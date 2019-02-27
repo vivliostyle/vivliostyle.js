@@ -6,7 +6,7 @@
 
 - TOC (Table of Contents) navigation is now enabled
   - <https://github.com/vivliostyle/vivliostyle.js/pull/498>, <https://github.com/vivliostyle/vivliostyle.js/pull/511>
-  - TOC box generation is enabled when `#b=` Viewer parameter (= Viewer.loadPublication() function) is used, and the publication has TOC data. In HTML documents, TOC is marked up with e.g. `<nav role="doc-toc">`. Vivliostyle recognizes element that is selected with CSS selector `[role=doc-toc], [role=directory], nav, .toc, #toc` as a TOC element.
+  - TOC box generation is enabled when `#b=` Viewer parameter (= Viewer.loadPublication() function) is used, and the publication has TOC data. In HTML documents, TOC is marked up with e.g. `<nav role="doc-toc">`. Vivliostyle recognizes element that is selected with CSS selector `[role=doc-toc], [role=directory], nav li, .toc, #toc` as a TOC element.
   - [Viewer UI] <https://github.com/vivliostyle/vivliostyle-ui/pull/62>
 - Support Web Publications and similar multi-HTML documents
   - <https://github.com/vivliostyle/vivliostyle.js/pull/511>
@@ -19,11 +19,11 @@
     - (X)HTML document
       - When (X)HTML document URL is specified, the URL is treated as primary entry page's, and a series of HTML files are automatically loaded.
         - When the web publication manifest is specified in the primary entry page (X)HTML document, the readingOrder in the manifest is used.
-        - If manifest is not specified or "readingOrder" is not in the manifest, the (X)HTML documents linked from the TOC element that is selected with CSS selector `[role=doc-toc], [role=directory], nav, .toc, #toc` are loaded.
+        - If manifest is not specified or "readingOrder" is not in the manifest, the (X)HTML documents linked from the TOC element that is selected with CSS selector `[role=doc-toc], [role=directory], nav li, .toc, #toc` are loaded.
 - Support loading documents from GitHub and some specific URLs
   - <https://github.com/vivliostyle/vivliostyle.js/pull/499>, <https://github.com/vivliostyle/vivliostyle.js/pull/505>, <https://github.com/vivliostyle/vivliostyle.js/commit/3424d965>
   - GitHub and Gist URLs can be directly specified. Vivliostyle loads raw github/gist content when github/gist URL is specified.
-  - Aozorabunko ([青空文庫]https://www.aozora.gr.jp/) (X)HTML URL can be specified. Vivliostyle loads Aozorabunko's raw github content when Aozorabunko (X)HTML URL is specified.
+  - Aozorabunko ([青空文庫](https://www.aozora.gr.jp/)) (X)HTML URL can be specified. Vivliostyle loads Aozorabunko's raw github content when Aozorabunko (X)HTML URL is specified.
   - JS Bin URL is converted to JS Bin output URL and can be loaded. This is useful for testing Vivliostyle output from small HTML + CSS code, as well as Gist.
 - Publication title and individual HTML document title are now passed to viewer UI
   - https://github.com/vivliostyle/vivliostyle.js/pull/501
@@ -34,11 +34,11 @@
   - Spec: [CSS Environment Variables Module Level 1](https://drafts.csswg.org/css-env/) defines `env()` function, but `env(pub-title)` and `env(doc-title)` are not yet defined so far.
   - `env(pub-title)`: publication title = EPUB, Web publication, or primary entry page HTML title. Enabled when `#b=` Viewer parameter (= Viewer.loadPublication() function) is used.
   - `env(doc-title)`: document title = HTML title, which may be chapter or section title in a publication composed of multiple HTML documents
-  - When title data are not found, i.e. no &lt;title&gt; element in HTML, or env(pub-title) with `#x=` Viewer parameter (= Viewer.loadDocument() function), the empty string "" is returned.
+  - When title data are not found, i.e. no `<title>` element in HTML, or env(pub-title) with `#x=` Viewer parameter (= Viewer.loadDocument() function), the empty string "" is returned.
 - Viewport-percentage length units: vw, vh, vi, vb, vmin, vmax, and page-size-percentage units pvw, pvh, pvi, pvb, pvmin, pvmax
   - <https://github.com/vivliostyle/vivliostyle.js/pull/507>
   - Spec: [CSS Values and Units - Viewport-percentage lengths](https://drafts.csswg.org/css-values/#viewport-relative-lengths), but page-size-percentage units are not defined so far.
-  - Note: On paged media context, the viewport-percentage units vw, vh, vi, vb, vmin, vmax are relative to the size of the page area, i.e., the content area of a page box and not including margin, border and padding specified on `@page` rule. This makes a lot of sense, but we need also page size based units. The pvw, pvh, pvi, pvb, pvmin, pvmax units are similar to the vw, vh, vi, vb, vmin, vmax but the reference size is the page size including page margins.
+  - Note: On paged media context, the viewport-percentage units vw, vh, vi, vb, vmin, vmax are relative to the size of the page area, i.e., the content area of a page box and not including margin, border and padding specified on `@page` rule. This makes a lot of sense, but page size relative units may also be necessary. The pvw, pvh, pvi, pvb, pvmin, pvmax units are similar to the vw, vh, vi, vb, vmin, vmax but the reference size is the page size including page margins.
 - Support CSS `calc()` function
   - <https://github.com/vivliostyle/vivliostyle.js/pull/507>
   - Spec: [CSS Values and Units - Mathematical Expressions](https://drafts.csswg.org/css-values/#calc-notation)
@@ -63,8 +63,8 @@
   - On: for Print (all pages printable, page count works as expected)
   - Off: for Read (quick loading with rough page count) -- This mode is necessary for viewing large publication composed of a lot of HTML documents.
   - [Viewer UI] <https://github.com/vivliostyle/vivliostyle-ui/pull/60>, <https://github.com/vivliostyle/vivliostyle-ui/pull/61>
-    - This setting can be specified in setting panel and URL parameter renderAllPages=[true|false].
-    - The default setting is renderAllPages=false (Off) for `#b=` (Book viewer mode) and renderAllPages=true (On) for `#x=` (for single (X)HTML documents).
+    - This setting can be specified in setting panel and URL parameter `renderAllPages=[true|false]`.
+    - The default setting is `renderAllPages=false` for `#b=` (Book view) and `renderAllPages=true` for `#x=` (individual (X)HTML document).
 - Enabled 'vivliostyle' media type by default
   - <https://github.com/vivliostyle/vivliostyle.js/pull/500>
   - This can be used like 'print' media type, and useful for distinguish Vivliostyle specific style sheets from general print style sheets.
