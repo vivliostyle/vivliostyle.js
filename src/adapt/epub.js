@@ -1049,8 +1049,9 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
                          ".toc a[href]," +
                          "#toc a[href]";
         Array.from(doc.querySelectorAll(selector)).forEach(anchorElem => {
-            const path = this.getPathFromURL(adapt.base.stripFragment(anchorElem.href));
-            const url = path ? encodeURI(path) : anchorElem.href;
+            const hrefNoFragment = adapt.base.stripFragment(anchorElem.href);
+            const path = this.getPathFromURL(hrefNoFragment);
+            const url = path !== null ? encodeURI(path) : hrefNoFragment;
             if (manifestObj["readingOrder"].indexOf(url) == -1) {
                 manifestObj["readingOrder"].push(url);
             }
