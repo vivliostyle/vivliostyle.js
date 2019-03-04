@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased
+
+### Fixed
+
+- Fix bug that cannot load unzipped EPUB when directory listing is enabled on the server
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/6d741b35>
+
+
 ## [2019.1.101](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.101) - 2019-02-27
 
 ### Added
