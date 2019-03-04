@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## [2019.1.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.102) - 2019-03-04
 
 ### Fixed
 
