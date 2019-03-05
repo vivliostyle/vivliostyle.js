@@ -86,6 +86,7 @@ adapt.toc.TOCView.prototype.setAutoHeight = function(elem, depth) {
             }
             if (adapt.base.getCSSProperty(e, "position", "static") == "absolute") {
                 adapt.base.setCSSProperty(e, "position", "relative");
+                adapt.base.setCSSProperty(e, "top", "0");   // fix position
                 this.setAutoHeight(e, depth);
             }
         }
@@ -284,6 +285,11 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
                     bodyChildElem.setAttribute("aria-hidden", "true");
                     bodyChildElem.setAttribute("hidden", "hidden");
                 });
+                let tocContainer = elem.firstElementChild.firstElementChild;
+                while (tocContainer && tocContainer.nextElementSibling) {
+                    // remove non-main page partitions
+                    tocContainer.nextElementSibling.remove();
+                }
                 self.setAutoHeight(elem, 2);
                 frame.finish(page);
             });
