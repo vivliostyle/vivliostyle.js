@@ -1,5 +1,15 @@
 # Change Log
 
+## 2019.1.103-pre
+
+### Fixed
+
+- Fix bug that TOC box is not properly generated when Adaptive Layout style sheet is used
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/62a96460>
+- Fix TOC box keyboard navigation: focus lost when closing a tree item without closing the sub tree items
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/71bec60d>
+
+
 ## [2019.1.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.102) - 2019-03-04
 
 ### Fixed
@@ -180,7 +190,7 @@
 - [Viewer UI] Fix sticky hover effect on touch devices
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/54>
 
-## [2018.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2017.2) - 2018-02-02 (Unreleased)
+## [2018.2](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.2) - 2018-02-02 (Unreleased)
 
 ### Added
 
