@@ -117,11 +117,21 @@ adapt.toc.toggleNodeExpansion = evt => {
                 ce.style.height = open ? "auto" : "0px";
 
                 // Update enable/disable tab move to the button and anchor.
-                if (ce.children.length >= 3) {
-                    ce.children[0].tabIndex = open ? 0 : -1;
-                }
                 if (ce.children.length >= 2) {
                     ce.children[1].tabIndex = open ? 0 : -1;
+                }
+                if (ce.children.length >= 3) {
+                    ce.children[0].tabIndex = open ? 0 : -1;
+                    if (!open) {
+                        const elem1 = ce.children[0];
+                        if (elem1.textContent == adapt.toc.bulletOpen) {
+                            elem1.textContent = adapt.toc.bulletClosed;
+                            elem1.setAttribute("aria-expanded", "false");
+                            ce.setAttribute("aria-expanded", "false");
+                            c = ce.children[2];
+                            continue;
+                        }
+                    }
                 }
             }
         }
