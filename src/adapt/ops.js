@@ -1655,6 +1655,10 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         = adapt.task.newFrame("OPSDocStore.load");
     const self = this;
     const url = response.url;
+
+    // Check "?viv-toc-box" appended in TOCView.showTOC()
+    const isTocBox = url.endsWith("?viv-toc-box");
+
     adapt.xmldoc.parseXMLResource(response, self).then(xmldoc => {
         if (!xmldoc) {
             frame.finish(null);
@@ -1689,7 +1693,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         sources.push({url: userAgentURL, text:null,
             flavor:adapt.cssparse.StylesheetFlavor.USER_AGENT, classes: null, media: null});
         const head = xmldoc.head;
-        if (head) {
+        if (!isTocBox && head) {
             for (let c = head.firstChild; c; c = c.nextSibling) {
                 if (c.nodeType != 1)
                     continue;
@@ -1740,8 +1744,10 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                 }
             }
         }
-        for (var i = 0; i < self.styleSheets.length; i++) {
-            sources.push(self.styleSheets[i]);
+        if (!isTocBox) {
+            for (var i = 0; i < self.styleSheets.length; i++) {
+                sources.push(self.styleSheets[i]);
+            }
         }
         let key = "";
         for (var i = 0; i < sources.length; i++) {

@@ -86,7 +86,6 @@ adapt.toc.TOCView.prototype.setAutoHeight = function(elem, depth) {
             }
             if (adapt.base.getCSSProperty(e, "position", "static") == "absolute") {
                 adapt.base.setCSSProperty(e, "position", "relative");
-                adapt.base.setCSSProperty(e, "top", "0");   // fix position
                 this.setAutoHeight(e, depth);
             }
         }
@@ -263,13 +262,13 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ const frame = adapt.task.newFrame("showTOC");
     const page = new adapt.vtree.Page(elem, elem);
     this.page = page;
-    this.store.load(this.url).then(xmldoc => {
-        let s = self.store.getStyleForDoc(xmldoc);
-        // Abandon using document's style and use uaBaseCascade instead because
-        // vertical writing-mode in TOC causes problem.
-        const style = new adapt.ops.Style(self.store, s.rootScope, s.pageScope,
-            adapt.csscasc.uaBaseCascade.clone(),
-            s.rootBox, s.fontFaces, s.footnoteProps, s.flowProps, s.viewportProps, s.pageProps);
+
+    // The (X)HTML doc for the TOC box may be reused for the TOC page in the book,
+    // but they need different styles. So, add "?viv-toc-box" to distinguish with TOC page URL.
+    const tocBoxUrl = this.url + "?viv-toc-box";
+
+    this.store.load(tocBoxUrl).then(xmldoc => {
+        const style = self.store.getStyleForDoc(xmldoc);
         const viewportSize = style.sizeViewport(width, 100000, fontSize);
         viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
             viewportSize.width, viewportSize.height);
@@ -285,11 +284,6 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
                     bodyChildElem.setAttribute("aria-hidden", "true");
                     bodyChildElem.setAttribute("hidden", "hidden");
                 });
-                let tocContainer = elem.firstElementChild.firstElementChild;
-                while (tocContainer && tocContainer.nextElementSibling) {
-                    // remove non-main page partitions
-                    tocContainer.nextElementSibling.remove();
-                }
                 self.setAutoHeight(elem, 2);
                 frame.finish(page);
             });
