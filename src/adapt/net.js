@@ -211,12 +211,23 @@ adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message
 adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_message) {
     const self = this;
     /** @type {adapt.task.Frame.<Resource>} */ const frame = adapt.task.newFrame("fetch");
+
+    // Hack for TOCView.showTOC()
+    const isTocBox = url.endsWith("?viv-toc-box");
+    if (isTocBox) {
+        url = url.replace("?viv-toc-box", "");
+    }
+
     adapt.net.ajax(url, self.type).then(response => {
         if (response.status >= 400) {
             if (opt_required) {
                 throw new Error((opt_message || `Failed to fetch required resource: ${url}`) +
                 ` (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
             }
+        }
+        if (isTocBox) { // Hack for TOCView.showTOC()
+            url += "?viv-toc-box";
+            response.url += "?viv-toc-box";
         }
         self.parser(response, self).then(resource => {
             delete self.fetchers[url];

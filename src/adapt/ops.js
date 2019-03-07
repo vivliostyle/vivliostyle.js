@@ -1656,7 +1656,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
     const self = this;
     const url = response.url;
 
-    // Check "?viv-toc-box" appended in TOCView.showTOC()
+    // Hack for TOCView.showTOC()
     const isTocBox = url.endsWith("?viv-toc-box");
 
     adapt.xmldoc.parseXMLResource(response, self).then(xmldoc => {

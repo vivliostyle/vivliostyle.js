@@ -278,6 +278,12 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     const tocBoxUrl = this.url + "?viv-toc-box";
 
     this.store.load(tocBoxUrl).then(xmldoc => {
+        // Mark if this doc is the primary entry page.
+        const nonTocBoxDoc = this.store.resources[this.url];
+        if (nonTocBoxDoc && nonTocBoxDoc.body && nonTocBoxDoc.body.getAttribute("data-vivliostyle-primary-entry")) {
+            xmldoc.body.setAttribute("data-vivliostyle-primary-entry", true);
+        }
+
         const style = self.store.getStyleForDoc(xmldoc);
         const viewportSize = style.sizeViewport(width, 100000, fontSize);
         viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,

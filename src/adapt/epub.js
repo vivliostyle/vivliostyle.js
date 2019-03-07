@@ -244,7 +244,7 @@ adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
                         frame.finish(opf);
                     });
                 } else {
-                    this.loadAsJSON(manifestLink.href).then(manifestObj => {
+                    this.loadAsJSON(manifestLink.getAttribute("href")).then(manifestObj => {
                         opf.initWithWebPubManifest(manifestObj, doc).then(() => {
                             frame.finish(opf);
                         });
@@ -1046,7 +1046,7 @@ adapt.epub.OPFDoc.prototype.initWithWebPubManifest = function(manifestObj, doc) 
                          ".toc a[href]," +
                          "#toc a[href]";
         Array.from(doc.querySelectorAll(selector)).forEach(anchorElem => {
-            const hrefNoFragment = adapt.base.stripFragment(anchorElem.href);
+            const hrefNoFragment = adapt.base.stripFragment(anchorElem.getAttribute("href"));
             const path = this.getPathFromURL(hrefNoFragment);
             const url = path !== null ? encodeURI(path) : hrefNoFragment;
             if (manifestObj["readingOrder"].indexOf(url) == -1) {
