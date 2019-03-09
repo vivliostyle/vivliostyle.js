@@ -114,66 +114,69 @@ adapt.epub.EPUBDocStore.prototype.loadPUBDoc = function(url, haveZipMetadata) {
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
         = adapt.task.newFrame("loadPUBDoc");
 
-    // This url may be the root of an unzipped EPUB.
-    let epubURL = url;
-    if (!epubURL.endsWith("/")) {
-        epubURL += "/";
-    }
-    const containerURL = `${epubURL}META-INF/container.xml`;
-    this.loadAsPlainXML(containerURL).then(containerXML => {
-        if (containerXML) {
-            const roots = containerXML.doc().child("container").child("rootfiles")
-                .child("rootfile").attribute("full-path");
-
-            for (const root of roots) {
-                if (root) {
-                    this.loadOPF(epubURL, root, haveZipMetadata).thenFinish(frame);
-                    return;
-                }
+    adapt.net.ajax(url, null, "HEAD").then(response => {
+        if (response.status >= 400) {
+            // This url can be the root of an unzipped EPUB.
+            let pubURL = url;
+            if (pubURL.substring(pubURL.length - 1) !== "/") {
+                pubURL = `${pubURL}/`;
             }
-        }
+            if (haveZipMetadata) {
+                this.startLoadingAsJSON(`${pubURL}?r=list`);
+            }
+            this.startLoadingAsPlainXML(`${pubURL}META-INF/encryption.xml`);
+            const containerURL = `${pubURL}META-INF/container.xml`;
+            this.loadAsPlainXML(containerURL).then(containerXML => {
+                if (containerXML) {
+                    const roots = containerXML.doc().child("container").child("rootfiles")
+                        .child("rootfile").attribute("full-path");
 
-        adapt.net.ajax(url, null, "HEAD").then(response => {
-            if (response.status >= 400) {
-                vivliostyle.logging.logger.error(`Failed to fetch a source document from ${url} (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
-                frame.finish(null);
-            } else {
-                if (!response.status && !response.responseXML && !response.responseText && !response.responseBlob && !response.contentType) {
-                    // Empty response
-                    if ((/\/[^/.]+(?:[#?]|$)/).test(url)) {
-                        // Adding trailing "/" may solve the problem.
-                        url = url.replace(/([#?]|$)/, "/$1");
-                    } else {
-                        // Ignore empty response of HEAD request, it may become OK with GET request.
-                    }
-                }
-                if (response.contentType == "application/oebps-package+xml" || (/\.opf(?:[#?]|$)/).test(url)) {
-                    // EPUB OPF
-                    const [, pubURL, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
-                    this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
-                } else if (response.contentType == "application/ld+json" ||
-                        response.contentType == "application/webpub+json" ||
-                        response.contentType == "application/audiobook+json" ||
-                        response.contentType == "application/json" ||
-                        (/\.json(?:ld)?(?:[#?]|$)/).test(url)) {
-                    // Web Publication Manifest
-                    this.loadAsJSON(url, true).then(manifestObj => {
-                        if (!manifestObj) {
-                            vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
-                            frame.finish(null);
+                    for (const root of roots) {
+                        if (root) {
+                            this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
                             return;
                         }
-                        const opf = new adapt.epub.OPFDoc(this, url);
-                        opf.initWithWebPubManifest(manifestObj).then(() => {
-                            frame.finish(opf);
-                        });
-                    });
+                    }
+                }
+                vivliostyle.logging.logger.error(`Failed to fetch a source document from ${url} (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
+                frame.finish(null);
+            });
+        } else {
+            if (!response.status && !response.responseXML && !response.responseText && !response.responseBlob && !response.contentType) {
+                // Empty response
+                if ((/\/[^/.]+(?:[#?]|$)/).test(url)) {
+                    // Adding trailing "/" may solve the problem.
+                    url = url.replace(/([#?]|$)/, "/$1");
                 } else {
-                    // Web Publication primary entry (X)HTML
-                    this.loadWebPub(url).thenFinish(frame);
+                    // Ignore empty response of HEAD request, it may become OK with GET request.
                 }
             }
-        });
+            if (response.contentType == "application/oebps-package+xml" || (/\.opf(?:[#?]|$)/).test(url)) {
+                // EPUB OPF
+                const [, pubURL, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
+                this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
+            } else if (response.contentType == "application/ld+json" ||
+                       response.contentType == "application/webpub+json" ||
+                       response.contentType == "application/audiobook+json" ||
+                       response.contentType == "application/json" ||
+                       (/\.json(?:ld)?(?:[#?]|$)/).test(url)) {
+                // Web Publication Manifest
+                this.loadAsJSON(url, true).then(manifestObj => {
+                    if (!manifestObj) {
+                        vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
+                        frame.finish(null);
+                        return;
+                    }
+                    const opf = new adapt.epub.OPFDoc(this, url);
+                    opf.initWithWebPubManifest(manifestObj).then(() => {
+                        frame.finish(opf);
+                    });
+                });
+            } else {
+                // Web Publication primary entry (X)HTML
+                this.loadWebPub(url).thenFinish(frame);
+            }
+        }
     });
     return frame.result();
 };
