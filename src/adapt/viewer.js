@@ -201,7 +201,7 @@ adapt.viewer.Viewer.prototype.loadPublication = function(command) {
         store.init(authorStyleSheet, userStyleSheet).then(() => {
             const pubURL = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), self.window.location.href);
             self.packageURL = [pubURL];
-            store.loadPUBDoc(pubURL, haveZipMetadata).then(opf => {
+            store.loadPubDoc(pubURL, haveZipMetadata).then(opf => {
                 if (opf) {
                     self.opf = opf;
                     self.render(fragment).then(() => {

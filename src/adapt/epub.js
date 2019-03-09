@@ -110,33 +110,17 @@ adapt.epub.EPUBDocStore.prototype.startLoadingAsJSON = function(url) {
  * @param {boolean} haveZipMetadata
  * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
  */
-adapt.epub.EPUBDocStore.prototype.loadPUBDoc = function(url, haveZipMetadata) {
+adapt.epub.EPUBDocStore.prototype.loadPubDoc = function(url, haveZipMetadata) {
     /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
-        = adapt.task.newFrame("loadPUBDoc");
+        = adapt.task.newFrame("loadPubDoc");
 
     adapt.net.ajax(url, null, "HEAD").then(response => {
         if (response.status >= 400) {
             // This url can be the root of an unzipped EPUB.
-            let pubURL = url;
-            if (pubURL.substring(pubURL.length - 1) !== "/") {
-                pubURL = `${pubURL}/`;
-            }
-            if (haveZipMetadata) {
-                this.startLoadingAsJSON(`${pubURL}?r=list`);
-            }
-            this.startLoadingAsPlainXML(`${pubURL}META-INF/encryption.xml`);
-            const containerURL = `${pubURL}META-INF/container.xml`;
-            this.loadAsPlainXML(containerURL).then(containerXML => {
-                if (containerXML) {
-                    const roots = containerXML.doc().child("container").child("rootfiles")
-                        .child("rootfile").attribute("full-path");
-
-                    for (const root of roots) {
-                        if (root) {
-                            this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
-                            return;
-                        }
-                    }
+            this.loadEPUBDoc(url, haveZipMetadata).then(opf => {
+                if (opf) {
+                    frame.finish(opf);
+                    return;
                 }
                 vivliostyle.logging.logger.error(`Failed to fetch a source document from ${url} (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
                 frame.finish(null);
@@ -174,9 +158,55 @@ adapt.epub.EPUBDocStore.prototype.loadPUBDoc = function(url, haveZipMetadata) {
                 });
             } else {
                 // Web Publication primary entry (X)HTML
-                this.loadWebPub(url).thenFinish(frame);
+                this.loadWebPub(url).then(opf => {
+                    if (opf) {
+                        frame.finish(opf);
+                        return;
+                    }
+                    // This url can be the root of an unzipped EPUB.
+                    this.loadEPUBDoc(url, haveZipMetadata).then(opf => {
+                        if (opf) {
+                            frame.finish(opf);
+                            return;
+                        }
+                        vivliostyle.logging.logger.error(`Failed to load ${url}.`);
+                        frame.finish(null);
+                    });
+                });
             }
         }
+    });
+    return frame.result();
+};
+
+/**
+ * @param {string} url
+ * @param {boolean} haveZipMetadata
+ * @return {!adapt.task.Result.<adapt.epub.OPFDoc>}
+ */
+adapt.epub.EPUBDocStore.prototype.loadEPUBDoc = function(url, haveZipMetadata) {
+    /** @type {!adapt.task.Frame.<adapt.epub.OPFDoc>} */ const frame
+        = adapt.task.newFrame("loadEPUBDoc");
+    if (!url.endsWith("/")) {
+        url = url + "/";
+    }
+    if (haveZipMetadata) {
+        this.startLoadingAsJSON(url + "?r=list");
+    }
+    this.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
+    const containerURL = url + "META-INF/container.xml";
+    this.loadAsPlainXML(containerURL).then(containerXML => {
+        if (containerXML) {
+            const roots = containerXML.doc().child("container").child("rootfiles")
+                .child("rootfile").attribute("full-path");
+            for (const root of roots) {
+                if (root) {
+                    this.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+                    return;
+                }
+            }
+        }
+        frame.finish(null);
     });
     return frame.result();
 };
@@ -229,8 +259,10 @@ adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
     this.load(url).then(xmldoc => {
         if (!xmldoc) {
             vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
-        }
-        else {
+        } else if (xmldoc.document.querySelector("a[href='META-INF/']")) {
+            // This is likely the directory listing of unzipped EPUB top directory
+            frame.finish(null);
+        } else {
             const doc = xmldoc.document;
             const opf = new adapt.epub.OPFDoc(this, url);
 
