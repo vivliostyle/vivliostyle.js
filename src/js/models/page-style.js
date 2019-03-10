@@ -143,7 +143,7 @@ class PageStyle {
         this.pageStyleRegExp = new RegExp(
 
             // 1. beforeOtherStyle,
-            "^(.*?)\\/\\*<viewer>\\*\\/\\s*(?:@page\\s*\\{\\s*" +
+            "^((?:\\n|.)*?)\\/\\*<viewer>\\*\\/\\s*(?:@page\\s*\\{\\s*" +
 
             // 2. sizeW, sizeH, sizeImportant,
             "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
@@ -161,7 +161,7 @@ class PageStyle {
             "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
 
             // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
-            "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
+            "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
 
             // body {font-size: inherit !important;} etc.
             "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
@@ -173,7 +173,7 @@ class PageStyle {
             "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
 
             // 25. afterOtherStyle
-            "((?:\n|.)*)$"
+            "((?:\\n|.)*)$"
         );
 
         if (pageStyle) {
@@ -329,6 +329,7 @@ class PageStyle {
                 this.baseLineHeightSpecified(false);
             }
             if (baseFontFamily != null) {
+                baseFontFamily = baseFontFamily.trim();
                 this.baseFontFamilySpecified(true);
                 this.baseFontFamily(baseFontFamily);
                 this.baseFontFamilyImportant(!!baseFontFamilyImportant);
