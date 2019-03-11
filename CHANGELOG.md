@@ -5,9 +5,13 @@
 ### Fixed
 
 - Fix bug that TOC box is not properly generated when Adaptive Layout style sheet is used
-  - <https://github.com/vivliostyle/vivliostyle.js/commit/62a96460>
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/62a96460>, <https://github.com/vivliostyle/vivliostyle.js/commit/fd1c3df9>, <https://github.com/vivliostyle/vivliostyle.js/commit/ec05c74b>
 - Fix TOC box keyboard navigation: focus lost when closing a tree item without closing the sub tree items
   - <https://github.com/vivliostyle/vivliostyle.js/commit/71bec60d>
+- Fix again the bug that cannot load unzipped EPUB when directory listing is enabled on the server
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/6cbe8244>
+- [Viewer UI] Fix userStyle CSS parsing and encoding problems
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/1c469a8>, <https://github.com/vivliostyle/vivliostyle-ui/commit/c98331e>, <https://github.com/vivliostyle/vivliostyle.js/commit/60fb2106>
 
 
 ## [2019.1.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.102) - 2019-03-04
