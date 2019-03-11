@@ -54,7 +54,7 @@ class URLParameterStore {
                 // It was
                 //   value = stringUtil.percentDecodeAmpersandAndPercent(value);
                 // but why only Ampersand and Percent?
-                value = decodeURI(value);
+                value = decodeURIComponent(value);
             }
             results.push(value);
         }

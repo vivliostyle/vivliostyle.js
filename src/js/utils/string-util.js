@@ -32,5 +32,8 @@ export default {
     },
     percentDecodeAmpersandAndPercent(str) {
         return str.replace(/%26/g, "&").replace(/%25/g, "%");
+    },
+    percentEncodeForDataURI(str) {
+        return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
     }
 };

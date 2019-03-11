@@ -69,7 +69,7 @@ function ViewerApp() {
             }
             if (inputUrl.startsWith("<")) {
                 // seems start tag, so convert to data url
-                inputUrl = "data:," + encodeURI(inputUrl);
+                inputUrl = "data:," + stringUtil.percentEncodeForDataURI(inputUrl);
             } else {
                 inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(inputUrl);
             }

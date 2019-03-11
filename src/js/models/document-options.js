@@ -21,6 +21,7 @@
 import ko from "knockout";
 import urlParameters from "../stores/url-parameters";
 import PageStyle from "./page-style";
+import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL() {
     const bookUrl = urlParameters.getParameter("b", true);
@@ -64,9 +65,9 @@ class DocumentOptions {
             if ((/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//).test(userStyle)) {
                 this.dataUserStyleIndex = index;
                 const data = userStyle.replace(/^data:,/, "")
-                    // Escape unescaped "%" that causes error in decodeURI()
+                    // Escape unescaped "%" that causes error in decodeURIComponent()
                     .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
-                const cssText = decodeURI(data);
+                const cssText = decodeURIComponent(data);
                 this.pageStyle.cssText(cssText);
                 return true;
             }
@@ -110,7 +111,7 @@ class DocumentOptions {
                 return;
             }
         }
-        const dataUserStyle = "data:," + encodeURI(cssText.trim());
+        const dataUserStyle = "data:," + stringUtil.percentEncodeForDataURI(cssText.trim());
         if (this.dataUserStyleIndex == -1) {
             userStyleSheet.push(dataUserStyle);
             this.dataUserStyleIndex = userStyleSheet.length - 1;
