@@ -1337,6 +1337,10 @@ var _pageStyle = require("./page-style");
 
 var _pageStyle2 = _interopRequireDefault(_pageStyle);
 
+var _utilsStringUtil = require("../utils/string-util");
+
+var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
+
 function getDocumentOptionsFromURL() {
     var bookUrl = _storesUrlParameters2["default"].getParameter("b", true);
     var xUrl = _storesUrlParameters2["default"].getParameter("x", true);
@@ -1383,9 +1387,9 @@ var DocumentOptions = (function () {
             if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(userStyle)) {
                 _this.dataUserStyleIndex = index;
                 var data = userStyle.replace(/^data:,/, "")
-                // Escape unescaped "%" that causes error in decodeURI()
+                // Escape unescaped "%" that causes error in decodeURIComponent()
                 .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
-                var cssText = decodeURI(data);
+                var cssText = decodeURIComponent(data);
                 _this.pageStyle.cssText(cssText);
                 return true;
             } else {
@@ -1433,7 +1437,7 @@ var DocumentOptions = (function () {
                     return;
                 }
             }
-            var dataUserStyle = "data:," + encodeURI(cssText.trim());
+            var dataUserStyle = "data:," + _utilsStringUtil2["default"].percentEncodeForDataURI(cssText.trim());
             if (this.dataUserStyleIndex == -1) {
                 userStyleSheet.push(dataUserStyle);
                 this.dataUserStyleIndex = userStyleSheet.length - 1;
@@ -1451,7 +1455,7 @@ var DocumentOptions = (function () {
 exports["default"] = DocumentOptions;
 module.exports = exports["default"];
 
-},{"../stores/url-parameters":14,"./page-style":9,"knockout":1}],8:[function(require,module,exports){
+},{"../stores/url-parameters":14,"../utils/string-util":17,"./page-style":9,"knockout":1}],8:[function(require,module,exports){
 /*
  * Copyright 2015 Trim-marks Inc.
  *
@@ -2642,7 +2646,7 @@ var URLParameterStore = (function () {
                     // It was
                     //   value = stringUtil.percentDecodeAmpersandAndPercent(value);
                     // but why only Ampersand and Percent?
-                    value = decodeURI(value);
+                    value = decodeURIComponent(value);
                 }
                 results.push(value);
             }
@@ -2897,6 +2901,9 @@ exports["default"] = {
     },
     percentDecodeAmpersandAndPercent: function percentDecodeAmpersandAndPercent(str) {
         return str.replace(/%26/g, "&").replace(/%25/g, "%");
+    },
+    percentEncodeForDataURI: function percentEncodeForDataURI(str) {
+        return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
     }
 };
 module.exports = exports["default"];
@@ -4085,7 +4092,7 @@ function ViewerApp() {
             }
             if (inputUrl.startsWith("<")) {
                 // seems start tag, so convert to data url
-                inputUrl = "data:," + encodeURI(inputUrl);
+                inputUrl = "data:," + _utilsStringUtil2["default"].percentEncodeForDataURI(inputUrl);
             } else {
                 inputUrl = _utilsStringUtil2["default"].percentEncodeAmpersandAndUnencodedPercent(inputUrl);
             }
