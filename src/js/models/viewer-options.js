@@ -25,10 +25,21 @@ import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
     const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
-    const fontSize = urlParameters.getParameter("fontSize")[0];
+    const fontSizeStr = urlParameters.getParameter("fontSize")[0];
+    const r = (/^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/).exec(fontSizeStr);
+    let fontSize = null;
+    if (r) {
+        const [, num, percent, denom] = r;
+        fontSize = parseFloat(num);
+        if (percent || denom) {
+            fontSize = 16 * fontSize / (percent ? 100 : parseFloat(denom));
+        }
+        if (fontSize < 5) fontSize = 5;
+        if (fontSize > 72) fontSize = 72;
+    }
     return {
         renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : null),
-        fontSize: fontSize ? parseFloat(fontSize) : null,
+        fontSize: fontSize,
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
