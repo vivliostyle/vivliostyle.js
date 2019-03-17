@@ -854,7 +854,12 @@ adapt.viewer.Viewer.prototype.resize = function() {
             // When resizing, do not use the current page index, for a page index corresponding to
             // the current position in the document (offsetInItem) can change due to different layout
             // caused by different viewport size.
-            self.pagePosition.pageIndex = -1;
+
+            // Update(2019-03): to avoid unexpected page move (first page to next),
+            // keep pageIndex == 0 when offsetInItem == 0
+            if (!(self.pagePosition.pageIndex == 0 && self.pagePosition.offsetInItem == 0)) {
+                self.pagePosition.pageIndex = -1;
+            }
         }
 
         // epageCount counting depends renderAllPages mode
