@@ -10,8 +10,17 @@
   - <https://github.com/vivliostyle/vivliostyle.js/commit/71bec60d>
 - Fix again the bug that cannot load unzipped EPUB when directory listing is enabled on the server
   - <https://github.com/vivliostyle/vivliostyle.js/commit/6cbe8244>
+- Fix problem that resizing causes unexpected page move, first page to next.
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/34be45f9>
 - [Viewer UI] Fix userStyle CSS parsing and encoding problems
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/1c469a8>, <https://github.com/vivliostyle/vivliostyle-ui/commit/c98331e>, <https://github.com/vivliostyle/vivliostyle.js/commit/60fb2106>
+
+### Changed
+
+- [Viewer UI] Change the order to hide the menu buttons on small screen
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/d47fbf7>
+- [Viewer UI] Improve "fontSize" URL parameter: accept percent and fraction
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/015a193>
 
 
 ## [2019.1.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.102) - 2019-03-04
