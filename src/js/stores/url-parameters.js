@@ -43,20 +43,13 @@ class URLParameterStore {
         return regexp.test(url);
     }
 
-    getParameter(name, dontPercentDecode) {
+    getParameter(name) {
         const url = this.location.href;
         const regexp = getRegExpForParameter(name);
         const results = [];
         let r;
         while (r = regexp.exec(url)) {
-            let value = r[1];
-            if (!dontPercentDecode) {
-                // It was
-                //   value = stringUtil.percentDecodeAmpersandAndPercent(value);
-                // but why only Ampersand and Percent?
-                value = decodeURIComponent(value);
-            }
-            results.push(value);
+            results.push(r[1]);
         }
         return results;
     }
@@ -64,12 +57,10 @@ class URLParameterStore {
     /**
      * @param {string} name 
      * @param {string} value 
-     * @param {boolean=} dontPercentEncode 
      * @param {number=} opt_index specifies index in multiple parameters with same name.
      */
-    setParameter(name, value, dontPercentEncode, opt_index) {
+    setParameter(name, value, opt_index) {
         const url = this.location.href;
-        if (!dontPercentEncode) value = stringUtil.percentEncodeAmpersandAndPercent(value);
         let updated;
         const regexp = getRegExpForParameter(name);
         let r = regexp.exec(url);

@@ -73,7 +73,7 @@ function ViewerApp() {
             } else {
                 inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(inputUrl);
             }
-            urlParameters.setParameter("b", inputUrl, true);
+            urlParameters.setParameter("b", inputUrl);
         } else {
             urlParameters.removeParameter("b");
         }
@@ -103,7 +103,7 @@ function ViewerApp() {
         const key = keyUtil.identifyKeyFromEvent(event);
         if (document.activeElement.id === "vivliostyle-input-url") {
             if (key === "Enter" && event.keyCode === 13) {
-                this.documentOptions.bookUrl(urlParameters.getParameter("b", true)[0]);
+                this.documentOptions.bookUrl(urlParameters.getParameter("b")[0]);
                 this.viewer.loadDocument(this.documentOptions);
                 return false;
             }

@@ -24,11 +24,11 @@ import PageStyle from "./page-style";
 import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL() {
-    const bookUrl = urlParameters.getParameter("b", true);
-    const xUrl = urlParameters.getParameter("x", true); 
-    const fragment = urlParameters.getParameter("f", true);
-    const style = urlParameters.getParameter("style", true);
-    const userStyle = urlParameters.getParameter("userStyle", true);
+    const bookUrl = urlParameters.getParameter("b");
+    const xUrl = urlParameters.getParameter("x"); 
+    const fragment = urlParameters.getParameter("f");
+    const style = urlParameters.getParameter("style");
+    const userStyle = urlParameters.getParameter("userStyle");
     return {
         bookUrl: bookUrl[0] || null, // bookUrl and xUrl are exclusive
         xUrl: !bookUrl[0] && xUrl.length && xUrl[0] ? xUrl : null,
@@ -55,7 +55,7 @@ class DocumentOptions {
                 urlParameters.removeParameter("f");
             } else {
                 const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-                urlParameters.setParameter("f", encoded, true);
+                urlParameters.setParameter("f", encoded);
             }
         });
 
@@ -119,7 +119,7 @@ class DocumentOptions {
             userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
         }
         this.userStyleSheet(userStyleSheet);
-        urlParameters.setParameter("userStyle", dataUserStyle, true, this.dataUserStyleIndex);
+        urlParameters.setParameter("userStyle", dataUserStyle, this.dataUserStyleIndex);
     }
 }
 
