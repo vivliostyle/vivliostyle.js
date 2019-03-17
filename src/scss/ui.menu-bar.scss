@@ -304,7 +304,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					-webkit-filter: grayscale(100%) brightness(150%); filter: grayscale(100%) brightness(150%);
 				}
 			}
-			&#vivliostyle-menu-item_text-size-default {
+			&#vivliostyle-menu-item_zoom-to-actual-size {
 				@media screen and (max-width: $menu-icon-width * 15 - 3px) {
 					display: none;
 				}
@@ -314,19 +314,19 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 					display: none;
 				}
 			}
-			&#vivliostyle-menu-item_zoom-to-actual-size {
+			&#vivliostyle-menu-item_zoom-fit-to-screen {
 				@media screen and (max-width: $menu-icon-width * 12 - 3px) {
 					display: none;
 				}
 			}
-			&#vivliostyle-menu-item_zoom-fit-to-screen {
-				@media screen and (max-width: $menu-icon-width * 11 - 3px) {
+			&#vivliostyle-menu-item_text-size-default {
+				@media screen and (max-width: $menu-icon-width * 9 - 3px - 2px) {
 					display: none;
 				}
 			}
 		}
 		&#vivliostyle-menu_zoom {
-			@media screen and (max-width: $menu-icon-width * 10 - 3px) {
+			@media screen and (max-width: $menu-icon-width * 11 - 3px) {
 				display: none;
 			}
 		}
