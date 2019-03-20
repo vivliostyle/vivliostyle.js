@@ -338,7 +338,18 @@ class Navigation {
     increaseFontSize() {
         if (!this.isIncreaseFontSizeDisabled()) {
             let fontSize = this.viewerOptions_.fontSize();
-            fontSize *= 1.25;
+            // fontSize *= 1.25;
+            if (fontSize < 10) {
+                fontSize = Math.floor(fontSize) + 1;
+            } else if (fontSize < 20) {
+                fontSize = (Math.floor(fontSize / 2) + 1) * 2; 
+            } else if (fontSize < 40) {
+                fontSize = (Math.floor(fontSize / 4) + 1) * 4;
+            } else if (fontSize < 72) {
+                fontSize = Math.min((Math.floor(fontSize / 8) + 1) * 8, 72);
+            } else {
+                fontSize = 72;
+            }
             this.viewerOptions_.fontSize(fontSize);
             this.updateFontSizeSettings();
             return true;
@@ -350,7 +361,18 @@ class Navigation {
     decreaseFontSize() {
         if (!this.isDecreaseFontSizeDisabled()) {
             let fontSize = this.viewerOptions_.fontSize();
-            fontSize *= 0.8;
+            // fontSize *= 0.8;
+            if (fontSize > 40) {
+                fontSize = (Math.ceil(fontSize / 8) - 1) * 8;
+            } else if (fontSize > 20) {
+                fontSize = (Math.ceil(fontSize / 4) - 1) * 4;
+            } else if (fontSize > 10) {
+                fontSize = (Math.ceil(fontSize / 2) - 1) * 2;
+            } else if (fontSize > 5) {
+                fontSize = Math.ceil(fontSize) - 1;
+            } else {
+                fontSize = 5;
+            }
             this.viewerOptions_.fontSize(fontSize);
             this.updateFontSizeSettings();
             return true;
