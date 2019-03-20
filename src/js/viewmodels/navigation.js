@@ -346,7 +346,7 @@ class Navigation {
             } else if (fontSize < 40) {
                 fontSize = (Math.floor(fontSize / 4) + 1) * 4;
             } else if (fontSize < 72) {
-                fontSize = Math.min((Math.floor(fontSize / 8) + 1) * 8, 72);
+                fontSize = (Math.floor(fontSize / 8) + 1) * 8;
             } else {
                 fontSize = 72;
             }
