@@ -19,6 +19,8 @@
 
 - [Viewer UI] Change the order to hide the menu buttons on small screen
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/d47fbf7>
+- [Viewer UI] Adjust FontSize decrease/increase values effective on Text:Smaller/Larger buttons
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/437e488>
 - [Viewer UI] Improve "fontSize" URL parameter: accept percent and fraction
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/015a193>
 
