@@ -604,7 +604,7 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitFunc = func => null;
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = expr => null;
+adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = expr => expr; // null;
 
 /**
  * @param {adapt.cssvalid.PrimitiveValidator} other
