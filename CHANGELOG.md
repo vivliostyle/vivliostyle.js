@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Fix problem that vw/vh units, calc(), -epubx-expr() are invalid on shorthand properties
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/779d0305>
 - Fix bug that TOC box is not properly generated when Adaptive Layout style sheet is used
   - <https://github.com/vivliostyle/vivliostyle.js/commit/62a96460>, <https://github.com/vivliostyle/vivliostyle.js/commit/fd1c3df9>, <https://github.com/vivliostyle/vivliostyle.js/commit/ec05c74b>
 - Fix TOC box keyboard navigation: focus lost when closing a tree item without closing the sub tree items
