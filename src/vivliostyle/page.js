@@ -433,6 +433,13 @@ vivliostyle.page.addPrinterMarks = (cascadedPageStyle, evaluatedPageSizeAndBleed
     const printerMarkOffset = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkOffset, context);
     const lineLength = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineLength, context);
 
+    if (bleed) {
+        const bgcolor = cascadedPageStyle["background-color"];
+        if (bgcolor && bgcolor.value) {
+            page.bleedBox.style.backgroundColor = bgcolor.value.stringValue()
+        }
+    }
+
     // corner marks
     if (crop) {
         Object.keys(vivliostyle.page.CornerMarkPosition).forEach(key => {
