@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Fix problem that page background color is not painted in the bleed area
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/0fcba151>
 - Fix problem that vw/vh units, calc(), -epubx-expr() are invalid on shorthand properties
   - <https://github.com/vivliostyle/vivliostyle.js/commit/779d0305>
 - Fix bug that TOC box is not properly generated when Adaptive Layout style sheet is used
@@ -19,6 +21,8 @@
 
 ### Changed
 
+- Support color name 'rebeccapurple'
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/d329ff08>
 - [Viewer UI] Change the order to hide the menu buttons on small screen
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/d47fbf7>
 - [Viewer UI] Adjust FontSize decrease/increase values effective on Text:Smaller/Larger buttons
