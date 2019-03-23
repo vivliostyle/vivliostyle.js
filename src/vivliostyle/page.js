@@ -436,7 +436,7 @@ vivliostyle.page.addPrinterMarks = (cascadedPageStyle, evaluatedPageSizeAndBleed
     if (bleed) {
         const bgcolor = cascadedPageStyle["background-color"];
         if (bgcolor && bgcolor.value) {
-            page.bleedBox.style.backgroundColor = bgcolor.value.stringValue()
+            page.bleedBox.style.backgroundColor = bgcolor.value.stringValue();
         }
     }
 
