@@ -16,6 +16,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/commit/6cbe8244>
 - Fix problem that resizing causes unexpected page move, first page to next.
   - <https://github.com/vivliostyle/vivliostyle.js/commit/34be45f9>
+- [Viewer UI] Fix problem that the default page size auto is not respected when print to PDF
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/fff481c>
 - [Viewer UI] Fix userStyle CSS parsing and encoding problems
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/1c469a8>, <https://github.com/vivliostyle/vivliostyle-ui/commit/c98331e>, <https://github.com/vivliostyle/vivliostyle.js/commit/60fb2106>
 
