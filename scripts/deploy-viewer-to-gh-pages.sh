@@ -20,7 +20,6 @@ git config user.name "MurakamiShinyu (Travis CI)"
 cp -R ../vivliostyle-ui/dist/* .
 cp -R ../vivliostyle-ui/node_modules/vivliostyle/samples/* samples/
 cp ../vivliostyle-ui/node_modules/vivliostyle/doc/supported-features.{md,html} docs/en/
-cp ../vivliostyle-ui/node_modules/vivliostyle/CHANGELOG.md .
 cp -R ../vivliostyle-ui/build/* viewer/
 
 zip="../vivliostyle-ui/vivliostyle-js-latest.zip"
