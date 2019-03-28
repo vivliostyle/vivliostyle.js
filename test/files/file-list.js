@@ -86,7 +86,9 @@ module.exports = [
         category: "Column",
         files: [
             {file: "column/column-fill_balance.html", title: "column-fill: balance"},
-            {file: "column/column-fill_balance-all.html", title: "column-fill: balance-all"}
+            {file: "column/column-fill_balance_vertical.html", title: "column-fill: balance (vertical writing-mode)"},
+            {file: "column/column-fill_balance-all.html", title: "column-fill: balance-all"},
+            {file: "column/column-fill_balance-all_vertical.html", title: "column-fill: balance-all (vertical writing-mode)"}
         ]
     },
     {
