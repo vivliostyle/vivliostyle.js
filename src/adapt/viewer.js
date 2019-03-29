@@ -502,6 +502,8 @@ adapt.viewer.Viewer.prototype.showSinglePage = function(page) {
 adapt.viewer.Viewer.prototype.showPage = function(page) {
     this.hidePages();
     this.currentPage = page;
+    page.container.style.marginLeft = "";
+    page.container.style.marginRight = "";
     this.showSinglePage(page);
 };
 
@@ -512,6 +514,18 @@ adapt.viewer.Viewer.prototype.showPage = function(page) {
 adapt.viewer.Viewer.prototype.showSpread = function(spread) {
     this.hidePages();
     this.currentSpread = spread;
+    if (spread.left && spread.right) {
+        // Adjust spread horizontal alignment when left/right page widths differ
+        let leftWidth = parseFloat(spread.left.container.style.width);
+        let rightWidth = parseFloat(spread.right.container.style.width);
+        if (leftWidth && rightWidth && leftWidth !== rightWidth) {
+            if (leftWidth < rightWidth) {
+                spread.left.container.style.marginLeft = `${rightWidth - leftWidth}px`;
+            } else {
+                spread.right.container.style.marginRight = `${leftWidth - rightWidth}px`;
+            }
+        }
+    }
     if (spread.left) {
         this.showSinglePage(spread.left);
         if (!spread.right) {
@@ -761,6 +775,8 @@ adapt.viewer.Viewer.prototype.getSpreadDimensions = function(spread) {
     }
     if (spread.left && spread.right) {
         width += this.pref.pageBorder * 2;
+        // Adjust spread horizontal alignment when left/right page widths differ
+        width += Math.abs(spread.left.dimensions.width - spread.right.dimensions.width);
     }
     return {width, height};
 };
