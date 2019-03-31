@@ -227,6 +227,13 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
     const list = this.delayedItems;
     for (var i = 0; i < list.length; i++) {
         const item = list[i];
+        if (item.target === this.container && item.name === "transform" && !this.isAutoPageWidth && !this.isAutoPageHeight) {
+            // When fixed page size is specified, cancel the transform property
+            // set at OPFView.makePage() for the specified viewport size
+            // (e.g. `<meta name="viewport" content="width=1307, height=1920"/>`)
+            // to avoid wrong page resizing.
+            continue;
+        }
         adapt.base.setCSSProperty(item.target, item.name, item.value.toString());
     }
 
