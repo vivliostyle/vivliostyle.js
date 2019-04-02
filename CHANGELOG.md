@@ -18,8 +18,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/commit/34be45f9>
 - Fix problem that page spread is not centered properly when left/right page widths differ
   - <https://github.com/vivliostyle/vivliostyle.js/commit/13829261>
-- Fix problem that when fixed page size is given the specified viewport size causes wrong page resizing
-  - <https://github.com/vivliostyle/vivliostyle.js/commit/e0e69664>
+- Fix problem that the specified viewport size (e.g. fixed EPUB's) causes wrong page resizing
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/e0e69664>, <https://github.com/vivliostyle/vivliostyle.js/commit/110203be>
 - [Viewer UI] Fix problem that the default page size auto is not respected when print to PDF
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/fff481c>
 - [Viewer UI] Fix userStyle CSS parsing and encoding problems
