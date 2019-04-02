@@ -1269,7 +1269,8 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ const frame
         = adapt.task.newFrame("layoutNextPage");
     frame.loopWithFrame(loopFrame => {
-        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
+        // self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
+        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge,
             [], pageFloatLayoutContext).then(() => {
             if (!pageFloatLayoutContext.isInvalidated()) {
                 pageFloatLayoutContext.finish();
@@ -1328,7 +1329,7 @@ adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSi
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
     // Shift 1px to workaround Chrome printing bug
-    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
+    // page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
 };
 
 /**

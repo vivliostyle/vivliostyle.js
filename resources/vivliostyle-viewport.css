@@ -83,10 +83,10 @@
     }
 
     /* Workaround for Chrome printing problem */
-    [data-vivliostyle-page-box] {
+    /* [data-vivliostyle-page-box] {
         padding-bottom: 0 !important;
         overflow: visible !important;
-    }
+    } */
 
     /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
     @-moz-document regexp('.*') {
