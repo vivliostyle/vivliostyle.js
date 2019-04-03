@@ -87,6 +87,12 @@
         padding-bottom: 0 !important;
         overflow: visible !important;
     } */
+    [data-vivliostyle-bleed-box] > div > div::before {
+        display: block;
+        content: "";
+        padding-top: 0.015625px;
+        margin-bottom: -0.015625px;
+    }
 
     /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
     @-moz-document regexp('.*') {
