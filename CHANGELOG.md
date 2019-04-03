@@ -20,6 +20,8 @@
   - <https://github.com/vivliostyle/vivliostyle.js/commit/13829261>
 - Fix problem that the specified viewport size (e.g. fixed EPUB's) causes wrong page resizing
   - <https://github.com/vivliostyle/vivliostyle.js/commit/e0e69664>, <https://github.com/vivliostyle/vivliostyle.js/commit/110203be>
+- Fix problem that large images may disappear when printing with zero page margin
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/514>
 - [Viewer UI] Fix problem that the default page size auto is not respected when print to PDF
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/fff481c>
 - [Viewer UI] Fix userStyle CSS parsing and encoding problems
