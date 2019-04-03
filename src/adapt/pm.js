@@ -176,7 +176,7 @@ adapt.pm.PageMaster = function(scope, name, pseudoName, classes, parent, conditi
     this.specified["position"] = new adapt.csscasc.CascadeValue(adapt.css.ident.relative, 0);
     this.specified["overflow"] = new adapt.csscasc.CascadeValue(adapt.css.ident.visible, 0);
     // Shift 1px to workaround Chrome printing bug
-    this.specified["top"] = new adapt.csscasc.CascadeValue(new adapt.css.Numeric(-1, "px"), 0);
+    // this.specified["top"] = new adapt.csscasc.CascadeValue(new adapt.css.Numeric(-1, "px"), 0);
     /** @type {Object.<string,string>} */ this.keyMap = {};
 };
 goog.inherits(adapt.pm.PageMaster, adapt.pm.PageBox);
