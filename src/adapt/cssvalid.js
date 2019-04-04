@@ -604,7 +604,12 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitFunc = func => null;
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = expr => expr; // null;
+adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = function(expr) {
+    if (this.allowed & 0x7FE) { // ALLOW_STR|ALLOW_IDENT|...|ALLOW_ZERO_PERCENT
+        return expr;
+    }
+    return null;
+};
 
 /**
  * @param {adapt.cssvalid.PrimitiveValidator} other

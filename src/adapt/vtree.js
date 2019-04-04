@@ -1638,8 +1638,13 @@ adapt.vtree.ContentPropertyHandler.prototype.visitSpaceList = function(list) {
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
     const ex = expr.toExpr();
-    const val = ex.evaluate(this.context);
+    let val = ex.evaluate(this.context);
     if (typeof val === "string") {
+        if (ex instanceof adapt.expr.Named) {
+            // For env(pub-title) and env(doc-title)
+            // Need to unquote the result. To be consistent with cssparse.evaluateExprToCSS()
+            val = adapt.cssparse.parseValue(ex.scope, new adapt.csstok.Tokenizer(val, null), "").stringValue();
+        }
         goog.asserts.assert(this.elem.ownerDocument);
         const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
         this.visitStrInner(val, node);
