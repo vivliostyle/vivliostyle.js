@@ -1,6 +1,14 @@
 # Change Log
 
-## 2019.1.103-pre
+## 2019.1.104-pre
+
+### Fixed
+
+- Fix bug that duplicate page margin box content appears at bottom of pages
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/515>
+
+
+## [2019.1.103](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.103) - 2019-04-05
 
 ### Fixed
 
