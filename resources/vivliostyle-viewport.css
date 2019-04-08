@@ -47,6 +47,10 @@
     box-sizing: border-box;
 }
 
+[data-vivliostyle-page-box] ~ [data-vivliostyle-page-box] {
+    display: none;
+}
+
 [data-vivliostyle-toc-box] {
     position: absolute;
     left: 3px;
