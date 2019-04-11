@@ -1,0 +1,515 @@
+@charset 'utf-8';
+
+/* stylesheet for Vivliostyle */
+/* horizontal writing mode */
+/*------------------------------------------------------------------*/
+
+/* MacのHiragino Sans W4が太すぎるのでW3に変える */
+@font-face {
+  font-family: "Hiragino Sans";
+  src: local(HiraginoSans-W3);
+  font-weight: 400;
+}
+
+@-epubx-define {
+  side-margin:          9vw;
+  bottom-margin:        5.5vh;
+  first-header-height:  16vh;
+  rest-header-height:   -epubx-expr(max(7vw, 6.5vh));
+  body-font:            'Hiragino Sans, Arial, BIZ UDGothic, sans-serif';
+  title-font:           'Hiragino Mincho ProN, Yu Mincho, serif';
+  subtitle-font:        'Hiragino Sans, Arial, BIZ UDPGothic, sans-serif';
+  lead-font:            'Hiragino Mincho ProN, Times New Roman, BIZ UDPMincho, serif';
+  header-font:          'Helvetica Neue, Corbel, sans-serif';
+  bleed:                0;
+}
+
+/** カバー・目次 **/
+@-epubx-page-master cover-toc-page {
+  @-epubx-partition toc {
+    -epubx-flow-from: cover-toc;
+    -epubx-required: true;
+    top:    -epubx-expr(header.bottom-edge + 0.5rem);
+    bottom: -epubx-expr(bottom-margin);
+    left:   -epubx-expr(side-margin);
+    right:  -epubx-expr(side-margin);
+  }
+  @-epubx-partition-group header {
+    top:    -epubx-expr(- bleed);
+    left:   -epubx-expr(- bleed);
+    right:  -epubx-expr(- bleed);
+    height: -epubx-expr(bleed + (page-number == 1 ? 19vh : rest-header-height));
+    width:  auto;
+    background: #BDC0C1;
+    @-epubx-partition header-logo {
+      content: url(../images/jdir_logo_wht.svg);
+      bottom: 0;
+      left:   -epubx-expr(bleed + (page-number % 2 == 0 ? side-margin : 100vw - side-margin - header-logo.width));
+      height: -epubx-expr(page-number == 1 ? 15vh : rest-header-height * 0.5);
+      width:  -epubx-expr(page-number == 1 ? 36vh : rest-header-height * 1.2);
+    }
+  }
+  @-epubx-partition body {
+    -epubx-flow-from: body;
+  }
+}
+
+/** 記事の先頭ページ **/
+@-epubx-page-master article-first-page {
+  @-epubx-partition page-number {
+    -epubx-enabled: -epubx-expr(page-number % 2 == 1 || figure.height == 0);
+    content: counter(page);
+    font-family: -epubx-expr(header-font);
+    font-size: 0.75rem;
+    line-height: 1;
+    color: #6B6B6B;
+    bottom: 2vh;
+    left:   -epubx-expr(side-margin / 2);
+    right:  -epubx-expr(side-margin / 2);
+    height: 1rem;
+    text-align: -epubx-expr(page-number % 2 == 0 ? 'left' : 'right');
+  }
+  @-epubx-partition body {
+    -epubx-flow-from: body;
+    top:    -epubx-expr(figure.top-edge < lead.bottom-edge + 5rem ? figure.top-edge : lead.bottom-edge);
+    bottom: -epubx-expr(bottom-margin);
+    left:   -epubx-expr(side-margin);
+    right:  -epubx-expr(side-margin);
+    column-width: 14rem;
+    column-gap: 2rem;
+  }
+  @-epubx-partition lead {
+    -epubx-flow-from: lead;
+    top:    -epubx-expr(title.bottom-edge);
+    left:   -epubx-expr(side-margin);
+    right:  -epubx-expr(side-margin);
+    margin-bottom: 1.5rem;
+  }
+  @-epubx-partition figure class(figure-bottom-left) {
+    -epubx-flow-from: figure;
+    bottom: -epubx-expr(- bleed);
+    left:   -epubx-expr(- bleed);
+    width:  -epubx-expr(bleed + (page-width < 26rem ? 100vw : (body.column-count <= 2 ? 50vw : side-margin + body.column-width * 2 + body.column-gap)));
+    margin-right: 1rem;
+    border-bottom: 3px solid #E3E3E3; /* 画像の下にアキがないとChromeの印刷で画像が消える不具合に対処 */
+  }
+  @-epubx-partition title {
+    -epubx-flow-from: title;
+    -epubx-required: true;
+    top:    -epubx-expr(first-header-height);
+    left:   -epubx-expr(side-margin);
+    right:  1rem;
+  }
+  @-epubx-partition-group header {
+    top:    -epubx-expr(- bleed);
+    left:   -epubx-expr(- bleed);
+    right:  -epubx-expr(- bleed);
+    height: -epubx-expr(bleed + first-header-height);
+    width:  auto;
+    background: #BDC0C1;
+    @-epubx-partition keyperson {
+      -epubx-flow-from: keyperson;
+      left: -epubx-expr(bleed + side-margin);
+      bottom: 0;
+    }
+    @-epubx-partition header-logo {
+      content: url(../images/jdir_logo_wht.svg);
+      top:    -epubx-expr(bleed + 4vh);
+      right:  -epubx-expr(bleed + side-margin);
+      height: 7.5vh;
+      width:  18vh;
+    }
+  }
+}
+
+/** 記事の２ページ目以降 **/
+@-epubx-page-master article-rest-page {
+  -epubx-utilization: 0.4;  /* 図版がちょうどよいページに配置されるように調整 */
+  @-epubx-partition page-number {
+    content: counter(page);
+    font-family: -epubx-expr(header-font);
+    font-size: 0.75rem;
+    line-height: 1;
+    color: #6B6B6B;
+    bottom: 2vh;
+    left:   -epubx-expr(side-margin / 2);
+    right:  -epubx-expr(side-margin / 2);
+    height: 1rem;
+    text-align: -epubx-expr(page-number % 2 == 0 ? 'left' : 'right');
+  }
+  @-epubx-partition body {
+    -epubx-flow-from: body;
+    top:    -epubx-expr(lead.bottom-edge);
+    bottom: -epubx-expr(bottom-margin);
+    left:   -epubx-expr(side-margin);
+    right:  -epubx-expr(side-margin);
+    column-width: 14rem;
+    column-gap: 2rem;
+  }
+  @-epubx-partition lead {
+    -epubx-flow-from: lead;
+    top:    -epubx-expr(rest-header-height + 2.5vh);
+    left:   -epubx-expr(side-margin);
+    right:  -epubx-expr(side-margin);
+    margin-bottom: 1.5rem;
+  }
+  @-epubx-partition figure class(figure-right) {
+    -epubx-flow-from: figure;
+    top:    -epubx-expr(rest-header-height + 2.5vh);
+    right:  -epubx-expr(- bleed);
+    width:  -epubx-expr(bleed + (page-width < 26rem ? 100vw : (body.column-count <= 2 ? 50vw : side-margin + body.column-width * 2 + body.column-gap)));
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  @-epubx-partition-group header {
+    top:    -epubx-expr(- bleed);
+    left:   -epubx-expr(- bleed);
+    right:  -epubx-expr(- bleed);
+    height: -epubx-expr(bleed + rest-header-height);
+    width:  auto;
+    background: #BDC0C1;
+    @-epubx-partition keyperson {
+      -epubx-flow-from: keyperson;
+      -epubx-enabled: -epubx-expr(page-number % 2 == 0);
+      left: -epubx-expr(bleed + side-margin);
+      bottom: 0;
+    }
+    @-epubx-partition header-logo {
+      content: url(../images/jdir_logo_wht.svg);
+      -epubx-enabled: -epubx-expr(page-number % 2 == 1);
+      bottom: 0;
+      right: -epubx-expr(bleed + side-margin);
+      height: -epubx-expr(rest-header-height * 0.5);
+      width: -epubx-expr(rest-header-height * 1.2);
+    }
+  }
+}
+
+/** 本文 **/
+body {
+  font-family: -epubx-expr(body-font);
+  /* font-weight: 300; */
+  font-size: 1rem;    /* 16px (=12pt)  */
+  line-height: 1.625; /* 26px (=19.5pt) */
+  widows: 1;
+  orphans: 1;
+  margin: 0;
+}
+
+/** 強調 **/
+.article-body strong {
+  font-weight: 700;
+}
+
+/** リンク **/
+.article-body a {
+  color: #ED1C24; 
+}
+
+/** ページヘッダーに表示する人物名 **/
+.viv-header-keyperson {
+  -epubx-flow-into: keyperson;
+  -epubx-flow-options: static;
+  font-family: -epubx-expr(header-font);
+  font-weight: 100;
+  font-size: -epubx-expr(3vh + 5vw);
+  line-height: 1;
+  color: white;
+  position: relative;
+  bottom: -0.145em;
+}
+
+/** 記事タイトル **/
+.article-body h1 {
+  -epubx-flow-into: title;
+  -epubx-flow-options: exclusive;
+  font-family: -epubx-expr(title-font);
+  font-weight: 800;
+  font-feature-settings: "palt";
+  font-size: 5vw;
+  text-shadow: 1px 1px 2px white, -1px -1px 2px white, -1px 1px 2px white, 1px -1px 2px white;
+  line-height: 1.2;
+  border-left: 0.35em solid #EE00B9;
+  padding-left: 0.35em;
+  margin: 0.25em 0;
+  break-inside: avoid;
+  line-break: strict;
+  column-count: 1;
+}
+
+/** 記事サブタイトル **/
+.article-body h2 {
+  -epubx-flow-into: lead;
+  font-family: -epubx-expr(subtitle-font);
+  font-weight: 400;
+  font-feature-settings: "palt";
+  font-size: 1.6rem;
+  line-height: 1.3;
+  margin: 0.25em 0;
+  break-inside: avoid;
+  line-break: strict;
+}
+
+/** 著者・日付 **/
+.article-body .date {
+  -epubx-flow-into: lead;
+  font-weight: 400;
+  font-size: 1.2rem;
+  line-height: 1.625;
+  text-align: end;
+  margin: 0;
+}
+
+/** リード **/
+.viv-lead {
+  -epubx-flow-into: lead;
+  font-family: -epubx-expr(lead-font);
+  font-feature-settings: "palt";
+  font-size: 1.2rem;
+  line-height: 1.625;
+  margin: 1em 0 0;
+}
+
+.viv-lead > p > strong:first-child:last-child,
+.viv-lead > p > span:first-child:last-child > strong:first-child:last-child {
+  font-family: inherit;
+  font-weight: inherit;
+  color: black;
+}
+
+@-epubx-flow lead {
+  -epubx-flow-consume: all;
+}
+
+@media (max-width: 34rem) {
+  .article-body h1 {
+    font-size: 1.7rem;
+  }
+}
+@media (max-width: 26rem), (max-height: 26rem) {
+  .article-body h1 {
+    font-size: 1.55rem;
+  }
+  .article-body h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  .article-body .date {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  .viv-lead {
+    font-size: 1rem;
+  }
+}
+@media (max-width: 38rem) and (max-height: 38rem) {
+  .article-body h1 {
+    font-size: 1.55rem;
+  }
+  .article-body h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  .article-body .date {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  .viv-lead {
+    font-size: 1rem;
+  }
+}
+
+/** 段落 **/
+.article-body p {
+  margin: 0;
+  text-align: justify;
+}
+
+/** 見出し **/
+.article-body h4 {
+  font-family: -epubx-expr(title-font);
+  font-weight: 700;
+  font-feature-settings: "palt";
+  font-size: 1.125rem;    /* 18px (=13.5pt) */
+  line-height: 1.625rem;  /* 26px (=19.5pt) */
+  color: #6B6B6B;
+  border-left: 1em solid #6B6B6B;
+  padding-left: 0.35em;
+  margin: 0 0 1.625rem 0;
+  break-inside: avoid;
+  line-break: strict;
+  column-count: 1;
+}
+.article-body p + h4 {
+  margin-top: 1.625rem;
+}
+
+/** 図版 **/
+figure {
+  -epubx-flow-into: figure;
+  -epubx-flow-options: exclusive; /* 図版は１個ずつ配置 */
+  background: #E3E3E3;
+  margin: 0;
+  width: 100% !important;
+}
+
+figure> img, figure > a > img {
+  display: block;
+  width: 100%;
+}
+
+/* キャプション付き画像は高さを制限 */
+figure> img:not(:last-child), figure > a:not(:last-child) > img {
+  max-height: 50vh;
+  object-fit: cover;
+}
+
+@media (max-width: 26rem), (max-height: 26rem) {
+  figure> img:not(:last-child), figure > a:not(:last-child) > img {
+    max-height: 30vh;
+    object-fit: contain;
+  }
+}
+@media (max-width: 38rem) and (max-height: 38rem) {
+  figure> img:not(:last-child), figure > a:not(:last-child) > img {
+    max-height: 30vh;
+    object-fit: contain;
+  }
+}
+
+/** 図版キャプション **/
+figcaption {
+  display: block;
+  font-family: -epubx-expr(subtitle-font);
+  font-feature-settings: "palt";
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: justify;
+  padding: 0.5em 1.5em 1.2em;
+}
+
+@-epubx-flow figure {
+  -epubx-flow-consume: all;
+}
+
+@-epubx-region .figure-bottom-left {
+  figcaption {
+    padding-left: -epubx-expr(bleed + 1.5em);
+    padding-bottom: -epubx-expr(bleed + 1.2em);
+  }
+}
+
+@-epubx-region .figure-right {
+  figcaption {
+    padding-right: -epubx-expr(bleed + 1.5em);
+  }
+}
+
+/** 枠囲み **/
+.article-body .frame {
+  display: block;
+  font-family: -epubx-expr(subtitle-font);
+  font-feature-settings: "palt";
+  font-size: 0.9rem;
+  text-align: justify;
+  border: 1px solid black;
+  padding: 0.5em;
+  margin-top: 1em;
+  break-inside: avoid;
+}
+
+.article-body .frame > strong:first-child {
+  display: block;
+  text-align: center;
+  color: #2952FA;
+  break-inside: avoid;
+  break-after: avoid;
+}
+
+/** 非表示要素 **/
+style, header, footer, footer ~ *, article ~ *, .bread-crumb, .sub-column, .sns-button {
+    display: none;
+}
+
+/** カバー・目次 **/
+#cover-toc {
+  -epubx-flow-into: cover-toc;
+  font-family: -epubx-expr(subtitle-font);
+  font-feature-settings: "palt";
+  font-size: -epubx-expr(max(1rem, 1vw + 1vh));;
+  line-height: 1.625;
+}
+
+@-epubx-flow cover-toc {
+  -epubx-flow-consume: all;
+}
+
+/* 目次 */
+
+#toc > h1 {
+  font-family: -epubx-expr(subtitle-font);
+  font-size: 150%;
+  line-height: 1.5;
+  color: #6B6B6B;
+  margin-inline: 0;
+  margin-block: 0.5em;
+}
+
+#toc > ol {
+  padding-block: 0;
+  padding-inline: 0;
+  counter-reset: item;
+}
+
+#toc > ol > li {
+  display: block;
+  border-block-end: 1px dotted #BDC0C1;
+  padding-block: 0.25em;
+  padding-inline: 0.5em 0;
+  margin-inline: 2em 0;
+  break-inside: avoid;
+}
+
+#toc > ol > li::before {
+  float: left;
+  counter-increment: item;
+  content: counter(item);
+  font-size: 150%;
+  line-height: 1.25;
+  color: #6B6B6B;
+  margin-inline: -1.333em 0;
+  padding-inline: 0 0.667em;
+}
+
+#toc > ol > li::after {
+  display: block;
+  content: "";
+  clear: both;
+}
+
+#toc > ol > li:first-child {
+  border-block-start: 1px dotted #BDC0C1;
+}
+
+#toc > ol > li a {
+  text-decoration: none;
+  color: inherit;
+}
+
+#toc > ol > li a::after {
+  /* content: target-counter(attr(href url), page); */
+  color: #6B6B6B;
+  float: right;
+}
+
+/** Notice **/
+p.notice {
+  font-family: -epubx-expr(body-font);
+  font-size: 90%;
+  margin-block: 2em 0;
+  margin-inline: 1.5em 0;
+}
+p.notice::before {
+  content: "※";
+  margin-inline: -1em 0;
+}
