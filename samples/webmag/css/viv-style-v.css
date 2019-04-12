@@ -497,7 +497,7 @@ style, header, footer, footer ~ *, article ~ *, .bread-crumb, .sub-column, .sns-
   -epubx-flow-into: cover-toc;
   font-family: -epubx-expr(subtitle-font);
   font-feature-settings: "vpal";
-  font-size: -epubx-expr(max(1rem, 0.9vw + 0.9vh));;
+  font-size: 1rem;
   line-height: 1.625;
 }
 
