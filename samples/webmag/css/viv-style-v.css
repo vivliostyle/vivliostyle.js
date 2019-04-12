@@ -567,6 +567,7 @@ style, header, footer, footer ~ *, article ~ *, .bread-crumb, .sub-column, .sns-
 
 #toc > ol > li::before,
 #toc > ol > li a::after {
+  -webkit-text-combine: horizontal;
   text-combine-upright: all;
 }
 
