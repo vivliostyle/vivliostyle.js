@@ -1186,7 +1186,11 @@ adapt.pm.passPostProperties = [
     "background-origin",
     "background-size",
     "opacity",
-    "z-index"
+    "z-index",
+    "background-blend-mode",
+    "isolation",
+    "mix-blend-mode",
+    "filter"
 ];
 
 /**
@@ -1207,7 +1211,22 @@ adapt.pm.passContentProperties = [
     "text-indent",
     "text-transform",
     "white-space",
-    "word-spacing"
+    "word-spacing",
+    "font-feature-settings",
+    "font-kerning",
+    "font-size-adjust",
+    "font-variant-east-asian",
+    "font-stretch",
+    "text-decoration-color",
+    "text-decoration-line",
+    "text-decoration-skip",
+    "text-decoration-style",
+    "text-emphasis",
+    "text-emphasis-color",
+    "text-emphasis-position",
+    "text-emphasis-style",
+    "text-shadow",
+    "text-underline-position"
 ];
 
 /**
@@ -1215,7 +1234,10 @@ adapt.pm.passContentProperties = [
  */
 adapt.pm.passSingleUriContentProperties = [
     "width",
-    "height"
+    "height",
+    "image-resolution",
+    "object-fit",
+    "object-position"
 ];
 
 /**
