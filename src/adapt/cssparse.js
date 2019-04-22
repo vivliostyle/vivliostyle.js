@@ -1102,6 +1102,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsExprOp[adapt.csstok.TokenType.LT_EQ] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.EQ] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.EQ_EQ] = adapt.cssparse.Action.EXPR_INFIX;
+    actionsExprOp[adapt.csstok.TokenType.BANG_EQ] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.AMP_AMP] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.BAR_BAR] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.PLUS] = adapt.cssparse.Action.EXPR_INFIX;
