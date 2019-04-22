@@ -396,6 +396,14 @@ adapt.base.getPrefixedPropertyNames = prop => {
         return prefixed;
     }
     switch (prop) {
+        case "text-combine-upright":
+            // Special case for Safari
+            if (adapt.base.checkIfPropertySupported("-webkit-", "text-combine") &&
+                    !adapt.base.checkIfPropertySupported("", "text-combine-upright")) {
+                adapt.base.propNameMap[prop] = ["-webkit-text-combine"];
+                return ["-webkit-text-combine"];
+            }
+            break;
         case "writing-mode":
             // Special case: prefer '-ms-writing-mode' to 'writing-mode'
             if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
@@ -479,6 +487,13 @@ adapt.base.setCSSProperty = (elem, prop, value) => {
                         break;
                     case "vertical-lr":
                         value = "tb-lr";
+                        break;
+                }
+            }
+            else if (prefixed === "-webkit-text-combine") {
+                switch (value) {
+                    case "all":
+                        value = "horizontal";
                         break;
                 }
             }
