@@ -259,7 +259,7 @@ adapt.epub.EPUBDocStore.prototype.loadWebPub = function(url) {
     this.load(url).then(xmldoc => {
         if (!xmldoc) {
             vivliostyle.logging.logger.error(`Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`);
-        } else if (xmldoc.document.querySelector("a[href='META-INF/']")) {
+        } else if (xmldoc.document.querySelector("a[href='META-INF/'],a[href$='/META-INF/']")) {
             // This is likely the directory listing of unzipped EPUB top directory
             frame.finish(null);
         } else {
