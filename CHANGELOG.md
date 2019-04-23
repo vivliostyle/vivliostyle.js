@@ -1,11 +1,17 @@
 # Change Log
 
-## 2019.1.104-pre
+## [2019.1.104](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.104) - 2019-04-23
 
 ### Fixed
 
 - Fix bug that duplicate page margin box content appears at bottom of pages
   - <https://github.com/vivliostyle/vivliostyle.js/pull/515>
+- Fix bug that the operator `!=` in `-epubx-expr()` causes CSS parser error and fails page generation
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/7ed551fa>
+- Fix problem that some properties are ignored on page partition or margin box context
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/1b9d589c>
+- Fix problem that `text-combine-upright: all` does not work on WebKit
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/e87924a2>
 
 
 ## [2019.1.103](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.103) - 2019-04-05
