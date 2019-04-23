@@ -1,9 +1,11 @@
 # Change Log
 
-## [2019.1.104](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.104) - 2019-04-23
+## [2019.1.105](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.105) - 2019-04-23
 
 ### Fixed
 
+- Fix again the bug that cannot load unzipped EPUB when directory listing is enabled on the server
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/5229e760>
 - Fix bug that duplicate page margin box content appears at bottom of pages
   - <https://github.com/vivliostyle/vivliostyle.js/pull/515>
 - Fix bug that the operator `!=` in `-epubx-expr()` causes CSS parser error and fails page generation
