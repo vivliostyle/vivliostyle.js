@@ -47,9 +47,10 @@
     width:  auto;
     background: #BDC0C1;
     @-epubx-partition header-logo {
-      content: url(../images/jdir_logo_wht.svg);
+      content: url(http://jbpress.ismedia.jp/common/feature/jdir/jdir_logo_no.svg);
+      filter: invert(100%);
       bottom: 0;
-      left:   -epubx-expr(bleed + (page-number > 1 && page-number % 2 == 1 ? side-margin : 100vw - side-margin - header-logo.width));
+      left:   -epubx-expr(bleed + (page-number > 1 && page-number % 2 != 0 ? side-margin : 100vw - side-margin - header-logo.width));
       height: -epubx-expr(page-number == 1 ? 15vh : rest-header-height * 0.5);
       width:  -epubx-expr(page-number == 1 ? 36vh : rest-header-height * 1.2);
     }
@@ -71,7 +72,7 @@
     left:   -epubx-expr(side-margin / 2);
     right:  -epubx-expr(side-margin / 2);
     height: 1rem;
-    text-align: -epubx-expr(page-number % 2 == 1 ? 'left' : 'right');
+    text-align: -epubx-expr(page-number % 2 != 0 ? 'left' : 'right');
   }
   @-epubx-partition body {
     writing-mode: vertical-rl;
@@ -148,7 +149,8 @@
       z-index: 2;
     }
     @-epubx-partition header-logo {
-      content: url(../images/jdir_logo_wht.svg);
+      content: url(http://jbpress.ismedia.jp/common/feature/jdir/jdir_logo_no.svg);
+      filter: invert(100%);
       -epubx-wrap-flow: auto;
       top:    -epubx-expr(bleed + 7vh);
       right:  -epubx-expr(bleed + ((page-width < 48rem || page-height < 48rem) ? 1vw : side-margin - 1vw));
@@ -172,7 +174,7 @@
     left:   -epubx-expr(side-margin / 2);
     right:  -epubx-expr(side-margin / 2);
     height: 1rem;
-    text-align: -epubx-expr(page-number % 2 == 1 ? 'left' : 'right');
+    text-align: -epubx-expr(page-number % 2 != 0 ? 'left' : 'right');
   }
   @-epubx-partition body {
     writing-mode: vertical-rl;
@@ -213,12 +215,13 @@
     background: #BDC0C1;
     @-epubx-partition keyperson {
       -epubx-flow-from: keyperson;
-      -epubx-enabled: -epubx-expr(page-number % 2 == 1);
+      -epubx-enabled: -epubx-expr(page-number % 2 != 0);
       left: -epubx-expr(bleed + side-margin);
       bottom: 0;
     }
     @-epubx-partition header-logo {
-      content: url(../images/jdir_logo_wht.svg);
+      content: url(http://jbpress.ismedia.jp/common/feature/jdir/jdir_logo_no.svg);
+      filter: invert(100%);
       -epubx-enabled: -epubx-expr(page-number % 2 == 0);
       bottom: 0;
       right: -epubx-expr(bleed + side-margin);
@@ -483,7 +486,6 @@ style, header, footer, footer ~ *, article ~ *, .bread-crumb, .sub-column, .sns-
 /*** Tate-chuu-yoko, upright ***/
 
 .viv-tcy {
-  -webkit-text-combine: horizontal;
   text-combine-upright: all;
 }
 
@@ -567,7 +569,6 @@ style, header, footer, footer ~ *, article ~ *, .bread-crumb, .sub-column, .sns-
 
 #toc > ol > li::before,
 #toc > ol > li a::after {
-  -webkit-text-combine: horizontal;
   text-combine-upright: all;
 }
 

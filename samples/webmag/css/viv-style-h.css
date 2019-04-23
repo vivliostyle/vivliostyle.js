@@ -42,7 +42,8 @@
     width:  auto;
     background: #BDC0C1;
     @-epubx-partition header-logo {
-      content: url(../images/jdir_logo_wht.svg);
+      content: url(http://jbpress.ismedia.jp/common/feature/jdir/jdir_logo_no.svg);
+      filter: invert(100%);
       bottom: 0;
       left:   -epubx-expr(bleed + (page-number % 2 == 0 ? side-margin : 100vw - side-margin - header-logo.width));
       height: -epubx-expr(page-number == 1 ? 15vh : rest-header-height * 0.5);
@@ -57,7 +58,7 @@
 /** 記事の先頭ページ **/
 @-epubx-page-master article-first-page {
   @-epubx-partition page-number {
-    -epubx-enabled: -epubx-expr(page-number % 2 == 1 || figure.height == 0);
+    -epubx-enabled: -epubx-expr(page-number % 2 != 0 || figure.height == 0);
     content: counter(page);
     font-family: -epubx-expr(header-font);
     font-size: 0.75rem;
@@ -113,7 +114,8 @@
       bottom: 0;
     }
     @-epubx-partition header-logo {
-      content: url(../images/jdir_logo_wht.svg);
+      content: url(http://jbpress.ismedia.jp/common/feature/jdir/jdir_logo_no.svg);
+      filter: invert(100%);
       top:    -epubx-expr(bleed + 4vh);
       right:  -epubx-expr(bleed + side-margin);
       height: 7.5vh;
@@ -175,8 +177,9 @@
       bottom: 0;
     }
     @-epubx-partition header-logo {
-      content: url(../images/jdir_logo_wht.svg);
-      -epubx-enabled: -epubx-expr(page-number % 2 == 1);
+      content: url(http://jbpress.ismedia.jp/common/feature/jdir/jdir_logo_no.svg);
+      filter: invert(100%);
+      -epubx-enabled: -epubx-expr(page-number % 2 != 0);
       bottom: 0;
       right: -epubx-expr(bleed + side-margin);
       height: -epubx-expr(rest-header-height * 0.5);
