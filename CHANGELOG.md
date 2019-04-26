@@ -1,5 +1,11 @@
 # Change Log
 
+## 2019.1.106-pre - 2019-04-27
+
+- Fix error occurring when `@page` size has vw/vh units
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/e1d7023c>
+
+
 ## [2019.1.105](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.105) - 2019-04-23
 
 ### Fixed
