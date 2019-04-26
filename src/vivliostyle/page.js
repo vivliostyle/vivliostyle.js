@@ -139,7 +139,7 @@ vivliostyle.page.resolvePageSizeAndBleed = style => {
             pageSizeAndBleed.height = val2 || val1;
         } else {
             // <page-size> || [ portrait | landscape ]
-            const s = vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
+            const s = val1.name && vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
             if (!s) {
                 // portrait or landscape is specified alone. fallback to fit to the viewport (use default value)
             } else if (val2 && val2 === adapt.css.ident.landscape) {
