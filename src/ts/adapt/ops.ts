@@ -38,7 +38,7 @@ import * as exprs from './expr';
 import * as font from './font';
 import * as geom from './geom';
 import * as layout from './layout';
-import {Response, XMLHttpRequestResponseType} from './net';
+import {Response, XMLHttpRequestResponseType, ResourceStore} from './net';
 import * as pm from './pm';
 import * as task from './task';
 import {Fetcher} from './taskutil';
@@ -61,7 +61,7 @@ export const uaStylesheetBaseFetcher: Fetcher<boolean> =
         const handler = new csscasc.CascadeParserHandler(
             null, null, null, null, null, validatorSet, true);
         handler.startStylesheet(cssparse.StylesheetFlavor.USER_AGENT);
-        csscasc.uaBaseCascade = handler.cascade;
+        csscasc.setUABaseCascade(handler.cascade);
         cssparse.parseStylesheetFromURL(url, handler, null, null)
             .thenFinish(frame);
       });
@@ -543,7 +543,7 @@ export class StyleInstance extends exprs.Context implements
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
     const deferredFloats =
         pageFloatLayoutContext.getDeferredPageFloatContinuations();
-    const frame = task.newFrame('layoutDeferredPageFloats');
+    const frame = task.newFrame<boolean>('layoutDeferredPageFloats');
     let invalidated = false;
     let i = 0;
     frame
@@ -1584,7 +1584,7 @@ export const parseOPSResource = (response: Response, store: xmldocs.XMLDocStore)
                                     task.Result<xmldocs.XMLDocHolder> =>
     (store as OPSDocStore).parseOPSResource(response);
 
-export class OPSDocStore extends xmldocs.XMLDocStore {
+export class OPSDocStore extends ResourceStore<xmldocs.XMLDocHolder> {
   styleByKey: {[key: string]: Style} = {};
   styleFetcherByKey: {[key: string]: Fetcher<Style>} = {};
   styleByDocURL: {[key: string]: Style} = {};
@@ -1607,7 +1607,7 @@ export class OPSDocStore extends xmldocs.XMLDocStore {
     this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
     const userAgentXML =
         base.resolveURL('user-agent.xml', base.resourceBaseURL);
-    const frame = task.newFrame('OPSDocStore.init');
+    const frame = task.newFrame<boolean>('OPSDocStore.init');
     const self = this;
     cssvalid.loadValidatorSet().then((validatorSet) => {
       self.validatorSet = validatorSet;
@@ -1727,7 +1727,7 @@ export class OPSDocStore extends xmldocs.XMLDocStore {
       });
       const head = xmldoc.head;
       if (head) {
-        for (let c = head.firstChild; c; c = c.nextSibling) {
+        for (let c: Node = head.firstChild; c; c = c.nextSibling) {
           if (c.nodeType != 1) {
             continue;
           }

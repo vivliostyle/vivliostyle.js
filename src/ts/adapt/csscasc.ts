@@ -2728,7 +2728,10 @@ export enum ParseState {
 /**
  * Cascade for base User Agent stylesheet.
  */
-export let uaBaseCascade: Cascade = null;
+export var uaBaseCascade: Cascade = null;
+export function setUABaseCascade(value: Cascade) {
+  uaBaseCascade = value;
+}
 
 //------------- parsing ------------
 export class CascadeParserHandler extends
