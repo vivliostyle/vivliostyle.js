@@ -61,10 +61,7 @@ function setBlockSize(container: Container, size) {
   }
 }
 
-/**
- * @abstract
- */
-export class ColumnBalancer {
+export abstract class ColumnBalancer {
   originalContainerBlockSize: any;
 
   constructor(
@@ -119,21 +116,11 @@ export class ColumnBalancer {
 
   protected preBalance(layoutResult: ColumnLayoutResult) {}
 
-  /**
-   * @abstract
-   */
-  protected calculatePenalty(layoutResult: ColumnLayoutResult): number {}
+  protected abstract calculatePenalty(layoutResult: ColumnLayoutResult): number;
 
-  /**
-   * @abstract
-   */
-  protected hasNextCandidate(candidates: ColumnBalancingTrialResult[]):
-      boolean {}
+  protected abstract hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean;
 
-  /**
-   * @abstract
-   */
-  protected updateCondition(candidates: ColumnBalancingTrialResult[]) {}
+  protected abstract updateCondition(candidates: ColumnBalancingTrialResult[]): void;
 
   protected postBalance() {
     setBlockSize(this.layoutContainer, this.originalContainerBlockSize);
