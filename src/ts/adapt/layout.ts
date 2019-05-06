@@ -2663,7 +2663,7 @@ export class Column extends vtree.Container {
                     return;
                   }
                 }
-                const viewTag = nodeContext.viewNode.localName;
+                const viewTag = (nodeContext.viewNode as Element).localName;
                 if (mediaTags[viewTag]) {
                   // elements that have inherent content
                   // check if a forced break must occur before the block.
@@ -2811,7 +2811,7 @@ export class Column extends vtree.Container {
                 // Leading edge
                 breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                     breakAtTheEdge, nodeContext.breakBefore);
-                const viewTag = nodeContext.viewNode.localName;
+                const viewTag = (nodeContext.viewNode as Element).localName;
                 if (mediaTags[viewTag]) {
                   // elements that have inherent content
                   // check if a forced break must occur before the block.
