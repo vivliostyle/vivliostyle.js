@@ -593,7 +593,7 @@ export function multiIndexArray<T> (arr: T[], key: (p1: T) => string | null): {[
  * Apply function to each value of the object
  * @param fn second parameter is the key
  */
-export function mapObj<P, R> (obj: {[key: string]: P}, fn: (p1: any, p2: string) => R): {[key: string]: R} {
+export function mapObj<P, R> (obj: {[key: string]: P}, fn: (p1: P, p2: string) => R): {[key: string]: R} {
       const res: {[key: string]: R} = {};
       for (const n in obj) {
         res[n] = fn(obj[n], n);
