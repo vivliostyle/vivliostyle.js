@@ -51,12 +51,18 @@ export const stripFragmentAndQuery = (url: string): string => {
  * Base URL relative to which URLs of resources are resolved.
  */
 export let baseURL = window.location.href;
+export function setBaseURL(value: string) {
+  baseURL = value;
+}
 
 /**
  * Base URL relative to which URLs of resources such as validation.txt and
  * user-agent.css are resolved.
  */
 export let resourceBaseURL = window.location.href;
+export function setResourceBaseURL(value: string) {
+  resourceBaseURL = value;
+}
 
 /**
  * @param relURL relative URL

@@ -1948,7 +1948,7 @@ export class OPFView implements CustomRendererFactory {
     }
   }
 
-  isTOCVisible(autohide): boolean {
+  isTOCVisible(): boolean {
     return this.tocView && this.tocView.isTOCVisible();
   }
 }
