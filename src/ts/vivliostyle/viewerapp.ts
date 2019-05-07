@@ -196,7 +196,7 @@ export const callback = (msg) => {
           'data-vivliostyle-page-progression', pageProgression);
       viewer.viewportElement.setAttribute(
           'data-vivliostyle-spread-view', viewer.pref.spreadView);
-      window.addEventListener('keydown', (keydown as Function), false);
+      window.addEventListener('keydown', keydown, false);
 
       //        window.addEventListener("touchstart", /** @type {Function} */
       //        (.touch), false);
@@ -207,12 +207,10 @@ export const callback = (msg) => {
       document.body.setAttribute('data-vivliostyle-viewer-status', 'complete');
       const leftButton =
           document.getElementById('vivliostyle-page-navigation-left');
-      leftButton.addEventListener(
-          'click', (navigateToLeftPage as Function), false);
+      leftButton.addEventListener('click', navigateToLeftPage, false);
       const rightButton =
           document.getElementById('vivliostyle-page-navigation-right');
-      rightButton.addEventListener(
-          'click', (navigateToRightPage as Function), false);
+      rightButton.addEventListener('click', navigateToRightPage, false);
       [leftButton, rightButton].forEach((button) => {
         button.setAttribute('data-vivliostyle-ui-state', 'attention');
         window.setTimeout(() => {
