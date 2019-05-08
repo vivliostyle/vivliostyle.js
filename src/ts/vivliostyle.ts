@@ -16,4 +16,6 @@
  *
  */
 
-export function test() {}
+import {constants} from './vivliostyle/constants'
+export {constants};
+

@@ -19,7 +19,7 @@
  * @fileoverview Sample EPUB rendering application.
  */
 import * as asserts from '../vivliostyle/asserts';
-import {constants} from '../vivliostyle/constants';
+import * as constants from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
 import {plugin} from '../vivliostyle/plugin';
 import {profile} from '../vivliostyle/profile';

@@ -18,7 +18,7 @@
  * @fileoverview Vivliostyle Viewer class
  */
 import {profile} from './profile';
-import {constants} from './constants';
+import * as constants from './constants';
 import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';
 
@@ -130,7 +130,7 @@ export class Viewer {
 
   constructor(
       private readonly settings: ViewerSettings, opt_options?: ViewerOptions) {
-    constants.isDebug = settings.debug;
+    constants.setDebug(settings.debug);
     this.adaptViewer = new adaptviewer.Viewer(
         settings['window'] || window, settings['viewportElement'], 'main',
         this.dispatcher.bind(this));

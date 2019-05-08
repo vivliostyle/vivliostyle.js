@@ -17,7 +17,7 @@
  *
  * @fileoverview Vivliostyle page viewer base on adapt.sampleapp
  */
-import {constants} from './constants';
+import * as constants from './constants';
 import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';
 

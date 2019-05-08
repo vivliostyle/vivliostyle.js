@@ -37,7 +37,6 @@ module.exports = {
   module: {
     rules: [{
       test: /\.ts$/,
-      exclude: /\/(adapt|closure|vivliostyle)\//,   //FIXME
       use: 'ts-loader'
     }]
   },

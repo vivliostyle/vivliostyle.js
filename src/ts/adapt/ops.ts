@@ -19,7 +19,7 @@
  * layout.
  */
 import * as asserts from '../vivliostyle/asserts';
-import {constants} from '../vivliostyle/constants';
+import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';

@@ -19,7 +19,7 @@
  * @fileoverview Deal with META-INF/ and .opf files in EPUB container.
  */
 import * as asserts from '../vivliostyle/asserts';
-import {constants} from '../vivliostyle/constants';
+import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
 
@@ -663,7 +663,7 @@ export class OPFDoc {
     const pageProgressionAttr =
         pkg.child('spine').attribute('page-progression-direction')[0];
     if (pageProgressionAttr) {
-      this.pageProgression = constants.PageProgression.of(pageProgressionAttr);
+      this.pageProgression = constants.pageProgressionOf(pageProgressionAttr);
     }
     const idpfObfURLs = !encXML ?
         [] :

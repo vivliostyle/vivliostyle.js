@@ -18,7 +18,7 @@
  * @fileoverview Basic view tree data structures and support utilities.
  */
 import * as asserts from '../vivliostyle/asserts';
-import {constants} from '../vivliostyle/constants';
+import * as constants from '../vivliostyle/constants';
 import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
 import {FloatReference} from '../vivliostyle/pagefloat';
 import {AfterIfContinues} from '../vivliostyle/selectors';
