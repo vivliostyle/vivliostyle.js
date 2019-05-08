@@ -22,7 +22,7 @@ import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
 
-import {plugin} from './plugin';
+import * as plugin from './plugin';
 
 import * as layout from '../adapt/layout';
 import * as layoututil from './layoututil';

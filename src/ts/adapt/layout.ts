@@ -21,7 +21,7 @@
  */
 import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
-import {plugin} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
 import {ElementsOffset} from '../vivliostyle/repetitiveelements';
 import * as repetitiveelements from '../vivliostyle/repetitiveelements';
 import {processAfterIfContinues, processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';

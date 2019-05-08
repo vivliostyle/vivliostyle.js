@@ -27,8 +27,6 @@ import {FormattingContext} from '../adapt/vtree';
 
 import * as logging from './logging';
 
-export namespace plugin {
-
 /**
  * Type of implemented hooks.
  * @enum {string}
@@ -220,7 +218,10 @@ export const getHooksForName = (name: string): ((...p1) => any)[] => {
   return hooksForName || [];
 };
 
-} // export namespace plugin
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.plugin.registerHook", vivliostyle.plugin.registerHook);
-// vivliostyle.namespace.exportSymbol("vivliostyle.plugin.removeHook", vivliostyle.plugin.removeHook);
+/**
+ * Pubilc members of the bundled library.
+ */
+export const plugin = {
+  registerHook,
+  removeHook,
+};

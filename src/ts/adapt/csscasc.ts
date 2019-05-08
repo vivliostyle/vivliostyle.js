@@ -19,7 +19,7 @@
  */
 import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
-import {plugin} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
 import {Matcher} from '../vivliostyle/selectors';
 import * as selectors from '../vivliostyle/selectors';
 

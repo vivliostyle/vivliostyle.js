@@ -16,6 +16,7 @@
  *
  */
 
-import {constants} from './vivliostyle/constants'
-export {constants};
+import {constants} from './vivliostyle/constants';
+import {plugin} from './vivliostyle/plugin';
+export {constants, plugin};
 

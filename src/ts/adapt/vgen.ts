@@ -21,7 +21,7 @@ import {restoreNewText, diffChars} from '../vivliostyle/diff';
 import * as display from '../vivliostyle/display';
 import * as urls from '../vivliostyle/urls';
 import * as selectors from '../vivliostyle/selectors';
-import {plugin} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
 

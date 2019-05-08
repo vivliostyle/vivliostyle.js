@@ -21,7 +21,7 @@
 import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
-import {plugin} from '../vivliostyle/plugin';
+import * as plugin from '../vivliostyle/plugin';
 import {profile} from '../vivliostyle/profile';
 
 import {JSON} from './base';

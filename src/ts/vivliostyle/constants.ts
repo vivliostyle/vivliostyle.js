@@ -67,7 +67,9 @@ export enum ReadyState {
   COMPLETE = 'complete'
 }
 
-// Pubilc members of the bundled library
+/**
+ * Pubilc members of the bundled library.
+ */
 export const constants = {
   PageProgression,
   PageSide,

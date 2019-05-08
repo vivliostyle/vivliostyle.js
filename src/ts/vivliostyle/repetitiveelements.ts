@@ -14,7 +14,7 @@ import * as layout from '../adapt/layout';
 
 import * as selectors from './selectors';
 import * as table from './table';
-import {plugin} from './plugin';
+import * as plugin from './plugin';
 
 export class RepetitiveElementsOwnerFormattingContext implements
     vtree.FormattingContext {
