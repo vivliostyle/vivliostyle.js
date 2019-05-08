@@ -17,7 +17,7 @@
  *
  * @fileoverview Vivliostyle Viewer class
  */
-import {profile} from './profile';
+import * as profile from './profile';
 import * as constants from './constants';
 import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';

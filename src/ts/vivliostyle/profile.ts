@@ -18,8 +18,6 @@
  */
 import * as logging from './logging';
 
-export namespace profile {
-
 /**
  * Performance profiler measuring execution time of the script.
  */
@@ -172,9 +170,15 @@ const performanceInstance = window && window.performance;
 export const profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
 profiler.forceRegisterStartTiming('load_vivliostyle');
 
-} // export namespace profile
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.profile.profiler", profiler);
-// goog.exportProperty(Profiler.prototype, "printTimings", Profiler.prototype.printTimings);
-// goog.exportProperty(Profiler.prototype, "disable", Profiler.prototype.disable);
-// goog.exportProperty(Profiler.prototype, "enable", Profiler.prototype.enable);
+/**
+ * Pubilc members of the bundled library.
+ */
+export const profile = {
+  profiler: {
+    registerStartTiming: profiler.registerStartTiming,
+    registerEndTiming: profiler.registerEndTiming,
+    printTimings: profiler.printTimings,
+    disable: profiler.disable,
+    enable: profiler.enable,
+  }
+};

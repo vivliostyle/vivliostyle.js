@@ -223,5 +223,5 @@ export const getHooksForName = (name: string): ((...p1) => any)[] => {
  */
 export const plugin = {
   registerHook,
-  removeHook,
+  removeHook
 };
