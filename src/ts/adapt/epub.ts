@@ -61,7 +61,8 @@ export class EPUBDocStore extends ops.OPSDocStore {
   documents: {[key: string]: Result<xmldocs.XMLDocHolder>} = {};
 
   constructor() {
-    super(this.makeDeobfuscatorFactory());
+    super(null);
+    this.fontDeobfuscator = this.makeDeobfuscatorFactory();
     this.plainXMLStore = xmldocs.newXMLDocStore();
     this.jsonStore = net.newJSONStore();
   }
@@ -163,7 +164,7 @@ export class EPUBDocStore extends ops.OPSDocStore {
   }
 
   addDocument(url: string, doc: Document) {
-    const frame = task.newFrame('EPUBDocStore.load');
+    const frame = task.newFrame<xmldocs.XMLDocHolder>('EPUBDocStore.load');
     const docURL = base.stripFragment(url);
     const r = this.documents[docURL] = this.parseOPSResource({
       status: 200,
@@ -180,14 +181,14 @@ export class EPUBDocStore extends ops.OPSDocStore {
   /**
    * @override
    */
-  load(url) {
+  load(url: string)  {
     const docURL = base.stripFragment(url);
     let r = this.documents[docURL];
     if (r) {
       return r.isPending() ? r : task.newResult(r.get());
     } else {
-      const frame = task.newFrame('EPUBDocStore.load');
-      r = super(
+      const frame = task.newFrame<xmldocs.XMLDocHolder>('EPUBDocStore.load');
+      r = super.load(
           docURL, true,
           `Failed to fetch a source document from ${docURL}`);
       r.then((xmldoc: xmldocs.XMLDocHolder) => {
@@ -385,7 +386,7 @@ export const readMetadata = (mroot: xmldocs.NodeList, prefixes: string|null): JS
   let order = 1;
 
   // List of metadata items.
-  const rawItems = mroot.childElements().forEachNonNull((node) => {
+  const rawItems = mroot.childElements().forEachNonNull((node: Element) => {
     if (node.localName == 'meta') {
       const p = resolveProperty((node as Element).getAttribute('property'));
       if (p) {
@@ -416,9 +417,9 @@ export const readMetadata = (mroot: xmldocs.NodeList, prefixes: string|null): JS
   // Items grouped by their target id.
   const rawItemsByTarget =
       base.multiIndexArray(rawItems, (rawItem) => rawItem.refines);
-  const makeMetadata = (map) =>
-      base.mapObj(map, (rawItemArr, itemName) => {
-        const result = rawItemArr.map(rawItem => {
+  const makeMetadata = (map: {[key: string]: any[]}): {[key: string]: any[]} =>
+      base.mapObj(map, (rawItemArr, itemName) =>
+        rawItemArr.map(rawItem => {
           const entry = {'v': rawItem.value, 'o': rawItem.order};
           if (rawItem.schema) {
             entry['s'] = rawItem.scheme;
@@ -449,18 +450,17 @@ export const readMetadata = (mroot: xmldocs.NodeList, prefixes: string|null): JS
             }
           }
           return entry;
-        });
-        return result;
-      });
+        })
+      );
   const metadata = makeMetadata(base.multiIndexArray(
       rawItems, (rawItem) => rawItem.refines ? null : rawItem.name));
   let lang = null;
   if (metadata[metaTerms.language]) {
     lang = metadata[metaTerms.language][0]['v'];
   }
-  const sortMetadata = (metadata) => {
+  const sortMetadata = (metadata: {[key: string]: any[]}) => {
     for (const term in metadata) {
-      const arr = (metadata[term] as Array);
+      const arr = metadata[term];
       arr.sort(getMetadataComparator(term, lang));
       for (let i = 0; i < arr.length; i++) {
         const r = arr[i]['r'];
@@ -598,7 +598,7 @@ export class OPFDoc {
 
   initWithXMLDoc(
       opfXML: xmldocs.XMLDocHolder, encXML: xmldocs.XMLDocHolder,
-      zipMetadata: JSON, manifestURL: string): Result {
+      zipMetadata: JSON, manifestURL: string): Result<any> {
     const self = this;
     this.opfXML = opfXML;
     this.encXML = encXML;
@@ -938,7 +938,7 @@ export {OPFViewItem};
 
 export class OPFView implements CustomRendererFactory {
   spineItems: OPFViewItem[] = [];
-  spineItemLoadingContinuations: Continuation[][] = [];
+  spineItemLoadingContinuations: Continuation<any>[][] = [];
   pref: any;
   clientLayout: any;
   counterStore: any;
@@ -1006,8 +1006,8 @@ export class OPFView implements CustomRendererFactory {
    * too (calling `renderSinglePage` recursively).
    */
   private renderSinglePage(viewItem: OPFViewItem, pos: LayoutPosition):
-      Result<OPFView.RenderSinglePageResult> {
-    const frame: Frame<OPFView.RenderSinglePageResult> =
+      Result<RenderSinglePageResult> {
+    const frame: Frame<RenderSinglePageResult> =
         task.newFrame('renderSinglePage');
     let page = this.makePage(viewItem, pos);
     const self = this;
@@ -1641,7 +1641,7 @@ export class OPFView implements CustomRendererFactory {
           sb.append(srcParam);
           sb.append('&type=');
           sb.append(typeParam);
-          for (let c = srcElem.firstChild; c; c = c.nextSibling) {
+          for (let c: Node = srcElem.firstChild; c; c = c.nextSibling) {
             if (c.nodeType == 1) {
               const ce = (c as Element);
               if (ce.localName == 'param' &&
@@ -1948,7 +1948,7 @@ export class OPFView implements CustomRendererFactory {
     }
   }
 
-  isTOCVisible(autohide): boolean {
+  isTOCVisible(): boolean {
     return this.tocView && this.tocView.isTOCVisible();
   }
 }

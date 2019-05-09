@@ -58,7 +58,7 @@ export class TOCView implements vgen.CustomRendererFactory {
     if (depth-- == 0) {
       return;
     }
-    for (let c = elem.firstChild; c; c = c.nextSibling) {
+    for (let c: Node = elem.firstChild; c; c = c.nextSibling) {
       if (c.nodeType == 1) {
         const e = (c as Element);
         if (base.getCSSProperty(e, 'height', 'auto') != 'auto') {
@@ -180,7 +180,7 @@ export const toggleNodeExpansion = (evt: Event) => {
   const open = elem.textContent == bulletClosed;
   elem.textContent = open ? bulletOpen : bulletClosed;
   const tocNodeElem = (elem.parentNode as Element);
-  let c = tocNodeElem.firstChild;
+  let c: Node = tocNodeElem.firstChild;
   while (c) {
     if (c.nodeType != 1) {
       c = c.nextSibling;

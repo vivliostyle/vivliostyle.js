@@ -668,7 +668,7 @@ export const marginBoxesKey: string = '_marginBoxes';
  * Represent a page master generated for @page rules
  * @param style Cascaded style for @page rules
  */
-export class PageRuleMaster extends pm.PageMaster {
+export class PageRuleMaster extends pm.PageMaster<PageRuleMasterInstance> {
   private bodyPartitionKey: any;
   private pageMarginBoxes: any =
       ({} as {[key: string]: PageMarginBoxPartition});
@@ -728,7 +728,7 @@ export class PageRuleMaster extends pm.PageMaster {
  * Represent a partition placed in a PageRuleMaster
  * @param style Cascaded style for @page rules
  */
-export class PageRulePartition extends pm.Partition {
+export class PageRulePartition extends pm.Partition<PageRulePartitionInstance> {
   constructor(
       scope: exprs.LexicalScope, parent: PageRuleMaster,
       style: csscasc.ElementStyle, public readonly pageSize: PageSize) {
@@ -760,7 +760,7 @@ export class PageRulePartition extends pm.Partition {
   /**
    * @override
    */
-  createInstance(parentInstance): PageRulePartitionInstance {
+  createInstance(parentInstance): pm.PageBoxInstance {
     return new PageRulePartitionInstance(parentInstance, this);
   }
 }
@@ -768,7 +768,7 @@ export class PageRulePartition extends pm.Partition {
 /**
  * Represent a partition for a page-margin box
  */
-export class PageMarginBoxPartition extends pm.Partition {
+export class PageMarginBoxPartition extends pm.Partition<PageMarginBoxPartitionInstance> {
   constructor(
       scope: exprs.LexicalScope, parent: PageRuleMaster,
       public readonly marginBoxName: string, style: csscasc.ElementStyle) {
@@ -806,7 +806,7 @@ export class PageMarginBoxPartition extends pm.Partition {
   /**
    * @override
    */
-  createInstance(parentInstance): PageMarginBoxPartitionInstance {
+  createInstance(parentInstance): pm.PageBoxInstance {
     return new PageMarginBoxPartitionInstance(parentInstance, this);
   }
 }
@@ -823,7 +823,7 @@ type PageAreaDimension = {
 
 export {PageAreaDimension};
 
-export class PageRuleMasterInstance extends pm.PageMasterInstance {
+export class PageRuleMasterInstance extends pm.PageMasterInstance<PageRuleMaster> {
   pageAreaDimension: PageAreaDimension|null = null;
   pageMarginBoxInstances: {[key: string]: PageMarginBoxPartitionInstance} = {};
 
@@ -1215,7 +1215,7 @@ interface MarginBoxSizingParam {
  */
 class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   private hasAutoSize_: boolean;
-  private size: {[keykey in keyof sizing.Size]: number} | null = null;
+  private size: {[key in sizing.Size]: number} | null = null;
 
   constructor(
       protected readonly container: vtree.Container,
@@ -1382,7 +1382,7 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
   }
 };
 
-export class PageRulePartitionInstance extends pm.PartitionInstance {
+export class PageRulePartitionInstance extends pm.PartitionInstance<PageRulePartition> {
   borderBoxWidth: exprs.Val = null;
   borderBoxHeight: exprs.Val = null;
   marginTop: exprs.Val = null;
@@ -1537,7 +1537,7 @@ export class PageRulePartitionInstance extends pm.PartitionInstance {
   }
 }
 
-export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
+export class PageMarginBoxPartitionInstance extends pm.PartitionInstance<PageMarginBoxPartition> {
   boxInfo: PageMarginBoxInformation;
   suppressEmptyBoxGeneration: any = true;
 
@@ -1556,7 +1556,7 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
    */
   prepareContainer(context, container, page, docFaces, clientLayout) {
     this.applyVerticalAlign(context, container.element);
-    super(
+    super.prepareContainer(
         context, container, page, docFaces, clientLayout);
   }
 
@@ -1688,7 +1688,7 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
       [borderInsideWidth, paddingInside, paddingOutside, borderOutsideWidth]
           .forEach((x) => {
             if (x) {
-              borderAndPadding += x.evaluate(context);
+              borderAndPadding += x.evaluate(context) as number;
             }
           });
       if (result.marginInside === null || result.marginOutside === null) {
@@ -1795,7 +1795,7 @@ export class PageMarginBoxPartitionInstance extends pm.PartitionInstance {
    */
   finishContainer(
       context, container, page, column, columnCount, clientLayout, docFaces) {
-    super(
+    super.finishContainer(
         context, container, page, column, columnCount, clientLayout,
         docFaces);
 
@@ -1982,7 +1982,7 @@ export class PageManager {
       }
     });
     const pageMasterInstance =
-        newPageMaster.createInstance(this.rootPageBoxInstance);
+        newPageMaster.createInstance(this.rootPageBoxInstance) as pm.PageMasterInstance;
 
     // Do the same initialization as in adapt.ops.StyleInstance.prototype.init
     pageMasterInstance.applyCascadeAndInit(

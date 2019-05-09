@@ -34,19 +34,27 @@ export let keyCount: number = 1;
  * Represent an at-rule which creates a page-level CSS box (page-master,
  * partition, and partition-group).
  */
-export class PageBox {
+export abstract class PageBox<I extends PageBoxInstance = PageBoxInstance<any>> {
   // styles specified in the at-rule
-  specified: any = ({} as csscasc.ElementStyle);
-  children: any = ([] as PageBox[]);
+  specified: csscasc.ElementStyle = {};
+  children: PageBox[] = [];
   pageMaster: PageMaster = null;
   index: number = 0;
   key: any;
 
+  protected _scope: exprs.LexicalScope;
+
+  get scope(): exprs.LexicalScope {
+    return this._scope;
+  }
+
   constructor(
-      public readonly scope: exprs.LexicalScope,
+      scope: exprs.LexicalScope,
       public readonly name: string|null,
       public readonly pseudoName: string|null,
-      public readonly classes: string[], public readonly parent: PageBox) {
+      public readonly classes: string[],
+      public readonly parent: PageBox) {
+    this._scope = scope;
     this.key = `p${keyCount++}`;
     if (parent) {
       this.index = parent.children.length;
@@ -63,8 +71,7 @@ export class PageBox {
    * @param param parent: The parent of the cloned PageBox. pseudoName: Assign
    *     this value as the pseudoName of the cloned PageBox.
    */
-  clone(param: {parent: PageBox|undefined, pseudoName: string|undefined}):
-      PageBox {
+  clone(param: {parent?: PageBox, pseudoName?: string}): PageBox<I> {
     throw new Error('E_UNEXPECTED_CALL');
   }
 
@@ -96,7 +103,7 @@ export class PageBox {
 /**
  * Parent of all page masters
  */
-export class RootPageBox extends PageBox {
+export class RootPageBox extends PageBox<RootPageBoxInstance> {
   constructor(scope: exprs.LexicalScope) {
     super(scope, null, null, [], null);
     this.specified['width'] = new csscasc.CascadeValue(css.fullWidth, 0);
@@ -133,7 +140,7 @@ export class PageMasterScope extends exprs.LexicalScope {
 /**
  * Represent a page-master rule
  */
-export class PageMaster extends PageBox {
+export class PageMaster<I extends PageMasterInstance = PageMasterInstance<any>> extends PageBox<I> {
   pageMaster: any;
   keyMap: {[key: string]: string} = {};
 
@@ -142,14 +149,11 @@ export class PageMaster extends PageBox {
       classes: string[], parent: RootPageBox,
       public readonly condition: exprs.Val,
       public readonly specificity: number) {
-    let pageMasterScope;
-    if (scope instanceof PageMasterScope) {
-      // if PageMasterScope object is passed, use (share) it.
-      pageMasterScope = scope;
-    } else {
-      pageMasterScope = new PageMasterScope(scope, this);
+    super(scope, name, pseudoName, classes, parent);
+    // if PageMasterScope object is passed, use (share) it.
+    if (!(scope instanceof PageMasterScope)) {
+      this._scope = new PageMasterScope(scope, this);
     }
-    super(pageMasterScope, name, pseudoName, classes, parent);
     this.pageMaster = this;
     this.specified['width'] = new csscasc.CascadeValue(css.fullWidth, 0);
     this.specified['height'] = new csscasc.CascadeValue(css.fullHeight, 0);
@@ -166,7 +170,7 @@ export class PageMaster extends PageBox {
   /**
    * @override
    */
-  createInstance(parentInstance): PageMasterInstance {
+  createInstance(parentInstance): PageBoxInstance {
     return new PageMasterInstance(parentInstance, this);
   }
 
@@ -201,7 +205,7 @@ export class PageMaster extends PageBox {
 /**
  * Represent a partition-group rule
  */
-export class PartitionGroup extends PageBox {
+export class PartitionGroup extends PageBox<PartitionGroupInstance> {
   pageMaster: any;
 
   constructor(
@@ -238,7 +242,7 @@ export class PartitionGroup extends PageBox {
 /**
  * Represent a partition rule
  */
-export class Partition extends PageBox {
+export class Partition<I extends PartitionInstance = PartitionInstance> extends PageBox<I> {
   pageMaster: any;
 
   constructor(
@@ -254,7 +258,7 @@ export class Partition extends PageBox {
   /**
    * @override
    */
-  createInstance(parentInstance) {
+  createInstance(parentInstance): PageBoxInstance {
     return new PartitionInstance(parentInstance, this);
   }
 
@@ -347,7 +351,7 @@ export const toExprBool =
       return val.toExpr(scope, scope.zero);
     };
 
-export interface InstanceHolder {
+export interface InstanceHolder extends exprs.Context {
   registerInstance(key: string, instance: PageBoxInstance): void;
 
   /**
@@ -356,12 +360,12 @@ export interface InstanceHolder {
   lookupInstance(key: string): PageBoxInstance;
 }
 
-export class PageBoxInstance {
+export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   /**
    * cascaded styles, geometric ones converted to css.Expr
    */
-  protected cascaded: any = ({} as csscasc.ElementStyle);
-  protected style: any = ({} as {[key: string]: css.Val});
+  protected cascaded: csscasc.ElementStyle = {};
+  style: {[key: string]: css.Val} = {};
   private autoWidth: exprs.Native = null;
   private autoHeight: exprs.Native = null;
   children: PageBoxInstance[] = [];
@@ -380,7 +384,7 @@ export class PageBoxInstance {
 
   constructor(
       public readonly parentInstance: PageBoxInstance,
-      public readonly pageBox: PageBox) {
+      public readonly pageBox: P) {
     if (parentInstance) {
       parentInstance.children.push(this);
     }
@@ -543,9 +547,9 @@ export class PageBoxInstance {
     style['enabled'] = new css.Expr(enabled);
   }
 
-  private boxSpecificEnabled(enabled: exprs.Val): exprs.Val {return enabled}
+  protected boxSpecificEnabled(enabled: exprs.Val): exprs.Val {return enabled}
 
-      protected initHorizontal(): void {
+  protected initHorizontal(): void {
     const scope = this.pageBox.scope;
     const style = this.style;
     const parentWidth = this.parentInstance ?
@@ -1298,7 +1302,7 @@ export const delayedProperties = ['transform', 'transform-origin'];
 
 export const userAgentPageMasterPseudo = 'background-host';
 
-export class RootPageBoxInstance extends PageBoxInstance {
+export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
   constructor(pageBox: RootPageBox) {
     super(null, pageBox);
   }
@@ -1313,16 +1317,16 @@ export class RootPageBoxInstance extends PageBoxInstance {
     // Sort page masters using order and specificity.
     const pageMasters = this.children;
     (pageMasters as PageMasterInstance[])
-        .sort(
-            (a, b) => b.pageBox.specificity - a.pageBox.specificity ||
-                a.pageBox.index - b.pageBox.index);
+      .sort((a, b) =>
+        (b.pageBox as any).specificity - (a.pageBox as any).specificity // probably cause NaN
+        || a.pageBox.index - b.pageBox.index);
   }
 }
 
-export class PageMasterInstance extends PageBoxInstance {
+export class PageMasterInstance<P extends PageMaster = PageMaster<PageMasterInstance<any>>> extends PageBoxInstance<P> {
   pageMasterInstance: any;
 
-  constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
+  constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = this;
   }
@@ -1347,7 +1351,7 @@ export class PageMasterInstance extends PageBoxInstance {
       clientLayout: vtree.ClientLayout) {}
 }
 
-export class PartitionGroupInstance extends PageBoxInstance {
+export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
   pageMasterInstance: any;
 
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
@@ -1356,10 +1360,10 @@ export class PartitionGroupInstance extends PageBoxInstance {
   }
 }
 
-export class PartitionInstance extends PageBoxInstance {
+export class PartitionInstance<P extends Partition = Partition<PartitionInstance<any>>> extends PageBoxInstance<P> {
   pageMasterInstance: any;
 
-  constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
+  constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
   }

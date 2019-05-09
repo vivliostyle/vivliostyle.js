@@ -105,8 +105,8 @@ export class Viewer {
   pageSizes: {width: number, height: number}[];
 
   // force relayout
-  viewport: any;
-  opfView: any;
+  viewport: vgen.Viewport | null;
+  opfView: epub.OPFView;
 
   constructor(
       public readonly window: Window,
@@ -376,13 +376,12 @@ export class Viewer {
 
     // for backward compatibility
     if (typeof command['userAgentRootURL'] == 'string') {
-      base.baseURL =
-          command['userAgentRootURL'].replace(/resources\/?$/, '');
-      base.resourceBaseURL = command['userAgentRootURL'];
+      base.setBaseURL(command['userAgentRootURL'].replace(/resources\/?$/, ''));
+      base.setResourceBaseURL(command['userAgentRootURL']);
     }
     if (typeof command['rootURL'] == 'string') {
-      base.baseURL = command['rootURL'];
-      base.resourceBaseURL = `${base.baseURL}resources/`;
+      base.setBaseURL(command['rootURL']);
+      base.setResourceBaseURL(`${base.baseURL}resources/`);
     }
     if (typeof command['pageViewMode'] == 'string' &&
         command['pageViewMode'] !== this.pageViewMode) {
@@ -649,7 +648,7 @@ export class Viewer {
    * @param sync If true, get the necessary page synchronously (not waiting
    *     another rendering task)
    */
-  private showCurrent(page: Page, sync?: boolean): task.Result {
+  private showCurrent(page: Page, sync?: boolean): task.Result<null> {
     this.needRefresh = false;
     this.removePageListeners();
     const self = this;
@@ -757,11 +756,11 @@ export class Viewer {
     const self = this;
     this.setReadyState(constants.ReadyState.LOADING);
     this.cancelRenderingTask();
-    const task = task.currentTask().getScheduler().run(
+    const resizeTask = task.currentTask().getScheduler().run(
         () => task.handle(
             'resize',
             (frame) => {
-              self.renderTask = task;
+              self.renderTask = resizeTask;
               profile.profiler.registerStartTiming(
                   'render (resize)');
               self.reset();
@@ -785,7 +784,7 @@ export class Viewer {
                         self.opfView.renderAllPages() :
                         task.newResult(null);
                     r.then(() => {
-                      if (self.renderTask === task) {
+                      if (self.renderTask === resizeTask) {
                         self.renderTask = null;
                       }
                       profile.profiler.registerEndTiming(

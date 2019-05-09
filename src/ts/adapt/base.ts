@@ -51,12 +51,18 @@ export const stripFragmentAndQuery = (url: string): string => {
  * Base URL relative to which URLs of resources are resolved.
  */
 export let baseURL = window.location.href;
+export function setBaseURL(value: string) {
+  baseURL = value;
+}
 
 /**
  * Base URL relative to which URLs of resources such as validation.txt and
  * user-agent.css are resolved.
  */
 export let resourceBaseURL = window.location.href;
+export function setResourceBaseURL(value: string) {
+  resourceBaseURL = value;
+}
 
 /**
  * @param relURL relative URL
@@ -593,7 +599,7 @@ export function multiIndexArray<T> (arr: T[], key: (p1: T) => string | null): {[
  * Apply function to each value of the object
  * @param fn second parameter is the key
  */
-export function mapObj<P, R> (obj: {[key: string]: P}, fn: (p1: any, p2: string) => R): {[key: string]: R} {
+export function mapObj<P, R> (obj: {[key: string]: P}, fn: (p1: P, p2: string) => R): {[key: string]: R} {
       const res: {[key: string]: R} = {};
       for (const n in obj) {
         res[n] = fn(obj[n], n);
