@@ -22,8 +22,6 @@ import * as constants from './constants';
 import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';
 
-export namespace viewer {
-
 const PageProgression = constants.PageProgression;
 
 /**
@@ -56,7 +54,7 @@ export type ViewerOptions = {
   fontSize: number|undefined,
   pageBorderWidth: number|undefined,
   renderAllPages: boolean|undefined,
-  pageViewMode: viewer.PageViewMode|undefined,
+  pageViewMode: PageViewMode|undefined,
   zoom: number|undefined,
   fitToScreen: boolean|undefined,
   defaultPaperSize: {width: number, height: number}|undefined
@@ -308,7 +306,7 @@ export class Viewer {
   /**
    * Returns zoom factor corresponding to the specified zoom type.
    */
-  queryZoomFactor(type: viewer.ZoomType): number {
+  queryZoomFactor(type: ZoomType): number {
     return this.adaptViewer.queryZoomFactor(type);
   }
 
@@ -364,25 +362,10 @@ export const ZoomType = adaptviewer.ZoomType;
 export type PageViewMode = adaptviewer.PageViewMode;
 export const PageViewMode = adaptviewer.PageViewMode;
 
-} // namespace viewer
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.viewer.Viewer", Viewer);
-// goog.exportProperty(Viewer.prototype, "setOptions", Viewer.prototype.setOptions);
-// goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
-// goog.exportProperty(Viewer.prototype, "removeListener", Viewer.prototype.removeListener);
-// goog.exportProperty(Viewer.prototype, "loadDocument", Viewer.prototype.loadDocument);
-// goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
-// goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
-// goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
-// goog.exportProperty(Viewer.prototype, "navigateToNthPage", Viewer.prototype.navigateToNthPage);
-// goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
-// goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
-// goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
-// vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);
-// goog.exportProperty(ZoomType, "FIT_INSIDE_VIEWPORT", ZoomType.FIT_INSIDE_VIEWPORT);
-// vivliostyle.namespace.exportSymbol("vivliostyle.viewer.PageViewMode", PageViewMode);
-// goog.exportProperty(PageViewMode, "SINGLE_PAGE", PageViewMode.SINGLE_PAGE);
-// goog.exportProperty(PageViewMode, "SPREAD", PageViewMode.SPREAD);
-// goog.exportProperty(PageViewMode, "AUTO_SPREAD", PageViewMode.AUTO_SPREAD);
+export const viewer = {
+  Viewer,
+  PageViewMode,
+  ZoomType
+};
 
 profile.profiler.forceRegisterEndTiming('load_vivliostyle');

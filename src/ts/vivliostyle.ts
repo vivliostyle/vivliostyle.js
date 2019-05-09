@@ -19,5 +19,6 @@
 import {constants} from './vivliostyle/constants';
 import {plugin} from './vivliostyle/plugin';
 import {profile} from './vivliostyle/profile';
-export {constants, plugin, profile};
+import {viewer} from './vivliostyle/viewer';
+export {constants, plugin, profile, viewer};
 

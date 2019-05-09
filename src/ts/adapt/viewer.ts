@@ -22,7 +22,7 @@ import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
 import * as plugin from '../vivliostyle/plugin';
-import {profile} from '../vivliostyle/profile';
+import * as profile from '../vivliostyle/profile';
 
 import {JSON} from './base';
 import {EventListener} from './base';
