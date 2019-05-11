@@ -18,12 +18,12 @@
  * @fileoverview Basic view tree data structures and support utilities.
  */
 import * as constants from '../vivliostyle/constants';
+import {vtree, xmldoc} from '../vivliostyle/types';
 import * as base from './base';
 import * as css from './css';
 import * as geom from './geom';
 import * as task from './task';
 import * as taskutil from './taskutil';
-import * as xmldocs from './xmldoc';
 
 import * as asserts from '../vivliostyle/asserts';
 import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
@@ -482,16 +482,7 @@ export const eachAncestorFormattingContext =
         callback(fc);
       }
     };
-type NodePositionStep = {
-  node: Node,
-  shadowType: ShadowType,
-  shadowContext: ShadowContext|null,
-  nodeShadow: ShadowContext|null,
-  shadowSibling: NodePositionStep|null,
-  formattingContext: FormattingContext|null,
-  fragmentIndex: number
-};
-
+type NodePositionStep = vtree.NodePositionStep;
 export {NodePositionStep};
 
 export const isSameNodePositionStep =
@@ -507,13 +498,7 @@ export const isSameNodePositionStep =
           isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
           isSameNodePositionStep(nps1.shadowSibling, nps2.shadowSibling);
     };
-type NodePosition = {
-  steps: NodePositionStep[],
-  offsetInNode: number,
-  after: boolean,
-  preprocessedTextContent: Change[]|null
-};
-
+type NodePosition = vtree.NodePosition;
 export {NodePosition};
 
 export const isSameNodePosition =
@@ -590,25 +575,19 @@ export const makeNodeContextFromNodePositionStep =
       return nodeContext;
     };
 
-/**
- * @enum {number}
- */
-export enum ShadowType {
-  NONE,
-  CONTENT,
-  ROOTLESS,
-  ROOTED
-}
+const {ShadowType} = vtree;
+export {ShadowType};
+type ShadowType = vtree.ShadowType;
 
 /**
  * Data about shadow tree instance.
  */
-export class ShadowContext {
+export class ShadowContext implements vtree.ShadowContext {
   subShadow: ShadowContext = null;
 
   constructor(
       public readonly owner: Element, public readonly root: Element,
-      public readonly xmldoc: xmldocs.XMLDocHolder,
+      public readonly xmldoc: xmldoc.XMLDocHolder,
       public readonly parentShadow: ShadowContext, superShadow: ShadowContext,
       public readonly type: ShadowType, public readonly styler: Object) {
     if (superShadow) {
@@ -634,7 +613,7 @@ export const isSameShadowContext =
  * Information about :first-letter or :first-line pseudoelements
  * @param count 0 - first-letter, 1 or more - first line(s)
  */
-export class FirstPseudo {
+export class FirstPseudo implements vtree.FirstPseudo {
   constructor(
       public readonly outer: FirstPseudo, public readonly count: number) {}
 }
@@ -647,7 +626,7 @@ export class FirstPseudo {
  * node. When after=true it represents position right after the last child
  * of the node. boxOffset is incremented by 1 for any valid node position.
  */
-export class NodeContext {
+export class NodeContext implements vtree.NodeContext {
   // position itself
   offsetInNode: number = 0;
   after: boolean = false;
@@ -903,7 +882,7 @@ export class NodeContext {
   }
 }
 
-export class ChunkPosition {
+export class ChunkPosition implements vtree.ChunkPosition {
   floats: NodePosition[] = null;
 
   constructor(public primary: NodePosition) {}
@@ -1301,8 +1280,7 @@ export class Container {
 }
 
 // vertical writing
-type ExprContentListener = (p1: Val, p2: string, p3: Document) => Node|null;
-
+type ExprContentListener = vtree.ExprContentListener;
 export {ExprContentListener};
 
 export class ContentPropertyHandler extends css.Visitor {

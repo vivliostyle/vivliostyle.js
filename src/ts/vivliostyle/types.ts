@@ -639,7 +639,7 @@ export namespace pagefloat {
     PAGE = 'page',
   }
 
-  type PageFloatID = string;
+  export type PageFloatID = string;
 
   export interface PageFloat {
     order: number|null;
@@ -948,7 +948,6 @@ export namespace vtree {
     readonly type: vtree.ShadowType;
     readonly styler: Object;
 
-    constructor();
     equals(other: ShadowContext): boolean;
   }
 
@@ -957,7 +956,7 @@ export namespace vtree {
    * @param count 0 - first-letter, 1 or more - first line(s)
    */
   export interface FirstPseudo {
-    readonly ouer: FirstPseudo;
+    readonly outer: FirstPseudo;
     readonly count: number;
   }
 
