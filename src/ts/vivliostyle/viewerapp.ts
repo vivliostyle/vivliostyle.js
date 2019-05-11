@@ -21,8 +21,6 @@ import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';
 import * as constants from './constants';
 
-export namespace viewerapp {
-
 export let fontSize: number = 16;
 
 export let touchActive: boolean = false;
@@ -331,6 +329,6 @@ export const main = (arg): void => {
   viewerInstance.initEmbed(config);
 };
 
-} // export namespace viewerapp
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);
+export const viewerapp = {
+  main
+};
