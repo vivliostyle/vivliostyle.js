@@ -17,8 +17,10 @@
  *
  * @fileoverview View tree generator.
  */
+import * as asserts from '../vivliostyle/asserts';
 import * as display from '../vivliostyle/display';
 import * as urls from '../vivliostyle/urls';
+import * as selectors from '../vivliostyle/selectors';
 import * as css from './css';
 import * as csscasc from './csscasc';
 import * as cssstyler from './cssstyler';
@@ -28,9 +30,7 @@ import * as taskutil from './taskutil';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
-import * as asserts from '../vivliostyle/asserts';
 import {restoreNewText, diffChars} from '../vivliostyle/diff';
-import * as selectors from '../vivliostyle/selectors';
 import * as plugin from '../vivliostyle/plugin';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
@@ -298,12 +298,12 @@ export class ViewFactory extends base.SimpleEventTarget implements
     for (const key in pseudoMap) {
       const computedPseudoStyle = computedPseudoStyleMap[key] = {};
       csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
-      selectors.mergeViewConditionalStyles(
+      csscasc.mergeViewConditionalStyles(
           computedPseudoStyle, context, pseudoMap[key]);
       csscasc.forEachStylesInRegion(
           pseudoMap[key], regionIds, isFootnote, (regionId, regionStyle) => {
             csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-            selectors.forEachViewConditionalStyles(
+            csscasc.forEachViewConditionalStyles(
                 regionStyle, (viewConditionalStyles) => {
                   csscasc.mergeStyle(
                       computedPseudoStyle, viewConditionalStyles, context);

@@ -18,8 +18,6 @@
  */
 
 import * as base from '../adapt/base';
-import {CascadeValue, ElementStyle, matchANPlusB, mergeStyle, getViewConditionalStyleMap} from '../adapt/csscasc';
-import {Context} from '../adapt/expr';
 import {Column, getElementHeight, FragmentLayoutConstraint} from '../adapt/layout';
 import {Frame, newResult, Result} from '../adapt/task';
 import * as task from '../adapt/task';
@@ -29,99 +27,12 @@ import {NodeContext, ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
 import {PseudoColumn} from './layoututil';
+import {NthFragmentMatcher} from './matcher';
 import {ElementsOffset} from './repetitiveelements';
 
-export interface Matcher {
-  matches(): boolean;
-}
+export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;
 
-let fragmentIndices = {};
-
-export class NthFragmentMatcher implements Matcher {
-  constructor(
-      public readonly elementOffset: number, public readonly a: number,
-      public readonly b: number) {}
-
-  /** @override */
-  matches() {
-    const entry = fragmentIndices[this.elementOffset];
-    return entry != null && entry.fragmentIndex != null &&
-        matchANPlusB(entry.fragmentIndex, this.a, this.b);
-  }
-}
-
-export class AnyMatcher implements Matcher {
-  constructor(public readonly matchers: Matcher[]) {}
-
-  /** @override */
-  matches() {
-    return this.matchers.some((matcher) => matcher.matches());
-  }
-}
-
-export class AllMatcher implements Matcher {
-  constructor(public readonly matchers: Matcher[]) {}
-
-  /** @override */
-  matches() {
-    return this.matchers.every((matcher) => matcher.matches());
-  }
-}
-
-export class MatcherBuilder {
-  buildViewConditionMatcher(elementOffset: number, viewCondition: string):
-      Matcher {
-    const strs = viewCondition.split('_');
-    if (strs[0] == 'NFS') {
-      return new NthFragmentMatcher(
-          elementOffset, parseInt(strs[1], 10), parseInt(strs[2], 10));
-    } else {
-      asserts.fail(`unknown view condition. condition=${viewCondition}`);
-      return null;
-    }
-  }
-
-  buildAllMatcher(matchers: Matcher[]): Matcher {return new AllMatcher(matchers);}
-
-  buildAnyMatcher(matchers: Matcher[]): Matcher {return new AnyMatcher(matchers);}
-
-  static instance = new MatcherBuilder();
-}
-
-export const mergeViewConditionalStyles =
-    (cascMap: {[key: string]: CascadeValue}, context: Context,
-     style: ElementStyle) => {
-      forEachViewConditionalStyles(style, (viewConditionalStyles) => {
-        mergeStyle(cascMap, viewConditionalStyles, context);
-      });
-    };
-
-export const forEachViewConditionalStyles =
-    (style: ElementStyle, callback: (p1: ElementStyle) => any) => {
-      const viewConditionalStyles = getViewConditionalStyleMap(style);
-      if (!viewConditionalStyles) {
-        return;
-      }
-      viewConditionalStyles.forEach((entry) => {
-        if (!entry.matcher.matches()) {
-          return;
-        }
-        callback(entry.styles);
-      });
-    };
-
-export const registerFragmentIndex =
-    (elementOffset: number, fragmentIndex: number, priority: number) => {
-      const indices = fragmentIndices;
-      if (!indices[elementOffset] ||
-          indices[elementOffset].priority <= priority) {
-        indices[elementOffset] = {fragmentIndex, priority};
-      }
-    };
-
-export const clearFragmentIndices = () => {
-  fragmentIndices = {};
-};
+export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
 
 export class AfterIfContinues {
   constructor(
