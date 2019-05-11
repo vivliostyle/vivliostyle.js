@@ -588,6 +588,16 @@ export namespace layout {
 }
 
 export namespace net {
+
+  export type Response = {
+    status: number,
+    url: string,
+    contentType: string|null,
+    responseText: string|null,
+    responseXML: Document,
+    responseBlob: Blob
+  };
+
   export interface ResourceStore<Resource> {
     resources: { [key: string]: Resource };
     fetchers: { [key: string]: taskutil.Fetcher<Resource> };
@@ -595,7 +605,7 @@ export namespace net {
       p1: Response,
       p2: ResourceStore<Resource>
     ) => task.Result<Resource>;
-    readonly ype: XMLHttpRequestResponseType;
+    readonly type: XMLHttpRequestResponseType;
 
     /**
      * @return resource for the given URL
@@ -1076,6 +1086,32 @@ export namespace xmldoc {
      * or 'url#id' form.
      */
     getElement(url: string): Element | null;
+  }
+
+  export interface Predicate {
+    readonly fn: (p1: Node) => boolean;
+
+    check(node: Node): boolean;
+    withAttribute(name: string, value: string): Predicate;
+    withChild(name: string, opt_childPredicate?: Predicate): Predicate;
+  }
+
+  export interface NodeList {
+    readonly nodes: Node[];
+
+    asArray(): Node[];
+    size(): number ;
+    /**
+     * Filter with predicate
+     */
+    predicate(pr: Predicate): NodeList;
+    forEachNode(fn: (p1: Node, p2: (p1: Node) => void) => void): NodeList;
+    forEach<T>(fn: (p1: Node) => T): T[];
+    forEachNonNull<T>(fn: (p1: Node) => T): T[];
+    child(tag: string): NodeList;
+    childElements(): NodeList;
+    attribute(name: string): (string|null)[];
+    textContent(): (string|null)[];
   }
 
   export type XMLDocStore = net.ResourceStore<XMLDocHolder>;

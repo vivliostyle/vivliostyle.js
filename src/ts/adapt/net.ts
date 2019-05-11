@@ -18,12 +18,10 @@
  * @fileoverview Fetch resource from a URL.
  */
 import * as logging from '../vivliostyle/logging';
-import * as task from './task';
-
-import {JSON} from './base';
+import {net, xmldoc} from '../vivliostyle/types';
 import * as base from './base';
+import * as task from './task';
 import {Fetcher} from './taskutil';
-import {XMLDocHolder} from './xmldoc';
 
 /**
  * @enum {string}
@@ -36,16 +34,8 @@ export enum XMLHttpRequestResponseType {
   JSON = 'json',
   TEXT = 'text'
 }
-type Response = {
-  status: number,
-  url: string,
-  contentType: string|null,
-  responseText: string|null,
-  responseXML: Document,
-  responseBlob: Blob
-};
 
-export {Response};
+export type Response = net.Response;
 
 export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
                      opt_method?: string, opt_data?: string,
@@ -168,7 +158,7 @@ export const createObjectURL = (blob: Blob): string =>
 /**
  * @template Resource
  */
-export class ResourceStore<Resource> {
+export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
   resources: {[key: string]: Resource} = {};
   fetchers: {[key: string]: Fetcher<Resource>} = {};
 
@@ -230,21 +220,20 @@ export class ResourceStore<Resource> {
     return fetcher;
   }
 
-  get(url: string): XMLDocHolder {
+  get(url: string): xmldoc.XMLDocHolder {
     const resource: unknown = this.resources[base.stripFragment(url)];
-    return resource as XMLDocHolder;
+    return resource as xmldoc.XMLDocHolder;
   }
 
   delete(url: string) {
     delete this.resources[base.stripFragment(url)];
   }
 }
-type JSONStore = ResourceStore<JSON>;
 
-export {JSONStore};
+export type JSONStore = ResourceStore<base.JSON>;
 
 export const parseJSONResource =
-    (response: Response, store: JSONStore): task.Result<JSON> => {
+    (response: Response, store: JSONStore): task.Result<base.JSON> => {
       const text = response.responseText;
       return task.newResult(text ? base.stringToJSON(text) : null);
     };
