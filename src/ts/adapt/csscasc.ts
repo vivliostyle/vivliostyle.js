@@ -22,15 +22,16 @@ import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
 import * as plugin from '../vivliostyle/plugin';
 import {Matcher, MatcherBuilder, matchANPlusB} from '../vivliostyle/matcher';
+import { csscasc } from '../vivliostyle/types';
 import * as css from './css';
 import * as exprs from './expr';
 import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
-import * as cssvalid from './cssvalid';
-
 import * as csstok from './csstok';
-import {ExprContentListener} from './vtree';
-import {NodeContext} from './vtree';
+import * as cssvalid from './cssvalid';
+import {ExprContentListener, NodeContext} from './vtree';
+
+export interface ElementStyle extends csscasc.ElementStyle {}
 
 declare var DEBUG: boolean;
 
@@ -317,15 +318,9 @@ export const cascadeValues =
       return tv;
     };
 
-/**
- * @dict
- */
-export class ElementStyle {}
-type ElementStyleMap = {
+export type ElementStyleMap = {
   [key: string]: ElementStyle
 };
-
-export {ElementStyleMap};
 
 export const SPECIALS = {
   'region-id': true,

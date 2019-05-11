@@ -17,34 +17,12 @@
  * @fileoverview Type definiions.
  */
 import * as base from '../adapt/base';
+import * as css from '../adapt/css';
 import * as expr from '../adapt/expr';
 import * as geom from '../adapt/geom';
 import * as task from '../adapt/task';
 import * as taskutil from '../adapt/taskutil';
 import * as diff from './diff';
-
-export namespace css {
-  export interface Val {
-    stringValue(): string;
-    toExpr(scope: expr.LexicalScope, ref: expr.Val): expr.Val;
-    appendTo(buf: base.StringBuffer, toString: boolean): void;
-    isExpr(): boolean;
-    isNumeric(): boolean;
-    isNum(): boolean;
-    isIdent(): boolean;
-    isSpaceList(): boolean;
-    visit(visitor: any): any;
-  }
-
-  export interface Numeric extends Val {
-    unit: string;
-    num: number;
-  }
-
-  export interface Ident extends Val {
-    name: string;
-  }
-}
 
 export namespace csscasc {
   export interface ElementStyle {}
