@@ -17,20 +17,16 @@
  *
  * @fileoverview Basic view tree data structures and support utilities.
  */
+import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
-import {vtree, xmldoc} from '../vivliostyle/types';
+import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
+import {pagefloat, selector, vtree, xmldoc} from '../vivliostyle/types';
 import * as base from './base';
 import * as css from './css';
-import * as geom from './geom';
-import * as task from './task';
-import * as taskutil from './taskutil';
-
-import * as asserts from '../vivliostyle/asserts';
-import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
-import {FloatReference} from '../vivliostyle/pagefloat';
-import {AfterIfContinues} from '../vivliostyle/selectors';
 import {toShape} from './cssprop';
-import {Context, Val} from './expr';
+import {Context} from './expr';
+import * as geom from './geom';
+import * as taskutil from './taskutil';
 
 export const delayedProps = {
   'transform': true,
@@ -262,19 +258,9 @@ export {Spread};
  */
 export const SPECIAL_ATTR = 'data-adapt-spec';
 
-/**
- * Handling of purely whitespace sequences between blocks
- * @enum {number}
- */
-export enum Whitespace {
-  IGNORE,
-
-  // Whitespace sequence between blocks is ignored
-  NEWLINE,
-
-  // Whitespace sequence between blocks is ignored unless it containes newline
-  PRESERVE
-}
+const {Whitespace} = vtree;
+export {Whitespace};
+type Whitespace = vtree.Whitespace;
 
 // Whitespace sequence between blocks is preserved
 
@@ -346,16 +332,8 @@ export class FlowChunk {
     return this.last;
   }
 }
-type ClientRect = {
-  left: number,
-  top: number,
-  right: number,
-  bottom: number,
-  width: number,
-  height: number
-};
 
-export {ClientRect};
+export type ClientRect = vtree.ClientRect;
 
 export const clientrectIncreasingTop =
     (r1: ClientRect, r2: ClientRect): number => r1.top - r2.top;
@@ -367,111 +345,17 @@ export const clientrectDecreasingRight =
  * Interface to read the position assigned to the elements and ranges by the
  * browser.
  */
-export interface ClientLayout {
-  getRangeClientRects(range: Range): ClientRect[];
-
-  getElementClientRect(element: Element): ClientRect;
-
-  /**
-   * @return element's computed style
-   */
-  getElementComputedStyle(element: Element): CSSStyleDeclaration;
-}
+export type ClientLayout = vtree.ClientLayout;
 
 /**
  * Styling, creating a single node's view, etc.
  */
-export interface LayoutContext {
-  /**
-   * Creates a functionally equivalent, but uninitialized layout context,
-   * suitable for building a separate column.
-   */
-  clone(): LayoutContext;
-
-  /**
-   * Set the current source node and create a view. Parameter firstTime
-   * is true (and possibly offsetInNode > 0) if node was broken on
-   * the previous page.
-   * @return true if children should be processed as well
-   */
-  setCurrent(
-      nodeContext: NodeContext, firstTime: boolean,
-      atUnforcedBreak?: boolean): task.Result<boolean>;
-
-  /**
-   * Set the container element that holds view elements produced from the
-   * source.
-   */
-  setViewRoot(container: Element, isFootnote: boolean);
-
-  /**
-   * Moves to the next view node, creating it and appending it to the view tree
-   * if needed.
-   * @return that corresponds to the next view node
-   */
-  nextInTree(nodeContext: NodeContext, atUnforcedBreak?: boolean):
-      task.Result<NodeContext>;
-
-  /**
-   * Apply pseudo-element styles (if any).
-   * @param element element to apply styles to
-   */
-  applyPseudoelementStyle(
-      nodeContext: NodeContext, pseudoName: string, element: Element): void;
-
-  /**
-   * Apply styles to footnote container.
-   * @param element element to apply styles to
-   * @return vertical
-   */
-  applyFootnoteStyle(vertical: boolean, rtl: boolean, element: Element):
-      boolean;
-
-  /**
-   * Peel off innermost first-XXX pseudoelement, create and create view nodes
-   * after the end of that pseudoelement.
-   */
-  peelOff(nodeContext: NodeContext, nodeOffset: number):
-      task.Result<NodeContext>;
-
-  /**
-   * Process a block-end edge of a fragmented block.
-   */
-  processFragmentedBlockEdge(nodeContext: NodeContext);
-
-  convertLengthToPx(
-      numeric: css.Numeric, viewNode: Node, clientLayout: ClientLayout): number
-      |css.Numeric;
-
-  /**
-   * Returns if two NodePositions represents the same position in the document.
-   */
-  isSameNodePosition(nodePosition1: NodePosition, nodePosition2: NodePosition):
-      boolean;
-
-  addEventListener(
-      type: string, listener: base.EventListener, capture?: boolean): void;
-
-  removeEventListener(
-      type: string, listener: base.EventListener, capture?: boolean): void;
-
-  dispatchEvent(evt: base.Event): void;
-}
+export type LayoutContext = vtree.LayoutContext;
 
 /**
  * Formatting context.
  */
-export interface FormattingContext {
-  getName(): string;
-
-  isFirstTime(nodeContext: NodeContext, firstTime: boolean): boolean;
-
-  getParent(): FormattingContext;
-
-  saveState(): any;
-
-  restoreState(state: any);
-}
+export type FormattingContext = vtree.FormattingContext;
 
 export const eachAncestorFormattingContext =
     (nodeContext: NodeContext, callback: (p1: FormattingContext) => any) => {
@@ -482,8 +366,8 @@ export const eachAncestorFormattingContext =
         callback(fc);
       }
     };
-type NodePositionStep = vtree.NodePositionStep;
-export {NodePositionStep};
+
+export type NodePositionStep = vtree.NodePositionStep;
 
 export const isSameNodePositionStep =
     (nps1: NodePositionStep, nps2: NodePositionStep): boolean => {
@@ -498,8 +382,8 @@ export const isSameNodePositionStep =
           isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
           isSameNodePositionStep(nps1.shadowSibling, nps2.shadowSibling);
     };
-type NodePosition = vtree.NodePosition;
-export {NodePosition};
+
+export type NodePosition = vtree.NodePosition;
 
 export const isSameNodePosition =
     (np1: NodePosition|null, np2: NodePosition|null): boolean => {
@@ -644,7 +528,7 @@ export class NodeContext implements vtree.NodeContext {
   overflow: boolean = false;
   breakPenalty: number;
   display: string|null = null;
-  floatReference: FloatReference;
+  floatReference: pagefloat.FloatReference;
   floatSide: string|null = null;
   clearSide: string|null = null;
   floatMinWrapBlock: css.Numeric|null = null;
@@ -674,7 +558,7 @@ export class NodeContext implements vtree.NodeContext {
   pluginProps: {[key: string]: string|number|undefined|null|
                 (number|null)[]} = {};
   fragmentIndex: number = 1;
-  afterIfContinues: AfterIfContinues = null;
+  afterIfContinues: selector.AfterIfContinues = null;
   footnotePolicy: css.Ident|null = null;
 
   constructor(
@@ -683,7 +567,7 @@ export class NodeContext implements vtree.NodeContext {
     this.shadowType = ShadowType.NONE;
     this.shadowContext = parent ? parent.shadowContext : null;
     this.breakPenalty = parent ? parent.breakPenalty : 0;
-    this.floatReference = FloatReference.INLINE;
+    this.floatReference = pagefloat.FloatReference.INLINE;
     this.whitespace = parent ? parent.whitespace : Whitespace.IGNORE;
     this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
     this.breakWord = parent ? parent.breakWord : false;
@@ -702,7 +586,7 @@ export class NodeContext implements vtree.NodeContext {
     this.offsetInNode = 0;
     this.after = false;
     this.display = null;
-    this.floatReference = FloatReference.INLINE;
+    this.floatReference = pagefloat.FloatReference.INLINE;
     this.floatSide = null;
     this.clearSide = null;
     this.floatMinWrapBlock = null;
@@ -1280,8 +1164,7 @@ export class Container {
 }
 
 // vertical writing
-type ExprContentListener = vtree.ExprContentListener;
-export {ExprContentListener};
+export type ExprContentListener = vtree.ExprContentListener;
 
 export class ContentPropertyHandler extends css.Visitor {
   constructor(
