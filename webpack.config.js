@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const pkg = require('./package.json');
 
 const bannerText = `Copyright 2013 Google, Inc.
@@ -43,6 +44,7 @@ module.exports = {
   plugins: [
     new webpack.BannerPlugin({
       banner: bannerText
-    })
+    }),
+    new CircularDependencyPlugin()
   ]
 }
