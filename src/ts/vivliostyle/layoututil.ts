@@ -16,12 +16,13 @@
  *
  * @fileoverview Utilities related to layout.
  */
-import * as asserts from './asserts';
-
-import {BreakPosition, BreakPositionAndNodeContext, Column, EdgeBreakPosition, LayoutConstraint} from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as breaks from './break';
+
+import {BreakPosition, BreakPositionAndNodeContext, Column, EdgeBreakPosition, LayoutConstraint} from '../adapt/layout';
+import * as asserts from './asserts';
+
 type LayoutIteratorState = {
   nodeContext: vtree.NodeContext,
   atUnforcedBreak: boolean,

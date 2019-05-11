@@ -20,7 +20,14 @@
  * layout interface that gives it one view tree node at a time.
  */
 import * as asserts from '../vivliostyle/asserts';
+import * as breaks from '../vivliostyle/break';
+import * as layoututil from '../vivliostyle/layoututil';
 import * as logging from '../vivliostyle/logging';
+import * as pagefloat from '../vivliostyle/pagefloat';
+import * as base from './base';
+import * as geom from './geom';
+import * as task from './task';
+
 import * as plugin from '../vivliostyle/plugin';
 import {ElementsOffset} from '../vivliostyle/repetitiveelements';
 import * as repetitiveelements from '../vivliostyle/repetitiveelements';
@@ -29,17 +36,9 @@ import {Size, getSize} from '../vivliostyle/sizing';
 import {resolveNewIndex} from '../vivliostyle/diff';
 import {TableFormattingContext} from '../vivliostyle/table';
 import {isBlock} from '../vivliostyle/display';
-
-import * as base from './base';
 import {ident, Val} from './css';
-import * as geom from './geom';
-import * as task from './task';
-
-import * as breaks from '../vivliostyle/break';
-import * as vtree from './vtree';
-import * as layoututil from '../vivliostyle/layoututil';
-import * as pagefloat from '../vivliostyle/pagefloat';
 import {ViewFactory} from './vgen';
+import * as vtree from './vtree';
 
 declare var DEBUG: boolean; 
 

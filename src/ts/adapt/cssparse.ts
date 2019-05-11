@@ -18,7 +18,6 @@
  * @fileoverview CSS Parser.
  */
 import * as logging from '../vivliostyle/logging';
-
 import * as base from './base';
 import * as css from './css';
 import * as csstok from './csstok';

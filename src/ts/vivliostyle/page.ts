@@ -16,7 +16,6 @@
  *
  * @fileoverview \@page rule (CSS Paged Media) support
  */
-import * as base from '../adapt/base';
 import * as css from '../adapt/css';
 import * as csscasc from '../adapt/csscasc';
 import * as cssparse from '../adapt/cssparse';
@@ -24,10 +23,11 @@ import * as cssvalid from '../adapt/cssvalid';
 import * as exprs from '../adapt/expr';
 import * as pm from '../adapt/pm';
 import * as vtree from '../adapt/vtree';
-import * as asserts from './asserts';
-
 import * as constants from './constants';
 import * as sizing from './sizing';
+
+import * as base from '../adapt/base';
+import * as asserts from './asserts';
 
 /**
  * Resolve page progression direction from writing-mode and direction.

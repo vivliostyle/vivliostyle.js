@@ -18,6 +18,7 @@
  * @fileoverview Adaptive Layout expressions.
  */
 import * as base from './base';
+
 type Preferences = {
   fontFamily: string,
   lineHeight: number,

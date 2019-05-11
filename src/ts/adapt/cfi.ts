@@ -18,6 +18,7 @@
  * @fileoverview Support for EPUB Canonical Fragment Identifiers.
  */
 import * as base from './base';
+
 type Position = {
   node: Node,
   offset: number,

@@ -17,18 +17,17 @@
  * @fileoverview Table formatting context and layout.
  */
 import * as base from '../adapt/base';
-import {ident} from '../adapt/css';
+import * as layout from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
-
-import * as plugin from './plugin';
-
-import * as layout from '../adapt/layout';
 import * as layoututil from './layoututil';
+import * as plugin from './plugin';
 import * as repetitiveelements from './repetitiveelements';
+
+import {ident} from '../adapt/css';
+import {ViewFactory} from '../adapt/vgen';
 import {registerFragmentIndex} from './selectors';
-import { ViewFactory } from '../adapt/vgen';
 
 export class TableRow {
   cells: TableCell[] = [];

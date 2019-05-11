@@ -16,16 +16,13 @@
  *
  * @fileoverview Plugin mechanism
  */
+import * as logging from './logging';
+
 import {JSON} from '../adapt/base';
 import {Ident} from '../adapt/css';
-import {TextNodeBreaker} from '../adapt/layout';
-import {LayoutProcessor} from '../adapt/layout';
-import {Column} from '../adapt/layout';
+import {TextNodeBreaker, LayoutProcessor, Column} from '../adapt/layout';
 import {Result} from '../adapt/task';
-import {NodeContext} from '../adapt/vtree';
-import {FormattingContext} from '../adapt/vtree';
-
-import * as logging from './logging';
+import {NodeContext, FormattingContext} from '../adapt/vtree';
 
 /**
  * Type of implemented hooks.

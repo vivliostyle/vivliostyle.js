@@ -18,13 +18,14 @@
  */
 import * as base from '../adapt/base';
 import * as csscasc from '../adapt/csscasc';
-import {toCounters} from '../adapt/cssprop'
 import * as cssstyler from '../adapt/cssstyler';
 import * as exprs from '../adapt/expr';
 import * as layout from '../adapt/layout';
-import {Viewport} from '../adapt/vgen';
 import * as vtree from '../adapt/vtree';
-import * as asserts from '../vivliostyle/asserts';
+
+import {toCounters} from '../adapt/cssprop'
+import {Viewport} from '../adapt/vgen';
+import * as asserts from './asserts';
 
 /**
  * Clone counter values.

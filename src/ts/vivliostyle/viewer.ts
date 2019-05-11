@@ -17,10 +17,11 @@
  *
  * @fileoverview Vivliostyle Viewer class
  */
-import * as profile from './profile';
-import * as constants from './constants';
 import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';
+import * as constants from './constants';
+
+import * as profile from './profile';
 
 const PageProgression = constants.PageProgression;
 

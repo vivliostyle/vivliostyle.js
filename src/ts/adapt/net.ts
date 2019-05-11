@@ -18,10 +18,10 @@
  * @fileoverview Fetch resource from a URL.
  */
 import * as logging from '../vivliostyle/logging';
+import * as task from './task';
 
 import {JSON} from './base';
 import * as base from './base';
-import * as task from './task';
 import {Fetcher} from './taskutil';
 import {XMLDocHolder} from './xmldoc';
 

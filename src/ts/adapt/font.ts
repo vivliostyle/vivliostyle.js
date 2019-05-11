@@ -18,16 +18,14 @@
  * @fileoverview Deal with embedded fonts.
  */
 import * as logging from '../vivliostyle/logging';
-
-import * as base from './base';
 import * as css from './css';
-import {ElementStyle, getProp} from './csscasc';
-import * as cssparse from './cssparse';
-import * as cssprop from './cssprop';
 import * as exprs from './expr';
 import * as net from './net';
 import * as task from './task';
 import * as taskutil from './taskutil';
+
+import * as base from './base';
+import {ElementStyle, getProp} from './csscasc';
 
 export const traitProps: {[key: string]: css.Val} = {
   'font-style': css.ident.normal,

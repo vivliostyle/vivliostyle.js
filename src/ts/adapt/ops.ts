@@ -19,36 +19,34 @@
  * layout.
  */
 import * as asserts from '../vivliostyle/asserts';
+import * as breaks from '../vivliostyle/break';
+import * as colums from '../vivliostyle/column';
 import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
+import * as pages from '../vivliostyle/page';
 import * as pagefloat from '../vivliostyle/pagefloat';
-import * as plugin from '../vivliostyle/plugin';
-
-import {DocumentURLTransformer} from './base';
-import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
 import * as cssparse from './cssparse';
-import {toShape} from './cssprop'
 import * as cssstyler from './cssstyler';
-import * as csstok from './csstok';
 import * as cssvalid from './cssvalid';
 import * as exprs from './expr';
 import * as font from './font';
 import * as geom from './geom';
 import * as layout from './layout';
-import {Response, XMLHttpRequestResponseType, ResourceStore} from './net';
 import * as pm from './pm';
 import * as task from './task';
-import {Fetcher} from './taskutil';
 import * as vgen from './vgen';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
-import * as breaks from '../vivliostyle/break';
-import * as pages from '../vivliostyle/page';
-import * as colums from '../vivliostyle/column';
+import * as plugin from '../vivliostyle/plugin';
+import {DocumentURLTransformer} from './base';
+import * as base from './base';
+import {toShape} from './cssprop'
+import {Response, XMLHttpRequestResponseType, ResourceStore} from './net';
+import {Fetcher} from './taskutil';
 
 declare var DEBUG: boolean; 
 

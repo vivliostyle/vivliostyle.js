@@ -18,25 +18,23 @@
  *
  * @fileoverview Sample EPUB rendering application.
  */
-import * as asserts from '../vivliostyle/asserts';
+
+
 import * as constants from '../vivliostyle/constants';
 import * as logging from '../vivliostyle/logging';
-import * as plugin from '../vivliostyle/plugin';
-import * as profile from '../vivliostyle/profile';
-
-import {JSON} from './base';
-import {EventListener} from './base';
-import {Event} from './base';
-import * as base from './base';
 import * as epub from './epub';
 import * as exprs from './expr';
-import {Mapper} from './font';
 import * as task from './task';
-import {waitForFetchers} from './taskutil';
 import * as vgen from './vgen';
-import {Page} from './vtree';
-import {Spread} from './vtree';
-import {PageHyperlinkEvent} from './vtree';
+
+import * as asserts from '../vivliostyle/asserts';
+import * as plugin from '../vivliostyle/plugin';
+import * as profile from '../vivliostyle/profile';
+import {JSON, Event, EventListener} from './base';
+import * as base from './base';
+import {Mapper} from './font';
+import {waitForFetchers} from './taskutil';
+import {Page, Spread, PageHyperlinkEvent} from './vtree';
 
 type Action = (p1: JSON) => task.Result<boolean>;
 

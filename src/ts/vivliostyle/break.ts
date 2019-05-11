@@ -17,7 +17,6 @@
  * @fileoverview Control fragmentation
  */
 import * as css from '../adapt/css';
-
 import {plugin} from './plugin';
 
 /**

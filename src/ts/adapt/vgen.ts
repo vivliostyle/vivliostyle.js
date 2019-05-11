@@ -17,21 +17,11 @@
  *
  * @fileoverview View tree generator.
  */
-import {restoreNewText, diffChars} from '../vivliostyle/diff';
 import * as display from '../vivliostyle/display';
 import * as urls from '../vivliostyle/urls';
-import * as selectors from '../vivliostyle/selectors';
-import * as plugin from '../vivliostyle/plugin';
-import * as pagefloat from '../vivliostyle/pagefloat';
-import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
-
-import {DocumentURLTransformer} from './base';
-import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
-import {UrlTransformVisitor} from './cssprop';
 import * as cssstyler from './cssstyler';
-import {Context, defaultUnitSizes, isFontRelativeLengthUnit, needUnitConversion} from './expr';
 import * as font from './font';
 import * as task from './task';
 import * as taskutil from './taskutil';
@@ -39,6 +29,15 @@ import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
 import * as asserts from '../vivliostyle/asserts';
+import {restoreNewText, diffChars} from '../vivliostyle/diff';
+import * as selectors from '../vivliostyle/selectors';
+import * as plugin from '../vivliostyle/plugin';
+import * as pagefloat from '../vivliostyle/pagefloat';
+import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
+import {DocumentURLTransformer} from './base';
+import * as base from './base';
+import {UrlTransformVisitor} from './cssprop';
+import {Context, defaultUnitSizes, isFontRelativeLengthUnit, needUnitConversion} from './expr';
 
 const namespacePrefixMap = {};
 

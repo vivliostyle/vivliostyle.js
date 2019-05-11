@@ -16,19 +16,15 @@
  *
  * @fileoverview CSS Page Floats
  */
-import * as base from '../adapt/base';
-import {Numeric, ident} from '../adapt/css';
-import {Val} from '../adapt/css';
 import * as geom from '../adapt/geom';
-import {LayoutConstraint} from '../adapt/layout';
-import {PageFloatArea} from '../adapt/layout';
-import {Column} from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
-
 import * as logging from './logging';
 import * as logical from './logical';
+
+import {Numeric, ident, Val} from '../adapt/css';
+import {LayoutConstraint, PageFloatArea, Column} from '../adapt/layout';
 import {Size, getSize} from './sizing'
 
 /**

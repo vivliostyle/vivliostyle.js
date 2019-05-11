@@ -17,16 +17,15 @@
  *
  */
 import * as counters from '../vivliostyle/counters';
-
-import {DocumentURLTransformer} from './base';
-import * as base from './base';
 import * as exprs from './expr';
 import * as font from './font';
 import * as ops from './ops';
-import {Result, newResult, newFrame} from './task';
-import {Frame} from './task';
 import * as vgen from './vgen';
 import * as vtree from './vtree';
+
+import {DocumentURLTransformer} from './base';
+import * as base from './base';
+import {Result, newResult, newFrame, Frame} from './task';
 
 // closed: 25B8
 // open: 25BE

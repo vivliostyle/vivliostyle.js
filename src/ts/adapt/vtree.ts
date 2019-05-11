@@ -17,21 +17,20 @@
  *
  * @fileoverview Basic view tree data structures and support utilities.
  */
-import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
-import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
-import {FloatReference} from '../vivliostyle/pagefloat';
-import {AfterIfContinues} from '../vivliostyle/selectors';
-
 import * as base from './base';
 import * as css from './css';
-import {toShape} from './cssprop';
-import {Context} from './expr';
-import {Val} from './expr';
 import * as geom from './geom';
 import * as task from './task';
 import * as taskutil from './taskutil';
 import * as xmldocs from './xmldoc';
+
+import * as asserts from '../vivliostyle/asserts';
+import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
+import {FloatReference} from '../vivliostyle/pagefloat';
+import {AfterIfContinues} from '../vivliostyle/selectors';
+import {toShape} from './cssprop';
+import {Context, Val} from './expr';
 
 export const delayedProps = {
   'transform': true,
