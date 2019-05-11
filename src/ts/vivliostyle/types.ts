@@ -712,7 +712,7 @@ export namespace pagefloat {
 export namespace selector {
   export interface AfterIfContinues {
     readonly sourceNode: Element;
-    readonly styler: vgen.PseudoelementStyler;
+    readonly styler: pseudoelement.PseudoelementStyler;
 
     createElement(
       column: layout.Column,
@@ -721,7 +721,7 @@ export namespace selector {
   }
 }
 
-export namespace vgen {
+export namespace pseudoelement {
   export interface PseudoelementStyler extends cssstyler.AbstractStyler {
     contentProcessed: { [key: string]: boolean };
     readonly element: Element;

@@ -16,13 +16,13 @@
  *
  * @fileoverview Utilities for selectors.
  */
+import {selector} from './types';
 
 import * as base from '../adapt/base';
 import {Column, getElementHeight, FragmentLayoutConstraint} from '../adapt/layout';
+import * as pseudoElement from '../adapt/pseudoelement';
 import {Frame, newResult, Result} from '../adapt/task';
 import * as task from '../adapt/task';
-import {PseudoelementStyler} from '../adapt/vgen';
-import * as vgen from '../adapt/vgen';
 import {NodeContext, ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
@@ -34,10 +34,10 @@ export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;
 
 export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
 
-export class AfterIfContinues {
+export class AfterIfContinues implements selector.AfterIfContinues {
   constructor(
       public readonly sourceNode: Element,
-      public readonly styler: PseudoelementStyler) {}
+      public readonly styler: pseudoElement.PseudoelementStyler) {}
 
   createElement(column: Column, parentNodeContext: NodeContext):
       Result<Element> {
@@ -58,8 +58,8 @@ export class AfterIfContinues {
 
   private createNodePositionForPseudoElement(): ChunkPosition {
     const sourceNode =
-        vgen.pseudoelementDoc.createElementNS(base.NS.XHTML, 'div');
-    vgen.setPseudoName(sourceNode, 'after-if-continues');
+        pseudoElement.document.createElementNS(base.NS.XHTML, 'div');
+    pseudoElement.setPseudoName(sourceNode, 'after-if-continues');
     const shadowContext = this.createShadowContext(sourceNode);
     const step = {
       node: sourceNode,
@@ -91,7 +91,7 @@ export class AfterIfContinuesLayoutConstraint implements
   pseudoElementHeight: any;
 
   constructor(
-      nodeContext: NodeContext, afterIfContinues: AfterIfContinues,
+      nodeContext: NodeContext, afterIfContinues: selector.AfterIfContinues,
       pseudoElementHeight: number) {
     this.nodeContext = nodeContext;
     this.afterIfContinues = afterIfContinues;
@@ -143,6 +143,7 @@ export class AfterIfContinuesLayoutConstraint implements
   /** @override */
   getPriorityOfFinishBreak() {return 9;}
 }
+
 export class AfterIfContinuesElementsOffset implements ElementsOffset {
   nodeContext: any;
   pseudoElementHeight: any;
