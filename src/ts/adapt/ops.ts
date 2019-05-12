@@ -23,32 +23,32 @@ import * as breaks from '../vivliostyle/break';
 import * as colums from '../vivliostyle/column';
 import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
+import * as layoutprocessor from '../vivliostyle/layoutprocessor';
 import * as logging from '../vivliostyle/logging';
 import * as pages from '../vivliostyle/page';
 import * as pagefloat from '../vivliostyle/pagefloat';
+import * as plugin from '../vivliostyle/plugin';
+import {layout} from '../vivliostyle/types';
+import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
 import * as cssparse from './cssparse';
+import {toShape} from './cssprop'
 import * as cssstyler from './cssstyler';
 import * as cssvalid from './cssvalid';
 import * as exprs from './expr';
 import * as font from './font';
 import * as geom from './geom';
-import * as layout from './layout';
+import * as layoutImpl from './layout';
+import {Response, XMLHttpRequestResponseType, ResourceStore} from './net';
 import * as pm from './pm';
 import * as task from './task';
+import {Fetcher} from './taskutil';
 import * as vgen from './vgen';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
-import * as plugin from '../vivliostyle/plugin';
-import {DocumentURLTransformer} from './base';
-import * as base from './base';
-import {toShape} from './cssprop'
-import {Response, XMLHttpRequestResponseType, ResourceStore} from './net';
-import {Fetcher} from './taskutil';
-
-declare var DEBUG: boolean; 
+declare var DEBUG: boolean;
 
 export const uaStylesheetBaseFetcher: Fetcher<boolean> =
     new Fetcher(() => {
@@ -178,7 +178,7 @@ export class StyleInstance extends exprs.Context implements
       public readonly customRenderer: vgen.CustomRenderer,
       public readonly fallbackMap: {[key: string]: string},
       public readonly pageNumberOffset: number,
-      public readonly documentURLTransformer: DocumentURLTransformer,
+      public readonly documentURLTransformer: base.DocumentURLTransformer,
       public readonly counterStore: counters.CounterStore,
       pageProgression?: constants.PageProgression) {
     super(
@@ -532,7 +532,7 @@ export class StyleInstance extends exprs.Context implements
   setFormattingContextToColumn(column: layout.Column, flowName: string) {
     const flow = this.currentLayoutPosition.flows[flowName];
     if (!flow.formattingContext) {
-      flow.formattingContext = new layout.BlockFormattingContext(null);
+      flow.formattingContext = new layoutprocessor.BlockFormattingContext(null);
     }
     column.flowRootFormattingContext = flow.formattingContext;
   }
@@ -794,7 +794,7 @@ export class StyleInstance extends exprs.Context implements
     const pageIndex = this.currentLayoutPosition.page - 1;
     const counterConstraint =
         this.counterStore.createLayoutConstraint(pageIndex);
-    return new layout.AllLayoutConstraint([counterConstraint].concat(
+    return new layoutImpl.AllLayoutConstraint([counterConstraint].concat(
         pageFloatLayoutContext.getLayoutConstraints()));
   }
 
@@ -826,7 +826,7 @@ export class StyleInstance extends exprs.Context implements
             const columnContainer = self.viewport.document.createElement('div');
             base.setCSSProperty(columnContainer, 'position', 'absolute');
             boxContainer.appendChild(columnContainer);
-            column = new layout.Column(
+            column = new layoutImpl.Column(
                 columnContainer, layoutContext, self.clientLayout,
                 layoutConstraint, columnPageFloatLayoutContext);
             column.forceNonfitting = forceNonFitting;
@@ -849,7 +849,7 @@ export class StyleInstance extends exprs.Context implements
             column.originX = offsetX;
             column.originY = offsetY;
           } else {
-            column = new layout.Column(
+            column = new layoutImpl.Column(
                 boxContainer, layoutContext, self.clientLayout,
                 layoutConstraint, columnPageFloatLayoutContext);
             column.copyFrom(layoutContainer);

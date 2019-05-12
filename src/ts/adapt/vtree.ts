@@ -445,8 +445,8 @@ export const newNodePositionFromNodeContext =
     };
 
 export const makeNodeContextFromNodePositionStep =
-    (step: NodePositionStep, parent: NodeContext): NodeContext => {
-      const nodeContext = new NodeContext(step.node, parent, 0);
+    (step: NodePositionStep, parent: vtree.NodeContext): NodeContext => {
+      const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
       nodeContext.shadowType = step.shadowType;
       nodeContext.shadowContext = step.shadowContext;
       nodeContext.nodeShadow = step.nodeShadow;

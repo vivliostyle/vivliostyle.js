@@ -16,23 +16,25 @@
  *
  * @fileoverview Utilities for selectors.
  */
-import {layout, selector, vtree} from './types';
-
 import * as base from '../adapt/base';
-import {FragmentLayoutConstraint} from '../adapt/layout';
 import * as pseudoElement from '../adapt/pseudoelement';
-import {Frame, newResult, Result} from '../adapt/task';
 import * as task from '../adapt/task';
 import {ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as asserts from './asserts';
 import * as layouthelper from './layouthelper';
-import {PseudoColumn} from './layoututil';
 import {NthFragmentMatcher} from './matcher';
-import {ElementsOffset} from './repetitiveelements';
+import {layout, selector, vtree, FragmentLayoutConstraintType} from './types';
 
 export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;
 
 export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
+
+// FIXME: When importing layoututil module statically, it causes a circular dependency.
+let layoututil: typeof import('./layoututil');
+import('./layoututil').then(it => {
+  console.log('>>>', it);
+  layoututil = it;
+});
 
 export class AfterIfContinues implements selector.AfterIfContinues {
   constructor(
@@ -40,10 +42,13 @@ export class AfterIfContinues implements selector.AfterIfContinues {
       public readonly styler: pseudoElement.PseudoelementStyler) {}
 
   createElement(column: layout.Column, parentNodeContext: vtree.NodeContext):
-      Result<Element> {
+      task.Result<Element> {
+    if (!layoututil) {
+      throw new Error('layoututil module is required but not be imported.');
+    }
     const doc = parentNodeContext.viewNode.ownerDocument;
     const viewRoot = doc.createElement('div');
-    const pseudoColumn = new PseudoColumn(column, viewRoot, parentNodeContext);
+    const pseudoColumn = new layoututil.PseudoColumn(column, viewRoot, parentNodeContext);
     const initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
     pseudoColumn.getColumn().pageBreakType = null;
     return pseudoColumn.layout(this.createNodePositionForPseudoElement(), true)
@@ -52,7 +57,7 @@ export class AfterIfContinues implements selector.AfterIfContinues {
           pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
           const pseudoElement = (viewRoot.firstChild as Element);
           base.setCSSProperty(pseudoElement, 'display', 'block');
-          return newResult(pseudoElement);
+          return task.newResult(pseudoElement);
         });
   }
 
@@ -84,8 +89,8 @@ export class AfterIfContinues implements selector.AfterIfContinues {
   }
 }
 
-export class AfterIfContinuesLayoutConstraint implements
-    FragmentLayoutConstraint {
+export class AfterIfContinuesLayoutConstraint implements selector.AfterIfContinuesLayoutConstraint {
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType = 'AfterIfContinue';
   nodeContext: any;
   afterIfContinues: any;
   pseudoElementHeight: any;
@@ -144,7 +149,7 @@ export class AfterIfContinuesLayoutConstraint implements
   getPriorityOfFinishBreak() {return 9;}
 }
 
-export class AfterIfContinuesElementsOffset implements ElementsOffset {
+export class AfterIfContinuesElementsOffset implements selector.AfterIfContinuesElementsOffset {
   nodeContext: any;
   pseudoElementHeight: any;
 
@@ -186,7 +191,7 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
 }
 
 function processAfterIfContinuesOfNodeContext(
-    nodeContext: vtree.NodeContext, column: layout.Column): Result<vtree.NodeContext> {
+    nodeContext: vtree.NodeContext, column: layout.Column): task.Result<vtree.NodeContext> {
   if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after ||
       column.isFloatNodeContext(nodeContext)) {
     return task.newResult(nodeContext);
@@ -205,14 +210,14 @@ function processAfterIfContinuesOfNodeContext(
 }
 
 export const processAfterIfContinues =
-    (result: Result<vtree.NodeContext>, column: layout.Column): Result<vtree.NodeContext> =>
+    (result: task.Result<vtree.NodeContext>, column: layout.Column): task.Result<vtree.NodeContext> =>
         result.thenAsync(
             (nodeContext) =>
                 processAfterIfContinuesOfNodeContext(nodeContext, column));
 
 export const processAfterIfContinuesOfAncestors =
-    (nodeContext: vtree.NodeContext, column: layout.Column): Result<boolean> => {
-      const frame: Frame<boolean> = task.newFrame(
+    (nodeContext: vtree.NodeContext, column: layout.Column): task.Result<boolean> => {
+      const frame: task.Frame<boolean> = task.newFrame(
           'vivliostyle.selectors.processAfterIfContinuesOfAncestors');
       let current: vtree.NodeContext = nodeContext;
       frame

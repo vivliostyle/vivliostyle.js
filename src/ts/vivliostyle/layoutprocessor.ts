@@ -22,7 +22,7 @@ import * as breakposition from './breakposition';
 import {isBlock} from './display';
 import * as layouthelper from './layouthelper';
 import * as plugin from './plugin';
-import {layout, vtree} from './types';
+import {layout, layoutprocessor, vtree, FormattingContextType} from './types';
 
 /**
  * Processor doing some special layout (e.g. table layout)
@@ -157,7 +157,9 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   }
 }
 
-export class BlockFormattingContext implements vtree.FormattingContext {
+export class BlockFormattingContext implements layoutprocessor.BlockFormattingContext {
+  formattingContextType: FormattingContextType = 'Block';
+
   constructor(private readonly parent: vtree.FormattingContext) {}
 
   /**

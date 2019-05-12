@@ -3,11 +3,8 @@
  * @fileoverview Elements repeated in every fragment by repeat-on-break
  * property.
  */
-// import * as layoutImpl from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtreeImpl from '../adapt/vtree';
-import {layout, repetitiveelement, vtree} from './types';
-
 import * as asserts from './asserts';
 import * as layouthelper from './layouthelper';
 import * as layoutprocessor from './layoutprocessor';
@@ -15,12 +12,15 @@ import {AbstractLayoutRetryer} from './layoutretryer';
 import {LayoutIterator, EdgeSkipper, PseudoColumn} from './layoututil';
 import * as plugin from './plugin';
 import * as selectors from './selectors';
-import * as table from './table';
+import {repetitiveElementsCache} from './shared';
+import {layout, repetitiveelement, table, vtree, FormattingContextType, FragmentLayoutConstraintType} from './types';
 
-export class RepetitiveElementsOwnerFormattingContext implements
-    vtree.FormattingContext {
+export class RepetitiveElementsOwnerFormattingContext
+    implements repetitiveelement.RepetitiveElementsOwnerFormattingContext {
+
+  formattingContextType: FormattingContextType = 'RepetitiveElementsOwner';
   isRoot: boolean = false;
-  repetitiveElements: RepetitiveElements = null;
+  repetitiveElements: repetitiveelement.RepetitiveElements = null;
 
   constructor(
       public readonly parent: vtree.FormattingContext,
@@ -43,7 +43,7 @@ export class RepetitiveElementsOwnerFormattingContext implements
     return this.parent;
   }
 
-  getRepetitiveElements(): RepetitiveElements {
+  getRepetitiveElements(): repetitiveelement.RepetitiveElements {
     return this.repetitiveElements;
   }
 
@@ -88,16 +88,9 @@ export class RepetitiveElementsOwnerFormattingContext implements
   restoreState(state) {}
 }
 
-let repetitiveElementsCache: {root: Element, elements: RepetitiveElements}[] =
-    [];
-
-export const clearCache = () => {
-  repetitiveElementsCache = [];
-};
-
 export type ElementsOffset = repetitiveelement.ElementsOffset;
 
-export class RepetitiveElements implements ElementsOffset {
+export class RepetitiveElements implements repetitiveelement.RepetitiveElements {
   private headerSourceNode: Element|null = null;
   private footerSourceNode: Element|null = null;
   private headerViewNode: Element|null = null;
@@ -166,7 +159,7 @@ export class RepetitiveElements implements ElementsOffset {
 
   appendHeaderToFragment(
       rootNodeContext: vtree.NodeContext, firstChild: Node|null,
-      column: layout.Column) {
+      column: layout.Column): task.Result<boolean> {
     if (!this.headerNodePosition || this.isSkipHeader) {
       return task.newResult(true);
     }
@@ -176,7 +169,7 @@ export class RepetitiveElements implements ElementsOffset {
 
   appendFooterToFragment(
       rootNodeContext: vtree.NodeContext, firstChild: Node|null,
-      column: layout.Column) {
+      column: layout.Column): task.Result<boolean> {
     if (!this.footerNodePosition || this.isSkipFooter) {
       return task.newResult(true);
     }
@@ -189,7 +182,7 @@ export class RepetitiveElements implements ElementsOffset {
    */
   appendElementToFragment(
       nodePosition: vtree.NodePosition, rootNodeContext: vtree.NodeContext,
-      firstChild: Node|null, column: layout.Column): any {
+      firstChild: Node|null, column: layout.Column): task.Result<boolean> {
     const doc = rootNodeContext.viewNode.ownerDocument;
     const rootViewNode = (rootNodeContext.viewNode as Element);
     const viewRoot = doc.createElement('div');
@@ -372,7 +365,7 @@ export class RepetitiveElements implements ElementsOffset {
 export abstract class LayoutEntireBlock implements layout.LayoutMode {
   formattingContext: any;
 
-  constructor(formattingContext: RepetitiveElementsOwnerFormattingContext) {
+  constructor(formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext) {
     this.formattingContext = formattingContext;
   }
 
@@ -409,7 +402,7 @@ export abstract class LayoutEntireBlock implements layout.LayoutMode {
 export abstract class LayoutFragmentedBlock implements layout.LayoutMode {
   formattingContext: any;
 
-  constructor(formattingContext: RepetitiveElementsOwnerFormattingContext) {
+  constructor(formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext) {
     this.formattingContext = formattingContext;
   }
 
@@ -433,7 +426,7 @@ export abstract class LayoutFragmentedBlock implements layout.LayoutMode {
 export class LayoutEntireOwnerBlock extends
     LayoutEntireBlock {
   constructor(
-      formattingContext: RepetitiveElementsOwnerFormattingContext,
+      formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
       public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
     super(formattingContext);
   }
@@ -455,7 +448,7 @@ export class LayoutEntireOwnerBlock extends
 export class LayoutFragmentedOwnerBlock extends
     LayoutFragmentedBlock {
   constructor(
-      formattingContext: RepetitiveElementsOwnerFormattingContext,
+      formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
       public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
     super(formattingContext);
   }
@@ -473,7 +466,9 @@ export class LayoutFragmentedOwnerBlock extends
 }
 
 export class RepetitiveElementsOwnerLayoutConstraint implements
-    layout.FragmentLayoutConstraint {
+    repetitiveelement.RepetitiveElementsOwnerLayoutConstraint {
+
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType = 'RepetitiveElementsOwner';
   nodeContext: any;
 
   constructor(nodeContext: vtree.NodeContext) {
@@ -550,7 +545,7 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
                       }));
   }
 
-  getRepetitiveElements() {
+  getRepetitiveElements(): repetitiveelement.RepetitiveElements {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
         this.nodeContext.formattingContext);
     return formattingContext.getRepetitiveElements();
@@ -574,8 +569,7 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
 export class RepetitiveElementsOwnerLayoutRetryer extends
     AbstractLayoutRetryer {
   constructor(
-      public readonly formattingContext:
-          RepetitiveElementsOwnerFormattingContext,
+      public readonly formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
       private readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
     super();
   }
@@ -604,8 +598,7 @@ export class RepetitiveElementsOwnerLayoutRetryer extends
 export class EntireBlockLayoutStrategy extends
     EdgeSkipper {
   constructor(
-      public readonly formattingContext:
-          RepetitiveElementsOwnerFormattingContext,
+      public readonly formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
       public readonly column: layout.Column) {
     super();
   }
@@ -677,10 +670,8 @@ export class FragmentedBlockLayoutStrategy extends
 
 export class RepetitiveElementsOwnerLayoutProcessor extends
     layoutprocessor.BlockLayoutProcessor implements layoutprocessor.LayoutProcessor {
-  /**
-   * @override
-   */
-  layout(nodeContext, column, leadingEdge) {
+
+  layout(nodeContext: vtree.NodeContext, column: layout.Column, leadingEdge: boolean) {
     if (column.isFloatNodeContext(nodeContext)) {
       return column.layoutFloatOrFootnote(nodeContext);
     }
@@ -704,10 +695,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
     }
   }
 
-  /**
-   * @override
-   */
-  startNonInlineElementNode(nodeContext) {
+  startNonInlineElementNode(nodeContext: vtree.NodeContext) {
     const formattingContext =
         getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
     const repetitiveElements = formattingContext.getRepetitiveElements();
@@ -835,8 +823,7 @@ export function appendHeaderToAncestors(
   eachAncestorNodeContext(
       nodeContext.after ? nodeContext.parent : nodeContext,
       (formattingContext, nc) => {
-        if (formattingContext instanceof
-            table.TableFormattingContext) {
+        if (table.isInstanceOfTableFormattingContext(formattingContext)) {
           return;
         }
         column.fragmentLayoutConstraints.push(
@@ -845,7 +832,7 @@ export function appendHeaderToAncestors(
 }
 
 export function appendHeader(
-    formattingContext: RepetitiveElementsOwnerFormattingContext,
+    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
     nodeContext: vtree.NodeContext, column) {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
@@ -860,7 +847,7 @@ export function appendHeader(
 }
 
 export function appendFooter(
-    formattingContext: RepetitiveElementsOwnerFormattingContext,
+    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
     nodeContext: vtree.NodeContext, column) {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
@@ -875,77 +862,31 @@ export function appendFooter(
   return task.newResult(true);
 }
 
-export function isFirstContentOfRepetitiveElementsOwner(
-    nodeContext: vtree.NodeContext): boolean {
-  if (!nodeContext || !nodeContext.parent) {
-    return false;
-  }
-  const formattingContext =
-      getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext.parent);
-  if (!formattingContext) {
-    return false;
-  }
-  const repetitiveElements = formattingContext.getRepetitiveElements();
-  if (!repetitiveElements) {
-    return false;
-  }
-  return repetitiveElements.isFirstContentNode(nodeContext);
-}
 
-export const collectElementsOffset = (column:
-                                          layout.Column): ElementsOffset[] => {
-  const repetitiveElements: ElementsOffset[] = [];
-  for (let current = column; current; current = current.pseudoParent) {
-    current.fragmentLayoutConstraints.forEach((constraint) => {
-      if (constraint instanceof RepetitiveElementsOwnerLayoutConstraint) {
-        let repetitiveElement = constraint.getRepetitiveElements();
-        repetitiveElements.push(repetitiveElement);
-      }
-      if (constraint instanceof
-          selectors.AfterIfContinuesLayoutConstraint) {
-        let repetitiveElement = constraint.getRepetitiveElements();
-        repetitiveElements.push(repetitiveElement);
-      }
-      if (constraint instanceof table.TableRowLayoutConstraint) {
-        constraint.getElementsOffsetsForTableCell(column).forEach(
-            (repetitiveElement) => {
-              repetitiveElements.push(repetitiveElement);
-            });
-      }
-    });
-  }
-  return repetitiveElements;
-};
-
-function getRepetitiveElementsOwnerFormattingContextOrNull(
-    nodeContext: vtree.NodeContext): RepetitiveElementsOwnerFormattingContext {
+function getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext: vtree.NodeContext):
+    repetitiveelement.RepetitiveElementsOwnerFormattingContext | null {
   const formattingContext = nodeContext.formattingContext;
   if (!formattingContext) {
     return null;
   }
-  if (!(formattingContext instanceof
-        RepetitiveElementsOwnerFormattingContext)) {
+  if (!(formattingContext instanceof RepetitiveElementsOwnerFormattingContext)) {
     return null;
   }
-  return (formattingContext as RepetitiveElementsOwnerFormattingContext);
+  return formattingContext;
 }
 
-export function getRepetitiveElementsOwnerFormattingContext(
-    formattingContext: vtree.FormattingContext):
-    RepetitiveElementsOwnerFormattingContext {
-  asserts.assert(
-      formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
-  return (formattingContext as RepetitiveElementsOwnerFormattingContext);
+function getRepetitiveElementsOwnerFormattingContext(formattingContext: vtree.FormattingContext):
+    repetitiveelement.RepetitiveElementsOwnerFormattingContext {
+  asserts.assert(formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
+  return formattingContext as repetitiveelement.RepetitiveElementsOwnerFormattingContext;
 }
 
 const repetitiveLayoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
 plugin.registerHook(
-    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
-      if (formattingContext instanceof
-              RepetitiveElementsOwnerFormattingContext &&
-          !(formattingContext instanceof
-            table.TableFormattingContext)) {
-        return repetitiveLayoutProcessor;
-      }
-      return null;
-    });
+  plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
+    if (formattingContext instanceof RepetitiveElementsOwnerFormattingContext
+        && !table.isInstanceOfTableFormattingContext(formattingContext)) {
+      return repetitiveLayoutProcessor;
+    }
+    return null;
+  });

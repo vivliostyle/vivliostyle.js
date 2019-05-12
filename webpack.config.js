@@ -45,6 +45,9 @@ module.exports = {
     new webpack.BannerPlugin({
       banner: bannerText
     }),
-    new CircularDependencyPlugin()
+    new CircularDependencyPlugin({
+      failOnError: true,
+      allowAsyncCycles: true
+    })
   ]
 }

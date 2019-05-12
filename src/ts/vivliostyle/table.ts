@@ -17,8 +17,10 @@
  * @fileoverview Table formatting context and layout.
  */
 import * as base from '../adapt/base';
+import {ident} from '../adapt/css';
 import * as task from '../adapt/task';
-import * as vtree from '../adapt/vtree';
+import {ViewFactory} from '../adapt/vgen';
+import * as vtreeImpl from '../adapt/vtree';
 import * as asserts from './asserts';
 import * as breakposition from './breakposition';
 import * as layouthelper from './layouthelper';
@@ -26,12 +28,9 @@ import * as layoutprocessor from './layoutprocessor';
 import * as layoutretryer from './layoutretryer';
 import * as layoututil from './layoututil';
 import * as plugin from './plugin';
-import * as repetitiveelements from './repetitiveelements';
-import {layout} from './types';
-
-import {ident} from '../adapt/css';
-import {ViewFactory} from '../adapt/vgen';
+import * as repetitiveelementImpl from './repetitiveelements';
 import {registerFragmentIndex} from './selectors';
+import {layout, repetitiveelement, table, vtree, FormattingContextType, FragmentLayoutConstraintType} from './types';
 
 export class TableRow {
   cells: TableCell[] = [];
@@ -256,9 +255,11 @@ export {BrokenTableCellPosition};
 /**
  * @param tableSourceNode Source node of the table
  */
-export class TableFormattingContext extends
-    repetitiveelements.RepetitiveElementsOwnerFormattingContext
-        implements vtree.FormattingContext {
+export class TableFormattingContext
+    extends repetitiveelementImpl.RepetitiveElementsOwnerFormattingContext
+    implements table.TableFormattingContext {
+
+  formattingContextType: FormattingContextType = 'Table';
   vertical: boolean = false;
   columnCount: number = -1;
   tableWidth: number = 0;
@@ -271,7 +272,7 @@ export class TableFormattingContext extends
   cellFragments: TableCellFragment[][] = [];
   lastRowViewNode: Element|null = null;
   cellBreakPositions: BrokenTableCellPosition[] = [];
-  repetitiveElements: repetitiveelements.RepetitiveElements|null = null;
+  repetitiveElements: repetitiveelement.RepetitiveElements|null = null;
 
   constructor(
       parent: vtree.FormattingContext,
@@ -453,9 +454,8 @@ export class TableFormattingContext extends
     return null;
   }
 
-  collectElementsOffsetOfUpperCells(position:
-                                        {rowIndex: number, columnIndex: number}|
-                                    null): repetitiveelements.ElementsOffset[] {
+  collectElementsOffsetOfUpperCells(
+      position:{rowIndex: number, columnIndex: number}|null): repetitiveelement.ElementsOffset[] {
     const collected = [];
     return this.slots.reduce((repetitiveElements, row, index) => {
       if (index >= position.rowIndex) {
@@ -470,10 +470,10 @@ export class TableFormattingContext extends
           cellFragment.pseudoColumn.getColumn(), repetitiveElements);
       collected.push(cellFragment);
       return repetitiveElements;
-    }, [] as repetitiveelements.ElementsOffset[]);
+    }, [] as repetitiveelement.ElementsOffset[]);
   }
 
-  collectElementsOffsetOfHighestColumn(): repetitiveelements.ElementsOffset[] {
+  collectElementsOffsetOfHighestColumn(): repetitiveelement.ElementsOffset[] {
     const elementsInColumn = [];
     this.rows.forEach((row) => {
       row.cells.forEach((cell, index) => {
@@ -496,13 +496,13 @@ export class TableFormattingContext extends
 
   private collectElementsOffsetFromColumn(
       column: layout.Column,
-      repetitiveElements: repetitiveelements.ElementsOffset[]) {
+      repetitiveElements: repetitiveelement.ElementsOffset[]) {
     column.fragmentLayoutConstraints.forEach((constraint) => {
-      if (constraint instanceof repetitiveelements.RepetitiveElementsOwnerLayoutConstraint) {
+      if (repetitiveelement.isInstanceOfRepetitiveElementsOwnerLayoutConstraint(constraint)) {
         const repetitiveElement = constraint.getRepetitiveElements();
         repetitiveElements.push(repetitiveElement);
       }
-      if (constraint instanceof TableRowLayoutConstraint) {
+      if (table.isInstanceOfTableRowLayoutConstraint(constraint)) {
         constraint.getElementsOffsetsForTableCell(null).forEach(
             (repetitiveElement) => {
               repetitiveElements.push(repetitiveElement);
@@ -522,10 +522,9 @@ export class TableFormattingContext extends
   }
 }
 
-export class ElementsOffsetOfTableCell implements
-    repetitiveelements.ElementsOffset {
+export class ElementsOffsetOfTableCell implements repetitiveelement.ElementsOffset {
   constructor(public readonly repeatitiveElementsInColumns:
-                  repetitiveelements.ElementsOffset[][]) {}
+                  repetitiveelement.ElementsOffset[][]) {}
 
   /** @override */
   calculateOffset(nodeContext) {
@@ -863,7 +862,7 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
     rowSpanningCellBreakPositions.forEach(function(rowCellBreakPositions) {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
-        const rowNodeContext = vtree.makeNodeContextFromNodePositionStep(
+        const rowNodeContext = vtreeImpl.makeNodeContextFromNodePositionStep(
             rowCellBreakPositions[0].cellNodePosition.steps[1],
             currentRow.parent);
         return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
@@ -886,7 +885,7 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
               const cell = cellBreakPosition.cell;
               addDummyCellUntil(cell.anchorSlot.columnIndex);
               const cellNodePosition = cellBreakPosition.cellNodePosition;
-              const cellNodeContext = vtree.makeNodeContextFromNodePositionStep(
+              const cellNodeContext = vtreeImpl.makeNodeContextFromNodePositionStep(
                   cellNodePosition.steps[0], rowNodeContext);
               cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
               cellNodeContext.after = cellNodePosition.after;
@@ -1014,9 +1013,9 @@ export class TableLayoutStrategy extends layoututil.EdgeSkipper {
                      nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
                    }
                    const startNodePosition =
-                       vtree.newNodePositionFromNodeContext(nextNodeContext, 0);
+                       vtreeImpl.newNodePositionFromNodeContext(nextNodeContext, 0);
                    return task.newResult(
-                       new vtree.ChunkPosition(startNodePosition));
+                       new vtreeImpl.ChunkPosition(startNodePosition));
                  });
     }
     cont.then((startChunkPosition) => {
@@ -1290,7 +1289,7 @@ export class TableLayoutProcessor implements layoutprocessor.LayoutProcessor {
               breakposition
                   .calculateOffset(
                       nodeContext,
-                      repetitiveelements.collectElementsOffset(column))
+                      column.collectElementsOffset())
                   .current;
           if (!column.isOverflown(edge) &&
               (!tableLayoutOption ||
@@ -1369,7 +1368,7 @@ export class TableLayoutProcessor implements layoutprocessor.LayoutProcessor {
       return column.buildDeepElementView(nodeContext);
     } else {
       if (leadingEdge) {
-        repetitiveelements.appendHeaderToAncestors(nodeContext.parent, column);
+        repetitiveelementImpl.appendHeaderToAncestors(nodeContext.parent, column);
       }
       return (new LayoutRetryer(formattingContext, this))
           .layout(nodeContext, column);
@@ -1430,7 +1429,7 @@ export class TableLayoutProcessor implements layoutprocessor.LayoutProcessor {
               const cellNodeContext = cellFragment.cellNodeContext;
               const cellNodePosition = cellNodeContext.toNodePosition();
               const breakChunkPosition =
-                  new vtree.ChunkPosition(breakNodeContext.toNodePosition());
+                  new vtreeImpl.ChunkPosition(breakNodeContext.toNodePosition());
               formattingContext.cellBreakPositions.push(
                   ({cellNodePosition, breakChunkPosition, cell} as
                    BrokenTableCellPosition));
@@ -1551,8 +1550,7 @@ export class LayoutRetryer extends
   }
 }
 
-export class LayoutEntireTable extends
-    repetitiveelements.LayoutEntireBlock {
+export class LayoutEntireTable extends repetitiveelementImpl.LayoutEntireBlock {
   constructor(
       formattingContext: TableFormattingContext,
       public readonly processor: TableLayoutProcessor) {
@@ -1592,8 +1590,10 @@ export class EntireTableBreakPosition extends breakposition.EdgeBreakPosition {
   }
 }
 
-export class EntireTableLayoutConstraint implements
-    layout.FragmentLayoutConstraint {
+export class EntireTableLayoutConstraint implements layout.FragmentLayoutConstraint {
+
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType = 'EntireTable';
+
   tableRootNode: any;
 
   constructor(tableRootNode: Node) {
@@ -1648,7 +1648,7 @@ export class EntireTableLayoutConstraint implements
 }
 
 export class LayoutFragmentedTable extends
-    repetitiveelements.LayoutFragmentedBlock {
+    repetitiveelementImpl.LayoutFragmentedBlock {
   constructor(
       formattingContext: TableFormattingContext,
       public readonly processor: TableLayoutProcessor) {
@@ -1672,8 +1672,10 @@ export class LayoutFragmentedTable extends
   }
 }
 
-export class TableRowLayoutConstraint extends
-    repetitiveelements.RepetitiveElementsOwnerLayoutConstraint {
+export class TableRowLayoutConstraint
+    extends repetitiveelementImpl.RepetitiveElementsOwnerLayoutConstraint
+    implements table.TableRowLayoutConstraint {
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType = 'TableRow';
   cellFragmentLayoutConstraints: {
     constraints: layout.FragmentLayoutConstraint[],
     breakPosition: vtree.NodeContext
@@ -1771,13 +1773,13 @@ export class TableRowLayoutConstraint extends
     );
   }
 
-  removeDummyRowNodes(nodeContext) {
+  removeDummyRowNodes(nodeContext: vtree.NodeContext) {
     if (!nodeContext || nodeContext.display !== 'table-row' ||
         !nodeContext.viewNode) {
       return;
     }
-    while (nodeContext.viewNode.previousElementSibling) {
-      const dummyNode = nodeContext.viewNode.previousElementSibling;
+    while ((nodeContext.viewNode as Element).previousElementSibling) {
+      const dummyNode = (nodeContext.viewNode as Element).previousElementSibling;
       if (dummyNode.parentNode) {
         dummyNode.parentNode.removeChild(dummyNode);
       }
@@ -1801,7 +1803,7 @@ export class TableRowLayoutConstraint extends
   private getCellFragemnts(
       nodeContext: vtree.NodeContext,
       formattingContext: TableFormattingContext):
-      {fragment: TableCellFragment, breakPosition: vtree.NodeContext}[] {
+      {fragment: TableCellFragment, breakPosition: vtreeImpl.NodeContext}[] {
     let rowIndex = Number.MAX_VALUE;
     if (nodeContext && nodeContext.display === 'table-row') {
       asserts.assert(nodeContext.sourceNode);
@@ -1828,8 +1830,7 @@ export class TableRowLayoutConstraint extends
     return cellFragments;
   }
 
-  getElementsOffsetsForTableCell(column: layout.Column):
-      repetitiveelements.ElementsOffset[] {
+  getElementsOffsetsForTableCell(column: layout.Column): repetitiveelement.ElementsOffset[] {
     const formattingContext =
         getTableFormattingContext(this.nodeContext.formattingContext);
     const position = formattingContext.findCellFromColumn(column);

@@ -24,6 +24,17 @@ import * as task from '../adapt/task';
 import * as taskutil from '../adapt/taskutil';
 import * as diff from './diff';
 
+export type FormattingContextType =
+  'Block' |
+  'RepetitiveElementsOwner' |
+  'Table';
+
+export type FragmentLayoutConstraintType =
+  'AfterIfContinue' |
+  'EntireTable' |
+  'RepetitiveElementsOwner' |
+  'TableRow';
+
 export namespace csscasc {
   export interface ElementStyle {}
 }
@@ -50,6 +61,7 @@ export namespace layout {
    * Represents constraints on laying out fragments
    */
   export interface FragmentLayoutConstraint {
+    flagmentLayoutConstraintType: FragmentLayoutConstraintType;
     allowLayout(
         nodeContext: vtree.NodeContext, overflownNodeContext: vtree.NodeContext,
         column: Column): boolean;
@@ -516,6 +528,7 @@ export namespace layout {
      */
     redoLayout(): task.Result<vtree.ChunkPosition>;
     saveDistanceToBlockEndFloats(): void;
+    collectElementsOffset(): repetitiveelement.ElementsOffset[];
   }
 
   export type SinglePageFloatLayoutResult = {
@@ -565,6 +578,16 @@ export namespace layout {
     convertPercentageSizesToPx(target: Element): void;
     fixFloatSizeAndPosition(nodeContext: vtree.NodeContext): void;
     getContentInlineSize(): number;
+  }
+}
+
+export namespace layoutprocessor {
+
+  export interface BlockFormattingContext extends vtree.FormattingContext {}
+
+  export function isInstanceOfBlockFormattingContext(object: vtree.FormattingContext):
+      object is BlockFormattingContext {
+    return object && object.formattingContextType === 'Block';
   }
 }
 
@@ -763,6 +786,26 @@ export namespace selector {
       parentNodeContext: vtree.NodeContext
     ): task.Result<Element>;
   }
+
+  export interface AfterIfContinuesLayoutConstraint extends layout.FragmentLayoutConstraint {
+    nodeContext: any;
+    afterIfContinues: any;
+    pseudoElementHeight: any;
+
+    getRepetitiveElements(): AfterIfContinuesElementsOffset;
+  }
+
+  export function isInstanceOfAfterIfContinuesLayoutConstraint(object: layout.FragmentLayoutConstraint):
+      object is AfterIfContinuesLayoutConstraint {
+    return object && object.flagmentLayoutConstraintType == 'AfterIfContinue';
+  }
+
+  export interface AfterIfContinuesElementsOffset extends repetitiveelement.ElementsOffset {
+    nodeContext: any;
+    pseudoElementHeight: any;
+
+    affectTo(nodeContext: vtree.NodeContext): boolean;
+  }
 }
 
 export namespace pseudoelement {
@@ -777,9 +820,109 @@ export namespace pseudoelement {
 }
 
 export namespace repetitiveelement {
+  export interface RepetitiveElementsOwnerFormattingContext extends vtree.FormattingContext {
+    isRoot: boolean;
+    repetitiveElements: RepetitiveElements;
+    readonly parent: vtree.FormattingContext;
+    readonly rootSourceNode: Element;
+    getRepetitiveElements(): RepetitiveElements;
+    getRootViewNode(position: vtree.NodeContext): Element|null ;
+    getRootNodeContext(nodeContext: vtree.NodeContext): vtree.NodeContext|null;
+    initializeRepetitiveElements(vertical: boolean): void;
+  }
+
+  export function isInstanceOfRepetitiveElementsOwnerFormattingContext(object: vtree.FormattingContext):
+      object is RepetitiveElementsOwnerFormattingContext {
+    if (!object) {
+      return false;
+    }
+    const type = object.formattingContextType;
+    return type === 'RepetitiveElementsOwner'
+      || table.isInstanceOfTableFormattingContext(object); // subset
+  }
+
   export interface ElementsOffset {
     calculateOffset(nodeContext: vtree.NodeContext): number;
     calculateMinimumOffset(nodeContext: vtree.NodeContext): number;
+  }
+
+  export interface RepetitiveElements extends ElementsOffset {
+    isSkipHeader: boolean;
+    isSkipFooter: boolean;
+    enableSkippingFooter: boolean;
+    enableSkippingHeader: boolean;
+    doneInitialLayout: boolean;
+    firstContentSourceNode: Element|null;
+    lastContentSourceNode: Element|null;
+    allowInsert: any;
+    allowInsertRepeatitiveElements: any;
+    ownerSourceNode: Element;
+
+    setHeaderNodeContext(nodeContext: vtree.NodeContext): void;
+    setFooterNodeContext(nodeContext: vtree.NodeContext): void;
+    updateHeight(column: layout.Column): void;
+    prepareLayoutFragment(): void;
+    appendHeaderToFragment(
+        rootNodeContext: vtree.NodeContext, firstChild: Node|null,
+        column: layout.Column): task.Result<boolean>;
+    appendFooterToFragment(
+        rootNodeContext: vtree.NodeContext, firstChild: Node|null,
+        column: layout.Column): task.Result<boolean>;
+    appendElementToFragment(
+        nodePosition: vtree.NodePosition, rootNodeContext: vtree.NodeContext,
+        firstChild: Node|null, column: layout.Column): task.Result<boolean>;
+    moveChildren(from: Element, to: Element, firstChild: Node|null): void;
+    isAfterLastContent(nodeContext: vtree.NodeContext): boolean;
+    isFirstContentNode(nodeContext: vtree.NodeContext): boolean;
+    isEnableToUpdateState(): boolean;
+    updateState(): void;
+    preventSkippingHeader(): void;
+    preventSkippingFooter(): void;
+    isHeaderRegistered(): boolean;
+    isFooterRegistered(): boolean;
+    isHeaderSourceNode(node: Node): boolean;
+    isFooterSourceNode(node: Node): boolean;
+  }
+
+  export interface RepetitiveElementsOwnerLayoutConstraint extends layout.FragmentLayoutConstraint {
+    getRepetitiveElements(): RepetitiveElements;
+  }
+
+  export function isInstanceOfRepetitiveElementsOwnerLayoutConstraint(object: layout.FragmentLayoutConstraint):
+      object is RepetitiveElementsOwnerLayoutConstraint {
+    if (!object) {
+      return false;
+    }
+    const type = object.flagmentLayoutConstraintType;
+    return type === 'RepetitiveElementsOwner'
+      || table.isInstanceOfTableRowLayoutConstraint(object); // subset
+  }
+}
+
+export namespace table {
+
+  export interface TableFormattingContext extends repetitiveelement.RepetitiveElementsOwnerFormattingContext {
+    // FIXME
+  }
+
+  export function isInstanceOfTableFormattingContext(object: vtree.FormattingContext):
+      object is TableFormattingContext {
+    return object && object.formattingContextType === 'Table';
+  }
+
+  export interface TableRowLayoutConstraint extends repetitiveelement.RepetitiveElementsOwnerLayoutConstraint {
+    cellFragmentLayoutConstraints: {
+      constraints: layout.FragmentLayoutConstraint[],
+      breakPosition: vtree.NodeContext
+    }[];
+
+    removeDummyRowNodes(nodeContext: vtree.NodeContext): void;
+    getElementsOffsetsForTableCell(column: layout.Column): repetitiveelement.ElementsOffset[];
+  }
+
+  export function isInstanceOfTableRowLayoutConstraint(object: layout.FragmentLayoutConstraint):
+      object is TableRowLayoutConstraint {
+    return object && object.flagmentLayoutConstraintType === 'TableRow';
   }
 }
 
@@ -879,6 +1022,7 @@ export namespace vtree {
    * Formatting context.
    */
   export interface FormattingContext {
+    formattingContextType: FormattingContextType;
     getName(): string;
     isFirstTime(nodeContext: NodeContext, firstTime: boolean): boolean;
     getParent(): FormattingContext;

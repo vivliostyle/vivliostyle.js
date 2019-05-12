@@ -18,7 +18,6 @@
  */
 import * as breaks from './break';
 import * as layouthelper from './layouthelper';
-import * as repetitiveelementImpl from './repetitiveelements';
 import {layout, repetitiveelement, vtree} from './types';
 
 /**
@@ -37,7 +36,7 @@ export abstract class AbstractBreakPosition implements layout.AbstractBreakPosit
   calculateOffset(column): { current: number; minimum: number } {
     return calculateOffset(
       this.getNodeContext(),
-      repetitiveelementImpl.collectElementsOffset(column)
+      column.collectElementsOffset()
     );
   }
 
@@ -146,8 +145,19 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   }
 
   private isFirstContentOfRepetitiveElementsOwner(): boolean {
-    return repetitiveelementImpl.isFirstContentOfRepetitiveElementsOwner(
-      this.getNodeContext()
-    );
+    const nodeContext = this.getNodeContext();
+    if (!nodeContext || !nodeContext.parent) {
+      return false;
+    }
+    const {formattingContext} = nodeContext.parent;
+    if (!repetitiveelement.isInstanceOfRepetitiveElementsOwnerFormattingContext(formattingContext)) {
+      return false;
+    }
+
+    const repetitiveElements = formattingContext.getRepetitiveElements();
+    if (!repetitiveElements) {
+      return false;
+    }
+    return repetitiveElements.isFirstContentNode(nodeContext);
   }
 }

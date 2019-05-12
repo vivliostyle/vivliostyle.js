@@ -24,16 +24,15 @@ import * as breaks from '../vivliostyle/break';
 import * as breakposition from '../vivliostyle/breakposition';
 import {resolveNewIndex} from '../vivliostyle/diff';
 import * as layouthelper from '../vivliostyle/layouthelper';
-import * as layoutprocessor from '../vivliostyle/layoutprocessor';
+import * as layoutprocessorImpl from '../vivliostyle/layoutprocessor';
 import * as layoutretryer from '../vivliostyle/layoutretryer';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import * as plugin from '../vivliostyle/plugin';
-import * as repetitiveelementImpl from '../vivliostyle/repetitiveelements';
 import {processAfterIfContinues, processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';
 import {Size, getSize} from '../vivliostyle/sizing';
-import {TableFormattingContext} from '../vivliostyle/table';
-import {layout, vtree} from '../vivliostyle/types';
+import {clearRepetitiveElementsCache} from '../vivliostyle/shared';
+import {layout, layoutprocessor, repetitiveelement, selector, table, vtree} from '../vivliostyle/types';
 import * as base from './base';
 import {ident, Val} from './css';
 import * as geom from './geom';
@@ -1461,7 +1460,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
           if (!resNodeContext || !layouthelper.isOrphan(resNodeContext.viewNode)) {
             const offsets = breakposition.calculateOffset(
                 resNodeContext,
-                repetitiveelementImpl.collectElementsOffset(self));
+                self.collectElementsOffset());
             overflown = self.isOverflown(
                 edge + (self.vertical ? -1 : 1) * offsets.minimum);
             if (self.isOverflown(
@@ -1739,8 +1738,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
     if (bp) {
       offset = bp.calculateOffset(this);
     } else {
-      offset = breakposition.calculateOffset(
-          null, repetitiveelementImpl.collectElementsOffset(this));
+      offset = breakposition.calculateOffset(null, this.collectElementsOffset());
     }
     return offset.current;
   }
@@ -1871,11 +1869,11 @@ export class Column extends vtreeImpl.Container implements layout.Column {
       endOfColumn: boolean): task.Result<boolean> {
     asserts.assert(nodeContext.formattingContext);
     const layoutProcessor =
-        (new layoutprocessor.LayoutProcessorResolver()).find(nodeContext.formattingContext);
+        (new layoutprocessorImpl.LayoutProcessorResolver()).find(nodeContext.formattingContext);
     let result = layoutProcessor.finishBreak(
         this, nodeContext, forceRemoveSelf, endOfColumn);
     if (!result) {
-      result = layoutprocessor.blockLayoutProcessor.finishBreak(
+      result = layoutprocessorImpl.blockLayoutProcessor.finishBreak(
           this, nodeContext, forceRemoveSelf, endOfColumn);
     }
     return result;
@@ -1983,7 +1981,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
     let edge = layouthelper.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
     const offsets = breakposition.calculateOffset(
         nodeContext,
-        repetitiveelementImpl.collectElementsOffset(this));
+        this.collectElementsOffset());
     const overflown =
         this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.minimum);
     if (this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
@@ -2107,15 +2105,10 @@ export class Column extends vtreeImpl.Container implements layout.Column {
   }
 
   isBFC(formattingContext: vtree.FormattingContext): boolean {
-    if (formattingContext instanceof layoutprocessor.BlockFormattingContext) {
+    if (layoutprocessor.isInstanceOfBlockFormattingContext(formattingContext)) {
       return true;
     }
-    if (formattingContext instanceof TableFormattingContext) {
-      return false;
-    }
-    if (formattingContext instanceof
-        repetitiveelementImpl
-            .RepetitiveElementsOwnerFormattingContext) {
+    if (repetitiveelement.isInstanceOfRepetitiveElementsOwnerFormattingContext(formattingContext)) {
       return true;
     }
     return false;
@@ -2164,7 +2157,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
         .loopWithFrame((loopFrame) => {
           while (nodeContext) {
             asserts.assert(nodeContext.formattingContext);
-            const layoutProcessor = (new layoutprocessor.LayoutProcessorResolver())
+            const layoutProcessor = (new layoutprocessorImpl.LayoutProcessorResolver())
                                         .find(nodeContext.formattingContext);
 
             // A code block to be able to use break. Break moves to the next
@@ -2215,9 +2208,8 @@ export class Column extends vtreeImpl.Container implements layout.Column {
                   }
                 }
                 if (!self.isBFC(nodeContext.formattingContext) ||
-                    nodeContext.formattingContext instanceof
-                        repetitiveelementImpl
-                            .RepetitiveElementsOwnerFormattingContext ||
+                    repetitiveelement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
+                      nodeContext.formattingContext) ||
                     self.isFloatNodeContext(nodeContext) ||
                     nodeContext.flexContainer) {
                   // new formatting context, or float or flex container
@@ -2532,7 +2524,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
             const formattingContext = nodeContext.formattingContext;
             asserts.assert(formattingContext);
             const layoutProcessor =
-                (new layoutprocessor.LayoutProcessorResolver()).find(formattingContext);
+                (new layoutprocessorImpl.LayoutProcessorResolver()).find(formattingContext);
             layoutProcessor.layout(nodeContext, self, leadingEdge)
                 .thenFinish(frame);
           }
@@ -2550,7 +2542,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
       const formattingContext = (parent || nodeContext).formattingContext;
       asserts.assert(formattingContext);
       const layoutProcessor =
-          (new layoutprocessor.LayoutProcessorResolver()).find(formattingContext);
+          (new layoutprocessorImpl.LayoutProcessorResolver()).find(formattingContext);
       layoutProcessor.clearOverflownViewNodes(
           this, parent, nodeContext, removeSelf);
       removeSelf = false;
@@ -2616,7 +2608,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
     asserts.assert(position.formattingContext);
     const copy = position.copy();
     const layoutProcessor =
-        (new layoutprocessor.LayoutProcessorResolver()).find(position.formattingContext);
+        (new layoutprocessorImpl.LayoutProcessorResolver()).find(position.formattingContext);
     const clonedPaddingBorder = this.calculateClonedPaddingBorder(copy);
     const bp = layoutProcessor.createEdgeBreakPosition(
         copy, breakAtEdge, overflows,
@@ -2887,6 +2879,30 @@ export class Column extends vtreeImpl.Container implements layout.Column {
            this.computedBlockSize);
     }
   }
+
+  collectElementsOffset(): repetitiveelement.ElementsOffset[] {
+    const repetitiveElements: repetitiveelement.ElementsOffset[] = [];
+    for (let current: Column = this; current; current = current.pseudoParent) {
+      current.fragmentLayoutConstraints.forEach((constraint) => {
+        if (repetitiveelement.isInstanceOfRepetitiveElementsOwnerLayoutConstraint(constraint)) {
+          let repetitiveElement = constraint.getRepetitiveElements();
+          repetitiveElements.push(repetitiveElement);
+        }
+        if (selector.isInstanceOfAfterIfContinuesLayoutConstraint(constraint)) {
+          let repetitiveElement = constraint.getRepetitiveElements();
+          repetitiveElements.push(repetitiveElement);
+        }
+        if (table.isInstanceOfTableRowLayoutConstraint(constraint)) {
+          constraint.getElementsOffsetsForTableCell(this).forEach(
+            (repetitiveElement) => {
+              repetitiveElements.push(repetitiveElement);
+            }
+          );
+        }
+      });
+    }
+    return repetitiveElements;
+  }
 }
 
 export const firstCharPattern =
@@ -3016,7 +3032,7 @@ export class ColumnLayoutRetryer extends layoutretryer.AbstractLayoutRetryer {
   prepareLayout(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
-      repetitiveelementImpl.clearCache();
+      clearRepetitiveElementsCache();
     }
   }
 
