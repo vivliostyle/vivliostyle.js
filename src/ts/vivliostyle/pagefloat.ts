@@ -19,11 +19,11 @@
 import {Numeric, ident, Val} from '../adapt/css';
 import * as geom from '../adapt/geom';
 import * as task from '../adapt/task';
-import * as vtree from '../adapt/vtree';
+import * as vtreeImpl from '../adapt/vtree';
 import * as asserts from './asserts';
 import * as logging from './logging';
 import * as logical from './logical';
-import {layout, pagefloat} from './types';
+import {layout, pagefloat, vtree} from './types';
 
 // import {LayoutConstraint, PageFloatArea, Column} from '../adapt/layout';
 import {Size, getSize} from './sizing'
@@ -141,7 +141,7 @@ export class PageFloatStore {
 
   addPageFloat(float: PageFloat) {
     const index = this.floats.findIndex(
-        (f) => vtree.isSameNodePosition(f.nodePosition, float.nodePosition));
+        (f) => vtreeImpl.isSameNodePosition(f.nodePosition, float.nodePosition));
     if (index >= 0) {
       throw new Error(
           'A page float with the same source node is already registered');
@@ -155,7 +155,7 @@ export class PageFloatStore {
   findPageFloatByNodePosition(nodePosition: vtree.NodePosition): PageFloat
       |null {
     const index = this.floats.findIndex(
-        (f) => vtree.isSameNodePosition(f.nodePosition, nodePosition));
+        (f) => vtreeImpl.isSameNodePosition(f.nodePosition, nodePosition));
     return index >= 0 ? this.floats[index] : null;
   }
 
@@ -235,7 +235,7 @@ export class PageFloatContinuation implements pagefloat.PageFloatContinuation {
       return true;
     }
     return this.float === other.float &&
-        vtree.isSameNodePosition(this.nodePosition, other.nodePosition);
+        vtreeImpl.isSameNodePosition(this.nodePosition, other.nodePosition);
   }
 }
 type PageFloatPlacementCondition = pagefloat.PageFloatPlacementCondition;
@@ -299,7 +299,7 @@ export class PageFloatLayoutContext implements pagefloat.PageFloatLayoutContext 
       let result = this.children[i];
       if (result.floatReference === floatReference &&
           result.flowName === flowName &&
-          vtree.isSameNodePosition(
+          vtreeImpl.isSameNodePosition(
               result.generatingNodePosition, generatingNodePosition)) {
         return result;
       } else {

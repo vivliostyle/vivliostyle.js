@@ -21,26 +21,27 @@
  */
 import * as asserts from '../vivliostyle/asserts';
 import * as breaks from '../vivliostyle/break';
-import * as layoututil from '../vivliostyle/layoututil';
+import * as breakposition from '../vivliostyle/breakposition';
+import {resolveNewIndex} from '../vivliostyle/diff';
+import * as layouthelper from '../vivliostyle/layouthelper';
+import * as layoutprocessor from '../vivliostyle/layoutprocessor';
+import * as layoutretryer from '../vivliostyle/layoutretryer';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';
-import * as base from './base';
-import * as geom from './geom';
-import * as task from './task';
-
 import * as plugin from '../vivliostyle/plugin';
-import {ElementsOffset} from '../vivliostyle/repetitiveelements';
-import * as repetitiveelements from '../vivliostyle/repetitiveelements';
+import * as repetitiveelementImpl from '../vivliostyle/repetitiveelements';
 import {processAfterIfContinues, processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';
 import {Size, getSize} from '../vivliostyle/sizing';
-import {resolveNewIndex} from '../vivliostyle/diff';
 import {TableFormattingContext} from '../vivliostyle/table';
-import {isBlock} from '../vivliostyle/display';
+import {layout, vtree} from '../vivliostyle/types';
+import * as base from './base';
 import {ident, Val} from './css';
+import * as geom from './geom';
+import * as task from './task';
+import * as vtreeImpl from './vtree';
 import {ViewFactory} from './vgen';
-import * as vtree from './vtree';
 
-declare var DEBUG: boolean; 
+declare var DEBUG: boolean;
 
 export const mediaTags = {
   'img': true,
@@ -50,180 +51,9 @@ export const mediaTags = {
 };
 
 /**
- * Though method used to be used as a workaround for Chrome bug, it seems that
- * the bug has been already fixed:
- *   https://bugs.chromium.org/p/chromium/issues/detail?id=297808
- * We now use this method as a workaround for Firefox bug:
- *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
- */
-export const fixBoxesForNode =
-    (clientLayout: vtree.ClientLayout, boxes: vtree.ClientRect[],
-     node: Node): vtree.ClientRect[] => {
-      const fullRange = node.ownerDocument.createRange();
-      fullRange.setStart(node, 0);
-      fullRange.setEnd(node, node.textContent.length);
-      const fullBoxes = clientLayout.getRangeClientRects(fullRange);
-      const result = [];
-      for (const box of boxes) {
-        let k;
-        for (k = 0; k < fullBoxes.length; k++) {
-          const fullBox = fullBoxes[k];
-          if (box.top >= fullBox.top && box.bottom <= fullBox.bottom &&
-              Math.abs(box.left - fullBox.left) < 1) {
-            result.push({
-              top: box.top,
-              left: fullBox.left,
-              bottom: box.bottom,
-              right: fullBox.right
-            });
-            break;
-          }
-        }
-        if (k == fullBoxes.length) {
-          logging.logger.warn('Could not fix character box');
-          result.push(box);
-        }
-      }
-      return result;
-    };
-
-/**
- * Calculate the position of the "after" edge in the block-progression
- * dimension. Return 0 if position was determined successfully and return
- * non-zero if position could not be determined and the node should be
- * considered zero-height.
- */
-export const calculateEdge =
-    (nodeContext: vtree.NodeContext, clientLayout: vtree.ClientLayout,
-     extraOffset: number, vertical: boolean): number => {
-      const node = nodeContext.viewNode;
-      if (!node) {
-        return NaN;
-      }
-      if (node.nodeType == 1) {
-        if (nodeContext.after || !nodeContext.inline) {
-          const cbox = clientLayout.getElementClientRect((node as Element));
-          if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
-            if (nodeContext.after) {
-              return vertical ? cbox.left : cbox.bottom;
-            } else {
-              return vertical ? cbox.right : cbox.top;
-            }
-          }
-        }
-        return NaN;
-      } else {
-        let edge = NaN;
-        const range = node.ownerDocument.createRange();
-        const length = node.textContent.length;
-        if (!length) {
-          return NaN;
-        }
-        if (nodeContext.after) {
-          extraOffset += length;
-        }
-        if (extraOffset >= length) {
-          extraOffset = length - 1;
-        }
-        range.setStart(node, extraOffset);
-        range.setEnd(node, extraOffset + 1);
-        let boxes = clientLayout.getRangeClientRects(range);
-        if (vertical && base.checkVerticalBBoxBug(document.body)) {
-          boxes = fixBoxesForNode(clientLayout, boxes, node);
-        }
-        let maxSize = 0;
-
-        // Get first of the widest boxes (works around Chrome results for soft
-        // hyphens).
-        for (const box of boxes) {
-          const boxSize =
-              vertical ? box.bottom - box.top : box.right - box.left;
-          if (box.right > box.left && box.bottom > box.top &&
-              (isNaN(edge) || boxSize > maxSize)) {
-            edge = vertical ? box.left : box.bottom;
-            maxSize = boxSize;
-          }
-        }
-        return edge;
-      }
-    };
-
-// NaN or not NaN
-
-/**
- * Processor doing some special layout (e.g. table layout)
- */
-export interface LayoutProcessor {
-  /**
-   * Do actual layout in the column starting from given NodeContext.
-   */
-  layout(nodeContext: vtree.NodeContext, column: Column, leadingEdge: boolean):
-      task.Result<vtree.NodeContext>;
-
-  /**
-   * Potential edge breaking position.
-   */
-  createEdgeBreakPosition(
-      position: vtree.NodeContext, breakOnEdge: string|null, overflows: boolean,
-      columnBlockSize: number): BreakPosition;
-
-  /**
-   * process nodecontext at the start of a non inline element.
-   * @return return true if you skip the subsequent nodes
-   */
-  startNonInlineElementNode(nodeContext: vtree.NodeContext): boolean;
-
-  /**
-   * process nodecontext after a non inline element.
-   * @return return true if you skip the subsequent nodes
-   */
-  afterNonInlineElementNode(
-      nodeContext: vtree.NodeContext, stopAtOverflow: boolean): boolean;
-
-  /**
-   * @return holing true
-   */
-  finishBreak(
-      column: Column, nodeContext: vtree.NodeContext, forceRemoveSelf: boolean,
-      endOfColumn: boolean): task.Result<boolean>|null;
-
-  clearOverflownViewNodes(
-      column: Column, parentNodeContext: vtree.NodeContext,
-      nodeContext: vtree.NodeContext, removeSelf: boolean);
-}
-
-/**
- * Resolver finding an appropriate LayoutProcessor given a formatting context
- */
-export class LayoutProcessorResolver {
-  /**
-   * Find LayoutProcessor corresponding to given formatting context.
-   */
-  find(formattingContext: vtree.FormattingContext): LayoutProcessor {
-    const hooks: plugin.ResolveLayoutProcessorHook[] =
-        plugin.getHooksForName(
-            plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR);
-    for (let i = 0; i < hooks.length; i++) {
-      const processor = hooks[i](formattingContext);
-      if (processor) {
-        return processor;
-      }
-    }
-    throw new Error(`No processor found for a formatting context: ${
-        formattingContext.getName()}`);
-  }
-}
-
-/**
  * Represents a constraint on layout
  */
-export interface LayoutConstraint {
-  /**
-   * Returns if this constraint allows the node context to be laid out at the
-   * current position.
-   */
-  allowLayout(nodeContext: vtree.NodeContext): boolean;
-}
+export type LayoutConstraint = layout.LayoutConstraint;
 
 /**
  * Represents a constraint that allows layout if all the constraints it contains
@@ -243,91 +73,9 @@ export class AllLayoutConstraint implements LayoutConstraint {
 /**
  * Represents constraints on laying out fragments
  */
-export interface FragmentLayoutConstraint {
-  allowLayout(
-      nodeContext: vtree.NodeContext, overflownNodeContext: vtree.NodeContext,
-      column: Column): boolean;
+export type FragmentLayoutConstraint = layout.FragmentLayoutConstraint;
 
-  nextCandidate(nodeContext: vtree.NodeContext): boolean;
-
-  postLayout(
-      allowed: boolean, positionAfter: vtree.NodeContext,
-      initialPosition: vtree.NodeContext, column: Column);
-
-  finishBreak(nodeContext: vtree.NodeContext, column: Column):
-      task.Result<boolean>;
-
-  equalsTo(constraint: FragmentLayoutConstraint): boolean;
-
-  getPriorityOfFinishBreak(): number;
-}
-
-/**
- * Potential breaking position.
- */
-export interface BreakPosition {
-  /**
-   * @return break position, if found
-   */
-  findAcceptableBreak(column: Column, penalty: number): vtree.NodeContext;
-
-  /**
-   * @return penalty for this break position
-   */
-  getMinBreakPenalty(): number;
-
-  calculateOffset(column: Column): {current: number, minimum: number};
-
-  breakPositionChosen(column: Column);
-}
-
-/**
- * @abstract
- */
-export abstract class AbstractBreakPosition implements BreakPosition {
-  /**
-   * @abstract
-   */
-  abstract findAcceptableBreak(column: Column, penalty: number): vtree.NodeContext;
-
-  /**
-   * @abstract
-   */
-  abstract getMinBreakPenalty(): number;
-
-  calculateOffset(column): {current: number, minimum: number} {
-    return calculateOffset(
-        this.getNodeContext(),
-        repetitiveelements.collectElementsOffset(column));
-  }
-
-  /**
-   * @override
-   */
-  breakPositionChosen(column) {}
-
-  getNodeContext(): vtree.NodeContext {return null;}
-}
-
-export function calculateOffset(
-    nodeContext: vtree.NodeContext,
-    elementsOffsets: ElementsOffset[]): {current: number, minimum: number} {
-  return {
-    current: elementsOffsets.reduce(
-        (val, repetitiveElement) =>
-            val + repetitiveElement.calculateOffset(nodeContext),
-        0),
-    minimum: elementsOffsets.reduce(
-        (val, repetitiveElement) =>
-            val + repetitiveElement.calculateMinimumOffset(nodeContext),
-        0)
-  };
-}
-type BreakPositionAndNodeContext = {
-  breakPosition: BreakPosition,
-  nodeContext: vtree.NodeContext
-};
-
+type BreakPositionAndNodeContext = layout.BreakPositionAndNodeContext;
 export {BreakPositionAndNodeContext};
 
 /**
@@ -335,7 +83,7 @@ export {BreakPositionAndNodeContext};
  * @param checkPoints array of breaking points for
  *    breakable block
  */
-export class BoxBreakPosition extends AbstractBreakPosition {
+export class BoxBreakPosition extends breakposition.AbstractBreakPosition implements layout.BoxBreakPosition {
   private alreadyEvaluated: boolean = false;
   breakNodeContext: vtree.NodeContext = null;
 
@@ -374,79 +122,6 @@ export class BoxBreakPosition extends AbstractBreakPosition {
   }
 }
 
-/**
- * Potential edge breaking position.
- */
-export class EdgeBreakPosition extends AbstractBreakPosition {
-  overflowIfRepetitiveElementsDropped: boolean;
-  protected isEdgeUpdated: boolean = false;
-  private edge: number = 0;
-
-  constructor(
-      public readonly position: vtree.NodeContext,
-      public readonly breakOnEdge: string|null, public overflows: boolean,
-      public readonly computedBlockSize: number) {
-    super();
-    this.overflowIfRepetitiveElementsDropped = overflows;
-  }
-
-  /**
-   * @override
-   */
-  findAcceptableBreak(column, penalty) {
-    this.updateOverflows(column);
-    if (penalty < this.getMinBreakPenalty()) {
-      return null;
-    }
-    return column.findEdgeBreakPosition(this);
-  }
-
-  /**
-   * @override
-   */
-  getMinBreakPenalty() {
-    if (!this.isEdgeUpdated) {
-      throw new Error('EdgeBreakPosition.prototype.updateEdge not called');
-    }
-    const preferDropping = this.isFirstContentOfRepetitiveElementsOwner() &&
-        !this.overflowIfRepetitiveElementsDropped;
-    return (breaks.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0) +
-        (this.overflows && !preferDropping ? 3 : 0) +
-        (this.position.parent ? this.position.parent.breakPenalty : 0);
-  }
-
-  private updateEdge(column: Column) {
-    const clonedPaddingBorder =
-        column.calculateClonedPaddingBorder(this.position);
-    this.edge =
-        calculateEdge(this.position, column.clientLayout, 0, column.vertical) +
-        clonedPaddingBorder;
-    this.isEdgeUpdated = true;
-  }
-
-  private updateOverflows(column: Column) {
-    if (!this.isEdgeUpdated) {
-      this.updateEdge(column);
-    }
-    const edge = this.edge;
-    const offsets = this.calculateOffset(column);
-    this.overflowIfRepetitiveElementsDropped =
-        column.isOverflown(edge + (column.vertical ? -1 : 1) * offsets.minimum);
-    this.overflows = this.position.overflow =
-        column.isOverflown(edge + (column.vertical ? -1 : 1) * offsets.current);
-  }
-
-  /** @override */
-  getNodeContext() {
-    return this.position;
-  }
-
-  private isFirstContentOfRepetitiveElementsOwner(): boolean {
-    return repetitiveelements
-        .isFirstContentOfRepetitiveElementsOwner(this.getNodeContext());
-  }
-}
-
 export const validateCheckPoints = (checkPoints: vtree.NodeContext[]) => {
   for (let i = 1; i < checkPoints.length; i++) {
     const cp0 = checkPoints[i - 1];
@@ -474,34 +149,7 @@ export const validateCheckPoints = (checkPoints: vtree.NodeContext[]) => {
   }
 };
 
-export class BlockFormattingContext implements vtree.FormattingContext {
-  constructor(private readonly parent: vtree.FormattingContext) {}
-
-  /**
-   * @override
-   */
-  getName() {return 'Block formatting context (BlockFormattingContext)';}
-
-  /**
-   * @override
-   */
-  isFirstTime(nodeContext, firstTime) {return firstTime;}
-
-  /**
-   * @override
-   */
-  getParent() {
-    return this.parent;
-  }
-
-  /** @override */
-  saveState() {}
-
-  /** @override */
-  restoreState(state) {}
-}
-
-export class Column extends vtree.Container {
+export class Column extends vtreeImpl.Container implements layout.Column {
   last: Node;
   viewDocument: Document;
   flowRootFormattingContext: vtree.FormattingContext = null;
@@ -516,7 +164,7 @@ export class Column extends vtree.Container {
   chunkPositions: vtree.ChunkPosition[] = null;
   bands: geom.Band[] = null;
   overflown: boolean = false;
-  breakPositions: BreakPosition[] = null;
+  breakPositions: breakposition.BreakPosition[] = null;
   pageBreakType: string|null = null;
   forceNonfitting: boolean = true;
   leftFloatEdge: number = 0;
@@ -599,7 +247,7 @@ export class Column extends vtree.Container {
             const prevContext = nodeContext;
             const step = steps[stepIndex];
             nodeContext =
-                vtree.makeNodeContextFromNodePositionStep(step, prevContext);
+                vtreeImpl.makeNodeContextFromNodePositionStep(step, prevContext);
             if (stepIndex === steps.length - 1 &&
                 !nodeContext.formattingContext) {
               nodeContext.formattingContext = self.flowRootFormattingContext;
@@ -669,14 +317,14 @@ export class Column extends vtree.Container {
         task.newFrame('buildViewToNextBlockEdge');
     frame
         .loopWithFrame((bodyFrame) => {
-          if (position.viewNode && !isSpecialNodeContext(position)) {
+          if (position.viewNode && !layouthelper.isSpecialNodeContext(position)) {
             checkPoints.push(position.copy());
           }
           self.maybePeelOff(position, 0).then((position1Param) => {
             const position1 = (position1Param as vtree.NodeContext);
             if (position1 !== position) {
               position = position1;
-              if (!isSpecialNodeContext(position)) {
+              if (!layouthelper.isSpecialNodeContext(position)) {
                 checkPoints.push(position.copy());
               }
             }
@@ -748,7 +396,7 @@ export class Column extends vtree.Container {
     frame
         .loopWithFrame((bodyFrame) => {
           if (position.viewNode && position.inline &&
-              !isSpecialNodeContext(position)) {
+              !layouthelper.isSpecialNodeContext(position)) {
             checkPoints.push(position.copy());
           } else {
             if (checkPoints.length > 0) {
@@ -769,7 +417,7 @@ export class Column extends vtree.Container {
                 bodyFrame.breakLoop();
                 return;
               }
-              if (!isSpecialNodeContext(position1)) {
+              if (!layouthelper.isSpecialNodeContext(position1)) {
                 checkPoints.push(position1.copy());
               }
             }
@@ -878,10 +526,10 @@ export class Column extends vtree.Container {
       nodeContext: vtree.NodeContext, checkPoints: vtree.NodeContext[],
       index: number, boxOffset: number): number {
     let edge;
-    if (nodeContext && isOrphan(nodeContext.viewNode)) {
+    if (nodeContext && layouthelper.isOrphan(nodeContext.viewNode)) {
       return NaN;
     } else if (nodeContext && nodeContext.after && !nodeContext.inline) {
-      edge = calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
+      edge = layouthelper.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
       if (!isNaN(edge)) {
         return edge;
       }
@@ -890,7 +538,7 @@ export class Column extends vtree.Container {
     let offset = boxOffset - nodeContext.boxOffset;
     while (true) {
       edge =
-          calculateEdge(nodeContext, this.clientLayout, offset, this.vertical);
+          layouthelper.calculateEdge(nodeContext, this.clientLayout, offset, this.vertical);
       if (!isNaN(edge)) {
         return edge;
       }
@@ -1295,7 +943,7 @@ export class Column extends vtree.Container {
             return;
           }
           const c = continuations[i];
-          const floatChunkPosition = new vtree.ChunkPosition(c.nodePosition);
+          const floatChunkPosition = new vtreeImpl.ChunkPosition(c.nodePosition);
           floatArea.layout(floatChunkPosition, true).then((newPosition) => {
             result.newPosition = newPosition;
             if (!newPosition || allowFragmented) {
@@ -1463,7 +1111,7 @@ export class Column extends vtree.Container {
   setFloatAnchorViewNode(nodeContext: vtree.NodeContext): vtree.NodeContext {
     const parent = nodeContext.viewNode.parentNode;
     const anchor = parent.ownerDocument.createElement('span');
-    anchor.setAttribute(vtree.SPECIAL_ATTR, '1');
+    anchor.setAttribute(vtreeImpl.SPECIAL_ATTR, '1');
     if (nodeContext.floatSide === 'footnote') {
       // Defaults for footnote-call, can be overriden by the stylesheet.
       this.layoutContext.applyPseudoelementStyle(
@@ -1535,7 +1183,7 @@ export class Column extends vtree.Container {
       cont = task.newResult(float);
     }
     return cont.thenAsync((float) => {
-      const nodePosition = vtree.newNodePositionFromNodeContext(nodeContext, 0);
+      const nodePosition = vtreeImpl.newNodePositionFromNodeContext(nodeContext, 0);
       const nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
       const pageFloatFragment = strategy.findPageFloatFragment(float, context);
       const continuation =
@@ -1551,7 +1199,7 @@ export class Column extends vtree.Container {
       } else if (self.nodeContextOverflowingDueToRepetitiveElements) {
         return task.newResult(null);
       } else {
-        const edge = calculateEdge(
+        const edge = layouthelper.calculateEdge(
             nodeContextAfter, self.clientLayout, 0, self.vertical);
         if (self.isOverflown(edge)) {
           return task.newResult(nodeContextAfter);
@@ -1580,7 +1228,7 @@ export class Column extends vtree.Container {
     const span = (doc.createElement('span') as HTMLElement);
     span.style.visibility = 'hidden';
     span.style.verticalAlign = 'top';
-    span.setAttribute(vtree.SPECIAL_ATTR, '1');
+    span.setAttribute(vtreeImpl.SPECIAL_ATTR, '1');
     const inner = (doc.createElement('span') as HTMLElement);
     inner.style.fontSize = '0';
     inner.style.lineHeight = '0';
@@ -1634,7 +1282,7 @@ export class Column extends vtree.Container {
       (br as HTMLElement).style.marginTop = `${spanRect.top - brRect.top}px`;
       (br as HTMLElement).style.height = '0px';
     }
-    br.setAttribute(vtree.SPECIAL_ATTR, '1');
+    br.setAttribute(vtreeImpl.SPECIAL_ATTR, '1');
   }
 
   /**
@@ -1810,10 +1458,10 @@ export class Column extends vtree.Container {
               resNodeContext, checkPoints, checkPointIndex,
               checkPoints[checkPointIndex].boxOffset);
           let overflown = false;
-          if (!resNodeContext || !isOrphan(resNodeContext.viewNode)) {
-            const offsets = calculateOffset(
+          if (!resNodeContext || !layouthelper.isOrphan(resNodeContext.viewNode)) {
+            const offsets = breakposition.calculateOffset(
                 resNodeContext,
-                repetitiveelements.collectElementsOffset(self));
+                repetitiveelementImpl.collectElementsOffset(self));
             overflown = self.isOverflown(
                 edge + (self.vertical ? -1 : 1) * offsets.minimum);
             if (self.isOverflown(
@@ -1973,7 +1621,7 @@ export class Column extends vtree.Container {
           lastGood = node;
         } else if (wentUp) {
           wentUp = false;
-        } else if (isSpecial((node as Element))) {
+        } else if (layouthelper.isSpecial((node as Element))) {
           // Skip special
           seekRange = !haveStart;
         } else {
@@ -2012,8 +1660,8 @@ export class Column extends vtree.Container {
     const boxes = this.getRangeBoxes(
         checkPoints[0].viewNode, checkPoints[checkPoints.length - 1].viewNode);
     boxes.sort(
-        this.vertical ? vtree.clientrectDecreasingRight :
-                        vtree.clientrectIncreasingTop);
+        this.vertical ? vtreeImpl.clientrectDecreasingRight :
+                        vtreeImpl.clientrectIncreasingTop);
     let lineBefore = 0;
     let lineAfter = 0;
     let lineEnd = 0;
@@ -2086,13 +1734,13 @@ export class Column extends vtree.Container {
     return clonedPaddingBorder;
   }
 
-  private getOffsetByRepetitiveElements(bp?: BreakPosition): number {
+  private getOffsetByRepetitiveElements(bp?: breakposition.BreakPosition): number {
     let offset;
     if (bp) {
       offset = bp.calculateOffset(this);
     } else {
-      offset = calculateOffset(
-          null, repetitiveelements.collectElementsOffset(this));
+      offset = breakposition.calculateOffset(
+          null, repetitiveelementImpl.collectElementsOffset(this));
     }
     return offset.current;
   }
@@ -2189,7 +1837,7 @@ export class Column extends vtree.Container {
     if (blockParent) {
       blockParent = blockParent.copy().modify();
       blockParent.after = true;
-      return calculateEdge(blockParent, this.clientLayout, 0, this.vertical);
+      return layouthelper.calculateEdge(blockParent, this.clientLayout, 0, this.vertical);
     } else {
       return NaN;
     }
@@ -2208,7 +1856,7 @@ export class Column extends vtree.Container {
     };
   }
 
-  findEdgeBreakPosition(bp: EdgeBreakPosition): vtree.NodeContext {
+  findEdgeBreakPosition(bp: breakposition.EdgeBreakPosition): vtree.NodeContext {
     this.computedBlockSize =
         bp.computedBlockSize + this.getOffsetByRepetitiveElements(bp);
     return bp.position;
@@ -2223,11 +1871,11 @@ export class Column extends vtree.Container {
       endOfColumn: boolean): task.Result<boolean> {
     asserts.assert(nodeContext.formattingContext);
     const layoutProcessor =
-        (new LayoutProcessorResolver()).find(nodeContext.formattingContext);
+        (new layoutprocessor.LayoutProcessorResolver()).find(nodeContext.formattingContext);
     let result = layoutProcessor.finishBreak(
         this, nodeContext, forceRemoveSelf, endOfColumn);
     if (!result) {
-      result = blockLayoutProcessor.finishBreak(
+      result = layoutprocessor.blockLayoutProcessor.finishBreak(
           this, nodeContext, forceRemoveSelf, endOfColumn);
     }
     return result;
@@ -2329,13 +1977,13 @@ export class Column extends vtree.Container {
     if (!nodeContext) {
       return false;
     }
-    if (isOrphan(nodeContext.viewNode)) {
+    if (layouthelper.isOrphan(nodeContext.viewNode)) {
       return false;
     }
-    let edge = calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
-    const offsets = calculateOffset(
+    let edge = layouthelper.calculateEdge(nodeContext, this.clientLayout, 0, this.vertical);
+    const offsets = breakposition.calculateOffset(
         nodeContext,
-        repetitiveelements.collectElementsOffset(this));
+        repetitiveelementImpl.collectElementsOffset(this));
     const overflown =
         this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.minimum);
     if (this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
@@ -2367,7 +2015,7 @@ export class Column extends vtree.Container {
     if (!nodeContext) {
       return false;
     }
-    if (isOrphan(nodeContext.viewNode)) {
+    if (layouthelper.isOrphan(nodeContext.viewNode)) {
       return false;
     }
     const overflown =
@@ -2459,14 +2107,14 @@ export class Column extends vtree.Container {
   }
 
   isBFC(formattingContext: vtree.FormattingContext): boolean {
-    if (formattingContext instanceof BlockFormattingContext) {
+    if (formattingContext instanceof layoutprocessor.BlockFormattingContext) {
       return true;
     }
     if (formattingContext instanceof TableFormattingContext) {
       return false;
     }
     if (formattingContext instanceof
-        repetitiveelements
+        repetitiveelementImpl
             .RepetitiveElementsOwnerFormattingContext) {
       return true;
     }
@@ -2516,7 +2164,7 @@ export class Column extends vtree.Container {
         .loopWithFrame((loopFrame) => {
           while (nodeContext) {
             asserts.assert(nodeContext.formattingContext);
-            const layoutProcessor = (new LayoutProcessorResolver())
+            const layoutProcessor = (new layoutprocessor.LayoutProcessorResolver())
                                         .find(nodeContext.formattingContext);
 
             // A code block to be able to use break. Break moves to the next
@@ -2527,7 +2175,7 @@ export class Column extends vtree.Container {
                 break;
               }
               if (nodeContext.inline && nodeContext.viewNode.nodeType != 1) {
-                if (vtree.canIgnore(
+                if (vtreeImpl.canIgnore(
                         nodeContext.viewNode, nodeContext.whitespace)) {
                   // Ignorable text content, skip
                   break;
@@ -2568,7 +2216,7 @@ export class Column extends vtree.Container {
                 }
                 if (!self.isBFC(nodeContext.formattingContext) ||
                     nodeContext.formattingContext instanceof
-                        repetitiveelements
+                        repetitiveelementImpl
                             .RepetitiveElementsOwnerFormattingContext ||
                     self.isFloatNodeContext(nodeContext) ||
                     nodeContext.flexContainer) {
@@ -2752,7 +2400,7 @@ export class Column extends vtree.Container {
                 break;
               }
               if (nodeContext.inline && nodeContext.viewNode.nodeType != 1) {
-                if (vtree.canIgnore(
+                if (vtreeImpl.canIgnore(
                         nodeContext.viewNode, nodeContext.whitespace)) {
                   // Ignorable text content, skip
                   break;
@@ -2884,7 +2532,7 @@ export class Column extends vtree.Container {
             const formattingContext = nodeContext.formattingContext;
             asserts.assert(formattingContext);
             const layoutProcessor =
-                (new LayoutProcessorResolver()).find(formattingContext);
+                (new layoutprocessor.LayoutProcessorResolver()).find(formattingContext);
             layoutProcessor.layout(nodeContext, self, leadingEdge)
                 .thenFinish(frame);
           }
@@ -2902,7 +2550,7 @@ export class Column extends vtree.Container {
       const formattingContext = (parent || nodeContext).formattingContext;
       asserts.assert(formattingContext);
       const layoutProcessor =
-          (new LayoutProcessorResolver()).find(formattingContext);
+          (new layoutprocessor.LayoutProcessorResolver()).find(formattingContext);
       layoutProcessor.clearOverflownViewNodes(
           this, parent, nodeContext, removeSelf);
       removeSelf = false;
@@ -2968,7 +2616,7 @@ export class Column extends vtree.Container {
     asserts.assert(position.formattingContext);
     const copy = position.copy();
     const layoutProcessor =
-        (new LayoutProcessorResolver()).find(position.formattingContext);
+        (new layoutprocessor.LayoutProcessorResolver()).find(position.formattingContext);
     const clonedPaddingBorder = this.calculateClonedPaddingBorder(copy);
     const bp = layoutProcessor.createEdgeBreakPosition(
         copy, breakAtEdge, overflows,
@@ -3035,7 +2683,7 @@ export class Column extends vtree.Container {
         };
         self.layoutContext.addEventListener('nextInTree', nextInTreeListener);
       }
-      const retryer = new LayoutRetryer(leadingEdge, breakAfter);
+      const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
       retryer.layout(nodeContext, self).then((nodeContextParam) => {
         self.doFinishBreak(
                 nodeContextParam, retryer.context.overflownNodeContext,
@@ -3058,7 +2706,7 @@ export class Column extends vtree.Container {
                 } else {
                   self.overflown = true;
                   const result =
-                      new vtree.ChunkPosition(positionAfter.toNodePosition());
+                      new vtreeImpl.ChunkPosition(positionAfter.toNodePosition());
                   frame.finish(result);
                 }
               });
@@ -3241,25 +2889,10 @@ export class Column extends vtree.Container {
   }
 }
 
-export const removeFollowingSiblings =
-    (parentNode: Node, viewNode: Node): void => {
-      if (!parentNode) {
-        return;
-      }
-      let lastChild: Node;
-      while ((lastChild = parentNode.lastChild) != viewNode) {
-        parentNode.removeChild(lastChild);
-      }
-    };
-
 export const firstCharPattern =
     /^[^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*([A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527][^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*)?/;
-type SinglePageFloatLayoutResult = {
-  floatArea: PageFloatArea|null,
-  pageFloatFragment: pagefloat.PageFloatFragment|null,
-  newPosition: vtree.ChunkPosition|null
-};
 
+type SinglePageFloatLayoutResult = layout.SinglePageFloatLayoutResult;
 export {SinglePageFloatLayoutResult};
 
 export const fixJustificationOnHyphen =
@@ -3286,7 +2919,7 @@ export const fixJustificationOnHyphen =
 /**
  * breaking point resolver for Text Node.
  */
-export class TextNodeBreaker {
+export class TextNodeBreaker implements layout.TextNodeBreaker {
   breakTextNode(
       textNode: Text, nodeContext: vtree.NodeContext, low: number,
       checkPoints: vtree.NodeContext[], checkpointIndex: number,
@@ -3356,34 +2989,7 @@ export const resolveHyphenateCharacter =
         nodeContext.hyphenateCharacter ||
     nodeContext.parent && nodeContext.parent.hyphenateCharacter || '-';
 
-export const isSpecial = (e: Element): boolean =>
-    !!e.getAttribute(vtree.SPECIAL_ATTR);
-
-export const isSpecialNodeContext =
-    (nodeContext: vtree.NodeContext): boolean => {
-      if (!nodeContext) {
-        return false;
-      }
-      const viewNode = nodeContext.viewNode;
-      if (viewNode && viewNode.nodeType === 1) {
-        return isSpecial((viewNode as Element));
-      } else {
-        return false;
-      }
-    };
-
-export const isOrphan = (node: Node): boolean => {
-  while (node) {
-    if (node.parentNode === node.ownerDocument) {
-      return false;
-    }
-    node = node.parentNode;
-  }
-  return true;
-};
-
-export class LayoutRetryer extends
-    layoututil.AbstractLayoutRetryer {
+export class ColumnLayoutRetryer extends layoutretryer.AbstractLayoutRetryer {
   breakAfter: any;
   private initialPageBreakType: string|null = null;
   initialComputedBlockSize: number = 0;
@@ -3410,7 +3016,7 @@ export class LayoutRetryer extends
   prepareLayout(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
-      repetitiveelements.clearCache();
+      repetitiveelementImpl.clearCache();
     }
   }
 
@@ -3423,7 +3029,7 @@ export class LayoutRetryer extends
     while (nodeContext) {
       const viewNode = nodeContext.viewNode;
       if (viewNode) {
-        removeFollowingSiblings(viewNode.parentNode, viewNode);
+        layouthelper.removeFollowingSiblings(viewNode.parentNode, viewNode);
       }
       nodeContext = nodeContext.parent;
     }
@@ -3450,7 +3056,7 @@ export class LayoutRetryer extends
   }
 }
 
-export class DefaultLayoutMode implements layoututil.LayoutMode {
+export class DefaultLayoutMode implements layout.LayoutMode {
   constructor(
       public readonly leadingEdge: boolean,
       public readonly breakAfter: string|null,
@@ -3462,7 +3068,7 @@ export class DefaultLayoutMode implements layoututil.LayoutMode {
   doLayout(nodeContext, column) {
     const frame: task.Frame<vtree.NodeContext> =
         task.newFrame('DefaultLayoutMode.doLayout');
-    
+
     processAfterIfContinuesOfAncestors(nodeContext, column)
         .then(() => {
           column.doLayout(nodeContext, this.leadingEdge, this.breakAfter)
@@ -3510,102 +3116,7 @@ export class DefaultLayoutMode implements layoututil.LayoutMode {
   }
 }
 
-export class BlockLayoutProcessor implements LayoutProcessor {
-  /**
-   * @override
-   */
-  layout(nodeContext, column, leadingEdge) {
-    if (column.isFloatNodeContext(nodeContext)) {
-      return column.layoutFloatOrFootnote(nodeContext);
-    } else if (column.isBreakable(nodeContext)) {
-      return column.layoutBreakableBlock(nodeContext);
-    } else {
-      return column.layoutUnbreakable(nodeContext);
-    }
-  }
-
-  /**
-   * @override
-   */
-  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {return new EdgeBreakPosition(
-      position.copy(), breakOnEdge, overflows, columnBlockSize);}
-
-  /**
-   * @override
-   */
-  startNonInlineElementNode(nodeContext) {return false;}
-
-  /**
-   * @override
-   */
-  afterNonInlineElementNode(nodeContext) {return false;}
-
-  /**
-   * @override
-   */
-  clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf) {
-    if (!nodeContext.viewNode) {
-      return;
-    }
-    if (!nodeContext.viewNode.parentNode) {
-      return;
-    }
-    const parentNode = nodeContext.viewNode.parentNode;
-    removeFollowingSiblings(parentNode, nodeContext.viewNode);
-    if (removeSelf) {
-      parentNode.removeChild(nodeContext.viewNode);
-    }
-  }
-
-  /**
-   * @return holing true
-   * @override
-   */
-  finishBreak(
-      column: Column, nodeContext: vtree.NodeContext, forceRemoveSelf: boolean,
-      endOfColumn: boolean): task.Result<boolean> {
-    const removeSelf = forceRemoveSelf ||
-        nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 &&
-            !nodeContext.after;
-    column.clearOverflownViewNodes(nodeContext, removeSelf);
-    if (endOfColumn) {
-      column.fixJustificationIfNeeded(nodeContext, true);
-      column.layoutContext.processFragmentedBlockEdge(
-          removeSelf ? nodeContext : nodeContext.parent);
-    }
-    return task.newResult(true);
-  }
-}
-
-export const blockLayoutProcessor = new BlockLayoutProcessor();
-plugin.registerHook(
-    plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-    (nodeContext, firstTime, display, position, floatSide, isRoot) => {
-      const parent = nodeContext.parent;
-      if (!parent && nodeContext.formattingContext) {
-        return null;
-      } else if (parent &&
-          nodeContext.formattingContext !== parent.formattingContext) {
-        return null;
-      } else if (nodeContext.establishesBFC ||
-          !nodeContext.formattingContext &&
-              isBlock(
-                  display, position, floatSide, isRoot)) {
-        return new BlockFormattingContext(
-            parent ? parent.formattingContext : null);
-      } else {
-        return null;
-      }
-    });
-plugin.registerHook(
-    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
-      if (formattingContext instanceof BlockFormattingContext) {
-        return blockLayoutProcessor;
-      }
-      return null;
-    });
-
-export class PageFloatArea extends Column {
+export class PageFloatArea extends Column implements layout.PageFloatArea {
   private rootViewNodes: Element[] = [];
   private floatMargins: geom.Insets[] = [];
   adjustContentRelativeSize: boolean = true;
@@ -3707,11 +3218,3 @@ export class PageFloatArea extends Column {
     }, this));
   }
 }
-
-export const getElementHeight =
-    (element: Element, column: Column, vertical: boolean): number => {
-      const rect = column.clientLayout.getElementClientRect(element);
-      const margin = column.getComputedMargin(element);
-      return vertical ? rect['width'] + margin['left'] + margin['right'] :
-                        rect['height'] + margin['top'] + margin['bottom'];
-    };

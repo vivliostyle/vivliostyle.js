@@ -17,13 +17,17 @@
  * @fileoverview Table formatting context and layout.
  */
 import * as base from '../adapt/base';
-import * as layout from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 import * as asserts from './asserts';
+import * as breakposition from './breakposition';
+import * as layouthelper from './layouthelper';
+import * as layoutprocessor from './layoutprocessor';
+import * as layoutretryer from './layoutretryer';
 import * as layoututil from './layoututil';
 import * as plugin from './plugin';
 import * as repetitiveelements from './repetitiveelements';
+import {layout} from './types';
 
 import {ident} from '../adapt/css';
 import {ViewFactory} from '../adapt/vgen';
@@ -102,7 +106,7 @@ export class TableCaptionView {
   }
 }
 
-export class BetweenTableRowBreakPosition extends layout.EdgeBreakPosition {
+export class BetweenTableRowBreakPosition extends breakposition.EdgeBreakPosition {
   private formattingContext: any;
 
   /** Array<!adapt.layout.BreakPositionAndNodeContext> */
@@ -172,8 +176,7 @@ export class BetweenTableRowBreakPosition extends layout.EdgeBreakPosition {
   }
 }
 
-export class InsideTableRowBreakPosition extends
-    layout.AbstractBreakPosition {
+export class InsideTableRowBreakPosition extends breakposition.AbstractBreakPosition {
   acceptableCellBreakPositions: layout.BreakPositionAndNodeContext[] = null;
 
   constructor(
@@ -539,7 +542,7 @@ export class ElementsOffsetOfTableCell implements
   private calculateMaxOffsetOfColumn(nodeContext, resolver) {
     let maxOffset = 0;
     this.repeatitiveElementsInColumns.forEach((repetitiveElements) => {
-      const offsets = layout.calculateOffset(nodeContext, repetitiveElements);
+      const offsets = breakposition.calculateOffset(nodeContext, repetitiveElements);
       maxOffset = Math.max(maxOffset, resolver(offsets));
     });
     return maxOffset;
@@ -731,7 +734,7 @@ export class EntireTableLayoutStrategy extends
   registerCheckPoint(state: layoututil.LayoutIteratorState) {
     const nodeContext = state.nodeContext;
     if (nodeContext && nodeContext.viewNode &&
-        !layout.isSpecialNodeContext(nodeContext)) {
+        !layouthelper.isSpecialNodeContext(nodeContext)) {
       this.checkPoints.push(nodeContext.clone());
     }
   }
@@ -1132,7 +1135,7 @@ function clearTableLayoutOptionCache(tableRootSourceNode: Node) {
   }
 }
 
-export class TableLayoutProcessor implements layout.LayoutProcessor {
+export class TableLayoutProcessor implements layoutprocessor.LayoutProcessor {
   private layoutEntireTable(
       nodeContext: vtree.NodeContext,
       column: layout.Column): task.Result<vtree.NodeContext> {
@@ -1284,7 +1287,7 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
               column.clientLayout.getElementClientRect(tableElement);
           let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
           edge += (column.vertical ? -1 : 1) *
-              layout
+              breakposition
                   .calculateOffset(
                       nodeContext,
                       repetitiveelements.collectElementsOffset(column))
@@ -1376,8 +1379,10 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
   /**
    * @override
    */
-  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {return new BetweenTableRowBreakPosition(
-      position, breakOnEdge, overflows, columnBlockSize);}
+  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {
+    return new BetweenTableRowBreakPosition(
+      position, breakOnEdge, overflows, columnBlockSize);
+  }
 
   /**
    * @override
@@ -1458,13 +1463,13 @@ export class TableLayoutProcessor implements layout.LayoutProcessor {
       }
     }
     formattingContext.finishFragment();
-    return layout.blockLayoutProcessor.finishBreak(
+    return layoutprocessor.blockLayoutProcessor.finishBreak(
         column, nodeContext, forceRemoveSelf, endOfColumn);
   }
 
   /** @override */
   clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf) {
-    layout.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
+    layoutprocessor.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
         column, parentNodeContext, nodeContext, removeSelf);
   }
 }
@@ -1496,7 +1501,7 @@ function adjustCellHeight(
 }
 
 export class LayoutRetryer extends
-    layoututil.AbstractLayoutRetryer {
+    layoutretryer.AbstractLayoutRetryer {
   private tableFormattingContext: any;
 
   constructor(
@@ -1562,7 +1567,7 @@ export class LayoutEntireTable extends
   }
 }
 
-export class EntireTableBreakPosition extends layout.EdgeBreakPosition {
+export class EntireTableBreakPosition extends breakposition.EdgeBreakPosition {
   constructor(tableNodeContext: vtree.NodeContext) {
     super(tableNodeContext, null, tableNodeContext.overflow, 0);
   }
@@ -1687,7 +1692,7 @@ export class TableRowLayoutConstraint extends
     if (column.pseudoParent) {
       return true;
     }
-    if (layout.isOrphan(this.nodeContext.viewNode)) {
+    if (layouthelper.isOrphan(this.nodeContext.viewNode)) {
       return true;
     }
     if (!repetitiveElements.isEnableToUpdateState()) {

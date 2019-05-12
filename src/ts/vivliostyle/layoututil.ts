@@ -16,12 +16,12 @@
  *
  * @fileoverview Utilities related to layout.
  */
+import * as layoutImpl from '../adapt/layout';
 import * as task from '../adapt/task';
-import * as vtree from '../adapt/vtree';
+import * as vtreeImpl from '../adapt/vtree';
 import * as breaks from './break';
-
-import {BreakPosition, BreakPositionAndNodeContext, Column, EdgeBreakPosition, LayoutConstraint} from '../adapt/layout';
-import * as asserts from './asserts';
+import * as breakposition from './breakposition';
+import {layout, vtree} from './types';
 
 type LayoutIteratorState = {
   nodeContext: vtree.NodeContext,
@@ -90,7 +90,7 @@ export class LayoutIterator {
                 r = strategy.startNonDisplayableNode(state);
               }
             } else if (state.nodeContext.viewNode.nodeType !== 1) {
-              if (vtree.canIgnore(
+              if (vtreeImpl.canIgnore(
                       state.nodeContext.viewNode,
                       state.nodeContext.whitespace)) {
                 if (state.nodeContext.after) {
@@ -182,7 +182,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   /**
    * @return Returns true if a forced break occurs.
    */
-  processForcedBreak(state: LayoutIteratorState, column: Column): boolean {
+  processForcedBreak(state: LayoutIteratorState, column: layout.Column): boolean {
     const needForcedBreak =
         !state.leadingEdge && breaks.isForcedBreakValue(state.breakAtTheEdge);
     if (needForcedBreak) {
@@ -197,7 +197,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   /**
    * @return Returns true if the node overflows the column.
    */
-  saveEdgeAndProcessOverflow(state: LayoutIteratorState, column: Column):
+  saveEdgeAndProcessOverflow(state: LayoutIteratorState, column: layout.Column):
       boolean {
     const overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(
         state.lastAfterNodeContext, null, true, state.breakAtTheEdge);
@@ -213,8 +213,8 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    * @returns Returns true if the layout constraint is violated.
    */
   processLayoutConstraint(
-      state: LayoutIteratorState, layoutConstraint: LayoutConstraint,
-      column: Column): boolean {
+      state: LayoutIteratorState, layoutConstraint: layout.LayoutConstraint,
+      column: layout.Column): boolean {
     let nodeContext = state.nodeContext;
     const violateConstraint = !layoutConstraint.allowLayout(nodeContext);
     if (violateConstraint) {
@@ -296,8 +296,8 @@ export class PseudoColumn {
   private column: any;
 
   constructor(
-      column: Column, viewRoot: Element, parentNodeContext: vtree.NodeContext) {
-    this.column = (Object.create(column) as Column);
+      column: layout.Column, viewRoot: Element, parentNodeContext: vtree.NodeContext) {
+    this.column = (Object.create(column) as layout.Column);
     this.column.element = viewRoot;
     this.column.layoutContext = column.layoutContext.clone();
     this.column.stopAtOverflow = false;
@@ -309,7 +309,7 @@ export class PseudoColumn {
         this.column.footnoteEdge - parentClonedPaddingBorder;
     const pseudoColumn = this;
     this.column.openAllViews = function(position) {
-      return Column.prototype.openAllViews.call(this, position)
+      return layoutImpl.Column.prototype.openAllViews.call(this, position)
           .thenAsync((result) => {
             pseudoColumn.startNodeContexts.push(result.copy());
             return task.newResult(result);
@@ -327,11 +327,11 @@ export class PseudoColumn {
   }
 
   findAcceptableBreakPosition(allowBreakAtStartPosition: boolean):
-      BreakPositionAndNodeContext {
+      layout.BreakPositionAndNodeContext {
     const p = this.column.findAcceptableBreakPosition();
     if (allowBreakAtStartPosition) {
       const startNodeContext = this.startNodeContexts[0].copy();
-      const bp = new EdgeBreakPosition(
+      const bp = new breakposition.EdgeBreakPosition(
           startNodeContext, null, startNodeContext.overflow, 0);
       bp.findAcceptableBreak(this.column, 0);
       if (!p.nodeContext) {
@@ -362,7 +362,7 @@ export class PseudoColumn {
   }
 
   isLastAfterNodeContext(nodeContext: vtree.NodeContext): boolean {
-    return vtree.isSameNodePosition(
+    return vtreeImpl.isSameNodePosition(
         nodeContext.toNodePosition(), this.column.lastAfterPosition);
   }
 
@@ -370,96 +370,7 @@ export class PseudoColumn {
     return this.column.element;
   }
 
-  getColumn(): Column {
+  getColumn(): layout.Column {
     return this.column;
   }
-}
-
-/**
- * @abstract
- */
-export abstract class AbstractLayoutRetryer {
-  initialBreakPositions: BreakPosition[] = null;
-  initialStateOfFormattingContext: any = null;
-  initialPosition: any;
-  initialFragmentLayoutConstraints: any;
-
-  layout(nodeContext: vtree.NodeContext, column: Column):
-      task.Result<vtree.NodeContext> {
-    this.prepareLayout(nodeContext, column);
-    return this.tryLayout(nodeContext, column);
-  }
-
-  private tryLayout(nodeContext: vtree.NodeContext, column: Column):
-      task.Result<vtree.NodeContext> {
-    const frame =
-        task.newFrame<vtree.NodeContext>('vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout');
-    this.saveState(nodeContext, column);
-    const mode = this.resolveLayoutMode(nodeContext);
-    mode.doLayout(nodeContext, column).then(function(positionAfter) {
-      let accepted = mode.accept(positionAfter, column);
-      accepted = mode.postLayout(
-          positionAfter, this.initialPosition, column, accepted);
-      if (accepted) {
-        frame.finish(positionAfter);
-      } else {
-        asserts.assert(this.initialPosition);
-        this.clearNodes(this.initialPosition);
-        this.restoreState(nodeContext, column);
-        this.tryLayout(this.initialPosition, column).thenFinish(frame);
-      }
-    }.bind(this));
-    return frame.result();
-  }
-
-  /**
-   * @abstract
-   */
-  abstract resolveLayoutMode(nodeContext: vtree.NodeContext): LayoutMode;
-
-  prepareLayout(nodeContext: vtree.NodeContext, column: Column) {}
-
-  clearNodes(initialPosition: vtree.NodeContext) {
-    const viewNode =
-        initialPosition.viewNode || initialPosition.parent.viewNode;
-    let child;
-    while (child = viewNode.lastChild) {
-      viewNode.removeChild(child);
-    }
-    let sibling;
-    while (sibling = viewNode.nextSibling) {
-      sibling.parentNode.removeChild(sibling);
-    }
-  }
-
-  saveState(nodeContext: vtree.NodeContext, column: Column) {
-    this.initialPosition = nodeContext.copy();
-    this.initialBreakPositions = [].concat(column.breakPositions);
-    this.initialFragmentLayoutConstraints =
-        [].concat(column.fragmentLayoutConstraints);
-    if (nodeContext.formattingContext) {
-      this.initialStateOfFormattingContext =
-          nodeContext.formattingContext.saveState();
-    }
-  }
-
-  restoreState(nodeContext: vtree.NodeContext, column: Column) {
-    column.breakPositions = this.initialBreakPositions;
-    column.fragmentLayoutConstraints = this.initialFragmentLayoutConstraints;
-    if (nodeContext.formattingContext) {
-      nodeContext.formattingContext.restoreState(
-          this.initialStateOfFormattingContext);
-    }
-  }
-}
-
-export interface LayoutMode {
-  doLayout(nodeContext: vtree.NodeContext, column: Column):
-      task.Result<vtree.NodeContext>;
-
-  accept(nodeContext: vtree.NodeContext, column: Column): boolean;
-
-  postLayout(
-      positionAfter: vtree.NodeContext, initialPosition: vtree.NodeContext,
-      column: Column, accepted: boolean): boolean;
 }

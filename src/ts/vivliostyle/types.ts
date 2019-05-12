@@ -80,8 +80,6 @@ export namespace layout {
   }
 
   export interface AbstractBreakPosition extends BreakPosition {
-    findAcceptableBreak(column: Column, penalty: number): vtree.NodeContext;
-    getMinBreakPenalty(): number;
     getNodeContext(): vtree.NodeContext;
   }
 
@@ -545,23 +543,6 @@ export namespace layout {
         textNode: Text): vtree.NodeContext;
   }
 
-  export interface LayoutRetryer {
-    initialBreakPositions: layout.BreakPosition[];
-    initialStateOfFormattingContext: any;
-    initialPosition: any;
-    initialFragmentLayoutConstraints: any;
-
-    layout(
-      nodeContext: vtree.NodeContext,
-      column: layout.Column
-    ): task.Result<vtree.NodeContext>;
-    resolveLayoutMode(nodeContext: vtree.NodeContext): LayoutMode;
-    prepareLayout(nodeContext: vtree.NodeContext, column: layout.Column): void;
-    clearNodes(initialPosition: vtree.NodeContext): void;
-    saveState(nodeContext: vtree.NodeContext, column: layout.Column): void;
-    restoreState(nodeContext: vtree.NodeContext, column: layout.Column): void;
-  }
-
   export interface LayoutMode {
     doLayout(
       nodeContext: vtree.NodeContext,
@@ -686,7 +667,70 @@ export namespace pagefloat {
   };
 
   export interface PageFloatLayoutContext {
-    // FIXME
+    writingMode: css.Val;
+    direction: css.Val;
+    floatFragments: PageFloatFragment[];
+    readonly parent: PageFloatLayoutContext;
+    readonly flowName: string|null;
+    readonly generatingNodePosition: vtree.NodePosition|null;
+
+    getContainer(floatReference?: FloatReference): vtree.Container;
+    setContainer(container: vtree.Container);
+    addPageFloat(float: PageFloat): void;
+    getPageFloatLayoutContext(floatReference: FloatReference): PageFloatLayoutContext;
+    findPageFloatByNodePosition(nodePosition: vtree.NodePosition): PageFloat|null;
+    isForbidden(float: PageFloat): boolean;
+    addPageFloatFragment(floatFragment: PageFloatFragment, dontInvalidate?: boolean): void;
+    removePageFloatFragment(floatFragment: PageFloatFragment, dontInvalidate?: boolean): void;
+    findPageFloatFragment(float: PageFloat): PageFloatFragment|null;
+    hasFloatFragments(condition?: (p1: PageFloatFragment) => boolean): boolean;
+    hasContinuingFloatFragmentsInFlow(flowName: string): boolean;
+    registerPageFloatAnchor(float: PageFloat, anchorViewNode: Node): void;
+    collectPageFloatAnchors(): any;
+    isAnchorAlreadyAppeared(floatId: PageFloatID): boolean;
+    deferPageFloat(continuation: PageFloatContinuation): void;
+    hasPrecedingFloatsDeferredToNext(float: PageFloat, ignoreReference?: boolean): boolean;
+    getLastFollowingFloatInFragments(float: PageFloat): PageFloat|null;
+    getDeferredPageFloatContinuations(flowName?: string|null): PageFloatContinuation[];
+    getPageFloatContinuationsDeferredToNext(flowName?: string|null): PageFloatContinuation[];
+    getFloatsDeferredToNextInChildContexts(): PageFloat[];
+    checkAndForbidNotAllowedFloat(): boolean;
+    checkAndForbidFloatFollowingDeferredFloat(): boolean;
+    finish(): void;
+    hasSameContainerAs(other: PageFloatLayoutContext): boolean;
+    invalidate(): void;
+    detachChildren(): PageFloatLayoutContext[];
+    attachChildren(children: PageFloatLayoutContext[]): void;
+    isInvalidated(): boolean;
+    validate(): void;
+    removeEndFloatFragments(floatSide: string): void;
+    stashEndFloatFragments(float: PageFloat): void;
+    restoreStashedFragments(floatReference: FloatReference): void;
+    discardStashedFragments(floatReference: FloatReference): void;
+    getStashedFloatFragments(floatReference: FloatReference): PageFloatFragment[];
+    /**
+     * @param anchorEdge Null indicates that the anchor is not in the current
+     *     container.
+     * @return Logical float side (snap-block is resolved when init=false). Null
+     *     indicates that the float area does not fit inside the container
+     */
+    setFloatAreaDimensions(
+        area: layout.PageFloatArea, floatReference: FloatReference, floatSide: string,
+        anchorEdge: number|null, init: boolean, force: boolean,
+        condition: PageFloatPlacementCondition): string|null;
+    getFloatFragmentExclusions(): geom.Shape[];
+    getMaxReachedAfterEdge(): number;
+    getBlockStartEdgeOfBlockEndFloats(): number;
+    getPageFloatClearEdge(clear: string, column: layout.Column): number;
+    getPageFloatPlacementCondition(
+        float: PageFloat, floatSide: string,
+        clearSide: string|null): PageFloatPlacementCondition;
+    getLayoutConstraints(): layout.LayoutConstraint[];
+    addLayoutConstraint(layoutConstraint: layout.LayoutConstraint, floatReference: FloatReference): void;
+    getMaxBlockSizeOfPageFloats(): number;
+    lock(): void;
+    unlock(): void;
+    isLocked(): boolean;
   }
 
   export interface PageFloatLayoutStrategy {
@@ -729,6 +773,13 @@ export namespace pseudoelement {
     styler: cssstyler.AbstractStyler;
     readonly context: expr.Context;
     readonly exprContentListener: vtree.ExprContentListener;
+  }
+}
+
+export namespace repetitiveelement {
+  export interface ElementsOffset {
+    calculateOffset(nodeContext: vtree.NodeContext): number;
+    calculateMinimumOffset(nodeContext: vtree.NodeContext): number;
   }
 }
 

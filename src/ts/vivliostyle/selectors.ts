@@ -16,16 +16,16 @@
  *
  * @fileoverview Utilities for selectors.
  */
-import {selector} from './types';
+import {layout, selector, vtree} from './types';
 
 import * as base from '../adapt/base';
-import {Column, getElementHeight, FragmentLayoutConstraint} from '../adapt/layout';
+import {FragmentLayoutConstraint} from '../adapt/layout';
 import * as pseudoElement from '../adapt/pseudoelement';
 import {Frame, newResult, Result} from '../adapt/task';
 import * as task from '../adapt/task';
-import {NodeContext, ChunkPosition, ShadowContext} from '../adapt/vtree';
-import * as vtree from '../adapt/vtree';
+import {ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as asserts from './asserts';
+import * as layouthelper from './layouthelper';
 import {PseudoColumn} from './layoututil';
 import {NthFragmentMatcher} from './matcher';
 import {ElementsOffset} from './repetitiveelements';
@@ -39,7 +39,7 @@ export class AfterIfContinues implements selector.AfterIfContinues {
       public readonly sourceNode: Element,
       public readonly styler: pseudoElement.PseudoelementStyler) {}
 
-  createElement(column: Column, parentNodeContext: NodeContext):
+  createElement(column: layout.Column, parentNodeContext: vtree.NodeContext):
       Result<Element> {
     const doc = parentNodeContext.viewNode.ownerDocument;
     const viewRoot = doc.createElement('div');
@@ -56,7 +56,7 @@ export class AfterIfContinues implements selector.AfterIfContinues {
         });
   }
 
-  private createNodePositionForPseudoElement(): ChunkPosition {
+  private createNodePositionForPseudoElement(): vtree.ChunkPosition {
     const sourceNode =
         pseudoElement.document.createElementNS(base.NS.XHTML, 'div');
     pseudoElement.setPseudoName(sourceNode, 'after-if-continues');
@@ -74,11 +74,11 @@ export class AfterIfContinues implements selector.AfterIfContinues {
       after: false,
       preprocessedTextContent: null
     };
-    return new vtree.ChunkPosition(nodePosition as any);
+    return new ChunkPosition(nodePosition as any);
   }
 
-  private createShadowContext(root: Element): ShadowContext {
-    return new vtree.ShadowContext(
+  private createShadowContext(root: Element): vtree.ShadowContext {
+    return new ShadowContext(
         this.sourceNode, root, null, null, null, vtree.ShadowType.ROOTED,
         this.styler);
   }
@@ -91,7 +91,7 @@ export class AfterIfContinuesLayoutConstraint implements
   pseudoElementHeight: any;
 
   constructor(
-      nodeContext: NodeContext, afterIfContinues: selector.AfterIfContinues,
+      nodeContext: vtree.NodeContext, afterIfContinues: selector.AfterIfContinues,
       pseudoElementHeight: number) {
     this.nodeContext = nodeContext;
     this.afterIfContinues = afterIfContinues;
@@ -166,7 +166,7 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
     return this.calculateOffset(nodeContext);
   }
 
-  affectTo(nodeContext: NodeContext): boolean {
+  affectTo(nodeContext: vtree.NodeContext): boolean {
     if (!nodeContext) {
       return false;
     }
@@ -186,7 +186,7 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
 }
 
 function processAfterIfContinuesOfNodeContext(
-    nodeContext: NodeContext, column: Column): Result<NodeContext> {
+    nodeContext: vtree.NodeContext, column: layout.Column): Result<vtree.NodeContext> {
   if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after ||
       column.isFloatNodeContext(nodeContext)) {
     return task.newResult(nodeContext);
@@ -205,16 +205,16 @@ function processAfterIfContinuesOfNodeContext(
 }
 
 export const processAfterIfContinues =
-    (result: Result<NodeContext>, column: Column): Result<NodeContext> =>
+    (result: Result<vtree.NodeContext>, column: layout.Column): Result<vtree.NodeContext> =>
         result.thenAsync(
             (nodeContext) =>
                 processAfterIfContinuesOfNodeContext(nodeContext, column));
 
 export const processAfterIfContinuesOfAncestors =
-    (nodeContext: NodeContext, column: Column): Result<boolean> => {
+    (nodeContext: vtree.NodeContext, column: layout.Column): Result<boolean> => {
       const frame: Frame<boolean> = task.newFrame(
           'vivliostyle.selectors.processAfterIfContinuesOfAncestors');
-      let current: NodeContext = nodeContext;
+      let current: vtree.NodeContext = nodeContext;
       frame
           .loop(() => {
             if (current !== null) {
@@ -233,11 +233,11 @@ export const processAfterIfContinuesOfAncestors =
     };
 
 export const calculatePseudoElementHeight =
-    (nodeContext: NodeContext, column: Column, pseudoElement: Element):
+    (nodeContext: vtree.NodeContext, column: layout.Column, pseudoElement: Element):
         number => {
           const parentNode = (nodeContext.viewNode as Element);
           parentNode.appendChild(pseudoElement);
-          const height = getElementHeight(
+          const height = layouthelper.getElementHeight(
               pseudoElement, column, nodeContext.vertical);
           parentNode.removeChild(pseudoElement);
           return height;

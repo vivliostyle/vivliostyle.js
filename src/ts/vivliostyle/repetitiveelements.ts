@@ -3,12 +3,16 @@
  * @fileoverview Elements repeated in every fragment by repeat-on-break
  * property.
  */
-import * as layout from '../adapt/layout';
+// import * as layoutImpl from '../adapt/layout';
 import * as task from '../adapt/task';
-import * as vtree from '../adapt/vtree';
+import * as vtreeImpl from '../adapt/vtree';
+import {layout, repetitiveelement, vtree} from './types';
 
 import * as asserts from './asserts';
-import {LayoutMode, LayoutIterator, EdgeSkipper, AbstractLayoutRetryer, PseudoColumn} from './layoututil';
+import * as layouthelper from './layouthelper';
+import * as layoutprocessor from './layoutprocessor';
+import {AbstractLayoutRetryer} from './layoutretryer';
+import {LayoutIterator, EdgeSkipper, PseudoColumn} from './layoututil';
 import * as plugin from './plugin';
 import * as selectors from './selectors';
 import * as table from './table';
@@ -91,11 +95,7 @@ export const clearCache = () => {
   repetitiveElementsCache = [];
 };
 
-export interface ElementsOffset {
-  calculateOffset(nodeContext: vtree.NodeContext): number;
-
-  calculateMinimumOffset(nodeContext: vtree.NodeContext): number;
-}
+export type ElementsOffset = repetitiveelement.ElementsOffset;
 
 export class RepetitiveElements implements ElementsOffset {
   private headerSourceNode: Element|null = null;
@@ -130,7 +130,7 @@ export class RepetitiveElements implements ElementsOffset {
 
     // use first one.
     this.headerNodePosition =
-        vtree.newNodePositionFromNodeContext(nodeContext, 0);
+        vtreeImpl.newNodePositionFromNodeContext(nodeContext, 0);
     this.headerSourceNode = (nodeContext.sourceNode as Element);
     this.headerViewNode = (nodeContext.viewNode as Element);
   }
@@ -142,20 +142,18 @@ export class RepetitiveElements implements ElementsOffset {
 
     // use first one.
     this.footerNodePosition =
-        vtree.newNodePositionFromNodeContext(nodeContext, 0);
+        vtreeImpl.newNodePositionFromNodeContext(nodeContext, 0);
     this.footerSourceNode = (nodeContext.sourceNode as Element);
     this.footerViewNode = (nodeContext.viewNode as Element);
   }
 
   updateHeight(column: layout.Column) {
     if (this.headerViewNode) {
-      this.headerHeight =
-          layout.getElementHeight(this.headerViewNode, column, this.vertical);
+      this.headerHeight = layouthelper.getElementHeight(this.headerViewNode, column, this.vertical);
       this.headerViewNode = null;
     }
     if (this.footerViewNode) {
-      this.footerHeight =
-          layout.getElementHeight(this.footerViewNode, column, this.vertical);
+      this.footerHeight = layouthelper.getElementHeight(this.footerViewNode, column, this.vertical);
       this.footerViewNode = null;
     }
   }
@@ -200,7 +198,7 @@ export class RepetitiveElements implements ElementsOffset {
     const initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
     pseudoColumn.getColumn().pageBreakType = null;
     this.allowInsertRepeatitiveElements = true;
-    return pseudoColumn.layout(new vtree.ChunkPosition(nodePosition), true)
+    return pseudoColumn.layout(new vtreeImpl.ChunkPosition(nodePosition), true)
         .thenAsync(() => {
           this.allowInsertRepeatitiveElements = false;
           rootViewNode.removeChild(viewRoot);
@@ -217,7 +215,7 @@ export class RepetitiveElements implements ElementsOffset {
     while (from.firstChild) {
       const child = from.firstChild;
       from.removeChild(child);
-      (child as Element).setAttribute(vtree.SPECIAL_ATTR, '1');
+      (child as Element).setAttribute(vtreeImpl.SPECIAL_ATTR, '1');
       if (firstChild) {
         to.insertBefore(child, firstChild);
       } else {
@@ -371,7 +369,7 @@ export class RepetitiveElements implements ElementsOffset {
 /**
  * @abstract
  */
-export abstract class LayoutEntireBlock implements LayoutMode {
+export abstract class LayoutEntireBlock implements layout.LayoutMode {
   formattingContext: any;
 
   constructor(formattingContext: RepetitiveElementsOwnerFormattingContext) {
@@ -408,7 +406,7 @@ export abstract class LayoutEntireBlock implements LayoutMode {
 /**
  * @abstract
  */
-export abstract class LayoutFragmentedBlock implements LayoutMode {
+export abstract class LayoutFragmentedBlock implements layout.LayoutMode {
   formattingContext: any;
 
   constructor(formattingContext: RepetitiveElementsOwnerFormattingContext) {
@@ -490,7 +488,7 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
     if (!repetitiveElements) {
       return true;
     }
-    if (layout.isOrphan(this.nodeContext.viewNode)) {
+    if (layouthelper.isOrphan(this.nodeContext.viewNode)) {
       return true;
     }
     if (!repetitiveElements.isEnableToUpdateState()) {
@@ -678,7 +676,7 @@ export class FragmentedBlockLayoutStrategy extends
 }
 
 export class RepetitiveElementsOwnerLayoutProcessor extends
-    layout.BlockLayoutProcessor implements layout.LayoutProcessor {
+    layoutprocessor.BlockLayoutProcessor implements layoutprocessor.LayoutProcessor {
   /**
    * @override
    */
@@ -700,7 +698,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
                     formattingContext, this))
             .layout(nodeContext, column);
       } else {
-        return layout.BlockLayoutProcessor.prototype.layout.call(
+        return layoutprocessor.BlockLayoutProcessor.prototype.layout.call(
             this, nodeContext, column, leadingEdge);
       }
     }
@@ -801,7 +799,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
    * @override
    */
   finishBreak(column, nodeContext, forceRemoveSelf, endOfColumn) {
-    return layout.BlockLayoutProcessor.prototype.finishBreak.call(
+    return layoutprocessor.BlockLayoutProcessor.prototype.finishBreak.call(
         this, column, nodeContext, forceRemoveSelf, endOfColumn);
   }
 
@@ -809,7 +807,7 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
    * @override
    */
   clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf) {
-    layout.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
+    layoutprocessor.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
         column, parentNodeContext, nodeContext, removeSelf);
   }
 }
@@ -939,14 +937,15 @@ export function getRepetitiveElementsOwnerFormattingContext(
       formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
   return (formattingContext as RepetitiveElementsOwnerFormattingContext);
 }
-const layoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
+
+const repetitiveLayoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
 plugin.registerHook(
     plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
       if (formattingContext instanceof
               RepetitiveElementsOwnerFormattingContext &&
           !(formattingContext instanceof
             table.TableFormattingContext)) {
-        return layoutProcessor;
+        return repetitiveLayoutProcessor;
       }
       return null;
     });

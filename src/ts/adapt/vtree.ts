@@ -424,7 +424,7 @@ export const newNodePositionFromNode = (node: Node): NodePosition => {
 };
 
 export const newNodePositionFromNodeContext =
-    (nodeContext: NodeContext,
+    (nodeContext: vtree.NodeContext,
      initialFragmentIndex: number|null): NodePosition => {
       const step: NodePositionStep = {
         node: nodeContext.sourceNode,
@@ -946,7 +946,7 @@ export class LayoutPosition {
   }
 }
 
-export class Container {
+export class Container implements vtree.Container {
   left: number = 0;
   top: number = 0;
   marginLeft: number = 0;
