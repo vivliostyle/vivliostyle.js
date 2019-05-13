@@ -19,7 +19,7 @@
  */
 import * as logging from '../vivliostyle/logging';
 
-declare var DEBUG: boolean; 
+declare var DEBUG: boolean;
 
 export let emptyObj = {};
 

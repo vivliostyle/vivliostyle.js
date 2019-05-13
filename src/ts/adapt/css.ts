@@ -224,12 +224,18 @@ export class Val {
   }
 }
 
-export class Empty extends Val {
-  constructor() {
-    super();
-    if (empty) {
-      throw new Error('E_INVALID_CALL');
+class Empty extends Val {
+  private static empty: Empty;
+
+  public static get instance(): Empty {
+    if (!this.empty) {
+      this.empty = new Empty();
     }
+    return this.empty;
+  }
+
+  private constructor() {
+    super();
   }
 
   /**
@@ -250,14 +256,20 @@ export class Empty extends Val {
   }
 }
 
-export const empty: Empty = new Empty();
+export const empty: Empty = Empty.instance;
 
-export class Slash extends Val {
-  constructor() {
-    super();
-    if (slash) {
-      throw new Error('E_INVALID_CALL');
+class Slash extends Val {
+  private static slash: Slash;
+
+  public static get instance(): Slash {
+    if (!this.slash) {
+      this.slash = new Slash();
     }
+    return this.slash;
+  }
+
+  private constructor() {
+    super();
   }
 
   /**
@@ -280,7 +292,7 @@ export class Slash extends Val {
   }
 }
 
-export const slash: Slash = new Slash();
+export const slash: Slash = Slash.instance;
 
 export class Str extends Val {
   constructor(public str: string) {
@@ -317,7 +329,7 @@ export class Str extends Val {
 
 const nameTable = {};
 
-export class Ident extends Val {
+class Ident extends Val {
   constructor(public name: string) {
     super();
     if (nameTable[name]) {
