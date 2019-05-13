@@ -32,7 +32,6 @@ export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
 // FIXME: When importing layoututil module statically, it causes a circular dependency.
 let layoututil: typeof import('./layoututil');
 import('./layoututil').then(it => {
-  console.log('>>>', it);
   layoututil = it;
 });
 
