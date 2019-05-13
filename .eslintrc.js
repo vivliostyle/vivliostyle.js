@@ -15,19 +15,29 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 module.exports = {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "sourceType": "module",
+        "project": "./tsconfig.json"
+    },
     "env": {
         "es6": true,
         "browser": true,
-        "jasmine": true,
-        "commonjs": true
+        "jasmine": true
     },
     "globals": {
-        "adapt": false,
-        "goog": false,
         "vivliostyle": false,
-        "DataView": false
     },
-    // "extends": "eslint:recommended",
+    "extends": [
+      "eslint:recommended",
+      "plugin:import/errors",
+      "plugin:import/warnings",
+      "plugin:import/typescript"
+    ],
+    "plugins": [
+        "@typescript-eslint",
+        "import"
+    ],
     "rules": {
         // Possible Errors
         // (in recommended)
@@ -188,13 +198,14 @@ module.exports = {
         "id-blacklist": "error",
         // "id-length": "off",
         "id-match": "error",
-        "indent": [
-            "warn",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
+        "indent": "off",
+        // "indent": [
+        //     "warn",
+        //     2,
+        //     {
+        //         "SwitchCase": 1
+        //     }
+        // ],
         // "key-spacing": "off",
         "keyword-spacing": "error",
         "linebreak-style": [
