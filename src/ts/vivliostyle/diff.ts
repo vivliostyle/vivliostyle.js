@@ -19,9 +19,7 @@
 
 import * as fastdiff from 'fast-diff';
 
-type Change = (number|string)[];
-
-export {Change};
+export type Change = (number|string)[];
 
 export const diffChars = (originalText: string, newText: string): Change[] =>
     fastdiff(originalText, newText, 0);

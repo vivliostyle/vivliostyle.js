@@ -224,7 +224,7 @@ export class Val {
   }
 }
 
-class Empty extends Val {
+export class Empty extends Val {
   private static empty: Empty;
 
   public static get instance(): Empty {
@@ -258,7 +258,7 @@ class Empty extends Val {
 
 export const empty: Empty = Empty.instance;
 
-class Slash extends Val {
+export class Slash extends Val {
   private static slash: Slash;
 
   public static get instance(): Slash {
@@ -329,7 +329,7 @@ export class Str extends Val {
 
 const nameTable = {};
 
-class Ident extends Val {
+export class Ident extends Val {
   constructor(public name: string) {
     super();
     if (nameTable[name]) {

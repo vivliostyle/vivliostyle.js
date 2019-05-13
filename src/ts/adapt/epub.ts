@@ -42,13 +42,11 @@ import * as task from './task';
 import {CustomRenderer, CustomRendererFactory, DefaultClientLayout, Viewport} from './vgen';
 import {Page, DelayedItem, LayoutPosition, Spread} from './vtree';
 
-type Position = {
+export type Position = {
   spineIndex: number,
   pageIndex: number,
   offsetInItem: number
 };
-
-export {Position};
 
 export class EPUBDocStore extends ops.OPSDocStore {
   plainXMLStore: any;
@@ -202,14 +200,12 @@ export class EPUBDocStore extends ops.OPSDocStore {
   }
 }
 
-type OPFItemParam = {
+export type OPFItemParam = {
   url: string,
   index: number,
   startPage: number|null,
   skipPagesBefore: number|null
 };
-
-export {OPFItemParam};
 
 export class OPFItem {
   id: string|null = null;
@@ -279,7 +275,8 @@ export const makeDeobfuscator = (uid: string): (p1: Blob) => Result<Blob> => {
 
 export const makeObfuscationKey = (uid: string): string =>
     `1040:${sha1.bytesToSHA1Hex(uid)}`;
-type RawMetaItem = {
+
+export type RawMetaItem = {
   name: string,
   value: string,
   id: string|null,
@@ -288,8 +285,6 @@ type RawMetaItem = {
   lang: string|null,
   order: number
 };
-
-export {RawMetaItem};
 
 export const predefinedPrefixes = {
   'dcterms': 'http://purl.org/dc/terms/',
@@ -910,12 +905,11 @@ export class OPFDoc {
     return frame.result();
   }
 }
-type PageAndPosition = {
+
+export type PageAndPosition = {
   page: Page,
   position: Position
 };
-
-export {PageAndPosition};
 
 export const makePageAndPosition =
     (page: Page, pageIndex: number): PageAndPosition => ({
@@ -923,7 +917,8 @@ export const makePageAndPosition =
       position:
           {spineIndex: page.spineIndex, pageIndex, offsetInItem: page.offset}
     });
-type OPFViewItem = {
+
+export type OPFViewItem = {
   item: OPFItem,
   xmldoc: xmldocs.XMLDocHolder,
   instance: ops.StyleInstance,
@@ -931,8 +926,6 @@ type OPFViewItem = {
   pages: Page[],
   complete: boolean
 };
-
-export {OPFViewItem};
 
 export class OPFView implements CustomRendererFactory {
   spineItems: OPFViewItem[] = [];

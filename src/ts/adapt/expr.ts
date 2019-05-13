@@ -19,7 +19,7 @@
  */
 import * as base from './base';
 
-type Preferences = {
+export type Preferences = {
   fontFamily: string,
   lineHeight: number,
   margin: number,
@@ -32,8 +32,6 @@ type Preferences = {
   enabledMediaTypes: {[key: string]: boolean},
   defaultPaperSize: {[key: string]: number}|undefined
 };
-
-export {Preferences};
 
 export const defaultPreferences = (): Preferences => ({
   fontFamily: 'serif',
@@ -78,12 +76,9 @@ export const Special = {
   PENDING: {} as Pending,
 };
 
-type Result = string|number|boolean|undefined;
+export type Result = string|number|boolean|undefined;
 
-export {Result};
-type PendingResult = Special|Result;
-
-export {PendingResult};
+export type PendingResult = Special|Result;
 
 export const letterbox =
     (viewW: number, viewH: number, objW: number, objH: number): string => {
@@ -260,11 +255,10 @@ export const needUnitConversion = (unit: string): boolean => {
       return false;
   }
 };
-type ScopeContext = {
+
+export type ScopeContext = {
   [key: string]: Result
 };
-
-export {ScopeContext};
 
 /**
  * Run-time instance of a scope and its children.
@@ -465,11 +459,9 @@ export class Context {
 }
 
 //---------- name resolution --------------
-type DependencyCache = {
+export type DependencyCache = {
   [key: string]: boolean|Special
 };
-
-export {DependencyCache};
 
 export class Val {
   scope: any;

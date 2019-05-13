@@ -51,7 +51,8 @@ export class DelayedItem {
     this.value = value;
   }
 }
-type PageHyperlinkEvent = {
+
+export type PageHyperlinkEvent = {
   type: string,
   target,
   currentTarget,
@@ -59,15 +60,12 @@ type PageHyperlinkEvent = {
   href: string
 };
 
-export {PageHyperlinkEvent};
-type Trigger = {
+export type Trigger = {
   observer: string,
   event: string,
   action: string,
   ref: string
 };
-
-export {Trigger};
 
 export const actions = {
   'show': function(obj) {
@@ -246,21 +244,18 @@ export class Page extends base.SimpleEventTarget {
   }
 }
 
-type Spread = {
+export type Spread = {
   left: Page,
   right: Page
 };
-
-export {Spread};
 
 /**
  * Marks an element as "special". It should not be used in bbox calculations.
  */
 export const SPECIAL_ATTR = 'data-adapt-spec';
 
-const {Whitespace} = vtree;
-export {Whitespace};
-type Whitespace = vtree.Whitespace;
+export const Whitespace = vtree.Whitespace;
+export type Whitespace = vtree.Whitespace;
 
 // Whitespace sequence between blocks is preserved
 
@@ -459,9 +454,8 @@ export const makeNodeContextFromNodePositionStep =
       return nodeContext;
     };
 
-const {ShadowType} = vtree;
-export {ShadowType};
-type ShadowType = vtree.ShadowType;
+export const ShadowType = vtree.ShadowType;
+export type ShadowType = vtree.ShadowType;
 
 /**
  * Data about shadow tree instance.

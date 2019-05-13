@@ -25,16 +25,13 @@ import {LayoutPosition, Container, FlowPosition} from '../adapt/vtree';
 import {PageFloatLayoutContext} from './pagefloat';
 import {variance} from './math';
 
-type ColumnLayoutResult = {
+export type ColumnLayoutResult = {
   columns: Column[],
   position: LayoutPosition,
   columnPageFloatLayoutContexts: undefined|PageFloatLayoutContext[]
 };
 
-export {ColumnLayoutResult};
-type ColumnGenerator = () => Result<ColumnLayoutResult|null>;
-
-export {ColumnGenerator};
+export type ColumnGenerator = () => Result<ColumnLayoutResult|null>;
 
 export class ColumnBalancingTrialResult {
   constructor(

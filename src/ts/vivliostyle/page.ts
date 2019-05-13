@@ -45,12 +45,10 @@ export const resolvePageProgression = (style: csscasc.ElementStyle):
     return constants.PageProgression.RTL;
   }
 };
-type PageSize = {
+export type PageSize = {
   width: css.Numeric,
   height: css.Numeric
 };
-
-export {PageSize};
 
 /**
  * Named page sizes.
@@ -96,14 +94,13 @@ export const defaultPrinterMarkLineLength: css.Numeric =
  * defaultPrinterMarkLineLength)
  */
 export const defaultBleedOffset: css.Numeric = new css.Numeric(3 + 10, 'mm');
-type PageSizeAndBleed = {
+
+export type PageSizeAndBleed = {
   width: css.Numeric,
   height: css.Numeric,
   bleed: css.Numeric,
   bleedOffset: css.Numeric
 };
-
-export {PageSizeAndBleed};
 
 export const resolvePageSizeAndBleed =
     (style: {[key: string]: csscasc.CascadeValue}): PageSizeAndBleed => {
@@ -175,15 +172,14 @@ export const resolvePageSizeAndBleed =
       }
       return pageSizeAndBleed;
     };
-type EvaluatedPageSizeAndBleed = {
+
+export type EvaluatedPageSizeAndBleed = {
   pageWidth: number,
   pageHeight: number,
   bleed: number,
   bleedOffset: number,
   cropOffset: number
 };
-
-export {EvaluatedPageSizeAndBleed};
 
 /**
  * Evaluate actual page width, height and bleed from style specified in page
@@ -490,7 +486,8 @@ export enum MarginBoxPositionAlongVariableDimension {
   CENTER = 'center',
   END = 'end'
 }
-type PageMarginBoxInformation = {
+
+export type PageMarginBoxInformation = {
   order: number,
   isInTopRow: boolean,
   isInBottomRow: boolean,
@@ -498,8 +495,6 @@ type PageMarginBoxInformation = {
   isInRightColumn: boolean,
   positionAlongVariableDimension: MarginBoxPositionAlongVariableDimension
 };
-
-export {PageMarginBoxInformation};
 
 /**
  * Page-margin boxes.
@@ -812,7 +807,7 @@ export class PageMarginBoxPartition extends pm.Partition<PageMarginBoxPartitionI
 }
 
 //---------------------------- Instance --------------------------------
-type PageAreaDimension = {
+export type PageAreaDimension = {
   borderBoxWidth: exprs.Val,
   borderBoxHeight: exprs.Val,
   marginTop: exprs.Val,
@@ -820,8 +815,6 @@ type PageAreaDimension = {
   marginLeft: exprs.Val,
   marginRight: exprs.Val
 };
-
-export {PageAreaDimension};
 
 export class PageRuleMasterInstance extends pm.PageMasterInstance<PageRuleMaster> {
   pageAreaDimension: PageAreaDimension|null = null;
