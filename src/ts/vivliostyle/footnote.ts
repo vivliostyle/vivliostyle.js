@@ -16,16 +16,13 @@
  *
  * @fileoverview Footnotes
  */
-import * as asserts from './asserts';
-
-import {Ident, ident} from '../adapt/css';
-import {Numeric} from '../adapt/css';
-import {LayoutConstraint} from '../adapt/layout';
-import {NodePosition, isSameNodePosition} from '../adapt/vtree';
-import {Container} from '../adapt/vtree';
-import {newResult} from '../adapt/task';
-
 import * as pagefloat from './pagefloat';
+
+import {Ident, ident, Numeric} from '../adapt/css';
+import {LayoutConstraint} from '../adapt/layout';
+import {NodePosition, isSameNodePosition, Container} from '../adapt/vtree';
+import {newResult} from '../adapt/task';
+import * as asserts from './asserts';
 
 const PageFloat = pagefloat.PageFloat;
 const PageFloatFragment = pagefloat.PageFloatFragment;

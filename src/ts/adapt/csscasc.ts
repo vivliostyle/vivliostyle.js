@@ -17,21 +17,19 @@
  *
  * @fileoverview CSS Cascade.
  */
-import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
-import {plugin} from '../vivliostyle/plugin';
-import {Matcher} from '../vivliostyle/selectors';
-import * as selectors from '../vivliostyle/selectors';
-
-import * as base from './base';
+import * as plugin from '../vivliostyle/plugin';
 import * as css from './css';
+import * as exprs from './expr';
 import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
-import * as csstok from './csstok';
 import * as cssvalid from './cssvalid';
-import * as exprs from './expr';
-import * as task from './task';
-import * as taskutil from './taskutil';
+
+import * as asserts from '../vivliostyle/asserts';
+import {Matcher} from '../vivliostyle/selectors';
+import * as selectors from '../vivliostyle/selectors';
+import * as base from './base';
+import * as csstok from './csstok';
 import {ExprContentListener} from './vtree';
 import {NodeContext} from './vtree';
 

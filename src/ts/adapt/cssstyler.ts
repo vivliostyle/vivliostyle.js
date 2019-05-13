@@ -19,20 +19,19 @@
  * result.
  */
 import * as asserts from '../vivliostyle/asserts';
+import * as csscasc from './csscasc';
+import * as cssprop from './cssprop';
+import * as vtree from './vtree';
+import * as xmldocs from './xmldoc';
 
 import * as breaks from '../vivliostyle/break';
 import {isBlock} from '../vivliostyle/display';
-
 import * as base from './base';
 import {Val, Ident, ident} from './css';
-import * as csscasc from './csscasc';
-import * as cssprop from './cssprop';
 import {ValidatorSet, ValueMap} from './cssvalid';
 import * as cssparse from './cssparse';
-import {Context, defaultUnitSizes, LexicalScope} from './expr';
+import {Context, LexicalScope} from './expr';
 import * as exprs from './expr';
-import * as vtree from './vtree';
-import * as xmldocs from './xmldoc';
 
 declare var DEBUG: boolean; 
 

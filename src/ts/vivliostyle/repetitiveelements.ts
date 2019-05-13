@@ -3,18 +3,15 @@
  * @fileoverview Elements repeated in every fragment by repeat-on-break
  * property.
  */
-import * as asserts from './asserts';
-
+import * as layout from '../adapt/layout';
 import * as task from '../adapt/task';
 import * as vtree from '../adapt/vtree';
 
+import * as asserts from './asserts';
 import {LayoutMode, LayoutIterator, EdgeSkipper, AbstractLayoutRetryer, PseudoColumn} from './layoututil';
-
-import * as layout from '../adapt/layout';
-
+import * as plugin from './plugin';
 import * as selectors from './selectors';
 import * as table from './table';
-import {plugin} from './plugin';
 
 export class RepetitiveElementsOwnerFormattingContext implements
     vtree.FormattingContext {

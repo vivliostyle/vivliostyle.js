@@ -19,30 +19,28 @@
  * @fileoverview Deal with META-INF/ and .opf files in EPUB container.
  */
 import * as asserts from '../vivliostyle/asserts';
-import {constants} from '../vivliostyle/constants';
+import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
-
-import {JSON} from './base';
-import * as base from './base';
-import {DocumentURLTransformer} from './base';
 import * as cfi from './cfi';
 import * as csscasc from './csscasc';
-import {parseValue} from './cssparse';
-import {Tokenizer} from './csstok';
-import {Preferences, clonePreferences, letterbox} from './expr';
 import * as font from './font';
 import * as net from './net';
 import * as ops from './ops';
 import * as sha1 from './sha1';
-import {Result} from './task';
-import {Frame} from './task';
-import {Continuation} from './task';
-import * as task from './task';
 import * as tocs from './toc';
+import * as xmldocs from './xmldoc';
+
+import {JSON} from './base';
+import * as base from './base';
+import {DocumentURLTransformer} from './base';
+import {parseValue} from './cssparse';
+import {Tokenizer} from './csstok';
+import {Preferences, clonePreferences, letterbox} from './expr';
+import {Result, Frame, Continuation} from './task';
+import * as task from './task';
 import {CustomRenderer, CustomRendererFactory, DefaultClientLayout, Viewport} from './vgen';
 import {Page, DelayedItem, LayoutPosition, Spread} from './vtree';
-import * as xmldocs from './xmldoc';
 
 type Position = {
   spineIndex: number,
@@ -663,7 +661,7 @@ export class OPFDoc {
     const pageProgressionAttr =
         pkg.child('spine').attribute('page-progression-direction')[0];
     if (pageProgressionAttr) {
-      this.pageProgression = constants.PageProgression.of(pageProgressionAttr);
+      this.pageProgression = constants.pageProgressionOf(pageProgressionAttr);
     }
     const idpfObfURLs = !encXML ?
         [] :

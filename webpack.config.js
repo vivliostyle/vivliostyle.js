@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const pkg = require('./package.json');
 
 const bannerText = `Copyright 2013 Google, Inc.
@@ -37,13 +38,13 @@ module.exports = {
   module: {
     rules: [{
       test: /\.ts$/,
-      exclude: /\/(adapt|closure|vivliostyle)\//,   //FIXME
       use: 'ts-loader'
     }]
   },
   plugins: [
     new webpack.BannerPlugin({
       banner: bannerText
-    })
+    }),
+    new CircularDependencyPlugin()
   ]
 }

@@ -16,18 +16,13 @@
  *
  * @fileoverview Plugin mechanism
  */
-import {JSON} from '../adapt/base';
-import {Ident} from '../adapt/css';
-import {TextNodeBreaker} from '../adapt/layout';
-import {LayoutProcessor} from '../adapt/layout';
-import {Column} from '../adapt/layout';
-import {Result} from '../adapt/task';
-import {NodeContext} from '../adapt/vtree';
-import {FormattingContext} from '../adapt/vtree';
-
 import * as logging from './logging';
 
-export namespace plugin {
+import {JSON} from '../adapt/base';
+import {Ident} from '../adapt/css';
+import {TextNodeBreaker, LayoutProcessor, Column} from '../adapt/layout';
+import {Result} from '../adapt/task';
+import {NodeContext, FormattingContext} from '../adapt/vtree';
 
 /**
  * Type of implemented hooks.
@@ -220,7 +215,10 @@ export const getHooksForName = (name: string): ((...p1) => any)[] => {
   return hooksForName || [];
 };
 
-} // export namespace plugin
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.plugin.registerHook", vivliostyle.plugin.registerHook);
-// vivliostyle.namespace.exportSymbol("vivliostyle.plugin.removeHook", vivliostyle.plugin.removeHook);
+/**
+ * Pubilc members of the bundled library.
+ */
+export const plugin = {
+  registerHook,
+  removeHook
+};

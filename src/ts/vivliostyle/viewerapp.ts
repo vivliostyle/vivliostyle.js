@@ -17,11 +17,9 @@
  *
  * @fileoverview Vivliostyle page viewer base on adapt.sampleapp
  */
-import {constants} from './constants';
 import * as base from '../adapt/base';
 import * as adaptviewer from '../adapt/viewer';
-
-export namespace viewerapp {
+import * as constants from './constants';
 
 export let fontSize: number = 16;
 
@@ -331,6 +329,6 @@ export const main = (arg): void => {
   viewerInstance.initEmbed(config);
 };
 
-} // export namespace viewerapp
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.viewerapp.main", vivliostyle.viewerapp.main);
+export const viewerapp = {
+  main
+};

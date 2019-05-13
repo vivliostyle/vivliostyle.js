@@ -19,11 +19,7 @@
  * CSS values.
  */
 import * as logging from '../vivliostyle/logging';
-
-import * as base from './base';
 import * as css from './css';
-import * as cssparse from './cssparse';
-import * as csstok from './csstok';
 import * as exprs from './expr';
 import * as geom from './geom';
 

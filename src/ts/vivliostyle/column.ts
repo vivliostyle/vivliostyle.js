@@ -17,14 +17,11 @@
  * @fileoverview Control column layout
  */
 import * as css from '../adapt/css';
-import {Column} from '../adapt/layout';
-import {Result, newFrame} from '../adapt/task';
-import {Frame} from '../adapt/task';
-import {LayoutPosition} from '../adapt/vtree';
-import {Container} from '../adapt/vtree';
-import {FlowPosition} from '../adapt/vtree';
 import * as asserts from './asserts';
 
+import {Column} from '../adapt/layout';
+import {Result, newFrame, Frame} from '../adapt/task';
+import {LayoutPosition, Container, FlowPosition} from '../adapt/vtree';
 import {PageFloatLayoutContext} from './pagefloat';
 import {variance} from './math';
 

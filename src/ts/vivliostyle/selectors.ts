@@ -16,23 +16,18 @@
  *
  * @fileoverview Utilities for selectors.
  */
-import * as asserts from './asserts';
 
 import * as base from '../adapt/base';
-
 import {CascadeValue, ElementStyle, matchANPlusB, mergeStyle, getViewConditionalStyleMap} from '../adapt/csscasc';
 import {Context} from '../adapt/expr';
-import {Column, getElementHeight} from '../adapt/layout';
-import {FragmentLayoutConstraint} from '../adapt/layout';
+import {Column, getElementHeight, FragmentLayoutConstraint} from '../adapt/layout';
 import {Frame, newResult, Result} from '../adapt/task';
 import * as task from '../adapt/task';
 import {PseudoelementStyler} from '../adapt/vgen';
 import * as vgen from '../adapt/vgen';
-import {NodeContext} from '../adapt/vtree';
-import {ChunkPosition} from '../adapt/vtree';
-import {ShadowContext} from '../adapt/vtree';
+import {NodeContext, ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as vtree from '../adapt/vtree';
-
+import * as asserts from './asserts';
 import {PseudoColumn} from './layoututil';
 import {ElementsOffset} from './repetitiveelements';
 

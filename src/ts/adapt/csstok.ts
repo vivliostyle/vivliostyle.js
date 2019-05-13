@@ -17,7 +17,6 @@
  *
  * @fileoverview CSS Tokenizer.
  */
-import * as base from './base';
 
 export interface TokenizerHandler {
   error(mnemonics: string, token: Token): void;

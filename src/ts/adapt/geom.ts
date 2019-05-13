@@ -18,7 +18,6 @@
  * @fileoverview Geometric utilities.
  */
 import * as logging from '../vivliostyle/logging';
-import * as base from './base';
 
 export class Rect {
   constructor(

@@ -19,7 +19,6 @@
  * and shorthands.
  */
 import * as logging from '../vivliostyle/logging';
-
 import * as base from './base';
 import * as css from './css';
 import * as cssparse from './cssparse';

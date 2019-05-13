@@ -18,8 +18,9 @@
  * @fileoverview Utilities asynchronous execution and cooperative multitasking.
  */
 import * as logging from '../vivliostyle/logging';
-import * as base from './base';
 import * as task from './task';
+
+import * as base from './base';
 
 /**
  * A class that can fetch or compute a resource that may be needed by multiple

@@ -20,13 +20,13 @@
 import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
+import * as exprs from './expr';
+import * as vtree from './vtree';
+
 import {DispatchParserHandler} from './cssparse';
 import * as cssparse from './cssparse';
-import {ValidatorSet} from './cssvalid';
-import {PropertyReceiver} from './cssvalid';
-import * as exprs from './expr';
+import {ValidatorSet, PropertyReceiver} from './cssvalid';
 import {DocumentFaces} from './font';
-import * as vtree from './vtree';
 
 export let keyCount: number = 1;
 

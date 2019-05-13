@@ -17,12 +17,13 @@
  * @fileoverview Constants
  */
 
-export namespace constants {
-
 /**
  * Debug flag.
  */
 export let isDebug: boolean = false;
+export function setDebug(value: boolean) {
+  isDebug = value;
+}
 
 /**
  * Page progression direction.
@@ -32,11 +33,11 @@ export enum PageProgression {
   LTR = 'ltr',
   RTL = 'rtl'
 }
-export namespace PageProgression {
+
 /**
- * Return PageProgressino corresponding to the specified string
+ * Return PageProgression corresponding to the specified string
  */
-export const of = (str: string): PageProgression => {
+export const pageProgressionOf = (str: string): PageProgression => {
   switch (str) {
     case 'ltr':
       return PageProgression.LTR;
@@ -46,7 +47,6 @@ export const of = (str: string): PageProgression => {
       throw new Error(`unknown PageProgression: ${str}`);
   }
 };
-}
 
 /**
  * Page side (left/right).
@@ -67,15 +67,11 @@ export enum ReadyState {
   COMPLETE = 'complete'
 }
 
-} // export namespace constants
-// Old exports:
-// vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageProgression", PageProgression);
-// goog.exportProperty(PageProgression, "LTR", PageProgression.LTR);
-// goog.exportProperty(PageProgression, "RTL", PageProgression.RTL);
-// vivliostyle.namespace.exportSymbol("vivliostyle.constants.PageSide", PageSide);
-// goog.exportProperty(PageSide, "LEFT", PageSide.LEFT);
-// goog.exportProperty(PageSide, "RIGHT", PageSide.RIGHT);
-// vivliostyle.namespace.exportSymbol("vivliostyle.constants.ReadyState", ReadyState);
-// goog.exportProperty(ReadyState, "LOADING", ReadyState.LOADING);
-// goog.exportProperty(ReadyState, "INTERACTIVE", ReadyState.INTERACTIVE);
-// goog.exportProperty(ReadyState, "COMPLETE", ReadyState.COMPLETE);
+/**
+ * Pubilc members of the bundled library.
+ */
+export const constants = {
+  PageProgression,
+  PageSide,
+  ReadyState
+};
