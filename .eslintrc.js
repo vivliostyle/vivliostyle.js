@@ -26,7 +26,7 @@ module.exports = {
         "jasmine": true
     },
     "globals": {
-        "vivliostyle": false,
+        "DEBUG": true,
     },
     "extends": [
       "eslint:recommended",

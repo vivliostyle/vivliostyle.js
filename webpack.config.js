@@ -42,6 +42,9 @@ module.exports = {
     }]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      DEBUG: JSON.stringify(process.env.NODE_ENV !== 'production')
+    }),
     new webpack.BannerPlugin({
       banner: bannerText
     }),

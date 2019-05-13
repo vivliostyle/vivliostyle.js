@@ -40,8 +40,6 @@ import * as task from './task';
 import * as vtreeImpl from './vtree';
 import {ViewFactory} from './vgen';
 
-declare var DEBUG: boolean;
-
 export const mediaTags = {
   'img': true,
   'svg': true,

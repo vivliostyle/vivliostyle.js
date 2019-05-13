@@ -33,8 +33,6 @@ import {ExprContentListener, NodeContext} from './vtree';
 
 export interface ElementStyle extends csscasc.ElementStyle {}
 
-declare var DEBUG: boolean;
-
 export const inheritedProps = {
   'azimuth': true,
   'border-collapse': true,

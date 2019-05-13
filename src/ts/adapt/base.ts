@@ -19,8 +19,6 @@
  */
 import * as logging from '../vivliostyle/logging';
 
-declare var DEBUG: boolean;
-
 export let emptyObj = {};
 
 export type JSON = any;

@@ -48,8 +48,6 @@ import * as vgen from './vgen';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
-declare var DEBUG: boolean;
-
 export const uaStylesheetBaseFetcher: Fetcher<boolean> =
     new Fetcher(() => {
       const frame: task.Frame<boolean> = task.newFrame('uaStylesheetBase');
