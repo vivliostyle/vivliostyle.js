@@ -17,12 +17,12 @@
  * @fileoverview Utilities for selectors.
  */
 import * as base from '../adapt/base';
-import * as pseudoElement from '../adapt/pseudoelement';
 import * as task from '../adapt/task';
 import {ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as asserts from './asserts';
 import * as layouthelper from './layouthelper';
 import {NthFragmentMatcher} from './matcher';
+import * as pseudoElement from './pseudoelement';
 import {layout, selector, vtree, FragmentLayoutConstraintType} from './types';
 
 export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;

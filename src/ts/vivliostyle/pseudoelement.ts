@@ -16,13 +16,13 @@
  *
  * @fileoverview View tree generator.
  */
-import {pseudoelement} from '../vivliostyle/types';
-import * as base from './base';
-import {Context} from './expr';
-import * as css from './css';
-import * as csscasc from './csscasc';
-import * as cssstyler from './cssstyler';
-import * as vtree from './vtree';
+import * as base from '../adapt/base';
+import {Context} from '../adapt/expr';
+import * as css from '../adapt/css';
+import * as csscasc from '../adapt/csscasc';
+import * as cssstyler from '../adapt/cssstyler';
+import * as vtree from '../adapt/vtree';
+import {pseudoelement} from './types';
 
 export const document = new DOMParser().parseFromString(
   `<root xmlns="${base.NS.SHADOW}"/>`,
