@@ -17,27 +17,27 @@
  *
  * @fileoverview View tree generator.
  */
+import * as asserts from '../vivliostyle/asserts';
+import {restoreNewText, diffChars} from '../vivliostyle/diff';
 import * as display from '../vivliostyle/display';
+import {NthFragmentMatcher} from '../vivliostyle/matcher';
+import * as pagefloat from '../vivliostyle/pagefloat';
+import * as plugin from '../vivliostyle/plugin';
+import * as pseudoelement from '../vivliostyle/pseudoelement';
+import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
+import * as selectors from '../vivliostyle/selectors';
 import * as urls from '../vivliostyle/urls';
+import * as base from './base';
 import * as css from './css';
 import * as csscasc from './csscasc';
+import {UrlTransformVisitor} from './cssprop';
 import * as cssstyler from './cssstyler';
+import {Context, defaultUnitSizes, isFontRelativeLengthUnit, needUnitConversion} from './expr';
 import * as font from './font';
 import * as task from './task';
 import * as taskutil from './taskutil';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
-
-import * as asserts from '../vivliostyle/asserts';
-import {restoreNewText, diffChars} from '../vivliostyle/diff';
-import * as selectors from '../vivliostyle/selectors';
-import * as plugin from '../vivliostyle/plugin';
-import * as pagefloat from '../vivliostyle/pagefloat';
-import {RepetitiveElementsOwnerFormattingContext} from '../vivliostyle/repetitiveelements';
-import {DocumentURLTransformer} from './base';
-import * as base from './base';
-import {UrlTransformVisitor} from './cssprop';
-import {Context, defaultUnitSizes, isFontRelativeLengthUnit, needUnitConversion} from './expr';
 
 const namespacePrefixMap = {};
 
@@ -105,82 +105,6 @@ export interface StylerProducer {
   getStylerForDoc(xmldoc: xmldocs.XMLDocHolder): cssstyler.AbstractStyler;
 }
 
-export const pseudoelementDoc =
-    (new DOMParser())
-        .parseFromString(`<root xmlns="${base.NS.SHADOW}"/>`, 'text/xml');
-
-/**
- * Pseudoelement names in the order they should be inserted in the shadow DOM,
- * empty string is the place where the element's DOM children are processed.
- */
-export const pseudoNames = [
-  'footnote-marker', 'first-5-lines', 'first-4-lines', 'first-3-lines',
-  'first-2-lines', 'first-line', 'first-letter', 'before', '',
-  /* content */
-  'after'
-];
-
-export const PSEUDO_ATTR = 'data-adapt-pseudo';
-
-export const getPseudoName = (element: Element): string =>
-    element.getAttribute(PSEUDO_ATTR) || '';
-
-export const setPseudoName = (element: Element, name: string) => {
-  element.setAttribute(PSEUDO_ATTR, name);
-};
-
-export class PseudoelementStyler implements cssstyler.AbstractStyler {
-  contentProcessed: {[key: string]: boolean} = {};
-
-  // after content: update style
-
-  constructor(
-      public readonly element: Element, public style: csscasc.ElementStyle,
-      public styler: cssstyler.AbstractStyler, public readonly context: Context,
-      public readonly exprContentListener: vtree.ExprContentListener) {}
-
-  /**
-   * @override
-   */
-  getStyle(element, deep) {
-    const pseudoName = getPseudoName(element);
-    if (this.styler && pseudoName && pseudoName.match(/after$/)) {
-      this.style = this.styler.getStyle(this.element, true);
-      this.styler = null;
-    }
-    const pseudoMap = csscasc.getStyleMap(this.style, '_pseudos');
-    const style = pseudoMap[pseudoName] || ({} as csscasc.ElementStyle);
-    if (pseudoName.match(/^first-/) && !style['x-first-pseudo']) {
-      let nest = 1;
-      let r;
-      if (pseudoName == 'first-letter') {
-        nest = 0;
-      } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
-        nest = r[1] - 0;
-      }
-      style['x-first-pseudo'] = new csscasc.CascadeValue(new css.Int(nest), 0);
-    }
-    return style;
-  }
-
-  /**
-   * @override
-   */
-  processContent(element, style) {
-    const pseudoName = getPseudoName(element);
-    if (!this.contentProcessed[pseudoName]) {
-      this.contentProcessed[pseudoName] = true;
-      const contentVal = style['content'];
-      if (contentVal) {
-        if (vtree.nonTrivialContent(contentVal)) {
-          contentVal.visit(new vtree.ContentPropertyHandler(
-              element, this.context, contentVal, this.exprContentListener));
-        }
-      }
-    }
-  }
-}
-
 export class ViewFactory extends base.SimpleEventTarget implements
     vtree.LayoutContext {
   private static SVG_URL_ATTRIBUTES: string[] = [
@@ -213,7 +137,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
       public readonly page: vtree.Page,
       public readonly customRenderer: CustomRenderer,
       public readonly fallbackMap: {[key: string]: string},
-      public readonly documentURLTransformer: DocumentURLTransformer) {
+      public readonly documentURLTransformer: base.DocumentURLTransformer) {
     super();
     this.document = viewport.document;
     this.exprContentListener = styler.counterListener.getExprContentListener();
@@ -241,9 +165,9 @@ export class ViewFactory extends base.SimpleEventTarget implements
       return subShadow;
     }
     const addedNames = [];
-    const root = pseudoelementDoc.createElementNS(base.NS.SHADOW, 'root');
+    const root = pseudoelement.document.createElementNS(base.NS.SHADOW, 'root');
     let att = root;
-    for (const name of pseudoNames) {
+    for (const name of pseudoelement.pseudoNames) {
       let elem;
       if (name) {
         if (!pseudoMap[name]) {
@@ -266,11 +190,11 @@ export class ViewFactory extends base.SimpleEventTarget implements
           }
         }
         addedNames.push(name);
-        elem = pseudoelementDoc.createElementNS(base.NS.XHTML, 'span');
-        setPseudoName(elem, name);
+        elem = pseudoelement.document.createElementNS(base.NS.XHTML, 'span');
+        pseudoelement.setPseudoName(elem, name);
       } else {
         elem =
-            pseudoelementDoc.createElementNS(base.NS.SHADOW, 'content');
+            pseudoelement.document.createElementNS(base.NS.SHADOW, 'content');
       }
       att.appendChild(elem);
       if (name.match(/^first-/)) {
@@ -280,7 +204,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     if (!addedNames.length) {
       return subShadow;
     }
-    const shadowStyler = new PseudoelementStyler(
+    const shadowStyler = new pseudoelement.PseudoelementStyler(
         element, cascStyle, styler, context, this.exprContentListener);
     return new vtree.ShadowContext(
         element, root, null, parentShadow, subShadow, vtree.ShadowType.ROOTLESS,
@@ -298,12 +222,12 @@ export class ViewFactory extends base.SimpleEventTarget implements
     for (const key in pseudoMap) {
       const computedPseudoStyle = computedPseudoStyleMap[key] = {};
       csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
-      selectors.mergeViewConditionalStyles(
+      csscasc.mergeViewConditionalStyles(
           computedPseudoStyle, context, pseudoMap[key]);
       csscasc.forEachStylesInRegion(
           pseudoMap[key], regionIds, isFootnote, (regionId, regionStyle) => {
             csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-            selectors.forEachViewConditionalStyles(
+            csscasc.forEachViewConditionalStyles(
                 regionStyle, (viewConditionalStyles) => {
                   csscasc.mergeStyle(
                       computedPseudoStyle, viewConditionalStyles, context);
@@ -591,7 +515,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     let elementStyle = styler.getStyle(element, false);
     if (!self.nodeContext.shadowContext) {
       const offset = this.xmldoc.getElementOffset(element);
-      selectors.registerFragmentIndex(
+      NthFragmentMatcher.registerFragmentIndex(
           offset, self.nodeContext.fragmentIndex, 0);
     }
     const computedStyle = {};
@@ -601,7 +525,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
       self.nodeContext.lang = inheritedValues.lang;
     }
     const floatReference = elementStyle['float-reference'] &&
-        pagefloat.FloatReference.of(
+        pagefloat.floatReferenceOf(
             elementStyle['float-reference'].value.toString());
     if (self.nodeContext.parent && floatReference &&
         pagefloat.isPageFloat(floatReference)) {
@@ -828,7 +752,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
             } else if (tag == 'object') {
               custom = !!self.customRenderer;
             }
-            if (element.getAttribute(PSEUDO_ATTR)) {
+            if (element.getAttribute(pseudoelement.PSEUDO_ATTR)) {
               if (elementStyle['content'] && elementStyle['content'].value &&
                   elementStyle['content'].value.url) {
                 tag = 'img';
@@ -1165,7 +1089,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     }
     if (pseudoMap['after-if-continues'] &&
         pseudoMap['after-if-continues']['content']) {
-      const shadowStyler = new PseudoelementStyler(
+      const shadowStyler = new pseudoelement.PseudoelementStyler(
           element, cascStyle, styler, context, this.exprContentListener);
       this.nodeContext.afterIfContinues =
           new selectors.AfterIfContinues(element, shadowStyler);
@@ -1780,7 +1704,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     if (pseudoMap && pseudoMap['before']) {
       const childComputedStyle = {};
       const span = this.createElement(base.NS.XHTML, 'span');
-      setPseudoName(span, 'before');
+      pseudoelement.setPseudoName(span, 'before');
       target.appendChild(span);
       this.computeStyle(vertical, rtl, pseudoMap['before'], childComputedStyle);
       delete childComputedStyle['content'];
@@ -1859,7 +1783,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
       const elem2 = step2.node.nodeType === 1 ? (step2.node as Element) :
                                                 (step2.node.parentElement as Element);
       return step1.shadowContext.owner === step2.shadowContext.owner &&
-          getPseudoName(elem1) === getPseudoName(elem2);
+          pseudoelement.getPseudoName(elem1) === pseudoelement.getPseudoName(elem2);
     } else {
       return step1.node === step2.node;
     }
@@ -1878,7 +1802,9 @@ export class ViewFactory extends base.SimpleEventTarget implements
         });
   }
 
-  isPseudoelement(elem) {return !!getPseudoName(elem);}
+  isPseudoelement(elem) {
+    return !!pseudoelement.getPseudoName(elem);
+  }
 }
 
 export const fb2Remap = {

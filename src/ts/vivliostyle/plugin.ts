@@ -16,13 +16,13 @@
  *
  * @fileoverview Plugin mechanism
  */
-import * as logging from './logging';
-
 import {JSON} from '../adapt/base';
 import {Ident} from '../adapt/css';
-import {TextNodeBreaker, LayoutProcessor, Column} from '../adapt/layout';
 import {Result} from '../adapt/task';
-import {NodeContext, FormattingContext} from '../adapt/vtree';
+import {FormattingContext} from '../adapt/vtree';
+import * as layoutprocessor from './layoutprocessor';
+import * as logging from './logging';
+import {vtree, layout} from './types';
 
 /**
  * Type of implemented hooks.
@@ -142,9 +142,9 @@ export enum HOOKS {
 
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
-export type PreProcessTextContentHook = (p1: NodeContext, p2: string) => Result<string>;
+export type PreProcessTextContentHook = (p1: vtree.NodeContext, p2: string) => Result<string>;
 
-export type PreProcessElementStyleHook = (p1: NodeContext, p2: Object) => void;
+export type PreProcessElementStyleHook = (p1: vtree.NodeContext, p2: Object) => void;
 
 export type PolyfilledInheritedPropsHook = () => string[];
 
@@ -152,15 +152,15 @@ export type ConfigurationHook = (p1: JSON) => {
   needResize: boolean|null|undefined, needRefresh: boolean|null|undefined
 };
 
-export type ResolveTextNodeBreakerHook = (p1: NodeContext) => TextNodeBreaker;
+export type ResolveTextNodeBreakerHook = (p1: vtree.NodeContext) => layout.TextNodeBreaker;
 
 export type ResolveFormattingContextHook =
-    (p1: NodeContext, p2: boolean, p3: Ident, p4: Ident, p5: Ident,
+    (p1: vtree.NodeContext, p2: boolean, p3: Ident, p4: Ident, p5: Ident,
      p6: boolean) => FormattingContext;
 
-export type ResolveLayoutProcessorHook = (p1: FormattingContext) => LayoutProcessor;
+export type ResolveLayoutProcessorHook = (p1: FormattingContext) => layoutprocessor.LayoutProcessor;
 
-export type PostLayoutBlockHook = (p1: NodeContext, p2: NodeContext[], p3: Column) => void;
+export type PostLayoutBlockHook = (p1: vtree.NodeContext, p2: vtree.NodeContext[], p3: layout.Column) => void;
 
 const hooks = {};
 

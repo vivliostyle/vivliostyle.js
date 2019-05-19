@@ -17,23 +17,23 @@
  *
  * @fileoverview CSS Cascade.
  */
+import * as base from './base';
+import * as asserts from '../vivliostyle/asserts';
 import * as logging from '../vivliostyle/logging';
 import * as plugin from '../vivliostyle/plugin';
+import {Matcher, MatcherBuilder, matchANPlusB} from '../vivliostyle/matcher';
+import { csscasc } from '../vivliostyle/types';
 import * as css from './css';
 import * as exprs from './expr';
 import * as cssparse from './cssparse';
 import * as cssprop from './cssprop';
-import * as cssvalid from './cssvalid';
-
-import * as asserts from '../vivliostyle/asserts';
-import {Matcher} from '../vivliostyle/selectors';
-import * as selectors from '../vivliostyle/selectors';
-import * as base from './base';
 import * as csstok from './csstok';
-import {ExprContentListener} from './vtree';
-import {NodeContext} from './vtree';
+import * as cssvalid from './cssvalid';
+import {ExprContentListener, NodeContext} from './vtree';
 
-declare var DEBUG: boolean; 
+export interface ElementStyle extends csscasc.ElementStyle {}
+
+declare var DEBUG: boolean;
 
 export const inheritedProps = {
   'azimuth': true,
@@ -318,15 +318,9 @@ export const cascadeValues =
       return tv;
     };
 
-/**
- * @dict
- */
-export class ElementStyle {}
-type ElementStyleMap = {
+export type ElementStyleMap = {
   [key: string]: ElementStyle
 };
-
-export {ElementStyleMap};
 
 export const SPECIALS = {
   'region-id': true,
@@ -1002,19 +996,6 @@ export class IsNthAction extends ChainedAction {
     return matchANPlusB(order, this.a, this.b);
   }
 }
-
-/**
- * Checkes whether given order can be represented as an+b with a non-negative
- * interger n
- */
-export const matchANPlusB = (order: number, a: number, b: number): boolean => {
-  order -= b;
-  if (a === 0) {
-    return order === 0;
-  } else {
-    return order % a === 0 && order / a >= 0;
-  }
-};
 
 export class IsNthSiblingAction extends IsNthAction {
   constructor(a: number, b: number) {
@@ -2306,11 +2287,10 @@ export class CascadeInstance {
   }
 
   buildViewConditionMatcher(viewConditionId: string|null): Matcher {
-    const matcherBuilder = selectors.MatcherBuilder.instance;
     let matcher = null;
     if (viewConditionId) {
       asserts.assert(this.currentElementOffset);
-      matcher = matcherBuilder.buildViewConditionMatcher(
+      matcher = MatcherBuilder.buildViewConditionMatcher(
           this.currentElementOffset, viewConditionId);
     }
     const dependentConditionMatchers =
@@ -2320,7 +2300,7 @@ export class CascadeInstance {
               if (conditions && conditions.length > 0) {
                 return conditions.length === 1 ?
                     conditions[0] :
-                    matcherBuilder.buildAnyMatcher([].concat(conditions));
+                    MatcherBuilder.buildAnyMatcher([].concat(conditions));
               } else {
                 return null;
               }
@@ -2332,9 +2312,9 @@ export class CascadeInstance {
     if (matcher === null) {
       return dependentConditionMatchers.length === 1 ?
           dependentConditionMatchers[0] :
-          matcherBuilder.buildAllMatcher(dependentConditionMatchers);
+          MatcherBuilder.buildAllMatcher(dependentConditionMatchers);
     }
-    return matcherBuilder.buildAllMatcher(
+    return MatcherBuilder.buildAllMatcher(
         [matcher].concat(dependentConditionMatchers));
   }
 
@@ -3479,6 +3459,28 @@ export class PropertyParserHandler extends
   }
 }
 
+export const forEachViewConditionalStyles =
+    (style: ElementStyle, callback: (p1: ElementStyle) => any) => {
+      const viewConditionalStyles = getViewConditionalStyleMap(style);
+      if (!viewConditionalStyles) {
+        return;
+      }
+      viewConditionalStyles.forEach((entry) => {
+        if (!entry.matcher.matches()) {
+          return;
+        }
+        callback(entry.styles);
+      });
+    };
+
+export const mergeViewConditionalStyles =
+    (cascMap: {[key: string]: CascadeValue}, context: exprs.Context,
+     style: ElementStyle) => {
+      forEachViewConditionalStyles(style, (viewConditionalStyles) => {
+        mergeStyle(cascMap, viewConditionalStyles, context);
+      });
+    };
+
 export const parseStyleAttribute =
     (scope: exprs.LexicalScope, validatorSet: cssvalid.ValidatorSet,
      baseURL: string, styleAttrValue: string): ElementStyle => {
@@ -3528,11 +3530,11 @@ export const flattenCascadedStyle =
           cascMap[n] = getProp(style, n);
         }
       }
-      selectors.mergeViewConditionalStyles(cascMap, context, style);
+      mergeViewConditionalStyles(cascMap, context, style);
       forEachStylesInRegion(
           style, regionIds, isFootnote, (regionId, regionStyle) => {
             mergeStyle(cascMap, regionStyle, context);
-            selectors.mergeViewConditionalStyles(
+            mergeViewConditionalStyles(
                 cascMap, context, regionStyle);
           });
       return cascMap;

@@ -17,15 +17,18 @@
  *
  * @fileoverview Utility functions to work with XML (mostly XHTML) documents.
  */
+import {xmldoc} from '../vivliostyle/types';
 import * as base from './base';
 import * as net from './net';
 import * as task from './task';
 
-declare var DEBUG: boolean; 
+export type XMLDocStore = xmldoc.XMLDocStore;
+
+declare var DEBUG: boolean;
 
 export const ELEMENT_OFFSET_ATTR = 'data-adapt-eloff';
 
-export class XMLDocHolder {
+export class XMLDocHolder implements xmldoc.XMLDocHolder {
   lang: string|null = null;
   totalOffset: number = -1;
   root: Element;
@@ -101,7 +104,7 @@ export class XMLDocHolder {
     this.last.setAttribute(ELEMENT_OFFSET_ATTR, '0');
   }
 
-  doc(): NodeList {
+  doc(): xmldoc.NodeList {
     return new NodeList([this.document]);
   }
 
@@ -294,9 +297,6 @@ export class XMLDocHolder {
     return r;
   }
 }
-type XMLDocStore = net.ResourceStore<XMLDocHolder>;
-
-export {XMLDocStore};
 
 /**
  * cf. https://w3c.github.io/DOM-Parsing/#the-domparser-interface
@@ -418,7 +418,7 @@ export const parseXMLResource = (response: net.Response, store: XMLDocStore):
 export const newXMLDocStore = (): XMLDocStore => new net.ResourceStore(
     parseXMLResource, net.XMLHttpRequestResponseType.DOCUMENT);
 
-export class Predicate {
+export class Predicate implements xmldoc.Predicate {
   constructor(public readonly fn: (p1: Node) => boolean) {}
 
   check(node: Node): boolean {
@@ -450,7 +450,7 @@ export class Predicate {
 
 export const predicate = new Predicate((node) => true);
 
-export class NodeList {
+export class NodeList implements xmldoc.NodeList {
   constructor(public readonly nodes: Node[]) {}
 
   asArray(): Node[] {

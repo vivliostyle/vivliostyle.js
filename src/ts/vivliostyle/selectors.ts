@@ -16,123 +16,38 @@
  *
  * @fileoverview Utilities for selectors.
  */
-
 import * as base from '../adapt/base';
-import {CascadeValue, ElementStyle, matchANPlusB, mergeStyle, getViewConditionalStyleMap} from '../adapt/csscasc';
-import {Context} from '../adapt/expr';
-import {Column, getElementHeight, FragmentLayoutConstraint} from '../adapt/layout';
-import {Frame, newResult, Result} from '../adapt/task';
 import * as task from '../adapt/task';
-import {PseudoelementStyler} from '../adapt/vgen';
-import * as vgen from '../adapt/vgen';
-import {NodeContext, ChunkPosition, ShadowContext} from '../adapt/vtree';
-import * as vtree from '../adapt/vtree';
+import {ChunkPosition, ShadowContext} from '../adapt/vtree';
 import * as asserts from './asserts';
-import {PseudoColumn} from './layoututil';
-import {ElementsOffset} from './repetitiveelements';
+import * as layouthelper from './layouthelper';
+import {NthFragmentMatcher} from './matcher';
+import * as pseudoElement from './pseudoelement';
+import {layout, selector, vtree, FragmentLayoutConstraintType} from './types';
 
-export interface Matcher {
-  matches(): boolean;
-}
+export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;
 
-let fragmentIndices = {};
+export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
 
-export class NthFragmentMatcher implements Matcher {
-  constructor(
-      public readonly elementOffset: number, public readonly a: number,
-      public readonly b: number) {}
+// FIXME: When importing layoututil module statically, it causes a circular dependency.
+let layoututil: typeof import('./layoututil');
+import('./layoututil').then(it => {
+  layoututil = it;
+});
 
-  /** @override */
-  matches() {
-    const entry = fragmentIndices[this.elementOffset];
-    return entry != null && entry.fragmentIndex != null &&
-        matchANPlusB(entry.fragmentIndex, this.a, this.b);
-  }
-}
-
-export class AnyMatcher implements Matcher {
-  constructor(public readonly matchers: Matcher[]) {}
-
-  /** @override */
-  matches() {
-    return this.matchers.some((matcher) => matcher.matches());
-  }
-}
-
-export class AllMatcher implements Matcher {
-  constructor(public readonly matchers: Matcher[]) {}
-
-  /** @override */
-  matches() {
-    return this.matchers.every((matcher) => matcher.matches());
-  }
-}
-
-export class MatcherBuilder {
-  buildViewConditionMatcher(elementOffset: number, viewCondition: string):
-      Matcher {
-    const strs = viewCondition.split('_');
-    if (strs[0] == 'NFS') {
-      return new NthFragmentMatcher(
-          elementOffset, parseInt(strs[1], 10), parseInt(strs[2], 10));
-    } else {
-      asserts.fail(`unknown view condition. condition=${viewCondition}`);
-      return null;
-    }
-  }
-
-  buildAllMatcher(matchers: Matcher[]): Matcher {return new AllMatcher(matchers);}
-
-  buildAnyMatcher(matchers: Matcher[]): Matcher {return new AnyMatcher(matchers);}
-
-  static instance = new MatcherBuilder();
-}
-
-export const mergeViewConditionalStyles =
-    (cascMap: {[key: string]: CascadeValue}, context: Context,
-     style: ElementStyle) => {
-      forEachViewConditionalStyles(style, (viewConditionalStyles) => {
-        mergeStyle(cascMap, viewConditionalStyles, context);
-      });
-    };
-
-export const forEachViewConditionalStyles =
-    (style: ElementStyle, callback: (p1: ElementStyle) => any) => {
-      const viewConditionalStyles = getViewConditionalStyleMap(style);
-      if (!viewConditionalStyles) {
-        return;
-      }
-      viewConditionalStyles.forEach((entry) => {
-        if (!entry.matcher.matches()) {
-          return;
-        }
-        callback(entry.styles);
-      });
-    };
-
-export const registerFragmentIndex =
-    (elementOffset: number, fragmentIndex: number, priority: number) => {
-      const indices = fragmentIndices;
-      if (!indices[elementOffset] ||
-          indices[elementOffset].priority <= priority) {
-        indices[elementOffset] = {fragmentIndex, priority};
-      }
-    };
-
-export const clearFragmentIndices = () => {
-  fragmentIndices = {};
-};
-
-export class AfterIfContinues {
+export class AfterIfContinues implements selector.AfterIfContinues {
   constructor(
       public readonly sourceNode: Element,
-      public readonly styler: PseudoelementStyler) {}
+      public readonly styler: pseudoElement.PseudoelementStyler) {}
 
-  createElement(column: Column, parentNodeContext: NodeContext):
-      Result<Element> {
+  createElement(column: layout.Column, parentNodeContext: vtree.NodeContext):
+      task.Result<Element> {
+    if (!layoututil) {
+      throw new Error('layoututil module is required but not be imported.');
+    }
     const doc = parentNodeContext.viewNode.ownerDocument;
     const viewRoot = doc.createElement('div');
-    const pseudoColumn = new PseudoColumn(column, viewRoot, parentNodeContext);
+    const pseudoColumn = new layoututil.PseudoColumn(column, viewRoot, parentNodeContext);
     const initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
     pseudoColumn.getColumn().pageBreakType = null;
     return pseudoColumn.layout(this.createNodePositionForPseudoElement(), true)
@@ -141,14 +56,14 @@ export class AfterIfContinues {
           pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
           const pseudoElement = (viewRoot.firstChild as Element);
           base.setCSSProperty(pseudoElement, 'display', 'block');
-          return newResult(pseudoElement);
+          return task.newResult(pseudoElement);
         });
   }
 
-  private createNodePositionForPseudoElement(): ChunkPosition {
+  private createNodePositionForPseudoElement(): vtree.ChunkPosition {
     const sourceNode =
-        vgen.pseudoelementDoc.createElementNS(base.NS.XHTML, 'div');
-    vgen.setPseudoName(sourceNode, 'after-if-continues');
+        pseudoElement.document.createElementNS(base.NS.XHTML, 'div');
+    pseudoElement.setPseudoName(sourceNode, 'after-if-continues');
     const shadowContext = this.createShadowContext(sourceNode);
     const step = {
       node: sourceNode,
@@ -163,24 +78,24 @@ export class AfterIfContinues {
       after: false,
       preprocessedTextContent: null
     };
-    return new vtree.ChunkPosition(nodePosition as any);
+    return new ChunkPosition(nodePosition as any);
   }
 
-  private createShadowContext(root: Element): ShadowContext {
-    return new vtree.ShadowContext(
+  private createShadowContext(root: Element): vtree.ShadowContext {
+    return new ShadowContext(
         this.sourceNode, root, null, null, null, vtree.ShadowType.ROOTED,
         this.styler);
   }
 }
 
-export class AfterIfContinuesLayoutConstraint implements
-    FragmentLayoutConstraint {
+export class AfterIfContinuesLayoutConstraint implements selector.AfterIfContinuesLayoutConstraint {
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType = 'AfterIfContinue';
   nodeContext: any;
   afterIfContinues: any;
   pseudoElementHeight: any;
 
   constructor(
-      nodeContext: NodeContext, afterIfContinues: AfterIfContinues,
+      nodeContext: vtree.NodeContext, afterIfContinues: selector.AfterIfContinues,
       pseudoElementHeight: number) {
     this.nodeContext = nodeContext;
     this.afterIfContinues = afterIfContinues;
@@ -232,7 +147,8 @@ export class AfterIfContinuesLayoutConstraint implements
   /** @override */
   getPriorityOfFinishBreak() {return 9;}
 }
-export class AfterIfContinuesElementsOffset implements ElementsOffset {
+
+export class AfterIfContinuesElementsOffset implements selector.AfterIfContinuesElementsOffset {
   nodeContext: any;
   pseudoElementHeight: any;
 
@@ -254,7 +170,7 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
     return this.calculateOffset(nodeContext);
   }
 
-  affectTo(nodeContext: NodeContext): boolean {
+  affectTo(nodeContext: vtree.NodeContext): boolean {
     if (!nodeContext) {
       return false;
     }
@@ -274,7 +190,7 @@ export class AfterIfContinuesElementsOffset implements ElementsOffset {
 }
 
 function processAfterIfContinuesOfNodeContext(
-    nodeContext: NodeContext, column: Column): Result<NodeContext> {
+    nodeContext: vtree.NodeContext, column: layout.Column): task.Result<vtree.NodeContext> {
   if (!nodeContext || !nodeContext.afterIfContinues || nodeContext.after ||
       column.isFloatNodeContext(nodeContext)) {
     return task.newResult(nodeContext);
@@ -293,16 +209,16 @@ function processAfterIfContinuesOfNodeContext(
 }
 
 export const processAfterIfContinues =
-    (result: Result<NodeContext>, column: Column): Result<NodeContext> =>
+    (result: task.Result<vtree.NodeContext>, column: layout.Column): task.Result<vtree.NodeContext> =>
         result.thenAsync(
             (nodeContext) =>
                 processAfterIfContinuesOfNodeContext(nodeContext, column));
 
 export const processAfterIfContinuesOfAncestors =
-    (nodeContext: NodeContext, column: Column): Result<boolean> => {
-      const frame: Frame<boolean> = task.newFrame(
+    (nodeContext: vtree.NodeContext, column: layout.Column): task.Result<boolean> => {
+      const frame: task.Frame<boolean> = task.newFrame(
           'vivliostyle.selectors.processAfterIfContinuesOfAncestors');
-      let current: NodeContext = nodeContext;
+      let current: vtree.NodeContext = nodeContext;
       frame
           .loop(() => {
             if (current !== null) {
@@ -321,11 +237,11 @@ export const processAfterIfContinuesOfAncestors =
     };
 
 export const calculatePseudoElementHeight =
-    (nodeContext: NodeContext, column: Column, pseudoElement: Element):
+    (nodeContext: vtree.NodeContext, column: layout.Column, pseudoElement: Element):
         number => {
           const parentNode = (nodeContext.viewNode as Element);
           parentNode.appendChild(pseudoElement);
-          const height = getElementHeight(
+          const height = layouthelper.getElementHeight(
               pseudoElement, column, nodeContext.vertical);
           parentNode.removeChild(pseudoElement);
           return height;
