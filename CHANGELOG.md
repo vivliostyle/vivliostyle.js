@@ -1,7 +1,9 @@
 # Change Log
 
-## 2019.1.106-pre - 2019-04-27
+## 2019.1.106-pre - 2019-06-11
 
+- Workaround for Firefox printing problem
+  - <https://github.com/vivliostyle/vivliostyle.js/issues/525>
 - Fix error occurring when `@page` size has vw/vh units
   - <https://github.com/vivliostyle/vivliostyle.js/commit/e1d7023c>
 
