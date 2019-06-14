@@ -1,6 +1,8 @@
 # Change Log
 
-## 2019.1.106-pre - 2019-06-11
+## [2019.1.106](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.106) - 2019-06-14
+
+### Fixed
 
 - Workaround for Firefox printing problem
   - <https://github.com/vivliostyle/vivliostyle.js/issues/525>
