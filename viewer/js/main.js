@@ -139,6 +139,3547 @@ h.beforeRemove?a.na:a.removeNode);var M,O,P;try{P=e.ownerDocument.activeElement}
 v.fragments={};return e};this.createJavaScriptEvaluatorBlock=function(a){return"{{ko_code ((function() { return "+a+" })()) }}"};this.addTemplate=function(a,b){w.write("<script type='text/html' id='"+a+"'>"+b+"\x3c/script>")};0<a&&(v.tmpl.tag.ko_code={open:"__.push($1 || '');"},v.tmpl.tag.ko_with={open:"with($1) {",close:"} "})};a.Za.prototype=new a.ca;a.Za.prototype.constructor=a.Za;var b=new a.Za;0<b.Gd&&a.ec(b);a.b("jqueryTmplTemplateEngine",a.Za)})()})})();})();
 
 },{}],2:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var supportTouchEvents = ("ontouchstart" in window);
+
+_knockout2["default"].bindingHandlers.menuButton = {
+    init: function init(element, valueAccessor) {
+        if (_knockout2["default"].unwrap(valueAccessor())) {
+            if (supportTouchEvents) {
+                element.addEventListener("touchstart", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", true);
+                });
+                element.addEventListener("touchend", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", false);
+                });
+            } else {
+                element.addEventListener("mouseover", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", true);
+                });
+                element.addEventListener("mousedown", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", true);
+                });
+                element.addEventListener("mouseup", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", false);
+                });
+                element.addEventListener("mouseout", function () {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", false);
+                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", false);
+                    window.getSelection().removeAllRanges(); // prevent unwanted text selection
+                });
+            }
+        }
+    }
+};
+
+},{"knockout":1}],3:[function(require,module,exports){
+/*
+ * Copyright 2018 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var supportTouchEvents = ("ontouchstart" in window);
+
+var xStart = null;
+var yStart = null;
+var arrowButton = null;
+
+_knockout2["default"].bindingHandlers.swipePages = {
+    init: function init(element, valueAccessor) {
+        if (supportTouchEvents && _knockout2["default"].unwrap(valueAccessor())) {
+            element.addEventListener("touchstart", function (event) {
+                if (event.touches.length > 1) {
+                    return; // multi-touch is not for page swipe
+                }
+                if (window.visualViewport && window.visualViewport.scale > 1) {
+                    return; // disable page swipe when pinch-zoomed
+                }
+                var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+                if (viewportElement && viewportElement.scrollWidth > viewportElement.clientWidth) {
+                    return; // disable page swipe when horizontal scrollable
+                }
+                xStart = event.touches[0].clientX;
+                yStart = event.touches[0].clientY;
+            });
+            element.addEventListener("touchmove", function (event) {
+                if (event.touches.length > 1) {
+                    return;
+                }
+                if (xStart !== null && yStart !== null) {
+                    var xDiff = event.touches[0].clientX - xStart;
+                    var yDiff = event.touches[0].clientY - yStart;
+                    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                        if (xDiff < 0) {
+                            // swipe to left = go to right
+                            arrowButton = document.getElementById("vivliostyle-page-navigation-right");
+                        } else {
+                            // swipe to right = go to left
+                            arrowButton = document.getElementById("vivliostyle-page-navigation-left");
+                        }
+                    }
+                    if (Math.abs(xDiff) + Math.abs(yDiff) >= 16) {
+                        if (arrowButton) {
+                            arrowButton.click();
+                            _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", true);
+                        }
+                        xStart = null;
+                        yStart = null;
+                    }
+                }
+            });
+            element.addEventListener("touchend", function (event) {
+                if (arrowButton) {
+                    _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", false);
+                }
+                arrowButton = null;
+                xStart = null;
+                yStart = null;
+            });
+        }
+    }
+};
+
+},{"knockout":1}],4:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsMessageQueue = require("../models/message-queue");
+
+var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
+
+var LogLevel = {
+    DEBUG: "debug",
+    INFO: "info",
+    WARN: "warn",
+    ERROR: "error"
+};
+
+var Logger = (function () {
+    function Logger() {
+        _classCallCheck(this, Logger);
+
+        this.logLevel = LogLevel.ERROR;
+    }
+
+    _createClass(Logger, [{
+        key: "setLogLevel",
+        value: function setLogLevel(logLevel) {
+            this.logLevel = logLevel;
+        }
+    }, {
+        key: "debug",
+        value: function debug(content) {
+            if (this.logLevel === LogLevel.DEBUG) {
+                _modelsMessageQueue2["default"].push({
+                    type: "debug",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "info",
+        value: function info(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
+                _modelsMessageQueue2["default"].push({
+                    type: "info",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "warn",
+        value: function warn(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
+                _modelsMessageQueue2["default"].push({
+                    type: "warn",
+                    content: content
+                });
+            }
+        }
+    }, {
+        key: "error",
+        value: function error(content) {
+            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
+                _modelsMessageQueue2["default"].push({
+                    type: "error",
+                    content: content
+                });
+            }
+        }
+    }]);
+
+    return Logger;
+})();
+
+Logger.LogLevel = LogLevel;
+
+var instance = new Logger();
+
+Logger.getLogger = function () {
+    return instance;
+};
+
+exports["default"] = Logger;
+module.exports = exports["default"];
+
+},{"../models/message-queue":7}],5:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _vivliostyle = require("vivliostyle");
+
+var _vivliostyle2 = _interopRequireDefault(_vivliostyle);
+
+var _modelsVivliostyle = require("./models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var _vivliostyleViewer = require("./vivliostyle-viewer");
+
+var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
+
+_modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
+_vivliostyleViewer2["default"].start();
+
+},{"./models/vivliostyle":11,"./vivliostyle-viewer":22,"vivliostyle":23}],6:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
+var _pageStyle = require("./page-style");
+
+var _pageStyle2 = _interopRequireDefault(_pageStyle);
+
+var _utilsStringUtil = require("../utils/string-util");
+
+var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
+
+function getDocumentOptionsFromURL() {
+    var bookUrl = _storesUrlParameters2["default"].getParameter("b");
+    var xUrl = _storesUrlParameters2["default"].getParameter("x");
+    var fragment = _storesUrlParameters2["default"].getParameter("f");
+    var style = _storesUrlParameters2["default"].getParameter("style");
+    var userStyle = _storesUrlParameters2["default"].getParameter("userStyle");
+    return {
+        bookUrl: bookUrl[0] || null, // bookUrl and xUrl are exclusive
+        xUrl: !bookUrl[0] && xUrl.length && xUrl[0] ? xUrl : null,
+        fragment: fragment[0] || null,
+        authorStyleSheet: style.length ? style : [],
+        userStyleSheet: userStyle.length ? userStyle : []
+    };
+}
+
+var DocumentOptions = (function () {
+    function DocumentOptions() {
+        var _this = this;
+
+        _classCallCheck(this, DocumentOptions);
+
+        var urlOptions = getDocumentOptionsFromURL();
+        this.bookUrl = _knockout2["default"].observable(urlOptions.bookUrl || "");
+        this.xUrl = _knockout2["default"].observable(urlOptions.xUrl || null);
+        this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
+        this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
+        this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
+        this.pageStyle = new _pageStyle2["default"]();
+        this.dataUserStyleIndex = -1;
+
+        // write fragment back to URL when updated
+        this.fragment.subscribe(function (fragment) {
+            if (/^epubcfi\(\/([246]\/)?2!\)/.test(fragment)) {
+                _storesUrlParameters2["default"].removeParameter("f");
+            } else {
+                var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+                _storesUrlParameters2["default"].setParameter("f", encoded);
+            }
+        });
+
+        // read userStyle=data:.<cssText> URL parameter
+        urlOptions.userStyleSheet.find(function (userStyle, index) {
+            // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
+            if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(userStyle)) {
+                _this.dataUserStyleIndex = index;
+                var data = userStyle.replace(/^data:,/, "")
+                // Escape unescaped "%" that causes error in decodeURIComponent()
+                .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
+                var cssText = decodeURIComponent(data);
+                _this.pageStyle.cssText(cssText);
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        // write cssText back to URL parameter userStyle= when updated
+        this.pageStyle.cssText.subscribe(function (cssText) {
+            _this.updateUserStyleSheetFromCSSText(cssText);
+        });
+    }
+
+    _createClass(DocumentOptions, [{
+        key: "toObject",
+        value: function toObject() {
+            function convertStyleSheetArray(arr) {
+                return arr.map(function (url) {
+                    return {
+                        url: url
+                    };
+                });
+            }
+            var userStyleSheetArray = convertStyleSheetArray(this.userStyleSheet());
+            if (this.pageStyle.pageSizeMode() == _pageStyle2["default"].Mode.DEFAULT) {
+                // Put default page size auto. This is needed to output auto size PDF.
+                userStyleSheetArray.unshift({ text: "@page{size:auto}" });
+            }
+            // Do not include url
+            // (url is a required argument to Viewer.loadDocument, separated from other options)
+            return {
+                fragment: this.fragment(),
+                authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
+                userStyleSheet: userStyleSheetArray
+            };
+        }
+    }, {
+        key: "updateUserStyleSheetFromCSSText",
+        value: function updateUserStyleSheetFromCSSText(cssText) {
+            if (cssText == undefined) {
+                cssText = this.pageStyle.toCSSText();
+            }
+            var userStyleSheet = this.userStyleSheet();
+            if (!cssText || /^\s*(\/\*.*?\*\/\s*)*$/.test(cssText)) {
+                if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
+                    userStyleSheet.pop();
+                    this.dataUserStyleIndex = -1;
+                    this.userStyleSheet(userStyleSheet);
+                    _storesUrlParameters2["default"].removeParameter("userStyle");
+                    return;
+                }
+            }
+            var dataUserStyle = "data:," + _utilsStringUtil2["default"].percentEncodeForDataURI(cssText.trim());
+            if (this.dataUserStyleIndex == -1) {
+                userStyleSheet.push(dataUserStyle);
+                this.dataUserStyleIndex = userStyleSheet.length - 1;
+            } else {
+                userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
+            }
+            this.userStyleSheet(userStyleSheet);
+            _storesUrlParameters2["default"].setParameter("userStyle", dataUserStyle, this.dataUserStyleIndex);
+        }
+    }]);
+
+    return DocumentOptions;
+})();
+
+exports["default"] = DocumentOptions;
+module.exports = exports["default"];
+
+},{"../stores/url-parameters":13,"../utils/string-util":16,"./page-style":8,"knockout":1}],7:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+function MessageQueue() {
+  return _knockout2["default"].observableArray();
+}
+
+exports["default"] = new MessageQueue();
+module.exports = exports["default"];
+
+},{"knockout":1}],8:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var Mode = {
+    DEFAULT: "",
+    AUTO: "auto",
+    PRESET: "preset",
+    CUSTOM: "custom",
+    ZERO: "0"
+};
+
+var PresetSize = [{ name: "A5", description: "A5" }, { name: "A4", description: "A4" }, { name: "A3", description: "A3" }, { name: "B5", description: "B5 (ISO)" }, { name: "B4", description: "B4 (ISO)" }, { name: "JIS-B5", description: "B5 (JIS)" }, { name: "JIS-B4", description: "B4 (JIS)" }, { name: "letter", description: "letter" }, { name: "legal", description: "legal" }, { name: "ledger", description: "ledger" }];
+
+var Constants = {
+    customWidth: "210mm",
+    customHeight: "297mm",
+    customMargin: "10%",
+    baseFontSize: "12pt",
+    baseLineHeight: "1.2",
+    baseFontFamily: "serif",
+    viewerFontSize: 16
+};
+
+var PageStyle = (function () {
+    function PageStyle(pageStyle) {
+        var _this = this;
+
+        _classCallCheck(this, PageStyle);
+
+        this.pageSizeMode = _knockout2["default"].observable(Mode.DEFAULT);
+        this.presetSize = _knockout2["default"].observable(PresetSize[1]);
+        this.isLandscape = _knockout2["default"].observable(false);
+        this.customWidth = _knockout2["default"].observable(Constants.customWidth);
+        this.customHeight = _knockout2["default"].observable(Constants.customHeight);
+        this.pageSizeImportant = _knockout2["default"].observable(false);
+        this.pageMarginMode = _knockout2["default"].observable(Mode.DEFAULT);
+        this.customMargin = _knockout2["default"].observable(Constants.customMargin);
+        this.pageMarginImportant = _knockout2["default"].observable(false);
+        this.firstPageMarginZero = _knockout2["default"].observable(false);
+        this.firstPageMarginZeroImportant = _knockout2["default"].observable(false);
+        this.forceHtmlBodyMarginZero = _knockout2["default"].observable(false);
+        this.widowsOrphans = _knockout2["default"].observable("");
+        this.widowsOrphansImportant = _knockout2["default"].observable(false);
+        this.imageMaxSizeToFitPage = _knockout2["default"].observable(false);
+        this.imageMaxSizeToFitPageImportant = _knockout2["default"].observable(false);
+        this.imageKeepAspectRatio = _knockout2["default"].observable(false);
+        this.imageKeepAspectRatioImportant = _knockout2["default"].observable(false);
+        this.baseFontSize = _knockout2["default"].observable(Constants.baseFontSize);
+        this.baseFontSizeSpecified = _knockout2["default"].observable(false);
+        this.baseFontSizeImportant = _knockout2["default"].observable(false);
+        this.baseLineHeight = _knockout2["default"].observable(Constants.baseLineHeight);
+        this.baseLineHeightSpecified = _knockout2["default"].observable(false);
+        this.baseLineHeightImportant = _knockout2["default"].observable(false);
+        this.baseFontFamily = _knockout2["default"].observable(Constants.baseFontFamily);
+        this.baseFontFamilySpecified = _knockout2["default"].observable(false);
+        this.baseFontFamilyImportant = _knockout2["default"].observable(false);
+        this.allImportant = _knockout2["default"].observable(false);
+        this.pageOtherStyle = _knockout2["default"].observable("");
+        this.firstPageOtherStyle = _knockout2["default"].observable("");
+        this.rootOtherStyle = _knockout2["default"].observable("");
+        this.beforeOtherStyle = _knockout2["default"].observable("");
+        this.afterOtherStyle = _knockout2["default"].observable("");
+
+        this.viewerFontSize = null;
+        this.setViewerFontSizeObservable = function (viewerFontSizeObservable) {
+            _this.viewerFontSize = viewerFontSizeObservable;
+            var elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
+            if (elem) {
+                elem.value = _this.fontSizePxToPercent(viewerFontSizeObservable(), 100, 5);
+            }
+        };
+
+        this.viewerFontSizePercent = _knockout2["default"].pureComputed({
+            read: function read() {
+                if (!this.viewerFontSize) {
+                    return 100;
+                }
+                var percent = this.fontSizePxToPercent(this.viewerFontSize(), 100, 5);
+                return percent;
+            },
+            write: function write(viewerFontSizePercent) {
+                if (!this.viewerFontSize) {
+                    return;
+                }
+                var percent = parseFloat(viewerFontSizePercent);
+                var fontSize = percent && this.fontSizePercentToPx(percent);
+                if (!fontSize || fontSize < 5 || fontSize > 72) {
+                    var elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
+                    if (elem) {
+                        elem.value = "100";
+                    }
+                    fontSize = Constants.viewerFontSize;
+                }
+                this.viewerFontSize(fontSize);
+            },
+            owner: this
+        });
+
+        this.cssText = _knockout2["default"].pureComputed({
+            read: this.toCSSText,
+            write: this.fromCSSText,
+            owner: this
+        });
+
+        this.allImportant.subscribe(function (allImportant) {
+            _this.pageSizeImportant(allImportant);
+            _this.pageMarginImportant(allImportant);
+            _this.firstPageMarginZeroImportant(allImportant);
+            _this.widowsOrphansImportant(allImportant);
+            _this.imageMaxSizeToFitPageImportant(allImportant);
+            _this.imageKeepAspectRatioImportant(allImportant);
+            _this.baseFontSizeImportant(allImportant);
+            _this.baseLineHeightImportant(allImportant);
+            _this.baseFontFamilyImportant(allImportant);
+        });
+
+        this.pageStyleRegExp = new RegExp(
+
+        // 1. beforeOtherStyle,
+        "^((?:\\n|.)*?)\\/\\*<viewer>\\*\\/\\s*(?:@page\\s*\\{\\s*" +
+
+        // 2. sizeW, sizeH, sizeImportant,
+        "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+
+        // 5. pageMargin, pageMarginImportant,
+        "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+
+        // 7. pageOtherStyle,
+        "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
+
+        // 8. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+        "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
+
+        // 11. forceHtmlBodyMarginZero,
+        "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
+
+        // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
+        "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
+
+        // body {font-size: inherit !important;} etc.
+        "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
+
+        // 19. widowsOrphans, widowsOrphansImportant,
+        "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*orphans:\\s*\\19\\s*\\20(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
+
+        // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
+        "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
+
+        // 25. afterOtherStyle
+        "((?:\\n|.)*)$");
+
+        if (pageStyle) {
+            this.copyFrom(pageStyle);
+        }
+    }
+
+    /**
+     * @param {number} px Font size in px unit
+     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
+     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
+     */
+
+    _createClass(PageStyle, [{
+        key: "fontSizePxToPercent",
+        value: function fontSizePxToPercent(px, opt_cent, opt_precision) {
+            var percent = px / Constants.viewerFontSize * (opt_cent || 100);
+            if (opt_precision) {
+                percent = percent.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+            }
+            return percent;
+        }
+
+        /**
+         * @param {number} percent Font size in percent (or per _N_) unit
+         * @param {number=} opt_cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
+         * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+         * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
+         */
+    }, {
+        key: "fontSizePercentToPx",
+        value: function fontSizePercentToPx(percent, opt_cent, opt_precision) {
+            var px = percent / (opt_cent || 100) * Constants.viewerFontSize;
+            if (opt_precision) {
+                px = px.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+            }
+            return px;
+        }
+    }, {
+        key: "fromCSSText",
+        value: function fromCSSText(cssText) {
+            var _this2 = this;
+
+            var r = this.pageStyleRegExp.exec(cssText);
+            if (r) {
+                (function () {
+                    var _r = _slicedToArray(r, 26);
+
+                    var beforeOtherStyle = _r[1];
+                    var sizeW = _r[2];
+                    var sizeH = _r[3];
+                    var sizeImportant = _r[4];
+                    var pageMargin = _r[5];
+                    var pageMarginImportant = _r[6];
+                    var pageOtherStyle = _r[7];
+                    var firstPageMarginZero = _r[8];
+                    var firstPageMarginZeroImportant = _r[9];
+                    var firstPageOtherStyle = _r[10];
+                    var forceHtmlBodyMarginZero = _r[11];
+                    var baseFontSize = _r[12];
+                    var baseFontSizeImportant = _r[13];
+                    var baseLineHeight = _r[14];
+                    var baseLineHeightImportant = _r[15];
+                    var baseFontFamily = _r[16];
+                    var baseFontFamilyImportant = _r[17];
+                    var rootOtherStyle = _r[18];
+                    var widowsOrphans = _r[19];
+                    var widowsOrphansImportant = _r[20];
+                    var imageMaxSizeToFitPage = _r[21];
+                    var imageMaxSizeToFitPageImportant = _r[22];
+                    var imageKeepAspectRatio = _r[23];
+                    var imageKeepAspectRatioImportant = _r[24];
+                    var afterOtherStyle = _r[25];
+
+                    var countImportant = 0;
+                    var countNotImportant = 0;
+
+                    _this2.beforeOtherStyle(beforeOtherStyle);
+
+                    if (sizeW == "landscape" || sizeW == "portrait") {
+                        _this2.isLandscape(sizeW == "landscape");
+                        sizeW = sizeH;
+                        sizeH = null;
+                    } else if (sizeH == "landscape" || sizeH == "portrait") {
+                        _this2.isLandscape(sizeH == "landscape");
+                        sizeH = null;
+                    }
+                    if (sizeW != null) {
+                        if (sizeH == null) {
+                            if (sizeW == "auto") {
+                                _this2.pageSizeMode(Mode.AUTO);
+                            } else {
+                                var presetSize = PresetSize.find(function (presetSize) {
+                                    return presetSize.name.toLowerCase() == sizeW.toLowerCase();
+                                });
+                                if (presetSize) {
+                                    _this2.pageSizeMode(Mode.PRESET);
+                                    _this2.presetSize(presetSize);
+                                } else {
+                                    _this2.pageSizeMode(Mode.CUSTOM);
+                                    _this2.customWidth(sizeW);
+                                    _this2.customHeight(sizeW);
+                                }
+                            }
+                        } else {
+                            _this2.pageSizeMode(Mode.CUSTOM);
+                            _this2.customWidth(sizeW);
+                            _this2.customHeight(sizeH);
+                        }
+                        _this2.pageSizeImportant(!!sizeImportant);
+                        if (sizeImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.pageSizeMode(Mode.DEFAULT);
+                    }
+                    if (pageMargin != null) {
+                        _this2.pageMarginMode(pageMargin == "0" ? Mode.ZERO : Mode.CUSTOM);
+                        if (pageMargin == "0") {
+                            _this2.pageMarginMode(Mode.ZERO);
+                        } else {
+                            _this2.pageMarginMode(Mode.CUSTOM);
+                            _this2.customMargin(pageMargin);
+                        }
+                        _this2.pageMarginImportant(!!pageMarginImportant);
+                        if (pageMarginImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.pageMarginMode(Mode.DEFAULT);
+                    }
+                    pageOtherStyle = pageOtherStyle || "";
+                    _this2.pageOtherStyle(pageOtherStyle);
+
+                    if (firstPageMarginZero) {
+                        _this2.firstPageMarginZero(true);
+                        _this2.firstPageMarginZeroImportant(!!firstPageMarginZeroImportant);
+                        if (firstPageMarginZeroImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.firstPageMarginZero(false);
+                    }
+                    firstPageOtherStyle = firstPageOtherStyle || "";
+                    _this2.firstPageOtherStyle(firstPageOtherStyle);
+
+                    if (forceHtmlBodyMarginZero) {
+                        _this2.forceHtmlBodyMarginZero(true);
+                    } else {
+                        _this2.forceHtmlBodyMarginZero(false);
+                    }
+
+                    if (baseFontSize != null) {
+                        // This may be calc() e.g. "calc(1.25 * 12pt)" when viewer font size is 125%.
+                        baseFontSize = baseFontSize.replace(/^\s*calc\([.\d]+\s*\*\s*([.\d]+\w+)\)\s*$/, "$1");
+                        _this2.baseFontSizeSpecified(true);
+                        _this2.baseFontSize(baseFontSize);
+                        _this2.baseFontSizeImportant(!!baseFontSizeImportant);
+                        if (baseFontSizeImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.baseFontSizeSpecified(false);
+                    }
+                    if (baseLineHeight != null) {
+                        _this2.baseLineHeightSpecified(true);
+                        _this2.baseLineHeight(baseLineHeight);
+                        _this2.baseLineHeightImportant(!!baseLineHeightImportant);
+                        if (baseLineHeightImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.baseLineHeightSpecified(false);
+                    }
+                    if (baseFontFamily != null) {
+                        baseFontFamily = baseFontFamily.trim();
+                        _this2.baseFontFamilySpecified(true);
+                        _this2.baseFontFamily(baseFontFamily);
+                        _this2.baseFontFamilyImportant(!!baseFontFamilyImportant);
+                        if (baseFontFamilyImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.baseFontFamilySpecified(false);
+                    }
+                    rootOtherStyle = rootOtherStyle || "";
+                    _this2.rootOtherStyle(rootOtherStyle);
+
+                    if (widowsOrphans != null) {
+                        _this2.widowsOrphans(widowsOrphans);
+                        _this2.widowsOrphansImportant(!!widowsOrphansImportant);
+                        if (widowsOrphansImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.widowsOrphans(Mode.DEFAULT);
+                    }
+
+                    if (imageMaxSizeToFitPage) {
+                        _this2.imageMaxSizeToFitPage(true);
+                        _this2.imageMaxSizeToFitPageImportant(!!imageMaxSizeToFitPageImportant);
+                        if (imageMaxSizeToFitPageImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.imageMaxSizeToFitPage(false);
+                    }
+
+                    if (imageKeepAspectRatio) {
+                        _this2.imageKeepAspectRatio(true);
+                        _this2.imageKeepAspectRatioImportant(!!imageKeepAspectRatioImportant);
+                        if (imageKeepAspectRatioImportant) countImportant++;else countNotImportant++;
+                    } else {
+                        _this2.imageKeepAspectRatio(false);
+                    }
+
+                    afterOtherStyle = afterOtherStyle.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
+                    _this2.afterOtherStyle(afterOtherStyle);
+
+                    _this2.allImportant(countImportant > 0 && countNotImportant == 0);
+                })();
+            } else {
+                // When not match
+                var afterOtherStyle = cssText.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
+                this.afterOtherStyle(afterOtherStyle);
+            }
+        }
+    }, {
+        key: "toCSSText",
+        value: function toCSSText() {
+            function imp(important) {
+                return important ? " !important" : "";
+            }
+
+            var cssText = this.beforeOtherStyle();
+            cssText += "/*<viewer>*/\n";
+            if (this.pageSizeMode() != Mode.DEFAULT || this.pageMarginMode() != Mode.DEFAULT || this.pageOtherStyle()) {
+                cssText += "@page { ";
+                if (this.pageSizeMode() != Mode.DEFAULT) {
+                    cssText += "size: ";
+
+                    switch (this.pageSizeMode()) {
+                        case Mode.AUTO:
+                            cssText += "auto";
+                            break;
+                        case Mode.PRESET:
+                            cssText += this.presetSize().name;
+                            if (this.isLandscape()) {
+                                cssText += " landscape";
+                            }
+                            break;
+                        case Mode.CUSTOM:
+                            cssText += this.customWidth() + " " + this.customHeight();
+                            break;
+                        default:
+                            throw new Error("Unknown pageSizeMode " + this.pageSizeMode());
+                    }
+                    cssText += imp(this.pageSizeImportant()) + "; ";
+                }
+                if (this.pageMarginMode() != Mode.DEFAULT) {
+                    cssText += "margin: ";
+
+                    switch (this.pageMarginMode()) {
+                        case Mode.AUTO:
+                            cssText += "auto";
+                            break;
+                        case Mode.ZERO:
+                            cssText += "0";
+                            break;
+                        case Mode.CUSTOM:
+                            cssText += "" + this.customMargin();
+                            break;
+                        default:
+                            throw new Error("Unknown pageMarginMode " + this.pageMarginMode());
+                    }
+                    cssText += imp(this.pageMarginImportant()) + "; ";
+                }
+                cssText += this.pageOtherStyle();
+                cssText += "}\n";
+            }
+
+            if (this.firstPageMarginZero() || this.firstPageOtherStyle()) {
+                cssText += "@page :first { ";
+                if (this.firstPageMarginZero()) {
+                    cssText += "margin: 0" + imp(this.firstPageMarginZeroImportant()) + "; ";
+                }
+                cssText += this.firstPageOtherStyle();
+                cssText += "}\n";
+            }
+
+            if (this.forceHtmlBodyMarginZero()) {
+                cssText += ":root, body { margin: 0 !important; }\n";
+            }
+
+            if (this.baseFontSizeSpecified() || this.baseLineHeightSpecified() || this.baseFontFamilySpecified() || this.rootOtherStyle()) {
+                cssText += ":root { ";
+                var baseFontSize = this.baseFontSize();
+                if (this.baseFontSizeSpecified()) {
+                    if (this.viewerFontSize && this.viewerFontSize() != Constants.viewerFontSize && !baseFontSize.endsWith("%")) {
+                        var perOne = this.fontSizePxToPercent(this.viewerFontSize(), 1, 5);
+                        cssText += "font-size: calc(" + perOne + " * " + baseFontSize + ")" + imp(this.baseFontSizeImportant()) + "; ";
+                    } else {
+                        cssText += "font-size: " + this.baseFontSize() + imp(this.baseFontSizeImportant()) + "; ";
+                    }
+                }
+                if (this.baseLineHeightSpecified()) {
+                    cssText += "line-height: " + this.baseLineHeight() + imp(this.baseLineHeightImportant()) + "; ";
+                }
+                if (this.baseFontFamilySpecified()) {
+                    cssText += "font-family: " + this.baseFontFamily() + imp(this.baseFontFamilyImportant()) + "; ";
+                }
+                cssText += this.rootOtherStyle();
+                cssText += "}\n";
+            }
+            if (this.baseFontSizeSpecified() && this.baseFontSizeImportant() || this.baseLineHeightSpecified() && this.baseLineHeightImportant() || this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
+                cssText += "body { ";
+                if (this.baseFontSizeSpecified() && this.baseFontSizeImportant()) {
+                    cssText += "font-size: inherit !important; ";
+                }
+                if (this.baseLineHeightSpecified() && this.baseLineHeightImportant()) {
+                    cssText += "line-height: inherit !important; ";
+                }
+                if (this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
+                    cssText += "font-family: inherit !important; ";
+                }
+                cssText += "}\n";
+            }
+
+            if (this.widowsOrphans()) {
+                cssText += "* { ";
+                cssText += "widows: " + this.widowsOrphans() + imp(this.widowsOrphansImportant()) + "; ";
+                cssText += "orphans: " + this.widowsOrphans() + imp(this.widowsOrphansImportant()) + "; ";
+                cssText += "}\n";
+            }
+
+            if (this.imageMaxSizeToFitPage() || this.imageKeepAspectRatio()) {
+                cssText += "img, svg { ";
+                if (this.imageMaxSizeToFitPage()) {
+                    cssText += "max-inline-size: 100%" + imp(this.imageMaxSizeToFitPageImportant()) + "; ";
+                    cssText += "max-block-size: 100vb" + imp(this.imageMaxSizeToFitPageImportant()) + "; ";
+                }
+                if (this.imageKeepAspectRatio()) {
+                    cssText += "object-fit: contain" + imp(this.imageKeepAspectRatioImportant()) + "; ";
+                }
+                cssText += "}\n";
+            }
+
+            cssText += "/*</viewer>*/\n";
+            cssText += this.afterOtherStyle();
+
+            return cssText;
+        }
+    }, {
+        key: "copyFrom",
+        value: function copyFrom(other) {
+            this.pageSizeMode(other.pageSizeMode());
+            this.presetSize(other.presetSize());
+            this.isLandscape(other.isLandscape());
+            this.customWidth(other.customWidth());
+            this.customHeight(other.customHeight());
+            this.pageSizeImportant(other.pageSizeImportant());
+            this.pageMarginMode(other.pageMarginMode());
+            this.customMargin(other.customMargin());
+            this.pageMarginImportant(other.pageMarginImportant());
+            this.firstPageMarginZero(other.firstPageMarginZero());
+            this.firstPageMarginZeroImportant(other.firstPageMarginZeroImportant());
+            this.forceHtmlBodyMarginZero(other.forceHtmlBodyMarginZero());
+            this.widowsOrphans(other.widowsOrphans());
+            this.widowsOrphansImportant(other.widowsOrphansImportant());
+            this.imageMaxSizeToFitPage(other.imageMaxSizeToFitPage());
+            this.imageMaxSizeToFitPageImportant(other.imageMaxSizeToFitPageImportant());
+            this.imageKeepAspectRatio(other.imageKeepAspectRatio());
+            this.imageKeepAspectRatioImportant(other.imageKeepAspectRatioImportant());
+            this.baseFontSize(other.baseFontSize());
+            this.baseFontSizeSpecified(other.baseFontSizeSpecified());
+            this.baseFontSizeImportant(other.baseFontSizeImportant());
+            this.baseLineHeight(other.baseLineHeight());
+            this.baseLineHeightSpecified(other.baseLineHeightSpecified());
+            this.baseLineHeightImportant(other.baseLineHeightImportant());
+            this.baseFontFamily(other.baseFontFamily());
+            this.baseFontFamilySpecified(other.baseFontFamilySpecified());
+            this.baseFontFamilyImportant(other.baseFontFamilyImportant());
+            this.allImportant(other.allImportant());
+            this.pageOtherStyle(other.pageOtherStyle());
+            this.firstPageOtherStyle(other.firstPageOtherStyle());
+            this.rootOtherStyle(other.rootOtherStyle());
+            this.beforeOtherStyle(other.beforeOtherStyle());
+            this.afterOtherStyle(other.afterOtherStyle());
+
+            if (this.viewerFontSize && other.viewerFontSize) {
+                this.viewerFontSize(other.viewerFontSize());
+            }
+        }
+    }, {
+        key: "equivalentTo",
+        value: function equivalentTo(other) {
+            if (this.pageSizeMode() !== other.pageSizeMode()) return false;
+            if (this.pageSizeMode() === Mode.PRESET && this.presetSize() !== other.presetSize()) return false;
+            if (this.pageSizeMode() === Mode.PRESET && this.isLandscape() !== other.isLandscape()) return false;
+            if (this.pageSizeMode() === Mode.CUSTOM && this.customWidth() !== other.customWidth()) return false;
+            if (this.pageSizeMode() === Mode.CUSTOM && this.customHeight() !== other.customHeight()) return false;
+            if (this.pageSizeImportant() !== other.pageSizeImportant()) return false;
+
+            if (this.pageMarginMode() !== other.pageMarginMode()) return false;
+            if (this.pageMarginMode() === Mode.CUSTOM && this.customMargin() !== other.customMargin()) return false;
+            if (this.pageMarginImportant() !== other.pageMarginImportant()) return false;
+            if (this.firstPageMarginZero() !== other.firstPageMarginZero()) return false;
+            if (this.firstPageMarginZeroImportant() !== other.firstPageMarginZeroImportant()) return false;
+            if (this.forceHtmlBodyMarginZero() !== other.forceHtmlBodyMarginZero()) return false;
+
+            if (this.widowsOrphans() !== other.widowsOrphans()) return false;
+            if (this.widowsOrphansImportant() !== other.widowsOrphansImportant()) return false;
+
+            if (this.imageMaxSizeToFitPage() !== other.imageMaxSizeToFitPage()) return false;
+            if (this.imageMaxSizeToFitPageImportant() !== other.imageMaxSizeToFitPageImportant()) return false;
+            if (this.imageKeepAspectRatio() !== other.imageKeepAspectRatio()) return false;
+            if (this.imageKeepAspectRatioImportant() !== other.imageKeepAspectRatioImportant()) return false;
+
+            if (this.baseFontSizeSpecified() !== other.baseFontSizeSpecified()) return false;
+            if (this.baseFontSizeSpecified() && this.baseFontSize() !== other.baseFontSize()) return false;
+            if (this.baseFontSizeImportant() !== other.baseFontSizeImportant()) return false;
+            if (this.baseLineHeightSpecified() !== other.baseLineHeightSpecified()) return false;
+            if (this.baseLineHeightSpecified() && this.baseLineHeight() !== other.baseLineHeight()) return false;
+            if (this.baseLineHeightImportant() !== other.baseLineHeightImportant()) return false;
+            if (this.baseFontFamilySpecified() !== other.baseFontFamilySpecified()) return false;
+            if (this.baseFontFamilySpecified() && this.baseFontFamily() !== other.baseFontFamily()) return false;
+            if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant()) return false;
+
+            if (this.allImportant() !== other.allImportant()) return false;
+            if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
+            if (this.firstPageOtherStyle() !== other.firstPageOtherStyle()) return false;
+            if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
+            if (this.beforeOtherStyle() !== other.beforeOtherStyle()) return false;
+            if (this.afterOtherStyle() !== other.afterOtherStyle()) return false;
+
+            if (!this.viewerFontSize !== !other.viewerFontSize || this.viewerFontSize && this.viewerFontSize() !== other.viewerFontSize()) return false;
+
+            return true;
+        }
+    }]);
+
+    return PageStyle;
+})();
+
+PageStyle.Mode = Mode;
+PageStyle.Constants = Constants;
+PageStyle.PresetSize = PageStyle.prototype.PresetSize = PresetSize;
+
+exports["default"] = PageStyle;
+module.exports = exports["default"];
+
+},{"knockout":1}],9:[function(require,module,exports){
+/*
+ * Copyright 2016 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var PageViewModeInstance = (function () {
+    function PageViewModeInstance() {
+        _classCallCheck(this, PageViewModeInstance);
+    }
+
+    _createClass(PageViewModeInstance, [{
+        key: "toSpreadViewString",
+        value: function toSpreadViewString() {
+            switch (this) {
+                case PageViewMode.SPREAD:
+                    return "true";
+                case PageViewMode.SINGLE_PAGE:
+                    return "false";
+                case PageViewMode.AUTO_SPREAD:
+                    return "auto";
+                default:
+                    throw new Error("Invalid PageViewMode");
+            }
+        }
+    }, {
+        key: "toString",
+        value: function toString() {
+            switch (this) {
+                case PageViewMode.SPREAD:
+                    return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
+                case PageViewMode.SINGLE_PAGE:
+                    return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
+                case PageViewMode.AUTO_SPREAD:
+                    return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
+                default:
+                    throw new Error("Invalid PageViewMode");
+            }
+        }
+    }]);
+
+    return PageViewModeInstance;
+})();
+
+var PageViewMode = {
+    AUTO_SPREAD: new PageViewModeInstance(),
+    SINGLE_PAGE: new PageViewModeInstance(),
+    SPREAD: new PageViewModeInstance(),
+    defaultMode: function defaultMode() {
+        return this.AUTO_SPREAD;
+    },
+    fromSpreadViewString: function fromSpreadViewString(str) {
+        switch (str) {
+            case "true":
+                return this.SPREAD;
+            case "false":
+                return this.SINGLE_PAGE;
+            case "auto":
+            default:
+                return this.AUTO_SPREAD;
+        }
+    },
+    of: function of(name) {
+        switch (name) {
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.SPREAD:
+                return this.SPREAD;
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.SINGLE_PAGE:
+                return this.SINGLE_PAGE;
+            case _modelsVivliostyle2["default"].viewer.PageViewMode.AUTO_SPREAD:
+                return this.AUTO_SPREAD;
+            default:
+                throw new Error("Invalid PageViewMode name: " + name);
+        }
+    }
+};
+
+exports["default"] = PageViewMode;
+module.exports = exports["default"];
+
+},{"../models/vivliostyle":11}],10:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
+var _pageViewMode = require("./page-view-mode");
+
+var _pageViewMode2 = _interopRequireDefault(_pageViewMode);
+
+var _zoomOptions = require("./zoom-options");
+
+var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
+
+function getViewerOptionsFromURL() {
+    var renderAllPages = _storesUrlParameters2["default"].getParameter("renderAllPages")[0];
+    var fontSizeStr = _storesUrlParameters2["default"].getParameter("fontSize")[0];
+    var r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
+    var fontSize = null;
+    if (r) {
+        var _r = _slicedToArray(r, 4);
+
+        var num = _r[1];
+        var percent = _r[2];
+        var denom = _r[3];
+
+        fontSize = parseFloat(num);
+        if (percent || denom) {
+            fontSize = 16 * fontSize / (percent ? 100 : parseFloat(denom));
+        }
+        if (fontSize < 5) fontSize = 5;
+        if (fontSize > 72) fontSize = 72;
+    }
+    return {
+        renderAllPages: renderAllPages === "true" ? true : renderAllPages === "false" ? false : null,
+        fontSize: fontSize,
+        profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
+        pageViewMode: _pageViewMode2["default"].fromSpreadViewString(_storesUrlParameters2["default"].getParameter("spread")[0])
+    };
+}
+
+function getDefaultValues() {
+    var isNotBook = _storesUrlParameters2["default"].hasParameter("x");
+    return {
+        renderAllPages: isNotBook,
+        fontSize: 16,
+        profile: false,
+        pageViewMode: _pageViewMode2["default"].defaultMode(),
+        zoom: _zoomOptions2["default"].createDefaultOptions()
+    };
+}
+
+var ViewerOptions = (function () {
+    function ViewerOptions(options) {
+        var _this = this;
+
+        _classCallCheck(this, ViewerOptions);
+
+        this.renderAllPages = _knockout2["default"].observable();
+        this.fontSize = _knockout2["default"].observable();
+        this.profile = _knockout2["default"].observable();
+        this.pageViewMode = _knockout2["default"].observable();
+        this.zoom = _knockout2["default"].observable();
+        if (options) {
+            this.copyFrom(options);
+        } else {
+            (function () {
+                var defaultValues = getDefaultValues();
+                var urlOptions = getViewerOptionsFromURL();
+                _this.renderAllPages(urlOptions.renderAllPages !== null ? urlOptions.renderAllPages : defaultValues.renderAllPages);
+                _this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
+                _this.profile(urlOptions.profile || defaultValues.profile);
+                _this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
+                _this.zoom(defaultValues.zoom);
+
+                // write spread parameter back to URL when updated
+                _this.pageViewMode.subscribe(function (pageViewMode) {
+                    if (pageViewMode === defaultValues.pageViewMode) {
+                        _storesUrlParameters2["default"].removeParameter("spread");
+                    } else {
+                        _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
+                    }
+                });
+                _this.renderAllPages.subscribe(function (renderAllPages) {
+                    if (renderAllPages === defaultValues.renderAllPages) {
+                        _storesUrlParameters2["default"].removeParameter("renderAllPages");
+                    } else {
+                        _storesUrlParameters2["default"].setParameter("renderAllPages", renderAllPages.toString());
+                    }
+                });
+                _this.fontSize.subscribe(function (fontSize) {
+                    if (typeof fontSize == "number") {
+                        fontSize = fontSize.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+                    }
+                    if (fontSize == defaultValues.fontSize) {
+                        _storesUrlParameters2["default"].removeParameter("fontSize");
+                    } else {
+                        _storesUrlParameters2["default"].setParameter("fontSize", fontSize + "/" + defaultValues.fontSize);
+                    }
+                });
+            })();
+        }
+    }
+
+    _createClass(ViewerOptions, [{
+        key: "copyFrom",
+        value: function copyFrom(other) {
+            this.renderAllPages(other.renderAllPages());
+            this.fontSize(other.fontSize());
+            this.profile(other.profile());
+            this.pageViewMode(other.pageViewMode());
+            this.zoom(other.zoom());
+        }
+    }, {
+        key: "toObject",
+        value: function toObject() {
+            return {
+                renderAllPages: this.renderAllPages(),
+                fontSize: this.fontSize(),
+                pageViewMode: this.pageViewMode().toString(),
+                zoom: this.zoom().zoom,
+                fitToScreen: this.zoom().fitToScreen
+            };
+        }
+    }]);
+
+    return ViewerOptions;
+})();
+
+ViewerOptions.getDefaultValues = getDefaultValues;
+
+exports["default"] = ViewerOptions;
+module.exports = exports["default"];
+
+},{"../stores/url-parameters":13,"./page-view-mode":9,"./zoom-options":12,"knockout":1}],11:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Vivliostyle = (function () {
+    function Vivliostyle() {
+        _classCallCheck(this, Vivliostyle);
+
+        this.viewer = null;
+        this.constants = null;
+        this.profile = null;
+    }
+
+    _createClass(Vivliostyle, [{
+        key: "setInstance",
+        value: function setInstance(vivliostyle) {
+            this.viewer = vivliostyle.viewer;
+            this.constants = vivliostyle.constants;
+            this.profile = vivliostyle.profile;
+        }
+    }]);
+
+    return Vivliostyle;
+})();
+
+exports["default"] = new Vivliostyle();
+module.exports = exports["default"];
+
+},{}],12:[function(require,module,exports){
+/*
+ * Copyright 2016 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var ZoomOptions = (function () {
+    function ZoomOptions(zoom) {
+        _classCallCheck(this, ZoomOptions);
+
+        this.zoom = zoom;
+    }
+
+    _createClass(ZoomOptions, [{
+        key: "zoomIn",
+        value: function zoomIn(viewer) {
+            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
+        }
+    }, {
+        key: "zoomOut",
+        value: function zoomOut(viewer) {
+            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
+        }
+    }, {
+        key: "zoomToActualSize",
+        value: function zoomToActualSize() {
+            return new FixedZoomFactor(1);
+        }
+    }], [{
+        key: "createDefaultOptions",
+        value: function createDefaultOptions() {
+            return new FitToScreen();
+        }
+    }, {
+        key: "createFromZoomFactor",
+        value: function createFromZoomFactor(zoom) {
+            return new FixedZoomFactor(zoom);
+        }
+    }]);
+
+    return ZoomOptions;
+})();
+
+var FitToScreen = (function (_ZoomOptions) {
+    _inherits(FitToScreen, _ZoomOptions);
+
+    function FitToScreen() {
+        _classCallCheck(this, FitToScreen);
+
+        _get(Object.getPrototypeOf(FitToScreen.prototype), "constructor", this).call(this, 1);
+    }
+
+    _createClass(FitToScreen, [{
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            return new FixedZoomFactor(1);
+        }
+    }, {
+        key: "getCurrentZoomFactor",
+        value: function getCurrentZoomFactor(viewer) {
+            return viewer.queryZoomFactor(_modelsVivliostyle2["default"].viewer.ZoomType.FIT_INSIDE_VIEWPORT);
+        }
+    }, {
+        key: "fitToScreen",
+        get: function get() {
+            return true;
+        }
+    }]);
+
+    return FitToScreen;
+})(ZoomOptions);
+
+var FixedZoomFactor = (function (_ZoomOptions2) {
+    _inherits(FixedZoomFactor, _ZoomOptions2);
+
+    function FixedZoomFactor() {
+        _classCallCheck(this, FixedZoomFactor);
+
+        _get(Object.getPrototypeOf(FixedZoomFactor.prototype), "constructor", this).apply(this, arguments);
+    }
+
+    _createClass(FixedZoomFactor, [{
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            return new FitToScreen();
+        }
+    }, {
+        key: "getCurrentZoomFactor",
+        value: function getCurrentZoomFactor(viewer) {
+            return this.zoom;
+        }
+    }, {
+        key: "fitToScreen",
+        get: function get() {
+            return false;
+        }
+    }]);
+
+    return FixedZoomFactor;
+})(ZoomOptions);
+
+exports["default"] = ZoomOptions;
+module.exports = exports["default"];
+
+},{"../models/vivliostyle":11}],13:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _utilsStringUtil = require("../utils/string-util");
+
+var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
+
+function getRegExpForParameter(name) {
+    return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)", "g");
+}
+
+var URLParameterStore = (function () {
+    function URLParameterStore() {
+        _classCallCheck(this, URLParameterStore);
+
+        this.history = window ? window.history : {};
+        this.location = window ? window.location : { href: "" };
+        this.storedUrl = this.location.href;
+    }
+
+    _createClass(URLParameterStore, [{
+        key: "getBaseURL",
+        value: function getBaseURL() {
+            var url = this.location.href;
+            url = url.replace(/#.*$/, "");
+            return url.replace(/\/[^/]*$/, "/");
+        }
+    }, {
+        key: "hasParameter",
+        value: function hasParameter(name) {
+            var url = this.location.href;
+            var regexp = getRegExpForParameter(name);
+            return regexp.test(url);
+        }
+    }, {
+        key: "getParameter",
+        value: function getParameter(name) {
+            var url = this.location.href;
+            var regexp = getRegExpForParameter(name);
+            var results = [];
+            var r = undefined;
+            while (r = regexp.exec(url)) {
+                results.push(r[1]);
+            }
+            return results;
+        }
+
+        /**
+         * @param {string} name 
+         * @param {string} value 
+         * @param {number=} opt_index specifies index in multiple parameters with same name.
+         */
+    }, {
+        key: "setParameter",
+        value: function setParameter(name, value, opt_index) {
+            var url = this.location.href;
+            var updated = undefined;
+            var regexp = getRegExpForParameter(name);
+            var r = regexp.exec(url);
+            if (r && opt_index) {
+                while (opt_index-- >= 1) {
+                    r = regexp.exec(url);
+                }
+            }
+            if (r) {
+                var l = r[1].length;
+                var start = r.index + r[0].length - l;
+                updated = url.substring(0, start) + value + url.substring(start + l);
+            } else {
+                updated = url + (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") + name + "=" + value;
+            }
+            if (this.history.replaceState) {
+                this.history.replaceState(null, "", updated);
+            } else {
+                this.location.href = updated;
+            }
+            this.storedUrl = updated;
+        }
+
+        /**
+         * @param {string} name 
+         * @param {boolean=} opt_keepFirst If true, not remove the first one in multiple parameters with same name.
+         */
+    }, {
+        key: "removeParameter",
+        value: function removeParameter(name, opt_keepFirst) {
+            var url = this.location.href;
+            var updated = undefined;
+            var regexp = getRegExpForParameter(name);
+            var r = regexp.exec(url);
+            if (r && opt_keepFirst) {
+                r = regexp.exec(url);
+            }
+            if (r) {
+                updated = url;
+                for (; r; r = regexp.exec(updated)) {
+                    var end = r.index + r[0].length;
+                    if (r[0].charAt(0) == '#') {
+                        updated = updated.substring(0, r.index + 1) + updated.substring(end + 1);
+                    } else {
+                        updated = updated.substring(0, r.index) + updated.substring(end);
+                    }
+                    regexp.lastIndex -= r[0].length;
+                }
+                updated = updated.replace(/^(.*?)[#&]$/, "$1");
+                if (this.history.replaceState) {
+                    this.history.replaceState(null, "", updated);
+                } else {
+                    this.location.href = updated;
+                }
+            }
+            this.storedUrl = updated;
+        }
+    }]);
+
+    return URLParameterStore;
+})();
+
+exports["default"] = new URLParameterStore();
+module.exports = exports["default"];
+
+},{"../utils/string-util":16}],14:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// cf. http://www.w3.org/TR/DOM-Level-3-Events-key/
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var Keys = {
+    Unidentified: "Unidentified",
+    ArrowDown: "ArrowDown",
+    ArrowLeft: "ArrowLeft",
+    ArrowRight: "ArrowRight",
+    ArrowUp: "ArrowUp",
+    Home: "Home",
+    End: "End",
+    PageDown: "PageDown",
+    PageUp: "PageUp",
+    Escape: "Escape",
+    Enter: "Enter",
+    Space: " "
+};
+
+// CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
+function identifyKeyFromEvent(event) {
+    var key = event.key;
+    var keyIdentifier = event.keyIdentifier;
+    var location = event.location;
+    if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
+        if (event.metaKey) {
+            // Mac Cmd+Down -> End
+            return Keys.End;
+        }
+        return Keys.ArrowDown;
+    } else if (key === Keys.ArrowLeft || key === "Left" || keyIdentifier === "Left") {
+        return Keys.ArrowLeft;
+    } else if (key === Keys.ArrowRight || key === "Right" || keyIdentifier === "Right") {
+        return Keys.ArrowRight;
+    } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
+        if (event.metaKey) {
+            // Mac Cmd+Up -> Home
+            return Keys.Home;
+        }
+        return Keys.ArrowUp;
+    } else if (key === Keys.Escape || key === "Esc" || keyIdentifier === "U+001B") {
+        return Keys.Escape;
+    } else if (key === Keys.Enter || keyIdentifier === "Enter") {
+        return Keys.Enter;
+    } else if (key === Keys.Space || keyIdentifier === "U+0020") {
+        return Keys.Space;
+    } else if (key === "0" || keyIdentifier === "U+0030") {
+        return "0";
+    } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B" || keyIdentifier === "U+00BB" || keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
+            return "+";
+        } else if (key === "-" || key === "Subtract" || keyIdentifier === "U+002D" || keyIdentifier === "U+00BD" || keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
+            return "-";
+        } else {
+        return key || keyIdentifier || Keys.Unidentified;
+    }
+}
+
+exports["default"] = {
+    Keys: Keys,
+    identifyKeyFromEvent: identifyKeyFromEvent
+};
+module.exports = exports["default"];
+
+},{}],15:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var util = {
+    readonlyObservable: function readonlyObservable(value) {
+        var obs = _knockout2["default"].observable(value);
+        return {
+            getter: _knockout2["default"].pureComputed(function () {
+                return obs();
+            }),
+            value: obs
+        };
+    }
+};
+
+exports["default"] = util;
+module.exports = exports["default"];
+
+},{"knockout":1}],16:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports["default"] = {
+    escapeUnicodeChar: function escapeUnicodeChar(ch) {
+        return "\\u" + (0x10000 | ch.charCodeAt(0)).toString(16).substring(1);
+    },
+    escapeUnicodeString: function escapeUnicodeString(str) {
+        return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
+    },
+    percentEncodeAmpersandAndUnencodedPercent: function percentEncodeAmpersandAndUnencodedPercent(str) {
+        return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
+    },
+    percentEncodeAmpersandAndPercent: function percentEncodeAmpersandAndPercent(str) {
+        return str.replace(/%/g, "%25").replace(/&/g, "%26");
+    },
+    percentDecodeAmpersandAndPercent: function percentDecodeAmpersandAndPercent(str) {
+        return str.replace(/%26/g, "&").replace(/%25/g, "%");
+    },
+    percentEncodeForDataURI: function percentEncodeForDataURI(str) {
+        return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
+    }
+};
+module.exports = exports["default"];
+
+},{}],17:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var MessageDialog = (function () {
+    function MessageDialog(queue) {
+        _classCallCheck(this, MessageDialog);
+
+        this.list = queue;
+        this.visible = _knockout2["default"].pureComputed(function () {
+            return queue().length > 0;
+        });
+    }
+
+    _createClass(MessageDialog, [{
+        key: "getDisplayMessage",
+        value: function getDisplayMessage(errorInfo) {
+            var e = errorInfo.error;
+            var msg = e && (e.toString() || e.frameTrace || e.stack);
+            if (msg) {
+                msg = msg.split("\n", 1)[0];
+            }
+            if (!msg) {
+                msg = errorInfo.messages.join("\n");
+            }
+            return msg;
+        }
+    }]);
+
+    return MessageDialog;
+})();
+
+exports["default"] = MessageDialog;
+module.exports = exports["default"];
+
+},{"knockout":1}],18:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _modelsViewerOptions = require("../models/viewer-options");
+
+var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
+
+var _utilsKeyUtil = require("../utils/key-util");
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var Navigation = (function () {
+    function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
+        var _this = this;
+
+        _classCallCheck(this, Navigation);
+
+        this.viewerOptions_ = viewerOptions;
+        this.viewer_ = viewer;
+        this.settingsPanel_ = settingsPanel;
+        this.justClicked = false; // double click check
+
+        this.isDisabled = _knockout2["default"].pureComputed(function () {
+            return _this.settingsPanel_.opened() && !_this.settingsPanel_.pinned() || !_this.viewer_.state.navigatable();
+        });
+
+        var navigationDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disablePageNavigation || _this.isDisabled();
+        });
+
+        navigationDisabled.subscribe(function (disabled) {
+            var pageNumberElem = document.getElementById("vivliostyle-page-number");
+            if (pageNumberElem) {
+                pageNumberElem.disabled = disabled;
+            }
+        });
+
+        this.isPageNumberDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationDisabled();
+        });
+
+        this.isNavigateToPreviousDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            return _this.viewer_.firstPage();
+        });
+
+        this.isNavigateToNextDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                return false;
+            }
+            return _this.viewer_.lastPage();
+        });
+
+        this.isNavigateToLeftDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.pageProgression === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
+                return _this.isNavigateToPreviousDisabled();
+            } else {
+                return _this.isNavigateToNextDisabled();
+            }
+        });
+
+        this.isNavigateToRightDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.pageProgression === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
+                return _this.isNavigateToNextDisabled();
+            } else {
+                return _this.isNavigateToPreviousDisabled();
+            }
+        });
+
+        this.isNavigateToFirstDisabled = this.isNavigateToPreviousDisabled;
+
+        this.isNavigateToLastDisabled = _knockout2["default"].pureComputed(function () {
+            if (navigationDisabled()) {
+                return true;
+            }
+            if (_this.viewer_.state.status === undefined) {
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
+            }
+            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                return true;
+            }
+            return _this.viewer_.lastPage();
+        });
+
+        this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
+
+        var zoomDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableZoom || _this.isDisabled();
+        });
+
+        this.isZoomOutDisabled = zoomDisabled;
+        this.isZoomInDisabled = zoomDisabled;
+        this.isZoomToActualSizeDisabled = zoomDisabled;
+        this.isToggleFitToScreenDisabled = zoomDisabled;
+        this.hideZoom = !!navigationOptions.disableZoom;
+
+        this.fitToScreen = _knockout2["default"].pureComputed(function () {
+            return viewerOptions.zoom().fitToScreen;
+        });
+
+        var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableFontSizeChange || _this.isDisabled();
+        });
+
+        // Font size limit (max:72, min:5) is hard coded in vivliostyle.js/src/adapt/viewer.js.
+        this.isIncreaseFontSizeDisabled = _knockout2["default"].pureComputed(function () {
+            if (fontSizeChangeDisabled()) {
+                return true;
+            }
+            if (_this.viewerOptions_.fontSize() >= 72) {
+                return true;
+            }
+            return false;
+        });
+        this.isDecreaseFontSizeDisabled = _knockout2["default"].pureComputed(function () {
+            if (fontSizeChangeDisabled()) {
+                return true;
+            }
+            if (_this.viewerOptions_.fontSize() <= 5) {
+                return true;
+            }
+            return false;
+        });
+        this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
+        this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
+
+        this.isTOCToggleDisabled = _knockout2["default"].pureComputed(function () {
+            return navigationOptions.disableTOCNavigation || _this.isDisabled() || _this.viewer_.tocVisible() == null;
+        });
+        this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
+
+        this.pageNumber = _knockout2["default"].pureComputed({
+            read: function read() {
+                return this.viewer_.epageToPageNumber(this.viewer_.epage());
+            },
+            write: function write(pageNumberText) {
+                var _this2 = this;
+
+                var epageOld = this.viewer_.epage();
+                var pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
+
+                // Accept non-integer, convert fullwidth to ascii
+                var pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, function (s) {
+                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+                })) || 0;
+                if (/^[-+]/.test(pageNumberText)) {
+                    // "+number" and "-number" to relative move.
+                    pageNumber = pageNumberOld + pageNumber;
+                }
+                if (pageNumber < 1) {
+                    pageNumber = 1;
+                } else {
+                    var epageCount = this.viewer_.epageCount();
+                    if (this.viewerOptions_.renderAllPages()) {
+                        if (pageNumber > epageCount) {
+                            pageNumber = epageCount;
+                        }
+                    } else if (pageNumber > epageCount + 1) {
+                        // Accept "epageCount + 1" because the last epage may equal epageCount.
+                        pageNumber = epageCount + 1;
+                    }
+                }
+                var epageNav = this.viewer_.epageFromPageNumber(pageNumber);
+                var pageNumberElem = document.getElementById("vivliostyle-page-number");
+                pageNumberElem.value = pageNumber;
+                this.viewer_.navigateToEPage(epageNav);
+
+                setTimeout(function () {
+                    if (_this2.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.LOADING && _this2.viewer_.epage() === epageOld) {
+                        pageNumberElem.value = pageNumberOld;
+                    }
+                    document.getElementById("vivliostyle-viewer-viewport").focus();
+                }, 10);
+            },
+            owner: this
+        });
+
+        this.totalPages = _knockout2["default"].pureComputed(function () {
+            var totalPages = _this.viewer_.epageCount();
+            if (!totalPages) {
+                return totalPages;
+            }
+            var pageNumber = _this.pageNumber();
+            if (_this.viewer_.lastPage()) {
+                totalPages = pageNumber;
+            } else if (pageNumber >= totalPages) {
+                totalPages++;
+            }
+            return totalPages;
+        });
+
+        ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "onclickViewport", "toggleTOC"].forEach(function (methodName) {
+            _this[methodName] = _this[methodName].bind(_this);
+        });
+    }
+
+    _createClass(Navigation, [{
+        key: "navigateToPrevious",
+        value: function navigateToPrevious() {
+            if (!this.isNavigateToPreviousDisabled()) {
+                this.viewer_.navigateToPrevious();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToNext",
+        value: function navigateToNext() {
+            if (!this.isNavigateToNextDisabled()) {
+                this.viewer_.navigateToNext();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToLeft",
+        value: function navigateToLeft() {
+            if (!this.isNavigateToLeftDisabled()) {
+                this.viewer_.navigateToLeft();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToRight",
+        value: function navigateToRight() {
+            if (!this.isNavigateToRightDisabled()) {
+                this.viewer_.navigateToRight();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToFirst",
+        value: function navigateToFirst() {
+            if (!this.isNavigateToFirstDisabled()) {
+                this.viewer_.navigateToFirst();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateToLast",
+        value: function navigateToLast() {
+            if (!this.isNavigateToLastDisabled()) {
+                this.viewer_.navigateToLast();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomIn",
+        value: function zoomIn() {
+            if (!this.isZoomInDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomOut",
+        value: function zoomOut() {
+            if (!this.isZoomOutDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "zoomToActualSize",
+        value: function zoomToActualSize() {
+            if (!this.isZoomToActualSizeDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.zoomToActualSize());
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "toggleFitToScreen",
+        value: function toggleFitToScreen() {
+            if (!this.isToggleFitToScreenDisabled()) {
+                var zoom = this.viewerOptions_.zoom();
+                this.viewerOptions_.zoom(zoom.toggleFitToScreen());
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "increaseFontSize",
+        value: function increaseFontSize() {
+            if (!this.isIncreaseFontSizeDisabled()) {
+                var fontSize = this.viewerOptions_.fontSize();
+                // fontSize *= 1.25;
+                if (fontSize < 10) {
+                    fontSize = Math.floor(fontSize) + 1;
+                } else if (fontSize < 20) {
+                    fontSize = (Math.floor(fontSize / 2) + 1) * 2;
+                } else if (fontSize < 40) {
+                    fontSize = (Math.floor(fontSize / 4) + 1) * 4;
+                } else if (fontSize < 72) {
+                    fontSize = (Math.floor(fontSize / 8) + 1) * 8;
+                } else {
+                    fontSize = 72;
+                }
+                this.viewerOptions_.fontSize(fontSize);
+                this.updateFontSizeSettings();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "decreaseFontSize",
+        value: function decreaseFontSize() {
+            if (!this.isDecreaseFontSizeDisabled()) {
+                var fontSize = this.viewerOptions_.fontSize();
+                // fontSize *= 0.8;
+                if (fontSize > 40) {
+                    fontSize = (Math.ceil(fontSize / 8) - 1) * 8;
+                } else if (fontSize > 20) {
+                    fontSize = (Math.ceil(fontSize / 4) - 1) * 4;
+                } else if (fontSize > 10) {
+                    fontSize = (Math.ceil(fontSize / 2) - 1) * 2;
+                } else if (fontSize > 5) {
+                    fontSize = Math.ceil(fontSize) - 1;
+                } else {
+                    fontSize = 5;
+                }
+                this.viewerOptions_.fontSize(fontSize);
+                this.updateFontSizeSettings();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "defaultFontSize",
+        value: function defaultFontSize() {
+            if (!this.isDefaultFontSizeDisabled()) {
+                var fontSize = _modelsViewerOptions2["default"].getDefaultValues().fontSize;
+                this.viewerOptions_.fontSize(fontSize);
+                this.updateFontSizeSettings();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "updateFontSizeSettings",
+        value: function updateFontSizeSettings() {
+            // Update setting panel "Font Size".
+            this.settingsPanel_.state.viewerOptions.fontSize(this.viewerOptions_.fontSize());
+
+            if (this.viewer_.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+                // Update userStylesheet when base font-size is specified
+                this.viewer_.documentOptions_.updateUserStyleSheetFromCSSText();
+                this.viewer_.loadDocument(this.viewer_.documentOptions_, this.viewerOptions_);
+            }
+        }
+    }, {
+        key: "onclickViewport",
+        value: function onclickViewport() {
+            if (this.settingsPanel_.justClicked) {
+                return true;
+            }
+            if (this.viewer_.tocVisible() && !this.viewer_.tocPinned()) {
+                var tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+                if (tocBox && !tocBox.contains(document.activeElement)) {
+                    this.toggleTOC();
+                }
+            }
+            if (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) {
+                this.settingsPanel_.close();
+            }
+            return true;
+        }
+    }, {
+        key: "toggleTOC",
+        value: function toggleTOC() {
+            var _this3 = this;
+
+            if (!this.isTOCToggleDisabled()) {
+                var _ret = (function () {
+                    var intervalID = 0;
+                    var tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
+
+                    if (!_this3.viewer_.tocVisible()) {
+                        if (_this3.justClicked) {
+                            _this3.viewer_.showTOC(true, false); // autohide=false
+                            _this3.justClicked = false;
+                        } else {
+                            _this3.viewer_.showTOC(true, true); // autohide=true
+                            _this3.justClicked = true;
+                        }
+                        // Here use timer for two purposes:
+                        // - Check double click to make TOC box pinned.
+                        // - Move focus to TOC box when TOC box becomes visible.
+                        intervalID = setInterval(function () {
+                            var tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+                            if (tocBox && tocBox.style.visibility === "visible") {
+                                tocBox.tabIndex = 0;
+                                tocBox.focus();
+
+                                clearInterval(intervalID);
+                                intervalID = 0;
+                            }
+                            _this3.justClicked = false;
+                        }, 300);
+                    } else if (_this3.justClicked) {
+                        // Double click to keep TOC box visible during TOC navigation
+                        _this3.viewer_.showTOC(true, false); // autohide=false
+                        _this3.justClicked = false;
+                    } else {
+                        if (intervalID) {
+                            clearInterval(intervalID);
+                            intervalID = 0;
+                        }
+                        _this3.viewer_.showTOC(false);
+
+                        _this3.justClicked = true;
+                        setTimeout(function () {
+                            if (_this3.justClicked) {
+                                document.getElementById("vivliostyle-viewer-viewport").focus();
+                                _this3.justClicked = false;
+                            }
+                        }, 300);
+                    }
+                    return {
+                        v: true
+                    };
+                })();
+
+                if (typeof _ret === "object") return _ret.v;
+            } else {
+                return false;
+            }
+        }
+    }, {
+        key: "navigateTOC",
+        value: function navigateTOC(key) {
+            var selecter = "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," + "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
+            var nodes = Array.from(document.querySelectorAll(selecter));
+            var index = nodes.indexOf(document.activeElement);
+
+            var isButton = function isButton(index) {
+                return nodes[index] && nodes[index].getAttribute("role") === "button";
+            };
+            var isExpanded = function isExpanded(index) {
+                return nodes[index] && nodes[index].getAttribute("aria-expanded") === "true";
+            };
+
+            switch (key) {
+                case _utilsKeyUtil.Keys.ArrowLeft:
+                    if (index == -1) {
+                        index = nodes.length - 1;
+                        break;
+                    }
+                    if (!isButton(index) && isButton(index - 1)) {
+                        index--;
+                    }
+                    if (isButton(index) && isExpanded(index)) {
+                        nodes[index].click();
+                    } else {
+                        for (var i = index - 1; i >= 0; i--) {
+                            if (isButton(i) && nodes[i].parentElement.contains(nodes[index])) {
+                                index = i;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case _utilsKeyUtil.Keys.ArrowRight:
+                    if (index == -1) {
+                        index = 0;
+                        break;
+                    }
+                    if (!isButton(index) && isButton(index - 1)) {
+                        index--;
+                    }
+                    if (isButton(index)) {
+                        if (isExpanded(index)) {
+                            index += 2;
+                        } else {
+                            nodes[index].click();
+                        }
+                    }
+                    break;
+                case _utilsKeyUtil.Keys.ArrowDown:
+                    index++;
+                    break;
+                case _utilsKeyUtil.Keys.ArrowUp:
+                    if (index == -1) {
+                        index = nodes.length - 1;
+                        break;
+                    }
+                    if (index > 0) {
+                        if (isButton(--index)) {
+                            index--;
+                        }
+                    }
+                    break;
+                case _utilsKeyUtil.Keys.Home:
+                    index = 0;
+                    break;
+                case _utilsKeyUtil.Keys.End:
+                    index = nodes.length - 1;
+                    break;
+                case _utilsKeyUtil.Keys.Space:
+                    if (!isButton(index) && isButton(index - 1)) {
+                        index--;
+                    }
+                    if (isButton(index)) {
+                        nodes[index].click();
+                    }
+                    break;
+            }
+
+            if (isButton(index)) {
+                index++;
+            }
+
+            if (nodes[index]) {
+                nodes[index].focus();
+            }
+
+            return true;
+        }
+    }, {
+        key: "handleKey",
+        value: function handleKey(key) {
+            var isSettingsActive = this.settingsPanel_.opened() && this.settingsPanel_.settingsToggle.contains(document.activeElement);
+
+            if (isSettingsActive) {
+                return true;
+            }
+
+            var pageNumberElem = document.getElementById("vivliostyle-page-number");
+            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+            var horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
+            var verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
+            var isPageNumberInput = pageNumberElem === document.activeElement;
+            var isTOCActive = this.viewer_.tocVisible() && !isPageNumberInput && viewportElement != document.activeElement;
+
+            switch (key) {
+                case "+":
+                    return isPageNumberInput || !this.increaseFontSize();
+                case "-":
+                    return isPageNumberInput || !this.decreaseFontSize();
+                case "0":
+                    return isPageNumberInput || !this.defaultFontSize();
+                case "1":
+                    return isPageNumberInput || !this.zoomToActualSize();
+                case _utilsKeyUtil.Keys.ArrowLeft:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
+                case _utilsKeyUtil.Keys.ArrowRight:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
+                case _utilsKeyUtil.Keys.ArrowDown:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    viewportElement.focus();
+                    return verticalScrollable || !this.navigateToNext();
+                case _utilsKeyUtil.Keys.ArrowUp:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    viewportElement.focus();
+                    return verticalScrollable || !this.navigateToPrevious();
+                case _utilsKeyUtil.Keys.PageDown:
+                    if (isTOCActive) return true;
+                    viewportElement.focus();
+                    return !this.navigateToNext();
+                case _utilsKeyUtil.Keys.PageUp:
+                    if (isTOCActive) return true;
+                    viewportElement.focus();
+                    return !this.navigateToPrevious();
+                case _utilsKeyUtil.Keys.Home:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    viewportElement.focus();
+                    return !this.navigateToFirst();
+                case _utilsKeyUtil.Keys.End:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    viewportElement.focus();
+                    return !this.navigateToLast();
+                case "o":
+                case "O":
+                    viewportElement.focus();
+                    return !this.zoomOut();
+                case "i":
+                case "I":
+                    viewportElement.focus();
+                    return !this.zoomIn();
+                case "f":
+                case "F":
+                    viewportElement.focus();
+                    return !this.toggleFitToScreen();
+                case "g":
+                case "G":
+                    pageNumberElem.focus();
+                    return false;
+                case "t":
+                case "T":
+                    viewportElement.focus();
+                    return !this.toggleTOC();
+                case _utilsKeyUtil.Keys.Escape:
+                    if (this.viewer_.tocVisible()) {
+                        return !this.toggleTOC();
+                    }
+                    viewportElement.focus();
+                    return true;
+                case _utilsKeyUtil.Keys.Space:
+                    if (isTOCActive) return !this.navigateTOC(key);
+                    if (document.activeElement.getAttribute("role") === "button") {
+                        document.activeElement.click();
+                        return false;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        }
+    }]);
+
+    return Navigation;
+})();
+
+exports["default"] = Navigation;
+module.exports = exports["default"];
+
+},{"../models/viewer-options":10,"../models/vivliostyle":11,"../utils/key-util":14,"knockout":1}],19:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _modelsViewerOptions = require("../models/viewer-options");
+
+var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
+
+var _modelsPageStyle = require("../models/page-style");
+
+var _modelsPageStyle2 = _interopRequireDefault(_modelsPageStyle);
+
+var _modelsPageViewMode = require("../models/page-view-mode");
+
+var _modelsPageViewMode2 = _interopRequireDefault(_modelsPageViewMode);
+
+var _utilsKeyUtil = require("../utils/key-util");
+
+var SettingsPanel = (function () {
+    function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
+        var _this = this;
+
+        _classCallCheck(this, SettingsPanel);
+
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = documentOptions;
+        this.viewer_ = viewer;
+
+        this.isPageStyleChangeDisabled = !!settingsPanelOptions.disablePageStyleChange;
+        this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
+        this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+        this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
+
+        this.justClicked = false; // double click check
+        this.settingsToggle = document.getElementById("vivliostyle-menu-item_settings-toggle");
+
+        this.opened = _knockout2["default"].observable(false);
+        this.pinned = _knockout2["default"].observable(false);
+
+        this.state = {
+            viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
+            pageStyle: new _modelsPageStyle2["default"](documentOptions.pageStyle),
+            pageViewMode: _knockout2["default"].pureComputed({
+                read: function read() {
+                    return _this.state.viewerOptions.pageViewMode().toString();
+                },
+                write: function write(value) {
+                    _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
+                }
+            }),
+            renderAllPages: _knockout2["default"].pureComputed({
+                read: function read() {
+                    return _this.state.viewerOptions.renderAllPages();
+                },
+                write: function write(value) {
+                    _this.state.viewerOptions.renderAllPages(value);
+                }
+            })
+        };
+
+        this.state.pageStyle.setViewerFontSizeObservable(this.state.viewerOptions.fontSize);
+
+        this.defaultPageStyle = new _modelsPageStyle2["default"]();
+
+        ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function (methodName) {
+            this[methodName] = this[methodName].bind(this);
+        }, this);
+
+        messageDialog.visible.subscribe(function (visible) {
+            if (visible) this.close();
+        }, this);
+    }
+
+    _createClass(SettingsPanel, [{
+        key: "close",
+        value: function close() {
+            this.opened(false);
+            this.pinned(false);
+            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+            if (viewportElement) viewportElement.focus();
+            return true;
+        }
+    }, {
+        key: "toggle",
+        value: function toggle() {
+            var _this2 = this;
+
+            if (!this.opened()) {
+                if (!this.viewer_.tocPinned()) {
+                    this.viewer_.showTOC(false); // Hide TOC box
+                }
+                this.opened(true);
+
+                if (this.justClicked) {
+                    this.justClicked = false;
+                    this.pinned(true);
+                } else {
+                    this.pinned(false);
+                    this.justClicked = true;
+                    this.focusToFirstItem();
+                    setTimeout(function () {
+                        _this2.justClicked = false;
+                    }, 300);
+                }
+            } else if (this.justClicked) {
+                // Double click to keep Settings panel open when Apply is clicked.
+                this.justClicked = false;
+                this.pinned(true);
+            } else {
+                this.close();
+
+                this.justClicked = true;
+                setTimeout(function () {
+                    _this2.justClicked = false;
+                }, 300);
+            }
+        }
+    }, {
+        key: "apply",
+        value: function apply() {
+            if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() && this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)) {
+                this.viewerOptions_.copyFrom(this.state.viewerOptions);
+            } else {
+                this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
+                if (this.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+                    // Update userStylesheet when base font-size is specified
+                    this.documentOptions_.updateUserStyleSheetFromCSSText();
+                }
+                this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
+            }
+            if (this.pinned()) {
+                this.focusToFirstItem();
+            } else {
+                this.close();
+            }
+        }
+    }, {
+        key: "cancel",
+        value: function cancel() {
+            this.state.viewerOptions.copyFrom(this.viewerOptions_);
+            this.state.pageStyle.copyFrom(this.documentOptions_.pageStyle);
+            this.close();
+        }
+    }, {
+        key: "resetUserStyle",
+        value: function resetUserStyle() {
+            this.state.pageStyle.copyFrom(this.defaultPageStyle);
+            this.state.viewerOptions.fontSize(_modelsViewerOptions2["default"].getDefaultValues().fontSize);
+            setTimeout(function () {
+                var elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0];
+                elem.checked = false;
+            }, 200);
+            return true;
+        }
+    }, {
+        key: "focusToFirstItem",
+        value: function focusToFirstItem(opt_outerElem) {
+            var outerElem = opt_outerElem || this.settingsToggle;
+            var inputElem = ["input", "textarea", "summary"].includes(outerElem.localName) ? outerElem : Array.from(outerElem.getElementsByTagName("input")).find(function (e) {
+                return !e.disabled && (e.type != "radio" || e.checked);
+            });
+            if (inputElem) {
+                for (var e = inputElem.parentElement; e && e != this.settingsToggle; e = e.parentElement) {
+                    if (e.localName == "details") {
+                        e.open = true;
+                    }
+                }
+                inputElem.focus();
+            }
+        }
+    }, {
+        key: "handleKey",
+        value: function handleKey(key) {
+            var isSettingsActive = this.opened() && this.settingsToggle.contains(document.activeElement);
+            var isInInput = isSettingsActive && (document.activeElement.type == "text" || document.activeElement.localName == "select");
+            var isInTextArea = isSettingsActive && document.activeElement.localName == "textarea";
+            var isHotKeyEnabled = isSettingsActive && !isInInput && !isInTextArea;
+
+            switch (key) {
+                case _utilsKeyUtil.Keys.Escape:
+                    if (this.opened()) {
+                        this.cancel();
+                        this.close();
+                    }
+                    return true;
+                case "s":
+                case "S":
+                    if (!this.opened() || isHotKeyEnabled || !isSettingsActive) {
+                        this.toggle();
+                        return false;
+                    }
+                    return true;
+                case "p":
+                case "P":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-view-and-rendering").firstElementChild);
+                        return false;
+                    }
+                    return true;
+                case "v":
+                case "V":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-view-mode"));
+                        return false;
+                    }
+                    return true;
+                case "a":
+                case "A":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_render-all-pages")[0]);
+                        return false;
+                    }
+                    return true;
+                case "u":
+                case "U":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_user-style").firstElementChild);
+                        return false;
+                    }
+                    return true;
+                case "z":
+                case "Z":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-size"));
+                        return false;
+                    }
+                    return true;
+                case "m":
+                case "M":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-margin"));
+                        return false;
+                    }
+                    return true;
+                case "b":
+                case "B":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-breaks"));
+                        return false;
+                    }
+                    return true;
+                case "i":
+                case "I":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_images"));
+                        return false;
+                    }
+                    return true;
+                case "t":
+                case "T":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_text"));
+                        return false;
+                    }
+                    return true;
+                case "o":
+                case "O":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_override-document-stylesheets")[0]);
+                        return false;
+                    }
+                    return true;
+                case "c":
+                case "C":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_css-details")[0]);
+                        return false;
+                    }
+                    return true;
+                case "r":
+                case "R":
+                    if (isHotKeyEnabled) {
+                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_reset-user-style")[0]);
+                        return false;
+                    }
+                    return true;
+                case _utilsKeyUtil.Keys.Enter:
+                    if (isInInput || isHotKeyEnabled && document.activeElement.id !== "vivliostyle-menu-button_apply" && document.activeElement.id !== "vivliostyle-menu-button_reset") {
+                        document.getElementById("vivliostyle-menu-button_apply").focus();
+                        return false;
+                    }
+                    return true;
+                default:
+                    return true;
+            }
+        }
+    }]);
+
+    return SettingsPanel;
+})();
+
+exports["default"] = SettingsPanel;
+module.exports = exports["default"];
+
+},{"../models/page-style":8,"../models/page-view-mode":9,"../models/viewer-options":10,"../utils/key-util":14,"knockout":1}],20:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var _modelsDocumentOptions = require("../models/document-options");
+
+var _modelsDocumentOptions2 = _interopRequireDefault(_modelsDocumentOptions);
+
+var _modelsViewerOptions = require("../models/viewer-options");
+
+var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
+
+var _modelsMessageQueue = require("../models/message-queue");
+
+var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
+
+var _viewer = require("./viewer");
+
+var _viewer2 = _interopRequireDefault(_viewer);
+
+var _navigation = require("./navigation");
+
+var _navigation2 = _interopRequireDefault(_navigation);
+
+var _settingsPanel = require("./settings-panel");
+
+var _settingsPanel2 = _interopRequireDefault(_settingsPanel);
+
+var _messageDialog = require("./message-dialog");
+
+var _messageDialog2 = _interopRequireDefault(_messageDialog);
+
+var _utilsKeyUtil = require("../utils/key-util");
+
+var _utilsKeyUtil2 = _interopRequireDefault(_utilsKeyUtil);
+
+var _utilsStringUtil = require("../utils/string-util");
+
+var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
+
+var _storesUrlParameters = require("../stores/url-parameters");
+
+var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
+
+function ViewerApp() {
+    var _this = this;
+
+    this.documentOptions = new _modelsDocumentOptions2["default"]();
+    this.viewerOptions = new _modelsViewerOptions2["default"]();
+
+    this.documentOptions.pageStyle.setViewerFontSizeObservable(this.viewerOptions.fontSize);
+
+    if (this.viewerOptions.profile()) {
+        _modelsVivliostyle2["default"].profile.profiler.enable();
+    }
+    this.isDebug = _storesUrlParameters2["default"].getParameter("debug")[0] === "true";
+    this.viewerSettings = {
+        userAgentRootURL: _storesUrlParameters2["default"].getBaseURL() + "resources/",
+        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
+        debug: this.isDebug
+    };
+
+    // Remove redundant or ineffective URL parameters
+    if (_storesUrlParameters2["default"].getParameter("b")[0]) {
+        _storesUrlParameters2["default"].removeParameter("b", true); // only first one is effective
+        _storesUrlParameters2["default"].removeParameter("x"); // x= is ineffective when b= is given
+    }
+    _storesUrlParameters2["default"].removeParameter("f", true); // only first one is effective
+    _storesUrlParameters2["default"].removeParameter("spread", true);
+    _storesUrlParameters2["default"].removeParameter("renderAllPages", true);
+    _storesUrlParameters2["default"].removeParameter("fontSize", true);
+    _storesUrlParameters2["default"].removeParameter("profile", true);
+    _storesUrlParameters2["default"].removeParameter("debug", true);
+
+    this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
+
+    this.viewer.inputUrl.subscribe(function (inputUrl) {
+        if (inputUrl != "") {
+            if (!_storesUrlParameters2["default"].hasParameter("b")) {
+                // Push current URL to browser history to enable to go back here when browser Back button is clicked.
+                if (_storesUrlParameters2["default"].history.pushState) _storesUrlParameters2["default"].history.pushState(null, "");
+            }
+            if (inputUrl.startsWith("<")) {
+                // seems start tag, so convert to data url
+                inputUrl = "data:," + _utilsStringUtil2["default"].percentEncodeForDataURI(inputUrl);
+            } else {
+                inputUrl = _utilsStringUtil2["default"].percentEncodeAmpersandAndUnencodedPercent(inputUrl);
+            }
+            _storesUrlParameters2["default"].setParameter("b", inputUrl);
+        } else {
+            _storesUrlParameters2["default"].removeParameter("b");
+        }
+    });
+
+    this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
+
+    var settingsPanelOptions = {
+        disablePageStyleChange: false,
+        disablePageViewModeChange: false,
+        disableRenderAllPagesChange: false
+    };
+
+    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
+
+    var navigationOptions = {
+        disableTOCNavigation: false,
+        disablePageNavigation: false,
+        disableZoom: false,
+        disableFontSizeChange: false
+    };
+
+    this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
+
+    this.handleKey = function (data, event) {
+        var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
+        if (document.activeElement.id === "vivliostyle-input-url") {
+            if (key === "Enter" && event.keyCode === 13) {
+                _this.documentOptions.bookUrl(_storesUrlParameters2["default"].getParameter("b")[0]);
+                _this.viewer.loadDocument(_this.documentOptions);
+                return false;
+            }
+            return true;
+        }
+        if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
+            return true;
+        }
+        var ret = _this.settingsPanel.handleKey(key);
+        if (ret) {
+            ret = _this.navigation.handleKey(key);
+        }
+        return ret;
+    };
+
+    this.viewer.loadDocument(this.documentOptions);
+
+    window.onhashchange = function () {
+        if (window.location.href != _storesUrlParameters2["default"].storedUrl) {
+            // Reload when address bar change is detected
+            window.location.reload();
+        }
+    };
+}
+
+exports["default"] = ViewerApp;
+module.exports = exports["default"];
+
+},{"../models/document-options":6,"../models/message-queue":7,"../models/viewer-options":10,"../models/vivliostyle":11,"../stores/url-parameters":13,"../utils/key-util":14,"../utils/string-util":16,"./message-dialog":17,"./navigation":18,"./settings-panel":19,"./viewer":21}],21:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2018 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _utilsObservableUtil = require("../utils/observable-util");
+
+var _utilsObservableUtil2 = _interopRequireDefault(_utilsObservableUtil);
+
+var _loggingLogger = require("../logging/logger");
+
+var _loggingLogger2 = _interopRequireDefault(_loggingLogger);
+
+var _modelsVivliostyle = require("../models/vivliostyle");
+
+var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
+
+var Viewer = (function () {
+    function Viewer(viewerSettings, viewerOptions) {
+        _classCallCheck(this, Viewer);
+
+        this.viewerOptions_ = viewerOptions;
+        this.documentOptions_ = null;
+        this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
+        var state_ = this.state_ = {
+            status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
+            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.PageProgression.LTR)
+        };
+        this.state = {
+            status: state_.status.getter.extend({
+                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
+                notify: 'always'
+            }),
+            navigatable: _knockout2["default"].pureComputed(function () {
+                return state_.status.value() && state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
+            }),
+            pageProgression: state_.pageProgression.getter
+        };
+
+        this.epage = _knockout2["default"].observable();
+        this.epageCount = _knockout2["default"].observable();
+        this.firstPage = _knockout2["default"].observable();
+        this.lastPage = _knockout2["default"].observable();
+        this.tocVisible = _knockout2["default"].observable();
+        this.tocPinned = _knockout2["default"].observable();
+
+        this.inputUrl = _knockout2["default"].observable("");
+
+        this.setupViewerEventHandler();
+        this.setupViewerOptionSubscriptions();
+    }
+
+    _createClass(Viewer, [{
+        key: "setupViewerEventHandler",
+        value: function setupViewerEventHandler() {
+            var _this = this;
+
+            var logger = _loggingLogger2["default"].getLogger();
+            var intervalID = 0;
+            this.viewer_.addListener("debug", function (payload) {
+                logger.debug(payload.content);
+            });
+            this.viewer_.addListener("info", function (payload) {
+                logger.info(payload.content);
+            });
+            this.viewer_.addListener("warn", function (payload) {
+                logger.warn(payload.content);
+            });
+            this.viewer_.addListener("error", function (payload) {
+                logger.error(payload.content);
+            });
+            this.viewer_.addListener("readystatechange", function () {
+                var readyState = _this.viewer_.readyState;
+                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || readyState === _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
+                    _this.state_.pageProgression.value(_this.viewer_.getCurrentPageProgression());
+                }
+                _this.state_.status.value(readyState);
+            });
+            this.viewer_.addListener("loaded", function () {
+                if (_this.viewerOptions_.profile()) {
+                    _modelsVivliostyle2["default"].profile.profiler.printTimings();
+                }
+            });
+            this.viewer_.addListener("nav", function (payload) {
+                var cfi = payload.cfi;
+                var first = payload.first;
+                var last = payload.last;
+                var epage = payload.epage;
+                var epageCount = payload.epageCount;
+                var metadata = payload.metadata;
+                var docTitle = payload.docTitle;
+
+                if (cfi) {
+                    _this.documentOptions_.fragment(cfi);
+                }
+                if (first !== undefined) {
+                    _this.firstPage(first);
+                }
+                if (last !== undefined) {
+                    _this.lastPage(last);
+                }
+                if (epage !== undefined) {
+                    _this.epage(epage);
+                }
+                if (epageCount !== undefined) {
+                    _this.epageCount(epageCount);
+                }
+                if (metadata || docTitle) {
+                    var pubTitles = metadata && metadata["http://purl.org/dc/terms/title"];
+                    var pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
+                    if (!pubTitle) {
+                        document.title = docTitle ? docTitle : "Vivliostyle Viewer";
+                    } else if (!docTitle || docTitle === pubTitle || _this.firstPage() || /\.xhtml$/.test(docTitle)) {
+                        // ignore ugly titles copied from *.xhtml file name
+                        document.title = pubTitle;
+                    } else {
+                        document.title = docTitle + " | " + pubTitle;
+                    }
+                }
+
+                var tocVisibleOld = _this.tocVisible();
+                var tocVisibleNew = _this.viewer_.isTOCVisible();
+                if (tocVisibleOld && !tocVisibleNew) {
+                    // When resize, TOC box will be regenerated and hidden temporarily.
+                    // So keep TOC toggle button status on.
+                } else {
+                        _this.tocVisible(tocVisibleNew);
+                    }
+            });
+            this.viewer_.addListener("hyperlink", function (payload) {
+                if (payload.internal) {
+                    _this.navigateToInternalUrl(payload.href);
+
+                    // When navigate from TOC, TOC box may or may not become hidden by autohide.
+                    // Here set tocVisible false and it may become true again in "nav" event.
+                    if (_this.tocVisible()) {
+                        _this.tocVisible(false);
+                    }
+
+                    document.getElementById("vivliostyle-viewer-viewport").focus();
+                } else {
+                    window.location.href = payload.href;
+                }
+            });
+        }
+    }, {
+        key: "setupViewerOptionSubscriptions",
+        value: function setupViewerOptionSubscriptions() {
+            _knockout2["default"].computed(function () {
+                var viewerOptions = this.viewerOptions_.toObject();
+                this.viewer_.setOptions(viewerOptions);
+            }, this).extend({ rateLimit: 0 });
+        }
+    }, {
+        key: "loadDocument",
+        value: function loadDocument(documentOptions, viewerOptions) {
+            this.state_.status.value(_modelsVivliostyle2["default"].constants.ReadyState.LOADING);
+            if (viewerOptions) {
+                this.viewerOptions_.copyFrom(viewerOptions);
+            }
+            this.documentOptions_ = documentOptions;
+
+            if (documentOptions.xUrl()) {
+                this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            } else if (documentOptions.bookUrl()) {
+                if (this.viewer_.loadPublication) // new name
+                    this.viewer_.loadPublication(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());else // old name
+                    this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            } else {
+                // No document specified, show welcome page
+                this.state_.status.value("");
+            }
+        }
+    }, {
+        key: "navigateToPrevious",
+        value: function navigateToPrevious() {
+            this.viewer_.navigateToPage("previous");
+        }
+    }, {
+        key: "navigateToNext",
+        value: function navigateToNext() {
+            this.viewer_.navigateToPage("next");
+        }
+    }, {
+        key: "navigateToLeft",
+        value: function navigateToLeft() {
+            this.viewer_.navigateToPage("left");
+        }
+    }, {
+        key: "navigateToRight",
+        value: function navigateToRight() {
+            this.viewer_.navigateToPage("right");
+        }
+    }, {
+        key: "navigateToFirst",
+        value: function navigateToFirst() {
+            this.viewer_.navigateToPage("first");
+        }
+    }, {
+        key: "navigateToLast",
+        value: function navigateToLast() {
+            this.viewer_.navigateToPage("last");
+        }
+    }, {
+        key: "navigateToEPage",
+        value: function navigateToEPage(epage) {
+            this.viewer_.navigateToPage("epage", epage);
+        }
+    }, {
+        key: "navigateToInternalUrl",
+        value: function navigateToInternalUrl(href) {
+            this.viewer_.navigateToInternalUrl(href);
+        }
+    }, {
+        key: "queryZoomFactor",
+        value: function queryZoomFactor(type) {
+            return this.viewer_.queryZoomFactor(type);
+        }
+    }, {
+        key: "epageToPageNumber",
+        value: function epageToPageNumber(epage) {
+            if (!epage && epage != 0) {
+                return undefined;
+            }
+            var pageNumber = Math.round(epage + 1);
+            return pageNumber;
+        }
+    }, {
+        key: "epageFromPageNumber",
+        value: function epageFromPageNumber(pageNumber) {
+            if (!pageNumber && pageNumber != 0) {
+                return undefined;
+            }
+            var epage = pageNumber - 1;
+            return epage;
+        }
+    }, {
+        key: "showTOC",
+        value: function showTOC(opt_show, opt_autohide) {
+            if (this.viewer_.isTOCVisible() == null) {
+                // TOC is unavailable
+                return;
+            }
+            var show = opt_show == null ? !this.tocVisible() : opt_show;
+            this.tocVisible(show);
+            this.tocPinned(show ? !opt_autohide : false);
+            this.viewer_.showTOC(show, opt_autohide);
+        }
+    }]);
+
+    return Viewer;
+})();
+
+exports["default"] = Viewer;
+module.exports = exports["default"];
+
+},{"../logging/logger":4,"../models/vivliostyle":11,"../utils/observable-util":15,"knockout":1}],22:[function(require,module,exports){
+/*
+ * Copyright 2015 Trim-marks Inc.
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var _knockout = require("knockout");
+
+var _knockout2 = _interopRequireDefault(_knockout);
+
+var _bindingsMenuButtonJs = require("./bindings/menuButton.js");
+
+var _bindingsMenuButtonJs2 = _interopRequireDefault(_bindingsMenuButtonJs);
+
+var _bindingsSwipePagesJs = require("./bindings/swipePages.js");
+
+var _bindingsSwipePagesJs2 = _interopRequireDefault(_bindingsSwipePagesJs);
+
+var _viewmodelsViewerApp = require("./viewmodels/viewer-app");
+
+var _viewmodelsViewerApp2 = _interopRequireDefault(_viewmodelsViewerApp);
+
+exports["default"] = {
+    start: function start() {
+        function startViewer() {
+            _knockout2["default"].applyBindings(new _viewmodelsViewerApp2["default"]());
+        }
+
+        if (window["__loaded"]) startViewer();else window.onload = startViewer;
+    }
+};
+module.exports = exports["default"];
+
+},{"./bindings/menuButton.js":2,"./bindings/swipePages.js":3,"./viewmodels/viewer-app":20,"knockout":1}],23:[function(require,module,exports){
 (function (global){
 /*
  * Copyright 2013 Google, Inc.
@@ -157,7 +3698,7 @@ v.fragments={};return e};this.createJavaScriptEvaluatorBlock=function(a){return"
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Vivliostyle core 2019.1.106-pre.20190610155329
+ * Vivliostyle core 2019.1.106
  */
 (function(factory) {
     if (typeof define === "function" && define.amd) {
@@ -993,3545 +4534,4 @@ g.textContent="@page { size: "+m+"; margin: 0; }",document.head.appendChild(g));
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var supportTouchEvents = ("ontouchstart" in window);
-
-_knockout2["default"].bindingHandlers.menuButton = {
-    init: function init(element, valueAccessor) {
-        if (_knockout2["default"].unwrap(valueAccessor())) {
-            if (supportTouchEvents) {
-                element.addEventListener("touchstart", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", true);
-                });
-                element.addEventListener("touchend", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover active", false);
-                });
-            } else {
-                element.addEventListener("mouseover", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", true);
-                });
-                element.addEventListener("mousedown", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", true);
-                });
-                element.addEventListener("mouseup", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", false);
-                });
-                element.addEventListener("mouseout", function () {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "hover", false);
-                    _knockout2["default"].utils.toggleDomNodeCssClass(element, "active", false);
-                    window.getSelection().removeAllRanges(); // prevent unwanted text selection
-                });
-            }
-        }
-    }
-};
-
-},{"knockout":1}],4:[function(require,module,exports){
-/*
- * Copyright 2018 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var supportTouchEvents = ("ontouchstart" in window);
-
-var xStart = null;
-var yStart = null;
-var arrowButton = null;
-
-_knockout2["default"].bindingHandlers.swipePages = {
-    init: function init(element, valueAccessor) {
-        if (supportTouchEvents && _knockout2["default"].unwrap(valueAccessor())) {
-            element.addEventListener("touchstart", function (event) {
-                if (event.touches.length > 1) {
-                    return; // multi-touch is not for page swipe
-                }
-                if (window.visualViewport && window.visualViewport.scale > 1) {
-                    return; // disable page swipe when pinch-zoomed
-                }
-                var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-                if (viewportElement && viewportElement.scrollWidth > viewportElement.clientWidth) {
-                    return; // disable page swipe when horizontal scrollable
-                }
-                xStart = event.touches[0].clientX;
-                yStart = event.touches[0].clientY;
-            });
-            element.addEventListener("touchmove", function (event) {
-                if (event.touches.length > 1) {
-                    return;
-                }
-                if (xStart !== null && yStart !== null) {
-                    var xDiff = event.touches[0].clientX - xStart;
-                    var yDiff = event.touches[0].clientY - yStart;
-                    if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                        if (xDiff < 0) {
-                            // swipe to left = go to right
-                            arrowButton = document.getElementById("vivliostyle-page-navigation-right");
-                        } else {
-                            // swipe to right = go to left
-                            arrowButton = document.getElementById("vivliostyle-page-navigation-left");
-                        }
-                    }
-                    if (Math.abs(xDiff) + Math.abs(yDiff) >= 16) {
-                        if (arrowButton) {
-                            arrowButton.click();
-                            _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", true);
-                        }
-                        xStart = null;
-                        yStart = null;
-                    }
-                }
-            });
-            element.addEventListener("touchend", function (event) {
-                if (arrowButton) {
-                    _knockout2["default"].utils.toggleDomNodeCssClass(arrowButton, "active", false);
-                }
-                arrowButton = null;
-                xStart = null;
-                yStart = null;
-            });
-        }
-    }
-};
-
-},{"knockout":1}],5:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _modelsMessageQueue = require("../models/message-queue");
-
-var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
-
-var LogLevel = {
-    DEBUG: "debug",
-    INFO: "info",
-    WARN: "warn",
-    ERROR: "error"
-};
-
-var Logger = (function () {
-    function Logger() {
-        _classCallCheck(this, Logger);
-
-        this.logLevel = LogLevel.ERROR;
-    }
-
-    _createClass(Logger, [{
-        key: "setLogLevel",
-        value: function setLogLevel(logLevel) {
-            this.logLevel = logLevel;
-        }
-    }, {
-        key: "debug",
-        value: function debug(content) {
-            if (this.logLevel === LogLevel.DEBUG) {
-                _modelsMessageQueue2["default"].push({
-                    type: "debug",
-                    content: content
-                });
-            }
-        }
-    }, {
-        key: "info",
-        value: function info(content) {
-            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
-                _modelsMessageQueue2["default"].push({
-                    type: "info",
-                    content: content
-                });
-            }
-        }
-    }, {
-        key: "warn",
-        value: function warn(content) {
-            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
-                _modelsMessageQueue2["default"].push({
-                    type: "warn",
-                    content: content
-                });
-            }
-        }
-    }, {
-        key: "error",
-        value: function error(content) {
-            if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN || this.logLevel === LogLevel.ERROR) {
-                _modelsMessageQueue2["default"].push({
-                    type: "error",
-                    content: content
-                });
-            }
-        }
-    }]);
-
-    return Logger;
-})();
-
-Logger.LogLevel = LogLevel;
-
-var instance = new Logger();
-
-Logger.getLogger = function () {
-    return instance;
-};
-
-exports["default"] = Logger;
-module.exports = exports["default"];
-
-},{"../models/message-queue":8}],6:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _vivliostyle = require("vivliostyle");
-
-var _vivliostyle2 = _interopRequireDefault(_vivliostyle);
-
-var _modelsVivliostyle = require("./models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var _vivliostyleViewer = require("./vivliostyle-viewer");
-
-var _vivliostyleViewer2 = _interopRequireDefault(_vivliostyleViewer);
-
-_modelsVivliostyle2["default"].setInstance(_vivliostyle2["default"]);
-_vivliostyleViewer2["default"].start();
-
-},{"./models/vivliostyle":12,"./vivliostyle-viewer":23,"vivliostyle":2}],7:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _storesUrlParameters = require("../stores/url-parameters");
-
-var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
-
-var _pageStyle = require("./page-style");
-
-var _pageStyle2 = _interopRequireDefault(_pageStyle);
-
-var _utilsStringUtil = require("../utils/string-util");
-
-var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
-
-function getDocumentOptionsFromURL() {
-    var bookUrl = _storesUrlParameters2["default"].getParameter("b");
-    var xUrl = _storesUrlParameters2["default"].getParameter("x");
-    var fragment = _storesUrlParameters2["default"].getParameter("f");
-    var style = _storesUrlParameters2["default"].getParameter("style");
-    var userStyle = _storesUrlParameters2["default"].getParameter("userStyle");
-    return {
-        bookUrl: bookUrl[0] || null, // bookUrl and xUrl are exclusive
-        xUrl: !bookUrl[0] && xUrl.length && xUrl[0] ? xUrl : null,
-        fragment: fragment[0] || null,
-        authorStyleSheet: style.length ? style : [],
-        userStyleSheet: userStyle.length ? userStyle : []
-    };
-}
-
-var DocumentOptions = (function () {
-    function DocumentOptions() {
-        var _this = this;
-
-        _classCallCheck(this, DocumentOptions);
-
-        var urlOptions = getDocumentOptionsFromURL();
-        this.bookUrl = _knockout2["default"].observable(urlOptions.bookUrl || "");
-        this.xUrl = _knockout2["default"].observable(urlOptions.xUrl || null);
-        this.fragment = _knockout2["default"].observable(urlOptions.fragment || "");
-        this.authorStyleSheet = _knockout2["default"].observable(urlOptions.authorStyleSheet);
-        this.userStyleSheet = _knockout2["default"].observable(urlOptions.userStyleSheet);
-        this.pageStyle = new _pageStyle2["default"]();
-        this.dataUserStyleIndex = -1;
-
-        // write fragment back to URL when updated
-        this.fragment.subscribe(function (fragment) {
-            if (/^epubcfi\(\/([246]\/)?2!\)/.test(fragment)) {
-                _storesUrlParameters2["default"].removeParameter("f");
-            } else {
-                var encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
-                _storesUrlParameters2["default"].setParameter("f", encoded);
-            }
-        });
-
-        // read userStyle=data:.<cssText> URL parameter
-        urlOptions.userStyleSheet.find(function (userStyle, index) {
-            // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
-            if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(userStyle)) {
-                _this.dataUserStyleIndex = index;
-                var data = userStyle.replace(/^data:,/, "")
-                // Escape unescaped "%" that causes error in decodeURIComponent()
-                .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
-                var cssText = decodeURIComponent(data);
-                _this.pageStyle.cssText(cssText);
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-        // write cssText back to URL parameter userStyle= when updated
-        this.pageStyle.cssText.subscribe(function (cssText) {
-            _this.updateUserStyleSheetFromCSSText(cssText);
-        });
-    }
-
-    _createClass(DocumentOptions, [{
-        key: "toObject",
-        value: function toObject() {
-            function convertStyleSheetArray(arr) {
-                return arr.map(function (url) {
-                    return {
-                        url: url
-                    };
-                });
-            }
-            var userStyleSheetArray = convertStyleSheetArray(this.userStyleSheet());
-            if (this.pageStyle.pageSizeMode() == _pageStyle2["default"].Mode.DEFAULT) {
-                // Put default page size auto. This is needed to output auto size PDF.
-                userStyleSheetArray.unshift({ text: "@page{size:auto}" });
-            }
-            // Do not include url
-            // (url is a required argument to Viewer.loadDocument, separated from other options)
-            return {
-                fragment: this.fragment(),
-                authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-                userStyleSheet: userStyleSheetArray
-            };
-        }
-    }, {
-        key: "updateUserStyleSheetFromCSSText",
-        value: function updateUserStyleSheetFromCSSText(cssText) {
-            if (cssText == undefined) {
-                cssText = this.pageStyle.toCSSText();
-            }
-            var userStyleSheet = this.userStyleSheet();
-            if (!cssText || /^\s*(\/\*.*?\*\/\s*)*$/.test(cssText)) {
-                if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
-                    userStyleSheet.pop();
-                    this.dataUserStyleIndex = -1;
-                    this.userStyleSheet(userStyleSheet);
-                    _storesUrlParameters2["default"].removeParameter("userStyle");
-                    return;
-                }
-            }
-            var dataUserStyle = "data:," + _utilsStringUtil2["default"].percentEncodeForDataURI(cssText.trim());
-            if (this.dataUserStyleIndex == -1) {
-                userStyleSheet.push(dataUserStyle);
-                this.dataUserStyleIndex = userStyleSheet.length - 1;
-            } else {
-                userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
-            }
-            this.userStyleSheet(userStyleSheet);
-            _storesUrlParameters2["default"].setParameter("userStyle", dataUserStyle, this.dataUserStyleIndex);
-        }
-    }]);
-
-    return DocumentOptions;
-})();
-
-exports["default"] = DocumentOptions;
-module.exports = exports["default"];
-
-},{"../stores/url-parameters":14,"../utils/string-util":17,"./page-style":9,"knockout":1}],8:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-function MessageQueue() {
-  return _knockout2["default"].observableArray();
-}
-
-exports["default"] = new MessageQueue();
-module.exports = exports["default"];
-
-},{"knockout":1}],9:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var Mode = {
-    DEFAULT: "",
-    AUTO: "auto",
-    PRESET: "preset",
-    CUSTOM: "custom",
-    ZERO: "0"
-};
-
-var PresetSize = [{ name: "A5", description: "A5" }, { name: "A4", description: "A4" }, { name: "A3", description: "A3" }, { name: "B5", description: "B5 (ISO)" }, { name: "B4", description: "B4 (ISO)" }, { name: "JIS-B5", description: "B5 (JIS)" }, { name: "JIS-B4", description: "B4 (JIS)" }, { name: "letter", description: "letter" }, { name: "legal", description: "legal" }, { name: "ledger", description: "ledger" }];
-
-var Constants = {
-    customWidth: "210mm",
-    customHeight: "297mm",
-    customMargin: "10%",
-    baseFontSize: "12pt",
-    baseLineHeight: "1.2",
-    baseFontFamily: "serif",
-    viewerFontSize: 16
-};
-
-var PageStyle = (function () {
-    function PageStyle(pageStyle) {
-        var _this = this;
-
-        _classCallCheck(this, PageStyle);
-
-        this.pageSizeMode = _knockout2["default"].observable(Mode.DEFAULT);
-        this.presetSize = _knockout2["default"].observable(PresetSize[1]);
-        this.isLandscape = _knockout2["default"].observable(false);
-        this.customWidth = _knockout2["default"].observable(Constants.customWidth);
-        this.customHeight = _knockout2["default"].observable(Constants.customHeight);
-        this.pageSizeImportant = _knockout2["default"].observable(false);
-        this.pageMarginMode = _knockout2["default"].observable(Mode.DEFAULT);
-        this.customMargin = _knockout2["default"].observable(Constants.customMargin);
-        this.pageMarginImportant = _knockout2["default"].observable(false);
-        this.firstPageMarginZero = _knockout2["default"].observable(false);
-        this.firstPageMarginZeroImportant = _knockout2["default"].observable(false);
-        this.forceHtmlBodyMarginZero = _knockout2["default"].observable(false);
-        this.widowsOrphans = _knockout2["default"].observable("");
-        this.widowsOrphansImportant = _knockout2["default"].observable(false);
-        this.imageMaxSizeToFitPage = _knockout2["default"].observable(false);
-        this.imageMaxSizeToFitPageImportant = _knockout2["default"].observable(false);
-        this.imageKeepAspectRatio = _knockout2["default"].observable(false);
-        this.imageKeepAspectRatioImportant = _knockout2["default"].observable(false);
-        this.baseFontSize = _knockout2["default"].observable(Constants.baseFontSize);
-        this.baseFontSizeSpecified = _knockout2["default"].observable(false);
-        this.baseFontSizeImportant = _knockout2["default"].observable(false);
-        this.baseLineHeight = _knockout2["default"].observable(Constants.baseLineHeight);
-        this.baseLineHeightSpecified = _knockout2["default"].observable(false);
-        this.baseLineHeightImportant = _knockout2["default"].observable(false);
-        this.baseFontFamily = _knockout2["default"].observable(Constants.baseFontFamily);
-        this.baseFontFamilySpecified = _knockout2["default"].observable(false);
-        this.baseFontFamilyImportant = _knockout2["default"].observable(false);
-        this.allImportant = _knockout2["default"].observable(false);
-        this.pageOtherStyle = _knockout2["default"].observable("");
-        this.firstPageOtherStyle = _knockout2["default"].observable("");
-        this.rootOtherStyle = _knockout2["default"].observable("");
-        this.beforeOtherStyle = _knockout2["default"].observable("");
-        this.afterOtherStyle = _knockout2["default"].observable("");
-
-        this.viewerFontSize = null;
-        this.setViewerFontSizeObservable = function (viewerFontSizeObservable) {
-            _this.viewerFontSize = viewerFontSizeObservable;
-            var elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
-            if (elem) {
-                elem.value = _this.fontSizePxToPercent(viewerFontSizeObservable(), 100, 5);
-            }
-        };
-
-        this.viewerFontSizePercent = _knockout2["default"].pureComputed({
-            read: function read() {
-                if (!this.viewerFontSize) {
-                    return 100;
-                }
-                var percent = this.fontSizePxToPercent(this.viewerFontSize(), 100, 5);
-                return percent;
-            },
-            write: function write(viewerFontSizePercent) {
-                if (!this.viewerFontSize) {
-                    return;
-                }
-                var percent = parseFloat(viewerFontSizePercent);
-                var fontSize = percent && this.fontSizePercentToPx(percent);
-                if (!fontSize || fontSize < 5 || fontSize > 72) {
-                    var elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
-                    if (elem) {
-                        elem.value = "100";
-                    }
-                    fontSize = Constants.viewerFontSize;
-                }
-                this.viewerFontSize(fontSize);
-            },
-            owner: this
-        });
-
-        this.cssText = _knockout2["default"].pureComputed({
-            read: this.toCSSText,
-            write: this.fromCSSText,
-            owner: this
-        });
-
-        this.allImportant.subscribe(function (allImportant) {
-            _this.pageSizeImportant(allImportant);
-            _this.pageMarginImportant(allImportant);
-            _this.firstPageMarginZeroImportant(allImportant);
-            _this.widowsOrphansImportant(allImportant);
-            _this.imageMaxSizeToFitPageImportant(allImportant);
-            _this.imageKeepAspectRatioImportant(allImportant);
-            _this.baseFontSizeImportant(allImportant);
-            _this.baseLineHeightImportant(allImportant);
-            _this.baseFontFamilyImportant(allImportant);
-        });
-
-        this.pageStyleRegExp = new RegExp(
-
-        // 1. beforeOtherStyle,
-        "^((?:\\n|.)*?)\\/\\*<viewer>\\*\\/\\s*(?:@page\\s*\\{\\s*" +
-
-        // 2. sizeW, sizeH, sizeImportant,
-        "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
-
-        // 5. pageMargin, pageMarginImportant,
-        "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
-
-        // 7. pageOtherStyle,
-        "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
-
-        // 8. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
-        "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
-
-        // 11. forceHtmlBodyMarginZero,
-        "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
-
-        // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
-        "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
-
-        // body {font-size: inherit !important;} etc.
-        "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
-
-        // 19. widowsOrphans, widowsOrphansImportant,
-        "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*orphans:\\s*\\19\\s*\\20(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
-
-        // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
-        "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
-
-        // 25. afterOtherStyle
-        "((?:\\n|.)*)$");
-
-        if (pageStyle) {
-            this.copyFrom(pageStyle);
-        }
-    }
-
-    /**
-     * @param {number} px Font size in px unit
-     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
-     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
-     * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
-     */
-
-    _createClass(PageStyle, [{
-        key: "fontSizePxToPercent",
-        value: function fontSizePxToPercent(px, opt_cent, opt_precision) {
-            var percent = px / Constants.viewerFontSize * (opt_cent || 100);
-            if (opt_precision) {
-                percent = percent.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
-            }
-            return percent;
-        }
-
-        /**
-         * @param {number} percent Font size in percent (or per _N_) unit
-         * @param {number=} opt_cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
-         * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
-         * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
-         */
-    }, {
-        key: "fontSizePercentToPx",
-        value: function fontSizePercentToPx(percent, opt_cent, opt_precision) {
-            var px = percent / (opt_cent || 100) * Constants.viewerFontSize;
-            if (opt_precision) {
-                px = px.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
-            }
-            return px;
-        }
-    }, {
-        key: "fromCSSText",
-        value: function fromCSSText(cssText) {
-            var _this2 = this;
-
-            var r = this.pageStyleRegExp.exec(cssText);
-            if (r) {
-                (function () {
-                    var _r = _slicedToArray(r, 26);
-
-                    var beforeOtherStyle = _r[1];
-                    var sizeW = _r[2];
-                    var sizeH = _r[3];
-                    var sizeImportant = _r[4];
-                    var pageMargin = _r[5];
-                    var pageMarginImportant = _r[6];
-                    var pageOtherStyle = _r[7];
-                    var firstPageMarginZero = _r[8];
-                    var firstPageMarginZeroImportant = _r[9];
-                    var firstPageOtherStyle = _r[10];
-                    var forceHtmlBodyMarginZero = _r[11];
-                    var baseFontSize = _r[12];
-                    var baseFontSizeImportant = _r[13];
-                    var baseLineHeight = _r[14];
-                    var baseLineHeightImportant = _r[15];
-                    var baseFontFamily = _r[16];
-                    var baseFontFamilyImportant = _r[17];
-                    var rootOtherStyle = _r[18];
-                    var widowsOrphans = _r[19];
-                    var widowsOrphansImportant = _r[20];
-                    var imageMaxSizeToFitPage = _r[21];
-                    var imageMaxSizeToFitPageImportant = _r[22];
-                    var imageKeepAspectRatio = _r[23];
-                    var imageKeepAspectRatioImportant = _r[24];
-                    var afterOtherStyle = _r[25];
-
-                    var countImportant = 0;
-                    var countNotImportant = 0;
-
-                    _this2.beforeOtherStyle(beforeOtherStyle);
-
-                    if (sizeW == "landscape" || sizeW == "portrait") {
-                        _this2.isLandscape(sizeW == "landscape");
-                        sizeW = sizeH;
-                        sizeH = null;
-                    } else if (sizeH == "landscape" || sizeH == "portrait") {
-                        _this2.isLandscape(sizeH == "landscape");
-                        sizeH = null;
-                    }
-                    if (sizeW != null) {
-                        if (sizeH == null) {
-                            if (sizeW == "auto") {
-                                _this2.pageSizeMode(Mode.AUTO);
-                            } else {
-                                var presetSize = PresetSize.find(function (presetSize) {
-                                    return presetSize.name.toLowerCase() == sizeW.toLowerCase();
-                                });
-                                if (presetSize) {
-                                    _this2.pageSizeMode(Mode.PRESET);
-                                    _this2.presetSize(presetSize);
-                                } else {
-                                    _this2.pageSizeMode(Mode.CUSTOM);
-                                    _this2.customWidth(sizeW);
-                                    _this2.customHeight(sizeW);
-                                }
-                            }
-                        } else {
-                            _this2.pageSizeMode(Mode.CUSTOM);
-                            _this2.customWidth(sizeW);
-                            _this2.customHeight(sizeH);
-                        }
-                        _this2.pageSizeImportant(!!sizeImportant);
-                        if (sizeImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.pageSizeMode(Mode.DEFAULT);
-                    }
-                    if (pageMargin != null) {
-                        _this2.pageMarginMode(pageMargin == "0" ? Mode.ZERO : Mode.CUSTOM);
-                        if (pageMargin == "0") {
-                            _this2.pageMarginMode(Mode.ZERO);
-                        } else {
-                            _this2.pageMarginMode(Mode.CUSTOM);
-                            _this2.customMargin(pageMargin);
-                        }
-                        _this2.pageMarginImportant(!!pageMarginImportant);
-                        if (pageMarginImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.pageMarginMode(Mode.DEFAULT);
-                    }
-                    pageOtherStyle = pageOtherStyle || "";
-                    _this2.pageOtherStyle(pageOtherStyle);
-
-                    if (firstPageMarginZero) {
-                        _this2.firstPageMarginZero(true);
-                        _this2.firstPageMarginZeroImportant(!!firstPageMarginZeroImportant);
-                        if (firstPageMarginZeroImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.firstPageMarginZero(false);
-                    }
-                    firstPageOtherStyle = firstPageOtherStyle || "";
-                    _this2.firstPageOtherStyle(firstPageOtherStyle);
-
-                    if (forceHtmlBodyMarginZero) {
-                        _this2.forceHtmlBodyMarginZero(true);
-                    } else {
-                        _this2.forceHtmlBodyMarginZero(false);
-                    }
-
-                    if (baseFontSize != null) {
-                        // This may be calc() e.g. "calc(1.25 * 12pt)" when viewer font size is 125%.
-                        baseFontSize = baseFontSize.replace(/^\s*calc\([.\d]+\s*\*\s*([.\d]+\w+)\)\s*$/, "$1");
-                        _this2.baseFontSizeSpecified(true);
-                        _this2.baseFontSize(baseFontSize);
-                        _this2.baseFontSizeImportant(!!baseFontSizeImportant);
-                        if (baseFontSizeImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.baseFontSizeSpecified(false);
-                    }
-                    if (baseLineHeight != null) {
-                        _this2.baseLineHeightSpecified(true);
-                        _this2.baseLineHeight(baseLineHeight);
-                        _this2.baseLineHeightImportant(!!baseLineHeightImportant);
-                        if (baseLineHeightImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.baseLineHeightSpecified(false);
-                    }
-                    if (baseFontFamily != null) {
-                        baseFontFamily = baseFontFamily.trim();
-                        _this2.baseFontFamilySpecified(true);
-                        _this2.baseFontFamily(baseFontFamily);
-                        _this2.baseFontFamilyImportant(!!baseFontFamilyImportant);
-                        if (baseFontFamilyImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.baseFontFamilySpecified(false);
-                    }
-                    rootOtherStyle = rootOtherStyle || "";
-                    _this2.rootOtherStyle(rootOtherStyle);
-
-                    if (widowsOrphans != null) {
-                        _this2.widowsOrphans(widowsOrphans);
-                        _this2.widowsOrphansImportant(!!widowsOrphansImportant);
-                        if (widowsOrphansImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.widowsOrphans(Mode.DEFAULT);
-                    }
-
-                    if (imageMaxSizeToFitPage) {
-                        _this2.imageMaxSizeToFitPage(true);
-                        _this2.imageMaxSizeToFitPageImportant(!!imageMaxSizeToFitPageImportant);
-                        if (imageMaxSizeToFitPageImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.imageMaxSizeToFitPage(false);
-                    }
-
-                    if (imageKeepAspectRatio) {
-                        _this2.imageKeepAspectRatio(true);
-                        _this2.imageKeepAspectRatioImportant(!!imageKeepAspectRatioImportant);
-                        if (imageKeepAspectRatioImportant) countImportant++;else countNotImportant++;
-                    } else {
-                        _this2.imageKeepAspectRatio(false);
-                    }
-
-                    afterOtherStyle = afterOtherStyle.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
-                    _this2.afterOtherStyle(afterOtherStyle);
-
-                    _this2.allImportant(countImportant > 0 && countNotImportant == 0);
-                })();
-            } else {
-                // When not match
-                var afterOtherStyle = cssText.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
-                this.afterOtherStyle(afterOtherStyle);
-            }
-        }
-    }, {
-        key: "toCSSText",
-        value: function toCSSText() {
-            function imp(important) {
-                return important ? " !important" : "";
-            }
-
-            var cssText = this.beforeOtherStyle();
-            cssText += "/*<viewer>*/\n";
-            if (this.pageSizeMode() != Mode.DEFAULT || this.pageMarginMode() != Mode.DEFAULT || this.pageOtherStyle()) {
-                cssText += "@page { ";
-                if (this.pageSizeMode() != Mode.DEFAULT) {
-                    cssText += "size: ";
-
-                    switch (this.pageSizeMode()) {
-                        case Mode.AUTO:
-                            cssText += "auto";
-                            break;
-                        case Mode.PRESET:
-                            cssText += this.presetSize().name;
-                            if (this.isLandscape()) {
-                                cssText += " landscape";
-                            }
-                            break;
-                        case Mode.CUSTOM:
-                            cssText += this.customWidth() + " " + this.customHeight();
-                            break;
-                        default:
-                            throw new Error("Unknown pageSizeMode " + this.pageSizeMode());
-                    }
-                    cssText += imp(this.pageSizeImportant()) + "; ";
-                }
-                if (this.pageMarginMode() != Mode.DEFAULT) {
-                    cssText += "margin: ";
-
-                    switch (this.pageMarginMode()) {
-                        case Mode.AUTO:
-                            cssText += "auto";
-                            break;
-                        case Mode.ZERO:
-                            cssText += "0";
-                            break;
-                        case Mode.CUSTOM:
-                            cssText += "" + this.customMargin();
-                            break;
-                        default:
-                            throw new Error("Unknown pageMarginMode " + this.pageMarginMode());
-                    }
-                    cssText += imp(this.pageMarginImportant()) + "; ";
-                }
-                cssText += this.pageOtherStyle();
-                cssText += "}\n";
-            }
-
-            if (this.firstPageMarginZero() || this.firstPageOtherStyle()) {
-                cssText += "@page :first { ";
-                if (this.firstPageMarginZero()) {
-                    cssText += "margin: 0" + imp(this.firstPageMarginZeroImportant()) + "; ";
-                }
-                cssText += this.firstPageOtherStyle();
-                cssText += "}\n";
-            }
-
-            if (this.forceHtmlBodyMarginZero()) {
-                cssText += ":root, body { margin: 0 !important; }\n";
-            }
-
-            if (this.baseFontSizeSpecified() || this.baseLineHeightSpecified() || this.baseFontFamilySpecified() || this.rootOtherStyle()) {
-                cssText += ":root { ";
-                var baseFontSize = this.baseFontSize();
-                if (this.baseFontSizeSpecified()) {
-                    if (this.viewerFontSize && this.viewerFontSize() != Constants.viewerFontSize && !baseFontSize.endsWith("%")) {
-                        var perOne = this.fontSizePxToPercent(this.viewerFontSize(), 1, 5);
-                        cssText += "font-size: calc(" + perOne + " * " + baseFontSize + ")" + imp(this.baseFontSizeImportant()) + "; ";
-                    } else {
-                        cssText += "font-size: " + this.baseFontSize() + imp(this.baseFontSizeImportant()) + "; ";
-                    }
-                }
-                if (this.baseLineHeightSpecified()) {
-                    cssText += "line-height: " + this.baseLineHeight() + imp(this.baseLineHeightImportant()) + "; ";
-                }
-                if (this.baseFontFamilySpecified()) {
-                    cssText += "font-family: " + this.baseFontFamily() + imp(this.baseFontFamilyImportant()) + "; ";
-                }
-                cssText += this.rootOtherStyle();
-                cssText += "}\n";
-            }
-            if (this.baseFontSizeSpecified() && this.baseFontSizeImportant() || this.baseLineHeightSpecified() && this.baseLineHeightImportant() || this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
-                cssText += "body { ";
-                if (this.baseFontSizeSpecified() && this.baseFontSizeImportant()) {
-                    cssText += "font-size: inherit !important; ";
-                }
-                if (this.baseLineHeightSpecified() && this.baseLineHeightImportant()) {
-                    cssText += "line-height: inherit !important; ";
-                }
-                if (this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
-                    cssText += "font-family: inherit !important; ";
-                }
-                cssText += "}\n";
-            }
-
-            if (this.widowsOrphans()) {
-                cssText += "* { ";
-                cssText += "widows: " + this.widowsOrphans() + imp(this.widowsOrphansImportant()) + "; ";
-                cssText += "orphans: " + this.widowsOrphans() + imp(this.widowsOrphansImportant()) + "; ";
-                cssText += "}\n";
-            }
-
-            if (this.imageMaxSizeToFitPage() || this.imageKeepAspectRatio()) {
-                cssText += "img, svg { ";
-                if (this.imageMaxSizeToFitPage()) {
-                    cssText += "max-inline-size: 100%" + imp(this.imageMaxSizeToFitPageImportant()) + "; ";
-                    cssText += "max-block-size: 100vb" + imp(this.imageMaxSizeToFitPageImportant()) + "; ";
-                }
-                if (this.imageKeepAspectRatio()) {
-                    cssText += "object-fit: contain" + imp(this.imageKeepAspectRatioImportant()) + "; ";
-                }
-                cssText += "}\n";
-            }
-
-            cssText += "/*</viewer>*/\n";
-            cssText += this.afterOtherStyle();
-
-            return cssText;
-        }
-    }, {
-        key: "copyFrom",
-        value: function copyFrom(other) {
-            this.pageSizeMode(other.pageSizeMode());
-            this.presetSize(other.presetSize());
-            this.isLandscape(other.isLandscape());
-            this.customWidth(other.customWidth());
-            this.customHeight(other.customHeight());
-            this.pageSizeImportant(other.pageSizeImportant());
-            this.pageMarginMode(other.pageMarginMode());
-            this.customMargin(other.customMargin());
-            this.pageMarginImportant(other.pageMarginImportant());
-            this.firstPageMarginZero(other.firstPageMarginZero());
-            this.firstPageMarginZeroImportant(other.firstPageMarginZeroImportant());
-            this.forceHtmlBodyMarginZero(other.forceHtmlBodyMarginZero());
-            this.widowsOrphans(other.widowsOrphans());
-            this.widowsOrphansImportant(other.widowsOrphansImportant());
-            this.imageMaxSizeToFitPage(other.imageMaxSizeToFitPage());
-            this.imageMaxSizeToFitPageImportant(other.imageMaxSizeToFitPageImportant());
-            this.imageKeepAspectRatio(other.imageKeepAspectRatio());
-            this.imageKeepAspectRatioImportant(other.imageKeepAspectRatioImportant());
-            this.baseFontSize(other.baseFontSize());
-            this.baseFontSizeSpecified(other.baseFontSizeSpecified());
-            this.baseFontSizeImportant(other.baseFontSizeImportant());
-            this.baseLineHeight(other.baseLineHeight());
-            this.baseLineHeightSpecified(other.baseLineHeightSpecified());
-            this.baseLineHeightImportant(other.baseLineHeightImportant());
-            this.baseFontFamily(other.baseFontFamily());
-            this.baseFontFamilySpecified(other.baseFontFamilySpecified());
-            this.baseFontFamilyImportant(other.baseFontFamilyImportant());
-            this.allImportant(other.allImportant());
-            this.pageOtherStyle(other.pageOtherStyle());
-            this.firstPageOtherStyle(other.firstPageOtherStyle());
-            this.rootOtherStyle(other.rootOtherStyle());
-            this.beforeOtherStyle(other.beforeOtherStyle());
-            this.afterOtherStyle(other.afterOtherStyle());
-
-            if (this.viewerFontSize && other.viewerFontSize) {
-                this.viewerFontSize(other.viewerFontSize());
-            }
-        }
-    }, {
-        key: "equivalentTo",
-        value: function equivalentTo(other) {
-            if (this.pageSizeMode() !== other.pageSizeMode()) return false;
-            if (this.pageSizeMode() === Mode.PRESET && this.presetSize() !== other.presetSize()) return false;
-            if (this.pageSizeMode() === Mode.PRESET && this.isLandscape() !== other.isLandscape()) return false;
-            if (this.pageSizeMode() === Mode.CUSTOM && this.customWidth() !== other.customWidth()) return false;
-            if (this.pageSizeMode() === Mode.CUSTOM && this.customHeight() !== other.customHeight()) return false;
-            if (this.pageSizeImportant() !== other.pageSizeImportant()) return false;
-
-            if (this.pageMarginMode() !== other.pageMarginMode()) return false;
-            if (this.pageMarginMode() === Mode.CUSTOM && this.customMargin() !== other.customMargin()) return false;
-            if (this.pageMarginImportant() !== other.pageMarginImportant()) return false;
-            if (this.firstPageMarginZero() !== other.firstPageMarginZero()) return false;
-            if (this.firstPageMarginZeroImportant() !== other.firstPageMarginZeroImportant()) return false;
-            if (this.forceHtmlBodyMarginZero() !== other.forceHtmlBodyMarginZero()) return false;
-
-            if (this.widowsOrphans() !== other.widowsOrphans()) return false;
-            if (this.widowsOrphansImportant() !== other.widowsOrphansImportant()) return false;
-
-            if (this.imageMaxSizeToFitPage() !== other.imageMaxSizeToFitPage()) return false;
-            if (this.imageMaxSizeToFitPageImportant() !== other.imageMaxSizeToFitPageImportant()) return false;
-            if (this.imageKeepAspectRatio() !== other.imageKeepAspectRatio()) return false;
-            if (this.imageKeepAspectRatioImportant() !== other.imageKeepAspectRatioImportant()) return false;
-
-            if (this.baseFontSizeSpecified() !== other.baseFontSizeSpecified()) return false;
-            if (this.baseFontSizeSpecified() && this.baseFontSize() !== other.baseFontSize()) return false;
-            if (this.baseFontSizeImportant() !== other.baseFontSizeImportant()) return false;
-            if (this.baseLineHeightSpecified() !== other.baseLineHeightSpecified()) return false;
-            if (this.baseLineHeightSpecified() && this.baseLineHeight() !== other.baseLineHeight()) return false;
-            if (this.baseLineHeightImportant() !== other.baseLineHeightImportant()) return false;
-            if (this.baseFontFamilySpecified() !== other.baseFontFamilySpecified()) return false;
-            if (this.baseFontFamilySpecified() && this.baseFontFamily() !== other.baseFontFamily()) return false;
-            if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant()) return false;
-
-            if (this.allImportant() !== other.allImportant()) return false;
-            if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
-            if (this.firstPageOtherStyle() !== other.firstPageOtherStyle()) return false;
-            if (this.rootOtherStyle() !== other.rootOtherStyle()) return false;
-            if (this.beforeOtherStyle() !== other.beforeOtherStyle()) return false;
-            if (this.afterOtherStyle() !== other.afterOtherStyle()) return false;
-
-            if (!this.viewerFontSize !== !other.viewerFontSize || this.viewerFontSize && this.viewerFontSize() !== other.viewerFontSize()) return false;
-
-            return true;
-        }
-    }]);
-
-    return PageStyle;
-})();
-
-PageStyle.Mode = Mode;
-PageStyle.Constants = Constants;
-PageStyle.PresetSize = PageStyle.prototype.PresetSize = PresetSize;
-
-exports["default"] = PageStyle;
-module.exports = exports["default"];
-
-},{"knockout":1}],10:[function(require,module,exports){
-/*
- * Copyright 2016 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var PageViewModeInstance = (function () {
-    function PageViewModeInstance() {
-        _classCallCheck(this, PageViewModeInstance);
-    }
-
-    _createClass(PageViewModeInstance, [{
-        key: "toSpreadViewString",
-        value: function toSpreadViewString() {
-            switch (this) {
-                case PageViewMode.SPREAD:
-                    return "true";
-                case PageViewMode.SINGLE_PAGE:
-                    return "false";
-                case PageViewMode.AUTO_SPREAD:
-                    return "auto";
-                default:
-                    throw new Error("Invalid PageViewMode");
-            }
-        }
-    }, {
-        key: "toString",
-        value: function toString() {
-            switch (this) {
-                case PageViewMode.SPREAD:
-                    return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
-                case PageViewMode.SINGLE_PAGE:
-                    return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
-                case PageViewMode.AUTO_SPREAD:
-                    return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
-                default:
-                    throw new Error("Invalid PageViewMode");
-            }
-        }
-    }]);
-
-    return PageViewModeInstance;
-})();
-
-var PageViewMode = {
-    AUTO_SPREAD: new PageViewModeInstance(),
-    SINGLE_PAGE: new PageViewModeInstance(),
-    SPREAD: new PageViewModeInstance(),
-    defaultMode: function defaultMode() {
-        return this.AUTO_SPREAD;
-    },
-    fromSpreadViewString: function fromSpreadViewString(str) {
-        switch (str) {
-            case "true":
-                return this.SPREAD;
-            case "false":
-                return this.SINGLE_PAGE;
-            case "auto":
-            default:
-                return this.AUTO_SPREAD;
-        }
-    },
-    of: function of(name) {
-        switch (name) {
-            case _modelsVivliostyle2["default"].viewer.PageViewMode.SPREAD:
-                return this.SPREAD;
-            case _modelsVivliostyle2["default"].viewer.PageViewMode.SINGLE_PAGE:
-                return this.SINGLE_PAGE;
-            case _modelsVivliostyle2["default"].viewer.PageViewMode.AUTO_SPREAD:
-                return this.AUTO_SPREAD;
-            default:
-                throw new Error("Invalid PageViewMode name: " + name);
-        }
-    }
-};
-
-exports["default"] = PageViewMode;
-module.exports = exports["default"];
-
-},{"../models/vivliostyle":12}],11:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _storesUrlParameters = require("../stores/url-parameters");
-
-var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
-
-var _pageViewMode = require("./page-view-mode");
-
-var _pageViewMode2 = _interopRequireDefault(_pageViewMode);
-
-var _zoomOptions = require("./zoom-options");
-
-var _zoomOptions2 = _interopRequireDefault(_zoomOptions);
-
-function getViewerOptionsFromURL() {
-    var renderAllPages = _storesUrlParameters2["default"].getParameter("renderAllPages")[0];
-    var fontSizeStr = _storesUrlParameters2["default"].getParameter("fontSize")[0];
-    var r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
-    var fontSize = null;
-    if (r) {
-        var _r = _slicedToArray(r, 4);
-
-        var num = _r[1];
-        var percent = _r[2];
-        var denom = _r[3];
-
-        fontSize = parseFloat(num);
-        if (percent || denom) {
-            fontSize = 16 * fontSize / (percent ? 100 : parseFloat(denom));
-        }
-        if (fontSize < 5) fontSize = 5;
-        if (fontSize > 72) fontSize = 72;
-    }
-    return {
-        renderAllPages: renderAllPages === "true" ? true : renderAllPages === "false" ? false : null,
-        fontSize: fontSize,
-        profile: _storesUrlParameters2["default"].getParameter("profile")[0] === "true",
-        pageViewMode: _pageViewMode2["default"].fromSpreadViewString(_storesUrlParameters2["default"].getParameter("spread")[0])
-    };
-}
-
-function getDefaultValues() {
-    var isNotBook = _storesUrlParameters2["default"].hasParameter("x");
-    return {
-        renderAllPages: isNotBook,
-        fontSize: 16,
-        profile: false,
-        pageViewMode: _pageViewMode2["default"].defaultMode(),
-        zoom: _zoomOptions2["default"].createDefaultOptions()
-    };
-}
-
-var ViewerOptions = (function () {
-    function ViewerOptions(options) {
-        var _this = this;
-
-        _classCallCheck(this, ViewerOptions);
-
-        this.renderAllPages = _knockout2["default"].observable();
-        this.fontSize = _knockout2["default"].observable();
-        this.profile = _knockout2["default"].observable();
-        this.pageViewMode = _knockout2["default"].observable();
-        this.zoom = _knockout2["default"].observable();
-        if (options) {
-            this.copyFrom(options);
-        } else {
-            (function () {
-                var defaultValues = getDefaultValues();
-                var urlOptions = getViewerOptionsFromURL();
-                _this.renderAllPages(urlOptions.renderAllPages !== null ? urlOptions.renderAllPages : defaultValues.renderAllPages);
-                _this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
-                _this.profile(urlOptions.profile || defaultValues.profile);
-                _this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
-                _this.zoom(defaultValues.zoom);
-
-                // write spread parameter back to URL when updated
-                _this.pageViewMode.subscribe(function (pageViewMode) {
-                    if (pageViewMode === defaultValues.pageViewMode) {
-                        _storesUrlParameters2["default"].removeParameter("spread");
-                    } else {
-                        _storesUrlParameters2["default"].setParameter("spread", pageViewMode.toSpreadViewString());
-                    }
-                });
-                _this.renderAllPages.subscribe(function (renderAllPages) {
-                    if (renderAllPages === defaultValues.renderAllPages) {
-                        _storesUrlParameters2["default"].removeParameter("renderAllPages");
-                    } else {
-                        _storesUrlParameters2["default"].setParameter("renderAllPages", renderAllPages.toString());
-                    }
-                });
-                _this.fontSize.subscribe(function (fontSize) {
-                    if (typeof fontSize == "number") {
-                        fontSize = fontSize.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
-                    }
-                    if (fontSize == defaultValues.fontSize) {
-                        _storesUrlParameters2["default"].removeParameter("fontSize");
-                    } else {
-                        _storesUrlParameters2["default"].setParameter("fontSize", fontSize + "/" + defaultValues.fontSize);
-                    }
-                });
-            })();
-        }
-    }
-
-    _createClass(ViewerOptions, [{
-        key: "copyFrom",
-        value: function copyFrom(other) {
-            this.renderAllPages(other.renderAllPages());
-            this.fontSize(other.fontSize());
-            this.profile(other.profile());
-            this.pageViewMode(other.pageViewMode());
-            this.zoom(other.zoom());
-        }
-    }, {
-        key: "toObject",
-        value: function toObject() {
-            return {
-                renderAllPages: this.renderAllPages(),
-                fontSize: this.fontSize(),
-                pageViewMode: this.pageViewMode().toString(),
-                zoom: this.zoom().zoom,
-                fitToScreen: this.zoom().fitToScreen
-            };
-        }
-    }]);
-
-    return ViewerOptions;
-})();
-
-ViewerOptions.getDefaultValues = getDefaultValues;
-
-exports["default"] = ViewerOptions;
-module.exports = exports["default"];
-
-},{"../stores/url-parameters":14,"./page-view-mode":10,"./zoom-options":13,"knockout":1}],12:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Vivliostyle = (function () {
-    function Vivliostyle() {
-        _classCallCheck(this, Vivliostyle);
-
-        this.viewer = null;
-        this.constants = null;
-        this.profile = null;
-    }
-
-    _createClass(Vivliostyle, [{
-        key: "setInstance",
-        value: function setInstance(vivliostyle) {
-            this.viewer = vivliostyle.viewer;
-            this.constants = vivliostyle.constants;
-            this.profile = vivliostyle.profile;
-        }
-    }]);
-
-    return Vivliostyle;
-})();
-
-exports["default"] = new Vivliostyle();
-module.exports = exports["default"];
-
-},{}],13:[function(require,module,exports){
-/*
- * Copyright 2016 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var ZoomOptions = (function () {
-    function ZoomOptions(zoom) {
-        _classCallCheck(this, ZoomOptions);
-
-        this.zoom = zoom;
-    }
-
-    _createClass(ZoomOptions, [{
-        key: "zoomIn",
-        value: function zoomIn(viewer) {
-            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
-        }
-    }, {
-        key: "zoomOut",
-        value: function zoomOut(viewer) {
-            return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
-        }
-    }, {
-        key: "zoomToActualSize",
-        value: function zoomToActualSize() {
-            return new FixedZoomFactor(1);
-        }
-    }], [{
-        key: "createDefaultOptions",
-        value: function createDefaultOptions() {
-            return new FitToScreen();
-        }
-    }, {
-        key: "createFromZoomFactor",
-        value: function createFromZoomFactor(zoom) {
-            return new FixedZoomFactor(zoom);
-        }
-    }]);
-
-    return ZoomOptions;
-})();
-
-var FitToScreen = (function (_ZoomOptions) {
-    _inherits(FitToScreen, _ZoomOptions);
-
-    function FitToScreen() {
-        _classCallCheck(this, FitToScreen);
-
-        _get(Object.getPrototypeOf(FitToScreen.prototype), "constructor", this).call(this, 1);
-    }
-
-    _createClass(FitToScreen, [{
-        key: "toggleFitToScreen",
-        value: function toggleFitToScreen() {
-            return new FixedZoomFactor(1);
-        }
-    }, {
-        key: "getCurrentZoomFactor",
-        value: function getCurrentZoomFactor(viewer) {
-            return viewer.queryZoomFactor(_modelsVivliostyle2["default"].viewer.ZoomType.FIT_INSIDE_VIEWPORT);
-        }
-    }, {
-        key: "fitToScreen",
-        get: function get() {
-            return true;
-        }
-    }]);
-
-    return FitToScreen;
-})(ZoomOptions);
-
-var FixedZoomFactor = (function (_ZoomOptions2) {
-    _inherits(FixedZoomFactor, _ZoomOptions2);
-
-    function FixedZoomFactor() {
-        _classCallCheck(this, FixedZoomFactor);
-
-        _get(Object.getPrototypeOf(FixedZoomFactor.prototype), "constructor", this).apply(this, arguments);
-    }
-
-    _createClass(FixedZoomFactor, [{
-        key: "toggleFitToScreen",
-        value: function toggleFitToScreen() {
-            return new FitToScreen();
-        }
-    }, {
-        key: "getCurrentZoomFactor",
-        value: function getCurrentZoomFactor(viewer) {
-            return this.zoom;
-        }
-    }, {
-        key: "fitToScreen",
-        get: function get() {
-            return false;
-        }
-    }]);
-
-    return FixedZoomFactor;
-})(ZoomOptions);
-
-exports["default"] = ZoomOptions;
-module.exports = exports["default"];
-
-},{"../models/vivliostyle":12}],14:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _utilsStringUtil = require("../utils/string-util");
-
-var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
-
-function getRegExpForParameter(name) {
-    return new RegExp("[#&]" + _utilsStringUtil2["default"].escapeUnicodeString(name) + "=([^&]*)", "g");
-}
-
-var URLParameterStore = (function () {
-    function URLParameterStore() {
-        _classCallCheck(this, URLParameterStore);
-
-        this.history = window ? window.history : {};
-        this.location = window ? window.location : { href: "" };
-        this.storedUrl = this.location.href;
-    }
-
-    _createClass(URLParameterStore, [{
-        key: "getBaseURL",
-        value: function getBaseURL() {
-            var url = this.location.href;
-            url = url.replace(/#.*$/, "");
-            return url.replace(/\/[^/]*$/, "/");
-        }
-    }, {
-        key: "hasParameter",
-        value: function hasParameter(name) {
-            var url = this.location.href;
-            var regexp = getRegExpForParameter(name);
-            return regexp.test(url);
-        }
-    }, {
-        key: "getParameter",
-        value: function getParameter(name) {
-            var url = this.location.href;
-            var regexp = getRegExpForParameter(name);
-            var results = [];
-            var r = undefined;
-            while (r = regexp.exec(url)) {
-                results.push(r[1]);
-            }
-            return results;
-        }
-
-        /**
-         * @param {string} name 
-         * @param {string} value 
-         * @param {number=} opt_index specifies index in multiple parameters with same name.
-         */
-    }, {
-        key: "setParameter",
-        value: function setParameter(name, value, opt_index) {
-            var url = this.location.href;
-            var updated = undefined;
-            var regexp = getRegExpForParameter(name);
-            var r = regexp.exec(url);
-            if (r && opt_index) {
-                while (opt_index-- >= 1) {
-                    r = regexp.exec(url);
-                }
-            }
-            if (r) {
-                var l = r[1].length;
-                var start = r.index + r[0].length - l;
-                updated = url.substring(0, start) + value + url.substring(start + l);
-            } else {
-                updated = url + (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") + name + "=" + value;
-            }
-            if (this.history.replaceState) {
-                this.history.replaceState(null, "", updated);
-            } else {
-                this.location.href = updated;
-            }
-            this.storedUrl = updated;
-        }
-
-        /**
-         * @param {string} name 
-         * @param {boolean=} opt_keepFirst If true, not remove the first one in multiple parameters with same name.
-         */
-    }, {
-        key: "removeParameter",
-        value: function removeParameter(name, opt_keepFirst) {
-            var url = this.location.href;
-            var updated = undefined;
-            var regexp = getRegExpForParameter(name);
-            var r = regexp.exec(url);
-            if (r && opt_keepFirst) {
-                r = regexp.exec(url);
-            }
-            if (r) {
-                updated = url;
-                for (; r; r = regexp.exec(updated)) {
-                    var end = r.index + r[0].length;
-                    if (r[0].charAt(0) == '#') {
-                        updated = updated.substring(0, r.index + 1) + updated.substring(end + 1);
-                    } else {
-                        updated = updated.substring(0, r.index) + updated.substring(end);
-                    }
-                    regexp.lastIndex -= r[0].length;
-                }
-                updated = updated.replace(/^(.*?)[#&]$/, "$1");
-                if (this.history.replaceState) {
-                    this.history.replaceState(null, "", updated);
-                } else {
-                    this.location.href = updated;
-                }
-            }
-            this.storedUrl = updated;
-        }
-    }]);
-
-    return URLParameterStore;
-})();
-
-exports["default"] = new URLParameterStore();
-module.exports = exports["default"];
-
-},{"../utils/string-util":17}],15:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-// cf. http://www.w3.org/TR/DOM-Level-3-Events-key/
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var Keys = {
-    Unidentified: "Unidentified",
-    ArrowDown: "ArrowDown",
-    ArrowLeft: "ArrowLeft",
-    ArrowRight: "ArrowRight",
-    ArrowUp: "ArrowUp",
-    Home: "Home",
-    End: "End",
-    PageDown: "PageDown",
-    PageUp: "PageUp",
-    Escape: "Escape",
-    Enter: "Enter",
-    Space: " "
-};
-
-// CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
-function identifyKeyFromEvent(event) {
-    var key = event.key;
-    var keyIdentifier = event.keyIdentifier;
-    var location = event.location;
-    if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
-        if (event.metaKey) {
-            // Mac Cmd+Down -> End
-            return Keys.End;
-        }
-        return Keys.ArrowDown;
-    } else if (key === Keys.ArrowLeft || key === "Left" || keyIdentifier === "Left") {
-        return Keys.ArrowLeft;
-    } else if (key === Keys.ArrowRight || key === "Right" || keyIdentifier === "Right") {
-        return Keys.ArrowRight;
-    } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
-        if (event.metaKey) {
-            // Mac Cmd+Up -> Home
-            return Keys.Home;
-        }
-        return Keys.ArrowUp;
-    } else if (key === Keys.Escape || key === "Esc" || keyIdentifier === "U+001B") {
-        return Keys.Escape;
-    } else if (key === Keys.Enter || keyIdentifier === "Enter") {
-        return Keys.Enter;
-    } else if (key === Keys.Space || keyIdentifier === "U+0020") {
-        return Keys.Space;
-    } else if (key === "0" || keyIdentifier === "U+0030") {
-        return "0";
-    } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B" || keyIdentifier === "U+00BB" || keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
-            return "+";
-        } else if (key === "-" || key === "Subtract" || keyIdentifier === "U+002D" || keyIdentifier === "U+00BD" || keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD /* workaround for Chrome for Windows */) {
-            return "-";
-        } else {
-        return key || keyIdentifier || Keys.Unidentified;
-    }
-}
-
-exports["default"] = {
-    Keys: Keys,
-    identifyKeyFromEvent: identifyKeyFromEvent
-};
-module.exports = exports["default"];
-
-},{}],16:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var util = {
-    readonlyObservable: function readonlyObservable(value) {
-        var obs = _knockout2["default"].observable(value);
-        return {
-            getter: _knockout2["default"].pureComputed(function () {
-                return obs();
-            }),
-            value: obs
-        };
-    }
-};
-
-exports["default"] = util;
-module.exports = exports["default"];
-
-},{"knockout":1}],17:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports["default"] = {
-    escapeUnicodeChar: function escapeUnicodeChar(ch) {
-        return "\\u" + (0x10000 | ch.charCodeAt(0)).toString(16).substring(1);
-    },
-    escapeUnicodeString: function escapeUnicodeString(str) {
-        return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
-    },
-    percentEncodeAmpersandAndUnencodedPercent: function percentEncodeAmpersandAndUnencodedPercent(str) {
-        return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
-    },
-    percentEncodeAmpersandAndPercent: function percentEncodeAmpersandAndPercent(str) {
-        return str.replace(/%/g, "%25").replace(/&/g, "%26");
-    },
-    percentDecodeAmpersandAndPercent: function percentDecodeAmpersandAndPercent(str) {
-        return str.replace(/%26/g, "&").replace(/%25/g, "%");
-    },
-    percentEncodeForDataURI: function percentEncodeForDataURI(str) {
-        return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
-    }
-};
-module.exports = exports["default"];
-
-},{}],18:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var MessageDialog = (function () {
-    function MessageDialog(queue) {
-        _classCallCheck(this, MessageDialog);
-
-        this.list = queue;
-        this.visible = _knockout2["default"].pureComputed(function () {
-            return queue().length > 0;
-        });
-    }
-
-    _createClass(MessageDialog, [{
-        key: "getDisplayMessage",
-        value: function getDisplayMessage(errorInfo) {
-            var e = errorInfo.error;
-            var msg = e && (e.toString() || e.frameTrace || e.stack);
-            if (msg) {
-                msg = msg.split("\n", 1)[0];
-            }
-            if (!msg) {
-                msg = errorInfo.messages.join("\n");
-            }
-            return msg;
-        }
-    }]);
-
-    return MessageDialog;
-})();
-
-exports["default"] = MessageDialog;
-module.exports = exports["default"];
-
-},{"knockout":1}],19:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2018 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _modelsViewerOptions = require("../models/viewer-options");
-
-var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
-
-var _utilsKeyUtil = require("../utils/key-util");
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var Navigation = (function () {
-    function Navigation(viewerOptions, viewer, settingsPanel, navigationOptions) {
-        var _this = this;
-
-        _classCallCheck(this, Navigation);
-
-        this.viewerOptions_ = viewerOptions;
-        this.viewer_ = viewer;
-        this.settingsPanel_ = settingsPanel;
-        this.justClicked = false; // double click check
-
-        this.isDisabled = _knockout2["default"].pureComputed(function () {
-            return _this.settingsPanel_.opened() && !_this.settingsPanel_.pinned() || !_this.viewer_.state.navigatable();
-        });
-
-        var navigationDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disablePageNavigation || _this.isDisabled();
-        });
-
-        navigationDisabled.subscribe(function (disabled) {
-            var pageNumberElem = document.getElementById("vivliostyle-page-number");
-            if (pageNumberElem) {
-                pageNumberElem.disabled = disabled;
-            }
-        });
-
-        this.isPageNumberDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationDisabled();
-        });
-
-        this.isNavigateToPreviousDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.status === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            return _this.viewer_.firstPage();
-        });
-
-        this.isNavigateToNextDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.status === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-                return false;
-            }
-            return _this.viewer_.lastPage();
-        });
-
-        this.isNavigateToLeftDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.pageProgression === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
-                return _this.isNavigateToPreviousDisabled();
-            } else {
-                return _this.isNavigateToNextDisabled();
-            }
-        });
-
-        this.isNavigateToRightDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.pageProgression === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewer_.state.pageProgression() === _modelsVivliostyle2["default"].constants.PageProgression.LTR) {
-                return _this.isNavigateToNextDisabled();
-            } else {
-                return _this.isNavigateToPreviousDisabled();
-            }
-        });
-
-        this.isNavigateToFirstDisabled = this.isNavigateToPreviousDisabled;
-
-        this.isNavigateToLastDisabled = _knockout2["default"].pureComputed(function () {
-            if (navigationDisabled()) {
-                return true;
-            }
-            if (_this.viewer_.state.status === undefined) {
-                return false; // needed for test/spec/viewmodels/navigation-spec.js
-            }
-            if (_this.viewerOptions_.renderAllPages() && _this.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-                return true;
-            }
-            return _this.viewer_.lastPage();
-        });
-
-        this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
-
-        var zoomDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableZoom || _this.isDisabled();
-        });
-
-        this.isZoomOutDisabled = zoomDisabled;
-        this.isZoomInDisabled = zoomDisabled;
-        this.isZoomToActualSizeDisabled = zoomDisabled;
-        this.isToggleFitToScreenDisabled = zoomDisabled;
-        this.hideZoom = !!navigationOptions.disableZoom;
-
-        this.fitToScreen = _knockout2["default"].pureComputed(function () {
-            return viewerOptions.zoom().fitToScreen;
-        });
-
-        var fontSizeChangeDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableFontSizeChange || _this.isDisabled();
-        });
-
-        // Font size limit (max:72, min:5) is hard coded in vivliostyle.js/src/adapt/viewer.js.
-        this.isIncreaseFontSizeDisabled = _knockout2["default"].pureComputed(function () {
-            if (fontSizeChangeDisabled()) {
-                return true;
-            }
-            if (_this.viewerOptions_.fontSize() >= 72) {
-                return true;
-            }
-            return false;
-        });
-        this.isDecreaseFontSizeDisabled = _knockout2["default"].pureComputed(function () {
-            if (fontSizeChangeDisabled()) {
-                return true;
-            }
-            if (_this.viewerOptions_.fontSize() <= 5) {
-                return true;
-            }
-            return false;
-        });
-        this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
-        this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
-
-        this.isTOCToggleDisabled = _knockout2["default"].pureComputed(function () {
-            return navigationOptions.disableTOCNavigation || _this.isDisabled() || _this.viewer_.tocVisible() == null;
-        });
-        this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
-
-        this.pageNumber = _knockout2["default"].pureComputed({
-            read: function read() {
-                return this.viewer_.epageToPageNumber(this.viewer_.epage());
-            },
-            write: function write(pageNumberText) {
-                var _this2 = this;
-
-                var epageOld = this.viewer_.epage();
-                var pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
-
-                // Accept non-integer, convert fullwidth to ascii
-                var pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, function (s) {
-                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-                })) || 0;
-                if (/^[-+]/.test(pageNumberText)) {
-                    // "+number" and "-number" to relative move.
-                    pageNumber = pageNumberOld + pageNumber;
-                }
-                if (pageNumber < 1) {
-                    pageNumber = 1;
-                } else {
-                    var epageCount = this.viewer_.epageCount();
-                    if (this.viewerOptions_.renderAllPages()) {
-                        if (pageNumber > epageCount) {
-                            pageNumber = epageCount;
-                        }
-                    } else if (pageNumber > epageCount + 1) {
-                        // Accept "epageCount + 1" because the last epage may equal epageCount.
-                        pageNumber = epageCount + 1;
-                    }
-                }
-                var epageNav = this.viewer_.epageFromPageNumber(pageNumber);
-                var pageNumberElem = document.getElementById("vivliostyle-page-number");
-                pageNumberElem.value = pageNumber;
-                this.viewer_.navigateToEPage(epageNav);
-
-                setTimeout(function () {
-                    if (_this2.viewer_.state.status() != _modelsVivliostyle2["default"].constants.ReadyState.LOADING && _this2.viewer_.epage() === epageOld) {
-                        pageNumberElem.value = pageNumberOld;
-                    }
-                    document.getElementById("vivliostyle-viewer-viewport").focus();
-                }, 10);
-            },
-            owner: this
-        });
-
-        this.totalPages = _knockout2["default"].pureComputed(function () {
-            var totalPages = _this.viewer_.epageCount();
-            if (!totalPages) {
-                return totalPages;
-            }
-            var pageNumber = _this.pageNumber();
-            if (_this.viewer_.lastPage()) {
-                totalPages = pageNumber;
-            } else if (pageNumber >= totalPages) {
-                totalPages++;
-            }
-            return totalPages;
-        });
-
-        ["navigateToPrevious", "navigateToNext", "navigateToLeft", "navigateToRight", "navigateToFirst", "navigateToLast", "zoomIn", "zoomOut", "zoomToActualSize", "toggleFitToScreen", "increaseFontSize", "decreaseFontSize", "defaultFontSize", "onclickViewport", "toggleTOC"].forEach(function (methodName) {
-            _this[methodName] = _this[methodName].bind(_this);
-        });
-    }
-
-    _createClass(Navigation, [{
-        key: "navigateToPrevious",
-        value: function navigateToPrevious() {
-            if (!this.isNavigateToPreviousDisabled()) {
-                this.viewer_.navigateToPrevious();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToNext",
-        value: function navigateToNext() {
-            if (!this.isNavigateToNextDisabled()) {
-                this.viewer_.navigateToNext();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToLeft",
-        value: function navigateToLeft() {
-            if (!this.isNavigateToLeftDisabled()) {
-                this.viewer_.navigateToLeft();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToRight",
-        value: function navigateToRight() {
-            if (!this.isNavigateToRightDisabled()) {
-                this.viewer_.navigateToRight();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToFirst",
-        value: function navigateToFirst() {
-            if (!this.isNavigateToFirstDisabled()) {
-                this.viewer_.navigateToFirst();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateToLast",
-        value: function navigateToLast() {
-            if (!this.isNavigateToLastDisabled()) {
-                this.viewer_.navigateToLast();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "zoomIn",
-        value: function zoomIn() {
-            if (!this.isZoomInDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "zoomOut",
-        value: function zoomOut() {
-            if (!this.isZoomOutDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "zoomToActualSize",
-        value: function zoomToActualSize() {
-            if (!this.isZoomToActualSizeDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.zoomToActualSize());
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "toggleFitToScreen",
-        value: function toggleFitToScreen() {
-            if (!this.isToggleFitToScreenDisabled()) {
-                var zoom = this.viewerOptions_.zoom();
-                this.viewerOptions_.zoom(zoom.toggleFitToScreen());
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "increaseFontSize",
-        value: function increaseFontSize() {
-            if (!this.isIncreaseFontSizeDisabled()) {
-                var fontSize = this.viewerOptions_.fontSize();
-                // fontSize *= 1.25;
-                if (fontSize < 10) {
-                    fontSize = Math.floor(fontSize) + 1;
-                } else if (fontSize < 20) {
-                    fontSize = (Math.floor(fontSize / 2) + 1) * 2;
-                } else if (fontSize < 40) {
-                    fontSize = (Math.floor(fontSize / 4) + 1) * 4;
-                } else if (fontSize < 72) {
-                    fontSize = (Math.floor(fontSize / 8) + 1) * 8;
-                } else {
-                    fontSize = 72;
-                }
-                this.viewerOptions_.fontSize(fontSize);
-                this.updateFontSizeSettings();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "decreaseFontSize",
-        value: function decreaseFontSize() {
-            if (!this.isDecreaseFontSizeDisabled()) {
-                var fontSize = this.viewerOptions_.fontSize();
-                // fontSize *= 0.8;
-                if (fontSize > 40) {
-                    fontSize = (Math.ceil(fontSize / 8) - 1) * 8;
-                } else if (fontSize > 20) {
-                    fontSize = (Math.ceil(fontSize / 4) - 1) * 4;
-                } else if (fontSize > 10) {
-                    fontSize = (Math.ceil(fontSize / 2) - 1) * 2;
-                } else if (fontSize > 5) {
-                    fontSize = Math.ceil(fontSize) - 1;
-                } else {
-                    fontSize = 5;
-                }
-                this.viewerOptions_.fontSize(fontSize);
-                this.updateFontSizeSettings();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "defaultFontSize",
-        value: function defaultFontSize() {
-            if (!this.isDefaultFontSizeDisabled()) {
-                var fontSize = _modelsViewerOptions2["default"].getDefaultValues().fontSize;
-                this.viewerOptions_.fontSize(fontSize);
-                this.updateFontSizeSettings();
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "updateFontSizeSettings",
-        value: function updateFontSizeSettings() {
-            // Update setting panel "Font Size".
-            this.settingsPanel_.state.viewerOptions.fontSize(this.viewerOptions_.fontSize());
-
-            if (this.viewer_.documentOptions_.pageStyle.baseFontSizeSpecified()) {
-                // Update userStylesheet when base font-size is specified
-                this.viewer_.documentOptions_.updateUserStyleSheetFromCSSText();
-                this.viewer_.loadDocument(this.viewer_.documentOptions_, this.viewerOptions_);
-            }
-        }
-    }, {
-        key: "onclickViewport",
-        value: function onclickViewport() {
-            if (this.settingsPanel_.justClicked) {
-                return true;
-            }
-            if (this.viewer_.tocVisible() && !this.viewer_.tocPinned()) {
-                var tocBox = document.querySelector("[data-vivliostyle-toc-box]");
-                if (tocBox && !tocBox.contains(document.activeElement)) {
-                    this.toggleTOC();
-                }
-            }
-            if (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) {
-                this.settingsPanel_.close();
-            }
-            return true;
-        }
-    }, {
-        key: "toggleTOC",
-        value: function toggleTOC() {
-            var _this3 = this;
-
-            if (!this.isTOCToggleDisabled()) {
-                var _ret = (function () {
-                    var intervalID = 0;
-                    var tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
-
-                    if (!_this3.viewer_.tocVisible()) {
-                        if (_this3.justClicked) {
-                            _this3.viewer_.showTOC(true, false); // autohide=false
-                            _this3.justClicked = false;
-                        } else {
-                            _this3.viewer_.showTOC(true, true); // autohide=true
-                            _this3.justClicked = true;
-                        }
-                        // Here use timer for two purposes:
-                        // - Check double click to make TOC box pinned.
-                        // - Move focus to TOC box when TOC box becomes visible.
-                        intervalID = setInterval(function () {
-                            var tocBox = document.querySelector("[data-vivliostyle-toc-box]");
-                            if (tocBox && tocBox.style.visibility === "visible") {
-                                tocBox.tabIndex = 0;
-                                tocBox.focus();
-
-                                clearInterval(intervalID);
-                                intervalID = 0;
-                            }
-                            _this3.justClicked = false;
-                        }, 300);
-                    } else if (_this3.justClicked) {
-                        // Double click to keep TOC box visible during TOC navigation
-                        _this3.viewer_.showTOC(true, false); // autohide=false
-                        _this3.justClicked = false;
-                    } else {
-                        if (intervalID) {
-                            clearInterval(intervalID);
-                            intervalID = 0;
-                        }
-                        _this3.viewer_.showTOC(false);
-
-                        _this3.justClicked = true;
-                        setTimeout(function () {
-                            if (_this3.justClicked) {
-                                document.getElementById("vivliostyle-viewer-viewport").focus();
-                                _this3.justClicked = false;
-                            }
-                        }, 300);
-                    }
-                    return {
-                        v: true
-                    };
-                })();
-
-                if (typeof _ret === "object") return _ret.v;
-            } else {
-                return false;
-            }
-        }
-    }, {
-        key: "navigateTOC",
-        value: function navigateTOC(key) {
-            var selecter = "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," + "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
-            var nodes = Array.from(document.querySelectorAll(selecter));
-            var index = nodes.indexOf(document.activeElement);
-
-            var isButton = function isButton(index) {
-                return nodes[index] && nodes[index].getAttribute("role") === "button";
-            };
-            var isExpanded = function isExpanded(index) {
-                return nodes[index] && nodes[index].getAttribute("aria-expanded") === "true";
-            };
-
-            switch (key) {
-                case _utilsKeyUtil.Keys.ArrowLeft:
-                    if (index == -1) {
-                        index = nodes.length - 1;
-                        break;
-                    }
-                    if (!isButton(index) && isButton(index - 1)) {
-                        index--;
-                    }
-                    if (isButton(index) && isExpanded(index)) {
-                        nodes[index].click();
-                    } else {
-                        for (var i = index - 1; i >= 0; i--) {
-                            if (isButton(i) && nodes[i].parentElement.contains(nodes[index])) {
-                                index = i;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                case _utilsKeyUtil.Keys.ArrowRight:
-                    if (index == -1) {
-                        index = 0;
-                        break;
-                    }
-                    if (!isButton(index) && isButton(index - 1)) {
-                        index--;
-                    }
-                    if (isButton(index)) {
-                        if (isExpanded(index)) {
-                            index += 2;
-                        } else {
-                            nodes[index].click();
-                        }
-                    }
-                    break;
-                case _utilsKeyUtil.Keys.ArrowDown:
-                    index++;
-                    break;
-                case _utilsKeyUtil.Keys.ArrowUp:
-                    if (index == -1) {
-                        index = nodes.length - 1;
-                        break;
-                    }
-                    if (index > 0) {
-                        if (isButton(--index)) {
-                            index--;
-                        }
-                    }
-                    break;
-                case _utilsKeyUtil.Keys.Home:
-                    index = 0;
-                    break;
-                case _utilsKeyUtil.Keys.End:
-                    index = nodes.length - 1;
-                    break;
-                case _utilsKeyUtil.Keys.Space:
-                    if (!isButton(index) && isButton(index - 1)) {
-                        index--;
-                    }
-                    if (isButton(index)) {
-                        nodes[index].click();
-                    }
-                    break;
-            }
-
-            if (isButton(index)) {
-                index++;
-            }
-
-            if (nodes[index]) {
-                nodes[index].focus();
-            }
-
-            return true;
-        }
-    }, {
-        key: "handleKey",
-        value: function handleKey(key) {
-            var isSettingsActive = this.settingsPanel_.opened() && this.settingsPanel_.settingsToggle.contains(document.activeElement);
-
-            if (isSettingsActive) {
-                return true;
-            }
-
-            var pageNumberElem = document.getElementById("vivliostyle-page-number");
-            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-            var horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
-            var verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
-            var isPageNumberInput = pageNumberElem === document.activeElement;
-            var isTOCActive = this.viewer_.tocVisible() && !isPageNumberInput && viewportElement != document.activeElement;
-
-            switch (key) {
-                case "+":
-                    return isPageNumberInput || !this.increaseFontSize();
-                case "-":
-                    return isPageNumberInput || !this.decreaseFontSize();
-                case "0":
-                    return isPageNumberInput || !this.defaultFontSize();
-                case "1":
-                    return isPageNumberInput || !this.zoomToActualSize();
-                case _utilsKeyUtil.Keys.ArrowLeft:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
-                case _utilsKeyUtil.Keys.ArrowRight:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
-                case _utilsKeyUtil.Keys.ArrowDown:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    viewportElement.focus();
-                    return verticalScrollable || !this.navigateToNext();
-                case _utilsKeyUtil.Keys.ArrowUp:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    viewportElement.focus();
-                    return verticalScrollable || !this.navigateToPrevious();
-                case _utilsKeyUtil.Keys.PageDown:
-                    if (isTOCActive) return true;
-                    viewportElement.focus();
-                    return !this.navigateToNext();
-                case _utilsKeyUtil.Keys.PageUp:
-                    if (isTOCActive) return true;
-                    viewportElement.focus();
-                    return !this.navigateToPrevious();
-                case _utilsKeyUtil.Keys.Home:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    viewportElement.focus();
-                    return !this.navigateToFirst();
-                case _utilsKeyUtil.Keys.End:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    viewportElement.focus();
-                    return !this.navigateToLast();
-                case "o":
-                case "O":
-                    viewportElement.focus();
-                    return !this.zoomOut();
-                case "i":
-                case "I":
-                    viewportElement.focus();
-                    return !this.zoomIn();
-                case "f":
-                case "F":
-                    viewportElement.focus();
-                    return !this.toggleFitToScreen();
-                case "g":
-                case "G":
-                    pageNumberElem.focus();
-                    return false;
-                case "t":
-                case "T":
-                    viewportElement.focus();
-                    return !this.toggleTOC();
-                case _utilsKeyUtil.Keys.Escape:
-                    if (this.viewer_.tocVisible()) {
-                        return !this.toggleTOC();
-                    }
-                    viewportElement.focus();
-                    return true;
-                case _utilsKeyUtil.Keys.Space:
-                    if (isTOCActive) return !this.navigateTOC(key);
-                    if (document.activeElement.getAttribute("role") === "button") {
-                        document.activeElement.click();
-                        return false;
-                    }
-                    return true;
-                default:
-                    return true;
-            }
-        }
-    }]);
-
-    return Navigation;
-})();
-
-exports["default"] = Navigation;
-module.exports = exports["default"];
-
-},{"../models/viewer-options":11,"../models/vivliostyle":12,"../utils/key-util":15,"knockout":1}],20:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _modelsViewerOptions = require("../models/viewer-options");
-
-var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
-
-var _modelsPageStyle = require("../models/page-style");
-
-var _modelsPageStyle2 = _interopRequireDefault(_modelsPageStyle);
-
-var _modelsPageViewMode = require("../models/page-view-mode");
-
-var _modelsPageViewMode2 = _interopRequireDefault(_modelsPageViewMode);
-
-var _utilsKeyUtil = require("../utils/key-util");
-
-var SettingsPanel = (function () {
-    function SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
-        var _this = this;
-
-        _classCallCheck(this, SettingsPanel);
-
-        this.viewerOptions_ = viewerOptions;
-        this.documentOptions_ = documentOptions;
-        this.viewer_ = viewer;
-
-        this.isPageStyleChangeDisabled = !!settingsPanelOptions.disablePageStyleChange;
-        this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
-        this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
-        this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
-
-        this.justClicked = false; // double click check
-        this.settingsToggle = document.getElementById("vivliostyle-menu-item_settings-toggle");
-
-        this.opened = _knockout2["default"].observable(false);
-        this.pinned = _knockout2["default"].observable(false);
-
-        this.state = {
-            viewerOptions: new _modelsViewerOptions2["default"](viewerOptions),
-            pageStyle: new _modelsPageStyle2["default"](documentOptions.pageStyle),
-            pageViewMode: _knockout2["default"].pureComputed({
-                read: function read() {
-                    return _this.state.viewerOptions.pageViewMode().toString();
-                },
-                write: function write(value) {
-                    _this.state.viewerOptions.pageViewMode(_modelsPageViewMode2["default"].of(value));
-                }
-            }),
-            renderAllPages: _knockout2["default"].pureComputed({
-                read: function read() {
-                    return _this.state.viewerOptions.renderAllPages();
-                },
-                write: function write(value) {
-                    _this.state.viewerOptions.renderAllPages(value);
-                }
-            })
-        };
-
-        this.state.pageStyle.setViewerFontSizeObservable(this.state.viewerOptions.fontSize);
-
-        this.defaultPageStyle = new _modelsPageStyle2["default"]();
-
-        ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function (methodName) {
-            this[methodName] = this[methodName].bind(this);
-        }, this);
-
-        messageDialog.visible.subscribe(function (visible) {
-            if (visible) this.close();
-        }, this);
-    }
-
-    _createClass(SettingsPanel, [{
-        key: "close",
-        value: function close() {
-            this.opened(false);
-            this.pinned(false);
-            var viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-            if (viewportElement) viewportElement.focus();
-            return true;
-        }
-    }, {
-        key: "toggle",
-        value: function toggle() {
-            var _this2 = this;
-
-            if (!this.opened()) {
-                if (!this.viewer_.tocPinned()) {
-                    this.viewer_.showTOC(false); // Hide TOC box
-                }
-                this.opened(true);
-
-                if (this.justClicked) {
-                    this.justClicked = false;
-                    this.pinned(true);
-                } else {
-                    this.pinned(false);
-                    this.justClicked = true;
-                    this.focusToFirstItem();
-                    setTimeout(function () {
-                        _this2.justClicked = false;
-                    }, 300);
-                }
-            } else if (this.justClicked) {
-                // Double click to keep Settings panel open when Apply is clicked.
-                this.justClicked = false;
-                this.pinned(true);
-            } else {
-                this.close();
-
-                this.justClicked = true;
-                setTimeout(function () {
-                    _this2.justClicked = false;
-                }, 300);
-            }
-        }
-    }, {
-        key: "apply",
-        value: function apply() {
-            if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() && this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)) {
-                this.viewerOptions_.copyFrom(this.state.viewerOptions);
-            } else {
-                this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
-                if (this.documentOptions_.pageStyle.baseFontSizeSpecified()) {
-                    // Update userStylesheet when base font-size is specified
-                    this.documentOptions_.updateUserStyleSheetFromCSSText();
-                }
-                this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
-            }
-            if (this.pinned()) {
-                this.focusToFirstItem();
-            } else {
-                this.close();
-            }
-        }
-    }, {
-        key: "cancel",
-        value: function cancel() {
-            this.state.viewerOptions.copyFrom(this.viewerOptions_);
-            this.state.pageStyle.copyFrom(this.documentOptions_.pageStyle);
-            this.close();
-        }
-    }, {
-        key: "resetUserStyle",
-        value: function resetUserStyle() {
-            this.state.pageStyle.copyFrom(this.defaultPageStyle);
-            this.state.viewerOptions.fontSize(_modelsViewerOptions2["default"].getDefaultValues().fontSize);
-            setTimeout(function () {
-                var elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0];
-                elem.checked = false;
-            }, 200);
-            return true;
-        }
-    }, {
-        key: "focusToFirstItem",
-        value: function focusToFirstItem(opt_outerElem) {
-            var outerElem = opt_outerElem || this.settingsToggle;
-            var inputElem = ["input", "textarea", "summary"].includes(outerElem.localName) ? outerElem : Array.from(outerElem.getElementsByTagName("input")).find(function (e) {
-                return !e.disabled && (e.type != "radio" || e.checked);
-            });
-            if (inputElem) {
-                for (var e = inputElem.parentElement; e && e != this.settingsToggle; e = e.parentElement) {
-                    if (e.localName == "details") {
-                        e.open = true;
-                    }
-                }
-                inputElem.focus();
-            }
-        }
-    }, {
-        key: "handleKey",
-        value: function handleKey(key) {
-            var isSettingsActive = this.opened() && this.settingsToggle.contains(document.activeElement);
-            var isInInput = isSettingsActive && (document.activeElement.type == "text" || document.activeElement.localName == "select");
-            var isInTextArea = isSettingsActive && document.activeElement.localName == "textarea";
-            var isHotKeyEnabled = isSettingsActive && !isInInput && !isInTextArea;
-
-            switch (key) {
-                case _utilsKeyUtil.Keys.Escape:
-                    if (this.opened()) {
-                        this.cancel();
-                        this.close();
-                    }
-                    return true;
-                case "s":
-                case "S":
-                    if (!this.opened() || isHotKeyEnabled || !isSettingsActive) {
-                        this.toggle();
-                        return false;
-                    }
-                    return true;
-                case "p":
-                case "P":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-view-and-rendering").firstElementChild);
-                        return false;
-                    }
-                    return true;
-                case "v":
-                case "V":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-view-mode"));
-                        return false;
-                    }
-                    return true;
-                case "a":
-                case "A":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_render-all-pages")[0]);
-                        return false;
-                    }
-                    return true;
-                case "u":
-                case "U":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_user-style").firstElementChild);
-                        return false;
-                    }
-                    return true;
-                case "z":
-                case "Z":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-size"));
-                        return false;
-                    }
-                    return true;
-                case "m":
-                case "M":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-margin"));
-                        return false;
-                    }
-                    return true;
-                case "b":
-                case "B":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_page-breaks"));
-                        return false;
-                    }
-                    return true;
-                case "i":
-                case "I":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_images"));
-                        return false;
-                    }
-                    return true;
-                case "t":
-                case "T":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementById("vivliostyle-settings_text"));
-                        return false;
-                    }
-                    return true;
-                case "o":
-                case "O":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_override-document-stylesheets")[0]);
-                        return false;
-                    }
-                    return true;
-                case "c":
-                case "C":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_css-details")[0]);
-                        return false;
-                    }
-                    return true;
-                case "r":
-                case "R":
-                    if (isHotKeyEnabled) {
-                        this.focusToFirstItem(document.getElementsByName("vivliostyle-settings_reset-user-style")[0]);
-                        return false;
-                    }
-                    return true;
-                case _utilsKeyUtil.Keys.Enter:
-                    if (isInInput || isHotKeyEnabled && document.activeElement.id !== "vivliostyle-menu-button_apply" && document.activeElement.id !== "vivliostyle-menu-button_reset") {
-                        document.getElementById("vivliostyle-menu-button_apply").focus();
-                        return false;
-                    }
-                    return true;
-                default:
-                    return true;
-            }
-        }
-    }]);
-
-    return SettingsPanel;
-})();
-
-exports["default"] = SettingsPanel;
-module.exports = exports["default"];
-
-},{"../models/page-style":9,"../models/page-view-mode":10,"../models/viewer-options":11,"../utils/key-util":15,"knockout":1}],21:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2019 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var _modelsDocumentOptions = require("../models/document-options");
-
-var _modelsDocumentOptions2 = _interopRequireDefault(_modelsDocumentOptions);
-
-var _modelsViewerOptions = require("../models/viewer-options");
-
-var _modelsViewerOptions2 = _interopRequireDefault(_modelsViewerOptions);
-
-var _modelsMessageQueue = require("../models/message-queue");
-
-var _modelsMessageQueue2 = _interopRequireDefault(_modelsMessageQueue);
-
-var _viewer = require("./viewer");
-
-var _viewer2 = _interopRequireDefault(_viewer);
-
-var _navigation = require("./navigation");
-
-var _navigation2 = _interopRequireDefault(_navigation);
-
-var _settingsPanel = require("./settings-panel");
-
-var _settingsPanel2 = _interopRequireDefault(_settingsPanel);
-
-var _messageDialog = require("./message-dialog");
-
-var _messageDialog2 = _interopRequireDefault(_messageDialog);
-
-var _utilsKeyUtil = require("../utils/key-util");
-
-var _utilsKeyUtil2 = _interopRequireDefault(_utilsKeyUtil);
-
-var _utilsStringUtil = require("../utils/string-util");
-
-var _utilsStringUtil2 = _interopRequireDefault(_utilsStringUtil);
-
-var _storesUrlParameters = require("../stores/url-parameters");
-
-var _storesUrlParameters2 = _interopRequireDefault(_storesUrlParameters);
-
-function ViewerApp() {
-    var _this = this;
-
-    this.documentOptions = new _modelsDocumentOptions2["default"]();
-    this.viewerOptions = new _modelsViewerOptions2["default"]();
-
-    this.documentOptions.pageStyle.setViewerFontSizeObservable(this.viewerOptions.fontSize);
-
-    if (this.viewerOptions.profile()) {
-        _modelsVivliostyle2["default"].profile.profiler.enable();
-    }
-    this.isDebug = _storesUrlParameters2["default"].getParameter("debug")[0] === "true";
-    this.viewerSettings = {
-        userAgentRootURL: _storesUrlParameters2["default"].getBaseURL() + "resources/",
-        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: this.isDebug
-    };
-
-    // Remove redundant or ineffective URL parameters
-    if (_storesUrlParameters2["default"].getParameter("b")[0]) {
-        _storesUrlParameters2["default"].removeParameter("b", true); // only first one is effective
-        _storesUrlParameters2["default"].removeParameter("x"); // x= is ineffective when b= is given
-    }
-    _storesUrlParameters2["default"].removeParameter("f", true); // only first one is effective
-    _storesUrlParameters2["default"].removeParameter("spread", true);
-    _storesUrlParameters2["default"].removeParameter("renderAllPages", true);
-    _storesUrlParameters2["default"].removeParameter("fontSize", true);
-    _storesUrlParameters2["default"].removeParameter("profile", true);
-    _storesUrlParameters2["default"].removeParameter("debug", true);
-
-    this.viewer = new _viewer2["default"](this.viewerSettings, this.viewerOptions);
-
-    this.viewer.inputUrl.subscribe(function (inputUrl) {
-        if (inputUrl != "") {
-            if (!_storesUrlParameters2["default"].hasParameter("b")) {
-                // Push current URL to browser history to enable to go back here when browser Back button is clicked.
-                if (_storesUrlParameters2["default"].history.pushState) _storesUrlParameters2["default"].history.pushState(null, "");
-            }
-            if (inputUrl.startsWith("<")) {
-                // seems start tag, so convert to data url
-                inputUrl = "data:," + _utilsStringUtil2["default"].percentEncodeForDataURI(inputUrl);
-            } else {
-                inputUrl = _utilsStringUtil2["default"].percentEncodeAmpersandAndUnencodedPercent(inputUrl);
-            }
-            _storesUrlParameters2["default"].setParameter("b", inputUrl);
-        } else {
-            _storesUrlParameters2["default"].removeParameter("b");
-        }
-    });
-
-    this.messageDialog = new _messageDialog2["default"](_modelsMessageQueue2["default"]);
-
-    var settingsPanelOptions = {
-        disablePageStyleChange: false,
-        disablePageViewModeChange: false,
-        disableRenderAllPagesChange: false
-    };
-
-    this.settingsPanel = new _settingsPanel2["default"](this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
-
-    var navigationOptions = {
-        disableTOCNavigation: false,
-        disablePageNavigation: false,
-        disableZoom: false,
-        disableFontSizeChange: false
-    };
-
-    this.navigation = new _navigation2["default"](this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
-
-    this.handleKey = function (data, event) {
-        var key = _utilsKeyUtil2["default"].identifyKeyFromEvent(event);
-        if (document.activeElement.id === "vivliostyle-input-url") {
-            if (key === "Enter" && event.keyCode === 13) {
-                _this.documentOptions.bookUrl(_storesUrlParameters2["default"].getParameter("b")[0]);
-                _this.viewer.loadDocument(_this.documentOptions);
-                return false;
-            }
-            return true;
-        }
-        if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
-            return true;
-        }
-        var ret = _this.settingsPanel.handleKey(key);
-        if (ret) {
-            ret = _this.navigation.handleKey(key);
-        }
-        return ret;
-    };
-
-    this.viewer.loadDocument(this.documentOptions);
-
-    window.onhashchange = function () {
-        if (window.location.href != _storesUrlParameters2["default"].storedUrl) {
-            // Reload when address bar change is detected
-            window.location.reload();
-        }
-    };
-}
-
-exports["default"] = ViewerApp;
-module.exports = exports["default"];
-
-},{"../models/document-options":7,"../models/message-queue":8,"../models/viewer-options":11,"../models/vivliostyle":12,"../stores/url-parameters":14,"../utils/key-util":15,"../utils/string-util":17,"./message-dialog":18,"./navigation":19,"./settings-panel":20,"./viewer":22}],22:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- * Copyright 2018 Vivliostyle Foundation
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _utilsObservableUtil = require("../utils/observable-util");
-
-var _utilsObservableUtil2 = _interopRequireDefault(_utilsObservableUtil);
-
-var _loggingLogger = require("../logging/logger");
-
-var _loggingLogger2 = _interopRequireDefault(_loggingLogger);
-
-var _modelsVivliostyle = require("../models/vivliostyle");
-
-var _modelsVivliostyle2 = _interopRequireDefault(_modelsVivliostyle);
-
-var Viewer = (function () {
-    function Viewer(viewerSettings, viewerOptions) {
-        _classCallCheck(this, Viewer);
-
-        this.viewerOptions_ = viewerOptions;
-        this.documentOptions_ = null;
-        this.viewer_ = new _modelsVivliostyle2["default"].viewer.Viewer(viewerSettings, viewerOptions.toObject());
-        var state_ = this.state_ = {
-            status: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.ReadyState.LOADING),
-            pageProgression: _utilsObservableUtil2["default"].readonlyObservable(_modelsVivliostyle2["default"].constants.PageProgression.LTR)
-        };
-        this.state = {
-            status: state_.status.getter.extend({
-                rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
-                notify: 'always'
-            }),
-            navigatable: _knockout2["default"].pureComputed(function () {
-                return state_.status.value() && state_.status.value() !== _modelsVivliostyle2["default"].constants.ReadyState.LOADING;
-            }),
-            pageProgression: state_.pageProgression.getter
-        };
-
-        this.epage = _knockout2["default"].observable();
-        this.epageCount = _knockout2["default"].observable();
-        this.firstPage = _knockout2["default"].observable();
-        this.lastPage = _knockout2["default"].observable();
-        this.tocVisible = _knockout2["default"].observable();
-        this.tocPinned = _knockout2["default"].observable();
-
-        this.inputUrl = _knockout2["default"].observable("");
-
-        this.setupViewerEventHandler();
-        this.setupViewerOptionSubscriptions();
-    }
-
-    _createClass(Viewer, [{
-        key: "setupViewerEventHandler",
-        value: function setupViewerEventHandler() {
-            var _this = this;
-
-            var logger = _loggingLogger2["default"].getLogger();
-            var intervalID = 0;
-            this.viewer_.addListener("debug", function (payload) {
-                logger.debug(payload.content);
-            });
-            this.viewer_.addListener("info", function (payload) {
-                logger.info(payload.content);
-            });
-            this.viewer_.addListener("warn", function (payload) {
-                logger.warn(payload.content);
-            });
-            this.viewer_.addListener("error", function (payload) {
-                logger.error(payload.content);
-            });
-            this.viewer_.addListener("readystatechange", function () {
-                var readyState = _this.viewer_.readyState;
-                if (readyState === _modelsVivliostyle2["default"].constants.ReadyState.INTERACTIVE || readyState === _modelsVivliostyle2["default"].constants.ReadyState.COMPLETE) {
-                    _this.state_.pageProgression.value(_this.viewer_.getCurrentPageProgression());
-                }
-                _this.state_.status.value(readyState);
-            });
-            this.viewer_.addListener("loaded", function () {
-                if (_this.viewerOptions_.profile()) {
-                    _modelsVivliostyle2["default"].profile.profiler.printTimings();
-                }
-            });
-            this.viewer_.addListener("nav", function (payload) {
-                var cfi = payload.cfi;
-                var first = payload.first;
-                var last = payload.last;
-                var epage = payload.epage;
-                var epageCount = payload.epageCount;
-                var metadata = payload.metadata;
-                var docTitle = payload.docTitle;
-
-                if (cfi) {
-                    _this.documentOptions_.fragment(cfi);
-                }
-                if (first !== undefined) {
-                    _this.firstPage(first);
-                }
-                if (last !== undefined) {
-                    _this.lastPage(last);
-                }
-                if (epage !== undefined) {
-                    _this.epage(epage);
-                }
-                if (epageCount !== undefined) {
-                    _this.epageCount(epageCount);
-                }
-                if (metadata || docTitle) {
-                    var pubTitles = metadata && metadata["http://purl.org/dc/terms/title"];
-                    var pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
-                    if (!pubTitle) {
-                        document.title = docTitle ? docTitle : "Vivliostyle Viewer";
-                    } else if (!docTitle || docTitle === pubTitle || _this.firstPage() || /\.xhtml$/.test(docTitle)) {
-                        // ignore ugly titles copied from *.xhtml file name
-                        document.title = pubTitle;
-                    } else {
-                        document.title = docTitle + " | " + pubTitle;
-                    }
-                }
-
-                var tocVisibleOld = _this.tocVisible();
-                var tocVisibleNew = _this.viewer_.isTOCVisible();
-                if (tocVisibleOld && !tocVisibleNew) {
-                    // When resize, TOC box will be regenerated and hidden temporarily.
-                    // So keep TOC toggle button status on.
-                } else {
-                        _this.tocVisible(tocVisibleNew);
-                    }
-            });
-            this.viewer_.addListener("hyperlink", function (payload) {
-                if (payload.internal) {
-                    _this.navigateToInternalUrl(payload.href);
-
-                    // When navigate from TOC, TOC box may or may not become hidden by autohide.
-                    // Here set tocVisible false and it may become true again in "nav" event.
-                    if (_this.tocVisible()) {
-                        _this.tocVisible(false);
-                    }
-
-                    document.getElementById("vivliostyle-viewer-viewport").focus();
-                } else {
-                    window.location.href = payload.href;
-                }
-            });
-        }
-    }, {
-        key: "setupViewerOptionSubscriptions",
-        value: function setupViewerOptionSubscriptions() {
-            _knockout2["default"].computed(function () {
-                var viewerOptions = this.viewerOptions_.toObject();
-                this.viewer_.setOptions(viewerOptions);
-            }, this).extend({ rateLimit: 0 });
-        }
-    }, {
-        key: "loadDocument",
-        value: function loadDocument(documentOptions, viewerOptions) {
-            this.state_.status.value(_modelsVivliostyle2["default"].constants.ReadyState.LOADING);
-            if (viewerOptions) {
-                this.viewerOptions_.copyFrom(viewerOptions);
-            }
-            this.documentOptions_ = documentOptions;
-
-            if (documentOptions.xUrl()) {
-                this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
-            } else if (documentOptions.bookUrl()) {
-                if (this.viewer_.loadPublication) // new name
-                    this.viewer_.loadPublication(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());else // old name
-                    this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
-            } else {
-                // No document specified, show welcome page
-                this.state_.status.value("");
-            }
-        }
-    }, {
-        key: "navigateToPrevious",
-        value: function navigateToPrevious() {
-            this.viewer_.navigateToPage("previous");
-        }
-    }, {
-        key: "navigateToNext",
-        value: function navigateToNext() {
-            this.viewer_.navigateToPage("next");
-        }
-    }, {
-        key: "navigateToLeft",
-        value: function navigateToLeft() {
-            this.viewer_.navigateToPage("left");
-        }
-    }, {
-        key: "navigateToRight",
-        value: function navigateToRight() {
-            this.viewer_.navigateToPage("right");
-        }
-    }, {
-        key: "navigateToFirst",
-        value: function navigateToFirst() {
-            this.viewer_.navigateToPage("first");
-        }
-    }, {
-        key: "navigateToLast",
-        value: function navigateToLast() {
-            this.viewer_.navigateToPage("last");
-        }
-    }, {
-        key: "navigateToEPage",
-        value: function navigateToEPage(epage) {
-            this.viewer_.navigateToPage("epage", epage);
-        }
-    }, {
-        key: "navigateToInternalUrl",
-        value: function navigateToInternalUrl(href) {
-            this.viewer_.navigateToInternalUrl(href);
-        }
-    }, {
-        key: "queryZoomFactor",
-        value: function queryZoomFactor(type) {
-            return this.viewer_.queryZoomFactor(type);
-        }
-    }, {
-        key: "epageToPageNumber",
-        value: function epageToPageNumber(epage) {
-            if (!epage && epage != 0) {
-                return undefined;
-            }
-            var pageNumber = Math.round(epage + 1);
-            return pageNumber;
-        }
-    }, {
-        key: "epageFromPageNumber",
-        value: function epageFromPageNumber(pageNumber) {
-            if (!pageNumber && pageNumber != 0) {
-                return undefined;
-            }
-            var epage = pageNumber - 1;
-            return epage;
-        }
-    }, {
-        key: "showTOC",
-        value: function showTOC(opt_show, opt_autohide) {
-            if (this.viewer_.isTOCVisible() == null) {
-                // TOC is unavailable
-                return;
-            }
-            var show = opt_show == null ? !this.tocVisible() : opt_show;
-            this.tocVisible(show);
-            this.tocPinned(show ? !opt_autohide : false);
-            this.viewer_.showTOC(show, opt_autohide);
-        }
-    }]);
-
-    return Viewer;
-})();
-
-exports["default"] = Viewer;
-module.exports = exports["default"];
-
-},{"../logging/logger":5,"../models/vivliostyle":12,"../utils/observable-util":16,"knockout":1}],23:[function(require,module,exports){
-/*
- * Copyright 2015 Trim-marks Inc.
- *
- * This file is part of Vivliostyle UI.
- *
- * Vivliostyle UI is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle UI is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-var _knockout = require("knockout");
-
-var _knockout2 = _interopRequireDefault(_knockout);
-
-var _bindingsMenuButtonJs = require("./bindings/menuButton.js");
-
-var _bindingsMenuButtonJs2 = _interopRequireDefault(_bindingsMenuButtonJs);
-
-var _bindingsSwipePagesJs = require("./bindings/swipePages.js");
-
-var _bindingsSwipePagesJs2 = _interopRequireDefault(_bindingsSwipePagesJs);
-
-var _viewmodelsViewerApp = require("./viewmodels/viewer-app");
-
-var _viewmodelsViewerApp2 = _interopRequireDefault(_viewmodelsViewerApp);
-
-exports["default"] = {
-    start: function start() {
-        function startViewer() {
-            _knockout2["default"].applyBindings(new _viewmodelsViewerApp2["default"]());
-        }
-
-        if (window["__loaded"]) startViewer();else window.onload = startViewer;
-    }
-};
-module.exports = exports["default"];
-
-},{"./bindings/menuButton.js":3,"./bindings/swipePages.js":4,"./viewmodels/viewer-app":21,"knockout":1}]},{},[6]);
+},{}]},{},[5]);
