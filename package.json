@@ -3,9 +3,10 @@
   "version": "2018.12.100-pre",
   "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
   "scripts": {
-    "lint": "eslint src test",
+    "lint": "eslint --ext .ts src",
     "build": "node tools/build.js",
-    "build-ts": "webpack",
+    "build-ts-dev": "NODE_ENV=development webpack",
+    "build-ts-prod": "NODE_ENV=production webpack",
     "typecheck": "node tools/typecheck.js",
     "test": "karma start test/conf/karma-sauce.conf.js",
     "test:local": "karma start test/conf/karma-local.conf.js"
@@ -30,8 +31,11 @@
   "main": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.8.0",
+    "@typescript-eslint/parser": "^1.8.0",
     "circular-dependency-plugin": "^5.0.2",
-    "eslint": "^5.8.0",
+    "eslint": "^5.16.0",
+    "eslint-plugin-import": "^2.17.2",
     "fast-diff": "1.1.2",
     "google-closure-compiler": "^20160911.0.0",
     "jasmine-core": "^3.3.0",
@@ -44,7 +48,6 @@
     "mkdirp": "^0.5.1",
     "mustache": "^2.2.1",
     "ts-loader": "^4.5.0",
-    "tslint": "^5.12.1",
     "typescript": "^3.0.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"

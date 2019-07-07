@@ -32,8 +32,6 @@ import * as expr from './expr';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
-declare var DEBUG: boolean;
-
 export class SlipRange {
   endStuckFixed: number;
   endFixed: number;

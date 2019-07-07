@@ -179,7 +179,7 @@ export class TimerImpl implements Timer {
   setTimeout(fn: () => void, delay: number) {
     // HACK: casting to unknown type to prevent TypeScript error
     // [TS2352] Conversion of type 'Timer' to type 'number' may be a mistake because neither type sufficiently overlaps with the other.
-    const timer: unknown = this.setTimeout(fn, delay);
+    const timer: unknown = setTimeout(fn, delay);
     return timer as number;
   }
 

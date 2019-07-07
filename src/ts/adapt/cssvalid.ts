@@ -350,11 +350,10 @@ export const ALLOW_ZERO = 512;
 export const ALLOW_ZERO_PERCENT = 1024;
 
 export const ALLOW_SLASH = 2048;
-type ValueMap = {
+
+export type ValueMap = {
   [key: string]: css.Val
 };
-
-export {ValueMap};
 
 /**
  * Abstract class to validate simple CSS property value (not a shorthand)

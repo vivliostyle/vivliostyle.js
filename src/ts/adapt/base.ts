@@ -19,13 +19,9 @@
  */
 import * as logging from '../vivliostyle/logging';
 
-declare var DEBUG: boolean; 
-
 export let emptyObj = {};
 
-type JSON = any;
-
-export {JSON};
+export type JSON = any;
 
 export const jsonToString = (json: JSON): string => JSON.stringify(json);
 
@@ -614,7 +610,8 @@ export const mapSize = (obj: Object): number => {
   }
   return n;
 };
-type Event = {
+
+export type Event = {
   type: string,
   target?,
   currentTarget?,
@@ -624,10 +621,7 @@ type Event = {
   href?
 };
 
-export {Event};
-type EventListener = (p1: Event) => void;
-
-export {EventListener};
+export type EventListener = (p1: Event) => void;
 
 /**
  * Extemely simple-minded EventTarget implementation. Consider using
@@ -674,9 +668,7 @@ export class SimpleEventTarget {
     }
   }
 }
-type EventTarget = SimpleEventTarget;
-
-export {EventTarget};
+export type EventTarget = SimpleEventTarget;
 
 export let hasLShapeFloatBug: boolean|null = null;
 

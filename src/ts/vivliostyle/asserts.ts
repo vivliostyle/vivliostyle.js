@@ -17,8 +17,6 @@
  * @fileoverview Assertion utilities.
  */
 
-declare var DEBUG: boolean; 
-
 export const assert = (cond: any): void => {
   if (DEBUG) {
     if (!cond) {

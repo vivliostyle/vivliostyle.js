@@ -33,8 +33,6 @@ import {ExprContentListener, NodeContext} from './vtree';
 
 export interface ElementStyle extends csscasc.ElementStyle {}
 
-declare var DEBUG: boolean;
-
 export const inheritedProps = {
   'azimuth': true,
   'border-collapse': true,
@@ -540,11 +538,10 @@ export const convertFontSizeToPx = (numeric: css.Numeric,
     return new css.Numeric(num * context.queryUnitSize(unit, false), 'px');
   }
 };
-type ActionTable = {
+
+export type ActionTable = {
   [key: string]: CascadeAction
 };
-
-export {ActionTable};
 
 export class CascadeAction {
   apply(cascade: CascadeInstance): void {}
@@ -1586,11 +1583,9 @@ export class QuotesScopeItem implements ConditionItem {
     return false;
   }
 }
-type CounterValues = {
+export type CounterValues = {
   [key: string]: number[]
 };
-
-export {CounterValues};
 
 export interface CounterListener {
   countersOfId(id: string, counters: CounterValues);
@@ -2078,14 +2073,13 @@ export const alphabeticFormat = (alphabetStr: String, num: number) => {
   } while (num > 0);
   return result;
 };
-type ChineseNumbering = {
+
+export type ChineseNumbering = {
   digits: string,
   markers: string,
   negative: string,
   formal: boolean
 };
-
-export {ChineseNumbering};
 
 /**
  * From http://www.w3.org/TR/css3-lists/

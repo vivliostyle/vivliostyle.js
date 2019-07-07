@@ -28,12 +28,10 @@ export enum LogLevel {
   ERROR
 }
 
-type ErrorInfo = {
+export type ErrorInfo = {
   error: Error,
   messages: any[]
 };
-
-export {ErrorInfo};
 
 /**
  * Class logging error, warning, information or debug messages.

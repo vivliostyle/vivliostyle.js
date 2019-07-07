@@ -36,10 +36,9 @@ import {Mapper} from './font';
 import {waitForFetchers} from './taskutil';
 import {Page, Spread, PageHyperlinkEvent} from './vtree';
 
-type Action = (p1: JSON) => task.Result<boolean>;
+export type Action = (p1: JSON) => task.Result<boolean>;
 
-export {Action};
-type ViewportSize = {
+export type ViewportSize = {
   marginLeft: number,
   marginRight: number,
   marginTop: number,
@@ -47,8 +46,6 @@ type ViewportSize = {
   width: number,
   height: number
 };
-
-export {ViewportSize};
 
 export const VIEWPORT_STATUS_ATTRIBUTE = 'data-vivliostyle-viewer-status';
 
@@ -62,13 +59,12 @@ export enum PageViewMode {
   SPREAD = 'spread',
   AUTO_SPREAD = 'autoSpread'
 }
-type SingleDocumentParam = {
+
+export type SingleDocumentParam = {
   url: string,
   startPage: number|null,
   skipPagesBefore: number|null
 };
-
-export {SingleDocumentParam};
 
 export class Viewer {
   fontMapper: any;

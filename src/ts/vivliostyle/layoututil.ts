@@ -23,7 +23,7 @@ import * as breaks from './break';
 import * as breakposition from './breakposition';
 import {layout, vtree} from './types';
 
-type LayoutIteratorState = {
+export type LayoutIteratorState = {
   nodeContext: vtree.NodeContext,
   atUnforcedBreak: boolean,
   break: boolean,
@@ -33,8 +33,6 @@ type LayoutIteratorState = {
   leadingEdgeContexts?: vtree.NodeContext[],
   lastAfterNodeContext?: vtree.NodeContext|null
 };
-
-export {LayoutIteratorState};
 
 export class LayoutIteratorStrategy {
   initialState(initialNodeContext: vtree.NodeContext): LayoutIteratorState {

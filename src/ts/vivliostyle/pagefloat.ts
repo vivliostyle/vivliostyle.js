@@ -23,14 +23,11 @@ import * as vtreeImpl from '../adapt/vtree';
 import * as asserts from './asserts';
 import * as logging from './logging';
 import * as logical from './logical';
+import {Size, getSize} from './sizing';
 import {layout, pagefloat, vtree} from './types';
 
-// import {LayoutConstraint, PageFloatArea, Column} from '../adapt/layout';
-import {Size, getSize} from './sizing'
-
-const {FloatReference} = pagefloat;
-export {FloatReference}
-type FloatReference = pagefloat.FloatReference;;
+export const FloatReference = pagefloat.FloatReference;
+export type FloatReference = pagefloat.FloatReference;
 
 type PageFloatID = pagefloat.PageFloatID;
 
@@ -238,8 +235,8 @@ export class PageFloatContinuation implements pagefloat.PageFloatContinuation {
         vtreeImpl.isSameNodePosition(this.nodePosition, other.nodePosition);
   }
 }
-type PageFloatPlacementCondition = pagefloat.PageFloatPlacementCondition;
-export {PageFloatPlacementCondition};
+
+export type PageFloatPlacementCondition = pagefloat.PageFloatPlacementCondition;
 
 /**
  * @param generatingNodePosition Source NodePosition generating the context.

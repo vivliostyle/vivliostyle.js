@@ -244,13 +244,11 @@ export class InsideTableRowBreakPosition extends breakposition.AbstractBreakPosi
   }
 }
 
-type BrokenTableCellPosition = {
+export type BrokenTableCellPosition = {
   cellNodePosition: vtree.NodePosition,
   breakChunkPosition: vtree.ChunkPosition,
   cell: TableCell
 };
-
-export {BrokenTableCellPosition};
 
 /**
  * @param tableSourceNode Source node of the table

@@ -1,7 +1,7 @@
-const path = require('path');
-const webpack = require('webpack');
-const CircularDependencyPlugin = require('circular-dependency-plugin');
-const pkg = require('./package.json');
+const path = require("path");
+const webpack = require("webpack");
+const CircularDependencyPlugin = require("circular-dependency-plugin");
+const pkg = require("./package.json");
 
 const bannerText = `Copyright 2013 Google, Inc.
 Copyright 2015 Trim-marks Inc.
@@ -23,25 +23,33 @@ along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
 Vivliostyle core ${pkg.version}`;
 
 module.exports = {
-  mode: process.env.NODE_ENV === 'production'? 'production' : 'development',
-  entry: './src/ts/vivliostyle.ts',
-  devtool: 'source-map',
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
+  entry: "./src/ts/vivliostyle.ts",
+  devtool: "source-map",
   output: {
-    path: path.join(__dirname, 'lib-ts'),
-    filename: 'vivliostyle.min.js',
-    library: 'vivliostyle',
-    libraryTarget: 'umd',
+    path: path.join(__dirname, "lib-ts"),
+    filename:
+      process.env.NODE_ENV === "production"
+        ? "vivliostyle.min.js"
+        : "vivliostyle.dev.js",
+    library: "vivliostyle",
+    libraryTarget: "umd"
   },
   resolve: {
-    extensions: ['.js', '.ts'],
+    extensions: [".js", ".ts"]
   },
   module: {
-    rules: [{
-      test: /\.ts$/,
-      use: 'ts-loader'
-    }]
+    rules: [
+      {
+        test: /\.ts$/,
+        use: "ts-loader"
+      }
+    ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      DEBUG: JSON.stringify(process.env.NODE_ENV !== "production")
+    }),
     new webpack.BannerPlugin({
       banner: bannerText
     }),
@@ -50,4 +58,4 @@ module.exports = {
       allowAsyncCycles: true
     })
   ]
-}
+};

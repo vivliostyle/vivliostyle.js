@@ -40,8 +40,6 @@ import * as task from './task';
 import * as vtreeImpl from './vtree';
 import {ViewFactory} from './vgen';
 
-declare var DEBUG: boolean;
-
 export const mediaTags = {
   'img': true,
   'svg': true,
@@ -74,8 +72,7 @@ export class AllLayoutConstraint implements LayoutConstraint {
  */
 export type FragmentLayoutConstraint = layout.FragmentLayoutConstraint;
 
-type BreakPositionAndNodeContext = layout.BreakPositionAndNodeContext;
-export {BreakPositionAndNodeContext};
+export type BreakPositionAndNodeContext = layout.BreakPositionAndNodeContext;
 
 /**
  * Potential breaking position inside CSS box (between lines).
@@ -2908,8 +2905,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
 export const firstCharPattern =
     /^[^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*([A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527][^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*)?/;
 
-type SinglePageFloatLayoutResult = layout.SinglePageFloatLayoutResult;
-export {SinglePageFloatLayoutResult};
+export type SinglePageFloatLayoutResult = layout.SinglePageFloatLayoutResult;
 
 export const fixJustificationOnHyphen =
     (nodeContext: vtree.NodeContext, insertAfter: boolean, node: Node,

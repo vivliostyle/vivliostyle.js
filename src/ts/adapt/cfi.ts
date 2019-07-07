@@ -19,15 +19,13 @@
  */
 import * as base from './base';
 
-type Position = {
+export type Position = {
   node: Node,
   offset: number,
   after: boolean,
   sideBias: string|null,
   ref: Fragment
 };
-
-export {Position};
 
 export const getId = (node: Node): string|null => {
   if (node.nodeType == 1) {

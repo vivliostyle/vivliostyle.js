@@ -48,8 +48,6 @@ import * as vgen from './vgen';
 import * as vtree from './vtree';
 import * as xmldocs from './xmldoc';
 
-declare var DEBUG: boolean;
-
 export const uaStylesheetBaseFetcher: Fetcher<boolean> =
     new Fetcher(() => {
       const frame: task.Frame<boolean> = task.newFrame('uaStylesheetBase');
@@ -68,12 +66,11 @@ export const uaStylesheetBaseFetcher: Fetcher<boolean> =
 
 export const loadUABase = (): task.Result<boolean> =>
     uaStylesheetBaseFetcher.get();
-type FontFace = {
+
+export type FontFace = {
   properties: csscasc.ElementStyle,
   condition: exprs.Val
 };
-
-export {FontFace};
 
 export class Style {
   fontDeobfuscator: any;
@@ -1568,15 +1565,13 @@ export class StyleParserHandler extends cssparse.DispatchParserHandler {
   }
 }
 
-type StyleSource = {
+export type StyleSource = {
   url: string,
   text: string|null,
   flavor: cssparse.StylesheetFlavor,
   classes: string|null,
   media: string|null
 };
-
-export {StyleSource};
 
 export const parseOPSResource = (response: Response, store: xmldocs.XMLDocStore):
                                     task.Result<xmldocs.XMLDocHolder> =>

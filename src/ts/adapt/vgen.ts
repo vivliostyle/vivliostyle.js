@@ -70,11 +70,10 @@ export const frontEdgeUnforcedBreakBlackListHor: {[key: string]: string} = {
 export const frontEdgeUnforcedBreakBlackListVert: {[key: string]: string} = {
   'margin-right': '0px'
 };
-type CustomRenderer =
+
+export type CustomRenderer =
     (p1: Element, p2: Element, p3: {[key: string]: css.Val}) =>
         task.Result<Element>;
-
-export {CustomRenderer};
 
 export interface CustomRendererFactory {
   makeCustomRenderer(xmldoc: xmldocs.XMLDocHolder): CustomRenderer;

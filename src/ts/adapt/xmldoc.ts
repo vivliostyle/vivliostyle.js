@@ -24,8 +24,6 @@ import * as task from './task';
 
 export type XMLDocStore = xmldoc.XMLDocStore;
 
-declare var DEBUG: boolean;
-
 export const ELEMENT_OFFSET_ATTR = 'data-adapt-eloff';
 
 export class XMLDocHolder implements xmldoc.XMLDocHolder {
