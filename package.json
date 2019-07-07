@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "eslint --ext .ts src",
     "build": "node tools/build.js",
-    "build-ts": "webpack",
+    "build-ts-dev": "NODE_ENV=development webpack",
+    "build-ts-prod": "NODE_ENV=production webpack",
     "typecheck": "node tools/typecheck.js",
     "test": "karma start test/conf/karma-sauce.conf.js",
     "test:local": "karma start test/conf/karma-local.conf.js"
