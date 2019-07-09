@@ -582,7 +582,7 @@ export class Prefix extends Val {
     if (val === this.val) {
       return this;
     }
-    const r = new Prefix(this.scope, val);
+    const r = new (this.constructor as any)(this.scope, val);
     return r;
   }
 }
@@ -647,7 +647,7 @@ export class Infix extends Val {
     if (lhs === this.lhs && rhs === this.rhs) {
       return this;
     }
-    const r = new Infix(this.scope, lhs, rhs);
+    const r = new (this.constructor as any)(this.scope, lhs, rhs);
     return r;
   }
 }

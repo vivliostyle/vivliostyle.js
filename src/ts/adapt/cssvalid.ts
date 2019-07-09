@@ -1004,8 +1004,8 @@ export class ShorthandValidator extends css.Visitor {
     return new ShorthandSyntaxProperty(this.validatorSet, name);
   }
 
-  clone(): ShorthandValidator {
-    const other = new ShorthandValidator();
+  clone(): this {
+    const other = new (this.constructor as any)();
     other.syntax = this.syntax;
     other.propList = this.propList;
     other.validatorSet = this.validatorSet;
