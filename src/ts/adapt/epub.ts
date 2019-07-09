@@ -22,7 +22,7 @@ import * as asserts from '../vivliostyle/asserts';
 import * as constants from '../vivliostyle/constants';
 import * as counters from '../vivliostyle/counters';
 import * as logging from '../vivliostyle/logging';
-import * as cfi from './cfi';
+import * as Cfi from './cfi';
 import * as csscasc from './csscasc';
 import * as font from './font';
 import * as net from './net';
@@ -791,7 +791,7 @@ export class OPFDoc {
       if (node) {
         const startOffset = xmldoc.getNodeOffset(node, 0, false);
         const offsetInNode = offsetInItem - startOffset;
-        const fragment = new cfi.Fragment();
+        const fragment = new Cfi.Fragment();
         fragment.prependPathFromNode(node, offsetInNode, false, null);
         if (item.itemRefElement) {
           fragment.prependPathFromNode(item.itemRefElement, 0, false, null);
@@ -813,7 +813,7 @@ export class OPFDoc {
                 frame.finish(null);
                 return;
               }
-              let fragment = new cfi.Fragment();
+              let fragment = new Cfi.Fragment();
               fragment.fromString(fragstr);
               let item;
               if (self.opfXML) {

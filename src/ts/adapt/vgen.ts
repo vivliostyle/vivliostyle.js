@@ -19,7 +19,7 @@
  */
 import * as asserts from '../vivliostyle/asserts';
 import {restoreNewText, diffChars} from '../vivliostyle/diff';
-import * as display from '../vivliostyle/display';
+import * as Display from '../vivliostyle/display';
 import {NthFragmentMatcher} from '../vivliostyle/matcher';
 import * as pagefloat from '../vivliostyle/pagefloat';
 import * as plugin from '../vivliostyle/plugin';
@@ -358,7 +358,7 @@ export class ViewFactory extends base.SimpleEventTarget implements
     // Compute values of display, position and float
     const position = (computedStyle['position'] as css.Ident);
     const float = (computedStyle['float'] as css.Ident);
-    const displayValues = display.getComputedDislayValue(
+    const displayValues = Display.getComputedDislayValue(
         computedStyle['display'] as css.Ident || css.ident.inline, position, float,
         this.sourceNode === this.xmldoc.root);
     ['display', 'position', 'float'].forEach((name) => {
@@ -574,12 +574,12 @@ export class ViewFactory extends base.SimpleEventTarget implements
               self.nodeContext.parent.vertical ? css.ident.vertical_rl :
                                                  css.ident.horizontal_tb :
               writingMode;
-          const isFlowRoot = display.isFlowRoot(element);
-          self.nodeContext.establishesBFC = display.establishesBFC(
+          const isFlowRoot = Display.isFlowRoot(element);
+          self.nodeContext.establishesBFC = Display.establishesBFC(
               display, position, floatSide, computedStyle['overflow'],
               writingMode, parentWritingMode, isFlowRoot);
           self.nodeContext.containingBlockForAbsolute =
-              display.establishesCBForAbsolute(position);
+              Display.establishesCBForAbsolute(position);
           if (self.nodeContext.isInsideBFC() &&
               floatSide !== css.ident.footnote &&
               !(floatReference &&
@@ -640,8 +640,8 @@ export class ViewFactory extends base.SimpleEventTarget implements
             self.nodeContext.breakPenalty++;
           }
           self.nodeContext.inline = !floating && !display ||
-              display.isInlineLevel(display) ||
-              display.isRubyInternalDisplay(display);
+              Display.isInlineLevel(display) ||
+              Display.isRubyInternalDisplay(display);
           self.nodeContext.display = display ? display.toString() : 'inline';
           self.nodeContext.floatSide = floating ? floatSide.toString() : null;
           self.nodeContext.floatReference =
