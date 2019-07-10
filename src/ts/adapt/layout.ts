@@ -28,6 +28,7 @@ import * as layoutprocessorImpl from '../vivliostyle/layoutprocessor';
 import * as layoutretryer from '../vivliostyle/layoutretryer';
 import * as logging from '../vivliostyle/logging';
 import * as pagefloat from '../vivliostyle/pagefloat';
+import * as Footnotes from '../vivliostyle/footnote';
 import * as plugin from '../vivliostyle/plugin';
 import {processAfterIfContinues, processAfterIfContinuesOfAncestors} from '../vivliostyle/selectors';
 import {Size, getSize} from '../vivliostyle/sizing';
@@ -3230,3 +3231,6 @@ export class PageFloatArea extends Column implements layout.PageFloatArea {
     }, this));
   }
 }
+
+pagefloat.PageFloatLayoutStrategyResolver.register(new pagefloat.NormalPageFloatLayoutStrategy());
+pagefloat.PageFloatLayoutStrategyResolver.register(new Footnotes.FootnoteLayoutStrategy());

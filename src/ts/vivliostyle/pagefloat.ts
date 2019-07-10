@@ -1460,4 +1460,3 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    */
   forbid(float, pageFloatLayoutContext) {}
 }
-PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());

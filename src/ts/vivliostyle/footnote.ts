@@ -170,5 +170,3 @@ export class FootnoteLayoutStrategy implements
     }
   }
 }
-pagefloat.PageFloatLayoutStrategyResolver.register(
-    new FootnoteLayoutStrategy());
