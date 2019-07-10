@@ -435,7 +435,9 @@ export class LayoutEntireOwnerBlock extends
    * @override
    */
   doLayout(nodeContext, column) {
-    LayoutEntireBlock.prototype.doLayout.call(this, nodeContext, column);
+    // FIXME: LayoutEntireBlock.prototype.doLayout is undefined because it's abstract method.
+    //        Probably, removing this call is ok.
+    // LayoutEntireBlock.prototype.doLayout.call(this, nodeContext, column);
     return this.processor.doInitialLayout(nodeContext, column);
   }
 
