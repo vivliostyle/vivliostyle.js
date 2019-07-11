@@ -57,7 +57,7 @@ export class NthFragmentMatcher implements Matcher {
   static fragmentIndices = {};
 
   static registerFragmentIndex(elementOffset: number, fragmentIndex: number, priority: number)  {
-    const indices = this.fragmentIndices;
+    const indices = NthFragmentMatcher.fragmentIndices;
     if (!indices[elementOffset] ||
         indices[elementOffset].priority <= priority) {
       indices[elementOffset] = {fragmentIndex, priority};
@@ -65,7 +65,7 @@ export class NthFragmentMatcher implements Matcher {
   }
 
   static clearFragmentIndices() {
-    this.fragmentIndices = {};
+    NthFragmentMatcher.fragmentIndices = {};
   }
 
   constructor(
