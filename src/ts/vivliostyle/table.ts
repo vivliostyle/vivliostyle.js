@@ -1872,10 +1872,9 @@ function resolveLayoutProcessor(formattingContext) {
   return null;
 }
 
-function registerHooks() {
+export function registerTablePlugin() {
   plugin.registerHook(
       plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT, resolveFormattingContextHook);
   plugin.registerHook(
       plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, resolveLayoutProcessor);
 }
-registerHooks();

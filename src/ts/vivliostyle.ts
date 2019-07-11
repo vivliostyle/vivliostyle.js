@@ -23,3 +23,5 @@ import {viewer} from './vivliostyle/viewer';
 import {viewerapp} from './vivliostyle/viewerapp';
 export {constants, plugin, profile, viewer, viewerapp};
 
+import {registerPlugins} from './plugins';
+registerPlugins();

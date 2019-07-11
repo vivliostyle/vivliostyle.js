@@ -187,7 +187,9 @@ export class BlockFormattingContext implements layoutprocessor.BlockFormattingCo
 }
 
 export const blockLayoutProcessor = new BlockLayoutProcessor();
-plugin.registerHook(
+
+export function registerLayoutProcessorPlugin() {
+  plugin.registerHook(
     plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     (nodeContext, firstTime, display, position, floatSide, isRoot) => {
       const parent = nodeContext.parent;
@@ -206,10 +208,11 @@ plugin.registerHook(
         return null;
       }
     });
-plugin.registerHook(
+  plugin.registerHook(
     plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
       if (formattingContext instanceof BlockFormattingContext) {
         return blockLayoutProcessor;
       }
       return null;
     });
+}

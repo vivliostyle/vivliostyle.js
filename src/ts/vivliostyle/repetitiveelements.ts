@@ -884,11 +884,14 @@ function getRepetitiveElementsOwnerFormattingContext(formattingContext: vtree.Fo
 }
 
 const repetitiveLayoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
-plugin.registerHook(
-  plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
-    if (formattingContext instanceof RepetitiveElementsOwnerFormattingContext
-        && !table.isInstanceOfTableFormattingContext(formattingContext)) {
-      return repetitiveLayoutProcessor;
-    }
-    return null;
-  });
+
+export function registerRepetitiveElementsPlugin() {
+  plugin.registerHook(
+    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
+      if (formattingContext instanceof RepetitiveElementsOwnerFormattingContext
+          && !table.isInstanceOfTableFormattingContext(formattingContext)) {
+        return repetitiveLayoutProcessor;
+      }
+      return null;
+    });
+}

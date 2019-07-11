@@ -42,7 +42,10 @@ export const convertPageBreakAliases =
               return original;
           }
         };
-plugin.registerHook('SIMPLE_PROPERTY', convertPageBreakAliases);
+
+export function registerBreakPlugin() {
+  plugin.registerHook('SIMPLE_PROPERTY', convertPageBreakAliases);
+}
 
 export const forcedBreakValues: {[key: string]: boolean|null} = {
   'page': true,
