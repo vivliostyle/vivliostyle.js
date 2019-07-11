@@ -432,7 +432,8 @@ export const findUppermostFullyOpenRect =
       }
       let topEdge = rect.y1;
       let band;
-      for (let i = 0; i < bands.length; i++) {
+      let i: number;
+      for (i = 0; i < bands.length; i++) {
         band = bands[i];
         if (band.y2 > rect.y1 && band.x1 - 0.1 <= rect.x1 &&
             band.x2 + 0.1 >= rect.x2) {
@@ -442,7 +443,6 @@ export const findUppermostFullyOpenRect =
         }
       }
       let bottomEdge = topEdge;
-      let i: number;
       for (; i < bands.length; i++) {
         band = bands[i];
         if (band.y1 >= rect.y2 || band.x1 - 0.1 > rect.x1 ||
@@ -477,7 +477,8 @@ export const findBottommostFullyOpenRect =
       }
       let bottomEdge = rect.y2;
       let band;
-      for (let i = bands.length - 1; i >= 0; i--) {
+      let i: number;
+      for (i = bands.length - 1; i >= 0; i--) {
         band = bands[i];
         if (i === bands.length - 1 && band.y2 < rect.y2) {
           break;
@@ -489,7 +490,6 @@ export const findBottommostFullyOpenRect =
         }
       }
       let topEdge = Math.min(bottomEdge, band.y2);
-      let i: number;
       for (; i >= 0; i--) {
         band = bands[i];
         if (band.y2 <= rect.y1 || band.x1 - 0.1 > rect.x1 ||
