@@ -112,13 +112,13 @@ export class RootPageBox extends PageBox<RootPageBoxInstance> {
 }
 
 export class PageMasterScope extends exprs.LexicalScope {
-  pageMaster: any;
-
-  constructor(scope: exprs.LexicalScope, pageMaster: PageMaster) {
-    super(scope, function(qualifiedName, isFunc) {
+  constructor(scope: exprs.LexicalScope, public pageMaster: PageMaster) {
+    super(scope, resolver);
+    let self = this;
+    function resolver (qualifiedName, isFunc) {
       const r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
       if (r) {
-        const key = pageMaster.keyMap[r[1]];
+        const key = self.pageMaster.keyMap[r[1]];
         if (key) {
           const holder = (this as InstanceHolder);
           const boxInstance = holder.lookupInstance(key);
@@ -132,8 +132,7 @@ export class PageMasterScope extends exprs.LexicalScope {
         }
       }
       return null;
-    });
-    this.pageMaster = pageMaster;
+    }
   }
 }
 
