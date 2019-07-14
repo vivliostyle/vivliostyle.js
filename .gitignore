@@ -1,6 +1,6 @@
 ## Directory
 node_modules/
-lib-ts/
+lib/
 
 ## Files
 doc/anchors.json

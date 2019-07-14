@@ -1,13 +1,13 @@
 {
   "name": "vivliostyle",
-  "version": "2018.12.100-pre",
-  "description": "Library for web sites with rich paged viewing and EPUB support, shared with Vivliostyle Formatter & Browser",
+  "version": "2019.7.100-pre",
+  "description": "Library for web sites with rich paged viewing and EPUB support",
   "scripts": {
     "lint": "eslint --ext .ts src",
-    "build": "node tools/build.js",
-    "build-ts-dev": "NODE_ENV=development webpack",
-    "build-ts-prod": "NODE_ENV=production webpack",
-    "typecheck": "node tools/typecheck.js",
+    "build": "NODE_ENV=production webpack",
+    "build-dev": "NODE_ENV=development webpack",
+    "build-oldjs": "node tools/build.js",
+    "typecheck-oldjs": "node tools/typecheck.js",
     "test": "karma start test/conf/karma-sauce.conf.js",
     "test:local": "karma start test/conf/karma-local.conf.js"
   },

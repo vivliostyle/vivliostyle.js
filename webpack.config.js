@@ -27,7 +27,7 @@ module.exports = {
   entry: "./src/ts/vivliostyle.ts",
   devtool: "source-map",
   output: {
-    path: path.join(__dirname, "lib-ts"),
+    path: path.join(__dirname, "lib"),
     filename:
       process.env.NODE_ENV === "production"
         ? "vivliostyle.min.js"
