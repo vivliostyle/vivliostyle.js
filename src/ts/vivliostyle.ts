@@ -22,6 +22,7 @@ import {profile} from './vivliostyle/profile';
 import {viewer} from './vivliostyle/viewer';
 import {viewerapp} from './vivliostyle/viewerapp';
 export {constants, plugin, profile, viewer, viewerapp};
+export default {constants, plugin, profile, viewer, viewerapp};
 
 import {registerPlugins} from './plugins';
 registerPlugins();
