@@ -7,3 +7,4 @@ doc/anchors.json
 doc/supported-features.html
 lib/vivliostyle.min.js
 test/wpt/sauce-credentials.ini
+package-lock.json
