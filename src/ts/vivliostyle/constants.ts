@@ -30,8 +30,8 @@ export function setDebug(value: boolean) {
  * @enum {string}
  */
 export enum PageProgression {
-  LTR = 'ltr',
-  RTL = 'rtl'
+  LTR = "ltr",
+  RTL = "rtl"
 }
 
 /**
@@ -39,9 +39,9 @@ export enum PageProgression {
  */
 export const pageProgressionOf = (str: string): PageProgression => {
   switch (str) {
-    case 'ltr':
+    case "ltr":
       return PageProgression.LTR;
-    case 'rtl':
+    case "rtl":
       return PageProgression.RTL;
     default:
       throw new Error(`unknown PageProgression: ${str}`);
@@ -53,8 +53,8 @@ export const pageProgressionOf = (str: string): PageProgression => {
  * @enum {string}
  */
 export enum PageSide {
-  LEFT = 'left',
-  RIGHT = 'right'
+  LEFT = "left",
+  RIGHT = "right"
 }
 
 /**
@@ -62,9 +62,9 @@ export enum PageSide {
  * @enum {string}
  */
 export enum ReadyState {
-  LOADING = 'loading',
-  INTERACTIVE = 'interactive',
-  COMPLETE = 'complete'
+  LOADING = "loading",
+  INTERACTIVE = "interactive",
+  COMPLETE = "complete"
 }
 
 /**

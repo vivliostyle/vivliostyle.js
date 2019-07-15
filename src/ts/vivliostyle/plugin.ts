@@ -16,20 +16,19 @@
  *
  * @fileoverview Plugin mechanism
  */
-import {JSON} from '../adapt/base';
-import {Ident} from '../adapt/css';
-import {Result} from '../adapt/task';
-import {FormattingContext} from '../adapt/vtree';
-import * as layoutprocessor from './layoutprocessor';
-import * as logging from './logging';
-import {vtree, layout} from './types';
+import { JSON } from "../adapt/base";
+import { Ident } from "../adapt/css";
+import { Result } from "../adapt/task";
+import { FormattingContext } from "../adapt/vtree";
+import * as layoutprocessor from "./layoutprocessor";
+import * as logging from "./logging";
+import { vtree, layout } from "./types";
 
 /**
  * Type of implemented hooks.
  * @enum {string}
  */
 export enum HOOKS {
-
   /**
    * Called when a single property declaration is parsed.
    *
@@ -45,7 +44,7 @@ export enum HOOKS {
    * non-shorthand declarations, the hook is called for each of the
    * non-shorthand declarations.
    */
-  SIMPLE_PROPERTY = 'SIMPLE_PROPERTY',
+  SIMPLE_PROPERTY = "SIMPLE_PROPERTY",
 
   /**
    * Called when a single document (i.e. a single spine item) has been fetched,
@@ -53,7 +52,7 @@ export enum HOOKS {
    *
    * The hook is called with the Document object.
    */
-  PREPROCESS_SINGLE_DOCUMENT = 'PREPROCESS_SINGLE_DOCUMENT',
+  PREPROCESS_SINGLE_DOCUMENT = "PREPROCESS_SINGLE_DOCUMENT",
 
   /**
    * Called before creating a text node for modifying a text content.
@@ -66,7 +65,7 @@ export enum HOOKS {
    * adapt.task.Result.<string>. The text content is then replaced by the
    * returned value.
    */
-  PREPROCESS_TEXT_CONTENT = 'PREPROCESS_TEXT_CONTENT',
+  PREPROCESS_TEXT_CONTENT = "PREPROCESS_TEXT_CONTENT",
 
   /**
    * Called before creating a element for modifying a element style.
@@ -75,14 +74,14 @@ export enum HOOKS {
    *   {adapt.vtree.NodeContext} nodeContext
    *   {!Object} style
    */
-  PREPROCESS_ELEMENT_STYLE = 'PREPROCESS_ELEMENT_STYLE',
+  PREPROCESS_ELEMENT_STYLE = "PREPROCESS_ELEMENT_STYLE",
 
   /**
    * Called before geting adapt.csscasc.polyfilledInheritedProps.
    *
    * The hook return a array of polyfilled inherited property name.
    */
-  POLYFILLED_INHERITED_PROPS = 'POLYFILLED_INHERITED_PROPS',
+  POLYFILLED_INHERITED_PROPS = "POLYFILLED_INHERITED_PROPS",
 
   /**
    * Called when a Viewer is configured.
@@ -90,7 +89,7 @@ export enum HOOKS {
    * The hook is called with an object with the following properties:
    *  {adapt.base.JSON} command
    */
-  CONFIGURATION = 'CONFIGURATION',
+  CONFIGURATION = "CONFIGURATION",
 
   /**
    * Called when resolving a text node breaker
@@ -102,7 +101,7 @@ export enum HOOKS {
    * Functions called by this hook are expected to
    * return an instnce of {adapt.layout.TextNodeBreaker} or null.
    */
-  RESOLVE_TEXT_NODE_BREAKER = 'RESOLVE_TEXT_NODE_BREAKER',
+  RESOLVE_TEXT_NODE_BREAKER = "RESOLVE_TEXT_NODE_BREAKER",
 
   /**
    * Called when resolving a formatting context.
@@ -117,7 +116,7 @@ export enum HOOKS {
    * node is a root (of a flow) or not Functions called by this hook are
    * expected to return a formatting context for the NodeContext.
    */
-  RESOLVE_FORMATTING_CONTEXT = 'RESOLVE_FORMATTING_CONTEXT',
+  RESOLVE_FORMATTING_CONTEXT = "RESOLVE_FORMATTING_CONTEXT",
 
   /**
    * Called when resolving a layout processor (adapt.layout.LayoutProcessor) for
@@ -127,7 +126,7 @@ export enum HOOKS {
    * (adapt.vtree.FormattingContext). Functions called by this hook are expected
    * to return a layout processor corresponding to the formatting context.
    */
-  RESOLVE_LAYOUT_PROCESSOR = 'RESOLVE_LAYOUT_PROCESSOR',
+  RESOLVE_LAYOUT_PROCESSOR = "RESOLVE_LAYOUT_PROCESSOR",
 
   /**
    * Called after laid out a block contents.
@@ -137,30 +136,52 @@ export enum HOOKS {
    *  {Array.<adapt.vtree.NodeContext>} checkPoints
    *  {adapt.layout.Column} column
    */
-  POST_LAYOUT_BLOCK = 'POST_LAYOUT_BLOCK'
+  POST_LAYOUT_BLOCK = "POST_LAYOUT_BLOCK"
 }
 
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
-export type PreProcessTextContentHook = (p1: vtree.NodeContext, p2: string) => Result<string>;
+export type PreProcessTextContentHook = (
+  p1: vtree.NodeContext,
+  p2: string
+) => Result<string>;
 
-export type PreProcessElementStyleHook = (p1: vtree.NodeContext, p2: Object) => void;
+export type PreProcessElementStyleHook = (
+  p1: vtree.NodeContext,
+  p2: Object
+) => void;
 
 export type PolyfilledInheritedPropsHook = () => string[];
 
-export type ConfigurationHook = (p1: JSON) => {
-  needResize: boolean|null|undefined, needRefresh: boolean|null|undefined
+export type ConfigurationHook = (
+  p1: JSON
+) => {
+  needResize: boolean | null | undefined;
+  needRefresh: boolean | null | undefined;
 };
 
-export type ResolveTextNodeBreakerHook = (p1: vtree.NodeContext) => layout.TextNodeBreaker;
+export type ResolveTextNodeBreakerHook = (
+  p1: vtree.NodeContext
+) => layout.TextNodeBreaker;
 
-export type ResolveFormattingContextHook =
-    (p1: vtree.NodeContext, p2: boolean, p3: Ident, p4: Ident, p5: Ident,
-     p6: boolean) => FormattingContext;
+export type ResolveFormattingContextHook = (
+  p1: vtree.NodeContext,
+  p2: boolean,
+  p3: Ident,
+  p4: Ident,
+  p5: Ident,
+  p6: boolean
+) => FormattingContext;
 
-export type ResolveLayoutProcessorHook = (p1: FormattingContext) => layoutprocessor.LayoutProcessor;
+export type ResolveLayoutProcessorHook = (
+  p1: FormattingContext
+) => layoutprocessor.LayoutProcessor;
 
-export type PostLayoutBlockHook = (p1: vtree.NodeContext, p2: vtree.NodeContext[], p3: layout.Column) => void;
+export type PostLayoutBlockHook = (
+  p1: vtree.NodeContext,
+  p2: vtree.NodeContext[],
+  p3: layout.Column
+) => void;
 
 const hooks = {};
 

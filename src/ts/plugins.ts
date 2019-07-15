@@ -15,13 +15,13 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @fileoverview Register Plugins
-*/
-import {registerLayoutProcessorPlugin} from './vivliostyle/layoutprocessor';
-import {registerBreakPlugin} from './vivliostyle/break';
-import {registerRepetitiveElementsPlugin} from './vivliostyle/repetitiveelements';
-import {registerTablePlugin} from './vivliostyle/table';
-import {registerPageFloatPlugin} from './vivliostyle/pagefloat';
-import {registerFootnotePlugin} from './vivliostyle/footnote';
+ */
+import { registerLayoutProcessorPlugin } from "./vivliostyle/layoutprocessor";
+import { registerBreakPlugin } from "./vivliostyle/break";
+import { registerRepetitiveElementsPlugin } from "./vivliostyle/repetitiveelements";
+import { registerTablePlugin } from "./vivliostyle/table";
+import { registerPageFloatPlugin } from "./vivliostyle/pagefloat";
+import { registerFootnotePlugin } from "./vivliostyle/footnote";
 
 export function registerPlugins() {
   registerLayoutProcessorPlugin();

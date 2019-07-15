@@ -16,17 +16,17 @@
  *
  * @fileoverview View tree generator.
  */
-import * as base from '../adapt/base';
-import {Context} from '../adapt/expr';
-import * as css from '../adapt/css';
-import * as csscasc from '../adapt/csscasc';
-import * as cssstyler from '../adapt/cssstyler';
-import * as vtree from '../adapt/vtree';
-import {pseudoelement} from './types';
+import * as base from "../adapt/base";
+import { Context } from "../adapt/expr";
+import * as css from "../adapt/css";
+import * as csscasc from "../adapt/csscasc";
+import * as cssstyler from "../adapt/cssstyler";
+import * as vtree from "../adapt/vtree";
+import { pseudoelement } from "./types";
 
 export const document = new DOMParser().parseFromString(
   `<root xmlns="${base.NS.SHADOW}"/>`,
-  'text/xml'
+  "text/xml"
 );
 
 /**
@@ -34,23 +34,23 @@ export const document = new DOMParser().parseFromString(
  * empty string is the place where the element's DOM children are processed.
  */
 export const pseudoNames = [
-  'footnote-marker',
-  'first-5-lines',
-  'first-4-lines',
-  'first-3-lines',
-  'first-2-lines',
-  'first-line',
-  'first-letter',
-  'before',
-  '',
+  "footnote-marker",
+  "first-5-lines",
+  "first-4-lines",
+  "first-3-lines",
+  "first-2-lines",
+  "first-line",
+  "first-letter",
+  "before",
+  "",
   /* content */
-  'after',
+  "after"
 ];
 
-export const PSEUDO_ATTR = 'data-adapt-pseudo';
+export const PSEUDO_ATTR = "data-adapt-pseudo";
 
 export const getPseudoName = (element: Element): string =>
-  element.getAttribute(PSEUDO_ATTR) || '';
+  element.getAttribute(PSEUDO_ATTR) || "";
 
 export const setPseudoName = (element: Element, name: string) => {
   element.setAttribute(PSEUDO_ATTR, name);
@@ -78,17 +78,17 @@ export class PseudoelementStyler implements pseudoelement.PseudoelementStyler {
       this.style = this.styler.getStyle(this.element, true);
       this.styler = null;
     }
-    const pseudoMap = csscasc.getStyleMap(this.style, '_pseudos');
+    const pseudoMap = csscasc.getStyleMap(this.style, "_pseudos");
     const style = pseudoMap[pseudoName] || ({} as csscasc.ElementStyle);
-    if (pseudoName.match(/^first-/) && !style['x-first-pseudo']) {
+    if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
       let nest = 1;
       let r;
-      if (pseudoName == 'first-letter') {
+      if (pseudoName == "first-letter") {
         nest = 0;
       } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
         nest = r[1] - 0;
       }
-      style['x-first-pseudo'] = new csscasc.CascadeValue(new css.Int(nest), 0);
+      style["x-first-pseudo"] = new csscasc.CascadeValue(new css.Int(nest), 0);
     }
     return style;
   }
@@ -100,7 +100,7 @@ export class PseudoelementStyler implements pseudoelement.PseudoelementStyler {
     const pseudoName = getPseudoName(element);
     if (!this.contentProcessed[pseudoName]) {
       this.contentProcessed[pseudoName] = true;
-      const contentVal = style['content'];
+      const contentVal = style["content"];
       if (contentVal) {
         if (vtree.nonTrivialContent(contentVal)) {
           contentVal.visit(

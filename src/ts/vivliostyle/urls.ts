@@ -1,4 +1,4 @@
-import {DocumentURLTransformer} from '../adapt/base';
+import { DocumentURLTransformer } from "../adapt/base";
 
 /**
  * Copyright 2015 Trim-marks Inc.
@@ -25,17 +25,21 @@ import {DocumentURLTransformer} from '../adapt/base';
  * @returns transformed attributeValue
  */
 
-export const transformURIs = (attributeValue, baseUrl, documentURLTransformer) =>
-    attributeValue
-        .replace(
-            /[uU][rR][lL]\(\s*"((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^"\r\n])+)"/gm,
-            (match, m1) =>
-                `url("${documentURLTransformer.transformURL(m1, baseUrl)}"`)
-        .replace(
-            /[uU][rR][lL]\(\s*'((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^'\r\n])+)'/gm,
-            (match, m1) =>
-                `url('${documentURLTransformer.transformURL(m1, baseUrl)}'`)
-        .replace(
-            /[uU][rR][lL]\(\s*((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^"'\r\n\)\s])+)/gm,
-            (match, m1) =>
-                `url(${documentURLTransformer.transformURL(m1, baseUrl)}`);
+export const transformURIs = (
+  attributeValue,
+  baseUrl,
+  documentURLTransformer
+) =>
+  attributeValue
+    .replace(
+      /[uU][rR][lL]\(\s*"((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^"\r\n])+)"/gm,
+      (match, m1) => `url("${documentURLTransformer.transformURL(m1, baseUrl)}"`
+    )
+    .replace(
+      /[uU][rR][lL]\(\s*'((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^'\r\n])+)'/gm,
+      (match, m1) => `url('${documentURLTransformer.transformURL(m1, baseUrl)}'`
+    )
+    .replace(
+      /[uU][rR][lL]\(\s*((\\([^0-9a-fA-F]+|[0-9a-fA-F]+\s*)|[^"'\r\n\)\s])+)/gm,
+      (match, m1) => `url(${documentURLTransformer.transformURL(m1, baseUrl)}`
+    );

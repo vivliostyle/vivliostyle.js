@@ -17,8 +17,8 @@
  *
  * @fileoverview CSS Values and utilities to handle them.
  */
-import * as base from './base';
-import * as exprs from './expr';
+import * as base from "./base";
+import * as exprs from "./expr";
 
 export class Visitor {
   /**
@@ -31,27 +31,27 @@ export class Visitor {
   }
 
   visitEmpty(empty: Val): Val {
-    throw new Error('E_CSS_EMPTY_NOT_ALLOWED');
+    throw new Error("E_CSS_EMPTY_NOT_ALLOWED");
   }
 
   visitSlash(slash: Val): Val {
-    throw new Error('E_CSS_SLASH_NOT_ALLOWED');
+    throw new Error("E_CSS_SLASH_NOT_ALLOWED");
   }
 
   visitStr(str: Str): Val {
-    throw new Error('E_CSS_STR_NOT_ALLOWED');
+    throw new Error("E_CSS_STR_NOT_ALLOWED");
   }
 
   visitIdent(ident: Ident): Val {
-    throw new Error('E_CSS_IDENT_NOT_ALLOWED');
+    throw new Error("E_CSS_IDENT_NOT_ALLOWED");
   }
 
   visitNumeric(numeric: Numeric): Val {
-    throw new Error('E_CSS_NUMERIC_NOT_ALLOWED');
+    throw new Error("E_CSS_NUMERIC_NOT_ALLOWED");
   }
 
   visitNum(num: Num): Val {
-    throw new Error('E_CSS_NUM_NOT_ALLOWED');
+    throw new Error("E_CSS_NUM_NOT_ALLOWED");
   }
 
   visitInt(num: Int): Val {
@@ -59,27 +59,27 @@ export class Visitor {
   }
 
   visitColor(color: Color): Val {
-    throw new Error('E_CSS_COLOR_NOT_ALLOWED');
+    throw new Error("E_CSS_COLOR_NOT_ALLOWED");
   }
 
   visitURL(url: URL): Val {
-    throw new Error('E_CSS_URL_NOT_ALLOWED');
+    throw new Error("E_CSS_URL_NOT_ALLOWED");
   }
 
   visitSpaceList(list: SpaceList): Val {
-    throw new Error('E_CSS_LIST_NOT_ALLOWED');
+    throw new Error("E_CSS_LIST_NOT_ALLOWED");
   }
 
   visitCommaList(list: CommaList): Val {
-    throw new Error('E_CSS_COMMA_NOT_ALLOWED');
+    throw new Error("E_CSS_COMMA_NOT_ALLOWED");
   }
 
   visitFunc(func: Func): Val {
-    throw new Error('E_CSS_FUNC_NOT_ALLOWED');
+    throw new Error("E_CSS_FUNC_NOT_ALLOWED");
   }
 
   visitExpr(expr: Expr): Val {
-    throw new Error('E_CSS_EXPR_NOT_ALLOWED');
+    throw new Error("E_CSS_EXPR_NOT_ALLOWED");
   }
 }
 
@@ -109,42 +109,58 @@ export class FilterVisitor extends Visitor {
   /**
    * @override
    */
-  visitStr(str) {return str;}
+  visitStr(str) {
+    return str;
+  }
 
   /**
    * @override
    */
-  visitIdent(ident) {return ident;}
+  visitIdent(ident) {
+    return ident;
+  }
 
   /**
    * @override
    */
-  visitSlash(slash) {return slash;}
+  visitSlash(slash) {
+    return slash;
+  }
 
   /**
    * @override
    */
-  visitNumeric(numeric) {return numeric;}
+  visitNumeric(numeric) {
+    return numeric;
+  }
 
   /**
    * @override
    */
-  visitNum(num) {return num;}
+  visitNum(num) {
+    return num;
+  }
 
   /**
    * @override
    */
-  visitInt(num) {return num;}
+  visitInt(num) {
+    return num;
+  }
 
   /**
    * @override
    */
-  visitColor(color) {return color;}
+  visitColor(color) {
+    return color;
+  }
 
   /**
    * @override
    */
-  visitURL(url) {return url;}
+  visitURL(url) {
+    return url;
+  }
 
   /**
    * @override
@@ -182,7 +198,9 @@ export class FilterVisitor extends Visitor {
   /**
    * @override
    */
-  visitExpr(expr) {return expr;}
+  visitExpr(expr) {
+    return expr;
+  }
 }
 
 export class Val {
@@ -202,25 +220,35 @@ export class Val {
   }
 
   toExpr(scope: exprs.LexicalScope, ref: exprs.Val): exprs.Val {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   appendTo(buf: base.StringBuffer, toString: boolean): void {
-    buf.append('[error]');
+    buf.append("[error]");
   }
 
-  isExpr(): boolean {return false;}
+  isExpr(): boolean {
+    return false;
+  }
 
-  isNumeric(): boolean {return false;}
+  isNumeric(): boolean {
+    return false;
+  }
 
-  isNum(): boolean {return false;}
+  isNum(): boolean {
+    return false;
+  }
 
-  isIdent(): boolean {return false;}
+  isIdent(): boolean {
+    return false;
+  }
 
-  isSpaceList(): boolean {return false;}
+  isSpaceList(): boolean {
+    return false;
+  }
 
   visit(visitor: any): any {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 }
 
@@ -241,7 +269,9 @@ export class Empty extends Val {
   /**
    * @override
    */
-  toExpr(scope, ref) {return new exprs.Const(scope, '');}
+  toExpr(scope, ref) {
+    return new exprs.Const(scope, "");
+  }
 
   /**
    * @override
@@ -275,13 +305,15 @@ export class Slash extends Val {
   /**
    * @override
    */
-  toExpr(scope, ref) {return new exprs.Const(scope, '/');}
+  toExpr(scope, ref) {
+    return new exprs.Const(scope, "/");
+  }
 
   /**
    * @override
    */
   appendTo(buf, toString) {
-    buf.append('/');
+    buf.append("/");
   }
 
   /**
@@ -333,7 +365,7 @@ export class Ident extends Val {
   constructor(public name: string) {
     super();
     if (nameTable[name]) {
-      throw new Error('E_INVALID_CALL');
+      throw new Error("E_INVALID_CALL");
     }
     nameTable[name] = this;
   }
@@ -366,7 +398,9 @@ export class Ident extends Val {
   /**
    * @override
    */
-  isIdent() {return true;}
+  isIdent() {
+    return true;
+  }
 }
 
 export const getName = (name: string): Ident => {
@@ -392,12 +426,15 @@ export class Numeric extends Val {
     if (this.num == 0) {
       return scope.zero;
     }
-    if (ref && this.unit == '%') {
+    if (ref && this.unit == "%") {
       if (this.num == 100) {
         return ref;
       }
       return new exprs.Multiply(
-          scope, ref, new exprs.Const(scope, this.num / 100));
+        scope,
+        ref,
+        new exprs.Const(scope, this.num / 100)
+      );
     }
     return new exprs.Numeric(scope, this.num, this.unit);
   }
@@ -420,7 +457,9 @@ export class Numeric extends Val {
   /**
    * @override
    */
-  isNumeric() {return true;}
+  isNumeric() {
+    return true;
+  }
 }
 
 export class Num extends Val {
@@ -461,7 +500,9 @@ export class Num extends Val {
   /**
    * @override
    */
-  isNum() {return true;}
+  isNum() {
+    return true;
+  }
 }
 
 export class Int extends Num {
@@ -486,9 +527,9 @@ export class Color extends Val {
    * @override
    */
   appendTo(buf, toString) {
-    buf.append('#');
+    buf.append("#");
     const str = this.rgb.toString(16);
-    buf.append('000000'.substr(str.length));
+    buf.append("000000".substr(str.length));
     buf.append(str);
   }
 
@@ -522,16 +563,19 @@ export class URL extends Val {
   }
 }
 
-export const appendList =
-    (buf: base.StringBuffer, values: Val[], separator: string,
-     toString: boolean): void => {
-      const length = values.length;
-      values[0].appendTo(buf, toString);
-      for (let i = 1; i < length; i++) {
-        buf.append(separator);
-        values[i].appendTo(buf, toString);
-      }
-    };
+export const appendList = (
+  buf: base.StringBuffer,
+  values: Val[],
+  separator: string,
+  toString: boolean
+): void => {
+  const length = values.length;
+  values[0].appendTo(buf, toString);
+  for (let i = 1; i < length; i++) {
+    buf.append(separator);
+    values[i].appendTo(buf, toString);
+  }
+};
 
 export class SpaceList extends Val {
   constructor(public values: Val[]) {
@@ -542,7 +586,7 @@ export class SpaceList extends Val {
    * @override
    */
   appendTo(buf, toString) {
-    appendList(buf, this.values, ' ', toString);
+    appendList(buf, this.values, " ", toString);
   }
 
   /**
@@ -555,7 +599,9 @@ export class SpaceList extends Val {
   /**
    * @override
    */
-  isSpaceList() {return true;}
+  isSpaceList() {
+    return true;
+  }
 }
 
 export class CommaList extends Val {
@@ -567,7 +613,7 @@ export class CommaList extends Val {
    * @override
    */
   appendTo(buf, toString) {
-    appendList(buf, this.values, ',', toString);
+    appendList(buf, this.values, ",", toString);
   }
 
   /**
@@ -588,9 +634,9 @@ export class Func extends Val {
    */
   appendTo(buf, toString) {
     buf.append(base.escapeCSSIdent(this.name));
-    buf.append('(');
-    appendList(buf, this.values, ',', toString);
-    buf.append(')');
+    buf.append("(");
+    appendList(buf, this.values, ",", toString);
+    buf.append(")");
   }
 
   /**
@@ -617,9 +663,9 @@ export class Expr extends Val {
    * @override
    */
   appendTo(buf, toString) {
-    buf.append('-epubx-expr(');
+    buf.append("-epubx-expr(");
     this.expr.appendTo(buf, 0);
-    buf.append(')');
+    buf.append(")");
   }
 
   /**
@@ -632,13 +678,15 @@ export class Expr extends Val {
   /**
    * @override
    */
-  isExpr() {return true;}
+  isExpr() {
+    return true;
+  }
 }
 
 export const toNumber = (val: Val, context: exprs.Context): number => {
   if (val) {
     if (val.isNumeric()) {
-      const numeric = (val as Numeric);
+      const numeric = val as Numeric;
       return context.queryUnitSize(numeric.unit, false) * numeric.num;
     }
     if (val.isNum()) {
@@ -652,85 +700,85 @@ export const toNumber = (val: Val, context: exprs.Context): number => {
  * Convert numeric value to px
  */
 export const convertNumericToPx = (val: Val, context: exprs.Context): Numeric =>
-    new Numeric(toNumber(val, context), 'px');
+  new Numeric(toNumber(val, context), "px");
 
-export const ident: {[key: string]: Ident} = {
-  absolute: getName('absolute'),
-  all: getName('all'),
-  always: getName('always'),
-  auto: getName('auto'),
-  avoid: getName('avoid'),
-  balance: getName('balance'),
-  balance_all: getName('balance-all'),
-  block: getName('block'),
-  block_end: getName('block-end'),
-  block_start: getName('block-start'),
-  both: getName('both'),
-  bottom: getName('bottom'),
-  border_box: getName('border-box'),
-  break_all: getName('break-all'),
-  break_word: getName('break-word'),
-  crop: getName('crop'),
-  cross: getName('cross'),
-  column: getName('column'),
-  exclusive: getName('exclusive'),
-  _false: getName('false'),
-  fixed: getName('fixed'),
-  flex: getName('flex'),
-  footnote: getName('footnote'),
-  footer: getName('footer'),
-  header: getName('header'),
-  hidden: getName('hidden'),
-  horizontal_tb: getName('horizontal-tb'),
-  inherit: getName('inherit'),
-  inline: getName('inline'),
-  inline_block: getName('inline-block'),
-  inline_end: getName('inline-end'),
-  inline_start: getName('inline-start'),
-  landscape: getName('landscape'),
-  left: getName('left'),
-  line: getName('line'),
-  list_item: getName('list-item'),
-  ltr: getName('ltr'),
-  manual: getName('manual'),
-  none: getName('none'),
-  normal: getName('normal'),
-  oeb_page_foot: getName('oeb-page-foot'),
-  oeb_page_head: getName('oeb-page-head'),
-  page: getName('page'),
-  relative: getName('relative'),
-  right: getName('right'),
-  same: getName('same'),
-  scale: getName('scale'),
-  snap_block: getName('snap-block'),
-  spread: getName('spread'),
-  _static: getName('static'),
-  rtl: getName('rtl'),
-  table: getName('table'),
-  table_caption: getName('table-caption'),
-  table_cell: getName('table-cell'),
-  table_footer_group: getName('table-footer-group'),
-  table_header_group: getName('table-header-group'),
-  table_row: getName('table-row'),
-  top: getName('top'),
-  transparent: getName('transparent'),
-  vertical_lr: getName('vertical-lr'),
-  vertical_rl: getName('vertical-rl'),
-  visible: getName('visible'),
-  _true: getName('true')
+export const ident: { [key: string]: Ident } = {
+  absolute: getName("absolute"),
+  all: getName("all"),
+  always: getName("always"),
+  auto: getName("auto"),
+  avoid: getName("avoid"),
+  balance: getName("balance"),
+  balance_all: getName("balance-all"),
+  block: getName("block"),
+  block_end: getName("block-end"),
+  block_start: getName("block-start"),
+  both: getName("both"),
+  bottom: getName("bottom"),
+  border_box: getName("border-box"),
+  break_all: getName("break-all"),
+  break_word: getName("break-word"),
+  crop: getName("crop"),
+  cross: getName("cross"),
+  column: getName("column"),
+  exclusive: getName("exclusive"),
+  _false: getName("false"),
+  fixed: getName("fixed"),
+  flex: getName("flex"),
+  footnote: getName("footnote"),
+  footer: getName("footer"),
+  header: getName("header"),
+  hidden: getName("hidden"),
+  horizontal_tb: getName("horizontal-tb"),
+  inherit: getName("inherit"),
+  inline: getName("inline"),
+  inline_block: getName("inline-block"),
+  inline_end: getName("inline-end"),
+  inline_start: getName("inline-start"),
+  landscape: getName("landscape"),
+  left: getName("left"),
+  line: getName("line"),
+  list_item: getName("list-item"),
+  ltr: getName("ltr"),
+  manual: getName("manual"),
+  none: getName("none"),
+  normal: getName("normal"),
+  oeb_page_foot: getName("oeb-page-foot"),
+  oeb_page_head: getName("oeb-page-head"),
+  page: getName("page"),
+  relative: getName("relative"),
+  right: getName("right"),
+  same: getName("same"),
+  scale: getName("scale"),
+  snap_block: getName("snap-block"),
+  spread: getName("spread"),
+  _static: getName("static"),
+  rtl: getName("rtl"),
+  table: getName("table"),
+  table_caption: getName("table-caption"),
+  table_cell: getName("table-cell"),
+  table_footer_group: getName("table-footer-group"),
+  table_header_group: getName("table-header-group"),
+  table_row: getName("table-row"),
+  top: getName("top"),
+  transparent: getName("transparent"),
+  vertical_lr: getName("vertical-lr"),
+  vertical_rl: getName("vertical-rl"),
+  visible: getName("visible"),
+  _true: getName("true")
 };
 
-export const hundredPercent: Numeric = new Numeric(100, '%');
+export const hundredPercent: Numeric = new Numeric(100, "%");
 
-export const fullWidth: Numeric = new Numeric(100, 'vw');
+export const fullWidth: Numeric = new Numeric(100, "vw");
 
-export const fullHeight: Numeric = new Numeric(100, 'vh');
+export const fullHeight: Numeric = new Numeric(100, "vh");
 
-export const numericZero: Numeric = new Numeric(0, 'px');
+export const numericZero: Numeric = new Numeric(0, "px");
 
 export const processingOrder = {
-  'font-size': 1,
-  'color': 2
+  "font-size": 1,
+  color: 2
 };
 
 /**

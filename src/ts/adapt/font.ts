@@ -17,37 +17,38 @@
  *
  * @fileoverview Deal with embedded fonts.
  */
-import * as logging from '../vivliostyle/logging';
-import * as css from './css';
-import * as exprs from './expr';
-import * as net from './net';
-import * as task from './task';
-import * as taskutil from './taskutil';
+import * as logging from "../vivliostyle/logging";
+import * as css from "./css";
+import * as exprs from "./expr";
+import * as net from "./net";
+import * as task from "./task";
+import * as taskutil from "./taskutil";
 
-import * as base from './base';
-import {ElementStyle, getProp} from './csscasc';
+import * as base from "./base";
+import { ElementStyle, getProp } from "./csscasc";
 
-export const traitProps: {[key: string]: css.Val} = {
-  'font-style': css.ident.normal,
-  'font-variant': css.ident.normal,
-  'font-weight': css.ident.normal
+export const traitProps: { [key: string]: css.Val } = {
+  "font-style": css.ident.normal,
+  "font-variant": css.ident.normal,
+  "font-weight": css.ident.normal
 };
 
-export const bogusFontData = `OTTO${(new Date()).valueOf()}`;
+export const bogusFontData = `OTTO${new Date().valueOf()}`;
 
 export let bogusFontCounter: number = 1;
 
-export const makeFontTraitKey =
-    (properties: {[key: string]: css.Val}): string => {
-      const sb = new base.StringBuffer();
-      for (const prop in traitProps) {
-        sb.append(' ');
-        sb.append(properties[prop].toString());
-      }
-      return sb.toString();
-    };
+export const makeFontTraitKey = (properties: {
+  [key: string]: css.Val;
+}): string => {
+  const sb = new base.StringBuffer();
+  for (const prop in traitProps) {
+    sb.append(" ");
+    sb.append(properties[prop].toString());
+  }
+  return sb.toString();
+};
 
-export const fillDefaults = (properties: {[key: string]: css.Val}) => {
+export const fillDefaults = (properties: { [key: string]: css.Val }) => {
   for (const prop in traitProps) {
     if (!properties[prop]) {
       properties[prop] = traitProps[prop];
@@ -55,17 +56,17 @@ export const fillDefaults = (properties: {[key: string]: css.Val}) => {
   }
 };
 
-export const prepareProperties =
-    (properties: ElementStyle, context: exprs.Context):
-        {[key: string]: css.Val} => {
-          const result = ({} as {[key: string]: css.Val});
-          for (const prop in properties) {
-            result[prop] =
-                getProp(properties, prop).evaluate(context, prop);
-          }
-          fillDefaults(result);
-          return result;
-        };
+export const prepareProperties = (
+  properties: ElementStyle,
+  context: exprs.Context
+): { [key: string]: css.Val } => {
+  const result = {} as { [key: string]: css.Val };
+  for (const prop in properties) {
+    result[prop] = getProp(properties, prop).evaluate(context, prop);
+  }
+  fillDefaults(result);
+  return result;
+};
 
 /**
  * A font declared in a font-face rule.
@@ -77,11 +78,12 @@ export class Face {
   blobs: Blob[] = [];
   family: any;
 
-  constructor(public readonly properties: {[key: string]: css.Val}) {
+  constructor(public readonly properties: { [key: string]: css.Val }) {
     this.fontTraitKey = makeFontTraitKey(this.properties);
-    this.src =
-        this.properties['src'] ? this.properties['src'].toString() : null;
-    const family = this.properties['font-family'];
+    this.src = this.properties["src"]
+      ? this.properties["src"].toString()
+      : null;
+    const family = this.properties["font-family"];
     this.family = family ? family.stringValue() : null;
   }
 
@@ -97,14 +99,14 @@ export class Face {
    */
   makeAtRule(src: string, fontBytes: Blob): string {
     const sb = new base.StringBuffer();
-    sb.append('@font-face {\n  font-family: ');
-    sb.append((this.family as string));
-    sb.append(';\n  ');
+    sb.append("@font-face {\n  font-family: ");
+    sb.append(this.family as string);
+    sb.append(";\n  ");
     for (const prop in traitProps) {
       sb.append(prop);
-      sb.append(': ');
+      sb.append(": ");
       this.properties[prop].appendTo(sb, true);
-      sb.append(';\n  ');
+      sb.append(";\n  ");
     }
     if (fontBytes) {
       sb.append('src: url("');
@@ -114,10 +116,10 @@ export class Face {
       this.blobs.push(fontBytes);
       sb.append('")');
     } else {
-      sb.append('src: ');
+      sb.append("src: ");
       sb.append(src);
     }
-    sb.append(';\n}\n');
+    sb.append(";\n}\n");
     return sb.toString();
   }
 }
@@ -131,14 +133,16 @@ export class DocumentFaces {
   /**
    * Maps source font family names to the family names used in the HTML view.
    */
-  familyMap: any = ({} as {[key: string]: string});
+  familyMap: any = {} as { [key: string]: string };
 
-  constructor(public readonly deobfuscator:
-                  ((p1: string) => ((p1: Blob) => task.Result<Blob>) | null)|
-              null) {}
+  constructor(
+    public readonly deobfuscator:
+      | ((p1: string) => ((p1: Blob) => task.Result<Blob>) | null)
+      | null
+  ) {}
 
   registerFamily(srcFace: Face, viewFace: Face): void {
-    const srcFamily = (srcFace.family as string);
+    const srcFamily = srcFace.family as string;
     const viewFamilyFromSrc = this.familyMap[srcFamily];
     const viewFamilyFromView = viewFace.family;
     if (viewFamilyFromSrc) {
@@ -146,14 +150,14 @@ export class DocumentFaces {
         throw new Error(`E_FONT_FAMILY_INCONSISTENT ${srcFace.family}`);
       }
     } else {
-      this.familyMap[srcFamily] = (viewFamilyFromView as string);
+      this.familyMap[srcFamily] = viewFamilyFromView as string;
     }
   }
 
   filterFontFamily(val: css.Val): css.Val {
     if (val instanceof css.CommaList) {
       const list = (val as css.CommaList).values;
-      const newValues = ([] as css.Val[]);
+      const newValues = [] as css.Val[];
       for (const v of list) {
         const r = this.familyMap[v.stringValue()];
         if (r) {
@@ -182,18 +186,20 @@ export class Mapper {
   /**
    * Maps Face.src to an entry for an already-loaded font.
    */
-  srcURLMap: {[key: string]: taskutil.Fetcher<Face>} = {};
+  srcURLMap: { [key: string]: taskutil.Fetcher<Face> } = {};
   familyPrefix: any;
   familyCounter: number = 0;
 
   constructor(
-      public readonly head: Element, public readonly body: Element,
-      opt_familyPrefix?: string) {
-    this.familyPrefix = opt_familyPrefix || 'Fnt_';
+    public readonly head: Element,
+    public readonly body: Element,
+    opt_familyPrefix?: string
+  ) {
+    this.familyPrefix = opt_familyPrefix || "Fnt_";
   }
 
   getViewFontFamily(srcFace: Face, documentFaces: DocumentFaces): string {
-    const srcFamily = (srcFace.family as string);
+    const srcFamily = srcFace.family as string;
     let viewFamily = documentFaces.familyMap[srcFamily];
     if (viewFamily) {
       return viewFamily;
@@ -207,28 +213,29 @@ export class Mapper {
    * @param fontBytes deobfuscated font bytes (if deobfuscation is needed)
    */
   private initFont(
-      srcFace: Face, fontBytes: Blob,
-      documentFaces: DocumentFaces): task.Result<Face> {
-    const frame: task.Frame<Face> = task.newFrame('initFont');
+    srcFace: Face,
+    fontBytes: Blob,
+    documentFaces: DocumentFaces
+  ): task.Result<Face> {
+    const frame: task.Frame<Face> = task.newFrame("initFont");
     const self = this;
-    const src = (srcFace.src as string);
-    const props = ({} as {[key: string]: css.Val});
+    const src = srcFace.src as string;
+    const props = {} as { [key: string]: css.Val };
     for (const prop in traitProps) {
       props[prop] = srcFace.properties[prop];
     }
     const fontFamily = self.getViewFontFamily(srcFace, documentFaces);
-    props['font-family'] = css.getName(fontFamily);
+    props["font-family"] = css.getName(fontFamily);
     const viewFontFace = new Face(props);
-    const probe =
-        (self.body.ownerDocument.createElement('span') as HTMLElement);
-    probe.textContent = 'M';
-    const killTime = (new Date()).valueOf() + 1000;
-    const style = self.head.ownerDocument.createElement('style');
+    const probe = self.body.ownerDocument.createElement("span") as HTMLElement;
+    probe.textContent = "M";
+    const killTime = new Date().valueOf() + 1000;
+    const style = self.head.ownerDocument.createElement("style");
     const bogusData = bogusFontData + bogusFontCounter++;
-    style.textContent = viewFontFace.makeAtRule('', net.makeBlob([bogusData]));
+    style.textContent = viewFontFace.makeAtRule("", net.makeBlob([bogusData]));
     self.head.appendChild(style);
     self.body.appendChild(probe);
-    probe.style.visibility = 'hidden';
+    probe.style.visibility = "hidden";
     probe.style.fontFamily = fontFamily;
     for (const pname in traitProps) {
       base.setCSSProperty(probe, pname, props[pname].toString());
@@ -237,64 +244,68 @@ export class Mapper {
     const initWidth = rect.right - rect.left;
     const initHeight = rect.bottom - rect.top;
     style.textContent = viewFontFace.makeAtRule(src, fontBytes);
-    logging.logger.info('Starting to load font:', src);
+    logging.logger.info("Starting to load font:", src);
     let loaded = false;
     frame
-        .loop(() => {
-          const rect = probe.getBoundingClientRect();
-          const currWidth = rect.right - rect.left;
-          const currHeight = rect.bottom - rect.top;
-          if (initWidth != currWidth || initHeight != currHeight) {
-            loaded = true;
-            return task.newResult(false);
-          }
-          const currTime = (new Date()).valueOf();
-          if (currTime > killTime) {
-            return task.newResult(false);
-          }
-          return frame.sleep(10);
-        })
-        .then(() => {
-          if (loaded) {
-            logging.logger.info('Loaded font:', src);
-          } else {
-            logging.logger.warn('Failed to load font:', src);
-          }
-          self.body.removeChild(probe);
-          frame.finish(viewFontFace);
-        });
+      .loop(() => {
+        const rect = probe.getBoundingClientRect();
+        const currWidth = rect.right - rect.left;
+        const currHeight = rect.bottom - rect.top;
+        if (initWidth != currWidth || initHeight != currHeight) {
+          loaded = true;
+          return task.newResult(false);
+        }
+        const currTime = new Date().valueOf();
+        if (currTime > killTime) {
+          return task.newResult(false);
+        }
+        return frame.sleep(10);
+      })
+      .then(() => {
+        if (loaded) {
+          logging.logger.info("Loaded font:", src);
+        } else {
+          logging.logger.warn("Failed to load font:", src);
+        }
+        self.body.removeChild(probe);
+        frame.finish(viewFontFace);
+      });
     return frame.result();
   }
 
-  loadFont(srcFace: Face, documentFaces: DocumentFaces):
-      taskutil.Fetcher<Face> {
-    const src = (srcFace.src as string);
+  loadFont(
+    srcFace: Face,
+    documentFaces: DocumentFaces
+  ): taskutil.Fetcher<Face> {
+    const src = srcFace.src as string;
     let fetcher = this.srcURLMap[src];
     const self = this;
     if (fetcher) {
-      fetcher.piggyback((viewFaceParam) => {
-        const viewFace = (viewFaceParam as Face);
+      fetcher.piggyback(viewFaceParam => {
+        const viewFace = viewFaceParam as Face;
         if (!viewFace.traitsEqual(srcFace)) {
-          logging.logger.warn('E_FONT_FACE_INCOMPATIBLE', srcFace.src);
+          logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
         } else {
           documentFaces.registerFamily(srcFace, viewFace);
-          logging.logger.warn('Found already-loaded font:', src);
+          logging.logger.warn("Found already-loaded font:", src);
         }
       });
     } else {
       fetcher = new taskutil.Fetcher(() => {
-        const frame: task.Frame<Face> = task.newFrame('loadFont');
-        const deobfuscator =
-            documentFaces.deobfuscator ? documentFaces.deobfuscator(src) : null;
+        const frame: task.Frame<Face> = task.newFrame("loadFont");
+        const deobfuscator = documentFaces.deobfuscator
+          ? documentFaces.deobfuscator(src)
+          : null;
         if (deobfuscator) {
-          net.ajax(src, net.XMLHttpRequestResponseType.BLOB).then((xhr) => {
+          net.ajax(src, net.XMLHttpRequestResponseType.BLOB).then(xhr => {
             if (!xhr.responseBlob) {
               frame.finish(null);
               return;
             }
-            deobfuscator(xhr.responseBlob).then((fontBytes) => {
-              self.initFont(srcFace, fontBytes, documentFaces)
-                  .thenFinish(frame);
+            deobfuscator(xhr.responseBlob).then(fontBytes => {
+              self
+                .initFont(srcFace, fontBytes, documentFaces)
+                .thenFinish(frame);
             });
           });
         } else {
@@ -308,12 +319,14 @@ export class Mapper {
     return fetcher;
   }
 
-  findOrLoadFonts(srcFaces: Face[], documentFaces: DocumentFaces):
-      task.Result<boolean> {
-    const fetchers = ([] as taskutil.Fetcher<Face>[]);
+  findOrLoadFonts(
+    srcFaces: Face[],
+    documentFaces: DocumentFaces
+  ): task.Result<boolean> {
+    const fetchers = [] as taskutil.Fetcher<Face>[];
     for (const srcFace of srcFaces) {
       if (!srcFace.src || !srcFace.family) {
-        logging.logger.warn('E_FONT_FACE_INVALID');
+        logging.logger.warn("E_FONT_FACE_INVALID");
         continue;
       }
       fetchers.push(this.loadFont(srcFace, documentFaces));

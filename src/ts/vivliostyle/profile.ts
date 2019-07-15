@@ -16,7 +16,7 @@
  *
  * @fileoverview Utility for profiling
  */
-import * as logging from './logging';
+import * as logging from "./logging";
 
 /**
  * Performance profiler measuring execution time of the script.
@@ -31,8 +31,8 @@ export class Profiler {
     this.registerTiming = noop;
 
     // hack to export (non-prototype) methods
-    this['registerStartTiming'] = this.registerStartTiming = noop;
-    this['registerEndTiming'] = this.registerEndTiming = noop;
+    this["registerStartTiming"] = this.registerStartTiming = noop;
+    this["registerEndTiming"] = this.registerEndTiming = noop;
   }
 
   /**
@@ -42,7 +42,7 @@ export class Profiler {
    *     instead of "now"
    */
   forceRegisterStartTiming(name: string, timestamp?: number) {
-    registerTiming.call(this, name, 'start', timestamp);
+    registerTiming.call(this, name, "start", timestamp);
   }
 
   /**
@@ -52,7 +52,7 @@ export class Profiler {
    *     instead of "now"
    */
   forceRegisterEndTiming(name: string, timestamp?: number) {
-    registerTiming.call(this, name, 'end', timestamp);
+    registerTiming.call(this, name, "end", timestamp);
   }
 
   /**
@@ -61,8 +61,8 @@ export class Profiler {
    */
   printTimings() {
     const timestamps = this.timestamps;
-    let st = '';
-    Object.keys(timestamps).forEach((name) => {
+    let st = "";
+    Object.keys(timestamps).forEach(name => {
       const stamps = timestamps[name];
       const l = stamps.length;
       for (let i = 0; i < l; i++) {
@@ -71,8 +71,9 @@ export class Profiler {
         if (l > 1) {
           st += `(${i})`;
         }
-        st += ` => start: ${t['start']}, end: ${t['end']}, duration: ${
-            t['end'] - t['start']}\n`;
+        st += ` => start: ${t["start"]}, end: ${t["end"]}, duration: ${t[
+          "end"
+        ] - t["start"]}\n`;
       }
     });
     logging.logger.info(st);
@@ -85,8 +86,8 @@ export class Profiler {
     this.registerTiming = noop;
 
     // hack to export (non-prototype) methods
-    this['registerStartTiming'] = this.registerStartTiming = noop;
-    this['registerEndTiming'] = this.registerEndTiming = noop;
+    this["registerStartTiming"] = this.registerStartTiming = noop;
+    this["registerEndTiming"] = this.registerEndTiming = noop;
   }
 
   /**
@@ -96,9 +97,10 @@ export class Profiler {
     this.registerTiming = registerTiming;
 
     // hack to export (non-prototype) methods
-    this['registerStartTiming'] = this.registerStartTiming =
-        registerStartTiming;
-    this['registerEndTiming'] = this.registerEndTiming = registerEndTiming;
+    this[
+      "registerStartTiming"
+    ] = this.registerStartTiming = registerStartTiming;
+    this["registerEndTiming"] = this.registerEndTiming = registerEndTiming;
   }
 
   /**
@@ -108,7 +110,6 @@ export class Profiler {
     return this.registerStartTiming === registerStartTiming;
   }
 }
-
 
 function noop() {}
 
@@ -152,7 +153,7 @@ function registerTiming(name: string, startEnd: string, timestamp?: number) {
  *     instead of "now"
  */
 function registerStartTiming(name: string, timestamp?: number) {
-  this.registerTiming(name, 'start', timestamp);
+  this.registerTiming(name, "start", timestamp);
 }
 
 /**
@@ -163,12 +164,14 @@ function registerStartTiming(name: string, timestamp?: number) {
  *     instead of "now"
  */
 function registerEndTiming(name: string, timestamp?: number) {
-  this.registerTiming(name, 'end', timestamp);
+  this.registerTiming(name, "end", timestamp);
 }
-const fallbackPerformanceInstance = ({now: Date.now} as Performance);
+const fallbackPerformanceInstance = { now: Date.now } as Performance;
 const performanceInstance = window && window.performance;
-export const profiler = new Profiler(performanceInstance || fallbackPerformanceInstance);
-profiler.forceRegisterStartTiming('load_vivliostyle');
+export const profiler = new Profiler(
+  performanceInstance || fallbackPerformanceInstance
+);
+profiler.forceRegisterStartTiming("load_vivliostyle");
 
 /**
  * Pubilc members of the bundled library.
@@ -179,6 +182,6 @@ export const profile = {
     registerEndTiming: profiler.registerEndTiming,
     printTimings: profiler.printTimings,
     disable: profiler.disable,
-    enable: profiler.enable,
+    enable: profiler.enable
   }
 };

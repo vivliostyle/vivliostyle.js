@@ -17,27 +17,27 @@
  *
  * @fileoverview Basic view tree data structures and support utilities.
  */
-import * as asserts from '../vivliostyle/asserts';
-import * as constants from '../vivliostyle/constants';
-import {Change, resolveOriginalIndex} from '../vivliostyle/diff';
-import {pagefloat, selector, vtree, xmldoc} from '../vivliostyle/types';
-import * as base from './base';
-import * as css from './css';
-import {toShape} from './cssprop';
-import {Context} from './expr';
-import * as geom from './geom';
-import * as taskutil from './taskutil';
+import * as asserts from "../vivliostyle/asserts";
+import * as constants from "../vivliostyle/constants";
+import { Change, resolveOriginalIndex } from "../vivliostyle/diff";
+import { pagefloat, selector, vtree, xmldoc } from "../vivliostyle/types";
+import * as base from "./base";
+import * as css from "./css";
+import { toShape } from "./cssprop";
+import { Context } from "./expr";
+import * as geom from "./geom";
+import * as taskutil from "./taskutil";
 
 export const delayedProps = {
-  'transform': true,
-  'transform-origin': true
+  transform: true,
+  "transform-origin": true
 };
 
 export const delayedPropsIfRelativePositioned = {
-  'top': true,
-  'bottom': true,
-  'left': true,
-  'right': true
+  top: true,
+  bottom: true,
+  left: true,
+  right: true
 };
 
 export class DelayedItem {
@@ -53,71 +53,72 @@ export class DelayedItem {
 }
 
 export type PageHyperlinkEvent = {
-  type: string,
-  target,
-  currentTarget,
-  anchorElement: Element,
-  href: string
+  type: string;
+  target;
+  currentTarget;
+  anchorElement: Element;
+  href: string;
 };
 
 export type Trigger = {
-  observer: string,
-  event: string,
-  action: string,
-  ref: string
+  observer: string;
+  event: string;
+  action: string;
+  ref: string;
 };
 
 export const actions = {
-  'show': function(obj) {
-    obj.style.visibility = 'visible';
+  show: function(obj) {
+    obj.style.visibility = "visible";
   },
-  'hide': function(obj) {
-    obj.style.visibility = 'hidden';
+  hide: function(obj) {
+    obj.style.visibility = "hidden";
   },
-  'play': function(obj) {
+  play: function(obj) {
     obj.currentTime = 0;
     obj.play();
   },
-  'pause': function(obj) {
+  pause: function(obj) {
     obj.pause();
   },
-  'resume': function(obj) {
+  resume: function(obj) {
     obj.play();
   },
-  'mute': function(obj) {
+  mute: function(obj) {
     obj.muted = true;
   },
-  'unmute': function(obj) {
+  unmute: function(obj) {
     obj.muted = false;
   }
 };
 
-export const makeListener =
-    (refs: Element[], action: string): EventListener | null => {
-      const actionFn = actions[action];
-      if (actionFn) {
-        return () => {
-          for (let k = 0; k < refs.length; k++) {
-            try {
-              actionFn(refs[k]);
-            } catch (err) {
-            }
-          }
-        };
+export const makeListener = (
+  refs: Element[],
+  action: string
+): EventListener | null => {
+  const actionFn = actions[action];
+  if (actionFn) {
+    return () => {
+      for (let k = 0; k < refs.length; k++) {
+        try {
+          actionFn(refs[k]);
+        } catch (err) {}
       }
-      return null;
     };
+  }
+  return null;
+};
 
 export class Page extends base.SimpleEventTarget {
   private static AUTO_PAGE_WIDTH_ATTRIBUTE: string =
-      'data-vivliostyle-auto-page-width';
+    "data-vivliostyle-auto-page-width";
   private static AUTO_PAGE_HEIGHT_ATTRIBUTE: string =
-      'data-vivliostyle-auto-page-height';
-  pageAreaElement: HTMLElement|null = null;
+    "data-vivliostyle-auto-page-height";
+  pageAreaElement: HTMLElement | null = null;
   delayedItems: DelayedItem[] = [];
   hrefHandler: any;
-  elementsById: {[key: string]: Element[]} = {};
-  dimensions: {width: number, height: number} = {width: 0, height: 0};
+  elementsById: { [key: string]: Element[] } = {};
+  dimensions: { width: number; height: number } = { width: 0, height: 0 };
   isFirstPage: boolean = false;
   isLastPage: boolean = false;
   isAutoPageWidth: boolean = true;
@@ -125,27 +126,29 @@ export class Page extends base.SimpleEventTarget {
   spineIndex: number = 0;
   position: LayoutPosition = null;
   offset: number = -1;
-  side: constants.PageSide|null = null;
+  side: constants.PageSide | null = null;
   fetchers: taskutil.Fetcher<{}>[] = [];
   marginBoxes: {
-    top: {[key: string]: Container},
-    bottom: {[key: string]: Container},
-    left: {[key: string]: Container},
-    right: {[key: string]: Container}
-  } = {top: {}, bottom: {}, left: {}, right: {}};
+    top: { [key: string]: Container };
+    bottom: { [key: string]: Container };
+    left: { [key: string]: Container };
+    right: { [key: string]: Container };
+  } = { top: {}, bottom: {}, left: {}, right: {} };
 
   constructor(
-      public readonly container: HTMLElement,
-      public readonly bleedBox: HTMLElement) {
+    public readonly container: HTMLElement,
+    public readonly bleedBox: HTMLElement
+  ) {
     super();
     const self = this;
     this.hrefHandler = (e: Event) => {
-      const anchorElement = (e.currentTarget as Element);
-      const href = anchorElement.getAttribute('href') ||
-          anchorElement.getAttributeNS(base.NS.XLINK, 'href');
+      const anchorElement = e.currentTarget as Element;
+      const href =
+        anchorElement.getAttribute("href") ||
+        anchorElement.getAttributeNS(base.NS.XLINK, "href");
       if (href) {
         const evt = {
-          type: 'hyperlink',
+          type: "hyperlink",
           target: null,
           currentTarget: null,
           anchorElement,
@@ -162,7 +165,7 @@ export class Page extends base.SimpleEventTarget {
   setAutoPageWidth(isAuto: boolean) {
     this.isAutoPageWidth = isAuto;
     if (isAuto) {
-      this.container.setAttribute(Page.AUTO_PAGE_WIDTH_ATTRIBUTE, 'true');
+      this.container.setAttribute(Page.AUTO_PAGE_WIDTH_ATTRIBUTE, "true");
     } else {
       this.container.removeAttribute(Page.AUTO_PAGE_WIDTH_ATTRIBUTE);
     }
@@ -171,7 +174,7 @@ export class Page extends base.SimpleEventTarget {
   setAutoPageHeight(isAuto: boolean) {
     this.isAutoPageHeight = isAuto;
     if (isAuto) {
-      this.container.setAttribute(Page.AUTO_PAGE_HEIGHT_ATTRIBUTE, 'true');
+      this.container.setAttribute(Page.AUTO_PAGE_HEIGHT_ATTRIBUTE, "true");
     } else {
       this.container.removeAttribute(Page.AUTO_PAGE_HEIGHT_ATTRIBUTE);
     }
@@ -192,7 +195,7 @@ export class Page extends base.SimpleEventTarget {
     // in the page)
     Object.keys(this.elementsById).forEach(function(id) {
       const elems = this.elementsById[id];
-      for (let i = 0; i < elems.length;) {
+      for (let i = 0; i < elems.length; ) {
         if (this.container.contains(elems[i])) {
           i++;
         } else {
@@ -233,7 +236,7 @@ export class Page extends base.SimpleEventTarget {
    * @param scale Factor to which the page will be scaled.
    */
   zoom(scale: number) {
-    base.setCSSProperty(this.container, 'transform', `scale(${scale})`);
+    base.setCSSProperty(this.container, "transform", `scale(${scale})`);
   }
 
   /**
@@ -245,14 +248,14 @@ export class Page extends base.SimpleEventTarget {
 }
 
 export type Spread = {
-  left: Page,
-  right: Page
+  left: Page;
+  right: Page;
 };
 
 /**
  * Marks an element as "special". It should not be used in bbox calculations.
  */
-export const SPECIAL_ATTR = 'data-adapt-spec';
+export const SPECIAL_ATTR = "data-adapt-spec";
 
 export const Whitespace = vtree.Whitespace;
 export type Whitespace = vtree.Whitespace;
@@ -263,21 +266,22 @@ export type Whitespace = vtree.Whitespace;
  * Resolves adapt.vtree.Whitespace value from a value of 'white-space' property
  * @param whitespace The value of 'white-space' property
  */
-export const whitespaceFromPropertyValue =
-    (whitespace: string): Whitespace|null => {
-      switch (whitespace) {
-        case 'normal':
-        case 'nowrap':
-          return Whitespace.IGNORE;
-        case 'pre-line':
-          return Whitespace.NEWLINE;
-        case 'pre':
-        case 'pre-wrap':
-          return Whitespace.PRESERVE;
-        default:
-          return null;
-      }
-    };
+export const whitespaceFromPropertyValue = (
+  whitespace: string
+): Whitespace | null => {
+  switch (whitespace) {
+    case "normal":
+    case "nowrap":
+      return Whitespace.IGNORE;
+    case "pre-line":
+      return Whitespace.NEWLINE;
+    case "pre":
+    case "pre-wrap":
+      return Whitespace.PRESERVE;
+    default:
+      return null;
+  }
+};
 
 export const canIgnore = (node: Node, whitespace: Whitespace): boolean => {
   if (node.nodeType == 1) {
@@ -296,23 +300,29 @@ export const canIgnore = (node: Node, whitespace: Whitespace): boolean => {
 };
 
 export class Flow {
-  forcedBreakOffsets: any = ([] as number[]);
-  formattingContext: FormattingContext|null = null;
+  forcedBreakOffsets: any = [] as number[];
+  formattingContext: FormattingContext | null = null;
 
   constructor(
-      public readonly flowName: string,
-      public readonly parentFlowName: string|null) {}
+    public readonly flowName: string,
+    public readonly parentFlowName: string | null
+  ) {}
 }
 
 export class FlowChunk {
   startPage: number = -1;
 
   constructor(
-      public flowName: string, public element: Element,
-      public startOffset: number, public priority: number,
-      public linger: number, public exclusive: boolean,
-      public repeated: boolean, public last: boolean,
-      public breakBefore: string|null) {}
+    public flowName: string,
+    public element: Element,
+    public startOffset: number,
+    public priority: number,
+    public linger: number,
+    public exclusive: boolean,
+    public repeated: boolean,
+    public last: boolean,
+    public breakBefore: string | null
+  ) {}
 
   isBetter(other: FlowChunk): boolean {
     if (!this.exclusive) {
@@ -330,11 +340,15 @@ export class FlowChunk {
 
 export type ClientRect = vtree.ClientRect;
 
-export const clientrectIncreasingTop =
-    (r1: ClientRect, r2: ClientRect): number => r1.top - r2.top;
+export const clientrectIncreasingTop = (
+  r1: ClientRect,
+  r2: ClientRect
+): number => r1.top - r2.top;
 
-export const clientrectDecreasingRight =
-    (r1: ClientRect, r2: ClientRect): number => r2.right - r1.right;
+export const clientrectDecreasingRight = (
+  r1: ClientRect,
+  r2: ClientRect
+): number => r2.right - r1.right;
 
 /**
  * Interface to read the position assigned to the elements and ranges by the
@@ -352,53 +366,65 @@ export type LayoutContext = vtree.LayoutContext;
  */
 export type FormattingContext = vtree.FormattingContext;
 
-export const eachAncestorFormattingContext =
-    (nodeContext: NodeContext, callback: (p1: FormattingContext) => any) => {
-      if (!nodeContext) {
-        return;
-      }
-      for (let fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
-        callback(fc);
-      }
-    };
+export const eachAncestorFormattingContext = (
+  nodeContext: NodeContext,
+  callback: (p1: FormattingContext) => any
+) => {
+  if (!nodeContext) {
+    return;
+  }
+  for (let fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
+    callback(fc);
+  }
+};
 
 export type NodePositionStep = vtree.NodePositionStep;
 
-export const isSameNodePositionStep =
-    (nps1: NodePositionStep, nps2: NodePositionStep): boolean => {
-      if (nps1 === nps2) {
-        return true;
-      }
-      if (!nps1 || !nps2) {
-        return false;
-      }
-      return nps1.node === nps2.node && nps1.shadowType === nps2.shadowType &&
-          isSameShadowContext(nps1.shadowContext, nps2.shadowContext) &&
-          isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
-          isSameNodePositionStep(nps1.shadowSibling, nps2.shadowSibling);
-    };
+export const isSameNodePositionStep = (
+  nps1: NodePositionStep,
+  nps2: NodePositionStep
+): boolean => {
+  if (nps1 === nps2) {
+    return true;
+  }
+  if (!nps1 || !nps2) {
+    return false;
+  }
+  return (
+    nps1.node === nps2.node &&
+    nps1.shadowType === nps2.shadowType &&
+    isSameShadowContext(nps1.shadowContext, nps2.shadowContext) &&
+    isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
+    isSameNodePositionStep(nps1.shadowSibling, nps2.shadowSibling)
+  );
+};
 
 export type NodePosition = vtree.NodePosition;
 
-export const isSameNodePosition =
-    (np1: NodePosition|null, np2: NodePosition|null): boolean => {
-      if (np1 === np2) {
-        return true;
-      }
-      if (!np1 || !np2) {
-        return false;
-      }
-      if (np1.offsetInNode !== np2.offsetInNode || np1.after !== np2.after ||
-          np1.steps.length !== np2.steps.length) {
-        return false;
-      }
-      for (let i = 0; i < np1.steps.length; i++) {
-        if (!isSameNodePositionStep(np1.steps[i], np2.steps[i])) {
-          return false;
-        }
-      }
-      return true;
-    };
+export const isSameNodePosition = (
+  np1: NodePosition | null,
+  np2: NodePosition | null
+): boolean => {
+  if (np1 === np2) {
+    return true;
+  }
+  if (!np1 || !np2) {
+    return false;
+  }
+  if (
+    np1.offsetInNode !== np2.offsetInNode ||
+    np1.after !== np2.after ||
+    np1.steps.length !== np2.steps.length
+  ) {
+    return false;
+  }
+  for (let i = 0; i < np1.steps.length; i++) {
+    if (!isSameNodePositionStep(np1.steps[i], np2.steps[i])) {
+      return false;
+    }
+  }
+  return true;
+};
 
 export const newNodePositionFromNode = (node: Node): NodePosition => {
   const step: NodePositionStep = {
@@ -418,41 +444,45 @@ export const newNodePositionFromNode = (node: Node): NodePosition => {
   };
 };
 
-export const newNodePositionFromNodeContext =
-    (nodeContext: vtree.NodeContext,
-     initialFragmentIndex: number|null): NodePosition => {
-      const step: NodePositionStep = {
-        node: nodeContext.sourceNode,
-        shadowType: ShadowType.NONE,
-        shadowContext: nodeContext.shadowContext,
-        nodeShadow: null,
-        shadowSibling: null,
-        formattingContext: null,
-        fragmentIndex: initialFragmentIndex != null ? initialFragmentIndex :
-                                                      nodeContext.fragmentIndex
-      };
-      return {
-        steps: [step],
-        offsetInNode: 0,
-        after: false,
-        preprocessedTextContent: nodeContext.preprocessedTextContent
-      };
-    };
+export const newNodePositionFromNodeContext = (
+  nodeContext: vtree.NodeContext,
+  initialFragmentIndex: number | null
+): NodePosition => {
+  const step: NodePositionStep = {
+    node: nodeContext.sourceNode,
+    shadowType: ShadowType.NONE,
+    shadowContext: nodeContext.shadowContext,
+    nodeShadow: null,
+    shadowSibling: null,
+    formattingContext: null,
+    fragmentIndex:
+      initialFragmentIndex != null
+        ? initialFragmentIndex
+        : nodeContext.fragmentIndex
+  };
+  return {
+    steps: [step],
+    offsetInNode: 0,
+    after: false,
+    preprocessedTextContent: nodeContext.preprocessedTextContent
+  };
+};
 
-export const makeNodeContextFromNodePositionStep =
-    (step: NodePositionStep, parent: vtree.NodeContext): NodeContext => {
-      const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
-      nodeContext.shadowType = step.shadowType;
-      nodeContext.shadowContext = step.shadowContext;
-      nodeContext.nodeShadow = step.nodeShadow;
-      nodeContext.shadowSibling = step.shadowSibling ?
-          makeNodeContextFromNodePositionStep(
-              step.shadowSibling, parent.copy()) :
-          null;
-      nodeContext.formattingContext = step.formattingContext;
-      nodeContext.fragmentIndex = step.fragmentIndex + 1;
-      return nodeContext;
-    };
+export const makeNodeContextFromNodePositionStep = (
+  step: NodePositionStep,
+  parent: vtree.NodeContext
+): NodeContext => {
+  const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
+  nodeContext.shadowType = step.shadowType;
+  nodeContext.shadowContext = step.shadowContext;
+  nodeContext.nodeShadow = step.nodeShadow;
+  nodeContext.shadowSibling = step.shadowSibling
+    ? makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy())
+    : null;
+  nodeContext.formattingContext = step.formattingContext;
+  nodeContext.fragmentIndex = step.fragmentIndex + 1;
+  return nodeContext;
+};
 
 export const ShadowType = vtree.ShadowType;
 export type ShadowType = vtree.ShadowType;
@@ -464,10 +494,14 @@ export class ShadowContext implements vtree.ShadowContext {
   subShadow: ShadowContext = null;
 
   constructor(
-      public readonly owner: Element, public readonly root: Element,
-      public readonly xmldoc: xmldoc.XMLDocHolder,
-      public readonly parentShadow: ShadowContext, superShadow: ShadowContext,
-      public readonly type: ShadowType, public readonly styler: Object) {
+    public readonly owner: Element,
+    public readonly root: Element,
+    public readonly xmldoc: xmldoc.XMLDocHolder,
+    public readonly parentShadow: ShadowContext,
+    superShadow: ShadowContext,
+    public readonly type: ShadowType,
+    public readonly styler: Object
+  ) {
     if (superShadow) {
       superShadow.subShadow = this;
     }
@@ -477,15 +511,19 @@ export class ShadowContext implements vtree.ShadowContext {
     if (!other) {
       return false;
     }
-    return this.owner === other.owner && this.xmldoc === other.xmldoc &&
-        this.type === other.type &&
-        isSameShadowContext(this.parentShadow, other.parentShadow);
+    return (
+      this.owner === other.owner &&
+      this.xmldoc === other.xmldoc &&
+      this.type === other.type &&
+      isSameShadowContext(this.parentShadow, other.parentShadow)
+    );
   }
 }
 
-export const isSameShadowContext =
-    (sc1: ShadowContext, sc2: ShadowContext): boolean =>
-        sc1 === sc2 || !!sc1 && !!sc2 && sc1.equals(sc2);
+export const isSameShadowContext = (
+  sc1: ShadowContext,
+  sc2: ShadowContext
+): boolean => sc1 === sc2 || (!!sc1 && !!sc2 && sc1.equals(sc2));
 
 /**
  * Information about :first-letter or :first-line pseudoelements
@@ -493,7 +531,9 @@ export const isSameShadowContext =
  */
 export class FirstPseudo implements vtree.FirstPseudo {
   constructor(
-      public readonly outer: FirstPseudo, public readonly count: number) {}
+    public readonly outer: FirstPseudo,
+    public readonly count: number
+  ) {}
 }
 
 /**
@@ -521,43 +561,46 @@ export class NodeContext implements vtree.NodeContext {
   inline: boolean = true;
   overflow: boolean = false;
   breakPenalty: number;
-  display: string|null = null;
+  display: string | null = null;
   floatReference: pagefloat.FloatReference;
-  floatSide: string|null = null;
-  clearSide: string|null = null;
-  floatMinWrapBlock: css.Numeric|null = null;
-  columnSpan: css.Val|null = null;
-  verticalAlign: string = 'baseline';
-  captionSide: string = 'top';
+  floatSide: string | null = null;
+  clearSide: string | null = null;
+  floatMinWrapBlock: css.Numeric | null = null;
+  columnSpan: css.Val | null = null;
+  verticalAlign: string = "baseline";
+  captionSide: string = "top";
   inlineBorderSpacing: number = 0;
   blockBorderSpacing: number = 0;
   flexContainer: boolean = false;
   whitespace: Whitespace;
-  hyphenateCharacter: string|null;
+  hyphenateCharacter: string | null;
   breakWord: boolean;
   establishesBFC: boolean = false;
   containingBlockForAbsolute: boolean = false;
-  breakBefore: string|null = null;
-  breakAfter: string|null = null;
+  breakBefore: string | null = null;
+  breakAfter: string | null = null;
   viewNode: Node = null;
   clearSpacer: Node = null;
-  inheritedProps: {[key: string]: number|string|css.Val};
+  inheritedProps: { [key: string]: number | string | css.Val };
   vertical: boolean;
   direction: string;
   firstPseudo: FirstPseudo;
-  lang: string|null = null;
-  preprocessedTextContent: Change[]|null = null;
+  lang: string | null = null;
+  preprocessedTextContent: Change[] | null = null;
   formattingContext: FormattingContext;
-  repeatOnBreak: string|null = null;
-  pluginProps: {[key: string]: string|number|undefined|null|
-                (number|null)[]} = {};
+  repeatOnBreak: string | null = null;
+  pluginProps: {
+    [key: string]: string | number | undefined | null | (number | null)[];
+  } = {};
   fragmentIndex: number = 1;
   afterIfContinues: selector.AfterIfContinues = null;
-  footnotePolicy: css.Ident|null = null;
+  footnotePolicy: css.Ident | null = null;
 
   constructor(
-      public sourceNode: Node, public parent: NodeContext,
-      public boxOffset: number) {
+    public sourceNode: Node,
+    public parent: NodeContext,
+    public boxOffset: number
+  ) {
     this.shadowType = ShadowType.NONE;
     this.shadowContext = parent ? parent.shadowContext : null;
     this.breakPenalty = parent ? parent.breakPenalty : 0;
@@ -567,7 +610,7 @@ export class NodeContext implements vtree.NodeContext {
     this.breakWord = parent ? parent.breakWord : false;
     this.inheritedProps = parent ? parent.inheritedProps : {};
     this.vertical = parent ? parent.vertical : false;
-    this.direction = parent ? parent.direction : 'ltr';
+    this.direction = parent ? parent.direction : "ltr";
     this.firstPseudo = parent ? parent.firstPseudo : null;
     this.formattingContext = parent ? parent.formattingContext : null;
   }
@@ -585,11 +628,12 @@ export class NodeContext implements vtree.NodeContext {
     this.clearSide = null;
     this.floatMinWrapBlock = null;
     this.columnSpan = null;
-    this.verticalAlign = 'baseline';
+    this.verticalAlign = "baseline";
     this.flexContainer = false;
     this.whitespace = this.parent ? this.parent.whitespace : Whitespace.IGNORE;
-    this.hyphenateCharacter =
-        this.parent ? this.parent.hyphenateCharacter : null;
+    this.hyphenateCharacter = this.parent
+      ? this.parent.hyphenateCharacter
+      : null;
     this.breakWord = this.parent ? this.parent.breakWord : false;
     this.breakBefore = null;
     this.breakAfter = null;
@@ -687,8 +731,9 @@ export class NodeContext implements vtree.NodeContext {
       shadowType: this.shadowType,
       shadowContext: this.shadowContext,
       nodeShadow: this.nodeShadow,
-      shadowSibling:
-          this.shadowSibling ? this.shadowSibling.toNodePositionStep() : null,
+      shadowSibling: this.shadowSibling
+        ? this.shadowSibling.toNodePositionStep()
+        : null,
       formattingContext: this.formattingContext,
       fragmentIndex: this.fragmentIndex
     };
@@ -700,16 +745,18 @@ export class NodeContext implements vtree.NodeContext {
     do {
       // We need fully "peeled" path, so don't record first-XXX pseudoelement
       // containers
-      if (!nc.firstPseudo || !nc.parent ||
-          nc.parent.firstPseudo === nc.firstPseudo) {
+      if (
+        !nc.firstPseudo ||
+        !nc.parent ||
+        nc.parent.firstPseudo === nc.firstPseudo
+      ) {
         steps.push(nc.toNodePositionStep());
       }
       nc = nc.parent;
     } while (nc);
-    const actualOffsetInNode = this.preprocessedTextContent ?
-        resolveOriginalIndex(
-            this.preprocessedTextContent, this.offsetInNode) :
-        this.offsetInNode;
+    const actualOffsetInNode = this.preprocessedTextContent
+      ? resolveOriginalIndex(this.preprocessedTextContent, this.offsetInNode)
+      : this.offsetInNode;
     return {
       steps,
       offsetInNode: actualOffsetInNode,
@@ -755,8 +802,11 @@ export class NodeContext implements vtree.NodeContext {
   }
 
   belongsTo(formattingContext: FormattingContext): boolean {
-    return this.formattingContext === formattingContext && !!this.parent &&
-        this.parent.formattingContext === formattingContext;
+    return (
+      this.formattingContext === formattingContext &&
+      !!this.parent &&
+      this.parent.formattingContext === formattingContext
+    );
   }
 }
 
@@ -804,24 +854,26 @@ export class ChunkPosition implements vtree.ChunkPosition {
 
 export class FlowChunkPosition {
   constructor(
-      public chunkPosition: ChunkPosition,
-      public readonly flowChunk: FlowChunk) {}
+    public chunkPosition: ChunkPosition,
+    public readonly flowChunk: FlowChunk
+  ) {}
 
   clone(): FlowChunkPosition {
     return new FlowChunkPosition(this.chunkPosition.clone(), this.flowChunk);
   }
 
   isSamePosition(other: FlowChunkPosition): boolean {
-    return !!other &&
-        (this === other ||
-         this.chunkPosition.isSamePosition(other.chunkPosition));
+    return (
+      !!other &&
+      (this === other || this.chunkPosition.isSamePosition(other.chunkPosition))
+    );
   }
 }
 
 export class FlowPosition {
   positions: FlowChunkPosition[] = [];
-  startSide: string = 'any';
-  breakAfter: string|null = null;
+  startSide: string = "any";
+  breakAfter: string | null = null;
 
   clone(): FlowPosition {
     const newfp = new FlowPosition();
@@ -851,8 +903,10 @@ export class FlowPosition {
   }
 
   hasContent(offset: number): boolean {
-    return this.positions.length > 0 &&
-        this.positions[0].flowChunk.startOffset <= offset;
+    return (
+      this.positions.length > 0 &&
+      this.positions[0].flowChunk.startOffset <= offset
+    );
   }
 }
 
@@ -861,8 +915,8 @@ export class LayoutPosition {
    * One-based, incremented before layout.
    */
   page: number = 0;
-  flows: {[key: string]: Flow} = {};
-  flowPositions: {[key: string]: FlowPosition} = {};
+  flows: { [key: string]: Flow } = {};
+  flowPositions: { [key: string]: FlowPosition } = {};
 
   /**
    * flowPositions is built up to this offset.
@@ -890,8 +944,11 @@ export class LayoutPosition {
     if (this === other) {
       return true;
     }
-    if (!other || this.page !== other.page ||
-        this.highestSeenOffset !== other.highestSeenOffset) {
+    if (
+      !other ||
+      this.page !== other.page ||
+      this.highestSeenOffset !== other.highestSeenOffset
+    ) {
       return false;
     }
     const thisFlowNames = Object.keys(this.flowPositions);
@@ -900,8 +957,11 @@ export class LayoutPosition {
       return false;
     }
     for (const flowName of thisFlowNames) {
-      if (!this.flowPositions[flowName].isSamePosition(
-              other.flowPositions[flowName])) {
+      if (
+        !this.flowPositions[flowName].isSamePosition(
+          other.flowPositions[flowName]
+        )
+      ) {
         return false;
       }
     }
@@ -922,12 +982,12 @@ export class LayoutPosition {
   startSideOfFlow(name: string): string {
     const flowPos = this.flowPositions[name];
     if (!flowPos) {
-      return 'any';
+      return "any";
     }
     return flowPos.startSide;
   }
 
-  firstFlowChunkOfFlow(name: string): FlowChunk|null {
+  firstFlowChunkOfFlow(name: string): FlowChunk | null {
     const flowPos = this.flowPositions[name];
     if (!flowPos) {
       return null;
@@ -1046,7 +1106,9 @@ export class Container implements vtree.Container {
     return this.vertical ? -1 : 1;
   }
 
-  getInlineDir(): number {return 1;}
+  getInlineDir(): number {
+    return 1;
+  }
 
   copyFrom(other: Container): void {
     this.element = other.element;
@@ -1079,15 +1141,15 @@ export class Container implements vtree.Container {
   setVerticalPosition(top: number, height: number): void {
     this.top = top;
     this.height = height;
-    base.setCSSProperty(this.element, 'top', `${top}px`);
-    base.setCSSProperty(this.element, 'height', `${height}px`);
+    base.setCSSProperty(this.element, "top", `${top}px`);
+    base.setCSSProperty(this.element, "height", `${height}px`);
   }
 
   setHorizontalPosition(left: number, width: number): void {
     this.left = left;
     this.width = width;
-    base.setCSSProperty(this.element, 'left', `${left}px`);
-    base.setCSSProperty(this.element, 'width', `${width}px`);
+    base.setCSSProperty(this.element, "left", `${left}px`);
+    base.setCSSProperty(this.element, "width", `${width}px`);
   }
 
   setBlockPosition(start: number, extent: number): void {
@@ -1109,7 +1171,7 @@ export class Container implements vtree.Container {
   clear() {
     const parent = this.element;
     let c;
-    while (c = parent.lastChild) {
+    while ((c = parent.lastChild)) {
       parent.removeChild(c);
     }
   }
@@ -1126,24 +1188,37 @@ export class Container implements vtree.Container {
     const offsetX = this.originX + this.left + this.getInsetLeft();
     const offsetY = this.originY + this.top + this.getInsetTop();
     return new geom.Rect(
-        offsetX, offsetY, offsetX + this.width, offsetY + this.height);
+      offsetX,
+      offsetY,
+      offsetX + this.width,
+      offsetY + this.height
+    );
   }
 
   getPaddingRect(): geom.Rect {
     const paddingX =
-        this.originX + this.left + this.marginLeft + this.borderLeft;
+      this.originX + this.left + this.marginLeft + this.borderLeft;
     const paddingY = this.originY + this.top + this.marginTop + this.borderTop;
     const paddingWidth = this.paddingLeft + this.width + this.paddingRight;
     const paddingHeight = this.paddingTop + this.height + this.paddingBottom;
     return new geom.Rect(
-        paddingX, paddingY, paddingX + paddingWidth, paddingY + paddingHeight);
+      paddingX,
+      paddingY,
+      paddingX + paddingWidth,
+      paddingY + paddingHeight
+    );
   }
 
   getOuterShape(outerShapeProp: css.Val, context: Context): geom.Shape {
     const rect = this.getOuterRect();
     return toShape(
-        outerShapeProp, rect.x1, rect.y1, rect.x2 - rect.x1, rect.y2 - rect.y1,
-        context);
+      outerShapeProp,
+      rect.x1,
+      rect.y1,
+      rect.x2 - rect.x1,
+      rect.y2 - rect.y1,
+      context
+    );
   }
 
   getOuterRect(): geom.Rect {
@@ -1151,9 +1226,13 @@ export class Container implements vtree.Container {
     const outerY = this.originY + this.top;
     const outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
     const outerHeight =
-        this.getInsetTop() + this.height + this.getInsetBottom();
+      this.getInsetTop() + this.height + this.getInsetBottom();
     return new geom.Rect(
-        outerX, outerY, outerX + outerWidth, outerY + outerHeight);
+      outerX,
+      outerY,
+      outerX + outerWidth,
+      outerY + outerHeight
+    );
   }
 }
 
@@ -1162,13 +1241,15 @@ export type ExprContentListener = vtree.ExprContentListener;
 
 export class ContentPropertyHandler extends css.Visitor {
   constructor(
-      public readonly elem: Element, public readonly context: Context,
-      public readonly rootContentValue: css.Val,
-      public readonly exprContentListener: ExprContentListener) {
+    public readonly elem: Element,
+    public readonly context: Context,
+    public readonly rootContentValue: css.Val,
+    public readonly exprContentListener: ExprContentListener
+  ) {
     super();
   }
 
-  private visitStrInner(str: string, node?: Node|null) {
+  private visitStrInner(str: string, node?: Node | null) {
     if (!node) {
       node = this.elem.ownerDocument.createTextNode(str);
     }
@@ -1184,10 +1265,10 @@ export class ContentPropertyHandler extends css.Visitor {
   /** @override */
   visitURL(url) {
     if ((this.rootContentValue as any).url) {
-      this.elem.setAttribute('src', url.url);
+      this.elem.setAttribute("src", url.url);
     } else {
-      const img = this.elem.ownerDocument.createElementNS(base.NS.XHTML, 'img');
-      img.setAttribute('src', url.url);
+      const img = this.elem.ownerDocument.createElementNS(base.NS.XHTML, "img");
+      img.setAttribute("src", url.url);
       this.elem.appendChild(img);
     }
     return null;
@@ -1203,7 +1284,7 @@ export class ContentPropertyHandler extends css.Visitor {
   visitExpr(expr) {
     const ex = expr.toExpr();
     const val = ex.evaluate(this.context);
-    if (typeof val === 'string') {
+    if (typeof val === "string") {
       asserts.assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
       this.visitStrInner(val, node);
@@ -1212,6 +1293,8 @@ export class ContentPropertyHandler extends css.Visitor {
   }
 }
 
-export const nonTrivialContent = (val: css.Val): boolean => val != null &&
-    val !== css.ident.normal && val !== css.ident.none &&
-    val !== css.ident.inherit;
+export const nonTrivialContent = (val: css.Val): boolean =>
+  val != null &&
+  val !== css.ident.normal &&
+  val !== css.ident.none &&
+  val !== css.ident.inherit;

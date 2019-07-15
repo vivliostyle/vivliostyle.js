@@ -29,8 +29,8 @@ export enum LogLevel {
 }
 
 export type ErrorInfo = {
-  error: Error,
-  messages: any[]
+  error: Error;
+  messages: any[];
 };
 
 /**
@@ -41,13 +41,13 @@ export class Logger {
   private consoleInfo: any;
   private consoleWarn: any;
   private consoleError: any;
-  private listeners: {[key in LogLevel]?: ((p1: ErrorInfo) => void)[]} = {};
+  private listeners: { [key in LogLevel]?: ((p1: ErrorInfo) => void)[] } = {};
 
   constructor(opt_console?: Console) {
     const c = opt_console || console;
 
     function makeConsoleMethod(method) {
-      return (args) => method.apply(c, args);
+      return args => method.apply(c, args);
     }
     this.consoleDebug = makeConsoleMethod(c.debug || c.log);
     this.consoleInfo = makeConsoleMethod(c.info || c.log);
@@ -58,7 +58,7 @@ export class Logger {
   private triggerListeners(level: LogLevel, args: ErrorInfo) {
     const listeners = this.listeners[level];
     if (listeners) {
-      listeners.forEach((listener) => {
+      listeners.forEach(listener => {
         listener(args);
       });
     }
@@ -110,20 +110,20 @@ function argumentsToErrorInfo(args): ErrorInfo {
   if (a[0] instanceof Error) {
     e = a.shift();
   }
-  return {'error': e, 'messages': a};
+  return { error: e, messages: a };
 }
 
 function buildMessageAndStackTrace(args: ErrorInfo): string[] {
   const e = args.error;
-  const stack = e && (e['frameTrace'] || e['stack']);
-  let messages = [].concat(args['messages']);
+  const stack = e && (e["frameTrace"] || e["stack"]);
+  let messages = [].concat(args["messages"]);
   if (e) {
     if (messages.length > 0) {
-      messages = messages.concat(['\n']);
+      messages = messages.concat(["\n"]);
     }
-    messages = messages.concat([e['toString']()]);
+    messages = messages.concat([e["toString"]()]);
     if (stack) {
-      messages = messages.concat(['\n']).concat(stack);
+      messages = messages.concat(["\n"]).concat(stack);
     }
   }
   return messages;

@@ -17,65 +17,69 @@
  * @fileoverview Diff utility
  */
 
-import * as fastdiff from 'fast-diff';
+import * as fastdiff from "fast-diff";
 
-export type Change = (number|string)[];
+export type Change = (number | string)[];
 
 export const diffChars = (originalText: string, newText: string): Change[] =>
-    fastdiff(originalText, newText, 0);
+  fastdiff(originalText, newText, 0);
 
 /**
  * @returns string
  */
 export const restoreOriginalText = (changes: Change[]): any =>
-    changes.reduce((result, item) => {
-      if (item[0] === fastdiff.INSERT) {
-        return result;
-      }
-      return result + item[1];
-    }, '');
+  changes.reduce((result, item) => {
+    if (item[0] === fastdiff.INSERT) {
+      return result;
+    }
+    return result + item[1];
+  }, "");
 
 /**
  * @returns string
  */
 export const restoreNewText = (changes: Change[]): any =>
-    changes.reduce((result, item) => {
-      if (item[0] === fastdiff.DELETE) {
-        return result;
-      }
-      return result + item[1];
-    }, '');
+  changes.reduce((result, item) => {
+    if (item[0] === fastdiff.DELETE) {
+      return result;
+    }
+    return result + item[1];
+  }, "");
 
 export const resolveNewIndex = (changes: Change[], oldIndex: number): number =>
-    resolveIndex(changes, oldIndex, 1);
+  resolveIndex(changes, oldIndex, 1);
 
-export const resolveOriginalIndex =
-    (changes: Change[], newIndex: number): number =>
-        resolveIndex(changes, newIndex, -1);
+export const resolveOriginalIndex = (
+  changes: Change[],
+  newIndex: number
+): number => resolveIndex(changes, newIndex, -1);
 
-export const resolveIndex =
-    (changes: Change[], index: number, coef: number): number => {
-      let diff = 0;
-      let current = 0;
-      changes.some((change) => {
-        for (let i = 0; i < (change[1] as string).length; i++) {
-          switch ((change[0] as number) * coef) {
-            case fastdiff.INSERT:
-              diff++;
-              break;
-            case fastdiff.DELETE:
-              diff--;
-              current++;
-              break;
-            case fastdiff.EQUAL:
-              current++;
-              break;
-          }
-          if (current > index) {
-            return true;
-          }
-        }
-        return false;
-      });
-      return Math.max(Math.min(index, current - 1) + diff, 0);
-    };
+export const resolveIndex = (
+  changes: Change[],
+  index: number,
+  coef: number
+): number => {
+  let diff = 0;
+  let current = 0;
+  changes.some(change => {
+    for (let i = 0; i < (change[1] as string).length; i++) {
+      switch ((change[0] as number) * coef) {
+        case fastdiff.INSERT:
+          diff++;
+          break;
+        case fastdiff.DELETE:
+          diff--;
+          current++;
+          break;
+        case fastdiff.EQUAL:
+          current++;
+          break;
+      }
+      if (current > index) {
+        return true;
+      }
+    }
+    return false;
+  });
+  return Math.max(Math.min(index, current - 1) + diff, 0);
+};

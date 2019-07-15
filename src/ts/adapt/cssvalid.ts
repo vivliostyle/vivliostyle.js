@@ -18,14 +18,14 @@
  * @fileoverview Parse validation rules (validation.txt), validate properties
  * and shorthands.
  */
-import * as logging from '../vivliostyle/logging';
-import * as base from './base';
-import * as css from './css';
-import * as cssparse from './cssparse';
-import * as csstok from './csstok';
-import * as net from './net';
-import * as task from './task';
-import * as taskutil from './taskutil';
+import * as logging from "../vivliostyle/logging";
+import * as base from "./base";
+import * as css from "./css";
+import * as cssparse from "./cssparse";
+import * as csstok from "./csstok";
+import * as net from "./net";
+import * as task from "./task";
+import * as taskutil from "./taskutil";
 
 export interface PropertyReceiver {
   unknownProperty(name: string, value: css.Val): void;
@@ -133,8 +133,10 @@ export class ValidatingGroup {
     }
     for (let i = 0; i < this.connections.length; i++) {
       const connection = this.connections[i];
-      const groupConnection =
-          new Connection(connection.where, connection.success);
+      const groupConnection = new Connection(
+        connection.where,
+        connection.success
+      );
       groupConnection.what = connection.what;
       group.connections.push(groupConnection);
     }
@@ -184,7 +186,7 @@ export class ValidatingGroup {
 
   startSpecialGroup(): void {
     if (this.nodes.length) {
-      throw new Error('invalid call');
+      throw new Error("invalid call");
     }
     this.addSpecialToArr(this.match, true, -1);
   }
@@ -195,7 +197,7 @@ export class ValidatingGroup {
 
   startClause(clause: number): void {
     if (this.nodes.length) {
-      throw new Error('invalid call');
+      throw new Error("invalid call");
     }
     const node = new Node(ALWAYS_FAIL);
     node.markAsStartAlternate(clause);
@@ -232,8 +234,9 @@ export class ValidatingGroup {
   }
 
   isPrimitive(): boolean {
-    return this.isSimple() &&
-        this.nodes[0].validator instanceof PrimitiveValidator;
+    return (
+      this.isSimple() && this.nodes[0].validator instanceof PrimitiveValidator
+    );
   }
 
   addGroup(group: ValidatingGroup, how: Add): void {
@@ -243,11 +246,15 @@ export class ValidatingGroup {
     const index = this.nodes.length;
 
     // optimization for alternate primitive validators
-    if (how == Add.ALTERNATE && index == 1 && group.isPrimitive() &&
-        this.isPrimitive()) {
-      this.nodes[0].validator =
-          (this.nodes[0].validator as PrimitiveValidator)
-              .combine((group.nodes[0].validator as PrimitiveValidator));
+    if (
+      how == Add.ALTERNATE &&
+      index == 1 &&
+      group.isPrimitive() &&
+      this.isPrimitive()
+    ) {
+      this.nodes[0].validator = (this.nodes[0]
+        .validator as PrimitiveValidator).combine(group.nodes[0]
+        .validator as PrimitiveValidator);
       return;
     }
     for (let i = 0; i < group.nodes.length; i++) {
@@ -320,7 +327,7 @@ export class ValidatingGroup {
     // make sure that our data structure is correct
     for (let j = 0; j < index; j++) {
       if (this.nodes[j].failure == null || this.nodes[j].success == null) {
-        throw new Error('Invalid validator state');
+        throw new Error("Invalid validator state");
       }
     }
     return this.nodes[0];
@@ -352,7 +359,7 @@ export const ALLOW_ZERO_PERCENT = 1024;
 export const ALLOW_SLASH = 2048;
 
 export type ValueMap = {
-  [key: string]: css.Val
+  [key: string]: css.Val;
 };
 
 /**
@@ -382,8 +389,10 @@ export class PropertyValidator extends css.Visitor {
  */
 export class PrimitiveValidator extends PropertyValidator {
   constructor(
-      public readonly allowed: number, public readonly idents: ValueMap,
-      public readonly units: ValueMap) {
+    public readonly allowed: number,
+    public readonly idents: ValueMap,
+    public readonly units: ValueMap
+  ) {
     super();
   }
 
@@ -436,7 +445,7 @@ export class PrimitiveValidator extends PropertyValidator {
    */
   visitNumeric(numeric) {
     if (numeric.num == 0 && !(this.allowed & ALLOW_ZERO)) {
-      if (numeric.unit == '%' && this.allowed & ALLOW_ZERO_PERCENT) {
+      if (numeric.unit == "%" && this.allowed & ALLOW_ZERO_PERCENT) {
         return numeric;
       }
       return null;
@@ -509,22 +518,30 @@ export class PrimitiveValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitSpaceList(list) {return null;}
+  visitSpaceList(list) {
+    return null;
+  }
 
   /**
    * @override
    */
-  visitCommaList(list) {return null;}
+  visitCommaList(list) {
+    return null;
+  }
 
   /**
    * @override
    */
-  visitFunc(func) {return null;}
+  visitFunc(func) {
+    return null;
+  }
 
   /**
    * @override
    */
-  visitExpr(expr) {return null;}
+  visitExpr(expr) {
+    return null;
+  }
 
   combine(other: PrimitiveValidator): PrimitiveValidator {
     const idents: ValueMap = {};
@@ -570,8 +587,10 @@ export class ListValidator extends PropertyValidator {
     let index = startIndex;
     let alternativeStack = null;
     let alternatives = null;
-    while (current !== this.successTerminal &&
-           current !== this.failureTerminal) {
+    while (
+      current !== this.successTerminal &&
+      current !== this.failureTerminal
+    ) {
       if (index >= arr.length) {
         current = current.failure;
         continue;
@@ -594,27 +613,33 @@ export class ListValidator extends PropertyValidator {
             alternatives = null;
           }
         } else if (current.isEndAlternate()) {
-          alternatives[current.getAlternate()] = 'taken';
+          alternatives[current.getAlternate()] = "taken";
         } else {
           success = alternatives[current.getAlternate()] == null;
         }
         current = success ? current.success : current.failure;
       } else {
-        if (index == 0 && !slice &&
-            current.validator instanceof SpaceListValidator &&
-            this instanceof SpaceListValidator) {
+        if (
+          index == 0 &&
+          !slice &&
+          current.validator instanceof SpaceListValidator &&
+          this instanceof SpaceListValidator
+        ) {
           // Special nesting case: validate the input space list as a whole.
-          outval = (new css.SpaceList(arr)).visit(current.validator);
+          outval = new css.SpaceList(arr).visit(current.validator);
           if (outval) {
             index = arr.length;
             current = current.success;
             continue;
           }
-        } else if (index == 0 && !slice &&
-            current.validator instanceof CommaListValidator &&
-            this instanceof SpaceListValidator) {
+        } else if (
+          index == 0 &&
+          !slice &&
+          current.validator instanceof CommaListValidator &&
+          this instanceof SpaceListValidator
+        ) {
           // Special nesting case: validate the input comma list as a whole.
-          outval = (new css.CommaList(arr)).visit(current.validator);
+          outval = new css.CommaList(arr).visit(current.validator);
           if (outval) {
             index = arr.length;
             current = current.success;
@@ -653,8 +678,10 @@ export class ListValidator extends PropertyValidator {
     // no need to worry about "specials"
     let outval: css.Val = null;
     let current = this.first;
-    while (current !== this.successTerminal &&
-           current !== this.failureTerminal) {
+    while (
+      current !== this.successTerminal &&
+      current !== this.failureTerminal
+    ) {
       if (!inval) {
         current = current.failure;
         continue;
@@ -743,12 +770,16 @@ export class ListValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitSpaceList(list) {return null;}
+  visitSpaceList(list) {
+    return null;
+  }
 
   /**
    * @override
    */
-  visitCommaList(list) {return null;}
+  visitCommaList(list) {
+    return null;
+  }
 
   /**
    * @override
@@ -760,7 +791,9 @@ export class ListValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitExpr(expr) {return null;}
+  visitExpr(expr) {
+    return null;
+  }
 }
 
 export class SpaceListValidator extends ListValidator {
@@ -868,7 +901,9 @@ export class FuncValidator extends ListValidator {
   /**
    * @override
    */
-  validateSingle(inval) {return null;}
+  validateSingle(inval) {
+    return null;
+  }
 
   /**
    * @override
@@ -895,14 +930,17 @@ export class ShorthandSyntaxNode {
    * @return new index.
    */
   tryParse(
-      values: css.Val[], index: number,
-      shorthandValidator: ShorthandValidator): number {return index;}
+    values: css.Val[],
+    index: number,
+    shorthandValidator: ShorthandValidator
+  ): number {
+    return index;
+  }
 
   success(rval: css.Val, shorthandValidator: ShorthandValidator): void {}
 }
 
-export class ShorthandSyntaxProperty extends
-    ShorthandSyntaxNode {
+export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
   validator: PropertyValidator;
 
   constructor(validatorSet: ValidatorSet, public readonly name: string) {
@@ -935,8 +973,7 @@ export class ShorthandSyntaxProperty extends
   }
 }
 
-export class ShorthandSyntaxPropertyN extends
-    ShorthandSyntaxProperty {
+export class ShorthandSyntaxPropertyN extends ShorthandSyntaxProperty {
   constructor(validatorSet: ValidatorSet, public readonly names: string[]) {
     super(validatorSet, names[0]);
   }
@@ -951,11 +988,11 @@ export class ShorthandSyntaxPropertyN extends
   }
 }
 
-export class ShorthandSyntaxCompound extends
-    ShorthandSyntaxNode {
+export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
   constructor(
-      public readonly nodes: ShorthandSyntaxNode[],
-      public readonly slash: boolean) {
+    public readonly nodes: ShorthandSyntaxNode[],
+    public readonly slash: boolean
+  ) {
     super();
   }
 
@@ -1021,8 +1058,10 @@ export class ShorthandValidator extends css.Visitor {
     if (!this.error) {
       for (const name of this.propList) {
         receiver.simpleProperty(
-            name, this.values[name] || this.validatorSet.defaultValues[name],
-            important);
+          name,
+          this.values[name] || this.validatorSet.defaultValues[name],
+          important
+        );
       }
       return true;
     }
@@ -1133,8 +1172,7 @@ export class ShorthandValidator extends css.Visitor {
   }
 }
 
-export class SimpleShorthandValidator extends
-    ShorthandValidator {
+export class SimpleShorthandValidator extends ShorthandValidator {
   error: any;
 
   constructor() {
@@ -1163,8 +1201,7 @@ export class SimpleShorthandValidator extends
   }
 }
 
-export class InsetsShorthandValidator extends
-    ShorthandValidator {
+export class InsetsShorthandValidator extends ShorthandValidator {
   error: any;
 
   constructor() {
@@ -1197,8 +1234,7 @@ export class InsetsShorthandValidator extends
   }
 }
 
-export class InsetsSlashShorthandValidator extends
-    ShorthandValidator {
+export class InsetsSlashShorthandValidator extends ShorthandValidator {
   error: any;
 
   constructor() {
@@ -1244,8 +1280,7 @@ export class InsetsSlashShorthandValidator extends
   }
 }
 
-export class CommaShorthandValidator extends
-    SimpleShorthandValidator {
+export class CommaShorthandValidator extends SimpleShorthandValidator {
   values: any;
   error: any;
 
@@ -1253,7 +1288,7 @@ export class CommaShorthandValidator extends
     super();
   }
 
-  mergeIn(acc: {[key: string]: css.Val[]}, values: ValueMap) {
+  mergeIn(acc: { [key: string]: css.Val[] }, values: ValueMap) {
     for (const name of this.propList) {
       const val = values[name] || this.validatorSet.defaultValues[name];
       let arr = acc[name];
@@ -1269,7 +1304,7 @@ export class CommaShorthandValidator extends
    * @override
    */
   visitCommaList(list) {
-    const acc: {[key: string]: css.Val[]} = {};
+    const acc: { [key: string]: css.Val[] } = {};
     for (let i = 0; i < list.values.length; i++) {
       this.values = {};
       if (list.values[i] instanceof css.CommaList) {
@@ -1277,7 +1312,7 @@ export class CommaShorthandValidator extends
       } else {
         list.values[i].visit(this);
         this.mergeIn(acc, this.values);
-        if (this.values['background-color'] && i != list.values.length - 1) {
+        if (this.values["background-color"] && i != list.values.length - 1) {
           this.error = true;
         }
       }
@@ -1287,7 +1322,7 @@ export class CommaShorthandValidator extends
     }
     this.values = {};
     for (const name in acc) {
-      if (name == 'background-color') {
+      if (name == "background-color") {
         this.values[name] = acc[name].pop();
       } else {
         this.values[name] = new css.CommaList(acc[name]);
@@ -1297,8 +1332,7 @@ export class CommaShorthandValidator extends
   }
 }
 
-export class FontShorthandValidator extends
-    SimpleShorthandValidator {
+export class FontShorthandValidator extends SimpleShorthandValidator {
   error: any;
 
   constructor() {
@@ -1310,15 +1344,14 @@ export class FontShorthandValidator extends
    */
   init(syntax, propList) {
     super.init(syntax, propList);
-    this.propList.push('font-family', 'line-height', 'font-size');
+    this.propList.push("font-family", "line-height", "font-size");
   }
 
   /**
    * @override
    */
   validateList(list) {
-    let index =
-        super.validateList(list);
+    let index = super.validateList(list);
 
     // must at least have font-size and font-family at the end
     if (index + 2 > list.length) {
@@ -1327,11 +1360,11 @@ export class FontShorthandValidator extends
     }
     this.error = false;
     const validators = this.validatorSet.validators;
-    if (!list[index].visit(validators['font-size'])) {
+    if (!list[index].visit(validators["font-size"])) {
       this.error = true;
       return index;
     }
-    this.values['font-size'] = list[index++];
+    this.values["font-size"] = list[index++];
     if (list[index] === css.slash) {
       index++;
 
@@ -1340,20 +1373,21 @@ export class FontShorthandValidator extends
         this.error = true;
         return index;
       }
-      if (!list[index].visit(validators['line-height'])) {
+      if (!list[index].visit(validators["line-height"])) {
         this.error = true;
         return index;
       }
-      this.values['line-height'] = list[index++];
+      this.values["line-height"] = list[index++];
     }
-    const fontFamily = index == list.length - 1 ?
-        list[index] :
-        new css.SpaceList(list.slice(index, list.length));
-    if (!fontFamily.visit(validators['font-family'])) {
+    const fontFamily =
+      index == list.length - 1
+        ? list[index]
+        : new css.SpaceList(list.slice(index, list.length));
+    if (!fontFamily.visit(validators["font-family"])) {
       this.error = true;
       return index;
     }
-    this.values['font-family'] = fontFamily;
+    this.values["font-family"] = fontFamily;
     return list.length;
   }
 
@@ -1365,15 +1399,15 @@ export class FontShorthandValidator extends
     if (this.error) {
       return null;
     }
-    const familyList = [this.values['font-family']];
+    const familyList = [this.values["font-family"]];
     for (let i = 1; i < list.values.length; i++) {
       familyList.push(list.values[i]);
     }
     const family = new css.CommaList(familyList);
-    if (!family.visit(this.validatorSet.validators['font-family'])) {
+    if (!family.visit(this.validatorSet.validators["font-family"])) {
       this.error = true;
     } else {
-      this.values['font-family'] = family;
+      this.values["font-family"] = family;
     }
     return null;
   }
@@ -1394,12 +1428,14 @@ export class FontShorthandValidator extends
   }
 }
 
-export const shorthandValidators: {[key: string]: typeof ShorthandValidator} = {
-  'SIMPLE': SimpleShorthandValidator,
-  'INSETS': InsetsShorthandValidator,
-  'INSETS_SLASH': InsetsSlashShorthandValidator,
-  'COMMA': CommaShorthandValidator,
-  'FONT': FontShorthandValidator
+export const shorthandValidators: {
+  [key: string]: typeof ShorthandValidator;
+} = {
+  SIMPLE: SimpleShorthandValidator,
+  INSETS: InsetsShorthandValidator,
+  INSETS_SLASH: InsetsSlashShorthandValidator,
+  COMMA: CommaShorthandValidator,
+  FONT: FontShorthandValidator
 };
 
 //---- validation grammar parser and public property validator
@@ -1410,17 +1446,19 @@ export const shorthandValidators: {[key: string]: typeof ShorthandValidator} = {
  * properties into corresponding simple ones, also stripping property prefixes.
  */
 export class ValidatorSet {
-  validators: {[key: string]: PropertyValidator} = {};
-  prefixes: {[key: string]: {[key: string]: boolean}} = {};
+  validators: { [key: string]: PropertyValidator } = {};
+  prefixes: { [key: string]: { [key: string]: boolean } } = {};
   defaultValues: ValueMap = {};
-  namedValidators: {[key: string]: ValidatingGroup} = {};
-  systemFonts: {[key: string]: ValueMap} = {};
-  shorthands: {[key: string]: ShorthandValidator} = {};
+  namedValidators: { [key: string]: ValidatingGroup } = {};
+  systemFonts: { [key: string]: ValueMap } = {};
+  shorthands: { [key: string]: ShorthandValidator } = {};
   layoutProps: ValueMap = {};
   backgroundProps: ValueMap = {};
 
-  private addReplacement(val: ValidatingGroup, token: csstok.Token):
-      ValidatingGroup {
+  private addReplacement(
+    val: ValidatingGroup,
+    token: csstok.Token
+  ): ValidatingGroup {
     let cssval: css.Val;
     if (token.type == csstok.TokenType.NUMERIC) {
       cssval = new css.Numeric(token.num, token.text);
@@ -1429,22 +1467,22 @@ export class ValidatorSet {
     } else if (token.type == csstok.TokenType.IDENT) {
       cssval = css.getName(token.text);
     } else {
-      throw new Error('unexpected replacement');
+      throw new Error("unexpected replacement");
     }
     if (val.isPrimitive()) {
-      const validator = (val.nodes[0].validator as PrimitiveValidator);
+      const validator = val.nodes[0].validator as PrimitiveValidator;
       const idents = validator.idents;
       for (const ident in idents) {
         idents[ident] = cssval;
       }
       return val;
     }
-    throw new Error('unexpected replacement');
+    throw new Error("unexpected replacement");
   }
 
   private newGroup(op: string, vals: ValidatingGroup[]): ValidatingGroup {
     const group = new ValidatingGroup();
-    if (op == '||') {
+    if (op == "||") {
       for (let i = 0; i < vals.length; i++) {
         const subgroup = new ValidatingGroup();
         subgroup.startClause(i);
@@ -1460,15 +1498,15 @@ export class ValidatorSet {
     } else {
       let how: Add;
       switch (op) {
-        case ' ':
+        case " ":
           how = Add.FOLLOW;
           break;
-        case '|':
-        case '||':
+        case "|":
+        case "||":
           how = Add.ALTERNATE;
           break;
         default:
-          throw new Error('unexpected op');
+          throw new Error("unexpected op");
       }
       for (let i = 0; i < vals.length; i++) {
         group.addGroup(vals[i], i == 0 ? Add.FOLLOW : how);
@@ -1477,8 +1515,11 @@ export class ValidatorSet {
     }
   }
 
-  private addCounts(val: ValidatingGroup, min: number, max: number):
-      ValidatingGroup {
+  private addCounts(
+    val: ValidatingGroup,
+    min: number,
+    max: number
+  ): ValidatingGroup {
     const group = new ValidatingGroup();
     for (let i = 0; i < min; i++) {
       group.addGroup(val.clone(), Add.FOLLOW);
@@ -1502,10 +1543,10 @@ export class ValidatorSet {
   private newFunc(fn: string, val: ValidatingGroup): ValidatingGroup {
     let validator: PropertyValidator;
     switch (fn) {
-      case 'COMMA':
+      case "COMMA":
         validator = new CommaListValidator(val);
         break;
-      case 'SPACE':
+      case "SPACE":
         validator = new SpaceListValidator(val);
         break;
       default:
@@ -1516,100 +1557,129 @@ export class ValidatorSet {
   }
 
   initBuiltInValidators(): void {
-    this.namedValidators['HASHCOLOR'] = this.primitive(
-        new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['POS_INT'] = this.primitive(
-        new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['POS_NUM'] = this.primitive(
-        new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['POS_PERCENTAGE'] = this.primitive(
-        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {'%': css.empty}));
-    this.namedValidators['NEGATIVE'] = this.primitive(
-        new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['ZERO'] = this.primitive(
-        new PrimitiveValidator(ALLOW_ZERO, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['ZERO_PERCENTAGE'] = this.primitive(
-        new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['POS_LENGTH'] =
-        this.primitive(new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-          'em': css.empty,
-          'ex': css.empty,
-          'ch': css.empty,
-          'rem': css.empty,
-          'vh': css.empty,
-          'vw': css.empty,
-          'vmin': css.empty,
-          'vmax': css.empty,
-          'cm': css.empty,
-          'mm': css.empty,
-          'in': css.empty,
-          'px': css.empty,
-          'pt': css.empty,
-          'pc': css.empty,
-          'q': css.empty
-        }));
-    this.namedValidators['POS_ANGLE'] =
-        this.primitive(new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-          'deg': css.empty,
-          'grad': css.empty,
-          'rad': css.empty,
-          'turn': css.empty
-        }));
-    this.namedValidators['POS_TIME'] = this.primitive(new PrimitiveValidator(
-        ALLOW_POS_NUMERIC, NO_IDENTS, {'s': css.empty, 'ms': css.empty}));
-    this.namedValidators['FREQUENCY'] = this.primitive(new PrimitiveValidator(
-        ALLOW_POS_NUMERIC, NO_IDENTS, {'Hz': css.empty, 'kHz': css.empty}));
-    this.namedValidators['RESOLUTION'] = this.primitive(new PrimitiveValidator(
-        ALLOW_POS_NUMERIC, NO_IDENTS,
-        {'dpi': css.empty, 'dpcm': css.empty, 'dppx': css.empty}));
-    this.namedValidators['URI'] =
-        this.primitive(new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['IDENT'] = this.primitive(
-        new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['STRING'] =
-        this.primitive(new PrimitiveValidator(ALLOW_STR, NO_IDENTS, NO_IDENTS));
-    this.namedValidators['SLASH'] = this.primitive(
-        new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS));
-    const stdfont = {'font-family': css.getName('sans-serif')};
-    this.systemFonts['caption'] = stdfont;
-    this.systemFonts['icon'] = stdfont;
-    this.systemFonts['menu'] = stdfont;
-    this.systemFonts['message-box'] = stdfont;
-    this.systemFonts['small-caption'] = stdfont;
-    this.systemFonts['status-bar'] = stdfont;
+    this.namedValidators["HASHCOLOR"] = this.primitive(
+      new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["POS_INT"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["POS_NUM"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["POS_PERCENTAGE"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, { "%": css.empty })
+    );
+    this.namedValidators["NEGATIVE"] = this.primitive(
+      new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["ZERO"] = this.primitive(
+      new PrimitiveValidator(ALLOW_ZERO, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["ZERO_PERCENTAGE"] = this.primitive(
+      new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["POS_LENGTH"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
+        em: css.empty,
+        ex: css.empty,
+        ch: css.empty,
+        rem: css.empty,
+        vh: css.empty,
+        vw: css.empty,
+        vmin: css.empty,
+        vmax: css.empty,
+        cm: css.empty,
+        mm: css.empty,
+        in: css.empty,
+        px: css.empty,
+        pt: css.empty,
+        pc: css.empty,
+        q: css.empty
+      })
+    );
+    this.namedValidators["POS_ANGLE"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
+        deg: css.empty,
+        grad: css.empty,
+        rad: css.empty,
+        turn: css.empty
+      })
+    );
+    this.namedValidators["POS_TIME"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
+        s: css.empty,
+        ms: css.empty
+      })
+    );
+    this.namedValidators["FREQUENCY"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
+        Hz: css.empty,
+        kHz: css.empty
+      })
+    );
+    this.namedValidators["RESOLUTION"] = this.primitive(
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
+        dpi: css.empty,
+        dpcm: css.empty,
+        dppx: css.empty
+      })
+    );
+    this.namedValidators["URI"] = this.primitive(
+      new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["IDENT"] = this.primitive(
+      new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["STRING"] = this.primitive(
+      new PrimitiveValidator(ALLOW_STR, NO_IDENTS, NO_IDENTS)
+    );
+    this.namedValidators["SLASH"] = this.primitive(
+      new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS)
+    );
+    const stdfont = { "font-family": css.getName("sans-serif") };
+    this.systemFonts["caption"] = stdfont;
+    this.systemFonts["icon"] = stdfont;
+    this.systemFonts["menu"] = stdfont;
+    this.systemFonts["message-box"] = stdfont;
+    this.systemFonts["small-caption"] = stdfont;
+    this.systemFonts["status-bar"] = stdfont;
   }
 
-  private isBuiltIn(name: string): boolean {return !!name.match(/^[A-Z_0-9]+$/);}
+  private isBuiltIn(name: string): boolean {
+    return !!name.match(/^[A-Z_0-9]+$/);
+  }
 
-      private readNameAndPrefixes(tok: csstok.Tokenizer, section: number):
-          string|null {
+  private readNameAndPrefixes(
+    tok: csstok.Tokenizer,
+    section: number
+  ): string | null {
     let token = tok.token();
     if (token.type == csstok.TokenType.EOF) {
       // Finished normally
       return null;
     }
-    const rulePrefixes: {[key: string]: boolean} = {'': true};
+    const rulePrefixes: { [key: string]: boolean } = { "": true };
     if (token.type == csstok.TokenType.O_BRK) {
       do {
         tok.consume();
         token = tok.token();
         if (token.type != csstok.TokenType.IDENT) {
-          throw new Error('Prefix name expected');
+          throw new Error("Prefix name expected");
         }
         rulePrefixes[token.text] = true;
         tok.consume();
         token = tok.token();
       } while (token.type == csstok.TokenType.COMMA);
       if (token.type != csstok.TokenType.C_BRK) {
-        throw new Error('\']\' expected');
+        throw new Error("']' expected");
       }
       tok.consume();
       token = tok.token();
     }
     if (token.type != csstok.TokenType.IDENT) {
-      throw new Error('Property name expected');
+      throw new Error("Property name expected");
     }
-    if (section == 2 ? token.text == 'SHORTHANDS' : token.text == 'DEFAULTS') {
+    if (section == 2 ? token.text == "SHORTHANDS" : token.text == "DEFAULTS") {
       tok.consume();
       return null;
     }
@@ -1617,14 +1687,14 @@ export class ValidatorSet {
     tok.consume();
     if (section != 2) {
       if (tok.token().type != csstok.TokenType.EQ) {
-        throw new Error('\'=\' expected');
+        throw new Error("'=' expected");
       }
       if (!this.isBuiltIn(name)) {
         this.prefixes[name] = rulePrefixes;
       }
     } else {
       if (tok.token().type != csstok.TokenType.COLON) {
-        throw new Error('\':\' expected');
+        throw new Error("':' expected");
       }
     }
     return name;
@@ -1638,13 +1708,13 @@ export class ValidatorSet {
       }
       let vals: ValidatingGroup[] = [];
       const stack = [];
-      let op = '';
+      let op = "";
       let val;
       let expectval = true;
       const self = this;
       const reduce = (): ValidatingGroup => {
         if (vals.length == 0) {
-          throw new Error('No values');
+          throw new Error("No values");
         }
         if (vals.length == 1) {
           return vals[0];
@@ -1668,7 +1738,7 @@ export class ValidatorSet {
         switch (token.type) {
           case csstok.TokenType.IDENT:
             if (!expectval) {
-              setop(' ');
+              setop(" ");
             }
             if (this.isBuiltIn(token.text)) {
               const builtIn = this.namedValidators[token.text];
@@ -1680,7 +1750,8 @@ export class ValidatorSet {
               var idents = {};
               idents[token.text.toLowerCase()] = css.getName(token.text);
               vals.push(
-                  this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)));
+                this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
+              );
             }
             expectval = false;
             break;
@@ -1688,38 +1759,39 @@ export class ValidatorSet {
             var idents = {};
             idents[`${token.num}`] = new css.Int(token.num);
             vals.push(
-                this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)));
+              this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
+            );
             expectval = false;
             break;
           case csstok.TokenType.BAR:
-            setop('|');
+            setop("|");
             break;
           case csstok.TokenType.BAR_BAR:
-            setop('||');
+            setop("||");
             break;
           case csstok.TokenType.O_BRK:
             if (!expectval) {
-              setop(' ');
+              setop(" ");
             }
-            stack.push({vals, op, b: '['});
-            op = '';
+            stack.push({ vals, op, b: "[" });
+            op = "";
             vals = [];
             expectval = true;
             break;
           case csstok.TokenType.FUNC:
             if (!expectval) {
-              setop(' ');
+              setop(" ");
             }
-            stack.push({vals, op, b: '(', fn: token.text});
-            op = '';
+            stack.push({ vals, op, b: "(", fn: token.text });
+            op = "";
             vals = [];
             expectval = true;
             break;
           case csstok.TokenType.C_BRK:
             val = reduce();
             var open = stack.pop();
-            if (open.b != '[') {
-              throw new Error('\']\' unexpected');
+            if (open.b != "[") {
+              throw new Error("']' unexpected");
             }
             vals = open.vals;
             vals.push(val);
@@ -1729,8 +1801,8 @@ export class ValidatorSet {
           case csstok.TokenType.C_PAR:
             val = reduce();
             var open = stack.pop();
-            if (open.b != '(') {
-              throw new Error('\')\' unexpected');
+            if (open.b != "(") {
+              throw new Error("')' unexpected");
             }
             vals = open.vals;
             vals.push(this.newFunc(open.fn, val));
@@ -1739,26 +1811,26 @@ export class ValidatorSet {
             break;
           case csstok.TokenType.COLON:
             if (expectval) {
-              throw new Error('\':\' unexpected');
+              throw new Error("':' unexpected");
             }
             tok.consume();
             vals.push(this.addReplacement(vals.pop(), tok.token()));
             break;
           case csstok.TokenType.QMARK:
             if (expectval) {
-              throw new Error('\'?\' unexpected');
+              throw new Error("'?' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 0, 1));
             break;
           case csstok.TokenType.STAR:
             if (expectval) {
-              throw new Error('\'*\' unexpected');
+              throw new Error("'*' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 0, Number.POSITIVE_INFINITY));
             break;
           case csstok.TokenType.PLUS:
             if (expectval) {
-              throw new Error('\'+\' unexpected');
+              throw new Error("'+' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 1, Number.POSITIVE_INFINITY));
             break;
@@ -1766,7 +1838,7 @@ export class ValidatorSet {
             tok.consume();
             token = tok.token();
             if (token.type != csstok.TokenType.INT) {
-              throw new Error('<int> expected');
+              throw new Error("<int> expected");
             }
             const min = token.num;
             let max = min;
@@ -1776,14 +1848,14 @@ export class ValidatorSet {
               tok.consume();
               token = tok.token();
               if (token.type != csstok.TokenType.INT) {
-                throw new Error('<int> expected');
+                throw new Error("<int> expected");
               }
               max = token.num;
               tok.consume();
               token = tok.token();
             }
             if (token.type != csstok.TokenType.C_BRC) {
-              throw new Error('\'}\' expected');
+              throw new Error("'}' expected");
             }
             vals.push(this.addCounts(vals.pop(), min, max));
             break;
@@ -1794,7 +1866,7 @@ export class ValidatorSet {
             }
             break;
           default:
-            throw new Error('unexpected token');
+            throw new Error("unexpected token");
         }
       }
       tok.consume();
@@ -1838,11 +1910,11 @@ export class ValidatorSet {
             vals.push(new css.Numeric(token.num, token.text));
             break;
           default:
-            throw new Error('unexpected token');
+            throw new Error("unexpected token");
         }
       }
       this.defaultValues[propName] =
-          vals.length > 1 ? new css.SpaceList(vals) : vals[0];
+        vals.length > 1 ? new css.SpaceList(vals) : vals[0];
     }
   }
 
@@ -1854,8 +1926,10 @@ export class ValidatorSet {
       }
       let token = tok.nthToken(1);
       let shorthandValidator;
-      if (token.type == csstok.TokenType.IDENT &&
-          shorthandValidators[token.text]) {
+      if (
+        token.type == csstok.TokenType.IDENT &&
+        shorthandValidators[token.text]
+      ) {
         shorthandValidator = new shorthandValidators[token.text]();
         tok.consume();
       } else {
@@ -1875,26 +1949,28 @@ export class ValidatorSet {
             if (this.validators[token.text]) {
               syntax.push(shorthandValidator.syntaxNodeForProperty(token.text));
               propList.push(token.text);
-            } else if (this.shorthands[token.text] instanceof
-                InsetsShorthandValidator) {
-              const insetShorthand =
-                  (this.shorthands[token.text] as InsetsShorthandValidator);
+            } else if (
+              this.shorthands[token.text] instanceof InsetsShorthandValidator
+            ) {
+              const insetShorthand = this.shorthands[
+                token.text
+              ] as InsetsShorthandValidator;
               syntax.push(insetShorthand.createSyntaxNode());
               propList.push(...insetShorthand.propList);
             } else {
-              throw new Error(`'${
-                  token
-                      .text}' is neither a simple property nor an inset shorthand`);
+              throw new Error(
+                `'${token.text}' is neither a simple property nor an inset shorthand`
+              );
             }
             break;
           case csstok.TokenType.SLASH:
             if (syntax.length > 0 || slash) {
-              throw new Error('unexpected slash');
+              throw new Error("unexpected slash");
             }
             slash = true;
             break;
           case csstok.TokenType.O_BRK:
-            stack.push({slash, syntax});
+            stack.push({ slash, syntax });
             syntax = [];
             slash = false;
             break;
@@ -1910,7 +1986,7 @@ export class ValidatorSet {
             tok.consume();
             break;
           default:
-            throw new Error('unexpected token');
+            throw new Error("unexpected token");
         }
       }
       shorthandValidator.init(syntax, propList);
@@ -1924,10 +2000,15 @@ export class ValidatorSet {
     this.parseValidators(tok);
     this.parseDefaults(tok);
     this.parseShorthands(tok);
-    this.backgroundProps = this.makePropSet(['background']);
+    this.backgroundProps = this.makePropSet(["background"]);
     this.layoutProps = this.makePropSet([
-      'margin', 'border', 'padding', 'columns', 'column-gap', 'column-rule',
-      'column-fill'
+      "margin",
+      "border",
+      "padding",
+      "columns",
+      "column-gap",
+      "column-rule",
+      "column-fill"
     ]);
   }
 
@@ -1939,7 +2020,7 @@ export class ValidatorSet {
       for (const pname of list) {
         const pval = this.defaultValues[pname];
         if (!pval) {
-          logging.logger.warn('Unknown property in makePropSet:', pname);
+          logging.logger.warn("Unknown property in makePropSet:", pname);
         } else {
           map[pname] = pval;
         }
@@ -1949,9 +2030,12 @@ export class ValidatorSet {
   }
 
   validatePropertyAndHandleShorthand(
-      name: string, value: css.Val, important: boolean,
-      receiver: PropertyReceiver): void {
-    let prefix = '';
+    name: string,
+    value: css.Val,
+    important: boolean,
+    receiver: PropertyReceiver
+  ): void {
+    let prefix = "";
     const origName = name;
     name = name.toLowerCase();
     const r = name.match(/^-([a-z]+)-([-a-z0-9]+)$/);
@@ -1966,9 +2050,10 @@ export class ValidatorSet {
     }
     const validator = this.validators[name];
     if (validator) {
-      const rvalue = value === css.ident.inherit || value.isExpr() ?
-          value :
-          value.visit(validator);
+      const rvalue =
+        value === css.ident.inherit || value.isExpr()
+          ? value
+          : value.visit(validator);
       if (rvalue) {
         receiver.simpleProperty(name, rvalue, important);
       } else {
@@ -1988,28 +2073,30 @@ export class ValidatorSet {
   }
 }
 
-export const validatorFetcher: taskutil.Fetcher<ValidatorSet> =
-    new taskutil.Fetcher(() => {
-      const frame: task.Frame<ValidatorSet> =
-          task.newFrame('loadValidatorSet.load');
-      const url = base.resolveURL('validation.txt', base.resourceBaseURL);
-      const result = net.ajax(url);
-      const validatorSet = new ValidatorSet();
-      validatorSet.initBuiltInValidators();
-      result.then((xhr) => {
-        try {
-          if (xhr.responseText) {
-            validatorSet.parse(xhr.responseText);
-          } else {
-            logging.logger.error('Error: missing', url);
-          }
-        } catch (err) {
-          logging.logger.error(err, 'Error:');
-        }
-        frame.finish(validatorSet);
-      });
-      return frame.result();
-    }, 'validatorFetcher');
+export const validatorFetcher: taskutil.Fetcher<
+  ValidatorSet
+> = new taskutil.Fetcher(() => {
+  const frame: task.Frame<ValidatorSet> = task.newFrame(
+    "loadValidatorSet.load"
+  );
+  const url = base.resolveURL("validation.txt", base.resourceBaseURL);
+  const result = net.ajax(url);
+  const validatorSet = new ValidatorSet();
+  validatorSet.initBuiltInValidators();
+  result.then(xhr => {
+    try {
+      if (xhr.responseText) {
+        validatorSet.parse(xhr.responseText);
+      } else {
+        logging.logger.error("Error: missing", url);
+      }
+    } catch (err) {
+      logging.logger.error(err, "Error:");
+    }
+    frame.finish(validatorSet);
+  });
+  return frame.result();
+}, "validatorFetcher");
 
 export const loadValidatorSet = (): task.Result<ValidatorSet> =>
-    validatorFetcher.get();
+  validatorFetcher.get();

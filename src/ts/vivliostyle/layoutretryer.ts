@@ -16,9 +16,9 @@
  *
  * @fileoverview Definitions of LayoutRetryer.
  */
-import * as task from '../adapt/task';
-import * as asserts from './asserts';
-import {layout, vtree} from './types';
+import * as task from "../adapt/task";
+import * as asserts from "./asserts";
+import { layout, vtree } from "./types";
 
 /**
  * @abstract
@@ -42,7 +42,7 @@ export abstract class AbstractLayoutRetryer {
     column: layout.Column
   ): task.Result<vtree.NodeContext> {
     const frame = task.newFrame<vtree.NodeContext>(
-      'vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout'
+      "vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout"
     );
     this.saveState(nodeContext, column);
     const mode = this.resolveLayoutMode(nodeContext);

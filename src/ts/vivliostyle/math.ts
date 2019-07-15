@@ -17,12 +17,14 @@
  * @fileoverview Math utilities
  */
 export const mean = (array: number[]): number =>
-    array.reduce((prev, curr) => prev + curr, 0) / array.length;
+  array.reduce((prev, curr) => prev + curr, 0) / array.length;
 
 export const variance = (array: number[]): number => {
   const meanValue = mean(array);
-  return mean(array.map((x) => {
-    const d = x - meanValue;
-    return d * d;
-  }));
+  return mean(
+    array.map(x => {
+      const d = x - meanValue;
+      return d * d;
+    })
+  );
 };

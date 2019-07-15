@@ -16,31 +16,41 @@
  *
  * @fileoverview Footnotes
  */
-import * as pagefloat from './pagefloat';
+import * as pagefloat from "./pagefloat";
 
-import {Ident, ident, Numeric} from '../adapt/css';
-import {LayoutConstraint} from '../adapt/layout';
-import {NodePosition, isSameNodePosition, Container} from '../adapt/vtree';
-import {newResult} from '../adapt/task';
-import * as asserts from './asserts';
+import { Ident, ident, Numeric } from "../adapt/css";
+import { LayoutConstraint } from "../adapt/layout";
+import { NodePosition, isSameNodePosition, Container } from "../adapt/vtree";
+import { newResult } from "../adapt/task";
+import * as asserts from "./asserts";
 
 const PageFloat = pagefloat.PageFloat;
 const PageFloatFragment = pagefloat.PageFloatFragment;
 
 export class Footnote extends pagefloat.PageFloat {
   constructor(
-      nodePosition: NodePosition, floatReference: pagefloat.FloatReference,
-      flowName: string, public readonly footnotePolicy: Ident|null,
-      floatMinWrapBlock: Numeric|null) {
+    nodePosition: NodePosition,
+    floatReference: pagefloat.FloatReference,
+    flowName: string,
+    public readonly footnotePolicy: Ident | null,
+    floatMinWrapBlock: Numeric | null
+  ) {
     super(
-        nodePosition, floatReference, 'block-end', null, flowName,
-        floatMinWrapBlock);
+      nodePosition,
+      floatReference,
+      "block-end",
+      null,
+      flowName,
+      floatMinWrapBlock
+    );
   }
 
   /**
    * @override
    */
-  isAllowedToPrecede(other) {return !(other instanceof Footnote);}
+  isAllowedToPrecede(other) {
+    return !(other instanceof Footnote);
+  }
 }
 
 /**
@@ -48,16 +58,20 @@ export class Footnote extends pagefloat.PageFloat {
  */
 export class FootnoteFragment extends PageFloatFragment {
   constructor(
-      floatReference: pagefloat.FloatReference,
-      continuations: pagefloat.PageFloatContinuation[], area: Container,
-      continues: boolean) {
-    super(floatReference, 'block-end', continuations, area, continues);
+    floatReference: pagefloat.FloatReference,
+    continuations: pagefloat.PageFloatContinuation[],
+    area: Container,
+    continues: boolean
+  ) {
+    super(floatReference, "block-end", continuations, area, continues);
   }
 
   /**
    * @override
    */
-  getOrder() {return Infinity;}
+  getOrder() {
+    return Infinity;
+  }
 
   /**
    * @override
@@ -76,22 +90,25 @@ export class LineFootnotePolicyLayoutConstraint implements LayoutConstraint {
 
   allowLayout(nodeContext) {
     const nodePosition = nodeContext.toNodePosition();
-    return !isSameNodePosition(
-        nodePosition, this.footnote.nodePosition);
+    return !isSameNodePosition(nodePosition, this.footnote.nodePosition);
   }
 }
 
-export class FootnoteLayoutStrategy implements
-    pagefloat.PageFloatLayoutStrategy {
+export class FootnoteLayoutStrategy
+  implements pagefloat.PageFloatLayoutStrategy {
   /**
    * @override
    */
-  appliesToNodeContext(nodeContext) {return nodeContext.floatSide === 'footnote';}
+  appliesToNodeContext(nodeContext) {
+    return nodeContext.floatSide === "footnote";
+  }
 
   /**
    * @override
    */
-  appliesToFloat(float) {return float instanceof Footnote;}
+  appliesToFloat(float) {
+    return float instanceof Footnote;
+  }
 
   /**
    * @override
@@ -101,18 +118,24 @@ export class FootnoteLayoutStrategy implements
 
     // If the region context has the same container as the page context,
     // use the page context as the context for the footnote.
-    const regionContext =
-        pageFloatLayoutContext.getPageFloatLayoutContext(floatReference);
+    const regionContext = pageFloatLayoutContext.getPageFloatLayoutContext(
+      floatReference
+    );
     const pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
-        pagefloat.FloatReference.PAGE);
+      pagefloat.FloatReference.PAGE
+    );
     if (pageContext.hasSameContainerAs(regionContext)) {
       floatReference = pagefloat.FloatReference.PAGE;
     }
     const nodePosition = nodeContext.toNodePosition();
     asserts.assert(pageFloatLayoutContext.flowName);
     const float: pagefloat.PageFloat = new Footnote(
-        nodePosition, floatReference, pageFloatLayoutContext.flowName,
-        nodeContext.footnotePolicy, nodeContext.floatMinWrapBlock);
+      nodePosition,
+      floatReference,
+      pageFloatLayoutContext.flowName,
+      nodeContext.footnotePolicy,
+      nodeContext.floatMinWrapBlock
+    );
     pageFloatLayoutContext.addPageFloat(float);
     return newResult(float);
   }
@@ -123,17 +146,23 @@ export class FootnoteLayoutStrategy implements
   createPageFloatFragment(continuations, floatSide, floatArea, continues) {
     const f = continuations[0].float;
     return new FootnoteFragment(
-        f.floatReference, continuations, floatArea, continues);
+      f.floatReference,
+      continuations,
+      floatArea,
+      continues
+    );
   }
 
   /**
    * @override
    */
   findPageFloatFragment(float, pageFloatLayoutContext) {
-    const context =
-        pageFloatLayoutContext.getPageFloatLayoutContext(float.floatReference);
-    const fragments =
-        context.floatFragments.filter((fr) => fr instanceof FootnoteFragment);
+    const context = pageFloatLayoutContext.getPageFloatLayoutContext(
+      float.floatReference
+    );
+    const fragments = context.floatFragments.filter(
+      fr => fr instanceof FootnoteFragment
+    );
     asserts.assert(fragments.length <= 1);
     return fragments[0] || null;
   }
@@ -147,10 +176,11 @@ export class FootnoteLayoutStrategy implements
     const element = floatArea.element;
     asserts.assert(element);
     floatArea.vertical = column.layoutContext.applyFootnoteStyle(
-        floatContainer.vertical,
-        column.layoutContext.nodeContext &&
-            column.layoutContext.nodeContext.direction === 'rtl',
-        element);
+      floatContainer.vertical,
+      column.layoutContext.nodeContext &&
+        column.layoutContext.nodeContext.direction === "rtl",
+      element
+    );
     floatArea.convertPercentageSizesToPx(element);
     column.setComputedInsets(element, floatArea);
     column.setComputedWidthAndHeight(element, floatArea);
@@ -160,17 +190,21 @@ export class FootnoteLayoutStrategy implements
    * @override
    */
   forbid(float, pageFloatLayoutContext) {
-    const footnote = (float as Footnote);
+    const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
       case ident.line:
         const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
         pageFloatLayoutContext.addLayoutConstraint(
-            constraint, footnote.floatReference);
+          constraint,
+          footnote.floatReference
+        );
         break;
     }
   }
 }
 
 export function registerFootnotePlugin() {
-  pagefloat.PageFloatLayoutStrategyResolver.register(new FootnoteLayoutStrategy());
+  pagefloat.PageFloatLayoutStrategyResolver.register(
+    new FootnoteLayoutStrategy()
+  );
 }

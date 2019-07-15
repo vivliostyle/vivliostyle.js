@@ -17,30 +17,34 @@
  *
  * @fileoverview Fetch resource from a URL.
  */
-import * as logging from '../vivliostyle/logging';
-import {net, xmldoc} from '../vivliostyle/types';
-import * as base from './base';
-import * as task from './task';
-import {Fetcher} from './taskutil';
+import * as logging from "../vivliostyle/logging";
+import { net, xmldoc } from "../vivliostyle/types";
+import * as base from "./base";
+import * as task from "./task";
+import { Fetcher } from "./taskutil";
 
 /**
  * @enum {string}
  */
 export enum XMLHttpRequestResponseType {
-  DEFAULT = '',
-  ARRAYBUFFER = 'arraybuffer',
-  BLOB = 'blob',
-  DOCUMENT = 'document',
-  JSON = 'json',
-  TEXT = 'text'
+  DEFAULT = "",
+  ARRAYBUFFER = "arraybuffer",
+  BLOB = "blob",
+  DOCUMENT = "document",
+  JSON = "json",
+  TEXT = "text"
 }
 
 export type Response = net.Response;
 
-export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
-                     opt_method?: string, opt_data?: string,
-                     opt_contentType?: string): task.Result<Response> => {
-  const frame: task.Frame<Response> = task.newFrame('ajax');
+export const ajax = (
+  url: string,
+  opt_type?: XMLHttpRequestResponseType,
+  opt_method?: string,
+  opt_data?: string,
+  opt_contentType?: string
+): task.Result<Response> => {
+  const frame: task.Frame<Response> = task.newFrame("ajax");
   const request = new XMLHttpRequest();
   const continuation = frame.suspend(request);
   const response: Response = {
@@ -51,7 +55,7 @@ export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
     responseXML: null,
     responseBlob: null
   };
-  request.open(opt_method || 'GET', url, true);
+  request.open(opt_method || "GET", url, true);
   if (opt_type) {
     request.responseType = opt_type;
   }
@@ -59,34 +63,38 @@ export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
     if (request.readyState === 4) {
       response.status = request.status;
       if (response.status == 200 || response.status == 0) {
-        if ((!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
-            request.responseXML &&
-            request.responseXML.documentElement.localName != 'parsererror') {
+        if (
+          (!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
+          request.responseXML &&
+          request.responseXML.documentElement.localName != "parsererror"
+        ) {
           response.responseXML = request.responseXML;
           response.contentType = (request.responseXML as any).contentType;
-        } else if ((!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
-            request.response instanceof HTMLDocument) {
+        } else if (
+          (!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
+          request.response instanceof HTMLDocument
+        ) {
           response.responseXML = request.response;
           response.contentType = (request.response as any).contentType;
         } else {
           const text = request.response;
-          if ((!opt_type || opt_type === XMLHttpRequestResponseType.TEXT) &&
-              typeof text == 'string') {
+          if (
+            (!opt_type || opt_type === XMLHttpRequestResponseType.TEXT) &&
+            typeof text == "string"
+          ) {
             response.responseText = text;
           } else if (!text) {
-            logging.logger.warn(
-                'Unexpected empty success response for', url);
+            logging.logger.warn("Unexpected empty success response for", url);
           } else {
-            if (typeof text == 'string') {
+            if (typeof text == "string") {
               response.responseBlob = makeBlob([text]);
             } else {
-              response.responseBlob = (text as Blob);
+              response.responseBlob = text as Blob;
             }
           }
-          const contentTypeHeader = request.getResponseHeader('Content-Type');
+          const contentTypeHeader = request.getResponseHeader("Content-Type");
           if (contentTypeHeader) {
-            response.contentType =
-                contentTypeHeader.replace(/(.*);.*$/, '$1');
+            response.contentType = contentTypeHeader.replace(/(.*);.*$/, "$1");
           }
         }
       }
@@ -96,11 +104,13 @@ export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
   try {
     if (opt_data) {
       request.setRequestHeader(
-          'Content-Type', opt_contentType || 'text/plain; charset=UTF-8');
+        "Content-Type",
+        opt_contentType || "text/plain; charset=UTF-8"
+      );
       request.send(opt_data);
     } else {
       if (url.match(/file:\/\/.*(\.html$|\.htm$)/)) {
-        request.overrideMimeType('text/html');
+        request.overrideMimeType("text/html");
       }
       request.send(null);
     }
@@ -114,82 +124,97 @@ export const ajax = (url: string, opt_type?: XMLHttpRequestResponseType,
 /**
  * @return Blob
  */
-export const makeBlob =
-    (parts: (string|Blob|ArrayBuffer|ArrayBufferView)[],
-     opt_type?: string): any => {
-      const type = opt_type || 'application/octet-stream';
-      const builderCtr = window['WebKitBlobBuilder'] || window['MSBlobBuilder'];
+export const makeBlob = (
+  parts: (string | Blob | ArrayBuffer | ArrayBufferView)[],
+  opt_type?: string
+): any => {
+  const type = opt_type || "application/octet-stream";
+  const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"];
 
-      // deprecated
-      if (builderCtr) {
-        const builder = new builderCtr();
-        for (let i = 0; i < parts.length; i++) {
-          builder.append(parts[i]);
-        }
-        return builder.getBlob(type);
-      }
-      return new Blob(parts, {type});
-    };
+  // deprecated
+  if (builderCtr) {
+    const builder = new builderCtr();
+    for (let i = 0; i < parts.length; i++) {
+      builder.append(parts[i]);
+    }
+    return builder.getBlob(type);
+  }
+  return new Blob(parts, { type });
+};
 
 /**
  * @return task.Result.<ArrayBuffer>
  */
 export const readBlob = (blob: Blob): any => {
-  const frame: task.Frame<ArrayBuffer> = task.newFrame('readBlob');
+  const frame: task.Frame<ArrayBuffer> = task.newFrame("readBlob");
   const fileReader = new FileReader();
   const continuation = frame.suspend(fileReader);
-  fileReader.addEventListener('load', () => {
-    continuation.schedule((fileReader.result as ArrayBuffer));
-  }, false);
+  fileReader.addEventListener(
+    "load",
+    () => {
+      continuation.schedule(fileReader.result as ArrayBuffer);
+    },
+    false
+  );
   fileReader.readAsArrayBuffer(blob);
   return frame.result();
 };
 
 export const revokeObjectURL = (url: string) => {
-  (window['URL'] || window['webkitURL']).revokeObjectURL(url);
+  (window["URL"] || window["webkitURL"]).revokeObjectURL(url);
 };
 
 /**
  * @return url
  */
 export const createObjectURL = (blob: Blob): string =>
-    (window['URL'] || window['webkitURL']).createObjectURL(blob);
+  (window["URL"] || window["webkitURL"]).createObjectURL(blob);
 
 /**
  * @template Resource
  */
 export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
-  resources: {[key: string]: Resource} = {};
-  fetchers: {[key: string]: Fetcher<Resource>} = {};
+  resources: { [key: string]: Resource } = {};
+  fetchers: { [key: string]: Fetcher<Resource> } = {};
 
   constructor(
-      public readonly parser:
-          (p1: Response, p2: ResourceStore<Resource>) => task.Result<Resource>,
-      public readonly type: XMLHttpRequestResponseType) {}
+    public readonly parser: (
+      p1: Response,
+      p2: ResourceStore<Resource>
+    ) => task.Result<Resource>,
+    public readonly type: XMLHttpRequestResponseType
+  ) {}
 
   /**
    * @return resource for the given URL
    */
-  load(url: string, opt_required?: boolean, opt_message?: string):
-      task.Result<Resource> {
+  load(
+    url: string,
+    opt_required?: boolean,
+    opt_message?: string
+  ): task.Result<Resource> {
     url = base.stripFragment(url);
     const resource = this.resources[url];
-    if (typeof resource != 'undefined') {
+    if (typeof resource != "undefined") {
       return task.newResult(resource);
     }
     return this.fetch(url, opt_required, opt_message).get();
   }
 
-  private fetchInner(url: string, opt_required?: boolean, opt_message?: string):
-      task.Result<Resource> {
+  private fetchInner(
+    url: string,
+    opt_required?: boolean,
+    opt_message?: string
+  ): task.Result<Resource> {
     const self = this;
-    const frame: task.Frame<Resource> = task.newFrame('fetch');
-    ajax(url, self.type).then((response) => {
+    const frame: task.Frame<Resource> = task.newFrame("fetch");
+    ajax(url, self.type).then(response => {
       if (opt_required && response.status >= 400) {
         throw new Error(
-            opt_message || `Failed to fetch required resource: ${url}`);
+          opt_message || `Failed to fetch required resource: ${url}`
+        );
       }
-      self.parser(response, self).then((resource) => {
+      self.parser(response, self).then(resource => {
         delete self.fetchers[url];
         self.resources[url] = resource;
         frame.finish(resource);
@@ -201,8 +226,11 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
   /**
    * @return fetcher for the resource for the given URL
    */
-  fetch(url: string, opt_required?: boolean, opt_message?: string):
-      Fetcher<Resource> {
+  fetch(
+    url: string,
+    opt_required?: boolean,
+    opt_message?: string
+  ): Fetcher<Resource> {
     url = base.stripFragment(url);
     const resource = this.resources[url];
     if (resource) {
@@ -212,8 +240,9 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
     if (!fetcher) {
       const self = this;
       fetcher = new Fetcher(
-          () => self.fetchInner(url, opt_required, opt_message),
-          `Fetch ${url}`);
+        () => self.fetchInner(url, opt_required, opt_message),
+        `Fetch ${url}`
+      );
       self.fetchers[url] = fetcher;
       fetcher.start();
     }
@@ -232,14 +261,16 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
 
 export type JSONStore = ResourceStore<base.JSON>;
 
-export const parseJSONResource =
-    (response: Response, store: JSONStore): task.Result<base.JSON> => {
-      const text = response.responseText;
-      return task.newResult(text ? base.stringToJSON(text) : null);
-    };
+export const parseJSONResource = (
+  response: Response,
+  store: JSONStore
+): task.Result<base.JSON> => {
+  const text = response.responseText;
+  return task.newResult(text ? base.stringToJSON(text) : null);
+};
 
 /**
  * return {adapt.net.JSONStore}
  */
 export const newJSONStore = () =>
-    new ResourceStore(parseJSONResource, XMLHttpRequestResponseType.TEXT);
+  new ResourceStore(parseJSONResource, XMLHttpRequestResponseType.TEXT);

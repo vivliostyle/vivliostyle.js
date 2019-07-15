@@ -17,13 +17,13 @@
  *
  * @fileoverview CSS Parser.
  */
-import * as logging from '../vivliostyle/logging';
-import * as base from './base';
-import * as css from './css';
-import * as csstok from './csstok';
-import * as exprs from './expr';
-import * as net from './net';
-import * as task from './task';
+import * as logging from "../vivliostyle/logging";
+import * as base from "./base";
+import * as css from "./css";
+import * as csstok from "./csstok";
+import * as exprs from "./expr";
+import * as net from "./net";
+import * as task from "./task";
 
 /**
  * User agent stylesheet base specificity.
@@ -66,9 +66,9 @@ export const SPECIFICITY_USER_IMPORTANT: number = 100663296;
  * @enum {string}
  */
 export enum StylesheetFlavor {
-  USER_AGENT = 'UA',
-  USER = 'User',
-  AUTHOR = 'Author'
+  USER_AGENT = "UA",
+  USER = "User",
+  AUTHOR = "Author"
 }
 
 /**
@@ -77,17 +77,22 @@ export enum StylesheetFlavor {
 export const colorFromHash = (text: string): css.Color => {
   let num = parseInt(text, 16);
   if (isNaN(num)) {
-    throw new Error('E_CSS_COLOR');
+    throw new Error("E_CSS_COLOR");
   }
   if (text.length == 6) {
     return new css.Color(num);
   }
   if (text.length == 3) {
-    num = num & 15 | (num & 15) << 4 | (num & 240) << 4 | (num & 240) << 8 |
-        (num & 3840) << 8 | (num & 3840) << 12;
+    num =
+      (num & 15) |
+      ((num & 15) << 4) |
+      ((num & 240) << 4) |
+      ((num & 240) << 8) |
+      ((num & 3840) << 8) |
+      ((num & 3840) << 12);
     return new css.Color(num);
   }
-  throw new Error('E_CSS_COLOR');
+  throw new Error("E_CSS_COLOR");
 };
 
 export class ParserHandler implements csstok.TokenizerHandler {
@@ -97,7 +102,9 @@ export class ParserHandler implements csstok.TokenizerHandler {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
-  getCurrentToken(): csstok.Token {return null;}
+  getCurrentToken(): csstok.Token {
+    return null;
+  }
 
   getScope(): exprs.LexicalScope {
     return this.scope;
@@ -109,19 +116,22 @@ export class ParserHandler implements csstok.TokenizerHandler {
     this.flavor = flavor;
   }
 
-  tagSelector(ns: string|null, name: string|null): void {}
+  tagSelector(ns: string | null, name: string | null): void {}
 
   classSelector(name: string): void {}
 
-  pseudoclassSelector(name: string, params: (number|string)[]): void {}
+  pseudoclassSelector(name: string, params: (number | string)[]): void {}
 
-  pseudoelementSelector(name: string, params: (number|string)[]): void {}
+  pseudoelementSelector(name: string, params: (number | string)[]): void {}
 
   idSelector(id: string): void {}
 
   attributeSelector(
-      ns: string, name: string, op: csstok.TokenType,
-      value: string|null): void {}
+    ns: string,
+    name: string,
+    op: csstok.TokenType,
+    value: string | null
+  ): void {}
 
   descendantSelector(): void {}
 
@@ -137,7 +147,7 @@ export class ParserHandler implements csstok.TokenizerHandler {
 
   startFontFaceRule(): void {}
 
-  startFootnoteRule(pseudoelem: string|null): void {}
+  startFootnoteRule(pseudoelem: string | null): void {}
 
   startViewportRule(): void {}
 
@@ -160,13 +170,22 @@ export class ParserHandler implements csstok.TokenizerHandler {
   startPageTemplateRule(): void {}
 
   startPageMasterRule(
-      name: string|null, pseudoName: string|null, classes: string[]): void {}
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {}
 
   startPartitionRule(
-      name: string|null, pseudoName: string|null, classes: string[]): void {}
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {}
 
   startPartitionGroupRule(
-      name: string|null, pseudoName: string|null, classes: string[]): void {}
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {}
 
   startRuleBody(): void {}
 
@@ -484,8 +503,10 @@ export class SkippingParserHandler extends ParserHandler {
   flavor: any;
 
   constructor(
-      scope: exprs.LexicalScope, public owner: DispatchParserHandler,
-      public readonly topLevel) {
+    scope: exprs.LexicalScope,
+    public owner: DispatchParserHandler,
+    public readonly topLevel
+  ) {
     super(scope);
     if (owner) {
       this.flavor = owner.flavor;
@@ -525,8 +546,10 @@ export class SkippingParserHandler extends ParserHandler {
 
 export class SlaveParserHandler extends SkippingParserHandler {
   constructor(
-      scope: exprs.LexicalScope, owner: DispatchParserHandler,
-      topLevel: boolean) {
+    scope: exprs.LexicalScope,
+    owner: DispatchParserHandler,
+    topLevel: boolean
+  ) {
     super(scope, owner, topLevel);
   }
 
@@ -537,119 +560,120 @@ export class SlaveParserHandler extends SkippingParserHandler {
   reportAndSkip(message: string): void {
     this.report(message);
     this.owner.pushHandler(
-        new SkippingParserHandler(this.scope, this.owner, false));
+      new SkippingParserHandler(this.scope, this.owner, false)
+    );
   }
 
   /**
    * @override
    */
   startSelectorRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_SELECTOR');
+    this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR");
   }
 
   /**
    * @override
    */
   startFontFaceRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_FONT_FACE');
+    this.reportAndSkip("E_CSS_UNEXPECTED_FONT_FACE");
   }
 
   /**
    * @override
    */
   startFootnoteRule(pseudoelem) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_FOOTNOTE');
+    this.reportAndSkip("E_CSS_UNEXPECTED_FOOTNOTE");
   }
 
   /**
    * @override
    */
   startViewportRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_VIEWPORT');
+    this.reportAndSkip("E_CSS_UNEXPECTED_VIEWPORT");
   }
 
   /**
    * @override
    */
   startDefineRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_DEFINE');
+    this.reportAndSkip("E_CSS_UNEXPECTED_DEFINE");
   }
 
   /**
    * @override
    */
   startRegionRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_REGION');
+    this.reportAndSkip("E_CSS_UNEXPECTED_REGION");
   }
 
   /**
    * @override
    */
   startPageRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_PAGE');
+    this.reportAndSkip("E_CSS_UNEXPECTED_PAGE");
   }
 
   /**
    * @override
    */
   startWhenRule(expr) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_WHEN');
+    this.reportAndSkip("E_CSS_UNEXPECTED_WHEN");
   }
 
   /**
    * @override
    */
   startFlowRule(flowName) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_FLOW');
+    this.reportAndSkip("E_CSS_UNEXPECTED_FLOW");
   }
 
   /**
    * @override
    */
   startPageTemplateRule() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_PAGE_TEMPLATE');
+    this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_TEMPLATE");
   }
 
   /**
    * @override
    */
   startPageMasterRule(name, pseudoName, classes) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_PAGE_MASTER');
+    this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_MASTER");
   }
 
   /**
    * @override
    */
   startPartitionRule(name, pseudoName, classes) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_PARTITION');
+    this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION");
   }
 
   /**
    * @override
    */
   startPartitionGroupRule(name, pseudoName, classes) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_PARTITION_GROUP');
+    this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION_GROUP");
   }
 
   /**
    * @override
    */
   startFuncWithSelector(funcName) {
-    this.reportAndSkip('E_CSS_UNEXPECTED_SELECTOR_FUNC');
+    this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR_FUNC");
   }
 
   /**
    * @override
    */
   endFuncWithSelector() {
-    this.reportAndSkip('E_CSS_UNEXPECTED_END_SELECTOR_FUNC');
+    this.reportAndSkip("E_CSS_UNEXPECTED_END_SELECTOR_FUNC");
   }
 
   /**
    * @override
    */
   property(name, value, important) {
-    this.error('E_CSS_UNEXPECTED_PROPERTY', this.getCurrentToken());
+    this.error("E_CSS_UNEXPECTED_PROPERTY", this.getCurrentToken());
   }
 }
 
@@ -893,14 +917,14 @@ export enum ExprContext {
 
 export class Parser {
   valStack: any[] = [];
-  namespacePrefixToURI: {[key: string]: string} = {};
-  defaultNamespaceURI: string|null = null;
-  propName: string|null = null;
+  namespacePrefixToURI: { [key: string]: string } = {};
+  defaultNamespaceURI: string | null = null;
+  propName: string | null = null;
   propImportant: boolean = false;
   exprContext: ExprContext;
   result: css.Val = null;
   importReady: boolean = false;
-  importURL: string|null = null;
+  importURL: string | null = null;
   importCondition: css.Expr = null;
   errorBrackets: number[] = [];
   ruleStack: string[] = [];
@@ -908,8 +932,11 @@ export class Parser {
   pageRule: boolean = false;
 
   constructor(
-      public actions: Action[], public tokenizer: csstok.Tokenizer,
-      public readonly handler: ParserHandler, public baseURL: string) {
+    public actions: Action[],
+    public tokenizer: csstok.Tokenizer,
+    public readonly handler: ParserHandler,
+    public baseURL: string
+  ) {
     this.exprContext = ExprContext.MEDIA;
   }
 
@@ -917,12 +944,12 @@ export class Parser {
     const arr: css.Val[] = [];
     const valStack = this.valStack;
     while (true) {
-      arr.push((valStack[index++] as css.Val));
+      arr.push(valStack[index++] as css.Val);
       if (index == valStack.length) {
         break;
       }
       if (valStack[index++] != sep) {
-        throw new Error('Unexpected state');
+        throw new Error("Unexpected state");
       }
     }
     return arr;
@@ -934,41 +961,45 @@ export class Parser {
     let v;
     do {
       v = valStack[--index];
-    } while (typeof v != 'undefined' && typeof v != 'string');
+    } while (typeof v != "undefined" && typeof v != "string");
     let count = valStack.length - (index + 1);
     if (count > 1) {
       valStack.splice(
-          index + 1, count,
-          new css.SpaceList(valStack.slice(index + 1, valStack.length)));
+        index + 1,
+        count,
+        new css.SpaceList(valStack.slice(index + 1, valStack.length))
+      );
     }
-    if (sep == ',') {
+    if (sep == ",") {
       return null;
     }
     index++;
     do {
       v = valStack[--index];
-    } while (typeof v != 'undefined' && (typeof v != 'string' || v == ','));
+    } while (typeof v != "undefined" && (typeof v != "string" || v == ","));
     count = valStack.length - (index + 1);
-    if (v == '(') {
-      if (sep != ')') {
-        this.handler.error('E_CSS_MISMATCHED_C_PAR', token);
+    if (v == "(") {
+      if (sep != ")") {
+        this.handler.error("E_CSS_MISMATCHED_C_PAR", token);
         this.actions = actionsErrorDecl;
         return null;
       }
       const func = new css.Func(
-          (valStack[index - 1] as string), this.extractVals(',', index + 1));
+        valStack[index - 1] as string,
+        this.extractVals(",", index + 1)
+      );
       valStack.splice(index - 1, count + 2, func);
       return null;
     }
-    if (sep != ';' || index >= 0) {
-      this.handler.error('E_CSS_UNEXPECTED_VAL_END', token);
+    if (sep != ";" || index >= 0) {
+      this.handler.error("E_CSS_UNEXPECTED_VAL_END", token);
       this.actions = actionsErrorDecl;
       return null;
     }
     if (count > 1) {
-      return new css.CommaList(this.extractVals(',', index + 1));
+      return new css.CommaList(this.extractVals(",", index + 1));
     }
-    return (valStack[0] as css.Val);
+    return valStack[0] as css.Val;
   }
 
   exprError(mnemonics: string, token: csstok.Token) {
@@ -979,7 +1010,7 @@ export class Parser {
   exprStackReduce(op: number, token: csstok.Token): boolean {
     const valStack = this.valStack;
     const handler = this.handler;
-    let val = (valStack.pop() as exprs.Val);
+    let val = valStack.pop() as exprs.Val;
     let val2: exprs.Val;
     while (true) {
       let tok = valStack.pop();
@@ -989,8 +1020,8 @@ export class Parser {
           args.unshift(valStack.pop());
           tok = valStack.pop();
         }
-        if (typeof tok == 'string') {
-          if (tok == '{') {
+        if (typeof tok == "string") {
+          if (tok == "{") {
             // reached CSS portion of the stack
             while (args.length >= 2) {
               const e1 = args.shift();
@@ -1000,13 +1031,15 @@ export class Parser {
             }
             valStack.push(new css.Expr(args[0]));
             return true;
-          } else if (tok == '(') {
+          } else if (tok == "(") {
             // call
-            const name2 = (valStack.pop() as string);
-            const name1 = (valStack.pop() as string | null);
+            const name2 = valStack.pop() as string;
+            const name1 = valStack.pop() as string | null;
             val = new exprs.Call(
-                handler.getScope(), exprs.makeQualifiedName(name1, name2),
-                args);
+              handler.getScope(),
+              exprs.makeQualifiedName(name1, name2),
+              args
+            );
             op = csstok.TokenType.EOF;
             continue;
           }
@@ -1014,13 +1047,16 @@ export class Parser {
         if (tok == csstok.TokenType.O_PAR) {
           if (val.isMediaName()) {
             val = new exprs.MediaTest(
-                handler.getScope(), (val as exprs.MediaName), null);
+              handler.getScope(),
+              val as exprs.MediaName,
+              null
+            );
           }
           op = csstok.TokenType.EOF;
           continue;
         }
       } else {
-        if (typeof tok == 'string') {
+        if (typeof tok == "string") {
           // reached CSS portion of the stack or a call
           valStack.push(tok);
           break;
@@ -1033,16 +1069,16 @@ export class Parser {
         } else if (tok == -csstok.TokenType.MINUS) {
           val = new exprs.Negate(handler.getScope(), val);
         } else {
-          this.exprError('F_UNEXPECTED_STATE', token);
+          this.exprError("F_UNEXPECTED_STATE", token);
           return false;
         }
       } else {
         // infix
-        if (priority[op] > priority[(tok as number)]) {
+        if (priority[op] > priority[tok as number]) {
           valStack.push(tok);
           break;
         }
-        val2 = (valStack.pop() as exprs.Val);
+        val2 = valStack.pop() as exprs.Val;
         switch (tok) {
           case csstok.TokenType.AMP_AMP:
             val = new exprs.And(handler.getScope(), val2, val);
@@ -1093,40 +1129,45 @@ export class Parser {
                 case csstok.TokenType.QMARK:
                   valStack.pop();
                   val = new exprs.Cond(
-                      handler.getScope(), (valStack.pop() as exprs.Val), val2,
-                      val);
+                    handler.getScope(),
+                    valStack.pop() as exprs.Val,
+                    val2,
+                    val
+                  );
                   break;
                 case csstok.TokenType.O_PAR:
                   if (val2.isMediaName()) {
                     val = new exprs.MediaTest(
-                        handler.getScope(), (val2 as exprs.MediaName), val);
+                      handler.getScope(),
+                      val2 as exprs.MediaName,
+                      val
+                    );
                   } else {
-                    this.exprError('E_CSS_MEDIA_TEST', token);
+                    this.exprError("E_CSS_MEDIA_TEST", token);
                     return false;
                   }
                   break;
               }
             } else {
-              this.exprError('E_CSS_EXPR_COND', token);
+              this.exprError("E_CSS_EXPR_COND", token);
               return false;
             }
             break;
           case csstok.TokenType.QMARK:
             if (op != csstok.TokenType.COLON) {
-              this.exprError('E_CSS_EXPR_COND', token);
+              this.exprError("E_CSS_EXPR_COND", token);
               return false;
             }
 
           // fall through
           case csstok.TokenType.O_PAR:
-
             // don't reduce
             valStack.push(val2);
             valStack.push(tok);
             valStack.push(val);
             return false;
           default:
-            this.exprError('F_UNEXPECTED_STATE', token);
+            this.exprError("F_UNEXPECTED_STATE", token);
             return false;
         }
       }
@@ -1135,7 +1176,7 @@ export class Parser {
     return false;
   }
 
-  readPseudoParams(): (number|string)[] {
+  readPseudoParams(): (number | string)[] {
     const arr = [];
     while (true) {
       const token = this.tokenizer.token();
@@ -1144,7 +1185,7 @@ export class Parser {
           arr.push(token.text);
           break;
         case csstok.TokenType.PLUS:
-          arr.push('+');
+          arr.push("+");
           break;
         case csstok.TokenType.NUM:
         case csstok.TokenType.INT:
@@ -1161,7 +1202,7 @@ export class Parser {
    * Read `an+b` argument of pseudoclasses. Roughly based on the algorithm at
    * https://drafts.csswg.org/css-syntax/#the-anb-type
    */
-  private readNthPseudoParams(): number[]|null {
+  private readNthPseudoParams(): number[] | null {
     let hasLeadingPlus = false;
     let token = this.tokenizer.token();
     if (token.type === csstok.TokenType.PLUS) {
@@ -1169,11 +1210,13 @@ export class Parser {
       hasLeadingPlus = true;
       this.tokenizer.consume();
       token = this.tokenizer.token();
-    } else if (token.type === csstok.TokenType.IDENT &&
-        (token.text === 'even' || token.text === 'odd')) {
+    } else if (
+      token.type === csstok.TokenType.IDENT &&
+      (token.text === "even" || token.text === "odd")
+    ) {
       // 'even' or 'odd'
       this.tokenizer.consume();
-      return [2, token.text === 'odd' ? 1 : 0];
+      return [2, token.text === "odd" ? 1 : 0];
     }
     switch (token.type) {
       case csstok.TokenType.NUMERIC:
@@ -1184,17 +1227,17 @@ export class Parser {
 
       // FALLTHROUGH
       case csstok.TokenType.IDENT:
-        if (hasLeadingPlus && token.text.charAt(0) === '-') {
+        if (hasLeadingPlus && token.text.charAt(0) === "-") {
           // reject '+-n'
           return null;
         }
-        if (token.text === 'n' || token.text === '-n') {
+        if (token.text === "n" || token.text === "-n") {
           // 'an', 'an +b', 'an -b', 'n', 'n +b', 'n -b', '-n', '-n +b' '-n -b'
           if (hasLeadingPlus && token.precededBySpace) {
             // reject '+ an'
             return null;
           }
-          let a = token.text === '-n' ? -1 : 1;
+          let a = token.text === "-n" ? -1 : 1;
           if (token.type === csstok.TokenType.NUMERIC) {
             a = token.num;
           }
@@ -1234,13 +1277,13 @@ export class Parser {
             return null;
           }
           return [a, hasMinusSign && b > 0 ? -b : b];
-        } else if (token.text === 'n-' || token.text === '-n-') {
+        } else if (token.text === "n-" || token.text === "-n-") {
           // 'an- b', '-n- b'
           if (hasLeadingPlus && token.precededBySpace) {
             // reject '+ an- b'
             return null;
           }
-          let a = token.text === '-n-' ? -1 : 1;
+          let a = token.text === "-n-" ? -1 : 1;
           if (token.type === csstok.TokenType.NUMERIC) {
             a = token.num;
           }
@@ -1288,7 +1331,7 @@ export class Parser {
     return null;
   }
 
-  makeCondition(classes: string|null, condition: exprs.Val): css.Expr {
+  makeCondition(classes: string | null, condition: exprs.Val): css.Expr {
     const scope = this.handler.getScope();
     if (!scope) {
       return null;
@@ -1298,23 +1341,33 @@ export class Parser {
       const classList = classes.split(/\s+/);
       for (const className of classList) {
         switch (className) {
-          case 'vertical':
+          case "vertical":
             condition = exprs.and(
-                scope, condition,
-                new exprs.Not(scope, new exprs.Named(scope, 'pref-horizontal')));
+              scope,
+              condition,
+              new exprs.Not(scope, new exprs.Named(scope, "pref-horizontal"))
+            );
             break;
-          case 'horizontal':
+          case "horizontal":
             condition = exprs.and(
-                scope, condition, new exprs.Named(scope, 'pref-horizontal'));
+              scope,
+              condition,
+              new exprs.Named(scope, "pref-horizontal")
+            );
             break;
-          case 'day':
+          case "day":
             condition = exprs.and(
-                scope, condition,
-                new exprs.Not(scope, new exprs.Named(scope, 'pref-night-mode')));
+              scope,
+              condition,
+              new exprs.Not(scope, new exprs.Named(scope, "pref-night-mode"))
+            );
             break;
-          case 'night':
+          case "night":
             condition = exprs.and(
-                scope, condition, new exprs.Named(scope, 'pref-night-mode'));
+              scope,
+              condition,
+              new exprs.Named(scope, "pref-night-mode")
+            );
             break;
           default:
             condition = scope._false;
@@ -1329,44 +1382,47 @@ export class Parser {
 
   isInsidePropertyOnlyRule(): boolean {
     switch (this.ruleStack[this.ruleStack.length - 1]) {
-      case '[selector]':
-      case 'font-face':
-      case '-epubx-flow':
-      case '-epubx-viewport':
-      case '-epubx-define':
-      case '-adapt-footnote-area':
+      case "[selector]":
+      case "font-face":
+      case "-epubx-flow":
+      case "-epubx-viewport":
+      case "-epubx-define":
+      case "-adapt-footnote-area":
         return true;
     }
     return false;
   }
 
   runParser(
-      count: number, parsingValue, parsingStyleAttr: boolean, parsingMediaQuery,
-      parsingFunctionParam): boolean {
+    count: number,
+    parsingValue,
+    parsingStyleAttr: boolean,
+    parsingMediaQuery,
+    parsingFunctionParam
+  ): boolean {
     const handler = this.handler;
     const tokenizer = this.tokenizer;
     const valStack = this.valStack;
     let token: csstok.Token;
     let token1: csstok.Token;
-    let ns: string|null;
-    let text: string|null;
+    let ns: string | null;
+    let text: string | null;
     let num: number;
     let val: css.Val;
-    let params: (number|string)[];
+    let params: (number | string)[];
     if (parsingMediaQuery) {
       this.exprContext = ExprContext.MEDIA;
-      this.valStack.push('{');
+      this.valStack.push("{");
     }
     parserLoop: for (; count > 0; --count) {
       token = tokenizer.token();
       switch (this.actions[token.type]) {
         case Action.IDENT:
-
           // figure out if this is a property assignment or selector
           if (tokenizer.nthToken(1).type != csstok.TokenType.COLON) {
             // cannot be property assignment
             if (this.isInsidePropertyOnlyRule()) {
-              handler.error('E_CSS_COLON_EXPECTED', tokenizer.nthToken(1));
+              handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
               this.actions = actionsErrorDecl;
             } else {
               this.actions = actionsSelectorStart;
@@ -1377,9 +1433,11 @@ export class Parser {
           token1 = tokenizer.nthToken(2);
 
           // cannot be a selector
-          if (token1.precededBySpace ||
-              token1.type != csstok.TokenType.IDENT &&
-                  token1.type != csstok.TokenType.FUNC) {
+          if (
+            token1.precededBySpace ||
+            (token1.type != csstok.TokenType.IDENT &&
+              token1.type != csstok.TokenType.FUNC)
+          ) {
           } else {
             // can be either a selector or a property assignment
             tokenizer.mark();
@@ -1392,12 +1450,11 @@ export class Parser {
           valStack.splice(0, valStack.length);
           continue;
         case Action.PROP:
-
           // figure out if this is a property assignment or selector
           if (tokenizer.nthToken(1).type != csstok.TokenType.COLON) {
             // cannot be property assignment
             this.actions = actionsErrorDecl;
-            handler.error('E_CSS_COLON_EXPECTED', tokenizer.nthToken(1));
+            handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
             continue;
           }
           this.propName = token.text;
@@ -1408,7 +1465,6 @@ export class Parser {
           valStack.splice(0, valStack.length);
           continue;
         case Action.SELECTOR_START:
-
           // don't consume, process again
           this.actions = actionsSelectorStart;
           handler.startSelectorRule();
@@ -1416,7 +1472,7 @@ export class Parser {
         case Action.SELECTOR_NAME_1:
           if (!token.precededBySpace) {
             this.actions = actionsErrorSelector;
-            handler.error('E_CSS_SPACE_EXPECTED', token);
+            handler.error("E_CSS_SPACE_EXPECTED", token);
             continue;
           }
           handler.descendantSelector();
@@ -1450,11 +1506,11 @@ export class Parser {
                   break;
                 default:
                   this.actions = actionsError;
-                  handler.error('E_CSS_NAMESPACE', token);
+                  handler.error("E_CSS_NAMESPACE", token);
               }
             } else {
               this.actions = actionsError;
-              handler.error('E_CSS_UNDECLARED_PREFIX', token);
+              handler.error("E_CSS_UNDECLARED_PREFIX", token);
             }
           } else {
             handler.tagSelector(this.defaultNamespaceURI, token.text);
@@ -1469,7 +1525,7 @@ export class Parser {
         case Action.SELECTOR_ANY_1:
           if (!token.precededBySpace) {
             this.actions = actionsErrorSelector;
-            handler.error('E_CSS_SPACE_EXPECTED', token);
+            handler.error("E_CSS_SPACE_EXPECTED", token);
             continue;
           }
           handler.descendantSelector();
@@ -1501,7 +1557,7 @@ export class Parser {
                 break;
               default:
                 this.actions = actionsError;
-                handler.error('E_CSS_NAMESPACE', token);
+                handler.error("E_CSS_NAMESPACE", token);
             }
           } else {
             handler.tagSelector(this.defaultNamespaceURI, null);
@@ -1566,19 +1622,25 @@ export class Parser {
               text = token.text;
               tokenizer.consume();
               switch (text) {
-                case 'not':
+                case "not":
                   this.actions = actionsSelectorStart;
-                  handler.startFuncWithSelector('not');
-                  if (this.runParser(
-                          Number.POSITIVE_INFINITY, false, false, false,
-                          true)) {
+                  handler.startFuncWithSelector("not");
+                  if (
+                    this.runParser(
+                      Number.POSITIVE_INFINITY,
+                      false,
+                      false,
+                      false,
+                      true
+                    )
+                  ) {
                     this.actions = actionsSelector;
                   } else {
                     this.actions = actionsErrorSelector;
                   }
                   break parserLoop;
-                case 'lang':
-                case 'href-epub-type':
+                case "lang":
+                case "href-epub-type":
                   token = tokenizer.token();
                   if (token.type === csstok.TokenType.IDENT) {
                     params = [token.text];
@@ -1587,10 +1649,10 @@ export class Parser {
                   } else {
                     break pseudoclassType;
                   }
-                case 'nth-child':
-                case 'nth-of-type':
-                case 'nth-last-child':
-                case 'nth-last-of-type':
+                case "nth-child":
+                case "nth-of-type":
+                case "nth-last-child":
+                case "nth-last-of-type":
                   params = this.readNthPseudoParams();
                   if (!params) {
                     break pseudoclassType;
@@ -1598,13 +1660,12 @@ export class Parser {
                     break;
                   }
                 default:
-
                   // TODO
                   params = this.readPseudoParams();
               }
               token = tokenizer.token();
               if (token.type == csstok.TokenType.C_PAR) {
-                handler.pseudoclassSelector((text as string), params);
+                handler.pseudoclassSelector(text as string, params);
                 tokenizer.consume();
                 if (parsingFunctionParam) {
                   this.actions = actionsSelectorInFunc;
@@ -1615,7 +1676,7 @@ export class Parser {
               }
               break;
           }
-          handler.error('E_CSS_PSEUDOCLASS_SYNTAX', token);
+          handler.error("E_CSS_PSEUDOCLASS_SYNTAX", token);
           this.actions = actionsError;
           continue;
         case Action.SELECTOR_PSEUDOELEM:
@@ -1634,7 +1695,7 @@ export class Parser {
             case csstok.TokenType.FUNC:
               text = token.text;
               tokenizer.consume();
-              if (text == 'nth-fragment') {
+              if (text == "nth-fragment") {
                 params = this.readNthPseudoParams();
                 if (params === null) {
                   break;
@@ -1644,7 +1705,7 @@ export class Parser {
               }
               token = tokenizer.token();
               if (token.type == csstok.TokenType.C_PAR) {
-                handler.pseudoelementSelector((text as string), params);
+                handler.pseudoelementSelector(text as string, params);
                 if (parsingFunctionParam) {
                   this.actions = actionsSelectorInFunc;
                 } else {
@@ -1655,7 +1716,7 @@ export class Parser {
               }
               break;
           }
-          handler.error('E_CSS_PSEUDOELEM_SYNTAX', token);
+          handler.error("E_CSS_PSEUDOELEM_SYNTAX", token);
           this.actions = actionsError;
           continue;
         case Action.SELECTOR_ATTR_1:
@@ -1674,10 +1735,10 @@ export class Parser {
             text = null;
             tokenizer.consume();
           } else if (token.type == csstok.TokenType.BAR) {
-            text = '';
+            text = "";
           } else {
             this.actions = actionsErrorSelector;
-            handler.error('E_CSS_ATTR', token);
+            handler.error("E_CSS_ATTR", token);
             tokenizer.consume();
             continue;
           }
@@ -1686,7 +1747,7 @@ export class Parser {
             ns = text ? this.namespacePrefixToURI[text] : text;
             if (ns == null) {
               this.actions = actionsErrorSelector;
-              handler.error('E_CSS_UNDECLARED_PREFIX', token);
+              handler.error("E_CSS_UNDECLARED_PREFIX", token);
               tokenizer.consume();
               continue;
             }
@@ -1694,14 +1755,14 @@ export class Parser {
             token = tokenizer.token();
             if (token.type != csstok.TokenType.IDENT) {
               this.actions = actionsErrorSelector;
-              handler.error('E_CSS_ATTR_NAME_EXPECTED', token);
+              handler.error("E_CSS_ATTR_NAME_EXPECTED", token);
               continue;
             }
             text = token.text;
             tokenizer.consume();
             token = tokenizer.token();
           } else {
-            ns = '';
+            ns = "";
           }
           switch (token.type) {
             case csstok.TokenType.EQ:
@@ -1717,7 +1778,11 @@ export class Parser {
               break;
             case csstok.TokenType.C_BRK:
               handler.attributeSelector(
-                  (ns as string), (text as string), csstok.TokenType.EOF, null);
+                ns as string,
+                text as string,
+                csstok.TokenType.EOF,
+                null
+              );
               if (parsingFunctionParam) {
                 this.actions = actionsSelectorInFunc;
               } else {
@@ -1727,25 +1792,29 @@ export class Parser {
               continue;
             default:
               this.actions = actionsErrorSelector;
-              handler.error('E_CSS_ATTR_OP_EXPECTED', token);
+              handler.error("E_CSS_ATTR_OP_EXPECTED", token);
               continue;
           }
           switch (token.type) {
             case csstok.TokenType.IDENT:
             case csstok.TokenType.STR:
               handler.attributeSelector(
-                  (ns as string), (text as string), num, token.text);
+                ns as string,
+                text as string,
+                num,
+                token.text
+              );
               tokenizer.consume();
               token = tokenizer.token();
               break;
             default:
               this.actions = actionsErrorSelector;
-              handler.error('E_CSS_ATTR_VAL_EXPECTED', token);
+              handler.error("E_CSS_ATTR_VAL_EXPECTED", token);
               continue;
           }
           if (token.type != csstok.TokenType.C_BRK) {
             this.actions = actionsErrorSelector;
-            handler.error('E_CSS_ATTR', token);
+            handler.error("E_CSS_ATTR", token);
             continue;
           }
           if (parsingFunctionParam) {
@@ -1772,13 +1841,13 @@ export class Parser {
           continue;
         case Action.SELECTOR_BODY:
           if (this.regionRule) {
-            this.ruleStack.push('-epubx-region');
+            this.ruleStack.push("-epubx-region");
             this.regionRule = false;
           } else if (this.pageRule) {
-            this.ruleStack.push('page');
+            this.ruleStack.push("page");
             this.pageRule = false;
           } else {
-            this.ruleStack.push('[selector]');
+            this.ruleStack.push("[selector]");
           }
           handler.startRuleBody();
           this.actions = actionsBase;
@@ -1798,7 +1867,7 @@ export class Parser {
           try {
             valStack.push(colorFromHash(token.text));
           } catch (err) {
-            handler.error('E_CSS_COLOR', token);
+            handler.error("E_CSS_COLOR", token);
             this.actions = actionsError;
           }
           tokenizer.consume();
@@ -1824,8 +1893,8 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.VAL_COMMA:
-          this.valStackReduce(',', token);
-          valStack.push(',');
+          this.valStackReduce(",", token);
+          valStack.push(",");
           tokenizer.consume();
           continue;
         case Action.VAL_SLASH:
@@ -1834,35 +1903,37 @@ export class Parser {
           continue;
         case Action.VAL_FUNC:
           text = token.text.toLowerCase();
-          if (text == '-epubx-expr') {
+          if (text == "-epubx-expr") {
             // special case
             this.actions = actionsExprVal;
             this.exprContext = ExprContext.PROP;
-            valStack.push('{');
+            valStack.push("{");
           } else {
             valStack.push(text);
-            valStack.push('(');
+            valStack.push("(");
           }
           tokenizer.consume();
           continue;
         case Action.VAL_C_PAR:
-          this.valStackReduce(')', token);
+          this.valStackReduce(")", token);
           tokenizer.consume();
           continue;
         case Action.VAL_BANG:
           tokenizer.consume();
           token = tokenizer.token();
           token1 = tokenizer.nthToken(1);
-          if (token.type == csstok.TokenType.IDENT &&
-              token.text.toLowerCase() == 'important' &&
-              (token1.type == csstok.TokenType.SEMICOL ||
-               token1.type == csstok.TokenType.EOF ||
-               token1.type == csstok.TokenType.C_BRC)) {
+          if (
+            token.type == csstok.TokenType.IDENT &&
+            token.text.toLowerCase() == "important" &&
+            (token1.type == csstok.TokenType.SEMICOL ||
+              token1.type == csstok.TokenType.EOF ||
+              token1.type == csstok.TokenType.C_BRC)
+          ) {
             tokenizer.consume();
             this.propImportant = true;
             continue;
           }
-          this.exprError('E_CSS_SYNTAX', token);
+          this.exprError("E_CSS_SYNTAX", token);
           continue;
         case Action.VAL_PLUS:
           token1 = tokenizer.nthToken(1);
@@ -1882,7 +1953,7 @@ export class Parser {
             handler.startSelectorRule();
             continue;
           } else {
-            this.exprError('E_CSS_UNEXPECTED_PLUS', token);
+            this.exprError("E_CSS_UNEXPECTED_PLUS", token);
             continue;
           }
         case Action.VAL_END:
@@ -1891,58 +1962,65 @@ export class Parser {
         // fall through
         case Action.VAL_BRC:
           tokenizer.unmark();
-          val = this.valStackReduce(';', token);
+          val = this.valStackReduce(";", token);
           if (val && this.propName) {
-            handler.property(
-                (this.propName as string), val, this.propImportant);
+            handler.property(this.propName as string, val, this.propImportant);
           }
           this.actions = parsingStyleAttr ? actionsStyleAttribute : actionsBase;
           continue;
         case Action.VAL_FINISH:
           tokenizer.consume();
           tokenizer.unmark();
-          val = this.valStackReduce(';', token);
+          val = this.valStackReduce(";", token);
           if (parsingValue) {
             this.result = val;
             return true;
           }
           if (this.propName && val) {
-            handler.property(
-                (this.propName as string), val, this.propImportant);
+            handler.property(this.propName as string, val, this.propImportant);
           }
           if (parsingStyleAttr) {
             return true;
           }
-          this.exprError('E_CSS_SYNTAX', token);
+          this.exprError("E_CSS_SYNTAX", token);
           continue;
         case Action.EXPR_IDENT:
           token1 = tokenizer.nthToken(1);
           if (token1.type == csstok.TokenType.CLASS) {
-            if (tokenizer.nthToken(2).type == csstok.TokenType.O_PAR &&
-                !tokenizer.nthToken(2).precededBySpace) {
-              valStack.push(token.text, token1.text, '(');
+            if (
+              tokenizer.nthToken(2).type == csstok.TokenType.O_PAR &&
+              !tokenizer.nthToken(2).precededBySpace
+            ) {
+              valStack.push(token.text, token1.text, "(");
               tokenizer.consume();
             } else {
-              valStack.push(new exprs.Named(
+              valStack.push(
+                new exprs.Named(
                   handler.getScope(),
-                  exprs.makeQualifiedName(token.text, token1.text)));
+                  exprs.makeQualifiedName(token.text, token1.text)
+                )
+              );
               this.actions = actionsExprOp;
             }
             tokenizer.consume();
           } else {
-            if (this.exprContext == ExprContext.MEDIA ||
-                this.exprContext == ExprContext.IMPORT) {
-              if (token.text.toLowerCase() == 'not') {
+            if (
+              this.exprContext == ExprContext.MEDIA ||
+              this.exprContext == ExprContext.IMPORT
+            ) {
+              if (token.text.toLowerCase() == "not") {
                 tokenizer.consume();
                 valStack.push(
-                    new exprs.MediaName(handler.getScope(), true, token1.text));
+                  new exprs.MediaName(handler.getScope(), true, token1.text)
+                );
               } else {
-                if (token.text.toLowerCase() == 'only') {
+                if (token.text.toLowerCase() == "only") {
                   tokenizer.consume();
                   token = token1;
                 }
                 valStack.push(
-                    new exprs.MediaName(handler.getScope(), false, token.text));
+                  new exprs.MediaName(handler.getScope(), false, token.text)
+                );
               }
             } else {
               valStack.push(new exprs.Named(handler.getScope(), token.text));
@@ -1952,7 +2030,7 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_FUNC:
-          valStack.push(null, token.text, '(');
+          valStack.push(null, token.text, "(");
           tokenizer.consume();
           continue;
         case Action.EXPR_NUM:
@@ -1962,11 +2040,11 @@ export class Parser {
           continue;
         case Action.EXPR_NUMERIC:
           text = token.text;
-          if (text == '%') {
+          if (text == "%") {
             if (this.propName && this.propName.match(/height|^(top|bottom)$/)) {
-              text = 'vh';
+              text = "vh";
             } else {
-              text = 'vw';
+              text = "vw";
             }
           }
           valStack.push(new exprs.Numeric(handler.getScope(), token.num, text));
@@ -1982,7 +2060,7 @@ export class Parser {
           tokenizer.consume();
           token = tokenizer.token();
           if (token.type != csstok.TokenType.INT || token.precededBySpace) {
-            this.exprError('E_CSS_SYNTAX', token);
+            this.exprError("E_CSS_SYNTAX", token);
           } else {
             valStack.push(new exprs.Param(handler.getScope(), token.num));
             tokenizer.consume();
@@ -2000,13 +2078,13 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_INFIX_NAME:
-          if (token.text.toLowerCase() == 'and') {
+          if (token.text.toLowerCase() == "and") {
             this.actions = actionsExprVal;
             this.exprStackReduce(OP_MEDIA_AND, token);
             valStack.push(OP_MEDIA_AND);
             tokenizer.consume();
           } else {
-            this.exprError('E_CSS_SYNTAX', token);
+            this.exprError("E_CSS_SYNTAX", token);
           }
           continue;
         case Action.EXPR_C_PAR:
@@ -2014,7 +2092,7 @@ export class Parser {
             if (this.propName) {
               this.actions = actionsPropVal;
             } else {
-              this.exprError('E_CSS_UNBALANCED_PAR', token);
+              this.exprError("E_CSS_UNBALANCED_PAR", token);
             }
           }
           tokenizer.consume();
@@ -2022,14 +2100,14 @@ export class Parser {
         case Action.EXPR_O_BRC:
           if (this.exprStackReduce(csstok.TokenType.C_PAR, token)) {
             if (this.propName || this.exprContext == ExprContext.IMPORT) {
-              this.exprError('E_CSS_UNEXPECTED_BRC', token);
+              this.exprError("E_CSS_UNEXPECTED_BRC", token);
             } else {
               if (this.exprContext == ExprContext.WHEN) {
-                handler.startWhenRule((valStack.pop() as css.Expr));
+                handler.startWhenRule(valStack.pop() as css.Expr);
               } else {
-                handler.startMediaRule((valStack.pop() as css.Expr));
+                handler.startMediaRule(valStack.pop() as css.Expr);
               }
-              this.ruleStack.push('media');
+              this.ruleStack.push("media");
               handler.startRuleBody();
               this.actions = actionsBase;
             }
@@ -2039,9 +2117,9 @@ export class Parser {
         case Action.EXPR_SEMICOL:
           if (this.exprStackReduce(csstok.TokenType.C_PAR, token)) {
             if (this.propName || this.exprContext != ExprContext.IMPORT) {
-              this.exprError('E_CSS_UNEXPECTED_SEMICOL', token);
+              this.exprError("E_CSS_UNEXPECTED_SEMICOL", token);
             } else {
-              this.importCondition = (valStack.pop() as css.Expr);
+              this.importCondition = valStack.pop() as css.Expr;
               this.importReady = true;
               this.actions = actionsBase;
               tokenizer.consume();
@@ -2065,16 +2143,20 @@ export class Parser {
         case Action.AT:
           text = token.text.toLowerCase();
           switch (text) {
-            case 'import':
+            case "import":
               tokenizer.consume();
               token = tokenizer.token();
-              if (token.type == csstok.TokenType.STR ||
-                  token.type == csstok.TokenType.URL) {
+              if (
+                token.type == csstok.TokenType.STR ||
+                token.type == csstok.TokenType.URL
+              ) {
                 this.importURL = token.text;
                 tokenizer.consume();
                 token = tokenizer.token();
-                if (token.type == csstok.TokenType.SEMICOL ||
-                    token.type == csstok.TokenType.EOF) {
+                if (
+                  token.type == csstok.TokenType.SEMICOL ||
+                  token.type == csstok.TokenType.EOF
+                ) {
                   this.importReady = true;
                   tokenizer.consume();
                   return false;
@@ -2084,14 +2166,14 @@ export class Parser {
                   // signals @ rule
                   this.exprContext = ExprContext.IMPORT;
                   this.actions = actionsExprVal;
-                  valStack.push('{');
+                  valStack.push("{");
                   continue;
                 }
               }
-              handler.error('E_CSS_IMPORT_SYNTAX', token);
+              handler.error("E_CSS_IMPORT_SYNTAX", token);
               this.actions = actionsError;
               continue;
-            case 'namespace':
+            case "namespace":
               tokenizer.consume();
               token = tokenizer.token();
               switch (token.type) {
@@ -2101,9 +2183,11 @@ export class Parser {
                   // Prefix
                   tokenizer.consume();
                   token = tokenizer.token();
-                  if ((token.type == csstok.TokenType.STR ||
-                       token.type == csstok.TokenType.URL) &&
-                      tokenizer.nthToken(1).type == csstok.TokenType.SEMICOL) {
+                  if (
+                    (token.type == csstok.TokenType.STR ||
+                      token.type == csstok.TokenType.URL) &&
+                    tokenizer.nthToken(1).type == csstok.TokenType.SEMICOL
+                  ) {
                     this.namespacePrefixToURI[text] = token.text;
                     tokenizer.consume();
                     tokenizer.consume();
@@ -2120,46 +2204,47 @@ export class Parser {
                   }
                   break;
               }
-              handler.error('E_CSS_NAMESPACE_SYNTAX', token);
+              handler.error("E_CSS_NAMESPACE_SYNTAX", token);
               this.actions = actionsError;
               continue;
-            case 'charset':
-
+            case "charset":
               // Useless in EPUB (only UTF-8 or UTF-16 is allowed anyway and
               // we are at the mercy of the browser charset handling anyway).
               tokenizer.consume();
               token = tokenizer.token();
-              if (token.type == csstok.TokenType.STR &&
-                  tokenizer.nthToken(1).type == csstok.TokenType.SEMICOL) {
+              if (
+                token.type == csstok.TokenType.STR &&
+                tokenizer.nthToken(1).type == csstok.TokenType.SEMICOL
+              ) {
                 text = token.text.toLowerCase();
-                if (text != 'utf-8' && text != 'utf-16') {
+                if (text != "utf-8" && text != "utf-16") {
                   handler.error(`E_CSS_UNEXPECTED_CHARSET ${text}`, token);
                 }
                 tokenizer.consume();
                 tokenizer.consume();
                 continue;
               }
-              handler.error('E_CSS_CHARSET_SYNTAX', token);
+              handler.error("E_CSS_CHARSET_SYNTAX", token);
               this.actions = actionsError;
               continue;
-            case 'font-face':
-            case '-epubx-page-template':
-            case '-epubx-define':
-            case '-epubx-viewport':
+            case "font-face":
+            case "-epubx-page-template":
+            case "-epubx-define":
+            case "-epubx-viewport":
               if (tokenizer.nthToken(1).type == csstok.TokenType.O_BRC) {
                 tokenizer.consume();
                 tokenizer.consume();
                 switch (text) {
-                  case 'font-face':
+                  case "font-face":
                     handler.startFontFaceRule();
                     break;
-                  case '-epubx-page-template':
+                  case "-epubx-page-template":
                     handler.startPageTemplateRule();
                     break;
-                  case '-epubx-define':
+                  case "-epubx-define":
                     handler.startDefineRule();
                     break;
-                  case '-epubx-viewport':
+                  case "-epubx-viewport":
                     handler.startViewportRule();
                     break;
                 }
@@ -2168,7 +2253,7 @@ export class Parser {
                 continue;
               }
               break;
-            case '-adapt-footnote-area':
+            case "-adapt-footnote-area":
               tokenizer.consume();
               token = tokenizer.token();
               switch (token.type) {
@@ -2181,47 +2266,49 @@ export class Parser {
                 case csstok.TokenType.COL_COL:
                   tokenizer.consume();
                   token = tokenizer.token();
-                  if (token.type == csstok.TokenType.IDENT &&
-                      tokenizer.nthToken(1).type == csstok.TokenType.O_BRC) {
+                  if (
+                    token.type == csstok.TokenType.IDENT &&
+                    tokenizer.nthToken(1).type == csstok.TokenType.O_BRC
+                  ) {
                     text = token.text;
                     tokenizer.consume();
                     tokenizer.consume();
                     handler.startFootnoteRule(text);
-                    this.ruleStack.push('-adapt-footnote-area');
+                    this.ruleStack.push("-adapt-footnote-area");
                     handler.startRuleBody();
                     continue;
                   }
                   break;
               }
               break;
-            case '-epubx-region':
+            case "-epubx-region":
               tokenizer.consume();
               handler.startRegionRule();
               this.regionRule = true;
               this.actions = actionsSelectorStart;
               continue;
-            case 'page':
+            case "page":
               tokenizer.consume();
               handler.startPageRule();
               this.pageRule = true;
               this.actions = actionsSelectorCont;
               continue;
-            case 'top-left-corner':
-            case 'top-left':
-            case 'top-center':
-            case 'top-right':
-            case 'top-right-corner':
-            case 'right-top':
-            case 'right-middle':
-            case 'right-bottom':
-            case 'bottom-right-corner':
-            case 'bottom-right':
-            case 'bottom-center':
-            case 'bottom-left':
-            case 'bottom-left-corner':
-            case 'left-bottom':
-            case 'left-middle':
-            case 'left-top':
+            case "top-left-corner":
+            case "top-left":
+            case "top-center":
+            case "top-right":
+            case "top-right-corner":
+            case "right-top":
+            case "right-middle":
+            case "right-bottom":
+            case "bottom-right-corner":
+            case "bottom-right":
+            case "bottom-center":
+            case "bottom-left":
+            case "bottom-left-corner":
+            case "left-bottom":
+            case "left-middle":
+            case "left-top":
               tokenizer.consume();
               token = tokenizer.token();
               if (token.type == csstok.TokenType.O_BRC) {
@@ -2232,27 +2319,29 @@ export class Parser {
                 continue;
               }
               break;
-            case '-epubx-when':
+            case "-epubx-when":
               tokenizer.consume();
               this.propName = null;
 
               // signals @ rule
               this.exprContext = ExprContext.WHEN;
               this.actions = actionsExprVal;
-              valStack.push('{');
+              valStack.push("{");
               continue;
-            case 'media':
+            case "media":
               tokenizer.consume();
               this.propName = null;
 
               // signals @ rule
               this.exprContext = ExprContext.MEDIA;
               this.actions = actionsExprVal;
-              valStack.push('{');
+              valStack.push("{");
               continue;
-            case '-epubx-flow':
-              if (tokenizer.nthToken(1).type == csstok.TokenType.IDENT &&
-                  tokenizer.nthToken(2).type == csstok.TokenType.O_BRC) {
+            case "-epubx-flow":
+              if (
+                tokenizer.nthToken(1).type == csstok.TokenType.IDENT &&
+                tokenizer.nthToken(2).type == csstok.TokenType.O_BRC
+              ) {
                 handler.startFlowRule(tokenizer.nthToken(1).text);
                 tokenizer.consume();
                 tokenizer.consume();
@@ -2262,30 +2351,34 @@ export class Parser {
                 continue;
               }
               break;
-            case '-epubx-page-master':
-            case '-epubx-partition':
-            case '-epubx-partition-group':
+            case "-epubx-page-master":
+            case "-epubx-partition":
+            case "-epubx-partition-group":
               tokenizer.consume();
               token = tokenizer.token();
-              let ruleName: string|null = null;
-              let rulePseudoName: string|null = null;
+              let ruleName: string | null = null;
+              let rulePseudoName: string | null = null;
               const classes: string[] = [];
               if (token.type == csstok.TokenType.IDENT) {
                 ruleName = token.text;
                 tokenizer.consume();
                 token = tokenizer.token();
               }
-              if (token.type == csstok.TokenType.COLON &&
-                  tokenizer.nthToken(1).type == csstok.TokenType.IDENT) {
+              if (
+                token.type == csstok.TokenType.COLON &&
+                tokenizer.nthToken(1).type == csstok.TokenType.IDENT
+              ) {
                 rulePseudoName = tokenizer.nthToken(1).text;
                 tokenizer.consume();
                 tokenizer.consume();
                 token = tokenizer.token();
               }
-              while (token.type == csstok.TokenType.FUNC &&
-                     token.text.toLowerCase() == 'class' &&
-                     tokenizer.nthToken(1).type == csstok.TokenType.IDENT &&
-                     tokenizer.nthToken(2).type == csstok.TokenType.C_PAR) {
+              while (
+                token.type == csstok.TokenType.FUNC &&
+                token.text.toLowerCase() == "class" &&
+                tokenizer.nthToken(1).type == csstok.TokenType.IDENT &&
+                tokenizer.nthToken(2).type == csstok.TokenType.C_PAR
+              ) {
                 classes.push(tokenizer.nthToken(1).text);
                 tokenizer.consume();
                 tokenizer.consume();
@@ -2295,17 +2388,26 @@ export class Parser {
               if (token.type == csstok.TokenType.O_BRC) {
                 tokenizer.consume();
                 switch (text) {
-                  case '-epubx-page-master':
+                  case "-epubx-page-master":
                     handler.startPageMasterRule(
-                        ruleName, rulePseudoName, classes);
+                      ruleName,
+                      rulePseudoName,
+                      classes
+                    );
                     break;
-                  case '-epubx-partition':
+                  case "-epubx-partition":
                     handler.startPartitionRule(
-                        ruleName, rulePseudoName, classes);
+                      ruleName,
+                      rulePseudoName,
+                      classes
+                    );
                     break;
-                  case '-epubx-partition-group':
+                  case "-epubx-partition-group":
                     handler.startPartitionGroupRule(
-                        ruleName, rulePseudoName, classes);
+                      ruleName,
+                      rulePseudoName,
+                      classes
+                    );
                     break;
                 }
                 this.ruleStack.push(text);
@@ -2313,8 +2415,7 @@ export class Parser {
                 continue;
               }
               break;
-            case '':
-
+            case "":
               // No text after @
               handler.error(`E_CSS_UNEXPECTED_AT${text}`, token);
 
@@ -2330,7 +2431,6 @@ export class Parser {
           this.actions = actionsError;
           continue;
         case Action.ERROR_PUSH:
-
           // Open bracket while skipping error syntax
           if (parsingValue || parsingStyleAttr) {
             return true;
@@ -2341,7 +2441,6 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.ERROR_POP_DECL:
-
           // Close bracket while skipping error syntax in declaration
           if (parsingValue || parsingStyleAttr) {
             return true;
@@ -2355,14 +2454,17 @@ export class Parser {
 
         // fall through
         case Action.ERROR_POP:
-
           // Close bracket while skipping error syntax
-          if (this.errorBrackets.length > 0 &&
-              this.errorBrackets[this.errorBrackets.length - 1] == token.type) {
+          if (
+            this.errorBrackets.length > 0 &&
+            this.errorBrackets[this.errorBrackets.length - 1] == token.type
+          ) {
             this.errorBrackets.pop();
           }
-          if (this.errorBrackets.length == 0 &&
-              token.type == csstok.TokenType.C_BRC) {
+          if (
+            this.errorBrackets.length == 0 &&
+            token.type == csstok.TokenType.C_BRC
+          ) {
             this.actions = actionsBase;
           }
           tokenizer.consume();
@@ -2388,7 +2490,7 @@ export class Parser {
           }
           if (parsingMediaQuery) {
             if (this.exprStackReduce(csstok.TokenType.C_PAR, token)) {
-              this.result = (valStack.pop() as css.Val);
+              this.result = valStack.pop() as css.Val;
               return true;
             }
             return false;
@@ -2397,7 +2499,7 @@ export class Parser {
             if (token.type == csstok.TokenType.INVALID) {
               handler.error(token.text, token);
             } else {
-              handler.error('E_CSS_SYNTAX', token);
+              handler.error("E_CSS_SYNTAX", token);
             }
             return false;
           }
@@ -2407,13 +2509,15 @@ export class Parser {
             handler.startSelectorRule();
             continue;
           }
-          if (this.actions !== actionsError &&
-              this.actions !== actionsErrorSelector &&
-              this.actions !== actionsErrorDecl) {
+          if (
+            this.actions !== actionsError &&
+            this.actions !== actionsErrorSelector &&
+            this.actions !== actionsErrorDecl
+          ) {
             if (token.type == csstok.TokenType.INVALID) {
               handler.error(token.text, token);
             } else {
-              handler.error('E_CSS_SYNTAX', token);
+              handler.error("E_CSS_SYNTAX", token);
             }
             if (this.isInsidePropertyOnlyRule()) {
               this.actions = actionsErrorDecl;
@@ -2454,16 +2558,22 @@ export class ErrorHandler extends ParserHandler {
   }
 }
 
-export const parseStylesheet = (tokenizer: csstok.Tokenizer,
-                                handler: ParserHandler, baseURL: string,
-                                classes: string|null,
-                                media: string|null): task.Result<boolean> => {
-  const frame: task.Frame<boolean> = task.newFrame('parseStylesheet');
+export const parseStylesheet = (
+  tokenizer: csstok.Tokenizer,
+  handler: ParserHandler,
+  baseURL: string,
+  classes: string | null,
+  media: string | null
+): task.Result<boolean> => {
+  const frame: task.Frame<boolean> = task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
   let condition = null;
   if (media) {
-    condition =
-        parseMediaQuery(new csstok.Tokenizer(media, handler), handler, baseURL);
+    condition = parseMediaQuery(
+      new csstok.Tokenizer(media, handler),
+      handler,
+      baseURL
+    );
   }
   condition = parser.makeCondition(classes, condition && condition.toExpr());
   if (condition) {
@@ -2471,121 +2581,143 @@ export const parseStylesheet = (tokenizer: csstok.Tokenizer,
     handler.startRuleBody();
   }
   frame
-      .loop(() => {
-        while (!parser.runParser(100, false, false, false, false)) {
-          if (parser.importReady) {
-            const resolvedURL =
-                base.resolveURL((parser.importURL as string), baseURL);
+    .loop(() => {
+      while (!parser.runParser(100, false, false, false, false)) {
+        if (parser.importReady) {
+          const resolvedURL = base.resolveURL(
+            parser.importURL as string,
+            baseURL
+          );
+          if (parser.importCondition) {
+            handler.startMediaRule(parser.importCondition);
+            handler.startRuleBody();
+          }
+          const innerFrame: task.Frame<boolean> = task.newFrame(
+            "parseStylesheet.import"
+          );
+          parseStylesheetFromURL(resolvedURL, handler, null, null).then(() => {
             if (parser.importCondition) {
-              handler.startMediaRule(parser.importCondition);
-              handler.startRuleBody();
+              handler.endRule();
             }
-            const innerFrame: task.Frame<boolean> =
-                task.newFrame('parseStylesheet.import');
-            parseStylesheetFromURL(resolvedURL, handler, null, null)
-                .then(() => {
-                  if (parser.importCondition) {
-                    handler.endRule();
-                  }
-                  parser.importReady = false;
-                  parser.importURL = null;
-                  parser.importCondition = null;
-                  innerFrame.finish(true);
-                });
-            return innerFrame.result();
-          }
-          const r = frame.timeSlice();
-          if (r.isPending) {
-            return r;
-          }
+            parser.importReady = false;
+            parser.importURL = null;
+            parser.importCondition = null;
+            innerFrame.finish(true);
+          });
+          return innerFrame.result();
         }
-        return task.newResult(false);
-      })
-      .then(() => {
-        if (condition) {
-          handler.endRule();
+        const r = frame.timeSlice();
+        if (r.isPending) {
+          return r;
         }
-        frame.finish(true);
-      });
+      }
+      return task.newResult(false);
+    })
+    .then(() => {
+      if (condition) {
+        handler.endRule();
+      }
+      frame.finish(true);
+    });
   return frame.result();
 };
 
-export const parseStylesheetFromText = (text: string, handler: ParserHandler,
-                                        baseURL: string, classes: string|null,
-                                        media: string|
-                                        null): task.Result<boolean> => {
+export const parseStylesheetFromText = (
+  text: string,
+  handler: ParserHandler,
+  baseURL: string,
+  classes: string | null,
+  media: string | null
+): task.Result<boolean> => {
   return task.handle(
-      'parseStylesheetFromText',
-      (frame) => {
-        const tok = new csstok.Tokenizer(text, handler);
-        parseStylesheet(tok, handler, baseURL, classes, media)
-            .thenFinish(frame);
-      },
-      (frame, err) => {
-        logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
-        frame.finish(false);
-      });
+    "parseStylesheetFromText",
+    frame => {
+      const tok = new csstok.Tokenizer(text, handler);
+      parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
+    },
+    (frame, err) => {
+      logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
+      frame.finish(false);
+    }
+  );
 };
 
-export const parseStylesheetFromURL = (url: string, handler: ParserHandler,
-                                       classes: string|null,
-                                       media: string|null):
-                                          task.Result<boolean> => task.handle(
-    'parseStylesheetFromURL',
-    (frame) => {
-      net.ajax(url).then((xhr) => {
+export const parseStylesheetFromURL = (
+  url: string,
+  handler: ParserHandler,
+  classes: string | null,
+  media: string | null
+): task.Result<boolean> =>
+  task.handle(
+    "parseStylesheetFromURL",
+    frame => {
+      net.ajax(url).then(xhr => {
         if (!xhr.responseText) {
           frame.finish(true);
         } else {
           parseStylesheetFromText(
-              xhr.responseText, handler, url, classes, media)
-              .then((result) => {
-                if (!result) {
-                  logging.logger.warn(`Failed to parse stylesheet from ${url}`);
-                }
-                frame.finish(true);
-              });
+            xhr.responseText,
+            handler,
+            url,
+            classes,
+            media
+          ).then(result => {
+            if (!result) {
+              logging.logger.warn(`Failed to parse stylesheet from ${url}`);
+            }
+            frame.finish(true);
+          });
         }
       });
     },
     (frame, err) => {
-      logging.logger.warn(err, 'Exception while fetching and parsing:', url);
+      logging.logger.warn(err, "Exception while fetching and parsing:", url);
       frame.finish(true);
-    });
+    }
+  );
 
-export const parseValue = (scope: exprs.LexicalScope,
-                           tokenizer: csstok.Tokenizer,
-                           baseURL: string): css.Val => {
-  const parser =
-      new Parser(actionsPropVal, tokenizer, new ErrorHandler(scope), baseURL);
+export const parseValue = (
+  scope: exprs.LexicalScope,
+  tokenizer: csstok.Tokenizer,
+  baseURL: string
+): css.Val => {
+  const parser = new Parser(
+    actionsPropVal,
+    tokenizer,
+    new ErrorHandler(scope),
+    baseURL
+  );
   parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
   return parser.result;
 };
 
-export const parseStyleAttribute =
-    (tokenizer: csstok.Tokenizer, handler: ParserHandler, baseURL: string):
-        void => {
-          const parser =
-              new Parser(actionsStyleAttribute, tokenizer, handler, baseURL);
-          parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
-        };
+export const parseStyleAttribute = (
+  tokenizer: csstok.Tokenizer,
+  handler: ParserHandler,
+  baseURL: string
+): void => {
+  const parser = new Parser(actionsStyleAttribute, tokenizer, handler, baseURL);
+  parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
+};
 
-export const parseMediaQuery =
-    (tokenizer: csstok.Tokenizer, handler: ParserHandler,
-     baseURL: string): css.Expr => {
-      const parser = new Parser(actionsExprVal, tokenizer, handler, baseURL);
-      parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
-      return (parser.result as css.Expr);
-    };
+export const parseMediaQuery = (
+  tokenizer: csstok.Tokenizer,
+  handler: ParserHandler,
+  baseURL: string
+): css.Expr => {
+  const parser = new Parser(actionsExprVal, tokenizer, handler, baseURL);
+  parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
+  return parser.result as css.Expr;
+};
 
-export const numProp: {[key: string]: boolean} = {
-  'z-index': true,
-  'column-count': true,
-  'flow-linger': true,
-  'opacity': true,
-  'page': true,
-  'flow-priority': true,
-  'utilization': true
+export const numProp: { [key: string]: boolean } = {
+  "z-index": true,
+  "column-count": true,
+  "flow-linger": true,
+  opacity: true,
+  page: true,
+  "flow-priority": true,
+  utilization: true
 };
 
 export const takesOnlyNum = (propName: string): boolean => !!numProp[propName];
@@ -2593,40 +2725,50 @@ export const takesOnlyNum = (propName: string): boolean => !!numProp[propName];
 /**
  * @return val
  */
-export const evaluateExprToCSS =
-    (context: exprs.Context, val: exprs.Val, propName: string): css.Val => {
-      const result = val.evaluate(context);
-      switch (typeof result) {
-        case 'number':
-          if (!takesOnlyNum(propName)) {
-            return new css.Numeric(result as number, 'px');
-          } else if (result == Math.round(result as number)) {
-            return new css.Int(result as number);
-          } else {
-            return new css.Num(result as number);
-          }
-        case 'string':
-          if (!result) {
-            return css.empty;
-          }
-
-          // TODO: where baseURL should come from???
-          return parseValue(val.scope, new csstok.Tokenizer(result  as string, null), '');
-        case 'boolean':
-          return result ? css.ident._true : css.ident._false;
-        case 'undefined':
-          return css.empty;
+export const evaluateExprToCSS = (
+  context: exprs.Context,
+  val: exprs.Val,
+  propName: string
+): css.Val => {
+  const result = val.evaluate(context);
+  switch (typeof result) {
+    case "number":
+      if (!takesOnlyNum(propName)) {
+        return new css.Numeric(result as number, "px");
+      } else if (result == Math.round(result as number)) {
+        return new css.Int(result as number);
+      } else {
+        return new css.Num(result as number);
       }
-      throw new Error('E_UNEXPECTED');
-    };
+    case "string":
+      if (!result) {
+        return css.empty;
+      }
+
+      // TODO: where baseURL should come from???
+      return parseValue(
+        val.scope,
+        new csstok.Tokenizer(result as string, null),
+        ""
+      );
+    case "boolean":
+      return result ? css.ident._true : css.ident._false;
+    case "undefined":
+      return css.empty;
+  }
+  throw new Error("E_UNEXPECTED");
+};
 
 /**
  * @return val
  */
-export const evaluateCSSToCSS =
-    (context: exprs.Context, val: css.Val, propName: string): css.Val => {
-      if (val.isExpr()) {
-        return evaluateExprToCSS(context, (val as css.Expr).expr, propName);
-      }
-      return val;
-    };
+export const evaluateCSSToCSS = (
+  context: exprs.Context,
+  val: css.Val,
+  propName: string
+): css.Val => {
+  if (val.isExpr()) {
+    return evaluateExprToCSS(context, (val as css.Expr).expr, propName);
+  }
+  return val;
+};

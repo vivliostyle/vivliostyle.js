@@ -18,58 +18,62 @@
  * @fileoverview Render EPUB content files by applying page masters, styling and
  * layout.
  */
-import * as asserts from '../vivliostyle/asserts';
-import * as breaks from '../vivliostyle/break';
-import * as colums from '../vivliostyle/column';
-import * as constants from '../vivliostyle/constants';
-import * as counters from '../vivliostyle/counters';
-import * as layoutprocessor from '../vivliostyle/layoutprocessor';
-import * as logging from '../vivliostyle/logging';
-import * as pages from '../vivliostyle/page';
-import * as pagefloat from '../vivliostyle/pagefloat';
-import * as plugin from '../vivliostyle/plugin';
-import {layout} from '../vivliostyle/types';
-import * as base from './base';
-import * as css from './css';
-import * as csscasc from './csscasc';
-import * as cssparse from './cssparse';
-import {toShape} from './cssprop'
-import * as cssstyler from './cssstyler';
-import * as cssvalid from './cssvalid';
-import * as exprs from './expr';
-import * as font from './font';
-import * as geom from './geom';
-import * as layoutImpl from './layout';
-import {Response, XMLHttpRequestResponseType, ResourceStore} from './net';
-import * as pm from './pm';
-import * as task from './task';
-import {Fetcher} from './taskutil';
-import * as vgen from './vgen';
-import * as vtree from './vtree';
-import * as xmldocs from './xmldoc';
+import * as asserts from "../vivliostyle/asserts";
+import * as breaks from "../vivliostyle/break";
+import * as colums from "../vivliostyle/column";
+import * as constants from "../vivliostyle/constants";
+import * as counters from "../vivliostyle/counters";
+import * as layoutprocessor from "../vivliostyle/layoutprocessor";
+import * as logging from "../vivliostyle/logging";
+import * as pages from "../vivliostyle/page";
+import * as pagefloat from "../vivliostyle/pagefloat";
+import * as plugin from "../vivliostyle/plugin";
+import { layout } from "../vivliostyle/types";
+import * as base from "./base";
+import * as css from "./css";
+import * as csscasc from "./csscasc";
+import * as cssparse from "./cssparse";
+import { toShape } from "./cssprop";
+import * as cssstyler from "./cssstyler";
+import * as cssvalid from "./cssvalid";
+import * as exprs from "./expr";
+import * as font from "./font";
+import * as geom from "./geom";
+import * as layoutImpl from "./layout";
+import { Response, XMLHttpRequestResponseType, ResourceStore } from "./net";
+import * as pm from "./pm";
+import * as task from "./task";
+import { Fetcher } from "./taskutil";
+import * as vgen from "./vgen";
+import * as vtree from "./vtree";
+import * as xmldocs from "./xmldoc";
 
-export const uaStylesheetBaseFetcher: Fetcher<boolean> =
-    new Fetcher(() => {
-      const frame: task.Frame<boolean> = task.newFrame('uaStylesheetBase');
-      cssvalid.loadValidatorSet().then((validatorSet) => {
-        const url = base.resolveURL(
-            'user-agent-base.css', base.resourceBaseURL);
-        const handler = new csscasc.CascadeParserHandler(
-            null, null, null, null, null, validatorSet, true);
-        handler.startStylesheet(cssparse.StylesheetFlavor.USER_AGENT);
-        csscasc.setUABaseCascade(handler.cascade);
-        cssparse.parseStylesheetFromURL(url, handler, null, null)
-            .thenFinish(frame);
-      });
-      return frame.result();
-    }, 'uaStylesheetBaseFetcher');
+export const uaStylesheetBaseFetcher: Fetcher<boolean> = new Fetcher(() => {
+  const frame: task.Frame<boolean> = task.newFrame("uaStylesheetBase");
+  cssvalid.loadValidatorSet().then(validatorSet => {
+    const url = base.resolveURL("user-agent-base.css", base.resourceBaseURL);
+    const handler = new csscasc.CascadeParserHandler(
+      null,
+      null,
+      null,
+      null,
+      null,
+      validatorSet,
+      true
+    );
+    handler.startStylesheet(cssparse.StylesheetFlavor.USER_AGENT);
+    csscasc.setUABaseCascade(handler.cascade);
+    cssparse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
+  });
+  return frame.result();
+}, "uaStylesheetBaseFetcher");
 
 export const loadUABase = (): task.Result<boolean> =>
-    uaStylesheetBaseFetcher.get();
+  uaStylesheetBaseFetcher.get();
 
 export type FontFace = {
-  properties: csscasc.ElementStyle,
-  condition: exprs.Val
+  properties: csscasc.ElementStyle;
+  condition: exprs.Val;
 };
 
 export class Style {
@@ -77,51 +81,70 @@ export class Style {
   validatorSet: any;
 
   constructor(
-      public readonly store: OPSDocStore,
-      public readonly rootScope: exprs.LexicalScope,
-      public readonly pageScope: exprs.LexicalScope,
-      public readonly cascade: csscasc.Cascade,
-      public readonly rootBox: pm.RootPageBox,
-      public readonly fontFaces: FontFace[],
-      public readonly footnoteProps: csscasc.ElementStyle,
-      public readonly flowProps: {[key: string]: csscasc.ElementStyle},
-      public readonly viewportProps: csscasc.ElementStyle[],
-      public readonly pageProps: {[key: string]: csscasc.ElementStyle}) {
+    public readonly store: OPSDocStore,
+    public readonly rootScope: exprs.LexicalScope,
+    public readonly pageScope: exprs.LexicalScope,
+    public readonly cascade: csscasc.Cascade,
+    public readonly rootBox: pm.RootPageBox,
+    public readonly fontFaces: FontFace[],
+    public readonly footnoteProps: csscasc.ElementStyle,
+    public readonly flowProps: { [key: string]: csscasc.ElementStyle },
+    public readonly viewportProps: csscasc.ElementStyle[],
+    public readonly pageProps: { [key: string]: csscasc.ElementStyle }
+  ) {
     this.fontDeobfuscator = store.fontDeobfuscator;
     this.validatorSet = store.validatorSet;
-    this.pageScope.defineBuiltIn('has-content', function(name) {
-      name = (name as string);
-      const styleInstance = (this as StyleInstance);
+    this.pageScope.defineBuiltIn("has-content", function(name) {
+      name = name as string;
+      const styleInstance = this as StyleInstance;
       const cp = styleInstance.currentLayoutPosition;
       const flowChunk = cp.firstFlowChunkOfFlow(name);
-      return styleInstance.matchPageSide(
-                 cp.startSideOfFlow((name as string))) &&
-          cp.hasContent((name as string), styleInstance.lookupOffset) &&
-          !!flowChunk &&
-          !styleInstance.flowChunkIsAfterParentFlowForcedBreak(flowChunk);
+      return (
+        styleInstance.matchPageSide(cp.startSideOfFlow(name as string)) &&
+        cp.hasContent(name as string, styleInstance.lookupOffset) &&
+        !!flowChunk &&
+        !styleInstance.flowChunkIsAfterParentFlowForcedBreak(flowChunk)
+      );
     });
     this.pageScope.defineName(
-        'page-number', new exprs.Native(this.pageScope, function() {
-          const styleInstance = (this as StyleInstance);
-          return styleInstance.pageNumberOffset +
-              styleInstance.currentLayoutPosition.page;
-        }, 'page-number'));
+      "page-number",
+      new exprs.Native(
+        this.pageScope,
+        function() {
+          const styleInstance = this as StyleInstance;
+          return (
+            styleInstance.pageNumberOffset +
+            styleInstance.currentLayoutPosition.page
+          );
+        },
+        "page-number"
+      )
+    );
   }
 
-  sizeViewport(viewportWidth: number, viewportHeight: number, fontSize: number, pref?: exprs.Preferences):
-      {width: number, height: number, fontSize: number} {
+  sizeViewport(
+    viewportWidth: number,
+    viewportHeight: number,
+    fontSize: number,
+    pref?: exprs.Preferences
+  ): { width: number; height: number; fontSize: number } {
     if (this.viewportProps.length) {
       const context = new exprs.Context(
-          this.rootScope, viewportWidth, viewportHeight, fontSize);
+        this.rootScope,
+        viewportWidth,
+        viewportHeight,
+        fontSize
+      );
       const viewportProps = csscasc.mergeAll(context, this.viewportProps);
-      const width = viewportProps['width'];
-      const height = viewportProps['height'];
-      const textZoom = viewportProps['text-zoom'];
+      const width = viewportProps["width"];
+      const height = viewportProps["height"];
+      const textZoom = viewportProps["text-zoom"];
       let scaleFactor = 1;
-      if (width && height || textZoom) {
-        const defaultFontSize = exprs.defaultUnitSizes['em'];
-        const zoomVal =
-            textZoom ? textZoom.evaluate(context, 'text-zoom') : null;
+      if ((width && height) || textZoom) {
+        const defaultFontSize = exprs.defaultUnitSizes["em"];
+        const zoomVal = textZoom
+          ? textZoom.evaluate(context, "text-zoom")
+          : null;
         if (zoomVal === css.ident.scale) {
           scaleFactor = defaultFontSize / fontSize;
           fontSize = defaultFontSize;
@@ -129,68 +152,83 @@ export class Style {
           viewportHeight *= scaleFactor;
         }
         if (width && height) {
-          const widthVal =
-              css.toNumber(width.evaluate(context, 'width'), context);
-          const heightVal =
-              css.toNumber(height.evaluate(context, 'height'), context);
+          const widthVal = css.toNumber(
+            width.evaluate(context, "width"),
+            context
+          );
+          const heightVal = css.toNumber(
+            height.evaluate(context, "height"),
+            context
+          );
           if (widthVal > 0 && heightVal > 0) {
-            const spreadWidth = pref && pref.spreadView ? (widthVal + pref.pageBorder) * 2 : widthVal;
-            return {width: spreadWidth, height: heightVal, fontSize};
+            const spreadWidth =
+              pref && pref.spreadView
+                ? (widthVal + pref.pageBorder) * 2
+                : widthVal;
+            return { width: spreadWidth, height: heightVal, fontSize };
           }
         }
       }
     }
-    return {width: viewportWidth, height: viewportHeight, fontSize};
+    return { width: viewportWidth, height: viewportHeight, fontSize };
   }
 }
 
 //-------------------------------------------------------------------------------
-export class StyleInstance extends exprs.Context implements
-    cssstyler.FlowListener, pm.InstanceHolder, vgen.StylerProducer {
+export class StyleInstance extends exprs.Context
+  implements cssstyler.FlowListener, pm.InstanceHolder, vgen.StylerProducer {
   lang: any;
-  primaryFlows: any = ({'body': true} as {[key: string]: boolean});
+  primaryFlows: any = { body: true } as { [key: string]: boolean };
   rootPageBoxInstance: pm.RootPageBoxInstance = null;
   styler: cssstyler.Styler = null;
-  stylerMap: {[key: string]: cssstyler.Styler} = null;
+  stylerMap: { [key: string]: cssstyler.Styler } = null;
   currentLayoutPosition: vtree.LayoutPosition = null;
   layoutPositionAtPageStart: vtree.LayoutPosition = null;
   lookupOffset: number = 0;
   faces: any;
-  pageBoxInstances: {[key: string]: pm.PageBoxInstance} = {};
+  pageBoxInstances: { [key: string]: pm.PageBoxInstance } = {};
   pageManager: pages.PageManager = null;
   private rootPageFloatLayoutContext: any;
-  pageBreaks: {[key: string]: boolean} = {};
-  pageProgression: constants.PageProgression|null = null;
-  pageSheetSize: {[key: string]: {width: number, height: number}} = {};
+  pageBreaks: { [key: string]: boolean } = {};
+  pageProgression: constants.PageProgression | null = null;
+  pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
   actualPageWidth: any;
   actualPageHeight: any;
 
   constructor(
-      public readonly style: Style, public readonly xmldoc: xmldocs.XMLDocHolder,
-      defaultLang: string|null, public readonly viewport: vgen.Viewport,
-      public readonly clientLayout: vtree.ClientLayout,
-      public readonly fontMapper: font.Mapper,
-      public readonly customRenderer: vgen.CustomRenderer,
-      public readonly fallbackMap: {[key: string]: string},
-      public readonly pageNumberOffset: number,
-      public readonly documentURLTransformer: base.DocumentURLTransformer,
-      public readonly counterStore: counters.CounterStore,
-      pageProgression?: constants.PageProgression) {
-    super(
-        style.rootScope, viewport.width, viewport.height,
-        viewport.fontSize);
+    public readonly style: Style,
+    public readonly xmldoc: xmldocs.XMLDocHolder,
+    defaultLang: string | null,
+    public readonly viewport: vgen.Viewport,
+    public readonly clientLayout: vtree.ClientLayout,
+    public readonly fontMapper: font.Mapper,
+    public readonly customRenderer: vgen.CustomRenderer,
+    public readonly fallbackMap: { [key: string]: string },
+    public readonly pageNumberOffset: number,
+    public readonly documentURLTransformer: base.DocumentURLTransformer,
+    public readonly counterStore: counters.CounterStore,
+    pageProgression?: constants.PageProgression
+  ) {
+    super(style.rootScope, viewport.width, viewport.height, viewport.fontSize);
     this.lang = xmldoc.lang || defaultLang;
     this.faces = new font.DocumentFaces(this.style.fontDeobfuscator);
     this.rootPageFloatLayoutContext = new pagefloat.PageFloatLayoutContext(
-        null, null, null, null, null, null, null);
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    );
     this.pageProgression = pageProgression || null;
     for (const flowName in style.flowProps) {
       const flowStyle = style.flowProps[flowName];
-      const consume = csscasc.getProp(flowStyle, 'flow-consume');
+      const consume = csscasc.getProp(flowStyle, "flow-consume");
       if (consume) {
-        const consumeVal = consume.evaluate(this, 'flow-consume');
+        const consumeVal = consume.evaluate(this, "flow-consume");
         if (consumeVal == css.ident.all) {
           this.primaryFlows[flowName] = true;
         } else {
@@ -202,15 +240,25 @@ export class StyleInstance extends exprs.Context implements
 
   init(): task.Result<boolean> {
     const self = this;
-    const frame: task.Frame<boolean> = task.newFrame('StyleInstance.init');
-    const counterListener =
-        self.counterStore.createCounterListener(self.xmldoc.url);
+    const frame: task.Frame<boolean> = task.newFrame("StyleInstance.init");
+    const counterListener = self.counterStore.createCounterListener(
+      self.xmldoc.url
+    );
     const counterResolver = self.counterStore.createCounterResolver(
-        self.xmldoc.url, self.style.rootScope, self.style.pageScope);
+      self.xmldoc.url,
+      self.style.rootScope,
+      self.style.pageScope
+    );
     self.styler = new cssstyler.Styler(
-        self.xmldoc, self.style.cascade, self.style.rootScope, self,
-        this.primaryFlows, self.style.validatorSet, counterListener,
-        counterResolver);
+      self.xmldoc,
+      self.style.cascade,
+      self.style.rootScope,
+      self,
+      this.primaryFlows,
+      self.style.validatorSet,
+      counterListener,
+      counterResolver
+    );
     counterResolver.setStyler(self.styler);
     self.styler.resetFlowChunkStream(self);
     self.stylerMap = {};
@@ -222,14 +270,24 @@ export class StyleInstance extends exprs.Context implements
     const rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new pm.RootPageBoxInstance(rootBox);
     const cascadeInstance = this.style.cascade.createInstance(
-        self, counterListener, counterResolver, this.lang);
+      self,
+      counterListener,
+      counterResolver,
+      this.lang
+    );
     this.rootPageBoxInstance.applyCascadeAndInit(
-        cascadeInstance, docElementStyle);
+      cascadeInstance,
+      docElementStyle
+    );
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new pages.PageManager(
-        cascadeInstance, this.style.pageScope, this.rootPageBoxInstance, self,
-        docElementStyle);
-    const srcFaces = ([] as font.Face[]);
+      cascadeInstance,
+      this.style.pageScope,
+      this.rootPageBoxInstance,
+      self,
+      docElementStyle
+    );
+    const srcFaces = [] as font.Face[];
     for (const fontFace of self.style.fontFaces) {
       if (fontFace.condition && !fontFace.condition.evaluate(self)) {
         continue;
@@ -244,7 +302,9 @@ export class StyleInstance extends exprs.Context implements
     const pageProps = self.style.pageProps;
     Object.keys(pageProps).forEach(function(selector) {
       const pageSizeAndBleed = pages.evaluatePageSizeAndBleed(
-          pages.resolvePageSizeAndBleed(pageProps[selector] as any), this);
+        pages.resolvePageSizeAndBleed(pageProps[selector] as any),
+        this
+      );
       this.pageSheetSize[selector] = {
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
         height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
@@ -264,15 +324,29 @@ export class StyleInstance extends exprs.Context implements
       // We need a separate content, so that variables can get potentially
       // different values.
       const context = new exprs.Context(
-          style.rootScope, this.pageWidth(), this.pageHeight(),
-          this.initialFontSize);
-      const counterListener =
-          this.counterStore.createCounterListener(xmldoc.url);
+        style.rootScope,
+        this.pageWidth(),
+        this.pageHeight(),
+        this.initialFontSize
+      );
+      const counterListener = this.counterStore.createCounterListener(
+        xmldoc.url
+      );
       const counterResolver = this.counterStore.createCounterResolver(
-          xmldoc.url, style.rootScope, style.pageScope);
+        xmldoc.url,
+        style.rootScope,
+        style.pageScope
+      );
       styler = new cssstyler.Styler(
-          xmldoc, style.cascade, style.rootScope, context, this.primaryFlows,
-          style.validatorSet, counterListener, counterResolver);
+        xmldoc,
+        style.cascade,
+        style.rootScope,
+        context,
+        this.primaryFlows,
+        style.validatorSet,
+        counterListener,
+        counterResolver
+      );
       this.stylerMap[xmldoc.url] = styler;
     }
     return styler;
@@ -310,8 +384,10 @@ export class StyleInstance extends exprs.Context implements
       }
       const nodePosition = vtree.newNodePositionFromNode(flowChunk.element);
       const chunkPosition = new vtree.ChunkPosition(nodePosition);
-      const flowChunkPosition =
-          new vtree.FlowChunkPosition(chunkPosition, flowChunk);
+      const flowChunkPosition = new vtree.FlowChunkPosition(
+        chunkPosition,
+        flowChunk
+      );
       flowPosition.positions.push(flowChunkPosition);
     }
   }
@@ -343,17 +419,20 @@ export class StyleInstance extends exprs.Context implements
    * @return document offset of the given layoutPosition
    */
   getPosition(
-      layoutPosition: vtree.LayoutPosition|undefined,
-      noLookAhead?: boolean): number {
+    layoutPosition: vtree.LayoutPosition | undefined,
+    noLookAhead?: boolean
+  ): number {
     if (!layoutPosition) {
       return 0;
     }
     let currentPosition = Number.POSITIVE_INFINITY;
     for (const flowName in this.primaryFlows) {
       let flowPosition = layoutPosition.flowPositions[flowName];
-      if (!noLookAhead &&
-          (!flowPosition || flowPosition.positions.length == 0) &&
-          this.currentLayoutPosition) {
+      if (
+        !noLookAhead &&
+        (!flowPosition || flowPosition.positions.length == 0) &&
+        this.currentLayoutPosition
+      ) {
         this.styler.styleUntilFlowIsReached(flowName);
         flowPosition = this.currentLayoutPosition.flowPositions[flowName];
         if (layoutPosition != this.currentLayoutPosition) {
@@ -374,27 +453,30 @@ export class StyleInstance extends exprs.Context implements
   }
 
   dumpLocation(position) {
-    logging.logger.debug('Location - page', this.currentLayoutPosition.page);
-    logging.logger.debug('  current:', position);
-    logging.logger.debug('  lookup:', this.lookupOffset);
+    logging.logger.debug("Location - page", this.currentLayoutPosition.page);
+    logging.logger.debug("  current:", position);
+    logging.logger.debug("  lookup:", this.lookupOffset);
     for (const flowName in this.currentLayoutPosition.flowPositions) {
       const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
       for (const p of flowPosition.positions) {
         logging.logger.debug(
-            '  Chunk', `${flowName}:`, p.flowChunk.startOffset);
+          "  Chunk",
+          `${flowName}:`,
+          p.flowChunk.startOffset
+        );
       }
     }
   }
 
   matchPageSide(side: string): boolean {
     switch (side) {
-      case 'left':
-      case 'right':
-      case 'recto':
-      case 'verso':
-        return (
-            (new exprs.Named(this.style.pageScope, `${side}-page`))
-                .evaluate(this) as boolean);
+      case "left":
+      case "right":
+      case "recto":
+      case "verso":
+        return new exprs.Named(this.style.pageScope, `${side}-page`).evaluate(
+          this
+        ) as boolean;
       default:
         return true;
     }
@@ -407,12 +489,16 @@ export class StyleInstance extends exprs.Context implements
         const flowChunk = flowPos.positions[0].flowChunk;
         if (this.getConsumedOffset(flowPos) === flowChunk.startOffset) {
           const flowChunkBreakBefore =
-              flowPos.positions[0].flowChunk.breakBefore;
-          const flowBreakAfter =
-              breaks.startSideValueToBreakValue(flowPos.startSide);
-          flowPos.startSide =
-              breaks.breakValueToStartSideValue(breaks.resolveEffectiveBreakValue(
-                  flowBreakAfter, flowChunkBreakBefore));
+            flowPos.positions[0].flowChunk.breakBefore;
+          const flowBreakAfter = breaks.startSideValueToBreakValue(
+            flowPos.startSide
+          );
+          flowPos.startSide = breaks.breakValueToStartSideValue(
+            breaks.resolveEffectiveBreakValue(
+              flowBreakAfter,
+              flowChunkBreakBefore
+            )
+          );
         }
       }
     }
@@ -421,8 +507,9 @@ export class StyleInstance extends exprs.Context implements
   /**
    * @param cascadedPageStyle Cascaded page style specified in page context
    */
-  selectPageMaster(cascadedPageStyle: csscasc.ElementStyle):
-      pm.PageMasterInstance {
+  selectPageMaster(
+    cascadedPageStyle: csscasc.ElementStyle
+  ): pm.PageMasterInstance {
     const self = this;
     const cp = this.currentLayoutPosition;
 
@@ -437,8 +524,8 @@ export class StyleInstance extends exprs.Context implements
     }
 
     // 2. Page master selection: for each page master:
-    const pageMasters =
-        (this.rootPageBoxInstance.children as pm.PageMasterInstance[]);
+    const pageMasters = this.rootPageBoxInstance
+      .children as pm.PageMasterInstance[];
     let pageMaster;
     for (let i = 0; i < pageMasters.length; i++) {
       pageMaster = pageMasters[i];
@@ -451,13 +538,13 @@ export class StyleInstance extends exprs.Context implements
 
       // A. Calculate lookup position using current position and utilization
       // (see -epubx-utilization property)
-      const utilization = pageMaster.getProp(self, 'utilization');
+      const utilization = pageMaster.getProp(self, "utilization");
       if (utilization && utilization.isNum()) {
         coeff = (utilization as css.Num).num;
       }
-      const em = self.queryUnitSize('em', false);
+      const em = self.queryUnitSize("em", false);
       const pageArea = self.pageWidth() * self.pageHeight();
-      const lookup = Math.ceil(coeff * pageArea / (em * em));
+      const lookup = Math.ceil((coeff * pageArea) / (em * em));
 
       // B. Determine element eligibility. Each element in a flow is considered
       // eligible if it is is not marked as fully consumed and it comes in the
@@ -476,7 +563,7 @@ export class StyleInstance extends exprs.Context implements
       // C. Determine content availability. Flow has content available if it
       // contains eligible elements. D. Determine if page master is enabled
       // using rules in Section 3.4.7
-      const enabled = pageMaster.getProp(self, 'enabled');
+      const enabled = pageMaster.getProp(self, "enabled");
 
       // E. First enabled page master is used for the next page
       if (!enabled || enabled === css.ident._true) {
@@ -486,10 +573,12 @@ export class StyleInstance extends exprs.Context implements
 
         // Apply @page rules
         return this.pageManager.getPageRulePageMaster(
-            pageMaster, cascadedPageStyle);
+          pageMaster,
+          cascadedPageStyle
+        );
       }
     }
-    throw new Error('No enabled page masters');
+    throw new Error("No enabled page masters");
   }
 
   flowChunkIsAfterParentFlowForcedBreak(flowChunk: vtree.FlowChunk): boolean {
@@ -502,14 +591,15 @@ export class StyleInstance extends exprs.Context implements
         return false;
       }
       const breakOffsetBeforeStartIndex =
-          base.binarySearch(
-              forcedBreakOffsets.length,
-              (i) => forcedBreakOffsets[i] > startOffset) -
-          1;
+        base.binarySearch(
+          forcedBreakOffsets.length,
+          i => forcedBreakOffsets[i] > startOffset
+        ) - 1;
       const breakOffsetBeforeStart =
-          forcedBreakOffsets[breakOffsetBeforeStartIndex];
-      const parentFlowPosition =
-          this.layoutPositionAtPageStart.flowPositions[parentFlowName];
+        forcedBreakOffsets[breakOffsetBeforeStartIndex];
+      const parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[
+        parentFlowName
+      ];
       const parentStartOffset = this.getConsumedOffset(parentFlowPosition);
       if (breakOffsetBeforeStart < parentStartOffset) {
         return false;
@@ -536,69 +626,72 @@ export class StyleInstance extends exprs.Context implements
 
   layoutDeferredPageFloats(column: layout.Column): task.Result<boolean> {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
-    const deferredFloats =
-        pageFloatLayoutContext.getDeferredPageFloatContinuations();
-    const frame = task.newFrame<boolean>('layoutDeferredPageFloats');
+    const deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
+    const frame = task.newFrame<boolean>("layoutDeferredPageFloats");
     let invalidated = false;
     let i = 0;
     frame
-        .loopWithFrame((loopFrame) => {
-          if (i === deferredFloats.length) {
-            loopFrame.breakLoop();
-            return;
-          }
-          const continuation = deferredFloats[i++];
-          const float = continuation.float;
-          const strategy = (new pagefloat.PageFloatLayoutStrategyResolver())
-                               .findByFloat(float);
-          const pageFloatFragment =
-              strategy.findPageFloatFragment(float, pageFloatLayoutContext);
-          if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
+      .loopWithFrame(loopFrame => {
+        if (i === deferredFloats.length) {
+          loopFrame.breakLoop();
+          return;
+        }
+        const continuation = deferredFloats[i++];
+        const float = continuation.float;
+        const strategy = new pagefloat.PageFloatLayoutStrategyResolver().findByFloat(
+          float
+        );
+        const pageFloatFragment = strategy.findPageFloatFragment(
+          float,
+          pageFloatLayoutContext
+        );
+        if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
+          loopFrame.continueLoop();
+          return;
+        } else if (
+          pageFloatLayoutContext.isForbidden(float) ||
+          pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(float)
+        ) {
+          pageFloatLayoutContext.deferPageFloat(continuation);
+          loopFrame.breakLoop();
+          return;
+        }
+        column
+          .layoutPageFloatInner(continuation, strategy, null, pageFloatFragment)
+          .then(success => {
+            if (!success) {
+              loopFrame.breakLoop();
+              return;
+            }
+            const parentInvalidated = pageFloatLayoutContext.parent.isInvalidated();
+            if (parentInvalidated) {
+              loopFrame.breakLoop();
+              return;
+            } else if (
+              pageFloatLayoutContext.isInvalidated() &&
+              !parentInvalidated
+            ) {
+              invalidated = true;
+              pageFloatLayoutContext.validate();
+            }
             loopFrame.continueLoop();
-            return;
-          } else if (pageFloatLayoutContext.isForbidden(float) ||
-              pageFloatLayoutContext.hasPrecedingFloatsDeferredToNext(
-                  float)) {
-            pageFloatLayoutContext.deferPageFloat(continuation);
-            loopFrame.breakLoop();
-            return;
-          }
-          column
-              .layoutPageFloatInner(
-                  continuation, strategy, null, pageFloatFragment)
-              .then((success) => {
-                if (!success) {
-                  loopFrame.breakLoop();
-                  return;
-                }
-                const parentInvalidated =
-                    pageFloatLayoutContext.parent.isInvalidated();
-                if (parentInvalidated) {
-                  loopFrame.breakLoop();
-                  return;
-                } else if (pageFloatLayoutContext.isInvalidated() &&
-                    !parentInvalidated) {
-                  invalidated = true;
-                  pageFloatLayoutContext.validate();
-                }
-                loopFrame.continueLoop();
-              });
-        })
-        .then(() => {
-          if (invalidated) {
-            pageFloatLayoutContext.invalidate();
-          }
-          frame.finish(true);
-        });
+          });
+      })
+      .then(() => {
+        if (invalidated) {
+          pageFloatLayoutContext.invalidate();
+        }
+        frame.finish(true);
+      });
     return frame.result();
   }
 
   getLastAfterPositionIfDeferredFloatsExists(
-      column: layout.Column,
-      newPosition: vtree.ChunkPosition|null): vtree.ChunkPosition|null {
+    column: layout.Column,
+    newPosition: vtree.ChunkPosition | null
+  ): vtree.ChunkPosition | null {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
-    const deferredFloats =
-        pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
+    const deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
     if (deferredFloats.length > 0) {
       if (column.lastAfterPosition) {
         let result;
@@ -611,7 +704,7 @@ export class StyleInstance extends exprs.Context implements
         }
         return result;
       } else {
-        asserts.assert('column.lastAfterPosition === null');
+        asserts.assert("column.lastAfterPosition === null");
         return null;
       }
     } else {
@@ -627,7 +720,7 @@ export class StyleInstance extends exprs.Context implements
     if (!flowPosition || !this.matchPageSide(flowPosition.startSide)) {
       return task.newResult(true);
     }
-    flowPosition.startSide = 'any';
+    flowPosition.startSide = "any";
     this.setFormattingContextToColumn(column, flowName);
     column.init();
     if (this.primaryFlows[flowName] && column.bands.length > 0) {
@@ -636,7 +729,7 @@ export class StyleInstance extends exprs.Context implements
       column.forceNonfitting = false;
     }
     const self = this;
-    const frame: task.Frame<boolean> = task.newFrame('layoutColumn');
+    const frame: task.Frame<boolean> = task.newFrame("layoutColumn");
     this.layoutDeferredPageFloats(column).then(() => {
       if (column.pageFloatLayoutContext.isInvalidated()) {
         frame.finish(true);
@@ -644,296 +737,371 @@ export class StyleInstance extends exprs.Context implements
       }
 
       // Record indices of repeated positions and removed positions
-      const repeatedIndices = ([] as number[]);
-      const removedIndices = ([] as number[]);
+      const repeatedIndices = [] as number[];
+      const removedIndices = [] as number[];
       let leadingEdge = true;
       frame
-          .loopWithFrame((loopFrame) => {
-            if (column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(
-                    flowName)) {
-              loopFrame.breakLoop();
-              return;
-            }
-            while (flowPosition.positions.length - removedIndices.length > 0) {
-              let index = 0;
+        .loopWithFrame(loopFrame => {
+          if (
+            column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(
+              flowName
+            )
+          ) {
+            loopFrame.breakLoop();
+            return;
+          }
+          while (flowPosition.positions.length - removedIndices.length > 0) {
+            let index = 0;
 
-              // Skip all removed positions
-              while (removedIndices.includes(index)) {
-                index++;
+            // Skip all removed positions
+            while (removedIndices.includes(index)) {
+              index++;
+            }
+            let selected = flowPosition.positions[index];
+            if (
+              selected.flowChunk.startOffset > self.lookupOffset ||
+              self.flowChunkIsAfterParentFlowForcedBreak(selected.flowChunk)
+            ) {
+              break;
+            }
+            for (let k = index + 1; k < flowPosition.positions.length; k++) {
+              if (removedIndices.includes(k)) {
+                continue;
               }
-              let selected = flowPosition.positions[index];
-              if (selected.flowChunk.startOffset > self.lookupOffset ||
-                  self.flowChunkIsAfterParentFlowForcedBreak(
-                      selected.flowChunk)) {
+
+              // Skip removed positions
+              const alt = flowPosition.positions[k];
+              if (
+                alt.flowChunk.startOffset > self.lookupOffset ||
+                self.flowChunkIsAfterParentFlowForcedBreak(alt.flowChunk)
+              ) {
                 break;
               }
-              for (let k = index + 1; k < flowPosition.positions.length; k++) {
-                if (removedIndices.includes(k)) {
-                  continue;
-                }
-
-                // Skip removed positions
-                const alt = flowPosition.positions[k];
-                if (alt.flowChunk.startOffset > self.lookupOffset ||
-                    self.flowChunkIsAfterParentFlowForcedBreak(alt.flowChunk)) {
-                  break;
-                }
-                if (alt.flowChunk.isBetter(selected.flowChunk)) {
-                  selected = alt;
-                  index = k;
-                }
+              if (alt.flowChunk.isBetter(selected.flowChunk)) {
+                selected = alt;
+                index = k;
               }
-              const flowChunk = selected.flowChunk;
-              let pending = true;
-              column
-                  .layout(
-                      selected.chunkPosition, leadingEdge,
-                      flowPosition.breakAfter)
-                  .then((newPosition) => {
-                    if (column.pageFloatLayoutContext.isInvalidated()) {
-                      loopFrame.breakLoop();
-                      return;
-                    }
-                    leadingEdge = false;
+            }
+            const flowChunk = selected.flowChunk;
+            let pending = true;
+            column
+              .layout(
+                selected.chunkPosition,
+                leadingEdge,
+                flowPosition.breakAfter
+              )
+              .then(newPosition => {
+                if (column.pageFloatLayoutContext.isInvalidated()) {
+                  loopFrame.breakLoop();
+                  return;
+                }
+                leadingEdge = false;
 
-                    // static: keep in the flow
-                    if (selected.flowChunk.repeated &&
-                        (newPosition === null || flowChunk.exclusive)) {
+                // static: keep in the flow
+                if (
+                  selected.flowChunk.repeated &&
+                  (newPosition === null || flowChunk.exclusive)
+                ) {
+                  repeatedIndices.push(index);
+                }
+                if (flowChunk.exclusive) {
+                  // exclusive, only can have one, remove from the flow even
+                  // if it did not fit
+                  removedIndices.push(index);
+                  loopFrame.breakLoop();
+                  return;
+                } else {
+                  // not exclusive
+                  const endOfColumn = !!newPosition || !!column.pageBreakType;
+                  const lastAfterPosition = self.getLastAfterPositionIfDeferredFloatsExists(
+                    column,
+                    newPosition
+                  );
+                  if (column.pageBreakType && lastAfterPosition) {
+                    selected.chunkPosition = lastAfterPosition;
+
+                    // TODO propagate pageBreakType
+                    flowPosition.breakAfter = column.pageBreakType;
+                    column.pageBreakType = null;
+                  } else {
+                    // go to the next element in the flow
+                    removedIndices.push(index);
+                    if (newPosition || lastAfterPosition) {
+                      // did not fit completely
+                      selected.chunkPosition = newPosition || lastAfterPosition;
                       repeatedIndices.push(index);
                     }
-                    if (flowChunk.exclusive) {
-                      // exclusive, only can have one, remove from the flow even
-                      // if it did not fit
-                      removedIndices.push(index);
-                      loopFrame.breakLoop();
-                      return;
-                    } else {
-                      // not exclusive
-                      const endOfColumn =
-                          !!newPosition || !!column.pageBreakType;
-                      const lastAfterPosition =
-                          self.getLastAfterPositionIfDeferredFloatsExists(
-                              column, newPosition);
-                      if (column.pageBreakType && lastAfterPosition) {
-                        selected.chunkPosition = lastAfterPosition;
-
-                        // TODO propagate pageBreakType
-                        flowPosition.breakAfter = column.pageBreakType;
-                        column.pageBreakType = null;
-                      } else {
-                        // go to the next element in the flow
-                        removedIndices.push(index);
-                        if (newPosition || lastAfterPosition) {
-                          // did not fit completely
-                          selected.chunkPosition =
-                              newPosition || lastAfterPosition;
-                          repeatedIndices.push(index);
-                        }
-                        if (column.pageBreakType) {
-                          // forced break
-                          flowPosition.startSide =
-                              breaks.breakValueToStartSideValue(
-                                  column.pageBreakType);
-                        }
-                      }
-                      if (endOfColumn) {
-                        loopFrame.breakLoop();
-                        return;
-                      }
+                    if (column.pageBreakType) {
+                      // forced break
+                      flowPosition.startSide = breaks.breakValueToStartSideValue(
+                        column.pageBreakType
+                      );
                     }
+                  }
+                  if (endOfColumn) {
+                    loopFrame.breakLoop();
+                    return;
+                  }
+                }
 
-                    // Since at least one flowChunk has been placed in the
-                    // column, the next flowChunk of the flow can be deferred to
-                    // the next partition if there is not enough space in the
-                    // current partition.
-                    column.forceNonfitting = false;
-                    if (pending) {
-                      // Sync result
-                      pending = false;
-                    } else {
-                      // Async result
-                      loopFrame.continueLoop();
-                    }
-                  });
-              if (pending) {
-                // Async result
-                pending = false;
-                return;
-              }
+                // Since at least one flowChunk has been placed in the
+                // column, the next flowChunk of the flow can be deferred to
+                // the next partition if there is not enough space in the
+                // current partition.
+                column.forceNonfitting = false;
+                if (pending) {
+                  // Sync result
+                  pending = false;
+                } else {
+                  // Async result
+                  loopFrame.continueLoop();
+                }
+              });
+            if (pending) {
+              // Async result
+              pending = false;
+              return;
             }
+          }
 
-            // Sync result
-            loopFrame.breakLoop();
-          })
-          .then(() => {
-            if (!column.pageFloatLayoutContext.isInvalidated()) {
-              // Keep positions repeated or not removed
-              flowPosition.positions = flowPosition.positions.filter(
-                  (pos, i) => repeatedIndices.includes(i) ||
-                      !removedIndices.includes(i));
-              if (flowPosition.breakAfter === 'column') {
-                flowPosition.breakAfter = null;
-              }
-              column.saveDistanceToBlockEndFloats();
-              const edge =
-                  column.pageFloatLayoutContext.getMaxReachedAfterEdge();
-              column.updateMaxReachedAfterEdge(edge);
+          // Sync result
+          loopFrame.breakLoop();
+        })
+        .then(() => {
+          if (!column.pageFloatLayoutContext.isInvalidated()) {
+            // Keep positions repeated or not removed
+            flowPosition.positions = flowPosition.positions.filter(
+              (pos, i) =>
+                repeatedIndices.includes(i) || !removedIndices.includes(i)
+            );
+            if (flowPosition.breakAfter === "column") {
+              flowPosition.breakAfter = null;
             }
-            frame.finish(true);
-          });
+            column.saveDistanceToBlockEndFloats();
+            const edge = column.pageFloatLayoutContext.getMaxReachedAfterEdge();
+            column.updateMaxReachedAfterEdge(edge);
+          }
+          frame.finish(true);
+        });
     });
     return frame.result();
   }
 
-  createLayoutConstraint(pageFloatLayoutContext:
-                             pagefloat.PageFloatLayoutContext):
-      layout.LayoutConstraint {
+  createLayoutConstraint(
+    pageFloatLayoutContext: pagefloat.PageFloatLayoutContext
+  ): layout.LayoutConstraint {
     const pageIndex = this.currentLayoutPosition.page - 1;
-    const counterConstraint =
-        this.counterStore.createLayoutConstraint(pageIndex);
-    return new layoutImpl.AllLayoutConstraint([counterConstraint].concat(
-        pageFloatLayoutContext.getLayoutConstraints()));
+    const counterConstraint = this.counterStore.createLayoutConstraint(
+      pageIndex
+    );
+    return new layoutImpl.AllLayoutConstraint(
+      [counterConstraint].concat(pageFloatLayoutContext.getLayoutConstraints())
+    );
   }
 
   private createAndLayoutColumn(
-      boxInstance: pm.PageBoxInstance, offsetX: number, offsetY: number,
-      exclusions: geom.Shape[], layoutContainer: vtree.Container,
-      currentColumnIndex: number, flowNameStr: string,
-      regionPageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
-      columnCount: number, columnGap: number, columnWidth: number,
-      innerShape: geom.Shape, layoutContext: vtree.LayoutContext,
-      forceNonFitting: boolean): task.Result<layout.Column> {
+    boxInstance: pm.PageBoxInstance,
+    offsetX: number,
+    offsetY: number,
+    exclusions: geom.Shape[],
+    layoutContainer: vtree.Container,
+    currentColumnIndex: number,
+    flowNameStr: string,
+    regionPageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
+    columnCount: number,
+    columnGap: number,
+    columnWidth: number,
+    innerShape: geom.Shape,
+    layoutContext: vtree.LayoutContext,
+    forceNonFitting: boolean
+  ): task.Result<layout.Column> {
     const self = this;
-    const dontApplyExclusions = boxInstance.vertical ?
-        boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth :
-        boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
+    const dontApplyExclusions = boxInstance.vertical
+      ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
+      : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     const boxContainer = layoutContainer.element;
     const columnPageFloatLayoutContext = new pagefloat.PageFloatLayoutContext(
-        regionPageFloatLayoutContext, pagefloat.FloatReference.COLUMN, null,
-        flowNameStr, null, null, null);
+      regionPageFloatLayoutContext,
+      pagefloat.FloatReference.COLUMN,
+      null,
+      flowNameStr,
+      null,
+      null,
+      null
+    );
     const positionAtColumnStart = self.currentLayoutPosition.clone();
-    const frame: task.Frame<layout.Column> =
-        task.newFrame('createAndLayoutColumn');
+    const frame: task.Frame<layout.Column> = task.newFrame(
+      "createAndLayoutColumn"
+    );
     let column;
     frame
-        .loopWithFrame((loopFrame) => {
-          const layoutConstraint =
-              self.createLayoutConstraint(columnPageFloatLayoutContext);
-          if (columnCount > 1) {
-            const columnContainer = self.viewport.document.createElement('div');
-            base.setCSSProperty(columnContainer, 'position', 'absolute');
-            boxContainer.appendChild(columnContainer);
-            column = new layoutImpl.Column(
-                columnContainer, layoutContext, self.clientLayout,
-                layoutConstraint, columnPageFloatLayoutContext);
-            column.forceNonfitting = forceNonFitting;
-            column.vertical = layoutContainer.vertical;
-            column.snapHeight = layoutContainer.snapHeight;
-            column.snapWidth = layoutContainer.snapWidth;
-            if (layoutContainer.vertical) {
-              const columnY = currentColumnIndex * (columnWidth + columnGap) +
-                  layoutContainer.paddingTop;
-              column.setHorizontalPosition(
-                  layoutContainer.paddingLeft, layoutContainer.width);
-              column.setVerticalPosition(columnY, columnWidth);
-            } else {
-              const columnX = currentColumnIndex * (columnWidth + columnGap) +
-                  layoutContainer.paddingLeft;
-              column.setVerticalPosition(
-                  layoutContainer.paddingTop, layoutContainer.height);
-              column.setHorizontalPosition(columnX, columnWidth);
+      .loopWithFrame(loopFrame => {
+        const layoutConstraint = self.createLayoutConstraint(
+          columnPageFloatLayoutContext
+        );
+        if (columnCount > 1) {
+          const columnContainer = self.viewport.document.createElement("div");
+          base.setCSSProperty(columnContainer, "position", "absolute");
+          boxContainer.appendChild(columnContainer);
+          column = new layoutImpl.Column(
+            columnContainer,
+            layoutContext,
+            self.clientLayout,
+            layoutConstraint,
+            columnPageFloatLayoutContext
+          );
+          column.forceNonfitting = forceNonFitting;
+          column.vertical = layoutContainer.vertical;
+          column.snapHeight = layoutContainer.snapHeight;
+          column.snapWidth = layoutContainer.snapWidth;
+          if (layoutContainer.vertical) {
+            const columnY =
+              currentColumnIndex * (columnWidth + columnGap) +
+              layoutContainer.paddingTop;
+            column.setHorizontalPosition(
+              layoutContainer.paddingLeft,
+              layoutContainer.width
+            );
+            column.setVerticalPosition(columnY, columnWidth);
+          } else {
+            const columnX =
+              currentColumnIndex * (columnWidth + columnGap) +
+              layoutContainer.paddingLeft;
+            column.setVerticalPosition(
+              layoutContainer.paddingTop,
+              layoutContainer.height
+            );
+            column.setHorizontalPosition(columnX, columnWidth);
+          }
+          column.originX = offsetX;
+          column.originY = offsetY;
+        } else {
+          column = new layoutImpl.Column(
+            boxContainer,
+            layoutContext,
+            self.clientLayout,
+            layoutConstraint,
+            columnPageFloatLayoutContext
+          );
+          column.copyFrom(layoutContainer);
+        }
+        column.exclusions = dontApplyExclusions ? [] : exclusions.concat();
+        column.innerShape = innerShape;
+        columnPageFloatLayoutContext.setContainer(column);
+        if (column.width >= 0) {
+          // column.element.style.outline = "1px dotted green";
+          self.layoutColumn(column, flowNameStr).then(() => {
+            if (!columnPageFloatLayoutContext.isInvalidated()) {
+              columnPageFloatLayoutContext.finish();
             }
-            column.originX = offsetX;
-            column.originY = offsetY;
-          } else {
-            column = new layoutImpl.Column(
-                boxContainer, layoutContext, self.clientLayout,
-                layoutConstraint, columnPageFloatLayoutContext);
-            column.copyFrom(layoutContainer);
-          }
-          column.exclusions = dontApplyExclusions ? [] : exclusions.concat();
-          column.innerShape = innerShape;
-          columnPageFloatLayoutContext.setContainer(column);
-          if (column.width >= 0) {
-            // column.element.style.outline = "1px dotted green";
-            self.layoutColumn(column, flowNameStr).then(() => {
-              if (!columnPageFloatLayoutContext.isInvalidated()) {
-                columnPageFloatLayoutContext.finish();
+            if (
+              column.pageFloatLayoutContext.isInvalidated() &&
+              !regionPageFloatLayoutContext.isInvalidated()
+            ) {
+              column.pageFloatLayoutContext.validate();
+              self.currentLayoutPosition = positionAtColumnStart.clone();
+              if (column.element !== boxContainer) {
+                boxContainer.removeChild(column.element);
               }
-              if (column.pageFloatLayoutContext.isInvalidated() &&
-                  !regionPageFloatLayoutContext.isInvalidated()) {
-                column.pageFloatLayoutContext.validate();
-                self.currentLayoutPosition = positionAtColumnStart.clone();
-                if (column.element !== boxContainer) {
-                  boxContainer.removeChild(column.element);
-                }
-                loopFrame.continueLoop();
-              } else {
-                loopFrame.breakLoop();
-              }
-            });
-          } else {
-            columnPageFloatLayoutContext.finish();
-            loopFrame.breakLoop();
-          }
-        })
-        .then(() => {
-          frame.finish(column);
-        });
+              loopFrame.continueLoop();
+            } else {
+              loopFrame.breakLoop();
+            }
+          });
+        } else {
+          columnPageFloatLayoutContext.finish();
+          loopFrame.breakLoop();
+        }
+      })
+      .then(() => {
+        frame.finish(column);
+      });
     return frame.result();
   }
 
   setPagePageFloatLayoutContextContainer(
-      pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
-      boxInstance: pm.PageBoxInstance, layoutContainer: vtree.Container) {
-    if (boxInstance instanceof pages.PageRulePartitionInstance ||
-        boxInstance instanceof pm.PageMasterInstance &&
-            !(boxInstance instanceof pages.PageRuleMasterInstance)) {
+    pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
+    boxInstance: pm.PageBoxInstance,
+    layoutContainer: vtree.Container
+  ) {
+    if (
+      boxInstance instanceof pages.PageRulePartitionInstance ||
+      (boxInstance instanceof pm.PageMasterInstance &&
+        !(boxInstance instanceof pages.PageRuleMasterInstance))
+    ) {
       pagePageFloatLayoutContext.setContainer(layoutContainer);
     }
   }
 
   getRegionPageFloatLayoutContext(
-      pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
-      boxInstance: pm.PageBoxInstance, layoutContainer: vtree.Container,
-      flowName: string): pagefloat.PageFloatLayoutContext {
+    pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
+    boxInstance: pm.PageBoxInstance,
+    layoutContainer: vtree.Container,
+    flowName: string
+  ): pagefloat.PageFloatLayoutContext {
     asserts.assert(boxInstance instanceof pm.PartitionInstance);
-    const writingMode = boxInstance.getProp(this, 'writing-mode') || null;
-    const direction = boxInstance.getProp(this, 'direction') || null;
+    const writingMode = boxInstance.getProp(this, "writing-mode") || null;
+    const direction = boxInstance.getProp(this, "direction") || null;
     return new pagefloat.PageFloatLayoutContext(
-        pagePageFloatLayoutContext, pagefloat.FloatReference.REGION,
-        layoutContainer, flowName, null, writingMode, direction);
+      pagePageFloatLayoutContext,
+      pagefloat.FloatReference.REGION,
+      layoutContainer,
+      flowName,
+      null,
+      writingMode,
+      direction
+    );
   }
 
   layoutFlowColumnsWithBalancing(
-      page: vtree.Page, boxInstance: pm.PageBoxInstance, offsetX: number,
-      offsetY: number, exclusions: geom.Shape[],
-      pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
-      layoutContainer: vtree.Container, flowNameStr: string,
-      columnCount: number): task.Result<layout.Column[]> {
+    page: vtree.Page,
+    boxInstance: pm.PageBoxInstance,
+    offsetX: number,
+    offsetY: number,
+    exclusions: geom.Shape[],
+    pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
+    layoutContainer: vtree.Container,
+    flowNameStr: string,
+    columnCount: number
+  ): task.Result<layout.Column[]> {
     const self = this;
     const positionAtContainerStart = self.currentLayoutPosition.clone();
     const regionPageFloatLayoutContext = self.getRegionPageFloatLayoutContext(
-        pagePageFloatLayoutContext, boxInstance, layoutContainer, flowNameStr);
+      pagePageFloatLayoutContext,
+      boxInstance,
+      layoutContainer,
+      flowNameStr
+    );
     let isFirstTime = true;
 
     function layoutColumns() {
       self.currentLayoutPosition = positionAtContainerStart.clone();
       return self
-          .layoutFlowColumns(
-              page, boxInstance, offsetX, offsetY, exclusions,
-              pagePageFloatLayoutContext, regionPageFloatLayoutContext,
-              layoutContainer, flowNameStr, columnCount, isFirstTime)
-          .thenAsync((columns) => {
-            if (columns) {
-              return task.newResult(
-                  {columns, position: self.currentLayoutPosition});
-            } else {
-              return task.newResult(null);
-            }
-          });
+        .layoutFlowColumns(
+          page,
+          boxInstance,
+          offsetX,
+          offsetY,
+          exclusions,
+          pagePageFloatLayoutContext,
+          regionPageFloatLayoutContext,
+          layoutContainer,
+          flowNameStr,
+          columnCount,
+          isFirstTime
+        )
+        .thenAsync(columns => {
+          if (columns) {
+            return task.newResult({
+              columns,
+              position: self.currentLayoutPosition
+            });
+          } else {
+            return task.newResult(null);
+          }
+        });
     }
-    return layoutColumns().thenAsync((generatorResult) => {
+    return layoutColumns().thenAsync(generatorResult => {
       if (!generatorResult) {
         return task.newResult(null);
       }
@@ -941,114 +1109,159 @@ export class StyleInstance extends exprs.Context implements
         return task.newResult(generatorResult.columns);
       }
       const columnFill =
-          boxInstance.getProp(self, 'column-fill') as css.Ident || css.ident.balance;
+        (boxInstance.getProp(self, "column-fill") as css.Ident) ||
+        css.ident.balance;
       const flowPosition =
-          self.currentLayoutPosition.flowPositions[flowNameStr];
+        self.currentLayoutPosition.flowPositions[flowNameStr];
       asserts.assert(flowPosition);
       const columnBalancer = colums.createColumnBalancer(
-          columnCount, columnFill, layoutColumns, regionPageFloatLayoutContext,
-          layoutContainer, generatorResult.columns, flowPosition);
+        columnCount,
+        columnFill,
+        layoutColumns,
+        regionPageFloatLayoutContext,
+        layoutContainer,
+        generatorResult.columns,
+        flowPosition
+      );
       if (!columnBalancer) {
         return task.newResult(generatorResult.columns);
       }
       isFirstTime = false;
       pagePageFloatLayoutContext.lock();
       regionPageFloatLayoutContext.lock();
-      return columnBalancer.balanceColumns(generatorResult)
-          .thenAsync((result) => {
-            pagePageFloatLayoutContext.unlock();
-            pagePageFloatLayoutContext.validate();
-            regionPageFloatLayoutContext.unlock();
-            self.currentLayoutPosition = result.position;
-            return task.newResult(result.columns);
-          });
+      return columnBalancer
+        .balanceColumns(generatorResult)
+        .thenAsync(result => {
+          pagePageFloatLayoutContext.unlock();
+          pagePageFloatLayoutContext.validate();
+          regionPageFloatLayoutContext.unlock();
+          self.currentLayoutPosition = result.position;
+          return task.newResult(result.columns);
+        });
     });
   }
 
   layoutFlowColumns(
-      page: vtree.Page, boxInstance: pm.PageBoxInstance, offsetX: number,
-      offsetY: number, exclusions: geom.Shape[],
-      pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
-      regionPageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
-      layoutContainer: vtree.Container, flowNameStr: string,
-      columnCount: number,
-      forceNonFitting: boolean): task.Result<layout.Column[]|null> {
+    page: vtree.Page,
+    boxInstance: pm.PageBoxInstance,
+    offsetX: number,
+    offsetY: number,
+    exclusions: geom.Shape[],
+    pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
+    regionPageFloatLayoutContext: pagefloat.PageFloatLayoutContext,
+    layoutContainer: vtree.Container,
+    flowNameStr: string,
+    columnCount: number,
+    forceNonFitting: boolean
+  ): task.Result<layout.Column[] | null> {
     const self = this;
-    const frame: task.Frame<layout.Column[]|null> =
-        task.newFrame('layoutFlowColumns');
+    const frame: task.Frame<layout.Column[] | null> = task.newFrame(
+      "layoutFlowColumns"
+    );
     const positionAtContainerStart = self.currentLayoutPosition.clone();
-    const columnGap = boxInstance.getPropAsNumber(self, 'column-gap');
+    const columnGap = boxInstance.getPropAsNumber(self, "column-gap");
 
     // Don't query columnWidth when it's not needed, so that width calculation
     // can be delayed for width: auto columns.
-    const columnWidth = columnCount > 1 ?
-        boxInstance.getPropAsNumber(self, 'column-width') :
-        layoutContainer.width;
+    const columnWidth =
+      columnCount > 1
+        ? boxInstance.getPropAsNumber(self, "column-width")
+        : layoutContainer.width;
     const regionIds = boxInstance.getActiveRegions(self);
-    const innerShapeVal = boxInstance.getProp(self, 'shape-inside');
+    const innerShapeVal = boxInstance.getProp(self, "shape-inside");
     const innerShape = toShape(
-        innerShapeVal, 0, 0, layoutContainer.width, layoutContainer.height,
-        self);
+      innerShapeVal,
+      0,
+      0,
+      layoutContainer.width,
+      layoutContainer.height,
+      self
+    );
     const layoutContext = new vgen.ViewFactory(
-        flowNameStr, self, self.viewport, self.styler, regionIds, self.xmldoc,
-        self.faces, self.style.footnoteProps, self, page, self.customRenderer,
-        self.fallbackMap, this.documentURLTransformer);
+      flowNameStr,
+      self,
+      self.viewport,
+      self.styler,
+      regionIds,
+      self.xmldoc,
+      self.faces,
+      self.style.footnoteProps,
+      self,
+      page,
+      self.customRenderer,
+      self.fallbackMap,
+      this.documentURLTransformer
+    );
     let columnIndex = 0;
     let column = null;
     let columns = [];
     frame
-        .loopWithFrame((loopFrame) => {
-          self.createAndLayoutColumn(
-                  boxInstance, offsetX, offsetY, exclusions, layoutContainer,
-                  columnIndex++, flowNameStr, regionPageFloatLayoutContext,
-                  columnCount, columnGap, columnWidth, innerShape,
-                  layoutContext, forceNonFitting)
-              .then((c) => {
-                if (pagePageFloatLayoutContext.isInvalidated()) {
-                  columns = null;
-                  loopFrame.breakLoop();
-                  return;
+      .loopWithFrame(loopFrame => {
+        self
+          .createAndLayoutColumn(
+            boxInstance,
+            offsetX,
+            offsetY,
+            exclusions,
+            layoutContainer,
+            columnIndex++,
+            flowNameStr,
+            regionPageFloatLayoutContext,
+            columnCount,
+            columnGap,
+            columnWidth,
+            innerShape,
+            layoutContext,
+            forceNonFitting
+          )
+          .then(c => {
+            if (pagePageFloatLayoutContext.isInvalidated()) {
+              columns = null;
+              loopFrame.breakLoop();
+              return;
+            }
+            const forcedRegionBreak =
+              !!c.pageBreakType && c.pageBreakType !== "column";
+            if (
+              (forcedRegionBreak || columnIndex === columnCount) &&
+              !regionPageFloatLayoutContext.isInvalidated()
+            ) {
+              regionPageFloatLayoutContext.finish();
+            }
+            if (regionPageFloatLayoutContext.isInvalidated()) {
+              columnIndex = 0;
+              self.currentLayoutPosition = positionAtContainerStart.clone();
+              regionPageFloatLayoutContext.validate();
+              if (regionPageFloatLayoutContext.isLocked()) {
+                columns = null;
+                loopFrame.breakLoop();
+              } else {
+                loopFrame.continueLoop();
+              }
+              return;
+            }
+            column = c;
+            columns[columnIndex - 1] = column;
+            if (column.pageBreakType) {
+              if (column.pageBreakType != "column") {
+                // skip remaining columns
+                columnIndex = columnCount;
+                if (column.pageBreakType != "region") {
+                  // skip remaining regions
+                  self.pageBreaks[flowNameStr] = true;
                 }
-                const forcedRegionBreak =
-                    !!c.pageBreakType && c.pageBreakType !== 'column';
-                if ((forcedRegionBreak || columnIndex === columnCount) &&
-                    !regionPageFloatLayoutContext.isInvalidated()) {
-                  regionPageFloatLayoutContext.finish();
-                }
-                if (regionPageFloatLayoutContext.isInvalidated()) {
-                  columnIndex = 0;
-                  self.currentLayoutPosition = positionAtContainerStart.clone();
-                  regionPageFloatLayoutContext.validate();
-                  if (regionPageFloatLayoutContext.isLocked()) {
-                    columns = null;
-                    loopFrame.breakLoop();
-                  } else {
-                    loopFrame.continueLoop();
-                  }
-                  return;
-                }
-                column = c;
-                columns[columnIndex - 1] = column;
-                if (column.pageBreakType) {
-                  if (column.pageBreakType != 'column') {
-                    // skip remaining columns
-                    columnIndex = columnCount;
-                    if (column.pageBreakType != 'region') {
-                      // skip remaining regions
-                      self.pageBreaks[flowNameStr] = true;
-                    }
-                  }
-                }
-                if (columnIndex < columnCount) {
-                  loopFrame.continueLoop();
-                } else {
-                  loopFrame.breakLoop();
-                }
-              });
-        })
-        .then(() => {
-          frame.finish(columns);
-        });
+              }
+            }
+            if (columnIndex < columnCount) {
+              loopFrame.continueLoop();
+            } else {
+              loopFrame.breakLoop();
+            }
+          });
+      })
+      .then(() => {
+        frame.finish(columns);
+      });
     return frame.result();
   }
 
@@ -1056,107 +1269,167 @@ export class StyleInstance extends exprs.Context implements
    * @return holding true
    */
   layoutContainer(
-      page: vtree.Page, boxInstance: pm.PageBoxInstance,
-      parentContainer: HTMLElement, offsetX: number, offsetY: number,
-      exclusions: geom.Shape[],
-      pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext):
-      task.Result<boolean> {
+    page: vtree.Page,
+    boxInstance: pm.PageBoxInstance,
+    parentContainer: HTMLElement,
+    offsetX: number,
+    offsetY: number,
+    exclusions: geom.Shape[],
+    pagePageFloatLayoutContext: pagefloat.PageFloatLayoutContext
+  ): task.Result<boolean> {
     const self = this;
     boxInstance.reset();
-    const enabled = boxInstance.getProp(self, 'enabled');
+    const enabled = boxInstance.getProp(self, "enabled");
     if (enabled && enabled !== css.ident._true) {
       return task.newResult(true);
     }
-    const frame: task.Frame<boolean> = task.newFrame('layoutContainer');
-    const wrapFlow = boxInstance.getProp(self, 'wrap-flow');
+    const frame: task.Frame<boolean> = task.newFrame("layoutContainer");
+    const wrapFlow = boxInstance.getProp(self, "wrap-flow");
     const dontExclude = wrapFlow === css.ident.auto;
-    const flowName = boxInstance.getProp(self, 'flow-from');
-    const boxContainer = self.viewport.document.createElement('div');
-    const position = boxInstance.getProp(self, 'position');
+    const flowName = boxInstance.getProp(self, "flow-from");
+    const boxContainer = self.viewport.document.createElement("div");
+    const position = boxInstance.getProp(self, "position");
     base.setCSSProperty(
-        boxContainer, 'position', position ? (position as any).name : 'absolute');
+      boxContainer,
+      "position",
+      position ? (position as any).name : "absolute"
+    );
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     let layoutContainer = new vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
     layoutContainer.exclusions = exclusions;
     boxInstance.prepareContainer(
-        self, layoutContainer, page, self.faces, self.clientLayout);
+      self,
+      layoutContainer,
+      page,
+      self.faces,
+      self.clientLayout
+    );
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
-    offsetX += layoutContainer.left + layoutContainer.marginLeft +
-        layoutContainer.borderLeft;
-    offsetY += layoutContainer.top + layoutContainer.marginTop +
-        layoutContainer.borderTop;
+    offsetX +=
+      layoutContainer.left +
+      layoutContainer.marginLeft +
+      layoutContainer.borderLeft;
+    offsetY +=
+      layoutContainer.top +
+      layoutContainer.marginTop +
+      layoutContainer.borderTop;
     this.setPagePageFloatLayoutContextContainer(
-        pagePageFloatLayoutContext, boxInstance, layoutContainer);
+      pagePageFloatLayoutContext,
+      boxInstance,
+      layoutContainer
+    );
     let cont;
     let removed = false;
     if (!flowName || !flowName.isIdent()) {
-      const contentVal = boxInstance.getProp(self, 'content');
+      const contentVal = boxInstance.getProp(self, "content");
       if (contentVal && vtree.nonTrivialContent(contentVal)) {
-        let innerContainerTag = 'span';
+        let innerContainerTag = "span";
         if ((contentVal as any).url) {
-          innerContainerTag = 'img';
+          innerContainerTag = "img";
         }
-        const innerContainer =
-            self.viewport.document.createElement(innerContainerTag);
-        contentVal.visit(new vtree.ContentPropertyHandler(
-            innerContainer, self, contentVal,
-            self.counterStore.getExprContentListener()));
+        const innerContainer = self.viewport.document.createElement(
+          innerContainerTag
+        );
+        contentVal.visit(
+          new vtree.ContentPropertyHandler(
+            innerContainer,
+            self,
+            contentVal,
+            self.counterStore.getExprContentListener()
+          )
+        );
         boxContainer.appendChild(innerContainer);
-        if (innerContainerTag == 'img') {
+        if (innerContainerTag == "img") {
           boxInstance.transferSinglUriContentProps(
-              self, innerContainer, self.faces);
+            self,
+            innerContainer,
+            self.faces
+          );
         }
         boxInstance.transferContentProps(
-            self, layoutContainer, page, self.faces);
+          self,
+          layoutContainer,
+          page,
+          self.faces
+        );
       } else if (boxInstance.suppressEmptyBoxGeneration) {
         parentContainer.removeChild(boxContainer);
         removed = true;
       }
       if (!removed) {
         boxInstance.finishContainer(
-            self, layoutContainer, page, null, 1, self.clientLayout,
-            self.faces);
+          self,
+          layoutContainer,
+          page,
+          null,
+          1,
+          self.clientLayout,
+          self.faces
+        );
       }
       cont = task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
-      const innerFrame: task.Frame<boolean> =
-          task.newFrame('layoutContainer.inner');
+      const innerFrame: task.Frame<boolean> = task.newFrame(
+        "layoutContainer.inner"
+      );
       const flowNameStr = flowName.toString();
 
       // for now only a single column in vertical case
-      const columnCount = boxInstance.getPropAsNumber(self, 'column-count');
-      self.layoutFlowColumnsWithBalancing(
-              page, boxInstance, offsetX, offsetY, exclusions,
-              pagePageFloatLayoutContext, layoutContainer, flowNameStr,
-              columnCount)
-          .then((columns) => {
-            if (!pagePageFloatLayoutContext.isInvalidated()) {
-              const column = columns[0];
-              asserts.assert(column);
-              if (column.element === boxContainer) {
-                layoutContainer = column;
-              }
-              layoutContainer.computedBlockSize = Math.max.apply(
-                  null, columns.map((c) => c.computedBlockSize));
-              boxInstance.finishContainer(
-                  self, layoutContainer, page, column, columnCount,
-                  self.clientLayout, self.faces);
-              const flowPosition =
-                  self.currentLayoutPosition.flowPositions[flowNameStr];
-              if (flowPosition && flowPosition.breakAfter === 'region') {
-                flowPosition.breakAfter = null;
-              }
+      const columnCount = boxInstance.getPropAsNumber(self, "column-count");
+      self
+        .layoutFlowColumnsWithBalancing(
+          page,
+          boxInstance,
+          offsetX,
+          offsetY,
+          exclusions,
+          pagePageFloatLayoutContext,
+          layoutContainer,
+          flowNameStr,
+          columnCount
+        )
+        .then(columns => {
+          if (!pagePageFloatLayoutContext.isInvalidated()) {
+            const column = columns[0];
+            asserts.assert(column);
+            if (column.element === boxContainer) {
+              layoutContainer = column;
             }
-            innerFrame.finish(true);
-          });
+            layoutContainer.computedBlockSize = Math.max.apply(
+              null,
+              columns.map(c => c.computedBlockSize)
+            );
+            boxInstance.finishContainer(
+              self,
+              layoutContainer,
+              page,
+              column,
+              columnCount,
+              self.clientLayout,
+              self.faces
+            );
+            const flowPosition =
+              self.currentLayoutPosition.flowPositions[flowNameStr];
+            if (flowPosition && flowPosition.breakAfter === "region") {
+              flowPosition.breakAfter = null;
+            }
+          }
+          innerFrame.finish(true);
+        });
       cont = innerFrame.result();
     } else {
       if (!pagePageFloatLayoutContext.isInvalidated()) {
         boxInstance.finishContainer(
-            self, layoutContainer, page, null, 1, self.clientLayout,
-            self.faces);
+          self,
+          layoutContainer,
+          page,
+          null,
+          1,
+          self.clientLayout,
+          self.faces
+        );
       }
       cont = task.newResult(true);
     }
@@ -1165,12 +1438,16 @@ export class StyleInstance extends exprs.Context implements
         frame.finish(true);
         return;
       }
-      if (!boxInstance.isAutoHeight ||
-          Math.floor(layoutContainer.computedBlockSize) > 0) {
+      if (
+        !boxInstance.isAutoHeight ||
+        Math.floor(layoutContainer.computedBlockSize) > 0
+      ) {
         if (!removed && !dontExclude) {
-          const outerShapeProp = boxInstance.getProp(self, 'shape-outside');
-          const outerShape =
-              layoutContainer.getOuterShape(outerShapeProp, self);
+          const outerShapeProp = boxInstance.getProp(self, "shape-outside");
+          const outerShape = layoutContainer.getOuterShape(
+            outerShapeProp,
+            self
+          );
 
           // Though it seems that LShapeFloatBug still exists in Firefox, it
           // apparently does not occur on exclusion floats. See the test file:
@@ -1190,25 +1467,31 @@ export class StyleInstance extends exprs.Context implements
       }
       let i = boxInstance.children.length - 1;
       frame
-          .loop(() => {
-            while (i >= 0) {
-              const child = boxInstance.children[i--];
-              const r = self.layoutContainer(
-                  page, child, (boxContainer as HTMLElement), offsetX, offsetY,
-                  exclusions, pagePageFloatLayoutContext);
-              if (r.isPending()) {
-                return r.thenAsync(
-                    () => task.newResult(
-                        !pagePageFloatLayoutContext.isInvalidated()));
-              } else if (pagePageFloatLayoutContext.isInvalidated()) {
-                break;
-              }
+        .loop(() => {
+          while (i >= 0) {
+            const child = boxInstance.children[i--];
+            const r = self.layoutContainer(
+              page,
+              child,
+              boxContainer as HTMLElement,
+              offsetX,
+              offsetY,
+              exclusions,
+              pagePageFloatLayoutContext
+            );
+            if (r.isPending()) {
+              return r.thenAsync(() =>
+                task.newResult(!pagePageFloatLayoutContext.isInvalidated())
+              );
+            } else if (pagePageFloatLayoutContext.isInvalidated()) {
+              break;
             }
-            return task.newResult(false);
-          })
-          .then(() => {
-            frame.finish(true);
-          });
+          }
+          return task.newResult(false);
+        })
+        .then(() => {
+          frame.finish(true);
+        });
     });
     return frame.result();
   }
@@ -1219,8 +1502,10 @@ export class StyleInstance extends exprs.Context implements
       const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
       for (let i = flowPosition.positions.length - 1; i >= 0; i--) {
         const pos = flowPosition.positions[i];
-        if (pos.flowChunk.startPage >= 0 &&
-            pos.flowChunk.startPage + pos.flowChunk.linger - 1 <= pageNumber) {
+        if (
+          pos.flowChunk.startPage >= 0 &&
+          pos.flowChunk.startPage + pos.flowChunk.linger - 1 <= pageNumber
+        ) {
           flowPosition.positions.splice(i, 1);
         }
       }
@@ -1233,8 +1518,10 @@ export class StyleInstance extends exprs.Context implements
       const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
       for (let i = flowPosition.positions.length - 1; i >= 0; i--) {
         const pos = flowPosition.positions[i];
-        if (pos.flowChunk.startPage < 0 &&
-            pos.flowChunk.startOffset < this.lookupOffset) {
+        if (
+          pos.flowChunk.startPage < 0 &&
+          pos.flowChunk.startOffset < this.lookupOffset
+        ) {
           pos.flowChunk.startPage = pageNumber;
         }
       }
@@ -1251,8 +1538,10 @@ export class StyleInstance extends exprs.Context implements
     return true;
   }
 
-  layoutNextPage(page: vtree.Page, cp: vtree.LayoutPosition|undefined):
-      task.Result<vtree.LayoutPosition> {
+  layoutNextPage(
+    page: vtree.Page,
+    cp: vtree.LayoutPosition | undefined
+  ): task.Result<vtree.LayoutPosition> {
     const self = this;
     self.pageBreaks = {};
     if (cp) {
@@ -1263,7 +1552,7 @@ export class StyleInstance extends exprs.Context implements
       self.styler.replayFlowElementsFromOffset(-1);
     }
     if (this.lang) {
-      page.bleedBox.setAttribute('lang', this.lang);
+      page.bleedBox.setAttribute("lang", this.lang);
     }
     cp = self.currentLayoutPosition;
     cp.page++;
@@ -1275,77 +1564,102 @@ export class StyleInstance extends exprs.Context implements
     const pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
-      return task.newResult((null as vtree.LayoutPosition));
+      return task.newResult(null as vtree.LayoutPosition);
     }
     page.setAutoPageWidth(
-        pageMaster.pageBox.specified['width'].value === css.fullWidth);
+      pageMaster.pageBox.specified["width"].value === css.fullWidth
+    );
     page.setAutoPageHeight(
-        pageMaster.pageBox.specified['height'].value === css.fullHeight);
+      pageMaster.pageBox.specified["height"].value === css.fullHeight
+    );
     self.counterStore.setCurrentPage(page);
     self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
     // setup bleed area and crop marks
     const evaluatedPageSizeAndBleed = pages.evaluatePageSizeAndBleed(
-        pages.resolvePageSizeAndBleed(cascadedPageStyle as any), this);
+      pages.resolvePageSizeAndBleed(cascadedPageStyle as any),
+      this
+    );
     self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
     pages.addPrinterMarks(
-        cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
+      cascadedPageStyle,
+      evaluatedPageSizeAndBleed,
+      page,
+      this
+    );
     const bleedBoxPaddingEdge =
-        evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+      evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
     const writingMode =
-        pageMaster.getProp(self, 'writing-mode') || css.ident.horizontal_tb;
-    const direction = pageMaster.getProp(self, 'direction') || css.ident.ltr;
+      pageMaster.getProp(self, "writing-mode") || css.ident.horizontal_tb;
+    const direction = pageMaster.getProp(self, "direction") || css.ident.ltr;
     const pageFloatLayoutContext = new pagefloat.PageFloatLayoutContext(
-        self.rootPageFloatLayoutContext, pagefloat.FloatReference.PAGE, null,
-        null, null, writingMode, direction);
-    const frame: task.Frame<vtree.LayoutPosition> =
-        task.newFrame('layoutNextPage');
+      self.rootPageFloatLayoutContext,
+      pagefloat.FloatReference.PAGE,
+      null,
+      null,
+      null,
+      writingMode,
+      direction
+    );
+    const frame: task.Frame<vtree.LayoutPosition> = task.newFrame(
+      "layoutNextPage"
+    );
     frame
-        .loopWithFrame((loopFrame) => {
-          self.layoutContainer(
-                  page, pageMaster, page.bleedBox, bleedBoxPaddingEdge,
-                  bleedBoxPaddingEdge + 1,
-                  // Compensate 'top: -1px' on page master
-                  [], pageFloatLayoutContext)
-              .then(() => {
-                if (!pageFloatLayoutContext.isInvalidated()) {
-                  pageFloatLayoutContext.finish();
-                }
-                if (pageFloatLayoutContext.isInvalidated()) {
-                  self.currentLayoutPosition =
-                      self.layoutPositionAtPageStart.clone();
-                  pageFloatLayoutContext.validate();
-                  loopFrame.continueLoop();
-                } else {
-                  loopFrame.breakLoop();
-                }
-              });
-        })
-        .then(() => {
-          pageMaster.adjustPageLayout(self, page, self.clientLayout);
-          const isLeftPage =
-              new exprs.Named(pageMaster.pageBox.scope, 'left-page');
-          page.side = isLeftPage.evaluate(self) ? constants.PageSide.LEFT :
-                                                  constants.PageSide.RIGHT;
-          self.processLinger();
-          cp = self.currentLayoutPosition;
-          Object.keys(cp.flowPositions).forEach((flowName) => {
-            const flowPosition = cp.flowPositions[flowName];
-            const breakAfter = flowPosition.breakAfter;
-            if (breakAfter &&
-                (breakAfter === 'page' || !self.matchPageSide(breakAfter))) {
-              flowPosition.breakAfter = null;
+      .loopWithFrame(loopFrame => {
+        self
+          .layoutContainer(
+            page,
+            pageMaster,
+            page.bleedBox,
+            bleedBoxPaddingEdge,
+            bleedBoxPaddingEdge + 1,
+            // Compensate 'top: -1px' on page master
+            [],
+            pageFloatLayoutContext
+          )
+          .then(() => {
+            if (!pageFloatLayoutContext.isInvalidated()) {
+              pageFloatLayoutContext.finish();
+            }
+            if (pageFloatLayoutContext.isInvalidated()) {
+              self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
+              pageFloatLayoutContext.validate();
+              loopFrame.continueLoop();
+            } else {
+              loopFrame.breakLoop();
             }
           });
-          self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
-          cp.highestSeenOffset = self.styler.getReachedOffset();
-          const triggers = self.style.store.getTriggersForDoc(self.xmldoc);
-          page.finish(triggers, self.clientLayout);
-          if (self.noMorePrimaryFlows(cp)) {
-            cp = null;
+      })
+      .then(() => {
+        pageMaster.adjustPageLayout(self, page, self.clientLayout);
+        const isLeftPage = new exprs.Named(
+          pageMaster.pageBox.scope,
+          "left-page"
+        );
+        page.side = isLeftPage.evaluate(self)
+          ? constants.PageSide.LEFT
+          : constants.PageSide.RIGHT;
+        self.processLinger();
+        cp = self.currentLayoutPosition;
+        Object.keys(cp.flowPositions).forEach(flowName => {
+          const flowPosition = cp.flowPositions[flowName];
+          const breakAfter = flowPosition.breakAfter;
+          if (
+            breakAfter &&
+            (breakAfter === "page" || !self.matchPageSide(breakAfter))
+          ) {
+            flowPosition.breakAfter = null;
           }
-          frame.finish(cp);
         });
+        self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
+        cp.highestSeenOffset = self.styler.getReachedOffset();
+        const triggers = self.style.store.getTriggersForDoc(self.xmldoc);
+        page.finish(triggers, self.clientLayout);
+        if (self.noMorePrimaryFlows(cp)) {
+          cp = null;
+        }
+        frame.finish(cp);
+      });
     return frame.result();
   }
 
@@ -1354,14 +1668,17 @@ export class StyleInstance extends exprs.Context implements
    * context.
    */
   private setPageSizeAndBleed(
-      evaluatedPageSizeAndBleed: pages.EvaluatedPageSizeAndBleed,
-      page: vtree.Page) {
+    evaluatedPageSizeAndBleed: pages.EvaluatedPageSizeAndBleed,
+    page: vtree.Page
+  ) {
     this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
     this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
-    this.pageSheetWidth = evaluatedPageSizeAndBleed.pageWidth +
-        evaluatedPageSizeAndBleed.cropOffset * 2;
-    this.pageSheetHeight = evaluatedPageSizeAndBleed.pageHeight +
-        evaluatedPageSizeAndBleed.cropOffset * 2;
+    this.pageSheetWidth =
+      evaluatedPageSizeAndBleed.pageWidth +
+      evaluatedPageSizeAndBleed.cropOffset * 2;
+    this.pageSheetHeight =
+      evaluatedPageSizeAndBleed.pageHeight +
+      evaluatedPageSizeAndBleed.cropOffset * 2;
     page.container.style.width = `${this.pageSheetWidth}px`;
     page.container.style.height = `${this.pageSheetHeight}px`;
     page.bleedBox.style.left = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
@@ -1379,11 +1696,20 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
   insideRegion: boolean = false;
 
   constructor(
-      public masterHandler: StyleParserHandler, condition: exprs.Val,
-      parent: BaseParserHandler, regionId: string|null) {
+    public masterHandler: StyleParserHandler,
+    condition: exprs.Val,
+    parent: BaseParserHandler,
+    regionId: string | null
+  ) {
     super(
-        masterHandler.rootScope, masterHandler, condition, parent,
-        regionId, masterHandler.validatorSet, !parent);
+      masterHandler.rootScope,
+      masterHandler,
+      condition,
+      parent,
+      regionId,
+      masterHandler.validatorSet,
+      !parent
+    );
   }
 
   /**
@@ -1396,11 +1722,22 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
    */
   startPageMasterRule(name, pseudoName, classes) {
     const pageMaster = new pm.PageMaster(
-        this.masterHandler.pageScope, name, pseudoName, classes,
-        this.masterHandler.rootBox, this.condition,
-        this.owner.getBaseSpecificity());
-    this.masterHandler.pushHandler(new pm.PageMasterParserHandler(
-        pageMaster.scope, this.masterHandler, pageMaster, this.validatorSet));
+      this.masterHandler.pageScope,
+      name,
+      pseudoName,
+      classes,
+      this.masterHandler.rootBox,
+      this.condition,
+      this.owner.getBaseSpecificity()
+    );
+    this.masterHandler.pushHandler(
+      new pm.PageMasterParserHandler(
+        pageMaster.scope,
+        this.masterHandler,
+        pageMaster,
+        this.validatorSet
+      )
+    );
   }
 
   /**
@@ -1411,8 +1748,9 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
     if (this.condition != null) {
       condition = exprs.and(this.scope, this.condition, condition);
     }
-    this.masterHandler.pushHandler(new BaseParserHandler(
-        this.masterHandler, condition, this, this.regionId));
+    this.masterHandler.pushHandler(
+      new BaseParserHandler(this.masterHandler, condition, this, this.regionId)
+    );
   }
 
   /**
@@ -1420,18 +1758,28 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
    */
   startDefineRule() {
     this.masterHandler.pushHandler(
-        new csscasc.DefineParserHandler(this.scope, this.owner));
+      new csscasc.DefineParserHandler(this.scope, this.owner)
+    );
   }
 
   /**
    * @override
    */
   startFontFaceRule() {
-    const properties = ({} as csscasc.ElementStyle);
-    this.masterHandler.fontFaces.push({properties, condition: this.condition});
-    this.masterHandler.pushHandler(new csscasc.PropSetParserHandler(
-        this.scope, this.owner, null, properties,
-        this.masterHandler.validatorSet));
+    const properties = {} as csscasc.ElementStyle;
+    this.masterHandler.fontFaces.push({
+      properties,
+      condition: this.condition
+    });
+    this.masterHandler.pushHandler(
+      new csscasc.PropSetParserHandler(
+        this.scope,
+        this.owner,
+        null,
+        properties,
+        this.masterHandler.validatorSet
+      )
+    );
   }
 
   /**
@@ -1440,22 +1788,35 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
   startFlowRule(flowName) {
     let style = this.masterHandler.flowProps[flowName];
     if (!style) {
-      style = ({} as csscasc.ElementStyle);
+      style = {} as csscasc.ElementStyle;
       this.masterHandler.flowProps[flowName] = style;
     }
-    this.masterHandler.pushHandler(new csscasc.PropSetParserHandler(
-        this.scope, this.owner, null, style, this.masterHandler.validatorSet));
+    this.masterHandler.pushHandler(
+      new csscasc.PropSetParserHandler(
+        this.scope,
+        this.owner,
+        null,
+        style,
+        this.masterHandler.validatorSet
+      )
+    );
   }
 
   /**
    * @override
    */
   startViewportRule() {
-    const viewportProps = ({} as csscasc.ElementStyle);
+    const viewportProps = {} as csscasc.ElementStyle;
     this.masterHandler.viewportProps.push(viewportProps);
-    this.masterHandler.pushHandler(new csscasc.PropSetParserHandler(
-        this.scope, this.owner, this.condition, viewportProps,
-        this.masterHandler.validatorSet));
+    this.masterHandler.pushHandler(
+      new csscasc.PropSetParserHandler(
+        this.scope,
+        this.owner,
+        this.condition,
+        viewportProps,
+        this.masterHandler.validatorSet
+      )
+    );
   }
 
   /**
@@ -1464,15 +1825,22 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
   startFootnoteRule(pseudoelement) {
     let style = this.masterHandler.footnoteProps;
     if (pseudoelement) {
-      const pseudos = csscasc.getMutableStyleMap(style, '_pseudos');
+      const pseudos = csscasc.getMutableStyleMap(style, "_pseudos");
       style = pseudos[pseudoelement];
       if (!style) {
-        style = ({} as csscasc.ElementStyle);
+        style = {} as csscasc.ElementStyle;
         pseudos[pseudoelement] = style;
       }
     }
-    this.masterHandler.pushHandler(new csscasc.PropSetParserHandler(
-        this.scope, this.owner, null, style, this.masterHandler.validatorSet));
+    this.masterHandler.pushHandler(
+      new csscasc.PropSetParserHandler(
+        this.scope,
+        this.owner,
+        null,
+        style,
+        this.masterHandler.validatorSet
+      )
+    );
   }
 
   /**
@@ -1488,8 +1856,12 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
    */
   startPageRule() {
     const pageHandler = new pages.PageParserHandler(
-        this.masterHandler.pageScope, this.masterHandler, this,
-        this.validatorSet, this.masterHandler.pageProps);
+      this.masterHandler.pageScope,
+      this.masterHandler,
+      this,
+      this.validatorSet,
+      this.masterHandler.pageProps
+    );
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();
   }
@@ -1502,10 +1874,14 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
     if (this.insideRegion) {
       this.insideRegion = false;
       const regionId = `R${this.masterHandler.regionCount++}`;
-      this.special('region-id', css.getName(regionId));
+      this.special("region-id", css.getName(regionId));
       this.endRule();
       const regionHandler = new BaseParserHandler(
-          this.masterHandler, this.condition, this, regionId);
+        this.masterHandler,
+        this.condition,
+        this,
+        regionId
+      );
       this.masterHandler.pushHandler(regionHandler);
       regionHandler.startRuleBody();
     }
@@ -1514,25 +1890,26 @@ export class BaseParserHandler extends csscasc.CascadeParserHandler {
 
 // override, so we don't register an error
 export const processViewportMeta = (meta: Element): string => {
-  let content = meta.getAttribute('content');
+  let content = meta.getAttribute("content");
   if (!content) {
-    return '';
+    return "";
   }
   const vals = {};
   let r;
   while (
-      (r = content.match(
-           /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/)) !=
-      null) {
+    (r = content.match(
+      /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/
+    )) != null
+  ) {
     content = content.substr(r[0].length);
     vals[r[1]] = r[2];
   }
-  const width = vals['width'] - 0;
-  const height = vals['height'] - 0;
+  const width = vals["width"] - 0;
+  const height = vals["height"] - 0;
   if (width && height) {
     return `@-epubx-viewport{width:${width}px;height:${height}px;}`;
   }
-  return '';
+  return "";
 };
 
 export class StyleParserHandler extends cssparse.DispatchParserHandler {
@@ -1541,11 +1918,11 @@ export class StyleParserHandler extends cssparse.DispatchParserHandler {
   rootBox: any;
   cascadeParserHandler: any;
   regionCount: number = 0;
-  fontFaces: any = ([] as FontFace[]);
-  footnoteProps: any = ({} as csscasc.ElementStyle);
-  flowProps: any = ({} as {[key: string]: csscasc.ElementStyle});
-  viewportProps: any = ([] as csscasc.ElementStyle[]);
-  pageProps: any = ({} as {[key: string]: csscasc.ElementStyle});
+  fontFaces: any = [] as FontFace[];
+  footnoteProps: any = {} as csscasc.ElementStyle;
+  flowProps: any = {} as { [key: string]: csscasc.ElementStyle };
+  viewportProps: any = [] as csscasc.ElementStyle[];
+  pageProps: any = {} as { [key: string]: csscasc.ElementStyle };
   slave: any;
 
   constructor(public readonly validatorSet: cssvalid.ValidatorSet) {
@@ -1561,48 +1938,53 @@ export class StyleParserHandler extends cssparse.DispatchParserHandler {
    * @override
    */
   error(mnemonics, token) {
-    logging.logger.warn('CSS parser:', mnemonics);
+    logging.logger.warn("CSS parser:", mnemonics);
   }
 }
 
 export type StyleSource = {
-  url: string,
-  text: string|null,
-  flavor: cssparse.StylesheetFlavor,
-  classes: string|null,
-  media: string|null
+  url: string;
+  text: string | null;
+  flavor: cssparse.StylesheetFlavor;
+  classes: string | null;
+  media: string | null;
 };
 
-export const parseOPSResource = (response: Response, store: xmldocs.XMLDocStore):
-                                    task.Result<xmldocs.XMLDocHolder> =>
-    (store as OPSDocStore).parseOPSResource(response);
+export const parseOPSResource = (
+  response: Response,
+  store: xmldocs.XMLDocStore
+): task.Result<xmldocs.XMLDocHolder> =>
+  (store as OPSDocStore).parseOPSResource(response);
 
 export class OPSDocStore extends ResourceStore<xmldocs.XMLDocHolder> {
-  styleByKey: {[key: string]: Style} = {};
-  styleFetcherByKey: {[key: string]: Fetcher<Style>} = {};
-  styleByDocURL: {[key: string]: Style} = {};
-  triggersByDocURL: {[key: string]: vtree.Trigger[]} = {};
+  styleByKey: { [key: string]: Style } = {};
+  styleFetcherByKey: { [key: string]: Fetcher<Style> } = {};
+  styleByDocURL: { [key: string]: Style } = {};
+  triggersByDocURL: { [key: string]: vtree.Trigger[] } = {};
   validatorSet: cssvalid.ValidatorSet = null;
   private styleSheets: StyleSource[] = [];
   private triggerSingleDocumentPreprocessing: boolean = false;
 
-  constructor(public fontDeobfuscator:
-                  ((p1: string) => ((p1: Blob) => task.Result<Blob>) | null)|
-              null) {
-    super(
-        parseOPSResource, XMLHttpRequestResponseType.DOCUMENT);
+  constructor(
+    public fontDeobfuscator:
+      | ((p1: string) => ((p1: Blob) => task.Result<Blob>) | null)
+      | null
+  ) {
+    super(parseOPSResource, XMLHttpRequestResponseType.DOCUMENT);
   }
 
   init(
-      authorStyleSheets: {url: string|null, text: string|null}[]|null,
-      userStyleSheets: {url: string|null, text: string|null}[]|
-      null): task.Result<boolean> {
+    authorStyleSheets: { url: string | null; text: string | null }[] | null,
+    userStyleSheets: { url: string | null; text: string | null }[] | null
+  ): task.Result<boolean> {
     this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
-    const userAgentXML =
-        base.resolveURL('user-agent.xml', base.resourceBaseURL);
-    const frame = task.newFrame<boolean>('OPSDocStore.init');
+    const userAgentXML = base.resolveURL(
+      "user-agent.xml",
+      base.resourceBaseURL
+    );
+    const frame = task.newFrame<boolean>("OPSDocStore.init");
     const self = this;
-    cssvalid.loadValidatorSet().then((validatorSet) => {
+    cssvalid.loadValidatorSet().then(validatorSet => {
       self.validatorSet = validatorSet;
       loadUABase().then(() => {
         self.load(userAgentXML).then(() => {
@@ -1627,8 +2009,9 @@ export class OPSDocStore extends ResourceStore<xmldocs.XMLDocHolder> {
    * removed.
    */
   private setStyleSheets(
-      authorStyleSheets: StyleSource[]|null,
-      userStyleSheets: StyleSource[]|null) {
+    authorStyleSheets: StyleSource[] | null,
+    userStyleSheets: StyleSource[] | null
+  ) {
     this.clearStyleSheets();
     if (authorStyleSheets) {
       authorStyleSheets.forEach(this.addAuthorStyleSheet, this);
@@ -1671,168 +2054,191 @@ export class OPSDocStore extends ResourceStore<xmldocs.XMLDocHolder> {
   }
 
   parseOPSResource(response: Response): task.Result<xmldocs.XMLDocHolder> {
-    const frame: task.Frame<xmldocs.XMLDocHolder> =
-        task.newFrame('OPSDocStore.load');
+    const frame: task.Frame<xmldocs.XMLDocHolder> = task.newFrame(
+      "OPSDocStore.load"
+    );
     const self = this;
     const url = response.url;
-    xmldocs.parseXMLResource(response, self).then((xmldoc: xmldocs.XMLDocHolder) => {
-      if (!xmldoc) {
-        frame.finish(null);
-        return;
-      }
-      if (self.triggerSingleDocumentPreprocessing) {
-        const hooks: plugin.PreProcessSingleDocumentHook[] =
-            plugin.getHooksForName(
-                plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
-        for (let i = 0; i < hooks.length; i++) {
-          try {
-            hooks[i](xmldoc.document);
-          } catch (e) {
-            logging.logger.warn(
-                'Error during single document preprocessing:', e);
+    xmldocs
+      .parseXMLResource(response, self)
+      .then((xmldoc: xmldocs.XMLDocHolder) => {
+        if (!xmldoc) {
+          frame.finish(null);
+          return;
+        }
+        if (self.triggerSingleDocumentPreprocessing) {
+          const hooks: plugin.PreProcessSingleDocumentHook[] = plugin.getHooksForName(
+            plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT
+          );
+          for (let i = 0; i < hooks.length; i++) {
+            try {
+              hooks[i](xmldoc.document);
+            } catch (e) {
+              logging.logger.warn(
+                "Error during single document preprocessing:",
+                e
+              );
+            }
           }
         }
-      }
-      const triggers = [];
-      const triggerList =
-          xmldoc.document.getElementsByTagNameNS(base.NS.epub, 'trigger');
-      for (let i = 0; i < triggerList.length; i++) {
-        const triggerElem = triggerList[i];
-        const observer =
-            triggerElem.getAttributeNS(base.NS.EV, 'observer');
-        const event = triggerElem.getAttributeNS(base.NS.EV, 'event');
-        const action = triggerElem.getAttribute('action');
-        const ref = triggerElem.getAttribute('ref');
-        if (observer && event && action && ref) {
-          triggers.push({observer, event, action, ref});
-        }
-      }
-      self.triggersByDocURL[url] = triggers;
-      const sources = ([] as StyleSource[]);
-      const userAgentURL = base.resolveURL(
-          'user-agent-page.css', base.resourceBaseURL);
-      sources.push({
-        url: userAgentURL,
-        text: null,
-        flavor: cssparse.StylesheetFlavor.USER_AGENT,
-        classes: null,
-        media: null
-      });
-      const head = xmldoc.head;
-      if (head) {
-        for (let c: Node = head.firstChild; c; c = c.nextSibling) {
-          if (c.nodeType != 1) {
-            continue;
+        const triggers = [];
+        const triggerList = xmldoc.document.getElementsByTagNameNS(
+          base.NS.epub,
+          "trigger"
+        );
+        for (let i = 0; i < triggerList.length; i++) {
+          const triggerElem = triggerList[i];
+          const observer = triggerElem.getAttributeNS(base.NS.EV, "observer");
+          const event = triggerElem.getAttributeNS(base.NS.EV, "event");
+          const action = triggerElem.getAttribute("action");
+          const ref = triggerElem.getAttribute("ref");
+          if (observer && event && action && ref) {
+            triggers.push({ observer, event, action, ref });
           }
-          const child = (c as Element);
-          const ns = child.namespaceURI;
-          const localName = child.localName;
-          if (ns == base.NS.XHTML) {
-            if (localName == 'style') {
-              sources.push({
-                url,
-                text: child.textContent,
-                flavor: cssparse.StylesheetFlavor.AUTHOR,
-                classes: null,
-                media: null
-              });
-            } else if (localName == 'link') {
-              const rel = child.getAttribute('rel');
-              const classes = child.getAttribute('class');
-              const media = child.getAttribute('media');
-              if (rel == 'stylesheet' ||
-                  rel == 'alternate stylesheet' && classes) {
-                let src = child.getAttribute('href');
-                src = base.resolveURL(src, url);
-                const title = child.getAttribute("title");
-                sources.push({
-                  url: src,
-                  text: null,
-                  classes: (title ? classes : null),
-                  media,
-                  flavor: cssparse.StylesheetFlavor.AUTHOR
-                });
-              }
-            } else if (localName == 'meta' &&
-                child.getAttribute('name') == 'viewport') {
-              sources.push({
-                url,
-                text: processViewportMeta(child),
-                flavor: cssparse.StylesheetFlavor.AUTHOR,
-                classes: null,
-                media: null
-              });
+        }
+        self.triggersByDocURL[url] = triggers;
+        const sources = [] as StyleSource[];
+        const userAgentURL = base.resolveURL(
+          "user-agent-page.css",
+          base.resourceBaseURL
+        );
+        sources.push({
+          url: userAgentURL,
+          text: null,
+          flavor: cssparse.StylesheetFlavor.USER_AGENT,
+          classes: null,
+          media: null
+        });
+        const head = xmldoc.head;
+        if (head) {
+          for (let c: Node = head.firstChild; c; c = c.nextSibling) {
+            if (c.nodeType != 1) {
+              continue;
             }
-          } else if (ns == base.NS.FB2) {
-            if (localName == 'stylesheet' &&
-                child.getAttribute('type') == 'text/css') {
-              sources.push({
-                url,
-                text: child.textContent,
-                flavor: cssparse.StylesheetFlavor.AUTHOR,
-                classes: null,
-                media: null
-              });
-            }
-          } else if (ns == base.NS.SSE && localName === 'property') {
-            // look for stylesheet specification like:
-            // <property><name>stylesheet</name><value>style.css</value></property>
-            const name = child.getElementsByTagName('name')[0];
-            if (name && name.textContent === 'stylesheet') {
-              const value = child.getElementsByTagName('value')[0];
-              if (value) {
-                let src = base.resolveURL(value.textContent, url);
+            const child = c as Element;
+            const ns = child.namespaceURI;
+            const localName = child.localName;
+            if (ns == base.NS.XHTML) {
+              if (localName == "style") {
                 sources.push({
-                  url: src,
-                  text: null,
+                  url,
+                  text: child.textContent,
+                  flavor: cssparse.StylesheetFlavor.AUTHOR,
                   classes: null,
-                  media: null,
-                  flavor: cssparse.StylesheetFlavor.AUTHOR
+                  media: null
                 });
+              } else if (localName == "link") {
+                const rel = child.getAttribute("rel");
+                const classes = child.getAttribute("class");
+                const media = child.getAttribute("media");
+                if (
+                  rel == "stylesheet" ||
+                  (rel == "alternate stylesheet" && classes)
+                ) {
+                  let src = child.getAttribute("href");
+                  src = base.resolveURL(src, url);
+                  const title = child.getAttribute("title");
+                  sources.push({
+                    url: src,
+                    text: null,
+                    classes: title ? classes : null,
+                    media,
+                    flavor: cssparse.StylesheetFlavor.AUTHOR
+                  });
+                }
+              } else if (
+                localName == "meta" &&
+                child.getAttribute("name") == "viewport"
+              ) {
+                sources.push({
+                  url,
+                  text: processViewportMeta(child),
+                  flavor: cssparse.StylesheetFlavor.AUTHOR,
+                  classes: null,
+                  media: null
+                });
+              }
+            } else if (ns == base.NS.FB2) {
+              if (
+                localName == "stylesheet" &&
+                child.getAttribute("type") == "text/css"
+              ) {
+                sources.push({
+                  url,
+                  text: child.textContent,
+                  flavor: cssparse.StylesheetFlavor.AUTHOR,
+                  classes: null,
+                  media: null
+                });
+              }
+            } else if (ns == base.NS.SSE && localName === "property") {
+              // look for stylesheet specification like:
+              // <property><name>stylesheet</name><value>style.css</value></property>
+              const name = child.getElementsByTagName("name")[0];
+              if (name && name.textContent === "stylesheet") {
+                const value = child.getElementsByTagName("value")[0];
+                if (value) {
+                  let src = base.resolveURL(value.textContent, url);
+                  sources.push({
+                    url: src,
+                    text: null,
+                    classes: null,
+                    media: null,
+                    flavor: cssparse.StylesheetFlavor.AUTHOR
+                  });
+                }
               }
             }
           }
         }
-      }
-      for (let i = 0; i < self.styleSheets.length; i++) {
-        sources.push(self.styleSheets[i]);
-      }
-      let key = '';
-      for (let i = 0; i < sources.length; i++) {
-        key += sources[i].url;
-        key += '^';
-        if (sources[i].text) {
-          key += sources[i].text;
+        for (let i = 0; i < self.styleSheets.length; i++) {
+          sources.push(self.styleSheets[i]);
         }
-        key += '^';
-      }
-      let style = self.styleByKey[key];
-      if (style) {
-        self.styleByDocURL[url] = style;
-        frame.finish(xmldoc);
-        return;
-      }
-      let fetcher = self.styleFetcherByKey[key];
-      if (!fetcher) {
-        fetcher = new Fetcher(() => {
-          const innerFrame: task.Frame<Style> =
-              task.newFrame('fetchStylesheet');
-          let index = 0;
-          const sph = new StyleParserHandler(self.validatorSet);
-          innerFrame
+        let key = "";
+        for (let i = 0; i < sources.length; i++) {
+          key += sources[i].url;
+          key += "^";
+          if (sources[i].text) {
+            key += sources[i].text;
+          }
+          key += "^";
+        }
+        let style = self.styleByKey[key];
+        if (style) {
+          self.styleByDocURL[url] = style;
+          frame.finish(xmldoc);
+          return;
+        }
+        let fetcher = self.styleFetcherByKey[key];
+        if (!fetcher) {
+          fetcher = new Fetcher(() => {
+            const innerFrame: task.Frame<Style> = task.newFrame(
+              "fetchStylesheet"
+            );
+            let index = 0;
+            const sph = new StyleParserHandler(self.validatorSet);
+            innerFrame
               .loop(() => {
                 if (index < sources.length) {
                   const source = sources[index++];
                   sph.startStylesheet(source.flavor);
                   if (source.text !== null) {
                     return cssparse
-                        .parseStylesheetFromText(
-                            source.text, sph, source.url, source.classes,
-                            source.media)
-                        .thenReturn(true);
+                      .parseStylesheetFromText(
+                        source.text,
+                        sph,
+                        source.url,
+                        source.classes,
+                        source.media
+                      )
+                      .thenReturn(true);
                   } else {
                     return cssparse.parseStylesheetFromURL(
-                        source.url, sph, source.classes, source.media);
+                      source.url,
+                      sph,
+                      source.classes,
+                      source.media
+                    );
                   }
                 }
                 return task.newResult(false);
@@ -1840,23 +2246,31 @@ export class OPSDocStore extends ResourceStore<xmldocs.XMLDocHolder> {
               .then(() => {
                 const cascade = sph.cascadeParserHandler.finish();
                 style = new Style(
-                    self, sph.rootScope, sph.pageScope, cascade, sph.rootBox,
-                    sph.fontFaces, sph.footnoteProps, sph.flowProps,
-                    sph.viewportProps, sph.pageProps);
+                  self,
+                  sph.rootScope,
+                  sph.pageScope,
+                  cascade,
+                  sph.rootBox,
+                  sph.fontFaces,
+                  sph.footnoteProps,
+                  sph.flowProps,
+                  sph.viewportProps,
+                  sph.pageProps
+                );
                 self.styleByKey[key] = style;
                 delete self.styleFetcherByKey[key];
                 innerFrame.finish(style);
               });
-          return innerFrame.result();
-        }, `FetchStylesheet ${url}`);
-        self.styleFetcherByKey[key] = fetcher;
-        fetcher.start();
-      }
-      fetcher.get().then((style) => {
-        self.styleByDocURL[url] = style;
-        frame.finish(xmldoc);
+            return innerFrame.result();
+          }, `FetchStylesheet ${url}`);
+          self.styleFetcherByKey[key] = fetcher;
+          fetcher.start();
+        }
+        fetcher.get().then(style => {
+          self.styleByDocURL[url] = style;
+          frame.finish(xmldoc);
+        });
       });
-    });
     return frame.result();
   }
 }

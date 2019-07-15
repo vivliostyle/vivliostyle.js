@@ -18,14 +18,14 @@
  * @fileoverview Support utilities to extract information from various (parsed)
  * CSS values.
  */
-import * as logging from '../vivliostyle/logging';
-import * as css from './css';
-import * as exprs from './expr';
-import * as geom from './geom';
+import * as logging from "../vivliostyle/logging";
+import * as css from "./css";
+import * as exprs from "./expr";
+import * as geom from "./geom";
 
 //---------------------- value parsers ----------------------------------
 export class SetVisitor extends css.Visitor {
-  propSet: {[key: string]: boolean} = {};
+  propSet: { [key: string]: boolean } = {};
 
   constructor() {
     super();
@@ -48,21 +48,20 @@ export class SetVisitor extends css.Visitor {
   }
 }
 
-export const toSet = (val: css.Val): {[key: string]: boolean} => {
+export const toSet = (val: css.Val): { [key: string]: boolean } => {
   if (val) {
     const visitor = new SetVisitor();
     try {
       val.visit(visitor);
       return visitor.propSet;
     } catch (err) {
-      logging.logger.warn(err, 'toSet:');
+      logging.logger.warn(err, "toSet:");
     }
   }
   return {};
 };
 
 export class IntVisitor extends css.Visitor {
-
   constructor(public value: number) {
     super();
   }
@@ -83,7 +82,7 @@ export const toInt = (val: css.Val, def: number): number => {
       val.visit(visitor);
       return visitor.value;
     } catch (err) {
-      logging.logger.warn(err, 'toInt: ');
+      logging.logger.warn(err, "toInt: ");
     }
   }
   return def;
@@ -92,7 +91,7 @@ export const toInt = (val: css.Val, def: number): number => {
 export class ShapeVisitor extends css.Visitor {
   collect: boolean = false;
   coords: css.Numeric[] = [];
-  name: string|null = null;
+  name: string | null = null;
 
   constructor() {
     super();
@@ -113,7 +112,7 @@ export class ShapeVisitor extends css.Visitor {
    */
   visitNum(num) {
     if (this.collect && num.num == 0) {
-      this.coords.push(new css.Numeric(0, 'px'));
+      this.coords.push(new css.Numeric(0, "px"));
     }
     return null;
   }
@@ -140,23 +139,27 @@ export class ShapeVisitor extends css.Visitor {
   }
 
   getShape(
-      x: number, y: number, width: number, height: number,
-      context: exprs.Context): geom.Shape {
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    context: exprs.Context
+  ): geom.Shape {
     if (this.coords.length > 0) {
       const numbers: number[] = [];
       this.coords.forEach((coord, i) => {
-        if (coord.unit == '%') {
+        if (coord.unit == "%") {
           let ref = i % 2 == 0 ? width : height;
-          if (i == 3 && this.name == 'circle') {
+          if (i == 3 && this.name == "circle") {
             ref = Math.sqrt((width * width + height * height) / 2);
           }
-          numbers.push(coord.num * ref / 100);
+          numbers.push((coord.num * ref) / 100);
         } else {
           numbers.push(coord.num * context.queryUnitSize(coord.unit, false));
         }
       });
       switch (this.name) {
-        case 'polygon':
+        case "polygon":
           if (numbers.length % 2 == 0) {
             const points: geom.Point[] = [];
             for (let k = 0; k < numbers.length; k += 2) {
@@ -165,23 +168,34 @@ export class ShapeVisitor extends css.Visitor {
             return new geom.Shape(points);
           }
           break;
-        case 'rectangle':
+        case "rectangle":
           if (numbers.length == 4) {
             return geom.shapeForRect(
-                x + numbers[0], y + numbers[1], x + numbers[0] + numbers[2],
-                y + numbers[1] + numbers[3]);
+              x + numbers[0],
+              y + numbers[1],
+              x + numbers[0] + numbers[2],
+              y + numbers[1] + numbers[3]
+            );
           }
           break;
-        case 'ellipse':
+        case "ellipse":
           if (numbers.length == 4) {
             return geom.shapeForEllipse(
-                x + numbers[0], y + numbers[1], numbers[2], numbers[3]);
+              x + numbers[0],
+              y + numbers[1],
+              numbers[2],
+              numbers[3]
+            );
           }
           break;
-        case 'circle':
+        case "circle":
           if (numbers.length == 3) {
             return geom.shapeForEllipse(
-                x + numbers[0], y + numbers[1], numbers[2], numbers[2]);
+              x + numbers[0],
+              y + numbers[1],
+              numbers[2],
+              numbers[2]
+            );
           }
           break;
       }
@@ -190,23 +204,29 @@ export class ShapeVisitor extends css.Visitor {
   }
 }
 
-export const toShape = (val: css.Val, x: number, y: number, width: number,
-                        height: number, context: exprs.Context): geom.Shape => {
+export const toShape = (
+  val: css.Val,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  context: exprs.Context
+): geom.Shape => {
   if (val) {
     const visitor = new ShapeVisitor();
     try {
       val.visit(visitor);
       return visitor.getShape(x, y, width, height, context);
     } catch (err) {
-      logging.logger.warn(err, 'toShape:');
+      logging.logger.warn(err, "toShape:");
     }
   }
   return geom.shapeForRect(x, y, x + width, y + height);
 };
 
 export class CountersVisitor extends css.Visitor {
-  counters: {[key: string]: number} = {};
-  name: string|null = null;
+  counters: { [key: string]: number } = {};
+  name: string | null = null;
 
   constructor(public readonly reset: boolean) {
     super();
@@ -238,16 +258,18 @@ export class CountersVisitor extends css.Visitor {
   }
 }
 
-export const toCounters =
-    (val: css.Val, reset: boolean): {[key: string]: number} => {
-      const visitor = new CountersVisitor(reset);
-      try {
-        val.visit(visitor);
-      } catch (err) {
-        logging.logger.warn(err, 'toCounters:');
-      }
-      return visitor.counters;
-    };
+export const toCounters = (
+  val: css.Val,
+  reset: boolean
+): { [key: string]: number } => {
+  const visitor = new CountersVisitor(reset);
+  try {
+    val.visit(visitor);
+  } catch (err) {
+    logging.logger.warn(err, "toCounters:");
+  }
+  return visitor.counters;
+};
 
 export class UrlTransformVisitor extends css.FilterVisitor {
   baseUrl: any;

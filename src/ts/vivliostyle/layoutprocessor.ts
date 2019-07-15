@@ -17,12 +17,12 @@
  * @fileoverview Definitions of LayoutProcessor.
  */
 
-import * as task from '../adapt/task';
-import * as breakposition from './breakposition';
-import {isBlock} from './display';
-import * as layouthelper from './layouthelper';
-import * as plugin from './plugin';
-import {layout, layoutprocessor, vtree, FormattingContextType} from './types';
+import * as task from "../adapt/task";
+import * as breakposition from "./breakposition";
+import { isBlock } from "./display";
+import * as layouthelper from "./layouthelper";
+import * as plugin from "./plugin";
+import { layout, layoutprocessor, vtree, FormattingContextType } from "./types";
 
 /**
  * Processor doing some special layout (e.g. table layout)
@@ -31,15 +31,21 @@ export interface LayoutProcessor {
   /**
    * Do actual layout in the column starting from given NodeContext.
    */
-  layout(nodeContext: vtree.NodeContext, column: layout.Column, leadingEdge: boolean):
-      task.Result<vtree.NodeContext>;
+  layout(
+    nodeContext: vtree.NodeContext,
+    column: layout.Column,
+    leadingEdge: boolean
+  ): task.Result<vtree.NodeContext>;
 
   /**
    * Potential edge breaking position.
    */
   createEdgeBreakPosition(
-      position: vtree.NodeContext, breakOnEdge: string|null, overflows: boolean,
-      columnBlockSize: number): layout.BreakPosition;
+    position: vtree.NodeContext,
+    breakOnEdge: string | null,
+    overflows: boolean,
+    columnBlockSize: number
+  ): layout.BreakPosition;
 
   /**
    * process nodecontext at the start of a non inline element.
@@ -52,18 +58,26 @@ export interface LayoutProcessor {
    * @return return true if you skip the subsequent nodes
    */
   afterNonInlineElementNode(
-      nodeContext: vtree.NodeContext, stopAtOverflow: boolean): boolean;
+    nodeContext: vtree.NodeContext,
+    stopAtOverflow: boolean
+  ): boolean;
 
   /**
    * @return holing true
    */
   finishBreak(
-      column: layout.Column, nodeContext: vtree.NodeContext, forceRemoveSelf: boolean,
-      endOfColumn: boolean): task.Result<boolean>|null;
+    column: layout.Column,
+    nodeContext: vtree.NodeContext,
+    forceRemoveSelf: boolean,
+    endOfColumn: boolean
+  ): task.Result<boolean> | null;
 
   clearOverflownViewNodes(
-      column: layout.Column, parentNodeContext: vtree.NodeContext,
-      nodeContext: vtree.NodeContext, removeSelf: boolean);
+    column: layout.Column,
+    parentNodeContext: vtree.NodeContext,
+    nodeContext: vtree.NodeContext,
+    removeSelf: boolean
+  );
 }
 
 /**
@@ -74,17 +88,18 @@ export class LayoutProcessorResolver {
    * Find LayoutProcessor corresponding to given formatting context.
    */
   find(formattingContext: vtree.FormattingContext): LayoutProcessor {
-    const hooks: plugin.ResolveLayoutProcessorHook[] =
-        plugin.getHooksForName(
-            plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR);
+    const hooks: plugin.ResolveLayoutProcessorHook[] = plugin.getHooksForName(
+      plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR
+    );
     for (let i = 0; i < hooks.length; i++) {
       const processor = hooks[i](formattingContext);
       if (processor) {
         return processor;
       }
     }
-    throw new Error(`No processor found for a formatting context: ${
-        formattingContext.getName()}`);
+    throw new Error(
+      `No processor found for a formatting context: ${formattingContext.getName()}`
+    );
   }
 }
 
@@ -107,18 +122,26 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    */
   createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {
     return new breakposition.EdgeBreakPosition(
-      position.copy(), breakOnEdge, overflows, columnBlockSize);
+      position.copy(),
+      breakOnEdge,
+      overflows,
+      columnBlockSize
+    );
   }
 
   /**
    * @override
    */
-  startNonInlineElementNode(nodeContext) {return false;}
+  startNonInlineElementNode(nodeContext) {
+    return false;
+  }
 
   /**
    * @override
    */
-  afterNonInlineElementNode(nodeContext) {return false;}
+  afterNonInlineElementNode(nodeContext) {
+    return false;
+  }
 
   /**
    * @override
@@ -142,35 +165,46 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    * @override
    */
   finishBreak(
-      column: layout.Column, nodeContext: vtree.NodeContext, forceRemoveSelf: boolean,
-      endOfColumn: boolean): task.Result<boolean> {
-    const removeSelf = forceRemoveSelf ||
-        nodeContext.viewNode != null && nodeContext.viewNode.nodeType == 1 &&
-            !nodeContext.after;
+    column: layout.Column,
+    nodeContext: vtree.NodeContext,
+    forceRemoveSelf: boolean,
+    endOfColumn: boolean
+  ): task.Result<boolean> {
+    const removeSelf =
+      forceRemoveSelf ||
+      (nodeContext.viewNode != null &&
+        nodeContext.viewNode.nodeType == 1 &&
+        !nodeContext.after);
     column.clearOverflownViewNodes(nodeContext, removeSelf);
     if (endOfColumn) {
       column.fixJustificationIfNeeded(nodeContext, true);
       column.layoutContext.processFragmentedBlockEdge(
-          removeSelf ? nodeContext : nodeContext.parent);
+        removeSelf ? nodeContext : nodeContext.parent
+      );
     }
     return task.newResult(true);
   }
 }
 
-export class BlockFormattingContext implements layoutprocessor.BlockFormattingContext {
-  formattingContextType: FormattingContextType = 'Block';
+export class BlockFormattingContext
+  implements layoutprocessor.BlockFormattingContext {
+  formattingContextType: FormattingContextType = "Block";
 
   constructor(private readonly parent: vtree.FormattingContext) {}
 
   /**
    * @override
    */
-  getName() {return 'Block formatting context (BlockFormattingContext)';}
+  getName() {
+    return "Block formatting context (BlockFormattingContext)";
+  }
 
   /**
    * @override
    */
-  isFirstTime(nodeContext, firstTime) {return firstTime;}
+  isFirstTime(nodeContext, firstTime) {
+    return firstTime;
+  }
 
   /**
    * @override
@@ -195,24 +229,31 @@ export function registerLayoutProcessorPlugin() {
       const parent = nodeContext.parent;
       if (!parent && nodeContext.formattingContext) {
         return null;
-      } else if (parent &&
-          nodeContext.formattingContext !== parent.formattingContext) {
+      } else if (
+        parent &&
+        nodeContext.formattingContext !== parent.formattingContext
+      ) {
         return null;
-      } else if (nodeContext.establishesBFC ||
-          !nodeContext.formattingContext &&
-              isBlock(
-                  display, position, floatSide, isRoot)) {
+      } else if (
+        nodeContext.establishesBFC ||
+        (!nodeContext.formattingContext &&
+          isBlock(display, position, floatSide, isRoot))
+      ) {
         return new BlockFormattingContext(
-            parent ? parent.formattingContext : null);
+          parent ? parent.formattingContext : null
+        );
       } else {
         return null;
       }
-    });
+    }
+  );
   plugin.registerHook(
-    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
+    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
+    formattingContext => {
       if (formattingContext instanceof BlockFormattingContext) {
         return blockLayoutProcessor;
       }
       return null;
-    });
+    }
+  );
 }

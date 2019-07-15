@@ -17,17 +17,17 @@
  *
  * @fileoverview Utility functions to work with XML (mostly XHTML) documents.
  */
-import {xmldoc} from '../vivliostyle/types';
-import * as base from './base';
-import * as net from './net';
-import * as task from './task';
+import { xmldoc } from "../vivliostyle/types";
+import * as base from "./base";
+import * as net from "./net";
+import * as task from "./task";
 
 export type XMLDocStore = xmldoc.XMLDocStore;
 
-export const ELEMENT_OFFSET_ATTR = 'data-adapt-eloff';
+export const ELEMENT_OFFSET_ATTR = "data-adapt-eloff";
 
 export class XMLDocHolder implements xmldoc.XMLDocHolder {
-  lang: string|null = null;
+  lang: string | null = null;
   totalOffset: number = -1;
   root: Element;
   body: Element;
@@ -37,61 +37,74 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
   idMap: any;
 
   constructor(
-      public readonly store: XMLDocStore, public readonly url: string,
-      public readonly document: Document) {
+    public readonly store: XMLDocStore,
+    public readonly url: string,
+    public readonly document: Document
+  ) {
     this.root = document.documentElement;
 
     // html element
     let body = null;
     let head = null;
     if (this.root.namespaceURI == base.NS.XHTML) {
-      for (let child: Node = this.root.firstChild; child; child = child.nextSibling) {
+      for (
+        let child: Node = this.root.firstChild;
+        child;
+        child = child.nextSibling
+      ) {
         if (child.nodeType != 1) {
           continue;
         }
-        let elem = (child as Element);
+        let elem = child as Element;
         if (elem.namespaceURI == base.NS.XHTML) {
           switch (elem.localName) {
-            case 'head':
+            case "head":
               head = elem;
               break;
-            case 'body':
+            case "body":
               body = elem;
               break;
           }
         }
       }
-      this.lang = this.root.getAttribute('lang');
+      this.lang = this.root.getAttribute("lang");
     } else if (this.root.namespaceURI == base.NS.FB2) {
       head = this.root;
-      for (let child: Node = this.root.firstChild; child; child = child.nextSibling) {
+      for (
+        let child: Node = this.root.firstChild;
+        child;
+        child = child.nextSibling
+      ) {
         if (child.nodeType != 1) {
           continue;
         }
-        let elem = (child as Element);
+        let elem = child as Element;
         if (elem.namespaceURI == base.NS.FB2) {
-          if (elem.localName == 'body') {
+          if (elem.localName == "body") {
             body = elem;
           }
         }
       }
       const langs = this.doc()
-                        .child('FictionBook')
-                        .child('description')
-                        .child('title-info')
-                        .child('lang')
-                        .textContent();
+        .child("FictionBook")
+        .child("description")
+        .child("title-info")
+        .child("lang")
+        .textContent();
       if (langs.length > 0) {
         this.lang = langs[0];
       }
     } else if (this.root.namespaceURI == base.NS.SSE) {
       // treat <meta> element as "head" of the document
-      for (let elem = this.root.firstElementChild; elem;
-           elem = elem.nextElementSibling) {
+      for (
+        let elem = this.root.firstElementChild;
+        elem;
+        elem = elem.nextElementSibling
+      ) {
         const localName = elem.localName;
-        if (localName === 'meta') {
+        if (localName === "meta") {
           head = elem;
-        } else if (localName === 'body') {
+        } else if (localName === "body") {
           body = elem;
         }
       }
@@ -99,7 +112,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
     this.body = body as Element;
     this.head = head as Element;
     this.last = this.root;
-    this.last.setAttribute(ELEMENT_OFFSET_ATTR, '0');
+    this.last.setAttribute(ELEMENT_OFFSET_ATTR, "0");
   }
 
   doc(): xmldoc.NodeList {
@@ -112,9 +125,9 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       return parseInt(offsetStr, 10);
     }
     let offset = this.lastOffset;
-    let last: Node|null = this.last;
+    let last: Node | null = this.last;
     while (last != element) {
-      let next: Node|null = last.firstChild;
+      let next: Node | null = last.firstChild;
       if (!next) {
         while (true) {
           next = last.nextSibling;
@@ -123,13 +136,13 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
           }
           last = last.parentNode;
           if (last == null) {
-            throw new Error('Internal error');
+            throw new Error("Internal error");
           }
         }
       }
       last = next;
       if (next.nodeType == 1) {
-        const nextElement = (next as Element);
+        const nextElement = next as Element;
         nextElement.setAttribute(ELEMENT_OFFSET_ATTR, offset.toString());
         ++offset;
       } else {
@@ -143,12 +156,12 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
 
   getNodeOffset(srcNode: Node, offsetInNode: number, after: boolean) {
     let extraOffset = 0;
-    let node: Node|null = srcNode;
-    let prev: Node|null = null;
+    let node: Node | null = srcNode;
+    let prev: Node | null = null;
     if (node.nodeType == 1) {
       // after = true is only valid for elements
       if (!after) {
-        return this.getElementOffset((node as Element));
+        return this.getElementOffset(node as Element);
       }
     } else {
       // offsetInNode is only valid for text nodes
@@ -157,7 +170,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       if (!prev) {
         node = node.parentNode;
         extraOffset += 1;
-        return this.getElementOffset((node as Element)) + extraOffset;
+        return this.getElementOffset(node as Element) + extraOffset;
       }
       node = prev;
     }
@@ -178,7 +191,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       node = prev;
     }
     extraOffset += 1;
-    return this.getElementOffset((node as Element)) + extraOffset;
+    return this.getElementOffset(node as Element) + extraOffset;
   }
 
   getTotalOffset(): number {
@@ -210,7 +223,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       if (!children) {
         break;
       }
-      const index = base.binarySearch(children.length, (index) => {
+      const index = base.binarySearch(children.length, index => {
         const child = children[index];
         const childOffset = self.getElementOffset(child);
         return childOffset > offset;
@@ -222,7 +235,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
         if (index < children.length) {
           const elemOffset = self.getElementOffset(children[index]);
           if (elemOffset <= offset) {
-            throw new Error('Consistency check failed!');
+            throw new Error("Consistency check failed!");
           }
         }
       }
@@ -232,9 +245,9 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
     // Now we have element with offset less than desired. Find following
     // (non-element) node with the right offset.
     let nodeOffset = elementOffset + 1;
-    let node: Node|null = element;
-    let next: Node|null = node.firstChild || node.nextSibling;
-    let lastGood: Node|null = null;
+    let node: Node | null = element;
+    let next: Node | null = node.firstChild || node.nextSibling;
+    let lastGood: Node | null = null;
     while (true) {
       if (next) {
         if (next.nodeType == 1) {
@@ -258,11 +271,11 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
   }
 
   private buildIdMap(e: Element): void {
-    const id = e.getAttribute('id');
+    const id = e.getAttribute("id");
     if (id && !this.idMap[id]) {
       this.idMap[id] = e;
     }
-    const xmlid = e.getAttributeNS(base.NS.XML, 'id');
+    const xmlid = e.getAttributeNS(base.NS.XML, "id");
     if (xmlid && !this.idMap[xmlid]) {
       this.idMap[xmlid] = e;
     }
@@ -275,9 +288,9 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
    * Get element by URL in the source document(s). URL must be in either '#id'
    * or 'url#id' form.
    */
-  getElement(url: string): Element|null {
+  getElement(url: string): Element | null {
     const m = url.match(/([^#]*)#(.+)$/);
-    if (!m || m[1] && m[1] != this.url) {
+    if (!m || (m[1] && m[1] != this.url)) {
       return null;
     }
     const id = m[2];
@@ -301,48 +314,50 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
  * @enum {string}
  */
 export enum DOMParserSupportedType {
-  TEXT_HTML = 'text/html',
-  TEXT_XML = 'text/xml',
-  APPLICATION_XML = 'application/xml',
-  APPLICATION_XHTML_XML = 'application/xhtml_xml',
-  IMAGE_SVG_XML = 'image/svg+xml'
+  TEXT_HTML = "text/html",
+  TEXT_XML = "text/xml",
+  APPLICATION_XML = "application/xml",
+  APPLICATION_XHTML_XML = "application/xhtml_xml",
+  IMAGE_SVG_XML = "image/svg+xml"
 }
 
 /**
  * Parses a string with a DOMParser and returns the document.
  * If a parse error occurs, return null.
  */
-export const parseAndReturnNullIfError =
-    (str: string, type: string, opt_parser?: DOMParser): Document|null => {
-      const parser = opt_parser || new DOMParser();
-      let doc;
-      try {
-        doc = parser.parseFromString(str, type as SupportedType);
-      } catch (e) {
-      }
-      if (!doc) {
-        return null;
-      } else {
-        const docElement = doc.documentElement;
-        const errorTagName = 'parsererror';
-        if (docElement.localName === errorTagName) {
+export const parseAndReturnNullIfError = (
+  str: string,
+  type: string,
+  opt_parser?: DOMParser
+): Document | null => {
+  const parser = opt_parser || new DOMParser();
+  let doc;
+  try {
+    doc = parser.parseFromString(str, type as SupportedType);
+  } catch (e) {}
+  if (!doc) {
+    return null;
+  } else {
+    const docElement = doc.documentElement;
+    const errorTagName = "parsererror";
+    if (docElement.localName === errorTagName) {
+      return null;
+    } else {
+      for (let c = docElement.firstChild; c; c = c.nextSibling) {
+        if (c.localName === errorTagName) {
           return null;
-        } else {
-          for (let c = docElement.firstChild; c; c = c.nextSibling) {
-            if (c.localName === errorTagName) {
-              return null;
-            }
-          }
         }
       }
-      return doc;
-    };
+    }
+  }
+  return doc;
+};
 
 /**
  * @returns null if contentType cannot be inferred from HTTP header and file
  *     extension
  */
-export const resolveContentType = (response: net.Response): string|null => {
+export const resolveContentType = (response: net.Response): string | null => {
   const contentType = response.contentType;
   if (contentType) {
     const supportedKeys = Object.keys(DOMParserSupportedType);
@@ -359,25 +374,27 @@ export const resolveContentType = (response: net.Response): string|null => {
   if (match) {
     const extension = match[1];
     switch (extension) {
-      case 'html':
-      case 'htm':
+      case "html":
+      case "htm":
         return DOMParserSupportedType.TEXT_HTML;
-      case 'xhtml':
-      case 'xht':
+      case "xhtml":
+      case "xht":
         return DOMParserSupportedType.APPLICATION_XHTML_XML;
-      case 'svg':
-      case 'svgz':
+      case "svg":
+      case "svgz":
         return DOMParserSupportedType.IMAGE_SVG_XML;
-      case 'opf':
-      case 'xml':
+      case "opf":
+      case "xml":
         return DOMParserSupportedType.APPLICATION_XML;
     }
   }
   return null;
 };
 
-export const parseXMLResource = (response: net.Response, store: XMLDocStore):
-                                    task.Result<XMLDocHolder> => {
+export const parseXMLResource = (
+  response: net.Response,
+  store: XMLDocStore
+): task.Result<XMLDocHolder> => {
   let doc = response.responseXML;
   if (!doc) {
     const parser = new DOMParser();
@@ -385,7 +402,10 @@ export const parseXMLResource = (response: net.Response, store: XMLDocStore):
     if (text) {
       const contentType = resolveContentType(response);
       doc = parseAndReturnNullIfError(
-          text, contentType || DOMParserSupportedType.APPLICATION_XML, parser);
+        text,
+        contentType || DOMParserSupportedType.APPLICATION_XML,
+        parser
+      );
 
       // When contentType cannot be inferred from HTTP header and file
       // extension, we use root element's tag name to infer the contentType. If
@@ -393,19 +413,30 @@ export const parseXMLResource = (response: net.Response, store: XMLDocStore):
       // contentType.
       if (doc && !contentType) {
         const root = doc.documentElement;
-        if (root.localName.toLowerCase() === 'html' && !root.namespaceURI) {
+        if (root.localName.toLowerCase() === "html" && !root.namespaceURI) {
           doc = parseAndReturnNullIfError(
-              text, DOMParserSupportedType.TEXT_HTML, parser);
-        } else if (root.localName.toLowerCase() === 'svg' &&
-            (doc as any).contentType !== DOMParserSupportedType.IMAGE_SVG_XML) {
+            text,
+            DOMParserSupportedType.TEXT_HTML,
+            parser
+          );
+        } else if (
+          root.localName.toLowerCase() === "svg" &&
+          (doc as any).contentType !== DOMParserSupportedType.IMAGE_SVG_XML
+        ) {
           doc = parseAndReturnNullIfError(
-              text, DOMParserSupportedType.IMAGE_SVG_XML, parser);
+            text,
+            DOMParserSupportedType.IMAGE_SVG_XML,
+            parser
+          );
         }
       }
       if (!doc) {
         // Fallback to HTML parsing
         doc = parseAndReturnNullIfError(
-            text, DOMParserSupportedType.TEXT_HTML, parser);
+          text,
+          DOMParserSupportedType.TEXT_HTML,
+          parser
+        );
       }
     }
   }
@@ -413,8 +444,11 @@ export const parseXMLResource = (response: net.Response, store: XMLDocStore):
   return task.newResult(xmldoc);
 };
 
-export const newXMLDocStore = (): XMLDocStore => new net.ResourceStore(
-    parseXMLResource, net.XMLHttpRequestResponseType.DOCUMENT);
+export const newXMLDocStore = (): XMLDocStore =>
+  new net.ResourceStore(
+    parseXMLResource,
+    net.XMLHttpRequestResponseType.DOCUMENT
+  );
 
 export class Predicate implements xmldoc.Predicate {
   constructor(public readonly fn: (p1: Node) => boolean) {}
@@ -426,13 +460,16 @@ export class Predicate implements xmldoc.Predicate {
   withAttribute(name: string, value: string): Predicate {
     const self = this;
     return new Predicate(
-        (node) => self.check(node) && node.nodeType == 1 &&
-            (node as Element).getAttribute(name) == value);
+      node =>
+        self.check(node) &&
+        node.nodeType == 1 &&
+        (node as Element).getAttribute(name) == value
+    );
   }
 
   withChild(name: string, opt_childPredicate?: Predicate): Predicate {
     const self = this;
-    return new Predicate((node) => {
+    return new Predicate(node => {
       if (!self.check(node)) {
         return false;
       }
@@ -446,7 +483,7 @@ export class Predicate implements xmldoc.Predicate {
   }
 }
 
-export const predicate = new Predicate((node) => true);
+export const predicate = new Predicate(node => true);
 
 export class NodeList implements xmldoc.NodeList {
   constructor(public readonly nodes: Node[]) {}
@@ -474,7 +511,7 @@ export class NodeList implements xmldoc.NodeList {
 
   forEachNode(fn: (p1: Node, p2: (p1: Node) => void) => void): NodeList {
     const arr = [];
-    const add = (n) => {
+    const add = n => {
       arr.push(n);
     };
     for (let i = 0; i < this.nodes.length; i++) {
@@ -528,8 +565,8 @@ export class NodeList implements xmldoc.NodeList {
     });
   }
 
-  attribute(name: string): (string|null)[] {
-    return this.forEachNonNull((node) => {
+  attribute(name: string): (string | null)[] {
+    return this.forEachNonNull(node => {
       if (node.nodeType == 1) {
         return (node as Element).getAttribute(name);
       }
@@ -537,7 +574,7 @@ export class NodeList implements xmldoc.NodeList {
     });
   }
 
-  textContent(): (string|null)[] {
-    return this.forEach((node) => node.textContent);
+  textContent(): (string | null)[] {
+    return this.forEach(node => node.textContent);
   }
 }

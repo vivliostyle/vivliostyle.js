@@ -16,67 +16,69 @@
  *
  * @fileoverview Control fragmentation
  */
-import * as css from '../adapt/css';
-import {plugin} from './plugin';
+import * as css from "../adapt/css";
+import { plugin } from "./plugin";
 
 /**
  * Convert old page-break-* properties to break-* properties with appropriate
  * values as specified by CSS Fragmentation module:
  * https://drafts.csswg.org/css-break/#page-break-properties
  */
-export const convertPageBreakAliases =
-    (original: {name: string, value: css.Val, important: boolean}):
-        {name: string, value: css.Val, important: boolean} => {
-          const name = original['name'];
-          const value = original['value'];
-          switch (name) {
-            case 'page-break-before':
-            case 'page-break-after':
-            case 'page-break-inside':
-              return {
-                'name': name.replace(/^page-/, ''),
-                'value': value === css.ident.always ? css.ident.page : value,
-                'important': original['important']
-              };
-            default:
-              return original;
-          }
-        };
+export const convertPageBreakAliases = (original: {
+  name: string;
+  value: css.Val;
+  important: boolean;
+}): { name: string; value: css.Val; important: boolean } => {
+  const name = original["name"];
+  const value = original["value"];
+  switch (name) {
+    case "page-break-before":
+    case "page-break-after":
+    case "page-break-inside":
+      return {
+        name: name.replace(/^page-/, ""),
+        value: value === css.ident.always ? css.ident.page : value,
+        important: original["important"]
+      };
+    default:
+      return original;
+  }
+};
 
 export function registerBreakPlugin() {
-  plugin.registerHook('SIMPLE_PROPERTY', convertPageBreakAliases);
+  plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);
 }
 
-export const forcedBreakValues: {[key: string]: boolean|null} = {
-  'page': true,
-  'left': true,
-  'right': true,
-  'recto': true,
-  'verso': true,
-  'column': true,
-  'region': true
+export const forcedBreakValues: { [key: string]: boolean | null } = {
+  page: true,
+  left: true,
+  right: true,
+  recto: true,
+  verso: true,
+  column: true,
+  region: true
 };
 
 /**
  * Returns if the value is one of the forced break values.
  * @param value The break value to be judged. Treats null as 'auto'.
  */
-export const isForcedBreakValue = (value: string|null): boolean =>
-    !!forcedBreakValues[value];
+export const isForcedBreakValue = (value: string | null): boolean =>
+  !!forcedBreakValues[value];
 
-export const avoidBreakValues: {[key: string]: boolean|null} = {
-  'avoid': true,
-  'avoid-page': true,
-  'avoid-column': true,
-  'avoid-region': true
+export const avoidBreakValues: { [key: string]: boolean | null } = {
+  avoid: true,
+  "avoid-page": true,
+  "avoid-column": true,
+  "avoid-region": true
 };
 
 /**
  * Returns if the value is one of the avoid break values.
  * @param value The break value to be judged. Treats null as 'auto'.
  */
-export const isAvoidBreakValue = (value: string|null): boolean =>
-    !!avoidBreakValues[value];
+export const isAvoidBreakValue = (value: string | null): boolean =>
+  !!avoidBreakValues[value];
 
 /**
  * Resolves the effective break value given two break values at a single break
@@ -94,66 +96,68 @@ export const isAvoidBreakValue = (value: string|null): boolean =>
  * @param second The break value specified on the latter element. null means
  *     'auto' (not specified)
  */
-export const resolveEffectiveBreakValue =
-    (first: string|null, second: string|null): string|null => {
-      if (!first) {
-        return second;
-      } else if (!second) {
-        return first;
-      } else {
-        const firstIsForcedBreakValue = isForcedBreakValue(first);
-        const secondIsForcedBreakValue = isForcedBreakValue(second);
-        if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
-          switch (second) {
-            case 'column':
-
-              // "column" is the weakest value
-              return first;
-            case 'region':
-
-              // "region" is stronger than "column" but weaker than page
-              // values
-              return first === 'column' ? second : first;
-            default:
-
-              // page values are strongest
-              return second;
-          }
-        } else if (secondIsForcedBreakValue) {
-          return second;
-        } else if (firstIsForcedBreakValue) {
+export const resolveEffectiveBreakValue = (
+  first: string | null,
+  second: string | null
+): string | null => {
+  if (!first) {
+    return second;
+  } else if (!second) {
+    return first;
+  } else {
+    const firstIsForcedBreakValue = isForcedBreakValue(first);
+    const secondIsForcedBreakValue = isForcedBreakValue(second);
+    if (firstIsForcedBreakValue && secondIsForcedBreakValue) {
+      switch (second) {
+        case "column":
+          // "column" is the weakest value
           return first;
-        } else if (isAvoidBreakValue(second)) {
+        case "region":
+          // "region" is stronger than "column" but weaker than page
+          // values
+          return first === "column" ? second : first;
+        default:
+          // page values are strongest
           return second;
-        } else if (isAvoidBreakValue(first)) {
-          return first;
-        } else {
-          return second;
-        }
       }
-    };
-
-export const breakValueToStartSideValue = (breakValue: string|null): string => {
-  switch (breakValue) {
-    case 'left':
-    case 'right':
-    case 'recto':
-    case 'verso':
-      return breakValue;
-    default:
-      return 'any';
+    } else if (secondIsForcedBreakValue) {
+      return second;
+    } else if (firstIsForcedBreakValue) {
+      return first;
+    } else if (isAvoidBreakValue(second)) {
+      return second;
+    } else if (isAvoidBreakValue(first)) {
+      return first;
+    } else {
+      return second;
+    }
   }
 };
 
-export const startSideValueToBreakValue =
-    (startSideValue: string): string|null => {
-      switch (startSideValue) {
-        case 'left':
-        case 'right':
-        case 'recto':
-        case 'verso':
-          return startSideValue;
-        default:
-          return null;
-      }
-    };
+export const breakValueToStartSideValue = (
+  breakValue: string | null
+): string => {
+  switch (breakValue) {
+    case "left":
+    case "right":
+    case "recto":
+    case "verso":
+      return breakValue;
+    default:
+      return "any";
+  }
+};
+
+export const startSideValueToBreakValue = (
+  startSideValue: string
+): string | null => {
+  switch (startSideValue) {
+    case "left":
+    case "right":
+    case "recto":
+    case "verso":
+      return startSideValue;
+    default:
+      return null;
+  }
+};

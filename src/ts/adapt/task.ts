@@ -18,8 +18,8 @@
  * @fileoverview Support for asynchronous execution and cooperative
  * multitasking.
  */
-import * as logging from '../vivliostyle/logging';
-import * as base from './base';
+import * as logging from "../vivliostyle/logging";
+import * as base from "./base";
 
 /**
  * External timer. Only needed for testing.
@@ -85,7 +85,7 @@ export interface Result<T> {
   /**
    * If this Result is resolved, return the value that it holds.
    */
-  get(): T|null;
+  get(): T | null;
 }
 
 export let privateCurrentTask: Task | null = null;
@@ -102,7 +102,7 @@ export const currentTask = (): Task | null => privateCurrentTask;
  */
 export function newFrame<T>(name: string): Frame<T> {
   if (!privateCurrentTask) {
-    throw new Error('E_TASK_NO_CONTEXT');
+    throw new Error("E_TASK_NO_CONTEXT");
   }
   if (!privateCurrentTask.name) {
     privateCurrentTask.name = name;
@@ -112,17 +112,19 @@ export function newFrame<T>(name: string): Frame<T> {
   task.top = frame;
   frame.state = FrameState.ACTIVE;
   return frame;
-};
+}
 
 export const newEventSource = (): EventSource => new EventSource();
 
 export const newScheduler = (opt_timer?: Timer): Scheduler =>
-    new Scheduler(opt_timer || new TimerImpl());
+  new Scheduler(opt_timer || new TimerImpl());
 
 /**
  * @template T
  */
-export function newResult<T> (opt_value: T): Result<T> {return new SyncResultImpl<T>(opt_value)};
+export function newResult<T>(opt_value: T): Result<T> {
+  return new SyncResultImpl<T>(opt_value);
+}
 
 /**
  * Creates a new frame and runs code in its context, catching synchronous and
@@ -130,24 +132,28 @@ export function newResult<T> (opt_value: T): Result<T> {return new SyncResultImp
  * the same frame). As usual, onErr is supposed either produce a result or raise
  * an exception.
  */
-export function handle<T> (name: any, code: (p1: Frame<T>) => void,
-     onErr: (p1: Frame<T>, p2: Error) => void): Result<T> {
-      const frame = newFrame<T>(name);
-      frame.handler = onErr;
-      try {
-        code(frame);
-      } catch (err) {
-        // synchronous exception
-        frame.task.raise(err, frame);
-      }
-      return frame.result();
-    };
+export function handle<T>(
+  name: any,
+  code: (p1: Frame<T>) => void,
+  onErr: (p1: Frame<T>, p2: Error) => void
+): Result<T> {
+  const frame = newFrame<T>(name);
+  frame.handler = onErr;
+  try {
+    code(frame);
+  } catch (err) {
+    // synchronous exception
+    frame.task.raise(err, frame);
+  }
+  return frame.result();
+}
 
-export function start<T> (func: () => Result<T>, opt_name?: string): Task {
-  const scheduler = privateCurrentTask ? privateCurrentTask.getScheduler() :
-                                         primaryScheduler || newScheduler();
+export function start<T>(func: () => Result<T>, opt_name?: string): Task {
+  const scheduler = privateCurrentTask
+    ? privateCurrentTask.getScheduler()
+    : primaryScheduler || newScheduler();
   return scheduler.run(func, opt_name);
-};
+}
 
 /**
  * Frame state.
@@ -171,7 +177,9 @@ export class TimerImpl implements Timer {
   /**
    * @override
    */
-  currentTime() {return (new Date()).valueOf();}
+  currentTime() {
+    return new Date().valueOf();
+  }
 
   /**
    * @override
@@ -199,8 +207,8 @@ export class Scheduler {
   slice: number = 25;
   sliceOverTime: number = 0;
   queue: base.PriorityQueue;
-  wakeupTime: number|null = null;
-  timeoutToken: number|null = null;
+  wakeupTime: number | null = null;
+  timeoutToken: number | null = null;
   inTimeSlice: boolean = false;
   order: number = 0;
 
@@ -239,7 +247,7 @@ export class Scheduler {
     if (this.inTimeSlice) {
       return;
     }
-    const nextInQueue = (this.queue.peek() as Continuation<any>);
+    const nextInQueue = this.queue.peek() as Continuation<any>;
     const newTime = nextInQueue.scheduledTime;
     const now = this.timer.currentTime();
     if (this.timeoutToken != null) {
@@ -263,7 +271,7 @@ export class Scheduler {
   }
 
   schedule(continuation: Continuation<any>, opt_delay?: number): void {
-    const c = (continuation as Continuation<any>);
+    const c = continuation as Continuation<any>;
     const now = this.timer.currentTime();
     c.order = this.order++;
     c.scheduledTime = now + (opt_delay || 0);
@@ -281,7 +289,7 @@ export class Scheduler {
       let now = this.timer.currentTime();
       this.sliceOverTime = now + this.slice;
       while (this.queue.length()) {
-        const continuation = (this.queue.peek() as Continuation<any>);
+        const continuation = this.queue.peek() as Continuation<any>;
         if (continuation.scheduledTime > now) {
           break;
         }
@@ -306,8 +314,8 @@ export class Scheduler {
   }
 
   run(func: () => Result<any>, opt_name?: string): Task {
-    const task = new Task(this, opt_name || '');
-    task.top = new Frame<any>(task, null, 'bootstrap');
+    const task = new Task(this, opt_name || "");
+    task.top = new Frame<any>(task, null, "bootstrap");
     task.top.state = FrameState.ACTIVE;
     task.top.then(() => {
       const done = () => {
@@ -321,7 +329,7 @@ export class Scheduler {
         }
       };
       try {
-        func().then((result) => {
+        func().then(result => {
           task.result = result;
           done();
         });
@@ -332,7 +340,7 @@ export class Scheduler {
     });
     const savedTask = privateCurrentTask;
     privateCurrentTask = task;
-    this.schedule(task.top.suspend('bootstrap'));
+    this.schedule(task.top.suspend("bootstrap"));
     privateCurrentTask = savedTask;
     return task;
   }
@@ -355,7 +363,7 @@ export class Continuation<T> implements base.Comparable {
    */
   compare(otherComp: base.Comparable): number {
     // earlier wins
-    const other = (otherComp as Continuation<any>);
+    const other = otherComp as Continuation<any>;
     return other.scheduledTime - this.scheduledTime || other.order - this.order;
   }
 
@@ -422,12 +430,12 @@ export class Task {
    * @param err exception to throw in the task's context.
    */
   interrupt(err: Error): void {
-    this.raise(err || new Error('E_TASK_INTERRUPT'));
+    this.raise(err || new Error("E_TASK_INTERRUPT"));
     if (this !== privateCurrentTask && this.continuation) {
       // blocked on something
       this.continuation.cancel();
       const continuation = new Continuation(this);
-      this.waitTarget = 'interrupt';
+      this.waitTarget = "interrupt";
       this.continuation = continuation;
       this.scheduler.schedule(continuation);
     }
@@ -460,7 +468,7 @@ export class Task {
    * Wait for task to finish (from another task).
    */
   join(): Result<any> {
-    const frame = newFrame<any>('Task.join');
+    const frame = newFrame<any>("Task.join");
     if (!this.running) {
       frame.finish(this.result);
     } else {
@@ -490,7 +498,10 @@ export class Task {
     } else {
       if (this.exception) {
         logging.logger.error(
-            this.exception, 'Unhandled exception in task', this.name);
+          this.exception,
+          "Unhandled exception in task",
+          this.name
+        );
       }
     }
   }
@@ -515,15 +526,15 @@ export class Task {
    * @param err exception
    */
   fillStack(err: Error) {
-    let out = err['frameTrace'];
+    let out = err["frameTrace"];
     if (!out) {
-      out = err['stack'] ? `${err['stack']}\n\t---- async ---\n` : '';
+      out = err["stack"] ? `${err["stack"]}\n\t---- async ---\n` : "";
       for (let f = this.top; f; f = f.parent) {
-        out += '\t';
+        out += "\t";
         out += f.getName();
-        out += '\n';
+        out += "\n";
       }
-      err['frameTrace'] = out;
+      err["frameTrace"] = out;
     }
   }
 }
@@ -551,7 +562,9 @@ export class SyncResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenReturn<T1>(result: T1) {return new SyncResultImpl(result);}
+  thenReturn<T1>(result: T1) {
+    return new SyncResultImpl(result);
+  }
 
   /**
    * @override
@@ -563,7 +576,9 @@ export class SyncResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  isPending() {return false;}
+  isPending() {
+    return false;
+  }
 
   /**
    * @override
@@ -589,15 +604,18 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1>{
+  thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1> {
     if (this.isPending()) {
       // thenAsync is special, do the trick with the context
       const frame = new Frame<T | T1>(
-          this.frame.task, this.frame.parent, 'AsyncResult.thenAsync');
+        this.frame.task,
+        this.frame.parent,
+        "AsyncResult.thenAsync"
+      );
       frame.state = FrameState.ACTIVE;
       this.frame.parent = frame as Frame<T>;
-      this.frame.then((res1) => {
-        callback(res1).then((res2) => {
+      this.frame.then(res1 => {
+        callback(res1).then(res2 => {
           frame.finish(res2);
         });
       });
@@ -623,7 +641,7 @@ export class ResultImpl<T> implements Result<T> {
    */
   thenFinish(frame: Frame<T>) {
     if (this.isPending()) {
-      this.then((res) => {
+      this.then(res => {
         frame.finish(res);
       });
     } else {
@@ -643,7 +661,7 @@ export class ResultImpl<T> implements Result<T> {
    */
   get() {
     if (this.isPending()) {
-      throw new Error('Result is pending');
+      throw new Error("Result is pending");
     }
     return this.frame.res;
   }
@@ -657,8 +675,8 @@ export class ResultImpl<T> implements Result<T> {
 export class Frame<T> {
   res: any = null;
   state: FrameState;
-  callback: ((p1: any) => void)|null = null;
-  handler: ((p1: Frame<any>, p2: Error) => void)|null = null;
+  callback: ((p1: any) => void) | null = null;
+  handler: ((p1: Frame<any>, p2: Error) => void) | null = null;
 
   constructor(public task: Task, public parent: Frame<T>, public name: string) {
     this.state = FrameState.INIT;
@@ -666,10 +684,10 @@ export class Frame<T> {
 
   private checkEnvironment(): void {
     if (!privateCurrentTask) {
-      throw new Error('F_TASK_NO_CONTEXT');
+      throw new Error("F_TASK_NO_CONTEXT");
     }
     if (this !== privateCurrentTask.top) {
-      throw new Error('F_TASK_NOT_TOP_FRAME');
+      throw new Error("F_TASK_NOT_TOP_FRAME");
     }
   }
 
@@ -723,7 +741,7 @@ export class Frame<T> {
     switch (this.state) {
       case FrameState.ACTIVE:
         if (this.callback) {
-          throw new Error('F_TASK_FRAME_ALREADY_HAS_CALLBACK');
+          throw new Error("F_TASK_FRAME_ALREADY_HAS_CALLBACK");
         } else {
           this.callback = callback;
         }
@@ -740,7 +758,7 @@ export class Frame<T> {
         }
         break;
       case FrameState.DEAD:
-        throw new Error('F_TASK_DEAD_FRAME');
+        throw new Error("F_TASK_DEAD_FRAME");
       default:
         throw new Error(`F_TASK_UNEXPECTED_FRAME_STATE ${this.state}`);
     }
@@ -751,10 +769,10 @@ export class Frame<T> {
    * @return holds true
    */
   timeSlice(): Result<boolean> {
-    const frame = newFrame<boolean>('Frame.timeSlice');
+    const frame = newFrame<boolean>("Frame.timeSlice");
     const scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
-      logging.logger.debug('-- time slice --');
+      logging.logger.debug("-- time slice --");
       frame.suspend().schedule(true);
     } else {
       frame.finish(true);
@@ -768,7 +786,7 @@ export class Frame<T> {
    * @return holds true
    */
   sleep(delay: number): Result<boolean> {
-    const frame = newFrame<boolean>('Frame.sleep');
+    const frame = newFrame<boolean>("Frame.sleep");
     frame.suspend().schedule(true, delay);
     return frame.result();
   }
@@ -779,8 +797,8 @@ export class Frame<T> {
    * @return holds true.
    */
   loop(func: () => Result<boolean>): Result<boolean> {
-    const frame = newFrame<boolean>('Frame.loop');
-    const step = (more) => {
+    const frame = newFrame<boolean>("Frame.loop");
+    const step = more => {
       try {
         while (more) {
           const result = func();
@@ -788,7 +806,7 @@ export class Frame<T> {
             result.then(step);
             return;
           } else {
-            result.then((m) => {
+            result.then(m => {
               more = m;
             });
           }
@@ -809,12 +827,12 @@ export class Frame<T> {
   loopWithFrame(func: (p1: LoopBodyFrame) => void): Result<boolean> {
     const task = privateCurrentTask;
     if (!task) {
-      throw new Error('E_TASK_NO_CONTEXT');
+      throw new Error("E_TASK_NO_CONTEXT");
     }
     return this.loop(() => {
       let result;
       do {
-        const frame = new LoopBodyFrame((task as Task), task.top);
+        const frame = new LoopBodyFrame(task as Task, task.top);
         task.top = frame;
         frame.state = FrameState.ACTIVE;
         func(frame);
@@ -827,7 +845,7 @@ export class Frame<T> {
   suspend(opt_waitTarget?: any): Continuation<T> {
     this.checkEnvironment();
     if (this.task.continuation) {
-      throw new Error('E_TASK_ALREADY_SUSPENDED');
+      throw new Error("E_TASK_ALREADY_SUSPENDED");
     }
     const continuation: Continuation<T> = new Continuation(this.task);
     this.task.continuation = continuation;
@@ -839,7 +857,7 @@ export class Frame<T> {
 
 export class LoopBodyFrame extends Frame<boolean> {
   constructor(task: Task, parent: Frame<boolean>) {
-    super(task, parent, 'loop');
+    super(task, parent, "loop");
   }
 
   continueLoop(): void {
@@ -863,9 +881,11 @@ export class EventItem {
  */
 export class EventSource {
   continuation: Continuation<boolean> = null;
-  listeners:
-      {target: base.EventTarget, type: string, listener: base.EventListener}[] =
-          [];
+  listeners: {
+    target: base.EventTarget;
+    type: string;
+    listener: base.EventListener;
+  }[] = [];
   head: EventItem;
   tail: EventItem;
 
@@ -877,10 +897,13 @@ export class EventSource {
   /**
    * Attaches as an event listener to an EventTarget.
    */
-  attach(target: base.EventTarget, type: string, opt_preventDefault?: boolean):
-      void {
+  attach(
+    target: base.EventTarget,
+    type: string,
+    opt_preventDefault?: boolean
+  ): void {
     const self = this;
-    const listener = (event) => {
+    const listener = event => {
       if (opt_preventDefault) {
         event.preventDefault();
       }
@@ -897,7 +920,7 @@ export class EventSource {
       }
     };
     target.addEventListener(type, listener, false);
-    this.listeners.push({target, type, listener});
+    this.listeners.push({ target, type, listener });
   }
 
   detach(target: base.EventTarget, type: string): void {
@@ -912,14 +935,14 @@ export class EventSource {
       }
       i++;
     }
-    throw new Error('E_TASK_EVENT_SOURCE_NOT_ATTACHED');
+    throw new Error("E_TASK_EVENT_SOURCE_NOT_ATTACHED");
   }
 
   /**
    * Read next dispatched event, blocking the current task if needed.
    */
   nextEvent(): Result<base.Event> {
-    const frame: Frame<base.Event> = newFrame('EventSource.nextEvent');
+    const frame: Frame<base.Event> = newFrame("EventSource.nextEvent");
     const self = this;
     const readEvent = () => {
       if (self.head.event) {
@@ -931,10 +954,11 @@ export class EventSource {
         }
         frame.finish(event);
       } else if (self.continuation) {
-        throw new Error('E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING');
+        throw new Error("E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING");
       } else {
-        const frameInternal: Frame<boolean> =
-            newFrame('EventSource.nextEventInternal');
+        const frameInternal: Frame<boolean> = newFrame(
+          "EventSource.nextEventInternal"
+        );
         self.continuation = frameInternal.suspend(self);
         frameInternal.result().then(readEvent);
       }

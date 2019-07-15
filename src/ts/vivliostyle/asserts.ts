@@ -20,7 +20,7 @@
 export const assert = (cond: any): void => {
   if (DEBUG) {
     if (!cond) {
-      throw new Error('Assertion failed');
+      throw new Error("Assertion failed");
     }
   }
 };

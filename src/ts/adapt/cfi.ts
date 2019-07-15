@@ -17,19 +17,19 @@
  *
  * @fileoverview Support for EPUB Canonical Fragment Identifiers.
  */
-import * as base from './base';
+import * as base from "./base";
 
 export type Position = {
-  node: Node,
-  offset: number,
-  after: boolean,
-  sideBias: string|null,
-  ref: Fragment
+  node: Node;
+  offset: number;
+  after: boolean;
+  sideBias: string | null;
+  ref: Fragment;
 };
 
-export const getId = (node: Node): string|null => {
+export const getId = (node: Node): string | null => {
   if (node.nodeType == 1) {
-    const idtxt = (node as Element).getAttribute('id');
+    const idtxt = (node as Element).getAttribute("id");
     if (idtxt && idtxt.match(/^[-a-zA-Z_0-9.\u007F-\uFFFF]+$/)) {
       return idtxt;
     }
@@ -40,7 +40,7 @@ export const getId = (node: Node): string|null => {
 export const escapeChar = (ch: string): string => `^${ch}`;
 
 export const escape = (str: string): string =>
-    str.replace(/[\[\]\(\),=;^]/g, escapeChar);
+  str.replace(/[\[\]\(\),=;^]/g, escapeChar);
 
 export const unescapeChar = (str: string): string => str.substr(1);
 
@@ -51,7 +51,7 @@ export const unescape = (str: string): string => {
   return str.replace(/\^[\[\]\(\),=;^]/g, unescapeChar);
 };
 
-export const parseExtVal = (extstr: string): string|string[] => {
+export const parseExtVal = (extstr: string): string | string[] => {
   const result = [];
   do {
     const r = extstr.match(/^(\^,|[^,])*/);
@@ -65,7 +65,9 @@ export const parseExtVal = (extstr: string): string|string[] => {
   return result;
 };
 
-export const parseExt = (extstr: string): {[key: string]: string|string[]} => {
+export const parseExt = (
+  extstr: string
+): { [key: string]: string | string[] } => {
   const ext = {};
   while (extstr) {
     const r = extstr.match(/^;([^;=]+)=(([^;]|\^;)*)/);
@@ -86,36 +88,40 @@ export interface Step {
 
 export class RefStep implements Step {
   appendTo(sb: base.StringBuffer) {
-    sb.append('!');
+    sb.append("!");
   }
 
   /**
    * @override
    */
-  applyTo(pos) {return false;}
+  applyTo(pos) {
+    return false;
+  }
 }
 
 export class ChildStep implements Step {
   constructor(
-      public readonly index: number, public readonly id: string|null,
-      public readonly sideBias: string|null) {}
+    public readonly index: number,
+    public readonly id: string | null,
+    public readonly sideBias: string | null
+  ) {}
 
   /**
    * @override
    */
   appendTo(sb) {
-    sb.append('/');
+    sb.append("/");
     sb.append(this.index.toString());
     if (this.id || this.sideBias) {
-      sb.append('[');
+      sb.append("[");
       if (this.id) {
         sb.append(this.id);
       }
       if (this.sideBias) {
-        sb.append(';s=');
+        sb.append(";s=");
         sb.append(this.sideBias);
       }
-      sb.append(']');
+      sb.append("]");
     }
   }
 
@@ -124,9 +130,9 @@ export class ChildStep implements Step {
    */
   applyTo(pos) {
     if (pos.node.nodeType != 1) {
-      throw new Error('E_CFI_NOT_ELEMENT');
+      throw new Error("E_CFI_NOT_ELEMENT");
     }
-    const elem = (pos.node as Element);
+    const elem = pos.node as Element;
     const childElements = elem.children;
     const childElementCount = childElements.length;
     let child;
@@ -147,7 +153,7 @@ export class ChildStep implements Step {
       pos.node = child;
     }
     if (this.id && (pos.after || this.id != getId(pos.node))) {
-      throw new Error('E_CFI_ID_MISMATCH');
+      throw new Error("E_CFI_ID_MISMATCH");
     }
     pos.sideBias = this.sideBias;
     return true;
@@ -156,9 +162,11 @@ export class ChildStep implements Step {
 
 export class OffsetStep implements Step {
   constructor(
-      public readonly offset: number, public readonly textBefore: string|null,
-      public readonly textAfter: string|null,
-      public readonly sideBias: string|null) {}
+    public readonly offset: number,
+    public readonly textBefore: string | null,
+    public readonly textAfter: string | null,
+    public readonly sideBias: string | null
+  ) {}
 
   applyTo(pos) {
     if (this.offset > 0 && !pos.after) {
@@ -198,24 +206,24 @@ export class OffsetStep implements Step {
    * @override
    */
   appendTo(sb) {
-    sb.append(':');
+    sb.append(":");
     sb.append(this.offset.toString());
     if (this.textBefore || this.textAfter || this.sideBias) {
-      sb.append('[');
+      sb.append("[");
       if (this.textBefore || this.textAfter) {
         if (this.textBefore) {
           sb.append(escape(this.textBefore));
         }
-        sb.append(',');
+        sb.append(",");
         if (this.textAfter) {
           sb.append(escape(this.textAfter));
         }
       }
       if (this.sideBias) {
-        sb.append(';s=');
+        sb.append(";s=");
         sb.append(this.sideBias);
       }
-      sb.append(']');
+      sb.append("]");
     }
   }
 }
@@ -226,7 +234,7 @@ export class Fragment {
   fromString(fragstr: string): void {
     let r = fragstr.match(/^#?epubcfi\((.*)\)$/);
     if (!r) {
-      throw new Error('E_CFI_NOT_CFI');
+      throw new Error("E_CFI_NOT_CFI");
     }
     const str = r[1];
     let i = 0;
@@ -234,25 +242,31 @@ export class Fragment {
     while (true) {
       let ext;
       switch (str.charAt(i)) {
-        case '/':
+        case "/":
           i++;
-          r = str.substr(i).match(
-              /^(0|[1-9][0-9]*)(\[([-a-zA-Z_0-9.\u007F-\uFFFF]+)(;([^\]]|\^\])*)?\])?/);
+          r = str
+            .substr(i)
+            .match(
+              /^(0|[1-9][0-9]*)(\[([-a-zA-Z_0-9.\u007F-\uFFFF]+)(;([^\]]|\^\])*)?\])?/
+            );
           if (!r) {
-            throw new Error('E_CFI_NUMBER_EXPECTED');
+            throw new Error("E_CFI_NUMBER_EXPECTED");
           }
           i += r[0].length;
           const index = parseInt(r[1], 10);
           const id = r[3];
           ext = parseExt(r[4]);
-          steps.push(new ChildStep(index, id, base.asString(ext['s'])));
+          steps.push(new ChildStep(index, id, base.asString(ext["s"])));
           break;
-        case ':':
+        case ":":
           i++;
-          r = str.substr(i).match(
-              /^(0|[1-9][0-9]*)(\[((([^\];,]|\^[\];,])*)(,(([^\];,]|\^[\];,])*))?)(;([^]]|\^\])*)?\])?/);
+          r = str
+            .substr(i)
+            .match(
+              /^(0|[1-9][0-9]*)(\[((([^\];,]|\^[\];,])*)(,(([^\];,]|\^[\];,])*))?)(;([^]]|\^\])*)?\])?/
+            );
           if (!r) {
-            throw new Error('E_CFI_NUMBER_EXPECTED');
+            throw new Error("E_CFI_NUMBER_EXPECTED");
           }
           i += r[0].length;
           const offset = parseInt(r[1], 10);
@@ -265,23 +279,29 @@ export class Fragment {
             textAfter = unescape(textAfter);
           }
           ext = parseExt(r[10]);
-          steps.push(new OffsetStep(
-              offset, textBefore, textAfter, base.asString(ext['s'])));
+          steps.push(
+            new OffsetStep(
+              offset,
+              textBefore,
+              textAfter,
+              base.asString(ext["s"])
+            )
+          );
           break;
-        case '!':
+        case "!":
           i++;
           steps.push(new RefStep());
           break;
-        case '~':
-        case '@':
+        case "~":
+        case "@":
 
         // Time/space terminus; only useful for highlights/selections which are
         // not yet supported, skip for now. fall through
-        case '':
+        case "":
           this.steps = steps;
           return;
         default:
-          throw new Error('E_CFI_PARSE_ERROR');
+          throw new Error("E_CFI_PARSE_ERROR");
       }
     }
   }
@@ -307,22 +327,30 @@ export class Fragment {
   }
 
   trim(text: string, after: boolean): string {
-      return text.replace(/\s+/g, ' ')
-      .match(after? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/:
-                 /[ -\uD7FF\uE000-\uFFFF]{0,8}$/)[0]
-      .replace(/^\s/, '')
-      .replace(/\s$/, '')
+    return text
+      .replace(/\s+/g, " ")
+      .match(
+        after
+          ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/
+          : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
+      )[0]
+      .replace(/^\s/, "")
+      .replace(/\s$/, "");
   }
 
   /**
    * Initialize from a node and an offset.
    */
   prependPathFromNode(
-      node: Node, offset: number, after: boolean, sideBias: string|null) {
+    node: Node,
+    offset: number,
+    after: boolean,
+    sideBias: string | null
+  ) {
     const steps = [];
     let parent = node.parentNode;
-    let textBefore = '';
-    let textAfter = '';
+    let textBefore = "";
+    let textAfter = "";
     while (node) {
       switch (node.nodeType) {
         case 3:
@@ -348,7 +376,6 @@ export class Fragment {
           node = node.previousSibling;
           continue;
         case 8:
-
           // Comment Node
           node = node.previousSibling;
           continue;
@@ -390,14 +417,14 @@ export class Fragment {
 
   toString() {
     if (!this.steps) {
-      return '';
+      return "";
     }
     const sb = new base.StringBuffer();
-    sb.append('epubcfi(');
+    sb.append("epubcfi(");
     for (let i = 0; i < this.steps.length; i++) {
       this.steps[i].appendTo(sb);
     }
-    sb.append(')');
+    sb.append(")");
     return sb.toString();
   }
 }

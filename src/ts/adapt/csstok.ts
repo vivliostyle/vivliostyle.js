@@ -29,23 +29,28 @@ export const escapeParseSingle = (str: string): string => {
   }
   const code = parseInt(str, 16);
   if (isNaN(code)) {
-    return '';
+    return "";
   }
   if (code <= 65535) {
     return String.fromCharCode(code);
   }
   if (code <= 1114111) {
     // non-BMP characters: convert to a surrogate pair
-    return String.fromCharCode(55296 | code >> 10 & 1023, 56320 | code & 1023);
+    return String.fromCharCode(
+      55296 | ((code >> 10) & 1023),
+      56320 | (code & 1023)
+    );
   }
 
   // not a valid Unicode value
-  return '\ufffd';
+  return "\ufffd";
 };
 
-export const escapeParse = (str: string): string => str.replace(
+export const escapeParse = (str: string): string =>
+  str.replace(
     /\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
-    escapeParseSingle);
+    escapeParseSingle
+  );
 
 /**
  * @enum {number}
@@ -109,7 +114,7 @@ export class Token {
   type: TokenType;
   precededBySpace: boolean = false;
   num: number = 0;
-  text: string = '';
+  text: string = "";
   position: number = 0;
 
   constructor() {
@@ -223,53 +228,149 @@ export const makeActions = (def: Action, spec: Action[]): Action[] => {
  * Start of the token.
  */
 export const actionsNormal: Action[] = [
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x00-0x07
-  Action.INVALID, Action.SPACE, Action.SPACE, Action.INVALID, Action.SPACE,
-  Action.SPACE, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.SPACE,
+  Action.SPACE,
+  Action.INVALID,
+  Action.SPACE,
+  Action.SPACE,
+  Action.INVALID,
+  Action.INVALID,
   // 0x08-0x0F
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x10-0x17
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x18-0x1F
-  Action.SPACE, Action.BANG, Action.STR2, Action.HASH, Action.DOLLAR,
-  Action.PERCENT, Action.AMP, Action.STR1,
+  Action.SPACE,
+  Action.BANG,
+  Action.STR2,
+  Action.HASH,
+  Action.DOLLAR,
+  Action.PERCENT,
+  Action.AMP,
+  Action.STR1,
   // 0x20-0x27
-  Action.O_PAR, Action.C_PAR, Action.STAR, Action.PLUS, Action.COMMA,
-  Action.MINUS, Action.DOT, Action.SLASH,
+  Action.O_PAR,
+  Action.C_PAR,
+  Action.STAR,
+  Action.PLUS,
+  Action.COMMA,
+  Action.MINUS,
+  Action.DOT,
+  Action.SLASH,
   // 0x28-0x2F
-  Action.INT, Action.INT, Action.INT, Action.INT, Action.INT, Action.INT,
-  Action.INT, Action.INT,
+  Action.INT,
+  Action.INT,
+  Action.INT,
+  Action.INT,
+  Action.INT,
+  Action.INT,
+  Action.INT,
+  Action.INT,
   // 0x30-0x37
-  Action.INT, Action.INT, Action.COLON, Action.SEMICOL, Action.LT, Action.EQ,
-  Action.GT, Action.QMARK,
+  Action.INT,
+  Action.INT,
+  Action.COLON,
+  Action.SEMICOL,
+  Action.LT,
+  Action.EQ,
+  Action.GT,
+  Action.QMARK,
   // 0x38-0x3F
-  Action.AT, Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT,
-  Action.IDENT, Action.IDENT, Action.IDENT,
+  Action.AT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
   // 0x40-0x47
-  Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT,
-  Action.IDENT, Action.IDENT, Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
   // 0x48-0x4F
-  Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT,
-  Action.IDENT, Action.IDENT, Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
   // 0x50-0x57
-  Action.IDENT, Action.IDENT, Action.IDENT, Action.O_BRK, Action.BSLASH,
-  Action.C_BRK, Action.HAT, Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.O_BRK,
+  Action.BSLASH,
+  Action.C_BRK,
+  Action.HAT,
+  Action.IDENT,
   // 0x58-0x5F
-  Action.INVALID, Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT,
-  Action.IDENT, Action.IDENT, Action.IDENT,
+  Action.INVALID,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
   // 0x60-0x67
-  Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT,
-  Action.IDENT, Action.IDENT, Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
   // 0x68-0x6F
-  Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT, Action.IDENT,
-  Action.IDENT, Action.IDENT, Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
   // 0x70-0x77
-  Action.IDENT, Action.IDENT, Action.IDENT, Action.O_BRC, Action.BAR,
-  Action.C_BRC, Action.TILDE, Action.INVALID
+  Action.IDENT,
+  Action.IDENT,
+  Action.IDENT,
+  Action.O_BRC,
+  Action.BAR,
+  Action.C_BRC,
+  Action.TILDE,
+  Action.INVALID
 ];
 
 // 0x78-0x7F
@@ -279,53 +380,149 @@ actionsNormal[NaN] = Action.EOF;
  * Inside identifier.
  */
 export const actionsIdent: Action[] = [
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x00-0x07
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x08-0x0F
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x10-0x17
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x18-0x1F
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x20-0x27
-  Action.FUNC, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.CONT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.FUNC,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.CONT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x28-0x2F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x30-0x37
-  Action.CONT, Action.CONT, Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
   // 0x38-0x3F
-  Action.ENDIDNT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT, Action.CONT,
+  Action.ENDIDNT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x40-0x47
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x48-0x4F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x50-0x57
-  Action.CONT, Action.CONT, Action.CONT, Action.ENDIDNT, Action.IDNTESC,
-  Action.ENDIDNT, Action.ENDIDNT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDIDNT,
+  Action.IDNTESC,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.CONT,
   // 0x58-0x5F
-  Action.ENDIDNT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT, Action.CONT,
+  Action.ENDIDNT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x60-0x67
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x68-0x6F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x70-0x77
-  Action.CONT, Action.CONT, Action.CONT, Action.ENDIDNT, Action.ENDIDNT,
-  Action.ENDIDNT, Action.ENDIDNT, Action.ENDIDNT
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT,
+  Action.ENDIDNT
 ];
 
 // 0x78-0x7F
@@ -335,53 +532,149 @@ actionsIdent[NaN] = Action.ENDIDNT;
  * After dot (either .class or .123)
  */
 export const actionsNumOrClass: Action[] = [
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x00-0x07
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x08-0x0F
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x10-0x17
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x18-0x1F
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x20-0x27
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.TOCLASS, Action.TONUM, Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.TOCLASS,
+  Action.TONUM,
+  Action.INVALID,
   // 0x28-0x2F
-  Action.TONUM, Action.TONUM, Action.TONUM, Action.TONUM, Action.TONUM,
-  Action.TONUM, Action.TONUM, Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
+  Action.TONUM,
   // 0x30-0x37
-  Action.TONUM, Action.TONUM, Action.INVALID, Action.INVALID, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID,
+  Action.TONUM,
+  Action.TONUM,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
   // 0x38-0x3F
-  Action.INVALID, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
+  Action.INVALID,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
   // 0x40-0x47
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
   // 0x48-0x4F
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
   // 0x50-0x57
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.INVALID, Action.TOIDES,
-  Action.INVALID, Action.INVALID, Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.INVALID,
+  Action.TOIDES,
+  Action.INVALID,
+  Action.INVALID,
+  Action.TOCLASS,
   // 0x58-0x5F
-  Action.INVALID, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
+  Action.INVALID,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
   // 0x60-0x67
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
   // 0x68-0x6F
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
   // 0x70-0x77
-  Action.TOCLASS, Action.TOCLASS, Action.TOCLASS, Action.INVALID,
-  Action.INVALID, Action.INVALID, Action.INVALID, Action.INVALID
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID
 ];
 
 // 0x78-0x7F
@@ -391,53 +684,149 @@ actionsIdent[NaN] = Action.ENDIDNT;
  * after '-'
  */
 export const actionsMinus: Action[] = [
-  Action.END, Action.END, Action.END, Action.END, Action.END, Action.END,
-  Action.END, Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
   // 0x00-0x07
-  Action.END, Action.END, Action.END, Action.END, Action.END, Action.END,
-  Action.END, Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
   // 0x08-0x0F
-  Action.END, Action.END, Action.END, Action.END, Action.END, Action.END,
-  Action.END, Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
   // 0x10-0x17
-  Action.END, Action.END, Action.END, Action.END, Action.END, Action.END,
-  Action.END, Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
   // 0x18-0x1F
-  Action.END, Action.END, Action.END, Action.END, Action.END, Action.END,
-  Action.END, Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
   // 0x20-0x27
-  Action.END, Action.END, Action.END, Action.END, Action.END, Action.MINMIN,
-  Action.TONUM, Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.MINMIN,
+  Action.TONUM,
+  Action.END,
   // 0x28-0x2F
-  Action.TOINT, Action.TOINT, Action.TOINT, Action.TOINT, Action.TOINT,
-  Action.TOINT, Action.TOINT, Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
+  Action.TOINT,
   // 0x30-0x37
-  Action.TOINT, Action.TOINT, Action.END, Action.END, Action.END, Action.END,
-  Action.END, Action.END,
+  Action.TOINT,
+  Action.TOINT,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
   // 0x38-0x3F
-  Action.END, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
+  Action.END,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
   // 0x40-0x47
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
   // 0x48-0x4F
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
   // 0x50-0x57
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.END, Action.TOIDES,
-  Action.END, Action.END, Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.END,
+  Action.TOIDES,
+  Action.END,
+  Action.END,
+  Action.TOIDENT,
   // 0x58-0x5F
-  Action.END, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
+  Action.END,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
   // 0x60-0x67
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
   // 0x68-0x6F
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
   // 0x70-0x77
-  Action.TOIDENT, Action.TOIDENT, Action.TOIDENT, Action.END, Action.END,
-  Action.END, Action.END, Action.END
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END,
+  Action.END
 ];
 
 // 0x78-0x7F
@@ -447,53 +836,149 @@ actionsMinus[NaN] = Action.END;
  * Inside identifier with escape sequence
  */
 export const actionsIdentEsc: Action[] = [
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x00-0x07
-  Action.ENDIDES, Action.CHKPOSS, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.ENDIDES,
+  Action.CHKPOSS,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x08-0x0F
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x10-0x17
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x18-0x1F
-  Action.CHKPOSS, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.CHKPOSS,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x20-0x27
-  Action.FUNCES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.FUNCES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x28-0x2F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x30-0x37
-  Action.CONT, Action.CONT, Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
   // 0x38-0x3F
-  Action.ENDIDES, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT, Action.CONT,
+  Action.ENDIDES,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x40-0x47
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x48-0x4F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x50-0x57
-  Action.CONT, Action.CONT, Action.CONT, Action.ENDIDES, Action.IDNTESC,
-  Action.ENDIDES, Action.ENDIDES, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDIDES,
+  Action.IDNTESC,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.CONT,
   // 0x58-0x5F
-  Action.ENDIDES, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT, Action.CONT,
+  Action.ENDIDES,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x60-0x67
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x68-0x6F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x70-0x77
-  Action.CONT, Action.CONT, Action.CONT, Action.ENDIDES, Action.ENDIDES,
-  Action.ENDIDES, Action.ENDIDES, Action.ENDIDES
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES,
+  Action.ENDIDES
 ];
 
 // 0x78-0x7F
@@ -503,53 +988,149 @@ actionsIdentEsc[NaN] = Action.ENDIDES;
  * Inside integer
  */
 export const actionsInt: Action[] = [
-  Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
   // 0x00-0x07
-  Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
   // 0x08-0x0F
-  Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
   // 0x10-0x17
-  Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
   // 0x18-0x1F
-  Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.PCUNIT, Action.ENDINT, Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.PCUNIT,
+  Action.ENDINT,
+  Action.ENDINT,
   // 0x20-0x27
-  Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.NUMBER, Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.NUMBER,
+  Action.ENDINT,
   // 0x28-0x2F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x30-0x37
-  Action.CONT, Action.CONT, Action.ENDINT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.ENDINT,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
   // 0x38-0x3F
-  Action.ENDINT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT, Action.UNIT,
+  Action.ENDINT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x40-0x47
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x48-0x4F
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x50-0x57
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.UNIT,
   // 0x58-0x5F
-  Action.ENDINT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT, Action.UNIT,
+  Action.ENDINT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x60-0x67
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x68-0x6F
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x70-0x77
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.ENDINT, Action.ENDINT,
-  Action.ENDINT, Action.ENDINT, Action.ENDINT
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT
 ];
 
 // 0x78-0x7F
@@ -559,53 +1140,149 @@ actionsInt[NaN] = Action.ENDINT;
  * inside real, after dot
  */
 export const actionsNumber: Action[] = [
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x00-0x07
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x08-0x0F
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x10-0x17
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x18-0x1F
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.PCUNIT, Action.ENDNUM, Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.PCUNIT,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x20-0x27
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x28-0x2F
-  Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT, Action.CONT,
-  Action.CONT, Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
   // 0x30-0x37
-  Action.CONT, Action.CONT, Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM,
+  Action.CONT,
+  Action.CONT,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
   // 0x38-0x3F
-  Action.ENDNUM, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT, Action.UNIT,
+  Action.ENDNUM,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x40-0x47
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x48-0x4F
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x50-0x57
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.UNIT,
   // 0x58-0x5F
-  Action.ENDNUM, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT, Action.UNIT,
+  Action.ENDNUM,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x60-0x67
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x68-0x6F
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT, Action.UNIT,
-  Action.UNIT, Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
   // 0x70-0x77
-  Action.UNIT, Action.UNIT, Action.UNIT, Action.ENDNUM, Action.ENDNUM,
-  Action.ENDNUM, Action.ENDNUM, Action.ENDNUM
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM
 ];
 
 // 0x78-0x7F
@@ -626,7 +1303,8 @@ export const actionsColon: Action[] = makeActions(Action.END, [
 export const actionsBar: Action[] = makeActions(Action.END, [
   61,
   /*=*/
-  Action.EQTAIL, 124,
+  Action.EQTAIL,
+  124,
   /*|*/
   Action.BAR_BAR
 ]);
@@ -637,14 +1315,20 @@ export const actionsAmp: Action[] = makeActions(Action.END, [
   Action.AMP_AMP
 ]);
 
-export const actionsSlash: Action[] =
-    makeActions(Action.END, [42, Action.COMMENT]);
+export const actionsSlash: Action[] = makeActions(Action.END, [
+  42,
+  Action.COMMENT
+]);
 
-export const actionsComment: Action[] =
-    makeActions(Action.CONT, [42, Action.COMMST]);
+export const actionsComment: Action[] = makeActions(Action.CONT, [
+  42,
+  Action.COMMST
+]);
 
 export const actionsCommentStar: Action[] = makeActions(Action.COMMENT, [
-  42, Action.COMMST, 47,
+  42,
+  Action.COMMST,
+  47,
   /* / */
   Action.ENDNOTK
 ]);
@@ -658,7 +1342,8 @@ export const actionsMinusMinus: Action[] = makeActions(Action.KILL1, [
 export const actionsLt: Action[] = makeActions(Action.END, [
   61,
   /*=*/
-  Action.EQTAIL, 33,
+  Action.EQTAIL,
+  33,
   /*!*/
   Action.LT_BG
 ]);
@@ -678,11 +1363,14 @@ export const actionsLtBangMinus: Action[] = makeActions(Action.KILL2, [
 export const actionsIdentEscChr: Action[] = makeActions(Action.IDESCH, [
   9,
   /*tab*/
-  Action.INVALID, 10,
+  Action.INVALID,
+  10,
   /*LF*/
-  Action.INVALID, 13,
+  Action.INVALID,
+  13,
   /*CR*/
-  Action.INVALID, 32,
+  Action.INVALID,
+  32,
   /*sp*/
   Action.INVALID
 ]);
@@ -690,11 +1378,14 @@ export const actionsIdentEscChr: Action[] = makeActions(Action.IDESCH, [
 export const actionsStr1: Action[] = makeActions(Action.CONT, [
   39,
   /*'*/
-  Action.ENDSTR, 10,
+  Action.ENDSTR,
+  10,
   /*LF*/
-  Action.INVALID, 13,
+  Action.INVALID,
+  13,
   /*CR*/
-  Action.INVALID, 92,
+  Action.INVALID,
+  92,
   /*\*/
   Action.STR1ESC
 ]);
@@ -702,11 +1393,14 @@ export const actionsStr1: Action[] = makeActions(Action.CONT, [
 export const actionsStr2: Action[] = makeActions(Action.CONT, [
   34,
   /*"*/
-  Action.ENDSTR, 10,
+  Action.ENDSTR,
+  10,
   /*LF*/
-  Action.INVALID, 13,
+  Action.INVALID,
+  13,
   /*CR*/
-  Action.INVALID, 92,
+  Action.INVALID,
+  92,
   /*\*/
   Action.STR2ESC
 ]);
@@ -714,11 +1408,14 @@ export const actionsStr2: Action[] = makeActions(Action.CONT, [
 export const actionsStr1Esc: Action[] = makeActions(Action.CONT, [
   39,
   /*'*/
-  Action.ENDESTR, 10,
+  Action.ENDESTR,
+  10,
   /*LF*/
-  Action.CHKPOSN, 13,
+  Action.CHKPOSN,
+  13,
   /*CR*/
-  Action.CHKPOSN, 92,
+  Action.CHKPOSN,
+  92,
   /*\*/
   Action.STR1ESC
 ]);
@@ -726,11 +1423,14 @@ export const actionsStr1Esc: Action[] = makeActions(Action.CONT, [
 export const actionsStr2Esc: Action[] = makeActions(Action.CONT, [
   34,
   /*"*/
-  Action.ENDESTR, 10,
+  Action.ENDESTR,
+  10,
   /*LF*/
-  Action.CHKPOSN, 13,
+  Action.CHKPOSN,
+  13,
   /*CR*/
-  Action.CHKPOSN, 92,
+  Action.CHKPOSN,
+  92,
   /*\*/
   Action.STR2ESC
 ]);
@@ -738,17 +1438,23 @@ export const actionsStr2Esc: Action[] = makeActions(Action.CONT, [
 export const actionsURL: Action[] = makeActions(Action.URL, [
   9,
   /*tab*/
-  Action.CONT, 32,
+  Action.CONT,
+  32,
   /*sp*/
-  Action.CONT, 34,
+  Action.CONT,
+  34,
   /*"*/
-  Action.URL2, 39,
+  Action.URL2,
+  39,
   /*'*/
-  Action.URL1, 41,
+  Action.URL1,
+  41,
   /*)*/
-  Action.INVALID, 10,
+  Action.INVALID,
+  10,
   /*LF*/
-  Action.CONT, 13,
+  Action.CONT,
+  13,
   /*CR*/
   Action.CONT
 ]);
@@ -756,63 +1462,89 @@ export const actionsURL: Action[] = makeActions(Action.URL, [
 export const actionsURLInside: Action[] = makeActions(Action.CONT, [
   41,
   /*)*/
-  Action.ENDURL, 9,
+  Action.ENDURL,
+  9,
   /*TAB*/
-  Action.CHKSP, 10,
+  Action.CHKSP,
+  10,
   /*LF*/
-  Action.CHKSP, 13,
+  Action.CHKSP,
+  13,
   /*CR*/
-  Action.CHKSP, 32,
+  Action.CHKSP,
+  32,
   /*sp*/
-  Action.CHKSP, 92,
+  Action.CHKSP,
+  92,
   /*\*/
-  Action.URLESC, 40,
+  Action.URLESC,
+  40,
   /*(*/
-  Action.INVALID, 91,
+  Action.INVALID,
+  91,
   /*[*/
-  Action.INVALID, 93,
+  Action.INVALID,
+  93,
   /*]*/
-  Action.INVALID, 123,
+  Action.INVALID,
+  123,
   /*{*/
-  Action.INVALID, 125,
+  Action.INVALID,
+  125,
   /*}*/
-  Action.INVALID, NaN, Action.ENDURL
+  Action.INVALID,
+  NaN,
+  Action.ENDURL
 ]);
 
 export const actionsURLInside1: Action[] = makeActions(Action.CONT, [
   39,
   /*'*/
-  Action.TERMURL, 10,
+  Action.TERMURL,
+  10,
   /*LF*/
-  Action.CHKPOSN, 13,
+  Action.CHKPOSN,
+  13,
   /*CR*/
-  Action.CHKPOSN, 92,
+  Action.CHKPOSN,
+  92,
   /*\*/
-  Action.URLESC, NaN, Action.ENDURL
+  Action.URLESC,
+  NaN,
+  Action.ENDURL
 ]);
 
 export const actionsURLInside2: Action[] = makeActions(Action.CONT, [
   34,
   /*"*/
-  Action.TERMURL, 10,
+  Action.TERMURL,
+  10,
   /*LF*/
-  Action.CHKPOSN, 13,
+  Action.CHKPOSN,
+  13,
   /*CR*/
-  Action.CHKPOSN, 92,
+  Action.CHKPOSN,
+  92,
   /*\*/
-  Action.URLESC, NaN, Action.ENDURL
+  Action.URLESC,
+  NaN,
+  Action.ENDURL
 ]);
 
 export const actionsURLTail: Action[] = makeActions(Action.INVALID, [
   9,
   /*tab*/
-  Action.CONT, 10,
+  Action.CONT,
+  10,
   /*LF*/
-  Action.CONT, 13,
+  Action.CONT,
+  13,
   /*CR*/
-  Action.CONT, 32,
+  Action.CONT,
+  32,
   /*sp*/
-  Action.CONT, 41,
+  Action.CONT,
+  41,
   /*)*/
   Action.FINURL
 ]);
@@ -849,26 +1581,26 @@ export class Tokenizer {
   }
 
   nthToken(n: number): Token {
-    if ((this.tail - this.curr & this.indexMask) <= n) {
+    if (((this.tail - this.curr) & this.indexMask) <= n) {
       this.fillBuffer();
     }
-    return this.buffer[this.curr + n & this.indexMask];
+    return this.buffer[(this.curr + n) & this.indexMask];
   }
 
   consume(): void {
-    this.curr = this.curr + 1 & this.indexMask;
+    this.curr = (this.curr + 1) & this.indexMask;
   }
 
   mark(): void {
     if (this.head >= 0) {
-      throw new Error('F_CSSTOK_BAD_CALL mark');
+      throw new Error("F_CSSTOK_BAD_CALL mark");
     }
     this.head = this.curr;
   }
 
   reset(): void {
     if (this.head < 0) {
-      throw new Error('F_CSSTOK_BAD_CALL reset');
+      throw new Error("F_CSSTOK_BAD_CALL reset");
     }
     this.curr = this.head;
     this.head = -1;
@@ -892,7 +1624,7 @@ export class Tokenizer {
       if (oldIndex == this.curr) {
         this.curr = newIndex;
       }
-      oldIndex = oldIndex + 1 & this.indexMask;
+      oldIndex = (oldIndex + 1) & this.indexMask;
       newIndex++;
     }
     this.head = 0;
@@ -922,7 +1654,7 @@ export class Tokenizer {
     if (head == tail) {
       // only expect to get here when mark is in effect
       if (this.head < 0) {
-        throw new Error('F_CSSTOK_INTERNAL');
+        throw new Error("F_CSSTOK_INTERNAL");
       }
       this.reallocate();
       tail = this.tail;
@@ -937,7 +1669,7 @@ export class Tokenizer {
     const buffer = this.buffer;
     let tokenType: TokenType = TokenType.EOF;
     let tokenPosition: number = 0;
-    let tokenText: string = '';
+    let tokenText: string = "";
     let tokenNum: number = 0;
     let seenSpace = false;
     let token: Token = buffer[tail];
@@ -951,9 +1683,9 @@ export class Tokenizer {
         case Action.INVALID:
           tokenType = TokenType.INVALID;
           if (isNaN(charCode)) {
-            tokenText = 'E_CSS_UNEXPECTED_EOF';
+            tokenText = "E_CSS_UNEXPECTED_EOF";
           } else {
-            tokenText = 'E_CSS_UNEXPECTED_CHAR';
+            tokenText = "E_CSS_UNEXPECTED_CHAR";
           }
           actions = actionsNormal;
           position++;
@@ -1128,28 +1860,25 @@ export class Tokenizer {
           actions = actionsCheckEq;
           continue;
         case Action.END:
-
           // don't consume current char
           break;
         case Action.EQTAIL:
           position++;
-          tokenType =
-              (tokenType + TokenType.BANG_EQ - TokenType.BANG as TokenType);
+          tokenType = (tokenType +
+            TokenType.BANG_EQ -
+            TokenType.BANG) as TokenType;
           break;
         case Action.ENDINT:
-
           // don't consume current char
           tokenType = TokenType.INT;
           tokenNum = parseInt(input.substring(tokenPosition, position), 10);
           break;
         case Action.ENDNUM:
-
           // don't consume current char
           tokenType = TokenType.NUM;
           tokenNum = parseFloat(input.substring(tokenPosition, position));
           break;
         case Action.CONT:
-
           // just consume current char
           position++;
           continue;
@@ -1162,7 +1891,7 @@ export class Tokenizer {
         case Action.PCUNIT:
           tokenType = TokenType.NUMERIC;
           tokenNum = parseFloat(input.substring(tokenPosition, position));
-          tokenText = '%';
+          tokenText = "%";
           tokenPosition = position++;
 
           // for consistency with alphabetic units
@@ -1172,7 +1901,6 @@ export class Tokenizer {
           actions = actionsNumber;
           continue;
         case Action.ENDIDNT:
-
           // don't consume current char
           // tokenType should be set already
           tokenText = input.substring(tokenPosition, position);
@@ -1182,7 +1910,6 @@ export class Tokenizer {
           actions = actionsIdentEscChr;
           continue;
         case Action.ENDIDES:
-
           // end of identifier with escapes
           // don't consume current char
           // tokenType should be set already
@@ -1223,7 +1950,6 @@ export class Tokenizer {
           tokenType = TokenType.AMP_AMP;
           break;
         case Action.FUNC:
-
           // tokenType can be TokenType.IDENT,
           // TokenType.CLASS, TokenType.AT,
           // TokenType.HASH, TokenType.NUMERIC
@@ -1232,7 +1958,7 @@ export class Tokenizer {
             position++;
 
             // consume
-            if (tokenText.toLowerCase() == 'url') {
+            if (tokenText.toLowerCase() == "url") {
               actions = actionsURL;
               continue;
             }
@@ -1240,7 +1966,6 @@ export class Tokenizer {
           }
           break;
         case Action.FUNCES:
-
           // tokenType can be TokenType.IDENT,
           // TokenType.CLASS, TokenType.AT,
           // TokenType.HASH, T_NUMERIC
@@ -1249,7 +1974,7 @@ export class Tokenizer {
             position++;
 
             // consume
-            if (tokenText.toLowerCase() == 'url') {
+            if (tokenText.toLowerCase() == "url") {
               actions = actionsURL;
               continue;
             }
@@ -1335,12 +2060,14 @@ export class Tokenizer {
           position++;
           continue;
         case Action.CHKSP:
-
           // newline in non-quoted URL - check if end of url
           if (position - backslashPos < 8) {
             // close enough: may be valid
-            if (input.substring(backslashPos + 1, position + 1)
-                    .match(/^[0-9a-fA-F]{0,6}(\r\n|[\n\r])|[ \t]$/)) {
+            if (
+              input
+                .substring(backslashPos + 1, position + 1)
+                .match(/^[0-9a-fA-F]{0,6}(\r\n|[\n\r])|[ \t]$/)
+            ) {
               // valid, keep going
               position++;
               continue;
@@ -1358,13 +2085,15 @@ export class Tokenizer {
           actions = actionsURLTail;
           continue;
         case Action.CHKPOSN:
-
           // newline in string or quoted URL - check validity
           position++;
           if (position - backslashPos < 9) {
             // close enough: may be valid
-            if (input.substring(backslashPos + 1, position)
-                    .match(/^[0-9a-fA-F]{0,6}(\r\n|[\n\r])$/)) {
+            if (
+              input
+                .substring(backslashPos + 1, position)
+                .match(/^[0-9a-fA-F]{0,6}(\r\n|[\n\r])$/)
+            ) {
               // valid, keep going
               continue;
             }
@@ -1372,16 +2101,18 @@ export class Tokenizer {
 
           // invalid token
           tokenType = TokenType.INVALID;
-          tokenText = 'E_CSS_UNEXPECTED_NEWLINE';
+          tokenText = "E_CSS_UNEXPECTED_NEWLINE";
           actions = actionsNormal;
           break;
         case Action.CHKPOSS:
-
           // space in identifier - check validity
           if (position - backslashPos < 9) {
             // close enough: may be valid
-            if (input.substring(backslashPos + 1, position + 1)
-                    .match(/^[0-9a-fA-F]{0,6}[ \t]$/)) {
+            if (
+              input
+                .substring(backslashPos + 1, position + 1)
+                .match(/^[0-9a-fA-F]{0,6}[ \t]$/)
+            ) {
               // valid, keep going
               position++;
               continue;
@@ -1401,11 +2132,10 @@ export class Tokenizer {
           actions = actionsIdentEsc;
           continue;
         default:
-
           // EOF
           if (actions !== actionsNormal) {
             tokenType = TokenType.INVALID;
-            tokenText = 'E_CSS_UNEXPECTED_STATE';
+            tokenText = "E_CSS_UNEXPECTED_STATE";
             break;
           }
           tokenPosition = position;

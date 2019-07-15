@@ -17,10 +17,10 @@
  *
  * @fileoverview Utilities asynchronous execution and cooperative multitasking.
  */
-import * as logging from '../vivliostyle/logging';
-import * as task from './task';
+import * as logging from "../vivliostyle/logging";
+import * as task from "./task";
 
-import * as base from './base';
+import * as base from "./base";
 
 /**
  * A class that can fetch or compute a resource that may be needed by multiple
@@ -35,7 +35,7 @@ export class Fetcher<T> {
   arrived: boolean = false;
   resource: T = null;
   task: task.Task = null;
-  piggybacks: ((p1: any) => void)[]|null = [];
+  piggybacks: ((p1: any) => void)[] | null = [];
 
   constructor(public readonly fetch: () => task.Result<T>, opt_name?: string) {
     this.name = opt_name;
@@ -47,27 +47,30 @@ export class Fetcher<T> {
   start(): void {
     if (!this.task) {
       const self = this;
-      this.task = task.currentTask().getScheduler().run(() => {
-        const frame = task.newFrame('Fetcher.run');
-        self.fetch().then((resource) => {
-          const piggibacks = self.piggybacks;
-          self.arrived = true;
-          self.resource = resource;
-          self.task = null;
-          self.piggybacks = [];
-          if (piggibacks) {
-            for (let i = 0; i < piggibacks.length; i++) {
-              try {
-                piggibacks[i](resource);
-              } catch (err) {
-                logging.logger.error(err, 'Error:');
+      this.task = task
+        .currentTask()
+        .getScheduler()
+        .run(() => {
+          const frame = task.newFrame("Fetcher.run");
+          self.fetch().then(resource => {
+            const piggibacks = self.piggybacks;
+            self.arrived = true;
+            self.resource = resource;
+            self.task = null;
+            self.piggybacks = [];
+            if (piggibacks) {
+              for (let i = 0; i < piggibacks.length; i++) {
+                try {
+                  piggibacks[i](resource);
+                } catch (err) {
+                  logging.logger.error(err, "Error:");
+                }
               }
             }
-          }
-          frame.finish(resource);
-        });
-        return frame.result();
-      }, this.name);
+            frame.finish(resource);
+          });
+          return frame.result();
+        }, this.name);
     }
   }
 
@@ -88,7 +91,7 @@ export class Fetcher<T> {
       return task.newResult(this.resource);
     }
     this.start();
-    return (this.task.join() as task.Result<T>);
+    return this.task.join() as task.Result<T>;
   }
 
   hasArrived(): boolean {
@@ -99,28 +102,30 @@ export class Fetcher<T> {
 /**
  * Wait for all Fetcher objects in the array to arrive
  */
-export const waitForFetchers = <T>(fetchers: Fetcher<T>[]): task.Result<boolean> => {
+export const waitForFetchers = <T>(
+  fetchers: Fetcher<T>[]
+): task.Result<boolean> => {
   if (fetchers.length == 0) {
     return task.newResult(true);
   }
   if (fetchers.length == 1) {
     return fetchers[0].get().thenReturn(true);
   }
-  const frame = task.newFrame<boolean>('waitForFetches');
+  const frame = task.newFrame<boolean>("waitForFetches");
   let i = 0;
   frame
-      .loop(() => {
-        while (i < fetchers.length) {
-          const fetcher = fetchers[i++];
-          if (!fetcher.hasArrived()) {
-            return fetcher.get().thenReturn(true);
-          }
+    .loop(() => {
+      while (i < fetchers.length) {
+        const fetcher = fetchers[i++];
+        if (!fetcher.hasArrived()) {
+          return fetcher.get().thenReturn(true);
         }
-        return task.newResult(false);
-      })
-      .then(() => {
-        frame.finish(true);
-      });
+      }
+      return task.newResult(false);
+    })
+    .then(() => {
+      frame.finish(true);
+    });
   return frame.result();
 };
 
@@ -130,12 +135,12 @@ export const waitForFetchers = <T>(fetchers: Fetcher<T>[]): task.Result<boolean>
 export const loadElement = (elem: Element, src: string): Fetcher<string> => {
   let width = null;
   let height = null;
-  if (elem.localName == 'img') {
-    width = elem.getAttribute('width');
-    height = elem.getAttribute('height');
+  if (elem.localName == "img") {
+    width = elem.getAttribute("width");
+    height = elem.getAttribute("height");
   }
   const fetcher = new Fetcher(() => {
-    const frame: task.Frame<string> = task.newFrame('loadImage');
+    const frame: task.Frame<string> = task.newFrame("loadImage");
     const continuation = frame.suspend(elem);
     let done = false;
     const handler = (evt: Event) => {
@@ -144,22 +149,22 @@ export const loadElement = (elem: Element, src: string): Fetcher<string> => {
       } else {
         done = true;
       }
-      if (elem.localName == 'img') {
+      if (elem.localName == "img") {
         // IE puts these bogus attributes, even if they were not present
         if (!width) {
-          elem.removeAttribute('width');
+          elem.removeAttribute("width");
         }
         if (!height) {
-          elem.removeAttribute('height');
+          elem.removeAttribute("height");
         }
       }
-      continuation.schedule(evt ? evt.type : 'timeout');
+      continuation.schedule(evt ? evt.type : "timeout");
     };
-    elem.addEventListener('load', handler, false);
-    elem.addEventListener('error', handler, false);
-    elem.addEventListener('abort', handler, false);
+    elem.addEventListener("load", handler, false);
+    elem.addEventListener("error", handler, false);
+    elem.addEventListener("abort", handler, false);
     if (elem.namespaceURI == base.NS.SVG) {
-      elem.setAttributeNS(base.NS.XLINK, 'xlink:href', src);
+      elem.setAttributeNS(base.NS.XLINK, "xlink:href", src);
 
       // SVG handlers are not reliable
       setTimeout(handler, 300);

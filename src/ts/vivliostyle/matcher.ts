@@ -16,7 +16,7 @@
  *
  * @fileoverview Definitions of Matcher.
  */
-import * as asserts from './asserts';
+import * as asserts from "./asserts";
 
 /**
  * Checkes whether given order can be represented as an+b with a non-negative
@@ -40,7 +40,7 @@ export class AnyMatcher implements Matcher {
 
   /** @override */
   matches() {
-    return this.matchers.some((matcher) => matcher.matches());
+    return this.matchers.some(matcher => matcher.matches());
   }
 }
 
@@ -49,18 +49,24 @@ export class AllMatcher implements Matcher {
 
   /** @override */
   matches() {
-    return this.matchers.every((matcher) => matcher.matches());
+    return this.matchers.every(matcher => matcher.matches());
   }
 }
 
 export class NthFragmentMatcher implements Matcher {
   static fragmentIndices = {};
 
-  static registerFragmentIndex(elementOffset: number, fragmentIndex: number, priority: number)  {
+  static registerFragmentIndex(
+    elementOffset: number,
+    fragmentIndex: number,
+    priority: number
+  ) {
     const indices = NthFragmentMatcher.fragmentIndices;
-    if (!indices[elementOffset] ||
-        indices[elementOffset].priority <= priority) {
-      indices[elementOffset] = {fragmentIndex, priority};
+    if (
+      !indices[elementOffset] ||
+      indices[elementOffset].priority <= priority
+    ) {
+      indices[elementOffset] = { fragmentIndex, priority };
     }
   }
 
@@ -69,24 +75,34 @@ export class NthFragmentMatcher implements Matcher {
   }
 
   constructor(
-      public readonly elementOffset: number, public readonly a: number,
-      public readonly b: number) {}
+    public readonly elementOffset: number,
+    public readonly a: number,
+    public readonly b: number
+  ) {}
 
   /** @override */
   matches() {
     const entry = NthFragmentMatcher.fragmentIndices[this.elementOffset];
-    return entry != null && entry.fragmentIndex != null &&
-        matchANPlusB(entry.fragmentIndex, this.a, this.b);
+    return (
+      entry != null &&
+      entry.fragmentIndex != null &&
+      matchANPlusB(entry.fragmentIndex, this.a, this.b)
+    );
   }
 }
 
 export class MatcherBuilder {
-  static buildViewConditionMatcher(elementOffset: number, viewCondition: string):
-      Matcher {
-    const strs = viewCondition.split('_');
-    if (strs[0] == 'NFS') {
+  static buildViewConditionMatcher(
+    elementOffset: number,
+    viewCondition: string
+  ): Matcher {
+    const strs = viewCondition.split("_");
+    if (strs[0] == "NFS") {
       return new NthFragmentMatcher(
-          elementOffset, parseInt(strs[1], 10), parseInt(strs[2], 10));
+        elementOffset,
+        parseInt(strs[1], 10),
+        parseInt(strs[2], 10)
+      );
     } else {
       asserts.fail(`unknown view condition. condition=${viewCondition}`);
       return null;

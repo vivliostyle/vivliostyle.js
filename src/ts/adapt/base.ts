@@ -17,7 +17,7 @@
  *
  * @fileoverview Common utilities.
  */
-import * as logging from '../vivliostyle/logging';
+import * as logging from "../vivliostyle/logging";
 
 export let emptyObj = {};
 
@@ -67,8 +67,8 @@ export function setResourceBaseURL(value: string) {
  */
 export const resolveURL = (relURL: string, baseURL: string): string => {
   if (!baseURL || relURL.match(/^\w{2,}:/)) {
-    if (relURL.toLowerCase().match('^javascript:')) {
-      return '#';
+    if (relURL.toLowerCase().match("^javascript:")) {
+      return "#";
     }
     return relURL;
   }
@@ -97,23 +97,23 @@ export const resolveURL = (relURL: string, baseURL: string): string => {
   if (relURL.match(/^#/)) {
     return baseURL + relURL;
   }
-  let i = baseURL.lastIndexOf('/');
+  let i = baseURL.lastIndexOf("/");
   if (i < 0) {
     return relURL;
   }
   let url = baseURL.substr(0, i + 1) + relURL;
   while (true) {
-    i = url.indexOf('/../');
+    i = url.indexOf("/../");
     if (i <= 0) {
       break;
     }
-    const j = url.lastIndexOf('/', i - 1);
+    const j = url.lastIndexOf("/", i - 1);
     if (j <= 0) {
       break;
     }
     url = url.substr(0, j) + url.substr(i + 3);
   }
-  return url.replace(/\/(\.\/)+/g, '/');
+  return url.replace(/\/(\.\/)+/g, "/");
 };
 
 export interface DocumentURLTransformer {
@@ -129,18 +129,18 @@ export interface DocumentURLTransformer {
  * @enum {string}
  */
 export enum NS {
-  FB2 = 'http://www.gribuser.ru/xml/fictionbook/2.0',
-  epub = 'http://www.idpf.org/2007/ops',
-  EV = 'http://www.w3.org/2001/xml-events',
-  MATHML = 'http://www.w3.org/1998/Math/MathML',
-  XML = 'http://www.w3.org/XML/1998/namespace',
-  XHTML = 'http://www.w3.org/1999/xhtml',
-  XLINK = 'http://www.w3.org/1999/xlink',
-  SHADOW = 'http://www.pyroxy.com/ns/shadow',
-  SVG = 'http://www.w3.org/2000/svg',
-  DC = 'http://purl.org/dc/elements/1.1/',
-  NCX = 'http://www.daisy.org/z3986/2005/ncx/',
-  SSE = 'http://example.com/sse'
+  FB2 = "http://www.gribuser.ru/xml/fictionbook/2.0",
+  epub = "http://www.idpf.org/2007/ops",
+  EV = "http://www.w3.org/2001/xml-events",
+  MATHML = "http://www.w3.org/1998/Math/MathML",
+  XML = "http://www.w3.org/XML/1998/namespace",
+  XHTML = "http://www.w3.org/1999/xhtml",
+  XLINK = "http://www.w3.org/1999/xlink",
+  SHADOW = "http://www.pyroxy.com/ns/shadow",
+  SVG = "http://www.w3.org/2000/svg",
+  DC = "http://purl.org/dc/elements/1.1/",
+  NCX = "http://www.daisy.org/z3986/2005/ncx/",
+  SSE = "http://example.com/sse"
 }
 
 // temporary dummy namespace
@@ -150,7 +150,7 @@ export enum NS {
  * @param opt_url URL; window.location.href is used if not provided
  * @return parameter value
  */
-export const getURLParam = (name: string, opt_url?: string): string|null => {
+export const getURLParam = (name: string, opt_url?: string): string | null => {
   const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
   const url = opt_url || window.location.href;
   const r = url.match(rg);
@@ -165,21 +165,24 @@ export const getURLParam = (name: string, opt_url?: string): string|null => {
  * @param value parameter value
  * @return new url
  */
-export const setURLParam =
-    (url: string, name: string, value: string): string => {
-      const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
-      const r = url.match(rg);
-      if (r) {
-        const length = r[2].length;
-        const index = r.index + r[0].length - length;
-        return url.substr(0, index) + value + url.substr(index + length);
-      }
-      if (!url.match(/#/)) {
-        return `${url}#${name}=${value}`;
-      } else {
-        return `${url}&${name}=${value}`;
-      }
-    };
+export const setURLParam = (
+  url: string,
+  name: string,
+  value: string
+): string => {
+  const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
+  const r = url.match(rg);
+  if (r) {
+    const length = r[2].length;
+    const index = r.index + r[0].length - length;
+    return url.substr(0, index) + value + url.substr(index + length);
+  }
+  if (!url.match(/#/)) {
+    return `${url}#${name}=${value}`;
+  } else {
+    return `${url}&${name}=${value}`;
+  }
+};
 
 /**
  * @return ?string
@@ -235,8 +238,8 @@ export class PriorityQueue {
    * @return removed item.
    */
   remove(): Comparable {
-    const result = (this.queue[1] as Comparable);
-    const curr = (this.queue.pop() as Comparable);
+    const result = this.queue[1] as Comparable;
+    const curr = this.queue.pop() as Comparable;
     const size = this.queue.length;
     if (size > 1) {
       let index = 1;
@@ -246,13 +249,18 @@ export class PriorityQueue {
           break;
         }
         if (this.queue[childIndex].compare(curr) > 0) {
-          if (childIndex + 1 < size &&
-              this.queue[childIndex + 1].compare(
-                  (this.queue[childIndex] as Comparable)) > 0) {
+          if (
+            childIndex + 1 < size &&
+            this.queue[childIndex + 1].compare(this.queue[
+              childIndex
+            ] as Comparable) > 0
+          ) {
             childIndex++;
           }
-        } else if (childIndex + 1 < size &&
-            this.queue[childIndex + 1].compare(curr) > 0) {
+        } else if (
+          childIndex + 1 < size &&
+          this.queue[childIndex + 1].compare(curr) > 0
+        ) {
           childIndex++;
         } else {
           break;
@@ -274,65 +282,65 @@ export class PriorityQueue {
 export const cssToJSProp = (prefix: string, cssPropName: string): string => {
   if (prefix) {
     cssPropName = `-${cssPropName}`;
-    prefix = prefix.replace(/-/g, '');
-    if (prefix === 'moz') {
-      prefix = 'Moz';
+    prefix = prefix.replace(/-/g, "");
+    if (prefix === "moz") {
+      prefix = "Moz";
     }
   }
-  return prefix +
-      cssPropName.replace(/-[a-z]/g, (txt) => txt.substr(1).toUpperCase());
+  return (
+    prefix + cssPropName.replace(/-[a-z]/g, txt => txt.substr(1).toUpperCase())
+  );
 };
 
-export const knownPrefixes = ['', '-webkit-', '-moz-', '-ms-', '-o-', '-epub-'];
+export const knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
 
 export const propNameMap = {};
 
-export const checkIfPropertySupported =
-    (prefix: string, prop: string): boolean => {
-      // Special case
-      if (prop === 'writing-mode') {
-        const probe = document.createElement('span');
-        if (prefix === '-ms-') {
-          probe.style.setProperty(prefix + prop, 'tb-rl');
-          return probe.style['writing-mode'] === 'tb-rl';
-        } else {
-          probe.style.setProperty(prefix + prop, 'vertical-rl');
-          return probe.style[prefix + prop] === 'vertical-rl';
-        }
-      } else {
-        const style = document.documentElement.style;
-        return typeof style[cssToJSProp(prefix, prop)] === 'string';
-      }
-    };
+export const checkIfPropertySupported = (
+  prefix: string,
+  prop: string
+): boolean => {
+  // Special case
+  if (prop === "writing-mode") {
+    const probe = document.createElement("span");
+    if (prefix === "-ms-") {
+      probe.style.setProperty(prefix + prop, "tb-rl");
+      return probe.style["writing-mode"] === "tb-rl";
+    } else {
+      probe.style.setProperty(prefix + prop, "vertical-rl");
+      return probe.style[prefix + prop] === "vertical-rl";
+    }
+  } else {
+    const style = document.documentElement.style;
+    return typeof style[cssToJSProp(prefix, prop)] === "string";
+  }
+};
 
-export const getPrefixedPropertyNames = (prop: string): string[]|null => {
+export const getPrefixedPropertyNames = (prop: string): string[] | null => {
   let prefixed = propNameMap[prop];
   if (prefixed || prefixed === null) {
     // null means the browser does not support the property
     return prefixed;
   }
   switch (prop) {
-    case 'writing-mode':
-
+    case "writing-mode":
       // Special case: prefer '-ms-writing-mode' to 'writing-mode'
-      if (checkIfPropertySupported('-ms-', 'writing-mode')) {
-        propNameMap[prop] = ['-ms-writing-mode'];
-        return ['-ms-writing-mode'];
+      if (checkIfPropertySupported("-ms-", "writing-mode")) {
+        propNameMap[prop] = ["-ms-writing-mode"];
+        return ["-ms-writing-mode"];
       }
       break;
-    case 'filter':
-
+    case "filter":
       // Special case: prefer '-webkit-filter' to 'filter'
-      if (checkIfPropertySupported('-webkit-', 'filter')) {
-        propNameMap[prop] = ['-webkit-filter'];
-        return ['-webkit-filter'];
+      if (checkIfPropertySupported("-webkit-", "filter")) {
+        propNameMap[prop] = ["-webkit-filter"];
+        return ["-webkit-filter"];
       }
       break;
-    case 'clip-path':
-
+    case "clip-path":
       // Special case for chrome.
-      if (checkIfPropertySupported('-webkit-', 'clip-path')) {
-        return propNameMap[prop] = ['-webkit-clip-path', 'clip-path'];
+      if (checkIfPropertySupported("-webkit-", "clip-path")) {
+        return (propNameMap[prop] = ["-webkit-clip-path", "clip-path"]);
       }
       break;
   }
@@ -345,56 +353,62 @@ export const getPrefixedPropertyNames = (prop: string): string[]|null => {
   }
 
   // Not supported by the browser
-  logging.logger.warn('Property not supported by the browser: ', prop);
+  logging.logger.warn("Property not supported by the browser: ", prop);
   propNameMap[prop] = null;
   return null;
 };
 
-export const setCSSProperty =
-    (elem: Element, prop: string, value: string): void => {
-      try {
-        const prefixedPropertyNames = getPrefixedPropertyNames(prop);
-        if (!prefixedPropertyNames) {
-          return;
+export const setCSSProperty = (
+  elem: Element,
+  prop: string,
+  value: string
+): void => {
+  try {
+    const prefixedPropertyNames = getPrefixedPropertyNames(prop);
+    if (!prefixedPropertyNames) {
+      return;
+    }
+    prefixedPropertyNames.forEach(prefixed => {
+      if (prefixed === "-ms-writing-mode") {
+        switch (value) {
+          case "horizontal-tb":
+            value = "lr-tb";
+            break;
+          case "vertical-rl":
+            value = "tb-rl";
+            break;
+          case "vertical-lr":
+            value = "tb-lr";
+            break;
         }
-        prefixedPropertyNames.forEach((prefixed) => {
-          if (prefixed === '-ms-writing-mode') {
-            switch (value) {
-              case 'horizontal-tb':
-                value = 'lr-tb';
-                break;
-              case 'vertical-rl':
-                value = 'tb-rl';
-                break;
-              case 'vertical-lr':
-                value = 'tb-lr';
-                break;
-            }
-          }
-          if (elem && (elem as HTMLElement).style) {
-            (elem as HTMLElement).style.setProperty(prefixed, value);
-          }
-        });
-      } catch (err) {
-        logging.logger.warn(err);
       }
-    };
+      if (elem && (elem as HTMLElement).style) {
+        (elem as HTMLElement).style.setProperty(prefixed, value);
+      }
+    });
+  } catch (err) {
+    logging.logger.warn(err);
+  }
+};
 
-export const getCSSProperty =
-    (elem: Element, prop: string, opt_value?: string): string => {
-      try {
-        const propertyNames = propNameMap[prop];
-        return (elem as HTMLElement)
-            .style.getPropertyValue(propertyNames ? propertyNames[0] : prop);
-      } catch (err) {
-      }
-      return opt_value || '';
-    };
+export const getCSSProperty = (
+  elem: Element,
+  prop: string,
+  opt_value?: string
+): string => {
+  try {
+    const propertyNames = propNameMap[prop];
+    return (elem as HTMLElement).style.getPropertyValue(
+      propertyNames ? propertyNames[0] : prop
+    );
+  } catch (err) {}
+  return opt_value || "";
+};
 
 export const getLangAttribute = (element: Element): string => {
-  let lang = element.getAttributeNS(NS.XML, 'lang');
+  let lang = element.getAttributeNS(NS.XML, "lang");
   if (!lang && element.namespaceURI == NS.XHTML) {
-    lang = element.getAttribute('lang');
+    lang = element.getAttribute("lang");
   }
   return lang;
 };
@@ -415,30 +429,32 @@ export class StringBuffer {
    * @override
    */
   toString(): string {
-    const str = this.list.join('');
+    const str = this.list.join("");
     this.list = [str];
     return str;
   }
 }
 
 export const escapeChar = (str: string): string =>
-    // not called for surrogate pairs, no need to worry about them
-    `\\${str.charCodeAt(0).toString(16)} `;
+  // not called for surrogate pairs, no need to worry about them
+  `\\${str.charCodeAt(0).toString(16)} `;
 
 export const escapeCSSIdent = (name: string): string =>
-    name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, escapeChar);
+  name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, escapeChar);
 
 export const escapeCSSStr = (str: string): string =>
-    str.replace(/[\u0000-\u001F"]/g, escapeChar);
+  str.replace(/[\u0000-\u001F"]/g, escapeChar);
 
 export const lightURLEncode = (str: string): string =>
-    str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+  str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
 
-export const isLetter = (ch: string): boolean => !!ch.match(
-    /^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/);
+export const isLetter = (ch: string): boolean =>
+  !!ch.match(
+    /^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/
+  );
 
 export const escapeCharToHex = (str: string, prefix?: string): string => {
-  prefix = typeof prefix === 'string' ? prefix : '\\u';
+  prefix = typeof prefix === "string" ? prefix : "\\u";
   return prefix + (65536 | str.charCodeAt(0)).toString(16).substr(1);
 };
 
@@ -452,7 +468,7 @@ export const escapeNameStrToHex = (str: string, prefix?: string): string => {
 export const escapeRegExp = (str: string): string => escapeNameStrToHex(str);
 
 export const unescapeCharFromHex = (str: string, prefix?: string): string => {
-  prefix = typeof prefix === 'string' ? prefix : '\\u';
+  prefix = typeof prefix === "string" ? prefix : "\\u";
   if (str.indexOf(prefix) === 0) {
     return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
   } else {
@@ -461,18 +477,18 @@ export const unescapeCharFromHex = (str: string, prefix?: string): string => {
 };
 
 export const unescapeStrFromHex = (str: string, prefix?: string): string => {
-  prefix = typeof prefix === 'string' ? prefix : '\\u';
+  prefix = typeof prefix === "string" ? prefix : "\\u";
 
   function unescapeChar(s) {
     return unescapeCharFromHex(s, prefix);
   }
-  const regexp = new RegExp(`${escapeRegExp(prefix)}[0-9a-fA-F]{4}`, 'g');
+  const regexp = new RegExp(`${escapeRegExp(prefix)}[0-9a-fA-F]{4}`, "g");
   return str.replace(regexp, unescapeChar);
 };
 
 export const assert = (cond: boolean): void => {
   if (!cond) {
-    throw 'Assert failed';
+    throw "Assert failed";
   }
 };
 
@@ -483,27 +499,29 @@ export const assert = (cond: boolean): void => {
  * Find i such that (i == 0 || !good(i-1)) && (i == h || good(i))
  * In other words, good(i) is the "first" good = true.
  */
-export const binarySearch =
-    (high: number, good: (p1: number) => boolean): number => {
-      let l = 0;
-      let h = high;
-      while (true) {
-        if (DEBUG) {
-          assert(l <= h);
-          assert(l == 0 || !good(l - 1));
-          assert(h == high || good(h));
-        }
-        if (l == h) {
-          return l;
-        }
-        const m = l + h >> 1;
-        if (good(m)) {
-          h = m;
-        } else {
-          l = m + 1;
-        }
-      }
-    };
+export const binarySearch = (
+  high: number,
+  good: (p1: number) => boolean
+): number => {
+  let l = 0;
+  let h = high;
+  while (true) {
+    if (DEBUG) {
+      assert(l <= h);
+      assert(l == 0 || !good(l - 1));
+      assert(h == high || good(h));
+    }
+    if (l == h) {
+      return l;
+    }
+    const m = (l + h) >> 1;
+    if (good(m)) {
+      h = m;
+    } else {
+      l = m + 1;
+    }
+  }
+};
 
 /**
  * Function to sort numbers low to high
@@ -511,7 +529,7 @@ export const binarySearch =
 export const numberCompare = (a: number, b: number): number => a - b;
 
 export const base64Chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 export const appendBase64 = (sb: StringBuffer, data: string): void => {
   const length = data.length;
@@ -521,24 +539,24 @@ export const appendBase64 = (sb: StringBuffer, data: string): void => {
     const c2 = data.charCodeAt(i + 1) & 255;
     const c3 = data.charCodeAt(i + 2) & 255;
     sb.append(base64Chars.charAt(c1 >> 2));
-    sb.append(base64Chars.charAt((c1 << 4 | c2 >> 4) & 63));
-    sb.append(base64Chars.charAt((c2 << 2 | c3 >> 6) & 63));
+    sb.append(base64Chars.charAt(((c1 << 4) | (c2 >> 4)) & 63));
+    sb.append(base64Chars.charAt(((c2 << 2) | (c3 >> 6)) & 63));
     sb.append(base64Chars.charAt(c3 & 63));
   }
   switch (length - length3) {
     case 1:
       const p1 = data.charCodeAt(length3) & 255;
       sb.append(base64Chars.charAt(p1 >> 2));
-      sb.append(base64Chars.charAt(p1 << 4 & 63));
-      sb.append('==');
+      sb.append(base64Chars.charAt((p1 << 4) & 63));
+      sb.append("==");
       break;
     case 2:
       const q1 = data.charCodeAt(length3) & 255;
       const q2 = data.charCodeAt(length3 + 1) & 255;
       sb.append(base64Chars.charAt(q1 >> 2));
-      sb.append(base64Chars.charAt((q1 << 4 | q2 >> 4) & 63));
-      sb.append(base64Chars.charAt(q2 << 2 & 63));
-      sb.append('=');
+      sb.append(base64Chars.charAt(((q1 << 4) | (q2 >> 4)) & 63));
+      sb.append(base64Chars.charAt((q2 << 2) & 63));
+      sb.append("=");
       break;
   }
 };
@@ -547,22 +565,25 @@ export const appendBase64 = (sb: StringBuffer, data: string): void => {
  * Index array using key function. First encountered item wins on collision.
  * Elements with empty and null keys are dropped.
  */
-export function indexArray<T> (arr: T[], key: (p1: T) => string | null): {[key: string]: T} {
-      const map : {[key: string]: T} = {} ;
-      for (const v of arr) {
-        const k: string | null = key(v);
-        if (k && !map[k]) {
-          map[k] = v;
-        }
-      }
-      return map;
-    };
+export function indexArray<T>(
+  arr: T[],
+  key: (p1: T) => string | null
+): { [key: string]: T } {
+  const map: { [key: string]: T } = {};
+  for (const v of arr) {
+    const k: string | null = key(v);
+    if (k && !map[k]) {
+      map[k] = v;
+    }
+  }
+  return map;
+}
 
 /**
  * Convert array of strings to an object with the values in the array set to
  * true.
  */
-export const arrayToSet = (arr: string[]): {[key: string]: boolean} => {
+export const arrayToSet = (arr: string[]): { [key: string]: boolean } => {
   const set = {};
   for (let i = 0; i < arr.length; i++) {
     set[arr[i]] = true;
@@ -575,33 +596,38 @@ export const arrayToSet = (arr: string[]): {[key: string]: boolean} => {
  * arrays. Elements with empty and null keys are dropped. Ordering of the
  * elements in arrays is preserved.
  */
-export function multiIndexArray<T> (arr: T[], key: (p1: T) => string | null): {[key: string]: T[]} {
-      const map: {[key: string]: T[]} = {};
-      for (const v of arr) {
-        const k = key(v);
-        if (k) {
-          if (map[k]) {
-            map[k].push(v);
-          } else {
-            map[k] = [v];
-          }
-        }
+export function multiIndexArray<T>(
+  arr: T[],
+  key: (p1: T) => string | null
+): { [key: string]: T[] } {
+  const map: { [key: string]: T[] } = {};
+  for (const v of arr) {
+    const k = key(v);
+    if (k) {
+      if (map[k]) {
+        map[k].push(v);
+      } else {
+        map[k] = [v];
       }
-      return map;
-    };
-
+    }
+  }
+  return map;
+}
 
 /**
  * Apply function to each value of the object
  * @param fn second parameter is the key
  */
-export function mapObj<P, R> (obj: {[key: string]: P}, fn: (p1: P, p2: string) => R): {[key: string]: R} {
-      const res: {[key: string]: R} = {};
-      for (const n in obj) {
-        res[n] = fn(obj[n], n);
-      }
-      return res;
-    };
+export function mapObj<P, R>(
+  obj: { [key: string]: P },
+  fn: (p1: P, p2: string) => R
+): { [key: string]: R } {
+  const res: { [key: string]: R } = {};
+  for (const n in obj) {
+    res[n] = fn(obj[n], n);
+  }
+  return res;
+}
 
 export const mapSize = (obj: Object): number => {
   let n = 0;
@@ -612,13 +638,13 @@ export const mapSize = (obj: Object): number => {
 };
 
 export type Event = {
-  type: string,
-  target?,
-  currentTarget?,
-  preventDefault?,
-  newPage?,
-  anchorElement?,
-  href?
+  type: string;
+  target?;
+  currentTarget?;
+  preventDefault?;
+  newPage?;
+  anchorElement?;
+  href?;
 };
 
 export type EventListener = (p1: Event) => void;
@@ -628,7 +654,7 @@ export type EventListener = (p1: Event) => void;
  * goog.events.EventTarget if you are using Closure library.
  */
 export class SimpleEventTarget {
-  listeners: {[key: string]: EventListener[]} = {};
+  listeners: { [key: string]: EventListener[] } = {};
 
   dispatchEvent(evt: Event): void {
     const list = this.listeners[evt.type];
@@ -641,8 +667,11 @@ export class SimpleEventTarget {
     }
   }
 
-  addEventListener(type: string, listener: EventListener, capture?: boolean):
-      void {
+  addEventListener(
+    type: string,
+    listener: EventListener,
+    capture?: boolean
+  ): void {
     if (capture) {
       return;
     }
@@ -654,8 +683,11 @@ export class SimpleEventTarget {
     }
   }
 
-  removeEventListener(type: string, listener: EventListener, capture?: boolean):
-      void {
+  removeEventListener(
+    type: string,
+    listener: EventListener,
+    capture?: boolean
+  ): void {
     if (capture) {
       return;
     }
@@ -670,7 +702,7 @@ export class SimpleEventTarget {
 }
 export type EventTarget = SimpleEventTarget;
 
-export let hasLShapeFloatBug: boolean|null = null;
+export let hasLShapeFloatBug: boolean | null = null;
 
 /**
  * Check if there is a bug with L-shape floats overlapping text.
@@ -678,28 +710,28 @@ export let hasLShapeFloatBug: boolean|null = null;
 export const checkLShapeFloatBug = (body: HTMLElement): boolean => {
   if (hasLShapeFloatBug == null) {
     const doc = body.ownerDocument;
-    const container = (doc.createElement('div') as HTMLElement);
-    container.style.position = 'absolute';
-    container.style.top = '0px';
-    container.style.left = '0px';
-    container.style.width = '100px';
-    container.style.height = '100px';
-    container.style.overflow = 'hidden';
-    container.style.lineHeight = '16px';
-    container.style.fontSize = '16px';
+    const container = doc.createElement("div") as HTMLElement;
+    container.style.position = "absolute";
+    container.style.top = "0px";
+    container.style.left = "0px";
+    container.style.width = "100px";
+    container.style.height = "100px";
+    container.style.overflow = "hidden";
+    container.style.lineHeight = "16px";
+    container.style.fontSize = "16px";
     body.appendChild(container);
-    const f1 = (doc.createElement('div') as HTMLElement);
-    f1.style.width = '0px';
-    f1.style.height = '14px';
-    f1.style.cssFloat = 'left';
+    const f1 = doc.createElement("div") as HTMLElement;
+    f1.style.width = "0px";
+    f1.style.height = "14px";
+    f1.style.cssFloat = "left";
     container.appendChild(f1);
-    const f2 = (doc.createElement('div') as HTMLElement);
-    f2.style.width = '50px';
-    f2.style.height = '50px';
-    f2.style.cssFloat = 'left';
-    f2.style.clear = 'left';
+    const f2 = doc.createElement("div") as HTMLElement;
+    f2.style.width = "50px";
+    f2.style.height = "50px";
+    f2.style.cssFloat = "left";
+    f2.style.clear = "left";
     container.appendChild(f2);
-    const t = doc.createTextNode('a a a a a a a a a a a a a a a a');
+    const t = doc.createTextNode("a a a a a a a a a a a a a a a a");
     container.appendChild(t);
     const range = doc.createRange();
     range.setStart(t, 0);
@@ -711,7 +743,7 @@ export const checkLShapeFloatBug = (body: HTMLElement): boolean => {
   return hasLShapeFloatBug;
 };
 
-export let hasVerticalBBoxBug: boolean|null = null;
+export let hasVerticalBBoxBug: boolean | null = null;
 
 /**
  * Check if there is a bug with the bounding boxes of vertical text characters.
@@ -724,18 +756,18 @@ export let hasVerticalBBoxBug: boolean|null = null;
 export const checkVerticalBBoxBug = (body: HTMLElement): boolean => {
   if (hasVerticalBBoxBug == null) {
     const doc = body.ownerDocument;
-    const container = (doc.createElement('div') as HTMLElement);
-    container.style.position = 'absolute';
-    container.style.top = '0px';
-    container.style.left = '0px';
-    container.style.width = '100px';
-    container.style.height = '100px';
-    container.style.overflow = 'hidden';
-    container.style.lineHeight = '16px';
-    container.style.fontSize = '16px';
-    setCSSProperty(container, 'writing-mode', 'vertical-rl');
+    const container = doc.createElement("div") as HTMLElement;
+    container.style.position = "absolute";
+    container.style.top = "0px";
+    container.style.left = "0px";
+    container.style.width = "100px";
+    container.style.height = "100px";
+    container.style.overflow = "hidden";
+    container.style.lineHeight = "16px";
+    container.style.fontSize = "16px";
+    setCSSProperty(container, "writing-mode", "vertical-rl");
     body.appendChild(container);
-    const t = doc.createTextNode('a a a a a a a a a a a a a a a a');
+    const t = doc.createTextNode("a a a a a a a a a a a a a a a a");
     container.appendChild(t);
     const range = doc.createRange();
     range.setStart(t, 0);
@@ -747,99 +779,102 @@ export const checkVerticalBBoxBug = (body: HTMLElement): boolean => {
   return hasVerticalBBoxBug;
 };
 
-export let hasInlineBlockJustificationBug: boolean|null = null;
+export let hasInlineBlockJustificationBug: boolean | null = null;
 
-export const checkInlineBlockJustificationBug =
-    (body: HTMLElement): boolean => {
-      if (hasInlineBlockJustificationBug === null) {
-        const doc = body.ownerDocument;
-        const container = (doc.createElement('div') as HTMLElement);
-        container.style.position = 'absolute';
-        container.style.top = '0px';
-        container.style.left = '0px';
-        container.style.width = '30px';
-        container.style.height = '100px';
-        container.style.lineHeight = '16px';
-        container.style.fontSize = '16px';
-        container.style.textAlign = 'justify';
-        body.appendChild(container);
-        const t = doc.createTextNode('a | ');
-        container.appendChild(t);
-        const inlineBlock = doc.createElement('span');
-        inlineBlock.style.display = 'inline-block';
-        inlineBlock.style.width = '30px';
-        container.appendChild(inlineBlock);
-        const range = doc.createRange();
-        range.setStart(t, 0);
-        range.setEnd(t, 3);
-        const box = range.getBoundingClientRect();
-        hasInlineBlockJustificationBug = box.right < 27;
-        body.removeChild(container);
-      }
-      return hasInlineBlockJustificationBug;
-    };
+export const checkInlineBlockJustificationBug = (
+  body: HTMLElement
+): boolean => {
+  if (hasInlineBlockJustificationBug === null) {
+    const doc = body.ownerDocument;
+    const container = doc.createElement("div") as HTMLElement;
+    container.style.position = "absolute";
+    container.style.top = "0px";
+    container.style.left = "0px";
+    container.style.width = "30px";
+    container.style.height = "100px";
+    container.style.lineHeight = "16px";
+    container.style.fontSize = "16px";
+    container.style.textAlign = "justify";
+    body.appendChild(container);
+    const t = doc.createTextNode("a | ");
+    container.appendChild(t);
+    const inlineBlock = doc.createElement("span");
+    inlineBlock.style.display = "inline-block";
+    inlineBlock.style.width = "30px";
+    container.appendChild(inlineBlock);
+    const range = doc.createRange();
+    range.setStart(t, 0);
+    range.setEnd(t, 3);
+    const box = range.getBoundingClientRect();
+    hasInlineBlockJustificationBug = box.right < 27;
+    body.removeChild(container);
+  }
+  return hasInlineBlockJustificationBug;
+};
 
-export let hasSoftWrapOpportunityAfterHyphenBug: boolean|null = null;
+export let hasSoftWrapOpportunityAfterHyphenBug: boolean | null = null;
 
-export const checkSoftWrapOpportunityAfterHyphenBug =
-    (body: HTMLElement): boolean => {
-      if (hasSoftWrapOpportunityAfterHyphenBug === null) {
-        const doc = body.ownerDocument;
-        const container = (doc.createElement('div') as HTMLElement);
-        container.style.position = 'absolute';
-        container.style.top = '0px';
-        container.style.left = '0px';
-        container.style.width = '40px';
-        container.style.height = '100px';
-        container.style.lineHeight = '16px';
-        container.style.fontSize = '16px';
-        container.style.textAlign = 'justify';
-        body.appendChild(container);
-        const t = doc.createTextNode('a a-');
-        container.appendChild(t);
-        const inlineBlock = doc.createElement('span');
-        inlineBlock.style.display = 'inline-block';
-        inlineBlock.style.width = '40px';
-        container.appendChild(inlineBlock);
-        const range = doc.createRange();
-        range.setStart(t, 2);
-        range.setEnd(t, 4);
-        const box = range.getBoundingClientRect();
-        hasSoftWrapOpportunityAfterHyphenBug = box.right < 37;
-        body.removeChild(container);
-      }
-      return hasSoftWrapOpportunityAfterHyphenBug;
-    };
+export const checkSoftWrapOpportunityAfterHyphenBug = (
+  body: HTMLElement
+): boolean => {
+  if (hasSoftWrapOpportunityAfterHyphenBug === null) {
+    const doc = body.ownerDocument;
+    const container = doc.createElement("div") as HTMLElement;
+    container.style.position = "absolute";
+    container.style.top = "0px";
+    container.style.left = "0px";
+    container.style.width = "40px";
+    container.style.height = "100px";
+    container.style.lineHeight = "16px";
+    container.style.fontSize = "16px";
+    container.style.textAlign = "justify";
+    body.appendChild(container);
+    const t = doc.createTextNode("a a-");
+    container.appendChild(t);
+    const inlineBlock = doc.createElement("span");
+    inlineBlock.style.display = "inline-block";
+    inlineBlock.style.width = "40px";
+    container.appendChild(inlineBlock);
+    const range = doc.createRange();
+    range.setStart(t, 2);
+    range.setEnd(t, 4);
+    const box = range.getBoundingClientRect();
+    hasSoftWrapOpportunityAfterHyphenBug = box.right < 37;
+    body.removeChild(container);
+  }
+  return hasSoftWrapOpportunityAfterHyphenBug;
+};
 
-export let hasSoftWrapOpportunityByWbrBug: boolean|null = null;
+export let hasSoftWrapOpportunityByWbrBug: boolean | null = null;
 
-export const checkSoftWrapOpportunityByWbrBug =
-    (body: HTMLElement): boolean => {
-      if (hasSoftWrapOpportunityByWbrBug === null) {
-        const doc = body.ownerDocument;
-        const container = (doc.createElement('div') as HTMLElement);
-        container.style.position = 'absolute';
-        container.style.top = '0px';
-        container.style.left = '0px';
-        container.style.width = '40px';
-        container.style.height = '100px';
-        container.style.lineHeight = '16px';
-        container.style.fontSize = '16px';
-        container.style.textAlign = 'justify';
-        body.appendChild(container);
-        const t = doc.createTextNode('a a-');
-        container.appendChild(t);
-        container.appendChild(doc.createElement('wbr'));
-        const inlineBlock = doc.createElement('span');
-        inlineBlock.style.display = 'inline-block';
-        inlineBlock.style.width = '40px';
-        container.appendChild(inlineBlock);
-        const range = doc.createRange();
-        range.setStart(t, 2);
-        range.setEnd(t, 4);
-        const box = range.getBoundingClientRect();
-        hasSoftWrapOpportunityByWbrBug = box.right < 37;
-        body.removeChild(container);
-      }
-      return hasSoftWrapOpportunityByWbrBug;
-    };
+export const checkSoftWrapOpportunityByWbrBug = (
+  body: HTMLElement
+): boolean => {
+  if (hasSoftWrapOpportunityByWbrBug === null) {
+    const doc = body.ownerDocument;
+    const container = doc.createElement("div") as HTMLElement;
+    container.style.position = "absolute";
+    container.style.top = "0px";
+    container.style.left = "0px";
+    container.style.width = "40px";
+    container.style.height = "100px";
+    container.style.lineHeight = "16px";
+    container.style.fontSize = "16px";
+    container.style.textAlign = "justify";
+    body.appendChild(container);
+    const t = doc.createTextNode("a a-");
+    container.appendChild(t);
+    container.appendChild(doc.createElement("wbr"));
+    const inlineBlock = doc.createElement("span");
+    inlineBlock.style.display = "inline-block";
+    inlineBlock.style.width = "40px";
+    container.appendChild(inlineBlock);
+    const range = doc.createRange();
+    range.setStart(t, 2);
+    range.setEnd(t, 4);
+    const box = range.getBoundingClientRect();
+    hasSoftWrapOpportunityByWbrBug = box.right < 37;
+    body.removeChild(container);
+  }
+  return hasSoftWrapOpportunityByWbrBug;
+};

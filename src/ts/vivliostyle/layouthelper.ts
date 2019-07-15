@@ -16,10 +16,10 @@
  *
  * @fileoverview Helper functions of Layout.
  */
-import * as base from '../adapt/base';
-import * as vtreeImpl from '../adapt/vtree';
-import * as logging from './logging';
-import {layout, vtree} from './types';
+import * as base from "../adapt/base";
+import * as vtreeImpl from "../adapt/vtree";
+import * as logging from "./logging";
+import { layout, vtree } from "./types";
 
 /**
  * Though method used to be used as a workaround for Chrome bug, it seems that
@@ -51,13 +51,13 @@ export const fixBoxesForNode = (
           top: box.top,
           left: fullBox.left,
           bottom: box.bottom,
-          right: fullBox.right,
+          right: fullBox.right
         });
         break;
       }
     }
     if (k == fullBoxes.length) {
-      logging.logger.warn('Could not fix character box');
+      logging.logger.warn("Could not fix character box");
       result.push(box);
     }
   }
@@ -138,8 +138,8 @@ export const getElementHeight = (
   const rect = column.clientLayout.getElementClientRect(element);
   const margin = column.getComputedMargin(element);
   return vertical
-    ? rect['width'] + margin['left'] + margin['right']
-    : rect['height'] + margin['top'] + margin['bottom'];
+    ? rect["width"] + margin["left"] + margin["right"]
+    : rect["height"] + margin["top"] + margin["bottom"];
 };
 
 export const isOrphan = (node: Node): boolean => {

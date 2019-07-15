@@ -17,24 +17,24 @@
  *
  * @fileoverview Adaptive Layout expressions.
  */
-import * as base from './base';
+import * as base from "./base";
 
 export type Preferences = {
-  fontFamily: string,
-  lineHeight: number,
-  margin: number,
-  hyphenate: boolean,
-  columnWidth: number,
-  horizontal: boolean,
-  nightMode: boolean,
-  spreadView: boolean,
-  pageBorder: number,
-  enabledMediaTypes: {[key: string]: boolean},
-  defaultPaperSize: {[key: string]: number}|undefined
+  fontFamily: string;
+  lineHeight: number;
+  margin: number;
+  hyphenate: boolean;
+  columnWidth: number;
+  horizontal: boolean;
+  nightMode: boolean;
+  spreadView: boolean;
+  pageBorder: number;
+  enabledMediaTypes: { [key: string]: boolean };
+  defaultPaperSize: { [key: string]: number } | undefined;
 };
 
 export const defaultPreferences = (): Preferences => ({
-  fontFamily: 'serif',
+  fontFamily: "serif",
   lineHeight: 1.25,
   margin: 8,
   hyphenate: false,
@@ -43,7 +43,7 @@ export const defaultPreferences = (): Preferences => ({
   nightMode: false,
   spreadView: false,
   pageBorder: 1,
-  enabledMediaTypes: {'print': true},
+  enabledMediaTypes: { print: true },
   defaultPaperSize: undefined
 });
 
@@ -58,14 +58,14 @@ export const clonePreferences = (pref: Preferences): Preferences => ({
   spreadView: pref.spreadView,
   pageBorder: pref.pageBorder,
   enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
-  defaultPaperSize: pref.defaultPaperSize ?
-      Object.assign({}, pref.defaultPaperSize) :
-      undefined
+  defaultPaperSize: pref.defaultPaperSize
+    ? Object.assign({}, pref.defaultPaperSize)
+    : undefined
 });
 
 export const defaultPreferencesInstance = defaultPreferences();
 
-interface Pending {};
+interface Pending {}
 type Special = Pending;
 
 /**
@@ -73,39 +73,44 @@ type Special = Pending;
  * calculated.
  */
 export const Special = {
-  PENDING: {} as Pending,
+  PENDING: {} as Pending
 };
 
-export type Result = string|number|boolean|undefined;
+export type Result = string | number | boolean | undefined;
 
-export type PendingResult = Special|Result;
+export type PendingResult = Special | Result;
 
-export const letterbox =
-    (viewW: number, viewH: number, objW: number, objH: number): string => {
-      const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
-      return `matrix(${scale},0,0,${scale},0,0)`;
-    };
+export const letterbox = (
+  viewW: number,
+  viewH: number,
+  objW: number,
+  objH: number
+): string => {
+  const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
+  return `matrix(${scale},0,0,${scale},0,0)`;
+};
 
 /**
  * @return string that can be parsed as CSS string with value str
  */
 export const cssString = (str: string): string =>
-    `"${base.escapeCSSStr(`${str}`)}"`;
+  `"${base.escapeCSSStr(`${str}`)}"`;
 
 /**
  * @return string that can be parsed as CSS name
  */
 export const cssIdent = (name: string): string =>
-    base.escapeCSSIdent(`${name}`);
+  base.escapeCSSIdent(`${name}`);
 
-export const makeQualifiedName =
-    (objName: string|null, memberName: string): string => {
-      if (objName) {
-        return `${base.escapeCSSIdent(objName)}.${
-            base.escapeCSSIdent(memberName)}`;
-      }
-      return base.escapeCSSIdent(memberName);
-    };
+export const makeQualifiedName = (
+  objName: string | null,
+  memberName: string
+): string => {
+  if (objName) {
+    return `${base.escapeCSSIdent(objName)}.${base.escapeCSSIdent(memberName)}`;
+  }
+  return base.escapeCSSIdent(memberName);
+};
 
 export let nextKeyIndex: number = 0;
 
@@ -120,13 +125,15 @@ export class LexicalScope {
   one: Const;
   _true: Const;
   _false: Const;
-  values: {[key: string]: Val} = {};
-  funcs: {[key: string]: Val} = {};
-  builtIns: {[key: string]: (...p1: Result[]) => Result} = {};
+  values: { [key: string]: Val } = {};
+  funcs: { [key: string]: Val } = {};
+  builtIns: { [key: string]: (...p1: Result[]) => Result } = {};
   resolver: (p1: string, p2: boolean) => Val;
 
   constructor(
-      parent: LexicalScope, resolver?: (p1: string, p2: boolean) => Val) {
+    parent: LexicalScope,
+    resolver?: (p1: string, p2: boolean) => Val
+  ) {
     this.parent = parent;
     this.scopeKey = `S${nextKeyIndex++}`;
     this.zero = new Const(this, 0);
@@ -140,44 +147,44 @@ export class LexicalScope {
     if (!parent) {
       // root scope
       const builtIns = this.builtIns;
-      builtIns['floor'] = Math.floor;
-      builtIns['ceil'] = Math.ceil;
-      builtIns['round'] = Math.round;
-      builtIns['sqrt'] = Math.sqrt;
-      builtIns['min'] = Math.min;
-      builtIns['max'] = Math.max;
-      builtIns['letterbox'] = letterbox;
-      builtIns['css-string'] = cssString;
-      builtIns['css-name'] = cssIdent;
-      builtIns['typeof'] = (x) => typeof x;
-      this.defineBuiltInName('page-width', function() {
+      builtIns["floor"] = Math.floor;
+      builtIns["ceil"] = Math.ceil;
+      builtIns["round"] = Math.round;
+      builtIns["sqrt"] = Math.sqrt;
+      builtIns["min"] = Math.min;
+      builtIns["max"] = Math.max;
+      builtIns["letterbox"] = letterbox;
+      builtIns["css-string"] = cssString;
+      builtIns["css-name"] = cssIdent;
+      builtIns["typeof"] = x => typeof x;
+      this.defineBuiltInName("page-width", function() {
         return this.pageWidth();
       });
-      this.defineBuiltInName('page-height', function() {
+      this.defineBuiltInName("page-height", function() {
         return this.pageHeight();
       });
-      this.defineBuiltInName('pref-font-family', function() {
+      this.defineBuiltInName("pref-font-family", function() {
         return this.pref.fontFamily;
       });
-      this.defineBuiltInName('pref-night-mode', function() {
+      this.defineBuiltInName("pref-night-mode", function() {
         return this.pref.nightMode;
       });
-      this.defineBuiltInName('pref-hyphenate', function() {
+      this.defineBuiltInName("pref-hyphenate", function() {
         return this.pref.hyphenate;
       });
-      this.defineBuiltInName('pref-margin', function() {
+      this.defineBuiltInName("pref-margin", function() {
         return this.pref.margin;
       });
-      this.defineBuiltInName('pref-line-height', function() {
+      this.defineBuiltInName("pref-line-height", function() {
         return this.pref.lineHeight;
       });
-      this.defineBuiltInName('pref-column-width', function() {
+      this.defineBuiltInName("pref-column-width", function() {
         return this.pref.columnWidth * this.fontSize;
       });
-      this.defineBuiltInName('pref-horizontal', function() {
+      this.defineBuiltInName("pref-horizontal", function() {
         return this.pref.horizontal;
       });
-      this.defineBuiltInName('pref-spread-view', function() {
+      this.defineBuiltInName("pref-spread-view", function() {
         return this.pref.spreadView;
       });
     }
@@ -202,13 +209,13 @@ export class LexicalScope {
 
 export const isAbsoluteLengthUnit = (unit: string): boolean => {
   switch (unit.toLowerCase()) {
-    case 'px':
-    case 'in':
-    case 'pt':
-    case 'pc':
-    case 'cm':
-    case 'mm':
-    case 'q':
+    case "px":
+    case "in":
+    case "pt":
+    case "pc":
+    case "cm":
+    case "mm":
+    case "q":
       return true;
     default:
       return false;
@@ -217,30 +224,30 @@ export const isAbsoluteLengthUnit = (unit: string): boolean => {
 
 export const isFontRelativeLengthUnit = (unit: string): boolean => {
   switch (unit.toLowerCase()) {
-    case 'em':
-    case 'ex':
-    case 'rem':
+    case "em":
+    case "ex":
+    case "rem":
       return true;
     default:
       return false;
   }
 };
 
-export const defaultUnitSizes: {[key: string]: number} = {
-  'px': 1,
-  'in': 96,
-  'pt': 4 / 3,
-  'pc': 96 / 6,
-  'cm': 96 / 2.54,
-  'mm': 96 / 25.4,
-  'q': 96 / 2.54 / 40,
-  'em': 16,
-  'rem': 16,
-  'ex': 8,
+export const defaultUnitSizes: { [key: string]: number } = {
+  px: 1,
+  in: 96,
+  pt: 4 / 3,
+  pc: 96 / 6,
+  cm: 96 / 2.54,
+  mm: 96 / 25.4,
+  q: 96 / 2.54 / 40,
+  em: 16,
+  rem: 16,
+  ex: 8,
   // <resolution>
-  'dppx': 1,
-  'dpi': 1 / 96,
-  'dpcm': 2.54 / 96
+  dppx: 1,
+  dpi: 1 / 96,
+  dpcm: 2.54 / 96
 };
 
 /**
@@ -248,8 +255,8 @@ export const defaultUnitSizes: {[key: string]: number} = {
  */
 export const needUnitConversion = (unit: string): boolean => {
   switch (unit) {
-    case 'q':
-    case 'rem':
+    case "q":
+    case "rem":
       return true;
     default:
       return false;
@@ -257,34 +264,36 @@ export const needUnitConversion = (unit: string): boolean => {
 };
 
 export type ScopeContext = {
-  [key: string]: Result
+  [key: string]: Result;
 };
 
 /**
  * Run-time instance of a scope and its children.
  */
 export class Context {
-  protected actualPageWidth: number|null = null;
+  protected actualPageWidth: number | null = null;
   pageWidth: () => number;
-  protected actualPageHeight: number|null = null;
+  protected actualPageHeight: number | null = null;
   pageHeight: () => number;
   initialFontSize: any;
-  rootFontSize: number|null = null;
+  rootFontSize: number | null = null;
   fontSize: any;
   pref: any;
-  scopes: {[key: string]: ScopeContext} = {};
+  scopes: { [key: string]: ScopeContext } = {};
 
   constructor(
-      public readonly rootScope: LexicalScope,
-      public readonly viewportWidth: number,
-      public readonly viewportHeight: number, fontSize: number) {
+    public readonly rootScope: LexicalScope,
+    public readonly viewportWidth: number,
+    public readonly viewportHeight: number,
+    fontSize: number
+  ) {
     this.pageWidth = function() {
       if (this.actualPageWidth) {
         return this.actualPageWidth;
       } else {
-        return this.pref.spreadView ?
-            Math.floor(viewportWidth / 2) - this.pref.pageBorder :
-            viewportWidth;
+        return this.pref.spreadView
+          ? Math.floor(viewportWidth / 2) - this.pref.pageBorder
+          : viewportWidth;
       }
     };
     this.pageHeight = function() {
@@ -322,19 +331,21 @@ export class Context {
   }
 
   queryUnitSize(unit: string, isRoot: boolean): number {
-    if (unit == 'vw') {
+    if (unit == "vw") {
       return this.pageWidth() / 100;
     }
-    if (unit == 'vh') {
+    if (unit == "vh") {
       return this.pageHeight() / 100;
     }
-    if (unit == 'em' || unit == 'rem') {
+    if (unit == "em" || unit == "rem") {
       return isRoot ? this.initialFontSize : this.fontSize();
     }
-    if (unit == 'ex') {
-      return defaultUnitSizes['ex'] *
-          (isRoot ? this.initialFontSize : this.fontSize()) /
-          defaultUnitSizes['em'];
+    if (unit == "ex") {
+      return (
+        (defaultUnitSizes["ex"] *
+          (isRoot ? this.initialFontSize : this.fontSize())) /
+        defaultUnitSizes["em"]
+      );
     }
     return defaultUnitSizes[unit];
   }
@@ -360,8 +371,11 @@ export class Context {
    * @param noBuiltInEval don't evaluate built-ins (for dependency calculations)
    */
   evalCall(
-      scope: LexicalScope, qualifiedName: string, params: Val[],
-      noBuiltInEval: boolean): Val {
+    scope: LexicalScope,
+    qualifiedName: string,
+    params: Val[],
+    noBuiltInEval: boolean
+  ): Val {
     do {
       let body = scope.funcs[qualifiedName];
       if (body) {
@@ -392,12 +406,12 @@ export class Context {
   }
 
   evalMediaName(name: string, not: boolean): boolean {
-    const enabled = name === 'all' || !!this.pref.enabledMediaTypes[name];
+    const enabled = name === "all" || !!this.pref.enabledMediaTypes[name];
     return not ? !enabled : enabled;
   }
 
   evalMediaTest(feature: string, value: Val): boolean {
-    let prefix = '';
+    let prefix = "";
     const r = feature.match(/^(min|max)-(.*)$/);
     if (r) {
       prefix = r[1];
@@ -406,38 +420,38 @@ export class Context {
     let req = null;
     let actual = null;
     switch (feature) {
-      case 'width':
-      case 'height':
-      case 'device-width':
-      case 'device-height':
-      case 'color':
+      case "width":
+      case "height":
+      case "device-width":
+      case "device-height":
+      case "color":
         if (value) {
           req = value.evaluate(this);
         }
         break;
     }
     switch (feature) {
-      case 'width':
+      case "width":
         actual = this.pageWidth();
         break;
-      case 'height':
+      case "height":
         actual = this.pageHeight();
         break;
-      case 'device-width':
+      case "device-width":
         actual = window.screen.availWidth;
         break;
-      case 'device-height':
+      case "device-height":
         actual = window.screen.availHeight;
         break;
-      case 'color':
+      case "color":
         actual = window.screen.pixelDepth;
         break;
     }
     if (actual != null && req != null) {
       switch (prefix) {
-        case 'min':
+        case "min":
           return actual >= req;
-        case 'max':
+        case "max":
           return actual <= req;
         default:
           return actual == req;
@@ -448,7 +462,7 @@ export class Context {
     return false;
   }
 
-  queryVal(scope: LexicalScope, key: string): Result|undefined {
+  queryVal(scope: LexicalScope, key: string): Result | undefined {
     const s = this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
   }
@@ -460,7 +474,7 @@ export class Context {
 
 //---------- name resolution --------------
 export type DependencyCache = {
-  [key: string]: boolean|Special
+  [key: string]: boolean | Special;
 };
 
 export class Val {
@@ -482,11 +496,11 @@ export class Val {
   }
 
   appendTo(buf: base.StringBuffer, priority: number): void {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   protected evaluateCore(context: Context): Result {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   expand(context: Context, params: Val[]): Val {
@@ -494,18 +508,24 @@ export class Val {
   }
 
   dependCore(
-      other: Val, context: Context, dependencyCache: DependencyCache): boolean {
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return other === this;
   }
 
   dependOuter(
-      other: Val, context: Context, dependencyCache: DependencyCache): boolean {
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     const cached = dependencyCache[this.key];
     if (cached != null) {
       if (cached === Special.PENDING) {
         return false;
       }
-      return (cached as boolean);
+      return cached as boolean;
     } else {
       dependencyCache[this.key] = Special.PENDING;
       const result = this.dependCore(other, context, dependencyCache);
@@ -520,7 +540,7 @@ export class Val {
 
   evaluate(context: Context): Result {
     let result = context.queryVal(this.scope, this.key);
-    if (typeof result != 'undefined') {
+    if (typeof result != "undefined") {
       return result;
     }
     result = this.evaluateCore(context);
@@ -528,7 +548,9 @@ export class Val {
     return result;
   }
 
-  isMediaName(): boolean {return false;}
+  isMediaName(): boolean {
+    return false;
+  }
 }
 
 export class Prefix extends Val {
@@ -537,11 +559,11 @@ export class Prefix extends Val {
   }
 
   protected getOp(): string {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   evalPrefix(val: Result): Result {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   /**
@@ -556,8 +578,9 @@ export class Prefix extends Val {
    * @override
    */
   dependCore(other, context, dependencyCache) {
-    return other === this ||
-        this.val.dependOuter(other, context, dependencyCache);
+    return (
+      other === this || this.val.dependOuter(other, context, dependencyCache)
+    );
   }
 
   /**
@@ -565,12 +588,12 @@ export class Prefix extends Val {
    */
   appendTo(buf, priority) {
     if (10 < priority) {
-      buf.append('(');
+      buf.append("(");
     }
     buf.append(this.getOp());
     this.val.appendTo(buf, 10);
     if (10 < priority) {
-      buf.append(')');
+      buf.append(")");
     }
   }
 
@@ -593,15 +616,15 @@ export class Infix extends Val {
   }
 
   getPriority(): number {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   getOp(): string {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   evalInfix(lhs: Result, rhs: Result): Result {
-    throw new Error('F_ABSTRACT');
+    throw new Error("F_ABSTRACT");
   }
 
   /**
@@ -617,9 +640,11 @@ export class Infix extends Val {
    * @override
    */
   dependCore(other, context, dependencyCache) {
-    return other === this ||
-        this.lhs.dependOuter(other, context, dependencyCache) ||
-        this.rhs.dependOuter(other, context, dependencyCache);
+    return (
+      other === this ||
+      this.lhs.dependOuter(other, context, dependencyCache) ||
+      this.rhs.dependOuter(other, context, dependencyCache)
+    );
   }
 
   /**
@@ -628,13 +653,13 @@ export class Infix extends Val {
   appendTo(buf, priority) {
     const thisPriority = this.getPriority();
     if (thisPriority <= priority) {
-      buf.append('(');
+      buf.append("(");
     }
     this.lhs.appendTo(buf, thisPriority);
     buf.append(this.getOp());
     this.rhs.appendTo(buf, thisPriority);
     if (thisPriority <= priority) {
-      buf.append(')');
+      buf.append(")");
     }
   }
 
@@ -660,7 +685,9 @@ export class Logical extends Infix {
   /**
    * @override
    */
-  getPriority() {return 1;}
+  getPriority() {
+    return 1;
+  }
 }
 
 export class Comparison extends Infix {
@@ -671,7 +698,9 @@ export class Comparison extends Infix {
   /**
    * @override
    */
-  getPriority() {return 2;}
+  getPriority() {
+    return 2;
+  }
 }
 
 export class Additive extends Infix {
@@ -682,7 +711,9 @@ export class Additive extends Infix {
   /**
    * @override
    */
-  getPriority() {return 3;}
+  getPriority() {
+    return 3;
+  }
 }
 
 export class Multiplicative extends Infix {
@@ -693,7 +724,9 @@ export class Multiplicative extends Infix {
   /**
    * @override
    */
-  getPriority() {return 4;}
+  getPriority() {
+    return 4;
+  }
 }
 
 export class Not extends Prefix {
@@ -704,12 +737,16 @@ export class Not extends Prefix {
   /**
    * @override
    */
-  getOp() {return '!';}
+  getOp() {
+    return "!";
+  }
 
   /**
    * @override
    */
-  evalPrefix(val) {return !val;}
+  evalPrefix(val) {
+    return !val;
+  }
 }
 
 export class Negate extends Prefix {
@@ -720,12 +757,16 @@ export class Negate extends Prefix {
   /**
    * @override
    */
-  getOp() {return '-';}
+  getOp() {
+    return "-";
+  }
 
   /**
    * @override
    */
-  evalPrefix(val) {return - val;}
+  evalPrefix(val) {
+    return -val;
+  }
 }
 
 export class And extends Logical {
@@ -736,7 +777,9 @@ export class And extends Logical {
   /**
    * @override
    */
-  getOp() {return '&&';}
+  getOp() {
+    return "&&";
+  }
 
   /**
    * @override
@@ -754,7 +797,9 @@ export class AndMedia extends And {
   /**
    * @override
    */
-  getOp() {return ' and ';}
+  getOp() {
+    return " and ";
+  }
 }
 
 export class Or extends Logical {
@@ -765,7 +810,9 @@ export class Or extends Logical {
   /**
    * @override
    */
-  getOp() {return '||';}
+  getOp() {
+    return "||";
+  }
 
   /**
    * @override
@@ -783,7 +830,9 @@ export class OrMedia extends Or {
   /**
    * @override
    */
-  getOp() {return ', ';}
+  getOp() {
+    return ", ";
+  }
 }
 
 export class Lt extends Comparison {
@@ -794,12 +843,16 @@ export class Lt extends Comparison {
   /**
    * @override
    */
-  getOp() {return '<';}
+  getOp() {
+    return "<";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs < rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs < rhs;
+  }
 }
 
 export class Le extends Comparison {
@@ -810,12 +863,16 @@ export class Le extends Comparison {
   /**
    * @override
    */
-  getOp() {return '<=';}
+  getOp() {
+    return "<=";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs <= rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs <= rhs;
+  }
 }
 
 export class Gt extends Comparison {
@@ -826,12 +883,16 @@ export class Gt extends Comparison {
   /**
    * @override
    */
-  getOp() {return '>';}
+  getOp() {
+    return ">";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs > rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs > rhs;
+  }
 }
 
 export class Ge extends Comparison {
@@ -842,12 +903,16 @@ export class Ge extends Comparison {
   /**
    * @override
    */
-  getOp() {return '>=';}
+  getOp() {
+    return ">=";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs >= rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs >= rhs;
+  }
 }
 
 export class Eq extends Comparison {
@@ -858,12 +923,16 @@ export class Eq extends Comparison {
   /**
    * @override
    */
-  getOp() {return '==';}
+  getOp() {
+    return "==";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs == rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs == rhs;
+  }
 }
 
 export class Ne extends Comparison {
@@ -874,12 +943,16 @@ export class Ne extends Comparison {
   /**
    * @override
    */
-  getOp() {return '!=';}
+  getOp() {
+    return "!=";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs != rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs != rhs;
+  }
 }
 
 export class Add extends Additive {
@@ -890,12 +963,16 @@ export class Add extends Additive {
   /**
    * @override
    */
-  getOp() {return '+';}
+  getOp() {
+    return "+";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs + rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs + rhs;
+  }
 }
 
 export class Subtract extends Additive {
@@ -906,12 +983,16 @@ export class Subtract extends Additive {
   /**
    * @override
    */
-  getOp() {return ' - ';}
+  getOp() {
+    return " - ";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs - rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs - rhs;
+  }
 }
 
 export class Multiply extends Multiplicative {
@@ -922,12 +1003,16 @@ export class Multiply extends Multiplicative {
   /**
    * @override
    */
-  getOp() {return '*';}
+  getOp() {
+    return "*";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs * rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs * rhs;
+  }
 }
 
 export class Divide extends Multiplicative {
@@ -938,12 +1023,16 @@ export class Divide extends Multiplicative {
   /**
    * @override
    */
-  getOp() {return '/';}
+  getOp() {
+    return "/";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs / rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs / rhs;
+  }
 }
 
 export class Modulo extends Multiplicative {
@@ -954,12 +1043,16 @@ export class Modulo extends Multiplicative {
   /**
    * @override
    */
-  getOp() {return '%';}
+  getOp() {
+    return "%";
+  }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {return lhs % rhs;}
+  evalInfix(lhs, rhs) {
+    return lhs % rhs;
+  }
 }
 
 /**
@@ -1019,9 +1112,12 @@ export class Named extends Val {
    * @override
    */
   dependCore(other, context, dependencyCache) {
-    return other === this ||
-        context.evalName(this.scope, this.qualifiedName)
-            .dependOuter(other, context, dependencyCache);
+    return (
+      other === this ||
+      context
+        .evalName(this.scope, this.qualifiedName)
+        .dependOuter(other, context, dependencyCache)
+    );
   }
 }
 
@@ -1042,7 +1138,7 @@ export class MediaName extends Val {
    */
   appendTo(buf, priority) {
     if (this.not) {
-      buf.append('not ');
+      buf.append("not ");
     }
     buf.append(base.escapeCSSIdent(this.name));
   }
@@ -1058,14 +1154,17 @@ export class MediaName extends Val {
    * @override
    */
   dependCore(other, context, dependencyCache) {
-    return other === this ||
-        this.value.dependOuter(other, context, dependencyCache);
+    return (
+      other === this || this.value.dependOuter(other, context, dependencyCache)
+    );
   }
 
   /**
    * @override
    */
-  isMediaName() {return true;}
+  isMediaName() {
+    return true;
+  }
 }
 
 /**
@@ -1077,7 +1176,10 @@ export class MediaName extends Val {
  */
 export class Native extends Val {
   constructor(
-      scope: LexicalScope, public fn: () => Result, public str: string) {
+    scope: LexicalScope,
+    public fn: () => Result,
+    public str: string
+  ) {
     super(scope);
   }
 
@@ -1097,33 +1199,36 @@ export class Native extends Val {
 }
 
 export const appendValArray = (buf: base.StringBuffer, arr: Val[]): void => {
-  buf.append('(');
+  buf.append("(");
   for (let i = 0; i < arr.length; i++) {
     if (i) {
-      buf.append(',');
+      buf.append(",");
     }
     arr[i].appendTo(buf, 0);
   }
-  buf.append(')');
+  buf.append(")");
 };
 
-export const expandValArray =
-    (context: Context, arr: Val[], params: Val[]): Val[] => {
-      let expanded: Val[] = arr;
-      for (let i = 0; i < arr.length; i++) {
-        const p = arr[i].expand(context, params);
-        if (arr !== expanded) {
-          expanded[i] = p;
-        } else if (p !== arr[i]) {
-          expanded = Array(arr.length);
-          for (let j = 0; j < i; j++) {
-            expanded[j] = arr[j];
-          }
-          expanded[i] = p;
-        }
+export const expandValArray = (
+  context: Context,
+  arr: Val[],
+  params: Val[]
+): Val[] => {
+  let expanded: Val[] = arr;
+  for (let i = 0; i < arr.length; i++) {
+    const p = arr[i].expand(context, params);
+    if (arr !== expanded) {
+      expanded[i] = p;
+    } else if (p !== arr[i]) {
+      expanded = Array(arr.length);
+      for (let j = 0; j < i; j++) {
+        expanded[j] = arr[j];
       }
-      return expanded;
-    };
+      expanded[i] = p;
+    }
+  }
+  return expanded;
+};
 
 export const evalValArray = (context: Context, arr: Val[]): Result[] => {
   const result: Result[] = Array(arr.length);
@@ -1135,7 +1240,10 @@ export const evalValArray = (context: Context, arr: Val[]): Result[] => {
 
 export class Call extends Val {
   constructor(
-      scope: LexicalScope, public qualifiedName: string, public params: Val[]) {
+    scope: LexicalScope,
+    public qualifiedName: string,
+    public params: Val[]
+  ) {
     super(scope);
   }
 
@@ -1151,8 +1259,12 @@ export class Call extends Val {
    * @override
    */
   evaluateCore(context) {
-    const body =
-        context.evalCall(this.scope, this.qualifiedName, this.params, false);
+    const body = context.evalCall(
+      this.scope,
+      this.qualifiedName,
+      this.params,
+      false
+    );
     return body.expand(context, this.params).evaluate(context);
   }
 
@@ -1168,8 +1280,12 @@ export class Call extends Val {
         return true;
       }
     }
-    const body =
-        context.evalCall(this.scope, this.qualifiedName, this.params, true);
+    const body = context.evalCall(
+      this.scope,
+      this.qualifiedName,
+      this.params,
+      true
+    );
 
     // No expansion here!
     return body.dependOuter(other, context, dependencyCache);
@@ -1189,8 +1305,11 @@ export class Call extends Val {
 
 export class Cond extends Val {
   constructor(
-      scope: LexicalScope, public cond: Val, public ifTrue: Val,
-      public ifFalse: Val) {
+    scope: LexicalScope,
+    public cond: Val,
+    public ifTrue: Val,
+    public ifFalse: Val
+  ) {
     super(scope);
   }
 
@@ -1199,15 +1318,15 @@ export class Cond extends Val {
    */
   appendTo(buf, priority) {
     if (priority > 0) {
-      buf.append('(');
+      buf.append("(");
     }
     this.cond.appendTo(buf, 0);
-    buf.append('?');
+    buf.append("?");
     this.ifTrue.appendTo(buf, 0);
-    buf.append(':');
+    buf.append(":");
     this.ifFalse.appendTo(buf, 0);
     if (priority > 0) {
-      buf.append(')');
+      buf.append(")");
     }
   }
 
@@ -1226,10 +1345,12 @@ export class Cond extends Val {
    * @override
    */
   dependCore(other, context, dependencyCache) {
-    return other === this ||
-        this.cond.dependOuter(other, context, dependencyCache) ||
-        this.ifTrue.dependOuter(other, context, dependencyCache) ||
-        this.ifFalse.dependOuter(other, context, dependencyCache);
+    return (
+      other === this ||
+      this.cond.dependOuter(other, context, dependencyCache) ||
+      this.ifTrue.dependOuter(other, context, dependencyCache) ||
+      this.ifFalse.dependOuter(other, context, dependencyCache)
+    );
   }
 
   /**
@@ -1239,8 +1360,11 @@ export class Cond extends Val {
     const cond = this.cond.expand(context, params);
     const ifTrue = this.ifTrue.expand(context, params);
     const ifFalse = this.ifFalse.expand(context, params);
-    if (cond === this.cond && ifTrue === this.ifTrue &&
-        ifFalse === this.ifFalse) {
+    if (
+      cond === this.cond &&
+      ifTrue === this.ifTrue &&
+      ifFalse === this.ifFalse
+    ) {
       return this;
     }
     const r = new Cond(this.scope, cond, ifTrue, ifFalse);
@@ -1261,17 +1385,17 @@ export class Const extends Val {
    */
   appendTo(buf, priority) {
     switch (typeof this.val) {
-      case 'number':
-      case 'boolean':
+      case "number":
+      case "boolean":
         buf.append(this.val.toString());
         break;
-      case 'string':
+      case "string":
         buf.append('"');
         buf.append(base.escapeCSSStr(this.val));
         buf.append('"');
         break;
       default:
-        throw new Error('F_UNEXPECTED_STATE');
+        throw new Error("F_UNEXPECTED_STATE");
     }
   }
 
@@ -1297,11 +1421,11 @@ export class MediaTest extends Val {
    * @override
    */
   appendTo(buf, priority) {
-    buf.append('(');
+    buf.append("(");
     buf.append(base.escapeCSSStr(this.name.name));
-    buf.append(':');
+    buf.append(":");
     this.value.appendTo(buf, 0);
-    buf.append(')');
+    buf.append(")");
   }
 
   /**
@@ -1315,8 +1439,9 @@ export class MediaTest extends Val {
    * @override
    */
   dependCore(other, context, dependencyCache) {
-    return other === this ||
-        this.value.dependOuter(other, context, dependencyCache);
+    return (
+      other === this || this.value.dependOuter(other, context, dependencyCache)
+    );
   }
 
   /**
@@ -1344,7 +1469,7 @@ export class Param extends Val {
    * @override
    */
   appendTo(buf, priority) {
-    buf.append('$');
+    buf.append("$");
     buf.append(this.index.toString());
   }
 
@@ -1356,13 +1481,17 @@ export class Param extends Val {
     if (!v) {
       throw new Error(`Parameter missing: ${this.index}`);
     }
-    return (v as Val);
+    return v as Val;
   }
 }
 
 export const and = (scope: LexicalScope, v1: Val, v2: Val): Val => {
-  if (v1 === scope._false || v1 === scope.zero || v2 == scope._false ||
-      v2 == scope.zero) {
+  if (
+    v1 === scope._false ||
+    v1 === scope.zero ||
+    v2 == scope._false ||
+    v2 == scope.zero
+  ) {
     return scope._false;
   }
   if (v1 === scope._true || v1 === scope.one) {

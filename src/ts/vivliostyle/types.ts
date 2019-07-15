@@ -16,24 +16,24 @@
  *
  * @fileoverview Type definiions.
  */
-import * as base from '../adapt/base';
-import * as css from '../adapt/css';
-import * as expr from '../adapt/expr';
-import * as geom from '../adapt/geom';
-import * as task from '../adapt/task';
-import * as taskutil from '../adapt/taskutil';
-import * as diff from './diff';
+import * as base from "../adapt/base";
+import * as css from "../adapt/css";
+import * as expr from "../adapt/expr";
+import * as geom from "../adapt/geom";
+import * as task from "../adapt/task";
+import * as taskutil from "../adapt/taskutil";
+import * as diff from "./diff";
 
 export type FormattingContextType =
-  'Block' |
-  'RepetitiveElementsOwner' |
-  'Table';
+  | "Block"
+  | "RepetitiveElementsOwner"
+  | "Table";
 
 export type FragmentLayoutConstraintType =
-  'AfterIfContinue' |
-  'EntireTable' |
-  'RepetitiveElementsOwner' |
-  'TableRow';
+  | "AfterIfContinue"
+  | "EntireTable"
+  | "RepetitiveElementsOwner"
+  | "TableRow";
 
 export namespace csscasc {
   export interface ElementStyle {}
@@ -63,14 +63,21 @@ export namespace layout {
   export interface FragmentLayoutConstraint {
     flagmentLayoutConstraintType: FragmentLayoutConstraintType;
     allowLayout(
-        nodeContext: vtree.NodeContext, overflownNodeContext: vtree.NodeContext,
-        column: Column): boolean;
+      nodeContext: vtree.NodeContext,
+      overflownNodeContext: vtree.NodeContext,
+      column: Column
+    ): boolean;
     nextCandidate(nodeContext: vtree.NodeContext): boolean;
     postLayout(
-        allowed: boolean, positionAfter: vtree.NodeContext,
-        initialPosition: vtree.NodeContext, column: Column);
-    finishBreak(nodeContext: vtree.NodeContext, column: Column):
-        task.Result<boolean>;
+      allowed: boolean,
+      positionAfter: vtree.NodeContext,
+      initialPosition: vtree.NodeContext,
+      column: Column
+    );
+    finishBreak(
+      nodeContext: vtree.NodeContext,
+      column: Column
+    ): task.Result<boolean>;
     equalsTo(constraint: FragmentLayoutConstraint): boolean;
     getPriorityOfFinishBreak(): number;
   }
@@ -95,10 +102,9 @@ export namespace layout {
     getNodeContext(): vtree.NodeContext;
   }
 
-
   export type BreakPositionAndNodeContext = {
-    breakPosition: BreakPosition,
-    nodeContext: vtree.NodeContext
+    breakPosition: BreakPosition;
+    nodeContext: vtree.NodeContext;
   };
 
   /**
@@ -118,7 +124,7 @@ export namespace layout {
   export interface EdgeBreakPosition extends AbstractBreakPosition {
     overflowIfRepetitiveElementsDropped: boolean;
     readonly position: vtree.NodeContext;
-    readonly breakOnEdge: string|null;
+    readonly breakOnEdge: string | null;
     overflows: boolean;
     readonly computedBlockSize: number;
   }
@@ -532,9 +538,9 @@ export namespace layout {
   }
 
   export type SinglePageFloatLayoutResult = {
-    floatArea: PageFloatArea|null,
-    pageFloatFragment: pagefloat.PageFloatFragment|null,
-    newPosition: vtree.ChunkPosition|null
+    floatArea: PageFloatArea | null;
+    pageFloatFragment: pagefloat.PageFloatFragment | null;
+    newPosition: vtree.ChunkPosition | null;
   };
 
   /**
@@ -542,18 +548,30 @@ export namespace layout {
    */
   export interface TextNodeBreaker {
     breakTextNode(
-        textNode: Text, nodeContext: vtree.NodeContext, low: number,
-        checkPoints: vtree.NodeContext[], checkpointIndex: number,
-        force: boolean): vtree.NodeContext;
+      textNode: Text,
+      nodeContext: vtree.NodeContext,
+      low: number,
+      checkPoints: vtree.NodeContext[],
+      checkpointIndex: number,
+      force: boolean
+    ): vtree.NodeContext;
     breakAfterSoftHyphen(
-        textNode: Text, text: string, viewIndex: number,
-        nodeContext: vtree.NodeContext): number;
+      textNode: Text,
+      text: string,
+      viewIndex: number,
+      nodeContext: vtree.NodeContext
+    ): number;
     breakAfterOtherCharacter(
-        textNode: Text, text: string, viewIndex: number,
-        nodeContext: vtree.NodeContext): number;
+      textNode: Text,
+      text: string,
+      viewIndex: number,
+      nodeContext: vtree.NodeContext
+    ): number;
     updateNodeContext(
-        nodeContext: vtree.NodeContext, viewIndex: number,
-        textNode: Text): vtree.NodeContext;
+      nodeContext: vtree.NodeContext,
+      viewIndex: number,
+      textNode: Text
+    ): vtree.NodeContext;
   }
 
   export interface LayoutMode {
@@ -582,24 +600,23 @@ export namespace layout {
 }
 
 export namespace layoutprocessor {
-
   export interface BlockFormattingContext extends vtree.FormattingContext {}
 
-  export function isInstanceOfBlockFormattingContext(object: vtree.FormattingContext):
-      object is BlockFormattingContext {
-    return object && object.formattingContextType === 'Block';
+  export function isInstanceOfBlockFormattingContext(
+    object: vtree.FormattingContext
+  ): object is BlockFormattingContext {
+    return object && object.formattingContextType === "Block";
   }
 }
 
 export namespace net {
-
   export type Response = {
-    status: number,
-    url: string,
-    contentType: string|null,
-    responseText: string|null,
-    responseXML: Document,
-    responseBlob: Blob
+    status: number;
+    url: string;
+    contentType: string | null;
+    responseText: string | null;
+    responseXML: Document;
+    responseBlob: Blob;
   };
 
   export interface ResourceStore<Resource> {
@@ -637,23 +654,23 @@ export namespace pagefloat {
    * @enum {string}
    */
   export enum FloatReference {
-    INLINE = 'inline',
-    COLUMN = 'column',
-    REGION = 'region',
-    PAGE = 'page',
+    INLINE = "inline",
+    COLUMN = "column",
+    REGION = "region",
+    PAGE = "page"
   }
 
   export type PageFloatID = string;
 
   export interface PageFloat {
-    order: number|null;
-    id: PageFloatID|null;
+    order: number | null;
+    id: PageFloatID | null;
     readonly nodePosition: vtree.NodePosition;
     readonly floatReference: FloatReference;
     readonly floatSide: string;
-    readonly clearSide: string|null;
+    readonly clearSide: string | null;
     readonly flowName: string;
-    readonly floatMinWrapBlock: css.Numeric|null;
+    readonly floatMinWrapBlock: css.Numeric | null;
 
     getOrder(): number;
     getId(): PageFloatID;
@@ -669,7 +686,7 @@ export namespace pagefloat {
     readonly continues: boolean;
 
     hasFloat(float: PageFloat): boolean;
-    findNotAllowedFloat(context: PageFloatLayoutContext): PageFloat|null;
+    findNotAllowedFloat(context: PageFloatLayoutContext): PageFloat | null;
     getOuterShape(): geom.Shape;
     getOuterRect(): geom.Rect;
     getOrder(): number;
@@ -682,11 +699,11 @@ export namespace pagefloat {
     readonly float: PageFloat;
     readonly nodePosition: vtree.NodePosition;
 
-    equals(other: PageFloatContinuation|null): boolean;
+    equals(other: PageFloatContinuation | null): boolean;
   }
 
   export type PageFloatPlacementCondition = {
-    [key: string]: boolean
+    [key: string]: boolean;
   };
 
   export interface PageFloatLayoutContext {
@@ -694,28 +711,45 @@ export namespace pagefloat {
     direction: css.Val;
     floatFragments: PageFloatFragment[];
     readonly parent: PageFloatLayoutContext;
-    readonly flowName: string|null;
-    readonly generatingNodePosition: vtree.NodePosition|null;
+    readonly flowName: string | null;
+    readonly generatingNodePosition: vtree.NodePosition | null;
 
     getContainer(floatReference?: FloatReference): vtree.Container;
     setContainer(container: vtree.Container);
     addPageFloat(float: PageFloat): void;
-    getPageFloatLayoutContext(floatReference: FloatReference): PageFloatLayoutContext;
-    findPageFloatByNodePosition(nodePosition: vtree.NodePosition): PageFloat|null;
+    getPageFloatLayoutContext(
+      floatReference: FloatReference
+    ): PageFloatLayoutContext;
+    findPageFloatByNodePosition(
+      nodePosition: vtree.NodePosition
+    ): PageFloat | null;
     isForbidden(float: PageFloat): boolean;
-    addPageFloatFragment(floatFragment: PageFloatFragment, dontInvalidate?: boolean): void;
-    removePageFloatFragment(floatFragment: PageFloatFragment, dontInvalidate?: boolean): void;
-    findPageFloatFragment(float: PageFloat): PageFloatFragment|null;
+    addPageFloatFragment(
+      floatFragment: PageFloatFragment,
+      dontInvalidate?: boolean
+    ): void;
+    removePageFloatFragment(
+      floatFragment: PageFloatFragment,
+      dontInvalidate?: boolean
+    ): void;
+    findPageFloatFragment(float: PageFloat): PageFloatFragment | null;
     hasFloatFragments(condition?: (p1: PageFloatFragment) => boolean): boolean;
     hasContinuingFloatFragmentsInFlow(flowName: string): boolean;
     registerPageFloatAnchor(float: PageFloat, anchorViewNode: Node): void;
     collectPageFloatAnchors(): any;
     isAnchorAlreadyAppeared(floatId: PageFloatID): boolean;
     deferPageFloat(continuation: PageFloatContinuation): void;
-    hasPrecedingFloatsDeferredToNext(float: PageFloat, ignoreReference?: boolean): boolean;
-    getLastFollowingFloatInFragments(float: PageFloat): PageFloat|null;
-    getDeferredPageFloatContinuations(flowName?: string|null): PageFloatContinuation[];
-    getPageFloatContinuationsDeferredToNext(flowName?: string|null): PageFloatContinuation[];
+    hasPrecedingFloatsDeferredToNext(
+      float: PageFloat,
+      ignoreReference?: boolean
+    ): boolean;
+    getLastFollowingFloatInFragments(float: PageFloat): PageFloat | null;
+    getDeferredPageFloatContinuations(
+      flowName?: string | null
+    ): PageFloatContinuation[];
+    getPageFloatContinuationsDeferredToNext(
+      flowName?: string | null
+    ): PageFloatContinuation[];
     getFloatsDeferredToNextInChildContexts(): PageFloat[];
     checkAndForbidNotAllowedFloat(): boolean;
     checkAndForbidFloatFollowingDeferredFloat(): boolean;
@@ -730,7 +764,9 @@ export namespace pagefloat {
     stashEndFloatFragments(float: PageFloat): void;
     restoreStashedFragments(floatReference: FloatReference): void;
     discardStashedFragments(floatReference: FloatReference): void;
-    getStashedFloatFragments(floatReference: FloatReference): PageFloatFragment[];
+    getStashedFloatFragments(
+      floatReference: FloatReference
+    ): PageFloatFragment[];
     /**
      * @param anchorEdge Null indicates that the anchor is not in the current
      *     container.
@@ -738,18 +774,28 @@ export namespace pagefloat {
      *     indicates that the float area does not fit inside the container
      */
     setFloatAreaDimensions(
-        area: layout.PageFloatArea, floatReference: FloatReference, floatSide: string,
-        anchorEdge: number|null, init: boolean, force: boolean,
-        condition: PageFloatPlacementCondition): string|null;
+      area: layout.PageFloatArea,
+      floatReference: FloatReference,
+      floatSide: string,
+      anchorEdge: number | null,
+      init: boolean,
+      force: boolean,
+      condition: PageFloatPlacementCondition
+    ): string | null;
     getFloatFragmentExclusions(): geom.Shape[];
     getMaxReachedAfterEdge(): number;
     getBlockStartEdgeOfBlockEndFloats(): number;
     getPageFloatClearEdge(clear: string, column: layout.Column): number;
     getPageFloatPlacementCondition(
-        float: PageFloat, floatSide: string,
-        clearSide: string|null): PageFloatPlacementCondition;
+      float: PageFloat,
+      floatSide: string,
+      clearSide: string | null
+    ): PageFloatPlacementCondition;
     getLayoutConstraints(): layout.LayoutConstraint[];
-    addLayoutConstraint(layoutConstraint: layout.LayoutConstraint, floatReference: FloatReference): void;
+    addLayoutConstraint(
+      layoutConstraint: layout.LayoutConstraint,
+      floatReference: FloatReference
+    ): void;
     getMaxBlockSizeOfPageFloats(): number;
     lock(): void;
     unlock(): void;
@@ -760,18 +806,25 @@ export namespace pagefloat {
     appliesToNodeContext(nodeContext: vtree.NodeContext): boolean;
     appliesToFloat(float: PageFloat): boolean;
     createPageFloat(
-        nodeContext: vtree.NodeContext,
-        pageFloatLayoutContext: PageFloatLayoutContext,
-        column: layout.Column): task.Result<PageFloat>;
+      nodeContext: vtree.NodeContext,
+      pageFloatLayoutContext: PageFloatLayoutContext,
+      column: layout.Column
+    ): task.Result<PageFloat>;
     createPageFloatFragment(
-        continuations: PageFloatContinuation[], logicalFloatSide: string,
-        floatArea: layout.PageFloatArea, continues: boolean): PageFloatFragment;
+      continuations: PageFloatContinuation[],
+      logicalFloatSide: string,
+      floatArea: layout.PageFloatArea,
+      continues: boolean
+    ): PageFloatFragment;
     findPageFloatFragment(
-        float: PageFloat,
-        pageFloatLayoutContext: PageFloatLayoutContext): PageFloatFragment|null;
+      float: PageFloat,
+      pageFloatLayoutContext: PageFloatLayoutContext
+    ): PageFloatFragment | null;
     adjustPageFloatArea(
-        floatArea: layout.PageFloatArea, floatContainer: vtree.Container,
-        column: layout.Column);
+      floatArea: layout.PageFloatArea,
+      floatContainer: vtree.Container,
+      column: layout.Column
+    );
     forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext);
   }
 }
@@ -787,7 +840,8 @@ export namespace selector {
     ): task.Result<Element>;
   }
 
-  export interface AfterIfContinuesLayoutConstraint extends layout.FragmentLayoutConstraint {
+  export interface AfterIfContinuesLayoutConstraint
+    extends layout.FragmentLayoutConstraint {
     nodeContext: any;
     afterIfContinues: any;
     pseudoElementHeight: any;
@@ -795,12 +849,14 @@ export namespace selector {
     getRepetitiveElements(): AfterIfContinuesElementsOffset;
   }
 
-  export function isInstanceOfAfterIfContinuesLayoutConstraint(object: layout.FragmentLayoutConstraint):
-      object is AfterIfContinuesLayoutConstraint {
-    return object && object.flagmentLayoutConstraintType == 'AfterIfContinue';
+  export function isInstanceOfAfterIfContinuesLayoutConstraint(
+    object: layout.FragmentLayoutConstraint
+  ): object is AfterIfContinuesLayoutConstraint {
+    return object && object.flagmentLayoutConstraintType == "AfterIfContinue";
   }
 
-  export interface AfterIfContinuesElementsOffset extends repetitiveelement.ElementsOffset {
+  export interface AfterIfContinuesElementsOffset
+    extends repetitiveelement.ElementsOffset {
     nodeContext: any;
     pseudoElementHeight: any;
 
@@ -820,25 +876,31 @@ export namespace pseudoelement {
 }
 
 export namespace repetitiveelement {
-  export interface RepetitiveElementsOwnerFormattingContext extends vtree.FormattingContext {
+  export interface RepetitiveElementsOwnerFormattingContext
+    extends vtree.FormattingContext {
     isRoot: boolean;
     repetitiveElements: RepetitiveElements;
     readonly parent: vtree.FormattingContext;
     readonly rootSourceNode: Element;
     getRepetitiveElements(): RepetitiveElements;
-    getRootViewNode(position: vtree.NodeContext): Element|null ;
-    getRootNodeContext(nodeContext: vtree.NodeContext): vtree.NodeContext|null;
+    getRootViewNode(position: vtree.NodeContext): Element | null;
+    getRootNodeContext(
+      nodeContext: vtree.NodeContext
+    ): vtree.NodeContext | null;
     initializeRepetitiveElements(vertical: boolean): void;
   }
 
-  export function isInstanceOfRepetitiveElementsOwnerFormattingContext(object: vtree.FormattingContext):
-      object is RepetitiveElementsOwnerFormattingContext {
+  export function isInstanceOfRepetitiveElementsOwnerFormattingContext(
+    object: vtree.FormattingContext
+  ): object is RepetitiveElementsOwnerFormattingContext {
     if (!object) {
       return false;
     }
     const type = object.formattingContextType;
-    return type === 'RepetitiveElementsOwner'
-      || table.isInstanceOfTableFormattingContext(object); // subset
+    return (
+      type === "RepetitiveElementsOwner" ||
+      table.isInstanceOfTableFormattingContext(object)
+    ); // subset
   }
 
   export interface ElementsOffset {
@@ -852,8 +914,8 @@ export namespace repetitiveelement {
     enableSkippingFooter: boolean;
     enableSkippingHeader: boolean;
     doneInitialLayout: boolean;
-    firstContentSourceNode: Element|null;
-    lastContentSourceNode: Element|null;
+    firstContentSourceNode: Element | null;
+    lastContentSourceNode: Element | null;
     allowInsert: any;
     allowInsertRepeatitiveElements: any;
     ownerSourceNode: Element;
@@ -863,15 +925,22 @@ export namespace repetitiveelement {
     updateHeight(column: layout.Column): void;
     prepareLayoutFragment(): void;
     appendHeaderToFragment(
-        rootNodeContext: vtree.NodeContext, firstChild: Node|null,
-        column: layout.Column): task.Result<boolean>;
+      rootNodeContext: vtree.NodeContext,
+      firstChild: Node | null,
+      column: layout.Column
+    ): task.Result<boolean>;
     appendFooterToFragment(
-        rootNodeContext: vtree.NodeContext, firstChild: Node|null,
-        column: layout.Column): task.Result<boolean>;
+      rootNodeContext: vtree.NodeContext,
+      firstChild: Node | null,
+      column: layout.Column
+    ): task.Result<boolean>;
     appendElementToFragment(
-        nodePosition: vtree.NodePosition, rootNodeContext: vtree.NodeContext,
-        firstChild: Node|null, column: layout.Column): task.Result<boolean>;
-    moveChildren(from: Element, to: Element, firstChild: Node|null): void;
+      nodePosition: vtree.NodePosition,
+      rootNodeContext: vtree.NodeContext,
+      firstChild: Node | null,
+      column: layout.Column
+    ): task.Result<boolean>;
+    moveChildren(from: Element, to: Element, firstChild: Node | null): void;
     isAfterLastContent(nodeContext: vtree.NodeContext): boolean;
     isFirstContentNode(nodeContext: vtree.NodeContext): boolean;
     isEnableToUpdateState(): boolean;
@@ -884,57 +953,65 @@ export namespace repetitiveelement {
     isFooterSourceNode(node: Node): boolean;
   }
 
-  export interface RepetitiveElementsOwnerLayoutConstraint extends layout.FragmentLayoutConstraint {
+  export interface RepetitiveElementsOwnerLayoutConstraint
+    extends layout.FragmentLayoutConstraint {
     getRepetitiveElements(): RepetitiveElements;
   }
 
-  export function isInstanceOfRepetitiveElementsOwnerLayoutConstraint(object: layout.FragmentLayoutConstraint):
-      object is RepetitiveElementsOwnerLayoutConstraint {
+  export function isInstanceOfRepetitiveElementsOwnerLayoutConstraint(
+    object: layout.FragmentLayoutConstraint
+  ): object is RepetitiveElementsOwnerLayoutConstraint {
     if (!object) {
       return false;
     }
     const type = object.flagmentLayoutConstraintType;
-    return type === 'RepetitiveElementsOwner'
-      || table.isInstanceOfTableRowLayoutConstraint(object); // subset
+    return (
+      type === "RepetitiveElementsOwner" ||
+      table.isInstanceOfTableRowLayoutConstraint(object)
+    ); // subset
   }
 }
 
 export namespace table {
-
-  export interface TableFormattingContext extends repetitiveelement.RepetitiveElementsOwnerFormattingContext {
+  export interface TableFormattingContext
+    extends repetitiveelement.RepetitiveElementsOwnerFormattingContext {
     // FIXME
   }
 
-  export function isInstanceOfTableFormattingContext(object: vtree.FormattingContext):
-      object is TableFormattingContext {
-    return object && object.formattingContextType === 'Table';
+  export function isInstanceOfTableFormattingContext(
+    object: vtree.FormattingContext
+  ): object is TableFormattingContext {
+    return object && object.formattingContextType === "Table";
   }
 
-  export interface TableRowLayoutConstraint extends repetitiveelement.RepetitiveElementsOwnerLayoutConstraint {
+  export interface TableRowLayoutConstraint
+    extends repetitiveelement.RepetitiveElementsOwnerLayoutConstraint {
     cellFragmentLayoutConstraints: {
-      constraints: layout.FragmentLayoutConstraint[],
-      breakPosition: vtree.NodeContext
+      constraints: layout.FragmentLayoutConstraint[];
+      breakPosition: vtree.NodeContext;
     }[];
 
     removeDummyRowNodes(nodeContext: vtree.NodeContext): void;
-    getElementsOffsetsForTableCell(column: layout.Column): repetitiveelement.ElementsOffset[];
+    getElementsOffsetsForTableCell(
+      column: layout.Column
+    ): repetitiveelement.ElementsOffset[];
   }
 
-  export function isInstanceOfTableRowLayoutConstraint(object: layout.FragmentLayoutConstraint):
-      object is TableRowLayoutConstraint {
-    return object && object.flagmentLayoutConstraintType === 'TableRow';
+  export function isInstanceOfTableRowLayoutConstraint(
+    object: layout.FragmentLayoutConstraint
+  ): object is TableRowLayoutConstraint {
+    return object && object.flagmentLayoutConstraintType === "TableRow";
   }
 }
 
 export namespace vtree {
-
   export type ClientRect = {
-    left: number,
-    top: number,
-    right: number,
-    bottom: number,
-    width: number,
-    height: number
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
   };
 
   /**
@@ -966,8 +1043,10 @@ export namespace vtree {
      * @return true if children should be processed as well
      */
     setCurrent(
-        nodeContext: NodeContext, firstTime: boolean,
-        atUnforcedBreak?: boolean): task.Result<boolean>;
+      nodeContext: NodeContext,
+      firstTime: boolean,
+      atUnforcedBreak?: boolean
+    ): task.Result<boolean>;
     /**
      * Set the container element that holds view elements produced from the
      * source.
@@ -978,43 +1057,63 @@ export namespace vtree {
      * if needed.
      * @return that corresponds to the next view node
      */
-    nextInTree(nodeContext: NodeContext, atUnforcedBreak?: boolean):
-        task.Result<NodeContext>;
+    nextInTree(
+      nodeContext: NodeContext,
+      atUnforcedBreak?: boolean
+    ): task.Result<NodeContext>;
     /**
      * Apply pseudo-element styles (if any).
      * @param element element to apply styles to
      */
     applyPseudoelementStyle(
-        nodeContext: NodeContext, pseudoName: string, element: Element): void;
+      nodeContext: NodeContext,
+      pseudoName: string,
+      element: Element
+    ): void;
     /**
      * Apply styles to footnote container.
      * @param element element to apply styles to
      * @return vertical
      */
-    applyFootnoteStyle(vertical: boolean, rtl: boolean, element: Element):
-        boolean;
+    applyFootnoteStyle(
+      vertical: boolean,
+      rtl: boolean,
+      element: Element
+    ): boolean;
     /**
      * Peel off innermost first-XXX pseudoelement, create and create view nodes
      * after the end of that pseudoelement.
      */
-    peelOff(nodeContext: NodeContext, nodeOffset: number):
-        task.Result<NodeContext>;
+    peelOff(
+      nodeContext: NodeContext,
+      nodeOffset: number
+    ): task.Result<NodeContext>;
     /**
      * Process a block-end edge of a fragmented block.
      */
     processFragmentedBlockEdge(nodeContext: NodeContext);
     convertLengthToPx(
-        numeric: css.Numeric, viewNode: Node, clientLayout: ClientLayout): number
-        |css.Numeric;
+      numeric: css.Numeric,
+      viewNode: Node,
+      clientLayout: ClientLayout
+    ): number | css.Numeric;
     /**
      * Returns if two NodePositions represents the same position in the document.
      */
-    isSameNodePosition(nodePosition1: NodePosition, nodePosition2: NodePosition):
-        boolean;
+    isSameNodePosition(
+      nodePosition1: NodePosition,
+      nodePosition2: NodePosition
+    ): boolean;
     addEventListener(
-        type: string, listener: base.EventListener, capture?: boolean): void;
+      type: string,
+      listener: base.EventListener,
+      capture?: boolean
+    ): void;
     removeEventListener(
-        type: string, listener: base.EventListener, capture?: boolean): void;
+      type: string,
+      listener: base.EventListener,
+      capture?: boolean
+    ): void;
     dispatchEvent(evt: base.Event): void;
   }
 
@@ -1060,7 +1159,7 @@ export namespace vtree {
     /**
      * Whitespace sequence between blocks is ignored unless it containes newline
      */
-    PRESERVE,
+    PRESERVE
   }
 
   export interface Container {
@@ -1128,7 +1227,7 @@ export namespace vtree {
     NONE,
     CONTENT,
     ROOTLESS,
-    ROOTED,
+    ROOTED
   }
 
   /**
@@ -1294,7 +1393,7 @@ export namespace xmldoc {
     readonly nodes: Node[];
 
     asArray(): Node[];
-    size(): number ;
+    size(): number;
     /**
      * Filter with predicate
      */
@@ -1304,8 +1403,8 @@ export namespace xmldoc {
     forEachNonNull<T>(fn: (p1: Node) => T): T[];
     child(tag: string): NodeList;
     childElements(): NodeList;
-    attribute(name: string): (string|null)[];
-    textContent(): (string|null)[];
+    attribute(name: string): (string | null)[];
+    textContent(): (string | null)[];
   }
 
   export type XMLDocStore = net.ResourceStore<XMLDocHolder>;

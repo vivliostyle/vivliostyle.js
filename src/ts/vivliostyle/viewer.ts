@@ -17,11 +17,11 @@
  *
  * @fileoverview Vivliostyle Viewer class
  */
-import * as base from '../adapt/base';
-import * as adaptviewer from '../adapt/viewer';
-import * as constants from './constants';
+import * as base from "../adapt/base";
+import * as adaptviewer from "../adapt/viewer";
+import * as constants from "./constants";
 
-import * as profile from './profile';
+import * as profile from "./profile";
 
 const PageProgression = constants.PageProgression;
 
@@ -33,10 +33,10 @@ const PageProgression = constants.PageProgression;
  * - debug: Debug flag.
  */
 export type ViewerSettings = {
-  userAgentRootURL: string,
-  viewportElement: HTMLElement,
-  window: Window|undefined,
-  debug: boolean
+  userAgentRootURL: string;
+  viewportElement: HTMLElement;
+  window: Window | undefined;
+  debug: boolean;
 };
 
 /**
@@ -51,39 +51,39 @@ export type ViewerSettings = {
  * - defaultPaperSize: Default paper size in px. Effective when @page size is set to auto. default: undefined (means the windows size is used as paper size).
  */
 export type ViewerOptions = {
-  autoResize: boolean|undefined,
-  fontSize: number|undefined,
-  pageBorderWidth: number|undefined,
-  renderAllPages: boolean|undefined,
-  pageViewMode: PageViewMode|undefined,
-  zoom: number|undefined,
-  fitToScreen: boolean|undefined,
-  defaultPaperSize: {width: number, height: number}|undefined
+  autoResize: boolean | undefined;
+  fontSize: number | undefined;
+  pageBorderWidth: number | undefined;
+  renderAllPages: boolean | undefined;
+  pageViewMode: PageViewMode | undefined;
+  zoom: number | undefined;
+  fitToScreen: boolean | undefined;
+  defaultPaperSize: { width: number; height: number } | undefined;
 };
 
 function getDefaultViewerOptions(): ViewerOptions {
   return {
-    'autoResize': true,
-    'fontSize': 16,
-    'pageBorderWidth': 1,
-    'renderAllPages': true,
-    'pageViewMode': PageViewMode.AUTO_SPREAD,
-    'zoom': 1,
-    'fitToScreen': false,
-    'defaultPaperSize': undefined
+    autoResize: true,
+    fontSize: 16,
+    pageBorderWidth: 1,
+    renderAllPages: true,
+    pageViewMode: PageViewMode.AUTO_SPREAD,
+    zoom: 1,
+    fitToScreen: false,
+    defaultPaperSize: undefined
   };
 }
 
 function convertViewerOptions(options: ViewerOptions): Object {
   const converted = {};
-  Object.keys(options).forEach((key) => {
+  Object.keys(options).forEach(key => {
     const v = options[key];
     switch (key) {
-      case 'autoResize':
-        converted['autoresize'] = v;
+      case "autoResize":
+        converted["autoresize"] = v;
         break;
-      case 'pageBorderWidth':
-        converted['pageBorder'] = v;
+      case "pageBorderWidth":
+        converted["pageBorder"] = v;
         break;
       default:
         converted[key] = v;
@@ -100,10 +100,14 @@ function convertViewerOptions(options: ViewerOptions): Object {
  * - userStyleSheet: An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
  */
 export type DocumentOptions = {
-  documentObject: Document|undefined,
-  fragment: string|undefined,
-  authorStyleSheet: {url: string|undefined, text: string|undefined}[]|undefined,
-  userStyleSheet: {url: string|undefined, text: string|undefined}[]|undefined
+  documentObject: Document | undefined;
+  fragment: string | undefined;
+  authorStyleSheet:
+    | { url: string | undefined; text: string | undefined }[]
+    | undefined;
+  userStyleSheet:
+    | { url: string | undefined; text: string | undefined }[]
+    | undefined;
 };
 
 /**
@@ -112,11 +116,13 @@ export type DocumentOptions = {
  * - startPage: If specified, the `page` page-based counter is set to the specified value on the first page of the document. It is equivalent to specifying `counter-reset: page [specified value - 1]` on that page.
  * - skipPagesBefore: If specified, the `page` page-based counter is incremented by the specified value *before* updating page-based counters on the first page of the document. This option is ignored if `startPageNumber` option is also specified.
  */
-export type SingleDocumentOptions = string|{
-  url: string,
-  startPage: number | undefined,
-  skipPagesBefore: number | undefined
-};
+export type SingleDocumentOptions =
+  | string
+  | {
+      url: string;
+      startPage: number | undefined;
+      skipPagesBefore: number | undefined;
+    };
 
 /**
  * Vivliostyle Viewer class.
@@ -128,17 +134,22 @@ export class Viewer {
   private eventTarget: any;
 
   constructor(
-      private readonly settings: ViewerSettings, opt_options?: ViewerOptions) {
+    private readonly settings: ViewerSettings,
+    opt_options?: ViewerOptions
+  ) {
     constants.setDebug(settings.debug);
     this.adaptViewer = new adaptviewer.Viewer(
-        settings['window'] || window, settings['viewportElement'], 'main',
-        this.dispatcher.bind(this));
+      settings["window"] || window,
+      settings["viewportElement"],
+      "main",
+      this.dispatcher.bind(this)
+    );
     this.options = getDefaultViewerOptions();
     if (opt_options) {
       this.setOptions(opt_options);
     }
     this.eventTarget = new base.SimpleEventTarget();
-    Object.defineProperty(this, 'readyState', {
+    Object.defineProperty(this, "readyState", {
       get() {
         return this.adaptViewer.readyState;
       }
@@ -149,18 +160,20 @@ export class Viewer {
    * Set ViewerOptions to the viewer.
    */
   setOptions(options: ViewerOptions) {
-    const command =
-        Object.assign({'a': 'configure'}, convertViewerOptions(options));
+    const command = Object.assign(
+      { a: "configure" },
+      convertViewerOptions(options)
+    );
     this.adaptViewer.sendCommand(command);
     Object.assign(this.options, options);
   }
 
   private dispatcher(msg: base.JSON) {
     /** @dict */
-    const event = {'type': msg['t']};
-    const o = (msg as Object);
-    Object.keys(o).forEach((key) => {
-      if (key !== 't') {
+    const event = { type: msg["t"] };
+    const o = msg as Object;
+    Object.keys(o).forEach(key => {
+      if (key !== "t") {
         event[key] = o[key];
       }
     });
@@ -173,9 +186,12 @@ export class Viewer {
    * @param type Event type.
    * @param listener Listener function.
    */
-  addListener(type: string, listener: (p1: {type: string}) => void) {
+  addListener(type: string, listener: (p1: { type: string }) => void) {
     this.eventTarget.addEventListener(
-        type, (listener as base.EventListener), false);
+      type,
+      listener as base.EventListener,
+      false
+    );
   }
 
   /**
@@ -183,74 +199,100 @@ export class Viewer {
    * @param type Event type.
    * @param listener Listener function.
    */
-  removeListener(type: string, listener: (p1: {type: string}) => void) {
+  removeListener(type: string, listener: (p1: { type: string }) => void) {
     this.eventTarget.removeEventListener(
-        type, (listener as base.EventListener), false);
+      type,
+      listener as base.EventListener,
+      false
+    );
   }
 
   /**
    * Load an HTML or XML document(s).
    */
   loadDocument(
-      singleDocumentOptions: SingleDocumentOptions|SingleDocumentOptions[],
-      opt_documentOptions?: DocumentOptions,
-      opt_viewerOptions?: ViewerOptions) {
+    singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[],
+    opt_documentOptions?: DocumentOptions,
+    opt_viewerOptions?: ViewerOptions
+  ) {
     if (!singleDocumentOptions) {
-      this.eventTarget.dispatchEvent(
-          {'type': 'error', 'content': 'No URL specified'});
+      this.eventTarget.dispatchEvent({
+        type: "error",
+        content: "No URL specified"
+      });
     }
     this.loadDocumentOrEPUB(
-        singleDocumentOptions, null, opt_documentOptions, opt_viewerOptions);
+      singleDocumentOptions,
+      null,
+      opt_documentOptions,
+      opt_viewerOptions
+    );
   }
 
   /**
    * Load an EPUB document.
    */
   loadEPUB(
-      epubUrl: string, opt_documentOptions?: DocumentOptions,
-      opt_viewerOptions?: ViewerOptions) {
+    epubUrl: string,
+    opt_documentOptions?: DocumentOptions,
+    opt_viewerOptions?: ViewerOptions
+  ) {
     if (!epubUrl) {
-      this.eventTarget.dispatchEvent(
-          {'type': 'error', 'content': 'No URL specified'});
+      this.eventTarget.dispatchEvent({
+        type: "error",
+        content: "No URL specified"
+      });
     }
     this.loadDocumentOrEPUB(
-        null, epubUrl, opt_documentOptions, opt_viewerOptions);
+      null,
+      epubUrl,
+      opt_documentOptions,
+      opt_viewerOptions
+    );
   }
 
   /**
    * Load an HTML or XML document, or an EPUB document.
    */
   private loadDocumentOrEPUB(
-      singleDocumentOptions: SingleDocumentOptions|SingleDocumentOptions[]|null,
-      epubUrl: string|null, opt_documentOptions?: DocumentOptions,
-      opt_viewerOptions?: ViewerOptions) {
+    singleDocumentOptions:
+      | SingleDocumentOptions
+      | SingleDocumentOptions[]
+      | null,
+    epubUrl: string | null,
+    opt_documentOptions?: DocumentOptions,
+    opt_viewerOptions?: ViewerOptions
+  ) {
     const documentOptions = opt_documentOptions || {};
 
     function convertStyleSheetArray(arr) {
       if (arr) {
-        return arr.map((s) => ({url: s.url || null, text: s.text || null}));
+        return arr.map(s => ({ url: s.url || null, text: s.text || null }));
       } else {
         return undefined;
       }
     }
-    const authorStyleSheet =
-        convertStyleSheetArray(documentOptions['authorStyleSheet']);
-    const userStyleSheet =
-        convertStyleSheetArray(documentOptions['userStyleSheet']);
+    const authorStyleSheet = convertStyleSheetArray(
+      documentOptions["authorStyleSheet"]
+    );
+    const userStyleSheet = convertStyleSheetArray(
+      documentOptions["userStyleSheet"]
+    );
     if (opt_viewerOptions) {
       Object.assign(this.options, opt_viewerOptions);
     }
     const command = Object.assign(
-        {
-          'a': singleDocumentOptions ? 'loadXML' : 'loadEPUB',
-          'userAgentRootURL': this.settings['userAgentRootURL'],
-          'url': convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
-          'document': documentOptions['documentObject'],
-          'fragment': documentOptions['fragment'],
-          'authorStyleSheet': authorStyleSheet,
-          'userStyleSheet': userStyleSheet
-        },
-        convertViewerOptions(this.options));
+      {
+        a: singleDocumentOptions ? "loadXML" : "loadEPUB",
+        userAgentRootURL: this.settings["userAgentRootURL"],
+        url: convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
+        document: documentOptions["documentObject"],
+        fragment: documentOptions["fragment"],
+        authorStyleSheet: authorStyleSheet,
+        userStyleSheet: userStyleSheet
+      },
+      convertViewerOptions(this.options)
+    );
     if (this.initialized) {
       this.adaptViewer.sendCommand(command);
     } else {
@@ -263,20 +305,20 @@ export class Viewer {
    * Returns the current page progression of the viewer. If no document is
    * loaded, returns null.
    */
-  getCurrentPageProgression(): constants.PageProgression|null {
+  getCurrentPageProgression(): constants.PageProgression | null {
     return this.adaptViewer.getCurrentPageProgression();
   }
 
   private resolveNavigation(nav: Navigation): Navigation {
     switch (nav) {
       case Navigation.LEFT:
-        return this.getCurrentPageProgression() === PageProgression.LTR ?
-            Navigation.PREVIOUS :
-            Navigation.NEXT;
+        return this.getCurrentPageProgression() === PageProgression.LTR
+          ? Navigation.PREVIOUS
+          : Navigation.NEXT;
       case Navigation.RIGHT:
-        return this.getCurrentPageProgression() === PageProgression.LTR ?
-            Navigation.NEXT :
-            Navigation.PREVIOUS;
+        return this.getCurrentPageProgression() === PageProgression.LTR
+          ? Navigation.NEXT
+          : Navigation.PREVIOUS;
       default:
         return nav;
     }
@@ -286,22 +328,24 @@ export class Viewer {
    * Navigate to the specified page.
    */
   navigateToPage(nav: Navigation) {
-    this.adaptViewer.sendCommand(
-        {'a': 'moveTo', 'where': this.resolveNavigation(nav)});
+    this.adaptViewer.sendCommand({
+      a: "moveTo",
+      where: this.resolveNavigation(nav)
+    });
   }
 
   /**
    * Navigate to the Nth page.
    */
   navigateToNthPage(nthPage: number) {
-    this.adaptViewer.sendCommand({"a": "moveTo", "nthPage": nthPage});
-  };
+    this.adaptViewer.sendCommand({ a: "moveTo", nthPage: nthPage });
+  }
 
   /**
    * Navigate to the specified internal URL.
    */
   navigateToInternalUrl(url: string) {
-    this.adaptViewer.sendCommand({'a': 'moveTo', 'url': url});
+    this.adaptViewer.sendCommand({ a: "moveTo", url: url });
   }
 
   /**
@@ -311,29 +355,31 @@ export class Viewer {
     return this.adaptViewer.queryZoomFactor(type);
   }
 
-  getPageSizes(): {width: number, height: number}[] {
+  getPageSizes(): { width: number; height: number }[] {
     return this.adaptViewer.pageSizes;
   }
 }
 
 function convertSingleDocumentOptions(
-    singleDocumentOptions: SingleDocumentOptions|
-    SingleDocumentOptions[]): adaptviewer.SingleDocumentParam[]|null {
-  function toNumberOrNull(num: any): number|null {
-    return typeof num === 'number' ? num : null;
+  singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[]
+): adaptviewer.SingleDocumentParam[] | null {
+  function toNumberOrNull(num: any): number | null {
+    return typeof num === "number" ? num : null;
   }
 
   function convert(opt) {
-    if (typeof opt === 'string') {
-      return (
-          {url: opt, startPage: null, skipPagesBefore: null} as
-          adaptviewer.SingleDocumentParam);
+    if (typeof opt === "string") {
+      return {
+        url: opt,
+        startPage: null,
+        skipPagesBefore: null
+      } as adaptviewer.SingleDocumentParam;
     } else {
-      return ({
-        url: opt['url'],
-        startPage: toNumberOrNull(opt['startPage']),
-        skipPagesBefore: toNumberOrNull(opt['skipPagesBefore'])
-      } as adaptviewer.SingleDocumentParam);
+      return {
+        url: opt["url"],
+        startPage: toNumberOrNull(opt["startPage"]),
+        skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"])
+      } as adaptviewer.SingleDocumentParam;
     }
   }
   if (Array.isArray(singleDocumentOptions)) {
@@ -349,12 +395,12 @@ function convertSingleDocumentOptions(
  * @enum {string}
  */
 export enum Navigation {
-  PREVIOUS = 'previous',
-  NEXT = 'next',
-  LEFT = 'left',
-  RIGHT = 'right',
-  FIRST = 'first',
-  LAST = 'last'
+  PREVIOUS = "previous",
+  NEXT = "next",
+  LEFT = "left",
+  RIGHT = "right",
+  FIRST = "first",
+  LAST = "last"
 }
 
 export type ZoomType = adaptviewer.ZoomType;
@@ -369,4 +415,4 @@ export const viewer = {
   ZoomType
 };
 
-profile.profiler.forceRegisterEndTiming('load_vivliostyle');
+profile.profiler.forceRegisterEndTiming("load_vivliostyle");

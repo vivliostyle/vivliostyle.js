@@ -18,19 +18,19 @@
  * @fileoverview Apply CSS cascade to a document incrementally and cache the
  * result.
  */
-import * as asserts from '../vivliostyle/asserts';
-import * as breaks from '../vivliostyle/break';
-import {isBlock} from '../vivliostyle/display';
-import {cssstyler} from '../vivliostyle/types';
-import * as base from './base';
-import {Val, Ident, ident} from './css';
-import * as csscasc from './csscasc';
-import * as cssparse from './cssparse';
-import * as cssprop from './cssprop';
-import {ValidatorSet, ValueMap} from './cssvalid';
-import * as expr from './expr';
-import * as vtree from './vtree';
-import * as xmldocs from './xmldoc';
+import * as asserts from "../vivliostyle/asserts";
+import * as breaks from "../vivliostyle/break";
+import { isBlock } from "../vivliostyle/display";
+import { cssstyler } from "../vivliostyle/types";
+import * as base from "./base";
+import { Val, Ident, ident } from "./css";
+import * as csscasc from "./csscasc";
+import * as cssparse from "./cssparse";
+import * as cssprop from "./cssprop";
+import { ValidatorSet, ValueMap } from "./cssvalid";
+import * as expr from "./expr";
+import * as vtree from "./vtree";
+import * as xmldocs from "./xmldoc";
 
 export class SlipRange {
   endStuckFixed: number;
@@ -48,7 +48,7 @@ export class SlipRange {
  * Maps all ints in a range ("fixed") to ints with slippage ("slipped")
  */
 export class SlipMap {
-  map: any = ([] as SlipRange[]);
+  map: any = [] as SlipRange[];
 
   getMaxFixed(): number {
     if (this.map.length == 0) {
@@ -93,7 +93,9 @@ export class SlipMap {
   slippedByFixed(fixed: number): number {
     const self = this;
     const index = base.binarySearch(
-        this.map.length, (index) => fixed <= self.map[index].endFixed);
+      this.map.length,
+      index => fixed <= self.map[index].endFixed
+    );
     const range = this.map[index];
     return range.endSlipped - Math.max(0, range.endStuckFixed - fixed);
   }
@@ -104,7 +106,9 @@ export class SlipMap {
   fixedBySlipped(slipped: number): number {
     const self = this;
     const index = base.binarySearch(
-        this.map.length, (index) => slipped <= self.map[index].endSlipped);
+      this.map.length,
+      index => slipped <= self.map[index].endSlipped
+    );
     const range = this.map[index];
     return range.endStuckFixed - (range.endSlipped - slipped);
   }
@@ -139,30 +143,39 @@ export interface AbstractStyler extends cssstyler.AbstractStyler {}
  */
 export class Box {
   flowName: any;
-  isBlockValue: boolean|null = null;
-  hasBoxValue: boolean|null = null;
-  styleValues: any = ({} as {[key: string]: Val});
+  isBlockValue: boolean | null = null;
+  hasBoxValue: boolean | null = null;
+  styleValues: any = {} as { [key: string]: Val };
   beforeBox: Box = null;
   afterBox: Box = null;
-  breakBefore: string|null = null;
+  breakBefore: string | null = null;
 
   constructor(
-      public readonly context: expr.Context,
-      public readonly style: csscasc.ElementStyle,
-      public readonly offset: number, public readonly isRoot: boolean,
-      public readonly flowChunk: vtree.FlowChunk,
-      public readonly atBlockStart: boolean,
-      public readonly atFlowStart: boolean,
-      public readonly isParentBoxDisplayed: boolean) {
+    public readonly context: expr.Context,
+    public readonly style: csscasc.ElementStyle,
+    public readonly offset: number,
+    public readonly isRoot: boolean,
+    public readonly flowChunk: vtree.FlowChunk,
+    public readonly atBlockStart: boolean,
+    public readonly atFlowStart: boolean,
+    public readonly isParentBoxDisplayed: boolean
+  ) {
     this.flowName = flowChunk.flowName;
     if (this.hasBox()) {
-      const pseudoMap = style['_pseudos'];
+      const pseudoMap = style["_pseudos"];
       if (pseudoMap) {
-        if (pseudoMap['before']) {
+        if (pseudoMap["before"]) {
           const beforeBox = new Box(
-              context, pseudoMap['before'], offset, false, flowChunk,
-              this.isBlock(), atFlowStart, true);
-          const beforeContent = beforeBox.styleValue('content');
+            context,
+            pseudoMap["before"],
+            offset,
+            false,
+            flowChunk,
+            this.isBlock(),
+            atFlowStart,
+            true
+          );
+          const beforeContent = beforeBox.styleValue("content");
           if (vtree.nonTrivialContent(beforeContent)) {
             this.beforeBox = beforeBox;
             this.breakBefore = beforeBox.breakBefore;
@@ -171,11 +184,14 @@ export class Box {
       }
     }
     this.breakBefore = breaks.resolveEffectiveBreakValue(
-        this.getBreakValue('before'), this.breakBefore);
-    if (this.atFlowStart &&
-        breaks.isForcedBreakValue(this.breakBefore)) {
+      this.getBreakValue("before"),
+      this.breakBefore
+    );
+    if (this.atFlowStart && breaks.isForcedBreakValue(this.breakBefore)) {
       flowChunk.breakBefore = breaks.resolveEffectiveBreakValue(
-          flowChunk.breakBefore, this.breakBefore);
+        flowChunk.breakBefore,
+        this.breakBefore
+      );
     }
   }
 
@@ -188,15 +204,25 @@ export class Box {
    * @param atFlowStart True if the box is right after the flow start.
    */
   buildAfterPseudoElementBox(
-      offset: number, atBlockStart: boolean, atFlowStart: boolean) {
+    offset: number,
+    atBlockStart: boolean,
+    atFlowStart: boolean
+  ) {
     if (this.hasBox()) {
-      const pseudoMap = this.style['_pseudos'];
+      const pseudoMap = this.style["_pseudos"];
       if (pseudoMap) {
-        if (pseudoMap['after']) {
+        if (pseudoMap["after"]) {
           const afterBox = new Box(
-              this.context, pseudoMap['after'], offset, false, this.flowChunk,
-              atBlockStart, atFlowStart, true);
-          const afterContent = afterBox.styleValue('content');
+            this.context,
+            pseudoMap["after"],
+            offset,
+            false,
+            this.flowChunk,
+            atBlockStart,
+            atFlowStart,
+            true
+          );
+          const afterContent = afterBox.styleValue("content");
           if (vtree.nonTrivialContent(afterContent)) {
             this.afterBox = afterBox;
           }
@@ -205,39 +231,39 @@ export class Box {
     }
   }
 
-  styleValue(name: string, defaultValue?: Val): Val|null {
+  styleValue(name: string, defaultValue?: Val): Val | null {
     if (!(name in this.styleValues)) {
       const cv = this.style[name];
-      this.styleValues[name] =
-          cv ? cv.evaluate(this.context, name) : defaultValue || null;
+      this.styleValues[name] = cv
+        ? cv.evaluate(this.context, name)
+        : defaultValue || null;
     }
     return this.styleValues[name];
   }
 
   displayValue(): Val {
-    return this.styleValue('display', ident.inline);
+    return this.styleValue("display", ident.inline);
   }
 
   isBlock(): boolean {
     if (this.isBlockValue === null) {
-      const display = (this.displayValue() as Ident);
-      const position = (this.styleValue('position') as Ident);
-      const float = (this.styleValue('float') as Ident);
-      this.isBlockValue =
-          isBlock(display, position, float, this.isRoot);
+      const display = this.displayValue() as Ident;
+      const position = this.styleValue("position") as Ident;
+      const float = this.styleValue("float") as Ident;
+      this.isBlockValue = isBlock(display, position, float, this.isRoot);
     }
     return this.isBlockValue;
   }
 
   hasBox(): boolean {
     if (this.hasBoxValue === null) {
-      this.hasBoxValue = this.isParentBoxDisplayed &&
-          this.displayValue() !== ident.none;
+      this.hasBoxValue =
+        this.isParentBoxDisplayed && this.displayValue() !== ident.none;
     }
     return this.hasBoxValue;
   }
 
-  getBreakValue(edge: string): string|null {
+  getBreakValue(edge: string): string | null {
     let breakValue = null;
     if (this.isBlock()) {
       const val = this.styleValue(`break-${edge}`);
@@ -253,14 +279,14 @@ export class Box {
  * Manages boxes generated by elements as a stack.
  */
 export class BoxStack {
-  stack: any = ([] as Box[]);
+  stack: any = [] as Box[];
   atBlockStart: boolean = true;
 
   // indicates if the next pushed box will be at the block start
   atFlowStart: boolean = true;
 
   // indicates if the next pushed box will be at the flow start
-  atStartStack: any = ([] as {atBlockStart: boolean, atFlowStart: boolean}[]);
+  atStartStack: any = [] as { atBlockStart: boolean; atFlowStart: boolean }[];
 
   constructor(public readonly context: expr.Context) {}
 
@@ -274,14 +300,14 @@ export class BoxStack {
   /**
    * Returns the last box in the stack.
    */
-  lastBox(): Box|undefined {
+  lastBox(): Box | undefined {
     return this.stack[this.stack.length - 1];
   }
 
   /**
    * Returns the flow name of the last box in the stack.
    */
-  lastFlowName(): string|null {
+  lastFlowName(): string | null {
     const lastBox = this.lastBox();
     return lastBox ? lastBox.flowChunk.flowName : null;
   }
@@ -290,8 +316,7 @@ export class BoxStack {
    * Returns if the last box in the stack is displayed.
    */
   isCurrentBoxDisplayed(): boolean {
-    return this.stack.every(
-        (box) => box.displayValue() !== ident.none);
+    return this.stack.every(box => box.displayValue() !== ident.none);
   }
 
   /**
@@ -303,33 +328,47 @@ export class BoxStack {
    *     element is specified a new `flow-into` value)
    */
   push(
-      style: csscasc.ElementStyle, offset: number, isRoot: boolean,
-      newFlowChunk?: vtree.FlowChunk): Box {
+    style: csscasc.ElementStyle,
+    offset: number,
+    isRoot: boolean,
+    newFlowChunk?: vtree.FlowChunk
+  ): Box {
     const lastBox = this.lastBox();
     if (newFlowChunk && lastBox && newFlowChunk.flowName !== lastBox.flowName) {
-      this.atStartStack.push(
-          {atBlockStart: this.atBlockStart, atFlowStart: this.atFlowStart});
+      this.atStartStack.push({
+        atBlockStart: this.atBlockStart,
+        atFlowStart: this.atFlowStart
+      });
     }
     const flowChunk = newFlowChunk || lastBox.flowChunk;
     const isAtFlowStart = this.atFlowStart || !!newFlowChunk;
     const isParentBoxDisplayed = this.isCurrentBoxDisplayed();
     const box = new Box(
-        this.context, style, offset, isRoot, flowChunk,
-        isAtFlowStart || this.atBlockStart, isAtFlowStart,
-        isParentBoxDisplayed);
+      this.context,
+      style,
+      offset,
+      isRoot,
+      flowChunk,
+      isAtFlowStart || this.atBlockStart,
+      isAtFlowStart,
+      isParentBoxDisplayed
+    );
     this.stack.push(box);
-    this.atBlockStart =
-        box.hasBox() ? !box.beforeBox && box.isBlock() : this.atBlockStart;
-    this.atFlowStart =
-        box.hasBox() ? !box.beforeBox && isAtFlowStart : this.atFlowStart;
+    this.atBlockStart = box.hasBox()
+      ? !box.beforeBox && box.isBlock()
+      : this.atBlockStart;
+    this.atFlowStart = box.hasBox()
+      ? !box.beforeBox && isAtFlowStart
+      : this.atFlowStart;
     return box;
   }
 
   encounteredTextNode(node: Node) {
     const box = this.lastBox();
     if ((this.atBlockStart || this.atFlowStart) && box.hasBox()) {
-      const whitespaceValue =
-          box.styleValue('white-space', ident.normal).toString();
+      const whitespaceValue = box
+        .styleValue("white-space", ident.normal)
+        .toString();
       const whitespace = vtree.whitespaceFromPropertyValue(whitespaceValue);
       asserts.assert(whitespace !== null);
       if (!vtree.canIgnore(node, whitespace)) {
@@ -346,9 +385,11 @@ export class BoxStack {
     const box = this.stack.pop();
     box.buildAfterPseudoElementBox(offset, this.atBlockStart, this.atFlowStart);
     if (this.atFlowStart && box.afterBox) {
-      const breakBefore = box.afterBox.getBreakValue('before');
+      const breakBefore = box.afterBox.getBreakValue("before");
       box.flowChunk.breakBefore = breaks.resolveEffectiveBreakValue(
-          box.flowChunk.breakBefore, breakBefore);
+        box.flowChunk.breakBefore,
+        breakBefore
+      );
     }
     const parent = this.lastBox();
     if (parent) {
@@ -399,7 +440,7 @@ export class BoxStack {
       box = parent;
       parent = this.stack[--i];
     }
-    throw new Error('No block start offset found!');
+    throw new Error("No block start offset found!");
   }
 }
 
@@ -408,36 +449,43 @@ export class Styler implements AbstractStyler {
   root: any;
   cascadeHolder: any;
   last: Node;
-  rootStyle: any = ({} as csscasc.ElementStyle);
-  styleMap: {[key: string]: csscasc.ElementStyle} = {};
-  flows: any = ({} as {[key: string]: vtree.Flow});
-  flowChunks: any = ([] as vtree.FlowChunk[]);
+  rootStyle: any = {} as csscasc.ElementStyle;
+  styleMap: { [key: string]: csscasc.ElementStyle } = {};
+  flows: any = {} as { [key: string]: vtree.Flow };
+  flowChunks: any = [] as vtree.FlowChunk[];
   flowListener: FlowListener = null;
-  flowToReach: string|null = null;
-  idToReach: string|null = null;
+  flowToReach: string | null = null;
+  idToReach: string | null = null;
   cascade: any;
   offsetMap: any;
   primary: boolean = true;
-  primaryStack: any = ([] as boolean[]);
+  primaryStack: any = [] as boolean[];
   rootBackgroundAssigned: boolean = false;
   rootLayoutAssigned: boolean = false;
   lastOffset: number;
-  breakBeforeValues: any = ({} as {[key: number]: string | null});
+  breakBeforeValues: any = {} as { [key: number]: string | null };
   boxStack: any;
   bodyReached: boolean = true;
 
   constructor(
-      public readonly xmldoc: xmldocs.XMLDocHolder, cascade: csscasc.Cascade,
-      public readonly scope: expr.LexicalScope, public readonly context: expr.Context,
-      public readonly primaryFlows: {[key: string]: boolean},
-      public readonly validatorSet: ValidatorSet,
-      public readonly counterListener: csscasc.CounterListener,
-      counterResolver: csscasc.CounterResolver) {
+    public readonly xmldoc: xmldocs.XMLDocHolder,
+    cascade: csscasc.Cascade,
+    public readonly scope: expr.LexicalScope,
+    public readonly context: expr.Context,
+    public readonly primaryFlows: { [key: string]: boolean },
+    public readonly validatorSet: ValidatorSet,
+    public readonly counterListener: csscasc.CounterListener,
+    counterResolver: csscasc.CounterResolver
+  ) {
     this.root = xmldoc.root;
     this.cascadeHolder = cascade;
     this.last = this.root;
     this.cascade = cascade.createInstance(
-        context, counterListener, counterResolver, xmldoc.lang);
+      context,
+      counterListener,
+      counterResolver,
+      xmldoc.lang
+    );
     this.offsetMap = new SlipMap();
     const rootOffset = xmldoc.getElementOffset(this.root);
     this.lastOffset = rootOffset;
@@ -473,8 +521,10 @@ export class Styler implements AbstractStyler {
       } else {
         const val = map[pname];
         if (val) {
-          this.rootStyle[pname] =
-              new csscasc.CascadeValue(val, cssparse.SPECIFICITY_AUTHOR);
+          this.rootStyle[pname] = new csscasc.CascadeValue(
+            val,
+            cssparse.SPECIFICITY_AUTHOR
+          );
         }
       }
     }
@@ -487,34 +537,39 @@ export class Styler implements AbstractStyler {
    */
   postprocessTopStyle(elemStyle: csscasc.ElementStyle, isBody: boolean): void {
     ["writing-mode", "direction"].forEach(propName => {
-        if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
-            // Copy it over, but keep it at the root element as well.
-            this.rootStyle[propName] = elemStyle[propName];
-        }
+      if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
+        // Copy it over, but keep it at the root element as well.
+        this.rootStyle[propName] = elemStyle[propName];
+      }
     });
     if (!this.rootBackgroundAssigned) {
-      const backgroundColor =
-          (this.hasProp(
-               elemStyle, this.validatorSet.backgroundProps,
-               'background-color') ?
-               elemStyle['background-color'].evaluate(this.context) :
-               null as Val);
-      const backgroundImage =
-          (this.hasProp(
-               elemStyle, this.validatorSet.backgroundProps,
-               'background-image') ?
-               elemStyle['background-image'].evaluate(this.context) :
-               null as Val);
-      if (backgroundColor && backgroundColor !== ident.inherit ||
-          backgroundImage && backgroundImage !== ident.inherit) {
+      const backgroundColor = this.hasProp(
+        elemStyle,
+        this.validatorSet.backgroundProps,
+        "background-color"
+      )
+        ? elemStyle["background-color"].evaluate(this.context)
+        : (null as Val);
+      const backgroundImage = this.hasProp(
+        elemStyle,
+        this.validatorSet.backgroundProps,
+        "background-image"
+      )
+        ? elemStyle["background-image"].evaluate(this.context)
+        : (null as Val);
+      if (
+        (backgroundColor && backgroundColor !== ident.inherit) ||
+        (backgroundImage && backgroundImage !== ident.inherit)
+      ) {
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
         this.rootBackgroundAssigned = true;
       }
     }
     if (!this.rootLayoutAssigned) {
       for (let i = 0; i < columnProps.length; i++) {
-        if (this.hasProp(
-                elemStyle, this.validatorSet.layoutProps, columnProps[i])) {
+        if (
+          this.hasProp(elemStyle, this.validatorSet.layoutProps, columnProps[i])
+        ) {
           this.transferPropsToRoot(elemStyle, this.validatorSet.layoutProps);
           this.rootLayoutAssigned = true;
           break;
@@ -522,21 +577,21 @@ export class Styler implements AbstractStyler {
       }
     }
     if (!isBody) {
-      const fontSize = elemStyle['font-size'];
+      const fontSize = elemStyle["font-size"];
       if (fontSize) {
         const val = fontSize.evaluate(this.context);
         let px = val.num;
         switch (val.unit) {
-          case 'em':
-          case 'rem':
+          case "em":
+          case "rem":
             px *= this.context.initialFontSize;
             break;
-          case 'ex':
-            px *= this.context.initialFontSize *
-                expr.defaultUnitSizes['ex'] /
-                expr.defaultUnitSizes['em'];
+          case "ex":
+            px *=
+              (this.context.initialFontSize * expr.defaultUnitSizes["ex"]) /
+              expr.defaultUnitSizes["em"];
             break;
-          case '%':
+          case "%":
             px *= this.context.initialFontSize / 100;
             break;
           default:
@@ -565,13 +620,17 @@ export class Styler implements AbstractStyler {
     // skip cases in which elements for XML other than HTML or SVG
     // have 'style' attribute not for CSS declaration
     if ((elem as any).style instanceof CSSStyleDeclaration) {
-      const styleAttrValue = elem.getAttribute('style');
+      const styleAttrValue = elem.getAttribute("style");
       if (styleAttrValue) {
         return csscasc.parseStyleAttribute(
-            this.scope, this.validatorSet, this.xmldoc.url, styleAttrValue);
+          this.scope,
+          this.validatorSet,
+          this.xmldoc.url,
+          styleAttrValue
+        );
       }
     }
-    return ({} as csscasc.ElementStyle);
+    return {} as csscasc.ElementStyle;
   }
 
   /**
@@ -593,12 +652,16 @@ export class Styler implements AbstractStyler {
     if (offset < rootOffset) {
       const rootStyle = this.getStyle(this.root, false);
       asserts.assert(rootStyle);
-      let flowName = csscasc.getProp(rootStyle, 'flow-into');
-      let flowNameStr = flowName ?
-          flowName.evaluate(context, 'flow-into').toString() :
-          'body';
+      let flowName = csscasc.getProp(rootStyle, "flow-into");
+      let flowNameStr = flowName
+        ? flowName.evaluate(context, "flow-into").toString()
+        : "body";
       const newFlowChunk = this.encounteredFlowElement(
-          flowNameStr, rootStyle, this.root, rootOffset);
+        flowNameStr,
+        rootStyle,
+        this.root,
+        rootOffset
+      );
       if (this.boxStack.empty()) {
         this.boxStack.push(rootStyle, rootOffset, true, newFlowChunk);
       }
@@ -612,16 +675,16 @@ export class Styler implements AbstractStyler {
       if (node.nodeType != 1) {
         nodeOffset += node.textContent.length;
       } else {
-        const elem = (node as Element);
+        const elem = node as Element;
         if (DEBUG) {
           if (nodeOffset != this.xmldoc.getElementOffset(elem)) {
-            throw new Error('Inconsistent offset');
+            throw new Error("Inconsistent offset");
           }
         }
         const style = this.getStyle(elem, false);
-        let flowName = style['flow-into'];
+        let flowName = style["flow-into"];
         if (flowName) {
-          let flowNameStr = flowName.evaluate(context, 'flow-into').toString();
+          let flowNameStr = flowName.evaluate(context, "flow-into").toString();
           this.encounteredFlowElement(flowNameStr, style, elem, nodeOffset);
         }
         nodeOffset++;
@@ -650,7 +713,9 @@ export class Styler implements AbstractStyler {
     this.flowListener = flowListener;
     for (let i = 0; i < this.flowChunks.length; i++) {
       this.flowListener.encounteredFlowChunk(
-          this.flowChunks[i], this.flows[this.flowChunks[i].flowName]);
+        this.flowChunks[i],
+        this.flows[this.flowChunks[i].flowName]
+      );
     }
   }
 
@@ -687,31 +752,38 @@ export class Styler implements AbstractStyler {
   }
 
   private encounteredFlowElement(
-      flowName: string, style: csscasc.ElementStyle, elem: Element,
-      startOffset: number): vtree.FlowChunk {
+    flowName: string,
+    style: csscasc.ElementStyle,
+    elem: Element,
+    startOffset: number
+  ): vtree.FlowChunk {
     let priority = 0;
     let linger = Number.POSITIVE_INFINITY;
     let exclusive = false;
     let repeated = false;
     let last = false;
-    const optionsCV = style['flow-options'];
+    const optionsCV = style["flow-options"];
     if (optionsCV) {
-      const options =
-          cssprop.toSet(optionsCV.evaluate(this.context, 'flow-options'));
-      exclusive = !!options['exclusive'];
-      repeated = !!options['static'];
-      last = !!options['last'];
+      const options = cssprop.toSet(
+        optionsCV.evaluate(this.context, "flow-options")
+      );
+      exclusive = !!options["exclusive"];
+      repeated = !!options["static"];
+      last = !!options["last"];
     }
-    const lingerCV = style['flow-linger'];
+    const lingerCV = style["flow-linger"];
     if (lingerCV) {
       linger = cssprop.toInt(
-          lingerCV.evaluate(this.context, 'flow-linger'),
-          Number.POSITIVE_INFINITY);
+        lingerCV.evaluate(this.context, "flow-linger"),
+        Number.POSITIVE_INFINITY
+      );
     }
-    const priorityCV = style['flow-priority'];
+    const priorityCV = style["flow-priority"];
     if (priorityCV) {
-      priority =
-          cssprop.toInt(priorityCV.evaluate(this.context, 'flow-priority'), 0);
+      priority = cssprop.toInt(
+        priorityCV.evaluate(this.context, "flow-priority"),
+        0
+      );
     }
     const breakBefore = this.breakBeforeValues[startOffset] || null;
     let flow = this.flows[flowName];
@@ -720,8 +792,16 @@ export class Styler implements AbstractStyler {
       flow = this.flows[flowName] = new vtree.Flow(flowName, parentFlowName);
     }
     const flowChunk = new vtree.FlowChunk(
-        flowName, elem, startOffset, priority, linger, exclusive, repeated,
-        last, breakBefore);
+      flowName,
+      elem,
+      startOffset,
+      priority,
+      linger,
+      exclusive,
+      repeated,
+      last,
+      breakBefore
+    );
     this.flowChunks.push(flowChunk);
     if (this.flowToReach == flowName) {
       this.flowToReach = null;
@@ -733,17 +813,24 @@ export class Styler implements AbstractStyler {
   }
 
   registerForcedBreakOffset(
-      breakValue: string|null, offset: number, flowName: string) {
+    breakValue: string | null,
+    offset: number,
+    flowName: string
+  ) {
     if (breaks.isForcedBreakValue(breakValue)) {
       const forcedBreakOffsets = this.flows[flowName].forcedBreakOffsets;
-      if (forcedBreakOffsets.length === 0 ||
-          forcedBreakOffsets[forcedBreakOffsets.length - 1] < offset) {
+      if (
+        forcedBreakOffsets.length === 0 ||
+        forcedBreakOffsets[forcedBreakOffsets.length - 1] < offset
+      ) {
         forcedBreakOffsets.push(offset);
       }
     }
     const previousValue = this.breakBeforeValues[offset];
-    this.breakBeforeValues[offset] =
-        breaks.resolveEffectiveBreakValue(previousValue, breakValue);
+    this.breakBeforeValues[offset] = breaks.resolveEffectiveBreakValue(
+      previousValue,
+      breakValue
+    );
   }
 
   /**
@@ -771,25 +858,32 @@ export class Styler implements AbstractStyler {
       if (next == null) {
         while (true) {
           if (this.last.nodeType == 1) {
-            this.cascade.popElement((this.last as Element));
+            this.cascade.popElement(this.last as Element);
             this.primary = this.primaryStack.pop();
             let box = this.boxStack.pop(this.lastOffset);
             let breakAfter = null;
             if (box.afterBox) {
-              const afterPseudoBreakBefore =
-                  box.afterBox.getBreakValue('before');
+              const afterPseudoBreakBefore = box.afterBox.getBreakValue(
+                "before"
+              );
               this.registerForcedBreakOffset(
-                  afterPseudoBreakBefore,
-                  box.afterBox.atBlockStart ?
-                      this.boxStack.nearestBlockStartOffset(box) :
-                      box.afterBox.offset,
-                  box.flowName);
-              breakAfter = box.afterBox.getBreakValue('after');
+                afterPseudoBreakBefore,
+                box.afterBox.atBlockStart
+                  ? this.boxStack.nearestBlockStartOffset(box)
+                  : box.afterBox.offset,
+                box.flowName
+              );
+              breakAfter = box.afterBox.getBreakValue("after");
             }
             breakAfter = breaks.resolveEffectiveBreakValue(
-                breakAfter, box.getBreakValue('after'));
+              breakAfter,
+              box.getBreakValue("after")
+            );
             this.registerForcedBreakOffset(
-                breakAfter, this.lastOffset, box.flowName);
+              breakAfter,
+              this.lastOffset,
+              box.flowName
+            );
           }
           next = this.last.nextSibling;
           if (next) {
@@ -822,42 +916,58 @@ export class Styler implements AbstractStyler {
           this.offsetMap.addSlippedRange(this.lastOffset);
         }
       } else {
-        const elem = (this.last as Element);
+        const elem = this.last as Element;
         const style = this.getAttrStyle(elem);
         this.primaryStack.push(this.primary);
         this.cascade.pushElement(elem, style, this.lastOffset);
-        const id = elem.getAttribute('id') ||
-            elem.getAttributeNS(base.NS.XML, 'id');
+        const id =
+          elem.getAttribute("id") || elem.getAttributeNS(base.NS.XML, "id");
         if (id && id === this.idToReach) {
           this.idToReach = null;
         }
-        if (!this.bodyReached && elem.localName == 'body' &&
-            elem.parentNode == this.root) {
+        if (
+          !this.bodyReached &&
+          elem.localName == "body" &&
+          elem.parentNode == this.root
+        ) {
           this.postprocessTopStyle(style, true);
           this.bodyReached = true;
         }
         let box;
-        const flowName = style['flow-into'];
+        const flowName = style["flow-into"];
         if (flowName) {
-          const flowNameStr =
-              flowName.evaluate(context, 'flow-into').toString();
+          const flowNameStr = flowName
+            .evaluate(context, "flow-into")
+            .toString();
           const newFlowChunk = this.encounteredFlowElement(
-              flowNameStr, style, elem, this.lastOffset);
+            flowNameStr,
+            style,
+            elem,
+            this.lastOffset
+          );
           this.primary = !!this.primaryFlows[flowNameStr];
           box = this.boxStack.push(
-              style, this.lastOffset, elem === this.root, newFlowChunk);
+            style,
+            this.lastOffset,
+            elem === this.root,
+            newFlowChunk
+          );
         } else {
           box = this.boxStack.push(style, this.lastOffset, elem === this.root);
         }
         const blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
         this.registerForcedBreakOffset(
-            box.breakBefore, blockStartOffset, box.flowName);
+          box.breakBefore,
+          blockStartOffset,
+          box.flowName
+        );
         if (box.beforeBox) {
-          const beforePseudoBreakAfter = box.beforeBox.getBreakValue('after');
+          const beforePseudoBreakAfter = box.beforeBox.getBreakValue("after");
           this.registerForcedBreakOffset(
-              beforePseudoBreakAfter,
-              box.beforeBox.atBlockStart ? blockStartOffset : box.offset,
-              box.flowName);
+            beforePseudoBreakAfter,
+            box.beforeBox.atBlockStart ? blockStartOffset : box.offset,
+            box.flowName
+          );
         }
         if (this.primary) {
           if (box.displayValue() === ident.none) {
@@ -865,9 +975,9 @@ export class Styler implements AbstractStyler {
           }
         }
         if (DEBUG) {
-          const offset = this.xmldoc.getElementOffset((this.last as Element));
+          const offset = this.xmldoc.getElementOffset(this.last as Element);
           if (offset != this.lastOffset) {
-            throw new Error('Inconsistent offset');
+            throw new Error("Inconsistent offset");
           }
         }
         this.styleMap[`e${this.lastOffset}`] = style;
@@ -912,4 +1022,4 @@ export class Styler implements AbstractStyler {
   processContent(element, styles) {}
 }
 
-export const columnProps = ['column-count', 'column-width', 'column-fill'];
+export const columnProps = ["column-count", "column-width", "column-fill"];

@@ -16,16 +16,17 @@
  *
  * @fileoverview Definitions of BreakPosition.
  */
-import * as breaks from './break';
-import * as layouthelper from './layouthelper';
-import {layout, repetitiveelement, vtree} from './types';
+import * as breaks from "./break";
+import * as layouthelper from "./layouthelper";
+import { layout, repetitiveelement, vtree } from "./types";
 
 /**
  * Potential breaking position.
  */
 export type BreakPosition = layout.BreakPosition;
 
-export abstract class AbstractBreakPosition implements layout.AbstractBreakPosition {
+export abstract class AbstractBreakPosition
+  implements layout.AbstractBreakPosition {
   abstract findAcceptableBreak(
     column: layout.Column,
     penalty: number
@@ -64,7 +65,7 @@ export function calculateOffset(
       (val, repetitiveElement) =>
         val + repetitiveElement.calculateMinimumOffset(nodeContext),
       0
-    ),
+    )
   };
 }
 
@@ -103,7 +104,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
    */
   getMinBreakPenalty() {
     if (!this.isEdgeUpdated) {
-      throw new Error('EdgeBreakPosition.prototype.updateEdge not called');
+      throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
     const preferDropping =
       this.isFirstContentOfRepetitiveElementsOwner() &&
@@ -120,8 +121,12 @@ export class EdgeBreakPosition extends AbstractBreakPosition
       this.position
     );
     this.edge =
-      layouthelper.calculateEdge(this.position, column.clientLayout, 0, column.vertical) +
-      clonedPaddingBorder;
+      layouthelper.calculateEdge(
+        this.position,
+        column.clientLayout,
+        0,
+        column.vertical
+      ) + clonedPaddingBorder;
     this.isEdgeUpdated = true;
   }
 
@@ -149,8 +154,12 @@ export class EdgeBreakPosition extends AbstractBreakPosition
     if (!nodeContext || !nodeContext.parent) {
       return false;
     }
-    const {formattingContext} = nodeContext.parent;
-    if (!repetitiveelement.isInstanceOfRepetitiveElementsOwnerFormattingContext(formattingContext)) {
+    const { formattingContext } = nodeContext.parent;
+    if (
+      !repetitiveelement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
+        formattingContext
+      )
+    ) {
       return false;
     }
 

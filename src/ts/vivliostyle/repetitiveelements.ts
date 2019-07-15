@@ -3,38 +3,49 @@
  * @fileoverview Elements repeated in every fragment by repeat-on-break
  * property.
  */
-import * as task from '../adapt/task';
-import * as vtreeImpl from '../adapt/vtree';
-import * as asserts from './asserts';
-import * as layouthelper from './layouthelper';
-import * as layoutprocessor from './layoutprocessor';
-import {AbstractLayoutRetryer} from './layoutretryer';
-import {LayoutIterator, EdgeSkipper, PseudoColumn} from './layoututil';
-import * as plugin from './plugin';
-import * as selectors from './selectors';
-import {repetitiveElementsCache} from './shared';
-import {layout, repetitiveelement, table, vtree, FormattingContextType, FragmentLayoutConstraintType} from './types';
+import * as task from "../adapt/task";
+import * as vtreeImpl from "../adapt/vtree";
+import * as asserts from "./asserts";
+import * as layouthelper from "./layouthelper";
+import * as layoutprocessor from "./layoutprocessor";
+import { AbstractLayoutRetryer } from "./layoutretryer";
+import { LayoutIterator, EdgeSkipper, PseudoColumn } from "./layoututil";
+import * as plugin from "./plugin";
+import * as selectors from "./selectors";
+import { repetitiveElementsCache } from "./shared";
+import {
+  layout,
+  repetitiveelement,
+  table,
+  vtree,
+  FormattingContextType,
+  FragmentLayoutConstraintType
+} from "./types";
 
 export class RepetitiveElementsOwnerFormattingContext
-    implements repetitiveelement.RepetitiveElementsOwnerFormattingContext {
-
-  formattingContextType: FormattingContextType = 'RepetitiveElementsOwner';
+  implements repetitiveelement.RepetitiveElementsOwnerFormattingContext {
+  formattingContextType: FormattingContextType = "RepetitiveElementsOwner";
   isRoot: boolean = false;
   repetitiveElements: repetitiveelement.RepetitiveElements = null;
 
   constructor(
-      public readonly parent: vtree.FormattingContext,
-      public readonly rootSourceNode: Element) {}
+    public readonly parent: vtree.FormattingContext,
+    public readonly rootSourceNode: Element
+  ) {}
 
   /**
    * @override
    */
-  getName() {return 'Repetitive elements owner formatting context (RepetitiveElementsOwnerFormattingContext)';}
+  getName() {
+    return "Repetitive elements owner formatting context (RepetitiveElementsOwnerFormattingContext)";
+  }
 
   /**
    * @override
    */
-  isFirstTime(nodeContext, firstTime) {return firstTime;}
+  isFirstTime(nodeContext, firstTime) {
+    return firstTime;
+  }
 
   /**
    * @override
@@ -47,18 +58,20 @@ export class RepetitiveElementsOwnerFormattingContext
     return this.repetitiveElements;
   }
 
-  getRootViewNode(position: vtree.NodeContext): Element|null {
+  getRootViewNode(position: vtree.NodeContext): Element | null {
     const root = this.getRootNodeContext(position);
     return root ? (root.viewNode as Element) : null;
   }
 
-  getRootNodeContext(nodeContext: vtree.NodeContext): vtree.NodeContext|null {
+  getRootNodeContext(nodeContext: vtree.NodeContext): vtree.NodeContext | null {
     do {
-      if (!nodeContext.belongsTo(this) &&
-          nodeContext.sourceNode === this.rootSourceNode) {
+      if (
+        !nodeContext.belongsTo(this) &&
+        nodeContext.sourceNode === this.rootSourceNode
+      ) {
         return nodeContext;
       }
-    } while (nodeContext = nodeContext.parent);
+    } while ((nodeContext = nodeContext.parent));
     return null;
   }
 
@@ -66,7 +79,7 @@ export class RepetitiveElementsOwnerFormattingContext
     if (this.repetitiveElements) {
       return;
     }
-    const found = repetitiveElementsCache.some((entry) => {
+    const found = repetitiveElementsCache.some(entry => {
       if (entry.root === this.rootSourceNode) {
         this.repetitiveElements = entry.elements;
         return true;
@@ -74,10 +87,14 @@ export class RepetitiveElementsOwnerFormattingContext
       return false;
     });
     if (!found) {
-      this.repetitiveElements =
-          new RepetitiveElements(vertical, this.rootSourceNode);
-      repetitiveElementsCache.push(
-          {root: this.rootSourceNode, elements: this.repetitiveElements});
+      this.repetitiveElements = new RepetitiveElements(
+        vertical,
+        this.rootSourceNode
+      );
+      repetitiveElementsCache.push({
+        root: this.rootSourceNode,
+        elements: this.repetitiveElements
+      });
     }
   }
 
@@ -90,13 +107,14 @@ export class RepetitiveElementsOwnerFormattingContext
 
 export type ElementsOffset = repetitiveelement.ElementsOffset;
 
-export class RepetitiveElements implements repetitiveelement.RepetitiveElements {
-  private headerSourceNode: Element|null = null;
-  private footerSourceNode: Element|null = null;
-  private headerViewNode: Element|null = null;
-  private footerViewNode: Element|null = null;
-  private headerNodePosition: vtree.NodePosition|null = null;
-  private footerNodePosition: vtree.NodePosition|null = null;
+export class RepetitiveElements
+  implements repetitiveelement.RepetitiveElements {
+  private headerSourceNode: Element | null = null;
+  private footerSourceNode: Element | null = null;
+  private headerViewNode: Element | null = null;
+  private footerViewNode: Element | null = null;
+  private headerNodePosition: vtree.NodePosition | null = null;
+  private footerNodePosition: vtree.NodePosition | null = null;
   private headerHeight: number = 0;
   private footerHeight: number = 0;
   isSkipHeader: boolean = false;
@@ -104,17 +122,23 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
   enableSkippingFooter: boolean = true;
   enableSkippingHeader: boolean = true;
   doneInitialLayout: boolean = false;
-  firstContentSourceNode: Element|null = null;
-  lastContentSourceNode: Element|null = null;
-  private affectedNodeCache: {nodeContext: vtree.NodeContext,
-                              result: boolean}[] = [];
-  private afterLastContentNodeCache:
-      {nodeContext: vtree.NodeContext, result: boolean}[] = [];
+  firstContentSourceNode: Element | null = null;
+  lastContentSourceNode: Element | null = null;
+  private affectedNodeCache: {
+    nodeContext: vtree.NodeContext;
+    result: boolean;
+  }[] = [];
+  private afterLastContentNodeCache: {
+    nodeContext: vtree.NodeContext;
+    result: boolean;
+  }[] = [];
   allowInsert: any = false;
   allowInsertRepeatitiveElements: any;
 
   constructor(
-      private readonly vertical: boolean, public ownerSourceNode: Element) {}
+    private readonly vertical: boolean,
+    public ownerSourceNode: Element
+  ) {}
 
   setHeaderNodeContext(nodeContext: vtree.NodeContext) {
     if (this.headerNodePosition) {
@@ -122,10 +146,12 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
     }
 
     // use first one.
-    this.headerNodePosition =
-        vtreeImpl.newNodePositionFromNodeContext(nodeContext, 0);
-    this.headerSourceNode = (nodeContext.sourceNode as Element);
-    this.headerViewNode = (nodeContext.viewNode as Element);
+    this.headerNodePosition = vtreeImpl.newNodePositionFromNodeContext(
+      nodeContext,
+      0
+    );
+    this.headerSourceNode = nodeContext.sourceNode as Element;
+    this.headerViewNode = nodeContext.viewNode as Element;
   }
 
   setFooterNodeContext(nodeContext: vtree.NodeContext) {
@@ -134,19 +160,29 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
     }
 
     // use first one.
-    this.footerNodePosition =
-        vtreeImpl.newNodePositionFromNodeContext(nodeContext, 0);
-    this.footerSourceNode = (nodeContext.sourceNode as Element);
-    this.footerViewNode = (nodeContext.viewNode as Element);
+    this.footerNodePosition = vtreeImpl.newNodePositionFromNodeContext(
+      nodeContext,
+      0
+    );
+    this.footerSourceNode = nodeContext.sourceNode as Element;
+    this.footerViewNode = nodeContext.viewNode as Element;
   }
 
   updateHeight(column: layout.Column) {
     if (this.headerViewNode) {
-      this.headerHeight = layouthelper.getElementHeight(this.headerViewNode, column, this.vertical);
+      this.headerHeight = layouthelper.getElementHeight(
+        this.headerViewNode,
+        column,
+        this.vertical
+      );
       this.headerViewNode = null;
     }
     if (this.footerViewNode) {
-      this.footerHeight = layouthelper.getElementHeight(this.footerViewNode, column, this.vertical);
+      this.footerHeight = layouthelper.getElementHeight(
+        this.footerViewNode,
+        column,
+        this.vertical
+      );
       this.footerViewNode = null;
     }
   }
@@ -158,57 +194,73 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
   }
 
   appendHeaderToFragment(
-      rootNodeContext: vtree.NodeContext, firstChild: Node|null,
-      column: layout.Column): task.Result<boolean> {
+    rootNodeContext: vtree.NodeContext,
+    firstChild: Node | null,
+    column: layout.Column
+  ): task.Result<boolean> {
     if (!this.headerNodePosition || this.isSkipHeader) {
       return task.newResult(true);
     }
     return this.appendElementToFragment(
-        this.headerNodePosition, rootNodeContext, firstChild, column);
+      this.headerNodePosition,
+      rootNodeContext,
+      firstChild,
+      column
+    );
   }
 
   appendFooterToFragment(
-      rootNodeContext: vtree.NodeContext, firstChild: Node|null,
-      column: layout.Column): task.Result<boolean> {
+    rootNodeContext: vtree.NodeContext,
+    firstChild: Node | null,
+    column: layout.Column
+  ): task.Result<boolean> {
     if (!this.footerNodePosition || this.isSkipFooter) {
       return task.newResult(true);
     }
     return this.appendElementToFragment(
-        this.footerNodePosition, rootNodeContext, firstChild, column);
+      this.footerNodePosition,
+      rootNodeContext,
+      firstChild,
+      column
+    );
   }
 
   /**
    * @return
    */
   appendElementToFragment(
-      nodePosition: vtree.NodePosition, rootNodeContext: vtree.NodeContext,
-      firstChild: Node|null, column: layout.Column): task.Result<boolean> {
+    nodePosition: vtree.NodePosition,
+    rootNodeContext: vtree.NodeContext,
+    firstChild: Node | null,
+    column: layout.Column
+  ): task.Result<boolean> {
     const doc = rootNodeContext.viewNode.ownerDocument;
-    const rootViewNode = (rootNodeContext.viewNode as Element);
-    const viewRoot = doc.createElement('div');
+    const rootViewNode = rootNodeContext.viewNode as Element;
+    const viewRoot = doc.createElement("div");
     rootViewNode.appendChild(viewRoot);
     const pseudoColumn = new PseudoColumn(column, viewRoot, rootNodeContext);
     const initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
     pseudoColumn.getColumn().pageBreakType = null;
     this.allowInsertRepeatitiveElements = true;
-    return pseudoColumn.layout(new vtreeImpl.ChunkPosition(nodePosition), true)
-        .thenAsync(() => {
-          this.allowInsertRepeatitiveElements = false;
-          rootViewNode.removeChild(viewRoot);
-          this.moveChildren(viewRoot, rootViewNode, firstChild);
-          pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
-          return task.newResult(true);
-        });
+    return pseudoColumn
+      .layout(new vtreeImpl.ChunkPosition(nodePosition), true)
+      .thenAsync(() => {
+        this.allowInsertRepeatitiveElements = false;
+        rootViewNode.removeChild(viewRoot);
+        this.moveChildren(viewRoot, rootViewNode, firstChild);
+        pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
+        return task.newResult(true);
+      });
   }
 
-  moveChildren(from: Element, to: Element, firstChild: Node|null) {
+  moveChildren(from: Element, to: Element, firstChild: Node | null) {
     if (!to) {
       return;
     }
     while (from.firstChild) {
       const child = from.firstChild;
       from.removeChild(child);
-      (child as Element).setAttribute(vtreeImpl.SPECIAL_ATTR, '1');
+      (child as Element).setAttribute(vtreeImpl.SPECIAL_ATTR, "1");
       if (firstChild) {
         to.insertBefore(child, firstChild);
       } else {
@@ -223,8 +275,10 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
     if (nodeContext && !this.affectTo(nodeContext)) {
       return offset;
     }
-    if (!this.isSkipFooter ||
-        nodeContext && this.isAfterLastContent(nodeContext)) {
+    if (
+      !this.isSkipFooter ||
+      (nodeContext && this.isAfterLastContent(nodeContext))
+    ) {
       offset += this.footerHeight;
     }
     if (!this.isSkipHeader) {
@@ -250,53 +304,69 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
 
   isAfterLastContent(nodeContext: vtree.NodeContext): boolean {
     return this.findResultFromCache(
-        nodeContext, this.afterLastContentNodeCache,
-        (nc) => this.isAfterNodeContextOf(
-            this.lastContentSourceNode as Element, nodeContext, false));
+      nodeContext,
+      this.afterLastContentNodeCache,
+      nc =>
+        this.isAfterNodeContextOf(
+          this.lastContentSourceNode as Element,
+          nodeContext,
+          false
+        )
+    );
   }
 
   private affectTo(nodeContext: vtree.NodeContext): boolean {
-    return this.findResultFromCache(
-        nodeContext, this.affectedNodeCache,
-        (nc) =>
-            this.isAfterNodeContextOf(this.ownerSourceNode, nodeContext, true));
+    return this.findResultFromCache(nodeContext, this.affectedNodeCache, nc =>
+      this.isAfterNodeContextOf(this.ownerSourceNode, nodeContext, true)
+    );
   }
 
   private findResultFromCache(
-      nodeContext: vtree.NodeContext,
-      cache: {nodeContext: vtree.NodeContext, result: boolean}[],
-      calculator: (p1: vtree.NodeContext) => boolean): boolean {
+    nodeContext: vtree.NodeContext,
+    cache: { nodeContext: vtree.NodeContext; result: boolean }[],
+    calculator: (p1: vtree.NodeContext) => boolean
+  ): boolean {
     const cacheEntry = cache.filter(
-        (cache) => cache.nodeContext.sourceNode === nodeContext.sourceNode &&
-            cache.nodeContext.after === nodeContext.after);
+      cache =>
+        cache.nodeContext.sourceNode === nodeContext.sourceNode &&
+        cache.nodeContext.after === nodeContext.after
+    );
     if (cacheEntry.length > 0) {
       return cacheEntry[0].result;
     } else {
       const result = calculator(nodeContext);
-      cache.push({nodeContext, result});
+      cache.push({ nodeContext, result });
       return result;
     }
   }
 
   private isAfterNodeContextOf(
-      node: Element, nodeContext: vtree.NodeContext,
-      includeChildren: boolean): boolean {
+    node: Element,
+    nodeContext: vtree.NodeContext,
+    includeChildren: boolean
+  ): boolean {
     const parentsOfNode = [];
-    for (let n: Node|null = node; n; n = n.parentNode) {
+    for (let n: Node | null = node; n; n = n.parentNode) {
       if (nodeContext.sourceNode === n) {
         return nodeContext.after;
       } else {
         parentsOfNode.push(n);
       }
     }
-    for (let currentParent: Node|null = nodeContext.sourceNode; currentParent;
-         currentParent = currentParent.parentNode) {
+    for (
+      let currentParent: Node | null = nodeContext.sourceNode;
+      currentParent;
+      currentParent = currentParent.parentNode
+    ) {
       const index = parentsOfNode.indexOf(currentParent);
       if (index >= 0) {
         return includeChildren ? index === 0 : false;
       } else {
-        for (let current: Element|null = currentParent as Element; current;
-             current = current.previousElementSibling) {
+        for (
+          let current: Element | null = currentParent as Element;
+          current;
+          current = current.previousElementSibling
+        ) {
           if (parentsOfNode.includes(current)) {
             return true;
           }
@@ -307,15 +377,20 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
   }
 
   isFirstContentNode(nodeContext: vtree.NodeContext): boolean {
-    return nodeContext &&
-        this.firstContentSourceNode === nodeContext.sourceNode;
+    return (
+      nodeContext && this.firstContentSourceNode === nodeContext.sourceNode
+    );
   }
 
   isEnableToUpdateState(): boolean {
-    if (!this.isSkipFooter && this.enableSkippingFooter &&
-            this.footerNodePosition ||
-        !this.isSkipHeader && this.enableSkippingHeader &&
-            this.headerNodePosition) {
+    if (
+      (!this.isSkipFooter &&
+        this.enableSkippingFooter &&
+        this.footerNodePosition) ||
+      (!this.isSkipHeader &&
+        this.enableSkippingHeader &&
+        this.headerNodePosition)
+    ) {
       return true;
     } else {
       return false;
@@ -323,11 +398,17 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
   }
 
   updateState() {
-    if (!this.isSkipFooter && this.enableSkippingFooter &&
-        this.footerNodePosition) {
+    if (
+      !this.isSkipFooter &&
+      this.enableSkippingFooter &&
+      this.footerNodePosition
+    ) {
       this.isSkipFooter = true;
-    } else if (!this.isSkipHeader && this.enableSkippingHeader &&
-        this.headerNodePosition) {
+    } else if (
+      !this.isSkipHeader &&
+      this.enableSkippingHeader &&
+      this.headerNodePosition
+    ) {
       this.isSkipHeader = true;
     }
   }
@@ -365,20 +446,26 @@ export class RepetitiveElements implements repetitiveelement.RepetitiveElements 
 export abstract class LayoutEntireBlock implements layout.LayoutMode {
   formattingContext: any;
 
-  constructor(formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext) {
+  constructor(
+    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext
+  ) {
     this.formattingContext = formattingContext;
   }
 
   /**
    * @override
    */
-  abstract doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
-      task.Result<vtree.NodeContext>;
+  abstract doLayout(
+    nodeContext: vtree.NodeContext,
+    column: layout.Column
+  ): task.Result<vtree.NodeContext>;
 
   /**
    * @override
    */
-  accept(nodeContext, column) {return !!nodeContext;}
+  accept(nodeContext, column) {
+    return !!nodeContext;
+  }
 
   /**
    * @override
@@ -402,32 +489,40 @@ export abstract class LayoutEntireBlock implements layout.LayoutMode {
 export abstract class LayoutFragmentedBlock implements layout.LayoutMode {
   formattingContext: any;
 
-  constructor(formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext) {
+  constructor(
+    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext
+  ) {
     this.formattingContext = formattingContext;
   }
 
   /**
    * @override
    */
-  abstract doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
-      task.Result<vtree.NodeContext>;
+  abstract doLayout(
+    nodeContext: vtree.NodeContext,
+    column: layout.Column
+  ): task.Result<vtree.NodeContext>;
 
   /**
    * @override
    */
-  accept(nodeContext, column) {return true;}
+  accept(nodeContext, column) {
+    return true;
+  }
 
   /**
    * @override
    */
-  postLayout(positionAfter, initialPosition, column, accepted) {return accepted;}
+  postLayout(positionAfter, initialPosition, column, accepted) {
+    return accepted;
+  }
 }
 
-export class LayoutEntireOwnerBlock extends
-    LayoutEntireBlock {
+export class LayoutEntireOwnerBlock extends LayoutEntireBlock {
   constructor(
-      formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
-      public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
+    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
+    public readonly processor: RepetitiveElementsOwnerLayoutProcessor
+  ) {
     super(formattingContext);
   }
 
@@ -444,14 +539,16 @@ export class LayoutEntireOwnerBlock extends
   /**
    * @override
    */
-  accept(nodeContext, column) {return false;}
+  accept(nodeContext, column) {
+    return false;
+  }
 }
 
-export class LayoutFragmentedOwnerBlock extends
-    LayoutFragmentedBlock {
+export class LayoutFragmentedOwnerBlock extends LayoutFragmentedBlock {
   constructor(
-      formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
-      public readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
+    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
+    public readonly processor: RepetitiveElementsOwnerLayoutProcessor
+  ) {
     super(formattingContext);
   }
 
@@ -461,21 +558,23 @@ export class LayoutFragmentedOwnerBlock extends
   doLayout(nodeContext, column) {
     if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
       column.fragmentLayoutConstraints.unshift(
-          new RepetitiveElementsOwnerLayoutConstraint(nodeContext));
+        new RepetitiveElementsOwnerLayoutConstraint(nodeContext)
+      );
     }
     return this.processor.doLayout(nodeContext, column);
   }
 }
 
-export class RepetitiveElementsOwnerLayoutConstraint implements
-    repetitiveelement.RepetitiveElementsOwnerLayoutConstraint {
-
-  flagmentLayoutConstraintType: FragmentLayoutConstraintType = 'RepetitiveElementsOwner';
+export class RepetitiveElementsOwnerLayoutConstraint
+  implements repetitiveelement.RepetitiveElementsOwnerLayoutConstraint {
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType =
+    "RepetitiveElementsOwner";
   nodeContext: any;
 
   constructor(nodeContext: vtree.NodeContext) {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        nodeContext.formattingContext);
+      nodeContext.formattingContext
+    );
     this.nodeContext = formattingContext.getRootNodeContext(nodeContext);
   }
 
@@ -491,8 +590,10 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
     if (!repetitiveElements.isEnableToUpdateState()) {
       return true;
     }
-    if (overflownNodeContext && !nodeContext ||
-        nodeContext && nodeContext.overflow) {
+    if (
+      (overflownNodeContext && !nodeContext) ||
+      (nodeContext && nodeContext.overflow)
+    ) {
       return false;
     } else {
       return true;
@@ -521,8 +622,10 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
     }
     if (allowed) {
       if (column.stopAtOverflow) {
-        if (nodeContext == null ||
-            repetitiveElements.isAfterLastContent(nodeContext)) {
+        if (
+          nodeContext == null ||
+          repetitiveElements.isAfterLastContent(nodeContext)
+        ) {
           repetitiveElements.preventSkippingFooter();
         }
       }
@@ -532,24 +635,28 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
   /** @override */
   finishBreak(nodeContext, column) {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        this.nodeContext.formattingContext);
+      this.nodeContext.formattingContext
+    );
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
       return task.newResult(true);
     }
     const rootNodeContext = this.nodeContext;
-    return appendHeader(formattingContext, rootNodeContext, column)
-        .thenAsync(
-            () => appendFooter(formattingContext, rootNodeContext, column)
-                      .thenAsync(() => {
-                        repetitiveElements.prepareLayoutFragment();
-                        return task.newResult(true);
-                      }));
+    return appendHeader(formattingContext, rootNodeContext, column).thenAsync(
+      () =>
+        appendFooter(formattingContext, rootNodeContext, column).thenAsync(
+          () => {
+            repetitiveElements.prepareLayoutFragment();
+            return task.newResult(true);
+          }
+        )
+    );
   }
 
   getRepetitiveElements(): repetitiveelement.RepetitiveElements {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        this.nodeContext.formattingContext);
+      this.nodeContext.formattingContext
+    );
     return formattingContext.getRepetitiveElements();
   }
 
@@ -558,21 +665,27 @@ export class RepetitiveElementsOwnerLayoutConstraint implements
     if (!(constraint instanceof RepetitiveElementsOwnerLayoutConstraint)) {
       return false;
     }
-    return getRepetitiveElementsOwnerFormattingContext(
-               this.nodeContext.formattingContext) ===
-        getRepetitiveElementsOwnerFormattingContext(
-               constraint.nodeContext.formattingContext);
+    return (
+      getRepetitiveElementsOwnerFormattingContext(
+        this.nodeContext.formattingContext
+      ) ===
+      getRepetitiveElementsOwnerFormattingContext(
+        constraint.nodeContext.formattingContext
+      )
+    );
   }
 
   /** @override */
-  getPriorityOfFinishBreak() {return 10;}
+  getPriorityOfFinishBreak() {
+    return 10;
+  }
 }
 
-export class RepetitiveElementsOwnerLayoutRetryer extends
-    AbstractLayoutRetryer {
+export class RepetitiveElementsOwnerLayoutRetryer extends AbstractLayoutRetryer {
   constructor(
-      public readonly formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
-      private readonly processor: RepetitiveElementsOwnerLayoutProcessor) {
+    public readonly formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
+    private readonly processor: RepetitiveElementsOwnerLayoutProcessor
+  ) {
     super();
   }
 
@@ -581,27 +694,33 @@ export class RepetitiveElementsOwnerLayoutRetryer extends
    */
   resolveLayoutMode(nodeContext) {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
-    if (!nodeContext.belongsTo(this.formattingContext) &&
-        !repetitiveElements.doneInitialLayout) {
+    if (
+      !nodeContext.belongsTo(this.formattingContext) &&
+      !repetitiveElements.doneInitialLayout
+    ) {
       return new LayoutEntireOwnerBlock(this.formattingContext, this.processor);
     } else {
-      if (!nodeContext.belongsTo(this.formattingContext) &&
-          !nodeContext.after) {
+      if (
+        !nodeContext.belongsTo(this.formattingContext) &&
+        !nodeContext.after
+      ) {
         if (repetitiveElements) {
           repetitiveElements.preventSkippingHeader();
         }
       }
       return new LayoutFragmentedOwnerBlock(
-          this.formattingContext, this.processor);
+        this.formattingContext,
+        this.processor
+      );
     }
   }
 }
 
-export class EntireBlockLayoutStrategy extends
-    EdgeSkipper {
+export class EntireBlockLayoutStrategy extends EdgeSkipper {
   constructor(
-      public readonly formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
-      public readonly column: layout.Column) {
+    public readonly formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
+    public readonly column: layout.Column
+  ) {
     super();
   }
 
@@ -612,29 +731,30 @@ export class EntireBlockLayoutStrategy extends
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
     const repetitiveElements = formattingContext.getRepetitiveElements();
-    if (nodeContext.parent &&
-        formattingContext.rootSourceNode === nodeContext.parent.sourceNode) {
+    if (
+      nodeContext.parent &&
+      formattingContext.rootSourceNode === nodeContext.parent.sourceNode
+    ) {
       switch (nodeContext.repeatOnBreak) {
-        case 'header':
+        case "header":
           if (!repetitiveElements.isHeaderRegistered()) {
             repetitiveElements.setHeaderNodeContext(nodeContext);
             return task.newResult(true);
           } else {
-            nodeContext.repeatOnBreak = 'none';
+            nodeContext.repeatOnBreak = "none";
           }
           break;
-        case 'footer':
+        case "footer":
           if (!repetitiveElements.isFooterRegistered()) {
             repetitiveElements.setFooterNodeContext(nodeContext);
             return task.newResult(true);
           } else {
-            nodeContext.repeatOnBreak = 'none';
+            nodeContext.repeatOnBreak = "none";
           }
           break;
       }
       if (!repetitiveElements.firstContentSourceNode) {
-        repetitiveElements.firstContentSourceNode =
-            (nodeContext.sourceNode as Element);
+        repetitiveElements.firstContentSourceNode = nodeContext.sourceNode as Element;
       }
     }
     return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);
@@ -648,11 +768,13 @@ export class EntireBlockLayoutStrategy extends
     const nodeContext = state.nodeContext;
     if (nodeContext.sourceNode === formattingContext.rootSourceNode) {
       formattingContext.getRepetitiveElements().lastContentSourceNode =
-          state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode;
+        state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode;
       state.break = true;
     }
-    if (nodeContext.repeatOnBreak === 'header' ||
-        nodeContext.repeatOnBreak === 'footer') {
+    if (
+      nodeContext.repeatOnBreak === "header" ||
+      nodeContext.repeatOnBreak === "footer"
+    ) {
       return task.newResult(true);
     } else {
       return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
@@ -660,25 +782,29 @@ export class EntireBlockLayoutStrategy extends
   }
 }
 
-export class FragmentedBlockLayoutStrategy extends
-    EdgeSkipper {
+export class FragmentedBlockLayoutStrategy extends EdgeSkipper {
   constructor(
-      public readonly formattingContext:
-          RepetitiveElementsOwnerFormattingContext,
-      public readonly column: layout.Column) {
+    public readonly formattingContext: RepetitiveElementsOwnerFormattingContext,
+    public readonly column: layout.Column
+  ) {
     super();
   }
 }
 
-export class RepetitiveElementsOwnerLayoutProcessor extends
-    layoutprocessor.BlockLayoutProcessor implements layoutprocessor.LayoutProcessor {
-
-  layout(nodeContext: vtree.NodeContext, column: layout.Column, leadingEdge: boolean) {
+export class RepetitiveElementsOwnerLayoutProcessor
+  extends layoutprocessor.BlockLayoutProcessor
+  implements layoutprocessor.LayoutProcessor {
+  layout(
+    nodeContext: vtree.NodeContext,
+    column: layout.Column,
+    leadingEdge: boolean
+  ) {
     if (column.isFloatNodeContext(nodeContext)) {
       return column.layoutFloatOrFootnote(nodeContext);
     }
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        nodeContext.formattingContext);
+      nodeContext.formattingContext
+    );
     const rootViewNode = formattingContext.getRootViewNode(nodeContext);
     if (!rootViewNode) {
       return column.buildDeepElementView(nodeContext);
@@ -687,101 +813,121 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
         appendHeaderToAncestors(nodeContext.parent, column);
       }
       if (!nodeContext.belongsTo(formattingContext)) {
-        return (new RepetitiveElementsOwnerLayoutRetryer(
-                    formattingContext, this))
-            .layout(nodeContext, column);
+        return new RepetitiveElementsOwnerLayoutRetryer(
+          formattingContext,
+          this
+        ).layout(nodeContext, column);
       } else {
         return layoutprocessor.BlockLayoutProcessor.prototype.layout.call(
-            this, nodeContext, column, leadingEdge);
+          this,
+          nodeContext,
+          column,
+          leadingEdge
+        );
       }
     }
   }
 
   startNonInlineElementNode(nodeContext: vtree.NodeContext) {
-    const formattingContext =
-        getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
+    const formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(
+      nodeContext
+    );
     const repetitiveElements = formattingContext.getRepetitiveElements();
     if (!repetitiveElements) {
       return false;
     }
-    if (!repetitiveElements.allowInsertRepeatitiveElements &&
-        (repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode) ||
-         repetitiveElements.isFooterSourceNode(nodeContext.sourceNode))) {
+    if (
+      !repetitiveElements.allowInsertRepeatitiveElements &&
+      (repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode) ||
+        repetitiveElements.isFooterSourceNode(nodeContext.sourceNode))
+    ) {
       nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
     }
     return false;
   }
 
-  doInitialLayout(nodeContext: vtree.NodeContext, column: layout.Column):
-      task.Result<vtree.NodeContext> {
+  doInitialLayout(
+    nodeContext: vtree.NodeContext,
+    column: layout.Column
+  ): task.Result<vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        nodeContext.formattingContext);
-    const frame = task.newFrame<vtree.NodeContext>('BlockLayoutProcessor.doInitialLayout');
+      nodeContext.formattingContext
+    );
+    const frame = task.newFrame<vtree.NodeContext>(
+      "BlockLayoutProcessor.doInitialLayout"
+    );
     this.layoutEntireBlock(nodeContext, column).thenFinish(frame);
     return frame.result();
   }
 
   private layoutEntireBlock(
-      nodeContext: vtree.NodeContext,
-      column: layout.Column): task.Result<vtree.NodeContext> {
+    nodeContext: vtree.NodeContext,
+    column: layout.Column
+  ): task.Result<vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        nodeContext.formattingContext);
+      nodeContext.formattingContext
+    );
     const strategy = new EntireBlockLayoutStrategy(formattingContext, column);
     const iterator = new LayoutIterator(strategy, column.layoutContext);
     return iterator.iterate(nodeContext);
   }
 
-  doLayout(nodeContext: vtree.NodeContext, column: layout.Column):
-      task.Result<vtree.NodeContext> {
+  doLayout(
+    nodeContext: vtree.NodeContext,
+    column: layout.Column
+  ): task.Result<vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-        nodeContext.formattingContext);
-    const frame: task.Frame<vtree.NodeContext> = task.newFrame('doLayout');
+      nodeContext.formattingContext
+    );
+    const frame: task.Frame<vtree.NodeContext> = task.newFrame("doLayout");
     const cont = column.layoutContext.nextInTree(nodeContext, false);
-    selectors.processAfterIfContinues(cont, column)
-        .then((resNodeContext) => {
-          let nextNodeContext = resNodeContext;
-          frame
-              .loopWithFrame((loopFrame) => {
-                while (nextNodeContext) {
-                  let pending = true;
-                  column.layoutNext(nextNodeContext, false)
-                      .then((nodeContextParam) => {
-                        nextNodeContext = nodeContextParam;
-                        if (column.pageFloatLayoutContext.isInvalidated()) {
-                          loopFrame.breakLoop();
-                        } else if (column.pageBreakType) {
-                          loopFrame.breakLoop(); // Loop end
-                        } else if (nextNodeContext &&
-                            column.stopByOverflow(nextNodeContext)) {
-                          loopFrame.breakLoop(); // Loop end
-                        } else if (nextNodeContext && nextNodeContext.after &&
-                            nextNodeContext.sourceNode ==
-                                formattingContext.rootSourceNode) {
-                          loopFrame.breakLoop(); // Loop end
-                        } else {
-                          if (pending) {
-                            // Sync case
-                            pending = false;
-                          } else {
-                            // Async case
-                            loopFrame.continueLoop();
-                          }
-                        }
-                      });
-                  if (pending) {
-                    // Async case and loop end
-                    pending = false;
-                    return;
-                  }
-                }
-
-                // Sync case
+    selectors.processAfterIfContinues(cont, column).then(resNodeContext => {
+      let nextNodeContext = resNodeContext;
+      frame
+        .loopWithFrame(loopFrame => {
+          while (nextNodeContext) {
+            let pending = true;
+            column.layoutNext(nextNodeContext, false).then(nodeContextParam => {
+              nextNodeContext = nodeContextParam;
+              if (column.pageFloatLayoutContext.isInvalidated()) {
                 loopFrame.breakLoop();
-              })
-              .then(() => {
-                frame.finish(nextNodeContext);
-              });
+              } else if (column.pageBreakType) {
+                loopFrame.breakLoop(); // Loop end
+              } else if (
+                nextNodeContext &&
+                column.stopByOverflow(nextNodeContext)
+              ) {
+                loopFrame.breakLoop(); // Loop end
+              } else if (
+                nextNodeContext &&
+                nextNodeContext.after &&
+                nextNodeContext.sourceNode == formattingContext.rootSourceNode
+              ) {
+                loopFrame.breakLoop(); // Loop end
+              } else {
+                if (pending) {
+                  // Sync case
+                  pending = false;
+                } else {
+                  // Async case
+                  loopFrame.continueLoop();
+                }
+              }
+            });
+            if (pending) {
+              // Async case and loop end
+              pending = false;
+              return;
+            }
+          }
+
+          // Sync case
+          loopFrame.breakLoop();
+        })
+        .then(() => {
+          frame.finish(nextNodeContext);
         });
+    });
     return frame.result();
   }
 
@@ -790,7 +936,12 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
    */
   finishBreak(column, nodeContext, forceRemoveSelf, endOfColumn) {
     return layoutprocessor.BlockLayoutProcessor.prototype.finishBreak.call(
-        this, column, nodeContext, forceRemoveSelf, endOfColumn);
+      this,
+      column,
+      nodeContext,
+      forceRemoveSelf,
+      endOfColumn
+    );
   }
 
   /**
@@ -798,88 +949,115 @@ export class RepetitiveElementsOwnerLayoutProcessor extends
    */
   clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf) {
     layoutprocessor.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
-        column, parentNodeContext, nodeContext, removeSelf);
+      column,
+      parentNodeContext,
+      nodeContext,
+      removeSelf
+    );
   }
 }
 
 function eachAncestorNodeContext(
-    nodeContext: vtree.NodeContext,
-    callback:
-        (p1: RepetitiveElementsOwnerFormattingContext, p2: vtree.NodeContext) =>
-            any) {
+  nodeContext: vtree.NodeContext,
+  callback: (
+    p1: RepetitiveElementsOwnerFormattingContext,
+    p2: vtree.NodeContext
+  ) => any
+) {
   for (let nc = nodeContext; nc; nc = nc.parent) {
     const formattingContext = nc.formattingContext;
-    if (formattingContext &&
-        formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
-        !nc.belongsTo(formattingContext)) {
+    if (
+      formattingContext &&
+      formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
+      !nc.belongsTo(formattingContext)
+    ) {
       callback(formattingContext, nc);
     }
   }
 }
 
 export function appendHeaderToAncestors(
-    nodeContext: vtree.NodeContext, column: layout.Column) {
+  nodeContext: vtree.NodeContext,
+  column: layout.Column
+) {
   if (!nodeContext) {
     return;
   }
   eachAncestorNodeContext(
-      nodeContext.after ? nodeContext.parent : nodeContext,
-      (formattingContext, nc) => {
-        if (table.isInstanceOfTableFormattingContext(formattingContext)) {
-          return;
-        }
-        column.fragmentLayoutConstraints.push(
-            new RepetitiveElementsOwnerLayoutConstraint(nc));
-      });
+    nodeContext.after ? nodeContext.parent : nodeContext,
+    (formattingContext, nc) => {
+      if (table.isInstanceOfTableFormattingContext(formattingContext)) {
+        return;
+      }
+      column.fragmentLayoutConstraints.push(
+        new RepetitiveElementsOwnerLayoutConstraint(nc)
+      );
+    }
+  );
 }
 
 export function appendHeader(
-    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
-    nodeContext: vtree.NodeContext, column) {
+  formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
+  nodeContext: vtree.NodeContext,
+  column
+) {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
     const rootNodeContext = formattingContext.getRootNodeContext(nodeContext);
     if (rootNodeContext.viewNode) {
       const firstChild = rootNodeContext.viewNode.firstChild;
       return repetitiveElements.appendHeaderToFragment(
-          rootNodeContext, firstChild, column);
+        rootNodeContext,
+        firstChild,
+        column
+      );
     }
   }
   return task.newResult(true);
 }
 
 export function appendFooter(
-    formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
-    nodeContext: vtree.NodeContext, column) {
+  formattingContext: repetitiveelement.RepetitiveElementsOwnerFormattingContext,
+  nodeContext: vtree.NodeContext,
+  column
+) {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
     if (!repetitiveElements.isSkipFooter) {
       const rootNodeContext = formattingContext.getRootNodeContext(nodeContext);
       if (rootNodeContext.viewNode) {
         return repetitiveElements.appendFooterToFragment(
-            rootNodeContext, null, column);
+          rootNodeContext,
+          null,
+          column
+        );
       }
     }
   }
   return task.newResult(true);
 }
 
-
-function getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext: vtree.NodeContext):
-    repetitiveelement.RepetitiveElementsOwnerFormattingContext | null {
+function getRepetitiveElementsOwnerFormattingContextOrNull(
+  nodeContext: vtree.NodeContext
+): repetitiveelement.RepetitiveElementsOwnerFormattingContext | null {
   const formattingContext = nodeContext.formattingContext;
   if (!formattingContext) {
     return null;
   }
-  if (!(formattingContext instanceof RepetitiveElementsOwnerFormattingContext)) {
+  if (
+    !(formattingContext instanceof RepetitiveElementsOwnerFormattingContext)
+  ) {
     return null;
   }
   return formattingContext;
 }
 
-function getRepetitiveElementsOwnerFormattingContext(formattingContext: vtree.FormattingContext):
-    repetitiveelement.RepetitiveElementsOwnerFormattingContext {
-  asserts.assert(formattingContext instanceof RepetitiveElementsOwnerFormattingContext);
+function getRepetitiveElementsOwnerFormattingContext(
+  formattingContext: vtree.FormattingContext
+): repetitiveelement.RepetitiveElementsOwnerFormattingContext {
+  asserts.assert(
+    formattingContext instanceof RepetitiveElementsOwnerFormattingContext
+  );
   return formattingContext as repetitiveelement.RepetitiveElementsOwnerFormattingContext;
 }
 
@@ -887,11 +1065,15 @@ const repetitiveLayoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
 
 export function registerRepetitiveElementsPlugin() {
   plugin.registerHook(
-    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR, (formattingContext) => {
-      if (formattingContext instanceof RepetitiveElementsOwnerFormattingContext
-          && !table.isInstanceOfTableFormattingContext(formattingContext)) {
+    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
+    formattingContext => {
+      if (
+        formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
+        !table.isInstanceOfTableFormattingContext(formattingContext)
+      ) {
         return repetitiveLayoutProcessor;
       }
       return null;
-    });
+    }
+  );
 }

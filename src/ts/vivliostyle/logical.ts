@@ -17,23 +17,25 @@
  * @fileoverview CSS Logical Properties
  */
 type ConversionMap = {
-  regexp: RegExp,
-  to: string
+  regexp: RegExp;
+  to: string;
 };
 
 function createRegExpMap(
-    valueMaps:
-        {[key: string]: {[key: string]: {logical: string, physical: string}[]}},
-    toPhysical: boolean): {[key: string]: {[key: string]: ConversionMap[]}} {
+  valueMaps: {
+    [key: string]: { [key: string]: { logical: string; physical: string }[] };
+  },
+  toPhysical: boolean
+): { [key: string]: { [key: string]: ConversionMap[] } } {
   const map = {};
-  Object.keys((valueMaps as Object)).forEach((writingMode) => {
-    const dest = map[writingMode] = {};
+  Object.keys(valueMaps as Object).forEach(writingMode => {
+    const dest = (map[writingMode] = {});
     const src = valueMaps[writingMode];
-    Object.keys((src as Object)).forEach((direction) => {
-      dest[direction] = src[direction].map((p) => {
+    Object.keys(src as Object).forEach(direction => {
+      dest[direction] = src[direction].map(p => {
         const from = toPhysical ? p.logical : p.physical;
         const to = toPhysical ? p.physical : p.logical;
-        return {regexp: new RegExp(`(-?)${from}(-?)`), to: `\$1${to}\$2`};
+        return { regexp: new RegExp(`(-?)${from}(-?)`), to: `\$1${to}\$2` };
       });
     });
   });
@@ -41,13 +43,16 @@ function createRegExpMap(
 }
 
 function convert(
-    value: string, writingMode: string, direction: string|null,
-    maps: {[key: string]: {[key: string]: ConversionMap[]}}): string {
+  value: string,
+  writingMode: string,
+  direction: string | null,
+  maps: { [key: string]: { [key: string]: ConversionMap[] } }
+): string {
   const maps2 = maps[writingMode];
   if (!maps2) {
     throw new Error(`unknown writing-mode: ${writingMode}`);
   }
-  const map = maps2[direction || 'ltr'];
+  const map = maps2[direction || "ltr"];
   if (!map) {
     throw new Error(`unknown direction: ${direction}`);
   }
@@ -59,94 +64,100 @@ function convert(
   }
   return value;
 }
-const values:
-    {[key: string]: {[key: string]: {logical: string, physical: string}[]}} = {
-      'horizontal-tb': {
-        'ltr': [
-          {logical: 'inline-start', physical: 'left'},
-          {logical: 'inline-end', physical: 'right'},
-          {logical: 'block-start', physical: 'top'},
-          {logical: 'block-end', physical: 'bottom'},
-          {logical: 'inline-size', physical: 'width'},
-          {logical: 'block-size', physical: 'height'}
-        ],
-        'rtl': [
-          {logical: 'inline-start', physical: 'right'},
-          {logical: 'inline-end', physical: 'left'},
-          {logical: 'block-start', physical: 'top'},
-          {logical: 'block-end', physical: 'bottom'},
-          {logical: 'inline-size', physical: 'width'},
-          {logical: 'block-size', physical: 'height'}
-        ]
-      },
-      'vertical-rl': {
-        'ltr': [
-          {logical: 'inline-start', physical: 'top'},
-          {logical: 'inline-end', physical: 'bottom'},
-          {logical: 'block-start', physical: 'right'},
-          {logical: 'block-end', physical: 'left'},
-          {logical: 'inline-size', physical: 'height'},
-          {logical: 'block-size', physical: 'width'}
-        ],
-        'rtl': [
-          {logical: 'inline-start', physical: 'bottom'},
-          {logical: 'inline-end', physical: 'top'},
-          {logical: 'block-start', physical: 'right'},
-          {logical: 'block-end', physical: 'left'},
-          {logical: 'inline-size', physical: 'height'},
-          {logical: 'block-size', physical: 'width'}
-        ]
-      },
-      'vertical-lr': {
-        'ltr': [
-          {logical: 'inline-start', physical: 'top'},
-          {logical: 'inline-end', physical: 'bottom'},
-          {logical: 'block-start', physical: 'left'},
-          {logical: 'block-end', physical: 'right'},
-          {logical: 'inline-size', physical: 'height'},
-          {logical: 'block-size', physical: 'width'}
-        ],
-        'rtl': [
-          {logical: 'inline-start', physical: 'bottom'},
-          {logical: 'inline-end', physical: 'top'},
-          {logical: 'block-start', physical: 'left'},
-          {logical: 'block-end', physical: 'right'},
-          {logical: 'inline-size', physical: 'height'},
-          {logical: 'block-size', physical: 'width'}
-        ]
-      }
-    };
+const values: {
+  [key: string]: { [key: string]: { logical: string; physical: string }[] };
+} = {
+  "horizontal-tb": {
+    ltr: [
+      { logical: "inline-start", physical: "left" },
+      { logical: "inline-end", physical: "right" },
+      { logical: "block-start", physical: "top" },
+      { logical: "block-end", physical: "bottom" },
+      { logical: "inline-size", physical: "width" },
+      { logical: "block-size", physical: "height" }
+    ],
+    rtl: [
+      { logical: "inline-start", physical: "right" },
+      { logical: "inline-end", physical: "left" },
+      { logical: "block-start", physical: "top" },
+      { logical: "block-end", physical: "bottom" },
+      { logical: "inline-size", physical: "width" },
+      { logical: "block-size", physical: "height" }
+    ]
+  },
+  "vertical-rl": {
+    ltr: [
+      { logical: "inline-start", physical: "top" },
+      { logical: "inline-end", physical: "bottom" },
+      { logical: "block-start", physical: "right" },
+      { logical: "block-end", physical: "left" },
+      { logical: "inline-size", physical: "height" },
+      { logical: "block-size", physical: "width" }
+    ],
+    rtl: [
+      { logical: "inline-start", physical: "bottom" },
+      { logical: "inline-end", physical: "top" },
+      { logical: "block-start", physical: "right" },
+      { logical: "block-end", physical: "left" },
+      { logical: "inline-size", physical: "height" },
+      { logical: "block-size", physical: "width" }
+    ]
+  },
+  "vertical-lr": {
+    ltr: [
+      { logical: "inline-start", physical: "top" },
+      { logical: "inline-end", physical: "bottom" },
+      { logical: "block-start", physical: "left" },
+      { logical: "block-end", physical: "right" },
+      { logical: "inline-size", physical: "height" },
+      { logical: "block-size", physical: "width" }
+    ],
+    rtl: [
+      { logical: "inline-start", physical: "bottom" },
+      { logical: "inline-end", physical: "top" },
+      { logical: "block-start", physical: "left" },
+      { logical: "block-end", physical: "right" },
+      { logical: "inline-size", physical: "height" },
+      { logical: "block-size", physical: "width" }
+    ]
+  }
+};
 const toPhysicalMaps = createRegExpMap(values, true);
 
-export const toPhysical =
-    (value: string, writingMode: string, direction?: string|null): string =>
-        convert(value, writingMode, direction || null, toPhysicalMaps);
+export const toPhysical = (
+  value: string,
+  writingMode: string,
+  direction?: string | null
+): string => convert(value, writingMode, direction || null, toPhysicalMaps);
 const toLogicalMaps = createRegExpMap(values, false);
 
-export const toLogical =
-    (value: string, writingMode: string, direction?: string|null): string =>
-        convert(value, writingMode, direction || null, toLogicalMaps);
-const lineRelativeValues:
-    {[key: string]: {logical: string, physical: string}[]} = {
-      'horizontal-tb': [
-        {logical: 'line-left', physical: 'left'},
-        {logical: 'line-right', physical: 'right'},
-        {logical: 'over', physical: 'top'},
-        {logical: 'under', physical: 'bottom'}
-      ],
-      'vertical-rl': [
-        {logical: 'line-left', physical: 'top'},
-        {logical: 'line-right', physical: 'bottom'},
-        {logical: 'over', physical: 'right'},
-        {logical: 'under', physical: 'left'}
-      ],
-      'vertical-lr': [
-        {logical: 'line-left', physical: 'top'},
-        {logical: 'line-right', physical: 'bottom'},
-        {logical: 'over', physical: 'right'},
-        {logical: 'under', physical: 'left'}
-      ]
-    };
+export const toLogical = (
+  value: string,
+  writingMode: string,
+  direction?: string | null
+): string => convert(value, writingMode, direction || null, toLogicalMaps);
+const lineRelativeValues: {
+  [key: string]: { logical: string; physical: string }[];
+} = {
+  "horizontal-tb": [
+    { logical: "line-left", physical: "left" },
+    { logical: "line-right", physical: "right" },
+    { logical: "over", physical: "top" },
+    { logical: "under", physical: "bottom" }
+  ],
+  "vertical-rl": [
+    { logical: "line-left", physical: "top" },
+    { logical: "line-right", physical: "bottom" },
+    { logical: "over", physical: "right" },
+    { logical: "under", physical: "left" }
+  ],
+  "vertical-lr": [
+    { logical: "line-left", physical: "top" },
+    { logical: "line-right", physical: "bottom" },
+    { logical: "over", physical: "right" },
+    { logical: "under", physical: "left" }
+  ]
+};
 
 export const toLineRelative = (value: string, writingMode: string): string => {
   const maps = lineRelativeValues[writingMode];
