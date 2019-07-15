@@ -242,7 +242,7 @@ export class Fragment {
     while (true) {
       let ext;
       switch (str.charAt(i)) {
-        case "/":
+        case "/": {
           i++;
           r = str
             .substr(i)
@@ -258,7 +258,8 @@ export class Fragment {
           ext = parseExt(r[4]);
           steps.push(new ChildStep(index, id, base.asString(ext["s"])));
           break;
-        case ":":
+        }
+        case ":": {
           i++;
           r = str
             .substr(i)
@@ -288,6 +289,7 @@ export class Fragment {
             )
           );
           break;
+        }
         case "!":
           i++;
           steps.push(new RefStep());
@@ -353,11 +355,9 @@ export class Fragment {
     let textAfter = "";
     while (node) {
       switch (node.nodeType) {
-        case 3:
-
-        // Text nodes
+        case 3: // Text nodes
         case 4:
-        case 5:
+        case 5: {
           const text = node.textContent;
           const textLength = text.length;
           if (after) {
@@ -375,8 +375,8 @@ export class Fragment {
           }
           node = node.previousSibling;
           continue;
-        case 8:
-          // Comment Node
+        }
+        case 8: // Comment Node
           node = node.previousSibling;
           continue;
       }

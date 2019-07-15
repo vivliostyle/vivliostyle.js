@@ -761,7 +761,7 @@ export class Viewer {
       throw new Error("no page exists.");
     }
     switch (type) {
-      case ZoomType.FIT_INSIDE_VIEWPORT:
+      case ZoomType.FIT_INSIDE_VIEWPORT: {
         let pageDim;
         if (this.pref.spreadView) {
           asserts.assert(this.currentSpread);
@@ -770,6 +770,7 @@ export class Viewer {
           pageDim = this.currentPage.dimensions;
         }
         return this.calculateZoomFactorToFitInsideViewPort(pageDim);
+      }
       default:
         throw new Error(`unknown zoom type: ${type}`);
     }

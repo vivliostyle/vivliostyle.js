@@ -1747,7 +1747,7 @@ export class ValidatorSet {
               }
               vals.push(builtIn.clone());
             } else {
-              var idents = {};
+              const idents = {};
               idents[token.text.toLowerCase()] = css.getName(token.text);
               vals.push(
                 this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
@@ -1755,14 +1755,15 @@ export class ValidatorSet {
             }
             expectval = false;
             break;
-          case csstok.TokenType.INT:
-            var idents = {};
+          case csstok.TokenType.INT: {
+            const idents = {};
             idents[`${token.num}`] = new css.Int(token.num);
             vals.push(
               this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
             );
             expectval = false;
             break;
+          }
           case csstok.TokenType.BAR:
             setop("|");
             break;
@@ -1787,9 +1788,9 @@ export class ValidatorSet {
             vals = [];
             expectval = true;
             break;
-          case csstok.TokenType.C_BRK:
+          case csstok.TokenType.C_BRK: {
             val = reduce();
-            var open = stack.pop();
+            const open = stack.pop();
             if (open.b != "[") {
               throw new Error("']' unexpected");
             }
@@ -1798,9 +1799,10 @@ export class ValidatorSet {
             op = open.op;
             expectval = false;
             break;
-          case csstok.TokenType.C_PAR:
+          }
+          case csstok.TokenType.C_PAR: {
             val = reduce();
-            var open = stack.pop();
+            const open = stack.pop();
             if (open.b != "(") {
               throw new Error("')' unexpected");
             }
@@ -1809,6 +1811,7 @@ export class ValidatorSet {
             op = open.op;
             expectval = false;
             break;
+          }
           case csstok.TokenType.COLON:
             if (expectval) {
               throw new Error("':' unexpected");
@@ -1834,7 +1837,7 @@ export class ValidatorSet {
             }
             vals.push(this.addCounts(vals.pop(), 1, Number.POSITIVE_INFINITY));
             break;
-          case csstok.TokenType.O_BRC:
+          case csstok.TokenType.O_BRC: {
             tok.consume();
             token = tok.token();
             if (token.type != csstok.TokenType.INT) {
@@ -1859,6 +1862,7 @@ export class ValidatorSet {
             }
             vals.push(this.addCounts(vals.pop(), min, max));
             break;
+          }
           case csstok.TokenType.SEMICOL:
             result = reduce();
             if (stack.length > 0) {
@@ -1974,13 +1978,14 @@ export class ValidatorSet {
             syntax = [];
             slash = false;
             break;
-          case csstok.TokenType.C_BRK:
+          case csstok.TokenType.C_BRK: {
             const compound = new ShorthandSyntaxCompound(syntax, slash);
             const item = stack.pop();
             syntax = item.syntax;
             slash = item.slash;
             syntax.push(compound);
             break;
+          }
           case csstok.TokenType.SEMICOL:
             result = true;
             tok.consume();

@@ -594,11 +594,12 @@ export class Styler implements AbstractStyler {
           case "%":
             px *= this.context.initialFontSize / 100;
             break;
-          default:
+          default: {
             const unitSize = expr.defaultUnitSizes[val.unit];
             if (unitSize) {
               px *= unitSize;
             }
+          }
         }
         this.context.rootFontSize = px;
       }

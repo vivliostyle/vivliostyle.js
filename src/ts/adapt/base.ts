@@ -544,13 +544,14 @@ export const appendBase64 = (sb: StringBuffer, data: string): void => {
     sb.append(base64Chars.charAt(c3 & 63));
   }
   switch (length - length3) {
-    case 1:
+    case 1: {
       const p1 = data.charCodeAt(length3) & 255;
       sb.append(base64Chars.charAt(p1 >> 2));
       sb.append(base64Chars.charAt((p1 << 4) & 63));
       sb.append("==");
       break;
-    case 2:
+    }
+    case 2: {
       const q1 = data.charCodeAt(length3) & 255;
       const q2 = data.charCodeAt(length3 + 1) & 255;
       sb.append(base64Chars.charAt(q1 >> 2));
@@ -558,6 +559,7 @@ export const appendBase64 = (sb: StringBuffer, data: string): void => {
       sb.append(base64Chars.charAt((q2 << 2) & 63));
       sb.append("=");
       break;
+    }
   }
 };
 

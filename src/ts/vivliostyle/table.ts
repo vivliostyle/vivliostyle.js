@@ -699,13 +699,14 @@ export class EntireTableLayoutStrategy extends layoututil.EdgeSkipper {
       case "table":
         formattingContext.inlineBorderSpacing = nodeContext.inlineBorderSpacing;
         break;
-      case "table-caption":
+      case "table-caption": {
         const captionView = new TableCaptionView(
           nodeContext.viewNode as Element,
           nodeContext.captionSide
         );
         formattingContext.captions.push(captionView);
         break;
+      }
       case "table-header-group":
         if (!repetitiveElements.isHeaderRegistered()) {
           this.inHeaderOrFooter = true;

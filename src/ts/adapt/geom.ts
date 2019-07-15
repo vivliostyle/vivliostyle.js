@@ -358,9 +358,9 @@ export const shapesToBands = (
         continue;
       }
       if (segment.low.y < y2min) {
-        // Horizontal segment that goes right at y is not active, but
-        // consume it anyway
         if (segment.low.y == segment.high.y && segment.low.y == y) {
+          // Horizontal segment that goes right at y is not active,
+          // but consume it anyway
         } else {
           activeSegments.push(segment);
           y2 = y2min;

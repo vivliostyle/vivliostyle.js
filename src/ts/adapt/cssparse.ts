@@ -1431,13 +1431,12 @@ export class Parser {
             continue;
           }
           token1 = tokenizer.nthToken(2);
-
-          // cannot be a selector
           if (
             token1.precededBySpace ||
             (token1.type != csstok.TokenType.IDENT &&
               token1.type != csstok.TokenType.FUNC)
           ) {
+            // cannot be a selector
           } else {
             // can be either a selector or a property assignment
             tokenizer.mark();
@@ -2353,7 +2352,7 @@ export class Parser {
               break;
             case "-epubx-page-master":
             case "-epubx-partition":
-            case "-epubx-partition-group":
+            case "-epubx-partition-group": {
               tokenizer.consume();
               token = tokenizer.token();
               let ruleName: string | null = null;
@@ -2415,6 +2414,7 @@ export class Parser {
                 continue;
               }
               break;
+            }
             case "":
               // No text after @
               handler.error(`E_CSS_UNEXPECTED_AT${text}`, token);
@@ -2531,7 +2531,6 @@ export class Parser {
           tokenizer.consume();
           continue;
       }
-      break;
     }
     return false;
   }

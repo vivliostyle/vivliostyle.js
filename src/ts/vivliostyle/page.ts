@@ -131,8 +131,8 @@ export const resolvePageSizeAndBleed = (style: {
   };
   const size: csscasc.CascadeValue = style["size"];
 
-  // if size is auto, fit to the viewport (use default value)
   if (!size || size.value === css.ident.auto) {
+    // if size is auto, fit to the viewport (use default value)
   } else {
     /** !type {!css.Val} */
     const value = size.value;

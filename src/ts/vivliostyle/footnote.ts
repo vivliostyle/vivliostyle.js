@@ -24,7 +24,6 @@ import { NodePosition, isSameNodePosition, Container } from "../adapt/vtree";
 import { newResult } from "../adapt/task";
 import * as asserts from "./asserts";
 
-const PageFloat = pagefloat.PageFloat;
 const PageFloatFragment = pagefloat.PageFloatFragment;
 
 export class Footnote extends pagefloat.PageFloat {
@@ -192,13 +191,14 @@ export class FootnoteLayoutStrategy
   forbid(float, pageFloatLayoutContext) {
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
-      case ident.line:
+      case ident.line: {
         const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
         pageFloatLayoutContext.addLayoutConstraint(
           constraint,
           footnote.floatReference
         );
         break;
+      }
     }
   }
 }

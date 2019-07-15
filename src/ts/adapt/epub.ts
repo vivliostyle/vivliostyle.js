@@ -31,9 +31,8 @@ import * as sha1 from "./sha1";
 import * as tocs from "./toc";
 import * as xmldocs from "./xmldoc";
 
-import { JSON } from "./base";
+import { JSON, DocumentURLTransformer } from "./base";
 import * as base from "./base";
-import { DocumentURLTransformer } from "./base";
 import { parseValue } from "./cssparse";
 import { Tokenizer } from "./csstok";
 import { Preferences, clonePreferences, letterbox } from "./expr";

@@ -1801,14 +1801,12 @@ export class AttrValueFilterVisitor extends css.FilterVisitor {
 
         // TODO should convert to absolute path
         return new css.URL("about:invalid");
-        break;
       case "string":
       default:
         if (str) {
           return new css.Str(str);
         }
         return new css.Str("");
-        break;
     }
   }
 
@@ -1870,10 +1868,11 @@ export class ContentPropVisitor extends css.FilterVisitor {
     const quotes = cascade.quotes;
     const maxDepth = Math.floor(quotes.length / 2) - 1;
     switch (ident.name) {
-      case "open-quote":
+      case "open-quote": {
         const result = quotes[2 * Math.min(maxDepth, cascade.quoteDepth)];
         cascade.quoteDepth++;
         return result;
+      }
       case "close-quote":
         if (cascade.quoteDepth > 0) {
           cascade.quoteDepth--;
@@ -2579,7 +2578,7 @@ export class CascadeInstance {
   };
   viewConditions: { [key: string]: Matcher[] } = {};
   dependentConditions: string[] = [];
-  elementStack: Element[] = [];
+  elementStack: Element[];
   currentDoc: any;
 
   constructor(
@@ -2600,6 +2599,7 @@ export class CascadeInstance {
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
     this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
     if (DEBUG) {
+      this.elementStack = [];
     }
   }
 
@@ -3168,9 +3168,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
   classSelector(name) {
     if (this.pseudoelement) {
       logging.logger.warn(`::${this.pseudoelement}`, `followed by .${name}`);
-      this.chain.push(new CheckConditionAction(""));
-
-      // always fails
+      this.chain.push(new CheckConditionAction("")); // always fails
       return;
     }
     this.specificity += 256;
@@ -3183,9 +3181,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
   pseudoclassSelector(name, params) {
     if (this.pseudoelement) {
       logging.logger.warn(`::${this.pseudoelement}`, `followed by :${name}`);
-      this.chain.push(new CheckConditionAction(""));
-
-      // always fails
+      this.chain.push(new CheckConditionAction("")); // always fails
       return;
     }
     switch (name.toLowerCase()) {
@@ -3212,10 +3208,8 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
           const patt = new RegExp(`(^|s)${base.escapeRegExp(value)}(\$|s)`);
           this.chain.push(new CheckTargetEpubTypeAction(patt));
         } else {
-          this.chain.push(new CheckConditionAction(""));
+          this.chain.push(new CheckConditionAction("")); // always fails
         }
-
-        // always fails
         break;
       case "-adapt-footnote-content":
       case "footnote-content":
@@ -3226,9 +3220,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
       case "active":
       case "hover":
       case "focus":
-        this.chain.push(new CheckConditionAction(""));
-
-        // always fails
+        this.chain.push(new CheckConditionAction("")); // always fails
         break;
       case "lang":
         if (params && params.length == 1 && typeof params[0] == "string") {
@@ -3239,26 +3231,23 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
             )
           );
         } else {
-          this.chain.push(new CheckConditionAction(""));
+          this.chain.push(new CheckConditionAction("")); // always fais
         }
-
-        // always fais
         break;
       case "nth-child":
       case "nth-last-child":
       case "nth-of-type":
-      case "nth-last-of-type":
+      case "nth-last-of-type": {
         const ActionClass = nthSelectorActionClasses[name.toLowerCase()];
         if (params && params.length == 2) {
           this.chain.push(
             new ActionClass(params[0] as number, params[1] as number)
           );
         } else {
-          this.chain.push(new CheckConditionAction(""));
+          this.chain.push(new CheckConditionAction("")); // always fails
         }
-
-        // always fails
         break;
+      }
       case "first-child":
         this.chain.push(new IsFirstAction());
         break;
@@ -3290,9 +3279,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         return;
       default:
         logging.logger.warn(`unknown pseudo-class selector: ${name}`);
-        this.chain.push(new CheckConditionAction(""));
-
-        // always fails
+        this.chain.push(new CheckConditionAction("")); // always fails
         break;
     }
     this.specificity += 256;
@@ -3317,10 +3304,8 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
           logging.logger.warn(
             `Double pseudoelement ::${this.pseudoelement}::${name}`
           );
-          this.chain.push(new CheckConditionAction(""));
+          this.chain.push(new CheckConditionAction("")); // always fails
         }
-
-        // always fails
         break;
       case "first-n-lines":
         if (params && params.length == 1 && typeof params[0] == "number") {
@@ -3332,27 +3317,23 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
               logging.logger.warn(
                 `Double pseudoelement ::${this.pseudoelement}::${name}`
               );
-              this.chain.push(new CheckConditionAction(""));
+              this.chain.push(new CheckConditionAction("")); // always fails
             }
-
-            // always fails
             break;
           }
         }
+        this.chain.push(new CheckConditionAction("")); // always fails
+        break;
       case "nth-fragment":
         if (params && params.length == 2) {
           this.viewConditionId = `NFS_${params[0]}_${params[1]}`;
         } else {
-          this.chain.push(new CheckConditionAction(""));
+          this.chain.push(new CheckConditionAction("")); // always fails
         }
-
-        // always fails
         break;
       default:
         logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
-        this.chain.push(new CheckConditionAction(""));
-
-        // always fails
+        this.chain.push(new CheckConditionAction("")); // always fails
         break;
     }
     this.specificity += 1;
@@ -3382,9 +3363,8 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         action = new CheckAttributeEqAction(ns, name, value);
         break;
       case csstok.TokenType.TILDE_EQ:
-        // always fails
         if (!value || value.match(/\s/)) {
-          action = new CheckConditionAction("");
+          action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
@@ -3401,9 +3381,8 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         );
         break;
       case csstok.TokenType.HAT_EQ:
-        // always fails
         if (!value) {
-          action = new CheckConditionAction("");
+          action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
@@ -3413,9 +3392,8 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         }
         break;
       case csstok.TokenType.DOLLAR_EQ:
-        // always fails
         if (!value) {
-          action = new CheckConditionAction("");
+          action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
@@ -3425,9 +3403,8 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         }
         break;
       case csstok.TokenType.STAR_EQ:
-        // always fails
         if (!value) {
-          action = new CheckConditionAction("");
+          action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
@@ -3441,17 +3418,13 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
           logging.logger.warn("Unsupported :: attr selector op:", value);
-          action = new CheckConditionAction("");
+          action = new CheckConditionAction(""); // always fails
         }
-
-        // always fails
         break;
       default:
         logging.logger.warn("Unsupported attr selector:", op);
-        action = new CheckConditionAction("");
+        action = new CheckConditionAction(""); // always fails
     }
-
-    // always fails
     this.chain.push(action);
   }
 
@@ -3683,11 +3656,12 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
    */
   startFuncWithSelector(funcName) {
     switch (funcName) {
-      case "not":
+      case "not": {
         const notParserHandler = new NotParameterParserHandler(this);
         notParserHandler.startSelectorRule();
         this.owner.pushHandler(notParserHandler);
         break;
+      }
       default:
         // TODO
         break;

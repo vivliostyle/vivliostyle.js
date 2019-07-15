@@ -557,7 +557,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       return expr;
     }
     switch (name) {
-      case "columns":
+      case "columns": {
         // min(count,column-count) * (column-width + column-gap) - column-gap
         const scope = this.pageBox.scope;
         const count = new exprs.Param(scope, 0);
@@ -574,6 +574,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           columnGap
         );
         break;
+      }
     }
     if (expr) {
       this.namedFuncs[name] = expr;

@@ -203,7 +203,7 @@ export const touch = (evt: TouchEvent): void => {
 
 export const callback = msg => {
   switch (msg["t"]) {
-    case "loaded":
+    case "loaded": {
       const viewer = msg["viewer"];
       const pageProgression = (currentPageProgression = viewer.getCurrentPageProgression());
       viewer.viewportElement.setAttribute(
@@ -238,10 +238,11 @@ export const callback = msg => {
         }, 1000);
       });
       break;
+    }
     case "error":
       // base.log("Error: " + msg["content"]);
       break;
-    case "nav":
+    case "nav": {
       const cfi = msg["cfi"];
       if (cfi) {
         location.replace(
@@ -249,6 +250,7 @@ export const callback = msg => {
         );
       }
       break;
+    }
     case "hyperlink":
       if (msg["internal"]) {
         sendCommand({ a: "moveTo", url: msg["href"] });

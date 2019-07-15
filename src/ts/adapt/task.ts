@@ -746,7 +746,7 @@ export class Frame<T> {
           this.callback = callback;
         }
         break;
-      case FrameState.FINISHED:
+      case FrameState.FINISHED: {
         const task = this.task;
         const frame = this.parent;
         try {
@@ -757,6 +757,7 @@ export class Frame<T> {
           task.raise(err, frame);
         }
         break;
+      }
       case FrameState.DEAD:
         throw new Error("F_TASK_DEAD_FRAME");
       default:
