@@ -60,8 +60,6 @@ export const SPECIFICITY_AUTHOR_IMPORTANT: number = 83886080;
  */
 export const SPECIFICITY_USER_IMPORTANT: number = 100663296;
 
-// User stylesheet !important
-
 /**
  * @enum {string}
  */
@@ -2160,9 +2158,7 @@ export class Parser {
                   tokenizer.consume();
                   return false;
                 } else {
-                  this.propName = null;
-
-                  // signals @ rule
+                  this.propName = null; // signals @ rule
                   this.exprContext = ExprContext.IMPORT;
                   this.actions = actionsExprVal;
                   valStack.push("{");
@@ -2177,9 +2173,7 @@ export class Parser {
               token = tokenizer.token();
               switch (token.type) {
                 case csstok.TokenType.IDENT:
-                  text = token.text;
-
-                  // Prefix
+                  text = token.text; // Prefix
                   tokenizer.consume();
                   token = tokenizer.token();
                   if (
@@ -2320,18 +2314,14 @@ export class Parser {
               break;
             case "-epubx-when":
               tokenizer.consume();
-              this.propName = null;
-
-              // signals @ rule
+              this.propName = null; // signals @ rule
               this.exprContext = ExprContext.WHEN;
               this.actions = actionsExprVal;
               valStack.push("{");
               continue;
             case "media":
               tokenizer.consume();
-              this.propName = null;
-
-              // signals @ rule
+              this.propName = null; // signals @ rule
               this.exprContext = ExprContext.MEDIA;
               this.actions = actionsExprVal;
               valStack.push("{");
@@ -2524,19 +2514,16 @@ export class Parser {
             } else {
               this.actions = actionsErrorSelector;
             }
-            continue;
+            continue; // Let error-recovery to re-process the offending token
           }
-
-          // Let error-recovery to re-process the offending token
           tokenizer.consume();
           continue;
       }
     }
-    return false;
+    return false; // Not done yet.
   }
 }
 
-// Not done yet.
 export class ErrorHandler extends ParserHandler {
   constructor(public readonly scope: exprs.LexicalScope) {
     super(null);

@@ -379,10 +379,8 @@ export class Context {
     do {
       let body = scope.funcs[qualifiedName];
       if (body) {
-        return body;
+        return body; // will be expanded by callee
       }
-
-      // will be expanded by callee
       if (scope.resolver) {
         body = scope.resolver.call(this, qualifiedName, true);
         if (body) {

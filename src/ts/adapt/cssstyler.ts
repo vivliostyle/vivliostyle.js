@@ -280,13 +280,9 @@ export class Box {
  */
 export class BoxStack {
   stack: any = [] as Box[];
-  atBlockStart: boolean = true;
-
-  // indicates if the next pushed box will be at the block start
-  atFlowStart: boolean = true;
-
-  // indicates if the next pushed box will be at the flow start
-  atStartStack: any = [] as { atBlockStart: boolean; atFlowStart: boolean }[];
+  atBlockStart: boolean = true; // indicates if the next pushed box will be at the block start
+  atFlowStart: boolean = true; // indicates if the next pushed box will be at the flow start
+  atStartStack: any = [] as { atBlockStart: boolean; atFlowStart: boolean }[]; // pushed when a new flow starts
 
   constructor(public readonly context: expr.Context) {}
 
@@ -444,7 +440,6 @@ export class BoxStack {
   }
 }
 
-// pushed when a new flow starts
 export class Styler implements AbstractStyler {
   root: any;
   cascadeHolder: any;

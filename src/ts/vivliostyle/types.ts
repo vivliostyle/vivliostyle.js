@@ -192,10 +192,8 @@ export namespace layout {
     /**
      * Builds the view until a CSS box edge is reached.
      * @param position start source position.
-     * @param checkPoints array to append
-     *                      possible breaking points.
-     * @return holding box edge position reached
-     *                      or null if the source is exhausted.
+     * @param checkPoints array to append possible breaking points.
+     * @return holding box edge position reached or null if the source is exhausted.
      */
     buildViewToNextBlockEdge(
       position: vtree.NodeContext,
@@ -208,8 +206,7 @@ export namespace layout {
     /**
      * Builds the view for a single unbreakable element.
      * @param position start source position.
-     * @return holding box edge position reached
-     *       or null if the source is exhausted.
+     * @return holding box edge position reached or null if the source is exhausted.
      */
     buildDeepElementView(
       position: vtree.NodeContext
@@ -1151,13 +1148,16 @@ export namespace vtree {
    * @enum {number}
    */
   export enum Whitespace {
-    IGNORE,
     /**
      * Whitespace sequence between blocks is ignored
      */
-    NEWLINE,
+    IGNORE,
     /**
      * Whitespace sequence between blocks is ignored unless it containes newline
+     */
+    NEWLINE,
+    /**
+     * Whitespace sequence between blocks is preserved
      */
     PRESERVE
   }
@@ -1188,7 +1188,7 @@ export namespace vtree {
     snapHeight: number;
     snapOffsetX: number;
     snapOffsetY: number;
-    vertical: boolean;
+    vertical: boolean; // vertical writing
     element: Element;
 
     getInsetTop(): number;
@@ -1266,14 +1266,10 @@ export namespace vtree {
     // position itself
     offsetInNode: number;
     after: boolean;
-    shadowType: ShadowType;
-
-    // parent's shadow type
+    shadowType: ShadowType; // parent's shadow type
     shadowContext: vtree.ShadowContext;
     nodeShadow: vtree.ShadowContext;
-    shadowSibling: NodeContext;
-
-    // next "sibling" in the shadow tree
+    shadowSibling: NodeContext; // next "sibling" in the shadow tree
     // other stuff
     shared: boolean;
     inline: boolean;
@@ -1342,9 +1338,6 @@ export namespace vtree {
     isSamePosition(other: ChunkPosition): boolean;
   }
 
-  /**
-   * vertical writing
-   */
   export type ExprContentListener = (
     p1: expr.Val,
     p2: string,

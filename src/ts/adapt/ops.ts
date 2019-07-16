@@ -766,10 +766,8 @@ export class StyleInstance extends exprs.Context
             }
             for (let k = index + 1; k < flowPosition.positions.length; k++) {
               if (removedIndices.includes(k)) {
-                continue;
+                continue; // Skip removed positions
               }
-
-              // Skip removed positions
               const alt = flowPosition.positions[k];
               if (
                 alt.flowChunk.startOffset > self.lookupOffset ||
@@ -1451,12 +1449,10 @@ export class StyleInstance extends exprs.Context
 
           // Though it seems that LShapeFloatBug still exists in Firefox, it
           // apparently does not occur on exclusion floats. See the test file:
-          // test/files/column-break-bug.html if
-          // (base.checkLShapeFloatBug(self.viewport.root)) {
-          // 	// Simplistic bug workaround: add a copy of the shape translated
-          // up.
-          //     exclusions.push(outerShape.withOffset(0, -1.25 *
-          //     self.queryUnitSize("em", false)));
+          // test/files/column-break-bug.html
+          // if (base.checkLShapeFloatBug(self.viewport.root)) {
+          // 	// Simplistic bug workaround: add a copy of the shape translated up.
+          //     exclusions.push(outerShape.withOffset(0, -1.25 * self.queryUnitSize("em", false)));
           // }
           exclusions.push(outerShape);
         }
@@ -1612,8 +1608,7 @@ export class StyleInstance extends exprs.Context
             pageMaster,
             page.bleedBox,
             bleedBoxPaddingEdge,
-            bleedBoxPaddingEdge + 1,
-            // Compensate 'top: -1px' on page master
+            bleedBoxPaddingEdge + 1, // Compensate 'top: -1px' on page master
             [],
             pageFloatLayoutContext
           )

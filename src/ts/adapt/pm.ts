@@ -71,8 +71,8 @@ export abstract class PageBox<
 
   /**
    * Clone the PageBox.
-   * @param param parent: The parent of the cloned PageBox. pseudoName: Assign
-   *     this value as the pseudoName of the cloned PageBox.
+   * @param param parent: The parent of the cloned PageBox.
+   *     pseudoName: Assign this value as the pseudoName of the cloned PageBox.
    */
   clone(param: { parent?: PageBox; pseudoName?: string }): PageBox<I> {
     throw new Error("E_UNEXPECTED_CALL");
@@ -1738,9 +1738,7 @@ export class PartitionInstance<
    * @override
    */
   prepareContainer(context, container, delayedItems, docFaces, clientLayout) {
-    base.setCSSProperty(container.element, "overflow", "hidden");
-
-    // default value
+    base.setCSSProperty(container.element, "overflow", "hidden"); // default value
     super.prepareContainer(
       context,
       container,

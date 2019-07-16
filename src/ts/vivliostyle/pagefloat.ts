@@ -864,11 +864,9 @@ export class PageFloatLayoutContext
     floatReference: FloatReference
   ): PageFloatFragment[] {
     if (floatReference === this.floatReference) {
-      return this.stashedFloatFragments.concat().sort(
-        (fr1, fr2) =>
-          // return in reverse order
-          fr2.getOrder() - fr1.getOrder()
-      );
+      return this.stashedFloatFragments
+        .concat()
+        .sort((fr1, fr2) => fr2.getOrder() - fr1.getOrder()); // return in reverse order
     } else {
       return this.getParent(floatReference).getStashedFloatFragments(
         floatReference

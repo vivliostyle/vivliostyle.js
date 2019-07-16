@@ -160,19 +160,11 @@ export function start<T>(func: () => Result<T>, opt_name?: string): Task {
  * @enum {number}
  */
 export enum FrameState {
-  INIT,
-
-  // before newFrame call
-  ACTIVE,
-
-  // before finish call
-  FINISHED,
-
-  // before callback complete
-  DEAD
+  INIT, // before newFrame call
+  ACTIVE, // before finish call
+  FINISHED, // before callback complete
+  DEAD // when callback is complete
 }
-
-// when callback is complete
 export class TimerImpl implements Timer {
   /**
    * @override
@@ -252,10 +244,8 @@ export class Scheduler {
     const now = this.timer.currentTime();
     if (this.timeoutToken != null) {
       if (now + this.timeout > this.wakeupTime) {
-        return;
+        return; // no use re-arming
       }
-
-      // no use re-arming
       this.timer.clearTimeout(this.timeoutToken);
     }
     let timeout = newTime - now;
@@ -291,10 +281,8 @@ export class Scheduler {
       while (this.queue.length()) {
         const continuation = this.queue.peek() as Continuation<any>;
         if (continuation.scheduledTime > now) {
-          break;
+          break; // too early
         }
-
-        // too early
         this.queue.remove();
         if (!continuation.canceled) {
           continuation.resumeInternal();
@@ -692,8 +680,7 @@ export class Frame<T> {
   }
 
   /**
-   * @return to be returned as this asynchronous function
-   *                              return value.
+   * @return to be returned as this asynchronous function return value.
    */
   result(): Result<T> {
     return new ResultImpl<T>(this);

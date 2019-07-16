@@ -368,14 +368,11 @@ export class Viewer {
       this.needResize = true;
     }
     if (typeof command["load"] == "boolean") {
-      this.waitForLoading = command["load"];
+      this.waitForLoading = command["load"]; // Load images (and other resources) on the page.
     }
-
-    // Load images (and other resources) on the page.
     if (typeof command["renderAllPages"] == "boolean") {
       this.renderAllPages = command["renderAllPages"];
     }
-
     // for backward compatibility
     if (typeof command["userAgentRootURL"] == "string") {
       base.setBaseURL(command["userAgentRootURL"].replace(/resources\/?$/, ""));

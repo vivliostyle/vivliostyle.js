@@ -254,7 +254,6 @@ class CounterResolver implements csscasc.CounterResolver {
         // argument can be set to true.
         counters = self.getTargetCounters(id, transformedId, true);
 
-        // TODO more reasonable placeholder?
         if (counters) {
           if (counters[name]) {
             // Since an element-based counter is defined, any page-based
@@ -281,7 +280,7 @@ class CounterResolver implements csscasc.CounterResolver {
                 transformedId,
                 false
               );
-              return "??";
+              return "??"; // TODO more reasonable placeholder?
             }
           }
         } else {
@@ -289,10 +288,9 @@ class CounterResolver implements csscasc.CounterResolver {
           // (The element is in another source document that is not parsed
           // yet)
           self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
-          return "??";
+          return "??"; // TODO more reasonable placeholder?
         }
       },
-      // TODO more reasonable placeholder?
       `target-counter-${name}-of-${url}`
     );
   }
@@ -309,11 +307,10 @@ class CounterResolver implements csscasc.CounterResolver {
       () => {
         const pageCounters = self.getTargetPageCounters(transformedId);
 
-        // TODO more reasonable placeholder?
         if (!pageCounters) {
           // The target element has not been laid out yet.
           self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
-          return "??";
+          return "??"; // TODO more reasonable placeholder?
         } else {
           self.counterStore.resolveReference(transformedId);
           const pageCountersOfName = pageCounters[name] || [];

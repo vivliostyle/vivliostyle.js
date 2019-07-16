@@ -129,9 +129,7 @@ export const makeBlob = (
   opt_type?: string
 ): any => {
   const type = opt_type || "application/octet-stream";
-  const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"];
-
-  // deprecated
+  const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
   if (builderCtr) {
     const builder = new builderCtr();
     for (let i = 0; i < parts.length; i++) {

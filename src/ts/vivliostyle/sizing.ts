@@ -103,9 +103,7 @@ export const getSize = (
 
     // When the available inline size is sufficiently large, the fit-content
     // inline size equals to the max-content inline size.
-    base.setCSSProperty(container, inlineSizeName, "99999999px");
-
-    // 'sufficiently large' value
+    base.setCSSProperty(container, inlineSizeName, "99999999px"); // 'sufficiently large' value
     const r = getComputedValue(inlineSizeName);
     base.setCSSProperty(container, inlineSizeName, "");
     return r;

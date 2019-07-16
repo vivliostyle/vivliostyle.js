@@ -41,9 +41,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
     public readonly url: string,
     public readonly document: Document
   ) {
-    this.root = document.documentElement;
-
-    // html element
+    this.root = document.documentElement; // html element
     let body = null;
     let head = null;
     if (this.root.namespaceURI == base.NS.XHTML) {
@@ -217,9 +215,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       if (elementOffset >= offset) {
         return element;
       }
-      const children = element.children;
-
-      // Element children
+      const children = element.children; // Element children
       if (!children) {
         break;
       }

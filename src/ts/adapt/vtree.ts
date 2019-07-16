@@ -260,8 +260,6 @@ export const SPECIAL_ATTR = "data-adapt-spec";
 export const Whitespace = vtree.Whitespace;
 export type Whitespace = vtree.Whitespace;
 
-// Whitespace sequence between blocks is preserved
-
 /**
  * Resolves adapt.vtree.Whitespace value from a value of 'white-space' property
  * @param whitespace The value of 'white-space' property
@@ -1026,7 +1024,7 @@ export class Container implements vtree.Container {
   snapHeight: number = 0;
   snapOffsetX: number = 0;
   snapOffsetY: number = 0;
-  vertical: boolean = false;
+  vertical: boolean = false; // vertical writing
 
   constructor(public element: Element) {}
 
@@ -1236,7 +1234,6 @@ export class Container implements vtree.Container {
   }
 }
 
-// vertical writing
 export type ExprContentListener = vtree.ExprContentListener;
 
 export class ContentPropertyHandler extends css.Visitor {

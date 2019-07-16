@@ -416,7 +416,7 @@ export class Numeric extends Val {
 
   constructor(public num: number, unit: string) {
     super();
-    this.unit = unit.toLowerCase();
+    this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
   }
 
   /**

@@ -86,8 +86,7 @@ export type BreakPositionAndNodeContext = layout.BreakPositionAndNodeContext;
 
 /**
  * Potential breaking position inside CSS box (between lines).
- * @param checkPoints array of breaking points for
- *    breakable block
+ * @param checkPoints array of breaking points for breakable block
  */
 export class BoxBreakPosition extends breakposition.AbstractBreakPosition
   implements layout.BoxBreakPosition {
@@ -177,15 +176,9 @@ export class Column extends vtreeImpl.Container implements layout.Column {
   breakPositions: breakposition.BreakPosition[] = null;
   pageBreakType: string | null = null;
   forceNonfitting: boolean = true;
-  leftFloatEdge: number = 0;
-
-  // bottom of the bottommost left float
-  rightFloatEdge: number = 0;
-
-  // bottom of the bottommost right float
-  bottommostFloatTop: number = 0;
-
-  // Top of the bottommost float
+  leftFloatEdge: number = 0; // bottom of the bottommost left float
+  rightFloatEdge: number = 0; // bottom of the bottommost right float
+  bottommostFloatTop: number = 0; // Top of the bottommost float
   stopAtOverflow: boolean = true;
   lastAfterPosition: vtree.NodePosition | null = null;
   fragmentLayoutConstraints: FragmentLayoutConstraint[] = [];
@@ -327,10 +320,8 @@ export class Column extends vtreeImpl.Container implements layout.Column {
   /**
    * Builds the view until a CSS box edge is reached.
    * @param position start source position.
-   * @param checkPoints array to append
-   *                      possible breaking points.
-   * @return holding box edge position reached
-   *                      or null if the source is exhausted.
+   * @param checkPoints array to append possible breaking points.
+   * @return holding box edge position reached or null if the source is exhausted.
    */
   buildViewToNextBlockEdge(
     position: vtree.NodeContext,
@@ -408,8 +399,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
   /**
    * Builds the view for a single unbreakable element.
    * @param position start source position.
-   * @return holding box edge position reached
-   *       or null if the source is exhausted.
+   * @return holding box edge position reached or null if the source is exhausted.
    */
   buildDeepElementView(
     position: vtree.NodeContext
@@ -1542,21 +1532,13 @@ export class Column extends vtreeImpl.Container implements layout.Column {
     if (DEBUG) {
       validateCheckPoints(checkPoints);
     }
-    let lastCheckPoints = checkPoints.concat([]);
-
-    // make a copy
-    checkPoints.splice(0, checkPoints.length);
-
-    // make empty
+    let lastCheckPoints = checkPoints.concat([]); // make a copy
+    checkPoints.splice(0, checkPoints.length); // make empty
     let totalLineCount = 0;
-    let firstPseudo = nodeContext.firstPseudo;
-
-    // :first-letter is not processed here
+    let firstPseudo = nodeContext.firstPseudo; // :first-letter is not processed here
     if (firstPseudo.count == 0) {
-      firstPseudo = firstPseudo.outer;
+      firstPseudo = firstPseudo.outer; // move to line pseudoelement (if any)
     }
-
-    // move to line pseudoelement (if any)
     frame
       .loopWithFrame(loopFrame => {
         if (!firstPseudo) {
@@ -1584,9 +1566,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
             nodeContext = resNodeContextParam;
             self.fixJustificationIfNeeded(nodeContext, false);
             firstPseudo = nodeContext.firstPseudo;
-            lastCheckPoints = [];
-
-            // Wipe out line breaks inside pseudoelements
+            lastCheckPoints = []; // Wipe out line breaks inside pseudoelements
             self
               .buildViewToNextBlockEdge(nodeContext, lastCheckPoints)
               .then(resNodeContextParam => {
@@ -2255,10 +2235,8 @@ export class Column extends vtreeImpl.Container implements layout.Column {
    */
   isBreakable(flowPosition: vtree.NodeContext): boolean {
     if (flowPosition.after) {
-      return true;
+      return true; // may be an empty block
     }
-
-    // may be an empty block
     switch (flowPosition.sourceNode.namespaceURI) {
       case base.NS.SVG:
         return false;
@@ -2638,9 +2616,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
                 atUnforcedBreak = false;
                 breakAtTheEdge = null;
               }
-              onStartEdges = false;
-
-              // we are now on end edges.
+              onStartEdges = false; // we are now on end edges.
               lastAfterNodeContext = nodeContext.copy();
               trailingEdgeContexts.push(lastAfterNodeContext);
               breakAtTheEdge = breaks.resolveEffectiveBreakValue(
@@ -2715,14 +2691,10 @@ export class Column extends vtreeImpl.Container implements layout.Column {
                 atUnforcedBreak = false;
                 trailingEdgeContexts = [];
               }
-              onStartEdges = true;
+              onStartEdges = true; // we are now on starting edges.
             }
-          } while (
-            // we are now on starting edges.
-            false
-          );
+          } while (false); // End of block of code to use break
 
-          // End of block of code to use break
           const nextResult = self.nextInTree(nodeContext, atUnforcedBreak);
           if (nextResult.isPending()) {
             nextResult.then(nodeContextParam => {
@@ -2844,9 +2816,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
                 // since a break did not occur, move to the next edge.
                 breakAtTheEdge = null;
               }
-              onStartEdges = false;
-
-              // we are now on end edges.
+              onStartEdges = false; // we are now on end edges.
               breakAtTheEdge = breaks.resolveEffectiveBreakValue(
                 breakAtTheEdge,
                 nodeContext.breakAfter
@@ -2879,13 +2849,9 @@ export class Column extends vtreeImpl.Container implements layout.Column {
                 return;
               }
             }
-            onStartEdges = true;
-          } while (
-            // we are now on starting edges.
-            false
-          );
+            onStartEdges = true; // we are now on starting edges.
+          } while (false); // End of block of code to use break
 
-          // End of block of code to use break
           const nextResult = self.layoutContext.nextInTree(nodeContext);
           if (nextResult.isPending()) {
             nextResult.then(nodeContextParam => {
@@ -3102,9 +3068,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
     leadingEdge: boolean,
     breakAfter?: string | null
   ): task.Result<vtree.ChunkPosition> {
-    this.chunkPositions.push(chunkPosition);
-
-    // So we can re-layout this column later
+    this.chunkPositions.push(chunkPosition); // So we can re-layout this column later
     if (chunkPosition.primary.after) {
       this.lastAfterPosition = chunkPosition.primary;
     }

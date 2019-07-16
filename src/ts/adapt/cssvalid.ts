@@ -105,15 +105,9 @@ export enum Add {
 export class ValidatingGroup {
   nodes: Node[] = [];
   connections: Connection[] = [];
-  match: number[] = [];
-
-  // connector indicies
-  nomatch: number[] = [];
-
-  // connector indicies
-  error: number[] = [];
-
-  // connector indicies
+  match: number[] = []; // connector indicies
+  nomatch: number[] = []; // connector indicies
+  error: number[] = []; // connector indicies
   emptyHead: boolean = true;
 
   connect(arr: number[], nodeIndex: number): void {

@@ -323,9 +323,7 @@ export const shapesToBands = (
   // process the segments from low to high y values
   while (segmentIndex < segmentCount || activeSegments.length > 0) {
     // calculate the height of the band to work with
-    let y2 = box.y2;
-
-    // band bottom
+    let y2 = box.y2; // band bottom
     // min possible y2
     const y2min = Math.min(
       ceil(Math.ceil(y + granularity), snapHeight),
@@ -436,18 +434,13 @@ export const normalize = (box: Rect, bands: Band[]): void => {
   // Create fictious last band to merge unneeded bands at the end
   let currBand = new Band(box.y2, box.y2, box.x1, box.x2);
   while (k >= 0) {
-    const prevBand = currBand;
-
-    // result[k+1]
+    const prevBand = currBand; // result[k+1]
     currBand = bands[k];
     if (
-      currBand.y2 - currBand.y1 < 1 ||
-      // Remove bands with height less than 1px
+      currBand.y2 - currBand.y1 < 1 || // Remove bands with height less than 1px
       (currBand.x1 == prevBand.x1 && currBand.x2 == prevBand.x2)
     ) {
-      prevBand.y1 = currBand.y1;
-
-      // merge
+      prevBand.y1 = currBand.y1; // merge
       bands.splice(k, 1);
       currBand = prevBand;
     }

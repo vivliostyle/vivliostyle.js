@@ -940,10 +940,8 @@ export class CheckAttributeEqAction extends ChainedAction {
    */
   getPriority() {
     if (this.name == "type" && this.ns == base.NS.epub) {
-      return 9;
+      return 9; // epub:type is a pretty good thing to check
     }
-
-    // epub:type is a pretty good thing to check
     return 0;
   }
 
@@ -1076,9 +1074,8 @@ export class IsRootAction extends ChainedAction {
    * @override
    */
   getPriority() {
-    return 12;
+    return 12; // :root is the first thing to check
   }
-  // :root is the first thing to check
 }
 
 export class IsNthAction extends ChainedAction {
@@ -1796,10 +1793,8 @@ export class AttrValueFilterVisitor extends css.FilterVisitor {
     switch (type) {
       case "url":
         if (str) {
-          return new css.URL(str);
+          return new css.URL(str); // TODO should convert to absolute path
         }
-
-        // TODO should convert to absolute path
         return new css.URL("about:invalid");
       case "string":
       default:
@@ -1891,10 +1886,9 @@ export class ContentPropVisitor extends css.FilterVisitor {
   }
 
   private format(num: number, type: string): string {
-    let upper = false;
+    let upper = false; // type == "armenian";
+    // content-counter-10.xht assumes armenian is uppercase, enable if desired
 
-    // type == "armenian"; // content-counter-10.xht assumes armenian is
-    // uppercase, enable if desired
     let lower = false;
     let r;
     if ((r = type.match(/^upper-(.*)/)) != null) {
@@ -2425,10 +2419,8 @@ export const chineseTradInformal: ChineseNumbering = {
 
 export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
   if (num > 9999 || num < -9999) {
-    return `${num}`;
+    return `${num}`; // TODO: should be cjk-decimal
   }
-
-  // TODO: should be cjk-decimal
   if (num == 0) {
     return numbering.digits.charAt(0);
   }

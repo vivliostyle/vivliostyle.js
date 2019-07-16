@@ -235,26 +235,15 @@ export const actionsNormal: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  Action.INVALID,
-  // 0x00-0x07
-  Action.INVALID,
-  Action.SPACE,
-  Action.SPACE,
+  Action.INVALID, // 0x00-0x07
   Action.INVALID,
   Action.SPACE,
   Action.SPACE,
   Action.INVALID,
+  Action.SPACE,
+  Action.SPACE,
   Action.INVALID,
-  // 0x08-0x0F
-  Action.INVALID,
-  Action.INVALID,
-  Action.INVALID,
-  Action.INVALID,
-  Action.INVALID,
-  Action.INVALID,
-  Action.INVALID,
-  Action.INVALID,
-  // 0x10-0x17
+  Action.INVALID, // 0x08-0x0F
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
@@ -262,8 +251,15 @@ export const actionsNormal: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
+  Action.INVALID, // 0x10-0x17
   Action.INVALID,
-  // 0x18-0x1F
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID,
+  Action.INVALID, // 0x18-0x1F
   Action.SPACE,
   Action.BANG,
   Action.STR2,
@@ -271,8 +267,7 @@ export const actionsNormal: Action[] = [
   Action.DOLLAR,
   Action.PERCENT,
   Action.AMP,
-  Action.STR1,
-  // 0x20-0x27
+  Action.STR1, // 0x20-0x27
   Action.O_PAR,
   Action.C_PAR,
   Action.STAR,
@@ -280,8 +275,7 @@ export const actionsNormal: Action[] = [
   Action.COMMA,
   Action.MINUS,
   Action.DOT,
-  Action.SLASH,
-  // 0x28-0x2F
+  Action.SLASH, // 0x28-0x2F
   Action.INT,
   Action.INT,
   Action.INT,
@@ -289,8 +283,7 @@ export const actionsNormal: Action[] = [
   Action.INT,
   Action.INT,
   Action.INT,
-  Action.INT,
-  // 0x30-0x37
+  Action.INT, // 0x30-0x37
   Action.INT,
   Action.INT,
   Action.COLON,
@@ -298,8 +291,7 @@ export const actionsNormal: Action[] = [
   Action.LT,
   Action.EQ,
   Action.GT,
-  Action.QMARK,
-  // 0x38-0x3F
+  Action.QMARK, // 0x38-0x3F
   Action.AT,
   Action.IDENT,
   Action.IDENT,
@@ -307,9 +299,7 @@ export const actionsNormal: Action[] = [
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
-  Action.IDENT,
-  // 0x40-0x47
-  Action.IDENT,
+  Action.IDENT, // 0x40-0x47
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
@@ -317,7 +307,7 @@ export const actionsNormal: Action[] = [
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
-  // 0x48-0x4F
+  Action.IDENT, // 0x48-0x4F
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
@@ -325,8 +315,7 @@ export const actionsNormal: Action[] = [
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
-  Action.IDENT,
-  // 0x50-0x57
+  Action.IDENT, // 0x50-0x57
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
@@ -334,8 +323,7 @@ export const actionsNormal: Action[] = [
   Action.BSLASH,
   Action.C_BRK,
   Action.HAT,
-  Action.IDENT,
-  // 0x58-0x5F
+  Action.IDENT, // 0x58-0x5F
   Action.INVALID,
   Action.IDENT,
   Action.IDENT,
@@ -343,9 +331,7 @@ export const actionsNormal: Action[] = [
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
-  Action.IDENT,
-  // 0x60-0x67
-  Action.IDENT,
+  Action.IDENT, // 0x60-0x67
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
@@ -353,7 +339,7 @@ export const actionsNormal: Action[] = [
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
-  // 0x68-0x6F
+  Action.IDENT, // 0x68-0x6F
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
@@ -361,8 +347,7 @@ export const actionsNormal: Action[] = [
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
-  Action.IDENT,
-  // 0x70-0x77
+  Action.IDENT, // 0x70-0x77
   Action.IDENT,
   Action.IDENT,
   Action.IDENT,
@@ -370,10 +355,9 @@ export const actionsNormal: Action[] = [
   Action.BAR,
   Action.C_BRC,
   Action.TILDE,
-  Action.INVALID
+  Action.INVALID // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsNormal[NaN] = Action.EOF;
 
 /**
@@ -387,9 +371,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  Action.ENDIDNT,
-  // 0x00-0x07
-  Action.ENDIDNT,
+  Action.ENDIDNT, // 0x00-0x07
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
@@ -397,7 +379,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  // 0x08-0x0F
+  Action.ENDIDNT, // 0x08-0x0F
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
@@ -405,9 +387,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  Action.ENDIDNT,
-  // 0x10-0x17
-  Action.ENDIDNT,
+  Action.ENDIDNT, // 0x10-0x17
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
@@ -415,7 +395,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  // 0x18-0x1F
+  Action.ENDIDNT, // 0x18-0x1F
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
@@ -423,8 +403,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  Action.ENDIDNT,
-  // 0x20-0x27
+  Action.ENDIDNT, // 0x20-0x27
   Action.FUNC,
   Action.ENDIDNT,
   Action.ENDIDNT,
@@ -432,8 +411,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.CONT,
   Action.ENDIDNT,
-  Action.ENDIDNT,
-  // 0x28-0x2F
+  Action.ENDIDNT, // 0x28-0x2F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -441,8 +419,7 @@ export const actionsIdent: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x30-0x37
+  Action.CONT, // 0x30-0x37
   Action.CONT,
   Action.CONT,
   Action.ENDIDNT,
@@ -450,9 +427,15 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
+  Action.ENDIDNT, // 0x38-0x3F
   Action.ENDIDNT,
-  // 0x38-0x3F
-  Action.ENDIDNT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT, // 0x40-0x47
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -460,7 +443,7 @@ export const actionsIdent: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  // 0x40-0x47
+  Action.CONT, // 0x48-0x4F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -468,17 +451,7 @@ export const actionsIdent: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x48-0x4F
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  // 0x50-0x57
+  Action.CONT, // 0x50-0x57
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -486,8 +459,7 @@ export const actionsIdent: Action[] = [
   Action.IDNTESC,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  Action.CONT,
-  // 0x58-0x5F
+  Action.CONT, // 0x58-0x5F
   Action.ENDIDNT,
   Action.CONT,
   Action.CONT,
@@ -495,9 +467,7 @@ export const actionsIdent: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x60-0x67
-  Action.CONT,
+  Action.CONT, // 0x60-0x67
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -505,7 +475,7 @@ export const actionsIdent: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  // 0x68-0x6F
+  Action.CONT, // 0x68-0x6F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -513,8 +483,7 @@ export const actionsIdent: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x70-0x77
+  Action.CONT, // 0x70-0x77
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -522,10 +491,9 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  Action.ENDIDNT
+  Action.ENDIDNT // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsIdent[NaN] = Action.ENDIDNT;
 
 /**
@@ -539,9 +507,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  Action.INVALID,
-  // 0x00-0x07
-  Action.INVALID,
+  Action.INVALID, // 0x00-0x07
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
@@ -549,7 +515,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  // 0x08-0x0F
+  Action.INVALID, // 0x08-0x0F
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
@@ -557,9 +523,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  Action.INVALID,
-  // 0x10-0x17
-  Action.INVALID,
+  Action.INVALID, // 0x10-0x17
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
@@ -567,7 +531,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  // 0x18-0x1F
+  Action.INVALID, // 0x18-0x1F
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
@@ -575,8 +539,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  Action.INVALID,
-  // 0x20-0x27
+  Action.INVALID, // 0x20-0x27
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
@@ -584,8 +547,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.TOCLASS,
   Action.TONUM,
-  Action.INVALID,
-  // 0x28-0x2F
+  Action.INVALID, // 0x28-0x2F
   Action.TONUM,
   Action.TONUM,
   Action.TONUM,
@@ -593,8 +555,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TONUM,
   Action.TONUM,
   Action.TONUM,
-  Action.TONUM,
-  // 0x30-0x37
+  Action.TONUM, // 0x30-0x37
   Action.TONUM,
   Action.TONUM,
   Action.INVALID,
@@ -602,9 +563,15 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
+  Action.INVALID, // 0x38-0x3F
   Action.INVALID,
-  // 0x38-0x3F
-  Action.INVALID,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS,
+  Action.TOCLASS, // 0x40-0x47
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -612,7 +579,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
-  // 0x40-0x47
+  Action.TOCLASS, // 0x48-0x4F
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -620,17 +587,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
-  Action.TOCLASS,
-  // 0x48-0x4F
-  Action.TOCLASS,
-  Action.TOCLASS,
-  Action.TOCLASS,
-  Action.TOCLASS,
-  Action.TOCLASS,
-  Action.TOCLASS,
-  Action.TOCLASS,
-  Action.TOCLASS,
-  // 0x50-0x57
+  Action.TOCLASS, // 0x50-0x57
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -638,8 +595,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TOIDES,
   Action.INVALID,
   Action.INVALID,
-  Action.TOCLASS,
-  // 0x58-0x5F
+  Action.TOCLASS, // 0x58-0x5F
   Action.INVALID,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -647,9 +603,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
-  Action.TOCLASS,
-  // 0x60-0x67
-  Action.TOCLASS,
+  Action.TOCLASS, // 0x60-0x67
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -657,7 +611,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
-  // 0x68-0x6F
+  Action.TOCLASS, // 0x68-0x6F
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -665,8 +619,7 @@ export const actionsNumOrClass: Action[] = [
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
-  Action.TOCLASS,
-  // 0x70-0x77
+  Action.TOCLASS, // 0x70-0x77
   Action.TOCLASS,
   Action.TOCLASS,
   Action.TOCLASS,
@@ -674,10 +627,9 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  Action.INVALID
+  Action.INVALID // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsIdent[NaN] = Action.ENDIDNT;
 
 /**
@@ -691,9 +643,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  Action.END,
-  // 0x00-0x07
-  Action.END,
+  Action.END, // 0x00-0x07
   Action.END,
   Action.END,
   Action.END,
@@ -701,7 +651,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  // 0x08-0x0F
+  Action.END, // 0x08-0x0F
   Action.END,
   Action.END,
   Action.END,
@@ -709,9 +659,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  Action.END,
-  // 0x10-0x17
-  Action.END,
+  Action.END, // 0x10-0x17
   Action.END,
   Action.END,
   Action.END,
@@ -719,7 +667,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  // 0x18-0x1F
+  Action.END, // 0x18-0x1F
   Action.END,
   Action.END,
   Action.END,
@@ -727,8 +675,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  Action.END,
-  // 0x20-0x27
+  Action.END, // 0x20-0x27
   Action.END,
   Action.END,
   Action.END,
@@ -736,8 +683,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.MINMIN,
   Action.TONUM,
-  Action.END,
-  // 0x28-0x2F
+  Action.END, // 0x28-0x2F
   Action.TOINT,
   Action.TOINT,
   Action.TOINT,
@@ -745,8 +691,7 @@ export const actionsMinus: Action[] = [
   Action.TOINT,
   Action.TOINT,
   Action.TOINT,
-  Action.TOINT,
-  // 0x30-0x37
+  Action.TOINT, // 0x30-0x37
   Action.TOINT,
   Action.TOINT,
   Action.END,
@@ -754,9 +699,15 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
+  Action.END, // 0x38-0x3F
   Action.END,
-  // 0x38-0x3F
-  Action.END,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT,
+  Action.TOIDENT, // 0x40-0x47
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -764,7 +715,7 @@ export const actionsMinus: Action[] = [
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
-  // 0x40-0x47
+  Action.TOIDENT, // 0x48-0x4F
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -772,17 +723,7 @@ export const actionsMinus: Action[] = [
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
-  Action.TOIDENT,
-  // 0x48-0x4F
-  Action.TOIDENT,
-  Action.TOIDENT,
-  Action.TOIDENT,
-  Action.TOIDENT,
-  Action.TOIDENT,
-  Action.TOIDENT,
-  Action.TOIDENT,
-  Action.TOIDENT,
-  // 0x50-0x57
+  Action.TOIDENT, // 0x50-0x57
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -790,8 +731,7 @@ export const actionsMinus: Action[] = [
   Action.TOIDES,
   Action.END,
   Action.END,
-  Action.TOIDENT,
-  // 0x58-0x5F
+  Action.TOIDENT, // 0x58-0x5F
   Action.END,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -799,9 +739,7 @@ export const actionsMinus: Action[] = [
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
-  Action.TOIDENT,
-  // 0x60-0x67
-  Action.TOIDENT,
+  Action.TOIDENT, // 0x60-0x67
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -809,7 +747,7 @@ export const actionsMinus: Action[] = [
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
-  // 0x68-0x6F
+  Action.TOIDENT, // 0x68-0x6F
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -817,8 +755,7 @@ export const actionsMinus: Action[] = [
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
-  Action.TOIDENT,
-  // 0x70-0x77
+  Action.TOIDENT, // 0x70-0x77
   Action.TOIDENT,
   Action.TOIDENT,
   Action.TOIDENT,
@@ -826,10 +763,9 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  Action.END
+  Action.END // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsMinus[NaN] = Action.END;
 
 /**
@@ -843,8 +779,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES,
-  // 0x00-0x07
+  Action.ENDIDES, // 0x00-0x07
   Action.ENDIDES,
   Action.CHKPOSS,
   Action.ENDIDES,
@@ -852,9 +787,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES,
-  // 0x08-0x0F
-  Action.ENDIDES,
+  Action.ENDIDES, // 0x08-0x0F
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
@@ -862,7 +795,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  // 0x10-0x17
+  Action.ENDIDES, // 0x10-0x17
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
@@ -870,8 +803,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES,
-  // 0x18-0x1F
+  Action.ENDIDES, // 0x18-0x1F
   Action.CHKPOSS,
   Action.ENDIDES,
   Action.ENDIDES,
@@ -879,8 +811,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES,
-  // 0x20-0x27
+  Action.ENDIDES, // 0x20-0x27
   Action.FUNCES,
   Action.ENDIDES,
   Action.ENDIDES,
@@ -888,8 +819,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES,
-  // 0x28-0x2F
+  Action.ENDIDES, // 0x28-0x2F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -897,8 +827,7 @@ export const actionsIdentEsc: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x30-0x37
+  Action.CONT, // 0x30-0x37
   Action.CONT,
   Action.CONT,
   Action.ENDIDES,
@@ -906,9 +835,15 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
+  Action.ENDIDES, // 0x38-0x3F
   Action.ENDIDES,
-  // 0x38-0x3F
-  Action.ENDIDES,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT,
+  Action.CONT, // 0x40-0x47
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -916,7 +851,7 @@ export const actionsIdentEsc: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  // 0x40-0x47
+  Action.CONT, // 0x48-0x4F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -924,17 +859,7 @@ export const actionsIdentEsc: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x48-0x4F
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  Action.CONT,
-  // 0x50-0x57
+  Action.CONT, // 0x50-0x57
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -942,8 +867,7 @@ export const actionsIdentEsc: Action[] = [
   Action.IDNTESC,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.CONT,
-  // 0x58-0x5F
+  Action.CONT, // 0x58-0x5F
   Action.ENDIDES,
   Action.CONT,
   Action.CONT,
@@ -951,9 +875,7 @@ export const actionsIdentEsc: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x60-0x67
-  Action.CONT,
+  Action.CONT, // 0x60-0x67
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -961,7 +883,7 @@ export const actionsIdentEsc: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  // 0x68-0x6F
+  Action.CONT, // 0x68-0x6F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -969,8 +891,7 @@ export const actionsIdentEsc: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
-  Action.CONT,
-  // 0x70-0x77
+  Action.CONT, // 0x70-0x77
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -978,10 +899,9 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES
+  Action.ENDIDES // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsIdentEsc[NaN] = Action.ENDIDES;
 
 /**
@@ -995,9 +915,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  Action.ENDINT,
-  // 0x00-0x07
-  Action.ENDINT,
+  Action.ENDINT, // 0x00-0x07
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
@@ -1005,7 +923,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  // 0x08-0x0F
+  Action.ENDINT, // 0x08-0x0F
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
@@ -1013,9 +931,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  Action.ENDINT,
-  // 0x10-0x17
-  Action.ENDINT,
+  Action.ENDINT, // 0x10-0x17
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
@@ -1023,7 +939,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  // 0x18-0x1F
+  Action.ENDINT, // 0x18-0x1F
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
@@ -1031,8 +947,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.PCUNIT,
   Action.ENDINT,
-  Action.ENDINT,
-  // 0x20-0x27
+  Action.ENDINT, // 0x20-0x27
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
@@ -1040,8 +955,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.NUMBER,
-  Action.ENDINT,
-  // 0x28-0x2F
+  Action.ENDINT, // 0x28-0x2F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -1049,53 +963,15 @@ export const actionsInt: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
+  Action.CONT, // 0x30-0x37
   Action.CONT,
-  // 0x30-0x37
-  Action.CONT,
   Action.CONT,
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  Action.ENDINT,
-  // 0x38-0x3F
-  Action.ENDINT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  // 0x40-0x47
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  // 0x48-0x4F
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  // 0x50-0x57
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.ENDINT,
-  Action.ENDINT,
-  Action.ENDINT,
-  Action.ENDINT,
-  Action.UNIT,
-  // 0x58-0x5F
+  Action.ENDINT, // 0x38-0x3F
   Action.ENDINT,
   Action.UNIT,
   Action.UNIT,
@@ -1103,9 +979,7 @@ export const actionsInt: Action[] = [
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
-  Action.UNIT,
-  // 0x60-0x67
-  Action.UNIT,
+  Action.UNIT, // 0x40-0x47
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
@@ -1113,7 +987,7 @@ export const actionsInt: Action[] = [
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
-  // 0x68-0x6F
+  Action.UNIT, // 0x48-0x4F
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
@@ -1121,8 +995,7 @@ export const actionsInt: Action[] = [
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
-  Action.UNIT,
-  // 0x70-0x77
+  Action.UNIT, // 0x50-0x57
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
@@ -1130,10 +1003,41 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  Action.ENDINT
+  Action.UNIT, // 0x58-0x5F
+  Action.ENDINT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT, // 0x60-0x67
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT, // 0x68-0x6F
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT, // 0x70-0x77
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT,
+  Action.ENDINT // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsInt[NaN] = Action.ENDINT;
 
 /**
@@ -1147,9 +1051,7 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  Action.ENDNUM,
-  // 0x00-0x07
-  Action.ENDNUM,
+  Action.ENDNUM, // 0x00-0x07
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
@@ -1157,7 +1059,7 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  // 0x08-0x0F
+  Action.ENDNUM, // 0x08-0x0F
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
@@ -1165,9 +1067,7 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  Action.ENDNUM,
-  // 0x10-0x17
-  Action.ENDNUM,
+  Action.ENDNUM, // 0x10-0x17
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
@@ -1175,7 +1075,7 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  // 0x18-0x1F
+  Action.ENDNUM, // 0x18-0x1F
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
@@ -1183,9 +1083,7 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.PCUNIT,
   Action.ENDNUM,
-  Action.ENDNUM,
-  // 0x20-0x27
-  Action.ENDNUM,
+  Action.ENDNUM, // 0x20-0x27
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
@@ -1193,7 +1091,7 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  // 0x28-0x2F
+  Action.ENDNUM, // 0x28-0x2F
   Action.CONT,
   Action.CONT,
   Action.CONT,
@@ -1201,53 +1099,15 @@ export const actionsNumber: Action[] = [
   Action.CONT,
   Action.CONT,
   Action.CONT,
+  Action.CONT, // 0x30-0x37
   Action.CONT,
-  // 0x30-0x37
-  Action.CONT,
   Action.CONT,
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  Action.ENDNUM,
-  // 0x38-0x3F
-  Action.ENDNUM,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  // 0x40-0x47
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  // 0x48-0x4F
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  // 0x50-0x57
-  Action.UNIT,
-  Action.UNIT,
-  Action.UNIT,
-  Action.ENDNUM,
-  Action.ENDNUM,
-  Action.ENDNUM,
-  Action.ENDNUM,
-  Action.UNIT,
-  // 0x58-0x5F
+  Action.ENDNUM, // 0x38-0x3F
   Action.ENDNUM,
   Action.UNIT,
   Action.UNIT,
@@ -1255,9 +1115,7 @@ export const actionsNumber: Action[] = [
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
-  Action.UNIT,
-  // 0x60-0x67
-  Action.UNIT,
+  Action.UNIT, // 0x40-0x47
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
@@ -1265,7 +1123,7 @@ export const actionsNumber: Action[] = [
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
-  // 0x68-0x6F
+  Action.UNIT, // 0x48-0x4F
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
@@ -1273,8 +1131,7 @@ export const actionsNumber: Action[] = [
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
-  Action.UNIT,
-  // 0x70-0x77
+  Action.UNIT, // 0x50-0x57
   Action.UNIT,
   Action.UNIT,
   Action.UNIT,
@@ -1282,270 +1139,239 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  Action.ENDNUM
+  Action.UNIT, // 0x58-0x5F
+  Action.ENDNUM,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT, // 0x60-0x67
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT, // 0x68-0x6F
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT, // 0x70-0x77
+  Action.UNIT,
+  Action.UNIT,
+  Action.UNIT,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM,
+  Action.ENDNUM // 0x78-0x7F
 ];
 
-// 0x78-0x7F
 actionsNumber[NaN] = Action.ENDNUM;
 
 export const actionsCheckEq: Action[] = makeActions(Action.END, [
-  61,
-  /*=*/
+  61 /*=*/,
   Action.EQTAIL
 ]);
 
 export const actionsColon: Action[] = makeActions(Action.END, [
-  58,
-  /*:*/
+  58 /*:*/,
   Action.COL_COL
 ]);
 
 export const actionsBar: Action[] = makeActions(Action.END, [
-  61,
-  /*=*/
+  61 /*=*/,
   Action.EQTAIL,
-  124,
-  /*|*/
+  124 /*|*/,
   Action.BAR_BAR
 ]);
 
 export const actionsAmp: Action[] = makeActions(Action.END, [
-  38,
-  /*&*/
+  38 /*&*/,
   Action.AMP_AMP
 ]);
 
 export const actionsSlash: Action[] = makeActions(Action.END, [
-  42,
+  42 /* * */,
   Action.COMMENT
 ]);
 
 export const actionsComment: Action[] = makeActions(Action.CONT, [
-  42,
+  42 /* * */,
   Action.COMMST
 ]);
 
 export const actionsCommentStar: Action[] = makeActions(Action.COMMENT, [
-  42,
+  42 /* * */,
   Action.COMMST,
-  47,
-  /* / */
+  47 /* / */,
   Action.ENDNOTK
 ]);
 
 export const actionsMinusMinus: Action[] = makeActions(Action.KILL1, [
-  62,
-  /* > */
+  62 /* > */,
   Action.ENDNOTK
 ]);
 
 export const actionsLt: Action[] = makeActions(Action.END, [
-  61,
-  /*=*/
+  61 /*=*/,
   Action.EQTAIL,
-  33,
-  /*!*/
+  33 /*!*/,
   Action.LT_BG
 ]);
 
 export const actionsLtBang: Action[] = makeActions(Action.KILL1, [
-  45,
-  /*-*/
+  45 /*-*/,
   Action.LT_BG_M
 ]);
 
 export const actionsLtBangMinus: Action[] = makeActions(Action.KILL2, [
-  45,
-  /*-*/
+  45 /*-*/,
   Action.ENDNOTK
 ]);
 
 export const actionsIdentEscChr: Action[] = makeActions(Action.IDESCH, [
-  9,
-  /*tab*/
+  9 /*tab*/,
   Action.INVALID,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.INVALID,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.INVALID,
-  32,
-  /*sp*/
+  32 /*sp*/,
   Action.INVALID
 ]);
 
 export const actionsStr1: Action[] = makeActions(Action.CONT, [
-  39,
-  /*'*/
+  39 /*'*/,
   Action.ENDSTR,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.INVALID,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.INVALID,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.STR1ESC
 ]);
 
 export const actionsStr2: Action[] = makeActions(Action.CONT, [
-  34,
-  /*"*/
+  34 /*"*/,
   Action.ENDSTR,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.INVALID,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.INVALID,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.STR2ESC
 ]);
 
 export const actionsStr1Esc: Action[] = makeActions(Action.CONT, [
-  39,
-  /*'*/
+  39 /*'*/,
   Action.ENDESTR,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CHKPOSN,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CHKPOSN,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.STR1ESC
 ]);
 
 export const actionsStr2Esc: Action[] = makeActions(Action.CONT, [
-  34,
-  /*"*/
+  34 /*"*/,
   Action.ENDESTR,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CHKPOSN,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CHKPOSN,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.STR2ESC
 ]);
 
 export const actionsURL: Action[] = makeActions(Action.URL, [
-  9,
-  /*tab*/
+  9 /*tab*/,
   Action.CONT,
-  32,
-  /*sp*/
+  32 /*sp*/,
   Action.CONT,
-  34,
-  /*"*/
+  34 /*"*/,
   Action.URL2,
-  39,
-  /*'*/
+  39 /*'*/,
   Action.URL1,
-  41,
-  /*)*/
+  41 /*)*/,
   Action.INVALID,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CONT,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CONT
 ]);
 
 export const actionsURLInside: Action[] = makeActions(Action.CONT, [
-  41,
-  /*)*/
+  41 /*)*/,
   Action.ENDURL,
-  9,
-  /*TAB*/
+  9 /*TAB*/,
   Action.CHKSP,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CHKSP,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CHKSP,
-  32,
-  /*sp*/
+  32 /*sp*/,
   Action.CHKSP,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.URLESC,
-  40,
-  /*(*/
+  40 /*(*/,
   Action.INVALID,
-  91,
-  /*[*/
+  91 /*[*/,
   Action.INVALID,
-  93,
-  /*]*/
+  93 /*]*/,
   Action.INVALID,
-  123,
-  /*{*/
+  123 /*{*/,
   Action.INVALID,
-  125,
-  /*}*/
+  125 /*}*/,
   Action.INVALID,
   NaN,
   Action.ENDURL
 ]);
 
 export const actionsURLInside1: Action[] = makeActions(Action.CONT, [
-  39,
-  /*'*/
+  39 /*'*/,
   Action.TERMURL,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CHKPOSN,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CHKPOSN,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.URLESC,
   NaN,
   Action.ENDURL
 ]);
 
 export const actionsURLInside2: Action[] = makeActions(Action.CONT, [
-  34,
-  /*"*/
+  34 /*"*/,
   Action.TERMURL,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CHKPOSN,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CHKPOSN,
-  92,
-  /*\*/
+  92 /*\*/,
   Action.URLESC,
   NaN,
   Action.ENDURL
 ]);
 
 export const actionsURLTail: Action[] = makeActions(Action.INVALID, [
-  9,
-  /*tab*/
+  9 /*tab*/,
   Action.CONT,
-  10,
-  /*LF*/
+  10 /*LF*/,
   Action.CONT,
-  13,
-  /*CR*/
+  13 /*CR*/,
   Action.CONT,
-  32,
-  /*sp*/
+  32 /*sp*/,
   Action.CONT,
-  41,
-  /*)*/
+  41 /*)*/,
   Action.FINURL
 ]);
 
@@ -1554,15 +1380,9 @@ export const INITIAL_INDEX_MASK = 15;
 export class Tokenizer {
   indexMask: number;
   buffer: Token[];
-  head: number = -1;
-
-  // saved, occupied if >= 0
-  tail: number = 0;
-
-  // available, ready to write
-  curr: number = 0;
-
-  // ready to read
+  head: number = -1; // saved, occupied if >= 0
+  tail: number = 0; // available, ready to write
+  curr: number = 0; // ready to read
   position: number = 0;
 
   constructor(public input: string, public readonly handler: TokenizerHandler) {
@@ -1659,10 +1479,8 @@ export class Tokenizer {
       this.reallocate();
       tail = this.tail;
       indexMask = this.indexMask;
-      head = indexMask;
+      head = indexMask; // this.head is zero
     }
-
-    // this.head is zero
     let actions = actionsNormal;
     const input = this.input;
     let position = this.position;
@@ -1673,13 +1491,10 @@ export class Tokenizer {
     let tokenNum: number = 0;
     let seenSpace = false;
     let token: Token = buffer[tail];
-    let backslashPos = -9;
-
-    // far enough before the start of the string
+    let backslashPos = -9; // far enough before the start of the string
     while (true) {
       const charCode = input.charCodeAt(position);
-      switch (actions[charCode] || actions[65]) {
-        /*A*/
+      switch (actions[charCode] || actions[65] /*A*/) {
         case Action.INVALID:
           tokenType = TokenType.INVALID;
           if (isNaN(charCode)) {
@@ -1710,22 +1525,16 @@ export class Tokenizer {
           continue;
         case Action.STR1:
           tokenType = TokenType.STR;
-          tokenPosition = ++position;
-
-          // after quote
+          tokenPosition = ++position; // after quote
           actions = actionsStr1;
           continue;
         case Action.STR2:
           tokenType = TokenType.STR;
-          tokenPosition = ++position;
-
-          // after quote
+          tokenPosition = ++position; // after quote
           actions = actionsStr2;
           continue;
         case Action.HASH:
-          tokenPosition = ++position;
-
-          // after hash
+          tokenPosition = ++position; // after hash
           tokenType = TokenType.HASH;
           actions = actionsIdent;
           continue;
@@ -1816,9 +1625,7 @@ export class Tokenizer {
           tokenType = TokenType.QMARK;
           break;
         case Action.AT:
-          tokenPosition = ++position;
-
-          // after "at" sign
+          tokenPosition = ++position; // after "at" sign
           tokenType = TokenType.AT;
           actions = actionsIdent;
           continue;
@@ -1892,9 +1699,7 @@ export class Tokenizer {
           tokenType = TokenType.NUMERIC;
           tokenNum = parseFloat(input.substring(tokenPosition, position));
           tokenText = "%";
-          tokenPosition = position++;
-
-          // for consistency with alphabetic units
+          tokenPosition = position++; // for consistency with alphabetic units
           break;
         case Action.NUMBER:
           position++;
@@ -1916,29 +1721,21 @@ export class Tokenizer {
           tokenText = escapeParse(input.substring(tokenPosition, position));
           break;
         case Action.ENDSTR:
-          tokenText = input.substring(tokenPosition, position);
-
-          // consume closing quote
+          tokenText = input.substring(tokenPosition, position); // consume closing quote
           position++;
           break;
         case Action.ENDESTR:
-          tokenText = escapeParse(input.substring(tokenPosition, position));
-
-          // consume closing quote
+          tokenText = escapeParse(input.substring(tokenPosition, position)); // consume closing quote
           position++;
           break;
         case Action.STR1ESC:
           backslashPos = position;
-          position += 2;
-
-          // consume character after backslash in any case
+          position += 2; // consume character after backslash in any case
           actions = actionsStr1Esc;
           continue;
         case Action.STR2ESC:
           backslashPos = position;
-          position += 2;
-
-          // consume character after backslash in any case
+          position += 2; // consume character after backslash in any case
           actions = actionsStr2Esc;
           continue;
         case Action.BAR_BAR:
@@ -1955,9 +1752,7 @@ export class Tokenizer {
           // TokenType.HASH, TokenType.NUMERIC
           tokenText = input.substring(tokenPosition, position);
           if (tokenType == TokenType.IDENT) {
-            position++;
-
-            // consume
+            position++; // consume
             if (tokenText.toLowerCase() == "url") {
               actions = actionsURL;
               continue;
@@ -1971,9 +1766,7 @@ export class Tokenizer {
           // TokenType.HASH, T_NUMERIC
           tokenText = escapeParse(input.substring(tokenPosition, position));
           if (tokenType == TokenType.IDENT) {
-            position++;
-
-            // consume
+            position++; // consume
             if (tokenText.toLowerCase() == "url") {
               actions = actionsURL;
               continue;
@@ -2028,28 +1821,20 @@ export class Tokenizer {
           actions = actionsURLInside;
           continue;
         case Action.URL1:
-          tokenPosition = ++position;
-
-          // skip quote
+          tokenPosition = ++position; // skip quote
           actions = actionsURLInside1;
           continue;
         case Action.URL2:
-          tokenPosition = ++position;
-
-          // skip quote
+          tokenPosition = ++position; // skip quote
           actions = actionsURLInside2;
           continue;
         case Action.ENDURL:
           tokenType = TokenType.URL;
           tokenText = escapeParse(input.substring(tokenPosition, position));
-          position++;
-
-          // skip ')'
+          position++; // skip ')'
           break;
         case Action.FINURL:
-          position++;
-
-          // skip ')'
+          position++; // skip ')'
           break;
         case Action.LT_BG:
           actions = actionsLtBang;
@@ -2079,9 +1864,7 @@ export class Tokenizer {
         case Action.TERMURL:
           tokenType = TokenType.URL;
           tokenText = escapeParse(input.substring(tokenPosition, position));
-          position++;
-
-          // skip quote (or newline)
+          position++; // skip quote (or newline)
           actions = actionsURLTail;
           continue;
         case Action.CHKPOSN:

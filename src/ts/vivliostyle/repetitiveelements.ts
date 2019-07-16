@@ -142,10 +142,8 @@ export class RepetitiveElements
 
   setHeaderNodeContext(nodeContext: vtree.NodeContext) {
     if (this.headerNodePosition) {
-      return;
+      return; // use first one.
     }
-
-    // use first one.
     this.headerNodePosition = vtreeImpl.newNodePositionFromNodeContext(
       nodeContext,
       0
@@ -156,10 +154,8 @@ export class RepetitiveElements
 
   setFooterNodeContext(nodeContext: vtree.NodeContext) {
     if (this.footerNodePosition) {
-      return;
+      return; // use first one.
     }
-
-    // use first one.
     this.footerNodePosition = vtreeImpl.newNodePositionFromNodeContext(
       nodeContext,
       0

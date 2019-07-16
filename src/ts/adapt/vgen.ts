@@ -1131,15 +1131,11 @@ export class ViewFactory extends base.SimpleEventTarget
               let attributeValue = attribute.nodeValue;
               if (!attributeNS) {
                 if (attributeName.match(/^on/)) {
-                  continue;
+                  continue; // don't propagate JavaScript code
                 }
-
-                // don't propagate JavaScript code
                 if (attributeName == "style") {
-                  continue;
+                  continue; // we do styling ourselves
                 }
-
-                // we do styling ourselves
                 if (attributeName == "id" || attributeName == "name") {
                   // Propagate transformed ids and collect them on the page
                   // (only first time).
@@ -1656,9 +1652,7 @@ export class ViewFactory extends base.SimpleEventTarget
       result = self.createElementView(firstTime, atUnforcedBreak);
     } else {
       if (self.sourceNode.nodeType == 8) {
-        self.viewNode = null;
-
-        // comment node
+        self.viewNode = null; // comment node
         result = task.newResult(true);
       } else {
         result = self.createTextNodeView();
@@ -1751,9 +1745,7 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   private nextPositionInTree(pos: vtree.NodeContext): vtree.NodeContext {
-    let boxOffset = pos.boxOffset + 1;
-
-    // offset for the next position
+    let boxOffset = pos.boxOffset + 1; // offset for the next position
     if (pos.after) {
       // root, that was the last possible position
       if (!pos.parent) {
@@ -1853,9 +1845,7 @@ export class ViewFactory extends base.SimpleEventTarget
       processChildren => {
         if (!nodeContext.viewNode || !processChildren) {
           nodeContext = nodeContext.modify();
-          nodeContext.after = true;
-
-          // skip
+          nodeContext.after = true; // skip
           if (!nodeContext.viewNode) {
             nodeContext.inline = true;
           }
@@ -1985,9 +1975,7 @@ export class ViewFactory extends base.SimpleEventTarget
       arr.push(nodeContext);
       nodeContext = nodeContext.parent;
     }
-    let pn = arr.pop();
-
-    // container for that pseudoelement
+    let pn = arr.pop(); // container for that pseudoelement
     let shadowSibling = pn.shadowSibling;
     const self = this;
     frame
