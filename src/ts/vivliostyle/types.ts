@@ -1240,7 +1240,7 @@ export namespace vtree {
     readonly parentShadow: ShadowContext;
     subShadow: ShadowContext;
     readonly type: vtree.ShadowType;
-    readonly styler: Object;
+    readonly styler: object;
 
     equals(other: ShadowContext): boolean;
   }

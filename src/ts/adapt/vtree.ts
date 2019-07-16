@@ -500,7 +500,7 @@ export class ShadowContext implements vtree.ShadowContext {
     public readonly parentShadow: ShadowContext,
     superShadow: ShadowContext,
     public readonly type: ShadowType,
-    public readonly styler: Object
+    public readonly styler: object
   ) {
     if (superShadow) {
       superShadow.subShadow = this;

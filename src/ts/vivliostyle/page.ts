@@ -871,8 +871,8 @@ export class PageMarginBoxPartition extends pm.Partition<
     ] as csscasc.ElementStyle;
 
     // Inherit properties in the page context to the page-margin context
-    for (let prop in style) {
-      let val = style[prop] as csscasc.CascadeValue;
+    for (const prop in style) {
+      const val = style[prop] as csscasc.CascadeValue;
       const ownVal = ownStyle[prop] as csscasc.CascadeValue;
       if (
         csscasc.inheritedProps[prop] ||
@@ -881,9 +881,9 @@ export class PageMarginBoxPartition extends pm.Partition<
         this.specified[prop] = val;
       }
     }
-    for (let prop in ownStyle) {
+    for (const prop in ownStyle) {
       if (Object.prototype.hasOwnProperty.call(ownStyle, prop)) {
-        let val = ownStyle[prop] as csscasc.CascadeValue;
+        const val = ownStyle[prop] as csscasc.CascadeValue;
         if (val && val.value !== css.ident.inherit) {
           this.specified[prop] = val;
         }

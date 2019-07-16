@@ -763,7 +763,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
         // We need to get the edge of the parent's content area, calling
         // getElementClientRect will also give us borders. Avoid it by creating
         // a temporary element and using it for measurment.
-        let probe = parent.viewNode.ownerDocument.createElement("div");
+        const probe = parent.viewNode.ownerDocument.createElement("div");
         probe.style.left = "0px";
         probe.style.top = "0px";
         if (self.vertical) {
@@ -840,7 +840,7 @@ export class Column extends vtreeImpl.Container implements layout.Column {
         }
       }
       if (containingBlockForAbsolute) {
-        let probe = containingBlockForAbsolute.viewNode.ownerDocument.createElement(
+        const probe = containingBlockForAbsolute.viewNode.ownerDocument.createElement(
           "div"
         );
         probe.style.position = "absolute";
@@ -3379,11 +3379,11 @@ export class Column extends vtreeImpl.Container implements layout.Column {
             constraint
           )
         ) {
-          let repetitiveElement = constraint.getRepetitiveElements();
+          const repetitiveElement = constraint.getRepetitiveElements();
           repetitiveElements.push(repetitiveElement);
         }
         if (selector.isInstanceOfAfterIfContinuesLayoutConstraint(constraint)) {
-          let repetitiveElement = constraint.getRepetitiveElements();
+          const repetitiveElement = constraint.getRepetitiveElements();
           repetitiveElements.push(repetitiveElement);
         }
         if (table.isInstanceOfTableRowLayoutConstraint(constraint)) {

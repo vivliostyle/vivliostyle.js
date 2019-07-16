@@ -55,7 +55,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
         if (child.nodeType != 1) {
           continue;
         }
-        let elem = child as Element;
+        const elem = child as Element;
         if (elem.namespaceURI == base.NS.XHTML) {
           switch (elem.localName) {
             case "head":
@@ -78,7 +78,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
         if (child.nodeType != 1) {
           continue;
         }
-        let elem = child as Element;
+        const elem = child as Element;
         if (elem.namespaceURI == base.NS.FB2) {
           if (elem.localName == "body") {
             body = elem;

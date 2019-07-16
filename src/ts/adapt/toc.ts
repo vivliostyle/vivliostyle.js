@@ -95,7 +95,7 @@ export class TOCView implements vgen.CustomRendererFactory {
       }
       const adaptParentClass = viewParent.getAttribute("data-adapt-class");
       if (adaptParentClass == "toc-node") {
-        let button = viewParent.firstChild as Element;
+        const button = viewParent.firstChild as Element;
         if (button.textContent != bulletClosed) {
           button.textContent = bulletClosed;
           base.setCSSProperty(button, "cursor", "pointer");
@@ -105,7 +105,7 @@ export class TOCView implements vgen.CustomRendererFactory {
       const element = viewParent.ownerDocument.createElement("div");
       element.setAttribute("data-adapt-process-children", "true");
       if (behavior.toString() == "toc-node") {
-        let button = viewParent.ownerDocument.createElement("div");
+        const button = viewParent.ownerDocument.createElement("div");
         button.textContent = bulletEmpty;
 
         // TODO: define pseudo-element for the button?

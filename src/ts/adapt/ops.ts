@@ -2178,7 +2178,7 @@ export class OPSDocStore extends ResourceStore<xmldocs.XMLDocHolder> {
               if (name && name.textContent === "stylesheet") {
                 const value = child.getElementsByTagName("value")[0];
                 if (value) {
-                  let src = base.resolveURL(value.textContent, url);
+                  const src = base.resolveURL(value.textContent, url);
                   sources.push({
                     url: src,
                     text: null,

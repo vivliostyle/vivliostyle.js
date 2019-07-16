@@ -667,7 +667,7 @@ export class ViewFactory extends base.SimpleEventTarget
     }
     const computedStyle = {};
     if (!self.nodeContext.parent) {
-      let inheritedValues = self.inheritFromSourceParent(elementStyle);
+      const inheritedValues = self.inheritFromSourceParent(elementStyle);
       elementStyle = inheritedValues.elementStyle;
       self.nodeContext.lang = inheritedValues.lang;
     }
@@ -683,7 +683,7 @@ export class ViewFactory extends base.SimpleEventTarget
     ) {
       // Since a page float will be detached from a view node of its parent,
       // inherited properties need to be inherited from its source parent.
-      let inheritedValues = self.inheritFromSourceParent(elementStyle);
+      const inheritedValues = self.inheritFromSourceParent(elementStyle);
       elementStyle = inheritedValues.elementStyle;
       self.nodeContext.lang = inheritedValues.lang;
     }
@@ -1180,7 +1180,7 @@ export class ViewFactory extends base.SimpleEventTarget
                   hasAutoWidth &&
                   hasAutoHeight
                 ) {
-                  let image = new Image();
+                  const image = new Image();
                   const fetcher = taskutil.loadElement(image, attributeValue);
                   fetchers.push(fetcher);
                   images.push({ image, element: result, fetcher });
@@ -1244,7 +1244,7 @@ export class ViewFactory extends base.SimpleEventTarget
               }
             }
             if (delayedSrc) {
-              let image = tag === "input" ? new Image() : result;
+              const image = tag === "input" ? new Image() : result;
               const imageFetcher = taskutil.loadElement(image, delayedSrc);
               if (image !== result) {
                 result.src = delayedSrc;

@@ -488,7 +488,7 @@ export const unescapeStrFromHex = (str: string, prefix?: string): string => {
 
 export const assert = (cond: boolean): void => {
   if (!cond) {
-    throw "Assert failed";
+    throw new Error("Assert failed");
   }
 };
 
@@ -631,7 +631,7 @@ export function mapObj<P, R>(
   return res;
 }
 
-export const mapSize = (obj: Object): number => {
+export const mapSize = (obj: object): number => {
   let n = 0;
   for (const key in obj) {
     n++;

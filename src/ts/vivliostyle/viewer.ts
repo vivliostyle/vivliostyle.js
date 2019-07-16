@@ -74,7 +74,7 @@ function getDefaultViewerOptions(): ViewerOptions {
   };
 }
 
-function convertViewerOptions(options: ViewerOptions): Object {
+function convertViewerOptions(options: ViewerOptions): object {
   const converted = {};
   Object.keys(options).forEach(key => {
     const v = options[key];
@@ -171,7 +171,7 @@ export class Viewer {
   private dispatcher(msg: base.JSON) {
     /** @dict */
     const event = { type: msg["t"] };
-    const o = msg as Object;
+    const o = msg as object;
     Object.keys(o).forEach(key => {
       if (key !== "t") {
         event[key] = o[key];

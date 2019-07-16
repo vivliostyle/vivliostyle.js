@@ -653,8 +653,8 @@ export class Styler implements AbstractStyler {
     if (offset < rootOffset) {
       const rootStyle = this.getStyle(this.root, false);
       asserts.assert(rootStyle);
-      let flowName = csscasc.getProp(rootStyle, "flow-into");
-      let flowNameStr = flowName
+      const flowName = csscasc.getProp(rootStyle, "flow-into");
+      const flowNameStr = flowName
         ? flowName.evaluate(context, "flow-into").toString()
         : "body";
       const newFlowChunk = this.encounteredFlowElement(
@@ -683,9 +683,9 @@ export class Styler implements AbstractStyler {
           }
         }
         const style = this.getStyle(elem, false);
-        let flowName = style["flow-into"];
+        const flowName = style["flow-into"];
         if (flowName) {
-          let flowNameStr = flowName.evaluate(context, "flow-into").toString();
+          const flowNameStr = flowName.evaluate(context, "flow-into").toString();
           this.encounteredFlowElement(flowNameStr, style, elem, nodeOffset);
         }
         nodeOffset++;
@@ -861,7 +861,7 @@ export class Styler implements AbstractStyler {
           if (this.last.nodeType == 1) {
             this.cascade.popElement(this.last as Element);
             this.primary = this.primaryStack.pop();
-            let box = this.boxStack.pop(this.lastOffset);
+            const box = this.boxStack.pop(this.lastOffset);
             let breakAfter = null;
             if (box.afterBox) {
               const afterPseudoBreakBefore = box.afterBox.getBreakValue(

@@ -508,7 +508,7 @@ export const readMetadata = (
   return metadata;
 };
 
-export const getMathJaxHub = (): Object => {
+export const getMathJaxHub = (): object => {
   const math = window["MathJax"];
   if (math) {
     return math["Hub"];
@@ -679,7 +679,7 @@ export class OPFDoc {
     for (const src in srcToFallbackId) {
       let fallbackSrc = src;
       while (true) {
-        let item = this.itemMap[srcToFallbackId[fallbackSrc]];
+        const item = this.itemMap[srcToFallbackId[fallbackSrc]];
         if (!item) {
           break;
         }
@@ -738,7 +738,7 @@ export class OPFDoc {
       .asArray() as Element[];
     for (let i = 0; i < mediaTypeElems.length; i++) {
       const handlerId = mediaTypeElems[i].getAttribute("handler");
-      let mediaType = mediaTypeElems[i].getAttribute("media-type");
+      const mediaType = mediaTypeElems[i].getAttribute("media-type");
       if (mediaType && handlerId && this.itemMap[handlerId]) {
         this.bindings[mediaType] = this.itemMap[handlerId].src;
       }
@@ -776,7 +776,7 @@ export class OPFDoc {
       const encodedPath = entry["n"];
       if (encodedPath) {
         const path = decodeURI(encodedPath);
-        let item = this.itemMapByPath[path];
+        const item = this.itemMapByPath[path];
         let mediaType = null;
         if (item) {
           item.compressed = entry["m"] != 0;
@@ -1579,7 +1579,7 @@ export class OPFView implements CustomRendererFactory {
     let countPages = 0;
     let pageIndex = -1;
     let spineIndex = 0;
-    for (let item of this.spineItems) {
+    for (const item of this.spineItems) {
       const findPageIndex = nthPage - countPages - 1;
       if (findPageIndex < item.pages.length) {
         pageIndex = findPageIndex;

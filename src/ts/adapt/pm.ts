@@ -117,7 +117,7 @@ export class RootPageBox extends PageBox<RootPageBoxInstance> {
 export class PageMasterScope extends exprs.LexicalScope {
   constructor(scope: exprs.LexicalScope, public pageMaster: PageMaster) {
     super(scope, resolver);
-    let self = this;
+    const self = this;
     function resolver(qualifiedName, isFunc) {
       const r = qualifiedName.match(/^([^.]+)\.([^.]+)$/);
       if (r) {
@@ -1472,20 +1472,20 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   ): void {
     const style = this.cascaded;
     const specified = this.pageBox.specified;
-    for (let name in specified) {
+    for (const name in specified) {
       if (csscasc.isPropName(name)) {
         csscasc.setProp(style, name, csscasc.getProp(specified, name));
       }
     }
     if (this.pageBox.pseudoName == userAgentPageMasterPseudo) {
-      for (let name in docElementStyle) {
+      for (const name in docElementStyle) {
         if (name.match(/^background-/) || name == "writing-mode") {
           style[name] = docElementStyle[name];
         }
       }
     }
     if (this.pageBox.pseudoName == "layout-host") {
-      for (let name in docElementStyle) {
+      for (const name in docElementStyle) {
         if (!name.match(/^background-/) && name != "writing-mode") {
           style[name] = docElementStyle[name];
         }

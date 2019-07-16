@@ -28,10 +28,10 @@ function createRegExpMap(
   toPhysical: boolean
 ): { [key: string]: { [key: string]: ConversionMap[] } } {
   const map = {};
-  Object.keys(valueMaps as Object).forEach(writingMode => {
+  Object.keys(valueMaps as object).forEach(writingMode => {
     const dest = (map[writingMode] = {});
     const src = valueMaps[writingMode];
-    Object.keys(src as Object).forEach(direction => {
+    Object.keys(src as object).forEach(direction => {
       dest[direction] = src[direction].map(p => {
         const from = toPhysical ? p.logical : p.physical;
         const to = toPhysical ? p.physical : p.logical;

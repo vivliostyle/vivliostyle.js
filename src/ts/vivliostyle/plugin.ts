@@ -148,7 +148,7 @@ export type PreProcessTextContentHook = (
 
 export type PreProcessElementStyleHook = (
   p1: vtree.NodeContext,
-  p2: Object
+  p2: object
 ) => void;
 
 export type PolyfilledInheritedPropsHook = () => string[];

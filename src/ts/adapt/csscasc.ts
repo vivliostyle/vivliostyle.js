@@ -704,8 +704,8 @@ export class ChainedAction extends CascadeAction {
     return 0;
   }
 
-  makePrimary(cascade: Cascade): boolean // cannot be made primary
-  {
+  makePrimary(cascade: Cascade): boolean {
+    // cannot be made primary
     return false;
   }
 }
@@ -2391,7 +2391,7 @@ export const expandAlphabet = str => {
   return arr;
 };
 
-export const alphabeticFormat = (alphabetStr: String, num: number) => {
+export const alphabeticFormat = (alphabetStr: string, num: number) => {
   if (num <= 0 || num != Math.round(num)) {
     return "";
   }
@@ -2668,7 +2668,9 @@ export class CascadeInstance {
 
   applyAction(table: ActionTable, key: string): void {
     const action = table[key];
-    action && action.apply(this);
+    if (action) {
+      action.apply(this);
+    }
   }
 
   pushRule(
@@ -2759,7 +2761,7 @@ export class CascadeInstance {
         if (!this.counters[setCounterName]) {
           this.defineCounter(setCounterName, setMap[setCounterName]);
         } else {
-          let counterValues = this.counters[setCounterName];
+          const counterValues = this.counters[setCounterName];
           counterValues[counterValues.length - 1] = setMap[setCounterName];
         }
       }
@@ -2769,7 +2771,7 @@ export class CascadeInstance {
         if (!this.counters[incrementCounterName]) {
           this.defineCounter(incrementCounterName, 0);
         }
-        let counterValues = this.counters[incrementCounterName];
+        const counterValues = this.counters[incrementCounterName];
         counterValues[counterValues.length - 1] +=
           incrementMap[incrementCounterName];
       }
@@ -3085,7 +3087,7 @@ export enum ParseState {
 /**
  * Cascade for base User Agent stylesheet.
  */
-export var uaBaseCascade: Cascade = null;
+export let uaBaseCascade: Cascade = null;
 export function setUABaseCascade(value: Cascade) {
   uaBaseCascade = value;
 }

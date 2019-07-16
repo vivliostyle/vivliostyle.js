@@ -546,16 +546,16 @@ export class PrimitiveValidator extends PropertyValidator {
   combine(other: PrimitiveValidator): PrimitiveValidator {
     const idents: ValueMap = {};
     const units: ValueMap = {};
-    for (let ident in this.idents) {
+    for (const ident in this.idents) {
       idents[ident] = this.idents[ident];
     }
-    for (let ident in other.idents) {
+    for (const ident in other.idents) {
       idents[ident] = other.idents[ident];
     }
-    for (let unit in this.units) {
+    for (const unit in this.units) {
       units[unit] = this.units[unit];
     }
-    for (let unit in other.units) {
+    for (const unit in other.units) {
       units[unit] = other.units[unit];
     }
     return new PrimitiveValidator(this.allowed | other.allowed, idents, units);
