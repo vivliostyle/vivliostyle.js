@@ -265,7 +265,7 @@ module.exports = {
             "error",
             "never"
         ],
-        "space-in-parens": "error",
+        // "space-in-parens": "error",
         // "space-infix-ops": "off",
         "space-unary-ops": "error",
         // "spaced-comment": "off",

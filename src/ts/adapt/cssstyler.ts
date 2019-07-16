@@ -685,7 +685,9 @@ export class Styler implements AbstractStyler {
         const style = this.getStyle(elem, false);
         const flowName = style["flow-into"];
         if (flowName) {
-          const flowNameStr = flowName.evaluate(context, "flow-into").toString();
+          const flowNameStr = flowName
+            .evaluate(context, "flow-into")
+            .toString();
           this.encounteredFlowElement(flowNameStr, style, elem, nodeOffset);
         }
         nodeOffset++;

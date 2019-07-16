@@ -195,7 +195,7 @@ export class Page extends base.SimpleEventTarget {
     // in the page)
     Object.keys(this.elementsById).forEach(function(id) {
       const elems = this.elementsById[id];
-      for (let i = 0; i < elems.length;) {
+      for (let i = 0; i < elems.length; ) {
         if (this.container.contains(elems[i])) {
           i++;
         } else {

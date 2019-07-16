@@ -472,7 +472,7 @@ export class CounterStore {
       resolvedRefs = this.resolvedReferences[id] = [];
     }
     let pushed = false;
-    for (let i = 0; i < this.referencesToSolve.length;) {
+    for (let i = 0; i < this.referencesToSolve.length; ) {
       const ref = this.referencesToSolve[i];
       if (ref.targetId === id) {
         ref.resolve();
