@@ -33,7 +33,8 @@ module.exports = {
         ? "vivliostyle.min.js"
         : "vivliostyle.dev.js",
     library: "vivliostyle",
-    libraryTarget: "umd"
+    libraryTarget: "umd",
+    libraryExport: "default"
   },
   resolve: {
     extensions: [".js", ".ts"]
