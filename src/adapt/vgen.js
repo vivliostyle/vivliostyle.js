@@ -247,8 +247,8 @@ adapt.vgen.PseudoelementStyler.prototype.processContent = function(element, styl
  * @extends {adapt.base.SimpleEventTarget}
  */
 adapt.vgen.ViewFactory = function(flowName, context, viewport, styler, regionIds,
-                                  xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
-                                  documentURLTransformer) {
+    xmldoc, docFaces, footnoteStyle, stylerProducer, page, customRenderer, fallbackMap,
+    documentURLTransformer) {
     adapt.base.SimpleEventTarget.call(this);
     // from constructor parameters
     /** @const */ this.flowName = flowName;
@@ -302,7 +302,7 @@ adapt.vgen.ViewFactory.prototype.clone = function() {
  * @return {adapt.vtree.ShadowContext}
  */
 adapt.vgen.ViewFactory.prototype.createPseudoelementShadow = function(element, isRoot,
-                                                                      cascStyle, computedStyle, styler, context, parentShadow, subShadow) {
+    cascStyle, computedStyle, styler, context, parentShadow, subShadow) {
     const pseudoMap = this.getPseudoMap(cascStyle, this.regionIds, this.isFootnote, this.nodeContext, context);
     if (!pseudoMap) {
         return subShadow;
@@ -415,7 +415,7 @@ adapt.vgen.ViewFactory.prototype.createRefShadow = function(href, type, element,
  * @return {adapt.task.Result.<adapt.vtree.ShadowContext>}
  */
 adapt.vgen.ViewFactory.prototype.createShadows = function(element, isRoot, cascStyle,
-                                                          computedStyle, styler, context, shadowContext) {
+    computedStyle, styler, context, shadowContext) {
     const self = this;
     /** @type {!adapt.task.Frame.<adapt.vtree.ShadowContext>} */ const frame
         = adapt.task.newFrame("createShadows");
@@ -792,6 +792,10 @@ adapt.vgen.ViewFactory.prototype.createElementView = function(firstTime, atUnfor
         const listItem = display === adapt.css.ident.list_item && computedStyle["ua-list-item-count"];
         if (floating ||
             (computedStyle["break-inside"] && computedStyle["break-inside"] !== adapt.css.ident.auto)) {
+            self.nodeContext.breakPenalty++;
+        }
+        if (display && display !== adapt.css.ident.inline && vivliostyle.display.isInlineLevel(display)) {
+            // Don't break inside ruby, inline-block, etc.
             self.nodeContext.breakPenalty++;
         }
         self.nodeContext.inline = !floating && !display || vivliostyle.display.isInlineLevel(display) || vivliostyle.display.isRubyInternalDisplay(display);
@@ -1728,7 +1732,7 @@ adapt.vgen.ViewFactory.prototype.peelOff = function(nodeContext, nodeOffset) {
             }
             nodeContext.shadowType = pn.shadowType;
             nodeContext.shadowContext = pn.shadowContext,
-                nodeContext.nodeShadow = pn.nodeShadow;
+            nodeContext.nodeShadow = pn.nodeShadow;
             nodeContext.shadowSibling = pn.shadowSibling ? pn.shadowSibling : shadowSibling;
             shadowSibling = null;
             const result = self.setCurrent(nodeContext, false);

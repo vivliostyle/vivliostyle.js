@@ -217,20 +217,20 @@ goog.scope(() => {
         if (!singleDocumentOptions) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
-        this.loadDocumentOrEPUB(singleDocumentOptions, null, opt_documentOptions, opt_viewerOptions);
+        this.loadDocumentOrPublication(singleDocumentOptions, null, opt_documentOptions, opt_viewerOptions);
     };
 
     /**
-     * Load an EPUB document.
-     * @param {string} epubUrl
+     * Load a EPUB/WebPub publication.
+     * @param {string} pubURL
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadEPUB = function(epubUrl, opt_documentOptions, opt_viewerOptions) {
-        if (!epubUrl) {
+    Viewer.prototype.loadPublication = function(pubURL, opt_documentOptions, opt_viewerOptions) {
+        if (!pubURL) {
             this.eventTarget.dispatchEvent({"type": "error", "content": "No URL specified"});
         }
-        this.loadDocumentOrEPUB(null, epubUrl, opt_documentOptions, opt_viewerOptions);
+        this.loadDocumentOrPublication(null, pubURL, opt_documentOptions, opt_viewerOptions);
     };
 
     /**
@@ -272,14 +272,14 @@ goog.scope(() => {
     }
 
     /**
-     * Load an HTML or XML document, or an EPUB document.
+     * Load an HTML or XML document, or an EPUB/WebPub publication.
      * @private
      * @param {?(!vivliostyle.viewer.SingleDocumentOptions|!Array<!vivliostyle.viewer.SingleDocumentOptions>)} singleDocumentOptions
-     * @param {?string} epubUrl
+     * @param {?string} pubURL
      * @param {!vivliostyle.viewer.DocumentOptions=} opt_documentOptions
      * @param {!vivliostyle.viewer.ViewerOptions=} opt_viewerOptions
      */
-    Viewer.prototype.loadDocumentOrEPUB = function(singleDocumentOptions, epubUrl, opt_documentOptions, opt_viewerOptions) {
+    Viewer.prototype.loadDocumentOrPublication = function(singleDocumentOptions, pubURL, opt_documentOptions, opt_viewerOptions) {
         const documentOptions = opt_documentOptions || {};
 
         function convertStyleSheetArray(arr) {
@@ -301,11 +301,11 @@ goog.scope(() => {
         }
 
         const command = Object.assign({
-            "a": singleDocumentOptions ? "loadXML" : "loadEPUB",
+            "a": singleDocumentOptions ? "loadXML" : "loadPublication",
 
             "userAgentRootURL": this.settings["userAgentRootURL"],
 
-            "url": convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
+            "url": convertSingleDocumentOptions(singleDocumentOptions) || pubURL,
             "document": documentOptions["documentObject"],
             "fragment": documentOptions["fragment"],
             "authorStyleSheet": authorStyleSheet,
@@ -337,7 +337,8 @@ goog.scope(() => {
         LEFT: "left",
         RIGHT: "right",
         FIRST: "first",
-        LAST: "last"
+        LAST: "last",
+        EPAGE: "epage"
     };
     /** @const */ const Navigation = vivliostyle.viewer.Navigation;
 
@@ -360,17 +361,13 @@ goog.scope(() => {
     /**
      * Navigate to the specified page.
      * @param {!vivliostyle.viewer.Navigation} nav
+     * @param {number=} opt_epage
      */
-    Viewer.prototype.navigateToPage = function(nav) {
-        this.adaptViewer.sendCommand({"a": "moveTo", "where": this.resolveNavigation(nav)});
-    };
-
-    /**
-     * Navigate to the Nth page.
-     * @param {number} nthPage
-     */
-    Viewer.prototype.navigateToNthPage = function(nthPage) {
-        this.adaptViewer.sendCommand({"a": "moveTo", "nthPage": nthPage});
+    Viewer.prototype.navigateToPage = function(nav, opt_epage) {
+        if (nav === Navigation.EPAGE)
+            this.adaptViewer.sendCommand({"a": "moveTo", "epage": opt_epage});
+        else
+            this.adaptViewer.sendCommand({"a": "moveTo", "where": this.resolveNavigation(nav)});
     };
 
     /**
@@ -381,11 +378,37 @@ goog.scope(() => {
         this.adaptViewer.sendCommand({"a": "moveTo", "url": url});
     };
 
-    /** @const */ const ZoomType = adapt.viewer.ZoomType;
+    /**
+     * @returns {?boolean} True if TOC is visible, false if hidden, null if TOC is unavailable
+     */
+    Viewer.prototype.isTOCVisible = function() {
+        if (this.adaptViewer.opfView && this.adaptViewer.opfView.opf &&
+                (this.adaptViewer.opfView.opf.xhtmlToc || this.adaptViewer.opfView.opf.ncxToc)) {
+            return !!this.adaptViewer.opfView.isTOCVisible();
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * Show or hide TOC box
+     * @param {?boolean=} opt_show      If true show TOC, false hide TOC. If null or undefined toggle TOC.
+     * @param {boolean=} opt_autohide   If true, automatically hide when click TOC item
+     */
+    Viewer.prototype.showTOC = function(opt_show, opt_autohide) {
+        const visibility = opt_show == null ? "toggle" : opt_show ? "show" : "hide";
+        this.adaptViewer.sendCommand({"a": "toc", "v": visibility, "autohide": opt_autohide});
+    };
+
+    /**
+     * @enum {string}
+     */
+    vivliostyle.viewer.ZoomType = adapt.viewer.ZoomType;
+    /** @const */ const ZoomType = vivliostyle.viewer.ZoomType;
 
     /**
      * Returns zoom factor corresponding to the specified zoom type.
-     * @param {adapt.viewer.ZoomType} type
+     * @param {vivliostyle.viewer.ZoomType} type
      * @returns {number}
      */
     Viewer.prototype.queryZoomFactor = function(type) {
@@ -398,19 +421,23 @@ goog.scope(() => {
     vivliostyle.viewer.Viewer.prototype.getPageSizes = function() {
         return this.adaptViewer.pageSizes;
     };
-
-    /** @const */ var PageViewMode = adapt.viewer.PageViewMode;
+    /**
+     * @enum {string}
+     */
+    vivliostyle.viewer.PageViewMode = adapt.viewer.PageViewMode;
+    /** @const */ var PageViewMode = vivliostyle.viewer.PageViewMode;
 
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.Viewer", Viewer);
     goog.exportProperty(Viewer.prototype, "setOptions", Viewer.prototype.setOptions);
     goog.exportProperty(Viewer.prototype, "addListener", Viewer.prototype.addListener);
     goog.exportProperty(Viewer.prototype, "removeListener", Viewer.prototype.removeListener);
     goog.exportProperty(Viewer.prototype, "loadDocument", Viewer.prototype.loadDocument);
-    goog.exportProperty(Viewer.prototype, "loadEPUB", Viewer.prototype.loadEPUB);
+    goog.exportProperty(Viewer.prototype, "loadPublication", Viewer.prototype.loadPublication);
     goog.exportProperty(Viewer.prototype, "getCurrentPageProgression", Viewer.prototype.getCurrentPageProgression);
     goog.exportProperty(Viewer.prototype, "navigateToPage", Viewer.prototype.navigateToPage);
-    goog.exportProperty(Viewer.prototype, "navigateToNthPage", Viewer.prototype.navigateToNthPage);
     goog.exportProperty(Viewer.prototype, "navigateToInternalUrl", Viewer.prototype.navigateToInternalUrl);
+    goog.exportProperty(Viewer.prototype, "isTOCVisible", Viewer.prototype.isTOCVisible);
+    goog.exportProperty(Viewer.prototype, "showTOC", Viewer.prototype.showTOC);
     goog.exportProperty(Viewer.prototype, "queryZoomFactor", Viewer.prototype.queryZoomFactor);
     goog.exportProperty(Viewer.prototype, "getPageSizes", Viewer.prototype.getPageSizes);
     vivliostyle.namespace.exportSymbol("vivliostyle.viewer.ZoomType", ZoomType);

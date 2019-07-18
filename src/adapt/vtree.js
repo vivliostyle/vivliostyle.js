@@ -227,6 +227,13 @@ adapt.vtree.Page.prototype.finish = function(triggers, clientLayout) {
     const list = this.delayedItems;
     for (var i = 0; i < list.length; i++) {
         const item = list[i];
+        if (item.target === this.container && item.name === "transform" && !this.isAutoPageWidth && !this.isAutoPageHeight) {
+            // When fixed page size is specified, cancel the transform property
+            // set at OPFView.makePage() for the specified viewport size
+            // (e.g. `<meta name="viewport" content="width=1307, height=1920"/>`)
+            // to avoid wrong page resizing.
+            continue;
+        }
         adapt.base.setCSSProperty(item.target, item.name, item.value.toString());
     }
 
@@ -353,7 +360,7 @@ adapt.vtree.Flow = function(flowName, parentFlowName) {
  * @constructor
  */
 adapt.vtree.FlowChunk = function(flowName, element, startOffset,
-                                 priority, linger, exclusive, repeated, last, breakBefore) {
+    priority, linger, exclusive, repeated, last, breakBefore) {
     /** @type {string} */ this.flowName = flowName;
     /** @type {!Element} */ this.element = element;
     /** @type {number} */ this.startOffset = startOffset;
@@ -1584,7 +1591,7 @@ adapt.vtree.ExprContentListener;
  * @extends {adapt.css.Visitor}
  */
 adapt.vtree.ContentPropertyHandler = function(elem, context, rootContentValue,
-                                              exprContentListener) {
+    exprContentListener) {
     adapt.css.Visitor.call(this);
     /** @const */ this.elem = elem;
     /** @const */ this.context = context;
@@ -1631,8 +1638,13 @@ adapt.vtree.ContentPropertyHandler.prototype.visitSpaceList = function(list) {
 /** @override */
 adapt.vtree.ContentPropertyHandler.prototype.visitExpr = function(expr) {
     const ex = expr.toExpr();
-    const val = ex.evaluate(this.context);
+    let val = ex.evaluate(this.context);
     if (typeof val === "string") {
+        if (ex instanceof adapt.expr.Named) {
+            // For env(pub-title) and env(doc-title)
+            // Need to unquote the result. To be consistent with cssparse.evaluateExprToCSS()
+            val = adapt.cssparse.parseValue(ex.scope, new adapt.csstok.Tokenizer(val, null), "").stringValue();
+        }
         goog.asserts.assert(this.elem.ownerDocument);
         const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
         this.visitStrInner(val, node);

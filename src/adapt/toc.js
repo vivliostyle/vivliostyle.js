@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -51,13 +52,14 @@ adapt.toc.bulletEmpty = "\u25B9";
  * @implements {adapt.vgen.CustomRendererFactory}
  */
 adapt.toc.TOCView = function(store, url, lang, clientLayout, fontMapper, pref,
-                             rendererFactory, fallbackMap, documentURLTransformer, counterStore) {
+    rendererFactory, fallbackMap, documentURLTransformer, counterStore) {
     /** @const */ this.store = store;
     /** @const */ this.url = url;
     /** @const */ this.lang = lang;
     /** @const */ this.clientLayout = clientLayout;
     /** @const */ this.fontMapper = fontMapper;
     /** @const */ this.pref = adapt.expr.clonePreferences(pref);
+    this.pref.spreadView = false;   // No spred view for TOC box
     /** @const */ this.rendererFactory = rendererFactory;
     /** @const */ this.fallbackMap = fallbackMap;
     /** @const */ this.documentURLTransformer = documentURLTransformer;
@@ -98,20 +100,43 @@ adapt.toc.toggleNodeExpansion = evt => {
     const open = elem.textContent == adapt.toc.bulletClosed;
     elem.textContent = open ? adapt.toc.bulletOpen : adapt.toc.bulletClosed;
     const tocNodeElem = /** @type {Element} */ (elem.parentNode);
+    elem.setAttribute("aria-expanded", open ? "true" : "false");
+    tocNodeElem.setAttribute("aria-expanded", open ? "true" : "false");
     let c = tocNodeElem.firstChild;
     while (c) {
-        if (c.nodeType != 1) {
-            c = c.nextSibling;
-            continue;
+        if (c.nodeType === 1) {
+            const ce = /** @type {HTMLElement} */ (c);
+            const adaptClass = ce.getAttribute("data-adapt-class");
+            if (adaptClass === "toc-container") {
+                ce.setAttribute("aria-hidden", !open ? "true" : "false");
+                if (ce.firstChild) {
+                    c = ce.firstChild;
+                    continue;
+                }
+            } else if (adaptClass === "toc-node") {
+                ce.style.height = open ? "auto" : "0px";
+
+                // Update enable/disable tab move to the button and anchor.
+                if (ce.children.length >= 2) {
+                    ce.children[1].tabIndex = open ? 0 : -1;
+                }
+                if (ce.children.length >= 3) {
+                    ce.children[0].tabIndex = open ? 0 : -1;
+                    if (!open) {
+                        const elem1 = ce.children[0];
+                        if (elem1.textContent == adapt.toc.bulletOpen) {
+                            elem1.textContent = adapt.toc.bulletClosed;
+                            elem1.setAttribute("aria-expanded", "false");
+                            ce.setAttribute("aria-expanded", "false");
+                            c = ce.children[2];
+                            continue;
+                        }
+                    }
+                }
+            }
         }
-        const ce = /** @type {HTMLElement} */ (c);
-        const adaptClass = ce.getAttribute("data-adapt-class");
-        if (adaptClass == "toc-container") {
-            c = ce.firstChild;
-            continue;
-        }
-        if (ce.getAttribute("data-adapt-class") == "toc-node") {
-            ce.style.height = open ? "auto" : "0px";
+        while (!c.nextSibling && c.parentNode !== tocNodeElem) {
+            c = c.parentNode;
         }
         c = c.nextSibling;
     }
@@ -131,8 +156,44 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
          */
         (srcElem, viewParent, computedStyle) => {
             const behavior = computedStyle["behavior"];
+            if (behavior) {
+                switch (behavior.toString()) {
+                    case "body-child":
+                        if (srcElem.parentElement.getAttribute("data-vivliostyle-primary-entry")) {
+                            if (!srcElem.querySelector("[role=doc-toc], [role=directory], nav li a, .toc, #toc")) {
+                                // When the TOC element is a part of the primaty entry (X)HTML,
+                                // hide elements not containing TOC.
+                                computedStyle["display"] = adapt.css.ident.none;
+                            }
+                        }
+                        break;
+                    case "toc-node-anchor":
+                        computedStyle["color"] = adapt.css.ident.inherit;
+                        computedStyle["text-decoration"] = adapt.css.ident.none;
+                        break;
+                    case "toc-node":
+                        computedStyle["display"] = adapt.css.ident.block;
+                        computedStyle["margin"] = adapt.css.numericZero;
+                        computedStyle["padding"] = adapt.css.numericZero;
+                        computedStyle["padding-inline-start"] = new adapt.css.Numeric(1.25, "em");
+                        break;
+                    case "toc-node-first-child":
+                        computedStyle["display"] = adapt.css.ident.inline_block;
+                        computedStyle["margin"] = new adapt.css.Numeric(0.2, "em");
+                        computedStyle["vertical-align"] = adapt.css.ident.top;
+                        computedStyle["color"] = adapt.css.ident.inherit;
+                        computedStyle["text-decoration"] = adapt.css.ident.none;
+                        break;
+                }
+            }
             if (!behavior || (behavior.toString() != "toc-node" && behavior.toString() != "toc-container")) {
                 return renderer(srcElem, viewParent, computedStyle);
+            }
+            // Remove white-space textnode that becomes unwanted space between button and anchor element.
+            const firstChild = srcElem.firstChild;
+            if (firstChild && firstChild.nodeType !== 1 && firstChild.textContent.trim() === "") {
+                // To avoid "Inconsistent offset" error, create a comment node with same white-space text.
+                srcElem.replaceChild(srcElem.ownerDocument.createComment(firstChild.textContent), firstChild);
             }
             const adaptParentClass = viewParent.getAttribute("data-adapt-class");
             if (adaptParentClass == "toc-node") {
@@ -141,6 +202,15 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                     button.textContent = adapt.toc.bulletClosed;
                     adapt.base.setCSSProperty(button, "cursor", "pointer");
                     button.addEventListener("click", adapt.toc.toggleNodeExpansion, false);
+
+                    button.setAttribute("role", "button");
+                    button.setAttribute("aria-expanded", "false");
+                    viewParent.setAttribute("aria-expanded", "false");
+
+                    // Enable tab move to the button unless hidden.
+                    if (viewParent.style.height !== "0px") {
+                        button.tabIndex = 0;
+                    }
                 }
             }
             const element = viewParent.ownerDocument.createElement("div");
@@ -149,21 +219,36 @@ adapt.toc.TOCView.prototype.makeCustomRenderer = function(xmldoc) {
                 var button = viewParent.ownerDocument.createElement("div");
                 button.textContent = adapt.toc.bulletEmpty;
                 // TODO: define pseudo-element for the button?
-                adapt.base.setCSSProperty(button, "margin-left", "-1em");
+                adapt.base.setCSSProperty(button, "margin", "0.2em 0 0 -1em");
+                adapt.base.setCSSProperty(button, "margin-inline-start", "-1em");
+                adapt.base.setCSSProperty(button, "margin-inline-end", "0");
                 adapt.base.setCSSProperty(button, "display", "inline-block");
                 adapt.base.setCSSProperty(button, "width", "1em");
-                adapt.base.setCSSProperty(button, "text-align", "left");
+                adapt.base.setCSSProperty(button, "text-align", "center");
+                adapt.base.setCSSProperty(button, "vertical-align", "top");
                 adapt.base.setCSSProperty(button, "cursor", "default");
                 adapt.base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
                 element.appendChild(button);
                 adapt.base.setCSSProperty(element, "overflow", "hidden");
                 element.setAttribute("data-adapt-class", "toc-node");
+                element.setAttribute("role", "treeitem");
+
                 if (adaptParentClass == "toc-node" || adaptParentClass == "toc-container") {
                     adapt.base.setCSSProperty(element, "height", "0px");
+
+                    // Prevent tab move to hidden anchor.
+                    const anchorElem = srcElem.firstElementChild;
+                    if (anchorElem && anchorElem.localName === "a") {
+                        anchorElem.tabIndex = -1;
+                    }
+                } else {
+                    viewParent.setAttribute("role", "tree");
                 }
             } else {
                 if (adaptParentClass == "toc-node") {
                     element.setAttribute("data-adapt-class", "toc-container");
+                    element.setAttribute("role", "group");
+                    element.setAttribute("aria-hidden", "true");
                 }
             }
             return adapt.task.newResult(/** @type {Element} */ (element));
@@ -187,7 +272,18 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
     /** @type {!adapt.task.Frame.<adapt.vtree.Page>} */ const frame = adapt.task.newFrame("showTOC");
     const page = new adapt.vtree.Page(elem, elem);
     this.page = page;
-    this.store.load(this.url).then(xmldoc => {
+
+    // The (X)HTML doc for the TOC box may be reused for the TOC page in the book,
+    // but they need different styles. So, add "?viv-toc-box" to distinguish with TOC page URL.
+    const tocBoxUrl = this.url + "?viv-toc-box";
+
+    this.store.load(tocBoxUrl).then(xmldoc => {
+        // Mark if this doc is the primary entry page.
+        const nonTocBoxDoc = this.store.resources[this.url];
+        if (nonTocBoxDoc && nonTocBoxDoc.body && nonTocBoxDoc.body.getAttribute("data-vivliostyle-primary-entry")) {
+            xmldoc.body.setAttribute("data-vivliostyle-primary-entry", true);
+        }
+
         const style = self.store.getStyleForDoc(xmldoc);
         const viewportSize = style.sizeViewport(width, 100000, fontSize);
         viewport = new adapt.vgen.Viewport(viewport.window, viewportSize.fontSize, viewport.root,
@@ -200,6 +296,10 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
         instance.pref = self.pref;
         instance.init().then(() => {
             instance.layoutNextPage(page, null).then(() => {
+                Array.from(page.container.querySelectorAll("[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']")).forEach(bodyChildElem => {
+                    bodyChildElem.setAttribute("aria-hidden", "true");
+                    bodyChildElem.setAttribute("hidden", "hidden");
+                });
                 self.setAutoHeight(elem, 2);
                 frame.finish(page);
             });
@@ -213,14 +313,8 @@ adapt.toc.TOCView.prototype.showTOC = function(elem, viewport, width, height, fo
  */
 adapt.toc.TOCView.prototype.hideTOC = function() {
     if (this.page) {
-        const page = this.page;
-        this.page = null;
-        this.instance = null;
-        adapt.base.setCSSProperty(page.container, "visibility", "none");
-        const parent = page.container.parentNode;
-        if (parent) {
-            parent.removeChild(page.container);
-        }
+        this.page.container.style.visibility = "hidden";
+        this.page.container.setAttribute("aria-hidden", "true");
     }
 };
 
@@ -228,6 +322,6 @@ adapt.toc.TOCView.prototype.hideTOC = function() {
  * @return {boolean}
  */
 adapt.toc.TOCView.prototype.isTOCVisible = function() {
-    return !!this.page;
+    return !!this.page && this.page.container.style.visibility === "visible";
 };
 

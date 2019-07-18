@@ -3,7 +3,7 @@ set -ev
 
 if [ "${TRAVIS_PULL_REQUEST}" = "false" -a \( "${TRAVIS_BRANCH}" = "master" -o "${TRAVIS_TAG}" != "" \) ]; then
     # build documents
-    gem install kramdown
+    gem install kramdown -v 1.17.0
     src="doc/supported-features.md"
     template=doc/supported-features.erb
     version=$(grep '^ *"version":' package.json | sed -e 's/^.*"\([^"]*\)"[^"]*$/\1/' | sed -e 's/\.0$//')

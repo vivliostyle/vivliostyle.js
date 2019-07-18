@@ -139,7 +139,7 @@ vivliostyle.page.resolvePageSizeAndBleed = style => {
             pageSizeAndBleed.height = val2 || val1;
         } else {
             // <page-size> || [ portrait | landscape ]
-            const s = vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
+            const s = val1.name && vivliostyle.page.pageSizes[/** @type {adapt.css.Ident} */ (val1).name.toLowerCase()];
             if (!s) {
                 // portrait or landscape is specified alone. fallback to fit to the viewport (use default value)
             } else if (val2 && val2 === adapt.css.ident.landscape) {
@@ -432,6 +432,13 @@ vivliostyle.page.addPrinterMarks = (cascadedPageStyle, evaluatedPageSizeAndBleed
     const lineWidth = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineWidth, context);
     const printerMarkOffset = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkOffset, context);
     const lineLength = adapt.css.toNumber(vivliostyle.page.defaultPrinterMarkLineLength, context);
+
+    if (bleed) {
+        const bgcolor = cascadedPageStyle["background-color"];
+        if (bgcolor && bgcolor.value) {
+            page.bleedBox.style.backgroundColor = bgcolor.value.stringValue();
+        }
+    }
 
     // corner marks
     if (crop) {
@@ -900,7 +907,8 @@ vivliostyle.page.PageRuleMasterInstance.prototype.initHorizontal = function() {
 vivliostyle.page.PageRuleMasterInstance.prototype.initVertical = function() {
     const style = this.style;
     // Shift 1px to workaround Chrome printing bug
-    style["top"] = new adapt.css.Numeric(-1, "px");
+    // style["top"] = new adapt.css.Numeric(-1, "px");
+    style["top"] = adapt.css.numericZero;
     style["margin-top"] = adapt.css.numericZero;
     style["border-top-width"] = adapt.css.numericZero;
     style["padding-top"] = adapt.css.numericZero;
@@ -1497,6 +1505,10 @@ vivliostyle.page.PageRulePartitionInstance.prototype.resolvePageBoxDimensions = 
 vivliostyle.page.PageRulePartitionInstance.prototype.prepareContainer = function(context, container, page, docFaces, clientLayout) {
     adapt.pm.PartitionInstance.prototype.prepareContainer.call(this, context, container, page, docFaces, clientLayout);
     page.pageAreaElement = /** @type {HTMLElement} */ (container.element);
+
+    // Set page area size for vw/vh unit calculation
+    context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
+    context.pageAreaHeight = parseFloat(page.pageAreaElement.style.height);
 };
 
 /**

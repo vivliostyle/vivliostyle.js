@@ -44,20 +44,65 @@ goog.scope(() => {
      * @constructor
      */
     vivliostyle.logging.Logger = function(opt_console) {
-        const c = opt_console || console;
+        this.opt_console = opt_console;
 
-        function makeConsoleMethod(method) {
-            return args => method.apply(c, args);
-        }
-
-        /** @const @private */ this.consoleDebug = makeConsoleMethod(c.debug || c.log);
-        /** @const @private */ this.consoleInfo = makeConsoleMethod(c.info || c.log);
-        /** @const @private */ this.consoleWarn = makeConsoleMethod(c.warn || c.log);
-        /** @const @private */ this.consoleError = makeConsoleMethod(c.error || c.log);
-
-        /** @const @private @type {Object<vivliostyle.logging.LogLevel, Array<!function(vivliostyle.logging.ErrorInfo):void>>} */ this.listeners = {};
+        /** @const @private @type {Object<vivliostyle.logging.LogLevel, Array<!function(vivliostyle.logging.ErrorInfo):void>>} */
+        this.listeners = {};
     };
-    /** @const */ const Logger = vivliostyle.logging.Logger;
+    /** @const */
+    const Logger = vivliostyle.logging.Logger;
+
+    /** @const @private */
+    Logger.prototype.consoleDebug = function(msg) {
+        if (this.opt_console) {
+            if (this.opt_console.debug) {
+                this.opt_console.debug(...msg);
+            } else {
+                this.opt_console.log(...msg);
+            }
+        } else {
+            console.debug(...msg); // eslint-disable-line no-console
+        }
+    };
+
+    /** @const @private */
+    Logger.prototype.consoleInfo = function(msg) {
+        if (this.opt_console) {
+            if (this.opt_console.info) {
+                this.opt_console.info(...msg);
+            } else {
+                this.opt_console.log(...msg);
+            }
+        } else {
+            console.info(...msg); // eslint-disable-line no-console
+        }
+    };
+
+    /** @const @private */
+    Logger.prototype.consoleWarn = function(msg) {
+        if (this.opt_console) {
+            if (this.opt_console.warn) {
+                this.opt_console.warn(...msg);
+            } else {
+                this.opt_console.log(...msg);
+            }
+        } else {
+            console.warn(...msg); // eslint-disable-line no-console
+        }
+    };
+
+    /** @const @private */
+    Logger.prototype.consoleError = function(msg) {
+        if (this.opt_console) {
+            if (this.opt_console.error) {
+                this.opt_console.error(...msg);
+            } else {
+                this.opt_console.log(...msg);
+            }
+        } else {
+            console.error(...msg); // eslint-disable-line no-console
+        }
+    };
 
     /**
      * @private

@@ -823,7 +823,7 @@ adapt.csscasc.ChainedAction.prototype.getPriority = () => 0;
  * @return {boolean}
  */
 adapt.csscasc.ChainedAction.prototype.makePrimary = cascade => // cannot be made primary
-false;
+    false;
 
 /**
  * @param {string} className
@@ -848,7 +848,7 @@ adapt.csscasc.CheckClassAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.CheckClassAction.prototype.getPriority = () => // class should be checked after id
-10;
+    10;
 
 /**
  * @override
@@ -884,7 +884,7 @@ adapt.csscasc.CheckIdAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.CheckIdAction.prototype.getPriority = () => // id should be checked after :root
-11;
+    11;
 
 /**
  * @override
@@ -920,7 +920,7 @@ adapt.csscasc.CheckLocalNameAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.CheckLocalNameAction.prototype.getPriority = () => // tag is a pretty good thing to check, after epub:type
-8;
+    8;
 
 /**
  * @override
@@ -958,7 +958,7 @@ adapt.csscasc.CheckNSTagAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.CheckNSTagAction.prototype.getPriority = () => // tag is a pretty good thing to check, after epub:type
-8;
+    8;
 
 /**
  * @override
@@ -1224,7 +1224,7 @@ adapt.csscasc.IsRootAction.prototype.apply = function(cascadeInstance) {
  * @override
  */
 adapt.csscasc.IsRootAction.prototype.getPriority = () => // :root is the first thing to check
-12;
+    12;
 
 /**
  * @param {number} a
@@ -3123,7 +3123,7 @@ adapt.csscasc.uaBaseCascade = null;
  * @implements {adapt.cssvalid.PropertyReceiver}
  */
 adapt.csscasc.CascadeParserHandler = function(scope, owner, condition, parent, regionId,
-                                              validatorSet, topLevel) {
+    validatorSet, topLevel) {
     adapt.cssparse.SlaveParserHandler.call(this, scope, owner, topLevel);
     /** @type {Array.<adapt.csscasc.ChainedAction>} */ this.chain = null;
     /** @type {number} */ this.specificity = 0;

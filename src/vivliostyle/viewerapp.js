@@ -184,9 +184,9 @@ vivliostyle.viewerapp.callback = msg => {
             viewer.viewportElement.setAttribute("data-vivliostyle-spread-view", viewer.pref.spreadView);
 
             window.addEventListener("keydown", /** @type {Function} */ (vivliostyle.viewerapp.keydown), false);
-//        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-//        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
-//        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+            //        window.addEventListener("touchstart", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+            //        window.addEventListener("touchmove", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
+            //        window.addEventListener("touchend", /** @type {Function} */ (vivliostyle.viewerapp.touch), false);
 
             document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
 
@@ -291,7 +291,7 @@ function setViewportSize(width, height, size, orientation, config) {
  */
 vivliostyle.viewerapp.main = arg => {
     const fragment = (arg && arg["fragment"]) || adapt.base.getURLParam("f");
-    const epubURL = (arg && arg["epubURL"]) || adapt.base.getURLParam("b");
+    const pubURL = (arg && arg["pubURL"]) || adapt.base.getURLParam("b");
     const xmlURL = (arg && arg["xmlURL"]) || adapt.base.getURLParam("x");
     const width = (arg && arg["defaultPageWidth"]) || adapt.base.getURLParam("w");
     const height = (arg && arg["defaultPageHeight"]) || adapt.base.getURLParam("h");
@@ -305,8 +305,8 @@ vivliostyle.viewerapp.main = arg => {
     const viewportElement = (arg && arg["viewportElement"]) || document.body;
 
     const config = {
-        "a": epubURL ? "loadEPUB" : "loadXML",
-        "url": epubURL || xmlURL,
+        "a": pubURL ? "loadPublication" : "loadXML",
+        "url": pubURL || xmlURL,
         "autoresize": true,
         "fragment": fragment,
         // render all pages on load and resize

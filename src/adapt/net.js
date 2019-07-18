@@ -34,7 +34,7 @@ adapt.net.XMLHttpRequestResponseType = {
     TEXT: "text"
 };
 
-/** @typedef {{status:number, url:string, contentType:?string, responseText:?string, responseXML:Document, responseBlob:Blob}} */
+/** @typedef {{status:number, statusText:?string, url:string, contentType:?string, responseText:?string, responseXML:Document, responseBlob:Blob}} */
 adapt.net.Response;
 
 /**
@@ -51,7 +51,7 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
     const request = new XMLHttpRequest();
     const continuation = frame.suspend(request);
     /** @type {adapt.net.Response} */ const response =
-    {status: 0, url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
+    {status: 0, statusText: "", url, contentType: null, responseText: null, responseXML: null, responseBlob: null};
     request.open(opt_method || "GET", url, true);
     if (opt_type) {
         request.responseType = opt_type;
@@ -59,6 +59,7 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
     request.onreadystatechange = () => {
         if (request.readyState === 4) {
             response.status = request.status;
+            response.statusText = request.statusText || request.status == 404 && "Not Found" || "";
             if (response.status == 200 || response.status == 0) {
                 if ((!opt_type || opt_type === adapt.net.XMLHttpRequestResponseType.DOCUMENT) &&
                     request.responseXML &&
@@ -98,8 +99,26 @@ adapt.net.ajax = (url, opt_type, opt_method, opt_data, opt_contentType) => {
             request.send(opt_data);
         }
         else {
-            if (url.match(/file:\/\/.*(\.html$|\.htm$)/))
-                request.overrideMimeType("text/html");
+            if ((/^file:|^https?:\/\/[^/]+\.githubusercontent\.com/).test(url)) {
+                // File or GitHub raw URL
+                if ((/\/aozorabunko\/[^/]+\/cards\/[^/]+\/files\/[^/.]+\.html$/).test(url)) {
+                    // Aozorabunko's (X)HTML support
+                    request.overrideMimeType("text/html; charset=Shift_JIS");
+                } else if ((/\.(html|htm)$/).test(url)) {
+                    request.overrideMimeType("text/html; charset=UTF-8");
+                } else if ((/\.(xhtml|xht|xml|opf)$/).test(url)) {
+                    request.overrideMimeType("application/xml; charset=UTF-8");
+                } else if ((/\.(txt|css)$/).test(url)) {
+                    request.overrideMimeType("text/plain; charset=UTF-8");
+                } else {
+                    // fallback to HTML
+                    request.overrideMimeType("text/html; charset=UTF-8");
+                }
+            } else if ((/^data:,(<|%3C|%3c)/).test(url)) {
+                request.overrideMimeType("text/html; charset=UTF-8");
+            } else if ((/^data:,/).test(url)) {
+                request.overrideMimeType("text/plain; charset=UTF-8");
+            }
             request.send(null);
         }
     } catch (e) {
@@ -194,9 +213,23 @@ adapt.net.ResourceStore.prototype.load = function(url, opt_required, opt_message
 adapt.net.ResourceStore.prototype.fetchInner = function(url, opt_required, opt_message) {
     const self = this;
     /** @type {adapt.task.Frame.<Resource>} */ const frame = adapt.task.newFrame("fetch");
+
+    // Hack for TOCView.showTOC()
+    const isTocBox = url.endsWith("?viv-toc-box");
+    if (isTocBox) {
+        url = url.replace("?viv-toc-box", "");
+    }
+
     adapt.net.ajax(url, self.type).then(response => {
-        if (opt_required && response.status >= 400) {
-            throw new Error(opt_message || (`Failed to fetch required resource: ${url}`));
+        if (response.status >= 400) {
+            if (opt_required) {
+                throw new Error((opt_message || `Failed to fetch required resource: ${url}`) +
+                ` (${response.status}${response.statusText ? ' ' + response.statusText : ''})`);
+            }
+        }
+        if (isTocBox) { // Hack for TOCView.showTOC()
+            url += "?viv-toc-box";
+            response.url += "?viv-toc-box";
         }
         self.parser(response, self).then(resource => {
             delete self.fetchers[url];

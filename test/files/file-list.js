@@ -3,6 +3,7 @@ module.exports = [
         category: "General",
         files: [
             {file: "print_media/", title: "Print media"},
+            {file: "vivliostyle_media/", title: "'vivliostyle' vs 'screen' media"},
             {file: "running_header_adaptive.html", title: "Running header emulation with Adaptive Layout"},
             {file: "case_sensitivity/html.html", title: "HTML case sensitivity"},
             {file: "attr_selectors.html", title: "Attribute selectors"},
@@ -54,7 +55,10 @@ module.exports = [
             {file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug"},
             {file: "pages_counter.html", title: "pages counter"},
             {file: "float-in-relative-bug.html", title: "Float in position:relative bug"},
-            {file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug"}
+            {file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug"},
+            {file: "viewport_unit.html", title: "viewport-percentage units"},
+            {file: "viewport_unit_vertical.html", title: "viewport-percentage units (vertical writing-mode)"},
+            {file: "page_viewport_unit.html", title: "page viewport-percentage units with calc()"}
         ]
     },
     {
@@ -82,7 +86,9 @@ module.exports = [
         category: "Column",
         files: [
             {file: "column/column-fill_balance.html", title: "column-fill: balance"},
-            {file: "column/column-fill_balance-all.html", title: "column-fill: balance-all"}
+            {file: "column/column-fill_balance_vertical.html", title: "column-fill: balance (vertical writing-mode)"},
+            {file: "column/column-fill_balance-all.html", title: "column-fill: balance-all"},
+            {file: "column/column-fill_balance-all_vertical.html", title: "column-fill: balance-all (vertical writing-mode)"}
         ]
     },
     {

@@ -77,10 +77,15 @@ adapt.base.resourceBaseURL = window.location.href;
  * @return {string} resolved (absolute) URL
  */
 adapt.base.resolveURL = (relURL, baseURL) => {
+    if (baseURL.startsWith("data:")) {
+        return relURL || baseURL;
+    }
     if (!baseURL || relURL.match(/^\w{2,}:/)) {
         if (relURL.toLowerCase().match("^javascript:")) {
             return "#";
         }
+        if (relURL.match(/^\w{2,}:\/\/[^\/]+$/))
+            relURL = `${relURL}/`;
         return relURL;
     }
     if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/))
@@ -99,13 +104,24 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         return relURL;
     }
     if (relURL.match(/^\.(\/|$)/))
-        relURL = relURL.substr(1);
+        relURL = relURL.substr(2);  // './foo' => 'foo'
     baseURL = adapt.base.stripFragmentAndQuery(baseURL);
     if (relURL.match(/^\#/))
         return baseURL + relURL;
     let i = baseURL.lastIndexOf('/');
     if (i < 0)
         return relURL;
+    if (i < baseURL.length - 1) {
+        const j = baseURL.lastIndexOf('.');
+        if (j < i) {
+            // Assume the last part without '.' to be a directory name.
+            if (relURL == '') {
+                return baseURL;
+            }
+            baseURL += '/';
+            i = baseURL.length - 1;
+        }
+    }
     let url = baseURL.substr(0, i + 1) + relURL;
     while (true) {
         i = url.indexOf('/../');
@@ -117,6 +133,28 @@ adapt.base.resolveURL = (relURL, baseURL) => {
         url = url.substr(0, j) + url.substr(i + 3);
     }
     return url.replace(/\/(\.\/)+/g, '/');
+};
+
+/**
+ * @param {string} url
+ * @return {string} converted URL
+ */
+adapt.base.convertSpecialURL = url => {
+    let r;
+    if (r = (/^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/).exec(url)) {
+        // Convert GitHub URL to GitHub raw URL
+        url = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? '' : 'master/'}${r[4]}`;
+    } else if (r = (/^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/).exec(url)) {
+        // Convert Aozorabunko (X)HTML URL to GitHub raw URL
+        url = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
+    } else if (r = (/^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/).exec(url)) {
+        // Convert Gist URL to Gist raw URL
+        url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
+    } else if (r = (/^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/).exec(url)) {
+        // Convert JS Bin URL to JS Bin output URL
+        url = `${r[1]}//output.jsbin.com/${r[2]}${r[3]}/`;
+    }
+    return url;
 };
 
 /**
@@ -358,6 +396,14 @@ adapt.base.getPrefixedPropertyNames = prop => {
         return prefixed;
     }
     switch (prop) {
+        case "text-combine-upright":
+            // Special case for Safari
+            if (adapt.base.checkIfPropertySupported("-webkit-", "text-combine") &&
+                    !adapt.base.checkIfPropertySupported("", "text-combine-upright")) {
+                adapt.base.propNameMap[prop] = ["-webkit-text-combine"];
+                return ["-webkit-text-combine"];
+            }
+            break;
         case "writing-mode":
             // Special case: prefer '-ms-writing-mode' to 'writing-mode'
             if (adapt.base.checkIfPropertySupported("-ms-", "writing-mode")) {
@@ -376,6 +422,29 @@ adapt.base.getPrefixedPropertyNames = prop => {
             // Special case for chrome.
             if (adapt.base.checkIfPropertySupported("-webkit-", "clip-path")) {
                 return adapt.base.propNameMap[prop] = ["-webkit-clip-path", "clip-path"];
+            }
+            break;
+        case "margin-inline-start":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "margin-start")) {
+                adapt.base.propNameMap[prop] = ["-webkit-margin-start"];
+                return ["-webkit-margin-start"];
+            }
+            break;
+        case "margin-inline-end":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "margin-end")) {
+                adapt.base.propNameMap[prop] = ["-webkit-margin-end"];
+                return ["-webkit-margin-end"];
+            }
+        case "padding-inline-start":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "padding-start")) {
+                adapt.base.propNameMap[prop] = ["-webkit-padding-start"];
+                return ["-webkit-padding-start"];
+            }
+            break;
+        case "padding-inline-end":
+            if (adapt.base.checkIfPropertySupported("-webkit-", "padding-end")) {
+                adapt.base.propNameMap[prop] = ["-webkit-padding-end"];
+                return ["-webkit-padding-end"];
             }
             break;
     }
@@ -421,6 +490,13 @@ adapt.base.setCSSProperty = (elem, prop, value) => {
                         break;
                 }
             }
+            else if (prefixed === "-webkit-text-combine") {
+                switch (value) {
+                    case "all":
+                        value = "horizontal";
+                        break;
+                }
+            }
             if (elem && elem.style) {
                 (/** @type {HTMLElement} */ (elem)).style.setProperty(prefixed, value);
             }
@@ -440,7 +516,7 @@ adapt.base.getCSSProperty = (elem, prop, opt_value) => {
     try {
         const propertyNames = adapt.base.propNameMap[prop];
         return (/** @type {HTMLElement} */ (elem)).style.getPropertyValue(
-             propertyNames ? propertyNames[0] : prop);
+            propertyNames ? propertyNames[0] : prop);
     } catch (err) {
     }
     return opt_value || "";
@@ -496,7 +572,7 @@ adapt.base.StringBuffer.prototype.toString = function() {
  * @return {string}
  */
 adapt.base.escapeChar = str => // not called for surrogate pairs, no need to worry about them
-`\\${str.charCodeAt(0).toString(16)} `;
+    `\\${str.charCodeAt(0).toString(16)} `;
 
 /**
  * @param {string} name
@@ -508,7 +584,7 @@ adapt.base.escapeCSSIdent = name => name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g,
  * @param {string} str
  * @return {string}
  */
-adapt.base.escapeCSSStr = str => str.replace(/[\u0000-\u001F"]/g, adapt.base.escapeChar);
+adapt.base.escapeCSSStr = str => str.replace(/[\u0000-\u001F"\\]/g, adapt.base.escapeChar);
 
 /**
  * @param {string} str

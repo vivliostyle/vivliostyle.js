@@ -41,7 +41,7 @@ adapt.expr.defaultPreferences = () => ({
     nightMode: false,
     spreadView: false,
     pageBorder: 1,
-    enabledMediaTypes: {"print": true},
+    enabledMediaTypes: {"vivliostyle": true, "print": true},
     defaultPaperSize: undefined
 });
 
@@ -176,6 +176,14 @@ adapt.expr.LexicalScope = function(parent, resolver) {
             return this.pref.horizontal;
         });
         this.defineBuiltInName("pref-spread-view", function() { return this.pref.spreadView; });
+
+        // For env(pub-title) and env(doc-title)
+        this.defineBuiltInName("pub-title", function() {
+            return adapt.expr.cssString(this.pubTitle ? this.pubTitle : "");
+        });
+        this.defineBuiltInName("doc-title", function() {
+            return adapt.expr.cssString(this.docTitle ? this.docTitle : "");
+        });
     }
 };
 
@@ -242,6 +250,30 @@ adapt.expr.isFontRelativeLengthUnit = unit => {
         case "em":
         case "ex":
         case "rem":
+            return true;
+        default:
+            return false;
+    }
+};
+
+/**
+ * @param {string} unit
+ * @returns {boolean}
+ */
+adapt.expr.isViewportRelativeLengthUnit = unit => {
+    switch (unit.toLowerCase()) {
+        case "vw":
+        case "vh":
+        case "vi":
+        case "vb":
+        case "vmin":
+        case "vmax":
+        case "pvw":
+        case "pvh":
+        case "pvi":
+        case "pvb":
+        case "pvmin":
+        case "pvmax":
             return true;
         default:
             return false;
@@ -327,6 +359,9 @@ adapt.expr.Context = function(rootScope, viewportWidth, viewportHeight, fontSize
     };
     this.pref = adapt.expr.defaultPreferencesInstance;
     /** @type {Object.<string,adapt.expr.ScopeContext>} */ this.scopes = {};
+    /** @type {?number} */ this.pageAreaWidth = null;
+    /** @type {?number} */ this.pageAreaHeight = null;
+    /** @type {?boolean} */ this.pageVertical = null;
 };
 
 /**
@@ -360,10 +395,39 @@ adapt.expr.Context.prototype.clearScope = function(scope) {
  * @return {number}
  */
 adapt.expr.Context.prototype.queryUnitSize = function(unit, isRoot) {
-    if (unit == "vw")
-        return this.pageWidth() / 100;
-    if (unit == "vh")
-        return this.pageHeight() / 100;
+    if (adapt.expr.isViewportRelativeLengthUnit(unit)) {
+        const pvw = this.pageWidth() / 100;
+        const pvh = this.pageHeight() / 100;
+        const vw = this.pageAreaWidth != null ? this.pageAreaWidth / 100 : pvw;
+        const vh = this.pageAreaHeight != null ? this.pageAreaHeight / 100 : pvh;
+
+        switch (unit) {
+            case "vw":
+                return vw;
+            case "vh":
+                return vh;
+            case "vi":
+                return this.pageVertical ? vh : vw;
+            case "vb":
+                return this.pageVertical ? vw: vh;
+            case "vmin":
+                return vw < vh ? vw : vh;
+            case "vmax":
+                return vw > vh ? vw : vh;
+            case "pvw":
+                return pvw;
+            case "pvh":
+                return pvh;
+            case "pvi":
+                return this.pageVertical ? pvh : pvw;
+            case "pvb":
+                return this.pageVertical ? pvw: pvh;
+            case "pvmin":
+                return pvw < pvh ? pvw : pvh;
+            case "pvmax":
+                return pvw > pvh ? pvw : pvh;
+        }
+    }
     if (unit == "em" || unit == "rem")
         return isRoot ? this.initialFontSize : this.fontSize();
     if (unit == "ex")

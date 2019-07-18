@@ -1102,6 +1102,7 @@ adapt.cssparse.OP_MEDIA_AND = adapt.csstok.TokenType.LAST + 1;
     actionsExprOp[adapt.csstok.TokenType.LT_EQ] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.EQ] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.EQ_EQ] = adapt.cssparse.Action.EXPR_INFIX;
+    actionsExprOp[adapt.csstok.TokenType.BANG_EQ] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.AMP_AMP] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.BAR_BAR] = adapt.cssparse.Action.EXPR_INFIX;
     actionsExprOp[adapt.csstok.TokenType.PLUS] = adapt.cssparse.Action.EXPR_INFIX;
@@ -2078,7 +2079,12 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.VAL_NUMERIC:
-                valStack.push(new adapt.css.Numeric(token.num, token.text));
+                if (adapt.expr.isViewportRelativeLengthUnit(token.text)) {
+                    // Treat numeric value with viewport unit as numeric in expr.
+                    valStack.push(new adapt.css.Expr(new adapt.expr.Numeric(handler.getScope(), token.num, token.text)));
+                } else {
+                    valStack.push(new adapt.css.Numeric(token.num, token.text));
+                }
                 tokenizer.consume();
                 continue;
             case adapt.cssparse.Action.VAL_STR:
@@ -2100,7 +2106,7 @@ adapt.cssparse.Parser.prototype.runParser = function(count, parsingValue, parsin
                 continue;
             case adapt.cssparse.Action.VAL_FUNC:
                 text = token.text.toLowerCase();
-                if (text == "-epubx-expr") {
+                if (text == "-epubx-expr" || text == "calc" || text == "env") {
                     // special case
                     this.actions = adapt.cssparse.actionsExprVal;
                     this.exprContext = adapt.cssparse.ExprContext.PROP;

@@ -353,7 +353,7 @@ goog.scope(() => {
      * @constructor
      */
     vivliostyle.pagefloat.PageFloatLayoutContext = function(parent, floatReference, container, flowName,
-                                                            generatingNodePosition, writingMode, direction) {
+        generatingNodePosition, writingMode, direction) {
         /** @const */ this.parent = parent;
         if (parent) {
             parent.children.push(this);
@@ -403,7 +403,7 @@ goog.scope(() => {
      * @returns {?vivliostyle.pagefloat.PageFloatLayoutContext}
      */
     PageFloatLayoutContext.prototype.getPreviousSiblingOf = function(child, floatReference,
-                                                                     flowName, generatingNodePosition) {
+        flowName, generatingNodePosition) {
         let index = this.children.indexOf(/** @type {!vivliostyle.pagefloat.PageFloatLayoutContext} */ (child));
         if (index < 0) {
             index = this.children.length;
@@ -991,7 +991,7 @@ goog.scope(() => {
     PageFloatLayoutContext.prototype.getStashedFloatFragments = function(floatReference) {
         if (floatReference === this.floatReference) {
             return this.stashedFloatFragments.concat().sort((fr1, fr2) => // return in reverse order
-            fr2.getOrder() - fr1.getOrder());
+                fr2.getOrder() - fr1.getOrder());
         } else {
             return this.getParent(floatReference).getStashedFloatFragments(floatReference);
         }

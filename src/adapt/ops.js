@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -86,7 +87,7 @@ adapt.ops.FontFace;
  * @constructor
  */
 adapt.ops.Style = function(store, rootScope, pageScope, cascade, rootBox,
-                           fontFaces, footnoteProps, flowProps, viewportProps, pageProps) {
+    fontFaces, footnoteProps, flowProps, viewportProps, pageProps) {
     /** @const */ this.store = store;
     /** @const */ this.rootScope = rootScope;
     /** @const */ this.pageScope = pageScope;
@@ -174,8 +175,8 @@ adapt.ops.Style.prototype.sizeViewport = function(viewportWidth, viewportHeight,
  * @implements {adapt.vgen.StylerProducer}
  */
 adapt.ops.StyleInstance = function(style, xmldoc, defaultLang, viewport, clientLayout,
-                                   fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore,
-                                   pageProgression) {
+    fontMapper, customRenderer, fallbackMap, pageNumberOffset, documentURLTransformer, counterStore,
+    pageProgression) {
     adapt.expr.Context.call(this, style.rootScope, viewport.width, viewport.height, viewport.fontSize);
     /** @const */ this.style = style;
     /** @const */ this.xmldoc = xmldoc;
@@ -502,7 +503,7 @@ adapt.ops.StyleInstance.prototype.flowChunkIsAfterParentFlowForcedBreak = functi
             return false;
         }
         const breakOffsetBeforeStartIndex = adapt.base.binarySearch(forcedBreakOffsets.length,
-                i => forcedBreakOffsets[i] > startOffset) - 1;
+            i => forcedBreakOffsets[i] > startOffset) - 1;
         const breakOffsetBeforeStart = forcedBreakOffsets[breakOffsetBeforeStartIndex];
         const parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[parentFlowName];
         const parentStartOffset = this.getConsumedOffset(parentFlowPosition);
@@ -773,10 +774,10 @@ adapt.ops.StyleInstance.prototype.createLayoutConstraint = function(pageFloatLay
  * @returns {!adapt.task.Result.<!adapt.layout.Column>}
  */
 adapt.ops.StyleInstance.prototype.createAndLayoutColumn = function(boxInstance, offsetX, offsetY, exclusions,
-                                                                   layoutContainer, currentColumnIndex,
-                                                                   flowNameStr, regionPageFloatLayoutContext,
-                                                                   columnCount, columnGap, columnWidth,
-                                                                   innerShape, layoutContext, forceNonFitting) {
+    layoutContainer, currentColumnIndex,
+    flowNameStr, regionPageFloatLayoutContext,
+    columnCount, columnGap, columnWidth,
+    innerShape, layoutContext, forceNonFitting) {
     const self = this;
     const dontApplyExclusions = boxInstance.vertical
         ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
@@ -905,15 +906,15 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumnsWithBalancing = function(
         return self.layoutFlowColumns(
             page, boxInstance, offsetX, offsetY, exclusions, pagePageFloatLayoutContext, regionPageFloatLayoutContext,
             layoutContainer, flowNameStr, columnCount, isFirstTime).thenAsync(columns => {
-                if (columns) {
-                    return adapt.task.newResult({
-                        columns,
-                        position: self.currentLayoutPosition
-                    });
-                } else {
-                    return adapt.task.newResult(null);
-                }
-            });
+            if (columns) {
+                return adapt.task.newResult({
+                    columns,
+                    position: self.currentLayoutPosition
+                });
+            } else {
+                return adapt.task.newResult(null);
+            }
+        });
     }
 
     return layoutColumns().thenAsync(generatorResult => {
@@ -983,46 +984,46 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
         self.createAndLayoutColumn(boxInstance, offsetX, offsetY, exclusions, layoutContainer,
             columnIndex++, flowNameStr, regionPageFloatLayoutContext, columnCount, columnGap,
             columnWidth, innerShape, layoutContext, forceNonFitting).then(c => {
-                if (pagePageFloatLayoutContext.isInvalidated()) {
+            if (pagePageFloatLayoutContext.isInvalidated()) {
+                columns = null;
+                loopFrame.breakLoop();
+                return;
+            }
+            const forcedRegionBreak = !!c.pageBreakType && (c.pageBreakType !== "column");
+            if ((forcedRegionBreak || columnIndex === columnCount) &&
+                    !regionPageFloatLayoutContext.isInvalidated()) {
+                regionPageFloatLayoutContext.finish();
+            }
+            if (regionPageFloatLayoutContext.isInvalidated()) {
+                columnIndex = 0;
+                self.currentLayoutPosition = positionAtContainerStart.clone();
+                regionPageFloatLayoutContext.validate();
+                if (regionPageFloatLayoutContext.isLocked()) {
                     columns = null;
                     loopFrame.breakLoop();
-                    return;
-                }
-                const forcedRegionBreak = !!c.pageBreakType && (c.pageBreakType !== "column");
-                if ((forcedRegionBreak || columnIndex === columnCount) &&
-                    !regionPageFloatLayoutContext.isInvalidated()) {
-                    regionPageFloatLayoutContext.finish();
-                }
-                if (regionPageFloatLayoutContext.isInvalidated()) {
-                    columnIndex = 0;
-                    self.currentLayoutPosition = positionAtContainerStart.clone();
-                    regionPageFloatLayoutContext.validate();
-                    if (regionPageFloatLayoutContext.isLocked()) {
-                        columns = null;
-                        loopFrame.breakLoop();
-                    } else {
-                        loopFrame.continueLoop();
-                    }
-                    return;
-                }
-                column = c;
-                columns[columnIndex - 1] = column;
-                if (column.pageBreakType) {
-                    if (column.pageBreakType != "column") {
-                        // skip remaining columns
-                        columnIndex = columnCount;
-                        if (column.pageBreakType != "region") {
-                            // skip remaining regions
-                            self.pageBreaks[flowNameStr] = true;
-                        }
-                    }
-                }
-                if (columnIndex < columnCount) {
-                    loopFrame.continueLoop();
                 } else {
-                    loopFrame.breakLoop();
+                    loopFrame.continueLoop();
                 }
-            });
+                return;
+            }
+            column = c;
+            columns[columnIndex - 1] = column;
+            if (column.pageBreakType) {
+                if (column.pageBreakType != "column") {
+                    // skip remaining columns
+                    columnIndex = columnCount;
+                    if (column.pageBreakType != "region") {
+                        // skip remaining regions
+                        self.pageBreaks[flowNameStr] = true;
+                    }
+                }
+            }
+            if (columnIndex < columnCount) {
+                loopFrame.continueLoop();
+            } else {
+                loopFrame.breakLoop();
+            }
+        });
     }).then(() => {
         frame.finish(columns);
     });
@@ -1040,8 +1041,8 @@ adapt.ops.StyleInstance.prototype.layoutFlowColumns = function(
  * @return {adapt.task.Result.<boolean>} holding true
  */
 adapt.ops.StyleInstance.prototype.layoutContainer = function(page, boxInstance, parentContainer,
-                                                             offsetX, offsetY, exclusions,
-                                                             pagePageFloatLayoutContext) {
+    offsetX, offsetY, exclusions,
+    pagePageFloatLayoutContext) {
     const self = this;
     boxInstance.reset();
     const enabled = boxInstance.getProp(self, "enabled");
@@ -1213,6 +1214,10 @@ adapt.ops.StyleInstance.prototype.noMorePrimaryFlows = function(cp) {
  */
 adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     const self = this;
+
+    // TOC box is special page container, no pagination
+    const isTocBox = page.container === page.bleedBox;
+
     self.pageBreaks = {};
     if (cp) {
         self.currentLayoutPosition = cp.clone();
@@ -1230,26 +1235,32 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     self.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
-    const cascadedPageStyle = self.pageManager.getCascadedPageStyle();
+    const cascadedPageStyle = isTocBox ? /** @type {adapt.csscasc.ElementStyle} */ ({}) : self.pageManager.getCascadedPageStyle();
     const pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
         // end of primary content
         return adapt.task.newResult(/** @type {adapt.vtree.LayoutPosition}*/ (null));
     }
 
-    page.setAutoPageWidth(pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth);
-    page.setAutoPageHeight(pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight);
-    self.counterStore.setCurrentPage(page);
-    self.counterStore.updatePageCounters(cascadedPageStyle, self);
+    let bleedBoxPaddingEdge = 0;
+    if (!isTocBox) {
+        page.setAutoPageWidth(pageMaster.pageBox.specified["width"].value === adapt.css.fullWidth);
+        page.setAutoPageHeight(pageMaster.pageBox.specified["height"].value === adapt.css.fullHeight);
+        self.counterStore.setCurrentPage(page);
+        self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
-    // setup bleed area and crop marks
-    const evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
-        vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
-    self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
-    vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
-    const bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+        // setup bleed area and crop marks
+        const evaluatedPageSizeAndBleed = vivliostyle.page.evaluatePageSizeAndBleed(
+            vivliostyle.page.resolvePageSizeAndBleed(cascadedPageStyle), this);
+        self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+        vivliostyle.page.addPrinterMarks(cascadedPageStyle, evaluatedPageSizeAndBleed, page, this);
+        bleedBoxPaddingEdge = evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+    }
 
-    const writingMode = pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+    const writingMode = !isTocBox && pageMaster.getProp(self, "writing-mode") || adapt.css.ident.horizontal_tb;
+
+    this.pageVertical = writingMode != adapt.css.ident.horizontal_tb;
+
     const direction = pageMaster.getProp(self, "direction") || adapt.css.ident.ltr;
     const pageFloatLayoutContext = new vivliostyle.pagefloat.PageFloatLayoutContext(
         self.rootPageFloatLayoutContext, vivliostyle.pagefloat.FloatReference.PAGE, null, null, null,
@@ -1258,32 +1269,35 @@ adapt.ops.StyleInstance.prototype.layoutNextPage = function(page, cp) {
     /** @type {!adapt.task.Frame.<adapt.vtree.LayoutPosition>} */ const frame
         = adapt.task.newFrame("layoutNextPage");
     frame.loopWithFrame(loopFrame => {
-        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
+        // self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
+        self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge,
             [], pageFloatLayoutContext).then(() => {
-                if (!pageFloatLayoutContext.isInvalidated()) {
-                    pageFloatLayoutContext.finish();
-                }
-                if (pageFloatLayoutContext.isInvalidated()) {
-                    self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
-                    pageFloatLayoutContext.validate();
-                    loopFrame.continueLoop();
-                } else {
-                    loopFrame.breakLoop();
-                }
-            });
-    }).then(() => {
-        pageMaster.adjustPageLayout(self, page, self.clientLayout);
-        const isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
-        page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
-        self.processLinger();
-        cp = self.currentLayoutPosition;
-        Object.keys(cp.flowPositions).forEach(flowName => {
-            const flowPosition = cp.flowPositions[flowName];
-            const breakAfter = flowPosition.breakAfter;
-            if (breakAfter && (breakAfter === "page" || !self.matchPageSide(breakAfter))) {
-                flowPosition.breakAfter = null;
+            if (!pageFloatLayoutContext.isInvalidated()) {
+                pageFloatLayoutContext.finish();
+            }
+            if (pageFloatLayoutContext.isInvalidated()) {
+                self.currentLayoutPosition = self.layoutPositionAtPageStart.clone();
+                pageFloatLayoutContext.validate();
+                loopFrame.continueLoop();
+            } else {
+                loopFrame.breakLoop();
             }
         });
+    }).then(() => {
+        pageMaster.adjustPageLayout(self, page, self.clientLayout);
+        if (!isTocBox) {
+            const isLeftPage = new adapt.expr.Named(pageMaster.pageBox.scope, "left-page");
+            page.side = isLeftPage.evaluate(self) ? vivliostyle.constants.PageSide.LEFT : vivliostyle.constants.PageSide.RIGHT;
+            self.processLinger();
+            cp = self.currentLayoutPosition;
+            Object.keys(cp.flowPositions).forEach(flowName => {
+                const flowPosition = cp.flowPositions[flowName];
+                const breakAfter = flowPosition.breakAfter;
+                if (breakAfter && (breakAfter === "page" || !self.matchPageSide(breakAfter))) {
+                    flowPosition.breakAfter = null;
+                }
+            });
+        }
         self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
         cp.highestSeenOffset = self.styler.getReachedOffset();
         const triggers = self.style.store.getTriggersForDoc(self.xmldoc);
@@ -1314,8 +1328,12 @@ adapt.ops.StyleInstance.prototype.setPageSizeAndBleed = function(evaluatedPageSi
     page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
-    // Shift 1px to workaround Chrome printing bug
-    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
+    // Shift 1px to workaround Chrome printing bug (Canceled because of another Chrome problem)
+    // page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
+
+    // Shift 0.01px to workaround Firefox printing problem
+    // (This small value (< 1/64 px) has no effect to Chrome)
+    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+0.01}px`;
 };
 
 /**
@@ -1617,7 +1635,7 @@ adapt.ops.OPSDocStore.prototype.clearStyleSheets = function() {
  */
 adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
     let url = stylesheet.url;
-    if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
+    if (url) url = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), adapt.base.baseURL);
     this.styleSheets.push({url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
 };
@@ -1628,7 +1646,7 @@ adapt.ops.OPSDocStore.prototype.addAuthorStyleSheet = function(stylesheet) {
  */
 adapt.ops.OPSDocStore.prototype.addUserStyleSheet = function(stylesheet) {
     let url = stylesheet.url;
-    if (url) url = adapt.base.resolveURL(url, adapt.base.baseURL);
+    if (url) url = adapt.base.resolveURL(adapt.base.convertSpecialURL(url), adapt.base.baseURL);
     this.styleSheets.push({url, text: stylesheet.text,
         flavor: adapt.cssparse.StylesheetFlavor.USER, classes: null, media: null});
 };
@@ -1642,6 +1660,10 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         = adapt.task.newFrame("OPSDocStore.load");
     const self = this;
     const url = response.url;
+
+    // Hack for TOCView.showTOC()
+    const isTocBox = url.endsWith("?viv-toc-box");
+
     adapt.xmldoc.parseXMLResource(response, self).then(xmldoc => {
         if (!xmldoc) {
             frame.finish(null);
@@ -1676,7 +1698,7 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
         sources.push({url: userAgentURL, text:null,
             flavor:adapt.cssparse.StylesheetFlavor.USER_AGENT, classes: null, media: null});
         const head = xmldoc.head;
-        if (head) {
+        if (!isTocBox && head) {
             for (let c = head.firstChild; c; c = c.nextSibling) {
                 if (c.nodeType != 1)
                     continue;
@@ -1685,8 +1707,11 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                 const localName = child.localName;
                 if (ns == adapt.base.NS.XHTML) {
                     if (localName == "style") {
+                        const classes = child.getAttribute("class");
+                        const media = child.getAttribute("media");
+                        const title = child.getAttribute("title");
                         sources.push({url, text:child.textContent,
-                            flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: null, media: null});
+                            flavor:adapt.cssparse.StylesheetFlavor.AUTHOR, classes: (title ? classes : null), media});
                     } else if (localName == "link") {
                         const rel = child.getAttribute("rel");
                         const classes = child.getAttribute("class");
@@ -1724,8 +1749,10 @@ adapt.ops.OPSDocStore.prototype.parseOPSResource = function(response) {
                 }
             }
         }
-        for (var i = 0; i < self.styleSheets.length; i++) {
-            sources.push(self.styleSheets[i]);
+        if (!isTocBox) {
+            for (var i = 0; i < self.styleSheets.length; i++) {
+                sources.push(self.styleSheets[i]);
+            }
         }
         let key = "";
         for (var i = 0; i < sources.length; i++) {

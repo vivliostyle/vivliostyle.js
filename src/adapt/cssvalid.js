@@ -604,7 +604,12 @@ adapt.cssvalid.PrimitiveValidator.prototype.visitFunc = func => null;
 /**
  * @override
  */
-adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = expr => null;
+adapt.cssvalid.PrimitiveValidator.prototype.visitExpr = function(expr) {
+    if (this.allowed & 0x7FE) { // ALLOW_STR|ALLOW_IDENT|...|ALLOW_ZERO_PERCENT
+        return expr;
+    }
+    return null;
+};
 
 /**
  * @param {adapt.cssvalid.PrimitiveValidator} other
@@ -1738,10 +1743,18 @@ adapt.cssvalid.ValidatorSet.prototype.initBuiltInValidators = function() {
             "ex": adapt.css.empty,
             "ch": adapt.css.empty,
             "rem": adapt.css.empty,
-            "vh": adapt.css.empty,
             "vw": adapt.css.empty,
+            "vh": adapt.css.empty,
+            "vi": adapt.css.empty,
+            "vb": adapt.css.empty,
             "vmin": adapt.css.empty,
             "vmax": adapt.css.empty,
+            "pvw": adapt.css.empty,
+            "pvh": adapt.css.empty,
+            "pvi": adapt.css.empty,
+            "pvb": adapt.css.empty,
+            "pvmin": adapt.css.empty,
+            "pvmax": adapt.css.empty,
             "cm": adapt.css.empty,
             "mm": adapt.css.empty,
             "in": adapt.css.empty,
