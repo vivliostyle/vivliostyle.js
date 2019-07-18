@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Utilities asynchronous execution and cooperative multitasking.
+ * @fileoverview TaskUtil - Utilities asynchronous execution and cooperative
+ * multitasking.
  */
-import * as logging from "../vivliostyle/logging";
-import * as task from "./task";
+import * as Logging from "../vivliostyle/logging";
+import * as Task from "./task";
 
-import * as base from "./base";
+import * as Base from "./base";
 
 /**
  * A class that can fetch or compute a resource that may be needed by multiple
@@ -34,10 +35,10 @@ export class Fetcher<T> {
   name: any;
   arrived: boolean = false;
   resource: T = null;
-  task: task.Task = null;
+  task: Task.Task = null;
   piggybacks: ((p1: any) => void)[] | null = [];
 
-  constructor(public readonly fetch: () => task.Result<T>, opt_name?: string) {
+  constructor(public readonly fetch: () => Task.Result<T>, opt_name?: string) {
     this.name = opt_name;
   }
 
@@ -47,11 +48,10 @@ export class Fetcher<T> {
   start(): void {
     if (!this.task) {
       const self = this;
-      this.task = task
-        .currentTask()
+      this.task = Task.currentTask()
         .getScheduler()
         .run(() => {
-          const frame = task.newFrame("Fetcher.run");
+          const frame = Task.newFrame("Fetcher.run");
           self.fetch().then(resource => {
             const piggibacks = self.piggybacks;
             self.arrived = true;
@@ -63,7 +63,7 @@ export class Fetcher<T> {
                 try {
                   piggibacks[i](resource);
                 } catch (err) {
-                  logging.logger.error(err, "Error:");
+                  Logging.logger.error(err, "Error:");
                 }
               }
             }
@@ -86,12 +86,12 @@ export class Fetcher<T> {
    * Fetches the resource, waits for it to arrive if it is already being
    * fetched.
    */
-  get(): task.Result<T> {
+  get(): Task.Result<T> {
     if (this.arrived) {
-      return task.newResult(this.resource);
+      return Task.newResult(this.resource);
     }
     this.start();
-    return this.task.join() as task.Result<T>;
+    return this.task.join() as Task.Result<T>;
   }
 
   hasArrived(): boolean {
@@ -104,14 +104,14 @@ export class Fetcher<T> {
  */
 export const waitForFetchers = <T>(
   fetchers: Fetcher<T>[]
-): task.Result<boolean> => {
+): Task.Result<boolean> => {
   if (fetchers.length == 0) {
-    return task.newResult(true);
+    return Task.newResult(true);
   }
   if (fetchers.length == 1) {
     return fetchers[0].get().thenReturn(true);
   }
-  const frame = task.newFrame<boolean>("waitForFetches");
+  const frame = Task.newFrame<boolean>("waitForFetches");
   let i = 0;
   frame
     .loop(() => {
@@ -121,7 +121,7 @@ export const waitForFetchers = <T>(
           return fetcher.get().thenReturn(true);
         }
       }
-      return task.newResult(false);
+      return Task.newResult(false);
     })
     .then(() => {
       frame.finish(true);
@@ -140,7 +140,7 @@ export const loadElement = (elem: Element, src: string): Fetcher<string> => {
     height = elem.getAttribute("height");
   }
   const fetcher = new Fetcher(() => {
-    const frame: task.Frame<string> = task.newFrame("loadImage");
+    const frame: Task.Frame<string> = Task.newFrame("loadImage");
     const continuation = frame.suspend(elem);
     let done = false;
     const handler = (evt: Event) => {
@@ -163,8 +163,8 @@ export const loadElement = (elem: Element, src: string): Fetcher<string> => {
     elem.addEventListener("load", handler, false);
     elem.addEventListener("error", handler, false);
     elem.addEventListener("abort", handler, false);
-    if (elem.namespaceURI == base.NS.SVG) {
-      elem.setAttributeNS(base.NS.XLINK, "xlink:href", src);
+    if (elem.namespaceURI == Base.NS.SVG) {
+      elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
 
       // SVG handlers are not reliable
       setTimeout(handler, 300);

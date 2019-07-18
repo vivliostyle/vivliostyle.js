@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CSS Tokenizer.
+ * @fileoverview CssTok - CSS Tokenizer.
  */
 
 export interface TokenizerHandler {

@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Adaptive Layout expressions.
+ * @fileoverview Exprs - Adaptive Layout expressions.
  */
-import * as base from "./base";
+import * as Base from "./base";
 
 export type Preferences = {
   fontFamily: string;
@@ -94,22 +94,22 @@ export const letterbox = (
  * @return string that can be parsed as CSS string with value str
  */
 export const cssString = (str: string): string =>
-  `"${base.escapeCSSStr(`${str}`)}"`;
+  `"${Base.escapeCSSStr(`${str}`)}"`;
 
 /**
  * @return string that can be parsed as CSS name
  */
 export const cssIdent = (name: string): string =>
-  base.escapeCSSIdent(`${name}`);
+  Base.escapeCSSIdent(`${name}`);
 
 export const makeQualifiedName = (
   objName: string | null,
   memberName: string
 ): string => {
   if (objName) {
-    return `${base.escapeCSSIdent(objName)}.${base.escapeCSSIdent(memberName)}`;
+    return `${Base.escapeCSSIdent(objName)}.${Base.escapeCSSIdent(memberName)}`;
   }
-  return base.escapeCSSIdent(memberName);
+  return Base.escapeCSSIdent(memberName);
 };
 
 export let nextKeyIndex: number = 0;
@@ -488,12 +488,12 @@ export class Val {
    * @override
    */
   toString(): string {
-    const buf = new base.StringBuffer();
+    const buf = new Base.StringBuffer();
     this.appendTo(buf, 0);
     return buf.toString();
   }
 
-  appendTo(buf: base.StringBuffer, priority: number): void {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     throw new Error("F_ABSTRACT");
   }
 
@@ -1069,7 +1069,7 @@ export class Numeric extends Val {
    */
   appendTo(buf, priority) {
     buf.append(this.num.toString());
-    buf.append(base.escapeCSSIdent(this.unit));
+    buf.append(Base.escapeCSSIdent(this.unit));
   }
 
   /**
@@ -1138,7 +1138,7 @@ export class MediaName extends Val {
     if (this.not) {
       buf.append("not ");
     }
-    buf.append(base.escapeCSSIdent(this.name));
+    buf.append(Base.escapeCSSIdent(this.name));
   }
 
   /**
@@ -1196,7 +1196,7 @@ export class Native extends Val {
   }
 }
 
-export const appendValArray = (buf: base.StringBuffer, arr: Val[]): void => {
+export const appendValArray = (buf: Base.StringBuffer, arr: Val[]): void => {
   buf.append("(");
   for (let i = 0; i < arr.length; i++) {
     if (i) {
@@ -1389,7 +1389,7 @@ export class Const extends Val {
         break;
       case "string":
         buf.append('"');
-        buf.append(base.escapeCSSStr(this.val));
+        buf.append(Base.escapeCSSStr(this.val));
         buf.append('"');
         break;
       default:
@@ -1420,7 +1420,7 @@ export class MediaTest extends Val {
    */
   appendTo(buf, priority) {
     buf.append("(");
-    buf.append(base.escapeCSSStr(this.name.name));
+    buf.append(Base.escapeCSSStr(this.name.name));
     buf.append(":");
     this.value.appendTo(buf, 0);
     buf.append(")");

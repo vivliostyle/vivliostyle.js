@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview View tree generator.
+ * @fileoverview PseudoElement
  */
-import * as base from "../adapt/base";
+import * as Base from "../adapt/base";
 import { Context } from "../adapt/expr";
-import * as css from "../adapt/css";
-import * as csscasc from "../adapt/csscasc";
-import * as cssstyler from "../adapt/cssstyler";
-import * as vtree from "../adapt/vtree";
-import { pseudoelement } from "./types";
+import * as Css from "../adapt/css";
+import * as CssCasc from "../adapt/csscasc";
+import * as CssStyler from "../adapt/cssstyler";
+import * as Vtree from "../adapt/vtree";
+import { PseudoElement } from "./types";
 
 export const document = new DOMParser().parseFromString(
-  `<root xmlns="${base.NS.SHADOW}"/>`,
+  `<root xmlns="${Base.NS.SHADOW}"/>`,
   "text/xml"
 );
 
@@ -56,17 +56,17 @@ export const setPseudoName = (element: Element, name: string) => {
   element.setAttribute(PSEUDO_ATTR, name);
 };
 
-export class PseudoelementStyler implements pseudoelement.PseudoelementStyler {
+export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   contentProcessed: { [key: string]: boolean } = {};
 
   // after content: update style
 
   constructor(
     public readonly element: Element,
-    public style: csscasc.ElementStyle,
-    public styler: cssstyler.AbstractStyler,
+    public style: CssCasc.ElementStyle,
+    public styler: CssStyler.AbstractStyler,
     public readonly context: Context,
-    public readonly exprContentListener: vtree.ExprContentListener
+    public readonly exprContentListener: Vtree.ExprContentListener
   ) {}
 
   /**
@@ -78,8 +78,8 @@ export class PseudoelementStyler implements pseudoelement.PseudoelementStyler {
       this.style = this.styler.getStyle(this.element, true);
       this.styler = null;
     }
-    const pseudoMap = csscasc.getStyleMap(this.style, "_pseudos");
-    const style = pseudoMap[pseudoName] || ({} as csscasc.ElementStyle);
+    const pseudoMap = CssCasc.getStyleMap(this.style, "_pseudos");
+    const style = pseudoMap[pseudoName] || ({} as CssCasc.ElementStyle);
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
       let nest = 1;
       let r;
@@ -88,7 +88,7 @@ export class PseudoelementStyler implements pseudoelement.PseudoelementStyler {
       } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
         nest = r[1] - 0;
       }
-      style["x-first-pseudo"] = new csscasc.CascadeValue(new css.Int(nest), 0);
+      style["x-first-pseudo"] = new CssCasc.CascadeValue(new Css.Int(nest), 0);
     }
     return style;
   }
@@ -102,9 +102,9 @@ export class PseudoelementStyler implements pseudoelement.PseudoelementStyler {
       this.contentProcessed[pseudoName] = true;
       const contentVal = style["content"];
       if (contentVal) {
-        if (vtree.nonTrivialContent(contentVal)) {
+        if (Vtree.nonTrivialContent(contentVal)) {
           contentVal.visit(
-            new vtree.ContentPropertyHandler(
+            new Vtree.ContentPropertyHandler(
               element,
               this.context,
               contentVal,

@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Geometric utilities.
+ * @fileoverview Geom - Geometric utilities.
  */
-import * as logging from "../vivliostyle/logging";
+import * as Logging from "../vivliostyle/logging";
 
 export class Rect {
   constructor(
@@ -172,7 +172,7 @@ export const addBandIntersections = (
   let x2: number;
   let w2: number;
   if (s.high.y < y1) {
-    logging.logger.warn("Error: inconsistent segment (1)");
+    Logging.logger.warn("Error: inconsistent segment (1)");
   }
   if (s.low.y <= y1) {
     // outside

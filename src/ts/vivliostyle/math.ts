@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Math utilities
+ * @fileoverview MathUtil - Math utilities
  */
 export const mean = (array: number[]): number =>
   array.reduce((prev, curr) => prev + curr, 0) / array.length;

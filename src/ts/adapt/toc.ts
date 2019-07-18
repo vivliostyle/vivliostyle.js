@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * @fileoverview Toc - Table of Contents view.
  */
-import * as counters from "../vivliostyle/counters";
-import * as exprs from "./expr";
-import * as font from "./font";
-import * as ops from "./ops";
-import * as vgen from "./vgen";
-import * as vtree from "./vtree";
+import * as Counters from "../vivliostyle/counters";
+import * as Exprs from "./expr";
+import * as Font from "./font";
+import * as Ops from "./ops";
+import * as Vgen from "./vgen";
+import * as Vtree from "./vtree";
 
 import { DocumentURLTransformer } from "./base";
-import * as base from "./base";
+import * as Base from "./base";
 import { Result, newResult, newFrame, Frame } from "./task";
 
 // closed: 25B8
@@ -36,24 +37,24 @@ export const bulletOpen = "\u25be";
 
 export const bulletEmpty = "\u25b9";
 
-export class TOCView implements vgen.CustomRendererFactory {
+export class TOCView implements Vgen.CustomRendererFactory {
   pref: any;
-  page: vtree.Page = null;
-  instance: ops.StyleInstance = null;
+  page: Vtree.Page = null;
+  instance: Ops.StyleInstance = null;
 
   constructor(
-    public readonly store: ops.OPSDocStore,
+    public readonly store: Ops.OPSDocStore,
     public readonly url: string,
     public readonly lang: string | null,
-    public readonly clientLayout: vtree.ClientLayout,
-    public readonly fontMapper: font.Mapper,
-    pref: exprs.Preferences,
-    public readonly rendererFactory: vgen.CustomRendererFactory,
+    public readonly clientLayout: Vtree.ClientLayout,
+    public readonly fontMapper: Font.Mapper,
+    pref: Exprs.Preferences,
+    public readonly rendererFactory: Vgen.CustomRendererFactory,
     public readonly fallbackMap: { [key: string]: string },
     public readonly documentURLTransformer: DocumentURLTransformer,
-    public readonly counterStore: counters.CounterStore
+    public readonly counterStore: Counters.CounterStore
   ) {
-    this.pref = exprs.clonePreferences(pref);
+    this.pref = Exprs.clonePreferences(pref);
   }
 
   setAutoHeight(elem: Element, depth: number): void {
@@ -63,12 +64,12 @@ export class TOCView implements vgen.CustomRendererFactory {
     for (let c: Node = elem.firstChild; c; c = c.nextSibling) {
       if (c.nodeType == 1) {
         const e = c as Element;
-        if (base.getCSSProperty(e, "height", "auto") != "auto") {
-          base.setCSSProperty(e, "height", "auto");
+        if (Base.getCSSProperty(e, "height", "auto") != "auto") {
+          Base.setCSSProperty(e, "height", "auto");
           this.setAutoHeight(e, depth);
         }
-        if (base.getCSSProperty(e, "position", "static") == "absolute") {
-          base.setCSSProperty(e, "position", "relative");
+        if (Base.getCSSProperty(e, "position", "static") == "absolute") {
+          Base.setCSSProperty(e, "position", "relative");
           this.setAutoHeight(e, depth);
         }
       }
@@ -98,7 +99,7 @@ export class TOCView implements vgen.CustomRendererFactory {
         const button = viewParent.firstChild as Element;
         if (button.textContent != bulletClosed) {
           button.textContent = bulletClosed;
-          base.setCSSProperty(button, "cursor", "pointer");
+          Base.setCSSProperty(button, "cursor", "pointer");
           button.addEventListener("click", toggleNodeExpansion, false);
         }
       }
@@ -109,20 +110,20 @@ export class TOCView implements vgen.CustomRendererFactory {
         button.textContent = bulletEmpty;
 
         // TODO: define pseudo-element for the button?
-        base.setCSSProperty(button, "margin-left", "-1em");
-        base.setCSSProperty(button, "display", "inline-block");
-        base.setCSSProperty(button, "width", "1em");
-        base.setCSSProperty(button, "text-align", "left");
-        base.setCSSProperty(button, "cursor", "default");
-        base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
+        Base.setCSSProperty(button, "margin-left", "-1em");
+        Base.setCSSProperty(button, "display", "inline-block");
+        Base.setCSSProperty(button, "width", "1em");
+        Base.setCSSProperty(button, "text-align", "left");
+        Base.setCSSProperty(button, "cursor", "default");
+        Base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
         element.appendChild(button);
-        base.setCSSProperty(element, "overflow", "hidden");
+        Base.setCSSProperty(element, "overflow", "hidden");
         element.setAttribute("data-adapt-class", "toc-node");
         if (
           adaptParentClass == "toc-node" ||
           adaptParentClass == "toc-container"
         ) {
-          base.setCSSProperty(element, "height", "0px");
+          Base.setCSSProperty(element, "height", "0px");
         }
       } else {
         if (adaptParentClass == "toc-node") {
@@ -135,22 +136,22 @@ export class TOCView implements vgen.CustomRendererFactory {
 
   showTOC(
     elem: HTMLElement,
-    viewport: vgen.Viewport,
+    viewport: Vgen.Viewport,
     width: number,
     height: number,
     fontSize: number
-  ): Result<vtree.Page> {
+  ): Result<Vtree.Page> {
     if (this.page) {
-      return newResult(this.page as vtree.Page);
+      return newResult(this.page as Vtree.Page);
     }
     const self = this;
-    const frame: Frame<vtree.Page> = newFrame("showTOC");
-    const page = new vtree.Page(elem, elem);
+    const frame: Frame<Vtree.Page> = newFrame("showTOC");
+    const page = new Vtree.Page(elem, elem);
     this.page = page;
     this.store.load(this.url).then(xmldoc => {
       const style = self.store.getStyleForDoc(xmldoc);
       const viewportSize = style.sizeViewport(width, 100000, fontSize);
-      viewport = new vgen.Viewport(
+      viewport = new Vgen.Viewport(
         viewport.window,
         viewportSize.fontSize,
         viewport.root,
@@ -158,7 +159,7 @@ export class TOCView implements vgen.CustomRendererFactory {
         viewportSize.height
       );
       const customRenderer = self.makeCustomRenderer(xmldoc);
-      const instance = new ops.StyleInstance(
+      const instance = new Ops.StyleInstance(
         style,
         xmldoc,
         self.lang,
@@ -188,7 +189,7 @@ export class TOCView implements vgen.CustomRendererFactory {
       const page = this.page;
       this.page = null;
       this.instance = null;
-      base.setCSSProperty(page.container, "visibility", "none");
+      Base.setCSSProperty(page.container, "visibility", "none");
       const parent = page.container.parentNode;
       if (parent) {
         parent.removeChild(page.container);

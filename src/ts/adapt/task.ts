@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Support for asynchronous execution and cooperative
+ * @fileoverview Task - Support for asynchronous execution and cooperative
  * multitasking.
  */
-import * as logging from "../vivliostyle/logging";
-import * as base from "./base";
+import * as Logging from "../vivliostyle/logging";
+import * as Base from "./base";
 
 /**
  * External timer. Only needed for testing.
@@ -198,14 +198,14 @@ export class Scheduler {
   timeout: number = 1;
   slice: number = 25;
   sliceOverTime: number = 0;
-  queue: base.PriorityQueue;
+  queue: Base.PriorityQueue;
   wakeupTime: number | null = null;
   timeoutToken: number | null = null;
   inTimeSlice: boolean = false;
   order: number = 0;
 
   constructor(public timer: Timer) {
-    this.queue = new base.PriorityQueue();
+    this.queue = new Base.PriorityQueue();
     if (!primaryScheduler) {
       primaryScheduler = this;
     }
@@ -293,7 +293,7 @@ export class Scheduler {
         }
       }
     } catch (err) {
-      logging.logger.error(err);
+      Logging.logger.error(err);
     }
     this.inTimeSlice = false;
     if (this.queue.length()) {
@@ -312,7 +312,7 @@ export class Scheduler {
           try {
             callback();
           } catch (err) {
-            logging.logger.error(err);
+            Logging.logger.error(err);
           }
         }
       };
@@ -338,7 +338,7 @@ export class Scheduler {
  * Task suspension point.
  * @template T
  */
-export class Continuation<T> implements base.Comparable {
+export class Continuation<T> implements Base.Comparable {
   scheduledTime: number = 0;
   order: number = 0;
   result: any = null;
@@ -349,7 +349,7 @@ export class Continuation<T> implements base.Comparable {
   /**
    * @override
    */
-  compare(otherComp: base.Comparable): number {
+  compare(otherComp: Base.Comparable): number {
     // earlier wins
     const other = otherComp as Continuation<any>;
     return other.scheduledTime - this.scheduledTime || other.order - this.order;
@@ -485,7 +485,7 @@ export class Task {
       this.top.handler(this.top, err);
     } else {
       if (this.exception) {
-        logging.logger.error(
+        Logging.logger.error(
           this.exception,
           "Unhandled exception in task",
           this.name
@@ -760,7 +760,7 @@ export class Frame<T> {
     const frame = newFrame<boolean>("Frame.timeSlice");
     const scheduler = frame.getScheduler();
     if (scheduler.isTimeSliceOver()) {
-      logging.logger.debug("-- time slice --");
+      Logging.logger.debug("-- time slice --");
       frame.suspend().schedule(true);
     } else {
       frame.finish(true);
@@ -860,7 +860,7 @@ export class LoopBodyFrame extends Frame<boolean> {
 export class EventItem {
   next: EventItem = null;
 
-  constructor(public event: base.Event) {}
+  constructor(public event: Base.Event) {}
 }
 
 /**
@@ -870,9 +870,9 @@ export class EventItem {
 export class EventSource {
   continuation: Continuation<boolean> = null;
   listeners: {
-    target: base.EventTarget;
+    target: Base.EventTarget;
     type: string;
-    listener: base.EventListener;
+    listener: Base.EventListener;
   }[] = [];
   head: EventItem;
   tail: EventItem;
@@ -886,7 +886,7 @@ export class EventSource {
    * Attaches as an event listener to an EventTarget.
    */
   attach(
-    target: base.EventTarget,
+    target: Base.EventTarget,
     type: string,
     opt_preventDefault?: boolean
   ): void {
@@ -911,7 +911,7 @@ export class EventSource {
     this.listeners.push({ target, type, listener });
   }
 
-  detach(target: base.EventTarget, type: string): void {
+  detach(target: Base.EventTarget, type: string): void {
     let i = 0;
     let item = null;
     while (i < this.listeners.length) {
@@ -929,8 +929,8 @@ export class EventSource {
   /**
    * Read next dispatched event, blocking the current task if needed.
    */
-  nextEvent(): Result<base.Event> {
-    const frame: Frame<base.Event> = newFrame("EventSource.nextEvent");
+  nextEvent(): Result<Base.Event> {
+    const frame: Frame<Base.Event> = newFrame("EventSource.nextEvent");
     const self = this;
     const readEvent = () => {
       if (self.head.event) {

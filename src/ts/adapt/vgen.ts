@@ -15,34 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview View tree generator.
+ * @fileoverview Vgen - View tree generator.
  */
-import * as asserts from "../vivliostyle/asserts";
+import * as Asserts from "../vivliostyle/asserts";
 import { restoreNewText, diffChars } from "../vivliostyle/diff";
 import * as Display from "../vivliostyle/display";
 import { NthFragmentMatcher } from "../vivliostyle/matcher";
-import * as pagefloat from "../vivliostyle/pagefloat";
-import * as plugin from "../vivliostyle/plugin";
-import * as pseudoelement from "../vivliostyle/pseudoelement";
+import * as PageFloat from "../vivliostyle/pagefloat";
+import * as Plugin from "../vivliostyle/plugin";
+import * as PseudoElement from "../vivliostyle/pseudoelement";
 import { RepetitiveElementsOwnerFormattingContext } from "../vivliostyle/repetitiveelements";
-import * as selectors from "../vivliostyle/selectors";
-import * as urls from "../vivliostyle/urls";
-import * as base from "./base";
-import * as css from "./css";
-import * as csscasc from "./csscasc";
+import * as Selectors from "../vivliostyle/selectors";
+import * as Urls from "../vivliostyle/urls";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
 import { UrlTransformVisitor } from "./cssprop";
-import * as cssstyler from "./cssstyler";
+import * as CssStyler from "./cssstyler";
 import {
   Context,
   defaultUnitSizes,
   isFontRelativeLengthUnit,
   needUnitConversion
 } from "./expr";
-import * as font from "./font";
-import * as task from "./task";
-import * as taskutil from "./taskutil";
-import * as vtree from "./vtree";
-import * as xmldocs from "./xmldoc";
+import * as Font from "./font";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
+import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
 
 const namespacePrefixMap = {};
 
@@ -79,11 +79,11 @@ export const frontEdgeUnforcedBreakBlackListVert: { [key: string]: string } = {
 export type CustomRenderer = (
   p1: Element,
   p2: Element,
-  p3: { [key: string]: css.Val }
-) => task.Result<Element>;
+  p3: { [key: string]: Css.Val }
+) => Task.Result<Element>;
 
 export interface CustomRendererFactory {
-  makeCustomRenderer(xmldoc: xmldocs.XMLDocHolder): CustomRenderer;
+  makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): CustomRenderer;
 }
 
 /**
@@ -112,11 +112,11 @@ export const initIFrame = (iframe: HTMLIFrameElement) => {
 };
 
 export interface StylerProducer {
-  getStylerForDoc(xmldoc: xmldocs.XMLDocHolder): cssstyler.AbstractStyler;
+  getStylerForDoc(xmldoc: XmlDoc.XMLDocHolder): CssStyler.AbstractStyler;
 }
 
-export class ViewFactory extends base.SimpleEventTarget
-  implements vtree.LayoutContext {
+export class ViewFactory extends Base.SimpleEventTarget
+  implements Vtree.LayoutContext {
   private static SVG_URL_ATTRIBUTES: string[] = [
     "color-profile",
     "clip-path",
@@ -134,7 +134,7 @@ export class ViewFactory extends base.SimpleEventTarget
   exprContentListener: any;
 
   // provided by layout
-  nodeContext: vtree.NodeContext | null = null;
+  nodeContext: Vtree.NodeContext | null = null;
   viewRoot: Element | null = null;
   isFootnote: boolean = false;
   sourceNode: Node | null = null;
@@ -148,16 +148,16 @@ export class ViewFactory extends base.SimpleEventTarget
     public readonly flowName: string,
     public readonly context: Context,
     public readonly viewport: Viewport,
-    public readonly styler: cssstyler.Styler,
+    public readonly styler: CssStyler.Styler,
     public readonly regionIds: string[],
-    public readonly xmldoc: xmldocs.XMLDocHolder,
-    public readonly docFaces: font.DocumentFaces,
-    public readonly footnoteStyle: csscasc.ElementStyle,
+    public readonly xmldoc: XmlDoc.XMLDocHolder,
+    public readonly docFaces: Font.DocumentFaces,
+    public readonly footnoteStyle: CssCasc.ElementStyle,
     public readonly stylerProducer: StylerProducer,
-    public readonly page: vtree.Page,
+    public readonly page: Vtree.Page,
     public readonly customRenderer: CustomRenderer,
     public readonly fallbackMap: { [key: string]: string },
-    public readonly documentURLTransformer: base.DocumentURLTransformer
+    public readonly documentURLTransformer: Base.DocumentURLTransformer
   ) {
     super();
     this.document = viewport.document;
@@ -188,13 +188,13 @@ export class ViewFactory extends base.SimpleEventTarget
   createPseudoelementShadow(
     element: Element,
     isRoot: boolean,
-    cascStyle: csscasc.ElementStyle,
-    computedStyle: { [key: string]: css.Val },
-    styler: cssstyler.AbstractStyler,
+    cascStyle: CssCasc.ElementStyle,
+    computedStyle: { [key: string]: Css.Val },
+    styler: CssStyler.AbstractStyler,
     context: Context,
-    parentShadow: vtree.ShadowContext,
-    subShadow: vtree.ShadowContext
-  ): vtree.ShadowContext {
+    parentShadow: Vtree.ShadowContext,
+    subShadow: Vtree.ShadowContext
+  ): Vtree.ShadowContext {
     const pseudoMap = this.getPseudoMap(
       cascStyle,
       this.regionIds,
@@ -206,9 +206,9 @@ export class ViewFactory extends base.SimpleEventTarget
       return subShadow;
     }
     const addedNames = [];
-    const root = pseudoelement.document.createElementNS(base.NS.SHADOW, "root");
+    const root = PseudoElement.document.createElementNS(Base.NS.SHADOW, "root");
     let att = root;
-    for (const name of pseudoelement.pseudoNames) {
+    for (const name of PseudoElement.pseudoNames) {
       let elem;
       if (name) {
         if (!pseudoMap[name]) {
@@ -219,7 +219,7 @@ export class ViewFactory extends base.SimpleEventTarget
         }
         if (name.match(/^first-/)) {
           const display = computedStyle["display"];
-          if (!display || display === css.ident.inline) {
+          if (!display || display === Css.ident.inline) {
             continue;
           }
         }
@@ -227,18 +227,18 @@ export class ViewFactory extends base.SimpleEventTarget
           const content = pseudoMap[name]["content"];
           if (
             !content ||
-            content === css.ident.normal ||
-            content === css.ident.none
+            content === Css.ident.normal ||
+            content === Css.ident.none
           ) {
             continue;
           }
         }
         addedNames.push(name);
-        elem = pseudoelement.document.createElementNS(base.NS.XHTML, "span");
-        pseudoelement.setPseudoName(elem, name);
+        elem = PseudoElement.document.createElementNS(Base.NS.XHTML, "span");
+        PseudoElement.setPseudoName(elem, name);
       } else {
-        elem = pseudoelement.document.createElementNS(
-          base.NS.SHADOW,
+        elem = PseudoElement.document.createElementNS(
+          Base.NS.SHADOW,
           "content"
         );
       }
@@ -250,54 +250,54 @@ export class ViewFactory extends base.SimpleEventTarget
     if (!addedNames.length) {
       return subShadow;
     }
-    const shadowStyler = new pseudoelement.PseudoelementStyler(
+    const shadowStyler = new PseudoElement.PseudoelementStyler(
       element,
       cascStyle,
       styler,
       context,
       this.exprContentListener
     );
-    return new vtree.ShadowContext(
+    return new Vtree.ShadowContext(
       element,
       root,
       null,
       parentShadow,
       subShadow,
-      vtree.ShadowType.ROOTLESS,
+      Vtree.ShadowType.ROOTLESS,
       shadowStyler
     );
   }
 
   getPseudoMap(
-    cascStyle: csscasc.ElementStyle,
+    cascStyle: CssCasc.ElementStyle,
     regionIds: string[],
     isFootnote: boolean,
-    nodeContext: vtree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     context
   ) {
-    const pseudoMap = csscasc.getStyleMap(cascStyle, "_pseudos");
+    const pseudoMap = CssCasc.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) {
       return null;
     }
     const computedPseudoStyleMap = {};
     for (const key in pseudoMap) {
       const computedPseudoStyle = (computedPseudoStyleMap[key] = {});
-      csscasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
-      csscasc.mergeViewConditionalStyles(
+      CssCasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
+      CssCasc.mergeViewConditionalStyles(
         computedPseudoStyle,
         context,
         pseudoMap[key]
       );
-      csscasc.forEachStylesInRegion(
+      CssCasc.forEachStylesInRegion(
         pseudoMap[key],
         regionIds,
         isFootnote,
         (regionId, regionStyle) => {
-          csscasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-          csscasc.forEachViewConditionalStyles(
+          CssCasc.mergeStyle(computedPseudoStyle, regionStyle, context);
+          CssCasc.forEachViewConditionalStyles(
             regionStyle,
             viewConditionalStyles => {
-              csscasc.mergeStyle(
+              CssCasc.mergeStyle(
                 computedPseudoStyle,
                 viewConditionalStyles,
                 context
@@ -314,20 +314,20 @@ export class ViewFactory extends base.SimpleEventTarget
     href: string,
     type,
     element: Element,
-    parentShadow: vtree.ShadowContext,
-    subShadow: vtree.ShadowContext
-  ): task.Result<vtree.ShadowContext> {
+    parentShadow: Vtree.ShadowContext,
+    subShadow: Vtree.ShadowContext
+  ): Task.Result<Vtree.ShadowContext> {
     const self = this;
-    const frame: task.Frame<vtree.ShadowContext> = task.newFrame(
+    const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
       "createRefShadow"
     );
     self.xmldoc.store.load(href).then(refDocParam => {
-      const refDoc = refDocParam as xmldocs.XMLDocHolder;
+      const refDoc = refDocParam as XmlDoc.XMLDocHolder;
       if (refDoc) {
         const refElement = refDoc.getElement(href);
         if (refElement) {
           const refStyler = self.stylerProducer.getStylerForDoc(refDoc);
-          subShadow = new vtree.ShadowContext(
+          subShadow = new Vtree.ShadowContext(
             element,
             refElement,
             refDoc,
@@ -346,54 +346,54 @@ export class ViewFactory extends base.SimpleEventTarget
   createShadows(
     element: Element,
     isRoot,
-    cascStyle: csscasc.ElementStyle,
-    computedStyle: { [key: string]: css.Val },
-    styler: cssstyler.AbstractStyler,
+    cascStyle: CssCasc.ElementStyle,
+    computedStyle: { [key: string]: Css.Val },
+    styler: CssStyler.AbstractStyler,
     context: Context,
-    shadowContext: vtree.ShadowContext
-  ): task.Result<vtree.ShadowContext> {
+    shadowContext: Vtree.ShadowContext
+  ): Task.Result<Vtree.ShadowContext> {
     const self = this;
-    const frame: task.Frame<vtree.ShadowContext> = task.newFrame(
+    const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
       "createShadows"
     );
     const shadow = null;
     const templateURLVal = computedStyle["template"];
     let cont;
-    if (templateURLVal instanceof css.URL) {
-      const url = (templateURLVal as css.URL).url;
+    if (templateURLVal instanceof Css.URL) {
+      const url = (templateURLVal as Css.URL).url;
       cont = self.createRefShadow(
         url,
-        vtree.ShadowType.ROOTLESS,
+        Vtree.ShadowType.ROOTLESS,
         element,
         shadowContext,
         shadow
       );
     } else {
-      cont = task.newResult(shadow);
+      cont = Task.newResult(shadow);
     }
     cont.then(shadow => {
       let cont1 = null;
-      if (element.namespaceURI == base.NS.SHADOW) {
+      if (element.namespaceURI == Base.NS.SHADOW) {
         if (element.localName == "include") {
           let href = element.getAttribute("href");
           let xmldoc = null;
           if (href) {
             xmldoc = shadowContext ? shadowContext.xmldoc : self.xmldoc;
           } else if (shadowContext) {
-            if (shadowContext.owner.namespaceURI == base.NS.XHTML) {
+            if (shadowContext.owner.namespaceURI == Base.NS.XHTML) {
               href = shadowContext.owner.getAttribute("href");
             } else {
-              href = shadowContext.owner.getAttributeNS(base.NS.XLINK, "href");
+              href = shadowContext.owner.getAttributeNS(Base.NS.XLINK, "href");
             }
             xmldoc = shadowContext.parentShadow
               ? shadowContext.parentShadow.xmldoc
               : self.xmldoc;
           }
           if (href) {
-            href = base.resolveURL(href, xmldoc.url);
+            href = Base.resolveURL(href, xmldoc.url);
             cont1 = self.createRefShadow(
               href,
-              vtree.ShadowType.ROOTED,
+              Vtree.ShadowType.ROOTED,
               element,
               shadowContext,
               shadow
@@ -402,24 +402,24 @@ export class ViewFactory extends base.SimpleEventTarget
         }
       }
       if (cont1 == null) {
-        cont1 = task.newResult(shadow);
+        cont1 = Task.newResult(shadow);
       }
       let cont2 = null;
       cont1.then(shadow => {
-        if (computedStyle["display"] === css.ident.table_cell) {
-          const url = base.resolveURL(
+        if (computedStyle["display"] === Css.ident.table_cell) {
+          const url = Base.resolveURL(
             "user-agent.xml#table-cell",
-            base.resourceBaseURL
+            Base.resourceBaseURL
           );
           cont2 = self.createRefShadow(
             url,
-            vtree.ShadowType.ROOTLESS,
+            Vtree.ShadowType.ROOTLESS,
             element,
             shadowContext,
             shadow
           );
         } else {
-          cont2 = task.newResult(shadow);
+          cont2 = Task.newResult(shadow);
         }
       });
       cont2.then(shadow => {
@@ -453,21 +453,21 @@ export class ViewFactory extends base.SimpleEventTarget
   computeStyle(
     vertical: boolean,
     rtl: boolean,
-    style: csscasc.ElementStyle,
-    computedStyle: { [key: string]: css.Val }
+    style: CssCasc.ElementStyle,
+    computedStyle: { [key: string]: Css.Val }
   ): boolean {
     const context = this.context;
-    const cascMap = csscasc.flattenCascadedStyle(
+    const cascMap = CssCasc.flattenCascadedStyle(
       style,
       context,
       this.regionIds,
       this.isFootnote,
       this.nodeContext
     );
-    vertical = csscasc.isVertical(cascMap, context, vertical);
-    rtl = csscasc.isRtl(cascMap, context, rtl);
+    vertical = CssCasc.isVertical(cascMap, context, vertical);
+    rtl = CssCasc.isRtl(cascMap, context, rtl);
     const self = this;
-    csscasc.convertToPhysical(
+    CssCasc.convertToPhysical(
       cascMap,
       computedStyle,
       vertical,
@@ -482,10 +482,10 @@ export class ViewFactory extends base.SimpleEventTarget
     );
 
     // Compute values of display, position and float
-    const position = computedStyle["position"] as css.Ident;
-    const float = computedStyle["float"] as css.Ident;
+    const position = computedStyle["position"] as Css.Ident;
+    const float = computedStyle["float"] as Css.Ident;
     const displayValues = Display.getComputedDislayValue(
-      (computedStyle["display"] as css.Ident) || css.ident.inline,
+      (computedStyle["display"] as Css.Ident) || Css.ident.inline,
       position,
       float,
       this.sourceNode === this.xmldoc.root
@@ -499,8 +499,8 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   private inheritFromSourceParent(
-    elementStyle: csscasc.ElementStyle
-  ): { lang: string | null; elementStyle: csscasc.ElementStyle } {
+    elementStyle: CssCasc.ElementStyle
+  ): { lang: string | null; elementStyle: CssCasc.ElementStyle } {
     let node = this.nodeContext.sourceNode;
     const styles = [];
     let lang = null;
@@ -513,13 +513,13 @@ export class ViewFactory extends base.SimpleEventTarget
     let steps = -1;
     while (node && node.nodeType == 1) {
       const shadowRoot = shadowContext && shadowContext.root == node;
-      if (!shadowRoot || shadowContext.type == vtree.ShadowType.ROOTLESS) {
+      if (!shadowRoot || shadowContext.type == Vtree.ShadowType.ROOTLESS) {
         const styler = shadowContext
-          ? (shadowContext.styler as cssstyler.AbstractStyler)
+          ? (shadowContext.styler as CssStyler.AbstractStyler)
           : this.styler;
         const nodeStyle = styler.getStyle(node as Element, false);
         styles.push(nodeStyle);
-        lang = lang || base.getLangAttribute(node as Element);
+        lang = lang || Base.getLangAttribute(node as Element);
       }
       if (shadowRoot) {
         node = shadowContext.owner;
@@ -532,9 +532,9 @@ export class ViewFactory extends base.SimpleEventTarget
     const isRoot = steps === 0;
     const fontSize = this.context.queryUnitSize("em", isRoot);
     const props = {
-      "font-size": new csscasc.CascadeValue(new css.Numeric(fontSize, "px"), 0)
-    } as csscasc.ElementStyle;
-    const inheritanceVisitor = new csscasc.InheritanceVisitor(
+      "font-size": new CssCasc.CascadeValue(new Css.Numeric(fontSize, "px"), 0)
+    } as CssCasc.ElementStyle;
+    const inheritanceVisitor = new CssCasc.InheritanceVisitor(
       props,
       this.context
     );
@@ -542,21 +542,21 @@ export class ViewFactory extends base.SimpleEventTarget
       const style = styles[i];
       const propList = [];
       for (const propName in style) {
-        if (csscasc.isInherited(propName)) {
+        if (CssCasc.isInherited(propName)) {
           propList.push(propName);
         }
       }
-      propList.sort(css.processingOrderFn);
+      propList.sort(Css.processingOrderFn);
       for (const name of propList) {
         inheritanceVisitor.setPropName(name);
-        const value = csscasc.getProp(style, name);
-        if (value.value !== css.ident.inherit) {
+        const value = CssCasc.getProp(style, name);
+        if (value.value !== Css.ident.inherit) {
           props[name] = value.filterValue(inheritanceVisitor);
         }
       }
     }
     for (const sname in elementStyle) {
-      if (!csscasc.isInherited(sname)) {
+      if (!CssCasc.isInherited(sname)) {
         props[sname] = elementStyle[sname];
       }
     }
@@ -564,21 +564,21 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   resolveURL(url: string): string {
-    url = base.resolveURL(url, this.xmldoc.url);
+    url = Base.resolveURL(url, this.xmldoc.url);
     return this.fallbackMap[url] || url;
   }
 
   inheritLangAttribute() {
     this.nodeContext.lang =
-      base.getLangAttribute(this.nodeContext.sourceNode as Element) ||
+      Base.getLangAttribute(this.nodeContext.sourceNode as Element) ||
       (this.nodeContext.parent && this.nodeContext.parent.lang) ||
       this.nodeContext.lang;
   }
 
-  transferPolyfilledInheritedProps(computedStyle: { [key: string]: css.Val }) {
-    const polyfilledInheritedProps = csscasc
-      .getPolyfilledInheritedProps()
-      .filter(name => computedStyle[name]);
+  transferPolyfilledInheritedProps(computedStyle: { [key: string]: Css.Val }) {
+    const polyfilledInheritedProps = CssCasc.getPolyfilledInheritedProps().filter(
+      name => computedStyle[name]
+    );
     if (polyfilledInheritedProps.length) {
       let props = this.nodeContext.inheritedProps;
       if (this.nodeContext.parent) {
@@ -590,12 +590,12 @@ export class ViewFactory extends base.SimpleEventTarget
       polyfilledInheritedProps.forEach(name => {
         const value = computedStyle[name];
         if (value) {
-          if (value instanceof css.Int) {
-            props[name] = (value as css.Int).num;
-          } else if (value instanceof css.Ident) {
-            props[name] = (value as css.Ident).name;
-          } else if (value instanceof css.Numeric) {
-            const numericVal = value as css.Numeric;
+          if (value instanceof Css.Int) {
+            props[name] = (value as Css.Int).num;
+          } else if (value instanceof Css.Ident) {
+            props[name] = (value as Css.Ident).name;
+          } else if (value instanceof Css.Numeric) {
+            const numericVal = value as Css.Numeric;
             switch (numericVal.unit) {
               case "dpi":
               case "dpcm":
@@ -614,15 +614,15 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   resolveFormattingContext(
-    nodeContext: vtree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     firstTime: boolean,
-    display: css.Ident,
-    position: css.Ident,
-    float: css.Ident,
+    display: Css.Ident,
+    position: Css.Ident,
+    float: Css.Ident,
     isRoot: boolean
   ) {
-    const hooks: plugin.ResolveFormattingContextHook[] = plugin.getHooksForName(
-      plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT
+    const hooks: Plugin.ResolveFormattingContextHook[] = Plugin.getHooksForName(
+      Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT
     );
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext = hooks[i](
@@ -646,15 +646,15 @@ export class ViewFactory extends base.SimpleEventTarget
   private createElementView(
     firstTime: boolean,
     atUnforcedBreak: boolean
-  ): task.Result<boolean> {
+  ): Task.Result<boolean> {
     const self = this;
     let needToProcessChildren = true;
-    const frame: task.Frame<boolean> = task.newFrame("createElementView");
+    const frame: Task.Frame<boolean> = Task.newFrame("createElementView");
 
     // Figure out element's styles
     let element = self.sourceNode as Element;
     const styler = self.nodeContext.shadowContext
-      ? (self.nodeContext.shadowContext.styler as cssstyler.AbstractStyler)
+      ? (self.nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
       : self.styler;
     let elementStyle = styler.getStyle(element, false);
     if (!self.nodeContext.shadowContext) {
@@ -673,13 +673,13 @@ export class ViewFactory extends base.SimpleEventTarget
     }
     const floatReference =
       elementStyle["float-reference"] &&
-      pagefloat.floatReferenceOf(
+      PageFloat.floatReferenceOf(
         elementStyle["float-reference"].value.toString()
       );
     if (
       self.nodeContext.parent &&
       floatReference &&
-      pagefloat.isPageFloat(floatReference)
+      PageFloat.isPageFloat(floatReference)
     ) {
       // Since a page float will be detached from a view node of its parent,
       // inherited properties need to be inherited from its source parent.
@@ -708,13 +708,13 @@ export class ViewFactory extends base.SimpleEventTarget
       return frame.result();
     }
     let display = computedStyle["display"];
-    if (display === css.ident.none) {
+    if (display === Css.ident.none) {
       // no content
       frame.finish(false);
       return frame.result();
     }
     const isRoot = self.nodeContext.parent == null;
-    self.nodeContext.flexContainer = display === css.ident.flex;
+    self.nodeContext.flexContainer = display === Css.ident.flex;
     self
       .createShadows(
         element,
@@ -731,12 +731,12 @@ export class ViewFactory extends base.SimpleEventTarget
         let floatSide = computedStyle["float"];
         let clearSide = computedStyle["clear"];
         const writingMode = self.nodeContext.vertical
-          ? css.ident.vertical_rl
-          : css.ident.horizontal_tb;
+          ? Css.ident.vertical_rl
+          : Css.ident.horizontal_tb;
         const parentWritingMode = self.nodeContext.parent
           ? self.nodeContext.parent.vertical
-            ? css.ident.vertical_rl
-            : css.ident.horizontal_tb
+            ? Css.ident.vertical_rl
+            : Css.ident.horizontal_tb
           : writingMode;
         const isFlowRoot = Display.isFlowRoot(element);
         self.nodeContext.establishesBFC = Display.establishesBFC(
@@ -753,8 +753,8 @@ export class ViewFactory extends base.SimpleEventTarget
         );
         if (
           self.nodeContext.isInsideBFC() &&
-          floatSide !== css.ident.footnote &&
-          !(floatReference && pagefloat.isPageFloat(floatReference))
+          floatSide !== Css.ident.footnote &&
+          !(floatReference && PageFloat.isPageFloat(floatReference))
         ) {
           // When the element is already inside a block formatting context
           // (except one from the root), float and clear can be controlled by
@@ -763,62 +763,62 @@ export class ViewFactory extends base.SimpleEventTarget
           clearSide = null;
         }
         let floating =
-          floatSide === css.ident.left ||
-          floatSide === css.ident.right ||
-          floatSide === css.ident.top ||
-          floatSide === css.ident.bottom ||
-          floatSide === css.ident.inline_start ||
-          floatSide === css.ident.inline_end ||
-          floatSide === css.ident.block_start ||
-          floatSide === css.ident.block_end ||
-          floatSide === css.ident.snap_block ||
-          floatSide === css.ident.footnote;
+          floatSide === Css.ident.left ||
+          floatSide === Css.ident.right ||
+          floatSide === Css.ident.top ||
+          floatSide === Css.ident.bottom ||
+          floatSide === Css.ident.inline_start ||
+          floatSide === Css.ident.inline_end ||
+          floatSide === Css.ident.block_start ||
+          floatSide === Css.ident.block_end ||
+          floatSide === Css.ident.snap_block ||
+          floatSide === Css.ident.footnote;
         if (floatSide) {
           // Don't want to set it in view DOM CSS.
           delete computedStyle["float"];
-          if (floatSide === css.ident.footnote) {
+          if (floatSide === Css.ident.footnote) {
             if (self.isFootnote) {
               // No footnotes inside footnotes. self is most likely the root
               // of the footnote body being rendered in footnote area. Treat
               // as block.
               floating = false;
-              computedStyle["display"] = css.ident.block;
+              computedStyle["display"] = Css.ident.block;
             } else {
-              computedStyle["display"] = css.ident.inline;
+              computedStyle["display"] = Css.ident.inline;
             }
           }
         }
         if (clearSide) {
-          if (clearSide === css.ident.inherit) {
+          if (clearSide === Css.ident.inherit) {
             if (self.nodeContext.parent && self.nodeContext.parent.clearSide) {
-              clearSide = css.getName(self.nodeContext.parent.clearSide);
+              clearSide = Css.getName(self.nodeContext.parent.clearSide);
             }
           }
           if (
-            clearSide === css.ident.left ||
-            clearSide === css.ident.right ||
-            clearSide === css.ident.top ||
-            clearSide === css.ident.bottom ||
-            clearSide === css.ident.both ||
-            clearSide === css.ident.all ||
-            clearSide === css.ident.same
+            clearSide === Css.ident.left ||
+            clearSide === Css.ident.right ||
+            clearSide === Css.ident.top ||
+            clearSide === Css.ident.bottom ||
+            clearSide === Css.ident.both ||
+            clearSide === Css.ident.all ||
+            clearSide === Css.ident.same
           ) {
             delete computedStyle["clear"];
             if (
               computedStyle["display"] &&
-              computedStyle["display"] != css.ident.inline
+              computedStyle["display"] != Css.ident.inline
             ) {
               self.nodeContext.clearSide = clearSide.toString();
             }
           }
         }
         const listItem =
-          display === css.ident.list_item &&
+          display === Css.ident.list_item &&
           computedStyle["ua-list-item-count"];
         if (
           floating ||
           (computedStyle["break-inside"] &&
-            computedStyle["break-inside"] !== css.ident.auto)
+            computedStyle["break-inside"] !== Css.ident.auto)
         ) {
           self.nodeContext.breakPenalty++;
         }
@@ -829,7 +829,7 @@ export class ViewFactory extends base.SimpleEventTarget
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference =
-          floatReference || pagefloat.FloatReference.INLINE;
+          floatReference || PageFloat.FloatReference.INLINE;
         self.nodeContext.floatMinWrapBlock =
           computedStyle["float-min-wrap-block"] || null;
         self.nodeContext.columnSpan = computedStyle["column-span"];
@@ -852,7 +852,7 @@ export class ViewFactory extends base.SimpleEventTarget
             computedStyle["caption-side"].toString()) ||
           "top";
         const borderCollapse = computedStyle["border-collapse"];
-        if (!borderCollapse || borderCollapse === css.getName("separate")) {
+        if (!borderCollapse || borderCollapse === Css.getName("separate")) {
           const borderSpacing = computedStyle["border-spacing"];
           let inlineBorderSpacing;
           let blockBorderSpacing;
@@ -864,13 +864,13 @@ export class ViewFactory extends base.SimpleEventTarget
               inlineBorderSpacing = blockBorderSpacing = borderSpacing;
             }
             if (inlineBorderSpacing.isNumeric()) {
-              self.nodeContext.inlineBorderSpacing = css.toNumber(
+              self.nodeContext.inlineBorderSpacing = Css.toNumber(
                 inlineBorderSpacing,
                 self.context
               );
             }
             if (blockBorderSpacing.isNumeric()) {
-              self.nodeContext.blockBorderSpacing = css.toNumber(
+              self.nodeContext.blockBorderSpacing = Css.toNumber(
                 blockBorderSpacing,
                 self.context
               );
@@ -883,9 +883,9 @@ export class ViewFactory extends base.SimpleEventTarget
           const outerPseudo = self.nodeContext.parent
             ? self.nodeContext.parent.firstPseudo
             : null;
-          self.nodeContext.firstPseudo = new vtree.FirstPseudo(
+          self.nodeContext.firstPseudo = new Vtree.FirstPseudo(
             outerPseudo,
-            /** css.Int */
+            /** Css.Int */
             firstPseudo.num
           );
         }
@@ -899,7 +899,7 @@ export class ViewFactory extends base.SimpleEventTarget
         }
         const whitespace = computedStyle["white-space"];
         if (whitespace) {
-          const whitespaceValue = vtree.whitespaceFromPropertyValue(
+          const whitespaceValue = Vtree.whitespaceFromPropertyValue(
             whitespace.toString()
           );
           if (whitespaceValue !== null) {
@@ -907,14 +907,14 @@ export class ViewFactory extends base.SimpleEventTarget
           }
         }
         const hyphenateCharacter = computedStyle["hyphenate-character"];
-        if (hyphenateCharacter && hyphenateCharacter !== css.ident.auto) {
+        if (hyphenateCharacter && hyphenateCharacter !== Css.ident.auto) {
           self.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
         }
         const wordBreak = computedStyle["word-break"];
         const overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
         self.nodeContext.breakWord =
-          wordBreak === css.ident.break_all ||
-          overflowWrap === css.ident.break_word;
+          wordBreak === Css.ident.break_all ||
+          overflowWrap === Css.ident.break_word;
 
         // Resolve formatting context
         self.resolveFormattingContext(
@@ -947,7 +947,7 @@ export class ViewFactory extends base.SimpleEventTarget
         const fetchers = [];
         let ns = element.namespaceURI;
         let tag = element.localName;
-        if (ns == base.NS.XHTML) {
+        if (ns == Base.NS.XHTML) {
           if (
             tag == "html" ||
             tag == "body" ||
@@ -963,7 +963,7 @@ export class ViewFactory extends base.SimpleEventTarget
           } else if (tag == "object") {
             custom = !!self.customRenderer;
           }
-          if (element.getAttribute(pseudoelement.PSEUDO_ATTR)) {
+          if (element.getAttribute(PseudoElement.PSEUDO_ATTR)) {
             if (
               elementStyle["content"] &&
               elementStyle["content"].value &&
@@ -972,14 +972,14 @@ export class ViewFactory extends base.SimpleEventTarget
               tag = "img";
             }
           }
-        } else if (ns == base.NS.epub) {
+        } else if (ns == Base.NS.epub) {
           tag = "span";
-          ns = base.NS.XHTML;
-        } else if (ns == base.NS.FB2) {
-          ns = base.NS.XHTML;
+          ns = Base.NS.XHTML;
+        } else if (ns == Base.NS.FB2) {
+          ns = Base.NS.XHTML;
           if (tag == "image") {
             tag = "div";
-            const imageRef = element.getAttributeNS(base.NS.XLINK, "href");
+            const imageRef = element.getAttributeNS(Base.NS.XLINK, "href");
             if (imageRef && imageRef.charAt(0) == "#") {
               const imageBinary = self.xmldoc.getElement(imageRef);
               if (imageBinary) {
@@ -990,7 +990,7 @@ export class ViewFactory extends base.SimpleEventTarget
                   /[ \t\n\t]/g,
                   ""
                 )}`;
-                fetchers.push(taskutil.loadElement(inner, innerSrc));
+                fetchers.push(TaskUtil.loadElement(inner, innerSrc));
               }
             }
           } else {
@@ -999,8 +999,8 @@ export class ViewFactory extends base.SimpleEventTarget
           if (!tag) {
             tag = self.nodeContext.inline ? "span" : "div";
           }
-        } else if (ns == base.NS.NCX) {
-          ns = base.NS.XHTML;
+        } else if (ns == Base.NS.NCX) {
+          ns = Base.NS.XHTML;
           if (tag == "ncx" || tag == "navPoint") {
             tag = "div";
           } else if (tag == "navLabel") {
@@ -1017,7 +1017,7 @@ export class ViewFactory extends base.SimpleEventTarget
                 }
                 const childElement = c as Element;
                 if (
-                  childElement.namespaceURI == base.NS.NCX &&
+                  childElement.namespaceURI == Base.NS.NCX &&
                   childElement.localName == "content"
                 ) {
                   href = childElement.getAttribute("src");
@@ -1033,8 +1033,8 @@ export class ViewFactory extends base.SimpleEventTarget
           } else {
             tag = "span";
           }
-        } else if (ns == base.NS.SHADOW) {
-          ns = base.NS.XHTML;
+        } else if (ns == Base.NS.SHADOW) {
+          ns = Base.NS.XHTML;
           tag = self.nodeContext.inline ? "span" : "div";
         } else {
           custom = !!self.customRenderer;
@@ -1044,7 +1044,7 @@ export class ViewFactory extends base.SimpleEventTarget
             tag = "li";
           } else {
             tag = "div";
-            display = css.ident.block;
+            display = Css.ident.block;
             computedStyle["display"] = display;
           }
         } else if (tag == "body" || tag == "li") {
@@ -1080,7 +1080,7 @@ export class ViewFactory extends base.SimpleEventTarget
             computedStyle
           );
         } else {
-          elemResult = task.newResult(null);
+          elemResult = Task.newResult(null);
         }
         elemResult.then(result => {
           if (result) {
@@ -1100,7 +1100,7 @@ export class ViewFactory extends base.SimpleEventTarget
           }
           if (
             result.localName == "iframe" &&
-            result.namespaceURI == base.NS.XHTML
+            result.namespaceURI == Base.NS.XHTML
           ) {
             initIFrame(result as HTMLIFrameElement);
           }
@@ -1110,17 +1110,17 @@ export class ViewFactory extends base.SimpleEventTarget
           const images: {
             image: HTMLElement;
             element: HTMLElement;
-            fetcher: taskutil.Fetcher<string>;
+            fetcher: TaskUtil.Fetcher<string>;
           }[] = [];
           const cssWidth = computedStyle["width"];
           const cssHeight = computedStyle["height"];
           const attrWidth = element.getAttribute("width");
           const attrHeight = element.getAttribute("height");
           const hasAutoWidth =
-            cssWidth === css.ident.auto || (!cssWidth && !attrWidth);
+            cssWidth === Css.ident.auto || (!cssWidth && !attrWidth);
           const hasAutoHeight =
-            cssHeight === css.ident.auto || (!cssHeight && !attrHeight);
-          if (element.namespaceURI != base.NS.FB2 || tag == "td") {
+            cssHeight === Css.ident.auto || (!cssHeight && !attrHeight);
+          if (element.namespaceURI != Base.NS.FB2 || tag == "td") {
             const attributes = element.attributes;
             const attributeCount = attributes.length;
             let delayedSrc = null;
@@ -1172,30 +1172,30 @@ export class ViewFactory extends base.SimpleEventTarget
                 if (
                   attributeName === "poster" &&
                   tag === "video" &&
-                  ns === base.NS.XHTML &&
+                  ns === Base.NS.XHTML &&
                   hasAutoWidth &&
                   hasAutoHeight
                 ) {
                   const image = new Image();
-                  const fetcher = taskutil.loadElement(image, attributeValue);
+                  const fetcher = TaskUtil.loadElement(image, attributeValue);
                   fetchers.push(fetcher);
                   images.push({ image, element: result, fetcher });
                 }
               } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
                 continue; // namespace declaration (in Firefox)
-              } else if (attributeNS == base.NS.XLINK) {
+              } else if (attributeNS == Base.NS.XLINK) {
                 if (attributeName == "href") {
                   attributeValue = self.resolveURL(attributeValue);
                 }
               }
-              if (ns == base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
+              if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
                 // Workaround for Edge bug
                 // See
                 // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
                 attributeName = attributeName.toLowerCase();
               }
               if (self.isSVGUrlAttribute(attributeName)) {
-                attributeValue = urls.transformURIs(
+                attributeValue = Urls.transformURIs(
                   attributeValue,
                   self.xmldoc.url,
                   self.documentURLTransformer
@@ -1211,7 +1211,7 @@ export class ViewFactory extends base.SimpleEventTarget
                 attributeName == "src" &&
                 !attributeNS &&
                 (tag == "img" || tag == "input") &&
-                ns == base.NS.XHTML
+                ns == Base.NS.XHTML
               ) {
                 // HTML img element should start loading only once all
                 // attributes are assigned.
@@ -1219,11 +1219,11 @@ export class ViewFactory extends base.SimpleEventTarget
               } else if (
                 attributeName == "href" &&
                 tag == "image" &&
-                ns == base.NS.SVG &&
-                attributeNS == base.NS.XLINK
+                ns == Base.NS.SVG &&
+                attributeNS == Base.NS.XLINK
               ) {
                 self.page.fetchers.push(
-                  taskutil.loadElement(result, attributeValue)
+                  TaskUtil.loadElement(result, attributeValue)
                 );
               } else {
                 // When the document is not XML document (e.g. non-XML HTML)
@@ -1241,7 +1241,7 @@ export class ViewFactory extends base.SimpleEventTarget
             }
             if (delayedSrc) {
               const image = tag === "input" ? new Image() : result;
-              const imageFetcher = taskutil.loadElement(image, delayedSrc);
+              const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
               if (image !== result) {
                 result.src = delayedSrc;
               }
@@ -1267,9 +1267,9 @@ export class ViewFactory extends base.SimpleEventTarget
           }
           delete computedStyle["content"];
           const listStyleImage = computedStyle["list-style-image"];
-          if (listStyleImage && listStyleImage instanceof css.URL) {
-            const listStyleURL = (listStyleImage as css.URL).url;
-            fetchers.push(taskutil.loadElement(new Image(), listStyleURL));
+          if (listStyleImage && listStyleImage instanceof Css.URL) {
+            const listStyleURL = (listStyleImage as Css.URL).url;
+            fetchers.push(TaskUtil.loadElement(new Image(), listStyleURL));
           }
           self.preprocessElementStyle(computedStyle);
           self.applyComputedStyles(result, computedStyle);
@@ -1297,7 +1297,7 @@ export class ViewFactory extends base.SimpleEventTarget
             }
             if (blackList) {
               for (const propName in blackList) {
-                base.setCSSProperty(result, propName, blackList[propName]);
+                Base.setCSSProperty(result, propName, blackList[propName]);
               }
             }
           }
@@ -1309,7 +1309,7 @@ export class ViewFactory extends base.SimpleEventTarget
           }
           self.viewNode = result;
           if (fetchers.length) {
-            taskutil.waitForFetchers(fetchers).then(() => {
+            TaskUtil.waitForFetchers(fetchers).then(() => {
               if (imageResolution > 0) {
                 self.modifyElemDimensionWithImageResolution(
                   images,
@@ -1332,8 +1332,8 @@ export class ViewFactory extends base.SimpleEventTarget
 
   private processAfterIfcontinues(
     element: Element,
-    cascStyle: csscasc.ElementStyle,
-    styler: cssstyler.AbstractStyler,
+    cascStyle: CssCasc.ElementStyle,
+    styler: CssStyler.AbstractStyler,
     context: Context
   ) {
     const pseudoMap = this.getPseudoMap(
@@ -1350,14 +1350,14 @@ export class ViewFactory extends base.SimpleEventTarget
       pseudoMap["after-if-continues"] &&
       pseudoMap["after-if-continues"]["content"]
     ) {
-      const shadowStyler = new pseudoelement.PseudoelementStyler(
+      const shadowStyler = new PseudoElement.PseudoelementStyler(
         element,
         cascStyle,
         styler,
         context,
         this.exprContentListener
       );
-      this.nodeContext.afterIfContinues = new selectors.AfterIfContinues(
+      this.nodeContext.afterIfContinues = new Selectors.AfterIfContinues(
         element,
         shadowStyler
       );
@@ -1375,10 +1375,10 @@ export class ViewFactory extends base.SimpleEventTarget
     images: {
       image: HTMLElement;
       element: HTMLElement;
-      fetcher: taskutil.Fetcher<string>;
+      fetcher: TaskUtil.Fetcher<string>;
     }[],
     imageResolution: number,
-    computedStyle: { [key: string]: css.Val },
+    computedStyle: { [key: string]: Css.Val },
     isVertical: boolean
   ) {
     const self = this;
@@ -1389,123 +1389,123 @@ export class ViewFactory extends base.SimpleEventTarget
         let scaledHeight = (img as HTMLImageElement).height / imageResolution;
         const elem = param.element;
         if (scaledWidth > 0 && scaledHeight > 0) {
-          if (computedStyle["box-sizing"] === css.ident.border_box) {
-            if (computedStyle["border-left-style"] !== css.ident.none) {
-              scaledWidth += css.toNumber(
+          if (computedStyle["box-sizing"] === Css.ident.border_box) {
+            if (computedStyle["border-left-style"] !== Css.ident.none) {
+              scaledWidth += Css.toNumber(
                 computedStyle["border-left-width"],
                 self.context
               );
             }
-            if (computedStyle["border-right-style"] !== css.ident.none) {
-              scaledWidth += css.toNumber(
+            if (computedStyle["border-right-style"] !== Css.ident.none) {
+              scaledWidth += Css.toNumber(
                 computedStyle["border-right-width"],
                 self.context
               );
             }
-            if (computedStyle["border-top-style"] !== css.ident.none) {
-              scaledHeight += css.toNumber(
+            if (computedStyle["border-top-style"] !== Css.ident.none) {
+              scaledHeight += Css.toNumber(
                 computedStyle["border-top-width"],
                 self.context
               );
             }
-            if (computedStyle["border-bottom-style"] !== css.ident.none) {
-              scaledHeight += css.toNumber(
+            if (computedStyle["border-bottom-style"] !== Css.ident.none) {
+              scaledHeight += Css.toNumber(
                 computedStyle["border-bottom-width"],
                 self.context
               );
             }
           }
           if (imageResolution > 1) {
-            const maxWidth = computedStyle["max-width"] || css.ident.none;
-            const maxHeight = computedStyle["max-height"] || css.ident.none;
-            if (maxWidth === css.ident.none && maxHeight === css.ident.none) {
-              base.setCSSProperty(elem, "max-width", `${scaledWidth}px`);
+            const maxWidth = computedStyle["max-width"] || Css.ident.none;
+            const maxHeight = computedStyle["max-height"] || Css.ident.none;
+            if (maxWidth === Css.ident.none && maxHeight === Css.ident.none) {
+              Base.setCSSProperty(elem, "max-width", `${scaledWidth}px`);
             } else if (
-              maxWidth !== css.ident.none &&
-              maxHeight === css.ident.none
+              maxWidth !== Css.ident.none &&
+              maxHeight === Css.ident.none
             ) {
-              base.setCSSProperty(elem, "width", `${scaledWidth}px`);
+              Base.setCSSProperty(elem, "width", `${scaledWidth}px`);
             } else if (
-              maxWidth === css.ident.none &&
-              maxHeight !== css.ident.none
+              maxWidth === Css.ident.none &&
+              maxHeight !== Css.ident.none
             ) {
-              base.setCSSProperty(elem, "height", `${scaledHeight}px`);
+              Base.setCSSProperty(elem, "height", `${scaledHeight}px`);
             } else {
               // maxWidth != none && maxHeight != none
-              asserts.assert(maxWidth.isNumeric());
-              asserts.assert(maxHeight.isNumeric());
-              const numericMaxWidth = maxWidth as css.Numeric;
-              const numericMaxHeight = maxHeight as css.Numeric;
+              Asserts.assert(maxWidth.isNumeric());
+              Asserts.assert(maxHeight.isNumeric());
+              const numericMaxWidth = maxWidth as Css.Numeric;
+              const numericMaxHeight = maxHeight as Css.Numeric;
               if (numericMaxWidth.unit !== "%") {
-                base.setCSSProperty(
+                Base.setCSSProperty(
                   elem,
                   "max-width",
                   `${Math.min(
                     scaledWidth,
-                    css.toNumber(numericMaxWidth, self.context)
+                    Css.toNumber(numericMaxWidth, self.context)
                   )}px`
                 );
               } else if (numericMaxHeight.unit !== "%") {
-                base.setCSSProperty(
+                Base.setCSSProperty(
                   elem,
                   "max-height",
                   `${Math.min(
                     scaledHeight,
-                    css.toNumber(numericMaxHeight, self.context)
+                    Css.toNumber(numericMaxHeight, self.context)
                   )}px`
                 );
               } else {
                 if (isVertical) {
-                  base.setCSSProperty(elem, "height", `${scaledHeight}px`);
+                  Base.setCSSProperty(elem, "height", `${scaledHeight}px`);
                 } else {
-                  base.setCSSProperty(elem, "width", `${scaledWidth}px`);
+                  Base.setCSSProperty(elem, "width", `${scaledWidth}px`);
                 }
               }
             }
           } else if (imageResolution < 1) {
-            const minWidth = computedStyle["min-width"] || css.numericZero;
-            const minHeight = computedStyle["min-height"] || css.numericZero;
-            asserts.assert(minWidth.isNumeric());
-            asserts.assert(minWidth.isNumeric());
-            const numericMinWidth = minWidth as css.Numeric;
-            const numericMinHeight = minHeight as css.Numeric;
+            const minWidth = computedStyle["min-width"] || Css.numericZero;
+            const minHeight = computedStyle["min-height"] || Css.numericZero;
+            Asserts.assert(minWidth.isNumeric());
+            Asserts.assert(minWidth.isNumeric());
+            const numericMinWidth = minWidth as Css.Numeric;
+            const numericMinHeight = minHeight as Css.Numeric;
             if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
-              base.setCSSProperty(elem, "min-width", `${scaledWidth}px`);
+              Base.setCSSProperty(elem, "min-width", `${scaledWidth}px`);
             } else if (
               numericMinWidth.num !== 0 &&
               numericMinHeight.num === 0
             ) {
-              base.setCSSProperty(elem, "width", `${scaledWidth}px`);
+              Base.setCSSProperty(elem, "width", `${scaledWidth}px`);
             } else if (
               numericMinWidth.num === 0 &&
               numericMinHeight.num !== 0
             ) {
-              base.setCSSProperty(elem, "height", `${scaledHeight}px`);
+              Base.setCSSProperty(elem, "height", `${scaledHeight}px`);
             } else {
               // minWidth != 0 && minHeight != 0
               if (numericMinWidth.unit !== "%") {
-                base.setCSSProperty(
+                Base.setCSSProperty(
                   elem,
                   "min-width",
                   `${Math.max(
                     scaledWidth,
-                    css.toNumber(numericMinWidth, self.context)
+                    Css.toNumber(numericMinWidth, self.context)
                   )}px`
                 );
               } else if (numericMinHeight.unit !== "%") {
-                base.setCSSProperty(
+                Base.setCSSProperty(
                   elem,
                   "min-height",
                   `${Math.max(
                     scaledHeight,
-                    css.toNumber(numericMinHeight, self.context)
+                    Css.toNumber(numericMinHeight, self.context)
                   )}px`
                 );
               } else {
                 if (isVertical) {
-                  base.setCSSProperty(elem, "height", `${scaledHeight}px`);
+                  Base.setCSSProperty(elem, "height", `${scaledHeight}px`);
                 } else {
-                  base.setCSSProperty(elem, "width", `${scaledWidth}px`);
+                  Base.setCSSProperty(elem, "width", `${scaledWidth}px`);
                 }
               }
             }
@@ -1515,10 +1515,10 @@ export class ViewFactory extends base.SimpleEventTarget
     });
   }
 
-  private preprocessElementStyle(computedStyle: { [key: string]: css.Val }) {
+  private preprocessElementStyle(computedStyle: { [key: string]: Css.Val }) {
     const self = this;
-    const hooks: plugin.PreProcessElementStyleHook[] = plugin.getHooksForName(
-      plugin.HOOKS.PREPROCESS_ELEMENT_STYLE
+    const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
+      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE
     );
     hooks.forEach(hook => {
       hook(self.nodeContext, computedStyle);
@@ -1527,7 +1527,7 @@ export class ViewFactory extends base.SimpleEventTarget
 
   private findAndProcessRepeatingElements(
     element: Element,
-    styler: cssstyler.AbstractStyler
+    styler: CssStyler.AbstractStyler
   ) {
     for (
       let child: Node = element.firstChild;
@@ -1570,28 +1570,28 @@ export class ViewFactory extends base.SimpleEventTarget
     }
   }
 
-  private processRepeatOnBreak(computedStyle: { [key: string]: css.Val }) {
+  private processRepeatOnBreak(computedStyle: { [key: string]: Css.Val }) {
     let repeatOnBreak = computedStyle["repeat-on-break"];
-    if (repeatOnBreak !== css.ident.none) {
-      if (repeatOnBreak === css.ident.auto) {
-        if (computedStyle["display"] === css.ident.table_header_group) {
-          repeatOnBreak = css.ident.header;
-        } else if (computedStyle["display"] === css.ident.table_footer_group) {
-          repeatOnBreak = css.ident.footer;
+    if (repeatOnBreak !== Css.ident.none) {
+      if (repeatOnBreak === Css.ident.auto) {
+        if (computedStyle["display"] === Css.ident.table_header_group) {
+          repeatOnBreak = Css.ident.header;
+        } else if (computedStyle["display"] === Css.ident.table_footer_group) {
+          repeatOnBreak = Css.ident.footer;
         } else {
-          repeatOnBreak = css.ident.none;
+          repeatOnBreak = Css.ident.none;
         }
       }
-      if (repeatOnBreak && repeatOnBreak !== css.ident.none) {
+      if (repeatOnBreak && repeatOnBreak !== Css.ident.none) {
         return repeatOnBreak.toString();
       }
     }
     return null;
   }
 
-  private createTextNodeView(): task.Result<boolean> {
+  private createTextNodeView(): Task.Result<boolean> {
     const self = this;
-    const frame: task.Frame<boolean> = task.newFrame("createTextNodeView");
+    const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
     this.preprocessTextContent().then(() => {
       const offsetInNode = self.offsetInNode || 0;
       const textContent = restoreNewText(
@@ -1603,27 +1603,27 @@ export class ViewFactory extends base.SimpleEventTarget
     return frame.result();
   }
 
-  private preprocessTextContent(): task.Result<boolean> {
+  private preprocessTextContent(): Task.Result<boolean> {
     if (this.nodeContext.preprocessedTextContent != null) {
-      return task.newResult(true);
+      return Task.newResult(true);
     }
     const self = this;
     let originl;
     let textContent = (originl = self.sourceNode.textContent);
-    const frame: task.Frame<boolean> = task.newFrame("preprocessTextContent");
-    const hooks: plugin.PreProcessTextContentHook[] = plugin.getHooksForName(
-      plugin.HOOKS.PREPROCESS_TEXT_CONTENT
+    const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
+    const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
+      Plugin.HOOKS.PREPROCESS_TEXT_CONTENT
     );
     let index = 0;
     frame
       .loop(() => {
         if (index >= hooks.length) {
-          return task.newResult(false);
+          return Task.newResult(false);
         }
         return hooks[index++](self.nodeContext, textContent).thenAsync(
           processedText => {
             textContent = processedText;
-            return task.newResult(true);
+            return Task.newResult(true);
           }
         );
       })
@@ -1643,9 +1643,9 @@ export class ViewFactory extends base.SimpleEventTarget
   createNodeView(
     firstTime: boolean,
     atUnforcedBreak: boolean
-  ): task.Result<boolean> {
+  ): Task.Result<boolean> {
     const self = this;
-    const frame: task.Frame<boolean> = task.newFrame("createNodeView");
+    const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
     let result;
     let needToProcessChildren = true;
     if (self.sourceNode.nodeType == 1) {
@@ -1653,7 +1653,7 @@ export class ViewFactory extends base.SimpleEventTarget
     } else {
       if (self.sourceNode.nodeType == 8) {
         self.viewNode = null; // comment node
-        result = task.newResult(true);
+        result = Task.newResult(true);
       } else {
         result = self.createTextNodeView();
       }
@@ -1690,14 +1690,14 @@ export class ViewFactory extends base.SimpleEventTarget
     if (this.nodeContext) {
       return this.createNodeView(firstTime, !!atUnforcedBreak);
     }
-    return task.newResult(true);
+    return Task.newResult(true);
   }
 
   processShadowContent(pos) {
     if (
       pos.shadowContext == null ||
       pos.sourceNode.localName != "content" ||
-      pos.sourceNode.namespaceURI != base.NS.SHADOW
+      pos.sourceNode.namespaceURI != Base.NS.SHADOW
     ) {
       return pos;
     }
@@ -1713,13 +1713,13 @@ export class ViewFactory extends base.SimpleEventTarget
       contentShadow = shadow.subShadow;
       contentNode = shadow.root;
       contentShadowType = shadow.type;
-      if (contentShadowType == vtree.ShadowType.ROOTLESS) {
+      if (contentShadowType == Vtree.ShadowType.ROOTLESS) {
         contentNode = contentNode.firstChild;
       }
     } else {
       contentShadow = shadow.parentShadow;
       contentNode = shadow.owner.firstChild;
-      contentShadowType = vtree.ShadowType.ROOTLESS;
+      contentShadowType = Vtree.ShadowType.ROOTLESS;
     }
     const nextSibling = pos.sourceNode.nextSibling;
     if (nextSibling) {
@@ -1734,7 +1734,7 @@ export class ViewFactory extends base.SimpleEventTarget
       pos.after = true;
     }
     if (contentNode) {
-      const r = new vtree.NodeContext(contentNode, parent, boxOffset);
+      const r = new Vtree.NodeContext(contentNode, parent, boxOffset);
       r.shadowContext = contentShadow;
       r.shadowType = contentShadowType;
       r.shadowSibling = pos;
@@ -1744,7 +1744,7 @@ export class ViewFactory extends base.SimpleEventTarget
     return pos;
   }
 
-  private nextPositionInTree(pos: vtree.NodeContext): vtree.NodeContext {
+  private nextPositionInTree(pos: Vtree.NodeContext): Vtree.NodeContext {
     let boxOffset = pos.boxOffset + 1; // offset for the next position
     if (pos.after) {
       // root, that was the last possible position
@@ -1754,7 +1754,7 @@ export class ViewFactory extends base.SimpleEventTarget
 
       // we are done with this sourceNode, see if there is a next sibling,
       // unless this is the root of the shadow tree
-      if (pos.shadowType != vtree.ShadowType.ROOTED) {
+      if (pos.shadowType != Vtree.ShadowType.ROOTED) {
         const next = pos.sourceNode.nextSibling;
         if (next) {
           pos = pos.modify();
@@ -1785,11 +1785,11 @@ export class ViewFactory extends base.SimpleEventTarget
       // any shadow trees?
       if (pos.nodeShadow) {
         let shadowNode: Node | null = pos.nodeShadow.root;
-        if (pos.nodeShadow.type == vtree.ShadowType.ROOTLESS) {
+        if (pos.nodeShadow.type == Vtree.ShadowType.ROOTLESS) {
           shadowNode = shadowNode.firstChild;
         }
         if (shadowNode) {
-          const sr = new vtree.NodeContext(shadowNode, pos, boxOffset);
+          const sr = new Vtree.NodeContext(shadowNode, pos, boxOffset);
           sr.shadowContext = pos.nodeShadow;
           sr.shadowType = pos.nodeShadow.type;
           return this.processShadowContent(sr);
@@ -1800,7 +1800,7 @@ export class ViewFactory extends base.SimpleEventTarget
       const child = pos.sourceNode.firstChild;
       if (child) {
         return this.processShadowContent(
-          new vtree.NodeContext(child, pos, boxOffset)
+          new Vtree.NodeContext(child, pos, boxOffset)
         );
       }
 
@@ -1818,10 +1818,10 @@ export class ViewFactory extends base.SimpleEventTarget
 
   isTransclusion(
     element: Element,
-    elementStyle: csscasc.ElementStyle,
+    elementStyle: CssCasc.ElementStyle,
     transclusionType: string | null
   ) {
-    const proc = csscasc.getProp(elementStyle, "hyperlink-processing");
+    const proc = CssCasc.getProp(elementStyle, "hyperlink-processing");
     if (!proc) {
       return false;
     }
@@ -1838,9 +1838,9 @@ export class ViewFactory extends base.SimpleEventTarget
   nextInTree(nodeContext, atUnforcedBreak) {
     nodeContext = this.nextPositionInTree(nodeContext);
     if (!nodeContext || nodeContext.after) {
-      return task.newResult(nodeContext);
+      return Task.newResult(nodeContext);
     }
-    const frame: task.Frame<vtree.NodeContext> = task.newFrame("nextInTree");
+    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("nextInTree");
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(
       processChildren => {
         if (!nodeContext.viewNode || !processChildren) {
@@ -1858,27 +1858,27 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   addImageFetchers(bg) {
-    if (bg instanceof css.CommaList) {
-      const values = (bg as css.CommaList).values;
+    if (bg instanceof Css.CommaList) {
+      const values = (bg as Css.CommaList).values;
       for (let i = 0; i < values.length; i++) {
         this.addImageFetchers(values[i]);
       }
-    } else if (bg instanceof css.URL) {
-      const url = (bg as css.URL).url;
-      this.page.fetchers.push(taskutil.loadElement(new Image(), url));
+    } else if (bg instanceof Css.URL) {
+      const url = (bg as Css.URL).url;
+      this.page.fetchers.push(TaskUtil.loadElement(new Image(), url));
     }
   }
 
   applyComputedStyles(
     target: Element,
-    computedStyle: { [key: string]: css.Val }
+    computedStyle: { [key: string]: Css.Val }
   ) {
     const bg = computedStyle["background-image"];
     if (bg) {
       this.addImageFetchers(bg);
     }
     const isRelativePositioned =
-      computedStyle["position"] === css.ident.relative;
+      computedStyle["position"] === Css.ident.relative;
     for (const propName in computedStyle) {
       if (propertiesNotPassedToDOM[propName]) {
         continue;
@@ -1889,23 +1889,23 @@ export class ViewFactory extends base.SimpleEventTarget
       );
       if (
         value.isNumeric() &&
-        needUnitConversion((value as css.Numeric).unit)
+        needUnitConversion((value as Css.Numeric).unit)
       ) {
         // font-size for the root element is already converted to px
-        value = css.convertNumericToPx(value, this.context);
+        value = Css.convertNumericToPx(value, this.context);
       }
       if (
-        vtree.delayedProps[propName] ||
+        Vtree.delayedProps[propName] ||
         (isRelativePositioned &&
-          vtree.delayedPropsIfRelativePositioned[propName])
+          Vtree.delayedPropsIfRelativePositioned[propName])
       ) {
         // Set it after page layout is done.
         this.page.delayedItems.push(
-          new vtree.DelayedItem(target, propName, value)
+          new Vtree.DelayedItem(target, propName, value)
         );
         continue;
       }
-      base.setCSSProperty(target, propName, value.toString());
+      Base.setCSSProperty(target, propName, value.toString());
     }
   }
 
@@ -1918,10 +1918,10 @@ export class ViewFactory extends base.SimpleEventTarget
     }
     const element = this.sourceNode as Element;
     const styler = nodeContext.shadowContext
-      ? (nodeContext.shadowContext.styler as cssstyler.AbstractStyler)
+      ? (nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
       : this.styler;
     let elementStyle = styler.getStyle(element, false);
-    const pseudoMap = csscasc.getStyleMap(elementStyle, "_pseudos");
+    const pseudoMap = CssCasc.getStyleMap(elementStyle, "_pseudos");
     if (!pseudoMap) {
       return;
     }
@@ -1937,9 +1937,9 @@ export class ViewFactory extends base.SimpleEventTarget
       computedStyle
     );
     const content = computedStyle["content"];
-    if (vtree.nonTrivialContent(content)) {
+    if (Vtree.nonTrivialContent(content)) {
       content.visit(
-        new vtree.ContentPropertyHandler(
+        new Vtree.ContentPropertyHandler(
           target,
           this.context,
           content,
@@ -1955,7 +1955,7 @@ export class ViewFactory extends base.SimpleEventTarget
    * @override
    */
   peelOff(nodeContext, nodeOffset) {
-    const frame: task.Frame<vtree.NodeContext> = task.newFrame("peelOff");
+    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("peelOff");
     const firstPseudo = nodeContext.firstPseudo;
     let offsetInNode = nodeContext.offsetInNode;
     const after = nodeContext.after;
@@ -1982,7 +1982,7 @@ export class ViewFactory extends base.SimpleEventTarget
       .loop(() => {
         while (arr.length > 0) {
           pn = arr.pop();
-          nodeContext = new vtree.NodeContext(
+          nodeContext = new Vtree.NodeContext(
             pn.sourceNode,
             nodeContext,
             boxOffset
@@ -2003,7 +2003,7 @@ export class ViewFactory extends base.SimpleEventTarget
             return result;
           }
         }
-        return task.newResult(false);
+        return Task.newResult(false);
       })
       .then(() => {
         frame.finish(nodeContext);
@@ -2012,7 +2012,7 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   createElement(ns: string, tag: string): Element {
-    if (ns == base.NS.XHTML) {
+    if (ns == Base.NS.XHTML) {
       return this.document.createElement(tag);
     }
     return this.document.createElementNS(ns, tag);
@@ -2023,7 +2023,7 @@ export class ViewFactory extends base.SimpleEventTarget
    */
   applyFootnoteStyle(vertical, rtl, target) {
     const computedStyle = {};
-    const pseudoMap = csscasc.getStyleMap(this.footnoteStyle, "_pseudos");
+    const pseudoMap = CssCasc.getStyleMap(this.footnoteStyle, "_pseudos");
     vertical = this.computeStyle(
       vertical,
       rtl,
@@ -2032,8 +2032,8 @@ export class ViewFactory extends base.SimpleEventTarget
     );
     if (pseudoMap && pseudoMap["before"]) {
       const childComputedStyle = {};
-      const span = this.createElement(base.NS.XHTML, "span");
-      pseudoelement.setPseudoName(span, "before");
+      const span = this.createElement(Base.NS.XHTML, "span");
+      PseudoElement.setPseudoName(span, "before");
       target.appendChild(span);
       this.computeStyle(vertical, rtl, pseudoMap["before"], childComputedStyle);
       delete childComputedStyle["content"];
@@ -2053,17 +2053,17 @@ export class ViewFactory extends base.SimpleEventTarget
         const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
         if (!boxDecorationBreak || boxDecorationBreak === "slice") {
           const elem = block.viewNode;
-          asserts.assert(elem instanceof Element);
+          Asserts.assert(elem instanceof Element);
           if (block.vertical) {
-            base.setCSSProperty(elem, "padding-left", "0");
-            base.setCSSProperty(elem, "border-left", "none");
-            base.setCSSProperty(elem, "border-top-left-radius", "0");
-            base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+            Base.setCSSProperty(elem, "padding-left", "0");
+            Base.setCSSProperty(elem, "border-left", "none");
+            Base.setCSSProperty(elem, "border-top-left-radius", "0");
+            Base.setCSSProperty(elem, "border-bottom-left-radius", "0");
           } else {
-            base.setCSSProperty(elem, "padding-bottom", "0");
-            base.setCSSProperty(elem, "border-bottom", "none");
-            base.setCSSProperty(elem, "border-bottom-left-radius", "0");
-            base.setCSSProperty(elem, "border-bottom-right-radius", "0");
+            Base.setCSSProperty(elem, "padding-bottom", "0");
+            Base.setCSSProperty(elem, "border-bottom", "none");
+            Base.setCSSProperty(elem, "border-bottom-left-radius", "0");
+            Base.setCSSProperty(elem, "border-bottom-right-radius", "0");
           }
         }
       });
@@ -2081,12 +2081,12 @@ export class ViewFactory extends base.SimpleEventTarget
       while (elem && elem.nodeType !== 1) {
         elem = elem.parentNode;
       }
-      asserts.assert(elem);
+      Asserts.assert(elem);
       const fontSize = parseFloat(
         clientLayout.getElementComputedStyle(elem as Element)["font-size"]
       );
-      asserts.assert(this.context);
-      return csscasc.convertFontRelativeLengthToPx(
+      Asserts.assert(this.context);
+      return CssCasc.convertFontRelativeLengthToPx(
         numeric,
         fontSize,
         this.context
@@ -2105,8 +2105,8 @@ export class ViewFactory extends base.SimpleEventTarget
    * Returns if two NodePositionStep are equivalent.
    */
   isSameNodePositionStep(
-    step1: vtree.NodePositionStep,
-    step2: vtree.NodePositionStep
+    step1: Vtree.NodePositionStep,
+    step2: Vtree.NodePositionStep
   ): boolean {
     if (step1.shadowContext) {
       if (!step2.shadowContext) {
@@ -2122,8 +2122,8 @@ export class ViewFactory extends base.SimpleEventTarget
           : (step2.node.parentElement as Element);
       return (
         step1.shadowContext.owner === step2.shadowContext.owner &&
-        pseudoelement.getPseudoName(elem1) ===
-          pseudoelement.getPseudoName(elem2)
+        PseudoElement.getPseudoName(elem1) ===
+          PseudoElement.getPseudoName(elem2)
       );
     } else {
       return step1.node === step2.node;
@@ -2146,7 +2146,7 @@ export class ViewFactory extends base.SimpleEventTarget
   }
 
   isPseudoelement(elem) {
-    return !!pseudoelement.getPseudoName(elem);
+    return !!PseudoElement.getPseudoName(elem);
   }
 }
 
@@ -2181,7 +2181,7 @@ export const propertiesNotPassedToDOM = {
   page: true
 };
 
-export class DefaultClientLayout implements vtree.ClientLayout {
+export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: any;
   window: any;
 
@@ -2191,9 +2191,9 @@ export class DefaultClientLayout implements vtree.ClientLayout {
   }
 
   private subtractOffsets(
-    rect: vtree.ClientRect,
-    originRect: vtree.ClientRect
-  ): vtree.ClientRect {
+    rect: Vtree.ClientRect,
+    originRect: Vtree.ClientRect
+  ): Vtree.ClientRect {
     const viewportLeft = originRect.left;
     const viewportTop = originRect.top;
     return {
@@ -2203,7 +2203,7 @@ export class DefaultClientLayout implements vtree.ClientLayout {
       bottom: rect.bottom - viewportTop,
       width: rect.width,
       height: rect.height
-    } as vtree.ClientRect;
+    } as Vtree.ClientRect;
   }
 
   /**
@@ -2222,7 +2222,7 @@ export class DefaultClientLayout implements vtree.ClientLayout {
    */
   getElementClientRect(element) {
     const htmlElement = element as HTMLElement;
-    const rect = htmlElement.getBoundingClientRect() as vtree.ClientRect;
+    const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return this.subtractOffsets(rect, layoutBoxRect);
   }
@@ -2289,11 +2289,11 @@ export class Viewport {
    * Reset zoom.
    */
   resetZoom() {
-    base.setCSSProperty(this.outerZoomBox, "width", "");
-    base.setCSSProperty(this.outerZoomBox, "height", "");
-    base.setCSSProperty(this.contentContainer, "width", "");
-    base.setCSSProperty(this.contentContainer, "height", "");
-    base.setCSSProperty(this.contentContainer, "transform", "");
+    Base.setCSSProperty(this.outerZoomBox, "width", "");
+    Base.setCSSProperty(this.outerZoomBox, "height", "");
+    Base.setCSSProperty(this.contentContainer, "width", "");
+    Base.setCSSProperty(this.contentContainer, "height", "");
+    Base.setCSSProperty(this.contentContainer, "transform", "");
   }
 
   /**
@@ -2303,11 +2303,11 @@ export class Viewport {
    * @param scale Factor to which the viewport will be scaled.
    */
   zoom(width: number, height: number, scale: number) {
-    base.setCSSProperty(this.outerZoomBox, "width", `${width * scale}px`);
-    base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
-    base.setCSSProperty(this.contentContainer, "width", `${width}px`);
-    base.setCSSProperty(this.contentContainer, "height", `${height}px`);
-    base.setCSSProperty(this.contentContainer, "transform", `scale(${scale})`);
+    Base.setCSSProperty(this.outerZoomBox, "width", `${width * scale}px`);
+    Base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
+    Base.setCSSProperty(this.contentContainer, "width", `${width}px`);
+    Base.setCSSProperty(this.contentContainer, "height", `${height}px`);
+    Base.setCSSProperty(this.contentContainer, "transform", `scale(${scale})`);
   }
 
   /**

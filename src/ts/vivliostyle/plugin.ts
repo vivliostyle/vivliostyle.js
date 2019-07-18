@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Plugin mechanism
+ * @fileoverview Plugin - Plugin mechanism
  */
 import { JSON } from "../adapt/base";
 import { Ident } from "../adapt/css";
 import { Result } from "../adapt/task";
 import { FormattingContext } from "../adapt/vtree";
-import * as layoutprocessor from "./layoutprocessor";
-import * as logging from "./logging";
-import { vtree, layout } from "./types";
+import * as LayoutProcessor from "./layoutprocessor";
+import * as Logging from "./logging";
+import { ViewTree, Layout } from "./types";
 
 /**
  * Type of implemented hooks.
@@ -34,7 +34,7 @@ export enum HOOKS {
    *
    * The hook is called with an object with the following properties:
    *   {string} name: Property name
-   *   {!adapt.css.Val} value: Property value
+   *   {!Css.Val} value: Property value
    *   {boolean} important: Whether '!important' flag is present or not
    * Functions called by this hook are expected to return a value with the same
    * type as the above. The declaration is then replaced by the returned value.
@@ -58,11 +58,11 @@ export enum HOOKS {
    * Called before creating a text node for modifying a text content.
    *
    * The hook is called with an object with the following properties:
-   *   {adapt.vtree.NodeContext} nodeContext
+   *   {ViewTree.NodeContext} nodeContext
    *   {string} sourceTextContent
    *
    * Functions called by this hook are expected to return a
-   * adapt.task.Result.<string>. The text content is then replaced by the
+   * Task.Result.<string>. The text content is then replaced by the
    * returned value.
    */
   PREPROCESS_TEXT_CONTENT = "PREPROCESS_TEXT_CONTENT",
@@ -71,13 +71,13 @@ export enum HOOKS {
    * Called before creating a element for modifying a element style.
    *
    * The hook is called with an object with the following properties:
-   *   {adapt.vtree.NodeContext} nodeContext
+   *   {ViewTree.NodeContext} nodeContext
    *   {!Object} style
    */
   PREPROCESS_ELEMENT_STYLE = "PREPROCESS_ELEMENT_STYLE",
 
   /**
-   * Called before geting adapt.csscasc.polyfilledInheritedProps.
+   * Called before geting CssCasc.polyfilledInheritedProps.
    *
    * The hook return a array of polyfilled inherited property name.
    */
@@ -87,7 +87,7 @@ export enum HOOKS {
    * Called when a Viewer is configured.
    *
    * The hook is called with an object with the following properties:
-   *  {adapt.base.JSON} command
+   *  {Base.JSON} command
    */
   CONFIGURATION = "CONFIGURATION",
 
@@ -96,10 +96,10 @@ export enum HOOKS {
    * which detects an acceptable breakpoint and break text node at this point.
    *
    * The hook is called with an object with the following properties:
-   *  {adapt.vtree.NodeContext} nodeContext
+   *  {ViewTree.NodeContext} nodeContext
    *
    * Functions called by this hook are expected to
-   * return an instnce of {adapt.layout.TextNodeBreaker} or null.
+   * return an instnce of {Layout.TextNodeBreaker} or null.
    */
   RESOLVE_TEXT_NODE_BREAKER = "RESOLVE_TEXT_NODE_BREAKER",
 
@@ -109,9 +109,9 @@ export enum HOOKS {
    * The hook is called with the following parameters:
    *   nodeContext: a NodeContext object
    *   firstTime: a boolean flag representing whether this node is encountered
-   * for the first time or not display: an adapt.css.Ident value representing
-   * 'display' value of the node position: an adapt.css.Ident value representing
-   * 'position' value of the node float: an adapt.css.Ident value representing
+   * for the first time or not display: an Css.Ident value representing
+   * 'display' value of the node position: an Css.Ident value representing
+   * 'position' value of the node float: an Css.Ident value representing
    * 'float' value of the node isRoot: a boolean flag representing whether this
    * node is a root (of a flow) or not Functions called by this hook are
    * expected to return a formatting context for the NodeContext.
@@ -119,11 +119,11 @@ export enum HOOKS {
   RESOLVE_FORMATTING_CONTEXT = "RESOLVE_FORMATTING_CONTEXT",
 
   /**
-   * Called when resolving a layout processor (adapt.layout.LayoutProcessor) for
+   * Called when resolving a layout processor (LayoutProcessor) for
    * a formatting context.
    *
    * The hook is called with a formatting context
-   * (adapt.vtree.FormattingContext). Functions called by this hook are expected
+   * (ViewTree.FormattingContext). Functions called by this hook are expected
    * to return a layout processor corresponding to the formatting context.
    */
   RESOLVE_LAYOUT_PROCESSOR = "RESOLVE_LAYOUT_PROCESSOR",
@@ -132,9 +132,9 @@ export enum HOOKS {
    * Called after laid out a block contents.
    *
    * The hook is called with an object with the following properties:
-   *  {adapt.vtree.NodeContext} nodeContext
-   *  {Array.<adapt.vtree.NodeContext>} checkPoints
-   *  {adapt.layout.Column} column
+   *  {ViewTree.NodeContext} nodeContext
+   *  {Array.<ViewTree.NodeContext>} checkPoints
+   *  {Layout.Column} column
    */
   POST_LAYOUT_BLOCK = "POST_LAYOUT_BLOCK"
 }
@@ -142,12 +142,12 @@ export enum HOOKS {
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
 export type PreProcessTextContentHook = (
-  p1: vtree.NodeContext,
+  p1: ViewTree.NodeContext,
   p2: string
 ) => Result<string>;
 
 export type PreProcessElementStyleHook = (
-  p1: vtree.NodeContext,
+  p1: ViewTree.NodeContext,
   p2: object
 ) => void;
 
@@ -161,11 +161,11 @@ export type ConfigurationHook = (
 };
 
 export type ResolveTextNodeBreakerHook = (
-  p1: vtree.NodeContext
-) => layout.TextNodeBreaker;
+  p1: ViewTree.NodeContext
+) => Layout.TextNodeBreaker;
 
 export type ResolveFormattingContextHook = (
-  p1: vtree.NodeContext,
+  p1: ViewTree.NodeContext,
   p2: boolean,
   p3: Ident,
   p4: Ident,
@@ -175,12 +175,12 @@ export type ResolveFormattingContextHook = (
 
 export type ResolveLayoutProcessorHook = (
   p1: FormattingContext
-) => layoutprocessor.LayoutProcessor;
+) => LayoutProcessor.LayoutProcessor;
 
 export type PostLayoutBlockHook = (
-  p1: vtree.NodeContext,
-  p2: vtree.NodeContext[],
-  p3: layout.Column
+  p1: ViewTree.NodeContext,
+  p2: ViewTree.NodeContext[],
+  p3: Layout.Column
 ) => void;
 
 const hooks = {};
@@ -196,7 +196,7 @@ const hooks = {};
  */
 export const registerHook = (name: string, fn: (...p1) => any) => {
   if (!HOOKS[name]) {
-    logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
+    Logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
   } else {
     let hooksForName = hooks[name];
     if (!hooksForName) {
@@ -215,7 +215,7 @@ export const registerHook = (name: string, fn: (...p1) => any) => {
  */
 export const removeHook = (name: string, fn: (...p1) => any) => {
   if (!HOOKS[name]) {
-    logging.logger.warn(new Error(`Ignoring unknown plugin hook '${name}'.`));
+    Logging.logger.warn(new Error(`Ignoring unknown plugin hook '${name}'.`));
   } else {
     const hooksForName = hooks[name];
     if (hooksForName) {

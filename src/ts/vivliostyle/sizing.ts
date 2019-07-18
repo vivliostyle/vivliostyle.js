@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CSS Intrinsic & Extrinsic Sizing
+ * @fileoverview Sizing - CSS Intrinsic & Extrinsic Sizing
  */
-import * as base from "../adapt/base";
-import * as vtree from "../adapt/vtree";
+import * as Base from "../adapt/base";
+import * as Vtree from "../adapt/vtree";
 
 /**
  * Box sizes defined in css-sizing.
@@ -46,7 +46,7 @@ export enum Size {
  * Get specified sizes for the element.
  */
 export const getSize = (
-  clientLayout: vtree.ClientLayout,
+  clientLayout: Vtree.ClientLayout,
   element: Element,
   sizes: Size[]
 ): { [key in Size]: number } => {
@@ -65,20 +65,20 @@ export const getSize = (
 
   // wrap the element with a dummy container element
   const container = doc.createElement("div");
-  base.setCSSProperty(container, "position", original.position);
+  Base.setCSSProperty(container, "position", original.position);
   parent.insertBefore(container, element);
   container.appendChild(element);
-  base.setCSSProperty(element, "width", "auto");
-  base.setCSSProperty(element, "max-width", "none");
-  base.setCSSProperty(element, "min-width", "0");
-  base.setCSSProperty(element, "height", "auto");
-  base.setCSSProperty(element, "max-height", "none");
-  base.setCSSProperty(element, "min-height", "0");
+  Base.setCSSProperty(element, "width", "auto");
+  Base.setCSSProperty(element, "max-width", "none");
+  Base.setCSSProperty(element, "min-width", "0");
+  Base.setCSSProperty(element, "height", "auto");
+  Base.setCSSProperty(element, "max-height", "none");
+  Base.setCSSProperty(element, "min-height", "0");
 
   function getComputedValue(name: string): string {
     return clientLayout.getElementComputedStyle(element).getPropertyValue(name);
   }
-  const writingModeProperty = base.getPrefixedPropertyNames("writing-mode");
+  const writingModeProperty = Base.getPrefixedPropertyNames("writing-mode");
   const writingModeValue =
     (writingModeProperty ? getComputedValue(writingModeProperty[0]) : null) ||
     getComputedValue("writing-mode");
@@ -91,32 +91,32 @@ export const getSize = (
   const blockSizeName = isVertical ? "width" : "height";
 
   function getFillAvailableInline(): string {
-    base.setCSSProperty(element, "display", "block");
-    base.setCSSProperty(element, "position", "static");
+    Base.setCSSProperty(element, "display", "block");
+    Base.setCSSProperty(element, "position", "static");
     return getComputedValue(inlineSizeName);
   }
 
   // Inline size of an inline-block element is the fit-content
   // (shrink-to-fit) inline size.
   function getMaxContentInline(): string {
-    base.setCSSProperty(element, "display", "inline-block");
+    Base.setCSSProperty(element, "display", "inline-block");
 
     // When the available inline size is sufficiently large, the fit-content
     // inline size equals to the max-content inline size.
-    base.setCSSProperty(container, inlineSizeName, "99999999px"); // 'sufficiently large' value
+    Base.setCSSProperty(container, inlineSizeName, "99999999px"); // 'sufficiently large' value
     const r = getComputedValue(inlineSizeName);
-    base.setCSSProperty(container, inlineSizeName, "");
+    Base.setCSSProperty(container, inlineSizeName, "");
     return r;
   }
 
   function getMinContentInline(): string {
-    base.setCSSProperty(element, "display", "inline-block");
+    Base.setCSSProperty(element, "display", "inline-block");
 
     // When the available inline size is zero, the fit-content inline size
     // equals to the min-content inline size.
-    base.setCSSProperty(container, inlineSizeName, "0");
+    Base.setCSSProperty(container, inlineSizeName, "0");
     const r = getComputedValue(inlineSizeName);
-    base.setCSSProperty(container, inlineSizeName, "");
+    Base.setCSSProperty(container, inlineSizeName, "");
     return r;
   }
 
@@ -193,15 +193,15 @@ export const getSize = (
         break;
     }
     result[size] = parseFloat(r);
-    base.setCSSProperty(element, "position", original.position);
-    base.setCSSProperty(element, "display", original.display);
+    Base.setCSSProperty(element, "position", original.position);
+    Base.setCSSProperty(element, "display", original.display);
   });
-  base.setCSSProperty(element, "width", original.width);
-  base.setCSSProperty(element, "max-width", original.maxWidth);
-  base.setCSSProperty(element, "min-width", original.minWidth);
-  base.setCSSProperty(element, "height", original.height);
-  base.setCSSProperty(element, "max-height", original.maxHeight);
-  base.setCSSProperty(element, "min-height", original.minHeight);
+  Base.setCSSProperty(element, "width", original.width);
+  Base.setCSSProperty(element, "max-width", original.maxWidth);
+  Base.setCSSProperty(element, "min-width", original.minWidth);
+  Base.setCSSProperty(element, "height", original.height);
+  Base.setCSSProperty(element, "max-height", original.maxHeight);
+  Base.setCSSProperty(element, "min-height", original.minHeight);
   parent.insertBefore(element, container);
   parent.removeChild(container);
   return result;

@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Calculate SHA1 hash of the given content.
+ * @fileoverview Sha1 - Calculate SHA1 hash of the given content.
  */
-import * as base from "./base";
+import * as Base from "./base";
 
 /**
  * @return big-endian byte sequence
@@ -47,7 +47,7 @@ export const decode32 = (bytes: string): number => {
  * @return big-endian uint32 numbers representing sha1 hash
  */
 export const bytesToSHA1Int32 = (bytes: string): number[] => {
-  const sb = new base.StringBuffer();
+  const sb = new Base.StringBuffer();
   sb.append(bytes);
   let appendCount = (55 - bytes.length) & 63;
   sb.append("\u0080");
@@ -122,7 +122,7 @@ export const bytesToSHA1Int8 = (bytes: string): number[] => {
  */
 export const bytesToSHA1Bytes = (bytes: string): string => {
   const h = bytesToSHA1Int32(bytes);
-  const sb = new base.StringBuffer();
+  const sb = new Base.StringBuffer();
   for (let i = 0; i < h.length; i++) {
     sb.append(encode32(h[i]));
   }
@@ -135,7 +135,7 @@ export const bytesToSHA1Bytes = (bytes: string): string => {
  */
 export const bytesToSHA1Hex = (bytes: string): string => {
   const sha1 = bytesToSHA1Bytes(bytes);
-  const sb = new base.StringBuffer();
+  const sb = new Base.StringBuffer();
   for (let i = 0; i < sha1.length; i++) {
     sb.append((sha1.charCodeAt(i) | 256).toString(16).substr(1));
   }
@@ -148,7 +148,7 @@ export const bytesToSHA1Hex = (bytes: string): string => {
  */
 export const bytesToSHA1Base64 = (bytes: string): string => {
   const sha1 = bytesToSHA1Bytes(bytes);
-  const sb = new base.StringBuffer();
-  base.appendBase64(sb, sha1);
+  const sb = new Base.StringBuffer();
+  Base.appendBase64(sb, sha1);
   return sb.toString();
 };

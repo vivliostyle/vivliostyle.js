@@ -15,19 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Vivliostyle Viewer class
+ * @fileoverview Viewer - Vivliostyle Viewer class
  */
-import * as base from "../adapt/base";
-import * as adaptviewer from "../adapt/viewer";
-import * as constants from "./constants";
+import * as Base from "../adapt/base";
+import * as ViewerImpl from "../adapt/viewer";
+import * as Constants from "./constants";
 
-import * as profile from "./profile";
+import * as Profile from "./profile";
 
-const PageProgression = constants.PageProgression;
+const PageProgression = Constants.PageProgression;
 
 /**
  * Viewer settings that must be passed to Viewer's constructor.
- * - userAgentRootURL: URL of a directory from which viewer resource files (under resources/ directory in the source repository) are served.
+ * - userAgentRootURL: URL of a directory from which viewer resource files
+ *   (under resources/ directory in the source repository) are served.
  * - viewportElement: An element used as the viewport of the displayed contents.
  * - window: Window object. If omitted, current `window` is used.
  * - debug: Debug flag.
@@ -43,12 +44,16 @@ export type ViewerSettings = {
  * Viewer options that can be set after the Viewer object is constructed.
  * - autoResize: Run layout again when the window is resized. default: true
  * - fontSize: Default font size (px). default: 16
- * - pageBorderWidth: Width of a border between two pages in a single spread (px). Effective only in spread view mode. default: 1
+ * - pageBorderWidth: Width of a border between two pages in a single
+ *   spread (px). Effective only in spread view mode. default: 1
  * - renderAllPages: Render all pages at the document load time. default: true
- * - pageViewMode: Page view mode (singlePage / spread / autoSpread). default: singlePage
+ * - pageViewMode: Page view mode (singlePage / spread / autoSpread).
+ *   default: singlePage
  * - zoom: Zoom factor with which pages are displayed. default: 1
  * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
- * - defaultPaperSize: Default paper size in px. Effective when @page size is set to auto. default: undefined (means the windows size is used as paper size).
+ * - defaultPaperSize: Default paper size in px. Effective when `@page` size
+ *   is set to auto. default: undefined (means the windows size is used as
+ *   paper size).
  */
 export type ViewerOptions = {
   autoResize: boolean | undefined;
@@ -94,10 +99,16 @@ function convertViewerOptions(options: ViewerOptions): object {
 
 /**
  * Options for the displayed document.
- * - documentObject: Document object for the document. If provided, it is used directly without parsing the source again.
- * - fragment: Fragmentation identifier (EPUB CFI) of the location in the document which is to be displayed.
- * - authorStyleSheet: An array of author style sheets to be injected after all author style sheets referenced from the document. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
- * - userStyleSheet: An array of user style sheets to be injected. A single stylesheet may be a URL of the style sheet or a text content of the style sheet.
+ * - documentObject: Document object for the document. If provided, it is used
+ *   directly without parsing the source again.
+ * - fragment: Fragmentation identifier (EPUB CFI) of the location in the
+ *   document which is to be displayed.
+ * - authorStyleSheet: An array of author style sheets to be injected after all
+ *   author style sheets referenced from the document. A single stylesheet may
+ *   be a URL of the style sheet or a text content of the style sheet.
+ * - userStyleSheet: An array of user style sheets to be injected.
+ *   A single stylesheet may be a URL of the style sheet or a text content of
+ *   the style sheet.
  */
 export type DocumentOptions = {
   documentObject: Document | undefined;
@@ -113,8 +124,13 @@ export type DocumentOptions = {
 /**
  * Options for a single source document.
  * - url: URL of the document.
- * - startPage: If specified, the `page` page-based counter is set to the specified value on the first page of the document. It is equivalent to specifying `counter-reset: page [specified value - 1]` on that page.
- * - skipPagesBefore: If specified, the `page` page-based counter is incremented by the specified value *before* updating page-based counters on the first page of the document. This option is ignored if `startPageNumber` option is also specified.
+ * - startPage: If specified, the `page` page-based counter is set to the
+ *   specified value on the first page of the document. It is equivalent to
+ *   specifying `counter-reset: page [specified value - 1]` on that page.
+ * - skipPagesBefore: If specified, the `page` page-based counter is
+ *   incremented by the specified value *before* updating page-based counters
+ *   on the first page of the document.
+ *   This option is ignored if `startPageNumber` option is also specified.
  */
 export type SingleDocumentOptions =
   | string
@@ -137,8 +153,8 @@ export class Viewer {
     private readonly settings: ViewerSettings,
     opt_options?: ViewerOptions
   ) {
-    constants.setDebug(settings.debug);
-    this.adaptViewer = new adaptviewer.Viewer(
+    Constants.setDebug(settings.debug);
+    this.adaptViewer = new ViewerImpl.Viewer(
       settings["window"] || window,
       settings["viewportElement"],
       "main",
@@ -148,7 +164,7 @@ export class Viewer {
     if (opt_options) {
       this.setOptions(opt_options);
     }
-    this.eventTarget = new base.SimpleEventTarget();
+    this.eventTarget = new Base.SimpleEventTarget();
     Object.defineProperty(this, "readyState", {
       get() {
         return this.adaptViewer.readyState;
@@ -168,7 +184,7 @@ export class Viewer {
     Object.assign(this.options, options);
   }
 
-  private dispatcher(msg: base.JSON) {
+  private dispatcher(msg: Base.JSON) {
     /** @dict */
     const event = { type: msg["t"] };
     const o = msg as object;
@@ -189,7 +205,7 @@ export class Viewer {
   addListener(type: string, listener: (p1: { type: string }) => void) {
     this.eventTarget.addEventListener(
       type,
-      listener as base.EventListener,
+      listener as Base.EventListener,
       false
     );
   }
@@ -202,7 +218,7 @@ export class Viewer {
   removeListener(type: string, listener: (p1: { type: string }) => void) {
     this.eventTarget.removeEventListener(
       type,
-      listener as base.EventListener,
+      listener as Base.EventListener,
       false
     );
   }
@@ -305,7 +321,7 @@ export class Viewer {
    * Returns the current page progression of the viewer. If no document is
    * loaded, returns null.
    */
-  getCurrentPageProgression(): constants.PageProgression | null {
+  getCurrentPageProgression(): Constants.PageProgression | null {
     return this.adaptViewer.getCurrentPageProgression();
   }
 
@@ -362,7 +378,7 @@ export class Viewer {
 
 function convertSingleDocumentOptions(
   singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[]
-): adaptviewer.SingleDocumentParam[] | null {
+): ViewerImpl.SingleDocumentParam[] | null {
   function toNumberOrNull(num: any): number | null {
     return typeof num === "number" ? num : null;
   }
@@ -373,13 +389,13 @@ function convertSingleDocumentOptions(
         url: opt,
         startPage: null,
         skipPagesBefore: null
-      } as adaptviewer.SingleDocumentParam;
+      } as ViewerImpl.SingleDocumentParam;
     } else {
       return {
         url: opt["url"],
         startPage: toNumberOrNull(opt["startPage"]),
         skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"])
-      } as adaptviewer.SingleDocumentParam;
+      } as ViewerImpl.SingleDocumentParam;
     }
   }
   if (Array.isArray(singleDocumentOptions)) {
@@ -403,11 +419,11 @@ export enum Navigation {
   LAST = "last"
 }
 
-export type ZoomType = adaptviewer.ZoomType;
-export const ZoomType = adaptviewer.ZoomType;
+export type ZoomType = ViewerImpl.ZoomType;
+export const ZoomType = ViewerImpl.ZoomType;
 
-export type PageViewMode = adaptviewer.PageViewMode;
-export const PageViewMode = adaptviewer.PageViewMode;
+export type PageViewMode = ViewerImpl.PageViewMode;
+export const PageViewMode = ViewerImpl.PageViewMode;
 
 export const viewer = {
   Viewer,
@@ -415,4 +431,4 @@ export const viewer = {
   ZoomType
 };
 
-profile.profiler.forceRegisterEndTiming("load_vivliostyle");
+Profile.profiler.forceRegisterEndTiming("load_vivliostyle");

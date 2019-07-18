@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Deal with page masters, partition groups, and partitions.
+ * @fileoverview Pm - Deal with page masters, partition groups, and partitions.
  */
-import * as base from "./base";
-import * as css from "./css";
-import * as csscasc from "./csscasc";
-import * as exprs from "./expr";
-import * as vtree from "./vtree";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
+import * as Exprs from "./expr";
+import * as Vtree from "./vtree";
 
 import { DispatchParserHandler } from "./cssparse";
-import * as cssparse from "./cssparse";
+import * as CssParse from "./cssparse";
 import { ValidatorSet, PropertyReceiver } from "./cssvalid";
 import { DocumentFaces } from "./font";
 
@@ -38,20 +38,20 @@ export abstract class PageBox<
   I extends PageBoxInstance = PageBoxInstance<any>
 > {
   // styles specified in the at-rule
-  specified: csscasc.ElementStyle = {};
+  specified: CssCasc.ElementStyle = {};
   children: PageBox[] = [];
   pageMaster: PageMaster = null;
   index: number = 0;
   key: any;
 
-  protected _scope: exprs.LexicalScope;
+  protected _scope: Exprs.LexicalScope;
 
-  get scope(): exprs.LexicalScope {
+  get scope(): Exprs.LexicalScope {
     return this._scope;
   }
 
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     public readonly name: string | null,
     public readonly pseudoName: string | null,
     public readonly classes: string[],
@@ -107,15 +107,15 @@ export abstract class PageBox<
  * Parent of all page masters
  */
 export class RootPageBox extends PageBox<RootPageBoxInstance> {
-  constructor(scope: exprs.LexicalScope) {
+  constructor(scope: Exprs.LexicalScope) {
     super(scope, null, null, [], null);
-    this.specified["width"] = new csscasc.CascadeValue(css.fullWidth, 0);
-    this.specified["height"] = new csscasc.CascadeValue(css.fullHeight, 0);
+    this.specified["width"] = new CssCasc.CascadeValue(Css.fullWidth, 0);
+    this.specified["height"] = new CssCasc.CascadeValue(Css.fullHeight, 0);
   }
 }
 
-export class PageMasterScope extends exprs.LexicalScope {
-  constructor(scope: exprs.LexicalScope, public pageMaster: PageMaster) {
+export class PageMasterScope extends Exprs.LexicalScope {
+  constructor(scope: Exprs.LexicalScope, public pageMaster: PageMaster) {
     super(scope, resolver);
     const self = this;
     function resolver(qualifiedName, isFunc) {
@@ -149,12 +149,12 @@ export class PageMaster<
   keyMap: { [key: string]: string } = {};
 
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     name: string | null,
     pseudoName: string | null,
     classes: string[],
     parent: RootPageBox,
-    public readonly condition: exprs.Val,
+    public readonly condition: Exprs.Val,
     public readonly specificity: number
   ) {
     super(scope, name, pseudoName, classes, parent);
@@ -163,18 +163,18 @@ export class PageMaster<
       this._scope = new PageMasterScope(scope, this);
     }
     this.pageMaster = this;
-    this.specified["width"] = new csscasc.CascadeValue(css.fullWidth, 0);
-    this.specified["height"] = new csscasc.CascadeValue(css.fullHeight, 0);
-    this.specified["wrap-flow"] = new csscasc.CascadeValue(css.ident.auto, 0);
-    this.specified["position"] = new csscasc.CascadeValue(
-      css.ident.relative,
+    this.specified["width"] = new CssCasc.CascadeValue(Css.fullWidth, 0);
+    this.specified["height"] = new CssCasc.CascadeValue(Css.fullHeight, 0);
+    this.specified["wrap-flow"] = new CssCasc.CascadeValue(Css.ident.auto, 0);
+    this.specified["position"] = new CssCasc.CascadeValue(
+      Css.ident.relative,
       0
     );
-    this.specified["overflow"] = new csscasc.CascadeValue(css.ident.visible, 0);
+    this.specified["overflow"] = new CssCasc.CascadeValue(Css.ident.visible, 0);
 
     // Shift 1px to workaround Chrome printing bug
-    this.specified["top"] = new csscasc.CascadeValue(
-      new css.Numeric(-1, "px"),
+    this.specified["top"] = new CssCasc.CascadeValue(
+      new Css.Numeric(-1, "px"),
       0
     );
   }
@@ -209,7 +209,7 @@ export class PageMaster<
   /**
    * Point the pageMaster reference in the PageMasterScope to the current page
    * master. This is needed when a page master is cloned and shares a common
-   * scope with the original page master. Since every exprs.Val which the
+   * scope with the original page master. Since every Exprs.Val which the
    * page master holds has a reference to the scope and uses it for variable
    * resolution, this reference must be updated properly before the page master
    * instance is used.
@@ -226,7 +226,7 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
   pageMaster: any;
 
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -237,7 +237,7 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
     if (name) {
       this.pageMaster.keyMap[name] = this.key;
     }
-    this.specified["wrap-flow"] = new csscasc.CascadeValue(css.ident.auto, 0);
+    this.specified["wrap-flow"] = new CssCasc.CascadeValue(Css.ident.auto, 0);
   }
 
   /**
@@ -273,7 +273,7 @@ export class Partition<
   pageMaster: any;
 
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -316,44 +316,44 @@ export class Partition<
  * @param def default value
  */
 export const toExprIdent = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
   def: string
-): exprs.Val => {
+): Exprs.Val => {
   if (!val) {
-    return new exprs.Const(scope, def);
+    return new Exprs.Const(scope, def);
   }
   return val.toExpr(scope, scope.zero);
 };
 
 export const toExprAuto = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
-  ref: exprs.Val
-): exprs.Val => {
-  if (!val || val === css.ident.auto) {
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
+  ref: Exprs.Val
+): Exprs.Val => {
+  if (!val || val === Css.ident.auto) {
     return null;
   }
   return val.toExpr(scope, ref);
 };
 
 export const toExprNormal = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
-  ref: exprs.Val
-): exprs.Val => {
-  if (!val || val === css.ident.normal) {
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
+  ref: Exprs.Val
+): Exprs.Val => {
+  if (!val || val === Css.ident.normal) {
     return null;
   }
   return val.toExpr(scope, ref);
 };
 
 export const toExprZero = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
-  ref: exprs.Val
-): exprs.Val => {
-  if (!val || val === css.ident.auto) {
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
+  ref: Exprs.Val
+): Exprs.Val => {
+  if (!val || val === Css.ident.auto) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
@@ -365,13 +365,13 @@ export const toExprZero = (
  * Otherwise, return the value itself.
  */
 export const toExprZeroAuto = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
-  ref: exprs.Val
-): exprs.Val => {
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
+  ref: Exprs.Val
+): Exprs.Val => {
   if (!val) {
     return scope.zero;
-  } else if (val === css.ident.auto) {
+  } else if (val === Css.ident.auto) {
     return null;
   } else {
     return val.toExpr(scope, ref);
@@ -379,35 +379,35 @@ export const toExprZeroAuto = (
 };
 
 export const toExprZeroBorder = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
-  styleVal: css.Val,
-  ref: exprs.Val
-): exprs.Val => {
-  if (!val || styleVal === css.ident.none) {
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
+  styleVal: Css.Val,
+  ref: Exprs.Val
+): Exprs.Val => {
+  if (!val || styleVal === Css.ident.none) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
 };
 
 export const toExprBool = (
-  scope: exprs.LexicalScope,
-  val: css.Val,
-  def: exprs.Val
-): exprs.Val => {
+  scope: Exprs.LexicalScope,
+  val: Css.Val,
+  def: Exprs.Val
+): Exprs.Val => {
   if (!val) {
     return def;
   }
-  if (val === css.ident._true) {
+  if (val === Css.ident._true) {
     return scope._true;
   }
-  if (val === css.ident._false) {
+  if (val === Css.ident._false) {
     return scope._false;
   }
   return val.toExpr(scope, scope.zero);
 };
 
-export interface InstanceHolder extends exprs.Context {
+export interface InstanceHolder extends Exprs.Context {
   registerInstance(key: string, instance: PageBoxInstance): void;
 
   /**
@@ -418,12 +418,12 @@ export interface InstanceHolder extends exprs.Context {
 
 export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   /**
-   * cascaded styles, geometric ones converted to css.Expr
+   * cascaded styles, geometric ones converted to Css.Expr
    */
-  protected cascaded: csscasc.ElementStyle = {};
-  style: { [key: string]: css.Val } = {};
-  private autoWidth: exprs.Native = null;
-  private autoHeight: exprs.Native = null;
+  protected cascaded: CssCasc.ElementStyle = {};
+  style: { [key: string]: Css.Val } = {};
+  private autoWidth: Exprs.Native = null;
+  private autoHeight: Exprs.Native = null;
   children: PageBoxInstance[] = [];
   isAutoWidth: boolean = false;
   isAutoHeight: boolean = false;
@@ -432,8 +432,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   private calculatedWidth: number = 0;
   private calculatedHeight: number = 0;
   pageMasterInstance: PageMasterInstance = null;
-  namedValues: { [key: string]: exprs.Val } = {};
-  namedFuncs: { [key: string]: exprs.Val } = {};
+  namedValues: { [key: string]: Exprs.Val } = {};
+  namedFuncs: { [key: string]: Exprs.Val } = {};
   vertical: boolean = false;
   rtl: boolean = false;
   suppressEmptyBoxGeneration: boolean = false;
@@ -455,16 +455,16 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     this.calculatedHeight = 0;
   }
 
-  private addNamedValues(name1: string, name2: string): exprs.Val {
+  private addNamedValues(name1: string, name2: string): Exprs.Val {
     const v1 = this.resolveName(name1);
     const v2 = this.resolveName(name2);
     if (!v1 || !v2) {
       throw new Error("E_INTERNAL");
     }
-    return exprs.add(this.pageBox.scope, v1, v2);
+    return Exprs.add(this.pageBox.scope, v1, v2);
   }
 
-  resolveName(name: string): exprs.Val {
+  resolveName(name: string): Exprs.Val {
     let expr = this.namedValues[name];
     if (expr) {
       return expr;
@@ -534,8 +534,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         altName = this.vertical ? "height" : "width";
       } else {
         const map = this.vertical
-          ? csscasc.couplingMapVert
-          : csscasc.couplingMapHor;
+          ? CssCasc.couplingMapVert
+          : CssCasc.couplingMapHor;
         altName = name;
         for (const key in map) {
           altName = altName.replace(key, map[key]);
@@ -560,16 +560,16 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       case "columns": {
         // min(count,column-count) * (column-width + column-gap) - column-gap
         const scope = this.pageBox.scope;
-        const count = new exprs.Param(scope, 0);
+        const count = new Exprs.Param(scope, 0);
         const columnCount = this.resolveName("column-count");
         const columnWidth = this.resolveName("column-width");
         const columnGap = this.resolveName("column-gap");
-        expr = exprs.sub(
+        expr = Exprs.sub(
           scope,
-          exprs.mul(
+          Exprs.mul(
             scope,
-            new exprs.Call(scope, "min", [count, columnCount]),
-            exprs.add(scope, columnWidth, columnGap)
+            new Exprs.Call(scope, "min", [count, columnCount]),
+            Exprs.add(scope, columnWidth, columnGap)
           ),
           columnGap
         );
@@ -588,19 +588,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     let enabled = toExprBool(scope, style["enabled"], scope._true);
     const page = toExprAuto(scope, style["page"], scope.zero);
     if (page) {
-      const currentPage = new exprs.Named(scope, "page-number");
-      enabled = exprs.and(
+      const currentPage = new Exprs.Named(scope, "page-number");
+      enabled = Exprs.and(
         scope,
         enabled,
-        new exprs.Eq(scope, page, currentPage)
+        new Exprs.Eq(scope, page, currentPage)
       );
     }
     const minPageWidth = toExprAuto(scope, style["min-page-width"], scope.zero);
     if (minPageWidth) {
-      enabled = exprs.and(
+      enabled = Exprs.and(
         scope,
         enabled,
-        new exprs.Ge(scope, new exprs.Named(scope, "page-width"), minPageWidth)
+        new Exprs.Ge(scope, new Exprs.Named(scope, "page-width"), minPageWidth)
       );
     }
     const minPageHeight = toExprAuto(
@@ -609,21 +609,21 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       scope.zero
     );
     if (minPageHeight) {
-      enabled = exprs.and(
+      enabled = Exprs.and(
         scope,
         enabled,
-        new exprs.Ge(
+        new Exprs.Ge(
           scope,
-          new exprs.Named(scope, "page-height"),
+          new Exprs.Named(scope, "page-height"),
           minPageHeight
         )
       );
     }
     enabled = this.boxSpecificEnabled(enabled);
-    style["enabled"] = new css.Expr(enabled);
+    style["enabled"] = new Css.Expr(enabled);
   }
 
-  protected boxSpecificEnabled(enabled: exprs.Val): exprs.Val {
+  protected boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     return enabled;
   }
 
@@ -653,36 +653,36 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     );
     let marginRight = toExprAuto(scope, style["margin-right"], parentWidth);
     let right = toExprAuto(scope, style["right"], parentWidth);
-    const leftBP = exprs.add(scope, borderLeftWidth, paddingLeft);
-    const rightBP = exprs.add(scope, borderLeftWidth, paddingRight);
+    const leftBP = Exprs.add(scope, borderLeftWidth, paddingLeft);
+    const rightBP = Exprs.add(scope, borderLeftWidth, paddingRight);
     if (left && right && width) {
-      let extra = exprs.sub(
+      let extra = Exprs.sub(
         scope,
         parentWidth,
-        exprs.add(
+        Exprs.add(
           scope,
           width,
-          exprs.add(scope, exprs.add(scope, left, leftBP), rightBP)
+          Exprs.add(scope, Exprs.add(scope, left, leftBP), rightBP)
         )
       );
       if (!marginLeft) {
-        extra = exprs.sub(scope, extra, right);
+        extra = Exprs.sub(scope, extra, right);
         if (!marginRight) {
-          marginLeft = exprs.mul(scope, extra, new exprs.Const(scope, 0.5));
+          marginLeft = Exprs.mul(scope, extra, new Exprs.Const(scope, 0.5));
           marginRight = marginLeft;
         } else {
-          marginLeft = exprs.sub(scope, extra, marginRight);
+          marginLeft = Exprs.sub(scope, extra, marginRight);
         }
       } else {
         if (!marginRight) {
-          marginRight = exprs.sub(
+          marginRight = Exprs.sub(
             scope,
             extra,
-            exprs.add(scope, right, marginLeft)
+            Exprs.add(scope, right, marginLeft)
           );
         } else {
           // overconstraint
-          right = exprs.sub(scope, extra, marginRight);
+          right = Exprs.sub(scope, extra, marginRight);
         }
       }
     } else {
@@ -704,19 +704,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         width = this.autoWidth;
         this.isAutoWidth = true;
       }
-      const remains = exprs.sub(
+      const remains = Exprs.sub(
         scope,
         parentWidth,
-        exprs.add(
+        Exprs.add(
           scope,
-          exprs.add(scope, marginLeft, leftBP),
-          exprs.add(scope, marginRight, rightBP)
+          Exprs.add(scope, marginLeft, leftBP),
+          Exprs.add(scope, marginRight, rightBP)
         )
       );
       if (this.isAutoWidth) {
         if (!maxWidth) {
           // TODO: handle the case when right/left depends on width
-          maxWidth = exprs.sub(scope, remains, left ? left : right);
+          maxWidth = Exprs.sub(scope, remains, left ? left : right);
         }
 
         // For multi-column layout, width is max-width.
@@ -730,11 +730,11 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         }
       }
       if (!left) {
-        left = exprs.sub(scope, remains, exprs.add(scope, right, width));
+        left = Exprs.sub(scope, remains, Exprs.add(scope, right, width));
       } else if (!width) {
-        width = exprs.sub(scope, remains, exprs.add(scope, left, right));
+        width = Exprs.sub(scope, remains, Exprs.add(scope, left, right));
       } else if (!right) {
-        right = exprs.sub(scope, remains, exprs.add(scope, left, width));
+        right = Exprs.sub(scope, remains, Exprs.add(scope, left, width));
       }
     }
 
@@ -743,17 +743,17 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       style["snap-width"] ||
       (this.parentInstance ? this.parentInstance.style["snap-width"] : null);
     const snapWidth = toExprZero(scope, snapWidthVal, parentWidth);
-    style["left"] = new css.Expr(left);
-    style["margin-left"] = new css.Expr(marginLeft);
-    style["border-left-width"] = new css.Expr(borderLeftWidth);
-    style["padding-left"] = new css.Expr(paddingLeft);
-    style["width"] = new css.Expr(width);
-    style["max-width"] = new css.Expr(maxWidth ? maxWidth : width);
-    style["padding-right"] = new css.Expr(paddingRight);
-    style["border-right-width"] = new css.Expr(borderRightWidth);
-    style["margin-right"] = new css.Expr(marginRight);
-    style["right"] = new css.Expr(right);
-    style["snap-width"] = new css.Expr(snapWidth);
+    style["left"] = new Css.Expr(left);
+    style["margin-left"] = new Css.Expr(marginLeft);
+    style["border-left-width"] = new Css.Expr(borderLeftWidth);
+    style["padding-left"] = new Css.Expr(paddingLeft);
+    style["width"] = new Css.Expr(width);
+    style["max-width"] = new Css.Expr(maxWidth ? maxWidth : width);
+    style["padding-right"] = new Css.Expr(paddingRight);
+    style["border-right-width"] = new Css.Expr(borderRightWidth);
+    style["margin-right"] = new Css.Expr(marginRight);
+    style["right"] = new Css.Expr(right);
+    style["snap-width"] = new Css.Expr(snapWidth);
   }
 
   protected initVertical(): void {
@@ -789,36 +789,36 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     );
     let marginBottom = toExprAuto(scope, style["margin-bottom"], parentWidth);
     let bottom = toExprAuto(scope, style["bottom"], parentHeight);
-    const topBP = exprs.add(scope, borderTopWidth, paddingTop);
-    const bottomBP = exprs.add(scope, borderBottomWidth, paddingBottom);
+    const topBP = Exprs.add(scope, borderTopWidth, paddingTop);
+    const bottomBP = Exprs.add(scope, borderBottomWidth, paddingBottom);
     if (top && bottom && height) {
-      let extra = exprs.sub(
+      let extra = Exprs.sub(
         scope,
         parentHeight,
-        exprs.add(
+        Exprs.add(
           scope,
           height,
-          exprs.add(scope, exprs.add(scope, top, topBP), bottomBP)
+          Exprs.add(scope, Exprs.add(scope, top, topBP), bottomBP)
         )
       );
       if (!marginTop) {
-        extra = exprs.sub(scope, extra, bottom);
+        extra = Exprs.sub(scope, extra, bottom);
         if (!marginBottom) {
-          marginTop = exprs.mul(scope, extra, new exprs.Const(scope, 0.5));
+          marginTop = Exprs.mul(scope, extra, new Exprs.Const(scope, 0.5));
           marginBottom = marginTop;
         } else {
-          marginTop = exprs.sub(scope, extra, marginBottom);
+          marginTop = Exprs.sub(scope, extra, marginBottom);
         }
       } else {
         if (!marginBottom) {
-          marginBottom = exprs.sub(
+          marginBottom = Exprs.sub(
             scope,
             extra,
-            exprs.add(scope, bottom, marginTop)
+            Exprs.add(scope, bottom, marginTop)
           );
         } else {
           // overconstraint
-          bottom = exprs.sub(scope, extra, marginTop);
+          bottom = Exprs.sub(scope, extra, marginTop);
         }
       }
     } else {
@@ -840,19 +840,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         height = this.autoHeight;
         this.isAutoHeight = true;
       }
-      const remains = exprs.sub(
+      const remains = Exprs.sub(
         scope,
         parentHeight,
-        exprs.add(
+        Exprs.add(
           scope,
-          exprs.add(scope, marginTop, topBP),
-          exprs.add(scope, marginBottom, bottomBP)
+          Exprs.add(scope, marginTop, topBP),
+          Exprs.add(scope, marginBottom, bottomBP)
         )
       );
       if (this.isAutoHeight) {
         if (!maxHeight) {
           // TODO: handle the case when top/bottom depends on height
-          maxHeight = exprs.sub(scope, remains, top ? top : bottom);
+          maxHeight = Exprs.sub(scope, remains, top ? top : bottom);
         }
 
         // For multi-column layout in vertical writing, height is max-height.
@@ -866,11 +866,11 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         }
       }
       if (!top) {
-        top = exprs.sub(scope, remains, exprs.add(scope, bottom, height));
+        top = Exprs.sub(scope, remains, Exprs.add(scope, bottom, height));
       } else if (!height) {
-        height = exprs.sub(scope, remains, exprs.add(scope, bottom, top));
+        height = Exprs.sub(scope, remains, Exprs.add(scope, bottom, top));
       } else if (!bottom) {
-        bottom = exprs.sub(scope, remains, exprs.add(scope, top, height));
+        bottom = Exprs.sub(scope, remains, Exprs.add(scope, top, height));
       }
     }
 
@@ -879,17 +879,17 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       style["snap-height"] ||
       (this.parentInstance ? this.parentInstance.style["snap-height"] : null);
     const snapHeight = toExprZero(scope, snapHeightVal, parentWidth);
-    style["top"] = new css.Expr(top);
-    style["margin-top"] = new css.Expr(marginTop);
-    style["border-top-width"] = new css.Expr(borderTopWidth);
-    style["padding-top"] = new css.Expr(paddingTop);
-    style["height"] = new css.Expr(height);
-    style["max-height"] = new css.Expr(maxHeight ? maxHeight : height);
-    style["padding-bottom"] = new css.Expr(paddingBottom);
-    style["border-bottom-width"] = new css.Expr(borderBottomWidth);
-    style["margin-bottom"] = new css.Expr(marginBottom);
-    style["bottom"] = new css.Expr(bottom);
-    style["snap-height"] = new css.Expr(snapHeight);
+    style["top"] = new Css.Expr(top);
+    style["margin-top"] = new Css.Expr(marginTop);
+    style["border-top-width"] = new Css.Expr(borderTopWidth);
+    style["padding-top"] = new Css.Expr(paddingTop);
+    style["height"] = new Css.Expr(height);
+    style["max-height"] = new Css.Expr(maxHeight ? maxHeight : height);
+    style["padding-bottom"] = new Css.Expr(paddingBottom);
+    style["border-bottom-width"] = new Css.Expr(borderBottomWidth);
+    style["margin-bottom"] = new Css.Expr(marginBottom);
+    style["bottom"] = new Css.Expr(bottom);
+    style["snap-height"] = new Css.Expr(snapHeight);
   }
 
   private initColumns(): void {
@@ -904,42 +904,42 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     let columnCount = toExprAuto(scope, style["column-count"], null);
     let columnGap = toExprNormal(scope, style["column-gap"], null);
     if (!columnGap) {
-      columnGap = new exprs.Numeric(scope, 1, "em");
+      columnGap = new Exprs.Numeric(scope, 1, "em");
     }
     if (columnWidth && !columnCount) {
-      columnCount = new exprs.Call(scope, "floor", [
-        exprs.div(
+      columnCount = new Exprs.Call(scope, "floor", [
+        Exprs.div(
           scope,
-          exprs.add(scope, width, columnGap),
-          exprs.add(scope, columnWidth, columnGap)
+          Exprs.add(scope, width, columnGap),
+          Exprs.add(scope, columnWidth, columnGap)
         )
       ]);
-      columnCount = new exprs.Call(scope, "max", [scope.one, columnCount]);
+      columnCount = new Exprs.Call(scope, "max", [scope.one, columnCount]);
     }
     if (!columnCount) {
       columnCount = scope.one;
     }
-    columnWidth = exprs.sub(
+    columnWidth = Exprs.sub(
       scope,
-      exprs.div(scope, exprs.add(scope, width, columnGap), columnCount),
+      Exprs.div(scope, Exprs.add(scope, width, columnGap), columnCount),
       columnGap
     );
-    style["column-width"] = new css.Expr(columnWidth);
-    style["column-count"] = new css.Expr(columnCount);
-    style["column-gap"] = new css.Expr(columnGap);
+    style["column-width"] = new Css.Expr(columnWidth);
+    style["column-count"] = new Css.Expr(columnCount);
+    style["column-gap"] = new Css.Expr(columnGap);
   }
 
   private depends(
     propName: string,
-    val: exprs.Val,
-    context: exprs.Context
+    val: Exprs.Val,
+    context: Exprs.Context
   ): boolean {
     return this.style[propName]
       .toExpr(this.pageBox.scope, null)
       .depend(val, context);
   }
 
-  private init(context: exprs.Context): void {
+  private init(context: Exprs.Context): void {
     // If context does not implement InstanceHolder we would not be able to
     // resolve "partition.property" names later.
     const holder = context as InstanceHolder;
@@ -950,36 +950,36 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     const regionIds = this.parentInstance
       ? this.parentInstance.getActiveRegions(context)
       : null;
-    const cascMap = csscasc.flattenCascadedStyle(
+    const cascMap = CssCasc.flattenCascadedStyle(
       this.cascaded,
       context,
       regionIds,
       false,
       null
     );
-    this.vertical = csscasc.isVertical(
+    this.vertical = CssCasc.isVertical(
       cascMap,
       context,
       this.parentInstance ? this.parentInstance.vertical : false
     );
-    this.rtl = csscasc.isRtl(
+    this.rtl = CssCasc.isRtl(
       cascMap,
       context,
       this.parentInstance ? this.parentInstance.rtl : false
     );
-    csscasc.convertToPhysical(
+    CssCasc.convertToPhysical(
       cascMap,
       style,
       this.vertical,
       this.rtl,
       (name, cascVal) => cascVal.value
     );
-    this.autoWidth = new exprs.Native(
+    this.autoWidth = new Exprs.Native(
       scope,
       () => self.calculatedWidth,
       "autoWidth"
     );
-    this.autoHeight = new exprs.Native(
+    this.autoHeight = new Exprs.Native(
       scope,
       () => self.calculatedHeight,
       "autoHeight"
@@ -990,29 +990,29 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     this.initEnabled();
   }
 
-  getProp(context: exprs.Context, name: string): css.Val {
+  getProp(context: Exprs.Context, name: string): Css.Val {
     let val = this.style[name];
     if (val) {
-      val = cssparse.evaluateCSSToCSS(context, val, name);
+      val = CssParse.evaluateCSSToCSS(context, val, name);
     }
     return val;
   }
 
-  getPropAsNumber(context: exprs.Context, name: string): number {
+  getPropAsNumber(context: Exprs.Context, name: string): number {
     let val = this.style[name];
     if (val) {
-      val = cssparse.evaluateCSSToCSS(context, val, name);
+      val = CssParse.evaluateCSSToCSS(context, val, name);
     }
-    return css.toNumber(val, context);
+    return Css.toNumber(val, context);
   }
 
-  getSpecial(context: exprs.Context, name: string): css.Val[] {
-    const arr = csscasc.getSpecial(this.cascaded, name);
+  getSpecial(context: Exprs.Context, name: string): Css.Val[] {
+    const arr = CssCasc.getSpecial(this.cascaded, name);
     if (arr) {
-      const result = [] as css.Val[];
+      const result = [] as Css.Val[];
       for (let i = 0; i < arr.length; i++) {
         const v = arr[i].evaluate(context, "");
-        if (v && v !== css.empty) {
+        if (v && v !== Css.empty) {
           result.push(v);
         }
       }
@@ -1023,7 +1023,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     return null;
   }
 
-  getActiveRegions(context: exprs.Context): string[] {
+  getActiveRegions(context: Exprs.Context): string[] {
     const arr = this.getSpecial(context, "region-id");
     if (arr) {
       const result = [] as string[];
@@ -1036,8 +1036,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   propagateProperty(
-    context: exprs.Context,
-    container: vtree.Container,
+    context: Exprs.Context,
+    container: Vtree.Container,
     name: string,
     docFaces: DocumentFaces
   ): void {
@@ -1045,7 +1045,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   propagatePropertyToElement(
-    context: exprs.Context,
+    context: Exprs.Context,
     element: Element,
     name: string,
     docFaces: DocumentFaces
@@ -1054,39 +1054,39 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     if (val) {
       if (
         val.isNumeric() &&
-        exprs.needUnitConversion((val as css.Numeric).unit)
+        Exprs.needUnitConversion((val as Css.Numeric).unit)
       ) {
-        val = css.convertNumericToPx(val, context);
+        val = Css.convertNumericToPx(val, context);
       }
       if (name === "font-family") {
         val = docFaces.filterFontFamily(val);
       }
-      base.setCSSProperty(element, name, val.toString());
+      Base.setCSSProperty(element, name, val.toString());
     }
   }
 
   propagateDelayedProperty(
-    context: exprs.Context,
-    container: vtree.Container,
+    context: Exprs.Context,
+    container: Vtree.Container,
     name: string,
-    delayedItems: vtree.DelayedItem[]
+    delayedItems: Vtree.DelayedItem[]
   ): void {
     const val = this.getProp(context, name);
     if (val) {
-      delayedItems.push(new vtree.DelayedItem(container.element, name, val));
+      delayedItems.push(new Vtree.DelayedItem(container.element, name, val));
     }
   }
 
-  assignLeftPosition(context: exprs.Context, container: vtree.Container): void {
+  assignLeftPosition(context: Exprs.Context, container: Vtree.Container): void {
     const left = this.getPropAsNumber(context, "left");
     const marginLeft = this.getPropAsNumber(context, "margin-left");
     const paddingLeft = this.getPropAsNumber(context, "padding-left");
     const borderLeftWidth = this.getPropAsNumber(context, "border-left-width");
     const width = this.getPropAsNumber(context, "width");
     container.setHorizontalPosition(left, width);
-    base.setCSSProperty(container.element, "margin-left", `${marginLeft}px`);
-    base.setCSSProperty(container.element, "padding-left", `${paddingLeft}px`);
-    base.setCSSProperty(
+    Base.setCSSProperty(container.element, "margin-left", `${marginLeft}px`);
+    Base.setCSSProperty(container.element, "padding-left", `${paddingLeft}px`);
+    Base.setCSSProperty(
       container.element,
       "border-left-width",
       `${borderLeftWidth}px`
@@ -1097,8 +1097,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   assignRightPosition(
-    context: exprs.Context,
-    container: vtree.Container
+    context: Exprs.Context,
+    container: Vtree.Container
   ): void {
     const right = this.getPropAsNumber(context, "right");
     const snapWidth = this.getPropAsNumber(context, "snap-height");
@@ -1108,13 +1108,13 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       context,
       "border-right-width"
     );
-    base.setCSSProperty(container.element, "margin-right", `${marginRight}px`);
-    base.setCSSProperty(
+    Base.setCSSProperty(container.element, "margin-right", `${marginRight}px`);
+    Base.setCSSProperty(
       container.element,
       "padding-right",
       `${paddingRight}px`
     );
-    base.setCSSProperty(
+    Base.setCSSProperty(
       container.element,
       "border-right-width",
       `${borderRightWidth}px`
@@ -1133,7 +1133,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     container.snapWidth = snapWidth;
   }
 
-  assignTopPosition(context: exprs.Context, container: vtree.Container): void {
+  assignTopPosition(context: Exprs.Context, container: Vtree.Container): void {
     const snapHeight = this.getPropAsNumber(context, "snap-height");
     const top = this.getPropAsNumber(context, "top");
     const marginTop = this.getPropAsNumber(context, "margin-top");
@@ -1152,10 +1152,10 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       }
     }
     container.paddingTop = paddingTop;
-    base.setCSSProperty(container.element, "top", `${top}px`);
-    base.setCSSProperty(container.element, "margin-top", `${marginTop}px`);
-    base.setCSSProperty(container.element, "padding-top", `${paddingTop}px`);
-    base.setCSSProperty(
+    Base.setCSSProperty(container.element, "top", `${top}px`);
+    Base.setCSSProperty(container.element, "margin-top", `${marginTop}px`);
+    Base.setCSSProperty(container.element, "padding-top", `${paddingTop}px`);
+    Base.setCSSProperty(
       container.element,
       "border-top-width",
       `${borderTopWidth}px`
@@ -1163,8 +1163,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   assignBottomPosition(
-    context: exprs.Context,
-    container: vtree.Container
+    context: Exprs.Context,
+    container: Vtree.Container
   ): void {
     const marginBottom = this.getPropAsNumber(context, "margin-bottom");
     const paddingBottom = this.getPropAsNumber(context, "padding-bottom");
@@ -1174,18 +1174,18 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     );
     const height =
       this.getPropAsNumber(context, "height") - container.snapOffsetY;
-    base.setCSSProperty(container.element, "height", `${height}px`);
-    base.setCSSProperty(
+    Base.setCSSProperty(container.element, "height", `${height}px`);
+    Base.setCSSProperty(
       container.element,
       "margin-bottom",
       `${marginBottom}px`
     );
-    base.setCSSProperty(
+    Base.setCSSProperty(
       container.element,
       "padding-bottom",
       `${paddingBottom}px`
     );
-    base.setCSSProperty(
+    Base.setCSSProperty(
       container.element,
       "border-bottom-width",
       `${borderBottomWidth}px`
@@ -1197,8 +1197,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   assignBeforePosition(
-    context: exprs.Context,
-    container: vtree.Container
+    context: Exprs.Context,
+    container: Vtree.Container
   ): void {
     if (this.vertical) {
       this.assignRightPosition(context, container);
@@ -1208,8 +1208,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   assignAfterPosition(
-    context: exprs.Context,
-    container: vtree.Container
+    context: Exprs.Context,
+    container: Vtree.Container
   ): void {
     if (this.vertical) {
       this.assignLeftPosition(context, container);
@@ -1219,8 +1219,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   assignStartEndPosition(
-    context: exprs.Context,
-    container: vtree.Container
+    context: Exprs.Context,
+    container: Vtree.Container
   ): void {
     if (this.vertical) {
       this.assignTopPosition(context, container);
@@ -1231,8 +1231,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
   }
 
-  sizeWithMaxHeight(context: exprs.Context, container: vtree.Container): void {
-    base.setCSSProperty(container.element, "border-top-width", "0px");
+  sizeWithMaxHeight(context: Exprs.Context, container: Vtree.Container): void {
+    Base.setCSSProperty(container.element, "border-top-width", "0px");
     let height = this.getPropAsNumber(context, "max-height");
     if (this.isTopDependentOnAutoHeight) {
       container.setVerticalPosition(0, height);
@@ -1240,12 +1240,12 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       this.assignTopPosition(context, container);
       height -= container.snapOffsetY;
       container.height = height;
-      base.setCSSProperty(container.element, "height", `${height}px`);
+      Base.setCSSProperty(container.element, "height", `${height}px`);
     }
   }
 
-  sizeWithMaxWidth(context: exprs.Context, container: vtree.Container): void {
-    base.setCSSProperty(container.element, "border-left-width", "0px");
+  sizeWithMaxWidth(context: Exprs.Context, container: Vtree.Container): void {
+    Base.setCSSProperty(container.element, "border-left-width", "0px");
     let width = this.getPropAsNumber(context, "max-width");
     if (this.isRightDependentOnAutoWidth) {
       container.setHorizontalPosition(0, width);
@@ -1254,20 +1254,20 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       width -= container.snapOffsetX;
       container.width = width;
       const right = this.getPropAsNumber(context, "right");
-      base.setCSSProperty(container.element, "right", `${right}px`);
-      base.setCSSProperty(container.element, "width", `${width}px`);
+      Base.setCSSProperty(container.element, "right", `${right}px`);
+      Base.setCSSProperty(container.element, "width", `${width}px`);
     }
   }
 
   prepareContainer(
-    context: exprs.Context,
-    container: vtree.Container,
-    page: vtree.Page,
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
     docFaces: DocumentFaces,
-    clientLayout: vtree.ClientLayout
+    clientLayout: Vtree.ClientLayout
   ): void {
     if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
-      base.setCSSProperty(
+      Base.setCSSProperty(
         container.element,
         "writing-mode",
         this.vertical ? "vertical-rl" : "horizontal-tb"
@@ -1303,9 +1303,9 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   transferContentProps(
-    context: exprs.Context,
-    container: vtree.Container,
-    page: vtree.Page,
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
     docFaces: DocumentFaces
   ): void {
     for (let i = 0; i < passContentProperties.length; i++) {
@@ -1319,7 +1319,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   transferSinglUriContentProps(
-    context: exprs.Context,
+    context: Exprs.Context,
     element: Element,
     docFaces: DocumentFaces
   ): void {
@@ -1337,12 +1337,12 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
    * @param column (null when content comes from the content property)
    */
   finishContainer(
-    context: exprs.Context,
-    container: vtree.Container,
-    page: vtree.Page,
-    column: vtree.Container,
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    column: Vtree.Container,
     columnCount: number,
-    clientLayout: vtree.ClientLayout,
+    clientLayout: Vtree.ClientLayout,
     docFaces: DocumentFaces
   ): void {
     if (this.vertical) {
@@ -1357,10 +1357,10 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     let bbox = null;
     if (readWidth || readHeight) {
       if (readWidth) {
-        base.setCSSProperty(container.element, "width", "auto");
+        Base.setCSSProperty(container.element, "width", "auto");
       }
       if (readHeight) {
-        base.setCSSProperty(container.element, "height", "auto");
+        Base.setCSSProperty(container.element, "height", "auto");
       }
       bbox = clientLayout.getElementClientRect(
         column ? column.element : container.element
@@ -1411,8 +1411,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       if (
         ruleWidth > 0 &&
         ruleStyle &&
-        ruleStyle != css.ident.none &&
-        ruleColor != css.ident.transparent
+        ruleStyle != Css.ident.none &&
+        ruleColor != Css.ident.transparent
       ) {
         const columnGap = this.getPropAsNumber(context, "column-gap");
         const containerSize = this.vertical
@@ -1428,16 +1428,16 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           const size =
             container.height + container.paddingTop + container.paddingBottom;
           const rule = container.element.ownerDocument.createElement("div");
-          base.setCSSProperty(rule, "position", "absolute");
-          base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
-          base.setCSSProperty(rule, this.vertical ? "top" : "left", `${pos}px`);
-          base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
-          base.setCSSProperty(
+          Base.setCSSProperty(rule, "position", "absolute");
+          Base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
+          Base.setCSSProperty(rule, this.vertical ? "top" : "left", `${pos}px`);
+          Base.setCSSProperty(rule, this.vertical ? "height" : "width", "0px");
+          Base.setCSSProperty(
             rule,
             this.vertical ? "width" : "height",
             `${size}px`
           );
-          base.setCSSProperty(
+          Base.setCSSProperty(
             rule,
             border,
             `${ruleWidth}px ${ruleStyle.toString()}${
@@ -1467,14 +1467,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   applyCascadeAndInit(
-    cascade: csscasc.CascadeInstance,
-    docElementStyle: csscasc.ElementStyle
+    cascade: CssCasc.CascadeInstance,
+    docElementStyle: CssCasc.ElementStyle
   ): void {
     const style = this.cascaded;
     const specified = this.pageBox.specified;
     for (const name in specified) {
-      if (csscasc.isPropName(name)) {
-        csscasc.setProp(style, name, csscasc.getProp(specified, name));
+      if (CssCasc.isPropName(name)) {
+        CssCasc.setProp(style, name, CssCasc.getProp(specified, name));
       }
     }
     if (this.pageBox.pseudoName == userAgentPageMasterPseudo) {
@@ -1494,7 +1494,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     cascade.pushRule(this.pageBox.classes, null, style);
     if (style["content"]) {
       style["content"] = style["content"].filterValue(
-        new csscasc.ContentPropVisitor(cascade, null, cascade.counterResolver)
+        new CssCasc.ContentPropVisitor(cascade, null, cascade.counterResolver)
       );
     }
     this.init(cascade.context);
@@ -1505,7 +1505,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     cascade.popRule();
   }
 
-  resolveAutoSizing(context: exprs.Context): void {
+  resolveAutoSizing(context: Exprs.Context): void {
     // all implicit dependencies are set up at this point
     if (this.isAutoWidth) {
       this.isRightDependentOnAutoWidth =
@@ -1634,7 +1634,7 @@ export class PageMasterInstance<
   boxSpecificEnabled(enabled) {
     const pageMaster = this.pageBox.pageMaster;
     if (pageMaster.condition) {
-      enabled = exprs.and(pageMaster.scope, enabled, pageMaster.condition);
+      enabled = Exprs.and(pageMaster.scope, enabled, pageMaster.condition);
     }
     return enabled;
   }
@@ -1644,9 +1644,9 @@ export class PageMasterInstance<
    * page layout. Override in subclasses.
    */
   adjustPageLayout(
-    context: exprs.Context,
-    page: vtree.Page,
-    clientLayout: vtree.ClientLayout
+    context: Exprs.Context,
+    page: Vtree.Page,
+    clientLayout: Vtree.ClientLayout
   ) {}
 }
 
@@ -1670,30 +1670,30 @@ export class PartitionInstance<
   }
 
   processPartitionList(
-    enabled: exprs.Val,
-    listVal: css.Val,
+    enabled: Exprs.Val,
+    listVal: Css.Val,
     conflicting: boolean
-  ): exprs.Val {
+  ): Exprs.Val {
     let list = null;
-    if (listVal instanceof css.Ident) {
+    if (listVal instanceof Css.Ident) {
       list = [listVal];
     }
-    if (listVal instanceof css.CommaList) {
-      list = (listVal as css.CommaList).values;
+    if (listVal instanceof Css.CommaList) {
+      list = (listVal as Css.CommaList).values;
     }
     if (list) {
       const scope = this.pageBox.scope;
       for (let i = 0; i < list.length; i++) {
-        if (list[i] instanceof css.Ident) {
-          const qname = exprs.makeQualifiedName(
-            (list[i] as css.Ident).name,
+        if (list[i] instanceof Css.Ident) {
+          const qname = Exprs.makeQualifiedName(
+            (list[i] as Css.Ident).name,
             "enabled"
           );
-          let term: exprs.Val = new exprs.Named(scope, qname);
+          let term: Exprs.Val = new Exprs.Named(scope, qname);
           if (conflicting) {
-            term = new exprs.Not(scope, term);
+            term = new Exprs.Not(scope, term);
           }
-          enabled = exprs.and(scope, enabled, term);
+          enabled = Exprs.and(scope, enabled, term);
         }
       }
     }
@@ -1710,8 +1710,8 @@ export class PartitionInstance<
       toExprBool(scope, style["required"], scope._false) !== scope._false;
     if (required || this.isAutoHeight) {
       const flowName = toExprIdent(scope, style["flow-from"], "body");
-      const hasContent = new exprs.Call(scope, "has-content", [flowName]);
-      enabled = exprs.and(scope, enabled, hasContent);
+      const hasContent = new Exprs.Call(scope, "has-content", [flowName]);
+      enabled = Exprs.and(scope, enabled, hasContent);
     }
     enabled = this.processPartitionList(
       enabled,
@@ -1728,8 +1728,8 @@ export class PartitionInstance<
       let pmEnabled = pmEnabledVal
         ? pmEnabledVal.toExpr(scope, null)
         : scope._true;
-      pmEnabled = exprs.and(scope, pmEnabled, enabled);
-      this.pageMasterInstance.style["enabled"] = new css.Expr(pmEnabled);
+      pmEnabled = Exprs.and(scope, pmEnabled, enabled);
+      this.pageMasterInstance.style["enabled"] = new Css.Expr(pmEnabled);
     }
     return enabled;
   }
@@ -1738,7 +1738,7 @@ export class PartitionInstance<
    * @override
    */
   prepareContainer(context, container, delayedItems, docFaces, clientLayout) {
-    base.setCSSProperty(container.element, "overflow", "hidden"); // default value
+    Base.setCSSProperty(container.element, "overflow", "hidden"); // default value
     super.prepareContainer(
       context,
       container,
@@ -1750,10 +1750,10 @@ export class PartitionInstance<
 }
 
 //--------------------- parsing -----------------------
-export class PageBoxParserHandler extends cssparse.SlaveParserHandler
+export class PageBoxParserHandler extends CssParse.SlaveParserHandler
   implements PropertyReceiver {
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
     public readonly target: PageBox,
     public readonly validatorSet: ValidatorSet
@@ -1791,18 +1791,18 @@ export class PageBoxParserHandler extends cssparse.SlaveParserHandler
    * @override
    */
   simpleProperty(name, value, important) {
-    this.target.specified[name] = new csscasc.CascadeValue(
+    this.target.specified[name] = new CssCasc.CascadeValue(
       value,
       important
-        ? cssparse.SPECIFICITY_STYLE
-        : cssparse.SPECIFICITY_STYLE_IMPORTANT
+        ? CssParse.SPECIFICITY_STYLE
+        : CssParse.SPECIFICITY_STYLE_IMPORTANT
     );
   }
 }
 
 export class PartitionParserHandler extends PageBoxParserHandler {
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
     target: Partition,
     validatorSet: ValidatorSet
@@ -1813,15 +1813,15 @@ export class PartitionParserHandler extends PageBoxParserHandler {
 
 export class PartitionGroupParserHandler extends PageBoxParserHandler {
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
     target: PartitionGroup,
     validatorSet: ValidatorSet
   ) {
     super(scope, owner, target, validatorSet);
-    target.specified["width"] = new csscasc.CascadeValue(css.hundredPercent, 0);
-    target.specified["height"] = new csscasc.CascadeValue(
-      css.hundredPercent,
+    target.specified["width"] = new CssCasc.CascadeValue(Css.hundredPercent, 0);
+    target.specified["height"] = new CssCasc.CascadeValue(
+      Css.hundredPercent,
       0
     );
   }
@@ -1869,7 +1869,7 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
 
 export class PageMasterParserHandler extends PageBoxParserHandler {
   constructor(
-    scope: exprs.LexicalScope,
+    scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
     target: PageMaster,
     validatorSet: ValidatorSet

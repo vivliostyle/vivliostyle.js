@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Control column layout
+ * @fileoverview Columns - Control column layout.
  */
-import * as css from "../adapt/css";
-import * as asserts from "./asserts";
+import * as Css from "../adapt/css";
+import * as Asserts from "./asserts";
 
 import { Column } from "../adapt/layout";
 import { Result, newFrame, Frame } from "../adapt/task";
@@ -141,7 +141,7 @@ export abstract class ColumnBalancer {
     newLayoutResult.columns.forEach(c => {
       parent.appendChild(c.element);
     });
-    asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
+    Asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
     this.regionPageFloatLayoutContext.attachChildren(
       newLayoutResult.columnPageFloatLayoutContexts
     );
@@ -341,14 +341,14 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
 
 export const createColumnBalancer = (
   columnCount: number,
-  columnFill: css.Ident,
+  columnFill: Css.Ident,
   columnGenerator: ColumnGenerator,
   regionPageFloatLayoutContext: PageFloatLayoutContext,
   layoutContainer: Container,
   columns: Column[],
   flowPosition: FlowPosition
 ): ColumnBalancer | null => {
-  if (columnFill === css.ident.auto) {
+  if (columnFill === Css.ident.auto) {
     return null;
   } else {
     // TODO: how to handle a case where no more in-flow contents but some
@@ -363,14 +363,14 @@ export const createColumnBalancer = (
         layoutContainer,
         columnCount
       );
-    } else if (columnFill === css.ident.balance_all) {
+    } else if (columnFill === Css.ident.balance_all) {
       return new BalanceNonLastColumnBalancer(
         columnGenerator,
         regionPageFloatLayoutContext,
         layoutContainer
       );
     } else {
-      asserts.assert(columnFill === css.ident.balance);
+      Asserts.assert(columnFill === Css.ident.balance);
       return null;
     }
   }

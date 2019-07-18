@@ -15,23 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CSS Cascade.
+ * @fileoverview CssCasc - CSS Cascade.
  */
-import * as base from "./base";
-import * as asserts from "../vivliostyle/asserts";
-import * as logging from "../vivliostyle/logging";
-import * as plugin from "../vivliostyle/plugin";
+import * as Base from "./base";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Logging from "../vivliostyle/logging";
+import * as Plugin from "../vivliostyle/plugin";
 import { Matcher, MatcherBuilder, matchANPlusB } from "../vivliostyle/matcher";
-import { csscasc } from "../vivliostyle/types";
-import * as css from "./css";
-import * as exprs from "./expr";
-import * as cssparse from "./cssparse";
-import * as cssprop from "./cssprop";
-import * as csstok from "./csstok";
-import * as cssvalid from "./cssvalid";
+import { CssCasc } from "../vivliostyle/types";
+import * as Css from "./css";
+import * as Exprs from "./expr";
+import * as CssParse from "./cssparse";
+import * as CssProp from "./cssprop";
+import * as CssTok from "./csstok";
+import * as CssValid from "./cssvalid";
 import { ExprContentListener, NodeContext } from "./vtree";
 
-export interface ElementStyle extends csscasc.ElementStyle {}
+export interface ElementStyle extends CssCasc.ElementStyle {}
 
 export const inheritedProps = {
   azimuth: true,
@@ -134,8 +134,8 @@ export const polyfilledInheritedProps = [
 ];
 
 export const getPolyfilledInheritedProps = (): string[] => {
-  const hooks: plugin.PolyfilledInheritedPropsHook[] = plugin.getHooksForName(
-    plugin.HOOKS.POLYFILLED_INHERITED_PROPS
+  const hooks: Plugin.PolyfilledInheritedPropsHook[] = Plugin.getHooksForName(
+    Plugin.HOOKS.POLYFILLED_INHERITED_PROPS
   );
   return hooks.reduce(
     (props, f) => props.concat(f()),
@@ -245,7 +245,7 @@ export const couplingMapHorRtl = buildCouplingMap(
 
 export class CascadeValue {
   constructor(
-    public readonly value: css.Val,
+    public readonly value: Css.Val,
     public readonly priority: number
   ) {}
 
@@ -253,7 +253,7 @@ export class CascadeValue {
     return this;
   }
 
-  filterValue(visitor: css.Visitor): CascadeValue {
+  filterValue(visitor: Css.Visitor): CascadeValue {
     const value = this.value.visit(visitor);
     if (value === this.value) {
       return this;
@@ -268,11 +268,11 @@ export class CascadeValue {
     return new CascadeValue(this.value, this.priority + specificity);
   }
 
-  evaluate(context: exprs.Context, propName: string): css.Val {
-    return cssparse.evaluateCSSToCSS(context, this.value, propName);
+  evaluate(context: Exprs.Context, propName: string): Css.Val {
+    return CssParse.evaluateCSSToCSS(context, this.value, propName);
   }
 
-  isEnabled(context: exprs.Context): boolean {
+  isEnabled(context: Exprs.Context): boolean {
     return true;
   }
 }
@@ -283,9 +283,9 @@ export class CascadeValue {
  */
 export class ConditionalCascadeValue extends CascadeValue {
   constructor(
-    value: css.Val,
+    value: Css.Val,
     priority: number,
-    public readonly condition: exprs.Val
+    public readonly condition: Exprs.Val
   ) {
     super(value, priority);
   }
@@ -322,7 +322,7 @@ export class ConditionalCascadeValue extends CascadeValue {
     );
   }
 
-  isEnabled(context: exprs.Context): boolean {
+  isEnabled(context: Exprs.Context): boolean {
     return !!this.condition.evaluate(context);
   }
 }
@@ -332,7 +332,7 @@ export class ConditionalCascadeValue extends CascadeValue {
  * @param av cascaded value (can be conditional)
  */
 export const cascadeValues = (
-  context: exprs.Context,
+  context: Exprs.Context,
   tv: CascadeValue,
   av: CascadeValue
 ): CascadeValue => {
@@ -425,7 +425,7 @@ export const getMutableSpecial = (
 };
 
 export const mergeIn = (
-  context: exprs.Context,
+  context: Exprs.Context,
   target: ElementStyle,
   style: ElementStyle,
   specificity: number,
@@ -474,7 +474,7 @@ export const mergeIn = (
 };
 
 export const mergeAll = (
-  context: exprs.Context,
+  context: Exprs.Context,
   styles: ElementStyle[]
 ): ElementStyle => {
   const target = {} as ElementStyle;
@@ -501,12 +501,12 @@ export const chainActions = (
   return action;
 };
 
-export class InheritanceVisitor extends css.FilterVisitor {
+export class InheritanceVisitor extends Css.FilterVisitor {
   propName: string = "";
 
   constructor(
     public readonly props: ElementStyle,
-    public readonly context: exprs.Context
+    public readonly context: Exprs.Context
   ) {
     super();
   }
@@ -517,18 +517,18 @@ export class InheritanceVisitor extends css.FilterVisitor {
 
   private getFontSize() {
     const cascval = getProp(this.props, "font-size");
-    const n = cascval.value as css.Numeric;
-    if (!exprs.isAbsoluteLengthUnit(n.unit)) {
+    const n = cascval.value as Css.Numeric;
+    if (!Exprs.isAbsoluteLengthUnit(n.unit)) {
       throw new Error("Unexpected state");
     }
-    return n.num * exprs.defaultUnitSizes[n.unit];
+    return n.num * Exprs.defaultUnitSizes[n.unit];
   }
 
   /**
    * @override
    */
   visitNumeric(numeric) {
-    asserts.assert(this.context);
+    Asserts.assert(this.context);
     if (this.propName === "font-size") {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
     } else if (
@@ -546,7 +546,7 @@ export class InheritanceVisitor extends css.FilterVisitor {
         return numeric;
       }
       const unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
-      return new css.Numeric(numeric.num, unit);
+      return new Css.Numeric(numeric.num, unit);
     }
     return numeric;
   }
@@ -556,7 +556,7 @@ export class InheritanceVisitor extends css.FilterVisitor {
    */
   visitExpr(expr) {
     if (this.propName == "font-size") {
-      const val = cssparse.evaluateCSSToCSS(this.context, expr, this.propName);
+      const val = CssParse.evaluateCSSToCSS(this.context, expr, this.propName);
       return val.visit(this);
     }
     return expr;
@@ -564,36 +564,36 @@ export class InheritanceVisitor extends css.FilterVisitor {
 }
 
 export const convertFontRelativeLengthToPx = (
-  numeric: css.Numeric,
+  numeric: Css.Numeric,
   baseFontSize: number,
-  context: exprs.Context
-): css.Numeric => {
+  context: Exprs.Context
+): Css.Numeric => {
   const unit = numeric.unit;
   const num = numeric.num;
   if (unit === "em" || unit === "ex") {
-    const ratio = exprs.defaultUnitSizes[unit] / exprs.defaultUnitSizes["em"];
-    return new css.Numeric(num * ratio * baseFontSize, "px");
+    const ratio = Exprs.defaultUnitSizes[unit] / Exprs.defaultUnitSizes["em"];
+    return new Css.Numeric(num * ratio * baseFontSize, "px");
   } else if (unit === "rem") {
-    return new css.Numeric(num * context.fontSize(), "px");
+    return new Css.Numeric(num * context.fontSize(), "px");
   } else {
     return numeric;
   }
 };
 
 export const convertFontSizeToPx = (
-  numeric: css.Numeric,
+  numeric: Css.Numeric,
   parentFontSize: number,
-  context: exprs.Context
-): css.Numeric => {
+  context: Exprs.Context
+): Css.Numeric => {
   numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);
   const unit = numeric.unit;
   const num = numeric.num;
   if (unit === "px") {
     return numeric;
   } else if (unit === "%") {
-    return new css.Numeric((num / 100) * parentFontSize, "px");
+    return new Css.Numeric((num / 100) * parentFontSize, "px");
   } else {
-    return new css.Numeric(num * context.queryUnitSize(unit, false), "px");
+    return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
   }
 };
 
@@ -870,7 +870,7 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
         const id = href.substring(1);
         const target = elem.ownerDocument.getElementById(id);
         if (target) {
-          const epubType = target.getAttributeNS(base.NS.epub, "type");
+          const epubType = target.getAttributeNS(Base.NS.epub, "type");
           if (epubType && epubType.match(this.epubTypePatt)) {
             this.chained.apply(cascadeInstance);
           }
@@ -939,7 +939,7 @@ export class CheckAttributeEqAction extends ChainedAction {
    * @override
    */
   getPriority() {
-    if (this.name == "type" && this.ns == base.NS.epub) {
+    if (this.name == "type" && this.ns == Base.NS.epub) {
       return 9; // epub:type is a pretty good thing to check
     }
     return 0;
@@ -949,7 +949,7 @@ export class CheckAttributeEqAction extends ChainedAction {
    * @override
    */
   makePrimary(cascade) {
-    if (this.name == "type" && this.ns == base.NS.epub) {
+    if (this.name == "type" && this.ns == Base.NS.epub) {
       if (this.chained) {
         cascade.insertInTable(cascade.epubtypes, this.value, this.chained);
       }
@@ -1705,7 +1705,7 @@ export class RestoreLangItem implements ConditionItem {
  * Not a true condition item, this class manages inheritance of quotes property
  */
 export class QuotesScopeItem implements ConditionItem {
-  constructor(public readonly oldQuotes: css.Str[]) {}
+  constructor(public readonly oldQuotes: Css.Str[]) {}
 
   /**
    * @override
@@ -1744,7 +1744,7 @@ export interface CounterListener {
 
 export interface CounterResolver {
   /**
-   * Returns an exprs.Val, whose value is calculated at the layout time by
+   * Returns an Exprs.Val, whose value is calculated at the layout time by
    * retrieving the innermost page-based counter (null if it does not exist) by
    * its name and formatting the value into a string.
    * @param name Name of the page-based counter to be retrieved
@@ -1753,10 +1753,10 @@ export interface CounterResolver {
   getPageCounterVal(
     name: string,
     format: (p1: number | null) => string
-  ): exprs.Val;
+  ): Exprs.Val;
 
   /**
-   * Returns an exprs.Val, whose value is calculated at the layout time by
+   * Returns an Exprs.Val, whose value is calculated at the layout time by
    * retrieving the page-based counters by its name and formatting the values
    * into a string.
    * @param name Name of the page-based counters to be retrieved
@@ -1764,24 +1764,24 @@ export interface CounterResolver {
    *     array ordered by the nesting depth with the outermost counter first and
    *     the innermost last) into a string
    */
-  getPageCountersVal(name: string, format: (p1: number[]) => string): exprs.Val;
+  getPageCountersVal(name: string, format: (p1: number[]) => string): Exprs.Val;
 
   getTargetCounterVal(
     url: string,
     name: string,
     format: (p1: number | null) => string
-  ): exprs.Val;
+  ): Exprs.Val;
 
   getTargetCountersVal(
     url: string,
     name: string,
     format: (p1: number[]) => string
-  ): exprs.Val;
+  ): Exprs.Val;
 
   setStyler(styler: any);
 }
 
-export class AttrValueFilterVisitor extends css.FilterVisitor {
+export class AttrValueFilterVisitor extends Css.FilterVisitor {
   element: any;
 
   constructor(element: Element) {
@@ -1789,19 +1789,19 @@ export class AttrValueFilterVisitor extends css.FilterVisitor {
     this.element = element;
   }
 
-  private createValueFromString(str: string | null, type: string): css.Val {
+  private createValueFromString(str: string | null, type: string): Css.Val {
     switch (type) {
       case "url":
         if (str) {
-          return new css.URL(str); // TODO should convert to absolute path
+          return new Css.URL(str); // TODO should convert to absolute path
         }
-        return new css.URL("about:invalid");
+        return new Css.URL("about:invalid");
       case "string":
       default:
         if (str) {
-          return new css.Str(str);
+          return new Css.Str(str);
         }
-        return new css.Str("");
+        return new Css.Str("");
     }
   }
 
@@ -1814,8 +1814,8 @@ export class AttrValueFilterVisitor extends css.FilterVisitor {
     }
     let type = "string";
     let attributeName = null;
-    let defaultValue: css.Val = null;
-    if (func.values[0] instanceof css.SpaceList) {
+    let defaultValue: Css.Val = null;
+    if (func.values[0] instanceof Css.SpaceList) {
       if (func.values[0].values.length >= 2) {
         type = func.values[0].values[1].stringValue();
       }
@@ -1841,7 +1841,7 @@ export class AttrValueFilterVisitor extends css.FilterVisitor {
   }
 }
 
-export class ContentPropVisitor extends css.FilterVisitor {
+export class ContentPropVisitor extends Css.FilterVisitor {
   cascade: any;
   element: any;
 
@@ -1875,12 +1875,12 @@ export class ContentPropVisitor extends css.FilterVisitor {
         return quotes[2 * Math.min(maxDepth, cascade.quoteDepth) + 1];
       case "no-open-quote":
         cascade.quoteDepth++;
-        return new css.Str("");
+        return new Css.Str("");
       case "no-close-quote":
         if (cascade.quoteDepth > 0) {
           cascade.quoteDepth--;
         }
-        return new css.Str("");
+        return new Css.Str("");
     }
     return ident;
   }
@@ -1924,30 +1924,30 @@ export class ContentPropVisitor extends css.FilterVisitor {
     return result;
   }
 
-  visitFuncCounter(values: css.Val[]): css.Val {
+  visitFuncCounter(values: Css.Val[]): Css.Val {
     const counterName = values[0].toString();
     const type = values.length > 1 ? values[1].stringValue() : "decimal";
     const arr = this.cascade.counters[counterName];
     if (arr && arr.length) {
       const numval = (arr && arr.length && arr[arr.length - 1]) || 0;
-      return new css.Str(this.format(numval, type));
+      return new Css.Str(this.format(numval, type));
     } else {
       const self = this;
-      const c = new css.Expr(
+      const c = new Css.Expr(
         this.counterResolver.getPageCounterVal(counterName, numval =>
           self.format(numval || 0, type)
         )
       );
-      return new css.SpaceList([c]);
+      return new Css.SpaceList([c]);
     }
   }
 
-  visitFuncCounters(values: css.Val[]): css.Val {
+  visitFuncCounters(values: Css.Val[]): Css.Val {
     const counterName = values[0].toString();
     const separator = values[1].stringValue();
     const type = values.length > 2 ? values[2].stringValue() : "decimal";
     const arr = this.cascade.counters[counterName];
-    const sb = new base.StringBuffer();
+    const sb = new Base.StringBuffer();
     if (arr && arr.length) {
       for (let i = 0; i < arr.length; i++) {
         if (i > 0) {
@@ -1957,7 +1957,7 @@ export class ContentPropVisitor extends css.FilterVisitor {
       }
     }
     const self = this;
-    const c = new css.Expr(
+    const c = new Css.Expr(
       this.counterResolver.getPageCountersVal(counterName, numvals => {
         const parts = [] as string[];
         if (numvals.length) {
@@ -1976,13 +1976,13 @@ export class ContentPropVisitor extends css.FilterVisitor {
         }
       })
     );
-    return new css.SpaceList([c]);
+    return new Css.SpaceList([c]);
   }
 
-  visitFuncTargetCounter(values: css.Val[]): css.Val {
+  visitFuncTargetCounter(values: Css.Val[]): Css.Val {
     const targetUrl = values[0];
     let targetUrlStr;
-    if (targetUrl instanceof css.URL) {
+    if (targetUrl instanceof Css.URL) {
       targetUrlStr = targetUrl.url;
     } else {
       targetUrlStr = targetUrl.stringValue();
@@ -1990,20 +1990,20 @@ export class ContentPropVisitor extends css.FilterVisitor {
     const counterName = values[1].toString();
     const type = values.length > 2 ? values[2].stringValue() : "decimal";
     const self = this;
-    const c = new css.Expr(
+    const c = new Css.Expr(
       this.counterResolver.getTargetCounterVal(
         targetUrlStr,
         counterName,
         numval => self.format(numval || 0, type)
       )
     );
-    return new css.SpaceList([c]);
+    return new Css.SpaceList([c]);
   }
 
-  visitFuncTargetCounters(values: css.Val[]): css.Val {
+  visitFuncTargetCounters(values: Css.Val[]): Css.Val {
     const targetUrl = values[0];
     let targetUrlStr;
-    if (targetUrl instanceof css.URL) {
+    if (targetUrl instanceof Css.URL) {
       targetUrlStr = targetUrl.url;
     } else {
       targetUrlStr = targetUrl.stringValue();
@@ -2012,7 +2012,7 @@ export class ContentPropVisitor extends css.FilterVisitor {
     const separator = values[2].stringValue();
     const type = values.length > 3 ? values[3].stringValue() : "decimal";
     const self = this;
-    const c = new css.Expr(
+    const c = new Css.Expr(
       this.counterResolver.getTargetCountersVal(
         targetUrlStr,
         counterName,
@@ -2026,7 +2026,7 @@ export class ContentPropVisitor extends css.FilterVisitor {
         }
       )
     );
-    return new css.SpaceList([c]);
+    return new Css.SpaceList([c]);
   }
 
   /**
@@ -2055,8 +2055,8 @@ export class ContentPropVisitor extends css.FilterVisitor {
         }
         break;
     }
-    logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
-    return new css.Str("");
+    Logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
+    return new Css.Str("");
   }
 }
 
@@ -2424,7 +2424,7 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
   if (num == 0) {
     return numbering.digits.charAt(0);
   }
-  const res = new base.StringBuffer();
+  const res = new Base.StringBuffer();
   if (num < 0) {
     res.append(numbering.negative);
     num = -num;
@@ -2513,7 +2513,7 @@ export class Cascade {
   }
 
   createInstance(
-    context: exprs.Context,
+    context: Exprs.Context,
     counterListener: CounterListener,
     counterResolver: CounterResolver,
     lang
@@ -2551,7 +2551,7 @@ export class CascadeInstance {
   isRoot: boolean = true;
   counters: { [key: string]: number[] } = {};
   counterScoping: ({ [key: string]: boolean })[] = [{}];
-  quotes: css.Str[];
+  quotes: Css.Str[];
   quoteDepth: number = 0;
   lang: string = "";
   siblingOrderStack: number[] = [0];
@@ -2575,17 +2575,17 @@ export class CascadeInstance {
 
   constructor(
     cascade: Cascade,
-    public readonly context: exprs.Context,
+    public readonly context: Exprs.Context,
     public readonly counterListener: CounterListener,
     public readonly counterResolver: CounterResolver,
     lang: string
   ) {
     this.code = cascade;
     this.quotes = [
-      new css.Str("\u201c"),
-      new css.Str("\u201d"),
-      new css.Str("\u2018"),
-      new css.Str("\u2019")
+      new Css.Str("\u201c"),
+      new Css.Str("\u201d"),
+      new Css.Str("\u2018"),
+      new Css.Str("\u2019")
     ];
     this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
@@ -2627,7 +2627,7 @@ export class CascadeInstance {
   buildViewConditionMatcher(viewConditionId: string | null): Matcher {
     let matcher = null;
     if (viewConditionId) {
-      asserts.assert(this.currentElementOffset);
+      Asserts.assert(this.currentElementOffset);
       matcher = MatcherBuilder.buildViewConditionMatcher(
         this.currentElementOffset,
         viewConditionId
@@ -2699,7 +2699,7 @@ export class CascadeInstance {
   }
 
   pushCounters(props: ElementStyle): void {
-    let displayVal = css.ident.inline;
+    let displayVal = Css.ident.inline;
     const display = props["display"];
     if (display) {
       displayVal = display.evaluate(this.context);
@@ -2711,33 +2711,33 @@ export class CascadeInstance {
     if (reset) {
       const resetVal = reset.evaluate(this.context);
       if (resetVal) {
-        resetMap = cssprop.toCounters(resetVal, true);
+        resetMap = CssProp.toCounters(resetVal, true);
       }
     }
     const set = props["counter-set"];
     if (set) {
       const setVal = set.evaluate(this.context);
       if (setVal) {
-        setMap = cssprop.toCounters(setVal, false);
+        setMap = CssProp.toCounters(setVal, false);
       }
     }
     const increment = props["counter-increment"];
     if (increment) {
       const incrementVal = increment.evaluate(this.context);
       if (incrementVal) {
-        incrementMap = cssprop.toCounters(incrementVal, false);
+        incrementMap = CssProp.toCounters(incrementVal, false);
       }
     }
     if (
       (this.currentLocalName == "ol" || this.currentLocalName == "ul") &&
-      this.currentNamespace == base.NS.XHTML
+      this.currentNamespace == Base.NS.XHTML
     ) {
       if (!resetMap) {
         resetMap = {};
       }
       resetMap["ua-list-item"] = 0;
     }
-    if (displayVal === css.ident.list_item) {
+    if (displayVal === Css.ident.list_item) {
       if (!incrementMap) {
         incrementMap = {};
       }
@@ -2768,11 +2768,11 @@ export class CascadeInstance {
           incrementMap[incrementCounterName];
       }
     }
-    if (displayVal === css.ident.list_item) {
+    if (displayVal === Css.ident.list_item) {
       const listItemCounts = this.counters["ua-list-item"];
       const listItemCount = listItemCounts[listItemCounts.length - 1];
       props["ua-list-item-count"] = new CascadeValue(
-        new css.Num(listItemCount),
+        new Css.Num(listItemCount),
         0
       );
     }
@@ -2828,14 +2828,14 @@ export class CascadeInstance {
       this.currentNSTag = "";
     }
     this.currentId = element.getAttribute("id");
-    this.currentXmlId = element.getAttributeNS(base.NS.XML, "id");
+    this.currentXmlId = element.getAttributeNS(Base.NS.XML, "id");
     const classes = element.getAttribute("class");
     if (classes) {
       this.currentClassNames = classes.split(/\s+/);
     } else {
       this.currentClassNames = EMPTY;
     }
-    const types = element.getAttributeNS(base.NS.epub, "type");
+    const types = element.getAttributeNS(Base.NS.epub, "type");
     if (types) {
       this.currentEpubTypes = types.split(/\s+/);
     } else {
@@ -2843,13 +2843,13 @@ export class CascadeInstance {
     }
     if (
       this.currentLocalName == "style" &&
-      this.currentNamespace == base.NS.FB2
+      this.currentNamespace == Base.NS.FB2
     ) {
       // special case
       const className = element.getAttribute("name") || "";
       this.currentClassNames = [className];
     }
-    const lang = base.getLangAttribute(element);
+    const lang = Base.getLangAttribute(element);
     if (lang) {
       this.stack[this.stack.length - 1].push(new RestoreLangItem(this.lang));
       this.lang = lang.toLowerCase();
@@ -2907,10 +2907,10 @@ export class CascadeInstance {
       const quotesVal = quotesCasc.evaluate(this.context);
       if (quotesVal) {
         itemToPushLast = new QuotesScopeItem(this.quotes);
-        if (quotesVal === css.ident.none) {
-          this.quotes = [new css.Str(""), new css.Str("")];
-        } else if (quotesVal instanceof css.SpaceList) {
-          this.quotes = (quotesVal as css.SpaceList).values as css.Str[];
+        if (quotesVal === Css.ident.none) {
+          this.quotes = [new Css.Str(""), new Css.Str("")];
+        } else if (quotesVal instanceof Css.SpaceList) {
+          this.quotes = (quotesVal as Css.SpaceList).values as Css.Str[];
         }
       }
     }
@@ -3085,8 +3085,8 @@ export function setUABaseCascade(value: Cascade) {
 }
 
 //------------- parsing ------------
-export class CascadeParserHandler extends cssparse.SlaveParserHandler
-  implements cssvalid.PropertyReceiver {
+export class CascadeParserHandler extends CssParse.SlaveParserHandler
+  implements CssValid.PropertyReceiver {
   chain: ChainedAction[] = null;
   specificity: number = 0;
   elementStyle: ElementStyle = null;
@@ -3099,12 +3099,12 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
   insideSelectorRule: any;
 
   constructor(
-    scope: exprs.LexicalScope,
-    owner: cssparse.DispatchParserHandler,
-    public readonly condition: exprs.Val,
+    scope: Exprs.LexicalScope,
+    owner: CssParse.DispatchParserHandler,
+    public readonly condition: Exprs.Val,
     parent: CascadeParserHandler,
     public readonly regionId: string | null,
-    public readonly validatorSet: cssvalid.ValidatorSet,
+    public readonly validatorSet: CssValid.ValidatorSet,
     topLevel: boolean
   ) {
     super(scope, owner, topLevel);
@@ -3161,7 +3161,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
    */
   classSelector(name) {
     if (this.pseudoelement) {
-      logging.logger.warn(`::${this.pseudoelement}`, `followed by .${name}`);
+      Logging.logger.warn(`::${this.pseudoelement}`, `followed by .${name}`);
       this.chain.push(new CheckConditionAction("")); // always fails
       return;
     }
@@ -3174,7 +3174,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
    */
   pseudoclassSelector(name, params) {
     if (this.pseudoelement) {
-      logging.logger.warn(`::${this.pseudoelement}`, `followed by :${name}`);
+      Logging.logger.warn(`::${this.pseudoelement}`, `followed by :${name}`);
       this.chain.push(new CheckConditionAction("")); // always fails
       return;
     }
@@ -3199,7 +3199,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
       case "href-epub-type":
         if (params && params.length == 1 && typeof params[0] == "string") {
           const value = params[0] as string;
-          const patt = new RegExp(`(^|s)${base.escapeRegExp(value)}(\$|s)`);
+          const patt = new RegExp(`(^|s)${Base.escapeRegExp(value)}(\$|s)`);
           this.chain.push(new CheckTargetEpubTypeAction(patt));
         } else {
           this.chain.push(new CheckConditionAction("")); // always fails
@@ -3221,7 +3221,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
           const langValue = params[0] as string;
           this.chain.push(
             new CheckLangAction(
-              new RegExp(`^${base.escapeRegExp(langValue.toLowerCase())}(\$|-)`)
+              new RegExp(`^${Base.escapeRegExp(langValue.toLowerCase())}(\$|-)`)
             )
           );
         } else {
@@ -3272,7 +3272,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         this.pseudoelementSelector(name, params);
         return;
       default:
-        logging.logger.warn(`unknown pseudo-class selector: ${name}`);
+        Logging.logger.warn(`unknown pseudo-class selector: ${name}`);
         this.chain.push(new CheckConditionAction("")); // always fails
         break;
     }
@@ -3295,7 +3295,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         if (!this.pseudoelement) {
           this.pseudoelement = name;
         } else {
-          logging.logger.warn(
+          Logging.logger.warn(
             `Double pseudoelement ::${this.pseudoelement}::${name}`
           );
           this.chain.push(new CheckConditionAction("")); // always fails
@@ -3308,7 +3308,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
             if (!this.pseudoelement) {
               this.pseudoelement = `first-${n}-lines`;
             } else {
-              logging.logger.warn(
+              Logging.logger.warn(
                 `Double pseudoelement ::${this.pseudoelement}::${name}`
               );
               this.chain.push(new CheckConditionAction("")); // always fails
@@ -3326,7 +3326,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
         }
         break;
       default:
-        logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
+        Logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
         this.chain.push(new CheckConditionAction("")); // always fails
         break;
     }
@@ -3350,73 +3350,73 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
     value = value || "";
     let action;
     switch (op) {
-      case csstok.TokenType.EOF:
+      case CssTok.TokenType.EOF:
         action = new CheckAttributePresentAction(ns, name);
         break;
-      case csstok.TokenType.EQ:
+      case CssTok.TokenType.EQ:
         action = new CheckAttributeEqAction(ns, name, value);
         break;
-      case csstok.TokenType.TILDE_EQ:
+      case CssTok.TokenType.TILDE_EQ:
         if (!value || value.match(/\s/)) {
           action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`(^|\\s)${base.escapeRegExp(value)}(\$|\\s)`)
+            new RegExp(`(^|\\s)${Base.escapeRegExp(value)}(\$|\\s)`)
           );
         }
         break;
-      case csstok.TokenType.BAR_EQ:
+      case CssTok.TokenType.BAR_EQ:
         action = new CheckAttributeRegExpAction(
           ns,
           name,
-          new RegExp(`^${base.escapeRegExp(value)}(\$|-)`)
+          new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`)
         );
         break;
-      case csstok.TokenType.HAT_EQ:
+      case CssTok.TokenType.HAT_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`^${base.escapeRegExp(value)}`)
+            new RegExp(`^${Base.escapeRegExp(value)}`)
           );
         }
         break;
-      case csstok.TokenType.DOLLAR_EQ:
+      case CssTok.TokenType.DOLLAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`${base.escapeRegExp(value)}\$`)
+            new RegExp(`${Base.escapeRegExp(value)}\$`)
           );
         }
         break;
-      case csstok.TokenType.STAR_EQ:
+      case CssTok.TokenType.STAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(base.escapeRegExp(value))
+            new RegExp(Base.escapeRegExp(value))
           );
         }
         break;
-      case csstok.TokenType.COL_COL:
+      case CssTok.TokenType.COL_COL:
         if (value == "supported") {
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
-          logging.logger.warn("Unsupported :: attr selector op:", value);
+          Logging.logger.warn("Unsupported :: attr selector op:", value);
           action = new CheckConditionAction(""); // always fails
         }
         break;
       default:
-        logging.logger.warn("Unsupported attr selector:", op);
+        Logging.logger.warn("Unsupported attr selector:", op);
         action = new CheckConditionAction(""); // always fails
     }
     this.chain.push(action);
@@ -3571,7 +3571,7 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
     );
   }
 
-  special(name: string, value: css.Val) {
+  special(name: string, value: Css.Val) {
     let val;
     if (!this.condition) {
       val = new CascadeValue(value, 0);
@@ -3614,17 +3614,17 @@ export class CascadeParserHandler extends cssparse.SlaveParserHandler
   simpleProperty(name, value, important) {
     if (
       name == "display" &&
-      (value === css.ident.oeb_page_head || value === css.ident.oeb_page_foot)
+      (value === Css.ident.oeb_page_head || value === Css.ident.oeb_page_foot)
     ) {
       this.simpleProperty(
         "flow-options",
-        new css.SpaceList([css.ident.exclusive, css.ident._static]),
+        new Css.SpaceList([Css.ident.exclusive, Css.ident._static]),
         important
       );
       this.simpleProperty("flow-into", value, important);
-      value = css.ident.block;
+      value = Css.ident.block;
     }
-    const hooks = plugin.getHooksForName("SIMPLE_PROPERTY");
+    const hooks = Plugin.getHooksForName("SIMPLE_PROPERTY");
     hooks.forEach(hook => {
       const original = { name: name, value: value, important: important };
       const converted = hook(original);
@@ -3734,10 +3734,10 @@ export class NotParameterParserHandler extends CascadeParserHandler {
 /**
  * @override
  */
-export class DefineParserHandler extends cssparse.SlaveParserHandler {
+export class DefineParserHandler extends CssParse.SlaveParserHandler {
   constructor(
-    scope: exprs.LexicalScope,
-    owner: cssparse.DispatchParserHandler
+    scope: Exprs.LexicalScope,
+    owner: CssParse.DispatchParserHandler
   ) {
     super(scope, owner, false);
   }
@@ -3750,22 +3750,22 @@ export class DefineParserHandler extends cssparse.SlaveParserHandler {
       this.error(`E_CSS_NAME_REDEFINED ${propName}`, this.getCurrentToken());
     } else {
       const unit = propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
-      const dim = new exprs.Numeric(this.scope, 100, unit);
+      const dim = new Exprs.Numeric(this.scope, 100, unit);
       this.scope.defineName(propName, value.toExpr(this.scope, dim));
     }
   }
 }
 
-export class PropSetParserHandler extends cssparse.SlaveParserHandler
-  implements cssvalid.PropertyReceiver {
+export class PropSetParserHandler extends CssParse.SlaveParserHandler
+  implements CssValid.PropertyReceiver {
   order: number;
 
   constructor(
-    scope: exprs.LexicalScope,
-    owner: cssparse.DispatchParserHandler,
-    public readonly condition: exprs.Val,
+    scope: Exprs.LexicalScope,
+    owner: CssParse.DispatchParserHandler,
+    public readonly condition: Exprs.Val,
     public readonly elementStyle: ElementStyle,
-    public readonly validatorSet: cssvalid.ValidatorSet
+    public readonly validatorSet: CssValid.ValidatorSet
   ) {
     super(scope, owner, false);
     this.order = 0;
@@ -3776,7 +3776,7 @@ export class PropSetParserHandler extends cssparse.SlaveParserHandler
    */
   property(name, value, important) {
     if (important) {
-      logging.logger.warn("E_IMPORTANT_NOT_ALLOWED");
+      Logging.logger.warn("E_IMPORTANT_NOT_ALLOWED");
     } else {
       this.validatorSet.validatePropertyAndHandleShorthand(
         name,
@@ -3791,7 +3791,7 @@ export class PropSetParserHandler extends cssparse.SlaveParserHandler
    * @override
    */
   invalidPropertyValue(name, value) {
-    logging.logger.warn(
+    Logging.logger.warn(
       "E_INVALID_PROPERTY_VALUE",
       `${name}:`,
       value.toString()
@@ -3802,7 +3802,7 @@ export class PropSetParserHandler extends cssparse.SlaveParserHandler
    * @override
    */
   unknownProperty(name, value) {
-    logging.logger.warn("E_INVALID_PROPERTY", `${name}:`, value.toString());
+    Logging.logger.warn("E_INVALID_PROPERTY", `${name}:`, value.toString());
   }
 
   /**
@@ -3821,14 +3821,14 @@ export class PropSetParserHandler extends cssparse.SlaveParserHandler
   }
 }
 
-export class PropertyParserHandler extends cssparse.ErrorHandler
-  implements cssvalid.PropertyReceiver {
+export class PropertyParserHandler extends CssParse.ErrorHandler
+  implements CssValid.PropertyReceiver {
   elementStyle: any = {} as ElementStyle;
   order: number = 0;
 
   constructor(
-    scope: exprs.LexicalScope,
-    public readonly validatorSet: cssvalid.ValidatorSet
+    scope: Exprs.LexicalScope,
+    public readonly validatorSet: CssValid.ValidatorSet
   ) {
     super(scope);
   }
@@ -3849,7 +3849,7 @@ export class PropertyParserHandler extends cssparse.ErrorHandler
    * @override
    */
   invalidPropertyValue(name, value) {
-    logging.logger.warn(
+    Logging.logger.warn(
       "E_INVALID_PROPERTY_VALUE",
       `${name}:`,
       value.toString()
@@ -3860,7 +3860,7 @@ export class PropertyParserHandler extends cssparse.ErrorHandler
    * @override
    */
   unknownProperty(name, value) {
-    logging.logger.warn("E_INVALID_PROPERTY", `${name}:`, value.toString());
+    Logging.logger.warn("E_INVALID_PROPERTY", `${name}:`, value.toString());
   }
 
   /**
@@ -3868,8 +3868,8 @@ export class PropertyParserHandler extends cssparse.ErrorHandler
    */
   simpleProperty(name, value, important) {
     let specificity = important
-      ? cssparse.SPECIFICITY_STYLE_IMPORTANT
-      : cssparse.SPECIFICITY_STYLE;
+      ? CssParse.SPECIFICITY_STYLE_IMPORTANT
+      : CssParse.SPECIFICITY_STYLE;
     specificity += this.order;
     this.order += ORDER_INCREMENT;
     const cascval = new CascadeValue(value, specificity);
@@ -3895,7 +3895,7 @@ export const forEachViewConditionalStyles = (
 
 export const mergeViewConditionalStyles = (
   cascMap: { [key: string]: CascadeValue },
-  context: exprs.Context,
+  context: Exprs.Context,
   style: ElementStyle
 ) => {
   forEachViewConditionalStyles(style, viewConditionalStyles => {
@@ -3904,31 +3904,31 @@ export const mergeViewConditionalStyles = (
 };
 
 export const parseStyleAttribute = (
-  scope: exprs.LexicalScope,
-  validatorSet: cssvalid.ValidatorSet,
+  scope: Exprs.LexicalScope,
+  validatorSet: CssValid.ValidatorSet,
   baseURL: string,
   styleAttrValue: string
 ): ElementStyle => {
   const handler = new PropertyParserHandler(scope, validatorSet);
-  const tokenizer = new csstok.Tokenizer(styleAttrValue, handler);
+  const tokenizer = new CssTok.Tokenizer(styleAttrValue, handler);
   try {
-    cssparse.parseStyleAttribute(tokenizer, handler, baseURL);
+    CssParse.parseStyleAttribute(tokenizer, handler, baseURL);
   } catch (err) {
-    logging.logger.warn(err, "Style attribute parse error:");
+    Logging.logger.warn(err, "Style attribute parse error:");
   }
   return handler.elementStyle;
 };
 
 export const isVertical = (
   cascaded: { [key: string]: CascadeValue },
-  context: exprs.Context,
+  context: Exprs.Context,
   vertical: boolean
 ): boolean => {
   const writingModeCasc = cascaded["writing-mode"];
   if (writingModeCasc) {
     const writingMode = writingModeCasc.evaluate(context, "writing-mode");
-    if (writingMode && writingMode !== css.ident.inherit) {
-      return writingMode === css.ident.vertical_rl;
+    if (writingMode && writingMode !== Css.ident.inherit) {
+      return writingMode === Css.ident.vertical_rl;
     }
   }
   return vertical;
@@ -3936,14 +3936,14 @@ export const isVertical = (
 
 export const isRtl = (
   cascaded: { [key: string]: CascadeValue },
-  context: exprs.Context,
+  context: Exprs.Context,
   rtl: boolean
 ): boolean => {
   const directionCasc = cascaded["direction"];
   if (directionCasc) {
     const direction = directionCasc.evaluate(context, "direction");
-    if (direction && direction !== css.ident.inherit) {
-      return direction === css.ident.rtl;
+    if (direction && direction !== Css.ident.inherit) {
+      return direction === Css.ident.rtl;
     }
   }
   return rtl;
@@ -3951,7 +3951,7 @@ export const isRtl = (
 
 export const flattenCascadedStyle = (
   style: ElementStyle,
-  context: exprs.Context,
+  context: Exprs.Context,
   regionIds: string[],
   isFootnote: boolean,
   nodeContext: NodeContext
@@ -4003,7 +4003,7 @@ export const forEachStylesInRegion = (
 export const mergeStyle = (
   to: { [key: string]: CascadeValue },
   from: ElementStyle,
-  context: exprs.Context
+  context: Exprs.Context
 ) => {
   for (const property in from) {
     if (isPropName(property)) {

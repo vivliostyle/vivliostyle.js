@@ -14,22 +14,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CSS Page Floats
+ * @fileoverview PageFloat - CSS Page Floats
  */
 import { Numeric, ident, Val } from "../adapt/css";
-import * as geom from "../adapt/geom";
-import * as task from "../adapt/task";
-import * as vtreeImpl from "../adapt/vtree";
-import * as asserts from "./asserts";
-import * as logging from "./logging";
-import * as logical from "./logical";
+import * as Geom from "../adapt/geom";
+import * as Task from "../adapt/task";
+import * as Vtree from "../adapt/vtree";
+import * as Asserts from "./asserts";
+import * as Logging from "./logging";
+import * as Logical from "./logical";
 import { Size, getSize } from "./sizing";
-import { layout, pagefloat, vtree } from "./types";
+import { Layout, PageFloats, ViewTree } from "./types";
 
-export const FloatReference = pagefloat.FloatReference;
-export type FloatReference = pagefloat.FloatReference;
+export const FloatReference = PageFloats.FloatReference;
+export type FloatReference = PageFloats.FloatReference;
 
-type PageFloatID = pagefloat.PageFloatID;
+type PageFloatID = PageFloats.PageFloatID;
 
 export const floatReferenceOf = (str: string): FloatReference => {
   switch (str) {
@@ -70,7 +70,7 @@ export const resolveInlineFloatDirection = (
 ): string => {
   const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {
-    floatSide = logical.toLogical(floatSide, writingMode, direction);
+    floatSide = Logical.toLogical(floatSide, writingMode, direction);
   }
   if (floatSide === "block-start") {
     floatSide = "inline-start";
@@ -79,8 +79,8 @@ export const resolveInlineFloatDirection = (
     floatSide = "inline-end";
   }
   if (floatSide === "inline-start" || floatSide === "inline-end") {
-    const physicalValue = logical.toPhysical(floatSide, writingMode, direction);
-    const lineRelativeValue = logical.toLineRelative(
+    const physicalValue = Logical.toPhysical(floatSide, writingMode, direction);
+    const lineRelativeValue = Logical.toLineRelative(
       physicalValue,
       writingMode
     );
@@ -91,18 +91,18 @@ export const resolveInlineFloatDirection = (
     }
   }
   if (floatSide !== "left" && floatSide !== "right") {
-    logging.logger.warn(`Invalid float value: ${floatSide}. Fallback to left.`);
+    Logging.logger.warn(`Invalid float value: ${floatSide}. Fallback to left.`);
     floatSide = "left";
   }
   return floatSide;
 };
 
-export class PageFloat implements pagefloat.PageFloat {
+export class PageFloat implements PageFloats.PageFloat {
   order: number | null = null;
   id: PageFloatID | null = null;
 
   constructor(
-    public readonly nodePosition: vtree.NodePosition,
+    public readonly nodePosition: ViewTree.NodePosition,
     public readonly floatReference: FloatReference,
     public readonly floatSide: string,
     public readonly clearSide: string | null,
@@ -147,7 +147,7 @@ export class PageFloatStore {
 
   addPageFloat(float: PageFloat) {
     const index = this.floats.findIndex(f =>
-      vtreeImpl.isSameNodePosition(f.nodePosition, float.nodePosition)
+      Vtree.isSameNodePosition(f.nodePosition, float.nodePosition)
     );
     if (index >= 0) {
       throw new Error(
@@ -161,10 +161,10 @@ export class PageFloatStore {
   }
 
   findPageFloatByNodePosition(
-    nodePosition: vtree.NodePosition
+    nodePosition: ViewTree.NodePosition
   ): PageFloat | null {
     const index = this.floats.findIndex(f =>
-      vtreeImpl.isSameNodePosition(f.nodePosition, nodePosition)
+      Vtree.isSameNodePosition(f.nodePosition, nodePosition)
     );
     return index >= 0 ? this.floats[index] : null;
   }
@@ -179,12 +179,12 @@ export class PageFloatStore {
  * @param continues Represents whether the float is fragmented and continues
  *     after this fragment
  */
-export class PageFloatFragment implements pagefloat.PageFloatFragment {
+export class PageFloatFragment implements PageFloats.PageFloatFragment {
   constructor(
     public readonly floatReference: FloatReference,
     public readonly floatSide: string,
     public readonly continuations: PageFloatContinuation[],
-    public readonly area: vtree.Container,
+    public readonly area: ViewTree.Container,
     public readonly continues: boolean
   ) {}
 
@@ -202,11 +202,11 @@ export class PageFloatFragment implements pagefloat.PageFloatFragment {
     return null;
   }
 
-  getOuterShape(): geom.Shape {
+  getOuterShape(): Geom.Shape {
     return this.area.getOuterShape(null, null);
   }
 
-  getOuterRect(): geom.Rect {
+  getOuterRect(): Geom.Rect {
     return this.area.getOuterRect();
   }
 
@@ -227,17 +227,17 @@ export class PageFloatFragment implements pagefloat.PageFloatFragment {
 
   getFlowName(): string {
     const flowName = this.continuations[0].float.flowName;
-    asserts.assert(
+    Asserts.assert(
       this.continuations.every(c => c.float.flowName === flowName)
     );
     return flowName;
   }
 }
 
-export class PageFloatContinuation implements pagefloat.PageFloatContinuation {
+export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   constructor(
     public readonly float: PageFloat,
-    public readonly nodePosition: vtree.NodePosition
+    public readonly nodePosition: ViewTree.NodePosition
   ) {}
 
   equals(other: PageFloatContinuation | null): boolean {
@@ -249,12 +249,12 @@ export class PageFloatContinuation implements pagefloat.PageFloatContinuation {
     }
     return (
       this.float === other.float &&
-      vtreeImpl.isSameNodePosition(this.nodePosition, other.nodePosition)
+      Vtree.isSameNodePosition(this.nodePosition, other.nodePosition)
     );
   }
 }
 
-export type PageFloatPlacementCondition = pagefloat.PageFloatPlacementCondition;
+export type PageFloatPlacementCondition = PageFloats.PageFloatPlacementCondition;
 
 /**
  * @param generatingNodePosition Source NodePosition generating the context.
@@ -262,7 +262,7 @@ export type PageFloatPlacementCondition = pagefloat.PageFloatPlacementCondition;
  *     example page floats)
  */
 export class PageFloatLayoutContext
-  implements pagefloat.PageFloatLayoutContext {
+  implements PageFloats.PageFloatLayoutContext {
   private children: PageFloatLayoutContext[] = [];
   writingMode: Val;
   direction: Val;
@@ -274,15 +274,15 @@ export class PageFloatLayoutContext
   private floatAnchors: { [key in PageFloatID]: Node } = {};
   private floatsDeferredToNext: PageFloatContinuation[] = [];
   private floatsDeferredFromPrevious: PageFloatContinuation[];
-  private layoutConstraints: layout.LayoutConstraint[] = [];
+  private layoutConstraints: Layout.LayoutConstraint[] = [];
   private locked: boolean = false;
 
   constructor(
     public readonly parent: PageFloatLayoutContext,
     private readonly floatReference: FloatReference | null,
-    private container: vtree.Container,
+    private container: ViewTree.Container,
     public readonly flowName: string | null,
-    public readonly generatingNodePosition: vtree.NodePosition | null,
+    public readonly generatingNodePosition: ViewTree.NodePosition | null,
     writingMode: Val | null,
     direction: Val | null
   ) {
@@ -310,7 +310,7 @@ export class PageFloatLayoutContext
     child: PageFloatLayoutContext | null,
     floatReference: FloatReference | null,
     flowName: string | null,
-    generatingNodePosition: vtree.NodePosition | null
+    generatingNodePosition: ViewTree.NodePosition | null
   ): PageFloatLayoutContext | null {
     let index = this.children.indexOf(child as PageFloatLayoutContext);
     if (index < 0) {
@@ -321,7 +321,7 @@ export class PageFloatLayoutContext
       if (
         result.floatReference === floatReference &&
         result.flowName === flowName &&
-        vtreeImpl.isSameNodePosition(
+        Vtree.isSameNodePosition(
           result.generatingNodePosition,
           generatingNodePosition
         )
@@ -362,14 +362,14 @@ export class PageFloatLayoutContext
     return null;
   }
 
-  getContainer(floatReference?: FloatReference): vtree.Container {
+  getContainer(floatReference?: FloatReference): ViewTree.Container {
     if (!floatReference || floatReference === this.floatReference) {
       return this.container;
     }
     return this.getParent(floatReference).getContainer(floatReference);
   }
 
-  setContainer(container: vtree.Container) {
+  setContainer(container: ViewTree.Container) {
     this.container = container;
     this.reattachFloatFragments();
   }
@@ -390,7 +390,7 @@ export class PageFloatLayoutContext
   }
 
   findPageFloatByNodePosition(
-    nodePosition: vtree.NodePosition
+    nodePosition: ViewTree.NodePosition
   ): PageFloat | null {
     return this.floatStore.findPageFloatByNodePosition(nodePosition);
   }
@@ -679,7 +679,7 @@ export class PageFloatLayoutContext
         } else {
           this.forbid(float);
           const fragment = this.findPageFloatFragment(float);
-          asserts.assert(fragment);
+          Asserts.assert(fragment);
           this.removePageFloatFragment(fragment);
         }
         return true;
@@ -785,13 +785,13 @@ export class PageFloatLayoutContext
   private toLogical(side: string): string {
     const writingMode = this.writingMode.toString();
     const direction = this.direction.toString();
-    return logical.toLogical(side, writingMode, direction);
+    return Logical.toLogical(side, writingMode, direction);
   }
 
   private toPhysical(side: string): string {
     const writingMode = this.writingMode.toString();
     const direction = this.direction.toString();
-    return logical.toPhysical(side, writingMode, direction);
+    return Logical.toPhysical(side, writingMode, direction);
   }
 
   removeEndFloatFragments(floatSide: string) {
@@ -876,11 +876,11 @@ export class PageFloatLayoutContext
 
   private getLimitValue(
     side: string,
-    layoutContext: vtree.LayoutContext,
-    clientLayout: vtree.ClientLayout,
+    layoutContext: ViewTree.LayoutContext,
+    clientLayout: ViewTree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
   ): number {
-    asserts.assert(this.container);
+    Asserts.assert(this.container);
     const logicalSide = this.toLogical(side);
     const physicalSide = this.toPhysical(side);
     const limit = this.getLimitValueInner(
@@ -906,7 +906,7 @@ export class PageFloatLayoutContext
         case "right":
           return Math.min(limit, parentLimit);
         default:
-          asserts.fail("Should be unreachable");
+          Asserts.fail("Should be unreachable");
       }
     }
     return limit;
@@ -914,11 +914,11 @@ export class PageFloatLayoutContext
 
   private getLimitValueInner(
     logicalSide: string,
-    layoutContext: vtree.LayoutContext,
-    clientLayout: vtree.ClientLayout,
+    layoutContext: ViewTree.LayoutContext,
+    clientLayout: ViewTree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
   ): number {
-    asserts.assert(this.container);
+    Asserts.assert(this.container);
     const limits = this.getLimitValuesInner(
       layoutContext,
       clientLayout,
@@ -939,8 +939,8 @@ export class PageFloatLayoutContext
   }
 
   private getLimitValuesInner(
-    layoutContext: vtree.LayoutContext,
-    clientLayout: vtree.ClientLayout,
+    layoutContext: ViewTree.LayoutContext,
+    clientLayout: ViewTree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
   ): {
     top: number;
@@ -950,7 +950,7 @@ export class PageFloatLayoutContext
     floatMinWrapBlockStart: number;
     floatMinWrapBlockEnd: number;
   } {
-    asserts.assert(this.container);
+    Asserts.assert(this.container);
     const offsetX = this.container.originX;
     const offsetY = this.container.originY;
     const paddingRect = this.container.getPaddingRect();
@@ -1069,7 +1069,7 @@ export class PageFloatLayoutContext
    *     indicates that the float area does not fit inside the container
    */
   setFloatAreaDimensions(
-    area: layout.PageFloatArea,
+    area: Layout.PageFloatArea,
     floatReference: FloatReference,
     floatSide: string,
     anchorEdge: number | null,
@@ -1099,7 +1099,7 @@ export class PageFloatLayoutContext
         return null;
       }
     }
-    asserts.assert(area.clientLayout);
+    Asserts.assert(area.clientLayout);
     let blockStart = this.getLimitValue(
       "block-start",
       area.layoutContext,
@@ -1147,7 +1147,7 @@ export class PageFloatLayoutContext
       let openRect = getRect(area.bands, rect);
       if (openRect) {
         if (area.vertical) {
-          openRect = geom.unrotateBox(openRect);
+          openRect = Geom.unrotateBox(openRect);
         }
         blockStart = area.vertical
           ? Math.min(blockStart, openRect.x2)
@@ -1166,10 +1166,10 @@ export class PageFloatLayoutContext
     let outerInlineSize;
     if (init) {
       const rect = area.vertical
-        ? geom.rotateBox(
-            new geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)
+        ? Geom.rotateBox(
+            new Geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)
           )
-        : new geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
+        : new Geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
       if (
         logicalFloatSide === "block-start" ||
         logicalFloatSide === "snap-block" ||
@@ -1177,7 +1177,7 @@ export class PageFloatLayoutContext
       ) {
         if (
           !limitBlockStartEndValueWithOpenRect(
-            geom.findUppermostFullyOpenRect,
+            Geom.findUppermostFullyOpenRect,
             rect
           )
         ) {
@@ -1191,7 +1191,7 @@ export class PageFloatLayoutContext
       ) {
         if (
           !limitBlockStartEndValueWithOpenRect(
-            geom.findBottommostFullyOpenRect,
+            Geom.findBottommostFullyOpenRect,
             rect
           )
         ) {
@@ -1284,7 +1284,7 @@ export class PageFloatLayoutContext
     return logicalFloatSide;
   }
 
-  getFloatFragmentExclusions(): geom.Shape[] {
+  getFloatFragmentExclusions(): Geom.Shape[] {
     const result = this.floatFragments.map(fragment =>
       fragment.getOuterShape()
     );
@@ -1336,7 +1336,7 @@ export class PageFloatLayoutContext
       );
   }
 
-  getPageFloatClearEdge(clear: string, column: layout.Column): number {
+  getPageFloatClearEdge(clear: string, column: Layout.Column): number {
     function isContinuationOfAlreadyAppearedFloat(context) {
       return continuation =>
         context.isAnchorAlreadyAppeared(continuation.float.getId());
@@ -1360,7 +1360,7 @@ export class PageFloatLayoutContext
       }
       context = context.parent;
     }
-    asserts.assert(column.clientLayout);
+    Asserts.assert(column.clientLayout);
     const blockStartLimit = this.getLimitValue(
       "block-start",
       column.layoutContext,
@@ -1465,13 +1465,13 @@ export class PageFloatLayoutContext
     return result;
   }
 
-  getLayoutConstraints(): layout.LayoutConstraint[] {
+  getLayoutConstraints(): Layout.LayoutConstraint[] {
     const constraints = this.parent ? this.parent.getLayoutConstraints() : [];
     return constraints.concat(this.layoutConstraints);
   }
 
   addLayoutConstraint(
-    layoutConstraint: layout.LayoutConstraint,
+    layoutConstraint: Layout.LayoutConstraint,
     floatReference: FloatReference
   ) {
     if (floatReference === this.floatReference) {
@@ -1484,10 +1484,10 @@ export class PageFloatLayoutContext
     }
   }
 
-  isColumnFullWithPageFloats(column: layout.Column): boolean {
+  isColumnFullWithPageFloats(column: Layout.Column): boolean {
     const layoutContext = column.layoutContext;
     const clientLayout = column.clientLayout;
-    asserts.assert(clientLayout);
+    Asserts.assert(clientLayout);
     let context: PageFloatLayoutContext = this;
     let limits = null;
     while (context && context.container) {
@@ -1559,7 +1559,7 @@ export class PageFloatLayoutContext
 }
 
 export interface PageFloatLayoutStrategy
-  extends pagefloat.PageFloatLayoutStrategy {}
+  extends PageFloats.PageFloatLayoutStrategy {}
 
 const pageFloatLayoutStrategies: PageFloatLayoutStrategy[] = [];
 
@@ -1568,7 +1568,9 @@ export class PageFloatLayoutStrategyResolver {
     pageFloatLayoutStrategies.push(strategy);
   }
 
-  findByNodeContext(nodeContext: vtree.NodeContext): PageFloatLayoutStrategy {
+  findByNodeContext(
+    nodeContext: ViewTree.NodeContext
+  ): PageFloatLayoutStrategy {
     for (let i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
       const strategy = pageFloatLayoutStrategies[i];
       if (strategy.appliesToNodeContext(nodeContext)) {
@@ -1609,7 +1611,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    */
   createPageFloat(nodeContext, pageFloatLayoutContext, column) {
     let floatReference = nodeContext.floatReference;
-    asserts.assert(nodeContext.floatSide);
+    Asserts.assert(nodeContext.floatSide);
     const floatSide: string = nodeContext.floatSide;
     const nodePosition = nodeContext.toNodePosition();
     return column
@@ -1620,7 +1622,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
       )
       .thenAsync(ref => {
         floatReference = ref;
-        asserts.assert(pageFloatLayoutContext.flowName);
+        Asserts.assert(pageFloatLayoutContext.flowName);
         const float = new PageFloat(
           nodePosition,
           floatReference,
@@ -1630,7 +1632,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
           nodeContext.floatMinWrapBlock
         );
         pageFloatLayoutContext.addPageFloat(float);
-        return task.newResult(float);
+        return Task.newResult(float);
       });
   }
 

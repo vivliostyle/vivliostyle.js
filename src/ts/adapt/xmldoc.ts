@@ -15,18 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Utility functions to work with XML (mostly XHTML) documents.
+ * @fileoverview XmlDoc - Utility functions to work with XML (mostly XHTML)
+ * documents.
  */
-import { xmldoc } from "../vivliostyle/types";
-import * as base from "./base";
-import * as net from "./net";
-import * as task from "./task";
+import { XmlDoc } from "../vivliostyle/types";
+import * as Base from "./base";
+import * as Net from "./net";
+import * as Task from "./task";
 
-export type XMLDocStore = xmldoc.XMLDocStore;
+export type XMLDocStore = XmlDoc.XMLDocStore;
 
 export const ELEMENT_OFFSET_ATTR = "data-adapt-eloff";
 
-export class XMLDocHolder implements xmldoc.XMLDocHolder {
+export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   lang: string | null = null;
   totalOffset: number = -1;
   root: Element;
@@ -44,7 +45,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
     this.root = document.documentElement; // html element
     let body = null;
     let head = null;
-    if (this.root.namespaceURI == base.NS.XHTML) {
+    if (this.root.namespaceURI == Base.NS.XHTML) {
       for (
         let child: Node = this.root.firstChild;
         child;
@@ -54,7 +55,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
           continue;
         }
         const elem = child as Element;
-        if (elem.namespaceURI == base.NS.XHTML) {
+        if (elem.namespaceURI == Base.NS.XHTML) {
           switch (elem.localName) {
             case "head":
               head = elem;
@@ -66,7 +67,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
         }
       }
       this.lang = this.root.getAttribute("lang");
-    } else if (this.root.namespaceURI == base.NS.FB2) {
+    } else if (this.root.namespaceURI == Base.NS.FB2) {
       head = this.root;
       for (
         let child: Node = this.root.firstChild;
@@ -77,7 +78,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
           continue;
         }
         const elem = child as Element;
-        if (elem.namespaceURI == base.NS.FB2) {
+        if (elem.namespaceURI == Base.NS.FB2) {
           if (elem.localName == "body") {
             body = elem;
           }
@@ -92,7 +93,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       if (langs.length > 0) {
         this.lang = langs[0];
       }
-    } else if (this.root.namespaceURI == base.NS.SSE) {
+    } else if (this.root.namespaceURI == Base.NS.SSE) {
       // treat <meta> element as "head" of the document
       for (
         let elem = this.root.firstElementChild;
@@ -113,7 +114,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
     this.last.setAttribute(ELEMENT_OFFSET_ATTR, "0");
   }
 
-  doc(): xmldoc.NodeList {
+  doc(): XmlDoc.NodeList {
     return new NodeList([this.document]);
   }
 
@@ -219,7 +220,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
       if (!children) {
         break;
       }
-      const index = base.binarySearch(children.length, index => {
+      const index = Base.binarySearch(children.length, index => {
         const child = children[index];
         const childOffset = self.getElementOffset(child);
         return childOffset > offset;
@@ -271,7 +272,7 @@ export class XMLDocHolder implements xmldoc.XMLDocHolder {
     if (id && !this.idMap[id]) {
       this.idMap[id] = e;
     }
-    const xmlid = e.getAttributeNS(base.NS.XML, "id");
+    const xmlid = e.getAttributeNS(Base.NS.XML, "id");
     if (xmlid && !this.idMap[xmlid]) {
       this.idMap[xmlid] = e;
     }
@@ -353,7 +354,7 @@ export const parseAndReturnNullIfError = (
  * @returns null if contentType cannot be inferred from HTTP header and file
  *     extension
  */
-export const resolveContentType = (response: net.Response): string | null => {
+export const resolveContentType = (response: Net.Response): string | null => {
   const contentType = response.contentType;
   if (contentType) {
     const supportedKeys = Object.keys(DOMParserSupportedType);
@@ -388,9 +389,9 @@ export const resolveContentType = (response: net.Response): string | null => {
 };
 
 export const parseXMLResource = (
-  response: net.Response,
+  response: Net.Response,
   store: XMLDocStore
-): task.Result<XMLDocHolder> => {
+): Task.Result<XMLDocHolder> => {
   let doc = response.responseXML;
   if (!doc) {
     const parser = new DOMParser();
@@ -437,16 +438,16 @@ export const parseXMLResource = (
     }
   }
   const xmldoc = doc ? new XMLDocHolder(store, response.url, doc) : null;
-  return task.newResult(xmldoc);
+  return Task.newResult(xmldoc);
 };
 
 export const newXMLDocStore = (): XMLDocStore =>
-  new net.ResourceStore(
+  new Net.ResourceStore(
     parseXMLResource,
-    net.XMLHttpRequestResponseType.DOCUMENT
+    Net.XMLHttpRequestResponseType.DOCUMENT
   );
 
-export class Predicate implements xmldoc.Predicate {
+export class Predicate implements XmlDoc.Predicate {
   constructor(public readonly fn: (p1: Node) => boolean) {}
 
   check(node: Node): boolean {
@@ -481,7 +482,7 @@ export class Predicate implements xmldoc.Predicate {
 
 export const predicate = new Predicate(node => true);
 
-export class NodeList implements xmldoc.NodeList {
+export class NodeList implements XmlDoc.NodeList {
   constructor(public readonly nodes: Node[]) {}
 
   asArray(): Node[] {

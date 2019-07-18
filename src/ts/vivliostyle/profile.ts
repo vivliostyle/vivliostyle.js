@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Utility for profiling
+ * @fileoverview Profile - Utility for profiling
  */
-import * as logging from "./logging";
+import * as Logging from "./logging";
 
 /**
  * Performance profiler measuring execution time of the script.
@@ -76,7 +76,7 @@ export class Profiler {
         ] - t["start"]}\n`;
       }
     });
-    logging.logger.info(st);
+    Logging.logger.info(st);
   }
 
   /**
@@ -115,7 +115,7 @@ function noop() {}
 
 /**
  * Registers start/end timing of some event.
- * @this {profile.Profiler}
+ * @this {Profile.Profiler}
  * @param name Name of event
  * @param startEnd Either of "start" or "end"
  * @param timestamp Used as the actual timestamp of the event if specified,
@@ -147,7 +147,7 @@ function registerTiming(name: string, startEnd: string, timestamp?: number) {
 
 /**
  * Registers start timing of some event.
- * @this {profile.Profiler}
+ * @this {Profile.Profiler}
  * @param name Name of event
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"
@@ -158,7 +158,7 @@ function registerStartTiming(name: string, timestamp?: number) {
 
 /**
  * Registers end timing of some event.
- * @this {profile.Profiler}
+ * @this {Profile.Profiler}
  * @param name Name of event
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"

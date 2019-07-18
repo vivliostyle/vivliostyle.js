@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CSS Values and utilities to handle them.
+ * @fileoverview Css - CSS Values and utilities to handle them.
  */
-import * as base from "./base";
-import * as exprs from "./expr";
+import * as Base from "./base";
+import * as Exprs from "./expr";
 
 export class Visitor {
   /**
@@ -208,22 +208,22 @@ export class Val {
    * @override
    */
   toString(): string {
-    const buf = new base.StringBuffer();
+    const buf = new Base.StringBuffer();
     this.appendTo(buf, true);
     return buf.toString();
   }
 
   stringValue(): string {
-    const buf = new base.StringBuffer();
+    const buf = new Base.StringBuffer();
     this.appendTo(buf, false);
     return buf.toString();
   }
 
-  toExpr(scope: exprs.LexicalScope, ref: exprs.Val): exprs.Val {
+  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     throw new Error("F_ABSTRACT");
   }
 
-  appendTo(buf: base.StringBuffer, toString: boolean): void {
+  appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append("[error]");
   }
 
@@ -270,7 +270,7 @@ export class Empty extends Val {
    * @override
    */
   toExpr(scope, ref) {
-    return new exprs.Const(scope, "");
+    return new Exprs.Const(scope, "");
   }
 
   /**
@@ -306,7 +306,7 @@ export class Slash extends Val {
    * @override
    */
   toExpr(scope, ref) {
-    return new exprs.Const(scope, "/");
+    return new Exprs.Const(scope, "/");
   }
 
   /**
@@ -335,7 +335,7 @@ export class Str extends Val {
    * @override
    */
   toExpr(scope, ref) {
-    return new exprs.Const(scope, this.str);
+    return new Exprs.Const(scope, this.str);
   }
 
   /**
@@ -344,7 +344,7 @@ export class Str extends Val {
   appendTo(buf, toString) {
     if (toString) {
       buf.append('"');
-      buf.append(base.escapeCSSStr(this.str));
+      buf.append(Base.escapeCSSStr(this.str));
       buf.append('"');
     } else {
       buf.append(this.str);
@@ -374,7 +374,7 @@ export class Ident extends Val {
    * @override
    */
   toExpr(scope, ref) {
-    return new exprs.Const(scope, this.name);
+    return new Exprs.Const(scope, this.name);
   }
 
   /**
@@ -382,7 +382,7 @@ export class Ident extends Val {
    */
   appendTo(buf, toString) {
     if (toString) {
-      buf.append(base.escapeCSSIdent(this.name));
+      buf.append(Base.escapeCSSIdent(this.name));
     } else {
       buf.append(this.name);
     }
@@ -430,13 +430,13 @@ export class Numeric extends Val {
       if (this.num == 100) {
         return ref;
       }
-      return new exprs.Multiply(
+      return new Exprs.Multiply(
         scope,
         ref,
-        new exprs.Const(scope, this.num / 100)
+        new Exprs.Const(scope, this.num / 100)
       );
     }
-    return new exprs.Numeric(scope, this.num, this.unit);
+    return new Exprs.Numeric(scope, this.num, this.unit);
   }
 
   /**
@@ -480,7 +480,7 @@ export class Num extends Val {
     if (this.num == 1) {
       return scope.one;
     }
-    return new exprs.Const(scope, this.num);
+    return new Exprs.Const(scope, this.num);
   }
 
   /**
@@ -551,7 +551,7 @@ export class URL extends Val {
    */
   appendTo(buf, toString) {
     buf.append('url("');
-    buf.append(base.escapeCSSStr(this.url));
+    buf.append(Base.escapeCSSStr(this.url));
     buf.append('")');
   }
 
@@ -564,7 +564,7 @@ export class URL extends Val {
 }
 
 export const appendList = (
-  buf: base.StringBuffer,
+  buf: Base.StringBuffer,
   values: Val[],
   separator: string,
   toString: boolean
@@ -633,7 +633,7 @@ export class Func extends Val {
    * @override
    */
   appendTo(buf, toString) {
-    buf.append(base.escapeCSSIdent(this.name));
+    buf.append(Base.escapeCSSIdent(this.name));
     buf.append("(");
     appendList(buf, this.values, ",", toString);
     buf.append(")");
@@ -648,7 +648,7 @@ export class Func extends Val {
 }
 
 export class Expr extends Val {
-  constructor(public expr: exprs.Val) {
+  constructor(public expr: Exprs.Val) {
     super();
   }
 
@@ -683,7 +683,7 @@ export class Expr extends Val {
   }
 }
 
-export const toNumber = (val: Val, context: exprs.Context): number => {
+export const toNumber = (val: Val, context: Exprs.Context): number => {
   if (val) {
     if (val.isNumeric()) {
       const numeric = val as Numeric;
@@ -699,7 +699,7 @@ export const toNumber = (val: Val, context: exprs.Context): number => {
 /**
  * Convert numeric value to px
  */
-export const convertNumericToPx = (val: Val, context: exprs.Context): Numeric =>
+export const convertNumericToPx = (val: Val, context: Exprs.Context): Numeric =>
   new Numeric(toNumber(val, context), "px");
 
 export const ident: { [key: string]: Ident } = {

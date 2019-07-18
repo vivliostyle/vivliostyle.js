@@ -14,43 +14,48 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Utilities for selectors.
+ * @fileoverview Selectors - Utilities for selectors.
  */
-import * as base from "../adapt/base";
-import * as task from "../adapt/task";
+import * as Base from "../adapt/base";
+import * as Task from "../adapt/task";
 import { ChunkPosition, ShadowContext } from "../adapt/vtree";
-import * as asserts from "./asserts";
-import * as layouthelper from "./layouthelper";
+import * as Asserts from "./asserts";
+import * as LayoutHelper from "./layouthelper";
 import { NthFragmentMatcher } from "./matcher";
-import * as pseudoElement from "./pseudoelement";
-import { layout, selector, vtree, FragmentLayoutConstraintType } from "./types";
+import * as PseudoElement from "./pseudoelement";
+import {
+  Layout,
+  Selectors,
+  ViewTree,
+  FragmentLayoutConstraintType
+} from "./types";
 
 export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;
 
 export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
 
 // FIXME: When importing layoututil module statically, it causes a circular dependency.
-let layoututil: typeof import("./layoututil");
+let LayoutUtil: typeof import("./layoututil");
 import("./layoututil").then(it => {
-  layoututil = it;
+  LayoutUtil = it;
 });
 
-export class AfterIfContinues implements selector.AfterIfContinues {
+export class AfterIfContinues implements Selectors.AfterIfContinues {
   constructor(
     public readonly sourceNode: Element,
-    public readonly styler: pseudoElement.PseudoelementStyler
+    public readonly styler: PseudoElement.PseudoelementStyler
   ) {}
 
   createElement(
-    column: layout.Column,
-    parentNodeContext: vtree.NodeContext
-  ): task.Result<Element> {
-    if (!layoututil) {
+    column: Layout.Column,
+    parentNodeContext: ViewTree.NodeContext
+  ): Task.Result<Element> {
+    if (!LayoutUtil) {
       throw new Error("layoututil module is required but not be imported.");
     }
     const doc = parentNodeContext.viewNode.ownerDocument;
     const viewRoot = doc.createElement("div");
-    const pseudoColumn = new layoututil.PseudoColumn(
+    const pseudoColumn = new LayoutUtil.PseudoColumn(
       column,
       viewRoot,
       parentNodeContext
@@ -63,17 +68,17 @@ export class AfterIfContinues implements selector.AfterIfContinues {
         this.styler.contentProcessed["after-if-continues"] = false;
         pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
         const pseudoElement = viewRoot.firstChild as Element;
-        base.setCSSProperty(pseudoElement, "display", "block");
-        return task.newResult(pseudoElement);
+        Base.setCSSProperty(pseudoElement, "display", "block");
+        return Task.newResult(pseudoElement);
       });
   }
 
-  private createNodePositionForPseudoElement(): vtree.ChunkPosition {
-    const sourceNode = pseudoElement.document.createElementNS(
-      base.NS.XHTML,
+  private createNodePositionForPseudoElement(): ViewTree.ChunkPosition {
+    const sourceNode = PseudoElement.document.createElementNS(
+      Base.NS.XHTML,
       "div"
     );
-    pseudoElement.setPseudoName(sourceNode, "after-if-continues");
+    PseudoElement.setPseudoName(sourceNode, "after-if-continues");
     const shadowContext = this.createShadowContext(sourceNode);
     const step = {
       node: sourceNode,
@@ -91,21 +96,21 @@ export class AfterIfContinues implements selector.AfterIfContinues {
     return new ChunkPosition(nodePosition as any);
   }
 
-  private createShadowContext(root: Element): vtree.ShadowContext {
+  private createShadowContext(root: Element): ViewTree.ShadowContext {
     return new ShadowContext(
       this.sourceNode,
       root,
       null,
       null,
       null,
-      vtree.ShadowType.ROOTED,
+      ViewTree.ShadowType.ROOTED,
       this.styler
     );
   }
 }
 
 export class AfterIfContinuesLayoutConstraint
-  implements selector.AfterIfContinuesLayoutConstraint {
+  implements Selectors.AfterIfContinuesLayoutConstraint {
   flagmentLayoutConstraintType: FragmentLayoutConstraintType =
     "AfterIfContinue";
   nodeContext: any;
@@ -113,8 +118,8 @@ export class AfterIfContinuesLayoutConstraint
   pseudoElementHeight: any;
 
   constructor(
-    nodeContext: vtree.NodeContext,
-    afterIfContinues: selector.AfterIfContinues,
+    nodeContext: ViewTree.NodeContext,
+    afterIfContinues: Selectors.AfterIfContinues,
     pseudoElementHeight: number
   ) {
     this.nodeContext = nodeContext;
@@ -145,13 +150,13 @@ export class AfterIfContinuesLayoutConstraint
   /** @override */
   finishBreak(nodeContext, column) {
     if (!this.getRepetitiveElements().affectTo(nodeContext)) {
-      return task.newResult(true);
+      return Task.newResult(true);
     }
     return this.afterIfContinues
       .createElement(column, this.nodeContext)
       .thenAsync(element => {
         this.nodeContext.viewNode.appendChild(element);
-        return task.newResult(true);
+        return Task.newResult(true);
       });
   }
 
@@ -180,7 +185,7 @@ export class AfterIfContinuesLayoutConstraint
 }
 
 export class AfterIfContinuesElementsOffset
-  implements selector.AfterIfContinuesElementsOffset {
+  implements Selectors.AfterIfContinuesElementsOffset {
   nodeContext: any;
   pseudoElementHeight: any;
 
@@ -202,7 +207,7 @@ export class AfterIfContinuesElementsOffset
     return this.calculateOffset(nodeContext);
   }
 
-  affectTo(nodeContext: vtree.NodeContext): boolean {
+  affectTo(nodeContext: ViewTree.NodeContext): boolean {
     if (!nodeContext) {
       return false;
     }
@@ -222,22 +227,22 @@ export class AfterIfContinuesElementsOffset
 }
 
 function processAfterIfContinuesOfNodeContext(
-  nodeContext: vtree.NodeContext,
-  column: layout.Column
-): task.Result<vtree.NodeContext> {
+  nodeContext: ViewTree.NodeContext,
+  column: Layout.Column
+): Task.Result<ViewTree.NodeContext> {
   if (
     !nodeContext ||
     !nodeContext.afterIfContinues ||
     nodeContext.after ||
     column.isFloatNodeContext(nodeContext)
   ) {
-    return task.newResult(nodeContext);
+    return Task.newResult(nodeContext);
   }
   const afterIfContinues = nodeContext.afterIfContinues;
   return afterIfContinues
     .createElement(column, nodeContext)
     .thenAsync(pseudoElement => {
-      asserts.assert(nodeContext !== null);
+      Asserts.assert(nodeContext !== null);
       const pseudoElementHeight = calculatePseudoElementHeight(
         nodeContext,
         column,
@@ -250,26 +255,26 @@ function processAfterIfContinuesOfNodeContext(
           pseudoElementHeight
         )
       );
-      return task.newResult(nodeContext);
+      return Task.newResult(nodeContext);
     });
 }
 
 export const processAfterIfContinues = (
-  result: task.Result<vtree.NodeContext>,
-  column: layout.Column
-): task.Result<vtree.NodeContext> =>
+  result: Task.Result<ViewTree.NodeContext>,
+  column: Layout.Column
+): Task.Result<ViewTree.NodeContext> =>
   result.thenAsync(nodeContext =>
     processAfterIfContinuesOfNodeContext(nodeContext, column)
   );
 
 export const processAfterIfContinuesOfAncestors = (
-  nodeContext: vtree.NodeContext,
-  column: layout.Column
-): task.Result<boolean> => {
-  const frame: task.Frame<boolean> = task.newFrame(
-    "vivliostyle.selectors.processAfterIfContinuesOfAncestors"
+  nodeContext: ViewTree.NodeContext,
+  column: Layout.Column
+): Task.Result<boolean> => {
+  const frame: Task.Frame<boolean> = Task.newFrame(
+    "processAfterIfContinuesOfAncestors"
   );
-  let current: vtree.NodeContext = nodeContext;
+  let current: ViewTree.NodeContext = nodeContext;
   frame
     .loop(() => {
       if (current !== null) {
@@ -277,7 +282,7 @@ export const processAfterIfContinuesOfAncestors = (
         current = current.parent;
         return result.thenReturn(true);
       } else {
-        return task.newResult(false);
+        return Task.newResult(false);
       }
     })
     .then(() => {
@@ -287,13 +292,13 @@ export const processAfterIfContinuesOfAncestors = (
 };
 
 export const calculatePseudoElementHeight = (
-  nodeContext: vtree.NodeContext,
-  column: layout.Column,
+  nodeContext: ViewTree.NodeContext,
+  column: Layout.Column,
   pseudoElement: Element
 ): number => {
   const parentNode = nodeContext.viewNode as Element;
   parentNode.appendChild(pseudoElement);
-  const height = layouthelper.getElementHeight(
+  const height = LayoutHelper.getElementHeight(
     pseudoElement,
     column,
     nodeContext.vertical

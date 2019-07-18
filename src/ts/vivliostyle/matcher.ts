@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Definitions of Matcher.
+ * @fileoverview Matcher - Definitions of Matcher.
  */
-import * as asserts from "./asserts";
+import * as Asserts from "./asserts";
 
 /**
  * Checkes whether given order can be represented as an+b with a non-negative
@@ -104,7 +104,7 @@ export class MatcherBuilder {
         parseInt(strs[2], 10)
       );
     } else {
-      asserts.fail(`unknown view condition. condition=${viewCondition}`);
+      Asserts.fail(`unknown view condition. condition=${viewCondition}`);
       return null;
     }
   }

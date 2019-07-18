@@ -14,15 +14,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Definitions of LayoutProcessor.
+ * @fileoverview LayoutProcessor - Definitions of LayoutProcessor.
  */
-
-import * as task from "../adapt/task";
-import * as breakposition from "./breakposition";
+import * as Task from "../adapt/task";
+import * as BreakPosition from "./breakposition";
 import { isBlock } from "./display";
-import * as layouthelper from "./layouthelper";
-import * as plugin from "./plugin";
-import { layout, layoutprocessor, vtree, FormattingContextType } from "./types";
+import * as LayoutHelper from "./layouthelper";
+import * as Plugin from "./plugin";
+import {
+  Layout,
+  LayoutProcessor,
+  ViewTree,
+  FormattingContextType
+} from "./types";
 
 /**
  * Processor doing some special layout (e.g. table layout)
@@ -32,33 +36,33 @@ export interface LayoutProcessor {
    * Do actual layout in the column starting from given NodeContext.
    */
   layout(
-    nodeContext: vtree.NodeContext,
-    column: layout.Column,
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column,
     leadingEdge: boolean
-  ): task.Result<vtree.NodeContext>;
+  ): Task.Result<ViewTree.NodeContext>;
 
   /**
    * Potential edge breaking position.
    */
   createEdgeBreakPosition(
-    position: vtree.NodeContext,
+    position: ViewTree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
     columnBlockSize: number
-  ): layout.BreakPosition;
+  ): Layout.BreakPosition;
 
   /**
    * process nodecontext at the start of a non inline element.
    * @return return true if you skip the subsequent nodes
    */
-  startNonInlineElementNode(nodeContext: vtree.NodeContext): boolean;
+  startNonInlineElementNode(nodeContext: ViewTree.NodeContext): boolean;
 
   /**
    * process nodecontext after a non inline element.
    * @return return true if you skip the subsequent nodes
    */
   afterNonInlineElementNode(
-    nodeContext: vtree.NodeContext,
+    nodeContext: ViewTree.NodeContext,
     stopAtOverflow: boolean
   ): boolean;
 
@@ -66,16 +70,16 @@ export interface LayoutProcessor {
    * @return holing true
    */
   finishBreak(
-    column: layout.Column,
-    nodeContext: vtree.NodeContext,
+    column: Layout.Column,
+    nodeContext: ViewTree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean
-  ): task.Result<boolean> | null;
+  ): Task.Result<boolean> | null;
 
   clearOverflownViewNodes(
-    column: layout.Column,
-    parentNodeContext: vtree.NodeContext,
-    nodeContext: vtree.NodeContext,
+    column: Layout.Column,
+    parentNodeContext: ViewTree.NodeContext,
+    nodeContext: ViewTree.NodeContext,
     removeSelf: boolean
   );
 }
@@ -87,9 +91,9 @@ export class LayoutProcessorResolver {
   /**
    * Find LayoutProcessor corresponding to given formatting context.
    */
-  find(formattingContext: vtree.FormattingContext): LayoutProcessor {
-    const hooks: plugin.ResolveLayoutProcessorHook[] = plugin.getHooksForName(
-      plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR
+  find(formattingContext: ViewTree.FormattingContext): LayoutProcessor {
+    const hooks: Plugin.ResolveLayoutProcessorHook[] = Plugin.getHooksForName(
+      Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR
     );
     for (let i = 0; i < hooks.length; i++) {
       const processor = hooks[i](formattingContext);
@@ -121,7 +125,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    * @override
    */
   createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {
-    return new breakposition.EdgeBreakPosition(
+    return new BreakPosition.EdgeBreakPosition(
       position.copy(),
       breakOnEdge,
       overflows,
@@ -154,7 +158,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
       return;
     }
     const parentNode = nodeContext.viewNode.parentNode;
-    layouthelper.removeFollowingSiblings(parentNode, nodeContext.viewNode);
+    LayoutHelper.removeFollowingSiblings(parentNode, nodeContext.viewNode);
     if (removeSelf) {
       parentNode.removeChild(nodeContext.viewNode);
     }
@@ -165,11 +169,11 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    * @override
    */
   finishBreak(
-    column: layout.Column,
-    nodeContext: vtree.NodeContext,
+    column: Layout.Column,
+    nodeContext: ViewTree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean
-  ): task.Result<boolean> {
+  ): Task.Result<boolean> {
     const removeSelf =
       forceRemoveSelf ||
       (nodeContext.viewNode != null &&
@@ -182,15 +186,15 @@ export class BlockLayoutProcessor implements LayoutProcessor {
         removeSelf ? nodeContext : nodeContext.parent
       );
     }
-    return task.newResult(true);
+    return Task.newResult(true);
   }
 }
 
 export class BlockFormattingContext
-  implements layoutprocessor.BlockFormattingContext {
+  implements LayoutProcessor.BlockFormattingContext {
   formattingContextType: FormattingContextType = "Block";
 
-  constructor(private readonly parent: vtree.FormattingContext) {}
+  constructor(private readonly parent: ViewTree.FormattingContext) {}
 
   /**
    * @override
@@ -222,9 +226,12 @@ export class BlockFormattingContext
 
 export const blockLayoutProcessor = new BlockLayoutProcessor();
 
+export const isInstanceOfBlockFormattingContext =
+  LayoutProcessor.isInstanceOfBlockFormattingContext;
+
 export function registerLayoutProcessorPlugin() {
-  plugin.registerHook(
-    plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+  Plugin.registerHook(
+    Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     (nodeContext, firstTime, display, position, floatSide, isRoot) => {
       const parent = nodeContext.parent;
       if (!parent && nodeContext.formattingContext) {
@@ -247,8 +254,8 @@ export function registerLayoutProcessorPlugin() {
       }
     }
   );
-  plugin.registerHook(
-    plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
+  Plugin.registerHook(
+    Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
     formattingContext => {
       if (formattingContext instanceof BlockFormattingContext) {
         return blockLayoutProcessor;

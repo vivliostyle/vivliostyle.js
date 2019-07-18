@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CSS Logical Properties
+ * @fileoverview Logical - CSS Logical Properties
  */
 type ConversionMap = {
   regexp: RegExp;

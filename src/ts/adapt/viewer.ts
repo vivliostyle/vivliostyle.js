@@ -16,26 +16,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Sample EPUB rendering application.
+ * @fileoverview ViewerImpl - Viewer implementation.
  */
 
-import * as constants from "../vivliostyle/constants";
-import * as logging from "../vivliostyle/logging";
-import * as epub from "./epub";
-import * as exprs from "./expr";
-import * as task from "./task";
-import * as vgen from "./vgen";
+import * as Constants from "../vivliostyle/constants";
+import * as Logging from "../vivliostyle/logging";
+import * as Epub from "./epub";
+import * as Exprs from "./expr";
+import * as Task from "./task";
+import * as Vgen from "./vgen";
 
-import * as asserts from "../vivliostyle/asserts";
-import * as plugin from "../vivliostyle/plugin";
-import * as profile from "../vivliostyle/profile";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Plugin from "../vivliostyle/plugin";
+import * as Profile from "../vivliostyle/profile";
 import { JSON, Event, EventListener } from "./base";
-import * as base from "./base";
+import * as Base from "./base";
 import { Mapper } from "./font";
 import { waitForFetchers } from "./taskutil";
 import { Page, Spread, PageHyperlinkEvent } from "./vtree";
 
-export type Action = (p1: JSON) => task.Result<boolean>;
+export type Action = (p1: JSON) => Task.Result<boolean>;
 
 export type ViewportSize = {
   marginLeft: number;
@@ -73,11 +73,11 @@ export class Viewer {
   hyperlinkListener: EventListener;
   pageRuleStyleElement: any;
   pageSheetSizeAlreadySet: boolean = false;
-  renderTask: task.Task | null = null;
+  renderTask: Task.Task | null = null;
   actions: { [key: string]: Action };
-  readyState: constants.ReadyState;
+  readyState: Constants.ReadyState;
   packageURL: string[];
-  opf: epub.OPFDoc;
+  opf: Epub.OPFDoc;
   haveZipMetadata: boolean;
   touchActive: boolean;
   touchX: number;
@@ -87,19 +87,19 @@ export class Viewer {
   viewportSize: ViewportSize | null;
   currentPage: Page;
   currentSpread: Spread | null;
-  pagePosition: epub.Position | null;
+  pagePosition: Epub.Position | null;
   fontSize: number;
   zoom: number;
   fitToScreen: boolean;
   pageViewMode: PageViewMode;
   waitForLoading: boolean;
   renderAllPages: boolean;
-  pref: exprs.Preferences;
+  pref: Exprs.Preferences;
   pageSizes: { width: number; height: number }[];
 
   // force relayout
-  viewport: vgen.Viewport | null;
-  opfView: epub.OPFView;
+  viewport: Vgen.Viewport | null;
+  opfView: Epub.OPFView;
 
   constructor(
     public readonly window: Window,
@@ -109,7 +109,7 @@ export class Viewer {
   ) {
     const self = this;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
-    if (constants.isDebug) {
+    if (Constants.isDebug) {
       viewportElement.setAttribute("data-vivliostyle-debug", true);
     }
     viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, "loading");
@@ -138,7 +138,7 @@ export class Viewer {
   }
 
   private init(): void {
-    this.readyState = constants.ReadyState.LOADING;
+    this.readyState = Constants.ReadyState.LOADING;
     this.packageURL = [];
     this.opf = null;
     this.haveZipMetadata = false;
@@ -157,22 +157,22 @@ export class Viewer {
     this.pageViewMode = PageViewMode.SINGLE_PAGE;
     this.waitForLoading = false;
     this.renderAllPages = true;
-    this.pref = exprs.defaultPreferences();
+    this.pref = Exprs.defaultPreferences();
     this.pageSizes = [];
   }
 
   addLogListeners() {
-    const LogLevel = logging.LogLevel;
-    logging.logger.addListener(LogLevel.DEBUG, info => {
+    const LogLevel = Logging.LogLevel;
+    Logging.logger.addListener(LogLevel.DEBUG, info => {
       this.callback({ t: "debug", content: info });
     });
-    logging.logger.addListener(LogLevel.INFO, info => {
+    Logging.logger.addListener(LogLevel.INFO, info => {
       this.callback({ t: "info", content: info });
     });
-    logging.logger.addListener(LogLevel.WARN, info => {
+    Logging.logger.addListener(LogLevel.WARN, info => {
       this.callback({ t: "warn", content: info });
     });
-    logging.logger.addListener(LogLevel.ERROR, info => {
+    Logging.logger.addListener(LogLevel.ERROR, info => {
       this.callback({ t: "error", content: info });
     });
   }
@@ -185,7 +185,7 @@ export class Viewer {
   /**
    * Set readyState and notify to listeners
    */
-  setReadyState(readyState: constants.ReadyState) {
+  setReadyState(readyState: Constants.ReadyState) {
     if (this.readyState !== readyState) {
       this.readyState = readyState;
       this.viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, readyState);
@@ -193,9 +193,9 @@ export class Viewer {
     }
   }
 
-  loadEPUB(command: JSON): task.Result<boolean> {
-    profile.profiler.registerStartTiming("beforeRender");
-    this.setReadyState(constants.ReadyState.LOADING);
+  loadEPUB(command: JSON): Task.Result<boolean> {
+    Profile.profiler.registerStartTiming("beforeRender");
+    this.setReadyState(Constants.ReadyState.LOADING);
     const url = command["url"] as string;
     const fragment = command["fragment"] as string | null;
     const haveZipMetadata = !!command["zipmeta"];
@@ -208,12 +208,12 @@ export class Viewer {
       text: string | null;
     }[];
     this.viewport = null;
-    const frame: task.Frame<boolean> = task.newFrame("loadEPUB");
+    const frame: Task.Frame<boolean> = Task.newFrame("loadEPUB");
     const self = this;
     self.configure(command).then(() => {
-      const store = new epub.EPUBDocStore();
+      const store = new Epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
-        const epubURL = base.resolveURL(url, self.window.location.href);
+        const epubURL = Base.resolveURL(url, self.window.location.href);
         self.packageURL = [epubURL];
         store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
           self.opf = opf;
@@ -226,9 +226,9 @@ export class Viewer {
     return frame.result();
   }
 
-  loadXML(command: JSON): task.Result<boolean> {
-    profile.profiler.registerStartTiming("beforeRender");
-    this.setReadyState(constants.ReadyState.LOADING);
+  loadXML(command: JSON): Task.Result<boolean> {
+    Profile.profiler.registerStartTiming("beforeRender");
+    this.setReadyState(Constants.ReadyState.LOADING);
     const params: SingleDocumentParam[] = command["url"];
     const doc = command["document"] as Document;
     const fragment = command["fragment"] as string | null;
@@ -243,19 +243,19 @@ export class Viewer {
 
     // force relayout
     this.viewport = null;
-    const frame: task.Frame<boolean> = task.newFrame("loadXML");
+    const frame: Task.Frame<boolean> = Task.newFrame("loadXML");
     const self = this;
     self.configure(command).then(() => {
-      const store = new epub.EPUBDocStore();
+      const store = new Epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
-        const resolvedParams: epub.OPFItemParam[] = params.map((p, index) => ({
-          url: base.resolveURL(p.url, self.window.location.href),
+        const resolvedParams: Epub.OPFItemParam[] = params.map((p, index) => ({
+          url: Base.resolveURL(p.url, self.window.location.href),
           index,
           startPage: p.startPage,
           skipPagesBefore: p.skipPagesBefore
         }));
         self.packageURL = resolvedParams.map(p => p.url);
-        self.opf = new epub.OPFDoc(store, "");
+        self.opf = new Epub.OPFDoc(store, "");
         self.opf.initWithChapters(resolvedParams, doc).then(() => {
           self.render(fragment).then(() => {
             frame.finish(true);
@@ -266,20 +266,20 @@ export class Viewer {
     return frame.result();
   }
 
-  private render(fragment?: string | null): task.Result<boolean> {
+  private render(fragment?: string | null): Task.Result<boolean> {
     this.cancelRenderingTask();
     const self = this;
     let cont;
     if (fragment) {
       cont = this.opf.resolveFragment(fragment).thenAsync(position => {
         self.pagePosition = position;
-        return task.newResult(true);
+        return Task.newResult(true);
       });
     } else {
-      cont = task.newResult(true);
+      cont = Task.newResult(true);
     }
     return cont.thenAsync(() => {
-      profile.profiler.registerEndTiming("beforeRender");
+      Profile.profiler.registerEndTiming("beforeRender");
       return self.resize();
     });
   }
@@ -298,11 +298,11 @@ export class Viewer {
       }
       if (unit === "ex") {
         return (
-          (value * exprs.defaultUnitSizes["ex"] * this.fontSize) /
-          exprs.defaultUnitSizes["em"]
+          (value * Exprs.defaultUnitSizes["ex"] * this.fontSize) /
+          Exprs.defaultUnitSizes["em"]
         );
       }
-      const unitSize = exprs.defaultUnitSizes[unit];
+      const unitSize = Exprs.defaultUnitSizes[unit];
       if (unitSize) {
         return value * unitSize;
       }
@@ -310,7 +310,7 @@ export class Viewer {
     return value;
   }
 
-  configure(command: JSON): task.Result<boolean> {
+  configure(command: JSON): Task.Result<boolean> {
     if (typeof command["autoresize"] == "boolean") {
       if (command["autoresize"]) {
         this.viewportSize = null;
@@ -375,12 +375,12 @@ export class Viewer {
     }
     // for backward compatibility
     if (typeof command["userAgentRootURL"] == "string") {
-      base.setBaseURL(command["userAgentRootURL"].replace(/resources\/?$/, ""));
-      base.setResourceBaseURL(command["userAgentRootURL"]);
+      Base.setBaseURL(command["userAgentRootURL"].replace(/resources\/?$/, ""));
+      Base.setResourceBaseURL(command["userAgentRootURL"]);
     }
     if (typeof command["rootURL"] == "string") {
-      base.setBaseURL(command["rootURL"]);
-      base.setResourceBaseURL(`${base.baseURL}resources/`);
+      Base.setBaseURL(command["rootURL"]);
+      Base.setResourceBaseURL(`${Base.baseURL}resources/`);
     }
     if (
       typeof command["pageViewMode"] == "string" &&
@@ -419,12 +419,12 @@ export class Viewer {
       this.needResize = true;
     }
     this.configurePlugins(command);
-    return task.newResult(true);
+    return Task.newResult(true);
   }
 
   configurePlugins(command: JSON) {
-    const hooks: plugin.ConfigurationHook[] = plugin.getHooksForName(
-      plugin.HOOKS.CONFIGURATION
+    const hooks: Plugin.ConfigurationHook[] = Plugin.getHooksForName(
+      Plugin.HOOKS.CONFIGURATION
     );
     hooks.forEach(hook => {
       const result = hook(command);
@@ -482,7 +482,7 @@ export class Viewer {
   private hidePages() {
     this.removePageListeners();
     this.forCurrentPages(page => {
-      base.setCSSProperty(page.container, "display", "none");
+      Base.setCSSProperty(page.container, "display", "none");
     });
     this.currentPage = null;
     this.currentSpread = null;
@@ -491,8 +491,8 @@ export class Viewer {
   private showSinglePage(page: Page) {
     page.addEventListener("hyperlink", this.hyperlinkListener, false);
     page.addEventListener("replaced", this.pageReplacedListener, false);
-    base.setCSSProperty(page.container, "visibility", "visible");
-    base.setCSSProperty(page.container, "display", "block");
+    Base.setCSSProperty(page.container, "visibility", "visible");
+    Base.setCSSProperty(page.container, "display", "block");
   }
 
   private showPage(page: Page): void {
@@ -524,10 +524,10 @@ export class Viewer {
     }
   }
 
-  private reportPosition(): task.Result<boolean> {
-    const frame: task.Frame<boolean> = task.newFrame("reportPosition");
+  private reportPosition(): Task.Result<boolean> {
+    const frame: Task.Frame<boolean> = Task.newFrame("reportPosition");
     const self = this;
-    asserts.assert(self.pagePosition);
+    Asserts.assert(self.pagePosition);
     self.opf
       .getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem)
       .then(cfi => {
@@ -535,7 +535,7 @@ export class Viewer {
         const r =
           self.waitForLoading && page.fetchers.length > 0
             ? waitForFetchers(page.fetchers)
-            : task.newResult(true);
+            : Task.newResult(true);
         r.then(() => {
           self.sendLocationNotification(page, cfi).thenFinish(frame);
         });
@@ -543,7 +543,7 @@ export class Viewer {
     return frame.result();
   }
 
-  private createViewport(): vgen.Viewport {
+  private createViewport(): Vgen.Viewport {
     const viewportElement = this.viewportElement;
     if (this.viewportSize) {
       const vs = this.viewportSize;
@@ -551,7 +551,7 @@ export class Viewer {
       viewportElement.style.marginRight = `${vs.marginRight}px`;
       viewportElement.style.marginTop = `${vs.marginTop}px`;
       viewportElement.style.marginBottom = `${vs.marginBottom}px`;
-      return new vgen.Viewport(
+      return new Vgen.Viewport(
         this.window,
         this.fontSize,
         viewportElement,
@@ -559,11 +559,11 @@ export class Viewer {
         vs.height
       );
     } else {
-      return new vgen.Viewport(this.window, this.fontSize, viewportElement);
+      return new Vgen.Viewport(this.window, this.fontSize, viewportElement);
     }
   }
 
-  private resolveSpreadView(viewport: vgen.Viewport): boolean {
+  private resolveSpreadView(viewport: Vgen.Viewport): boolean {
     switch (this.pageViewMode) {
       case PageViewMode.SINGLE_PAGE:
         return false;
@@ -672,7 +672,7 @@ export class Viewer {
     this.removePageSizePageRules();
     this.viewport = this.createViewport();
     this.viewport.resetZoom();
-    this.opfView = new epub.OPFView(
+    this.opfView = new Epub.OPFView(
       this.opf,
       this.viewport,
       this.fontMapper,
@@ -687,7 +687,7 @@ export class Viewer {
    * @param sync If true, get the necessary page synchronously (not waiting
    *     another rendering task)
    */
-  private showCurrent(page: Page, sync?: boolean): task.Result<null> {
+  private showCurrent(page: Page, sync?: boolean): Task.Result<null> {
     this.needRefresh = false;
     this.removePageListeners();
     const self = this;
@@ -698,13 +698,13 @@ export class Viewer {
           self.showSpread(spread);
           self.setSpreadZoom(spread);
           self.currentPage = page;
-          return task.newResult(null);
+          return Task.newResult(null);
         });
     } else {
       this.showPage(page);
       this.setPageZoom(page);
       this.currentPage = page;
-      return task.newResult(null);
+      return Task.newResult(null);
     }
   }
 
@@ -761,7 +761,7 @@ export class Viewer {
       case ZoomType.FIT_INSIDE_VIEWPORT: {
         let pageDim;
         if (this.pref.spreadView) {
-          asserts.assert(this.currentSpread);
+          Asserts.assert(this.currentSpread);
           pageDim = this.getSpreadDimensions(this.currentSpread);
         } else {
           pageDim = this.currentPage.dimensions;
@@ -792,24 +792,23 @@ export class Viewer {
     this.renderTask = null;
   }
 
-  resize(): task.Result<boolean> {
+  resize(): Task.Result<boolean> {
     this.needResize = false;
     this.needRefresh = false;
     if (this.sizeIsGood()) {
-      return task.newResult(true);
+      return Task.newResult(true);
     }
     const self = this;
-    this.setReadyState(constants.ReadyState.LOADING);
+    this.setReadyState(Constants.ReadyState.LOADING);
     this.cancelRenderingTask();
-    const resizeTask = task
-      .currentTask()
+    const resizeTask = Task.currentTask()
       .getScheduler()
       .run(() =>
-        task.handle(
+        Task.handle(
           "resize",
           frame => {
             self.renderTask = resizeTask;
-            profile.profiler.registerStartTiming("render (resize)");
+            Profile.profiler.registerStartTiming("render (resize)");
             self.reset();
             if (self.pagePosition) {
               // When resizing, do not use the current page index, for a page
@@ -826,16 +825,16 @@ export class Viewer {
               self.pagePosition = result.position;
               self.showCurrent(result.page, true).then(() => {
                 self.reportPosition().then(p => {
-                  self.setReadyState(constants.ReadyState.INTERACTIVE);
+                  self.setReadyState(Constants.ReadyState.INTERACTIVE);
                   const r = self.renderAllPages
                     ? self.opfView.renderAllPages()
-                    : task.newResult(null);
+                    : Task.newResult(null);
                   r.then(() => {
                     if (self.renderTask === resizeTask) {
                       self.renderTask = null;
                     }
-                    profile.profiler.registerEndTiming("render (resize)");
-                    self.setReadyState(constants.ReadyState.COMPLETE);
+                    Profile.profiler.registerEndTiming("render (resize)");
+                    self.setReadyState(Constants.ReadyState.COMPLETE);
                     self.callback({ t: "loaded" });
                     frame.finish(p);
                   });
@@ -845,22 +844,22 @@ export class Viewer {
           },
           (frame, err) => {
             if (err instanceof RenderingCanceledError) {
-              profile.profiler.registerEndTiming("render (resize)");
-              logging.logger.debug(err.message);
+              Profile.profiler.registerEndTiming("render (resize)");
+              Logging.logger.debug(err.message);
             } else {
               throw err;
             }
           }
         )
       );
-    return task.newResult(true);
+    return Task.newResult(true);
   }
 
   private sendLocationNotification(
     page: Page,
     cfi: string | null
-  ): task.Result<boolean> {
-    const frame: task.Frame<boolean> = task.newFrame(
+  ): Task.Result<boolean> {
+    const frame: Task.Frame<boolean> = Task.newFrame(
       "sendLocationNotification"
     );
     const notification = {
@@ -870,7 +869,7 @@ export class Viewer {
     };
     const self = this;
     this.opf
-      .getEPageFromPosition(self.pagePosition as epub.Position)
+      .getEPageFromPosition(self.pagePosition as Epub.Position)
       .then(epage => {
         notification["epage"] = epage;
         notification["epageCount"] = self.opf.epageCount;
@@ -883,17 +882,17 @@ export class Viewer {
     return frame.result();
   }
 
-  getCurrentPageProgression(): constants.PageProgression | null {
+  getCurrentPageProgression(): Constants.PageProgression | null {
     return this.opfView
       ? this.opfView.getCurrentPageProgression(this.pagePosition)
       : null;
   }
 
-  moveTo(command: JSON): task.Result<boolean> {
+  moveTo(command: JSON): Task.Result<boolean> {
     let method;
     const self = this;
-    if (this.readyState !== constants.ReadyState.COMPLETE) {
-      this.setReadyState(constants.ReadyState.LOADING);
+    if (this.readyState !== Constants.ReadyState.COMPLETE) {
+      this.setReadyState(Constants.ReadyState.LOADING);
     }
     if (typeof command["where"] == "string") {
       switch (command["where"]) {
@@ -914,7 +913,7 @@ export class Viewer {
           method = this.opfView.firstPage;
           break;
         default:
-          return task.newResult(true);
+          return Task.newResult(true);
       }
       if (method) {
         const m = method;
@@ -930,14 +929,14 @@ export class Viewer {
       const url = command["url"] as string;
       method = () => self.opfView.navigateTo(url, self.pagePosition);
     } else {
-      return task.newResult(true);
+      return Task.newResult(true);
     }
-    const frame: task.Frame<boolean> = task.newFrame("moveTo");
+    const frame: Task.Frame<boolean> = Task.newFrame("moveTo");
     method.call(self.opfView).then(result => {
       let cont;
       if (result) {
         self.pagePosition = result.position;
-        const innerFrame: task.Frame<boolean> = task.newFrame(
+        const innerFrame: Task.Frame<boolean> = Task.newFrame(
           "moveTo.showCurrent"
         );
         cont = innerFrame.result();
@@ -945,11 +944,11 @@ export class Viewer {
           self.reportPosition().thenFinish(innerFrame);
         });
       } else {
-        cont = task.newResult(true);
+        cont = Task.newResult(true);
       }
       cont.then(res => {
-        if (self.readyState === constants.ReadyState.LOADING) {
-          self.setReadyState(constants.ReadyState.INTERACTIVE);
+        if (self.readyState === Constants.ReadyState.LOADING) {
+          self.setReadyState(Constants.ReadyState.INTERACTIVE);
         }
         frame.finish(res);
       });
@@ -957,25 +956,25 @@ export class Viewer {
     return frame.result();
   }
 
-  showTOC(command: JSON): task.Result<boolean> {
+  showTOC(command: JSON): Task.Result<boolean> {
     const autohide = !!command["autohide"];
     const visibility = command["v"];
     const currentVisibility = this.opfView.isTOCVisible();
     if (currentVisibility) {
       if (visibility == "show") {
-        return task.newResult(true);
+        return Task.newResult(true);
       }
     } else {
       if (visibility == "hide") {
-        return task.newResult(true);
+        return Task.newResult(true);
       }
     }
     if (currentVisibility) {
       this.opfView.hideTOC();
-      return task.newResult(true);
+      return Task.newResult(true);
     } else {
       const self = this;
-      const frame: task.Frame<boolean> = task.newFrame("showTOC");
+      const frame: Task.Frame<boolean> = Task.newFrame("showTOC");
       this.opfView.showTOC(autohide).then(page => {
         if (page) {
           if (autohide) {
@@ -993,10 +992,10 @@ export class Viewer {
     }
   }
 
-  runCommand(command: JSON): task.Result<boolean> {
+  runCommand(command: JSON): Task.Result<boolean> {
     const self = this;
     const actionName = command["a"] || "";
-    return task.handle(
+    return Task.handle(
       "runCommand",
       frame => {
         const action = self.actions[actionName];
@@ -1006,12 +1005,12 @@ export class Viewer {
             frame.finish(true);
           });
         } else {
-          logging.logger.error("No such action:", actionName);
+          Logging.logger.error("No such action:", actionName);
           frame.finish(true);
         }
       },
       (frame, err) => {
-        logging.logger.error(err, "Error during action:", actionName);
+        Logging.logger.error(err, "Error during action:", actionName);
         frame.finish(true);
       }
     );
@@ -1021,9 +1020,9 @@ export class Viewer {
     let command = maybeParse(cmd);
     let continuation = null;
     const viewer = this;
-    task.start(() => {
-      const frame: task.Frame<boolean> = task.newFrame("commandLoop");
-      const scheduler = task.currentTask().getScheduler();
+    Task.start(() => {
+      const frame: Task.Frame<boolean> = Task.newFrame("commandLoop");
+      const scheduler = Task.currentTask().getScheduler();
       viewer.hyperlinkListener = evt => {
         const hrefEvent = evt as PageHyperlinkEvent;
         const internal =
@@ -1040,7 +1039,7 @@ export class Viewer {
           };
           scheduler.run(() => {
             viewer.callback(msg);
-            return task.newResult(true);
+            return Task.newResult(true);
           });
         }
       };
@@ -1063,7 +1062,7 @@ export class Viewer {
               loopFrame.continueLoop();
             });
           } else {
-            const frameInternal: task.Frame<boolean> = task.newFrame(
+            const frameInternal: Task.Frame<boolean> = Task.newFrame(
               "waitForCommand"
             );
             continuation = frameInternal.suspend(self);
@@ -1117,7 +1116,7 @@ class RenderingCanceledError extends Error {
 
 export const maybeParse = (cmd: any): JSON => {
   if (typeof cmd == "string") {
-    return base.stringToJSON(cmd);
+    return Base.stringToJSON(cmd);
   }
   return cmd;
 };

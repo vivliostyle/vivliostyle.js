@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Global variables of Vivliostyle.js
+ * @fileoverview Shared - Global variables of Vivliostyle.js
  */
-import { repetitiveelement } from "./types";
+import { RepetitiveElement } from "./types";
 
 export let repetitiveElementsCache: {
   root: Element;
-  elements: repetitiveelement.RepetitiveElements;
+  elements: RepetitiveElement.RepetitiveElements;
 }[] = [];
 
 export function clearRepetitiveElementsCache() {

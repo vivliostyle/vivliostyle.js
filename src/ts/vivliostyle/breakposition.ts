@@ -14,23 +14,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Definitions of BreakPosition.
+ * @fileoverview BreakPosition - Definitions of BreakPosition.
  */
-import * as breaks from "./break";
-import * as layouthelper from "./layouthelper";
-import { layout, repetitiveelement, vtree } from "./types";
+import * as Break from "./break";
+import * as LayoutHelper from "./layouthelper";
+import { Layout, RepetitiveElement, ViewTree } from "./types";
 
 /**
  * Potential breaking position.
  */
-export type BreakPosition = layout.BreakPosition;
+export type BreakPosition = Layout.BreakPosition;
 
 export abstract class AbstractBreakPosition
-  implements layout.AbstractBreakPosition {
+  implements Layout.AbstractBreakPosition {
   abstract findAcceptableBreak(
-    column: layout.Column,
+    column: Layout.Column,
     penalty: number
-  ): vtree.NodeContext;
+  ): ViewTree.NodeContext;
 
   abstract getMinBreakPenalty(): number;
 
@@ -46,14 +46,14 @@ export abstract class AbstractBreakPosition
    */
   breakPositionChosen(column) {}
 
-  getNodeContext(): vtree.NodeContext {
+  getNodeContext(): ViewTree.NodeContext {
     return null;
   }
 }
 
 export function calculateOffset(
-  nodeContext: vtree.NodeContext,
-  elementsOffsets: repetitiveelement.ElementsOffset[]
+  nodeContext: ViewTree.NodeContext,
+  elementsOffsets: RepetitiveElement.ElementsOffset[]
 ): { current: number; minimum: number } {
   return {
     current: elementsOffsets.reduce(
@@ -73,13 +73,13 @@ export function calculateOffset(
  * Potential edge breaking position.
  */
 export class EdgeBreakPosition extends AbstractBreakPosition
-  implements layout.EdgeBreakPosition {
+  implements Layout.EdgeBreakPosition {
   overflowIfRepetitiveElementsDropped: boolean;
   protected isEdgeUpdated: boolean = false;
   private edge: number = 0;
 
   constructor(
-    public readonly position: vtree.NodeContext,
+    public readonly position: ViewTree.NodeContext,
     public readonly breakOnEdge: string | null,
     public overflows: boolean,
     public readonly computedBlockSize: number
@@ -110,18 +110,18 @@ export class EdgeBreakPosition extends AbstractBreakPosition
       this.isFirstContentOfRepetitiveElementsOwner() &&
       !this.overflowIfRepetitiveElementsDropped;
     return (
-      (breaks.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0) +
+      (Break.isAvoidBreakValue(this.breakOnEdge) ? 1 : 0) +
       (this.overflows && !preferDropping ? 3 : 0) +
       (this.position.parent ? this.position.parent.breakPenalty : 0)
     );
   }
 
-  private updateEdge(column: layout.Column) {
+  private updateEdge(column: Layout.Column) {
     const clonedPaddingBorder = column.calculateClonedPaddingBorder(
       this.position
     );
     this.edge =
-      layouthelper.calculateEdge(
+      LayoutHelper.calculateEdge(
         this.position,
         column.clientLayout,
         0,
@@ -130,7 +130,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
     this.isEdgeUpdated = true;
   }
 
-  private updateOverflows(column: layout.Column) {
+  private updateOverflows(column: Layout.Column) {
     if (!this.isEdgeUpdated) {
       this.updateEdge(column);
     }
@@ -156,7 +156,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
     }
     const { formattingContext } = nodeContext.parent;
     if (
-      !repetitiveelement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
+      !RepetitiveElement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
         formattingContext
       )
     ) {

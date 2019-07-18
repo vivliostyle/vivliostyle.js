@@ -14,35 +14,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Definitions of LayoutRetryer.
+ * @fileoverview LayoutRetryer - Definitions of LayoutRetryer.
  */
-import * as task from "../adapt/task";
-import * as asserts from "./asserts";
-import { layout, vtree } from "./types";
+import * as Task from "../adapt/task";
+import * as Asserts from "./asserts";
+import { Layout, ViewTree } from "./types";
 
 /**
  * @abstract
  */
 export abstract class AbstractLayoutRetryer {
-  initialBreakPositions: layout.BreakPosition[] = null;
+  initialBreakPositions: Layout.BreakPosition[] = null;
   initialStateOfFormattingContext: any = null;
   initialPosition: any;
   initialFragmentLayoutConstraints: any;
 
   layout(
-    nodeContext: vtree.NodeContext,
-    column: layout.Column
-  ): task.Result<vtree.NodeContext> {
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<ViewTree.NodeContext> {
     this.prepareLayout(nodeContext, column);
     return this.tryLayout(nodeContext, column);
   }
 
   private tryLayout(
-    nodeContext: vtree.NodeContext,
-    column: layout.Column
-  ): task.Result<vtree.NodeContext> {
-    const frame = task.newFrame<vtree.NodeContext>(
-      "vivliostyle.layoututil.AbstractLayoutRetryer.tryLayout"
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<ViewTree.NodeContext> {
+    const frame = Task.newFrame<ViewTree.NodeContext>(
+      "AbstractLayoutRetryer.tryLayout"
     );
     this.saveState(nodeContext, column);
     const mode = this.resolveLayoutMode(nodeContext);
@@ -58,7 +58,7 @@ export abstract class AbstractLayoutRetryer {
         if (accepted) {
           frame.finish(positionAfter);
         } else {
-          asserts.assert(this.initialPosition);
+          Asserts.assert(this.initialPosition);
           this.clearNodes(this.initialPosition);
           this.restoreState(nodeContext, column);
           this.tryLayout(this.initialPosition, column).thenFinish(frame);
@@ -71,11 +71,13 @@ export abstract class AbstractLayoutRetryer {
   /**
    * @abstract
    */
-  abstract resolveLayoutMode(nodeContext: vtree.NodeContext): layout.LayoutMode;
+  abstract resolveLayoutMode(
+    nodeContext: ViewTree.NodeContext
+  ): Layout.LayoutMode;
 
-  prepareLayout(nodeContext: vtree.NodeContext, column: layout.Column) {}
+  prepareLayout(nodeContext: ViewTree.NodeContext, column: Layout.Column) {}
 
-  clearNodes(initialPosition: vtree.NodeContext) {
+  clearNodes(initialPosition: ViewTree.NodeContext) {
     const viewNode =
       initialPosition.viewNode || initialPosition.parent.viewNode;
     let child;
@@ -88,7 +90,7 @@ export abstract class AbstractLayoutRetryer {
     }
   }
 
-  saveState(nodeContext: vtree.NodeContext, column: layout.Column) {
+  saveState(nodeContext: ViewTree.NodeContext, column: Layout.Column) {
     this.initialPosition = nodeContext.copy();
     this.initialBreakPositions = [].concat(column.breakPositions);
     this.initialFragmentLayoutConstraints = [].concat(
@@ -99,7 +101,7 @@ export abstract class AbstractLayoutRetryer {
     }
   }
 
-  restoreState(nodeContext: vtree.NodeContext, column: layout.Column) {
+  restoreState(nodeContext: ViewTree.NodeContext, column: Layout.Column) {
     column.breakPositions = this.initialBreakPositions;
     column.fragmentLayoutConstraints = this.initialFragmentLayoutConstraints;
     if (nodeContext.formattingContext) {

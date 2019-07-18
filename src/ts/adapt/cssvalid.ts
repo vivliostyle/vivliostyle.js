@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Parse validation rules (validation.txt), validate properties
- * and shorthands.
+ * @fileoverview CssValid - Parse validation rules (validation.txt), validate
+ * properties and shorthands.
  */
-import * as logging from "../vivliostyle/logging";
-import * as base from "./base";
-import * as css from "./css";
-import * as cssparse from "./cssparse";
-import * as csstok from "./csstok";
-import * as net from "./net";
-import * as task from "./task";
-import * as taskutil from "./taskutil";
+import * as Logging from "../vivliostyle/logging";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssParse from "./cssparse";
+import * as CssTok from "./csstok";
+import * as Net from "./net";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
 
 export interface PropertyReceiver {
-  unknownProperty(name: string, value: css.Val): void;
+  unknownProperty(name: string, value: Css.Val): void;
 
-  invalidPropertyValue(name: string, value: css.Val): void;
+  invalidPropertyValue(name: string, value: Css.Val): void;
 
-  simpleProperty(name: string, value: css.Val, important): void;
+  simpleProperty(name: string, value: Css.Val, important): void;
 }
 
 export class Node {
@@ -353,13 +353,13 @@ export const ALLOW_ZERO_PERCENT = 1024;
 export const ALLOW_SLASH = 2048;
 
 export type ValueMap = {
-  [key: string]: css.Val;
+  [key: string]: Css.Val;
 };
 
 /**
  * Abstract class to validate simple CSS property value (not a shorthand)
  */
-export class PropertyValidator extends css.Visitor {
+export class PropertyValidator extends Css.Visitor {
   constructor() {
     super();
   }
@@ -368,7 +368,7 @@ export class PropertyValidator extends css.Visitor {
    * Validate a subsequence of the given values from the given index. Return the
    * list of matched values or null if there is no match.
    */
-  validateForShorthand(values: css.Val[], index: number): css.Val[] {
+  validateForShorthand(values: Css.Val[], index: number): Css.Val[] {
     const rval = values[index].visit(this);
     if (rval) {
       return [rval];
@@ -575,8 +575,8 @@ export class ListValidator extends PropertyValidator {
     this.first = group.finish(this.successTerminal, this.failureTerminal);
   }
 
-  validateList(arr: css.Val[], slice: boolean, startIndex: number): css.Val[] {
-    let out: css.Val[] = slice ? [] : arr;
+  validateList(arr: Css.Val[], slice: boolean, startIndex: number): Css.Val[] {
+    let out: Css.Val[] = slice ? [] : arr;
     let current = this.first;
     let index = startIndex;
     let alternativeStack = null;
@@ -620,7 +620,7 @@ export class ListValidator extends PropertyValidator {
           this instanceof SpaceListValidator
         ) {
           // Special nesting case: validate the input space list as a whole.
-          outval = new css.SpaceList(arr).visit(current.validator);
+          outval = new Css.SpaceList(arr).visit(current.validator);
           if (outval) {
             index = arr.length;
             current = current.success;
@@ -633,7 +633,7 @@ export class ListValidator extends PropertyValidator {
           this instanceof SpaceListValidator
         ) {
           // Special nesting case: validate the input comma list as a whole.
-          outval = new css.CommaList(arr).visit(current.validator);
+          outval = new Css.CommaList(arr).visit(current.validator);
           if (outval) {
             index = arr.length;
             current = current.success;
@@ -668,9 +668,9 @@ export class ListValidator extends PropertyValidator {
     return null;
   }
 
-  validateSingle(inval: css.Val): css.Val {
+  validateSingle(inval: Css.Val): Css.Val {
     // no need to worry about "specials"
-    let outval: css.Val = null;
+    let outval: Css.Val = null;
     let current = this.first;
     while (
       current !== this.successTerminal &&
@@ -806,7 +806,7 @@ export class SpaceListValidator extends ListValidator {
     if (!arr) {
       return null;
     }
-    return new css.SpaceList(arr);
+    return new Css.SpaceList(arr);
   }
 
   /**
@@ -831,7 +831,7 @@ export class SpaceListValidator extends ListValidator {
       if (!arr) {
         return null;
       }
-      return new css.CommaList(arr);
+      return new Css.CommaList(arr);
     }
     return null;
   }
@@ -867,7 +867,7 @@ export class CommaListValidator extends ListValidator {
     if (!arr) {
       return null;
     }
-    return new css.CommaList(arr);
+    return new Css.CommaList(arr);
   }
 
   /**
@@ -913,7 +913,7 @@ export class FuncValidator extends ListValidator {
     if (!arr) {
       return null;
     }
-    return new css.Func(func.name, arr);
+    return new Css.Func(func.name, arr);
   }
 }
 
@@ -924,14 +924,14 @@ export class ShorthandSyntaxNode {
    * @return new index.
    */
   tryParse(
-    values: css.Val[],
+    values: Css.Val[],
     index: number,
     shorthandValidator: ShorthandValidator
   ): number {
     return index;
   }
 
-  success(rval: css.Val, shorthandValidator: ShorthandValidator): void {}
+  success(rval: Css.Val, shorthandValidator: ShorthandValidator): void {}
 }
 
 export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
@@ -952,7 +952,7 @@ export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
     const rvals = this.validator.validateForShorthand(values, index);
     if (rvals) {
       const len = rvals.length;
-      const rval = len > 1 ? new css.SpaceList(rvals) : rvals[0];
+      const rval = len > 1 ? new Css.SpaceList(rvals) : rvals[0];
       this.success(rval, shorthandValidator);
       return index + len;
     }
@@ -996,7 +996,7 @@ export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
   tryParse(values, index, shorthandValidator) {
     const index0 = index;
     if (this.slash) {
-      if (values[index] == css.slash) {
+      if (values[index] == Css.slash) {
         if (++index == values.length) {
           return index0;
         }
@@ -1020,7 +1020,7 @@ export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
   }
 }
 
-export class ShorthandValidator extends css.Visitor {
+export class ShorthandValidator extends Css.Visitor {
   syntax: ShorthandSyntaxNode[] = null;
   propList: string[] = null;
   error: boolean = false;
@@ -1064,16 +1064,16 @@ export class ShorthandValidator extends css.Visitor {
 
   propagateInherit(important: boolean, receiver: PropertyReceiver): void {
     for (const name of this.propList) {
-      receiver.simpleProperty(name, css.ident.inherit, important);
+      receiver.simpleProperty(name, Css.ident.inherit, important);
     }
   }
 
-  validateList(list: css.Val[]): number {
+  validateList(list: Css.Val[]): number {
     this.error = true;
     return 0;
   }
 
-  validateSingle(val: css.Val): css.Val {
+  validateSingle(val: Css.Val): Css.Val {
     this.validateList([val]);
     return null;
   }
@@ -1241,7 +1241,7 @@ export class InsetsSlashShorthandValidator extends ShorthandValidator {
   validateList(list) {
     let slashIndex = list.length;
     for (let i = 0; i < list.length; i++) {
-      if (list[i] === css.slash) {
+      if (list[i] === Css.slash) {
         slashIndex = i;
         break;
       }
@@ -1282,7 +1282,7 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
     super();
   }
 
-  mergeIn(acc: { [key: string]: css.Val[] }, values: ValueMap) {
+  mergeIn(acc: { [key: string]: Css.Val[] }, values: ValueMap) {
     for (const name of this.propList) {
       const val = values[name] || this.validatorSet.defaultValues[name];
       let arr = acc[name];
@@ -1298,10 +1298,10 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
    * @override
    */
   visitCommaList(list) {
-    const acc: { [key: string]: css.Val[] } = {};
+    const acc: { [key: string]: Css.Val[] } = {};
     for (let i = 0; i < list.values.length; i++) {
       this.values = {};
-      if (list.values[i] instanceof css.CommaList) {
+      if (list.values[i] instanceof Css.CommaList) {
         this.error = true;
       } else {
         list.values[i].visit(this);
@@ -1319,7 +1319,7 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
       if (name == "background-color") {
         this.values[name] = acc[name].pop();
       } else {
-        this.values[name] = new css.CommaList(acc[name]);
+        this.values[name] = new Css.CommaList(acc[name]);
       }
     }
     return null;
@@ -1359,7 +1359,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
       return index;
     }
     this.values["font-size"] = list[index++];
-    if (list[index] === css.slash) {
+    if (list[index] === Css.slash) {
       index++;
 
       // must at least have line-height and font-family at the end
@@ -1376,7 +1376,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     const fontFamily =
       index == list.length - 1
         ? list[index]
-        : new css.SpaceList(list.slice(index, list.length));
+        : new Css.SpaceList(list.slice(index, list.length));
     if (!fontFamily.visit(validators["font-family"])) {
       this.error = true;
       return index;
@@ -1397,7 +1397,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     for (let i = 1; i < list.values.length; i++) {
       familyList.push(list.values[i]);
     }
-    const family = new css.CommaList(familyList);
+    const family = new Css.CommaList(familyList);
     if (!family.visit(this.validatorSet.validators["font-family"])) {
       this.error = true;
     } else {
@@ -1451,15 +1451,15 @@ export class ValidatorSet {
 
   private addReplacement(
     val: ValidatingGroup,
-    token: csstok.Token
+    token: CssTok.Token
   ): ValidatingGroup {
-    let cssval: css.Val;
-    if (token.type == csstok.TokenType.NUMERIC) {
-      cssval = new css.Numeric(token.num, token.text);
-    } else if (token.type == csstok.TokenType.HASH) {
-      cssval = cssparse.colorFromHash(token.text);
-    } else if (token.type == csstok.TokenType.IDENT) {
-      cssval = css.getName(token.text);
+    let cssval: Css.Val;
+    if (token.type == CssTok.TokenType.NUMERIC) {
+      cssval = new Css.Numeric(token.num, token.text);
+    } else if (token.type == CssTok.TokenType.HASH) {
+      cssval = CssParse.colorFromHash(token.text);
+    } else if (token.type == CssTok.TokenType.IDENT) {
+      cssval = Css.getName(token.text);
     } else {
       throw new Error("unexpected replacement");
     }
@@ -1561,7 +1561,7 @@ export class ValidatorSet {
       new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS)
     );
     this.namedValidators["POS_PERCENTAGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, { "%": css.empty })
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, { "%": Css.empty })
     );
     this.namedValidators["NEGATIVE"] = this.primitive(
       new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS)
@@ -1574,48 +1574,48 @@ export class ValidatorSet {
     );
     this.namedValidators["POS_LENGTH"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        em: css.empty,
-        ex: css.empty,
-        ch: css.empty,
-        rem: css.empty,
-        vh: css.empty,
-        vw: css.empty,
-        vmin: css.empty,
-        vmax: css.empty,
-        cm: css.empty,
-        mm: css.empty,
-        in: css.empty,
-        px: css.empty,
-        pt: css.empty,
-        pc: css.empty,
-        q: css.empty
+        em: Css.empty,
+        ex: Css.empty,
+        ch: Css.empty,
+        rem: Css.empty,
+        vh: Css.empty,
+        vw: Css.empty,
+        vmin: Css.empty,
+        vmax: Css.empty,
+        cm: Css.empty,
+        mm: Css.empty,
+        in: Css.empty,
+        px: Css.empty,
+        pt: Css.empty,
+        pc: Css.empty,
+        q: Css.empty
       })
     );
     this.namedValidators["POS_ANGLE"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        deg: css.empty,
-        grad: css.empty,
-        rad: css.empty,
-        turn: css.empty
+        deg: Css.empty,
+        grad: Css.empty,
+        rad: Css.empty,
+        turn: Css.empty
       })
     );
     this.namedValidators["POS_TIME"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        s: css.empty,
-        ms: css.empty
+        s: Css.empty,
+        ms: Css.empty
       })
     );
     this.namedValidators["FREQUENCY"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        Hz: css.empty,
-        kHz: css.empty
+        Hz: Css.empty,
+        kHz: Css.empty
       })
     );
     this.namedValidators["RESOLUTION"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        dpi: css.empty,
-        dpcm: css.empty,
-        dppx: css.empty
+        dpi: Css.empty,
+        dpcm: Css.empty,
+        dppx: Css.empty
       })
     );
     this.namedValidators["URI"] = this.primitive(
@@ -1630,7 +1630,7 @@ export class ValidatorSet {
     this.namedValidators["SLASH"] = this.primitive(
       new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS)
     );
-    const stdfont = { "font-family": css.getName("sans-serif") };
+    const stdfont = { "font-family": Css.getName("sans-serif") };
     this.systemFonts["caption"] = stdfont;
     this.systemFonts["icon"] = stdfont;
     this.systemFonts["menu"] = stdfont;
@@ -1644,33 +1644,33 @@ export class ValidatorSet {
   }
 
   private readNameAndPrefixes(
-    tok: csstok.Tokenizer,
+    tok: CssTok.Tokenizer,
     section: number
   ): string | null {
     let token = tok.token();
-    if (token.type == csstok.TokenType.EOF) {
+    if (token.type == CssTok.TokenType.EOF) {
       // Finished normally
       return null;
     }
     const rulePrefixes: { [key: string]: boolean } = { "": true };
-    if (token.type == csstok.TokenType.O_BRK) {
+    if (token.type == CssTok.TokenType.O_BRK) {
       do {
         tok.consume();
         token = tok.token();
-        if (token.type != csstok.TokenType.IDENT) {
+        if (token.type != CssTok.TokenType.IDENT) {
           throw new Error("Prefix name expected");
         }
         rulePrefixes[token.text] = true;
         tok.consume();
         token = tok.token();
-      } while (token.type == csstok.TokenType.COMMA);
-      if (token.type != csstok.TokenType.C_BRK) {
+      } while (token.type == CssTok.TokenType.COMMA);
+      if (token.type != CssTok.TokenType.C_BRK) {
         throw new Error("']' expected");
       }
       tok.consume();
       token = tok.token();
     }
-    if (token.type != csstok.TokenType.IDENT) {
+    if (token.type != CssTok.TokenType.IDENT) {
       throw new Error("Property name expected");
     }
     if (section == 2 ? token.text == "SHORTHANDS" : token.text == "DEFAULTS") {
@@ -1680,21 +1680,21 @@ export class ValidatorSet {
     const name = token.text;
     tok.consume();
     if (section != 2) {
-      if (tok.token().type != csstok.TokenType.EQ) {
+      if (tok.token().type != CssTok.TokenType.EQ) {
         throw new Error("'=' expected");
       }
       if (!this.isBuiltIn(name)) {
         this.prefixes[name] = rulePrefixes;
       }
     } else {
-      if (tok.token().type != csstok.TokenType.COLON) {
+      if (tok.token().type != CssTok.TokenType.COLON) {
         throw new Error("':' expected");
       }
     }
     return name;
   }
 
-  private parseValidators(tok: csstok.Tokenizer): void {
+  private parseValidators(tok: CssTok.Tokenizer): void {
     while (true) {
       const ruleName = this.readNameAndPrefixes(tok, 1);
       if (!ruleName) {
@@ -1730,7 +1730,7 @@ export class ValidatorSet {
         tok.consume();
         let token = tok.token();
         switch (token.type) {
-          case csstok.TokenType.IDENT:
+          case CssTok.TokenType.IDENT:
             if (!expectval) {
               setop(" ");
             }
@@ -1742,29 +1742,29 @@ export class ValidatorSet {
               vals.push(builtIn.clone());
             } else {
               const idents = {};
-              idents[token.text.toLowerCase()] = css.getName(token.text);
+              idents[token.text.toLowerCase()] = Css.getName(token.text);
               vals.push(
                 this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
               );
             }
             expectval = false;
             break;
-          case csstok.TokenType.INT: {
+          case CssTok.TokenType.INT: {
             const idents = {};
-            idents[`${token.num}`] = new css.Int(token.num);
+            idents[`${token.num}`] = new Css.Int(token.num);
             vals.push(
               this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
             );
             expectval = false;
             break;
           }
-          case csstok.TokenType.BAR:
+          case CssTok.TokenType.BAR:
             setop("|");
             break;
-          case csstok.TokenType.BAR_BAR:
+          case CssTok.TokenType.BAR_BAR:
             setop("||");
             break;
-          case csstok.TokenType.O_BRK:
+          case CssTok.TokenType.O_BRK:
             if (!expectval) {
               setop(" ");
             }
@@ -1773,7 +1773,7 @@ export class ValidatorSet {
             vals = [];
             expectval = true;
             break;
-          case csstok.TokenType.FUNC:
+          case CssTok.TokenType.FUNC:
             if (!expectval) {
               setop(" ");
             }
@@ -1782,7 +1782,7 @@ export class ValidatorSet {
             vals = [];
             expectval = true;
             break;
-          case csstok.TokenType.C_BRK: {
+          case CssTok.TokenType.C_BRK: {
             val = reduce();
             const open = stack.pop();
             if (open.b != "[") {
@@ -1794,7 +1794,7 @@ export class ValidatorSet {
             expectval = false;
             break;
           }
-          case csstok.TokenType.C_PAR: {
+          case CssTok.TokenType.C_PAR: {
             val = reduce();
             const open = stack.pop();
             if (open.b != "(") {
@@ -1806,58 +1806,58 @@ export class ValidatorSet {
             expectval = false;
             break;
           }
-          case csstok.TokenType.COLON:
+          case CssTok.TokenType.COLON:
             if (expectval) {
               throw new Error("':' unexpected");
             }
             tok.consume();
             vals.push(this.addReplacement(vals.pop(), tok.token()));
             break;
-          case csstok.TokenType.QMARK:
+          case CssTok.TokenType.QMARK:
             if (expectval) {
               throw new Error("'?' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 0, 1));
             break;
-          case csstok.TokenType.STAR:
+          case CssTok.TokenType.STAR:
             if (expectval) {
               throw new Error("'*' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 0, Number.POSITIVE_INFINITY));
             break;
-          case csstok.TokenType.PLUS:
+          case CssTok.TokenType.PLUS:
             if (expectval) {
               throw new Error("'+' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 1, Number.POSITIVE_INFINITY));
             break;
-          case csstok.TokenType.O_BRC: {
+          case CssTok.TokenType.O_BRC: {
             tok.consume();
             token = tok.token();
-            if (token.type != csstok.TokenType.INT) {
+            if (token.type != CssTok.TokenType.INT) {
               throw new Error("<int> expected");
             }
             const min = token.num;
             let max = min;
             tok.consume();
             token = tok.token();
-            if (token.type == csstok.TokenType.COMMA) {
+            if (token.type == CssTok.TokenType.COMMA) {
               tok.consume();
               token = tok.token();
-              if (token.type != csstok.TokenType.INT) {
+              if (token.type != CssTok.TokenType.INT) {
                 throw new Error("<int> expected");
               }
               max = token.num;
               tok.consume();
               token = tok.token();
             }
-            if (token.type != csstok.TokenType.C_BRC) {
+            if (token.type != CssTok.TokenType.C_BRC) {
               throw new Error("'}' expected");
             }
             vals.push(this.addCounts(vals.pop(), min, max));
             break;
           }
-          case csstok.TokenType.SEMICOL:
+          case CssTok.TokenType.SEMICOL:
             result = reduce();
             if (stack.length > 0) {
               throw new Error(`unclosed '${stack.pop().b}'`);
@@ -1880,43 +1880,43 @@ export class ValidatorSet {
     }
   }
 
-  private parseDefaults(tok: csstok.Tokenizer): void {
+  private parseDefaults(tok: CssTok.Tokenizer): void {
     while (true) {
       const propName = this.readNameAndPrefixes(tok, 2);
       if (!propName) {
         return;
       }
-      const vals: css.Val[] = [];
+      const vals: Css.Val[] = [];
       while (true) {
         tok.consume();
         const token = tok.token();
-        if (token.type == csstok.TokenType.SEMICOL) {
+        if (token.type == CssTok.TokenType.SEMICOL) {
           tok.consume();
           break;
         }
         switch (token.type) {
-          case csstok.TokenType.IDENT:
-            vals.push(css.getName(token.text));
+          case CssTok.TokenType.IDENT:
+            vals.push(Css.getName(token.text));
             break;
-          case csstok.TokenType.NUM:
-            vals.push(new css.Num(token.num));
+          case CssTok.TokenType.NUM:
+            vals.push(new Css.Num(token.num));
             break;
-          case csstok.TokenType.INT:
-            vals.push(new css.Int(token.num));
+          case CssTok.TokenType.INT:
+            vals.push(new Css.Int(token.num));
             break;
-          case csstok.TokenType.NUMERIC:
-            vals.push(new css.Numeric(token.num, token.text));
+          case CssTok.TokenType.NUMERIC:
+            vals.push(new Css.Numeric(token.num, token.text));
             break;
           default:
             throw new Error("unexpected token");
         }
       }
       this.defaultValues[propName] =
-        vals.length > 1 ? new css.SpaceList(vals) : vals[0];
+        vals.length > 1 ? new Css.SpaceList(vals) : vals[0];
     }
   }
 
-  private parseShorthands(tok: csstok.Tokenizer): void {
+  private parseShorthands(tok: CssTok.Tokenizer): void {
     while (true) {
       const ruleName = this.readNameAndPrefixes(tok, 3);
       if (!ruleName) {
@@ -1925,7 +1925,7 @@ export class ValidatorSet {
       let token = tok.nthToken(1);
       let shorthandValidator;
       if (
-        token.type == csstok.TokenType.IDENT &&
+        token.type == CssTok.TokenType.IDENT &&
         shorthandValidators[token.text]
       ) {
         shorthandValidator = new shorthandValidators[token.text]();
@@ -1943,7 +1943,7 @@ export class ValidatorSet {
         tok.consume();
         token = tok.token();
         switch (token.type) {
-          case csstok.TokenType.IDENT:
+          case CssTok.TokenType.IDENT:
             if (this.validators[token.text]) {
               syntax.push(shorthandValidator.syntaxNodeForProperty(token.text));
               propList.push(token.text);
@@ -1961,18 +1961,18 @@ export class ValidatorSet {
               );
             }
             break;
-          case csstok.TokenType.SLASH:
+          case CssTok.TokenType.SLASH:
             if (syntax.length > 0 || slash) {
               throw new Error("unexpected slash");
             }
             slash = true;
             break;
-          case csstok.TokenType.O_BRK:
+          case CssTok.TokenType.O_BRK:
             stack.push({ slash, syntax });
             syntax = [];
             slash = false;
             break;
-          case csstok.TokenType.C_BRK: {
+          case CssTok.TokenType.C_BRK: {
             const compound = new ShorthandSyntaxCompound(syntax, slash);
             const item = stack.pop();
             syntax = item.syntax;
@@ -1980,7 +1980,7 @@ export class ValidatorSet {
             syntax.push(compound);
             break;
           }
-          case csstok.TokenType.SEMICOL:
+          case CssTok.TokenType.SEMICOL:
             result = true;
             tok.consume();
             break;
@@ -1995,7 +1995,7 @@ export class ValidatorSet {
 
   parse(text: string): void {
     // Not as robust as CSS parser.
-    const tok = new csstok.Tokenizer(text, null);
+    const tok = new CssTok.Tokenizer(text, null);
     this.parseValidators(tok);
     this.parseDefaults(tok);
     this.parseShorthands(tok);
@@ -2019,7 +2019,7 @@ export class ValidatorSet {
       for (const pname of list) {
         const pval = this.defaultValues[pname];
         if (!pval) {
-          logging.logger.warn("Unknown property in makePropSet:", pname);
+          Logging.logger.warn("Unknown property in makePropSet:", pname);
         } else {
           map[pname] = pval;
         }
@@ -2030,7 +2030,7 @@ export class ValidatorSet {
 
   validatePropertyAndHandleShorthand(
     name: string,
-    value: css.Val,
+    value: Css.Val,
     important: boolean,
     receiver: PropertyReceiver
   ): void {
@@ -2050,7 +2050,7 @@ export class ValidatorSet {
     const validator = this.validators[name];
     if (validator) {
       const rvalue =
-        value === css.ident.inherit || value.isExpr()
+        value === Css.ident.inherit || value.isExpr()
           ? value
           : value.visit(validator);
       if (rvalue) {
@@ -2060,7 +2060,7 @@ export class ValidatorSet {
       }
     } else {
       const shorthand = this.shorthands[name].clone();
-      if (value === css.ident.inherit) {
+      if (value === Css.ident.inherit) {
         shorthand.propagateInherit(important, receiver);
       } else {
         value.visit(shorthand);
@@ -2072,14 +2072,14 @@ export class ValidatorSet {
   }
 }
 
-export const validatorFetcher: taskutil.Fetcher<
+export const validatorFetcher: TaskUtil.Fetcher<
   ValidatorSet
-> = new taskutil.Fetcher(() => {
-  const frame: task.Frame<ValidatorSet> = task.newFrame(
+> = new TaskUtil.Fetcher(() => {
+  const frame: Task.Frame<ValidatorSet> = Task.newFrame(
     "loadValidatorSet.load"
   );
-  const url = base.resolveURL("validation.txt", base.resourceBaseURL);
-  const result = net.ajax(url);
+  const url = Base.resolveURL("validation.txt", Base.resourceBaseURL);
+  const result = Net.ajax(url);
   const validatorSet = new ValidatorSet();
   validatorSet.initBuiltInValidators();
   result.then(xhr => {
@@ -2087,15 +2087,15 @@ export const validatorFetcher: taskutil.Fetcher<
       if (xhr.responseText) {
         validatorSet.parse(xhr.responseText);
       } else {
-        logging.logger.error("Error: missing", url);
+        Logging.logger.error("Error: missing", url);
       }
     } catch (err) {
-      logging.logger.error(err, "Error:");
+      Logging.logger.error(err, "Error:");
     }
     frame.finish(validatorSet);
   });
   return frame.result();
 }, "validatorFetcher");
 
-export const loadValidatorSet = (): task.Result<ValidatorSet> =>
+export const loadValidatorSet = (): Task.Result<ValidatorSet> =>
   validatorFetcher.get();

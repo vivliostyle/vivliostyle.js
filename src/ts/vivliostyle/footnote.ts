@@ -16,20 +16,20 @@
  *
  * @fileoverview Footnotes
  */
-import * as pagefloat from "./pagefloat";
+import * as PageFloat from "./pagefloat";
 
 import { Ident, ident, Numeric } from "../adapt/css";
 import { LayoutConstraint } from "../adapt/layout";
 import { NodePosition, isSameNodePosition, Container } from "../adapt/vtree";
 import { newResult } from "../adapt/task";
-import * as asserts from "./asserts";
+import * as Asserts from "./asserts";
 
-const PageFloatFragment = pagefloat.PageFloatFragment;
+const PageFloatFragment = PageFloat.PageFloatFragment;
 
-export class Footnote extends pagefloat.PageFloat {
+export class Footnote extends PageFloat.PageFloat {
   constructor(
     nodePosition: NodePosition,
-    floatReference: pagefloat.FloatReference,
+    floatReference: PageFloat.FloatReference,
     flowName: string,
     public readonly footnotePolicy: Ident | null,
     floatMinWrapBlock: Numeric | null
@@ -57,8 +57,8 @@ export class Footnote extends pagefloat.PageFloat {
  */
 export class FootnoteFragment extends PageFloatFragment {
   constructor(
-    floatReference: pagefloat.FloatReference,
-    continuations: pagefloat.PageFloatContinuation[],
+    floatReference: PageFloat.FloatReference,
+    continuations: PageFloat.PageFloatContinuation[],
     area: Container,
     continues: boolean
   ) {
@@ -94,7 +94,7 @@ export class LineFootnotePolicyLayoutConstraint implements LayoutConstraint {
 }
 
 export class FootnoteLayoutStrategy
-  implements pagefloat.PageFloatLayoutStrategy {
+  implements PageFloat.PageFloatLayoutStrategy {
   /**
    * @override
    */
@@ -113,7 +113,7 @@ export class FootnoteLayoutStrategy
    * @override
    */
   createPageFloat(nodeContext, pageFloatLayoutContext, column) {
-    let floatReference = pagefloat.FloatReference.REGION;
+    let floatReference = PageFloat.FloatReference.REGION;
 
     // If the region context has the same container as the page context,
     // use the page context as the context for the footnote.
@@ -121,14 +121,14 @@ export class FootnoteLayoutStrategy
       floatReference
     );
     const pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
-      pagefloat.FloatReference.PAGE
+      PageFloat.FloatReference.PAGE
     );
     if (pageContext.hasSameContainerAs(regionContext)) {
-      floatReference = pagefloat.FloatReference.PAGE;
+      floatReference = PageFloat.FloatReference.PAGE;
     }
     const nodePosition = nodeContext.toNodePosition();
-    asserts.assert(pageFloatLayoutContext.flowName);
-    const float: pagefloat.PageFloat = new Footnote(
+    Asserts.assert(pageFloatLayoutContext.flowName);
+    const float: PageFloat.PageFloat = new Footnote(
       nodePosition,
       floatReference,
       pageFloatLayoutContext.flowName,
@@ -162,7 +162,7 @@ export class FootnoteLayoutStrategy
     const fragments = context.floatFragments.filter(
       fr => fr instanceof FootnoteFragment
     );
-    asserts.assert(fragments.length <= 1);
+    Asserts.assert(fragments.length <= 1);
     return fragments[0] || null;
   }
 
@@ -173,7 +173,7 @@ export class FootnoteLayoutStrategy
     floatArea.isFootnote = true;
     floatArea.adjustContentRelativeSize = false;
     const element = floatArea.element;
-    asserts.assert(element);
+    Asserts.assert(element);
     floatArea.vertical = column.layoutContext.applyFootnoteStyle(
       floatContainer.vertical,
       column.layoutContext.nodeContext &&
@@ -204,7 +204,7 @@ export class FootnoteLayoutStrategy
 }
 
 export function registerFootnotePlugin() {
-  pagefloat.PageFloatLayoutStrategyResolver.register(
+  PageFloat.PageFloatLayoutStrategyResolver.register(
     new FootnoteLayoutStrategy()
   );
 }

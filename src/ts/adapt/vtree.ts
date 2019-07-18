@@ -15,18 +15,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Basic view tree data structures and support utilities.
+ * @fileoverview Vtree - Basic view tree data structures and support utilities.
  */
-import * as asserts from "../vivliostyle/asserts";
-import * as constants from "../vivliostyle/constants";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Constants from "../vivliostyle/constants";
 import { Change, resolveOriginalIndex } from "../vivliostyle/diff";
-import { pagefloat, selector, vtree, xmldoc } from "../vivliostyle/types";
-import * as base from "./base";
-import * as css from "./css";
+import { PageFloats, Selectors, ViewTree, XmlDoc } from "../vivliostyle/types";
+import * as Base from "./base";
+import * as Css from "./css";
 import { toShape } from "./cssprop";
 import { Context } from "./expr";
-import * as geom from "./geom";
-import * as taskutil from "./taskutil";
+import * as Geom from "./geom";
+import * as TaskUtil from "./taskutil";
 
 export const delayedProps = {
   transform: true,
@@ -45,7 +45,7 @@ export class DelayedItem {
   name: any;
   value: any;
 
-  constructor(target: Element, name: string, value: css.Val) {
+  constructor(target: Element, name: string, value: Css.Val) {
     this.target = target;
     this.name = name;
     this.value = value;
@@ -109,7 +109,7 @@ export const makeListener = (
   return null;
 };
 
-export class Page extends base.SimpleEventTarget {
+export class Page extends Base.SimpleEventTarget {
   private static AUTO_PAGE_WIDTH_ATTRIBUTE: string =
     "data-vivliostyle-auto-page-width";
   private static AUTO_PAGE_HEIGHT_ATTRIBUTE: string =
@@ -126,8 +126,8 @@ export class Page extends base.SimpleEventTarget {
   spineIndex: number = 0;
   position: LayoutPosition = null;
   offset: number = -1;
-  side: constants.PageSide | null = null;
-  fetchers: taskutil.Fetcher<{}>[] = [];
+  side: Constants.PageSide | null = null;
+  fetchers: TaskUtil.Fetcher<{}>[] = [];
   marginBoxes: {
     top: { [key: string]: Container };
     bottom: { [key: string]: Container };
@@ -145,7 +145,7 @@ export class Page extends base.SimpleEventTarget {
       const anchorElement = e.currentTarget as Element;
       const href =
         anchorElement.getAttribute("href") ||
-        anchorElement.getAttributeNS(base.NS.XLINK, "href");
+        anchorElement.getAttributeNS(Base.NS.XLINK, "href");
       if (href) {
         const evt = {
           type: "hyperlink",
@@ -209,7 +209,7 @@ export class Page extends base.SimpleEventTarget {
     const list = this.delayedItems;
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
-      base.setCSSProperty(item.target, item.name, item.value.toString());
+      Base.setCSSProperty(item.target, item.name, item.value.toString());
     }
 
     // use size of the container of the PageMasterInstance
@@ -236,7 +236,7 @@ export class Page extends base.SimpleEventTarget {
    * @param scale Factor to which the page will be scaled.
    */
   zoom(scale: number) {
-    base.setCSSProperty(this.container, "transform", `scale(${scale})`);
+    Base.setCSSProperty(this.container, "transform", `scale(${scale})`);
   }
 
   /**
@@ -257,11 +257,11 @@ export type Spread = {
  */
 export const SPECIAL_ATTR = "data-adapt-spec";
 
-export const Whitespace = vtree.Whitespace;
-export type Whitespace = vtree.Whitespace;
+export const Whitespace = ViewTree.Whitespace;
+export type Whitespace = ViewTree.Whitespace;
 
 /**
- * Resolves adapt.vtree.Whitespace value from a value of 'white-space' property
+ * Resolves Whitespace value from a value of 'white-space' property
  * @param whitespace The value of 'white-space' property
  */
 export const whitespaceFromPropertyValue = (
@@ -336,7 +336,7 @@ export class FlowChunk {
   }
 }
 
-export type ClientRect = vtree.ClientRect;
+export type ClientRect = ViewTree.ClientRect;
 
 export const clientrectIncreasingTop = (
   r1: ClientRect,
@@ -352,17 +352,17 @@ export const clientrectDecreasingRight = (
  * Interface to read the position assigned to the elements and ranges by the
  * browser.
  */
-export type ClientLayout = vtree.ClientLayout;
+export type ClientLayout = ViewTree.ClientLayout;
 
 /**
  * Styling, creating a single node's view, etc.
  */
-export type LayoutContext = vtree.LayoutContext;
+export type LayoutContext = ViewTree.LayoutContext;
 
 /**
  * Formatting context.
  */
-export type FormattingContext = vtree.FormattingContext;
+export type FormattingContext = ViewTree.FormattingContext;
 
 export const eachAncestorFormattingContext = (
   nodeContext: NodeContext,
@@ -376,7 +376,7 @@ export const eachAncestorFormattingContext = (
   }
 };
 
-export type NodePositionStep = vtree.NodePositionStep;
+export type NodePositionStep = ViewTree.NodePositionStep;
 
 export const isSameNodePositionStep = (
   nps1: NodePositionStep,
@@ -397,7 +397,7 @@ export const isSameNodePositionStep = (
   );
 };
 
-export type NodePosition = vtree.NodePosition;
+export type NodePosition = ViewTree.NodePosition;
 
 export const isSameNodePosition = (
   np1: NodePosition | null,
@@ -443,7 +443,7 @@ export const newNodePositionFromNode = (node: Node): NodePosition => {
 };
 
 export const newNodePositionFromNodeContext = (
-  nodeContext: vtree.NodeContext,
+  nodeContext: ViewTree.NodeContext,
   initialFragmentIndex: number | null
 ): NodePosition => {
   const step: NodePositionStep = {
@@ -468,7 +468,7 @@ export const newNodePositionFromNodeContext = (
 
 export const makeNodeContextFromNodePositionStep = (
   step: NodePositionStep,
-  parent: vtree.NodeContext
+  parent: ViewTree.NodeContext
 ): NodeContext => {
   const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
   nodeContext.shadowType = step.shadowType;
@@ -482,19 +482,19 @@ export const makeNodeContextFromNodePositionStep = (
   return nodeContext;
 };
 
-export const ShadowType = vtree.ShadowType;
-export type ShadowType = vtree.ShadowType;
+export const ShadowType = ViewTree.ShadowType;
+export type ShadowType = ViewTree.ShadowType;
 
 /**
  * Data about shadow tree instance.
  */
-export class ShadowContext implements vtree.ShadowContext {
+export class ShadowContext implements ViewTree.ShadowContext {
   subShadow: ShadowContext = null;
 
   constructor(
     public readonly owner: Element,
     public readonly root: Element,
-    public readonly xmldoc: xmldoc.XMLDocHolder,
+    public readonly xmldoc: XmlDoc.XMLDocHolder,
     public readonly parentShadow: ShadowContext,
     superShadow: ShadowContext,
     public readonly type: ShadowType,
@@ -527,7 +527,7 @@ export const isSameShadowContext = (
  * Information about :first-letter or :first-line pseudoelements
  * @param count 0 - first-letter, 1 or more - first line(s)
  */
-export class FirstPseudo implements vtree.FirstPseudo {
+export class FirstPseudo implements ViewTree.FirstPseudo {
   constructor(
     public readonly outer: FirstPseudo,
     public readonly count: number
@@ -542,7 +542,7 @@ export class FirstPseudo implements vtree.FirstPseudo {
  * node. When after=true it represents position right after the last child
  * of the node. boxOffset is incremented by 1 for any valid node position.
  */
-export class NodeContext implements vtree.NodeContext {
+export class NodeContext implements ViewTree.NodeContext {
   // position itself
   offsetInNode: number = 0;
   after: boolean = false;
@@ -560,11 +560,11 @@ export class NodeContext implements vtree.NodeContext {
   overflow: boolean = false;
   breakPenalty: number;
   display: string | null = null;
-  floatReference: pagefloat.FloatReference;
+  floatReference: PageFloats.FloatReference;
   floatSide: string | null = null;
   clearSide: string | null = null;
-  floatMinWrapBlock: css.Numeric | null = null;
-  columnSpan: css.Val | null = null;
+  floatMinWrapBlock: Css.Numeric | null = null;
+  columnSpan: Css.Val | null = null;
   verticalAlign: string = "baseline";
   captionSide: string = "top";
   inlineBorderSpacing: number = 0;
@@ -579,7 +579,7 @@ export class NodeContext implements vtree.NodeContext {
   breakAfter: string | null = null;
   viewNode: Node = null;
   clearSpacer: Node = null;
-  inheritedProps: { [key: string]: number | string | css.Val };
+  inheritedProps: { [key: string]: number | string | Css.Val };
   vertical: boolean;
   direction: string;
   firstPseudo: FirstPseudo;
@@ -591,8 +591,8 @@ export class NodeContext implements vtree.NodeContext {
     [key: string]: string | number | undefined | null | (number | null)[];
   } = {};
   fragmentIndex: number = 1;
-  afterIfContinues: selector.AfterIfContinues = null;
-  footnotePolicy: css.Ident | null = null;
+  afterIfContinues: Selectors.AfterIfContinues = null;
+  footnotePolicy: Css.Ident | null = null;
 
   constructor(
     public sourceNode: Node,
@@ -602,7 +602,7 @@ export class NodeContext implements vtree.NodeContext {
     this.shadowType = ShadowType.NONE;
     this.shadowContext = parent ? parent.shadowContext : null;
     this.breakPenalty = parent ? parent.breakPenalty : 0;
-    this.floatReference = pagefloat.FloatReference.INLINE;
+    this.floatReference = PageFloats.FloatReference.INLINE;
     this.whitespace = parent ? parent.whitespace : Whitespace.IGNORE;
     this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
     this.breakWord = parent ? parent.breakWord : false;
@@ -621,7 +621,7 @@ export class NodeContext implements vtree.NodeContext {
     this.offsetInNode = 0;
     this.after = false;
     this.display = null;
-    this.floatReference = pagefloat.FloatReference.INLINE;
+    this.floatReference = PageFloats.FloatReference.INLINE;
     this.floatSide = null;
     this.clearSide = null;
     this.floatMinWrapBlock = null;
@@ -808,7 +808,7 @@ export class NodeContext implements vtree.NodeContext {
   }
 }
 
-export class ChunkPosition implements vtree.ChunkPosition {
+export class ChunkPosition implements ViewTree.ChunkPosition {
   floats: NodePosition[] = null;
 
   constructor(public primary: NodePosition) {}
@@ -998,7 +998,7 @@ export class LayoutPosition {
   }
 }
 
-export class Container implements vtree.Container {
+export class Container implements ViewTree.Container {
   left: number = 0;
   top: number = 0;
   marginLeft: number = 0;
@@ -1017,8 +1017,8 @@ export class Container implements vtree.Container {
   height: number = 0;
   originX: number = 0;
   originY: number = 0;
-  exclusions: geom.Shape[] = null;
-  innerShape: geom.Shape = null;
+  exclusions: Geom.Shape[] = null;
+  innerShape: Geom.Shape = null;
   computedBlockSize: number = 0;
   snapWidth: number = 0;
   snapHeight: number = 0;
@@ -1139,15 +1139,15 @@ export class Container implements vtree.Container {
   setVerticalPosition(top: number, height: number): void {
     this.top = top;
     this.height = height;
-    base.setCSSProperty(this.element, "top", `${top}px`);
-    base.setCSSProperty(this.element, "height", `${height}px`);
+    Base.setCSSProperty(this.element, "top", `${top}px`);
+    Base.setCSSProperty(this.element, "height", `${height}px`);
   }
 
   setHorizontalPosition(left: number, width: number): void {
     this.left = left;
     this.width = width;
-    base.setCSSProperty(this.element, "left", `${left}px`);
-    base.setCSSProperty(this.element, "width", `${width}px`);
+    Base.setCSSProperty(this.element, "left", `${left}px`);
+    Base.setCSSProperty(this.element, "width", `${width}px`);
   }
 
   setBlockPosition(start: number, extent: number): void {
@@ -1174,18 +1174,18 @@ export class Container implements vtree.Container {
     }
   }
 
-  getInnerShape(): geom.Shape {
+  getInnerShape(): Geom.Shape {
     const rect = this.getInnerRect();
     if (this.innerShape) {
       return this.innerShape.withOffset(rect.x1, rect.y1);
     }
-    return geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
+    return Geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
   }
 
-  getInnerRect(): geom.Rect {
+  getInnerRect(): Geom.Rect {
     const offsetX = this.originX + this.left + this.getInsetLeft();
     const offsetY = this.originY + this.top + this.getInsetTop();
-    return new geom.Rect(
+    return new Geom.Rect(
       offsetX,
       offsetY,
       offsetX + this.width,
@@ -1193,13 +1193,13 @@ export class Container implements vtree.Container {
     );
   }
 
-  getPaddingRect(): geom.Rect {
+  getPaddingRect(): Geom.Rect {
     const paddingX =
       this.originX + this.left + this.marginLeft + this.borderLeft;
     const paddingY = this.originY + this.top + this.marginTop + this.borderTop;
     const paddingWidth = this.paddingLeft + this.width + this.paddingRight;
     const paddingHeight = this.paddingTop + this.height + this.paddingBottom;
-    return new geom.Rect(
+    return new Geom.Rect(
       paddingX,
       paddingY,
       paddingX + paddingWidth,
@@ -1207,7 +1207,7 @@ export class Container implements vtree.Container {
     );
   }
 
-  getOuterShape(outerShapeProp: css.Val, context: Context): geom.Shape {
+  getOuterShape(outerShapeProp: Css.Val, context: Context): Geom.Shape {
     const rect = this.getOuterRect();
     return toShape(
       outerShapeProp,
@@ -1219,13 +1219,13 @@ export class Container implements vtree.Container {
     );
   }
 
-  getOuterRect(): geom.Rect {
+  getOuterRect(): Geom.Rect {
     const outerX = this.originX + this.left;
     const outerY = this.originY + this.top;
     const outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
     const outerHeight =
       this.getInsetTop() + this.height + this.getInsetBottom();
-    return new geom.Rect(
+    return new Geom.Rect(
       outerX,
       outerY,
       outerX + outerWidth,
@@ -1234,13 +1234,13 @@ export class Container implements vtree.Container {
   }
 }
 
-export type ExprContentListener = vtree.ExprContentListener;
+export type ExprContentListener = ViewTree.ExprContentListener;
 
-export class ContentPropertyHandler extends css.Visitor {
+export class ContentPropertyHandler extends Css.Visitor {
   constructor(
     public readonly elem: Element,
     public readonly context: Context,
-    public readonly rootContentValue: css.Val,
+    public readonly rootContentValue: Css.Val,
     public readonly exprContentListener: ExprContentListener
   ) {
     super();
@@ -1264,7 +1264,7 @@ export class ContentPropertyHandler extends css.Visitor {
     if ((this.rootContentValue as any).url) {
       this.elem.setAttribute("src", url.url);
     } else {
-      const img = this.elem.ownerDocument.createElementNS(base.NS.XHTML, "img");
+      const img = this.elem.ownerDocument.createElementNS(Base.NS.XHTML, "img");
       img.setAttribute("src", url.url);
       this.elem.appendChild(img);
     }
@@ -1282,7 +1282,7 @@ export class ContentPropertyHandler extends css.Visitor {
     const ex = expr.toExpr();
     const val = ex.evaluate(this.context);
     if (typeof val === "string") {
-      asserts.assert(this.elem.ownerDocument);
+      Asserts.assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
       this.visitStrInner(val, node);
     }
@@ -1290,8 +1290,8 @@ export class ContentPropertyHandler extends css.Visitor {
   }
 }
 
-export const nonTrivialContent = (val: css.Val): boolean =>
+export const nonTrivialContent = (val: Css.Val): boolean =>
   val != null &&
-  val !== css.ident.normal &&
-  val !== css.ident.none &&
-  val !== css.ident.inherit;
+  val !== Css.ident.normal &&
+  val !== Css.ident.none &&
+  val !== Css.ident.inherit;

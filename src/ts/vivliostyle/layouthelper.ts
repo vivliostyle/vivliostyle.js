@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Helper functions of Layout.
+ * @fileoverview LayoutHelper - Helper functions of Layout.
  */
-import * as base from "../adapt/base";
-import * as vtreeImpl from "../adapt/vtree";
-import * as logging from "./logging";
-import { layout, vtree } from "./types";
+import * as Base from "../adapt/base";
+import * as Vtree from "../adapt/vtree";
+import * as Logging from "./logging";
+import { Layout, ViewTree } from "./types";
 
 /**
  * Though method used to be used as a workaround for Chrome bug, it seems that
@@ -29,10 +29,10 @@ import { layout, vtree } from "./types";
  *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  */
 export const fixBoxesForNode = (
-  clientLayout: vtree.ClientLayout,
-  boxes: vtree.ClientRect[],
+  clientLayout: ViewTree.ClientLayout,
+  boxes: ViewTree.ClientRect[],
   node: Node
-): vtree.ClientRect[] => {
+): ViewTree.ClientRect[] => {
   const fullRange = node.ownerDocument.createRange();
   fullRange.setStart(node, 0);
   fullRange.setEnd(node, node.textContent.length);
@@ -57,7 +57,7 @@ export const fixBoxesForNode = (
       }
     }
     if (k == fullBoxes.length) {
-      logging.logger.warn("Could not fix character box");
+      Logging.logger.warn("Could not fix character box");
       result.push(box);
     }
   }
@@ -71,8 +71,8 @@ export const fixBoxesForNode = (
  * considered zero-height.
  */
 export const calculateEdge = (
-  nodeContext: vtree.NodeContext,
-  clientLayout: vtree.ClientLayout,
+  nodeContext: ViewTree.NodeContext,
+  clientLayout: ViewTree.ClientLayout,
   extraOffset: number,
   vertical: boolean
 ): number => {
@@ -108,7 +108,7 @@ export const calculateEdge = (
     range.setStart(node, extraOffset);
     range.setEnd(node, extraOffset + 1);
     let boxes = clientLayout.getRangeClientRects(range);
-    if (vertical && base.checkVerticalBBoxBug(document.body)) {
+    if (vertical && Base.checkVerticalBBoxBug(document.body)) {
       boxes = fixBoxesForNode(clientLayout, boxes, node);
     }
     let maxSize = 0;
@@ -132,7 +132,7 @@ export const calculateEdge = (
 
 export const getElementHeight = (
   element: Element,
-  column: layout.Column,
+  column: Layout.Column,
   vertical: boolean
 ): number => {
   const rect = column.clientLayout.getElementClientRect(element);
@@ -166,10 +166,10 @@ export const removeFollowingSiblings = (
 };
 
 export const isSpecial = (e: Element): boolean =>
-  !!e.getAttribute(vtreeImpl.SPECIAL_ATTR);
+  !!e.getAttribute(Vtree.SPECIAL_ATTR);
 
 export const isSpecialNodeContext = (
-  nodeContext: vtree.NodeContext
+  nodeContext: ViewTree.NodeContext
 ): boolean => {
   if (!nodeContext) {
     return false;

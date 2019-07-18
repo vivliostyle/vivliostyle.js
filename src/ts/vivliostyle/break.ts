@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Control fragmentation
+ * @fileoverview Break - Control fragmentation.
  */
-import * as css from "../adapt/css";
+import * as Css from "../adapt/css";
 import { plugin } from "./plugin";
 
 /**
@@ -26,9 +26,9 @@ import { plugin } from "./plugin";
  */
 export const convertPageBreakAliases = (original: {
   name: string;
-  value: css.Val;
+  value: Css.Val;
   important: boolean;
-}): { name: string; value: css.Val; important: boolean } => {
+}): { name: string; value: Css.Val; important: boolean } => {
   const name = original["name"];
   const value = original["value"];
   switch (name) {
@@ -37,7 +37,7 @@ export const convertPageBreakAliases = (original: {
     case "page-break-inside":
       return {
         name: name.replace(/^page-/, ""),
-        value: value === css.ident.always ? css.ident.page : value,
+        value: value === Css.ident.always ? Css.ident.page : value,
         important: original["important"]
       };
     default:

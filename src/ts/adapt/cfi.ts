@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Support for EPUB Canonical Fragment Identifiers.
+ * @fileoverview Cfi - Support for EPUB Canonical Fragment Identifiers.
  */
-import * as base from "./base";
+import * as Base from "./base";
 
 export type Position = {
   node: Node;
@@ -81,13 +81,13 @@ export const parseExt = (
 };
 
 export interface Step {
-  appendTo(sb: base.StringBuffer): void;
+  appendTo(sb: Base.StringBuffer): void;
 
   applyTo(pos: Position): boolean;
 }
 
 export class RefStep implements Step {
-  appendTo(sb: base.StringBuffer) {
+  appendTo(sb: Base.StringBuffer) {
     sb.append("!");
   }
 
@@ -256,7 +256,7 @@ export class Fragment {
           const index = parseInt(r[1], 10);
           const id = r[3];
           ext = parseExt(r[4]);
-          steps.push(new ChildStep(index, id, base.asString(ext["s"])));
+          steps.push(new ChildStep(index, id, Base.asString(ext["s"])));
           break;
         }
         case ":": {
@@ -285,7 +285,7 @@ export class Fragment {
               offset,
               textBefore,
               textAfter,
-              base.asString(ext["s"])
+              Base.asString(ext["s"])
             )
           );
           break;
@@ -419,7 +419,7 @@ export class Fragment {
     if (!this.steps) {
       return "";
     }
-    const sb = new base.StringBuffer();
+    const sb = new Base.StringBuffer();
     sb.append("epubcfi(");
     for (let i = 0; i < this.steps.length; i++) {
       this.steps[i].appendTo(sb);

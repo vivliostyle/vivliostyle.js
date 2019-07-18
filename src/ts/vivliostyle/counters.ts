@@ -16,23 +16,23 @@
  *
  * @fileoverview Counters
  */
-import * as base from "../adapt/base";
-import * as csscasc from "../adapt/csscasc";
-import * as cssstyler from "../adapt/cssstyler";
-import * as exprs from "../adapt/expr";
-import * as layout from "../adapt/layout";
-import * as vtree from "../adapt/vtree";
+import * as Base from "../adapt/base";
+import * as CssCasc from "../adapt/csscasc";
+import * as CssStyler from "../adapt/cssstyler";
+import * as Exprs from "../adapt/expr";
+import * as LayoutImpl from "../adapt/layout";
+import * as Vtree from "../adapt/vtree";
 
 import { toCounters } from "../adapt/cssprop";
 import { Viewport } from "../adapt/vgen";
-import * as asserts from "./asserts";
+import * as Asserts from "./asserts";
 
 /**
  * Clone counter values.
  */
 function cloneCounterValues(
-  counters: csscasc.CounterValues
-): csscasc.CounterValues {
+  counters: CssCasc.CounterValues
+): CssCasc.CounterValues {
   const result = {};
   Object.keys(counters).forEach(name => {
     result[name] = Array.from(counters[name]);
@@ -48,7 +48,7 @@ function cloneCounterValues(
  * @param resolved If the reference is already resolved or not
  */
 export class TargetCounterReference {
-  pageCounters: csscasc.CounterValues = null;
+  pageCounters: CssCasc.CounterValues = null;
   spineIndex: number = -1;
   pageIndex: number = -1;
 
@@ -91,7 +91,7 @@ export class TargetCounterReference {
   }
 }
 
-class CounterListener implements csscasc.CounterListener {
+class CounterListener implements CssCasc.CounterListener {
   constructor(
     public readonly counterStore: CounterStore,
     public readonly baseURL: string
@@ -108,22 +108,22 @@ class CounterListener implements csscasc.CounterListener {
     this.counterStore.countersById[id] = counters;
   }
 
-  getExprContentListener(): vtree.ExprContentListener {
+  getExprContentListener(): Vtree.ExprContentListener {
     return this.counterStore.getExprContentListener();
   }
 }
 
-class CounterResolver implements csscasc.CounterResolver {
-  styler: cssstyler.Styler | null = null;
+class CounterResolver implements CssCasc.CounterResolver {
+  styler: CssStyler.Styler | null = null;
 
   constructor(
     public readonly counterStore: CounterStore,
     public readonly baseURL: string,
-    public readonly rootScope: exprs.LexicalScope,
-    public readonly pageScope: exprs.LexicalScope
+    public readonly rootScope: Exprs.LexicalScope,
+    public readonly pageScope: Exprs.LexicalScope
   ) {}
 
-  setStyler(styler: cssstyler.Styler) {
+  setStyler(styler: CssStyler.Styler) {
     this.styler = styler;
   }
 
@@ -134,7 +134,7 @@ class CounterResolver implements csscasc.CounterResolver {
 
   private getTransformedId(url: string): string {
     let transformedId = this.counterStore.documentURLTransformer.transformURL(
-      base.resolveURL(url, this.baseURL),
+      Base.resolveURL(url, this.baseURL),
       this.baseURL
     );
     if (transformedId.charAt(0) === "#") {
@@ -153,7 +153,7 @@ class CounterResolver implements csscasc.CounterResolver {
       const values = self.counterStore.currentPageCounters[name];
       return values && values.length ? values[values.length - 1] : null;
     }
-    const expr = new exprs.Native(
+    const expr = new Exprs.Native(
       this.pageScope,
       () => format(getCounterNumber()),
       `page-counter-${name}`
@@ -175,7 +175,7 @@ class CounterResolver implements csscasc.CounterResolver {
     function getCounterNumbers() {
       return self.counterStore.currentPageCounters[name] || [];
     }
-    const expr = new exprs.Native(
+    const expr = new Exprs.Native(
       this.pageScope,
       () => format(getCounterNumbers()),
       `page-counters-${name}`
@@ -202,7 +202,7 @@ class CounterResolver implements csscasc.CounterResolver {
     id: string | null,
     transformedId: string,
     lookForElement: boolean
-  ): csscasc.CounterValues | null {
+  ): CssCasc.CounterValues | null {
     let targetCounters = this.counterStore.countersById[transformedId];
     if (!targetCounters && lookForElement && id) {
       this.styler.styleUntilIdIsReached(id);
@@ -219,7 +219,7 @@ class CounterResolver implements csscasc.CounterResolver {
    */
   private getTargetPageCounters(
     transformedId: string
-  ): csscasc.CounterValues | null {
+  ): CssCasc.CounterValues | null {
     if (this.counterStore.currentPage.elementsById[transformedId]) {
       return this.counterStore.currentPageCounters;
     } else {
@@ -241,13 +241,13 @@ class CounterResolver implements csscasc.CounterResolver {
       // Since an element-based counter is defined, any page-based counter is
       // obscured even if it exists.
       const countersOfName = counters[name];
-      return new exprs.Const(
+      return new Exprs.Const(
         this.rootScope,
         format(countersOfName[countersOfName.length - 1] || null)
       );
     }
     const self = this;
-    return new exprs.Native(
+    return new Exprs.Native(
       this.pageScope,
       () => {
         // Since This block is evaluated during layout, lookForElement
@@ -302,7 +302,7 @@ class CounterResolver implements csscasc.CounterResolver {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
     const self = this;
-    return new exprs.Native(
+    return new Exprs.Native(
       this.pageScope,
       () => {
         const pageCounters = self.getTargetPageCounters(transformedId);
@@ -329,44 +329,44 @@ class CounterResolver implements csscasc.CounterResolver {
 }
 
 export class CounterStore {
-  countersById: { [key: string]: csscasc.CounterValues } = {};
-  pageCountersById: { [key: string]: csscasc.CounterValues } = {};
-  currentPageCounters: csscasc.CounterValues = {};
-  previousPageCounters: csscasc.CounterValues = {};
-  currentPageCountersStack: csscasc.CounterValues[] = [];
+  countersById: { [key: string]: CssCasc.CounterValues } = {};
+  pageCountersById: { [key: string]: CssCasc.CounterValues } = {};
+  currentPageCounters: CssCasc.CounterValues = {};
+  previousPageCounters: CssCasc.CounterValues = {};
+  currentPageCountersStack: CssCasc.CounterValues[] = [];
   pageIndicesById: {
     [key: string]: { spineIndex: number; pageIndex: number };
   } = {};
-  currentPage: vtree.Page = null;
+  currentPage: Vtree.Page = null;
   newReferencesOfCurrentPage: TargetCounterReference[] = [];
   referencesToSolve: TargetCounterReference[] = [];
   referencesToSolveStack: TargetCounterReference[][] = [];
   unresolvedReferences: { [key: string]: TargetCounterReference[] } = {};
   resolvedReferences: { [key: string]: TargetCounterReference[] } = {};
   private pagesCounterExprs: {
-    expr: exprs.Val;
+    expr: Exprs.Val;
     format: (p1: number[]) => string;
   }[] = [];
 
   constructor(
-    public readonly documentURLTransformer: base.DocumentURLTransformer
+    public readonly documentURLTransformer: Base.DocumentURLTransformer
   ) {
     this.currentPageCounters["page"] = [0];
   }
 
-  createCounterListener(baseURL: string): csscasc.CounterListener {
+  createCounterListener(baseURL: string): CssCasc.CounterListener {
     return new CounterListener(this, baseURL);
   }
 
   createCounterResolver(
     baseURL: string,
-    rootScope: exprs.LexicalScope,
-    pageScope: exprs.LexicalScope
-  ): csscasc.CounterResolver {
+    rootScope: Exprs.LexicalScope,
+    pageScope: Exprs.LexicalScope
+  ): CssCasc.CounterResolver {
     return new CounterResolver(this, baseURL, rootScope, pageScope);
   }
 
-  setCurrentPage(page: vtree.Page) {
+  setCurrentPage(page: Vtree.Page) {
     this.currentPage = page;
   }
 
@@ -396,8 +396,8 @@ export class CounterStore {
    * page.
    */
   updatePageCounters(
-    cascadedPageStyle: csscasc.ElementStyle,
-    context: exprs.Context
+    cascadedPageStyle: CssCasc.ElementStyle,
+    context: Exprs.Context
   ) {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
@@ -447,7 +447,7 @@ export class CounterStore {
    * Save current page-based counters values and set them to the values passed
    * in. The saved counter values can be restored by popPageCounters method.
    */
-  pushPageCounters(counters: csscasc.CounterValues) {
+  pushPageCounters(counters: CssCasc.CounterValues) {
     this.currentPageCountersStack.push(this.currentPageCounters);
     this.currentPageCounters = cloneCounterValues(counters);
   }
@@ -561,11 +561,11 @@ export class CounterStore {
    * Returns unresolved references pointing to the specified page.
    */
   getUnresolvedRefsToPage(
-    page: vtree.Page
+    page: Vtree.Page
   ): {
     spineIndex: number;
     pageIndex: number;
-    pageCounters: csscasc.CounterValues;
+    pageCounters: CssCasc.CounterValues;
     refs: TargetCounterReference[];
   }[] {
     let refs = [];
@@ -620,14 +620,14 @@ export class CounterStore {
   registerPageCounterExpr(
     name: string,
     format: (p1: number[]) => string,
-    expr: exprs.Val
+    expr: Exprs.Val
   ) {
     if (name === "pages") {
       this.pagesCounterExprs.push({ expr, format });
     }
   }
 
-  getExprContentListener(): vtree.ExprContentListener {
+  getExprContentListener(): Vtree.ExprContentListener {
     return this.exprContentListener.bind(this);
   }
 
@@ -649,19 +649,19 @@ export class CounterStore {
     Array.from(nodes).forEach(function(node) {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
       const i = this.pagesCounterExprs.findIndex(o => o.expr.key === key);
-      asserts.assert(i >= 0);
+      Asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
     }, this);
   }
 
-  createLayoutConstraint(pageIndex: number): layout.LayoutConstraint {
+  createLayoutConstraint(pageIndex: number): LayoutImpl.LayoutConstraint {
     return new LayoutConstraint(this, pageIndex);
   }
 }
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 
-class LayoutConstraint implements layout.LayoutConstraint {
+class LayoutConstraint implements LayoutImpl.LayoutConstraint {
   constructor(
     public readonly counterStore: CounterStore,
     public readonly pageIndex: number

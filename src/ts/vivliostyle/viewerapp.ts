@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Vivliostyle page viewer base on adapt.sampleapp
+ * @fileoverview ViewerApp - (Deprecated) Vivliostyle page viewer base on adapt.sampleapp
  */
-import * as base from "../adapt/base";
-import * as adaptviewer from "../adapt/viewer";
-import * as constants from "./constants";
+import * as Base from "../adapt/base";
+import * as ViewerImpl from "../adapt/viewer";
+import * as Constants from "./constants";
 
 export let fontSize: number = 16;
 
@@ -33,10 +33,10 @@ export let zoomActive: boolean = false;
 
 export let pinchDist: number = 0;
 
-export let currentPageProgression: constants.PageProgression =
-  constants.PageProgression.LTR;
+export let currentPageProgression: Constants.PageProgression =
+  Constants.PageProgression.LTR;
 
-export const sendCommand = (cmd: base.JSON) => {
+export const sendCommand = (cmd: Base.JSON) => {
   window["adapt_command"](cmd);
 };
 
@@ -44,7 +44,7 @@ export const navigateToLeftPage = () => {
   sendCommand({
     a: "moveTo",
     where:
-      currentPageProgression === constants.PageProgression.LTR
+      currentPageProgression === Constants.PageProgression.LTR
         ? "previous"
         : "next"
   });
@@ -54,7 +54,7 @@ export const navigateToRightPage = () => {
   sendCommand({
     a: "moveTo",
     where:
-      currentPageProgression === constants.PageProgression.LTR
+      currentPageProgression === Constants.PageProgression.LTR
         ? "next"
         : "previous"
   });
@@ -163,7 +163,7 @@ export const touch = (evt: TouchEvent): void => {
           sendCommand({
             a: "moveTo",
             where:
-              currentPageProgression === constants.PageProgression.LTR
+              currentPageProgression === Constants.PageProgression.LTR
                 ? "previous"
                 : "next"
           });
@@ -171,7 +171,7 @@ export const touch = (evt: TouchEvent): void => {
           sendCommand({
             a: "moveTo",
             where:
-              currentPageProgression === constants.PageProgression.LTR
+              currentPageProgression === Constants.PageProgression.LTR
                 ? "next"
                 : "previous"
           });
@@ -240,13 +240,13 @@ export const callback = msg => {
       break;
     }
     case "error":
-      // base.log("Error: " + msg["content"]);
+      // Base.log("Error: " + msg["content"]);
       break;
     case "nav": {
       const cfi = msg["cfi"];
       if (cfi) {
         location.replace(
-          base.setURLParam(location.href, "f", base.lightURLEncode(cfi || ""))
+          Base.setURLParam(location.href, "f", Base.lightURLEncode(cfi || ""))
         );
       }
       break;
@@ -324,15 +324,15 @@ function setViewportSize(
 }
 
 export const main = (arg): void => {
-  const fragment = (arg && arg["fragment"]) || base.getURLParam("f");
-  const epubURL = (arg && arg["epubURL"]) || base.getURLParam("b");
-  const xmlURL = (arg && arg["xmlURL"]) || base.getURLParam("x");
-  const width = (arg && arg["defaultPageWidth"]) || base.getURLParam("w");
-  const height = (arg && arg["defaultPageHeight"]) || base.getURLParam("h");
-  const size = (arg && arg["defaultPageSize"]) || base.getURLParam("size");
+  const fragment = (arg && arg["fragment"]) || Base.getURLParam("f");
+  const epubURL = (arg && arg["epubURL"]) || Base.getURLParam("b");
+  const xmlURL = (arg && arg["xmlURL"]) || Base.getURLParam("x");
+  const width = (arg && arg["defaultPageWidth"]) || Base.getURLParam("w");
+  const height = (arg && arg["defaultPageHeight"]) || Base.getURLParam("h");
+  const size = (arg && arg["defaultPageSize"]) || Base.getURLParam("size");
   const orientation =
-    (arg && arg["orientation"]) || base.getURLParam("orientation");
-  let spreadView = base.getURLParam("spread");
+    (arg && arg["orientation"]) || Base.getURLParam("orientation");
+  let spreadView = Base.getURLParam("spread");
   spreadView =
     (arg && arg["spreadView"]) || (!!spreadView && spreadView != "false");
   const uaRoot = (arg && arg["uaRoot"]) || null;
@@ -353,7 +353,7 @@ export const main = (arg): void => {
     pageBorder: 1
   };
   setViewportSize(width, height, size, orientation, config);
-  const viewerInstance = new adaptviewer.Viewer(
+  const viewerInstance = new ViewerImpl.Viewer(
     window,
     viewportElement,
     "main",

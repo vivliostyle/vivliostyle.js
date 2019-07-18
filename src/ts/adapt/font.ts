@@ -15,22 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Deal with embedded fonts.
+ * @fileoverview Font - Deal with embedded fonts.
  */
-import * as logging from "../vivliostyle/logging";
-import * as css from "./css";
-import * as exprs from "./expr";
-import * as net from "./net";
-import * as task from "./task";
-import * as taskutil from "./taskutil";
+import * as Logging from "../vivliostyle/logging";
+import * as Css from "./css";
+import * as Exprs from "./expr";
+import * as Net from "./net";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
 
-import * as base from "./base";
+import * as Base from "./base";
 import { ElementStyle, getProp } from "./csscasc";
 
-export const traitProps: { [key: string]: css.Val } = {
-  "font-style": css.ident.normal,
-  "font-variant": css.ident.normal,
-  "font-weight": css.ident.normal
+export const traitProps: { [key: string]: Css.Val } = {
+  "font-style": Css.ident.normal,
+  "font-variant": Css.ident.normal,
+  "font-weight": Css.ident.normal
 };
 
 export const bogusFontData = `OTTO${new Date().valueOf()}`;
@@ -38,9 +38,9 @@ export const bogusFontData = `OTTO${new Date().valueOf()}`;
 export let bogusFontCounter: number = 1;
 
 export const makeFontTraitKey = (properties: {
-  [key: string]: css.Val;
+  [key: string]: Css.Val;
 }): string => {
-  const sb = new base.StringBuffer();
+  const sb = new Base.StringBuffer();
   for (const prop in traitProps) {
     sb.append(" ");
     sb.append(properties[prop].toString());
@@ -48,7 +48,7 @@ export const makeFontTraitKey = (properties: {
   return sb.toString();
 };
 
-export const fillDefaults = (properties: { [key: string]: css.Val }) => {
+export const fillDefaults = (properties: { [key: string]: Css.Val }) => {
   for (const prop in traitProps) {
     if (!properties[prop]) {
       properties[prop] = traitProps[prop];
@@ -58,9 +58,9 @@ export const fillDefaults = (properties: { [key: string]: css.Val }) => {
 
 export const prepareProperties = (
   properties: ElementStyle,
-  context: exprs.Context
-): { [key: string]: css.Val } => {
-  const result = {} as { [key: string]: css.Val };
+  context: Exprs.Context
+): { [key: string]: Css.Val } => {
+  const result = {} as { [key: string]: Css.Val };
   for (const prop in properties) {
     result[prop] = getProp(properties, prop).evaluate(context, prop);
   }
@@ -78,7 +78,7 @@ export class Face {
   blobs: Blob[] = [];
   family: any;
 
-  constructor(public readonly properties: { [key: string]: css.Val }) {
+  constructor(public readonly properties: { [key: string]: Css.Val }) {
     this.fontTraitKey = makeFontTraitKey(this.properties);
     this.src = this.properties["src"]
       ? this.properties["src"].toString()
@@ -98,7 +98,7 @@ export class Face {
    * Create "at" font-face rule.
    */
   makeAtRule(src: string, fontBytes: Blob): string {
-    const sb = new base.StringBuffer();
+    const sb = new Base.StringBuffer();
     sb.append("@font-face {\n  font-family: ");
     sb.append(this.family as string);
     sb.append(";\n  ");
@@ -110,7 +110,7 @@ export class Face {
     }
     if (fontBytes) {
       sb.append('src: url("');
-      const blobURL = net.createObjectURL(fontBytes);
+      const blobURL = Net.createObjectURL(fontBytes);
       sb.append(blobURL);
       this.blobURLs.push(blobURL);
       this.blobs.push(fontBytes);
@@ -137,7 +137,7 @@ export class DocumentFaces {
 
   constructor(
     public readonly deobfuscator:
-      | ((p1: string) => ((p1: Blob) => task.Result<Blob>) | null)
+      | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
       | null
   ) {}
 
@@ -154,22 +154,22 @@ export class DocumentFaces {
     }
   }
 
-  filterFontFamily(val: css.Val): css.Val {
-    if (val instanceof css.CommaList) {
-      const list = (val as css.CommaList).values;
-      const newValues = [] as css.Val[];
+  filterFontFamily(val: Css.Val): Css.Val {
+    if (val instanceof Css.CommaList) {
+      const list = (val as Css.CommaList).values;
+      const newValues = [] as Css.Val[];
       for (const v of list) {
         const r = this.familyMap[v.stringValue()];
         if (r) {
-          newValues.push(css.getName(r));
+          newValues.push(Css.getName(r));
         }
         newValues.push(v);
       }
-      return new css.CommaList(newValues);
+      return new Css.CommaList(newValues);
     } else {
       const rf = this.familyMap[val.stringValue()];
       if (rf) {
-        return new css.CommaList([css.getName(rf), val]);
+        return new Css.CommaList([Css.getName(rf), val]);
       }
       return val;
     }
@@ -186,7 +186,7 @@ export class Mapper {
   /**
    * Maps Face.src to an entry for an already-loaded font.
    */
-  srcURLMap: { [key: string]: taskutil.Fetcher<Face> } = {};
+  srcURLMap: { [key: string]: TaskUtil.Fetcher<Face> } = {};
   familyPrefix: any;
   familyCounter: number = 0;
 
@@ -216,35 +216,35 @@ export class Mapper {
     srcFace: Face,
     fontBytes: Blob,
     documentFaces: DocumentFaces
-  ): task.Result<Face> {
-    const frame: task.Frame<Face> = task.newFrame("initFont");
+  ): Task.Result<Face> {
+    const frame: Task.Frame<Face> = Task.newFrame("initFont");
     const self = this;
     const src = srcFace.src as string;
-    const props = {} as { [key: string]: css.Val };
+    const props = {} as { [key: string]: Css.Val };
     for (const prop in traitProps) {
       props[prop] = srcFace.properties[prop];
     }
     const fontFamily = self.getViewFontFamily(srcFace, documentFaces);
-    props["font-family"] = css.getName(fontFamily);
+    props["font-family"] = Css.getName(fontFamily);
     const viewFontFace = new Face(props);
     const probe = self.body.ownerDocument.createElement("span") as HTMLElement;
     probe.textContent = "M";
     const killTime = new Date().valueOf() + 1000;
     const style = self.head.ownerDocument.createElement("style");
     const bogusData = bogusFontData + bogusFontCounter++;
-    style.textContent = viewFontFace.makeAtRule("", net.makeBlob([bogusData]));
+    style.textContent = viewFontFace.makeAtRule("", Net.makeBlob([bogusData]));
     self.head.appendChild(style);
     self.body.appendChild(probe);
     probe.style.visibility = "hidden";
     probe.style.fontFamily = fontFamily;
     for (const pname in traitProps) {
-      base.setCSSProperty(probe, pname, props[pname].toString());
+      Base.setCSSProperty(probe, pname, props[pname].toString());
     }
     const rect = probe.getBoundingClientRect();
     const initWidth = rect.right - rect.left;
     const initHeight = rect.bottom - rect.top;
     style.textContent = viewFontFace.makeAtRule(src, fontBytes);
-    logging.logger.info("Starting to load font:", src);
+    Logging.logger.info("Starting to load font:", src);
     let loaded = false;
     frame
       .loop(() => {
@@ -253,19 +253,19 @@ export class Mapper {
         const currHeight = rect.bottom - rect.top;
         if (initWidth != currWidth || initHeight != currHeight) {
           loaded = true;
-          return task.newResult(false);
+          return Task.newResult(false);
         }
         const currTime = new Date().valueOf();
         if (currTime > killTime) {
-          return task.newResult(false);
+          return Task.newResult(false);
         }
         return frame.sleep(10);
       })
       .then(() => {
         if (loaded) {
-          logging.logger.info("Loaded font:", src);
+          Logging.logger.info("Loaded font:", src);
         } else {
-          logging.logger.warn("Failed to load font:", src);
+          Logging.logger.warn("Failed to load font:", src);
         }
         self.body.removeChild(probe);
         frame.finish(viewFontFace);
@@ -276,7 +276,7 @@ export class Mapper {
   loadFont(
     srcFace: Face,
     documentFaces: DocumentFaces
-  ): taskutil.Fetcher<Face> {
+  ): TaskUtil.Fetcher<Face> {
     const src = srcFace.src as string;
     let fetcher = this.srcURLMap[src];
     const self = this;
@@ -284,20 +284,20 @@ export class Mapper {
       fetcher.piggyback(viewFaceParam => {
         const viewFace = viewFaceParam as Face;
         if (!viewFace.traitsEqual(srcFace)) {
-          logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
+          Logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
         } else {
           documentFaces.registerFamily(srcFace, viewFace);
-          logging.logger.warn("Found already-loaded font:", src);
+          Logging.logger.warn("Found already-loaded font:", src);
         }
       });
     } else {
-      fetcher = new taskutil.Fetcher(() => {
-        const frame: task.Frame<Face> = task.newFrame("loadFont");
+      fetcher = new TaskUtil.Fetcher(() => {
+        const frame: Task.Frame<Face> = Task.newFrame("loadFont");
         const deobfuscator = documentFaces.deobfuscator
           ? documentFaces.deobfuscator(src)
           : null;
         if (deobfuscator) {
-          net.ajax(src, net.XMLHttpRequestResponseType.BLOB).then(xhr => {
+          Net.ajax(src, Net.XMLHttpRequestResponseType.BLOB).then(xhr => {
             if (!xhr.responseBlob) {
               frame.finish(null);
               return;
@@ -322,15 +322,15 @@ export class Mapper {
   findOrLoadFonts(
     srcFaces: Face[],
     documentFaces: DocumentFaces
-  ): task.Result<boolean> {
-    const fetchers = [] as taskutil.Fetcher<Face>[];
+  ): Task.Result<boolean> {
+    const fetchers = [] as TaskUtil.Fetcher<Face>[];
     for (const srcFace of srcFaces) {
       if (!srcFace.src || !srcFace.family) {
-        logging.logger.warn("E_FONT_FACE_INVALID");
+        Logging.logger.warn("E_FONT_FACE_INVALID");
         continue;
       }
       fetchers.push(this.loadFont(srcFace, documentFaces));
     }
-    return taskutil.waitForFetchers(fetchers);
+    return TaskUtil.waitForFetchers(fetchers);
   }
 }

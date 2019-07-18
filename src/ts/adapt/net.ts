@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Fetch resource from a URL.
+ * @fileoverview Net - Fetch resource from a URL.
  */
-import * as logging from "../vivliostyle/logging";
-import { net, xmldoc } from "../vivliostyle/types";
-import * as base from "./base";
-import * as task from "./task";
+import * as Logging from "../vivliostyle/logging";
+import { Net, XmlDoc } from "../vivliostyle/types";
+import * as Base from "./base";
+import * as Task from "./task";
 import { Fetcher } from "./taskutil";
 
 /**
@@ -35,7 +35,7 @@ export enum XMLHttpRequestResponseType {
   TEXT = "text"
 }
 
-export type Response = net.Response;
+export type Response = Net.Response;
 
 export const ajax = (
   url: string,
@@ -43,8 +43,8 @@ export const ajax = (
   opt_method?: string,
   opt_data?: string,
   opt_contentType?: string
-): task.Result<Response> => {
-  const frame: task.Frame<Response> = task.newFrame("ajax");
+): Task.Result<Response> => {
+  const frame: Task.Frame<Response> = Task.newFrame("ajax");
   const request = new XMLHttpRequest();
   const continuation = frame.suspend(request);
   const response: Response = {
@@ -84,7 +84,7 @@ export const ajax = (
           ) {
             response.responseText = text;
           } else if (!text) {
-            logging.logger.warn("Unexpected empty success response for", url);
+            Logging.logger.warn("Unexpected empty success response for", url);
           } else {
             if (typeof text == "string") {
               response.responseBlob = makeBlob([text]);
@@ -115,7 +115,7 @@ export const ajax = (
       request.send(null);
     }
   } catch (e) {
-    logging.logger.warn(e, `Error fetching ${url}`);
+    Logging.logger.warn(e, `Error fetching ${url}`);
     continuation.schedule(response);
   }
   return frame.result();
@@ -141,10 +141,10 @@ export const makeBlob = (
 };
 
 /**
- * @return task.Result.<ArrayBuffer>
+ * @return Task.Result.<ArrayBuffer>
  */
 export const readBlob = (blob: Blob): any => {
-  const frame: task.Frame<ArrayBuffer> = task.newFrame("readBlob");
+  const frame: Task.Frame<ArrayBuffer> = Task.newFrame("readBlob");
   const fileReader = new FileReader();
   const continuation = frame.suspend(fileReader);
   fileReader.addEventListener(
@@ -171,7 +171,7 @@ export const createObjectURL = (blob: Blob): string =>
 /**
  * @template Resource
  */
-export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
+export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
   resources: { [key: string]: Resource } = {};
   fetchers: { [key: string]: Fetcher<Resource> } = {};
 
@@ -179,7 +179,7 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
     public readonly parser: (
       p1: Response,
       p2: ResourceStore<Resource>
-    ) => task.Result<Resource>,
+    ) => Task.Result<Resource>,
     public readonly type: XMLHttpRequestResponseType
   ) {}
 
@@ -190,11 +190,11 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
     url: string,
     opt_required?: boolean,
     opt_message?: string
-  ): task.Result<Resource> {
-    url = base.stripFragment(url);
+  ): Task.Result<Resource> {
+    url = Base.stripFragment(url);
     const resource = this.resources[url];
     if (typeof resource != "undefined") {
-      return task.newResult(resource);
+      return Task.newResult(resource);
     }
     return this.fetch(url, opt_required, opt_message).get();
   }
@@ -203,9 +203,9 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
     url: string,
     opt_required?: boolean,
     opt_message?: string
-  ): task.Result<Resource> {
+  ): Task.Result<Resource> {
     const self = this;
-    const frame: task.Frame<Resource> = task.newFrame("fetch");
+    const frame: Task.Frame<Resource> = Task.newFrame("fetch");
     ajax(url, self.type).then(response => {
       if (opt_required && response.status >= 400) {
         throw new Error(
@@ -229,7 +229,7 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
     opt_required?: boolean,
     opt_message?: string
   ): Fetcher<Resource> {
-    url = base.stripFragment(url);
+    url = Base.stripFragment(url);
     const resource = this.resources[url];
     if (resource) {
       return null;
@@ -247,28 +247,25 @@ export class ResourceStore<Resource> implements net.ResourceStore<Resource> {
     return fetcher;
   }
 
-  get(url: string): xmldoc.XMLDocHolder {
-    const resource: unknown = this.resources[base.stripFragment(url)];
-    return resource as xmldoc.XMLDocHolder;
+  get(url: string): XmlDoc.XMLDocHolder {
+    const resource: unknown = this.resources[Base.stripFragment(url)];
+    return resource as XmlDoc.XMLDocHolder;
   }
 
   delete(url: string) {
-    delete this.resources[base.stripFragment(url)];
+    delete this.resources[Base.stripFragment(url)];
   }
 }
 
-export type JSONStore = ResourceStore<base.JSON>;
+export type JSONStore = ResourceStore<Base.JSON>;
 
 export const parseJSONResource = (
   response: Response,
   store: JSONStore
-): task.Result<base.JSON> => {
+): Task.Result<Base.JSON> => {
   const text = response.responseText;
-  return task.newResult(text ? base.stringToJSON(text) : null);
+  return Task.newResult(text ? Base.stringToJSON(text) : null);
 };
 
-/**
- * return {adapt.net.JSONStore}
- */
-export const newJSONStore = () =>
+export const newJSONStore = (): JSONStore =>
   new ResourceStore(parseJSONResource, XMLHttpRequestResponseType.TEXT);

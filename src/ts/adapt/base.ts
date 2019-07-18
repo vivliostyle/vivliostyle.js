@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Common utilities.
+ * @fileoverview Base - Common utilities.
  */
-import * as logging from "../vivliostyle/logging";
+import * as Logging from "../vivliostyle/logging";
 
 export let emptyObj = {};
 
@@ -351,7 +351,7 @@ export const getPrefixedPropertyNames = (prop: string): string[] | null => {
   }
 
   // Not supported by the browser
-  logging.logger.warn("Property not supported by the browser: ", prop);
+  Logging.logger.warn("Property not supported by the browser: ", prop);
   propNameMap[prop] = null;
   return null;
 };
@@ -385,7 +385,7 @@ export const setCSSProperty = (
       }
     });
   } catch (err) {
-    logging.logger.warn(err);
+    Logging.logger.warn(err);
   }
 };
 
