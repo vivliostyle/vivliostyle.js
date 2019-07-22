@@ -173,10 +173,7 @@ export class PageMaster<
     this.specified["overflow"] = new CssCasc.CascadeValue(Css.ident.visible, 0);
 
     // Shift 1px to workaround Chrome printing bug
-    this.specified["top"] = new CssCasc.CascadeValue(
-      new Css.Numeric(-1, "px"),
-      0
-    );
+    // this.specified["top"] = new CssCasc.CascadeValue(new Css.Numeric(-1, "px"), 0);
   }
 
   /**
@@ -1568,7 +1565,11 @@ export const passPostProperties = [
   "background-origin",
   "background-size",
   "opacity",
-  "z-index"
+  "z-index",
+  "background-blend-mode",
+  "isolation",
+  "mix-blend-mode",
+  "filter"
 ];
 
 /**
@@ -1588,10 +1589,31 @@ export const passContentProperties = [
   "text-indent",
   "text-transform",
   "white-space",
-  "word-spacing"
+  "word-spacing",
+  "font-feature-settings",
+  "font-kerning",
+  "font-size-adjust",
+  "font-variant-east-asian",
+  "font-stretch",
+  "text-decoration-color",
+  "text-decoration-line",
+  "text-decoration-skip",
+  "text-decoration-style",
+  "text-emphasis",
+  "text-emphasis-color",
+  "text-emphasis-position",
+  "text-emphasis-style",
+  "text-shadow",
+  "text-underline-position"
 ];
 
-export const passSingleUriContentProperties = ["width", "height"];
+export const passSingleUriContentProperties = [
+  "width",
+  "height",
+  "image-resolution",
+  "object-fit",
+  "object-position"
+];
 
 export const delayedProperties = ["transform", "transform-origin"];
 

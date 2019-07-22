@@ -19,12 +19,14 @@
  */
 import * as Asserts from "../vivliostyle/asserts";
 import * as Constants from "../vivliostyle/constants";
-import { Change, resolveOriginalIndex } from "../vivliostyle/diff";
+import * as Diff from "../vivliostyle/diff";
 import { PageFloats, Selectors, ViewTree, XmlDoc } from "../vivliostyle/types";
 import * as Base from "./base";
 import * as Css from "./css";
-import { toShape } from "./cssprop";
-import { Context } from "./expr";
+import * as CssParse from "./cssparse";
+import * as CssProp from "./cssprop";
+import * as CssTok from "./csstok";
+import * as Exprs from "./expr";
 import * as Geom from "./geom";
 import * as TaskUtil from "./taskutil";
 
@@ -209,6 +211,18 @@ export class Page extends Base.SimpleEventTarget {
     const list = this.delayedItems;
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
+      if (
+        item.target === this.container &&
+        item.name === "transform" &&
+        !this.isAutoPageWidth &&
+        !this.isAutoPageHeight
+      ) {
+        // When fixed page size is specified, cancel the transform property
+        // set at OPFView.makePage() for the specified viewport size
+        // (e.g. `<meta name="viewport" content="width=1307, height=1920"/>`)
+        // to avoid wrong page resizing.
+        continue;
+      }
       Base.setCSSProperty(item.target, item.name, item.value.toString());
     }
 
@@ -584,7 +598,7 @@ export class NodeContext implements ViewTree.NodeContext {
   direction: string;
   firstPseudo: FirstPseudo;
   lang: string | null = null;
-  preprocessedTextContent: Change[] | null = null;
+  preprocessedTextContent: Diff.Change[] | null = null;
   formattingContext: FormattingContext;
   repeatOnBreak: string | null = null;
   pluginProps: {
@@ -753,7 +767,10 @@ export class NodeContext implements ViewTree.NodeContext {
       nc = nc.parent;
     } while (nc);
     const actualOffsetInNode = this.preprocessedTextContent
-      ? resolveOriginalIndex(this.preprocessedTextContent, this.offsetInNode)
+      ? Diff.resolveOriginalIndex(
+          this.preprocessedTextContent,
+          this.offsetInNode
+        )
       : this.offsetInNode;
     return {
       steps,
@@ -1207,9 +1224,9 @@ export class Container implements ViewTree.Container {
     );
   }
 
-  getOuterShape(outerShapeProp: Css.Val, context: Context): Geom.Shape {
+  getOuterShape(outerShapeProp: Css.Val, context: Exprs.Context): Geom.Shape {
     const rect = this.getOuterRect();
-    return toShape(
+    return CssProp.toShape(
       outerShapeProp,
       rect.x1,
       rect.y1,
@@ -1239,7 +1256,7 @@ export type ExprContentListener = ViewTree.ExprContentListener;
 export class ContentPropertyHandler extends Css.Visitor {
   constructor(
     public readonly elem: Element,
-    public readonly context: Context,
+    public readonly context: Exprs.Context,
     public readonly rootContentValue: Css.Val,
     public readonly exprContentListener: ExprContentListener
   ) {
@@ -1280,8 +1297,17 @@ export class ContentPropertyHandler extends Css.Visitor {
   /** @override */
   visitExpr(expr) {
     const ex = expr.toExpr();
-    const val = ex.evaluate(this.context);
+    let val = ex.evaluate(this.context);
     if (typeof val === "string") {
+      if (ex instanceof Exprs.Named) {
+        // For env(pub-title) and env(doc-title)
+        // Need to unquote the result. To be consistent with cssparse.evaluateExprToCSS()
+        val = CssParse.parseValue(
+          ex.scope,
+          new CssTok.Tokenizer(val, null),
+          ""
+        ).stringValue();
+      }
       Asserts.assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
       this.visitStrInner(val, node);

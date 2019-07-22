@@ -617,6 +617,7 @@ export namespace LayoutProcessor {
 export namespace Net {
   export type Response = {
     status: number;
+    statusText: string | null;
     url: string;
     contentType: string | null;
     responseText: string | null;

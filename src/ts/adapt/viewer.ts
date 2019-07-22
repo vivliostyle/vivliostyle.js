@@ -128,7 +128,7 @@ export class Viewer {
       "vivliostyle-page-rules"
     );
     this.actions = {
-      loadEPUB: this.loadEPUB,
+      loadPublication: this.loadPublication,
       loadXML: this.loadXML,
       configure: this.configure,
       moveTo: this.moveTo,
@@ -193,7 +193,7 @@ export class Viewer {
     }
   }
 
-  loadEPUB(command: JSON): Task.Result<boolean> {
+  loadPublication(command: JSON): Task.Result<boolean> {
     Profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(Constants.ReadyState.LOADING);
     const url = command["url"] as string;
@@ -208,18 +208,25 @@ export class Viewer {
       text: string | null;
     }[];
     this.viewport = null;
-    const frame: Task.Frame<boolean> = Task.newFrame("loadEPUB");
+    const frame: Task.Frame<boolean> = Task.newFrame("loadPublication");
     const self = this;
     self.configure(command).then(() => {
       const store = new Epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
-        const epubURL = Base.resolveURL(url, self.window.location.href);
-        self.packageURL = [epubURL];
-        store.loadEPUBDoc(epubURL, haveZipMetadata).then(opf => {
-          self.opf = opf;
-          self.render(fragment).then(() => {
-            frame.finish(true);
-          });
+        const pubURL = Base.resolveURL(
+          Base.convertSpecialURL(url),
+          self.window.location.href
+        );
+        self.packageURL = [pubURL];
+        store.loadPubDoc(pubURL, haveZipMetadata).then(opf => {
+          if (opf) {
+            self.opf = opf;
+            self.render(fragment).then(() => {
+              frame.finish(true);
+            });
+          } else {
+            frame.finish(false);
+          }
         });
       });
     });
@@ -249,7 +256,10 @@ export class Viewer {
       const store = new Epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
         const resolvedParams: Epub.OPFItemParam[] = params.map((p, index) => ({
-          url: Base.resolveURL(p.url, self.window.location.href),
+          url: Base.resolveURL(
+            Base.convertSpecialURL(p.url),
+            self.window.location.href
+          ),
           index,
           startPage: p.startPage,
           skipPagesBefore: p.skipPagesBefore
@@ -483,6 +493,7 @@ export class Viewer {
     this.removePageListeners();
     this.forCurrentPages(page => {
       Base.setCSSProperty(page.container, "display", "none");
+      page.container.setAttribute("aria-hidden", "true");
     });
     this.currentPage = null;
     this.currentSpread = null;
@@ -493,17 +504,34 @@ export class Viewer {
     page.addEventListener("replaced", this.pageReplacedListener, false);
     Base.setCSSProperty(page.container, "visibility", "visible");
     Base.setCSSProperty(page.container, "display", "block");
+    page.container.setAttribute("aria-hidden", "false");
   }
 
   private showPage(page: Page): void {
     this.hidePages();
     this.currentPage = page;
+    page.container.style.marginLeft = "";
+    page.container.style.marginRight = "";
     this.showSinglePage(page);
   }
 
   private showSpread(spread: Spread) {
     this.hidePages();
     this.currentSpread = spread;
+    if (spread.left && spread.right) {
+      // Adjust spread horizontal alignment when left/right page widths differ
+      let leftWidth = parseFloat(spread.left.container.style.width);
+      let rightWidth = parseFloat(spread.right.container.style.width);
+      if (leftWidth && rightWidth && leftWidth !== rightWidth) {
+        if (leftWidth < rightWidth) {
+          spread.left.container.style.marginLeft = `${rightWidth -
+            leftWidth}px`;
+        } else {
+          spread.right.container.style.marginRight = `${leftWidth -
+            rightWidth}px`;
+        }
+      }
+    }
     if (spread.left) {
       this.showSinglePage(spread.left);
       if (!spread.right) {
@@ -511,6 +539,8 @@ export class Viewer {
           "data-vivliostyle-unpaired-page",
           true
         );
+      } else {
+        spread.left.container.removeAttribute("data-vivliostyle-unpaired-page");
       }
     }
     if (spread.right) {
@@ -519,6 +549,10 @@ export class Viewer {
         spread.right.container.setAttribute(
           "data-vivliostyle-unpaired-page",
           true
+        );
+      } else {
+        spread.right.container.removeAttribute(
+          "data-vivliostyle-unpaired-page"
         );
       }
     }
@@ -665,7 +699,11 @@ export class Viewer {
   }
 
   private reset(): void {
+    let tocVisible = false;
+    let tocAutohide = false;
     if (this.opfView) {
+      tocVisible = this.opfView.isTOCVisible();
+      tocAutohide = this.opfView.tocAutohide;
       this.opfView.hideTOC();
       this.opfView.removeRenderedPages();
     }
@@ -679,6 +717,9 @@ export class Viewer {
       this.pref,
       this.setPageSize.bind(this)
     );
+    if (tocVisible) {
+      this.sendCommand({ a: "toc", v: "show", autohide: tocAutohide });
+    }
   }
 
   /**
@@ -746,6 +787,10 @@ export class Viewer {
     }
     if (spread.left && spread.right) {
       width += this.pref.pageBorder * 2;
+      // Adjust spread horizontal alignment when left/right page widths differ
+      width += Math.abs(
+        spread.left.dimensions.width - spread.right.dimensions.width
+      );
     }
     return { width, height };
   }
@@ -807,6 +852,10 @@ export class Viewer {
         Task.handle(
           "resize",
           frame => {
+            if (!self.opf) {
+              frame.finish(false);
+              return;
+            }
             self.renderTask = resizeTask;
             Profile.profiler.registerStartTiming("render (resize)");
             self.reset();
@@ -815,32 +864,77 @@ export class Viewer {
               // index corresponding to the current position in the document
               // (offsetInItem) can change due to different layout caused by
               // different viewport size.
-              self.pagePosition.pageIndex = -1;
+
+              // Update(2019-03): to avoid unexpected page move (first page to next),
+              // keep pageIndex == 0 when offsetInItem == 0
+              if (
+                !(
+                  self.pagePosition.pageIndex == 0 &&
+                  self.pagePosition.offsetInItem == 0
+                )
+              ) {
+                self.pagePosition.pageIndex = -1;
+              }
             }
+
+            // epageCount counting depends renderAllPages mode
+            self.opf.setEPageCountMode(self.renderAllPages);
 
             // With renderAllPages option specified, the rendering is
             // performed after the initial page display, otherwise users are
             // forced to wait the rendering finish in front of a blank page.
-            self.opfView.renderPagesUpto(self.pagePosition).then(result => {
-              self.pagePosition = result.position;
-              self.showCurrent(result.page, true).then(() => {
-                self.reportPosition().then(p => {
+            self.opfView
+              .renderPagesUpto(self.pagePosition, !self.renderAllPages)
+              .then(result => {
+                if (!result) {
+                  frame.finish(false);
+                  return;
+                }
+                self.pagePosition = result.position;
+                self.showCurrent(result.page, true).then(() => {
                   self.setReadyState(Constants.ReadyState.INTERACTIVE);
-                  const r = self.renderAllPages
-                    ? self.opfView.renderAllPages()
-                    : Task.newResult(null);
-                  r.then(() => {
-                    if (self.renderTask === resizeTask) {
-                      self.renderTask = null;
-                    }
-                    Profile.profiler.registerEndTiming("render (resize)");
-                    self.setReadyState(Constants.ReadyState.COMPLETE);
-                    self.callback({ t: "loaded" });
-                    frame.finish(p);
-                  });
+
+                  self.opf
+                    .countEPages(epageCount => {
+                      const notification = {
+                        t: "nav",
+                        epageCount: epageCount,
+                        first: self.currentPage.isFirstPage,
+                        last: self.currentPage.isLastPage,
+                        metadata: self.opf.metadata,
+                        docTitle:
+                          self.opf.spine[self.pagePosition.spineIndex].title
+                      };
+                      if (
+                        self.currentPage.isFirstPage ||
+                        (self.pagePosition.pageIndex == 0 &&
+                          self.opf.spine[self.pagePosition.spineIndex].epage)
+                      ) {
+                        notification["epage"] =
+                          self.opf.spine[self.pagePosition.spineIndex].epage;
+                      }
+                      self.callback(notification);
+                    })
+                    .then(() => {
+                      self.reportPosition().then(p => {
+                        const r = self.renderAllPages
+                          ? self.opfView.renderAllPages()
+                          : Task.newResult(null);
+                        r.then(() => {
+                          if (self.renderTask === resizeTask) {
+                            self.renderTask = null;
+                          }
+                          Profile.profiler.registerEndTiming("render (resize)");
+                          if (self.renderAllPages) {
+                            self.setReadyState(Constants.ReadyState.COMPLETE);
+                          }
+                          self.callback({ t: "loaded" });
+                          frame.finish(p);
+                        });
+                      });
+                    });
                 });
               });
-            });
           },
           (frame, err) => {
             if (err instanceof RenderingCanceledError) {
@@ -865,7 +959,9 @@ export class Viewer {
     const notification = {
       t: "nav",
       first: page.isFirstPage,
-      last: page.isLastPage
+      last: page.isLastPage,
+      metadata: this.opf.metadata,
+      docTitle: this.opf.spine[page.spineIndex].title
     };
     const self = this;
     this.opf
@@ -891,7 +987,10 @@ export class Viewer {
   moveTo(command: JSON): Task.Result<boolean> {
     let method;
     const self = this;
-    if (this.readyState !== Constants.ReadyState.COMPLETE) {
+    if (
+      this.readyState !== Constants.ReadyState.COMPLETE &&
+      command["where"] !== "next"
+    ) {
       this.setReadyState(Constants.ReadyState.LOADING);
     }
     if (typeof command["where"] == "string") {
@@ -917,17 +1016,21 @@ export class Viewer {
       }
       if (method) {
         const m = method;
-        method = () => m.call(self.opfView, self.pagePosition);
+        method = () =>
+          m.call(self.opfView, self.pagePosition, !self.renderAllPages);
       }
-    } else if (typeof command["nthPage"] == "number") {
-      const nthPage = command["nthPage"] as number;
-      method = () => self.opfView.navigateToNthPage(nthPage, self.pagePosition);
     } else if (typeof command["epage"] == "number") {
       const epage = command["epage"] as number;
-      method = () => self.opfView.navigateToEPage(epage);
+      method = () =>
+        self.opfView.navigateToEPage(
+          epage,
+          self.pagePosition,
+          !self.renderAllPages
+        );
     } else if (typeof command["url"] == "string") {
       const url = command["url"] as string;
-      method = () => self.opfView.navigateTo(url, self.pagePosition);
+      method = () =>
+        self.opfView.navigateTo(url, self.pagePosition, !self.renderAllPages);
     } else {
       return Task.newResult(true);
     }
@@ -940,7 +1043,7 @@ export class Viewer {
           "moveTo.showCurrent"
         );
         cont = innerFrame.result();
-        self.showCurrent(result.page).then(() => {
+        self.showCurrent(result.page, !self.renderAllPages).then(() => {
           self.reportPosition().thenFinish(innerFrame);
         });
       } else {
@@ -960,8 +1063,10 @@ export class Viewer {
     const autohide = !!command["autohide"];
     const visibility = command["v"];
     const currentVisibility = this.opfView.isTOCVisible();
+    const changeAutohide =
+      autohide != this.opfView.tocAutohide && visibility != "hide";
     if (currentVisibility) {
-      if (visibility == "show") {
+      if (visibility == "show" && !changeAutohide) {
         return Task.newResult(true);
       }
     } else {
@@ -969,7 +1074,7 @@ export class Viewer {
         return Task.newResult(true);
       }
     }
-    if (currentVisibility) {
+    if (currentVisibility && visibility != "show") {
       this.opfView.hideTOC();
       return Task.newResult(true);
     } else {
@@ -977,12 +1082,15 @@ export class Viewer {
       const frame: Task.Frame<boolean> = Task.newFrame("showTOC");
       this.opfView.showTOC(autohide).then(page => {
         if (page) {
+          if (changeAutohide) {
+            page.listeners = {};
+          }
           if (autohide) {
             const hideTOC = () => {
               self.opfView.hideTOC();
             };
             page.addEventListener("hyperlink", hideTOC, false);
-            page.container.addEventListener("click", hideTOC, false);
+            // page.container.addEventListener("click", hideTOC, false);
           }
           page.addEventListener("hyperlink", self.hyperlinkListener, false);
         }

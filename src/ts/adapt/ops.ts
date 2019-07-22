@@ -1,6 +1,7 @@
 /**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1539,6 +1540,10 @@ export class StyleInstance extends Exprs.Context
     cp: Vtree.LayoutPosition | undefined
   ): Task.Result<Vtree.LayoutPosition> {
     const self = this;
+
+    // TOC box is special page container, no pagination
+    const isTocBox = page.container === page.bleedBox;
+
     self.pageBreaks = {};
     if (cp) {
       self.currentLayoutPosition = cp.clone();
@@ -1556,37 +1561,47 @@ export class StyleInstance extends Exprs.Context
     self.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
-    const cascadedPageStyle = self.pageManager.getCascadedPageStyle();
+    const cascadedPageStyle = isTocBox
+      ? ({} as CssCasc.ElementStyle)
+      : self.pageManager.getCascadedPageStyle();
     const pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
       return Task.newResult(null as Vtree.LayoutPosition);
     }
-    page.setAutoPageWidth(
-      pageMaster.pageBox.specified["width"].value === Css.fullWidth
-    );
-    page.setAutoPageHeight(
-      pageMaster.pageBox.specified["height"].value === Css.fullHeight
-    );
-    self.counterStore.setCurrentPage(page);
-    self.counterStore.updatePageCounters(cascadedPageStyle, self);
+    let bleedBoxPaddingEdge = 0;
+    if (!isTocBox) {
+      page.setAutoPageWidth(
+        pageMaster.pageBox.specified["width"].value === Css.fullWidth
+      );
+      page.setAutoPageHeight(
+        pageMaster.pageBox.specified["height"].value === Css.fullHeight
+      );
+      self.counterStore.setCurrentPage(page);
+      self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
-    // setup bleed area and crop marks
-    const evaluatedPageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
-      Pages.resolvePageSizeAndBleed(cascadedPageStyle as any),
-      this
-    );
-    self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
-    Pages.addPrinterMarks(
-      cascadedPageStyle,
-      evaluatedPageSizeAndBleed,
-      page,
-      this
-    );
-    const bleedBoxPaddingEdge =
-      evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+      // setup bleed area and crop marks
+      const evaluatedPageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
+        Pages.resolvePageSizeAndBleed(cascadedPageStyle as any),
+        this
+      );
+      self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+      Pages.addPrinterMarks(
+        cascadedPageStyle,
+        evaluatedPageSizeAndBleed,
+        page,
+        this
+      );
+      bleedBoxPaddingEdge =
+        evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
+    }
+
     const writingMode =
-      pageMaster.getProp(self, "writing-mode") || Css.ident.horizontal_tb;
+      (!isTocBox && pageMaster.getProp(self, "writing-mode")) ||
+      Css.ident.horizontal_tb;
+
+    this.pageVertical = writingMode != Css.ident.horizontal_tb;
+
     const direction = pageMaster.getProp(self, "direction") || Css.ident.ltr;
     const pageFloatLayoutContext = new PageFloat.PageFloatLayoutContext(
       self.rootPageFloatLayoutContext,
@@ -1602,13 +1617,14 @@ export class StyleInstance extends Exprs.Context
     );
     frame
       .loopWithFrame(loopFrame => {
+        // self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
         self
           .layoutContainer(
             page,
             pageMaster,
             page.bleedBox,
             bleedBoxPaddingEdge,
-            bleedBoxPaddingEdge + 1, // Compensate 'top: -1px' on page master
+            bleedBoxPaddingEdge,
             [],
             pageFloatLayoutContext
           )
@@ -1627,25 +1643,27 @@ export class StyleInstance extends Exprs.Context
       })
       .then(() => {
         pageMaster.adjustPageLayout(self, page, self.clientLayout);
-        const isLeftPage = new Exprs.Named(
-          pageMaster.pageBox.scope,
-          "left-page"
-        );
-        page.side = isLeftPage.evaluate(self)
-          ? Constants.PageSide.LEFT
-          : Constants.PageSide.RIGHT;
-        self.processLinger();
-        cp = self.currentLayoutPosition;
-        Object.keys(cp.flowPositions).forEach(flowName => {
-          const flowPosition = cp.flowPositions[flowName];
-          const breakAfter = flowPosition.breakAfter;
-          if (
-            breakAfter &&
-            (breakAfter === "page" || !self.matchPageSide(breakAfter))
-          ) {
-            flowPosition.breakAfter = null;
-          }
-        });
+        if (!isTocBox) {
+          const isLeftPage = new Exprs.Named(
+            pageMaster.pageBox.scope,
+            "left-page"
+          );
+          page.side = isLeftPage.evaluate(self)
+            ? Constants.PageSide.LEFT
+            : Constants.PageSide.RIGHT;
+          self.processLinger();
+          cp = self.currentLayoutPosition;
+          Object.keys(cp.flowPositions).forEach(flowName => {
+            const flowPosition = cp.flowPositions[flowName];
+            const breakAfter = flowPosition.breakAfter;
+            if (
+              breakAfter &&
+              (breakAfter === "page" || !self.matchPageSide(breakAfter))
+            ) {
+              flowPosition.breakAfter = null;
+            }
+          });
+        }
         self.currentLayoutPosition = self.layoutPositionAtPageStart = null;
         cp.highestSeenOffset = self.styler.getReachedOffset();
         const triggers = self.style.store.getTriggersForDoc(self.xmldoc);
@@ -1682,8 +1700,13 @@ export class StyleInstance extends Exprs.Context
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
 
-    // Shift 1px to workaround Chrome printing bug
-    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed + 1}px`;
+    // Shift 1px to workaround Chrome printing bug (Canceled because of another Chrome problem)
+    // page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
+
+    // Shift 0.01px to workaround Firefox printing problem
+    // (This small value (< 1/64 px) has no effect to Chrome)
+    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed +
+      0.01}px`;
   }
 }
 
@@ -2023,7 +2046,7 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
   private addAuthorStyleSheet(stylesheet: StyleSource) {
     let url = stylesheet.url;
     if (url) {
-      url = Base.resolveURL(url, Base.baseURL);
+      url = Base.resolveURL(Base.convertSpecialURL(url), Base.baseURL);
     }
     this.styleSheets.push({
       url,
@@ -2037,7 +2060,7 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
   private addUserStyleSheet(stylesheet: StyleSource) {
     let url = stylesheet.url;
     if (url) {
-      url = Base.resolveURL(url, Base.baseURL);
+      url = Base.resolveURL(Base.convertSpecialURL(url), Base.baseURL);
     }
     this.styleSheets.push({
       url,
@@ -2054,6 +2077,10 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
     );
     const self = this;
     const url = response.url;
+
+    // Hack for TOCView.showTOC()
+    const isTocBox = url.endsWith("?viv-toc-box");
+
     XmlDoc.parseXMLResource(response, self).then(
       (xmldoc: XmlDoc.XMLDocHolder) => {
         if (!xmldoc) {
@@ -2104,7 +2131,7 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
           media: null
         });
         const head = xmldoc.head;
-        if (head) {
+        if (!isTocBox && head) {
           for (let c: Node = head.firstChild; c; c = c.nextSibling) {
             if (c.nodeType != 1) {
               continue;
@@ -2114,12 +2141,15 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
             const localName = child.localName;
             if (ns == Base.NS.XHTML) {
               if (localName == "style") {
+                const classes = child.getAttribute("class");
+                const media = child.getAttribute("media");
+                const title = child.getAttribute("title");
                 sources.push({
                   url,
                   text: child.textContent,
                   flavor: CssParse.StylesheetFlavor.AUTHOR,
-                  classes: null,
-                  media: null
+                  classes: title ? classes : null,
+                  media
                 });
               } else if (localName == "link") {
                 const rel = child.getAttribute("rel");
@@ -2185,8 +2215,10 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
             }
           }
         }
-        for (let i = 0; i < self.styleSheets.length; i++) {
-          sources.push(self.styleSheets[i]);
+        if (!isTocBox) {
+          for (let i = 0; i < self.styleSheets.length; i++) {
+            sources.push(self.styleSheets[i]);
+          }
         }
         let key = "";
         for (let i = 0; i < sources.length; i++) {

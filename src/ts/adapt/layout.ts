@@ -158,6 +158,19 @@ export const validateCheckPoints = (checkPoints: ViewTree.NodeContext[]) => {
   }
 };
 
+export const isSpecialInlineDisplay = (display: string): boolean => {
+  switch (display) {
+    case "ruby":
+    case "inline-block":
+    case "inline-flex":
+    case "inline-grid":
+    case "inline-list-item":
+    case "inline-table":
+      return true;
+  }
+  return false;
+};
+
 export class Column extends Vtree.Container implements Layout.Column {
   last: Node;
   viewDocument: Document;
@@ -1864,6 +1877,22 @@ export class Column extends Vtree.Container implements Layout.Column {
         } else if (LayoutHelper.isSpecial(node as Element)) {
           // Skip special
           seekRange = !haveStart;
+        } else if (
+          (node as Element).localName == "ruby" ||
+          isSpecialInlineDisplay(
+            this.clientLayout.getElementComputedStyle(node as Element).display
+          )
+        ) {
+          // ruby, inline-block, etc.
+          seekRange = !haveStart;
+          if (seekRange) {
+            range.setStartBefore(node);
+            haveStart = true;
+            lastGood = node;
+          }
+          if (node.contains(end)) {
+            endNotReached = false;
+          }
         } else {
           next = node.firstChild;
         }

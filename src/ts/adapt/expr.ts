@@ -43,7 +43,7 @@ export const defaultPreferences = (): Preferences => ({
   nightMode: false,
   spreadView: false,
   pageBorder: 1,
-  enabledMediaTypes: { print: true },
+  enabledMediaTypes: { vivliostyle: true, print: true },
   defaultPaperSize: undefined
 });
 
@@ -187,6 +187,14 @@ export class LexicalScope {
       this.defineBuiltInName("pref-spread-view", function() {
         return this.pref.spreadView;
       });
+
+      // For env(pub-title) and env(doc-title)
+      this.defineBuiltInName("pub-title", function() {
+        return cssString(this.pubTitle ? this.pubTitle : "");
+      });
+      this.defineBuiltInName("doc-title", function() {
+        return cssString(this.docTitle ? this.docTitle : "");
+      });
     }
   }
 
@@ -216,6 +224,26 @@ export const isAbsoluteLengthUnit = (unit: string): boolean => {
     case "cm":
     case "mm":
     case "q":
+      return true;
+    default:
+      return false;
+  }
+};
+
+export const isViewportRelativeLengthUnit = (unit: string): boolean => {
+  switch (unit.toLowerCase()) {
+    case "vw":
+    case "vh":
+    case "vi":
+    case "vb":
+    case "vmin":
+    case "vmax":
+    case "pvw":
+    case "pvh":
+    case "pvi":
+    case "pvb":
+    case "pvmin":
+    case "pvmax":
       return true;
     default:
       return false;
@@ -275,11 +303,16 @@ export class Context {
   pageWidth: () => number;
   protected actualPageHeight: number | null = null;
   pageHeight: () => number;
-  initialFontSize: any;
+  initialFontSize: number;
   rootFontSize: number | null = null;
-  fontSize: any;
-  pref: any;
+  fontSize: () => number;
+  pref: Preferences;
   scopes: { [key: string]: ScopeContext } = {};
+  pageAreaWidth: number | null = null;
+  pageAreaHeight: number | null = null;
+  pageVertical: boolean | null = null;
+  pubTitle: string | null = null;
+  docTitle: string | null = null;
 
   constructor(
     public readonly rootScope: LexicalScope,
@@ -331,11 +364,38 @@ export class Context {
   }
 
   queryUnitSize(unit: string, isRoot: boolean): number {
-    if (unit == "vw") {
-      return this.pageWidth() / 100;
-    }
-    if (unit == "vh") {
-      return this.pageHeight() / 100;
+    if (isViewportRelativeLengthUnit(unit)) {
+      const pvw = this.pageWidth() / 100;
+      const pvh = this.pageHeight() / 100;
+      const vw = this.pageAreaWidth != null ? this.pageAreaWidth / 100 : pvw;
+      const vh = this.pageAreaHeight != null ? this.pageAreaHeight / 100 : pvh;
+
+      switch (unit) {
+        case "vw":
+          return vw;
+        case "vh":
+          return vh;
+        case "vi":
+          return this.pageVertical ? vh : vw;
+        case "vb":
+          return this.pageVertical ? vw : vh;
+        case "vmin":
+          return vw < vh ? vw : vh;
+        case "vmax":
+          return vw > vh ? vw : vh;
+        case "pvw":
+          return pvw;
+        case "pvh":
+          return pvh;
+        case "pvi":
+          return this.pageVertical ? pvh : pvw;
+        case "pvb":
+          return this.pageVertical ? pvw : pvh;
+        case "pvmin":
+          return pvw < pvh ? pvw : pvh;
+        case "pvmax":
+          return pvw > pvh ? pvw : pvh;
+      }
     }
     if (unit == "em" || unit == "rem") {
       return isRoot ? this.initialFontSize : this.fontSize();

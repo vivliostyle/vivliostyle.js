@@ -66,9 +66,15 @@ export function setResourceBaseURL(value: string) {
  * @return resolved (absolute) URL
  */
 export const resolveURL = (relURL: string, baseURL: string): string => {
+  if (baseURL.startsWith("data:")) {
+    return relURL || baseURL;
+  }
   if (!baseURL || relURL.match(/^\w{2,}:/)) {
     if (relURL.toLowerCase().match("^javascript:")) {
       return "#";
+    }
+    if (relURL.match(/^\w{2,}:\/\/[^\/]+$/)) {
+      relURL = `${relURL}/`;
     }
     return relURL;
   }
@@ -91,7 +97,7 @@ export const resolveURL = (relURL: string, baseURL: string): string => {
     return relURL;
   }
   if (relURL.match(/^\.(\/|$)/)) {
-    relURL = relURL.substr(1);
+    relURL = relURL.substr(2); // './foo' => 'foo'
   }
   baseURL = stripFragmentAndQuery(baseURL);
   if (relURL.match(/^#/)) {
@@ -100,6 +106,17 @@ export const resolveURL = (relURL: string, baseURL: string): string => {
   let i = baseURL.lastIndexOf("/");
   if (i < 0) {
     return relURL;
+  }
+  if (i < baseURL.length - 1) {
+    const j = baseURL.lastIndexOf(".");
+    if (j < i) {
+      // Assume the last part without '.' to be a directory name.
+      if (relURL == "") {
+        return baseURL;
+      }
+      baseURL += "/";
+      i = baseURL.length - 1;
+    }
   }
   let url = baseURL.substr(0, i + 1) + relURL;
   while (true) {
@@ -114,6 +131,45 @@ export const resolveURL = (relURL: string, baseURL: string): string => {
     url = url.substr(0, j) + url.substr(i + 3);
   }
   return url.replace(/\/(\.\/)+/g, "/");
+};
+
+/**
+ * @return converted URL
+ */
+export const convertSpecialURL = (url: string): string => {
+  let r;
+  if (
+    (r = /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
+      url
+    ))
+  ) {
+    // Convert GitHub URL to GitHub raw URL
+    url = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? "" : "master/"}${
+      r[4]
+    }`;
+  } else if (
+    (r = /^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/.exec(
+      url
+    ))
+  ) {
+    // Convert Aozorabunko (X)HTML URL to GitHub raw URL
+    url = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
+  } else if (
+    (r = /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/.exec(
+      url
+    ))
+  ) {
+    // Convert Gist URL to Gist raw URL
+    url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
+  } else if (
+    (r = /^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/.exec(
+      url
+    ))
+  ) {
+    // Convert JS Bin URL to JS Bin output URL
+    url = `${r[1]}//output.jsbin.com/${r[2]}${r[3]}/`;
+  }
+  return url;
 };
 
 export interface DocumentURLTransformer {
@@ -321,6 +377,16 @@ export const getPrefixedPropertyNames = (prop: string): string[] | null => {
     return prefixed;
   }
   switch (prop) {
+    case "text-combine-upright":
+      // Special case for Safari
+      if (
+        checkIfPropertySupported("-webkit-", "text-combine") &&
+        !checkIfPropertySupported("", "text-combine-upright")
+      ) {
+        propNameMap[prop] = ["-webkit-text-combine"];
+        return ["-webkit-text-combine"];
+      }
+      break;
     case "writing-mode":
       // Special case: prefer '-ms-writing-mode' to 'writing-mode'
       if (checkIfPropertySupported("-ms-", "writing-mode")) {
@@ -339,6 +405,30 @@ export const getPrefixedPropertyNames = (prop: string): string[] | null => {
       // Special case for chrome.
       if (checkIfPropertySupported("-webkit-", "clip-path")) {
         return (propNameMap[prop] = ["-webkit-clip-path", "clip-path"]);
+      }
+      break;
+    case "margin-inline-start":
+      if (checkIfPropertySupported("-webkit-", "margin-start")) {
+        propNameMap[prop] = ["-webkit-margin-start"];
+        return ["-webkit-margin-start"];
+      }
+      break;
+    case "margin-inline-end":
+      if (checkIfPropertySupported("-webkit-", "margin-end")) {
+        propNameMap[prop] = ["-webkit-margin-end"];
+        return ["-webkit-margin-end"];
+      }
+      break;
+    case "padding-inline-start":
+      if (checkIfPropertySupported("-webkit-", "padding-start")) {
+        propNameMap[prop] = ["-webkit-padding-start"];
+        return ["-webkit-padding-start"];
+      }
+      break;
+    case "padding-inline-end":
+      if (checkIfPropertySupported("-webkit-", "padding-end")) {
+        propNameMap[prop] = ["-webkit-padding-end"];
+        return ["-webkit-padding-end"];
       }
       break;
   }
@@ -377,6 +467,12 @@ export const setCSSProperty = (
             break;
           case "vertical-lr":
             value = "tb-lr";
+            break;
+        }
+      } else if (prefixed === "-webkit-text-combine") {
+        switch (value) {
+          case "all":
+            value = "horizontal";
             break;
         }
       }
@@ -441,7 +537,7 @@ export const escapeCSSIdent = (name: string): string =>
   name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, escapeChar);
 
 export const escapeCSSStr = (str: string): string =>
-  str.replace(/[\u0000-\u001F"]/g, escapeChar);
+  str.replace(/[\u0000-\u001F"\\]/g, escapeChar);
 
 export const lightURLEncode = (str: string): string =>
   str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
@@ -645,6 +741,7 @@ export type Event = {
   newPage?;
   anchorElement?;
   href?;
+  content?;
 };
 
 export type EventListener = (p1: Event) => void;

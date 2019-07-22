@@ -822,6 +822,14 @@ export class ViewFactory extends Base.SimpleEventTarget
         ) {
           self.nodeContext.breakPenalty++;
         }
+        if (
+          display &&
+          display !== Css.ident.inline &&
+          Display.isInlineLevel(display)
+        ) {
+          // Don't break inside ruby, inline-block, etc.
+          self.nodeContext.breakPenalty++;
+        }
         self.nodeContext.inline =
           (!floating && !display) ||
           Display.isInlineLevel(display) ||

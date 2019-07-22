@@ -770,9 +770,9 @@ export const ident: { [key: string]: Ident } = {
 
 export const hundredPercent: Numeric = new Numeric(100, "%");
 
-export const fullWidth: Numeric = new Numeric(100, "vw");
+export const fullWidth: Numeric = new Numeric(100, "pvw");
 
-export const fullHeight: Numeric = new Numeric(100, "vh");
+export const fullHeight: Numeric = new Numeric(100, "pvh");
 
 export const numericZero: Numeric = new Numeric(0, "px");
 

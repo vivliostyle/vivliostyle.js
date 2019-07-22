@@ -534,6 +534,10 @@ export class PrimitiveValidator extends PropertyValidator {
    * @override
    */
   visitExpr(expr) {
+    if (this.allowed & 0x7fe) {
+      // ALLOW_STR|ALLOW_IDENT|...|ALLOW_ZERO_PERCENT
+      return expr;
+    }
     return null;
   }
 
@@ -1578,10 +1582,18 @@ export class ValidatorSet {
         ex: Css.empty,
         ch: Css.empty,
         rem: Css.empty,
-        vh: Css.empty,
         vw: Css.empty,
+        vh: Css.empty,
+        vi: Css.empty,
+        vb: Css.empty,
         vmin: Css.empty,
         vmax: Css.empty,
+        pvw: Css.empty,
+        pvh: Css.empty,
+        pvi: Css.empty,
+        pvb: Css.empty,
+        pvmin: Css.empty,
+        pvmax: Css.empty,
         cm: Css.empty,
         mm: Css.empty,
         in: Css.empty,

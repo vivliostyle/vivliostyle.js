@@ -846,6 +846,7 @@ export const OP_MEDIA_AND: number = CssTok.TokenType.LAST + 1;
   actionsExprOp[CssTok.TokenType.LT_EQ] = Action.EXPR_INFIX;
   actionsExprOp[CssTok.TokenType.EQ] = Action.EXPR_INFIX;
   actionsExprOp[CssTok.TokenType.EQ_EQ] = Action.EXPR_INFIX;
+  actionsExprOp[CssTok.TokenType.BANG_EQ] = Action.EXPR_INFIX;
   actionsExprOp[CssTok.TokenType.AMP_AMP] = Action.EXPR_INFIX;
   actionsExprOp[CssTok.TokenType.BAR_BAR] = Action.EXPR_INFIX;
   actionsExprOp[CssTok.TokenType.PLUS] = Action.EXPR_INFIX;
@@ -1878,7 +1879,16 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.VAL_NUMERIC:
-          valStack.push(new Css.Numeric(token.num, token.text));
+          if (Exprs.isViewportRelativeLengthUnit(token.text)) {
+            // Treat numeric value with viewport unit as numeric in expr.
+            valStack.push(
+              new Css.Expr(
+                new Exprs.Numeric(handler.getScope(), token.num, token.text)
+              )
+            );
+          } else {
+            valStack.push(new Css.Numeric(token.num, token.text));
+          }
           tokenizer.consume();
           continue;
         case Action.VAL_STR:
@@ -1900,7 +1910,7 @@ export class Parser {
           continue;
         case Action.VAL_FUNC:
           text = token.text.toLowerCase();
-          if (text == "-epubx-expr") {
+          if (text == "-epubx-expr" || text == "calc" || text == "env") {
             // special case
             this.actions = actionsExprVal;
             this.exprContext = ExprContext.PROP;

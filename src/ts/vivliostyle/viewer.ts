@@ -145,16 +145,16 @@ export type SingleDocumentOptions =
  */
 export class Viewer {
   private initialized: boolean = false;
-  private adaptViewer: any;
+  private viewer_: ViewerImpl.Viewer;
   private options: ViewerOptions;
-  private eventTarget: any;
+  private eventTarget: Base.SimpleEventTarget;
 
   constructor(
     private readonly settings: ViewerSettings,
     opt_options?: ViewerOptions
   ) {
     Constants.setDebug(settings.debug);
-    this.adaptViewer = new ViewerImpl.Viewer(
+    this.viewer_ = new ViewerImpl.Viewer(
       settings["window"] || window,
       settings["viewportElement"],
       "main",
@@ -167,7 +167,7 @@ export class Viewer {
     this.eventTarget = new Base.SimpleEventTarget();
     Object.defineProperty(this, "readyState", {
       get() {
-        return this.adaptViewer.readyState;
+        return this.viewer_.readyState;
       }
     });
   }
@@ -180,7 +180,7 @@ export class Viewer {
       { a: "configure" },
       convertViewerOptions(options)
     );
-    this.adaptViewer.sendCommand(command);
+    this.viewer_.sendCommand(command);
     Object.assign(this.options, options);
   }
 
@@ -237,7 +237,7 @@ export class Viewer {
         content: "No URL specified"
       });
     }
-    this.loadDocumentOrEPUB(
+    this.loadDocumentOrPublication(
       singleDocumentOptions,
       null,
       opt_documentOptions,
@@ -246,36 +246,36 @@ export class Viewer {
   }
 
   /**
-   * Load an EPUB document.
+   * Load an EPUB/WebPub publication.
    */
-  loadEPUB(
-    epubUrl: string,
+  loadPublication(
+    pubUrl: string,
     opt_documentOptions?: DocumentOptions,
     opt_viewerOptions?: ViewerOptions
   ) {
-    if (!epubUrl) {
+    if (!pubUrl) {
       this.eventTarget.dispatchEvent({
         type: "error",
         content: "No URL specified"
       });
     }
-    this.loadDocumentOrEPUB(
+    this.loadDocumentOrPublication(
       null,
-      epubUrl,
+      pubUrl,
       opt_documentOptions,
       opt_viewerOptions
     );
   }
 
   /**
-   * Load an HTML or XML document, or an EPUB document.
+   * Load an HTML or XML document, or an EPUB/WebPub publication.
    */
-  private loadDocumentOrEPUB(
+  private loadDocumentOrPublication(
     singleDocumentOptions:
       | SingleDocumentOptions
       | SingleDocumentOptions[]
       | null,
-    epubUrl: string | null,
+    pubUrl: string | null,
     opt_documentOptions?: DocumentOptions,
     opt_viewerOptions?: ViewerOptions
   ) {
@@ -299,9 +299,9 @@ export class Viewer {
     }
     const command = Object.assign(
       {
-        a: singleDocumentOptions ? "loadXML" : "loadEPUB",
+        a: singleDocumentOptions ? "loadXML" : "loadPublication",
         userAgentRootURL: this.settings["userAgentRootURL"],
-        url: convertSingleDocumentOptions(singleDocumentOptions) || epubUrl,
+        url: convertSingleDocumentOptions(singleDocumentOptions) || pubUrl,
         document: documentOptions["documentObject"],
         fragment: documentOptions["fragment"],
         authorStyleSheet: authorStyleSheet,
@@ -310,10 +310,10 @@ export class Viewer {
       convertViewerOptions(this.options)
     );
     if (this.initialized) {
-      this.adaptViewer.sendCommand(command);
+      this.viewer_.sendCommand(command);
     } else {
       this.initialized = true;
-      this.adaptViewer.initEmbed(command);
+      this.viewer_.initEmbed(command);
     }
   }
 
@@ -322,7 +322,7 @@ export class Viewer {
    * loaded, returns null.
    */
   getCurrentPageProgression(): Constants.PageProgression | null {
-    return this.adaptViewer.getCurrentPageProgression();
+    return this.viewer_.getCurrentPageProgression();
   }
 
   private resolveNavigation(nav: Navigation): Navigation {
@@ -343,36 +343,65 @@ export class Viewer {
   /**
    * Navigate to the specified page.
    */
-  navigateToPage(nav: Navigation) {
-    this.adaptViewer.sendCommand({
-      a: "moveTo",
-      where: this.resolveNavigation(nav)
-    });
-  }
-
-  /**
-   * Navigate to the Nth page.
-   */
-  navigateToNthPage(nthPage: number) {
-    this.adaptViewer.sendCommand({ a: "moveTo", nthPage: nthPage });
+  navigateToPage(nav: Navigation, opt_epage?: number) {
+    if (nav === Navigation.EPAGE) {
+      this.viewer_.sendCommand({
+        a: "moveTo",
+        epage: opt_epage
+      });
+    } else {
+      this.viewer_.sendCommand({
+        a: "moveTo",
+        where: this.resolveNavigation(nav)
+      });
+    }
   }
 
   /**
    * Navigate to the specified internal URL.
    */
   navigateToInternalUrl(url: string) {
-    this.adaptViewer.sendCommand({ a: "moveTo", url: url });
+    this.viewer_.sendCommand({ a: "moveTo", url: url });
+  }
+
+  /**
+   * @returns True if TOC is visible, false if hidden, null if TOC is unavailable
+   */
+  isTOCVisible(): boolean | null {
+    if (
+      this.viewer_.opfView &&
+      this.viewer_.opfView.opf &&
+      (this.viewer_.opfView.opf.xhtmlToc || this.viewer_.opfView.opf.ncxToc)
+    ) {
+      return !!this.viewer_.opfView.isTOCVisible();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Show or hide TOC box
+   * @param opt_autohide If true, automatically hide when click TOC item
+   * @param opt_show If true show TOC, false hide TOC. If null or undefined toggle TOC.
+   */
+  showTOC(opt_show?: boolean | null, opt_autohide?: boolean) {
+    const visibility = opt_show == null ? "toggle" : opt_show ? "show" : "hide";
+    this.viewer_.sendCommand({
+      a: "toc",
+      v: visibility,
+      autohide: opt_autohide
+    });
   }
 
   /**
    * Returns zoom factor corresponding to the specified zoom type.
    */
   queryZoomFactor(type: ZoomType): number {
-    return this.adaptViewer.queryZoomFactor(type);
+    return this.viewer_.queryZoomFactor(type);
   }
 
   getPageSizes(): { width: number; height: number }[] {
-    return this.adaptViewer.pageSizes;
+    return this.viewer_.pageSizes;
   }
 }
 
@@ -416,7 +445,8 @@ export enum Navigation {
   LEFT = "left",
   RIGHT = "right",
   FIRST = "first",
-  LAST = "last"
+  LAST = "last",
+  EPAGE = "epage"
 }
 
 export type ZoomType = ViewerImpl.ZoomType;

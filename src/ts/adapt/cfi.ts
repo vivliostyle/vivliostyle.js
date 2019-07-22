@@ -318,10 +318,8 @@ export class Fragment {
     };
     for (let i = 0; i < this.steps.length; i++) {
       if (!this.steps[i].applyTo(pos)) {
-        if (++i < this.steps.length) {
-          pos.ref = new Fragment();
-          pos.ref.steps = this.steps.slice(i);
-        }
+        pos.ref = new Fragment();
+        pos.ref.steps = this.steps.slice(i + 1);
         break;
       }
     }

@@ -151,7 +151,7 @@ export const resolvePageSizeAndBleed = (style: {
       pageSizeAndBleed.height = val2 || val1;
     } else {
       // <page-size> || [ portrait | landscape ]
-      const s = pageSizes[(val1 as Css.Ident).name.toLowerCase()];
+      const s = val1.name && pageSizes[(val1 as Css.Ident).name.toLowerCase()];
       if (!s) {
         // portrait or landscape is specified alone. fallback to fit to the
         // viewport (use default value)
@@ -466,6 +466,13 @@ export const addPrinterMarks = (
   const lineWidth = Css.toNumber(defaultPrinterMarkLineWidth, context);
   const printerMarkOffset = Css.toNumber(defaultPrinterMarkOffset, context);
   const lineLength = Css.toNumber(defaultPrinterMarkLineLength, context);
+
+  if (bleed) {
+    const bgcolor = cascadedPageStyle["background-color"];
+    if (bgcolor && bgcolor.value) {
+      page.bleedBox.style.backgroundColor = bgcolor.value.stringValue();
+    }
+  }
 
   // corner marks
   if (crop) {
@@ -963,7 +970,8 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
     const style = this.style;
 
     // Shift 1px to workaround Chrome printing bug
-    style["top"] = new Css.Numeric(-1, "px");
+    // style["top"] = new Css.Numeric(-1, "px");
+    style["top"] = Css.numericZero;
     style["margin-top"] = Css.numericZero;
     style["border-top-width"] = Css.numericZero;
     style["padding-top"] = Css.numericZero;
@@ -1752,6 +1760,10 @@ export class PageRulePartitionInstance extends Pm.PartitionInstance<
   prepareContainer(context, container, page, docFaces, clientLayout) {
     super.prepareContainer(context, container, page, docFaces, clientLayout);
     page.pageAreaElement = container.element as HTMLElement;
+
+    // Set page area size for vw/vh unit calculation
+    context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
+    context.pageAreaHeight = parseFloat(page.pageAreaElement.style.height);
   }
 }
 

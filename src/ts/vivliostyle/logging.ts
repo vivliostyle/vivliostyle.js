@@ -37,22 +37,59 @@ export type ErrorInfo = {
  * Class logging error, warning, information or debug messages.
  */
 export class Logger {
-  private consoleDebug: any;
-  private consoleInfo: any;
-  private consoleWarn: any;
-  private consoleError: any;
+  private opt_console: any;
   private listeners: { [key in LogLevel]?: ((p1: ErrorInfo) => void)[] } = {};
 
   constructor(opt_console?: Console) {
-    const c = opt_console || console;
+    this.opt_console = opt_console;
+  }
 
-    function makeConsoleMethod(method) {
-      return args => method.apply(c, args);
+  private consoleDebug(msg) {
+    if (this.opt_console) {
+      if (this.opt_console.debug) {
+        this.opt_console.debug(...msg);
+      } else {
+        this.opt_console.log(...msg);
+      }
+    } else {
+      console.debug(...msg); // eslint-disable-line no-console
     }
-    this.consoleDebug = makeConsoleMethod(c.debug || c.log);
-    this.consoleInfo = makeConsoleMethod(c.info || c.log);
-    this.consoleWarn = makeConsoleMethod(c.warn || c.log);
-    this.consoleError = makeConsoleMethod(c.error || c.log);
+  }
+
+  private consoleInfo(msg) {
+    if (this.opt_console) {
+      if (this.opt_console.info) {
+        this.opt_console.info(...msg);
+      } else {
+        this.opt_console.log(...msg);
+      }
+    } else {
+      console.info(...msg); // eslint-disable-line no-console
+    }
+  }
+
+  private consoleWarn(msg) {
+    if (this.opt_console) {
+      if (this.opt_console.warn) {
+        this.opt_console.warn(...msg);
+      } else {
+        this.opt_console.log(...msg);
+      }
+    } else {
+      console.warn(...msg); // eslint-disable-line no-console
+    }
+  }
+
+  private consoleError(msg) {
+    if (this.opt_console) {
+      if (this.opt_console.error) {
+        this.opt_console.error(...msg);
+      } else {
+        this.opt_console.log(...msg);
+      }
+    } else {
+      console.error(...msg); // eslint-disable-line no-console
+    }
   }
 
   private triggerListeners(level: LogLevel, args: ErrorInfo) {

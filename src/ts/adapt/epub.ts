@@ -88,95 +88,242 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     this.plainXMLStore.fetch(url);
   }
 
-  loadAsJSON(url: string): Result<JSON> {
-    return this.jsonStore.load(url);
+  loadAsJSON(
+    url: string,
+    opt_required?: boolean,
+    opt_message?: string
+  ): Result<JSON> {
+    return this.jsonStore.load(url, opt_required, opt_message);
   }
 
   startLoadingAsJSON(url: string): void {
     this.jsonStore.fetch(url);
   }
 
-  loadEPUBDoc(url: string, haveZipMetadata: boolean): Result<OPFDoc> {
-    const self = this;
-    const frame: Frame<OPFDoc> = Task.newFrame("loadEPUBDoc");
-    if (url.substring(url.length - 1) !== "/") {
-      url = `${url}/`;
-    }
-    if (haveZipMetadata) {
-      self.startLoadingAsJSON(`${url}?r=list`);
-    }
-    self.startLoadingAsPlainXML(`${url}META-INF/encryption.xml`);
-    const containerURL = `${url}META-INF/container.xml`;
-    self
-      .loadAsPlainXML(
-        containerURL,
-        true,
-        `Failed to fetch EPUB container.xml from ${containerURL}`
-      )
-      .then(containerXML => {
-        if (!containerXML) {
+  loadPubDoc(url: string, haveZipMetadata: boolean): Result<OPFDoc> {
+    const frame: Frame<OPFDoc> = Task.newFrame("loadPubDoc");
+
+    Net.ajax(url, null, "HEAD").then(response => {
+      if (response.status >= 400) {
+        // This url can be the root of an unzipped EPUB.
+        this.loadEPUBDoc(url, haveZipMetadata).then(opf => {
+          if (opf) {
+            frame.finish(opf);
+            return;
+          }
           Logging.logger.error(
-            `Received an empty response for EPUB container.xml ${containerURL}. This may be caused by the server not allowing cross origin requests.`
+            `Failed to fetch a source document from ${url} (${response.status}${
+              response.statusText ? " " + response.statusText : ""
+            })`
           );
-        } else {
-          const roots = containerXML
-            .doc()
-            .child("container")
-            .child("rootfiles")
-            .child("rootfile")
-            .attribute("full-path");
-          for (const root of roots) {
-            if (root) {
-              self.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+          frame.finish(null);
+        });
+      } else {
+        if (
+          !response.status &&
+          !response.responseXML &&
+          !response.responseText &&
+          !response.responseBlob &&
+          !response.contentType
+        ) {
+          // Empty response
+          if (/\/[^/.]+(?:[#?]|$)/.test(url)) {
+            // Adding trailing "/" may solve the problem.
+            url = url.replace(/([#?]|$)/, "/$1");
+          } else {
+            // Ignore empty response of HEAD request, it may become OK with GET request.
+          }
+        }
+        if (
+          response.contentType == "application/oebps-package+xml" ||
+          /\.opf(?:[#?]|$)/.test(url)
+        ) {
+          // EPUB OPF
+          const [, pubURL, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
+          this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
+        } else if (
+          response.contentType == "application/ld+json" ||
+          response.contentType == "application/webpub+json" ||
+          response.contentType == "application/audiobook+json" ||
+          response.contentType == "application/json" ||
+          /\.json(?:ld)?(?:[#?]|$)/.test(url)
+        ) {
+          // Web Publication Manifest
+          this.loadAsJSON(url, true).then(manifestObj => {
+            if (!manifestObj) {
+              Logging.logger.error(
+                `Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`
+              );
+              frame.finish(null);
               return;
             }
-          }
-          frame.finish(null);
+            const opf = new OPFDoc(this, url);
+            opf.initWithWebPubManifest(manifestObj).then(() => {
+              frame.finish(opf);
+            });
+          });
+        } else {
+          // Web Publication primary entry (X)HTML
+          this.loadWebPub(url).then(opf => {
+            if (opf) {
+              frame.finish(opf);
+              return;
+            }
+            // This url can be the root of an unzipped EPUB.
+            this.loadEPUBDoc(url, haveZipMetadata).then(opf => {
+              if (opf) {
+                frame.finish(opf);
+                return;
+              }
+              Logging.logger.error(`Failed to load ${url}.`);
+              frame.finish(null);
+            });
+          });
         }
-      });
+      }
+    });
+    return frame.result();
+  }
+
+  loadEPUBDoc(url: string, haveZipMetadata: boolean): Result<OPFDoc> {
+    const frame: Frame<OPFDoc> = Task.newFrame("loadEPUBDoc");
+    if (!url.endsWith("/")) {
+      url = url + "/";
+    }
+    if (haveZipMetadata) {
+      this.startLoadingAsJSON(url + "?r=list");
+    }
+    this.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
+    const containerURL = url + "META-INF/container.xml";
+    this.loadAsPlainXML(containerURL).then(containerXML => {
+      if (containerXML) {
+        const roots = containerXML
+          .doc()
+          .child("container")
+          .child("rootfiles")
+          .child("rootfile")
+          .attribute("full-path");
+        for (const root of roots) {
+          if (root) {
+            this.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+            return;
+          }
+        }
+        frame.finish(null);
+      }
+    });
     return frame.result();
   }
 
   loadOPF(
-    epubURL: string,
+    pubURL: string,
     root: string,
     haveZipMetadata: boolean
   ): Result<OPFDoc> {
     const self = this;
-    const url = epubURL + root;
+    const url = pubURL + root;
     let opf = self.opfByURL[url];
     if (opf) {
       return Task.newResult(opf);
     }
     const frame: Frame<OPFDoc> = Task.newFrame("loadOPF");
-    self.loadAsPlainXML(url).then(opfXML => {
-      if (!opfXML) {
-        Logging.logger.error(
-          `Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross origin requests.`
-        );
-      } else {
-        self
-          .loadAsPlainXML(`${epubURL}META-INF/encryption.xml`)
-          .then(encXML => {
-            const zipMetadataResult = haveZipMetadata
-              ? self.loadAsJSON(`${epubURL}?r=list`)
-              : Task.newResult(null);
-            zipMetadataResult.then(zipMetadata => {
-              opf = new OPFDoc(self, epubURL);
-              opf
-                .initWithXMLDoc(
-                  opfXML,
-                  encXML,
-                  zipMetadata,
-                  `${epubURL}?r=manifest`
-                )
-                .then(() => {
-                  self.opfByURL[url] = opf;
-                  self.primaryOPFByEPubURL[epubURL] = opf;
-                  frame.finish(opf);
-                });
+    self
+      .loadAsPlainXML(url, true, `Failed to fetch EPUB OPF ${url}`)
+      .then(opfXML => {
+        if (!opfXML) {
+          Logging.logger.error(
+            `Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`
+          );
+        } else {
+          self
+            .loadAsPlainXML(`${pubURL}META-INF/encryption.xml`)
+            .then(encXML => {
+              const zipMetadataResult = haveZipMetadata
+                ? self.loadAsJSON(`${pubURL}?r=list`)
+                : Task.newResult(null);
+              zipMetadataResult.then(zipMetadata => {
+                opf = new OPFDoc(self, pubURL);
+                opf
+                  .initWithXMLDoc(
+                    opfXML,
+                    encXML,
+                    zipMetadata,
+                    `${pubURL}?r=manifest`
+                  )
+                  .then(() => {
+                    self.opfByURL[url] = opf;
+                    self.primaryOPFByEPubURL[pubURL] = opf;
+                    frame.finish(opf);
+                  });
+              });
             });
+        }
+      });
+    return frame.result();
+  }
+
+  loadWebPub(url: string): Result<OPFDoc> {
+    const frame: Frame<OPFDoc> = Task.newFrame("loadWebPub");
+
+    // Load the primary entry page (X)HTML
+    this.load(url).then(xmldoc => {
+      if (!xmldoc) {
+        Logging.logger.error(
+          `Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`
+        );
+      } else if (
+        xmldoc.document.querySelector(
+          "a[href='META-INF/'],a[href$='/META-INF/']"
+        )
+      ) {
+        // This is likely the directory listing of unzipped EPUB top directory
+        frame.finish(null);
+      } else {
+        const doc = xmldoc.document;
+        const opf = new OPFDoc(this, url);
+
+        if (doc.body) {
+          doc.body.setAttribute("data-vivliostyle-primary-entry", true);
+        }
+        // Find manifest, W3C WebPublication or Readium Web Publication Manifest
+        const manifestLink = doc.querySelector(
+          "link[rel='publication'],link[rel='manifest'][type='application/webpub+json']"
+        );
+        if (manifestLink) {
+          const href = manifestLink.getAttribute("href");
+          if (/^#/.test(href)) {
+            const manifestObj = Base.stringToJSON(
+              doc.getElementById(href.substr(1)).textContent
+            );
+            opf.initWithWebPubManifest(manifestObj, doc).then(() => {
+              frame.finish(opf);
+            });
+          } else {
+            this.loadAsJSON(
+              (manifestLink as any).href || manifestLink.getAttribute("href")
+            ).then(manifestObj => {
+              opf.initWithWebPubManifest(manifestObj, doc).then(() => {
+                frame.finish(opf);
+              });
+            });
+          }
+        } else {
+          // No manifest
+          opf.initWithWebPubManifest({}, doc).then(() => {
+            if (opf.xhtmlToc && opf.xhtmlToc.src === xmldoc.url) {
+              // xhtmlToc is the primari entry (X)HTML
+              if (
+                !doc.querySelector(
+                  "[role=doc-toc], [role=directory], nav, .toc, #toc"
+                )
+              ) {
+                // TOC is not found in the primari entry (X)HTML
+                opf.xhtmlToc = null;
+              }
+            }
+            frame.finish(opf);
           });
+        }
       }
     });
     return frame.result();
@@ -187,6 +334,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     const docURL = Base.stripFragment(url);
     const r = (this.documents[docURL] = this.parseOPSResource({
       status: 200,
+      statusText: "",
       url: docURL,
       contentType: (doc as any).contentType,
       responseText: null,
@@ -214,9 +362,20 @@ export class EPUBDocStore extends Ops.OPSDocStore {
       );
       r.then((xmldoc: XmlDoc.XMLDocHolder) => {
         if (!xmldoc) {
-          Logging.logger.error(
-            `Received an empty response for ${docURL}. This may be caused by the server not allowing cross origin requests.`
-          );
+          if (docURL.startsWith("data:")) {
+            Logging.logger.error(`Failed to load ${docURL}. Invalid data.`);
+          } else if (
+            docURL.startsWith("http:") &&
+            Base.baseURL.startsWith("https:")
+          ) {
+            Logging.logger.error(
+              `Failed to load ${docURL}. Mixed Content ("http:" content on "https:" context) is not allowed.`
+            );
+          } else {
+            Logging.logger.error(
+              `Received an empty response for ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`
+            );
+          }
         } else {
           frame.finish(xmldoc);
         }
@@ -237,6 +396,7 @@ export class OPFItem {
   id: string | null = null;
   src: string = "";
   mediaType: string | null = null;
+  title: string | null = null;
   itemRefElement: Element | null = null;
   spineIndex: number = -1;
   compressedSize: number = 0;
@@ -316,6 +476,7 @@ export const predefinedPrefixes = {
   dcterms: "http://purl.org/dc/terms/",
   marc: "http://id.loc.gov/vocabulary/",
   media: "http://www.idpf.org/epub/vocab/overlays/#",
+  rendition: "http://www.idpf.org/vocab/rendition/#",
   onix: "http://www.editeur.org/ONIX/book/codelists/current.html#",
   xsd: "http://www.w3.org/2001/XMLSchema#"
 };
@@ -326,6 +487,7 @@ export const metaTerms = {
   language: `${predefinedPrefixes["dcterms"]}language`,
   title: `${predefinedPrefixes["dcterms"]}title`,
   creator: `${predefinedPrefixes["dcterms"]}creator`,
+  layout: `${predefinedPrefixes["rendition"]}layout`,
   titleType: `${defaultIRI}title-type`,
   displaySeq: `${defaultIRI}display-seq`,
   alternateScript: `${defaultIRI}alternate-script`
@@ -389,7 +551,7 @@ export const readMetadata = (
     // the pattern.
     while (
       (r = prefixes.match(
-        /(^\s*[A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/
+        /^\s*([A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/
       )) != null
     ) {
       prefixes = prefixes.substr(r[0].length);
@@ -400,7 +562,7 @@ export const readMetadata = (
     if (val) {
       const r = val.match(/^\s*(([^:]*):)?(\S+)\s*$/);
       if (r) {
-        const iri = r[1] ? prefixMap[r[1]] : defaultIRI;
+        const iri = r[2] ? prefixMap[r[2]] : defaultIRI;
         if (iri) {
           return iri + r[3];
         }
@@ -523,7 +685,7 @@ export const checkMathJax = (): void => {
 };
 
 export const supportedMediaTypes = {
-  "appliaction/xhtml+xml": true,
+  "application/xhtml+xml": true,
   "image/jpeg": true,
   "image/png": true,
   "image/svg+xml": true,
@@ -544,6 +706,9 @@ export class OPFDoc {
   bindings: { [key: string]: string } = {};
   lang: string | null = null;
   epageCount: number = 0;
+  prePaginated: boolean = false;
+  epageIsRenderedPage: boolean = true;
+  epageCountCallback: (p1: number) => void | null = null;
   metadata: JSON = {};
   ncxToc: OPFItem = null;
   xhtmlToc: OPFItem = null;
@@ -554,7 +719,7 @@ export class OPFDoc {
 
   constructor(
     public readonly store: EPUBDocStore,
-    public readonly epubURL: string
+    public readonly pubURL: string
   ) {
     this.documentURLTransformer = this.createDocumentURLTransformer();
     checkMathJax();
@@ -623,9 +788,19 @@ export class OPFDoc {
   }
 
   getPathFromURL(url: string): string | null {
-    if (this.epubURL) {
-      return url.substr(0, this.epubURL.length) == this.epubURL
-        ? decodeURI(url.substr(this.epubURL.length))
+    if (url.startsWith("data:")) {
+      return url === this.pubURL ? "" : url;
+    }
+    if (this.pubURL) {
+      let epubBaseURL = Base.resolveURL("", this.pubURL);
+      if (url === epubBaseURL || url + "/" === epubBaseURL) {
+        return "";
+      }
+      if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
+        epubBaseURL += "/";
+      }
+      return url.substr(0, epubBaseURL.length) == epubBaseURL
+        ? decodeURI(url.substr(epubBaseURL.length))
         : null;
     } else {
       return url;
@@ -750,15 +925,21 @@ export class OPFDoc {
     if (this.metadata[metaTerms.language]) {
       this.lang = this.metadata[metaTerms.language][0]["v"];
     }
+    if (this.metadata[metaTerms.layout]) {
+      this.prePaginated =
+        this.metadata[metaTerms.layout][0]["v"] === "pre-paginated";
+    }
+
     if (!zipMetadata) {
       if (idpfObfURLs.length > 0 && this.uid) {
         // Have to deobfuscate in JavaScript
         const deobfuscator = makeDeobfuscator(this.uid);
         for (let i = 0; i < idpfObfURLs.length; i++) {
-          this.store.deobfuscators[
-            this.epubURL + idpfObfURLs[i]
-          ] = deobfuscator;
+          this.store.deobfuscators[this.pubURL + idpfObfURLs[i]] = deobfuscator;
         }
+      }
+      if (this.prePaginated) {
+        this.assignAutoPages();
       }
       return Task.newResult(true);
     }
@@ -811,18 +992,76 @@ export class OPFDoc {
   assignAutoPages(): void {
     let epage = 0;
     for (const item of this.spine) {
-      const epageCount = Math.ceil(item.compressedSize / 1024);
+      const epageCount = this.prePaginated
+        ? 1
+        : Math.ceil(item.compressedSize / 1024);
       item.epage = epage;
       item.epageCount = epageCount;
       epage += epageCount;
     }
     this.epageCount = epage;
+
+    if (this.epageCountCallback) {
+      this.epageCountCallback(this.epageCount);
+    }
+  }
+
+  setEPageCountMode(epageIsRenderedPage: boolean) {
+    this.epageIsRenderedPage = epageIsRenderedPage || this.prePaginated;
+  }
+
+  countEPages(
+    epageCountCallback: ((p1: number) => void) | null
+  ): Result<boolean> {
+    this.epageCountCallback = epageCountCallback;
+
+    if (this.epageIsRenderedPage) {
+      if (this.prePaginated && this.epageCount == 0) {
+        this.assignAutoPages();
+      }
+      return Task.newResult(true);
+    }
+
+    let epage = 0;
+    let i = 0;
+    const frame: Frame<boolean> = Task.newFrame("countEPages");
+    frame
+      .loopWithFrame(loopFrame => {
+        if (i === this.spine.length) {
+          loopFrame.breakLoop();
+          return;
+        }
+        const item = this.spine[i++];
+        item.epage = epage;
+        this.store.load(item.src).then(xmldoc => {
+          // According to the old comment,
+          // "Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size."
+          // However, it should depend on the language.
+          // Further adjustment needed.
+
+          //let offsetPerEPage = 2700;
+          let offsetPerEPage = 1800;
+          const lang = xmldoc.lang || this.lang;
+          if (lang && lang.match(/^(ja|ko|zh)/)) {
+            offsetPerEPage /= 3;
+          }
+          item.epageCount = Math.ceil(xmldoc.getTotalOffset() / offsetPerEPage);
+          epage += item.epageCount;
+          this.epageCount = epage;
+          if (this.epageCountCallback) {
+            this.epageCountCallback(this.epageCount);
+          }
+          loopFrame.continueLoop();
+        });
+      })
+      .thenFinish(frame);
+    return frame.result();
   }
 
   /**
    * Creates a fake OPF "document" that contains OPS chapters.
    */
-  initWithChapters(params: OPFItemParam[], doc: Document | null) {
+  initWithChapters(params: OPFItemParam[], doc?: Document | null) {
     this.itemMap = {};
     this.itemMapByPath = {};
     this.items = [];
@@ -843,7 +1082,11 @@ export class OPFDoc {
       opfXML.root.appendChild(itemref);
       item.itemRefElement = itemref;
       this.itemMap[item.id] = item;
-      this.itemMapByPath[param.url] = item;
+      let path = this.getPathFromURL(param.url);
+      if (path == null) {
+        path = param.url;
+      }
+      this.itemMapByPath[path] = item;
       this.items.push(item);
     }, this);
     if (doc) {
@@ -851,6 +1094,106 @@ export class OPFDoc {
     } else {
       return Task.newResult(null);
     }
+  }
+
+  initWithWebPubManifest(
+    manifestObj: Base.JSON,
+    doc?: Document
+  ): Result<boolean> {
+    if (manifestObj["readingProgression"]) {
+      this.pageProgression = manifestObj["readingProgression"];
+    }
+    if (this.metadata === undefined) {
+      this.metadata = {};
+    }
+    const title =
+      (doc && doc.title) ||
+      manifestObj["name"] ||
+      (manifestObj["metadata"] && manifestObj["metadata"]["title"]);
+    if (title) {
+      this.metadata[metaTerms.title] = [{ v: title }];
+    }
+    // TODO: other metadata...
+
+    const primaryEntryPath = this.getPathFromURL(this.pubURL);
+    if (!manifestObj["readingOrder"] && doc && primaryEntryPath !== null) {
+      manifestObj["readingOrder"] = [encodeURI(primaryEntryPath)];
+
+      // Find TOC in the primary entry (X)HTML
+      const selector =
+        "[role=doc-toc] a[href]," +
+        "[role=directory] a[href]," +
+        "nav li a[href]," +
+        ".toc a[href]," +
+        "#toc a[href]";
+      Array.from(doc.querySelectorAll(selector)).forEach(anchorElem => {
+        const hrefNoFragment = Base.stripFragment(
+          (anchorElem as any).href || anchorElem.getAttribute("href")
+        );
+        const path = this.getPathFromURL(hrefNoFragment);
+        const url = path !== null ? encodeURI(path) : hrefNoFragment;
+        if (manifestObj["readingOrder"].indexOf(url) == -1) {
+          manifestObj["readingOrder"].push(url);
+        }
+      });
+    }
+
+    const params = [];
+    let itemCount = 0;
+    let tocFound = -1;
+    [manifestObj["readingOrder"], manifestObj["resources"]].forEach(
+      readingOrderOrResources => {
+        if (readingOrderOrResources instanceof Array) {
+          readingOrderOrResources.forEach(itemObj => {
+            const isInReadingOrder = manifestObj["readingOrder"].includes(
+              itemObj
+            );
+            const url =
+              typeof itemObj === "string"
+                ? itemObj
+                : itemObj.url || itemObj.href;
+            const encodingFormat =
+              typeof itemObj === "string"
+                ? ""
+                : itemObj.encodingFormat ||
+                  (itemObj.href && itemObj.type) ||
+                  "";
+            if (
+              isInReadingOrder ||
+              encodingFormat === "text/html" ||
+              encodingFormat === "application/xhtml+xml" ||
+              /(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/.test(url)
+            ) {
+              const param = {
+                url: Base.resolveURL(Base.convertSpecialURL(url), this.pubURL),
+                index: itemCount++,
+                startPage: null,
+                skipPagesBefore: null
+              };
+              if (itemObj.rel === "contents" && tocFound === -1) {
+                tocFound = param.index;
+              }
+              params.push(param);
+
+              //TODO: items not in readingOrder should be excluded from linear reading but available with internal link navigation.
+            }
+          });
+        }
+      }
+    );
+    const frame: Frame<boolean> = Task.newFrame("initWithWebPubManifest");
+    this.initWithChapters(params).then(() => {
+      if (tocFound !== -1) {
+        this.xhtmlToc = this.items[tocFound];
+      }
+
+      if (!this.xhtmlToc) {
+        this.xhtmlToc = this.itemMapByPath[primaryEntryPath];
+      }
+
+      frame.finish(true);
+    });
+    return frame.result();
   }
 
   /**
@@ -936,10 +1279,31 @@ export class OPFDoc {
           frame.finish({ spineIndex: 0, offsetInItem: 0, pageIndex: -1 });
           return;
         }
-        const spineIndex = Base.binarySearch(self.spine.length, index => {
+        if (self.epageIsRenderedPage) {
+          let spineIndex = self.spine.findIndex(item => {
+            return (
+              (item.epage == 0 && item.epageCount == 0) ||
+              (item.epage <= epage && item.epage + item.epageCount > epage)
+            );
+          });
+          if (spineIndex == -1) {
+            spineIndex = self.spine.length - 1;
+          }
+          let item = self.spine[spineIndex];
+          if (!item || item.epageCount == 0) {
+            item = self.spine[--spineIndex];
+          }
+          const pageIndex = Math.floor(epage - item.epage);
+          frame.finish({ spineIndex, offsetInItem: -1, pageIndex: pageIndex });
+          return;
+        }
+        let spineIndex = Base.binarySearch(self.spine.length, index => {
           const item = self.spine[index];
           return item.epage + item.epageCount > epage;
         });
+        if (spineIndex == self.spine.length) {
+          spineIndex--;
+        }
         const item = self.spine[spineIndex];
         self.store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
           epage -= item.epage;
@@ -966,6 +1330,10 @@ export class OPFDoc {
 
   getEPageFromPosition(position: Position): Result<number> {
     const item = this.spine[position.spineIndex];
+    if (this.epageIsRenderedPage) {
+      const epage = item.epage + position.pageIndex;
+      return Task.newResult(epage);
+    }
     if (position.offsetInItem <= 0) {
       return Task.newResult(item.epage);
     }
@@ -1008,10 +1376,11 @@ export type OPFViewItem = {
 export class OPFView implements CustomRendererFactory {
   spineItems: OPFViewItem[] = [];
   spineItemLoadingContinuations: Continuation<any>[][] = [];
-  pref: any;
-  clientLayout: any;
-  counterStore: any;
-  tocView: any;
+  pref: Preferences;
+  clientLayout: DefaultClientLayout;
+  counterStore: Counters.CounterStore;
+  tocAutohide: boolean = false;
+  tocView?: Toc.TOCView;
 
   constructor(
     public readonly opf: OPFDoc,
@@ -1063,6 +1432,23 @@ export class OPFView implements CustomRendererFactory {
     const oldPage = viewItem.pages[pageIndex];
     page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
     viewItem.pages[pageIndex] = page;
+
+    if (this.opf.epageIsRenderedPage) {
+      if (pageIndex == 0 && viewItem.item.spineIndex > 0) {
+        const prevItem = this.opf.spine[viewItem.item.spineIndex - 1];
+        viewItem.item.epage = prevItem.epage + prevItem.epageCount;
+      }
+      viewItem.item.epageCount = viewItem.pages.length;
+      this.opf.epageCount = this.opf.spine.reduce(
+        (count, item) => count + item.epageCount,
+        0
+      );
+
+      if (this.opf.epageCountCallback) {
+        this.opf.epageCountCallback(this.opf.epageCount);
+      }
+    }
+
     if (oldPage) {
       viewItem.instance.viewport.contentContainer.replaceChild(
         page.container,
@@ -1076,7 +1462,27 @@ export class OPFView implements CustomRendererFactory {
         newPage: page
       });
     } else {
-      viewItem.instance.viewport.contentContainer.appendChild(page.container);
+      // Find insert position in contentContainer.
+      let insertPos = null;
+      if (pageIndex > 0) {
+        insertPos = viewItem.pages[pageIndex - 1].container.nextElementSibling;
+      } else {
+        for (
+          let i = viewItem.item.spineIndex + 1;
+          i < this.spineItems.length;
+          i++
+        ) {
+          const item = this.spineItems[i];
+          if (item && item.pages[0]) {
+            insertPos = item.pages[0].container;
+            break;
+          }
+        }
+      }
+      viewItem.instance.viewport.contentContainer.insertBefore(
+        page.container,
+        insertPos
+      );
     }
     this.pageSheetSizeReporter(
       {
@@ -1165,6 +1571,10 @@ export class OPFView implements CustomRendererFactory {
             });
           })
           .then(() => {
+            if (!page.container.parentElement) {
+              // page is replaced
+              page = viewItem.pages[pageIndex];
+            }
             page.isLastPage =
               !pos && viewItem.item.spineIndex === self.opf.spine.length - 1;
             if (page.isLastPage) {
@@ -1215,6 +1625,11 @@ export class OPFView implements CustomRendererFactory {
         // page that contains seekOffset
         pageIndex = seekOffsetPageIndex - 1;
       }
+    } else if (
+      pageIndex === Number.POSITIVE_INFINITY &&
+      position.offsetInItem !== -1
+    ) {
+      seekOffset = position.offsetInItem;
     }
     return {
       spineIndex: position.spineIndex,
@@ -1231,7 +1646,7 @@ export class OPFView implements CustomRendererFactory {
    */
   private findPage(
     position: Position,
-    sync?: boolean
+    sync: boolean
   ): Result<PageAndPosition | null> {
     const self = this;
     const frame: Frame<PageAndPosition | null> = Task.newFrame("findPage");
@@ -1260,6 +1675,7 @@ export class OPFView implements CustomRendererFactory {
             self.renderPage(normalizedPosition).then(result => {
               if (result) {
                 resultPage = result.page;
+                pageIndex = result.position.pageIndex;
               }
               loopFrame.breakLoop();
             });
@@ -1352,21 +1768,28 @@ export class OPFView implements CustomRendererFactory {
   }
 
   renderAllPages(): Result<PageAndPosition | null> {
-    return this.renderPagesUpto({
-      spineIndex: this.opf.spine.length - 1,
-      pageIndex: Number.POSITIVE_INFINITY,
-      offsetInItem: -1
-    });
+    return this.renderPagesUpto(
+      {
+        spineIndex: this.opf.spine.length - 1,
+        pageIndex: Number.POSITIVE_INFINITY,
+        offsetInItem: -1
+      },
+      false
+    );
   }
 
   /**
    * Render pages from (spineIndex=0, pageIndex=0) to the specified (spineIndex,
    * pageIndex).
+   * @param notAllPages If true, render from biginning of specified spine item.
    */
-  renderPagesUpto(position: Position): Result<PageAndPosition | null> {
+  renderPagesUpto(
+    position: Position,
+    notAllPages: boolean
+  ): Result<PageAndPosition | null> {
     const self = this;
     const frame: Frame<PageAndPosition | null> = Task.newFrame(
-      "renderAllPages"
+      "renderPagesUpto"
     );
     if (!position) {
       position = { spineIndex: 0, pageIndex: 0, offsetInItem: 0 };
@@ -1374,6 +1797,12 @@ export class OPFView implements CustomRendererFactory {
     const spineIndex = position.spineIndex;
     const pageIndex = position.pageIndex;
     let s = 0;
+
+    if (notAllPages) {
+      // Render pages from biginning of specified spine item.
+      s = spineIndex;
+    }
+
     let lastResult;
     frame
       .loopWithFrame(loopFrame => {
@@ -1400,19 +1829,25 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Move to the first page and render it.
    */
-  firstPage(): Result<PageAndPosition | null> {
-    return this.findPage({ spineIndex: 0, pageIndex: 0, offsetInItem: -1 });
+  firstPage(position: Position, sync: boolean): Result<PageAndPosition | null> {
+    return this.findPage(
+      { spineIndex: 0, pageIndex: 0, offsetInItem: -1 },
+      sync
+    );
   }
 
   /**
    * Move to the last page and render it.
    */
-  lastPage(): Result<PageAndPosition | null> {
-    return this.findPage({
-      spineIndex: this.opf.spine.length - 1,
-      pageIndex: Number.POSITIVE_INFINITY,
-      offsetInItem: -1
-    });
+  lastPage(position: Position, sync: boolean): Result<PageAndPosition | null> {
+    return this.findPage(
+      {
+        spineIndex: this.opf.spine.length - 1,
+        pageIndex: Number.POSITIVE_INFINITY,
+        offsetInItem: -1
+      },
+      sync
+    );
   }
 
   /**
@@ -1440,6 +1875,19 @@ export class OPFView implements CustomRendererFactory {
         }
         spineIndex++;
         pageIndex = 0;
+
+        // Remove next viewItem if its first page has same side as the current page
+        // to avoid unpaired page.
+        const nextViewItem = this.spineItems[spineIndex];
+        const nextPage = nextViewItem && nextViewItem.pages[0];
+        const currentPage = viewItem.pages[viewItem.pages.length - 1];
+        if (nextPage && currentPage && nextPage.side == currentPage.side) {
+          nextViewItem.pages.forEach(page => {
+            if (page.container) page.container.remove();
+          });
+          this.spineItems[spineIndex] = null;
+          this.spineItemLoadingContinuations[spineIndex] = null;
+        }
       } else {
         pageIndex++;
       }
@@ -1453,7 +1901,10 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Move to the previous page and render it.
    */
-  previousPage(position: Position): Result<PageAndPosition | null> {
+  previousPage(
+    position: Position,
+    sync: boolean
+  ): Result<PageAndPosition | null> {
     let spineIndex = position.spineIndex;
     let pageIndex = position.pageIndex;
     if (pageIndex == 0) {
@@ -1465,7 +1916,7 @@ export class OPFView implements CustomRendererFactory {
     } else {
       pageIndex--;
     }
-    return this.findPage({ spineIndex, pageIndex, offsetInItem: -1 });
+    return this.findPage({ spineIndex, pageIndex, offsetInItem: -1 }, sync);
   }
 
   /**
@@ -1496,16 +1947,24 @@ export class OPFView implements CustomRendererFactory {
     const isLeft = page.side === Constants.PageSide.LEFT;
     let other;
     if (this.isRectoPage(page, position)) {
-      other = this.previousPage(position);
+      other = this.previousPage(position, sync);
     } else {
       other = this.nextPage(position, sync);
     }
     other.then(otherPageAndPosition => {
-      const otherPage = otherPageAndPosition && otherPageAndPosition.page;
+      // this page may be replaced during nextPage(), so get thisPage again.
+      const thisPage = this.getPage(position);
+
+      let otherPage = otherPageAndPosition && otherPageAndPosition.page;
+      if (otherPage && otherPage.side === thisPage.side) {
+        // otherPage must not be same side
+        otherPage = null;
+      }
+
       if (isLeft) {
-        frame.finish({ left: page, right: otherPage });
+        frame.finish({ left: thisPage, right: otherPage });
       } else {
-        frame.finish({ left: otherPage, right: page });
+        frame.finish({ left: otherPage, right: thisPage });
       }
     });
     return frame.result();
@@ -1519,21 +1978,33 @@ export class OPFView implements CustomRendererFactory {
    */
   nextSpread(
     position: Position,
-    sync?: boolean
+    sync: boolean
   ): Result<PageAndPosition | null> {
     const page = this.getPage(position);
     if (!page) {
       return Task.newResult(null as PageAndPosition | null);
     }
     const isRecto = this.isRectoPage(page, position);
-    const next = this.nextPage(position, !!sync);
+    const next = this.nextPage(position, sync);
     if (isRecto) {
       return next;
     } else {
       const self = this;
       return next.thenAsync(result => {
         if (result) {
-          return self.nextPage(result.position, !!sync);
+          if (result.page.side === page.side) {
+            // If same side, this is the next spread.
+            return next;
+          }
+          const next2 = self.nextPage(result.position, sync);
+          return next2.thenAsync(result2 => {
+            if (result2) {
+              return next2;
+            } else {
+              // If this is tha last spread, move to next page in the same spread.
+              return next;
+            }
+          });
         } else {
           return Task.newResult(null as PageAndPosition | null);
         }
@@ -1545,18 +2016,30 @@ export class OPFView implements CustomRendererFactory {
    * Move to the previous spread and render pages.
    * @returns The 'recto' page of the previous spread.
    */
-  previousSpread(position: Position): Result<PageAndPosition | null> {
+  previousSpread(
+    position: Position,
+    sync: boolean
+  ): Result<PageAndPosition | null> {
     const page = this.getPage(position);
     if (!page) {
       return Task.newResult(null as PageAndPosition | null);
     }
     const isRecto = this.isRectoPage(page, position);
-    const prev = this.previousPage(position);
+    const prev = this.previousPage(position, sync);
+    const oldPrevPageCont = page.container.previousElementSibling;
     if (isRecto) {
       const self = this;
       return prev.thenAsync(result => {
         if (result) {
-          return self.previousPage(result.position);
+          if (result.page.side === page.side) {
+            // If same side, this is the previous spread.
+            return prev;
+          }
+          if (result.page.container !== oldPrevPageCont) {
+            // If previous page is changed, return it.
+            return prev;
+          }
+          return self.previousPage(result.position, sync);
         } else {
           return Task.newResult(null as PageAndPosition | null);
         }
@@ -1567,48 +2050,20 @@ export class OPFView implements CustomRendererFactory {
   }
 
   /**
-   * Move to the Nth page and render it.
-   */
-  navigateToNthPage(
-    nthPage: number,
-    position: Position
-  ): Result<PageAndPosition | null> {
-    if (nthPage < 1) {
-      return Task.newResult(null as PageAndPosition | null);
-    }
-    let countPages = 0;
-    let pageIndex = -1;
-    let spineIndex = 0;
-    for (const item of this.spineItems) {
-      const findPageIndex = nthPage - countPages - 1;
-      if (findPageIndex < item.pages.length) {
-        pageIndex = findPageIndex;
-        break;
-      }
-      countPages += item.pages.length;
-      spineIndex++;
-    }
-    if (pageIndex === -1) {
-      return Task.newResult(null as PageAndPosition | null);
-    }
-    return this.findPage({
-      spineIndex,
-      pageIndex,
-      offsetInItem: -1
-    });
-  }
-
-  /**
    * Move to the epage specified by the given number (zero-based) and render it.
    */
-  navigateToEPage(epage: number): Result<PageAndPosition | null> {
+  navigateToEPage(
+    epage: number,
+    position: Position,
+    sync: boolean
+  ): Result<PageAndPosition | null> {
     const frame: Frame<PageAndPosition | null> = Task.newFrame(
       "navigateToEPage"
     );
     const self = this;
     this.opf.resolveEPage(epage).then(position => {
       if (position) {
-        self.findPage(position).thenFinish(frame);
+        self.findPage(position, sync).thenFinish(frame);
       } else {
         frame.finish(null);
       }
@@ -1619,12 +2074,16 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Move to the page specified by the given CFI and render it.
    */
-  navigateToFragment(fragment: string): Result<PageAndPosition | null> {
+  navigateToFragment(
+    fragment: string,
+    position: Position,
+    sync: boolean
+  ): Result<PageAndPosition | null> {
     const frame: Frame<PageAndPosition | null> = Task.newFrame("navigateToCFI");
     const self = this;
     self.opf.resolveFragment(fragment).then(position => {
       if (position) {
-        self.findPage(position).thenFinish(frame);
+        self.findPage(position, sync).thenFinish(frame);
       } else {
         frame.finish(null);
       }
@@ -1635,7 +2094,11 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Move to the page specified by the given URL and render it.
    */
-  navigateTo(href: string, position: Position): Result<PageAndPosition | null> {
+  navigateTo(
+    href: string,
+    position: Position,
+    sync: boolean
+  ): Result<PageAndPosition | null> {
     Logging.logger.debug("Navigate to", href);
     let path = this.opf.getPathFromURL(Base.stripFragment(href));
     if (!path) {
@@ -1646,6 +2109,9 @@ export class OPFView implements CustomRendererFactory {
         const restored = this.opf.documentURLTransformer.restoreURL(href);
         if (this.opf.opfXML) {
           path = this.opf.getPathFromURL(restored[0]);
+          if (path == null) {
+            path = restored[0];
+          }
         } else {
           path = restored[0];
         }
@@ -1664,7 +2130,11 @@ export class OPFView implements CustomRendererFactory {
         // CFI link?
         const fragmentIndex = href.indexOf("#");
         if (fragmentIndex >= 0) {
-          return this.navigateToFragment(href.substr(fragmentIndex + 1));
+          return this.navigateToFragment(
+            href.substr(fragmentIndex + 1),
+            position,
+            sync
+          );
         }
       }
       return Task.newResult(null as PageAndPosition | null);
@@ -1672,23 +2142,33 @@ export class OPFView implements CustomRendererFactory {
     const frame: Frame<PageAndPosition | null> = Task.newFrame("navigateTo");
     const self = this;
     self.getPageViewItem(item.spineIndex).then(viewItem => {
+      if (!viewItem) {
+        frame.finish(null);
+        return;
+      }
       const target = viewItem.xmldoc.getElement(href);
       if (target) {
         self
-          .findPage({
-            spineIndex: item.spineIndex,
-            pageIndex: -1,
-            offsetInItem: viewItem.xmldoc.getElementOffset(target)
-          })
+          .findPage(
+            {
+              spineIndex: item.spineIndex,
+              pageIndex: -1,
+              offsetInItem: viewItem.xmldoc.getElementOffset(target)
+            },
+            sync
+          )
           .thenFinish(frame);
       } else if (position.spineIndex !== item.spineIndex) {
         // no fragment, different spine item
         self
-          .findPage({
-            spineIndex: item.spineIndex,
-            pageIndex: 0,
-            offsetInItem: -1
-          })
+          .findPage(
+            {
+              spineIndex: item.spineIndex,
+              pageIndex: 0,
+              offsetInItem: -1
+            },
+            sync
+          )
           .thenFinish(frame);
       } else {
         frame.finish(null);
@@ -1701,11 +2181,13 @@ export class OPFView implements CustomRendererFactory {
     const viewport = viewItem.instance.viewport;
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     pageCont.setAttribute("data-vivliostyle-page-container", "true");
+    pageCont.setAttribute("role", "region");
     pageCont.style.position = "absolute";
     pageCont.style.top = "0";
     pageCont.style.left = "0";
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
+      pageCont.setAttribute("aria-hidden", "true");
     }
     viewport.layoutBox.appendChild(pageCont);
     const bleedBox = viewport.document.createElement("div") as HTMLElement;
@@ -1932,7 +2414,7 @@ export class OPFView implements CustomRendererFactory {
 
   getPageViewItem(spineIndex: number): Result<OPFViewItem> {
     const self = this;
-    if (spineIndex >= self.opf.spine.length) {
+    if (spineIndex === -1 || spineIndex >= self.opf.spine.length) {
       return Task.newResult(null as OPFViewItem);
     }
     let viewItem = self.spineItems[spineIndex];
@@ -1956,13 +2438,7 @@ export class OPFView implements CustomRendererFactory {
     const item = self.opf.spine[spineIndex];
     const store = self.opf.store;
     store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
-      if (item.epageCount == 0 && self.opf.spine.length == 1) {
-        // Single-chapter doc without epages (e.g. FB2).
-        // Estimate that offset=2700 roughly corresponds to 1024 bytes of
-        // compressed size.
-        item.epageCount = Math.ceil(xmldoc.getTotalOffset() / 2700);
-        self.opf.epageCount = item.epageCount;
-      }
+      item.title = xmldoc.document.title;
       const style = store.getStyleForDoc(xmldoc);
       const customRenderer = self.makeCustomRenderer(xmldoc);
       let viewport = self.viewport;
@@ -1990,10 +2466,23 @@ export class OPFView implements CustomRendererFactory {
       if (item.startPage !== null) {
         pageNumberOffset = item.startPage - 1;
       } else {
-        pageNumberOffset = previousViewItem
-          ? previousViewItem.instance.pageNumberOffset +
-            previousViewItem.pages.length
-          : 0;
+        if (
+          spineIndex > 0 &&
+          (!previousViewItem || !previousViewItem.complete)
+        ) {
+          // When navigate to a new spine item skipping the previous items,
+          // give up calculate pageNumberOffset and use epage (or spineIndex if epage is unset).
+          pageNumberOffset = item.epage || spineIndex;
+          if (!self.opf.prePaginated && pageNumberOffset % 2 == 0) {
+            // Force to odd number to avoid unpaired page. (This is 0 based and even number is recto)
+            pageNumberOffset++;
+          }
+        } else {
+          pageNumberOffset = previousViewItem
+            ? previousViewItem.instance.pageNumberOffset +
+              previousViewItem.pages.length
+            : 0;
+        }
         if (item.skipPagesBefore !== null) {
           pageNumberOffset += item.skipPagesBefore;
         }
@@ -2014,6 +2503,13 @@ export class OPFView implements CustomRendererFactory {
         self.opf.pageProgression
       );
       instance.pref = self.pref;
+
+      // For env(pub-title) and env(doc-title)
+      const pubTitles = self.opf.metadata && self.opf.metadata[metaTerms.title];
+      instance.pubTitle =
+        (pubTitles && pubTitles[0] && pubTitles[0]["v"]) || "";
+      instance.docTitle = item.title || "";
+
       instance.init().then(() => {
         viewItem = {
           item,
@@ -2068,8 +2564,14 @@ export class OPFView implements CustomRendererFactory {
   showTOC(autohide: boolean): Result<Page> {
     const opf = this.opf;
     const toc = opf.xhtmlToc || opf.ncxToc;
+    this.tocAutohide = autohide;
     if (!toc) {
       return Task.newResult(null as Page);
+    }
+    if (this.tocView && this.tocView.page) {
+      this.tocView.page.container.style.visibility = "visible";
+      this.tocView.page.container.setAttribute("aria-hidden", "false");
+      return Task.newResult(/** @type {adapt.vtree.Page} */ this.tocView.page);
     }
     const frame: Frame<Page> = Task.newFrame("showTOC");
     if (!this.tocView) {
@@ -2091,22 +2593,26 @@ export class OPFView implements CustomRendererFactory {
     const tocHeight = viewport.height - 6;
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     viewport.root.appendChild(pageCont);
-    pageCont.style.position = "absolute";
+    // pageCont.style.position = "absolute";
     pageCont.style.visibility = "hidden";
-    pageCont.style.left = "3px";
-    pageCont.style.top = "3px";
+    // pageCont.style.left = "3px";
+    // pageCont.style.top = "3px";
     pageCont.style.width = `${tocWidth + 10}px`;
     pageCont.style.maxHeight = `${tocHeight}px`;
-    pageCont.style.overflow = "scroll";
-    pageCont.style.overflowX = "hidden";
-    pageCont.style.background = "#EEE";
-    pageCont.style.border = "1px outset #999";
-    pageCont.style["borderRadius"] = "2px";
-    pageCont.style["boxShadow"] = " 5px 5px rgba(128,128,128,0.3)";
+    // pageCont.style.overflow = "scroll";
+    // pageCont.style.overflowX = "hidden";
+    // pageCont.style.background = "rgba(248,248,248,0.9)";
+    // pageCont.style["borderRadius"] = "2px";
+    // pageCont.style["boxShadow"] = "1px 1px 2px rgba(0,0,0,0.4)";
+
+    pageCont.setAttribute("data-vivliostyle-toc-box", "true");
+    pageCont.setAttribute("role", "navigation");
+
     this.tocView
       .showTOC(pageCont, viewport, tocWidth, tocHeight, this.viewport.fontSize)
       .then(page => {
         pageCont.style.visibility = "visible";
+        pageCont.setAttribute("aria-hidden", "false");
         frame.finish(page);
       });
     return frame.result();
@@ -2119,7 +2625,7 @@ export class OPFView implements CustomRendererFactory {
   }
 
   isTOCVisible(): boolean {
-    return this.tocView && this.tocView.isTOCVisible();
+    return !!this.tocView && this.tocView.isTOCVisible();
   }
 }
 
@@ -2127,5 +2633,3 @@ export interface RenderSinglePageResult {
   pageAndPosition: PageAndPosition;
   nextLayoutPosition: LayoutPosition;
 }
-
-//export {OPFView};
