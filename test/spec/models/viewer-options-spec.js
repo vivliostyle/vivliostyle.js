@@ -83,9 +83,9 @@ describe("ViewerOptions", function() {
 
         expect(urlParameters.location.href).toBe("http://example.com#spread=true");
 
-        options.pageViewMode(PageViewMode.AUTO_SPREAD);
+        // options.pageViewMode(PageViewMode.AUTO_SPREAD);
 
-        expect(urlParameters.location.href).toBe("http://example.com#spread=auto");
+        // expect(urlParameters.location.href).toBe("http://example.com#spread=auto");
 
         // not write back if it is constructed with another ViewerOptions
         var other = new ViewerOptions();
@@ -128,7 +128,8 @@ describe("ViewerOptions", function() {
                 fontSize: 20,
                 pageViewMode: vivliostyle.viewer.PageViewMode.SPREAD,
                 zoom: 1.2,
-                fitToScreen: false
+                fitToScreen: false,
+                renderAllPages: true
             });
         });
     });

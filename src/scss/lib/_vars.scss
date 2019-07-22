@@ -2,8 +2,8 @@
 // + Vars
 // --------------------------------------------------------------------------------
 
-$sans-serif: "游ゴシック", "Yu Gothic", "YuGothic", "ヒラギノ角ゴ ProN W3", "HiraKakuProN-W3", "ヒラギノ角ゴ Pro W3", "HiraKakuPro-W3", "メイリオ", "Meiryo", "ＭＳ ゴシック", "MS Gothic", sans-serif;
-$serif: "游明朝", "Yu Mincho", "YuMincho", "ヒラギノ明朝 ProN W3", "HiraMinProN-W3", "ヒラギノ明朝 Pro W3", "HiraMinPro-W3", "ＭＳ 明朝", "MS Mincho", sans-serif;
+$sans-serif: system-ui, Segoe UI, Roboto, sans-serif;
+$serif: serif;
 
 $menu-icon-offset-x: 2px;
 $menu-icon-offset-y: 2px;

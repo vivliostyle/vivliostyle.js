@@ -4,6 +4,7 @@ set -ev
 dist=vivliostyle-js-$1
 mkdir ${dist}
 cp -R dist/* ${dist}/
+cp node_modules/vivliostyle/CHANGELOG.md ${dist}/
 mkdir ${dist}/viewer/
 cp -R build/* ${dist}/viewer/
 cp scripts/start-webserver* ${dist}/

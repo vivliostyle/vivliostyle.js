@@ -28,13 +28,26 @@ class Navigation {
         this.viewerOptions_ = viewerOptions;
         this.viewer_ = viewer;
         this.settingsPanel_ = settingsPanel;
+        this.justClicked = false;    // double click check
 
         this.isDisabled = ko.pureComputed(() => {
-            return this.settingsPanel_.opened() || !this.viewer_.state.navigatable();
+            return this.settingsPanel_.opened() && !this.settingsPanel_.pinned() ||
+                !this.viewer_.state.navigatable();
         });
 
         const navigationDisabled = ko.pureComputed(() => {
             return navigationOptions.disablePageNavigation || this.isDisabled();
+        });
+
+        navigationDisabled.subscribe(disabled => {
+            const pageNumberElem = document.getElementById("vivliostyle-page-number");
+            if (pageNumberElem) {
+                pageNumberElem.disabled = disabled;
+            }
+        });
+
+        this.isPageNumberDisabled = ko.pureComputed(() => {
+            return navigationDisabled();
         });
 
         this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
@@ -44,9 +57,7 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
-            const firstPageContainer = spreadContainerElement && spreadContainerElement.firstElementChild;
-            return !firstPageContainer || firstPageContainer.style.display != "none";
+            return this.viewer_.firstPage();
         });
 
         this.isNavigateToNextDisabled = ko.pureComputed(() => {
@@ -56,12 +67,11 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+            if (this.viewerOptions_.renderAllPages() &&
+                this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return false;
             }
-            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
-            const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
-            return !lastPageContainer || lastPageContainer.style.display != "none";
+            return this.viewer_.lastPage();
         });
 
         this.isNavigateToLeftDisabled = ko.pureComputed(() => {
@@ -101,12 +111,11 @@ class Navigation {
             if (this.viewer_.state.status === undefined) {
                 return false;   // needed for test/spec/viewmodels/navigation-spec.js
             }
-            if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+            if (this.viewerOptions_.renderAllPages() &&
+                this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return true;
             }
-            const spreadContainerElement = this.viewer_.getSpreadContainerElement();
-            const lastPageContainer = spreadContainerElement && spreadContainerElement.lastElementChild;
-            return !lastPageContainer || lastPageContainer.style.display != "none";
+            return this.viewer_.lastPage();
         });
 
         this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
@@ -127,35 +136,88 @@ class Navigation {
             return navigationOptions.disableFontSizeChange || this.isDisabled();
         });
 
-        this.isIncreaseFontSizeDisabled = fontSizeChangeDisabled;
-        this.isDecreaseFontSizeDisabled = fontSizeChangeDisabled;
+        // Font size limit (max:72, min:5) is hard coded in vivliostyle.js/src/adapt/viewer.js.
+        this.isIncreaseFontSizeDisabled = ko.pureComputed(() => {
+            if (fontSizeChangeDisabled()) {
+                return true;
+            }
+            if (this.viewerOptions_.fontSize() >= 72) {
+                return true;
+            }
+            return false;
+        });
+        this.isDecreaseFontSizeDisabled = ko.pureComputed(() => {
+            if (fontSizeChangeDisabled()) {
+                return true;
+            }
+            if (this.viewerOptions_.fontSize() <= 5) {
+                return true;
+            }
+            return false;
+        });
         this.isDefaultFontSizeDisabled = fontSizeChangeDisabled;
         this.hideFontSizeChange = !!navigationOptions.disableFontSizeChange;
 
+        this.isTOCToggleDisabled = ko.pureComputed(() => {
+            return navigationOptions.disableTOCNavigation || this.isDisabled() || this.viewer_.tocVisible() == null;
+        });
+        this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
+
         this.pageNumber = ko.pureComputed({
             read() {
-                this.viewer_.state.status();
-                return this.viewer_.getPageNumber();
+                return this.viewer_.epageToPageNumber(this.viewer_.epage());
             },
-            write(pageNumber) {
-                let nthPage = parseInt(pageNumber.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
-                const totalPages = this.viewer_.getTotalPages();
-                if (nthPage < 1) {
-                    nthPage = 1;
-                } else if (nthPage > totalPages) {
-                    nthPage = totalPages;
+            write(pageNumberText) {
+                const epageOld = this.viewer_.epage();
+                const pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
+
+                // Accept non-integer, convert fullwidth to ascii
+                let pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
+                if (/^[-+]/.test(pageNumberText)) {
+                    // "+number" and "-number" to relative move.
+                    pageNumber = pageNumberOld + pageNumber;
                 }
-                this.viewer_.navigateToNthPage(nthPage);
-                const elem = document.getElementById('vivliostyle-page-number');
-                elem.value = nthPage;
-                elem.blur();
+                if (pageNumber < 1) {
+                    pageNumber = 1;
+                } else {
+                    const epageCount = this.viewer_.epageCount();
+                    if (this.viewerOptions_.renderAllPages()) {
+                        if (pageNumber > epageCount) {
+                            pageNumber = epageCount;
+                        }
+                    } else if (pageNumber > epageCount + 1) {
+                        // Accept "epageCount + 1" because the last epage may equal epageCount.
+                        pageNumber = epageCount + 1;
+                    }
+                }
+                const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
+                const pageNumberElem = document.getElementById("vivliostyle-page-number");
+                pageNumberElem.value = pageNumber;
+                this.viewer_.navigateToEPage(epageNav);
+
+                setTimeout(() => {
+                    if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.LOADING &&
+                        this.viewer_.epage() === epageOld) {
+                        pageNumberElem.value = pageNumberOld;
+                    }
+                    document.getElementById("vivliostyle-viewer-viewport").focus();
+                }, 10);
             },
             owner: this
         });
 
         this.totalPages = ko.pureComputed(() => {
-            this.viewer_.state.status();
-            return this.viewer_.getTotalPages();
+            let totalPages = this.viewer_.epageCount();
+            if (!totalPages) {
+                return totalPages;
+            }
+            const pageNumber = this.pageNumber();
+            if (this.viewer_.lastPage()) {
+                totalPages = pageNumber;
+            } else if (pageNumber >= totalPages) {
+                totalPages++;
+            }
+            return totalPages;
         });
 
         [
@@ -172,7 +234,8 @@ class Navigation {
             "increaseFontSize",
             "decreaseFontSize",
             "defaultFontSize",
-            "handleKey"
+            "onclickViewport",
+            "toggleTOC"
         ].forEach(methodName => {
             this[methodName] = this[methodName].bind(this);
         });
@@ -274,8 +337,21 @@ class Navigation {
 
     increaseFontSize() {
         if (!this.isIncreaseFontSizeDisabled()) {
-            const fontSize = this.viewerOptions_.fontSize();
-            this.viewerOptions_.fontSize(fontSize * 1.25);
+            let fontSize = this.viewerOptions_.fontSize();
+            // fontSize *= 1.25;
+            if (fontSize < 10) {
+                fontSize = Math.floor(fontSize) + 1;
+            } else if (fontSize < 20) {
+                fontSize = (Math.floor(fontSize / 2) + 1) * 2; 
+            } else if (fontSize < 40) {
+                fontSize = (Math.floor(fontSize / 4) + 1) * 4;
+            } else if (fontSize < 72) {
+                fontSize = (Math.floor(fontSize / 8) + 1) * 8;
+            } else {
+                fontSize = 72;
+            }
+            this.viewerOptions_.fontSize(fontSize);
+            this.updateFontSizeSettings();
             return true;
         } else {
             return false;
@@ -284,8 +360,21 @@ class Navigation {
 
     decreaseFontSize() {
         if (!this.isDecreaseFontSizeDisabled()) {
-            const fontSize = this.viewerOptions_.fontSize();
-            this.viewerOptions_.fontSize(fontSize * 0.8);
+            let fontSize = this.viewerOptions_.fontSize();
+            // fontSize *= 0.8;
+            if (fontSize > 40) {
+                fontSize = (Math.ceil(fontSize / 8) - 1) * 8;
+            } else if (fontSize > 20) {
+                fontSize = (Math.ceil(fontSize / 4) - 1) * 4;
+            } else if (fontSize > 10) {
+                fontSize = (Math.ceil(fontSize / 2) - 1) * 2;
+            } else if (fontSize > 5) {
+                fontSize = Math.ceil(fontSize) - 1;
+            } else {
+                fontSize = 5;
+            }
+            this.viewerOptions_.fontSize(fontSize);
+            this.updateFontSizeSettings();
             return true;
         } else {
             return false;
@@ -296,39 +385,269 @@ class Navigation {
         if (!this.isDefaultFontSizeDisabled()) {
             const fontSize = ViewerOptions.getDefaultValues().fontSize;
             this.viewerOptions_.fontSize(fontSize);
+            this.updateFontSizeSettings();
             return true;
         } else {
             return false;
         }
     }
 
-    handleKey(key) {
-        const isInputActive = document.activeElement && document.activeElement.tagName.toLowerCase() === 'input';
+    updateFontSizeSettings() {
+        // Update setting panel "Font Size".
+        this.settingsPanel_.state.viewerOptions.fontSize(this.viewerOptions_.fontSize());
+
+        if (this.viewer_.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+            // Update userStylesheet when base font-size is specified
+            this.viewer_.documentOptions_.updateUserStyleSheetFromCSSText();
+            this.viewer_.loadDocument(this.viewer_.documentOptions_, this.viewerOptions_);
+        }
+    }
+
+    onclickViewport() {
+        if (this.settingsPanel_.justClicked) {
+            return true;
+        }
+        if (this.viewer_.tocVisible() && !this.viewer_.tocPinned()) {
+            const tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+            if (tocBox && !tocBox.contains(document.activeElement)) {
+                this.toggleTOC();
+            }
+        }
+        if (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) {
+            this.settingsPanel_.close();
+        }
+        return true;
+    }
+
+    toggleTOC() {
+        if (!this.isTOCToggleDisabled()) {
+            let intervalID = 0;
+            const tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
+
+            if (!this.viewer_.tocVisible()) {
+                if (this.justClicked) {
+                    this.viewer_.showTOC(true, false);   // autohide=false
+                    this.justClicked = false;
+                } else {
+                    this.viewer_.showTOC(true, true);   // autohide=true
+                    this.justClicked = true;
+                }
+                // Here use timer for two purposes:
+                // - Check double click to make TOC box pinned.
+                // - Move focus to TOC box when TOC box becomes visible.
+                intervalID = setInterval(() => {
+                    const tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+                    if (tocBox && tocBox.style.visibility === "visible") {
+                        tocBox.tabIndex = 0;
+                        tocBox.focus();
+
+                        clearInterval(intervalID);
+                        intervalID = 0;
+                    }
+                    this.justClicked = false;
+                }, 300);
+            } else if (this.justClicked) {
+                // Double click to keep TOC box visible during TOC navigation
+                this.viewer_.showTOC(true, false);   // autohide=false
+                this.justClicked = false;
+            } else {
+                if (intervalID) {
+                    clearInterval(intervalID);
+                    intervalID = 0;
+                }
+                this.viewer_.showTOC(false);
+
+                this.justClicked = true;
+                setTimeout(() => {
+                    if (this.justClicked) {
+                        document.getElementById("vivliostyle-viewer-viewport").focus();
+                        this.justClicked = false;
+                    }
+                }, 300);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    navigateTOC(key) {
+        const selecter = "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
+                         "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
+        let nodes = Array.from(document.querySelectorAll(selecter));
+        let index = nodes.indexOf(document.activeElement);
+
+        const isButton = (index) => {
+            return nodes[index] && nodes[index].getAttribute("role") === "button";
+        }
+        const isExpanded = (index) => {
+            return nodes[index] && nodes[index].getAttribute("aria-expanded") === "true";
+        }
+
         switch (key) {
-            case Keys.ArrowDown:
-            case Keys.PageDown:
-                return !this.navigateToNext();
             case Keys.ArrowLeft:
-                return isInputActive || !this.navigateToLeft();
+                if (index == -1) {
+                    index = nodes.length - 1;
+                    break;
+                }
+                if (!isButton(index) && isButton(index - 1)) {
+                    index--;
+                }
+                if (isButton(index) && isExpanded(index)) {
+                    nodes[index].click();
+                } else {
+                    for (let i = index - 1; i >= 0; i--) {
+                        if (isButton(i) && nodes[i].parentElement.contains(nodes[index])) {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                break;
             case Keys.ArrowRight:
-                return isInputActive || !this.navigateToRight();
+                if (index == -1) {
+                    index = 0;
+                    break;
+                }
+                if (!isButton(index) && isButton(index - 1)) {
+                    index--;
+                }
+                if (isButton(index)) {
+                    if (isExpanded(index)) {
+                        index += 2;
+                    } else {
+                        nodes[index].click();
+                    }
+                }
+                break;
+            case Keys.ArrowDown:
+                index++;
+                break;
             case Keys.ArrowUp:
+                if (index == -1) {
+                    index = nodes.length - 1;
+                    break;
+                }
+                if (index > 0) {
+                    if (isButton(--index)) {
+                        index--;
+                    }
+                }
+                break;
+            case Keys.Home:
+                index = 0;
+                break;
+            case Keys.End:
+                index = nodes.length - 1;
+                break;
+            case Keys.Space:
+                if (!isButton(index) && isButton(index - 1)) {
+                    index--;
+                }
+                if (isButton(index)) {
+                    nodes[index].click();
+                }
+                break;
+        }
+
+        if (isButton(index)) {
+            index++;
+        }
+
+        if (nodes[index]) {
+            nodes[index].focus();
+        }
+
+        return true;
+    }
+
+    handleKey(key) {
+        const isSettingsActive = this.settingsPanel_.opened() &&
+            this.settingsPanel_.settingsToggle.contains(document.activeElement);
+
+        if (isSettingsActive) {
+            return true;
+        }
+
+        const pageNumberElem = document.getElementById("vivliostyle-page-number");
+        const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
+        const horizontalScrollable = viewportElement.scrollWidth > viewportElement.clientWidth;
+        const verticalScrollable = viewportElement.scrollHeight > viewportElement.clientHeight;
+        const isPageNumberInput = pageNumberElem === document.activeElement;
+        const isTOCActive = this.viewer_.tocVisible() && !isPageNumberInput && viewportElement != document.activeElement;
+
+        switch (key) {
+            case "+":
+                return isPageNumberInput || !this.increaseFontSize();
+            case "-":
+                return isPageNumberInput || !this.decreaseFontSize();
+            case "0":
+                return isPageNumberInput || !this.defaultFontSize();
+            case "1":
+                return isPageNumberInput || !this.zoomToActualSize();
+            case Keys.ArrowLeft:
+                if (isTOCActive) return !this.navigateTOC(key);
+                return isPageNumberInput || horizontalScrollable || !this.navigateToLeft();
+            case Keys.ArrowRight:
+                if (isTOCActive) return !this.navigateTOC(key);
+                return isPageNumberInput || horizontalScrollable || !this.navigateToRight();
+            case Keys.ArrowDown:
+                if (isTOCActive) return !this.navigateTOC(key);
+                viewportElement.focus();
+                return verticalScrollable || !this.navigateToNext();
+            case Keys.ArrowUp:
+                if (isTOCActive) return !this.navigateTOC(key);
+                viewportElement.focus();
+                return verticalScrollable || !this.navigateToPrevious();
+            case Keys.PageDown:
+                if (isTOCActive) return true;
+                viewportElement.focus();
+                return !this.navigateToNext();
             case Keys.PageUp:
+                if (isTOCActive) return true;
+                viewportElement.focus();
                 return !this.navigateToPrevious();
             case Keys.Home:
+                if (isTOCActive) return !this.navigateTOC(key);
+                viewportElement.focus();
                 return !this.navigateToFirst();
             case Keys.End:
+                if (isTOCActive) return !this.navigateTOC(key);
+                viewportElement.focus();
                 return !this.navigateToLast();
-            case "+":
-                return isInputActive || !this.increaseFontSize();
-            case "-":
-                return isInputActive || !this.decreaseFontSize();
-            case "0":
-                return isInputActive || !this.defaultFontSize();
+            case "o":
+            case "O":
+                viewportElement.focus();
+                return !this.zoomOut();
+            case "i":
+            case "I":
+                viewportElement.focus();
+                return !this.zoomIn();
+            case "f":
+            case "F":
+                viewportElement.focus();
+                return !this.toggleFitToScreen();
             case "g":
             case "G":
-                document.getElementById('vivliostyle-page-number').focus();
+                pageNumberElem.focus();
                 return false;
+            case "t":
+            case "T":
+                viewportElement.focus();
+                return !this.toggleTOC();
+            case Keys.Escape:
+                if (this.viewer_.tocVisible()) {
+                    return !this.toggleTOC();
+                }
+                viewportElement.focus();
+                return true;
+            case Keys.Space:
+                if (isTOCActive) return !this.navigateTOC(key);
+                if (document.activeElement.getAttribute("role") === "button") {
+                    document.activeElement.click();
+                    return false;
+                }
+                return true;
             default:
                 return true;
         }

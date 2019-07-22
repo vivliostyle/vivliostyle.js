@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -23,14 +24,31 @@ import PageViewMode from "./page-view-mode";
 import ZoomOptions from "./zoom-options";
 
 function getViewerOptionsFromURL() {
+    const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
+    const fontSizeStr = urlParameters.getParameter("fontSize")[0];
+    const r = (/^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/).exec(fontSizeStr);
+    let fontSize = null;
+    if (r) {
+        const [, num, percent, denom] = r;
+        fontSize = parseFloat(num);
+        if (percent || denom) {
+            fontSize = 16 * fontSize / (percent ? 100 : parseFloat(denom));
+        }
+        if (fontSize < 5) fontSize = 5;
+        if (fontSize > 72) fontSize = 72;
+    }
     return {
+        renderAllPages: (renderAllPages === "true" ? true : renderAllPages === "false" ? false : null),
+        fontSize: fontSize,
         profile: (urlParameters.getParameter("profile")[0] === "true"),
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
 }
 
 function getDefaultValues() {
+    const isNotBook = urlParameters.hasParameter("x");
     return {
+        renderAllPages: isNotBook,
         fontSize: 16,
         profile: false,
         pageViewMode: PageViewMode.defaultMode(),
@@ -40,6 +58,7 @@ function getDefaultValues() {
 
 class ViewerOptions {
     constructor(options) {
+        this.renderAllPages = ko.observable();
         this.fontSize = ko.observable();
         this.profile = ko.observable();
         this.pageViewMode = ko.observable();
@@ -49,19 +68,43 @@ class ViewerOptions {
         } else {
             const defaultValues = getDefaultValues();
             const urlOptions = getViewerOptionsFromURL();
-            this.fontSize(defaultValues.fontSize);
+            this.renderAllPages(urlOptions.renderAllPages !== null ?
+                urlOptions.renderAllPages : defaultValues.renderAllPages);
+            this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
             this.profile(urlOptions.profile || defaultValues.profile);
             this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
             this.zoom(defaultValues.zoom);
 
             // write spread parameter back to URL when updated
             this.pageViewMode.subscribe(pageViewMode => {
-                urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
+                if (pageViewMode === defaultValues.pageViewMode) {
+                    urlParameters.removeParameter("spread");
+                } else {
+                    urlParameters.setParameter("spread", pageViewMode.toSpreadViewString());
+                }
+            });
+            this.renderAllPages.subscribe(renderAllPages => {
+                if (renderAllPages === defaultValues.renderAllPages) {
+                    urlParameters.removeParameter("renderAllPages");
+                } else {
+                    urlParameters.setParameter("renderAllPages", renderAllPages.toString());
+                }
+            });
+            this.fontSize.subscribe(fontSize => {
+                if (typeof fontSize == "number") {
+                    fontSize = fontSize.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+                }
+                if (fontSize == defaultValues.fontSize) {
+                    urlParameters.removeParameter("fontSize");
+                } else {
+                    urlParameters.setParameter("fontSize", `${fontSize}/${defaultValues.fontSize}`);
+                }
             });
         }
     }
 
     copyFrom(other) {
+        this.renderAllPages(other.renderAllPages());
         this.fontSize(other.fontSize());
         this.profile(other.profile());
         this.pageViewMode(other.pageViewMode());
@@ -70,6 +113,7 @@ class ViewerOptions {
 
     toObject() {
         return {
+            renderAllPages: this.renderAllPages(),
             fontSize: this.fontSize(),
             pageViewMode: this.pageViewMode().toString(),
             zoom: this.zoom().zoom,

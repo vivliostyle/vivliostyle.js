@@ -37,9 +37,18 @@ class Viewer {
                 rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
                 notify: 'always'
             }),
-            navigatable: ko.pureComputed(() => state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
+            navigatable: ko.pureComputed(() => state_.status.value() && state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
             pageProgression: state_.pageProgression.getter
         };
+        
+        this.epage = ko.observable();
+        this.epageCount = ko.observable();
+        this.firstPage = ko.observable();
+        this.lastPage = ko.observable();
+        this.tocVisible = ko.observable();
+        this.tocPinned = ko.observable();
+
+        this.inputUrl = ko.observable("");
 
         this.setupViewerEventHandler();
         this.setupViewerOptionSubscriptions();
@@ -62,15 +71,6 @@ class Viewer {
         });
         this.viewer_.addListener("readystatechange", () => {
             const readyState = this.viewer_.readyState;
-            if (intervalID === 0 && readyState === vivliostyle.constants.ReadyState.INTERACTIVE) {
-                intervalID = setInterval(() => {
-                    this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
-                    this.state_.status.value(vivliostyle.constants.ReadyState.INTERACTIVE);
-                }, 200);
-            } else {
-                clearInterval(intervalID);
-                intervalID = 0;
-            }
             if (readyState === vivliostyle.constants.ReadyState.INTERACTIVE || readyState === vivliostyle.constants.ReadyState.COMPLETE) {
                 this.state_.pageProgression.value(this.viewer_.getCurrentPageProgression());
             }
@@ -82,14 +82,55 @@ class Viewer {
             }
         });
         this.viewer_.addListener("nav", payload => {
-            const cfi = payload.cfi;
+            const {cfi, first, last, epage, epageCount, metadata, docTitle} = payload;
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
+            }
+            if (first !== undefined) {
+                this.firstPage(first);
+            }
+            if (last !== undefined) {
+                this.lastPage(last);
+            }
+            if (epage !== undefined) {
+                this.epage(epage);
+            }
+            if (epageCount !== undefined) {
+                this.epageCount(epageCount);
+            }
+            if (metadata || docTitle) {
+                const pubTitles = metadata && metadata["http://purl.org/dc/terms/title"];
+                const pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
+                if (!pubTitle) {
+                    document.title = docTitle ? docTitle : "Vivliostyle Viewer";
+                } else if (!docTitle || docTitle === pubTitle || this.firstPage() ||
+                        (/\.xhtml$/).test(docTitle)) { // ignore ugly titles copied from *.xhtml file name
+                    document.title = pubTitle;
+                } else {
+                    document.title = `${docTitle} | ${pubTitle}`;
+                }
+            }
+
+            const tocVisibleOld = this.tocVisible();
+            const tocVisibleNew = this.viewer_.isTOCVisible();
+            if (tocVisibleOld && !tocVisibleNew) {
+                // When resize, TOC box will be regenerated and hidden temporarily.
+                // So keep TOC toggle button status on.
+            } else {
+                this.tocVisible(tocVisibleNew);
             }
         });
         this.viewer_.addListener("hyperlink", payload => {
             if (payload.internal) {
                 this.navigateToInternalUrl(payload.href);
+
+                // When navigate from TOC, TOC box may or may not become hidden by autohide.
+                // Here set tocVisible false and it may become true again in "nav" event.
+                if (this.tocVisible()) {
+                    this.tocVisible(false);
+                }
+                
+                document.getElementById("vivliostyle-viewer-viewport").focus();
             } else {
                 window.location.href = payload.href;
             }
@@ -104,100 +145,85 @@ class Viewer {
     }
 
     loadDocument(documentOptions, viewerOptions) {
-        this.state_.status.value("loading");
+        this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
         if (viewerOptions) {
             this.viewerOptions_.copyFrom(viewerOptions);
         }
         this.documentOptions_ = documentOptions;
-        if (documentOptions.url()) {
-            this.viewer_.loadDocument(documentOptions.url(), documentOptions.toObject(), this.viewerOptions_.toObject());
-        } else if (documentOptions.epubUrl()) {
-            this.viewer_.loadEPUB(documentOptions.epubUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
-        }
-    }
 
-    afterNavigateToPage() {
-        setTimeout(() => {
-            // Update page navigation disable/enable
-            this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
-            this.state_.status.value(this.viewer_.readyState);
-            const pageNumberElem = document.getElementById('vivliostyle-page-number');
-            pageNumberElem.value = this.getPageNumber();
-        }, 1);
-    }
-
-    getSpreadContainerElement() {
-        const viewportElement = document.getElementById("vivliostyle-viewer-viewport");
-        const outerZoomBoxElement = viewportElement && viewportElement.firstElementChild;
-        return outerZoomBoxElement && outerZoomBoxElement.firstElementChild;
-    }
-
-    getTotalPages() {
-        const spreadContainerElement = this.getSpreadContainerElement();
-        if (!spreadContainerElement) {
-            return 0;
+        if (documentOptions.xUrl()) {
+            this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+        } else if (documentOptions.bookUrl()) {
+            if (this.viewer_.loadPublication) // new name
+                this.viewer_.loadPublication(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            else // old name
+                this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+        } else {
+            // No document specified, show welcome page
+            this.state_.status.value("");
         }
-        return spreadContainerElement.childElementCount;
-    }
-
-    getPageNumber() {
-        const spreadContainerElement = this.getSpreadContainerElement();
-        if (!spreadContainerElement) {
-            return 0;
-        }
-        const children = spreadContainerElement.children;
-        let pageNumber = 0;
-        for (let i = 0; i < children.length; i++) {
-            if (children.item(i).style.display !== 'none') {
-                pageNumber = i + 1;
-                break;
-            }
-        }
-        return pageNumber;
     }
 
     navigateToPrevious() {
         this.viewer_.navigateToPage("previous");
-        this.afterNavigateToPage();
     }
 
     navigateToNext() {
         this.viewer_.navigateToPage("next");
-        this.afterNavigateToPage();
     }
 
     navigateToLeft() {
         this.viewer_.navigateToPage("left");
-        this.afterNavigateToPage();
     }
 
     navigateToRight() {
         this.viewer_.navigateToPage("right");
-        this.afterNavigateToPage();
     }
 
     navigateToFirst() {
         this.viewer_.navigateToPage("first");
-        this.afterNavigateToPage();
     }
 
     navigateToLast() {
         this.viewer_.navigateToPage("last");
-        this.afterNavigateToPage();
     }
 
-    navigateToNthPage(nthPage) {
-        this.viewer_.navigateToNthPage(nthPage);
-        this.afterNavigateToPage();
+    navigateToEPage(epage) {
+        this.viewer_.navigateToPage("epage", epage);
     }
 
     navigateToInternalUrl(href) {
         this.viewer_.navigateToInternalUrl(href);
-        this.afterNavigateToPage();
     }
 
     queryZoomFactor(type) {
         return this.viewer_.queryZoomFactor(type);
+    }
+
+    epageToPageNumber(epage) {
+        if (!epage && epage != 0) {
+            return undefined;
+        }
+        let pageNumber = Math.round(epage + 1);
+        return pageNumber;
+    }
+    epageFromPageNumber(pageNumber) {
+        if (!pageNumber && pageNumber != 0) {
+            return undefined;
+        }
+        let epage = pageNumber - 1;
+        return epage;
+    }
+
+    showTOC(opt_show, opt_autohide) {
+        if (this.viewer_.isTOCVisible() == null) {
+            // TOC is unavailable
+            return;
+        }
+        const show = opt_show == null ? !this.tocVisible() : opt_show;
+        this.tocVisible(show);
+        this.tocPinned(show ? !opt_autohide : false);
+        this.viewer_.showTOC(show, opt_autohide);
     }
 }
 
