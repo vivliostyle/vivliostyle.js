@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const pkg = require("./package.json");
 
 const bannerText = `Copyright 2013 Google, Inc.
@@ -58,5 +59,35 @@ module.exports = {
       failOnError: true,
       allowAsyncCycles: true
     })
-  ]
+  ],
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: {
+            properties: {
+              keep_quoted: true,
+              regex: /^[a-z]{2,}[A-Z]\w*$/,
+              reserved: [
+                "docTitle",
+                "getCurrentPageProgression",
+                "getPageSizes",
+                "isTOCVisible",
+                "layoutStyle",
+                "loadDocument",
+                "loadPublication",
+                "loadXML",
+                "navigateToInternalUrl",
+                "navigateToPage",
+                "printTimings",
+                "queryZoomFactor",
+                "setOptions",
+                "showTOC"
+              ]
+            }
+          }
+        }
+      })
+    ]
+  }
 };
