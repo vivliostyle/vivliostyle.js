@@ -44,6 +44,7 @@
     "karma-sauce-launcher": "^1.2.0",
     "karma-verbose-reporter": "0.0.6",
     "knockout": "^3.3.0",
+    "tinyify": "^2.5.1",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.3.1"
   }
