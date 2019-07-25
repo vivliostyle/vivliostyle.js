@@ -14,10 +14,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_cssparse from "../../../src/ts/adapt/cssparse";
+import * as adapt_csstok from "../../../src/ts/adapt/csstok";
+import * as adapt_task from "../../../src/ts/adapt/task";
+
 describe("cssparse", function() {
     describe("Parser", function() {
 
-        var handler = new adapt.cssparse.ParserHandler(null);
+        var handler = new adapt_cssparse.ParserHandler(null);
 
         beforeEach(function() {
             spyOn(handler, "error");
@@ -28,10 +33,10 @@ describe("cssparse", function() {
         });
 
         function parse(done, text, fn) {
-            var tokenizer = new adapt.csstok.Tokenizer(text, handler);
+            var tokenizer = new adapt_csstok.Tokenizer(text, handler);
 
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheet(tokenizer, handler, null, null, null).then(function(result) {
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheet(tokenizer, handler, null, null, null).then(function(result) {
                     expect(result).toBe(true);
                     fn();
                     done();

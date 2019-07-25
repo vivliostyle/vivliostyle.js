@@ -14,10 +14,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_css from "../../../src/ts/adapt/css";
+import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
+import * as adapt_csstok from "../../../src/ts/adapt/csstok";
+import * as vivliostyle_plugin from "../../../src/ts/vivliostyle/plugin";
+import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
+
 describe("csscasc", function() {
     describe("IsNthSiblingAction", function() {
         it("when a=0, matches if currentSiblingOrder=b", function() {
-            var action = new adapt.csscasc.IsNthSiblingAction(0, 3);
+            var action = new adapt_csscasc.IsNthSiblingAction(0, 3);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply({currentSiblingOrder: 1});
@@ -29,7 +36,7 @@ describe("csscasc", function() {
 
         it("when a is non-zero, matches if non-negative n which satisfies currentSiblingOrder=an+b exists", function() {
 
-            var action = new adapt.csscasc.IsNthSiblingAction(3, 0);
+            var action = new adapt_csscasc.IsNthSiblingAction(3, 0);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply({currentSiblingOrder: 1});
@@ -52,7 +59,7 @@ describe("csscasc", function() {
             action.apply({currentSiblingOrder: 6});
             expect(chained.apply).toHaveBeenCalled();
 
-            action = new adapt.csscasc.IsNthSiblingAction(2, 3);
+            action = new adapt_csscasc.IsNthSiblingAction(2, 3);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply({currentSiblingOrder: 1});
@@ -80,7 +87,7 @@ describe("csscasc", function() {
             action.apply({currentSiblingOrder: 7});
             expect(chained.apply).toHaveBeenCalled();
 
-            action = new adapt.csscasc.IsNthSiblingAction(-3, 0);
+            action = new adapt_csscasc.IsNthSiblingAction(-3, 0);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply({currentSiblingOrder: 1});
@@ -92,7 +99,7 @@ describe("csscasc", function() {
             action.apply({currentSiblingOrder: 3});
             expect(chained.apply).not.toHaveBeenCalled();
 
-            action = new adapt.csscasc.IsNthSiblingAction(-2, 5);
+            action = new adapt_csscasc.IsNthSiblingAction(-2, 5);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply({currentSiblingOrder: 1});
@@ -137,7 +144,7 @@ describe("csscasc", function() {
         }
 
         it("when a=0, matches if currentSiblingTypeCounts[namespace][locaName]=b", function() {
-            var action = new adapt.csscasc.IsNthSiblingOfTypeAction(0, 3);
+            var action = new adapt_csscasc.IsNthSiblingOfTypeAction(0, 3);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
@@ -149,7 +156,7 @@ describe("csscasc", function() {
 
         it("when a is non-zero, matches if non-negative n which satisfies currentSiblingTypeCounts[namespace][locaName]=an+b exists", function() {
 
-            var action = new adapt.csscasc.IsNthSiblingOfTypeAction(3, 0);
+            var action = new adapt_csscasc.IsNthSiblingOfTypeAction(3, 0);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
@@ -172,7 +179,7 @@ describe("csscasc", function() {
             action.apply(dummyCascadeInstance({"bar": 6, "baz": 1}));
             expect(chained.apply).toHaveBeenCalled();
 
-            action = new adapt.csscasc.IsNthSiblingOfTypeAction(2, 3);
+            action = new adapt_csscasc.IsNthSiblingOfTypeAction(2, 3);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
@@ -200,7 +207,7 @@ describe("csscasc", function() {
             action.apply(dummyCascadeInstance({"bar": 7, "baz": 3}));
             expect(chained.apply).toHaveBeenCalled();
 
-            action = new adapt.csscasc.IsNthSiblingOfTypeAction(-3, 0);
+            action = new adapt_csscasc.IsNthSiblingOfTypeAction(-3, 0);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply(dummyCascadeInstance({"bar": 1, "baz": 3}));
@@ -212,7 +219,7 @@ describe("csscasc", function() {
             action.apply(dummyCascadeInstance({"bar": 3, "baz": 3}));
             expect(chained.apply).not.toHaveBeenCalled();
 
-            action = new adapt.csscasc.IsNthSiblingOfTypeAction(-2, 5);
+            action = new adapt_csscasc.IsNthSiblingOfTypeAction(-2, 5);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             action.apply(dummyCascadeInstance({"bar": 1, "baz": 2}));
@@ -254,7 +261,7 @@ describe("csscasc", function() {
         }
 
         it("when a=0, matches if currentFollowingSiblingOrder=b", function() {
-            var action = new adapt.csscasc.IsNthLastSiblingAction(0, 3);
+            var action = new adapt_csscasc.IsNthLastSiblingAction(0, 3);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             var cascadeInstance = dummyCascadeInstance(4);
@@ -270,7 +277,7 @@ describe("csscasc", function() {
 
         it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingOrder=an+b exists", function() {
 
-            var action = new adapt.csscasc.IsNthLastSiblingAction(3, 0);
+            var action = new adapt_csscasc.IsNthLastSiblingAction(3, 0);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             var cascadeInstance = dummyCascadeInstance(3);
@@ -305,7 +312,7 @@ describe("csscasc", function() {
             expect(chained.apply).toHaveBeenCalled();
             expect(cascadeInstance.currentFollowingSiblingOrder).toBe(6);
 
-            action = new adapt.csscasc.IsNthLastSiblingAction(2, 3);
+            action = new adapt_csscasc.IsNthLastSiblingAction(2, 3);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             cascadeInstance = dummyCascadeInstance(3);
@@ -347,7 +354,7 @@ describe("csscasc", function() {
             expect(chained.apply).toHaveBeenCalled();
             expect(cascadeInstance.currentFollowingSiblingOrder).toBe(7);
 
-            action = new adapt.csscasc.IsNthLastSiblingAction(-3, 0);
+            action = new adapt_csscasc.IsNthLastSiblingAction(-3, 0);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             cascadeInstance = dummyCascadeInstance(3);
@@ -365,7 +372,7 @@ describe("csscasc", function() {
             expect(chained.apply).not.toHaveBeenCalled();
             expect(cascadeInstance.currentFollowingSiblingOrder).toBe(3);
 
-            action = new adapt.csscasc.IsNthLastSiblingAction(-2, 5);
+            action = new adapt_csscasc.IsNthLastSiblingAction(-2, 5);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             cascadeInstance = dummyCascadeInstance(3);
@@ -432,7 +439,7 @@ describe("csscasc", function() {
         }
 
         it("when a=0, matches if currentFollowingSiblingTypeCounts[namespace][locaName]=b", function() {
-            var action = new adapt.csscasc.IsNthLastSiblingOfTypeAction(0, 3);
+            var action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(0, 3);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             var cascadeInstance = dummyCascadeInstance({"bar": 1, "baz": 2});
@@ -448,7 +455,7 @@ describe("csscasc", function() {
 
         it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingTypeCounts[namespace][locaName]=an+b exists", function() {
 
-            var action = new adapt.csscasc.IsNthLastSiblingOfTypeAction(3, 0);
+            var action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(3, 0);
             var chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             var cascadeInstance = dummyCascadeInstance({"bar": 0, "baz": 2});
@@ -483,7 +490,7 @@ describe("csscasc", function() {
             expect(chained.apply).toHaveBeenCalled();
             expect(cascadeInstance.currentFollowingSiblingTypeCounts).toEqual({ "foo": {"bar": 6, "baz": 1} });
 
-            action = new adapt.csscasc.IsNthLastSiblingOfTypeAction(2, 3);
+            action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(2, 3);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             cascadeInstance = dummyCascadeInstance({"bar": 0, "baz": 3});
@@ -525,7 +532,7 @@ describe("csscasc", function() {
             expect(chained.apply).toHaveBeenCalled();
             expect(cascadeInstance.currentFollowingSiblingTypeCounts).toEqual({ "foo": {"bar": 7, "baz": 3} });
 
-            action = new adapt.csscasc.IsNthLastSiblingOfTypeAction(-3, 0);
+            action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(-3, 0);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             cascadeInstance = dummyCascadeInstance({"bar": 0, "baz": 3});
@@ -543,7 +550,7 @@ describe("csscasc", function() {
             expect(chained.apply).not.toHaveBeenCalled();
             expect(cascadeInstance.currentFollowingSiblingTypeCounts).toEqual({ "foo": {"bar": 3, "baz": 3} });
 
-            action = new adapt.csscasc.IsNthLastSiblingOfTypeAction(-2, 5);
+            action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(-2, 5);
             chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
 
             cascadeInstance = dummyCascadeInstance({"bar": 0, "baz": 2});
@@ -600,7 +607,7 @@ describe("csscasc", function() {
             return {currentElement: {firstChild: children ? children[0] : null}};
         }
 
-        var action = new adapt.csscasc.IsEmptyAction();
+        var action = new adapt_csscasc.IsEmptyAction();
         var chained;
 
         beforeEach(function() {
@@ -636,7 +643,7 @@ describe("csscasc", function() {
     });
 
     describe("IsEnabledAction", function() {
-        var action = new adapt.csscasc.IsEnabledAction();
+        var action = new adapt_csscasc.IsEnabledAction();
         var chained;
 
         beforeEach(function() {
@@ -660,7 +667,7 @@ describe("csscasc", function() {
     });
 
     describe("IsDisabledAction", function() {
-        var action = new adapt.csscasc.IsDisabledAction();
+        var action = new adapt_csscasc.IsDisabledAction();
         var chained;
 
         beforeEach(function() {
@@ -684,7 +691,7 @@ describe("csscasc", function() {
     });
 
     describe("IsCheckedAction", function() {
-        var action = new adapt.csscasc.IsCheckedAction();
+        var action = new adapt_csscasc.IsCheckedAction();
         var chained;
 
         beforeEach(function() {
@@ -719,13 +726,13 @@ describe("csscasc", function() {
 
     describe("CascadeParserHandler", function() {
         describe("simpleProperty", function() {
-            vivliostyle.test.util.mock.plugin.setup();
+            vivliostyle_test_util_mock_plugin.setup();
 
             it("convert property declaration by calling functions registered to 'SIMPLE_PROPERTY' hook", function() {
                 function hook1(original) {
                     return {
                         "name": original["name"] + "1",
-                        "value": adapt.css.getName(original["value"].stringValue() + "1"),
+                        "value": adapt_css.getName(original["value"].stringValue() + "1"),
                         "important": original["important"]
                     };
                 }
@@ -733,29 +740,29 @@ describe("csscasc", function() {
                 function hook2(original) {
                     return {
                         "name": original["name"] + "2",
-                        "value": adapt.css.getName(original["value"].stringValue() + "2"),
+                        "value": adapt_css.getName(original["value"].stringValue() + "2"),
                         "important": !original["important"]
                     };
                 }
 
-                var handler = new adapt.csscasc.CascadeParserHandler();
+                var handler = new adapt_csscasc.CascadeParserHandler();
                 var style = handler.elementStyle = {};
-                handler.simpleProperty("foo", adapt.css.getName("bar"), false);
+                handler.simpleProperty("foo", adapt_css.getName("bar"), false);
                 var originalPriority = style["foo"].priority;
-                expect(style["foo"].value).toBe(adapt.css.getName("bar"));
+                expect(style["foo"].value).toBe(adapt_css.getName("bar"));
 
-                vivliostyle.plugin.registerHook("SIMPLE_PROPERTY", hook1);
+                vivliostyle_plugin.registerHook("SIMPLE_PROPERTY", hook1);
                 style = handler.elementStyle = {};
-                handler.simpleProperty("foo", adapt.css.getName("bar"), false);
+                handler.simpleProperty("foo", adapt_css.getName("bar"), false);
                 expect("foo" in style).toBe(false);
-                expect(style["foo1"].value).toBe(adapt.css.getName("bar1"));
+                expect(style["foo1"].value).toBe(adapt_css.getName("bar1"));
                 expect(style["foo1"].priority).toBe(originalPriority);
 
-                vivliostyle.plugin.registerHook("SIMPLE_PROPERTY", hook2);
+                vivliostyle_plugin.registerHook("SIMPLE_PROPERTY", hook2);
                 style = handler.elementStyle = {};
-                handler.simpleProperty("foo", adapt.css.getName("bar"), false);
+                handler.simpleProperty("foo", adapt_css.getName("bar"), false);
                 expect("foo1" in style).toBe(false);
-                expect(style["foo12"].value).toBe(adapt.css.getName("bar12"));
+                expect(style["foo12"].value).toBe(adapt_css.getName("bar12"));
                 expect(style["foo12"].priority).not.toBe(originalPriority);
             });
         });
@@ -764,17 +771,17 @@ describe("csscasc", function() {
             var handler;
 
             beforeEach(function() {
-                handler = new adapt.csscasc.CascadeParserHandler();
+                handler = new adapt_csscasc.CascadeParserHandler();
                 handler.startSelectorRule();
             });
 
             describe("Attribute presence selector", function() {
                 it("use CheckAttributePresentAction when the operator is EOF (no operator)", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EOF, null);
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.EOF, null);
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributePresentAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributePresentAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                 });
@@ -782,11 +789,11 @@ describe("csscasc", function() {
 
             describe("Attribute equality selector", function() {
                 it("use CheckAttributeEqAction when the operator is '='", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.EQ, "bar");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.EQ, "bar");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeEqAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeEqAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     expect(action.value).toBe("bar");
@@ -795,11 +802,11 @@ describe("csscasc", function() {
 
             describe("~= attribute selector", function() {
                 it("use CheckAttributeRegExpAction when the value is not empty and contains no whitespaces", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "bar");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.TILDE_EQ, "bar");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeRegExpAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     var regexp = action.regexp;
@@ -809,31 +816,31 @@ describe("csscasc", function() {
                 });
 
                 it("represents nothing when the value contains whitespaces", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "b c");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.TILDE_EQ, "b c");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
                     expect(action.condition).toBe("");
                 });
 
                 it("represents nothing when the value is an empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.TILDE_EQ, "");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.TILDE_EQ, "");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
                     expect(action.condition).toBe("");
                 });
             });
 
             describe("|= attribute selector", function() {
                 it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "bar");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.BAR_EQ, "bar");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeRegExpAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     var regexp = action.regexp;
@@ -844,11 +851,11 @@ describe("csscasc", function() {
                 });
 
                 it("also use CheckAttributeRegExpAction when the value is an empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.BAR_EQ, "");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.BAR_EQ, "");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeRegExpAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     var regexp = action.regexp;
@@ -860,11 +867,11 @@ describe("csscasc", function() {
 
             describe("^= attribute selector", function() {
                 it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.HAT_EQ, "bar");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.HAT_EQ, "bar");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeRegExpAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     var regexp = action.regexp;
@@ -875,22 +882,22 @@ describe("csscasc", function() {
                 });
 
                 it("represents nothing when the value is an empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.HAT_EQ, "");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.HAT_EQ, "");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
                     expect(action.condition).toBe("");
                 });
             });
 
             describe("$= attribute selector", function() {
                 it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.DOLLAR_EQ, "bar");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.DOLLAR_EQ, "bar");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeRegExpAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     var regexp = action.regexp;
@@ -901,22 +908,22 @@ describe("csscasc", function() {
                 });
 
                 it("represents nothing when the value is an empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.DOLLAR_EQ, "");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.DOLLAR_EQ, "");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
                     expect(action.condition).toBe("");
                 });
             });
 
             describe("*= attribute selector", function() {
                 it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.STAR_EQ, "bar");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.STAR_EQ, "bar");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckAttributeRegExpAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckAttributeRegExpAction));
                     expect(action.ns).toBe("ns");
                     expect(action.name).toBe("foo");
                     var regexp = action.regexp;
@@ -927,11 +934,11 @@ describe("csscasc", function() {
                 });
 
                 it("represents nothing when the value is an empty string", function() {
-                    handler.attributeSelector("ns", "foo", adapt.csstok.TokenType.STAR_EQ, "");
+                    handler.attributeSelector("ns", "foo", adapt_csstok.TokenType.STAR_EQ, "");
 
                     expect(handler.chain.length).toBe(1);
                     var action = handler.chain[0];
-                    expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                    expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
                     expect(action.condition).toBe("");
                 });
             });
@@ -941,7 +948,7 @@ describe("csscasc", function() {
 
                 expect(handler.chain.length).toBe(1);
                 var action = handler.chain[0];
-                expect(action).toEqual(jasmine.any(adapt.csscasc.CheckConditionAction));
+                expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
                 expect(action.condition).toBe("");
             });
         });

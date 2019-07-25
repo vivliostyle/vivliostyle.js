@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
-goog.provide("vivliostyle.test.util.matchers");
+// goog.provide("vivliostyle.test.util.matchers");
 
-(function() {
+// (function() {
     function isSameNode(node1, node2) {
         return !!node1 && (node1.compareDocumentPosition(node2) === 0);
     }
@@ -31,7 +31,7 @@ goog.provide("vivliostyle.test.util.matchers");
         }
     };
 
-    vivliostyle.test.util.matchers.addMatchers = function() {
+    export const addMatchers = function() {
         jasmine.addMatchers(matchers);
     };
-})();
+// })();

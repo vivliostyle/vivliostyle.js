@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
-goog.provide("vivliostyle.test.util.dom");
+// goog.provide("vivliostyle.test.util.dom");
 
-(function() {
-    var domUtil = vivliostyle.test.util.dom;
+// (function() {
+//     var domUtil = vivliostyle.test.util.dom;
 
     var dummyElements = [];
 
@@ -30,14 +30,14 @@ goog.provide("vivliostyle.test.util.dom");
         }
     });
 
-    domUtil.getWindow = function() {
+    export const getWindow = function() {
         return window;
     };
 
-    domUtil.getDummyContainer = function() {
+    export const getDummyContainer = function() {
         var e = document.createElement("div");
         document.body.appendChild(e);
         dummyElements.push(e);
         return e;
     };
-})();
+// })();

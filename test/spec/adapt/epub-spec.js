@@ -14,10 +14,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_epub from "../../../src/ts/adapt/epub";
+
 describe("epub", function() {
     describe("OPFDoc", function() {
         describe("OPFDocumentURLTransformer", function() {
-            var opfDoc = new adapt.epub.OPFDoc(null, null);
+            var opfDoc = new adapt_epub.OPFDoc(null, null);
             opfDoc.items = [
                 {src: "http://example.com:8000/foo/bar1.html"},
                 {src: "http://example.com:8000/foo/bar2.html"}
@@ -33,7 +36,7 @@ describe("epub", function() {
 
                 it("transforms a pair of a fragment and a base URL into an XML ID string", function() {
                     expect(transformed).not.toMatch(illegalCharRegexp);
-                    expect(transformed.indexOf(adapt.epub.transformedIdPrefix)).toBe(0);
+                    expect(transformed.indexOf(adapt_epub.transformedIdPrefix)).toBe(0);
                 });
 
                 it("restores a pair of the original base URL and the original fragment", function() {

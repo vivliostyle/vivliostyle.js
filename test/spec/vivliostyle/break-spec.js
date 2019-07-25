@@ -14,9 +14,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_css from "../../../src/ts/adapt/css";
+import * as vivliostyle_break from "../../../src/ts/vivliostyle/break";
+
 describe("break", function() {
     describe("convertPageBreakAliases", function() {
-        var convertPageBreakAliases = vivliostyle.break.convertPageBreakAliases;
+        var convertPageBreakAliases = vivliostyle_break.convertPageBreakAliases;
 
         it("converts page-break-before/after to break-before/after", function() {
             ["before", "after"].forEach(function(side) {
@@ -27,31 +31,31 @@ describe("break", function() {
                 };
                 var converted;
 
-                original["value"] = adapt.css.ident.auto;
+                original["value"] = adapt_css.ident.auto;
                 converted = convertPageBreakAliases(original);
                 expect(converted["name"]).toBe(breakProp);
-                expect(converted["value"]).toBe(adapt.css.ident.auto);
+                expect(converted["value"]).toBe(adapt_css.ident.auto);
                 expect(converted["important"]).toBe(false);
 
-                original["value"] = adapt.css.ident.left;
+                original["value"] = adapt_css.ident.left;
                 converted = convertPageBreakAliases(original);
                 expect(converted["name"]).toBe(breakProp);
-                expect(converted["value"]).toBe(adapt.css.ident.left);
+                expect(converted["value"]).toBe(adapt_css.ident.left);
 
-                original["value"] = adapt.css.ident.right;
+                original["value"] = adapt_css.ident.right;
                 converted = convertPageBreakAliases(original);
                 expect(converted["name"]).toBe(breakProp);
-                expect(converted["value"]).toBe(adapt.css.ident.right);
+                expect(converted["value"]).toBe(adapt_css.ident.right);
 
-                original["value"] = adapt.css.ident.avoid;
+                original["value"] = adapt_css.ident.avoid;
                 converted = convertPageBreakAliases(original);
                 expect(converted["name"]).toBe(breakProp);
-                expect(converted["value"]).toBe(adapt.css.ident.avoid);
+                expect(converted["value"]).toBe(adapt_css.ident.avoid);
 
-                original["value"] = adapt.css.ident.always;
+                original["value"] = adapt_css.ident.always;
                 converted = convertPageBreakAliases(original);
                 expect(converted["name"]).toBe(breakProp);
-                expect(converted["value"]).toBe(adapt.css.ident.page);
+                expect(converted["value"]).toBe(adapt_css.ident.page);
             });
         });
 
@@ -62,21 +66,21 @@ describe("break", function() {
             };
             var converted;
 
-            original["value"] = adapt.css.ident.auto;
+            original["value"] = adapt_css.ident.auto;
             converted = convertPageBreakAliases(original);
             expect(converted["name"]).toBe("break-inside");
-            expect(converted["value"]).toBe(adapt.css.ident.auto);
+            expect(converted["value"]).toBe(adapt_css.ident.auto);
             expect(converted["important"]).toBe(false);
 
-            original["value"] = adapt.css.ident.avoid;
+            original["value"] = adapt_css.ident.avoid;
             converted = convertPageBreakAliases(original);
             expect(converted["name"]).toBe("break-inside");
-            expect(converted["value"]).toBe(adapt.css.ident.avoid);
+            expect(converted["value"]).toBe(adapt_css.ident.avoid);
         });
     });
 
     describe("resolveEffectiveBreakValue", function() {
-        var resolveEffectiveBreakValue = vivliostyle.break.resolveEffectiveBreakValue;
+        var resolveEffectiveBreakValue = vivliostyle_break.resolveEffectiveBreakValue;
 
         it("If one of the argument is null, return the other", function() {
             expect(resolveEffectiveBreakValue(null, null)).toBe(null);

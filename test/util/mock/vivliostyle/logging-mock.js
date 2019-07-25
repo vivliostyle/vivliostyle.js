@@ -14,11 +14,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
-var mockConsole = vivliostyle.logging.mockConsole = {
-    debug: function() {},
-    info: function() {},
-    warn: function() {},
-    error: function() {}
-};
 
-vivliostyle.logging.logger = new vivliostyle.logging.Logger(mockConsole);
+import * as vivliostyle_loggingg from "../../../../src/ts/vivliostyle/logging";
+
+// FIXME: cannot assign to vivliostyle_loggingg.mockConsole and vivliostyle_loggingg.logger
+
+// var mockConsole = vivliostyle_loggingg.mockConsole = {
+//     debug: function() {},
+//     info: function() {},
+//     warn: function() {},
+//     error: function() {}
+// };
+
+// vivliostyle_loggingg.logger = new vivliostyle_loggingg.Logger(mockConsole);

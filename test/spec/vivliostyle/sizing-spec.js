@@ -14,17 +14,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_base from "../../../src/ts/adapt/base";
+import * as adapt_vgen from "../../../src/ts/adapt/vgen";
+import * as vivliostyle_sizing from "../../../src/ts/vivliostyle/sizing";
+import * as vivliostyle_test_util_dom from "../../util/dom";
+import * as vivliostyle_test_util_matchers from "../../util/matchers";
+
 describe("sizing", function() {
     "use strict";
 
-    var domUtil = vivliostyle.test.util.dom;
-    var sizing = vivliostyle.sizing;
+    var domUtil = vivliostyle_test_util_dom;
+    var sizing = vivliostyle_sizing;
     var Size = sizing.Size;
 
-    var clientLayout = new adapt.vgen.DefaultClientLayout(domUtil.getWindow());
+    var clientLayout = new adapt_vgen.DefaultClientLayout(domUtil.getWindow());
     var containingBlock, element;
 
-    beforeAll(vivliostyle.test.util.matchers.addMatchers);
+    beforeAll(vivliostyle_test_util_matchers.addMatchers);
 
     beforeEach(function() {
         var container = domUtil.getDummyContainer();
@@ -151,7 +158,7 @@ describe("sizing", function() {
     }
 
     function setVertical() {
-        adapt.base.setCSSProperty(containingBlock, "writing-mode", "vertical-rl");
+        adapt_base.setCSSProperty(containingBlock, "writing-mode", "vertical-rl");
     }
 
     var horizontalBorderAndPadding =

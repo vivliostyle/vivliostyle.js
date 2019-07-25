@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_base from "../../../src/ts/adapt/base";
+
 describe("base", function() {
-    var module = adapt.base;
+    var module = adapt_base;
 
     describe("escapeCharToHex", function() {
         it("escape the first character to a 4-digit hex code and add the specified prefix", function() {

@@ -14,18 +14,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
+import * as adapt_cssparse from "../../../src/ts/adapt/cssparse";
+import * as adapt_cssvalid from "../../../src/ts/adapt/cssvalid";
+import * as adapt_task from "../../../src/ts/adapt/task";
+import * as vivliostyle_logging from "../../../src/ts/vivliostyle/logging";
+
 describe("cssvalid", function() {
     describe("ValidatorSet", function() {
         it("should parse simple validator and simple rule", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("foo-or = bar | [ baz || biz ];");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { foo-or: bar; }\n.test2 { foo-or: baz biz; }", handler, null, null, null).then(
                     function(result) {
                         expect(result).toBe(true);
@@ -35,15 +42,15 @@ describe("cssvalid", function() {
             });
         });
         it("should parse simple validator that compare values case-insensitively.", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("foo = bAr | Baz | bIZ ;");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { foo: bar; }\n" +
                     ".test2 { foo: BAR; }" +
                     ".test3 { foo: Bar; }" +
@@ -60,15 +67,15 @@ describe("cssvalid", function() {
             });
         });
         it("should parse validator and space rule", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("foo = SPACE(IDENT+);");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { foo: bar; }\n.test2 { foo: bar baz boo; }", handler, null, null, null).then(
                     function(result) {
                         expect(result).toBe(true);
@@ -79,15 +86,15 @@ describe("cssvalid", function() {
         });
 
         it("should parse validator and comma rule", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("foo = COMMA( IDENT+ );");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { foo: bar,baz; }\n .test2{ foo: bar; }", handler, null, null, null).then(
                     function(result) {
                         expect(result).toBe(true);
@@ -98,15 +105,15 @@ describe("cssvalid", function() {
         });
 
         it("should parse validator and complex comma rule", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("foo-comma = none | COMMA( [ bar | baz ]+ );");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { foo-comma: none; }\n.test2 { foo-comma: bar,baz; }\n .test3 { foo-comma: bar; }", handler, null, null, null).then(
                     function(result) {
                         expect(result).toBe(true);
@@ -117,15 +124,15 @@ describe("cssvalid", function() {
         });
 
         it("should parse validator and complex space rule", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("spacefoo = none | SPACE( [ bar | baz ]+ );");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { spacefoo: none; }\n.test2 { spacefoo: bar baz; }\n .test3 { spacefoo: bar; }", handler, null, null, null).then(
                     function(result) {
                         expect(result).toBe(true);
@@ -135,7 +142,7 @@ describe("cssvalid", function() {
             });
         });
         it("should parse rule that contains function", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             var validation_txt =
                 "THE_VALUE = SPACE(IDENT+);\n" +
@@ -145,12 +152,12 @@ describe("cssvalid", function() {
                 "accept-function = COMMA(AC_VALUES+);";
 
             validatorSet.parse(validation_txt);
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { accept-function: the-function(foo bar); }\n" +
                     ".test2 { accept-function: the-function(foo bar, bar baz); }\n" +
                     ".test3 { accept-function: the-function(fff, foo bar, bar baz); }\n" +
@@ -164,15 +171,15 @@ describe("cssvalid", function() {
             });
         });
         it("should parse rule that contains slash", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse("foo = bar( SPACE( POS_NUM [ SLASH POS_NUM ]? ) );");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test { foo: bar( 10 / 10 ) ; }\n" +
                     ".test2 { foo: bar( 10 ) ; }", handler, null, null, null).then(
                     function(result) {
@@ -183,7 +190,7 @@ describe("cssvalid", function() {
             });
         });
         it("should parse font shorthand rule", function(done) {
-            var validatorSet = new adapt.cssvalid.ValidatorSet();
+            var validatorSet = new adapt_cssvalid.ValidatorSet();
             validatorSet.initBuiltInValidators();
             validatorSet.parse(
                 "PPLENGTH = POS_LENGTH | ZERO | POS_PERCENTAGE;" +
@@ -207,12 +214,12 @@ describe("cssvalid", function() {
                 "\n\n" +
                 "SHORTHANDS\n\n" +
                 "font = FONT font-style font-variant font-weight font-stretch ;");
-            var handler = new adapt.csscasc.CascadeParserHandler(null, null, null, null, null,
+            var handler = new adapt_csscasc.CascadeParserHandler(null, null, null, null, null,
                 validatorSet, true);
             var warnListener = jasmine.createSpy("warn listener");
-            vivliostyle.logging.logger.addListener(vivliostyle.logging.LogLevel.WARN, warnListener);
-            adapt.task.start(function() {
-                adapt.cssparse.parseStylesheetFromText(
+            vivliostyle_logging.logger.addListener(vivliostyle_logging.LogLevel.WARN, warnListener);
+            adapt_task.start(function() {
+                adapt_cssparse.parseStylesheetFromText(
                     ".test  { font: 80% sans-serif ; }\n" +
                     ".test2 { font: 12px/14px \"Times\" ; }\n" +
                     ".test3 { font: oblique small-caps bold 12px/14px \"Times\" ; }\n" +

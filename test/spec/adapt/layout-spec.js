@@ -14,14 +14,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_layout from "../../../src/ts/adapt/layout";
+import * as adapt_vtree from "../../../src/ts/adapt/vtree";
+
 describe("layout", function() {
 
-    describe("adapt.layout.TextNodeBreaker", function() {
+    describe("adapt_layout.TextNodeBreaker", function() {
 
         var breaker;
         var textNode, nodeContext;
         beforeEach(function() {
-            breaker = new adapt.layout.TextNodeBreaker();
+            breaker = new adapt_layout.TextNodeBreaker();
 
             textNode = {
                 length: 17,
@@ -30,7 +34,7 @@ describe("layout", function() {
             };
             spyOn(textNode, 'replaceData').and.callThrough();
 
-            nodeContext = new adapt.vtree.NodeContext({}, null, 3);
+            nodeContext = new adapt_vtree.NodeContext({}, null, 3);
             nodeContext.preprocessedTextContent =
                 [[0, 'abcdeabcde'], [1, '\u00AD'], [0, 'f gh'], [1, '\u00AD'], [0, 'j']];
             nodeContext.hyphenateCharacter = '_';
@@ -84,20 +88,20 @@ describe("layout", function() {
 
     });
 
-    describe("adapt.layout.resolveHyphenateCharacter", function() {
+    describe("adapt_layout.resolveHyphenateCharacter", function() {
         it("returns a value of `hyphenateCharacter` in the nodeContext.", function() {
-            expect(adapt.layout.resolveHyphenateCharacter({
+            expect(adapt_layout.resolveHyphenateCharacter({
                 hyphenateCharacter: 'a',
                 parent: { hyphenateCharacter: 'b' }
             })).toEqual('a');
         });
         it("returns a value of `hyphenateCharacter` in the parent nodeContext if nodeContext's `hyphenateCharacter` is undefined.", function() {
-            expect(adapt.layout.resolveHyphenateCharacter({
+            expect(adapt_layout.resolveHyphenateCharacter({
                 parent: { hyphenateCharacter: 'b' }
             })).toEqual('b');
         });
         it("returns a default value if `hyphenateCharacter` of nodeContext and parent nodeContext are undefined.", function() {
-            expect(adapt.layout.resolveHyphenateCharacter({})).toEqual('-');
+            expect(adapt_layout.resolveHyphenateCharacter({})).toEqual('-');
         });
     });
 
