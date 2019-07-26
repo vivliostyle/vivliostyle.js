@@ -41,6 +41,7 @@ describe("cssparse", function() {
                     fn();
                     done();
                 });
+                return adapt_task.newResult(true);
             });
         }
 

@@ -39,6 +39,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
         it("should parse simple validator that compare values case-insensitively.", function(done) {
@@ -64,6 +65,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
         it("should parse validator and space rule", function(done) {
@@ -82,6 +84,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
 
@@ -101,6 +104,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
 
@@ -120,6 +124,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
 
@@ -139,6 +144,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
         it("should parse rule that contains function", function(done) {
@@ -168,6 +174,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
         it("should parse rule that contains slash", function(done) {
@@ -187,6 +194,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
         it("should parse font shorthand rule", function(done) {
@@ -233,6 +241,7 @@ describe("cssvalid", function() {
                         expect(warnListener).not.toHaveBeenCalled();
                         done();
                     });
+                return adapt_task.newResult(true);
             });
         });
     });
