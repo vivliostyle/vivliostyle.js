@@ -1668,6 +1668,4 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   forbid(float, pageFloatLayoutContext) {}
 }
 
-export function registerPageFloatPlugin() {
-  PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());
-}
+PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());

@@ -45,10 +45,6 @@ export const convertPageBreakAliases = (original: {
   }
 };
 
-export function registerBreakPlugin() {
-  plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);
-}
-
 export const forcedBreakValues: { [key: string]: boolean | null } = {
   page: true,
   left: true,
@@ -161,3 +157,5 @@ export const startSideValueToBreakValue = (
       return null;
   }
 };
+
+plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

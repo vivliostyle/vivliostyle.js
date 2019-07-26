@@ -229,38 +229,37 @@ export const blockLayoutProcessor = new BlockLayoutProcessor();
 export const isInstanceOfBlockFormattingContext =
   LayoutProcessor.isInstanceOfBlockFormattingContext;
 
-export function registerLayoutProcessorPlugin() {
-  Plugin.registerHook(
-    Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-    (nodeContext, firstTime, display, position, floatSide, isRoot) => {
-      const parent = nodeContext.parent;
-      if (!parent && nodeContext.formattingContext) {
-        return null;
-      } else if (
-        parent &&
-        nodeContext.formattingContext !== parent.formattingContext
-      ) {
-        return null;
-      } else if (
-        nodeContext.establishesBFC ||
-        (!nodeContext.formattingContext &&
-          isBlock(display, position, floatSide, isRoot))
-      ) {
-        return new BlockFormattingContext(
-          parent ? parent.formattingContext : null
-        );
-      } else {
-        return null;
-      }
-    }
-  );
-  Plugin.registerHook(
-    Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
-    formattingContext => {
-      if (formattingContext instanceof BlockFormattingContext) {
-        return blockLayoutProcessor;
-      }
+Plugin.registerHook(
+  Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+  (nodeContext, firstTime, display, position, floatSide, isRoot) => {
+    const parent = nodeContext.parent;
+    if (!parent && nodeContext.formattingContext) {
+      return null;
+    } else if (
+      parent &&
+      nodeContext.formattingContext !== parent.formattingContext
+    ) {
+      return null;
+    } else if (
+      nodeContext.establishesBFC ||
+      (!nodeContext.formattingContext &&
+        isBlock(display, position, floatSide, isRoot))
+    ) {
+      return new BlockFormattingContext(
+        parent ? parent.formattingContext : null
+      );
+    } else {
       return null;
     }
-  );
-}
+  }
+);
+
+Plugin.registerHook(
+  Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
+  formattingContext => {
+    if (formattingContext instanceof BlockFormattingContext) {
+      return blockLayoutProcessor;
+    }
+    return null;
+  }
+);

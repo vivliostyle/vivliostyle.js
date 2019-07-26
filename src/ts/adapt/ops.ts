@@ -48,6 +48,8 @@ import { Fetcher } from "./taskutil";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
+import "../vivliostyle/footnote";
+import "../vivliostyle/table";
 
 export const uaStylesheetBaseFetcher: Fetcher<boolean> = new Fetcher(() => {
   const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");

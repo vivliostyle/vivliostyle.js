@@ -1075,17 +1075,15 @@ function getRepetitiveElementsOwnerFormattingContext(
 
 const repetitiveLayoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
 
-export function registerRepetitiveElementsPlugin() {
-  Plugin.registerHook(
-    Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
-    formattingContext => {
-      if (
-        formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
-        !Table.isInstanceOfTableFormattingContext(formattingContext)
-      ) {
-        return repetitiveLayoutProcessor;
-      }
-      return null;
+Plugin.registerHook(
+  Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
+  formattingContext => {
+    if (
+      formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
+      !Table.isInstanceOfTableFormattingContext(formattingContext)
+    ) {
+      return repetitiveLayoutProcessor;
     }
-  );
-}
+    return null;
+  }
+);

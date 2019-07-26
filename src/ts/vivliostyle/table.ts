@@ -2189,13 +2189,12 @@ function resolveLayoutProcessor(formattingContext) {
   return null;
 }
 
-export function registerTablePlugin() {
-  Plugin.registerHook(
-    Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-    resolveFormattingContextHook
-  );
-  Plugin.registerHook(
-    Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
-    resolveLayoutProcessor
-  );
-}
+Plugin.registerHook(
+  Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+  resolveFormattingContextHook
+);
+
+Plugin.registerHook(
+  Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
+  resolveLayoutProcessor
+);

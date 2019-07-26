@@ -203,8 +203,6 @@ export class FootnoteLayoutStrategy
   }
 }
 
-export function registerFootnotePlugin() {
-  PageFloat.PageFloatLayoutStrategyResolver.register(
-    new FootnoteLayoutStrategy()
-  );
-}
+PageFloat.PageFloatLayoutStrategyResolver.register(
+  new FootnoteLayoutStrategy()
+);
