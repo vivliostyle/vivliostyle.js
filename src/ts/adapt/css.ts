@@ -463,11 +463,8 @@ export class Numeric extends Val {
 }
 
 export class Num extends Val {
-  num: any;
-
-  constructor(num: number) {
+  constructor(public num: number) {
     super();
-    this.num = num;
   }
 
   /**

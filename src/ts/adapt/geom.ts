@@ -56,10 +56,10 @@ export class Segment {
  */
 export class Band {
   /** Left float. */
-  left: any = null;
+  left: Element | null = null;
 
   /** Right float. */
-  right: any = null;
+  right: Element | null = null;
 
   constructor(
     public y1: number,

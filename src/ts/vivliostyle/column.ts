@@ -56,7 +56,7 @@ function setBlockSize(container: Vtree.Container, size) {
 }
 
 export abstract class ColumnBalancer {
-  originalContainerBlockSize: any;
+  originalContainerBlockSize: number;
 
   constructor(
     public readonly layoutContainer: Vtree.Container,

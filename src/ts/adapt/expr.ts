@@ -118,7 +118,6 @@ export let nextKeyIndex: number = 0;
  * Lexical scope of the expression.
  */
 export class LexicalScope {
-  parent: any;
   scopeKey: string;
   children: LexicalScope[] = [];
   zero: Const;
@@ -128,13 +127,11 @@ export class LexicalScope {
   values: { [key: string]: Val } = {};
   funcs: { [key: string]: Val } = {};
   builtIns: { [key: string]: (...p1: Result[]) => Result } = {};
-  resolver: (p1: string, p2: boolean) => Val;
 
   constructor(
-    parent: LexicalScope,
-    resolver?: (p1: string, p2: boolean) => Val
+    public parent: LexicalScope,
+    public resolver?: (p1: string, p2: boolean) => Val
   ) {
-    this.parent = parent;
     this.scopeKey = `S${nextKeyIndex++}`;
     this.zero = new Const(this, 0);
     this.one = new Const(this, 1);
@@ -143,7 +140,6 @@ export class LexicalScope {
     if (parent) {
       parent.children.push(this);
     }
-    this.resolver = resolver;
     if (!parent) {
       // root scope
       const builtIns = this.builtIns;
@@ -536,10 +532,9 @@ export type DependencyCache = {
 };
 
 export class Val {
-  scope: any;
-  key: any;
+  key: string;
 
-  constructor(scope: LexicalScope) {
+  constructor(public scope: LexicalScope) {
     this.scope = scope;
     this.key = `_${nextKeyIndex++}`;
   }
@@ -1145,11 +1140,8 @@ export class Numeric extends Val {
  * @param qualifiedName CSS-escaped name sequence separated by dots.
  */
 export class Named extends Val {
-  qualifiedName: any;
-
-  constructor(scope: LexicalScope, qualifiedName: string) {
+  constructor(scope: LexicalScope, public qualifiedName: string) {
     super(scope);
-    this.qualifiedName = qualifiedName;
   }
 
   /**
@@ -1185,7 +1177,7 @@ export class Named extends Val {
 export class MediaName extends Val {
   // FIXME: This property is added to reduce TypeScript error on `dependCore`
   // but it is never initialized. Is it really correct code?
-  value: any;
+  value: Val;
 
   constructor(scope: LexicalScope, public not: boolean, public name: string) {
     super(scope);
@@ -1431,11 +1423,8 @@ export class Cond extends Val {
 }
 
 export class Const extends Val {
-  val: any;
-
-  constructor(scope: LexicalScope, val: Result) {
+  constructor(scope: LexicalScope, public val: Result) {
     super(scope);
-    this.val = val;
   }
 
   /**
@@ -1466,13 +1455,8 @@ export class Const extends Val {
 }
 
 export class MediaTest extends Val {
-  name: any;
-  value: any;
-
-  constructor(scope: LexicalScope, name: MediaName, value: Val) {
+  constructor(scope: LexicalScope, public name: MediaName, public value: Val) {
     super(scope);
-    this.name = name;
-    this.value = value;
   }
 
   /**
@@ -1516,11 +1500,8 @@ export class MediaTest extends Val {
 }
 
 export class Param extends Val {
-  index: any;
-
-  constructor(scope: LexicalScope, index: number) {
+  constructor(scope: LexicalScope, public index: number) {
     super(scope);
-    this.index = index;
   }
 
   /**

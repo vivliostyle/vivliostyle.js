@@ -341,7 +341,7 @@ export class Scheduler {
 export class Continuation<T> implements Base.Comparable {
   scheduledTime: number = 0;
   order: number = 0;
-  result: any = null;
+  result: T = null;
   canceled: boolean = false;
 
   constructor(public task: Task) {}
@@ -401,7 +401,7 @@ export class Task {
   exception: Error | null = null;
   running: boolean = true;
   result: any = null;
-  waitTarget: any = null;
+  waitTarget: string | null = null;
   top: Frame<any> | null = null;
   continuation: Continuation<any> | null = null;
 
@@ -661,7 +661,7 @@ export class ResultImpl<T> implements Result<T> {
  * @template T
  */
 export class Frame<T> {
-  res: any = null;
+  res: T = null;
   state: FrameState;
   callback: ((p1: any) => void) | null = null;
   handler: ((p1: Frame<any>, p2: Error) => void) | null = null;

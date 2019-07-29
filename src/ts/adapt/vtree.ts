@@ -43,15 +43,11 @@ export const delayedPropsIfRelativePositioned = {
 };
 
 export class DelayedItem {
-  target: any;
-  name: any;
-  value: any;
-
-  constructor(target: Element, name: string, value: Css.Val) {
-    this.target = target;
-    this.name = name;
-    this.value = value;
-  }
+  constructor(
+    public target: Element,
+    public name: string,
+    public value: Css.Val
+  ) {}
 }
 
 export type PageHyperlinkEvent = {
@@ -118,7 +114,7 @@ export class Page extends Base.SimpleEventTarget {
     "data-vivliostyle-auto-page-height";
   pageAreaElement: HTMLElement | null = null;
   delayedItems: DelayedItem[] = [];
-  hrefHandler: any;
+  hrefHandler: (e: Event) => void;
   elementsById: { [key: string]: Element[] } = {};
   dimensions: { width: number; height: number } = { width: 0, height: 0 };
   isFirstPage: boolean = false;
@@ -312,7 +308,7 @@ export const canIgnore = (node: Node, whitespace: Whitespace): boolean => {
 };
 
 export class Flow {
-  forcedBreakOffsets: any = [] as number[];
+  forcedBreakOffsets = [] as number[];
   formattingContext: FormattingContext | null = null;
 
   constructor(
@@ -939,8 +935,8 @@ export class LayoutPosition {
   highestSeenOffset: number = 0;
 
   // FIXME: This properties seem to be not used
-  highestSeenNode: any;
-  lookupPositionOffset: any;
+  highestSeenNode: Node;
+  lookupPositionOffset: number;
 
   clone(): LayoutPosition {
     const newcp = new LayoutPosition();

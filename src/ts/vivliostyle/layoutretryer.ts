@@ -25,9 +25,9 @@ import { Layout, ViewTree } from "./types";
  */
 export abstract class AbstractLayoutRetryer {
   initialBreakPositions: Layout.BreakPosition[] = null;
-  initialStateOfFormattingContext: any = null;
-  initialPosition: any;
-  initialFragmentLayoutConstraints: any;
+  initialStateOfFormattingContext: ViewTree.NodeContext = null;
+  initialPosition: ViewTree.NodeContext;
+  initialFragmentLayoutConstraints: Layout.FragmentLayoutConstraint[];
 
   layout(
     nodeContext: ViewTree.NodeContext,

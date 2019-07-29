@@ -1770,7 +1770,7 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
   PageMarginBoxPartition
 > {
   boxInfo: PageMarginBoxInformation;
-  suppressEmptyBoxGeneration: any = true;
+  suppressEmptyBoxGeneration: boolean = true;
 
   constructor(
     parentInstance: Pm.PageBoxInstance,

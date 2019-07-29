@@ -1171,8 +1171,6 @@ export class ShorthandValidator extends Css.Visitor {
 }
 
 export class SimpleShorthandValidator extends ShorthandValidator {
-  error: any;
-
   constructor() {
     super();
   }
@@ -1200,8 +1198,6 @@ export class SimpleShorthandValidator extends ShorthandValidator {
 }
 
 export class InsetsShorthandValidator extends ShorthandValidator {
-  error: any;
-
   constructor() {
     super();
   }
@@ -1233,8 +1229,6 @@ export class InsetsShorthandValidator extends ShorthandValidator {
 }
 
 export class InsetsSlashShorthandValidator extends ShorthandValidator {
-  error: any;
-
   constructor() {
     super();
   }
@@ -1279,9 +1273,6 @@ export class InsetsSlashShorthandValidator extends ShorthandValidator {
 }
 
 export class CommaShorthandValidator extends SimpleShorthandValidator {
-  values: any;
-  error: any;
-
   constructor() {
     super();
   }
@@ -1331,8 +1322,6 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
 }
 
 export class FontShorthandValidator extends SimpleShorthandValidator {
-  error: any;
-
   constructor() {
     super();
   }

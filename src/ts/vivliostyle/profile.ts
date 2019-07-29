@@ -22,7 +22,7 @@ import * as Logging from "./logging";
  * Performance profiler measuring execution time of the script.
  */
 export class Profiler {
-  timestamps: any = {};
+  timestamps: { [key: string]: { [key: string]: number } } = {};
   private registerTiming: (p1: string, p2: string, p3?: number) => any;
   registerStartTiming: (name: string, timestamp?: number) => any;
   registerEndTiming: (name: string, timestamp?: number) => any;

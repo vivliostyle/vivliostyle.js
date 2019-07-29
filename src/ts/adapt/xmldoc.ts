@@ -35,7 +35,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   head: Element;
   last: Element;
   lastOffset: number = 1;
-  idMap: any;
+  idMap: { [key: string]: Element };
 
   constructor(
     public readonly store: XMLDocStore,
@@ -291,7 +291,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       return null;
     }
     const id = m[2];
-    let r = this.document.getElementById(id);
+    let r: Element = this.document.getElementById(id);
     if (!r && this.document.getElementsByName) {
       r = this.document.getElementsByName(id)[0];
     }

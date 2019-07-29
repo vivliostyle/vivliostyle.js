@@ -1339,7 +1339,7 @@ export class CheckConditionAction extends ChainedAction {
 }
 
 export class CheckAppliedAction extends CascadeAction {
-  applied: any = false;
+  applied = false;
 
   constructor() {
     super();
@@ -1363,8 +1363,8 @@ export class CheckAppliedAction extends CascadeAction {
 }
 
 export class NegateActionsSet extends ChainedAction {
-  checkAppliedAction: any;
-  firstAction: any;
+  checkAppliedAction: CheckAppliedAction;
+  firstAction: CascadeAction;
 
   constructor(list: ChainedAction[]) {
     super();
@@ -1387,7 +1387,7 @@ export class NegateActionsSet extends ChainedAction {
    * @override
    */
   getPriority() {
-    return this.firstAction.getPriority();
+    return (this.firstAction as ChainedAction).getPriority();
   }
 }
 
@@ -1782,11 +1782,8 @@ export interface CounterResolver {
 }
 
 export class AttrValueFilterVisitor extends Css.FilterVisitor {
-  element: any;
-
-  constructor(element: Element) {
+  constructor(public element: Element) {
     super();
-    this.element = element;
   }
 
   private createValueFromString(str: string | null, type: string): Css.Val {
@@ -1842,17 +1839,12 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
 }
 
 export class ContentPropVisitor extends Css.FilterVisitor {
-  cascade: any;
-  element: any;
-
   constructor(
-    cascade: CascadeInstance,
-    element: Element,
+    public cascade: CascadeInstance,
+    public element: Element,
     public readonly counterResolver: CounterResolver
   ) {
     super();
-    this.cascade = cascade;
-    this.element = element;
   }
 
   /**
@@ -2533,9 +2525,9 @@ export class Cascade {
 }
 
 export class CascadeInstance {
-  code: any;
-  stack: any = [[], []] as ConditionItem[][];
-  conditions: any = {} as { [key: string]: number };
+  code: Cascade;
+  stack = [[], []] as ConditionItem[][];
+  conditions = {} as { [key: string]: number };
   currentElement: Element | null = null;
   currentElementOffset: number | null = null;
   currentStyle: ElementStyle | null = null;
@@ -2571,7 +2563,7 @@ export class CascadeInstance {
   viewConditions: { [key: string]: Matchers.Matcher[] } = {};
   dependentConditions: string[] = [];
   elementStack: Element[];
-  currentDoc: any;
+  currentDoc?: Document | null;
 
   constructor(
     cascade: Cascade,
@@ -3093,10 +3085,10 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
   conditionCount: number = 0;
   pseudoelement: string | null = null;
   footnoteContent: boolean = false;
-  cascade: any;
+  cascade: Cascade;
   state: ParseState;
   viewConditionId: string | null = null;
-  insideSelectorRule: any;
+  insideSelectorRule: ParseState;
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -3673,7 +3665,7 @@ export const nthSelectorActionClasses: { [key: string]: typeof IsNthAction } = {
 export let conditionCount: number = 0;
 
 export class NotParameterParserHandler extends CascadeParserHandler {
-  parentChain: any;
+  parentChain: ChainedAction[];
 
   constructor(public readonly parent: CascadeParserHandler) {
     super(
@@ -3823,7 +3815,7 @@ export class PropSetParserHandler extends CssParse.SlaveParserHandler
 
 export class PropertyParserHandler extends CssParse.ErrorHandler
   implements CssValid.PropertyReceiver {
-  elementStyle: any = {} as ElementStyle;
+  elementStyle = {} as ElementStyle;
   order: number = 0;
 
   constructor(

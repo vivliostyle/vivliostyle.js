@@ -31,7 +31,7 @@ import * as Logging from "../vivliostyle/logging";
  *    a resource; it will be run in a separate task.
  */
 export class Fetcher<T> {
-  name: any;
+  name: string;
   arrived: boolean = false;
   resource: T = null;
   task: Task.Task = null;

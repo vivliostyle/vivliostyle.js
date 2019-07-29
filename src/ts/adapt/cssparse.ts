@@ -498,7 +498,7 @@ export class DispatchParserHandler extends ParserHandler {
 
 export class SkippingParserHandler extends ParserHandler {
   depth: number = 0;
-  flavor: any;
+  flavor: StylesheetFlavor;
 
   constructor(
     scope: Exprs.LexicalScope,

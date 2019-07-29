@@ -71,11 +71,11 @@ export const prepareProperties = (
  * A font declared in a font-face rule.
  */
 export class Face {
-  fontTraitKey: any;
-  src: any;
+  fontTraitKey: string;
+  src: string | null;
   blobURLs: string[] = [];
   blobs: Blob[] = [];
-  family: any;
+  family: string | null;
 
   constructor(public readonly properties: { [key: string]: Css.Val }) {
     this.fontTraitKey = makeFontTraitKey(this.properties);
@@ -132,7 +132,7 @@ export class DocumentFaces {
   /**
    * Maps source font family names to the family names used in the HTML view.
    */
-  familyMap: any = {} as { [key: string]: string };
+  familyMap = {} as { [key: string]: string };
 
   constructor(
     public readonly deobfuscator:
@@ -186,7 +186,7 @@ export class Mapper {
    * Maps Face.src to an entry for an already-loaded font.
    */
   srcURLMap: { [key: string]: TaskUtil.Fetcher<Face> } = {};
-  familyPrefix: any;
+  familyPrefix: string;
   familyCounter: number = 0;
 
   constructor(

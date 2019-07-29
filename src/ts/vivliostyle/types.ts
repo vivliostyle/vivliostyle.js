@@ -22,6 +22,7 @@ import * as Exprs from "../adapt/expr";
 import * as Geom from "../adapt/geom";
 import * as Task from "../adapt/task";
 import * as TaskUtil from "../adapt/taskutil";
+import * as Vtree from "../adapt/vtree";
 import * as Diff from "./diff";
 
 export type FormattingContextType =
@@ -165,7 +166,7 @@ export namespace Layout {
     pseudoParent: Column;
     nodeContextOverflowingDueToRepetitiveElements: ViewTree.NodeContext | null;
     blockDistanceToBlockEndFloats: number;
-    computedBlockSize: any;
+    computedBlockSize: number;
 
     layoutContext: ViewTree.LayoutContext;
     clientLayout: ViewTree.ClientLayout;
@@ -848,9 +849,9 @@ export namespace Selectors {
 
   export interface AfterIfContinuesLayoutConstraint
     extends Layout.FragmentLayoutConstraint {
-    nodeContext: any;
-    afterIfContinues: any;
-    pseudoElementHeight: any;
+    nodeContext: Vtree.NodeContext;
+    afterIfContinues: AfterIfContinues;
+    pseudoElementHeight: number;
 
     getRepetitiveElements(): AfterIfContinuesElementsOffset;
   }
@@ -863,8 +864,8 @@ export namespace Selectors {
 
   export interface AfterIfContinuesElementsOffset
     extends RepetitiveElement.ElementsOffset {
-    nodeContext: any;
-    pseudoElementHeight: any;
+    nodeContext: Vtree.NodeContext;
+    pseudoElementHeight: number;
 
     affectTo(nodeContext: ViewTree.NodeContext): boolean;
   }
@@ -922,8 +923,8 @@ export namespace RepetitiveElement {
     doneInitialLayout: boolean;
     firstContentSourceNode: Element | null;
     lastContentSourceNode: Element | null;
-    allowInsert: any;
-    allowInsertRepeatitiveElements: any;
+    allowInsert: boolean;
+    allowInsertRepeatitiveElements: boolean;
     ownerSourceNode: Element;
 
     setHeaderNodeContext(nodeContext: ViewTree.NodeContext): void;
@@ -1363,7 +1364,7 @@ export namespace XmlDoc {
     head: Element;
     last: Element;
     lastOffset: number;
-    idMap: any;
+    idMap: { [key: string]: Element };
     readonly store: XMLDocStore;
     readonly url: string;
     readonly document: Document;

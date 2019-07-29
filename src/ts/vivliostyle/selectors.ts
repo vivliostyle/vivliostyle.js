@@ -116,19 +116,12 @@ export class AfterIfContinuesLayoutConstraint
   implements Selectors.AfterIfContinuesLayoutConstraint {
   flagmentLayoutConstraintType: FragmentLayoutConstraintType =
     "AfterIfContinue";
-  nodeContext: any;
-  afterIfContinues: any;
-  pseudoElementHeight: any;
 
   constructor(
-    nodeContext: ViewTree.NodeContext,
-    afterIfContinues: Selectors.AfterIfContinues,
-    pseudoElementHeight: number
-  ) {
-    this.nodeContext = nodeContext;
-    this.afterIfContinues = afterIfContinues;
-    this.pseudoElementHeight = pseudoElementHeight;
-  }
+    public nodeContext: Vtree.NodeContext,
+    public afterIfContinues: Selectors.AfterIfContinues,
+    public pseudoElementHeight: number
+  ) {}
 
   /** @override */
   allowLayout(nodeContext, overflownNodeContext, column) {
@@ -189,13 +182,7 @@ export class AfterIfContinuesLayoutConstraint
 
 export class AfterIfContinuesElementsOffset
   implements Selectors.AfterIfContinuesElementsOffset {
-  nodeContext: any;
-  pseudoElementHeight: any;
-
-  constructor(nodeContext, pseudoElementHeight) {
-    this.nodeContext = nodeContext;
-    this.pseudoElementHeight = pseudoElementHeight;
-  }
+  constructor(public nodeContext, public pseudoElementHeight) {}
 
   /** @override */
   calculateOffset(nodeContext) {
@@ -253,7 +240,7 @@ function processAfterIfContinuesOfNodeContext(
       );
       column.fragmentLayoutConstraints.push(
         new AfterIfContinuesLayoutConstraint(
-          nodeContext,
+          nodeContext as Vtree.NodeContext,
           afterIfContinues,
           pseudoElementHeight
         )

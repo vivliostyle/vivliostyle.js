@@ -91,7 +91,7 @@ export class TableSlot {
 }
 
 export class TableCellFragment {
-  pseudoColumn: any;
+  pseudoColumn: LayoutUtil.PseudoColumn;
   empty: boolean = false;
 
   constructor(
@@ -687,7 +687,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   columnIndex: number = 0;
   inRow: boolean = false;
   checkPoints: ViewTree.NodeContext[] = [];
-  inHeaderOrFooter: any;
+  inHeaderOrFooter: boolean = false;
 
   constructor(
     public readonly formattingContext: TableFormattingContext,
@@ -855,8 +855,8 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   currentRowIndex: number = -1;
   currentColumnIndex: number = 0;
   originalStopAtOverflow: boolean;
-  inHeader: any;
-  inFooter: any;
+  inHeader: boolean;
+  inFooter: boolean;
 
   constructor(
     public readonly formattingContext: TableFormattingContext,
@@ -1864,11 +1864,7 @@ export class EntireTableLayoutConstraint
   implements Layout.FragmentLayoutConstraint {
   flagmentLayoutConstraintType: FragmentLayoutConstraintType = "EntireTable";
 
-  tableRootNode: any;
-
-  constructor(tableRootNode: Node) {
-    this.tableRootNode = tableRootNode;
-  }
+  constructor(public tableRootNode: Node) {}
 
   /**
    * @override

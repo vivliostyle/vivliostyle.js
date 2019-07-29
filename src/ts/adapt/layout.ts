@@ -194,7 +194,7 @@ export class Column extends Vtree.Container implements Layout.Column {
   pseudoParent: Column = null;
   nodeContextOverflowingDueToRepetitiveElements: ViewTree.NodeContext | null = null;
   blockDistanceToBlockEndFloats: number = NaN;
-  computedBlockSize: any;
+  computedBlockSize: number;
 
   constructor(
     element: Element,
@@ -3526,7 +3526,7 @@ export const resolveHyphenateCharacter = (
   "-";
 
 export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
-  breakAfter: any;
+  breakAfter: string | null;
   private initialPageBreakType: string | null = null;
   initialComputedBlockSize: number = 0;
   private initialOverflown: boolean = false;

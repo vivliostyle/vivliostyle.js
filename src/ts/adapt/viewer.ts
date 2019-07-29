@@ -63,12 +63,12 @@ export type SingleDocumentParam = {
 };
 
 export class Viewer {
-  fontMapper: any;
+  fontMapper: Font.Mapper;
   kick: () => void;
   sendCommand: (p1: Base.JSON | string) => void;
-  resizeListener: any;
+  resizeListener: () => void;
   hyperlinkListener: Base.EventListener;
-  pageRuleStyleElement: any;
+  pageRuleStyleElement: HTMLElement;
   pageSheetSizeAlreadySet: boolean = false;
   renderTask: Task.Task | null = null;
   actions: { [key: string]: Action };
@@ -1209,9 +1209,9 @@ export enum ZoomType {
  * Error representing that the rendering has been canceled.
  */
 class RenderingCanceledError extends Error {
-  name: any = "RenderingCanceledError";
-  message: any = "Page rendering has been canceled";
-  stack: any;
+  name: string = "RenderingCanceledError";
+  message: string = "Page rendering has been canceled";
+  stack: string;
 
   constructor() {
     super();

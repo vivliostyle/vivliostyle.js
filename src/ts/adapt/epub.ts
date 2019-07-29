@@ -45,8 +45,8 @@ export type Position = {
 };
 
 export class EPUBDocStore extends Ops.OPSDocStore {
-  plainXMLStore: any;
-  jsonStore: any;
+  plainXMLStore: XmlDoc.XMLDocStore;
+  jsonStore: Net.JSONStore;
   opfByURL: { [key: string]: OPFDoc } = {};
   primaryOPFByEPubURL: { [key: string]: OPFDoc } = {};
   deobfuscators: { [key: string]: (p1: Blob) => Task.Result<Blob> } = {};
@@ -73,7 +73,11 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     opt_required?: boolean,
     opt_message?: string
   ): Task.Result<XmlDoc.XMLDocHolder> {
-    return this.plainXMLStore.load(url, opt_required, opt_message);
+    return this.plainXMLStore.load(
+      url,
+      opt_required,
+      opt_message
+    ) as Task.Result<XmlDoc.XMLDocHolder>;
   }
 
   startLoadingAsPlainXML(url: string): void {
@@ -709,7 +713,7 @@ export class OPFDoc {
   cover: OPFItem = null;
   fallbackMap: { [key: string]: string } = {};
   pageProgression: Constants.PageProgression | null = null;
-  documentURLTransformer: any;
+  documentURLTransformer: Base.DocumentURLTransformer;
 
   constructor(
     public readonly store: EPUBDocStore,

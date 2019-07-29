@@ -40,7 +40,7 @@ export abstract class PageBox<
   children: PageBox[] = [];
   pageMaster: PageMaster = null;
   index: number = 0;
-  key: any;
+  key: string;
 
   protected _scope: Exprs.LexicalScope;
 
@@ -143,7 +143,7 @@ export class PageMasterScope extends Exprs.LexicalScope {
 export class PageMaster<
   I extends PageMasterInstance = PageMasterInstance<any>
 > extends PageBox<I> {
-  pageMaster: any;
+  pageMaster: PageMaster;
   keyMap: { [key: string]: string } = {};
 
   constructor(
@@ -218,7 +218,7 @@ export class PageMaster<
  * Represent a partition-group rule
  */
 export class PartitionGroup extends PageBox<PartitionGroupInstance> {
-  pageMaster: any;
+  pageMaster: PageMaster;
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -265,7 +265,7 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
 export class Partition<
   I extends PartitionInstance = PartitionInstance
 > extends PageBox<I> {
-  pageMaster: any;
+  pageMaster: PageMaster;
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -1641,7 +1641,7 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
 export class PageMasterInstance<
   P extends PageMaster = PageMaster<PageMasterInstance<any>>
 > extends PageBoxInstance<P> {
-  pageMasterInstance: any;
+  pageMasterInstance: PageMasterInstance;
 
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
@@ -1671,7 +1671,7 @@ export class PageMasterInstance<
 }
 
 export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
-  pageMasterInstance: any;
+  pageMasterInstance: PageMasterInstance;
 
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
     super(parentInstance, pageBox);
@@ -1682,7 +1682,7 @@ export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
 export class PartitionInstance<
   P extends Partition = Partition<PartitionInstance<any>>
 > extends PageBoxInstance<P> {
-  pageMasterInstance: any;
+  pageMasterInstance: PageMasterInstance;
 
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);

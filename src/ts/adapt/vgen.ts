@@ -125,8 +125,8 @@ export class ViewFactory extends Base.SimpleEventTarget
     "stroke",
     "mask"
   ];
-  document: any;
-  exprContentListener: any;
+  document: Document;
+  exprContentListener: Vtree.ExprContentListener;
 
   // provided by layout
   nodeContext: Vtree.NodeContext | null = null;
@@ -2188,8 +2188,8 @@ export const propertiesNotPassedToDOM = {
 };
 
 export class DefaultClientLayout implements Vtree.ClientLayout {
-  layoutBox: any;
-  window: any;
+  layoutBox: Element;
+  window: Window;
 
   constructor(viewport: Viewport) {
     this.layoutBox = viewport.layoutBox;
@@ -2242,11 +2242,11 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
 }
 
 export class Viewport {
-  document: any;
+  document: Document;
   root: HTMLElement;
   private outerZoomBox: HTMLElement;
   contentContainer: HTMLElement;
-  layoutBox: any;
+  layoutBox: Element;
   width: number;
   height: number;
 

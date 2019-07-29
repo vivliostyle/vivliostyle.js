@@ -82,8 +82,10 @@ export type FontFace = {
 };
 
 export class Style {
-  fontDeobfuscator: any;
-  validatorSet: any;
+  fontDeobfuscator:
+    | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
+    | null;
+  validatorSet: CssValid.ValidatorSet;
 
   constructor(
     public readonly store: OPSDocStore,
@@ -182,15 +184,15 @@ export class Style {
 //-------------------------------------------------------------------------------
 export class StyleInstance extends Exprs.Context
   implements CssStyler.FlowListener, Pm.InstanceHolder, Vgen.StylerProducer {
-  lang: any;
-  primaryFlows: any = { body: true } as { [key: string]: boolean };
+  lang: string | null;
+  primaryFlows = { body: true } as { [key: string]: boolean };
   rootPageBoxInstance: Pm.RootPageBoxInstance = null;
   styler: CssStyler.Styler = null;
   stylerMap: { [key: string]: CssStyler.Styler } = null;
   currentLayoutPosition: Vtree.LayoutPosition = null;
   layoutPositionAtPageStart: Vtree.LayoutPosition = null;
   lookupOffset: number = 0;
-  faces: any;
+  faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: Pm.PageBoxInstance } = {};
   pageManager: Pages.PageManager = null;
   private rootPageFloatLayoutContext: any;
@@ -199,8 +201,8 @@ export class StyleInstance extends Exprs.Context
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
-  actualPageWidth: any;
-  actualPageHeight: any;
+  actualPageWidth: number;
+  actualPageHeight: number;
 
   constructor(
     public readonly style: Style,
@@ -1935,17 +1937,17 @@ export const processViewportMeta = (meta: Element): string => {
 };
 
 export class StyleParserHandler extends CssParse.DispatchParserHandler {
-  rootScope: any;
-  pageScope: any;
-  rootBox: any;
-  cascadeParserHandler: any;
+  rootScope: Exprs.LexicalScope;
+  pageScope: Exprs.LexicalScope;
+  rootBox: Pm.RootPageBox;
+  cascadeParserHandler: BaseParserHandler;
   regionCount: number = 0;
-  fontFaces: any = [] as FontFace[];
-  footnoteProps: any = {} as CssCasc.ElementStyle;
-  flowProps: any = {} as { [key: string]: CssCasc.ElementStyle };
-  viewportProps: any = [] as CssCasc.ElementStyle[];
-  pageProps: any = {} as { [key: string]: CssCasc.ElementStyle };
-  slave: any;
+  fontFaces = [] as FontFace[];
+  footnoteProps = {} as CssCasc.ElementStyle;
+  flowProps = {} as { [key: string]: CssCasc.ElementStyle };
+  viewportProps = [] as CssCasc.ElementStyle[];
+  pageProps = {} as { [key: string]: CssCasc.ElementStyle };
+  slave: BaseParserHandler;
 
   constructor(public readonly validatorSet: CssValid.ValidatorSet) {
     super();

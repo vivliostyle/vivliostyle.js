@@ -148,8 +148,8 @@ export class RepetitiveElements
     nodeContext: ViewTree.NodeContext;
     result: boolean;
   }[] = [];
-  allowInsert: any = false;
-  allowInsertRepeatitiveElements: any;
+  allowInsert: boolean = false;
+  allowInsertRepeatitiveElements: boolean;
 
   constructor(
     private readonly vertical: boolean,
@@ -460,13 +460,9 @@ export class RepetitiveElements
  * @abstract
  */
 export abstract class LayoutEntireBlock implements Layout.LayoutMode {
-  formattingContext: any;
-
   constructor(
-    formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext
-  ) {
-    this.formattingContext = formattingContext;
-  }
+    public formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext
+  ) {}
 
   /**
    * @override
@@ -503,13 +499,9 @@ export abstract class LayoutEntireBlock implements Layout.LayoutMode {
  * @abstract
  */
 export abstract class LayoutFragmentedBlock implements Layout.LayoutMode {
-  formattingContext: any;
-
   constructor(
-    formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext
-  ) {
-    this.formattingContext = formattingContext;
-  }
+    public formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext
+  ) {}
 
   /**
    * @override
@@ -585,7 +577,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
   implements RepetitiveElement.RepetitiveElementsOwnerLayoutConstraint {
   flagmentLayoutConstraintType: FragmentLayoutConstraintType =
     "RepetitiveElementsOwner";
-  nodeContext: any;
+  nodeContext: ViewTree.NodeContext;
 
   constructor(nodeContext: ViewTree.NodeContext) {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(

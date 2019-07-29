@@ -18,6 +18,7 @@
  * @fileoverview CssProp - Support utilities to extract information
  * from various (parsed) CSS values.
  */
+import * as Base from "./base";
 import * as Css from "./css";
 import * as Exprs from "./expr";
 import * as Geom from "./geom";
@@ -272,13 +273,11 @@ export const toCounters = (
 };
 
 export class UrlTransformVisitor extends Css.FilterVisitor {
-  baseUrl: any;
-  transformer: any;
-
-  constructor(baseUrl, transformer) {
+  constructor(
+    public baseUrl: string,
+    public transformer: Base.DocumentURLTransformer
+  ) {
     super();
-    this.baseUrl = baseUrl;
-    this.transformer = transformer;
   }
 
   /** @override */
