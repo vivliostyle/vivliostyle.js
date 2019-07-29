@@ -20,13 +20,11 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
-import * as Exprs from "./expr";
-import * as Vtree from "./vtree";
-
-import { DispatchParserHandler } from "./cssparse";
 import * as CssParse from "./cssparse";
-import { ValidatorSet, PropertyReceiver } from "./cssvalid";
-import { DocumentFaces } from "./font";
+import * as CssValid from "./cssvalid";
+import * as Exprs from "./expr";
+import * as Font from "./font";
+import * as Vtree from "./vtree";
 
 export let keyCount: number = 1;
 
@@ -1036,7 +1034,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     context: Exprs.Context,
     container: Vtree.Container,
     name: string,
-    docFaces: DocumentFaces
+    docFaces: Font.DocumentFaces
   ): void {
     this.propagatePropertyToElement(context, container.element, name, docFaces);
   }
@@ -1045,7 +1043,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     context: Exprs.Context,
     element: Element,
     name: string,
-    docFaces: DocumentFaces
+    docFaces: Font.DocumentFaces
   ): void {
     let val = this.getProp(context, name);
     if (val) {
@@ -1260,7 +1258,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     context: Exprs.Context,
     container: Vtree.Container,
     page: Vtree.Page,
-    docFaces: DocumentFaces,
+    docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout
   ): void {
     if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
@@ -1303,7 +1301,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     context: Exprs.Context,
     container: Vtree.Container,
     page: Vtree.Page,
-    docFaces: DocumentFaces
+    docFaces: Font.DocumentFaces
   ): void {
     for (let i = 0; i < passContentProperties.length; i++) {
       this.propagateProperty(
@@ -1318,7 +1316,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   transferSinglUriContentProps(
     context: Exprs.Context,
     element: Element,
-    docFaces: DocumentFaces
+    docFaces: Font.DocumentFaces
   ): void {
     for (let i = 0; i < passSingleUriContentProperties.length; i++) {
       this.propagatePropertyToElement(
@@ -1340,7 +1338,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     column: Vtree.Container,
     columnCount: number,
     clientLayout: Vtree.ClientLayout,
-    docFaces: DocumentFaces
+    docFaces: Font.DocumentFaces
   ): void {
     if (this.vertical) {
       this.calculatedWidth =
@@ -1773,12 +1771,12 @@ export class PartitionInstance<
 
 //--------------------- parsing -----------------------
 export class PageBoxParserHandler extends CssParse.SlaveParserHandler
-  implements PropertyReceiver {
+  implements CssValid.PropertyReceiver {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: DispatchParserHandler,
+    owner: CssParse.DispatchParserHandler,
     public readonly target: PageBox,
-    public readonly validatorSet: ValidatorSet
+    public readonly validatorSet: CssValid.ValidatorSet
   ) {
     super(scope, owner, false);
   }
@@ -1825,9 +1823,9 @@ export class PageBoxParserHandler extends CssParse.SlaveParserHandler
 export class PartitionParserHandler extends PageBoxParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: DispatchParserHandler,
+    owner: CssParse.DispatchParserHandler,
     target: Partition,
-    validatorSet: ValidatorSet
+    validatorSet: CssValid.ValidatorSet
   ) {
     super(scope, owner, target, validatorSet);
   }
@@ -1836,9 +1834,9 @@ export class PartitionParserHandler extends PageBoxParserHandler {
 export class PartitionGroupParserHandler extends PageBoxParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: DispatchParserHandler,
+    owner: CssParse.DispatchParserHandler,
     target: PartitionGroup,
-    validatorSet: ValidatorSet
+    validatorSet: CssValid.ValidatorSet
   ) {
     super(scope, owner, target, validatorSet);
     target.specified["width"] = new CssCasc.CascadeValue(Css.hundredPercent, 0);
@@ -1892,9 +1890,9 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
 export class PageMasterParserHandler extends PageBoxParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: DispatchParserHandler,
+    owner: CssParse.DispatchParserHandler,
     target: PageMaster,
-    validatorSet: ValidatorSet
+    validatorSet: CssValid.ValidatorSet
   ) {
     super(scope, owner, target, validatorSet);
   }

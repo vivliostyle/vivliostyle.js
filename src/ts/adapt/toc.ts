@@ -18,17 +18,15 @@
  *
  * @fileoverview Toc - Table of Contents view.
  */
-import * as Counters from "../vivliostyle/counters";
+import * as Base from "./base";
 import * as Css from "./css";
 import * as Exprs from "./expr";
 import * as Font from "./font";
 import * as Ops from "./ops";
+import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
-
-import { DocumentURLTransformer } from "./base";
-import * as Base from "./base";
-import { Result, newResult, newFrame, Frame } from "./task";
+import * as Counters from "../vivliostyle/counters";
 
 // closed: 25B8
 // open: 25BE
@@ -53,7 +51,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     pref: Exprs.Preferences,
     public readonly rendererFactory: Vgen.CustomRendererFactory,
     public readonly fallbackMap: { [key: string]: string },
-    public readonly documentURLTransformer: DocumentURLTransformer,
+    public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly counterStore: Counters.CounterStore
   ) {
     this.pref = Exprs.clonePreferences(pref);
@@ -88,7 +86,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
       srcElem: Element,
       viewParent: Element,
       computedStyle
-    ): Result<Element> => {
+    ): Task.Result<Element> => {
       const behavior = computedStyle["behavior"];
       if (behavior) {
         switch (behavior.toString()) {
@@ -208,7 +206,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
           element.setAttribute("aria-hidden", "true");
         }
       }
-      return newResult(element as Element);
+      return Task.newResult(element as Element);
     };
   }
 
@@ -218,12 +216,12 @@ export class TOCView implements Vgen.CustomRendererFactory {
     width: number,
     height: number,
     fontSize: number
-  ): Result<Vtree.Page> {
+  ): Task.Result<Vtree.Page> {
     if (this.page) {
-      return newResult(this.page as Vtree.Page);
+      return Task.newResult(this.page as Vtree.Page);
     }
     const self = this;
-    const frame: Frame<Vtree.Page> = newFrame("showTOC");
+    const frame: Task.Frame<Vtree.Page> = Task.newFrame("showTOC");
     const page = new Vtree.Page(elem, elem);
     this.page = page;
 

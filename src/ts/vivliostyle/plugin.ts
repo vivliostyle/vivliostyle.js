@@ -16,13 +16,12 @@
  *
  * @fileoverview Plugin - Plugin mechanism
  */
-import { JSON } from "../adapt/base";
-import { Ident } from "../adapt/css";
-import { Result } from "../adapt/task";
-import { FormattingContext } from "../adapt/vtree";
+import * as Base from "../adapt/base";
+import * as Css from "../adapt/css";
+import * as Task from "../adapt/task";
 import * as LayoutProcessor from "./layoutprocessor";
 import * as Logging from "./logging";
-import { ViewTree, Layout } from "./types";
+import { Layout, ViewTree } from "./types";
 
 /**
  * Type of implemented hooks.
@@ -144,7 +143,7 @@ export type PreProcessSingleDocumentHook = (p1: Document) => any;
 export type PreProcessTextContentHook = (
   p1: ViewTree.NodeContext,
   p2: string
-) => Result<string>;
+) => Task.Result<string>;
 
 export type PreProcessElementStyleHook = (
   p1: ViewTree.NodeContext,
@@ -154,7 +153,7 @@ export type PreProcessElementStyleHook = (
 export type PolyfilledInheritedPropsHook = () => string[];
 
 export type ConfigurationHook = (
-  p1: JSON
+  p1: Base.JSON
 ) => {
   needResize: boolean | null | undefined;
   needRefresh: boolean | null | undefined;
@@ -167,14 +166,14 @@ export type ResolveTextNodeBreakerHook = (
 export type ResolveFormattingContextHook = (
   p1: ViewTree.NodeContext,
   p2: boolean,
-  p3: Ident,
-  p4: Ident,
-  p5: Ident,
+  p3: Css.Ident,
+  p4: Css.Ident,
+  p5: Css.Ident,
   p6: boolean
-) => FormattingContext;
+) => ViewTree.FormattingContext;
 
 export type ResolveLayoutProcessorHook = (
-  p1: FormattingContext
+  p1: ViewTree.FormattingContext
 ) => LayoutProcessor.LayoutProcessor;
 
 export type PostLayoutBlockHook = (

@@ -17,13 +17,13 @@
  *
  * @fileoverview CssParse - CSS Parser.
  */
-import * as Logging from "../vivliostyle/logging";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssTok from "./csstok";
 import * as Exprs from "./expr";
 import * as Net from "./net";
 import * as Task from "./task";
+import * as Logging from "../vivliostyle/logging";
 
 /**
  * User agent stylesheet base specificity.

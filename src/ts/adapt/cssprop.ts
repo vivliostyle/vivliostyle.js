@@ -18,10 +18,10 @@
  * @fileoverview CssProp - Support utilities to extract information
  * from various (parsed) CSS values.
  */
-import * as Logging from "../vivliostyle/logging";
 import * as Css from "./css";
 import * as Exprs from "./expr";
 import * as Geom from "./geom";
+import * as Logging from "../vivliostyle/logging";
 
 //---------------------- value parsers ----------------------------------
 export class SetVisitor extends Css.Visitor {

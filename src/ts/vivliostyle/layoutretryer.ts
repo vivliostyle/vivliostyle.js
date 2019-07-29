@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview LayoutRetryer - Definitions of LayoutRetryer.
+ * @fileoverview LayoutRetryers - Definitions of LayoutRetryer.
  */
 import * as Task from "../adapt/task";
 import * as Asserts from "./asserts";

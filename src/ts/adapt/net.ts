@@ -17,11 +17,11 @@
  *
  * @fileoverview Net - Fetch resource from a URL.
  */
-import * as Logging from "../vivliostyle/logging";
-import { Net, XmlDoc } from "../vivliostyle/types";
 import * as Base from "./base";
 import * as Task from "./task";
-import { Fetcher } from "./taskutil";
+import * as TaskUtil from "./taskutil";
+import * as Logging from "../vivliostyle/logging";
+import { Net, XmlDoc } from "../vivliostyle/types";
 
 /**
  * @enum {string}
@@ -195,7 +195,7 @@ export const createObjectURL = (blob: Blob): string =>
  */
 export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
   resources: { [key: string]: Resource } = {};
-  fetchers: { [key: string]: Fetcher<Resource> } = {};
+  fetchers: { [key: string]: TaskUtil.Fetcher<Resource> } = {};
 
   constructor(
     public readonly parser: (
@@ -267,7 +267,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     url: string,
     opt_required?: boolean,
     opt_message?: string
-  ): Fetcher<Resource> {
+  ): TaskUtil.Fetcher<Resource> {
     url = Base.stripFragment(url);
     const resource = this.resources[url];
     if (resource) {
@@ -276,7 +276,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     let fetcher = this.fetchers[url];
     if (!fetcher) {
       const self = this;
-      fetcher = new Fetcher(
+      fetcher = new TaskUtil.Fetcher(
         () => self.fetchInner(url, opt_required, opt_message),
         `Fetch ${url}`
       );

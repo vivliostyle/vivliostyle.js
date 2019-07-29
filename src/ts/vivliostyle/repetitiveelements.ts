@@ -22,11 +22,11 @@ import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as LayoutHelper from "./layouthelper";
 import * as LayoutProcessor from "./layoutprocessor";
-import { AbstractLayoutRetryer } from "./layoutretryer";
-import { LayoutIterator, EdgeSkipper, PseudoColumn } from "./layoututil";
+import * as LayoutRetryers from "./layoutretryer";
+import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
 import * as Selectors from "./selectors";
-import { repetitiveElementsCache } from "./shared";
+import * as Shared from "./shared";
 import {
   Layout,
   RepetitiveElement,
@@ -95,7 +95,7 @@ export class RepetitiveElementsOwnerFormattingContext
     if (this.repetitiveElements) {
       return;
     }
-    const found = repetitiveElementsCache.some(entry => {
+    const found = Shared.repetitiveElementsCache.some(entry => {
       if (entry.root === this.rootSourceNode) {
         this.repetitiveElements = entry.elements;
         return true;
@@ -107,7 +107,7 @@ export class RepetitiveElementsOwnerFormattingContext
         vertical,
         this.rootSourceNode
       );
-      repetitiveElementsCache.push({
+      Shared.repetitiveElementsCache.push({
         root: this.rootSourceNode,
         elements: this.repetitiveElements
       });
@@ -250,7 +250,11 @@ export class RepetitiveElements
     const rootViewNode = rootNodeContext.viewNode as Element;
     const viewRoot = doc.createElement("div");
     rootViewNode.appendChild(viewRoot);
-    const pseudoColumn = new PseudoColumn(column, viewRoot, rootNodeContext);
+    const pseudoColumn = new LayoutUtil.PseudoColumn(
+      column,
+      viewRoot,
+      rootNodeContext
+    );
     const initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
     pseudoColumn.getColumn().pageBreakType = null;
     this.allowInsertRepeatitiveElements = true;
@@ -693,7 +697,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
   }
 }
 
-export class RepetitiveElementsOwnerLayoutRetryer extends AbstractLayoutRetryer {
+export class RepetitiveElementsOwnerLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   constructor(
     public readonly formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
     private readonly processor: RepetitiveElementsOwnerLayoutProcessor
@@ -728,7 +732,7 @@ export class RepetitiveElementsOwnerLayoutRetryer extends AbstractLayoutRetryer 
   }
 }
 
-export class EntireBlockLayoutStrategy extends EdgeSkipper {
+export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   constructor(
     public readonly formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
     public readonly column: Layout.Column
@@ -769,7 +773,10 @@ export class EntireBlockLayoutStrategy extends EdgeSkipper {
         repetitiveElements.firstContentSourceNode = nodeContext.sourceNode as Element;
       }
     }
-    return EdgeSkipper.prototype.startNonInlineElementNode.call(this, state);
+    return LayoutUtil.EdgeSkipper.prototype.startNonInlineElementNode.call(
+      this,
+      state
+    );
   }
 
   /**
@@ -789,12 +796,15 @@ export class EntireBlockLayoutStrategy extends EdgeSkipper {
     ) {
       return Task.newResult(true);
     } else {
-      return EdgeSkipper.prototype.afterNonInlineElementNode.call(this, state);
+      return LayoutUtil.EdgeSkipper.prototype.afterNonInlineElementNode.call(
+        this,
+        state
+      );
     }
   }
 }
 
-export class FragmentedBlockLayoutStrategy extends EdgeSkipper {
+export class FragmentedBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   constructor(
     public readonly formattingContext: RepetitiveElementsOwnerFormattingContext,
     public readonly column: Layout.Column
@@ -880,7 +890,10 @@ export class RepetitiveElementsOwnerLayoutProcessor
       nodeContext.formattingContext
     );
     const strategy = new EntireBlockLayoutStrategy(formattingContext, column);
-    const iterator = new LayoutIterator(strategy, column.layoutContext);
+    const iterator = new LayoutUtil.LayoutIterator(
+      strategy,
+      column.layoutContext
+    );
     return iterator.iterate(nodeContext);
   }
 

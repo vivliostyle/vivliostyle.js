@@ -17,26 +17,26 @@
  * @fileoverview Table - Table formatting context and layout.
  */
 import * as Base from "../adapt/base";
-import { ident } from "../adapt/css";
+import * as Css from "../adapt/css";
 import * as Task from "../adapt/task";
-import { ViewFactory } from "../adapt/vgen";
+import * as Vgen from "../adapt/vgen";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as BreakPosition from "./breakposition";
 import * as LayoutHelper from "./layouthelper";
 import * as LayoutProcessor from "./layoutprocessor";
-import { AbstractLayoutRetryer } from "./layoutretryer";
+import * as LayoutRetryers from "./layoutretryer";
 import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
 import * as RepetitiveElementImpl from "./repetitiveelements";
-import { registerFragmentIndex } from "./selectors";
+import * as Selectors from "./selectors";
 import {
+  FormattingContextType,
+  FragmentLayoutConstraintType,
   Layout,
   RepetitiveElement,
   Table,
-  ViewTree,
-  FormattingContextType,
-  FragmentLayoutConstraintType
+  ViewTree
 } from "./types";
 
 export class TableRow {
@@ -1105,10 +1105,14 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       ) {
         const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
         const offset = (this.column
-          .layoutContext as ViewFactory).xmldoc.getElementOffset(
+          .layoutContext as Vgen.ViewFactory).xmldoc.getElementOffset(
           tdNodeStep.node as Element
         );
-        registerFragmentIndex(offset, tdNodeStep.fragmentIndex + 1, 1);
+        Selectors.registerFragmentIndex(
+          offset,
+          tdNodeStep.fragmentIndex + 1,
+          1
+        );
       }
     });
   }
@@ -1757,7 +1761,7 @@ function adjustCellHeight(
   Base.setCSSProperty(cellContentElement, "overflow", "hidden");
 }
 
-export class LayoutRetryer extends AbstractLayoutRetryer {
+export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   private tableFormattingContext: any;
 
   constructor(
@@ -2172,7 +2176,7 @@ function resolveFormattingContextHook(
   if (!firstTime) {
     return null;
   }
-  if (display === ident.table) {
+  if (display === Css.ident.table) {
     const parent = nodeContext.parent;
     return new TableFormattingContext(
       parent ? parent.formattingContext : null,

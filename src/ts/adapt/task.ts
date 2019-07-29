@@ -18,8 +18,8 @@
  * @fileoverview Task - Support for asynchronous execution and cooperative
  * multitasking.
  */
-import * as Logging from "../vivliostyle/logging";
 import * as Base from "./base";
+import * as Logging from "../vivliostyle/logging";
 
 /**
  * External timer. Only needed for testing.

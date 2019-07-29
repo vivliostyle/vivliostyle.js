@@ -18,14 +18,14 @@
  */
 import * as Task from "../adapt/task";
 import * as BreakPosition from "./breakposition";
-import { isBlock } from "./display";
+import * as Display from "./display";
 import * as LayoutHelper from "./layouthelper";
 import * as Plugin from "./plugin";
 import {
+  FormattingContextType,
   Layout,
   LayoutProcessor,
-  ViewTree,
-  FormattingContextType
+  ViewTree
 } from "./types";
 
 /**
@@ -243,7 +243,7 @@ Plugin.registerHook(
     } else if (
       nodeContext.establishesBFC ||
       (!nodeContext.formattingContext &&
-        isBlock(display, position, floatSide, isRoot))
+        Display.isBlock(display, position, floatSide, isRoot))
     ) {
       return new BlockFormattingContext(
         parent ? parent.formattingContext : null

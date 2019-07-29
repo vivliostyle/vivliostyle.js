@@ -18,24 +18,21 @@
  *
  * @fileoverview ViewerImpl - Viewer implementation.
  */
-
-import * as Constants from "../vivliostyle/constants";
-import * as Logging from "../vivliostyle/logging";
+import * as Base from "./base";
 import * as Epub from "./epub";
 import * as Exprs from "./expr";
+import * as Font from "./font";
 import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
 import * as Vgen from "./vgen";
-
+import * as Vtree from "./vtree";
 import * as Asserts from "../vivliostyle/asserts";
+import * as Constants from "../vivliostyle/constants";
+import * as Logging from "../vivliostyle/logging";
 import * as Plugin from "../vivliostyle/plugin";
 import * as Profile from "../vivliostyle/profile";
-import { JSON, Event, EventListener } from "./base";
-import * as Base from "./base";
-import { Mapper } from "./font";
-import { waitForFetchers } from "./taskutil";
-import { Page, Spread, PageHyperlinkEvent } from "./vtree";
 
-export type Action = (p1: JSON) => Task.Result<boolean>;
+export type Action = (p1: Base.JSON) => Task.Result<boolean>;
 
 export type ViewportSize = {
   marginLeft: number;
@@ -68,9 +65,9 @@ export type SingleDocumentParam = {
 export class Viewer {
   fontMapper: any;
   kick: () => void;
-  sendCommand: (p1: JSON | string) => void;
+  sendCommand: (p1: Base.JSON | string) => void;
   resizeListener: any;
-  hyperlinkListener: EventListener;
+  hyperlinkListener: Base.EventListener;
   pageRuleStyleElement: any;
   pageSheetSizeAlreadySet: boolean = false;
   renderTask: Task.Task | null = null;
@@ -85,8 +82,8 @@ export class Viewer {
   needResize: boolean;
   needRefresh: boolean;
   viewportSize: ViewportSize | null;
-  currentPage: Page;
-  currentSpread: Spread | null;
+  currentPage: Vtree.Page;
+  currentSpread: Vtree.Spread | null;
   pagePosition: Epub.Position | null;
   fontSize: number;
   zoom: number;
@@ -105,7 +102,7 @@ export class Viewer {
     public readonly window: Window,
     public readonly viewportElement: HTMLElement,
     public readonly instanceId: string,
-    public readonly callbackFn: (p1: JSON) => void
+    public readonly callbackFn: (p1: Base.JSON) => void
   ) {
     const self = this;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
@@ -114,7 +111,7 @@ export class Viewer {
     }
     viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, "loading");
     const document = window.document;
-    this.fontMapper = new Mapper(document.head, viewportElement);
+    this.fontMapper = new Font.Mapper(document.head, viewportElement);
     this.init();
     this.kick = () => {};
     this.sendCommand = () => {};
@@ -177,7 +174,7 @@ export class Viewer {
     });
   }
 
-  private callback(message: JSON): void {
+  private callback(message: Base.JSON): void {
     message["i"] = this.instanceId;
     this.callbackFn(message);
   }
@@ -193,7 +190,7 @@ export class Viewer {
     }
   }
 
-  loadPublication(command: JSON): Task.Result<boolean> {
+  loadPublication(command: Base.JSON): Task.Result<boolean> {
     Profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(Constants.ReadyState.LOADING);
     const url = command["url"] as string;
@@ -233,7 +230,7 @@ export class Viewer {
     return frame.result();
   }
 
-  loadXML(command: JSON): Task.Result<boolean> {
+  loadXML(command: Base.JSON): Task.Result<boolean> {
     Profile.profiler.registerStartTiming("beforeRender");
     this.setReadyState(Constants.ReadyState.LOADING);
     const params: SingleDocumentParam[] = command["url"];
@@ -320,7 +317,7 @@ export class Viewer {
     return value;
   }
 
-  configure(command: JSON): Task.Result<boolean> {
+  configure(command: Base.JSON): Task.Result<boolean> {
     if (typeof command["autoresize"] == "boolean") {
       if (command["autoresize"]) {
         this.viewportSize = null;
@@ -432,7 +429,7 @@ export class Viewer {
     return Task.newResult(true);
   }
 
-  configurePlugins(command: JSON) {
+  configurePlugins(command: Base.JSON) {
     const hooks: Plugin.ConfigurationHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.CONFIGURATION
     );
@@ -447,7 +444,7 @@ export class Viewer {
    * Refresh view when a currently displayed page is replaced (by re-layout
    * caused by cross reference resolutions)
    */
-  pageReplacedListener(evt: Event) {
+  pageReplacedListener(evt: Base.Event) {
     const currentPage = this.currentPage;
     const spread = this.currentSpread;
     const target = evt.target;
@@ -463,7 +460,7 @@ export class Viewer {
   /**
    * Iterate through currently displayed pages and do something
    */
-  private forCurrentPages(fn: (p1: Page) => any) {
+  private forCurrentPages(fn: (p1: Vtree.Page) => any) {
     const pages = [];
     if (this.currentPage) {
       pages.push(this.currentPage);
@@ -499,7 +496,7 @@ export class Viewer {
     this.currentSpread = null;
   }
 
-  private showSinglePage(page: Page) {
+  private showSinglePage(page: Vtree.Page) {
     page.addEventListener("hyperlink", this.hyperlinkListener, false);
     page.addEventListener("replaced", this.pageReplacedListener, false);
     Base.setCSSProperty(page.container, "visibility", "visible");
@@ -507,7 +504,7 @@ export class Viewer {
     page.container.setAttribute("aria-hidden", "false");
   }
 
-  private showPage(page: Page): void {
+  private showPage(page: Vtree.Page): void {
     this.hidePages();
     this.currentPage = page;
     page.container.style.marginLeft = "";
@@ -515,7 +512,7 @@ export class Viewer {
     this.showSinglePage(page);
   }
 
-  private showSpread(spread: Spread) {
+  private showSpread(spread: Vtree.Spread) {
     this.hidePages();
     this.currentSpread = spread;
     if (spread.left && spread.right) {
@@ -568,7 +565,7 @@ export class Viewer {
         const page = self.currentPage;
         const r =
           self.waitForLoading && page.fetchers.length > 0
-            ? waitForFetchers(page.fetchers)
+            ? TaskUtil.waitForFetchers(page.fetchers)
             : Task.newResult(true);
         r.then(() => {
           self.sendLocationNotification(page, cfi).thenFinish(frame);
@@ -728,7 +725,7 @@ export class Viewer {
    * @param sync If true, get the necessary page synchronously (not waiting
    *     another rendering task)
    */
-  private showCurrent(page: Page, sync?: boolean): Task.Result<null> {
+  private showCurrent(page: Vtree.Page, sync?: boolean): Task.Result<null> {
     this.needRefresh = false;
     this.removePageListeners();
     const self = this;
@@ -749,12 +746,12 @@ export class Viewer {
     }
   }
 
-  setPageZoom(page: Page) {
+  setPageZoom(page: Vtree.Page) {
     const zoom = this.getAdjustedZoomFactor(page.dimensions);
     this.viewport.zoom(page.dimensions.width, page.dimensions.height, zoom);
   }
 
-  setSpreadZoom(spread: Spread) {
+  setSpreadZoom(spread: Vtree.Spread) {
     const dim = this.getSpreadDimensions(spread);
     this.viewport.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
   }
@@ -774,7 +771,7 @@ export class Viewer {
   /**
    * Returns width and height of the spread, including the margin between pages.
    */
-  getSpreadDimensions(spread: Spread): { width: number; height: number } {
+  getSpreadDimensions(spread: Vtree.Spread): { width: number; height: number } {
     let width = 0;
     let height = 0;
     if (spread.left) {
@@ -950,7 +947,7 @@ export class Viewer {
   }
 
   private sendLocationNotification(
-    page: Page,
+    page: Vtree.Page,
     cfi: string | null
   ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame(
@@ -984,7 +981,7 @@ export class Viewer {
       : null;
   }
 
-  moveTo(command: JSON): Task.Result<boolean> {
+  moveTo(command: Base.JSON): Task.Result<boolean> {
     let method;
     const self = this;
     if (
@@ -1059,7 +1056,7 @@ export class Viewer {
     return frame.result();
   }
 
-  showTOC(command: JSON): Task.Result<boolean> {
+  showTOC(command: Base.JSON): Task.Result<boolean> {
     const autohide = !!command["autohide"];
     const visibility = command["v"];
     const currentVisibility = this.opfView.isTOCVisible();
@@ -1100,7 +1097,7 @@ export class Viewer {
     }
   }
 
-  runCommand(command: JSON): Task.Result<boolean> {
+  runCommand(command: Base.JSON): Task.Result<boolean> {
     const self = this;
     const actionName = command["a"] || "";
     return Task.handle(
@@ -1124,7 +1121,7 @@ export class Viewer {
     );
   }
 
-  initEmbed(cmd: JSON | string): void {
+  initEmbed(cmd: Base.JSON | string): void {
     let command = maybeParse(cmd);
     let continuation = null;
     const viewer = this;
@@ -1132,7 +1129,7 @@ export class Viewer {
       const frame: Task.Frame<boolean> = Task.newFrame("commandLoop");
       const scheduler = Task.currentTask().getScheduler();
       viewer.hyperlinkListener = evt => {
-        const hrefEvent = evt as PageHyperlinkEvent;
+        const hrefEvent = evt as Vtree.PageHyperlinkEvent;
         const internal =
           hrefEvent.href.charAt(0) === "#" ||
           viewer.packageURL.some(
@@ -1222,7 +1219,7 @@ class RenderingCanceledError extends Error {
   }
 }
 
-export const maybeParse = (cmd: any): JSON => {
+export const maybeParse = (cmd: any): Base.JSON => {
   if (typeof cmd == "string") {
     return Base.stringToJSON(cmd);
   }

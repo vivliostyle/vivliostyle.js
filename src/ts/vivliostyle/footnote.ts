@@ -18,21 +18,21 @@
  */
 import * as PageFloat from "./pagefloat";
 
-import { Ident, ident, Numeric } from "../adapt/css";
-import { LayoutConstraint } from "../adapt/layout";
-import { NodePosition, isSameNodePosition, Container } from "../adapt/vtree";
-import { newResult } from "../adapt/task";
+import * as Css from "../adapt/css";
+import * as Task from "../adapt/task";
+import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
+import { Layout } from "../vivliostyle/types";
 
 const PageFloatFragment = PageFloat.PageFloatFragment;
 
 export class Footnote extends PageFloat.PageFloat {
   constructor(
-    nodePosition: NodePosition,
+    nodePosition: Vtree.NodePosition,
     floatReference: PageFloat.FloatReference,
     flowName: string,
-    public readonly footnotePolicy: Ident | null,
-    floatMinWrapBlock: Numeric | null
+    public readonly footnotePolicy: Css.Ident | null,
+    floatMinWrapBlock: Css.Numeric | null
   ) {
     super(
       nodePosition,
@@ -59,7 +59,7 @@ export class FootnoteFragment extends PageFloatFragment {
   constructor(
     floatReference: PageFloat.FloatReference,
     continuations: PageFloat.PageFloatContinuation[],
-    area: Container,
+    area: Vtree.Container,
     continues: boolean
   ) {
     super(floatReference, "block-end", continuations, area, continues);
@@ -84,12 +84,13 @@ export class FootnoteFragment extends PageFloatFragment {
   }
 }
 
-export class LineFootnotePolicyLayoutConstraint implements LayoutConstraint {
+export class LineFootnotePolicyLayoutConstraint
+  implements Layout.LayoutConstraint {
   constructor(public readonly footnote: Footnote) {}
 
   allowLayout(nodeContext) {
     const nodePosition = nodeContext.toNodePosition();
-    return !isSameNodePosition(nodePosition, this.footnote.nodePosition);
+    return !Vtree.isSameNodePosition(nodePosition, this.footnote.nodePosition);
   }
 }
 
@@ -136,7 +137,7 @@ export class FootnoteLayoutStrategy
       nodeContext.floatMinWrapBlock
     );
     pageFloatLayoutContext.addPageFloat(float);
-    return newResult(float);
+    return Task.newResult(float);
   }
 
   /**
@@ -191,7 +192,7 @@ export class FootnoteLayoutStrategy
   forbid(float, pageFloatLayoutContext) {
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
-      case ident.line: {
+      case Css.ident.line: {
         const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
         pageFloatLayoutContext.addLayoutConstraint(
           constraint,

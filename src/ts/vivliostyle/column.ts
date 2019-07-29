@@ -17,21 +17,20 @@
  * @fileoverview Columns - Control column layout.
  */
 import * as Css from "../adapt/css";
+import * as LayoutImpl from "../adapt/layout";
+import * as Task from "../adapt/task";
+import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
-
-import { Column } from "../adapt/layout";
-import { Result, newFrame, Frame } from "../adapt/task";
-import { LayoutPosition, Container, FlowPosition } from "../adapt/vtree";
-import { PageFloatLayoutContext } from "./pagefloat";
-import { variance } from "./math";
+import * as MathUtil from "./math";
+import * as PageFloat from "./pagefloat";
 
 export type ColumnLayoutResult = {
-  columns: Column[];
-  position: LayoutPosition;
-  columnPageFloatLayoutContexts: undefined | PageFloatLayoutContext[];
+  columns: LayoutImpl.Column[];
+  position: Vtree.LayoutPosition;
+  columnPageFloatLayoutContexts: undefined | PageFloat.PageFloatLayoutContext[];
 };
 
-export type ColumnGenerator = () => Result<ColumnLayoutResult | null>;
+export type ColumnGenerator = () => Task.Result<ColumnLayoutResult | null>;
 
 export class ColumnBalancingTrialResult {
   constructor(
@@ -40,7 +39,7 @@ export class ColumnBalancingTrialResult {
   ) {}
 }
 
-function getBlockSize(container: Container): number {
+function getBlockSize(container: Vtree.Container): number {
   if (container.vertical) {
     return container.width;
   } else {
@@ -48,7 +47,7 @@ function getBlockSize(container: Container): number {
   }
 }
 
-function setBlockSize(container: Container, size) {
+function setBlockSize(container: Vtree.Container, size) {
   if (container.vertical) {
     container.width = size;
   } else {
@@ -60,16 +59,18 @@ export abstract class ColumnBalancer {
   originalContainerBlockSize: any;
 
   constructor(
-    public readonly layoutContainer: Container,
+    public readonly layoutContainer: Vtree.Container,
     public readonly columnGenerator: ColumnGenerator,
-    public readonly regionPageFloatLayoutContext: PageFloatLayoutContext
+    public readonly regionPageFloatLayoutContext: PageFloat.PageFloatLayoutContext
   ) {
     this.originalContainerBlockSize = getBlockSize(layoutContainer);
   }
 
-  balanceColumns(layoutResult: ColumnLayoutResult): Result<ColumnLayoutResult> {
+  balanceColumns(
+    layoutResult: ColumnLayoutResult
+  ): Task.Result<ColumnLayoutResult> {
     const self = this;
-    const frame: Frame<ColumnLayoutResult> = newFrame(
+    const frame: Task.Frame<ColumnLayoutResult> = Task.newFrame(
       "ColumnBalancer#balanceColumns"
     );
     self.preBalance(layoutResult);
@@ -177,7 +178,7 @@ export const canReduceContainerSize = (
 
 export const reduceContainerSize = (
   candidates: ColumnBalancingTrialResult[],
-  container: Container
+  container: Vtree.Container
 ) => {
   const columns = candidates[candidates.length - 1].layoutResult.columns;
   const maxColumnBlockSize = Math.max.apply(
@@ -203,13 +204,13 @@ export const reduceContainerSize = (
 };
 
 export class BalanceLastColumnBalancer extends ColumnBalancer {
-  originalPosition: LayoutPosition | null = null;
+  originalPosition: Vtree.LayoutPosition | null = null;
   foundUpperBound: boolean = false;
 
   constructor(
     columnGenerator: ColumnGenerator,
     regionPageFloatLayoutContext,
-    layoutContainer: Container,
+    layoutContainer: Vtree.Container,
     public readonly columnCount: number
   ) {
     super(layoutContainer, columnGenerator, regionPageFloatLayoutContext);
@@ -228,7 +229,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     this.originalPosition = layoutResult.position;
   }
 
-  private checkPosition(position: LayoutPosition | null): boolean {
+  private checkPosition(position: Vtree.LayoutPosition | null): boolean {
     if (this.originalPosition) {
       return this.originalPosition.isSamePosition(position);
     } else {
@@ -293,7 +294,9 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   }
 }
 
-function isLastColumnLongerThanAnyOtherColumn(columns: Column[]): boolean {
+function isLastColumnLongerThanAnyOtherColumn(
+  columns: LayoutImpl.Column[]
+): boolean {
   if (columns.length <= 1) {
     return false;
   }
@@ -306,7 +309,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   constructor(
     columnGenerator: ColumnGenerator,
     regionPageFloatLayoutContext,
-    layoutContainer: Container
+    layoutContainer: Vtree.Container
   ) {
     super(layoutContainer, columnGenerator, regionPageFloatLayoutContext);
   }
@@ -321,7 +324,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
     const computedBlockSizes = layoutResult.columns
       .filter(c => !c.pageBreakType)
       .map(c => c.computedBlockSize);
-    return variance(computedBlockSizes);
+    return MathUtil.variance(computedBlockSizes);
   }
 
   /**
@@ -343,10 +346,10 @@ export const createColumnBalancer = (
   columnCount: number,
   columnFill: Css.Ident,
   columnGenerator: ColumnGenerator,
-  regionPageFloatLayoutContext: PageFloatLayoutContext,
-  layoutContainer: Container,
-  columns: Column[],
-  flowPosition: FlowPosition
+  regionPageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+  layoutContainer: Vtree.Container,
+  columns: LayoutImpl.Column[],
+  flowPosition: Vtree.FlowPosition
 ): ColumnBalancer | null => {
   if (columnFill === Css.ident.auto) {
     return null;

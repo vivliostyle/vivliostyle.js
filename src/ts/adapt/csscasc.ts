@@ -18,18 +18,18 @@
  * @fileoverview CssCasc - CSS Cascade.
  */
 import * as Base from "./base";
-import * as Asserts from "../vivliostyle/asserts";
-import * as Logging from "../vivliostyle/logging";
-import * as Plugin from "../vivliostyle/plugin";
-import { Matcher, MatcherBuilder, matchANPlusB } from "../vivliostyle/matcher";
-import { CssCasc } from "../vivliostyle/types";
 import * as Css from "./css";
-import * as Exprs from "./expr";
 import * as CssParse from "./cssparse";
 import * as CssProp from "./cssprop";
 import * as CssTok from "./csstok";
 import * as CssValid from "./cssvalid";
-import { ExprContentListener, NodeContext } from "./vtree";
+import * as Exprs from "./expr";
+import * as Vtree from "./vtree";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Logging from "../vivliostyle/logging";
+import * as Matchers from "../vivliostyle/matcher";
+import * as Plugin from "../vivliostyle/plugin";
+import { CssCasc } from "../vivliostyle/types";
 
 export interface ElementStyle extends CssCasc.ElementStyle {}
 
@@ -397,9 +397,9 @@ export const getMutableStyleMap = (
 
 export const getViewConditionalStyleMap = (
   style: ElementStyle
-): { matcher: Matcher; styles: ElementStyleMap }[] => {
+): { matcher: Matchers.Matcher; styles: ElementStyleMap }[] => {
   let r = style["_viewConditionalStyles"] as {
-    matcher: Matcher;
+    matcher: Matchers.Matcher;
     styles: ElementStyleMap;
   }[];
   if (!r) {
@@ -431,7 +431,7 @@ export const mergeIn = (
   specificity: number,
   pseudoelement: string | null,
   regionId: string | null,
-  viewConditionMatcher: Matcher | null
+  viewConditionMatcher: Matchers.Matcher | null
 ): void => {
   const hierarchy = [
     { id: pseudoelement, styleKey: "_pseudos" },
@@ -1088,7 +1088,7 @@ export class IsNthAction extends ChainedAction {
    * interger n
    */
   protected matchANPlusB(order: number): boolean {
-    return matchANPlusB(order, this.a, this.b);
+    return Matchers.matchANPlusB(order, this.a, this.b);
   }
 }
 
@@ -1417,7 +1417,7 @@ export class AbstractConditionItem {
   constructor(
     public readonly condition: string,
     public readonly viewConditionId: string | null,
-    public readonly viewCondition: Matcher
+    public readonly viewCondition: Matchers.Matcher
   ) {}
 
   increment(cascade: CascadeInstance) {
@@ -1428,7 +1428,7 @@ export class AbstractConditionItem {
     cascade.decrement(this.condition, this.viewCondition);
   }
 
-  buildViewConditionMatcher(cascade: CascadeInstance): Matcher {
+  buildViewConditionMatcher(cascade: CascadeInstance): Matchers.Matcher {
     return cascade.buildViewConditionMatcher(this.viewConditionId);
   }
 }
@@ -1438,7 +1438,7 @@ export class DescendantConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matcher
+    viewCondition: Matchers.Matcher
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1481,7 +1481,7 @@ export class ChildConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matcher
+    viewCondition: Matchers.Matcher
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1530,7 +1530,7 @@ export class AdjacentSiblingConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matcher
+    viewCondition: Matchers.Matcher
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1581,7 +1581,7 @@ export class FollowingSiblingConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matcher
+    viewCondition: Matchers.Matcher
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1739,7 +1739,7 @@ export type CounterValues = {
 export interface CounterListener {
   countersOfId(id: string, counters: CounterValues);
 
-  getExprContentListener(): ExprContentListener;
+  getExprContentListener(): Vtree.ExprContentListener;
 }
 
 export interface CounterResolver {
@@ -2568,7 +2568,7 @@ export class CascadeInstance {
   currentFollowingSiblingTypeCounts: {
     [key: string]: { [key: string]: number };
   };
-  viewConditions: { [key: string]: Matcher[] } = {};
+  viewConditions: { [key: string]: Matchers.Matcher[] } = {};
   dependentConditions: string[] = [];
   elementStack: Element[];
   currentDoc: any;
@@ -2599,7 +2599,7 @@ export class CascadeInstance {
     this.stack[this.stack.length - 1].push(item);
   }
 
-  increment(condition: string, viewCondition: Matcher): void {
+  increment(condition: string, viewCondition: Matchers.Matcher): void {
     this.conditions[condition] = (this.conditions[condition] || 0) + 1;
     if (!viewCondition) {
       return;
@@ -2611,7 +2611,7 @@ export class CascadeInstance {
     }
   }
 
-  decrement(condition: string, viewCondition: Matcher): void {
+  decrement(condition: string, viewCondition: Matchers.Matcher): void {
     this.conditions[condition]--;
     if (!this.viewConditions[condition]) {
       return;
@@ -2624,11 +2624,11 @@ export class CascadeInstance {
     }
   }
 
-  buildViewConditionMatcher(viewConditionId: string | null): Matcher {
+  buildViewConditionMatcher(viewConditionId: string | null): Matchers.Matcher {
     let matcher = null;
     if (viewConditionId) {
       Asserts.assert(this.currentElementOffset);
-      matcher = MatcherBuilder.buildViewConditionMatcher(
+      matcher = Matchers.MatcherBuilder.buildViewConditionMatcher(
         this.currentElementOffset,
         viewConditionId
       );
@@ -2639,7 +2639,7 @@ export class CascadeInstance {
         if (conditions && conditions.length > 0) {
           return conditions.length === 1
             ? conditions[0]
-            : MatcherBuilder.buildAnyMatcher([].concat(conditions));
+            : Matchers.MatcherBuilder.buildAnyMatcher([].concat(conditions));
         } else {
           return null;
         }
@@ -2651,9 +2651,9 @@ export class CascadeInstance {
     if (matcher === null) {
       return dependentConditionMatchers.length === 1
         ? dependentConditionMatchers[0]
-        : MatcherBuilder.buildAllMatcher(dependentConditionMatchers);
+        : Matchers.MatcherBuilder.buildAllMatcher(dependentConditionMatchers);
     }
-    return MatcherBuilder.buildAllMatcher(
+    return Matchers.MatcherBuilder.buildAllMatcher(
       [matcher].concat(dependentConditionMatchers)
     );
   }
@@ -3954,7 +3954,7 @@ export const flattenCascadedStyle = (
   context: Exprs.Context,
   regionIds: string[],
   isFootnote: boolean,
-  nodeContext: NodeContext
+  nodeContext: Vtree.NodeContext
 ): { [key: string]: CascadeValue } => {
   const cascMap = {} as { [key: string]: CascadeValue };
   for (const n in style) {

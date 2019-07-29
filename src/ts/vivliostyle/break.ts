@@ -17,7 +17,7 @@
  * @fileoverview Break - Control fragmentation.
  */
 import * as Css from "../adapt/css";
-import { plugin } from "./plugin";
+import * as Plugin from "./plugin";
 
 /**
  * Convert old page-break-* properties to break-* properties with appropriate
@@ -158,4 +158,4 @@ export const startSideValueToBreakValue = (
   }
 };
 
-plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);
+Plugin.plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

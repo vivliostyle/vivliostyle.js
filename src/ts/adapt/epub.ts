@@ -18,33 +18,25 @@
  *
  * @fileoverview Epub - Deal with META-INF/ and .opf files in EPUB container.
  */
-import * as Asserts from "../vivliostyle/asserts";
-import * as Constants from "../vivliostyle/constants";
-import * as Counters from "../vivliostyle/counters";
-import * as Logging from "../vivliostyle/logging";
+import * as Base from "./base";
 import * as Cfi from "./cfi";
 import * as CssCasc from "./csscasc";
+import * as CssParse from "./cssparse";
+import * as CssTok from "./csstok";
+import * as Exprs from "./expr";
 import * as Font from "./font";
 import * as Net from "./net";
 import * as Ops from "./ops";
 import * as Sha1 from "./sha1";
-import * as Toc from "./toc";
-import * as XmlDoc from "./xmldoc";
-
-import { JSON, DocumentURLTransformer } from "./base";
-import * as Base from "./base";
-import { parseValue } from "./cssparse";
-import { Tokenizer } from "./csstok";
-import { Preferences, clonePreferences, letterbox } from "./expr";
-import { Result, Frame, Continuation } from "./task";
 import * as Task from "./task";
-import {
-  CustomRenderer,
-  CustomRendererFactory,
-  DefaultClientLayout,
-  Viewport
-} from "./vgen";
-import { Page, DelayedItem, LayoutPosition, Spread } from "./vtree";
+import * as Toc from "./toc";
+import * as Vgen from "./vgen";
+import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Constants from "../vivliostyle/constants";
+import * as Counters from "../vivliostyle/counters";
+import * as Logging from "../vivliostyle/logging";
 
 export type Position = {
   spineIndex: number;
@@ -57,8 +49,8 @@ export class EPUBDocStore extends Ops.OPSDocStore {
   jsonStore: any;
   opfByURL: { [key: string]: OPFDoc } = {};
   primaryOPFByEPubURL: { [key: string]: OPFDoc } = {};
-  deobfuscators: { [key: string]: (p1: Blob) => Result<Blob> } = {};
-  documents: { [key: string]: Result<XmlDoc.XMLDocHolder> } = {};
+  deobfuscators: { [key: string]: (p1: Blob) => Task.Result<Blob> } = {};
+  documents: { [key: string]: Task.Result<XmlDoc.XMLDocHolder> } = {};
 
   constructor() {
     super(null);
@@ -68,10 +60,10 @@ export class EPUBDocStore extends Ops.OPSDocStore {
   }
 
   makeDeobfuscatorFactory():
-    | ((p1: string) => ((p1: Blob) => Result<Blob>) | null)
+    | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
     | null {
     const self = this;
-    return (url: string): ((p1: Blob) => Result<Blob>) | null => {
+    return (url: string): ((p1: Blob) => Task.Result<Blob>) | null => {
       return self.deobfuscators[url];
     };
   }
@@ -80,7 +72,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     url: string,
     opt_required?: boolean,
     opt_message?: string
-  ): Result<XmlDoc.XMLDocHolder> {
+  ): Task.Result<XmlDoc.XMLDocHolder> {
     return this.plainXMLStore.load(url, opt_required, opt_message);
   }
 
@@ -92,7 +84,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     url: string,
     opt_required?: boolean,
     opt_message?: string
-  ): Result<JSON> {
+  ): Task.Result<Base.JSON> {
     return this.jsonStore.load(url, opt_required, opt_message);
   }
 
@@ -100,8 +92,8 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     this.jsonStore.fetch(url);
   }
 
-  loadPubDoc(url: string, haveZipMetadata: boolean): Result<OPFDoc> {
-    const frame: Frame<OPFDoc> = Task.newFrame("loadPubDoc");
+  loadPubDoc(url: string, haveZipMetadata: boolean): Task.Result<OPFDoc> {
+    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadPubDoc");
 
     Net.ajax(url, null, "HEAD").then(response => {
       if (response.status >= 400) {
@@ -185,8 +177,8 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     return frame.result();
   }
 
-  loadEPUBDoc(url: string, haveZipMetadata: boolean): Result<OPFDoc> {
-    const frame: Frame<OPFDoc> = Task.newFrame("loadEPUBDoc");
+  loadEPUBDoc(url: string, haveZipMetadata: boolean): Task.Result<OPFDoc> {
+    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadEPUBDoc");
     if (!url.endsWith("/")) {
       url = url + "/";
     }
@@ -219,14 +211,14 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     pubURL: string,
     root: string,
     haveZipMetadata: boolean
-  ): Result<OPFDoc> {
+  ): Task.Result<OPFDoc> {
     const self = this;
     const url = pubURL + root;
     let opf = self.opfByURL[url];
     if (opf) {
       return Task.newResult(opf);
     }
-    const frame: Frame<OPFDoc> = Task.newFrame("loadOPF");
+    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadOPF");
     self
       .loadAsPlainXML(url, true, `Failed to fetch EPUB OPF ${url}`)
       .then(opfXML => {
@@ -262,8 +254,8 @@ export class EPUBDocStore extends Ops.OPSDocStore {
     return frame.result();
   }
 
-  loadWebPub(url: string): Result<OPFDoc> {
-    const frame: Frame<OPFDoc> = Task.newFrame("loadWebPub");
+  loadWebPub(url: string): Task.Result<OPFDoc> {
+    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadWebPub");
 
     // Load the primary entry page (X)HTML
     this.load(url).then(xmldoc => {
@@ -432,11 +424,13 @@ export class OPFItem {
 
 export const getOPFItemId = (item: OPFItem): string | null => item.id;
 
-export const makeDeobfuscator = (uid: string): ((p1: Blob) => Result<Blob>) => {
+export const makeDeobfuscator = (
+  uid: string
+): ((p1: Blob) => Task.Result<Blob>) => {
   // TODO: use UTF8 of uid
   const sha1Sum = Sha1.bytesToSHA1Int8(uid);
   return blob => {
-    const frame = Task.newFrame("deobfuscator") as Frame<Blob>;
+    const frame = Task.newFrame("deobfuscator") as Task.Frame<Blob>;
     let head;
     let tail;
     if (blob.slice) {
@@ -496,7 +490,7 @@ export const metaTerms = {
 export const getMetadataComparator = (
   term: string,
   lang: string
-): ((p1: JSON, p2: JSON) => number) => {
+): ((p1: Base.JSON, p2: Base.JSON) => number) => {
   const empty = {};
   return (item1, item2) => {
     let m1;
@@ -535,7 +529,7 @@ export const getMetadataComparator = (
 export const readMetadata = (
   mroot: XmlDoc.NodeList,
   prefixes: string | null
-): JSON => {
+): Base.JSON => {
   // Parse prefix map (if any)
   let prefixMap;
   if (!prefixes) {
@@ -709,7 +703,7 @@ export class OPFDoc {
   prePaginated: boolean = false;
   epageIsRenderedPage: boolean = true;
   epageCountCallback: (p1: number) => void | null = null;
-  metadata: JSON = {};
+  metadata: Base.JSON = {};
   ncxToc: OPFItem = null;
   xhtmlToc: OPFItem = null;
   cover: OPFItem = null;
@@ -728,7 +722,7 @@ export class OPFDoc {
   createDocumentURLTransformer() {
     const self = this;
 
-    class OPFDocumentURLTransformer implements DocumentURLTransformer {
+    class OPFDocumentURLTransformer implements Base.DocumentURLTransformer {
       /**
        * @override
        */
@@ -783,7 +777,7 @@ export class OPFDoc {
    * - "r" - refinement submetadata (organized just like the top-level
    * metadata).
    */
-  getMetadata(): JSON {
+  getMetadata(): Base.JSON {
     return this.metadata;
   }
 
@@ -810,9 +804,9 @@ export class OPFDoc {
   initWithXMLDoc(
     opfXML: XmlDoc.XMLDocHolder,
     encXML: XmlDoc.XMLDocHolder,
-    zipMetadata: JSON,
+    zipMetadata: Base.JSON,
     manifestURL: string
-  ): Result<any> {
+  ): Task.Result<any> {
     const self = this;
     this.opfXML = opfXML;
     this.encXML = encXML;
@@ -1012,7 +1006,7 @@ export class OPFDoc {
 
   countEPages(
     epageCountCallback: ((p1: number) => void) | null
-  ): Result<boolean> {
+  ): Task.Result<boolean> {
     this.epageCountCallback = epageCountCallback;
 
     if (this.epageIsRenderedPage) {
@@ -1024,7 +1018,7 @@ export class OPFDoc {
 
     let epage = 0;
     let i = 0;
-    const frame: Frame<boolean> = Task.newFrame("countEPages");
+    const frame: Task.Frame<boolean> = Task.newFrame("countEPages");
     frame
       .loopWithFrame(loopFrame => {
         if (i === this.spine.length) {
@@ -1099,7 +1093,7 @@ export class OPFDoc {
   initWithWebPubManifest(
     manifestObj: Base.JSON,
     doc?: Document
-  ): Result<boolean> {
+  ): Task.Result<boolean> {
     if (manifestObj["readingProgression"]) {
       this.pageProgression = manifestObj["readingProgression"];
     }
@@ -1181,7 +1175,7 @@ export class OPFDoc {
         }
       }
     );
-    const frame: Frame<boolean> = Task.newFrame("initWithWebPubManifest");
+    const frame: Task.Frame<boolean> = Task.newFrame("initWithWebPubManifest");
     this.initWithChapters(params).then(() => {
       if (tocFound !== -1) {
         this.xhtmlToc = this.items[tocFound];
@@ -1199,9 +1193,9 @@ export class OPFDoc {
   /**
    * @return cfi
    */
-  getCFI(spineIndex: number, offsetInItem: number): Result<string | null> {
+  getCFI(spineIndex: number, offsetInItem: number): Task.Result<string | null> {
     const item = this.spine[spineIndex];
-    const frame: Frame<string | null> = Task.newFrame("getCFI");
+    const frame: Task.Frame<string | null> = Task.newFrame("getCFI");
     this.store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
       const node = xmldoc.getNodeByOffset(offsetInItem);
       let cfi = null;
@@ -1220,11 +1214,11 @@ export class OPFDoc {
     return frame.result();
   }
 
-  resolveFragment(fragstr: string | null): Result<Position | null> {
+  resolveFragment(fragstr: string | null): Task.Result<Position | null> {
     const self = this;
     return Task.handle(
       "resolveFragment",
-      (frame: Frame<Position | null>): void => {
+      (frame: Task.Frame<Position | null>): void => {
         if (!fragstr) {
           frame.finish(null);
           return;
@@ -1263,18 +1257,18 @@ export class OPFDoc {
           });
         });
       },
-      (frame: Frame<Position | null>, err: Error): void => {
+      (frame: Task.Frame<Position | null>, err: Error): void => {
         Logging.logger.warn(err, "Cannot resolve fragment:", fragstr);
         frame.finish(null);
       }
     );
   }
 
-  resolveEPage(epage: number): Result<Position | null> {
+  resolveEPage(epage: number): Task.Result<Position | null> {
     const self = this;
     return Task.handle(
       "resolveEPage",
-      (frame: Frame<Position | null>): void => {
+      (frame: Task.Frame<Position | null>): void => {
         if (epage <= 0) {
           frame.finish({ spineIndex: 0, offsetInItem: 0, pageIndex: -1 });
           return;
@@ -1321,14 +1315,14 @@ export class OPFDoc {
           frame.finish({ spineIndex, offsetInItem: offset, pageIndex: -1 });
         });
       },
-      (frame: Frame<Position | null>, err: Error): void => {
+      (frame: Task.Frame<Position | null>, err: Error): void => {
         Logging.logger.warn(err, "Cannot resolve epage:", epage);
         frame.finish(null);
       }
     );
   }
 
-  getEPageFromPosition(position: Position): Result<number> {
+  getEPageFromPosition(position: Position): Task.Result<number> {
     const item = this.spine[position.spineIndex];
     if (this.epageIsRenderedPage) {
       const epage = item.epage + position.pageIndex;
@@ -1337,7 +1331,7 @@ export class OPFDoc {
     if (position.offsetInItem <= 0) {
       return Task.newResult(item.epage);
     }
-    const frame: Frame<number> = Task.newFrame("getEPage");
+    const frame: Task.Frame<number> = Task.newFrame("getEPage");
     this.store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
       const totalOffset = xmldoc.getTotalOffset();
       const offset = Math.min(totalOffset, position.offsetInItem);
@@ -1348,12 +1342,12 @@ export class OPFDoc {
 }
 
 export type PageAndPosition = {
-  page: Page;
+  page: Vtree.Page;
   position: Position;
 };
 
 export const makePageAndPosition = (
-  page: Page,
+  page: Vtree.Page,
   pageIndex: number
 ): PageAndPosition => ({
   page,
@@ -1368,25 +1362,25 @@ export type OPFViewItem = {
   item: OPFItem;
   xmldoc: XmlDoc.XMLDocHolder;
   instance: Ops.StyleInstance;
-  layoutPositions: LayoutPosition[];
-  pages: Page[];
+  layoutPositions: Vtree.LayoutPosition[];
+  pages: Vtree.Page[];
   complete: boolean;
 };
 
-export class OPFView implements CustomRendererFactory {
+export class OPFView implements Vgen.CustomRendererFactory {
   spineItems: OPFViewItem[] = [];
-  spineItemLoadingContinuations: Continuation<any>[][] = [];
-  pref: Preferences;
-  clientLayout: DefaultClientLayout;
+  spineItemLoadingContinuations: Task.Continuation<any>[][] = [];
+  pref: Exprs.Preferences;
+  clientLayout: Vgen.DefaultClientLayout;
   counterStore: Counters.CounterStore;
   tocAutohide: boolean = false;
   tocView?: Toc.TOCView;
 
   constructor(
     public readonly opf: OPFDoc,
-    public readonly viewport: Viewport,
+    public readonly viewport: Vgen.Viewport,
     public readonly fontMapper: Font.Mapper,
-    pref: Preferences,
+    pref: Exprs.Preferences,
     public readonly pageSheetSizeReporter: (
       p1: { width: number; height: number },
       p2: { [key: string]: { width: number; height: number } },
@@ -1394,12 +1388,12 @@ export class OPFView implements CustomRendererFactory {
       p4: number
     ) => any
   ) {
-    this.pref = clonePreferences(pref);
-    this.clientLayout = new DefaultClientLayout(viewport);
+    this.pref = Exprs.clonePreferences(pref);
+    this.clientLayout = new Vgen.DefaultClientLayout(viewport);
     this.counterStore = new Counters.CounterStore(opf.documentURLTransformer);
   }
 
-  private getPage(position: Position): Page {
+  private getPage(position: Position): Vtree.Page {
     const viewItem = this.spineItems[position.spineIndex];
     return viewItem ? viewItem.pages[position.pageIndex] : null;
   }
@@ -1417,7 +1411,7 @@ export class OPFView implements CustomRendererFactory {
 
   private finishPageContainer(
     viewItem: OPFViewItem,
-    page: Page,
+    page: Vtree.Page,
     pageIndex: number
   ) {
     page.container.style.display = "none";
@@ -1502,15 +1496,15 @@ export class OPFView implements CustomRendererFactory {
    */
   private renderSinglePage(
     viewItem: OPFViewItem,
-    pos: LayoutPosition
-  ): Result<RenderSinglePageResult> {
-    const frame: Frame<RenderSinglePageResult> = Task.newFrame(
+    pos: Vtree.LayoutPosition
+  ): Task.Result<RenderSinglePageResult> {
+    const frame: Task.Frame<RenderSinglePageResult> = Task.newFrame(
       "renderSinglePage"
     );
     let page = this.makePage(viewItem, pos);
     const self = this;
     viewItem.instance.layoutNextPage(page, pos).then(posParam => {
-      pos = posParam as LayoutPosition;
+      pos = posParam as Vtree.LayoutPosition;
       const pageIndex = pos
         ? pos.page - 1
         : viewItem.layoutPositions.length - 1;
@@ -1647,9 +1641,9 @@ export class OPFView implements CustomRendererFactory {
   private findPage(
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
+  ): Task.Result<PageAndPosition | null> {
     const self = this;
-    const frame: Frame<PageAndPosition | null> = Task.newFrame("findPage");
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame("findPage");
     self.getPageViewItem(position.spineIndex).then(viewItem => {
       if (!viewItem) {
         frame.finish(null);
@@ -1697,9 +1691,11 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Renders a page at the specified position.
    */
-  renderPage(position: Position): Result<PageAndPosition | null> {
+  renderPage(position: Position): Task.Result<PageAndPosition | null> {
     const self = this;
-    const frame: Frame<PageAndPosition | null> = Task.newFrame("renderPage");
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
+      "renderPage"
+    );
     self.getPageViewItem(position.spineIndex).then(viewItem => {
       if (!viewItem) {
         frame.finish(null);
@@ -1767,7 +1763,7 @@ export class OPFView implements CustomRendererFactory {
     return frame.result();
   }
 
-  renderAllPages(): Result<PageAndPosition | null> {
+  renderAllPages(): Task.Result<PageAndPosition | null> {
     return this.renderPagesUpto(
       {
         spineIndex: this.opf.spine.length - 1,
@@ -1786,9 +1782,9 @@ export class OPFView implements CustomRendererFactory {
   renderPagesUpto(
     position: Position,
     notAllPages: boolean
-  ): Result<PageAndPosition | null> {
+  ): Task.Result<PageAndPosition | null> {
     const self = this;
-    const frame: Frame<PageAndPosition | null> = Task.newFrame(
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
       "renderPagesUpto"
     );
     if (!position) {
@@ -1829,7 +1825,10 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Move to the first page and render it.
    */
-  firstPage(position: Position, sync: boolean): Result<PageAndPosition | null> {
+  firstPage(
+    position: Position,
+    sync: boolean
+  ): Task.Result<PageAndPosition | null> {
     return this.findPage(
       { spineIndex: 0, pageIndex: 0, offsetInItem: -1 },
       sync
@@ -1839,7 +1838,10 @@ export class OPFView implements CustomRendererFactory {
   /**
    * Move to the last page and render it.
    */
-  lastPage(position: Position, sync: boolean): Result<PageAndPosition | null> {
+  lastPage(
+    position: Position,
+    sync: boolean
+  ): Task.Result<PageAndPosition | null> {
     return this.findPage(
       {
         spineIndex: this.opf.spine.length - 1,
@@ -1855,11 +1857,14 @@ export class OPFView implements CustomRendererFactory {
    * @param sync If true, get the page synchronously (not waiting another
    *     rendering task)
    */
-  nextPage(position: Position, sync: boolean): Result<PageAndPosition | null> {
+  nextPage(
+    position: Position,
+    sync: boolean
+  ): Task.Result<PageAndPosition | null> {
     const self = this;
     let spineIndex = position.spineIndex;
     let pageIndex = position.pageIndex;
-    const frame: Frame<PageAndPosition | null> = Task.newFrame("nextPage");
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame("nextPage");
     self.getPageViewItem(spineIndex).then(viewItem => {
       if (!viewItem) {
         frame.finish(null);
@@ -1904,7 +1909,7 @@ export class OPFView implements CustomRendererFactory {
   previousPage(
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
+  ): Task.Result<PageAndPosition | null> {
     let spineIndex = position.spineIndex;
     let pageIndex = position.pageIndex;
     if (pageIndex == 0) {
@@ -1922,7 +1927,7 @@ export class OPFView implements CustomRendererFactory {
   /**
    * @param page This page should be a currently displayed page.
    */
-  private isRectoPage(page: Page, position: Position): boolean {
+  private isRectoPage(page: Vtree.Page, position: Position): boolean {
     const isLeft = page.side === Constants.PageSide.LEFT;
     const isLTR =
       this.getCurrentPageProgression(position) ===
@@ -1935,13 +1940,13 @@ export class OPFView implements CustomRendererFactory {
    * @param sync If true, get the spread synchronously (not waiting another
    *     rendering task)
    */
-  getSpread(position: Position, sync: boolean): Result<Spread> {
-    const frame: Frame<Spread> = Task.newFrame("getCurrentSpread");
+  getSpread(position: Position, sync: boolean): Task.Result<Vtree.Spread> {
+    const frame: Task.Frame<Vtree.Spread> = Task.newFrame("getCurrentSpread");
     const page = this.getPage(position);
     if (!page) {
       return Task.newResult(
-        /** @type Spread */
-        { left: null, right: null } as Spread
+        /** @type Vtree.Spread */
+        { left: null, right: null } as Vtree.Spread
       );
     }
     const isLeft = page.side === Constants.PageSide.LEFT;
@@ -1979,7 +1984,7 @@ export class OPFView implements CustomRendererFactory {
   nextSpread(
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
+  ): Task.Result<PageAndPosition | null> {
     const page = this.getPage(position);
     if (!page) {
       return Task.newResult(null as PageAndPosition | null);
@@ -2019,7 +2024,7 @@ export class OPFView implements CustomRendererFactory {
   previousSpread(
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
+  ): Task.Result<PageAndPosition | null> {
     const page = this.getPage(position);
     if (!page) {
       return Task.newResult(null as PageAndPosition | null);
@@ -2056,8 +2061,8 @@ export class OPFView implements CustomRendererFactory {
     epage: number,
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
-    const frame: Frame<PageAndPosition | null> = Task.newFrame(
+  ): Task.Result<PageAndPosition | null> {
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
       "navigateToEPage"
     );
     const self = this;
@@ -2078,8 +2083,10 @@ export class OPFView implements CustomRendererFactory {
     fragment: string,
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
-    const frame: Frame<PageAndPosition | null> = Task.newFrame("navigateToCFI");
+  ): Task.Result<PageAndPosition | null> {
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
+      "navigateToCFI"
+    );
     const self = this;
     self.opf.resolveFragment(fragment).then(position => {
       if (position) {
@@ -2098,7 +2105,7 @@ export class OPFView implements CustomRendererFactory {
     href: string,
     position: Position,
     sync: boolean
-  ): Result<PageAndPosition | null> {
+  ): Task.Result<PageAndPosition | null> {
     Logging.logger.debug("Navigate to", href);
     let path = this.opf.getPathFromURL(Base.stripFragment(href));
     if (!path) {
@@ -2139,7 +2146,9 @@ export class OPFView implements CustomRendererFactory {
       }
       return Task.newResult(null as PageAndPosition | null);
     }
-    const frame: Frame<PageAndPosition | null> = Task.newFrame("navigateTo");
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
+      "navigateTo"
+    );
     const self = this;
     self.getPageViewItem(item.spineIndex).then(viewItem => {
       if (!viewItem) {
@@ -2177,7 +2186,7 @@ export class OPFView implements CustomRendererFactory {
     return frame.result();
   }
 
-  makePage(viewItem: OPFViewItem, pos: LayoutPosition): Page {
+  makePage(viewItem: OPFViewItem, pos: Vtree.LayoutPosition): Vtree.Page {
     const viewport = viewItem.instance.viewport;
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     pageCont.setAttribute("data-vivliostyle-page-container", "true");
@@ -2193,7 +2202,7 @@ export class OPFView implements CustomRendererFactory {
     const bleedBox = viewport.document.createElement("div") as HTMLElement;
     bleedBox.setAttribute("data-vivliostyle-bleed-box", "true");
     pageCont.appendChild(bleedBox);
-    const page = new Page(pageCont, bleedBox);
+    const page = new Vtree.Page(pageCont, bleedBox);
     page.spineIndex = viewItem.item.spineIndex;
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);
@@ -2206,14 +2215,20 @@ export class OPFView implements CustomRendererFactory {
       page.registerElementWithId(bleedBox, id);
     }
     if (viewport !== this.viewport) {
-      const matrix = letterbox(
+      const matrix = Exprs.letterbox(
         this.viewport.width,
         this.viewport.height,
         viewport.width,
         viewport.height
       );
-      const cssMatrix = parseValue(null, new Tokenizer(matrix, null), "");
-      page.delayedItems.push(new DelayedItem(pageCont, "transform", cssMatrix));
+      const cssMatrix = CssParse.parseValue(
+        null,
+        new CssTok.Tokenizer(matrix, null),
+        ""
+      );
+      page.delayedItems.push(
+        new Vtree.DelayedItem(pageCont, "transform", cssMatrix)
+      );
     }
     return page;
   }
@@ -2223,7 +2238,7 @@ export class OPFView implements CustomRendererFactory {
     srcElem: Element,
     viewParent: Element,
     computedStyle
-  ): Result<Element> {
+  ): Task.Result<Element> {
     let data = srcElem.getAttribute("data");
     let result: Element | null = null;
     if (data) {
@@ -2292,7 +2307,7 @@ export class OPFView implements CustomRendererFactory {
     srcElem: Element,
     viewParent: Element,
     computedStyle
-  ): Result<Element> {
+  ): Task.Result<Element> {
     // See if MathJax installed, use it if it is.
     const hub = getMathJaxHub();
     if (hub) {
@@ -2304,7 +2319,7 @@ export class OPFView implements CustomRendererFactory {
       span.appendChild(clonedMath);
       const queue = hub["queue"];
       queue["Push"](["Typeset", hub, span]);
-      const frame: Frame<Element> = Task.newFrame("makeMathJaxView");
+      const frame: Task.Frame<Element> = Task.newFrame("makeMathJaxView");
       const continuation = frame.suspend();
       queue["Push"](() => {
         continuation.schedule(span);
@@ -2354,7 +2369,7 @@ export class OPFView implements CustomRendererFactory {
     srcElem: Element,
     viewParent: Element,
     computedStyle
-  ): Result<Element> {
+  ): Task.Result<Element> {
     const doc = viewParent ? viewParent.ownerDocument : this.viewport.document;
     const srcTagName = srcElem.localName;
     let tagName;
@@ -2386,13 +2401,13 @@ export class OPFView implements CustomRendererFactory {
   /**
    * @override
    */
-  makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): CustomRenderer {
+  makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): Vgen.CustomRenderer {
     const self = this;
     return (
       srcElem: Element,
       viewParent: Element,
       computedStyle
-    ): Result<Element> => {
+    ): Task.Result<Element> => {
       if (
         srcElem.localName == "object" &&
         srcElem.namespaceURI == Base.NS.XHTML
@@ -2412,7 +2427,7 @@ export class OPFView implements CustomRendererFactory {
     };
   }
 
-  getPageViewItem(spineIndex: number): Result<OPFViewItem> {
+  getPageViewItem(spineIndex: number): Task.Result<OPFViewItem> {
     const self = this;
     if (spineIndex === -1 || spineIndex >= self.opf.spine.length) {
       return Task.newResult(null as OPFViewItem);
@@ -2421,7 +2436,7 @@ export class OPFView implements CustomRendererFactory {
     if (viewItem) {
       return Task.newResult(viewItem);
     }
-    const frame: Frame<OPFViewItem> = Task.newFrame("getPageViewItem");
+    const frame: Task.Frame<OPFViewItem> = Task.newFrame("getPageViewItem");
 
     // If loading for the item has already been started, suspend and wait for
     // the result.
@@ -2453,7 +2468,7 @@ export class OPFView implements CustomRendererFactory {
         viewportSize.height != viewport.height ||
         viewportSize.fontSize != viewport.fontSize
       ) {
-        viewport = new Viewport(
+        viewport = new Vgen.Viewport(
           viewport.window,
           viewportSize.fontSize,
           viewport.root,
@@ -2561,19 +2576,19 @@ export class OPFView implements CustomRendererFactory {
     return this.spineItems.some(item => item && item.pages.length > 0);
   }
 
-  showTOC(autohide: boolean): Result<Page> {
+  showTOC(autohide: boolean): Task.Result<Vtree.Page> {
     const opf = this.opf;
     const toc = opf.xhtmlToc || opf.ncxToc;
     this.tocAutohide = autohide;
     if (!toc) {
-      return Task.newResult(null as Page);
+      return Task.newResult(null as Vtree.Page);
     }
     if (this.tocView && this.tocView.page) {
       this.tocView.page.container.style.visibility = "visible";
       this.tocView.page.container.setAttribute("aria-hidden", "false");
-      return Task.newResult(/** @type {adapt.vtree.Page} */ this.tocView.page);
+      return Task.newResult(this.tocView.page);
     }
-    const frame: Frame<Page> = Task.newFrame("showTOC");
+    const frame: Task.Frame<Vtree.Page> = Task.newFrame("showTOC");
     if (!this.tocView) {
       this.tocView = new Toc.TOCView(
         opf.store,
@@ -2631,5 +2646,5 @@ export class OPFView implements CustomRendererFactory {
 
 export interface RenderSinglePageResult {
   pageAndPosition: PageAndPosition;
-  nextLayoutPosition: LayoutPosition;
+  nextLayoutPosition: Vtree.LayoutPosition;
 }

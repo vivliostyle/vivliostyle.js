@@ -19,6 +19,24 @@
  * @fileoverview Ops - Render EPUB content files by applying page masters,
  * styling and layout.
  */
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
+import * as CssParse from "./cssparse";
+import * as CssProp from "./cssprop";
+import * as CssStyler from "./cssstyler";
+import * as CssValid from "./cssvalid";
+import * as Exprs from "./expr";
+import * as Font from "./font";
+import * as Geom from "./geom";
+import * as LayoutImpl from "./layout";
+import * as Net from "./net";
+import * as Pm from "./pm";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
+import * as Vgen from "./vgen";
+import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Break from "../vivliostyle/break";
 import * as Columns from "../vivliostyle/column";
@@ -26,32 +44,16 @@ import * as Constants from "../vivliostyle/constants";
 import * as Counters from "../vivliostyle/counters";
 import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
 import * as Logging from "../vivliostyle/logging";
-import * as Pages from "../vivliostyle/page";
 import * as PageFloat from "../vivliostyle/pagefloat";
+import * as Pages from "../vivliostyle/page";
 import * as Plugin from "../vivliostyle/plugin";
 import { Layout } from "../vivliostyle/types";
-import * as Base from "./base";
-import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import { toShape } from "./cssprop";
-import * as CssStyler from "./cssstyler";
-import * as CssValid from "./cssvalid";
-import * as Exprs from "./expr";
-import * as Font from "./font";
-import * as Geom from "./geom";
-import * as LayoutImpl from "./layout";
-import { Response, XMLHttpRequestResponseType, ResourceStore } from "./net";
-import * as Pm from "./pm";
-import * as Task from "./task";
-import { Fetcher } from "./taskutil";
-import * as Vgen from "./vgen";
-import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
 import "../vivliostyle/footnote";
 import "../vivliostyle/table";
 
-export const uaStylesheetBaseFetcher: Fetcher<boolean> = new Fetcher(() => {
+export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
+  boolean
+> = new TaskUtil.Fetcher(() => {
   const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
   CssValid.loadValidatorSet().then(validatorSet => {
     const url = Base.resolveURL("user-agent-Base.css", Base.resourceBaseURL);
@@ -1170,7 +1172,7 @@ export class StyleInstance extends Exprs.Context
         : layoutContainer.width;
     const regionIds = boxInstance.getActiveRegions(self);
     const innerShapeVal = boxInstance.getProp(self, "shape-inside");
-    const innerShape = toShape(
+    const innerShape = CssProp.toShape(
       innerShapeVal,
       0,
       0,
@@ -1971,14 +1973,14 @@ export type StyleSource = {
 };
 
 export const parseOPSResource = (
-  response: Response,
+  response: Net.Response,
   store: XmlDoc.XMLDocStore
 ): Task.Result<XmlDoc.XMLDocHolder> =>
   (store as OPSDocStore).parseOPSResource(response);
 
-export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
+export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   styleByKey: { [key: string]: Style } = {};
-  styleFetcherByKey: { [key: string]: Fetcher<Style> } = {};
+  styleFetcherByKey: { [key: string]: TaskUtil.Fetcher<Style> } = {};
   styleByDocURL: { [key: string]: Style } = {};
   triggersByDocURL: { [key: string]: Vtree.Trigger[] } = {};
   validatorSet: CssValid.ValidatorSet = null;
@@ -1990,7 +1992,7 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
       | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
       | null
   ) {
-    super(parseOPSResource, XMLHttpRequestResponseType.DOCUMENT);
+    super(parseOPSResource, Net.XMLHttpRequestResponseType.DOCUMENT);
   }
 
   init(
@@ -2073,7 +2075,7 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
     });
   }
 
-  parseOPSResource(response: Response): Task.Result<XmlDoc.XMLDocHolder> {
+  parseOPSResource(response: Net.Response): Task.Result<XmlDoc.XMLDocHolder> {
     const frame: Task.Frame<XmlDoc.XMLDocHolder> = Task.newFrame(
       "OPSDocStore.load"
     );
@@ -2239,7 +2241,7 @@ export class OPSDocStore extends ResourceStore<XmlDoc.XMLDocHolder> {
         }
         let fetcher = self.styleFetcherByKey[key];
         if (!fetcher) {
-          fetcher = new Fetcher(() => {
+          fetcher = new TaskUtil.Fetcher(() => {
             const innerFrame: Task.Frame<Style> = Task.newFrame(
               "fetchStylesheet"
             );

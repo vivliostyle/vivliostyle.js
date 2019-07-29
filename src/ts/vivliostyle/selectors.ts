@@ -18,21 +18,24 @@
  */
 import * as Base from "../adapt/base";
 import * as Task from "../adapt/task";
-import { ChunkPosition, ShadowContext } from "../adapt/vtree";
+import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as LayoutHelper from "./layouthelper";
-import { NthFragmentMatcher } from "./matcher";
+import * as Matchers from "./matcher";
 import * as PseudoElement from "./pseudoelement";
 import {
+  FragmentLayoutConstraintType,
   Layout,
   Selectors,
-  ViewTree,
-  FragmentLayoutConstraintType
+  ViewTree
 } from "./types";
 
-export const registerFragmentIndex = NthFragmentMatcher.registerFragmentIndex;
-
-export const clearFragmentIndices = NthFragmentMatcher.clearFragmentIndices;
+export const isInstanceOfAfterIfContinuesLayoutConstraint =
+  Selectors.isInstanceOfAfterIfContinuesLayoutConstraint;
+export const registerFragmentIndex =
+  Matchers.NthFragmentMatcher.registerFragmentIndex;
+export const clearFragmentIndices =
+  Matchers.NthFragmentMatcher.clearFragmentIndices;
 
 // FIXME: When importing layoututil module statically, it causes a circular dependency.
 let LayoutUtil: typeof import("./layoututil");
@@ -93,11 +96,11 @@ export class AfterIfContinues implements Selectors.AfterIfContinues {
       after: false,
       preprocessedTextContent: null
     };
-    return new ChunkPosition(nodePosition as any);
+    return new Vtree.ChunkPosition(nodePosition as any);
   }
 
   private createShadowContext(root: Element): ViewTree.ShadowContext {
-    return new ShadowContext(
+    return new Vtree.ShadowContext(
       this.sourceNode,
       root,
       null,

@@ -17,10 +17,10 @@
  * @fileoverview PseudoElement
  */
 import * as Base from "../adapt/base";
-import { Context } from "../adapt/expr";
 import * as Css from "../adapt/css";
 import * as CssCasc from "../adapt/csscasc";
 import * as CssStyler from "../adapt/cssstyler";
+import * as Exprs from "../adapt/expr";
 import * as Vtree from "../adapt/vtree";
 import { PseudoElement } from "./types";
 
@@ -65,7 +65,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     public readonly element: Element,
     public style: CssCasc.ElementStyle,
     public styler: CssStyler.AbstractStyler,
-    public readonly context: Context,
+    public readonly context: Exprs.Context,
     public readonly exprContentListener: Vtree.ExprContentListener
   ) {}
 

@@ -16,14 +16,14 @@
  *
  * @fileoverview PageFloat - CSS Page Floats
  */
-import { Numeric, ident, Val } from "../adapt/css";
+import * as Css from "../adapt/css";
 import * as Geom from "../adapt/geom";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as Logging from "./logging";
 import * as Logical from "./logical";
-import { Size, getSize } from "./sizing";
+import * as Sizing from "./sizing";
 import { Layout, PageFloats, ViewTree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
@@ -107,7 +107,7 @@ export class PageFloat implements PageFloats.PageFloat {
     public readonly floatSide: string,
     public readonly clearSide: string | null,
     public readonly flowName: string,
-    public readonly floatMinWrapBlock: Numeric | null
+    public readonly floatMinWrapBlock: Css.Numeric | null
   ) {}
 
   getOrder(): number {
@@ -264,8 +264,8 @@ export type PageFloatPlacementCondition = PageFloats.PageFloatPlacementCondition
 export class PageFloatLayoutContext
   implements PageFloats.PageFloatLayoutContext {
   private children: PageFloatLayoutContext[] = [];
-  writingMode: Val;
-  direction: Val;
+  writingMode: Css.Val;
+  direction: Css.Val;
   private invalidated: boolean = false;
   private floatStore: any;
   private forbiddenFloats: PageFloatID[] = [];
@@ -283,15 +283,15 @@ export class PageFloatLayoutContext
     private container: ViewTree.Container,
     public readonly flowName: string | null,
     public readonly generatingNodePosition: ViewTree.NodePosition | null,
-    writingMode: Val | null,
-    direction: Val | null
+    writingMode: Css.Val | null,
+    direction: Css.Val | null
   ) {
     if (parent) {
       parent.children.push(this);
     }
     this.writingMode =
-      writingMode || (parent && parent.writingMode) || ident.horizontal_tb;
-    this.direction = direction || (parent && parent.direction) || ident.ltr;
+      writingMode || (parent && parent.writingMode) || Css.ident.horizontal_tb;
+    this.direction = direction || (parent && parent.direction) || Css.ident.ltr;
     this.floatStore = parent ? parent.floatStore : new PageFloatStore();
     const previousSibling = this.getPreviousSibling();
     this.floatsDeferredFromPrevious = previousSibling
@@ -1245,9 +1245,9 @@ export class PageFloatLayoutContext
         logicalFloatSide === "inline-start" ||
         logicalFloatSide === "inline-end"
       ) {
-        inlineSize = getSize(area.clientLayout, area.element, [
-          Size.FIT_CONTENT_INLINE_SIZE
-        ])[Size.FIT_CONTENT_INLINE_SIZE];
+        inlineSize = Sizing.getSize(area.clientLayout, area.element, [
+          Sizing.Size.FIT_CONTENT_INLINE_SIZE
+        ])[Sizing.Size.FIT_CONTENT_INLINE_SIZE];
       } else if (area.adjustContentRelativeSize) {
         inlineSize = area.getContentInlineSize();
       } else {

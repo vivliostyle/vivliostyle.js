@@ -20,35 +20,31 @@
  * Instead it goes through the layout interface that gives it one view tree
  * node at a time.
  */
+import * as Base from "./base";
+import * as Css from "./css";
+import * as Geom from "./geom";
+import * as Task from "./task";
+import * as Vgen from "./vgen";
+import * as Vtree from "./vtree";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Break from "../vivliostyle/break";
 import * as BreakPosition from "../vivliostyle/breakposition";
-import { resolveNewIndex } from "../vivliostyle/diff";
+import * as Diff from "../vivliostyle/diff";
 import * as LayoutHelper from "../vivliostyle/layouthelper";
 import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as LayoutRetryer from "../vivliostyle/layoutretryer";
+import * as LayoutRetryers from "../vivliostyle/layoutretryer";
 import * as Logging from "../vivliostyle/logging";
 import * as PageFloat from "../vivliostyle/pagefloat";
 import * as Plugin from "../vivliostyle/plugin";
-import {
-  processAfterIfContinues,
-  processAfterIfContinuesOfAncestors
-} from "../vivliostyle/selectors";
-import { Size, getSize } from "../vivliostyle/sizing";
-import { clearRepetitiveElementsCache } from "../vivliostyle/shared";
+import * as Selectors from "../vivliostyle/selectors";
+import * as Shared from "../vivliostyle/shared";
+import * as Sizing from "../vivliostyle/sizing";
 import {
   Layout,
   RepetitiveElement,
-  Selectors,
   Table,
   ViewTree
 } from "../vivliostyle/types";
-import * as Base from "./base";
-import { ident, Val } from "./css";
-import * as Geom from "./geom";
-import * as Task from "./task";
-import * as Vtree from "./vtree";
-import { ViewFactory } from "./vgen";
 
 export const mediaTags = {
   img: true,
@@ -307,7 +303,10 @@ export class Column extends Vtree.Container implements Layout.Column {
 
   calculateOffsetInNodeForNodeContext(position: ViewTree.NodePosition): number {
     return position.preprocessedTextContent
-      ? resolveNewIndex(position.preprocessedTextContent, position.offsetInNode)
+      ? Diff.resolveNewIndex(
+          position.preprocessedTextContent,
+          position.offsetInNode
+        )
       : position.offsetInNode;
   }
 
@@ -410,7 +409,7 @@ export class Column extends Vtree.Container implements Layout.Column {
     atUnforcedBreak?: boolean
   ): Task.Result<ViewTree.NodeContext> {
     const cont = this.layoutContext.nextInTree(position, atUnforcedBreak);
-    return processAfterIfContinues(cont, this);
+    return Selectors.processAfterIfContinues(cont, this);
   }
 
   /**
@@ -1290,7 +1289,7 @@ export class Column extends Vtree.Container implements Layout.Column {
 
   resolveFloatReferenceFromColumnSpan(
     floatReference: PageFloat.FloatReference,
-    columnSpan: Val,
+    columnSpan: Css.Val,
     nodeContext: ViewTree.NodeContext
   ): Task.Result<PageFloat.FloatReference> {
     const self = this;
@@ -1304,12 +1303,12 @@ export class Column extends Vtree.Container implements Layout.Column {
     const isRegionWider =
       columnContext.getContainer().width < regionContext.getContainer().width;
     if (isRegionWider && floatReference === PageFloat.FloatReference.COLUMN) {
-      if (columnSpan === ident.auto) {
+      if (columnSpan === Css.ident.auto) {
         this.buildDeepElementView(nodeContext.copy()).then(position => {
           const element = position.viewNode as Element;
-          let inlineSize = getSize(self.clientLayout, element, [
-            Size.MIN_CONTENT_INLINE_SIZE
-          ])[Size.MIN_CONTENT_INLINE_SIZE];
+          let inlineSize = Sizing.getSize(self.clientLayout, element, [
+            Sizing.Size.MIN_CONTENT_INLINE_SIZE
+          ])[Sizing.Size.MIN_CONTENT_INLINE_SIZE];
           const margin = self.getComputedMargin(element);
           if (self.vertical) {
             inlineSize += margin.top + margin.bottom;
@@ -1322,7 +1321,7 @@ export class Column extends Vtree.Container implements Layout.Column {
             frame.finish(floatReference);
           }
         });
-      } else if (columnSpan === ident.all) {
+      } else if (columnSpan === Css.ident.all) {
         frame.finish(PageFloat.FloatReference.REGION);
       } else {
         frame.finish(floatReference);
@@ -3315,7 +3314,7 @@ export class Column extends Vtree.Container implements Layout.Column {
       if (
         !(
           this.element === last.parentNode &&
-          (this.layoutContext as ViewFactory).isPseudoelement(last)
+          (this.layoutContext as Vgen.ViewFactory).isPseudoelement(last)
         )
       ) {
         this.element.removeChild(last);
@@ -3526,7 +3525,7 @@ export const resolveHyphenateCharacter = (
   (nodeContext.parent && nodeContext.parent.hyphenateCharacter) ||
   "-";
 
-export class ColumnLayoutRetryer extends LayoutRetryer.AbstractLayoutRetryer {
+export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   breakAfter: any;
   private initialPageBreakType: string | null = null;
   initialComputedBlockSize: number = 0;
@@ -3560,7 +3559,7 @@ export class ColumnLayoutRetryer extends LayoutRetryer.AbstractLayoutRetryer {
   prepareLayout(nodeContext, column) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
-      clearRepetitiveElementsCache();
+      Shared.clearRepetitiveElementsCache();
     }
   }
 
@@ -3615,14 +3614,16 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
       "DefaultLayoutMode.doLayout"
     );
 
-    processAfterIfContinuesOfAncestors(nodeContext, column).then(() => {
-      column
-        .doLayout(nodeContext, this.leadingEdge, this.breakAfter)
-        .then(result => {
-          this.context.overflownNodeContext = result.overflownNodeContext;
-          frame.finish(result.nodeContext);
-        });
-    });
+    Selectors.processAfterIfContinuesOfAncestors(nodeContext, column).then(
+      () => {
+        column
+          .doLayout(nodeContext, this.leadingEdge, this.breakAfter)
+          .then(result => {
+            this.context.overflownNodeContext = result.overflownNodeContext;
+            frame.finish(result.nodeContext);
+          });
+      }
+    );
     return frame.result();
   }
 

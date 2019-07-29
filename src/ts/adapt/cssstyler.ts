@@ -18,19 +18,19 @@
  * @fileoverview CssStyler - Apply CSS cascade to a document incrementally and
  * cache the result.
  */
-import * as Asserts from "../vivliostyle/asserts";
-import * as Break from "../vivliostyle/break";
-import { isBlock } from "../vivliostyle/display";
-import { CssStyler } from "../vivliostyle/types";
 import * as Base from "./base";
-import { Val, Ident, ident } from "./css";
+import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssProp from "./cssprop";
-import { ValidatorSet, ValueMap } from "./cssvalid";
+import * as CssValid from "./cssvalid";
 import * as Exprs from "./expr";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Break from "../vivliostyle/break";
+import * as Display from "../vivliostyle/display";
+import { CssStyler } from "../vivliostyle/types";
 
 export class SlipRange {
   endStuckFixed: number;
@@ -145,7 +145,7 @@ export class Box {
   flowName: any;
   isBlockValue: boolean | null = null;
   hasBoxValue: boolean | null = null;
-  styleValues: any = {} as { [key: string]: Val };
+  styleValues: any = {} as { [key: string]: Css.Val };
   beforeBox: Box = null;
   afterBox: Box = null;
   breakBefore: string | null = null;
@@ -231,7 +231,7 @@ export class Box {
     }
   }
 
-  styleValue(name: string, defaultValue?: Val): Val | null {
+  styleValue(name: string, defaultValue?: Css.Val): Css.Val | null {
     if (!(name in this.styleValues)) {
       const cv = this.style[name];
       this.styleValues[name] = cv
@@ -241,16 +241,21 @@ export class Box {
     return this.styleValues[name];
   }
 
-  displayValue(): Val {
-    return this.styleValue("display", ident.inline);
+  displayValue(): Css.Val {
+    return this.styleValue("display", Css.ident.inline);
   }
 
   isBlock(): boolean {
     if (this.isBlockValue === null) {
-      const display = this.displayValue() as Ident;
-      const position = this.styleValue("position") as Ident;
-      const float = this.styleValue("float") as Ident;
-      this.isBlockValue = isBlock(display, position, float, this.isRoot);
+      const display = this.displayValue() as Css.Ident;
+      const position = this.styleValue("position") as Css.Ident;
+      const float = this.styleValue("float") as Css.Ident;
+      this.isBlockValue = Display.isBlock(
+        display,
+        position,
+        float,
+        this.isRoot
+      );
     }
     return this.isBlockValue;
   }
@@ -258,7 +263,7 @@ export class Box {
   hasBox(): boolean {
     if (this.hasBoxValue === null) {
       this.hasBoxValue =
-        this.isParentBoxDisplayed && this.displayValue() !== ident.none;
+        this.isParentBoxDisplayed && this.displayValue() !== Css.ident.none;
     }
     return this.hasBoxValue;
   }
@@ -312,7 +317,7 @@ export class BoxStack {
    * Returns if the last box in the stack is displayed.
    */
   isCurrentBoxDisplayed(): boolean {
-    return this.stack.every(box => box.displayValue() !== ident.none);
+    return this.stack.every(box => box.displayValue() !== Css.ident.none);
   }
 
   /**
@@ -363,7 +368,7 @@ export class BoxStack {
     const box = this.lastBox();
     if ((this.atBlockStart || this.atFlowStart) && box.hasBox()) {
       const whitespaceValue = box
-        .styleValue("white-space", ident.normal)
+        .styleValue("white-space", Css.ident.normal)
         .toString();
       const whitespace = Vtree.whitespaceFromPropertyValue(whitespaceValue);
       Asserts.assert(whitespace !== null);
@@ -468,7 +473,7 @@ export class Styler implements AbstractStyler {
     public readonly scope: Exprs.LexicalScope,
     public readonly context: Exprs.Context,
     public readonly primaryFlows: { [key: string]: boolean },
-    public readonly validatorSet: ValidatorSet,
+    public readonly validatorSet: CssValid.ValidatorSet,
     public readonly counterListener: CssCasc.CounterListener,
     counterResolver: CssCasc.CounterResolver
   ) {
@@ -502,12 +507,19 @@ export class Styler implements AbstractStyler {
     this.replayFlowElementsFromOffset(-1);
   }
 
-  hasProp(style: CssCasc.ElementStyle, map: ValueMap, name: string): boolean {
+  hasProp(
+    style: CssCasc.ElementStyle,
+    map: CssValid.ValueMap,
+    name: string
+  ): boolean {
     const cascVal = style[name];
     return cascVal && cascVal.evaluate(this.context) !== map[name];
   }
 
-  transferPropsToRoot(srcStyle: CssCasc.ElementStyle, map: ValueMap): void {
+  transferPropsToRoot(
+    srcStyle: CssCasc.ElementStyle,
+    map: CssValid.ValueMap
+  ): void {
     for (const pname in map) {
       const cascval = srcStyle[pname];
       if (cascval) {
@@ -544,17 +556,17 @@ export class Styler implements AbstractStyler {
         "background-color"
       )
         ? elemStyle["background-color"].evaluate(this.context)
-        : (null as Val);
+        : (null as Css.Val);
       const backgroundImage = this.hasProp(
         elemStyle,
         this.validatorSet.backgroundProps,
         "background-image"
       )
         ? elemStyle["background-image"].evaluate(this.context)
-        : (null as Val);
+        : (null as Css.Val);
       if (
-        (backgroundColor && backgroundColor !== ident.inherit) ||
-        (backgroundImage && backgroundImage !== ident.inherit)
+        (backgroundColor && backgroundColor !== Css.ident.inherit) ||
+        (backgroundImage && backgroundImage !== Css.ident.inherit)
       ) {
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
         this.rootBackgroundAssigned = true;
@@ -968,7 +980,7 @@ export class Styler implements AbstractStyler {
           );
         }
         if (this.primary) {
-          if (box.displayValue() === ident.none) {
+          if (box.displayValue() === Css.ident.none) {
             this.primary = false;
           }
         }

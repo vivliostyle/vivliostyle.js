@@ -17,32 +17,27 @@
  *
  * @fileoverview Vgen - View tree generator.
  */
-import * as Asserts from "../vivliostyle/asserts";
-import { restoreNewText, diffChars } from "../vivliostyle/diff";
-import * as Display from "../vivliostyle/display";
-import { NthFragmentMatcher } from "../vivliostyle/matcher";
-import * as PageFloat from "../vivliostyle/pagefloat";
-import * as Plugin from "../vivliostyle/plugin";
-import * as PseudoElement from "../vivliostyle/pseudoelement";
-import { RepetitiveElementsOwnerFormattingContext } from "../vivliostyle/repetitiveelements";
-import * as Selectors from "../vivliostyle/selectors";
-import * as Urls from "../vivliostyle/urls";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
-import { UrlTransformVisitor } from "./cssprop";
+import * as CssProp from "./cssprop";
 import * as CssStyler from "./cssstyler";
-import {
-  Context,
-  defaultUnitSizes,
-  isFontRelativeLengthUnit,
-  needUnitConversion
-} from "./expr";
+import * as Exprs from "./expr";
 import * as Font from "./font";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Diff from "../vivliostyle/diff";
+import * as Display from "../vivliostyle/display";
+import * as Matchers from "../vivliostyle/matcher";
+import * as PageFloat from "../vivliostyle/pagefloat";
+import * as Plugin from "../vivliostyle/plugin";
+import * as PseudoElement from "../vivliostyle/pseudoelement";
+import * as RepetitiveElementImpl from "../vivliostyle/repetitiveelements";
+import * as Selectors from "../vivliostyle/selectors";
+import * as Urls from "../vivliostyle/urls";
 
 const namespacePrefixMap = {};
 
@@ -146,7 +141,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
   constructor(
     public readonly flowName: string,
-    public readonly context: Context,
+    public readonly context: Exprs.Context,
     public readonly viewport: Viewport,
     public readonly styler: CssStyler.Styler,
     public readonly regionIds: string[],
@@ -191,7 +186,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     cascStyle: CssCasc.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
-    context: Context,
+    context: Exprs.Context,
     parentShadow: Vtree.ShadowContext,
     subShadow: Vtree.ShadowContext
   ): Vtree.ShadowContext {
@@ -349,7 +344,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     cascStyle: CssCasc.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
-    context: Context,
+    context: Exprs.Context,
     shadowContext: Vtree.ShadowContext
   ): Task.Result<Vtree.ShadowContext> {
     const self = this;
@@ -601,7 +596,7 @@ export class ViewFactory extends Base.SimpleEventTarget
               case "dpcm":
               case "dppx":
                 props[name] =
-                  numericVal.num * defaultUnitSizes[numericVal.unit];
+                  numericVal.num * Exprs.defaultUnitSizes[numericVal.unit];
                 break;
             }
           } else {
@@ -659,7 +654,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     let elementStyle = styler.getStyle(element, false);
     if (!self.nodeContext.shadowContext) {
       const offset = this.xmldoc.getElementOffset(element);
-      NthFragmentMatcher.registerFragmentIndex(
+      Matchers.NthFragmentMatcher.registerFragmentIndex(
         offset,
         self.nodeContext.fragmentIndex,
         0
@@ -1342,7 +1337,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     element: Element,
     cascStyle: CssCasc.ElementStyle,
     styler: CssStyler.AbstractStyler,
-    context: Context
+    context: Exprs.Context
   ) {
     const pseudoMap = this.getPseudoMap(
       cascStyle,
@@ -1559,19 +1554,19 @@ export class ViewFactory extends Base.SimpleEventTarget
       }
       if (
         this.nodeContext.formattingContext instanceof
-          RepetitiveElementsOwnerFormattingContext &&
+          RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext &&
         !this.nodeContext.belongsTo(this.nodeContext.formattingContext)
       ) {
         return;
       }
       const parent = this.nodeContext.parent;
       const parentFormattingContext = parent && parent.formattingContext;
-      this.nodeContext.formattingContext = new RepetitiveElementsOwnerFormattingContext(
+      this.nodeContext.formattingContext = new RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext(
         parentFormattingContext,
         this.nodeContext.sourceNode as Element
       );
       (this.nodeContext
-        .formattingContext as RepetitiveElementsOwnerFormattingContext).initializeRepetitiveElements(
+        .formattingContext as RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext).initializeRepetitiveElements(
         this.nodeContext.vertical
       );
       return;
@@ -1602,7 +1597,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
     this.preprocessTextContent().then(() => {
       const offsetInNode = self.offsetInNode || 0;
-      const textContent = restoreNewText(
+      const textContent = Diff.restoreNewText(
         self.nodeContext.preprocessedTextContent
       ).substr(offsetInNode);
       self.viewNode = document.createTextNode(textContent);
@@ -1636,7 +1631,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         );
       })
       .then(() => {
-        self.nodeContext.preprocessedTextContent = diffChars(
+        self.nodeContext.preprocessedTextContent = Diff.diffChars(
           originl,
           textContent
         );
@@ -1814,7 +1809,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
       // no children - was there text content?
       if (pos.sourceNode.nodeType != 1) {
-        const content = restoreNewText(pos.preprocessedTextContent);
+        const content = Diff.restoreNewText(pos.preprocessedTextContent);
         boxOffset += content.length - 1 - pos.offsetInNode;
       }
       pos = pos.modify();
@@ -1893,11 +1888,14 @@ export class ViewFactory extends Base.SimpleEventTarget
       }
       let value = computedStyle[propName];
       value = value.visit(
-        new UrlTransformVisitor(this.xmldoc.url, this.documentURLTransformer)
+        new CssProp.UrlTransformVisitor(
+          this.xmldoc.url,
+          this.documentURLTransformer
+        )
       );
       if (
         value.isNumeric() &&
-        needUnitConversion((value as Css.Numeric).unit)
+        Exprs.needUnitConversion((value as Css.Numeric).unit)
       ) {
         // font-size for the root element is already converted to px
         value = Css.convertNumericToPx(value, this.context);
@@ -2084,7 +2082,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   convertLengthToPx(numeric, viewNode, clientLayout) {
     const num = numeric.num;
     const unit = numeric.unit;
-    if (isFontRelativeLengthUnit(unit)) {
+    if (Exprs.isFontRelativeLengthUnit(unit)) {
       let elem = viewNode;
       while (elem && elem.nodeType !== 1) {
         elem = elem.parentNode;

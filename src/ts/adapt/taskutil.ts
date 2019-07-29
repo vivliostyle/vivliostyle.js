@@ -18,10 +18,9 @@
  * @fileoverview TaskUtil - Utilities asynchronous execution and cooperative
  * multitasking.
  */
-import * as Logging from "../vivliostyle/logging";
-import * as Task from "./task";
-
 import * as Base from "./base";
+import * as Task from "./task";
+import * as Logging from "../vivliostyle/logging";
 
 /**
  * A class that can fetch or compute a resource that may be needed by multiple

@@ -20,7 +20,6 @@
 import * as Base from "../adapt/base";
 import * as ViewerImpl from "../adapt/viewer";
 import * as Constants from "./constants";
-
 import * as Profile from "./profile";
 
 const PageProgression = Constants.PageProgression;

@@ -1,5 +1,3 @@
-import { DocumentURLTransformer } from "../adapt/base";
-
 /**
  * Copyright 2015 Trim-marks Inc.
  *

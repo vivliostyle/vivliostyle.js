@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Matcher - Definitions of Matcher.
+ * @fileoverview Matchers - Definitions of Matcher.
  */
 import * as Asserts from "./asserts";
 

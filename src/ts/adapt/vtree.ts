@@ -17,10 +17,6 @@
  *
  * @fileoverview Vtree - Basic view tree data structures and support utilities.
  */
-import * as Asserts from "../vivliostyle/asserts";
-import * as Constants from "../vivliostyle/constants";
-import * as Diff from "../vivliostyle/diff";
-import { PageFloats, Selectors, ViewTree, XmlDoc } from "../vivliostyle/types";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssParse from "./cssparse";
@@ -29,6 +25,10 @@ import * as CssTok from "./csstok";
 import * as Exprs from "./expr";
 import * as Geom from "./geom";
 import * as TaskUtil from "./taskutil";
+import * as Asserts from "../vivliostyle/asserts";
+import * as Constants from "../vivliostyle/constants";
+import * as Diff from "../vivliostyle/diff";
+import { PageFloats, Selectors, ViewTree, XmlDoc } from "../vivliostyle/types";
 
 export const delayedProps = {
   transform: true,

@@ -17,15 +17,14 @@
  *
  * @fileoverview Font - Deal with embedded fonts.
  */
-import * as Logging from "../vivliostyle/logging";
+import * as Base from "./base";
 import * as Css from "./css";
+import * as CssCasc from "./csscasc";
 import * as Exprs from "./expr";
 import * as Net from "./net";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
-
-import * as Base from "./base";
-import { ElementStyle, getProp } from "./csscasc";
+import * as Logging from "../vivliostyle/logging";
 
 export const traitProps: { [key: string]: Css.Val } = {
   "font-style": Css.ident.normal,
@@ -57,12 +56,12 @@ export const fillDefaults = (properties: { [key: string]: Css.Val }) => {
 };
 
 export const prepareProperties = (
-  properties: ElementStyle,
+  properties: CssCasc.ElementStyle,
   context: Exprs.Context
 ): { [key: string]: Css.Val } => {
   const result = {} as { [key: string]: Css.Val };
   for (const prop in properties) {
-    result[prop] = getProp(properties, prop).evaluate(context, prop);
+    result[prop] = CssCasc.getProp(properties, prop).evaluate(context, prop);
   }
   fillDefaults(result);
   return result;
