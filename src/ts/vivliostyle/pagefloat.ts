@@ -1,5 +1,6 @@
 /**
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
