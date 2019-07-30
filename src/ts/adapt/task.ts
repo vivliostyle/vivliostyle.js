@@ -169,7 +169,7 @@ export class TimerImpl implements Timer {
   /**
    * @override
    */
-  currentTime() {
+  currentTime(): number {
     return new Date().valueOf();
   }
 
@@ -186,7 +186,7 @@ export class TimerImpl implements Timer {
   /**
    * @override
    */
-  clearTimeout(token: number) {
+  clearTimeout(token: number): void {
     clearTimeout(token);
   }
 }
@@ -557,21 +557,21 @@ export class SyncResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenFinish(frame: Frame<T>) {
+  thenFinish(frame: Frame<T>): void {
     frame.finish(this.value);
   }
 
   /**
    * @override
    */
-  isPending() {
+  isPending(): boolean {
     return false;
   }
 
   /**
    * @override
    */
-  get() {
+  get(): T | null {
     return this.value;
   }
 }
@@ -585,7 +585,7 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  then(callback) {
+  then(callback: (p1: T) => void): void {
     this.frame.then(callback);
   }
 
@@ -627,7 +627,7 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenFinish(frame: Frame<T>) {
+  thenFinish(frame: Frame<T>): void {
     if (this.isPending()) {
       this.then(res => {
         frame.finish(res);
@@ -640,14 +640,14 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  isPending() {
+  isPending(): boolean {
     return this.frame.state == FrameState.ACTIVE;
   }
 
   /**
    * @override
    */
-  get() {
+  get(): T | null {
     if (this.isPending()) {
       throw new Error("Result is pending");
     }

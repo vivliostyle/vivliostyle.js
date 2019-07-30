@@ -35,7 +35,7 @@ export class SetVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitIdent(ident) {
+  visitIdent(ident: Css.Ident): Css.Val {
     this.propSet[ident.name] = true;
     return ident;
   }
@@ -43,7 +43,7 @@ export class SetVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitSpaceList(list) {
+  visitSpaceList(list: Css.SpaceList): Css.Val {
     this.visitValues(list.values);
     return list;
   }
@@ -70,7 +70,7 @@ export class IntVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitInt(num) {
+  visitInt(num: Css.Int): Css.Val {
     this.value = num.num;
     return num;
   }
@@ -101,7 +101,7 @@ export class ShapeVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitNumeric(numeric) {
+  visitNumeric(numeric: Css.Numeric): Css.Val {
     if (this.collect) {
       this.coords.push(numeric);
     }
@@ -111,7 +111,7 @@ export class ShapeVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitNum(num) {
+  visitNum(num: Css.Num): Css.Val {
     if (this.collect && num.num == 0) {
       this.coords.push(new Css.Numeric(0, "px"));
     }
@@ -121,7 +121,7 @@ export class ShapeVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitSpaceList(list) {
+  visitSpaceList(list: Css.SpaceList): Css.Val {
     this.visitValues(list.values);
     return null;
   }
@@ -129,7 +129,7 @@ export class ShapeVisitor extends Css.Visitor {
   /**
    * @override
    */
-  visitFunc(func) {
+  visitFunc(func: Css.Func): Css.Val {
     if (!this.collect) {
       this.collect = true;
       this.visitValues(func.values);
@@ -234,7 +234,7 @@ export class CountersVisitor extends Css.Visitor {
   }
 
   /** @override */
-  visitIdent(ident) {
+  visitIdent(ident: Css.Ident): Css.Val {
     this.name = ident.toString();
     if (this.reset) {
       this.counters[this.name] = 0;
@@ -245,7 +245,7 @@ export class CountersVisitor extends Css.Visitor {
   }
 
   /** @override */
-  visitInt(num) {
+  visitInt(num: Css.Int): Css.Val {
     if (this.name) {
       this.counters[this.name] += num.num - (this.reset ? 0 : 1);
     }
@@ -253,7 +253,7 @@ export class CountersVisitor extends Css.Visitor {
   }
 
   /** @override */
-  visitSpaceList(list) {
+  visitSpaceList(list: Css.SpaceList): Css.Val {
     this.visitValues(list.values);
     return list;
   }
@@ -281,7 +281,7 @@ export class UrlTransformVisitor extends Css.FilterVisitor {
   }
 
   /** @override */
-  visitURL(url) {
+  visitURL(url: Css.URL): Css.Val {
     return new Css.URL(this.transformer.transformURL(url.url, this.baseUrl));
   }
 }

@@ -144,7 +144,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
   /**
    * @override
    */
-  findAcceptableBreak(column, penalty) {
+  findAcceptableBreak(column: Layout.Column, penalty: number): ViewTree.NodeContext {
     const breakNodeContext = super.findAcceptableBreak(column, penalty);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
@@ -162,7 +162,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
   /**
    * @override
    */
-  getMinBreakPenalty() {
+  getMinBreakPenalty(): number {
     let penalty = super.getMinBreakPenalty();
     this.getAcceptableCellBreakPositions().forEach(bp => {
       penalty += bp.breakPosition.getMinBreakPenalty();
@@ -214,7 +214,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
   /**
    * @override
    */
-  findAcceptableBreak(column, penalty) {
+  findAcceptableBreak(column: Layout.Column, penalty: number): ViewTree.NodeContext {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -243,7 +243,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
   /**
    * @override
    */
-  getMinBreakPenalty() {
+  getMinBreakPenalty(): number {
     const formattingContext = this.formattingContext;
     const row = formattingContext.getRowByIndex(this.rowIndex);
     let penalty = 0;
@@ -313,14 +313,14 @@ export class TableFormattingContext
   /**
    * @override
    */
-  getName() {
+  getName(): string {
     return "Table formatting context (Table.TableFormattingContext)";
   }
 
   /**
    * @override
    */
-  isFirstTime(nodeContext, firstTime) {
+  isFirstTime(nodeContext: ViewTree.NodeContext, firstTime: boolean): boolean {
     if (!firstTime) {
       return firstTime;
     }
@@ -339,7 +339,7 @@ export class TableFormattingContext
   /**
    * @override
    */
-  getParent() {
+  getParent(): ViewTree.FormattingContext {
     return this.parent;
   }
 
@@ -572,12 +572,12 @@ export class TableFormattingContext
   }
 
   /** @override */
-  saveState() {
+  saveState(): any {
     return [].concat(this.cellBreakPositions);
   }
 
   /** @override */
-  restoreState(state) {
+  restoreState(state: any) {
     this.cellBreakPositions = state as BrokenTableCellPosition[];
   }
 }
@@ -589,7 +589,7 @@ export class ElementsOffsetOfTableCell
   ) {}
 
   /** @override */
-  calculateOffset(nodeContext) {
+  calculateOffset(nodeContext: ViewTree.NodeContext): number {
     return this.calculateMaxOffsetOfColumn(
       nodeContext,
       offsets => offsets.current
@@ -597,7 +597,7 @@ export class ElementsOffsetOfTableCell
   }
 
   /** @override */
-  calculateMinimumOffset(nodeContext) {
+  calculateMinimumOffset(nodeContext: ViewTree.NodeContext): number {
     return this.calculateMaxOffsetOfColumn(
       nodeContext,
       offsets => offsets.minimum
@@ -699,7 +699,9 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   /**
    * @override
    */
-  startNonInlineElementNode(state) {
+  startNonInlineElementNode(
+    state: LayoutUtil.LayoutIteratorState
+  ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const r = skipNestedTable(state, formattingContext, this.column);
     if (r) {
@@ -755,7 +757,9 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   /**
    * @override
    */
-  afterNonInlineElementNode(state) {
+  afterNonInlineElementNode(
+    state: LayoutUtil.LayoutIteratorState
+  ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
     const display = nodeContext.display;
@@ -769,7 +773,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         computedStyle[formattingContext.vertical ? "height" : "width"]
       );
       formattingContext.getRepetitiveElements().lastContentSourceNode =
-        state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode;
+        state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode as Element;
       state.break = true;
     } else {
       switch (display) {
@@ -807,22 +811,30 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   /** @override */
-  startNonElementNode(state) {
+  startNonElementNode(
+    state: LayoutUtil.LayoutIteratorState
+  ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   /** @override */
-  afterNonElementNode(state) {
+  afterNonElementNode(
+    state: LayoutUtil.LayoutIteratorState
+  ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   /** @override */
-  startInlineElementNode(state) {
+  startInlineElementNode(
+    state: LayoutUtil.LayoutIteratorState
+  ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   /** @override */
-  afterInlineElementNode(state) {
+  afterInlineElementNode(
+    state: LayoutUtil.LayoutIteratorState
+  ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
@@ -1226,7 +1238,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
 
   afterNonInlineElementNode(
     state: LayoutUtil.LayoutIteratorState
-  ): undefined | Task.Result<boolean> {
+  ): void | Task.Result<boolean> {
     const nodeContext = state.nodeContext;
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     const display = nodeContext.display;
@@ -1582,7 +1594,11 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   /**
    * @override
    */
-  layout(nodeContext, column, leadingEdge) {
+  layout(
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column,
+    leadingEdge: boolean
+  ): Task.Result<ViewTree.NodeContext> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext
     );
@@ -1606,7 +1622,12 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   /**
    * @override
    */
-  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {
+  createEdgeBreakPosition(
+    position: ViewTree.NodeContext,
+    breakOnEdge: string | null,
+    overflows: boolean,
+    columnBlockSize: number
+  ): Layout.BreakPosition {
     return new BetweenTableRowBreakPosition(
       position,
       breakOnEdge,
@@ -1618,21 +1639,29 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   /**
    * @override
    */
-  startNonInlineElementNode(nodeContext) {
+  startNonInlineElementNode(nodeContext: ViewTree.NodeContext): boolean {
     return false;
   }
 
   /**
    * @override
    */
-  afterNonInlineElementNode(nodeContext) {
+  afterNonInlineElementNode(
+    nodeContext: ViewTree.NodeContext,
+    stopAtOverflow: boolean
+  ): boolean {
     return false;
   }
 
   /**
    * @override
    */
-  finishBreak(column, nodeContext, forceRemoveSelf, endOfColumn) {
+  finishBreak(
+    column: Layout.Column,
+    nodeContext: ViewTree.NodeContext,
+    forceRemoveSelf: boolean,
+    endOfColumn: boolean
+  ): Task.Result<boolean> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext
     );
@@ -1718,7 +1747,12 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   }
 
   /** @override */
-  clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf) {
+  clearOverflownViewNodes(
+    column: Layout.Column,
+    parentNodeContext: ViewTree.NodeContext,
+    nodeContext: ViewTree.NodeContext,
+    removeSelf: boolean
+  ) {
     LayoutProcessor.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
       column,
       parentNodeContext,
@@ -1775,7 +1809,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  resolveLayoutMode(nodeContext) {
+  resolveLayoutMode(nodeContext: ViewTree.NodeContext): Layout.LayoutMode {
     const repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
     if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
       return new LayoutEntireTable(this.tableFormattingContext, this.processor);
@@ -1799,7 +1833,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  clearNodes(initialPosition) {
+  clearNodes(initialPosition: ViewTree.NodeContext) {
     super.clearNodes(initialPosition);
     const rootViewNode = this.tableFormattingContext.getRootViewNode(
       initialPosition
@@ -1810,7 +1844,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  restoreState(nodeContext, column) {
+  restoreState(nodeContext: ViewTree.NodeContext, column: Layout.Column) {
     super.restoreState(nodeContext, column);
     this.tableFormattingContext.finishFragment();
   }
@@ -1827,7 +1861,10 @@ export class LayoutEntireTable extends RepetitiveElementImpl.LayoutEntireBlock {
   /**
    * @override
    */
-  doLayout(nodeContext, column) {
+  doLayout(
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<ViewTree.NodeContext> {
     return this.processor.doInitialLayout(nodeContext, column);
   }
 }
@@ -1840,7 +1877,7 @@ export class EntireTableBreakPosition extends BreakPosition.EdgeBreakPosition {
   /**
    * @override
    */
-  getMinBreakPenalty() {
+  getMinBreakPenalty(): number {
     if (!this.isEdgeUpdated) {
       throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
@@ -1853,7 +1890,7 @@ export class EntireTableBreakPosition extends BreakPosition.EdgeBreakPosition {
   /**
    * @override
    */
-  breakPositionChosen(column) {
+  breakPositionChosen(column: Layout.Column): void {
     column.fragmentLayoutConstraints.push(
       new EntireTableLayoutConstraint(this.position.sourceNode)
     );
@@ -1869,7 +1906,11 @@ export class EntireTableLayoutConstraint
   /**
    * @override
    */
-  allowLayout(nodeContext, overflownNodeContext, column) {
+  allowLayout(
+      nodeContext: ViewTree.NodeContext,
+      overflownNodeContext: ViewTree.NodeContext,
+      column: Layout.Column
+    ): boolean {
     // If the nodeContext overflows, any EntireTableLayoutConstraint should not
     // be registered in the first place. See
     // TableLayoutProcessor.prototype.doInitialLayout.
@@ -1880,14 +1921,19 @@ export class EntireTableLayoutConstraint
   /**
    * @override
    */
-  nextCandidate(nodeContext) {
+  nextCandidate(nodeContext: ViewTree.NodeContext): boolean {
     return true;
   }
 
   /**
    * @override
    */
-  postLayout(allowed, positionAfter, initialPosition, column) {
+  postLayout(
+      allowed: boolean,
+      positionAfter: ViewTree.NodeContext,
+      initialPosition: ViewTree.NodeContext,
+      column: Layout.Column
+    ) {
     Asserts.assert(positionAfter.sourceNode);
     tableLayoutOptionCache.push({
       root: positionAfter.sourceNode,
@@ -1900,14 +1946,17 @@ export class EntireTableLayoutConstraint
   /**
    * @override
    */
-  finishBreak(nodeContext, column) {
+  finishBreak(
+      nodeContext: ViewTree.NodeContext,
+      column: Layout.Column
+    ): Task.Result<boolean> {
     return Task.newResult(true);
   }
 
   /**
    * @override
    */
-  equalsTo(constraint) {
+  equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
     return (
       constraint instanceof EntireTableLayoutConstraint &&
       constraint.tableRootNode === this.tableRootNode
@@ -1917,7 +1966,7 @@ export class EntireTableLayoutConstraint
   /**
    * @override
    */
-  getPriorityOfFinishBreak() {
+  getPriorityOfFinishBreak(): number {
     return 0;
   }
 }
@@ -1933,7 +1982,10 @@ export class LayoutFragmentedTable extends RepetitiveElementImpl.LayoutFragmente
   /**
    * @override
    */
-  doLayout(nodeContext, column) {
+  doLayout(
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<ViewTree.NodeContext> {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (
       repetitiveElements &&
@@ -1962,7 +2014,11 @@ export class TableRowLayoutConstraint
   }
 
   /** @override */
-  allowLayout(nodeContext, overflownNodeContext, column) {
+  allowLayout(
+      nodeContext: ViewTree.NodeContext,
+      overflownNodeContext: ViewTree.NodeContext,
+      column: Layout.Column
+    ): boolean {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
       return true;
@@ -1987,7 +2043,7 @@ export class TableRowLayoutConstraint
   }
 
   /** @override */
-  nextCandidate(nodeContext) {
+  nextCandidate(nodeContext: ViewTree.NodeContext): boolean {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext
     );
@@ -2008,12 +2064,17 @@ export class TableRowLayoutConstraint
   }
 
   /** @override */
-  postLayout(allowed, nodeContext, initialPosition, column) {
+  postLayout(
+      allowed: boolean,
+      positionAfter: ViewTree.NodeContext,
+      initialPosition: ViewTree.NodeContext,
+      column: Layout.Column
+    ) {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext
     );
     this.cellFragmentLayoutConstraints = this.collectCellFragmentLayoutConstraints(
-      nodeContext,
+      positionAfter,
       formattingContext
     );
     this.cellFragmentLayoutConstraints.forEach(entry => {
@@ -2034,11 +2095,14 @@ export class TableRowLayoutConstraint
       );
       this.removeDummyRowNodes(initialPosition);
     }
-    super.postLayout(allowed, nodeContext, initialPosition, column);
+    super.postLayout(allowed, positionAfter, initialPosition, column);
   }
 
   /** @override */
-  finishBreak(nodeContext, column) {
+  finishBreak(
+      nodeContext: ViewTree.NodeContext,
+      column: Layout.Column
+    ): Task.Result<boolean> {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext
     );
@@ -2148,7 +2212,7 @@ export class TableRowLayoutConstraint
   }
 
   /** @override */
-  equalsTo(constraint) {
+  equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
     if (!(constraint instanceof TableRowLayoutConstraint)) {
       return false;
     }

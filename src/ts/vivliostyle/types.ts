@@ -819,7 +819,7 @@ export namespace PageFloats {
     ): Task.Result<PageFloat>;
     createPageFloatFragment(
       continuations: PageFloatContinuation[],
-      logicalFloatSide: string,
+      floatSide: string,
       floatArea: Layout.PageFloatArea,
       continues: boolean
     ): PageFloatFragment;
@@ -1058,7 +1058,7 @@ export namespace ViewTree {
      * Set the container element that holds view elements produced from the
      * source.
      */
-    setViewRoot(container: Element, isFootnote: boolean);
+    setViewRoot(viewRoot: Element, isFootnote: boolean);
     /**
      * Moves to the next view node, creating it and appending it to the view tree
      * if needed.
@@ -1070,22 +1070,22 @@ export namespace ViewTree {
     ): Task.Result<NodeContext>;
     /**
      * Apply pseudo-element styles (if any).
-     * @param element element to apply styles to
+     * @param target element to apply styles to
      */
     applyPseudoelementStyle(
       nodeContext: NodeContext,
       pseudoName: string,
-      element: Element
+      target: Element
     ): void;
     /**
      * Apply styles to footnote container.
-     * @param element element to apply styles to
+     * @param target element to apply styles to
      * @return vertical
      */
     applyFootnoteStyle(
       vertical: boolean,
       rtl: boolean,
-      element: Element
+      target: Element
     ): boolean;
     /**
      * Peel off innermost first-XXX pseudoelement, create and create view nodes

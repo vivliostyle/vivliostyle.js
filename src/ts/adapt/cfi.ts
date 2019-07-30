@@ -94,7 +94,7 @@ export class RefStep implements Step {
   /**
    * @override
    */
-  applyTo(pos) {
+  applyTo(pos: Position): boolean {
     return false;
   }
 }
@@ -109,7 +109,7 @@ export class ChildStep implements Step {
   /**
    * @override
    */
-  appendTo(sb) {
+  appendTo(sb: Base.StringBuffer): void {
     sb.append("/");
     sb.append(this.index.toString());
     if (this.id || this.sideBias) {
@@ -128,7 +128,7 @@ export class ChildStep implements Step {
   /**
    * @override
    */
-  applyTo(pos) {
+  applyTo(pos: Position): boolean {
     if (pos.node.nodeType != 1) {
       throw new Error("E_CFI_NOT_ELEMENT");
     }
@@ -168,7 +168,7 @@ export class OffsetStep implements Step {
     public readonly sideBias: string | null
   ) {}
 
-  applyTo(pos) {
+  applyTo(pos: Position): boolean {
     if (this.offset > 0 && !pos.after) {
       let offset = this.offset;
       let node = pos.node;
@@ -205,7 +205,7 @@ export class OffsetStep implements Step {
   /**
    * @override
    */
-  appendTo(sb) {
+  appendTo(sb: Base.StringBuffer): void {
     sb.append(":");
     sb.append(this.offset.toString());
     if (this.textBefore || this.textAfter || this.sideBias) {
@@ -413,7 +413,7 @@ export class Fragment {
     }
   }
 
-  toString() {
+  toString(): string {
     if (!this.steps) {
       return "";
     }

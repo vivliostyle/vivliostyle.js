@@ -344,7 +344,9 @@ export class EPUBDocStore extends Ops.OPSDocStore {
   /**
    * @override
    */
-  load(url: string) {
+    load(
+      url: string
+    ): Task.Result<XmlDoc.XMLDocHolder> {
     const docURL = Base.stripFragment(url);
     let r = this.documents[docURL];
     if (r) {
@@ -730,7 +732,7 @@ export class OPFDoc {
       /**
        * @override
        */
-      transformFragment(fragment, baseURL) {
+      transformFragment(fragment: string, baseURL: string): string {
         const url = baseURL + (fragment ? `#${fragment}` : "");
         return transformedIdPrefix + Base.escapeNameStrToHex(url, ":");
       }
@@ -738,7 +740,7 @@ export class OPFDoc {
       /**
        * @override
        */
-      transformURL(url, baseURL) {
+      transformURL(url: string, baseURL: string): string {
         const r = url.match(/^([^#]*)#?(.*)$/);
         if (r) {
           const path = r[1] || baseURL;
@@ -755,7 +757,7 @@ export class OPFDoc {
       /**
        * @override
        */
-      restoreURL(encoded) {
+      restoreURL(encoded: string): string[] {
         if (encoded.charAt(0) === "#") {
           encoded = encoded.substring(1);
         }

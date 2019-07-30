@@ -68,7 +68,7 @@ export class AllLayoutConstraint implements LayoutConstraint {
   /**
    * @override
    */
-  allowLayout(nodeContext) {
+  allowLayout(nodeContext: ViewTree.NodeContext): boolean {
     return this.constraints.every(c => c.allowLayout(nodeContext));
   }
 }
@@ -99,7 +99,7 @@ export class BoxBreakPosition extends BreakPosition.AbstractBreakPosition
   /**
    * @override
    */
-  findAcceptableBreak(column, penalty) {
+  findAcceptableBreak(column: Column, penalty: number): ViewTree.NodeContext {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -113,12 +113,12 @@ export class BoxBreakPosition extends BreakPosition.AbstractBreakPosition
   /**
    * @override
    */
-  getMinBreakPenalty() {
+  getMinBreakPenalty(): number {
     return this.penalty;
   }
 
   /** @override */
-  getNodeContext() {
+  getNodeContext(): ViewTree.NodeContext {
     return this.alreadyEvaluated
       ? this.breakNodeContext
       : this.checkPoints[this.checkPoints.length - 1];
@@ -3184,7 +3184,7 @@ export class Column extends Vtree.Container implements Layout.Column {
     return this.pageFloatLayoutContext.getMaxBlockSizeOfPageFloats();
   }
 
-  doFinishBreakOfFragmentLayoutConstraints(nodeContext) {
+  doFinishBreakOfFragmentLayoutConstraints(nodeContext: ViewTree.NodeContext): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame(
       "doFinishBreakOfFragmentLayoutConstraints"
     );
@@ -3545,7 +3545,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  resolveLayoutMode(nodeContext) {
+  resolveLayoutMode(nodeContext: ViewTree.NodeContext): Layout.LayoutMode {
     return new DefaultLayoutMode(
       this.leadingEdge,
       this.breakAfter,
@@ -3556,7 +3556,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  prepareLayout(nodeContext, column) {
+  prepareLayout(nodeContext: ViewTree.NodeContext, column: Layout.Column) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
       Shared.clearRepetitiveElementsCache();
@@ -3566,7 +3566,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  clearNodes(initialPosition) {
+  clearNodes(initialPosition: ViewTree.NodeContext) {
     super.clearNodes(initialPosition);
     let nodeContext = initialPosition;
     while (nodeContext) {
@@ -3581,7 +3581,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  saveState(nodeContext, column) {
+  saveState(nodeContext: ViewTree.NodeContext, column: Layout.Column) {
     super.saveState(nodeContext, column);
     this.initialPageBreakType = column.pageBreakType;
     this.initialComputedBlockSize = column.computedBlockSize;
@@ -3591,7 +3591,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  restoreState(nodeContext, column) {
+  restoreState(nodeContext: ViewTree.NodeContext, column: Layout.Column) {
     super.restoreState(nodeContext, column);
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
@@ -3609,7 +3609,10 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
   /**
    * @override
    */
-  doLayout(nodeContext, column) {
+  doLayout(
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<ViewTree.NodeContext> {
     const frame: Task.Frame<ViewTree.NodeContext> = Task.newFrame(
       "DefaultLayoutMode.doLayout"
     );
@@ -3630,7 +3633,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
   /**
    * @override
    */
-  accept(nodeContext, column) {
+  accept(nodeContext: ViewTree.NodeContext, column: Layout.Column): boolean {
     if (column.pageFloatLayoutContext.isInvalidated() || column.pageBreakType) {
       return true;
     }
@@ -3649,7 +3652,12 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
   /**
    * @override
    */
-  postLayout(positionAfter, initialPosition, column, accepted) {
+  postLayout(
+      positionAfter: ViewTree.NodeContext,
+      initialPosition: ViewTree.NodeContext,
+      column: Layout.Column,
+      accepted: boolean
+    ): boolean {
     if (!accepted) {
       const hasNextCandidate = column.fragmentLayoutConstraints.some(
         constraint => constraint.nextCandidate(positionAfter)
@@ -3694,7 +3702,9 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
   /**
    * @override
    */
-  openAllViews(position) {
+  openAllViews(
+    position: ViewTree.NodePosition
+  ): Task.Result<ViewTree.NodeContext> {
     return super.openAllViews(position).thenAsync(nodeContext => {
       if (nodeContext) {
         this.fixFloatSizeAndPosition(nodeContext);

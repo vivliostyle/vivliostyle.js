@@ -1595,21 +1595,25 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
    * @override
    */
-  appliesToNodeContext(nodeContext) {
+  appliesToNodeContext(nodeContext: ViewTree.NodeContext): boolean {
     return isPageFloat(nodeContext.floatReference);
   }
 
   /**
    * @override
    */
-  appliesToFloat(float) {
+  appliesToFloat(float: PageFloat): boolean {
     return true;
   }
 
   /**
    * @override
    */
-  createPageFloat(nodeContext, pageFloatLayoutContext, column) {
+  createPageFloat(
+      nodeContext: ViewTree.NodeContext,
+      pageFloatLayoutContext: PageFloatLayoutContext,
+      column: Layout.Column
+    ): Task.Result<PageFloat> {
     let floatReference = nodeContext.floatReference;
     Asserts.assert(nodeContext.floatSide);
     const floatSide: string = nodeContext.floatSide;
@@ -1639,7 +1643,12 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
    * @override
    */
-  createPageFloatFragment(continuations, floatSide, floatArea, continues) {
+  createPageFloatFragment(
+      continuations: PageFloatContinuation[],
+      floatSide: string,
+      floatArea: Layout.PageFloatArea,
+      continues: boolean
+    ): PageFloatFragment {
     const f = continuations[0].float;
     return new PageFloatFragment(
       f.floatReference,
@@ -1653,19 +1662,26 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
    * @override
    */
-  findPageFloatFragment(float, pageFloatLayoutContext) {
+  findPageFloatFragment(
+      float: PageFloat,
+      pageFloatLayoutContext: PageFloatLayoutContext
+    ): PageFloatFragment | null {
     return pageFloatLayoutContext.findPageFloatFragment(float);
   }
 
   /**
    * @override
    */
-  adjustPageFloatArea(floatArea, floatContainer, column) {}
+  adjustPageFloatArea(
+      floatArea: Layout.PageFloatArea,
+      floatContainer: ViewTree.Container,
+      column: Layout.Column
+    ) {}
 
   /**
    * @override
    */
-  forbid(float, pageFloatLayoutContext) {}
+  forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext) {}
 }
 
 PageFloatLayoutStrategyResolver.register(new NormalPageFloatLayoutStrategy());

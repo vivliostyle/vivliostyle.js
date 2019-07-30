@@ -44,7 +44,7 @@ export abstract class AbstractBreakPosition
   /**
    * @override
    */
-  breakPositionChosen(column) {}
+  breakPositionChosen(column: Layout.Column): void {}
 
   getNodeContext(): ViewTree.NodeContext {
     return null;
@@ -91,7 +91,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   /**
    * @override
    */
-  findAcceptableBreak(column, penalty) {
+  findAcceptableBreak(column: Layout.Column, penalty: number): ViewTree.NodeContext {
     this.updateOverflows(column);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
@@ -102,7 +102,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   /**
    * @override
    */
-  getMinBreakPenalty() {
+  getMinBreakPenalty(): number {
     if (!this.isEdgeUpdated) {
       throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
@@ -145,7 +145,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   }
 
   /** @override */
-  getNodeContext() {
+  getNodeContext(): ViewTree.NodeContext {
     return this.position;
   }
 

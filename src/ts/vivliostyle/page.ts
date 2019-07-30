@@ -22,6 +22,7 @@ import * as CssCasc from "../adapt/csscasc";
 import * as CssParse from "../adapt/cssparse";
 import * as CssValid from "../adapt/cssvalid";
 import * as Exprs from "../adapt/expr";
+import * as Font from "../adapt/font";
 import * as Pm from "../adapt/pm";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
@@ -933,7 +934,10 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
   /**
    * @override
    */
-  applyCascadeAndInit(cascade, docElementStyle) {
+  applyCascadeAndInit(
+    cascade: CssCasc.CascadeInstance,
+    docElementStyle: CssCasc.ElementStyle
+  ): void {
     const style = this.cascaded;
     for (const name in docElementStyle) {
       if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
@@ -950,7 +954,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
   /**
    * @override
    */
-  initHorizontal() {
+  initHorizontal(): void {
     const style = this.style;
     style["left"] = Css.numericZero;
     style["margin-left"] = Css.numericZero;
@@ -965,7 +969,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
   /**
    * @override
    */
-  initVertical() {
+  initVertical(): void {
     const style = this.style;
 
     // Shift 1px to workaround Chrome printing bug
@@ -994,7 +998,11 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
   /**
    * @override
    */
-  adjustPageLayout(context, page, clientLayout) {
+  adjustPageLayout(
+    context: Exprs.Context,
+    page: Vtree.Page,
+    clientLayout: Vtree.ClientLayout
+  ) {
     const marginBoxContainers = page.marginBoxes;
     const horizontalDimensions = {
       start: this.pageAreaDimension.marginLeft,
@@ -1336,7 +1344,13 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
   /**
    * @override
    */
-  prepareContainer(context, container, page, docFaces, clientLayout) {
+  prepareContainer(
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    docFaces: Font.DocumentFaces,
+    clientLayout: Vtree.ClientLayout
+  ): void {
     super.prepareContainer(context, container, page, docFaces, clientLayout);
 
     // Add an attribute to the element so that it can be refered from external
@@ -1384,7 +1398,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    *  @override
    */
-  hasAutoSize() {
+  hasAutoSize(): boolean {
     return this.hasAutoSize_;
   }
 
@@ -1405,7 +1419,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    * @override
    */
-  getOuterMaxContentSize() {
+  getOuterMaxContentSize(): number {
     const size = this.getSize();
     if (this.isHorizontal) {
       return (
@@ -1425,7 +1439,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    * @override
    */
-  getOuterMinContentSize() {
+  getOuterMinContentSize(): number {
     const size = this.getSize();
     if (this.isHorizontal) {
       return (
@@ -1445,7 +1459,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    * @override
    */
-  getOuterSize() {
+  getOuterSize(): number {
     if (this.isHorizontal) {
       return (
         this.container.getInsetLeft() +
@@ -1474,14 +1488,14 @@ class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    * @override
    */
-  hasAutoSize() {
+  hasAutoSize(): boolean {
     return this.params.some(p => p.hasAutoSize());
   }
 
   /**
    *  @override
    */
-  getOuterMaxContentSize() {
+  getOuterMaxContentSize(): number {
     const sizes = this.params.map(p => p.getOuterMaxContentSize());
     return Math.max.apply(null, sizes) * sizes.length;
   }
@@ -1489,7 +1503,7 @@ class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    *  @override
    */
-  getOuterMinContentSize() {
+  getOuterMinContentSize(): number {
     const sizes = this.params.map(p => p.getOuterMinContentSize());
     return Math.max.apply(null, sizes) * sizes.length;
   }
@@ -1497,7 +1511,7 @@ class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
   /**
    *  @override
    */
-  getOuterSize() {
+  getOuterSize(): number {
     const sizes = this.params.map(p => p.getOuterSize());
     return Math.max.apply(null, sizes) * sizes.length;
   }
@@ -1528,28 +1542,28 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
   /**
    * @override
    */
-  hasAutoSize() {
+  hasAutoSize(): boolean {
     return false;
   }
 
   /**
    *  @override
    */
-  getOuterMaxContentSize() {
+  getOuterMaxContentSize(): number {
     return this.getOuterSize();
   }
 
   /**
    *  @override
    */
-  getOuterMinContentSize() {
+  getOuterMinContentSize(): number {
     return this.getOuterSize();
   }
 
   /**
    * @override
    */
-  getOuterSize() {
+  getOuterSize(): number {
     if (this.isHorizontal) {
       return (
         this.container.getInsetLeft() +
@@ -1586,7 +1600,10 @@ export class PageRulePartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  applyCascadeAndInit(cascade, docElementStyle) {
+  applyCascadeAndInit(
+    cascade: CssCasc.CascadeInstance,
+    docElementStyle: CssCasc.ElementStyle
+  ): void {
     const style = this.cascaded;
     for (const name in docElementStyle) {
       if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
@@ -1611,7 +1628,7 @@ export class PageRulePartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  initHorizontal() {
+  initHorizontal(): void {
     const dim = this.resolvePageBoxDimensions({
       start: "left",
       end: "right",
@@ -1625,7 +1642,7 @@ export class PageRulePartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  initVertical() {
+  initVertical(): void {
     const dim = this.resolvePageBoxDimensions({
       start: "top",
       end: "bottom",
@@ -1756,7 +1773,13 @@ export class PageRulePartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  prepareContainer(context, container, page, docFaces, clientLayout) {
+  prepareContainer(
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    docFaces: Font.DocumentFaces,
+    clientLayout: Vtree.ClientLayout
+  ): void {
     super.prepareContainer(context, container, page, docFaces, clientLayout);
     page.pageAreaElement = container.element as HTMLElement;
 
@@ -1786,7 +1809,13 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  prepareContainer(context, container, page, docFaces, clientLayout) {
+  prepareContainer(
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    docFaces: Font.DocumentFaces,
+    clientLayout: Vtree.ClientLayout
+  ): void {
     this.applyVerticalAlign(context, container.element);
     super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
@@ -2098,7 +2127,7 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  initHorizontal() {
+  initHorizontal(): void {
     const pageRuleMasterInstance = this
       .parentInstance as PageRuleMasterInstance;
     const dim = pageRuleMasterInstance.pageAreaDimension;
@@ -2123,7 +2152,7 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
   /**
    * @override
    */
-  initVertical() {
+  initVertical(): void {
     const pageRuleMasterInstance = this
       .parentInstance as PageRuleMasterInstance;
     const dim = pageRuleMasterInstance.pageAreaDimension;
@@ -2149,14 +2178,14 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
    * @override
    */
   finishContainer(
-    context,
-    container,
-    page,
-    column,
-    columnCount,
-    clientLayout,
-    docFaces
-  ) {
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    column: Vtree.Container,
+    columnCount: number,
+    clientLayout: Vtree.ClientLayout,
+    docFaces: Font.DocumentFaces
+  ): void {
     super.finishContainer(
       context,
       container,
@@ -2393,7 +2422,7 @@ export class CheckPageTypeAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  apply(cascadeInstance) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     if (cascadeInstance.currentPageType === this.pageType) {
       this.chained.apply(cascadeInstance);
     }
@@ -2402,14 +2431,14 @@ export class CheckPageTypeAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 3;
   }
 
   /**
    * @override
    */
-  makePrimary(cascade) {
+  makePrimary(cascade: CssCasc.Cascade): boolean {
     if (this.chained) {
       cascade.insertInTable(cascade.pagetypes, this.pageType, this.chained);
     }
@@ -2425,17 +2454,17 @@ export class IsFirstPageAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  apply(cascadeInstace) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     const pageNumber = new Exprs.Named(this.scope, "page-number");
-    if (pageNumber.evaluate(cascadeInstace.context) === 1) {
-      this.chained.apply(cascadeInstace);
+    if (pageNumber.evaluate(cascadeInstance.context) === 1) {
+      this.chained.apply(cascadeInstance);
     }
   }
 
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 2;
   }
 }
@@ -2448,17 +2477,17 @@ export class IsLeftPageAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  apply(cascadeInstace) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     const leftPage = new Exprs.Named(this.scope, "left-page");
-    if (leftPage.evaluate(cascadeInstace.context)) {
-      this.chained.apply(cascadeInstace);
+    if (leftPage.evaluate(cascadeInstance.context)) {
+      this.chained.apply(cascadeInstance);
     }
   }
 
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 1;
   }
 }
@@ -2471,17 +2500,17 @@ export class IsRightPageAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  apply(cascadeInstace) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     const rightPage = new Exprs.Named(this.scope, "right-page");
-    if (rightPage.evaluate(cascadeInstace.context)) {
-      this.chained.apply(cascadeInstace);
+    if (rightPage.evaluate(cascadeInstance.context)) {
+      this.chained.apply(cascadeInstance);
     }
   }
 
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 1;
   }
 }
@@ -2494,17 +2523,17 @@ export class IsRectoPageAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  apply(cascadeInstace) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     const rectoPage = new Exprs.Named(this.scope, "recto-page");
-    if (rectoPage.evaluate(cascadeInstace.context)) {
-      this.chained.apply(cascadeInstace);
+    if (rectoPage.evaluate(cascadeInstance.context)) {
+      this.chained.apply(cascadeInstance);
     }
   }
 
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 1;
   }
 }
@@ -2517,17 +2546,17 @@ export class IsVersoPageAction extends CssCasc.ChainedAction {
   /**
    * @override
    */
-  apply(cascadeInstace) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     const versoPage = new Exprs.Named(this.scope, "verso-page");
-    if (versoPage.evaluate(cascadeInstace.context)) {
-      this.chained.apply(cascadeInstace);
+    if (versoPage.evaluate(cascadeInstance.context)) {
+      this.chained.apply(cascadeInstance);
     }
   }
 
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 1;
   }
 }
@@ -2543,7 +2572,7 @@ export class ApplyPageRuleAction extends CssCasc.ApplyRuleAction {
   /**
    * @override
    */
-  apply(cascadeInstance) {
+  apply(cascadeInstance: CssCasc.CascadeInstance): void {
     mergeInPageRule(
       cascadeInstance.context,
       cascadeInstance.currentStyle,
@@ -2621,14 +2650,14 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  startPageRule() {
+  startPageRule(): void {
     this.startSelectorRule();
   }
 
   /**
    * @override
    */
-  tagSelector(ns, name) {
+  tagSelector(ns: string | null, name: string | null): void {
     Asserts.assert(name);
     this.currentNamedPageSelector = name;
     if (name) {
@@ -2640,7 +2669,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  pseudoclassSelector(name, params) {
+  pseudoclassSelector(name: string, params: (number | string)[]): void {
     if (params) {
       this.reportAndSkip(
         `E_INVALID_PAGE_SELECTOR :${name}(${params.join("")})`
@@ -2700,7 +2729,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  nextSelector() {
+  nextSelector(): void {
     this.finishSelector();
     super.nextSelector();
   }
@@ -2708,7 +2737,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  startRuleBody() {
+  startRuleBody(): void {
     this.finishSelector();
     super.startRuleBody();
   }
@@ -2716,7 +2745,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  simpleProperty(name, value, important) {
+  simpleProperty(name: string, value: Css.Val, important): void {
     // we limit 'bleed' and 'marks' to be effective only when specified without
     // page selectors
     if (
@@ -2778,7 +2807,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  insertNonPrimary(action) {
+  insertNonPrimary(action: CssCasc.CascadeAction): void {
     // We represent page rules without selectors by *, though it is illegal in
     // CSS
     this.cascade.insertInTable(this.cascade.pagetypes, "*", action);
@@ -2787,14 +2816,14 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
   /**
    * @override
    */
-  makeApplyRuleAction(specificity) {
+  makeApplyRuleAction(specificity: number): CssCasc.ApplyRuleAction {
     return new ApplyPageRuleAction(this.elementStyle, specificity);
   }
 
   /**
    * @override
    */
-  startPageMarginBoxRule(name) {
+  startPageMarginBoxRule(name: string): void {
     const marginBoxMap = CssCasc.getMutableStyleMap(
       this.elementStyle,
       marginBoxesKey
@@ -2831,7 +2860,7 @@ export class PageMarginBoxParserHandler extends CssParse.SlaveParserHandler
   /**
    * @override
    */
-  property(name, value, important) {
+  property(name: string, value: Css.Val, important: boolean): void {
     this.validatorSet.validatePropertyAndHandleShorthand(
       name,
       value,
@@ -2843,21 +2872,21 @@ export class PageMarginBoxParserHandler extends CssParse.SlaveParserHandler
   /**
    * @override
    */
-  invalidPropertyValue(name, value) {
+  invalidPropertyValue(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
   }
 
   /**
    * @override
    */
-  unknownProperty(name, value) {
+  unknownProperty(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
   }
 
   /**
    * @override
    */
-  simpleProperty(name, value, important) {
+  simpleProperty(name: string, value: Css.Val, important): void {
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();

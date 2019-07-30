@@ -219,7 +219,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  preBalance(layoutResult) {
+  preBalance(layoutResult: ColumnLayoutResult) {
     const columns = layoutResult.columns;
     const totalBlockSize = columns.reduce(
       (prev, c) => prev + c.computedBlockSize,
@@ -240,7 +240,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  calculatePenalty(layoutResult) {
+  calculatePenalty(layoutResult: ColumnLayoutResult): number {
     if (!this.checkPosition(layoutResult.position)) {
       return Infinity;
     }
@@ -254,7 +254,9 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  hasNextCandidate(candidates) {
+  hasNextCandidate(
+    candidates: ColumnBalancingTrialResult[]
+  ): boolean {
     if (candidates.length === 1) {
       return true;
     } else if (this.foundUpperBound) {
@@ -280,7 +282,9 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  updateCondition(candidates) {
+  updateCondition(
+    candidates: ColumnBalancingTrialResult[]
+  ): void {
     if (this.foundUpperBound) {
       reduceContainerSize(candidates, this.layoutContainer);
     } else {
@@ -317,7 +321,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  calculatePenalty(layoutResult) {
+  calculatePenalty(layoutResult: ColumnLayoutResult): number {
     if (layoutResult.columns.every(c => c.computedBlockSize === 0)) {
       return Infinity;
     }
@@ -330,14 +334,18 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  hasNextCandidate(candidates) {
+  hasNextCandidate(
+    candidates: ColumnBalancingTrialResult[]
+  ): boolean {
     return canReduceContainerSize(candidates);
   }
 
   /**
    * @override
    */
-  updateCondition(candidates) {
+  updateCondition(
+    candidates: ColumnBalancingTrialResult[]
+  ): void {
     reduceContainerSize(candidates, this.layoutContainer);
   }
 }

@@ -26,6 +26,7 @@ import * as Ops from "./ops";
 import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
 import * as Counters from "../vivliostyle/counters";
 
 // closed: 25B8
@@ -80,7 +81,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
   /**
    * @override
    */
-  makeCustomRenderer(xmldoc) {
+  makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): Vgen.CustomRenderer {
     const renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
     return (
       srcElem: Element,

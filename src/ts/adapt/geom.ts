@@ -98,7 +98,7 @@ export class Shape {
     }
   }
 
-  withOffset(offsetX, offsetY) {
+  withOffset(offsetX: number, offsetY: number): Shape {
     const points = [];
     for (const p of this.points) {
       points.push(new Point(p.x + offsetX, p.y + offsetY));

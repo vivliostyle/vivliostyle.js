@@ -162,7 +162,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  clone() {
+  clone(): Vtree.LayoutContext {
     return new ViewFactory(
       this.flowName,
       this.context,
@@ -437,7 +437,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  setViewRoot(viewRoot, isFootnote) {
+  setViewRoot(viewRoot: Element, isFootnote: boolean) {
     this.viewRoot = viewRoot;
     this.isFootnote = isFootnote;
   }
@@ -1680,7 +1680,11 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  setCurrent(nodeContext, firstTime, atUnforcedBreak = false) {
+  setCurrent(
+      nodeContext: Vtree.NodeContext,
+      firstTime: boolean,
+      atUnforcedBreak?: boolean
+    ): Task.Result<boolean> {
     this.nodeContext = nodeContext;
     if (nodeContext) {
       this.sourceNode = nodeContext.sourceNode;
@@ -1838,8 +1842,10 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  nextInTree(nodeContext, atUnforcedBreak) {
-    nodeContext = this.nextPositionInTree(nodeContext);
+  nextInTree(position: Vtree.NodeContext,
+    atUnforcedBreak?: boolean
+  ): Task.Result<Vtree.NodeContext> {
+    let nodeContext = this.nextPositionInTree(position);
     if (!nodeContext || nodeContext.after) {
       return Task.newResult(nodeContext);
     }
@@ -1860,7 +1866,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     return frame.result();
   }
 
-  addImageFetchers(bg) {
+  addImageFetchers(bg: Css.Val) {
     if (bg instanceof Css.CommaList) {
       const values = (bg as Css.CommaList).values;
       for (let i = 0; i < values.length; i++) {
@@ -1918,7 +1924,11 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  applyPseudoelementStyle(nodeContext, pseudoName, target) {
+  applyPseudoelementStyle(
+      nodeContext: Vtree.NodeContext,
+      pseudoName: string,
+      target: Element
+    ): void {
     if (nodeContext.after) {
       return;
     }
@@ -1960,7 +1970,10 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  peelOff(nodeContext, nodeOffset) {
+  peelOff(
+      nodeContext: Vtree.NodeContext,
+      nodeOffset: number
+    ): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("peelOff");
     const firstPseudo = nodeContext.firstPseudo;
     let offsetInNode = nodeContext.offsetInNode;
@@ -2027,7 +2040,11 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  applyFootnoteStyle(vertical, rtl, target) {
+  applyFootnoteStyle(
+      vertical: boolean,
+      rtl: boolean,
+      target: Element
+    ): boolean {
     const computedStyle = {};
     const pseudoMap = CssCasc.getStyleMap(this.footnoteStyle, "_pseudos");
     vertical = this.computeStyle(
@@ -2053,12 +2070,12 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  processFragmentedBlockEdge(nodeContext) {
+  processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
     if (nodeContext) {
       nodeContext.walkUpBlocks(block => {
         const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
         if (!boxDecorationBreak || boxDecorationBreak === "slice") {
-          const elem = block.viewNode;
+          const elem = block.viewNode as Element;
           Asserts.assert(elem instanceof Element);
           if (block.vertical) {
             Base.setCSSProperty(elem, "padding-left", "0");
@@ -2079,7 +2096,11 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  convertLengthToPx(numeric, viewNode, clientLayout) {
+  convertLengthToPx(
+      numeric: Css.Numeric,
+      viewNode: Node,
+      clientLayout: Vtree.ClientLayout
+    ): number | Css.Numeric {
     const num = numeric.num;
     const unit = numeric.unit;
     if (Exprs.isFontRelativeLengthUnit(unit)) {
@@ -2139,7 +2160,10 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  isSameNodePosition(nodePosition1, nodePosition2) {
+  isSameNodePosition(
+      nodePosition1: Vtree.NodePosition,
+      nodePosition2: Vtree.NodePosition
+    ): boolean {
     return (
       nodePosition1.offsetInNode === nodePosition2.offsetInNode &&
       nodePosition1.after == nodePosition2.after &&
@@ -2215,7 +2239,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getRangeClientRects(range) {
+  getRangeClientRects(range: Range): ClientRect[] {
     const rects = range["getClientRects"]();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map(function(rect) {
@@ -2226,7 +2250,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getElementClientRect(element) {
+  getElementClientRect(element: Element): ClientRect {
     const htmlElement = element as HTMLElement;
     const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
@@ -2236,7 +2260,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getElementComputedStyle(element) {
+  getElementComputedStyle(element: Element): CSSStyleDeclaration {
     return this.window.getComputedStyle(element, null);
   }
 }

@@ -622,7 +622,7 @@ export class Prefix extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     const val = this.val.evaluate(context);
     return this.evalPrefix(val);
   }
@@ -630,7 +630,11 @@ export class Prefix extends Val {
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return (
       other === this || this.val.dependOuter(other, context, dependencyCache)
     );
@@ -639,7 +643,7 @@ export class Prefix extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     if (10 < priority) {
       buf.append("(");
     }
@@ -653,7 +657,7 @@ export class Prefix extends Val {
   /**
    * @override
    */
-  expand(context, params) {
+  expand(context: Context, params: Val[]): Val {
     const val = this.val.expand(context, params);
     if (val === this.val) {
       return this;
@@ -683,7 +687,7 @@ export class Infix extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     const lhs = this.lhs.evaluate(context);
     const rhs = this.rhs.evaluate(context);
     return this.evalInfix(lhs, rhs);
@@ -692,7 +696,11 @@ export class Infix extends Val {
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return (
       other === this ||
       this.lhs.dependOuter(other, context, dependencyCache) ||
@@ -703,7 +711,7 @@ export class Infix extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     const thisPriority = this.getPriority();
     if (thisPriority <= priority) {
       buf.append("(");
@@ -719,7 +727,7 @@ export class Infix extends Val {
   /**
    * @override
    */
-  expand(context, params) {
+  expand(context: Context, params: Val[]): Val {
     const lhs = this.lhs.expand(context, params);
     const rhs = this.rhs.expand(context, params);
     if (lhs === this.lhs && rhs === this.rhs) {
@@ -738,7 +746,7 @@ export class Logical extends Infix {
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 1;
   }
 }
@@ -751,7 +759,7 @@ export class Comparison extends Infix {
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 2;
   }
 }
@@ -764,7 +772,7 @@ export class Additive extends Infix {
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 3;
   }
 }
@@ -777,7 +785,7 @@ export class Multiplicative extends Infix {
   /**
    * @override
    */
-  getPriority() {
+  getPriority(): number {
     return 4;
   }
 }
@@ -790,14 +798,14 @@ export class Not extends Prefix {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "!";
   }
 
   /**
    * @override
    */
-  evalPrefix(val) {
+  evalPrefix(val: Result): Result {
     return !val;
   }
 }
@@ -810,14 +818,14 @@ export class Negate extends Prefix {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "-";
   }
 
   /**
    * @override
    */
-  evalPrefix(val) {
+  evalPrefix(val: Result): Result {
     return -val;
   }
 }
@@ -830,14 +838,14 @@ export class And extends Logical {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "&&";
   }
 
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return this.lhs.evaluate(context) && this.rhs.evaluate(context);
   }
 }
@@ -850,7 +858,7 @@ export class AndMedia extends And {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return " and ";
   }
 }
@@ -863,14 +871,14 @@ export class Or extends Logical {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "||";
   }
 
   /**
    * @override
    */
-  evaluateCore(context) {
+  evaluateCore(context: Context): Result {
     return this.lhs.evaluate(context) || this.rhs.evaluate(context);
   }
 }
@@ -883,7 +891,7 @@ export class OrMedia extends Or {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return ", ";
   }
 }
@@ -896,14 +904,14 @@ export class Lt extends Comparison {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "<";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
+  evalInfix(lhs: Result, rhs: Result): Result {
     return lhs < rhs;
   }
 }
@@ -916,14 +924,14 @@ export class Le extends Comparison {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "<=";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
+  evalInfix(lhs: Result, rhs: Result): Result {
     return lhs <= rhs;
   }
 }
@@ -936,14 +944,14 @@ export class Gt extends Comparison {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return ">";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
+  evalInfix(lhs: Result, rhs: Result): Result {
     return lhs > rhs;
   }
 }
@@ -956,14 +964,14 @@ export class Ge extends Comparison {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return ">=";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
+  evalInfix(lhs: Result, rhs: Result): Result {
     return lhs >= rhs;
   }
 }
@@ -976,14 +984,14 @@ export class Eq extends Comparison {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "==";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
+  evalInfix(lhs: Result, rhs: Result): Result {
     return lhs == rhs;
   }
 }
@@ -996,14 +1004,14 @@ export class Ne extends Comparison {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "!=";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
+  evalInfix(lhs: Result, rhs: Result): Result {
     return lhs != rhs;
   }
 }
@@ -1016,15 +1024,15 @@ export class Add extends Additive {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "+";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
-    return lhs + rhs;
+  evalInfix(lhs: Result, rhs: Result): Result {
+    return (lhs as any) + rhs;
   }
 }
 
@@ -1036,15 +1044,15 @@ export class Subtract extends Additive {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return " - ";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
-    return lhs - rhs;
+  evalInfix(lhs: Result, rhs: Result): Result {
+    return (lhs as any) - (rhs as any);
   }
 }
 
@@ -1056,15 +1064,15 @@ export class Multiply extends Multiplicative {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "*";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
-    return lhs * rhs;
+  evalInfix(lhs: Result, rhs: Result): Result {
+    return (lhs as any) * (rhs as any);
   }
 }
 
@@ -1076,15 +1084,15 @@ export class Divide extends Multiplicative {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "/";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
-    return lhs / rhs;
+  evalInfix(lhs: Result, rhs: Result): Result {
+    return (lhs as any) / (rhs as any);
   }
 }
 
@@ -1096,15 +1104,15 @@ export class Modulo extends Multiplicative {
   /**
    * @override
    */
-  getOp() {
+  getOp(): string {
     return "%";
   }
 
   /**
    * @override
    */
-  evalInfix(lhs, rhs) {
-    return lhs % rhs;
+  evalInfix(lhs: Result, rhs: Result): Result {
+    return (lhs as any) % (rhs as any);
   }
 }
 
@@ -1122,7 +1130,7 @@ export class Numeric extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append(this.num.toString());
     buf.append(Base.escapeCSSIdent(this.unit));
   }
@@ -1130,7 +1138,7 @@ export class Numeric extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return this.num * context.queryUnitSize(this.unit, false);
   }
 }
@@ -1147,21 +1155,25 @@ export class Named extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append(this.qualifiedName);
   }
 
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return context.evalName(this.scope, this.qualifiedName).evaluate(context);
   }
 
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return (
       other === this ||
       context
@@ -1186,7 +1198,7 @@ export class MediaName extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     if (this.not) {
       buf.append("not ");
     }
@@ -1196,14 +1208,18 @@ export class MediaName extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return context.evalMediaName(this.name, this.not);
   }
 
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return (
       other === this || this.value.dependOuter(other, context, dependencyCache)
     );
@@ -1212,7 +1228,7 @@ export class MediaName extends Val {
   /**
    * @override
    */
-  isMediaName() {
+  isMediaName(): boolean {
     return true;
   }
 }
@@ -1236,14 +1252,14 @@ export class Native extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append(this.str);
   }
 
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return this.fn.call(context);
   }
 }
@@ -1300,7 +1316,7 @@ export class Call extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append(this.qualifiedName);
     appendValArray(buf, this.params);
   }
@@ -1308,7 +1324,7 @@ export class Call extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     const body = context.evalCall(
       this.scope,
       this.qualifiedName,
@@ -1321,7 +1337,11 @@ export class Call extends Val {
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     if (other === this) {
       return true;
     }
@@ -1344,7 +1364,7 @@ export class Call extends Val {
   /**
    * @override
    */
-  expand(context, params) {
+  expand(context: Context, params: Val[]): Val {
     const expandedParams = expandValArray(context, this.params, params);
     if (expandedParams === this.params) {
       return this;
@@ -1366,7 +1386,7 @@ export class Cond extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     if (priority > 0) {
       buf.append("(");
     }
@@ -1383,7 +1403,7 @@ export class Cond extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     if (this.cond.evaluate(context)) {
       return this.ifTrue.evaluate(context);
     } else {
@@ -1394,7 +1414,11 @@ export class Cond extends Val {
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return (
       other === this ||
       this.cond.dependOuter(other, context, dependencyCache) ||
@@ -1406,7 +1430,7 @@ export class Cond extends Val {
   /**
    * @override
    */
-  expand(context, params) {
+  expand(context: Context, params: Val[]): Val {
     const cond = this.cond.expand(context, params);
     const ifTrue = this.ifTrue.expand(context, params);
     const ifFalse = this.ifFalse.expand(context, params);
@@ -1430,7 +1454,7 @@ export class Const extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     switch (typeof this.val) {
       case "number":
       case "boolean":
@@ -1449,7 +1473,7 @@ export class Const extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return this.val;
   }
 }
@@ -1462,7 +1486,7 @@ export class MediaTest extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append("(");
     buf.append(Base.escapeCSSStr(this.name.name));
     buf.append(":");
@@ -1473,14 +1497,18 @@ export class MediaTest extends Val {
   /**
    * @override
    */
-  evaluateCore(context) {
+evaluateCore(context: Context): Result {
     return context.evalMediaTest(this.name.name, this.value);
   }
 
   /**
    * @override
    */
-  dependCore(other, context, dependencyCache) {
+  dependCore(
+    other: Val,
+    context: Context,
+    dependencyCache: DependencyCache
+  ): boolean {
     return (
       other === this || this.value.dependOuter(other, context, dependencyCache)
     );
@@ -1489,7 +1517,7 @@ export class MediaTest extends Val {
   /**
    * @override
    */
-  expand(context, params) {
+  expand(context: Context, params: Val[]): Val {
     const value = this.value.expand(context, params);
     if (value === this.value) {
       return this;
@@ -1507,7 +1535,7 @@ export class Param extends Val {
   /**
    * @override
    */
-  appendTo(buf, priority) {
+  appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append("$");
     buf.append(this.index.toString());
   }
@@ -1515,7 +1543,7 @@ export class Param extends Val {
   /**
    * @override
    */
-  expand(context, params) {
+  expand(context: Context, params: Val[]): Val {
     const v = params[this.index];
     if (!v) {
       throw new Error(`Parameter missing: ${this.index}`);

@@ -72,7 +72,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   /**
    * @override
    */
-  getStyle(element, deep) {
+  getStyle(element: Element, deep: boolean): CssCasc.ElementStyle {
     const pseudoName = getPseudoName(element);
     if (this.styler && pseudoName && pseudoName.match(/after$/)) {
       this.style = this.styler.getStyle(this.element, true);
@@ -96,11 +96,11 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   /**
    * @override
    */
-  processContent(element, style) {
+  processContent(element: Element, styles: { [key: string]: Css.Val }) {
     const pseudoName = getPseudoName(element);
     if (!this.contentProcessed[pseudoName]) {
       this.contentProcessed[pseudoName] = true;
-      const contentVal = style["content"];
+      const contentVal = styles["content"];
       if (contentVal) {
         if (Vtree.nonTrivialContent(contentVal)) {
           contentVal.visit(

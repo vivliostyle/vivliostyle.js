@@ -24,7 +24,7 @@ import * as Exprs from "../adapt/expr";
 import * as Vgen from "../adapt/vgen";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
-import { Layout } from "../vivliostyle/types";
+import { Layout } from "./types";
 
 /**
  * Clone counter values.
@@ -99,7 +99,7 @@ class CounterListener implements CssCasc.CounterListener {
   /**
    * @override
    */
-  countersOfId(id, counters) {
+  countersOfId(id: string, counters: CssCasc.CounterValues) {
     id = this.counterStore.documentURLTransformer.transformFragment(
       id,
       this.baseURL
@@ -145,7 +145,10 @@ class CounterResolver implements CssCasc.CounterResolver {
   /**
    * @override
    */
-  getPageCounterVal(name, format) {
+  getPageCounterVal(
+    name: string,
+    format: (p1: number | null) => string
+  ): Exprs.Val {
     const self = this;
 
     function getCounterNumber() {
@@ -168,7 +171,7 @@ class CounterResolver implements CssCasc.CounterResolver {
   /**
    * @override
    */
-  getPageCountersVal(name, format) {
+  getPageCountersVal(name: string, format: (p1: number[]) => string): Exprs.Val {
     const self = this;
 
     function getCounterNumbers() {
@@ -229,7 +232,11 @@ class CounterResolver implements CssCasc.CounterResolver {
   /**
    * @override
    */
-  getTargetCounterVal(url, name, format) {
+  getTargetCounterVal(
+    url: string,
+    name: string,
+    format: (p1: number | null) => string
+  ): Exprs.Val {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
 
@@ -297,7 +304,11 @@ class CounterResolver implements CssCasc.CounterResolver {
   /**
    * @override
    */
-  getTargetCountersVal(url, name, format) {
+  getTargetCountersVal(
+    url: string,
+    name: string,
+    format: (p1: number[]) => string
+  ): Exprs.Val {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
     const self = this;
@@ -669,7 +680,7 @@ class LayoutConstraint implements Layout.LayoutConstraint {
   /**
    * @override
    */
-  allowLayout(nodeContext) {
+  allowLayout(nodeContext: Vtree.NodeContext): boolean {
     if (!nodeContext || nodeContext.after) {
       return true;
     }
@@ -677,7 +688,7 @@ class LayoutConstraint implements Layout.LayoutConstraint {
     if (!viewNode || viewNode.nodeType !== 1) {
       return true;
     }
-    const id = viewNode.getAttribute("id") || viewNode.getAttribute("name");
+    const id = (viewNode as Element).getAttribute("id") || (viewNode as Element).getAttribute("name");
     if (!id) {
       return true;
     }

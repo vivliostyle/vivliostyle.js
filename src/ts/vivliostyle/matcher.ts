@@ -39,7 +39,7 @@ export class AnyMatcher implements Matcher {
   constructor(public readonly matchers: Matcher[]) {}
 
   /** @override */
-  matches() {
+  matches(): boolean {
     return this.matchers.some(matcher => matcher.matches());
   }
 }
@@ -48,7 +48,7 @@ export class AllMatcher implements Matcher {
   constructor(public readonly matchers: Matcher[]) {}
 
   /** @override */
-  matches() {
+  matches(): boolean {
     return this.matchers.every(matcher => matcher.matches());
   }
 }
@@ -81,7 +81,7 @@ export class NthFragmentMatcher implements Matcher {
   ) {}
 
   /** @override */
-  matches() {
+  matches(): boolean {
     const entry = NthFragmentMatcher.fragmentIndices[this.elementOffset];
     return (
       entry != null &&

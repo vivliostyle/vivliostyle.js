@@ -1014,7 +1014,7 @@ export class Styler implements AbstractStyler {
   /**
    * @override
    */
-  getStyle(element, deep) {
+  getStyle(element: Element, deep: boolean): CssCasc.ElementStyle {
     let offset = this.xmldoc.getElementOffset(element);
     const key = `e${offset}`;
     if (deep) {
@@ -1029,7 +1029,7 @@ export class Styler implements AbstractStyler {
   /**
    * @override
    */
-  processContent(element, styles) {}
+    processContent(element: Element, styles: { [key: string]: Css.Val }) {}
 }
 
 export const columnProps = ["column-count", "column-width", "column-fill"];

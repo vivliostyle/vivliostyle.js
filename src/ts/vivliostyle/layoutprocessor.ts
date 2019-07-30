@@ -74,7 +74,7 @@ export interface LayoutProcessor {
     nodeContext: ViewTree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean
-  ): Task.Result<boolean> | null;
+  ): Task.Result<boolean>;
 
   clearOverflownViewNodes(
     column: Layout.Column,
@@ -111,7 +111,11 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /**
    * @override
    */
-  layout(nodeContext, column, leadingEdge) {
+  layout(
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column,
+    leadingEdge: boolean
+  ): Task.Result<ViewTree.NodeContext> {
     if (column.isFloatNodeContext(nodeContext)) {
       return column.layoutFloatOrFootnote(nodeContext);
     } else if (column.isBreakable(nodeContext)) {
@@ -124,7 +128,12 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /**
    * @override
    */
-  createEdgeBreakPosition(position, breakOnEdge, overflows, columnBlockSize) {
+  createEdgeBreakPosition(
+    position: ViewTree.NodeContext,
+    breakOnEdge: string | null,
+    overflows: boolean,
+    columnBlockSize: number
+  ): Layout.BreakPosition {
     return new BreakPosition.EdgeBreakPosition(
       position.copy(),
       breakOnEdge,
@@ -136,21 +145,29 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /**
    * @override
    */
-  startNonInlineElementNode(nodeContext) {
+  startNonInlineElementNode(nodeContext: ViewTree.NodeContext): boolean {
     return false;
   }
 
   /**
    * @override
    */
-  afterNonInlineElementNode(nodeContext) {
+  afterNonInlineElementNode(
+    nodeContext: ViewTree.NodeContext,
+    stopAtOverflow: boolean
+  ): boolean {
     return false;
   }
 
   /**
    * @override
    */
-  clearOverflownViewNodes(column, parentNodeContext, nodeContext, removeSelf) {
+  clearOverflownViewNodes(
+    column: Layout.Column,
+    parentNodeContext: ViewTree.NodeContext,
+    nodeContext: ViewTree.NodeContext,
+    removeSelf: boolean
+  ) {
     if (!nodeContext.viewNode) {
       return;
     }
@@ -199,29 +216,29 @@ export class BlockFormattingContext
   /**
    * @override
    */
-  getName() {
+  getName(): string {
     return "Block formatting context (BlockFormattingContext)";
   }
 
   /**
    * @override
    */
-  isFirstTime(nodeContext, firstTime) {
+  isFirstTime(nodeContext: ViewTree.NodeContext, firstTime: boolean): boolean {
     return firstTime;
   }
 
   /**
    * @override
    */
-  getParent() {
+  getParent(): ViewTree.FormattingContext {
     return this.parent;
   }
 
   /** @override */
-  saveState() {}
+  saveState(): any {}
 
   /** @override */
-  restoreState(state) {}
+  restoreState(state: any) {}
 }
 
 export const blockLayoutProcessor = new BlockLayoutProcessor();

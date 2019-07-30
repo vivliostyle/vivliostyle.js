@@ -124,7 +124,11 @@ export class AfterIfContinuesLayoutConstraint
   ) {}
 
   /** @override */
-  allowLayout(nodeContext, overflownNodeContext, column) {
+  allowLayout(
+      nodeContext: ViewTree.NodeContext,
+      overflownNodeContext: ViewTree.NodeContext,
+      column: Layout.Column
+    ): boolean {
     if (
       (overflownNodeContext && !nodeContext) ||
       (nodeContext && nodeContext.overflow)
@@ -136,15 +140,23 @@ export class AfterIfContinuesLayoutConstraint
   }
 
   /** @override */
-  nextCandidate(nodeContext) {
+  nextCandidate(nodeContext: ViewTree.NodeContext): boolean {
     return false;
   }
 
   /** @override */
-  postLayout(allowed, nodeContext, initialPosition, column) {}
+  postLayout(
+      allowed: boolean,
+      positionAfter: ViewTree.NodeContext,
+      initialPosition: ViewTree.NodeContext,
+      column: Layout.Column
+    ) {}
 
   /** @override */
-  finishBreak(nodeContext, column) {
+  finishBreak(
+      nodeContext: ViewTree.NodeContext,
+      column: Layout.Column
+    ): Task.Result<boolean> {
     if (!this.getRepetitiveElements().affectTo(nodeContext)) {
       return Task.newResult(true);
     }
@@ -164,7 +176,7 @@ export class AfterIfContinuesLayoutConstraint
   }
 
   /** @override */
-  equalsTo(constraint) {
+  equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
     if (!(constraint instanceof AfterIfContinuesLayoutConstraint)) {
       return false;
     }
@@ -175,7 +187,7 @@ export class AfterIfContinuesLayoutConstraint
   }
 
   /** @override */
-  getPriorityOfFinishBreak() {
+  getPriorityOfFinishBreak(): number {
     return 9;
   }
 }
@@ -185,7 +197,7 @@ export class AfterIfContinuesElementsOffset
   constructor(public nodeContext, public pseudoElementHeight) {}
 
   /** @override */
-  calculateOffset(nodeContext) {
+  calculateOffset(nodeContext: ViewTree.NodeContext): number {
     if (!this.affectTo(nodeContext)) {
       return 0;
     }
@@ -193,7 +205,7 @@ export class AfterIfContinuesElementsOffset
   }
 
   /** @override */
-  calculateMinimumOffset(nodeContext) {
+  calculateMinimumOffset(nodeContext: ViewTree.NodeContext): number {
     return this.calculateOffset(nodeContext);
   }
 

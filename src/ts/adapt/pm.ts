@@ -238,7 +238,7 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
   /**
    * @override
    */
-  createInstance(parentInstance) {
+  createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
     return new PartitionGroupInstance(parentInstance, this);
   }
 
@@ -1625,7 +1625,10 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
   /**
    * @override
    */
-  applyCascadeAndInit(cascade, docElementStyle) {
+  applyCascadeAndInit(
+    cascade: CssCasc.CascadeInstance,
+    docElementStyle: CssCasc.ElementStyle
+  ): void {
     super.applyCascadeAndInit(cascade, docElementStyle);
 
     // Sort page masters using order and specificity.
@@ -1651,7 +1654,7 @@ export class PageMasterInstance<
   /**
    * @override
    */
-  boxSpecificEnabled(enabled) {
+  boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     const pageMaster = this.pageBox.pageMaster;
     if (pageMaster.condition) {
       enabled = Exprs.and(pageMaster.scope, enabled, pageMaster.condition);
@@ -1723,7 +1726,7 @@ export class PartitionInstance<
   /**
    * @override
    */
-  boxSpecificEnabled(enabled) {
+  boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     const scope = this.pageBox.scope;
     const style = this.style;
     const required =
@@ -1757,12 +1760,18 @@ export class PartitionInstance<
   /**
    * @override
    */
-  prepareContainer(context, container, delayedItems, docFaces, clientLayout) {
+  prepareContainer(
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    docFaces: Font.DocumentFaces,
+    clientLayout: Vtree.ClientLayout
+  ): void {
     Base.setCSSProperty(container.element, "overflow", "hidden"); // default value
     super.prepareContainer(
       context,
       container,
-      delayedItems,
+      page,
       docFaces,
       clientLayout
     );
@@ -1784,7 +1793,7 @@ export class PageBoxParserHandler extends CssParse.SlaveParserHandler
   /**
    * @override
    */
-  property(name, value, important) {
+  property(name: string, value: Css.Val, important: boolean): void {
     this.validatorSet.validatePropertyAndHandleShorthand(
       name,
       value,
@@ -1796,21 +1805,21 @@ export class PageBoxParserHandler extends CssParse.SlaveParserHandler
   /**
    * @override
    */
-  unknownProperty(name, value) {
+  unknownProperty(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
   }
 
   /**
    * @override
    */
-  invalidPropertyValue(name, value) {
+  invalidPropertyValue(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
   }
 
   /**
    * @override
    */
-  simpleProperty(name, value, important) {
+  simpleProperty(name: string, value: Css.Val, important): void {
     this.target.specified[name] = new CssCasc.CascadeValue(
       value,
       important
@@ -1849,7 +1858,11 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
   /**
    * @override
    */
-  startPartitionRule(name, pseudoName, classes) {
+  startPartitionRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     const partition = new Partition(
       this.scope,
       name,
@@ -1869,7 +1882,11 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
   /**
    * @override
    */
-  startPartitionGroupRule(name, pseudoName, classes) {
+  startPartitionGroupRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     const partitionGroup = new PartitionGroup(
       this.scope,
       name,
@@ -1900,7 +1917,11 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
   /**
    * @override
    */
-  startPartitionRule(name, pseudoName, classes) {
+  startPartitionRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     const partition = new Partition(
       this.scope,
       name,
@@ -1920,7 +1941,11 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
   /**
    * @override
    */
-  startPartitionGroupRule(name, pseudoName, classes) {
+  startPartitionGroupRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     const partitionGroup = new PartitionGroup(
       this.scope,
       name,

@@ -243,7 +243,7 @@ export class DispatchParserHandler extends ParserHandler {
   /**
    * @override
    */
-  getCurrentToken() {
+  getCurrentToken(): CssTok.Token {
     if (this.tokenizer) {
       return this.tokenizer.token();
     }
@@ -253,7 +253,7 @@ export class DispatchParserHandler extends ParserHandler {
   /**
    * @override
    */
-  getScope() {
+  getScope(): Exprs.LexicalScope {
     return this.slave.getScope();
   }
 
@@ -261,7 +261,7 @@ export class DispatchParserHandler extends ParserHandler {
    * Forwards call to slave.
    * @override
    */
-  error(mnemonics, token) {
+  error(mnemonics: string, token: CssTok.Token): void {
     this.slave.error(mnemonics, token);
   }
 
@@ -275,7 +275,7 @@ export class DispatchParserHandler extends ParserHandler {
   /**
    * @override
    */
-  startStylesheet(flavor) {
+  startStylesheet(flavor: StylesheetFlavor): void {
     super.startStylesheet(flavor);
     if (this.stack.length > 0) {
       // This can occur as a result of an error
@@ -288,210 +288,227 @@ export class DispatchParserHandler extends ParserHandler {
   /**
    * @override
    */
-  tagSelector(ns, name) {
+  tagSelector(ns: string | null, name: string | null): void {
     this.slave.tagSelector(ns, name);
   }
 
   /**
    * @override
    */
-  classSelector(name) {
+  classSelector(name: string): void {
     this.slave.classSelector(name);
   }
 
   /**
    * @override
    */
-  pseudoclassSelector(name, params) {
+  pseudoclassSelector(name: string, params: (number | string)[]): void {
     this.slave.pseudoclassSelector(name, params);
   }
 
   /**
    * @override
    */
-  pseudoelementSelector(name, params) {
+  pseudoelementSelector(name: string, params: (number | string)[]): void {
     this.slave.pseudoelementSelector(name, params);
   }
 
   /**
    * @override
    */
-  idSelector(id) {
+  idSelector(id: string): void {
     this.slave.idSelector(id);
   }
 
   /**
    * @override
    */
-  attributeSelector(ns, name, op, value) {
+  attributeSelector(
+    ns: string,
+    name: string,
+    op: CssTok.TokenType,
+    value: string | null
+  ): void {
     this.slave.attributeSelector(ns, name, op, value);
   }
 
   /**
    * @override
    */
-  descendantSelector() {
+  descendantSelector(): void {
     this.slave.descendantSelector();
   }
 
   /**
    * @override
    */
-  childSelector() {
+  childSelector(): void {
     this.slave.childSelector();
   }
 
   /**
    * @override
    */
-  adjacentSiblingSelector() {
+  adjacentSiblingSelector(): void {
     this.slave.adjacentSiblingSelector();
   }
 
   /**
    * @override
    */
-  followingSiblingSelector() {
+  followingSiblingSelector(): void {
     this.slave.followingSiblingSelector();
   }
 
   /**
    * @override
    */
-  nextSelector() {
+  nextSelector(): void {
     this.slave.nextSelector();
   }
 
   /**
    * @override
    */
-  startSelectorRule() {
+  startSelectorRule(): void {
     this.slave.startSelectorRule();
   }
 
   /**
    * @override
    */
-  startFontFaceRule() {
+  startFontFaceRule(): void {
     this.slave.startFontFaceRule();
   }
 
   /**
    * @override
    */
-  startFootnoteRule(pseudoelem) {
+  startFootnoteRule(pseudoelem: string | null): void {
     this.slave.startFootnoteRule(pseudoelem);
   }
 
   /**
    * @override
    */
-  startViewportRule() {
+  startViewportRule(): void {
     this.slave.startViewportRule();
   }
 
   /**
    * @override
    */
-  startDefineRule() {
+  startDefineRule(): void {
     this.slave.startDefineRule();
   }
 
   /**
    * @override
    */
-  startRegionRule() {
+  startRegionRule(): void {
     this.slave.startRegionRule();
   }
 
   /**
    * @override
    */
-  startPageRule() {
+  startPageRule(): void {
     this.slave.startPageRule();
   }
 
   /**
    * @override
    */
-  startPageMarginBoxRule(name) {
+  startPageMarginBoxRule(name: string): void {
     this.slave.startPageMarginBoxRule(name);
   }
 
   /**
    * @override
    */
-  startWhenRule(expr) {
+  startWhenRule(expr: Css.Expr): void {
     this.slave.startWhenRule(expr);
   }
 
   /**
    * @override
    */
-  startFlowRule(flowName) {
+  startFlowRule(flowName: string): void {
     this.slave.startFlowRule(flowName);
   }
 
   /**
    * @override
    */
-  startPageTemplateRule() {
+  startPageTemplateRule(): void {
     this.slave.startPageTemplateRule();
   }
 
   /**
    * @override
    */
-  startPageMasterRule(name, pseudoName, classes) {
+  startPageMasterRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     this.slave.startPageMasterRule(name, pseudoName, classes);
   }
 
   /**
    * @override
    */
-  startPartitionRule(name, pseudoName, classes) {
+  startPartitionRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     this.slave.startPartitionRule(name, pseudoName, classes);
   }
 
   /**
    * @override
    */
-  startPartitionGroupRule(name, pseudoName, classes) {
+  startPartitionGroupRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     this.slave.startPartitionGroupRule(name, pseudoName, classes);
   }
 
   /**
    * @override
    */
-  startRuleBody() {
+  startRuleBody(): void {
     this.slave.startRuleBody();
   }
 
   /**
    * @override
    */
-  property(name, value, important) {
+  property(name: string, value: Css.Val, important: boolean): void {
     this.slave.property(name, value, important);
   }
 
   /**
    * @override
    */
-  endRule() {
+  endRule(): void {
     this.slave.endRule();
   }
 
   /**
    * @override
    */
-  startFuncWithSelector(funcName) {
+  startFuncWithSelector(funcName: string): void {
     this.slave.startFuncWithSelector(funcName);
   }
 
   /**
    * @override
    */
-  endFuncWithSelector() {
+  endFuncWithSelector(): void {
     this.slave.endFuncWithSelector();
   }
 }
@@ -514,28 +531,28 @@ export class SkippingParserHandler extends ParserHandler {
   /**
    * @override
    */
-  getCurrentToken() {
+  getCurrentToken(): CssTok.Token {
     return this.owner.getCurrentToken();
   }
 
   /**
    * @override
    */
-  error(mnemonics, token) {
+  error(mnemonics: string, token: CssTok.Token): void {
     this.owner.errorMsg(mnemonics, token);
   }
 
   /**
    * @override
    */
-  startRuleBody() {
+  startRuleBody(): void {
     this.depth++;
   }
 
   /**
    * @override
    */
-  endRule() {
+  endRule(): void {
     if (--this.depth == 0 && !this.topLevel) {
       this.owner.popHandler();
     }
@@ -565,112 +582,124 @@ export class SlaveParserHandler extends SkippingParserHandler {
   /**
    * @override
    */
-  startSelectorRule() {
+  startSelectorRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR");
   }
 
   /**
    * @override
    */
-  startFontFaceRule() {
+  startFontFaceRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FONT_FACE");
   }
 
   /**
    * @override
    */
-  startFootnoteRule(pseudoelem) {
+  startFootnoteRule(pseudoelem: string | null): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FOOTNOTE");
   }
 
   /**
    * @override
    */
-  startViewportRule() {
+  startViewportRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_VIEWPORT");
   }
 
   /**
    * @override
    */
-  startDefineRule() {
+  startDefineRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_DEFINE");
   }
 
   /**
    * @override
    */
-  startRegionRule() {
+  startRegionRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_REGION");
   }
 
   /**
    * @override
    */
-  startPageRule() {
+  startPageRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE");
   }
 
   /**
    * @override
    */
-  startWhenRule(expr) {
+  startWhenRule(expr: Css.Expr): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_WHEN");
   }
 
   /**
    * @override
    */
-  startFlowRule(flowName) {
+  startFlowRule(flowName: string): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FLOW");
   }
 
   /**
    * @override
    */
-  startPageTemplateRule() {
+  startPageTemplateRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_TEMPLATE");
   }
 
   /**
    * @override
    */
-  startPageMasterRule(name, pseudoName, classes) {
+  startPageMasterRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_MASTER");
   }
 
   /**
    * @override
    */
-  startPartitionRule(name, pseudoName, classes) {
+  startPartitionRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION");
   }
 
   /**
    * @override
    */
-  startPartitionGroupRule(name, pseudoName, classes) {
+  startPartitionGroupRule(
+    name: string | null,
+    pseudoName: string | null,
+    classes: string[]
+  ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION_GROUP");
   }
 
   /**
    * @override
    */
-  startFuncWithSelector(funcName) {
+  startFuncWithSelector(funcName: string): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR_FUNC");
   }
 
   /**
    * @override
    */
-  endFuncWithSelector() {
+  endFuncWithSelector(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_END_SELECTOR_FUNC");
   }
 
   /**
    * @override
    */
-  property(name, value, important) {
+  property(name: string, value: Css.Val, important: boolean): void {
     this.error("E_CSS_UNEXPECTED_PROPERTY", this.getCurrentToken());
   }
 }
@@ -2542,14 +2571,14 @@ export class ErrorHandler extends ParserHandler {
   /**
    * @override
    */
-  error(mnemonics, token) {
+  error(mnemonics: string, token: CssTok.Token): void {
     throw new Error(mnemonics);
   }
 
   /**
    * @override
    */
-  getScope() {
+  getScope(): Exprs.LexicalScope {
     return this.scope;
   }
 }
@@ -2563,7 +2592,7 @@ export const parseStylesheet = (
 ): Task.Result<boolean> => {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
-  let condition = null;
+  let condition: Css.Expr | null = null;
   if (media) {
     condition = parseMediaQuery(
       new CssTok.Tokenizer(media, handler),
