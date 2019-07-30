@@ -145,7 +145,10 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
   /**
    * @override
    */
-  findAcceptableBreak(column: Layout.Column, penalty: number): ViewTree.NodeContext {
+  findAcceptableBreak(
+    column: Layout.Column,
+    penalty: number
+  ): ViewTree.NodeContext {
     const breakNodeContext = super.findAcceptableBreak(column, penalty);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
@@ -215,7 +218,10 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
   /**
    * @override
    */
-  findAcceptableBreak(column: Layout.Column, penalty: number): ViewTree.NodeContext {
+  findAcceptableBreak(
+    column: Layout.Column,
+    penalty: number
+  ): ViewTree.NodeContext {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -774,7 +780,8 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         computedStyle[formattingContext.vertical ? "height" : "width"]
       );
       formattingContext.getRepetitiveElements().lastContentSourceNode =
-        state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode as Element;
+        state.lastAfterNodeContext &&
+        (state.lastAfterNodeContext.sourceNode as Element);
       state.break = true;
     } else {
       switch (display) {
@@ -1908,10 +1915,10 @@ export class EntireTableLayoutConstraint
    * @override
    */
   allowLayout(
-      nodeContext: ViewTree.NodeContext,
-      overflownNodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): boolean {
+    nodeContext: ViewTree.NodeContext,
+    overflownNodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): boolean {
     // If the nodeContext overflows, any EntireTableLayoutConstraint should not
     // be registered in the first place. See
     // TableLayoutProcessor.prototype.doInitialLayout.
@@ -1930,11 +1937,11 @@ export class EntireTableLayoutConstraint
    * @override
    */
   postLayout(
-      allowed: boolean,
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column
-    ) {
+    allowed: boolean,
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column
+  ) {
     Asserts.assert(positionAfter.sourceNode);
     tableLayoutOptionCache.push({
       root: positionAfter.sourceNode,
@@ -1948,9 +1955,9 @@ export class EntireTableLayoutConstraint
    * @override
    */
   finishBreak(
-      nodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): Task.Result<boolean> {
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<boolean> {
     return Task.newResult(true);
   }
 
@@ -2016,10 +2023,10 @@ export class TableRowLayoutConstraint
 
   /** @override */
   allowLayout(
-      nodeContext: ViewTree.NodeContext,
-      overflownNodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): boolean {
+    nodeContext: ViewTree.NodeContext,
+    overflownNodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): boolean {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
       return true;
@@ -2066,11 +2073,11 @@ export class TableRowLayoutConstraint
 
   /** @override */
   postLayout(
-      allowed: boolean,
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column
-    ) {
+    allowed: boolean,
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column
+  ) {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext
     );
@@ -2101,9 +2108,9 @@ export class TableRowLayoutConstraint
 
   /** @override */
   finishBreak(
-      nodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): Task.Result<boolean> {
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<boolean> {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext
     );

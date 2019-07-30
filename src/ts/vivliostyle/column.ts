@@ -255,9 +255,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  hasNextCandidate(
-    candidates: ColumnBalancingTrialResult[]
-  ): boolean {
+  hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {
     if (candidates.length === 1) {
       return true;
     } else if (this.foundUpperBound) {
@@ -283,9 +281,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  updateCondition(
-    candidates: ColumnBalancingTrialResult[]
-  ): void {
+  updateCondition(candidates: ColumnBalancingTrialResult[]): void {
     if (this.foundUpperBound) {
       reduceContainerSize(candidates, this.layoutContainer);
     } else {
@@ -335,18 +331,14 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   /**
    * @override
    */
-  hasNextCandidate(
-    candidates: ColumnBalancingTrialResult[]
-  ): boolean {
+  hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {
     return canReduceContainerSize(candidates);
   }
 
   /**
    * @override
    */
-  updateCondition(
-    candidates: ColumnBalancingTrialResult[]
-  ): void {
+  updateCondition(candidates: ColumnBalancingTrialResult[]): void {
     reduceContainerSize(candidates, this.layoutContainer);
   }
 }

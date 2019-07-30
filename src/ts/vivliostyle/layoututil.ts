@@ -274,9 +274,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   /**
    * @override
    */
-  startNonElementNode(
-    state: LayoutIteratorState
-  ): void | Task.Result<boolean> {
+  startNonElementNode(state: LayoutIteratorState): void | Task.Result<boolean> {
     state.onStartEdges = false;
   }
 

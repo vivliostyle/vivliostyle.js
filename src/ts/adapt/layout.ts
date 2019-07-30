@@ -3185,7 +3185,9 @@ export class Column extends Vtree.Container implements Layout.Column {
     return this.pageFloatLayoutContext.getMaxBlockSizeOfPageFloats();
   }
 
-  doFinishBreakOfFragmentLayoutConstraints(nodeContext: ViewTree.NodeContext): Task.Result<boolean> {
+  doFinishBreakOfFragmentLayoutConstraints(
+    nodeContext: ViewTree.NodeContext
+  ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame(
       "doFinishBreakOfFragmentLayoutConstraints"
     );
@@ -3654,11 +3656,11 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
    * @override
    */
   postLayout(
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column,
-      accepted: boolean
-    ): boolean {
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column,
+    accepted: boolean
+  ): boolean {
     if (!accepted) {
       const hasNextCandidate = column.fragmentLayoutConstraints.some(
         constraint => constraint.nextCandidate(positionAfter)

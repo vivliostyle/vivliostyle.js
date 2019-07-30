@@ -1682,10 +1682,10 @@ export class ViewFactory extends Base.SimpleEventTarget
    * @override
    */
   setCurrent(
-      nodeContext: Vtree.NodeContext,
-      firstTime: boolean,
-      atUnforcedBreak?: boolean
-    ): Task.Result<boolean> {
+    nodeContext: Vtree.NodeContext,
+    firstTime: boolean,
+    atUnforcedBreak?: boolean
+  ): Task.Result<boolean> {
     this.nodeContext = nodeContext;
     if (nodeContext) {
       this.sourceNode = nodeContext.sourceNode;
@@ -1843,7 +1843,8 @@ export class ViewFactory extends Base.SimpleEventTarget
   /**
    * @override
    */
-  nextInTree(position: Vtree.NodeContext,
+  nextInTree(
+    position: Vtree.NodeContext,
     atUnforcedBreak?: boolean
   ): Task.Result<Vtree.NodeContext> {
     let nodeContext = this.nextPositionInTree(position);
@@ -1926,10 +1927,10 @@ export class ViewFactory extends Base.SimpleEventTarget
    * @override
    */
   applyPseudoelementStyle(
-      nodeContext: Vtree.NodeContext,
-      pseudoName: string,
-      target: Element
-    ): void {
+    nodeContext: Vtree.NodeContext,
+    pseudoName: string,
+    target: Element
+  ): void {
     if (nodeContext.after) {
       return;
     }
@@ -1972,9 +1973,9 @@ export class ViewFactory extends Base.SimpleEventTarget
    * @override
    */
   peelOff(
-      nodeContext: Vtree.NodeContext,
-      nodeOffset: number
-    ): Task.Result<Vtree.NodeContext> {
+    nodeContext: Vtree.NodeContext,
+    nodeOffset: number
+  ): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("peelOff");
     const firstPseudo = nodeContext.firstPseudo;
     let offsetInNode = nodeContext.offsetInNode;
@@ -2042,10 +2043,10 @@ export class ViewFactory extends Base.SimpleEventTarget
    * @override
    */
   applyFootnoteStyle(
-      vertical: boolean,
-      rtl: boolean,
-      target: Element
-    ): boolean {
+    vertical: boolean,
+    rtl: boolean,
+    target: Element
+  ): boolean {
     const computedStyle = {};
     const pseudoMap = CssCasc.getStyleMap(this.footnoteStyle, "_pseudos");
     vertical = this.computeStyle(
@@ -2098,10 +2099,10 @@ export class ViewFactory extends Base.SimpleEventTarget
    * @override
    */
   convertLengthToPx(
-      numeric: Css.Numeric,
-      viewNode: Node,
-      clientLayout: Vtree.ClientLayout
-    ): number | Css.Numeric {
+    numeric: Css.Numeric,
+    viewNode: Node,
+    clientLayout: Vtree.ClientLayout
+  ): number | Css.Numeric {
     const num = numeric.num;
     const unit = numeric.unit;
     if (Exprs.isFontRelativeLengthUnit(unit)) {
@@ -2162,9 +2163,9 @@ export class ViewFactory extends Base.SimpleEventTarget
    * @override
    */
   isSameNodePosition(
-      nodePosition1: Vtree.NodePosition,
-      nodePosition2: Vtree.NodePosition
-    ): boolean {
+    nodePosition1: Vtree.NodePosition,
+    nodePosition2: Vtree.NodePosition
+  ): boolean {
     return (
       nodePosition1.offsetInNode === nodePosition2.offsetInNode &&
       nodePosition1.after == nodePosition2.after &&

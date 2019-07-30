@@ -114,10 +114,10 @@ export class FootnoteLayoutStrategy
    * @override
    */
   createPageFloat(
-      nodeContext: Vtree.NodeContext,
-      pageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
-      column: Layout.Column
-    ): Task.Result<PageFloat.PageFloat> {
+    nodeContext: Vtree.NodeContext,
+    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    column: Layout.Column
+  ): Task.Result<PageFloat.PageFloat> {
     let floatReference = PageFloat.FloatReference.REGION;
 
     // If the region context has the same container as the page context,
@@ -148,11 +148,11 @@ export class FootnoteLayoutStrategy
    * @override
    */
   createPageFloatFragment(
-      continuations: PageFloat.PageFloatContinuation[],
-      floatSide: string,
-      floatArea: Layout.PageFloatArea,
-      continues: boolean
-    ): PageFloat.PageFloatFragment {
+    continuations: PageFloat.PageFloatContinuation[],
+    floatSide: string,
+    floatArea: Layout.PageFloatArea,
+    continues: boolean
+  ): PageFloat.PageFloatFragment {
     const f = continuations[0].float;
     return new FootnoteFragment(
       f.floatReference,
@@ -166,9 +166,9 @@ export class FootnoteLayoutStrategy
    * @override
    */
   findPageFloatFragment(
-      float: PageFloat.PageFloat,
-      pageFloatLayoutContext: PageFloat.PageFloatLayoutContext
-    ): PageFloat.PageFloatFragment | null {
+    float: PageFloat.PageFloat,
+    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext
+  ): PageFloat.PageFloatFragment | null {
     const context = pageFloatLayoutContext.getPageFloatLayoutContext(
       float.floatReference
     );
@@ -183,10 +183,10 @@ export class FootnoteLayoutStrategy
    * @override
    */
   adjustPageFloatArea(
-      floatArea: Layout.PageFloatArea,
-      floatContainer: Vtree.Container,
-      column: Layout.Column
-    ) {
+    floatArea: Layout.PageFloatArea,
+    floatContainer: Vtree.Container,
+    column: Layout.Column
+  ) {
     floatArea.isFootnote = true;
     floatArea.adjustContentRelativeSize = false;
     const element = floatArea.element;
@@ -205,7 +205,10 @@ export class FootnoteLayoutStrategy
   /**
    * @override
    */
-  forbid(float: PageFloat.PageFloat, pageFloatLayoutContext: PageFloat.PageFloatLayoutContext) {
+  forbid(
+    float: PageFloat.PageFloat,
+    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext
+  ) {
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
       case Css.ident.line: {

@@ -344,9 +344,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
   /**
    * @override
    */
-    load(
-      url: string
-    ): Task.Result<XmlDoc.XMLDocHolder> {
+  load(url: string): Task.Result<XmlDoc.XMLDocHolder> {
     const docURL = Base.stripFragment(url);
     let r = this.documents[docURL];
     if (r) {

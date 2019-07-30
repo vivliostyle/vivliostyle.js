@@ -91,7 +91,10 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   /**
    * @override
    */
-  findAcceptableBreak(column: Layout.Column, penalty: number): ViewTree.NodeContext {
+  findAcceptableBreak(
+    column: Layout.Column,
+    penalty: number
+  ): ViewTree.NodeContext {
     this.updateOverflows(column);
     if (penalty < this.getMinBreakPenalty()) {
       return null;

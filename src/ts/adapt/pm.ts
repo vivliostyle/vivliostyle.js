@@ -1769,13 +1769,7 @@ export class PartitionInstance<
     clientLayout: Vtree.ClientLayout
   ): void {
     Base.setCSSProperty(container.element, "overflow", "hidden"); // default value
-    super.prepareContainer(
-      context,
-      container,
-      page,
-      docFaces,
-      clientLayout
-    );
+    super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
 }
 

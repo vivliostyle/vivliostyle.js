@@ -1429,7 +1429,9 @@ export class AbstractConditionItem {
     cascadeInstance.decrement(this.condition, this.viewCondition);
   }
 
-  buildViewConditionMatcher(cascadeInstance: CascadeInstance): Matchers.Matcher {
+  buildViewConditionMatcher(
+    cascadeInstance: CascadeInstance
+  ): Matchers.Matcher {
     return cascadeInstance.buildViewConditionMatcher(this.viewConditionId);
   }
 }
@@ -3297,7 +3299,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
         break;
       case "first-n-lines":
         if (params && params.length == 1 && typeof params[0] == "number") {
-          const n = Math.round((params[0] as number));
+          const n = Math.round(params[0] as number);
           if (n > 0 && n == params[0]) {
             if (!this.pseudoelement) {
               this.pseudoelement = `first-${n}-lines`;

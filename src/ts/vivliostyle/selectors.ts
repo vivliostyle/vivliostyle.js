@@ -126,10 +126,10 @@ export class AfterIfContinuesLayoutConstraint
 
   /** @override */
   allowLayout(
-      nodeContext: ViewTree.NodeContext,
-      overflownNodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): boolean {
+    nodeContext: ViewTree.NodeContext,
+    overflownNodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): boolean {
     if (
       (overflownNodeContext && !nodeContext) ||
       (nodeContext && nodeContext.overflow)
@@ -147,17 +147,17 @@ export class AfterIfContinuesLayoutConstraint
 
   /** @override */
   postLayout(
-      allowed: boolean,
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column
-    ) {}
+    allowed: boolean,
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column
+  ) {}
 
   /** @override */
   finishBreak(
-      nodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): Task.Result<boolean> {
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<boolean> {
     if (!this.getRepetitiveElements().affectTo(nodeContext)) {
       return Task.newResult(true);
     }

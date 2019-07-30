@@ -1030,7 +1030,7 @@ export class Styler implements AbstractStyler {
   /**
    * @override
    */
-    processContent(element: Element, styles: { [key: string]: Css.Val }) {}
+  processContent(element: Element, styles: { [key: string]: Css.Val }) {}
 }
 
 export const columnProps = ["column-count", "column-width", "column-fill"];

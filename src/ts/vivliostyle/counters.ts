@@ -172,7 +172,10 @@ class CounterResolver implements CssCasc.CounterResolver {
   /**
    * @override
    */
-  getPageCountersVal(name: string, format: (p1: number[]) => string): Exprs.Val {
+  getPageCountersVal(
+    name: string,
+    format: (p1: number[]) => string
+  ): Exprs.Val {
     const self = this;
 
     function getCounterNumbers() {
@@ -689,7 +692,9 @@ class LayoutConstraint implements Layout.LayoutConstraint {
     if (!viewNode || viewNode.nodeType !== 1) {
       return true;
     }
-    const id = (viewNode as Element).getAttribute("id") || (viewNode as Element).getAttribute("name");
+    const id =
+      (viewNode as Element).getAttribute("id") ||
+      (viewNode as Element).getAttribute("name");
     if (!id) {
       return true;
     }

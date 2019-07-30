@@ -484,11 +484,11 @@ export abstract class LayoutEntireBlock implements Layout.LayoutMode {
    * @override
    */
   postLayout(
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column,
-      accepted: boolean
-    ): boolean {
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column,
+    accepted: boolean
+  ): boolean {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (repetitiveElements) {
       Asserts.assert(column.clientLayout);
@@ -528,11 +528,11 @@ export abstract class LayoutFragmentedBlock implements Layout.LayoutMode {
    * @override
    */
   postLayout(
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column,
-      accepted: boolean
-    ): boolean {
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column,
+    accepted: boolean
+  ): boolean {
     return accepted;
   }
 }
@@ -605,10 +605,10 @@ export class RepetitiveElementsOwnerLayoutConstraint
 
   /** @override */
   allowLayout(
-      nodeContext: ViewTree.NodeContext,
-      overflownNodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): boolean {
+    nodeContext: ViewTree.NodeContext,
+    overflownNodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): boolean {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
       return true;
@@ -645,11 +645,11 @@ export class RepetitiveElementsOwnerLayoutConstraint
 
   /** @override */
   postLayout(
-      allowed: boolean,
-      positionAfter: ViewTree.NodeContext,
-      initialPosition: ViewTree.NodeContext,
-      column: Layout.Column
-    ) {
+    allowed: boolean,
+    positionAfter: ViewTree.NodeContext,
+    initialPosition: ViewTree.NodeContext,
+    column: Layout.Column
+  ) {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
       return;
@@ -668,9 +668,9 @@ export class RepetitiveElementsOwnerLayoutConstraint
 
   /** @override */
   finishBreak(
-      nodeContext: ViewTree.NodeContext,
-      column: Layout.Column
-    ): Task.Result<boolean> {
+    nodeContext: ViewTree.NodeContext,
+    column: Layout.Column
+  ): Task.Result<boolean> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       this.nodeContext.formattingContext
     );
@@ -812,7 +812,8 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
     const nodeContext = state.nodeContext;
     if (nodeContext.sourceNode === formattingContext.rootSourceNode) {
       formattingContext.getRepetitiveElements().lastContentSourceNode =
-        state.lastAfterNodeContext && state.lastAfterNodeContext.sourceNode as Element;
+        state.lastAfterNodeContext &&
+        (state.lastAfterNodeContext.sourceNode as Element);
       state.break = true;
     }
     if (

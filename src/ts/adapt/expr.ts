@@ -623,7 +623,7 @@ export class Prefix extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     const val = this.val.evaluate(context);
     return this.evalPrefix(val);
   }
@@ -688,7 +688,7 @@ export class Infix extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     const lhs = this.lhs.evaluate(context);
     const rhs = this.rhs.evaluate(context);
     return this.evalInfix(lhs, rhs);
@@ -846,7 +846,7 @@ export class And extends Logical {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return this.lhs.evaluate(context) && this.rhs.evaluate(context);
   }
 }
@@ -1139,7 +1139,7 @@ export class Numeric extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return this.num * context.queryUnitSize(this.unit, false);
   }
 }
@@ -1163,7 +1163,7 @@ export class Named extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return context.evalName(this.scope, this.qualifiedName).evaluate(context);
   }
 
@@ -1209,7 +1209,7 @@ export class MediaName extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return context.evalMediaName(this.name, this.not);
   }
 
@@ -1260,7 +1260,7 @@ export class Native extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return this.fn.call(context);
   }
 }
@@ -1325,7 +1325,7 @@ export class Call extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     const body = context.evalCall(
       this.scope,
       this.qualifiedName,
@@ -1404,7 +1404,7 @@ export class Cond extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     if (this.cond.evaluate(context)) {
       return this.ifTrue.evaluate(context);
     } else {
@@ -1474,7 +1474,7 @@ export class Const extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return this.val;
   }
 }
@@ -1498,7 +1498,7 @@ export class MediaTest extends Val {
   /**
    * @override
    */
-evaluateCore(context: Context): Result {
+  evaluateCore(context: Context): Result {
     return context.evalMediaTest(this.name.name, this.value);
   }
 
