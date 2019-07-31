@@ -19,25 +19,25 @@
  * @fileoverview Ops - Render EPUB content files by applying page masters,
  * styling and layout.
  */
-import * as Base from "./base";
-import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import * as CssProp from "./cssprop";
-import * as CssStyler from "./cssstyler";
-import * as CssTok from "./csstok";
-import * as CssValid from "./cssvalid";
-import * as Exprs from "./expr";
-import * as Font from "./font";
-import * as Geom from "./geom";
-import * as LayoutImpl from "./layout";
-import * as Net from "./net";
-import * as Pm from "./pm";
-import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
-import * as Vgen from "./vgen";
-import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
+import * as Base from "../adapt/base";
+import * as Css from "../adapt/css";
+import * as CssCasc from "../adapt/csscasc";
+import * as CssParse from "../adapt/cssparse";
+import * as CssProp from "../adapt/cssprop";
+import * as CssStyler from "../adapt/cssstyler";
+import * as CssTok from "../adapt/csstok";
+import * as CssValid from "../adapt/cssvalid";
+import * as Exprs from "../adapt/expr";
+import * as Font from "../adapt/font";
+import * as Geom from "../adapt/geom";
+import * as LayoutImpl from "../adapt/layout";
+import * as Net from "../adapt/net";
+import * as Pm from "../adapt/pm";
+import * as Task from "../adapt/task";
+import * as TaskUtil from "../adapt/taskutil";
+import * as Vgen from "../adapt/vgen";
+import * as Vtree from "../adapt/vtree";
+import * as XmlDoc from "../adapt/xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Break from "../vivliostyle/break";
 import * as Columns from "../vivliostyle/column";

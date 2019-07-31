@@ -16,9 +16,9 @@
  *
  * @fileoverview BreakPosition - Definitions of BreakPosition.
  */
-import * as Break from "./break";
-import * as LayoutHelper from "./layouthelper";
-import { Layout, RepetitiveElement, ViewTree } from "./types";
+import * as Break from "../vivliostyle/break";
+import * as LayoutHelper from "../vivliostyle/layouthelper";
+import { Layout, RepetitiveElement, ViewTree } from "../vivliostyle/types";
 
 /**
  * Potential breaking position.

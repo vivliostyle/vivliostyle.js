@@ -18,8 +18,8 @@
  */
 import * as Base from "../adapt/base";
 import * as Vtree from "../adapt/vtree";
-import * as Logging from "./logging";
-import { Layout, ViewTree } from "./types";
+import * as Logging from "../vivliostyle/logging";
+import { Layout, ViewTree } from "../vivliostyle/types";
 
 /**
  * Though method used to be used as a workaround for Chrome bug, it seems that

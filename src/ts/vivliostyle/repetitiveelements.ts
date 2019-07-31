@@ -20,14 +20,14 @@
  */
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "./asserts";
-import * as LayoutHelper from "./layouthelper";
-import * as LayoutProcessor from "./layoutprocessor";
-import * as LayoutRetryers from "./layoutretryer";
-import * as LayoutUtil from "./layoututil";
-import * as Plugin from "./plugin";
-import * as Selectors from "./selectors";
-import * as Shared from "./shared";
+import * as Asserts from "../vivliostyle/asserts";
+import * as LayoutHelper from "../vivliostyle/layouthelper";
+import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
+import * as LayoutRetryers from "../vivliostyle/layoutretryer";
+import * as LayoutUtil from "../vivliostyle/layoututil";
+import * as Plugin from "../vivliostyle/plugin";
+import * as Selectors from "../vivliostyle/selectors";
+import * as Shared from "../vivliostyle/shared";
 import {
   Layout,
   RepetitiveElement,
@@ -35,7 +35,7 @@ import {
   ViewTree,
   FormattingContextType,
   FragmentLayoutConstraintType
-} from "./types";
+} from "../vivliostyle/types";
 
 export class RepetitiveElementsOwnerFormattingContext
   implements RepetitiveElement.RepetitiveElementsOwnerFormattingContext {

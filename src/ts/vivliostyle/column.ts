@@ -21,9 +21,9 @@ import * as Css from "../adapt/css";
 import * as LayoutImpl from "../adapt/layout";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "./asserts";
-import * as MathUtil from "./math";
-import * as PageFloat from "./pagefloat";
+import * as Asserts from "../vivliostyle/asserts";
+import * as MathUtil from "../vivliostyle/math";
+import * as PageFloat from "../vivliostyle/pagefloat";
 
 export type ColumnLayoutResult = {
   columns: LayoutImpl.Column[];

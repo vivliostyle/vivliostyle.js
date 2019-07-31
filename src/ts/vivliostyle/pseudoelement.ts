@@ -22,7 +22,7 @@ import * as CssCasc from "../adapt/csscasc";
 import * as CssStyler from "../adapt/cssstyler";
 import * as Exprs from "../adapt/expr";
 import * as Vtree from "../adapt/vtree";
-import { PseudoElement } from "./types";
+import { PseudoElement } from "../vivliostyle/types";
 
 export const document = new DOMParser().parseFromString(
   `<root xmlns="${Base.NS.SHADOW}"/>`,

@@ -17,16 +17,16 @@
  * @fileoverview LayoutProcessor - Definitions of LayoutProcessor.
  */
 import * as Task from "../adapt/task";
-import * as BreakPosition from "./breakposition";
-import * as Display from "./display";
-import * as LayoutHelper from "./layouthelper";
-import * as Plugin from "./plugin";
+import * as BreakPosition from "../vivliostyle/breakposition";
+import * as Display from "../vivliostyle/display";
+import * as LayoutHelper from "../vivliostyle/layouthelper";
+import * as Plugin from "../vivliostyle/plugin";
 import {
   FormattingContextType,
   Layout,
   LayoutProcessor,
   ViewTree
-} from "./types";
+} from "../vivliostyle/types";
 
 /**
  * Processor doing some special layout (e.g. table layout)

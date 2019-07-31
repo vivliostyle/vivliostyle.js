@@ -19,8 +19,8 @@
  */
 import * as Base from "../adapt/base";
 import * as ViewerImpl from "../adapt/viewer";
-import * as Constants from "./constants";
-import * as Profile from "./profile";
+import * as Constants from "../vivliostyle/constants";
+import * as Profile from "../vivliostyle/profile";
 
 const PageProgression = Constants.PageProgression;
 

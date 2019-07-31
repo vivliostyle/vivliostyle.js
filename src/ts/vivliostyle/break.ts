@@ -18,7 +18,7 @@
  * @fileoverview Break - Control fragmentation.
  */
 import * as Css from "../adapt/css";
-import * as Plugin from "./plugin";
+import * as Plugin from "../vivliostyle/plugin";
 
 /**
  * Convert old page-break-* properties to break-* properties with appropriate

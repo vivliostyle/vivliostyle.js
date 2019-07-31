@@ -19,13 +19,13 @@
  * @fileoverview CssValid - Parse validation rules (validation.txt), validate
  * properties and shorthands.
  */
-import * as Base from "./base";
-import * as Css from "./css";
-import * as CssParse from "./cssparse";
-import * as CssTok from "./csstok";
-import * as Net from "./net";
-import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as Base from "../adapt/base";
+import * as Css from "../adapt/css";
+import * as CssParse from "../adapt/cssparse";
+import * as CssTok from "../adapt/csstok";
+import * as Net from "../adapt/net";
+import * as Task from "../adapt/task";
+import * as TaskUtil from "../adapt/taskutil";
 import * as Logging from "../vivliostyle/logging";
 
 export interface PropertyReceiver {

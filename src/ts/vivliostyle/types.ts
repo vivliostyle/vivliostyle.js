@@ -23,7 +23,7 @@ import * as Geom from "../adapt/geom";
 import * as Task from "../adapt/task";
 import * as TaskUtil from "../adapt/taskutil";
 import * as Vtree from "../adapt/vtree";
-import * as Diff from "./diff";
+import * as Diff from "../vivliostyle/diff";
 
 export type FormattingContextType =
   | "Block"

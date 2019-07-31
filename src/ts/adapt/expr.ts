@@ -18,7 +18,7 @@
  *
  * @fileoverview Exprs - Adaptive Layout expressions.
  */
-import * as Base from "./base";
+import * as Base from "../adapt/base";
 
 export type Preferences = {
   fontFamily: string;

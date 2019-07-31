@@ -18,21 +18,21 @@
  *
  * @fileoverview Epub - Deal with META-INF/ and .opf files in EPUB container.
  */
-import * as Base from "./base";
-import * as Cfi from "./cfi";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import * as CssTok from "./csstok";
-import * as Exprs from "./expr";
-import * as Font from "./font";
-import * as Net from "./net";
-import * as Ops from "./ops";
-import * as Sha1 from "./sha1";
-import * as Task from "./task";
-import * as Toc from "./toc";
-import * as Vgen from "./vgen";
-import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
+import * as Base from "../adapt/base";
+import * as Cfi from "../adapt/cfi";
+import * as CssCasc from "../adapt/csscasc";
+import * as CssParse from "../adapt/cssparse";
+import * as CssTok from "../adapt/csstok";
+import * as Exprs from "../adapt/expr";
+import * as Font from "../adapt/font";
+import * as Net from "../adapt/net";
+import * as Ops from "../adapt/ops";
+import * as Sha1 from "../adapt/sha1";
+import * as Task from "../adapt/task";
+import * as Toc from "../adapt/toc";
+import * as Vgen from "../adapt/vgen";
+import * as Vtree from "../adapt/vtree";
+import * as XmlDoc from "../adapt/xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Constants from "../vivliostyle/constants";
 import * as Counters from "../vivliostyle/counters";

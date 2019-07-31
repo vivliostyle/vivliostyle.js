@@ -18,17 +18,17 @@
  *
  * @fileoverview Vgen - View tree generator.
  */
-import * as Base from "./base";
-import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssProp from "./cssprop";
-import * as CssStyler from "./cssstyler";
-import * as Exprs from "./expr";
-import * as Font from "./font";
-import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
-import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
+import * as Base from "../adapt/base";
+import * as Css from "../adapt/css";
+import * as CssCasc from "../adapt/csscasc";
+import * as CssProp from "../adapt/cssprop";
+import * as CssStyler from "../adapt/cssstyler";
+import * as Exprs from "../adapt/expr";
+import * as Font from "../adapt/font";
+import * as Task from "../adapt/task";
+import * as TaskUtil from "../adapt/taskutil";
+import * as Vtree from "../adapt/vtree";
+import * as XmlDoc from "../adapt/xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Diff from "../vivliostyle/diff";
 import * as Display from "../vivliostyle/display";

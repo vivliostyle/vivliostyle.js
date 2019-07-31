@@ -20,16 +20,16 @@
 import * as Base from "../adapt/base";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "./asserts";
-import * as LayoutHelper from "./layouthelper";
-import * as Matchers from "./matcher";
-import * as PseudoElement from "./pseudoelement";
+import * as Asserts from "../vivliostyle/asserts";
+import * as LayoutHelper from "../vivliostyle/layouthelper";
+import * as Matchers from "../vivliostyle/matcher";
+import * as PseudoElement from "../vivliostyle/pseudoelement";
 import {
   FragmentLayoutConstraintType,
   Layout,
   Selectors,
   ViewTree
-} from "./types";
+} from "../vivliostyle/types";
 
 export const isInstanceOfAfterIfContinuesLayoutConstraint =
   Selectors.isInstanceOfAfterIfContinuesLayoutConstraint;

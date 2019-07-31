@@ -17,7 +17,7 @@
  *
  * @fileoverview Profile - Utility for profiling
  */
-import * as Logging from "./logging";
+import * as Logging from "../vivliostyle/logging";
 
 /**
  * Performance profiler measuring execution time of the script.

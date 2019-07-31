@@ -21,12 +21,12 @@
  * Instead it goes through the layout interface that gives it one view tree
  * node at a time.
  */
-import * as Base from "./base";
-import * as Css from "./css";
-import * as Geom from "./geom";
-import * as Task from "./task";
-import * as Vgen from "./vgen";
-import * as Vtree from "./vtree";
+import * as Base from "../adapt/base";
+import * as Css from "../adapt/css";
+import * as Geom from "../adapt/geom";
+import * as Task from "../adapt/task";
+import * as Vgen from "../adapt/vgen";
+import * as Vtree from "../adapt/vtree";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Break from "../vivliostyle/break";
 import * as BreakPosition from "../vivliostyle/breakposition";

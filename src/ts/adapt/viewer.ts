@@ -18,14 +18,14 @@
  *
  * @fileoverview ViewerImpl - Viewer implementation.
  */
-import * as Base from "./base";
-import * as Epub from "./epub";
-import * as Exprs from "./expr";
-import * as Font from "./font";
-import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
-import * as Vgen from "./vgen";
-import * as Vtree from "./vtree";
+import * as Base from "../adapt/base";
+import * as Epub from "../adapt/epub";
+import * as Exprs from "../adapt/expr";
+import * as Font from "../adapt/font";
+import * as Task from "../adapt/task";
+import * as TaskUtil from "../adapt/taskutil";
+import * as Vgen from "../adapt/vgen";
+import * as Vtree from "../adapt/vtree";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Constants from "../vivliostyle/constants";
 import * as Logging from "../vivliostyle/logging";

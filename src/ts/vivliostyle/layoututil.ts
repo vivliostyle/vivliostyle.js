@@ -20,9 +20,9 @@
 import * as LayoutImpl from "../adapt/layout";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Break from "./break";
-import * as BreakPosition from "./breakposition";
-import { Layout, ViewTree } from "./types";
+import * as Break from "../vivliostyle/break";
+import * as BreakPosition from "../vivliostyle/breakposition";
+import { Layout, ViewTree } from "../vivliostyle/types";
 
 export type LayoutIteratorState = {
   nodeContext: ViewTree.NodeContext;

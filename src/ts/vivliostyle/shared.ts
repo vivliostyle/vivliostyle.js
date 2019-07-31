@@ -16,7 +16,7 @@
  *
  * @fileoverview Shared - Global variables of Vivliostyle.js
  */
-import { RepetitiveElement } from "./types";
+import { RepetitiveElement } from "../vivliostyle/types";
 
 export let repetitiveElementsCache: {
   root: Element;

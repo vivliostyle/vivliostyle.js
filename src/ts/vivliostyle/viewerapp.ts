@@ -20,7 +20,7 @@
  */
 import * as Base from "../adapt/base";
 import * as ViewerImpl from "../adapt/viewer";
-import * as Constants from "./constants";
+import * as Constants from "../vivliostyle/constants";
 
 export let fontSize: number = 16;
 

@@ -18,14 +18,14 @@
  *
  * @fileoverview Vtree - Basic view tree data structures and support utilities.
  */
-import * as Base from "./base";
-import * as Css from "./css";
-import * as CssParse from "./cssparse";
-import * as CssProp from "./cssprop";
-import * as CssTok from "./csstok";
-import * as Exprs from "./expr";
-import * as Geom from "./geom";
-import * as TaskUtil from "./taskutil";
+import * as Base from "../adapt/base";
+import * as Css from "../adapt/css";
+import * as CssParse from "../adapt/cssparse";
+import * as CssProp from "../adapt/cssprop";
+import * as CssTok from "../adapt/csstok";
+import * as Exprs from "../adapt/expr";
+import * as Geom from "../adapt/geom";
+import * as TaskUtil from "../adapt/taskutil";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Constants from "../vivliostyle/constants";
 import * as Diff from "../vivliostyle/diff";

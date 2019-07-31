@@ -19,7 +19,7 @@
  * @fileoverview Task - Support for asynchronous execution and cooperative
  * multitasking.
  */
-import * as Base from "./base";
+import * as Base from "../adapt/base";
 import * as Logging from "../vivliostyle/logging";
 
 /**

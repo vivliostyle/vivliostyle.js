@@ -18,7 +18,7 @@
  *
  * @fileoverview Sha1 - Calculate SHA1 hash of the given content.
  */
-import * as Base from "./base";
+import * as Base from "../adapt/base";
 
 /**
  * @return big-endian byte sequence
