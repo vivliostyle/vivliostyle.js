@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle",
-  "version": "2019.7.100-pre",
+  "version": "2019.8.100-pre",
   "description": "Library for web sites with rich paged viewing and EPUB support",
   "scripts": {
     "lint": "eslint --ext .ts src",
