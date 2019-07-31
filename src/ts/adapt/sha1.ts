@@ -23,31 +23,32 @@ import * as Base from "../adapt/base";
 /**
  * @return big-endian byte sequence
  */
-export const encode32 = (n: number): string =>
-  String.fromCharCode(
+export function encode32(n: number): string {
+  return String.fromCharCode(
     (n >>> 24) & 255,
     (n >>> 16) & 255,
     (n >>> 8) & 255,
     n & 255
   );
+}
 
 /**
  * @param bytes big-endian byte sequence
  */
-export const decode32 = (bytes: string): number => {
+export function decode32(bytes: string): number {
   // Important facts: "".charCodeAt(0) == NaN, NaN & 0xFF == 0
   const b0 = bytes.charCodeAt(0) & 255;
   const b1 = bytes.charCodeAt(1) & 255;
   const b2 = bytes.charCodeAt(2) & 255;
   const b3 = bytes.charCodeAt(3) & 255;
   return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
-};
+}
 
 /**
  * @param bytes chars with codes 0 - 255 that represent message byte values
  * @return big-endian uint32 numbers representing sha1 hash
  */
-export const bytesToSHA1Int32 = (bytes: string): number[] => {
+export function bytesToSHA1Int32(bytes: string): number[] {
   const sb = new Base.StringBuffer();
   sb.append(bytes);
   let appendCount = (55 - bytes.length) & 63;
@@ -102,54 +103,54 @@ export const bytesToSHA1Int32 = (bytes: string): number[] => {
     h[4] = (h[4] + e) | 0;
   }
   return h;
-};
+}
 
 /**
  * @param bytes chars with codes 0 - 255 that represent message byte values
  * @return uint8 numbers representing sha1 hash
  */
-export const bytesToSHA1Int8 = (bytes: string): number[] => {
+export function bytesToSHA1Int8(bytes: string): number[] {
   const h = bytesToSHA1Int32(bytes);
   const res = [];
   for (const n of h) {
     res.push((n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255);
   }
   return res;
-};
+}
 
 /**
  * @param bytes chars with codes 0 - 255 that represent message byte values
  * @return chars with codes 0 - 255 equal to SHA1 hash of the input
  */
-export const bytesToSHA1Bytes = (bytes: string): string => {
+export function bytesToSHA1Bytes(bytes: string): string {
   const h = bytesToSHA1Int32(bytes);
   const sb = new Base.StringBuffer();
   for (let i = 0; i < h.length; i++) {
     sb.append(encode32(h[i]));
   }
   return sb.toString();
-};
+}
 
 /**
  * @param bytes chars with codes 0 - 255 that represent message byte values
  * @return hex-encoded SHA1 hash
  */
-export const bytesToSHA1Hex = (bytes: string): string => {
+export function bytesToSHA1Hex(bytes: string): string {
   const sha1 = bytesToSHA1Bytes(bytes);
   const sb = new Base.StringBuffer();
   for (let i = 0; i < sha1.length; i++) {
     sb.append((sha1.charCodeAt(i) | 256).toString(16).substr(1));
   }
   return sb.toString();
-};
+}
 
 /**
  * @param bytes chars with codes 0 - 255 that represent message byte values
  * @return base64-encoded SHA1 hash of the input
  */
-export const bytesToSHA1Base64 = (bytes: string): string => {
+export function bytesToSHA1Base64(bytes: string): string {
   const sha1 = bytesToSHA1Bytes(bytes);
   const sb = new Base.StringBuffer();
   Base.appendBase64(sb, sha1);
   return sb.toString();
-};
+}

@@ -22,44 +22,50 @@ import * as fastdiff from "fast-diff";
 
 export type Change = (number | string)[];
 
-export const diffChars = (originalText: string, newText: string): Change[] =>
-  fastdiff(originalText, newText, 0);
+export function diffChars(originalText: string, newText: string): Change[] {
+  return fastdiff(originalText, newText, 0);
+}
 
 /**
  * @returns string
  */
-export const restoreOriginalText = (changes: Change[]): any =>
-  changes.reduce((result, item) => {
+export function restoreOriginalText(changes: Change[]): any {
+  return changes.reduce((result, item) => {
     if (item[0] === fastdiff.INSERT) {
       return result;
     }
     return result + item[1];
   }, "");
+}
 
 /**
  * @returns string
  */
-export const restoreNewText = (changes: Change[]): any =>
-  changes.reduce((result, item) => {
+export function restoreNewText(changes: Change[]): any {
+  return changes.reduce((result, item) => {
     if (item[0] === fastdiff.DELETE) {
       return result;
     }
     return result + item[1];
   }, "");
+}
 
-export const resolveNewIndex = (changes: Change[], oldIndex: number): number =>
-  resolveIndex(changes, oldIndex, 1);
+export function resolveNewIndex(changes: Change[], oldIndex: number): number {
+  return resolveIndex(changes, oldIndex, 1);
+}
 
-export const resolveOriginalIndex = (
+export function resolveOriginalIndex(
   changes: Change[],
   newIndex: number
-): number => resolveIndex(changes, newIndex, -1);
+): number {
+  return resolveIndex(changes, newIndex, -1);
+}
 
-export const resolveIndex = (
+export function resolveIndex(
   changes: Change[],
   index: number,
   coef: number
-): number => {
+): number {
   let diff = 0;
   let current = 0;
   changes.some(change => {
@@ -83,4 +89,4 @@ export const resolveIndex = (
     return false;
   });
   return Math.max(Math.min(index, current - 1) + diff, 0);
-};
+}

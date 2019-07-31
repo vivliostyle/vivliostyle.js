@@ -17,16 +17,16 @@
  * @fileoverview Asserts - Assertion utilities.
  */
 
-export const assert = (cond: any): void => {
+export function assert(cond: any): void {
   if (DEBUG) {
     if (!cond) {
       throw new Error("Assertion failed");
     }
   }
-};
+}
 
-export const fail = (message: string): void => {
+export function fail(message: string): void {
   if (DEBUG) {
     throw new Error(`Failure: ${message}`);
   }
-};
+}

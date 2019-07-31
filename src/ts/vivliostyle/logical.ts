@@ -125,18 +125,22 @@ const values: {
 };
 const toPhysicalMaps = createRegExpMap(values, true);
 
-export const toPhysical = (
+export function toPhysical(
   value: string,
   writingMode: string,
   direction?: string | null
-): string => convert(value, writingMode, direction || null, toPhysicalMaps);
+): string {
+  return convert(value, writingMode, direction || null, toPhysicalMaps);
+}
 const toLogicalMaps = createRegExpMap(values, false);
 
-export const toLogical = (
+export function toLogical(
   value: string,
   writingMode: string,
   direction?: string | null
-): string => convert(value, writingMode, direction || null, toLogicalMaps);
+): string {
+  return convert(value, writingMode, direction || null, toLogicalMaps);
+}
 const lineRelativeValues: {
   [key: string]: { logical: string; physical: string }[];
 } = {
@@ -160,7 +164,7 @@ const lineRelativeValues: {
   ]
 };
 
-export const toLineRelative = (value: string, writingMode: string): string => {
+export function toLineRelative(value: string, writingMode: string): string {
   const maps = lineRelativeValues[writingMode];
   if (!maps) {
     throw new Error(`unknown writing-mode: ${writingMode}`);
@@ -171,4 +175,4 @@ export const toLineRelative = (value: string, writingMode: string): string => {
     }
   }
   return value;
-};
+}

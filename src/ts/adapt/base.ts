@@ -24,25 +24,29 @@ export let emptyObj = {};
 
 export type JSON = any;
 
-export const jsonToString = (json: JSON): string => JSON.stringify(json);
+export function jsonToString(json: JSON): string {
+  return JSON.stringify(json);
+}
 
-export const stringToJSON = (str: string): JSON => JSON.parse(str);
+export function stringToJSON(str: string): JSON {
+  return JSON.parse(str);
+}
 
-export const stripFragment = (url: string): string => {
+export function stripFragment(url: string): string {
   const r = url.match(/^([^#]*)/);
   if (r) {
     return r[1];
   }
   return url;
-};
+}
 
-export const stripFragmentAndQuery = (url: string): string => {
+export function stripFragmentAndQuery(url: string): string {
   const r = url.match(/^([^#?]*)/);
   if (r) {
     return r[1];
   }
   return url;
-};
+}
 
 /**
  * Base URL relative to which URLs of resources are resolved.
@@ -66,7 +70,7 @@ export function setResourceBaseURL(value: string) {
  * @param baseURL base (absolute) URL
  * @return resolved (absolute) URL
  */
-export const resolveURL = (relURL: string, baseURL: string): string => {
+export function resolveURL(relURL: string, baseURL: string): string {
   if (baseURL.startsWith("data:")) {
     return relURL || baseURL;
   }
@@ -132,12 +136,12 @@ export const resolveURL = (relURL: string, baseURL: string): string => {
     url = url.substr(0, j) + url.substr(i + 3);
   }
   return url.replace(/\/(\.\/)+/g, "/");
-};
+}
 
 /**
  * @return converted URL
  */
-export const convertSpecialURL = (url: string): string => {
+export function convertSpecialURL(url: string): string {
   let r;
   if (
     (r = /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
@@ -171,7 +175,7 @@ export const convertSpecialURL = (url: string): string => {
     url = `${r[1]}//output.jsbin.com/${r[2]}${r[3]}/`;
   }
   return url;
-};
+}
 
 export interface DocumentURLTransformer {
   transformFragment(fragment: string, baseURL: string): string;
@@ -205,7 +209,7 @@ export enum NS {
  * @param opt_url URL; window.location.href is used if not provided
  * @return parameter value
  */
-export const getURLParam = (name: string, opt_url?: string): string | null => {
+export function getURLParam(name: string, opt_url?: string): string | null {
   const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
   const url = opt_url || window.location.href;
   const r = url.match(rg);
@@ -213,18 +217,14 @@ export const getURLParam = (name: string, opt_url?: string): string | null => {
     return r[2];
   }
   return null;
-};
+}
 
 /**
  * @param name parameter name
  * @param value parameter value
  * @return new url
  */
-export const setURLParam = (
-  url: string,
-  name: string,
-  value: string
-): string => {
+export function setURLParam(url: string, name: string, value: string): string {
   const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
   const r = url.match(rg);
   if (r) {
@@ -237,17 +237,17 @@ export const setURLParam = (
   } else {
     return `${url}&${name}=${value}`;
   }
-};
+}
 
 /**
  * @return ?string
  */
-export const asString = (v: any): any => {
+export function asString(v: any): any {
   if (v == null) {
     return v;
   }
   return v.toString();
-};
+}
 
 export interface Comparable {
   /**
@@ -334,7 +334,7 @@ export class PriorityQueue {
  * @param cssPropName CSS property name
  * @return JavaScript property name
  */
-export const cssToJSProp = (prefix: string, cssPropName: string): string => {
+export function cssToJSProp(prefix: string, cssPropName: string): string {
   if (prefix) {
     cssPropName = `-${cssPropName}`;
     prefix = prefix.replace(/-/g, "");
@@ -345,16 +345,16 @@ export const cssToJSProp = (prefix: string, cssPropName: string): string => {
   return (
     prefix + cssPropName.replace(/-[a-z]/g, txt => txt.substr(1).toUpperCase())
   );
-};
+}
 
 export const knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
 
 export const propNameMap = {};
 
-export const checkIfPropertySupported = (
+export function checkIfPropertySupported(
   prefix: string,
   prop: string
-): boolean => {
+): boolean {
   // Special case
   if (prop === "writing-mode") {
     const probe = document.createElement("span");
@@ -369,9 +369,9 @@ export const checkIfPropertySupported = (
     const style = document.documentElement.style;
     return typeof style[cssToJSProp(prefix, prop)] === "string";
   }
-};
+}
 
-export const getPrefixedPropertyNames = (prop: string): string[] | null => {
+export function getPrefixedPropertyNames(prop: string): string[] | null {
   let prefixed = propNameMap[prop];
   if (prefixed || prefixed === null) {
     // null means the browser does not support the property
@@ -445,13 +445,13 @@ export const getPrefixedPropertyNames = (prop: string): string[] | null => {
   Logging.logger.warn("Property not supported by the browser: ", prop);
   propNameMap[prop] = null;
   return null;
-};
+}
 
-export const setCSSProperty = (
+export function setCSSProperty(
   elem: Element,
   prop: string,
   value: string
-): void => {
+): void {
   try {
     const prefixedPropertyNames = getPrefixedPropertyNames(prop);
     if (!prefixedPropertyNames) {
@@ -484,13 +484,13 @@ export const setCSSProperty = (
   } catch (err) {
     Logging.logger.warn(err);
   }
-};
+}
 
-export const getCSSProperty = (
+export function getCSSProperty(
   elem: Element,
   prop: string,
   opt_value?: string
-): string => {
+): string {
   try {
     const propertyNames = propNameMap[prop];
     return (elem as HTMLElement).style.getPropertyValue(
@@ -498,15 +498,15 @@ export const getCSSProperty = (
     );
   } catch (err) {}
   return opt_value || "";
-};
+}
 
-export const getLangAttribute = (element: Element): string => {
+export function getLangAttribute(element: Element): string {
   let lang = element.getAttributeNS(NS.XML, "lang");
   if (!lang && element.namespaceURI == NS.XHTML) {
     lang = element.getAttribute("lang");
   }
   return lang;
-};
+}
 
 export class StringBuffer {
   list: string[] = [];
@@ -530,48 +530,55 @@ export class StringBuffer {
   }
 }
 
-export const escapeChar = (str: string): string =>
+export function escapeChar(str: string): string {
   // not called for surrogate pairs, no need to worry about them
-  `\\${str.charCodeAt(0).toString(16)} `;
+  return `\\${str.charCodeAt(0).toString(16)} `;
+}
 
-export const escapeCSSIdent = (name: string): string =>
-  name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, escapeChar);
+export function escapeCSSIdent(name: string): string {
+  return name.replace(/[^-_a-zA-Z0-9\u0080-\uFFFF]/g, escapeChar);
+}
 
-export const escapeCSSStr = (str: string): string =>
-  str.replace(/[\u0000-\u001F"\\]/g, escapeChar);
+export function escapeCSSStr(str: string): string {
+  return str.replace(/[\u0000-\u001F"\\]/g, escapeChar);
+}
 
-export const lightURLEncode = (str: string): string =>
-  str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+export function lightURLEncode(str: string): string {
+  return str.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
+}
 
-export const isLetter = (ch: string): boolean =>
-  !!ch.match(
+export function isLetter(ch: string): boolean {
+  return !!ch.match(
     /^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/
   );
+}
 
-export const escapeCharToHex = (str: string, prefix?: string): string => {
+export function escapeCharToHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
   return prefix + (65536 | str.charCodeAt(0)).toString(16).substr(1);
-};
+}
 
-export const escapeNameStrToHex = (str: string, prefix?: string): string => {
+export function escapeNameStrToHex(str: string, prefix?: string): string {
   function escapeChar(s) {
     return escapeCharToHex(s, prefix);
   }
   return str.replace(/[^-a-zA-Z0-9_]/g, escapeChar);
-};
+}
 
-export const escapeRegExp = (str: string): string => escapeNameStrToHex(str);
+export function escapeRegExp(str: string): string {
+  return escapeNameStrToHex(str);
+}
 
-export const unescapeCharFromHex = (str: string, prefix?: string): string => {
+export function unescapeCharFromHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
   if (str.indexOf(prefix) === 0) {
     return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
   } else {
     return str;
   }
-};
+}
 
-export const unescapeStrFromHex = (str: string, prefix?: string): string => {
+export function unescapeStrFromHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
 
   function unescapeChar(s) {
@@ -579,13 +586,13 @@ export const unescapeStrFromHex = (str: string, prefix?: string): string => {
   }
   const regexp = new RegExp(`${escapeRegExp(prefix)}[0-9a-fA-F]{4}`, "g");
   return str.replace(regexp, unescapeChar);
-};
+}
 
-export const assert = (cond: boolean): void => {
+export function assert(cond: boolean): void {
   if (!cond) {
     throw new Error("Assert failed");
   }
-};
+}
 
 /**
  * Function good is defined for ints from 0 to high-1. It is such that for
@@ -594,10 +601,10 @@ export const assert = (cond: boolean): void => {
  * Find i such that (i == 0 || !good(i-1)) && (i == h || good(i))
  * In other words, good(i) is the "first" good = true.
  */
-export const binarySearch = (
+export function binarySearch(
   high: number,
   good: (p1: number) => boolean
-): number => {
+): number {
   let l = 0;
   let h = high;
   while (true) {
@@ -616,17 +623,19 @@ export const binarySearch = (
       l = m + 1;
     }
   }
-};
+}
 
 /**
  * Function to sort numbers low to high
  */
-export const numberCompare = (a: number, b: number): number => a - b;
+export function numberCompare(a: number, b: number): number {
+  return a - b;
+}
 
 export const base64Chars =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-export const appendBase64 = (sb: StringBuffer, data: string): void => {
+export function appendBase64(sb: StringBuffer, data: string): void {
   const length = data.length;
   const length3 = Math.floor(length / 3) * 3;
   for (let i = 0; i < length3; i += 3) {
@@ -656,7 +665,7 @@ export const appendBase64 = (sb: StringBuffer, data: string): void => {
       break;
     }
   }
-};
+}
 
 /**
  * Index array using key function. First encountered item wins on collision.
@@ -680,13 +689,13 @@ export function indexArray<T>(
  * Convert array of strings to an object with the values in the array set to
  * true.
  */
-export const arrayToSet = (arr: string[]): { [key: string]: boolean } => {
+export function arrayToSet(arr: string[]): { [key: string]: boolean } {
   const set = {};
   for (let i = 0; i < arr.length; i++) {
     set[arr[i]] = true;
   }
   return set;
-};
+}
 
 /**
  * Index array using key function. Repeated indices are all combined into
@@ -726,13 +735,13 @@ export function mapObj<P, R>(
   return res;
 }
 
-export const mapSize = (obj: object): number => {
+export function mapSize(obj: object): number {
   let n = 0;
   for (const key in obj) {
     n++;
   }
   return n;
-};
+}
 
 export type Event = {
   type: string;
@@ -805,7 +814,7 @@ export let hasLShapeFloatBug: boolean | null = null;
 /**
  * Check if there is a bug with L-shape floats overlapping text.
  */
-export const checkLShapeFloatBug = (body: HTMLElement): boolean => {
+export function checkLShapeFloatBug(body: HTMLElement): boolean {
   if (hasLShapeFloatBug == null) {
     const doc = body.ownerDocument;
     const container = doc.createElement("div") as HTMLElement;
@@ -839,7 +848,7 @@ export const checkLShapeFloatBug = (body: HTMLElement): boolean => {
     body.removeChild(container);
   }
   return hasLShapeFloatBug;
-};
+}
 
 export let hasVerticalBBoxBug: boolean | null = null;
 
@@ -851,7 +860,7 @@ export let hasVerticalBBoxBug: boolean | null = null;
  * We now use this method to check Firefox bug:
  *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  */
-export const checkVerticalBBoxBug = (body: HTMLElement): boolean => {
+export function checkVerticalBBoxBug(body: HTMLElement): boolean {
   if (hasVerticalBBoxBug == null) {
     const doc = body.ownerDocument;
     const container = doc.createElement("div") as HTMLElement;
@@ -875,13 +884,11 @@ export const checkVerticalBBoxBug = (body: HTMLElement): boolean => {
     body.removeChild(container);
   }
   return hasVerticalBBoxBug;
-};
+}
 
 export let hasInlineBlockJustificationBug: boolean | null = null;
 
-export const checkInlineBlockJustificationBug = (
-  body: HTMLElement
-): boolean => {
+export function checkInlineBlockJustificationBug(body: HTMLElement): boolean {
   if (hasInlineBlockJustificationBug === null) {
     const doc = body.ownerDocument;
     const container = doc.createElement("div") as HTMLElement;
@@ -908,13 +915,13 @@ export const checkInlineBlockJustificationBug = (
     body.removeChild(container);
   }
   return hasInlineBlockJustificationBug;
-};
+}
 
 export let hasSoftWrapOpportunityAfterHyphenBug: boolean | null = null;
 
-export const checkSoftWrapOpportunityAfterHyphenBug = (
+export function checkSoftWrapOpportunityAfterHyphenBug(
   body: HTMLElement
-): boolean => {
+): boolean {
   if (hasSoftWrapOpportunityAfterHyphenBug === null) {
     const doc = body.ownerDocument;
     const container = doc.createElement("div") as HTMLElement;
@@ -941,13 +948,11 @@ export const checkSoftWrapOpportunityAfterHyphenBug = (
     body.removeChild(container);
   }
   return hasSoftWrapOpportunityAfterHyphenBug;
-};
+}
 
 export let hasSoftWrapOpportunityByWbrBug: boolean | null = null;
 
-export const checkSoftWrapOpportunityByWbrBug = (
-  body: HTMLElement
-): boolean => {
+export function checkSoftWrapOpportunityByWbrBug(body: HTMLElement): boolean {
   if (hasSoftWrapOpportunityByWbrBug === null) {
     const doc = body.ownerDocument;
     const container = doc.createElement("div") as HTMLElement;
@@ -975,4 +980,4 @@ export const checkSoftWrapOpportunityByWbrBug = (
     body.removeChild(container);
   }
   return hasSoftWrapOpportunityByWbrBug;
-};
+}

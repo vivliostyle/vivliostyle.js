@@ -46,11 +46,11 @@ export enum Size {
 /**
  * Get specified sizes for the element.
  */
-export const getSize = (
+export function getSize(
   clientLayout: Vtree.ClientLayout,
   element: Element,
   sizes: Size[]
-): { [key in Size]: number } => {
+): { [key in Size]: number } {
   const original = {
     display: (element as any).style.display,
     position: (element as any).style.position,
@@ -206,4 +206,4 @@ export const getSize = (
   parent.insertBefore(element, container);
   parent.removeChild(container);
   return result;
-};
+}

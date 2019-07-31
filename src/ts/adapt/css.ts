@@ -404,13 +404,13 @@ export class Ident extends Val {
   }
 }
 
-export const getName = (name: string): Ident => {
+export function getName(name: string): Ident {
   let r = nameTable[name];
   if (!r) {
     r = new Ident(name);
   }
   return r;
-};
+}
 
 export class Numeric extends Val {
   unit: string;
@@ -561,19 +561,19 @@ export class URL extends Val {
   }
 }
 
-export const appendList = (
+export function appendList(
   buf: Base.StringBuffer,
   values: Val[],
   separator: string,
   toString: boolean
-): void => {
+): void {
   const length = values.length;
   values[0].appendTo(buf, toString);
   for (let i = 1; i < length; i++) {
     buf.append(separator);
     values[i].appendTo(buf, toString);
   }
-};
+}
 
 export class SpaceList extends Val {
   constructor(public values: Val[]) {
@@ -681,7 +681,7 @@ export class Expr extends Val {
   }
 }
 
-export const toNumber = (val: Val, context: Exprs.Context): number => {
+export function toNumber(val: Val, context: Exprs.Context): number {
   if (val) {
     if (val.isNumeric()) {
       const numeric = val as Numeric;
@@ -692,13 +692,14 @@ export const toNumber = (val: Val, context: Exprs.Context): number => {
     }
   }
   return 0;
-};
+}
 
 /**
  * Convert numeric value to px
  */
-export const convertNumericToPx = (val: Val, context: Exprs.Context): Numeric =>
-  new Numeric(toNumber(val, context), "px");
+export function convertNumericToPx(val: Val, context: Exprs.Context): Numeric {
+  return new Numeric(toNumber(val, context), "px");
+}
 
 export const ident: { [key: string]: Ident } = {
   absolute: getName("absolute"),
@@ -782,8 +783,8 @@ export const processingOrder = {
 /**
  * Function to sort property names in the order they should be processed
  */
-export const processingOrderFn = (name1: string, name2: string): number => {
+export function processingOrderFn(name1: string, name2: string): number {
   const n1 = processingOrder[name1] || Number.MAX_VALUE;
   const n2 = processingOrder[name2] || Number.MAX_VALUE;
   return n1 - n2;
-};
+}

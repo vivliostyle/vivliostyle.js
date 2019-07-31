@@ -426,11 +426,11 @@ export class OPFItem {
   }
 }
 
-export const getOPFItemId = (item: OPFItem): string | null => item.id;
+export function getOPFItemId(item: OPFItem): string | null {
+  return item.id;
+}
 
-export const makeDeobfuscator = (
-  uid: string
-): ((p1: Blob) => Task.Result<Blob>) => {
+export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
   // TODO: use UTF8 of uid
   const sha1Sum = Sha1.bytesToSHA1Int8(uid);
   return blob => {
@@ -455,10 +455,11 @@ export const makeDeobfuscator = (
     });
     return frame.result();
   };
-};
+}
 
-export const makeObfuscationKey = (uid: string): string =>
-  `1040:${Sha1.bytesToSHA1Hex(uid)}`;
+export function makeObfuscationKey(uid: string): string {
+  return `1040:${Sha1.bytesToSHA1Hex(uid)}`;
+}
 
 export type RawMetaItem = {
   name: string;
@@ -491,10 +492,10 @@ export const metaTerms = {
   alternateScript: `${defaultIRI}alternate-script`
 };
 
-export const getMetadataComparator = (
+export function getMetadataComparator(
   term: string,
   lang: string
-): ((p1: Base.JSON, p2: Base.JSON) => number) => {
+): (p1: Base.JSON, p2: Base.JSON) => number {
   const empty = {};
   return (item1, item2) => {
     let m1;
@@ -528,12 +529,12 @@ export const getMetadataComparator = (
     }
     return item1["o"] - item2["o"];
   };
-};
+}
 
-export const readMetadata = (
+export function readMetadata(
   mroot: XmlDoc.NodeList,
   prefixes: string | null
-): Base.JSON => {
+): Base.JSON {
   // Parse prefix map (if any)
   let prefixMap;
   if (!prefixes) {
@@ -666,21 +667,21 @@ export const readMetadata = (
   };
   sortMetadata(metadata);
   return metadata;
-};
+}
 
-export const getMathJaxHub = (): object => {
+export function getMathJaxHub(): object {
   const math = window["MathJax"];
   if (math) {
     return math["Hub"];
   }
   return null;
-};
+}
 
-export const checkMathJax = (): void => {
+export function checkMathJax(): void {
   if (getMathJaxHub()) {
     CssCasc.supportedNamespaces[Base.NS.MATHML] = true;
   }
-};
+}
 
 export const supportedMediaTypes = {
   "application/xhtml+xml": true,

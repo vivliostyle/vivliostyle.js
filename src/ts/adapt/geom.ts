@@ -70,8 +70,9 @@ export class Band {
   ) {}
 }
 
-export const segmentCompare = (s1: Segment, s2: Segment): number =>
-  s1.low.y - s2.low.y || s1.low.x - s2.low.x;
+export function segmentCompare(s1: Segment, s2: Segment): number {
+  return s1.low.y - s2.low.y || s1.low.x - s2.low.x;
+}
 
 export class Shape {
   constructor(public points: Point[]) {}
@@ -108,12 +109,12 @@ export class Shape {
   }
 }
 
-export const shapeForEllipse = (
+export function shapeForEllipse(
   cx: number,
   cy: number,
   rx: number,
   ry: number
-): Shape => {
+): Shape {
   const count = 20;
   const points: Point[] = [];
   for (let i = 0; i < count; i++) {
@@ -121,28 +122,30 @@ export const shapeForEllipse = (
     points.push(new Point(cx + rx * Math.sin(a), cy + ry * Math.cos(a)));
   }
   return new Shape(points);
-};
+}
 
-export const shapeForRect = (
+export function shapeForRect(
   x1: number,
   y1: number,
   x2: number,
   y2: number
-): Shape =>
-  new Shape([
+): Shape {
+  return new Shape([
     new Point(x1, y1),
     new Point(x2, y1),
     new Point(x2, y2),
     new Point(x1, y2)
   ]);
+}
 
-export const shapeForRectObj = (r: Rect): Shape =>
-  new Shape([
+export function shapeForRectObj(r: Rect): Shape {
+  return new Shape([
     new Point(r.x1, r.y1),
     new Point(r.x2, r.y1),
     new Point(r.x2, r.y2),
     new Point(r.x1, r.y2)
   ]);
+}
 
 export class BandIntersection {
   constructor(
@@ -153,21 +156,21 @@ export class BandIntersection {
   ) {}
 }
 
-export const intersectY = (s: Segment, y: number): number => {
+export function intersectY(s: Segment, y: number): number {
   const x =
     s.low.x + ((s.high.x - s.low.x) * (y - s.low.y)) / (s.high.y - s.low.y);
   if (isNaN(x)) {
     throw new Error("Bad intersection");
   }
   return x;
-};
+}
 
-export const addBandIntersections = (
+export function addBandIntersections(
   intersections: BandIntersection[],
   s: Segment,
   y1: number,
   y2: number
-): void => {
+): void {
   let x1: number;
   let w1: number;
   let x2: number;
@@ -198,13 +201,13 @@ export const addBandIntersections = (
     intersections.push(new BandIntersection(x2, w2, s.shapeId, -1));
     intersections.push(new BandIntersection(x1, w1, s.shapeId, 1));
   }
-};
+}
 
-export const mergeIntersections = (
+export function mergeIntersections(
   intersections: BandIntersection[],
   includeCount: number,
   excludeCount: number
-): number[] => {
+): number[] {
   const shapeCount = includeCount + excludeCount;
   const windings1: number[] = Array(shapeCount);
   const windings2: number[] = Array(shapeCount);
@@ -241,46 +244,52 @@ export const mergeIntersections = (
     }
   }
   return xranges;
-};
+}
 
 /**
  * Round v up to make it a multiple of unit. If unit is zero, return v.
  */
-export const ceil = (v: number, unit: number): number =>
-  unit ? Math.ceil(v / unit) * unit : v;
+export function ceil(v: number, unit: number): number {
+  return unit ? Math.ceil(v / unit) * unit : v;
+}
 
 /**
  * Round v down to make it a multiple of unit. If unit is zero, return v.
  */
-export const floor = (v: number, unit: number): number =>
-  unit ? Math.floor(v / unit) * unit : v;
+export function floor(v: number, unit: number): number {
+  return unit ? Math.floor(v / unit) * unit : v;
+}
 
-export const rotatePoint = (point: Point): Point =>
-  new Point(point.y, -point.x);
+export function rotatePoint(point: Point): Point {
+  return new Point(point.y, -point.x);
+}
 
 /**
  * Vertical box to pseudo-horizontal coords.
  */
-export const rotateBox = (box: Rect): Rect =>
-  new Rect(box.y1, -box.x2, box.y2, -box.x1);
+export function rotateBox(box: Rect): Rect {
+  return new Rect(box.y1, -box.x2, box.y2, -box.x1);
+}
 
 /**
  * Pseudo-horizontal coords to vertical.
  */
-export const unrotateBox = (box: Rect): Rect =>
-  new Rect(-box.y2, box.x1, -box.y1, box.x2);
+export function unrotateBox(box: Rect): Rect {
+  return new Rect(-box.y2, box.x1, -box.y1, box.x2);
+}
 
-export const rotateShape = (shape: Shape): Shape =>
-  new Shape(shape.points.map(point => rotatePoint(point)));
+export function rotateShape(shape: Shape): Shape {
+  return new Shape(shape.points.map(point => rotatePoint(point)));
+}
 
-export const shapesToBands = (
+export function shapesToBands(
   box: Rect,
   include: Shape[],
   exclude: Shape[],
   granularity: number,
   snapHeight: number,
   vertical: boolean
-): Band[] => {
+): Band[] {
   if (vertical) {
     box = rotateBox(box);
     include = include.map(shape => rotateShape(shape));
@@ -426,9 +435,9 @@ export const shapesToBands = (
   }
   normalize(box, result);
   return result;
-};
+}
 
-export const normalize = (box: Rect, bands: Band[]): void => {
+export function normalize(box: Rect, bands: Band[]): void {
   let k = bands.length - 1;
 
   // Merge bands with the same x1, x2 and remove unneeded bands at the end.
@@ -447,12 +456,12 @@ export const normalize = (box: Rect, bands: Band[]): void => {
     }
     k--;
   }
-};
+}
 
 /**
  * Find the index of the bottommost band so that y < band.y2
  */
-export const findBand = (bands: Band[], y: number): number => {
+export function findBand(bands: Band[], y: number): number {
   let low = 0;
   let high = bands.length;
   while (low < high) {
@@ -464,7 +473,7 @@ export const findBand = (bands: Band[], y: number): number => {
     }
   }
   return low;
-};
+}
 
 /**
  * Find the uppermost rectangle contained in the specified rect which occupies
@@ -472,10 +481,10 @@ export const findBand = (bands: Band[], y: number): number => {
  * bands.
  * @returns Returns null if such rectangle does not exist.
  */
-export const findUppermostFullyOpenRect = (
+export function findUppermostFullyOpenRect(
   bands: Band[],
   rect: Rect
-): Rect | null => {
+): Rect | null {
   if (!bands.length) {
     return rect;
   }
@@ -517,7 +526,7 @@ export const findUppermostFullyOpenRect = (
   } else {
     return new Rect(rect.x1, topEdge, rect.x2, bottomEdge);
   }
-};
+}
 
 /**
  * Find the bottommost rectangle contained in the specified rect which occupies
@@ -525,10 +534,10 @@ export const findUppermostFullyOpenRect = (
  * bands.
  * @returns Returns null if such rectangle does not exist.
  */
-export const findBottommostFullyOpenRect = (
+export function findBottommostFullyOpenRect(
   bands: Band[],
   rect: Rect
-): Rect | null => {
+): Rect | null {
   if (!bands.length) {
     return rect;
   }
@@ -568,17 +577,17 @@ export const findBottommostFullyOpenRect = (
   } else {
     return new Rect(rect.x1, topEdge, rect.x2, bottomEdge);
   }
-};
+}
 
 /**
  * @param side either "left" or "right"
  */
-export const positionFloat = (
+export function positionFloat(
   box: Rect,
   bands: Band[],
   floatBox: Rect,
   side: string
-): boolean => {
+): boolean {
   let y = floatBox.y1;
   const floatWidth = floatBox.x2 - floatBox.x1;
   const floatHeight = floatBox.y2 - floatBox.y1;
@@ -617,15 +626,15 @@ export const positionFloat = (
     y = bands[index].y2;
     index++;
   }
-};
+}
 
-export const addFloatToBands = (
+export function addFloatToBands(
   box: Rect,
   bands: Band[],
   floatBox: Rect,
   floatBands: Band[],
   side: string
-): void => {
+): void {
   if (!floatBands) {
     floatBands = [new Band(floatBox.y1, floatBox.y2, floatBox.x1, floatBox.x2)];
   }
@@ -682,4 +691,4 @@ export const addFloatToBands = (
     }
   }
   normalize(box, bands);
-};
+}

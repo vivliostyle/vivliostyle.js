@@ -74,8 +74,9 @@ export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
   return frame.result();
 }, "uaStylesheetBaseFetcher");
 
-export const loadUABase = (): Task.Result<boolean> =>
-  uaStylesheetBaseFetcher.get();
+export function loadUABase(): Task.Result<boolean> {
+  return uaStylesheetBaseFetcher.get();
+}
 
 export type FontFace = {
   properties: CssCasc.ElementStyle;
@@ -1918,7 +1919,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
 }
 
 // override, so we don't register an error
-export const processViewportMeta = (meta: Element): string => {
+export function processViewportMeta(meta: Element): string {
   let content = meta.getAttribute("content");
   if (!content) {
     return "";
@@ -1939,7 +1940,7 @@ export const processViewportMeta = (meta: Element): string => {
     return `@-epubx-viewport{width:${width}px;height:${height}px;}`;
   }
   return "";
-};
+}
 
 export class StyleParserHandler extends CssParse.DispatchParserHandler {
   rootScope: Exprs.LexicalScope;
@@ -1979,11 +1980,12 @@ export type StyleSource = {
   media: string | null;
 };
 
-export const parseOPSResource = (
+export function parseOPSResource(
   response: Net.Response,
   store: XmlDoc.XMLDocStore
-): Task.Result<XmlDoc.XMLDocHolder> =>
-  (store as OPSDocStore).parseOPSResource(response);
+): Task.Result<XmlDoc.XMLDocHolder> {
+  return (store as OPSDocStore).parseOPSResource(response);
+}
 
 export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   styleByKey: { [key: string]: Style } = {};

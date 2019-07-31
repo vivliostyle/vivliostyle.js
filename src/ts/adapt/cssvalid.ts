@@ -2107,5 +2107,6 @@ export const validatorFetcher: TaskUtil.Fetcher<
   return frame.result();
 }, "validatorFetcher");
 
-export const loadValidatorSet = (): Task.Result<ValidatorSet> =>
-  validatorFetcher.get();
+export function loadValidatorSet(): Task.Result<ValidatorSet> {
+  return validatorFetcher.get();
+}

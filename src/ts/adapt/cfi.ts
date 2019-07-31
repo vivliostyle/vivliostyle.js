@@ -28,7 +28,7 @@ export type Position = {
   ref: Fragment;
 };
 
-export const getId = (node: Node): string | null => {
+export function getId(node: Node): string | null {
   if (node.nodeType == 1) {
     const idtxt = (node as Element).getAttribute("id");
     if (idtxt && idtxt.match(/^[-a-zA-Z_0-9.\u007F-\uFFFF]+$/)) {
@@ -36,23 +36,28 @@ export const getId = (node: Node): string | null => {
     }
   }
   return null;
-};
+}
 
-export const escapeChar = (ch: string): string => `^${ch}`;
+export function escapeChar(ch: string): string {
+  return `^${ch}`;
+}
 
-export const escape = (str: string): string =>
-  str.replace(/[\[\]\(\),=;^]/g, escapeChar);
+export function escape(str: string): string {
+  return str.replace(/[\[\]\(\),=;^]/g, escapeChar);
+}
 
-export const unescapeChar = (str: string): string => str.substr(1);
+export function unescapeChar(str: string): string {
+  return str.substr(1);
+}
 
-export const unescape = (str: string): string => {
+export function unescape(str: string): string {
   if (!str) {
     return str;
   }
   return str.replace(/\^[\[\]\(\),=;^]/g, unescapeChar);
-};
+}
 
-export const parseExtVal = (extstr: string): string | string[] => {
+export function parseExtVal(extstr: string): string | string[] {
   const result = [];
   do {
     const r = extstr.match(/^(\^,|[^,])*/);
@@ -64,11 +69,9 @@ export const parseExtVal = (extstr: string): string | string[] => {
     result.push(p);
   } while (extstr);
   return result;
-};
+}
 
-export const parseExt = (
-  extstr: string
-): { [key: string]: string | string[] } => {
+export function parseExt(extstr: string): { [key: string]: string | string[] } {
   const ext = {};
   while (extstr) {
     const r = extstr.match(/^;([^;=]+)=(([^;]|\^;)*)/);
@@ -79,7 +82,7 @@ export const parseExt = (
     extstr = extstr.substr(r[0].length);
   }
   return ext;
-};
+}
 
 export interface Step {
   appendTo(sb: Base.StringBuffer): void;

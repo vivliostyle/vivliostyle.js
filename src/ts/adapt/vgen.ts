@@ -86,7 +86,7 @@ export interface CustomRendererFactory {
  * Creates an epubReadingSystem object in the iframe.contentWindow.navigator
  * when load event fires.
  */
-export const initIFrame = (iframe: HTMLIFrameElement) => {
+export function initIFrame(iframe: HTMLIFrameElement) {
   iframe.addEventListener(
     "load",
     () => {
@@ -105,7 +105,7 @@ export const initIFrame = (iframe: HTMLIFrameElement) => {
     },
     false
   );
-};
+}
 
 export interface StylerProducer {
   getStylerForDoc(xmldoc: XmlDoc.XMLDocHolder): CssStyler.AbstractStyler;

@@ -28,11 +28,11 @@ import { Layout, ViewTree } from "../vivliostyle/types";
  * We now use this method as a workaround for Firefox bug:
  *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  */
-export const fixBoxesForNode = (
+export function fixBoxesForNode(
   clientLayout: ViewTree.ClientLayout,
   boxes: ViewTree.ClientRect[],
   node: Node
-): ViewTree.ClientRect[] => {
+): ViewTree.ClientRect[] {
   const fullRange = node.ownerDocument.createRange();
   fullRange.setStart(node, 0);
   fullRange.setEnd(node, node.textContent.length);
@@ -62,7 +62,7 @@ export const fixBoxesForNode = (
     }
   }
   return result;
-};
+}
 
 /**
  * Calculate the position of the "after" edge in the block-progression
@@ -70,12 +70,12 @@ export const fixBoxesForNode = (
  * non-zero if position could not be determined and the node should be
  * considered zero-height.
  */
-export const calculateEdge = (
+export function calculateEdge(
   nodeContext: ViewTree.NodeContext,
   clientLayout: ViewTree.ClientLayout,
   extraOffset: number,
   vertical: boolean
-): number => {
+): number {
   const node = nodeContext.viewNode;
   if (!node) {
     return NaN;
@@ -128,21 +128,21 @@ export const calculateEdge = (
     }
     return edge;
   }
-};
+}
 
-export const getElementHeight = (
+export function getElementHeight(
   element: Element,
   column: Layout.Column,
   vertical: boolean
-): number => {
+): number {
   const rect = column.clientLayout.getElementClientRect(element);
   const margin = column.getComputedMargin(element);
   return vertical
     ? rect["width"] + margin["left"] + margin["right"]
     : rect["height"] + margin["top"] + margin["bottom"];
-};
+}
 
-export const isOrphan = (node: Node): boolean => {
+export function isOrphan(node: Node): boolean {
   while (node) {
     if (node.parentNode === node.ownerDocument) {
       return false;
@@ -150,12 +150,12 @@ export const isOrphan = (node: Node): boolean => {
     node = node.parentNode;
   }
   return true;
-};
+}
 
-export const removeFollowingSiblings = (
+export function removeFollowingSiblings(
   parentNode: Node,
   viewNode: Node
-): void => {
+): void {
   if (!parentNode) {
     return;
   }
@@ -163,14 +163,15 @@ export const removeFollowingSiblings = (
   while ((lastChild = parentNode.lastChild) != viewNode) {
     parentNode.removeChild(lastChild);
   }
-};
+}
 
-export const isSpecial = (e: Element): boolean =>
-  !!e.getAttribute(Vtree.SPECIAL_ATTR);
+export function isSpecial(e: Element): boolean {
+  return !!e.getAttribute(Vtree.SPECIAL_ATTR);
+}
 
-export const isSpecialNodeContext = (
+export function isSpecialNodeContext(
   nodeContext: ViewTree.NodeContext
-): boolean => {
+): boolean {
   if (!nodeContext) {
     return false;
   }
@@ -180,4 +181,4 @@ export const isSpecialNodeContext = (
   } else {
     return false;
   }
-};
+}

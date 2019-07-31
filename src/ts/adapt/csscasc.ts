@@ -134,7 +134,7 @@ export const polyfilledInheritedProps = [
   "widows"
 ];
 
-export const getPolyfilledInheritedProps = (): string[] => {
+export function getPolyfilledInheritedProps(): string[] {
   const hooks: Plugin.PolyfilledInheritedPropsHook[] = Plugin.getHooksForName(
     Plugin.HOOKS.POLYFILLED_INHERITED_PROPS
   );
@@ -142,7 +142,7 @@ export const getPolyfilledInheritedProps = (): string[] => {
     (props, f) => props.concat(f()),
     [].concat(polyfilledInheritedProps)
   );
-};
+}
 
 export const supportedNamespaces = {
   "http://www.idpf.org/2007/ops": true,
@@ -180,10 +180,10 @@ export const geomNames: { [key: string]: boolean } = (() => {
   return names;
 })();
 
-export const buildCouplingMap = (
+export function buildCouplingMap(
   sideMap: { [key: string]: string },
   extentMap: { [key: string]: string }
-): { [key: string]: string } => {
+): { [key: string]: string } {
   const map = {};
   for (const pattern of coupledPatterns) {
     for (const side in sideMap) {
@@ -202,7 +202,7 @@ export const buildCouplingMap = (
     }
   }
   return map;
-};
+}
 
 export const couplingMapVert = buildCouplingMap(
   {
@@ -332,16 +332,16 @@ export class ConditionalCascadeValue extends CascadeValue {
  * @param tv current value (cannot be conditional)
  * @param av cascaded value (can be conditional)
  */
-export const cascadeValues = (
+export function cascadeValues(
   context: Exprs.Context,
   tv: CascadeValue,
   av: CascadeValue
-): CascadeValue => {
+): CascadeValue {
   if ((tv == null || av.priority > tv.priority) && av.isEnabled(context)) {
     return av.getBaseValue();
   }
   return tv;
-};
+}
 
 export type ElementStyleMap = {
   [key: string]: ElementStyle;
@@ -352,49 +352,59 @@ export const SPECIALS = {
   "fragment-selector-id": true
 };
 
-export const isSpecialName = (name: string) => !!SPECIALS[name];
+export function isSpecialName(name: string) {
+  return !!SPECIALS[name];
+}
 
-export const isMapName = (name: string) => name.charAt(0) == "_";
+export function isMapName(name: string) {
+  return name.charAt(0) == "_";
+}
 
-export const isPropName = (name: string) =>
-  name.charAt(0) != "_" && !SPECIALS[name];
+export function isPropName(name: string) {
+  return name.charAt(0) != "_" && !SPECIALS[name];
+}
 
-export const isInherited = (name: string): boolean => !!inheritedProps[name];
+export function isInherited(name: string): boolean {
+  return !!inheritedProps[name];
+}
 
-export const getProp = (style: ElementStyle, name: string): CascadeValue =>
-  style[name] as CascadeValue;
+export function getProp(style: ElementStyle, name: string): CascadeValue {
+  return style[name] as CascadeValue;
+}
 
 /**
  * @return void
  */
-export const setProp = (
+export function setProp(
   style: ElementStyle,
   name: string,
   value: CascadeValue
-): any => {
+): any {
   if (!value) {
     delete style[name];
   } else {
     style[name] = value;
   }
-};
+}
 
-export const getStyleMap = (
+export function getStyleMap(
   style: ElementStyle,
   name: string
-): ElementStyleMap => style[name] as ElementStyleMap;
+): ElementStyleMap {
+  return style[name] as ElementStyleMap;
+}
 
-export const getMutableStyleMap = (
+export function getMutableStyleMap(
   style: ElementStyle,
   name: string
-): ElementStyleMap => {
+): ElementStyleMap {
   let r = style[name] as ElementStyleMap;
   if (!r) {
     r = {};
     style[name] = r;
   }
   return r;
-};
+}
 
 export const getViewConditionalStyleMap = (
   style: ElementStyle
@@ -410,22 +420,23 @@ export const getViewConditionalStyleMap = (
   return r;
 };
 
-export const getSpecial = (style: ElementStyle, name: string): CascadeValue[] =>
-  style[name] as CascadeValue[];
+export function getSpecial(style: ElementStyle, name: string): CascadeValue[] {
+  return style[name] as CascadeValue[];
+}
 
-export const getMutableSpecial = (
+export function getMutableSpecial(
   style: ElementStyle,
   name: string
-): CascadeValue[] => {
+): CascadeValue[] {
   let r = style[name] as CascadeValue[];
   if (!r) {
     r = [];
     style[name] = r;
   }
   return r;
-};
+}
 
-export const mergeIn = (
+export function mergeIn(
   context: Exprs.Context,
   target: ElementStyle,
   style: ElementStyle,
@@ -433,7 +444,7 @@ export const mergeIn = (
   pseudoelement: string | null,
   regionId: string | null,
   viewConditionMatcher: Matchers.Matcher | null
-): void => {
+): void {
   const hierarchy = [
     { id: pseudoelement, styleKey: "_pseudos" },
     { id: regionId, styleKey: "_regions" }
@@ -472,23 +483,23 @@ export const mergeIn = (
       setProp(target, prop, cascadeValues(context, tv, av));
     }
   }
-};
+}
 
-export const mergeAll = (
+export function mergeAll(
   context: Exprs.Context,
   styles: ElementStyle[]
-): ElementStyle => {
+): ElementStyle {
   const target = {} as ElementStyle;
   for (let k = 0; k < styles.length; k++) {
     mergeIn(context, target, styles[k], 0, null, null, null);
   }
   return target;
-};
+}
 
-export const chainActions = (
+export function chainActions(
   chain: ChainedAction[],
   action: CascadeAction
-): CascadeAction => {
+): CascadeAction {
   if (chain.length > 0) {
     chain.sort((a, b) => b.getPriority() - a.getPriority());
     let chained = null;
@@ -500,7 +511,7 @@ export const chainActions = (
     return chained;
   }
   return action;
-};
+}
 
 export class InheritanceVisitor extends Css.FilterVisitor {
   propName: string = "";
@@ -564,11 +575,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
   }
 }
 
-export const convertFontRelativeLengthToPx = (
+export function convertFontRelativeLengthToPx(
   numeric: Css.Numeric,
   baseFontSize: number,
   context: Exprs.Context
-): Css.Numeric => {
+): Css.Numeric {
   const unit = numeric.unit;
   const num = numeric.num;
   if (unit === "em" || unit === "ex") {
@@ -579,13 +590,13 @@ export const convertFontRelativeLengthToPx = (
   } else {
     return numeric;
   }
-};
+}
 
-export const convertFontSizeToPx = (
+export function convertFontSizeToPx(
   numeric: Css.Numeric,
   parentFontSize: number,
   context: Exprs.Context
-): Css.Numeric => {
+): Css.Numeric {
   numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);
   const unit = numeric.unit;
   const num = numeric.num;
@@ -596,7 +607,7 @@ export const convertFontSizeToPx = (
   } else {
     return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
   }
-};
+}
 
 export type ActionTable = {
   [key: string]: CascadeAction;
@@ -2056,7 +2067,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   }
 }
 
-export const roman = num => {
+export function roman(num: number) {
   if (num <= 0 || num != Math.round(num) || num > 3999) {
     return "";
   }
@@ -2085,7 +2096,7 @@ export const roman = num => {
     offset += 2;
   }
   return acc;
-};
+}
 
 export const additiveNumbering = {
   roman: [
@@ -2342,7 +2353,7 @@ export const fixed = {
   none: ""
 };
 
-export const additiveFormat = (entries: any[], num: number) => {
+export function additiveFormat(entries: any[], num: number) {
   const max = entries[0] as number;
   if (num > max || num <= 0 || num != Math.round(num)) {
     return "";
@@ -2361,9 +2372,9 @@ export const additiveFormat = (entries: any[], num: number) => {
     }
   }
   return result;
-};
+}
 
-export const expandAlphabet = str => {
+export function expandAlphabet(str: string) {
   const arr = [];
   let i = 0;
   while (i < str.length) {
@@ -2379,9 +2390,9 @@ export const expandAlphabet = str => {
     }
   }
   return arr;
-};
+}
 
-export const alphabeticFormat = (alphabetStr: string, num: number) => {
+export function alphabeticFormat(alphabetStr: string, num: number) {
   if (num <= 0 || num != Math.round(num)) {
     return "";
   }
@@ -2394,7 +2405,7 @@ export const alphabeticFormat = (alphabetStr: string, num: number) => {
     num = (num - digit) / alphabet.length;
   } while (num > 0);
   return result;
-};
+}
 
 export type ChineseNumbering = {
   digits: string;
@@ -2413,7 +2424,7 @@ export const chineseTradInformal: ChineseNumbering = {
   negative: "\u8ca0"
 };
 
-export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
+export function chineseCounter(num: number, numbering: ChineseNumbering) {
   if (num > 9999 || num < -9999) {
     return `${num}`; // TODO: should be cjk-decimal
   }
@@ -2456,7 +2467,7 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
 
   // res.append("\u3001");
   return res.toString();
-};
+}
 
 /**
  * Fitting order and specificity in the same number. Order is recorded in the
@@ -2467,11 +2478,11 @@ export const chineseCounter = (num: number, numbering: ChineseNumbering) => {
  */
 export const ORDER_INCREMENT = 1 / 1048576;
 
-export const copyTable = (src: ActionTable, dst: ActionTable): void => {
+export function copyTable(src: ActionTable, dst: ActionTable): void {
   for (const n in src) {
     dst[n] = src[n].clone();
   }
-};
+}
 
 export class Cascade {
   nsCount: number = 0;
@@ -3878,10 +3889,10 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
   }
 }
 
-export const forEachViewConditionalStyles = (
+export function forEachViewConditionalStyles(
   style: ElementStyle,
   callback: (p1: ElementStyle) => any
-) => {
+) {
   const viewConditionalStyles = getViewConditionalStyleMap(style);
   if (!viewConditionalStyles) {
     return;
@@ -3892,24 +3903,24 @@ export const forEachViewConditionalStyles = (
     }
     callback(entry.styles);
   });
-};
+}
 
-export const mergeViewConditionalStyles = (
+export function mergeViewConditionalStyles(
   cascMap: { [key: string]: CascadeValue },
   context: Exprs.Context,
   style: ElementStyle
-) => {
+) {
   forEachViewConditionalStyles(style, viewConditionalStyles => {
     mergeStyle(cascMap, viewConditionalStyles, context);
   });
-};
+}
 
-export const parseStyleAttribute = (
+export function parseStyleAttribute(
   scope: Exprs.LexicalScope,
   validatorSet: CssValid.ValidatorSet,
   baseURL: string,
   styleAttrValue: string
-): ElementStyle => {
+): ElementStyle {
   const handler = new PropertyParserHandler(scope, validatorSet);
   const tokenizer = new CssTok.Tokenizer(styleAttrValue, handler);
   try {
@@ -3918,13 +3929,13 @@ export const parseStyleAttribute = (
     Logging.logger.warn(err, "Style attribute parse error:");
   }
   return handler.elementStyle;
-};
+}
 
-export const isVertical = (
+export function isVertical(
   cascaded: { [key: string]: CascadeValue },
   context: Exprs.Context,
   vertical: boolean
-): boolean => {
+): boolean {
   const writingModeCasc = cascaded["writing-mode"];
   if (writingModeCasc) {
     const writingMode = writingModeCasc.evaluate(context, "writing-mode");
@@ -3933,13 +3944,13 @@ export const isVertical = (
     }
   }
   return vertical;
-};
+}
 
-export const isRtl = (
+export function isRtl(
   cascaded: { [key: string]: CascadeValue },
   context: Exprs.Context,
   rtl: boolean
-): boolean => {
+): boolean {
   const directionCasc = cascaded["direction"];
   if (directionCasc) {
     const direction = directionCasc.evaluate(context, "direction");
@@ -3948,15 +3959,15 @@ export const isRtl = (
     }
   }
   return rtl;
-};
+}
 
-export const flattenCascadedStyle = (
+export function flattenCascadedStyle(
   style: ElementStyle,
   context: Exprs.Context,
   regionIds: string[],
   isFootnote: boolean,
   nodeContext: Vtree.NodeContext
-): { [key: string]: CascadeValue } => {
+): { [key: string]: CascadeValue } {
   const cascMap = {} as { [key: string]: CascadeValue };
   for (const n in style) {
     if (isPropName(n)) {
@@ -3974,14 +3985,14 @@ export const flattenCascadedStyle = (
     }
   );
   return cascMap;
-};
+}
 
-export const forEachStylesInRegion = (
+export function forEachStylesInRegion(
   style: ElementStyle,
   regionIds: string[],
   isFootnote: boolean,
   callback: (p1: string, p2: ElementStyle) => any
-) => {
+) {
   const regions = getStyleMap(style, "_regions");
   if ((regionIds || isFootnote) && regions) {
     if (isFootnote) {
@@ -3999,13 +4010,13 @@ export const forEachStylesInRegion = (
       }
     }
   }
-};
+}
 
-export const mergeStyle = (
+export function mergeStyle(
   to: { [key: string]: CascadeValue },
   from: ElementStyle,
   context: Exprs.Context
-) => {
+) {
   for (const property in from) {
     if (isPropName(property)) {
       const newVal = getProp(from, property);
@@ -4013,7 +4024,7 @@ export const mergeStyle = (
       to[property] = cascadeValues(context, oldVal, newVal as CascadeValue);
     }
   }
-};
+}
 
 /**
  * Convert logical properties to physical ones, taking specificity into account.

@@ -73,7 +73,7 @@ export enum StylesheetFlavor {
 /**
  * CSS Color value from hash text (without '#' character).
  */
-export const colorFromHash = (text: string): Css.Color => {
+export function colorFromHash(text: string): Css.Color {
   let num = parseInt(text, 16);
   if (isNaN(num)) {
     throw new Error("E_CSS_COLOR");
@@ -92,7 +92,7 @@ export const colorFromHash = (text: string): Css.Color => {
     return new Css.Color(num);
   }
   throw new Error("E_CSS_COLOR");
-};
+}
 
 export class ParserHandler implements CssTok.TokenizerHandler {
   flavor: StylesheetFlavor;
@@ -2584,13 +2584,13 @@ export class ErrorHandler extends ParserHandler {
   }
 }
 
-export const parseStylesheet = (
+export function parseStylesheet(
   tokenizer: CssTok.Tokenizer,
   handler: ParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null
-): Task.Result<boolean> => {
+): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
   let condition: Css.Expr | null = null;
@@ -2646,15 +2646,15 @@ export const parseStylesheet = (
       frame.finish(true);
     });
   return frame.result();
-};
+}
 
-export const parseStylesheetFromText = (
+export function parseStylesheetFromText(
   text: string,
   handler: ParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null
-): Task.Result<boolean> => {
+): Task.Result<boolean> {
   return Task.handle(
     "parseStylesheetFromText",
     frame => {
@@ -2666,7 +2666,7 @@ export const parseStylesheetFromText = (
       frame.finish(false);
     }
   );
-};
+}
 
 export const parseStylesheetFromURL = (
   url: string,
@@ -2702,11 +2702,11 @@ export const parseStylesheetFromURL = (
     }
   );
 
-export const parseValue = (
+export function parseValue(
   scope: Exprs.LexicalScope,
   tokenizer: CssTok.Tokenizer,
   baseURL: string
-): Css.Val => {
+): Css.Val {
   const parser = new Parser(
     actionsPropVal,
     tokenizer,
@@ -2715,26 +2715,26 @@ export const parseValue = (
   );
   parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
   return parser.result;
-};
+}
 
-export const parseStyleAttribute = (
+export function parseStyleAttribute(
   tokenizer: CssTok.Tokenizer,
   handler: ParserHandler,
   baseURL: string
-): void => {
+): void {
   const parser = new Parser(actionsStyleAttribute, tokenizer, handler, baseURL);
   parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
-};
+}
 
-export const parseMediaQuery = (
+export function parseMediaQuery(
   tokenizer: CssTok.Tokenizer,
   handler: ParserHandler,
   baseURL: string
-): Css.Expr => {
+): Css.Expr {
   const parser = new Parser(actionsExprVal, tokenizer, handler, baseURL);
   parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
   return parser.result as Css.Expr;
-};
+}
 
 export const numProp: { [key: string]: boolean } = {
   "z-index": true,
@@ -2746,16 +2746,18 @@ export const numProp: { [key: string]: boolean } = {
   utilization: true
 };
 
-export const takesOnlyNum = (propName: string): boolean => !!numProp[propName];
+export function takesOnlyNum(propName: string): boolean {
+  return !!numProp[propName];
+}
 
 /**
  * @return val
  */
-export const evaluateExprToCSS = (
+export function evaluateExprToCSS(
   context: Exprs.Context,
   val: Exprs.Val,
   propName: string
-): Css.Val => {
+): Css.Val {
   const result = val.evaluate(context);
   switch (typeof result) {
     case "number":
@@ -2783,18 +2785,18 @@ export const evaluateExprToCSS = (
       return Css.empty;
   }
   throw new Error("E_UNEXPECTED");
-};
+}
 
 /**
  * @return val
  */
-export const evaluateCSSToCSS = (
+export function evaluateCSSToCSS(
   context: Exprs.Context,
   val: Css.Val,
   propName: string
-): Css.Val => {
+): Css.Val {
   if (val.isExpr()) {
     return evaluateExprToCSS(context, (val as Css.Expr).expr, propName);
   }
   return val;
-};
+}

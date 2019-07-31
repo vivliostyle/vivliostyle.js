@@ -126,7 +126,7 @@ export class BoxBreakPosition extends BreakPosition.AbstractBreakPosition
   }
 }
 
-export const validateCheckPoints = (checkPoints: ViewTree.NodeContext[]) => {
+export function validateCheckPoints(checkPoints: ViewTree.NodeContext[]) {
   for (let i = 1; i < checkPoints.length; i++) {
     const cp0 = checkPoints[i - 1];
     const cp1 = checkPoints[i];
@@ -153,9 +153,9 @@ export const validateCheckPoints = (checkPoints: ViewTree.NodeContext[]) => {
       }
     }
   }
-};
+}
 
-export const isSpecialInlineDisplay = (display: string): boolean => {
+export function isSpecialInlineDisplay(display: string): boolean {
   switch (display) {
     case "ruby":
     case "inline-block":
@@ -166,7 +166,7 @@ export const isSpecialInlineDisplay = (display: string): boolean => {
       return true;
   }
   return false;
-};
+}
 
 export class Column extends Vtree.Container implements Layout.Column {
   last: Node;
@@ -3405,12 +3405,12 @@ export const firstCharPattern = /^[^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u
 
 export type SinglePageFloatLayoutResult = Layout.SinglePageFloatLayoutResult;
 
-export const fixJustificationOnHyphen = (
+export function fixJustificationOnHyphen(
   nodeContext: ViewTree.NodeContext,
   insertAfter: boolean,
   node: Node,
   insertionPoint: Node
-) => {
+) {
   if (Base.checkSoftWrapOpportunityAfterHyphenBug(document.body)) {
     const hyphenChar = resolveHyphenateCharacter(nodeContext);
     const prevSibling = insertAfter ? node : node.previousSibling;
@@ -3427,7 +3427,7 @@ export const fixJustificationOnHyphen = (
       }
     }
   }
-};
+}
 
 /**
  * breaking point resolver for Text Node.
@@ -3521,12 +3521,15 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
 }
 TextNodeBreaker.instance = new TextNodeBreaker();
 
-export const resolveHyphenateCharacter = (
+export function resolveHyphenateCharacter(
   nodeContext: ViewTree.NodeContext
-): string =>
-  nodeContext.hyphenateCharacter ||
-  (nodeContext.parent && nodeContext.parent.hyphenateCharacter) ||
-  "-";
+): string {
+  return (
+    nodeContext.hyphenateCharacter ||
+    (nodeContext.parent && nodeContext.parent.hyphenateCharacter) ||
+    "-"
+  );
+}
 
 export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   breakAfter: string | null;

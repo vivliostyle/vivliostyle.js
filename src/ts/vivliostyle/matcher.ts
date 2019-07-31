@@ -22,14 +22,14 @@ import * as Asserts from "../vivliostyle/asserts";
  * Checkes whether given order can be represented as an+b with a non-negative
  * interger n
  */
-export const matchANPlusB = (order: number, a: number, b: number): boolean => {
+export function matchANPlusB(order: number, a: number, b: number): boolean {
   order -= b;
   if (a === 0) {
     return order === 0;
   } else {
     return order % a === 0 && order / a >= 0;
   }
-};
+}
 
 export interface Matcher {
   matches(): boolean;

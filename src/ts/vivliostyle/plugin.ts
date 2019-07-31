@@ -194,7 +194,7 @@ const hooks = {};
  * @param name Name of the hook.
  * @param fn Function to be registered to the hook.
  */
-export const registerHook = (name: string, fn: (...p1) => any) => {
+export function registerHook(name: string, fn: (...p1) => any) {
   if (!HOOKS[name]) {
     Logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
   } else {
@@ -204,7 +204,7 @@ export const registerHook = (name: string, fn: (...p1) => any) => {
     }
     hooksForName.push(fn);
   }
-};
+}
 
 /**
  * Remove a function already registered to the specified name.
@@ -213,7 +213,7 @@ export const registerHook = (name: string, fn: (...p1) => any) => {
  * @param name Name of the hook.
  * @param fn Function to be removed from the hook.
  */
-export const removeHook = (name: string, fn: (...p1) => any) => {
+export function removeHook(name: string, fn: (...p1) => any) {
   if (!HOOKS[name]) {
     Logging.logger.warn(new Error(`Ignoring unknown plugin hook '${name}'.`));
   } else {
@@ -225,16 +225,16 @@ export const removeHook = (name: string, fn: (...p1) => any) => {
       }
     }
   }
-};
+}
 
 /**
  * Get all hooks registered to the specified name.
  * This method is for internal use (from the core code).
  */
-export const getHooksForName = (name: string): ((...p1) => any)[] => {
+export function getHooksForName(name: string): ((...p1) => any)[] {
   const hooksForName = hooks[name];
   return hooksForName || [];
-};
+}
 
 /**
  * Pubilc members of the bundled library.

@@ -38,7 +38,7 @@ export enum PageProgression {
 /**
  * Return PageProgression corresponding to the specified string
  */
-export const pageProgressionOf = (str: string): PageProgression => {
+export function pageProgressionOf(str: string): PageProgression {
   switch (str) {
     case "ltr":
       return PageProgression.LTR;
@@ -47,7 +47,7 @@ export const pageProgressionOf = (str: string): PageProgression => {
     default:
       throw new Error(`unknown PageProgression: ${str}`);
   }
-};
+}
 
 /**
  * Page side (left/right).

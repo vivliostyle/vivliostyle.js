@@ -21,15 +21,16 @@ import * as Css from "../adapt/css";
 
 export const FLOW_ROOT_ATTR = "data-vivliostyle-flow-root";
 
-export const isFlowRoot = (element: Element): boolean =>
-  element.getAttribute(FLOW_ROOT_ATTR) === "true";
+export function isFlowRoot(element: Element): boolean {
+  return element.getAttribute(FLOW_ROOT_ATTR) === "true";
+}
 
 /**
  * 'Blockify' a display value.
  * cf. https://drafts.csswg.org/css-display/#transformations
  *     https://drafts.csswg.org/css2/visuren.html#dis-pos-flo
  */
-export const blockify = (display: Css.Ident): Css.Ident => {
+export function blockify(display: Css.Ident): Css.Ident {
   const displayStr = display.toString();
   let blockifiedStr;
   switch (displayStr) {
@@ -58,25 +59,26 @@ export const blockify = (display: Css.Ident): Css.Ident => {
       blockifiedStr = displayStr;
   }
   return Css.getName(blockifiedStr);
-};
+}
 
 /**
  * Judge if the generated box is absolutely positioned.
  */
-export const isAbsolutelyPositioned = (position: Css.Ident): boolean =>
-  position === Css.ident.absolute || position === Css.ident.fixed;
+export function isAbsolutelyPositioned(position: Css.Ident): boolean {
+  return position === Css.ident.absolute || position === Css.ident.fixed;
+}
 
 /**
  * Get computed values of display, position and float.
  * cf. https://drafts.csswg.org/css-display/#transformations
  *     https://drafts.csswg.org/css2/visuren.html#dis-pos-flo
  */
-export const getComputedDislayValue = (
+export function getComputedDislayValue(
   display: Css.Ident,
   position: Css.Ident,
   float: Css.Ident,
   isRoot: boolean
-): { display: Css.Ident; position: Css.Ident; float: Css.Ident } => {
+): { display: Css.Ident; position: Css.Ident; float: Css.Ident } {
   if (display === Css.ident.none) {
     // no need to convert values when 'display' is 'none'
   } else if (isAbsolutelyPositioned(position)) {
@@ -86,21 +88,24 @@ export const getComputedDislayValue = (
     display = blockify(display);
   }
   return { display, position, float };
-};
+}
 
 /**
  * Judges if the generated box is block.
  */
-export const isBlock = (
+export function isBlock(
   display: Css.Ident,
   position: Css.Ident,
   float: Css.Ident,
   isRoot: boolean
-): boolean =>
-  getComputedDislayValue(display, position, float, isRoot).display ===
-  Css.ident.block;
+): boolean {
+  return (
+    getComputedDislayValue(display, position, float, isRoot).display ===
+    Css.ident.block
+  );
+}
 
-export const isInlineLevel = (display: Css.Ident): boolean => {
+export function isInlineLevel(display: Css.Ident): boolean {
   switch (display.toString()) {
     case "inline":
     case "inline-block":
@@ -113,9 +118,9 @@ export const isInlineLevel = (display: Css.Ident): boolean => {
     default:
       return false;
   }
-};
+}
 
-export const isRubyInternalDisplay = (display: Css.Ident): boolean => {
+export function isRubyInternalDisplay(display: Css.Ident): boolean {
   switch (display.toString()) {
     case "ruby-base":
     case "ruby-text":
@@ -125,12 +130,12 @@ export const isRubyInternalDisplay = (display: Css.Ident): boolean => {
     default:
       return false;
   }
-};
+}
 
 /**
  * Judges if the generated box establishes a new block formatting context.
  */
-export const establishesBFC = (
+export function establishesBFC(
   display: Css.Ident,
   position: Css.Ident,
   float: Css.Ident,
@@ -138,7 +143,7 @@ export const establishesBFC = (
   writingMode?: Css.Ident,
   parentWritingMode?: Css.Ident,
   isFlowRoot?: boolean
-): boolean => {
+): boolean {
   writingMode = writingMode || parentWritingMode || Css.ident.horizontal_tb;
   return (
     !!isFlowRoot ||
@@ -152,13 +157,16 @@ export const establishesBFC = (
       (!!overflow && overflow !== Css.ident.visible)) ||
       (!!parentWritingMode && writingMode !== parentWritingMode))
   );
-};
+}
 
 /**
  * Judges if the generated box establishes a containing block for descendant
  * boxes with 'position: absolute'.
  */
-export const establishesCBForAbsolute = (position: Css.Ident): boolean =>
-  position === Css.ident.relative ||
-  position === Css.ident.absolute ||
-  position === Css.ident.fixed;
+export function establishesCBForAbsolute(position: Css.Ident): boolean {
+  return (
+    position === Css.ident.relative ||
+    position === Css.ident.absolute ||
+    position === Css.ident.fixed
+  );
+}

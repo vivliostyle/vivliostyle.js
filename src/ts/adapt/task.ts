@@ -96,7 +96,9 @@ export let primaryScheduler: Scheduler | null = null;
 /**
  * Returns current task.
  */
-export const currentTask = (): Task | null => privateCurrentTask;
+export function currentTask(): Task | null {
+  return privateCurrentTask;
+}
 
 /**
  * Create and return a new frame with the given name.
@@ -115,10 +117,13 @@ export function newFrame<T>(name: string): Frame<T> {
   return frame;
 }
 
-export const newEventSource = (): EventSource => new EventSource();
+export function newEventSource(): EventSource {
+  return new EventSource();
+}
 
-export const newScheduler = (opt_timer?: Timer): Scheduler =>
-  new Scheduler(opt_timer || new TimerImpl());
+export function newScheduler(opt_timer?: Timer): Scheduler {
+  return new Scheduler(opt_timer || new TimerImpl());
+}
 
 /**
  * @template T

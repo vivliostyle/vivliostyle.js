@@ -49,12 +49,13 @@ export const pseudoNames = [
 
 export const PSEUDO_ATTR = "data-adapt-pseudo";
 
-export const getPseudoName = (element: Element): string =>
-  element.getAttribute(PSEUDO_ATTR) || "";
+export function getPseudoName(element: Element): string {
+  return element.getAttribute(PSEUDO_ATTR) || "";
+}
 
-export const setPseudoName = (element: Element, name: string) => {
+export function setPseudoName(element: Element, name: string) {
   element.setAttribute(PSEUDO_ATTR, name);
-};
+}
 
 export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   contentProcessed: { [key: string]: boolean } = {};

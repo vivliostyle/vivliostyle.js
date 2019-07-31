@@ -37,11 +37,11 @@ export let pinchDist: number = 0;
 export let currentPageProgression: Constants.PageProgression =
   Constants.PageProgression.LTR;
 
-export const sendCommand = (cmd: Base.JSON) => {
+export function sendCommand(cmd: Base.JSON) {
   window["adapt_command"](cmd);
-};
+}
 
-export const navigateToLeftPage = () => {
+export function navigateToLeftPage() {
   sendCommand({
     a: "moveTo",
     where:
@@ -49,9 +49,9 @@ export const navigateToLeftPage = () => {
         ? "previous"
         : "next"
   });
-};
+}
 
-export const navigateToRightPage = () => {
+export function navigateToRightPage() {
   sendCommand({
     a: "moveTo",
     where:
@@ -59,9 +59,9 @@ export const navigateToRightPage = () => {
         ? "next"
         : "previous"
   });
-};
+}
 
-export const keydown = (evt: KeyboardEvent): void => {
+export function keydown(evt: KeyboardEvent): void {
   const key = evt.key;
   const keyIdentifier = (evt as any).keyIdentifier;
   const location = evt.location;
@@ -137,11 +137,11 @@ export const keydown = (evt: KeyboardEvent): void => {
     sendCommand({ a: "configure", fontSize: Math.round(fontSize) });
     evt.preventDefault();
   }
-};
+}
 
 let zoomDist: number;
 
-export const touch = (evt: TouchEvent): void => {
+export function touch(evt: TouchEvent): void {
   if (evt.type == "touchmove") {
     evt.preventDefault();
   }
@@ -200,9 +200,9 @@ export const touch = (evt: TouchEvent): void => {
       }
     }
   }
-};
+}
 
-export const callback = msg => {
+export function callback(msg: Base.JSON) {
   switch (msg["t"]) {
     case "loaded": {
       const viewer = msg["viewer"];
@@ -257,7 +257,7 @@ export const callback = msg => {
         sendCommand({ a: "moveTo", url: msg["href"] });
       }
   }
-};
+}
 
 function setViewportSize(
   width: string | null,
@@ -324,7 +324,7 @@ function setViewportSize(
   }
 }
 
-export const main = (arg): void => {
+export function main(arg): void {
   const fragment = (arg && arg["fragment"]) || Base.getURLParam("f");
   const epubURL = (arg && arg["epubURL"]) || Base.getURLParam("b");
   const xmlURL = (arg && arg["xmlURL"]) || Base.getURLParam("x");
@@ -361,7 +361,7 @@ export const main = (arg): void => {
     callback
   );
   viewerInstance.initEmbed(config);
-};
+}
 
 export const viewerapp = {
   main

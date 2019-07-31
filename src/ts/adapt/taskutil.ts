@@ -132,7 +132,7 @@ export const waitForFetchers = <T>(
 /**
  * @return holding event type (load/error/abort)
  */
-export const loadElement = (elem: Element, src: string): Fetcher<string> => {
+export function loadElement(elem: Element, src: string): Fetcher<string> {
   let width = null;
   let height = null;
   if (elem.localName == "img") {
@@ -175,4 +175,4 @@ export const loadElement = (elem: Element, src: string): Fetcher<string> => {
   }, `loadElement ${src}`);
   fetcher.start();
   return fetcher;
-};
+}

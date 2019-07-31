@@ -151,9 +151,9 @@ export abstract class ColumnBalancer {
 }
 const COLUMN_LENGTH_STEP = 1;
 
-export const canReduceContainerSize = (
+export function canReduceContainerSize(
   candidates: ColumnBalancingTrialResult[]
-): boolean => {
+): boolean {
   const lastCandidate = candidates[candidates.length - 1];
   if (lastCandidate.penalty === 0) {
     return false;
@@ -175,12 +175,12 @@ export const canReduceContainerSize = (
     columns.map(c => c.getMaxBlockSizeOfPageFloats())
   );
   return maxColumnBlockSize > maxPageFloatBlockSize + COLUMN_LENGTH_STEP;
-};
+}
 
-export const reduceContainerSize = (
+export function reduceContainerSize(
   candidates: ColumnBalancingTrialResult[],
   container: Vtree.Container
-) => {
+) {
   const columns = candidates[candidates.length - 1].layoutResult.columns;
   const maxColumnBlockSize = Math.max.apply(
     null,
@@ -202,7 +202,7 @@ export const reduceContainerSize = (
   } else {
     setBlockSize(container, getBlockSize(container) - 1);
   }
-};
+}
 
 export class BalanceLastColumnBalancer extends ColumnBalancer {
   originalPosition: Vtree.LayoutPosition | null = null;
@@ -343,7 +343,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   }
 }
 
-export const createColumnBalancer = (
+export function createColumnBalancer(
   columnCount: number,
   columnFill: Css.Ident,
   columnGenerator: ColumnGenerator,
@@ -351,7 +351,7 @@ export const createColumnBalancer = (
   layoutContainer: Vtree.Container,
   columns: LayoutImpl.Column[],
   flowPosition: Vtree.FlowPosition
-): ColumnBalancer | null => {
+): ColumnBalancer | null {
   if (columnFill === Css.ident.auto) {
     return null;
   } else {
@@ -378,4 +378,4 @@ export const createColumnBalancer = (
       return null;
     }
   }
-};
+}

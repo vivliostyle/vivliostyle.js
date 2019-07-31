@@ -311,60 +311,60 @@ export class Partition<
 /**
  * @param def default value
  */
-export const toExprIdent = (
+export function toExprIdent(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   def: string
-): Exprs.Val => {
+): Exprs.Val {
   if (!val) {
     return new Exprs.Const(scope, def);
   }
   return val.toExpr(scope, scope.zero);
-};
+}
 
-export const toExprAuto = (
+export function toExprAuto(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   ref: Exprs.Val
-): Exprs.Val => {
+): Exprs.Val {
   if (!val || val === Css.ident.auto) {
     return null;
   }
   return val.toExpr(scope, ref);
-};
+}
 
-export const toExprNormal = (
+export function toExprNormal(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   ref: Exprs.Val
-): Exprs.Val => {
+): Exprs.Val {
   if (!val || val === Css.ident.normal) {
     return null;
   }
   return val.toExpr(scope, ref);
-};
+}
 
-export const toExprZero = (
+export function toExprZero(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   ref: Exprs.Val
-): Exprs.Val => {
+): Exprs.Val {
   if (!val || val === Css.ident.auto) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
-};
+}
 
 /**
  * If the value is not specified (null), returns zero.
  * If the value is 'auto', returns null.
  * Otherwise, return the value itself.
  */
-export const toExprZeroAuto = (
+export function toExprZeroAuto(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   ref: Exprs.Val
-): Exprs.Val => {
+): Exprs.Val {
   if (!val) {
     return scope.zero;
   } else if (val === Css.ident.auto) {
@@ -372,25 +372,25 @@ export const toExprZeroAuto = (
   } else {
     return val.toExpr(scope, ref);
   }
-};
+}
 
-export const toExprZeroBorder = (
+export function toExprZeroBorder(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   styleVal: Css.Val,
   ref: Exprs.Val
-): Exprs.Val => {
+): Exprs.Val {
   if (!val || styleVal === Css.ident.none) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
-};
+}
 
-export const toExprBool = (
+export function toExprBool(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   def: Exprs.Val
-): Exprs.Val => {
+): Exprs.Val {
   if (!val) {
     return def;
   }
@@ -401,7 +401,7 @@ export const toExprBool = (
     return scope._false;
   }
   return val.toExpr(scope, scope.zero);
-};
+}
 
 export interface InstanceHolder extends Exprs.Context {
   registerInstance(key: string, instance: PageBoxInstance): void;

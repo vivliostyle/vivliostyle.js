@@ -34,35 +34,39 @@ export type Preferences = {
   defaultPaperSize: { [key: string]: number } | undefined;
 };
 
-export const defaultPreferences = (): Preferences => ({
-  fontFamily: "serif",
-  lineHeight: 1.25,
-  margin: 8,
-  hyphenate: false,
-  columnWidth: 25,
-  horizontal: false,
-  nightMode: false,
-  spreadView: false,
-  pageBorder: 1,
-  enabledMediaTypes: { vivliostyle: true, print: true },
-  defaultPaperSize: undefined
-});
+export function defaultPreferences(): Preferences {
+  return {
+    fontFamily: "serif",
+    lineHeight: 1.25,
+    margin: 8,
+    hyphenate: false,
+    columnWidth: 25,
+    horizontal: false,
+    nightMode: false,
+    spreadView: false,
+    pageBorder: 1,
+    enabledMediaTypes: { vivliostyle: true, print: true },
+    defaultPaperSize: undefined
+  };
+}
 
-export const clonePreferences = (pref: Preferences): Preferences => ({
-  fontFamily: pref.fontFamily,
-  lineHeight: pref.lineHeight,
-  margin: pref.margin,
-  hyphenate: pref.hyphenate,
-  columnWidth: pref.columnWidth,
-  horizontal: pref.horizontal,
-  nightMode: pref.nightMode,
-  spreadView: pref.spreadView,
-  pageBorder: pref.pageBorder,
-  enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
-  defaultPaperSize: pref.defaultPaperSize
-    ? Object.assign({}, pref.defaultPaperSize)
-    : undefined
-});
+export function clonePreferences(pref: Preferences): Preferences {
+  return {
+    fontFamily: pref.fontFamily,
+    lineHeight: pref.lineHeight,
+    margin: pref.margin,
+    hyphenate: pref.hyphenate,
+    columnWidth: pref.columnWidth,
+    horizontal: pref.horizontal,
+    nightMode: pref.nightMode,
+    spreadView: pref.spreadView,
+    pageBorder: pref.pageBorder,
+    enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
+    defaultPaperSize: pref.defaultPaperSize
+      ? Object.assign({}, pref.defaultPaperSize)
+      : undefined
+  };
+}
 
 export const defaultPreferencesInstance = defaultPreferences();
 
@@ -81,37 +85,39 @@ export type Result = string | number | boolean | undefined;
 
 export type PendingResult = Special | Result;
 
-export const letterbox = (
+export function letterbox(
   viewW: number,
   viewH: number,
   objW: number,
   objH: number
-): string => {
+): string {
   const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
   return `matrix(${scale},0,0,${scale},0,0)`;
-};
+}
 
 /**
  * @return string that can be parsed as CSS string with value str
  */
-export const cssString = (str: string): string =>
-  `"${Base.escapeCSSStr(`${str}`)}"`;
+export function cssString(str: string): string {
+  return `"${Base.escapeCSSStr(`${str}`)}"`;
+}
 
 /**
  * @return string that can be parsed as CSS name
  */
-export const cssIdent = (name: string): string =>
-  Base.escapeCSSIdent(`${name}`);
+export function cssIdent(name: string): string {
+  return Base.escapeCSSIdent(`${name}`);
+}
 
-export const makeQualifiedName = (
+export function makeQualifiedName(
   objName: string | null,
   memberName: string
-): string => {
+): string {
   if (objName) {
     return `${Base.escapeCSSIdent(objName)}.${Base.escapeCSSIdent(memberName)}`;
   }
   return Base.escapeCSSIdent(memberName);
-};
+}
 
 export let nextKeyIndex: number = 0;
 
@@ -212,7 +218,7 @@ export class LexicalScope {
   }
 }
 
-export const isAbsoluteLengthUnit = (unit: string): boolean => {
+export function isAbsoluteLengthUnit(unit: string): boolean {
   switch (unit.toLowerCase()) {
     case "px":
     case "in":
@@ -225,9 +231,9 @@ export const isAbsoluteLengthUnit = (unit: string): boolean => {
     default:
       return false;
   }
-};
+}
 
-export const isViewportRelativeLengthUnit = (unit: string): boolean => {
+export function isViewportRelativeLengthUnit(unit: string): boolean {
   switch (unit.toLowerCase()) {
     case "vw":
     case "vh":
@@ -245,9 +251,9 @@ export const isViewportRelativeLengthUnit = (unit: string): boolean => {
     default:
       return false;
   }
-};
+}
 
-export const isFontRelativeLengthUnit = (unit: string): boolean => {
+export function isFontRelativeLengthUnit(unit: string): boolean {
   switch (unit.toLowerCase()) {
     case "em":
     case "ex":
@@ -256,7 +262,7 @@ export const isFontRelativeLengthUnit = (unit: string): boolean => {
     default:
       return false;
   }
-};
+}
 
 export const defaultUnitSizes: { [key: string]: number } = {
   px: 1,
@@ -278,7 +284,7 @@ export const defaultUnitSizes: { [key: string]: number } = {
 /**
  * Returns if a unit should be converted to px before applied to the raw DOM.
  */
-export const needUnitConversion = (unit: string): boolean => {
+export function needUnitConversion(unit: string): boolean {
   switch (unit) {
     case "q":
     case "rem":
@@ -286,7 +292,7 @@ export const needUnitConversion = (unit: string): boolean => {
     default:
       return false;
   }
-};
+}
 
 export type ScopeContext = {
   [key: string]: Result;
@@ -1265,7 +1271,7 @@ export class Native extends Val {
   }
 }
 
-export const appendValArray = (buf: Base.StringBuffer, arr: Val[]): void => {
+export function appendValArray(buf: Base.StringBuffer, arr: Val[]): void {
   buf.append("(");
   for (let i = 0; i < arr.length; i++) {
     if (i) {
@@ -1274,13 +1280,13 @@ export const appendValArray = (buf: Base.StringBuffer, arr: Val[]): void => {
     arr[i].appendTo(buf, 0);
   }
   buf.append(")");
-};
+}
 
-export const expandValArray = (
+export function expandValArray(
   context: Context,
   arr: Val[],
   params: Val[]
-): Val[] => {
+): Val[] {
   let expanded: Val[] = arr;
   for (let i = 0; i < arr.length; i++) {
     const p = arr[i].expand(context, params);
@@ -1295,15 +1301,15 @@ export const expandValArray = (
     }
   }
   return expanded;
-};
+}
 
-export const evalValArray = (context: Context, arr: Val[]): Result[] => {
+export function evalValArray(context: Context, arr: Val[]): Result[] {
   const result: Result[] = Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
     result[i] = arr[i].evaluate(context);
   }
   return result;
-};
+}
 
 export class Call extends Val {
   constructor(
@@ -1553,7 +1559,7 @@ export class Param extends Val {
   }
 }
 
-export const and = (scope: LexicalScope, v1: Val, v2: Val): Val => {
+export function and(scope: LexicalScope, v1: Val, v2: Val): Val {
   if (
     v1 === scope._false ||
     v1 === scope.zero ||
@@ -1569,9 +1575,9 @@ export const and = (scope: LexicalScope, v1: Val, v2: Val): Val => {
     return v1;
   }
   return new And(scope, v1, v2);
-};
+}
 
-export const add = (scope: LexicalScope, v1: Val, v2: Val): Val => {
+export function add(scope: LexicalScope, v1: Val, v2: Val): Val {
   if (v1 === scope.zero) {
     return v2;
   }
@@ -1579,9 +1585,9 @@ export const add = (scope: LexicalScope, v1: Val, v2: Val): Val => {
     return v1;
   }
   return new Add(scope, v1, v2);
-};
+}
 
-export const sub = (scope: LexicalScope, v1: Val, v2: Val): Val => {
+export function sub(scope: LexicalScope, v1: Val, v2: Val): Val {
   if (v1 === scope.zero) {
     return new Negate(scope, v2);
   }
@@ -1589,9 +1595,9 @@ export const sub = (scope: LexicalScope, v1: Val, v2: Val): Val => {
     return v1;
   }
   return new Subtract(scope, v1, v2);
-};
+}
 
-export const mul = (scope: LexicalScope, v1: Val, v2: Val): Val => {
+export function mul(scope: LexicalScope, v1: Val, v2: Val): Val {
   if (v1 === scope.zero || v2 === scope.zero) {
     return scope.zero;
   }
@@ -1602,9 +1608,9 @@ export const mul = (scope: LexicalScope, v1: Val, v2: Val): Val => {
     return v1;
   }
   return new Multiply(scope, v1, v2);
-};
+}
 
-export const div = (scope: LexicalScope, v1: Val, v2: Val): Val => {
+export function div(scope: LexicalScope, v1: Val, v2: Val): Val {
   if (v1 === scope.zero) {
     return scope.zero;
   }
@@ -1612,4 +1618,4 @@ export const div = (scope: LexicalScope, v1: Val, v2: Val): Val => {
     return v1;
   }
   return new Divide(scope, v1, v2);
-};
+}

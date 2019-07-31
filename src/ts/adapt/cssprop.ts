@@ -50,7 +50,7 @@ export class SetVisitor extends Css.Visitor {
   }
 }
 
-export const toSet = (val: Css.Val): { [key: string]: boolean } => {
+export function toSet(val: Css.Val): { [key: string]: boolean } {
   if (val) {
     const visitor = new SetVisitor();
     try {
@@ -61,7 +61,7 @@ export const toSet = (val: Css.Val): { [key: string]: boolean } => {
     }
   }
   return {};
-};
+}
 
 export class IntVisitor extends Css.Visitor {
   constructor(public value: number) {
@@ -77,7 +77,7 @@ export class IntVisitor extends Css.Visitor {
   }
 }
 
-export const toInt = (val: Css.Val, def: number): number => {
+export function toInt(val: Css.Val, def: number): number {
   if (val) {
     const visitor = new IntVisitor(def);
     try {
@@ -88,7 +88,7 @@ export const toInt = (val: Css.Val, def: number): number => {
     }
   }
   return def;
-};
+}
 
 export class ShapeVisitor extends Css.Visitor {
   collect: boolean = false;
@@ -206,14 +206,14 @@ export class ShapeVisitor extends Css.Visitor {
   }
 }
 
-export const toShape = (
+export function toShape(
   val: Css.Val,
   x: number,
   y: number,
   width: number,
   height: number,
   context: Exprs.Context
-): Geom.Shape => {
+): Geom.Shape {
   if (val) {
     const visitor = new ShapeVisitor();
     try {
@@ -224,7 +224,7 @@ export const toShape = (
     }
   }
   return Geom.shapeForRect(x, y, x + width, y + height);
-};
+}
 
 export class CountersVisitor extends Css.Visitor {
   counters: { [key: string]: number } = {};
@@ -260,10 +260,10 @@ export class CountersVisitor extends Css.Visitor {
   }
 }
 
-export const toCounters = (
+export function toCounters(
   val: Css.Val,
   reset: boolean
-): { [key: string]: number } => {
+): { [key: string]: number } {
   const visitor = new CountersVisitor(reset);
   try {
     val.visit(visitor);
@@ -271,7 +271,7 @@ export const toCounters = (
     Logging.logger.warn(err, "toCounters:");
   }
   return visitor.counters;
-};
+}
 
 export class UrlTransformVisitor extends Css.FilterVisitor {
   constructor(

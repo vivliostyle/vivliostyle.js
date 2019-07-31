@@ -37,36 +37,36 @@ export const bogusFontData = `OTTO${new Date().valueOf()}`;
 
 export let bogusFontCounter: number = 1;
 
-export const makeFontTraitKey = (properties: {
+export function makeFontTraitKey(properties: {
   [key: string]: Css.Val;
-}): string => {
+}): string {
   const sb = new Base.StringBuffer();
   for (const prop in traitProps) {
     sb.append(" ");
     sb.append(properties[prop].toString());
   }
   return sb.toString();
-};
+}
 
-export const fillDefaults = (properties: { [key: string]: Css.Val }) => {
+export function fillDefaults(properties: { [key: string]: Css.Val }) {
   for (const prop in traitProps) {
     if (!properties[prop]) {
       properties[prop] = traitProps[prop];
     }
   }
-};
+}
 
-export const prepareProperties = (
+export function prepareProperties(
   properties: CssCasc.ElementStyle,
   context: Exprs.Context
-): { [key: string]: Css.Val } => {
+): { [key: string]: Css.Val } {
   const result = {} as { [key: string]: Css.Val };
   for (const prop in properties) {
     result[prop] = CssCasc.getProp(properties, prop).evaluate(context, prop);
   }
   fillDefaults(result);
   return result;
-};
+}
 
 /**
  * A font declared in a font-face rule.

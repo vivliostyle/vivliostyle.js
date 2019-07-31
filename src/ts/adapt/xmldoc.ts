@@ -323,11 +323,11 @@ export enum DOMParserSupportedType {
  * Parses a string with a DOMParser and returns the document.
  * If a parse error occurs, return null.
  */
-export const parseAndReturnNullIfError = (
+export function parseAndReturnNullIfError(
   str: string,
   type: string,
   opt_parser?: DOMParser
-): Document | null => {
+): Document | null {
   const parser = opt_parser || new DOMParser();
   let doc;
   try {
@@ -349,13 +349,13 @@ export const parseAndReturnNullIfError = (
     }
   }
   return doc;
-};
+}
 
 /**
  * @returns null if contentType cannot be inferred from HTTP header and file
  *     extension
  */
-export const resolveContentType = (response: Net.Response): string | null => {
+export function resolveContentType(response: Net.Response): string | null {
   const contentType = response.contentType;
   if (contentType) {
     const supportedKeys = Object.keys(DOMParserSupportedType);
@@ -387,12 +387,12 @@ export const resolveContentType = (response: Net.Response): string | null => {
     }
   }
   return null;
-};
+}
 
-export const parseXMLResource = (
+export function parseXMLResource(
   response: Net.Response,
   store: XMLDocStore
-): Task.Result<XMLDocHolder> => {
+): Task.Result<XMLDocHolder> {
   let doc = response.responseXML;
   if (!doc) {
     const parser = new DOMParser();
@@ -440,13 +440,14 @@ export const parseXMLResource = (
   }
   const xmldoc = doc ? new XMLDocHolder(store, response.url, doc) : null;
   return Task.newResult(xmldoc);
-};
+}
 
-export const newXMLDocStore = (): XMLDocStore =>
-  new Net.ResourceStore(
+export function newXMLDocStore(): XMLDocStore {
+  return new Net.ResourceStore(
     parseXMLResource,
     Net.XMLHttpRequestResponseType.DOCUMENT
   );
+}
 
 export class Predicate implements XmlDoc.Predicate {
   constructor(public readonly fn: (p1: Node) => boolean) {}

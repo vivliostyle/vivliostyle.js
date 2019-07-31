@@ -23,7 +23,7 @@ export interface TokenizerHandler {
   error(mnemonics: string, token: Token): void;
 }
 
-export const escapeParseSingle = (str: string): string => {
+export function escapeParseSingle(str: string): string {
   str = str.substr(1);
   if (str.match(/^[^0-9a-fA-F\n\r]$/)) {
     return str;
@@ -45,13 +45,14 @@ export const escapeParseSingle = (str: string): string => {
 
   // not a valid Unicode value
   return "\ufffd";
-};
+}
 
-export const escapeParse = (str: string): string =>
-  str.replace(
+export function escapeParse(str: string): string {
+  return str.replace(
     /\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
     escapeParseSingle
   );
+}
 
 /**
  * @enum {number}
@@ -212,7 +213,7 @@ export enum Action {
   EOF
 }
 
-export const makeActions = (def: Action, spec: Action[]): Action[] => {
+export function makeActions(def: Action, spec: Action[]): Action[] {
   const a: number[] = Array(128);
   let i: number;
   for (i = 0; i < 128; i++) {
@@ -223,7 +224,7 @@ export const makeActions = (def: Action, spec: Action[]): Action[] => {
     a[spec[i]] = spec[i + 1];
   }
   return a;
-};
+}
 
 /**
  * Start of the token.

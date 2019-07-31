@@ -32,7 +32,7 @@ export type FloatReference = PageFloats.FloatReference;
 
 type PageFloatID = PageFloats.PageFloatID;
 
-export const floatReferenceOf = (str: string): FloatReference => {
+export function floatReferenceOf(str: string): FloatReference {
   switch (str) {
     case "inline":
       return FloatReference.INLINE;
@@ -45,9 +45,9 @@ export const floatReferenceOf = (str: string): FloatReference => {
     default:
       throw new Error(`Unknown float-reference: ${str}`);
   }
-};
+}
 
-export const isPageFloat = (floatReference: FloatReference): boolean => {
+export function isPageFloat(floatReference: FloatReference): boolean {
   switch (floatReference) {
     case FloatReference.INLINE:
       return false;
@@ -58,17 +58,17 @@ export const isPageFloat = (floatReference: FloatReference): boolean => {
     default:
       throw new Error(`Unknown float-reference: ${floatReference}`);
   }
-};
+}
 
 /**
  * Interpret a float value with the writing-mode and direction assuming the
  * float-reference is inline and returns "left" or "right".
  */
-export const resolveInlineFloatDirection = (
+export function resolveInlineFloatDirection(
   floatSide: string,
   vertical: boolean,
   direction: string
-): string => {
+): string {
   const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {
     floatSide = Logical.toLogical(floatSide, writingMode, direction);
@@ -96,7 +96,7 @@ export const resolveInlineFloatDirection = (
     floatSide = "left";
   }
   return floatSide;
-};
+}
 
 export class PageFloat implements PageFloats.PageFloat {
   order: number | null = null;

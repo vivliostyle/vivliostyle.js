@@ -25,11 +25,11 @@ import * as Plugin from "../vivliostyle/plugin";
  * values as specified by CSS Fragmentation module:
  * https://drafts.csswg.org/css-break/#page-break-properties
  */
-export const convertPageBreakAliases = (original: {
+export function convertPageBreakAliases(original: {
   name: string;
   value: Css.Val;
   important: boolean;
-}): { name: string; value: Css.Val; important: boolean } => {
+}): { name: string; value: Css.Val; important: boolean } {
   const name = original["name"];
   const value = original["value"];
   switch (name) {
@@ -44,7 +44,7 @@ export const convertPageBreakAliases = (original: {
     default:
       return original;
   }
-};
+}
 
 export const forcedBreakValues: { [key: string]: boolean | null } = {
   page: true,
@@ -60,8 +60,9 @@ export const forcedBreakValues: { [key: string]: boolean | null } = {
  * Returns if the value is one of the forced break values.
  * @param value The break value to be judged. Treats null as 'auto'.
  */
-export const isForcedBreakValue = (value: string | null): boolean =>
-  !!forcedBreakValues[value];
+export function isForcedBreakValue(value: string | null): boolean {
+  return !!forcedBreakValues[value];
+}
 
 export const avoidBreakValues: { [key: string]: boolean | null } = {
   avoid: true,
@@ -74,8 +75,9 @@ export const avoidBreakValues: { [key: string]: boolean | null } = {
  * Returns if the value is one of the avoid break values.
  * @param value The break value to be judged. Treats null as 'auto'.
  */
-export const isAvoidBreakValue = (value: string | null): boolean =>
-  !!avoidBreakValues[value];
+export function isAvoidBreakValue(value: string | null): boolean {
+  return !!avoidBreakValues[value];
+}
 
 /**
  * Resolves the effective break value given two break values at a single break
@@ -93,10 +95,10 @@ export const isAvoidBreakValue = (value: string | null): boolean =>
  * @param second The break value specified on the latter element. null means
  *     'auto' (not specified)
  */
-export const resolveEffectiveBreakValue = (
+export function resolveEffectiveBreakValue(
   first: string | null,
   second: string | null
-): string | null => {
+): string | null {
   if (!first) {
     return second;
   } else if (!second) {
@@ -129,11 +131,9 @@ export const resolveEffectiveBreakValue = (
       return second;
     }
   }
-};
+}
 
-export const breakValueToStartSideValue = (
-  breakValue: string | null
-): string => {
+export function breakValueToStartSideValue(breakValue: string | null): string {
   switch (breakValue) {
     case "left":
     case "right":
@@ -143,11 +143,11 @@ export const breakValueToStartSideValue = (
     default:
       return "any";
   }
-};
+}
 
-export const startSideValueToBreakValue = (
+export function startSideValueToBreakValue(
   startSideValue: string
-): string | null => {
+): string | null {
   switch (startSideValue) {
     case "left":
     case "right":
@@ -157,6 +157,6 @@ export const startSideValueToBreakValue = (
     default:
       return null;
   }
-};
+}
 
 Plugin.plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

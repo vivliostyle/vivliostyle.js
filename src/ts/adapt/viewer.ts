@@ -1219,9 +1219,9 @@ class RenderingCanceledError extends Error {
   }
 }
 
-export const maybeParse = (cmd: any): Base.JSON => {
+export function maybeParse(cmd: any): Base.JSON {
   if (typeof cmd == "string") {
     return Base.stringToJSON(cmd);
   }
   return cmd;
-};
+}

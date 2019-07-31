@@ -17,10 +17,11 @@
  *
  * @fileoverview MathUtil - Math utilities
  */
-export const mean = (array: number[]): number =>
-  array.reduce((prev, curr) => prev + curr, 0) / array.length;
+export function mean(array: number[]): number {
+  return array.reduce((prev, curr) => prev + curr, 0) / array.length;
+}
 
-export const variance = (array: number[]): number => {
+export function variance(array: number[]): number {
   const meanValue = mean(array);
   return mean(
     array.map(x => {
@@ -28,4 +29,4 @@ export const variance = (array: number[]): number => {
       return d * d;
     })
   );
-};
+}

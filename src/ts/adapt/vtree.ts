@@ -91,10 +91,10 @@ export const actions = {
   }
 };
 
-export const makeListener = (
+export function makeListener(
   refs: Element[],
   action: string
-): EventListener | null => {
+): EventListener | null {
   const actionFn = actions[action];
   if (actionFn) {
     return () => {
@@ -106,7 +106,7 @@ export const makeListener = (
     };
   }
   return null;
-};
+}
 
 export class Page extends Base.SimpleEventTarget {
   private static AUTO_PAGE_WIDTH_ATTRIBUTE: string =
@@ -275,9 +275,9 @@ export type Whitespace = ViewTree.Whitespace;
  * Resolves Whitespace value from a value of 'white-space' property
  * @param whitespace The value of 'white-space' property
  */
-export const whitespaceFromPropertyValue = (
+export function whitespaceFromPropertyValue(
   whitespace: string
-): Whitespace | null => {
+): Whitespace | null {
   switch (whitespace) {
     case "normal":
     case "nowrap":
@@ -290,9 +290,9 @@ export const whitespaceFromPropertyValue = (
     default:
       return null;
   }
-};
+}
 
-export const canIgnore = (node: Node, whitespace: Whitespace): boolean => {
+export function canIgnore(node: Node, whitespace: Whitespace): boolean {
   if (node.nodeType == 1) {
     return false;
   }
@@ -306,7 +306,7 @@ export const canIgnore = (node: Node, whitespace: Whitespace): boolean => {
       return text.length == 0;
   }
   throw new Error(`Unexpected whitespace: ${whitespace}`);
-};
+}
 
 export class Flow {
   forcedBreakOffsets = [] as number[];
@@ -349,15 +349,19 @@ export class FlowChunk {
 
 export type ClientRect = ViewTree.ClientRect;
 
-export const clientrectIncreasingTop = (
+export function clientrectIncreasingTop(
   r1: ClientRect,
   r2: ClientRect
-): number => r1.top - r2.top;
+): number {
+  return r1.top - r2.top;
+}
 
-export const clientrectDecreasingRight = (
+export function clientrectDecreasingRight(
   r1: ClientRect,
   r2: ClientRect
-): number => r2.right - r1.right;
+): number {
+  return r2.right - r1.right;
+}
 
 /**
  * Interface to read the position assigned to the elements and ranges by the
@@ -375,24 +379,24 @@ export type LayoutContext = ViewTree.LayoutContext;
  */
 export type FormattingContext = ViewTree.FormattingContext;
 
-export const eachAncestorFormattingContext = (
+export function eachAncestorFormattingContext(
   nodeContext: NodeContext,
   callback: (p1: FormattingContext) => any
-) => {
+) {
   if (!nodeContext) {
     return;
   }
   for (let fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
     callback(fc);
   }
-};
+}
 
 export type NodePositionStep = ViewTree.NodePositionStep;
 
-export const isSameNodePositionStep = (
+export function isSameNodePositionStep(
   nps1: NodePositionStep,
   nps2: NodePositionStep
-): boolean => {
+): boolean {
   if (nps1 === nps2) {
     return true;
   }
@@ -406,14 +410,14 @@ export const isSameNodePositionStep = (
     isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
     isSameNodePositionStep(nps1.shadowSibling, nps2.shadowSibling)
   );
-};
+}
 
 export type NodePosition = ViewTree.NodePosition;
 
-export const isSameNodePosition = (
+export function isSameNodePosition(
   np1: NodePosition | null,
   np2: NodePosition | null
-): boolean => {
+): boolean {
   if (np1 === np2) {
     return true;
   }
@@ -433,9 +437,9 @@ export const isSameNodePosition = (
     }
   }
   return true;
-};
+}
 
-export const newNodePositionFromNode = (node: Node): NodePosition => {
+export function newNodePositionFromNode(node: Node): NodePosition {
   const step: NodePositionStep = {
     node,
     shadowType: ShadowType.NONE,
@@ -451,12 +455,12 @@ export const newNodePositionFromNode = (node: Node): NodePosition => {
     after: false,
     preprocessedTextContent: null
   };
-};
+}
 
-export const newNodePositionFromNodeContext = (
+export function newNodePositionFromNodeContext(
   nodeContext: ViewTree.NodeContext,
   initialFragmentIndex: number | null
-): NodePosition => {
+): NodePosition {
   const step: NodePositionStep = {
     node: nodeContext.sourceNode,
     shadowType: ShadowType.NONE,
@@ -475,12 +479,12 @@ export const newNodePositionFromNodeContext = (
     after: false,
     preprocessedTextContent: nodeContext.preprocessedTextContent
   };
-};
+}
 
-export const makeNodeContextFromNodePositionStep = (
+export function makeNodeContextFromNodePositionStep(
   step: NodePositionStep,
   parent: ViewTree.NodeContext
-): NodeContext => {
+): NodeContext {
   const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
   nodeContext.shadowType = step.shadowType;
   nodeContext.shadowContext = step.shadowContext;
@@ -491,7 +495,7 @@ export const makeNodeContextFromNodePositionStep = (
   nodeContext.formattingContext = step.formattingContext;
   nodeContext.fragmentIndex = step.fragmentIndex + 1;
   return nodeContext;
-};
+}
 
 export const ShadowType = ViewTree.ShadowType;
 export type ShadowType = ViewTree.ShadowType;
@@ -529,10 +533,12 @@ export class ShadowContext implements ViewTree.ShadowContext {
   }
 }
 
-export const isSameShadowContext = (
+export function isSameShadowContext(
   sc1: ShadowContext,
   sc2: ShadowContext
-): boolean => sc1 === sc2 || (!!sc1 && !!sc2 && sc1.equals(sc2));
+): boolean {
+  return sc1 === sc2 || (!!sc1 && !!sc2 && sc1.equals(sc2));
+}
 
 /**
  * Information about :first-letter or :first-line pseudoelements
@@ -1313,8 +1319,11 @@ export class ContentPropertyHandler extends Css.Visitor {
   }
 }
 
-export const nonTrivialContent = (val: Css.Val): boolean =>
-  val != null &&
-  val !== Css.ident.normal &&
-  val !== Css.ident.none &&
-  val !== Css.ident.inherit;
+export function nonTrivialContent(val: Css.Val): boolean {
+  return (
+    val != null &&
+    val !== Css.ident.normal &&
+    val !== Css.ident.none &&
+    val !== Css.ident.inherit
+  );
+}

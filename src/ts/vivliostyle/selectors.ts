@@ -39,8 +39,8 @@ export const clearFragmentIndices =
   Matchers.NthFragmentMatcher.clearFragmentIndices;
 
 // FIXME: When importing layoututil module statically, it causes a circular dependency.
-let LayoutUtil: typeof import("./layoututil");
-import("./layoututil").then(it => {
+let LayoutUtil: typeof import("../vivliostyle/layoututil");
+import("../vivliostyle/layoututil").then(it => {
   LayoutUtil = it;
 });
 
@@ -262,18 +262,19 @@ function processAfterIfContinuesOfNodeContext(
     });
 }
 
-export const processAfterIfContinues = (
+export function processAfterIfContinues(
   result: Task.Result<ViewTree.NodeContext>,
   column: Layout.Column
-): Task.Result<ViewTree.NodeContext> =>
-  result.thenAsync(nodeContext =>
+): Task.Result<ViewTree.NodeContext> {
+  return result.thenAsync(nodeContext =>
     processAfterIfContinuesOfNodeContext(nodeContext, column)
   );
+}
 
-export const processAfterIfContinuesOfAncestors = (
+export function processAfterIfContinuesOfAncestors(
   nodeContext: ViewTree.NodeContext,
   column: Layout.Column
-): Task.Result<boolean> => {
+): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame(
     "processAfterIfContinuesOfAncestors"
   );
@@ -292,13 +293,13 @@ export const processAfterIfContinuesOfAncestors = (
       frame.finish(true);
     });
   return frame.result();
-};
+}
 
-export const calculatePseudoElementHeight = (
+export function calculatePseudoElementHeight(
   nodeContext: ViewTree.NodeContext,
   column: Layout.Column,
   pseudoElement: Element
-): number => {
+): number {
   const parentNode = nodeContext.viewNode as Element;
   parentNode.appendChild(pseudoElement);
   const height = LayoutHelper.getElementHeight(
@@ -308,4 +309,4 @@ export const calculatePseudoElementHeight = (
   );
   parentNode.removeChild(pseudoElement);
   return height;
-};
+}

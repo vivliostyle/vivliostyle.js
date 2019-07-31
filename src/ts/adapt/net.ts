@@ -38,13 +38,13 @@ export enum XMLHttpRequestResponseType {
 
 export type Response = Net.Response;
 
-export const ajax = (
+export function ajax(
   url: string,
   opt_type?: XMLHttpRequestResponseType,
   opt_method?: string,
   opt_data?: string,
   opt_contentType?: string
-): Task.Result<Response> => {
+): Task.Result<Response> {
   const frame: Task.Frame<Response> = Task.newFrame("ajax");
   const request = new XMLHttpRequest();
   const continuation = frame.suspend(request);
@@ -142,15 +142,15 @@ export const ajax = (
     continuation.schedule(response);
   }
   return frame.result();
-};
+}
 
 /**
  * @return Blob
  */
-export const makeBlob = (
+export function makeBlob(
   parts: (string | Blob | ArrayBuffer | ArrayBufferView)[],
   opt_type?: string
-): any => {
+): any {
   const type = opt_type || "application/octet-stream";
   const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
   if (builderCtr) {
@@ -161,12 +161,12 @@ export const makeBlob = (
     return builder.getBlob(type);
   }
   return new Blob(parts, { type });
-};
+}
 
 /**
  * @return Task.Result.<ArrayBuffer>
  */
-export const readBlob = (blob: Blob): any => {
+export function readBlob(blob: Blob): any {
   const frame: Task.Frame<ArrayBuffer> = Task.newFrame("readBlob");
   const fileReader = new FileReader();
   const continuation = frame.suspend(fileReader);
@@ -179,17 +179,18 @@ export const readBlob = (blob: Blob): any => {
   );
   fileReader.readAsArrayBuffer(blob);
   return frame.result();
-};
+}
 
-export const revokeObjectURL = (url: string) => {
+export function revokeObjectURL(url: string) {
   (window["URL"] || window["webkitURL"]).revokeObjectURL(url);
-};
+}
 
 /**
  * @return url
  */
-export const createObjectURL = (blob: Blob): string =>
-  (window["URL"] || window["webkitURL"]).createObjectURL(blob);
+export function createObjectURL(blob: Blob): string {
+  return (window["URL"] || window["webkitURL"]).createObjectURL(blob);
+}
 
 /**
  * @template Resource
@@ -299,13 +300,14 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
 
 export type JSONStore = ResourceStore<Base.JSON>;
 
-export const parseJSONResource = (
+export function parseJSONResource(
   response: Response,
   store: JSONStore
-): Task.Result<Base.JSON> => {
+): Task.Result<Base.JSON> {
   const text = response.responseText;
   return Task.newResult(text ? Base.stringToJSON(text) : null);
-};
+}
 
-export const newJSONStore = (): JSONStore =>
-  new ResourceStore(parseJSONResource, XMLHttpRequestResponseType.TEXT);
+export function newJSONStore(): JSONStore {
+  return new ResourceStore(parseJSONResource, XMLHttpRequestResponseType.TEXT);
+}

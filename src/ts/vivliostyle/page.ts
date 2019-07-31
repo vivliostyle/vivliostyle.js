@@ -33,9 +33,9 @@ import * as Sizing from "../vivliostyle/sizing";
 /**
  * Resolve page progression direction from writing-mode and direction.
  */
-export const resolvePageProgression = (
+export function resolvePageProgression(
   style: CssCasc.ElementStyle
-): Constants.PageProgression => {
+): Constants.PageProgression {
   let writingMode = style["writing-mode"];
   writingMode = writingMode && writingMode.value;
   let direction = style["direction"];
@@ -48,7 +48,7 @@ export const resolvePageProgression = (
   } else {
     return Constants.PageProgression.RTL;
   }
-};
+}
 export type PageSize = {
   width: Css.Numeric;
   height: Css.Numeric;
@@ -120,9 +120,9 @@ export type PageSizeAndBleed = {
   bleedOffset: Css.Numeric;
 };
 
-export const resolvePageSizeAndBleed = (style: {
+export function resolvePageSizeAndBleed(style: {
   [key: string]: CssCasc.CascadeValue;
-}): PageSizeAndBleed => {
+}): PageSizeAndBleed {
   // default value (fit to viewport, no bleed)
   const pageSizeAndBleed: PageSizeAndBleed = {
     width: Css.fullWidth,
@@ -192,7 +192,7 @@ export const resolvePageSizeAndBleed = (style: {
     pageSizeAndBleed.bleed = bleed.value as Css.Numeric;
   }
   return pageSizeAndBleed;
-};
+}
 
 export type EvaluatedPageSizeAndBleed = {
   pageWidth: number;
@@ -206,10 +206,10 @@ export type EvaluatedPageSizeAndBleed = {
  * Evaluate actual page width, height and bleed from style specified in page
  * context.
  */
-export const evaluatePageSizeAndBleed = (
+export function evaluatePageSizeAndBleed(
   pageSizeAndBleed: PageSizeAndBleed,
   context: Exprs.Context
-): EvaluatedPageSizeAndBleed => {
+): EvaluatedPageSizeAndBleed {
   const evaluated = {} as EvaluatedPageSizeAndBleed;
   const bleed =
     pageSizeAndBleed.bleed.num *
@@ -251,40 +251,40 @@ export const evaluatePageSizeAndBleed = (
   evaluated.bleedOffset = bleedOffset;
   evaluated.cropOffset = cropOffset;
   return evaluated;
-};
+}
 
 /**
  * Create an 'svg' element for a printer mark.
  */
-export const createPrinterMarkSvg = (
+export function createPrinterMarkSvg(
   doc: Document,
   width: number,
   height: number
-): Element => {
+): Element {
   const mark = doc.createElementNS(Base.NS.SVG, "svg");
   mark.setAttribute("width", width);
   mark.setAttribute("height", height);
   mark.style.position = "absolute";
   return mark;
-};
+}
 
 /**
  * Create an SVG element for a printer mark line.
  * @param elementType Specifies which type of element to create. Default value
  *     is "polyline".
  */
-export const createPrinterMarkElement = (
+export function createPrinterMarkElement(
   doc: Document,
   lineWidth: number,
   elementType?: string
-): Element => {
+): Element {
   elementType = elementType || "polyline";
   const line = doc.createElementNS(Base.NS.SVG, elementType);
   line.setAttribute("stroke", "black");
   line.setAttribute("stroke-width", lineWidth);
   line.setAttribute("fill", "none");
   return line;
-};
+}
 
 /**
  * Position of a corner mark
@@ -300,14 +300,14 @@ export enum CornerMarkPosition {
 /**
  * Create a corner mark.
  */
-export const createCornerMark = (
+export function createCornerMark(
   doc: Document,
   position: CornerMarkPosition,
   lineWidth: number,
   cropMarkLineLength: number,
   bleed: number,
   offset: number
-): Element => {
+): Element {
   let bleedMarkLineLength = cropMarkLineLength;
 
   // bleed mark line should be longer than bleed + 2mm
@@ -351,7 +351,7 @@ export const createCornerMark = (
     (mark as any).style[side] = `${offset}px`;
   });
   return mark;
-};
+}
 
 /**
  * Position of a cross mark
@@ -367,13 +367,13 @@ export enum CrossMarkPosition {
 /**
  * Create a cross mark.
  */
-export const createCrossMark = (
+export function createCrossMark(
   doc: Document,
   position: CrossMarkPosition,
   lineWidth: number,
   lineLength: number,
   offset: number
-): Element => {
+): Element {
   const longLineLength = lineLength * 2;
   let width;
   let height;
@@ -427,17 +427,17 @@ export const createCrossMark = (
     }
   });
   return mark;
-};
+}
 
 /**
  * Add printer marks to the page.
  */
-export const addPrinterMarks = (
+export function addPrinterMarks(
   cascadedPageStyle: CssCasc.ElementStyle,
   evaluatedPageSizeAndBleed: EvaluatedPageSizeAndBleed,
   page: Vtree.Page,
   context: Exprs.Context
-) => {
+) {
   let crop = false;
   let cross = false;
   const marks = cascadedPageStyle["marks"];
@@ -505,7 +505,7 @@ export const addPrinterMarks = (
       container.appendChild(mark);
     });
   }
-};
+}
 
 /**
  * Properties transfered from the PageRuleMaster to the PageRulePartition
@@ -1070,13 +1070,13 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
     // prepare parameters
     const scope = this.pageBox.scope;
     const containers: {
-      [key in MarginBoxPositionAlongVariableDimension]?: Vtree.Container
+      [key in MarginBoxPositionAlongVariableDimension]?: Vtree.Container;
     } = {};
     const boxInstances: {
-      [key in MarginBoxPositionAlongVariableDimension]?: PageMarginBoxPartitionInstance
+      [key in MarginBoxPositionAlongVariableDimension]?: PageMarginBoxPartitionInstance;
     } = {};
     const boxParams: {
-      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam
+      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam;
     } = {};
     for (const name in marginBoxContainers) {
       const boxInfo = pageMarginBoxes[name];
@@ -1110,7 +1110,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
 
     // Check max-width/max-height
     const maxOuterSizes: {
-      [key in MarginBoxPositionAlongVariableDimension]?: number
+      [key in MarginBoxPositionAlongVariableDimension]?: number;
     } = {};
     Object.keys(containers).forEach(n => {
       const name = n as MarginBoxPositionAlongVariableDimension;
@@ -1148,7 +1148,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
 
     // Check min-width/min-height
     const minOuterSizes: {
-      [key in MarginBoxPositionAlongVariableDimension]?: number
+      [key in MarginBoxPositionAlongVariableDimension]?: number;
     } = {};
     Object.keys(containers).forEach(n => {
       const name = n as MarginBoxPositionAlongVariableDimension;
@@ -1220,7 +1220,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
 
   private getSizesOfMarginBoxesAlongVariableDimension(
     boxParams: {
-      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam
+      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam;
     },
     availableSize: number
   ): { [key in MarginBoxPositionAlongVariableDimension]?: number } {
@@ -1230,7 +1230,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
       boxParams[MarginBoxPositionAlongVariableDimension.CENTER];
     const endBoxParam = boxParams[MarginBoxPositionAlongVariableDimension.END];
     const sizes: {
-      [key in MarginBoxPositionAlongVariableDimension]?: number
+      [key in MarginBoxPositionAlongVariableDimension]?: number;
     } = {};
     if (!centerBoxParam) {
       const startEndSizes = this.distributeAutoMarginBoxSizes(
@@ -2589,13 +2589,13 @@ export class ApplyPageRuleAction extends CssCasc.ApplyRuleAction {
  * considering specificity. Intended to be used in place of
  * CssCasc.mergeIn, which is for element styles.
  */
-export const mergeInPageRule = (
+export function mergeInPageRule(
   context: Exprs.Context,
   target: CssCasc.ElementStyle,
   style: CssCasc.ElementStyle,
   specificity: number,
   cascadeInstance: CssCasc.CascadeInstance
-) => {
+) {
   CssCasc.mergeIn(context, target, style, specificity, null, null, null);
   const marginBoxes = style[marginBoxesKey];
   if (marginBoxes) {
@@ -2619,7 +2619,7 @@ export const mergeInPageRule = (
       }
     }
   }
-};
+}
 
 /**
  * ParserHandler for `@page` rules. It handles properties specified with page
