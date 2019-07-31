@@ -2915,9 +2915,9 @@ export class CascadeInstance {
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
       const counters: { [key: string]: number[] } = {};
-      Object.keys(this.counters).forEach(function(name) {
+      Object.keys(this.counters).forEach(name => {
         counters[name] = Array.from(this.counters[name]);
-      }, this);
+      });
       this.counterListener.countersOfId(id, counters);
     }
     const pseudos = getStyleMap(this.currentStyle, "_pseudos");

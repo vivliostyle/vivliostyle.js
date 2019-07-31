@@ -526,7 +526,7 @@ export class CounterStore {
     const ids = Object.keys(this.currentPage.elementsById);
     if (ids.length > 0) {
       const currentPageCounters = cloneCounterValues(this.currentPageCounters);
-      ids.forEach(function(id) {
+      ids.forEach(id => {
         this.pageCountersById[id] = currentPageCounters;
         const oldPageIndex = this.pageIndicesById[id];
         if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
@@ -544,7 +544,7 @@ export class CounterStore {
           }
         }
         this.pageIndicesById[id] = { spineIndex, pageIndex };
-      }, this);
+      });
     }
     const prevPageCounters = this.previousPageCounters;
     let ref;
@@ -584,12 +584,12 @@ export class CounterStore {
   }[] {
     let refs = [];
     const ids = Object.keys(page.elementsById);
-    ids.forEach(function(id) {
+    ids.forEach(id => {
       const idRefs = this.unresolvedReferences[id];
       if (idRefs) {
         refs = refs.concat(idRefs);
       }
-    }, this);
+    });
     refs.sort(
       (r1, r2) => r1.spineIndex - r2.spineIndex || r1.pageIndex - r2.pageIndex
     );
@@ -660,12 +660,12 @@ export class CounterStore {
   finishLastPage(viewport: Vgen.Viewport) {
     const nodes = viewport.root.querySelectorAll(`[${PAGES_COUNTER_ATTR}]`);
     const pages = this.currentPageCounters["page"][0];
-    Array.from(nodes).forEach(function(node) {
+    Array.from(nodes).forEach(node => {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
       const i = this.pagesCounterExprs.findIndex(o => o.expr.key === key);
       Asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
-    }, this);
+    });
   }
 
   createLayoutConstraint(pageIndex: number): Layout.LayoutConstraint {

@@ -308,7 +308,7 @@ export class StyleInstance extends Exprs.Context
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = self.style.pageProps;
-    Object.keys(pageProps).forEach(function(selector) {
+    Object.keys(pageProps).forEach(selector => {
       const pageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
         Pages.resolvePageSizeAndBleed(pageProps[selector] as any),
         this
@@ -317,7 +317,7 @@ export class StyleInstance extends Exprs.Context
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
         height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
       };
-    }, this);
+    });
     return frame.result();
   }
 

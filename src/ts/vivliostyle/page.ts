@@ -1070,13 +1070,13 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
     // prepare parameters
     const scope = this.pageBox.scope;
     const containers: {
-      [key in MarginBoxPositionAlongVariableDimension]?: Vtree.Container;
+      [key in MarginBoxPositionAlongVariableDimension]?: Vtree.Container
     } = {};
     const boxInstances: {
-      [key in MarginBoxPositionAlongVariableDimension]?: PageMarginBoxPartitionInstance;
+      [key in MarginBoxPositionAlongVariableDimension]?: PageMarginBoxPartitionInstance
     } = {};
     const boxParams: {
-      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam;
+      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam
     } = {};
     for (const name in marginBoxContainers) {
       const boxInfo = pageMarginBoxes[name];
@@ -1110,7 +1110,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
 
     // Check max-width/max-height
     const maxOuterSizes: {
-      [key in MarginBoxPositionAlongVariableDimension]?: number;
+      [key in MarginBoxPositionAlongVariableDimension]?: number
     } = {};
     Object.keys(containers).forEach(n => {
       const name = n as MarginBoxPositionAlongVariableDimension;
@@ -1148,7 +1148,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
 
     // Check min-width/min-height
     const minOuterSizes: {
-      [key in MarginBoxPositionAlongVariableDimension]?: number;
+      [key in MarginBoxPositionAlongVariableDimension]?: number
     } = {};
     Object.keys(containers).forEach(n => {
       const name = n as MarginBoxPositionAlongVariableDimension;
@@ -1220,7 +1220,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
 
   private getSizesOfMarginBoxesAlongVariableDimension(
     boxParams: {
-      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam;
+      [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam
     },
     availableSize: number
   ): { [key in MarginBoxPositionAlongVariableDimension]?: number } {
@@ -1230,7 +1230,7 @@ export class PageRuleMasterInstance extends Pm.PageMasterInstance<
       boxParams[MarginBoxPositionAlongVariableDimension.CENTER];
     const endBoxParam = boxParams[MarginBoxPositionAlongVariableDimension.END];
     const sizes: {
-      [key in MarginBoxPositionAlongVariableDimension]?: number;
+      [key in MarginBoxPositionAlongVariableDimension]?: number
     } = {};
     if (!centerBoxParam) {
       const startEndSizes = this.distributeAutoMarginBoxSizes(
@@ -2771,7 +2771,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
       });
     } else if (name === "size") {
       const noPageSelectorProps = pageProps[""];
-      this.currentPageSelectors.forEach(function(s) {
+      this.currentPageSelectors.forEach(s => {
         // update specificity to reflect the specificity of the selector
         let result = new CssCasc.CascadeValue(
           cascVal.value,
@@ -2801,7 +2801,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
             : result;
           CssCasc.setProp(props, name, result);
         }
-      }, this);
+      });
     }
   }
 

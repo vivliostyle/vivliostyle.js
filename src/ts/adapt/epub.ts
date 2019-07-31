@@ -1071,7 +1071,7 @@ export class OPFDoc {
       "",
       new DOMParser().parseFromString("<spine></spine>", "text/xml")
     ));
-    params.forEach(function(param) {
+    params.forEach(param => {
       const item = new OPFItem();
       item.initWithParam(param);
       Asserts.assert(item.id);
@@ -1086,7 +1086,7 @@ export class OPFDoc {
       }
       this.itemMapByPath[path] = item;
       this.items.push(item);
-    }, this);
+    });
     if (doc) {
       return this.store.addDocument(params[0].url, doc);
     } else {

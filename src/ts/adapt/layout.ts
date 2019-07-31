@@ -3791,13 +3791,13 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
   getContentInlineSize(): number {
     return Math.max.apply(
       null,
-      this.rootViewNodes.map(function(r, i) {
+      this.rootViewNodes.map((r, i) => {
         const box = this.clientLayout.getElementClientRect(r);
         const margin = this.floatMargins[i];
         return this.vertical
           ? margin.top + box.height + margin.bottom
           : margin.left + box.width + margin.right;
-      }, this)
+      })
     );
   }
 }

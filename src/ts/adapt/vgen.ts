@@ -2244,9 +2244,9 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   getRangeClientRects(range: Range): ClientRect[] {
     const rects = range["getClientRects"]();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
-    return Array.from(rects).map(function(rect) {
-      return this.subtractOffsets(rect, layoutBoxRect);
-    }, this);
+    return Array.from(rects).map(rect =>
+      this.subtractOffsets(rect, layoutBoxRect)
+    );
   }
 
   /**

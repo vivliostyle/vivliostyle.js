@@ -452,15 +452,15 @@ export class TableFormattingContext
   }
 
   updateCellSizes(clientLayout: ViewTree.ClientLayout) {
-    this.rows.forEach(function(row) {
-      row.cells.forEach(function(cell) {
+    this.rows.forEach(row => {
+      row.cells.forEach(cell => {
         const rect = clientLayout.getElementClientRect(
           cell.viewElement as Element
         );
         cell.viewElement = null;
         cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
-      }, this);
-    }, this);
+      });
+    });
   }
 
   /**
@@ -992,7 +992,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     let cont = Task.newResult(true);
     let spanningCellRowIndex = 0;
     const occupiedSlotIndices = [];
-    rowSpanningCellBreakPositions.forEach(function(rowCellBreakPositions) {
+    rowSpanningCellBreakPositions.forEach(rowCellBreakPositions => {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
         const rowNodeContext = Vtree.makeNodeContextFromNodePositionStep(
@@ -1015,7 +1015,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               columnIndex++;
             }
           }
-          rowCellBreakPositions.forEach(function(cellBreakPosition) {
+          rowCellBreakPositions.forEach(cellBreakPosition => {
             cont1 = cont1.thenAsync(() => {
               const cell = cellBreakPosition.cell;
               addDummyCellUntil(cell.anchorSlot.columnIndex);
@@ -1052,7 +1052,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
                   });
                 });
             });
-          }, this);
+          });
           return cont1.thenAsync(() => {
             addDummyCellUntil(formattingContext.getColumnCount());
             spanningCellRowIndex++;
@@ -1060,7 +1060,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           });
         });
       });
-    }, this);
+    });
     cont.then(() => {
       layoutContext
         .setCurrent(currentRow, true, state.atUnforcedBreak)
@@ -1496,35 +1496,30 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       "TableLayoutProcessor.doInitialLayout"
     );
     const initialNodeContext = nodeContext.copy();
-    this.layoutEntireTable(nodeContext, column).then(
-      function(nodeContextAfter) {
-        const tableElement = nodeContextAfter.viewNode;
-        const tableBBox = column.clientLayout.getElementClientRect(
-          tableElement
+    this.layoutEntireTable(nodeContext, column).then(nodeContextAfter => {
+      const tableElement = nodeContextAfter.viewNode as Element;
+      const tableBBox = column.clientLayout.getElementClientRect(tableElement);
+      let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
+      edge +=
+        (column.vertical ? -1 : 1) *
+        BreakPosition.calculateOffset(
+          nodeContext,
+          column.collectElementsOffset()
+        ).current;
+      if (
+        !column.isOverflown(edge) &&
+        (!tableLayoutOption || !tableLayoutOption.calculateBreakPositionsInside)
+      ) {
+        column.breakPositions.push(
+          new EntireTableBreakPosition(initialNodeContext)
         );
-        let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
-        edge +=
-          (column.vertical ? -1 : 1) *
-          BreakPosition.calculateOffset(
-            nodeContext,
-            column.collectElementsOffset()
-          ).current;
-        if (
-          !column.isOverflown(edge) &&
-          (!tableLayoutOption ||
-            !tableLayoutOption.calculateBreakPositionsInside)
-        ) {
-          column.breakPositions.push(
-            new EntireTableBreakPosition(initialNodeContext)
-          );
-          frame.finish(nodeContextAfter);
-          return;
-        }
-        this.normalizeColGroups(formattingContext, tableElement, column);
-        formattingContext.updateCellSizes(column.clientLayout);
-        frame.finish(null);
-      }.bind(this)
-    );
+        frame.finish(nodeContextAfter);
+        return;
+      }
+      this.normalizeColGroups(formattingContext, tableElement, column);
+      formattingContext.updateCellSizes(column.clientLayout);
+      frame.finish(null);
+    });
     return frame.result();
   }
 

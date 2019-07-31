@@ -221,9 +221,9 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
   }
 
   addContinuations(continuations: PageFloatContinuation[]) {
-    continuations.forEach(function(c) {
+    continuations.forEach(c => {
       this.continuations.push(c);
-    }, this);
+    });
   }
 
   getFlowName(): string {
@@ -703,7 +703,7 @@ export class PageFloatLayoutContext
         this.floatsDeferredToNext.splice(i, 1);
       }
     }
-    this.floatsDeferredFromPrevious.forEach(function(continuation) {
+    this.floatsDeferredFromPrevious.forEach(continuation => {
       if (
         this.floatsDeferredToNext.findIndex(c => continuation.equals(c)) >= 0
       ) {
@@ -713,7 +713,7 @@ export class PageFloatLayoutContext
         return;
       }
       this.floatsDeferredToNext.push(continuation);
-    }, this);
+    });
   }
 
   hasSameContainerAs(other: PageFloatLayoutContext): boolean {
@@ -730,7 +730,7 @@ export class PageFloatLayoutContext
       return;
     }
     if (this.container) {
-      this.children.forEach(function(child) {
+      this.children.forEach(child => {
         // Since the same container element is shared by a region page float
         // layout context and a column page float layout context in a single
         // column region, view elements of float fragments of the child (column)
@@ -743,16 +743,16 @@ export class PageFloatLayoutContext
             }
           });
         }
-      }, this);
+      });
       this.container.clear();
     }
     this.children.forEach(child => {
       child.layoutConstraints.splice(0);
     });
     this.children.splice(0);
-    Object.keys(this.floatAnchors).forEach(function(k) {
+    Object.keys(this.floatAnchors).forEach(k => {
       delete this.floatAnchors[k];
-    }, this);
+    });
   }
 
   detachChildren(): PageFloatLayoutContext[] {
@@ -769,10 +769,10 @@ export class PageFloatLayoutContext
   }
 
   attachChildren(children: PageFloatLayoutContext[]) {
-    children.forEach(function(child) {
+    children.forEach(child => {
       this.children.push(child);
       child.reattachFloatFragments();
-    }, this);
+    });
   }
 
   isInvalidated() {
@@ -847,9 +847,9 @@ export class PageFloatLayoutContext
       this.getParent(floatReference).restoreStashedFragments(floatReference);
       return;
     }
-    this.stashedFloatFragments.forEach(function(stashed) {
+    this.stashedFloatFragments.forEach(stashed => {
       this.addPageFloatFragment(stashed, true);
-    }, this);
+    });
     this.stashedFloatFragments.splice(0);
   }
 
@@ -1449,7 +1449,7 @@ export class PageFloatLayoutContext
           hasPrecedingFragmentInParents(parent, side))
       );
     }
-    logicalSides.forEach(function(side) {
+    logicalSides.forEach(side => {
       switch (side) {
         case "block-start":
         case "inline-start":
@@ -1462,7 +1462,7 @@ export class PageFloatLayoutContext
         default:
           throw new Error(`Unexpected side: ${side}`);
       }
-    }, this);
+    });
     return result;
   }
 

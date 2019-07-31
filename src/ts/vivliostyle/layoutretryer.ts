@@ -46,25 +46,23 @@ export abstract class AbstractLayoutRetryer {
     );
     this.saveState(nodeContext, column);
     const mode = this.resolveLayoutMode(nodeContext);
-    mode.doLayout(nodeContext, column).then(
-      function(positionAfter) {
-        let accepted = mode.accept(positionAfter, column);
-        accepted = mode.postLayout(
-          positionAfter,
-          this.initialPosition,
-          column,
-          accepted
-        );
-        if (accepted) {
-          frame.finish(positionAfter);
-        } else {
-          Asserts.assert(this.initialPosition);
-          this.clearNodes(this.initialPosition);
-          this.restoreState(nodeContext, column);
-          this.tryLayout(this.initialPosition, column).thenFinish(frame);
-        }
-      }.bind(this)
-    );
+    mode.doLayout(nodeContext, column).then(positionAfter => {
+      let accepted = mode.accept(positionAfter, column);
+      accepted = mode.postLayout(
+        positionAfter,
+        this.initialPosition,
+        column,
+        accepted
+      );
+      if (accepted) {
+        frame.finish(positionAfter);
+      } else {
+        Asserts.assert(this.initialPosition);
+        this.clearNodes(this.initialPosition);
+        this.restoreState(nodeContext, column);
+        this.tryLayout(this.initialPosition, column).thenFinish(frame);
+      }
+    });
     return frame.result();
   }
 
