@@ -20,5 +20,4 @@ import { constants } from "./vivliostyle/constants";
 import { plugin } from "./vivliostyle/plugin";
 import { profile } from "./vivliostyle/profile";
 import { viewer } from "./vivliostyle/viewer";
-import { viewerapp } from "./vivliostyle/viewerapp";
-export default { constants, plugin, profile, viewer, viewerapp };
+export default { constants, plugin, profile, viewer };
