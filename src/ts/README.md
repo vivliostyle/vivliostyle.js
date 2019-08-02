@@ -1,8 +1,10 @@
-# Migration to TypeScript
+# Migration to TypeScript finished
 
-Vivliostyle.js is going to change its type check system from Google Closure Compiler to TypeScript. This is the working directory for migration to TypeScript.
+Vivliostyle.js changed its type check system from Google Closure Compiler to TypeScript.
 
-See also the [JS-to-TS migration](https://github.com/vivliostyle/vivliostyle.js/milestone/1) milestone.
+The pre-migration JS source code has been moved to the [old-js-src](https://github.com/vivliostyle/vivliostyle.js/tree/old-js-src) branch.
+
+About the migration work, see the [JS-to-TS migration](https://github.com/vivliostyle/vivliostyle.js/milestone/1) milestone.
 
 ### Code dependency graph
 
