@@ -275,7 +275,6 @@ module.exports = {
         ],
         // "wrap-regex": "error",
         "no-control-regex": "off",
-        "import/no-duplicates": "error",
-        "import/order": "error"
+        "import/order": "warn"
     }
 };
