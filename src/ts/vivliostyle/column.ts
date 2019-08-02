@@ -48,7 +48,7 @@ function getBlockSize(container: Vtree.Container): number {
   }
 }
 
-function setBlockSize(container: Vtree.Container, size) {
+function setBlockSize(container: Vtree.Container, size: number) {
   if (container.vertical) {
     container.width = size;
   } else {
@@ -180,7 +180,7 @@ export function canReduceContainerSize(
 export function reduceContainerSize(
   candidates: ColumnBalancingTrialResult[],
   container: Vtree.Container
-) {
+): void {
   const columns = candidates[candidates.length - 1].layoutResult.columns;
   const maxColumnBlockSize = Math.max.apply(
     null,

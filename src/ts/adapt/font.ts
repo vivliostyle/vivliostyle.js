@@ -48,7 +48,7 @@ export function makeFontTraitKey(properties: {
   return sb.toString();
 }
 
-export function fillDefaults(properties: { [key: string]: Css.Val }) {
+export function fillDefaults(properties: { [key: string]: Css.Val }): void {
   for (const prop in traitProps) {
     if (!properties[prop]) {
       properties[prop] = traitProps[prop];

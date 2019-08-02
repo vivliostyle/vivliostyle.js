@@ -142,7 +142,7 @@ export class Logger {
 /**
  * @param args
  */
-function argumentsToErrorInfo(args): ErrorInfo {
+function argumentsToErrorInfo(args: IArguments): ErrorInfo {
   const a = Array.from(args);
   let e = null;
   if (a[0] instanceof Error) {

@@ -22,7 +22,7 @@
  * Debug flag.
  */
 export let isDebug: boolean = false;
-export function setDebug(value: boolean) {
+export function setDebug(value: boolean): void {
   isDebug = value;
 }
 

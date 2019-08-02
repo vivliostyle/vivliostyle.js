@@ -126,7 +126,7 @@ export class BoxBreakPosition extends BreakPosition.AbstractBreakPosition
   }
 }
 
-export function validateCheckPoints(checkPoints: ViewTree.NodeContext[]) {
+export function validateCheckPoints(checkPoints: ViewTree.NodeContext[]): void {
   for (let i = 1; i < checkPoints.length; i++) {
     const cp0 = checkPoints[i - 1];
     const cp1 = checkPoints[i];
@@ -3410,7 +3410,7 @@ export function fixJustificationOnHyphen(
   insertAfter: boolean,
   node: Node,
   insertionPoint: Node
-) {
+): void {
   if (Base.checkSoftWrapOpportunityAfterHyphenBug(document.body)) {
     const hyphenChar = resolveHyphenateCharacter(nodeContext);
     const prevSibling = insertAfter ? node : node.previousSibling;

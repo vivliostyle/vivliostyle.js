@@ -1024,7 +1024,7 @@ function eachAncestorNodeContext(
     p1: RepetitiveElementsOwnerFormattingContext,
     p2: ViewTree.NodeContext
   ) => any
-) {
+): void {
   for (let nc = nodeContext; nc; nc = nc.parent) {
     const formattingContext = nc.formattingContext;
     if (
@@ -1040,7 +1040,7 @@ function eachAncestorNodeContext(
 export function appendHeaderToAncestors(
   nodeContext: ViewTree.NodeContext,
   column: Layout.Column
-) {
+): void {
   if (!nodeContext) {
     return;
   }
@@ -1060,8 +1060,8 @@ export function appendHeaderToAncestors(
 export function appendHeader(
   formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   nodeContext: ViewTree.NodeContext,
-  column
-) {
+  column: Layout.Column
+): Task.Result<boolean> {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
     const rootNodeContext = formattingContext.getRootNodeContext(nodeContext);
@@ -1080,8 +1080,8 @@ export function appendHeader(
 export function appendFooter(
   formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   nodeContext: ViewTree.NodeContext,
-  column
-) {
+  column: Layout.Column
+): Task.Result<boolean> {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
     if (!repetitiveElements.isSkipFooter) {

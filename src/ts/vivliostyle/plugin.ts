@@ -194,7 +194,7 @@ const hooks = {};
  * @param name Name of the hook.
  * @param fn Function to be registered to the hook.
  */
-export function registerHook(name: string, fn: (...p1) => any) {
+export function registerHook(name: string, fn: (...p1) => any): void {
   if (!HOOKS[name]) {
     Logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
   } else {
@@ -213,7 +213,7 @@ export function registerHook(name: string, fn: (...p1) => any) {
  * @param name Name of the hook.
  * @param fn Function to be removed from the hook.
  */
-export function removeHook(name: string, fn: (...p1) => any) {
+export function removeHook(name: string, fn: (...p1) => any): void {
   if (!HOOKS[name]) {
     Logging.logger.warn(new Error(`Ignoring unknown plugin hook '${name}'.`));
   } else {

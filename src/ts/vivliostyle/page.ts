@@ -437,7 +437,7 @@ export function addPrinterMarks(
   evaluatedPageSizeAndBleed: EvaluatedPageSizeAndBleed,
   page: Vtree.Page,
   context: Exprs.Context
-) {
+): void {
   let crop = false;
   let cross = false;
   const marks = cascadedPageStyle["marks"];
@@ -2595,7 +2595,7 @@ export function mergeInPageRule(
   style: CssCasc.ElementStyle,
   specificity: number,
   cascadeInstance: CssCasc.CascadeInstance
-) {
+): void {
   CssCasc.mergeIn(context, target, style, specificity, null, null, null);
   const marginBoxes = style[marginBoxesKey];
   if (marginBoxes) {

@@ -37,11 +37,11 @@ export let pinchDist: number = 0;
 export let currentPageProgression: Constants.PageProgression =
   Constants.PageProgression.LTR;
 
-export function sendCommand(cmd: Base.JSON) {
+export function sendCommand(cmd: Base.JSON): void {
   window["adapt_command"](cmd);
 }
 
-export function navigateToLeftPage() {
+export function navigateToLeftPage(): void {
   sendCommand({
     a: "moveTo",
     where:
@@ -51,7 +51,7 @@ export function navigateToLeftPage() {
   });
 }
 
-export function navigateToRightPage() {
+export function navigateToRightPage(): void {
   sendCommand({
     a: "moveTo",
     where:
@@ -202,7 +202,7 @@ export function touch(evt: TouchEvent): void {
   }
 }
 
-export function callback(msg: Base.JSON) {
+export function callback(msg: Base.JSON): void {
   switch (msg["t"]) {
     case "loaded": {
       const viewer = msg["viewer"];

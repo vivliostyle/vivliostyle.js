@@ -382,7 +382,7 @@ export type FormattingContext = ViewTree.FormattingContext;
 export function eachAncestorFormattingContext(
   nodeContext: NodeContext,
   callback: (p1: FormattingContext) => any
-) {
+): void {
   if (!nodeContext) {
     return;
   }

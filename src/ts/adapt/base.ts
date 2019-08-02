@@ -52,7 +52,7 @@ export function stripFragmentAndQuery(url: string): string {
  * Base URL relative to which URLs of resources are resolved.
  */
 export let baseURL = window.location.href;
-export function setBaseURL(value: string) {
+export function setBaseURL(value: string): void {
   baseURL = value;
 }
 
@@ -61,7 +61,7 @@ export function setBaseURL(value: string) {
  * user-agent.css are resolved.
  */
 export let resourceBaseURL = window.location.href;
-export function setResourceBaseURL(value: string) {
+export function setResourceBaseURL(value: string): void {
   resourceBaseURL = value;
 }
 

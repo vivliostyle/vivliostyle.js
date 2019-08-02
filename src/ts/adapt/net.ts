@@ -181,7 +181,7 @@ export function readBlob(blob: Blob): any {
   return frame.result();
 }
 
-export function revokeObjectURL(url: string) {
+export function revokeObjectURL(url: string): void {
   (window["URL"] || window["webkitURL"]).revokeObjectURL(url);
 }
 

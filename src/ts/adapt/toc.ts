@@ -296,7 +296,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
   }
 }
 
-export function toggleNodeExpansion(evt: Event) {
+export function toggleNodeExpansion(evt: Event): void {
   const elem = evt.target as Element;
   const open = elem.textContent == bulletClosed;
   elem.textContent = open ? bulletOpen : bulletClosed;

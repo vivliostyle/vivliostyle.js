@@ -112,7 +112,7 @@ export class Profiler {
   }
 }
 
-function noop() {}
+function noop(): void {}
 
 /**
  * Registers start/end timing of some event.
@@ -122,7 +122,11 @@ function noop() {}
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"
  */
-function registerTiming(name: string, startEnd: string, timestamp?: number) {
+function registerTiming(
+  name: string,
+  startEnd: string,
+  timestamp?: number
+): void {
   if (!timestamp) {
     timestamp = this.performanceInstance.now();
   }
@@ -153,7 +157,7 @@ function registerTiming(name: string, startEnd: string, timestamp?: number) {
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"
  */
-function registerStartTiming(name: string, timestamp?: number) {
+function registerStartTiming(name: string, timestamp?: number): void {
   this.registerTiming(name, "start", timestamp);
 }
 
@@ -164,7 +168,7 @@ function registerStartTiming(name: string, timestamp?: number) {
  * @param timestamp Used as the actual timestamp of the event if specified,
  *     instead of "now"
  */
-function registerEndTiming(name: string, timestamp?: number) {
+function registerEndTiming(name: string, timestamp?: number): void {
   this.registerTiming(name, "end", timestamp);
 }
 const fallbackPerformanceInstance = { now: Date.now } as Performance;

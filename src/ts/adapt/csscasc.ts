@@ -352,15 +352,15 @@ export const SPECIALS = {
   "fragment-selector-id": true
 };
 
-export function isSpecialName(name: string) {
+export function isSpecialName(name: string): boolean {
   return !!SPECIALS[name];
 }
 
-export function isMapName(name: string) {
+export function isMapName(name: string): boolean {
   return name.charAt(0) == "_";
 }
 
-export function isPropName(name: string) {
+export function isPropName(name: string): boolean {
   return name.charAt(0) != "_" && !SPECIALS[name];
 }
 
@@ -2067,7 +2067,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   }
 }
 
-export function roman(num: number) {
+export function roman(num: number): string {
   if (num <= 0 || num != Math.round(num) || num > 3999) {
     return "";
   }
@@ -2353,7 +2353,7 @@ export const fixed = {
   none: ""
 };
 
-export function additiveFormat(entries: any[], num: number) {
+export function additiveFormat(entries: any[], num: number): string {
   const max = entries[0] as number;
   if (num > max || num <= 0 || num != Math.round(num)) {
     return "";
@@ -2374,7 +2374,7 @@ export function additiveFormat(entries: any[], num: number) {
   return result;
 }
 
-export function expandAlphabet(str: string) {
+export function expandAlphabet(str: string): string[] | null {
   const arr = [];
   let i = 0;
   while (i < str.length) {
@@ -2392,7 +2392,7 @@ export function expandAlphabet(str: string) {
   return arr;
 }
 
-export function alphabeticFormat(alphabetStr: string, num: number) {
+export function alphabeticFormat(alphabetStr: string, num: number): string {
   if (num <= 0 || num != Math.round(num)) {
     return "";
   }
@@ -2424,7 +2424,10 @@ export const chineseTradInformal: ChineseNumbering = {
   negative: "\u8ca0"
 };
 
-export function chineseCounter(num: number, numbering: ChineseNumbering) {
+export function chineseCounter(
+  num: number,
+  numbering: ChineseNumbering
+): string {
   if (num > 9999 || num < -9999) {
     return `${num}`; // TODO: should be cjk-decimal
   }
@@ -3087,7 +3090,7 @@ export enum ParseState {
  * Cascade for base User Agent stylesheet.
  */
 export let uaBaseCascade: Cascade = null;
-export function setUABaseCascade(value: Cascade) {
+export function setUABaseCascade(value: Cascade): void {
   uaBaseCascade = value;
 }
 
@@ -3892,7 +3895,7 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
 export function forEachViewConditionalStyles(
   style: ElementStyle,
   callback: (p1: ElementStyle) => any
-) {
+): void {
   const viewConditionalStyles = getViewConditionalStyleMap(style);
   if (!viewConditionalStyles) {
     return;
@@ -3909,7 +3912,7 @@ export function mergeViewConditionalStyles(
   cascMap: { [key: string]: CascadeValue },
   context: Exprs.Context,
   style: ElementStyle
-) {
+): void {
   forEachViewConditionalStyles(style, viewConditionalStyles => {
     mergeStyle(cascMap, viewConditionalStyles, context);
   });
@@ -3992,7 +3995,7 @@ export function forEachStylesInRegion(
   regionIds: string[],
   isFootnote: boolean,
   callback: (p1: string, p2: ElementStyle) => any
-) {
+): void {
   const regions = getStyleMap(style, "_regions");
   if ((regionIds || isFootnote) && regions) {
     if (isFootnote) {
@@ -4016,7 +4019,7 @@ export function mergeStyle(
   to: { [key: string]: CascadeValue },
   from: ElementStyle,
   context: Exprs.Context
-) {
+): void {
   for (const property in from) {
     if (isPropName(property)) {
       const newVal = getProp(from, property);

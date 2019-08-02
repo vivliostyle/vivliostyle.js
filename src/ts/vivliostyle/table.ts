@@ -1317,7 +1317,7 @@ function getTableLayoutOption(
   return pair ? pair.tableLayoutOption : null;
 }
 
-function clearTableLayoutOptionCache(tableRootSourceNode: Node) {
+function clearTableLayoutOptionCache(tableRootSourceNode: Node): void {
   const i = tableLayoutOptionCache.findIndex(
     c => c.root === tableRootSourceNode
   );
@@ -1769,7 +1769,7 @@ function adjustCellHeight(
   cellFragment: TableCellFragment,
   formattingContext: TableFormattingContext,
   breakNodeContext: ViewTree.NodeContext
-) {
+): void {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (!repetitiveElements) {
     return;
@@ -2229,13 +2229,13 @@ export class TableRowLayoutConstraint
 const tableLayoutProcessor = new TableLayoutProcessor();
 
 function resolveFormattingContextHook(
-  nodeContext,
-  firstTime,
-  display,
-  position,
-  floatSide,
-  isRoot
-) {
+  nodeContext: Vtree.NodeContext,
+  firstTime: boolean,
+  display: Css.Ident,
+  position: Css.Ident,
+  floatSide: Css.Ident,
+  isRoot: boolean
+): TableFormattingContext | null {
   if (!firstTime) {
     return null;
   }
@@ -2249,7 +2249,9 @@ function resolveFormattingContextHook(
   return null;
 }
 
-function resolveLayoutProcessor(formattingContext) {
+function resolveLayoutProcessor(
+  formattingContext
+): TableLayoutProcessor | null {
   if (formattingContext instanceof TableFormattingContext) {
     return tableLayoutProcessor;
   }

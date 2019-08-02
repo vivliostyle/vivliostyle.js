@@ -86,7 +86,7 @@ export interface CustomRendererFactory {
  * Creates an epubReadingSystem object in the iframe.contentWindow.navigator
  * when load event fires.
  */
-export function initIFrame(iframe: HTMLIFrameElement) {
+export function initIFrame(iframe: HTMLIFrameElement): void {
   iframe.addEventListener(
     "load",
     () => {

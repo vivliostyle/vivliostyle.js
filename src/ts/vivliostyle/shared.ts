@@ -23,6 +23,6 @@ export let repetitiveElementsCache: {
   elements: RepetitiveElement.RepetitiveElements;
 }[] = [];
 
-export function clearRepetitiveElementsCache() {
+export function clearRepetitiveElementsCache(): void {
   repetitiveElementsCache = [];
 }

@@ -53,7 +53,7 @@ export function getPseudoName(element: Element): string {
   return element.getAttribute(PSEUDO_ATTR) || "";
 }
 
-export function setPseudoName(element: Element, name: string) {
+export function setPseudoName(element: Element, name: string): void {
   element.setAttribute(PSEUDO_ATTR, name);
 }
 
