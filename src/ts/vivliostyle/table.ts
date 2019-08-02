@@ -22,15 +22,15 @@ import * as Css from "../adapt/css";
 import * as Task from "../adapt/task";
 import * as Vgen from "../adapt/vgen";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import * as BreakPosition from "../vivliostyle/breakposition";
-import * as LayoutHelper from "../vivliostyle/layouthelper";
-import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as LayoutRetryers from "../vivliostyle/layoutretryer";
-import * as LayoutUtil from "../vivliostyle/layoututil";
-import * as Plugin from "../vivliostyle/plugin";
-import * as RepetitiveElementImpl from "../vivliostyle/repetitiveelements";
-import * as Selectors from "../vivliostyle/selectors";
+import * as Asserts from "./asserts";
+import * as BreakPosition from "./breakposition";
+import * as LayoutHelper from "./layouthelper";
+import * as LayoutProcessor from "./layoutprocessor";
+import * as LayoutRetryers from "./layoutretryer";
+import * as LayoutUtil from "./layoututil";
+import * as Plugin from "./plugin";
+import * as RepetitiveElementImpl from "./repetitiveelements";
+import * as Selectors from "./selectors";
 import {
   FormattingContextType,
   FragmentLayoutConstraintType,
@@ -38,7 +38,7 @@ import {
   RepetitiveElement,
   Table,
   ViewTree
-} from "../vivliostyle/types";
+} from "./types";
 
 export class TableRow {
   cells: TableCell[] = [];

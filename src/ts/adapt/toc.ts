@@ -18,15 +18,15 @@
  *
  * @fileoverview Toc - Table of Contents view.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as Exprs from "../adapt/expr";
-import * as Font from "../adapt/font";
-import * as Ops from "../adapt/ops";
-import * as Task from "../adapt/task";
-import * as Vgen from "../adapt/vgen";
-import * as Vtree from "../adapt/vtree";
-import * as XmlDoc from "../adapt/xmldoc";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as Exprs from "./expr";
+import * as Font from "./font";
+import * as Ops from "./ops";
+import * as Task from "./task";
+import * as Vgen from "./vgen";
+import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
 import * as Counters from "../vivliostyle/counters";
 
 // closed: 25B8

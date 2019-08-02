@@ -19,8 +19,8 @@
  * @fileoverview TaskUtil - Utilities asynchronous execution and cooperative
  * multitasking.
  */
-import * as Base from "../adapt/base";
-import * as Task from "../adapt/task";
+import * as Base from "./base";
+import * as Task from "./task";
 import * as Logging from "../vivliostyle/logging";
 
 /**

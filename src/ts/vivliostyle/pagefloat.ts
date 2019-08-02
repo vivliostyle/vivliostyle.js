@@ -21,11 +21,11 @@ import * as Css from "../adapt/css";
 import * as Geom from "../adapt/geom";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import * as Logging from "../vivliostyle/logging";
-import * as Logical from "../vivliostyle/logical";
-import * as Sizing from "../vivliostyle/sizing";
-import { Layout, PageFloats, ViewTree } from "../vivliostyle/types";
+import * as Asserts from "./asserts";
+import * as Logging from "./logging";
+import * as Logical from "./logical";
+import * as Sizing from "./sizing";
+import { Layout, PageFloats, ViewTree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
 export type FloatReference = PageFloats.FloatReference;

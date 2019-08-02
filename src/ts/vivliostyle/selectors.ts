@@ -20,16 +20,16 @@
 import * as Base from "../adapt/base";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import * as LayoutHelper from "../vivliostyle/layouthelper";
-import * as Matchers from "../vivliostyle/matcher";
-import * as PseudoElement from "../vivliostyle/pseudoelement";
+import * as Asserts from "./asserts";
+import * as LayoutHelper from "./layouthelper";
+import * as Matchers from "./matcher";
+import * as PseudoElement from "./pseudoelement";
 import {
   FragmentLayoutConstraintType,
   Layout,
   Selectors,
   ViewTree
-} from "../vivliostyle/types";
+} from "./types";
 
 export const isInstanceOfAfterIfContinuesLayoutConstraint =
   Selectors.isInstanceOfAfterIfContinuesLayoutConstraint;
@@ -39,8 +39,8 @@ export const clearFragmentIndices =
   Matchers.NthFragmentMatcher.clearFragmentIndices;
 
 // FIXME: When importing layoututil module statically, it causes a circular dependency.
-let LayoutUtil: typeof import("../vivliostyle/layoututil");
-import("../vivliostyle/layoututil").then(it => {
+let LayoutUtil: typeof import("./layoututil");
+import("./layoututil").then(it => {
   LayoutUtil = it;
 });
 

@@ -24,8 +24,8 @@ import * as CssStyler from "../adapt/cssstyler";
 import * as Exprs from "../adapt/expr";
 import * as Vgen from "../adapt/vgen";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import { Layout } from "../vivliostyle/types";
+import * as Asserts from "./asserts";
+import { Layout } from "./types";
 
 /**
  * Clone counter values.

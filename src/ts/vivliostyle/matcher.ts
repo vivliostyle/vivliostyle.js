@@ -16,7 +16,7 @@
  *
  * @fileoverview Matchers - Definitions of Matcher.
  */
-import * as Asserts from "../vivliostyle/asserts";
+import * as Asserts from "./asserts";
 
 /**
  * Checkes whether given order can be represented as an+b with a non-negative

@@ -18,7 +18,7 @@
  *
  * @fileoverview Cfi - Support for EPUB Canonical Fragment Identifiers.
  */
-import * as Base from "../adapt/base";
+import * as Base from "./base";
 
 export type Position = {
   node: Node;

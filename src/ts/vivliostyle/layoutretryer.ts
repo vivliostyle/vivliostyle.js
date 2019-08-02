@@ -17,8 +17,8 @@
  * @fileoverview LayoutRetryers - Definitions of LayoutRetryer.
  */
 import * as Task from "../adapt/task";
-import * as Asserts from "../vivliostyle/asserts";
-import { Layout, ViewTree } from "../vivliostyle/types";
+import * as Asserts from "./asserts";
+import { Layout, ViewTree } from "./types";
 
 /**
  * @abstract

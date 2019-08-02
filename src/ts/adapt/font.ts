@@ -18,13 +18,13 @@
  *
  * @fileoverview Font - Deal with embedded fonts.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as CssCasc from "../adapt/csscasc";
-import * as Exprs from "../adapt/expr";
-import * as Net from "../adapt/net";
-import * as Task from "../adapt/task";
-import * as TaskUtil from "../adapt/taskutil";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
+import * as Exprs from "./expr";
+import * as Net from "./net";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
 import * as Logging from "../vivliostyle/logging";
 
 export const traitProps: { [key: string]: Css.Val } = {

@@ -20,9 +20,9 @@
 import * as Base from "../adapt/base";
 import * as Css from "../adapt/css";
 import * as Task from "../adapt/task";
-import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as Logging from "../vivliostyle/logging";
-import { Layout, ViewTree } from "../vivliostyle/types";
+import * as LayoutProcessor from "./layoutprocessor";
+import * as Logging from "./logging";
+import { Layout, ViewTree } from "./types";
 
 /**
  * Type of implemented hooks.

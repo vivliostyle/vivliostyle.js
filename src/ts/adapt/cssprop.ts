@@ -19,10 +19,10 @@
  * @fileoverview CssProp - Support utilities to extract information
  * from various (parsed) CSS values.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as Exprs from "../adapt/expr";
-import * as Geom from "../adapt/geom";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as Exprs from "./expr";
+import * as Geom from "./geom";
 import * as Logging from "../vivliostyle/logging";
 
 //---------------------- value parsers ----------------------------------

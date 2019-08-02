@@ -19,9 +19,9 @@
  * @fileoverview XmlDoc - Utility functions to work with XML (mostly XHTML)
  * documents.
  */
-import * as Base from "../adapt/base";
-import * as Net from "../adapt/net";
-import * as Task from "../adapt/task";
+import * as Base from "./base";
+import * as Net from "./net";
+import * as Task from "./task";
 import { XmlDoc } from "../vivliostyle/types";
 
 export type XMLDocStore = XmlDoc.XMLDocStore;

@@ -19,15 +19,15 @@
  * @fileoverview CssStyler - Apply CSS cascade to a document incrementally and
  * cache the result.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as CssCasc from "../adapt/csscasc";
-import * as CssParse from "../adapt/cssparse";
-import * as CssProp from "../adapt/cssprop";
-import * as CssValid from "../adapt/cssvalid";
-import * as Exprs from "../adapt/expr";
-import * as Vtree from "../adapt/vtree";
-import * as XmlDoc from "../adapt/xmldoc";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
+import * as CssParse from "./cssparse";
+import * as CssProp from "./cssprop";
+import * as CssValid from "./cssvalid";
+import * as Exprs from "./expr";
+import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Break from "../vivliostyle/break";
 import * as Display from "../vivliostyle/display";

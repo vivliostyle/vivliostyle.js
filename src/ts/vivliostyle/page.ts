@@ -26,9 +26,9 @@ import * as Exprs from "../adapt/expr";
 import * as Font from "../adapt/font";
 import * as Pm from "../adapt/pm";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import * as Constants from "../vivliostyle/constants";
-import * as Sizing from "../vivliostyle/sizing";
+import * as Asserts from "./asserts";
+import * as Constants from "./constants";
+import * as Sizing from "./sizing";
 
 /**
  * Resolve page progression direction from writing-mode and direction.

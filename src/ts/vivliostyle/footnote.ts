@@ -20,9 +20,9 @@
 import * as Css from "../adapt/css";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import * as PageFloat from "../vivliostyle/pagefloat";
-import { Layout } from "../vivliostyle/types";
+import * as Asserts from "./asserts";
+import * as PageFloat from "./pagefloat";
+import { Layout } from "./types";
 
 const PageFloatFragment = PageFloat.PageFloatFragment;
 

@@ -18,14 +18,14 @@
  *
  * @fileoverview Pm - Deal with page masters, partition groups, and partitions.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as CssCasc from "../adapt/csscasc";
-import * as CssParse from "../adapt/cssparse";
-import * as CssValid from "../adapt/cssvalid";
-import * as Exprs from "../adapt/expr";
-import * as Font from "../adapt/font";
-import * as Vtree from "../adapt/vtree";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
+import * as CssParse from "./cssparse";
+import * as CssValid from "./cssvalid";
+import * as Exprs from "./expr";
+import * as Font from "./font";
+import * as Vtree from "./vtree";
 
 export let keyCount: number = 1;
 
