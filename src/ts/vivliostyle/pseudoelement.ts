@@ -20,7 +20,7 @@ import * as Base from "../adapt/base";
 import * as Css from "../adapt/css";
 import * as CssCasc from "../adapt/csscasc";
 import * as CssStyler from "../adapt/cssstyler";
-import * as Exprs from "../adapt/expr";
+import * as Exprs from "../adapt/exprs";
 import * as Vtree from "../adapt/vtree";
 import { PseudoElement } from "./types";
 

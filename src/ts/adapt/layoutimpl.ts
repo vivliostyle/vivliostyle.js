@@ -33,7 +33,7 @@ import * as BreakPosition from "../vivliostyle/breakposition";
 import * as Diff from "../vivliostyle/diff";
 import * as LayoutHelper from "../vivliostyle/layouthelper";
 import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as LayoutRetryers from "../vivliostyle/layoutretryer";
+import * as LayoutRetryers from "../vivliostyle/layoutretryers";
 import * as Logging from "../vivliostyle/logging";
 import * as PageFloat from "../vivliostyle/pagefloat";
 import * as Plugin from "../vivliostyle/plugin";

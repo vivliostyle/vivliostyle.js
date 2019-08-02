@@ -23,7 +23,7 @@ import * as Cfi from "./cfi";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Net from "./net";
 import * as Ops from "./ops";

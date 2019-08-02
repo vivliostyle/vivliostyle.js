@@ -21,7 +21,7 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Net from "./net";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";

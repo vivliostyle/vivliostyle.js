@@ -23,7 +23,7 @@ import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssValid from "./cssvalid";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Vtree from "./vtree";
 

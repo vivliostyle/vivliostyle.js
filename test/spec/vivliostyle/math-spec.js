@@ -15,13 +15,13 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_math from "../../../src/ts/vivliostyle/math";
+import * as vivliostyle_mathutil from "../../../src/ts/vivliostyle/mathutil";
 
 describe("math", function() {
     describe("mean", function() {
 
         it("calculates mean of numbers stored in an array", function() {
-            expect(vivliostyle_math.mean([1, 2, 3, 4])).toBe(2.5);
+            expect(vivliostyle_mathutil.mean([1, 2, 3, 4])).toBe(2.5);
         });
 
     });
@@ -29,7 +29,7 @@ describe("math", function() {
     describe("variance", function() {
 
         it("calculates variance of numbers stored in an array", function() {
-            expect(vivliostyle_math.variance([1, 2, 3, 4])).toBe(1.25);
+            expect(vivliostyle_mathutil.variance([1, 2, 3, 4])).toBe(1.25);
         });
 
     });

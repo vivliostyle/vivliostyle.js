@@ -20,7 +20,7 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Ops from "./ops";
 import * as Task from "./task";

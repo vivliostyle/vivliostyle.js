@@ -17,15 +17,15 @@
 
 import * as adapt_css from "../../../src/ts/adapt/css";
 import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
-import * as vivliostyle_matcher from "../../../src/ts/vivliostyle/matcher";
+import * as vivliostyle_matchers from "../../../src/ts/vivliostyle/matchers";
 import * as vivliostyle_selectors from "../../../src/ts/vivliostyle/selectors";
 
 describe("selectors", function() {
 
-    var NthFragmentMatcher = vivliostyle_matcher.NthFragmentMatcher;
-    var AllMatcher = vivliostyle_matcher.AllMatcher;
-    var AnyMatcher = vivliostyle_matcher.AnyMatcher;
-    var MatcherBuilder = vivliostyle_matcher.MatcherBuilder;
+    var NthFragmentMatcher = vivliostyle_matchers.NthFragmentMatcher;
+    var AllMatcher = vivliostyle_matchers.AllMatcher;
+    var AnyMatcher = vivliostyle_matchers.AnyMatcher;
+    var MatcherBuilder = vivliostyle_matchers.MatcherBuilder;
     var mergeViewConditionalStyles = adapt_csscasc.mergeViewConditionalStyles;
     var registerFragmentIndex = vivliostyle_selectors.registerFragmentIndex;
     var clearFragmentIndices = vivliostyle_selectors.clearFragmentIndices;

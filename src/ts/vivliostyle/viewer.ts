@@ -17,8 +17,8 @@
  *
  * @fileoverview Viewer - Vivliostyle Viewer class
  */
+import * as AdaptViewer from "../adapt/adaptviewer";
 import * as Base from "../adapt/base";
-import * as ViewerImpl from "../adapt/viewer";
 import * as Constants from "./constants";
 import * as Profile from "./profile";
 
@@ -144,7 +144,7 @@ export type SingleDocumentOptions =
  */
 export class Viewer {
   private initialized: boolean = false;
-  private viewer_: ViewerImpl.Viewer;
+  private viewer_: AdaptViewer.Viewer;
   private options: ViewerOptions;
   private eventTarget: Base.SimpleEventTarget;
 
@@ -153,7 +153,7 @@ export class Viewer {
     opt_options?: ViewerOptions
   ) {
     Constants.setDebug(settings.debug);
-    this.viewer_ = new ViewerImpl.Viewer(
+    this.viewer_ = new AdaptViewer.Viewer(
       settings["window"] || window,
       settings["viewportElement"],
       "main",
@@ -406,7 +406,7 @@ export class Viewer {
 
 function convertSingleDocumentOptions(
   singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[]
-): ViewerImpl.SingleDocumentParam[] | null {
+): AdaptViewer.SingleDocumentParam[] | null {
   function toNumberOrNull(num: any): number | null {
     return typeof num === "number" ? num : null;
   }
@@ -417,13 +417,13 @@ function convertSingleDocumentOptions(
         url: opt,
         startPage: null,
         skipPagesBefore: null
-      } as ViewerImpl.SingleDocumentParam;
+      } as AdaptViewer.SingleDocumentParam;
     } else {
       return {
         url: opt["url"],
         startPage: toNumberOrNull(opt["startPage"]),
         skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"])
-      } as ViewerImpl.SingleDocumentParam;
+      } as AdaptViewer.SingleDocumentParam;
     }
   }
   if (Array.isArray(singleDocumentOptions)) {
@@ -448,11 +448,11 @@ export enum Navigation {
   EPAGE = "epage"
 }
 
-export type ZoomType = ViewerImpl.ZoomType;
-export const ZoomType = ViewerImpl.ZoomType;
+export type ZoomType = AdaptViewer.ZoomType;
+export const ZoomType = AdaptViewer.ZoomType;
 
-export type PageViewMode = ViewerImpl.PageViewMode;
-export const PageViewMode = ViewerImpl.PageViewMode;
+export type PageViewMode = AdaptViewer.PageViewMode;
+export const PageViewMode = AdaptViewer.PageViewMode;
 
 export const viewer = {
   Viewer,

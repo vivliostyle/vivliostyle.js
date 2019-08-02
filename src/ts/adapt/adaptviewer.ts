@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview ViewerImpl - Viewer implementation.
+ * @fileoverview AdaptViewer - Viewer implementation.
  */
 import * as Base from "./base";
 import * as Epub from "./epub";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";

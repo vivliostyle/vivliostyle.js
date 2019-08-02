@@ -17,7 +17,7 @@
  *
  * @fileoverview LayoutUtil - Utilities related to layout.
  */
-import * as LayoutImpl from "../adapt/layout";
+import * as LayoutImpl from "../adapt/layoutimpl";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
 import * as Break from "./break";

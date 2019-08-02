@@ -23,7 +23,7 @@ import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as LayoutHelper from "./layouthelper";
 import * as LayoutProcessor from "./layoutprocessor";
-import * as LayoutRetryers from "./layoutretryer";
+import * as LayoutRetryers from "./layoutretryers";
 import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
 import * as Selectors from "./selectors";

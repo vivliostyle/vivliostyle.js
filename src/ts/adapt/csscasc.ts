@@ -24,11 +24,11 @@ import * as CssParse from "./cssparse";
 import * as CssProp from "./cssprop";
 import * as CssTok from "./csstok";
 import * as CssValid from "./cssvalid";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Vtree from "./vtree";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Logging from "../vivliostyle/logging";
-import * as Matchers from "../vivliostyle/matcher";
+import * as Matchers from "../vivliostyle/matchers";
 import * as Plugin from "../vivliostyle/plugin";
 import { CssCasc } from "../vivliostyle/types";
 

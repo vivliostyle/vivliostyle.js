@@ -26,10 +26,10 @@ import * as Asserts from "./asserts";
 import * as BreakPosition from "./breakposition";
 import * as LayoutHelper from "./layouthelper";
 import * as LayoutProcessor from "./layoutprocessor";
-import * as LayoutRetryers from "./layoutretryer";
+import * as LayoutRetryers from "./layoutretryers";
 import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
-import * as RepetitiveElementImpl from "./repetitiveelements";
+import * as RepetitiveElementImpl from "./repetitiveelementimpl";
 import * as Selectors from "./selectors";
 import {
   FormattingContextType,

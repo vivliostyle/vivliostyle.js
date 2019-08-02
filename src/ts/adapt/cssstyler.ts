@@ -25,7 +25,7 @@ import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssProp from "./cssprop";
 import * as CssValid from "./cssvalid";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
 import * as Asserts from "../vivliostyle/asserts";

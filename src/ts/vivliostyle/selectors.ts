@@ -22,7 +22,7 @@ import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as LayoutHelper from "./layouthelper";
-import * as Matchers from "./matcher";
+import * as Matchers from "./matchers";
 import * as PseudoElement from "./pseudoelement";
 import {
   FragmentLayoutConstraintType,

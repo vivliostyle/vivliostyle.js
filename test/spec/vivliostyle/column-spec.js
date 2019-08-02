@@ -16,12 +16,12 @@
  */
 
 import * as adapt_vtree from "../../../src/ts/adapt/vtree";
-import * as vivliostyle_column from "../../../src/ts/vivliostyle/column";
+import * as vivliostyle_columns from "../../../src/ts/vivliostyle/columns";
 
 // FIXME: cannot spyOn(module, "...")
 
 describe("column", function() {
-    var module = vivliostyle_column;
+    var module = vivliostyle_columns;
     var ColumnBalancer = module.ColumnBalancer;
     var BalanceLastColumnBalancer = module.BalanceLastColumnBalancer;
     var BalanceNonLastColumnBalancer = module.BalanceNonLastColumnBalancer;

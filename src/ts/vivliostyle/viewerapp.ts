@@ -18,8 +18,8 @@
  *
  * @fileoverview ViewerApp - (Deprecated) Vivliostyle page viewer base on adapt.sampleapp
  */
+import * as AdaptViewer from "../adapt/adaptviewer";
 import * as Base from "../adapt/base";
-import * as ViewerImpl from "../adapt/viewer";
 import * as Constants from "./constants";
 
 export let fontSize: number = 16;
@@ -354,7 +354,7 @@ export function main(arg): void {
     pageBorder: 1
   };
   setViewportSize(width, height, size, orientation, config);
-  const viewerInstance = new ViewerImpl.Viewer(
+  const viewerInstance = new AdaptViewer.Viewer(
     window,
     viewportElement,
     "main",

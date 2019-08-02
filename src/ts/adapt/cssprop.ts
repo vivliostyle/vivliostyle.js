@@ -21,7 +21,7 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Geom from "./geom";
 import * as Logging from "../vivliostyle/logging";
 

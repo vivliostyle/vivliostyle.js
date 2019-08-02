@@ -23,7 +23,7 @@ import * as Css from "./css";
 import * as CssParse from "./cssparse";
 import * as CssProp from "./cssprop";
 import * as CssTok from "./csstok";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 import * as Geom from "./geom";
 import * as TaskUtil from "./taskutil";
 import * as Asserts from "../vivliostyle/asserts";

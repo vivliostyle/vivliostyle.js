@@ -19,7 +19,7 @@
  * @fileoverview Css - CSS Values and utilities to handle them.
  */
 import * as Base from "./base";
-import * as Exprs from "./expr";
+import * as Exprs from "./exprs";
 
 export class Visitor {
   /**
