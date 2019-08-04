@@ -19,7 +19,7 @@
  */
 import * as Base from "../adapt/base";
 import * as Task from "../adapt/task";
-import * as Vtree from "../adapt/vtree";
+import * as VtreeImpl from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as LayoutHelper from "./layouthelper";
 import * as Matchers from "./matchers";
@@ -28,7 +28,7 @@ import {
   FragmentLayoutConstraintType,
   Layout,
   Selectors,
-  ViewTree
+  Vtree
 } from "./types";
 
 export const isInstanceOfAfterIfContinuesLayoutConstraint =
@@ -52,7 +52,7 @@ export class AfterIfContinues implements Selectors.AfterIfContinues {
 
   createElement(
     column: Layout.Column,
-    parentNodeContext: ViewTree.NodeContext
+    parentNodeContext: Vtree.NodeContext
   ): Task.Result<Element> {
     if (!LayoutUtil) {
       throw new Error("layoututil module is required but not be imported.");
@@ -77,7 +77,7 @@ export class AfterIfContinues implements Selectors.AfterIfContinues {
       });
   }
 
-  private createNodePositionForPseudoElement(): ViewTree.ChunkPosition {
+  private createNodePositionForPseudoElement(): Vtree.ChunkPosition {
     const sourceNode = PseudoElement.document.createElementNS(
       Base.NS.XHTML,
       "div"
@@ -97,17 +97,17 @@ export class AfterIfContinues implements Selectors.AfterIfContinues {
       after: false,
       preprocessedTextContent: null
     };
-    return new Vtree.ChunkPosition(nodePosition as any);
+    return new VtreeImpl.ChunkPosition(nodePosition as any);
   }
 
-  private createShadowContext(root: Element): ViewTree.ShadowContext {
-    return new Vtree.ShadowContext(
+  private createShadowContext(root: Element): Vtree.ShadowContext {
+    return new VtreeImpl.ShadowContext(
       this.sourceNode,
       root,
       null,
       null,
       null,
-      ViewTree.ShadowType.ROOTED,
+      Vtree.ShadowType.ROOTED,
       this.styler
     );
   }
@@ -126,8 +126,8 @@ export class AfterIfContinuesLayoutConstraint
 
   /** @override */
   allowLayout(
-    nodeContext: ViewTree.NodeContext,
-    overflownNodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
+    overflownNodeContext: Vtree.NodeContext,
     column: Layout.Column
   ): boolean {
     if (
@@ -141,21 +141,21 @@ export class AfterIfContinuesLayoutConstraint
   }
 
   /** @override */
-  nextCandidate(nodeContext: ViewTree.NodeContext): boolean {
+  nextCandidate(nodeContext: Vtree.NodeContext): boolean {
     return false;
   }
 
   /** @override */
   postLayout(
     allowed: boolean,
-    positionAfter: ViewTree.NodeContext,
-    initialPosition: ViewTree.NodeContext,
+    positionAfter: Vtree.NodeContext,
+    initialPosition: Vtree.NodeContext,
     column: Layout.Column
   ) {}
 
   /** @override */
   finishBreak(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     column: Layout.Column
   ): Task.Result<boolean> {
     if (!this.getRepetitiveElements().affectTo(nodeContext)) {
@@ -198,7 +198,7 @@ export class AfterIfContinuesElementsOffset
   constructor(public nodeContext, public pseudoElementHeight) {}
 
   /** @override */
-  calculateOffset(nodeContext: ViewTree.NodeContext): number {
+  calculateOffset(nodeContext: Vtree.NodeContext): number {
     if (!this.affectTo(nodeContext)) {
       return 0;
     }
@@ -206,11 +206,11 @@ export class AfterIfContinuesElementsOffset
   }
 
   /** @override */
-  calculateMinimumOffset(nodeContext: ViewTree.NodeContext): number {
+  calculateMinimumOffset(nodeContext: Vtree.NodeContext): number {
     return this.calculateOffset(nodeContext);
   }
 
-  affectTo(nodeContext: ViewTree.NodeContext): boolean {
+  affectTo(nodeContext: Vtree.NodeContext): boolean {
     if (!nodeContext) {
       return false;
     }
@@ -230,9 +230,9 @@ export class AfterIfContinuesElementsOffset
 }
 
 function processAfterIfContinuesOfNodeContext(
-  nodeContext: ViewTree.NodeContext,
+  nodeContext: Vtree.NodeContext,
   column: Layout.Column
-): Task.Result<ViewTree.NodeContext> {
+): Task.Result<Vtree.NodeContext> {
   if (
     !nodeContext ||
     !nodeContext.afterIfContinues ||
@@ -263,22 +263,22 @@ function processAfterIfContinuesOfNodeContext(
 }
 
 export function processAfterIfContinues(
-  result: Task.Result<ViewTree.NodeContext>,
+  result: Task.Result<Vtree.NodeContext>,
   column: Layout.Column
-): Task.Result<ViewTree.NodeContext> {
+): Task.Result<Vtree.NodeContext> {
   return result.thenAsync(nodeContext =>
     processAfterIfContinuesOfNodeContext(nodeContext, column)
   );
 }
 
 export function processAfterIfContinuesOfAncestors(
-  nodeContext: ViewTree.NodeContext,
+  nodeContext: Vtree.NodeContext,
   column: Layout.Column
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame(
     "processAfterIfContinuesOfAncestors"
   );
-  let current: ViewTree.NodeContext = nodeContext;
+  let current: Vtree.NodeContext = nodeContext;
   frame
     .loop(() => {
       if (current !== null) {
@@ -296,7 +296,7 @@ export function processAfterIfContinuesOfAncestors(
 }
 
 export function calculatePseudoElementHeight(
-  nodeContext: ViewTree.NodeContext,
+  nodeContext: Vtree.NodeContext,
   column: Layout.Column,
   pseudoElement: Element
 ): number {

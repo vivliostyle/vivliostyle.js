@@ -22,7 +22,7 @@ import * as Css from "../adapt/css";
 import * as Task from "../adapt/task";
 import * as LayoutProcessor from "./layoutprocessor";
 import * as Logging from "./logging";
-import { Layout, ViewTree } from "./types";
+import { Layout, Vtree } from "./types";
 
 /**
  * Type of implemented hooks.
@@ -58,7 +58,7 @@ export enum HOOKS {
    * Called before creating a text node for modifying a text content.
    *
    * The hook is called with an object with the following properties:
-   *   {ViewTree.NodeContext} nodeContext
+   *   {Vtree.NodeContext} nodeContext
    *   {string} sourceTextContent
    *
    * Functions called by this hook are expected to return a
@@ -71,7 +71,7 @@ export enum HOOKS {
    * Called before creating a element for modifying a element style.
    *
    * The hook is called with an object with the following properties:
-   *   {ViewTree.NodeContext} nodeContext
+   *   {Vtree.NodeContext} nodeContext
    *   {!Object} style
    */
   PREPROCESS_ELEMENT_STYLE = "PREPROCESS_ELEMENT_STYLE",
@@ -96,7 +96,7 @@ export enum HOOKS {
    * which detects an acceptable breakpoint and break text node at this point.
    *
    * The hook is called with an object with the following properties:
-   *  {ViewTree.NodeContext} nodeContext
+   *  {Vtree.NodeContext} nodeContext
    *
    * Functions called by this hook are expected to
    * return an instnce of {Layout.TextNodeBreaker} or null.
@@ -123,7 +123,7 @@ export enum HOOKS {
    * a formatting context.
    *
    * The hook is called with a formatting context
-   * (ViewTree.FormattingContext). Functions called by this hook are expected
+   * (Vtree.FormattingContext). Functions called by this hook are expected
    * to return a layout processor corresponding to the formatting context.
    */
   RESOLVE_LAYOUT_PROCESSOR = "RESOLVE_LAYOUT_PROCESSOR",
@@ -132,8 +132,8 @@ export enum HOOKS {
    * Called after laid out a block contents.
    *
    * The hook is called with an object with the following properties:
-   *  {ViewTree.NodeContext} nodeContext
-   *  {Array.<ViewTree.NodeContext>} checkPoints
+   *  {Vtree.NodeContext} nodeContext
+   *  {Array.<Vtree.NodeContext>} checkPoints
    *  {Layout.Column} column
    */
   POST_LAYOUT_BLOCK = "POST_LAYOUT_BLOCK"
@@ -142,12 +142,12 @@ export enum HOOKS {
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
 export type PreProcessTextContentHook = (
-  p1: ViewTree.NodeContext,
+  p1: Vtree.NodeContext,
   p2: string
 ) => Task.Result<string>;
 
 export type PreProcessElementStyleHook = (
-  p1: ViewTree.NodeContext,
+  p1: Vtree.NodeContext,
   p2: object
 ) => void;
 
@@ -161,25 +161,25 @@ export type ConfigurationHook = (
 };
 
 export type ResolveTextNodeBreakerHook = (
-  p1: ViewTree.NodeContext
+  p1: Vtree.NodeContext
 ) => Layout.TextNodeBreaker;
 
 export type ResolveFormattingContextHook = (
-  p1: ViewTree.NodeContext,
+  p1: Vtree.NodeContext,
   p2: boolean,
   p3: Css.Ident,
   p4: Css.Ident,
   p5: Css.Ident,
   p6: boolean
-) => ViewTree.FormattingContext;
+) => Vtree.FormattingContext;
 
 export type ResolveLayoutProcessorHook = (
-  p1: ViewTree.FormattingContext
+  p1: Vtree.FormattingContext
 ) => LayoutProcessor.LayoutProcessor;
 
 export type PostLayoutBlockHook = (
-  p1: ViewTree.NodeContext,
-  p2: ViewTree.NodeContext[],
+  p1: Vtree.NodeContext,
+  p2: Vtree.NodeContext[],
   p3: Layout.Column
 ) => void;
 

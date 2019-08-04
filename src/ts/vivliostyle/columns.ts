@@ -18,17 +18,19 @@
  * @fileoverview Columns - Control column layout.
  */
 import * as Css from "../adapt/css";
-import * as LayoutImpl from "../adapt/layoutimpl";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as MathUtil from "./mathutil";
-import * as PageFloat from "./pagefloat";
+import * as PageFloats from "./pagefloats";
+import { Layout } from "../vivliostyle/types";
 
 export type ColumnLayoutResult = {
-  columns: LayoutImpl.Column[];
+  columns: Layout.Column[];
   position: Vtree.LayoutPosition;
-  columnPageFloatLayoutContexts: undefined | PageFloat.PageFloatLayoutContext[];
+  columnPageFloatLayoutContexts:
+    | undefined
+    | PageFloats.PageFloatLayoutContext[];
 };
 
 export type ColumnGenerator = () => Task.Result<ColumnLayoutResult | null>;
@@ -62,7 +64,7 @@ export abstract class ColumnBalancer {
   constructor(
     public readonly layoutContainer: Vtree.Container,
     public readonly columnGenerator: ColumnGenerator,
-    public readonly regionPageFloatLayoutContext: PageFloat.PageFloatLayoutContext
+    public readonly regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext
   ) {
     this.originalContainerBlockSize = getBlockSize(layoutContainer);
   }
@@ -296,7 +298,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
 }
 
 function isLastColumnLongerThanAnyOtherColumn(
-  columns: LayoutImpl.Column[]
+  columns: Layout.Column[]
 ): boolean {
   if (columns.length <= 1) {
     return false;
@@ -347,9 +349,9 @@ export function createColumnBalancer(
   columnCount: number,
   columnFill: Css.Ident,
   columnGenerator: ColumnGenerator,
-  regionPageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+  regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   layoutContainer: Vtree.Container,
-  columns: LayoutImpl.Column[],
+  columns: Layout.Column[],
   flowPosition: Vtree.FlowPosition
 ): ColumnBalancer | null {
   if (columnFill === Css.ident.auto) {

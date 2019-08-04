@@ -29,7 +29,7 @@ import * as TaskUtil from "./taskutil";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Constants from "../vivliostyle/constants";
 import * as Diff from "../vivliostyle/diff";
-import { PageFloats, Selectors, ViewTree, XmlDoc } from "../vivliostyle/types";
+import { PageFloats, Selectors, Vtree, XmlDoc } from "../vivliostyle/types";
 
 export const delayedProps = {
   transform: true,
@@ -268,8 +268,8 @@ export type Spread = {
  */
 export const SPECIAL_ATTR = "data-adapt-spec";
 
-export const Whitespace = ViewTree.Whitespace;
-export type Whitespace = ViewTree.Whitespace;
+export const Whitespace = Vtree.Whitespace;
+export type Whitespace = Vtree.Whitespace;
 
 /**
  * Resolves Whitespace value from a value of 'white-space' property
@@ -347,7 +347,7 @@ export class FlowChunk {
   }
 }
 
-export type ClientRect = ViewTree.ClientRect;
+export type ClientRect = Vtree.ClientRect;
 
 export function clientrectIncreasingTop(
   r1: ClientRect,
@@ -367,17 +367,17 @@ export function clientrectDecreasingRight(
  * Interface to read the position assigned to the elements and ranges by the
  * browser.
  */
-export type ClientLayout = ViewTree.ClientLayout;
+export type ClientLayout = Vtree.ClientLayout;
 
 /**
  * Styling, creating a single node's view, etc.
  */
-export type LayoutContext = ViewTree.LayoutContext;
+export type LayoutContext = Vtree.LayoutContext;
 
 /**
  * Formatting context.
  */
-export type FormattingContext = ViewTree.FormattingContext;
+export type FormattingContext = Vtree.FormattingContext;
 
 export function eachAncestorFormattingContext(
   nodeContext: NodeContext,
@@ -391,7 +391,7 @@ export function eachAncestorFormattingContext(
   }
 }
 
-export type NodePositionStep = ViewTree.NodePositionStep;
+export type NodePositionStep = Vtree.NodePositionStep;
 
 export function isSameNodePositionStep(
   nps1: NodePositionStep,
@@ -412,7 +412,7 @@ export function isSameNodePositionStep(
   );
 }
 
-export type NodePosition = ViewTree.NodePosition;
+export type NodePosition = Vtree.NodePosition;
 
 export function isSameNodePosition(
   np1: NodePosition | null,
@@ -458,7 +458,7 @@ export function newNodePositionFromNode(node: Node): NodePosition {
 }
 
 export function newNodePositionFromNodeContext(
-  nodeContext: ViewTree.NodeContext,
+  nodeContext: Vtree.NodeContext,
   initialFragmentIndex: number | null
 ): NodePosition {
   const step: NodePositionStep = {
@@ -483,7 +483,7 @@ export function newNodePositionFromNodeContext(
 
 export function makeNodeContextFromNodePositionStep(
   step: NodePositionStep,
-  parent: ViewTree.NodeContext
+  parent: Vtree.NodeContext
 ): NodeContext {
   const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
   nodeContext.shadowType = step.shadowType;
@@ -497,13 +497,13 @@ export function makeNodeContextFromNodePositionStep(
   return nodeContext;
 }
 
-export const ShadowType = ViewTree.ShadowType;
-export type ShadowType = ViewTree.ShadowType;
+export const ShadowType = Vtree.ShadowType;
+export type ShadowType = Vtree.ShadowType;
 
 /**
  * Data about shadow tree instance.
  */
-export class ShadowContext implements ViewTree.ShadowContext {
+export class ShadowContext implements Vtree.ShadowContext {
   subShadow: ShadowContext = null;
 
   constructor(
@@ -544,7 +544,7 @@ export function isSameShadowContext(
  * Information about :first-letter or :first-line pseudoelements
  * @param count 0 - first-letter, 1 or more - first line(s)
  */
-export class FirstPseudo implements ViewTree.FirstPseudo {
+export class FirstPseudo implements Vtree.FirstPseudo {
   constructor(
     public readonly outer: FirstPseudo,
     public readonly count: number
@@ -559,7 +559,7 @@ export class FirstPseudo implements ViewTree.FirstPseudo {
  * node. When after=true it represents position right after the last child
  * of the node. boxOffset is incremented by 1 for any valid node position.
  */
-export class NodeContext implements ViewTree.NodeContext {
+export class NodeContext implements Vtree.NodeContext {
   // position itself
   offsetInNode: number = 0;
   after: boolean = false;
@@ -828,7 +828,7 @@ export class NodeContext implements ViewTree.NodeContext {
   }
 }
 
-export class ChunkPosition implements ViewTree.ChunkPosition {
+export class ChunkPosition implements Vtree.ChunkPosition {
   floats: NodePosition[] = null;
 
   constructor(public primary: NodePosition) {}
@@ -1018,7 +1018,7 @@ export class LayoutPosition {
   }
 }
 
-export class Container implements ViewTree.Container {
+export class Container implements Vtree.Container {
   left: number = 0;
   top: number = 0;
   marginLeft: number = 0;
@@ -1254,7 +1254,7 @@ export class Container implements ViewTree.Container {
   }
 }
 
-export type ExprContentListener = ViewTree.ExprContentListener;
+export type ExprContentListener = Vtree.ExprContentListener;
 
 export class ContentPropertyHandler extends Css.Visitor {
   constructor(

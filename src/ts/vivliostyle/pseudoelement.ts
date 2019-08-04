@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview PseudoElement
+ * @fileoverview PseudoElement - CSS pseudo elements.
  */
 import * as Base from "../adapt/base";
 import * as Css from "../adapt/css";

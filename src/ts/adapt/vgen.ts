@@ -33,10 +33,10 @@ import * as Asserts from "../vivliostyle/asserts";
 import * as Diff from "../vivliostyle/diff";
 import * as Display from "../vivliostyle/display";
 import * as Matchers from "../vivliostyle/matchers";
-import * as PageFloat from "../vivliostyle/pagefloat";
+import * as PageFloats from "../vivliostyle/pagefloats";
 import * as Plugin from "../vivliostyle/plugin";
 import * as PseudoElement from "../vivliostyle/pseudoelement";
-import * as RepetitiveElementImpl from "../vivliostyle/repetitiveelementimpl";
+import * as RepetitiveElement from "../vivliostyle/repetitiveelement";
 import * as Selectors from "../vivliostyle/selectors";
 import * as Urls from "../vivliostyle/urls";
 
@@ -669,13 +669,13 @@ export class ViewFactory extends Base.SimpleEventTarget
     }
     const floatReference =
       elementStyle["float-reference"] &&
-      PageFloat.floatReferenceOf(
+      PageFloats.floatReferenceOf(
         elementStyle["float-reference"].value.toString()
       );
     if (
       self.nodeContext.parent &&
       floatReference &&
-      PageFloat.isPageFloat(floatReference)
+      PageFloats.isPageFloat(floatReference)
     ) {
       // Since a page float will be detached from a view node of its parent,
       // inherited properties need to be inherited from its source parent.
@@ -750,7 +750,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         if (
           self.nodeContext.isInsideBFC() &&
           floatSide !== Css.ident.footnote &&
-          !(floatReference && PageFloat.isPageFloat(floatReference))
+          !(floatReference && PageFloats.isPageFloat(floatReference))
         ) {
           // When the element is already inside a block formatting context
           // (except one from the root), float and clear can be controlled by
@@ -833,7 +833,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         self.nodeContext.display = display ? display.toString() : "inline";
         self.nodeContext.floatSide = floating ? floatSide.toString() : null;
         self.nodeContext.floatReference =
-          floatReference || PageFloat.FloatReference.INLINE;
+          floatReference || PageFloats.FloatReference.INLINE;
         self.nodeContext.floatMinWrapBlock =
           computedStyle["float-min-wrap-block"] || null;
         self.nodeContext.columnSpan = computedStyle["column-span"];
@@ -1555,19 +1555,19 @@ export class ViewFactory extends Base.SimpleEventTarget
       }
       if (
         this.nodeContext.formattingContext instanceof
-          RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext &&
+          RepetitiveElement.RepetitiveElementsOwnerFormattingContext &&
         !this.nodeContext.belongsTo(this.nodeContext.formattingContext)
       ) {
         return;
       }
       const parent = this.nodeContext.parent;
       const parentFormattingContext = parent && parent.formattingContext;
-      this.nodeContext.formattingContext = new RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext(
+      this.nodeContext.formattingContext = new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
         parentFormattingContext,
         this.nodeContext.sourceNode as Element
       );
       (this.nodeContext
-        .formattingContext as RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext).initializeRepetitiveElements(
+        .formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext).initializeRepetitiveElements(
         this.nodeContext.vertical
       );
       return;

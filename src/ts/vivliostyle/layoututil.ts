@@ -17,26 +17,26 @@
  *
  * @fileoverview LayoutUtil - Utilities related to layout.
  */
-import * as LayoutImpl from "../adapt/layoutimpl";
+import * as LayoutImpl from "../adapt/layout";
 import * as Task from "../adapt/task";
-import * as Vtree from "../adapt/vtree";
+import * as VtreeImpl from "../adapt/vtree";
 import * as Break from "./break";
 import * as BreakPosition from "./breakposition";
-import { Layout, ViewTree } from "./types";
+import { Layout, Vtree } from "./types";
 
 export type LayoutIteratorState = {
-  nodeContext: ViewTree.NodeContext;
+  nodeContext: Vtree.NodeContext;
   atUnforcedBreak: boolean;
   break: boolean;
   leadingEdge?: boolean;
   breakAtTheEdge?: string | null;
   onStartEdges?: boolean;
-  leadingEdgeContexts?: ViewTree.NodeContext[];
-  lastAfterNodeContext?: ViewTree.NodeContext | null;
+  leadingEdgeContexts?: Vtree.NodeContext[];
+  lastAfterNodeContext?: Vtree.NodeContext | null;
 };
 
 export class LayoutIteratorStrategy {
-  initialState(initialNodeContext: ViewTree.NodeContext): LayoutIteratorState {
+  initialState(initialNodeContext: Vtree.NodeContext): LayoutIteratorState {
     return {
       nodeContext: initialNodeContext,
       atUnforcedBreak: false,
@@ -90,15 +90,15 @@ export class LayoutIteratorStrategy {
 export class LayoutIterator {
   constructor(
     private readonly strategy: LayoutIteratorStrategy,
-    private readonly layoutContext: ViewTree.LayoutContext
+    private readonly layoutContext: Vtree.LayoutContext
   ) {}
 
   iterate(
-    initialNodeContext: ViewTree.NodeContext
-  ): Task.Result<ViewTree.NodeContext> {
+    initialNodeContext: Vtree.NodeContext
+  ): Task.Result<Vtree.NodeContext> {
     const strategy = this.strategy;
     const state = strategy.initialState(initialNodeContext);
-    const frame: Task.Frame<ViewTree.NodeContext> = Task.newFrame(
+    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
       "LayoutIterator"
     );
     frame
@@ -113,7 +113,7 @@ export class LayoutIterator {
             }
           } else if (state.nodeContext.viewNode.nodeType !== 1) {
             if (
-              Vtree.canIgnore(
+              VtreeImpl.canIgnore(
                 state.nodeContext.viewNode,
                 state.nodeContext.whitespace
               )
@@ -195,7 +195,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
 
   endNonInlineBox(state: LayoutIteratorState): void | Task.Result<boolean> {}
 
-  initialState(initialNodeContext: ViewTree.NodeContext): LayoutIteratorState {
+  initialState(initialNodeContext: Vtree.NodeContext): LayoutIteratorState {
     return {
       nodeContext: initialNodeContext,
       atUnforcedBreak: !!this.leadingEdge && initialNodeContext.after,
@@ -345,13 +345,13 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
  * @param parentNodeContext A NodeContext generating this PseudoColumn
  */
 export class PseudoColumn {
-  startNodeContexts: ViewTree.NodeContext[] = [];
-  private column: any;
+  startNodeContexts: Vtree.NodeContext[] = [];
+  private column: Layout.Column;
 
   constructor(
     column: Layout.Column,
     viewRoot: Element,
-    parentNodeContext: ViewTree.NodeContext
+    parentNodeContext: Vtree.NodeContext
   ) {
     this.column = Object.create(column) as Layout.Column;
     this.column.element = viewRoot;
@@ -380,9 +380,9 @@ export class PseudoColumn {
    * @return holding end position.
    */
   layout(
-    chunkPosition: ViewTree.ChunkPosition,
+    chunkPosition: Vtree.ChunkPosition,
     leadingEdge: boolean
-  ): Task.Result<ViewTree.ChunkPosition> {
+  ): Task.Result<Vtree.ChunkPosition> {
     return this.column.layout(chunkPosition, leadingEdge);
   }
 
@@ -410,20 +410,18 @@ export class PseudoColumn {
    * @return holing true
    */
   finishBreak(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean
   ): Task.Result<boolean> {
     return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfColumn);
   }
 
-  doFinishBreakOfFragmentLayoutConstraints(
-    positionAfter: ViewTree.NodeContext
-  ) {
+  doFinishBreakOfFragmentLayoutConstraints(positionAfter: Vtree.NodeContext) {
     this.column.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
   }
 
-  isStartNodeContext(nodeContext: ViewTree.NodeContext): boolean {
+  isStartNodeContext(nodeContext: Vtree.NodeContext): boolean {
     const startNodeContext = this.startNodeContexts[0];
     return (
       startNodeContext.viewNode === nodeContext.viewNode &&
@@ -432,8 +430,8 @@ export class PseudoColumn {
     );
   }
 
-  isLastAfterNodeContext(nodeContext: ViewTree.NodeContext): boolean {
-    return Vtree.isSameNodePosition(
+  isLastAfterNodeContext(nodeContext: Vtree.NodeContext): boolean {
+    return VtreeImpl.isSameNodePosition(
       nodeContext.toNodePosition(),
       this.column.lastAfterPosition
     );

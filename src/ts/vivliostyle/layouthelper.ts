@@ -17,9 +17,9 @@
  * @fileoverview LayoutHelper - Helper functions of Layout.
  */
 import * as Base from "../adapt/base";
-import * as Vtree from "../adapt/vtree";
+import * as VtreeImpl from "../adapt/vtree";
 import * as Logging from "./logging";
-import { Layout, ViewTree } from "./types";
+import { Layout, Vtree } from "./types";
 
 /**
  * Though method used to be used as a workaround for Chrome bug, it seems that
@@ -29,10 +29,10 @@ import { Layout, ViewTree } from "./types";
  *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
  */
 export function fixBoxesForNode(
-  clientLayout: ViewTree.ClientLayout,
-  boxes: ViewTree.ClientRect[],
+  clientLayout: Vtree.ClientLayout,
+  boxes: Vtree.ClientRect[],
   node: Node
-): ViewTree.ClientRect[] {
+): Vtree.ClientRect[] {
   const fullRange = node.ownerDocument.createRange();
   fullRange.setStart(node, 0);
   fullRange.setEnd(node, node.textContent.length);
@@ -71,8 +71,8 @@ export function fixBoxesForNode(
  * considered zero-height.
  */
 export function calculateEdge(
-  nodeContext: ViewTree.NodeContext,
-  clientLayout: ViewTree.ClientLayout,
+  nodeContext: Vtree.NodeContext,
+  clientLayout: Vtree.ClientLayout,
   extraOffset: number,
   vertical: boolean
 ): number {
@@ -166,12 +166,10 @@ export function removeFollowingSiblings(
 }
 
 export function isSpecial(e: Element): boolean {
-  return !!e.getAttribute(Vtree.SPECIAL_ATTR);
+  return !!e.getAttribute(VtreeImpl.SPECIAL_ATTR);
 }
 
-export function isSpecialNodeContext(
-  nodeContext: ViewTree.NodeContext
-): boolean {
+export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {
   if (!nodeContext) {
     return false;
   }

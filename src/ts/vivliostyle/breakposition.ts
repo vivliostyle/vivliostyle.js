@@ -18,7 +18,7 @@
  */
 import * as Break from "./break";
 import * as LayoutHelper from "./layouthelper";
-import { Layout, RepetitiveElement, ViewTree } from "./types";
+import { Layout, RepetitiveElement, Vtree } from "./types";
 
 /**
  * Potential breaking position.
@@ -30,7 +30,7 @@ export abstract class AbstractBreakPosition
   abstract findAcceptableBreak(
     column: Layout.Column,
     penalty: number
-  ): ViewTree.NodeContext;
+  ): Vtree.NodeContext;
 
   abstract getMinBreakPenalty(): number;
 
@@ -46,13 +46,13 @@ export abstract class AbstractBreakPosition
    */
   breakPositionChosen(column: Layout.Column): void {}
 
-  getNodeContext(): ViewTree.NodeContext {
+  getNodeContext(): Vtree.NodeContext {
     return null;
   }
 }
 
 export function calculateOffset(
-  nodeContext: ViewTree.NodeContext,
+  nodeContext: Vtree.NodeContext,
   elementsOffsets: RepetitiveElement.ElementsOffset[]
 ): { current: number; minimum: number } {
   return {
@@ -79,7 +79,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   private edge: number = 0;
 
   constructor(
-    public readonly position: ViewTree.NodeContext,
+    public readonly position: Vtree.NodeContext,
     public readonly breakOnEdge: string | null,
     public overflows: boolean,
     public readonly computedBlockSize: number
@@ -94,7 +94,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   findAcceptableBreak(
     column: Layout.Column,
     penalty: number
-  ): ViewTree.NodeContext {
+  ): Vtree.NodeContext {
     this.updateOverflows(column);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
@@ -148,7 +148,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
   }
 
   /** @override */
-  getNodeContext(): ViewTree.NodeContext {
+  getNodeContext(): Vtree.NodeContext {
     return this.position;
   }
 

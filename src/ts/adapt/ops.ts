@@ -30,7 +30,7 @@ import * as CssValid from "./cssvalid";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Geom from "./geom";
-import * as LayoutImpl from "./layoutimpl";
+import * as LayoutImpl from "./layout";
 import * as Net from "./net";
 import * as Pm from "./pm";
 import * as Task from "./task";
@@ -45,7 +45,7 @@ import * as Constants from "../vivliostyle/constants";
 import * as Counters from "../vivliostyle/counters";
 import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
 import * as Logging from "../vivliostyle/logging";
-import * as PageFloat from "../vivliostyle/pagefloat";
+import * as PageFloats from "../vivliostyle/pagefloats";
 import * as Pages from "../vivliostyle/pages";
 import * as Plugin from "../vivliostyle/plugin";
 import { Layout } from "../vivliostyle/types";
@@ -223,7 +223,7 @@ export class StyleInstance extends Exprs.Context
     super(style.rootScope, viewport.width, viewport.height, viewport.fontSize);
     this.lang = xmldoc.lang || defaultLang;
     this.faces = new Font.DocumentFaces(this.style.fontDeobfuscator);
-    this.rootPageFloatLayoutContext = new PageFloat.PageFloatLayoutContext(
+    this.rootPageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
       null,
       null,
       null,
@@ -647,7 +647,7 @@ export class StyleInstance extends Exprs.Context
         }
         const continuation = deferredFloats[i++];
         const float = continuation.float;
-        const strategy = new PageFloat.PageFloatLayoutStrategyResolver().findByFloat(
+        const strategy = new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(
           float
         );
         const pageFloatFragment = strategy.findPageFloatFragment(
@@ -895,7 +895,7 @@ export class StyleInstance extends Exprs.Context
   }
 
   createLayoutConstraint(
-    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
   ): Layout.LayoutConstraint {
     const pageIndex = this.currentLayoutPosition.page - 1;
     const counterConstraint = this.counterStore.createLayoutConstraint(
@@ -914,7 +914,7 @@ export class StyleInstance extends Exprs.Context
     layoutContainer: Vtree.Container,
     currentColumnIndex: number,
     flowNameStr: string,
-    regionPageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     columnCount: number,
     columnGap: number,
     columnWidth: number,
@@ -927,9 +927,9 @@ export class StyleInstance extends Exprs.Context
       ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
       : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
     const boxContainer = layoutContainer.element;
-    const columnPageFloatLayoutContext = new PageFloat.PageFloatLayoutContext(
+    const columnPageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
       regionPageFloatLayoutContext,
-      PageFloat.FloatReference.COLUMN,
+      PageFloats.FloatReference.COLUMN,
       null,
       flowNameStr,
       null,
@@ -1027,7 +1027,7 @@ export class StyleInstance extends Exprs.Context
   }
 
   setPagePageFloatLayoutContextContainer(
-    pagePageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     boxInstance: Pm.PageBoxInstance,
     layoutContainer: Vtree.Container
   ) {
@@ -1041,17 +1041,17 @@ export class StyleInstance extends Exprs.Context
   }
 
   getRegionPageFloatLayoutContext(
-    pagePageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     boxInstance: Pm.PageBoxInstance,
     layoutContainer: Vtree.Container,
     flowName: string
-  ): PageFloat.PageFloatLayoutContext {
+  ): PageFloats.PageFloatLayoutContext {
     Asserts.assert(boxInstance instanceof Pm.PartitionInstance);
     const writingMode = boxInstance.getProp(this, "writing-mode") || null;
     const direction = boxInstance.getProp(this, "direction") || null;
-    return new PageFloat.PageFloatLayoutContext(
+    return new PageFloats.PageFloatLayoutContext(
       pagePageFloatLayoutContext,
-      PageFloat.FloatReference.REGION,
+      PageFloats.FloatReference.REGION,
       layoutContainer,
       flowName,
       null,
@@ -1066,7 +1066,7 @@ export class StyleInstance extends Exprs.Context
     offsetX: number,
     offsetY: number,
     exclusions: Geom.Shape[],
-    pagePageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     layoutContainer: Vtree.Container,
     flowNameStr: string,
     columnCount: number
@@ -1154,8 +1154,8 @@ export class StyleInstance extends Exprs.Context
     offsetX: number,
     offsetY: number,
     exclusions: Geom.Shape[],
-    pagePageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
-    regionPageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     layoutContainer: Vtree.Container,
     flowNameStr: string,
     columnCount: number,
@@ -1282,7 +1282,7 @@ export class StyleInstance extends Exprs.Context
     offsetX: number,
     offsetY: number,
     exclusions: Geom.Shape[],
-    pagePageFloatLayoutContext: PageFloat.PageFloatLayoutContext
+    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext
   ): Task.Result<boolean> {
     const self = this;
     boxInstance.reset();
@@ -1611,9 +1611,9 @@ export class StyleInstance extends Exprs.Context
     this.pageVertical = writingMode != Css.ident.horizontal_tb;
 
     const direction = pageMaster.getProp(self, "direction") || Css.ident.ltr;
-    const pageFloatLayoutContext = new PageFloat.PageFloatLayoutContext(
+    const pageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
       self.rootPageFloatLayoutContext,
-      PageFloat.FloatReference.PAGE,
+      PageFloats.FloatReference.PAGE,
       null,
       null,
       null,

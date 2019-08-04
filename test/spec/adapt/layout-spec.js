@@ -15,17 +15,17 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_layoutimpl from "../../../src/ts/adapt/layoutimpl";
+import * as adapt_layout from "../../../src/ts/adapt/layout";
 import * as adapt_vtree from "../../../src/ts/adapt/vtree";
 
 describe("layout", function() {
 
-    describe("adapt_layoutimpl.TextNodeBreaker", function() {
+    describe("adapt_layout.TextNodeBreaker", function() {
 
         var breaker;
         var textNode, nodeContext;
         beforeEach(function() {
-            breaker = new adapt_layoutimpl.TextNodeBreaker();
+            breaker = new adapt_layout.TextNodeBreaker();
 
             textNode = {
                 length: 17,
@@ -88,20 +88,20 @@ describe("layout", function() {
 
     });
 
-    describe("adapt_layoutimpl.resolveHyphenateCharacter", function() {
+    describe("adapt_layout.resolveHyphenateCharacter", function() {
         it("returns a value of `hyphenateCharacter` in the nodeContext.", function() {
-            expect(adapt_layoutimpl.resolveHyphenateCharacter({
+            expect(adapt_layout.resolveHyphenateCharacter({
                 hyphenateCharacter: 'a',
                 parent: { hyphenateCharacter: 'b' }
             })).toEqual('a');
         });
         it("returns a value of `hyphenateCharacter` in the parent nodeContext if nodeContext's `hyphenateCharacter` is undefined.", function() {
-            expect(adapt_layoutimpl.resolveHyphenateCharacter({
+            expect(adapt_layout.resolveHyphenateCharacter({
                 parent: { hyphenateCharacter: 'b' }
             })).toEqual('b');
         });
         it("returns a default value if `hyphenateCharacter` of nodeContext and parent nodeContext are undefined.", function() {
-            expect(adapt_layoutimpl.resolveHyphenateCharacter({})).toEqual('-');
+            expect(adapt_layout.resolveHyphenateCharacter({})).toEqual('-');
         });
     });
 

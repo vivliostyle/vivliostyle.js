@@ -21,15 +21,15 @@ import * as Css from "../adapt/css";
 import * as Task from "../adapt/task";
 import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
-import * as PageFloat from "./pagefloat";
+import * as PageFloats from "./pagefloats";
 import { Layout } from "./types";
 
-const PageFloatFragment = PageFloat.PageFloatFragment;
+const PageFloatFragment = PageFloats.PageFloatFragment;
 
-export class Footnote extends PageFloat.PageFloat {
+export class Footnote extends PageFloats.PageFloat {
   constructor(
     nodePosition: Vtree.NodePosition,
-    floatReference: PageFloat.FloatReference,
+    floatReference: PageFloats.FloatReference,
     flowName: string,
     public readonly footnotePolicy: Css.Ident | null,
     floatMinWrapBlock: Css.Numeric | null
@@ -47,7 +47,7 @@ export class Footnote extends PageFloat.PageFloat {
   /**
    * @override
    */
-  isAllowedToPrecede(other: PageFloat.PageFloat): boolean {
+  isAllowedToPrecede(other: PageFloats.PageFloat): boolean {
     return !(other instanceof Footnote);
   }
 }
@@ -57,8 +57,8 @@ export class Footnote extends PageFloat.PageFloat {
  */
 export class FootnoteFragment extends PageFloatFragment {
   constructor(
-    floatReference: PageFloat.FloatReference,
-    continuations: PageFloat.PageFloatContinuation[],
+    floatReference: PageFloats.FloatReference,
+    continuations: PageFloats.PageFloatContinuation[],
     area: Vtree.Container,
     continues: boolean
   ) {
@@ -75,7 +75,7 @@ export class FootnoteFragment extends PageFloatFragment {
   /**
    * @override
    */
-  shouldBeStashedBefore(float: PageFloat.PageFloat): boolean {
+  shouldBeStashedBefore(float: PageFloats.PageFloat): boolean {
     if (float instanceof Footnote) {
       return true;
     } else {
@@ -95,7 +95,7 @@ export class LineFootnotePolicyLayoutConstraint
 }
 
 export class FootnoteLayoutStrategy
-  implements PageFloat.PageFloatLayoutStrategy {
+  implements PageFloats.PageFloatLayoutStrategy {
   /**
    * @override
    */
@@ -106,7 +106,7 @@ export class FootnoteLayoutStrategy
   /**
    * @override
    */
-  appliesToFloat(float: PageFloat.PageFloat): boolean {
+  appliesToFloat(float: PageFloats.PageFloat): boolean {
     return float instanceof Footnote;
   }
 
@@ -115,10 +115,10 @@ export class FootnoteLayoutStrategy
    */
   createPageFloat(
     nodeContext: Vtree.NodeContext,
-    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext,
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     column: Layout.Column
-  ): Task.Result<PageFloat.PageFloat> {
-    let floatReference = PageFloat.FloatReference.REGION;
+  ): Task.Result<PageFloats.PageFloat> {
+    let floatReference = PageFloats.FloatReference.REGION;
 
     // If the region context has the same container as the page context,
     // use the page context as the context for the footnote.
@@ -126,14 +126,14 @@ export class FootnoteLayoutStrategy
       floatReference
     );
     const pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
-      PageFloat.FloatReference.PAGE
+      PageFloats.FloatReference.PAGE
     );
     if (pageContext.hasSameContainerAs(regionContext)) {
-      floatReference = PageFloat.FloatReference.PAGE;
+      floatReference = PageFloats.FloatReference.PAGE;
     }
     const nodePosition = nodeContext.toNodePosition();
     Asserts.assert(pageFloatLayoutContext.flowName);
-    const float: PageFloat.PageFloat = new Footnote(
+    const float: PageFloats.PageFloat = new Footnote(
       nodePosition,
       floatReference,
       pageFloatLayoutContext.flowName,
@@ -148,11 +148,11 @@ export class FootnoteLayoutStrategy
    * @override
    */
   createPageFloatFragment(
-    continuations: PageFloat.PageFloatContinuation[],
+    continuations: PageFloats.PageFloatContinuation[],
     floatSide: string,
     floatArea: Layout.PageFloatArea,
     continues: boolean
-  ): PageFloat.PageFloatFragment {
+  ): PageFloats.PageFloatFragment {
     const f = continuations[0].float;
     return new FootnoteFragment(
       f.floatReference,
@@ -166,9 +166,9 @@ export class FootnoteLayoutStrategy
    * @override
    */
   findPageFloatFragment(
-    float: PageFloat.PageFloat,
-    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext
-  ): PageFloat.PageFloatFragment | null {
+    float: PageFloats.PageFloat,
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+  ): PageFloats.PageFloatFragment | null {
     const context = pageFloatLayoutContext.getPageFloatLayoutContext(
       float.floatReference
     );
@@ -206,8 +206,8 @@ export class FootnoteLayoutStrategy
    * @override
    */
   forbid(
-    float: PageFloat.PageFloat,
-    pageFloatLayoutContext: PageFloat.PageFloatLayoutContext
+    float: PageFloats.PageFloat,
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
   ) {
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
@@ -223,6 +223,6 @@ export class FootnoteLayoutStrategy
   }
 }
 
-PageFloat.PageFloatLayoutStrategyResolver.register(
+PageFloats.PageFloatLayoutStrategyResolver.register(
   new FootnoteLayoutStrategy()
 );

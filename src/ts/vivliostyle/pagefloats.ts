@@ -15,17 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview PageFloat - CSS Page Floats
+ * @fileoverview PageFloats - CSS Page Floats
  */
 import * as Css from "../adapt/css";
 import * as Geom from "../adapt/geom";
 import * as Task from "../adapt/task";
-import * as Vtree from "../adapt/vtree";
+import * as VtreeImpl from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as Logging from "./logging";
 import * as Logical from "./logical";
 import * as Sizing from "./sizing";
-import { Layout, PageFloats, ViewTree } from "./types";
+import { Layout, PageFloats, Vtree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
 export type FloatReference = PageFloats.FloatReference;
@@ -103,7 +103,7 @@ export class PageFloat implements PageFloats.PageFloat {
   id: PageFloatID | null = null;
 
   constructor(
-    public readonly nodePosition: ViewTree.NodePosition,
+    public readonly nodePosition: Vtree.NodePosition,
     public readonly floatReference: FloatReference,
     public readonly floatSide: string,
     public readonly clearSide: string | null,
@@ -148,7 +148,7 @@ export class PageFloatStore {
 
   addPageFloat(float: PageFloat) {
     const index = this.floats.findIndex(f =>
-      Vtree.isSameNodePosition(f.nodePosition, float.nodePosition)
+      VtreeImpl.isSameNodePosition(f.nodePosition, float.nodePosition)
     );
     if (index >= 0) {
       throw new Error(
@@ -162,10 +162,10 @@ export class PageFloatStore {
   }
 
   findPageFloatByNodePosition(
-    nodePosition: ViewTree.NodePosition
+    nodePosition: Vtree.NodePosition
   ): PageFloat | null {
     const index = this.floats.findIndex(f =>
-      Vtree.isSameNodePosition(f.nodePosition, nodePosition)
+      VtreeImpl.isSameNodePosition(f.nodePosition, nodePosition)
     );
     return index >= 0 ? this.floats[index] : null;
   }
@@ -185,7 +185,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
     public readonly floatReference: FloatReference,
     public readonly floatSide: string,
     public readonly continuations: PageFloatContinuation[],
-    public readonly area: ViewTree.Container,
+    public readonly area: Vtree.Container,
     public readonly continues: boolean
   ) {}
 
@@ -238,7 +238,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
 export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   constructor(
     public readonly float: PageFloat,
-    public readonly nodePosition: ViewTree.NodePosition
+    public readonly nodePosition: Vtree.NodePosition
   ) {}
 
   equals(other: PageFloatContinuation | null): boolean {
@@ -250,7 +250,7 @@ export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
     }
     return (
       this.float === other.float &&
-      Vtree.isSameNodePosition(this.nodePosition, other.nodePosition)
+      VtreeImpl.isSameNodePosition(this.nodePosition, other.nodePosition)
     );
   }
 }
@@ -281,9 +281,9 @@ export class PageFloatLayoutContext
   constructor(
     public readonly parent: PageFloatLayoutContext,
     private readonly floatReference: FloatReference | null,
-    private container: ViewTree.Container,
+    private container: Vtree.Container,
     public readonly flowName: string | null,
-    public readonly generatingNodePosition: ViewTree.NodePosition | null,
+    public readonly generatingNodePosition: Vtree.NodePosition | null,
     writingMode: Css.Val | null,
     direction: Css.Val | null
   ) {
@@ -311,7 +311,7 @@ export class PageFloatLayoutContext
     child: PageFloatLayoutContext | null,
     floatReference: FloatReference | null,
     flowName: string | null,
-    generatingNodePosition: ViewTree.NodePosition | null
+    generatingNodePosition: Vtree.NodePosition | null
   ): PageFloatLayoutContext | null {
     let index = this.children.indexOf(child as PageFloatLayoutContext);
     if (index < 0) {
@@ -322,7 +322,7 @@ export class PageFloatLayoutContext
       if (
         result.floatReference === floatReference &&
         result.flowName === flowName &&
-        Vtree.isSameNodePosition(
+        VtreeImpl.isSameNodePosition(
           result.generatingNodePosition,
           generatingNodePosition
         )
@@ -363,14 +363,14 @@ export class PageFloatLayoutContext
     return null;
   }
 
-  getContainer(floatReference?: FloatReference): ViewTree.Container {
+  getContainer(floatReference?: FloatReference): Vtree.Container {
     if (!floatReference || floatReference === this.floatReference) {
       return this.container;
     }
     return this.getParent(floatReference).getContainer(floatReference);
   }
 
-  setContainer(container: ViewTree.Container) {
+  setContainer(container: Vtree.Container) {
     this.container = container;
     this.reattachFloatFragments();
   }
@@ -391,7 +391,7 @@ export class PageFloatLayoutContext
   }
 
   findPageFloatByNodePosition(
-    nodePosition: ViewTree.NodePosition
+    nodePosition: Vtree.NodePosition
   ): PageFloat | null {
     return this.floatStore.findPageFloatByNodePosition(nodePosition);
   }
@@ -877,8 +877,8 @@ export class PageFloatLayoutContext
 
   private getLimitValue(
     side: string,
-    layoutContext: ViewTree.LayoutContext,
-    clientLayout: ViewTree.ClientLayout,
+    layoutContext: Vtree.LayoutContext,
+    clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
   ): number {
     Asserts.assert(this.container);
@@ -915,8 +915,8 @@ export class PageFloatLayoutContext
 
   private getLimitValueInner(
     logicalSide: string,
-    layoutContext: ViewTree.LayoutContext,
-    clientLayout: ViewTree.ClientLayout,
+    layoutContext: Vtree.LayoutContext,
+    clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
   ): number {
     Asserts.assert(this.container);
@@ -940,8 +940,8 @@ export class PageFloatLayoutContext
   }
 
   private getLimitValuesInner(
-    layoutContext: ViewTree.LayoutContext,
-    clientLayout: ViewTree.ClientLayout,
+    layoutContext: Vtree.LayoutContext,
+    clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
   ): {
     top: number;
@@ -1569,9 +1569,7 @@ export class PageFloatLayoutStrategyResolver {
     pageFloatLayoutStrategies.push(strategy);
   }
 
-  findByNodeContext(
-    nodeContext: ViewTree.NodeContext
-  ): PageFloatLayoutStrategy {
+  findByNodeContext(nodeContext: Vtree.NodeContext): PageFloatLayoutStrategy {
     for (let i = pageFloatLayoutStrategies.length - 1; i >= 0; i--) {
       const strategy = pageFloatLayoutStrategies[i];
       if (strategy.appliesToNodeContext(nodeContext)) {
@@ -1596,7 +1594,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   /**
    * @override
    */
-  appliesToNodeContext(nodeContext: ViewTree.NodeContext): boolean {
+  appliesToNodeContext(nodeContext: Vtree.NodeContext): boolean {
     return isPageFloat(nodeContext.floatReference);
   }
 
@@ -1611,7 +1609,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    * @override
    */
   createPageFloat(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     pageFloatLayoutContext: PageFloatLayoutContext,
     column: Layout.Column
   ): Task.Result<PageFloat> {
@@ -1675,7 +1673,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    */
   adjustPageFloatArea(
     floatArea: Layout.PageFloatArea,
-    floatContainer: ViewTree.Container,
+    floatContainer: Vtree.Container,
     column: Layout.Column
   ) {}
 

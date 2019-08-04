@@ -21,12 +21,7 @@ import * as BreakPosition from "./breakposition";
 import * as Display from "./display";
 import * as LayoutHelper from "./layouthelper";
 import * as Plugin from "./plugin";
-import {
-  FormattingContextType,
-  Layout,
-  LayoutProcessor,
-  ViewTree
-} from "./types";
+import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
 
 /**
  * Processor doing some special layout (e.g. table layout)
@@ -36,16 +31,16 @@ export interface LayoutProcessor {
    * Do actual layout in the column starting from given NodeContext.
    */
   layout(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     column: Layout.Column,
     leadingEdge: boolean
-  ): Task.Result<ViewTree.NodeContext>;
+  ): Task.Result<Vtree.NodeContext>;
 
   /**
    * Potential edge breaking position.
    */
   createEdgeBreakPosition(
-    position: ViewTree.NodeContext,
+    position: Vtree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
     columnBlockSize: number
@@ -55,14 +50,14 @@ export interface LayoutProcessor {
    * process nodecontext at the start of a non inline element.
    * @return return true if you skip the subsequent nodes
    */
-  startNonInlineElementNode(nodeContext: ViewTree.NodeContext): boolean;
+  startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean;
 
   /**
    * process nodecontext after a non inline element.
    * @return return true if you skip the subsequent nodes
    */
   afterNonInlineElementNode(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     stopAtOverflow: boolean
   ): boolean;
 
@@ -71,15 +66,15 @@ export interface LayoutProcessor {
    */
   finishBreak(
     column: Layout.Column,
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean
   ): Task.Result<boolean>;
 
   clearOverflownViewNodes(
     column: Layout.Column,
-    parentNodeContext: ViewTree.NodeContext,
-    nodeContext: ViewTree.NodeContext,
+    parentNodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     removeSelf: boolean
   );
 }
@@ -91,7 +86,7 @@ export class LayoutProcessorResolver {
   /**
    * Find LayoutProcessor corresponding to given formatting context.
    */
-  find(formattingContext: ViewTree.FormattingContext): LayoutProcessor {
+  find(formattingContext: Vtree.FormattingContext): LayoutProcessor {
     const hooks: Plugin.ResolveLayoutProcessorHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR
     );
@@ -112,10 +107,10 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    * @override
    */
   layout(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     column: Layout.Column,
     leadingEdge: boolean
-  ): Task.Result<ViewTree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext> {
     if (column.isFloatNodeContext(nodeContext)) {
       return column.layoutFloatOrFootnote(nodeContext);
     } else if (column.isBreakable(nodeContext)) {
@@ -129,7 +124,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    * @override
    */
   createEdgeBreakPosition(
-    position: ViewTree.NodeContext,
+    position: Vtree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
     columnBlockSize: number
@@ -145,7 +140,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /**
    * @override
    */
-  startNonInlineElementNode(nodeContext: ViewTree.NodeContext): boolean {
+  startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean {
     return false;
   }
 
@@ -153,7 +148,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    * @override
    */
   afterNonInlineElementNode(
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     stopAtOverflow: boolean
   ): boolean {
     return false;
@@ -164,8 +159,8 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    */
   clearOverflownViewNodes(
     column: Layout.Column,
-    parentNodeContext: ViewTree.NodeContext,
-    nodeContext: ViewTree.NodeContext,
+    parentNodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     removeSelf: boolean
   ) {
     if (!nodeContext.viewNode) {
@@ -187,7 +182,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    */
   finishBreak(
     column: Layout.Column,
-    nodeContext: ViewTree.NodeContext,
+    nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean
   ): Task.Result<boolean> {
@@ -211,7 +206,7 @@ export class BlockFormattingContext
   implements LayoutProcessor.BlockFormattingContext {
   formattingContextType: FormattingContextType = "Block";
 
-  constructor(private readonly parent: ViewTree.FormattingContext) {}
+  constructor(private readonly parent: Vtree.FormattingContext) {}
 
   /**
    * @override
@@ -223,14 +218,14 @@ export class BlockFormattingContext
   /**
    * @override
    */
-  isFirstTime(nodeContext: ViewTree.NodeContext, firstTime: boolean): boolean {
+  isFirstTime(nodeContext: Vtree.NodeContext, firstTime: boolean): boolean {
     return firstTime;
   }
 
   /**
    * @override
    */
-  getParent(): ViewTree.FormattingContext {
+  getParent(): Vtree.FormattingContext {
     return this.parent;
   }
 
