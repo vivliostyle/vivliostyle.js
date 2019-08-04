@@ -1183,7 +1183,7 @@ export class Viewer {
       const cont = continuation;
       if (cont) {
         continuation = null;
-        cont.schedule();
+        cont.schedule(true);
       }
     };
     viewer.sendCommand = cmd => {
