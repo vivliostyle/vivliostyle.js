@@ -2033,7 +2033,7 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
             result.marginInside = 0;
           }
           if (result.marginOutside === null) {
-            result.marginoutside = 0;
+            result.marginOutside = 0;
           }
         }
       }
