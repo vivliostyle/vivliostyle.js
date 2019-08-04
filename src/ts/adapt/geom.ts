@@ -489,7 +489,7 @@ export function findUppermostFullyOpenRect(
     return rect;
   }
   let topEdge = rect.y1;
-  let band;
+  let band: Band;
   let i: number;
   for (i = 0; i < bands.length; i++) {
     band = bands[i];
@@ -542,7 +542,7 @@ export function findBottommostFullyOpenRect(
     return rect;
   }
   let bottomEdge = rect.y2;
-  let band;
+  let band: Band;
   let i: number;
   for (i = bands.length - 1; i >= 0; i--) {
     band = bands[i];

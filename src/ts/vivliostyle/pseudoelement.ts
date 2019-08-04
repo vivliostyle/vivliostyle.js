@@ -83,11 +83,11 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     const style = pseudoMap[pseudoName] || ({} as CssCasc.ElementStyle);
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
       let nest = 1;
-      let r;
+      let r: RegExpMatchArray;
       if (pseudoName == "first-letter") {
         nest = 0;
       } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
-        nest = r[1] - 0;
+        nest = (r[1] as any) - 0;
       }
       style["x-first-pseudo"] = new CssCasc.CascadeValue(new Css.Int(nest), 0);
     }

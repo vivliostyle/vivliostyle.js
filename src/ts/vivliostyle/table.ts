@@ -127,7 +127,7 @@ export class TableCaptionView {
 }
 
 export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPosition {
-  private formattingContext: any;
+  private formattingContext: TableFormattingContext;
 
   acceptableCellBreakPositions: Layout.BreakPositionAndNodeContext[] = null;
   private rowIndex: number | null = null;
@@ -139,7 +139,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
     columnBlockSize: number
   ) {
     super(position, breakOnEdge, overflows, columnBlockSize);
-    this.formattingContext = position.formattingContext;
+    this.formattingContext = position.formattingContext as TableFormattingContext;
   }
 
   /**
@@ -472,7 +472,7 @@ export class TableFormattingContext
     if (!column) {
       return null;
     }
-    let tableCell = null;
+    let tableCell: TableCell = null;
     let row = 0;
     let col = 0;
     loop: for (row = 0; row < this.cellFragments.length; row++) {
@@ -1157,7 +1157,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     afterNodeContext.after = true;
     state.nodeContext = afterNodeContext;
     const frame = Task.newFrame<boolean>("startTableCell");
-    let cont;
+    let cont: Task.Result<Vtree.ChunkPosition>;
     if (this.hasBrokenCellAtSlot(cell.anchorSlot.columnIndex)) {
       const cellBreakPosition = this.formattingContext.cellBreakPositions.shift();
       nodeContext.fragmentIndex =
@@ -1674,7 +1674,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         nodeContext.sourceNode
       );
       formattingContext.cellBreakPositions = [];
-      let cells;
+      let cells: TableCell[];
       if (!nodeContext.after) {
         cells = formattingContext.getCellsFallingOnRow(rowIndex);
       } else {
@@ -1799,14 +1799,11 @@ function adjustCellHeight(
 }
 
 export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
-  private tableFormattingContext: any;
-
   constructor(
-    formattingContext: TableFormattingContext,
+    private tableFormattingContext: TableFormattingContext,
     private readonly processor: TableLayoutProcessor
   ) {
     super();
-    this.tableFormattingContext = formattingContext;
   }
 
   /**

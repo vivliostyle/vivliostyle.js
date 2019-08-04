@@ -478,8 +478,8 @@ export class Context {
       prefix = r[1];
       feature = r[2];
     }
-    let req = null;
-    let actual = null;
+    let req: Result | null = null;
+    let actual: number | null = null;
     switch (feature) {
       case "width":
       case "height":

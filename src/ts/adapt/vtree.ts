@@ -731,7 +731,7 @@ export class NodeContext implements Vtree.NodeContext {
   clone(): NodeContext {
     const np = this.cloneItem();
     let npc = np;
-    let npp;
+    let npp: NodeContext;
     while ((npp = npc.parent) != null) {
       npp = npp.cloneItem();
       npc.parent = npp;
@@ -1188,7 +1188,7 @@ export class Container implements Vtree.Container {
 
   clear() {
     const parent = this.element;
-    let c;
+    let c: Node;
     while ((c = parent.lastChild)) {
       parent.removeChild(c);
     }

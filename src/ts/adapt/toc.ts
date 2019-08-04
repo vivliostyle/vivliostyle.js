@@ -86,7 +86,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     return (
       srcElem: Element,
       viewParent: Element,
-      computedStyle
+      computedStyle: { [key: string]: Css.Val }
     ): Task.Result<Element> => {
       const behavior = computedStyle["behavior"];
       if (behavior) {

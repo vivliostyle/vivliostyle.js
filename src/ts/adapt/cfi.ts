@@ -139,7 +139,7 @@ export class ChildStep implements Step {
     const elem = pos.node as Element;
     const childElements = elem.children;
     const childElementCount = childElements.length;
-    let child;
+    let child: Node;
     const childIndex = Math.floor(this.index / 2) - 1;
     if (childIndex < 0 || childElementCount == 0) {
       child = elem.firstChild;
@@ -244,7 +244,9 @@ export class Fragment {
     let i = 0;
     const steps = [];
     while (true) {
-      let ext;
+      let ext: {
+        [key: string]: string | string[];
+      };
       switch (str.charAt(i)) {
         case "/": {
           i++;

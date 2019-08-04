@@ -32,7 +32,7 @@ export function isFlowRoot(element: Element): boolean {
  */
 export function blockify(display: Css.Ident): Css.Ident {
   const displayStr = display.toString();
-  let blockifiedStr;
+  let blockifiedStr: string;
   switch (displayStr) {
     case "inline-flex":
       blockifiedStr = "flex";

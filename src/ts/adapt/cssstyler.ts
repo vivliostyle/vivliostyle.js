@@ -27,11 +27,10 @@ import * as CssProp from "./cssprop";
 import * as CssValid from "./cssvalid";
 import * as Exprs from "./exprs";
 import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Break from "../vivliostyle/break";
 import * as Display from "../vivliostyle/display";
-import { CssStyler } from "../vivliostyle/types";
+import { CssStyler, XmlDoc } from "../vivliostyle/types";
 
 export class SlipRange {
   endStuckFixed: number;
@@ -270,7 +269,7 @@ export class Box {
   }
 
   getBreakValue(edge: string): string | null {
-    let breakValue = null;
+    let breakValue: string | null = null;
     if (this.isBlock()) {
       const val = this.styleValue(`break-${edge}`);
       if (val) {
@@ -851,7 +850,7 @@ export class Styler implements AbstractStyler {
    */
   styleUntil(startOffset: number, lookup: number): number {
     let targetSlippedOffset = -1;
-    let slippedOffset;
+    let slippedOffset: number;
     if (startOffset <= this.lastOffset) {
       slippedOffset = this.offsetMap.slippedByFixed(startOffset);
       targetSlippedOffset = slippedOffset + lookup;
@@ -872,7 +871,7 @@ export class Styler implements AbstractStyler {
             this.cascade.popElement(this.last as Element);
             this.primary = this.primaryStack.pop();
             const box = this.boxStack.pop(this.lastOffset);
-            let breakAfter = null;
+            let breakAfter: string | null = null;
             if (box.afterBox) {
               const afterPseudoBreakBefore = box.afterBox.getBreakValue(
                 "before"
@@ -944,7 +943,7 @@ export class Styler implements AbstractStyler {
           this.postprocessTopStyle(style, true);
           this.bodyReached = true;
         }
-        let box;
+        let box: Box;
         const flowName = style["flow-into"];
         if (flowName) {
           const flowNameStr = flowName

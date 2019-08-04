@@ -39,7 +39,7 @@ export function fixBoxesForNode(
   const fullBoxes = clientLayout.getRangeClientRects(fullRange);
   const result = [];
   for (const box of boxes) {
-    let k;
+    let k: number;
     for (k = 0; k < fullBoxes.length; k++) {
       const fullBox = fullBoxes[k];
       if (

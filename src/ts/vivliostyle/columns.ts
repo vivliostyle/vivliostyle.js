@@ -23,7 +23,7 @@ import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as MathUtil from "./mathutil";
 import * as PageFloats from "./pagefloats";
-import { Layout } from "../vivliostyle/types";
+import { Layout } from "./types";
 
 export type ColumnLayoutResult = {
   columns: Layout.Column[];

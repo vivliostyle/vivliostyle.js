@@ -44,8 +44,8 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     public readonly document: Document
   ) {
     this.root = document.documentElement; // html element
-    let body = null;
-    let head = null;
+    let body: Element = null;
+    let head: Element = null;
     if (this.root.namespaceURI == Base.NS.XHTML) {
       for (
         let child: Node = this.root.firstChild;
@@ -205,7 +205,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
    * @return last node such that its offset is less or equal to the given
    */
   getNodeByOffset(offset: number): Node {
-    let elementOffset;
+    let elementOffset: number;
 
     // First, find the last element in the document, such that
     // this.getElementOffset(element) <= offset; if offest matches
@@ -329,7 +329,7 @@ export function parseAndReturnNullIfError(
   opt_parser?: DOMParser
 ): Document | null {
   const parser = opt_parser || new DOMParser();
-  let doc;
+  let doc: Document;
   try {
     doc = parser.parseFromString(str, type as SupportedType);
   } catch (e) {}
@@ -342,7 +342,7 @@ export function parseAndReturnNullIfError(
       return null;
     } else {
       for (let c = docElement.firstChild; c; c = c.nextSibling) {
-        if (c.localName === errorTagName) {
+        if ((c as Element).localName === errorTagName) {
           return null;
         }
       }
@@ -392,7 +392,7 @@ export function resolveContentType(response: Net.Response): string | null {
 export function parseXMLResource(
   response: Net.Response,
   store: XMLDocStore
-): Task.Result<XMLDocHolder> {
+): Task.Result<XmlDoc.XMLDocHolder> {
   let doc = response.responseXML;
   if (!doc) {
     const parser = new DOMParser();

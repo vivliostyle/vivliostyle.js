@@ -415,7 +415,7 @@ export class CounterStore {
   ) {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
-    let resetMap;
+    let resetMap: { [key: string]: number };
     const reset = cascadedPageStyle["counter-reset"];
     if (reset) {
       const resetVal = reset.evaluate(context);
@@ -428,7 +428,7 @@ export class CounterStore {
         this.definePageCounter(resetCounterName, resetMap[resetCounterName]);
       }
     }
-    let incrementMap;
+    let incrementMap: { [key: string]: number };
     const increment = cascadedPageStyle["counter-increment"];
     if (increment) {
       const incrementVal = increment.evaluate(context);
@@ -536,7 +536,7 @@ export class CounterStore {
             if (!unresolvedRefs) {
               unresolvedRefs = this.unresolvedReferences[id] = [];
             }
-            let ref;
+            let ref: TargetCounterReference;
             while ((ref = resolvedRefs.shift())) {
               ref.unresolve();
               unresolvedRefs.push(ref);
@@ -547,12 +547,12 @@ export class CounterStore {
       });
     }
     const prevPageCounters = this.previousPageCounters;
-    let ref;
+    let ref: TargetCounterReference;
     while ((ref = this.newReferencesOfCurrentPage.shift())) {
       ref.pageCounters = prevPageCounters;
       ref.spineIndex = spineIndex;
       ref.pageIndex = pageIndex;
-      let arr;
+      let arr: TargetCounterReference[];
       if (ref.isResolved()) {
         arr = this.resolvedReferences[ref.targetId];
         if (!arr) {
@@ -582,7 +582,7 @@ export class CounterStore {
     pageCounters: CssCasc.CounterValues;
     refs: TargetCounterReference[];
   }[] {
-    let refs = [];
+    let refs: TargetCounterReference[] = [];
     const ids = Object.keys(page.elementsById);
     ids.forEach(id => {
       const idRefs = this.unresolvedReferences[id];
@@ -593,8 +593,18 @@ export class CounterStore {
     refs.sort(
       (r1, r2) => r1.spineIndex - r2.spineIndex || r1.pageIndex - r2.pageIndex
     );
-    const result = [];
-    let o = null;
+    const result: {
+      spineIndex: number;
+      pageIndex: number;
+      pageCounters: CssCasc.CounterValues;
+      refs: TargetCounterReference[];
+    }[] = [];
+    let o: {
+      spineIndex: number;
+      pageIndex: number;
+      pageCounters: CssCasc.CounterValues;
+      refs: TargetCounterReference[];
+    } = null;
     refs.forEach(ref => {
       if (
         !o ||

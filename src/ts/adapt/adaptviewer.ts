@@ -276,7 +276,7 @@ export class Viewer {
   private render(fragment?: string | null): Task.Result<boolean> {
     this.cancelRenderingTask();
     const self = this;
-    let cont;
+    let cont: Task.Result<boolean>;
     if (fragment) {
       cont = this.opf.resolveFragment(fragment).thenAsync(position => {
         self.pagePosition = position;
@@ -294,7 +294,7 @@ export class Viewer {
   private resolveLength(specified: string): number {
     const value = parseFloat(specified);
     const unitPattern = /[a-z]+$/;
-    let matched;
+    let matched: RegExpMatchArray;
     if (
       typeof specified === "string" &&
       (matched = specified.match(unitPattern))
@@ -801,7 +801,7 @@ export class Viewer {
     }
     switch (type) {
       case ZoomType.FIT_INSIDE_VIEWPORT: {
-        let pageDim;
+        let pageDim: { width: number; height: number };
         if (this.pref.spreadView) {
           Asserts.assert(this.currentSpread);
           pageDim = this.getSpreadDimensions(this.currentSpread);
@@ -982,7 +982,7 @@ export class Viewer {
   }
 
   moveTo(command: Base.JSON): Task.Result<boolean> {
-    let method;
+    let method: () => Task.Result<Epub.PageAndPosition>;
     const self = this;
     if (
       this.readyState !== Constants.ReadyState.COMPLETE &&
@@ -991,28 +991,31 @@ export class Viewer {
       this.setReadyState(Constants.ReadyState.LOADING);
     }
     if (typeof command["where"] == "string") {
+      let m: (
+        position: Epub.Position,
+        sync: boolean
+      ) => Task.Result<Epub.PageAndPosition>;
       switch (command["where"]) {
         case "next":
-          method = this.pref.spreadView
+          m = this.pref.spreadView
             ? this.opfView.nextSpread
             : this.opfView.nextPage;
           break;
         case "previous":
-          method = this.pref.spreadView
+          m = this.pref.spreadView
             ? this.opfView.previousSpread
             : this.opfView.previousPage;
           break;
         case "last":
-          method = this.opfView.lastPage;
+          m = this.opfView.lastPage;
           break;
         case "first":
-          method = this.opfView.firstPage;
+          m = this.opfView.firstPage;
           break;
         default:
           return Task.newResult(true);
       }
-      if (method) {
-        const m = method;
+      if (m) {
         method = () =>
           m.call(self.opfView, self.pagePosition, !self.renderAllPages);
       }
@@ -1033,7 +1036,7 @@ export class Viewer {
     }
     const frame: Task.Frame<boolean> = Task.newFrame("moveTo");
     method.call(self.opfView).then(result => {
-      let cont;
+      let cont: Task.Result<boolean>;
       if (result) {
         self.pagePosition = result.position;
         const innerFrame: Task.Frame<boolean> = Task.newFrame(
@@ -1123,7 +1126,7 @@ export class Viewer {
 
   initEmbed(cmd: Base.JSON | string): void {
     let command = maybeParse(cmd);
-    let continuation = null;
+    let continuation: Task.Continuation<boolean> | null = null;
     const viewer = this;
     Task.start(() => {
       const frame: Task.Frame<boolean> = Task.newFrame("commandLoop");

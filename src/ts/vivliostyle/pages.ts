@@ -137,8 +137,8 @@ export function resolvePageSizeAndBleed(style: {
   } else {
     /** !type {!Css.Val} */
     const value = size.value;
-    let val1;
-    let val2;
+    let val1: Css.Val;
+    let val2: Css.Val;
     if (value.isSpaceList()) {
       val1 = (value as Css.SpaceList).values[0];
       val2 = (value as Css.SpaceList).values[1];
@@ -148,11 +148,12 @@ export function resolvePageSizeAndBleed(style: {
     }
     if (val1.isNumeric()) {
       // <length>{1,2}
-      pageSizeAndBleed.width = val1;
-      pageSizeAndBleed.height = val2 || val1;
+      pageSizeAndBleed.width = val1 as Css.Numeric;
+      pageSizeAndBleed.height = (val2 || val1) as Css.Numeric;
     } else {
       // <page-size> || [ portrait | landscape ]
-      const s = val1.name && pageSizes[(val1 as Css.Ident).name.toLowerCase()];
+      const s =
+        (val1 as any).name && pageSizes[(val1 as Css.Ident).name.toLowerCase()];
       if (!s) {
         // portrait or landscape is specified alone. fallback to fit to the
         // viewport (use default value)
@@ -375,8 +376,8 @@ export function createCrossMark(
   offset: number
 ): Element {
   const longLineLength = lineLength * 2;
-  let width;
-  let height;
+  let width: number;
+  let height: number;
   if (
     position === CrossMarkPosition.TOP ||
     position === CrossMarkPosition.BOTTOM
@@ -402,7 +403,7 @@ export function createCrossMark(
   circle.setAttribute("cy", height / 2);
   circle.setAttribute("r", lineLength / 4);
   mark.appendChild(circle);
-  let opposite;
+  let opposite: CrossMarkPosition;
   switch (position) {
     case CrossMarkPosition.TOP:
       opposite = CrossMarkPosition.BOTTOM;
@@ -741,8 +742,8 @@ export const marginBoxesKey: string = "_marginBoxes";
  * @param style Cascaded style for `@page` rules
  */
 export class PageRuleMaster extends Pm.PageMaster<PageRuleMasterInstance> {
-  private bodyPartitionKey: any;
-  private pageMarginBoxes: any = {} as {
+  private bodyPartitionKey: string;
+  private pageMarginBoxes = {} as {
     [key: string]: PageMarginBoxPartition;
   };
 
@@ -1526,7 +1527,7 @@ class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
  * @param size The fixed size (width or height) along the variable dimension.
  */
 class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
-  private fixedSize: any;
+  private fixedSize: number;
 
   constructor(
     container: Vtree.Container,
@@ -1851,7 +1852,7 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
   private positionAlongVariableDimension(
     names: { start: string; end: string; extent: string },
     dim: PageAreaDimension | null
-  ) {
+  ): void {
     const style = this.style;
     const scope = this.pageBox.scope;
     const startSide = names.start;
@@ -1948,7 +1949,7 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
   private positionAndSizeAlongFixedDimension(
     names: { inside: string; outside: string; extent: string },
     dim: PageAreaDimension | null
-  ) {
+  ): void {
     const style = this.style;
     const scope = this.pageBox.scope;
     const insideName = names.inside;
@@ -1993,7 +1994,11 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
       pageMargin
     );
     const extent = Pm.toExprAuto(scope, style[extentName], pageMargin);
-    let result = null;
+    let result: {
+      extent: Exprs.Result;
+      marginInside: Exprs.Result;
+      marginOutside: Exprs.Result;
+    } = null;
 
     function getComputedValues(
       context: Exprs.Context
@@ -2025,9 +2030,9 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
       if (result.marginInside === null || result.marginOutside === null) {
         const total =
           borderAndPadding +
-          result.extent +
-          result.marginInside +
-          result.marginOutside;
+          (result.extent as number) +
+          (result.marginInside as number) +
+          (result.marginOutside as number);
         if (total > pageMarginValue) {
           if (result.marginInside === null) {
             result.marginInside = 0;
@@ -2053,18 +2058,18 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
         result.extent =
           pageMarginValue -
           borderAndPadding -
-          result.marginInside -
-          result.marginOutside;
+          (result.marginInside as number) -
+          (result.marginOutside as number);
       } else if (
         result.extent !== null &&
-        result.marginInside === null &&
-        result.marginOutside !== null
+        (result.marginInside as number) === null &&
+        (result.marginOutside as number) !== null
       ) {
         result.marginInside =
           pageMarginValue -
           borderAndPadding -
-          result.extent -
-          result.marginOutside;
+          (result.extent as number) -
+          (result.marginOutside as number);
       } else if (
         result.extent !== null &&
         result.marginInside !== null &&
@@ -2073,14 +2078,14 @@ export class PageMarginBoxPartitionInstance extends Pm.PartitionInstance<
         result.marginOutside =
           pageMarginValue -
           borderAndPadding -
-          result.extent -
-          result.marginInside;
+          (result.extent as number) -
+          (result.marginInside as number);
       } else if (result.extent === null) {
         result.marginInside = result.marginOutside = 0;
         result.extent = pageMarginValue - borderAndPadding;
       } else {
         result.marginInside = result.marginOutside =
-          (pageMarginValue - borderAndPadding - result.extent) / 2;
+          (pageMarginValue - borderAndPadding - (result.extent as number)) / 2;
       }
       return result;
     }
@@ -2708,7 +2713,7 @@ export class PageParserHandler extends CssCasc.CascadeParserHandler
    * Save currently processed selector and reset variables.
    */
   private finishSelector() {
-    let selectors;
+    let selectors: string[];
     if (
       !this.currentNamedPageSelector &&
       !this.currentPseudoPageClassSelectors.length

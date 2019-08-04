@@ -824,7 +824,7 @@ export class Frame<T> {
       throw new Error("E_TASK_NO_CONTEXT");
     }
     return this.loop(() => {
-      let result;
+      let result: Result<boolean>;
       do {
         const frame = new LoopBodyFrame(task as Task, task.top);
         task.top = frame;
@@ -919,7 +919,11 @@ export class EventSource {
 
   detach(target: Base.EventTarget, type: string): void {
     let i = 0;
-    let item = null;
+    let item: {
+      target: Base.SimpleEventTarget;
+      type: string;
+      listener: Base.EventListener;
+    } = null;
     while (i < this.listeners.length) {
       item = this.listeners[i];
       if (item.type == type && item.target === target) {

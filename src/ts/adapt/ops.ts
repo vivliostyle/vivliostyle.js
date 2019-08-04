@@ -197,7 +197,7 @@ export class StyleInstance extends Exprs.Context
   faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: Pm.PageBoxInstance } = {};
   pageManager: Pages.PageManager = null;
-  private rootPageFloatLayoutContext: any;
+  private rootPageFloatLayoutContext: PageFloats.PageFloatLayoutContext;
   pageBreaks: { [key: string]: boolean } = {};
   pageProgression: Constants.PageProgression | null = null;
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
@@ -535,7 +535,7 @@ export class StyleInstance extends Exprs.Context
     // 2. Page master selection: for each page master:
     const pageMasters = this.rootPageBoxInstance
       .children as Pm.PageMasterInstance[];
-    let pageMaster;
+    let pageMaster: Pm.PageMasterInstance;
     for (let i = 0; i < pageMasters.length; i++) {
       pageMaster = pageMasters[i];
 
@@ -703,7 +703,7 @@ export class StyleInstance extends Exprs.Context
     const deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
     if (deferredFloats.length > 0) {
       if (column.lastAfterPosition) {
-        let result;
+        let result: Vtree.ChunkPosition;
         if (newPosition) {
           // Need overflown footnotes owned by newPosition
           result = newPosition.clone();
@@ -940,7 +940,7 @@ export class StyleInstance extends Exprs.Context
     const frame: Task.Frame<Layout.Column> = Task.newFrame(
       "createAndLayoutColumn"
     );
-    let column;
+    let column: Layout.Column;
     frame
       .loopWithFrame(loopFrame => {
         const layoutConstraint = self.createLayoutConstraint(
@@ -1200,8 +1200,8 @@ export class StyleInstance extends Exprs.Context
       this.documentURLTransformer
     );
     let columnIndex = 0;
-    let column = null;
-    let columns = [];
+    let column: Layout.Column = null;
+    let columns: Layout.Column[] = [];
     frame
       .loopWithFrame(loopFrame => {
         self
@@ -1327,7 +1327,7 @@ export class StyleInstance extends Exprs.Context
       boxInstance,
       layoutContainer
     );
-    let cont;
+    let cont: Task.Result<boolean>;
     let removed = false;
     if (!flowName || !flowName.isIdent()) {
       const contentVal = boxInstance.getProp(self, "content");
@@ -1925,7 +1925,7 @@ export function processViewportMeta(meta: Element): string {
     return "";
   }
   const vals = {};
-  let r;
+  let r: RegExpMatchArray;
   while (
     (r = content.match(
       /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/

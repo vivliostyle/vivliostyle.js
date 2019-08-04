@@ -2593,7 +2593,7 @@ export function parseStylesheet(
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
-  let condition: Css.Expr | null = null;
+  let condition: Css.Expr = null;
   if (media) {
     condition = parseMediaQuery(
       new CssTok.Tokenizer(media, handler),
@@ -2668,13 +2668,13 @@ export function parseStylesheetFromText(
   );
 }
 
-export const parseStylesheetFromURL = (
+export function parseStylesheetFromURL(
   url: string,
   handler: ParserHandler,
   classes: string | null,
   media: string | null
-): Task.Result<boolean> =>
-  Task.handle(
+): Task.Result<boolean> {
+  return Task.handle(
     "parseStylesheetFromURL",
     frame => {
       Net.ajax(url).then(xhr => {
@@ -2701,6 +2701,7 @@ export const parseStylesheetFromURL = (
       frame.finish(true);
     }
   );
+}
 
 export function parseValue(
   scope: Exprs.LexicalScope,

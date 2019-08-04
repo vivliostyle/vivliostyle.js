@@ -268,7 +268,7 @@ export class PageFloatLayoutContext
   writingMode: Css.Val;
   direction: Css.Val;
   private invalidated: boolean = false;
-  private floatStore: any;
+  private floatStore: PageFloatStore;
   private forbiddenFloats: PageFloatID[] = [];
   floatFragments: PageFloatFragment[] = [];
   private stashedFloatFragments: PageFloatFragment[] = [];
@@ -346,7 +346,7 @@ export class PageFloatLayoutContext
   private getPreviousSibling(): PageFloatLayoutContext | null {
     let child: PageFloatLayoutContext = this;
     let parent = this.parent;
-    let result;
+    let result: PageFloatLayoutContext;
     while (parent) {
       result = parent.getPreviousSiblingOf(
         child,
@@ -563,7 +563,7 @@ export class PageFloatLayoutContext
 
   getLastFollowingFloatInFragments(float: PageFloat): PageFloat | null {
     const order = float.getOrder();
-    let lastFollowing = null;
+    let lastFollowing: PageFloat = null;
     this.floatFragments.forEach(fragment => {
       fragment.continuations.forEach(c => {
         const f = c.float;
@@ -1161,10 +1161,10 @@ export class PageFloatLayoutContext
         return force;
       }
     }
-    let blockSize;
-    let inlineSize;
-    let outerBlockSize;
-    let outerInlineSize;
+    let blockSize: number;
+    let inlineSize: number;
+    let outerBlockSize: number;
+    let outerInlineSize: number;
     if (init) {
       const rect = area.vertical
         ? Geom.rotateBox(
@@ -1490,7 +1490,14 @@ export class PageFloatLayoutContext
     const clientLayout = column.clientLayout;
     Asserts.assert(clientLayout);
     let context: PageFloatLayoutContext = this;
-    let limits = null;
+    let limits: {
+      top: number;
+      left: number;
+      bottom: number;
+      right: number;
+      floatMinWrapBlockStart: number;
+      floatMinWrapBlockEnd: number;
+    } = null;
     while (context && context.container) {
       const l = context.getLimitValuesInner(layoutContext, clientLayout);
       if (limits) {

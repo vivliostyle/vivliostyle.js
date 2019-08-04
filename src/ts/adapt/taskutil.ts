@@ -133,8 +133,8 @@ export const waitForFetchers = <T>(
  * @return holding event type (load/error/abort)
  */
 export function loadElement(elem: Element, src: string): Fetcher<string> {
-  let width = null;
-  let height = null;
+  let width: string | null = null;
+  let height: string | null = null;
   if (elem.localName == "img") {
     width = elem.getAttribute("width");
     height = elem.getAttribute("height");

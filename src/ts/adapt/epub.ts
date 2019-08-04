@@ -20,6 +20,7 @@
  */
 import * as Base from "./base";
 import * as Cfi from "./cfi";
+import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
@@ -435,8 +436,8 @@ export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
   const sha1Sum = Sha1.bytesToSHA1Int8(uid);
   return blob => {
     const frame = Task.newFrame("deobfuscator") as Task.Frame<Blob>;
-    let head;
-    let tail;
+    let head: Blob;
+    let tail: Blob;
     if (blob.slice) {
       head = blob.slice(0, 1040);
       tail = blob.slice(1040, blob.size);
@@ -498,8 +499,8 @@ export function getMetadataComparator(
 ): (p1: Base.JSON, p2: Base.JSON) => number {
   const empty = {};
   return (item1, item2) => {
-    let m1;
-    let m2;
+    let m1: boolean;
+    let m2: boolean;
     const r1 = item1["r"] || empty;
     const r2 = item2["r"] || empty;
     if (term == metaTerms.title) {
@@ -544,7 +545,7 @@ export function readMetadata(
     for (const pn in predefinedPrefixes) {
       prefixMap[pn] = predefinedPrefixes[pn];
     }
-    let r;
+    let r: RegExpMatchArray;
 
     // This code permits any non-ASCII characters in the name to avoid bloating
     // the pattern.
@@ -649,7 +650,7 @@ export function readMetadata(
       rawItem.refines ? null : rawItem.name
     )
   );
-  let lang = null;
+  let lang: string | null = null;
   if (metadata[metaTerms.language]) {
     lang = metadata[metaTerms.language][0]["v"];
   }
@@ -957,7 +958,7 @@ export class OPFDoc {
       if (encodedPath) {
         const path = decodeURI(encodedPath);
         const item = this.itemMapByPath[path];
-        let mediaType = null;
+        let mediaType: string | null = null;
         if (item) {
           item.compressed = entry["m"] != 0;
           item.compressedSize = entry["c"];
@@ -1203,7 +1204,7 @@ export class OPFDoc {
     const frame: Task.Frame<string | null> = Task.newFrame("getCFI");
     this.store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
       const node = xmldoc.getNodeByOffset(offsetInItem);
-      let cfi = null;
+      let cfi: string | null = null;
       if (node) {
         const startOffset = xmldoc.getNodeOffset(node, 0, false);
         const offsetInNode = offsetInItem - startOffset;
@@ -1230,7 +1231,7 @@ export class OPFDoc {
         }
         let fragment = new Cfi.Fragment();
         fragment.fromString(fragstr);
-        let item;
+        let item: OPFItem;
         if (self.opfXML) {
           const opfNav = fragment.navigate(self.opfXML.document);
           if (opfNav.node.nodeType != 1 || opfNav.after || !opfNav.ref) {
@@ -1462,7 +1463,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       });
     } else {
       // Find insert position in contentContainer.
-      let insertPos = null;
+      let insertPos: Element | null = null;
       if (pageIndex > 0) {
         insertPos = viewItem.pages[pageIndex - 1].container.nextElementSibling;
       } else {
@@ -1518,7 +1519,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
       // If the position of the page break change, we should re-layout the next
       // page too.
-      let cont = null;
+      let cont: Task.Result<any> = null;
       if (pos) {
         const prevPos = viewItem.layoutPositions[pos.page];
         viewItem.layoutPositions[pos.page] = pos;
@@ -1654,8 +1655,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
         frame.finish(null);
         return;
       }
-      let resultPage = null;
-      let pageIndex;
+      let resultPage: Vtree.Page = null;
+      let pageIndex: number;
       frame
         .loopWithFrame(loopFrame => {
           const normalizedPosition = self.normalizeSeekPosition(
@@ -1804,7 +1805,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       s = spineIndex;
     }
 
-    let lastResult;
+    let lastResult: PageAndPosition;
     frame
       .loopWithFrame(loopFrame => {
         const pos = {
@@ -1955,7 +1956,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       );
     }
     const isLeft = page.side === Constants.PageSide.LEFT;
-    let other;
+    let other: Task.Result<PageAndPosition>;
     if (this.isRectoPage(page, position)) {
       other = this.previousPage(position, sync);
     } else {
@@ -2242,7 +2243,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     xmldoc: XmlDoc.XMLDocHolder,
     srcElem: Element,
     viewParent: Element,
-    computedStyle
+    computedStyle: { [key: string]: Css.Val }
   ): Task.Result<Element> {
     let data = srcElem.getAttribute("data");
     let result: Element | null = null;
@@ -2311,7 +2312,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     xmldoc: XmlDoc.XMLDocHolder,
     srcElem: Element,
     viewParent: Element,
-    computedStyle
+    computedStyle: { [key: string]: Css.Val }
   ): Task.Result<Element> {
     // See if MathJax installed, use it if it is.
     const hub = getMathJaxHub();
@@ -2373,11 +2374,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
     xmldoc: XmlDoc.XMLDocHolder,
     srcElem: Element,
     viewParent: Element,
-    computedStyle
+    computedStyle: { [key: string]: Css.Val }
   ): Task.Result<Element> {
     const doc = viewParent ? viewParent.ownerDocument : this.viewport.document;
     const srcTagName = srcElem.localName;
-    let tagName;
+    let tagName: string;
     switch (srcTagName) {
       case "t":
       case "tab":
@@ -2411,7 +2412,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return (
       srcElem: Element,
       viewParent: Element,
-      computedStyle
+      computedStyle: { [key: string]: Css.Val }
     ): Task.Result<Element> => {
       if (
         srcElem.localName == "object" &&
@@ -2482,7 +2483,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         );
       }
       const previousViewItem = self.spineItems[spineIndex - 1];
-      let pageNumberOffset;
+      let pageNumberOffset: number;
       if (item.startPage !== null) {
         pageNumberOffset = item.startPage - 1;
       } else {

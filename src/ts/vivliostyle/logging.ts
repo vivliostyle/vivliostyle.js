@@ -38,14 +38,11 @@ export type ErrorInfo = {
  * Class logging error, warning, information or debug messages.
  */
 export class Logger {
-  private opt_console: any;
   private listeners: { [key in LogLevel]?: ((p1: ErrorInfo) => void)[] } = {};
 
-  constructor(opt_console?: Console) {
-    this.opt_console = opt_console;
-  }
+  constructor(private opt_console?: Console) {}
 
-  private consoleDebug(msg) {
+  private consoleDebug(msg: any[]) {
     if (this.opt_console) {
       if (this.opt_console.debug) {
         this.opt_console.debug(...msg);
@@ -57,7 +54,7 @@ export class Logger {
     }
   }
 
-  private consoleInfo(msg) {
+  private consoleInfo(msg: any[]) {
     if (this.opt_console) {
       if (this.opt_console.info) {
         this.opt_console.info(...msg);
@@ -69,7 +66,7 @@ export class Logger {
     }
   }
 
-  private consoleWarn(msg) {
+  private consoleWarn(msg: any[]) {
     if (this.opt_console) {
       if (this.opt_console.warn) {
         this.opt_console.warn(...msg);
@@ -81,7 +78,7 @@ export class Logger {
     }
   }
 
-  private consoleError(msg) {
+  private consoleError(msg: any[]) {
     if (this.opt_console) {
       if (this.opt_console.error) {
         this.opt_console.error(...msg);
@@ -144,7 +141,7 @@ export class Logger {
  */
 function argumentsToErrorInfo(args: IArguments): ErrorInfo {
   const a = Array.from(args);
-  let e = null;
+  let e: Error = null;
   if (a[0] instanceof Error) {
     e = a.shift();
   }

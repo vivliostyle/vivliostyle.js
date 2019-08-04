@@ -103,7 +103,7 @@ export class LayoutIterator {
     );
     frame
       .loopWithFrame(loopFrame => {
-        let r;
+        let r: void | Task.Result<boolean>;
         while (state.nodeContext) {
           if (!state.nodeContext.viewNode) {
             if (state.nodeContext.after) {
@@ -299,8 +299,8 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   afterNonInlineElementNode(
     state: LayoutIteratorState
   ): void | Task.Result<boolean> {
-    let r;
-    let cont;
+    let r: void | Task.Result<boolean>;
+    let cont: Task.Result<boolean>;
     if (state.onStartEdges) {
       r = this.endEmptyNonInlineBox(state);
       cont = r && r.isPending() ? r : Task.newResult(true);

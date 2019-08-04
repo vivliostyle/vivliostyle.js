@@ -523,7 +523,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         break;
     }
     if (!expr) {
-      let altName;
+      let altName: string;
       if (name == "extent") {
         altName = this.vertical ? "width" : "height";
       } else if (name == "measure") {
@@ -1350,7 +1350,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
     const readHeight = (this.vertical || !column) && this.isAutoHeight;
     const readWidth = (!this.vertical || !column) && this.isAutoWidth;
-    let bbox = null;
+    let bbox: Vtree.ClientRect = null;
     if (readWidth || readHeight) {
       if (readWidth) {
         Base.setCSSProperty(container.element, "width", "auto");
@@ -1698,7 +1698,7 @@ export class PartitionInstance<
     listVal: Css.Val,
     conflicting: boolean
   ): Exprs.Val {
-    let list = null;
+    let list: Css.Val[] = null;
     if (listVal instanceof Css.Ident) {
       list = [listVal];
     }

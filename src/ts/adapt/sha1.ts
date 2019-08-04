@@ -64,7 +64,7 @@ export function bytesToSHA1Int32(bytes: string): number[] {
   const w =
     /** @type Array.<number> */
     [] as number[];
-  let i;
+  let i: number;
   for (let bi = 0; bi < bytes.length; bi += 64) {
     for (i = 0; i < 16; i++) {
       w[i] = decode32(bytes.substr(bi + 4 * i, 4));
@@ -78,7 +78,7 @@ export function bytesToSHA1Int32(bytes: string): number[] {
     let c = h[2];
     let d = h[3];
     let e = h[4];
-    let f;
+    let f: number;
     for (i = 0; i < 80; i++) {
       if (i < 20) {
         f = ((b & c) | (~b & d)) + 1518500249;

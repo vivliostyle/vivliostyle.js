@@ -248,7 +248,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const steps = position.steps;
     self.layoutContext.setViewRoot(self.element, self.isFootnote);
     let stepIndex = steps.length - 1;
-    let nodeContext = null;
+    let nodeContext: Vtree.NodeContext = null;
     frame
       .loop(() => {
         while (stepIndex >= 0) {
@@ -561,7 +561,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     index: number,
     boxOffset: number
   ): number {
-    let edge;
+    let edge: number;
     if (nodeContext && LayoutHelper.isOrphan(nodeContext.viewNode)) {
       return NaN;
     } else if (nodeContext && nodeContext.after && !nodeContext.inline) {
@@ -829,7 +829,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Asserts.assert(nodeContext.display);
       Base.setCSSProperty(element, "display", nodeContext.display);
       let offsets;
-      let containingBlockForAbsolute = null;
+      let containingBlockForAbsolute: Vtree.NodeContext = null;
       if (parent) {
         if (parent.containingBlockForAbsolute) {
           containingBlockForAbsolute = parent;
@@ -1688,7 +1688,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           edge += self.getTrailingMarginEdgeAdjustment(checkPoints);
         }
         self.updateMaxReachedAfterEdge(edge);
-        let lineCont;
+        let lineCont: Task.Result<Vtree.NodeContext>;
         if (nodeContext.firstPseudo) {
           // possibly need to deal with :first-line and friends
           lineCont = self.processLineStyling(
@@ -1754,7 +1754,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let low1 = lowCP;
     let highCP = checkPoints.length - 1;
     let high = checkPoints[highCP].boxOffset;
-    let mid;
+    let mid: number;
     while (low < high) {
       mid = low + Math.ceil((high - low) / 2);
 
@@ -1837,13 +1837,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const range = start.ownerDocument.createRange();
     let wentUp = false;
     let node = start;
-    let lastGood = null;
+    let lastGood: Node = null;
     let haveStart = false;
     let endNotReached = true;
     while (endNotReached) {
       let seekRange = true;
       do {
-        let next = null;
+        let next: Node = null;
         if (node == end) {
           if (end.nodeType === 1) {
             // If end is an element, continue traversing its children to find
@@ -2004,7 +2004,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   private getOffsetByRepetitiveElements(
     bp?: BreakPosition.BreakPosition
   ): number {
-    let offset;
+    let offset: { current: number; minimum: number };
     if (bp) {
       offset = bp.calculateOffset(this);
     } else {
@@ -2026,8 +2026,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     while (block.parent && block.inline) {
       block = block.parent;
     }
-    let widows;
-    let orphans;
+    let widows: number;
+    let orphans: number;
     if (force) {
       // Last resort, ignore widows/orphans
       widows = 1;
@@ -2089,7 +2089,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return null;
     }
     edge = linePositions[lineIndex - 1];
-    let nodeContext;
+    let nodeContext: Vtree.NodeContext;
     if (forceCutBeforeOverflowing) {
       nodeContext = firstOverflowing.checkPoint;
     } else {
@@ -2181,8 +2181,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   findAcceptableBreakPosition(): BreakPositionAndNodeContext {
-    let bp = null;
-    let nodeContext = null;
+    let bp: Layout.BreakPosition = null;
+    let nodeContext: Vtree.NodeContext = null;
     let penalty = 0;
     let nextPenalty = 0;
     do {
@@ -2471,9 +2471,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let atUnforcedBreak =
       !forcedBreakValue && leadingEdge && (nodeContext && nodeContext.after);
     let breakAtTheEdge = forcedBreakValue;
-    let lastAfterNodeContext = null;
-    let leadingEdgeContexts = [];
-    let trailingEdgeContexts = [];
+    let lastAfterNodeContext: Vtree.NodeContext = null;
+    let leadingEdgeContexts: Vtree.NodeContext[] = [];
+    let trailingEdgeContexts: Vtree.NodeContext[] = [];
     let onStartEdges = false;
 
     function needForcedBreak() {
@@ -2770,7 +2770,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let resultNodeContext = nodeContext.copy();
     const self = this;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("skipEdges");
-    let breakAtTheEdge = null;
+    let breakAtTheEdge: string | null = null;
     let onStartEdges = false;
     frame
       .loopWithFrame(loopFrame => {
@@ -3115,7 +3115,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // ------ start the column -----------
     self.openAllViews(chunkPosition.primary).then(nodeContext => {
-      let initialNodeContext = null;
+      let initialNodeContext: Vtree.NodeContext = null;
       if (nodeContext.viewNode) {
         initialNodeContext = nodeContext.copy();
       } else {
@@ -3140,7 +3140,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             retryer.initialComputedBlockSize
           )
           .then(positionAfter => {
-            let cont = null;
+            let cont: Task.Result<boolean> = null;
             if (!self.pseudoParent) {
               cont = self.doFinishBreakOfFragmentLayoutConstraints(
                 positionAfter
@@ -3321,7 +3321,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const self = this;
     const frame: Task.Frame<Vtree.ChunkPosition> = Task.newFrame("redoLayout");
     let i = 0;
-    let res = null;
+    let res: Vtree.ChunkPosition = null;
     let leadingEdge = true;
     frame
       .loopWithFrame(loopFrame => {

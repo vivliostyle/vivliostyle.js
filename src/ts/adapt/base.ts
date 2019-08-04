@@ -142,7 +142,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
  * @return converted URL
  */
 export function convertSpecialURL(url: string): string {
-  let r;
+  let r: RegExpMatchArray;
   if (
     (r = /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
       url

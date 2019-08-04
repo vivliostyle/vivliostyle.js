@@ -28,7 +28,6 @@ import * as Font from "./font";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
 import * as Asserts from "../vivliostyle/asserts";
 import * as Diff from "../vivliostyle/diff";
 import * as Display from "../vivliostyle/display";
@@ -39,6 +38,7 @@ import * as PseudoElement from "../vivliostyle/pseudoelement";
 import * as RepetitiveElement from "../vivliostyle/repetitiveelement";
 import * as Selectors from "../vivliostyle/selectors";
 import * as Urls from "../vivliostyle/urls";
+import { XmlDoc } from "../vivliostyle/types";
 
 const namespacePrefixMap = {};
 
@@ -205,7 +205,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     const root = PseudoElement.document.createElementNS(Base.NS.SHADOW, "root");
     let att = root;
     for (const name of PseudoElement.pseudoNames) {
-      let elem;
+      let elem: Element;
       if (name) {
         if (!pseudoMap[name]) {
           continue;
@@ -269,7 +269,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     regionIds: string[],
     isFootnote: boolean,
     nodeContext: Vtree.NodeContext,
-    context
+    context: Exprs.Context
   ) {
     const pseudoMap = CssCasc.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) {
@@ -308,7 +308,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
   createRefShadow(
     href: string,
-    type,
+    type: Vtree.ShadowType,
     element: Element,
     parentShadow: Vtree.ShadowContext,
     subShadow: Vtree.ShadowContext
@@ -318,7 +318,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       "createRefShadow"
     );
     self.xmldoc.store.load(href).then(refDocParam => {
-      const refDoc = refDocParam as XmlDoc.XMLDocHolder;
+      const refDoc = refDocParam;
       if (refDoc) {
         const refElement = refDoc.getElement(href);
         if (refElement) {
@@ -352,9 +352,9 @@ export class ViewFactory extends Base.SimpleEventTarget
     const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
       "createShadows"
     );
-    const shadow = null;
+    const shadow: Vtree.ShadowContext = null;
     const templateURLVal = computedStyle["template"];
-    let cont;
+    let cont: Task.Result<Vtree.ShadowContext>;
     if (templateURLVal instanceof Css.URL) {
       const url = (templateURLVal as Css.URL).url;
       cont = self.createRefShadow(
@@ -368,11 +368,11 @@ export class ViewFactory extends Base.SimpleEventTarget
       cont = Task.newResult(shadow);
     }
     cont.then(shadow => {
-      let cont1 = null;
+      let cont1: Task.Result<Vtree.ShadowContext> = null;
       if (element.namespaceURI == Base.NS.SHADOW) {
         if (element.localName == "include") {
           let href = element.getAttribute("href");
-          let xmldoc = null;
+          let xmldoc: XmlDoc.XMLDocHolder = null;
           if (href) {
             xmldoc = shadowContext ? shadowContext.xmldoc : self.xmldoc;
           } else if (shadowContext) {
@@ -400,7 +400,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       if (cont1 == null) {
         cont1 = Task.newResult(shadow);
       }
-      let cont2 = null;
+      let cont2: Task.Result<Vtree.ShadowContext> = null;
       cont1.then(shadow => {
         if (computedStyle["display"] === Css.ident.table_cell) {
           const url = Base.resolveURL(
@@ -499,7 +499,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   ): { lang: string | null; elementStyle: CssCasc.ElementStyle } {
     let node = this.nodeContext.sourceNode;
     const styles = [];
-    let lang = null;
+    let lang: string | null = null;
 
     // TODO: this is hacky. We need to recover the path through the shadow
     // trees, but we do not have the full shadow tree structure at this point.
@@ -947,7 +947,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
         // Create the view element
         let custom = false;
-        let inner = null;
+        let inner: Element = null;
         const fetchers = [];
         let ns = element.namespaceURI;
         let tag = element.localName;
@@ -1014,7 +1014,7 @@ export class ViewFactory extends Base.SimpleEventTarget
             const navParent = element.parentNode;
             if (navParent) {
               // find the content element
-              let href = null;
+              let href: string | null = null;
               for (let c: Node = navParent.firstChild; c; c = c.nextSibling) {
                 if (c.nodeType != 1) {
                   continue;
@@ -1073,7 +1073,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         ) {
           custom = true;
         }
-        let elemResult;
+        let elemResult: Task.Result<Element>;
         if (custom) {
           const parentNode = self.nodeContext.parent
             ? self.nodeContext.parent.viewNode
@@ -1127,7 +1127,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           if (element.namespaceURI != Base.NS.FB2 || tag == "td") {
             const attributes = element.attributes;
             const attributeCount = attributes.length;
-            let delayedSrc = null;
+            let delayedSrc: string | null = null;
             for (let i = 0; i < attributeCount; i++) {
               const attribute = attributes[i];
               const attributeNS = attribute.namespaceURI;
@@ -1183,7 +1183,11 @@ export class ViewFactory extends Base.SimpleEventTarget
                   const image = new Image();
                   const fetcher = TaskUtil.loadElement(image, attributeValue);
                   fetchers.push(fetcher);
-                  images.push({ image, element: result, fetcher });
+                  images.push({
+                    image,
+                    element: result as HTMLElement,
+                    fetcher
+                  });
                 }
               } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
                 continue; // namespace declaration (in Firefox)
@@ -1247,7 +1251,7 @@ export class ViewFactory extends Base.SimpleEventTarget
               const image = tag === "input" ? new Image() : result;
               const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
               if (image !== result) {
-                result.src = delayedSrc;
+                (result as HTMLImageElement).src = delayedSrc;
               }
               if (!hasAutoWidth && !hasAutoHeight) {
                 // No need to wait for the image, does not affect layout
@@ -1260,8 +1264,8 @@ export class ViewFactory extends Base.SimpleEventTarget
                   imageResolution !== 1
                 ) {
                   images.push({
-                    image,
-                    element: result,
+                    image: image as HTMLElement,
+                    element: result as HTMLElement,
                     fetcher: imageFetcher
                   });
                 }
@@ -1278,7 +1282,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           self.preprocessElementStyle(computedStyle);
           self.applyComputedStyles(result, computedStyle);
           if (!self.nodeContext.inline) {
-            let blackList = null;
+            let blackList: { [key: string]: string } = null;
             if (!firstTime) {
               if (
                 self.nodeContext.inheritedProps["box-decoration-break"] !==
@@ -1612,7 +1616,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       return Task.newResult(true);
     }
     const self = this;
-    let originl;
+    let originl: string;
     let textContent = (originl = self.sourceNode.textContent);
     const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
     const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
@@ -1650,7 +1654,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   ): Task.Result<boolean> {
     const self = this;
     const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
-    let result;
+    let result: Task.Result<boolean>;
     let needToProcessChildren = true;
     if (self.sourceNode.nodeType == 1) {
       result = self.createElementView(firstTime, atUnforcedBreak);
@@ -1701,10 +1705,10 @@ export class ViewFactory extends Base.SimpleEventTarget
     return Task.newResult(true);
   }
 
-  processShadowContent(pos) {
+  processShadowContent(pos: Vtree.NodeContext): Vtree.NodeContext {
     if (
       pos.shadowContext == null ||
-      pos.sourceNode.localName != "content" ||
+      (pos.sourceNode as Element).localName != "content" ||
       pos.sourceNode.namespaceURI != Base.NS.SHADOW
     ) {
       return pos;
@@ -1714,9 +1718,9 @@ export class ViewFactory extends Base.SimpleEventTarget
     const parent = pos.parent;
 
     // content that will be inserted
-    let contentNode;
-    let contentShadowType;
-    let contentShadow;
+    let contentNode: Node;
+    let contentShadowType: Vtree.ShadowType;
+    let contentShadow: Vtree.ShadowContext;
     if (shadow.subShadow) {
       contentShadow = shadow.subShadow;
       contentNode = shadow.root;

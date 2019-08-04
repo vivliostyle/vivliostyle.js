@@ -502,7 +502,7 @@ export function chainActions(
 ): CascadeAction {
   if (chain.length > 0) {
     chain.sort((a, b) => b.getPriority() - a.getPriority());
-    let chained = null;
+    let chained: ChainedAction | null = null;
     for (let i = chain.length - 1; i >= 0; i--) {
       chained = chain[i];
       chained.chained = action;
@@ -1824,7 +1824,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
       return super.visitFunc(func);
     }
     let type = "string";
-    let attributeName = null;
+    let attributeName: string | null = null;
     let defaultValue: Css.Val = null;
     if (func.values[0] instanceof Css.SpaceList) {
       const values = (func.values[0] as Css.SpaceList).values;
@@ -1897,7 +1897,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     // content-counter-10.xht assumes armenian is uppercase, enable if desired
 
     let lower = false;
-    let r;
+    let r: RegExpMatchArray;
     if ((r = type.match(/^upper-(.*)/)) != null) {
       upper = true;
       type = r[1];
@@ -1988,7 +1988,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
 
   visitFuncTargetCounter(values: Css.Val[]): Css.Val {
     const targetUrl = values[0];
-    let targetUrlStr;
+    let targetUrlStr: string;
     if (targetUrl instanceof Css.URL) {
       targetUrlStr = targetUrl.url;
     } else {
@@ -2009,7 +2009,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
 
   visitFuncTargetCounters(values: Css.Val[]): Css.Val {
     const targetUrl = values[0];
-    let targetUrlStr;
+    let targetUrlStr: string;
     if (targetUrl instanceof Css.URL) {
       targetUrlStr = targetUrl.url;
     } else {
@@ -2635,7 +2635,7 @@ export class CascadeInstance {
   }
 
   buildViewConditionMatcher(viewConditionId: string | null): Matchers.Matcher {
-    let matcher = null;
+    let matcher: Matchers.Matcher = null;
     if (viewConditionId) {
       Asserts.assert(this.currentElementOffset);
       matcher = Matchers.MatcherBuilder.buildViewConditionMatcher(
@@ -2714,9 +2714,9 @@ export class CascadeInstance {
     if (display) {
       displayVal = display.evaluate(this.context);
     }
-    let resetMap = null;
-    let incrementMap = null;
-    let setMap = null;
+    let resetMap: { [key: string]: number } = null;
+    let incrementMap: { [key: string]: number } = null;
+    let setMap: { [key: string]: number } = null;
     const reset = props["counter-reset"];
     if (reset) {
       const resetVal = reset.evaluate(this.context);
@@ -2912,7 +2912,7 @@ export class CascadeInstance {
     this.applyActions();
     this.applyAttrFilter(element);
     const quotesCasc = baseStyle["quotes"];
-    let itemToPushLast = null;
+    let itemToPushLast: QuotesScopeItem | null = null;
     if (quotesCasc) {
       const quotesVal = quotesCasc.evaluate(this.context);
       if (quotesVal) {
@@ -2978,7 +2978,7 @@ export class CascadeInstance {
   }
 
   private applyActions(): void {
-    let i;
+    let i: number;
     for (i = 0; i < this.currentClassNames.length; i++) {
       this.applyAction(this.code.classes, this.currentClassNames[i]);
     }
@@ -3587,7 +3587,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
   }
 
   special(name: string, value: Css.Val) {
-    let val;
+    let val: CascadeValue;
     if (!this.condition) {
       val = new CascadeValue(value, 0);
     } else {
@@ -4059,7 +4059,7 @@ export const convertToPhysical = <T>(
         continue;
       }
       const coupledName = couplingMap[propName];
-      let targetName;
+      let targetName: string;
       if (coupledName) {
         const coupledCascVal = src[coupledName];
         if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {

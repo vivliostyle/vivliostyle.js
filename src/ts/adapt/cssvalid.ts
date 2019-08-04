@@ -584,8 +584,8 @@ export class ListValidator extends PropertyValidator {
     let out: Css.Val[] = slice ? [] : arr;
     let current = this.first;
     let index = startIndex;
-    let alternativeStack = null;
-    let alternatives = null;
+    let alternativeStack: string[][] = null;
+    let alternatives: string[] = null;
     while (
       current !== this.successTerminal &&
       current !== this.failureTerminal
@@ -880,7 +880,7 @@ export class CommaListValidator extends ListValidator {
    */
   validateForShorthand(values: Css.Val[], index: number): Css.Val[] {
     let current = this.first;
-    let rval;
+    let rval: Css.Val[];
     while (current !== this.failureTerminal) {
       rval = current.validator.validateForShorthand(values, index);
       if (rval) {
@@ -1262,7 +1262,7 @@ export class InsetsSlashShorthandValidator extends ShorthandValidator {
       while (index0 >= slashIndex) {
         index0 = index0 == 1 ? 0 : index0 - 2;
       }
-      let index1;
+      let index1: number;
       if (slashIndex + 1 < list.length) {
         index1 = slashIndex + i + 1;
         while (index1 >= list.length) {
@@ -1713,7 +1713,7 @@ export class ValidatorSet {
       let vals: ValidatingGroup[] = [];
       const stack = [];
       let op = "";
-      let val;
+      let val: ValidatingGroup;
       let expectval = true;
       const self = this;
       const reduce = (): ValidatingGroup => {
@@ -1933,7 +1933,7 @@ export class ValidatorSet {
         return;
       }
       let token = tok.nthToken(1);
-      let shorthandValidator;
+      let shorthandValidator: ShorthandValidator;
       if (
         token.type == CssTok.TokenType.IDENT &&
         shorthandValidators[token.text]
