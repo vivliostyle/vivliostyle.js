@@ -1,7 +1,8 @@
 # Vivliostyle Viewer
 
-Vivliostyle Viewerは、HTML+CSS文書を組版・表示するWebアプリケーションです。
-このパッケージは[Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js)、[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)およびその他の組版ライブラリーを組み合わせたものです。
+Vivliostyle Viewerは、HTML+CSS文書を美しくページ組版・表示するWebアプリケーションであり、EPUBやWeb出版物をサポートします。
+
+このパッケージは[Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js)と[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)を組み合わせたものです。
 
 - オンラインでサンプルを見る <https://vivliostyle.org/samples/>
 - リリース版のダウンロード <https://github.com/vivliostyle/vivliostyle.js/releases>
@@ -35,10 +36,16 @@ Vivliostyle Viewerは、HTML+CSS文書を組版・表示するWebアプリケー
 
 以下にお寄せください。
 
-- GitHub Issues <https://github.com/vivliostyle/vivliostyle.js/issues>
-- メーリングリスト <https://groups.google.com/forum/?hl=ja#!forum/vivliostyle-ja>
+- GitHub Issues: <https://github.com/vivliostyle/vivliostyle.js/issues>
+  - UIに関する問題は <https://github.com/vivliostyle/vivliostyle-ui/issues>
 
 ## ソースコード
 
-- Vivliostyle core engine on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
+- Vivliostyle.js (core engine) on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
 - Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-ui>
+
+## ドキュメント
+
+- [Vivliostyle Viewer  ユーザーガイド](https://vivliostyle.github.io/vivliostyle.js/docs/ja/)
+
+- [Vivliostyle ドキュメント](https://vivliostyle.org/ja/docs/)
