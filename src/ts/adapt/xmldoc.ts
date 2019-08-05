@@ -341,8 +341,8 @@ export function parseAndReturnNullIfError(
     if (docElement.localName === errorTagName) {
       return null;
     } else {
-      for (let c = docElement.firstChild; c; c = c.nextSibling) {
-        if ((c as Element).localName === errorTagName) {
+      for (let c = docElement.firstElementChild; c; c = c.nextElementSibling) {
+        if (c.localName === errorTagName) {
           return null;
         }
       }
