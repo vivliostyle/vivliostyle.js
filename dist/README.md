@@ -1,7 +1,8 @@
 # Vivliostyle Viewer
 
-Vivliostyle Viewer is a web application displaying and typesetting HTML+CSS documents.
-This is a bundled package of [Vivliostyle core engine](https://github.com/vivliostyle/vivliostyle.js), [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui) and other typesetting libraries.
+Vivliostyle Viewer is a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+
+This is a bundled package of [Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js) and [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui).
 
 - View samples online: <https://vivliostyle.org/samples/>
 - Download release version: <https://github.com/vivliostyle/vivliostyle.js/releases>
@@ -37,9 +38,15 @@ This is a bundled package of [Vivliostyle core engine](https://github.com/vivlio
 Please send them to
 
 - GitHub Issues: <https://github.com/vivliostyle/vivliostyle.js/issues>
-- Mailing list: <https://groups.google.com/forum/?hl=ja#!forum/vivliostyle>
+  - About UI issues <https://github.com/vivliostyle/vivliostyle-ui/issues>
 
 ## Source code
 
-- Vivliostyle core engine on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
+- Vivliostyle.js (core engine) on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
 - Vivliostyle UI on GitHub: <https://github.com/vivliostyle/vivliostyle-ui>
+
+## Documentation
+
+- [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
+
+- [Vivliostyle Documentation](https://vivliostyle.org/docs/)

@@ -83,6 +83,9 @@ function getBrowserify(development, watch) {
 function bundleJs(b, name) {
     return b.bundle()
             .on("error", gutil.log.bind(gutil, "Browserify Error"))
+            .pipe(name === JS_ENTRIES.production
+                ? require('minify-stream')({ sourceMap: false })
+                : gutil.noop())
             .pipe(source(name))
             .pipe(gulp.dest(destDir("js")));
 }

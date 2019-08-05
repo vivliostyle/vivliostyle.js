@@ -1,7 +1,7 @@
 {
   "name": "vivliostyle-ui",
-  "version": "2019.1.106",
-  "description": "Paged viewer UI with Vivliostyle Engine as its layout engine",
+  "version": "2019.8.100-pre",
+  "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
   "scripts": {
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
     "build": "gulp build",
@@ -44,6 +44,7 @@
     "karma-sauce-launcher": "^1.2.0",
     "karma-verbose-reporter": "0.0.6",
     "knockout": "^3.3.0",
+    "tinyify": "^2.5.1",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.3.1"
   }
