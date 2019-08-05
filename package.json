@@ -6,6 +6,7 @@
     "lint": "eslint --ext .ts src",
     "build": "NODE_ENV=production webpack",
     "build-dev": "NODE_ENV=development webpack",
+    "typecheck": "tsc --noEmit",
     "build-oldjs": "node tools/build.js",
     "typecheck-oldjs": "node tools/typecheck.js",
     "test": "karma start test/conf/karma-sauce.conf.js",
