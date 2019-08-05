@@ -1,5 +1,13 @@
 # Change Log
 
+## 2019.8.100-pre - 2019-08-06
+
+### Changed
+
+- Vivliostyle.js source code is now written in TypeScript
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/536>
+
+
 ## [2019.1.106](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.106) - 2019-06-14
 
 ### Fixed
