@@ -1,7 +1,7 @@
 {
   "name": "vivliostyle-ui",
   "version": "2019.8.100-pre",
-  "description": "Vivliostyle Viewer UI component",
+  "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
   "scripts": {
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
     "build": "gulp build",

@@ -1,6 +1,6 @@
 # Vivliostyle UI
 
-Vivliostyle UI is a UI component which can be used with [Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js) to make Vivliostyle Viewer, a web application typesetting and displaying HTML+CSS documents with pagination.
+Vivliostyle UI is a UI component used with [Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js) to make Vivliostyle Viewer, a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 ## Try Vivliostyle Viewer
 

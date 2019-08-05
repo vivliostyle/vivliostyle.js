@@ -1,6 +1,7 @@
 # Vivliostyle Viewer
 
-Vivliostyle Viewerは、HTML+CSS文書をページ組版・表示するWebアプリケーションです。
+Vivliostyle Viewerは、HTML+CSS文書を美しくページ組版・表示するWebアプリケーションであり、EPUBやWeb出版物をサポートします。
+
 このパッケージは[Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js)と[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)を組み合わせたものです。
 
 - オンラインでサンプルを見る <https://vivliostyle.org/samples/>

@@ -1,6 +1,7 @@
 # Vivliostyle Viewer
 
-Vivliostyle Viewer is a web application typesetting and displaying HTML+CSS documents with pagination.
+Vivliostyle Viewer is a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+
 This is a bundled package of [Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js) and [Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui).
 
 - View samples online: <https://vivliostyle.org/samples/>
