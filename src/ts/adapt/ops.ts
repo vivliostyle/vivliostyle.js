@@ -57,7 +57,7 @@ export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
 > = new TaskUtil.Fetcher(() => {
   const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
   CssValid.loadValidatorSet().then(validatorSet => {
-    const url = Base.resolveURL("user-agent-Base.css", Base.resourceBaseURL);
+    const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
     const handler = new CssCasc.CascadeParserHandler(
       null,
       null,
