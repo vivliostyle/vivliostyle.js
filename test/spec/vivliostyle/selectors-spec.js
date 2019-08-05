@@ -14,15 +14,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_css from "../../../src/ts/adapt/css";
+import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
+import * as vivliostyle_matchers from "../../../src/ts/vivliostyle/matchers";
+import * as vivliostyle_selectors from "../../../src/ts/vivliostyle/selectors";
+
 describe("selectors", function() {
 
-    var NthFragmentMatcher = vivliostyle.selectors.NthFragmentMatcher;
-    var AllMatcher = vivliostyle.selectors.AllMatcher;
-    var AnyMatcher = vivliostyle.selectors.AnyMatcher;
-    var MatcherBuilder = vivliostyle.selectors.MatcherBuilder;
-    var mergeViewConditionalStyles = vivliostyle.selectors.mergeViewConditionalStyles;
-    var registerFragmentIndex = vivliostyle.selectors.registerFragmentIndex;
-    var clearFragmentIndices = vivliostyle.selectors.clearFragmentIndices;
+    var NthFragmentMatcher = vivliostyle_matchers.NthFragmentMatcher;
+    var AllMatcher = vivliostyle_matchers.AllMatcher;
+    var AnyMatcher = vivliostyle_matchers.AnyMatcher;
+    var MatcherBuilder = vivliostyle_matchers.MatcherBuilder;
+    var mergeViewConditionalStyles = adapt_csscasc.mergeViewConditionalStyles;
+    var registerFragmentIndex = vivliostyle_selectors.registerFragmentIndex;
+    var clearFragmentIndices = vivliostyle_selectors.clearFragmentIndices;
 
     beforeEach(function() {
         clearFragmentIndices();
@@ -219,13 +225,13 @@ describe("selectors", function() {
                 _viewConditionalStyles: [{
                     matcher: new NthFragmentMatcher(100, 2, 1),
                     styles: {
-                        "display": new adapt.csscasc.CascadeValue(adapt.css.ident.block, 0),
-                        "visivility": new adapt.csscasc.CascadeValue(adapt.css.ident.hidden, 0)
+                        "display": new adapt_csscasc.CascadeValue(adapt_css.ident.block, 0),
+                        "visivility": new adapt_csscasc.CascadeValue(adapt_css.ident.hidden, 0)
                     }
                 }, {
                     matcher: new NthFragmentMatcher(200, 2, 1),
                     styles: {
-                        "display": new adapt.csscasc.CascadeValue(adapt.css.ident.inline, 1)
+                        "display": new adapt_csscasc.CascadeValue(adapt_css.ident.inline, 1)
                     }
                 }]
             };
@@ -256,13 +262,13 @@ describe("selectors", function() {
                 _viewConditionalStyles: [{
                     matcher: {matches: function() { return false; }},
                     styles: {
-                        "display": new adapt.csscasc.CascadeValue(adapt.css.ident.block, 0),
-                        "visivility": new adapt.csscasc.CascadeValue(adapt.css.ident.hidden, 0)
+                        "display": new adapt_csscasc.CascadeValue(adapt_css.ident.block, 0),
+                        "visivility": new adapt_csscasc.CascadeValue(adapt_css.ident.hidden, 0)
                     }
                 }, {
                     matcher: {matches: function() { return false; }},
                     styles: {
-                        "display": new adapt.csscasc.CascadeValue(adapt.css.ident.inline, 1)
+                        "display": new adapt_csscasc.CascadeValue(adapt_css.ident.inline, 1)
                     }
                 }]
             };

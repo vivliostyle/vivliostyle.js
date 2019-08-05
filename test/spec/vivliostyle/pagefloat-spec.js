@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
-describe("pagefloat", function() {
-    var module = vivliostyle.pagefloat;
+
+import * as adapt_css from "../../../src/ts/adapt/css";
+import * as vivliostyle_pagefloat from "../../../src/ts/vivliostyle/pagefloats";
+
+describe("pagefloats", function() {
+    var module = vivliostyle_pagefloat;
     var FloatReference = module.FloatReference;
     var PageFloat = module.PageFloat;
     var PageFloatList = module.PageFloatList;
@@ -103,16 +107,16 @@ describe("pagefloat", function() {
         describe("constructor", function() {
             it("uses writing-mode and direction values of the parent if they are not specified", function() {
                 var context = new PageFloatLayoutContext(rootContext, FloatReference.PAGE, null, null,
-                    null, adapt.css.ident.vertical_rl, adapt.css.ident.rtl);
+                    null, adapt_css.ident.vertical_rl, adapt_css.ident.rtl);
 
-                expect(context.writingMode).toBe(adapt.css.ident.vertical_rl);
-                expect(context.direction).toBe(adapt.css.ident.rtl);
+                expect(context.writingMode).toBe(adapt_css.ident.vertical_rl);
+                expect(context.direction).toBe(adapt_css.ident.rtl);
 
                 context = new PageFloatLayoutContext(context, FloatReference.REGION, null, null, null,
                     null, null);
 
-                expect(context.writingMode).toBe(adapt.css.ident.vertical_rl);
-                expect(context.direction).toBe(adapt.css.ident.rtl);
+                expect(context.writingMode).toBe(adapt_css.ident.vertical_rl);
+                expect(context.direction).toBe(adapt_css.ident.rtl);
             });
 
             it("registers itself to the parent as a child", function() {

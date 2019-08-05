@@ -1,7 +1,9 @@
-node_modules
+## Directory
+node_modules/
+lib/
 
+## Files
 doc/anchors.json
 doc/supported-features.html
-lib
-package-lock.json
 test/wpt/sauce-credentials.ini
+package-lock.json

@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as vivliostyle_urls from "../../../src/ts/vivliostyle/urls";
+
 describe("urls", function() {
-    var module = vivliostyle.urls;
+    var module = vivliostyle_urls;
     var transformer = {
         transformURL: function(m1, baaseUrl) {
             return baaseUrl + "|" + m1 + "|";

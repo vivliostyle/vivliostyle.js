@@ -14,24 +14,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
-goog.provide("vivliostyle.test.util.mock.plugin");
+// goog.provide("vivliostyle.test.util.mock.plugin");
 
-(function() {
-    var pluginMock = vivliostyle.test.util.mock.plugin;
+import * as vivliostyle_plugin from "../../../../src/ts/vivliostyle/plugin";
 
-    pluginMock.setup = function() {
+// (function() {
+//     var pluginMock = vivliostyle.test.util.mock.plugin;
+
+// FIXME: cannot access to vivliostyle_plugin.hooks
+
+    export const setup = function() {
         var originalHooks;
         beforeAll(function() {
-            originalHooks = vivliostyle.plugin.hooks;
+            // originalHooks = vivliostyle_plugin.hooks;
         });
         beforeEach(function() {
-            var hooks = vivliostyle.plugin.hooks = {};
-            Object.keys(originalHooks).forEach(function(name) {
-                hooks[name] = Array.from(originalHooks[name]);
-            });
+            // var hooks = vivliostyle_plugin.hooks = {};
+            // Object.keys(originalHooks).forEach(function(name) {
+            //     hooks[name] = Array.from(originalHooks[name]);
+            // });
         });
         afterAll(function() {
-            vivliostyle.plugin.hooks = originalHooks;
+            // vivliostyle_plugin.hooks = originalHooks;
         });
     };
-})();
+// })();

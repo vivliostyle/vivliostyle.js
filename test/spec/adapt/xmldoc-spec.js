@@ -14,6 +14,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import * as adapt_base from "../../../src/ts/adapt/base";
+import * as adapt_xmldoc from "../../../src/ts/adapt/xmldoc";
+
 describe("xmldoc", function() {
 
     describe("XMLDocHolder", function() {
@@ -22,7 +26,7 @@ describe("xmldoc", function() {
         describe("getElement", function() {
             it("returns an element if there is one with the specified ID", function() {
                 var doc = new DOMParser().parseFromString("<foo><bar id='baz'></bar></foo>", "text/xml");
-                var holder = new adapt.xmldoc.XMLDocHolder(null, url, doc);
+                var holder = new adapt_xmldoc.XMLDocHolder(null, url, doc);
 
                 var e = holder.getElement("foobar#baz");
                 expect(e instanceof Element).toBe(true);
@@ -30,7 +34,7 @@ describe("xmldoc", function() {
 
             it("returns an element if there is one with the specified name", function() {
                 var doc = new DOMParser().parseFromString("<html><head></head><body><bar name='baz'></bar></body></html>", "text/html");
-                var holder = new adapt.xmldoc.XMLDocHolder(null, url, doc);
+                var holder = new adapt_xmldoc.XMLDocHolder(null, url, doc);
 
                 var e = holder.getElement("foobar#baz");
                 expect(e instanceof Element).toBe(true);
@@ -38,7 +42,7 @@ describe("xmldoc", function() {
 
             it("returns null if nothing found", function() {
                 var doc = new DOMParser().parseFromString("<foo><bar></bar></foo>", "text/xml");
-                var holder = new adapt.xmldoc.XMLDocHolder(null, url, doc);
+                var holder = new adapt_xmldoc.XMLDocHolder(null, url, doc);
 
                 var e = holder.getElement("foobar#baz");
                 expect(e).toBeFalsy();
@@ -51,13 +55,13 @@ describe("xmldoc", function() {
             var parser = {parseFromString: function() {}};
             spyOn(parser, "parseFromString");
 
-            adapt.xmldoc.parseAndReturnNullIfError("<test>", "text/xml", parser);
+            adapt_xmldoc.parseAndReturnNullIfError("<test>", "text/xml", parser);
 
             expect(parser.parseFromString).toHaveBeenCalledWith("<test>", "text/xml");
         });
 
         it("returns a Document object when no error occurs", function() {
-            var d = adapt.xmldoc.parseAndReturnNullIfError("<a>a<b></b></a>", "text/xml");
+            var d = adapt_xmldoc.parseAndReturnNullIfError("<a>a<b></b></a>", "text/xml");
 
             expect(d).toBeTruthy();
             expect(d.documentElement.localName).toBe("a");
@@ -67,15 +71,15 @@ describe("xmldoc", function() {
         });
 
         it("returns null when a parse error occurs", function() {
-            expect(adapt.xmldoc.parseAndReturnNullIfError("<test", "text/xml")).toBe(null);
-            expect(adapt.xmldoc.parseAndReturnNullIfError("<test><t></test>", "text/xml")).toBe(null);
+            expect(adapt_xmldoc.parseAndReturnNullIfError("<test", "text/xml")).toBe(null);
+            expect(adapt_xmldoc.parseAndReturnNullIfError("<test><t></test>", "text/xml")).toBe(null);
         });
     });
 
     describe("parseXMLResource", function() {
         it("returns an already parsed Document if present", function(done) {
-            var docStore = adapt.xmldoc.newXMLDocStore();
-            var result = adapt.xmldoc.parseXMLResource({responseXML: document}, docStore);
+            var docStore = adapt_xmldoc.newXMLDocStore();
+            var result = adapt_xmldoc.parseXMLResource({responseXML: document}, docStore);
             result.then(function(docHolder) {
                 expect(docHolder.document).toBe(document);
                 done();
@@ -91,17 +95,17 @@ describe("xmldoc", function() {
                 }
             }
 
-            var docStore = adapt.xmldoc.newXMLDocStore();
-            var result = adapt.xmldoc.parseXMLResource({responseText: htmlText, contentType: "text/html"}, docStore);
+            var docStore = adapt_xmldoc.newXMLDocStore();
+            var result = adapt_xmldoc.parseXMLResource({responseText: htmlText, contentType: "text/html"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
-                expect(doc.documentElement.namespaceURI).toBe(adapt.base.NS.XHTML);
+                expect(doc.documentElement.namespaceURI).toBe(adapt_base.NS.XHTML);
                 doneHtml = true;
                 complete();
             });
 
-            docStore = adapt.xmldoc.newXMLDocStore();
-            result = adapt.xmldoc.parseXMLResource({responseText: htmlText, contentType: "text/xml"}, docStore);
+            docStore = adapt_xmldoc.newXMLDocStore();
+            result = adapt_xmldoc.parseXMLResource({responseText: htmlText, contentType: "text/xml"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
                 expect(doc.documentElement.namespaceURI).toBe(null);
@@ -110,8 +114,8 @@ describe("xmldoc", function() {
                 complete();
             });
 
-            docStore = adapt.xmldoc.newXMLDocStore();
-            result = adapt.xmldoc.parseXMLResource({responseText: "<svg></svg>", contentType: "image/svg+xml"}, docStore);
+            docStore = adapt_xmldoc.newXMLDocStore();
+            result = adapt_xmldoc.parseXMLResource({responseText: "<svg></svg>", contentType: "image/svg+xml"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
                 expect(doc.documentElement.localName).toBe("svg");
@@ -121,8 +125,8 @@ describe("xmldoc", function() {
         });
 
         it("can parse application/*+xml source as an XML", function(done) {
-            var docStore = adapt.xmldoc.newXMLDocStore();
-            var result = adapt.xmldoc.parseXMLResource(
+            var docStore = adapt_xmldoc.newXMLDocStore();
+            var result = adapt_xmldoc.parseXMLResource(
                 {responseText: "<foo></foo>", contentType: "application/foo+xml"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
@@ -140,18 +144,18 @@ describe("xmldoc", function() {
                 }
             }
 
-            var docStore = adapt.xmldoc.newXMLDocStore();
-            var result = adapt.xmldoc.parseXMLResource(
+            var docStore = adapt_xmldoc.newXMLDocStore();
+            var result = adapt_xmldoc.parseXMLResource(
                 {responseText: htmlText, contentType: null, url: "foo.html"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
-                expect(doc.documentElement.namespaceURI).toBe(adapt.base.NS.XHTML);
+                expect(doc.documentElement.namespaceURI).toBe(adapt_base.NS.XHTML);
                 doneHtml = true;
                 complete();
             });
 
-            docStore = adapt.xmldoc.newXMLDocStore();
-            result = adapt.xmldoc.parseXMLResource({
+            docStore = adapt_xmldoc.newXMLDocStore();
+            result = adapt_xmldoc.parseXMLResource({
                 responseText: htmlText, contentType: null, url: "foo.xml"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
@@ -161,8 +165,8 @@ describe("xmldoc", function() {
                 complete();
             });
 
-            docStore = adapt.xmldoc.newXMLDocStore();
-            result = adapt.xmldoc.parseXMLResource({
+            docStore = adapt_xmldoc.newXMLDocStore();
+            result = adapt_xmldoc.parseXMLResource({
                 responseText: "<svg></svg>", contentType: null, url: "foo.svg"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
@@ -180,8 +184,8 @@ describe("xmldoc", function() {
                 }
             }
 
-            var docStore = adapt.xmldoc.newXMLDocStore();
-            var result = adapt.xmldoc.parseXMLResource(
+            var docStore = adapt_xmldoc.newXMLDocStore();
+            var result = adapt_xmldoc.parseXMLResource(
                 {responseText: "<foo></foo>", contentType: null, url: "foo/"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
@@ -191,18 +195,18 @@ describe("xmldoc", function() {
                 complete();
             });
 
-            docStore = adapt.xmldoc.newXMLDocStore();
-            result = adapt.xmldoc.parseXMLResource(
+            docStore = adapt_xmldoc.newXMLDocStore();
+            result = adapt_xmldoc.parseXMLResource(
                 {responseText: "<html></html>", contentType: null, url: "foo/"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;
-                expect(doc.documentElement.namespaceURI).toBe(adapt.base.NS.XHTML);
+                expect(doc.documentElement.namespaceURI).toBe(adapt_base.NS.XHTML);
                 doneHtml = true;
                 complete();
             });
 
-            docStore = adapt.xmldoc.newXMLDocStore();
-            result = adapt.xmldoc.parseXMLResource(
+            docStore = adapt_xmldoc.newXMLDocStore();
+            result = adapt_xmldoc.parseXMLResource(
                 {responseText: "<svg></svg>", contentType: null, url: "foo/"}, docStore);
             result.then(function(docHolder) {
                 var doc = docHolder.document;

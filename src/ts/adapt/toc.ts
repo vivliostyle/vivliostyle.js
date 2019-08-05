@@ -1,0 +1,345 @@
+/**
+ * Copyright 2013 Google, Inc.
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @fileoverview Toc - Table of Contents view.
+ */
+import * as Base from "./base";
+import * as Counters from "../vivliostyle/counters";
+import * as Css from "./css";
+import * as Exprs from "./exprs";
+import * as Font from "./font";
+import * as Ops from "./ops";
+import * as Task from "./task";
+import * as Vgen from "./vgen";
+import * as Vtree from "./vtree";
+import * as XmlDoc from "./xmldoc";
+
+// closed: 25B8
+// open: 25BE
+// empty: 25B9
+export const bulletClosed = "\u25b8";
+
+export const bulletOpen = "\u25be";
+
+export const bulletEmpty = "\u25b9";
+
+export class TOCView implements Vgen.CustomRendererFactory {
+  pref: Exprs.Preferences;
+  page: Vtree.Page = null;
+  instance: Ops.StyleInstance = null;
+
+  constructor(
+    public readonly store: Ops.OPSDocStore,
+    public readonly url: string,
+    public readonly lang: string | null,
+    public readonly clientLayout: Vtree.ClientLayout,
+    public readonly fontMapper: Font.Mapper,
+    pref: Exprs.Preferences,
+    public readonly rendererFactory: Vgen.CustomRendererFactory,
+    public readonly fallbackMap: { [key: string]: string },
+    public readonly documentURLTransformer: Base.DocumentURLTransformer,
+    public readonly counterStore: Counters.CounterStore
+  ) {
+    this.pref = Exprs.clonePreferences(pref);
+    this.pref.spreadView = false; // No spred view for TOC box
+  }
+
+  setAutoHeight(elem: Element, depth: number): void {
+    if (depth-- == 0) {
+      return;
+    }
+    for (let c: Node = elem.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType == 1) {
+        const e = c as Element;
+        if (Base.getCSSProperty(e, "height", "auto") != "auto") {
+          Base.setCSSProperty(e, "height", "auto");
+          this.setAutoHeight(e, depth);
+        }
+        if (Base.getCSSProperty(e, "position", "static") == "absolute") {
+          Base.setCSSProperty(e, "position", "relative");
+          this.setAutoHeight(e, depth);
+        }
+      }
+    }
+  }
+
+  /**
+   * @override
+   */
+  makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): Vgen.CustomRenderer {
+    const renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
+    return (
+      srcElem: Element,
+      viewParent: Element,
+      computedStyle: { [key: string]: Css.Val }
+    ): Task.Result<Element> => {
+      const behavior = computedStyle["behavior"];
+      if (behavior) {
+        switch (behavior.toString()) {
+          case "body-child":
+            if (
+              srcElem.parentElement.getAttribute(
+                "data-vivliostyle-primary-entry"
+              )
+            ) {
+              if (
+                !srcElem.querySelector(
+                  "[role=doc-toc], [role=directory], nav li a, .toc, #toc"
+                )
+              ) {
+                // When the TOC element is a part of the primaty entry (X)HTML,
+                // hide elements not containing TOC.
+                computedStyle["display"] = Css.ident.none;
+              }
+            }
+            break;
+          case "toc-node-anchor":
+            computedStyle["color"] = Css.ident.inherit;
+            computedStyle["text-decoration"] = Css.ident.none;
+            break;
+          case "toc-node":
+            computedStyle["display"] = Css.ident.block;
+            computedStyle["margin"] = Css.numericZero;
+            computedStyle["padding"] = Css.numericZero;
+            computedStyle["padding-inline-start"] = new Css.Numeric(1.25, "em");
+            break;
+          case "toc-node-first-child":
+            computedStyle["display"] = Css.ident.inline_block;
+            computedStyle["margin"] = new Css.Numeric(0.2, "em");
+            computedStyle["vertical-align"] = Css.ident.top;
+            computedStyle["color"] = Css.ident.inherit;
+            computedStyle["text-decoration"] = Css.ident.none;
+            break;
+        }
+      }
+      if (
+        !behavior ||
+        (behavior.toString() != "toc-node" &&
+          behavior.toString() != "toc-container")
+      ) {
+        return renderer(srcElem, viewParent, computedStyle);
+      }
+      // Remove white-space textnode that becomes unwanted space between button and anchor element.
+      const firstChild = srcElem.firstChild;
+      if (
+        firstChild &&
+        firstChild.nodeType !== 1 &&
+        firstChild.textContent.trim() === ""
+      ) {
+        // To avoid "Inconsistent offset" error, create a comment node with same white-space text.
+        srcElem.replaceChild(
+          srcElem.ownerDocument.createComment(firstChild.textContent),
+          firstChild
+        );
+      }
+      const adaptParentClass = viewParent.getAttribute("data-adapt-class");
+      if (adaptParentClass == "toc-node") {
+        const button = viewParent.firstChild as Element;
+        if (button.textContent != bulletClosed) {
+          button.textContent = bulletClosed;
+          Base.setCSSProperty(button, "cursor", "pointer");
+          button.addEventListener("click", toggleNodeExpansion, false);
+
+          button.setAttribute("role", "button");
+          button.setAttribute("aria-expanded", "false");
+          viewParent.setAttribute("aria-expanded", "false");
+
+          // Enable tab move to the button unless hidden.
+          if ((viewParent as HTMLElement).style.height !== "0px") {
+            (button as HTMLElement).tabIndex = 0;
+          }
+        }
+      }
+      const element = viewParent.ownerDocument.createElement("div");
+      element.setAttribute("data-adapt-process-children", "true");
+      if (behavior.toString() == "toc-node") {
+        const button = viewParent.ownerDocument.createElement("div");
+        button.textContent = bulletEmpty;
+
+        // TODO: define pseudo-element for the button?
+        Base.setCSSProperty(button, "margin", "0.2em 0 0 -1em");
+        Base.setCSSProperty(button, "margin-inline-start", "-1em");
+        Base.setCSSProperty(button, "margin-inline-end", "0");
+        Base.setCSSProperty(button, "display", "inline-block");
+        Base.setCSSProperty(button, "width", "1em");
+        Base.setCSSProperty(button, "text-align", "center");
+        Base.setCSSProperty(button, "vertical-align", "top");
+        Base.setCSSProperty(button, "cursor", "default");
+        Base.setCSSProperty(button, "font-family", "Menlo,sans-serif");
+        element.appendChild(button);
+        Base.setCSSProperty(element, "overflow", "hidden");
+        element.setAttribute("data-adapt-class", "toc-node");
+        element.setAttribute("role", "treeitem");
+
+        if (
+          adaptParentClass == "toc-node" ||
+          adaptParentClass == "toc-container"
+        ) {
+          Base.setCSSProperty(element, "height", "0px");
+
+          // Prevent tab move to hidden anchor.
+          const anchorElem = srcElem.firstElementChild;
+          if (anchorElem && anchorElem.localName === "a") {
+            (anchorElem as HTMLElement).tabIndex = -1;
+          }
+        } else {
+          viewParent.setAttribute("role", "tree");
+        }
+      } else {
+        if (adaptParentClass == "toc-node") {
+          element.setAttribute("data-adapt-class", "toc-container");
+          element.setAttribute("role", "group");
+          element.setAttribute("aria-hidden", "true");
+        }
+      }
+      return Task.newResult(element as Element);
+    };
+  }
+
+  showTOC(
+    elem: HTMLElement,
+    viewport: Vgen.Viewport,
+    width: number,
+    height: number,
+    fontSize: number
+  ): Task.Result<Vtree.Page> {
+    if (this.page) {
+      return Task.newResult(this.page as Vtree.Page);
+    }
+    const self = this;
+    const frame: Task.Frame<Vtree.Page> = Task.newFrame("showTOC");
+    const page = new Vtree.Page(elem, elem);
+    this.page = page;
+
+    // The (X)HTML doc for the TOC box may be reused for the TOC page in the book,
+    // but they need different styles. So, add "?viv-toc-box" to distinguish with TOC page URL.
+    const tocBoxUrl = this.url + "?viv-toc-box";
+
+    this.store.load(tocBoxUrl).then(xmldoc => {
+      // Mark if this doc is the primary entry page.
+      const nonTocBoxDoc = this.store.resources[this.url];
+      if (
+        nonTocBoxDoc &&
+        nonTocBoxDoc.body &&
+        nonTocBoxDoc.body.getAttribute("data-vivliostyle-primary-entry")
+      ) {
+        xmldoc.body.setAttribute("data-vivliostyle-primary-entry", true);
+      }
+
+      const style = self.store.getStyleForDoc(xmldoc);
+      const viewportSize = style.sizeViewport(width, 100000, fontSize);
+      viewport = new Vgen.Viewport(
+        viewport.window,
+        viewportSize.fontSize,
+        viewport.root,
+        viewportSize.width,
+        viewportSize.height
+      );
+      const customRenderer = self.makeCustomRenderer(xmldoc);
+      const instance = new Ops.StyleInstance(
+        style,
+        xmldoc,
+        self.lang,
+        viewport,
+        self.clientLayout,
+        self.fontMapper,
+        customRenderer,
+        self.fallbackMap,
+        0,
+        self.documentURLTransformer,
+        self.counterStore
+      );
+      self.instance = instance;
+      instance.pref = self.pref;
+      instance.init().then(() => {
+        instance.layoutNextPage(page, null).then(() => {
+          Array.from(
+            page.container.querySelectorAll(
+              "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']"
+            )
+          ).forEach(bodyChildElem => {
+            bodyChildElem.setAttribute("aria-hidden", "true");
+            bodyChildElem.setAttribute("hidden", "hidden");
+          });
+          self.setAutoHeight(elem, 2);
+          frame.finish(page);
+        });
+      });
+    });
+    return frame.result();
+  }
+
+  hideTOC(): void {
+    if (this.page) {
+      this.page.container.style.visibility = "hidden";
+      this.page.container.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  isTOCVisible(): boolean {
+    return !!this.page && this.page.container.style.visibility === "visible";
+  }
+}
+
+export function toggleNodeExpansion(evt: Event): void {
+  const elem = evt.target as Element;
+  const open = elem.textContent == bulletClosed;
+  elem.textContent = open ? bulletOpen : bulletClosed;
+  const tocNodeElem = elem.parentNode as Element;
+  elem.setAttribute("aria-expanded", open ? "true" : "false");
+  tocNodeElem.setAttribute("aria-expanded", open ? "true" : "false");
+  let c: Node = tocNodeElem.firstChild;
+  while (c) {
+    if (c.nodeType === 1) {
+      const ce = c as HTMLElement;
+      const adaptClass = ce.getAttribute("data-adapt-class");
+      if (adaptClass === "toc-container") {
+        ce.setAttribute("aria-hidden", !open ? "true" : "false");
+        if (ce.firstChild) {
+          c = ce.firstChild;
+          continue;
+        }
+      } else if (adaptClass === "toc-node") {
+        ce.style.height = open ? "auto" : "0px";
+
+        // Update enable/disable tab move to the button and anchor.
+        if (ce.children.length >= 2) {
+          (ce.children[1] as HTMLElement).tabIndex = open ? 0 : -1;
+        }
+        if (ce.children.length >= 3) {
+          (ce.children[0] as HTMLElement).tabIndex = open ? 0 : -1;
+          if (!open) {
+            const elem1 = ce.children[0];
+            if (elem1.textContent == bulletOpen) {
+              elem1.textContent = bulletClosed;
+              elem1.setAttribute("aria-expanded", "false");
+              ce.setAttribute("aria-expanded", "false");
+              c = ce.children[2];
+              continue;
+            }
+          }
+        }
+      }
+    }
+    while (!c.nextSibling && c.parentNode !== tocNodeElem) {
+      c = c.parentNode;
+    }
+    c = c.nextSibling;
+  }
+  evt.stopPropagation();
+}

@@ -15,19 +15,29 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 module.exports = {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "sourceType": "module",
+        "project": "./tsconfig.json"
+    },
     "env": {
         "es6": true,
         "browser": true,
-        "jasmine": true,
-        "commonjs": true
+        "jasmine": true
     },
     "globals": {
-        "adapt": false,
-        "goog": false,
-        "vivliostyle": false,
-        "DataView": false
+        "DEBUG": true,
     },
-    // "extends": "eslint:recommended",
+    "extends": [
+      "eslint:recommended",
+      "plugin:import/errors",
+      "plugin:import/warnings",
+      "plugin:import/typescript"
+    ],
+    "plugins": [
+        "@typescript-eslint",
+        "import"
+    ],
     "rules": {
         // Possible Errors
         // (in recommended)
@@ -44,13 +54,10 @@ module.exports = {
                 "allowEmptyCatch": true
             }
         ],
-        "no-inner-declarations": [
-            "error",
-            "functions"
-        ],
+        "no-inner-declarations": "off",
         // (not in recommended)
         // "no-extra-parens": "off",
-        // "no-prototype-builtins": "off",
+        "no-prototype-builtins": "off",
         "no-template-curly-in-string": "error",
         "no-unsafe-negation": "error",
         // "valid-jsdoc": "off",
@@ -85,7 +92,7 @@ module.exports = {
         "no-global-assign": "error",
         // "no-implicit-globals": "off",
         "no-implied-eval": "error",
-        "no-invalid-this": "error",
+        "no-invalid-this": "off",
         "no-iterator": "error",
         "no-labels": [
             "error",
@@ -114,7 +121,7 @@ module.exports = {
         // "no-unused-expressions": "off",
         "no-useless-call": "error",
         "no-useless-concat": "error",
-        // "no-useless-escape": "off",
+        "no-useless-escape": "off",
         "no-void": "error",
         // "no-warning-comments": "off",
         "no-with": "error",
@@ -188,13 +195,14 @@ module.exports = {
         "id-blacklist": "error",
         // "id-length": "off",
         "id-match": "error",
-        "indent": [
-            "warn",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
+        "indent": "off",
+        // "indent": [
+        //     "warn",
+        //     2,
+        //     {
+        //         "SwitchCase": 1
+        //     }
+        // ],
         // "key-spacing": "off",
         "keyword-spacing": "error",
         "linebreak-style": [
@@ -257,7 +265,7 @@ module.exports = {
             "error",
             "never"
         ],
-        "space-in-parens": "error",
+        // "space-in-parens": "error",
         // "space-infix-ops": "off",
         "space-unary-ops": "error",
         // "spaced-comment": "off",
@@ -265,6 +273,8 @@ module.exports = {
             "error",
             "never"
         ],
-        "wrap-regex": "error"
+        // "wrap-regex": "error",
+        "no-control-regex": "off",
+        "sort-imports": "warn",
     }
 };

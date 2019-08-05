@@ -1,5 +1,6 @@
 /**
  * Copyright 2017 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,34 +16,46 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 /*eslint-env node */
-var sourceList = require("../../src/source-list");
-var sourceFiles = sourceList.list.map(function(src) {
-    return "src/" + src;
-});
-var commonJsSourceFiles = sourceList.commonJsModuleList;
+
+const webpack = require("webpack");
 
 var testFiles = [
     "test/util/dom.js",
     "test/util/matchers.js",
-    "test/util/mock/vivliostyle/logging-mock.js",
-    "test/util/mock/vivliostyle/plugin-mock.js",
+    // "test/util/mock/vivliostyle/logging-mock.js",
+    // "test/util/mock/vivliostyle/plugin-mock.js",
     "test/spec/**/*.js",
-    "plugins/*/test/spec/**/*.js"
+    // "plugins/*/test/spec/**/*.js"
 ];
 
 module.exports = function(config) {
     return {
         basePath: "../..",
-        frameworks: ["jasmine", "commonjs"],
-        files: sourceFiles.concat(testFiles).concat(commonJsSourceFiles),
-        preprocessors: Object.assign({
-            'src/vivliostyle/diff.js': ['commonjs']
-        }, commonJsSourceFiles.reduce(function(r, f) {
-            r[f] = ['commonjs'];
-            return r;
-        }, {})),
-        commonjsPreprocessor: {
-            modulesRoot: './'
+        frameworks: ["jasmine"],
+        files: testFiles,
+        preprocessors: {
+            "test/{util,spec}/**/*.js": ["webpack", "sourcemap"]
+        },
+        webpack: {
+            mode: process.env.NODE_ENV === "production" ? "production" : "development",
+            entry: "./src/ts/vivliostyle.ts",
+            devtool: "inline-source-map",
+            resolve: {
+                extensions: [".ts", ".js"]
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.ts$/,
+                        loader: "ts-loader"
+                    }
+                ]
+            },
+            plugins: [
+                new webpack.DefinePlugin({
+                    DEBUG: JSON.stringify(process.env.NODE_ENV !== "production")
+                })
+            ],
         },
         port: 9876,
         colors: true,
