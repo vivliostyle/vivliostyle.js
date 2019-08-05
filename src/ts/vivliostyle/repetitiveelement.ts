@@ -18,8 +18,6 @@
  * @fileoverview RepetitiveElement - Elements repeated in every fragment
  * by repeat-on-break property.
  */
-import * as Task from "../adapt/task";
-import * as VtreeImpl from "../adapt/vtree";
 import * as Asserts from "./asserts";
 import * as LayoutHelper from "./layouthelper";
 import * as LayoutProcessor from "./layoutprocessor";
@@ -28,13 +26,15 @@ import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
 import * as Selectors from "./selectors";
 import * as Shared from "./shared";
+import * as Task from "../adapt/task";
+import * as VtreeImpl from "../adapt/vtree";
 import {
+  FormattingContextType,
+  FragmentLayoutConstraintType,
   Layout,
   RepetitiveElement,
   Table,
-  Vtree,
-  FormattingContextType,
-  FragmentLayoutConstraintType
+  Vtree
 } from "./types";
 
 export class RepetitiveElementsOwnerFormattingContext

@@ -19,9 +19,9 @@
  */
 import * as Base from "../adapt/base";
 import * as Css from "../adapt/css";
-import * as Task from "../adapt/task";
 import * as LayoutProcessor from "./layoutprocessor";
 import * as Logging from "./logging";
+import * as Task from "../adapt/task";
 import { Layout, Vtree } from "./types";
 
 /**

@@ -18,26 +18,26 @@
  *
  * @fileoverview Vgen - View tree generator.
  */
+import * as Asserts from "../vivliostyle/asserts";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssProp from "./cssprop";
 import * as CssStyler from "./cssstyler";
-import * as Exprs from "./exprs";
-import * as Font from "./font";
-import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
-import * as Vtree from "./vtree";
-import * as Asserts from "../vivliostyle/asserts";
 import * as Diff from "../vivliostyle/diff";
 import * as Display from "../vivliostyle/display";
+import * as Exprs from "./exprs";
+import * as Font from "./font";
 import * as Matchers from "../vivliostyle/matchers";
 import * as PageFloats from "../vivliostyle/pagefloats";
 import * as Plugin from "../vivliostyle/plugin";
 import * as PseudoElement from "../vivliostyle/pseudoelement";
 import * as RepetitiveElement from "../vivliostyle/repetitiveelement";
 import * as Selectors from "../vivliostyle/selectors";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
 import * as Urls from "../vivliostyle/urls";
+import * as Vtree from "./vtree";
 import { XmlDoc } from "../vivliostyle/types";
 
 const namespacePrefixMap = {};

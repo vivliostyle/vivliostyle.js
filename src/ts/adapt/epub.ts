@@ -18,14 +18,18 @@
  *
  * @fileoverview Epub - Deal with META-INF/ and .opf files in EPUB container.
  */
+import * as Asserts from "../vivliostyle/asserts";
 import * as Base from "./base";
 import * as Cfi from "./cfi";
+import * as Constants from "../vivliostyle/constants";
+import * as Counters from "../vivliostyle/counters";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import * as Logging from "../vivliostyle/logging";
 import * as Net from "./net";
 import * as Ops from "./ops";
 import * as Sha1 from "./sha1";
@@ -34,10 +38,6 @@ import * as Toc from "./toc";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
-import * as Asserts from "../vivliostyle/asserts";
-import * as Constants from "../vivliostyle/constants";
-import * as Counters from "../vivliostyle/counters";
-import * as Logging from "../vivliostyle/logging";
 
 export type Position = {
   spineIndex: number;

@@ -17,13 +17,10 @@
  *
  * @fileoverview Table - Table formatting context and layout.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as Task from "../adapt/task";
-import * as Vgen from "../adapt/vgen";
-import * as VtreeImpl from "../adapt/vtree";
 import * as Asserts from "./asserts";
+import * as Base from "../adapt/base";
 import * as BreakPosition from "./breakposition";
+import * as Css from "../adapt/css";
 import * as LayoutHelper from "./layouthelper";
 import * as LayoutProcessor from "./layoutprocessor";
 import * as LayoutRetryers from "./layoutretryers";
@@ -31,6 +28,9 @@ import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
 import * as RepetitiveElementImpl from "./repetitiveelement";
 import * as Selectors from "./selectors";
+import * as Task from "../adapt/task";
+import * as Vgen from "../adapt/vgen";
+import * as VtreeImpl from "../adapt/vtree";
 import {
   FormattingContextType,
   FragmentLayoutConstraintType,

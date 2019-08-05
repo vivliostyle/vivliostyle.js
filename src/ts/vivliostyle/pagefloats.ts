@@ -17,14 +17,14 @@
  *
  * @fileoverview PageFloats - CSS Page Floats
  */
+import * as Asserts from "./asserts";
 import * as Css from "../adapt/css";
 import * as Geom from "../adapt/geom";
-import * as Task from "../adapt/task";
-import * as VtreeImpl from "../adapt/vtree";
-import * as Asserts from "./asserts";
 import * as Logging from "./logging";
 import * as Logical from "./logical";
 import * as Sizing from "./sizing";
+import * as Task from "../adapt/task";
+import * as VtreeImpl from "../adapt/vtree";
 import { Layout, PageFloats, Vtree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;

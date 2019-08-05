@@ -19,6 +19,7 @@
  * @fileoverview Toc - Table of Contents view.
  */
 import * as Base from "./base";
+import * as Counters from "../vivliostyle/counters";
 import * as Css from "./css";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
@@ -27,7 +28,6 @@ import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
-import * as Counters from "../vivliostyle/counters";
 
 // closed: 25B8
 // open: 25BE

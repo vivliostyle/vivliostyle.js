@@ -17,13 +17,13 @@
  *
  * @fileoverview Selectors - Utilities for selectors.
  */
-import * as Base from "../adapt/base";
-import * as Task from "../adapt/task";
-import * as VtreeImpl from "../adapt/vtree";
 import * as Asserts from "./asserts";
+import * as Base from "../adapt/base";
 import * as LayoutHelper from "./layouthelper";
 import * as Matchers from "./matchers";
 import * as PseudoElement from "./pseudoelement";
+import * as Task from "../adapt/task";
+import * as VtreeImpl from "../adapt/vtree";
 import {
   FragmentLayoutConstraintType,
   Layout,

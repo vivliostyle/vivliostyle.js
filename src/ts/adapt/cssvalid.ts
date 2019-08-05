@@ -23,10 +23,10 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
+import * as Logging from "../vivliostyle/logging";
 import * as Net from "./net";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
-import * as Logging from "../vivliostyle/logging";
 
 export interface PropertyReceiver {
   unknownProperty(name: string, value: Css.Val): void;

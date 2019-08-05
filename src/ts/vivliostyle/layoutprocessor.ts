@@ -16,11 +16,11 @@
  *
  * @fileoverview LayoutProcessor - Definitions of LayoutProcessor.
  */
-import * as Task from "../adapt/task";
 import * as BreakPosition from "./breakposition";
 import * as Display from "./display";
 import * as LayoutHelper from "./layouthelper";
 import * as Plugin from "./plugin";
+import * as Task from "../adapt/task";
 import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
 
 /**

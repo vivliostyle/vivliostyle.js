@@ -17,11 +17,11 @@
  *
  * @fileoverview LayoutUtil - Utilities related to layout.
  */
+import * as Break from "./break";
+import * as BreakPosition from "./breakposition";
 import * as LayoutImpl from "../adapt/layout";
 import * as Task from "../adapt/task";
 import * as VtreeImpl from "../adapt/vtree";
-import * as Break from "./break";
-import * as BreakPosition from "./breakposition";
 import { Layout, Vtree } from "./types";
 
 export type LayoutIteratorState = {

@@ -19,7 +19,14 @@
  * @fileoverview Ops - Render EPUB content files by applying page masters,
  * styling and layout.
  */
+import "../vivliostyle/footnotes";
+import "../vivliostyle/table";
+import * as Asserts from "../vivliostyle/asserts";
 import * as Base from "./base";
+import * as Break from "../vivliostyle/break";
+import * as Columns from "../vivliostyle/columns";
+import * as Constants from "../vivliostyle/constants";
+import * as Counters from "../vivliostyle/counters";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
@@ -31,26 +38,19 @@ import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Geom from "./geom";
 import * as LayoutImpl from "./layout";
+import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
+import * as Logging from "../vivliostyle/logging";
 import * as Net from "./net";
+import * as PageFloats from "../vivliostyle/pagefloats";
+import * as Pages from "../vivliostyle/pages";
+import * as Plugin from "../vivliostyle/plugin";
 import * as Pm from "./pm";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
-import * as Asserts from "../vivliostyle/asserts";
-import * as Break from "../vivliostyle/break";
-import * as Columns from "../vivliostyle/columns";
-import * as Constants from "../vivliostyle/constants";
-import * as Counters from "../vivliostyle/counters";
-import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as Logging from "../vivliostyle/logging";
-import * as PageFloats from "../vivliostyle/pagefloats";
-import * as Pages from "../vivliostyle/pages";
-import * as Plugin from "../vivliostyle/plugin";
 import { Layout } from "../vivliostyle/types";
-import "../vivliostyle/footnotes";
-import "../vivliostyle/table";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
   boolean

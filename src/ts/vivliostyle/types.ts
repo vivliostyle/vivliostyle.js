@@ -18,11 +18,11 @@
  */
 import * as Base from "../adapt/base";
 import * as Css from "../adapt/css";
+import * as Diff from "./diff";
 import * as Exprs from "../adapt/exprs";
 import * as Geom from "../adapt/geom";
 import * as Task from "../adapt/task";
 import * as TaskUtil from "../adapt/taskutil";
-import * as Diff from "./diff";
 
 export type FormattingContextType =
   | "Block"

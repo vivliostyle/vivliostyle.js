@@ -17,6 +17,7 @@
  *
  * @fileoverview Counters
  */
+import * as Asserts from "./asserts";
 import * as Base from "../adapt/base";
 import * as CssCasc from "../adapt/csscasc";
 import * as CssProp from "../adapt/cssprop";
@@ -24,7 +25,6 @@ import * as CssStyler from "../adapt/cssstyler";
 import * as Exprs from "../adapt/exprs";
 import * as Vgen from "../adapt/vgen";
 import * as Vtree from "../adapt/vtree";
-import * as Asserts from "./asserts";
 import { Layout } from "./types";
 
 /**

@@ -18,19 +18,19 @@
  *
  * @fileoverview AdaptViewer - Viewer implementation.
  */
+import * as Asserts from "../vivliostyle/asserts";
 import * as Base from "./base";
+import * as Constants from "../vivliostyle/constants";
 import * as Epub from "./epub";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import * as Logging from "../vivliostyle/logging";
+import * as Plugin from "../vivliostyle/plugin";
+import * as Profile from "../vivliostyle/profile";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
-import * as Asserts from "../vivliostyle/asserts";
-import * as Constants from "../vivliostyle/constants";
-import * as Logging from "../vivliostyle/logging";
-import * as Plugin from "../vivliostyle/plugin";
-import * as Profile from "../vivliostyle/profile";
 
 export type Action = (p1: Base.JSON) => Task.Result<boolean>;
 

@@ -17,12 +17,12 @@
  *
  * @fileoverview Columns - Control column layout.
  */
-import * as Css from "../adapt/css";
-import * as Task from "../adapt/task";
-import * as Vtree from "../adapt/vtree";
 import * as Asserts from "./asserts";
+import * as Css from "../adapt/css";
 import * as MathUtil from "./mathutil";
 import * as PageFloats from "./pagefloats";
+import * as Task from "../adapt/task";
+import * as Vtree from "../adapt/vtree";
 import { Layout } from "./types";
 
 export type ColumnLayoutResult = {
