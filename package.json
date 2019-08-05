@@ -1,7 +1,7 @@
 {
   "name": "vivliostyle-ui",
   "version": "2019.8.100-pre",
-  "description": "Paged viewer UI with Vivliostyle Engine as its layout engine",
+  "description": "Vivliostyle Viewer UI component",
   "scripts": {
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
     "build": "gulp build",
