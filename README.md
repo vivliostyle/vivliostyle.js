@@ -1,6 +1,6 @@
 # Vivliostyle.js
 
-JavaScript library for typesetting and displaying HTML+CSS documents with pagination.
+JavaScript Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 (Source code of Vivliostyle.js is [now written in TypeScript](https://github.com/vivliostyle/vivliostyle.js/tree/master/src/ts).)
 
