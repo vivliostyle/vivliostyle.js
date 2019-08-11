@@ -297,7 +297,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
             });
           } else {
             this.loadAsJSON(
-              (manifestLink as any).href || manifestLink.getAttribute("href")
+              Base.resolveURL(manifestLink.getAttribute("href"), url)
             ).then(manifestObj => {
               opf.initWithWebPubManifest(manifestObj, doc).then(() => {
                 frame.finish(opf);
@@ -1128,7 +1128,7 @@ export class OPFDoc {
         "#toc a[href]";
       Array.from(doc.querySelectorAll(selector)).forEach(anchorElem => {
         const hrefNoFragment = Base.stripFragment(
-          (anchorElem as any).href || anchorElem.getAttribute("href")
+          Base.resolveURL(anchorElem.getAttribute("href"), this.pubURL)
         );
         const path = this.getPathFromURL(hrefNoFragment);
         const url = path !== null ? encodeURI(path) : hrefNoFragment;
