@@ -202,7 +202,9 @@ gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
 // serve
 function serve(development) {
     browserSync.init({
-        browser: process.platform === "darwin" ? "google chrome": "chromium-browser",
+        browser: process.platform === "darwin" ? "google chrome"
+            : process.platform === "win32" ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+            : "chromium-browser",
         server: {
             baseDir: "../"
         },
