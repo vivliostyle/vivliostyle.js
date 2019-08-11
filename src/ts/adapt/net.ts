@@ -113,8 +113,8 @@ export function ajax(
       );
       request.send(opt_data);
     } else {
-      if (/^file:|^https?:\/\/[^/]+\.githubusercontent\.com/.test(url)) {
-        // File or GitHub raw URL
+      if (/^file:|^https?:\/\/[^/]+\.githubusercontent\.com|\.opf$/.test(url)) {
+        // File or GitHub raw URL or .opf
         if (
           /\/aozorabunko\/[^/]+\/cards\/[^/]+\/files\/[^/.]+\.html$/.test(url)
         ) {
