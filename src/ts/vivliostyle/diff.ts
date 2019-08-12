@@ -18,7 +18,7 @@
  * @fileoverview Diff utility
  */
 
-import * as fastdiff from "fast-diff";
+import fastdiff from "fast-diff";
 
 export type Change = (number | string)[];
 
