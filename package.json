@@ -30,12 +30,12 @@
   "main": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^1.8.0",
-    "@typescript-eslint/parser": "^1.8.0",
-    "circular-dependency-plugin": "^5.0.2",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "circular-dependency-plugin": "^5.2.0",
     "eslint": "^5.16.0",
-    "eslint-plugin-import": "^2.17.2",
-    "fast-diff": "1.1.2",
+    "eslint-plugin-import": "^2.18.2",
+    "fast-diff": "^1.2.0",
     "jasmine-core": "^3.4.0",
     "karma": "^4.2.0",
     "karma-cli": "^2.0.0",
@@ -45,10 +45,10 @@
     "karma-typescript-preprocessor": "^0.4.0",
     "karma-verbose-reporter": "0.0.6",
     "karma-webpack": "^4.0.2",
-    "mustache": "^2.2.1",
-    "ts-loader": "^4.5.0",
-    "typescript": "^3.0.1",
-    "webpack": "^4.17.1",
-    "webpack-cli": "^3.1.0"
+    "mustache": "^3.0.1",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
   }
 }
