@@ -1,11 +1,20 @@
 # Change Log
 
-## 2019.8.100-pre - 2019-08-06
+## 2019.8.100-pre - 2019-08-14
 
 ### Changed
 
 - Vivliostyle.js source code is now written in TypeScript
   - <https://github.com/vivliostyle/vivliostyle.js/pull/536>
+- Resources such as UA stylesheets are no longer downloaded separately
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/537>
+
+### Fixed
+
+- Fix error "Failed to fetch a source document" with web publications on Microsoft Edge
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/1ed01afc>
+- Fix error "empty response for EPUB OPF" on some web servers that don't know the MIME type for .opf
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/db8e9bcb>
 
 
 ## [2019.1.106](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.106) - 2019-06-14
