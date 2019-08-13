@@ -1,6 +1,7 @@
-/*
+/**
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * CSS property validation.
+ * @fileoverview ValidationTxt - CSS property validation.
  */
+export default `\
 NUM = POS_NUM | ZERO | NEGATIVE;
 NNEG_NUM = POS_NUM | ZERO;
 INT = POS_INT | ZERO | NEGATIVE;
@@ -604,3 +606,4 @@ inset-inline = INSETS inline-start inline-end;
 [adapt,webkit]after = block-end;
 [adapt,webkit]start = inline-start;
 [adapt,webkit]end = inline-end;
+`;

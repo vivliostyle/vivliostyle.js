@@ -19,14 +19,11 @@
  * @fileoverview CssValid - Parse validation rules (validation.txt), validate
  * properties and shorthands.
  */
-import * as Base from "./base";
 import * as Css from "./css";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
 import * as Logging from "../vivliostyle/logging";
-import * as Net from "./net";
-import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import ValidationTxt from "../resources/validation-txt";
 
 export interface PropertyReceiver {
   unknownProperty(name: string, value: Css.Val): void;
@@ -2082,31 +2079,9 @@ export class ValidatorSet {
   }
 }
 
-export const validatorFetcher: TaskUtil.Fetcher<
-  ValidatorSet
-> = new TaskUtil.Fetcher(() => {
-  const frame: Task.Frame<ValidatorSet> = Task.newFrame(
-    "loadValidatorSet.load"
-  );
-  const url = Base.resolveURL("validation.txt", Base.resourceBaseURL);
-  const result = Net.ajax(url);
+export function baseValidatorSet(): ValidatorSet {
   const validatorSet = new ValidatorSet();
   validatorSet.initBuiltInValidators();
-  result.then(xhr => {
-    try {
-      if (xhr.responseText) {
-        validatorSet.parse(xhr.responseText);
-      } else {
-        Logging.logger.error("Error: missing", url);
-      }
-    } catch (err) {
-      Logging.logger.error(err, "Error:");
-    }
-    frame.finish(validatorSet);
-  });
-  return frame.result();
-}, "validatorFetcher");
-
-export function loadValidatorSet(): Task.Result<ValidatorSet> {
-  return validatorFetcher.get();
+  validatorSet.parse(ValidationTxt);
+  return validatorSet;
 }

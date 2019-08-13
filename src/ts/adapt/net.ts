@@ -23,6 +23,7 @@ import * as Logging from "../vivliostyle/logging";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import { Net, XmlDoc } from "../vivliostyle/types";
+import UserAgentXml from "../resources/user-agent-xml";
 
 /**
  * @enum {string}
@@ -236,6 +237,15 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     if (isTocBox) {
       url = url.replace("?viv-toc-box", "");
     }
+    const userAgentXmlUrl = Base.resolveURL(
+      "user-agent.xml",
+      Base.resourceBaseURL
+    );
+    const isUserAgentXml = !isTocBox && url === userAgentXmlUrl;
+    if (isUserAgentXml) {
+      // Change "user-agent.xml" URL to data URL
+      url = `data:application/xml,${encodeURIComponent(UserAgentXml)}`;
+    }
 
     ajax(url, self.type).then(response => {
       if (response.status >= 400) {
@@ -252,6 +262,9 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
         // Hack for TOCView.showTOC()
         url += "?viv-toc-box";
         response.url += "?viv-toc-box";
+      } else if (isUserAgentXml) {
+        // Restore "user-agent.xml" URL
+        response.url = url = userAgentXmlUrl;
       }
       self.parser(response, self).then(resource => {
         delete self.fetchers[url];
