@@ -4,12 +4,12 @@
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "scripts": {
     "lint": "eslint --ext .ts src",
-    "lint:fix": "eslint --fix --ext .ts src",
+    "lint-fix": "eslint --fix --ext .ts src",
     "build": "NODE_ENV=production webpack",
     "build-dev": "NODE_ENV=development webpack",
     "typecheck": "tsc --noEmit",
     "test": "karma start test/conf/karma-sauce.conf.js",
-    "test:local": "karma start test/conf/karma-local.conf.js"
+    "test-local": "karma start test/conf/karma-local.conf.js"
   },
   "repository": {
     "type": "git",
