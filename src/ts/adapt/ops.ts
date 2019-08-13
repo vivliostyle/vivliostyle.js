@@ -51,26 +51,33 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
 import { Layout } from "../vivliostyle/types";
+import UserAgentBaseCss from "../resources/user-agent-base-css";
+import UserAgentPageCss from "../resources/user-agent-page-css";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
   boolean
 > = new TaskUtil.Fetcher(() => {
   const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
-  CssValid.loadValidatorSet().then(validatorSet => {
-    const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
-    const handler = new CssCasc.CascadeParserHandler(
-      null,
-      null,
-      null,
-      null,
-      null,
-      validatorSet,
-      true
-    );
-    handler.startStylesheet(CssParse.StylesheetFlavor.USER_AGENT);
-    CssCasc.setUABaseCascade(handler.cascade);
-    CssParse.parseStylesheetFromURL(url, handler, null, null).thenFinish(frame);
-  });
+  const validatorSet = CssValid.baseValidatorSet();
+  const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
+  const handler = new CssCasc.CascadeParserHandler(
+    null,
+    null,
+    null,
+    null,
+    null,
+    validatorSet,
+    true
+  );
+  handler.startStylesheet(CssParse.StylesheetFlavor.USER_AGENT);
+  CssCasc.setUABaseCascade(handler.cascade);
+  CssParse.parseStylesheetFromText(
+    UserAgentBaseCss,
+    handler,
+    url,
+    null,
+    null
+  ).thenFinish(frame);
   return frame.result();
 }, "uaStylesheetBaseFetcher");
 
@@ -2014,14 +2021,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       Base.resourceBaseURL
     );
     const frame = Task.newFrame<boolean>("OPSDocStore.init");
-    const self = this;
-    CssValid.loadValidatorSet().then(validatorSet => {
-      self.validatorSet = validatorSet;
-      loadUABase().then(() => {
-        self.load(userAgentXML).then(() => {
-          self.triggerSingleDocumentPreprocessing = true;
-          frame.finish(true);
-        });
+    this.validatorSet = CssValid.baseValidatorSet();
+    loadUABase().then(() => {
+      this.load(userAgentXML).then(() => {
+        this.triggerSingleDocumentPreprocessing = true;
+        frame.finish(true);
       });
     });
     return frame.result();
@@ -2138,7 +2142,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         );
         sources.push({
           url: userAgentURL,
-          text: null,
+          text: UserAgentPageCss,
           flavor: CssParse.StylesheetFlavor.USER_AGENT,
           classes: null,
           media: null
