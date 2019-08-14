@@ -30,7 +30,7 @@ export default [
         },
         plugins: [
             nodeResolve({
-                mainFields: ['module', 'browser', 'main']
+                mainFields: ['browser', 'main']
             }),
             sourcemaps(),
             commonJS({
