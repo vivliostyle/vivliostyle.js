@@ -7,6 +7,7 @@
     "lint-fix": "eslint --fix --ext .ts src",
     "build": "NODE_ENV=production webpack",
     "build-dev": "NODE_ENV=development webpack",
+    "build-debug": "NODE_ENV=debug webpack",
     "typecheck": "tsc --noEmit",
     "test": "karma start test/conf/karma-sauce.conf.js",
     "test-local": "karma start test/conf/karma-local.conf.js"

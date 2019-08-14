@@ -30,9 +30,9 @@ module.exports = {
   output: {
     path: path.join(__dirname, "lib"),
     filename:
-      process.env.NODE_ENV === "production"
-        ? "vivliostyle.min.js"
-        : "vivliostyle.dev.js",
+      process.env.NODE_ENV === "development"
+        ? "vivliostyle.dev.js"  // "development"
+        : "vivliostyle.min.js", // "production" or "debug"
     library: "vivliostyle",
     libraryTarget: "umd",
     libraryExport: "default"
