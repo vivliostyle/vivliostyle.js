@@ -7,6 +7,8 @@
 - Vivliostyle.js source code is now written in TypeScript
   - <https://github.com/vivliostyle/vivliostyle.js/pull/536>
   - See [Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development) and [Migration to TypeScript finished](https://github.com/vivliostyle/vivliostyle.js/tree/master/src/ts)
+- Transpile to multiple targets, `lib/vivliostyle.min.js` for ES2018 and `lib/vivliostyle-es5.min.js` for ES5.
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/538>
 - Resources such as UA stylesheets are no longer downloaded separately
   - <https://github.com/vivliostyle/vivliostyle.js/pull/537>
 - Remove large sample files from the download package and the npm package
