@@ -6,8 +6,13 @@
 
 - Vivliostyle.js source code is now written in TypeScript
   - <https://github.com/vivliostyle/vivliostyle.js/pull/536>
+  - See [Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development) and [Migration to TypeScript finished](https://github.com/vivliostyle/vivliostyle.js/tree/master/src/ts)
 - Resources such as UA stylesheets are no longer downloaded separately
   - <https://github.com/vivliostyle/vivliostyle.js/pull/537>
+- Remove large sample files from the download package and the npm package
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/5c3becac>, <https://github.com/vivliostyle/vivliostyle.js/commit/245c9e7d>
+  - The download package (vivliostyle-js-latest.zip) size was 6.8MB and now reduced to 1.4MB.
+  - Vivliostyle sample files are moved from the vivliostyle.js repository to [vivliostyle_doc](https://github.com/vivliostyle/vivliostyle_doc) repository.
 
 ### Fixed
 
