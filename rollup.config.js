@@ -1,4 +1,4 @@
-import buble from "rollup-plugin-buble"
+import babel from "rollup-plugin-babel"
 import nodeResolve from "rollup-plugin-node-resolve"
 import commonJS from "rollup-plugin-commonjs"
 import strip from "rollup-plugin-strip"
@@ -30,8 +30,7 @@ export default [
         },
         plugins: [
             nodeResolve({
-                main: true,
-                browser: true
+                mainFields: ['module', 'browser', 'main']
             }),
             sourcemaps(),
             commonJS({
@@ -42,7 +41,7 @@ export default [
                 debugger: false,
                 functions: [ 'console.*', 'console.warn.apply', 'console.info.apply', 'console.debug.apply', 'console.error.apply' ]
             }),
-            buble(),
+            babel(),
             terser()
         ]
     },
@@ -57,8 +56,7 @@ export default [
         },
         plugins: [
             nodeResolve({
-                main: true,
-                browser: true
+                mainFields: ['module', 'browser', 'main']
             }),
             sourcemaps(),
             commonJS({
