@@ -2340,7 +2340,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       return;
     }
     if (node.nodeType === 1 && (node as Element).tagName === "mglyph") {
-      const attrs = (node as Element).attributes;
+      const attrs = Array.from((node as Element).attributes);
       for (const attr of attrs) {
         if (attr.name !== "src") {
           continue;

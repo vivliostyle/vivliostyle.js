@@ -23,7 +23,8 @@ along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
 
 Vivliostyle core ${pkg.version}`;
 
-module.exports = {
+const config = (outputFilename, tsConfigName) =>
+({
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
   entry: "./src/ts/vivliostyle.ts",
   devtool: "source-map",
@@ -31,8 +32,8 @@ module.exports = {
     path: path.join(__dirname, "lib"),
     filename:
       process.env.NODE_ENV === "development"
-        ? "vivliostyle.dev.js"  // "development"
-        : "vivliostyle.min.js", // "production" or "debug"
+        ? outputFilename + ".dev.js"  // "development"
+        : outputFilename + ".min.js", // "production" or "debug"
     library: "vivliostyle",
     libraryTarget: "umd",
     libraryExport: "default"
@@ -44,7 +45,14 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: "ts-loader"
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              configFile: tsConfigName
+            }
+          }
+        ]
       }
     ]
   },
@@ -90,4 +98,9 @@ module.exports = {
       })
     ]
   }
-};
+});
+
+module.exports = [
+  config('vivliostyle', 'tsconfig.json'),
+  config('vivliostyle-es5', 'tsconfig-es5.json')
+];

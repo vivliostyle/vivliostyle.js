@@ -29,7 +29,8 @@
     "samples",
     "plugins/*/resources"
   ],
-  "main": "lib/vivliostyle.min.js",
+  "main": "lib/vivliostyle-es5.min.js",
+  "module": "lib/vivliostyle.min.js",
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^1.13.0",
