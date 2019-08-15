@@ -101,11 +101,11 @@ function bundleJsDev() {
 }
 gulp.task("build:js", function() {
     b = getBrowserify(false, watching);
-    bundleJsProd();
+    return bundleJsProd();
 });
 gulp.task("build:js-dev", function() {
     b = getBrowserify(true, watching);
-    bundleJsDev();
+    return bundleJsDev();
 });
 
 // create a task simply copying files
@@ -160,7 +160,7 @@ gulp.task("build:css-dev", function() {
 });
 
 // build all
-gulp.task("build", [
+gulp.task("build", gulp.parallel(
     "build:js",
     "build:html",
     "build:fonts",
@@ -168,36 +168,39 @@ gulp.task("build", [
 //    "build:mathjax",
     "build:plugin_resources",
     "build:css"
-]);
-gulp.task("build-dev", [
+));
+gulp.task("build-dev", gulp.parallel(
     "build:js-dev",
     "build:html-dev",
     "build:fonts",
     "build:resources",
     "build:plugin_resources",
     "build:css-dev"
-]);
+));
 
 // watch
-gulp.task("start-watching", function() {
+gulp.task("start-watching", function(done) {
     watching = true;
+    done();
 });
-gulp.task("watch", ["start-watching", "build"], function() {
+gulp.task("watch", gulp.series(gulp.parallel("start-watching", "build"), function(done) {
     b.on("update", bundleJsProd);
-    gulp.watch(srcPattern("html"), ["build:html"]);
-    gulp.watch(srcPattern("fonts"), ["build:fonts"]);
-    gulp.watch(srcPattern("resources"), ["build:resources"]);
-    gulp.watch(srcPattern("plugin_resources"), ["build:plugin_resources"]);
-    gulp.watch(srcPattern("css"), ["build:css"]);
-});
-gulp.task("watch-dev", ["start-watching", "build-dev"], function() {
+    gulp.watch(srcPattern("html"), gulp.task("build:html"));
+    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
+    gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
+    gulp.watch(srcPattern("css"), gulp.task("build:css"));
+    done();
+}));
+gulp.task("watch-dev", gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
     b.on("update", bundleJsDev);
-    gulp.watch(srcPattern("html"), ["build:html-dev"]);
-    gulp.watch(srcPattern("fonts"), ["build:fonts"]);
-    gulp.watch(srcPattern("resources"), ["build:resources"]);
-    gulp.watch(srcPattern("plugin_resources"), ["build:plugin_resources"]);
-    gulp.watch(srcPattern("css"), ["build:css-dev"]);
-});
+    gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
+    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
+    gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
+    gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
+    done();
+}));
 
 // serve
 function serve(development) {
@@ -216,14 +219,16 @@ function serve(development) {
     }
     gulp.watch(target).on("change", browserSync.reload);
 }
-gulp.task("serve", ["watch"], function() {
+gulp.task("serve", gulp.series("watch", function(done) {
     serve(false);
-});
-gulp.task("serve-dev", ["watch-dev"], function() {
+    done();
+}));
+gulp.task("serve-dev", gulp.series("watch-dev", function(done) {
     serve(true);
-});
+    done();
+}));
 
-gulp.task("default", ["serve-dev"]);
+gulp.task("default", gulp.task("serve-dev"));
 
 // test
 gulp.task("test-local", function(done) {
