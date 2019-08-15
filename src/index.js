@@ -1,18 +1,19 @@
+import viewportCss from "vivliostyle/resources/vivliostyle-viewport.css"
+import viewportScreenCss from "vivliostyle/resources/vivliostyle-viewport-screen.css"
 import vivliostyle from "vivliostyle"
+
 
 class VivliostylePrint {
 
     constructor(
         htmlDoc, {
             title = '',
-            resourcesUrl = 'resources/',
             printCallback = iframeWin => iframeWin.print(),
             hideIframe = true,
             removeIframe = true
         }) {
         this.htmlDoc = htmlDoc
         this.title = title
-        this.resourcesUrl = resourcesUrl // URL of 'vivliostyle/resources' folder.
         this.printCallback = printCallback
         this.hideIframe = hideIframe
         this.removeIframe = removeIframe
@@ -33,8 +34,8 @@ class VivliostylePrint {
                 <meta charset='utf-8'/>
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
                 <title>${this.title}</title>
-                <link rel="stylesheet" href="${this.resourcesUrl}vivliostyle-viewport-screen.css" media="screen"/>
-                <link rel="stylesheet" href="${this.resourcesUrl}vivliostyle-viewport.css"/>
+                <style>${viewportCss}</style>
+                <style>${viewportScreenCss}</style>
                 <style>
                     html[data-vivliostyle-paginated] {
                         width: 100%;
@@ -77,8 +78,7 @@ class VivliostylePrint {
             docURL = URL.createObjectURL(docBlob),
             Viewer = new vivliostyle.viewer.Viewer({
                 viewportElement: this.iframeWin.document.body.firstElementChild,
-                window: this.iframeWin,
-                userAgentRootURL: `${this.resourcesUrl}`
+                window: this.iframeWin
             })
         return new Promise(resolve => {
             Viewer.addListener('readystatechange', () => {

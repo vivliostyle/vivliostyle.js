@@ -6,6 +6,7 @@ import sourcemaps from "rollup-plugin-sourcemaps"
 import {
     terser
 } from "rollup-plugin-terser"
+import {string} from "rollup-plugin-string"
 
 export default {
     input: "demo/index.js",
@@ -15,6 +16,9 @@ export default {
         sourcemap: true
     },
     plugins: [
+        string({
+            include: "../**/*.css",
+        }),
         nodeResolve({
             mainFields: ['browser', 'main']
         }),

@@ -16,7 +16,6 @@ document.getElementById('print').addEventListener('click', () => {
             <head>
             <body>${html}</body>
         </html>`,
-        resourcesUrl = `${window.location.href}resources/`,
         printCallback = iframeWin => {
             const pageCount = iframeWin.document.querySelectorAll('[data-vivliostyle-page-container]').length
             console.log(`page count: ${pageCount}`)
@@ -25,7 +24,6 @@ document.getElementById('print').addEventListener('click', () => {
 
     vivliostylePrint(htmlDoc, {
         title,
-        resourcesUrl,
         printCallback,
         hideIframe: true, // Whether to use a hidden iframe (default: true)
         removeIframe: true // Whether to remove the iframe after use (default: true)

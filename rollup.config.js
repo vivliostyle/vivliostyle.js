@@ -6,6 +6,7 @@ import sourcemaps from "rollup-plugin-sourcemaps"
 import {
     terser
 } from "rollup-plugin-terser"
+import {string} from "rollup-plugin-string"
 import pkg from "./package.json"
 
 const banner = `\
@@ -29,6 +30,9 @@ export default [
             banner
         },
         plugins: [
+            string({
+                include: "**/*.css",
+            }),
             nodeResolve({
                 mainFields: ['browser', 'main']
             }),
@@ -55,6 +59,9 @@ export default [
             banner
         },
         plugins: [
+            string({
+                include: "**/*.css",
+            }),
             nodeResolve({
                 mainFields: ['module', 'browser', 'main']
             }),
