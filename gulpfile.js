@@ -179,24 +179,27 @@ gulp.task("build-dev", gulp.parallel(
 ));
 
 // watch
-gulp.task("start-watching", function() {
+gulp.task("start-watching", function(done) {
     watching = true;
+    done();
 });
-gulp.task("watch", gulp.series(gulp.parallel("start-watching", "build"), function() {
+gulp.task("watch", gulp.series(gulp.parallel("start-watching", "build"), function(done) {
     b.on("update", bundleJsProd);
     gulp.watch(srcPattern("html"), gulp.task("build:html"));
     gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
     gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
     gulp.watch(srcPattern("css"), gulp.task("build:css"));
+    done();
 }));
-gulp.task("watch-dev", gulp.series(gulp.parallel("start-watching", "build-dev"), function() {
+gulp.task("watch-dev", gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
     b.on("update", bundleJsDev);
     gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
     gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
     gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
     gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
+    done();
 }));
 
 // serve
@@ -216,11 +219,13 @@ function serve(development) {
     }
     gulp.watch(target).on("change", browserSync.reload);
 }
-gulp.task("serve", gulp.series("watch", function() {
+gulp.task("serve", gulp.series("watch", function(done) {
     serve(false);
+    done();
 }));
-gulp.task("serve-dev", gulp.series("watch-dev", function() {
+gulp.task("serve-dev", gulp.series("watch-dev", function(done) {
     serve(true);
+    done();
 }));
 
 gulp.task("default", gulp.task("serve-dev"));
