@@ -4,11 +4,11 @@
 <style><![CDATA[
 
 .footnote-content {
-  float: footnote;
+	float: footnote;
 }
 
 .table-cell-container {
-  display: block;
+    display: block;
 }
 
 ]]></style>
