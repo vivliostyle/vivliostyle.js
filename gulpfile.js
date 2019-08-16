@@ -71,7 +71,9 @@ function getBrowserify(development, watch) {
         cache: {},
         packageCache: {},
         entries: [srcDir("js") + "/" + (development ? JS_ENTRIES.development : JS_ENTRIES.production)],
-        transform: [babelify],
+        transform: [babelify.configure({
+            presets: ["@babel/preset-env"],
+        })],
         debug: development
     });
     if (watch) {

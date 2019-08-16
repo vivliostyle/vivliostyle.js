@@ -26,7 +26,9 @@
     "vivliostyle": "next"
   },
   "devDependencies": {
-    "babelify": "^6.4.0",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babelify": "^10.0.0",
     "browser-sync": "^2.26.7",
     "browserify": "^16.5.0",
     "gulp": "^4.0.2",
