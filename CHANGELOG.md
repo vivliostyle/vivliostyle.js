@@ -1,6 +1,6 @@
 # Change Log
 
-## 2019.8.100-pre - 2019-08-14
+## [2019.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.8.100) - 2019-08-16
 
 ### Changed
 
