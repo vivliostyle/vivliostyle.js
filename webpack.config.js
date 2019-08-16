@@ -47,7 +47,7 @@ const config = (outputFilename, tsConfigName) =>
         test: /\.ts$/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: "ts-loader",
             options: {
               configFile: tsConfigName
             }
@@ -101,6 +101,6 @@ const config = (outputFilename, tsConfigName) =>
 });
 
 module.exports = [
-  config('vivliostyle', 'tsconfig.json'),
-  config('vivliostyle-es5', 'tsconfig-es5.json')
+  config("vivliostyle", "tsconfig.json"),
+  config("vivliostyle-es5", "tsconfig-es5.json")
 ];
