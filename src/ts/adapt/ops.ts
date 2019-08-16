@@ -51,8 +51,8 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
 import { Layout } from "../vivliostyle/types";
-import UserAgentBaseCss from "../resources/user-agent-base-css";
-import UserAgentPageCss from "../resources/user-agent-page-css";
+import UserAgentBaseCss from "../../resources/user-agent-base.css";
+import UserAgentPageCss from "../../resources/user-agent-page.css";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
   boolean

@@ -53,6 +53,10 @@ const config = (outputFilename, tsConfigName) =>
             }
           }
         ]
+      },
+      {
+        test: /\.(css|txt|xml)$/,
+        use: "raw-loader"
       }
     ]
   },

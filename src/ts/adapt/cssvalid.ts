@@ -23,7 +23,7 @@ import * as Css from "./css";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
 import * as Logging from "../vivliostyle/logging";
-import ValidationTxt from "../resources/validation-txt";
+import ValidationTxt from "../../resources/validation.txt";
 
 export interface PropertyReceiver {
   unknownProperty(name: string, value: Css.Val): void;

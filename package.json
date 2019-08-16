@@ -51,6 +51,7 @@
     "karma-webpack": "^4.0.2",
     "mustache": "^3.0.1",
     "prettier": "^1.18.2",
+    "raw-loader": "^3.1.0",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",
     "webpack": "^4.39.1",

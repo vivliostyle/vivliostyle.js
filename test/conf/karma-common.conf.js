@@ -48,6 +48,10 @@ module.exports = function(config) {
                     {
                         test: /\.ts$/,
                         loader: "ts-loader"
+                    },
+                    {
+                        test: /\.(css|txt|xml)$/,
+                        use: "raw-loader"
                     }
                 ]
             },

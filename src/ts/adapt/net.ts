@@ -23,7 +23,7 @@ import * as Logging from "../vivliostyle/logging";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import { Net, XmlDoc } from "../vivliostyle/types";
-import UserAgentXml from "../resources/user-agent-xml";
+import UserAgentXml from "../../resources/user-agent.xml";
 
 /**
  * @enum {string}
