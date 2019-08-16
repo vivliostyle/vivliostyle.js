@@ -43,6 +43,6 @@
         "rollup-plugin-string": "^3.0.0",
         "rollup-plugin-strip": "^1.2.2",
         "rollup-plugin-terser": "^5.1.1",
-        "vivliostyle": "next"
+        "vivliostyle": "2019.8.100"
     }
 }
