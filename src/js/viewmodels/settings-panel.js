@@ -22,7 +22,9 @@ import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import PageStyle from "../models/page-style";
 import PageViewMode from "../models/page-view-mode";
-import {Keys} from "../utils/key-util";
+import keyUtil from "../utils/key-util";
+
+const { Keys } = keyUtil;
 
 class SettingsPanel {
     constructor(

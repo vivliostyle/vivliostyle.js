@@ -20,8 +20,10 @@
 
 import ko from "knockout";
 import ViewerOptions from "../models/viewer-options";
-import {Keys} from "../utils/key-util";
+import keyUtil from "../utils/key-util";
 import vivliostyle from "../models/vivliostyle";
+
+const { Keys } = keyUtil;
 
 class Navigation {
     constructor(viewerOptions, viewer, settingsPanel, navigationOptions) {
