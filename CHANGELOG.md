@@ -1,6 +1,8 @@
 # Change Log
 
-## [2019.8.101-pre] - 2019-08-20
+## [2019.8.101](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.8.101) - 2019-08-20
+
+### Fixed
 
 - [Viewer UI] Fix error on keyboard navigation
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/7a7db2c>

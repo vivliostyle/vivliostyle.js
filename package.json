@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle",
-  "version": "2019.8.101-pre",
+  "version": "2019.8.101",
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "scripts": {
     "lint": "eslint --ext .ts src",
