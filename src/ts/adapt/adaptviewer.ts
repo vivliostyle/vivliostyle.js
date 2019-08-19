@@ -1218,6 +1218,9 @@ class RenderingCanceledError extends Error {
 
   constructor() {
     super();
+    // Set the prototype explicitly.
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, RenderingCanceledError.prototype);
     this.stack = new Error().stack;
   }
 }
