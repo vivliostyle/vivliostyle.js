@@ -1,5 +1,13 @@
 # Change Log
 
+## [2019.8.101-pre] - 2019-08-20
+
+- [Viewer UI] Fix error on keyboard navigation
+  - <https://github.com/vivliostyle/vivliostyle-ui/commit/7a7db2c>
+- Fix auto resize not working
+  - <https://github.com/vivliostyle/vivliostyle.js/commit/2245bba4>, <https://github.com/vivliostyle/vivliostyle.js/commit/b833976e>
+
+
 ## [2019.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.8.100) - 2019-08-16
 
 ### Changed
