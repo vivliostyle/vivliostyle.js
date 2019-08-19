@@ -76,28 +76,30 @@ const config = (outputFilename, tsConfigName) =>
     minimizer: [
       new TerserPlugin({
         terserOptions: {
-          mangle: {
-            properties: {
-              keep_quoted: true,
-              regex: /^[a-z]{2,}[A-Z]\w*$/,
-              reserved: [
-                "docTitle",
-                "getCurrentPageProgression",
-                "getPageSizes",
-                "isTOCVisible",
-                "layoutStyle",
-                "loadDocument",
-                "loadPublication",
-                "loadXML",
-                "navigateToInternalUrl",
-                "navigateToPage",
-                "printTimings",
-                "queryZoomFactor",
-                "setOptions",
-                "showTOC"
-              ]
-            }
-          }
+          // mangle: {
+          //   properties: {
+          //     keep_quoted: true,
+          //     regex: /^[a-z]{2,}[A-Z]\w*$/, // mangle camelCase property names
+          //     reserved: [ // list all camelCase property names to be reserved!!
+          //       "autoResize",
+          //       "docTitle",
+          //       "getCurrentPageProgression",
+          //       "getPageSizes",
+          //       "isTOCVisible",
+          //       "layoutStyle",
+          //       "loadDocument",
+          //       "loadPublication",
+          //       "loadXML",
+          //       "navigateToInternalUrl",
+          //       "navigateToPage",
+          //       "pageBorderWidth",
+          //       "printTimings",
+          //       "queryZoomFactor",
+          //       "setOptions",
+          //       "showTOC"
+          //     ]
+          //   }
+          // }
         }
       })
     ]
