@@ -9,7 +9,8 @@
     "serve": "gulp serve",
     "serve-dev": "gulp serve-dev",
     "test-local": "gulp test-local",
-    "test-sauce": "gulp test-sauce"
+    "test-sauce": "gulp test-sauce",
+    "format": "prettier --write {.prettierrc.js,gulpfile.js,src/{js,scss}/**/*.*,test/{conf,mock,spec}/**/*.*}"
   },
   "repository": {
     "type": "git",
