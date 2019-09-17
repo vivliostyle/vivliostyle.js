@@ -1,4 +1,4 @@
-# Features supported by Vivliostyle 2019.8.101
+# Features supported by Vivliostyle
 
 The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine.
 
