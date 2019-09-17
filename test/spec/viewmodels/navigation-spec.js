@@ -39,7 +39,7 @@ describe("Navigation", function() {
     beforeEach(function() {
         viewerOptions = new ViewerOptions();
         viewer = {
-            state: {navigatable: ko.observable(false)},
+            state: { navigatable: ko.observable(false) },
             navigateToPrevious: function() {},
             navigateToNext: function() {},
             navigateToLeft: function() {},
@@ -48,7 +48,7 @@ describe("Navigation", function() {
             navigateToLast: function() {},
             queryZoomFactor: function() {}
         };
-        settingsPanel = {opened: ko.observable(false)};
+        settingsPanel = { opened: ko.observable(false) };
     });
 
     function createNavigation(options) {
@@ -108,7 +108,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disablePageNavigation: true});
+            navigation = createNavigation({ disablePageNavigation: true });
             setDisabled(false);
             ret = navigation.navigateToPrevious();
 
@@ -140,7 +140,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disablePageNavigation: true});
+            navigation = createNavigation({ disablePageNavigation: true });
             setDisabled(false);
             ret = navigation.navigateToNext();
 
@@ -172,7 +172,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disablePageNavigation: true});
+            navigation = createNavigation({ disablePageNavigation: true });
             setDisabled(false);
             ret = navigation.navigateToLeft();
 
@@ -204,7 +204,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disablePageNavigation: true});
+            navigation = createNavigation({ disablePageNavigation: true });
             setDisabled(false);
             ret = navigation.navigateToRight();
 
@@ -236,7 +236,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disablePageNavigation: true});
+            navigation = createNavigation({ disablePageNavigation: true });
             setDisabled(false);
             ret = navigation.navigateToFirst();
 
@@ -268,7 +268,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disablePageNavigation: true});
+            navigation = createNavigation({ disablePageNavigation: true });
             setDisabled(false);
             ret = navigation.navigateToLast();
 
@@ -278,14 +278,14 @@ describe("Navigation", function() {
     });
 
     describe("hidePageNavigation", function() {
-        it ("is false by default", function() {
+        it("is false by default", function() {
             var navigation = createNavigation();
 
             expect(navigation.hidePageNavigation).toBe(false);
         });
 
-        it ("is set to true by navigationOptions", function() {
-            var navigation = createNavigation({disablePageNavigation: true});
+        it("is set to true by navigationOptions", function() {
+            var navigation = createNavigation({ disablePageNavigation: true });
 
             expect(navigation.hidePageNavigation).toBe(true);
         });
@@ -327,7 +327,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableZoom: true});
+            navigation = createNavigation({ disableZoom: true });
             setDisabled(false);
             zoom = viewerOptions.zoom().zoom;
             ret = navigation.zoomIn();
@@ -375,7 +375,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableZoom: true});
+            navigation = createNavigation({ disableZoom: true });
             setDisabled(false);
             zoom = viewerOptions.zoom().zoom;
             ret = navigation.zoomOut();
@@ -422,7 +422,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableZoom: true});
+            navigation = createNavigation({ disableZoom: true });
             setDisabled(false);
             zoom = viewerOptions.zoom().zoom;
             ret = navigation.zoomOut();
@@ -471,7 +471,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableZoom: true});
+            navigation = createNavigation({ disableZoom: true });
             setDisabled(false);
             ret = navigation.toggleFitToScreen();
 
@@ -483,14 +483,14 @@ describe("Navigation", function() {
     });
 
     describe("hideZoom", function() {
-        it ("is false by default", function() {
+        it("is false by default", function() {
             var navigation = createNavigation();
 
             expect(navigation.hideZoom).toBe(false);
         });
 
-        it ("is set to true by navigationOptions", function() {
-            var navigation = createNavigation({disableZoom: true});
+        it("is set to true by navigationOptions", function() {
+            var navigation = createNavigation({ disableZoom: true });
 
             expect(navigation.hideZoom).toBe(true);
         });
@@ -522,7 +522,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableFontSizeChange: true});
+            navigation = createNavigation({ disableFontSizeChange: true });
             setDisabled(false);
             ret = navigation.increaseFontSize();
 
@@ -557,7 +557,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableFontSizeChange: true});
+            navigation = createNavigation({ disableFontSizeChange: true });
             setDisabled(false);
             ret = navigation.decreaseFontSize();
 
@@ -595,7 +595,7 @@ describe("Navigation", function() {
             expect(ret).toBe(false);
 
             // disabled by navigationOptions
-            navigation = createNavigation({disableFontSizeChange: true});
+            navigation = createNavigation({ disableFontSizeChange: true });
             setDisabled(false);
             ret = navigation.defaultFontSize();
 
@@ -605,14 +605,14 @@ describe("Navigation", function() {
     });
 
     describe("hideFontSizeChange", function() {
-        it ("is false by default", function() {
+        it("is false by default", function() {
             var navigation = createNavigation();
 
             expect(navigation.hideFontSizeChange).toBe(false);
         });
 
-        it ("is set to true by navigationOptions", function() {
-            var navigation = createNavigation({disableFontSizeChange: true});
+        it("is set to true by navigationOptions", function() {
+            var navigation = createNavigation({ disableFontSizeChange: true });
 
             expect(navigation.hideFontSizeChange).toBe(true);
         });

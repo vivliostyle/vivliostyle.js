@@ -21,7 +21,6 @@ import ZoomOptions from "../../../src/js/models/zoom-options";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("ZoomOptions", () => {
-
     vivliostyleMock();
 
     const viewer = {
@@ -111,5 +110,4 @@ describe("ZoomOptions", () => {
             });
         });
     });
-
 });

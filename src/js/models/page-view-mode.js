@@ -35,7 +35,7 @@ class PageViewModeInstance {
     toString() {
         switch (this) {
             case PageViewMode.SPREAD:
-                return "spread";     // vivliostyle.viewer.PageViewMode.SPREAD;
+                return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
             case PageViewMode.SINGLE_PAGE:
                 return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
             case PageViewMode.AUTO_SPREAD:
@@ -73,7 +73,7 @@ const PageViewMode = {
             case vivliostyle.viewer.PageViewMode.AUTO_SPREAD:
                 return this.AUTO_SPREAD;
             default:
-                throw new Error(`Invalid PageViewMode name: ${name}`)
+                throw new Error(`Invalid PageViewMode name: ${name}`);
         }
     }
 };

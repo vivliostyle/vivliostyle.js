@@ -30,11 +30,10 @@ class Navigation {
         this.viewerOptions_ = viewerOptions;
         this.viewer_ = viewer;
         this.settingsPanel_ = settingsPanel;
-        this.justClicked = false;    // double click check
+        this.justClicked = false; // double click check
 
         this.isDisabled = ko.pureComputed(() => {
-            return this.settingsPanel_.opened() && !this.settingsPanel_.pinned() ||
-                !this.viewer_.state.navigatable();
+            return (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) || !this.viewer_.state.navigatable();
         });
 
         const navigationDisabled = ko.pureComputed(() => {
@@ -57,7 +56,7 @@ class Navigation {
                 return true;
             }
             if (this.viewer_.state.status === undefined) {
-                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
             }
             return this.viewer_.firstPage();
         });
@@ -67,10 +66,9 @@ class Navigation {
                 return true;
             }
             if (this.viewer_.state.status === undefined) {
-                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
             }
-            if (this.viewerOptions_.renderAllPages() &&
-                this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+            if (this.viewerOptions_.renderAllPages() && this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return false;
             }
             return this.viewer_.lastPage();
@@ -81,7 +79,7 @@ class Navigation {
                 return true;
             }
             if (this.viewer_.state.pageProgression === undefined) {
-                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
             }
             if (this.viewer_.state.pageProgression() === vivliostyle.constants.PageProgression.LTR) {
                 return this.isNavigateToPreviousDisabled();
@@ -95,7 +93,7 @@ class Navigation {
                 return true;
             }
             if (this.viewer_.state.pageProgression === undefined) {
-                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
             }
             if (this.viewer_.state.pageProgression() === vivliostyle.constants.PageProgression.LTR) {
                 return this.isNavigateToNextDisabled();
@@ -111,10 +109,9 @@ class Navigation {
                 return true;
             }
             if (this.viewer_.state.status === undefined) {
-                return false;   // needed for test/spec/viewmodels/navigation-spec.js
+                return false; // needed for test/spec/viewmodels/navigation-spec.js
             }
-            if (this.viewerOptions_.renderAllPages() &&
-                this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
+            if (this.viewerOptions_.renderAllPages() && this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE) {
                 return true;
             }
             return this.viewer_.lastPage();
@@ -174,7 +171,7 @@ class Navigation {
                 const pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
 
                 // Accept non-integer, convert fullwidth to ascii
-                let pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))) || 0;
+                let pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0))) || 0;
                 if (/^[-+]/.test(pageNumberText)) {
                     // "+number" and "-number" to relative move.
                     pageNumber = pageNumberOld + pageNumber;
@@ -198,8 +195,7 @@ class Navigation {
                 this.viewer_.navigateToEPage(epageNav);
 
                 setTimeout(() => {
-                    if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.LOADING &&
-                        this.viewer_.epage() === epageOld) {
+                    if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.LOADING && this.viewer_.epage() === epageOld) {
                         pageNumberElem.value = pageNumberOld;
                     }
                     document.getElementById("vivliostyle-viewer-viewport").focus();
@@ -344,7 +340,7 @@ class Navigation {
             if (fontSize < 10) {
                 fontSize = Math.floor(fontSize) + 1;
             } else if (fontSize < 20) {
-                fontSize = (Math.floor(fontSize / 2) + 1) * 2; 
+                fontSize = (Math.floor(fontSize / 2) + 1) * 2;
             } else if (fontSize < 40) {
                 fontSize = (Math.floor(fontSize / 4) + 1) * 4;
             } else if (fontSize < 72) {
@@ -428,10 +424,10 @@ class Navigation {
 
             if (!this.viewer_.tocVisible()) {
                 if (this.justClicked) {
-                    this.viewer_.showTOC(true, false);   // autohide=false
+                    this.viewer_.showTOC(true, false); // autohide=false
                     this.justClicked = false;
                 } else {
-                    this.viewer_.showTOC(true, true);   // autohide=true
+                    this.viewer_.showTOC(true, true); // autohide=true
                     this.justClicked = true;
                 }
                 // Here use timer for two purposes:
@@ -450,7 +446,7 @@ class Navigation {
                 }, 300);
             } else if (this.justClicked) {
                 // Double click to keep TOC box visible during TOC navigation
-                this.viewer_.showTOC(true, false);   // autohide=false
+                this.viewer_.showTOC(true, false); // autohide=false
                 this.justClicked = false;
             } else {
                 if (intervalID) {
@@ -474,17 +470,18 @@ class Navigation {
     }
 
     navigateTOC(key) {
-        const selecter = "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
-                         "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
+        const selecter =
+            "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
+            "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
         let nodes = Array.from(document.querySelectorAll(selecter));
         let index = nodes.indexOf(document.activeElement);
 
-        const isButton = (index) => {
+        const isButton = index => {
             return nodes[index] && nodes[index].getAttribute("role") === "button";
-        }
-        const isExpanded = (index) => {
+        };
+        const isExpanded = index => {
             return nodes[index] && nodes[index].getAttribute("aria-expanded") === "true";
-        }
+        };
 
         switch (key) {
             case Keys.ArrowLeft:
@@ -564,8 +561,7 @@ class Navigation {
     }
 
     handleKey(key) {
-        const isSettingsActive = this.settingsPanel_.opened() &&
-            this.settingsPanel_.settingsToggle.contains(document.activeElement);
+        const isSettingsActive = this.settingsPanel_.opened() && this.settingsPanel_.settingsToggle.contains(document.activeElement);
 
         if (isSettingsActive) {
             return true;

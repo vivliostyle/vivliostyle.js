@@ -28,19 +28,19 @@ class Viewer {
         this.viewerOptions_ = viewerOptions;
         this.documentOptions_ = null;
         this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
-        const state_ = this.state_= {
+        const state_ = (this.state_ = {
             status: obs.readonlyObservable(vivliostyle.constants.ReadyState.LOADING),
             pageProgression: obs.readonlyObservable(vivliostyle.constants.PageProgression.LTR)
-        };
+        });
         this.state = {
             status: state_.status.getter.extend({
                 rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
-                notify: 'always'
+                notify: "always"
             }),
             navigatable: ko.pureComputed(() => state_.status.value() && state_.status.value() !== vivliostyle.constants.ReadyState.LOADING),
             pageProgression: state_.pageProgression.getter
         };
-        
+
         this.epage = ko.observable();
         this.epageCount = ko.observable();
         this.firstPage = ko.observable();
@@ -82,7 +82,7 @@ class Viewer {
             }
         });
         this.viewer_.addListener("nav", payload => {
-            const {cfi, first, last, epage, epageCount, metadata, docTitle} = payload;
+            const { cfi, first, last, epage, epageCount, metadata, docTitle } = payload;
             if (cfi) {
                 this.documentOptions_.fragment(cfi);
             }
@@ -103,8 +103,8 @@ class Viewer {
                 const pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
                 if (!pubTitle) {
                     document.title = docTitle ? docTitle : "Vivliostyle Viewer";
-                } else if (!docTitle || docTitle === pubTitle || this.firstPage() ||
-                        (/\.xhtml$/).test(docTitle)) { // ignore ugly titles copied from *.xhtml file name
+                } else if (!docTitle || docTitle === pubTitle || this.firstPage() || /\.xhtml$/.test(docTitle)) {
+                    // ignore ugly titles copied from *.xhtml file name
                     document.title = pubTitle;
                 } else {
                     document.title = `${docTitle} | ${pubTitle}`;
@@ -129,7 +129,7 @@ class Viewer {
                 if (this.tocVisible()) {
                     this.tocVisible(false);
                 }
-                
+
                 document.getElementById("vivliostyle-viewer-viewport").focus();
             } else {
                 window.location.href = payload.href;
@@ -141,7 +141,7 @@ class Viewer {
         ko.computed(function() {
             const viewerOptions = this.viewerOptions_.toObject();
             this.viewer_.setOptions(viewerOptions);
-        }, this).extend({rateLimit: 0});
+        }, this).extend({ rateLimit: 0 });
     }
 
     loadDocument(documentOptions, viewerOptions) {
@@ -154,10 +154,11 @@ class Viewer {
         if (documentOptions.xUrl()) {
             this.viewer_.loadDocument(documentOptions.xUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         } else if (documentOptions.bookUrl()) {
-            if (this.viewer_.loadPublication) // new name
+            if (this.viewer_.loadPublication)
+                // new name
                 this.viewer_.loadPublication(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
-            else // old name
-                this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
+            // old name
+            else this.viewer_.loadEPUB(documentOptions.bookUrl(), documentOptions.toObject(), this.viewerOptions_.toObject());
         } else {
             // No document specified, show welcome page
             this.state_.status.value("");

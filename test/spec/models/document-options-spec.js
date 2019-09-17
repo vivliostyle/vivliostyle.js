@@ -18,7 +18,7 @@
  */
 
 import DocumentOptions from "../../../src/js/models/document-options";
-import urlParameters from "../../../src/js/stores/url-parameters"
+import urlParameters from "../../../src/js/stores/url-parameters";
 
 describe("DocumentOptions", function() {
     var history, location;
@@ -36,7 +36,9 @@ describe("DocumentOptions", function() {
 
     describe("constructor", function() {
         it("retrieves parameters from URL", function() {
-            urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html"};
+            urlParameters.location = {
+                href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html"
+            };
             var options = new DocumentOptions();
 
             expect(options.epubUrl()).toBe("");
@@ -44,7 +46,9 @@ describe("DocumentOptions", function() {
             expect(options.fragment()).toBe("ghi%25");
             expect(options.userStyleSheet()).toEqual([]);
 
-            urlParameters.location = {href: "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3"};
+            urlParameters.location = {
+                href: "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3"
+            };
             options = new DocumentOptions();
 
             expect(options.epubUrl()).toBe("abc/");
@@ -56,7 +60,9 @@ describe("DocumentOptions", function() {
     });
 
     it("write fragment back to URL when updated", function() {
-        urlParameters.location = {href: "http://example.com#x=abc/def.html&f=ghi"};
+        urlParameters.location = {
+            href: "http://example.com#x=abc/def.html&f=ghi"
+        };
         var options = new DocumentOptions();
         options.fragment("jkl%25");
 
@@ -73,14 +79,8 @@ describe("DocumentOptions", function() {
 
             expect(options.toObject()).toEqual({
                 fragment: "ghi",
-                authorStyleSheet: [
-                    { url: "style1" },
-                    { url: "style2" }
-                ],
-                userStyleSheet: [
-                    { text: "@page {size: auto;}" },
-                    { url: "style3" }
-                ]
+                authorStyleSheet: [{ url: "style1" }, { url: "style2" }],
+                userStyleSheet: [{ text: "@page {size: auto;}" }, { url: "style3" }]
             });
         });
     });

@@ -18,7 +18,7 @@
  */
 
 module.exports = function(config) {
-    var commonConfig = (require("./karma-common.conf"))(config);
+    var commonConfig = require("./karma-common.conf")(config);
     var customLaunchers = {
         sl_chrome: {
             base: "SauceLabs",
@@ -26,9 +26,9 @@ module.exports = function(config) {
             platform: "Windows 10"
         },
         sl_firefox: {
-           base: "SauceLabs",
-           browserName: "firefox",
-           platform: "Windows 10"
+            base: "SauceLabs",
+            browserName: "firefox",
+            platform: "Windows 10"
         },
         sl_safari: {
             base: "SauceLabs",

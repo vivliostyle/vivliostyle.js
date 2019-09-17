@@ -36,24 +36,30 @@ describe("URLParameterStore", function() {
 
     describe("getBaseURL", function() {
         it("returns a URL of a directory in which the viewer entry point is located", function() {
-            urlParameters.location = {href: "http://example.com/aa/bb/cc/viewer.html?foo#x=bar"};
+            urlParameters.location = {
+                href: "http://example.com/aa/bb/cc/viewer.html?foo#x=bar"
+            };
 
-            expect(urlParameters.getBaseURL()).toEqual("http://example.com/aa/bb/cc/")
+            expect(urlParameters.getBaseURL()).toEqual("http://example.com/aa/bb/cc/");
 
-            urlParameters.location = {href: "http://example.com/aa/bb/cc/?foo#x=bar"};
+            urlParameters.location = {
+                href: "http://example.com/aa/bb/cc/?foo#x=bar"
+            };
 
-            expect(urlParameters.getBaseURL()).toEqual("http://example.com/aa/bb/cc/")
+            expect(urlParameters.getBaseURL()).toEqual("http://example.com/aa/bb/cc/");
         });
     });
 
     describe("getParameter", function() {
         it("returns an array containing values corresponding to the key in the URL hash", function() {
-            urlParameters.location = {href: "http://example.com#aa=bb&cc=dd&cc=ee"};
+            urlParameters.location = { href: "http://example.com#aa=bb&cc=dd&cc=ee" };
 
             expect(urlParameters.getParameter("aa")).toEqual(["bb"]);
             expect(urlParameters.getParameter("cc")).toEqual(["dd", "ee"]);
 
-            urlParameters.location = {href: "http://example.com#aa=b#b&cc=dd&cc=ee"};
+            urlParameters.location = {
+                href: "http://example.com#aa=b#b&cc=dd&cc=ee"
+            };
 
             expect(urlParameters.getParameter("aa")).toEqual(["b#b"]);
             expect(urlParameters.getParameter("cc")).toEqual(["dd", "ee"]);
@@ -61,20 +67,26 @@ describe("URLParameterStore", function() {
 
         it("can retrieve a value for a unicode key", function() {
             var key = "あいうえお";
-            urlParameters.location = {href: "http://example.com#aa=bb&" + key + "=dd"};
+            urlParameters.location = {
+                href: "http://example.com#aa=bb&" + key + "=dd"
+            };
 
             expect(urlParameters.getParameter(key)).toEqual(["dd"]);
         });
 
         it("can retrieve values containing '=', percent-encoded '&' and '%'", function() {
-            urlParameters.location = {href: "http://example.com#aa=foo%2525bar%26baz&bb=c=d"};
+            urlParameters.location = {
+                href: "http://example.com#aa=foo%2525bar%26baz&bb=c=d"
+            };
 
             expect(urlParameters.getParameter("aa")).toEqual(["foo%25bar&baz"]);
             expect(urlParameters.getParameter("bb")).toEqual(["c=d"]);
         });
 
         it("does not percent-decode when dontPercentDecode=true", function() {
-            urlParameters.location = {href: "http://example.com#aa=foo%2525bar%26baz"};
+            urlParameters.location = {
+                href: "http://example.com#aa=foo%2525bar%26baz"
+            };
 
             expect(urlParameters.getParameter("aa", true)).toEqual(["foo%2525bar%26baz"]);
         });
@@ -82,43 +94,45 @@ describe("URLParameterStore", function() {
 
     describe("setParameter", function() {
         it("add the parameter to the URL hash if not exists", function() {
-            urlParameters.location = {href: "http://example.com"};
+            urlParameters.location = { href: "http://example.com" };
             urlParameters.setParameter("cc", "dd");
 
             expect(urlParameters.location.href).toBe("http://example.com#cc=dd");
 
-            urlParameters.location = {href: "http://example.com#aa=bb"};
+            urlParameters.location = { href: "http://example.com#aa=bb" };
             urlParameters.setParameter("cc", "dd");
 
             expect(urlParameters.location.href).toBe("http://example.com#aa=bb&cc=dd");
         });
 
         it("replaces the parameter in the URL hash if already exists", function() {
-            urlParameters.location = {href: "http://example.com#cc=dd"};
+            urlParameters.location = { href: "http://example.com#cc=dd" };
             urlParameters.setParameter("cc", "ee");
 
             expect(urlParameters.location.href).toBe("http://example.com#cc=ee");
 
-            urlParameters.location = {href: "http://example.com#cc=dd&aa=bb"};
+            urlParameters.location = { href: "http://example.com#cc=dd&aa=bb" };
             urlParameters.setParameter("cc", "ee");
 
             expect(urlParameters.location.href).toBe("http://example.com#cc=ee&aa=bb");
         });
 
         it("can set a value for a unicode key", function() {
-            urlParameters.location = {href: "http://example.com#aa=bb"};
+            urlParameters.location = { href: "http://example.com#aa=bb" };
             urlParameters.setParameter("あいうえお", "かきくけこ");
 
             expect(urlParameters.location.href).toBe("http://example.com#aa=bb&あいうえお=かきくけこ");
 
-            urlParameters.location = {href: "http://example.com#あいうえお=かきくけこ"};
+            urlParameters.location = {
+                href: "http://example.com#あいうえお=かきくけこ"
+            };
             urlParameters.setParameter("あいうえお", "さしすせそ");
 
             expect(urlParameters.location.href).toBe("http://example.com#あいうえお=さしすせそ");
         });
 
         it("can set values containing '=', '&' and '%'", function() {
-            urlParameters.location = {href: "http://example.com#aa=bb"};
+            urlParameters.location = { href: "http://example.com#aa=bb" };
             urlParameters.setParameter("aa", "foo%25bar&baz");
             urlParameters.setParameter("bb", "c=d");
 
@@ -126,7 +140,7 @@ describe("URLParameterStore", function() {
         });
 
         it("does not percent-encode when dontPercentEncode=true", function() {
-            urlParameters.location = {href: "http://example.com#aa=bb"};
+            urlParameters.location = { href: "http://example.com#aa=bb" };
             urlParameters.setParameter("aa", "foo%25bar", true);
 
             expect(urlParameters.location.href).toBe("http://example.com#aa=foo%25bar");
@@ -135,7 +149,7 @@ describe("URLParameterStore", function() {
         it("use history.replaceState if available", function() {
             urlParameters.history.replaceState = function() {};
             spyOn(urlParameters.history, "replaceState");
-            urlParameters.location = {href: "http://example.com"};
+            urlParameters.location = { href: "http://example.com" };
             urlParameters.setParameter("cc", "dd");
 
             // dummy location.href does not change

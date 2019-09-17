@@ -19,7 +19,7 @@
 
 import ko from "knockout";
 
-const supportTouchEvents = ("ontouchstart" in window);
+const supportTouchEvents = "ontouchstart" in window;
 
 let xStart = null;
 let yStart = null;
@@ -28,7 +28,7 @@ let arrowButton = null;
 ko.bindingHandlers.swipePages = {
     init(element, valueAccessor) {
         if (supportTouchEvents && ko.unwrap(valueAccessor())) {
-            element.addEventListener("touchstart", (event) => {
+            element.addEventListener("touchstart", event => {
                 if (event.touches.length > 1) {
                     return; // multi-touch is not for page swipe
                 }
@@ -39,10 +39,10 @@ ko.bindingHandlers.swipePages = {
                 if (viewportElement && viewportElement.scrollWidth > viewportElement.clientWidth) {
                     return; // disable page swipe when horizontal scrollable
                 }
-                xStart = event.touches[0].clientX;                                      
-                yStart = event.touches[0].clientY;                                      
+                xStart = event.touches[0].clientX;
+                yStart = event.touches[0].clientY;
             });
-            element.addEventListener("touchmove", (event) => {
+            element.addEventListener("touchmove", event => {
                 if (event.touches.length > 1) {
                     return;
                 }
@@ -50,10 +50,11 @@ ko.bindingHandlers.swipePages = {
                     let xDiff = event.touches[0].clientX - xStart;
                     let yDiff = event.touches[0].clientY - yStart;
                     if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                        if (xDiff < 0) { // swipe to left = go to right
+                        if (xDiff < 0) {
+                            // swipe to left = go to right
                             arrowButton = document.getElementById("vivliostyle-page-navigation-right");
-                        }
-                        else { // swipe to right = go to left
+                        } else {
+                            // swipe to right = go to left
                             arrowButton = document.getElementById("vivliostyle-page-navigation-left");
                         }
                     }
@@ -67,7 +68,7 @@ ko.bindingHandlers.swipePages = {
                     }
                 }
             });
-            element.addEventListener("touchend", (event) => {
+            element.addEventListener("touchend", event => {
                 if (arrowButton) {
                     ko.utils.toggleDomNodeCssClass(arrowButton, "active", false);
                 }

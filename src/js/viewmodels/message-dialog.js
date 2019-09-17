@@ -39,4 +39,3 @@ class MessageDialog {
 }
 
 export default MessageDialog;
-
