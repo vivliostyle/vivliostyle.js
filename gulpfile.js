@@ -2,7 +2,7 @@
 
 var babelify = require("babelify");
 var browserify = require("browserify");
-var browserSync = require('browser-sync').create();
+var browserSync = require("browser-sync").create();
 var changed = require("gulp-changed");
 var compass = require("gulp-compass");
 var ejs = require("gulp-ejs");
@@ -21,13 +21,19 @@ var watchify = require("watchify");
 var SRC_DIR = "src";
 var DEST_DIR = "build";
 var DIRS = {
-    fonts: {src: "fonts"},
-    html: {src: "html", dest: "", srcPattern: "*.ejs"},
-    js: {src: "js"},
-    css: {src: "scss", dest: "css", srcPattern: "*.scss"},
-    resources: {src: "../node_modules/vivliostyle/resources", dest: "resources"},
-    mathjax: {src: "../node_modules/mathjax", dest: "mathjax"},
-    plugin_resources: {src: "../node_modules/vivliostyle/plugins/*/resources", dest: "plugins"}
+    fonts: { src: "fonts" },
+    html: { src: "html", dest: "", srcPattern: "*.ejs" },
+    js: { src: "js" },
+    css: { src: "scss", dest: "css", srcPattern: "*.scss" },
+    resources: {
+        src: "../node_modules/vivliostyle/resources",
+        dest: "resources"
+    },
+    mathjax: { src: "../node_modules/mathjax", dest: "mathjax" },
+    plugin_resources: {
+        src: "../node_modules/vivliostyle/plugins/*/resources",
+        dest: "plugins"
+    }
 };
 var JS_ENTRIES = {
     production: "main.js",
@@ -71,9 +77,11 @@ function getBrowserify(development, watch) {
         cache: {},
         packageCache: {},
         entries: [srcDir("js") + "/" + (development ? JS_ENTRIES.development : JS_ENTRIES.production)],
-        transform: [babelify.configure({
-            presets: ["@babel/preset-env"],
-        })],
+        transform: [
+            babelify.configure({
+                presets: ["@babel/preset-env"]
+            })
+        ],
         debug: development
     });
     if (watch) {
@@ -83,13 +91,12 @@ function getBrowserify(development, watch) {
     return b;
 }
 function bundleJs(b, name) {
-    return b.bundle()
-            .on("error", gutil.log.bind(gutil, "Browserify Error"))
-            .pipe(name === JS_ENTRIES.production
-                ? require('minify-stream')({ sourceMap: false })
-                : gutil.noop())
-            .pipe(source(name))
-            .pipe(gulp.dest(destDir("js")));
+    return b
+        .bundle()
+        .on("error", gutil.log.bind(gutil, "Browserify Error"))
+        .pipe(name === JS_ENTRIES.production ? require("minify-stream")({ sourceMap: false }) : gutil.noop())
+        .pipe(source(name))
+        .pipe(gulp.dest(destDir("js")));
 }
 var b;
 var watching = false;
@@ -114,7 +121,8 @@ gulp.task("build:js-dev", function() {
 function copyTask(type) {
     var dest = destDir(type);
     return gulp.task("build:" + type, function() {
-        return gulp.src(srcPattern(type))
+        return gulp
+            .src(srcPattern(type))
             .pipe(changed(dest))
             .pipe(gulp.dest(dest));
     });
@@ -126,11 +134,14 @@ copyTask("plugin_resources");
 
 // HTML build
 function buildHtml(development) {
-    return gulp.src(srcPattern("html"))
-        .pipe(ejs({development: development, versions: versions}))
-        .pipe(plumber({
-            errorHandler: notify.onError("Error: <%= error.message %>")
-        }))
+    return gulp
+        .src(srcPattern("html"))
+        .pipe(ejs({ development: development, versions: versions }))
+        .pipe(
+            plumber({
+                errorHandler: notify.onError("Error: <%= error.message %>")
+            })
+        )
         .pipe(rename(development ? HTML_FILENAMES.development : HTML_FILENAMES.production))
         .pipe(gulp.dest(destDir("html")));
 }
@@ -143,16 +154,21 @@ gulp.task("build:html-dev", function() {
 
 // CSS build
 function buildCss(development) {
-    return gulp.src(srcPattern("css"))
-        .pipe(plumber({
-            errorHandler: notify.onError("Error: <%= error.message %>")
-        }))
-        .pipe(compass({
-            config_file: SRC_DIR + "/config.rb",
-            css: path.resolve(destDir("css")),
-            sass: path.resolve(srcDir("css")),
-            environment: development ? "development" : "production"
-        }));
+    return gulp
+        .src(srcPattern("css"))
+        .pipe(
+            plumber({
+                errorHandler: notify.onError("Error: <%= error.message %>")
+            })
+        )
+        .pipe(
+            compass({
+                config_file: SRC_DIR + "/config.rb",
+                css: path.resolve(destDir("css")),
+                sass: path.resolve(srcDir("css")),
+                environment: development ? "development" : "production"
+            })
+        );
 }
 gulp.task("build:css", function() {
     return buildCss(false);
@@ -162,54 +178,59 @@ gulp.task("build:css-dev", function() {
 });
 
 // build all
-gulp.task("build", gulp.parallel(
-    "build:js",
-    "build:html",
-    "build:fonts",
-    "build:resources",
-//    "build:mathjax",
-    "build:plugin_resources",
-    "build:css"
-));
-gulp.task("build-dev", gulp.parallel(
-    "build:js-dev",
-    "build:html-dev",
-    "build:fonts",
-    "build:resources",
-    "build:plugin_resources",
-    "build:css-dev"
-));
+gulp.task(
+    "build",
+    gulp.parallel(
+        "build:js",
+        "build:html",
+        "build:fonts",
+        "build:resources",
+        //    "build:mathjax",
+        "build:plugin_resources",
+        "build:css"
+    )
+);
+gulp.task("build-dev", gulp.parallel("build:js-dev", "build:html-dev", "build:fonts", "build:resources", "build:plugin_resources", "build:css-dev"));
 
 // watch
 gulp.task("start-watching", function(done) {
     watching = true;
     done();
 });
-gulp.task("watch", gulp.series(gulp.parallel("start-watching", "build"), function(done) {
-    b.on("update", bundleJsProd);
-    gulp.watch(srcPattern("html"), gulp.task("build:html"));
-    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
-    gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
-    gulp.watch(srcPattern("css"), gulp.task("build:css"));
-    done();
-}));
-gulp.task("watch-dev", gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
-    b.on("update", bundleJsDev);
-    gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
-    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
-    gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
-    gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
-    done();
-}));
+gulp.task(
+    "watch",
+    gulp.series(gulp.parallel("start-watching", "build"), function(done) {
+        b.on("update", bundleJsProd);
+        gulp.watch(srcPattern("html"), gulp.task("build:html"));
+        gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+        gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
+        gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
+        gulp.watch(srcPattern("css"), gulp.task("build:css"));
+        done();
+    })
+);
+gulp.task(
+    "watch-dev",
+    gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
+        b.on("update", bundleJsDev);
+        gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
+        gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+        gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
+        gulp.watch(srcPattern("plugin_resources"), gulp.task("build:plugin_resources"));
+        gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
+        done();
+    })
+);
 
 // serve
 function serve(development) {
     browserSync.init({
-        browser: process.platform === "darwin" ? "google chrome"
-            : process.platform === "win32" ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-            : "chromium-browser",
+        browser:
+            process.platform === "darwin"
+                ? "google chrome"
+                : process.platform === "win32"
+                ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+                : "chromium-browser",
         server: {
             baseDir: "../"
         },
@@ -221,31 +242,43 @@ function serve(development) {
     }
     gulp.watch(target).on("change", browserSync.reload);
 }
-gulp.task("serve", gulp.series("watch", function(done) {
-    serve(false);
-    done();
-}));
-gulp.task("serve-dev", gulp.series("watch-dev", function(done) {
-    serve(true);
-    done();
-}));
+gulp.task(
+    "serve",
+    gulp.series("watch", function(done) {
+        serve(false);
+        done();
+    })
+);
+gulp.task(
+    "serve-dev",
+    gulp.series("watch-dev", function(done) {
+        serve(true);
+        done();
+    })
+);
 
 gulp.task("default", gulp.task("serve-dev"));
 
 // test
 gulp.task("test-local", function(done) {
-    var server = new KarmaServer({
-        configFile: process.cwd() + "/test/conf/karma-local.conf"
-    }, function(exitStatus) {
-        done(exitStatus ? "Some tests failed" : undefined);
-    });
+    var server = new KarmaServer(
+        {
+            configFile: process.cwd() + "/test/conf/karma-local.conf"
+        },
+        function(exitStatus) {
+            done(exitStatus ? "Some tests failed" : undefined);
+        }
+    );
     server.start();
 });
 gulp.task("test-sauce", function(done) {
-    var server = new KarmaServer({
-        configFile: process.cwd() + "/test/conf/karma-sauce.conf"
-    }, function(exitStatus) {
-        done(exitStatus ? "Some tests failed" : undefined);
-    });
+    var server = new KarmaServer(
+        {
+            configFile: process.cwd() + "/test/conf/karma-sauce.conf"
+        },
+        function(exitStatus) {
+            done(exitStatus ? "Some tests failed" : undefined);
+        }
+    );
     server.start();
 });

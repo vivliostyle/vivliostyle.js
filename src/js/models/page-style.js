@@ -29,16 +29,16 @@ const Mode = {
 };
 
 const PresetSize = [
-    {name: "A5", description: "A5"},
-    {name: "A4", description: "A4"},
-    {name: "A3", description: "A3"},
-    {name: "B5", description: "B5 (ISO)"},
-    {name: "B4", description: "B4 (ISO)"},
-    {name: "JIS-B5", description: "B5 (JIS)"},
-    {name: "JIS-B4", description: "B4 (JIS)"},
-    {name: "letter", description: "letter"},
-    {name: "legal", description: "legal"},
-    {name: "ledger", description: "ledger"}
+    { name: "A5", description: "A5" },
+    { name: "A4", description: "A4" },
+    { name: "A3", description: "A3" },
+    { name: "B5", description: "B5 (ISO)" },
+    { name: "B4", description: "B4 (ISO)" },
+    { name: "JIS-B5", description: "B5 (JIS)" },
+    { name: "JIS-B4", description: "B4 (JIS)" },
+    { name: "letter", description: "letter" },
+    { name: "legal", description: "legal" },
+    { name: "ledger", description: "ledger" }
 ];
 
 const Constants = {
@@ -88,7 +88,7 @@ class PageStyle {
         this.afterOtherStyle = ko.observable("");
 
         this.viewerFontSize = null;
-        this.setViewerFontSizeObservable = (viewerFontSizeObservable) => {
+        this.setViewerFontSizeObservable = viewerFontSizeObservable => {
             this.viewerFontSize = viewerFontSizeObservable;
             const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
             if (elem) {
@@ -141,39 +141,28 @@ class PageStyle {
         });
 
         this.pageStyleRegExp = new RegExp(
-
             // 1. beforeOtherStyle,
             "^((?:\\n|.)*?)\\/\\*<viewer>\\*\\/\\s*(?:@page\\s*\\{\\s*" +
-
-            // 2. sizeW, sizeH, sizeImportant,
-            "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
-
-            // 5. pageMargin, pageMarginImportant,
-            "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
-
-            // 7. pageOtherStyle,
-            "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
-
-            // 8. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
-            "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
-
-            // 11. forceHtmlBodyMarginZero,
-            "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
-
-            // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
-            "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
-
-            // body {font-size: inherit !important;} etc.
-            "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
-
-            // 19. widowsOrphans, widowsOrphansImportant,
-            "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*orphans:\\s*\\19\\s*\\20(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
-
-            // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
-            "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
-
-            // 25. afterOtherStyle
-            "((?:\\n|.)*)$"
+                // 2. sizeW, sizeH, sizeImportant,
+                "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+                // 5. pageMargin, pageMarginImportant,
+                "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+                // 7. pageOtherStyle,
+                "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
+                // 8. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+                "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
+                // 11. forceHtmlBodyMarginZero,
+                "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
+                // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
+                "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
+                // body {font-size: inherit !important;} etc.
+                "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
+                // 19. widowsOrphans, widowsOrphansImportant,
+                "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*orphans:\\s*\\19\\s*\\20(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
+                // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
+                "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
+                // 25. afterOtherStyle
+                "((?:\\n|.)*)$"
         );
 
         if (pageStyle) {
@@ -188,7 +177,7 @@ class PageStyle {
      * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
      */
     fontSizePxToPercent(px, opt_cent, opt_precision) {
-        let percent = px / Constants.viewerFontSize * (opt_cent || 100);
+        let percent = (px / Constants.viewerFontSize) * (opt_cent || 100);
         if (opt_precision) {
             percent = percent.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
         }
@@ -202,7 +191,7 @@ class PageStyle {
      * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
      */
     fontSizePercentToPx(percent, opt_cent, opt_precision) {
-        let px = percent / (opt_cent || 100) * Constants.viewerFontSize;
+        let px = (percent / (opt_cent || 100)) * Constants.viewerFontSize;
         if (opt_precision) {
             px = px.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
         }
@@ -212,16 +201,32 @@ class PageStyle {
     fromCSSText(cssText) {
         const r = this.pageStyleRegExp.exec(cssText);
         if (r) {
-            let [,
+            let [
+                ,
                 beforeOtherStyle,
-                sizeW, sizeH, sizeImportant,
-                pageMargin, pageMarginImportant,
+                sizeW,
+                sizeH,
+                sizeImportant,
+                pageMargin,
+                pageMarginImportant,
                 pageOtherStyle,
-                firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+                firstPageMarginZero,
+                firstPageMarginZeroImportant,
+                firstPageOtherStyle,
                 forceHtmlBodyMarginZero,
-                baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
-                widowsOrphans, widowsOrphansImportant,
-                imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
+                baseFontSize,
+                baseFontSizeImportant,
+                baseLineHeight,
+                baseLineHeightImportant,
+                baseFontFamily,
+                baseFontFamilyImportant,
+                rootOtherStyle,
+                widowsOrphans,
+                widowsOrphansImportant,
+                imageMaxSizeToFitPage,
+                imageMaxSizeToFitPageImportant,
+                imageKeepAspectRatio,
+                imageKeepAspectRatioImportant,
                 afterOtherStyle
             ] = r;
 
@@ -259,10 +264,8 @@ class PageStyle {
                     this.customHeight(sizeH);
                 }
                 this.pageSizeImportant(!!sizeImportant);
-                if (sizeImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (sizeImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.pageSizeMode(Mode.DEFAULT);
             }
@@ -275,10 +278,8 @@ class PageStyle {
                     this.customMargin(pageMargin);
                 }
                 this.pageMarginImportant(!!pageMarginImportant);
-                if (pageMarginImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (pageMarginImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.pageMarginMode(Mode.DEFAULT);
             }
@@ -288,10 +289,8 @@ class PageStyle {
             if (firstPageMarginZero) {
                 this.firstPageMarginZero(true);
                 this.firstPageMarginZeroImportant(!!firstPageMarginZeroImportant);
-                if (firstPageMarginZeroImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (firstPageMarginZeroImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.firstPageMarginZero(false);
             }
@@ -310,10 +309,8 @@ class PageStyle {
                 this.baseFontSizeSpecified(true);
                 this.baseFontSize(baseFontSize);
                 this.baseFontSizeImportant(!!baseFontSizeImportant);
-                if (baseFontSizeImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (baseFontSizeImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.baseFontSizeSpecified(false);
             }
@@ -321,10 +318,8 @@ class PageStyle {
                 this.baseLineHeightSpecified(true);
                 this.baseLineHeight(baseLineHeight);
                 this.baseLineHeightImportant(!!baseLineHeightImportant);
-                if (baseLineHeightImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (baseLineHeightImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.baseLineHeightSpecified(false);
             }
@@ -333,10 +328,8 @@ class PageStyle {
                 this.baseFontFamilySpecified(true);
                 this.baseFontFamily(baseFontFamily);
                 this.baseFontFamilyImportant(!!baseFontFamilyImportant);
-                if (baseFontFamilyImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (baseFontFamilyImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.baseFontFamilySpecified(false);
             }
@@ -346,10 +339,8 @@ class PageStyle {
             if (widowsOrphans != null) {
                 this.widowsOrphans(widowsOrphans);
                 this.widowsOrphansImportant(!!widowsOrphansImportant);
-                if (widowsOrphansImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (widowsOrphansImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.widowsOrphans(Mode.DEFAULT);
             }
@@ -357,10 +348,8 @@ class PageStyle {
             if (imageMaxSizeToFitPage) {
                 this.imageMaxSizeToFitPage(true);
                 this.imageMaxSizeToFitPageImportant(!!imageMaxSizeToFitPageImportant);
-                if (imageMaxSizeToFitPageImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (imageMaxSizeToFitPageImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.imageMaxSizeToFitPage(false);
             }
@@ -368,10 +357,8 @@ class PageStyle {
             if (imageKeepAspectRatio) {
                 this.imageKeepAspectRatio(true);
                 this.imageKeepAspectRatioImportant(!!imageKeepAspectRatioImportant);
-                if (imageKeepAspectRatioImportant)
-                    countImportant++;
-                else
-                    countNotImportant++;
+                if (imageKeepAspectRatioImportant) countImportant++;
+                else countNotImportant++;
             } else {
                 this.imageKeepAspectRatio(false);
             }
@@ -380,7 +367,6 @@ class PageStyle {
             this.afterOtherStyle(afterOtherStyle);
 
             this.allImportant(countImportant > 0 && countNotImportant == 0);
-
         } else {
             // When not match
             const afterOtherStyle = cssText.replace(/\/\*<\/?viewer>\*\/\n?/g, "") || "";
@@ -473,9 +459,11 @@ class PageStyle {
             cssText += this.rootOtherStyle();
             cssText += "}\n";
         }
-        if (this.baseFontSizeSpecified() && this.baseFontSizeImportant()
-                || this.baseLineHeightSpecified() && this.baseLineHeightImportant()
-                || this.baseFontFamilySpecified() && this.baseFontFamilyImportant()) {
+        if (
+            (this.baseFontSizeSpecified() && this.baseFontSizeImportant()) ||
+            (this.baseLineHeightSpecified() && this.baseLineHeightImportant()) ||
+            (this.baseFontFamilySpecified() && this.baseFontFamilyImportant())
+        ) {
             cssText += "body { ";
             if (this.baseFontSizeSpecified() && this.baseFontSizeImportant()) {
                 cssText += "font-size: inherit !important; ";
@@ -552,7 +540,7 @@ class PageStyle {
         if (this.viewerFontSize && other.viewerFontSize) {
             this.viewerFontSize(other.viewerFontSize());
         }
-   }
+    }
 
     equivalentTo(other) {
         if (this.pageSizeMode() !== other.pageSizeMode()) return false;
@@ -594,9 +582,7 @@ class PageStyle {
         if (this.beforeOtherStyle() !== other.beforeOtherStyle()) return false;
         if (this.afterOtherStyle() !== other.afterOtherStyle()) return false;
 
-        if (!this.viewerFontSize !== !other.viewerFontSize ||          
-                this.viewerFontSize && this.viewerFontSize() !== other.viewerFontSize())
-            return false;
+        if (!this.viewerFontSize !== !other.viewerFontSize || (this.viewerFontSize && this.viewerFontSize() !== other.viewerFontSize())) return false;
 
         return true;
     }

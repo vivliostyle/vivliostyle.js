@@ -42,17 +42,17 @@ describe("ViewerOptions", function() {
 
     describe("constructor", function() {
         it("retrieves parameters from URL", function() {
-            urlParameters.location = {href: "http://example.com#spread=true"};
+            urlParameters.location = { href: "http://example.com#spread=true" };
             var options = new ViewerOptions();
 
             expect(options.pageViewMode()).toEqual(PageViewMode.SPREAD);
 
-            urlParameters.location = {href: "http://example.com#spread=false"};
+            urlParameters.location = { href: "http://example.com#spread=false" };
             options = new ViewerOptions();
 
             expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
 
-            urlParameters.location = {href: "http://example.com#spread=auto"};
+            urlParameters.location = { href: "http://example.com#spread=auto" };
             options = new ViewerOptions();
 
             expect(options.pageViewMode()).toBe(PageViewMode.AUTO_SPREAD);
@@ -73,7 +73,7 @@ describe("ViewerOptions", function() {
     });
 
     it("write spread option back to URL when update if it is constructed with no argument", function() {
-        urlParameters.location = {href: "http://example.com#spread=true"};
+        urlParameters.location = { href: "http://example.com#spread=true" };
         var options = new ViewerOptions();
         options.pageViewMode(PageViewMode.SINGLE_PAGE);
 

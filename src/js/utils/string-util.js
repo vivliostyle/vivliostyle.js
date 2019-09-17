@@ -19,7 +19,7 @@
 
 export default {
     escapeUnicodeChar(ch) {
-        return `\\u${(0x10000|ch.charCodeAt(0)).toString(16).substring(1)}`;
+        return `\\u${(0x10000 | ch.charCodeAt(0)).toString(16).substring(1)}`;
     },
     escapeUnicodeString(str) {
         return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
@@ -34,6 +34,8 @@ export default {
         return str.replace(/%26/g, "&").replace(/%25/g, "%");
     },
     percentEncodeForDataURI(str) {
-        return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
+        return encodeURI(str)
+            .replace(/#/g, "%23")
+            .replace(/&/g, "%26");
     }
 };

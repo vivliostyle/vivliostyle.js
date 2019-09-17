@@ -39,7 +39,8 @@ function identifyKeyFromEvent(event) {
     const keyIdentifier = event.keyIdentifier;
     const location = event.location;
     if (key === Keys.ArrowDown || key === "Down" || keyIdentifier === "Down") {
-        if (event.metaKey) {    // Mac Cmd+Down -> End
+        if (event.metaKey) {
+            // Mac Cmd+Down -> End
             return Keys.End;
         }
         return Keys.ArrowDown;
@@ -48,7 +49,8 @@ function identifyKeyFromEvent(event) {
     } else if (key === Keys.ArrowRight || key === "Right" || keyIdentifier === "Right") {
         return Keys.ArrowRight;
     } else if (key === Keys.ArrowUp || key === "Up" || keyIdentifier === "Up") {
-        if (event.metaKey) {    // Mac Cmd+Up -> Home
+        if (event.metaKey) {
+            // Mac Cmd+Up -> Home
             return Keys.Home;
         }
         return Keys.ArrowUp;
@@ -60,11 +62,21 @@ function identifyKeyFromEvent(event) {
         return Keys.Space;
     } else if (key === "0" || keyIdentifier === "U+0030") {
         return "0";
-    } else if (key === "+" || key === "Add" || keyIdentifier === "U+002B"
-        || keyIdentifier === "U+00BB" || (keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) /* workaround for Chrome for Windows */) {
+    } else if (
+        key === "+" ||
+        key === "Add" ||
+        keyIdentifier === "U+002B" ||
+        keyIdentifier === "U+00BB" ||
+        (keyIdentifier === "U+004B" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) /* workaround for Chrome for Windows */
+    ) {
         return "+";
-    } else if (key === "-" || key === "Subtract" || keyIdentifier === "U+002D"
-        || keyIdentifier === "U+00BD" || (keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) /* workaround for Chrome for Windows */) {
+    } else if (
+        key === "-" ||
+        key === "Subtract" ||
+        keyIdentifier === "U+002D" ||
+        keyIdentifier === "U+00BD" ||
+        (keyIdentifier === "U+004D" && location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) /* workaround for Chrome for Windows */
+    ) {
         return "-";
     } else {
         return key || keyIdentifier || Keys.Unidentified;

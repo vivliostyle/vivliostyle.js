@@ -18,7 +18,7 @@
  */
 
 module.exports = function(config) {
-    var commonConfig = (require("./karma-common.conf"))(config);
+    var commonConfig = require("./karma-common.conf")(config);
 
     var options = {
         reporters: ["verbose"],

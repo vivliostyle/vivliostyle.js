@@ -20,7 +20,6 @@
 import PageSize from "../../../src/js/models/page-size";
 
 describe("PageSize", function() {
-
     function makeDummyPageSize() {
         var pageSize = new PageSize();
         pageSize.mode(PageSize.Mode.PRESET);

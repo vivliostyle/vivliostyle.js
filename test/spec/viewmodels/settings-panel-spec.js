@@ -41,13 +41,12 @@ describe("SettingsPanel", function() {
         viewerOptions = new ViewerOptions();
         viewerOptions.pageViewMode(PageViewMode.SPREAD);
         viewerOptions.fontSize(10);
-        viewer = {loadDocument: function() {}};
-        messageDialog = {visible: ko.observable(false)};
+        viewer = { loadDocument: function() {} };
+        messageDialog = { visible: ko.observable(false) };
     });
 
     function createSettingsPanel(options) {
-        return new SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog,
-            options || defaultSettingsPanelOptions);
+        return new SettingsPanel(viewerOptions, documentOptions, viewer, messageDialog, options || defaultSettingsPanelOptions);
     }
 
     describe("constructor", function() {
@@ -145,7 +144,7 @@ describe("SettingsPanel", function() {
         });
 
         it("page size change and 'override document style sheet' are disabled by disablePageSizeChange=true in settingsPanelOptions", function() {
-            var settingsPanel = createSettingsPanel({disablePageSizeChange: true});
+            var settingsPanel = createSettingsPanel({ disablePageSizeChange: true });
 
             expect(settingsPanel.isPageSizeChangeDisabled).toBe(true);
             expect(settingsPanel.isOverrideDocumentStyleSheetDisabled).toBe(true);
@@ -153,7 +152,9 @@ describe("SettingsPanel", function() {
         });
 
         it("page view mode change is disabled by disablePageViewModeChangeChange=true in settingsPanelOptions", function() {
-            var settingsPanel = createSettingsPanel({disablePageViewModeChange: true});
+            var settingsPanel = createSettingsPanel({
+                disablePageViewModeChange: true
+            });
 
             expect(settingsPanel.isPageSizeChangeDisabled).toBe(false);
             expect(settingsPanel.isOverrideDocumentStyleSheetDisabled).toBe(false);

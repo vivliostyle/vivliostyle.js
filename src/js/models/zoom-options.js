@@ -51,8 +51,7 @@ class FitToScreen extends ZoomOptions {
         return new FixedZoomFactor(1);
     }
     getCurrentZoomFactor(viewer) {
-        return viewer.queryZoomFactor(
-            vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
+        return viewer.queryZoomFactor(vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
     }
 }
 class FixedZoomFactor extends ZoomOptions {

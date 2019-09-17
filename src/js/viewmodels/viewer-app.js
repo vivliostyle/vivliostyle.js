@@ -48,10 +48,10 @@ function ViewerApp() {
 
     // Remove redundant or ineffective URL parameters
     if (urlParameters.getParameter("b")[0]) {
-        urlParameters.removeParameter("b", true);   // only first one is effective
-        urlParameters.removeParameter("x");         // x= is ineffective when b= is given
+        urlParameters.removeParameter("b", true); // only first one is effective
+        urlParameters.removeParameter("x"); // x= is ineffective when b= is given
     }
-    urlParameters.removeParameter("f", true);       // only first one is effective
+    urlParameters.removeParameter("f", true); // only first one is effective
     urlParameters.removeParameter("spread", true);
     urlParameters.removeParameter("renderAllPages", true);
     urlParameters.removeParameter("fontSize", true);
@@ -64,8 +64,7 @@ function ViewerApp() {
         if (inputUrl != "") {
             if (!urlParameters.hasParameter("b")) {
                 // Push current URL to browser history to enable to go back here when browser Back button is clicked.
-                if (urlParameters.history.pushState)
-                    urlParameters.history.pushState(null, "");
+                if (urlParameters.history.pushState) urlParameters.history.pushState(null, "");
             }
             if (inputUrl.startsWith("<")) {
                 // seems start tag, so convert to data url
@@ -87,8 +86,7 @@ function ViewerApp() {
         disableRenderAllPagesChange: false
     };
 
-    this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog,
-        settingsPanelOptions);
+    this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
 
     const navigationOptions = {
         disableTOCNavigation: false,
@@ -109,7 +107,7 @@ function ViewerApp() {
             }
             return true;
         }
-        if (!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
+        if ((!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey)) || event.altKey || event.shiftKey) {
             return true;
         }
         let ret = this.settingsPanel.handleKey(key);

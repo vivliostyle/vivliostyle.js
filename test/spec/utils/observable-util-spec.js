@@ -36,7 +36,9 @@ describe("Observable Utils", function() {
         it("the getter notifies when the value is updated", function() {
             var o = obs.readonlyObservable(1);
             var x = 1;
-            o.getter.subscribe(function(y) { x = y; });
+            o.getter.subscribe(function(y) {
+                x = y;
+            });
             o.value(2);
 
             expect(x).toBe(2);
@@ -44,7 +46,9 @@ describe("Observable Utils", function() {
 
         it("throws when trying to write on the getter", function() {
             var o = obs.readonlyObservable(1);
-            function set() { o.getter(2); }
+            function set() {
+                o.getter(2);
+            }
 
             expect(set).toThrow();
         });

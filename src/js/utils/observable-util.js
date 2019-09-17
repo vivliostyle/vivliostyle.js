@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout"
+import ko from "knockout";
 
 const util = {
     readonlyObservable(value) {

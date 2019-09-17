@@ -45,8 +45,7 @@ class Logger {
     }
 
     info(content) {
-        if (this.logLevel === LogLevel.DEBUG ||
-            this.logLevel === LogLevel.INFO) {
+        if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
             messageQueue.push({
                 type: "info",
                 content
@@ -55,9 +54,7 @@ class Logger {
     }
 
     warn(content) {
-        if (this.logLevel === LogLevel.DEBUG ||
-            this.logLevel === LogLevel.INFO ||
-            this.logLevel === LogLevel.WARN) {
+        if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
             messageQueue.push({
                 type: "warn",
                 content
@@ -66,10 +63,12 @@ class Logger {
     }
 
     error(content) {
-        if (this.logLevel === LogLevel.DEBUG ||
+        if (
+            this.logLevel === LogLevel.DEBUG ||
             this.logLevel === LogLevel.INFO ||
             this.logLevel === LogLevel.WARN ||
-            this.logLevel === LogLevel.ERROR) {
+            this.logLevel === LogLevel.ERROR
+        ) {
             messageQueue.push({
                 type: "error",
                 content

@@ -18,7 +18,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import stringUtil from "../utils/string-util"
+import stringUtil from "../utils/string-util";
 
 function getRegExpForParameter(name) {
     return new RegExp(`[#&]${stringUtil.escapeUnicodeString(name)}=([^&]*)`, "g");
@@ -27,7 +27,7 @@ function getRegExpForParameter(name) {
 class URLParameterStore {
     constructor() {
         this.history = window ? window.history : {};
-        this.location = window ? window.location : {href: ""};
+        this.location = window ? window.location : { href: "" };
         this.storedUrl = this.location.href;
     }
 
@@ -48,15 +48,15 @@ class URLParameterStore {
         const regexp = getRegExpForParameter(name);
         const results = [];
         let r;
-        while (r = regexp.exec(url)) {
+        while ((r = regexp.exec(url))) {
             results.push(r[1]);
         }
         return results;
     }
 
     /**
-     * @param {string} name 
-     * @param {string} value 
+     * @param {string} name
+     * @param {string} value
      * @param {number=} opt_index specifies index in multiple parameters with same name.
      */
     setParameter(name, value, opt_index) {
@@ -85,7 +85,7 @@ class URLParameterStore {
     }
 
     /**
-     * @param {string} name 
+     * @param {string} name
      * @param {boolean=} opt_keepFirst If true, not remove the first one in multiple parameters with same name.
      */
     removeParameter(name, opt_keepFirst) {
@@ -98,9 +98,9 @@ class URLParameterStore {
         }
         if (r) {
             updated = url;
-            for ( ;r ; r = regexp.exec(updated)) {
+            for (; r; r = regexp.exec(updated)) {
                 const end = r.index + r[0].length;
-                if (r[0].charAt(0) == '#') {
+                if (r[0].charAt(0) == "#") {
                     updated = updated.substring(0, r.index + 1) + updated.substring(end + 1);
                 } else {
                     updated = updated.substring(0, r.index) + updated.substring(end);

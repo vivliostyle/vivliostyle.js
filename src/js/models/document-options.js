@@ -25,7 +25,7 @@ import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL() {
     const bookUrl = urlParameters.getParameter("b");
-    const xUrl = urlParameters.getParameter("x"); 
+    const xUrl = urlParameters.getParameter("x");
     const fragment = urlParameters.getParameter("f");
     const style = urlParameters.getParameter("style");
     const userStyle = urlParameters.getParameter("userStyle");
@@ -51,7 +51,7 @@ class DocumentOptions {
 
         // write fragment back to URL when updated
         this.fragment.subscribe(fragment => {
-            if ((/^epubcfi\(\/([246]\/)?2!\)/).test(fragment)) {
+            if (/^epubcfi\(\/([246]\/)?2!\)/.test(fragment)) {
                 urlParameters.removeParameter("f");
             } else {
                 const encoded = fragment.replace(/[\s+&?=#\u007F-\uFFFF]+/g, encodeURIComponent);
@@ -62,16 +62,16 @@ class DocumentOptions {
         // read userStyle=data:.<cssText> URL parameter
         urlOptions.userStyleSheet.find((userStyle, index) => {
             // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
-            if ((/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//).test(userStyle)) {
+            if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(userStyle)) {
                 this.dataUserStyleIndex = index;
-                const data = userStyle.replace(/^data:,/, "")
+                const data = userStyle
+                    .replace(/^data:,/, "")
                     // Escape unescaped "%" that causes error in decodeURIComponent()
                     .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
                 const cssText = decodeURIComponent(data);
                 this.pageStyle.cssText(cssText);
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
         });
@@ -91,7 +91,7 @@ class DocumentOptions {
         const userStyleSheetArray = convertStyleSheetArray(this.userStyleSheet());
         if (this.pageStyle.pageSizeMode() == PageStyle.Mode.DEFAULT) {
             // Put default page size auto. This is needed to output auto size PDF.
-            userStyleSheetArray.unshift({text: "@page{size:auto}"});
+            userStyleSheetArray.unshift({ text: "@page{size:auto}" });
         }
         // Do not include url
         // (url is a required argument to Viewer.loadDocument, separated from other options)
@@ -107,7 +107,7 @@ class DocumentOptions {
             cssText = this.pageStyle.toCSSText();
         }
         const userStyleSheet = this.userStyleSheet();
-        if (!cssText || (/^\s*(\/\*.*?\*\/\s*)*$/).test(cssText)) {
+        if (!cssText || /^\s*(\/\*.*?\*\/\s*)*$/.test(cssText)) {
             if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
                 userStyleSheet.pop();
                 this.dataUserStyleIndex = -1;

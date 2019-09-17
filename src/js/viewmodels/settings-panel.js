@@ -27,13 +27,7 @@ import keyUtil from "../utils/key-util";
 const { Keys } = keyUtil;
 
 class SettingsPanel {
-    constructor(
-        viewerOptions,
-        documentOptions,
-        viewer,
-        messageDialog,
-        settingsPanelOptions
-    ) {
+    constructor(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
         this.viewerOptions_ = viewerOptions;
         this.documentOptions_ = documentOptions;
         this.viewer_ = viewer;
@@ -43,7 +37,7 @@ class SettingsPanel {
         this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
         this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
-        this.justClicked = false;    // double click check
+        this.justClicked = false; // double click check
         this.settingsToggle = document.getElementById("vivliostyle-menu-item_settings-toggle");
 
         this.opened = ko.observable(false);
@@ -124,8 +118,10 @@ class SettingsPanel {
     }
 
     apply() {
-        if (this.state.renderAllPages() === this.viewerOptions_.renderAllPages() &&
-                this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)) {
+        if (
+            this.state.renderAllPages() === this.viewerOptions_.renderAllPages() &&
+            this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)
+        ) {
             this.viewerOptions_.copyFrom(this.state.viewerOptions);
         } else {
             this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
@@ -160,10 +156,11 @@ class SettingsPanel {
 
     focusToFirstItem(opt_outerElem) {
         const outerElem = opt_outerElem || this.settingsToggle;
-        const inputElem = ["input", "textarea", "summary"].includes(outerElem.localName) ? outerElem :
-                Array.from(outerElem.getElementsByTagName("input")).find(e => {
-            return !e.disabled && (e.type != "radio" || e.checked);
-        });
+        const inputElem = ["input", "textarea", "summary"].includes(outerElem.localName)
+            ? outerElem
+            : Array.from(outerElem.getElementsByTagName("input")).find(e => {
+                  return !e.disabled && (e.type != "radio" || e.checked);
+              });
         if (inputElem) {
             for (let e = inputElem.parentElement; e && e != this.settingsToggle; e = e.parentElement) {
                 if (e.localName == "details") {
@@ -176,8 +173,7 @@ class SettingsPanel {
 
     handleKey(key) {
         const isSettingsActive = this.opened() && this.settingsToggle.contains(document.activeElement);
-        const isInInput = isSettingsActive && (document.activeElement.type == "text" ||
-                document.activeElement.localName == "select");
+        const isInInput = isSettingsActive && (document.activeElement.type == "text" || document.activeElement.localName == "select");
         const isInTextArea = isSettingsActive && document.activeElement.localName == "textarea";
         const isHotKeyEnabled = isSettingsActive && !isInInput && !isInTextArea;
 
@@ -280,9 +276,12 @@ class SettingsPanel {
                 }
                 return true;
             case Keys.Enter:
-                if (isInInput || isHotKeyEnabled &&
+                if (
+                    isInInput ||
+                    (isHotKeyEnabled &&
                         document.activeElement.id !== "vivliostyle-menu-button_apply" &&
-                        document.activeElement.id !== "vivliostyle-menu-button_reset") {
+                        document.activeElement.id !== "vivliostyle-menu-button_reset")
+                ) {
                     document.getElementById("vivliostyle-menu-button_apply").focus();
                     return false;
                 }

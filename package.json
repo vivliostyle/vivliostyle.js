@@ -9,7 +9,8 @@
     "serve": "gulp serve",
     "serve-dev": "gulp serve-dev",
     "test-local": "gulp test-local",
-    "test-sauce": "gulp test-sauce"
+    "test-sauce": "gulp test-sauce",
+    "format": "prettier --write {.prettierrc.js,gulpfile.js,src/{js,scss}/**/*.*,test/{conf,mock,spec}/**/*.*}"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
     "karma-sauce-launcher": "^2.0.2",
     "karma-verbose-reporter": "0.0.6",
     "knockout": "^3.5.0",
+    "prettier": "^1.18.2",
     "tinyify": "^2.5.1",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.11.1"
