@@ -66,10 +66,6 @@ function destDir(type) {
 function srcPattern(type) {
     return SRC_DIR + "/" + DIRS[type].src + "/" + (DIRS[type].srcPattern || "**/*");
 }
-function serverStartPath(development) {
-    var name = development ? HTML_FILENAMES.development : HTML_FILENAMES.production;
-    return SERVER_START_PATH.replace("%viewer-html%", name);
-}
 
 // JS build
 function getBrowserify(development, watch) {
