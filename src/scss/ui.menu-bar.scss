@@ -67,7 +67,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 // --------------------------------------------------------------------------------
 
 #vivliostyle-menu-bar {
-    @include box-sizing(border-box);
+    box-sizing: border-box;
     position: fixed;
     z-index: 88888888;
     left: 0;
@@ -155,7 +155,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
             > .vivliostyle-menu-icon-button,
             > .vivliostyle-menu-icon-button:before,
             > .vivliostyle-menu-icon-button:after {
-                @include box-sizing(border-box);
+                box-sizing: border-box;
                 display: block;
                 position: absolute;
             }
@@ -455,7 +455,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     ul.vivliostyle-menu {
         li.vivliostyle-menu-item {
             .vivliostyle-menu-detail {
-                @include box-sizing(border-box);
+                box-sizing: border-box;
                 display: none;
                 position: fixed;
                 right: 0;
@@ -513,7 +513,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                 .vivliostyle-menu-button {
                     display: inline-block;
                     position: relative;
-                    @include box-sizing(border-box);
+                    box-sizing: border-box;
                     padding: 0.6em 1.5em;
                     border: solid 1px rgb(128, 128, 128);
                     border-radius: 1.5em;
@@ -644,7 +644,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                     }
                 }
                 > .vivliostyle-menu-detail-aside {
-                    @include box-sizing(border-box);
+                    box-sizing: border-box;
                     position: absolute;
                     left: 0;
                     bottom: 0;

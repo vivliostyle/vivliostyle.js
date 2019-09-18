@@ -50,7 +50,7 @@ $button-offset: 0;
         @include transition(0.1s linear !important);
     }
     &:after {
-        @include box-sizing(content-box);
+        box-sizing: content-box;
         display: block;
         position: absolute;
         left: 0;
