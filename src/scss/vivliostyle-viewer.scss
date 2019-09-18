@@ -11,7 +11,8 @@
 @import "./lib/_vars";
 
 html[data-vivliostyle-paginated] {
-    &, & body {
+    &,
+    & body {
         margin: 0;
         padding: 0;
     }
@@ -30,7 +31,8 @@ html[data-vivliostyle-paginated] {
             display: block;
         }
 
-        body, [data-vivliostyle-viewer-viewport]  {
+        body,
+        [data-vivliostyle-viewer-viewport] {
             width: 100% !important;
             height: 100% !important;
         }
@@ -61,26 +63,26 @@ html[data-vivliostyle-paginated] {
     box-sizing: border-box;
     padding: 4px 16px;
     margin-top: $menu-icon-height;
-    background: #F0F0F0;
+    background: #f0f0f0;
     font-family: $sans-serif;
     font-size: 0.875rem;
     line-height: 1.5;
 
-    >h1 {
+    > h1 {
         font-size: 1.75rem;
         font-weight: 100;
         line-height: 1.1;
         padding: 0 2px;
         margin: 1rem 0;
 
-        >small {
+        > small {
             font-size: 0.75rem;
             font-weight: 300;
             display: inline-block;
         }
     }
 
-    >input {
+    > input {
         font-size: 1rem;
         background: white;
         display: block;
@@ -96,17 +98,18 @@ html[data-vivliostyle-paginated] {
         margin: 0.5em 0;
     }
 
-    ul, ol {
+    ul,
+    ol {
         margin-top: 0;
         padding-left: 2em;
     }
 
     a {
-        color: rgb(128,128,128);
+        color: rgb(128, 128, 128);
         text-decoration: none;
-        border-bottom: solid 1px rgb(192,192,192);
+        border-bottom: solid 1px rgb(192, 192, 192);
 
-        >strong {
+        > strong {
             font-size: 1.25em;
             font-weight: 400;
         }

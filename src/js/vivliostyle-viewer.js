@@ -28,9 +28,7 @@ export default {
             ko.applyBindings(new ViewerApp());
         }
 
-        if(window["__loaded"])
-            startViewer();
-        else
-            window.onload = startViewer;
+        if (window["__loaded"]) startViewer();
+        else window.onload = startViewer;
     }
 };
