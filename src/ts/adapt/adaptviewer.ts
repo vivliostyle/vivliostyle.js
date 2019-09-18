@@ -393,7 +393,7 @@ export class Viewer {
       typeof command["pageViewMode"] == "string" &&
       command["pageViewMode"] !== this.pageViewMode
     ) {
-      this.pageViewMode = command["pageViewMode"];
+      this.pageViewMode = command["pageViewMode"] as PageViewMode;
       this.needResize = true;
     }
     if (
