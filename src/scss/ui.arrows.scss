@@ -18,8 +18,6 @@ $button-offset: 0;
     background: transparent;
     cursor: pointer;
     z-index: 1000;
-    color: rgba(255, 255, 255, 0);
-    background: rgba(0, 0, 0, 0);
     @include prefix(user-select, none); // prevent unwanted text selection
     &.vivliostyle-menu-enabled {
         color: rgba(0, 0, 0, 0.25);
