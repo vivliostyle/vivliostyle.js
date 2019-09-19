@@ -53,6 +53,9 @@
     "knockout": "^3.5.0",
     "node-sass": "^4.12.0",
     "prettier": "^1.18.2",
+    "stylelint": "^11.0.0",
+    "stylelint-config-recommended": "^3.0.0",
+    "stylelint-scss": "^3.11.0",
     "tinyify": "^2.5.1",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.11.1"
