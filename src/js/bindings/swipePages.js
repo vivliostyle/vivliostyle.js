@@ -68,7 +68,7 @@ ko.bindingHandlers.swipePages = {
                     }
                 }
             });
-            element.addEventListener("touchend", event => {
+            element.addEventListener("touchend", () => {
                 if (arrowButton) {
                     ko.utils.toggleDomNodeCssClass(arrowButton, "active", false);
                 }
