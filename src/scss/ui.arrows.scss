@@ -9,6 +9,60 @@ $button-size: 36px;
 $button-offset: 0;
 
 #vivliostyle-page-navigation-up,
+#vivliostyle-page-navigation-down {
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    height: ($button-size + $button-offset * 2) * 1;
+}
+
+#vivliostyle-page-navigation-up {
+    top: 0;
+    &:after {
+        content: $fa-var-arrow-circle-up;
+    }
+    @media (hover: hover), (-moz-touch-enabled: 0) {
+        &:hover {
+            cursor: n-resize;
+        }
+    }
+}
+#vivliostyle-page-navigation-down {
+    bottom: 0;
+    cursor: s-resize;
+    &:after {
+        content: $fa-var-arrow-circle-down;
+    }
+}
+
+#vivliostyle-page-navigation-left,
+#vivliostyle-page-navigation-right {
+    top: 0;
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: ($button-size + $button-offset * 2) * 1;
+    height: 50%;
+}
+#vivliostyle-page-navigation-left {
+    left: 0;
+    cursor: w-resize;
+    &:after {
+        content: $fa-var-chevron-left;
+    }
+}
+#vivliostyle-page-navigation-right {
+    right: 0;
+    cursor: e-resize;
+    &:after {
+        content: $fa-var-chevron-right;
+        text-indent: 0.125em;
+    }
+}
+
+#vivliostyle-page-navigation-up,
 #vivliostyle-page-navigation-down,
 #vivliostyle-page-navigation-left,
 #vivliostyle-page-navigation-right {
@@ -61,58 +115,5 @@ $button-offset: 0;
         line-height: 1;
         text-align: center;
         @include font-icon("FontAwesome");
-    }
-}
-
-#vivliostyle-page-navigation-up,
-#vivliostyle-page-navigation-down {
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-    height: ($button-size + $button-offset * 2) * 1;
-}
-#vivliostyle-page-navigation-up {
-    top: 0;
-    &:after {
-        content: $fa-var-arrow-circle-up;
-    }
-    @media (hover: hover), (-moz-touch-enabled: 0) {
-        &:hover {
-            cursor: n-resize;
-        }
-    }
-}
-#vivliostyle-page-navigation-down {
-    bottom: 0;
-    cursor: s-resize;
-    &:after {
-        content: $fa-var-arrow-circle-down;
-    }
-}
-
-#vivliostyle-page-navigation-left,
-#vivliostyle-page-navigation-right {
-    top: 0;
-    bottom: 0;
-    margin-top: auto;
-    margin-bottom: auto;
-    width: ($button-size + $button-offset * 2) * 1;
-    height: 50%;
-}
-#vivliostyle-page-navigation-left {
-    left: 0;
-    cursor: w-resize;
-    &:after {
-        content: $fa-var-chevron-left;
-    }
-}
-#vivliostyle-page-navigation-right {
-    right: 0;
-    cursor: e-resize;
-    &:after {
-        content: $fa-var-chevron-right;
-        text-indent: 0.125em;
     }
 }
