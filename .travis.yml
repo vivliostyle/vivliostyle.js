@@ -1,15 +1,16 @@
 cache: false
 language: node_js
 node_js:
-- stable
+  - stable
 before_install:
-- gem install compass
+  - gem install compass
 script:
-- scripts/update-version.sh
-- npm run build
+  - scripts/update-version.sh
+  - npm run lint
+  - npm run build
 # - npm run test-sauce
 after_success:
-- scripts/travis-after-success.sh
+  - scripts/travis-after-success.sh
 notifications:
   email: false
   slack:
