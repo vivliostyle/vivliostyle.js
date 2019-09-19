@@ -61,7 +61,7 @@ class FixedZoomFactor extends ZoomOptions {
     toggleFitToScreen() {
         return new FitToScreen();
     }
-    getCurrentZoomFactor(viewer) {
+    getCurrentZoomFactor() {
         return this.zoom;
     }
 }

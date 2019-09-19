@@ -420,7 +420,6 @@ class Navigation {
     toggleTOC() {
         if (!this.isTOCToggleDisabled()) {
             let intervalID = 0;
-            const tocToggle = document.getElementById("vivliostyle-menu-item_toc-toggle");
 
             if (!this.viewer_.tocVisible()) {
                 if (this.justClicked) {

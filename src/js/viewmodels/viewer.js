@@ -56,7 +56,6 @@ class Viewer {
 
     setupViewerEventHandler() {
         const logger = Logger.getLogger();
-        let intervalID = 0;
         this.viewer_.addListener("debug", payload => {
             logger.debug(payload.content);
         });
@@ -138,7 +137,7 @@ class Viewer {
     }
 
     setupViewerOptionSubscriptions() {
-        ko.computed(function() {
+        ko.computed(function () {
             const viewerOptions = this.viewerOptions_.toObject();
             this.viewer_.setOptions(viewerOptions);
         }, this).extend({ rateLimit: 0 });
