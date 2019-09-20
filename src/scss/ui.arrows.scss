@@ -1,7 +1,5 @@
 @charset "utf-8";
 
-@import "compass";
-
 @import "./lib/_mixins";
 
 @import "../../node_modules/font-awesome/scss/_variables";
@@ -22,7 +20,7 @@ $button-offset: 0;
     z-index: 1000;
     color: rgba(255, 255, 255, 0);
     background: rgba(0, 0, 0, 0);
-    @include user-select(none); // prevent unwanted text selection
+    @include prefix(user-select, none); // prevent unwanted text selection
     &.vivliostyle-menu-enabled {
         color: rgba(0, 0, 0, 0.25);
         background: rgba(0, 0, 0, 0);

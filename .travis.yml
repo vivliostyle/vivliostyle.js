@@ -2,8 +2,6 @@ cache: false
 language: node_js
 node_js:
   - stable
-before_install:
-  - gem install compass
 script:
   - scripts/update-version.sh
   - npm run lint
