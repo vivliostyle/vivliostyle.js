@@ -82,7 +82,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     @include box-shadow($menu-box-shadow);
     -webkit-font-smoothing: subpixel-antialiased;
     -webkit-text-size-adjust: 100%;
-    @include user-select(none); // prevent unwanted text selection
+    @include prefix(user-select, none); // prevent unwanted text selection
     * {
         margin: 0;
         padding: 0;
@@ -324,7 +324,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                 position: absolute;
                 top: 13px;
                 font-size: 11.5px;
-                @include user-select(text);
+                @include prefix(user-select, text);
 
                 &::before {
                     content: "/\A0";
@@ -473,7 +473,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                 }
                 background: $menu-bg-color;
                 @include box-shadow($menu-box-shadow);
-                @include user-select(text);
+                @include prefix(user-select, text);
                 &:focus {
                     outline: 1px solid rgba(0, 0, 0, 0.15);
                 }
