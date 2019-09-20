@@ -4,7 +4,7 @@ var babelify = require("babelify");
 var browserify = require("browserify");
 var browserSync = require("browser-sync").create();
 var changed = require("gulp-changed");
-var compass = require("gulp-compass");
+var sass = require("gulp-sass");
 var ejs = require("gulp-ejs");
 var fs = require("fs");
 var gulp = require("gulp");
@@ -16,6 +16,8 @@ var plumber = require("gulp-plumber");
 var rename = require("gulp-rename");
 var source = require("vinyl-source-stream");
 var watchify = require("watchify");
+
+sass.compiler = require("node-sass");
 
 // Parameters
 var SRC_DIR = "src";
@@ -158,13 +160,11 @@ function buildCss(development) {
             })
         )
         .pipe(
-            compass({
-                config_file: SRC_DIR + "/config.rb",
-                css: path.resolve(destDir("css")),
-                sass: path.resolve(srcDir("css")),
-                environment: development ? "development" : "production"
-            })
-        );
+            sass({
+                outputStyle: development ? "expanded" : "compressed"
+            }).on("error", sass.logError)
+        )
+        .pipe(gulp.dest(path.resolve(destDir("css"))));
 }
 gulp.task("build:css", function() {
     return buildCss(false);
