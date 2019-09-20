@@ -9,7 +9,6 @@ chmod 600 ~/.ssh/deploy.key
 cd ../
 
 # fetch and build vivliostyle-ui
-gem install compass
 git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle-ui.git vivliostyle-ui
 cd vivliostyle-ui
 scripts/update-version.sh
