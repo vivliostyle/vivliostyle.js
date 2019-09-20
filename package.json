@@ -38,7 +38,6 @@
     "eslint-plugin-prettier": "^3.1.1",
     "gulp": "^4.0.2",
     "gulp-changed": "^4.0.0",
-    "gulp-compass": "^2.1.0",
     "gulp-ejs": "^4.1.1",
     "gulp-notify": "^3.2.0",
     "gulp-plumber": "^1.2.1",
