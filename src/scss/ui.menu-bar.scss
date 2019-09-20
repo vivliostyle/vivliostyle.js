@@ -79,7 +79,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     line-height: 1;
     color: white;
     background: black;
-    @include box-shadow($menu-box-shadow);
+    box-shadow: $menu-box-shadow;
     -webkit-font-smoothing: subpixel-antialiased;
     -webkit-text-size-adjust: 100%;
     @include prefix(user-select, none); // prevent unwanted text selection
@@ -472,7 +472,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                     color: $menu-disabled-fg-color;
                 }
                 background: $menu-bg-color;
-                @include box-shadow($menu-box-shadow);
+                box-shadow: $menu-box-shadow;
                 @include prefix(user-select, text);
                 &:focus {
                     outline: 1px solid rgba(0, 0, 0, 0.15);
