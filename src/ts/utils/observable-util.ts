@@ -17,10 +17,15 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { PureComputed, Observable } from "knockout";
+
+export type ReadonlyObservable<T> = {
+    getter: PureComputed<T>;
+    value: Observable<T>;
+};
 
 const util = {
-    readonlyObservable(value) {
+    readonlyObservable<T>(value: T): ReadonlyObservable<T> {
         const obs = ko.observable(value);
         return {
             getter: ko.pureComputed(() => obs()),
