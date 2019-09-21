@@ -20,30 +20,34 @@
 
 import stringUtil from "../utils/string-util";
 
-function getRegExpForParameter(name) {
+function getRegExpForParameter(name: string): RegExp {
     return new RegExp(`[#&]${stringUtil.escapeUnicodeString(name)}=([^&]*)`, "g");
 }
 
 class URLParameterStore {
+    history: History | null;
+    location: Location | { href: "" };
+    storedUrl: string;
+
     constructor() {
-        this.history = window ? window.history : {};
+        this.history = window ? window.history : null;
         this.location = window ? window.location : { href: "" };
         this.storedUrl = this.location.href;
     }
 
-    getBaseURL() {
+    getBaseURL(): string {
         let url = this.location.href;
         url = url.replace(/#.*$/, "");
         return url.replace(/\/[^/]*$/, "/");
     }
 
-    hasParameter(name) {
+    hasParameter(name: string): boolean {
         const url = this.location.href;
         const regexp = getRegExpForParameter(name);
         return regexp.test(url);
     }
 
-    getParameter(name) {
+    getParameter(name: string): Array<string> {
         const url = this.location.href;
         const regexp = getRegExpForParameter(name);
         const results = [];
@@ -59,7 +63,7 @@ class URLParameterStore {
      * @param {string} value
      * @param {number=} opt_index specifies index in multiple parameters with same name.
      */
-    setParameter(name, value, opt_index) {
+    setParameter(name: string, value: string, opt_index?: number): void {
         const url = this.location.href;
         let updated;
         const regexp = getRegExpForParameter(name);
@@ -76,7 +80,7 @@ class URLParameterStore {
         } else {
             updated = `${url + (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") + name}=${value}`;
         }
-        if (this.history.replaceState) {
+        if (this.history !== null && this.history.replaceState) {
             this.history.replaceState(null, "", updated);
         } else {
             this.location.href = updated;
@@ -88,7 +92,7 @@ class URLParameterStore {
      * @param {string} name
      * @param {boolean=} opt_keepFirst If true, not remove the first one in multiple parameters with same name.
      */
-    removeParameter(name, opt_keepFirst) {
+    removeParameter(name: string, opt_keepFirst?: boolean): void {
         const url = this.location.href;
         let updated;
         const regexp = getRegExpForParameter(name);
@@ -108,7 +112,7 @@ class URLParameterStore {
                 regexp.lastIndex -= r[0].length;
             }
             updated = updated.replace(/^(.*?)[#&]$/, "$1");
-            if (this.history.replaceState) {
+            if (this.history !== null && this.history.replaceState) {
                 this.history.replaceState(null, "", updated);
             } else {
                 this.location.href = updated;
@@ -118,4 +122,5 @@ class URLParameterStore {
     }
 }
 
-export default new URLParameterStore();
+const instance = new URLParameterStore();
+export default instance;
