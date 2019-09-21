@@ -17,10 +17,12 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { ObservableArray } from "knockout";
 
-function MessageQueue() {
+export type MessageQueue = ObservableArray<unknown>;
+
+function messageQueue(): MessageQueue {
     return ko.observableArray();
 }
 
-export default new MessageQueue();
+export default messageQueue();
