@@ -17,9 +17,9 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "../models/vivliostyle";
+import vivliostyle from "./vivliostyle";
 
-class PageViewModeInstance {
+export class PageViewModeInstance {
     toSpreadViewString() {
         switch (this) {
             case PageViewMode.SPREAD:
