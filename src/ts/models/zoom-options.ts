@@ -17,16 +17,28 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "../models/vivliostyle";
+import { Viewer as VivliostyleViewer } from "vivliostyle";
+import vivliostyle from "./vivliostyle";
 
 class ZoomOptions {
+    zoom: number;
+
     constructor(zoom) {
         this.zoom = zoom;
     }
-    zoomIn(viewer) {
+    get fitToScreen(): null | boolean {
+        return null;
+    }
+    getCurrentZoomFactor(_viewer?: VivliostyleViewer) {
+        return 1;
+    }
+    toggleFitToScreen() {
+        return new ZoomOptions(1);
+    }
+    zoomIn(viewer: VivliostyleViewer) {
         return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
     }
-    zoomOut(viewer) {
+    zoomOut(viewer: VivliostyleViewer) {
         return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
     }
     zoomToActualSize() {
@@ -40,7 +52,7 @@ class ZoomOptions {
     }
 }
 
-class FitToScreen extends ZoomOptions {
+export class FitToScreen extends ZoomOptions {
     constructor() {
         super(1);
     }
@@ -50,7 +62,7 @@ class FitToScreen extends ZoomOptions {
     toggleFitToScreen() {
         return new FixedZoomFactor(1);
     }
-    getCurrentZoomFactor(viewer) {
+    getCurrentZoomFactor(viewer: VivliostyleViewer) {
         return viewer.queryZoomFactor(vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT);
     }
 }
