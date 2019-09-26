@@ -17,15 +17,27 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { PureComputed } from "knockout";
+import { MessageQueue } from "../models/message-queue";
+
+type ErrorInfo = {
+    error: {
+        frameTrace: string;
+        stack: string;
+    };
+    messages: Array<string>;
+};
 
 class MessageDialog {
-    constructor(queue) {
+    list: MessageQueue;
+    visible: PureComputed<boolean>;
+
+    constructor(queue: MessageQueue) {
         this.list = queue;
         this.visible = ko.pureComputed(() => queue().length > 0);
     }
 
-    getDisplayMessage(errorInfo) {
+    getDisplayMessage(errorInfo: ErrorInfo) {
         const e = errorInfo.error;
         let msg = e && (e.toString() || e.frameTrace || e.stack);
         if (msg) {
