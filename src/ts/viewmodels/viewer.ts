@@ -18,13 +18,49 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
-import obs from "../utils/observable-util";
+import ko, { Observable, PureComputed } from "knockout";
+import { Viewer as VivliostyleViewer } from "vivliostyle";
+import obs, { ReadonlyObservable } from "../utils/observable-util";
 import Logger from "../logging/logger";
+import DocumentOptions from "../models/document-options";
+import ViewerOptions from "../models/viewer-options";
 import vivliostyle from "../models/vivliostyle";
 
+type State = {
+    status: PureComputed<unknown>;
+    pageProgression: PureComputed<unknown>;
+    navigatable?: PureComputed<boolean>;
+};
+
+type PrivateState = {
+    status: ReadonlyObservable<unknown>;
+    pageProgression: ReadonlyObservable<unknown>;
+};
+
+export type ViewerSettings = {
+    userAgentRootURL: string;
+    viewportElement: HTMLElement;
+    debug: boolean;
+};
+
 class Viewer {
-    constructor(viewerSettings, viewerOptions) {
+    private viewerOptions_: ViewerOptions;
+    private viewer_: VivliostyleViewer;
+    private state_: PrivateState;
+
+    // FIXME: In used in viewmodels/navigation. This property is desirable private access.
+    documentOptions_: null | DocumentOptions;
+
+    epage: Observable<unknown>;
+    epageCount: Observable<number>;
+    firstPage: Observable<boolean>;
+    inputUrl: Observable<string>;
+    state: State;
+    lastPage: Observable<boolean>;
+    tocVisible: Observable<boolean>;
+    tocPinned: Observable<unknown>;
+
+    constructor(viewerSettings?: ViewerSettings, viewerOptions?: ViewerOptions) {
         this.viewerOptions_ = viewerOptions;
         this.documentOptions_ = null;
         this.viewer_ = new vivliostyle.viewer.Viewer(viewerSettings, viewerOptions.toObject());
@@ -137,13 +173,13 @@ class Viewer {
     }
 
     setupViewerOptionSubscriptions() {
-        ko.computed(function () {
+        ko.computed(function() {
             const viewerOptions = this.viewerOptions_.toObject();
             this.viewer_.setOptions(viewerOptions);
         }, this).extend({ rateLimit: 0 });
     }
 
-    loadDocument(documentOptions, viewerOptions) {
+    loadDocument(documentOptions: DocumentOptions, viewerOptions: ViewerOptions) {
         this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
         if (viewerOptions) {
             this.viewerOptions_.copyFrom(viewerOptions);
@@ -215,7 +251,7 @@ class Viewer {
         return epage;
     }
 
-    showTOC(opt_show, opt_autohide) {
+    showTOC(opt_show?: boolean, opt_autohide?: boolean) {
         if (this.viewer_.isTOCVisible() == null) {
             // TOC is unavailable
             return;
