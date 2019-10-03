@@ -4,8 +4,8 @@
   "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
   "scripts": {
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
-    "build": "gulp build",
-    "build-dev": "gulp build-dev",
+    "build": "gulp build && NODE_ENV=production webpack",
+    "build-dev": "gulp build-dev && NODE_ENV=development webpack",
     "serve": "gulp serve",
     "serve-dev": "gulp serve-dev",
     "test-local": "gulp test-local",
