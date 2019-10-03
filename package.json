@@ -31,9 +31,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
-    "babelify": "^10.0.0",
     "browser-sync": "^2.26.7",
-    "browserify": "^16.5.0",
     "circular-dependency-plugin": "^5.2.0",
     "eslint": "^6.4.0",
     "eslint-plugin-import": "^2.18.2",
@@ -45,7 +43,6 @@
     "gulp-plumber": "^1.2.1",
     "gulp-rename": "^1.4.0",
     "gulp-sass": "^4.0.2",
-    "gulp-util": "^3.0.8",
     "jasmine-core": "^3.4.0",
     "karma": "^4.2.0",
     "karma-browserify": "^6.1.0",
@@ -62,8 +59,6 @@
     "tinyify": "^2.5.1",
     "ts-loader": "^6.2.0",
     "typescript": "^3.6.3",
-    "vinyl-source-stream": "^2.0.0",
-    "watchify": "^3.11.1",
     "webpack": "^4.41.0",
     "webpack-cli": "^3.3.9"
   }
