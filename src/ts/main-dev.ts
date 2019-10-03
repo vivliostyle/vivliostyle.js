@@ -16,9 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import vivliostyle from "./models/vivliostyle";
+import vivliostyle, { Vivliostyle } from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
+
+declare global {
+    interface Window {
+        vivliostyle: Vivliostyle;
+    }
+}
 
 vivliostyle.setInstance(window.vivliostyle);
 vivliostyleViewer.start();
