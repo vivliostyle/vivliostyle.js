@@ -21,26 +21,26 @@
  * Instead it goes through the layout interface that gives it one view tree
  * node at a time.
  */
-import * as Asserts from "../vivliostyle/asserts";
+import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as Break from "../vivliostyle/break";
-import * as BreakPosition from "../vivliostyle/breakposition";
+import * as Break from "./break";
+import * as BreakPosition from "./breakposition";
 import * as Css from "./css";
-import * as Diff from "../vivliostyle/diff";
+import * as Diff from "./diff";
 import * as Geom from "./geom";
-import * as LayoutHelper from "../vivliostyle/layouthelper";
-import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as LayoutRetryers from "../vivliostyle/layoutretryers";
-import * as Logging from "../vivliostyle/logging";
-import * as PageFloats from "../vivliostyle/pagefloats";
-import * as Plugin from "../vivliostyle/plugin";
-import * as Selectors from "../vivliostyle/selectors";
-import * as Shared from "../vivliostyle/shared";
-import * as Sizing from "../vivliostyle/sizing";
+import * as LayoutHelper from "./layouthelper";
+import * as LayoutProcessor from "./layoutprocessor";
+import * as LayoutRetryers from "./layoutretryers";
+import * as Logging from "./logging";
+import * as PageFloats from "./pagefloats";
+import * as Plugin from "./plugin";
+import * as Selectors from "./selectors";
+import * as Shared from "./shared";
+import * as Sizing from "./sizing";
 import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as VtreeImpl from "./vtree";
-import { Layout, RepetitiveElement, Table, Vtree } from "../vivliostyle/types";
+import { Layout, RepetitiveElement, Table, Vtree } from "./types";
 
 export const mediaTags = {
   img: true,

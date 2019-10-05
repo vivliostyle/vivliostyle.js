@@ -22,7 +22,7 @@
 import * as Base from "./base";
 import * as Net from "./net";
 import * as Task from "./task";
-import { XmlDoc } from "../vivliostyle/types";
+import { XmlDoc } from "./types";
 
 export type XMLDocStore = XmlDoc.XMLDocStore;
 

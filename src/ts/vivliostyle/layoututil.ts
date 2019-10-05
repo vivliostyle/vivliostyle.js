@@ -19,9 +19,9 @@
  */
 import * as Break from "./break";
 import * as BreakPosition from "./breakposition";
-import * as LayoutImpl from "../adapt/layout";
-import * as Task from "../adapt/task";
-import * as VtreeImpl from "../adapt/vtree";
+import * as LayoutImpl from "./layout";
+import * as Task from "./task";
+import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
 export type LayoutIteratorState = {

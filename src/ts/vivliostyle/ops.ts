@@ -19,14 +19,14 @@
  * @fileoverview Ops - Render EPUB content files by applying page masters,
  * styling and layout.
  */
-import "../vivliostyle/footnotes";
-import "../vivliostyle/table";
-import * as Asserts from "../vivliostyle/asserts";
+import "./footnotes";
+import "./table";
+import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as Break from "../vivliostyle/break";
-import * as Columns from "../vivliostyle/columns";
-import * as Constants from "../vivliostyle/constants";
-import * as Counters from "../vivliostyle/counters";
+import * as Break from "./break";
+import * as Columns from "./columns";
+import * as Constants from "./constants";
+import * as Counters from "./counters";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
@@ -38,19 +38,19 @@ import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Geom from "./geom";
 import * as LayoutImpl from "./layout";
-import * as LayoutProcessor from "../vivliostyle/layoutprocessor";
-import * as Logging from "../vivliostyle/logging";
+import * as LayoutProcessor from "./layoutprocessor";
+import * as Logging from "./logging";
 import * as Net from "./net";
-import * as PageFloats from "../vivliostyle/pagefloats";
-import * as Pages from "../vivliostyle/pages";
-import * as Plugin from "../vivliostyle/plugin";
+import * as PageFloats from "./pagefloats";
+import * as Pages from "./pages";
+import * as Plugin from "./plugin";
 import * as Pm from "./pm";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xmldoc";
-import { Layout } from "../vivliostyle/types";
+import { Layout } from "./types";
 import UserAgentBaseCss from "../../resources/user-agent-base.css";
 import UserAgentPageCss from "../../resources/user-agent-page.css";
 

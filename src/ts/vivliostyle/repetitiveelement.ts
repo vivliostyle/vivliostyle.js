@@ -26,8 +26,8 @@ import * as LayoutUtil from "./layoututil";
 import * as Plugin from "./plugin";
 import * as Selectors from "./selectors";
 import * as Shared from "./shared";
-import * as Task from "../adapt/task";
-import * as VtreeImpl from "../adapt/vtree";
+import * as Task from "./task";
+import * as VtreeImpl from "./vtree";
 import {
   FormattingContextType,
   FragmentLayoutConstraintType,

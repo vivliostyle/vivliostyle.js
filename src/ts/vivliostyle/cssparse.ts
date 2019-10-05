@@ -22,7 +22,7 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as CssTok from "./csstok";
 import * as Exprs from "./exprs";
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 import * as Net from "./net";
 import * as Task from "./task";
 

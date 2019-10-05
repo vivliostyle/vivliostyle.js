@@ -16,12 +16,12 @@
  *
  * @fileoverview PseudoElement - CSS pseudo elements.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
-import * as CssCasc from "../adapt/csscasc";
-import * as CssStyler from "../adapt/cssstyler";
-import * as Exprs from "../adapt/exprs";
-import * as Vtree from "../adapt/vtree";
+import * as Base from "./base";
+import * as Css from "./css";
+import * as CssCasc from "./csscasc";
+import * as CssStyler from "./cssstyler";
+import * as Exprs from "./exprs";
+import * as Vtree from "./vtree";
 import { PseudoElement } from "./types";
 
 export const document = new DOMParser().parseFromString(

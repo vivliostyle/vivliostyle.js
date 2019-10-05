@@ -18,10 +18,10 @@
  * @fileoverview Footnotes
  */
 import * as Asserts from "./asserts";
-import * as Css from "../adapt/css";
+import * as Css from "./css";
 import * as PageFloats from "./pagefloats";
-import * as Task from "../adapt/task";
-import * as Vtree from "../adapt/vtree";
+import * as Task from "./task";
+import * as Vtree from "./vtree";
 import { Layout } from "./types";
 
 const PageFloatFragment = PageFloats.PageFloatFragment;

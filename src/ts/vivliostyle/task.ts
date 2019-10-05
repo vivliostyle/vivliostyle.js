@@ -20,7 +20,7 @@
  * multitasking.
  */
 import * as Base from "./base";
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 
 /**
  * External timer. Only needed for testing.

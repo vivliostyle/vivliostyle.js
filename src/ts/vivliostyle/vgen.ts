@@ -18,27 +18,27 @@
  *
  * @fileoverview Vgen - View tree generator.
  */
-import * as Asserts from "../vivliostyle/asserts";
+import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssProp from "./cssprop";
 import * as CssStyler from "./cssstyler";
-import * as Diff from "../vivliostyle/diff";
-import * as Display from "../vivliostyle/display";
+import * as Diff from "./diff";
+import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
-import * as Matchers from "../vivliostyle/matchers";
-import * as PageFloats from "../vivliostyle/pagefloats";
-import * as Plugin from "../vivliostyle/plugin";
-import * as PseudoElement from "../vivliostyle/pseudoelement";
-import * as RepetitiveElement from "../vivliostyle/repetitiveelement";
-import * as Selectors from "../vivliostyle/selectors";
+import * as Matchers from "./matchers";
+import * as PageFloats from "./pagefloats";
+import * as Plugin from "./plugin";
+import * as PseudoElement from "./pseudoelement";
+import * as RepetitiveElement from "./repetitiveelement";
+import * as Selectors from "./selectors";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
-import * as Urls from "../vivliostyle/urls";
+import * as Urls from "./urls";
 import * as Vtree from "./vtree";
-import { XmlDoc } from "../vivliostyle/types";
+import { XmlDoc } from "./types";
 
 const namespacePrefixMap = {};
 

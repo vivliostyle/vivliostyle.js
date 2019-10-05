@@ -18,7 +18,7 @@
  *
  * @fileoverview Base - Common utilities.
  */
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 
 export let emptyObj = {};
 

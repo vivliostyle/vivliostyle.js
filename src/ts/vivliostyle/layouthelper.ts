@@ -16,9 +16,9 @@
  *
  * @fileoverview LayoutHelper - Helper functions of Layout.
  */
-import * as Base from "../adapt/base";
+import * as Base from "./base";
 import * as Logging from "./logging";
-import * as VtreeImpl from "../adapt/vtree";
+import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
 /**

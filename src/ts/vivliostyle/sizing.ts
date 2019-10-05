@@ -17,8 +17,8 @@
  *
  * @fileoverview Sizing - CSS Intrinsic & Extrinsic Sizing
  */
-import * as Base from "../adapt/base";
-import * as Vtree from "../adapt/vtree";
+import * as Base from "./base";
+import * as Vtree from "./vtree";
 
 /**
  * Box sizes defined in css-sizing.

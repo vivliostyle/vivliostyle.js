@@ -19,18 +19,18 @@
  * @fileoverview CssStyler - Apply CSS cascade to a document incrementally and
  * cache the result.
  */
-import * as Asserts from "../vivliostyle/asserts";
+import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as Break from "../vivliostyle/break";
+import * as Break from "./break";
 import * as Css from "./css";
 import * as CssCasc from "./csscasc";
 import * as CssParse from "./cssparse";
 import * as CssProp from "./cssprop";
 import * as CssValid from "./cssvalid";
-import * as Display from "../vivliostyle/display";
+import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Vtree from "./vtree";
-import { CssStyler, XmlDoc } from "../vivliostyle/types";
+import { CssStyler, XmlDoc } from "./types";
 
 export class SlipRange {
   endStuckFixed: number;

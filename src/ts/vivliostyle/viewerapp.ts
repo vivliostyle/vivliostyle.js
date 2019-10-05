@@ -18,8 +18,8 @@
  *
  * @fileoverview ViewerApp - (Deprecated) Vivliostyle page viewer base on adapt.sampleapp
  */
-import * as AdaptViewer from "../adapt/adaptviewer";
-import * as Base from "../adapt/base";
+import * as AdaptViewer from "./adaptviewer";
+import * as Base from "./base";
 import * as Constants from "./constants";
 
 export let fontSize: number = 16;
