@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_vtree from "../../../src/ts/adapt/vtree";
+import * as adapt_vtree from "../../../src/ts/vivliostyle/vtree";
 import * as vivliostyle_columns from "../../../src/ts/vivliostyle/columns";
 
 // FIXME: cannot spyOn(module, "...")

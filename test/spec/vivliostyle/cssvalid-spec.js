@@ -15,10 +15,10 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
-import * as adapt_cssparse from "../../../src/ts/adapt/cssparse";
-import * as adapt_cssvalid from "../../../src/ts/adapt/cssvalid";
-import * as adapt_task from "../../../src/ts/adapt/task";
+import * as adapt_csscasc from "../../../src/ts/vivliostyle/csscasc";
+import * as adapt_cssparse from "../../../src/ts/vivliostyle/cssparse";
+import * as adapt_cssvalid from "../../../src/ts/vivliostyle/cssvalid";
+import * as adapt_task from "../../../src/ts/vivliostyle/task";
 import * as vivliostyle_logging from "../../../src/ts/vivliostyle/logging";
 
 describe("cssvalid", function() {

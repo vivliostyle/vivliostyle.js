@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_base from "../../../src/ts/adapt/base";
+import * as adapt_base from "../../../src/ts/vivliostyle/base";
 
 describe("base", function() {
     var module = adapt_base;

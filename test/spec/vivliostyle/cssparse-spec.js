@@ -15,9 +15,9 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_cssparse from "../../../src/ts/adapt/cssparse";
-import * as adapt_csstok from "../../../src/ts/adapt/csstok";
-import * as adapt_task from "../../../src/ts/adapt/task";
+import * as adapt_cssparse from "../../../src/ts/vivliostyle/cssparse";
+import * as adapt_csstok from "../../../src/ts/vivliostyle/csstok";
+import * as adapt_task from "../../../src/ts/vivliostyle/task";
 
 describe("cssparse", function() {
     describe("Parser", function() {

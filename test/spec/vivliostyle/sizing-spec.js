@@ -15,8 +15,8 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_base from "../../../src/ts/adapt/base";
-import * as adapt_vgen from "../../../src/ts/adapt/vgen";
+import * as adapt_base from "../../../src/ts/vivliostyle/base";
+import * as adapt_vgen from "../../../src/ts/vivliostyle/vgen";
 import * as vivliostyle_sizing from "../../../src/ts/vivliostyle/sizing";
 import * as vivliostyle_test_util_dom from "../../util/dom";
 import * as vivliostyle_test_util_matchers from "../../util/matchers";
