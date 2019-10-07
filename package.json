@@ -10,7 +10,7 @@
     "serve-dev": "gulp serve-dev",
     "test-local": "gulp test-local",
     "test-sauce": "gulp test-sauce",
-    "lint-scripts": "eslint src/js",
+    "lint-scripts": "eslint src/ts",
     "lint-styles": "stylelint src/scss/{*.*,**/*.*}",
     "format": "prettier --write {*.*,src/{*.*,**/*.*,**/**/*.*}}"
   },
