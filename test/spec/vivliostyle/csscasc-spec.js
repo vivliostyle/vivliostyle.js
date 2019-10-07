@@ -15,9 +15,9 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_css from "../../../src/ts/adapt/css";
-import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
-import * as adapt_csstok from "../../../src/ts/adapt/csstok";
+import * as adapt_css from "../../../src/ts/vivliostyle/css";
+import * as adapt_csscasc from "../../../src/ts/vivliostyle/csscasc";
+import * as adapt_csstok from "../../../src/ts/vivliostyle/csstok";
 import * as vivliostyle_plugin from "../../../src/ts/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 

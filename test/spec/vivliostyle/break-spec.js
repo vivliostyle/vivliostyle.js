@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_css from "../../../src/ts/adapt/css";
+import * as adapt_css from "../../../src/ts/vivliostyle/css";
 import * as vivliostyle_break from "../../../src/ts/vivliostyle/break";
 
 describe("break", function() {

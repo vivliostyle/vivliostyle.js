@@ -22,7 +22,7 @@
 import * as Css from "./css";
 import * as CssParse from "./cssparse";
 import * as CssTok from "./csstok";
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 import ValidationTxt from "../../resources/validation.txt";
 
 export interface PropertyReceiver {

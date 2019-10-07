@@ -16,13 +16,13 @@
  *
  * @fileoverview Types - Type definiions.
  */
-import * as Base from "../adapt/base";
-import * as Css from "../adapt/css";
+import * as Base from "./base";
+import * as Css from "./css";
 import * as Diff from "./diff";
-import * as Exprs from "../adapt/exprs";
-import * as Geom from "../adapt/geom";
-import * as Task from "../adapt/task";
-import * as TaskUtil from "../adapt/taskutil";
+import * as Exprs from "./exprs";
+import * as Geom from "./geom";
+import * as Task from "./task";
+import * as TaskUtil from "./taskutil";
 
 export type FormattingContextType =
   | "Block"

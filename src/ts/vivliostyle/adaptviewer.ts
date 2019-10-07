@@ -18,15 +18,15 @@
  *
  * @fileoverview AdaptViewer - Viewer implementation.
  */
-import * as Asserts from "../vivliostyle/asserts";
+import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as Constants from "../vivliostyle/constants";
+import * as Constants from "./constants";
 import * as Epub from "./epub";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
-import * as Logging from "../vivliostyle/logging";
-import * as Plugin from "../vivliostyle/plugin";
-import * as Profile from "../vivliostyle/profile";
+import * as Logging from "./logging";
+import * as Plugin from "./plugin";
+import * as Profile from "./profile";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
 import * as Vgen from "./vgen";

@@ -23,7 +23,7 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as Exprs from "./exprs";
 import * as Geom from "./geom";
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 
 //---------------------- value parsers ----------------------------------
 export class SetVisitor extends Css.Visitor {

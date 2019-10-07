@@ -18,7 +18,7 @@
  *
  * @fileoverview CssCasc - CSS Cascade.
  */
-import * as Asserts from "../vivliostyle/asserts";
+import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssParse from "./cssparse";
@@ -26,11 +26,11 @@ import * as CssProp from "./cssprop";
 import * as CssTok from "./csstok";
 import * as CssValid from "./cssvalid";
 import * as Exprs from "./exprs";
-import * as Logging from "../vivliostyle/logging";
-import * as Matchers from "../vivliostyle/matchers";
-import * as Plugin from "../vivliostyle/plugin";
+import * as Logging from "./logging";
+import * as Matchers from "./matchers";
+import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssCasc } from "../vivliostyle/types";
+import { CssCasc } from "./types";
 
 export interface ElementStyle extends CssCasc.ElementStyle {}
 

@@ -17,7 +17,7 @@
  *
  * @fileoverview Break - Control fragmentation.
  */
-import * as Css from "../adapt/css";
+import * as Css from "./css";
 import * as Plugin from "./plugin";
 
 /**

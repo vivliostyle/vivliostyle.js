@@ -19,7 +19,7 @@
  * @fileoverview Toc - Table of Contents view.
  */
 import * as Base from "./base";
-import * as Counters from "../vivliostyle/counters";
+import * as Counters from "./counters";
 import * as Css from "./css";
 import * as Exprs from "./exprs";
 import * as Font from "./font";

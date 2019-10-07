@@ -19,10 +19,10 @@
  * @fileoverview Net - Fetch resource from a URL.
  */
 import * as Base from "./base";
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 import * as Task from "./task";
 import * as TaskUtil from "./taskutil";
-import { Net, XmlDoc } from "../vivliostyle/types";
+import { Net, XmlDoc } from "./types";
 import UserAgentXml from "../../resources/user-agent.xml";
 
 /**

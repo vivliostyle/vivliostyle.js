@@ -15,8 +15,8 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_layout from "../../../src/ts/adapt/layout";
-import * as adapt_vtree from "../../../src/ts/adapt/vtree";
+import * as adapt_layout from "../../../src/ts/vivliostyle/layout";
+import * as adapt_vtree from "../../../src/ts/vivliostyle/vtree";
 
 describe("layout", function() {
 

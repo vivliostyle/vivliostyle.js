@@ -17,7 +17,7 @@
  *
  * @fileoverview Display - CSS Display Module
  */
-import * as Css from "../adapt/css";
+import * as Css from "./css";
 
 export const FLOW_ROOT_ATTR = "data-vivliostyle-flow-root";
 

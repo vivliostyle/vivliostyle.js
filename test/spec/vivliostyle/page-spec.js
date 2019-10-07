@@ -15,9 +15,9 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_css from "../../../src/ts/adapt/css";
-import * as adapt_csscasc from "../../../src/ts/adapt/csscasc";
-import * as adapt_cssparse from "../../../src/ts/adapt/cssparse";
+import * as adapt_css from "../../../src/ts/vivliostyle/css";
+import * as adapt_csscasc from "../../../src/ts/vivliostyle/csscasc";
+import * as adapt_cssparse from "../../../src/ts/vivliostyle/cssparse";
 import * as vivliostyle_pages from "../../../src/ts/vivliostyle/pages";
 
 describe("page", function() {
