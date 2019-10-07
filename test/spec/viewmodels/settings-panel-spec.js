@@ -18,11 +18,11 @@
  */
 
 import ko from "knockout";
-import PageSize from "../../../src/js/models/page-size";
-import DocumentOptions from "../../../src/js/models/document-options";
-import ViewerOptions from "../../../src/js/models/viewer-options";
-import PageViewMode from "../../../src/js/models/page-view-mode";
-import SettingsPanel from "../../../src/js/viewmodels/settings-panel";
+import PageSize from "../../../src/ts/models/page-size";
+import DocumentOptions from "../../../src/ts/models/document-options";
+import ViewerOptions from "../../../src/ts/models/viewer-options";
+import PageViewMode from "../../../src/ts/models/page-view-mode";
+import SettingsPanel from "../../../src/ts/viewmodels/settings-panel";
 
 describe("SettingsPanel", function() {
     var documentOptions;

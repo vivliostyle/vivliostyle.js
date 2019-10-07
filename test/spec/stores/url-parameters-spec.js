@@ -17,8 +17,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import stringUtil from "../../../src/js/utils/string-util";
-import urlParameters from "../../../src/js/stores/url-parameters";
+import stringUtil from "../../../src/ts/utils/string-util";
+import urlParameters from "../../../src/ts/stores/url-parameters";
 
 describe("URLParameterStore", function() {
     var history, location;

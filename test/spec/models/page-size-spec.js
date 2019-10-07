@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import PageSize from "../../../src/js/models/page-size";
+import PageSize from "../../../src/ts/models/page-size";
 
 describe("PageSize", function() {
     function makeDummyPageSize() {

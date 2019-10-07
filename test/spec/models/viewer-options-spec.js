@@ -17,11 +17,11 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "../../../src/js/models/vivliostyle";
-import PageViewMode from "../../../src/js/models/page-view-mode";
-import ViewerOptions from "../../../src/js/models/viewer-options";
-import ZoomOptions from "../../../src/js/models/zoom-options";
-import urlParameters from "../../../src/js/stores/url-parameters";
+import vivliostyle from "../../../src/ts/models/vivliostyle";
+import PageViewMode from "../../../src/ts/models/page-view-mode";
+import ViewerOptions from "../../../src/ts/models/viewer-options";
+import ZoomOptions from "../../../src/ts/models/zoom-options";
+import urlParameters from "../../../src/ts/stores/url-parameters";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("ViewerOptions", function() {
