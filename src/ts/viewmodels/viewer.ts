@@ -240,14 +240,14 @@ class Viewer {
         if (!epage && epage != 0) {
             return undefined;
         }
-        let pageNumber = Math.round(epage + 1);
+        const pageNumber = Math.round(epage + 1);
         return pageNumber;
     }
     epageFromPageNumber(pageNumber) {
         if (!pageNumber && pageNumber != 0) {
             return undefined;
         }
-        let epage = pageNumber - 1;
+        const epage = pageNumber - 1;
         return epage;
     }
 

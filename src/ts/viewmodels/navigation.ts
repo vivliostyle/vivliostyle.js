@@ -510,7 +510,7 @@ class Navigation {
         const selecter =
             "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
             "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
-        let nodes = Array.from(document.querySelectorAll(selecter));
+        const nodes = Array.from(document.querySelectorAll(selecter));
         let index = nodes.indexOf(document.activeElement);
 
         const isButton = index => {

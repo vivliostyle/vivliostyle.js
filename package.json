@@ -10,7 +10,7 @@
     "serve-dev": "gulp serve-dev",
     "test-local": "gulp test-local",
     "test-sauce": "gulp test-sauce",
-    "lint-scripts": "eslint src/ts",
+    "lint-scripts": "eslint src/ts --ext .ts",
     "lint-styles": "stylelint src/scss/{*.*,**/*.*}",
     "format": "prettier --write {*.*,src/{*.*,**/*.*,**/**/*.*}}"
   },
@@ -31,9 +31,12 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
+    "@typescript-eslint/eslint-plugin": "^2.3.2",
+    "@typescript-eslint/parser": "^2.3.2",
     "browser-sync": "^2.26.7",
     "circular-dependency-plugin": "^5.2.0",
-    "eslint": "^6.4.0",
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-prettier": "^3.1.1",
     "gulp": "^4.0.2",
