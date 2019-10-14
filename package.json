@@ -8,8 +8,8 @@
     "build-dev": "gulp build-dev && NODE_ENV=development webpack",
     "serve": "gulp serve",
     "serve-dev": "gulp serve-dev",
-    "test-local": "gulp test-local",
-    "test-sauce": "gulp test-sauce",
+    "test-local": "NODE_ENV=development gulp test-local",
+    "test-sauce": "NODE_ENV=development gulp test-sauce",
     "lint-scripts": "eslint src/ts --ext .ts",
     "lint-styles": "stylelint src/scss/{*.*,**/*.*}",
     "format": "prettier --write {*.*,src/{*.*,**/*.*,**/**/*.*}}"
