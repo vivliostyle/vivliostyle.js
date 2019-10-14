@@ -18,7 +18,6 @@
  */
 
 import ko from "knockout";
-import vivliostyle from "../../../src/ts/models/vivliostyle";
 import ViewerOptions from "../../../src/ts/models/viewer-options";
 import ZoomOptions from "../../../src/ts/models/zoom-options";
 import Navigation from "../../../src/ts/viewmodels/navigation";
