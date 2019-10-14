@@ -18,7 +18,7 @@
  */
 
 import ko from "knockout";
-import PageSize from "../../../src/ts/models/page-size";
+import PageStyle from "../../../src/ts/models/page-style";
 import DocumentOptions from "../../../src/ts/models/document-options";
 import ViewerOptions from "../../../src/ts/models/viewer-options";
 import PageViewMode from "../../../src/ts/models/page-view-mode";
@@ -105,16 +105,16 @@ describe("SettingsPanel", function() {
             var settingsPanel = createSettingsPanel();
             settingsPanel.state.viewerOptions.pageViewMode(PageViewMode.SINGLE_PAGE);
             settingsPanel.state.viewerOptions.fontSize(20);
-            settingsPanel.state.pageSize.mode(PageSize.Mode.PRESET);
+            settingsPanel.state.pageSize.mode(PageStyle.Mode.PRESET);
 
-            expect(documentOptions.pageSize.mode()).toBe(PageSize.Mode.AUTO);
+            expect(documentOptions.pageSize.mode()).toBe(PageStyle.Mode.AUTO);
 
             spyOn(viewer, "loadDocument");
             settingsPanel.apply();
 
             expect(viewerOptions.pageViewMode()).toBe(PageViewMode.SPREAD);
             expect(viewerOptions.fontSize()).toBe(10);
-            expect(documentOptions.pageSize.mode()).toBe(PageSize.Mode.PRESET);
+            expect(documentOptions.pageSize.mode()).toBe(PageStyle.Mode.PRESET);
             expect(viewer.loadDocument).toHaveBeenCalledWith(documentOptions, settingsPanel.state.viewerOptions);
         });
     });
@@ -124,13 +124,13 @@ describe("SettingsPanel", function() {
             var settingsPanel = createSettingsPanel();
             settingsPanel.state.viewerOptions.pageViewMode(PageViewMode.SINGLE_PAGE);
             settingsPanel.state.viewerOptions.fontSize(20);
-            settingsPanel.state.pageSize.mode(PageSize.Mode.PRESET);
+            settingsPanel.state.pageSize.mode(PageStyle.Mode.PRESET);
 
             settingsPanel.reset();
 
             expect(settingsPanel.state.viewerOptions.pageViewMode()).toBe(PageViewMode.SPREAD);
             expect(settingsPanel.state.viewerOptions.fontSize()).toBe(10);
-            expect(settingsPanel.state.pageSize.mode()).toBe(PageSize.Mode.AUTO);
+            expect(settingsPanel.state.pageSize.mode()).toBe(PageStyle.Mode.AUTO);
         });
     });
 
