@@ -256,33 +256,34 @@ class PageStyle {
     fromCSSText(cssText: string) {
         const r = this.pageStyleRegExp.exec(cssText);
         if (r) {
-            let [
-                ,
+            const [
                 beforeOtherStyle,
-                sizeW,
-                sizeH,
                 sizeImportant,
                 pageMargin,
                 pageMarginImportant,
-                pageOtherStyle,
                 firstPageMarginZero,
                 firstPageMarginZeroImportant,
-                firstPageOtherStyle,
                 forceHtmlBodyMarginZero,
-                baseFontSize,
                 baseFontSizeImportant,
                 baseLineHeight,
                 baseLineHeightImportant,
-                baseFontFamily,
                 baseFontFamilyImportant,
-                rootOtherStyle,
                 widowsOrphans,
                 widowsOrphansImportant,
                 imageMaxSizeToFitPage,
                 imageMaxSizeToFitPageImportant,
                 imageKeepAspectRatio,
-                imageKeepAspectRatioImportant,
-                afterOtherStyle
+                imageKeepAspectRatioImportant
+            ] = r;
+            let [
+                afterOtherStyle,
+                baseFontFamily,
+                baseFontSize,
+                firstPageOtherStyle,
+                pageOtherStyle,
+                rootOtherStyle,
+                sizeW,
+                sizeH,
             ] = r;
 
             let countImportant = 0;
