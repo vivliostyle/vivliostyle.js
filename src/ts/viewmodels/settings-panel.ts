@@ -178,8 +178,8 @@ class SettingsPanel {
         return true;
     }
 
-    focusToFirstItem(opt_outerElem?: Element) {
-        const outerElem = opt_outerElem || this.settingsToggle;
+    focusToFirstItem(outerElemParam?: Element) {
+        const outerElem = outerElemParam || this.settingsToggle;
         const inputElem = ["input", "textarea", "summary"].includes(outerElem.localName)
             ? outerElem
             : Array.from(outerElem.getElementsByTagName("input")).find((e: HTMLInputElement) => {

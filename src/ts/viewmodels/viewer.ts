@@ -251,15 +251,15 @@ class Viewer {
         return epage;
     }
 
-    showTOC(opt_show?: boolean, opt_autohide?: boolean) {
+    showTOC(shown?: boolean, autoHide?: boolean) {
         if (this.viewer_.isTOCVisible() == null) {
             // TOC is unavailable
             return;
         }
-        const show = opt_show == null ? !this.tocVisible() : opt_show;
+        const show = shown == null ? !this.tocVisible() : shown;
         this.tocVisible(show);
-        this.tocPinned(show ? !opt_autohide : false);
-        this.viewer_.showTOC(show, opt_autohide);
+        this.tocPinned(show ? !autoHide : false);
+        this.viewer_.showTOC(show, autoHide);
     }
 }
 

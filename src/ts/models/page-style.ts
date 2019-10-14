@@ -227,28 +227,28 @@ class PageStyle {
 
     /**
      * @param {number} px Font size in px unit
-     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
-     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @param {number=} cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
+     * @param {number=} precision When specified, converts result number to string with max _precision_ digits
      * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
      */
-    fontSizePxToPercent(px: number, opt_cent?: number, opt_precision?: number): number | string {
-        let percent: number | string = (px / CONSTANTS.viewerFontSize) * (opt_cent || 100);
-        if (opt_precision) {
-            percent = percent.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+    fontSizePxToPercent(px: number, cent?: number, precision?: number): number | string {
+        let percent: number | string = (px / CONSTANTS.viewerFontSize) * (cent || 100);
+        if (precision) {
+            percent = percent.toPrecision(precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
         }
         return percent;
     }
 
     /**
      * @param {number} percent Font size in percent (or per _N_) unit
-     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
-     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @param {number=} cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
+     * @param {number=} precision When specified, converts result number to string with max _precision_ digits
      * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
      */
-    fontSizePercentToPx(percent: number, opt_cent?: number, opt_precision?: number): number | string {
-        let px: number | string = (percent / (opt_cent || 100)) * CONSTANTS.viewerFontSize;
-        if (opt_precision) {
-            px = px.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+    fontSizePercentToPx(percent: number, cent?: number, precision?: number): number | string {
+        let px: number | string = (percent / (cent || 100)) * CONSTANTS.viewerFontSize;
+        if (precision) {
+            px = px.toPrecision(precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
         }
         return px;
     }

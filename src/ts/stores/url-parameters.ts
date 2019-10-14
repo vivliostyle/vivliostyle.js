@@ -61,15 +61,15 @@ class URLParameterStore {
     /**
      * @param {string} name
      * @param {string} value
-     * @param {number=} opt_index specifies index in multiple parameters with same name.
+     * @param {number=} index specifies index in multiple parameters with same name.
      */
-    setParameter(name: string, value: string, opt_index?: number): void {
+    setParameter(name: string, value: string, index?: number): void {
         const url = this.location.href;
         let updated;
         const regexp = getRegExpForParameter(name);
         let r = regexp.exec(url);
-        if (r && opt_index) {
-            while (opt_index-- >= 1) {
+        if (r && index) {
+            while (index-- >= 1) {
                 r = regexp.exec(url);
             }
         }
@@ -90,14 +90,14 @@ class URLParameterStore {
 
     /**
      * @param {string} name
-     * @param {boolean=} opt_keepFirst If true, not remove the first one in multiple parameters with same name.
+     * @param {boolean=} keepFirst If true, not remove the first one in multiple parameters with same name.
      */
-    removeParameter(name: string, opt_keepFirst?: boolean): void {
+    removeParameter(name: string, keepFirst?: boolean): void {
         const url = this.location.href;
         let updated;
         const regexp = getRegExpForParameter(name);
         let r = regexp.exec(url);
-        if (r && opt_keepFirst) {
+        if (r && keepFirst) {
             r = regexp.exec(url);
         }
         if (r) {
