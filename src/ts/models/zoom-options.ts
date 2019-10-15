@@ -36,18 +36,28 @@ class ZoomOptions {
         return new ZoomOptions(1);
     }
     zoomIn(viewer: VivliostyleViewer) {
+        // FIXME: We want to stop disabling this rule to future
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
     }
     zoomOut(viewer: VivliostyleViewer) {
+        // FIXME: We want to stop disabling this rule to future
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
     }
     zoomToActualSize() {
+        // FIXME: We want to stop disabling this rule to future
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new FixedZoomFactor(1);
     }
     static createDefaultOptions() {
+        // FIXME: We want to stop disabling this rule to future
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new FitToScreen();
     }
     static createFromZoomFactor(zoom) {
+        // FIXME: We want to stop disabling this rule to future
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new FixedZoomFactor(zoom);
     }
 }
@@ -60,6 +70,8 @@ export class FitToScreen extends ZoomOptions {
         return true;
     }
     toggleFitToScreen() {
+        // FIXME: We want to stop disabling this rule to future
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new FixedZoomFactor(1);
     }
     getCurrentZoomFactor(viewer: VivliostyleViewer) {

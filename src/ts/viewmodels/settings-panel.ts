@@ -189,6 +189,7 @@ class SettingsPanel {
             for (let e = inputElem.parentElement; e && e != this.settingsToggle; e = e.parentElement) {
                 if (e.localName == "details") {
                     // FIXME: Remove ts-ignore comment
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
                     // @ts-ignore
                     e.open = true;
                 }
