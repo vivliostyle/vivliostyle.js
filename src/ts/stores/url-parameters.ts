@@ -21,105 +21,108 @@
 import stringUtil from "../utils/string-util";
 
 function getRegExpForParameter(name: string): RegExp {
-    return new RegExp(`[#&]${stringUtil.escapeUnicodeString(name)}=([^&]*)`, "g");
+  return new RegExp(`[#&]${stringUtil.escapeUnicodeString(name)}=([^&]*)`, "g");
 }
 
 class URLParameterStore {
-    history: History | null;
-    location: Location | { href: "" };
-    storedUrl: string;
+  history: History | null;
+  location: Location | { href: "" };
+  storedUrl: string;
 
-    constructor() {
-        this.history = window ? window.history : null;
-        this.location = window ? window.location : { href: "" };
-        this.storedUrl = this.location.href;
+  constructor() {
+    this.history = window ? window.history : null;
+    this.location = window ? window.location : { href: "" };
+    this.storedUrl = this.location.href;
+  }
+
+  getBaseURL(): string {
+    let url = this.location.href;
+    url = url.replace(/#.*$/, "");
+    return url.replace(/\/[^/]*$/, "/");
+  }
+
+  hasParameter(name: string): boolean {
+    const url = this.location.href;
+    const regexp = getRegExpForParameter(name);
+    return regexp.test(url);
+  }
+
+  getParameter(name: string): Array<string> {
+    const url = this.location.href;
+    const regexp = getRegExpForParameter(name);
+    const results = [];
+    let r;
+    while ((r = regexp.exec(url))) {
+      results.push(r[1]);
     }
+    return results;
+  }
 
-    getBaseURL(): string {
-        let url = this.location.href;
-        url = url.replace(/#.*$/, "");
-        return url.replace(/\/[^/]*$/, "/");
+  /**
+   * @param {string} name
+   * @param {string} value
+   * @param {number=} index specifies index in multiple parameters with same name.
+   */
+  setParameter(name: string, value: string, index?: number): void {
+    const url = this.location.href;
+    let updated;
+    const regexp = getRegExpForParameter(name);
+    let r = regexp.exec(url);
+    if (r && index) {
+      while (index-- >= 1) {
+        r = regexp.exec(url);
+      }
     }
-
-    hasParameter(name: string): boolean {
-        const url = this.location.href;
-        const regexp = getRegExpForParameter(name);
-        return regexp.test(url);
+    if (r) {
+      const l = r[1].length;
+      const start = r.index + r[0].length - l;
+      updated = url.substring(0, start) + value + url.substring(start + l);
+    } else {
+      updated = `${url +
+        (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") +
+        name}=${value}`;
     }
-
-    getParameter(name: string): Array<string> {
-        const url = this.location.href;
-        const regexp = getRegExpForParameter(name);
-        const results = [];
-        let r;
-        while ((r = regexp.exec(url))) {
-            results.push(r[1]);
-        }
-        return results;
+    if (this.history !== null && this.history.replaceState) {
+      this.history.replaceState(null, "", updated);
+    } else {
+      this.location.href = updated;
     }
+    this.storedUrl = updated;
+  }
 
-    /**
-     * @param {string} name
-     * @param {string} value
-     * @param {number=} index specifies index in multiple parameters with same name.
-     */
-    setParameter(name: string, value: string, index?: number): void {
-        const url = this.location.href;
-        let updated;
-        const regexp = getRegExpForParameter(name);
-        let r = regexp.exec(url);
-        if (r && index) {
-            while (index-- >= 1) {
-                r = regexp.exec(url);
-            }
-        }
-        if (r) {
-            const l = r[1].length;
-            const start = r.index + r[0].length - l;
-            updated = url.substring(0, start) + value + url.substring(start + l);
+  /**
+   * @param {string} name
+   * @param {boolean=} keepFirst If true, not remove the first one in multiple parameters with same name.
+   */
+  removeParameter(name: string, keepFirst?: boolean): void {
+    const url = this.location.href;
+    let updated;
+    const regexp = getRegExpForParameter(name);
+    let r = regexp.exec(url);
+    if (r && keepFirst) {
+      r = regexp.exec(url);
+    }
+    if (r) {
+      updated = url;
+      for (; r; r = regexp.exec(updated)) {
+        const end = r.index + r[0].length;
+        if (r[0].charAt(0) == "#") {
+          updated =
+            updated.substring(0, r.index + 1) + updated.substring(end + 1);
         } else {
-            updated = `${url + (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") + name}=${value}`;
+          updated = updated.substring(0, r.index) + updated.substring(end);
         }
-        if (this.history !== null && this.history.replaceState) {
-            this.history.replaceState(null, "", updated);
-        } else {
-            this.location.href = updated;
-        }
-        this.storedUrl = updated;
+        regexp.lastIndex -= r[0].length;
+      }
+      updated = updated.replace(/^(.*?)[#&]$/, "$1");
+      if (this.history !== null && this.history.replaceState) {
+        this.history.replaceState(null, "", updated);
+      } else {
+        this.location.href = updated;
+      }
     }
-
-    /**
-     * @param {string} name
-     * @param {boolean=} keepFirst If true, not remove the first one in multiple parameters with same name.
-     */
-    removeParameter(name: string, keepFirst?: boolean): void {
-        const url = this.location.href;
-        let updated;
-        const regexp = getRegExpForParameter(name);
-        let r = regexp.exec(url);
-        if (r && keepFirst) {
-            r = regexp.exec(url);
-        }
-        if (r) {
-            updated = url;
-            for (; r; r = regexp.exec(updated)) {
-                const end = r.index + r[0].length;
-                if (r[0].charAt(0) == "#") {
-                    updated = updated.substring(0, r.index + 1) + updated.substring(end + 1);
-                } else {
-                    updated = updated.substring(0, r.index) + updated.substring(end);
-                }
-                regexp.lastIndex -= r[0].length;
-            }
-            updated = updated.replace(/^(.*?)[#&]$/, "$1");
-            if (this.history !== null && this.history.replaceState) {
-                this.history.replaceState(null, "", updated);
-            } else {
-                this.location.href = updated;
-            }
-        }
-        this.storedUrl = updated;
-    }
+    this.storedUrl = updated;
+  }
 }
 
 const instance = new URLParameterStore();

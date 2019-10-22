@@ -21,33 +21,33 @@ import ko, { PureComputed } from "knockout";
 import { MessageQueue } from "../models/message-queue";
 
 type ErrorInfo = {
-    error: {
-        frameTrace: string;
-        stack: string;
-    };
-    messages: Array<string>;
+  error: {
+    frameTrace: string;
+    stack: string;
+  };
+  messages: Array<string>;
 };
 
 class MessageDialog {
-    list: MessageQueue;
-    visible: PureComputed<boolean>;
+  list: MessageQueue;
+  visible: PureComputed<boolean>;
 
-    constructor(queue: MessageQueue) {
-        this.list = queue;
-        this.visible = ko.pureComputed(() => queue().length > 0);
-    }
+  constructor(queue: MessageQueue) {
+    this.list = queue;
+    this.visible = ko.pureComputed(() => queue().length > 0);
+  }
 
-    getDisplayMessage(errorInfo: ErrorInfo) {
-        const e = errorInfo.error;
-        let msg = e && (e.toString() || e.frameTrace || e.stack);
-        if (msg) {
-            msg = msg.split("\n", 1)[0];
-        }
-        if (!msg) {
-            msg = errorInfo.messages.join("\n");
-        }
-        return msg;
+  getDisplayMessage(errorInfo: ErrorInfo) {
+    const e = errorInfo.error;
+    let msg = e && (e.toString() || e.frameTrace || e.stack);
+    if (msg) {
+      msg = msg.split("\n", 1)[0];
     }
+    if (!msg) {
+      msg = errorInfo.messages.join("\n");
+    }
+    return msg;
+  }
 }
 
 export default MessageDialog;

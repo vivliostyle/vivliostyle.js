@@ -7,14 +7,14 @@
 // --------------------------------------------------------------------------------
 
 @keyframes ROTATE {
-    0% {
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(360deg);
-        transform: rotate(360deg);
-    }
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
 }
 $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 
@@ -23,26 +23,26 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 // --------------------------------------------------------------------------------
 
 @mixin spinner($size, $color: #fff) {
-    $border-width: $size / 10;
-    $color-dark: rgba($color, 0.2);
+  $border-width: $size / 10;
+  $color-dark: rgba($color, 0.2);
 
-    position: relative;
-    text-indent: -9999em;
-    border-top: $border-width solid $color-dark;
-    border-right: $border-width solid $color-dark;
-    border-bottom: $border-width solid $color-dark;
-    border-left: $border-width solid $color;
-    -webkit-transform: translateZ(0);
-    -ms-transform: translateZ(0);
-    transform: translateZ(0);
-    animation: $animation-ROTATE;
+  position: relative;
+  text-indent: -9999em;
+  border-top: $border-width solid $color-dark;
+  border-right: $border-width solid $color-dark;
+  border-bottom: $border-width solid $color-dark;
+  border-left: $border-width solid $color;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  animation: $animation-ROTATE;
 
-    &,
-    &:after {
-        border-radius: 50%;
-        width: $size;
-        height: $size;
-    }
+  &,
+  &:after {
+    border-radius: 50%;
+    width: $size;
+    height: $size;
+  }
 }
 
 // ================================================================================
@@ -50,33 +50,33 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 // --------------------------------------------------------------------------------
 
 #vivliostyle-loading-overlay {
-    $spinner-width: 8em;
+  $spinner-width: 8em;
 
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-top: $menu-icon-height;
+  height: calc(100vh - #{$menu-icon-height});
+  width: 100vw;
+  background-color: rgba(black, 0.2);
+  @include on-loading() {
+    opacity: 1;
+    visibility: visible;
+    transition: 0.1s liner;
+    .vivliostyle-loading-spinner {
+      @include spinner($spinner-width);
+    }
+  }
+  @include on-interactive() {
     opacity: 0;
     visibility: hidden;
+    transition: 0.25s ease-out;
+  }
+  .vivliostyle-loading-spinner {
     position: absolute;
-    top: 0;
-    left: 0;
-    margin-top: $menu-icon-height;
-    height: calc(100vh - #{$menu-icon-height});
-    width: 100vw;
-    background-color: rgba(black, 0.2);
-    @include on-loading() {
-        opacity: 1;
-        visibility: visible;
-        transition: 0.1s liner;
-        .vivliostyle-loading-spinner {
-            @include spinner($spinner-width);
-        }
-    }
-    @include on-interactive() {
-        opacity: 0;
-        visibility: hidden;
-        transition: 0.25s ease-out;
-    }
-    .vivliostyle-loading-spinner {
-        position: absolute;
-        top: calc(50% - #{$spinner-width + $spinner-width * 0.2} / 2);
-        left: calc(50% - #{$spinner-width + $spinner-width * 0.2} / 2);
-    }
+    top: calc(50% - #{$spinner-width + $spinner-width * 0.2} / 2);
+    left: calc(50% - #{$spinner-width + $spinner-width * 0.2} / 2);
+  }
 }

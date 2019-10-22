@@ -20,18 +20,18 @@
 import ko, { PureComputed, Observable } from "knockout";
 
 export type ReadonlyObservable<T> = {
-    getter: PureComputed<T>;
-    value: Observable<T>;
+  getter: PureComputed<T>;
+  value: Observable<T>;
 };
 
 const util = {
-    readonlyObservable<T>(value: T): ReadonlyObservable<T> {
-        const obs = ko.observable(value);
-        return {
-            getter: ko.pureComputed(() => obs()),
-            value: obs
-        };
-    }
+  readonlyObservable<T>(value: T): ReadonlyObservable<T> {
+    const obs = ko.observable(value);
+    return {
+      getter: ko.pureComputed(() => obs()),
+      value: obs
+    };
+  }
 };
 
 export default util;

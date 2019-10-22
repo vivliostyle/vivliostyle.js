@@ -20,65 +20,69 @@
 import messageQueue from "../models/message-queue";
 
 enum LogLevel {
-    Debug = "debug",
-    Info = "info",
-    Warn = "warn",
-    Error = "error"
+  Debug = "debug",
+  Info = "info",
+  Warn = "warn",
+  Error = "error"
 }
 
 export default class Logger {
-    logLevel: LogLevel;
+  logLevel: LogLevel;
 
-    static getLogger() {
-        return new Logger();
-    }
+  static getLogger() {
+    return new Logger();
+  }
 
-    constructor() {
-        this.logLevel = LogLevel.Error;
-    }
+  constructor() {
+    this.logLevel = LogLevel.Error;
+  }
 
-    setLogLevel(logLevel) {
-        this.logLevel = logLevel;
-    }
+  setLogLevel(logLevel) {
+    this.logLevel = logLevel;
+  }
 
-    debug(content) {
-        if (this.logLevel === LogLevel.Debug) {
-            messageQueue.push({
-                type: "debug",
-                content
-            });
-        }
+  debug(content) {
+    if (this.logLevel === LogLevel.Debug) {
+      messageQueue.push({
+        type: "debug",
+        content
+      });
     }
+  }
 
-    info(content) {
-        if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info) {
-            messageQueue.push({
-                type: "info",
-                content
-            });
-        }
+  info(content) {
+    if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info) {
+      messageQueue.push({
+        type: "info",
+        content
+      });
     }
+  }
 
-    warn(content) {
-        if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info || this.logLevel === LogLevel.Warn) {
-            messageQueue.push({
-                type: "warn",
-                content
-            });
-        }
+  warn(content) {
+    if (
+      this.logLevel === LogLevel.Debug ||
+      this.logLevel === LogLevel.Info ||
+      this.logLevel === LogLevel.Warn
+    ) {
+      messageQueue.push({
+        type: "warn",
+        content
+      });
     }
+  }
 
-    error(content) {
-        if (
-            this.logLevel === LogLevel.Debug ||
-            this.logLevel === LogLevel.Info ||
-            this.logLevel === LogLevel.Warn ||
-            this.logLevel === LogLevel.Error
-        ) {
-            messageQueue.push({
-                type: "error",
-                content
-            });
-        }
+  error(content) {
+    if (
+      this.logLevel === LogLevel.Debug ||
+      this.logLevel === LogLevel.Info ||
+      this.logLevel === LogLevel.Warn ||
+      this.logLevel === LogLevel.Error
+    ) {
+      messageQueue.push({
+        type: "error",
+        content
+      });
     }
+  }
 }
