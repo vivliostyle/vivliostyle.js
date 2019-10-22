@@ -19,16 +19,22 @@
 
 import messageQueue from "../models/message-queue";
 
-const LogLevel = {
-    DEBUG: "debug",
-    INFO: "info",
-    WARN: "warn",
-    ERROR: "error"
-};
+enum LogLevel {
+    Debug = "debug",
+    Info = "info",
+    Warn = "warn",
+    Error = "error"
+}
 
-class Logger {
+export default class Logger {
+    logLevel: LogLevel;
+
+    static getLogger() {
+        return new Logger();
+    }
+
     constructor() {
-        this.logLevel = LogLevel.ERROR;
+        this.logLevel = LogLevel.Error;
     }
 
     setLogLevel(logLevel) {
@@ -36,7 +42,7 @@ class Logger {
     }
 
     debug(content) {
-        if (this.logLevel === LogLevel.DEBUG) {
+        if (this.logLevel === LogLevel.Debug) {
             messageQueue.push({
                 type: "debug",
                 content
@@ -45,7 +51,7 @@ class Logger {
     }
 
     info(content) {
-        if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO) {
+        if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info) {
             messageQueue.push({
                 type: "info",
                 content
@@ -54,7 +60,7 @@ class Logger {
     }
 
     warn(content) {
-        if (this.logLevel === LogLevel.DEBUG || this.logLevel === LogLevel.INFO || this.logLevel === LogLevel.WARN) {
+        if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info || this.logLevel === LogLevel.Warn) {
             messageQueue.push({
                 type: "warn",
                 content
@@ -64,10 +70,10 @@ class Logger {
 
     error(content) {
         if (
-            this.logLevel === LogLevel.DEBUG ||
-            this.logLevel === LogLevel.INFO ||
-            this.logLevel === LogLevel.WARN ||
-            this.logLevel === LogLevel.ERROR
+            this.logLevel === LogLevel.Debug ||
+            this.logLevel === LogLevel.Info ||
+            this.logLevel === LogLevel.Warn ||
+            this.logLevel === LogLevel.Error
         ) {
             messageQueue.push({
                 type: "error",
@@ -76,11 +82,3 @@ class Logger {
         }
     }
 }
-
-Logger.LogLevel = LogLevel;
-
-const instance = new Logger();
-
-Logger.getLogger = () => instance;
-
-export default Logger;

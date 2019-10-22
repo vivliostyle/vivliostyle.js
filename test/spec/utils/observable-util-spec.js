@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import obs from "../../../src/js/utils/observable-util";
+import obs from "../../../src/ts/utils/observable-util";
 
 describe("Observable Utils", function() {
     describe("readonlyObservable", function() {

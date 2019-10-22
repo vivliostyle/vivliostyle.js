@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import stringUtil from "../../../src/js/utils/string-util";
+import stringUtil from "../../../src/ts/utils/string-util";
 
 describe("String Utils", function() {
     describe("escapeUnicodeChar", function() {

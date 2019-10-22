@@ -17,8 +17,21 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "./models/vivliostyle";
-import vivliostyleViewer from "./vivliostyle-viewer";
+import ko, { PureComputed, Observable } from "knockout";
 
-vivliostyle.setInstance(window.vivliostyle);
-vivliostyleViewer.start();
+export type ReadonlyObservable<T> = {
+    getter: PureComputed<T>;
+    value: Observable<T>;
+};
+
+const util = {
+    readonlyObservable<T>(value: T): ReadonlyObservable<T> {
+        const obs = ko.observable(value);
+        return {
+            getter: ko.pureComputed(() => obs()),
+            value: obs
+        };
+    }
+};
+
+export default util;

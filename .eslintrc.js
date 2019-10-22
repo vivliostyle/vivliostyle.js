@@ -1,21 +1,23 @@
 module.exports = {
-    "parserOptions": {
-        "sourceType": "module"
+    parser: "@typescript-eslint/parser",
+    parserOptions: {
+        sourceType: "module"
     },
-    "env": {
-        "es6": true,
-        "browser": true,
-        "node": true
+    env: {
+        es6: true,
+        browser: true,
+        jasmine: true,
+        node: true
     },
-    "extends": [
+    extends: [
         "eslint:recommended",
         "plugin:import/errors",
-        "plugin:import/warnings"
+        "plugin:import/warnings",
+        "plugin:import/typescript",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "prettier/@typescript-eslint"
     ],
-    "plugins": [
-        "import",
-        "prettier"
-    ],
-    "rules": {
-    }
+    plugins: ["@typescript-eslint", "import", "prettier"],
+    rules: {}
 };

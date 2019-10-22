@@ -18,16 +18,24 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { Observable } from "knockout";
 import urlParameters from "../stores/url-parameters";
-import PageViewMode from "./page-view-mode";
-import ZoomOptions from "./zoom-options";
+import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
+import ZoomOptions, { FitToScreen } from "./zoom-options";
+
+type Options = {
+    renderAllPages: Observable<unknown>;
+    fontSize: Observable<number | string>;
+    profile: Observable<unknown>;
+    pageViewMode: Observable<PageViewModeInstance>;
+    zoom: Observable<ZoomOptions>;
+};
 
 function getViewerOptionsFromURL() {
     const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
     const fontSizeStr = urlParameters.getParameter("fontSize")[0];
     const r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
-    let fontSize = null;
+    let fontSize: null | number = null;
     if (r) {
         const [, num, percent, denom] = r;
         fontSize = parseFloat(num);
@@ -39,7 +47,7 @@ function getViewerOptionsFromURL() {
     }
     return {
         renderAllPages: renderAllPages === "true" ? true : renderAllPages === "false" ? false : null,
-        fontSize: fontSize,
+        fontSize,
         profile: urlParameters.getParameter("profile")[0] === "true",
         pageViewMode: PageViewMode.fromSpreadViewString(urlParameters.getParameter("spread")[0])
     };
@@ -57,12 +65,20 @@ function getDefaultValues() {
 }
 
 class ViewerOptions {
-    constructor(options) {
+    renderAllPages: Observable<unknown>;
+    fontSize: Observable<number | string>;
+    profile: Observable<unknown>;
+    pageViewMode: Observable<PageViewModeInstance>;
+    zoom: Observable<ZoomOptions>;
+    static getDefaultValues: () => { renderAllPages: boolean; fontSize: number; profile: boolean; pageViewMode: unknown; zoom: FitToScreen };
+
+    constructor(options?: Options) {
         this.renderAllPages = ko.observable();
         this.fontSize = ko.observable();
         this.profile = ko.observable();
         this.pageViewMode = ko.observable();
         this.zoom = ko.observable();
+
         if (options) {
             this.copyFrom(options);
         } else {
@@ -93,7 +109,7 @@ class ViewerOptions {
                 if (typeof fontSize == "number") {
                     fontSize = fontSize.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
                 }
-                if (fontSize == defaultValues.fontSize) {
+                if (Number(fontSize) == defaultValues.fontSize) {
                     urlParameters.removeParameter("fontSize");
                 } else {
                     urlParameters.setParameter("fontSize", `${fontSize}/${defaultValues.fontSize}`);
@@ -102,7 +118,7 @@ class ViewerOptions {
         }
     }
 
-    copyFrom(other) {
+    copyFrom(other: Options) {
         this.renderAllPages(other.renderAllPages());
         this.fontSize(other.fontSize());
         this.profile(other.profile());

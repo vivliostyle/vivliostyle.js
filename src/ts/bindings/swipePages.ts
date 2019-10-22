@@ -25,6 +25,20 @@ let xStart = null;
 let yStart = null;
 let arrowButton = null;
 
+declare global {
+    interface Window {
+        visualViewport?: {
+            offsetLeft: Readonly<number>;
+            offsetTop: Readonly<number>;
+            pageLeft: Readonly<number>;
+            pageTop: Readonly<number>;
+            width: Readonly<number>;
+            height: Readonly<number>;
+            scale: Readonly<number>;
+        };
+    }
+}
+
 ko.bindingHandlers.swipePages = {
     init(element, valueAccessor) {
         if (supportTouchEvents && ko.unwrap(valueAccessor())) {
@@ -47,8 +61,8 @@ ko.bindingHandlers.swipePages = {
                     return;
                 }
                 if (xStart !== null && yStart !== null) {
-                    let xDiff = event.touches[0].clientX - xStart;
-                    let yDiff = event.touches[0].clientY - yStart;
+                    const xDiff = event.touches[0].clientX - xStart;
+                    const yDiff = event.touches[0].clientY - yStart;
                     if (Math.abs(xDiff) > Math.abs(yDiff)) {
                         if (xDiff < 0) {
                             // swipe to left = go to right

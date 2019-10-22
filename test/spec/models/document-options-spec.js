@@ -17,8 +17,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DocumentOptions from "../../../src/js/models/document-options";
-import urlParameters from "../../../src/js/stores/url-parameters";
+import DocumentOptions from "../../../src/ts/models/document-options";
+import urlParameters from "../../../src/ts/stores/url-parameters";
 
 describe("DocumentOptions", function() {
     var history, location;

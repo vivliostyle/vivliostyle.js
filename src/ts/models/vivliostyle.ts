@@ -17,16 +17,32 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import { Profiler, Viewer, constants } from "vivliostyle";
 
-const util = {
-    readonlyObservable(value) {
-        const obs = ko.observable(value);
-        return {
-            getter: ko.pureComputed(() => obs()),
-            value: obs
-        };
-    }
+type Constants = typeof constants;
+
+export type Vivliostyle = {
+    viewer: Viewer;
+    constants: Constants;
+    profile: Profiler;
 };
 
-export default util;
+class VivliostyleImpl {
+    viewer: null | Viewer;
+    constants: null | Constants;
+    profile: null | Profiler;
+
+    constructor() {
+        this.viewer = null;
+        this.constants = null;
+        this.profile = null;
+    }
+
+    setInstance(vivliostyle: Vivliostyle) {
+        this.viewer = vivliostyle.viewer;
+        this.constants = vivliostyle.constants;
+        this.profile = vivliostyle.profile;
+    }
+}
+
+export default new VivliostyleImpl();

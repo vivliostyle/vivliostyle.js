@@ -18,17 +18,28 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { Observable, PureComputed } from "knockout";
 
-const Mode = {
-    DEFAULT: "",
-    AUTO: "auto",
-    PRESET: "preset",
-    CUSTOM: "custom",
-    ZERO: "0"
+type PresetSize = { name: string; description: string };
+type Constants = {
+    customWidth: string;
+    customHeight: string;
+    customMargin: string;
+    baseFontSize: string;
+    baseLineHeight: string;
+    baseFontFamily: string;
+    viewerFontSize: number;
 };
 
-const PresetSize = [
+enum Mode {
+    Default = "",
+    Auto = "auto",
+    Preset = "preset",
+    Custom = "custom",
+    Zero = "0"
+}
+
+const PRESET_SIZE: Array<PresetSize> = [
     { name: "A5", description: "A5" },
     { name: "A4", description: "A4" },
     { name: "A3", description: "A3" },
@@ -41,7 +52,7 @@ const PresetSize = [
     { name: "ledger", description: "ledger" }
 ];
 
-const Constants = {
+const CONSTANTS: Constants = {
     customWidth: "210mm",
     customHeight: "297mm",
     customMargin: "10%",
@@ -52,15 +63,59 @@ const Constants = {
 };
 
 class PageStyle {
-    constructor(pageStyle) {
-        this.pageSizeMode = ko.observable(Mode.DEFAULT);
-        this.presetSize = ko.observable(PresetSize[1]);
+    pageSizeMode: Observable<Mode>;
+    presetSize: Observable<PresetSize>;
+    isLandscape: Observable<boolean>;
+    customWidth: Observable<string>;
+    customHeight: Observable<string>;
+    pageSizeImportant: Observable<boolean>;
+    pageMarginMode: Observable<Mode>;
+    customMargin: Observable<string>;
+    pageMarginImportant: Observable<boolean>;
+    firstPageMarginZero: Observable<boolean>;
+    firstPageMarginZeroImportant: Observable<boolean>;
+    forceHtmlBodyMarginZero: Observable<boolean>;
+    widowsOrphans: Observable<string>;
+    widowsOrphansImportant: Observable<boolean>;
+    imageMaxSizeToFitPage: Observable<boolean>;
+    imageMaxSizeToFitPageImportant: Observable<boolean>;
+    imageKeepAspectRatio: Observable<boolean>;
+    imageKeepAspectRatioImportant: Observable<boolean>;
+    baseFontSize: Observable<string>;
+    baseFontSizeSpecified: Observable<boolean>;
+    baseFontSizeImportant: Observable<boolean>;
+    baseLineHeight: Observable<string>;
+    baseLineHeightSpecified: Observable<boolean>;
+    baseLineHeightImportant: Observable<boolean>;
+    baseFontFamily: Observable<string>;
+    baseFontFamilySpecified: Observable<boolean>;
+    baseFontFamilyImportant: Observable<boolean>;
+    allImportant: Observable<boolean>;
+    pageOtherStyle: Observable<string>;
+    firstPageOtherStyle: Observable<string>;
+    rootOtherStyle: Observable<string>;
+    beforeOtherStyle: Observable<string>;
+    afterOtherStyle: Observable<string>;
+
+    cssText: PureComputed<string>;
+    setViewerFontSizeObservable: (viewerFontSizeObservable: null | Observable<number | string>) => void;
+    pageStyleRegExp: RegExp;
+    viewerFontSize: null | Observable<number | string>;
+    viewerFontSizePercent: PureComputed<number | string>;
+
+    static Mode = Mode;
+    static Constants = CONSTANTS;
+    static PresetSize = PRESET_SIZE;
+
+    constructor(pageStyle?: unknown) {
+        this.pageSizeMode = ko.observable(Mode.Default);
+        this.presetSize = ko.observable(PRESET_SIZE[1]);
         this.isLandscape = ko.observable(false);
-        this.customWidth = ko.observable(Constants.customWidth);
-        this.customHeight = ko.observable(Constants.customHeight);
+        this.customWidth = ko.observable(CONSTANTS.customWidth);
+        this.customHeight = ko.observable(CONSTANTS.customHeight);
         this.pageSizeImportant = ko.observable(false);
-        this.pageMarginMode = ko.observable(Mode.DEFAULT);
-        this.customMargin = ko.observable(Constants.customMargin);
+        this.pageMarginMode = ko.observable(Mode.Default);
+        this.customMargin = ko.observable(CONSTANTS.customMargin);
         this.pageMarginImportant = ko.observable(false);
         this.firstPageMarginZero = ko.observable(false);
         this.firstPageMarginZeroImportant = ko.observable(false);
@@ -71,13 +126,13 @@ class PageStyle {
         this.imageMaxSizeToFitPageImportant = ko.observable(false);
         this.imageKeepAspectRatio = ko.observable(false);
         this.imageKeepAspectRatioImportant = ko.observable(false);
-        this.baseFontSize = ko.observable(Constants.baseFontSize);
+        this.baseFontSize = ko.observable(CONSTANTS.baseFontSize);
         this.baseFontSizeSpecified = ko.observable(false);
         this.baseFontSizeImportant = ko.observable(false);
-        this.baseLineHeight = ko.observable(Constants.baseLineHeight);
+        this.baseLineHeight = ko.observable(CONSTANTS.baseLineHeight);
         this.baseLineHeightSpecified = ko.observable(false);
         this.baseLineHeightImportant = ko.observable(false);
-        this.baseFontFamily = ko.observable(Constants.baseFontFamily);
+        this.baseFontFamily = ko.observable(CONSTANTS.baseFontFamily);
         this.baseFontFamilySpecified = ko.observable(false);
         this.baseFontFamilyImportant = ko.observable(false);
         this.allImportant = ko.observable(false);
@@ -90,9 +145,9 @@ class PageStyle {
         this.viewerFontSize = null;
         this.setViewerFontSizeObservable = viewerFontSizeObservable => {
             this.viewerFontSize = viewerFontSizeObservable;
-            const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
+            const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0] as HTMLInputElement;
             if (elem) {
-                elem.value = this.fontSizePxToPercent(viewerFontSizeObservable(), 100, 5);
+                elem.value = this.fontSizePxToPercent(Number(viewerFontSizeObservable()), 100, 5).toString();
             }
         };
 
@@ -101,23 +156,23 @@ class PageStyle {
                 if (!this.viewerFontSize) {
                     return 100;
                 }
-                const percent = this.fontSizePxToPercent(this.viewerFontSize(), 100, 5);
+                const percent = this.fontSizePxToPercent(Number(this.viewerFontSize()), 100, 5);
                 return percent;
             },
             write(viewerFontSizePercent) {
                 if (!this.viewerFontSize) {
                     return;
                 }
-                const percent = parseFloat(viewerFontSizePercent);
+                const percent = parseFloat(String(viewerFontSizePercent));
                 let fontSize = percent && this.fontSizePercentToPx(percent);
                 if (!fontSize || fontSize < 5 || fontSize > 72) {
-                    const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0];
+                    const elem = document.getElementsByName("vivliostyle-settings_viewer-font-size")[0] as HTMLInputElement;
                     if (elem) {
                         elem.value = "100";
                     }
-                    fontSize = Constants.viewerFontSize;
+                    fontSize = CONSTANTS.viewerFontSize;
                 }
-                this.viewerFontSize(fontSize);
+                this.viewerFontSize(Number(fontSize));
             },
             owner: this
         });
@@ -172,62 +227,63 @@ class PageStyle {
 
     /**
      * @param {number} px Font size in px unit
-     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
-     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @param {number=} cent When _N_ (e.g. 1) is specified, get "per _N_" value instead of percent
+     * @param {number=} precision When specified, converts result number to string with max _precision_ digits
      * @returns {number|string} converted percent (or per _N_) value. Returns string when opt_precision is specified.
      */
-    fontSizePxToPercent(px, opt_cent, opt_precision) {
-        let percent = (px / Constants.viewerFontSize) * (opt_cent || 100);
-        if (opt_precision) {
-            percent = percent.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+    fontSizePxToPercent(px: number, cent?: number, precision?: number): number | string {
+        let percent: number | string = (px / CONSTANTS.viewerFontSize) * (cent || 100);
+        if (precision) {
+            percent = percent.toPrecision(precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
         }
         return percent;
     }
 
     /**
      * @param {number} percent Font size in percent (or per _N_) unit
-     * @param {number=} opt_cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
-     * @param {number=} opt_precision When specified, converts result number to string with max _precision_ digits
+     * @param {number=} cent When _N_ (e.g. 1) is specified, converts fromg "per _N_" value instead of percent
+     * @param {number=} precision When specified, converts result number to string with max _precision_ digits
      * @returns {number|string} converted font size in px unit. Returns string when opt_precision is specified.
      */
-    fontSizePercentToPx(percent, opt_cent, opt_precision) {
-        let px = (percent / (opt_cent || 100)) * Constants.viewerFontSize;
-        if (opt_precision) {
-            px = px.toPrecision(opt_precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+    fontSizePercentToPx(percent: number, cent?: number, precision?: number): number | string {
+        let px: number | string = (percent / (cent || 100)) * CONSTANTS.viewerFontSize;
+        if (precision) {
+            px = px.toPrecision(precision).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
         }
         return px;
     }
 
-    fromCSSText(cssText) {
+    fromCSSText(cssText: string) {
         const r = this.pageStyleRegExp.exec(cssText);
         if (r) {
-            let [
-                ,
+            const [
                 beforeOtherStyle,
-                sizeW,
-                sizeH,
                 sizeImportant,
                 pageMargin,
                 pageMarginImportant,
-                pageOtherStyle,
                 firstPageMarginZero,
                 firstPageMarginZeroImportant,
-                firstPageOtherStyle,
                 forceHtmlBodyMarginZero,
-                baseFontSize,
                 baseFontSizeImportant,
                 baseLineHeight,
                 baseLineHeightImportant,
-                baseFontFamily,
                 baseFontFamilyImportant,
-                rootOtherStyle,
                 widowsOrphans,
                 widowsOrphansImportant,
                 imageMaxSizeToFitPage,
                 imageMaxSizeToFitPageImportant,
                 imageKeepAspectRatio,
-                imageKeepAspectRatioImportant,
-                afterOtherStyle
+                imageKeepAspectRatioImportant
+            ] = r;
+            let [
+                afterOtherStyle,
+                baseFontFamily,
+                baseFontSize,
+                firstPageOtherStyle,
+                pageOtherStyle,
+                rootOtherStyle,
+                sizeW,
+                sizeH,
             ] = r;
 
             let countImportant = 0;
@@ -246,20 +302,20 @@ class PageStyle {
             if (sizeW != null) {
                 if (sizeH == null) {
                     if (sizeW == "auto") {
-                        this.pageSizeMode(Mode.AUTO);
+                        this.pageSizeMode(Mode.Auto);
                     } else {
-                        const presetSize = PresetSize.find(presetSize => presetSize.name.toLowerCase() == sizeW.toLowerCase());
+                        const presetSize = PRESET_SIZE.find(presetSize => presetSize.name.toLowerCase() == sizeW.toLowerCase());
                         if (presetSize) {
-                            this.pageSizeMode(Mode.PRESET);
+                            this.pageSizeMode(Mode.Preset);
                             this.presetSize(presetSize);
                         } else {
-                            this.pageSizeMode(Mode.CUSTOM);
+                            this.pageSizeMode(Mode.Custom);
                             this.customWidth(sizeW);
                             this.customHeight(sizeW);
                         }
                     }
                 } else {
-                    this.pageSizeMode(Mode.CUSTOM);
+                    this.pageSizeMode(Mode.Custom);
                     this.customWidth(sizeW);
                     this.customHeight(sizeH);
                 }
@@ -267,21 +323,21 @@ class PageStyle {
                 if (sizeImportant) countImportant++;
                 else countNotImportant++;
             } else {
-                this.pageSizeMode(Mode.DEFAULT);
+                this.pageSizeMode(Mode.Default);
             }
             if (pageMargin != null) {
-                this.pageMarginMode(pageMargin == "0" ? Mode.ZERO : Mode.CUSTOM);
+                this.pageMarginMode(pageMargin == "0" ? Mode.Zero : Mode.Custom);
                 if (pageMargin == "0") {
-                    this.pageMarginMode(Mode.ZERO);
+                    this.pageMarginMode(Mode.Zero);
                 } else {
-                    this.pageMarginMode(Mode.CUSTOM);
+                    this.pageMarginMode(Mode.Custom);
                     this.customMargin(pageMargin);
                 }
                 this.pageMarginImportant(!!pageMarginImportant);
                 if (pageMarginImportant) countImportant++;
                 else countNotImportant++;
             } else {
-                this.pageMarginMode(Mode.DEFAULT);
+                this.pageMarginMode(Mode.Default);
             }
             pageOtherStyle = pageOtherStyle || "";
             this.pageOtherStyle(pageOtherStyle);
@@ -342,7 +398,7 @@ class PageStyle {
                 if (widowsOrphansImportant) countImportant++;
                 else countNotImportant++;
             } else {
-                this.widowsOrphans(Mode.DEFAULT);
+                this.widowsOrphans(Mode.Default);
             }
 
             if (imageMaxSizeToFitPage) {
@@ -381,22 +437,22 @@ class PageStyle {
 
         let cssText = this.beforeOtherStyle();
         cssText += "/*<viewer>*/\n";
-        if (this.pageSizeMode() != Mode.DEFAULT || this.pageMarginMode() != Mode.DEFAULT || this.pageOtherStyle()) {
+        if (this.pageSizeMode() != Mode.Default || this.pageMarginMode() != Mode.Default || this.pageOtherStyle()) {
             cssText += "@page { ";
-            if (this.pageSizeMode() != Mode.DEFAULT) {
+            if (this.pageSizeMode() != Mode.Default) {
                 cssText += "size: ";
 
                 switch (this.pageSizeMode()) {
-                    case Mode.AUTO:
+                    case Mode.Auto:
                         cssText += "auto";
                         break;
-                    case Mode.PRESET:
+                    case Mode.Preset:
                         cssText += this.presetSize().name;
                         if (this.isLandscape()) {
                             cssText += " landscape";
                         }
                         break;
-                    case Mode.CUSTOM:
+                    case Mode.Custom:
                         cssText += `${this.customWidth()} ${this.customHeight()}`;
                         break;
                     default:
@@ -404,17 +460,17 @@ class PageStyle {
                 }
                 cssText += `${imp(this.pageSizeImportant())}; `;
             }
-            if (this.pageMarginMode() != Mode.DEFAULT) {
+            if (this.pageMarginMode() != Mode.Default) {
                 cssText += "margin: ";
 
                 switch (this.pageMarginMode()) {
-                    case Mode.AUTO:
+                    case Mode.Auto:
                         cssText += "auto";
                         break;
-                    case Mode.ZERO:
+                    case Mode.Zero:
                         cssText += "0";
                         break;
-                    case Mode.CUSTOM:
+                    case Mode.Custom:
                         cssText += `${this.customMargin()}`;
                         break;
                     default:
@@ -443,8 +499,8 @@ class PageStyle {
             cssText += ":root { ";
             const baseFontSize = this.baseFontSize();
             if (this.baseFontSizeSpecified()) {
-                if (this.viewerFontSize && this.viewerFontSize() != Constants.viewerFontSize && !baseFontSize.endsWith("%")) {
-                    const perOne = this.fontSizePxToPercent(this.viewerFontSize(), 1, 5);
+                if (this.viewerFontSize && this.viewerFontSize() != CONSTANTS.viewerFontSize && !baseFontSize.endsWith("%")) {
+                    const perOne = this.fontSizePxToPercent(Number(this.viewerFontSize()), 1, 5);
                     cssText += `font-size: calc(${perOne} * ${baseFontSize})${imp(this.baseFontSizeImportant())}; `;
                 } else {
                     cssText += `font-size: ${this.baseFontSize()}${imp(this.baseFontSizeImportant())}; `;
@@ -544,14 +600,14 @@ class PageStyle {
 
     equivalentTo(other) {
         if (this.pageSizeMode() !== other.pageSizeMode()) return false;
-        if (this.pageSizeMode() === Mode.PRESET && this.presetSize() !== other.presetSize()) return false;
-        if (this.pageSizeMode() === Mode.PRESET && this.isLandscape() !== other.isLandscape()) return false;
-        if (this.pageSizeMode() === Mode.CUSTOM && this.customWidth() !== other.customWidth()) return false;
-        if (this.pageSizeMode() === Mode.CUSTOM && this.customHeight() !== other.customHeight()) return false;
+        if (this.pageSizeMode() === Mode.Preset && this.presetSize() !== other.presetSize()) return false;
+        if (this.pageSizeMode() === Mode.Preset && this.isLandscape() !== other.isLandscape()) return false;
+        if (this.pageSizeMode() === Mode.Custom && this.customWidth() !== other.customWidth()) return false;
+        if (this.pageSizeMode() === Mode.Custom && this.customHeight() !== other.customHeight()) return false;
         if (this.pageSizeImportant() !== other.pageSizeImportant()) return false;
 
         if (this.pageMarginMode() !== other.pageMarginMode()) return false;
-        if (this.pageMarginMode() === Mode.CUSTOM && this.customMargin() !== other.customMargin()) return false;
+        if (this.pageMarginMode() === Mode.Custom && this.customMargin() !== other.customMargin()) return false;
         if (this.pageMarginImportant() !== other.pageMarginImportant()) return false;
         if (this.firstPageMarginZero() !== other.firstPageMarginZero()) return false;
         if (this.firstPageMarginZeroImportant() !== other.firstPageMarginZeroImportant()) return false;
@@ -587,9 +643,5 @@ class PageStyle {
         return true;
     }
 }
-
-PageStyle.Mode = Mode;
-PageStyle.Constants = Constants;
-PageStyle.PresetSize = PageStyle.prototype.PresetSize = PresetSize;
 
 export default PageStyle;

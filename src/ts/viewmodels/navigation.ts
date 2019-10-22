@@ -18,15 +18,53 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { PureComputed } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import keyUtil from "../utils/key-util";
 import vivliostyle from "../models/vivliostyle";
+import SettingsPanel from "./settings-panel";
+import Viewer from "./viewer";
 
 const { Keys } = keyUtil;
 
+export type NavigationOptions = {
+    disableTOCNavigation: boolean;
+    disablePageNavigation: boolean;
+    disableZoom: boolean;
+    disableFontSizeChange: boolean;
+};
+
 class Navigation {
-    constructor(viewerOptions, viewer, settingsPanel, navigationOptions) {
+    private viewerOptions_: ViewerOptions;
+    private viewer_: Viewer;
+    private settingsPanel_: SettingsPanel;
+
+    fitToScreen: PureComputed<unknown>;
+    isDecreaseFontSizeDisabled: PureComputed<boolean>;
+    isDefaultFontSizeDisabled: PureComputed<boolean>;
+    isDisabled: PureComputed<boolean>;
+    isIncreaseFontSizeDisabled: PureComputed<boolean>;
+    isNavigateToNextDisabled: PureComputed<boolean>;
+    isNavigateToPreviousDisabled: PureComputed<boolean>;
+    isNavigateToLeftDisabled: PureComputed<boolean>;
+    isNavigateToRightDisabled: PureComputed<boolean>;
+    isNavigateToFirstDisabled: PureComputed<boolean>;
+    isNavigateToLastDisabled: PureComputed<boolean>;
+    isPageNumberDisabled: PureComputed<boolean>;
+    isTOCToggleDisabled: PureComputed<boolean>;
+    isToggleFitToScreenDisabled: PureComputed<boolean>;
+    isZoomOutDisabled: PureComputed<boolean>;
+    isZoomInDisabled: PureComputed<boolean>;
+    isZoomToActualSizeDisabled: PureComputed<boolean>;
+    pageNumber: PureComputed<number | string>;
+    totalPages: PureComputed<unknown>;
+    hideFontSizeChange: boolean;
+    hidePageNavigation: boolean;
+    hideTOCNavigation: boolean;
+    hideZoom: boolean;
+    justClicked: boolean;
+
+    constructor(viewerOptions: ViewerOptions, viewer: Viewer, settingsPanel: SettingsPanel, navigationOptions: NavigationOptions) {
         this.viewerOptions_ = viewerOptions;
         this.viewer_ = viewer;
         this.settingsPanel_ = settingsPanel;
@@ -41,7 +79,7 @@ class Navigation {
         });
 
         navigationDisabled.subscribe(disabled => {
-            const pageNumberElem = document.getElementById("vivliostyle-page-number");
+            const pageNumberElem = document.getElementById("vivliostyle-page-number") as HTMLInputElement;
             if (pageNumberElem) {
                 pageNumberElem.disabled = disabled;
             }
@@ -166,13 +204,13 @@ class Navigation {
             read() {
                 return this.viewer_.epageToPageNumber(this.viewer_.epage());
             },
-            write(pageNumberText) {
+            write(pageNumberText: number | string) {
                 const epageOld = this.viewer_.epage();
                 const pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
 
                 // Accept non-integer, convert fullwidth to ascii
-                let pageNumber = parseFloat(pageNumberText.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0))) || 0;
-                if (/^[-+]/.test(pageNumberText)) {
+                let pageNumber = parseFloat(pageNumberText.toString().replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0))) || 0;
+                if (/^[-+]/.test(pageNumberText.toString())) {
                     // "+number" and "-number" to relative move.
                     pageNumber = pageNumberOld + pageNumber;
                 }
@@ -190,13 +228,13 @@ class Navigation {
                     }
                 }
                 const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
-                const pageNumberElem = document.getElementById("vivliostyle-page-number");
-                pageNumberElem.value = pageNumber;
+                const pageNumberElem = document.getElementById("vivliostyle-page-number") as HTMLInputElement;
+                pageNumberElem.value = pageNumber.toString();
                 this.viewer_.navigateToEPage(epageNav);
 
                 setTimeout(() => {
                     if (this.viewer_.state.status() != vivliostyle.constants.ReadyState.LOADING && this.viewer_.epage() === epageOld) {
-                        pageNumberElem.value = pageNumberOld;
+                        pageNumberElem.value = pageNumberOld.toString();
                     }
                     document.getElementById("vivliostyle-viewer-viewport").focus();
                 }, 10);
@@ -209,7 +247,7 @@ class Navigation {
             if (!totalPages) {
                 return totalPages;
             }
-            const pageNumber = this.pageNumber();
+            const pageNumber = Number(this.pageNumber());
             if (this.viewer_.lastPage()) {
                 totalPages = pageNumber;
             } else if (pageNumber >= totalPages) {
@@ -335,7 +373,7 @@ class Navigation {
 
     increaseFontSize() {
         if (!this.isIncreaseFontSizeDisabled()) {
-            let fontSize = this.viewerOptions_.fontSize();
+            let fontSize = Number(this.viewerOptions_.fontSize());
             // fontSize *= 1.25;
             if (fontSize < 10) {
                 fontSize = Math.floor(fontSize) + 1;
@@ -358,7 +396,7 @@ class Navigation {
 
     decreaseFontSize() {
         if (!this.isDecreaseFontSizeDisabled()) {
-            let fontSize = this.viewerOptions_.fontSize();
+            let fontSize = Number(this.viewerOptions_.fontSize());
             // fontSize *= 0.8;
             if (fontSize > 40) {
                 fontSize = (Math.ceil(fontSize / 8) - 1) * 8;
@@ -419,7 +457,7 @@ class Navigation {
 
     toggleTOC() {
         if (!this.isTOCToggleDisabled()) {
-            let intervalID = 0;
+            let intervalID: NodeJS.Timeout | null = null;
 
             if (!this.viewer_.tocVisible()) {
                 if (this.justClicked) {
@@ -433,13 +471,13 @@ class Navigation {
                 // - Check double click to make TOC box pinned.
                 // - Move focus to TOC box when TOC box becomes visible.
                 intervalID = setInterval(() => {
-                    const tocBox = document.querySelector("[data-vivliostyle-toc-box]");
+                    const tocBox = document.querySelector("[data-vivliostyle-toc-box]") as HTMLElement;
                     if (tocBox && tocBox.style.visibility === "visible") {
                         tocBox.tabIndex = 0;
                         tocBox.focus();
 
                         clearInterval(intervalID);
-                        intervalID = 0;
+                        intervalID = null;
                     }
                     this.justClicked = false;
                 }, 300);
@@ -448,9 +486,9 @@ class Navigation {
                 this.viewer_.showTOC(true, false); // autohide=false
                 this.justClicked = false;
             } else {
-                if (intervalID) {
+                if (intervalID !== null) {
                     clearInterval(intervalID);
-                    intervalID = 0;
+                    intervalID = null;
                 }
                 this.viewer_.showTOC(false);
 
@@ -472,7 +510,7 @@ class Navigation {
         const selecter =
             "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
             "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
-        let nodes = Array.from(document.querySelectorAll(selecter));
+        const nodes = Array.from(document.querySelectorAll(selecter));
         let index = nodes.indexOf(document.activeElement);
 
         const isButton = index => {
@@ -492,7 +530,7 @@ class Navigation {
                     index--;
                 }
                 if (isButton(index) && isExpanded(index)) {
-                    nodes[index].click();
+                    (nodes[index] as HTMLElement).click();
                 } else {
                     for (let i = index - 1; i >= 0; i--) {
                         if (isButton(i) && nodes[i].parentElement.contains(nodes[index])) {
@@ -514,7 +552,7 @@ class Navigation {
                     if (isExpanded(index)) {
                         index += 2;
                     } else {
-                        nodes[index].click();
+                        (nodes[index] as HTMLElement).click();
                     }
                 }
                 break;
@@ -543,7 +581,7 @@ class Navigation {
                     index--;
                 }
                 if (isButton(index)) {
-                    nodes[index].click();
+                    (nodes[index] as HTMLElement).click();
                 }
                 break;
         }
@@ -553,7 +591,7 @@ class Navigation {
         }
 
         if (nodes[index]) {
-            nodes[index].focus();
+            (nodes[index] as HTMLElement).focus();
         }
 
         return true;
@@ -641,7 +679,7 @@ class Navigation {
             case Keys.Space:
                 if (isTOCActive) return !this.navigateTOC(key);
                 if (document.activeElement.getAttribute("role") === "button") {
-                    document.activeElement.click();
+                    (document.activeElement as HTMLElement).click();
                     return false;
                 }
                 return true;

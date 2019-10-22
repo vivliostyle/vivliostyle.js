@@ -18,10 +18,9 @@
  */
 
 import ko from "knockout";
-import vivliostyle from "../../../src/js/models/vivliostyle";
-import ViewerOptions from "../../../src/js/models/viewer-options";
-import ZoomOptions from "../../../src/js/models/zoom-options";
-import Navigation from "../../../src/js/viewmodels/navigation";
+import ViewerOptions from "../../../src/ts/models/viewer-options";
+import ZoomOptions from "../../../src/ts/models/zoom-options";
+import Navigation from "../../../src/ts/viewmodels/navigation";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("Navigation", function() {

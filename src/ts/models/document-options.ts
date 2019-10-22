@@ -18,7 +18,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
+import ko, { Observable } from "knockout";
 import urlParameters from "../stores/url-parameters";
 import PageStyle from "./page-style";
 import stringUtil from "../utils/string-util";
@@ -39,6 +39,14 @@ function getDocumentOptionsFromURL() {
 }
 
 class DocumentOptions {
+    pageStyle: PageStyle;
+    dataUserStyleIndex: number;
+    bookUrl?: Observable<string>;
+    xUrl?: Observable<Array<string> | null>;
+    fragment?: Observable<string>;
+    authorStyleSheet?: Observable<Array<unknown>>;
+    userStyleSheet?: Observable<Array<unknown>>;
+
     constructor() {
         const urlOptions = getDocumentOptionsFromURL();
         this.bookUrl = ko.observable(urlOptions.bookUrl || "");
@@ -89,7 +97,7 @@ class DocumentOptions {
             }));
         }
         const userStyleSheetArray = convertStyleSheetArray(this.userStyleSheet());
-        if (this.pageStyle.pageSizeMode() == PageStyle.Mode.DEFAULT) {
+        if (this.pageStyle.pageSizeMode() == PageStyle.Mode.Default) {
             // Put default page size auto. This is needed to output auto size PDF.
             userStyleSheetArray.unshift({ text: "@page{size:auto}" });
         }
@@ -102,7 +110,7 @@ class DocumentOptions {
         };
     }
 
-    updateUserStyleSheetFromCSSText(cssText) {
+    updateUserStyleSheetFromCSSText(cssText?: string) {
         if (cssText == undefined) {
             cssText = this.pageStyle.toCSSText();
         }

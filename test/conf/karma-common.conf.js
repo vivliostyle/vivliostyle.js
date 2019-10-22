@@ -17,19 +17,28 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const webpackConfig = require("../../webpack.config");
+
+const TEST_FILES = "test/spec/**/*.js";
+
 module.exports = function(config) {
     return {
         basePath: "../..",
-        frameworks: ["browserify", "jasmine"],
+        frameworks: ["jasmine"],
         preprocessors: {
-            "test/spec/**/*.js": ["browserify"]
+            [TEST_FILES]: ["webpack"]
         },
-        files: ["test/spec/**/*.js"],
+        files: [TEST_FILES],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
-        browserify: {
-            transform: ["babelify"]
+        webpack: {
+            mode: webpackConfig.mode,
+            entry: webpackConfig.entry,
+            module: webpackConfig.module,
+            output: webpackConfig.output,
+            plugins: webpackConfig.plugins,
+            resolve: webpackConfig.resolve
         }
     };
 };

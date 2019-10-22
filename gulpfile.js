@@ -1,21 +1,16 @@
 "use strict";
 
-var babelify = require("babelify");
-var browserify = require("browserify");
 var browserSync = require("browser-sync").create();
 var changed = require("gulp-changed");
 var sass = require("gulp-sass");
 var ejs = require("gulp-ejs");
 var fs = require("fs");
 var gulp = require("gulp");
-var gutil = require("gulp-util");
 var KarmaServer = require("karma").Server;
 var notify = require("gulp-notify");
 var path = require("path");
 var plumber = require("gulp-plumber");
 var rename = require("gulp-rename");
-var source = require("vinyl-source-stream");
-var watchify = require("watchify");
 
 sass.compiler = require("node-sass");
 
@@ -25,7 +20,6 @@ var DEST_DIR = "build";
 var DIRS = {
     fonts: { src: "fonts" },
     html: { src: "html", dest: "", srcPattern: "*.ejs" },
-    js: { src: "js" },
     css: { src: "scss", dest: "css", srcPattern: "*.scss" },
     resources: {
         src: "../node_modules/vivliostyle/resources",
@@ -37,16 +31,11 @@ var DIRS = {
         dest: "plugins"
     }
 };
-var JS_ENTRIES = {
-    production: "main.js",
-    development: "main-dev.js"
-};
 var VIVLIOSTYLE_JS_SRC_DIR = "node_modules/vivliostyle/src";
 var HTML_FILENAMES = {
     production: "vivliostyle-viewer.html",
     development: "vivliostyle-viewer-dev.html"
 };
-var SERVER_START_PATH = "/vivliostyle-ui/build/%viewer-html%#x=/vivliostyle.js/samples/gon/index.html";
 
 function getVersion(basePath) {
     var version = JSON.parse(fs.readFileSync(basePath + "package.json", "utf8")).version;
@@ -58,9 +47,6 @@ var versions = {
 };
 
 // Utility functions
-function srcDir(type) {
-    return SRC_DIR + "/" + DIRS[type].src;
-}
 function destDir(type) {
     var dirs = DIRS[type];
     return DEST_DIR + "/" + (typeof dirs.dest === "string" ? dirs.dest : dirs.src);
@@ -68,52 +54,6 @@ function destDir(type) {
 function srcPattern(type) {
     return SRC_DIR + "/" + DIRS[type].src + "/" + (DIRS[type].srcPattern || "**/*");
 }
-
-// JS build
-function getBrowserify(development, watch) {
-    var b = browserify({
-        cache: {},
-        packageCache: {},
-        entries: [srcDir("js") + "/" + (development ? JS_ENTRIES.development : JS_ENTRIES.production)],
-        transform: [
-            babelify.configure({
-                presets: ["@babel/preset-env"]
-            })
-        ],
-        debug: development
-    });
-    if (watch) {
-        b = watchify(b);
-    }
-    b.on("log", gutil.log);
-    return b;
-}
-function bundleJs(b, name) {
-    return b
-        .bundle()
-        .on("error", gutil.log.bind(gutil, "Browserify Error"))
-        .pipe(name === JS_ENTRIES.production ? require("minify-stream")({ sourceMap: false }) : gutil.noop())
-        .pipe(source(name))
-        .pipe(gulp.dest(destDir("js")));
-}
-var b;
-var watching = false;
-function bundleJsProd() {
-    var name = JS_ENTRIES.production;
-    return bundleJs(b, name);
-}
-function bundleJsDev() {
-    var name = JS_ENTRIES.development;
-    return bundleJs(b, name);
-}
-gulp.task("build:js", function() {
-    b = getBrowserify(false, watching);
-    return bundleJsProd();
-});
-gulp.task("build:js-dev", function() {
-    b = getBrowserify(true, watching);
-    return bundleJsDev();
-});
 
 // create a task simply copying files
 function copyTask(type) {
@@ -174,29 +114,16 @@ gulp.task("build:css-dev", function() {
 });
 
 // build all
-gulp.task(
-    "build",
-    gulp.parallel(
-        "build:js",
-        "build:html",
-        "build:fonts",
-        "build:resources",
-        //    "build:mathjax",
-        "build:plugin_resources",
-        "build:css"
-    )
-);
-gulp.task("build-dev", gulp.parallel("build:js-dev", "build:html-dev", "build:fonts", "build:resources", "build:plugin_resources", "build:css-dev"));
+gulp.task("build", gulp.parallel("build:html", "build:fonts", "build:resources", "build:plugin_resources", "build:css"));
+gulp.task("build-dev", gulp.parallel("build:html-dev", "build:fonts", "build:resources", "build:plugin_resources", "build:css-dev"));
 
 // watch
 gulp.task("start-watching", function(done) {
-    watching = true;
     done();
 });
 gulp.task(
     "watch",
     gulp.series(gulp.parallel("start-watching", "build"), function(done) {
-        b.on("update", bundleJsProd);
         gulp.watch(srcPattern("html"), gulp.task("build:html"));
         gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
         gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
@@ -208,7 +135,6 @@ gulp.task(
 gulp.task(
     "watch-dev",
     gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
-        b.on("update", bundleJsDev);
         gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
         gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
         gulp.watch(srcPattern("resources"), gulp.task("build:resources"));

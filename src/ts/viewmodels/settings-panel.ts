@@ -18,16 +18,40 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko from "knockout";
-import ViewerOptions from "../models/viewer-options";
+import ko, { Observable, PureComputed } from "knockout";
+import DocumentOptions from "../models/document-options";
 import PageStyle from "../models/page-style";
 import PageViewMode from "../models/page-view-mode";
+import ViewerOptions from "../models/viewer-options";
 import keyUtil from "../utils/key-util";
+import Viewer from "./viewer";
+
+type State = {
+    viewerOptions: ViewerOptions;
+    pageStyle: PageStyle;
+    pageViewMode: PureComputed<string>;
+    renderAllPages: PureComputed<unknown>;
+};
 
 const { Keys } = keyUtil;
 
 class SettingsPanel {
-    constructor(viewerOptions, documentOptions, viewer, messageDialog, settingsPanelOptions) {
+    private viewerOptions_: ViewerOptions;
+    private documentOptions_: DocumentOptions;
+    private viewer_: Viewer;
+
+    isPageStyleChangeDisabled: boolean;
+    isOverrideDocumentStyleSheetDisabled: boolean;
+    isPageViewModeChangeDisabled: boolean;
+    isRenderAllPagesChangeDisabled: boolean;
+    justClicked: boolean; // double click check
+    settingsToggle: HTMLElement;
+    state: State;
+    opened: Observable<boolean>;
+    pinned: Observable<boolean>;
+    defaultPageStyle: PageStyle;
+
+    constructor(viewerOptions: ViewerOptions, documentOptions: DocumentOptions, viewer: Viewer, messageDialog, settingsPanelOptions) {
         this.viewerOptions_ = viewerOptions;
         this.documentOptions_ = documentOptions;
         this.viewer_ = viewer;
@@ -37,7 +61,7 @@ class SettingsPanel {
         this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
         this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
-        this.justClicked = false; // double click check
+        this.justClicked = false;
         this.settingsToggle = document.getElementById("vivliostyle-menu-item_settings-toggle");
 
         this.opened = ko.observable(false);
@@ -148,32 +172,36 @@ class SettingsPanel {
         this.state.pageStyle.copyFrom(this.defaultPageStyle);
         this.state.viewerOptions.fontSize(ViewerOptions.getDefaultValues().fontSize);
         setTimeout(() => {
-            const elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0];
+            const elem = document.getElementsByName("vivliostyle-settings_reset-user-style")[0] as HTMLInputElement;
             elem.checked = false;
         }, 200);
         return true;
     }
 
-    focusToFirstItem(opt_outerElem) {
-        const outerElem = opt_outerElem || this.settingsToggle;
+    focusToFirstItem(outerElemParam?: Element) {
+        const outerElem = outerElemParam || this.settingsToggle;
         const inputElem = ["input", "textarea", "summary"].includes(outerElem.localName)
             ? outerElem
-            : Array.from(outerElem.getElementsByTagName("input")).find(e => {
+            : Array.from(outerElem.getElementsByTagName("input")).find((e: HTMLInputElement) => {
                   return !e.disabled && (e.type != "radio" || e.checked);
               });
         if (inputElem) {
             for (let e = inputElem.parentElement; e && e != this.settingsToggle; e = e.parentElement) {
                 if (e.localName == "details") {
+                    // FIXME: Remove ts-ignore comment
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                    // @ts-ignore
                     e.open = true;
                 }
             }
-            inputElem.focus();
+            (inputElem as HTMLInputElement | HTMLTextAreaElement).focus();
         }
     }
 
     handleKey(key) {
         const isSettingsActive = this.opened() && this.settingsToggle.contains(document.activeElement);
-        const isInInput = isSettingsActive && (document.activeElement.type == "text" || document.activeElement.localName == "select");
+        const isInInput =
+            isSettingsActive && ((document.activeElement as HTMLInputElement).type == "text" || document.activeElement.localName == "select");
         const isInTextArea = isSettingsActive && document.activeElement.localName == "textarea";
         const isHotKeyEnabled = isSettingsActive && !isInInput && !isInTextArea;
 
