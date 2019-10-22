@@ -2659,7 +2659,7 @@ export function parseStylesheetFromText(
     "parseStylesheetFromText",
     frame => {
       const tok = new CssTok.Tokenizer(text, handler);
-      parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
+      parseStylesheet(tok, handler, baseURL, classes, media).then(v => frame.finish(v));
     },
     (frame, err) => {
       Logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);

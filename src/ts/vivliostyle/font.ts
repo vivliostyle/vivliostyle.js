@@ -305,11 +305,11 @@ export class Mapper {
             deobfuscator(xhr.responseBlob).then(fontBytes => {
               self
                 .initFont(srcFace, fontBytes, documentFaces)
-                .thenFinish(frame);
+                .then(v => frame.finish(v));
             });
           });
         } else {
-          self.initFont(srcFace, null, documentFaces).thenFinish(frame);
+          self.initFont(srcFace, null, documentFaces).then(v => frame.finish(v));
         }
         return frame.result();
       }, `loadFont ${src}`);

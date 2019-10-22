@@ -137,7 +137,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
         ) {
           // EPUB OPF
           const [, pubURL, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
-          this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
+          this.loadOPF(pubURL, root, haveZipMetadata).then(v => frame.finish(v));
         } else if (
           response.contentType == "application/ld+json" ||
           response.contentType == "application/webpub+json" ||
@@ -202,7 +202,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
           .attribute("full-path");
         for (const root of roots) {
           if (root) {
-            this.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+            this.loadOPF(url, root, haveZipMetadata).then(v => frame.finish(v));
             return;
           }
         }
@@ -338,7 +338,7 @@ export class EPUBDocStore extends Ops.OPSDocStore {
       responseXML: doc,
       responseBlob: null
     }));
-    r.thenFinish(frame);
+    r.then(v => frame.finish(v));
     return frame.result();
   }
 
@@ -1054,7 +1054,7 @@ export class OPFDoc {
           loopFrame.continueLoop();
         });
       })
-      .thenFinish(frame);
+      .then(v => frame.finish(v));
     return frame.result();
   }
 
@@ -1904,7 +1904,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       }
       self
         .findPage({ spineIndex, pageIndex, offsetInItem: -1 }, sync)
-        .thenFinish(frame);
+        .then(v => frame.finish(v));
     });
     return frame.result();
   }
@@ -2074,7 +2074,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const self = this;
     this.opf.resolveEPage(epage).then(position => {
       if (position) {
-        self.findPage(position, sync).thenFinish(frame);
+        self.findPage(position, sync).then(v => frame.finish(v));
       } else {
         frame.finish(null);
       }
@@ -2096,7 +2096,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const self = this;
     self.opf.resolveFragment(fragment).then(position => {
       if (position) {
-        self.findPage(position, sync).thenFinish(frame);
+        self.findPage(position, sync).then(v => frame.finish(v));
       } else {
         frame.finish(null);
       }
@@ -2172,7 +2172,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             },
             sync
           )
-          .thenFinish(frame);
+          .then(v => frame.finish(v));
       } else if (position.spineIndex !== item.spineIndex) {
         // no fragment, different spine item
         self
@@ -2184,7 +2184,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             },
             sync
           )
-          .thenFinish(frame);
+          .then(v => frame.finish(v));
       } else {
         frame.finish(null);
       }

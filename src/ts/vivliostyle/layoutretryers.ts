@@ -60,7 +60,7 @@ export abstract class AbstractLayoutRetryer {
         Asserts.assert(this.initialPosition);
         this.clearNodes(this.initialPosition);
         this.restoreState(nodeContext, column);
-        this.tryLayout(this.initialPosition, column).thenFinish(frame);
+        this.tryLayout(this.initialPosition, column).then(v => frame.finish(v));
       }
     });
     return frame.result();

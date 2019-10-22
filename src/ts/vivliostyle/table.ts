@@ -1590,7 +1590,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const frame = Task.newFrame<Vtree.NodeContext>(
       "TableFormattingContext.doLayout"
     );
-    iterator.iterate(nodeContext).thenFinish(frame);
+    iterator.iterate(nodeContext).then(v => frame.finish(v));
     return frame.result();
   }
 

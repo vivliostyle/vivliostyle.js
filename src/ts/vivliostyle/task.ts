@@ -74,11 +74,6 @@ export interface Result<T> {
   thenReturn<T1>(result: T1): Result<T1>;
 
   /**
-   * Finish given frame with the result value when result becomes ready.
-   */
-  thenFinish(frame: Frame<T>): void;
-
-  /**
    * Check if this Result is still pending.
    */
   isPending(): boolean;
@@ -563,13 +558,6 @@ export class SyncResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  thenFinish(frame: Frame<T>): void {
-    frame.finish(this.value);
-  }
-
-  /**
-   * @override
-   */
   isPending(): boolean {
     return false;
   }
@@ -627,19 +615,6 @@ export class ResultImpl<T> implements Result<T> {
       return this.thenAsync(() => new SyncResultImpl(result));
     } else {
       return new SyncResultImpl(result);
-    }
-  }
-
-  /**
-   * @override
-   */
-  thenFinish(frame: Frame<T>): void {
-    if (this.isPending()) {
-      this.then(res => {
-        frame.finish(res);
-      });
-    } else {
-      frame.finish(this.frame.res);
     }
   }
 

@@ -902,7 +902,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
     const frame = Task.newFrame<Vtree.NodeContext>(
       "BlockLayoutProcessor.doInitialLayout"
     );
-    this.layoutEntireBlock(nodeContext, column).thenFinish(frame);
+    this.layoutEntireBlock(nodeContext, column).then(v => frame.finish(v));
     return frame.result();
   }
 

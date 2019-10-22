@@ -77,7 +77,7 @@ export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
     url,
     null,
     null
-  ).thenFinish(frame);
+  ).then(v => frame.finish(v));
   return frame.result();
 }, "uaStylesheetBaseFetcher");
 
@@ -312,7 +312,7 @@ export class StyleInstance extends Exprs.Context
       const srcFace = new Font.Face(properties);
       srcFaces.push(srcFace);
     }
-    self.fontMapper.findOrLoadFonts(srcFaces, self.faces).thenFinish(frame);
+    self.fontMapper.findOrLoadFonts(srcFaces, self.faces).then(v => frame.finish(v));
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = self.style.pageProps;

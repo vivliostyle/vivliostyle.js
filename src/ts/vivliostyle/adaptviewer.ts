@@ -568,7 +568,7 @@ export class Viewer {
             ? TaskUtil.waitForFetchers(page.fetchers)
             : Task.newResult(true);
         r.then(() => {
-          self.sendLocationNotification(page, cfi).thenFinish(frame);
+          self.sendLocationNotification(page, cfi).then(v => frame.finish(v));
         });
       });
     return frame.result();
@@ -1044,7 +1044,7 @@ export class Viewer {
         );
         cont = innerFrame.result();
         self.showCurrent(result.page, !self.renderAllPages).then(() => {
-          self.reportPosition().thenFinish(innerFrame);
+          self.reportPosition().then(v => innerFrame.finish(v));
         });
       } else {
         cont = Task.newResult(true);
@@ -1179,7 +1179,7 @@ export class Viewer {
             });
           }
         })
-        .thenFinish(frame);
+        .then(v => frame.finish(v));
       return frame.result();
     });
     viewer.kick = () => {

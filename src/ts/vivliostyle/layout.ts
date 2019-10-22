@@ -2938,7 +2938,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           );
           layoutProcessor
             .layout(nodeContext, self, leadingEdge)
-            .thenFinish(frame);
+            .then(v => frame.finish(v));
         }
       }
     );
