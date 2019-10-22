@@ -24,12 +24,12 @@ import "./bindings/menuButton";
 import "./bindings/swipePages";
 
 export default {
-    start() {
-        function startViewer() {
-            ko.applyBindings(new ViewerApp());
-        }
-
-        if (window["__loaded"]) startViewer();
-        else window.onload = startViewer;
+  start() {
+    function startViewer() {
+      ko.applyBindings(new ViewerApp());
     }
+
+    if (window["__loaded"]) startViewer();
+    else window.onload = startViewer;
+  }
 };

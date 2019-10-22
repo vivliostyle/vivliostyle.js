@@ -22,7 +22,7 @@ import ko, { ObservableArray } from "knockout";
 export type MessageQueue = ObservableArray<unknown>;
 
 function messageQueue(): MessageQueue {
-    return ko.observableArray();
+  return ko.observableArray();
 }
 
 export default messageQueue();

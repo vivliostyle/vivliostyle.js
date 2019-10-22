@@ -31,100 +31,121 @@ import stringUtil from "../utils/string-util";
 import urlParameters from "../stores/url-parameters";
 
 function ViewerApp() {
-    this.documentOptions = new DocumentOptions();
-    this.viewerOptions = new ViewerOptions();
+  this.documentOptions = new DocumentOptions();
+  this.viewerOptions = new ViewerOptions();
 
-    this.documentOptions.pageStyle.setViewerFontSizeObservable(this.viewerOptions.fontSize);
+  this.documentOptions.pageStyle.setViewerFontSizeObservable(
+    this.viewerOptions.fontSize
+  );
 
-    if (this.viewerOptions.profile()) {
-        vivliostyle.profile.profiler.enable();
+  if (this.viewerOptions.profile()) {
+    vivliostyle.profile.profiler.enable();
+  }
+  this.isDebug = urlParameters.getParameter("debug")[0] === "true";
+  this.viewerSettings = {
+    userAgentRootURL: `${urlParameters.getBaseURL()}resources/`,
+    viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
+    debug: this.isDebug
+  };
+
+  // Remove redundant or ineffective URL parameters
+  if (urlParameters.getParameter("b")[0]) {
+    urlParameters.removeParameter("b", true); // only first one is effective
+    urlParameters.removeParameter("x"); // x= is ineffective when b= is given
+  }
+  urlParameters.removeParameter("f", true); // only first one is effective
+  urlParameters.removeParameter("spread", true);
+  urlParameters.removeParameter("renderAllPages", true);
+  urlParameters.removeParameter("fontSize", true);
+  urlParameters.removeParameter("profile", true);
+  urlParameters.removeParameter("debug", true);
+
+  this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
+
+  this.viewer.inputUrl.subscribe(inputUrl => {
+    if (inputUrl != "") {
+      if (!urlParameters.hasParameter("b")) {
+        // Push current URL to browser history to enable to go back here when browser Back button is clicked.
+        if (urlParameters.history.pushState)
+          urlParameters.history.pushState(null, "");
+      }
+      if (inputUrl.startsWith("<")) {
+        // seems start tag, so convert to data url
+        inputUrl = "data:," + stringUtil.percentEncodeForDataURI(inputUrl);
+      } else {
+        inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(
+          inputUrl
+        );
+      }
+      urlParameters.setParameter("b", inputUrl);
+    } else {
+      urlParameters.removeParameter("b");
     }
-    this.isDebug = urlParameters.getParameter("debug")[0] === "true";
-    this.viewerSettings = {
-        userAgentRootURL: `${urlParameters.getBaseURL()}resources/`,
-        viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-        debug: this.isDebug
-    };
+  });
 
-    // Remove redundant or ineffective URL parameters
-    if (urlParameters.getParameter("b")[0]) {
-        urlParameters.removeParameter("b", true); // only first one is effective
-        urlParameters.removeParameter("x"); // x= is ineffective when b= is given
+  this.messageDialog = new MessageDialog(messageQueue);
+
+  const settingsPanelOptions = {
+    disablePageStyleChange: false,
+    disablePageViewModeChange: false,
+    disableRenderAllPagesChange: false
+  };
+
+  this.settingsPanel = new SettingsPanel(
+    this.viewerOptions,
+    this.documentOptions,
+    this.viewer,
+    this.messageDialog,
+    settingsPanelOptions
+  );
+
+  const navigationOptions = {
+    disableTOCNavigation: false,
+    disablePageNavigation: false,
+    disableZoom: false,
+    disableFontSizeChange: false
+  };
+
+  this.navigation = new Navigation(
+    this.viewerOptions,
+    this.viewer,
+    this.settingsPanel,
+    navigationOptions
+  );
+
+  this.handleKey = (data, event) => {
+    const key = keyUtil.identifyKeyFromEvent(event);
+    if (document.activeElement.id === "vivliostyle-input-url") {
+      if (key === "Enter" && event.keyCode === 13) {
+        this.documentOptions.bookUrl(urlParameters.getParameter("b")[0]);
+        this.viewer.loadDocument(this.documentOptions);
+        return false;
+      }
+      return true;
     }
-    urlParameters.removeParameter("f", true); // only first one is effective
-    urlParameters.removeParameter("spread", true);
-    urlParameters.removeParameter("renderAllPages", true);
-    urlParameters.removeParameter("fontSize", true);
-    urlParameters.removeParameter("profile", true);
-    urlParameters.removeParameter("debug", true);
+    if (
+      (!(key === "Home" || key === "End") &&
+        (event.ctrlKey || event.metaKey)) ||
+      event.altKey ||
+      event.shiftKey
+    ) {
+      return true;
+    }
+    let ret = this.settingsPanel.handleKey(key);
+    if (ret) {
+      ret = this.navigation.handleKey(key);
+    }
+    return ret;
+  };
 
-    this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
+  this.viewer.loadDocument(this.documentOptions);
 
-    this.viewer.inputUrl.subscribe(inputUrl => {
-        if (inputUrl != "") {
-            if (!urlParameters.hasParameter("b")) {
-                // Push current URL to browser history to enable to go back here when browser Back button is clicked.
-                if (urlParameters.history.pushState) urlParameters.history.pushState(null, "");
-            }
-            if (inputUrl.startsWith("<")) {
-                // seems start tag, so convert to data url
-                inputUrl = "data:," + stringUtil.percentEncodeForDataURI(inputUrl);
-            } else {
-                inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(inputUrl);
-            }
-            urlParameters.setParameter("b", inputUrl);
-        } else {
-            urlParameters.removeParameter("b");
-        }
-    });
-
-    this.messageDialog = new MessageDialog(messageQueue);
-
-    const settingsPanelOptions = {
-        disablePageStyleChange: false,
-        disablePageViewModeChange: false,
-        disableRenderAllPagesChange: false
-    };
-
-    this.settingsPanel = new SettingsPanel(this.viewerOptions, this.documentOptions, this.viewer, this.messageDialog, settingsPanelOptions);
-
-    const navigationOptions = {
-        disableTOCNavigation: false,
-        disablePageNavigation: false,
-        disableZoom: false,
-        disableFontSizeChange: false
-    };
-
-    this.navigation = new Navigation(this.viewerOptions, this.viewer, this.settingsPanel, navigationOptions);
-
-    this.handleKey = (data, event) => {
-        const key = keyUtil.identifyKeyFromEvent(event);
-        if (document.activeElement.id === "vivliostyle-input-url") {
-            if (key === "Enter" && event.keyCode === 13) {
-                this.documentOptions.bookUrl(urlParameters.getParameter("b")[0]);
-                this.viewer.loadDocument(this.documentOptions);
-                return false;
-            }
-            return true;
-        }
-        if ((!(key === "Home" || key === "End") && (event.ctrlKey || event.metaKey)) || event.altKey || event.shiftKey) {
-            return true;
-        }
-        let ret = this.settingsPanel.handleKey(key);
-        if (ret) {
-            ret = this.navigation.handleKey(key);
-        }
-        return ret;
-    };
-
-    this.viewer.loadDocument(this.documentOptions);
-
-    window.onhashchange = () => {
-        if (window.location.href != urlParameters.storedUrl) {
-            // Reload when address bar change is detected
-            window.location.reload();
-        }
-    };
+  window.onhashchange = () => {
+    if (window.location.href != urlParameters.storedUrl) {
+      // Reload when address bar change is detected
+      window.location.reload();
+    }
+  };
 }
 
 export default ViewerApp;

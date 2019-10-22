@@ -20,9 +20,9 @@ import vivliostyle, { Vivliostyle } from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
 
 declare global {
-    interface Window {
-        vivliostyle: Vivliostyle;
-    }
+  interface Window {
+    vivliostyle: Vivliostyle;
+  }
 }
 
 vivliostyle.setInstance(window.vivliostyle);

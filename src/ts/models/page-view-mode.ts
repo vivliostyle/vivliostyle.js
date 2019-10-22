@@ -20,74 +20,74 @@
 import vivliostyle from "./vivliostyle";
 
 export class PageViewModeInstance {
-    toSpreadViewString() {
-        switch (this) {
-            // FIXME: We want to stop disabling this rule to future
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            case PageViewMode.SPREAD:
-                return "true";
-            // FIXME: We want to stop disabling this rule to future
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            case PageViewMode.SINGLE_PAGE:
-                return "false";
-            // FIXME: We want to stop disabling this rule to future
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            case PageViewMode.AUTO_SPREAD:
-                return "auto";
-            default:
-                throw new Error("Invalid PageViewMode");
-        }
+  toSpreadViewString() {
+    switch (this) {
+      // FIXME: We want to stop disabling this rule to future
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      case PageViewMode.SPREAD:
+        return "true";
+      // FIXME: We want to stop disabling this rule to future
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      case PageViewMode.SINGLE_PAGE:
+        return "false";
+      // FIXME: We want to stop disabling this rule to future
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      case PageViewMode.AUTO_SPREAD:
+        return "auto";
+      default:
+        throw new Error("Invalid PageViewMode");
     }
-    toString() {
-        switch (this) {
-            // FIXME: We want to stop disabling this rule to future
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            case PageViewMode.SPREAD:
-                return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
-            // FIXME: We want to stop disabling this rule to future
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            case PageViewMode.SINGLE_PAGE:
-                return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
-            // FIXME: We want to stop disabling this rule to future
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            case PageViewMode.AUTO_SPREAD:
-                return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
-            default:
-                throw new Error("Invalid PageViewMode");
-        }
+  }
+  toString() {
+    switch (this) {
+      // FIXME: We want to stop disabling this rule to future
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      case PageViewMode.SPREAD:
+        return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
+      // FIXME: We want to stop disabling this rule to future
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      case PageViewMode.SINGLE_PAGE:
+        return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
+      // FIXME: We want to stop disabling this rule to future
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      case PageViewMode.AUTO_SPREAD:
+        return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
+      default:
+        throw new Error("Invalid PageViewMode");
     }
+  }
 }
 
 const PageViewMode = {
-    AUTO_SPREAD: new PageViewModeInstance(),
-    SINGLE_PAGE: new PageViewModeInstance(),
-    SPREAD: new PageViewModeInstance(),
-    defaultMode() {
+  AUTO_SPREAD: new PageViewModeInstance(),
+  SINGLE_PAGE: new PageViewModeInstance(),
+  SPREAD: new PageViewModeInstance(),
+  defaultMode() {
+    return this.AUTO_SPREAD;
+  },
+  fromSpreadViewString(str) {
+    switch (str) {
+      case "true":
+        return this.SPREAD;
+      case "false":
+        return this.SINGLE_PAGE;
+      case "auto":
+      default:
         return this.AUTO_SPREAD;
-    },
-    fromSpreadViewString(str) {
-        switch (str) {
-            case "true":
-                return this.SPREAD;
-            case "false":
-                return this.SINGLE_PAGE;
-            case "auto":
-            default:
-                return this.AUTO_SPREAD;
-        }
-    },
-    of(name) {
-        switch (name) {
-            case vivliostyle.viewer.PageViewMode.SPREAD:
-                return this.SPREAD;
-            case vivliostyle.viewer.PageViewMode.SINGLE_PAGE:
-                return this.SINGLE_PAGE;
-            case vivliostyle.viewer.PageViewMode.AUTO_SPREAD:
-                return this.AUTO_SPREAD;
-            default:
-                throw new Error(`Invalid PageViewMode name: ${name}`);
-        }
     }
+  },
+  of(name) {
+    switch (name) {
+      case vivliostyle.viewer.PageViewMode.SPREAD:
+        return this.SPREAD;
+      case vivliostyle.viewer.PageViewMode.SINGLE_PAGE:
+        return this.SINGLE_PAGE;
+      case vivliostyle.viewer.PageViewMode.AUTO_SPREAD:
+        return this.AUTO_SPREAD;
+      default:
+        throw new Error(`Invalid PageViewMode name: ${name}`);
+    }
+  }
 };
 
 export default PageViewMode;

@@ -22,27 +22,27 @@ import { Profiler, Viewer, constants } from "vivliostyle";
 type Constants = typeof constants;
 
 export type Vivliostyle = {
-    viewer: Viewer;
-    constants: Constants;
-    profile: Profiler;
+  viewer: Viewer;
+  constants: Constants;
+  profile: Profiler;
 };
 
 class VivliostyleImpl {
-    viewer: null | Viewer;
-    constants: null | Constants;
-    profile: null | Profiler;
+  viewer: null | Viewer;
+  constants: null | Constants;
+  profile: null | Profiler;
 
-    constructor() {
-        this.viewer = null;
-        this.constants = null;
-        this.profile = null;
-    }
+  constructor() {
+    this.viewer = null;
+    this.constants = null;
+    this.profile = null;
+  }
 
-    setInstance(vivliostyle: Vivliostyle) {
-        this.viewer = vivliostyle.viewer;
-        this.constants = vivliostyle.constants;
-        this.profile = vivliostyle.profile;
-    }
+  setInstance(vivliostyle: Vivliostyle) {
+    this.viewer = vivliostyle.viewer;
+    this.constants = vivliostyle.constants;
+    this.profile = vivliostyle.profile;
+  }
 }
 
 export default new VivliostyleImpl();

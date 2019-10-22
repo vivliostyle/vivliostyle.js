@@ -18,24 +18,24 @@
  */
 
 export default {
-    escapeUnicodeChar(ch) {
-        return `\\u${(0x10000 | ch.charCodeAt(0)).toString(16).substring(1)}`;
-    },
-    escapeUnicodeString(str) {
-        return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
-    },
-    percentEncodeAmpersandAndUnencodedPercent(str) {
-        return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
-    },
-    percentEncodeAmpersandAndPercent(str) {
-        return str.replace(/%/g, "%25").replace(/&/g, "%26");
-    },
-    percentDecodeAmpersandAndPercent(str) {
-        return str.replace(/%26/g, "&").replace(/%25/g, "%");
-    },
-    percentEncodeForDataURI(str) {
-        return encodeURI(str)
-            .replace(/#/g, "%23")
-            .replace(/&/g, "%26");
-    }
+  escapeUnicodeChar(ch) {
+    return `\\u${(0x10000 | ch.charCodeAt(0)).toString(16).substring(1)}`;
+  },
+  escapeUnicodeString(str) {
+    return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
+  },
+  percentEncodeAmpersandAndUnencodedPercent(str) {
+    return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
+  },
+  percentEncodeAmpersandAndPercent(str) {
+    return str.replace(/%/g, "%25").replace(/&/g, "%26");
+  },
+  percentDecodeAmpersandAndPercent(str) {
+    return str.replace(/%26/g, "&").replace(/%25/g, "%");
+  },
+  percentEncodeForDataURI(str) {
+    return encodeURI(str)
+      .replace(/#/g, "%23")
+      .replace(/&/g, "%26");
+  }
 };
