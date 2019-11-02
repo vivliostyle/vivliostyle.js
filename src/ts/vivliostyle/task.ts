@@ -57,7 +57,7 @@ export interface Result<T> {
    * Call the given function when asynchronous function is finished. Callback
    * is executed in the task's context.
    */
-  then(callback: (p1: T) => void): void;
+  then<T1>(callback: (p1: T) => T1): Result<T1>;
 
   /**
    * Call the given asynchronous function when some asynchronous function is
@@ -65,13 +65,6 @@ export interface Result<T> {
    * @template T1
    */
   thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1>;
-
-  /**
-   * Produce a Result that resolves to the given value when this Result is
-   * resolved.
-   * @template T1
-   */
-  thenReturn<T1>(result: T1): Result<T1>;
 
   /**
    * Check if this Result is still pending.
@@ -379,8 +372,10 @@ export class Continuation<T> implements Base.Comparable {
       task.continuation = null;
       const savedTask = privateCurrentTask;
       privateCurrentTask = task;
+      console.log('privateCurrentTask', privateCurrentTask);
       task.top.finish(this.result);
       privateCurrentTask = savedTask;
+      console.log('privateCurrentTask', privateCurrentTask);
       return true;
     }
     return false;
@@ -537,8 +532,8 @@ export class SyncResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  then(callback: (T: any) => void) {
-    callback(this.value);
+  then<T1>(callback: (p1: T) => T1): Result<T1> {
+    return new SyncResultImpl(callback(this.value));
   }
 
   /**
@@ -546,13 +541,6 @@ export class SyncResultImpl<T> implements Result<T> {
    */
   thenAsync<T1>(callback: (p1: T) => Result<T1>) {
     return callback(this.value);
-  }
-
-  /**
-   * @override
-   */
-  thenReturn<T1>(result: T1) {
-    return new SyncResultImpl(result);
   }
 
   /**
@@ -570,6 +558,52 @@ export class SyncResultImpl<T> implements Result<T> {
   }
 }
 
+// TODO: Delete this class
+class AwaitingResult<T> implements Result<T> {
+  promise: Promise<T>;
+  res: T | null = null;
+  constructor(executor: (resolve: (val: T) => void) => void) {
+    this.promise = new Promise(resolve => {
+      executor(val => {
+        this.res = val;
+        resolve(val);
+      })
+    });
+  }
+
+  then<T1>(callback: (p1: T) => T1): Result<T1> {
+    if (this.res) {
+      return new SyncResultImpl(callback(this.res));
+    } else {
+      return new AwaitingResult(resolve => {
+        this.promise.then(val => {
+          resolve(callback(val));
+        });
+      });
+    }
+  }
+
+  thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1> {
+    if (this.res) {
+      return callback(this.res);
+    } else {
+      return new AwaitingResult(resolve => {
+        this.promise.then(val => {
+          resolve(callback(val).get());
+        });
+      });
+    }
+  }
+
+  isPending(): boolean {
+    return !this.res;
+  }
+
+  get(): T | null {
+    return this.res;
+  }
+}
+
 /**
  * @template T
  */
@@ -579,8 +613,16 @@ export class ResultImpl<T> implements Result<T> {
   /**
    * @override
    */
-  then(callback: (p1: T) => void): void {
-    this.frame.then(callback);
+  then<T1>(callback: (p1: T) => T1): Result<T1> {
+    if (this.isPending()) {
+      return new AwaitingResult<T1>(resolve => {
+        this.frame.then(res => {
+          resolve(callback(res));
+        });
+      });
+    } else {
+      return new SyncResultImpl(callback(this.frame.res));
+    }
   }
 
   /**
@@ -604,17 +646,6 @@ export class ResultImpl<T> implements Result<T> {
       return frame.result() as Result<T1>;
     } else {
       return callback(this.frame.res);
-    }
-  }
-
-  /**
-   * @override
-   */
-  thenReturn<T1>(result: T1) {
-    if (this.isPending()) {
-      return this.thenAsync(() => new SyncResultImpl(result));
-    } else {
-      return new SyncResultImpl(result);
     }
   }
 

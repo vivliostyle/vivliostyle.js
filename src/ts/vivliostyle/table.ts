@@ -939,7 +939,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     }
     return cellFragment.pseudoColumn
       .layout(startChunkPosition, true)
-      .thenReturn(true);
+      .then(() => true);
   }
 
   hasBrokenCellAtSlot(slotIndex): boolean {
@@ -2124,7 +2124,7 @@ export class TableRowLayoutConstraint
           const entry = constraints[i++];
           return entry.constraint
             .finishBreak(entry.breakPosition, column)
-            .thenReturn(true);
+            .then(() => true);
         } else {
           return Task.newResult(false);
         }

@@ -284,7 +284,7 @@ export function processAfterIfContinuesOfAncestors(
       if (current !== null) {
         const result = processAfterIfContinuesOfNodeContext(current, column);
         current = current.parent;
-        return result.thenReturn(true);
+        return result.then(() => true);
       } else {
         return Task.newResult(false);
       }

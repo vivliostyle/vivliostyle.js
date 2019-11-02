@@ -109,7 +109,7 @@ export const waitForFetchers = <T>(
     return Task.newResult(true);
   }
   if (fetchers.length == 1) {
-    return fetchers[0].get().thenReturn(true);
+    return fetchers[0].get().then(() => true);
   }
   const frame = Task.newFrame<boolean>("waitForFetches");
   let i = 0;
@@ -118,7 +118,7 @@ export const waitForFetchers = <T>(
       while (i < fetchers.length) {
         const fetcher = fetchers[i++];
         if (!fetcher.hasArrived()) {
-          return fetcher.get().thenReturn(true);
+          return fetcher.get().then(() => true);
         }
       }
       return Task.newResult(false);

@@ -2272,7 +2272,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                       source.url,
                       source.classes,
                       source.media
-                    ).thenReturn(true);
+                    ).then(() => true);
                   } else {
                     return CssParse.parseStylesheetFromURL(
                       source.url,

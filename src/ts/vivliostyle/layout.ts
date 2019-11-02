@@ -3197,7 +3197,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             nodeContext,
             this
           );
-          return result.thenReturn(true);
+          return result.then(() => true);
         } else {
           return Task.newResult(false);
         }
