@@ -188,8 +188,8 @@ module.exports = [
     {
         category: "after-if-continues pseudo elements",
         files: [
-            {file: "after_if_continues/after-if-continues.html", title: "create and insert an after-if-continues psuedo element"},
-            {file: "after_if_continues/after-if-continues_vertical.html", title: "create and insert an after-if-continues psuedo element (vertical writing-mode)"},
+            {file: "after_if_continues/after-if-continues.html", title: "create and insert an after-if-continues pseudo element"},
+            {file: "after_if_continues/after-if-continues_vertical.html", title: "create and insert an after-if-continues pseudo element (vertical writing-mode)"},
             {file: "after_if_continues/after-if-continues_page_float.html", title: "after-if-continues on page_float"}
         ]
     }
