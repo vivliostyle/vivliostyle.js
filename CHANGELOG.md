@@ -1,5 +1,24 @@
 # Change Log
 
+## 2019.11.100-pre - 2019-11-13
+
+### Fixed
+
+- Fix bug: Internal links don't work when publication URL has ".html"
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/558>
+
+### Changed
+
+- Source code and build
+  - Change directory structure <https://github.com/vivliostyle/vivliostyle.js/pull/552>
+  - [Viewer UI]
+    - Convert src/js to TypeScript <https://github.com/vivliostyle/vivliostyle-ui/pull/79>
+    - Replace compass to Sass <https://github.com/vivliostyle/vivliostyle-ui/pull/76>
+    - Introduce Stylelint https://github.com/vivliostyle/vivliostyle-ui/pull/77>
+    - Introduce ESLint <https://github.com/vivliostyle/vivliostyle-ui/pull/75>
+    - Introduce prettier <https://github.com/vivliostyle/vivliostyle-ui/pull/72> <https://github.com/vivliostyle/vivliostyle-ui/pull/73>, <https://github.com/vivliostyle/vivliostyle-ui/pull/80>
+
+
 ## [2019.8.101](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.8.101) - 2019-08-20
 
 ### Fixed
