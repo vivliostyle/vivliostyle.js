@@ -2128,7 +2128,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         } else {
           path = restored[0];
         }
-        href = path + (restored[1] ? `#${restored[1]}` : "");
+        href = restored[0] + (restored[1] ? `#${restored[1]}` : "");
       }
       if (path == null) {
         return Task.newResult(null as PageAndPosition | null);
