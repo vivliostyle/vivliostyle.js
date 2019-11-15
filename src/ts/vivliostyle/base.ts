@@ -124,6 +124,13 @@ export function resolveURL(relURL: string, baseURL: string): string {
     }
   }
   let url = baseURL.substr(0, i + 1) + relURL;
+  let urlOption = "";
+  r = url.match(/^([^?#]*)([?#].*)$/);
+  if (r) {
+    url = r[1];
+    urlOption = r[2];
+  }
+
   while (true) {
     i = url.indexOf("/../");
     if (i <= 0) {
@@ -135,7 +142,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
     }
     url = url.substr(0, j) + url.substr(i + 3);
   }
-  return url.replace(/\/(\.\/)+/g, "/");
+  return url.replace(/\/(\.\/)+/g, "/") + urlOption;
 }
 
 /**
