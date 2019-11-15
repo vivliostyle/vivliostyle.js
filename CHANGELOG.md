@@ -6,6 +6,8 @@
 
 - Fix bug: Internal links don't work when publication URL has ".html"
   - <https://github.com/vivliostyle/vivliostyle.js/pull/558>
+- Fix bug: Links to document with Vivliostyle Viewer with relative URL don't work
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/560>
 
 ### Changed
 
