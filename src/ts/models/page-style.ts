@@ -108,6 +108,7 @@ class PageStyle {
   static Mode = Mode;
   static Constants = CONSTANTS;
   static PresetSize = PRESET_SIZE;
+  PresetSize = PageStyle.PresetSize;
 
   constructor(pageStyle?: unknown) {
     this.pageSizeMode = ko.observable(Mode.Default);
