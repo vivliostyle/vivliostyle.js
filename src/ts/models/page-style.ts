@@ -284,34 +284,41 @@ class PageStyle {
     const r = this.pageStyleRegExp.exec(cssText);
     if (r) {
       const [
+        ,
         beforeOtherStyle,
+        sizeW_,
+        sizeH_,
         sizeImportant,
         pageMargin,
         pageMarginImportant,
+        pageOtherStyle_,
         firstPageMarginZero,
         firstPageMarginZeroImportant,
+        firstPageOtherStyle_,
         forceHtmlBodyMarginZero,
+        baseFontSize_,
         baseFontSizeImportant,
         baseLineHeight,
         baseLineHeightImportant,
+        baseFontFamily_,
         baseFontFamilyImportant,
+        rootOtherStyle_,
         widowsOrphans,
         widowsOrphansImportant,
         imageMaxSizeToFitPage,
         imageMaxSizeToFitPageImportant,
         imageKeepAspectRatio,
-        imageKeepAspectRatioImportant
+        imageKeepAspectRatioImportant,
+        afterOtherStyle_
       ] = r;
-      let [
-        afterOtherStyle,
-        baseFontFamily,
-        baseFontSize,
-        firstPageOtherStyle,
-        pageOtherStyle,
-        rootOtherStyle,
-        sizeW,
-        sizeH
-      ] = r;
+      let afterOtherStyle = afterOtherStyle_;
+      let baseFontFamily = baseFontFamily_;
+      let baseFontSize = baseFontSize_;
+      let firstPageOtherStyle = firstPageOtherStyle_;
+      let pageOtherStyle = pageOtherStyle_;
+      let rootOtherStyle = rootOtherStyle_;
+      let sizeW = sizeW_;
+      let sizeH = sizeH_;
 
       let countImportant = 0;
       let countNotImportant = 0;
