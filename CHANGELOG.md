@@ -1,9 +1,11 @@
 # Change Log
 
-## 2019.11.100-pre - 2019-11-13
+## 2019.11.100-pre - 2019-11-26
 
 ### Fixed
 
+- Fix error on logical border shorthand properties
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/561>
 - Fix bug: Internal links don't work when publication URL has ".html"
   - <https://github.com/vivliostyle/vivliostyle.js/pull/558>
 - Fix bug: Links to document with Vivliostyle Viewer with relative URL don't work
