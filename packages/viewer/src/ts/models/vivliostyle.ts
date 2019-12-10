@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Profiler, Viewer, constants } from "vivliostyle";
+import { Profiler, Viewer, constants } from "@vivliostyle/core";
 
 type Constants = typeof constants;
 

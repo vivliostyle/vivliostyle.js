@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Viewer as VivliostyleViewer } from "vivliostyle";
+import { Viewer as VivliostyleViewer } from "@vivliostyle/core";
 import vivliostyle from "./vivliostyle";
 
 class ZoomOptions {
@@ -76,7 +76,7 @@ export class FitToScreen extends ZoomOptions {
   }
   getCurrentZoomFactor(viewer: VivliostyleViewer) {
     return viewer.queryZoomFactor(
-      vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT
+      vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT,
     );
   }
 }

@@ -16,7 +16,7 @@ const config = (outputFilename, tsConfigName) => ({
       process.env.NODE_ENV === "development"
         ? outputFilename + ".dev.js" // "development"
         : outputFilename + ".min.js", // "production" or "debug"
-    library: "vivliostyle-ui",
+    library: "@vivliostyle/viewer",
     libraryTarget: "umd",
     libraryExport: "default"
   },
@@ -54,4 +54,4 @@ const config = (outputFilename, tsConfigName) => ({
   }
 });
 
-module.exports = config("vivliostyle-ui", "tsconfig.json");
+module.exports = config("vivliostyle-viewer", "tsconfig.json");

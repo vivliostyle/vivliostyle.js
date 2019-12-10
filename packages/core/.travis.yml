@@ -1,16 +1,16 @@
 language: node_js
 node_js:
-- stable
+  - stable
 before_install:
-- sudo pip install virtualenv
+  - sudo pip install virtualenv
 script:
-- build/update-version.sh
-- npm run lint
-- npm run build
-- npm test
-# - build/wpt-sauce.sh
+  - scripts/update-version.sh
+  - npm run lint
+  - npm run build
+  - npm test
+# - scripts/wpt-sauce.sh
 after_success:
-- build/travis-after-success.sh
+  - scripts/travis-after-success.sh
 notifications:
   email: false
   slack:

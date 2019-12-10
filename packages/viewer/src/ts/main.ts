@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyleInstance from "vivliostyle";
+import vivliostyleInstance from "@vivliostyle/core";
 import vivliostyle from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
 

@@ -22,12 +22,12 @@ cp -R ../vivliostyle-ui/node_modules/vivliostyle/samples/* samples/
 cp ../vivliostyle-ui/node_modules/vivliostyle/doc/supported-features.{md,html} docs/en/
 cp -R ../vivliostyle-ui/build/* viewer/
 
-zip="../vivliostyle-ui/vivliostyle-js-latest.zip"
+zip="../viewer/vivliostyle-js-latest.zip"
 if [ -e ${zip} ]; then
     mv ${zip} downloads/
 fi
 
 git add .
 git status
-git commit -m "Update vivliostyle-ui (original commit: $TRAVIS_COMMIT)"
+git commit -m "Update vivliostyle-viewer (original commit: $TRAVIS_COMMIT)"
 git push origin gh-pages

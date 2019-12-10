@@ -1,55 +1,56 @@
 "use strict";
 
-var browserSync = require("browser-sync").create();
-var changed = require("gulp-changed");
-var sass = require("gulp-sass");
-var ejs = require("gulp-ejs");
-var fs = require("fs");
-var gulp = require("gulp");
-var KarmaServer = require("karma").Server;
-var notify = require("gulp-notify");
-var path = require("path");
-var plumber = require("gulp-plumber");
-var rename = require("gulp-rename");
+const browserSync = require("browser-sync").create();
+const changed = require("gulp-changed");
+const sass = require("gulp-sass");
+const ejs = require("gulp-ejs");
+const fs = require("fs");
+const gulp = require("gulp");
+const KarmaServer = require("karma").Server;
+const notify = require("gulp-notify");
+const path = require("path");
+const plumber = require("gulp-plumber");
+const rename = require("gulp-rename");
+const finder = require("find-package-json");
 
 sass.compiler = require("node-sass");
 
 // Parameters
-var SRC_DIR = "src";
-var DEST_DIR = "build";
-var DIRS = {
+const SRC_DIR = "src";
+const DEST_DIR = "build";
+const DIRS = {
   fonts: { src: "fonts" },
   html: { src: "html", dest: "", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
   resources: {
-    src: "../node_modules/vivliostyle/resources",
-    dest: "resources"
+    src: "../core/resources",
+    dest: "resources",
   },
-  mathjax: { src: "../node_modules/mathjax", dest: "mathjax" },
+  mathjax: { src: "../../node_modules/mathjax", dest: "mathjax" },
   plugin_resources: {
-    src: "../node_modules/vivliostyle/plugins/*/resources",
-    dest: "plugins"
-  }
+    src: "../core/plugins/*/resources",
+    dest: "plugins",
+  },
 };
-var VIVLIOSTYLE_JS_SRC_DIR = "node_modules/vivliostyle/src";
-var HTML_FILENAMES = {
+const VIVLIOSTYLE_JS_SRC_DIR = "../core/src";
+const HTML_FILENAMES = {
   production: "vivliostyle-viewer.html",
-  development: "vivliostyle-viewer-dev.html"
+  development: "vivliostyle-viewer-dev.html",
 };
 
 function getVersion(basePath) {
-  var version = JSON.parse(fs.readFileSync(basePath + "package.json", "utf8"))
+  const version = JSON.parse(fs.readFileSync(basePath + "package.json", "utf8"))
     .version;
   return version.replace(/\.0$/, "");
 }
-var versions = {
-  core: getVersion("node_modules/vivliostyle/"),
-  ui: getVersion("")
+const versions = {
+  core: getVersion("../../node_modules/@vivliostyle/core/"),
+  viewer: getVersion(""),
 };
 
 // Utility functions
 function destDir(type) {
-  var dirs = DIRS[type];
+  const dirs = DIRS[type];
   return (
     DEST_DIR + "/" + (typeof dirs.dest === "string" ? dirs.dest : dirs.src)
   );
@@ -62,7 +63,7 @@ function srcPattern(type) {
 
 // create a task simply copying files
 function copyTask(type) {
-  var dest = destDir(type);
+  const dest = destDir(type);
   return gulp.task("build:" + type, function() {
     return gulp
       .src(srcPattern(type))
@@ -82,13 +83,13 @@ function buildHtml(development) {
     .pipe(ejs({ development: development, versions: versions }))
     .pipe(
       plumber({
-        errorHandler: notify.onError("Error: <%= error.message %>")
-      })
+        errorHandler: notify.onError("Error: <%= error.message %>"),
+      }),
     )
     .pipe(
       rename(
-        development ? HTML_FILENAMES.development : HTML_FILENAMES.production
-      )
+        development ? HTML_FILENAMES.development : HTML_FILENAMES.production,
+      ),
     )
     .pipe(gulp.dest(destDir("html")));
 }
@@ -105,13 +106,13 @@ function buildCss(development) {
     .src(srcPattern("css"))
     .pipe(
       plumber({
-        errorHandler: notify.onError("Error: <%= error.message %>")
-      })
+        errorHandler: notify.onError("Error: <%= error.message %>"),
+      }),
     )
     .pipe(
       sass({
-        outputStyle: development ? "expanded" : "compressed"
-      }).on("error", sass.logError)
+        outputStyle: development ? "expanded" : "compressed",
+      }).on("error", sass.logError),
     )
     .pipe(gulp.dest(path.resolve(destDir("css"))));
 }
@@ -130,8 +131,8 @@ gulp.task(
     "build:fonts",
     "build:resources",
     "build:plugin_resources",
-    "build:css"
-  )
+    "build:css",
+  ),
 );
 gulp.task(
   "build-dev",
@@ -140,8 +141,8 @@ gulp.task(
     "build:fonts",
     "build:resources",
     "build:plugin_resources",
-    "build:css-dev"
-  )
+    "build:css-dev",
+  ),
 );
 
 // watch
@@ -156,11 +157,11 @@ gulp.task(
     gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(
       srcPattern("plugin_resources"),
-      gulp.task("build:plugin_resources")
+      gulp.task("build:plugin_resources"),
     );
     gulp.watch(srcPattern("css"), gulp.task("build:css"));
     done();
-  })
+  }),
 );
 gulp.task(
   "watch-dev",
@@ -170,11 +171,11 @@ gulp.task(
     gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(
       srcPattern("plugin_resources"),
-      gulp.task("build:plugin_resources")
+      gulp.task("build:plugin_resources"),
     );
     gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
     done();
-  })
+  }),
 );
 
 // serve
@@ -187,11 +188,11 @@ function serve(development) {
         ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
         : "chromium-browser",
     server: {
-      baseDir: "../"
+      baseDir: "../",
     },
-    startPath: "/vivliostyle.js/test/files/"
+    startPath: "/core/test/files/",
   });
-  var target = [DEST_DIR + "/**/*"];
+  const target = [DEST_DIR + "/**/*"];
   if (development) {
     target.push(VIVLIOSTYLE_JS_SRC_DIR + "/**/*");
   }
@@ -202,38 +203,38 @@ gulp.task(
   gulp.series("watch", function(done) {
     serve(false);
     done();
-  })
+  }),
 );
 gulp.task(
   "serve-dev",
   gulp.series("watch-dev", function(done) {
     serve(true);
     done();
-  })
+  }),
 );
 
 gulp.task("default", gulp.task("serve-dev"));
 
 // test
 gulp.task("test-local", function(done) {
-  var server = new KarmaServer(
+  const server = new KarmaServer(
     {
-      configFile: process.cwd() + "/test/conf/karma-local.conf"
+      configFile: process.cwd() + "/test/conf/karma-local.conf",
     },
     function(exitStatus) {
       done(exitStatus ? "Some tests failed" : undefined);
-    }
+    },
   );
   server.start();
 });
 gulp.task("test-sauce", function(done) {
-  var server = new KarmaServer(
+  const server = new KarmaServer(
     {
-      configFile: process.cwd() + "/test/conf/karma-sauce.conf"
+      configFile: process.cwd() + "/test/conf/karma-sauce.conf",
     },
     function(exitStatus) {
       done(exitStatus ? "Some tests failed" : undefined);
-    }
+    },
   );
   server.start();
 });

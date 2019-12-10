@@ -19,7 +19,7 @@
  */
 
 import ko, { Observable, PureComputed } from "knockout";
-import { Viewer as VivliostyleViewer } from "vivliostyle";
+import { Viewer as VivliostyleViewer } from "@vivliostyle/core";
 import obs, { ReadonlyObservable } from "../utils/observable-util";
 import Logger from "../logging/logger";
 import DocumentOptions from "../models/document-options";

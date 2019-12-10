@@ -1,0 +1,19 @@
+{
+  "name": "vivliostyle",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "lerna run build",
+    "lint": "lerna run lint",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "lerna": "^3.19.0",
+    "prettier": "^1.19.1",
+    "pretty-quick": "^2.0.1"
+  },
+  "private": true,
+  "repository": "ssh://git@github.com/vivliostyle/vivliostyle",
+  "workspaces": [
+    "packages/*"
+  ]
+}

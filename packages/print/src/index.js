@@ -1,15 +1,14 @@
-import viewportCss from "vivliostyle/resources/vivliostyle-viewport.css"
-import viewportScreenCss from "vivliostyle/resources/vivliostyle-viewport-screen.css"
-import vivliostyle from "vivliostyle"
-
+import viewportCss from "@vivliostyle/core/resources/vivliostyle-viewport.css";
+import viewportScreenCss from "@vivliostyle/core/resources/vivliostyle-viewport-screen.css";
+import vivliostyle from "@vivliostyle/core";
 
 class VivliostylePrint {
 
-    constructor(
+  constructor(
         htmlDoc, {
             title = '',
             printCallback = iframeWin => iframeWin.print(),
-            hideIframe = true,
+      hideIframe = true,
             removeIframe = true
         }) {
         this.htmlDoc = htmlDoc
@@ -17,18 +16,18 @@ class VivliostylePrint {
         this.printCallback = printCallback
         this.hideIframe = hideIframe
         this.removeIframe = removeIframe
-    }
+  }
 
-    init() {
+  init() {
         this.iframe = document.createElement('iframe')
-        if (this.hideIframe) {
+    if (this.hideIframe) {
             this.iframe.style.width = 0 // We don't want the iframe to be seen, so we make it zero size with zero border.
             this.iframe.style.height = 0
             this.iframe.style.borderWidth = 0
-        }
+    }
         this.window = window
         this.window.printInstance = this
-        this.iframe.srcdoc = `<!DOCTYPE html>
+    this.iframe.srcdoc = `<!DOCTYPE html>
         <html data-vivliostyle-paginated="true">
             <head>
                 <meta charset='utf-8'/>
@@ -59,31 +58,31 @@ class VivliostylePrint {
             </body>
         </html>`
         document.body.appendChild(this.iframe)
-    }
+  }
 
-    runInIframe(iframeWin) {
+  runInIframe(iframeWin) {
         this.iframeWin = iframeWin
         return this.preparePrint().then(
             () => this.browserPrint()
         ).then(
             () => this.cleanUp()
         )
-    }
+  }
 
-    preparePrint() {
+  preparePrint() {
         this.iframeWin.document.title = this.title
-        const docBlob = new Blob([this.htmlDoc], {
+    const docBlob = new Blob([this.htmlDoc], {
                 type: 'text/html'
-            }),
-            docURL = URL.createObjectURL(docBlob),
-            Viewer = new vivliostyle.viewer.Viewer(
-                {
-                    viewportElement: this.iframeWin.document.body.firstElementChild,
+      }),
+      docURL = URL.createObjectURL(docBlob),
+      Viewer = new vivliostyle.viewer.Viewer(
+        {
+          viewportElement: this.iframeWin.document.body.firstElementChild,
                     window: this.iframeWin
-                },
-                {
-                    defaultPaperSize: {
-                        width: 794, // These numbers give weird output, but not setting them crashes the browser when there is no CSS.
+        },
+        {
+          defaultPaperSize: {
+            width: 794, // These numbers give weird output, but not setting them crashes the browser when there is no CSS.
                         height: 1122
                     }
                 }
@@ -92,24 +91,24 @@ class VivliostylePrint {
             Viewer.addListener('readystatechange', () => {
                 if (Viewer.readyState === 'complete') {
                     resolve()
-                }
+        }
             })
-            Viewer.loadDocument({
+      Viewer.loadDocument({
                 url: docURL
             })
         })
-    }
+  }
 
-    browserPrint() {
+  browserPrint() {
         this.printCallback(this.iframeWin)
-    }
+  }
 
-    cleanUp() {
+  cleanUp() {
         delete this.window.printInstance
-        if (this.removeIframe) {
+    if (this.removeIframe) {
             this.iframe.parentElement.removeChild(this.iframe)
-        }
     }
+  }
 }
 
 export function vivliostylePrint(htmlDoc, config) {
