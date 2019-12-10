@@ -53,6 +53,9 @@
   ],
   "homepage": "https://github.com/vivliostyle/vivliostyle.js",
   "module": "lib/vivliostyle.min.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vivliostyle/vivliostyle.js.git"

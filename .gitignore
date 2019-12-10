@@ -46,9 +46,6 @@ build/Release
 node_modules/
 jspm_packages/
 
-# TypeScript v1 declaration files
-typings/
-
 # TypeScript cache
 *.tsbuildinfo
 
@@ -79,9 +76,6 @@ typings/
 
 # nuxt.js build output
 .nuxt
-
-# react / gatsby 
-public/
 
 # vuepress build output
 .vuepress/dist

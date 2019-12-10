@@ -1,6 +1,6 @@
 {
   "name": "vivliostyle",
-  "version": "0.0.0",
+  "version": "2019.11.100-pre",
   "scripts": {
     "build": "lerna run build",
     "lint": "lerna run lint",
