@@ -53,7 +53,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     public readonly rendererFactory: Vgen.CustomRendererFactory,
     public readonly fallbackMap: { [key: string]: string },
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
-    public readonly counterStore: Counters.CounterStore
+    public readonly counterStore: Counters.CounterStore,
   ) {
     this.pref = Exprs.clonePreferences(pref);
     this.pref.spreadView = false; // No spred view for TOC box
@@ -86,7 +86,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     return (
       srcElem: Element,
       viewParent: Element,
-      computedStyle: { [key: string]: Css.Val }
+      computedStyle: { [key: string]: Css.Val },
     ): Task.Result<Element> => {
       const behavior = computedStyle["behavior"];
       if (behavior) {
@@ -94,12 +94,12 @@ export class TOCView implements Vgen.CustomRendererFactory {
           case "body-child":
             if (
               srcElem.parentElement.getAttribute(
-                "data-vivliostyle-primary-entry"
+                "data-vivliostyle-primary-entry",
               )
             ) {
               if (
                 !srcElem.querySelector(
-                  "[role=doc-toc], [role=directory], nav li a, .toc, #toc"
+                  "[role=doc-toc], [role=directory], nav li a, .toc, #toc",
                 )
               ) {
                 // When the TOC element is a part of the primaty entry (X)HTML,
@@ -144,7 +144,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         // To avoid "Inconsistent offset" error, create a comment node with same white-space text.
         srcElem.replaceChild(
           srcElem.ownerDocument.createComment(firstChild.textContent),
-          firstChild
+          firstChild,
         );
       }
       const adaptParentClass = viewParent.getAttribute("data-adapt-class");
@@ -216,7 +216,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     viewport: Vgen.Viewport,
     width: number,
     height: number,
-    fontSize: number
+    fontSize: number,
   ): Task.Result<Vtree.Page> {
     if (this.page) {
       return Task.newResult(this.page as Vtree.Page);
@@ -230,7 +230,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     // but they need different styles. So, add "?viv-toc-box" to distinguish with TOC page URL.
     const tocBoxUrl = this.url + "?viv-toc-box";
 
-    this.store.load(tocBoxUrl).then(xmldoc => {
+    this.store.load(tocBoxUrl).then((xmldoc) => {
       // Mark if this doc is the primary entry page.
       const nonTocBoxDoc = this.store.resources[this.url];
       if (
@@ -248,7 +248,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         viewportSize.fontSize,
         viewport.root,
         viewportSize.width,
-        viewportSize.height
+        viewportSize.height,
       );
       const customRenderer = self.makeCustomRenderer(xmldoc);
       const instance = new Ops.StyleInstance(
@@ -262,7 +262,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         self.fallbackMap,
         0,
         self.documentURLTransformer,
-        self.counterStore
+        self.counterStore,
       );
       self.instance = instance;
       instance.pref = self.pref;
@@ -270,9 +270,9 @@ export class TOCView implements Vgen.CustomRendererFactory {
         instance.layoutNextPage(page, null).then(() => {
           Array.from(
             page.container.querySelectorAll(
-              "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']"
-            )
-          ).forEach(bodyChildElem => {
+              "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']",
+            ),
+          ).forEach((bodyChildElem) => {
             bodyChildElem.setAttribute("aria-hidden", "true");
             bodyChildElem.setAttribute("hidden", "hidden");
           });

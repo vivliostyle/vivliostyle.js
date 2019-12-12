@@ -152,7 +152,7 @@ export function convertSpecialURL(url: string): string {
   let r: RegExpMatchArray;
   if (
     (r = /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
-      url
+      url,
     ))
   ) {
     // Convert GitHub URL to GitHub raw URL
@@ -161,21 +161,21 @@ export function convertSpecialURL(url: string): string {
     }`;
   } else if (
     (r = /^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/.exec(
-      url
+      url,
     ))
   ) {
     // Convert Aozorabunko (X)HTML URL to GitHub raw URL
     url = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
   } else if (
     (r = /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/.exec(
-      url
+      url,
     ))
   ) {
     // Convert Gist URL to Gist raw URL
     url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
   } else if (
     (r = /^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/.exec(
-      url
+      url,
     ))
   ) {
     // Convert JS Bin URL to JS Bin output URL
@@ -208,7 +208,7 @@ export enum NS {
   SVG = "http://www.w3.org/2000/svg",
   DC = "http://purl.org/dc/elements/1.1/",
   NCX = "http://www.daisy.org/z3986/2005/ncx/",
-  SSE = "http://example.com/sse" // temporary dummy namespace
+  SSE = "http://example.com/sse", // temporary dummy namespace
 }
 
 /**
@@ -313,9 +313,9 @@ export class PriorityQueue {
         if (this.queue[childIndex].compare(curr) > 0) {
           if (
             childIndex + 1 < size &&
-            this.queue[childIndex + 1].compare(this.queue[
-              childIndex
-            ] as Comparable) > 0
+            this.queue[childIndex + 1].compare(
+              this.queue[childIndex] as Comparable,
+            ) > 0
           ) {
             childIndex++;
           }
@@ -350,7 +350,8 @@ export function cssToJSProp(prefix: string, cssPropName: string): string {
     }
   }
   return (
-    prefix + cssPropName.replace(/-[a-z]/g, txt => txt.substr(1).toUpperCase())
+    prefix +
+    cssPropName.replace(/-[a-z]/g, (txt) => txt.substr(1).toUpperCase())
   );
 }
 
@@ -360,7 +361,7 @@ export const propNameMap = {};
 
 export function checkIfPropertySupported(
   prefix: string,
-  prop: string
+  prop: string,
 ): boolean {
   // Special case
   if (prop === "writing-mode") {
@@ -457,14 +458,14 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
 export function setCSSProperty(
   elem: Element,
   prop: string,
-  value: string
+  value: string,
 ): void {
   try {
     const prefixedPropertyNames = getPrefixedPropertyNames(prop);
     if (!prefixedPropertyNames) {
       return;
     }
-    prefixedPropertyNames.forEach(prefixed => {
+    prefixedPropertyNames.forEach((prefixed) => {
       if (prefixed === "-ms-writing-mode") {
         switch (value) {
           case "horizontal-tb":
@@ -496,12 +497,12 @@ export function setCSSProperty(
 export function getCSSProperty(
   elem: Element,
   prop: string,
-  opt_value?: string
+  opt_value?: string,
 ): string {
   try {
     const propertyNames = propNameMap[prop];
     return (elem as HTMLElement).style.getPropertyValue(
-      propertyNames ? propertyNames[0] : prop
+      propertyNames ? propertyNames[0] : prop,
     );
   } catch (err) {}
   return opt_value || "";
@@ -556,7 +557,7 @@ export function lightURLEncode(str: string): string {
 
 export function isLetter(ch: string): boolean {
   return !!ch.match(
-    /^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/
+    /^[a-zA-Z\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]$/,
   );
 }
 
@@ -610,7 +611,7 @@ export function assert(cond: boolean): void {
  */
 export function binarySearch(
   high: number,
-  good: (p1: number) => boolean
+  good: (p1: number) => boolean,
 ): number {
   let l = 0;
   let h = high;
@@ -680,7 +681,7 @@ export function appendBase64(sb: StringBuffer, data: string): void {
  */
 export function indexArray<T>(
   arr: T[],
-  key: (p1: T) => string | null
+  key: (p1: T) => string | null,
 ): { [key: string]: T } {
   const map: { [key: string]: T } = {};
   for (const v of arr) {
@@ -711,7 +712,7 @@ export function arrayToSet(arr: string[]): { [key: string]: boolean } {
  */
 export function multiIndexArray<T>(
   arr: T[],
-  key: (p1: T) => string | null
+  key: (p1: T) => string | null,
 ): { [key: string]: T[] } {
   const map: { [key: string]: T[] } = {};
   for (const v of arr) {
@@ -733,7 +734,7 @@ export function multiIndexArray<T>(
  */
 export function mapObj<P, R>(
   obj: { [key: string]: P },
-  fn: (p1: P, p2: string) => R
+  fn: (p1: P, p2: string) => R,
 ): { [key: string]: R } {
   const res: { [key: string]: R } = {};
   for (const n in obj) {
@@ -784,7 +785,7 @@ export class SimpleEventTarget {
   addEventListener(
     type: string,
     listener: EventListener,
-    capture?: boolean
+    capture?: boolean,
   ): void {
     if (capture) {
       return;
@@ -800,7 +801,7 @@ export class SimpleEventTarget {
   removeEventListener(
     type: string,
     listener: EventListener,
-    capture?: boolean
+    capture?: boolean,
   ): void {
     if (capture) {
       return;
@@ -927,7 +928,7 @@ export function checkInlineBlockJustificationBug(body: HTMLElement): boolean {
 export let hasSoftWrapOpportunityAfterHyphenBug: boolean | null = null;
 
 export function checkSoftWrapOpportunityAfterHyphenBug(
-  body: HTMLElement
+  body: HTMLElement,
 ): boolean {
   if (hasSoftWrapOpportunityAfterHyphenBug === null) {
     const doc = body.ownerDocument;

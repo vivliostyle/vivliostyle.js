@@ -33,21 +33,21 @@ import { PageFloats, Selectors, Vtree, XmlDoc } from "./types";
 
 export const delayedProps = {
   transform: true,
-  "transform-origin": true
+  "transform-origin": true,
 };
 
 export const delayedPropsIfRelativePositioned = {
   top: true,
   bottom: true,
   left: true,
-  right: true
+  right: true,
 };
 
 export class DelayedItem {
   constructor(
     public target: Element,
     public name: string,
-    public value: Css.Val
+    public value: Css.Val,
   ) {}
 }
 
@@ -88,12 +88,12 @@ export const actions = {
   },
   unmute: function(obj) {
     obj.muted = false;
-  }
+  },
 };
 
 export function makeListener(
   refs: Element[],
-  action: string
+  action: string,
 ): EventListener | null {
   const actionFn = actions[action];
   if (actionFn) {
@@ -136,7 +136,7 @@ export class Page extends Base.SimpleEventTarget {
 
   constructor(
     public readonly container: HTMLElement,
-    public readonly bleedBox: HTMLElement
+    public readonly bleedBox: HTMLElement,
   ) {
     super();
     const self = this;
@@ -154,7 +154,7 @@ export class Page extends Base.SimpleEventTarget {
           href,
           preventDefault() {
             e.preventDefault();
-          }
+          },
         };
         self.dispatchEvent(evt);
       }
@@ -192,7 +192,7 @@ export class Page extends Base.SimpleEventTarget {
     // Remove ID of elements which eventually did not fit in the page
     // (Some nodes may have been removed after registration if they did not fit
     // in the page)
-    Object.keys(this.elementsById).forEach(id => {
+    Object.keys(this.elementsById).forEach((id) => {
       const elems = this.elementsById[id];
       for (let i = 0; i < elems.length; ) {
         if (this.container.contains(elems[i])) {
@@ -276,7 +276,7 @@ export type Whitespace = Vtree.Whitespace;
  * @param whitespace The value of 'white-space' property
  */
 export function whitespaceFromPropertyValue(
-  whitespace: string
+  whitespace: string,
 ): Whitespace | null {
   switch (whitespace) {
     case "normal":
@@ -314,7 +314,7 @@ export class Flow {
 
   constructor(
     public readonly flowName: string,
-    public readonly parentFlowName: string | null
+    public readonly parentFlowName: string | null,
   ) {}
 }
 
@@ -330,7 +330,7 @@ export class FlowChunk {
     public exclusive: boolean,
     public repeated: boolean,
     public last: boolean,
-    public breakBefore: string | null
+    public breakBefore: string | null,
   ) {}
 
   isBetter(other: FlowChunk): boolean {
@@ -351,14 +351,14 @@ export type ClientRect = Vtree.ClientRect;
 
 export function clientrectIncreasingTop(
   r1: ClientRect,
-  r2: ClientRect
+  r2: ClientRect,
 ): number {
   return r1.top - r2.top;
 }
 
 export function clientrectDecreasingRight(
   r1: ClientRect,
-  r2: ClientRect
+  r2: ClientRect,
 ): number {
   return r2.right - r1.right;
 }
@@ -381,7 +381,7 @@ export type FormattingContext = Vtree.FormattingContext;
 
 export function eachAncestorFormattingContext(
   nodeContext: NodeContext,
-  callback: (p1: FormattingContext) => any
+  callback: (p1: FormattingContext) => any,
 ): void {
   if (!nodeContext) {
     return;
@@ -395,7 +395,7 @@ export type NodePositionStep = Vtree.NodePositionStep;
 
 export function isSameNodePositionStep(
   nps1: NodePositionStep,
-  nps2: NodePositionStep
+  nps2: NodePositionStep,
 ): boolean {
   if (nps1 === nps2) {
     return true;
@@ -416,7 +416,7 @@ export type NodePosition = Vtree.NodePosition;
 
 export function isSameNodePosition(
   np1: NodePosition | null,
-  np2: NodePosition | null
+  np2: NodePosition | null,
 ): boolean {
   if (np1 === np2) {
     return true;
@@ -447,19 +447,19 @@ export function newNodePositionFromNode(node: Node): NodePosition {
     nodeShadow: null,
     shadowSibling: null,
     formattingContext: null,
-    fragmentIndex: 0
+    fragmentIndex: 0,
   };
   return {
     steps: [step],
     offsetInNode: 0,
     after: false,
-    preprocessedTextContent: null
+    preprocessedTextContent: null,
   };
 }
 
 export function newNodePositionFromNodeContext(
   nodeContext: Vtree.NodeContext,
-  initialFragmentIndex: number | null
+  initialFragmentIndex: number | null,
 ): NodePosition {
   const step: NodePositionStep = {
     node: nodeContext.sourceNode,
@@ -471,19 +471,19 @@ export function newNodePositionFromNodeContext(
     fragmentIndex:
       initialFragmentIndex != null
         ? initialFragmentIndex
-        : nodeContext.fragmentIndex
+        : nodeContext.fragmentIndex,
   };
   return {
     steps: [step],
     offsetInNode: 0,
     after: false,
-    preprocessedTextContent: nodeContext.preprocessedTextContent
+    preprocessedTextContent: nodeContext.preprocessedTextContent,
   };
 }
 
 export function makeNodeContextFromNodePositionStep(
   step: NodePositionStep,
-  parent: Vtree.NodeContext
+  parent: Vtree.NodeContext,
 ): NodeContext {
   const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
   nodeContext.shadowType = step.shadowType;
@@ -513,7 +513,7 @@ export class ShadowContext implements Vtree.ShadowContext {
     public readonly parentShadow: ShadowContext,
     superShadow: ShadowContext,
     public readonly type: ShadowType,
-    public readonly styler: object
+    public readonly styler: object,
   ) {
     if (superShadow) {
       superShadow.subShadow = this;
@@ -535,7 +535,7 @@ export class ShadowContext implements Vtree.ShadowContext {
 
 export function isSameShadowContext(
   sc1: ShadowContext,
-  sc2: ShadowContext
+  sc2: ShadowContext,
 ): boolean {
   return sc1 === sc2 || (!!sc1 && !!sc2 && sc1.equals(sc2));
 }
@@ -547,7 +547,7 @@ export function isSameShadowContext(
 export class FirstPseudo implements Vtree.FirstPseudo {
   constructor(
     public readonly outer: FirstPseudo,
-    public readonly count: number
+    public readonly count: number,
   ) {}
 }
 
@@ -614,7 +614,7 @@ export class NodeContext implements Vtree.NodeContext {
   constructor(
     public sourceNode: Node,
     public parent: NodeContext,
-    public boxOffset: number
+    public boxOffset: number,
   ) {
     this.shadowType = ShadowType.NONE;
     this.shadowContext = parent ? parent.shadowContext : null;
@@ -750,7 +750,7 @@ export class NodeContext implements Vtree.NodeContext {
         ? this.shadowSibling.toNodePositionStep()
         : null,
       formattingContext: this.formattingContext,
-      fragmentIndex: this.fragmentIndex
+      fragmentIndex: this.fragmentIndex,
     };
   }
 
@@ -772,14 +772,14 @@ export class NodeContext implements Vtree.NodeContext {
     const actualOffsetInNode = this.preprocessedTextContent
       ? Diff.resolveOriginalIndex(
           this.preprocessedTextContent,
-          this.offsetInNode
+          this.offsetInNode,
         )
       : this.offsetInNode;
     return {
       steps,
       offsetInNode: actualOffsetInNode,
       after: this.after,
-      preprocessedTextContent: this.preprocessedTextContent
+      preprocessedTextContent: this.preprocessedTextContent,
     };
   }
 
@@ -873,7 +873,7 @@ export class ChunkPosition implements Vtree.ChunkPosition {
 export class FlowChunkPosition {
   constructor(
     public chunkPosition: ChunkPosition,
-    public readonly flowChunk: FlowChunk
+    public readonly flowChunk: FlowChunk,
   ) {}
 
   clone(): FlowChunkPosition {
@@ -977,7 +977,7 @@ export class LayoutPosition {
     for (const flowName of thisFlowNames) {
       if (
         !this.flowPositions[flowName].isSamePosition(
-          other.flowPositions[flowName]
+          other.flowPositions[flowName],
         )
       ) {
         return false;
@@ -1209,7 +1209,7 @@ export class Container implements Vtree.Container {
       offsetX,
       offsetY,
       offsetX + this.width,
-      offsetY + this.height
+      offsetY + this.height,
     );
   }
 
@@ -1223,7 +1223,7 @@ export class Container implements Vtree.Container {
       paddingX,
       paddingY,
       paddingX + paddingWidth,
-      paddingY + paddingHeight
+      paddingY + paddingHeight,
     );
   }
 
@@ -1235,7 +1235,7 @@ export class Container implements Vtree.Container {
       rect.y1,
       rect.x2 - rect.x1,
       rect.y2 - rect.y1,
-      context
+      context,
     );
   }
 
@@ -1249,7 +1249,7 @@ export class Container implements Vtree.Container {
       outerX,
       outerY,
       outerX + outerWidth,
-      outerY + outerHeight
+      outerY + outerHeight,
     );
   }
 }
@@ -1261,7 +1261,7 @@ export class ContentPropertyHandler extends Css.Visitor {
     public readonly elem: Element,
     public readonly context: Exprs.Context,
     public readonly rootContentValue: Css.Val,
-    public readonly exprContentListener: ExprContentListener
+    public readonly exprContentListener: ExprContentListener,
   ) {
     super();
   }
@@ -1308,7 +1308,7 @@ export class ContentPropertyHandler extends Css.Visitor {
         val = CssParse.parseValue(
           ex.scope,
           new CssTok.Tokenizer(val, null),
-          ""
+          "",
         ).stringValue();
       }
       Asserts.assert(this.elem.ownerDocument);

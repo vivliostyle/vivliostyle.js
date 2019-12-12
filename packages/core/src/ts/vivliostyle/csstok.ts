@@ -39,7 +39,7 @@ export function escapeParseSingle(str: string): string {
     // non-BMP characters: convert to a surrogate pair
     return String.fromCharCode(
       55296 | ((code >> 10) & 1023),
-      56320 | (code & 1023)
+      56320 | (code & 1023),
     );
   }
 
@@ -50,7 +50,7 @@ export function escapeParseSingle(str: string): string {
 export function escapeParse(str: string): string {
   return str.replace(
     /\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
-    escapeParseSingle
+    escapeParseSingle,
   );
 }
 
@@ -109,7 +109,7 @@ export enum TokenType {
   EQ_EQ,
   COL_COL,
   INVALID,
-  LAST = 51
+  LAST = 51,
 }
 
 export class Token {
@@ -210,7 +210,7 @@ export enum Action {
   COL_COL,
   TOCLASS,
   CHKSP,
-  EOF
+  EOF,
 }
 
 export function makeActions(def: Action, spec: Action[]): Action[] {
@@ -357,7 +357,7 @@ export const actionsNormal: Action[] = [
   Action.BAR,
   Action.C_BRC,
   Action.TILDE,
-  Action.INVALID // 0x78-0x7F
+  Action.INVALID, // 0x78-0x7F
 ];
 
 actionsNormal[NaN] = Action.EOF;
@@ -493,7 +493,7 @@ export const actionsIdent: Action[] = [
   Action.ENDIDNT,
   Action.ENDIDNT,
   Action.ENDIDNT,
-  Action.ENDIDNT // 0x78-0x7F
+  Action.ENDIDNT, // 0x78-0x7F
 ];
 
 actionsIdent[NaN] = Action.ENDIDNT;
@@ -629,7 +629,7 @@ export const actionsNumOrClass: Action[] = [
   Action.INVALID,
   Action.INVALID,
   Action.INVALID,
-  Action.INVALID // 0x78-0x7F
+  Action.INVALID, // 0x78-0x7F
 ];
 
 actionsIdent[NaN] = Action.ENDIDNT;
@@ -765,7 +765,7 @@ export const actionsMinus: Action[] = [
   Action.END,
   Action.END,
   Action.END,
-  Action.END // 0x78-0x7F
+  Action.END, // 0x78-0x7F
 ];
 
 actionsMinus[NaN] = Action.END;
@@ -901,7 +901,7 @@ export const actionsIdentEsc: Action[] = [
   Action.ENDIDES,
   Action.ENDIDES,
   Action.ENDIDES,
-  Action.ENDIDES // 0x78-0x7F
+  Action.ENDIDES, // 0x78-0x7F
 ];
 
 actionsIdentEsc[NaN] = Action.ENDIDES;
@@ -1037,7 +1037,7 @@ export const actionsInt: Action[] = [
   Action.ENDINT,
   Action.ENDINT,
   Action.ENDINT,
-  Action.ENDINT // 0x78-0x7F
+  Action.ENDINT, // 0x78-0x7F
 ];
 
 actionsInt[NaN] = Action.ENDINT;
@@ -1173,70 +1173,70 @@ export const actionsNumber: Action[] = [
   Action.ENDNUM,
   Action.ENDNUM,
   Action.ENDNUM,
-  Action.ENDNUM // 0x78-0x7F
+  Action.ENDNUM, // 0x78-0x7F
 ];
 
 actionsNumber[NaN] = Action.ENDNUM;
 
 export const actionsCheckEq: Action[] = makeActions(Action.END, [
   61 /*=*/,
-  Action.EQTAIL
+  Action.EQTAIL,
 ]);
 
 export const actionsColon: Action[] = makeActions(Action.END, [
   58 /*:*/,
-  Action.COL_COL
+  Action.COL_COL,
 ]);
 
 export const actionsBar: Action[] = makeActions(Action.END, [
   61 /*=*/,
   Action.EQTAIL,
   124 /*|*/,
-  Action.BAR_BAR
+  Action.BAR_BAR,
 ]);
 
 export const actionsAmp: Action[] = makeActions(Action.END, [
   38 /*&*/,
-  Action.AMP_AMP
+  Action.AMP_AMP,
 ]);
 
 export const actionsSlash: Action[] = makeActions(Action.END, [
   42 /* * */,
-  Action.COMMENT
+  Action.COMMENT,
 ]);
 
 export const actionsComment: Action[] = makeActions(Action.CONT, [
   42 /* * */,
-  Action.COMMST
+  Action.COMMST,
 ]);
 
 export const actionsCommentStar: Action[] = makeActions(Action.COMMENT, [
   42 /* * */,
   Action.COMMST,
   47 /* / */,
-  Action.ENDNOTK
+  Action.ENDNOTK,
 ]);
 
 export const actionsMinusMinus: Action[] = makeActions(Action.KILL1, [
   62 /* > */,
-  Action.ENDNOTK
+  Action.ENDNOTK,
 ]);
 
 export const actionsLt: Action[] = makeActions(Action.END, [
   61 /*=*/,
   Action.EQTAIL,
   33 /*!*/,
-  Action.LT_BG
+  Action.LT_BG,
 ]);
 
 export const actionsLtBang: Action[] = makeActions(Action.KILL1, [
   45 /*-*/,
-  Action.LT_BG_M
+  Action.LT_BG_M,
 ]);
 
 export const actionsLtBangMinus: Action[] = makeActions(Action.KILL2, [
   45 /*-*/,
-  Action.ENDNOTK
+  Action.ENDNOTK,
 ]);
 
 export const actionsIdentEscChr: Action[] = makeActions(Action.IDESCH, [
@@ -1247,7 +1247,7 @@ export const actionsIdentEscChr: Action[] = makeActions(Action.IDESCH, [
   13 /*CR*/,
   Action.INVALID,
   32 /*sp*/,
-  Action.INVALID
+  Action.INVALID,
 ]);
 
 export const actionsStr1: Action[] = makeActions(Action.CONT, [
@@ -1258,7 +1258,7 @@ export const actionsStr1: Action[] = makeActions(Action.CONT, [
   13 /*CR*/,
   Action.INVALID,
   92 /*\*/,
-  Action.STR1ESC
+  Action.STR1ESC,
 ]);
 
 export const actionsStr2: Action[] = makeActions(Action.CONT, [
@@ -1269,7 +1269,7 @@ export const actionsStr2: Action[] = makeActions(Action.CONT, [
   13 /*CR*/,
   Action.INVALID,
   92 /*\*/,
-  Action.STR2ESC
+  Action.STR2ESC,
 ]);
 
 export const actionsStr1Esc: Action[] = makeActions(Action.CONT, [
@@ -1280,7 +1280,7 @@ export const actionsStr1Esc: Action[] = makeActions(Action.CONT, [
   13 /*CR*/,
   Action.CHKPOSN,
   92 /*\*/,
-  Action.STR1ESC
+  Action.STR1ESC,
 ]);
 
 export const actionsStr2Esc: Action[] = makeActions(Action.CONT, [
@@ -1291,7 +1291,7 @@ export const actionsStr2Esc: Action[] = makeActions(Action.CONT, [
   13 /*CR*/,
   Action.CHKPOSN,
   92 /*\*/,
-  Action.STR2ESC
+  Action.STR2ESC,
 ]);
 
 export const actionsURL: Action[] = makeActions(Action.URL, [
@@ -1308,7 +1308,7 @@ export const actionsURL: Action[] = makeActions(Action.URL, [
   10 /*LF*/,
   Action.CONT,
   13 /*CR*/,
-  Action.CONT
+  Action.CONT,
 ]);
 
 export const actionsURLInside: Action[] = makeActions(Action.CONT, [
@@ -1335,7 +1335,7 @@ export const actionsURLInside: Action[] = makeActions(Action.CONT, [
   125 /*}*/,
   Action.INVALID,
   NaN,
-  Action.ENDURL
+  Action.ENDURL,
 ]);
 
 export const actionsURLInside1: Action[] = makeActions(Action.CONT, [
@@ -1348,7 +1348,7 @@ export const actionsURLInside1: Action[] = makeActions(Action.CONT, [
   92 /*\*/,
   Action.URLESC,
   NaN,
-  Action.ENDURL
+  Action.ENDURL,
 ]);
 
 export const actionsURLInside2: Action[] = makeActions(Action.CONT, [
@@ -1361,7 +1361,7 @@ export const actionsURLInside2: Action[] = makeActions(Action.CONT, [
   92 /*\*/,
   Action.URLESC,
   NaN,
-  Action.ENDURL
+  Action.ENDURL,
 ]);
 
 export const actionsURLTail: Action[] = makeActions(Action.INVALID, [
@@ -1374,7 +1374,7 @@ export const actionsURLTail: Action[] = makeActions(Action.INVALID, [
   32 /*sp*/,
   Action.CONT,
   41 /*)*/,
-  Action.FINURL
+  Action.FINURL,
 ]);
 
 export const INITIAL_INDEX_MASK = 15;

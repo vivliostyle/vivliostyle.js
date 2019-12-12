@@ -19,25 +19,25 @@
 // (function() {
 //     var domUtil = vivliostyle.test.util.dom;
 
-    var dummyElements = [];
+var dummyElements = [];
 
-    afterEach(function() {
-        var e;
-        while (e = dummyElements.shift()) {
-            if (e.parentNode) {
-                e.parentNode.removeChild(e);
-            }
-        }
-    });
+afterEach(function() {
+  var e;
+  while ((e = dummyElements.shift())) {
+    if (e.parentNode) {
+      e.parentNode.removeChild(e);
+    }
+  }
+});
 
-    export const getWindow = function() {
-        return window;
-    };
+export const getWindow = function() {
+  return window;
+};
 
-    export const getDummyContainer = function() {
-        var e = document.createElement("div");
-        document.body.appendChild(e);
-        dummyElements.push(e);
-        return e;
-    };
+export const getDummyContainer = function() {
+  var e = document.createElement("div");
+  document.body.appendChild(e);
+  dummyElements.push(e);
+  return e;
+};
 // })();

@@ -1,87 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>float-min-wrap-block</title>
-  <style>
-    @page {
-      size: 220px;
-      margin: 10px;
-      @bottom-center {
-        font-size: 8px;
-        content: counter(page);
+  <head>
+    <meta charset="UTF-8" />
+    <title>float-min-wrap-block</title>
+    <style>
+      @page {
+        size: 220px;
+        margin: 10px;
+        @bottom-center {
+          font-size: 8px;
+          content: counter(page);
+        }
       }
-    }
-    :root {
-      font-size: 16px;
-      line-height: 20px;
-      writing-mode: vertical-rl;
-    }
-    body, p {
-      margin: 0;
-    }
-    section {
-      break-after: page;
-    }
-    .float {
-      float-reference: page;
-      box-sizing: border-box;
-      border: blue solid 2px;
-      width: 160px;
-      height: 100%;
-    }
-    .block-start {
-      float: block-start;
-      float-min-wrap-block: 2.6em;
-    }
-    .block-end {
-      float: block-end;
-      float-min-wrap-block: 21%;
-    }
-  </style>
-</head>
-<body>
-<section>
-  <div class="float block-start">This block-start float should be on the page 2.</div>
-  <p>This paragraph should be on the page 1.</p>
-  <p>This paragraph should be on the page 1.</p>
-  <p>This paragraph should be on the page 1.</p>
-  <p>This paragraph should be on the page 1.</p>
-  <p>This paragraph should be on the page 1.</p>
-  <p>This paragraph should be on the page 3.</p>
-</section>
+      :root {
+        font-size: 16px;
+        line-height: 20px;
+        writing-mode: vertical-rl;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      section {
+        break-after: page;
+      }
+      .float {
+        float-reference: page;
+        box-sizing: border-box;
+        border: blue solid 2px;
+        width: 160px;
+        height: 100%;
+      }
+      .block-start {
+        float: block-start;
+        float-min-wrap-block: 2.6em;
+      }
+      .block-end {
+        float: block-end;
+        float-min-wrap-block: 21%;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="float block-start">
+        This block-start float should be on the page 2.
+      </div>
+      <p>This paragraph should be on the page 1.</p>
+      <p>This paragraph should be on the page 1.</p>
+      <p>This paragraph should be on the page 1.</p>
+      <p>This paragraph should be on the page 1.</p>
+      <p>This paragraph should be on the page 1.</p>
+      <p>This paragraph should be on the page 3.</p>
+    </section>
 
-<section>
-  <div class="float block-end">This block-end float should be on the page 5.</div>
-  <p>This paragraph should be on the page 4.</p>
-  <p>This paragraph should be on the page 4.</p>
-  <p>This paragraph should be on the page 4.</p>
-  <p>This paragraph should be on the page 4.</p>
-  <p>This paragraph should be on the page 4.</p>
-  <p>This paragraph should be on the page 6.</p>
-</section>
+    <section>
+      <div class="float block-end">
+        This block-end float should be on the page 5.
+      </div>
+      <p>This paragraph should be on the page 4.</p>
+      <p>This paragraph should be on the page 4.</p>
+      <p>This paragraph should be on the page 4.</p>
+      <p>This paragraph should be on the page 4.</p>
+      <p>This paragraph should be on the page 4.</p>
+      <p>This paragraph should be on the page 6.</p>
+    </section>
 
-<section>
-  <p>This paragraph should be on the page 7.</p>
-  <p>This paragraph should be on the page 7.</p>
-  <p>This paragraph should be on the page 7.</p>
-  <p>This paragraph should be on the page 7.</p>
-  <div class="float block-start" style="width: 80px">This block-start float should be on the page 8.</div>
-  <div class="float block-end" style="width: 80px">This block-end float should be on the page 8.</div>
-  <p>This paragraph should be on the page 7.</p>
-  <p>This paragraph should be on the page 9.</p>
-</section>
+    <section>
+      <p>This paragraph should be on the page 7.</p>
+      <p>This paragraph should be on the page 7.</p>
+      <p>This paragraph should be on the page 7.</p>
+      <p>This paragraph should be on the page 7.</p>
+      <div class="float block-start" style="width: 80px">
+        This block-start float should be on the page 8.
+      </div>
+      <div class="float block-end" style="width: 80px">
+        This block-end float should be on the page 8.
+      </div>
+      <p>This paragraph should be on the page 7.</p>
+      <p>This paragraph should be on the page 9.</p>
+    </section>
 
-<section>
-  <p>This paragraph should be on the page 10.</p>
-  <p>This paragraph should be on the page 10.</p>
-  <p>This paragraph should be on the page 10.</p>
-  <p>This paragraph should be on the page 10.</p>
-  <div class="float block-start" style="width: 75px">This block-start float should be on the page 11.</div>
-  <div class="float block-end" style="width: 75px">This block-end float should be on the page 11.</div>
-  <p>This paragraph should be on the page 10.</p>
-  <p>This paragraph should be on the page 11.</p>
-  <p>This paragraph should be on the page 12.</p>
-</section>
-</body>
+    <section>
+      <p>This paragraph should be on the page 10.</p>
+      <p>This paragraph should be on the page 10.</p>
+      <p>This paragraph should be on the page 10.</p>
+      <p>This paragraph should be on the page 10.</p>
+      <div class="float block-start" style="width: 75px">
+        This block-start float should be on the page 11.
+      </div>
+      <div class="float block-end" style="width: 75px">
+        This block-end float should be on the page 11.
+      </div>
+      <p>This paragraph should be on the page 10.</p>
+      <p>This paragraph should be on the page 11.</p>
+      <p>This paragraph should be on the page 12.</p>
+    </section>
+  </body>
 </html>

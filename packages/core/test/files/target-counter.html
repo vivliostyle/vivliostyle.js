@@ -1,243 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>target-counter</title>
     <style>
-        @page {
-            size: 460px;
-            margin: 50px;
-            counter-increment: foo bar baz bazz bazzz qux;
-            @top-center {
-                font-size: 10px;
-                content: "Page " counter(page);
-            }
-            @bottom-center {
-                font-size: 10px;
-                content: "baz: " counter(baz, upper-roman) ", bazz: " counter(bazz, upper-roman) ", bazzz: " counter(bazzz, upper-roman) ", qux: " counter(qux, upper-roman);
-            }
+      @page {
+        size: 460px;
+        margin: 50px;
+        counter-increment: foo bar baz bazz bazzz qux;
+        @top-center {
+          font-size: 10px;
+          content: "Page " counter(page);
         }
-        @page:first {
-            counter-reset: baz 992 bazz 990 bazzz 988 qux 984;
+        @bottom-center {
+          font-size: 10px;
+          content: "baz: " counter(baz, upper-roman) ", bazz: "
+            counter(bazz, upper-roman) ", bazzz: " counter(bazzz, upper-roman)
+            ", qux: " counter(qux, upper-roman);
         }
+      }
+      @page:first {
+        counter-reset: baz 992 bazz 990 bazzz 988 qux 984;
+      }
 
-        * {
-            margin: 0;
-        }
-        html {
-            font-size: 16px;
-            line-height: 24px;
-            font-family: "Times New Roman", serif;
-            widows: 1;
-            orphans: 1;
-        }
-        section {
-            page-break-before: always;
-        }
+      * {
+        margin: 0;
+      }
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: "Times New Roman", serif;
+        widows: 1;
+        orphans: 1;
+      }
+      section {
+        page-break-before: always;
+      }
 
-        .ref-page::after {
-            content: target-counter(attr(data-href, url), page);
-        }
+      .ref-page::after {
+        content: target-counter(attr(data-href, url), page);
+      }
 
-        .foo {
-            counter-increment: foo;
-        }
-        .foo::after {
-            content: counter(foo);
-        }
-        .foofoo:first-child {
-            counter-reset: foo;
-        }
-        .foofoo {
-            counter-increment: foo;
-        }
-        .foofoo::after {
-            content: counters(foo, "-");
-        }
-        .ref-foo::before {
-            content: target-counter(url(#foo-target), foo);
-        }
-        .ref-foo::after {
-            content: target-counter("#foo-target", foo, lower-roman);
-        }
-        .ref-foofoo::before {
-            content: target-counters(url("#foofoo-target"), foo, "-");
-        }
-        .ref-foofoo::after {
-            content: target-counters("#foofoo-target", foo, "-", lower-roman);
-        }
-        .ref-foo-page::before {
-            content: target-counter(url(#foo-target), page);
-        }
-        .ref-foo-page::after {
-            content: target-counter("#foo-target", page, lower-roman);
-        }
+      .foo {
+        counter-increment: foo;
+      }
+      .foo::after {
+        content: counter(foo);
+      }
+      .foofoo:first-child {
+        counter-reset: foo;
+      }
+      .foofoo {
+        counter-increment: foo;
+      }
+      .foofoo::after {
+        content: counters(foo, "-");
+      }
+      .ref-foo::before {
+        content: target-counter(url(#foo-target), foo);
+      }
+      .ref-foo::after {
+        content: target-counter("#foo-target", foo, lower-roman);
+      }
+      .ref-foofoo::before {
+        content: target-counters(url("#foofoo-target"), foo, "-");
+      }
+      .ref-foofoo::after {
+        content: target-counters("#foofoo-target", foo, "-", lower-roman);
+      }
+      .ref-foo-page::before {
+        content: target-counter(url(#foo-target), page);
+      }
+      .ref-foo-page::after {
+        content: target-counter("#foo-target", page, lower-roman);
+      }
 
-        .bar {
-            counter-increment: bar;
-        }
-        .bar::after {
-            content: counter(bar);
-        }
-        .barbar:first-child {
-            counter-reset: bar;
-        }
-        .barbar {
-            counter-increment: bar;
-        }
-        .barbar::after {
-            content: counters(bar, "-");
-        }
-        [data-ref-bar]::before {
-            content: target-counter(attr(data-ref-bar url), bar);
-        }
-        [data-ref-bar]::after {
-            content: target-counter(attr(data-ref-bar), bar, lower-roman);
-        }
-        [data-ref-barbar]::before {
-            content: target-counters(attr(data-ref-barbar url), bar, "-");
-        }
-        [data-ref-barbar]::after {
-            content: target-counters(attr(data-ref-barbar), bar, "-", lower-roman);
-        }
-        [data-ref-bar-page]::before {
-            content: target-counter(attr(data-ref-bar-page url), page);
-        }
-        [data-ref-bar-page]::after {
-            content: target-counter(attr(data-ref-bar-page), page, lower-roman);
-        }
+      .bar {
+        counter-increment: bar;
+      }
+      .bar::after {
+        content: counter(bar);
+      }
+      .barbar:first-child {
+        counter-reset: bar;
+      }
+      .barbar {
+        counter-increment: bar;
+      }
+      .barbar::after {
+        content: counters(bar, "-");
+      }
+      [data-ref-bar]::before {
+        content: target-counter(attr(data-ref-bar url), bar);
+      }
+      [data-ref-bar]::after {
+        content: target-counter(attr(data-ref-bar), bar, lower-roman);
+      }
+      [data-ref-barbar]::before {
+        content: target-counters(attr(data-ref-barbar url), bar, "-");
+      }
+      [data-ref-barbar]::after {
+        content: target-counters(attr(data-ref-barbar), bar, "-", lower-roman);
+      }
+      [data-ref-bar-page]::before {
+        content: target-counter(attr(data-ref-bar-page url), page);
+      }
+      [data-ref-bar-page]::after {
+        content: target-counter(attr(data-ref-bar-page), page, lower-roman);
+      }
 
-        .baz {
-            margin-top: 330px;
-            text-indent: 60px;
-        }
-        .ref-baz::before {
-            content: target-counter(attr(data-href), baz, upper-roman);
-        }
-        #baz1-target, #baz2-target, #baz3-target {
-            border-left: 1px solid blue;
-        }
+      .baz {
+        margin-top: 330px;
+        text-indent: 60px;
+      }
+      .ref-baz::before {
+        content: target-counter(attr(data-href), baz, upper-roman);
+      }
+      #baz1-target,
+      #baz2-target,
+      #baz3-target {
+        border-left: 1px solid blue;
+      }
 
-        .bazz {
-            margin-top: 305px;
-        }
-        .ref-bazz {
-            margin-right: 80px;
-        }
-        .ref-bazz::before {
-            content: target-counter(attr(data-href), bazz, upper-roman);
-        }
-        #bazz-target {
-            border: 1px solid blue;
-        }
+      .bazz {
+        margin-top: 305px;
+      }
+      .ref-bazz {
+        margin-right: 80px;
+      }
+      .ref-bazz::before {
+        content: target-counter(attr(data-href), bazz, upper-roman);
+      }
+      #bazz-target {
+        border: 1px solid blue;
+      }
 
-        .bazzz {
-            margin-top: 310px;
-            text-indent: 60px;
-        }
-        .ref-bazzz::before {
-            content: target-counter(attr(data-href), bazzz, upper-roman);
-        }
-        .bazzz-target-container {
-            float: left;
-            width: 170px;
-        }
-        #bazzz-target {
-            border-left: 1px solid blue;
-        }
+      .bazzz {
+        margin-top: 310px;
+        text-indent: 60px;
+      }
+      .ref-bazzz::before {
+        content: target-counter(attr(data-href), bazzz, upper-roman);
+      }
+      .bazzz-target-container {
+        float: left;
+        width: 170px;
+      }
+      #bazzz-target {
+        border-left: 1px solid blue;
+      }
 
-        .qux {
-            margin-top: 330px;
-            text-indent: 120px;
-        }
-        .ref-qux::before {
-            content: target-counter(attr(data-href), qux, upper-roman);
-        }
-        #qux-target, #quxx-target {
-            border: 1px solid blue;
-        }
+      .qux {
+        margin-top: 330px;
+        text-indent: 120px;
+      }
+      .ref-qux::before {
+        content: target-counter(attr(data-href), qux, upper-roman);
+      }
+      #qux-target,
+      #quxx-target {
+        border: 1px solid blue;
+      }
 
-        #no-reffed-id, #xxx2-target {
-            margin-top: 400px;
-        }
+      #no-reffed-id,
+      #xxx2-target {
+        margin-top: 400px;
+      }
     </style>
-</head>
-<body>
-<section>
-    <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
-    <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-    <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
-    <p class="foo">foo=</p>
-    <p class="foo">foo=</p>
-    <p class="foo" id="foo-target">(#foo-target) foo=</p>
-    <p class="foo"><span class="foofoo">foos=</span>, <span class="foofoo" id="foofoo-target">(#foofoo-target) foos=</span>, foo=</p>
-    <p class="foo">foo=</p>
-    <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
-    <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-    <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
-    <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-    <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
-    <p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
-</section>
+  </head>
+  <body>
+    <section>
+      <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+      <p>
+        'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span>
+      </p>
+      <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+      <p class="foo">foo=</p>
+      <p class="foo">foo=</p>
+      <p class="foo" id="foo-target">(#foo-target) foo=</p>
+      <p class="foo">
+        <span class="foofoo">foos=</span>,
+        <span class="foofoo" id="foofoo-target">(#foofoo-target) foos=</span>,
+        foo=
+      </p>
+      <p class="foo">foo=</p>
+      <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+      <p>
+        'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span>
+      </p>
+      <p>
+        'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span>
+      </p>
+      <p>
+        'bar' values of #barbar-target =
+        <span data-ref-barbar="#barbar-target"> = </span>
+      </p>
+      <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+      <p>
+        #bar-target is on page <span data-ref-bar-page="#bar-target"> = </span>
+      </p>
+    </section>
 
-<section>
-    <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
-    <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-    <p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
-    <p class="bar">bar=</p>
-    <p class="bar">bar=</p>
-    <p class="bar" id="bar-target">(#bar-target) bar=</p>
-    <p class="bar"><span class="barbar">bars=</span>, <span class="barbar" id="barbar-target">(#barbar-target) bars=</span>, bar=</p>
-    <p class="bar">bar=</p>
-    <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
-    <p>'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span></p>
-    <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span></p>
-    <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"> = </span></p>
-    <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
-    <p>#bar-target is on page <span data-ref-bar-page="#bar-target"> = </span></p>
-</section>
+    <section>
+      <p>
+        'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span>
+      </p>
+      <p>
+        'bar' values of #barbar-target =
+        <span data-ref-barbar="#barbar-target"> = </span>
+      </p>
+      <p>
+        #bar-target is on page <span data-ref-bar-page="#bar-target"> = </span>
+      </p>
+      <p class="bar">bar=</p>
+      <p class="bar">bar=</p>
+      <p class="bar" id="bar-target">(#bar-target) bar=</p>
+      <p class="bar">
+        <span class="barbar">bars=</span>,
+        <span class="barbar" id="barbar-target">(#barbar-target) bars=</span>,
+        bar=
+      </p>
+      <p class="bar">bar=</p>
+      <p>'foo' value of #foo-target = <span class="ref-foo"> = </span></p>
+      <p>
+        'foo' values of #foofoo-target = <span class="ref-foofoo"> = </span>
+      </p>
+      <p>
+        'bar' value of #bar-target = <span data-ref-bar="#bar-target"> = </span>
+      </p>
+      <p>
+        'bar' values of #barbar-target =
+        <span data-ref-barbar="#barbar-target"> = </span>
+      </p>
+      <p>#foo-target is on page <span class="ref-foo-page"> = </span></p>
+      <p>
+        #bar-target is on page <span data-ref-bar-page="#bar-target"> = </span>
+      </p>
+    </section>
 
-<section>
-    <p class="baz">#baz1-target is on baz <span class="ref-baz" data-href="#baz1-target"></span> This sentence contains #baz1-target → <span id="baz1-target"></span> inside it. The previous sentence should be "This sentence contains #baz1-target → inside it." </p>
-</section>
+    <section>
+      <p class="baz">
+        #baz1-target is on baz
+        <span class="ref-baz" data-href="#baz1-target"></span> This sentence
+        contains #baz1-target → <span id="baz1-target"></span> inside it. The
+        previous sentence should be "This sentence contains #baz1-target →
+        inside it."
+      </p>
+    </section>
 
-<section>
-    <p class="baz">#baz2-target is on baz <span class="ref-baz" data-href="#baz2-target"></span> #baz2-target → <span id="baz2-target"></span> This sentence should be right after #baz2-target. The previous sentence should be "This sentence should be right after #baz2-target." </p>
-</section>
+    <section>
+      <p class="baz">
+        #baz2-target is on baz
+        <span class="ref-baz" data-href="#baz2-target"></span> #baz2-target →
+        <span id="baz2-target"></span> This sentence should be right after
+        #baz2-target. The previous sentence should be "This sentence should be
+        right after #baz2-target."
+      </p>
+    </section>
 
-<section>
-    <p class="baz">#baz3-target is on baz <span class="ref-baz" data-href="#baz3-target"></span> #baz3-target → <span id="baz3-target"></span> This sentence should be right after #baz3-target. The previous sentence should be "This sentence should be right after #baz3-target." </p>
-</section>
+    <section>
+      <p class="baz">
+        #baz3-target is on baz
+        <span class="ref-baz" data-href="#baz3-target"></span> #baz3-target →
+        <span id="baz3-target"></span> This sentence should be right after
+        #baz3-target. The previous sentence should be "This sentence should be
+        right after #baz3-target."
+      </p>
+    </section>
 
-<section>
-    <p class="bazz">#bazz-target is on bazz <span class="ref-bazz" data-href="#bazz-target"></span> #bazz-target ↓</p>
-    <div id="bazz-target">This sentence should be inside #bazz-target. The previous sentence should be "This sentence should be inside #bazz-target."</div>
-</section>
+    <section>
+      <p class="bazz">
+        #bazz-target is on bazz
+        <span class="ref-bazz" data-href="#bazz-target"></span> #bazz-target ↓
+      </p>
+      <div id="bazz-target">
+        This sentence should be inside #bazz-target. The previous sentence
+        should be "This sentence should be inside #bazz-target."
+      </div>
+    </section>
 
-<section>
-    <p class="bazzz">#bazzz-target is on bazzz <span class="ref-bazzz" data-href="#bazzz-target"></span> #bazzz-target ↓</p>
-    <div class="bazzz-target-container"><span id="bazzz-target">This is #bazzz-target.</span></div>
-</section>
+    <section>
+      <p class="bazzz">
+        #bazzz-target is on bazzz
+        <span class="ref-bazzz" data-href="#bazzz-target"></span> #bazzz-target
+        ↓
+      </p>
+      <div class="bazzz-target-container">
+        <span id="bazzz-target">This is #bazzz-target.</span>
+      </div>
+    </section>
 
-<section>
-    <p class="qux">#quxx-target is on qux <span class="ref-qux" data-href="#quxx-target"></span> <span id="qux-target">#qux-target</span> Blah blah blah blah blah.</p>
-</section>
+    <section>
+      <p class="qux">
+        #quxx-target is on qux
+        <span class="ref-qux" data-href="#quxx-target"></span>
+        <span id="qux-target">#qux-target</span> Blah blah blah blah blah.
+      </p>
+    </section>
 
-<section>
-    <p>#qux-target is on qux <span class="ref-qux" data-href="#qux-target"></span>. <span id="quxx-target">quxx-target</span></p>
-</section>
+    <section>
+      <p>
+        #qux-target is on qux
+        <span class="ref-qux" data-href="#qux-target"></span>.
+        <span id="quxx-target">quxx-target</span>
+      </p>
+    </section>
 
-<section>
-    <p>#xxx1-target is on page <span class="ref-page" data-href="#xxx1-target"></span>. ← This reference should be "page 17".</p>
-    <p id="no-reffed-id">no-reffed-id</p>
-    <p>#no-reffed-id is on this page (page 17). <span id="xxx1-target">xxx1-target</span></p>
-</section>
+    <section>
+      <p>
+        #xxx1-target is on page
+        <span class="ref-page" data-href="#xxx1-target"></span>. ← This
+        reference should be "page 17".
+      </p>
+      <p id="no-reffed-id">no-reffed-id</p>
+      <p>
+        #no-reffed-id is on this page (page 17).
+        <span id="xxx1-target">xxx1-target</span>
+      </p>
+    </section>
 
-<section>
-    <p>#xxx2-target is on page <span class="ref-page" data-href="#xxx2-target"></span>. ← This reference should be "page 19".</p>
-    <p>#xxx3-target is on page <span class="ref-page" data-href="#xxx3-target"></span>. ← This reference should be "page 19".</p>
-    <p id="xxx2-target">xxx2-target</p>
-    <p>#xxx2-target is on this page (page 19). <span id="xxx3-target">xxx3-target</span></p>
-</section>
-</body>
+    <section>
+      <p>
+        #xxx2-target is on page
+        <span class="ref-page" data-href="#xxx2-target"></span>. ← This
+        reference should be "page 19".
+      </p>
+      <p>
+        #xxx3-target is on page
+        <span class="ref-page" data-href="#xxx3-target"></span>. ← This
+        reference should be "page 19".
+      </p>
+      <p id="xxx2-target">xxx2-target</p>
+      <p>
+        #xxx2-target is on this page (page 19).
+        <span id="xxx3-target">xxx3-target</span>
+      </p>
+    </section>
+  </body>
 </html>

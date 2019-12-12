@@ -5,14 +5,14 @@
   "scripts": {
     "build": "gulp build && NODE_ENV=production webpack",
     "build-dev": "gulp build-dev && NODE_ENV=development webpack",
-    "format": "prettier --write {*.*,src/{*.*,**/*.*,**/**/*.*}}",
-    "lint": "yarn lint-scripts && yarn lint-styles",
-    "lint-scripts": "eslint src/ts --ext .ts",
-    "lint-styles": "stylelint src/scss/{*.*,**/*.*}",
+    "dev": "gulp serve-dev",
+    "format": "prettier --write \"{src,test,scripts}/**/*.js\"",
+    "lint": "run-p lint:*",
+    "lint:scripts": "eslint src/ts --ext .ts",
+    "lint:styles": "stylelint src/scss/{*.*,**/*.*}",
     "serve": "gulp serve",
-    "serve-dev": "gulp serve-dev",
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
-    "test-local": "NODE_ENV=development gulp test-local",
+    "test": "NODE_ENV=development gulp test-local",
     "test-sauce": "NODE_ENV=development gulp test-sauce"
   },
   "dependencies": {

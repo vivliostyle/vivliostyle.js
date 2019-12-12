@@ -1,156 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Forbid text around fragmented page floats</title>
-  <style>
-    @page {
-      size: 400px 300px;
-    }
-    @-epubx-page-template {
-      @-epubx-page-master {
-        @-epubx-partition {
-          left: 5px;
-          bottom: 0;
-          height: 15px;
-          width: 20px;
-          content: counter(page);
-          font-size: 10px;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Forbid text around fragmented page floats</title>
+    <style>
+      @page {
+        size: 400px 300px;
+      }
+      @-epubx-page-template {
+        @-epubx-page-master {
+          @-epubx-partition {
+            left: 5px;
+            bottom: 0;
+            height: 15px;
+            width: 20px;
+            content: counter(page);
+            font-size: 10px;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: running-footer;
+            right: 5px;
+            bottom: 0;
+            height: 20px;
+            width: 150px;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            top: 20px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            column-count: 3;
+            column-gap: 10px;
+          }
         }
-        @-epubx-partition {
-          -epubx-flow-from: running-footer;
-          right: 5px;
-          bottom: 0;
-          height: 20px;
-          width: 150px;
-        }
-        @-epubx-partition {
-          -epubx-flow-from: body;
-          top: 20px;
-          bottom: 20px;
-          left: 20px;
-          right: 20px;
-          column-count: 3;
-          column-gap: 10px;
+        .footer {
+          -epubx-flow-into: running-footer;
+          -epubx-flow-options: exclusive last static;
+          text-align: right;
+          color: green;
         }
       }
-      .footer {
-        -epubx-flow-into: running-footer;
-        -epubx-flow-options: exclusive last static;
-        text-align: right;
-        color: green;
+      :root {
+        font-size: 16px;
+        line-height: 20px;
+        widows: 1;
+        orphans: 1;
       }
-    }
-    :root {
-      font-size: 16px;
-      line-height: 20px;
-      widows: 1;
-      orphans: 1;
-    }
-    body {
-      margin: 0;
-    }
-    section {
-      break-after: page;
-    }
-    .page-float {
-      float-reference: page;
-      float: block-start;
-      margin: 20px;
-    }
-    .region-float {
-      float-reference: region;
-      float: block-start;
-    }
-    .column-float {
-      float-reference: column;
-      float: block-start;
-    }
-    .page-float, .region-float, .column-float {
-      background: lightblue;
-    }
-    .nobreak {
-      break-inside: avoid;
-    }
-  </style>
-</head>
-<body>
-<section>
-  <div class="footer">footer 1</div>
-  <p>
-    This text should be placed in the 1st column of P1. Blah blah blah blah blah blah blah blah.
-  </p>
-  <div class="column-float">
-    Column block-start float.<br>
-    Column block-start float.<br>
-    Column block-start float.<br>
-    Column block-start float.<br>
-    Column block-start float.<br>
-    Column block-start float.<br>
-    <div class="nobreak">
-      Column block-start float.<br>
-      Column block-start float.<br>
-    </div>
-  </div>
-  <p>
-    This text should be placed in the 1st and 3rd columns of P1. It shouldn't be in the 2nd column.
-  </p>
-</section>
-<section>
-  <div class="footer">footer 2</div>
-  <p>
-    This text should be placed in P2.
-  </p>
-  <div class="region-float">
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    Region block-start-float.<br>
-    <div class="nobreak">
-      Region block-start-float.<br>
-      Region block-start-float.<br>
-      Region block-start-float.<br>
-    </div>
-  </div>
-  <p>
-    This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3. This text should be placed in the P2 and P4. It shouldn't be in P3.
-  </p>
-</section>
-<section>
-  <div class="footer">footer 3</div>
-  <p>
-    This text should be placed in P5.
-  </p>
-  <div class="page-float">
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    Page block-start-float.<br>
-    <div class="nobreak">
-      Page block-start-float.<br>
-      Page block-start-float.<br>
-      Page block-start-float.<br>
-    </div>
-  </div>
-  <p>
-    This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6. This text should be placed in the P5 and P7. It shouldn't be in P6.
-  </p>
-</section>
-</body>
+      body {
+        margin: 0;
+      }
+      section {
+        break-after: page;
+      }
+      .page-float {
+        float-reference: page;
+        float: block-start;
+        margin: 20px;
+      }
+      .region-float {
+        float-reference: region;
+        float: block-start;
+      }
+      .column-float {
+        float-reference: column;
+        float: block-start;
+      }
+      .page-float,
+      .region-float,
+      .column-float {
+        background: lightblue;
+      }
+      .nobreak {
+        break-inside: avoid;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="footer">footer 1</div>
+      <p>
+        This text should be placed in the 1st column of P1. Blah blah blah blah
+        blah blah blah blah.
+      </p>
+      <div class="column-float">
+        Column block-start float.<br />
+        Column block-start float.<br />
+        Column block-start float.<br />
+        Column block-start float.<br />
+        Column block-start float.<br />
+        Column block-start float.<br />
+        <div class="nobreak">
+          Column block-start float.<br />
+          Column block-start float.<br />
+        </div>
+      </div>
+      <p>
+        This text should be placed in the 1st and 3rd columns of P1. It
+        shouldn't be in the 2nd column.
+      </p>
+    </section>
+    <section>
+      <div class="footer">footer 2</div>
+      <p>
+        This text should be placed in P2.
+      </p>
+      <div class="region-float">
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        Region block-start-float.<br />
+        <div class="nobreak">
+          Region block-start-float.<br />
+          Region block-start-float.<br />
+          Region block-start-float.<br />
+        </div>
+      </div>
+      <p>
+        This text should be placed in the P2 and P4. It shouldn't be in P3. This
+        text should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3. This text
+        should be placed in the P2 and P4. It shouldn't be in P3.
+      </p>
+    </section>
+    <section>
+      <div class="footer">footer 3</div>
+      <p>
+        This text should be placed in P5.
+      </p>
+      <div class="page-float">
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        Page block-start-float.<br />
+        <div class="nobreak">
+          Page block-start-float.<br />
+          Page block-start-float.<br />
+          Page block-start-float.<br />
+        </div>
+      </div>
+      <p>
+        This text should be placed in the P5 and P7. It shouldn't be in P6. This
+        text should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6. This text
+        should be placed in the P5 and P7. It shouldn't be in P6.
+      </p>
+    </section>
+  </body>
 </html>

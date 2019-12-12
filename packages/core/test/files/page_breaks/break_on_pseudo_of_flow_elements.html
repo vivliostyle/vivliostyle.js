@@ -1,104 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>break on pseudo</title>
     <style>
-        @page {
-            margin: 0;
-            size: 200px 200px;
-            @bottom-center {
-                content: counter(page);
-            }
+      @page {
+        margin: 0;
+        size: 200px 200px;
+        @bottom-center {
+          content: counter(page);
         }
-        html {
-            widows: 1;
-            orphans: 1;
+      }
+      html {
+        widows: 1;
+        orphans: 1;
+      }
+      #sec1::before {
+        content: "(#sec1::before) This should be on the 1st (right) page. ";
+        page-break-before: right;
+      }
+      #sec2::before {
+        content: "(#sec2::before) This should be on the 3rd (right) page.";
+        display: block;
+        page-break-before: right;
+      }
+      #sec3::after {
+        content: "(#sec3::after) This should be on the 5th (right) page.";
+        display: block;
+        page-break-before: right;
+      }
+      #sec4 > div::before {
+        content: "(#sec4 > div::before) This should be on the 5th (right) page. ";
+        page-break-before: right;
+      }
+      #sec5 > div::before {
+        content: "(#sec5 > div::before) This should be on the 7th (right) page.";
+        display: block;
+        page-break-before: right;
+      }
+      #sec6 > div::after {
+        content: "(#sec6 > div::after) This should be on the 9th (right) page.";
+        display: block;
+        page-break-before: right;
+      }
+      #sec7::before {
+        content: "(#sec7::before) This should be on the 10th (left) page.";
+        display: block;
+        page-break-before: always;
+      }
+      #sec7 > div {
+        page-break-before: right;
+      }
+      #sec8 > div::before {
+        content: "(#sec8 > div::before) This should be on the 12th (left) page.";
+        display: block;
+        page-break-before: always;
+      }
+      #sec8 > div::after {
+        content: "(#sec8 > div::after) This should be on the 13th (right) page.";
+        display: block;
+        page-break-before: right;
+      }
+      @-epubx-page-template {
+        section {
+          -epubx-flow-into: s;
         }
-        #sec1::before {
-            content: "(#sec1::before) This should be on the 1st (right) page. ";
-            page-break-before: right;
+        @-epubx-flow body {
+          -epubx-flow-consume: some;
         }
-        #sec2::before {
-            content: "(#sec2::before) This should be on the 3rd (right) page.";
-            display: block;
-            page-break-before: right;
+        @-epubx-flow s {
+          -epubx-flow-consume: all;
         }
-        #sec3::after {
-            content: "(#sec3::after) This should be on the 5th (right) page.";
-            display: block;
-            page-break-before: right;
+        @-epubx-page-master {
+          -epubx-utilization: 0.05;
+          @-epubx-partition {
+            height: 20px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            content: counter(page);
+            text-align: center;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: s;
+            top: 0;
+            bottom: 20px;
+          }
         }
-        #sec4 > div::before {
-            content: "(#sec4 > div::before) This should be on the 5th (right) page. ";
-            page-break-before: right;
-        }
-        #sec5 > div::before {
-            content: "(#sec5 > div::before) This should be on the 7th (right) page.";
-            display: block;
-            page-break-before: right;
-        }
-        #sec6 > div::after {
-            content: "(#sec6 > div::after) This should be on the 9th (right) page.";
-            display: block;
-            page-break-before: right;
-        }
-        #sec7::before {
-            content: "(#sec7::before) This should be on the 10th (left) page.";
-            display: block;
-            page-break-before: always;
-        }
-        #sec7 > div {
-            page-break-before: right;
-        }
-        #sec8 > div::before {
-            content: "(#sec8 > div::before) This should be on the 12th (left) page.";
-            display: block;
-            page-break-before: always;
-        }
-        #sec8 > div::after {
-            content: "(#sec8 > div::after) This should be on the 13th (right) page.";
-            display: block;
-            page-break-before: right;
-        }
-        @-epubx-page-template {
-            section {
-                -epubx-flow-into: s;
-            }
-            @-epubx-flow body {
-                -epubx-flow-consume: some;
-            }
-            @-epubx-flow s {
-                -epubx-flow-consume: all;
-            }
-            @-epubx-page-master {
-                -epubx-utilization: 0.05;
-                @-epubx-partition {
-                    height: 20px;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    content: counter(page);
-                    text-align: center;
-                }
-                @-epubx-partition {
-                    -epubx-flow-from: s;
-                    top: 0;
-                    bottom: 20px;
-                }
-            }
-        }
+      }
     </style>
-</head>
-<body>
-<section id="sec0">(#sec0) This should be on the 1st (right) page.</section>
-<section id="sec1">(#sec1) This should be on the 1st (right) page.</section>
-<section id="sec2">(#sec2) This should be on the 3rd (right) page.</section>
-<section id="sec3"></section>
-<section id="sec4"><div>(#sec4 > div) This should be on the 5th (right) page.</div></section>
-<section id="sec5"><div>(#sec5 > div) This should be on the 7th (right) page.</div></section>
-<section id="sec6"><div></div></section>
-<section id="sec7"><div>(#sec7 > div) This should be on the 11th (right) page.</div></section>
-<section id="sec8"><div></div></section>
-</body>
+  </head>
+  <body>
+    <section id="sec0">(#sec0) This should be on the 1st (right) page.</section>
+    <section id="sec1">(#sec1) This should be on the 1st (right) page.</section>
+    <section id="sec2">(#sec2) This should be on the 3rd (right) page.</section>
+    <section id="sec3"></section>
+    <section id="sec4">
+      <div>(#sec4 > div) This should be on the 5th (right) page.</div>
+    </section>
+    <section id="sec5">
+      <div>(#sec5 > div) This should be on the 7th (right) page.</div>
+    </section>
+    <section id="sec6"><div></div></section>
+    <section id="sec7">
+      <div>(#sec7 > div) This should be on the 11th (right) page.</div>
+    </section>
+    <section id="sec8"><div></div></section>
+  </body>
 </html>

@@ -29,7 +29,7 @@ export abstract class AbstractBreakPosition
   implements Layout.AbstractBreakPosition {
   abstract findAcceptableBreak(
     column: Layout.Column,
-    penalty: number
+    penalty: number,
   ): Vtree.NodeContext;
 
   abstract getMinBreakPenalty(): number;
@@ -37,7 +37,7 @@ export abstract class AbstractBreakPosition
   calculateOffset(column): { current: number; minimum: number } {
     return calculateOffset(
       this.getNodeContext(),
-      column.collectElementsOffset()
+      column.collectElementsOffset(),
     );
   }
 
@@ -53,19 +53,19 @@ export abstract class AbstractBreakPosition
 
 export function calculateOffset(
   nodeContext: Vtree.NodeContext,
-  elementsOffsets: RepetitiveElement.ElementsOffset[]
+  elementsOffsets: RepetitiveElement.ElementsOffset[],
 ): { current: number; minimum: number } {
   return {
     current: elementsOffsets.reduce(
       (val, repetitiveElement) =>
         val + repetitiveElement.calculateOffset(nodeContext),
-      0
+      0,
     ),
     minimum: elementsOffsets.reduce(
       (val, repetitiveElement) =>
         val + repetitiveElement.calculateMinimumOffset(nodeContext),
-      0
-    )
+      0,
+    ),
   };
 }
 
@@ -82,7 +82,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
     public readonly position: Vtree.NodeContext,
     public readonly breakOnEdge: string | null,
     public overflows: boolean,
-    public readonly computedBlockSize: number
+    public readonly computedBlockSize: number,
   ) {
     super();
     this.overflowIfRepetitiveElementsDropped = overflows;
@@ -93,7 +93,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
    */
   findAcceptableBreak(
     column: Layout.Column,
-    penalty: number
+    penalty: number,
   ): Vtree.NodeContext {
     this.updateOverflows(column);
     if (penalty < this.getMinBreakPenalty()) {
@@ -121,14 +121,14 @@ export class EdgeBreakPosition extends AbstractBreakPosition
 
   private updateEdge(column: Layout.Column) {
     const clonedPaddingBorder = column.calculateClonedPaddingBorder(
-      this.position
+      this.position,
     );
     this.edge =
       LayoutHelper.calculateEdge(
         this.position,
         column.clientLayout,
         0,
-        column.vertical
+        column.vertical,
       ) + clonedPaddingBorder;
     this.isEdgeUpdated = true;
   }
@@ -140,10 +140,10 @@ export class EdgeBreakPosition extends AbstractBreakPosition
     const edge = this.edge;
     const offsets = this.calculateOffset(column);
     this.overflowIfRepetitiveElementsDropped = column.isOverflown(
-      edge + (column.vertical ? -1 : 1) * offsets.minimum
+      edge + (column.vertical ? -1 : 1) * offsets.minimum,
     );
     this.overflows = this.position.overflow = column.isOverflown(
-      edge + (column.vertical ? -1 : 1) * offsets.current
+      edge + (column.vertical ? -1 : 1) * offsets.current,
     );
   }
 
@@ -160,7 +160,7 @@ export class EdgeBreakPosition extends AbstractBreakPosition
     const { formattingContext } = nodeContext.parent;
     if (
       !RepetitiveElement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
-        formattingContext
+        formattingContext,
       )
     ) {
       return false;

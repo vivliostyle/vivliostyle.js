@@ -40,7 +40,7 @@ export class AnyMatcher implements Matcher {
 
   /** @override */
   matches(): boolean {
-    return this.matchers.some(matcher => matcher.matches());
+    return this.matchers.some((matcher) => matcher.matches());
   }
 }
 
@@ -49,7 +49,7 @@ export class AllMatcher implements Matcher {
 
   /** @override */
   matches(): boolean {
-    return this.matchers.every(matcher => matcher.matches());
+    return this.matchers.every((matcher) => matcher.matches());
   }
 }
 
@@ -59,7 +59,7 @@ export class NthFragmentMatcher implements Matcher {
   static registerFragmentIndex(
     elementOffset: number,
     fragmentIndex: number,
-    priority: number
+    priority: number,
   ) {
     const indices = NthFragmentMatcher.fragmentIndices;
     if (
@@ -77,7 +77,7 @@ export class NthFragmentMatcher implements Matcher {
   constructor(
     public readonly elementOffset: number,
     public readonly a: number,
-    public readonly b: number
+    public readonly b: number,
   ) {}
 
   /** @override */
@@ -94,14 +94,14 @@ export class NthFragmentMatcher implements Matcher {
 export class MatcherBuilder {
   static buildViewConditionMatcher(
     elementOffset: number,
-    viewCondition: string
+    viewCondition: string,
   ): Matcher {
     const strs = viewCondition.split("_");
     if (strs[0] == "NFS") {
       return new NthFragmentMatcher(
         elementOffset,
         parseInt(strs[1], 10),
-        parseInt(strs[2], 10)
+        parseInt(strs[2], 10),
       );
     } else {
       Asserts.fail(`unknown view condition. condition=${viewCondition}`);

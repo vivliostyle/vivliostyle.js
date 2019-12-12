@@ -38,7 +38,7 @@ export type ColumnGenerator = () => Task.Result<ColumnLayoutResult | null>;
 export class ColumnBalancingTrialResult {
   constructor(
     public readonly layoutResult: ColumnLayoutResult,
-    public readonly penalty: number
+    public readonly penalty: number,
   ) {}
 }
 
@@ -64,30 +64,30 @@ export abstract class ColumnBalancer {
   constructor(
     public readonly layoutContainer: Vtree.Container,
     public readonly columnGenerator: ColumnGenerator,
-    public readonly regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+    public readonly regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     this.originalContainerBlockSize = getBlockSize(layoutContainer);
   }
 
   balanceColumns(
-    layoutResult: ColumnLayoutResult
+    layoutResult: ColumnLayoutResult,
   ): Task.Result<ColumnLayoutResult> {
     const self = this;
     const frame: Task.Frame<ColumnLayoutResult> = Task.newFrame(
-      "ColumnBalancer#balanceColumns"
+      "ColumnBalancer#balanceColumns",
     );
     self.preBalance(layoutResult);
     self.savePageFloatLayoutContexts(layoutResult);
     self.layoutContainer.clear();
     const candidates = [self.createTrialResult(layoutResult)];
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         if (!self.hasNextCandidate(candidates)) {
           loopFrame.breakLoop();
           return;
         }
         self.updateCondition(candidates);
-        self.columnGenerator().then(layoutResult => {
+        self.columnGenerator().then((layoutResult) => {
           self.savePageFloatLayoutContexts(layoutResult);
           self.layoutContainer.clear();
           if (!layoutResult) {
@@ -101,7 +101,7 @@ export abstract class ColumnBalancer {
       .then(() => {
         const result = candidates.reduce(
           (prev, curr) => (curr.penalty < prev.penalty ? curr : prev),
-          candidates[0]
+          candidates[0],
         );
         self.restoreContents(result.layoutResult);
         self.postBalance();
@@ -111,7 +111,7 @@ export abstract class ColumnBalancer {
   }
 
   private createTrialResult(
-    layoutResult: ColumnLayoutResult
+    layoutResult: ColumnLayoutResult,
   ): ColumnBalancingTrialResult {
     const penalty = this.calculatePenalty(layoutResult);
     return new ColumnBalancingTrialResult(layoutResult, penalty);
@@ -122,11 +122,11 @@ export abstract class ColumnBalancer {
   protected abstract calculatePenalty(layoutResult: ColumnLayoutResult): number;
 
   protected abstract hasNextCandidate(
-    candidates: ColumnBalancingTrialResult[]
+    candidates: ColumnBalancingTrialResult[],
   ): boolean;
 
   protected abstract updateCondition(
-    candidates: ColumnBalancingTrialResult[]
+    candidates: ColumnBalancingTrialResult[],
   ): void;
 
   protected postBalance() {
@@ -142,19 +142,19 @@ export abstract class ColumnBalancer {
 
   private restoreContents(newLayoutResult: ColumnLayoutResult) {
     const parent = this.layoutContainer.element;
-    newLayoutResult.columns.forEach(c => {
+    newLayoutResult.columns.forEach((c) => {
       parent.appendChild(c.element);
     });
     Asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
     this.regionPageFloatLayoutContext.attachChildren(
-      newLayoutResult.columnPageFloatLayoutContexts
+      newLayoutResult.columnPageFloatLayoutContexts,
     );
   }
 }
 const COLUMN_LENGTH_STEP = 1;
 
 export function canReduceContainerSize(
-  candidates: ColumnBalancingTrialResult[]
+  candidates: ColumnBalancingTrialResult[],
 ): boolean {
   const lastCandidate = candidates[candidates.length - 1];
   if (lastCandidate.penalty === 0) {
@@ -170,23 +170,23 @@ export function canReduceContainerSize(
   const columns = lastCandidate.layoutResult.columns;
   const maxColumnBlockSize = Math.max.apply(
     null,
-    columns.map(c => c.computedBlockSize)
+    columns.map((c) => c.computedBlockSize),
   );
   const maxPageFloatBlockSize = Math.max.apply(
     null,
-    columns.map(c => c.getMaxBlockSizeOfPageFloats())
+    columns.map((c) => c.getMaxBlockSizeOfPageFloats()),
   );
   return maxColumnBlockSize > maxPageFloatBlockSize + COLUMN_LENGTH_STEP;
 }
 
 export function reduceContainerSize(
   candidates: ColumnBalancingTrialResult[],
-  container: Vtree.Container
+  container: Vtree.Container,
 ): void {
   const columns = candidates[candidates.length - 1].layoutResult.columns;
   const maxColumnBlockSize = Math.max.apply(
     null,
-    columns.map(c => {
+    columns.map((c) => {
       if (!isNaN(c.blockDistanceToBlockEndFloats)) {
         return (
           c.computedBlockSize -
@@ -196,7 +196,7 @@ export function reduceContainerSize(
       } else {
         return c.computedBlockSize;
       }
-    })
+    }),
   );
   const newEdge = maxColumnBlockSize - COLUMN_LENGTH_STEP;
   if (newEdge < getBlockSize(container)) {
@@ -214,7 +214,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     columnGenerator: ColumnGenerator,
     regionPageFloatLayoutContext,
     layoutContainer: Vtree.Container,
-    public readonly columnCount: number
+    public readonly columnCount: number,
   ) {
     super(layoutContainer, columnGenerator, regionPageFloatLayoutContext);
   }
@@ -226,7 +226,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     const columns = layoutResult.columns;
     const totalBlockSize = columns.reduce(
       (prev, c) => prev + c.computedBlockSize,
-      0
+      0,
     );
     setBlockSize(this.layoutContainer, totalBlockSize / this.columnCount);
     this.originalPosition = layoutResult.position;
@@ -251,7 +251,10 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     if (isLastColumnLongerThanAnyOtherColumn(columns)) {
       return Infinity;
     }
-    return Math.max.apply(null, columns.map(c => c.computedBlockSize));
+    return Math.max.apply(
+      null,
+      columns.map((c) => c.computedBlockSize),
+    );
   }
 
   /**
@@ -267,7 +270,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
       if (this.checkPosition(lastCandidate.layoutResult.position)) {
         if (
           !isLastColumnLongerThanAnyOtherColumn(
-            lastCandidate.layoutResult.columns
+            lastCandidate.layoutResult.columns,
           )
         ) {
           this.foundUpperBound = true;
@@ -290,7 +293,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
       const newEdge = Math.min(
         this.originalContainerBlockSize,
         getBlockSize(this.layoutContainer) +
-          this.originalContainerBlockSize * 0.1
+          this.originalContainerBlockSize * 0.1,
       );
       setBlockSize(this.layoutContainer, newEdge);
     }
@@ -298,21 +301,21 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
 }
 
 function isLastColumnLongerThanAnyOtherColumn(
-  columns: Layout.Column[]
+  columns: Layout.Column[],
 ): boolean {
   if (columns.length <= 1) {
     return false;
   }
   const lastColumnBlockSize = columns[columns.length - 1].computedBlockSize;
   const otherColumns = columns.slice(0, columns.length - 1);
-  return otherColumns.every(c => lastColumnBlockSize > c.computedBlockSize);
+  return otherColumns.every((c) => lastColumnBlockSize > c.computedBlockSize);
 }
 
 export class BalanceNonLastColumnBalancer extends ColumnBalancer {
   constructor(
     columnGenerator: ColumnGenerator,
     regionPageFloatLayoutContext,
-    layoutContainer: Vtree.Container
+    layoutContainer: Vtree.Container,
   ) {
     super(layoutContainer, columnGenerator, regionPageFloatLayoutContext);
   }
@@ -321,12 +324,12 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
    * @override
    */
   calculatePenalty(layoutResult: ColumnLayoutResult): number {
-    if (layoutResult.columns.every(c => c.computedBlockSize === 0)) {
+    if (layoutResult.columns.every((c) => c.computedBlockSize === 0)) {
       return Infinity;
     }
     const computedBlockSizes = layoutResult.columns
-      .filter(c => !c.pageBreakType)
-      .map(c => c.computedBlockSize);
+      .filter((c) => !c.pageBreakType)
+      .map((c) => c.computedBlockSize);
     return MathUtil.variance(computedBlockSizes);
   }
 
@@ -352,7 +355,7 @@ export function createColumnBalancer(
   regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   layoutContainer: Vtree.Container,
   columns: Layout.Column[],
-  flowPosition: Vtree.FlowPosition
+  flowPosition: Vtree.FlowPosition,
 ): ColumnBalancer | null {
   if (columnFill === Css.ident.auto) {
     return null;
@@ -367,13 +370,13 @@ export function createColumnBalancer(
         columnGenerator,
         regionPageFloatLayoutContext,
         layoutContainer,
-        columnCount
+        columnCount,
       );
     } else if (columnFill === Css.ident.balance_all) {
       return new BalanceNonLastColumnBalancer(
         columnGenerator,
         regionPageFloatLayoutContext,
-        layoutContainer
+        layoutContainer,
       );
     } else {
       Asserts.assert(columnFill === Css.ident.balance);

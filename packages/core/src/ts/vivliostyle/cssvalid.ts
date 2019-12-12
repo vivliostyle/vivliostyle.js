@@ -94,7 +94,7 @@ export enum Add {
   FOLLOW = 1,
   OPTIONAL,
   REPEATED,
-  ALTERNATE
+  ALTERNATE,
 }
 
 /**
@@ -127,7 +127,7 @@ export class ValidatingGroup {
       const connection = this.connections[i];
       const groupConnection = new Connection(
         connection.where,
-        connection.success
+        connection.success,
       );
       groupConnection.what = connection.what;
       group.connections.push(groupConnection);
@@ -245,8 +245,9 @@ export class ValidatingGroup {
       this.isPrimitive()
     ) {
       this.nodes[0].validator = (this.nodes[0]
-        .validator as PrimitiveValidator).combine(group.nodes[0]
-        .validator as PrimitiveValidator);
+        .validator as PrimitiveValidator).combine(
+        group.nodes[0].validator as PrimitiveValidator,
+      );
       return;
     }
     for (let i = 0; i < group.nodes.length; i++) {
@@ -383,7 +384,7 @@ export class PrimitiveValidator extends PropertyValidator {
   constructor(
     public readonly allowed: number,
     public readonly idents: ValueMap,
-    public readonly units: ValueMap
+    public readonly units: ValueMap,
   ) {
     super();
   }
@@ -928,7 +929,7 @@ export class ShorthandSyntaxNode {
   tryParse(
     values: Css.Val[],
     index: number,
-    shorthandValidator: ShorthandValidator
+    shorthandValidator: ShorthandValidator,
   ): number {
     return index;
   }
@@ -950,7 +951,7 @@ export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
   tryParse(
     values: Css.Val[],
     index: number,
-    shorthandValidator: ShorthandValidator
+    shorthandValidator: ShorthandValidator,
   ): number {
     if (shorthandValidator.values[this.name]) {
       return index;
@@ -991,7 +992,7 @@ export class ShorthandSyntaxPropertyN extends ShorthandSyntaxProperty {
 export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
   constructor(
     public readonly nodes: ShorthandSyntaxNode[],
-    public readonly slash: boolean
+    public readonly slash: boolean,
   ) {
     super();
   }
@@ -1002,7 +1003,7 @@ export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
   tryParse(
     values: Css.Val[],
     index: number,
-    shorthandValidator: ShorthandValidator
+    shorthandValidator: ShorthandValidator,
   ): number {
     const index0 = index;
     if (this.slash) {
@@ -1064,7 +1065,7 @@ export class ShorthandValidator extends Css.Visitor {
         receiver.simpleProperty(
           name,
           this.values[name] || this.validatorSet.defaultValues[name],
-          important
+          important,
         );
       }
       return true;
@@ -1428,7 +1429,7 @@ export const shorthandValidators: {
   INSETS: InsetsShorthandValidator,
   INSETS_SLASH: InsetsSlashShorthandValidator,
   COMMA: CommaShorthandValidator,
-  FONT: FontShorthandValidator
+  FONT: FontShorthandValidator,
 };
 
 //---- validation grammar parser and public property validator
@@ -1450,7 +1451,7 @@ export class ValidatorSet {
 
   private addReplacement(
     val: ValidatingGroup,
-    token: CssTok.Token
+    token: CssTok.Token,
   ): ValidatingGroup {
     let cssval: Css.Val;
     if (token.type == CssTok.TokenType.NUMERIC) {
@@ -1511,7 +1512,7 @@ export class ValidatorSet {
   private addCounts(
     val: ValidatingGroup,
     min: number,
-    max: number
+    max: number,
   ): ValidatingGroup {
     const group = new ValidatingGroup();
     for (let i = 0; i < min; i++) {
@@ -1551,25 +1552,25 @@ export class ValidatorSet {
 
   initBuiltInValidators(): void {
     this.namedValidators["HASHCOLOR"] = this.primitive(
-      new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_INT"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_NUM"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_PERCENTAGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, { "%": Css.empty })
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, { "%": Css.empty }),
     );
     this.namedValidators["NEGATIVE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["ZERO"] = this.primitive(
-      new PrimitiveValidator(ALLOW_ZERO, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_ZERO, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["ZERO_PERCENTAGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_LENGTH"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
@@ -1595,47 +1596,47 @@ export class ValidatorSet {
         px: Css.empty,
         pt: Css.empty,
         pc: Css.empty,
-        q: Css.empty
-      })
+        q: Css.empty,
+      }),
     );
     this.namedValidators["POS_ANGLE"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
         deg: Css.empty,
         grad: Css.empty,
         rad: Css.empty,
-        turn: Css.empty
-      })
+        turn: Css.empty,
+      }),
     );
     this.namedValidators["POS_TIME"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
         s: Css.empty,
-        ms: Css.empty
-      })
+        ms: Css.empty,
+      }),
     );
     this.namedValidators["FREQUENCY"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
         Hz: Css.empty,
-        kHz: Css.empty
-      })
+        kHz: Css.empty,
+      }),
     );
     this.namedValidators["RESOLUTION"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
         dpi: Css.empty,
         dpcm: Css.empty,
-        dppx: Css.empty
-      })
+        dppx: Css.empty,
+      }),
     );
     this.namedValidators["URI"] = this.primitive(
-      new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["IDENT"] = this.primitive(
-      new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["STRING"] = this.primitive(
-      new PrimitiveValidator(ALLOW_STR, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_STR, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["SLASH"] = this.primitive(
-      new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS)
+      new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS),
     );
     const stdfont = { "font-family": Css.getName("sans-serif") };
     this.systemFonts["caption"] = stdfont;
@@ -1652,7 +1653,7 @@ export class ValidatorSet {
 
   private readNameAndPrefixes(
     tok: CssTok.Tokenizer,
-    section: number
+    section: number,
   ): string | null {
     let token = tok.token();
     if (token.type == CssTok.TokenType.EOF) {
@@ -1751,7 +1752,7 @@ export class ValidatorSet {
               const idents = {};
               idents[token.text.toLowerCase()] = Css.getName(token.text);
               vals.push(
-                this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
+                this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)),
               );
             }
             expectval = false;
@@ -1760,7 +1761,7 @@ export class ValidatorSet {
             const idents = {};
             idents[`${token.num}`] = new Css.Int(token.num);
             vals.push(
-              this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS))
+              this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)),
             );
             expectval = false;
             break;
@@ -1964,7 +1965,7 @@ export class ValidatorSet {
               propList.push(...insetShorthand.propList);
             } else {
               throw new Error(
-                `'${token.text}' is neither a simple property nor an inset shorthand`
+                `'${token.text}' is neither a simple property nor an inset shorthand`,
               );
             }
             break;
@@ -2014,7 +2015,7 @@ export class ValidatorSet {
       "columns",
       "column-gap",
       "column-rule",
-      "column-fill"
+      "column-fill",
     ]);
   }
 
@@ -2039,7 +2040,7 @@ export class ValidatorSet {
     name: string,
     value: Css.Val,
     important: boolean,
-    receiver: PropertyReceiver
+    receiver: PropertyReceiver,
   ): void {
     let prefix = "";
     const origName = name;

@@ -53,7 +53,7 @@ export const VIEWPORT_SPREAD_VIEW_ATTRIBUTE = "data-vivliostyle-spread-view";
 export enum PageViewMode {
   SINGLE_PAGE = "singlePage",
   SPREAD = "spread",
-  AUTO_SPREAD = "autoSpread"
+  AUTO_SPREAD = "autoSpread",
 }
 
 export type SingleDocumentParam = {
@@ -102,7 +102,7 @@ export class Viewer {
     public readonly window: Window,
     public readonly viewportElement: HTMLElement,
     public readonly instanceId: string,
-    public readonly callbackFn: (p1: Base.JSON) => void
+    public readonly callbackFn: (p1: Base.JSON) => void,
   ) {
     const self = this;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
@@ -120,16 +120,16 @@ export class Viewer {
       self.kick();
     };
     this.pageReplacedListener = this.pageReplacedListener.bind(this);
-    this.hyperlinkListener = evt => {};
+    this.hyperlinkListener = (evt) => {};
     this.pageRuleStyleElement = document.getElementById(
-      "vivliostyle-page-rules"
+      "vivliostyle-page-rules",
     );
     this.actions = {
       loadPublication: this.loadPublication,
       loadXML: this.loadXML,
       configure: this.configure,
       moveTo: this.moveTo,
-      toc: this.showTOC
+      toc: this.showTOC,
     };
     this.addLogListeners();
   }
@@ -160,16 +160,16 @@ export class Viewer {
 
   addLogListeners() {
     const LogLevel = Logging.LogLevel;
-    Logging.logger.addListener(LogLevel.DEBUG, info => {
+    Logging.logger.addListener(LogLevel.DEBUG, (info) => {
       this.callback({ t: "debug", content: info });
     });
-    Logging.logger.addListener(LogLevel.INFO, info => {
+    Logging.logger.addListener(LogLevel.INFO, (info) => {
       this.callback({ t: "info", content: info });
     });
-    Logging.logger.addListener(LogLevel.WARN, info => {
+    Logging.logger.addListener(LogLevel.WARN, (info) => {
       this.callback({ t: "warn", content: info });
     });
-    Logging.logger.addListener(LogLevel.ERROR, info => {
+    Logging.logger.addListener(LogLevel.ERROR, (info) => {
       this.callback({ t: "error", content: info });
     });
   }
@@ -212,10 +212,10 @@ export class Viewer {
       store.init(authorStyleSheet, userStyleSheet).then(() => {
         const pubURL = Base.resolveURL(
           Base.convertSpecialURL(url),
-          self.window.location.href
+          self.window.location.href,
         );
         self.packageURL = [pubURL];
-        store.loadPubDoc(pubURL, haveZipMetadata).then(opf => {
+        store.loadPubDoc(pubURL, haveZipMetadata).then((opf) => {
           if (opf) {
             self.opf = opf;
             self.render(fragment).then(() => {
@@ -255,13 +255,13 @@ export class Viewer {
         const resolvedParams: Epub.OPFItemParam[] = params.map((p, index) => ({
           url: Base.resolveURL(
             Base.convertSpecialURL(p.url),
-            self.window.location.href
+            self.window.location.href,
           ),
           index,
           startPage: p.startPage,
-          skipPagesBefore: p.skipPagesBefore
+          skipPagesBefore: p.skipPagesBefore,
         }));
-        self.packageURL = resolvedParams.map(p => p.url);
+        self.packageURL = resolvedParams.map((p) => p.url);
         self.opf = new Epub.OPFDoc(store, "");
         self.opf.initWithChapters(resolvedParams, doc).then(() => {
           self.render(fragment).then(() => {
@@ -278,7 +278,7 @@ export class Viewer {
     const self = this;
     let cont: Task.Result<boolean>;
     if (fragment) {
-      cont = this.opf.resolveFragment(fragment).thenAsync(position => {
+      cont = this.opf.resolveFragment(fragment).thenAsync((position) => {
         self.pagePosition = position;
         return Task.newResult(true);
       });
@@ -342,7 +342,7 @@ export class Viewer {
         marginTop: this.resolveLength(vp["margin-top"]) || 0,
         marginBottom: this.resolveLength(vp["margin-bottom"]) || 0,
         width: this.resolveLength(vp["width"]) || 0,
-        height: this.resolveLength(vp["height"]) || 0
+        height: this.resolveLength(vp["height"]) || 0,
       };
       if (viewportSize.width >= 200 || viewportSize.height >= 200) {
         this.window.removeEventListener("resize", this.resizeListener, false);
@@ -431,9 +431,9 @@ export class Viewer {
 
   configurePlugins(command: Base.JSON) {
     const hooks: Plugin.ConfigurationHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.CONFIGURATION
+      Plugin.HOOKS.CONFIGURATION,
     );
-    hooks.forEach(hook => {
+    hooks.forEach((hook) => {
       const result = hook(command);
       this.needResize = result.needResize || this.needResize;
       this.needRefresh = result.needRefresh || this.needRefresh;
@@ -469,7 +469,7 @@ export class Viewer {
       pages.push(this.currentSpread.left);
       pages.push(this.currentSpread.right);
     }
-    pages.forEach(page => {
+    pages.forEach((page) => {
       if (page) {
         fn(page);
       }
@@ -477,7 +477,7 @@ export class Viewer {
   }
 
   private removePageListeners() {
-    this.forCurrentPages(page => {
+    this.forCurrentPages((page) => {
       page.removeEventListener("hyperlink", this.hyperlinkListener, false);
       page.removeEventListener("replaced", this.pageReplacedListener, false);
     });
@@ -488,7 +488,7 @@ export class Viewer {
    */
   private hidePages() {
     this.removePageListeners();
-    this.forCurrentPages(page => {
+    this.forCurrentPages((page) => {
       Base.setCSSProperty(page.container, "display", "none");
       page.container.setAttribute("aria-hidden", "true");
     });
@@ -534,7 +534,7 @@ export class Viewer {
       if (!spread.right) {
         spread.left.container.setAttribute(
           "data-vivliostyle-unpaired-page",
-          true
+          true,
         );
       } else {
         spread.left.container.removeAttribute("data-vivliostyle-unpaired-page");
@@ -545,11 +545,11 @@ export class Viewer {
       if (!spread.left) {
         spread.right.container.setAttribute(
           "data-vivliostyle-unpaired-page",
-          true
+          true,
         );
       } else {
         spread.right.container.removeAttribute(
-          "data-vivliostyle-unpaired-page"
+          "data-vivliostyle-unpaired-page",
         );
       }
     }
@@ -561,7 +561,7 @@ export class Viewer {
     Asserts.assert(self.pagePosition);
     self.opf
       .getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem)
-      .then(cfi => {
+      .then((cfi) => {
         const page = self.currentPage;
         const r =
           self.waitForLoading && page.fetchers.length > 0
@@ -587,7 +587,7 @@ export class Viewer {
         this.fontSize,
         viewportElement,
         vs.width,
-        vs.height
+        vs.height,
       );
     } else {
       return new Vgen.Viewport(this.window, this.fontSize, viewportElement);
@@ -612,7 +612,7 @@ export class Viewer {
     this.pref.spreadView = spreadView;
     this.viewportElement.setAttribute(
       VIEWPORT_SPREAD_VIEW_ATTRIBUTE,
-      spreadView.toString()
+      spreadView.toString(),
     );
   }
 
@@ -665,7 +665,7 @@ export class Viewer {
     pageSize: { width: number; height: number },
     pageSheetSize: { [key: string]: { width: number; height: number } },
     spineIndex: number,
-    pageIndex: number
+    pageIndex: number,
   ) {
     this.pageSizes[pageIndex] = pageSize;
     this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
@@ -674,11 +674,11 @@ export class Viewer {
   private setPageSizePageRules(
     pageSheetSize: { [key: string]: { width: number; height: number } },
     spineIndex: number,
-    pageIndex: number
+    pageIndex: number,
   ) {
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
       let styleText = "";
-      Object.keys(pageSheetSize).forEach(selector => {
+      Object.keys(pageSheetSize).forEach((selector) => {
         styleText += `@page ${selector}{margin:0;size:`;
         const size = pageSheetSize[selector];
         styleText += `${size.width}px ${size.height}px;}`;
@@ -712,7 +712,7 @@ export class Viewer {
       this.viewport,
       this.fontMapper,
       this.pref,
-      this.setPageSize.bind(this)
+      this.setPageSize.bind(this),
     );
     if (tocVisible) {
       this.sendCommand({ a: "toc", v: "show", autohide: tocAutohide });
@@ -732,7 +732,7 @@ export class Viewer {
     if (this.pref.spreadView) {
       return this.opfView
         .getSpread(this.pagePosition, sync)
-        .thenAsync(spread => {
+        .thenAsync((spread) => {
           self.showSpread(spread);
           self.setSpreadZoom(spread);
           self.currentPage = page;
@@ -786,7 +786,7 @@ export class Viewer {
       width += this.pref.pageBorder * 2;
       // Adjust spread horizontal alignment when left/right page widths differ
       width += Math.abs(
-        spread.left.dimensions.width - spread.right.dimensions.width
+        spread.left.dimensions.width - spread.right.dimensions.width,
       );
     }
     return { width, height };
@@ -848,7 +848,7 @@ export class Viewer {
       .run(() =>
         Task.handle(
           "resize",
-          frame => {
+          (frame) => {
             if (!self.opf) {
               frame.finish(false);
               return;
@@ -882,7 +882,7 @@ export class Viewer {
             // forced to wait the rendering finish in front of a blank page.
             self.opfView
               .renderPagesUpto(self.pagePosition, !self.renderAllPages)
-              .then(result => {
+              .then((result) => {
                 if (!result) {
                   frame.finish(false);
                   return;
@@ -892,7 +892,7 @@ export class Viewer {
                   self.setReadyState(Constants.ReadyState.INTERACTIVE);
 
                   self.opf
-                    .countEPages(epageCount => {
+                    .countEPages((epageCount) => {
                       const notification = {
                         t: "nav",
                         epageCount: epageCount,
@@ -900,7 +900,7 @@ export class Viewer {
                         last: self.currentPage.isLastPage,
                         metadata: self.opf.metadata,
                         docTitle:
-                          self.opf.spine[self.pagePosition.spineIndex].title
+                          self.opf.spine[self.pagePosition.spineIndex].title,
                       };
                       if (
                         self.currentPage.isFirstPage ||
@@ -913,7 +913,7 @@ export class Viewer {
                       self.callback(notification);
                     })
                     .then(() => {
-                      self.reportPosition().then(p => {
+                      self.reportPosition().then((p) => {
                         const r = self.renderAllPages
                           ? self.opfView.renderAllPages()
                           : Task.newResult(null);
@@ -940,30 +940,30 @@ export class Viewer {
             } else {
               throw err;
             }
-          }
-        )
+          },
+        ),
       );
     return Task.newResult(true);
   }
 
   private sendLocationNotification(
     page: Vtree.Page,
-    cfi: string | null
+    cfi: string | null,
   ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame(
-      "sendLocationNotification"
+      "sendLocationNotification",
     );
     const notification = {
       t: "nav",
       first: page.isFirstPage,
       last: page.isLastPage,
       metadata: this.opf.metadata,
-      docTitle: this.opf.spine[page.spineIndex].title
+      docTitle: this.opf.spine[page.spineIndex].title,
     };
     const self = this;
     this.opf
       .getEPageFromPosition(self.pagePosition as Epub.Position)
-      .then(epage => {
+      .then((epage) => {
         notification["epage"] = epage;
         notification["epageCount"] = self.opf.epageCount;
         if (cfi) {
@@ -993,7 +993,7 @@ export class Viewer {
     if (typeof command["where"] == "string") {
       let m: (
         position: Epub.Position,
-        sync: boolean
+        sync: boolean,
       ) => Task.Result<Epub.PageAndPosition>;
       switch (command["where"]) {
         case "next":
@@ -1025,7 +1025,7 @@ export class Viewer {
         self.opfView.navigateToEPage(
           epage,
           self.pagePosition,
-          !self.renderAllPages
+          !self.renderAllPages,
         );
     } else if (typeof command["url"] == "string") {
       const url = command["url"] as string;
@@ -1035,12 +1035,12 @@ export class Viewer {
       return Task.newResult(true);
     }
     const frame: Task.Frame<boolean> = Task.newFrame("moveTo");
-    method.call(self.opfView).then(result => {
+    method.call(self.opfView).then((result) => {
       let cont: Task.Result<boolean>;
       if (result) {
         self.pagePosition = result.position;
         const innerFrame: Task.Frame<boolean> = Task.newFrame(
-          "moveTo.showCurrent"
+          "moveTo.showCurrent",
         );
         cont = innerFrame.result();
         self.showCurrent(result.page, !self.renderAllPages).then(() => {
@@ -1049,7 +1049,7 @@ export class Viewer {
       } else {
         cont = Task.newResult(true);
       }
-      cont.then(res => {
+      cont.then((res) => {
         if (self.readyState === Constants.ReadyState.LOADING) {
           self.setReadyState(Constants.ReadyState.INTERACTIVE);
         }
@@ -1080,7 +1080,7 @@ export class Viewer {
     } else {
       const self = this;
       const frame: Task.Frame<boolean> = Task.newFrame("showTOC");
-      this.opfView.showTOC(autohide).then(page => {
+      this.opfView.showTOC(autohide).then((page) => {
         if (page) {
           if (changeAutohide) {
             page.listeners = {};
@@ -1105,7 +1105,7 @@ export class Viewer {
     const actionName = command["a"] || "";
     return Task.handle(
       "runCommand",
-      frame => {
+      (frame) => {
         const action = self.actions[actionName];
         if (action) {
           action.call(self, command).then(() => {
@@ -1120,7 +1120,7 @@ export class Viewer {
       (frame, err) => {
         Logging.logger.error(err, "Error during action:", actionName);
         frame.finish(true);
-      }
+      },
     );
   }
 
@@ -1131,19 +1131,19 @@ export class Viewer {
     Task.start(() => {
       const frame: Task.Frame<boolean> = Task.newFrame("commandLoop");
       const scheduler = Task.currentTask().getScheduler();
-      viewer.hyperlinkListener = evt => {
+      viewer.hyperlinkListener = (evt) => {
         const hrefEvent = evt as Vtree.PageHyperlinkEvent;
         const internal =
           hrefEvent.href.charAt(0) === "#" ||
           viewer.packageURL.some(
-            url => hrefEvent.href.substr(0, url.length) == url
+            (url) => hrefEvent.href.substr(0, url.length) == url,
           );
         if (internal) {
           evt.preventDefault();
           const msg = {
             t: "hyperlink",
             href: hrefEvent.href,
-            internal: internal
+            internal: internal,
           };
           scheduler.run(() => {
             viewer.callback(msg);
@@ -1152,7 +1152,7 @@ export class Viewer {
         }
       };
       frame
-        .loopWithFrame(loopFrame => {
+        .loopWithFrame((loopFrame) => {
           if (viewer.needResize) {
             viewer.resize().then(() => {
               loopFrame.continueLoop();
@@ -1171,7 +1171,7 @@ export class Viewer {
             });
           } else {
             const frameInternal: Task.Frame<boolean> = Task.newFrame(
-              "waitForCommand"
+              "waitForCommand",
             );
             continuation = frameInternal.suspend(self);
             frameInternal.result().then(() => {
@@ -1189,7 +1189,7 @@ export class Viewer {
         cont.schedule(true);
       }
     };
-    viewer.sendCommand = cmd => {
+    viewer.sendCommand = (cmd) => {
       if (command) {
         return false;
       }
@@ -1205,7 +1205,7 @@ export class Viewer {
  * @enum {string}
  */
 export enum ZoomType {
-  FIT_INSIDE_VIEWPORT = "fit inside viewport"
+  FIT_INSIDE_VIEWPORT = "fit inside viewport",
 }
 
 /**

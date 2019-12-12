@@ -37,7 +37,7 @@ import {
   Layout,
   RepetitiveElement,
   Table,
-  Vtree
+  Vtree,
 } from "./types";
 
 export class TableRow {
@@ -45,7 +45,7 @@ export class TableRow {
 
   constructor(
     public readonly rowIndex: number,
-    public readonly sourceNode: Node
+    public readonly sourceNode: Node,
   ) {}
 
   addCell(cell: TableCell) {
@@ -53,7 +53,10 @@ export class TableRow {
   }
 
   getMinimumHeight(): number {
-    return Math.min.apply(null, this.cells.map(c => c.height));
+    return Math.min.apply(
+      null,
+      this.cells.map((c) => c.height),
+    );
   }
 }
 
@@ -67,7 +70,7 @@ export class TableCell {
   constructor(
     public readonly rowIndex: number,
     public readonly columnIndex: number,
-    viewElement: Element
+    viewElement: Element,
   ) {
     this.viewElement = viewElement;
     this.colSpan = (viewElement as HTMLTableCellElement).colSpan || 1;
@@ -87,7 +90,7 @@ export class TableSlot {
   constructor(
     public readonly rowIndex: number,
     public readonly columnIndex: number,
-    public readonly cell: TableCell
+    public readonly cell: TableCell,
   ) {}
 }
 
@@ -98,12 +101,12 @@ export class TableCellFragment {
   constructor(
     public readonly column: Layout.Column,
     pseudoColumnContainer: Element,
-    public readonly cellNodeContext: Vtree.NodeContext
+    public readonly cellNodeContext: Vtree.NodeContext,
   ) {
     this.pseudoColumn = new LayoutUtil.PseudoColumn(
       column,
       pseudoColumnContainer,
-      cellNodeContext
+      cellNodeContext,
     );
   }
 
@@ -122,7 +125,7 @@ export class TableCellFragment {
 export class TableCaptionView {
   constructor(
     public readonly viewNode: Element,
-    public readonly side: string
+    public readonly side: string,
   ) {}
 }
 
@@ -136,7 +139,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
     position: Vtree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
-    columnBlockSize: number
+    columnBlockSize: number,
   ) {
     super(position, breakOnEdge, overflows, columnBlockSize);
     this.formattingContext = position.formattingContext as TableFormattingContext;
@@ -147,14 +150,14 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
    */
   findAcceptableBreak(
     column: Layout.Column,
-    penalty: number
+    penalty: number,
   ): Vtree.NodeContext {
     const breakNodeContext = super.findAcceptableBreak(column, penalty);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
     const allCellsBreakable = this.getAcceptableCellBreakPositions().every(
-      bp => !!bp.nodeContext
+      (bp) => !!bp.nodeContext,
     );
     if (allCellsBreakable) {
       return breakNodeContext;
@@ -168,7 +171,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
    */
   getMinBreakPenalty(): number {
     let penalty = super.getMinBreakPenalty();
-    this.getAcceptableCellBreakPositions().forEach(bp => {
+    this.getAcceptableCellBreakPositions().forEach((bp) => {
       penalty += bp.breakPosition.getMinBreakPenalty();
     });
     return penalty;
@@ -178,8 +181,8 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
     if (!this.acceptableCellBreakPositions) {
       const formattingContext = this.formattingContext;
       const cellFragments = this.getCellFragments();
-      this.acceptableCellBreakPositions = cellFragments.map(cellFragment =>
-        cellFragment.findAcceptableBreakPosition()
+      this.acceptableCellBreakPositions = cellFragments.map((cellFragment) =>
+        cellFragment.findAcceptableBreakPosition(),
       );
     }
     return this.acceptableCellBreakPositions;
@@ -190,7 +193,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
       return this.rowIndex;
     }
     return (this.rowIndex = this.formattingContext.findRowIndexBySourceNode(
-      this.position.sourceNode
+      this.position.sourceNode,
     ));
   }
 
@@ -199,7 +202,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
       .getRowSpanningCellsOverflowingTheRow(this.getRowIndex())
       .map(
         this.formattingContext.getCellFragmentOfCell,
-        this.formattingContext
+        this.formattingContext,
       );
   }
 }
@@ -210,7 +213,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
   constructor(
     public readonly rowIndex: number,
     public readonly beforeNodeContext: Vtree.NodeContext,
-    public readonly formattingContext: TableFormattingContext
+    public readonly formattingContext: TableFormattingContext,
   ) {
     super();
   }
@@ -220,7 +223,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
    */
   findAcceptableBreak(
     column: Layout.Column,
-    penalty: number
+    penalty: number,
   ): Vtree.NodeContext {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
@@ -228,7 +231,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     const cellFragments = this.getCellFragments();
     const acceptableCellBreakPositions = this.getAcceptableCellBreakPositions();
     const allCellsBreakable =
-      acceptableCellBreakPositions.every(bp => !!bp.nodeContext) &&
+      acceptableCellBreakPositions.every((bp) => !!bp.nodeContext) &&
       acceptableCellBreakPositions.some((bp, index) => {
         const pseudoColumn = cellFragments[index].pseudoColumn;
         const nodeContext = bp.nodeContext;
@@ -238,7 +241,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
         );
       });
     this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(
-      bp => bp.nodeContext && bp.nodeContext.overflow
+      (bp) => bp.nodeContext && bp.nodeContext.overflow,
     );
     if (allCellsBreakable) {
       return this.beforeNodeContext;
@@ -257,7 +260,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     if (!formattingContext.isFreelyFragmentableRow(row)) {
       penalty += 10;
     }
-    this.getAcceptableCellBreakPositions().forEach(bp => {
+    this.getAcceptableCellBreakPositions().forEach((bp) => {
       penalty += bp.breakPosition.getMinBreakPenalty();
     });
     return penalty;
@@ -266,8 +269,8 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
   getAcceptableCellBreakPositions(): Layout.BreakPositionAndNodeContext[] {
     if (!this.acceptableCellBreakPositions) {
       const cellFragments = this.getCellFragments();
-      this.acceptableCellBreakPositions = cellFragments.map(cellFragment =>
-        cellFragment.findAcceptableBreakPosition()
+      this.acceptableCellBreakPositions = cellFragments.map((cellFragment) =>
+        cellFragment.findAcceptableBreakPosition(),
       );
     }
     return this.acceptableCellBreakPositions;
@@ -278,7 +281,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
       .getCellsFallingOnRow(this.rowIndex)
       .map(
         this.formattingContext.getCellFragmentOfCell,
-        this.formattingContext
+        this.formattingContext,
       );
   }
 }
@@ -312,7 +315,7 @@ export class TableFormattingContext
 
   constructor(
     parent: Vtree.FormattingContext,
-    public readonly tableSourceNode: Element
+    public readonly tableSourceNode: Element,
   ) {
     super(parent, tableSourceNode);
   }
@@ -336,7 +339,7 @@ export class TableFormattingContext
         return this.cellBreakPositions.length === 0;
       case "table-cell":
         return !this.cellBreakPositions.some(
-          p => p.cellNodePosition.steps[0].node === nodeContext.sourceNode
+          (p) => p.cellNodePosition.steps[0].node === nodeContext.sourceNode,
         );
       default:
         return firstTime;
@@ -398,13 +401,13 @@ export class TableFormattingContext
   }
 
   findRowIndexBySourceNode(sourceNode: Node): number {
-    return this.rows.findIndex(row => sourceNode === row.sourceNode);
+    return this.rows.findIndex((row) => sourceNode === row.sourceNode);
   }
 
   addCellFragment(
     rowIndex: number,
     columnIndex: number,
-    cellFragment: TableCellFragment
+    cellFragment: TableCellFragment,
   ) {
     let list = this.cellFragments[rowIndex];
     if (!list) {
@@ -426,7 +429,7 @@ export class TableFormattingContext
 
   getRowSpanningCellsOverflowingTheRow(rowIndex: number): TableCell[] {
     return this.getCellsFallingOnRow(rowIndex).filter(
-      cell => cell.rowIndex + cell.rowSpan - 1 > rowIndex
+      (cell) => cell.rowIndex + cell.rowSpan - 1 > rowIndex,
     );
   }
 
@@ -445,17 +448,19 @@ export class TableFormattingContext
     if (this.columnCount < 0) {
       this.columnCount = Math.max.apply(
         null,
-        this.rows.map(row => row.cells.reduce((sum, c) => sum + c.colSpan, 0))
+        this.rows.map((row) =>
+          row.cells.reduce((sum, c) => sum + c.colSpan, 0),
+        ),
       );
     }
     return this.columnCount;
   }
 
   updateCellSizes(clientLayout: Vtree.ClientLayout) {
-    this.rows.forEach(row => {
-      row.cells.forEach(cell => {
+    this.rows.forEach((row) => {
+      row.cells.forEach((cell) => {
         const rect = clientLayout.getElementClientRect(
-          cell.viewElement as Element
+          cell.viewElement as Element,
         );
         cell.viewElement = null;
         cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
@@ -467,7 +472,7 @@ export class TableFormattingContext
    * @return position
    */
   findCellFromColumn(
-    column: Layout.Column
+    column: Layout.Column,
   ): { rowIndex: number; columnIndex: number } | null {
     if (!column) {
       return null;
@@ -504,34 +509,31 @@ export class TableFormattingContext
   }
 
   collectElementsOffsetOfUpperCells(
-    position: { rowIndex: number; columnIndex: number } | null
+    position: { rowIndex: number; columnIndex: number } | null,
   ): RepetitiveElement.ElementsOffset[] {
     const collected = [];
-    return this.slots.reduce(
-      (repetitiveElements, row, index) => {
-        if (index >= position.rowIndex) {
-          return repetitiveElements;
-        }
-        const cellFragment = this.getCellFragmentOfCell(
-          row[position.columnIndex].cell
-        );
-        if (!cellFragment || collected.includes(cellFragment)) {
-          return repetitiveElements;
-        }
-        this.collectElementsOffsetFromColumn(
-          cellFragment.pseudoColumn.getColumn(),
-          repetitiveElements
-        );
-        collected.push(cellFragment);
+    return this.slots.reduce((repetitiveElements, row, index) => {
+      if (index >= position.rowIndex) {
         return repetitiveElements;
-      },
-      [] as RepetitiveElement.ElementsOffset[]
-    );
+      }
+      const cellFragment = this.getCellFragmentOfCell(
+        row[position.columnIndex].cell,
+      );
+      if (!cellFragment || collected.includes(cellFragment)) {
+        return repetitiveElements;
+      }
+      this.collectElementsOffsetFromColumn(
+        cellFragment.pseudoColumn.getColumn(),
+        repetitiveElements,
+      );
+      collected.push(cellFragment);
+      return repetitiveElements;
+    }, [] as RepetitiveElement.ElementsOffset[]);
   }
 
   collectElementsOffsetOfHighestColumn(): RepetitiveElement.ElementsOffset[] {
     const elementsInColumn = [];
-    this.rows.forEach(row => {
+    this.rows.forEach((row) => {
       row.cells.forEach((cell, index) => {
         if (!elementsInColumn[index]) {
           elementsInColumn[index] = { collected: [], elements: [] };
@@ -543,26 +545,26 @@ export class TableFormattingContext
         }
         this.collectElementsOffsetFromColumn(
           cellFragment.pseudoColumn.getColumn(),
-          state.elements
+          state.elements,
         );
         state.collected.push(cellFragment);
       });
     });
     return [
       new ElementsOffsetOfTableCell(
-        elementsInColumn.map(entry => entry.elements)
-      )
+        elementsInColumn.map((entry) => entry.elements),
+      ),
     ];
   }
 
   private collectElementsOffsetFromColumn(
     column: Layout.Column,
-    repetitiveElements: RepetitiveElement.ElementsOffset[]
+    repetitiveElements: RepetitiveElement.ElementsOffset[],
   ) {
-    column.fragmentLayoutConstraints.forEach(constraint => {
+    column.fragmentLayoutConstraints.forEach((constraint) => {
       if (
         RepetitiveElement.isInstanceOfRepetitiveElementsOwnerLayoutConstraint(
-          constraint
+          constraint,
         )
       ) {
         const repetitiveElement = constraint.getRepetitiveElements();
@@ -571,7 +573,7 @@ export class TableFormattingContext
       if (Table.isInstanceOfTableRowLayoutConstraint(constraint)) {
         constraint
           .getElementsOffsetsForTableCell(null)
-          .forEach(repetitiveElement => {
+          .forEach((repetitiveElement) => {
             repetitiveElements.push(repetitiveElement);
           });
       }
@@ -592,14 +594,14 @@ export class TableFormattingContext
 export class ElementsOffsetOfTableCell
   implements RepetitiveElement.ElementsOffset {
   constructor(
-    public readonly repeatitiveElementsInColumns: RepetitiveElement.ElementsOffset[][]
+    public readonly repeatitiveElementsInColumns: RepetitiveElement.ElementsOffset[][],
   ) {}
 
   /** @override */
   calculateOffset(nodeContext: Vtree.NodeContext): number {
     return this.calculateMaxOffsetOfColumn(
       nodeContext,
-      offsets => offsets.current
+      (offsets) => offsets.current,
     );
   }
 
@@ -607,16 +609,16 @@ export class ElementsOffsetOfTableCell
   calculateMinimumOffset(nodeContext: Vtree.NodeContext): number {
     return this.calculateMaxOffsetOfColumn(
       nodeContext,
-      offsets => offsets.minimum
+      (offsets) => offsets.minimum,
     );
   }
 
   private calculateMaxOffsetOfColumn(nodeContext, resolver) {
     let maxOffset = 0;
-    this.repeatitiveElementsInColumns.forEach(repetitiveElements => {
+    this.repeatitiveElementsInColumns.forEach((repetitiveElements) => {
       const offsets = BreakPosition.calculateOffset(
         nodeContext,
-        repetitiveElements
+        repetitiveElements,
       );
       maxOffset = Math.max(maxOffset, resolver(offsets));
     });
@@ -625,7 +627,7 @@ export class ElementsOffsetOfTableCell
 }
 
 function getTableFormattingContext(
-  formattingContext: Vtree.FormattingContext
+  formattingContext: Vtree.FormattingContext,
 ): TableFormattingContext {
   Asserts.assert(formattingContext instanceof TableFormattingContext);
   return formattingContext as TableFormattingContext;
@@ -650,7 +652,7 @@ function isValidParentOfTableRow(display: string | null): boolean {
 function skipNestedTable(
   state: LayoutUtil.LayoutIteratorState,
   formattingContext: TableFormattingContext,
-  column: Layout.Column
+  column: Layout.Column,
 ): Task.Result<boolean> | null {
   const nodeContext = state.nodeContext;
   const display = nodeContext.display;
@@ -680,7 +682,7 @@ function skipNestedTable(
   if (isNestedTable) {
     return column
       .buildDeepElementView(nodeContext)
-      .thenAsync(nodeContextAfter => {
+      .thenAsync((nodeContextAfter) => {
         state.nodeContext = nodeContextAfter;
         return Task.newResult(true);
       });
@@ -698,7 +700,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
 
   constructor(
     public readonly formattingContext: TableFormattingContext,
-    public readonly column: Layout.Column
+    public readonly column: Layout.Column,
   ) {
     super();
   }
@@ -707,7 +709,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
    * @override
    */
   startNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const r = skipNestedTable(state, formattingContext, this.column);
@@ -725,7 +727,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       case "table-caption": {
         const captionView = new TableCaptionView(
           nodeContext.viewNode as Element,
-          nodeContext.captionSide
+          nodeContext.captionSide,
         );
         formattingContext.captions.push(captionView);
         break;
@@ -750,7 +752,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           this.columnIndex = 0;
           formattingContext.addRow(
             this.rowIndex,
-            new TableRow(this.rowIndex, nodeContext.sourceNode)
+            new TableRow(this.rowIndex, nodeContext.sourceNode),
           );
           if (!repetitiveElements.firstContentSourceNode) {
             repetitiveElements.firstContentSourceNode = nodeContext.sourceNode as Element;
@@ -765,7 +767,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
    * @override
    */
   afterNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
@@ -774,10 +776,10 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     this.postLayoutBlockContents(state);
     if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
       const computedStyle = clientLayout.getElementComputedStyle(
-        formattingContext.getRootViewNode(nodeContext) as Element
+        formattingContext.getRootViewNode(nodeContext) as Element,
       );
       formattingContext.tableWidth = parseFloat(
-        computedStyle[formattingContext.vertical ? "height" : "width"]
+        computedStyle[formattingContext.vertical ? "height" : "width"],
       );
       formattingContext.getRepetitiveElements().lastContentSourceNode =
         state.lastAfterNodeContext &&
@@ -808,7 +810,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             const elem = nodeContext.viewNode as Element;
             formattingContext.addCell(
               this.rowIndex,
-              new TableCell(this.rowIndex, this.columnIndex, elem)
+              new TableCell(this.rowIndex, this.columnIndex, elem),
             );
             this.columnIndex++;
           }
@@ -820,28 +822,28 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
 
   /** @override */
   startNonElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   /** @override */
   afterNonElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   /** @override */
   startInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   /** @override */
   afterInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
@@ -869,7 +871,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   private static ignoreList: { [key: string]: boolean } = {
     "table-caption": true,
     "table-column-group": true,
-    "table-column": true
+    "table-column": true,
   };
   inRow: boolean = false;
   currentRowIndex: number = -1;
@@ -880,7 +882,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
 
   constructor(
     public readonly formattingContext: TableFormattingContext,
-    public readonly column: Layout.Column
+    public readonly column: Layout.Column,
   ) {
     super(true);
     this.originalStopAtOverflow = column.stopAtOverflow;
@@ -905,7 +907,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   layoutCell(
     cell: TableCell,
     cellNodeContext: Vtree.NodeContext,
-    startChunkPosition: Vtree.ChunkPosition
+    startChunkPosition: Vtree.ChunkPosition,
   ): Task.Result<boolean> {
     const rowIndex = cell.rowIndex;
     const columnIndex = cell.columnIndex;
@@ -917,17 +919,17 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       Base.setCSSProperty(
         cellViewNode,
         this.formattingContext.vertical ? "height" : "width",
-        `${this.getColSpanningCellWidth(cell)}px`
+        `${this.getColSpanningCellWidth(cell)}px`,
       );
     }
     const pseudoColumnContainer = cellViewNode.ownerDocument.createElement(
-      "div"
+      "div",
     );
     cellViewNode.appendChild(pseudoColumnContainer);
     const cellFragment = new TableCellFragment(
       this.column,
       pseudoColumnContainer,
-      cellNodeContext
+      cellNodeContext,
     );
     this.formattingContext.addCellFragment(rowIndex, columnIndex, cellFragment);
     if (
@@ -975,11 +977,11 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   layoutRowSpanningCellsFromPreviousFragment(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const rowSpanningCellBreakPositions = this.extractRowSpanningCellBreakPositions();
-    const rowCount = rowSpanningCellBreakPositions.reduce(s => s + 1, 0);
+    const rowCount = rowSpanningCellBreakPositions.reduce((s) => s + 1, 0);
     if (rowCount === 0) {
       return Task.newResult(true);
     }
@@ -987,17 +989,17 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     const currentRow = state.nodeContext;
     currentRow.viewNode.parentNode.removeChild(currentRow.viewNode);
     const frame = Task.newFrame<boolean>(
-      "layoutRowSpanningCellsFromPreviousFragment"
+      "layoutRowSpanningCellsFromPreviousFragment",
     );
     let cont = Task.newResult(true);
     let spanningCellRowIndex = 0;
     const occupiedSlotIndices = [];
-    rowSpanningCellBreakPositions.forEach(rowCellBreakPositions => {
+    rowSpanningCellBreakPositions.forEach((rowCellBreakPositions) => {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
         const rowNodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
           rowCellBreakPositions[0].cellNodePosition.steps[1],
-          currentRow.parent
+          currentRow.parent,
         );
         return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
           let cont1 = Task.newResult(true);
@@ -1007,7 +1009,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             while (columnIndex < upperColumnIndex) {
               if (!occupiedSlotIndices.includes(columnIndex)) {
                 const dummy = rowNodeContext.viewNode.ownerDocument.createElement(
-                  "td"
+                  "td",
                 );
                 Base.setCSSProperty(dummy, "padding", "0");
                 rowNodeContext.viewNode.appendChild(dummy);
@@ -1015,14 +1017,14 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               columnIndex++;
             }
           }
-          rowCellBreakPositions.forEach(cellBreakPosition => {
+          rowCellBreakPositions.forEach((cellBreakPosition) => {
             cont1 = cont1.thenAsync(() => {
               const cell = cellBreakPosition.cell;
               addDummyCellUntil(cell.anchorSlot.columnIndex);
               const cellNodePosition = cellBreakPosition.cellNodePosition;
               const cellNodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
                 cellNodePosition.steps[0],
-                rowNodeContext
+                rowNodeContext,
               );
               cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
               cellNodeContext.after = cellNodePosition.after;
@@ -1040,7 +1042,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
                   return this.layoutCell(
                     cell,
                     cellNodeContext,
-                    breakChunkPosition
+                    breakChunkPosition,
                   ).thenAsync(() => {
                     (cellNodeContext.viewNode as HTMLTableCellElement).rowSpan =
                       cell.rowIndex +
@@ -1080,7 +1082,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     if (this.currentRowIndex < 0) {
       Asserts.assert(nodeContext.sourceNode);
       this.currentRowIndex = formattingContext.findRowIndexBySourceNode(
-        nodeContext.sourceNode
+        nodeContext.sourceNode,
       );
     } else {
       this.currentRowIndex++;
@@ -1094,12 +1096,12 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           state.lastAfterNodeContext,
           null,
           true,
-          state.breakAtTheEdge
+          state.breakAtTheEdge,
         );
         if (
           overflown &&
           formattingContext.getRowSpanningCellsOverflowingTheRow(
-            this.currentRowIndex - 1
+            this.currentRowIndex - 1,
           ).length === 0
         ) {
           this.resetColumn();
@@ -1107,14 +1109,14 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           state.break = true;
         }
         return Task.newResult(true);
-      }
+      },
     );
   }
 
   private registerCellFragmentIndex() {
     const cells = this.formattingContext.getRowByIndex(this.currentRowIndex)
       .cells;
-    cells.forEach(cell => {
+    cells.forEach((cell) => {
       const cellBreakPosition = this.formattingContext.cellBreakPositions[
         cell.columnIndex
       ];
@@ -1126,12 +1128,12 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
         const offset = (this.column
           .layoutContext as Vgen.ViewFactory).xmldoc.getElementOffset(
-          tdNodeStep.node as Element
+          tdNodeStep.node as Element,
         );
         Selectors.registerFragmentIndex(
           offset,
           tdNodeStep.fragmentIndex + 1,
-          1
+          1,
         );
       }
     });
@@ -1166,18 +1168,18 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     } else {
       cont = this.column
         .nextInTree(nodeContext, state.atUnforcedBreak)
-        .thenAsync(nextNodeContext => {
+        .thenAsync((nextNodeContext) => {
           if (nextNodeContext.viewNode) {
             nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
           }
           const startNodePosition = VtreeImpl.newNodePositionFromNodeContext(
             nextNodeContext,
-            0
+            0,
           );
           return Task.newResult(new VtreeImpl.ChunkPosition(startNodePosition));
         });
     }
-    cont.then(startChunkPosition => {
+    cont.then((startChunkPosition) => {
       Asserts.assert(nodeContext);
       this.layoutCell(cell, nodeContext, startChunkPosition).then(() => {
         this.afterNonInlineElementNode(state);
@@ -1189,12 +1191,12 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   startNonInlineBox(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): Task.Result<boolean> {
     const r = skipNestedTable(
       state,
       getTableFormattingContext(this.formattingContext),
-      this.column
+      this.column,
     );
     if (r) {
       return r;
@@ -1236,7 +1238,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         const bp = new InsideTableRowBreakPosition(
           this.currentRowIndex,
           beforeNodeContext,
-          this.formattingContext
+          this.formattingContext,
         );
         this.column.breakPositions.push(bp);
       }
@@ -1245,7 +1247,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   afterNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState
+    state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     const nodeContext = state.nodeContext;
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
@@ -1262,7 +1264,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         Base.setCSSProperty(
           nodeContext.viewNode as Element,
           "display",
-          "table-row-group"
+          "table-row-group",
         );
       }
     } else if (display === "table-footer-group") {
@@ -1277,7 +1279,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         Base.setCSSProperty(
           nodeContext.viewNode as Element,
           "display",
-          "table-row-group"
+          "table-row-group",
         );
       }
     }
@@ -1288,7 +1290,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     ) {
       nodeContext.overflow = this.column.checkOverflowAndSaveEdge(
         nodeContext,
-        null
+        null,
       );
       this.resetColumn();
       state.break = true;
@@ -1308,10 +1310,10 @@ const tableLayoutOptionCache: {
 }[] = [];
 
 function getTableLayoutOption(
-  tableRootSourceNode: Node
+  tableRootSourceNode: Node,
 ): TableLayoutOption | null {
   const i = tableLayoutOptionCache.findIndex(
-    c => c.root === tableRootSourceNode
+    (c) => c.root === tableRootSourceNode,
   );
   const pair = tableLayoutOptionCache[i];
   return pair ? pair.tableLayoutOption : null;
@@ -1319,7 +1321,7 @@ function getTableLayoutOption(
 
 function clearTableLayoutOptionCache(tableRootSourceNode: Node): void {
   const i = tableLayoutOptionCache.findIndex(
-    c => c.root === tableRootSourceNode
+    (c) => c.root === tableRootSourceNode,
   );
   if (i >= 0) {
     tableLayoutOptionCache.splice(i, 1);
@@ -1329,15 +1331,15 @@ function clearTableLayoutOptionCache(tableRootSourceNode: Node): void {
 export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   private layoutEntireTable(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getTableFormattingContext(
-      nodeContext.formattingContext
+      nodeContext.formattingContext,
     );
     const strategy = new EntireTableLayoutStrategy(formattingContext, column);
     const iterator = new LayoutUtil.LayoutIterator(
       strategy,
-      column.layoutContext
+      column.layoutContext,
     );
     return iterator.iterate(nodeContext);
   }
@@ -1346,7 +1348,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     lastRow: Element,
     columnCount: number,
     vertical: boolean,
-    clientLayout: Vtree.ClientLayout
+    clientLayout: Vtree.ClientLayout,
   ): number[] {
     const doc = lastRow.ownerDocument;
     const dummyRow = doc.createElement("tr");
@@ -1357,7 +1359,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       dummyCells.push(cell);
     }
     lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
-    const colWidths = dummyCells.map(cell => {
+    const colWidths = dummyCells.map((cell) => {
       const rect = clientLayout.getElementClientRect(cell);
       return vertical ? rect["height"] : rect["width"];
     });
@@ -1379,7 +1381,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
 
   private normalizeAndGetColElements(colGroups: Element[]): Element[] {
     const cols = [];
-    colGroups.forEach(colGroup => {
+    colGroups.forEach((colGroup) => {
       // Replace colgroup[span=n] with colgroup with n col elements
       let span = (colGroup as any).span;
       colGroup.removeAttribute("span");
@@ -1412,7 +1414,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     cols: Element[],
     colGroups: Element[],
     columnCount: number,
-    tableElement: Element
+    tableElement: Element,
   ) {
     if (cols.length < columnCount) {
       const colGroup = tableElement.ownerDocument.createElement("colgroup");
@@ -1432,7 +1434,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   normalizeColGroups(
     formattingContext: TableFormattingContext,
     tableElement: Element,
-    column: Layout.Column
+    column: Layout.Column,
   ) {
     const vertical = formattingContext.vertical;
     const lastRow = formattingContext.lastRowViewNode;
@@ -1456,7 +1458,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       lastRow,
       columnCount,
       vertical,
-      column.clientLayout
+      column.clientLayout,
     ));
 
     // Normalize colgroup and col elements
@@ -1471,10 +1473,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       Base.setCSSProperty(
         col,
         vertical ? "height" : "width",
-        `${colWidths[i]}px`
+        `${colWidths[i]}px`,
       );
     });
-    colGroups.forEach(colGroup => {
+    colGroups.forEach((colGroup) => {
       fragment.appendChild(colGroup.cloneNode(true));
     });
     formattingContext.colGroups = fragment;
@@ -1482,10 +1484,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
 
   doInitialLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getTableFormattingContext(
-      nodeContext.formattingContext
+      nodeContext.formattingContext,
     );
     formattingContext.vertical = nodeContext.vertical;
     formattingContext.initializeRepetitiveElements(nodeContext.vertical);
@@ -1493,10 +1495,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
     clearTableLayoutOptionCache(nodeContext.sourceNode);
     const frame = Task.newFrame<Vtree.NodeContext>(
-      "TableLayoutProcessor.doInitialLayout"
+      "TableLayoutProcessor.doInitialLayout",
     );
     const initialNodeContext = nodeContext.copy();
-    this.layoutEntireTable(nodeContext, column).then(nodeContextAfter => {
+    this.layoutEntireTable(nodeContext, column).then((nodeContextAfter) => {
       const tableElement = nodeContextAfter.viewNode as Element;
       const tableBBox = column.clientLayout.getElementClientRect(tableElement);
       let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
@@ -1504,14 +1506,14 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         (column.vertical ? -1 : 1) *
         BreakPosition.calculateOffset(
           nodeContext,
-          column.collectElementsOffset()
+          column.collectElementsOffset(),
         ).current;
       if (
         !column.isOverflown(edge) &&
         (!tableLayoutOption || !tableLayoutOption.calculateBreakPositionsInside)
       ) {
         column.breakPositions.push(
-          new EntireTableBreakPosition(initialNodeContext)
+          new EntireTableBreakPosition(initialNodeContext),
         );
         frame.finish(nodeContextAfter);
         return;
@@ -1526,7 +1528,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   addCaptions(
     formattingContext: TableFormattingContext,
     rootViewNode: Element,
-    firstChild: Node | null
+    firstChild: Node | null,
   ) {
     const captions = formattingContext.captions;
     captions.forEach((caption, i) => {
@@ -1542,7 +1544,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   addColGroups(
     formattingContext: TableFormattingContext,
     rootViewNode: Element,
-    firstChild: Node | null
+    firstChild: Node | null,
   ) {
     if (
       formattingContext.colGroups &&
@@ -1550,19 +1552,19 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     ) {
       rootViewNode.insertBefore(
         formattingContext.colGroups.cloneNode(true),
-        firstChild
+        firstChild,
       );
     }
   }
 
   removeColGroups(
     formattingContext: TableFormattingContext,
-    rootViewNode: Element
+    rootViewNode: Element,
   ) {
     if (formattingContext.colGroups && rootViewNode) {
       const colGroups = this.getColGroupElements(rootViewNode);
       if (colGroups) {
-        colGroups.forEach(colGroup => {
+        colGroups.forEach((colGroup) => {
           rootViewNode.removeChild(colGroup);
         });
       }
@@ -1571,13 +1573,13 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
 
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getTableFormattingContext(
-      nodeContext.formattingContext
+      nodeContext.formattingContext,
     );
     const rootViewNode = formattingContext.getRootViewNode(
-      nodeContext
+      nodeContext,
     ) as Element;
     const firstChild = rootViewNode.firstChild;
     this.addCaptions(formattingContext, rootViewNode, firstChild);
@@ -1585,10 +1587,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const strategy = new TableLayoutStrategy(formattingContext, column);
     const iterator = new LayoutUtil.LayoutIterator(
       strategy,
-      column.layoutContext
+      column.layoutContext,
     );
     const frame = Task.newFrame<Vtree.NodeContext>(
-      "TableFormattingContext.doLayout"
+      "TableFormattingContext.doLayout",
     );
     iterator.iterate(nodeContext).thenFinish(frame);
     return frame.result();
@@ -1600,10 +1602,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   layout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-    leadingEdge: boolean
+    leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getTableFormattingContext(
-      nodeContext.formattingContext
+      nodeContext.formattingContext,
     );
     const rootViewNode = formattingContext.getRootViewNode(nodeContext);
     if (!rootViewNode) {
@@ -1612,12 +1614,12 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       if (leadingEdge) {
         RepetitiveElementImpl.appendHeaderToAncestors(
           nodeContext.parent,
-          column
+          column,
         );
       }
       return new LayoutRetryer(formattingContext, this).layout(
         nodeContext,
-        column
+        column,
       );
     }
   }
@@ -1629,13 +1631,13 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     position: Vtree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
-    columnBlockSize: number
+    columnBlockSize: number,
   ): Layout.BreakPosition {
     return new BetweenTableRowBreakPosition(
       position,
       breakOnEdge,
       overflows,
-      columnBlockSize
+      columnBlockSize,
     );
   }
 
@@ -1651,7 +1653,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
    */
   afterNonInlineElementNode(
     nodeContext: Vtree.NodeContext,
-    stopAtOverflow: boolean
+    stopAtOverflow: boolean,
   ): boolean {
     return false;
   }
@@ -1663,15 +1665,15 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     column: Layout.Column,
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
-    endOfColumn: boolean
+    endOfColumn: boolean,
   ): Task.Result<boolean> {
     const formattingContext = getTableFormattingContext(
-      nodeContext.formattingContext
+      nodeContext.formattingContext,
     );
     if (nodeContext.display === "table-row") {
       Asserts.assert(nodeContext.sourceNode);
       const rowIndex = formattingContext.findRowIndexBySourceNode(
-        nodeContext.sourceNode
+        nodeContext.sourceNode,
       );
       formattingContext.cellBreakPositions = [];
       let cells: TableCell[];
@@ -1679,16 +1681,16 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         cells = formattingContext.getCellsFallingOnRow(rowIndex);
       } else {
         cells = formattingContext.getRowSpanningCellsOverflowingTheRow(
-          rowIndex
+          rowIndex,
         );
       }
       if (cells.length) {
         const frame = Task.newFrame<boolean>(
-          "TableLayoutProcessor.finishBreak"
+          "TableLayoutProcessor.finishBreak",
         );
         let i = 0;
         frame
-          .loopWithFrame(loopFrame => {
+          .loopWithFrame((loopFrame) => {
             if (i === cells.length) {
               loopFrame.breakLoop();
               return;
@@ -1701,16 +1703,16 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
             const cellNodeContext = cellFragment.cellNodeContext;
             const cellNodePosition = cellNodeContext.toNodePosition();
             const breakChunkPosition = new VtreeImpl.ChunkPosition(
-              breakNodeContext.toNodePosition()
+              breakNodeContext.toNodePosition(),
             );
             formattingContext.cellBreakPositions.push({
               cellNodePosition,
               breakChunkPosition,
-              cell
+              cell,
             } as BrokenTableCellPosition);
             const cellViewNode = cellNodeContext.viewNode as HTMLTableCellElement;
             cellFragment.column.layoutContext.processFragmentedBlockEdge(
-              cellFragment.cellNodeContext
+              cellFragment.cellNodeContext,
             );
             if (rowIndex < cell.rowIndex + cell.rowSpan - 1) {
               cellViewNode.rowSpan = rowIndex - cell.rowIndex + 1;
@@ -1723,7 +1725,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
                   adjustCellHeight(
                     cellFragment,
                     formattingContext,
-                    breakNodeContext
+                    breakNodeContext,
                   );
                   loopFrame.continueLoop();
                 });
@@ -1745,7 +1747,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       column,
       nodeContext,
       forceRemoveSelf,
-      endOfColumn
+      endOfColumn,
     );
   }
 
@@ -1754,13 +1756,13 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     column: Layout.Column,
     parentNodeContext: Vtree.NodeContext,
     nodeContext: Vtree.NodeContext,
-    removeSelf: boolean
+    removeSelf: boolean,
   ) {
     LayoutProcessor.BlockLayoutProcessor.prototype.clearOverflownViewNodes(
       column,
       parentNodeContext,
       nodeContext,
-      removeSelf
+      removeSelf,
     );
   }
 }
@@ -1768,7 +1770,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
 function adjustCellHeight(
   cellFragment: TableCellFragment,
   formattingContext: TableFormattingContext,
-  breakNodeContext: Vtree.NodeContext
+  breakNodeContext: Vtree.NodeContext,
 ): void {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (!repetitiveElements) {
@@ -1801,7 +1803,7 @@ function adjustCellHeight(
 export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   constructor(
     private tableFormattingContext: TableFormattingContext,
-    private readonly processor: TableLayoutProcessor
+    private readonly processor: TableLayoutProcessor,
   ) {
     super();
   }
@@ -1825,7 +1827,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
       }
       return new LayoutFragmentedTable(
         this.tableFormattingContext,
-        this.processor
+        this.processor,
       );
     }
   }
@@ -1836,7 +1838,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   clearNodes(initialPosition: Vtree.NodeContext) {
     super.clearNodes(initialPosition);
     const rootViewNode = this.tableFormattingContext.getRootViewNode(
-      initialPosition
+      initialPosition,
     );
     this.processor.removeColGroups(this.tableFormattingContext, rootViewNode);
   }
@@ -1853,7 +1855,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
 export class LayoutEntireTable extends RepetitiveElementImpl.LayoutEntireBlock {
   constructor(
     formattingContext: TableFormattingContext,
-    public readonly processor: TableLayoutProcessor
+    public readonly processor: TableLayoutProcessor,
   ) {
     super(formattingContext);
   }
@@ -1863,7 +1865,7 @@ export class LayoutEntireTable extends RepetitiveElementImpl.LayoutEntireBlock {
    */
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
     return this.processor.doInitialLayout(nodeContext, column);
   }
@@ -1892,7 +1894,7 @@ export class EntireTableBreakPosition extends BreakPosition.EdgeBreakPosition {
    */
   breakPositionChosen(column: Layout.Column): void {
     column.fragmentLayoutConstraints.push(
-      new EntireTableLayoutConstraint(this.position.sourceNode)
+      new EntireTableLayoutConstraint(this.position.sourceNode),
     );
   }
 }
@@ -1909,7 +1911,7 @@ export class EntireTableLayoutConstraint
   allowLayout(
     nodeContext: Vtree.NodeContext,
     overflownNodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): boolean {
     // If the nodeContext overflows, any EntireTableLayoutConstraint should not
     // be registered in the first place. See
@@ -1932,14 +1934,14 @@ export class EntireTableLayoutConstraint
     allowed: boolean,
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ) {
     Asserts.assert(positionAfter.sourceNode);
     tableLayoutOptionCache.push({
       root: positionAfter.sourceNode,
       tableLayoutOption: {
-        calculateBreakPositionsInside: true
-      } as TableLayoutOption
+        calculateBreakPositionsInside: true,
+      } as TableLayoutOption,
     });
   }
 
@@ -1948,7 +1950,7 @@ export class EntireTableLayoutConstraint
    */
   finishBreak(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<boolean> {
     return Task.newResult(true);
   }
@@ -1974,7 +1976,7 @@ export class EntireTableLayoutConstraint
 export class LayoutFragmentedTable extends RepetitiveElementImpl.LayoutFragmentedBlock {
   constructor(
     formattingContext: TableFormattingContext,
-    public readonly processor: TableLayoutProcessor
+    public readonly processor: TableLayoutProcessor,
   ) {
     super(formattingContext);
   }
@@ -1984,7 +1986,7 @@ export class LayoutFragmentedTable extends RepetitiveElementImpl.LayoutFragmente
    */
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (
@@ -1992,7 +1994,9 @@ export class LayoutFragmentedTable extends RepetitiveElementImpl.LayoutFragmente
       !repetitiveElements.isAfterLastContent(nodeContext)
     ) {
       const constraint = new TableRowLayoutConstraint(nodeContext);
-      if (!column.fragmentLayoutConstraints.some(c => constraint.equalsTo(c))) {
+      if (
+        !column.fragmentLayoutConstraints.some((c) => constraint.equalsTo(c))
+      ) {
         column.fragmentLayoutConstraints.unshift(constraint);
       }
     }
@@ -2017,7 +2021,7 @@ export class TableRowLayoutConstraint
   allowLayout(
     nodeContext: Vtree.NodeContext,
     overflownNodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): boolean {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
@@ -2045,17 +2049,17 @@ export class TableRowLayoutConstraint
   /** @override */
   nextCandidate(nodeContext: Vtree.NodeContext): boolean {
     const formattingContext = getTableFormattingContext(
-      this.nodeContext.formattingContext
+      this.nodeContext.formattingContext,
     );
     const cellFragmentConstraints = this.collectCellFragmentLayoutConstraints(
       nodeContext,
-      formattingContext
+      formattingContext,
     );
     if (
-      cellFragmentConstraints.some(entry =>
-        entry.constraints.some(constraint =>
-          constraint.nextCandidate(nodeContext)
-        )
+      cellFragmentConstraints.some((entry) =>
+        entry.constraints.some((constraint) =>
+          constraint.nextCandidate(nodeContext),
+        ),
       )
     ) {
       return true;
@@ -2068,22 +2072,22 @@ export class TableRowLayoutConstraint
     allowed: boolean,
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ) {
     const formattingContext = getTableFormattingContext(
-      this.nodeContext.formattingContext
+      this.nodeContext.formattingContext,
     );
     this.cellFragmentLayoutConstraints = this.collectCellFragmentLayoutConstraints(
       positionAfter,
-      formattingContext
+      formattingContext,
     );
-    this.cellFragmentLayoutConstraints.forEach(entry => {
-      entry.constraints.forEach(constraint => {
+    this.cellFragmentLayoutConstraints.forEach((entry) => {
+      entry.constraints.forEach((constraint) => {
         constraint.postLayout(
           allowed,
           entry.breakPosition,
           initialPosition,
-          column
+          column,
         );
       });
     });
@@ -2091,7 +2095,7 @@ export class TableRowLayoutConstraint
       const rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
       new TableLayoutProcessor().removeColGroups(
         formattingContext,
-        rootViewNode as Element
+        rootViewNode as Element,
       );
       this.removeDummyRowNodes(initialPosition);
     }
@@ -2101,21 +2105,21 @@ export class TableRowLayoutConstraint
   /** @override */
   finishBreak(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<boolean> {
     const formattingContext = getTableFormattingContext(
-      this.nodeContext.formattingContext
+      this.nodeContext.formattingContext,
     );
     const frame: Task.Frame<boolean> = Task.newFrame("finishBreak");
     const constraints = this.cellFragmentLayoutConstraints.reduce(
       (array, entry) =>
         array.concat(
-          entry.constraints.map(constraint => ({
+          entry.constraints.map((constraint) => ({
             constraint,
-            breakPosition: entry.breakPosition
-          }))
+            breakPosition: entry.breakPosition,
+          })),
         ),
-      []
+      [],
     );
     let i = 0;
     frame
@@ -2156,21 +2160,23 @@ export class TableRowLayoutConstraint
 
   private collectCellFragmentLayoutConstraints(
     nodeContext: Vtree.NodeContext,
-    formattingContext: TableFormattingContext
+    formattingContext: TableFormattingContext,
   ): {
     constraints: Layout.FragmentLayoutConstraint[];
     breakPosition: Vtree.NodeContext;
   }[] {
-    return this.getCellFragemnts(nodeContext, formattingContext).map(entry => ({
-      constraints: entry.fragment.pseudoColumn.getColumn()
-        .fragmentLayoutConstraints,
-      breakPosition: entry.breakPosition
-    }));
+    return this.getCellFragemnts(nodeContext, formattingContext).map(
+      (entry) => ({
+        constraints: entry.fragment.pseudoColumn.getColumn()
+          .fragmentLayoutConstraints,
+        breakPosition: entry.breakPosition,
+      }),
+    );
   }
 
   private getCellFragemnts(
     nodeContext: Vtree.NodeContext,
-    formattingContext: TableFormattingContext
+    formattingContext: TableFormattingContext,
   ): { fragment: TableCellFragment; breakPosition: Vtree.NodeContext }[] {
     let rowIndex = Number.MAX_VALUE;
     if (nodeContext && nodeContext.display === "table-row") {
@@ -2184,13 +2190,13 @@ export class TableRowLayoutConstraint
       if (!formattingContext.cellFragments[i]) {
         continue;
       }
-      formattingContext.cellFragments[i].forEach(cellFragment => {
+      formattingContext.cellFragments[i].forEach((cellFragment) => {
         if (!cellFragment) {
           return;
         }
         cellFragments.push({
           fragment: cellFragment,
-          breakPosition: cellFragment.findAcceptableBreakPosition().nodeContext
+          breakPosition: cellFragment.findAcceptableBreakPosition().nodeContext,
         });
       });
     }
@@ -2198,10 +2204,10 @@ export class TableRowLayoutConstraint
   }
 
   getElementsOffsetsForTableCell(
-    column: Layout.Column
+    column: Layout.Column,
   ): RepetitiveElement.ElementsOffset[] {
     const formattingContext = getTableFormattingContext(
-      this.nodeContext.formattingContext
+      this.nodeContext.formattingContext,
     );
     const position = formattingContext.findCellFromColumn(column);
     if (position) {
@@ -2231,7 +2237,7 @@ function resolveFormattingContextHook(
   display: Css.Ident,
   position: Css.Ident,
   floatSide: Css.Ident,
-  isRoot: boolean
+  isRoot: boolean,
 ): TableFormattingContext | null {
   if (!firstTime) {
     return null;
@@ -2240,14 +2246,14 @@ function resolveFormattingContextHook(
     const parent = nodeContext.parent;
     return new TableFormattingContext(
       parent ? parent.formattingContext : null,
-      nodeContext.sourceNode as Element
+      nodeContext.sourceNode as Element,
     );
   }
   return null;
 }
 
 function resolveLayoutProcessor(
-  formattingContext
+  formattingContext,
 ): TableLayoutProcessor | null {
   if (formattingContext instanceof TableFormattingContext) {
     return tableLayoutProcessor;
@@ -2257,10 +2263,10 @@ function resolveLayoutProcessor(
 
 Plugin.registerHook(
   Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-  resolveFormattingContextHook
+  resolveFormattingContextHook,
 );
 
 Plugin.registerHook(
   Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
-  resolveLayoutProcessor
+  resolveLayoutProcessor,
 );

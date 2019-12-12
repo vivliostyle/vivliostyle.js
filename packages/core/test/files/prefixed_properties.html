@@ -1,43 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Prefixed properties</title>
     <style>
-        html {
-            line-height: 20px;
-        }
-        .multicol {
-            width: 350px;
-            height: 60px;
-            column-count: 2;
-            column-gap: 50px;
-            border: 1px black solid;
-        }
-        .ruler {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            margin-left: 151px;
-            width: 50px;
-            border-top: 3px green solid;
-            text-align: center;
-        }
-        .vertical {
-            writing-mode: vertical-rl;
-            max-height: 200px;
-            border: 1px black solid;
-        }
-        .digits {
-            -ms-text-combine-horizontal: all;
-            -webkit-text-combine: horizontal;
-        }
+      html {
+        line-height: 20px;
+      }
+      .multicol {
+        width: 350px;
+        height: 60px;
+        column-count: 2;
+        column-gap: 50px;
+        border: 1px black solid;
+      }
+      .ruler {
+        margin-top: 5px;
+        margin-bottom: 10px;
+        margin-left: 151px;
+        width: 50px;
+        border-top: 3px green solid;
+        text-align: center;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        max-height: 200px;
+        border: 1px black solid;
+      }
+      .digits {
+        -ms-text-combine-horizontal: all;
+        -webkit-text-combine: horizontal;
+      }
     </style>
-</head>
-<body>
-<div class="multicol">
-    This block should have 2 columns and the gap between the columns should be 50px.
-</div>
-<div class="ruler">50px</div>
-<div class="vertical">This text should be vertical but the following digits should run horizontally (except Firefox): <span class="digits">12</span></div>
-</body>
+  </head>
+  <body>
+    <div class="multicol">
+      This block should have 2 columns and the gap between the columns should be
+      50px.
+    </div>
+    <div class="ruler">50px</div>
+    <div class="vertical">
+      This text should be vertical but the following digits should run
+      horizontally (except Firefox): <span class="digits">12</span>
+    </div>
+  </body>
 </html>

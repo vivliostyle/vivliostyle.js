@@ -434,7 +434,7 @@ export class Numeric extends Val {
       return new Exprs.Multiply(
         scope,
         ref,
-        new Exprs.Const(scope, this.num / 100)
+        new Exprs.Const(scope, this.num / 100),
       );
     }
     return new Exprs.Numeric(scope, this.num, this.unit);
@@ -565,7 +565,7 @@ export function appendList(
   buf: Base.StringBuffer,
   values: Val[],
   separator: string,
-  toString: boolean
+  toString: boolean,
 ): void {
   const length = values.length;
   values[0].appendTo(buf, toString);
@@ -764,7 +764,7 @@ export const ident: { [key: string]: Ident } = {
   vertical_lr: getName("vertical-lr"),
   vertical_rl: getName("vertical-rl"),
   visible: getName("visible"),
-  _true: getName("true")
+  _true: getName("true"),
 };
 
 export const hundredPercent: Numeric = new Numeric(100, "%");
@@ -777,7 +777,7 @@ export const numericZero: Numeric = new Numeric(0, "px");
 
 export const processingOrder = {
   "font-size": 1,
-  color: 2
+  color: 2,
 };
 
 /**

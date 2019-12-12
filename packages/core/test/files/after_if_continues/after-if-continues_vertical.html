@@ -1,450 +1,491 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>after-if-continues (vertical-writing mode)</title>
     <style>
-        @page {
-            size: 820px;
+      @page {
+        size: 820px;
+      }
+      @-epubx-page-template {
+        .partition {
+          width: 198px;
+          height: 398px;
+          border: rgba(0, 0, 255, 0.2) solid 1px;
+          -epubx-flow-from: body;
+          writing-mode: vertical-rl;
         }
-        @-epubx-page-template {
-            .partition {
-                width: 198px;
-                height: 398px;
-                border: rgba(0, 0, 255, 0.2) solid 1px;
-                -epubx-flow-from: body;
-                writing-mode: vertical-rl;
-            }
-            .left {
-                top: 10px;
-            }
-            .right {
-                bottom: 10px;
-            }
-
-            @-epubx-page-master {
-                @-epubx-partition {
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 10px;
-                    font-size: 10px;
-                    line-height: 10px;
-                    text-align: center;
-                    content: counter(page);
-                }
-                @-epubx-partition class(partition) class(right) {
-                    right: 610px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    right: 410px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    right: 210px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    right: 10px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    right: 610px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    right: 410px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    right: 210px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    right: 10px;
-                }
-            }
+        .left {
+          top: 10px;
         }
-        :root {
-            writing-mode: vertical-rl;
-            font-size: 14px;
-            line-height: 12px;
-            widows: 1;
-            orphans: 1;
-        }
-        body {
-            margin: 0 10px;
+        .right {
+          bottom: 10px;
         }
 
-        section {
-            break-after: column;
+        @-epubx-page-master {
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            font-size: 10px;
+            line-height: 10px;
+            text-align: center;
+            content: counter(page);
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 610px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 410px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 210px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 10px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 610px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 410px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 210px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 10px;
+          }
         }
+      }
+      :root {
+        writing-mode: vertical-rl;
+        font-size: 14px;
+        line-height: 12px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0 10px;
+      }
 
-        h1 {
-          font-size: 14px;
-        }
+      section {
+        break-after: column;
+      }
 
-        div.content {
-          width: 30px;
-          padding: 10px;
-          margin-left: 5px;
-          background-color: #EEEEEE;
-        }
+      h1 {
+        font-size: 14px;
+      }
 
-        div.header {
-          width: 30px;
-          background-color: #FF9999;
-          repeat-on-break: header;
-        }
-        div.footer {
-          width: 30px;
-          background-color: #9999FF;
-          repeat-on-break: footer;
-        }
+      div.content {
+        width: 30px;
+        padding: 10px;
+        margin-left: 5px;
+        background-color: #eeeeee;
+      }
 
-        div.container {
-          border: 1px solid #333;
-          padding: 5px;
-        }
+      div.header {
+        width: 30px;
+        background-color: #ff9999;
+        repeat-on-break: header;
+      }
+      div.footer {
+        width: 30px;
+        background-color: #9999ff;
+        repeat-on-break: footer;
+      }
 
-        table {
-          border: 2px black solid;
-          border-spacing: 2px;
-        }
-        tr, .tr {
-          border: 1px blue solid;
-        }
-        th, td, .th, .td {
-          border: 1px gray solid;
-          line-height: 16px;
-          height: 160px;
-        }
-        thead, .thead {
-          background-color: #FFAAAA;
-        }
-        tfoot, .tfoot {
-          background-color: #AAAAFF;
-        }
+      div.container {
+        border: 1px solid #333;
+        padding: 5px;
+      }
 
-        div.test1.container::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-        }
-        div.test1.container::after {
-          content: "after";
-          background-color: #EEEEAA;
-        }
-        div.test1.container::before {
-          content: "before";
-          background-color: #EEEEAA;
-        }
+      table {
+        border: 2px black solid;
+        border-spacing: 2px;
+      }
+      tr,
+      .tr {
+        border: 1px blue solid;
+      }
+      th,
+      td,
+      .th,
+      .td {
+        border: 1px gray solid;
+        line-height: 16px;
+        height: 160px;
+      }
+      thead,
+      .thead {
+        background-color: #ffaaaa;
+      }
+      tfoot,
+      .tfoot {
+        background-color: #aaaaff;
+      }
 
+      div.test1.container::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+      }
+      div.test1.container::after {
+        content: "after";
+        background-color: #eeeeaa;
+      }
+      div.test1.container::before {
+        content: "before";
+        background-color: #eeeeaa;
+      }
 
-        div.test2.container::nth-fragment(2n+1)::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
+      div.test2.container::nth-fragment(2n + 1)::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 15px;
+      }
 
-        div.test3.container::nth-fragment(n)::after-if-continues {
-          content: "after-if-continues of outer container";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
-        div.test3.container.inner::after-if-continues {
-          content: "after-if-continues of inner container";
-          background-color: #EEEEAA;
-          width: 15px;
-        }
+      div.test3.container::nth-fragment(n)::after-if-continues {
+        content: "after-if-continues of outer container";
+        background-color: #aaeeee;
+        width: 15px;
+      }
+      div.test3.container.inner::after-if-continues {
+        content: "after-if-continues of inner container";
+        background-color: #eeeeaa;
+        width: 15px;
+      }
 
+      div.test4.container::nth-fragment(n)::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 15px;
+      }
 
-        div.test4.container::nth-fragment(n)::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
+      div.test5.container::nth-fragment(n)::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 15px;
+      }
+      div.test5 div.header {
+        width: 50px;
+      }
+      div.test5 div.footer {
+        width: 120px;
+      }
 
+      div.test6 {
+        line-height: 150%;
+        font-size: 16px;
+      }
+      div.test6::nth-fragment(n)::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+      }
+      div.test6::after {
+        content: "after";
+        background-color: #eeeeaa;
+      }
+      div.test6::before {
+        content: "before";
+        background-color: #eeeeaa;
+      }
 
-        div.test5.container::nth-fragment(n)::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
-        div.test5 div.header {
-          width: 50px;
-        }
-        div.test5 div.footer {
-          width: 120px;
-        }
+      div.test7.container::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 15px;
+      }
 
+      div.test8.container::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 15px;
+      }
 
-        div.test6 {
-          line-height: 150%;
-          font-size: 16px;
-        }
-        div.test6::nth-fragment(n)::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-        }
-        div.test6::after {
-          content: "after";
-          background-color: #EEEEAA;
-        }
-        div.test6::before {
-          content: "before";
-          background-color: #EEEEAA;
-        }
+      div.test9 div.container {
+        font-weight: bold;
+      }
+      div.test9 div.container::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 15px;
+      }
 
-        div.test7.container::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
+      div.test10.container::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 40px;
+      }
 
-        div.test8.container::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
-
-        div.test9 div.container {
-          font-weight: bold;
-        }
-        div.test9 div.container::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 15px;
-        }
-
-        div.test10.container::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 40px;
-        }
-
-        .test11::after-if-continues {
-          content: "(continue)";
-          background-color: #AAEEEE;
-          width: 40px;
-        }
+      .test11::after-if-continues {
+        content: "(continue)";
+        background-color: #aaeeee;
+        width: 40px;
+      }
     </style>
-</head>
-<body>
-
-  <section>
-    <h1>(1) ::after-if-continues</h1>
-    <div class="container test1">
-      <div class="content">content1</div>
-      <div class="content">content2</div>
-      <div class="content">content3</div>
-      <div class="content">content4</div>
-      <div class="content">content5</div>
-      <div class="content">content6</div>
-      <div class="content">content7</div>
-      <div class="content">content8</div>
-      <div class="content">content9</div>
-      <div class="content">content10</div>
-    </div>
-  </section>
-
-  <section>
-    <h1>(2) ::nth-fragment(2n+1)::after-if-continues</h1>
-    <div class="container test2">
-      <div class="content">content1</div>
-      <div class="content">content2</div>
-      <div class="content">content3</div>
-      <div class="content">content4</div>
-      <div class="content">content5</div>
-      <div class="content">content6</div>
-      <div class="content">content7</div>
-      <div class="content">content8</div>
-      <div class="content">content9</div>
-      <div class="content">content10</div>
-    </div>
-  </section>
-
-
-  <section>
-    <h1>(3) nesting after-if-continues</h1>
-    <div class="container test3 outer">
-      <div class="container test3 inner">
+  </head>
+  <body>
+    <section>
+      <h1>(1) ::after-if-continues</h1>
+      <div class="container test1">
         <div class="content">content1</div>
         <div class="content">content2</div>
         <div class="content">content3</div>
-      </div>
-      <div class="container test3 inner">
         <div class="content">content4</div>
         <div class="content">content5</div>
         <div class="content">content6</div>
         <div class="content">content7</div>
         <div class="content">content8</div>
         <div class="content">content9</div>
+        <div class="content">content10</div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section>
-    <h1>(4) use with repeat-on-break</h1>
-    <div class="container test4">
-      <div class="header">header</div>
-      <div class="content">content1</div>
-      <div class="content">content2</div>
-      <div class="content">content3</div>
-      <div class="content">content4</div>
-      <div class="content">content5</div>
-      <div class="content">content6</div>
-      <div class="content">content7</div>
-      <div class="footer">footer</div>
-    </div>
-  </section>
+    <section>
+      <h1>(2) ::nth-fragment(2n+1)::after-if-continues</h1>
+      <div class="container test2">
+        <div class="content">content1</div>
+        <div class="content">content2</div>
+        <div class="content">content3</div>
+        <div class="content">content4</div>
+        <div class="content">content5</div>
+        <div class="content">content6</div>
+        <div class="content">content7</div>
+        <div class="content">content8</div>
+        <div class="content">content9</div>
+        <div class="content">content10</div>
+      </div>
+    </section>
 
-  <section>
-    <h1>(5) use with repeat-on-break and dropping header/footer</h1>
-    <div class="container test5">
-      <div class="header">header</div>
-      <div class="content">content1</div>
-      <div class="content">content2</div>
-      <div class="content">content3</div>
-      <div class="content">content4</div>
-      <div class="content">content5</div>
-      <div class="content">content6</div>
-      <div class="footer">footer</div>
-    </div>
-  </section>
+    <section>
+      <h1>(3) nesting after-if-continues</h1>
+      <div class="container test3 outer">
+        <div class="container test3 inner">
+          <div class="content">content1</div>
+          <div class="content">content2</div>
+          <div class="content">content3</div>
+        </div>
+        <div class="container test3 inner">
+          <div class="content">content4</div>
+          <div class="content">content5</div>
+          <div class="content">content6</div>
+          <div class="content">content7</div>
+          <div class="content">content8</div>
+          <div class="content">content9</div>
+        </div>
+      </div>
+    </section>
 
-  <section>
-    <h1>(6) inline element</h1>
-    <div class="test6">
-      The '::before' content is laid out in the region prior to any other content coming from the flow.
-      The '::after' content is laid out in the region after laying out the flow fragment content into the RFCB.
-      Then, flow content is removed from the fragment to accommodate the '::after' content.
-      Accommodating means that the '::after' content is laid out without overflowing the region.
-      If there is not enough room to accommodate the ::before content, the '::after' content after removing
-      all flow fragment content, or a combination of the two, then the ::before and/or ::after content overflows that region.
-      The named flow mechanism can be used in several different ways - some of which are custom overflow handling, aggregating content,
-      linked display boxes, magazine-style layout.
-    </div>
-  </section>
+    <section>
+      <h1>(4) use with repeat-on-break</h1>
+      <div class="container test4">
+        <div class="header">header</div>
+        <div class="content">content1</div>
+        <div class="content">content2</div>
+        <div class="content">content3</div>
+        <div class="content">content4</div>
+        <div class="content">content5</div>
+        <div class="content">content6</div>
+        <div class="content">content7</div>
+        <div class="footer">footer</div>
+      </div>
+    </section>
 
-  <section>
-  empty
-  </section>
+    <section>
+      <h1>(5) use with repeat-on-break and dropping header/footer</h1>
+      <div class="container test5">
+        <div class="header">header</div>
+        <div class="content">content1</div>
+        <div class="content">content2</div>
+        <div class="content">content3</div>
+        <div class="content">content4</div>
+        <div class="content">content5</div>
+        <div class="content">content6</div>
+        <div class="footer">footer</div>
+      </div>
+    </section>
 
-  <section>
-    <h1>(7) table</h1>
-    <div class="container test7">
-      <table>
-        <tbody>
-          <tr><td>cell 1</td></tr>
-          <tr><td>cell 2</td></tr>
-          <tr><td>cell 3</td></tr>
-          <tr><td>cell 4</td></tr>
-          <tr><td>cell 5</td></tr>
-          <tr><td>cell 6</td></tr>
-          <tr><td>cell 7</td></tr>
-          <tr><td>cell 8</td></tr>
-          <tr><td>cell 9<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <section>
+      <h1>(6) inline element</h1>
+      <div class="test6">
+        The '::before' content is laid out in the region prior to any other
+        content coming from the flow. The '::after' content is laid out in the
+        region after laying out the flow fragment content into the RFCB. Then,
+        flow content is removed from the fragment to accommodate the '::after'
+        content. Accommodating means that the '::after' content is laid out
+        without overflowing the region. If there is not enough room to
+        accommodate the ::before content, the '::after' content after removing
+        all flow fragment content, or a combination of the two, then the
+        ::before and/or ::after content overflows that region. The named flow
+        mechanism can be used in several different ways - some of which are
+        custom overflow handling, aggregating content, linked display boxes,
+        magazine-style layout.
+      </div>
+    </section>
 
-  <section>
-  empty
-  </section>
+    <section>
+      empty
+    </section>
 
-  <section>
-    <h1>(8) table with heaer/footer</h1>
-    <div class="container test8">
-      <table>
-        <thead>
-          <tr>
-            <td>header 1</td>
-          </tr>
-        </thead>
-        <tfoot>
-          <tr>
-            <td>footer 1</td>
-          </tr>
-        </tfoot>
-        <tbody>
-          <tr><td>cell 1</td></tr>
-          <tr><td>cell 2</td></tr>
-          <tr><td>cell 3</td></tr>
-          <tr><td>cell 4</td></tr>
-          <tr><td>cell 5</td></tr>
-          <tr><td>cell 6</td></tr>
-          <tr><td>cell 7<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <section>
+      <h1>(7) table</h1>
+      <div class="container test7">
+        <table>
+          <tbody>
+            <tr>
+              <td>cell 1</td>
+            </tr>
+            <tr>
+              <td>cell 2</td>
+            </tr>
+            <tr>
+              <td>cell 3</td>
+            </tr>
+            <tr>
+              <td>cell 4</td>
+            </tr>
+            <tr>
+              <td>cell 5</td>
+            </tr>
+            <tr>
+              <td>cell 6</td>
+            </tr>
+            <tr>
+              <td>cell 7</td>
+            </tr>
+            <tr>
+              <td>cell 8</td>
+            </tr>
+            <tr>
+              <td>
+                cell 9<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />end
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-  <section>
-  empty
-  </section>
+    <section>
+      empty
+    </section>
 
-  <section>
-    <h1>(9) table cell</h1>
-    <div class="test9">
-      <table>
-        <thead>
-          <tr>
-            <td>header 1</td>
-            <td>header 2</td>
-          </tr>
-        </thead>
-        <tfoot>
-          <tr>
-            <td>footer 1</td>
-            <td>footer 2</td>
-          </tr>
-        </tfoot>
-        <tbody>
-          <tr>
-            <td>
-              <div class="container">
-                cell 1<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end
-              </div>
-            </td>
-            <td>
-              <div>
-                cell 2<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>↓<br/>end
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <section>
+      <h1>(8) table with heaer/footer</h1>
+      <div class="container test8">
+        <table>
+          <thead>
+            <tr>
+              <td>header 1</td>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <td>footer 1</td>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr>
+              <td>cell 1</td>
+            </tr>
+            <tr>
+              <td>cell 2</td>
+            </tr>
+            <tr>
+              <td>cell 3</td>
+            </tr>
+            <tr>
+              <td>cell 4</td>
+            </tr>
+            <tr>
+              <td>cell 5</td>
+            </tr>
+            <tr>
+              <td>cell 6</td>
+            </tr>
+            <tr>
+              <td>cell 7<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />end</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-  <section>
-  empty
-  </section>
+    <section>
+      empty
+    </section>
 
-  <section>
-  empty
-  </section>
+    <section>
+      <h1>(9) table cell</h1>
+      <div class="test9">
+        <table>
+          <thead>
+            <tr>
+              <td>header 1</td>
+              <td>header 2</td>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <td>footer 1</td>
+              <td>footer 2</td>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr>
+              <td>
+                <div class="container">
+                  cell 1<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />end
+                </div>
+              </td>
+              <td>
+                <div>
+                  cell 2<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />↓<br />end
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-  <section>
-    <h1>(10) overflowing ::after-if-continues</h1>
-    <div class="container test10">
-      <div class="content" style="width: 140px">content1</div>
-      <div class="content">content2</div>
-    </div>
-  </section>
+    <section>
+      empty
+    </section>
 
-  <section>
-  empty
-  </section>
+    <section>
+      empty
+    </section>
 
-  <section>
-    <h1>(11) Ignored when specified to an inline element</h1>
-    <span class="test11">
-      The '::before' content is laid out in the region prior to any other content coming from the flow.
-      The '::after' content is laid out in the region after laying out the flow fragment content into the RFCB.
-      Then, flow content is removed from the fragment to accommodate the '::after' content.
-      Accommodating means that the '::after' content is laid out without overflowing the region.
-      If there is not enough room to accommodate the ::before content, the '::after' content after removing
-      all flow fragment content, or a combination of the two, then the ::before and/or ::after content overflows that region.
-      The named flow mechanism can be used in several different ways - some of which are custom overflow handling, aggregating content,
-      linked display boxes, magazine-style layout.
-    </span>
-  </section>
+    <section>
+      <h1>(10) overflowing ::after-if-continues</h1>
+      <div class="container test10">
+        <div class="content" style="width: 140px">content1</div>
+        <div class="content">content2</div>
+      </div>
+    </section>
 
-</body>
+    <section>
+      empty
+    </section>
+
+    <section>
+      <h1>(11) Ignored when specified to an inline element</h1>
+      <span class="test11">
+        The '::before' content is laid out in the region prior to any other
+        content coming from the flow. The '::after' content is laid out in the
+        region after laying out the flow fragment content into the RFCB. Then,
+        flow content is removed from the fragment to accommodate the '::after'
+        content. Accommodating means that the '::after' content is laid out
+        without overflowing the region. If there is not enough room to
+        accommodate the ::before content, the '::after' content after removing
+        all flow fragment content, or a combination of the two, then the
+        ::before and/or ::after content overflows that region. The named flow
+        mechanism can be used in several different ways - some of which are
+        custom overflow handling, aggregating content, linked display boxes,
+        magazine-style layout.
+      </span>
+    </section>
+  </body>
 </html>

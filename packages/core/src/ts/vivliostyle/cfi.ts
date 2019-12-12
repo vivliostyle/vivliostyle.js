@@ -107,7 +107,7 @@ export class ChildStep implements Step {
   constructor(
     public readonly index: number,
     public readonly id: string | null,
-    public readonly sideBias: string | null
+    public readonly sideBias: string | null,
   ) {}
 
   /**
@@ -169,7 +169,7 @@ export class OffsetStep implements Step {
     public readonly offset: number,
     public readonly textBefore: string | null,
     public readonly textAfter: string | null,
-    public readonly sideBias: string | null
+    public readonly sideBias: string | null,
   ) {}
 
   applyTo(pos: Position): boolean {
@@ -253,7 +253,7 @@ export class Fragment {
           r = str
             .substr(i)
             .match(
-              /^(0|[1-9][0-9]*)(\[([-a-zA-Z_0-9.\u007F-\uFFFF]+)(;([^\]]|\^\])*)?\])?/
+              /^(0|[1-9][0-9]*)(\[([-a-zA-Z_0-9.\u007F-\uFFFF]+)(;([^\]]|\^\])*)?\])?/,
             );
           if (!r) {
             throw new Error("E_CFI_NUMBER_EXPECTED");
@@ -270,7 +270,7 @@ export class Fragment {
           r = str
             .substr(i)
             .match(
-              /^(0|[1-9][0-9]*)(\[((([^\];,]|\^[\];,])*)(,(([^\];,]|\^[\];,])*))?)(;([^]]|\^\])*)?\])?/
+              /^(0|[1-9][0-9]*)(\[((([^\];,]|\^[\];,])*)(,(([^\];,]|\^[\];,])*))?)(;([^]]|\^\])*)?\])?/,
             );
           if (!r) {
             throw new Error("E_CFI_NUMBER_EXPECTED");
@@ -291,8 +291,8 @@ export class Fragment {
               offset,
               textBefore,
               textAfter,
-              Base.asString(ext["s"])
-            )
+              Base.asString(ext["s"]),
+            ),
           );
           break;
         }
@@ -320,7 +320,7 @@ export class Fragment {
       offset: 0,
       after: false,
       sideBias: null,
-      ref: null
+      ref: null,
     };
     for (let i = 0; i < this.steps.length; i++) {
       if (!this.steps[i].applyTo(pos)) {
@@ -338,7 +338,7 @@ export class Fragment {
       .match(
         after
           ? /^[ -\uD7FF\uE000-\uFFFF]{0,8}/
-          : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/
+          : /[ -\uD7FF\uE000-\uFFFF]{0,8}$/,
       )[0]
       .replace(/^\s/, "")
       .replace(/\s$/, "");
@@ -351,7 +351,7 @@ export class Fragment {
     node: Node,
     offset: number,
     after: boolean,
-    sideBias: string | null
+    sideBias: string | null,
   ) {
     const steps = [];
     let parent = node.parentNode;

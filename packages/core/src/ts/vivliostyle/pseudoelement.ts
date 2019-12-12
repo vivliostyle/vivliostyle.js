@@ -26,7 +26,7 @@ import { PseudoElement } from "./types";
 
 export const document = new DOMParser().parseFromString(
   `<root xmlns="${Base.NS.SHADOW}"/>`,
-  "text/xml"
+  "text/xml",
 );
 
 /**
@@ -44,7 +44,7 @@ export const pseudoNames = [
   "before",
   "",
   /* content */
-  "after"
+  "after",
 ];
 
 export const PSEUDO_ATTR = "data-adapt-pseudo";
@@ -67,7 +67,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     public style: CssCasc.ElementStyle,
     public styler: CssStyler.AbstractStyler,
     public readonly context: Exprs.Context,
-    public readonly exprContentListener: Vtree.ExprContentListener
+    public readonly exprContentListener: Vtree.ExprContentListener,
   ) {}
 
   /**
@@ -109,8 +109,8 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
               element,
               this.context,
               contentVal,
-              this.exprContentListener
-            )
+              this.exprContentListener,
+            ),
           );
         }
       }

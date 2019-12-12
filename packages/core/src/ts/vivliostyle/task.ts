@@ -141,7 +141,7 @@ export function newResult<T>(opt_value: T): Result<T> {
 export function handle<T>(
   name: any,
   code: (p1: Frame<T>) => void,
-  onErr: (p1: Frame<T>, p2: Error) => void
+  onErr: (p1: Frame<T>, p2: Error) => void,
 ): Result<T> {
   const frame = newFrame<T>(name);
   frame.handler = onErr;
@@ -169,7 +169,7 @@ export enum FrameState {
   INIT, // before newFrame call
   ACTIVE, // before finish call
   FINISHED, // before callback complete
-  DEAD // when callback is complete
+  DEAD, // when callback is complete
 }
 export class TimerImpl implements Timer {
   /**
@@ -323,7 +323,7 @@ export class Scheduler {
         }
       };
       try {
-        func().then(result => {
+        func().then((result) => {
           task.result = result;
           done();
         });
@@ -494,7 +494,7 @@ export class Task {
         Logging.logger.error(
           this.exception,
           "Unhandled exception in task",
-          this.name
+          this.name,
         );
       }
     }
@@ -604,12 +604,12 @@ export class ResultImpl<T> implements Result<T> {
       const frame = new Frame<T | T1>(
         this.frame.task,
         this.frame.parent,
-        "AsyncResult.thenAsync"
+        "AsyncResult.thenAsync",
       );
       frame.state = FrameState.ACTIVE;
       this.frame.parent = frame as Frame<T>;
-      this.frame.then(res1 => {
-        callback(res1).then(res2 => {
+      this.frame.then((res1) => {
+        callback(res1).then((res2) => {
           frame.finish(res2);
         });
       });
@@ -635,7 +635,7 @@ export class ResultImpl<T> implements Result<T> {
    */
   thenFinish(frame: Frame<T>): void {
     if (this.isPending()) {
-      this.then(res => {
+      this.then((res) => {
         frame.finish(res);
       });
     } else {
@@ -792,7 +792,7 @@ export class Frame<T> {
    */
   loop(func: () => Result<boolean>): Result<boolean> {
     const frame = newFrame<boolean>("Frame.loop");
-    const step = more => {
+    const step = (more) => {
       try {
         while (more) {
           const result = func();
@@ -800,7 +800,7 @@ export class Frame<T> {
             result.then(step);
             return;
           } else {
-            result.then(m => {
+            result.then((m) => {
               more = m;
             });
           }
@@ -894,10 +894,10 @@ export class EventSource {
   attach(
     target: Base.EventTarget,
     type: string,
-    opt_preventDefault?: boolean
+    opt_preventDefault?: boolean,
   ): void {
     const self = this;
-    const listener = event => {
+    const listener = (event) => {
       if (opt_preventDefault) {
         event.preventDefault();
       }
@@ -955,7 +955,7 @@ export class EventSource {
         throw new Error("E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING");
       } else {
         const frameInternal: Frame<boolean> = newFrame(
-          "EventSource.nextEventInternal"
+          "EventSource.nextEventInternal",
         );
         self.continuation = frameInternal.suspend(self);
         frameInternal.result().then(readEvent);

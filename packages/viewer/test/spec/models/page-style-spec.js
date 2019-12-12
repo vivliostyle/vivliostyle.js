@@ -20,170 +20,172 @@
 import PageStyle from "../../../src/ts/models/page-style";
 
 describe("PageStyle", function() {
-    function makeDummyPageStyle() {
-        var pageStyle = new PageStyle();
-        pageStyle.mode(PageStyle.Mode.PRESET);
-        pageStyle.presetSize(PageStyle.PresetSize[3]);
-        pageStyle.isLandscape(true);
-        pageStyle.customWidth("100mm");
-        pageStyle.customHeight("200mm");
-        pageStyle.isImportant(true);
-        return pageStyle;
-    }
+  function makeDummyPageStyle() {
+    var pageStyle = new PageStyle();
+    pageStyle.mode(PageStyle.Mode.PRESET);
+    pageStyle.presetSize(PageStyle.PresetSize[3]);
+    pageStyle.isLandscape(true);
+    pageStyle.customWidth("100mm");
+    pageStyle.customHeight("200mm");
+    pageStyle.isImportant(true);
+    return pageStyle;
+  }
 
-    function verifyDummyPageStyle(pageStyle) {
-        expect(pageStyle.mode()).toBe(PageStyle.Mode.PRESET);
-        expect(pageStyle.presetSize()).toBe(PageStyle.PresetSize[3]);
-        expect(pageStyle.isLandscape()).toBe(true);
-        expect(pageStyle.customWidth()).toBe("100mm");
-        expect(pageStyle.customHeight()).toBe("200mm");
-        expect(pageStyle.isImportant()).toBe(true);
-    }
+  function verifyDummyPageStyle(pageStyle) {
+    expect(pageStyle.mode()).toBe(PageStyle.Mode.PRESET);
+    expect(pageStyle.presetSize()).toBe(PageStyle.PresetSize[3]);
+    expect(pageStyle.isLandscape()).toBe(true);
+    expect(pageStyle.customWidth()).toBe("100mm");
+    expect(pageStyle.customHeight()).toBe("200mm");
+    expect(pageStyle.isImportant()).toBe(true);
+  }
 
-    describe("constructor", function() {
-        it("copies parameters from the argument", function() {
-            var pageStyle = new PageStyle(makeDummyPageStyle());
+  describe("constructor", function() {
+    it("copies parameters from the argument", function() {
+      var pageStyle = new PageStyle(makeDummyPageStyle());
 
-            verifyDummyPageStyle(pageStyle);
-        });
+      verifyDummyPageStyle(pageStyle);
+    });
+  });
+
+  describe("copyFrom", function() {
+    it("copies parameters from the argument to itself", function() {
+      var pageStyle = new PageStyle();
+      pageStyle.copyFrom(makeDummyPageStyle());
+
+      verifyDummyPageStyle(pageStyle);
+    });
+  });
+
+  describe("equivalentTo", function() {
+    var dummy;
+
+    beforeEach(function() {
+      dummy = makeDummyPageStyle();
     });
 
-    describe("copyFrom", function() {
-        it("copies parameters from the argument to itself", function() {
-            var pageStyle = new PageStyle();
-            pageStyle.copyFrom(makeDummyPageStyle());
+    it("returns false if isImportant is different", function() {
+      var pageStyle = new PageStyle(dummy);
+      pageStyle.isImportant(false);
 
-            verifyDummyPageStyle(pageStyle);
-        });
+      expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
-    describe("equivalentTo", function() {
-        var dummy;
+    it("returns false if mode is different", function() {
+      var pageStyle = new PageStyle(dummy);
+      pageStyle.mode(PageStyle.Mode.AUTO);
 
-        beforeEach(function() {
-            dummy = makeDummyPageStyle();
-        });
-
-        it("returns false if isImportant is different", function() {
-            var pageStyle = new PageStyle(dummy);
-            pageStyle.isImportant(false);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(false);
-        });
-
-        it("returns false if mode is different", function() {
-            var pageStyle = new PageStyle(dummy);
-            pageStyle.mode(PageStyle.Mode.AUTO);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(false);
-        });
-
-        it("when mode is AUTO, other parameters (other than isImportant) doesn't matter", function() {
-            var pageStyle = new PageStyle(dummy);
-            dummy.mode(PageStyle.Mode.AUTO);
-            pageStyle.mode(PageStyle.Mode.AUTO);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.presetSize(PageStyle.PresetSize[0]);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.isLandscape(false);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.customWidth("210mm");
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.customHeight("297mm");
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-        });
-
-        it("when mode is PRESET, customWidth and customHeight doesn't matter", function() {
-            var pageStyle = new PageStyle(dummy);
-            dummy.mode(PageStyle.Mode.PRESET);
-            pageStyle.mode(PageStyle.Mode.PRESET);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.customWidth("210mm");
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.customHeight("297mm");
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.presetSize(PageStyle.PresetSize[0]);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(false);
-
-            pageStyle.presetSize(dummy.presetSize());
-            pageStyle.isLandscape(false);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(false);
-        });
-
-        it("when mode is CUSTOM, presetSize and isLandscape doesn't matter", function() {
-            var pageStyle = new PageStyle(dummy);
-            dummy.mode(PageStyle.Mode.CUSTOM);
-            pageStyle.mode(PageStyle.Mode.CUSTOM);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.presetSize(PageStyle.PresetSize[0]);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.isLandscape(false);
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(true);
-
-            pageStyle.customWidth("210mm");
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(false);
-
-            pageStyle.customWidth(dummy.customWidth());
-            pageStyle.customHeight("297mm");
-
-            expect(pageStyle.equivalentTo(dummy)).toBe(false);
-        });
+      expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
-    describe("toCSSDeclarationString", function() {
-        it("returns corresponding CSS declaration string", function() {
-            var pageStyle = makeDummyPageStyle();
-            pageStyle.mode(PageStyle.Mode.AUTO);
+    it("when mode is AUTO, other parameters (other than isImportant) doesn't matter", function() {
+      var pageStyle = new PageStyle(dummy);
+      dummy.mode(PageStyle.Mode.AUTO);
+      pageStyle.mode(PageStyle.Mode.AUTO);
 
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: auto !important;");
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
 
-            pageStyle.isImportant(false);
+      pageStyle.presetSize(PageStyle.PresetSize[0]);
 
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: auto;");
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
 
-            pageStyle.mode(PageStyle.Mode.CUSTOM);
+      pageStyle.isLandscape(false);
 
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: 100mm 200mm;");
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
 
-            pageStyle.isImportant(true);
+      pageStyle.customWidth("210mm");
 
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: 100mm 200mm !important;");
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
 
-            pageStyle.isImportant(false);
-            pageStyle.mode(PageStyle.Mode.PRESET);
+      pageStyle.customHeight("297mm");
 
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: B5 landscape;");
-
-            pageStyle.isLandscape(false);
-
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: B5;");
-
-            pageStyle.isImportant(true);
-
-            expect(pageStyle.toCSSDeclarationString()).toBe("size: B5 !important;");
-        });
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
     });
+
+    it("when mode is PRESET, customWidth and customHeight doesn't matter", function() {
+      var pageStyle = new PageStyle(dummy);
+      dummy.mode(PageStyle.Mode.PRESET);
+      pageStyle.mode(PageStyle.Mode.PRESET);
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
+
+      pageStyle.customWidth("210mm");
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
+
+      pageStyle.customHeight("297mm");
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
+
+      pageStyle.presetSize(PageStyle.PresetSize[0]);
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(false);
+
+      pageStyle.presetSize(dummy.presetSize());
+      pageStyle.isLandscape(false);
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(false);
+    });
+
+    it("when mode is CUSTOM, presetSize and isLandscape doesn't matter", function() {
+      var pageStyle = new PageStyle(dummy);
+      dummy.mode(PageStyle.Mode.CUSTOM);
+      pageStyle.mode(PageStyle.Mode.CUSTOM);
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
+
+      pageStyle.presetSize(PageStyle.PresetSize[0]);
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
+
+      pageStyle.isLandscape(false);
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(true);
+
+      pageStyle.customWidth("210mm");
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(false);
+
+      pageStyle.customWidth(dummy.customWidth());
+      pageStyle.customHeight("297mm");
+
+      expect(pageStyle.equivalentTo(dummy)).toBe(false);
+    });
+  });
+
+  describe("toCSSDeclarationString", function() {
+    it("returns corresponding CSS declaration string", function() {
+      var pageStyle = makeDummyPageStyle();
+      pageStyle.mode(PageStyle.Mode.AUTO);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe("size: auto !important;");
+
+      pageStyle.isImportant(false);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe("size: auto;");
+
+      pageStyle.mode(PageStyle.Mode.CUSTOM);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe("size: 100mm 200mm;");
+
+      pageStyle.isImportant(true);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe(
+        "size: 100mm 200mm !important;",
+      );
+
+      pageStyle.isImportant(false);
+      pageStyle.mode(PageStyle.Mode.PRESET);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe("size: B5 landscape;");
+
+      pageStyle.isLandscape(false);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe("size: B5;");
+
+      pageStyle.isImportant(true);
+
+      expect(pageStyle.toCSSDeclarationString()).toBe("size: B5 !important;");
+    });
+  });
 });

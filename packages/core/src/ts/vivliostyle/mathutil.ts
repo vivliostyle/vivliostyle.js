@@ -24,9 +24,9 @@ export function mean(array: number[]): number {
 export function variance(array: number[]): number {
   const meanValue = mean(array);
   return mean(
-    array.map(x => {
+    array.map((x) => {
       const d = x - meanValue;
       return d * d;
-    })
+    }),
   );
 }

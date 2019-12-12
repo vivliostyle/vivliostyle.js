@@ -1,242 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Page floats with repeating elements</title>
-<style>
-  @page {
-    size: 820px;
-  }
-  @-epubx-page-template {
-    .partition {
-      width: 398px;
-      height: 198px;
-      border: rgba(0, 0, 255, 0.2) solid 1px;
-      -epubx-flow-from: body;
-    }
-    .left {
-      left: 10px;
-    }
-    .right {
-      right: 10px;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page floats with repeating elements</title>
+    <style>
+      @page {
+        size: 820px;
+      }
+      @-epubx-page-template {
+        .partition {
+          width: 398px;
+          height: 198px;
+          border: rgba(0, 0, 255, 0.2) solid 1px;
+          -epubx-flow-from: body;
+        }
+        .left {
+          left: 10px;
+        }
+        .right {
+          right: 10px;
+        }
 
-    @-epubx-page-master {
-      @-epubx-partition {
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 10px;
+        @-epubx-page-master {
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            font-size: 10px;
+            line-height: 10px;
+            text-align: center;
+            content: counter(page);
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 10px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 10px;
+          }
+        }
+      }
+      :root {
         font-size: 10px;
-        line-height: 10px;
+        line-height: 12px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0 10px;
+      }
+      section {
+        break-after: column;
+      }
+      h1 {
+        font-size: 10px;
+      }
+
+      .header {
+        repeat-on-break: header;
+        background-color: #ff9999 !important;
+      }
+      .footer {
+        repeat-on-break: footer;
+        background-color: #9999ff !important;
+      }
+
+      .box {
+        height: 30px;
+        border: 1px solid #999;
+        margin: 2px;
+        padding: 2px;
+      }
+
+      .float {
+        float-reference: column;
+        float: top;
+        color: blue;
+      }
+
+      table {
+        width: 99%;
+      }
+      table,
+      td {
+        border: 1px solid #999;
+      }
+      thead,
+      tfoot {
+        font-weight: bold;
         text-align: center;
-        content: counter(page);
       }
-      @-epubx-partition class(partition) class(right) {
-        top: 610px;
-      }
-      @-epubx-partition class(partition) class(right) {
-        top: 410px;
-      }
-      @-epubx-partition class(partition) class(right) {
-        top: 210px;
-      }
-      @-epubx-partition class(partition) class(right) {
-        top: 10px;
-      }
-      @-epubx-partition class(partition) class(left) {
-        top: 610px;
-      }
-      @-epubx-partition class(partition) class(left) {
-        top: 410px;
-      }
-      @-epubx-partition class(partition) class(left) {
-        top: 210px;
-      }
-      @-epubx-partition class(partition) class(left) {
-        top: 10px;
-      }
-    }
-  }
-  :root {
-    font-size: 10px;
-    line-height: 12px;
-    widows: 1;
-    orphans: 1;
-  }
-  body {
-    margin: 0 10px;
-  }
-  section {
-    break-after: column;
-  }
-  h1 {
-    font-size: 10px;
-  }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>(1) The page float is not fragmented.</h1>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float.
+      <div class="float">
+        <div class="box header">header</div>
+        <div class="box footer">footer</div>
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float.
+      </div>
+    </section>
 
-  .header {
-    repeat-on-break: header;
-    background-color: #FF9999 !important;
-  }
-  .footer {
-    repeat-on-break: footer;
-    background-color: #9999FF !important;
-  }
+    <section>
+      <h1>(2) The page float is fragmented between block boxes</h1>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float.
+      <div class="float">
+        <div class="box header">header</div>
+        <div class="box footer">footer</div>
+        <div>
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float. Inside a page float.
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float. Inside a page float.
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float. Inside a page float.
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float.
+        </div>
+        <div>
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float. Inside a page float.
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float. Inside a page float.
+          Inside a page float. Inside a page float. Inside a page float. Inside
+          a page float. Inside a page float. Inside a page float. Inside a page
+          float. Inside a page float. Inside a page float. Inside a page float.
+          Inside a page float.
+        </div>
+      </div>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float.
+    </section>
 
-  .box {
-    height: 30px;
-    border: 1px solid #999;
-    margin: 2px;
-    padding: 2px;
-  }
+    <section>
+      <h1>(3) The page float is fragmented between lines</h1>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float.
+      <div class="float">
+        <div class="box header">header</div>
+        <div class="box footer">footer</div>
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float. Inside a page float. Inside a
+        page float. Inside a page float. Inside a page float. Inside a page
+        float. Inside a page float. Inside a page float. Inside a page float.
+        Inside a page float. Inside a page float.
+      </div>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float.
+    </section>
 
-  .float {
-    float-reference: column;
-    float: top;
-    color: blue;
-  }
+    <section>
+      <h1>(4) The page float (table) is not fragmented.</h1>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float.
+      <table class="float">
+        <thead>
+          <tr>
+            <th>header</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>footer</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
 
-  table {
-    width: 99%;
-  }
-  table, td {
-    border: 1px solid #999;
-  }
-  thead, tfoot {
-    font-weight: bold;
-    text-align: center;
-  }
-</style>
-</head>
-<body>
+    <section>
+      <h1>(5) The page float (table) is fragmented between table rows.</h1>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float.
+      <table class="float">
+        <thead>
+          <tr>
+            <th>header</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>footer</td>
+          </tr>
+        </tfoot>
+      </table>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float.
+    </section>
 
-<section>
-  <h1>(1) The page float is not fragmented.</h1>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-  <div class="float">
-    <div class="box header">header</div>
-    <div class="box footer">footer</div>
-    Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float.
-  </div>
-</section>
-
-<section>
-  <h1>(2) The page float is fragmented between block boxes</h1>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-  <div class="float">
-    <div class="box header">header</div>
-    <div class="box footer">footer</div>
-    <div>
-      Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float.
-    </div>
-    <div>
-      Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float.
-    </div>
-  </div>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-</section>
-
-<section>
-  <h1>(3) The page float is fragmented between lines</h1>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-  <div class="float">
-    <div class="box header">header</div>
-    <div class="box footer">footer</div>
-    Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float. Inside a page float.
-  </div>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-</section>
-
-<section>
-  <h1>(4) The page float (table) is not fragmented.</h1>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-  <table class="float">
-    <thead>
-    <tr><th>header</th></tr>
-    </thead>
-    <tbody>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    </tbody>
-    <tfoot>
-    <tr><td>footer</td></tr>
-    </tfoot>
-  </table>
-</section>
-
-<section>
-  <h1>(5) The page float (table) is fragmented between table rows.</h1>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-  <table class="float">
-    <thead>
-    <tr><th>header</th></tr>
-    </thead>
-    <tbody>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    </tbody>
-    <tfoot>
-    <tr><td>footer</td></tr>
-    </tfoot>
-  </table>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-</section>
-
-<section>
-  <h1>(5) The page float (table) is fragmented inside a table rows.</h1>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-  <table class="float">
-    <thead>
-    <tr><th>header</th></tr>
-    </thead>
-    <tbody>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>
-      Inside tbody. Inside tbody.<br>
-      Inside tbody. Inside tbody.<br>
-      Inside tbody. Inside tbody.<br>
-      Inside tbody. Inside tbody.<br>
-      Inside tbody. Inside tbody.<br>
-      Inside tbody. Inside tbody.
-    </td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    <tr><td>Inside tbody. Inside tbody.</td></tr>
-    </tbody>
-    <tfoot>
-    <tr><td>footer</td></tr>
-    </tfoot>
-  </table>
-  Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float. Outside a page float.
-</section>
-
-</body>
+    <section>
+      <h1>(5) The page float (table) is fragmented inside a table rows.</h1>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float.
+      <table class="float">
+        <thead>
+          <tr>
+            <th>header</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>
+              Inside tbody. Inside tbody.<br />
+              Inside tbody. Inside tbody.<br />
+              Inside tbody. Inside tbody.<br />
+              Inside tbody. Inside tbody.<br />
+              Inside tbody. Inside tbody.<br />
+              Inside tbody. Inside tbody.
+            </td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+          <tr>
+            <td>Inside tbody. Inside tbody.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>footer</td>
+          </tr>
+        </tfoot>
+      </table>
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float. Outside a page float. Outside a page float. Outside a page
+      float. Outside a page float. Outside a page float. Outside a page float.
+      Outside a page float. Outside a page float. Outside a page float. Outside
+      a page float.
+    </section>
+  </body>
 </html>

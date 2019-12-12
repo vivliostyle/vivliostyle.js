@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Web font in page margin</title>
     <style>
-        @font-face {
-            font-family: "foo";
-            src: local(Georgia);
+      @font-face {
+        font-family: "foo";
+        src: local(Georgia);
+      }
+      @page {
+        @top-left {
+          font-family: "foo";
+          content: "This should be rendered with Georgia too.";
         }
-        @page {
-            @top-left {
-                font-family: "foo";
-                content: "This should be rendered with Georgia too.";
-            }
-        }
-        span {
-            font-family: "foo";
-        }
+      }
+      span {
+        font-family: "foo";
+      }
     </style>
-</head>
-<body>
-<span>This text is rendered with Georgia.</span>
-</body>
+  </head>
+  <body>
+    <span>This text is rendered with Georgia.</span>
+  </body>
 </html>

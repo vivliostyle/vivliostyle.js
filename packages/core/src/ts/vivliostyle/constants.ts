@@ -32,7 +32,7 @@ export function setDebug(value: boolean): void {
  */
 export enum PageProgression {
   LTR = "ltr",
-  RTL = "rtl"
+  RTL = "rtl",
 }
 
 /**
@@ -55,7 +55,7 @@ export function pageProgressionOf(str: string): PageProgression {
  */
 export enum PageSide {
   LEFT = "left",
-  RIGHT = "right"
+  RIGHT = "right",
 }
 
 /**
@@ -65,7 +65,7 @@ export enum PageSide {
 export enum ReadyState {
   LOADING = "loading",
   INTERACTIVE = "interactive",
-  COMPLETE = "complete"
+  COMPLETE = "complete",
 }
 
 /**
@@ -74,5 +74,5 @@ export enum ReadyState {
 export const constants = {
   PageProgression,
   PageSide,
-  ReadyState
+  ReadyState,
 };

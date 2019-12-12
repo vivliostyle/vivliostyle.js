@@ -77,7 +77,7 @@ export function getComputedDislayValue(
   display: Css.Ident,
   position: Css.Ident,
   float: Css.Ident,
-  isRoot: boolean
+  isRoot: boolean,
 ): { display: Css.Ident; position: Css.Ident; float: Css.Ident } {
   if (display === Css.ident.none) {
     // no need to convert values when 'display' is 'none'
@@ -97,7 +97,7 @@ export function isBlock(
   display: Css.Ident,
   position: Css.Ident,
   float: Css.Ident,
-  isRoot: boolean
+  isRoot: boolean,
 ): boolean {
   return (
     getComputedDislayValue(display, position, float, isRoot).display ===
@@ -142,20 +142,21 @@ export function establishesBFC(
   overflow: Css.Ident,
   writingMode?: Css.Ident,
   parentWritingMode?: Css.Ident,
-  isFlowRoot?: boolean
+  isFlowRoot?: boolean,
 ): boolean {
   writingMode = writingMode || parentWritingMode || Css.ident.horizontal_tb;
   return (
     !!isFlowRoot ||
     (!!float && float !== Css.ident.none) ||
     isAbsolutelyPositioned(position) ||
-    (display === Css.ident.inline_block ||
-      display === Css.ident.table_cell ||
-      display === Css.ident.table_caption ||
-      display == Css.ident.flex) ||
-    (((display === Css.ident.block || display === Css.ident.list_item) &&
-      (!!overflow && overflow !== Css.ident.visible)) ||
-      (!!parentWritingMode && writingMode !== parentWritingMode))
+    display === Css.ident.inline_block ||
+    display === Css.ident.table_cell ||
+    display === Css.ident.table_caption ||
+    display == Css.ident.flex ||
+    ((display === Css.ident.block || display === Css.ident.list_item) &&
+      !!overflow &&
+      overflow !== Css.ident.visible) ||
+    (!!parentWritingMode && writingMode !== parentWritingMode)
   );
 }
 

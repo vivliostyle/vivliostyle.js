@@ -25,112 +25,112 @@ import urlParameters from "../../../src/ts/stores/url-parameters";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("ViewerOptions", function() {
-    var history, location;
+  var history, location;
 
-    vivliostyleMock();
+  vivliostyleMock();
 
-    beforeEach(function() {
-        history = urlParameters.history;
-        urlParameters.history = {};
-        location = urlParameters.location;
+  beforeEach(function() {
+    history = urlParameters.history;
+    urlParameters.history = {};
+    location = urlParameters.location;
+  });
+
+  afterEach(function() {
+    urlParameters.history = history;
+    urlParameters.location = location;
+  });
+
+  describe("constructor", function() {
+    it("retrieves parameters from URL", function() {
+      urlParameters.location = { href: "http://example.com#spread=true" };
+      var options = new ViewerOptions();
+
+      expect(options.pageViewMode()).toEqual(PageViewMode.SPREAD);
+
+      urlParameters.location = { href: "http://example.com#spread=false" };
+      options = new ViewerOptions();
+
+      expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
+
+      urlParameters.location = { href: "http://example.com#spread=auto" };
+      options = new ViewerOptions();
+
+      expect(options.pageViewMode()).toBe(PageViewMode.AUTO_SPREAD);
     });
 
-    afterEach(function() {
-        urlParameters.history = history;
-        urlParameters.location = location;
+    it("copies parameters from the argument", function() {
+      var other = new ViewerOptions();
+      other.pageViewMode(PageViewMode.SINGLE_PAGE);
+      other.fontSize(20);
+      other.zoom(ZoomOptions.createFromZoomFactor(1.2));
+      var options = new ViewerOptions(other);
+
+      expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
+      expect(options.fontSize()).toBe(20);
+      expect(options.zoom().zoom).toBe(1.2);
+      expect(options.zoom().fitToScreen).toBe(false);
     });
+  });
 
-    describe("constructor", function() {
-        it("retrieves parameters from URL", function() {
-            urlParameters.location = { href: "http://example.com#spread=true" };
-            var options = new ViewerOptions();
+  it("write spread option back to URL when update if it is constructed with no argument", function() {
+    urlParameters.location = { href: "http://example.com#spread=true" };
+    var options = new ViewerOptions();
+    options.pageViewMode(PageViewMode.SINGLE_PAGE);
 
-            expect(options.pageViewMode()).toEqual(PageViewMode.SPREAD);
+    expect(urlParameters.location.href).toBe("http://example.com#spread=false");
 
-            urlParameters.location = { href: "http://example.com#spread=false" };
-            options = new ViewerOptions();
+    options.pageViewMode(PageViewMode.SPREAD);
 
-            expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
+    expect(urlParameters.location.href).toBe("http://example.com#spread=true");
 
-            urlParameters.location = { href: "http://example.com#spread=auto" };
-            options = new ViewerOptions();
+    // options.pageViewMode(PageViewMode.AUTO_SPREAD);
 
-            expect(options.pageViewMode()).toBe(PageViewMode.AUTO_SPREAD);
-        });
+    // expect(urlParameters.location.href).toBe("http://example.com#spread=auto");
 
-        it("copies parameters from the argument", function() {
-            var other = new ViewerOptions();
-            other.pageViewMode(PageViewMode.SINGLE_PAGE);
-            other.fontSize(20);
-            other.zoom(ZoomOptions.createFromZoomFactor(1.2));
-            var options = new ViewerOptions(other);
+    // not write back if it is constructed with another ViewerOptions
+    var other = new ViewerOptions();
+    other.pageViewMode(PageViewMode.SINGLE_PAGE);
+    other.fontSize(20);
+    other.zoom(ZoomOptions.createFromZoomFactor(1.2));
+    options = new ViewerOptions(other);
+    options.pageViewMode(PageViewMode.SPREAD);
 
-            expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
-            expect(options.fontSize()).toBe(20);
-            expect(options.zoom().zoom).toBe(1.2);
-            expect(options.zoom().fitToScreen).toBe(false);
-        });
+    expect(urlParameters.location.href).toBe("http://example.com#spread=false");
+  });
+
+  describe("copyFrom", function() {
+    it("copies parameters from the argument to itself", function() {
+      var options = new ViewerOptions();
+      options.pageViewMode(PageViewMode.SPREAD);
+      options.fontSize(10);
+      options.zoom(ZoomOptions.createFromZoomFactor(1.4));
+      var other = new ViewerOptions();
+      other.pageViewMode(PageViewMode.SINGLE_PAGE);
+      other.fontSize(20);
+      other.zoom(ZoomOptions.createFromZoomFactor(1.2));
+      options.copyFrom(other);
+
+      expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
+      expect(options.fontSize()).toBe(20);
+      expect(options.zoom().zoom).toBe(1.2);
+      expect(options.zoom().fitToScreen).toBe(false);
     });
+  });
 
-    it("write spread option back to URL when update if it is constructed with no argument", function() {
-        urlParameters.location = { href: "http://example.com#spread=true" };
-        var options = new ViewerOptions();
-        options.pageViewMode(PageViewMode.SINGLE_PAGE);
+  describe("toObject", function() {
+    it("converts parameters to an object", function() {
+      var options = new ViewerOptions();
+      options.pageViewMode(PageViewMode.SPREAD);
+      options.fontSize(20);
+      options.zoom(ZoomOptions.createFromZoomFactor(1.2));
 
-        expect(urlParameters.location.href).toBe("http://example.com#spread=false");
-
-        options.pageViewMode(PageViewMode.SPREAD);
-
-        expect(urlParameters.location.href).toBe("http://example.com#spread=true");
-
-        // options.pageViewMode(PageViewMode.AUTO_SPREAD);
-
-        // expect(urlParameters.location.href).toBe("http://example.com#spread=auto");
-
-        // not write back if it is constructed with another ViewerOptions
-        var other = new ViewerOptions();
-        other.pageViewMode(PageViewMode.SINGLE_PAGE);
-        other.fontSize(20);
-        other.zoom(ZoomOptions.createFromZoomFactor(1.2));
-        options = new ViewerOptions(other);
-        options.pageViewMode(PageViewMode.SPREAD);
-
-        expect(urlParameters.location.href).toBe("http://example.com#spread=false");
+      expect(options.toObject()).toEqual({
+        fontSize: 20,
+        pageViewMode: vivliostyle.viewer.PageViewMode.SPREAD,
+        zoom: 1.2,
+        fitToScreen: false,
+        renderAllPages: true,
+      });
     });
-
-    describe("copyFrom", function() {
-        it("copies parameters from the argument to itself", function() {
-            var options = new ViewerOptions();
-            options.pageViewMode(PageViewMode.SPREAD);
-            options.fontSize(10);
-            options.zoom(ZoomOptions.createFromZoomFactor(1.4));
-            var other = new ViewerOptions();
-            other.pageViewMode(PageViewMode.SINGLE_PAGE);
-            other.fontSize(20);
-            other.zoom(ZoomOptions.createFromZoomFactor(1.2));
-            options.copyFrom(other);
-
-            expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
-            expect(options.fontSize()).toBe(20);
-            expect(options.zoom().zoom).toBe(1.2);
-            expect(options.zoom().fitToScreen).toBe(false);
-        });
-    });
-
-    describe("toObject", function() {
-        it("converts parameters to an object", function() {
-            var options = new ViewerOptions();
-            options.pageViewMode(PageViewMode.SPREAD);
-            options.fontSize(20);
-            options.zoom(ZoomOptions.createFromZoomFactor(1.2));
-
-            expect(options.toObject()).toEqual({
-                fontSize: 20,
-                pageViewMode: vivliostyle.viewer.PageViewMode.SPREAD,
-                zoom: 1.2,
-                fitToScreen: false,
-                renderAllPages: true
-            });
-        });
-    });
+  });
 });

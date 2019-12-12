@@ -40,48 +40,48 @@ export class LayoutIteratorStrategy {
     return {
       nodeContext: initialNodeContext,
       atUnforcedBreak: false,
-      break: false
+      break: false,
     };
   }
 
   startNonDisplayableNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterNonDisplayableNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   startIgnoredTextNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterIgnoredTextNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   startNonElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterNonElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   startInlineElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterInlineElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   startNonInlineElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterNonInlineElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   finish(state: LayoutIteratorState): void | Task.Result<boolean> {}
@@ -90,19 +90,19 @@ export class LayoutIteratorStrategy {
 export class LayoutIterator {
   constructor(
     private readonly strategy: LayoutIteratorStrategy,
-    private readonly layoutContext: Vtree.LayoutContext
+    private readonly layoutContext: Vtree.LayoutContext,
   ) {}
 
   iterate(
-    initialNodeContext: Vtree.NodeContext
+    initialNodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     const strategy = this.strategy;
     const state = strategy.initialState(initialNodeContext);
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "LayoutIterator"
+      "LayoutIterator",
     );
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         let r: void | Task.Result<boolean>;
         while (state.nodeContext) {
           if (!state.nodeContext.viewNode) {
@@ -115,7 +115,7 @@ export class LayoutIterator {
             if (
               VtreeImpl.canIgnore(
                 state.nodeContext.viewNode,
-                state.nodeContext.whitespace
+                state.nodeContext.whitespace,
               )
             ) {
               if (state.nodeContext.after) {
@@ -152,11 +152,11 @@ export class LayoutIterator {
             }
             return this.layoutContext.nextInTree(
               state.nodeContext,
-              state.atUnforcedBreak
+              state.atUnforcedBreak,
             );
           });
           if (nextResult.isPending()) {
-            nextResult.then(nextNodeContext => {
+            nextResult.then((nextNodeContext) => {
               if (state.break) {
                 loopFrame.breakLoop();
               } else {
@@ -190,7 +190,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   startNonInlineBox(state: LayoutIteratorState): void | Task.Result<boolean> {}
 
   endEmptyNonInlineBox(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   endNonInlineBox(state: LayoutIteratorState): void | Task.Result<boolean> {}
@@ -204,7 +204,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       breakAtTheEdge: null,
       onStartEdges: false,
       leadingEdgeContexts: [],
-      lastAfterNodeContext: null
+      lastAfterNodeContext: null,
     };
   }
 
@@ -213,7 +213,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    */
   processForcedBreak(
     state: LayoutIteratorState,
-    column: Layout.Column
+    column: Layout.Column,
   ): boolean {
     const needForcedBreak =
       !state.leadingEdge && Break.isForcedBreakValue(state.breakAtTheEdge);
@@ -231,13 +231,13 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    */
   saveEdgeAndProcessOverflow(
     state: LayoutIteratorState,
-    column: Layout.Column
+    column: Layout.Column,
   ): boolean {
     const overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(
       state.lastAfterNodeContext,
       null,
       true,
-      state.breakAtTheEdge
+      state.breakAtTheEdge,
     );
     if (overflow) {
       state.nodeContext = (
@@ -254,7 +254,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   processLayoutConstraint(
     state: LayoutIteratorState,
     layoutConstraint: Layout.LayoutConstraint,
-    column: Layout.Column
+    column: Layout.Column,
   ): boolean {
     let nodeContext = state.nodeContext;
     const violateConstraint = !layoutConstraint.allowLayout(nodeContext);
@@ -263,7 +263,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
         state.lastAfterNodeContext,
         null,
         false,
-        state.breakAtTheEdge
+        state.breakAtTheEdge,
       );
       nodeContext = state.nodeContext = nodeContext.modify();
       nodeContext.overflow = true;
@@ -282,12 +282,12 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    * @override
    */
   startNonInlineElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {
     state.leadingEdgeContexts.push(state.nodeContext.copy());
     state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
       state.breakAtTheEdge,
-      state.nodeContext.breakBefore
+      state.nodeContext.breakBefore,
     );
     state.onStartEdges = true;
     return this.startNonInlineBox(state);
@@ -297,7 +297,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
    * @override
    */
   afterNonInlineElementNode(
-    state: LayoutIteratorState
+    state: LayoutIteratorState,
   ): void | Task.Result<boolean> {
     let r: void | Task.Result<boolean>;
     let cont: Task.Result<boolean>;
@@ -323,7 +323,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
         state.lastAfterNodeContext = state.nodeContext.copy();
         state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
           state.breakAtTheEdge,
-          state.nodeContext.breakAfter
+          state.nodeContext.breakAfter,
         );
       }
       return Task.newResult(true);
@@ -351,7 +351,7 @@ export class PseudoColumn {
   constructor(
     column: Layout.Column,
     viewRoot: Element,
-    parentNodeContext: Vtree.NodeContext
+    parentNodeContext: Vtree.NodeContext,
   ) {
     this.column = Object.create(column) as Layout.Column;
     this.column.element = viewRoot;
@@ -360,7 +360,7 @@ export class PseudoColumn {
     this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
     this.column.pseudoParent = column;
     const parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(
-      parentNodeContext
+      parentNodeContext,
     );
     this.column.footnoteEdge =
       this.column.footnoteEdge - parentClonedPaddingBorder;
@@ -368,7 +368,7 @@ export class PseudoColumn {
     this.column.openAllViews = function(position) {
       return LayoutImpl.Column.prototype.openAllViews
         .call(this, position)
-        .thenAsync(result => {
+        .thenAsync((result) => {
           pseudoColumn.startNodeContexts.push(result.copy());
           return Task.newResult(result);
         });
@@ -381,13 +381,13 @@ export class PseudoColumn {
    */
   layout(
     chunkPosition: Vtree.ChunkPosition,
-    leadingEdge: boolean
+    leadingEdge: boolean,
   ): Task.Result<Vtree.ChunkPosition> {
     return this.column.layout(chunkPosition, leadingEdge);
   }
 
   findAcceptableBreakPosition(
-    allowBreakAtStartPosition: boolean
+    allowBreakAtStartPosition: boolean,
   ): Layout.BreakPositionAndNodeContext {
     const p = this.column.findAcceptableBreakPosition();
     if (allowBreakAtStartPosition) {
@@ -396,7 +396,7 @@ export class PseudoColumn {
         startNodeContext,
         null,
         startNodeContext.overflow,
-        0
+        0,
       );
       bp.findAcceptableBreak(this.column, 0);
       if (!p.nodeContext) {
@@ -412,7 +412,7 @@ export class PseudoColumn {
   finishBreak(
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
-    endOfColumn: boolean
+    endOfColumn: boolean,
   ): Task.Result<boolean> {
     return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfColumn);
   }
@@ -433,7 +433,7 @@ export class PseudoColumn {
   isLastAfterNodeContext(nodeContext: Vtree.NodeContext): boolean {
     return VtreeImpl.isSameNodePosition(
       nodeContext.toNodePosition(),
-      this.column.lastAfterPosition
+      this.column.lastAfterPosition,
     );
   }
 

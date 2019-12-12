@@ -46,7 +46,7 @@ export function defaultPreferences(): Preferences {
     spreadView: false,
     pageBorder: 1,
     enabledMediaTypes: { vivliostyle: true, print: true },
-    defaultPaperSize: undefined
+    defaultPaperSize: undefined,
   };
 }
 
@@ -64,7 +64,7 @@ export function clonePreferences(pref: Preferences): Preferences {
     enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
     defaultPaperSize: pref.defaultPaperSize
       ? Object.assign({}, pref.defaultPaperSize)
-      : undefined
+      : undefined,
   };
 }
 
@@ -78,7 +78,7 @@ type Special = Pending;
  * calculated.
  */
 export const Special = {
-  PENDING: {} as Pending
+  PENDING: {} as Pending,
 };
 
 export type Result = string | number | boolean | undefined;
@@ -89,7 +89,7 @@ export function letterbox(
   viewW: number,
   viewH: number,
   objW: number,
-  objH: number
+  objH: number,
 ): string {
   const scale = Math.min((viewW - 0) / objW, (viewH - 0) / objH);
   return `matrix(${scale},0,0,${scale},0,0)`;
@@ -111,7 +111,7 @@ export function cssIdent(name: string): string {
 
 export function makeQualifiedName(
   objName: string | null,
-  memberName: string
+  memberName: string,
 ): string {
   if (objName) {
     return `${Base.escapeCSSIdent(objName)}.${Base.escapeCSSIdent(memberName)}`;
@@ -137,7 +137,7 @@ export class LexicalScope {
 
   constructor(
     public parent: LexicalScope,
-    public resolver?: (p1: string, p2: boolean) => Val
+    public resolver?: (p1: string, p2: boolean) => Val,
   ) {
     this.scopeKey = `S${nextKeyIndex++}`;
     this.zero = new Const(this, 0);
@@ -159,7 +159,7 @@ export class LexicalScope {
       builtIns["letterbox"] = letterbox;
       builtIns["css-string"] = cssString;
       builtIns["css-name"] = cssIdent;
-      builtIns["typeof"] = x => typeof x;
+      builtIns["typeof"] = (x) => typeof x;
       this.defineBuiltInName("page-width", function() {
         return this.pageWidth();
       });
@@ -278,7 +278,7 @@ export const defaultUnitSizes: { [key: string]: number } = {
   // <resolution>
   dppx: 1,
   dpi: 1 / 96,
-  dpcm: 2.54 / 96
+  dpcm: 2.54 / 96,
 };
 
 /**
@@ -321,7 +321,7 @@ export class Context {
     public readonly rootScope: LexicalScope,
     public readonly viewportWidth: number,
     public readonly viewportHeight: number,
-    fontSize: number
+    fontSize: number,
   ) {
     this.pageWidth = function() {
       if (this.actualPageWidth) {
@@ -437,7 +437,7 @@ export class Context {
     scope: LexicalScope,
     qualifiedName: string,
     params: Val[],
-    noBuiltInEval: boolean
+    noBuiltInEval: boolean,
   ): Val {
     do {
       let body = scope.funcs[qualifiedName];
@@ -570,7 +570,7 @@ export class Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return other === this;
   }
@@ -578,7 +578,7 @@ export class Val {
   dependOuter(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     const cached = dependencyCache[this.key];
     if (cached != null) {
@@ -640,7 +640,7 @@ export class Prefix extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return (
       other === this || this.val.dependOuter(other, context, dependencyCache)
@@ -706,7 +706,7 @@ export class Infix extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return (
       other === this ||
@@ -1179,7 +1179,7 @@ export class Named extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return (
       other === this ||
@@ -1225,7 +1225,7 @@ export class MediaName extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return (
       other === this || this.value.dependOuter(other, context, dependencyCache)
@@ -1251,7 +1251,7 @@ export class Native extends Val {
   constructor(
     scope: LexicalScope,
     public fn: () => Result,
-    public str: string
+    public str: string,
   ) {
     super(scope);
   }
@@ -1285,7 +1285,7 @@ export function appendValArray(buf: Base.StringBuffer, arr: Val[]): void {
 export function expandValArray(
   context: Context,
   arr: Val[],
-  params: Val[]
+  params: Val[],
 ): Val[] {
   let expanded: Val[] = arr;
   for (let i = 0; i < arr.length; i++) {
@@ -1315,7 +1315,7 @@ export class Call extends Val {
   constructor(
     scope: LexicalScope,
     public qualifiedName: string,
-    public params: Val[]
+    public params: Val[],
   ) {
     super(scope);
   }
@@ -1336,7 +1336,7 @@ export class Call extends Val {
       this.scope,
       this.qualifiedName,
       this.params,
-      false
+      false,
     );
     return body.expand(context, this.params).evaluate(context);
   }
@@ -1347,7 +1347,7 @@ export class Call extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     if (other === this) {
       return true;
@@ -1361,7 +1361,7 @@ export class Call extends Val {
       this.scope,
       this.qualifiedName,
       this.params,
-      true
+      true,
     );
 
     // No expansion here!
@@ -1385,7 +1385,7 @@ export class Cond extends Val {
     scope: LexicalScope,
     public cond: Val,
     public ifTrue: Val,
-    public ifFalse: Val
+    public ifFalse: Val,
   ) {
     super(scope);
   }
@@ -1424,7 +1424,7 @@ export class Cond extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return (
       other === this ||
@@ -1514,7 +1514,7 @@ export class MediaTest extends Val {
   dependCore(
     other: Val,
     context: Context,
-    dependencyCache: DependencyCache
+    dependencyCache: DependencyCache,
   ): boolean {
     return (
       other === this || this.value.dependOuter(other, context, dependencyCache)

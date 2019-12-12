@@ -67,7 +67,7 @@ export function isPageFloat(floatReference: FloatReference): boolean {
 export function resolveInlineFloatDirection(
   floatSide: string,
   vertical: boolean,
-  direction: string
+  direction: string,
 ): string {
   const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {
@@ -83,7 +83,7 @@ export function resolveInlineFloatDirection(
     const physicalValue = Logical.toPhysical(floatSide, writingMode, direction);
     const lineRelativeValue = Logical.toLineRelative(
       physicalValue,
-      writingMode
+      writingMode,
     );
     if (lineRelativeValue === "line-left") {
       floatSide = "left";
@@ -108,7 +108,7 @@ export class PageFloat implements PageFloats.PageFloat {
     public readonly floatSide: string,
     public readonly clearSide: string | null,
     public readonly flowName: string,
-    public readonly floatMinWrapBlock: Css.Numeric | null
+    public readonly floatMinWrapBlock: Css.Numeric | null,
   ) {}
 
   getOrder(): number {
@@ -147,12 +147,12 @@ export class PageFloatStore {
   }
 
   addPageFloat(float: PageFloat) {
-    const index = this.floats.findIndex(f =>
-      VtreeImpl.isSameNodePosition(f.nodePosition, float.nodePosition)
+    const index = this.floats.findIndex((f) =>
+      VtreeImpl.isSameNodePosition(f.nodePosition, float.nodePosition),
     );
     if (index >= 0) {
       throw new Error(
-        "A page float with the same source node is already registered"
+        "A page float with the same source node is already registered",
       );
     } else {
       const order = (float.order = this.nextOrder());
@@ -162,16 +162,16 @@ export class PageFloatStore {
   }
 
   findPageFloatByNodePosition(
-    nodePosition: Vtree.NodePosition
+    nodePosition: Vtree.NodePosition,
   ): PageFloat | null {
-    const index = this.floats.findIndex(f =>
-      VtreeImpl.isSameNodePosition(f.nodePosition, nodePosition)
+    const index = this.floats.findIndex((f) =>
+      VtreeImpl.isSameNodePosition(f.nodePosition, nodePosition),
     );
     return index >= 0 ? this.floats[index] : null;
   }
 
   findPageFloatById(id: PageFloatID) {
-    const index = this.floats.findIndex(f => f.id === id);
+    const index = this.floats.findIndex((f) => f.id === id);
     return index >= 0 ? this.floats[index] : null;
   }
 }
@@ -186,11 +186,11 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
     public readonly floatSide: string,
     public readonly continuations: PageFloatContinuation[],
     public readonly area: Vtree.Container,
-    public readonly continues: boolean
+    public readonly continues: boolean,
   ) {}
 
   hasFloat(float: PageFloat): boolean {
-    return this.continuations.some(c => c.float === float);
+    return this.continuations.some((c) => c.float === float);
   }
 
   findNotAllowedFloat(context: PageFloatLayoutContext): PageFloat | null {
@@ -212,8 +212,11 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
   }
 
   getOrder(): number {
-    const floats = this.continuations.map(c => c.float);
-    return Math.min.apply(null, floats.map(f => f.getOrder()));
+    const floats = this.continuations.map((c) => c.float);
+    return Math.min.apply(
+      null,
+      floats.map((f) => f.getOrder()),
+    );
   }
 
   shouldBeStashedBefore(float: PageFloat): boolean {
@@ -221,7 +224,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
   }
 
   addContinuations(continuations: PageFloatContinuation[]) {
-    continuations.forEach(c => {
+    continuations.forEach((c) => {
       this.continuations.push(c);
     });
   }
@@ -229,7 +232,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
   getFlowName(): string {
     const flowName = this.continuations[0].float.flowName;
     Asserts.assert(
-      this.continuations.every(c => c.float.flowName === flowName)
+      this.continuations.every((c) => c.float.flowName === flowName),
     );
     return flowName;
   }
@@ -238,7 +241,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
 export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   constructor(
     public readonly float: PageFloat,
-    public readonly nodePosition: Vtree.NodePosition
+    public readonly nodePosition: Vtree.NodePosition,
   ) {}
 
   equals(other: PageFloatContinuation | null): boolean {
@@ -285,7 +288,7 @@ export class PageFloatLayoutContext
     public readonly flowName: string | null,
     public readonly generatingNodePosition: Vtree.NodePosition | null,
     writingMode: Css.Val | null,
-    direction: Css.Val | null
+    direction: Css.Val | null,
   ) {
     if (parent) {
       parent.children.push(this);
@@ -311,7 +314,7 @@ export class PageFloatLayoutContext
     child: PageFloatLayoutContext | null,
     floatReference: FloatReference | null,
     flowName: string | null,
-    generatingNodePosition: Vtree.NodePosition | null
+    generatingNodePosition: Vtree.NodePosition | null,
   ): PageFloatLayoutContext | null {
     let index = this.children.indexOf(child as PageFloatLayoutContext);
     if (index < 0) {
@@ -324,7 +327,7 @@ export class PageFloatLayoutContext
         result.flowName === flowName &&
         VtreeImpl.isSameNodePosition(
           result.generatingNodePosition,
-          generatingNodePosition
+          generatingNodePosition,
         )
       ) {
         return result;
@@ -333,7 +336,7 @@ export class PageFloatLayoutContext
           null,
           floatReference,
           flowName,
-          generatingNodePosition
+          generatingNodePosition,
         );
         if (result) {
           return result;
@@ -352,7 +355,7 @@ export class PageFloatLayoutContext
         child,
         this.floatReference,
         this.flowName,
-        this.generatingNodePosition
+        this.generatingNodePosition,
       );
       if (result) {
         return result;
@@ -380,18 +383,18 @@ export class PageFloatLayoutContext
   }
 
   getPageFloatLayoutContext(
-    floatReference: FloatReference
+    floatReference: FloatReference,
   ): PageFloatLayoutContext {
     if (floatReference === this.floatReference) {
       return this;
     }
     return this.getParent(floatReference).getPageFloatLayoutContext(
-      floatReference
+      floatReference,
     );
   }
 
   findPageFloatByNodePosition(
-    nodePosition: Vtree.NodePosition
+    nodePosition: Vtree.NodePosition,
   ): PageFloat | null {
     return this.floatStore.findPageFloatByNodePosition(nodePosition);
   }
@@ -403,7 +406,7 @@ export class PageFloatLayoutContext
       if (!this.forbiddenFloats.includes(id)) {
         this.forbiddenFloats.push(id);
         const strategy = new PageFloatLayoutStrategyResolver().findByFloat(
-          float
+          float,
         );
         strategy.forbid(float, this);
       }
@@ -426,7 +429,7 @@ export class PageFloatLayoutContext
 
   addPageFloatFragment(
     floatFragment: PageFloatFragment,
-    dontInvalidate?: boolean
+    dontInvalidate?: boolean,
   ) {
     const floatReference = floatFragment.floatReference;
     if (floatReference !== this.floatReference) {
@@ -443,7 +446,7 @@ export class PageFloatLayoutContext
 
   removePageFloatFragment(
     floatFragment: PageFloatFragment,
-    dontInvalidate?: boolean
+    dontInvalidate?: boolean,
   ) {
     const floatReference = floatFragment.floatReference;
     if (floatReference !== this.floatReference) {
@@ -469,7 +472,7 @@ export class PageFloatLayoutContext
       const parent = this.getParent(float.floatReference);
       return parent.findPageFloatFragment(float);
     }
-    const index = this.floatFragments.findIndex(f => f.hasFloat(float));
+    const index = this.floatFragments.findIndex((f) => f.hasFloat(float));
     if (index >= 0) {
       return this.floatFragments[index];
     } else {
@@ -492,7 +495,7 @@ export class PageFloatLayoutContext
 
   hasContinuingFloatFragmentsInFlow(flowName: string): boolean {
     return this.hasFloatFragments(
-      fragment => fragment.continues && fragment.getFlowName() === flowName
+      (fragment) => fragment.continues && fragment.getFlowName() === flowName,
     );
   }
 
@@ -504,13 +507,13 @@ export class PageFloatLayoutContext
     const anchors = Object.assign({}, this.floatAnchors);
     return this.children.reduce(
       (prev, child) => Object.assign(prev, child.collectPageFloatAnchors()),
-      anchors
+      anchors,
     );
   }
 
   isAnchorAlreadyAppeared(floatId: PageFloatID) {
     const deferredFloats = this.getDeferredPageFloatContinuations();
-    if (deferredFloats.some(cont => cont.float.getId() === floatId)) {
+    if (deferredFloats.some((cont) => cont.float.getId() === floatId)) {
       return true;
     }
     const floatAnchors = this.collectPageFloatAnchors();
@@ -527,7 +530,9 @@ export class PageFloatLayoutContext
   deferPageFloat(continuation: PageFloatContinuation) {
     const float = continuation.float;
     if (float.floatReference === this.floatReference) {
-      const index = this.floatsDeferredToNext.findIndex(c => c.float === float);
+      const index = this.floatsDeferredToNext.findIndex(
+        (c) => c.float === float,
+      );
       if (index >= 0) {
         this.floatsDeferredToNext.splice(index, 1, continuation);
       } else {
@@ -541,16 +546,16 @@ export class PageFloatLayoutContext
 
   hasPrecedingFloatsDeferredToNext(
     float: PageFloat,
-    ignoreReference?: boolean
+    ignoreReference?: boolean,
   ): boolean {
     if (!ignoreReference && float.floatReference !== this.floatReference) {
       return this.getParent(
-        float.floatReference
+        float.floatReference,
       ).hasPrecedingFloatsDeferredToNext(float, false);
     }
     const order = float.getOrder();
     const hasPrecedingFloatsDeferredToNext = this.floatsDeferredToNext.some(
-      c => c.float.getOrder() < order && !float.isAllowedToPrecede(c.float)
+      (c) => c.float.getOrder() < order && !float.isAllowedToPrecede(c.float),
     );
     if (hasPrecedingFloatsDeferredToNext) {
       return true;
@@ -564,8 +569,8 @@ export class PageFloatLayoutContext
   getLastFollowingFloatInFragments(float: PageFloat): PageFloat | null {
     const order = float.getOrder();
     let lastFollowing: PageFloat = null;
-    this.floatFragments.forEach(fragment => {
-      fragment.continuations.forEach(c => {
+    this.floatFragments.forEach((fragment) => {
+      fragment.continuations.forEach((c) => {
         const f = c.float;
         const o = f.getOrder();
         if (o > order && (!lastFollowing || o > lastFollowing.getOrder())) {
@@ -575,7 +580,7 @@ export class PageFloatLayoutContext
     });
     if (this.parent) {
       const lastFollowingOfParent = this.parent.getLastFollowingFloatInFragments(
-        float
+        float,
       );
       if (
         lastFollowingOfParent &&
@@ -589,11 +594,11 @@ export class PageFloatLayoutContext
   }
 
   getDeferredPageFloatContinuations(
-    flowName?: string | null
+    flowName?: string | null,
   ): PageFloatContinuation[] {
     flowName = flowName || this.flowName;
     let result = this.floatsDeferredFromPrevious.filter(
-      cont => !flowName || cont.float.flowName === flowName
+      (cont) => !flowName || cont.float.flowName === flowName,
     );
     if (this.parent) {
       result = this.parent
@@ -604,11 +609,11 @@ export class PageFloatLayoutContext
   }
 
   getPageFloatContinuationsDeferredToNext(
-    flowName?: string | null
+    flowName?: string | null,
   ): PageFloatContinuation[] {
     flowName = flowName || this.flowName;
     const result = this.floatsDeferredToNext.filter(
-      cont => !flowName || cont.float.flowName === flowName
+      (cont) => !flowName || cont.float.flowName === flowName,
     );
     if (this.parent) {
       return this.parent
@@ -628,7 +633,7 @@ export class PageFloatLayoutContext
         continue;
       }
       done.push(child.flowName);
-      result = result.concat(child.floatsDeferredToNext.map(c => c.float));
+      result = result.concat(child.floatsDeferredToNext.map((c) => c.float));
       result = result.concat(child.getFloatsDeferredToNextInChildContexts());
     }
     return result;
@@ -664,15 +669,15 @@ export class PageFloatLayoutContext
   checkAndForbidFloatFollowingDeferredFloat(): boolean {
     const deferredFloats = this.getFloatsDeferredToNextInChildContexts();
     const floatsInFragments = this.floatFragments.reduce(
-      (r, fr) => r.concat(fr.continuations.map(c => c.float)),
-      []
+      (r, fr) => r.concat(fr.continuations.map((c) => c.float)),
+      [],
     );
     floatsInFragments.sort((f1, f2) => f2.getOrder() - f1.getOrder());
     for (const float of floatsInFragments) {
       const order = float.getOrder();
       if (
         deferredFloats.some(
-          d => !float.isAllowedToPrecede(d) && order > d.getOrder()
+          (d) => !float.isAllowedToPrecede(d) && order > d.getOrder(),
         )
       ) {
         if (this.locked) {
@@ -703,13 +708,13 @@ export class PageFloatLayoutContext
         this.floatsDeferredToNext.splice(i, 1);
       }
     }
-    this.floatsDeferredFromPrevious.forEach(continuation => {
+    this.floatsDeferredFromPrevious.forEach((continuation) => {
       if (
-        this.floatsDeferredToNext.findIndex(c => continuation.equals(c)) >= 0
+        this.floatsDeferredToNext.findIndex((c) => continuation.equals(c)) >= 0
       ) {
         return;
       }
-      if (this.floatFragments.some(f => f.hasFloat(continuation.float))) {
+      if (this.floatFragments.some((f) => f.hasFloat(continuation.float))) {
         return;
       }
       this.floatsDeferredToNext.push(continuation);
@@ -730,13 +735,13 @@ export class PageFloatLayoutContext
       return;
     }
     if (this.container) {
-      this.children.forEach(child => {
+      this.children.forEach((child) => {
         // Since the same container element is shared by a region page float
         // layout context and a column page float layout context in a single
         // column region, view elements of float fragments of the child (column)
         // context need to be removed here.
         if (this.hasSameContainerAs(child)) {
-          child.floatFragments.forEach(fragment => {
+          child.floatFragments.forEach((fragment) => {
             const elem = fragment.area.element;
             if (elem && elem.parentNode) {
               elem.parentNode.removeChild(elem);
@@ -746,19 +751,19 @@ export class PageFloatLayoutContext
       });
       this.container.clear();
     }
-    this.children.forEach(child => {
+    this.children.forEach((child) => {
       child.layoutConstraints.splice(0);
     });
     this.children.splice(0);
-    Object.keys(this.floatAnchors).forEach(k => {
+    Object.keys(this.floatAnchors).forEach((k) => {
       delete this.floatAnchors[k];
     });
   }
 
   detachChildren(): PageFloatLayoutContext[] {
     const children = this.children.splice(0);
-    children.forEach(child => {
-      child.floatFragments.forEach(fragment => {
+    children.forEach((child) => {
+      child.floatFragments.forEach((fragment) => {
         const elem = fragment.area.element;
         if (elem && elem.parentNode) {
           elem.parentNode.removeChild(elem);
@@ -769,7 +774,7 @@ export class PageFloatLayoutContext
   }
 
   attachChildren(children: PageFloatLayoutContext[]) {
-    children.forEach(child => {
+    children.forEach((child) => {
       this.children.push(child);
       child.reattachFloatFragments();
     });
@@ -847,7 +852,7 @@ export class PageFloatLayoutContext
       this.getParent(floatReference).restoreStashedFragments(floatReference);
       return;
     }
-    this.stashedFloatFragments.forEach(stashed => {
+    this.stashedFloatFragments.forEach((stashed) => {
       this.addPageFloatFragment(stashed, true);
     });
     this.stashedFloatFragments.splice(0);
@@ -862,7 +867,7 @@ export class PageFloatLayoutContext
   }
 
   getStashedFloatFragments(
-    floatReference: FloatReference
+    floatReference: FloatReference,
   ): PageFloatFragment[] {
     if (floatReference === this.floatReference) {
       return this.stashedFloatFragments
@@ -870,7 +875,7 @@ export class PageFloatLayoutContext
         .sort((fr1, fr2) => fr2.getOrder() - fr1.getOrder()); // return in reverse order
     } else {
       return this.getParent(floatReference).getStashedFloatFragments(
-        floatReference
+        floatReference,
       );
     }
   }
@@ -879,7 +884,7 @@ export class PageFloatLayoutContext
     side: string,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
-    condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
+    condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
   ): number {
     Asserts.assert(this.container);
     const logicalSide = this.toLogical(side);
@@ -888,14 +893,14 @@ export class PageFloatLayoutContext
       logicalSide,
       layoutContext,
       clientLayout,
-      condition
+      condition,
     );
     if (this.parent && this.parent.container) {
       const parentLimit = this.parent.getLimitValue(
         physicalSide,
         layoutContext,
         clientLayout,
-        condition
+        condition,
       );
       switch (physicalSide) {
         case "top":
@@ -917,13 +922,13 @@ export class PageFloatLayoutContext
     logicalSide: string,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
-    condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
+    condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
   ): number {
     Asserts.assert(this.container);
     const limits = this.getLimitValuesInner(
       layoutContext,
       clientLayout,
-      condition
+      condition,
     );
     switch (logicalSide) {
       case "block-start":
@@ -942,7 +947,7 @@ export class PageFloatLayoutContext
   private getLimitValuesInner(
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
-    condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean
+    condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
   ): {
     top: number;
     left: number;
@@ -961,7 +966,7 @@ export class PageFloatLayoutContext
       bottom: paddingRect.y2 - offsetY,
       right: paddingRect.x2 - offsetX,
       floatMinWrapBlockStart: 0,
-      floatMinWrapBlockEnd: 0
+      floatMinWrapBlockEnd: 0,
     };
 
     function resolveLengthPercentage(numeric, viewNode, containerLength) {
@@ -1000,7 +1005,7 @@ export class PageFloatLayoutContext
                 floatMinWrapBlockStart = resolveLengthPercentage(
                   floatMinWrapBlock,
                   (area as any).rootViewNodes[0],
-                  paddingRect.x2 - paddingRect.x1
+                  paddingRect.x2 - paddingRect.x1,
                 ) as number;
               }
               right = Math.min(right, area.left);
@@ -1009,7 +1014,7 @@ export class PageFloatLayoutContext
                 floatMinWrapBlockStart = resolveLengthPercentage(
                   floatMinWrapBlock,
                   (area as any).rootViewNodes[0],
-                  paddingRect.y2 - paddingRect.y1
+                  paddingRect.y2 - paddingRect.y1,
                 ) as number;
               }
               top = Math.max(top, area.top + area.height);
@@ -1028,7 +1033,7 @@ export class PageFloatLayoutContext
                 floatMinWrapBlockEnd = resolveLengthPercentage(
                   floatMinWrapBlock,
                   (area as any).rootViewNodes[0],
-                  paddingRect.x2 - paddingRect.x1
+                  paddingRect.x2 - paddingRect.x1,
                 ) as number;
               }
               left = Math.max(left, area.left + area.width);
@@ -1037,7 +1042,7 @@ export class PageFloatLayoutContext
                 floatMinWrapBlockEnd = resolveLengthPercentage(
                   floatMinWrapBlock,
                   (area as any).rootViewNodes[0],
-                  paddingRect.y2 - paddingRect.y1
+                  paddingRect.y2 - paddingRect.y1,
                 ) as number;
               }
               bottom = Math.min(bottom, area.top);
@@ -1052,7 +1057,7 @@ export class PageFloatLayoutContext
           bottom,
           right,
           floatMinWrapBlockStart,
-          floatMinWrapBlockEnd
+          floatMinWrapBlockEnd,
         };
       }, limits);
     }
@@ -1076,7 +1081,7 @@ export class PageFloatLayoutContext
     anchorEdge: number | null,
     init: boolean,
     force: boolean,
-    condition: PageFloatPlacementCondition
+    condition: PageFloatPlacementCondition,
   ): string | null {
     if (floatReference !== this.floatReference) {
       const parent = this.getParent(floatReference);
@@ -1087,7 +1092,7 @@ export class PageFloatLayoutContext
         anchorEdge,
         init,
         force,
-        condition
+        condition,
       );
     }
     let logicalFloatSide = this.toLogical(floatSide);
@@ -1104,22 +1109,22 @@ export class PageFloatLayoutContext
     let blockStart = this.getLimitValue(
       "block-start",
       area.layoutContext,
-      area.clientLayout
+      area.clientLayout,
     );
     let blockEnd = this.getLimitValue(
       "block-end",
       area.layoutContext,
-      area.clientLayout
+      area.clientLayout,
     );
     let inlineStart = this.getLimitValue(
       "inline-start",
       area.layoutContext,
-      area.clientLayout
+      area.clientLayout,
     );
     let inlineEnd = this.getLimitValue(
       "inline-end",
       area.layoutContext,
-      area.clientLayout
+      area.clientLayout,
     );
     const blockOffset = area.vertical ? area.originX : area.originY;
     const inlineOffset = area.vertical ? area.originY : area.originX;
@@ -1130,7 +1135,7 @@ export class PageFloatLayoutContext
             area.getInsetLeft() +
             area.width +
             area.getInsetRight() +
-            blockOffset
+            blockOffset,
         )
       : Math.max(blockStart, area.top + blockOffset);
     blockEnd = area.vertical
@@ -1141,7 +1146,7 @@ export class PageFloatLayoutContext
             area.getInsetTop() +
             area.height +
             area.getInsetBottom() +
-            blockOffset
+            blockOffset,
         );
 
     function limitBlockStartEndValueWithOpenRect(getRect, rect) {
@@ -1168,7 +1173,7 @@ export class PageFloatLayoutContext
     if (init) {
       const rect = area.vertical
         ? Geom.rotateBox(
-            new Geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd)
+            new Geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd),
           )
         : new Geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
       if (
@@ -1179,7 +1184,7 @@ export class PageFloatLayoutContext
         if (
           !limitBlockStartEndValueWithOpenRect(
             Geom.findUppermostFullyOpenRect,
-            rect
+            rect,
           )
         ) {
           return null;
@@ -1193,7 +1198,7 @@ export class PageFloatLayoutContext
         if (
           !limitBlockStartEndValueWithOpenRect(
             Geom.findBottommostFullyOpenRect,
-            rect
+            rect,
           )
         ) {
           return null;
@@ -1247,7 +1252,7 @@ export class PageFloatLayoutContext
         logicalFloatSide === "inline-end"
       ) {
         inlineSize = Sizing.getSize(area.clientLayout, area.element, [
-          Sizing.Size.FIT_CONTENT_INLINE_SIZE
+          Sizing.Size.FIT_CONTENT_INLINE_SIZE,
         ])[Sizing.Size.FIT_CONTENT_INLINE_SIZE];
       } else if (area.adjustContentRelativeSize) {
         inlineSize = area.getContentInlineSize();
@@ -1276,7 +1281,7 @@ export class PageFloatLayoutContext
         area.setInlinePosition(inlineEnd - outerInlineSize, inlineSize);
         area.setBlockPosition(
           blockEnd - outerBlockSize * area.getBoxDir(),
-          blockSize
+          blockSize,
         );
         break;
       default:
@@ -1286,8 +1291,8 @@ export class PageFloatLayoutContext
   }
 
   getFloatFragmentExclusions(): Geom.Shape[] {
-    const result = this.floatFragments.map(fragment =>
-      fragment.getOuterShape()
+    const result = this.floatFragments.map((fragment) =>
+      fragment.getOuterShape(),
     );
     if (this.parent) {
       return this.parent.getFloatFragmentExclusions().concat(result);
@@ -1299,7 +1304,7 @@ export class PageFloatLayoutContext
   private reattachFloatFragments() {
     const parent = this.container.element && this.container.element.parentNode;
     if (parent) {
-      this.floatFragments.forEach(fragment => {
+      this.floatFragments.forEach((fragment) => {
         parent.appendChild(fragment.area.element);
       });
     }
@@ -1316,14 +1321,14 @@ export class PageFloatLayoutContext
           return Math.max(edge, rect.y2);
         }
       },
-      isVertical ? Infinity : 0
+      isVertical ? Infinity : 0,
     );
   }
 
   getBlockStartEdgeOfBlockEndFloats(): number {
     const isVertical = this.getContainer().vertical;
     return this.floatFragments
-      .filter(fragment => fragment.floatSide === "block-end")
+      .filter((fragment) => fragment.floatSide === "block-end")
       .reduce(
         (edge, fragment) => {
           const rect = fragment.getOuterRect();
@@ -1333,19 +1338,19 @@ export class PageFloatLayoutContext
             return Math.min(edge, rect.y1);
           }
         },
-        isVertical ? 0 : Infinity
+        isVertical ? 0 : Infinity,
       );
   }
 
   getPageFloatClearEdge(clear: string, column: Layout.Column): number {
     function isContinuationOfAlreadyAppearedFloat(context) {
-      return continuation =>
+      return (continuation) =>
         context.isAnchorAlreadyAppeared(continuation.float.getId());
     }
 
     function isFragmentWithAlreadyAppearedFloat(fragment, context) {
       return fragment.continuations.some(
-        isContinuationOfAlreadyAppearedFloat(context)
+        isContinuationOfAlreadyAppearedFloat(context),
       );
     }
     const columnRect = column.getPaddingRect();
@@ -1354,7 +1359,7 @@ export class PageFloatLayoutContext
     while (context) {
       if (
         context.floatsDeferredToNext.some(
-          isContinuationOfAlreadyAppearedFloat(context)
+          isContinuationOfAlreadyAppearedFloat(context),
         )
       ) {
         return columnBlockEnd;
@@ -1366,13 +1371,13 @@ export class PageFloatLayoutContext
       "block-start",
       column.layoutContext,
       column.clientLayout,
-      isFragmentWithAlreadyAppearedFloat
+      isFragmentWithAlreadyAppearedFloat,
     );
     const blockEndLimit = this.getLimitValue(
       "block-end",
       column.layoutContext,
       column.clientLayout,
-      isFragmentWithAlreadyAppearedFloat
+      isFragmentWithAlreadyAppearedFloat,
     );
     if (
       blockEndLimit * column.getBoxDir() <
@@ -1387,7 +1392,7 @@ export class PageFloatLayoutContext
   getPageFloatPlacementCondition(
     float: PageFloat,
     floatSide: string,
-    clearSide: string | null
+    clearSide: string | null,
   ): PageFloatPlacementCondition {
     if (float.floatReference !== this.floatReference) {
       const parent = this.getParent(float.floatReference);
@@ -1397,7 +1402,7 @@ export class PageFloatLayoutContext
       "block-start": true,
       "block-end": true,
       "inline-start": true,
-      "inline-end": true
+      "inline-end": true,
     };
     if (!clearSide) {
       return result;
@@ -1421,26 +1426,26 @@ export class PageFloatLayoutContext
     const floatOrder = float.getOrder();
 
     function isPrecedingFragment(
-      side: string
+      side: string,
     ): (p1: PageFloatFragment) => boolean {
-      return fragment =>
+      return (fragment) =>
         fragment.floatSide === side && fragment.getOrder() < floatOrder;
     }
 
     function hasPrecedingFragmentInChildren(
       context: PageFloatLayoutContext,
-      side: string
+      side: string,
     ): boolean {
       return context.children.some(
-        child =>
+        (child) =>
           child.floatFragments.some(isPrecedingFragment(side)) ||
-          hasPrecedingFragmentInChildren(child, side)
+          hasPrecedingFragmentInChildren(child, side),
       );
     }
 
     function hasPrecedingFragmentInParents(
       context: PageFloatLayoutContext,
-      side: string
+      side: string,
     ): boolean {
       const parent = context.parent;
       return (
@@ -1449,7 +1454,7 @@ export class PageFloatLayoutContext
           hasPrecedingFragmentInParents(parent, side))
       );
     }
-    logicalSides.forEach(side => {
+    logicalSides.forEach((side) => {
       switch (side) {
         case "block-start":
         case "inline-start":
@@ -1473,14 +1478,14 @@ export class PageFloatLayoutContext
 
   addLayoutConstraint(
     layoutConstraint: Layout.LayoutConstraint,
-    floatReference: FloatReference
+    floatReference: FloatReference,
   ) {
     if (floatReference === this.floatReference) {
       this.layoutConstraints.push(layoutConstraint);
     } else {
       this.getParent(floatReference).addLayoutConstraint(
         layoutConstraint,
-        floatReference
+        floatReference,
       );
     }
   }
@@ -1527,7 +1532,7 @@ export class PageFloatLayoutContext
     }
     const floatMinWrapBlock = Math.max(
       limits.floatMinWrapBlockStart,
-      limits.floatMinWrapBlockEnd
+      limits.floatMinWrapBlockEnd,
     );
     const blockSpace = column.vertical
       ? limits.right - limits.left
@@ -1542,14 +1547,14 @@ export class PageFloatLayoutContext
     }
     return Math.max.apply(
       null,
-      this.floatFragments.map(fragment => {
+      this.floatFragments.map((fragment) => {
         const area = fragment.area;
         if (isVertical) {
           return area.width;
         } else {
           return area.height;
         }
-      })
+      }),
     );
   }
 
@@ -1618,7 +1623,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   createPageFloat(
     nodeContext: Vtree.NodeContext,
     pageFloatLayoutContext: PageFloatLayoutContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<PageFloat> {
     let floatReference = nodeContext.floatReference;
     Asserts.assert(nodeContext.floatSide);
@@ -1628,9 +1633,9 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
       .resolveFloatReferenceFromColumnSpan(
         floatReference,
         nodeContext.columnSpan,
-        nodeContext
+        nodeContext,
       )
-      .thenAsync(ref => {
+      .thenAsync((ref) => {
         floatReference = ref;
         Asserts.assert(pageFloatLayoutContext.flowName);
         const float = new PageFloat(
@@ -1639,7 +1644,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
           floatSide,
           nodeContext.clearSide,
           pageFloatLayoutContext.flowName,
-          nodeContext.floatMinWrapBlock
+          nodeContext.floatMinWrapBlock,
         );
         pageFloatLayoutContext.addPageFloat(float);
         return Task.newResult(float);
@@ -1653,7 +1658,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
     continuations: PageFloatContinuation[],
     floatSide: string,
     floatArea: Layout.PageFloatArea,
-    continues: boolean
+    continues: boolean,
   ): PageFloatFragment {
     const f = continuations[0].float;
     return new PageFloatFragment(
@@ -1661,7 +1666,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
       floatSide,
       continuations,
       floatArea,
-      continues
+      continues,
     );
   }
 
@@ -1670,7 +1675,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    */
   findPageFloatFragment(
     float: PageFloat,
-    pageFloatLayoutContext: PageFloatLayoutContext
+    pageFloatLayoutContext: PageFloatLayoutContext,
   ): PageFloatFragment | null {
     return pageFloatLayoutContext.findPageFloatFragment(float);
   }
@@ -1681,7 +1686,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   adjustPageFloatArea(
     floatArea: Layout.PageFloatArea,
     floatContainer: Vtree.Container,
-    column: Layout.Column
+    column: Layout.Column,
   ) {}
 
   /**

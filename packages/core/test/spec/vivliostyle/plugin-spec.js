@@ -21,81 +21,81 @@ import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/
 // FIXME: cannot access to vivliostyle_plugin.hooks
 
 describe("plugin", function() {
-    "use strict";
+  "use strict";
 
-    var fn1 = function() {}, fn2 = function() {};
-    var hookName = vivliostyle_plugin.HOOKS["SIMPLE_PROPERTY"];
+  var fn1 = function() {},
+    fn2 = function() {};
+  var hookName = vivliostyle_plugin.HOOKS["SIMPLE_PROPERTY"];
 
-    vivliostyle_test_util_mock_plugin.setup();
-    beforeEach(function() {
-        // vivliostyle_plugin.hooks = {};
-    });
+  vivliostyle_test_util_mock_plugin.setup();
+  beforeEach(function() {
+    // vivliostyle_plugin.hooks = {};
+  });
 
-    // describe("registerHook", function() {
-    //     it("registers a function", function() {
-    //         var hooks = vivliostyle_plugin.getHooksForName(hookName);
-    //         expect(hooks).toEqual([]);
+  // describe("registerHook", function() {
+  //     it("registers a function", function() {
+  //         var hooks = vivliostyle_plugin.getHooksForName(hookName);
+  //         expect(hooks).toEqual([]);
 
-    //         vivliostyle_plugin.registerHook(hookName, fn1);
-    //         hooks = vivliostyle_plugin.getHooksForName(hookName);
-    //         expect(hooks).toEqual([fn1]);
+  //         vivliostyle_plugin.registerHook(hookName, fn1);
+  //         hooks = vivliostyle_plugin.getHooksForName(hookName);
+  //         expect(hooks).toEqual([fn1]);
 
-    //         vivliostyle_plugin.registerHook(hookName, fn2);
-    //         hooks = vivliostyle_plugin.getHooksForName(hookName);
-    //         expect(hooks).toEqual([fn1, fn2]);
+  //         vivliostyle_plugin.registerHook(hookName, fn2);
+  //         hooks = vivliostyle_plugin.getHooksForName(hookName);
+  //         expect(hooks).toEqual([fn1, fn2]);
 
-    //         vivliostyle_plugin.registerHook(hookName, fn1);
-    //         hooks = vivliostyle_plugin.getHooksForName(hookName);
-    //         expect(hooks).toEqual([fn1, fn2, fn1]);
-    //     });
+  //         vivliostyle_plugin.registerHook(hookName, fn1);
+  //         hooks = vivliostyle_plugin.getHooksForName(hookName);
+  //         expect(hooks).toEqual([fn1, fn2, fn1]);
+  //     });
 
-    //     it("skips unknown hook", function() {
-    //         vivliostyle_plugin.registerHook("unknown hook", fn1);
-    //         var hooks = vivliostyle_plugin.getHooksForName(hookName);
-    //         expect(hooks).toEqual([]);
-    //     });
+  //     it("skips unknown hook", function() {
+  //         vivliostyle_plugin.registerHook("unknown hook", fn1);
+  //         var hooks = vivliostyle_plugin.getHooksForName(hookName);
+  //         expect(hooks).toEqual([]);
+  //     });
+  // });
+
+  describe("removeHook", function() {
+    // it("removes a function", function() {
+    //     vivliostyle_plugin.registerHook(hookName, fn1);
+    //     var hooks = vivliostyle_plugin.getHooksForName(hookName);
+    //     expect(hooks).toEqual([fn1]);
+
+    //     vivliostyle_plugin.removeHook(hookName, fn1);
+    //     hooks = vivliostyle_plugin.getHooksForName(hookName);
+    //     expect(hooks).toEqual([]);
     // });
 
-    describe("removeHook", function() {
-        // it("removes a function", function() {
-        //     vivliostyle_plugin.registerHook(hookName, fn1);
-        //     var hooks = vivliostyle_plugin.getHooksForName(hookName);
-        //     expect(hooks).toEqual([fn1]);
+    it("removes one function at a time", function() {
+      vivliostyle_plugin.registerHook(hookName, fn1);
+      vivliostyle_plugin.registerHook(hookName, fn2);
+      vivliostyle_plugin.registerHook(hookName, fn1);
+      var hooks = vivliostyle_plugin.getHooksForName(hookName);
+      expect(hooks).toEqual([fn1, fn2, fn1]);
 
-        //     vivliostyle_plugin.removeHook(hookName, fn1);
-        //     hooks = vivliostyle_plugin.getHooksForName(hookName);
-        //     expect(hooks).toEqual([]);
-        // });
+      vivliostyle_plugin.removeHook(hookName, fn1);
+      hooks = vivliostyle_plugin.getHooksForName(hookName);
+      expect(hooks).toEqual([fn2, fn1]);
 
-        it("removes one function at a time", function() {
-            vivliostyle_plugin.registerHook(hookName, fn1);
-            vivliostyle_plugin.registerHook(hookName, fn2);
-            vivliostyle_plugin.registerHook(hookName, fn1);
-            var hooks = vivliostyle_plugin.getHooksForName(hookName);
-            expect(hooks).toEqual([fn1, fn2, fn1]);
+      vivliostyle_plugin.removeHook(hookName, fn1);
+      hooks = vivliostyle_plugin.getHooksForName(hookName);
+      expect(hooks).toEqual([fn2]);
 
-            vivliostyle_plugin.removeHook(hookName, fn1);
-            hooks = vivliostyle_plugin.getHooksForName(hookName);
-            expect(hooks).toEqual([fn2, fn1]);
-
-            vivliostyle_plugin.removeHook(hookName, fn1);
-            hooks = vivliostyle_plugin.getHooksForName(hookName);
-            expect(hooks).toEqual([fn2]);
-
-            vivliostyle_plugin.removeHook(hookName, fn1);
-            hooks = vivliostyle_plugin.getHooksForName(hookName);
-            expect(hooks).toEqual([fn2]);
-        });
-
-        // it("ignores unknown hook", function() {
-        //     vivliostyle_plugin.registerHook(hookName, fn1);
-        //     var hooks = vivliostyle_plugin.getHooksForName(hookName);
-        //     expect(hooks).toEqual([fn1]);
-
-        //     vivliostyle_plugin.removeHook("unknown hook", fn1);
-        //     hooks = vivliostyle_plugin.getHooksForName(hookName);
-        //     expect(hooks).toEqual([fn1]);
-        // });
+      vivliostyle_plugin.removeHook(hookName, fn1);
+      hooks = vivliostyle_plugin.getHooksForName(hookName);
+      expect(hooks).toEqual([fn2]);
     });
 
+    // it("ignores unknown hook", function() {
+    //     vivliostyle_plugin.registerHook(hookName, fn1);
+    //     var hooks = vivliostyle_plugin.getHooksForName(hookName);
+    //     expect(hooks).toEqual([fn1]);
+
+    //     vivliostyle_plugin.removeHook("unknown hook", fn1);
+    //     hooks = vivliostyle_plugin.getHooksForName(hookName);
+    //     expect(hooks).toEqual([fn1]);
+    // });
+  });
 });

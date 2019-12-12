@@ -25,7 +25,7 @@ export class Rect {
     public x1: number,
     public y1: number,
     public x2: number,
-    public y2: number
+    public y2: number,
   ) {}
 }
 
@@ -38,7 +38,7 @@ export class Insets {
     public left: number,
     public top: number,
     public right: number,
-    public bottom: number
+    public bottom: number,
   ) {}
 }
 
@@ -47,7 +47,7 @@ export class Segment {
     public low: Point,
     public high: Point,
     public winding: number,
-    public shapeId: number
+    public shapeId: number,
   ) {}
 }
 
@@ -66,7 +66,7 @@ export class Band {
     public y1: number,
     public y2: number,
     public x1: number,
-    public x2: number
+    public x2: number,
   ) {}
 }
 
@@ -113,7 +113,7 @@ export function shapeForEllipse(
   cx: number,
   cy: number,
   rx: number,
-  ry: number
+  ry: number,
 ): Shape {
   const count = 20;
   const points: Point[] = [];
@@ -128,13 +128,13 @@ export function shapeForRect(
   x1: number,
   y1: number,
   x2: number,
-  y2: number
+  y2: number,
 ): Shape {
   return new Shape([
     new Point(x1, y1),
     new Point(x2, y1),
     new Point(x2, y2),
-    new Point(x1, y2)
+    new Point(x1, y2),
   ]);
 }
 
@@ -143,7 +143,7 @@ export function shapeForRectObj(r: Rect): Shape {
     new Point(r.x1, r.y1),
     new Point(r.x2, r.y1),
     new Point(r.x2, r.y2),
-    new Point(r.x1, r.y2)
+    new Point(r.x1, r.y2),
   ]);
 }
 
@@ -152,7 +152,7 @@ export class BandIntersection {
     public x: number,
     public winding: number,
     public shapeId: number,
-    public lowOrHigh: number
+    public lowOrHigh: number,
   ) {}
 }
 
@@ -169,7 +169,7 @@ export function addBandIntersections(
   intersections: BandIntersection[],
   s: Segment,
   y1: number,
-  y2: number
+  y2: number,
 ): void {
   let x1: number;
   let w1: number;
@@ -206,7 +206,7 @@ export function addBandIntersections(
 export function mergeIntersections(
   intersections: BandIntersection[],
   includeCount: number,
-  excludeCount: number
+  excludeCount: number,
 ): number[] {
   const shapeCount = includeCount + excludeCount;
   const windings1: number[] = Array(shapeCount);
@@ -279,7 +279,7 @@ export function unrotateBox(box: Rect): Rect {
 }
 
 export function rotateShape(shape: Shape): Shape {
-  return new Shape(shape.points.map(point => rotatePoint(point)));
+  return new Shape(shape.points.map((point) => rotatePoint(point)));
 }
 
 export function shapesToBands(
@@ -288,12 +288,12 @@ export function shapesToBands(
   exclude: Shape[],
   granularity: number,
   snapHeight: number,
-  vertical: boolean
+  vertical: boolean,
 ): Band[] {
   if (vertical) {
     box = rotateBox(box);
-    include = include.map(shape => rotateShape(shape));
-    exclude = exclude.map(shape => rotateShape(shape));
+    include = include.map((shape) => rotateShape(shape));
+    exclude = exclude.map((shape) => rotateShape(shape));
   }
   const includeCount = include.length;
   const excludeCount = exclude ? exclude.length : 0;
@@ -337,7 +337,7 @@ export function shapesToBands(
     // min possible y2
     const y2min = Math.min(
       ceil(Math.ceil(y + granularity), snapHeight),
-      box.y2
+      box.y2,
     );
     for (k = 0; k < activeSegments.length && y2 > y2min; k++) {
       segment = activeSegments[k];
@@ -393,12 +393,12 @@ export function shapesToBands(
       addBandIntersections(bandIntersections, activeSegments[k], y, y2);
     }
     bandIntersections.sort(
-      (bi1, bi2) => bi1.x - bi2.x || bi1.lowOrHigh - bi2.lowOrHigh
+      (bi1, bi2) => bi1.x - bi2.x || bi1.lowOrHigh - bi2.lowOrHigh,
     );
     const xranges = mergeIntersections(
       bandIntersections,
       includeCount,
-      excludeCount
+      excludeCount,
     );
     if (xranges.length == 0) {
       result.push(new Band(y, y2, box.x2, box.x2));
@@ -419,7 +419,7 @@ export function shapesToBands(
         result.push(new Band(y, y2, box.x2, box.x2));
       } else {
         result.push(
-          new Band(y, y2, Math.max(x, box.x1), Math.min(x + width, box.x2))
+          new Band(y, y2, Math.max(x, box.x1), Math.min(x + width, box.x2)),
         );
       }
     }
@@ -483,7 +483,7 @@ export function findBand(bands: Band[], y: number): number {
  */
 export function findUppermostFullyOpenRect(
   bands: Band[],
-  rect: Rect
+  rect: Rect,
 ): Rect | null {
   if (!bands.length) {
     return rect;
@@ -536,7 +536,7 @@ export function findUppermostFullyOpenRect(
  */
 export function findBottommostFullyOpenRect(
   bands: Band[],
-  rect: Rect
+  rect: Rect,
 ): Rect | null {
   if (!bands.length) {
     return rect;
@@ -586,7 +586,7 @@ export function positionFloat(
   box: Rect,
   bands: Band[],
   floatBox: Rect,
-  side: string
+  side: string,
 ): boolean {
   let y = floatBox.y1;
   const floatWidth = floatBox.x2 - floatBox.x1;
@@ -633,7 +633,7 @@ export function addFloatToBands(
   bands: Band[],
   floatBox: Rect,
   floatBands: Band[],
-  side: string
+  side: string,
 ): void {
   if (!floatBands) {
     floatBands = [new Band(floatBox.y1, floatBox.y2, floatBox.x1, floatBox.x2)];
@@ -673,7 +673,7 @@ export function addFloatToBands(
         bands.splice(
           index,
           0,
-          new Band(floatBand.y2, band.y2, band.x1, band.x2)
+          new Band(floatBand.y2, band.y2, band.x1, band.x2),
         );
         band.y2 = floatBand.y2;
       }

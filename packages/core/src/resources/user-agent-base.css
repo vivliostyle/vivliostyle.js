@@ -1,13 +1,44 @@
 @namespace html "http://www.w3.org/1999/xhtml";
 
-html|html, html|address, html|blockquote, html|body, html|dd, html|div,
-html|dl, html|dt, html|fieldset, html|form, html|frame, html|frameset,
-html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|noframes,
-html|ol, html|p, html|ul, html|center, html|dir, html|hr, html|menu, html|pre,
-html|article, html|section, html|nav, html|aside, html|hgroup, html|footer, html|header,
-html|figure, html|figcaption, html|main {
-   display: block;
-   unicode-bidi: normal;
+html|html,
+html|address,
+html|blockquote,
+html|body,
+html|dd,
+html|div,
+html|dl,
+html|dt,
+html|fieldset,
+html|form,
+html|frame,
+html|frameset,
+html|h1,
+html|h2,
+html|h3,
+html|h4,
+html|h5,
+html|h6,
+html|noframes,
+html|ol,
+html|p,
+html|ul,
+html|center,
+html|dir,
+html|hr,
+html|menu,
+html|pre,
+html|article,
+html|section,
+html|nav,
+html|aside,
+html|hgroup,
+html|footer,
+html|header,
+html|figure,
+html|figcaption,
+html|main {
+  display: block;
+  unicode-bidi: normal;
 }
 html|li {
   display: list-item;
@@ -38,7 +69,8 @@ html|col {
 html|colgroup {
   display: table-column-group;
 }
-html|td, html|th {
+html|td,
+html|th {
   display: table-cell;
 }
 html|caption {
@@ -76,23 +108,45 @@ html|h3 {
   margin-inline-start: 0em;
   margin-inline-end: 0em;
 }
-html|h4, html|p, html|blockquote, html|ul, html|fieldset,
-html|form, html|ol, html|dl, html|dir, html|menu, html|h5, html|h6 {
+html|h4,
+html|p,
+html|blockquote,
+html|ul,
+html|fieldset,
+html|form,
+html|ol,
+html|dl,
+html|dir,
+html|menu,
+html|h5,
+html|h6 {
   margin-block-start: 1em;
   margin-block-end: 1em;
   margin-inline-start: 0em;
   margin-inline-end: 0em;
 }
 html|h5 {
-  font-size: .83em;
+  font-size: 0.83em;
 }
 html|h6 {
-  font-size: .75em;
+  font-size: 0.75em;
 }
-html|h1, html|h2, html|h3, html|h4, html|h5, html|h6, html|b, html|strong {
+html|h1,
+html|h2,
+html|h3,
+html|h4,
+html|h5,
+html|h6,
+html|b,
+html|strong {
   font-weight: bolder;
 }
-html|h1, html|h2, html|h3, html|h4, html|h5, html|h6 {
+html|h1,
+html|h2,
+html|h3,
+html|h4,
+html|h5,
+html|h6 {
   break-after: avoid;
 }
 html|blockquote {
@@ -101,23 +155,36 @@ html|blockquote {
   margin-inline-start: 40px;
   margin-inline-end: 40px;
 }
-html|i, html|cite, html|em, html|var, html|address {
+html|i,
+html|cite,
+html|em,
+html|var,
+html|address {
   font-style: italic;
 }
-html|pre, html|tt, html|code, html|kbd, html|samp {
+html|pre,
+html|tt,
+html|code,
+html|kbd,
+html|samp {
   font-family: monospace;
 }
 html|pre {
   white-space: pre;
 }
-html|button, html|textarea, html|input, html|select {
+html|button,
+html|textarea,
+html|input,
+html|select {
   display: inline-block;
 }
 html|big {
   font-size: 1.17em;
 }
-html|small, html|sub, html|sup {
-  font-size: .83em;
+html|small,
+html|sub,
+html|sup {
+  font-size: 0.83em;
 }
 html|sub {
   vertical-align: sub;
@@ -128,34 +195,47 @@ html|sup {
 html|table {
   border-spacing: 2px;
 }
-html|thead, html|tbody, html|tfoot {
+html|thead,
+html|tbody,
+html|tfoot {
   vertical-align: middle;
 }
 /* for XHTML tables without tbody */
 html|table > html|tr {
   vertical-align: middle;
 }
-html|td, html|th {
+html|td,
+html|th {
   vertical-align: inherit;
 }
-html|s, html|strike, html|del {
+html|s,
+html|strike,
+html|del {
   text-decoration: line-through;
 }
 html|hr {
   border: 1px inset;
 }
-html|ol, html|ul, html|dir, html|menu, html|dd {
+html|ol,
+html|ul,
+html|dir,
+html|menu,
+html|dd {
   margin: 0px;
   margin-inline-start: 40px;
 }
 html|ol {
   list-style-type: decimal;
 }
-html|ol html|ul, html|ul html|ol, html|ul html|ul, html|ol html|ol {
+html|ol html|ul,
+html|ul html|ol,
+html|ul html|ul,
+html|ol html|ol {
   margin-top: 0;
   margin-bottom: 0;
 }
-html|u, html|ins {
+html|u,
+html|ins {
   text-decoration: underline;
 }
 html|center {
@@ -168,7 +248,8 @@ html|q:after {
   content: close-quote;
 }
 
-html|audio, html|video {
+html|audio,
+html|video {
   break-inside: avoid;
 }
 
@@ -191,30 +272,39 @@ html|rb {
 html|rt {
   display: ruby-text;
 }
-html|ruby, html|rb, html|rt, html|rbc, html|rtc {
+html|ruby,
+html|rb,
+html|rt,
+html|rbc,
+html|rtc {
   unicode-bidi: isolate;
 }
 
-html|rtc, html|rt {
+html|rtc,
+html|rt {
   font-variant-east-asian: ruby;
   text-emphasis: none;
   white-space: nowrap;
   line-height: 1;
 }
 
-html|rtc:lang(zh), html|rt:lang(zh) {
+html|rtc:lang(zh),
+html|rt:lang(zh) {
   ruby-align: center;
 }
 
-html|rtc, html|rt {
+html|rtc,
+html|rt {
   font-size: 50%;
 }
 
-html|rtc:lang(zh-TW), html|rt:lang(zh-TW) {
+html|rtc:lang(zh-TW),
+html|rt:lang(zh-TW) {
   font-size: 30%;
 }
 
-html|rtc > html|rt, html|rtc > html|rt:lang(zh-TW) {
+html|rtc > html|rt,
+html|rtc > html|rt:lang(zh-TW) {
   font-size: 100%;
 }
 
@@ -308,13 +398,18 @@ body > * {
   -adapt-behavior: body-child;
 }
 
-[role=doc-toc], [role=directory], nav, .toc, #toc,
-#table-of-contents, #contents {
+[role="doc-toc"],
+[role="directory"],
+nav,
+.toc,
+#toc,
+#table-of-contents,
+#contents {
   -adapt-behavior: toc-root;
 }
 
-[role=doc-toc] a,
-[role=directory] a,
+[role="doc-toc"] a,
+[role="directory"] a,
 nav a,
 .toc a,
 #toc a,
@@ -322,8 +417,8 @@ ncx|navLabel {
   -adapt-behavior: toc-node-anchor;
 }
 
-[role=doc-toc] li,
-[role=directory] li,
+[role="doc-toc"] li,
+[role="directory"] li,
 nav li,
 .toc li,
 #toc li,
@@ -331,30 +426,30 @@ ncx|navPoint {
   -adapt-behavior: toc-node;
 }
 
-[role=doc-toc] li > *:first-child,
-[role=directory] li > *:first-child,
+[role="doc-toc"] li > *:first-child,
+[role="directory"] li > *:first-child,
 nav li > *:first-child,
 .toc li > *:first-child,
 #toc li > *:first-child {
   -adapt-behavior: toc-node-first-child;
 }
 
-[role=doc-toc] ol,
-[role=directory] ol,
+[role="doc-toc"] ol,
+[role="directory"] ol,
 nav ol,
 .toc ol,
 #toc ol,
-[role=doc-toc] ul,
-[role=directory] ul,
+[role="doc-toc"] ul,
+[role="directory"] ul,
 nav ul,
 .toc ul,
 #toc ul,
-ol[role=doc-toc],
-ol[role=directory],
+ol[role="doc-toc"],
+ol[role="directory"],
 ol.toc,
 ol#toc,
-ul[role=doc-toc],
-ul[role=directory],
+ul[role="doc-toc"],
+ul[role="directory"],
 ul.toc,
 ul#toc {
   -adapt-behavior: toc-container;
@@ -408,7 +503,7 @@ fb2|th {
   font-weight: bold;
   text-align: center;
   border: 1px solid black;
-  background-color: #CEE;
+  background-color: #cee;
   padding: 0.3em;
 }
 
@@ -473,7 +568,13 @@ fb2|section fb2|section fb2|section fb2|section fb2|section fb2|title {
   margin: 1em 0px 0.5em 2.272em;
 }
 
-fb2|section fb2|section fb2|section fb2|section fb2|section fb2|section fb2|title {
+fb2|section
+  fb2|section
+  fb2|section
+  fb2|section
+  fb2|section
+  fb2|section
+  fb2|title {
   text-align: left;
   margin: 1em 0px 0.5em 2.5em;
 }
@@ -566,7 +667,9 @@ fb2|*.bold {
   font-weight: bold;
 }
 
-fb2|binary, fb2|description, fb2|stylesheet {
+fb2|binary,
+fb2|description,
+fb2|stylesheet {
   display: none;
 }
 
@@ -594,7 +697,7 @@ fb2|body[name="notes"] fb2|title {
 
 fb2|body[name="notes"] fb2|p {
   text-indent: 0px;
-  display: inline;  /* for now */
+  display: inline; /* for now */
 }
 
 fb2|body[name="notes"] fb2|p + fb2|p {

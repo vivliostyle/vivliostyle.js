@@ -16,20 +16,22 @@ This is a bundled package of [Vivliostyle.js (core engine)](https://github.com/v
 
 3. Run the following command:
 
-  ```
-  (Shell environment like macOS or Linux)
-  > ./start-webserver
-  (Windows)
-  > .\start-webserver
-  ```
+```
+(Shell environment like macOS or Linux)
+> ./start-webserver
+(Windows)
+> .\start-webserver
+```
 
-  This command starts a web server if either of Node.js, Ruby, Python is installed.
+This command starts a web server if either of Node.js, Ruby, Python is installed.
 
-  If a message
-  ```
-  Please install Node.js or Python or Ruby and rerun this script, or use your favorite HTTP server.
-  ```
-  is shown, install either of them and rerun the command, or start your favorite web server.
+If a message
+
+```
+Please install Node.js or Python or Ruby and rerun this script, or use your favorite HTTP server.
+```
+
+is shown, install either of them and rerun the command, or start your favorite web server.
 
 4. Open <http://localhost:8000> with a web browser.
 

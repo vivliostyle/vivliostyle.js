@@ -20,49 +20,50 @@
 const webpack = require("webpack");
 
 var testFiles = [
-    "test/util/dom.js",
-    "test/util/matchers.js",
-    // "test/util/mock/vivliostyle/logging-mock.js",
-    // "test/util/mock/vivliostyle/plugin-mock.js",
-    "test/spec/**/*.js",
-    // "plugins/*/test/spec/**/*.js"
+  "test/util/dom.js",
+  "test/util/matchers.js",
+  // "test/util/mock/vivliostyle/logging-mock.js",
+  // "test/util/mock/vivliostyle/plugin-mock.js",
+  "test/spec/**/*.js",
+  // "plugins/*/test/spec/**/*.js"
 ];
 
 module.exports = function(config) {
-    return {
-        basePath: "../..",
-        frameworks: ["jasmine"],
-        files: testFiles,
-        preprocessors: {
-            "test/{util,spec}/**/*.js": ["webpack", "sourcemap"]
-        },
-        webpack: {
-            mode: process.env.NODE_ENV === "production" ? "production" : "development",
-            entry: "./src/ts/vivliostyle.ts",
-            devtool: "inline-source-map",
-            resolve: {
-                extensions: [".ts", ".js"]
-            },
-            module: {
-                rules: [
-                    {
-                        test: /\.ts$/,
-                        loader: "ts-loader"
-                    },
-                    {
-                        test: /\.(css|txt|xml)$/,
-                        use: "raw-loader"
-                    }
-                ]
-            },
-            plugins: [
-                new webpack.DefinePlugin({
-                    DEBUG: JSON.stringify(process.env.NODE_ENV !== "production")
-                })
-            ],
-        },
-        port: 9876,
-        colors: true,
-        logLevel: config.LOG_INFO
-    };
+  return {
+    basePath: "../..",
+    frameworks: ["jasmine"],
+    files: testFiles,
+    preprocessors: {
+      "test/{util,spec}/**/*.js": ["webpack", "sourcemap"],
+    },
+    webpack: {
+      mode:
+        process.env.NODE_ENV === "production" ? "production" : "development",
+      entry: "./src/ts/vivliostyle.ts",
+      devtool: "inline-source-map",
+      resolve: {
+        extensions: [".ts", ".js"],
+      },
+      module: {
+        rules: [
+          {
+            test: /\.ts$/,
+            loader: "ts-loader",
+          },
+          {
+            test: /\.(css|txt|xml)$/,
+            use: "raw-loader",
+          },
+        ],
+      },
+      plugins: [
+        new webpack.DefinePlugin({
+          DEBUG: JSON.stringify(process.env.NODE_ENV !== "production"),
+        }),
+      ],
+    },
+    port: 9876,
+    colors: true,
+    logLevel: config.LOG_INFO,
+  };
 };

@@ -1,103 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Page floats and break-*: avoid</title>
-  <style>
-    @page {
-      size: 220px;
-      margin: 10px;
-      @bottom-center {
-        font-size: 8px;
-        content: counter(page);
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page floats and break-*: avoid</title>
+    <style>
+      @page {
+        size: 220px;
+        margin: 10px;
+        @bottom-center {
+          font-size: 8px;
+          content: counter(page);
+        }
       }
-    }
-    :root {
-      font-size: 16px;
-      line-height: 20px;
-    }
-    body, p {
-      margin: 0;
-    }
-    section {
-      break-after: page;
-    }
-    .float {
-      float-reference: page;
-      box-sizing: border-box;
-      border: blue solid 2px;
-      height: 160px;
-      width: 100%;
-    }
-    .block-start {
-      float: block-start;
-    }
-    .block-end {
-      float: block-end;
-    }
-    .avoid-after {
-      break-after: avoid;
-    }
-    .avoid-before {
-      break-before: avoid;
-    }
-    .avoid-inside {
-      break-inside: avoid;
-    }
-  </style>
-</head>
-<body>
-<section>
-  <p>
-    The following<br>
-    page float should be<br>
-    on the page 2.
-  </p>
-  <div class="float block-start">This block-start float should be on the page 2.</div>
-  <p>
-    This paragraph<br>
-    should be on the page 1.<br>
-    This paragraph<br>
-    should be on the page 1.
-  </p>
-  <p class="avoid-after">This paragraph should be on the page 3.</p>
-  <p>This paragraph should be on the page 3.</p>
-</section>
+      :root {
+        font-size: 16px;
+        line-height: 20px;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      section {
+        break-after: page;
+      }
+      .float {
+        float-reference: page;
+        box-sizing: border-box;
+        border: blue solid 2px;
+        height: 160px;
+        width: 100%;
+      }
+      .block-start {
+        float: block-start;
+      }
+      .block-end {
+        float: block-end;
+      }
+      .avoid-after {
+        break-after: avoid;
+      }
+      .avoid-before {
+        break-before: avoid;
+      }
+      .avoid-inside {
+        break-inside: avoid;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>
+        The following<br />
+        page float should be<br />
+        on the page 2.
+      </p>
+      <div class="float block-start">
+        This block-start float should be on the page 2.
+      </div>
+      <p>
+        This paragraph<br />
+        should be on the page 1.<br />
+        This paragraph<br />
+        should be on the page 1.
+      </p>
+      <p class="avoid-after">This paragraph should be on the page 3.</p>
+      <p>This paragraph should be on the page 3.</p>
+    </section>
 
-<section>
-  <p>
-    The following<br>
-    page float should be<br>
-    on the page 5.
-  </p>
-  <div class="float block-end">This block-end float should be on the page 5.</div>
-  <p>
-    This paragraph<br>
-    should be on the page 4.<br>
-    This paragraph<br>
-    should be on the page 4.
-  </p>
-  <p>This paragraph should be on the page 6.</p>
-  <p class="avoid-before">This paragraph should be on the page 6.</p>
-</section>
+    <section>
+      <p>
+        The following<br />
+        page float should be<br />
+        on the page 5.
+      </p>
+      <div class="float block-end">
+        This block-end float should be on the page 5.
+      </div>
+      <p>
+        This paragraph<br />
+        should be on the page 4.<br />
+        This paragraph<br />
+        should be on the page 4.
+      </p>
+      <p>This paragraph should be on the page 6.</p>
+      <p class="avoid-before">This paragraph should be on the page 6.</p>
+    </section>
 
-<section>
-  <p>
-    The following<br>
-    page float should be<br>
-    on the page 7.
-  </p>
-  <div class="float block-start">This block-start float should be on the page 8.</div>
-  <p>
-    This paragraph<br>
-    should be on the page 7.<br>
-    This paragraph<br>
-    should be on the page 7.
-  </p>
-  <p class="avoid-inside">
-    This paragraph should be on the page 9.<br>
-    This paragraph should be on the page 9.
-  </p>
-</section>
-</body>
+    <section>
+      <p>
+        The following<br />
+        page float should be<br />
+        on the page 7.
+      </p>
+      <div class="float block-start">
+        This block-start float should be on the page 8.
+      </div>
+      <p>
+        This paragraph<br />
+        should be on the page 7.<br />
+        This paragraph<br />
+        should be on the page 7.
+      </p>
+      <p class="avoid-inside">
+        This paragraph should be on the page 9.<br />
+        This paragraph should be on the page 9.
+      </p>
+    </section>
+  </body>
 </html>

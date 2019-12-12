@@ -1,206 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Compositing and Blending</title>
-  <style>
-    :root {
-      background: rgb(0, 220, 255);
-    }
-    h1 {
-      font-size: 1rem;
-    }
-    .container {
-      background: linear-gradient(90deg, rgba(0, 255, 0, 0.8), rgba(255, 0, 0, 0.8)), linear-gradient(rgba(255, 255, 0, 0.8), rgba(0, 255, 255, 0.8)), rgba(0, 0, 255, 0.8);
-      color: rgba(255, 0, 255, 0.9);
-      padding: 10px;
-      text-align: center;
-      font-size: 30px;
-      line-height: 1;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Compositing and Blending</title>
+    <style>
+      :root {
+        background: rgb(0, 220, 255);
+      }
+      h1 {
+        font-size: 1rem;
+      }
+      .container {
+        background: linear-gradient(
+            90deg,
+            rgba(0, 255, 0, 0.8),
+            rgba(255, 0, 0, 0.8)
+          ),
+          linear-gradient(rgba(255, 255, 0, 0.8), rgba(0, 255, 255, 0.8)),
+          rgba(0, 0, 255, 0.8);
+        color: rgba(255, 0, 255, 0.9);
+        padding: 10px;
+        text-align: center;
+        font-size: 30px;
+        line-height: 1;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>mix-blend-mode: normal</h1>
+    <div style="mix-blend-mode: normal" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: normal</h1>
-<div style="mix-blend-mode: normal" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: multiply</h1>
+    <div style="mix-blend-mode: multiply" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: multiply</h1>
-<div style="mix-blend-mode: multiply" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: multiply inside isolation: isolate</h1>
+    <div style="isolation: isolate">
+      <div style="mix-blend-mode: multiply" class="container">
+        text
+      </div>
+    </div>
 
-<h1>mix-blend-mode: multiply inside isolation: isolate</h1>
-<div style="isolation: isolate">
-  <div style="mix-blend-mode: multiply" class="container">
-    text
-  </div>
-</div>
+    <h1>mix-blend-mode: screen</h1>
+    <div style="mix-blend-mode: screen" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: screen</h1>
-<div style="mix-blend-mode: screen" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: overlay</h1>
+    <div style="mix-blend-mode: overlay" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: overlay</h1>
-<div style="mix-blend-mode: overlay" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: darken</h1>
+    <div style="mix-blend-mode: darken" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: darken</h1>
-<div style="mix-blend-mode: darken" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: lighten</h1>
+    <div style="mix-blend-mode: lighten" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: lighten</h1>
-<div style="mix-blend-mode: lighten" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: color-dodge</h1>
+    <div style="mix-blend-mode: color-dodge" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: color-dodge</h1>
-<div style="mix-blend-mode: color-dodge" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: color-burn</h1>
+    <div style="mix-blend-mode: color-burn" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: color-burn</h1>
-<div style="mix-blend-mode: color-burn" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: hard-light</h1>
+    <div style="mix-blend-mode: hard-light" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: hard-light</h1>
-<div style="mix-blend-mode: hard-light" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: soft-light</h1>
+    <div style="mix-blend-mode: soft-light" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: soft-light</h1>
-<div style="mix-blend-mode: soft-light" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: differrence</h1>
+    <div style="mix-blend-mode: difference" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: differrence</h1>
-<div style="mix-blend-mode: difference" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: exclusion</h1>
+    <div style="mix-blend-mode: exclusion" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: exclusion</h1>
-<div style="mix-blend-mode: exclusion" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: hue</h1>
+    <div style="mix-blend-mode: hue" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: hue</h1>
-<div style="mix-blend-mode: hue" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: saturation</h1>
+    <div style="mix-blend-mode: saturation" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: saturation</h1>
-<div style="mix-blend-mode: saturation" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: color</h1>
+    <div style="mix-blend-mode: color" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: color</h1>
-<div style="mix-blend-mode: color" class="container">
-  text
-</div>
+    <h1>mix-blend-mode: luminosity</h1>
+    <div style="mix-blend-mode: luminosity" class="container">
+      text
+    </div>
 
-<h1>mix-blend-mode: luminosity</h1>
-<div style="mix-blend-mode: luminosity" class="container">
-  text
-</div>
+    <h1>background-blend-mode: normal</h1>
+    <div style="background-blend-mode: normal" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: normal</h1>
-<div style="background-blend-mode: normal" class="container">
-  text
-</div>
+    <h1>background-blend-mode: multiply</h1>
+    <div style="background-blend-mode: multiply" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: multiply</h1>
-<div style="background-blend-mode: multiply" class="container">
-  text
-</div>
+    <h1>background-blend-mode: multiply, difference</h1>
+    <div style="background-blend-mode: multiply, difference" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: multiply, difference</h1>
-<div style="background-blend-mode: multiply, difference" class="container">
-  text
-</div>
+    <h1>background-blend-mode: multiply inside isolation: isolate</h1>
+    <div style="isolation: isolate">
+      <div style="background-blend-mode: multiply" class="container">
+        text
+      </div>
+    </div>
 
-<h1>background-blend-mode: multiply inside isolation: isolate</h1>
-<div style="isolation: isolate">
-  <div style="background-blend-mode: multiply" class="container">
-    text
-  </div>
-</div>
+    <h1>background-blend-mode: screen</h1>
+    <div style="background-blend-mode: screen" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: screen</h1>
-<div style="background-blend-mode: screen" class="container">
-  text
-</div>
+    <h1>background-blend-mode: overlay</h1>
+    <div style="background-blend-mode: overlay" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: overlay</h1>
-<div style="background-blend-mode: overlay" class="container">
-  text
-</div>
+    <h1>background-blend-mode: darken</h1>
+    <div style="background-blend-mode: darken" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: darken</h1>
-<div style="background-blend-mode: darken" class="container">
-  text
-</div>
+    <h1>background-blend-mode: lighten</h1>
+    <div style="background-blend-mode: lighten" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: lighten</h1>
-<div style="background-blend-mode: lighten" class="container">
-  text
-</div>
+    <h1>background-blend-mode: color-dodge</h1>
+    <div style="background-blend-mode: color-dodge" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: color-dodge</h1>
-<div style="background-blend-mode: color-dodge" class="container">
-  text
-</div>
+    <h1>background-blend-mode: color-burn</h1>
+    <div style="background-blend-mode: color-burn" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: color-burn</h1>
-<div style="background-blend-mode: color-burn" class="container">
-  text
-</div>
+    <h1>background-blend-mode: hard-light</h1>
+    <div style="background-blend-mode: hard-light" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: hard-light</h1>
-<div style="background-blend-mode: hard-light" class="container">
-  text
-</div>
+    <h1>background-blend-mode: soft-light</h1>
+    <div style="background-blend-mode: soft-light" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: soft-light</h1>
-<div style="background-blend-mode: soft-light" class="container">
-  text
-</div>
+    <h1>background-blend-mode: differrence</h1>
+    <div style="background-blend-mode: difference" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: differrence</h1>
-<div style="background-blend-mode: difference" class="container">
-  text
-</div>
+    <h1>background-blend-mode: exclusion</h1>
+    <div style="background-blend-mode: exclusion" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: exclusion</h1>
-<div style="background-blend-mode: exclusion" class="container">
-  text
-</div>
+    <h1>background-blend-mode: hue</h1>
+    <div style="background-blend-mode: hue" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: hue</h1>
-<div style="background-blend-mode: hue" class="container">
-  text
-</div>
+    <h1>background-blend-mode: saturation</h1>
+    <div style="background-blend-mode: saturation" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: saturation</h1>
-<div style="background-blend-mode: saturation" class="container">
-  text
-</div>
+    <h1>background-blend-mode: color</h1>
+    <div style="background-blend-mode: color" class="container">
+      text
+    </div>
 
-<h1>background-blend-mode: color</h1>
-<div style="background-blend-mode: color" class="container">
-  text
-</div>
-
-<h1>background-blend-mode: luminosity</h1>
-<div style="background-blend-mode: luminosity" class="container">
-  text
-</div>
-
-</body>
+    <h1>background-blend-mode: luminosity</h1>
+    <div style="background-blend-mode: luminosity" class="container">
+      text
+    </div>
+  </body>
 </html>

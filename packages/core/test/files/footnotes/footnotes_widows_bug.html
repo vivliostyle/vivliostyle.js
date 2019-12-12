@@ -1,88 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Footnotes widows bug</title>
-  <style>
-    @-adapt-footnote-area {
-      -adapt-margin-before: 5px;
-      -adapt-margin-after: 5px;
-    }
-    @-adapt-footnote-area ::before {
-      -adapt-border-before-width: 1px;
-      -adapt-margin-after: 5px;
-    }
-    @page {
-      size: 220px;
-      margin: 10px;
-      @bottom-center {
-        font-size: 8px;
-        line-height: 1;
-        content: counter(page);
+  <head>
+    <meta charset="UTF-8" />
+    <title>Footnotes widows bug</title>
+    <style>
+      @-adapt-footnote-area {
+        -adapt-margin-before: 5px;
+        -adapt-margin-after: 5px;
       }
-    }
+      @-adapt-footnote-area ::before {
+        -adapt-border-before-width: 1px;
+        -adapt-margin-after: 5px;
+      }
+      @page {
+        size: 220px;
+        margin: 10px;
+        @bottom-center {
+          font-size: 8px;
+          line-height: 1;
+          content: counter(page);
+        }
+      }
 
-    :root {
-      line-height: 20px;
-      orphans: 1;
-      widows: 2;
-    }
+      :root {
+        line-height: 20px;
+        orphans: 1;
+        widows: 2;
+      }
 
-    body, p {
-      margin: 0;
-    }
+      body,
+      p {
+        margin: 0;
+      }
 
-    section {
-      page-break-after: always;
-    }
+      section {
+        page-break-after: always;
+      }
 
-    .footnote {
-      float: footnote;
-      counter-increment: footnote;
-    }
+      .footnote {
+        float: footnote;
+        counter-increment: footnote;
+      }
 
-    .tall {
-      line-height: 32px;
-    }
+      .tall {
+        line-height: 32px;
+      }
 
-    .footnote::footnote-marker, .footnote::footnote-call {
-      content: "[" counter(footnote) "]";
-    }
-  </style>
-</head>
-<body>
-<section>
-  <p>1: This page</p>
-  <p>
-    2: should<br>
-    3: contain<br>
-    4: 10 lines<br>
-    5: Should<br>
-    6: be<span class="footnote"><span class="tall">This line overflows p1</span><br>footnote<br>footnote</span><br>
-    7: on<br>
-    8: the<br>
-    9: 1st<br>
-    10: page<br>
-    11: 1st line of page 2<br>
-    12: This page<br>
-    13: should contain<br>
-    14: a footnote
-  </p>
-</section>
-<section>
-  1: This<br>
-  2: page<br>
-  3: should<br>
-  4: contain<span class="footnote">footnote on page 3</span><br>
-  5: 8 lines<br>
-  6: Should<span class="footnote">footnote<br>on<br>page 4</span><br>
-  7: be on the<br>
-  8: 3rd page<br>
-  9: 1st line of page 4<br>
-  10: This page<br>
-  11: should contain<br>
-  12: a footnote<br>
-  13
-</section>
-</body>
+      .footnote::footnote-marker,
+      .footnote::footnote-call {
+        content: "[" counter(footnote) "]";
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>1: This page</p>
+      <p>
+        2: should<br />
+        3: contain<br />
+        4: 10 lines<br />
+        5: Should<br />
+        6: be<span class="footnote"
+          ><span class="tall">This line overflows p1</span
+          ><br />footnote<br />footnote</span
+        ><br />
+        7: on<br />
+        8: the<br />
+        9: 1st<br />
+        10: page<br />
+        11: 1st line of page 2<br />
+        12: This page<br />
+        13: should contain<br />
+        14: a footnote
+      </p>
+    </section>
+    <section>
+      1: This<br />
+      2: page<br />
+      3: should<br />
+      4: contain<span class="footnote">footnote on page 3</span><br />
+      5: 8 lines<br />
+      6: Should<span class="footnote">footnote<br />on<br />page 4</span><br />
+      7: be on the<br />
+      8: 3rd page<br />
+      9: 1st line of page 4<br />
+      10: This page<br />
+      11: should contain<br />
+      12: a footnote<br />
+      13
+    </section>
+  </body>
 </html>

@@ -1,36 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>empty selector</title>
     <style>
-        .empty {
-            color: red;
-        }
-        .empty:empty {
-            color: green;
-        }
-        .empty::before {
-            content: "This shold be green (empty)";
-        }
-        .not-empty {
-            color: green;
-        }
-        .not-empty:empty {
-            color: red;
-        }
-        .not-empty::before {
-            content: "This should be green (not empty)"
-        }
+      .empty {
+        color: red;
+      }
+      .empty:empty {
+        color: green;
+      }
+      .empty::before {
+        content: "This shold be green (empty)";
+      }
+      .not-empty {
+        color: green;
+      }
+      .not-empty:empty {
+        color: red;
+      }
+      .not-empty::before {
+        content: "This should be green (not empty)";
+      }
     </style>
-</head>
-<body>
-<p class="empty"></p>
-<p class="empty"><!-- empty --></p>
-<p class="not-empty">
-</p>
-<p class="not-empty"> </p>
-<p class="not-empty"> foo</p>
-<p class="not-empty"><span style="display: none"></span></p>
-</body>
+  </head>
+  <body>
+    <p class="empty"></p>
+    <p class="empty"><!-- empty --></p>
+    <p class="not-empty"></p>
+    <p class="not-empty"></p>
+    <p class="not-empty">foo</p>
+    <p class="not-empty"><span style="display: none"></span></p>
+  </body>
 </html>

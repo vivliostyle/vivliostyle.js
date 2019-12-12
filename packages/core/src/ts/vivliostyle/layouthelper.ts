@@ -31,7 +31,7 @@ import { Layout, Vtree } from "./types";
 export function fixBoxesForNode(
   clientLayout: Vtree.ClientLayout,
   boxes: Vtree.ClientRect[],
-  node: Node
+  node: Node,
 ): Vtree.ClientRect[] {
   const fullRange = node.ownerDocument.createRange();
   fullRange.setStart(node, 0);
@@ -51,7 +51,7 @@ export function fixBoxesForNode(
           top: box.top,
           left: fullBox.left,
           bottom: box.bottom,
-          right: fullBox.right
+          right: fullBox.right,
         });
         break;
       }
@@ -74,7 +74,7 @@ export function calculateEdge(
   nodeContext: Vtree.NodeContext,
   clientLayout: Vtree.ClientLayout,
   extraOffset: number,
-  vertical: boolean
+  vertical: boolean,
 ): number {
   const node = nodeContext.viewNode;
   if (!node) {
@@ -133,7 +133,7 @@ export function calculateEdge(
 export function getElementHeight(
   element: Element,
   column: Layout.Column,
-  vertical: boolean
+  vertical: boolean,
 ): number {
   const rect = column.clientLayout.getElementClientRect(element);
   const margin = column.getComputedMargin(element);
@@ -154,7 +154,7 @@ export function isOrphan(node: Node): boolean {
 
 export function removeFollowingSiblings(
   parentNode: Node,
-  viewNode: Node
+  viewNode: Node,
 ): void {
   if (!parentNode) {
     return;

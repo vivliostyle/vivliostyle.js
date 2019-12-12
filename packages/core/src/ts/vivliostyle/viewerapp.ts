@@ -47,7 +47,7 @@ export function navigateToLeftPage(): void {
     where:
       currentPageProgression === Constants.PageProgression.LTR
         ? "previous"
-        : "next"
+        : "next",
   });
 }
 
@@ -57,7 +57,7 @@ export function navigateToRightPage(): void {
     where:
       currentPageProgression === Constants.PageProgression.LTR
         ? "next"
-        : "previous"
+        : "previous",
   });
 }
 
@@ -166,7 +166,7 @@ export function touch(evt: TouchEvent): void {
             where:
               currentPageProgression === Constants.PageProgression.LTR
                 ? "previous"
-                : "next"
+                : "next",
           });
         } else {
           sendCommand({
@@ -174,7 +174,7 @@ export function touch(evt: TouchEvent): void {
             where:
               currentPageProgression === Constants.PageProgression.LTR
                 ? "next"
-                : "previous"
+                : "previous",
           });
         }
       }
@@ -209,11 +209,11 @@ export function callback(msg: Base.JSON): void {
       const pageProgression = (currentPageProgression = viewer.getCurrentPageProgression());
       viewer.viewportElement.setAttribute(
         "data-vivliostyle-page-progression",
-        pageProgression
+        pageProgression,
       );
       viewer.viewportElement.setAttribute(
         "data-vivliostyle-spread-view",
-        viewer.pref.spreadView
+        viewer.pref.spreadView,
       );
       window.addEventListener("keydown", keydown, false);
 
@@ -225,14 +225,14 @@ export function callback(msg: Base.JSON): void {
       //        (.touch), false);
       document.body.setAttribute("data-vivliostyle-viewer-status", "complete");
       const leftButton = document.getElementById(
-        "vivliostyle-page-navigation-left"
+        "vivliostyle-page-navigation-left",
       );
       leftButton.addEventListener("click", navigateToLeftPage, false);
       const rightButton = document.getElementById(
-        "vivliostyle-page-navigation-right"
+        "vivliostyle-page-navigation-right",
       );
       rightButton.addEventListener("click", navigateToRightPage, false);
-      [leftButton, rightButton].forEach(button => {
+      [leftButton, rightButton].forEach((button) => {
         button.setAttribute("data-vivliostyle-ui-state", "attention");
         window.setTimeout(() => {
           button.removeAttribute("data-vivliostyle-ui-state");
@@ -247,7 +247,7 @@ export function callback(msg: Base.JSON): void {
       const cfi = msg["cfi"];
       if (cfi) {
         location.replace(
-          Base.setURLParam(location.href, "f", Base.lightURLEncode(cfi || ""))
+          Base.setURLParam(location.href, "f", Base.lightURLEncode(cfi || "")),
         );
       }
       break;
@@ -264,7 +264,7 @@ function setViewportSize(
   height: string | null,
   size: string | null,
   orientation: string | null,
-  config: { [key: string]: any }
+  config: { [key: string]: any },
 ): void {
   let pageSpec: string;
   if (!width || !height) {
@@ -351,18 +351,18 @@ export function main(arg): void {
     document: doc,
     userStyleSheet: userStyleSheet,
     spreadView: spreadView,
-    pageBorder: 1
+    pageBorder: 1,
   };
   setViewportSize(width, height, size, orientation, config);
   const viewerInstance = new AdaptViewer.Viewer(
     window,
     viewportElement,
     "main",
-    callback
+    callback,
   );
   viewerInstance.initEmbed(config);
 }
 
 export const viewerapp = {
-  main
+  main,
 };

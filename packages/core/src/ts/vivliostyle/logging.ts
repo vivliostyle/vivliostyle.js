@@ -26,7 +26,7 @@ export enum LogLevel {
   DEBUG = 1,
   INFO,
   WARN,
-  ERROR
+  ERROR,
 }
 
 export type ErrorInfo = {
@@ -93,7 +93,7 @@ export class Logger {
   private triggerListeners(level: LogLevel, args: ErrorInfo) {
     const listeners = this.listeners[level];
     if (listeners) {
-      listeners.forEach(listener => {
+      listeners.forEach((listener) => {
         listener(args);
       });
     }

@@ -46,7 +46,7 @@ export const mediaTags = {
   img: true,
   svg: true,
   audio: true,
-  video: true
+  video: true,
 };
 
 /**
@@ -65,7 +65,7 @@ export class AllLayoutConstraint implements LayoutConstraint {
    * @override
    */
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
-    return this.constraints.every(c => c.allowLayout(nodeContext));
+    return this.constraints.every((c) => c.allowLayout(nodeContext));
   }
 }
 
@@ -87,7 +87,7 @@ export class BoxBreakPosition extends BreakPosition.AbstractBreakPosition
 
   constructor(
     public readonly checkPoints: Vtree.NodeContext[],
-    public readonly penalty: number
+    public readonly penalty: number,
   ) {
     super();
   }
@@ -141,7 +141,7 @@ export function validateCheckPoints(checkPoints: Vtree.NodeContext[]): void {
             cp1.offsetInNode - cp0.offsetInNode
           ) {
             Logging.logger.warn(
-              "validateCheckPoints: boxOffset inconsistent with offsetInNode"
+              "validateCheckPoints: boxOffset inconsistent with offsetInNode",
             );
           }
         }
@@ -197,7 +197,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     public layoutContext: Vtree.LayoutContext,
     public clientLayout: Vtree.ClientLayout,
     public readonly layoutConstraint: LayoutConstraint,
-    public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+    public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     super(element);
     this.last = element.lastChild;
@@ -256,7 +256,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const step = steps[stepIndex];
           nodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
             step,
-            prevContext
+            prevContext,
           );
           if (
             stepIndex === steps.length - 1 &&
@@ -266,7 +266,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           }
           if (stepIndex == 0) {
             nodeContext.offsetInNode = self.calculateOffsetInNodeForNodeContext(
-              position
+              position,
             );
             nodeContext.after = position.after;
             nodeContext.preprocessedTextContent =
@@ -277,7 +277,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           }
           const r = self.layoutContext.setCurrent(
             nodeContext,
-            stepIndex == 0 && nodeContext.offsetInNode == 0
+            stepIndex == 0 && nodeContext.offsetInNode == 0,
           );
           stepIndex--;
           if (r.isPending()) {
@@ -297,7 +297,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return position.preprocessedTextContent
       ? Diff.resolveNewIndex(
           position.preprocessedTextContent,
-          position.offsetInNode
+          position.offsetInNode,
         )
       : position.offsetInNode;
   }
@@ -307,7 +307,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   maybePeelOff(
     position: Vtree.NodeContext,
-    count: number
+    count: number,
   ): Task.Result<Vtree.NodeContext> {
     if (
       position.firstPseudo &&
@@ -333,19 +333,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   buildViewToNextBlockEdge(
     position: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[]
+    checkPoints: Vtree.NodeContext[],
   ): Task.Result<Vtree.NodeContext> {
     const self = this;
     let violateConstraint = false;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "buildViewToNextBlockEdge"
+      "buildViewToNextBlockEdge",
     );
     frame
-      .loopWithFrame(bodyFrame => {
+      .loopWithFrame((bodyFrame) => {
         if (position.viewNode && !LayoutHelper.isSpecialNodeContext(position)) {
           checkPoints.push(position.copy());
         }
-        self.maybePeelOff(position, 0).then(position1Param => {
+        self.maybePeelOff(position, 0).then((position1Param) => {
           const position1 = position1Param as Vtree.NodeContext;
           if (position1 !== position) {
             position = position1;
@@ -353,7 +353,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               checkPoints.push(position.copy());
             }
           }
-          self.nextInTree(position).then(positionParam => {
+          self.nextInTree(position).then((positionParam) => {
             position = positionParam as Vtree.NodeContext;
             if (!position) {
               // Exit the loop
@@ -369,7 +369,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               position.overflow = true;
             }
             if (self.isFloatNodeContext(position) && !self.vertical) {
-              self.layoutFloatOrFootnote(position).then(positionParam => {
+              self.layoutFloatOrFootnote(position).then((positionParam) => {
                 position = positionParam as Vtree.NodeContext;
                 if (self.pageFloatLayoutContext.isInvalidated()) {
                   position = null;
@@ -398,7 +398,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   nextInTree(
     position: Vtree.NodeContext,
-    atUnforcedBreak?: boolean
+    atUnforcedBreak?: boolean,
   ): Task.Result<Vtree.NodeContext> {
     const cont = this.layoutContext.nextInTree(position, atUnforcedBreak);
     return Selectors.processAfterIfContinues(cont, this);
@@ -410,7 +410,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return holding box edge position reached or null if the source is exhausted.
    */
   buildDeepElementView(
-    position: Vtree.NodeContext
+    position: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     if (!position.viewNode) {
       return Task.newResult(position);
@@ -419,12 +419,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const sourceNode = position.sourceNode;
     const self = this;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "buildDeepElementView"
+      "buildDeepElementView",
     );
 
     // TODO: end the loop based on depth, not sourceNode comparison
     frame
-      .loopWithFrame(bodyFrame => {
+      .loopWithFrame((bodyFrame) => {
         if (
           position.viewNode &&
           position.inline &&
@@ -437,7 +437,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           }
           checkPoints = [];
         }
-        self.maybePeelOff(position, 0).then(position1Param => {
+        self.maybePeelOff(position, 0).then((position1Param) => {
           const position1 = position1Param as Vtree.NodeContext;
           if (position1 !== position) {
             let p = position1;
@@ -454,7 +454,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               checkPoints.push(position1.copy());
             }
           }
-          self.nextInTree(position1).then(positionParam => {
+          self.nextInTree(position1).then((positionParam) => {
             position = positionParam as Vtree.NodeContext;
             if (!position || position.sourceNode == sourceNode) {
               bodyFrame.breakLoop();
@@ -559,7 +559,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     nodeContext: Vtree.NodeContext,
     checkPoints: Vtree.NodeContext[],
     index: number,
-    boxOffset: number
+    boxOffset: number,
   ): number {
     let edge: number;
     if (nodeContext && LayoutHelper.isOrphan(nodeContext.viewNode)) {
@@ -569,7 +569,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nodeContext,
         this.clientLayout,
         0,
-        this.vertical
+        this.vertical,
       );
       if (!isNaN(edge)) {
         return edge;
@@ -582,7 +582,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nodeContext,
         this.clientLayout,
         offset,
-        this.vertical
+        this.vertical,
       );
       if (!isNaN(edge)) {
         return edge;
@@ -704,7 +704,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       container.paddingRight = this.parseComputedLength(style.paddingRight);
       container.marginBottom = this.parseComputedLength(style.marginBottom);
       container.borderBottom = this.parseComputedLength(
-        style.borderBottomWidth
+        style.borderBottomWidth,
       );
       container.paddingBottom = this.parseComputedLength(style.paddingBottom);
     }
@@ -725,7 +725,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Layout a single unbreakable element.
    */
   layoutUnbreakable(
-    nodeContextIn: Vtree.NodeContext
+    nodeContextIn: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     return this.buildDeepElementView(nodeContextIn);
   }
@@ -741,14 +741,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
     Base.setCSSProperty(element, "vertical-align", "top");
-    self.buildDeepElementView(nodeContext).then(nodeContextAfter => {
+    self.buildDeepElementView(nodeContext).then((nodeContextAfter) => {
       const floatBBox = self.clientLayout.getElementClientRect(element);
       const margin = self.getComputedMargin(element);
       let floatBox = new Geom.Rect(
         floatBBox.left - margin.left,
         floatBBox.top - margin.top,
         floatBBox.right + margin.right,
-        floatBBox.bottom + margin.bottom
+        floatBBox.bottom + margin.bottom,
       );
       let x1 = self.startEdge;
       let x2 = self.endEdge;
@@ -798,7 +798,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         x1,
         self.getBoxDir() * self.beforeEdge,
         x2,
-        self.getBoxDir() * self.afterEdge
+        self.getBoxDir() * self.afterEdge,
       );
       let floatHorBox = floatBox;
       if (self.vertical) {
@@ -818,12 +818,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Base.setCSSProperty(
         element,
         "width",
-        `${floatBox.x2 - floatBox.x1 - insets.left - insets.right}px`
+        `${floatBox.x2 - floatBox.x1 - insets.left - insets.right}px`,
       );
       Base.setCSSProperty(
         element,
         "height",
-        `${floatBox.y2 - floatBox.y1 - insets.top - insets.bottom}px`
+        `${floatBox.y2 - floatBox.y1 - insets.top - insets.bottom}px`,
       );
       Base.setCSSProperty(element, "position", "absolute");
       Asserts.assert(nodeContext.display);
@@ -839,7 +839,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       if (containingBlockForAbsolute) {
         const probe = containingBlockForAbsolute.viewNode.ownerDocument.createElement(
-          "div"
+          "div",
         );
         probe.style.position = "absolute";
         if (containingBlockForAbsolute.vertical) {
@@ -855,7 +855,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         offsets = {
           left: self.getLeftEdge() - self.paddingLeft,
           right: self.getRightEdge() + self.paddingRight,
-          top: self.getTopEdge() - self.paddingTop
+          top: self.getTopEdge() - self.paddingTop,
         };
       }
       if (
@@ -866,7 +866,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         Base.setCSSProperty(
           element,
           "right",
-          `${offsets.right - floatBox.x2}px`
+          `${offsets.right - floatBox.x2}px`,
         );
       } else {
         Base.setCSSProperty(element, "left", `${floatBox.x1 - offsets.left}px`);
@@ -887,7 +887,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           self.getLeftEdge(),
           self.getTopEdge(),
           self.getRightEdge(),
-          self.getBottomEdge()
+          self.getBottomEdge(),
         );
         if (self.vertical) {
           box = Geom.rotateBox(box);
@@ -917,7 +917,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     floatSide: string,
     anchorEdge: number | null,
     strategy: PageFloats.PageFloatLayoutStrategy,
-    condition: PageFloats.PageFloatPlacementCondition
+    condition: PageFloats.PageFloatPlacementCondition,
   ): boolean {
     const floatLayoutContext = this.pageFloatLayoutContext;
     const floatContainer = floatLayoutContext.getContainer(floatReference);
@@ -936,11 +936,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const containingBlockRect = floatContainer.getPaddingRect();
     area.setHorizontalPosition(
       containingBlockRect.x1 - floatContainer.originX,
-      containingBlockRect.x2 - containingBlockRect.x1
+      containingBlockRect.x2 - containingBlockRect.x1,
     );
     area.setVerticalPosition(
       containingBlockRect.y1 - floatContainer.originY,
-      containingBlockRect.y2 - containingBlockRect.y1
+      containingBlockRect.y2 - containingBlockRect.y1,
     );
     strategy.adjustPageFloatArea(area, floatContainer, this);
 
@@ -953,7 +953,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       anchorEdge,
       true,
       !floatLayoutContext.hasFloatFragments(),
-      condition
+      condition,
     );
     if (fitWithinContainer) {
       // New dimensions have been set, remove exclusion floats and re-init
@@ -970,12 +970,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     floatSide: string,
     anchorEdge: number | null,
     strategy: PageFloats.PageFloatLayoutStrategy,
-    condition: PageFloats.PageFloatPlacementCondition
+    condition: PageFloats.PageFloatPlacementCondition,
   ): PageFloatArea | null {
     const floatAreaElement = this.element.ownerDocument.createElement("div");
     Base.setCSSProperty(floatAreaElement, "position", "absolute");
     const parentPageFloatLayoutContext = this.pageFloatLayoutContext.getPageFloatLayoutContext(
-      float.floatReference
+      float.floatReference,
     );
 
     // TODO: establish how to specify an appropriate generating element for the
@@ -987,7 +987,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.pageFloatLayoutContext.flowName,
       float.nodePosition,
       null,
-      null
+      null,
     );
     const parentContainer = parentPageFloatLayoutContext.getContainer();
     const floatArea = new PageFloatArea(
@@ -997,7 +997,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.clientLayout,
       this.layoutConstraint,
       pageFloatLayoutContext,
-      parentContainer
+      parentContainer,
     );
     pageFloatLayoutContext.setContainer(floatArea);
     if (
@@ -1007,7 +1007,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatSide,
         anchorEdge,
         strategy,
-        condition
+        condition,
       )
     ) {
       return floatArea;
@@ -1023,7 +1023,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     allowFragmented: boolean,
     strategy: PageFloats.PageFloatLayoutStrategy,
     anchorEdge: number | null,
-    pageFloatFragment?: PageFloats.PageFloatFragment | null
+    pageFloatFragment?: PageFloats.PageFloatFragment | null,
   ): Task.Result<SinglePageFloatLayoutResult> {
     const context = this.pageFloatLayoutContext;
     const originalContinuations = pageFloatFragment
@@ -1034,37 +1034,37 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const condition = context.getPageFloatPlacementCondition(
       firstFloat,
       floatSide,
-      clearSide
+      clearSide,
     );
     const floatArea = this.createPageFloatArea(
       firstFloat,
       floatSide,
       anchorEdge,
       strategy,
-      condition
+      condition,
     );
     const result: SinglePageFloatLayoutResult = {
       floatArea,
       pageFloatFragment: null,
-      newPosition: null
+      newPosition: null,
     };
     if (!floatArea) {
       return Task.newResult(result);
     }
     const frame = Task.newFrame<SinglePageFloatLayoutResult>(
-      "layoutSinglePageFloatFragment"
+      "layoutSinglePageFloatFragment",
     );
     let failed = false;
     let i = 0;
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         if (i >= continuations.length) {
           loopFrame.breakLoop();
           return;
         }
         const c = continuations[i];
         const floatChunkPosition = new VtreeImpl.ChunkPosition(c.nodePosition);
-        floatArea.layout(floatChunkPosition, true).then(newPosition => {
+        floatArea.layout(floatChunkPosition, true).then((newPosition) => {
           result.newPosition = newPosition;
           if (!newPosition || allowFragmented) {
             i++;
@@ -1085,7 +1085,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             anchorEdge,
             false,
             allowFragmented,
-            condition
+            condition,
           );
           if (!logicalFloatSide) {
             failed = true;
@@ -1094,7 +1094,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               continuations,
               logicalFloatSide,
               floatArea,
-              !!result.newPosition
+              !!result.newPosition,
             );
             context.addPageFloatFragment(newFragment, true);
             result.pageFloatFragment = newFragment;
@@ -1109,7 +1109,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     continuation: PageFloats.PageFloatContinuation,
     strategy: PageFloats.PageFloatLayoutStrategy,
     anchorEdge: number | null,
-    pageFloatFragment?: PageFloats.PageFloatFragment
+    pageFloatFragment?: PageFloats.PageFloatFragment,
   ): Task.Result<boolean> {
     const context = this.pageFloatLayoutContext;
     const float = continuation.float;
@@ -1133,15 +1133,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       !context.hasFloatFragments(),
       strategy,
       anchorEdge,
-      pageFloatFragment
-    ).then(result => {
+      pageFloatFragment,
+    ).then((result) => {
       const floatArea = result.floatArea;
       const newFragment = result.pageFloatFragment;
       const newPosition = result.newPosition;
       if (newFragment) {
         self
           .layoutStashedPageFloats(float.floatReference, [pageFloatFragment])
-          .then(success => {
+          .then((success) => {
             if (success) {
               // Add again to invalidate the context
               Asserts.assert(newFragment);
@@ -1150,7 +1150,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (newPosition) {
                 const continuation = new PageFloats.PageFloatContinuation(
                   float,
-                  newPosition.primary
+                  newPosition.primary,
                 );
                 context.deferPageFloat(continuation);
               }
@@ -1173,11 +1173,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   private layoutStashedPageFloats(
     floatReference: PageFloats.FloatReference,
-    excluded: PageFloats.PageFloatFragment[]
+    excluded: PageFloats.PageFloatFragment[],
   ): Task.Result<boolean> {
     const context = this.pageFloatLayoutContext;
     const stashedFloatFragments = context.getStashedFloatFragments(
-      floatReference
+      floatReference,
     );
     const newFloatAreas = [];
     const newFragments = [];
@@ -1186,7 +1186,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const self = this;
     let i = 0;
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         if (i >= stashedFloatFragments.length) {
           loopFrame.breakLoop();
           return;
@@ -1198,7 +1198,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           return;
         }
         const strategy = new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(
-          stashedFragment.continuations[0].float
+          stashedFragment.continuations[0].float,
         );
 
         // Value of 'clear' is irrelevant when laying out stashed floats
@@ -1211,9 +1211,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             null,
             false,
             strategy,
-            null
+            null,
           )
-          .then(result => {
+          .then((result) => {
             const floatArea = result.floatArea;
             if (floatArea) {
               newFloatAreas.push(floatArea);
@@ -1231,17 +1231,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       })
       .then(() => {
         if (failed) {
-          newFragments.forEach(fragment => {
+          newFragments.forEach((fragment) => {
             context.removePageFloatFragment(fragment, true);
           });
-          newFloatAreas.forEach(area => {
+          newFloatAreas.forEach((area) => {
             const elem = area.element;
             if (elem && elem.parentNode) {
               elem.parentNode.removeChild(elem);
             }
           });
         } else {
-          stashedFloatFragments.forEach(fragment => {
+          stashedFloatFragments.forEach((fragment) => {
             const elem = fragment.area.element;
             if (elem && elem.parentNode) {
               elem.parentNode.removeChild(elem);
@@ -1262,7 +1262,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.layoutContext.applyPseudoelementStyle(
         nodeContext,
         "footnote-call",
-        anchor
+        anchor,
       );
     }
     parent.appendChild(anchor);
@@ -1276,24 +1276,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   resolveFloatReferenceFromColumnSpan(
     floatReference: PageFloats.FloatReference,
     columnSpan: Css.Val,
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): Task.Result<PageFloats.FloatReference> {
     const self = this;
     const frame = Task.newFrame(
-      "resolveFloatReferenceFromColumnSpan"
+      "resolveFloatReferenceFromColumnSpan",
     ) as Task.Frame<PageFloats.FloatReference>;
     const columnContext = this.pageFloatLayoutContext;
     const regionContext = columnContext.getPageFloatLayoutContext(
-      PageFloats.FloatReference.REGION
+      PageFloats.FloatReference.REGION,
     );
     const isRegionWider =
       columnContext.getContainer().width < regionContext.getContainer().width;
     if (isRegionWider && floatReference === PageFloats.FloatReference.COLUMN) {
       if (columnSpan === Css.ident.auto) {
-        this.buildDeepElementView(nodeContext.copy()).then(position => {
+        this.buildDeepElementView(nodeContext.copy()).then((position) => {
           const element = position.viewNode as Element;
           let inlineSize = Sizing.getSize(self.clientLayout, element, [
-            Sizing.Size.MIN_CONTENT_INLINE_SIZE
+            Sizing.Size.MIN_CONTENT_INLINE_SIZE,
           ])[Sizing.Size.MIN_CONTENT_INLINE_SIZE];
           const margin = self.getComputedMargin(element);
           if (self.vertical) {
@@ -1319,32 +1319,32 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   layoutPageFloat(
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     const self = this;
     const context = this.pageFloatLayoutContext;
     const strategy = new PageFloats.PageFloatLayoutStrategyResolver().findByNodeContext(
-      nodeContext
+      nodeContext,
     );
     let cont: Task.Result<PageFloats.PageFloat>;
     const float = context.findPageFloatByNodePosition(
-      nodeContext.toNodePosition()
+      nodeContext.toNodePosition(),
     );
     if (!float) {
       cont = strategy.createPageFloat(nodeContext, context, this);
     } else {
       cont = Task.newResult(float);
     }
-    return cont.thenAsync(float => {
+    return cont.thenAsync((float) => {
       const nodePosition = VtreeImpl.newNodePositionFromNodeContext(
         nodeContext,
-        0
+        0,
       );
       const nodeContextAfter = self.setFloatAnchorViewNode(nodeContext);
       const pageFloatFragment = strategy.findPageFloatFragment(float, context);
       const continuation = new PageFloats.PageFloatContinuation(
         float,
-        nodePosition
+        nodePosition,
       );
       if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
@@ -1363,7 +1363,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           nodeContextAfter,
           self.clientLayout,
           0,
-          self.vertical
+          self.vertical,
         );
         if (self.isOverflown(edge)) {
           return Task.newResult(nodeContextAfter);
@@ -1373,14 +1373,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               continuation,
               strategy,
               edge,
-              pageFloatFragment
+              pageFloatFragment,
             )
-            .thenAsync(success => {
+            .thenAsync((success) => {
               Asserts.assert(float);
               if (!success) {
                 context.registerPageFloatAnchor(
                   float,
-                  nodeContextAfter.viewNode
+                  nodeContextAfter.viewNode,
                 );
                 return Task.newResult(nodeContextAfter);
               } else {
@@ -1396,7 +1396,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     insertionPoint: Node,
     doc: Document,
     parentNode: Node,
-    vertical: boolean
+    vertical: boolean,
   ): HTMLElement {
     const span = doc.createElement("span") as HTMLElement;
     span.style.visibility = "hidden";
@@ -1443,21 +1443,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     node: Node,
     insertionPoint: Node,
     doc: Document,
-    parentNode: Node
+    parentNode: Node,
   ): HTMLElement {
     fixJustificationOnHyphen(nodeContext, insertAfter, node, insertionPoint);
     return this.createJustificationAdjustmentElement(
       insertionPoint,
       doc,
       parentNode,
-      nodeContext.vertical
+      nodeContext.vertical,
     );
   }
 
   compensateJustificationLineHeight(
     span: Element,
     br: Element,
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ) {
     const spanRect = this.clientLayout.getElementClientRect(span);
     const brRect = this.clientLayout.getElementClientRect(br);
@@ -1478,7 +1478,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   fixJustificationIfNeeded(
     nodeContext: Vtree.NodeContext,
-    endOfColumn: boolean
+    endOfColumn: boolean,
   ): void {
     if (nodeContext.after && !nodeContext.inline) {
       return;
@@ -1519,7 +1519,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       node,
       insertionPoint,
       doc,
-      parentNode
+      parentNode,
     );
     if (!endOfColumn) {
       const br = doc.createElement("div") as HTMLElement;
@@ -1531,11 +1531,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   processLineStyling(
     nodeContext: Vtree.NodeContext,
     resNodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[]
+    checkPoints: Vtree.NodeContext[],
   ): Task.Result<Vtree.NodeContext> {
     const self = this;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "processLineStyling"
+      "processLineStyling",
     );
     if (DEBUG) {
       validateCheckPoints(checkPoints);
@@ -1548,7 +1548,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       firstPseudo = firstPseudo.outer; // move to line pseudoelement (if any)
     }
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         if (!firstPseudo) {
           loopFrame.breakLoop();
           return;
@@ -1562,7 +1562,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         const lineBreak = self.findAcceptableBreakInside(
           lastCheckPoints,
           linePositions[count - 1],
-          true
+          true,
         );
         if (lineBreak == null) {
           loopFrame.breakLoop();
@@ -1570,18 +1570,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         self.finishBreak(lineBreak, false, false).then(() => {
           totalLineCount += count;
-          self.layoutContext.peelOff(lineBreak, 0).then(resNodeContextParam => {
-            nodeContext = resNodeContextParam;
-            self.fixJustificationIfNeeded(nodeContext, false);
-            firstPseudo = nodeContext.firstPseudo;
-            lastCheckPoints = []; // Wipe out line breaks inside pseudoelements
-            self
-              .buildViewToNextBlockEdge(nodeContext, lastCheckPoints)
-              .then(resNodeContextParam => {
-                resNodeContext = resNodeContextParam;
-                loopFrame.continueLoop();
-              });
-          });
+          self.layoutContext
+            .peelOff(lineBreak, 0)
+            .then((resNodeContextParam) => {
+              nodeContext = resNodeContextParam;
+              self.fixJustificationIfNeeded(nodeContext, false);
+              firstPseudo = nodeContext.firstPseudo;
+              lastCheckPoints = []; // Wipe out line breaks inside pseudoelements
+              self
+                .buildViewToNextBlockEdge(nodeContext, lastCheckPoints)
+                .then((resNodeContextParam) => {
+                  resNodeContext = resNodeContextParam;
+                  loopFrame.continueLoop();
+                });
+            });
         });
       })
       .then(() => {
@@ -1605,7 +1607,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   getTrailingMarginEdgeAdjustment(
-    trailingEdgeContexts: Vtree.NodeContext[]
+    trailingEdgeContexts: Vtree.NodeContext[],
   ): number {
     // Margins push the computed height, but are not counted as overflow. We
     // need to find the overall collapsed margin from all enclosed blocks.
@@ -1635,16 +1637,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Layout a single CSS box.
    */
   layoutBreakableBlock(
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     const self = this;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "layoutBreakableBlock"
+      "layoutBreakableBlock",
     );
     const checkPoints: Vtree.NodeContext[] = [];
     self
       .buildViewToNextBlockEdge(nodeContext, checkPoints)
-      .then(resNodeContext => {
+      .then((resNodeContext) => {
         // at this point a single block was appended to the column
         // flowPosition is either null or
         //  - if !after: contains view for the next block element
@@ -1661,7 +1663,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           resNodeContext,
           checkPoints,
           checkPointIndex,
-          checkPoints[checkPointIndex].boxOffset
+          checkPoints[checkPointIndex].boxOffset,
         );
         let overflown = false;
         if (
@@ -1670,14 +1672,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         ) {
           const offsets = BreakPosition.calculateOffset(
             resNodeContext,
-            self.collectElementsOffset()
+            self.collectElementsOffset(),
           );
           overflown = self.isOverflown(
-            edge + (self.vertical ? -1 : 1) * offsets.minimum
+            edge + (self.vertical ? -1 : 1) * offsets.minimum,
           );
           if (
             self.isOverflown(
-              edge + (self.vertical ? -1 : 1) * offsets.current
+              edge + (self.vertical ? -1 : 1) * offsets.current,
             ) &&
             !self.nodeContextOverflowingDueToRepetitiveElements
           ) {
@@ -1694,12 +1696,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           lineCont = self.processLineStyling(
             nodeContext,
             resNodeContext,
-            checkPoints
+            checkPoints,
           );
         } else {
           lineCont = Task.newResult(resNodeContext);
         }
-        lineCont.then(nodeContext => {
+        lineCont.then((nodeContext) => {
           self.postLayoutBlock(nodeContext, checkPoints);
           if (checkPoints.length > 0) {
             self.saveBoxBreakPosition(checkPoints);
@@ -1718,12 +1720,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   postLayoutBlock(
     nodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[]
+    checkPoints: Vtree.NodeContext[],
   ) {
     const hooks: Plugin.PostLayoutBlockHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.POST_LAYOUT_BLOCK
+      Plugin.HOOKS.POST_LAYOUT_BLOCK,
     );
-    hooks.forEach(hook => {
+    hooks.forEach((hook) => {
       hook(nodeContext, checkPoints, this);
     });
   }
@@ -1731,7 +1733,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   findEndOfLine(
     linePosition: number,
     checkPoints: Vtree.NodeContext[],
-    isUpdateMaxReachedAfterEdge: boolean
+    isUpdateMaxReachedAfterEdge: boolean,
   ): {
     nodeContext: Vtree.NodeContext;
     index: number;
@@ -1791,14 +1793,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return {
       nodeContext: checkPoints[low1],
       index: low,
-      checkPointIndex: low1
+      checkPointIndex: low1,
     };
   }
 
   findAcceptableBreakInside(
     checkPoints: Vtree.NodeContext[],
     edgePosition: number,
-    force: boolean
+    force: boolean,
   ): Vtree.NodeContext {
     const position = this.findEndOfLine(edgePosition, checkPoints, true);
     let nodeContext = position.nodeContext;
@@ -1812,7 +1814,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         position.index,
         checkPoints,
         position.checkPointIndex,
-        force
+        force,
       );
     }
     this.clearOverflownViewNodes(nodeContext, false);
@@ -1821,11 +1823,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   resolveTextNodeBreaker(nodeContext: Vtree.NodeContext): TextNodeBreaker {
     const hooks: Plugin.ResolveTextNodeBreakerHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER
+      Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
     );
     return hooks.reduce(
       (prev, hook) => hook(nodeContext) || prev,
-      TextNodeBreaker.instance
+      TextNodeBreaker.instance,
     );
   }
 
@@ -1868,7 +1870,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         } else if (
           (node as Element).localName == "ruby" ||
           isSpecialInlineDisplay(
-            this.clientLayout.getElementComputedStyle(node as Element).display
+            this.clientLayout.getElementComputedStyle(node as Element).display,
           )
         ) {
           // ruby, inline-block, etc.
@@ -1916,12 +1918,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const positions = [];
     const boxes = this.getRangeBoxes(
       checkPoints[0].viewNode,
-      checkPoints[checkPoints.length - 1].viewNode
+      checkPoints[checkPoints.length - 1].viewNode,
     );
     boxes.sort(
       this.vertical
         ? VtreeImpl.clientrectDecreasingRight
-        : VtreeImpl.clientrectIncreasingTop
+        : VtreeImpl.clientrectIncreasingTop,
     );
     let lineBefore = 0;
     let lineAfter = 0;
@@ -1984,11 +1986,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   calculateClonedPaddingBorder(nodeContext: Vtree.NodeContext): number {
     let clonedPaddingBorder = 0;
-    nodeContext.walkUpBlocks(block => {
+    nodeContext.walkUpBlocks((block) => {
       if (block.inheritedProps["box-decoration-break"] === "clone") {
         Asserts.assert(block.viewNode instanceof Element);
         const paddingBorders = this.getComputedPaddingBorder(
-          block.viewNode as Element
+          block.viewNode as Element,
         );
         clonedPaddingBorder += block.vertical
           ? -paddingBorders.left
@@ -2002,7 +2004,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   private getOffsetByRepetitiveElements(
-    bp?: BreakPosition.BreakPosition
+    bp?: BreakPosition.BreakPosition,
   ): number {
     let offset: { current: number; minimum: number };
     if (bp) {
@@ -2010,7 +2012,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     } else {
       offset = BreakPosition.calculateOffset(
         null,
-        this.collectElementsOffset()
+        this.collectElementsOffset(),
       );
     }
     return offset.current;
@@ -2018,7 +2020,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   findBoxBreakPosition(
     bp: BoxBreakPosition,
-    force: boolean
+    force: boolean,
   ): Vtree.NodeContext {
     const self = this;
     const checkPoints = bp.checkPoints;
@@ -2036,11 +2038,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // Get widows/orphans settings from the block element
       widows = Math.max(
         ((block.inheritedProps["widows"] as number) || 2) - 0,
-        1
+        1,
       );
       orphans = Math.max(
         ((block.inheritedProps["orphans"] as number) || 2) - 0,
-        1
+        1,
       );
     }
 
@@ -2060,12 +2062,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // exists before the edge, a line containing the checkpoint should be
     // deferred to the next column.
     const firstOverflowing = this.findFirstOverflowingEdgeAndCheckPoint(
-      checkPoints
+      checkPoints,
     );
     if (isNaN(firstOverflowing.edge)) {
       firstOverflowing.edge = dir * Infinity;
     }
-    let lineIndex = Base.binarySearch(linePositions.length, i => {
+    let lineIndex = Base.binarySearch(linePositions.length, (i) => {
       const p = linePositions[i];
       return self.vertical
         ? p < edge || p <= firstOverflowing.edge
@@ -2077,8 +2079,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // line just before it.
     const forceCutBeforeOverflowing = lineIndex <= 0;
     if (forceCutBeforeOverflowing) {
-      lineIndex = Base.binarySearch(linePositions.length, i =>
-        self.vertical ? linePositions[i] < edge : linePositions[i] > edge
+      lineIndex = Base.binarySearch(linePositions.length, (i) =>
+        self.vertical ? linePositions[i] < edge : linePositions[i] > edge,
       );
     }
 
@@ -2121,7 +2123,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         blockParent,
         this.clientLayout,
         0,
-        this.vertical
+        this.vertical,
       );
     } else {
       return NaN;
@@ -2129,21 +2131,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   findFirstOverflowingEdgeAndCheckPoint(
-    checkPoints: Vtree.NodeContext[]
+    checkPoints: Vtree.NodeContext[],
   ): { edge: number; checkPoint: Vtree.NodeContext | null } {
-    const index = checkPoints.findIndex(cp => cp.overflow);
+    const index = checkPoints.findIndex((cp) => cp.overflow);
     if (index < 0) {
       return { edge: NaN, checkPoint: null };
     }
     const cp = checkPoints[index];
     return {
       edge: this.calculateEdge(null, checkPoints, index, cp.boxOffset),
-      checkPoint: cp
+      checkPoint: cp,
     };
   }
 
   findEdgeBreakPosition(
-    bp: BreakPosition.EdgeBreakPosition
+    bp: BreakPosition.EdgeBreakPosition,
   ): Vtree.NodeContext {
     this.computedBlockSize =
       bp.computedBlockSize + this.getOffsetByRepetitiveElements(bp);
@@ -2157,24 +2159,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   finishBreak(
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
-    endOfColumn: boolean
+    endOfColumn: boolean,
   ): Task.Result<boolean> {
     Asserts.assert(nodeContext.formattingContext);
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
-      nodeContext.formattingContext
+      nodeContext.formattingContext,
     );
     let result = layoutProcessor.finishBreak(
       this,
       nodeContext,
       forceRemoveSelf,
-      endOfColumn
+      endOfColumn,
     );
     if (!result) {
       result = LayoutProcessor.blockLayoutProcessor.finishBreak(
         this,
         nodeContext,
         forceRemoveSelf,
-        endOfColumn
+        endOfColumn,
       );
     }
     return result;
@@ -2214,7 +2216,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     nodeContext: Vtree.NodeContext,
     overflownNodeContext: Vtree.NodeContext,
     initialNodeContext: Vtree.NodeContext,
-    initialComputedBlockSize: number
+    initialComputedBlockSize: number,
   ): Task.Result<Vtree.NodeContext> {
     if (
       this.pageFloatLayoutContext.isInvalidated() ||
@@ -2230,7 +2232,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // Last resort
       if (this.forceNonfitting) {
         Logging.logger.warn("Could not find any page breaks?!!");
-        self.skipTailEdges(overflownNodeContext).then(nodeContext => {
+        self.skipTailEdges(overflownNodeContext).then((nodeContext) => {
           if (nodeContext) {
             nodeContext = nodeContext.modify();
             nodeContext.overflow = false;
@@ -2281,7 +2283,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   checkOverflowAndSaveEdge(
     nodeContext: Vtree.NodeContext,
-    trailingEdgeContexts: Vtree.NodeContext[]
+    trailingEdgeContexts: Vtree.NodeContext[],
   ): boolean {
     if (!nodeContext) {
       return false;
@@ -2293,14 +2295,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext,
       this.clientLayout,
       0,
-      this.vertical
+      this.vertical,
     );
     const offsets = BreakPosition.calculateOffset(
       nodeContext,
-      this.collectElementsOffset()
+      this.collectElementsOffset(),
     );
     const overflown = this.isOverflown(
-      edge + (this.vertical ? -1 : 1) * offsets.minimum
+      edge + (this.vertical ? -1 : 1) * offsets.minimum,
     );
     if (
       this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
@@ -2331,7 +2333,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     nodeContext: Vtree.NodeContext,
     trailingEdgeContexts: Vtree.NodeContext[],
     saveEvenOverflown: boolean,
-    breakAtTheEdge: string | null
+    breakAtTheEdge: string | null,
   ): boolean {
     if (!nodeContext) {
       return false;
@@ -2341,7 +2343,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     const overflown = this.checkOverflowAndSaveEdge(
       nodeContext,
-      trailingEdgeContexts
+      trailingEdgeContexts,
     );
     if (saveEvenOverflown || !overflown) {
       this.saveEdgeBreakPosition(nodeContext, breakAtTheEdge, overflown);
@@ -2376,7 +2378,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (clear === "all") {
       clearEdge = this.pageFloatLayoutContext.getPageFloatClearEdge(
         clear,
-        this
+        this,
       );
     }
     switch (clear) {
@@ -2391,7 +2393,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           dir *
           Math.max(
             clearEdge * dir,
-            Math.max(this.rightFloatEdge * dir, this.leftFloatEdge * dir)
+            Math.max(this.rightFloatEdge * dir, this.leftFloatEdge * dir),
           );
     }
 
@@ -2439,7 +2441,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     if (
       RepetitiveElement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
-        formattingContext
+        formattingContext,
       )
     ) {
       return true;
@@ -2455,7 +2457,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   skipEdges(
     nodeContext: Vtree.NodeContext,
     leadingEdge: boolean,
-    forcedBreakValue: string | null
+    forcedBreakValue: string | null,
   ): Task.Result<Vtree.NodeContext> {
     const fc = nodeContext.after
       ? nodeContext.parent && nodeContext.parent.formattingContext
@@ -2469,7 +2471,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // If a forced break occurred at the end of the previous column,
     // nodeContext.after should be false.
     let atUnforcedBreak =
-      !forcedBreakValue && leadingEdge && (nodeContext && nodeContext.after);
+      !forcedBreakValue && leadingEdge && nodeContext && nodeContext.after;
     let breakAtTheEdge = forcedBreakValue;
     let lastAfterNodeContext: Vtree.NodeContext = null;
     let leadingEdgeContexts: Vtree.NodeContext[] = [];
@@ -2491,11 +2493,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       self.pageBreakType = breakAtTheEdge;
     }
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         while (nodeContext) {
           Asserts.assert(nodeContext.formattingContext);
           const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
-            nodeContext.formattingContext
+            nodeContext.formattingContext,
           );
 
           // A code block to be able to use break. Break moves to the next
@@ -2509,7 +2511,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (
                 VtreeImpl.canIgnore(
                   nodeContext.viewNode,
-                  nodeContext.whitespace
+                  nodeContext.whitespace,
                 )
               ) {
                 // Ignorable text content, skip
@@ -2525,7 +2527,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     lastAfterNodeContext,
                     null,
                     true,
-                    breakAtTheEdge
+                    breakAtTheEdge,
                   )
                 ) {
                   nodeContext = (self.stopAtOverflow
@@ -2557,14 +2559,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   self.saveEdgeBreakPosition(
                     nodeContext.copy(),
                     breakAtTheEdge,
-                    false
+                    false,
                   );
                 }
               }
               if (
                 !self.isBFC(nodeContext.formattingContext) ||
                 RepetitiveElement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
-                  nodeContext.formattingContext
+                  nodeContext.formattingContext,
                 ) ||
                 self.isFloatNodeContext(nodeContext) ||
                 nodeContext.flexContainer
@@ -2574,7 +2576,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 leadingEdgeContexts.push(nodeContext.copy());
                 breakAtTheEdge = Break.resolveEffectiveBreakValue(
                   breakAtTheEdge,
-                  nodeContext.breakBefore
+                  nodeContext.breakBefore,
                 );
 
                 // check if a forced break must occur before the block.
@@ -2585,7 +2587,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     lastAfterNodeContext,
                     null,
                     true,
-                    breakAtTheEdge
+                    breakAtTheEdge,
                   ) ||
                   !self.layoutConstraint.allowLayout(nodeContext)
                 ) {
@@ -2616,7 +2618,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 if (
                   layoutProcessor.afterNonInlineElementNode(
                     nodeContext,
-                    self.stopAtOverflow
+                    self.stopAtOverflow,
                   )
                 ) {
                   break;
@@ -2645,7 +2647,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               trailingEdgeContexts.push(lastAfterNodeContext);
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
-                nodeContext.breakAfter
+                nodeContext.breakAfter,
               );
               if (
                 style &&
@@ -2664,14 +2666,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               leadingEdgeContexts.push(nodeContext.copy());
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
-                nodeContext.breakBefore
+                nodeContext.breakBefore,
               );
               if (!self.layoutConstraint.allowLayout(nodeContext)) {
                 self.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext,
                   null,
                   !self.stopAtOverflow,
-                  breakAtTheEdge
+                  breakAtTheEdge,
                 );
                 nodeContext = nodeContext.modify();
                 nodeContext.overflow = true;
@@ -2691,7 +2693,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     lastAfterNodeContext,
                     null,
                     true,
-                    breakAtTheEdge
+                    breakAtTheEdge,
                   )
                 ) {
                   // overflow
@@ -2721,7 +2723,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
           const nextResult = self.nextInTree(nodeContext, atUnforcedBreak);
           if (nextResult.isPending()) {
-            nextResult.then(nodeContextParam => {
+            nextResult.then((nodeContextParam) => {
               nodeContext = nodeContextParam;
               loopFrame.continueLoop();
             });
@@ -2736,7 +2738,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             lastAfterNodeContext,
             trailingEdgeContexts,
             !self.stopAtOverflow,
-            breakAtTheEdge
+            breakAtTheEdge,
           )
         ) {
           if (lastAfterNodeContext && self.stopAtOverflow) {
@@ -2765,7 +2767,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * content remains and null if all content could be skipped.
    */
   skipTailEdges(
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     let resultNodeContext = nodeContext.copy();
     const self = this;
@@ -2773,7 +2775,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let breakAtTheEdge: string | null = null;
     let onStartEdges = false;
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         while (nodeContext) {
           // A code block to be able to use break. Break moves to the next
           // node position.
@@ -2786,7 +2788,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (
                 VtreeImpl.canIgnore(
                   nodeContext.viewNode,
-                  nodeContext.whitespace
+                  nodeContext.whitespace,
                 )
               ) {
                 // Ignorable text content, skip
@@ -2810,7 +2812,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // float or flex container (unbreakable)
                 breakAtTheEdge = Break.resolveEffectiveBreakValue(
                   breakAtTheEdge,
-                  nodeContext.breakBefore
+                  nodeContext.breakBefore,
                 );
 
                 // check if a forced break must occur before the block.
@@ -2843,13 +2845,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               onStartEdges = false; // we are now on end edges.
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
-                nodeContext.breakAfter
+                nodeContext.breakAfter,
               );
             } else {
               // Leading edge
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
-                nodeContext.breakBefore
+                nodeContext.breakBefore,
               );
               const viewTag = (nodeContext.viewNode as Element).localName;
               if (mediaTags[viewTag]) {
@@ -2878,7 +2880,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
           const nextResult = self.layoutContext.nextInTree(nodeContext);
           if (nextResult.isPending()) {
-            nextResult.then(nodeContextParam => {
+            nextResult.then((nodeContextParam) => {
               nodeContext = nodeContextParam;
               loopFrame.continueLoop();
             });
@@ -2897,7 +2899,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   layoutFloatOrFootnote(
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext> {
     if (
       PageFloats.isPageFloat(nodeContext.floatReference) ||
@@ -2915,12 +2917,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   layoutNext(
     nodeContext: Vtree.NodeContext,
     leadingEdge: boolean,
-    forcedBreakValue?: string | null
+    forcedBreakValue?: string | null,
   ): Task.Result<Vtree.NodeContext> {
     const self = this;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("layoutNext");
     this.skipEdges(nodeContext, leadingEdge, forcedBreakValue || null).then(
-      nodeContextParam => {
+      (nodeContextParam) => {
         nodeContext = nodeContextParam as Vtree.NodeContext;
         if (
           !nodeContext ||
@@ -2934,20 +2936,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const formattingContext = nodeContext.formattingContext;
           Asserts.assert(formattingContext);
           const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
-            formattingContext
+            formattingContext,
           );
           layoutProcessor
             .layout(nodeContext, self, leadingEdge)
             .thenFinish(frame);
         }
-      }
+      },
     );
     return frame.result();
   }
 
   clearOverflownViewNodes(
     nodeContext: Vtree.NodeContext,
-    removeSelf: boolean
+    removeSelf: boolean,
   ): void {
     if (!nodeContext) {
       return;
@@ -2960,13 +2962,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const formattingContext = (parent || nodeContext).formattingContext;
       Asserts.assert(formattingContext);
       const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
-        formattingContext
+        formattingContext,
       );
       layoutProcessor.clearOverflownViewNodes(
         this,
         parent,
         nodeContext,
-        removeSelf
+        removeSelf,
       );
       removeSelf = false;
     }
@@ -2978,7 +2980,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // Calling getElementClientRect on the container element includes element
     // padding which is wrong for our purposes.
     const probe = this.element.ownerDocument.createElement(
-      "div"
+      "div",
     ) as HTMLElement;
     probe.style.position = "absolute";
     probe.style.top = `${this.paddingTop}px`;
@@ -2994,7 +2996,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       offsetX,
       offsetY,
       offsetX + this.width,
-      offsetY + this.height
+      offsetY + this.height,
     );
     this.startEdge = columnBBox
       ? this.vertical
@@ -3026,7 +3028,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.getExclusions(),
       8,
       this.snapHeight,
-      this.vertical
+      this.vertical,
     );
     this.createFloats();
   }
@@ -3050,19 +3052,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   saveEdgeBreakPosition(
     position: Vtree.NodeContext,
     breakAtEdge: string | null,
-    overflows: boolean
+    overflows: boolean,
   ): void {
     Asserts.assert(position.formattingContext);
     const copy = position.copy();
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
-      position.formattingContext
+      position.formattingContext,
     );
     const clonedPaddingBorder = this.calculateClonedPaddingBorder(copy);
     const bp = layoutProcessor.createEdgeBreakPosition(
       copy,
       breakAtEdge,
       overflows,
-      this.computedBlockSize + clonedPaddingBorder
+      this.computedBlockSize + clonedPaddingBorder,
     );
     this.breakPositions.push(bp);
   }
@@ -3090,7 +3092,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   layout(
     chunkPosition: Vtree.ChunkPosition,
     leadingEdge: boolean,
-    breakAfter?: string | null
+    breakAfter?: string | null,
   ): Task.Result<Vtree.ChunkPosition> {
     this.chunkPositions.push(chunkPosition); // So we can re-layout this column later
     if (chunkPosition.primary.after) {
@@ -3114,36 +3116,36 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const frame: Task.Frame<Vtree.ChunkPosition> = Task.newFrame("layout");
 
     // ------ start the column -----------
-    self.openAllViews(chunkPosition.primary).then(nodeContext => {
+    self.openAllViews(chunkPosition.primary).then((nodeContext) => {
       let initialNodeContext: Vtree.NodeContext = null;
       if (nodeContext.viewNode) {
         initialNodeContext = nodeContext.copy();
       } else {
-        const nextInTreeListener = evt => {
+        const nextInTreeListener = (evt) => {
           if (evt.nodeContext.viewNode) {
             initialNodeContext = evt.nodeContext;
             self.layoutContext.removeEventListener(
               "nextInTree",
-              nextInTreeListener
+              nextInTreeListener,
             );
           }
         };
         self.layoutContext.addEventListener("nextInTree", nextInTreeListener);
       }
       const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
-      retryer.layout(nodeContext, self).then(nodeContextParam => {
+      retryer.layout(nodeContext, self).then((nodeContextParam) => {
         self
           .doFinishBreak(
             nodeContextParam,
             retryer.context.overflownNodeContext,
             initialNodeContext,
-            retryer.initialComputedBlockSize
+            retryer.initialComputedBlockSize,
           )
-          .then(positionAfter => {
+          .then((positionAfter) => {
             let cont: Task.Result<boolean> = null;
             if (!self.pseudoParent) {
               cont = self.doFinishBreakOfFragmentLayoutConstraints(
-                positionAfter
+                positionAfter,
               );
             } else {
               cont = Task.newResult(null);
@@ -3158,7 +3160,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               } else {
                 self.overflown = true;
                 const result = new VtreeImpl.ChunkPosition(
-                  positionAfter.toNodePosition()
+                  positionAfter.toNodePosition(),
                 );
                 frame.finish(result);
               }
@@ -3178,16 +3180,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   doFinishBreakOfFragmentLayoutConstraints(
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame(
-      "doFinishBreakOfFragmentLayoutConstraints"
+      "doFinishBreakOfFragmentLayoutConstraints",
     );
     const sortedFragmentLayoutConstraints = [].concat(
-      this.fragmentLayoutConstraints
+      this.fragmentLayoutConstraints,
     );
     sortedFragmentLayoutConstraints.sort(
-      (a, b) => a.getPriorityOfFinishBreak() - b.getPriorityOfFinishBreak()
+      (a, b) => a.getPriorityOfFinishBreak() - b.getPriorityOfFinishBreak(),
     );
     let i = 0;
     frame
@@ -3195,7 +3197,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         if (i < sortedFragmentLayoutConstraints.length) {
           const result = sortedFragmentLayoutConstraints[i++].finishBreak(
             nodeContext,
-            this
+            this,
           );
           return result.thenReturn(true);
         } else {
@@ -3215,7 +3217,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   doLayout(
     nodeContext: Vtree.NodeContext,
     leadingEdge: boolean,
-    breakAfter?: string | null
+    breakAfter?: string | null,
   ): Task.Result<{
     nodeContext: Vtree.NodeContext;
     overflownNodeContext: Vtree.NodeContext;
@@ -3233,13 +3235,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // ------- fill the column -------------
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         while (nodeContext) {
           // fill a single block
           let pending = true;
           self
             .layoutNext(nodeContext, leadingEdge, breakAfter || null)
-            .then(nodeContextParam => {
+            .then((nodeContextParam) => {
               leadingEdge = false;
               breakAfter = null;
               if (
@@ -3324,10 +3326,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let res: Vtree.ChunkPosition = null;
     let leadingEdge = true;
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         if (i < chunkPositions.length) {
           const chunkPosition = chunkPositions[i++];
-          self.layout(chunkPosition, leadingEdge).then(pos => {
+          self.layout(chunkPosition, leadingEdge).then((pos) => {
             leadingEdge = false;
             if (pos) {
               res = pos;
@@ -3363,10 +3365,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   collectElementsOffset(): RepetitiveElement.ElementsOffset[] {
     const repetitiveElements: RepetitiveElement.ElementsOffset[] = [];
     for (let current: Column = this; current; current = current.pseudoParent) {
-      current.fragmentLayoutConstraints.forEach(constraint => {
+      current.fragmentLayoutConstraints.forEach((constraint) => {
         if (
           RepetitiveElement.isInstanceOfRepetitiveElementsOwnerLayoutConstraint(
-            constraint
+            constraint,
           )
         ) {
           const repetitiveElement = constraint.getRepetitiveElements();
@@ -3381,7 +3383,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         if (Table.isInstanceOfTableRowLayoutConstraint(constraint)) {
           constraint
             .getElementsOffsetsForTableCell(this)
-            .forEach(repetitiveElement => {
+            .forEach((repetitiveElement) => {
               repetitiveElements.push(repetitiveElement);
             });
         }
@@ -3399,7 +3401,7 @@ export function fixJustificationOnHyphen(
   nodeContext: Vtree.NodeContext,
   insertAfter: boolean,
   node: Node,
-  insertionPoint: Node
+  insertionPoint: Node,
 ): void {
   if (Base.checkSoftWrapOpportunityAfterHyphenBug(document.body)) {
     const hyphenChar = resolveHyphenateCharacter(nodeContext);
@@ -3429,7 +3431,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     low: number,
     checkPoints: Vtree.NodeContext[],
     checkpointIndex: number,
-    force: boolean
+    force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
       nodeContext.offsetInNode = textNode.length;
@@ -3442,14 +3444,14 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
           textNode,
           text,
           viewIndex,
-          nodeContext
+          nodeContext,
         );
       } else {
         viewIndex = this.breakAfterOtherCharacter(
           textNode,
           text,
           viewIndex,
-          nodeContext
+          nodeContext,
         );
       }
       if (viewIndex > 0) {
@@ -3463,13 +3465,13 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     textNode: Text,
     text: string,
     viewIndex: number,
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): number {
     // convert trailing soft hyphen to a real hyphen
     textNode.replaceData(
       viewIndex,
       text.length - viewIndex,
-      !nodeContext.breakWord ? resolveHyphenateCharacter(nodeContext) : ""
+      !nodeContext.breakWord ? resolveHyphenateCharacter(nodeContext) : "",
     );
     return viewIndex + 1;
   }
@@ -3478,7 +3480,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     textNode: Text,
     text: string,
     viewIndex: number,
-    nodeContext: Vtree.NodeContext
+    nodeContext: Vtree.NodeContext,
   ): number {
     // keep the trailing character (it may be a space or not)
     const ch0 = text.charAt(viewIndex);
@@ -3491,7 +3493,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
       text.length - viewIndex,
       !nodeContext.breakWord && Base.isLetter(ch0) && Base.isLetter(ch1)
         ? resolveHyphenateCharacter(nodeContext)
-        : ""
+        : "",
     );
     return viewIndex;
   }
@@ -3499,7 +3501,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
   updateNodeContext(
     nodeContext: Vtree.NodeContext,
     viewIndex: number,
-    textNode: Text
+    textNode: Text,
   ): Vtree.NodeContext {
     nodeContext = nodeContext.modify();
     nodeContext.offsetInNode += viewIndex;
@@ -3512,7 +3514,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
 TextNodeBreaker.instance = new TextNodeBreaker();
 
 export function resolveHyphenateCharacter(
-  nodeContext: Vtree.NodeContext
+  nodeContext: Vtree.NodeContext,
 ): string {
   return (
     nodeContext.hyphenateCharacter ||
@@ -3527,12 +3529,12 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   initialComputedBlockSize: number = 0;
   private initialOverflown: boolean = false;
   context: { overflownNodeContext: Vtree.NodeContext } = {
-    overflownNodeContext: null
+    overflownNodeContext: null,
   };
 
   constructor(
     public readonly leadingEdge: boolean,
-    breakAfter?: string | null
+    breakAfter?: string | null,
   ) {
     super();
     this.breakAfter = breakAfter || null;
@@ -3545,7 +3547,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     return new DefaultLayoutMode(
       this.leadingEdge,
       this.breakAfter,
-      this.context
+      this.context,
     );
   }
 
@@ -3599,7 +3601,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
   constructor(
     public readonly leadingEdge: boolean,
     public readonly breakAfter: string | null,
-    public readonly context: { overflownNodeContext: Vtree.NodeContext }
+    public readonly context: { overflownNodeContext: Vtree.NodeContext },
   ) {}
 
   /**
@@ -3607,21 +3609,21 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
    */
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "DefaultLayoutMode.doLayout"
+      "DefaultLayoutMode.doLayout",
     );
 
     Selectors.processAfterIfContinuesOfAncestors(nodeContext, column).then(
       () => {
         column
           .doLayout(nodeContext, this.leadingEdge, this.breakAfter)
-          .then(result => {
+          .then((result) => {
             this.context.overflownNodeContext = result.overflownNodeContext;
             frame.finish(result.nodeContext);
           });
-      }
+      },
     );
     return frame.result();
   }
@@ -3636,12 +3638,12 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     if (column.fragmentLayoutConstraints.length <= 0) {
       return true;
     }
-    return column.fragmentLayoutConstraints.every(constraint =>
+    return column.fragmentLayoutConstraints.every((constraint) =>
       constraint.allowLayout(
         nodeContext,
         this.context.overflownNodeContext,
-        column
-      )
+        column,
+      ),
     );
   }
 
@@ -3652,11 +3654,11 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
     column: Layout.Column,
-    accepted: boolean
+    accepted: boolean,
   ): boolean {
     if (!accepted) {
       const hasNextCandidate = column.fragmentLayoutConstraints.some(
-        constraint => constraint.nextCandidate(positionAfter)
+        (constraint) => constraint.nextCandidate(positionAfter),
       );
 
       // If there is no next candidate, we accept the current layout trial.
@@ -3665,7 +3667,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
       // depending on the value of Column#forceNonfitting.
       accepted = !hasNextCandidate;
     }
-    column.fragmentLayoutConstraints.forEach(constraint => {
+    column.fragmentLayoutConstraints.forEach((constraint) => {
       constraint.postLayout(accepted, positionAfter, initialPosition, column);
     });
     return accepted;
@@ -3684,14 +3686,14 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     clientLayout: Vtree.ClientLayout,
     layoutConstraint: LayoutConstraint,
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
-    public readonly parentContainer: Vtree.Container
+    public readonly parentContainer: Vtree.Container,
   ) {
     super(
       element,
       layoutContext,
       clientLayout,
       layoutConstraint,
-      pageFloatLayoutContext
+      pageFloatLayoutContext,
     );
   }
 
@@ -3699,7 +3701,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
    * @override
    */
   openAllViews(position: Vtree.NodePosition): Task.Result<Vtree.NodeContext> {
-    return super.openAllViews(position).thenAsync(nodeContext => {
+    return super.openAllViews(position).thenAsync((nodeContext) => {
       if (nodeContext) {
         this.fixFloatSizeAndPosition(nodeContext);
       }
@@ -3713,7 +3715,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     const refHeight = containingBlockRect.y2 - containingBlockRect.y1;
 
     function convertPercentageToPx(props: string[], refValue: number) {
-      props.forEach(propName => {
+      props.forEach((propName) => {
         const valueString = Base.getCSSProperty(target, propName);
         if (valueString && valueString.charAt(valueString.length - 1) === "%") {
           const percentageValue = parseFloat(valueString);
@@ -3733,17 +3735,17 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         "padding-top",
         "padding-right",
         "padding-bottom",
-        "padding-left"
+        "padding-left",
       ],
-      this.vertical ? refHeight : refWidth
+      this.vertical ? refHeight : refWidth,
     );
     ["margin-top", "margin-right", "margin-bottom", "margin-left"].forEach(
-      propName => {
+      (propName) => {
         const value = Base.getCSSProperty(target, propName);
         if (value === "auto") {
           Base.setCSSProperty(target, propName, "0");
         }
-      }
+      },
     );
   }
 
@@ -3788,7 +3790,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         return this.vertical
           ? margin.top + box.height + margin.bottom
           : margin.left + box.width + margin.right;
-      })
+      }),
     );
   }
 }

@@ -136,32 +136,32 @@ export enum HOOKS {
    *  {Array.<Vtree.NodeContext>} checkPoints
    *  {Layout.Column} column
    */
-  POST_LAYOUT_BLOCK = "POST_LAYOUT_BLOCK"
+  POST_LAYOUT_BLOCK = "POST_LAYOUT_BLOCK",
 }
 
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
 export type PreProcessTextContentHook = (
   p1: Vtree.NodeContext,
-  p2: string
+  p2: string,
 ) => Task.Result<string>;
 
 export type PreProcessElementStyleHook = (
   p1: Vtree.NodeContext,
-  p2: object
+  p2: object,
 ) => void;
 
 export type PolyfilledInheritedPropsHook = () => string[];
 
 export type ConfigurationHook = (
-  p1: Base.JSON
+  p1: Base.JSON,
 ) => {
   needResize: boolean | null | undefined;
   needRefresh: boolean | null | undefined;
 };
 
 export type ResolveTextNodeBreakerHook = (
-  p1: Vtree.NodeContext
+  p1: Vtree.NodeContext,
 ) => Layout.TextNodeBreaker;
 
 export type ResolveFormattingContextHook = (
@@ -170,17 +170,17 @@ export type ResolveFormattingContextHook = (
   p3: Css.Ident,
   p4: Css.Ident,
   p5: Css.Ident,
-  p6: boolean
+  p6: boolean,
 ) => Vtree.FormattingContext;
 
 export type ResolveLayoutProcessorHook = (
-  p1: Vtree.FormattingContext
+  p1: Vtree.FormattingContext,
 ) => LayoutProcessor.LayoutProcessor;
 
 export type PostLayoutBlockHook = (
   p1: Vtree.NodeContext,
   p2: Vtree.NodeContext[],
-  p3: Layout.Column
+  p3: Layout.Column,
 ) => void;
 
 const hooks = {};
@@ -241,5 +241,5 @@ export function getHooksForName(name: string): ((...p1) => any)[] {
  */
 export const plugin = {
   registerHook,
-  removeHook
+  removeHook,
 };

@@ -67,7 +67,7 @@ export const SPECIFICITY_USER_IMPORTANT: number = 100663296;
 export enum StylesheetFlavor {
   USER_AGENT = "UA",
   USER = "User",
-  AUTHOR = "Author"
+  AUTHOR = "Author",
 }
 
 /**
@@ -129,7 +129,7 @@ export class ParserHandler implements CssTok.TokenizerHandler {
     ns: string,
     name: string,
     op: CssTok.TokenType,
-    value: string | null
+    value: string | null,
   ): void {}
 
   descendantSelector(): void {}
@@ -171,19 +171,19 @@ export class ParserHandler implements CssTok.TokenizerHandler {
   startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {}
 
   startPartitionRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {}
 
   startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {}
 
   startRuleBody(): void {}
@@ -328,7 +328,7 @@ export class DispatchParserHandler extends ParserHandler {
     ns: string,
     name: string,
     op: CssTok.TokenType,
-    value: string | null
+    value: string | null,
   ): void {
     this.slave.attributeSelector(ns, name, op, value);
   }
@@ -451,7 +451,7 @@ export class DispatchParserHandler extends ParserHandler {
   startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     this.slave.startPageMasterRule(name, pseudoName, classes);
   }
@@ -462,7 +462,7 @@ export class DispatchParserHandler extends ParserHandler {
   startPartitionRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     this.slave.startPartitionRule(name, pseudoName, classes);
   }
@@ -473,7 +473,7 @@ export class DispatchParserHandler extends ParserHandler {
   startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     this.slave.startPartitionGroupRule(name, pseudoName, classes);
   }
@@ -521,7 +521,7 @@ export class SkippingParserHandler extends ParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     public owner: DispatchParserHandler,
-    public readonly topLevel
+    public readonly topLevel,
   ) {
     super(scope);
     if (owner) {
@@ -564,7 +564,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
-    topLevel: boolean
+    topLevel: boolean,
   ) {
     super(scope, owner, topLevel);
   }
@@ -576,7 +576,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
   reportAndSkip(message: string): void {
     this.report(message);
     this.owner.pushHandler(
-      new SkippingParserHandler(this.scope, this.owner, false)
+      new SkippingParserHandler(this.scope, this.owner, false),
     );
   }
 
@@ -656,7 +656,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
   startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_MASTER");
   }
@@ -667,7 +667,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
   startPartitionRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION");
   }
@@ -678,7 +678,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
   startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION_GROUP");
   }
@@ -791,7 +791,7 @@ export enum Action {
   VAL_PLUS,
   SELECTOR_PSEUDOCLASS_1,
   SELECTOR_FOLLOWING_SIBLING,
-  DONE = 200
+  DONE = 200,
 }
 
 export const OP_MEDIA_AND: number = CssTok.TokenType.LAST + 1;
@@ -941,7 +941,7 @@ export enum ExprContext {
   PROP,
   WHEN,
   MEDIA,
-  IMPORT
+  IMPORT,
 }
 
 export class Parser {
@@ -964,7 +964,7 @@ export class Parser {
     public actions: Action[],
     public tokenizer: CssTok.Tokenizer,
     public readonly handler: ParserHandler,
-    public baseURL: string
+    public baseURL: string,
   ) {
     this.exprContext = ExprContext.MEDIA;
   }
@@ -996,7 +996,7 @@ export class Parser {
       valStack.splice(
         index + 1,
         count,
-        new Css.SpaceList(valStack.slice(index + 1, valStack.length))
+        new Css.SpaceList(valStack.slice(index + 1, valStack.length)),
       );
     }
     if (sep == ",") {
@@ -1015,7 +1015,7 @@ export class Parser {
       }
       const func = new Css.Func(
         valStack[index - 1] as string,
-        this.extractVals(",", index + 1)
+        this.extractVals(",", index + 1),
       );
       valStack.splice(index - 1, count + 2, func);
       return null;
@@ -1067,7 +1067,7 @@ export class Parser {
             val = new Exprs.Call(
               handler.getScope(),
               Exprs.makeQualifiedName(name1, name2),
-              args
+              args,
             );
             op = CssTok.TokenType.EOF;
             continue;
@@ -1078,7 +1078,7 @@ export class Parser {
             val = new Exprs.MediaTest(
               handler.getScope(),
               val as Exprs.MediaName,
-              null
+              null,
             );
           }
           op = CssTok.TokenType.EOF;
@@ -1161,7 +1161,7 @@ export class Parser {
                     handler.getScope(),
                     valStack.pop() as Exprs.Val,
                     val2,
-                    val
+                    val,
                   );
                   break;
                 case CssTok.TokenType.O_PAR:
@@ -1169,7 +1169,7 @@ export class Parser {
                     val = new Exprs.MediaTest(
                       handler.getScope(),
                       val2 as Exprs.MediaName,
-                      val
+                      val,
                     );
                   } else {
                     this.exprError("E_CSS_MEDIA_TEST", token);
@@ -1338,7 +1338,7 @@ export class Parser {
             this.tokenizer.consume();
             return [
               token.type === CssTok.TokenType.NUMERIC ? token.num : 1,
-              parseInt(r[1], 10)
+              parseInt(r[1], 10),
             ];
           }
           r = token.text.match(/^-n(-[0-9]+)$/);
@@ -1374,28 +1374,28 @@ export class Parser {
             condition = Exprs.and(
               scope,
               condition,
-              new Exprs.Not(scope, new Exprs.Named(scope, "pref-horizontal"))
+              new Exprs.Not(scope, new Exprs.Named(scope, "pref-horizontal")),
             );
             break;
           case "horizontal":
             condition = Exprs.and(
               scope,
               condition,
-              new Exprs.Named(scope, "pref-horizontal")
+              new Exprs.Named(scope, "pref-horizontal"),
             );
             break;
           case "day":
             condition = Exprs.and(
               scope,
               condition,
-              new Exprs.Not(scope, new Exprs.Named(scope, "pref-night-mode"))
+              new Exprs.Not(scope, new Exprs.Named(scope, "pref-night-mode")),
             );
             break;
           case "night":
             condition = Exprs.and(
               scope,
               condition,
-              new Exprs.Named(scope, "pref-night-mode")
+              new Exprs.Named(scope, "pref-night-mode"),
             );
             break;
           default:
@@ -1427,7 +1427,7 @@ export class Parser {
     parsingValue,
     parsingStyleAttr: boolean,
     parsingMediaQuery,
-    parsingFunctionParam
+    parsingFunctionParam,
   ): boolean {
     const handler = this.handler;
     const tokenizer = this.tokenizer;
@@ -1659,7 +1659,7 @@ export class Parser {
                       false,
                       false,
                       false,
-                      true
+                      true,
                     )
                   ) {
                     this.actions = actionsSelector;
@@ -1809,7 +1809,7 @@ export class Parser {
                 ns as string,
                 text as string,
                 CssTok.TokenType.EOF,
-                null
+                null,
               );
               if (parsingFunctionParam) {
                 this.actions = actionsSelectorInFunc;
@@ -1830,7 +1830,7 @@ export class Parser {
                 ns as string,
                 text as string,
                 num,
-                token.text
+                token.text,
               );
               tokenizer.consume();
               token = tokenizer.token();
@@ -1913,8 +1913,8 @@ export class Parser {
             // Treat numeric value with viewport unit as numeric in expr.
             valStack.push(
               new Css.Expr(
-                new Exprs.Numeric(handler.getScope(), token.num, token.text)
-              )
+                new Exprs.Numeric(handler.getScope(), token.num, token.text),
+              ),
             );
           } else {
             valStack.push(new Css.Numeric(token.num, token.text));
@@ -2034,8 +2034,8 @@ export class Parser {
               valStack.push(
                 new Exprs.Named(
                   handler.getScope(),
-                  Exprs.makeQualifiedName(token.text, token1.text)
-                )
+                  Exprs.makeQualifiedName(token.text, token1.text),
+                ),
               );
               this.actions = actionsExprOp;
             }
@@ -2048,7 +2048,7 @@ export class Parser {
               if (token.text.toLowerCase() == "not") {
                 tokenizer.consume();
                 valStack.push(
-                  new Exprs.MediaName(handler.getScope(), true, token1.text)
+                  new Exprs.MediaName(handler.getScope(), true, token1.text),
                 );
               } else {
                 if (token.text.toLowerCase() == "only") {
@@ -2056,7 +2056,7 @@ export class Parser {
                   token = token1;
                 }
                 valStack.push(
-                  new Exprs.MediaName(handler.getScope(), false, token.text)
+                  new Exprs.MediaName(handler.getScope(), false, token.text),
                 );
               }
             } else {
@@ -2421,21 +2421,21 @@ export class Parser {
                     handler.startPageMasterRule(
                       ruleName,
                       rulePseudoName,
-                      classes
+                      classes,
                     );
                     break;
                   case "-epubx-partition":
                     handler.startPartitionRule(
                       ruleName,
                       rulePseudoName,
-                      classes
+                      classes,
                     );
                     break;
                   case "-epubx-partition-group":
                     handler.startPartitionGroupRule(
                       ruleName,
                       rulePseudoName,
-                      classes
+                      classes,
                     );
                     break;
                 }
@@ -2589,7 +2589,7 @@ export function parseStylesheet(
   handler: ParserHandler,
   baseURL: string,
   classes: string | null,
-  media: string | null
+  media: string | null,
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
@@ -2598,7 +2598,7 @@ export function parseStylesheet(
     condition = parseMediaQuery(
       new CssTok.Tokenizer(media, handler),
       handler,
-      baseURL
+      baseURL,
     );
   }
   condition = parser.makeCondition(classes, condition && condition.toExpr());
@@ -2612,14 +2612,14 @@ export function parseStylesheet(
         if (parser.importReady) {
           const resolvedURL = Base.resolveURL(
             parser.importURL as string,
-            baseURL
+            baseURL,
           );
           if (parser.importCondition) {
             handler.startMediaRule(parser.importCondition);
             handler.startRuleBody();
           }
           const innerFrame: Task.Frame<boolean> = Task.newFrame(
-            "parseStylesheet.import"
+            "parseStylesheet.import",
           );
           parseStylesheetFromURL(resolvedURL, handler, null, null).then(() => {
             if (parser.importCondition) {
@@ -2653,18 +2653,18 @@ export function parseStylesheetFromText(
   handler: ParserHandler,
   baseURL: string,
   classes: string | null,
-  media: string | null
+  media: string | null,
 ): Task.Result<boolean> {
   return Task.handle(
     "parseStylesheetFromText",
-    frame => {
+    (frame) => {
       const tok = new CssTok.Tokenizer(text, handler);
       parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
     },
     (frame, err) => {
       Logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
       frame.finish(false);
-    }
+    },
   );
 }
 
@@ -2672,12 +2672,12 @@ export function parseStylesheetFromURL(
   url: string,
   handler: ParserHandler,
   classes: string | null,
-  media: string | null
+  media: string | null,
 ): Task.Result<boolean> {
   return Task.handle(
     "parseStylesheetFromURL",
-    frame => {
-      Net.ajax(url).then(xhr => {
+    (frame) => {
+      Net.ajax(url).then((xhr) => {
         if (!xhr.responseText) {
           frame.finish(true);
         } else {
@@ -2686,8 +2686,8 @@ export function parseStylesheetFromURL(
             handler,
             url,
             classes,
-            media
-          ).then(result => {
+            media,
+          ).then((result) => {
             if (!result) {
               Logging.logger.warn(`Failed to parse stylesheet from ${url}`);
             }
@@ -2699,20 +2699,20 @@ export function parseStylesheetFromURL(
     (frame, err) => {
       Logging.logger.warn(err, "Exception while fetching and parsing:", url);
       frame.finish(true);
-    }
+    },
   );
 }
 
 export function parseValue(
   scope: Exprs.LexicalScope,
   tokenizer: CssTok.Tokenizer,
-  baseURL: string
+  baseURL: string,
 ): Css.Val {
   const parser = new Parser(
     actionsPropVal,
     tokenizer,
     new ErrorHandler(scope),
-    baseURL
+    baseURL,
   );
   parser.runParser(Number.POSITIVE_INFINITY, true, false, false, false);
   return parser.result;
@@ -2721,7 +2721,7 @@ export function parseValue(
 export function parseStyleAttribute(
   tokenizer: CssTok.Tokenizer,
   handler: ParserHandler,
-  baseURL: string
+  baseURL: string,
 ): void {
   const parser = new Parser(actionsStyleAttribute, tokenizer, handler, baseURL);
   parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
@@ -2730,7 +2730,7 @@ export function parseStyleAttribute(
 export function parseMediaQuery(
   tokenizer: CssTok.Tokenizer,
   handler: ParserHandler,
-  baseURL: string
+  baseURL: string,
 ): Css.Expr {
   const parser = new Parser(actionsExprVal, tokenizer, handler, baseURL);
   parser.runParser(Number.POSITIVE_INFINITY, false, false, true, false);
@@ -2744,7 +2744,7 @@ export const numProp: { [key: string]: boolean } = {
   opacity: true,
   page: true,
   "flow-priority": true,
-  utilization: true
+  utilization: true,
 };
 
 export function takesOnlyNum(propName: string): boolean {
@@ -2757,7 +2757,7 @@ export function takesOnlyNum(propName: string): boolean {
 export function evaluateExprToCSS(
   context: Exprs.Context,
   val: Exprs.Val,
-  propName: string
+  propName: string,
 ): Css.Val {
   const result = val.evaluate(context);
   switch (typeof result) {
@@ -2778,7 +2778,7 @@ export function evaluateExprToCSS(
       return parseValue(
         val.scope,
         new CssTok.Tokenizer(result as string, null),
-        ""
+        "",
       );
     case "boolean":
       return result ? Css.ident._true : Css.ident._false;
@@ -2794,7 +2794,7 @@ export function evaluateExprToCSS(
 export function evaluateCSSToCSS(
   context: Exprs.Context,
   val: Css.Val,
-  propName: string
+  propName: string,
 ): Css.Val {
   if (val.isExpr()) {
     return evaluateExprToCSS(context, (val as Css.Expr).expr, propName);

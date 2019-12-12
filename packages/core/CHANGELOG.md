@@ -22,7 +22,6 @@
     - Introduce ESLint <https://github.com/vivliostyle/vivliostyle-ui/pull/75>
     - Introduce prettier <https://github.com/vivliostyle/vivliostyle-ui/pull/72> <https://github.com/vivliostyle/vivliostyle-ui/pull/73>, <https://github.com/vivliostyle/vivliostyle-ui/pull/80>
 
-
 ## [2019.8.101](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.8.101) - 2019-08-20
 
 ### Fixed
@@ -31,7 +30,6 @@
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/7a7db2c>
 - Fix auto resize not working
   - <https://github.com/vivliostyle/vivliostyle.js/commit/2245bba4>, <https://github.com/vivliostyle/vivliostyle.js/commit/b833976e>
-
 
 ## [2019.8.100](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.8.100) - 2019-08-16
 
@@ -56,7 +54,6 @@
 - Fix error "empty response for EPUB OPF" on some web servers that don't know the MIME type for .opf
   - <https://github.com/vivliostyle/vivliostyle.js/commit/db8e9bcb>
 
-
 ## [2019.1.106](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.106) - 2019-06-14
 
 ### Fixed
@@ -65,7 +62,6 @@
   - <https://github.com/vivliostyle/vivliostyle.js/issues/525>
 - Fix error occurring when `@page` size has vw/vh units
   - <https://github.com/vivliostyle/vivliostyle.js/commit/e1d7023c>
-
 
 ## [2019.1.105](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.105) - 2019-04-23
 
@@ -81,7 +77,6 @@
   - <https://github.com/vivliostyle/vivliostyle.js/commit/1b9d589c>
 - Fix problem that `text-combine-upright: all` does not work on WebKit
   - <https://github.com/vivliostyle/vivliostyle.js/commit/e87924a2>
-
 
 ## [2019.1.103](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.103) - 2019-04-05
 
@@ -123,14 +118,12 @@
 - [Viewer UI] Improve "fontSize" URL parameter: accept percent and fraction
   - <https://github.com/vivliostyle/vivliostyle-ui/commit/015a193>
 
-
 ## [2019.1.102](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.102) - 2019-03-04
 
 ### Fixed
 
 - Fix bug that cannot load unzipped EPUB when directory listing is enabled on the server
   - <https://github.com/vivliostyle/vivliostyle.js/commit/6d741b35>
-
 
 ## [2019.1.101](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2019.1.101) - 2019-02-27
 
@@ -186,7 +179,7 @@
 - [Viewer UI] Vivliostyle Viewer start page with document URL input and usage description
   - <https://github.com/vivliostyle/vivliostyle-ui/pull/65>
   - When document URL parameter (`#b=` or `#x=`) is not specified, the start page is now displayed.
-  - Document URL entered by user is reflected in the URL parameter `#b=`, and　when the Enter key is pressed, the document is loaded.
+  - Document URL entered by user is reflected in the URL parameter `#b=`, and 　 when the Enter key is pressed, the document is loaded.
 
 ### Changed
 
@@ -214,7 +207,6 @@
 - Fix bug that media attribute is not honored on `<style>` element.
   - <https://github.com/vivliostyle/vivliostyle.js/commit/35bea5e4>
 
-
 ## [2018.12.103](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2018.12.103) - 2019-01-03
 
 ### Fixed
@@ -222,7 +214,7 @@
 - Fix bug that ruby causes incorrect pagination
   - <https://github.com/vivliostyle/vivliostyle.js/pull/495>
 - Fix bug on epubcfi failing to navigate to beginning of a spine item
-  - <https://github.com/vivliostyle/vivliostyle.js/pull/494> 
+  - <https://github.com/vivliostyle/vivliostyle.js/pull/494>
 - Fix error occurring when inline-table is nested in another table
   - <https://github.com/vivliostyle/vivliostyle.js/pull/493>
 
@@ -410,7 +402,6 @@
   - Spec: [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
   - Spec: [CSS Multi-column Layout Module Level 2 - `column-span`](https://drafts.csswg.org/css-multicol-2/#column-span)
 
-
 ### Changed
 
 - Change license to AGPL 3.0
@@ -423,12 +414,12 @@
 - Improve page/column breaking inside tables
   - <https://github.com/vivliostyle/vivliostyle.js/pull/311>
   - Following issues are resolved:
-      - Table cell with rowspan disappears after page break
-          - https://github.com/vivliostyle/vivliostyle.js/issues/85
-      - Table (column) width should not change over page breaks
-          - https://github.com/vivliostyle/vivliostyle.js/issues/157
-      - Table breaks occur between the colgroup and the first row
-          - https://github.com/vivliostyle/vivliostyle.js/issues/279
+    - Table cell with rowspan disappears after page break
+      - https://github.com/vivliostyle/vivliostyle.js/issues/85
+    - Table (column) width should not change over page breaks
+      - https://github.com/vivliostyle/vivliostyle.js/issues/157
+    - Table breaks occur between the colgroup and the first row
+      - https://github.com/vivliostyle/vivliostyle.js/issues/279
 - Fix incorrect treatment of percentage value for line-height property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/312>
 - Support repeating table header/footer across pages
@@ -495,6 +486,7 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/300>
 
 ### Fixed
+
 - Fix bug that pages occasionally disappear when resolving cross references
   - <https://github.com/vivliostyle/vivliostyle.js/pull/268>
 - Respect `target="_blank"` on links to external URLs
@@ -520,6 +512,7 @@
 ## [2016.7](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.7) - 2016-07-04
 
 ### Added
+
 - Support `filter` property
   - <https://github.com/vivliostyle/vivliostyle.js/issues/220>
   - Spec: [CSS Filter Effect Module Level 3 - filter property](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
@@ -531,7 +524,7 @@
   - Spec: [CSS Fragmentation - Page Break Values](http://dev.w3.org/csswg/css-break/#page-break-values)
 - Support cross references by `target-counter()`/`target-counters()`
   - <https://github.com/vivliostyle/vivliostyle.js/pull/248>
-  - Spec: [CSS Generated Content Module Level 3 - Cross references and the target-* functions](https://drafts.csswg.org/css-content/#cross-references)
+  - Spec: [CSS Generated Content Module Level 3 - Cross references and the target-\* functions](https://drafts.csswg.org/css-content/#cross-references)
 - Support `box-decoration-break` property
   - <https://github.com/vivliostyle/vivliostyle.js/pull/250>
   - Spec: [CSS Fragmentation Module Level 3 - Fragmented Borders and Backgrounds: the box-decoration-break property](https://drafts.csswg.org/css-break/#break-decoration)
@@ -549,11 +542,13 @@
   - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
 
 ### Changed
+
 - `counter-reset` and `counter-increment` specified in a page master (`@-epubx-page-master`) are now effective to page-based counters
   - <https://github.com/vivliostyle/vivliostyle.js/pull/251>
   - Note that these values, if specified, always override values specified in page contexts.
 
 ### Fixed
+
 - Fix a bug that `clear` is ignored when `white-space` property is used before the element
   - <https://github.com/vivliostyle/vivliostyle.js/pull/222>
 - Fix incorrect float positioning
@@ -586,6 +581,7 @@
 ## [2016.4](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.4) - 2016-04-08
 
 ### Added
+
 - Support printer marks (`marks` property) and bleed area (`bleed` property)
   - <https://github.com/vivliostyle/vivliostyle.js/issues/98>
   - Spec: [CSS Paged Media Module Level 3 - Crop and Registration Marks: the 'marks' property](https://drafts.csswg.org/css-page/#marks), [Bleed Area: the 'bleed' property](https://drafts.csswg.org/css-page/#bleed)
@@ -629,6 +625,7 @@
   - AsciiMath mathematics are indicated by delimiters `` `...` ``.
 
 ### Fixed
+
 - Lengths in 'rem' specified within page context are now interpreted correctly
   - <https://github.com/vivliostyle/vivliostyle.js/issues/109>
 - Web fonts are now applied correctly even when specified within page context
@@ -653,6 +650,7 @@
 ## [2016.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/2016.1) - 2016-01-20
 
 ### Added
+
 - Support EPUB loading
   - <https://github.com/vivliostyle/vivliostyle.js/pull/60>
   - `loadEPUB` method of `Viewer` class loads an unzipped EPUB directory.
@@ -679,10 +677,12 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/117>
 
 ### Changed
+
 - Add default page margin
   - <https://github.com/vivliostyle/vivliostyle.js/pull/81>
 
 ### Fixed
+
 - Fix zoom problem when viewport is specified by the document
   - <https://github.com/vivliostyle/vivliostyle.js/pull/61>
 - Fix incorrect layout of HTML which is well-formed as XML
@@ -734,9 +734,11 @@
   - <https://github.com/vivliostyle/vivliostyle.js/pull/142>
 
 ## [0.2.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.2.0) - 2015-09-16
+
 Beta release.
 
 ### Added
+
 - [core] Support page background and document canvas background color
   - <https://github.com/vivliostyle/vivliostyle.js/pull/33>
   - Note: only simple background color is supported.
@@ -754,10 +756,12 @@ Beta release.
   - <https://github.com/vivliostyle/vivliostyle.js/pull/51>
 
 ### Changed
+
 - Viewer UI is separated to a new repository [vivliostyle-js-viewer](https://github.com/vivliostyle/vivliostyle-js-viewer).
   - <https://github.com/vivliostyle/vivliostyle.js/pull/53>
 
 ### Fixed
+
 - [core] Avoid incorrect margin collapse of the page area
   - <https://github.com/vivliostyle/vivliostyle.js/pull/32>
 - [core] Fix incorrect positioning of floats
@@ -771,20 +775,24 @@ Beta release.
   - <https://github.com/vivliostyle/vivliostyle.js/pull/56>
 
 ## [0.1.1](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.1) - 2015-05-06
+
 Minor update with several changes and bug fixes.
 
 ### Added
+
 - [core] Support [:root](http://www.w3.org/TR/selectors/#root-pseudo) pseudo-class selector
   - <https://github.com/vivliostyle/vivliostyle.js/commit/3e9c21002400ac90b09f996ca35187dbf7a3eaca>
 - [core] Support CSS properties currently implemented by browsers
   - See <https://github.com/vivliostyle/vivliostyle.js/pull/18> for details.
 
 ### Changed
+
 - [core] Cascade page size specified in @page rules to page masters defined by @-epubx-page-master rules
   - <https://github.com/vivliostyle/vivliostyle.js/pull/17>
   - When @page rules and @-epubx-page-master rules are both specified, the page size specified by 'size' property in @page rules is applied to the selected page master. This behavior is not defined in the related specs. We added this behavior for a use case in which one wants to print content styled with Adaptive Layout on a paper sheet and wants to specify the sheet size by adding a (user) stylesheet containing @page rules with 'size' property.
 
 ### Fixed
+
 - [core] Fixed incorrect page layout when non-zero padding is specified in page context.
   - <https://github.com/vivliostyle/vivliostyle.js/commit/899fab18dba4814dc4ce301a39a47a155ac36109>
 - [core] 'page-width', 'page-height' variables (used in -epubx-expr) are now correctly reflect the page size specified by @page rules
@@ -794,9 +802,11 @@ Minor update with several changes and bug fixes.
   - <https://github.com/vivliostyle/vivliostyle.js/commit/67af6146e99feb84766a4357c88ae6b9f196617b>
 
 ## [0.1.0](https://github.com/vivliostyle/vivliostyle.js/releases/tag/0.1.0) - 2015-04-28
+
 Initial alpha release. Following features are added while keeping the original Adaptive Layout features.
 
 ### Added
+
 - [core] Support @page rule
   - <https://github.com/vivliostyle/vivliostyle.js/pull/2>
   - Spec: [CSS Paged Media Module Level 3](http://dev.w3.org/csswg/css-page/)

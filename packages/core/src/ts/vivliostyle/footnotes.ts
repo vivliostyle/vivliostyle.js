@@ -32,7 +32,7 @@ export class Footnote extends PageFloats.PageFloat {
     floatReference: PageFloats.FloatReference,
     flowName: string,
     public readonly footnotePolicy: Css.Ident | null,
-    floatMinWrapBlock: Css.Numeric | null
+    floatMinWrapBlock: Css.Numeric | null,
   ) {
     super(
       nodePosition,
@@ -40,7 +40,7 @@ export class Footnote extends PageFloats.PageFloat {
       "block-end",
       null,
       flowName,
-      floatMinWrapBlock
+      floatMinWrapBlock,
     );
   }
 
@@ -60,7 +60,7 @@ export class FootnoteFragment extends PageFloatFragment {
     floatReference: PageFloats.FloatReference,
     continuations: PageFloats.PageFloatContinuation[],
     area: Vtree.Container,
-    continues: boolean
+    continues: boolean,
   ) {
     super(floatReference, "block-end", continuations, area, continues);
   }
@@ -116,17 +116,17 @@ export class FootnoteLayoutStrategy
   createPageFloat(
     nodeContext: Vtree.NodeContext,
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
-    column: Layout.Column
+    column: Layout.Column,
   ): Task.Result<PageFloats.PageFloat> {
     let floatReference = PageFloats.FloatReference.REGION;
 
     // If the region context has the same container as the page context,
     // use the page context as the context for the footnote.
     const regionContext = pageFloatLayoutContext.getPageFloatLayoutContext(
-      floatReference
+      floatReference,
     );
     const pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
-      PageFloats.FloatReference.PAGE
+      PageFloats.FloatReference.PAGE,
     );
     if (pageContext.hasSameContainerAs(regionContext)) {
       floatReference = PageFloats.FloatReference.PAGE;
@@ -138,7 +138,7 @@ export class FootnoteLayoutStrategy
       floatReference,
       pageFloatLayoutContext.flowName,
       nodeContext.footnotePolicy,
-      nodeContext.floatMinWrapBlock
+      nodeContext.floatMinWrapBlock,
     );
     pageFloatLayoutContext.addPageFloat(float);
     return Task.newResult(float);
@@ -151,14 +151,14 @@ export class FootnoteLayoutStrategy
     continuations: PageFloats.PageFloatContinuation[],
     floatSide: string,
     floatArea: Layout.PageFloatArea,
-    continues: boolean
+    continues: boolean,
   ): PageFloats.PageFloatFragment {
     const f = continuations[0].float;
     return new FootnoteFragment(
       f.floatReference,
       continuations,
       floatArea,
-      continues
+      continues,
     );
   }
 
@@ -167,13 +167,13 @@ export class FootnoteLayoutStrategy
    */
   findPageFloatFragment(
     float: PageFloats.PageFloat,
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ): PageFloats.PageFloatFragment | null {
     const context = pageFloatLayoutContext.getPageFloatLayoutContext(
-      float.floatReference
+      float.floatReference,
     );
     const fragments = context.floatFragments.filter(
-      fr => fr instanceof FootnoteFragment
+      (fr) => fr instanceof FootnoteFragment,
     );
     Asserts.assert(fragments.length <= 1);
     return fragments[0] || null;
@@ -185,7 +185,7 @@ export class FootnoteLayoutStrategy
   adjustPageFloatArea(
     floatArea: Layout.PageFloatArea,
     floatContainer: Vtree.Container,
-    column: Layout.Column
+    column: Layout.Column,
   ) {
     floatArea.isFootnote = true;
     floatArea.adjustContentRelativeSize = false;
@@ -195,7 +195,7 @@ export class FootnoteLayoutStrategy
       floatContainer.vertical,
       (column.layoutContext as any).nodeContext &&
         (column.layoutContext as any).nodeContext.direction === "rtl",
-      element
+      element,
     );
     floatArea.convertPercentageSizesToPx(element);
     column.setComputedInsets(element, floatArea);
@@ -207,7 +207,7 @@ export class FootnoteLayoutStrategy
    */
   forbid(
     float: PageFloats.PageFloat,
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
@@ -215,7 +215,7 @@ export class FootnoteLayoutStrategy
         const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
         pageFloatLayoutContext.addLayoutConstraint(
           constraint,
-          footnote.floatReference
+          footnote.floatReference,
         );
         break;
       }
@@ -224,5 +224,5 @@ export class FootnoteLayoutStrategy
 }
 
 PageFloats.PageFloatLayoutStrategyResolver.register(
-  new FootnoteLayoutStrategy()
+  new FootnoteLayoutStrategy(),
 );

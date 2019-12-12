@@ -52,7 +52,7 @@ export class Fetcher<T> {
         .getScheduler()
         .run(() => {
           const frame = Task.newFrame("Fetcher.run");
-          self.fetch().then(resource => {
+          self.fetch().then((resource) => {
             const piggibacks = self.piggybacks;
             self.arrived = true;
             self.resource = resource;
@@ -103,7 +103,7 @@ export class Fetcher<T> {
  * Wait for all Fetcher objects in the array to arrive
  */
 export const waitForFetchers = <T>(
-  fetchers: Fetcher<T>[]
+  fetchers: Fetcher<T>[],
 ): Task.Result<boolean> => {
   if (fetchers.length == 0) {
     return Task.newResult(true);

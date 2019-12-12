@@ -23,19 +23,19 @@ import * as vivliostyle_plugin from "../../../../src/ts/vivliostyle/plugin";
 
 // FIXME: cannot access to vivliostyle_plugin.hooks
 
-    export const setup = function() {
-        var originalHooks;
-        beforeAll(function() {
-            // originalHooks = vivliostyle_plugin.hooks;
-        });
-        beforeEach(function() {
-            // var hooks = vivliostyle_plugin.hooks = {};
-            // Object.keys(originalHooks).forEach(function(name) {
-            //     hooks[name] = Array.from(originalHooks[name]);
-            // });
-        });
-        afterAll(function() {
-            // vivliostyle_plugin.hooks = originalHooks;
-        });
-    };
+export const setup = function() {
+  var originalHooks;
+  beforeAll(function() {
+    // originalHooks = vivliostyle_plugin.hooks;
+  });
+  beforeEach(function() {
+    // var hooks = vivliostyle_plugin.hooks = {};
+    // Object.keys(originalHooks).forEach(function(name) {
+    //     hooks[name] = Array.from(originalHooks[name]);
+    // });
+  });
+  afterAll(function() {
+    // vivliostyle_plugin.hooks = originalHooks;
+  });
+};
 // })();

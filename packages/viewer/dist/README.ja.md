@@ -1,6 +1,6 @@
 # Vivliostyle Viewer
 
-Vivliostyle Viewerは、HTML+CSS文書を美しくページ組版・表示するWebアプリケーションであり、EPUBやWeb出版物をサポートします。
+Vivliostyle Viewer は、HTML+CSS 文書を美しくページ組版・表示する Web アプリケーションであり、EPUB や Web 出版物をサポートします。
 
 このパッケージは[Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js)と[Vivliostyle UI](https://github.com/vivliostyle/vivliostyle-ui)を組み合わせたものです。
 
@@ -10,25 +10,26 @@ Vivliostyle Viewerは、HTML+CSS文書を美しくページ組版・表示する
 
 ## 使い方
 
-1. ダウンロードしたZIPファイルを展開する
+1. ダウンロードした ZIP ファイルを展開する
 
 2. ターミナルまたはコマンドプロンプトを開き、1.の展開で作られたフォルダ(`vivliostyle-js-[version]`)に移動する
 
 3. 以下のコマンドを実行する
 
-  ```
-  （macOS, Linuxなど、シェルがある環境）
-  > ./start-webserver
-  （Windows）
-  > .\start-webserver
-  ```
+```
+（macOS, Linuxなど、シェルがある環境）
+> ./start-webserver
+（Windows）
+> .\start-webserver
+```
 
-  Node.js, Ruby, Pythonのいずれかがインストールされている場合、このコマンドでwebサーバーが起動します。
+Node.js, Ruby, Python のいずれかがインストールされている場合、このコマンドで web サーバーが起動します。
 
-  ```
-  Please install Node.js or Python or Ruby and rerun this script, or use your favorite HTTP server.
-  ```
-  と表示された場合は、これらのいずれかをインストールしてから再実行するか、お好きなwebサーバーを起動してください。
+```
+Please install Node.js or Python or Ruby and rerun this script, or use your favorite HTTP server.
+```
+
+と表示された場合は、これらのいずれかをインストールしてから再実行するか、お好きな web サーバーを起動してください。
 
 4. ブラウザで<http://localhost:8000>を開く
 
@@ -37,7 +38,7 @@ Vivliostyle Viewerは、HTML+CSS文書を美しくページ組版・表示する
 以下にお寄せください。
 
 - GitHub Issues: <https://github.com/vivliostyle/vivliostyle.js/issues>
-  - UIに関する問題は <https://github.com/vivliostyle/vivliostyle-ui/issues>
+  - UI に関する問題は <https://github.com/vivliostyle/vivliostyle-ui/issues>
 
 ## ソースコード
 
@@ -46,6 +47,6 @@ Vivliostyle Viewerは、HTML+CSS文書を美しくページ組版・表示する
 
 ## ドキュメント
 
-- [Vivliostyle Viewer  ユーザーガイド](https://vivliostyle.github.io/vivliostyle.js/docs/ja/)
+- [Vivliostyle Viewer ユーザーガイド](https://vivliostyle.github.io/vivliostyle.js/docs/ja/)
 
 - [Vivliostyle ドキュメント](https://vivliostyle.org/ja/docs/)

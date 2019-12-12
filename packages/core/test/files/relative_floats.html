@@ -1,41 +1,45 @@
-<!doctype html>
+<!DOCTYPE html>
 <style>
-	div, .float {
-		border: solid;
-	}
-	.relative {
-		position: relative;
-	}
-	.float {
-		float: left;
-		height: 100px;
-		width: 100px;
-		background: #CFC;
-	}
-	.clear {
-		clear: both;
-	}
-	.overflow-hidden {
-		overflow: hidden;
-	}
-	.container {
-		margin: 20px;
-		padding: 10px;
-	}
-	.container.fixed_height {
-		height: 120px;
-	}
+  div,
+  .float {
+    border: solid;
+  }
+  .relative {
+    position: relative;
+  }
+  .float {
+    float: left;
+    height: 100px;
+    width: 100px;
+    background: #cfc;
+  }
+  .clear {
+    clear: both;
+  }
+  .overflow-hidden {
+    overflow: hidden;
+  }
+  .container {
+    margin: 20px;
+    padding: 10px;
+  }
+  .container.fixed_height {
+    height: 120px;
+  }
 </style>
 <div class="relative container fixed_height">
-	<div class="float"></div>
-	← The left float should not be overflowing the container.
+  <div class="float"></div>
+  ← The left float should not be overflowing the container.
 </div>
 <div class="overflow-hidden container">
-	<div class="float"></div>
-	← The left float should not be clipped by the container.
+  <div class="float"></div>
+  ← The left float should not be clipped by the container.
 </div>
 <div class="container fixed_height">
-	<span class="relative"><span class="float"></span>← The left float should not be overflowing the container.</span>
+  <span class="relative"
+    ><span class="float"></span>← The left float should not be overflowing the
+    container.</span
+  >
 </div>
 <div class="relative float clear"></div>
 <div class="relative float clear"></div>

@@ -1,810 +1,838 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Repeating Table header,footer</title>
     <style>
-        @page {
-            size: 820px;
+      @page {
+        size: 820px;
+      }
+      @-epubx-page-template {
+        .partition {
+          width: 398px;
+          height: 198px;
+          border: rgba(0, 0, 255, 0.2) solid 1px;
+          -epubx-flow-from: body;
         }
-        @-epubx-page-template {
-            .partition {
-                width: 398px;
-                height: 198px;
-                border: rgba(0, 0, 255, 0.2) solid 1px;
-                -epubx-flow-from: body;
-            }
-            .left {
-                left: 10px;
-            }
-            .right {
-                right: 10px;
-            }
+        .left {
+          left: 10px;
+        }
+        .right {
+          right: 10px;
+        }
 
-            @-epubx-page-master {
-                @-epubx-partition {
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 10px;
-                    font-size: 10px;
-                    line-height: 10px;
-                    text-align: center;
-                    content: counter(page);
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 610px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 410px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 210px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 10px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 610px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 410px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 210px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 10px;
-                }
-            }
-        }
-        :root {
+        @-epubx-page-master {
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
             font-size: 10px;
-            line-height: 12px;
-            widows: 1;
-            orphans: 1;
+            line-height: 10px;
+            text-align: center;
+            content: counter(page);
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 10px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 10px;
+          }
         }
-        body {
-            margin: 0 10px;
-        }
-        section {
-            break-after: column;
-        }
-        table {
-            border: 2px black solid;
-            border-spacing: 2px;
-        }
-        caption {
-            caption-side: bottom;
-        }
-        tr, .tr {
-            border: 1px blue solid;
-        }
-        th, td, .th, .td {
-            border: 1px gray solid;
-            line-height: 16px;
-        }
-        td {
-            height: 30px;
-        }
-        thead, .thead {
-            background-color: #FFAAAA;
-        }
-        tfoot, .tfoot {
-            background-color: #AAAAFF;
-        }
-        .thead {
-            display: table-header-group;
-        }
-        .tfoot {
-            display: table-footer-group;
-        }
-        .tr {
-            display: table-row;
-        }
-        .th, .td {
-            display: table-cell;
-        }
-        figure {
-            margin: 0;
-            border: 2px black solid;
-            border-collapse: separate;
-            border-spacing: 2px;
-            display: table;
-        }
-        figcaption {
-            display: table-caption;
-            caption-side: bottom;
-        }
+      }
+      :root {
+        font-size: 10px;
+        line-height: 12px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0 10px;
+      }
+      section {
+        break-after: column;
+      }
+      table {
+        border: 2px black solid;
+        border-spacing: 2px;
+      }
+      caption {
+        caption-side: bottom;
+      }
+      tr,
+      .tr {
+        border: 1px blue solid;
+      }
+      th,
+      td,
+      .th,
+      .td {
+        border: 1px gray solid;
+        line-height: 16px;
+      }
+      td {
+        height: 30px;
+      }
+      thead,
+      .thead {
+        background-color: #ffaaaa;
+      }
+      tfoot,
+      .tfoot {
+        background-color: #aaaaff;
+      }
+      .thead {
+        display: table-header-group;
+      }
+      .tfoot {
+        display: table-footer-group;
+      }
+      .tr {
+        display: table-row;
+      }
+      .th,
+      .td {
+        display: table-cell;
+      }
+      figure {
+        margin: 0;
+        border: 2px black solid;
+        border-collapse: separate;
+        border-spacing: 2px;
+        display: table;
+      }
+      figcaption {
+        display: table-caption;
+        caption-side: bottom;
+      }
     </style>
-</head>
-<body>
-
-<section>
-    <table>
-        <caption>(1) Break Between Table Row</caption>
+  </head>
+  <body>
+    <section>
+      <table>
+        <caption>
+          (1) Break Between Table Row
+        </caption>
         <thead>
-            <tr>
-                <td>header-cell-1</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
         </thead>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
-        </tfoot>
-        <tbody>
-            <tr>
-                <td>row1-cell-1</td>
-                <td>row1-cell-2</td>
-                <td>row1-cell-3</td>
-            </tr>
-            <tr>
-                <td>row2-cell-1</td>
-                <td>row2-cell-2</td>
-                <td>row2-cell-3</td>
-            </tr>
-            <tr>
-                <td>row3-cell-1</td>
-                <td>row3-cell-2</td>
-                <td>row3-cell-3</td>
-            </tr>
-            <tr>
-                <td>row4-cell-1</td>
-                <td>row4-cell-2</td>
-                <td>row4-cell-3</td>
-            </tr>
-            <tr>
-                <td>row5-cell-1</td>
-                <td>row5-cell-2</td>
-                <td>row5-cell-3</td>
-            </tr>
-            <tr>
-                <td>row6-cell-1</td>
-                <td>row6-cell-2</td>
-                <td>row6-cell-3</td>
-            </tr>
-            <tr>
-                <td>row7-cell-1</td>
-                <td>row7-cell-2</td>
-                <td>row7-cell-3</td>
-            </tr>
-            <tr>
-                <td>row8-cell-1</td>
-                <td>row8-cell-2</td>
-                <td>row8-cell-3</td>
-            </tr>
-            <tr>
-                <td>row9-cell-1</td>
-                <td>row9-cell-2</td>
-                <td>row9-cell-3</td>
-            </tr>
-            <tr>
-                <td>row10-cell-1</td>
-                <td>row10-cell-2</td>
-                <td>row10-cell-3</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-<section>
-    <table>
-        <caption>(2) No Breaking</caption>
-        <thead>
-            <tr>
-                <td>header-cell-1</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
-        </tfoot>
-        <tbody>
-            <tr>
-                <td>row1-cell-1</td>
-                <td>row1-cell-2</td>
-                <td>row1-cell-3</td>
-            </tr>
-            <tr>
-                <td>row2-cell-1</td>
-                <td>row2-cell-2</td>
-                <td>row2-cell-3</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-<section>
-    <table>
-        <caption>(3) Break inside the row</caption>
-        <thead>
-            <tr>
-                <td>header-cell-1</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
         </tfoot>
         <tbody>
           <tr>
-              <td>
-                  <div style="width: 60px; height: 48px;">
-                      min-content width = 60px.
-                  </div>
-              </td>
-              <td>
-                  <div style="width: 60px; height: 48px;">
-                      min-content width = 60px.
-                  </div>
-              </td>
-              <td>
-                  <div style="width: 80px; height: 36px;">
-                      min-content width = 80px.
-                  </div>
-              </td>
+            <td>row1-cell-1</td>
+            <td>row1-cell-2</td>
+            <td>row1-cell-3</td>
           </tr>
           <tr>
-              <td style="padding: 10px">
-                  <div style="width: 100px; height: 36px;">
-                      minimum content width = 100px.
-                  </div>
-                  <div style="width: 60px; height: 48px;">
-                      min-content width = 60px.
-                  </div>
-              </td>
-              <td>
-                  <div style="width: 50px; height: 115px;">
-                      minimum content width = 50px.
-                  </div>
-                  <div style="width: 60px; height: 48px;">
-                      min-content width = 60px.
-                  </div>
-              </td>
-              <td>
-                  <div style="width: 70px; height: 48px;">
-                      minimum content width = 70px.
-                  </div>
-                  <div style="width: 80px; height: 36px;">
-                      min-content width = 80px.
-                  </div>
-              </td>
+            <td>row2-cell-1</td>
+            <td>row2-cell-2</td>
+            <td>row2-cell-3</td>
+          </tr>
+          <tr>
+            <td>row3-cell-1</td>
+            <td>row3-cell-2</td>
+            <td>row3-cell-3</td>
+          </tr>
+          <tr>
+            <td>row4-cell-1</td>
+            <td>row4-cell-2</td>
+            <td>row4-cell-3</td>
+          </tr>
+          <tr>
+            <td>row5-cell-1</td>
+            <td>row5-cell-2</td>
+            <td>row5-cell-3</td>
+          </tr>
+          <tr>
+            <td>row6-cell-1</td>
+            <td>row6-cell-2</td>
+            <td>row6-cell-3</td>
+          </tr>
+          <tr>
+            <td>row7-cell-1</td>
+            <td>row7-cell-2</td>
+            <td>row7-cell-3</td>
+          </tr>
+          <tr>
+            <td>row8-cell-1</td>
+            <td>row8-cell-2</td>
+            <td>row8-cell-3</td>
+          </tr>
+          <tr>
+            <td>row9-cell-1</td>
+            <td>row9-cell-2</td>
+            <td>row9-cell-3</td>
+          </tr>
+          <tr>
+            <td>row10-cell-1</td>
+            <td>row10-cell-2</td>
+            <td>row10-cell-3</td>
           </tr>
         </tbody>
-    </table>
-</section>
+      </table>
+    </section>
 
-<section>
-    <table>
-        <caption>(4) If there are multiple headers/footers, only the first one is used</caption>
+    <section>
+      <table>
+        <caption>
+          (2) No Breaking
+        </caption>
         <thead>
-            <tr>
-                <td>header-cell-1</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
         </thead>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>row1-cell-1</td>
+            <td>row1-cell-2</td>
+            <td>row1-cell-3</td>
+          </tr>
+          <tr>
+            <td>row2-cell-1</td>
+            <td>row2-cell-2</td>
+            <td>row2-cell-3</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (3) Break inside the row
+        </caption>
+        <thead>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>
+              <div style="width: 60px; height: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="width: 60px; height: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="width: 80px; height: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px">
+              <div style="width: 100px; height: 36px;">
+                minimum content width = 100px.
+              </div>
+              <div style="width: 60px; height: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="width: 50px; height: 115px;">
+                minimum content width = 50px.
+              </div>
+              <div style="width: 60px; height: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="width: 70px; height: 48px;">
+                minimum content width = 70px.
+              </div>
+              <div style="width: 80px; height: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (4) If there are multiple headers/footers, only the first one is used
+        </caption>
+        <thead>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
         </tfoot>
         <thead>
-            <tr>
-                <td>this header  treated as an ordinary table row</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
+          <tr>
+            <td>this header treated as an ordinary table row</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>row1-cell-1</td>
-                <td>row1-cell-2</td>
-                <td>row1-cell-3</td>
-            </tr>
-            <tr>
-                <td>row2-cell-1</td>
-                <td>row2-cell-2</td>
-                <td>row2-cell-3</td>
-            </tr>
-            <tr>
-                <td>row3-cell-1</td>
-                <td>row3-cell-2</td>
-                <td>row3-cell-3</td>
-            </tr>
-            <tr>
-                <td>row4-cell-1</td>
-                <td>row4-cell-2</td>
-                <td>row4-cell-3</td>
-            </tr>
-            <tr>
-                <td>row5-cell-1</td>
-                <td>row5-cell-2</td>
-                <td>row5-cell-3</td>
-            </tr>
-            <tr>
-                <td>row6-cell-1</td>
-                <td>row6-cell-2</td>
-                <td>row6-cell-3</td>
-            </tr>
-            <tr>
-                <td>row7-cell-1</td>
-                <td>row7-cell-2</td>
-                <td>row7-cell-3</td>
-            </tr>
-            <tr>
-                <td>row8-cell-1</td>
-                <td>row8-cell-2</td>
-                <td>row8-cell-3</td>
-            </tr>
-            <tr>
-                <td>row9-cell-1</td>
-                <td>row9-cell-2</td>
-                <td>row9-cell-3</td>
-            </tr>
+          <tr>
+            <td>row1-cell-1</td>
+            <td>row1-cell-2</td>
+            <td>row1-cell-3</td>
+          </tr>
+          <tr>
+            <td>row2-cell-1</td>
+            <td>row2-cell-2</td>
+            <td>row2-cell-3</td>
+          </tr>
+          <tr>
+            <td>row3-cell-1</td>
+            <td>row3-cell-2</td>
+            <td>row3-cell-3</td>
+          </tr>
+          <tr>
+            <td>row4-cell-1</td>
+            <td>row4-cell-2</td>
+            <td>row4-cell-3</td>
+          </tr>
+          <tr>
+            <td>row5-cell-1</td>
+            <td>row5-cell-2</td>
+            <td>row5-cell-3</td>
+          </tr>
+          <tr>
+            <td>row6-cell-1</td>
+            <td>row6-cell-2</td>
+            <td>row6-cell-3</td>
+          </tr>
+          <tr>
+            <td>row7-cell-1</td>
+            <td>row7-cell-2</td>
+            <td>row7-cell-3</td>
+          </tr>
+          <tr>
+            <td>row8-cell-1</td>
+            <td>row8-cell-2</td>
+            <td>row8-cell-3</td>
+          </tr>
+          <tr>
+            <td>row9-cell-1</td>
+            <td>row9-cell-2</td>
+            <td>row9-cell-3</td>
+          </tr>
         </tbody>
         <tfoot>
-            <tr>
-                <td>this footer treated as an ordinary table row</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
+          <tr>
+            <td>this footer treated as an ordinary table row</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
         </tfoot>
-    </table>
-</section>
+      </table>
+    </section>
 
-<section>
-    <table>
-        <caption>(5) colspan in 1st and 2nd columns</caption>
+    <section>
+      <table>
+        <caption>
+          (5) colspan in 1st and 2nd columns
+        </caption>
         <colgroup span="2" class="highlight"></colgroup>
         <tr>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>5</b><br>
-                (3) lines<br>
-                (4) normal cell<br>
-                (5) normal cell<br>
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>5</b><br>
-                (3) lines<br>
-                (4) normal cell<br>
-                (5) normal cell
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>5</b><br>
-                (3) lines<br>
-                (4) normal cell<br>
-                (5) normal cell
-            </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>5</b><br />
+            (3) lines<br />
+            (4) normal cell<br />
+            (5) normal cell<br />
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>5</b><br />
+            (3) lines<br />
+            (4) normal cell<br />
+            (5) normal cell
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>5</b><br />
+            (3) lines<br />
+            (4) normal cell<br />
+            (5) normal cell
+          </td>
         </tr>
         <tr>
-            <td colspan="2">
-                (1) This cell<br>
-                (2) contains <b>7</b><br>
-                (3) lines<br>
-                (4) colspan=2<br>
-                (5) colspan=2<br>
-                (6) colspan=2<br>
-                (7) colspan=2
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>7</b><br>
-                (3) lines<br>
-                (4) normal cell<br>
-                (5) normal cell<br>
-                (6) normal cell<br>
-                (7) normal cell
-            </td>
+          <td colspan="2">
+            (1) This cell<br />
+            (2) contains <b>7</b><br />
+            (3) lines<br />
+            (4) colspan=2<br />
+            (5) colspan=2<br />
+            (6) colspan=2<br />
+            (7) colspan=2
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>7</b><br />
+            (3) lines<br />
+            (4) normal cell<br />
+            (5) normal cell<br />
+            (6) normal cell<br />
+            (7) normal cell
+          </td>
         </tr>
         <thead>
-            <tr>
-                <td>header-cell-1</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
         </thead>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
         </tfoot>
-    </table>
-</section>
+      </table>
+    </section>
 
-<section>
-    <table>
-        <caption>(6) rowspan in 1st and 2nd columns</caption>
+    <section>
+      <table>
+        <caption>
+          (6) rowspan in 1st and 2nd columns
+        </caption>
         <colgroup span="2" class="highlight"></colgroup>
         <tr>
-            <td rowspan="3">
-                (1) This cell<br>
-                (2) contains <b>17</b><br>
-                (3) lines<br>
-                (4) rowspan=3<br>
-                (5) rowspan=3<br>
-                (6) rowspan=3<br>
-                (7) rowspan=3<br>
-                (8) rowspan=3<br>
-                (9) rowspan=3<br>
-                (10) rowspan=3<br>
-                (11) rowspan=3<br>
-                (12) rowspan=3<br>
-                (13) rowspan=3<br>
-                (14) rowspan=3<br>
-                (15) rowspan=3<br>
-                (16) rowspan=3<br>
-                (17) rowspan=3
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>7</b><br>
-                (3) lines<br>
-                (4) normal cell<br>
-                (5) normal cell<br>
-                (6) normal cell<br>
-                (7) normal cell
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>4</b><br>
-                (3) lines<br>
-                (4) normal cell
-            </td>
+          <td rowspan="3">
+            (1) This cell<br />
+            (2) contains <b>17</b><br />
+            (3) lines<br />
+            (4) rowspan=3<br />
+            (5) rowspan=3<br />
+            (6) rowspan=3<br />
+            (7) rowspan=3<br />
+            (8) rowspan=3<br />
+            (9) rowspan=3<br />
+            (10) rowspan=3<br />
+            (11) rowspan=3<br />
+            (12) rowspan=3<br />
+            (13) rowspan=3<br />
+            (14) rowspan=3<br />
+            (15) rowspan=3<br />
+            (16) rowspan=3<br />
+            (17) rowspan=3
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>7</b><br />
+            (3) lines<br />
+            (4) normal cell<br />
+            (5) normal cell<br />
+            (6) normal cell<br />
+            (7) normal cell
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>4</b><br />
+            (3) lines<br />
+            (4) normal cell
+          </td>
         </tr>
         <tr>
-            <td rowspan="2">
-                (1) This cell<br>
-                (2) contains <b>8</b><br>
-                (3) lines<br>
-                (4) rowspan=2<br>
-                (5) rowspan=2<br>
-                (6) rowspan=2<br>
-                (7) rowspan=2<br>
-                (8) rowspan=2
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>4</b><br>
-                (3) lines<br>
-                (4) normal cell
-            </td>
+          <td rowspan="2">
+            (1) This cell<br />
+            (2) contains <b>8</b><br />
+            (3) lines<br />
+            (4) rowspan=2<br />
+            (5) rowspan=2<br />
+            (6) rowspan=2<br />
+            (7) rowspan=2<br />
+            (8) rowspan=2
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>4</b><br />
+            (3) lines<br />
+            (4) normal cell
+          </td>
         </tr>
         <tr style="background: lightblue">
-            <td>
-                (1) This cell<br>
-                (2) contains <b>3</b><br>
-                (3) lines
-            </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>3</b><br />
+            (3) lines
+          </td>
         </tr>
         <tr>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>2</b>
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>2</b>
-            </td>
-            <td>
-                (1) This cell<br>
-                (2) contains <b>2</b>
-            </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>2</b>
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>2</b>
+          </td>
+          <td>
+            (1) This cell<br />
+            (2) contains <b>2</b>
+          </td>
         </tr>
         <thead>
-            <tr>
-                <td>header-cell-1</td>
-                <td>header-cell-2</td>
-                <td>header-cell-3</td>
-            </tr>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+            <td>header-cell-3</td>
+          </tr>
         </thead>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-                <td>footer-cell-3</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+            <td>footer-cell-3</td>
+          </tr>
         </tfoot>
-    </table>
-</section>
+      </table>
+    </section>
 
-<section>
-    <table>
-        <caption>(7) Break at the inside row</caption>
+    <section>
+      <table>
+        <caption>
+          (7) Break at the inside row
+        </caption>
         <thead>
-            <tr>
-                <td>header-cell-1</td>
-            </tr>
+          <tr>
+            <td>header-cell-1</td>
+          </tr>
         </thead>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+          </tr>
         </tfoot>
         <tbody>
           <tr>
-              <td>
-                  a<br>
-                  b<br>
-                  c<br>
-                  d<br>
-                  e<br>
-                  f<br>
-                  g<br>
-                  h<br>
-                  i
-              </td>
+            <td>
+              a<br />
+              b<br />
+              c<br />
+              d<br />
+              e<br />
+              f<br />
+              g<br />
+              h<br />
+              i
+            </td>
           </tr>
           <tr>
-              <td>
-                  j<br>
-                  k<br>
-                  l<br>
-                  m<br>
-                  n<br>
-                  o<br>
-                  p<br>
-                  q<br>
-                  r
-              </td>
+            <td>
+              j<br />
+              k<br />
+              l<br />
+              m<br />
+              n<br />
+              o<br />
+              p<br />
+              q<br />
+              r
+            </td>
           </tr>
         </tbody>
-    </table>
-</section>
+      </table>
+    </section>
 
-
-<section>
-    <figure>
-        <figcaption>(8) Non-table elements with table display values</figcaption>
+    <section>
+      <figure>
+        <figcaption>
+          (8) Non-table elements with table display values
+        </figcaption>
         <div class="tr">
-            <div class="td">
-                <div style="height: 60px; width: 48px;">
-                    min-content width = 60px.
-                </div>
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
             </div>
-            <div class="td">
-                <div style="height: 60px; width: 48px;">
-                    min-content width = 60px.
-                </div>
+          </div>
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
             </div>
-            <div class="td">
-                <div style="height: 80px; width: 36px;">
-                    min-content width = 80px.
-                </div>
+          </div>
+          <div class="td">
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
             </div>
+          </div>
         </div>
         <div class="tr">
-            <div class="td">
-                <div style="height: 100px; width: 36px;">
-                    minimum content width = 100px.
-                </div>
+          <div class="td">
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
             </div>
-            <div class="td">
-                <div style="height: 50px; width: 127px;">
-                    minimum content width = 50px.
-                </div>
+          </div>
+          <div class="td">
+            <div style="height: 50px; width: 127px;">
+              minimum content width = 50px.
             </div>
-            <div class="td">
-                <div style="height: 70px; width: 48px;">
-                    minimum content width = 70px.
-                </div>
+          </div>
+          <div class="td">
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
             </div>
+          </div>
         </div>
         <div class="tr">
-            <div class="td">
-                <div style="height: 60px; width: 48px;">
-                    min-content width = 60px.
-                </div>
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
             </div>
-            <div class="td">
-                <div style="height: 60px; width: 48px;">
-                    min-content width = 60px.
-                </div>
+          </div>
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
             </div>
-            <div class="td">
-                <div style="height: 80px; width: 36px;">
-                    min-content width = 80px.
-                </div>
+          </div>
+          <div class="td">
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
             </div>
+          </div>
         </div>
         <div class="thead">
-            <div class="tr">
-                <div class="td">header-cell-1</div>
-                <div class="td">header-cell-2</div>
-                <div class="td">header-cell-3</div>
-            </div>
+          <div class="tr">
+            <div class="td">header-cell-1</div>
+            <div class="td">header-cell-2</div>
+            <div class="td">header-cell-3</div>
+          </div>
         </div>
         <div class="tfoot">
-            <div class="tr">
-                <div class="td">footer-cell-1</div>
-                <div class="td">footer-cell-2</div>
-                <div class="td">footer-cell-3</div>
-            </tr>
+          <div class="tr">
+            <div class="td">footer-cell-1</div>
+            <div class="td">footer-cell-2</div>
+            <div class="td">footer-cell-3</div>
+          </div>
         </div>
-    </figure>
-</section>
+      </figure>
+    </section>
 
-<section>
-    <table>
-
-        <caption>(9) skip header/footer when there doesn't leave enough space to insert at least one content row</caption>
+    <section>
+      <table>
+        <caption>
+          (9) skip header/footer when there doesn't leave enough space to insert
+          at least one content row
+        </caption>
         <thead>
-            <tr>
-              <td>header-cell-1</td>
-              <td>header-cell-2</td>
-            </tr>
+          <tr>
+            <td>header-cell-1</td>
+            <td>header-cell-2</td>
+          </tr>
         </thead>
         <tbody>
           <tr>
-              <td>
-                  aaa
-              </td>
-              <td>
-                  bbb
-              </td>
+            <td>
+              aaa
+            </td>
+            <td>
+              bbb
+            </td>
           </tr>
           <tr>
-              <td>
-                  <div style="height:140px;">height=140px</div>
-              </td>
-              <td>
-                  ccc
-              </td>
+            <td>
+              <div style="height:140px;">height=140px</div>
+            </td>
+            <td>
+              ccc
+            </td>
           </tr>
           <tr>
-              <td>
-                  <div style="height:200px;">height=200px</div>
-              </td>
-              <td>
-                  ddd
-              </td>
+            <td>
+              <div style="height:200px;">height=200px</div>
+            </td>
+            <td>
+              ddd
+            </td>
           </tr>
           <tr>
-              <td>
-                  eee
-              </td>
-              <td>
-                  fff
-              </td>
+            <td>
+              eee
+            </td>
+            <td>
+              fff
+            </td>
           </tr>
         </tbody>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-                <td>footer-cell-2</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+            <td>footer-cell-2</td>
+          </tr>
         </tfoot>
-    </table>
-</section>
+      </table>
+    </section>
 
-<section>
-    <table>
-        <caption>(10) tall header</caption>
+    <section>
+      <table>
+        <caption>
+          (10) tall header
+        </caption>
         <thead>
-            <tr>
-              <td><div style="height:200px;">height=200px</div></td>
-            </tr>
+          <tr>
+            <td><div style="height:200px;">height=200px</div></td>
+          </tr>
         </thead>
         <tbody>
           <tr>
-              <td>
-                  aaa
-              </td>
+            <td>
+              aaa
+            </td>
           </tr>
           <tr>
-              <td>
-                  bbb
-              </td>
+            <td>
+              bbb
+            </td>
           </tr>
           <tr>
-              <td>
-                  ccc
-              </td>
+            <td>
+              ccc
+            </td>
           </tr>
         </tbody>
         <tfoot>
-            <tr>
-                <td>footer-cell-1</td>
-            </tr>
+          <tr>
+            <td>footer-cell-1</td>
+          </tr>
         </tfoot>
-    </table>
-</section>
+      </table>
+    </section>
 
-<section>
-Empty
-</section>
+    <section>
+      Empty
+    </section>
 
-<section>
-    <table>
-        <caption>(11) tall footer</caption>
+    <section>
+      <table>
+        <caption>
+          (11) tall footer
+        </caption>
         <tfoot>
-            <tr>
-                <td><div style="height:200px;">height=200px</div></td>
-            </tr>
-        </tfoot>
-        <tbody>
           <tr>
-              <td>
-                  aaa
-              </td>
+            <td><div style="height:200px;">height=200px</div></td>
           </tr>
-          <tr>
-              <td>
-                  bbb
-              </td>
-          </tr>
-          <tr>
-              <td>
-                  ccc
-              </td>
-          </tr>
-        </tbody>
-        <thead>
-            <tr>
-                <td>header</td>
-            </tr>
-        </thead>
-    </table>
-</section>
-
-<section>
-Empty
-</section>
-
-<section>
-    <table>
-        <caption>(12) tall header and footer</caption>
-        <tfoot>
-            <tr>
-                <td><div style="height:200px;">height=200px</div></td>
-            </tr>
         </tfoot>
         <tbody>
           <tr>
-              <td>
-                  aaa
-              </td>
+            <td>
+              aaa
+            </td>
           </tr>
           <tr>
-              <td>
-                  bbb
-              </td>
+            <td>
+              bbb
+            </td>
           </tr>
           <tr>
-              <td>
-                  ccc
-              </td>
+            <td>
+              ccc
+            </td>
           </tr>
         </tbody>
         <thead>
-            <tr>
-                <td><div style="height:200px;">height=200px</div></td>
-            </tr>
+          <tr>
+            <td>header</td>
+          </tr>
         </thead>
-    </table>
-</section>
+      </table>
+    </section>
 
-</body>
+    <section>
+      Empty
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (12) tall header and footer
+        </caption>
+        <tfoot>
+          <tr>
+            <td><div style="height:200px;">height=200px</div></td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>
+              aaa
+            </td>
+          </tr>
+          <tr>
+            <td>
+              bbb
+            </td>
+          </tr>
+          <tr>
+            <td>
+              ccc
+            </td>
+          </tr>
+        </tbody>
+        <thead>
+          <tr>
+            <td><div style="height:200px;">height=200px</div></td>
+          </tr>
+        </thead>
+      </table>
+    </section>
+  </body>
 </html>

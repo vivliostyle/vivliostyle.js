@@ -1,43 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Exclusion with printer marks</title>
     <style>
-        @page {
-            marks: crop cross;
-        }
+      @page {
+        marks: crop cross;
+      }
 
-        @-epubx-page-template {
-            @-epubx-page-master {
-                @-epubx-partition {
-                    -epubx-flow-from: body;
-                    left: 0;
-                    top: 0;
-                    width: 200px;
-                }
-                @-epubx-partition {
-                    -epubx-flow-from: left;
-                    left: 0;
-                    top: 0;
-                    width: 50px;
-                    height: 100px;
-                    background: #CFC;
-                }
-            }
+      @-epubx-page-template {
+        @-epubx-page-master {
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            left: 0;
+            top: 0;
+            width: 200px;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: left;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 100px;
+            background: #cfc;
+          }
         }
+      }
 
-        * {
-            margin: 0;
-        }
-        div {
-            border: 2px blue solid;
-            width: 140px;
-            float: right;
-        }
+      * {
+        margin: 0;
+      }
+      div {
+        border: 2px blue solid;
+        width: 140px;
+        float: right;
+      }
     </style>
-</head>
-<body>
-<div>This blue rectangle should be on the right side of a green rectangle.</div>
-</body>
+  </head>
+  <body>
+    <div>
+      This blue rectangle should be on the right side of a green rectangle.
+    </div>
+  </body>
 </html>

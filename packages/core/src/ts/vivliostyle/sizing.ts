@@ -40,7 +40,7 @@ export enum Size {
   FIT_CONTENT_INLINE_SIZE = "fit-content inline size",
   FIT_CONTENT_BLOCK_SIZE = "fit-content block size",
   FIT_CONTENT_WIDTH = "fit-content width",
-  FIT_CONTENT_HEIGHT = "fit-content height"
+  FIT_CONTENT_HEIGHT = "fit-content height",
 }
 
 /**
@@ -49,7 +49,7 @@ export enum Size {
 export function getSize(
   clientLayout: Vtree.ClientLayout,
   element: Element,
-  sizes: Size[]
+  sizes: Size[],
 ): { [key in Size]: number } {
   const original = {
     display: (element as any).style.display,
@@ -59,7 +59,7 @@ export function getSize(
     minWidth: (element as any).style.minWidth as string,
     height: (element as any).style.height as string,
     maxHeight: (element as any).style.maxHeight as string,
-    minHeight: (element as any).style.minHeight as string
+    minHeight: (element as any).style.minHeight as string,
   };
   const doc = element.ownerDocument;
   const parent = element.parentNode;
@@ -145,7 +145,7 @@ export function getSize(
     throw new Error("Getting fill-available block size is not implemented");
   }
   const result = {} as { [key in Size]: number };
-  sizes.forEach(size => {
+  sizes.forEach((size) => {
     let r: string;
     switch (size) {
       case Size.FILL_AVAILABLE_INLINE_SIZE:

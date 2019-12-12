@@ -33,7 +33,7 @@ export interface LayoutProcessor {
   layout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-    leadingEdge: boolean
+    leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext>;
 
   /**
@@ -43,7 +43,7 @@ export interface LayoutProcessor {
     position: Vtree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
-    columnBlockSize: number
+    columnBlockSize: number,
   ): Layout.BreakPosition;
 
   /**
@@ -58,7 +58,7 @@ export interface LayoutProcessor {
    */
   afterNonInlineElementNode(
     nodeContext: Vtree.NodeContext,
-    stopAtOverflow: boolean
+    stopAtOverflow: boolean,
   ): boolean;
 
   /**
@@ -68,14 +68,14 @@ export interface LayoutProcessor {
     column: Layout.Column,
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
-    endOfColumn: boolean
+    endOfColumn: boolean,
   ): Task.Result<boolean>;
 
   clearOverflownViewNodes(
     column: Layout.Column,
     parentNodeContext: Vtree.NodeContext,
     nodeContext: Vtree.NodeContext,
-    removeSelf: boolean
+    removeSelf: boolean,
   );
 }
 
@@ -88,7 +88,7 @@ export class LayoutProcessorResolver {
    */
   find(formattingContext: Vtree.FormattingContext): LayoutProcessor {
     const hooks: Plugin.ResolveLayoutProcessorHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR
+      Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
     );
     for (let i = 0; i < hooks.length; i++) {
       const processor = hooks[i](formattingContext);
@@ -97,7 +97,7 @@ export class LayoutProcessorResolver {
       }
     }
     throw new Error(
-      `No processor found for a formatting context: ${formattingContext.getName()}`
+      `No processor found for a formatting context: ${formattingContext.getName()}`,
     );
   }
 }
@@ -109,7 +109,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   layout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-    leadingEdge: boolean
+    leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext> {
     if (column.isFloatNodeContext(nodeContext)) {
       return column.layoutFloatOrFootnote(nodeContext);
@@ -127,13 +127,13 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     position: Vtree.NodeContext,
     breakOnEdge: string | null,
     overflows: boolean,
-    columnBlockSize: number
+    columnBlockSize: number,
   ): Layout.BreakPosition {
     return new BreakPosition.EdgeBreakPosition(
       position.copy(),
       breakOnEdge,
       overflows,
-      columnBlockSize
+      columnBlockSize,
     );
   }
 
@@ -149,7 +149,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
    */
   afterNonInlineElementNode(
     nodeContext: Vtree.NodeContext,
-    stopAtOverflow: boolean
+    stopAtOverflow: boolean,
   ): boolean {
     return false;
   }
@@ -161,7 +161,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     column: Layout.Column,
     parentNodeContext: Vtree.NodeContext,
     nodeContext: Vtree.NodeContext,
-    removeSelf: boolean
+    removeSelf: boolean,
   ) {
     if (!nodeContext.viewNode) {
       return;
@@ -184,7 +184,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     column: Layout.Column,
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
-    endOfColumn: boolean
+    endOfColumn: boolean,
   ): Task.Result<boolean> {
     const removeSelf =
       forceRemoveSelf ||
@@ -195,7 +195,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     if (endOfColumn) {
       column.fixJustificationIfNeeded(nodeContext, true);
       column.layoutContext.processFragmentedBlockEdge(
-        removeSelf ? nodeContext : nodeContext.parent
+        removeSelf ? nodeContext : nodeContext.parent,
       );
     }
     return Task.newResult(true);
@@ -258,20 +258,20 @@ Plugin.registerHook(
         Display.isBlock(display, position, floatSide, isRoot))
     ) {
       return new BlockFormattingContext(
-        parent ? parent.formattingContext : null
+        parent ? parent.formattingContext : null,
       );
     } else {
       return null;
     }
-  }
+  },
 );
 
 Plugin.registerHook(
   Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
-  formattingContext => {
+  (formattingContext) => {
     if (formattingContext instanceof BlockFormattingContext) {
       return blockLayoutProcessor;
     }
     return null;
-  }
+  },
 );

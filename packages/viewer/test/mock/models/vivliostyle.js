@@ -20,26 +20,26 @@
 import vivliostyle from "../../../src/ts/models/vivliostyle";
 
 export default function() {
-    beforeAll(function() {
-        vivliostyle.setInstance({
-            viewer: {
-                PageViewMode: {
-                    SINGLE_PAGE: "singlePage",
-                    SPREAD: "spread",
-                    AUTO_SPREAD: "autoSpread"
-                },
-                ZoomType: {
-                    FIT_INSIDE_VIEWPORT: "fit inside viewport"
-                }
-            },
-            constants: null
-        });
+  beforeAll(function() {
+    vivliostyle.setInstance({
+      viewer: {
+        PageViewMode: {
+          SINGLE_PAGE: "singlePage",
+          SPREAD: "spread",
+          AUTO_SPREAD: "autoSpread",
+        },
+        ZoomType: {
+          FIT_INSIDE_VIEWPORT: "fit inside viewport",
+        },
+      },
+      constants: null,
     });
+  });
 
-    afterAll(function() {
-        vivliostyle.setInstance({
-            viewer: null,
-            constants: null
-        });
+  afterAll(function() {
+    vivliostyle.setInstance({
+      viewer: null,
+      constants: null,
     });
+  });
 }

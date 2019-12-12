@@ -1,5 +1,1 @@
 build
-package-lock.json
-node_modules
-.sass-cache
-.DS_Store

@@ -122,7 +122,7 @@ export const inheritedProps = {
   "word-break": true,
   "word-spacing": true,
   "word-wrap": true,
-  "writing-mode": true
+  "writing-mode": true,
 };
 
 export const polyfilledInheritedProps = [
@@ -131,23 +131,23 @@ export const polyfilledInheritedProps = [
   // https://github.com/vivliostyle/vivliostyle.js/issues/259
   "image-resolution",
   "orphans",
-  "widows"
+  "widows",
 ];
 
 export function getPolyfilledInheritedProps(): string[] {
   const hooks: Plugin.PolyfilledInheritedPropsHook[] = Plugin.getHooksForName(
-    Plugin.HOOKS.POLYFILLED_INHERITED_PROPS
+    Plugin.HOOKS.POLYFILLED_INHERITED_PROPS,
   );
   return hooks.reduce(
     (props, f) => props.concat(f()),
-    [].concat(polyfilledInheritedProps)
+    [].concat(polyfilledInheritedProps),
   );
 }
 
 export const supportedNamespaces = {
   "http://www.idpf.org/2007/ops": true,
   "http://www.w3.org/1999/xhtml": true,
-  "http://www.w3.org/2000/svg": true
+  "http://www.w3.org/2000/svg": true,
 };
 
 export const coupledPatterns = [
@@ -156,7 +156,7 @@ export const coupledPatterns = [
   "border-%-width",
   "border-%-style",
   "border-%-color",
-  "%"
+  "%",
 ];
 
 export const coupledExtentPatterns = ["max-%", "min-%", "%"];
@@ -169,7 +169,7 @@ export const geomNames: { [key: string]: boolean } = (() => {
     "max-width": true,
     "max-height": true,
     "min-width": true,
-    "min-height": true
+    "min-height": true,
   };
   for (let i = 0; i < coupledPatterns.length; i++) {
     for (let k = 0; k < sides.length; k++) {
@@ -182,7 +182,7 @@ export const geomNames: { [key: string]: boolean } = (() => {
 
 export function buildCouplingMap(
   sideMap: { [key: string]: string },
-  extentMap: { [key: string]: string }
+  extentMap: { [key: string]: string },
 ): { [key: string]: string } {
   const map = {};
   for (const pattern of coupledPatterns) {
@@ -209,9 +209,9 @@ export const couplingMapVert = buildCouplingMap(
     "block-start": "right",
     "block-end": "left",
     "inline-start": "top",
-    "inline-end": "bottom"
+    "inline-end": "bottom",
   },
-  { "block-size": "width", "inline-size": "height" }
+  { "block-size": "width", "inline-size": "height" },
 );
 
 export const couplingMapHor = buildCouplingMap(
@@ -219,9 +219,9 @@ export const couplingMapHor = buildCouplingMap(
     "block-start": "top",
     "block-end": "bottom",
     "inline-start": "left",
-    "inline-end": "right"
+    "inline-end": "right",
   },
-  { "block-size": "height", "inline-size": "width" }
+  { "block-size": "height", "inline-size": "width" },
 );
 
 export const couplingMapVertRtl = buildCouplingMap(
@@ -229,9 +229,9 @@ export const couplingMapVertRtl = buildCouplingMap(
     "block-start": "right",
     "block-end": "left",
     "inline-start": "bottom",
-    "inline-end": "top"
+    "inline-end": "top",
   },
-  { "block-size": "width", "inline-size": "height" }
+  { "block-size": "width", "inline-size": "height" },
 );
 
 export const couplingMapHorRtl = buildCouplingMap(
@@ -239,15 +239,15 @@ export const couplingMapHorRtl = buildCouplingMap(
     "block-start": "top",
     "block-end": "bottom",
     "inline-start": "right",
-    "inline-end": "left"
+    "inline-end": "left",
   },
-  { "block-size": "height", "inline-size": "width" }
+  { "block-size": "height", "inline-size": "width" },
 );
 
 export class CascadeValue {
   constructor(
     public readonly value: Css.Val,
-    public readonly priority: number
+    public readonly priority: number,
   ) {}
 
   getBaseValue(): CascadeValue {
@@ -286,7 +286,7 @@ export class ConditionalCascadeValue extends CascadeValue {
   constructor(
     value: Css.Val,
     priority: number,
-    public readonly condition: Exprs.Val
+    public readonly condition: Exprs.Val,
   ) {
     super(value, priority);
   }
@@ -319,7 +319,7 @@ export class ConditionalCascadeValue extends CascadeValue {
     return new ConditionalCascadeValue(
       this.value,
       this.priority + specificity,
-      this.condition
+      this.condition,
     );
   }
 
@@ -335,7 +335,7 @@ export class ConditionalCascadeValue extends CascadeValue {
 export function cascadeValues(
   context: Exprs.Context,
   tv: CascadeValue,
-  av: CascadeValue
+  av: CascadeValue,
 ): CascadeValue {
   if ((tv == null || av.priority > tv.priority) && av.isEnabled(context)) {
     return av.getBaseValue();
@@ -349,7 +349,7 @@ export type ElementStyleMap = {
 
 export const SPECIALS = {
   "region-id": true,
-  "fragment-selector-id": true
+  "fragment-selector-id": true,
 };
 
 export function isSpecialName(name: string): boolean {
@@ -378,7 +378,7 @@ export function getProp(style: ElementStyle, name: string): CascadeValue {
 export function setProp(
   style: ElementStyle,
   name: string,
-  value: CascadeValue
+  value: CascadeValue,
 ): any {
   if (!value) {
     delete style[name];
@@ -389,14 +389,14 @@ export function setProp(
 
 export function getStyleMap(
   style: ElementStyle,
-  name: string
+  name: string,
 ): ElementStyleMap {
   return style[name] as ElementStyleMap;
 }
 
 export function getMutableStyleMap(
   style: ElementStyle,
-  name: string
+  name: string,
 ): ElementStyleMap {
   let r = style[name] as ElementStyleMap;
   if (!r) {
@@ -407,7 +407,7 @@ export function getMutableStyleMap(
 }
 
 export const getViewConditionalStyleMap = (
-  style: ElementStyle
+  style: ElementStyle,
 ): { matcher: Matchers.Matcher; styles: ElementStyleMap }[] => {
   let r = style["_viewConditionalStyles"] as {
     matcher: Matchers.Matcher;
@@ -426,7 +426,7 @@ export function getSpecial(style: ElementStyle, name: string): CascadeValue[] {
 
 export function getMutableSpecial(
   style: ElementStyle,
-  name: string
+  name: string,
 ): CascadeValue[] {
   let r = style[name] as CascadeValue[];
   if (!r) {
@@ -443,13 +443,13 @@ export function mergeIn(
   specificity: number,
   pseudoelement: string | null,
   regionId: string | null,
-  viewConditionMatcher: Matchers.Matcher | null
+  viewConditionMatcher: Matchers.Matcher | null,
 ): void {
   const hierarchy = [
     { id: pseudoelement, styleKey: "_pseudos" },
-    { id: regionId, styleKey: "_regions" }
+    { id: regionId, styleKey: "_regions" },
   ];
-  hierarchy.forEach(item => {
+  hierarchy.forEach((item) => {
     if (item.id) {
       const styleMap = getMutableStyleMap(target, item.styleKey);
       target = styleMap[item.id];
@@ -464,7 +464,7 @@ export function mergeIn(
     target = {} as ElementStyle;
     styleMap.push({
       styles: target as ElementStyleMap,
-      matcher: viewConditionMatcher
+      matcher: viewConditionMatcher,
     });
   }
   for (const prop in style) {
@@ -487,7 +487,7 @@ export function mergeIn(
 
 export function mergeAll(
   context: Exprs.Context,
-  styles: ElementStyle[]
+  styles: ElementStyle[],
 ): ElementStyle {
   const target = {} as ElementStyle;
   for (let k = 0; k < styles.length; k++) {
@@ -498,7 +498,7 @@ export function mergeAll(
 
 export function chainActions(
   chain: ChainedAction[],
-  action: CascadeAction
+  action: CascadeAction,
 ): CascadeAction {
   if (chain.length > 0) {
     chain.sort((a, b) => b.getPriority() - a.getPriority());
@@ -518,7 +518,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   constructor(
     public readonly props: ElementStyle,
-    public readonly context: Exprs.Context
+    public readonly context: Exprs.Context,
   ) {
     super();
   }
@@ -551,7 +551,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       return convertFontRelativeLengthToPx(
         numeric,
         this.getFontSize(),
-        this.context
+        this.context,
       );
     } else if (numeric.unit == "%") {
       if (this.propName === "line-height") {
@@ -578,7 +578,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 export function convertFontRelativeLengthToPx(
   numeric: Css.Numeric,
   baseFontSize: number,
-  context: Exprs.Context
+  context: Exprs.Context,
 ): Css.Numeric {
   const unit = numeric.unit;
   const num = numeric.num;
@@ -595,7 +595,7 @@ export function convertFontRelativeLengthToPx(
 export function convertFontSizeToPx(
   numeric: Css.Numeric,
   parentFontSize: number,
-  context: Exprs.Context
+  context: Exprs.Context,
 ): Css.Numeric {
   numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);
   const unit = numeric.unit;
@@ -636,7 +636,7 @@ export class ConditionItemAction extends CascadeAction {
    */
   apply(cascadeInstance: CascadeInstance): void {
     cascadeInstance.pushConditionItem(
-      this.conditionItem.fresh(cascadeInstance)
+      this.conditionItem.fresh(cascadeInstance),
     );
   }
 }
@@ -677,7 +677,7 @@ export class ApplyRuleAction extends CascadeAction {
     public readonly specificity: number,
     public readonly pseudoelement: string | null,
     public readonly regionId: string | null,
-    public readonly viewConditionId: string | null
+    public readonly viewConditionId: string | null,
   ) {
     super();
   }
@@ -693,7 +693,7 @@ export class ApplyRuleAction extends CascadeAction {
       this.specificity,
       this.pseudoelement,
       this.regionId,
-      cascadeInstance.buildViewConditionMatcher(this.viewConditionId)
+      cascadeInstance.buildViewConditionMatcher(this.viewConditionId),
     );
   }
 }
@@ -929,7 +929,7 @@ export class CheckAttributeEqAction extends ChainedAction {
   constructor(
     public readonly ns: string,
     public readonly name: string,
-    public readonly value: string
+    public readonly value: string,
   ) {
     super();
   }
@@ -983,7 +983,7 @@ export class CheckNamespaceSupportedAction extends ChainedAction {
     if (cascadeInstance.currentElement) {
       const ns = cascadeInstance.currentElement.getAttributeNS(
         this.ns,
-        this.name
+        this.name,
       );
       if (ns && supportedNamespaces[ns]) {
         this.chained.apply(cascadeInstance);
@@ -1010,7 +1010,7 @@ export class CheckAttributeRegExpAction extends ChainedAction {
   constructor(
     public readonly ns: string,
     public readonly name: string,
-    public readonly regexp: RegExp
+    public readonly regexp: RegExp,
   ) {
     super();
   }
@@ -1022,7 +1022,7 @@ export class CheckAttributeRegExpAction extends ChainedAction {
     if (cascadeInstance.currentElement) {
       const attr = cascadeInstance.currentElement.getAttributeNS(
         this.ns,
-        this.name
+        this.name,
       );
       if (attr && attr.match(this.regexp)) {
         this.chained.apply(cascadeInstance);
@@ -1207,7 +1207,7 @@ export class IsNthLastSiblingOfTypeAction extends IsNthAction {
       this.matchANPlusB(
         counts[cascadeInstance.currentNamespace][
           cascadeInstance.currentLocalName
-        ]
+        ],
       )
     ) {
       this.chained.apply(cascadeInstance);
@@ -1429,7 +1429,7 @@ export class AbstractConditionItem {
   constructor(
     public readonly condition: string,
     public readonly viewConditionId: string | null,
-    public readonly viewCondition: Matchers.Matcher
+    public readonly viewCondition: Matchers.Matcher,
   ) {}
 
   increment(cascadeInstance: CascadeInstance) {
@@ -1441,7 +1441,7 @@ export class AbstractConditionItem {
   }
 
   buildViewConditionMatcher(
-    cascadeInstance: CascadeInstance
+    cascadeInstance: CascadeInstance,
   ): Matchers.Matcher {
     return cascadeInstance.buildViewConditionMatcher(this.viewConditionId);
   }
@@ -1452,7 +1452,7 @@ export class DescendantConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher
+    viewCondition: Matchers.Matcher,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1464,7 +1464,7 @@ export class DescendantConditionItem extends AbstractConditionItem
     return new DescendantConditionItem(
       this.condition,
       this.viewConditionId,
-      this.buildViewConditionMatcher(cascadeInstance)
+      this.buildViewConditionMatcher(cascadeInstance),
     );
   }
 
@@ -1495,7 +1495,7 @@ export class ChildConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher
+    viewCondition: Matchers.Matcher,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1507,7 +1507,7 @@ export class ChildConditionItem extends AbstractConditionItem
     return new ChildConditionItem(
       this.condition,
       this.viewConditionId,
-      this.buildViewConditionMatcher(cascadeInstance)
+      this.buildViewConditionMatcher(cascadeInstance),
     );
   }
 
@@ -1544,7 +1544,7 @@ export class AdjacentSiblingConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher
+    viewCondition: Matchers.Matcher,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1556,7 +1556,7 @@ export class AdjacentSiblingConditionItem extends AbstractConditionItem
     return new AdjacentSiblingConditionItem(
       this.condition,
       this.viewConditionId,
-      this.buildViewConditionMatcher(cascadeInstance)
+      this.buildViewConditionMatcher(cascadeInstance),
     );
   }
 
@@ -1595,7 +1595,7 @@ export class FollowingSiblingConditionItem extends AbstractConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher
+    viewCondition: Matchers.Matcher,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1607,7 +1607,7 @@ export class FollowingSiblingConditionItem extends AbstractConditionItem
     return new FollowingSiblingConditionItem(
       this.condition,
       this.viewConditionId,
-      this.buildViewConditionMatcher(cascadeInstance)
+      this.buildViewConditionMatcher(cascadeInstance),
     );
   }
 
@@ -1654,7 +1654,7 @@ export class FollowingSiblingConditionItem extends AbstractConditionItem
 export class AfterPseudoelementItem implements ConditionItem {
   constructor(
     public readonly afterprop: ElementStyle,
-    public readonly element: Element
+    public readonly element: Element,
   ) {}
 
   /**
@@ -1766,7 +1766,7 @@ export interface CounterResolver {
    */
   getPageCounterVal(
     name: string,
-    format: (p1: number | null) => string
+    format: (p1: number | null) => string,
   ): Exprs.Val;
 
   /**
@@ -1783,13 +1783,13 @@ export interface CounterResolver {
   getTargetCounterVal(
     url: string,
     name: string,
-    format: (p1: number | null) => string
+    format: (p1: number | null) => string,
   ): Exprs.Val;
 
   getTargetCountersVal(
     url: string,
     name: string,
-    format: (p1: number[]) => string
+    format: (p1: number[]) => string,
   ): Exprs.Val;
 
   setStyler(styler: any);
@@ -1838,7 +1838,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     if (func.values.length > 1) {
       defaultValue = this.createValueFromString(
         func.values[1].stringValue(),
-        type
+        type,
       );
     } else {
       defaultValue = this.createValueFromString(null, type);
@@ -1846,7 +1846,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     if (this.element && this.element.hasAttribute(attributeName)) {
       return this.createValueFromString(
         this.element.getAttribute(attributeName),
-        type
+        type,
       );
     }
     return defaultValue;
@@ -1857,7 +1857,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   constructor(
     public cascade: CascadeInstance,
     public element: Element,
-    public readonly counterResolver: CounterResolver
+    public readonly counterResolver: CounterResolver,
   ) {
     super();
   }
@@ -1941,9 +1941,9 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     } else {
       const self = this;
       const c = new Css.Expr(
-        this.counterResolver.getPageCounterVal(counterName, numval =>
-          self.format(numval || 0, type)
-        )
+        this.counterResolver.getPageCounterVal(counterName, (numval) =>
+          self.format(numval || 0, type),
+        ),
       );
       return new Css.SpaceList([c]);
     }
@@ -1965,7 +1965,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
     const self = this;
     const c = new Css.Expr(
-      this.counterResolver.getPageCountersVal(counterName, numvals => {
+      this.counterResolver.getPageCountersVal(counterName, (numvals) => {
         const parts = [] as string[];
         if (numvals.length) {
           for (let i = 0; i < numvals.length; i++) {
@@ -1981,7 +1981,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         } else {
           return self.format(0, type);
         }
-      })
+      }),
     );
     return new Css.SpaceList([c]);
   }
@@ -2001,8 +2001,8 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       this.counterResolver.getTargetCounterVal(
         targetUrlStr,
         counterName,
-        numval => self.format(numval || 0, type)
-      )
+        (numval) => self.format(numval || 0, type),
+      ),
     );
     return new Css.SpaceList([c]);
   }
@@ -2023,15 +2023,15 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       this.counterResolver.getTargetCountersVal(
         targetUrlStr,
         counterName,
-        numvals => {
-          const parts = numvals.map(numval => self.format(numval, type));
+        (numvals) => {
+          const parts = numvals.map((numval) => self.format(numval, type));
           if (parts.length) {
             return parts.join(separator);
           } else {
             return self.format(0, type);
           }
-        }
-      )
+        },
+      ),
     );
     return new Css.SpaceList([c]);
   }
@@ -2126,7 +2126,7 @@ export const additiveNumbering = {
     4,
     "IV",
     1,
-    "I"
+    "I",
   ],
   armenian: [
     9999,
@@ -2201,7 +2201,7 @@ export const additiveNumbering = {
     2,
     "\u0562",
     1,
-    "\u0561"
+    "\u0561",
   ],
   georgian: [
     19999,
@@ -2278,7 +2278,7 @@ export const additiveNumbering = {
     2,
     "\u10d1",
     1,
-    "\u10d0"
+    "\u10d0",
   ],
   hebrew: [
     999,
@@ -2335,22 +2335,22 @@ export const additiveNumbering = {
     2,
     "\u05d1",
     1,
-    "\u05d0"
-  ]
+    "\u05d0",
+  ],
 };
 
 export const alphabeticNumbering = {
   latin: "a-z",
   alpha: "a-z",
   greek: "\u03b1-\u03c1\u03c3-\u03c9",
-  russian: "\u0430-\u0438\u043a-\u0449\u044d-\u044f"
+  russian: "\u0430-\u0438\u043a-\u0449\u044d-\u044f",
 };
 
 export const fixed = {
   square: "\u25a0",
   disc: "\u2022",
   circle: "\u25e6",
-  none: ""
+  none: "",
 };
 
 export function additiveFormat(entries: any[], num: number): string {
@@ -2421,12 +2421,12 @@ export const chineseTradInformal: ChineseNumbering = {
   formal: false,
   digits: "\u96f6\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d",
   markers: "\u5341\u767e\u5343",
-  negative: "\u8ca0"
+  negative: "\u8ca0",
 };
 
 export function chineseCounter(
   num: number,
-  numbering: ChineseNumbering
+  numbering: ChineseNumbering,
 ): string {
   if (num > 9999 || num < -9999) {
     return `${num}`; // TODO: should be cjk-decimal
@@ -2526,14 +2526,14 @@ export class Cascade {
     context: Exprs.Context,
     counterListener: CounterListener,
     counterResolver: CounterResolver,
-    lang
+    lang,
   ): CascadeInstance {
     return new CascadeInstance(
       this,
       context,
       counterListener,
       counterResolver,
-      lang
+      lang,
     );
   }
 
@@ -2560,21 +2560,19 @@ export class CascadeInstance {
   isFirst: boolean = true;
   isRoot: boolean = true;
   counters: { [key: string]: number[] } = {};
-  counterScoping: ({ [key: string]: boolean })[] = [{}];
+  counterScoping: { [key: string]: boolean }[] = [{}];
   quotes: Css.Str[];
   quoteDepth: number = 0;
   lang: string = "";
   siblingOrderStack: number[] = [0];
   currentSiblingOrder: number = 0;
-  siblingTypeCountsStack: ({ [key: string]: { [key: string]: number } })[] = [
-    {}
-  ];
+  siblingTypeCountsStack: { [key: string]: { [key: string]: number } }[] = [{}];
   currentSiblingTypeCounts: { [key: string]: { [key: string]: number } };
   currentFollowingSiblingOrder: number | null = null;
   followingSiblingOrderStack: (number | null)[];
-  followingSiblingTypeCountsStack: ({
+  followingSiblingTypeCountsStack: {
     [key: string]: { [key: string]: number };
-  })[] = [{}];
+  }[] = [{}];
   currentFollowingSiblingTypeCounts: {
     [key: string]: { [key: string]: number };
   };
@@ -2588,14 +2586,14 @@ export class CascadeInstance {
     public readonly context: Exprs.Context,
     public readonly counterListener: CounterListener,
     public readonly counterResolver: CounterResolver,
-    lang: string
+    lang: string,
   ) {
     this.code = cascade;
     this.quotes = [
       new Css.Str("\u201c"),
       new Css.Str("\u201d"),
       new Css.Str("\u2018"),
-      new Css.Str("\u2019")
+      new Css.Str("\u2019"),
     ];
     this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
@@ -2627,7 +2625,7 @@ export class CascadeInstance {
       return;
     }
     this.viewConditions[condition] = this.viewConditions[condition].filter(
-      item => item !== viewCondition
+      (item) => item !== viewCondition,
     );
     if (this.viewConditions[condition].length === 0) {
       delete this.viewConditions[condition];
@@ -2640,11 +2638,11 @@ export class CascadeInstance {
       Asserts.assert(this.currentElementOffset);
       matcher = Matchers.MatcherBuilder.buildViewConditionMatcher(
         this.currentElementOffset,
-        viewConditionId
+        viewConditionId,
       );
     }
     const dependentConditionMatchers = this.dependentConditions
-      .map(conditionId => {
+      .map((conditionId) => {
         const conditions = this.viewConditions[conditionId];
         if (conditions && conditions.length > 0) {
           return conditions.length === 1
@@ -2654,7 +2652,7 @@ export class CascadeInstance {
           return null;
         }
       })
-      .filter(item => item);
+      .filter((item) => item);
     if (dependentConditionMatchers.length <= 0) {
       return matcher;
     }
@@ -2664,7 +2662,7 @@ export class CascadeInstance {
         : Matchers.MatcherBuilder.buildAllMatcher(dependentConditionMatchers);
     }
     return Matchers.MatcherBuilder.buildAllMatcher(
-      [matcher].concat(dependentConditionMatchers)
+      [matcher].concat(dependentConditionMatchers),
     );
   }
 
@@ -2678,7 +2676,7 @@ export class CascadeInstance {
   pushRule(
     classes: string[],
     pageType: string | null,
-    baseStyle: ElementStyle
+    baseStyle: ElementStyle,
   ): void {
     this.currentElement = null;
     this.currentElementOffset = null;
@@ -2783,7 +2781,7 @@ export class CascadeInstance {
       const listItemCount = listItemCounts[listItemCounts.length - 1];
       props["ua-list-item-count"] = new CascadeValue(
         new Css.Num(listItemCount),
-        0
+        0,
       );
     }
     this.counterScoping.push(null);
@@ -2809,7 +2807,7 @@ export class CascadeInstance {
     this.pushCounters(pseudoprops);
     if (pseudoprops["content"]) {
       pseudoprops["content"] = pseudoprops["content"].filterValue(
-        new ContentPropVisitor(this, element, this.counterResolver)
+        new ContentPropVisitor(this, element, this.counterResolver),
       );
     }
     this.popCounters();
@@ -2818,7 +2816,7 @@ export class CascadeInstance {
   pushElement(
     element: Element,
     baseStyle: ElementStyle,
-    elementOffset: number
+    elementOffset: number,
   ): void {
     if (DEBUG) {
       this.elementStack.push(element);
@@ -2929,7 +2927,7 @@ export class CascadeInstance {
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
       const counters: { [key: string]: number[] } = {};
-      Object.keys(this.counters).forEach(name => {
+      Object.keys(this.counters).forEach((name) => {
         counters[name] = Array.from(this.counters[name]);
       });
       this.counterListener.countersOfId(id, counters);
@@ -2948,7 +2946,7 @@ export class CascadeInstance {
             this.processPseudoelementProps(pseudoProps, element);
           } else {
             this.stack[this.stack.length - 2].push(
-              new AfterPseudoelementItem(pseudoProps, element)
+              new AfterPseudoelementItem(pseudoProps, element),
             );
           }
         }
@@ -3074,7 +3072,7 @@ export const pseudoNames = [
   "",
   /* content */
   "transclusion-after",
-  "after"
+  "after",
 ];
 
 /**
@@ -3083,7 +3081,7 @@ export const pseudoNames = [
 export enum ParseState {
   TOP,
   SELECTOR,
-  RULE
+  RULE,
 }
 
 /**
@@ -3115,7 +3113,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     parent: CascadeParserHandler,
     public readonly regionId: string | null,
     public readonly validatorSet: CssValid.ValidatorSet,
-    topLevel: boolean
+    topLevel: boolean,
   ) {
     super(scope, owner, topLevel);
     this.cascade = parent
@@ -3231,8 +3229,10 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           const langValue = params[0] as string;
           this.chain.push(
             new CheckLangAction(
-              new RegExp(`^${Base.escapeRegExp(langValue.toLowerCase())}(\$|-)`)
-            )
+              new RegExp(
+                `^${Base.escapeRegExp(langValue.toLowerCase())}(\$|-)`,
+              ),
+            ),
           );
         } else {
           this.chain.push(new CheckConditionAction("")); // always fais
@@ -3245,7 +3245,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
         const ActionClass = nthSelectorActionClasses[name.toLowerCase()];
         if (params && params.length == 2) {
           this.chain.push(
-            new ActionClass(params[0] as number, params[1] as number)
+            new ActionClass(params[0] as number, params[1] as number),
           );
         } else {
           this.chain.push(new CheckConditionAction("")); // always fails
@@ -3306,7 +3306,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           this.pseudoelement = name;
         } else {
           Logging.logger.warn(
-            `Double pseudoelement ::${this.pseudoelement}::${name}`
+            `Double pseudoelement ::${this.pseudoelement}::${name}`,
           );
           this.chain.push(new CheckConditionAction("")); // always fails
         }
@@ -3319,7 +3319,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
               this.pseudoelement = `first-${n}-lines`;
             } else {
               Logging.logger.warn(
-                `Double pseudoelement ::${this.pseudoelement}::${name}`
+                `Double pseudoelement ::${this.pseudoelement}::${name}`,
               );
               this.chain.push(new CheckConditionAction("")); // always fails
             }
@@ -3358,7 +3358,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     ns: string,
     name: string,
     op: CssTok.TokenType,
-    value: string | null
+    value: string | null,
   ): void {
     this.specificity += 256;
     name = name.toLowerCase();
@@ -3378,7 +3378,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`(^|\\s)${Base.escapeRegExp(value)}(\$|\\s)`)
+            new RegExp(`(^|\\s)${Base.escapeRegExp(value)}(\$|\\s)`),
           );
         }
         break;
@@ -3386,7 +3386,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
         action = new CheckAttributeRegExpAction(
           ns,
           name,
-          new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`)
+          new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`),
         );
         break;
       case CssTok.TokenType.HAT_EQ:
@@ -3396,7 +3396,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`^${Base.escapeRegExp(value)}`)
+            new RegExp(`^${Base.escapeRegExp(value)}`),
           );
         }
         break;
@@ -3407,7 +3407,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`${Base.escapeRegExp(value)}\$`)
+            new RegExp(`${Base.escapeRegExp(value)}\$`),
           );
         }
         break;
@@ -3418,7 +3418,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(Base.escapeRegExp(value))
+            new RegExp(Base.escapeRegExp(value)),
           );
         }
         break;
@@ -3444,8 +3444,8 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     const condition = `d${conditionCount++}`;
     this.processChain(
       new ConditionItemAction(
-        new DescendantConditionItem(condition, this.viewConditionId, null)
-      )
+        new DescendantConditionItem(condition, this.viewConditionId, null),
+      ),
     );
     this.chain = [new CheckConditionAction(condition)];
     this.viewConditionId = null;
@@ -3458,8 +3458,8 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     const condition = `c${conditionCount++}`;
     this.processChain(
       new ConditionItemAction(
-        new ChildConditionItem(condition, this.viewConditionId, null)
-      )
+        new ChildConditionItem(condition, this.viewConditionId, null),
+      ),
     );
     this.chain = [new CheckConditionAction(condition)];
     this.viewConditionId = null;
@@ -3472,8 +3472,8 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     const condition = `a${conditionCount++}`;
     this.processChain(
       new ConditionItemAction(
-        new AdjacentSiblingConditionItem(condition, this.viewConditionId, null)
-      )
+        new AdjacentSiblingConditionItem(condition, this.viewConditionId, null),
+      ),
     );
     this.chain = [new CheckConditionAction(condition)];
     this.viewConditionId = null;
@@ -3486,8 +3486,12 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     const condition = `f${conditionCount++}`;
     this.processChain(
       new ConditionItemAction(
-        new FollowingSiblingConditionItem(condition, this.viewConditionId, null)
-      )
+        new FollowingSiblingConditionItem(
+          condition,
+          this.viewConditionId,
+          null,
+        ),
+      ),
     );
     this.chain = [new CheckConditionAction(condition)];
     this.viewConditionId = null;
@@ -3582,7 +3586,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
       specificity,
       this.pseudoelement,
       regionId,
-      this.viewConditionId
+      this.viewConditionId,
     );
   }
 
@@ -3605,7 +3609,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
       name,
       value,
       important,
-      this
+      this,
     );
   }
 
@@ -3634,13 +3638,13 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
       this.simpleProperty(
         "flow-options",
         new Css.SpaceList([Css.ident.exclusive, Css.ident._static]),
-        important
+        important,
       );
       this.simpleProperty("flow-into", value, important);
       value = Css.ident.block;
     }
     const hooks = Plugin.getHooksForName("SIMPLE_PROPERTY");
-    hooks.forEach(hook => {
+    hooks.forEach((hook) => {
       const original = { name: name, value: value, important: important };
       const converted = hook(original);
       name = converted["name"];
@@ -3682,7 +3686,7 @@ export const nthSelectorActionClasses: { [key: string]: typeof IsNthAction } = {
   "nth-child": IsNthSiblingAction,
   "nth-of-type": IsNthSiblingOfTypeAction,
   "nth-last-child": IsNthLastSiblingAction,
-  "nth-last-of-type": IsNthLastSiblingOfTypeAction
+  "nth-last-of-type": IsNthLastSiblingOfTypeAction,
 };
 
 export let conditionCount: number = 0;
@@ -3698,7 +3702,7 @@ export class NotParameterParserHandler extends CascadeParserHandler {
       parent,
       parent.regionId,
       parent.validatorSet,
-      false
+      false,
     );
     this.parentChain = parent.chain;
   }
@@ -3752,7 +3756,7 @@ export class NotParameterParserHandler extends CascadeParserHandler {
 export class DefineParserHandler extends CssParse.SlaveParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler
+    owner: CssParse.DispatchParserHandler,
   ) {
     super(scope, owner, false);
   }
@@ -3780,7 +3784,7 @@ export class PropSetParserHandler extends CssParse.SlaveParserHandler
     owner: CssParse.DispatchParserHandler,
     public readonly condition: Exprs.Val,
     public readonly elementStyle: ElementStyle,
-    public readonly validatorSet: CssValid.ValidatorSet
+    public readonly validatorSet: CssValid.ValidatorSet,
   ) {
     super(scope, owner, false);
     this.order = 0;
@@ -3797,7 +3801,7 @@ export class PropSetParserHandler extends CssParse.SlaveParserHandler
         name,
         value,
         important,
-        this
+        this,
       );
     }
   }
@@ -3809,7 +3813,7 @@ export class PropSetParserHandler extends CssParse.SlaveParserHandler
     Logging.logger.warn(
       "E_INVALID_PROPERTY_VALUE",
       `${name}:`,
-      value.toString()
+      value.toString(),
     );
   }
 
@@ -3843,7 +3847,7 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
 
   constructor(
     scope: Exprs.LexicalScope,
-    public readonly validatorSet: CssValid.ValidatorSet
+    public readonly validatorSet: CssValid.ValidatorSet,
   ) {
     super(scope);
   }
@@ -3856,7 +3860,7 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
       name,
       value,
       important,
-      this
+      this,
     );
   }
 
@@ -3867,7 +3871,7 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
     Logging.logger.warn(
       "E_INVALID_PROPERTY_VALUE",
       `${name}:`,
-      value.toString()
+      value.toString(),
     );
   }
 
@@ -3894,13 +3898,13 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
 
 export function forEachViewConditionalStyles(
   style: ElementStyle,
-  callback: (p1: ElementStyle) => any
+  callback: (p1: ElementStyle) => any,
 ): void {
   const viewConditionalStyles = getViewConditionalStyleMap(style);
   if (!viewConditionalStyles) {
     return;
   }
-  viewConditionalStyles.forEach(entry => {
+  viewConditionalStyles.forEach((entry) => {
     if (!entry.matcher.matches()) {
       return;
     }
@@ -3911,9 +3915,9 @@ export function forEachViewConditionalStyles(
 export function mergeViewConditionalStyles(
   cascMap: { [key: string]: CascadeValue },
   context: Exprs.Context,
-  style: ElementStyle
+  style: ElementStyle,
 ): void {
-  forEachViewConditionalStyles(style, viewConditionalStyles => {
+  forEachViewConditionalStyles(style, (viewConditionalStyles) => {
     mergeStyle(cascMap, viewConditionalStyles, context);
   });
 }
@@ -3922,7 +3926,7 @@ export function parseStyleAttribute(
   scope: Exprs.LexicalScope,
   validatorSet: CssValid.ValidatorSet,
   baseURL: string,
-  styleAttrValue: string
+  styleAttrValue: string,
 ): ElementStyle {
   const handler = new PropertyParserHandler(scope, validatorSet);
   const tokenizer = new CssTok.Tokenizer(styleAttrValue, handler);
@@ -3937,7 +3941,7 @@ export function parseStyleAttribute(
 export function isVertical(
   cascaded: { [key: string]: CascadeValue },
   context: Exprs.Context,
-  vertical: boolean
+  vertical: boolean,
 ): boolean {
   const writingModeCasc = cascaded["writing-mode"];
   if (writingModeCasc) {
@@ -3952,7 +3956,7 @@ export function isVertical(
 export function isRtl(
   cascaded: { [key: string]: CascadeValue },
   context: Exprs.Context,
-  rtl: boolean
+  rtl: boolean,
 ): boolean {
   const directionCasc = cascaded["direction"];
   if (directionCasc) {
@@ -3969,7 +3973,7 @@ export function flattenCascadedStyle(
   context: Exprs.Context,
   regionIds: string[],
   isFootnote: boolean,
-  nodeContext: Vtree.NodeContext
+  nodeContext: Vtree.NodeContext,
 ): { [key: string]: CascadeValue } {
   const cascMap = {} as { [key: string]: CascadeValue };
   for (const n in style) {
@@ -3985,7 +3989,7 @@ export function flattenCascadedStyle(
     (regionId, regionStyle) => {
       mergeStyle(cascMap, regionStyle, context);
       mergeViewConditionalStyles(cascMap, context, regionStyle);
-    }
+    },
   );
   return cascMap;
 }
@@ -3994,7 +3998,7 @@ export function forEachStylesInRegion(
   style: ElementStyle,
   regionIds: string[],
   isFootnote: boolean,
-  callback: (p1: string, p2: ElementStyle) => any
+  callback: (p1: string, p2: ElementStyle) => any,
 ): void {
   const regions = getStyleMap(style, "_regions");
   if ((regionIds || isFootnote) && regions) {
@@ -4018,7 +4022,7 @@ export function forEachStylesInRegion(
 export function mergeStyle(
   to: { [key: string]: CascadeValue },
   from: ElementStyle,
-  context: Exprs.Context
+  context: Exprs.Context,
 ): void {
   for (const property in from) {
     if (isPropName(property)) {
@@ -4043,7 +4047,7 @@ export const convertToPhysical = <T>(
   dest: { [key: string]: T },
   vertical: boolean,
   rtl: boolean,
-  transform: (p1: string, p2: CascadeValue) => T
+  transform: (p1: string, p2: CascadeValue) => T,
 ) => {
   const couplingMap = vertical
     ? rtl

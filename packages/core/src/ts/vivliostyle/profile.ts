@@ -63,7 +63,7 @@ export class Profiler {
   printTimings() {
     const timestamps = this.timestamps;
     let st = "";
-    Object.keys(timestamps).forEach(name => {
+    Object.keys(timestamps).forEach((name) => {
       const stamps = timestamps[name];
       const l = stamps.length;
       for (let i = 0; i < l; i++) {
@@ -125,7 +125,7 @@ function noop(): void {}
 function registerTiming(
   name: string,
   startEnd: string,
-  timestamp?: number
+  timestamp?: number,
 ): void {
   if (!timestamp) {
     timestamp = this.performanceInstance.now();
@@ -174,7 +174,7 @@ function registerEndTiming(name: string, timestamp?: number): void {
 const fallbackPerformanceInstance = { now: Date.now } as Performance;
 const performanceInstance = window && window.performance;
 export const profiler = new Profiler(
-  performanceInstance || fallbackPerformanceInstance
+  performanceInstance || fallbackPerformanceInstance,
 );
 profiler.forceRegisterStartTiming("load_vivliostyle");
 
@@ -187,6 +187,6 @@ export const profile = {
     registerEndTiming: profiler.registerEndTiming,
     printTimings: profiler.printTimings,
     disable: profiler.disable,
-    enable: profiler.enable
-  }
+    enable: profiler.enable,
+  },
 };

@@ -34,7 +34,7 @@ export enum XMLHttpRequestResponseType {
   BLOB = "blob",
   DOCUMENT = "document",
   JSON = "json",
-  TEXT = "text"
+  TEXT = "text",
 }
 
 export type Response = Net.Response;
@@ -44,7 +44,7 @@ export function ajax(
   opt_type?: XMLHttpRequestResponseType,
   opt_method?: string,
   opt_data?: string,
-  opt_contentType?: string
+  opt_contentType?: string,
 ): Task.Result<Response> {
   const frame: Task.Frame<Response> = Task.newFrame("ajax");
   const request = new XMLHttpRequest();
@@ -56,7 +56,7 @@ export function ajax(
     contentType: null,
     responseText: null,
     responseXML: null,
-    responseBlob: null
+    responseBlob: null,
   };
   request.open(opt_method || "GET", url, true);
   if (opt_type) {
@@ -110,7 +110,7 @@ export function ajax(
     if (opt_data) {
       request.setRequestHeader(
         "Content-Type",
-        opt_contentType || "text/plain; charset=UTF-8"
+        opt_contentType || "text/plain; charset=UTF-8",
       );
       request.send(opt_data);
     } else {
@@ -150,7 +150,7 @@ export function ajax(
  */
 export function makeBlob(
   parts: (string | Blob | ArrayBuffer | ArrayBufferView)[],
-  opt_type?: string
+  opt_type?: string,
 ): any {
   const type = opt_type || "application/octet-stream";
   const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
@@ -176,7 +176,7 @@ export function readBlob(blob: Blob): any {
     () => {
       continuation.schedule(fileReader.result as ArrayBuffer);
     },
-    false
+    false,
   );
   fileReader.readAsArrayBuffer(blob);
   return frame.result();
@@ -203,9 +203,9 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
   constructor(
     public readonly parser: (
       p1: Response,
-      p2: ResourceStore<Resource>
+      p2: ResourceStore<Resource>,
     ) => Task.Result<Resource>,
-    public readonly type: XMLHttpRequestResponseType
+    public readonly type: XMLHttpRequestResponseType,
   ) {}
 
   /**
@@ -214,7 +214,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
   load(
     url: string,
     opt_required?: boolean,
-    opt_message?: string
+    opt_message?: string,
   ): Task.Result<Resource> {
     url = Base.stripFragment(url);
     const resource = this.resources[url];
@@ -227,7 +227,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
   private fetchInner(
     url: string,
     opt_required?: boolean,
-    opt_message?: string
+    opt_message?: string,
   ): Task.Result<Resource> {
     const self = this;
     const frame: Task.Frame<Resource> = Task.newFrame("fetch");
@@ -239,7 +239,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     }
     const userAgentXmlUrl = Base.resolveURL(
       "user-agent.xml",
-      Base.resourceBaseURL
+      Base.resourceBaseURL,
     );
     const isUserAgentXml = !isTocBox && url === userAgentXmlUrl;
     if (isUserAgentXml) {
@@ -247,14 +247,14 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
       url = `data:application/xml,${encodeURIComponent(UserAgentXml)}`;
     }
 
-    ajax(url, self.type).then(response => {
+    ajax(url, self.type).then((response) => {
       if (response.status >= 400) {
         if (opt_required) {
           throw new Error(
             (opt_message || `Failed to fetch required resource: ${url}`) +
               ` (${response.status}${
                 response.statusText ? " " + response.statusText : ""
-              })`
+              })`,
           );
         }
       }
@@ -266,7 +266,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
         // Restore "user-agent.xml" URL
         response.url = url = userAgentXmlUrl;
       }
-      self.parser(response, self).then(resource => {
+      self.parser(response, self).then((resource) => {
         delete self.fetchers[url];
         self.resources[url] = resource;
         frame.finish(resource);
@@ -281,7 +281,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
   fetch(
     url: string,
     opt_required?: boolean,
-    opt_message?: string
+    opt_message?: string,
   ): TaskUtil.Fetcher<Resource> {
     url = Base.stripFragment(url);
     const resource = this.resources[url];
@@ -293,7 +293,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
       const self = this;
       fetcher = new TaskUtil.Fetcher(
         () => self.fetchInner(url, opt_required, opt_message),
-        `Fetch ${url}`
+        `Fetch ${url}`,
       );
       self.fetchers[url] = fetcher;
       fetcher.start();
@@ -315,7 +315,7 @@ export type JSONStore = ResourceStore<Base.JSON>;
 
 export function parseJSONResource(
   response: Response,
-  store: JSONStore
+  store: JSONStore,
 ): Task.Result<Base.JSON> {
   const text = response.responseText;
   return Task.newResult(text ? Base.stringToJSON(text) : null);

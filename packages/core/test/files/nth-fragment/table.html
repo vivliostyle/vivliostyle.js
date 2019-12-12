@@ -1,303 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>table</title>
     <style>
-        @page {
-            size: 820px;
+      @page {
+        size: 820px;
+      }
+      @-epubx-page-template {
+        .partition {
+          width: 398px;
+          height: 198px;
+          border: rgba(0, 0, 255, 0.2) solid 1px;
+          -epubx-flow-from: body;
         }
-        @-epubx-page-template {
-            .partition {
-                width: 398px;
-                height: 198px;
-                border: rgba(0, 0, 255, 0.2) solid 1px;
-                -epubx-flow-from: body;
-            }
-            .left {
-                left: 10px;
-            }
-            .right {
-                right: 10px;
-            }
+        .left {
+          left: 10px;
+        }
+        .right {
+          right: 10px;
+        }
 
-            @-epubx-page-master {
-                @-epubx-partition {
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 10px;
-                    font-size: 10px;
-                    line-height: 10px;
-                    text-align: center;
-                    content: counter(page);
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 610px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 410px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 210px;
-                }
-                @-epubx-partition class(partition) class(right) {
-                    top: 10px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 610px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 410px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 210px;
-                }
-                @-epubx-partition class(partition) class(left) {
-                    top: 10px;
-                }
-            }
-        }
-        :root {
+        @-epubx-page-master {
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
             font-size: 10px;
-            line-height: 12px;
-            widows: 1;
-            orphans: 1;
+            line-height: 10px;
+            text-align: center;
+            content: counter(page);
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 10px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 10px;
+          }
         }
-        body {
-            margin: 0 10px;
-        }
-        section {
-            break-after: column;
-        }
-        h1 {
-          font-size: 10px;
-          font-weight: normal;
-        }
+      }
+      :root {
+        font-size: 10px;
+        line-height: 12px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0 10px;
+      }
+      section {
+        break-after: column;
+      }
+      h1 {
+        font-size: 10px;
+        font-weight: normal;
+      }
 
-        table {
-            border: 2px black solid;
-            border-spacing: 2px;
-        }
-        tr, .tr {
-            border: 1px blue solid;
-        }
-        th, td, .th, .td {
-            border: 1px gray solid;
-            line-height: 16px;
-            vertical-align: top;
-            width: 160px;
-        }
-        thead, .thead {
-            background-color: #FFAAAA;
-        }
-        tfoot, .tfoot {
-            background-color: #AAAAFF;
-        }
+      table {
+        border: 2px black solid;
+        border-spacing: 2px;
+      }
+      tr,
+      .tr {
+        border: 1px blue solid;
+      }
+      th,
+      td,
+      .th,
+      .td {
+        border: 1px gray solid;
+        line-height: 16px;
+        vertical-align: top;
+        width: 160px;
+      }
+      thead,
+      .thead {
+        background-color: #ffaaaa;
+      }
+      tfoot,
+      .tfoot {
+        background-color: #aaaaff;
+      }
 
-        table::nth-fragment(2n) {
-            border: 2px red solid;
-        }
-        tr::nth-fragment(2n) td {
-            border: 1px blue solid;
-        }
-        td::nth-fragment(2n) {
-            color: red;
-        }
-        td::nth-fragment(3) {
-            color: blue;
-        }
-        div.cell_content::nth-fragment(2n) {
-            font-weight: bold;
-        }
+      table::nth-fragment(2n) {
+        border: 2px red solid;
+      }
+      tr::nth-fragment(2n) td {
+        border: 1px blue solid;
+      }
+      td::nth-fragment(2n) {
+        color: red;
+      }
+      td::nth-fragment(3) {
+        color: blue;
+      }
+      div.cell_content::nth-fragment(2n) {
+        font-weight: bold;
+      }
 
-        .table2 td {
-            width: 110px;
-        }
+      .table2 td {
+        width: 110px;
+      }
 
-        .table1 thead::nth-fragment(1) {
-            font-weight: bold;
-        }
-        .table1 tfoot::nth-fragment(1) {
-            font-weight: bold;
-        }
+      .table1 thead::nth-fragment(1) {
+        font-weight: bold;
+      }
+      .table1 tfoot::nth-fragment(1) {
+        font-weight: bold;
+      }
 
-        .table2 thead::nth-fragment(2) {
-            font-weight: bold;
-        }
-        .table2 tfoot::nth-fragment(2) {
-            font-weight: bold;
-        }
+      .table2 thead::nth-fragment(2) {
+        font-weight: bold;
+      }
+      .table2 tfoot::nth-fragment(2) {
+        font-weight: bold;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <section>
-        <p>
-          The table border of the 2n fragment should be red.<br/>
-          The table cell border of the 2n fragment should be blue.<br/>
-          the table header, footer should be bold.
-        </p>
-        <table class="table1">
-            <thead>
-                <tr>
-                    <td>header 1</td>
-                    <td>header 2</td>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <td>footer 1</td>
-                    <td>footer 2</td>
-                </tr>
-            </tfoot>
-            <tbody>
-                <tr>
-                    <td>cell 1-1</td>
-                    <td>cell 1-2</td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="cell_content">
-                            cell 2-1<br/>
-                            1<br/>
-                            2<br/>
-                            3<br/>
-                            4<br/>
-                            5<br/>
-                            6<br/>
-                            7: should be bold/red<br/>
-                            8<br/>
-                            9<br/>
-                            10<br/>
-                        </div>
-                    </td>
-                    <td>cell 2-2</td>
-                </tr>
-                <tr>
-                    <td>cell 3-1</td>
-                    <td>
-                        <div class="cell_content">
-                            cell 3-2<br/>
-                            1<br/>
-                            2<br/>
-                            3<br/>
-                            4: should be bold/red<br/>
-                            5<br/>
-                            6<br/>
-                            7<br/>
-                            8<br/>
-                            9<br/>
-                            10<br/>
-                            11<br/>
-                            12: should be normal/blue<br/>
-                            13<br/>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>cell 4-1</td>
-                    <td>cell 4-2</td>
-                </tr>
-            </tbody>
-        </table>
+      <p>
+        The table border of the 2n fragment should be red.<br />
+        The table cell border of the 2n fragment should be blue.<br />
+        the table header, footer should be bold.
+      </p>
+      <table class="table1">
+        <thead>
+          <tr>
+            <td>header 1</td>
+            <td>header 2</td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>footer 1</td>
+            <td>footer 2</td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>cell 1-1</td>
+            <td>cell 1-2</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="cell_content">
+                cell 2-1<br />
+                1<br />
+                2<br />
+                3<br />
+                4<br />
+                5<br />
+                6<br />
+                7: should be bold/red<br />
+                8<br />
+                9<br />
+                10<br />
+              </div>
+            </td>
+            <td>cell 2-2</td>
+          </tr>
+          <tr>
+            <td>cell 3-1</td>
+            <td>
+              <div class="cell_content">
+                cell 3-2<br />
+                1<br />
+                2<br />
+                3<br />
+                4: should be bold/red<br />
+                5<br />
+                6<br />
+                7<br />
+                8<br />
+                9<br />
+                10<br />
+                11<br />
+                12: should be normal/blue<br />
+                13<br />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>cell 4-1</td>
+            <td>cell 4-2</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section>
-        <p>
-          The table border of the 2n fragment should be red.<br/>
-          The table cell border of the 2n fragment should be blue.
-        </p>
-        <table class="table2">
-            <thead>
-                <tr>
-                    <td>header 1</td>
-                    <td>header 2</td>
-                    <td>header 3</td>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <td>footer 1</td>
-                    <td>footer 2</td>
-                    <td>footer 3</td>
-                </tr>
-            </tfoot>
-            <tbody>
-                <tr>
-                    <td colspan="2">cell 1-1</td>
-                    <td>cell 1-2</td>
-                </tr>
-                <tr>
-                    <td rowspan="2">
-                        <div class="cell_content">
-                            cell 2-1<br/>
-                            1<br/>
-                            2<br/>
-                            3<br/>
-                            4<br/>
-                            5<br/>
-                            6<br/>
-                            7: should be bold/red<br/>
-                            8<br/>
-                            9<br/>
-                            10<br/>
-                        </div>
-                    </td>
-                    <td>
-                      <div class="cell_content">
-                        cell 2-2
-                        1<br/>
-                        2<br/>
-                      </div>
-                    </td>
-                    <td>cell 2-3</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <div class="cell_content">
-                            cell 3-1<br/>
-                            1<br/>
-                            2<br/>
-                            3<br/>
-                            4: should be bold/red<br/>
-                            5<br/>
-                            6<br/>
-                            7<br/>
-                            8<br/>
-                            9<br/>
-                            10<br/>
-                            11<br/>
-                            12: should be normal/blue<br/>
-                            13<br/>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">cell 4-1</td>
-                    <td rowspan="2">
-                      <div class="cell_content">
-                          cell 4-2<br/>
-                          1<br/>
-                          2<br/>
-                          3<br/>
-                          4<br/>
-                          5<br/>
-                          6<br/>
-                          7: should be bold/red<br/>
-                          8<br/>
-                          9<br/>
-                          10<br/>
-                      </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>cell 5-1</td>
-                    <td>cell 5-2</td>
-                </tr>
-            </tbody>
-        </table>
+      <p>
+        The table border of the 2n fragment should be red.<br />
+        The table cell border of the 2n fragment should be blue.
+      </p>
+      <table class="table2">
+        <thead>
+          <tr>
+            <td>header 1</td>
+            <td>header 2</td>
+            <td>header 3</td>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <td>footer 1</td>
+            <td>footer 2</td>
+            <td>footer 3</td>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td colspan="2">cell 1-1</td>
+            <td>cell 1-2</td>
+          </tr>
+          <tr>
+            <td rowspan="2">
+              <div class="cell_content">
+                cell 2-1<br />
+                1<br />
+                2<br />
+                3<br />
+                4<br />
+                5<br />
+                6<br />
+                7: should be bold/red<br />
+                8<br />
+                9<br />
+                10<br />
+              </div>
+            </td>
+            <td>
+              <div class="cell_content">
+                cell 2-2 1<br />
+                2<br />
+              </div>
+            </td>
+            <td>cell 2-3</td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <div class="cell_content">
+                cell 3-1<br />
+                1<br />
+                2<br />
+                3<br />
+                4: should be bold/red<br />
+                5<br />
+                6<br />
+                7<br />
+                8<br />
+                9<br />
+                10<br />
+                11<br />
+                12: should be normal/blue<br />
+                13<br />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">cell 4-1</td>
+            <td rowspan="2">
+              <div class="cell_content">
+                cell 4-2<br />
+                1<br />
+                2<br />
+                3<br />
+                4<br />
+                5<br />
+                6<br />
+                7: should be bold/red<br />
+                8<br />
+                9<br />
+                10<br />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>cell 5-1</td>
+            <td>cell 5-2</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
-
-</body>
+  </body>
 </html>

@@ -41,7 +41,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   constructor(
     public readonly store: XMLDocStore,
     public readonly url: string,
-    public readonly document: Document
+    public readonly document: Document,
   ) {
     this.root = document.documentElement; // html element
     let body: Element = null;
@@ -221,7 +221,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       if (!children) {
         break;
       }
-      const index = Base.binarySearch(children.length, index => {
+      const index = Base.binarySearch(children.length, (index) => {
         const child = children[index];
         const childOffset = self.getElementOffset(child);
         return childOffset > offset;
@@ -316,7 +316,7 @@ export enum DOMParserSupportedType {
   TEXT_XML = "text/xml",
   APPLICATION_XML = "application/xml",
   APPLICATION_XHTML_XML = "application/xhtml_xml",
-  IMAGE_SVG_XML = "image/svg+xml"
+  IMAGE_SVG_XML = "image/svg+xml",
 }
 
 /**
@@ -326,7 +326,7 @@ export enum DOMParserSupportedType {
 export function parseAndReturnNullIfError(
   str: string,
   type: string,
-  opt_parser?: DOMParser
+  opt_parser?: DOMParser,
 ): Document | null {
   const parser = opt_parser || new DOMParser();
   let doc: Document;
@@ -391,7 +391,7 @@ export function resolveContentType(response: Net.Response): string | null {
 
 export function parseXMLResource(
   response: Net.Response,
-  store: XMLDocStore
+  store: XMLDocStore,
 ): Task.Result<XmlDoc.XMLDocHolder> {
   let doc = response.responseXML;
   if (!doc) {
@@ -402,7 +402,7 @@ export function parseXMLResource(
       doc = parseAndReturnNullIfError(
         text,
         contentType || DOMParserSupportedType.APPLICATION_XML,
-        parser
+        parser,
       );
 
       // When contentType cannot be inferred from HTTP header and file
@@ -415,7 +415,7 @@ export function parseXMLResource(
           doc = parseAndReturnNullIfError(
             text,
             DOMParserSupportedType.TEXT_HTML,
-            parser
+            parser,
           );
         } else if (
           root.localName.toLowerCase() === "svg" &&
@@ -424,7 +424,7 @@ export function parseXMLResource(
           doc = parseAndReturnNullIfError(
             text,
             DOMParserSupportedType.IMAGE_SVG_XML,
-            parser
+            parser,
           );
         }
       }
@@ -433,7 +433,7 @@ export function parseXMLResource(
         doc = parseAndReturnNullIfError(
           text,
           DOMParserSupportedType.TEXT_HTML,
-          parser
+          parser,
         );
       }
     }
@@ -445,7 +445,7 @@ export function parseXMLResource(
 export function newXMLDocStore(): XMLDocStore {
   return new Net.ResourceStore(
     parseXMLResource,
-    Net.XMLHttpRequestResponseType.DOCUMENT
+    Net.XMLHttpRequestResponseType.DOCUMENT,
   );
 }
 
@@ -459,16 +459,16 @@ export class Predicate implements XmlDoc.Predicate {
   withAttribute(name: string, value: string): Predicate {
     const self = this;
     return new Predicate(
-      node =>
+      (node) =>
         self.check(node) &&
         node.nodeType == 1 &&
-        (node as Element).getAttribute(name) == value
+        (node as Element).getAttribute(name) == value,
     );
   }
 
   withChild(name: string, opt_childPredicate?: Predicate): Predicate {
     const self = this;
-    return new Predicate(node => {
+    return new Predicate((node) => {
       if (!self.check(node)) {
         return false;
       }
@@ -482,7 +482,7 @@ export class Predicate implements XmlDoc.Predicate {
   }
 }
 
-export const predicate = new Predicate(node => true);
+export const predicate = new Predicate((node) => true);
 
 export class NodeList implements XmlDoc.NodeList {
   constructor(public readonly nodes: Node[]) {}
@@ -510,7 +510,7 @@ export class NodeList implements XmlDoc.NodeList {
 
   forEachNode(fn: (p1: Node, p2: (p1: Node) => void) => void): NodeList {
     const arr = [];
-    const add = n => {
+    const add = (n) => {
       arr.push(n);
     };
     for (let i = 0; i < this.nodes.length; i++) {
@@ -565,7 +565,7 @@ export class NodeList implements XmlDoc.NodeList {
   }
 
   attribute(name: string): (string | null)[] {
-    return this.forEachNonNull(node => {
+    return this.forEachNonNull((node) => {
       if (node.nodeType == 1) {
         return (node as Element).getAttribute(name);
       }
@@ -574,6 +574,6 @@ export class NodeList implements XmlDoc.NodeList {
   }
 
   textContent(): (string | null)[] {
-    return this.forEach(node => node.textContent);
+    return this.forEach((node) => node.textContent);
   }
 }

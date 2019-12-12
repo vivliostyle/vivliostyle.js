@@ -18,10 +18,10 @@ const config = (outputFilename, tsConfigName) => ({
         : outputFilename + ".min.js", // "production" or "debug"
     library: "@vivliostyle/viewer",
     libraryTarget: "umd",
-    libraryExport: "default"
+    libraryExport: "default",
   },
   resolve: {
-    extensions: [".ts", ".js"]
+    extensions: [".ts", ".js"],
   },
   module: {
     rules: [
@@ -29,29 +29,29 @@ const config = (outputFilename, tsConfigName) => ({
         test: /\.ts$/,
         loader: "ts-loader",
         options: {
-          configFile: tsConfigName
-        }
-      }
-    ]
+          configFile: tsConfigName,
+        },
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: process.env.NODE_ENV
-      }
+        NODE_ENV: process.env.NODE_ENV,
+      },
     }),
     new CircularDependencyPlugin({
       failOnError: true,
-      allowAsyncCycles: true
-    })
+      allowAsyncCycles: true,
+    }),
   ],
   optimization: {
     minimizer: [
       new TerserPlugin({
-        terserOptions: {}
-      })
-    ]
-  }
+        terserOptions: {},
+      }),
+    ],
+  },
 });
 
 module.exports = config("vivliostyle-viewer", "tsconfig.json");

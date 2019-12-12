@@ -30,7 +30,7 @@ import * as TaskUtil from "./taskutil";
 export const traitProps: { [key: string]: Css.Val } = {
   "font-style": Css.ident.normal,
   "font-variant": Css.ident.normal,
-  "font-weight": Css.ident.normal
+  "font-weight": Css.ident.normal,
 };
 
 export const bogusFontData = `OTTO${new Date().valueOf()}`;
@@ -58,7 +58,7 @@ export function fillDefaults(properties: { [key: string]: Css.Val }): void {
 
 export function prepareProperties(
   properties: CssCasc.ElementStyle,
-  context: Exprs.Context
+  context: Exprs.Context,
 ): { [key: string]: Css.Val } {
   const result = {} as { [key: string]: Css.Val };
   for (const prop in properties) {
@@ -138,7 +138,7 @@ export class DocumentFaces {
   constructor(
     public readonly deobfuscator:
       | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
-      | null
+      | null,
   ) {}
 
   registerFamily(srcFace: Face, viewFace: Face): void {
@@ -193,7 +193,7 @@ export class Mapper {
   constructor(
     public readonly head: Element,
     public readonly body: Element,
-    opt_familyPrefix?: string
+    opt_familyPrefix?: string,
   ) {
     this.familyPrefix = opt_familyPrefix || "Fnt_";
   }
@@ -215,7 +215,7 @@ export class Mapper {
   private initFont(
     srcFace: Face,
     fontBytes: Blob,
-    documentFaces: DocumentFaces
+    documentFaces: DocumentFaces,
   ): Task.Result<Face> {
     const frame: Task.Frame<Face> = Task.newFrame("initFont");
     const self = this;
@@ -275,13 +275,13 @@ export class Mapper {
 
   loadFont(
     srcFace: Face,
-    documentFaces: DocumentFaces
+    documentFaces: DocumentFaces,
   ): TaskUtil.Fetcher<Face> {
     const src = srcFace.src as string;
     let fetcher = this.srcURLMap[src];
     const self = this;
     if (fetcher) {
-      fetcher.piggyback(viewFaceParam => {
+      fetcher.piggyback((viewFaceParam) => {
         const viewFace = viewFaceParam as Face;
         if (!viewFace.traitsEqual(srcFace)) {
           Logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
@@ -297,12 +297,12 @@ export class Mapper {
           ? documentFaces.deobfuscator(src)
           : null;
         if (deobfuscator) {
-          Net.ajax(src, Net.XMLHttpRequestResponseType.BLOB).then(xhr => {
+          Net.ajax(src, Net.XMLHttpRequestResponseType.BLOB).then((xhr) => {
             if (!xhr.responseBlob) {
               frame.finish(null);
               return;
             }
-            deobfuscator(xhr.responseBlob).then(fontBytes => {
+            deobfuscator(xhr.responseBlob).then((fontBytes) => {
               self
                 .initFont(srcFace, fontBytes, documentFaces)
                 .thenFinish(frame);
@@ -321,7 +321,7 @@ export class Mapper {
 
   findOrLoadFonts(
     srcFaces: Face[],
-    documentFaces: DocumentFaces
+    documentFaces: DocumentFaces,
   ): Task.Result<boolean> {
     const fetchers = [] as TaskUtil.Fetcher<Face>[];
     for (const srcFace of srcFaces) {

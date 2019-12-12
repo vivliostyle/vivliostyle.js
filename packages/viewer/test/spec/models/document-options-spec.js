@@ -21,67 +21,70 @@ import DocumentOptions from "../../../src/ts/models/document-options";
 import urlParameters from "../../../src/ts/stores/url-parameters";
 
 describe("DocumentOptions", function() {
-    var history, location;
+  var history, location;
 
-    beforeEach(function() {
-        history = urlParameters.history;
-        urlParameters.history = {};
-        location = urlParameters.location;
+  beforeEach(function() {
+    history = urlParameters.history;
+    urlParameters.history = {};
+    location = urlParameters.location;
+  });
+
+  afterEach(function() {
+    urlParameters.history = history;
+    urlParameters.location = location;
+  });
+
+  describe("constructor", function() {
+    it("retrieves parameters from URL", function() {
+      urlParameters.location = {
+        href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html",
+      };
+      var options = new DocumentOptions();
+
+      expect(options.epubUrl()).toBe("");
+      expect(options.url()).toEqual(["abc/def.html", "jkl/mno.html"]);
+      expect(options.fragment()).toBe("ghi%25");
+      expect(options.userStyleSheet()).toEqual([]);
+
+      urlParameters.location = {
+        href:
+          "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3",
+      };
+      options = new DocumentOptions();
+
+      expect(options.epubUrl()).toBe("abc/");
+      expect(options.url()).toBe(null);
+      expect(options.fragment()).toBe("ghi");
+      expect(options.authorStyleSheet()).toEqual(["style1", "style2"]);
+      expect(options.userStyleSheet()).toEqual(["style3"]);
     });
+  });
 
-    afterEach(function() {
-        urlParameters.history = history;
-        urlParameters.location = location;
+  it("write fragment back to URL when updated", function() {
+    urlParameters.location = {
+      href: "http://example.com#x=abc/def.html&f=ghi",
+    };
+    var options = new DocumentOptions();
+    options.fragment("jkl%25");
+
+    expect(urlParameters.location.href).toBe(
+      "http://example.com#x=abc/def.html&f=jkl%25",
+    );
+  });
+
+  describe("toObject", function() {
+    it("converts parameters to an object except url", function() {
+      var options = new DocumentOptions();
+      options.url("abc/def.html");
+      options.fragment("ghi");
+      options.authorStyleSheet(["style1", "style2"]);
+      options.userStyleSheet(["style3"]);
+
+      expect(options.toObject()).toEqual({
+        fragment: "ghi",
+        authorStyleSheet: [{ url: "style1" }, { url: "style2" }],
+        userStyleSheet: [{ text: "@page {size: auto;}" }, { url: "style3" }],
+      });
     });
-
-    describe("constructor", function() {
-        it("retrieves parameters from URL", function() {
-            urlParameters.location = {
-                href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html"
-            };
-            var options = new DocumentOptions();
-
-            expect(options.epubUrl()).toBe("");
-            expect(options.url()).toEqual(["abc/def.html", "jkl/mno.html"]);
-            expect(options.fragment()).toBe("ghi%25");
-            expect(options.userStyleSheet()).toEqual([]);
-
-            urlParameters.location = {
-                href: "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3"
-            };
-            options = new DocumentOptions();
-
-            expect(options.epubUrl()).toBe("abc/");
-            expect(options.url()).toBe(null);
-            expect(options.fragment()).toBe("ghi");
-            expect(options.authorStyleSheet()).toEqual(["style1", "style2"]);
-            expect(options.userStyleSheet()).toEqual(["style3"]);
-        });
-    });
-
-    it("write fragment back to URL when updated", function() {
-        urlParameters.location = {
-            href: "http://example.com#x=abc/def.html&f=ghi"
-        };
-        var options = new DocumentOptions();
-        options.fragment("jkl%25");
-
-        expect(urlParameters.location.href).toBe("http://example.com#x=abc/def.html&f=jkl%25");
-    });
-
-    describe("toObject", function() {
-        it("converts parameters to an object except url", function() {
-            var options = new DocumentOptions();
-            options.url("abc/def.html");
-            options.fragment("ghi");
-            options.authorStyleSheet(["style1", "style2"]);
-            options.userStyleSheet(["style3"]);
-
-            expect(options.toObject()).toEqual({
-                fragment: "ghi",
-                authorStyleSheet: [{ url: "style1" }, { url: "style2" }],
-                userStyleSheet: [{ text: "@page {size: auto;}" }, { url: "style3" }]
-            });
-        });
-    });
+  });
 });

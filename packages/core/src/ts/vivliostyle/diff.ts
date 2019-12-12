@@ -56,7 +56,7 @@ export function resolveNewIndex(changes: Change[], oldIndex: number): number {
 
 export function resolveOriginalIndex(
   changes: Change[],
-  newIndex: number
+  newIndex: number,
 ): number {
   return resolveIndex(changes, newIndex, -1);
 }
@@ -64,11 +64,11 @@ export function resolveOriginalIndex(
 export function resolveIndex(
   changes: Change[],
   index: number,
-  coef: number
+  coef: number,
 ): number {
   let diff = 0;
   let current = 0;
-  changes.some(change => {
+  changes.some((change) => {
     for (let i = 0; i < (change[1] as string).length; i++) {
       switch ((change[0] as number) * coef) {
         case fastdiff.INSERT:

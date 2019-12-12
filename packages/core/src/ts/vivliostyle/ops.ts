@@ -54,32 +54,33 @@ import { Layout } from "./types";
 import UserAgentBaseCss from "../../resources/user-agent-base.css";
 import UserAgentPageCss from "../../resources/user-agent-page.css";
 
-export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<
-  boolean
-> = new TaskUtil.Fetcher(() => {
-  const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
-  const validatorSet = CssValid.baseValidatorSet();
-  const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
-  const handler = new CssCasc.CascadeParserHandler(
-    null,
-    null,
-    null,
-    null,
-    null,
-    validatorSet,
-    true
-  );
-  handler.startStylesheet(CssParse.StylesheetFlavor.USER_AGENT);
-  CssCasc.setUABaseCascade(handler.cascade);
-  CssParse.parseStylesheetFromText(
-    UserAgentBaseCss,
-    handler,
-    url,
-    null,
-    null
-  ).thenFinish(frame);
-  return frame.result();
-}, "uaStylesheetBaseFetcher");
+export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> = new TaskUtil.Fetcher(
+  () => {
+    const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
+    const validatorSet = CssValid.baseValidatorSet();
+    const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
+    const handler = new CssCasc.CascadeParserHandler(
+      null,
+      null,
+      null,
+      null,
+      null,
+      validatorSet,
+      true,
+    );
+    handler.startStylesheet(CssParse.StylesheetFlavor.USER_AGENT);
+    CssCasc.setUABaseCascade(handler.cascade);
+    CssParse.parseStylesheetFromText(
+      UserAgentBaseCss,
+      handler,
+      url,
+      null,
+      null,
+    ).thenFinish(frame);
+    return frame.result();
+  },
+  "uaStylesheetBaseFetcher",
+);
 
 export function loadUABase(): Task.Result<boolean> {
   return uaStylesheetBaseFetcher.get();
@@ -106,7 +107,7 @@ export class Style {
     public readonly footnoteProps: CssCasc.ElementStyle,
     public readonly flowProps: { [key: string]: CssCasc.ElementStyle },
     public readonly viewportProps: CssCasc.ElementStyle[],
-    public readonly pageProps: { [key: string]: CssCasc.ElementStyle }
+    public readonly pageProps: { [key: string]: CssCasc.ElementStyle },
   ) {
     this.fontDeobfuscator = store.fontDeobfuscator;
     this.validatorSet = store.validatorSet;
@@ -133,8 +134,8 @@ export class Style {
             styleInstance.currentLayoutPosition.page
           );
         },
-        "page-number"
-      )
+        "page-number",
+      ),
     );
   }
 
@@ -142,14 +143,14 @@ export class Style {
     viewportWidth: number,
     viewportHeight: number,
     fontSize: number,
-    pref?: Exprs.Preferences
+    pref?: Exprs.Preferences,
   ): { width: number; height: number; fontSize: number } {
     if (this.viewportProps.length) {
       const context = new Exprs.Context(
         this.rootScope,
         viewportWidth,
         viewportHeight,
-        fontSize
+        fontSize,
       );
       const viewportProps = CssCasc.mergeAll(context, this.viewportProps);
       const width = viewportProps["width"];
@@ -170,11 +171,11 @@ export class Style {
         if (width && height) {
           const widthVal = Css.toNumber(
             width.evaluate(context, "width"),
-            context
+            context,
           );
           const heightVal = Css.toNumber(
             height.evaluate(context, "height"),
-            context
+            context,
           );
           if (widthVal > 0 && heightVal > 0) {
             const spreadWidth =
@@ -225,7 +226,7 @@ export class StyleInstance extends Exprs.Context
     public readonly pageNumberOffset: number,
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly counterStore: Counters.CounterStore,
-    pageProgression?: Constants.PageProgression
+    pageProgression?: Constants.PageProgression,
   ) {
     super(style.rootScope, viewport.width, viewport.height, viewport.fontSize);
     this.lang = xmldoc.lang || defaultLang;
@@ -237,7 +238,7 @@ export class StyleInstance extends Exprs.Context
       null,
       null,
       null,
-      null
+      null,
     );
     this.pageProgression = pageProgression || null;
     for (const flowName in style.flowProps) {
@@ -258,12 +259,12 @@ export class StyleInstance extends Exprs.Context
     const self = this;
     const frame: Task.Frame<boolean> = Task.newFrame("StyleInstance.init");
     const counterListener = self.counterStore.createCounterListener(
-      self.xmldoc.url
+      self.xmldoc.url,
     );
     const counterResolver = self.counterStore.createCounterResolver(
       self.xmldoc.url,
       self.style.rootScope,
-      self.style.pageScope
+      self.style.pageScope,
     );
     self.styler = new CssStyler.Styler(
       self.xmldoc,
@@ -273,7 +274,7 @@ export class StyleInstance extends Exprs.Context
       this.primaryFlows,
       self.style.validatorSet,
       counterListener,
-      counterResolver
+      counterResolver,
     );
     counterResolver.setStyler(self.styler);
     self.styler.resetFlowChunkStream(self);
@@ -289,11 +290,11 @@ export class StyleInstance extends Exprs.Context
       self,
       counterListener,
       counterResolver,
-      this.lang
+      this.lang,
     );
     this.rootPageBoxInstance.applyCascadeAndInit(
       cascadeInstance,
-      docElementStyle
+      docElementStyle,
     );
     this.rootPageBoxInstance.resolveAutoSizing(self);
     this.pageManager = new Pages.PageManager(
@@ -301,7 +302,7 @@ export class StyleInstance extends Exprs.Context
       this.style.pageScope,
       this.rootPageBoxInstance,
       self,
-      docElementStyle
+      docElementStyle,
     );
     const srcFaces = [] as Font.Face[];
     for (const fontFace of self.style.fontFaces) {
@@ -316,14 +317,14 @@ export class StyleInstance extends Exprs.Context
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = self.style.pageProps;
-    Object.keys(pageProps).forEach(selector => {
+    Object.keys(pageProps).forEach((selector) => {
       const pageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
         Pages.resolvePageSizeAndBleed(pageProps[selector] as any),
-        this
+        this,
       );
       this.pageSheetSize[selector] = {
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
-        height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2
+        height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2,
       };
     });
     return frame.result();
@@ -343,15 +344,15 @@ export class StyleInstance extends Exprs.Context
         style.rootScope,
         this.pageWidth(),
         this.pageHeight(),
-        this.initialFontSize
+        this.initialFontSize,
       );
       const counterListener = this.counterStore.createCounterListener(
-        xmldoc.url
+        xmldoc.url,
       );
       const counterResolver = this.counterStore.createCounterResolver(
         xmldoc.url,
         style.rootScope,
-        style.pageScope
+        style.pageScope,
       );
       styler = new CssStyler.Styler(
         xmldoc,
@@ -361,7 +362,7 @@ export class StyleInstance extends Exprs.Context
         this.primaryFlows,
         style.validatorSet,
         counterListener,
-        counterResolver
+        counterResolver,
       );
       this.stylerMap[xmldoc.url] = styler;
     }
@@ -402,7 +403,7 @@ export class StyleInstance extends Exprs.Context
       const chunkPosition = new Vtree.ChunkPosition(nodePosition);
       const flowChunkPosition = new Vtree.FlowChunkPosition(
         chunkPosition,
-        flowChunk
+        flowChunk,
       );
       flowPosition.positions.push(flowChunkPosition);
     }
@@ -436,7 +437,7 @@ export class StyleInstance extends Exprs.Context
    */
   getPosition(
     layoutPosition: Vtree.LayoutPosition | undefined,
-    noLookAhead?: boolean
+    noLookAhead?: boolean,
   ): number {
     if (!layoutPosition) {
       return 0;
@@ -478,7 +479,7 @@ export class StyleInstance extends Exprs.Context
         Logging.logger.debug(
           "  Chunk",
           `${flowName}:`,
-          p.flowChunk.startOffset
+          p.flowChunk.startOffset,
         );
       }
     }
@@ -491,7 +492,7 @@ export class StyleInstance extends Exprs.Context
       case "recto":
       case "verso":
         return new Exprs.Named(this.style.pageScope, `${side}-page`).evaluate(
-          this
+          this,
         ) as boolean;
       default:
         return true;
@@ -507,13 +508,13 @@ export class StyleInstance extends Exprs.Context
           const flowChunkBreakBefore =
             flowPos.positions[0].flowChunk.breakBefore;
           const flowBreakAfter = Break.startSideValueToBreakValue(
-            flowPos.startSide
+            flowPos.startSide,
           );
           flowPos.startSide = Break.breakValueToStartSideValue(
             Break.resolveEffectiveBreakValue(
               flowBreakAfter,
-              flowChunkBreakBefore
-            )
+              flowChunkBreakBefore,
+            ),
           );
         }
       }
@@ -524,7 +525,7 @@ export class StyleInstance extends Exprs.Context
    * @param cascadedPageStyle Cascaded page style specified in page context
    */
   selectPageMaster(
-    cascadedPageStyle: CssCasc.ElementStyle
+    cascadedPageStyle: CssCasc.ElementStyle,
   ): Pm.PageMasterInstance {
     const self = this;
     const cp = this.currentLayoutPosition;
@@ -590,7 +591,7 @@ export class StyleInstance extends Exprs.Context
         // Apply @page rules
         return this.pageManager.getPageRulePageMaster(
           pageMaster,
-          cascadedPageStyle
+          cascadedPageStyle,
         );
       }
     }
@@ -609,7 +610,7 @@ export class StyleInstance extends Exprs.Context
       const breakOffsetBeforeStartIndex =
         Base.binarySearch(
           forcedBreakOffsets.length,
-          i => forcedBreakOffsets[i] > startOffset
+          (i) => forcedBreakOffsets[i] > startOffset,
         ) - 1;
       const breakOffsetBeforeStart =
         forcedBreakOffsets[breakOffsetBeforeStartIndex];
@@ -647,7 +648,7 @@ export class StyleInstance extends Exprs.Context
     let invalidated = false;
     let i = 0;
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         if (i === deferredFloats.length) {
           loopFrame.breakLoop();
           return;
@@ -655,11 +656,11 @@ export class StyleInstance extends Exprs.Context
         const continuation = deferredFloats[i++];
         const float = continuation.float;
         const strategy = new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(
-          float
+          float,
         );
         const pageFloatFragment = strategy.findPageFloatFragment(
           float,
-          pageFloatLayoutContext
+          pageFloatLayoutContext,
         );
         if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
           loopFrame.continueLoop();
@@ -674,7 +675,7 @@ export class StyleInstance extends Exprs.Context
         }
         column
           .layoutPageFloatInner(continuation, strategy, null, pageFloatFragment)
-          .then(success => {
+          .then((success) => {
             if (!success) {
               loopFrame.breakLoop();
               return;
@@ -704,7 +705,7 @@ export class StyleInstance extends Exprs.Context
 
   getLastAfterPositionIfDeferredFloatsExists(
     column: Layout.Column,
-    newPosition: Vtree.ChunkPosition | null
+    newPosition: Vtree.ChunkPosition | null,
   ): Vtree.ChunkPosition | null {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
     const deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
@@ -757,10 +758,10 @@ export class StyleInstance extends Exprs.Context
       const removedIndices = [] as number[];
       let leadingEdge = true;
       frame
-        .loopWithFrame(loopFrame => {
+        .loopWithFrame((loopFrame) => {
           if (
             column.pageFloatLayoutContext.hasContinuingFloatFragmentsInFlow(
-              flowName
+              flowName,
             )
           ) {
             loopFrame.breakLoop();
@@ -802,9 +803,9 @@ export class StyleInstance extends Exprs.Context
               .layout(
                 selected.chunkPosition,
                 leadingEdge,
-                flowPosition.breakAfter
+                flowPosition.breakAfter,
               )
-              .then(newPosition => {
+              .then((newPosition) => {
                 if (column.pageFloatLayoutContext.isInvalidated()) {
                   loopFrame.breakLoop();
                   return;
@@ -829,7 +830,7 @@ export class StyleInstance extends Exprs.Context
                   const endOfColumn = !!newPosition || !!column.pageBreakType;
                   const lastAfterPosition = self.getLastAfterPositionIfDeferredFloatsExists(
                     column,
-                    newPosition
+                    newPosition,
                   );
                   if (column.pageBreakType && lastAfterPosition) {
                     selected.chunkPosition = lastAfterPosition;
@@ -848,7 +849,7 @@ export class StyleInstance extends Exprs.Context
                     if (column.pageBreakType) {
                       // forced break
                       flowPosition.startSide = Break.breakValueToStartSideValue(
-                        column.pageBreakType
+                        column.pageBreakType,
                       );
                     }
                   }
@@ -886,7 +887,7 @@ export class StyleInstance extends Exprs.Context
             // Keep positions repeated or not removed
             flowPosition.positions = flowPosition.positions.filter(
               (pos, i) =>
-                repeatedIndices.includes(i) || !removedIndices.includes(i)
+                repeatedIndices.includes(i) || !removedIndices.includes(i),
             );
             if (flowPosition.breakAfter === "column") {
               flowPosition.breakAfter = null;
@@ -902,14 +903,14 @@ export class StyleInstance extends Exprs.Context
   }
 
   createLayoutConstraint(
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ): Layout.LayoutConstraint {
     const pageIndex = this.currentLayoutPosition.page - 1;
     const counterConstraint = this.counterStore.createLayoutConstraint(
-      pageIndex
+      pageIndex,
     );
     return new LayoutImpl.AllLayoutConstraint(
-      [counterConstraint].concat(pageFloatLayoutContext.getLayoutConstraints())
+      [counterConstraint].concat(pageFloatLayoutContext.getLayoutConstraints()),
     );
   }
 
@@ -927,7 +928,7 @@ export class StyleInstance extends Exprs.Context
     columnWidth: number,
     innerShape: Geom.Shape,
     layoutContext: Vtree.LayoutContext,
-    forceNonFitting: boolean
+    forceNonFitting: boolean,
   ): Task.Result<Layout.Column> {
     const self = this;
     const dontApplyExclusions = boxInstance.vertical
@@ -941,17 +942,17 @@ export class StyleInstance extends Exprs.Context
       flowNameStr,
       null,
       null,
-      null
+      null,
     );
     const positionAtColumnStart = self.currentLayoutPosition.clone();
     const frame: Task.Frame<Layout.Column> = Task.newFrame(
-      "createAndLayoutColumn"
+      "createAndLayoutColumn",
     );
     let column: Layout.Column;
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         const layoutConstraint = self.createLayoutConstraint(
-          columnPageFloatLayoutContext
+          columnPageFloatLayoutContext,
         );
         if (columnCount > 1) {
           const columnContainer = self.viewport.document.createElement("div");
@@ -962,7 +963,7 @@ export class StyleInstance extends Exprs.Context
             layoutContext,
             self.clientLayout,
             layoutConstraint,
-            columnPageFloatLayoutContext
+            columnPageFloatLayoutContext,
           );
           column.forceNonfitting = forceNonFitting;
           column.vertical = layoutContainer.vertical;
@@ -974,7 +975,7 @@ export class StyleInstance extends Exprs.Context
               layoutContainer.paddingTop;
             column.setHorizontalPosition(
               layoutContainer.paddingLeft,
-              layoutContainer.width
+              layoutContainer.width,
             );
             column.setVerticalPosition(columnY, columnWidth);
           } else {
@@ -983,7 +984,7 @@ export class StyleInstance extends Exprs.Context
               layoutContainer.paddingLeft;
             column.setVerticalPosition(
               layoutContainer.paddingTop,
-              layoutContainer.height
+              layoutContainer.height,
             );
             column.setHorizontalPosition(columnX, columnWidth);
           }
@@ -995,7 +996,7 @@ export class StyleInstance extends Exprs.Context
             layoutContext,
             self.clientLayout,
             layoutConstraint,
-            columnPageFloatLayoutContext
+            columnPageFloatLayoutContext,
           );
           column.copyFrom(layoutContainer);
         }
@@ -1036,7 +1037,7 @@ export class StyleInstance extends Exprs.Context
   setPagePageFloatLayoutContextContainer(
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     boxInstance: Pm.PageBoxInstance,
-    layoutContainer: Vtree.Container
+    layoutContainer: Vtree.Container,
   ) {
     if (
       boxInstance instanceof Pages.PageRulePartitionInstance ||
@@ -1051,7 +1052,7 @@ export class StyleInstance extends Exprs.Context
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     boxInstance: Pm.PageBoxInstance,
     layoutContainer: Vtree.Container,
-    flowName: string
+    flowName: string,
   ): PageFloats.PageFloatLayoutContext {
     Asserts.assert(boxInstance instanceof Pm.PartitionInstance);
     const writingMode = boxInstance.getProp(this, "writing-mode") || null;
@@ -1063,7 +1064,7 @@ export class StyleInstance extends Exprs.Context
       flowName,
       null,
       writingMode,
-      direction
+      direction,
     );
   }
 
@@ -1076,7 +1077,7 @@ export class StyleInstance extends Exprs.Context
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     layoutContainer: Vtree.Container,
     flowNameStr: string,
-    columnCount: number
+    columnCount: number,
   ): Task.Result<Layout.Column[]> {
     const self = this;
     const positionAtContainerStart = self.currentLayoutPosition.clone();
@@ -1084,7 +1085,7 @@ export class StyleInstance extends Exprs.Context
       pagePageFloatLayoutContext,
       boxInstance,
       layoutContainer,
-      flowNameStr
+      flowNameStr,
     );
     let isFirstTime = true;
 
@@ -1102,20 +1103,20 @@ export class StyleInstance extends Exprs.Context
           layoutContainer,
           flowNameStr,
           columnCount,
-          isFirstTime
+          isFirstTime,
         )
-        .thenAsync(columns => {
+        .thenAsync((columns) => {
           if (columns) {
             return Task.newResult({
               columns,
-              position: self.currentLayoutPosition
+              position: self.currentLayoutPosition,
             });
           } else {
             return Task.newResult(null);
           }
         });
     }
-    return layoutColumns().thenAsync(generatorResult => {
+    return layoutColumns().thenAsync((generatorResult) => {
       if (!generatorResult) {
         return Task.newResult(null);
       }
@@ -1135,7 +1136,7 @@ export class StyleInstance extends Exprs.Context
         regionPageFloatLayoutContext,
         layoutContainer,
         generatorResult.columns,
-        flowPosition
+        flowPosition,
       );
       if (!columnBalancer) {
         return Task.newResult(generatorResult.columns);
@@ -1145,7 +1146,7 @@ export class StyleInstance extends Exprs.Context
       regionPageFloatLayoutContext.lock();
       return columnBalancer
         .balanceColumns(generatorResult)
-        .thenAsync(result => {
+        .thenAsync((result) => {
           pagePageFloatLayoutContext.unlock();
           pagePageFloatLayoutContext.validate();
           regionPageFloatLayoutContext.unlock();
@@ -1166,11 +1167,11 @@ export class StyleInstance extends Exprs.Context
     layoutContainer: Vtree.Container,
     flowNameStr: string,
     columnCount: number,
-    forceNonFitting: boolean
+    forceNonFitting: boolean,
   ): Task.Result<Layout.Column[] | null> {
     const self = this;
     const frame: Task.Frame<Layout.Column[] | null> = Task.newFrame(
-      "layoutFlowColumns"
+      "layoutFlowColumns",
     );
     const positionAtContainerStart = self.currentLayoutPosition.clone();
     const columnGap = boxInstance.getPropAsNumber(self, "column-gap");
@@ -1189,7 +1190,7 @@ export class StyleInstance extends Exprs.Context
       0,
       layoutContainer.width,
       layoutContainer.height,
-      self
+      self,
     );
     const layoutContext = new Vgen.ViewFactory(
       flowNameStr,
@@ -1204,13 +1205,13 @@ export class StyleInstance extends Exprs.Context
       page,
       self.customRenderer,
       self.fallbackMap,
-      this.documentURLTransformer
+      this.documentURLTransformer,
     );
     let columnIndex = 0;
     let column: Layout.Column = null;
     let columns: Layout.Column[] = [];
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         self
           .createAndLayoutColumn(
             boxInstance,
@@ -1226,9 +1227,9 @@ export class StyleInstance extends Exprs.Context
             columnWidth,
             innerShape,
             layoutContext,
-            forceNonFitting
+            forceNonFitting,
           )
-          .then(c => {
+          .then((c) => {
             if (pagePageFloatLayoutContext.isInvalidated()) {
               columns = null;
               loopFrame.breakLoop();
@@ -1289,7 +1290,7 @@ export class StyleInstance extends Exprs.Context
     offsetX: number,
     offsetY: number,
     exclusions: Geom.Shape[],
-    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext
+    pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ): Task.Result<boolean> {
     const self = this;
     boxInstance.reset();
@@ -1306,7 +1307,7 @@ export class StyleInstance extends Exprs.Context
     Base.setCSSProperty(
       boxContainer,
       "position",
-      position ? (position as any).name : "absolute"
+      position ? (position as any).name : "absolute",
     );
     parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
     let layoutContainer = new Vtree.Container(boxContainer);
@@ -1317,7 +1318,7 @@ export class StyleInstance extends Exprs.Context
       layoutContainer,
       page,
       self.faces,
-      self.clientLayout
+      self.clientLayout,
     );
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
@@ -1332,7 +1333,7 @@ export class StyleInstance extends Exprs.Context
     this.setPagePageFloatLayoutContextContainer(
       pagePageFloatLayoutContext,
       boxInstance,
-      layoutContainer
+      layoutContainer,
     );
     let cont: Task.Result<boolean>;
     let removed = false;
@@ -1344,29 +1345,29 @@ export class StyleInstance extends Exprs.Context
           innerContainerTag = "img";
         }
         const innerContainer = self.viewport.document.createElement(
-          innerContainerTag
+          innerContainerTag,
         );
         contentVal.visit(
           new Vtree.ContentPropertyHandler(
             innerContainer,
             self,
             contentVal,
-            self.counterStore.getExprContentListener()
-          )
+            self.counterStore.getExprContentListener(),
+          ),
         );
         boxContainer.appendChild(innerContainer);
         if (innerContainerTag == "img") {
           boxInstance.transferSinglUriContentProps(
             self,
             innerContainer,
-            self.faces
+            self.faces,
           );
         }
         boxInstance.transferContentProps(
           self,
           layoutContainer,
           page,
-          self.faces
+          self.faces,
         );
       } else if (boxInstance.suppressEmptyBoxGeneration) {
         parentContainer.removeChild(boxContainer);
@@ -1380,13 +1381,13 @@ export class StyleInstance extends Exprs.Context
           null,
           1,
           self.clientLayout,
-          self.faces
+          self.faces,
         );
       }
       cont = Task.newResult(true);
     } else if (!self.pageBreaks[flowName.toString()]) {
       const innerFrame: Task.Frame<boolean> = Task.newFrame(
-        "layoutContainer.inner"
+        "layoutContainer.inner",
       );
       const flowNameStr = flowName.toString();
 
@@ -1402,9 +1403,9 @@ export class StyleInstance extends Exprs.Context
           pagePageFloatLayoutContext,
           layoutContainer,
           flowNameStr,
-          columnCount
+          columnCount,
         )
-        .then(columns => {
+        .then((columns) => {
           if (!pagePageFloatLayoutContext.isInvalidated()) {
             const column = columns[0];
             Asserts.assert(column);
@@ -1413,7 +1414,7 @@ export class StyleInstance extends Exprs.Context
             }
             layoutContainer.computedBlockSize = Math.max.apply(
               null,
-              columns.map(c => c.computedBlockSize)
+              columns.map((c) => c.computedBlockSize),
             );
             boxInstance.finishContainer(
               self,
@@ -1422,7 +1423,7 @@ export class StyleInstance extends Exprs.Context
               column,
               columnCount,
               self.clientLayout,
-              self.faces
+              self.faces,
             );
             const flowPosition =
               self.currentLayoutPosition.flowPositions[flowNameStr];
@@ -1442,7 +1443,7 @@ export class StyleInstance extends Exprs.Context
           null,
           1,
           self.clientLayout,
-          self.faces
+          self.faces,
         );
       }
       cont = Task.newResult(true);
@@ -1460,7 +1461,7 @@ export class StyleInstance extends Exprs.Context
           const outerShapeProp = boxInstance.getProp(self, "shape-outside");
           const outerShape = layoutContainer.getOuterShape(
             outerShapeProp,
-            self
+            self,
           );
 
           // Though it seems that LShapeFloatBug still exists in Firefox, it
@@ -1489,11 +1490,11 @@ export class StyleInstance extends Exprs.Context
               offsetX,
               offsetY,
               exclusions,
-              pagePageFloatLayoutContext
+              pagePageFloatLayoutContext,
             );
             if (r.isPending()) {
               return r.thenAsync(() =>
-                Task.newResult(!pagePageFloatLayoutContext.isInvalidated())
+                Task.newResult(!pagePageFloatLayoutContext.isInvalidated()),
               );
             } else if (pagePageFloatLayoutContext.isInvalidated()) {
               break;
@@ -1552,7 +1553,7 @@ export class StyleInstance extends Exprs.Context
 
   layoutNextPage(
     page: Vtree.Page,
-    cp: Vtree.LayoutPosition | undefined
+    cp: Vtree.LayoutPosition | undefined,
   ): Task.Result<Vtree.LayoutPosition> {
     const self = this;
 
@@ -1587,10 +1588,10 @@ export class StyleInstance extends Exprs.Context
     let bleedBoxPaddingEdge = 0;
     if (!isTocBox) {
       page.setAutoPageWidth(
-        pageMaster.pageBox.specified["width"].value === Css.fullWidth
+        pageMaster.pageBox.specified["width"].value === Css.fullWidth,
       );
       page.setAutoPageHeight(
-        pageMaster.pageBox.specified["height"].value === Css.fullHeight
+        pageMaster.pageBox.specified["height"].value === Css.fullHeight,
       );
       self.counterStore.setCurrentPage(page);
       self.counterStore.updatePageCounters(cascadedPageStyle, self);
@@ -1598,14 +1599,14 @@ export class StyleInstance extends Exprs.Context
       // setup bleed area and crop marks
       const evaluatedPageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
         Pages.resolvePageSizeAndBleed(cascadedPageStyle as any),
-        this
+        this,
       );
       self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
       Pages.addPrinterMarks(
         cascadedPageStyle,
         evaluatedPageSizeAndBleed,
         page,
-        this
+        this,
       );
       bleedBoxPaddingEdge =
         evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
@@ -1625,13 +1626,13 @@ export class StyleInstance extends Exprs.Context
       null,
       null,
       writingMode,
-      direction
+      direction,
     );
     const frame: Task.Frame<Vtree.LayoutPosition> = Task.newFrame(
-      "layoutNextPage"
+      "layoutNextPage",
     );
     frame
-      .loopWithFrame(loopFrame => {
+      .loopWithFrame((loopFrame) => {
         // self.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
         self
           .layoutContainer(
@@ -1641,7 +1642,7 @@ export class StyleInstance extends Exprs.Context
             bleedBoxPaddingEdge,
             bleedBoxPaddingEdge,
             [],
-            pageFloatLayoutContext
+            pageFloatLayoutContext,
           )
           .then(() => {
             if (!pageFloatLayoutContext.isInvalidated()) {
@@ -1661,14 +1662,14 @@ export class StyleInstance extends Exprs.Context
         if (!isTocBox) {
           const isLeftPage = new Exprs.Named(
             pageMaster.pageBox.scope,
-            "left-page"
+            "left-page",
           );
           page.side = isLeftPage.evaluate(self)
             ? Constants.PageSide.LEFT
             : Constants.PageSide.RIGHT;
           self.processLinger();
           cp = self.currentLayoutPosition;
-          Object.keys(cp.flowPositions).forEach(flowName => {
+          Object.keys(cp.flowPositions).forEach((flowName) => {
             const flowPosition = cp.flowPositions[flowName];
             const breakAfter = flowPosition.breakAfter;
             if (
@@ -1697,7 +1698,7 @@ export class StyleInstance extends Exprs.Context
    */
   private setPageSizeAndBleed(
     evaluatedPageSizeAndBleed: Pages.EvaluatedPageSizeAndBleed,
-    page: Vtree.Page
+    page: Vtree.Page,
   ) {
     this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
     this.actualPageHeight = evaluatedPageSizeAndBleed.pageHeight;
@@ -1732,7 +1733,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
     public masterHandler: StyleParserHandler,
     condition: Exprs.Val,
     parent: BaseParserHandler,
-    regionId: string | null
+    regionId: string | null,
   ) {
     super(
       masterHandler.rootScope,
@@ -1741,7 +1742,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
       parent,
       regionId,
       masterHandler.validatorSet,
-      !parent
+      !parent,
     );
   }
 
@@ -1756,7 +1757,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
   startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
-    classes: string[]
+    classes: string[],
   ): void {
     const pageMaster = new Pm.PageMaster(
       this.masterHandler.pageScope,
@@ -1765,15 +1766,15 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
       classes,
       this.masterHandler.rootBox,
       this.condition,
-      this.owner.getBaseSpecificity()
+      this.owner.getBaseSpecificity(),
     );
     this.masterHandler.pushHandler(
       new Pm.PageMasterParserHandler(
         pageMaster.scope,
         this.masterHandler,
         pageMaster,
-        this.validatorSet
-      )
+        this.validatorSet,
+      ),
     );
   }
 
@@ -1786,7 +1787,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
       condition = Exprs.and(this.scope, this.condition, condition);
     }
     this.masterHandler.pushHandler(
-      new BaseParserHandler(this.masterHandler, condition, this, this.regionId)
+      new BaseParserHandler(this.masterHandler, condition, this, this.regionId),
     );
   }
 
@@ -1795,7 +1796,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
    */
   startDefineRule(): void {
     this.masterHandler.pushHandler(
-      new CssCasc.DefineParserHandler(this.scope, this.owner)
+      new CssCasc.DefineParserHandler(this.scope, this.owner),
     );
   }
 
@@ -1806,7 +1807,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
     const properties = {} as CssCasc.ElementStyle;
     this.masterHandler.fontFaces.push({
       properties,
-      condition: this.condition
+      condition: this.condition,
     });
     this.masterHandler.pushHandler(
       new CssCasc.PropSetParserHandler(
@@ -1814,8 +1815,8 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
         this.owner,
         null,
         properties,
-        this.masterHandler.validatorSet
-      )
+        this.masterHandler.validatorSet,
+      ),
     );
   }
 
@@ -1834,8 +1835,8 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
         this.owner,
         null,
         style,
-        this.masterHandler.validatorSet
-      )
+        this.masterHandler.validatorSet,
+      ),
     );
   }
 
@@ -1851,8 +1852,8 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
         this.owner,
         this.condition,
         viewportProps,
-        this.masterHandler.validatorSet
-      )
+        this.masterHandler.validatorSet,
+      ),
     );
   }
 
@@ -1875,8 +1876,8 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
         this.owner,
         null,
         style,
-        this.masterHandler.validatorSet
-      )
+        this.masterHandler.validatorSet,
+      ),
     );
   }
 
@@ -1897,7 +1898,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
       this.masterHandler,
       this,
       this.validatorSet,
-      this.masterHandler.pageProps
+      this.masterHandler.pageProps,
     );
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();
@@ -1917,7 +1918,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
         this.masterHandler,
         this.condition,
         this,
-        regionId
+        regionId,
       );
       this.masterHandler.pushHandler(regionHandler);
       regionHandler.startRuleBody();
@@ -1935,7 +1936,7 @@ export function processViewportMeta(meta: Element): string {
   let r: RegExpMatchArray;
   while (
     (r = content.match(
-      /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/
+      /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/,
     )) != null
   ) {
     content = content.substr(r[0].length);
@@ -1989,7 +1990,7 @@ export type StyleSource = {
 
 export function parseOPSResource(
   response: Net.Response,
-  store: XmlDoc.XMLDocStore
+  store: XmlDoc.XMLDocStore,
 ): Task.Result<XmlDoc.XMLDocHolder> {
   return (store as OPSDocStore).parseOPSResource(response);
 }
@@ -2006,19 +2007,19 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   constructor(
     public fontDeobfuscator:
       | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
-      | null
+      | null,
   ) {
     super(parseOPSResource, Net.XMLHttpRequestResponseType.DOCUMENT);
   }
 
   init(
     authorStyleSheets: { url: string | null; text: string | null }[] | null,
-    userStyleSheets: { url: string | null; text: string | null }[] | null
+    userStyleSheets: { url: string | null; text: string | null }[] | null,
   ): Task.Result<boolean> {
     this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
     const userAgentXML = Base.resolveURL(
       "user-agent.xml",
-      Base.resourceBaseURL
+      Base.resourceBaseURL,
     );
     const frame = Task.newFrame<boolean>("OPSDocStore.init");
     this.validatorSet = CssValid.baseValidatorSet();
@@ -2045,7 +2046,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
    */
   private setStyleSheets(
     authorStyleSheets: StyleSource[] | null,
-    userStyleSheets: StyleSource[] | null
+    userStyleSheets: StyleSource[] | null,
   ) {
     this.clearStyleSheets();
     if (authorStyleSheets) {
@@ -2070,7 +2071,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       text: stylesheet.text,
       flavor: CssParse.StylesheetFlavor.AUTHOR,
       classes: null,
-      media: null
+      media: null,
     });
   }
 
@@ -2084,13 +2085,13 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       text: stylesheet.text,
       flavor: CssParse.StylesheetFlavor.USER,
       classes: null,
-      media: null
+      media: null,
     });
   }
 
   parseOPSResource(response: Net.Response): Task.Result<XmlDoc.XMLDocHolder> {
     const frame: Task.Frame<XmlDoc.XMLDocHolder> = Task.newFrame(
-      "OPSDocStore.load"
+      "OPSDocStore.load",
     );
     const self = this;
     const url = response.url;
@@ -2106,7 +2107,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         }
         if (self.triggerSingleDocumentPreprocessing) {
           const hooks: Plugin.PreProcessSingleDocumentHook[] = Plugin.getHooksForName(
-            Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT
+            Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
           );
           for (let i = 0; i < hooks.length; i++) {
             try {
@@ -2114,7 +2115,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             } catch (e) {
               Logging.logger.warn(
                 "Error during single document preprocessing:",
-                e
+                e,
               );
             }
           }
@@ -2122,7 +2123,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         const triggers = [];
         const triggerList = xmldoc.document.getElementsByTagNameNS(
           Base.NS.epub,
-          "trigger"
+          "trigger",
         );
         for (let i = 0; i < triggerList.length; i++) {
           const triggerElem = triggerList[i];
@@ -2138,14 +2139,14 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         const sources = [] as StyleSource[];
         const userAgentURL = Base.resolveURL(
           "user-agent-page.css",
-          Base.resourceBaseURL
+          Base.resourceBaseURL,
         );
         sources.push({
           url: userAgentURL,
           text: UserAgentPageCss,
           flavor: CssParse.StylesheetFlavor.USER_AGENT,
           classes: null,
-          media: null
+          media: null,
         });
         const head = xmldoc.head;
         if (!isTocBox && head) {
@@ -2166,7 +2167,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   text: child.textContent,
                   flavor: CssParse.StylesheetFlavor.AUTHOR,
                   classes: title ? classes : null,
-                  media
+                  media,
                 });
               } else if (localName == "link") {
                 const rel = child.getAttribute("rel");
@@ -2184,7 +2185,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                     text: null,
                     classes: title ? classes : null,
                     media,
-                    flavor: CssParse.StylesheetFlavor.AUTHOR
+                    flavor: CssParse.StylesheetFlavor.AUTHOR,
                   });
                 }
               } else if (
@@ -2196,7 +2197,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   text: processViewportMeta(child),
                   flavor: CssParse.StylesheetFlavor.AUTHOR,
                   classes: null,
-                  media: null
+                  media: null,
                 });
               }
             } else if (ns == Base.NS.FB2) {
@@ -2209,7 +2210,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   text: child.textContent,
                   flavor: CssParse.StylesheetFlavor.AUTHOR,
                   classes: null,
-                  media: null
+                  media: null,
                 });
               }
             } else if (ns == Base.NS.SSE && localName === "property") {
@@ -2225,7 +2226,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                     text: null,
                     classes: null,
                     media: null,
-                    flavor: CssParse.StylesheetFlavor.AUTHOR
+                    flavor: CssParse.StylesheetFlavor.AUTHOR,
                   });
                 }
               }
@@ -2256,7 +2257,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         if (!fetcher) {
           fetcher = new TaskUtil.Fetcher(() => {
             const innerFrame: Task.Frame<Style> = Task.newFrame(
-              "fetchStylesheet"
+              "fetchStylesheet",
             );
             let index = 0;
             const sph = new StyleParserHandler(self.validatorSet);
@@ -2271,14 +2272,14 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                       sph,
                       source.url,
                       source.classes,
-                      source.media
+                      source.media,
                     ).thenReturn(true);
                   } else {
                     return CssParse.parseStylesheetFromURL(
                       source.url,
                       sph,
                       source.classes,
-                      source.media
+                      source.media,
                     );
                   }
                 }
@@ -2296,7 +2297,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   sph.footnoteProps,
                   sph.flowProps,
                   sph.viewportProps,
-                  sph.pageProps
+                  sph.pageProps,
                 );
                 self.styleByKey[key] = style;
                 delete self.styleFetcherByKey[key];
@@ -2307,11 +2308,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           self.styleFetcherByKey[key] = fetcher;
           fetcher.start();
         }
-        fetcher.get().then(style => {
+        fetcher.get().then((style) => {
           self.styleByDocURL[url] = style;
           frame.finish(xmldoc);
         });
-      }
+      },
     );
     return frame.result();
   }

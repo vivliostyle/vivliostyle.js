@@ -31,10 +31,10 @@ import { Layout } from "./types";
  * Clone counter values.
  */
 function cloneCounterValues(
-  counters: CssCasc.CounterValues
+  counters: CssCasc.CounterValues,
 ): CssCasc.CounterValues {
   const result = {};
-  Object.keys(counters).forEach(name => {
+  Object.keys(counters).forEach((name) => {
     result[name] = Array.from(counters[name]);
   });
   return result;
@@ -94,7 +94,7 @@ export class TargetCounterReference {
 class CounterListener implements CssCasc.CounterListener {
   constructor(
     public readonly counterStore: CounterStore,
-    public readonly baseURL: string
+    public readonly baseURL: string,
   ) {}
 
   /**
@@ -103,7 +103,7 @@ class CounterListener implements CssCasc.CounterListener {
   countersOfId(id: string, counters: CssCasc.CounterValues) {
     id = this.counterStore.documentURLTransformer.transformFragment(
       id,
-      this.baseURL
+      this.baseURL,
     );
     this.counterStore.countersById[id] = counters;
   }
@@ -120,7 +120,7 @@ class CounterResolver implements CssCasc.CounterResolver {
     public readonly counterStore: CounterStore,
     public readonly baseURL: string,
     public readonly rootScope: Exprs.LexicalScope,
-    public readonly pageScope: Exprs.LexicalScope
+    public readonly pageScope: Exprs.LexicalScope,
   ) {}
 
   setStyler(styler: CssStyler.Styler) {
@@ -135,7 +135,7 @@ class CounterResolver implements CssCasc.CounterResolver {
   private getTransformedId(url: string): string {
     let transformedId = this.counterStore.documentURLTransformer.transformURL(
       Base.resolveURL(url, this.baseURL),
-      this.baseURL
+      this.baseURL,
     );
     if (transformedId.charAt(0) === "#") {
       transformedId = transformedId.substring(1);
@@ -148,7 +148,7 @@ class CounterResolver implements CssCasc.CounterResolver {
    */
   getPageCounterVal(
     name: string,
-    format: (p1: number | null) => string
+    format: (p1: number | null) => string,
   ): Exprs.Val {
     const self = this;
 
@@ -159,7 +159,7 @@ class CounterResolver implements CssCasc.CounterResolver {
     const expr = new Exprs.Native(
       this.pageScope,
       () => format(getCounterNumber()),
-      `page-counter-${name}`
+      `page-counter-${name}`,
     );
 
     function arrayFormat(arr) {
@@ -174,7 +174,7 @@ class CounterResolver implements CssCasc.CounterResolver {
    */
   getPageCountersVal(
     name: string,
-    format: (p1: number[]) => string
+    format: (p1: number[]) => string,
   ): Exprs.Val {
     const self = this;
 
@@ -184,7 +184,7 @@ class CounterResolver implements CssCasc.CounterResolver {
     const expr = new Exprs.Native(
       this.pageScope,
       () => format(getCounterNumbers()),
-      `page-counters-${name}`
+      `page-counters-${name}`,
     );
     this.counterStore.registerPageCounterExpr(name, format, expr);
     return expr;
@@ -207,7 +207,7 @@ class CounterResolver implements CssCasc.CounterResolver {
   private getTargetCounters(
     id: string | null,
     transformedId: string,
-    lookForElement: boolean
+    lookForElement: boolean,
   ): CssCasc.CounterValues | null {
     let targetCounters = this.counterStore.countersById[transformedId];
     if (!targetCounters && lookForElement && id) {
@@ -224,7 +224,7 @@ class CounterResolver implements CssCasc.CounterResolver {
    *     reference across multiple source documents
    */
   private getTargetPageCounters(
-    transformedId: string
+    transformedId: string,
   ): CssCasc.CounterValues | null {
     if (this.counterStore.currentPage.elementsById[transformedId]) {
       return this.counterStore.currentPageCounters;
@@ -239,7 +239,7 @@ class CounterResolver implements CssCasc.CounterResolver {
   getTargetCounterVal(
     url: string,
     name: string,
-    format: (p1: number | null) => string
+    format: (p1: number | null) => string,
   ): Exprs.Val {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
@@ -253,7 +253,7 @@ class CounterResolver implements CssCasc.CounterResolver {
       const countersOfName = counters[name];
       return new Exprs.Const(
         this.rootScope,
-        format(countersOfName[countersOfName.length - 1] || null)
+        format(countersOfName[countersOfName.length - 1] || null),
       );
     }
     const self = this;
@@ -278,7 +278,7 @@ class CounterResolver implements CssCasc.CounterResolver {
               if (pageCounters[name]) {
                 const pageCountersOfName = pageCounters[name];
                 return format(
-                  pageCountersOfName[pageCountersOfName.length - 1] || null
+                  pageCountersOfName[pageCountersOfName.length - 1] || null,
                 );
               } else {
                 // No corresponding counter with the name.
@@ -288,7 +288,7 @@ class CounterResolver implements CssCasc.CounterResolver {
               // The target element has not been laid out yet.
               self.counterStore.saveReferenceOfCurrentPage(
                 transformedId,
-                false
+                false,
               );
               return "??"; // TODO more reasonable placeholder?
             }
@@ -301,7 +301,7 @@ class CounterResolver implements CssCasc.CounterResolver {
           return "??"; // TODO more reasonable placeholder?
         }
       },
-      `target-counter-${name}-of-${url}`
+      `target-counter-${name}-of-${url}`,
     );
   }
 
@@ -311,7 +311,7 @@ class CounterResolver implements CssCasc.CounterResolver {
   getTargetCountersVal(
     url: string,
     name: string,
-    format: (p1: number[]) => string
+    format: (p1: number[]) => string,
   ): Exprs.Val {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
@@ -331,13 +331,13 @@ class CounterResolver implements CssCasc.CounterResolver {
           const elementCounters = self.getTargetCounters(
             id,
             transformedId,
-            true
+            true,
           );
           const elementCountersOfName = elementCounters[name] || [];
           return format(pageCountersOfName.concat(elementCountersOfName));
         }
       },
-      `target-counters-${name}-of-${url}`
+      `target-counters-${name}-of-${url}`,
     );
   }
 }
@@ -363,7 +363,7 @@ export class CounterStore {
   }[] = [];
 
   constructor(
-    public readonly documentURLTransformer: Base.DocumentURLTransformer
+    public readonly documentURLTransformer: Base.DocumentURLTransformer,
   ) {
     this.currentPageCounters["page"] = [0];
   }
@@ -375,7 +375,7 @@ export class CounterStore {
   createCounterResolver(
     baseURL: string,
     rootScope: Exprs.LexicalScope,
-    pageScope: Exprs.LexicalScope
+    pageScope: Exprs.LexicalScope,
   ): CssCasc.CounterResolver {
     return new CounterResolver(this, baseURL, rootScope, pageScope);
   }
@@ -411,7 +411,7 @@ export class CounterStore {
    */
   updatePageCounters(
     cascadedPageStyle: CssCasc.ElementStyle,
-    context: Exprs.Context
+    context: Exprs.Context,
   ) {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
@@ -510,7 +510,7 @@ export class CounterStore {
    * @param resolved If the reference is already resolved or not.
    */
   saveReferenceOfCurrentPage(id: string, resolved: boolean) {
-    if (!this.newReferencesOfCurrentPage.some(ref => ref.targetId === id)) {
+    if (!this.newReferencesOfCurrentPage.some((ref) => ref.targetId === id)) {
       const ref = new TargetCounterReference(id, resolved);
       this.newReferencesOfCurrentPage.push(ref);
     }
@@ -526,7 +526,7 @@ export class CounterStore {
     const ids = Object.keys(this.currentPage.elementsById);
     if (ids.length > 0) {
       const currentPageCounters = cloneCounterValues(this.currentPageCounters);
-      ids.forEach(id => {
+      ids.forEach((id) => {
         this.pageCountersById[id] = currentPageCounters;
         const oldPageIndex = this.pageIndicesById[id];
         if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
@@ -564,7 +564,7 @@ export class CounterStore {
           arr = this.unresolvedReferences[ref.targetId] = [];
         }
       }
-      if (arr.every(r => !ref.equals(r))) {
+      if (arr.every((r) => !ref.equals(r))) {
         arr.push(ref);
       }
     }
@@ -575,7 +575,7 @@ export class CounterStore {
    * Returns unresolved references pointing to the specified page.
    */
   getUnresolvedRefsToPage(
-    page: Vtree.Page
+    page: Vtree.Page,
   ): {
     spineIndex: number;
     pageIndex: number;
@@ -584,14 +584,14 @@ export class CounterStore {
   }[] {
     let refs: TargetCounterReference[] = [];
     const ids = Object.keys(page.elementsById);
-    ids.forEach(id => {
+    ids.forEach((id) => {
       const idRefs = this.unresolvedReferences[id];
       if (idRefs) {
         refs = refs.concat(idRefs);
       }
     });
     refs.sort(
-      (r1, r2) => r1.spineIndex - r2.spineIndex || r1.pageIndex - r2.pageIndex
+      (r1, r2) => r1.spineIndex - r2.spineIndex || r1.pageIndex - r2.pageIndex,
     );
     const result: {
       spineIndex: number;
@@ -605,7 +605,7 @@ export class CounterStore {
       pageCounters: CssCasc.CounterValues;
       refs: TargetCounterReference[];
     } = null;
-    refs.forEach(ref => {
+    refs.forEach((ref) => {
       if (
         !o ||
         o.spineIndex !== ref.spineIndex ||
@@ -615,7 +615,7 @@ export class CounterStore {
           spineIndex: ref.spineIndex,
           pageIndex: ref.pageIndex,
           pageCounters: ref.pageCounters,
-          refs: [ref]
+          refs: [ref],
         };
         result.push(o);
       } else {
@@ -644,7 +644,7 @@ export class CounterStore {
   registerPageCounterExpr(
     name: string,
     format: (p1: number[]) => string,
-    expr: Exprs.Val
+    expr: Exprs.Val,
   ) {
     if (name === "pages") {
       this.pagesCounterExprs.push({ expr, format });
@@ -656,7 +656,7 @@ export class CounterStore {
   }
 
   private exprContentListener(expr, val, document) {
-    const found = this.pagesCounterExprs.findIndex(o => o.expr === expr) >= 0;
+    const found = this.pagesCounterExprs.findIndex((o) => o.expr === expr) >= 0;
     if (found) {
       const node = document.createElement("span");
       node.textContent = val;
@@ -670,9 +670,9 @@ export class CounterStore {
   finishLastPage(viewport: Vgen.Viewport) {
     const nodes = viewport.root.querySelectorAll(`[${PAGES_COUNTER_ATTR}]`);
     const pages = this.currentPageCounters["page"][0];
-    Array.from(nodes).forEach(node => {
+    Array.from(nodes).forEach((node) => {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
-      const i = this.pagesCounterExprs.findIndex(o => o.expr.key === key);
+      const i = this.pagesCounterExprs.findIndex((o) => o.expr.key === key);
       Asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
     });
@@ -688,7 +688,7 @@ export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(
     public readonly counterStore: CounterStore,
-    public readonly pageIndex: number
+    public readonly pageIndex: number,
   ) {}
 
   /**

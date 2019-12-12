@@ -39,7 +39,7 @@ export function convertPageBreakAliases(original: {
       return {
         name: name.replace(/^page-/, ""),
         value: value === Css.ident.always ? Css.ident.page : value,
-        important: original["important"]
+        important: original["important"],
       };
     default:
       return original;
@@ -53,7 +53,7 @@ export const forcedBreakValues: { [key: string]: boolean | null } = {
   recto: true,
   verso: true,
   column: true,
-  region: true
+  region: true,
 };
 
 /**
@@ -68,7 +68,7 @@ export const avoidBreakValues: { [key: string]: boolean | null } = {
   avoid: true,
   "avoid-page": true,
   "avoid-column": true,
-  "avoid-region": true
+  "avoid-region": true,
 };
 
 /**
@@ -97,7 +97,7 @@ export function isAvoidBreakValue(value: string | null): boolean {
  */
 export function resolveEffectiveBreakValue(
   first: string | null,
-  second: string | null
+  second: string | null,
 ): string | null {
   if (!first) {
     return second;
@@ -146,7 +146,7 @@ export function breakValueToStartSideValue(breakValue: string | null): string {
 }
 
 export function startSideValueToBreakValue(
-  startSideValue: string
+  startSideValue: string,
 ): string | null {
   switch (startSideValue) {
     case "left":

@@ -145,7 +145,7 @@ export class ShapeVisitor extends Css.Visitor {
     y: number,
     width: number,
     height: number,
-    context: Exprs.Context
+    context: Exprs.Context,
   ): Geom.Shape {
     if (this.coords.length > 0) {
       const numbers: number[] = [];
@@ -176,7 +176,7 @@ export class ShapeVisitor extends Css.Visitor {
               x + numbers[0],
               y + numbers[1],
               x + numbers[0] + numbers[2],
-              y + numbers[1] + numbers[3]
+              y + numbers[1] + numbers[3],
             );
           }
           break;
@@ -186,7 +186,7 @@ export class ShapeVisitor extends Css.Visitor {
               x + numbers[0],
               y + numbers[1],
               numbers[2],
-              numbers[3]
+              numbers[3],
             );
           }
           break;
@@ -196,7 +196,7 @@ export class ShapeVisitor extends Css.Visitor {
               x + numbers[0],
               y + numbers[1],
               numbers[2],
-              numbers[2]
+              numbers[2],
             );
           }
           break;
@@ -212,7 +212,7 @@ export function toShape(
   y: number,
   width: number,
   height: number,
-  context: Exprs.Context
+  context: Exprs.Context,
 ): Geom.Shape {
   if (val) {
     const visitor = new ShapeVisitor();
@@ -262,7 +262,7 @@ export class CountersVisitor extends Css.Visitor {
 
 export function toCounters(
   val: Css.Val,
-  reset: boolean
+  reset: boolean,
 ): { [key: string]: number } {
   const visitor = new CountersVisitor(reset);
   try {
@@ -276,7 +276,7 @@ export function toCounters(
 export class UrlTransformVisitor extends Css.FilterVisitor {
   constructor(
     public baseUrl: string,
-    public transformer: Base.DocumentURLTransformer
+    public transformer: Base.DocumentURLTransformer,
   ) {
     super();
   }

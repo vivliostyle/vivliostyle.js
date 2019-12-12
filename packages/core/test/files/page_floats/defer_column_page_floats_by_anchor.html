@@ -1,63 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Defer column page floats by anchor</title>
-  <style>
-    @page {
-      size: 400px 220px;
-      margin: 10px;
-    }
-    :root, html {
-      line-height: 20px;
-      column-count: 2;
-      widows: 1;
-      orphans: 1;
-    }
-    body {
-      margin: 0;
-    }
-    section {
-      break-after: column;
-    }
-    .float {
-      float-reference: column;
-      float: block-start;
-      box-sizing: border-box;
-      width: 100%;
-      padding: 3px;
-      border: blue solid 2px;
-    }
-  </style>
-</head>
-<body>
-<section>
-  Text text text text text text.
-  Float anchor→
-  <div class="float">
-    This<br>
-    block-start<br>
-    column<br>
-    float<br>
-    has<br>
-    8<br>
-    lines<br>
-    foo
-  </div>
-  After page float.
-</section>
-<section>
-  Float anchor→
-  <div class="float">
-    This<br>
-    block-start<br>
-    column<br>
-    float<br>
-    alse<br>
-    has<br>
-    8<br>
-    lines
-  </div>
-</section>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Defer column page floats by anchor</title>
+    <style>
+      @page {
+        size: 400px 220px;
+        margin: 10px;
+      }
+      :root,
+      html {
+        line-height: 20px;
+        column-count: 2;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0;
+      }
+      section {
+        break-after: column;
+      }
+      .float {
+        float-reference: column;
+        float: block-start;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 3px;
+        border: blue solid 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      Text text text text text text. Float anchor→
+      <div class="float">
+        This<br />
+        block-start<br />
+        column<br />
+        float<br />
+        has<br />
+        8<br />
+        lines<br />
+        foo
+      </div>
+      After page float.
+    </section>
+    <section>
+      Float anchor→
+      <div class="float">
+        This<br />
+        block-start<br />
+        column<br />
+        float<br />
+        alse<br />
+        has<br />
+        8<br />
+        lines
+      </div>
+    </section>
+  </body>
 </html>
