@@ -87,7 +87,7 @@ const PageViewMode = {
       default:
         throw new Error(`Invalid PageViewMode name: ${name}`);
     }
-  }
+  },
 };
 
 export default PageViewMode;

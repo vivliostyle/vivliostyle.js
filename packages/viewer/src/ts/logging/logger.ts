@@ -23,7 +23,7 @@ enum LogLevel {
   Debug = "debug",
   Info = "info",
   Warn = "warn",
-  Error = "error"
+  Error = "error",
 }
 
 export default class Logger {
@@ -45,7 +45,7 @@ export default class Logger {
     if (this.logLevel === LogLevel.Debug) {
       messageQueue.push({
         type: "debug",
-        content
+        content,
       });
     }
   }
@@ -54,7 +54,7 @@ export default class Logger {
     if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info) {
       messageQueue.push({
         type: "info",
-        content
+        content,
       });
     }
   }
@@ -67,7 +67,7 @@ export default class Logger {
     ) {
       messageQueue.push({
         type: "warn",
-        content
+        content,
       });
     }
   }
@@ -81,7 +81,7 @@ export default class Logger {
     ) {
       messageQueue.push({
         type: "error",
-        content
+        content,
       });
     }
   }

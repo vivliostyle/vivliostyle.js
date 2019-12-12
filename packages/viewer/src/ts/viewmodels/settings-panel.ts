@@ -56,7 +56,7 @@ class SettingsPanel {
     documentOptions: DocumentOptions,
     viewer: Viewer,
     messageDialog,
-    settingsPanelOptions
+    settingsPanelOptions,
   ) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
@@ -69,7 +69,7 @@ class SettingsPanel {
 
     this.justClicked = false;
     this.settingsToggle = document.getElementById(
-      "vivliostyle-menu-item_settings-toggle"
+      "vivliostyle-menu-item_settings-toggle",
     );
 
     this.opened = ko.observable(false);
@@ -82,28 +82,28 @@ class SettingsPanel {
         read: () => {
           return this.state.viewerOptions.pageViewMode().toString();
         },
-        write: value => {
+        write: (value) => {
           this.state.viewerOptions.pageViewMode(PageViewMode.of(value));
-        }
+        },
       }),
       renderAllPages: ko.pureComputed({
         read: () => {
           return this.state.viewerOptions.renderAllPages();
         },
-        write: value => {
+        write: (value) => {
           this.state.viewerOptions.renderAllPages(value);
-        }
-      })
+        },
+      }),
     };
 
     this.state.pageStyle.setViewerFontSizeObservable(
-      this.state.viewerOptions.fontSize
+      this.state.viewerOptions.fontSize,
     );
 
     this.defaultPageStyle = new PageStyle();
 
     ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function(
-      methodName
+      methodName,
     ) {
       this[methodName] = this[methodName].bind(this);
     },
@@ -118,7 +118,7 @@ class SettingsPanel {
     this.opened(false);
     this.pinned(false);
     const viewportElement = document.getElementById(
-      "vivliostyle-viewer-viewport"
+      "vivliostyle-viewer-viewport",
     );
     if (viewportElement) viewportElement.focus();
     return true;
@@ -170,7 +170,7 @@ class SettingsPanel {
       }
       this.viewer_.loadDocument(
         this.documentOptions_,
-        this.state.viewerOptions
+        this.state.viewerOptions,
       );
     }
     if (this.pinned()) {
@@ -189,11 +189,11 @@ class SettingsPanel {
   resetUserStyle() {
     this.state.pageStyle.copyFrom(this.defaultPageStyle);
     this.state.viewerOptions.fontSize(
-      ViewerOptions.getDefaultValues().fontSize
+      ViewerOptions.getDefaultValues().fontSize,
     );
     setTimeout(() => {
       const elem = document.getElementsByName(
-        "vivliostyle-settings_reset-user-style"
+        "vivliostyle-settings_reset-user-style",
       )[0] as HTMLInputElement;
       elem.checked = false;
     }, 200);
@@ -203,13 +203,13 @@ class SettingsPanel {
   focusToFirstItem(outerElemParam?: Element) {
     const outerElem = outerElemParam || this.settingsToggle;
     const inputElem = ["input", "textarea", "summary"].includes(
-      outerElem.localName
+      outerElem.localName,
     )
       ? outerElem
       : Array.from(outerElem.getElementsByTagName("input")).find(
           (e: HTMLInputElement) => {
             return !e.disabled && (e.type != "radio" || e.checked);
-          }
+          },
         );
     if (inputElem) {
       for (
@@ -258,8 +258,8 @@ class SettingsPanel {
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementById(
-              "vivliostyle-settings_page-view-and-rendering"
-            ).firstElementChild
+              "vivliostyle-settings_page-view-and-rendering",
+            ).firstElementChild,
           );
           return false;
         }
@@ -268,7 +268,7 @@ class SettingsPanel {
       case "V":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_page-view-mode")
+            document.getElementById("vivliostyle-settings_page-view-mode"),
           );
           return false;
         }
@@ -278,8 +278,8 @@ class SettingsPanel {
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementsByName(
-              "vivliostyle-settings_render-all-pages"
-            )[0]
+              "vivliostyle-settings_render-all-pages",
+            )[0],
           );
           return false;
         }
@@ -289,7 +289,7 @@ class SettingsPanel {
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementById("vivliostyle-settings_user-style")
-              .firstElementChild
+              .firstElementChild,
           );
           return false;
         }
@@ -298,7 +298,7 @@ class SettingsPanel {
       case "Z":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_page-size")
+            document.getElementById("vivliostyle-settings_page-size"),
           );
           return false;
         }
@@ -307,7 +307,7 @@ class SettingsPanel {
       case "M":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_page-margin")
+            document.getElementById("vivliostyle-settings_page-margin"),
           );
           return false;
         }
@@ -316,7 +316,7 @@ class SettingsPanel {
       case "B":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_page-breaks")
+            document.getElementById("vivliostyle-settings_page-breaks"),
           );
           return false;
         }
@@ -325,7 +325,7 @@ class SettingsPanel {
       case "I":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_images")
+            document.getElementById("vivliostyle-settings_images"),
           );
           return false;
         }
@@ -334,7 +334,7 @@ class SettingsPanel {
       case "T":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_text")
+            document.getElementById("vivliostyle-settings_text"),
           );
           return false;
         }
@@ -344,8 +344,8 @@ class SettingsPanel {
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementsByName(
-              "vivliostyle-settings_override-document-stylesheets"
-            )[0]
+              "vivliostyle-settings_override-document-stylesheets",
+            )[0],
           );
           return false;
         }
@@ -354,7 +354,7 @@ class SettingsPanel {
       case "C":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementsByName("vivliostyle-settings_css-details")[0]
+            document.getElementsByName("vivliostyle-settings_css-details")[0],
           );
           return false;
         }
@@ -364,8 +364,8 @@ class SettingsPanel {
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementsByName(
-              "vivliostyle-settings_reset-user-style"
-            )[0]
+              "vivliostyle-settings_reset-user-style",
+            )[0],
           );
           return false;
         }

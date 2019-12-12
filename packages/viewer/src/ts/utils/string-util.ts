@@ -37,5 +37,5 @@ export default {
     return encodeURI(str)
       .replace(/#/g, "%23")
       .replace(/&/g, "%26");
-  }
+  },
 };

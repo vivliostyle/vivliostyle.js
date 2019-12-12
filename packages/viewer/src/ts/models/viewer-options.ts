@@ -55,8 +55,8 @@ function getViewerOptionsFromURL() {
     fontSize,
     profile: urlParameters.getParameter("profile")[0] === "true",
     pageViewMode: PageViewMode.fromSpreadViewString(
-      urlParameters.getParameter("spread")[0]
-    )
+      urlParameters.getParameter("spread")[0],
+    ),
   };
 }
 
@@ -67,7 +67,7 @@ function getDefaultValues() {
     fontSize: 16,
     profile: false,
     pageViewMode: PageViewMode.defaultMode(),
-    zoom: ZoomOptions.createDefaultOptions()
+    zoom: ZoomOptions.createDefaultOptions(),
   };
 }
 
@@ -100,7 +100,7 @@ class ViewerOptions {
       this.renderAllPages(
         urlOptions.renderAllPages !== null
           ? urlOptions.renderAllPages
-          : defaultValues.renderAllPages
+          : defaultValues.renderAllPages,
       );
       this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
       this.profile(urlOptions.profile || defaultValues.profile);
@@ -108,27 +108,27 @@ class ViewerOptions {
       this.zoom(defaultValues.zoom);
 
       // write spread parameter back to URL when updated
-      this.pageViewMode.subscribe(pageViewMode => {
+      this.pageViewMode.subscribe((pageViewMode) => {
         if (pageViewMode === defaultValues.pageViewMode) {
           urlParameters.removeParameter("spread");
         } else {
           urlParameters.setParameter(
             "spread",
-            pageViewMode.toSpreadViewString()
+            pageViewMode.toSpreadViewString(),
           );
         }
       });
-      this.renderAllPages.subscribe(renderAllPages => {
+      this.renderAllPages.subscribe((renderAllPages) => {
         if (renderAllPages === defaultValues.renderAllPages) {
           urlParameters.removeParameter("renderAllPages");
         } else {
           urlParameters.setParameter(
             "renderAllPages",
-            renderAllPages.toString()
+            renderAllPages.toString(),
           );
         }
       });
-      this.fontSize.subscribe(fontSize => {
+      this.fontSize.subscribe((fontSize) => {
         if (typeof fontSize == "number") {
           fontSize = fontSize
             .toPrecision(10)
@@ -139,7 +139,7 @@ class ViewerOptions {
         } else {
           urlParameters.setParameter(
             "fontSize",
-            `${fontSize}/${defaultValues.fontSize}`
+            `${fontSize}/${defaultValues.fontSize}`,
           );
         }
       });
@@ -160,7 +160,7 @@ class ViewerOptions {
       fontSize: this.fontSize(),
       pageViewMode: this.pageViewMode().toString(),
       zoom: this.zoom().zoom,
-      fitToScreen: this.zoom().fitToScreen
+      fitToScreen: this.zoom().fitToScreen,
     };
   }
 }

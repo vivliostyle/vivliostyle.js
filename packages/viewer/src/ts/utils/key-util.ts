@@ -30,7 +30,7 @@ const Keys = {
   PageUp: "PageUp",
   Escape: "Escape",
   Enter: "Enter",
-  Space: " "
+  Space: " ",
 };
 
 // CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
@@ -101,5 +101,5 @@ function identifyKeyFromEvent(event) {
 
 export default {
   Keys,
-  identifyKeyFromEvent
+  identifyKeyFromEvent,
 };

@@ -36,7 +36,7 @@ enum Mode {
   Auto = "auto",
   Preset = "preset",
   Custom = "custom",
-  Zero = "0"
+  Zero = "0",
 }
 
 const PRESET_SIZE: Array<PresetSize> = [
@@ -49,7 +49,7 @@ const PRESET_SIZE: Array<PresetSize> = [
   { name: "JIS-B4", description: "B4 (JIS)" },
   { name: "letter", description: "letter" },
   { name: "legal", description: "legal" },
-  { name: "ledger", description: "ledger" }
+  { name: "ledger", description: "ledger" },
 ];
 
 const CONSTANTS: Constants = {
@@ -59,7 +59,7 @@ const CONSTANTS: Constants = {
   baseFontSize: "12pt",
   baseLineHeight: "1.2",
   baseFontFamily: "serif",
-  viewerFontSize: 16
+  viewerFontSize: 16,
 };
 
 class PageStyle {
@@ -99,7 +99,7 @@ class PageStyle {
 
   cssText: PureComputed<string>;
   setViewerFontSizeObservable: (
-    viewerFontSizeObservable: null | Observable<number | string>
+    viewerFontSizeObservable: null | Observable<number | string>,
   ) => void;
   pageStyleRegExp: RegExp;
   viewerFontSize: null | Observable<number | string>;
@@ -146,16 +146,16 @@ class PageStyle {
     this.afterOtherStyle = ko.observable("");
 
     this.viewerFontSize = null;
-    this.setViewerFontSizeObservable = viewerFontSizeObservable => {
+    this.setViewerFontSizeObservable = (viewerFontSizeObservable) => {
       this.viewerFontSize = viewerFontSizeObservable;
       const elem = document.getElementsByName(
-        "vivliostyle-settings_viewer-font-size"
+        "vivliostyle-settings_viewer-font-size",
       )[0] as HTMLInputElement;
       if (elem) {
         elem.value = this.fontSizePxToPercent(
           Number(viewerFontSizeObservable()),
           100,
-          5
+          5,
         ).toString();
       }
     };
@@ -168,7 +168,7 @@ class PageStyle {
         const percent = this.fontSizePxToPercent(
           Number(this.viewerFontSize()),
           100,
-          5
+          5,
         );
         return percent;
       },
@@ -180,7 +180,7 @@ class PageStyle {
         let fontSize = percent && this.fontSizePercentToPx(percent);
         if (!fontSize || fontSize < 5 || fontSize > 72) {
           const elem = document.getElementsByName(
-            "vivliostyle-settings_viewer-font-size"
+            "vivliostyle-settings_viewer-font-size",
           )[0] as HTMLInputElement;
           if (elem) {
             elem.value = "100";
@@ -189,16 +189,16 @@ class PageStyle {
         }
         this.viewerFontSize(Number(fontSize));
       },
-      owner: this
+      owner: this,
     });
 
     this.cssText = ko.pureComputed({
       read: this.toCSSText,
       write: this.fromCSSText,
-      owner: this
+      owner: this,
     });
 
-    this.allImportant.subscribe(allImportant => {
+    this.allImportant.subscribe((allImportant) => {
       this.pageSizeImportant(allImportant);
       this.pageMarginImportant(allImportant);
       this.firstPageMarginZeroImportant(allImportant);
@@ -232,7 +232,7 @@ class PageStyle {
         // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
         "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
         // 25. afterOtherStyle
-        "((?:\\n|.)*)$"
+        "((?:\\n|.)*)$",
     );
 
     if (pageStyle) {
@@ -249,7 +249,7 @@ class PageStyle {
   fontSizePxToPercent(
     px: number,
     cent?: number,
-    precision?: number
+    precision?: number,
   ): number | string {
     let percent: number | string =
       (px / CONSTANTS.viewerFontSize) * (cent || 100);
@@ -270,7 +270,7 @@ class PageStyle {
   fontSizePercentToPx(
     percent: number,
     cent?: number,
-    precision?: number
+    precision?: number,
   ): number | string {
     let px: number | string =
       (percent / (cent || 100)) * CONSTANTS.viewerFontSize;
@@ -309,7 +309,7 @@ class PageStyle {
         imageMaxSizeToFitPageImportant,
         imageKeepAspectRatio,
         imageKeepAspectRatioImportant,
-        afterOtherStyle_
+        afterOtherStyle_,
       ] = r;
       let afterOtherStyle = afterOtherStyle_;
       let baseFontFamily = baseFontFamily_;
@@ -339,7 +339,8 @@ class PageStyle {
             this.pageSizeMode(Mode.Auto);
           } else {
             const presetSize = PRESET_SIZE.find(
-              presetSize => presetSize.name.toLowerCase() == sizeW.toLowerCase()
+              (presetSize) =>
+                presetSize.name.toLowerCase() == sizeW.toLowerCase(),
             );
             if (presetSize) {
               this.pageSizeMode(Mode.Preset);
@@ -399,7 +400,7 @@ class PageStyle {
         // This may be calc() e.g. "calc(1.25 * 12pt)" when viewer font size is 125%.
         baseFontSize = baseFontSize.replace(
           /^\s*calc\([.\d]+\s*\*\s*([.\d]+\w+)\)\s*$/,
-          "$1"
+          "$1",
         );
         this.baseFontSizeSpecified(true);
         this.baseFontSize(baseFontSize);
@@ -557,25 +558,25 @@ class PageStyle {
           const perOne = this.fontSizePxToPercent(
             Number(this.viewerFontSize()),
             1,
-            5
+            5,
           );
           cssText += `font-size: calc(${perOne} * ${baseFontSize})${imp(
-            this.baseFontSizeImportant()
+            this.baseFontSizeImportant(),
           )}; `;
         } else {
           cssText += `font-size: ${this.baseFontSize()}${imp(
-            this.baseFontSizeImportant()
+            this.baseFontSizeImportant(),
           )}; `;
         }
       }
       if (this.baseLineHeightSpecified()) {
         cssText += `line-height: ${this.baseLineHeight()}${imp(
-          this.baseLineHeightImportant()
+          this.baseLineHeightImportant(),
         )}; `;
       }
       if (this.baseFontFamilySpecified()) {
         cssText += `font-family: ${this.baseFontFamily()}${imp(
-          this.baseFontFamilyImportant()
+          this.baseFontFamilyImportant(),
         )}; `;
       }
       cssText += this.rootOtherStyle();
@@ -602,10 +603,10 @@ class PageStyle {
     if (this.widowsOrphans()) {
       cssText += "* { ";
       cssText += `widows: ${this.widowsOrphans()}${imp(
-        this.widowsOrphansImportant()
+        this.widowsOrphansImportant(),
       )}; `;
       cssText += `orphans: ${this.widowsOrphans()}${imp(
-        this.widowsOrphansImportant()
+        this.widowsOrphansImportant(),
       )}; `;
       cssText += "}\n";
     }
@@ -614,15 +615,15 @@ class PageStyle {
       cssText += "img, svg { ";
       if (this.imageMaxSizeToFitPage()) {
         cssText += `max-inline-size: 100%${imp(
-          this.imageMaxSizeToFitPageImportant()
+          this.imageMaxSizeToFitPageImportant(),
         )}; `;
         cssText += `max-block-size: 100vb${imp(
-          this.imageMaxSizeToFitPageImportant()
+          this.imageMaxSizeToFitPageImportant(),
         )}; `;
       }
       if (this.imageKeepAspectRatio()) {
         cssText += `object-fit: contain${imp(
-          this.imageKeepAspectRatioImportant()
+          this.imageKeepAspectRatioImportant(),
         )}; `;
       }
       cssText += "}\n";

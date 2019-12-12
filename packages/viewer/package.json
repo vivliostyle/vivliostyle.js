@@ -8,7 +8,7 @@
     "dev": "run-p dev:*",
     "dev:serve": "gulp serve-dev",
     "dev:webpack": "NODE_ENV=development webpack -w",
-    "format": "prettier --write \"{src,test,scripts}/**/*.js\"",
+    "format": "prettier --write \"{*.{js,md,json},{src,test}/**/*.{ts,js}}\"",
     "lint": "run-p lint:*",
     "lint:scripts": "eslint src/ts --ext .ts",
     "lint:styles": "stylelint src/scss/{*.*,**/*.*}",

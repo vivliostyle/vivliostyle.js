@@ -17,24 +17,24 @@
  */
 
 window.MathJax = {
-    showProcessingMessages: false,
-    messageStyle: "none",
-    skipStartupTypeset: true,
-    CommonHTML: {
-        scale: 90,
-        linebreaks: {
-            automatic: true
-        },
-        styles: {
-            ".MJXc-display": {
-                margin: "0"
-            }
-        }
+  showProcessingMessages: false,
+  messageStyle: "none",
+  skipStartupTypeset: true,
+  CommonHTML: {
+    scale: 90,
+    linebreaks: {
+      automatic: true,
     },
-    "fast-preview": {
-        disabled: true
+    styles: {
+      ".MJXc-display": {
+        margin: "0",
+      },
     },
-    AuthorInit: function() {
-        MathJax.Hub.processSectionDelay = 0;
-    }
+  },
+  "fast-preview": {
+    disabled: true,
+  },
+  AuthorInit: function() {
+    MathJax.Hub.processSectionDelay = 0;
+  },
 };

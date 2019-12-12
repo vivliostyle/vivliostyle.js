@@ -68,7 +68,7 @@ class Navigation {
     viewerOptions: ViewerOptions,
     viewer: Viewer,
     settingsPanel: SettingsPanel,
-    navigationOptions: NavigationOptions
+    navigationOptions: NavigationOptions,
   ) {
     this.viewerOptions_ = viewerOptions;
     this.viewer_ = viewer;
@@ -86,9 +86,9 @@ class Navigation {
       return navigationOptions.disablePageNavigation || this.isDisabled();
     });
 
-    navigationDisabled.subscribe(disabled => {
+    navigationDisabled.subscribe((disabled) => {
       const pageNumberElem = document.getElementById(
-        "vivliostyle-page-number"
+        "vivliostyle-page-number",
       ) as HTMLInputElement;
       if (pageNumberElem) {
         pageNumberElem.disabled = disabled;
@@ -239,9 +239,9 @@ class Navigation {
           parseFloat(
             pageNumberText
               .toString()
-              .replace(/[０-９]/g, s =>
-                String.fromCharCode(s.charCodeAt(0) - 0xfee0)
-              )
+              .replace(/[０-９]/g, (s) =>
+                String.fromCharCode(s.charCodeAt(0) - 0xfee0),
+              ),
           ) || 0;
         if (/^[-+]/.test(pageNumberText.toString())) {
           // "+number" and "-number" to relative move.
@@ -262,7 +262,7 @@ class Navigation {
         }
         const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
         const pageNumberElem = document.getElementById(
-          "vivliostyle-page-number"
+          "vivliostyle-page-number",
         ) as HTMLInputElement;
         pageNumberElem.value = pageNumber.toString();
         this.viewer_.navigateToEPage(epageNav);
@@ -278,7 +278,7 @@ class Navigation {
           document.getElementById("vivliostyle-viewer-viewport").focus();
         }, 10);
       },
-      owner: this
+      owner: this,
     });
 
     this.totalPages = ko.pureComputed(() => {
@@ -310,8 +310,8 @@ class Navigation {
       "decreaseFontSize",
       "defaultFontSize",
       "onclickViewport",
-      "toggleTOC"
-    ].forEach(methodName => {
+      "toggleTOC",
+    ].forEach((methodName) => {
       this[methodName] = this[methodName].bind(this);
     });
   }
@@ -470,7 +470,7 @@ class Navigation {
   updateFontSizeSettings() {
     // Update setting panel "Font Size".
     this.settingsPanel_.state.viewerOptions.fontSize(
-      this.viewerOptions_.fontSize()
+      this.viewerOptions_.fontSize(),
     );
 
     if (this.viewer_.documentOptions_.pageStyle.baseFontSizeSpecified()) {
@@ -478,7 +478,7 @@ class Navigation {
       this.viewer_.documentOptions_.updateUserStyleSheetFromCSSText();
       this.viewer_.loadDocument(
         this.viewer_.documentOptions_,
-        this.viewerOptions_
+        this.viewerOptions_,
       );
     }
   }
@@ -516,7 +516,7 @@ class Navigation {
         // - Move focus to TOC box when TOC box becomes visible.
         intervalID = setInterval(() => {
           const tocBox = document.querySelector(
-            "[data-vivliostyle-toc-box]"
+            "[data-vivliostyle-toc-box]",
           ) as HTMLElement;
           if (tocBox && tocBox.style.visibility === "visible") {
             tocBox.tabIndex = 0;
@@ -559,10 +559,10 @@ class Navigation {
     const nodes = Array.from(document.querySelectorAll(selecter));
     let index = nodes.indexOf(document.activeElement);
 
-    const isButton = index => {
+    const isButton = (index) => {
       return nodes[index] && nodes[index].getAttribute("role") === "button";
     };
-    const isExpanded = index => {
+    const isExpanded = (index) => {
       return (
         nodes[index] && nodes[index].getAttribute("aria-expanded") === "true"
       );
@@ -656,7 +656,7 @@ class Navigation {
 
     const pageNumberElem = document.getElementById("vivliostyle-page-number");
     const viewportElement = document.getElementById(
-      "vivliostyle-viewer-viewport"
+      "vivliostyle-viewer-viewport",
     );
     const horizontalScrollable =
       viewportElement.scrollWidth > viewportElement.clientWidth;

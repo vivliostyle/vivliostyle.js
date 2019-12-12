@@ -7,7 +7,7 @@
     "build-debug": "NODE_ENV=debug webpack",
     "build-dev": "NODE_ENV=development webpack",
     "dev": "NODE_ENV=development webpack -w",
-    "format": "prettier --write \"{src,test,scripts}/**/*.{html,js,css}\"",
+    "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js,html}}\"",
     "lint": "eslint --ext .ts src",
     "test": "karma start test/conf/karma-local.conf.js",
     "test-sauce": "test -z \"$SAUCE_USERNAME\" || karma start test/conf/karma-sauce.conf.js",

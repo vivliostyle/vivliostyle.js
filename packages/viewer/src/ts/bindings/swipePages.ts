@@ -42,7 +42,7 @@ declare global {
 ko.bindingHandlers.swipePages = {
   init(element, valueAccessor) {
     if (supportTouchEvents && ko.unwrap(valueAccessor())) {
-      element.addEventListener("touchstart", event => {
+      element.addEventListener("touchstart", (event) => {
         if (event.touches.length > 1) {
           return; // multi-touch is not for page swipe
         }
@@ -50,7 +50,7 @@ ko.bindingHandlers.swipePages = {
           return; // disable page swipe when pinch-zoomed
         }
         const viewportElement = document.getElementById(
-          "vivliostyle-viewer-viewport"
+          "vivliostyle-viewer-viewport",
         );
         if (
           viewportElement &&
@@ -61,7 +61,7 @@ ko.bindingHandlers.swipePages = {
         xStart = event.touches[0].clientX;
         yStart = event.touches[0].clientY;
       });
-      element.addEventListener("touchmove", event => {
+      element.addEventListener("touchmove", (event) => {
         if (event.touches.length > 1) {
           return;
         }
@@ -72,12 +72,12 @@ ko.bindingHandlers.swipePages = {
             if (xDiff < 0) {
               // swipe to left = go to right
               arrowButton = document.getElementById(
-                "vivliostyle-page-navigation-right"
+                "vivliostyle-page-navigation-right",
               );
             } else {
               // swipe to right = go to left
               arrowButton = document.getElementById(
-                "vivliostyle-page-navigation-left"
+                "vivliostyle-page-navigation-left",
               );
             }
           }
@@ -100,5 +100,5 @@ ko.bindingHandlers.swipePages = {
         yStart = null;
       });
     }
-  }
+  },
 };

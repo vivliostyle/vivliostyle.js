@@ -29,9 +29,9 @@ const util = {
     const obs = ko.observable(value);
     return {
       getter: ko.pureComputed(() => obs()),
-      value: obs
+      value: obs,
     };
-  }
+  },
 };
 
 export default util;

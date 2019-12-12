@@ -49,5 +49,5 @@ ko.bindingHandlers.menuButton = {
         });
       }
     }
-  }
+  },
 };

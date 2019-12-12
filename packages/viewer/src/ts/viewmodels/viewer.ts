@@ -65,25 +65,25 @@ class Viewer {
     this.documentOptions_ = null;
     this.viewer_ = new vivliostyle.viewer.Viewer(
       viewerSettings,
-      viewerOptions.toObject()
+      viewerOptions.toObject(),
     );
     const state_ = (this.state_ = {
       status: obs.readonlyObservable(vivliostyle.constants.ReadyState.LOADING),
       pageProgression: obs.readonlyObservable(
-        vivliostyle.constants.PageProgression.LTR
-      )
+        vivliostyle.constants.PageProgression.LTR,
+      ),
     });
     this.state = {
       status: state_.status.getter.extend({
         rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
-        notify: "always"
+        notify: "always",
       }),
       navigatable: ko.pureComputed(
         () =>
           state_.status.value() &&
-          state_.status.value() !== vivliostyle.constants.ReadyState.LOADING
+          state_.status.value() !== vivliostyle.constants.ReadyState.LOADING,
       ),
-      pageProgression: state_.pageProgression.getter
+      pageProgression: state_.pageProgression.getter,
     };
 
     this.epage = ko.observable();
@@ -101,16 +101,16 @@ class Viewer {
 
   setupViewerEventHandler() {
     const logger = Logger.getLogger();
-    this.viewer_.addListener("debug", payload => {
+    this.viewer_.addListener("debug", (payload) => {
       logger.debug(payload.content);
     });
-    this.viewer_.addListener("info", payload => {
+    this.viewer_.addListener("info", (payload) => {
       logger.info(payload.content);
     });
-    this.viewer_.addListener("warn", payload => {
+    this.viewer_.addListener("warn", (payload) => {
       logger.warn(payload.content);
     });
-    this.viewer_.addListener("error", payload => {
+    this.viewer_.addListener("error", (payload) => {
       logger.error(payload.content);
     });
     this.viewer_.addListener("readystatechange", () => {
@@ -120,7 +120,7 @@ class Viewer {
         readyState === vivliostyle.constants.ReadyState.COMPLETE
       ) {
         this.state_.pageProgression.value(
-          this.viewer_.getCurrentPageProgression()
+          this.viewer_.getCurrentPageProgression(),
         );
       }
       this.state_.status.value(readyState);
@@ -130,7 +130,7 @@ class Viewer {
         vivliostyle.profile.profiler.printTimings();
       }
     });
-    this.viewer_.addListener("nav", payload => {
+    this.viewer_.addListener("nav", (payload) => {
       const {
         cfi,
         first,
@@ -138,7 +138,7 @@ class Viewer {
         epage,
         epageCount,
         metadata,
-        docTitle
+        docTitle,
       } = payload;
       if (cfi) {
         this.documentOptions_.fragment(cfi);
@@ -183,7 +183,7 @@ class Viewer {
         this.tocVisible(tocVisibleNew);
       }
     });
-    this.viewer_.addListener("hyperlink", payload => {
+    this.viewer_.addListener("hyperlink", (payload) => {
       if (payload.internal) {
         this.navigateToInternalUrl(payload.href);
 
@@ -218,7 +218,7 @@ class Viewer {
       this.viewer_.loadDocument(
         documentOptions.xUrl(),
         documentOptions.toObject(),
-        this.viewerOptions_.toObject()
+        this.viewerOptions_.toObject(),
       );
     } else if (documentOptions.bookUrl()) {
       if (this.viewer_.loadPublication)
@@ -226,14 +226,14 @@ class Viewer {
         this.viewer_.loadPublication(
           documentOptions.bookUrl(),
           documentOptions.toObject(),
-          this.viewerOptions_.toObject()
+          this.viewerOptions_.toObject(),
         );
       // old name
       else
         this.viewer_.loadEPUB(
           documentOptions.bookUrl(),
           documentOptions.toObject(),
-          this.viewerOptions_.toObject()
+          this.viewerOptions_.toObject(),
         );
     } else {
       // No document specified, show welcome page

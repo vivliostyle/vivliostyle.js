@@ -35,7 +35,7 @@ function ViewerApp() {
   this.viewerOptions = new ViewerOptions();
 
   this.documentOptions.pageStyle.setViewerFontSizeObservable(
-    this.viewerOptions.fontSize
+    this.viewerOptions.fontSize,
   );
 
   if (this.viewerOptions.profile()) {
@@ -45,7 +45,7 @@ function ViewerApp() {
   this.viewerSettings = {
     userAgentRootURL: `${urlParameters.getBaseURL()}resources/`,
     viewportElement: document.getElementById("vivliostyle-viewer-viewport"),
-    debug: this.isDebug
+    debug: this.isDebug,
   };
 
   // Remove redundant or ineffective URL parameters
@@ -62,7 +62,7 @@ function ViewerApp() {
 
   this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 
-  this.viewer.inputUrl.subscribe(inputUrl => {
+  this.viewer.inputUrl.subscribe((inputUrl) => {
     if (inputUrl != "") {
       if (!urlParameters.hasParameter("b")) {
         // Push current URL to browser history to enable to go back here when browser Back button is clicked.
@@ -74,7 +74,7 @@ function ViewerApp() {
         inputUrl = "data:," + stringUtil.percentEncodeForDataURI(inputUrl);
       } else {
         inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(
-          inputUrl
+          inputUrl,
         );
       }
       urlParameters.setParameter("b", inputUrl);
@@ -88,7 +88,7 @@ function ViewerApp() {
   const settingsPanelOptions = {
     disablePageStyleChange: false,
     disablePageViewModeChange: false,
-    disableRenderAllPagesChange: false
+    disableRenderAllPagesChange: false,
   };
 
   this.settingsPanel = new SettingsPanel(
@@ -96,21 +96,21 @@ function ViewerApp() {
     this.documentOptions,
     this.viewer,
     this.messageDialog,
-    settingsPanelOptions
+    settingsPanelOptions,
   );
 
   const navigationOptions = {
     disableTOCNavigation: false,
     disablePageNavigation: false,
     disableZoom: false,
-    disableFontSizeChange: false
+    disableFontSizeChange: false,
   };
 
   this.navigation = new Navigation(
     this.viewerOptions,
     this.viewer,
     this.settingsPanel,
-    navigationOptions
+    navigationOptions,
   );
 
   this.handleKey = (data, event) => {

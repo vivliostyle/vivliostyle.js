@@ -34,7 +34,7 @@ function getDocumentOptionsFromURL() {
     xUrl: !bookUrl[0] && xUrl.length && xUrl[0] ? xUrl : null,
     fragment: fragment[0] || null,
     authorStyleSheet: style.length ? style : [],
-    userStyleSheet: userStyle.length ? userStyle : []
+    userStyleSheet: userStyle.length ? userStyle : [],
   };
 }
 
@@ -58,13 +58,13 @@ class DocumentOptions {
     this.dataUserStyleIndex = -1;
 
     // write fragment back to URL when updated
-    this.fragment.subscribe(fragment => {
+    this.fragment.subscribe((fragment) => {
       if (/^epubcfi\(\/([246]\/)?2!\)/.test(fragment)) {
         urlParameters.removeParameter("f");
       } else {
         const encoded = fragment.replace(
           /[\s+&?=#\u007F-\uFFFF]+/g,
-          encodeURIComponent
+          encodeURIComponent,
         );
         urlParameters.setParameter("f", encoded);
       }
@@ -88,15 +88,15 @@ class DocumentOptions {
     });
 
     // write cssText back to URL parameter userStyle= when updated
-    this.pageStyle.cssText.subscribe(cssText => {
+    this.pageStyle.cssText.subscribe((cssText) => {
       this.updateUserStyleSheetFromCSSText(cssText);
     });
   }
 
   toObject() {
     function convertStyleSheetArray(arr) {
-      return arr.map(url => ({
-        url
+      return arr.map((url) => ({
+        url,
       }));
     }
     const userStyleSheetArray = convertStyleSheetArray(this.userStyleSheet());
@@ -109,7 +109,7 @@ class DocumentOptions {
     return {
       fragment: this.fragment(),
       authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-      userStyleSheet: userStyleSheetArray
+      userStyleSheet: userStyleSheetArray,
     };
   }
 
@@ -139,7 +139,7 @@ class DocumentOptions {
     urlParameters.setParameter(
       "userStyle",
       dataUserStyle,
-      this.dataUserStyleIndex
+      this.dataUserStyleIndex,
     );
   }
 }
