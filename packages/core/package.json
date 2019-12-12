@@ -30,6 +30,7 @@
     "karma-verbose-reporter": "0.0.6",
     "karma-webpack": "^4.0.2",
     "mustache": "^3.1.0",
+    "parcel-bundler": "^1.12.4",
     "prettier": "^1.18.2",
     "raw-loader": "^3.1.0",
     "ts-loader": "^6.1.0",

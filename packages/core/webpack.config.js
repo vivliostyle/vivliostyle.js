@@ -23,8 +23,7 @@ along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
 
 Vivliostyle core ${pkg.version}`;
 
-const config = (outputFilename, tsConfigName) =>
-({
+const config = (outputFilename, tsConfigName) => ({
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
   entry: "./src/ts/vivliostyle.ts",
   devtool: "source-map",
@@ -32,14 +31,14 @@ const config = (outputFilename, tsConfigName) =>
     path: path.join(__dirname, "lib"),
     filename:
       process.env.NODE_ENV === "development"
-        ? outputFilename + ".dev.js"  // "development"
+        ? outputFilename + ".dev.js" // "development"
         : outputFilename + ".min.js", // "production" or "debug"
     library: "vivliostyle",
     libraryTarget: "umd",
-    libraryExport: "default"
+    libraryExport: "default",
   },
   resolve: {
-    extensions: [".js", ".ts"]
+    extensions: [".js", ".ts"],
   },
   module: {
     rules: [
@@ -49,28 +48,28 @@ const config = (outputFilename, tsConfigName) =>
           {
             loader: "ts-loader",
             options: {
-              configFile: tsConfigName
-            }
-          }
-        ]
+              configFile: tsConfigName,
+            },
+          },
+        ],
       },
       {
         test: /\.(css|txt|xml)$/,
-        use: "raw-loader"
-      }
-    ]
+        use: "raw-loader",
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
-      DEBUG: JSON.stringify(process.env.NODE_ENV !== "production")
+      DEBUG: JSON.stringify(process.env.NODE_ENV !== "production"),
     }),
     new webpack.BannerPlugin({
-      banner: bannerText
+      banner: bannerText,
     }),
     new CircularDependencyPlugin({
       failOnError: true,
-      allowAsyncCycles: true
-    })
+      allowAsyncCycles: true,
+    }),
   ],
   optimization: {
     minimizer: [
@@ -100,13 +99,13 @@ const config = (outputFilename, tsConfigName) =>
           //     ]
           //   }
           // }
-        }
-      })
-    ]
-  }
+        },
+      }),
+    ],
+  },
 });
 
 module.exports = [
   config("vivliostyle", "tsconfig.json"),
-  config("vivliostyle-es5", "tsconfig-es5.json")
+  config("vivliostyle-es5", "tsconfig-es5.json"),
 ];

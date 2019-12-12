@@ -50,7 +50,7 @@ export const frontEdgeBlackListHor: { [key: string]: string } = {
   "border-top-style": "none",
   "border-top-color": "transparent",
   "border-top-left-radius": "0px",
-  "border-top-right-radius": "0px"
+  "border-top-right-radius": "0px",
 };
 
 export const frontEdgeBlackListVert: { [key: string]: string } = {
@@ -61,21 +61,21 @@ export const frontEdgeBlackListVert: { [key: string]: string } = {
   "border-right-style": "none",
   "border-right-color": "transparent",
   "border-top-right-radius": "0px",
-  "border-bottom-right-radius": "0px"
+  "border-bottom-right-radius": "0px",
 };
 
 export const frontEdgeUnforcedBreakBlackListHor: { [key: string]: string } = {
-  "margin-top": "0px"
+  "margin-top": "0px",
 };
 
 export const frontEdgeUnforcedBreakBlackListVert: { [key: string]: string } = {
-  "margin-right": "0px"
+  "margin-right": "0px",
 };
 
 export type CustomRenderer = (
   p1: Element,
   p2: Element,
-  p3: { [key: string]: Css.Val }
+  p3: { [key: string]: Css.Val },
 ) => Task.Result<Element>;
 
 export interface CustomRendererFactory {
@@ -100,10 +100,10 @@ export function initIFrame(iframe: HTMLIFrameElement): void {
               return true;
           }
           return false;
-        }
+        },
       };
     },
-    false
+    false,
   );
 }
 
@@ -124,7 +124,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     "marker-mid",
     "fill",
     "stroke",
-    "mask"
+    "mask",
   ];
   document: Document;
   exprContentListener: Vtree.ExprContentListener;
@@ -153,7 +153,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     public readonly page: Vtree.Page,
     public readonly customRenderer: CustomRenderer,
     public readonly fallbackMap: { [key: string]: string },
-    public readonly documentURLTransformer: Base.DocumentURLTransformer
+    public readonly documentURLTransformer: Base.DocumentURLTransformer,
   ) {
     super();
     this.document = viewport.document;
@@ -177,7 +177,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       this.page,
       this.customRenderer,
       this.fallbackMap,
-      this.documentURLTransformer
+      this.documentURLTransformer,
     );
   }
 
@@ -189,14 +189,14 @@ export class ViewFactory extends Base.SimpleEventTarget
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
     parentShadow: Vtree.ShadowContext,
-    subShadow: Vtree.ShadowContext
+    subShadow: Vtree.ShadowContext,
   ): Vtree.ShadowContext {
     const pseudoMap = this.getPseudoMap(
       cascStyle,
       this.regionIds,
       this.isFootnote,
       this.nodeContext,
-      context
+      context,
     );
     if (!pseudoMap) {
       return subShadow;
@@ -235,7 +235,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       } else {
         elem = PseudoElement.document.createElementNS(
           Base.NS.SHADOW,
-          "content"
+          "content",
         );
       }
       att.appendChild(elem);
@@ -251,7 +251,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       cascStyle,
       styler,
       context,
-      this.exprContentListener
+      this.exprContentListener,
     );
     return new Vtree.ShadowContext(
       element,
@@ -260,7 +260,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       parentShadow,
       subShadow,
       Vtree.ShadowType.ROOTLESS,
-      shadowStyler
+      shadowStyler,
     );
   }
 
@@ -269,7 +269,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     regionIds: string[],
     isFootnote: boolean,
     nodeContext: Vtree.NodeContext,
-    context: Exprs.Context
+    context: Exprs.Context,
   ) {
     const pseudoMap = CssCasc.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) {
@@ -282,7 +282,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       CssCasc.mergeViewConditionalStyles(
         computedPseudoStyle,
         context,
-        pseudoMap[key]
+        pseudoMap[key],
       );
       CssCasc.forEachStylesInRegion(
         pseudoMap[key],
@@ -292,15 +292,15 @@ export class ViewFactory extends Base.SimpleEventTarget
           CssCasc.mergeStyle(computedPseudoStyle, regionStyle, context);
           CssCasc.forEachViewConditionalStyles(
             regionStyle,
-            viewConditionalStyles => {
+            (viewConditionalStyles) => {
               CssCasc.mergeStyle(
                 computedPseudoStyle,
                 viewConditionalStyles,
-                context
+                context,
               );
-            }
+            },
           );
-        }
+        },
       );
     }
     return computedPseudoStyleMap;
@@ -311,13 +311,13 @@ export class ViewFactory extends Base.SimpleEventTarget
     type: Vtree.ShadowType,
     element: Element,
     parentShadow: Vtree.ShadowContext,
-    subShadow: Vtree.ShadowContext
+    subShadow: Vtree.ShadowContext,
   ): Task.Result<Vtree.ShadowContext> {
     const self = this;
     const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
-      "createRefShadow"
+      "createRefShadow",
     );
-    self.xmldoc.store.load(href).then(refDocParam => {
+    self.xmldoc.store.load(href).then((refDocParam) => {
       const refDoc = refDocParam;
       if (refDoc) {
         const refElement = refDoc.getElement(href);
@@ -330,7 +330,7 @@ export class ViewFactory extends Base.SimpleEventTarget
             parentShadow,
             subShadow,
             type,
-            refStyler
+            refStyler,
           );
         }
       }
@@ -346,11 +346,11 @@ export class ViewFactory extends Base.SimpleEventTarget
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
-    shadowContext: Vtree.ShadowContext
+    shadowContext: Vtree.ShadowContext,
   ): Task.Result<Vtree.ShadowContext> {
     const self = this;
     const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
-      "createShadows"
+      "createShadows",
     );
     const shadow: Vtree.ShadowContext = null;
     const templateURLVal = computedStyle["template"];
@@ -362,12 +362,12 @@ export class ViewFactory extends Base.SimpleEventTarget
         Vtree.ShadowType.ROOTLESS,
         element,
         shadowContext,
-        shadow
+        shadow,
       );
     } else {
       cont = Task.newResult(shadow);
     }
-    cont.then(shadow => {
+    cont.then((shadow) => {
       let cont1: Task.Result<Vtree.ShadowContext> = null;
       if (element.namespaceURI == Base.NS.SHADOW) {
         if (element.localName == "include") {
@@ -392,7 +392,7 @@ export class ViewFactory extends Base.SimpleEventTarget
               Vtree.ShadowType.ROOTED,
               element,
               shadowContext,
-              shadow
+              shadow,
             );
           }
         }
@@ -401,24 +401,24 @@ export class ViewFactory extends Base.SimpleEventTarget
         cont1 = Task.newResult(shadow);
       }
       let cont2: Task.Result<Vtree.ShadowContext> = null;
-      cont1.then(shadow => {
+      cont1.then((shadow) => {
         if (computedStyle["display"] === Css.ident.table_cell) {
           const url = Base.resolveURL(
             "user-agent.xml#table-cell",
-            Base.resourceBaseURL
+            Base.resourceBaseURL,
           );
           cont2 = self.createRefShadow(
             url,
             Vtree.ShadowType.ROOTLESS,
             element,
             shadowContext,
-            shadow
+            shadow,
           );
         } else {
           cont2 = Task.newResult(shadow);
         }
       });
-      cont2.then(shadow => {
+      cont2.then((shadow) => {
         shadow = self.createPseudoelementShadow(
           element,
           isRoot,
@@ -427,7 +427,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           styler,
           context,
           shadowContext,
-          shadow
+          shadow,
         );
         frame.finish(shadow);
       });
@@ -450,7 +450,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     vertical: boolean,
     rtl: boolean,
     style: CssCasc.ElementStyle,
-    computedStyle: { [key: string]: Css.Val }
+    computedStyle: { [key: string]: Css.Val },
   ): boolean {
     const context = this.context;
     const cascMap = CssCasc.flattenCascadedStyle(
@@ -458,7 +458,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       context,
       this.regionIds,
       this.isFootnote,
-      this.nodeContext
+      this.nodeContext,
     );
     vertical = CssCasc.isVertical(cascMap, context, vertical);
     rtl = CssCasc.isRtl(cascMap, context, rtl);
@@ -474,7 +474,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           value = self.docFaces.filterFontFamily(value);
         }
         return value;
-      }
+      },
     );
 
     // Compute values of display, position and float
@@ -484,9 +484,9 @@ export class ViewFactory extends Base.SimpleEventTarget
       (computedStyle["display"] as Css.Ident) || Css.ident.inline,
       position,
       float,
-      this.sourceNode === this.xmldoc.root
+      this.sourceNode === this.xmldoc.root,
     );
-    ["display", "position", "float"].forEach(name => {
+    ["display", "position", "float"].forEach((name) => {
       if (displayValues[name]) {
         computedStyle[name] = displayValues[name];
       }
@@ -495,7 +495,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   }
 
   private inheritFromSourceParent(
-    elementStyle: CssCasc.ElementStyle
+    elementStyle: CssCasc.ElementStyle,
   ): { lang: string | null; elementStyle: CssCasc.ElementStyle } {
     let node = this.nodeContext.sourceNode;
     const styles = [];
@@ -528,11 +528,11 @@ export class ViewFactory extends Base.SimpleEventTarget
     const isRoot = steps === 0;
     const fontSize = this.context.queryUnitSize("em", isRoot);
     const props = {
-      "font-size": new CssCasc.CascadeValue(new Css.Numeric(fontSize, "px"), 0)
+      "font-size": new CssCasc.CascadeValue(new Css.Numeric(fontSize, "px"), 0),
     } as CssCasc.ElementStyle;
     const inheritanceVisitor = new CssCasc.InheritanceVisitor(
       props,
-      this.context
+      this.context,
     );
     for (let i = styles.length - 1; i >= 0; --i) {
       const style = styles[i];
@@ -573,7 +573,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
   transferPolyfilledInheritedProps(computedStyle: { [key: string]: Css.Val }) {
     const polyfilledInheritedProps = CssCasc.getPolyfilledInheritedProps().filter(
-      name => computedStyle[name]
+      (name) => computedStyle[name],
     );
     if (polyfilledInheritedProps.length) {
       let props = this.nodeContext.inheritedProps;
@@ -583,7 +583,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           props[n] = this.nodeContext.parent.inheritedProps[n];
         }
       }
-      polyfilledInheritedProps.forEach(name => {
+      polyfilledInheritedProps.forEach((name) => {
         const value = computedStyle[name];
         if (value) {
           if (value instanceof Css.Int) {
@@ -615,10 +615,10 @@ export class ViewFactory extends Base.SimpleEventTarget
     display: Css.Ident,
     position: Css.Ident,
     float: Css.Ident,
-    isRoot: boolean
+    isRoot: boolean,
   ) {
     const hooks: Plugin.ResolveFormattingContextHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT
+      Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     );
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext = hooks[i](
@@ -627,7 +627,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         display,
         position,
         float,
-        isRoot
+        isRoot,
       );
       if (formattingContext) {
         nodeContext.formattingContext = formattingContext;
@@ -641,7 +641,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   private createElementView(
     firstTime: boolean,
-    atUnforcedBreak: boolean
+    atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
     const self = this;
     let needToProcessChildren = true;
@@ -658,7 +658,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       Matchers.NthFragmentMatcher.registerFragmentIndex(
         offset,
         self.nodeContext.fragmentIndex,
-        0
+        0,
       );
     }
     const computedStyle = {};
@@ -670,7 +670,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     const floatReference =
       elementStyle["float-reference"] &&
       PageFloats.floatReferenceOf(
-        elementStyle["float-reference"].value.toString()
+        elementStyle["float-reference"].value.toString(),
       );
     if (
       self.nodeContext.parent &&
@@ -687,7 +687,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       self.nodeContext.vertical,
       self.nodeContext.direction === "rtl",
       elementStyle,
-      computedStyle
+      computedStyle,
     );
     styler.processContent(element, computedStyle);
     this.transferPolyfilledInheritedProps(computedStyle);
@@ -719,9 +719,9 @@ export class ViewFactory extends Base.SimpleEventTarget
         computedStyle,
         styler,
         self.context,
-        self.nodeContext.shadowContext
+        self.nodeContext.shadowContext,
       )
-      .then(shadowParam => {
+      .then((shadowParam) => {
         self.nodeContext.nodeShadow = shadowParam;
         const position = computedStyle["position"];
         let floatSide = computedStyle["float"];
@@ -742,10 +742,10 @@ export class ViewFactory extends Base.SimpleEventTarget
           computedStyle["overflow"],
           writingMode,
           parentWritingMode,
-          isFlowRoot
+          isFlowRoot,
         );
         self.nodeContext.containingBlockForAbsolute = Display.establishesCBForAbsolute(
-          position
+          position,
         );
         if (
           self.nodeContext.isInsideBFC() &&
@@ -870,13 +870,13 @@ export class ViewFactory extends Base.SimpleEventTarget
             if (inlineBorderSpacing.isNumeric()) {
               self.nodeContext.inlineBorderSpacing = Css.toNumber(
                 inlineBorderSpacing,
-                self.context
+                self.context,
               );
             }
             if (blockBorderSpacing.isNumeric()) {
               self.nodeContext.blockBorderSpacing = Css.toNumber(
                 blockBorderSpacing,
-                self.context
+                self.context,
               );
             }
           }
@@ -890,7 +890,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           self.nodeContext.firstPseudo = new Vtree.FirstPseudo(
             outerPseudo,
             /** Css.Int */
-            firstPseudo.num
+            firstPseudo.num,
           );
         }
         if (!self.nodeContext.inline) {
@@ -898,13 +898,13 @@ export class ViewFactory extends Base.SimpleEventTarget
             element,
             elementStyle,
             styler,
-            self.context
+            self.context,
           );
         }
         const whitespace = computedStyle["white-space"];
         if (whitespace) {
           const whitespaceValue = Vtree.whitespaceFromPropertyValue(
-            whitespace.toString()
+            whitespace.toString(),
           );
           if (whitespaceValue !== null) {
             self.nodeContext.whitespace = whitespaceValue;
@@ -927,7 +927,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           display,
           position,
           floatSide,
-          isRoot
+          isRoot,
         );
         if (
           self.nodeContext.parent &&
@@ -935,12 +935,12 @@ export class ViewFactory extends Base.SimpleEventTarget
         ) {
           firstTime = self.nodeContext.parent.formattingContext.isFirstTime(
             self.nodeContext,
-            firstTime
+            firstTime,
           );
         }
         if (!self.nodeContext.inline) {
           self.nodeContext.repeatOnBreak = self.processRepeatOnBreak(
-            computedStyle
+            computedStyle,
           );
           self.findAndProcessRepeatingElements(element, styler);
         }
@@ -992,7 +992,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   imageBinary.getAttribute("content-type") || "image/jpeg";
                 const innerSrc = `data:${mediaType};base64,${imageBinary.textContent.replace(
                   /[ \t\n\t]/g,
-                  ""
+                  "",
                 )}`;
                 fetchers.push(TaskUtil.loadElement(inner, innerSrc));
               }
@@ -1081,12 +1081,12 @@ export class ViewFactory extends Base.SimpleEventTarget
           elemResult = self.customRenderer(
             element,
             parentNode as Element,
-            computedStyle
+            computedStyle,
           );
         } else {
           elemResult = Task.newResult(null);
         }
-        elemResult.then(result => {
+        elemResult.then((result) => {
           if (result) {
             if (custom) {
               needToProcessChildren =
@@ -1146,7 +1146,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   if (firstTime) {
                     attributeValue = self.documentURLTransformer.transformFragment(
                       attributeValue,
-                      self.xmldoc.url
+                      self.xmldoc.url,
                     );
                     result.setAttribute(attributeName, attributeValue);
                     self.page.registerElementWithId(result, attributeValue);
@@ -1164,13 +1164,13 @@ export class ViewFactory extends Base.SimpleEventTarget
                   if (attributeName === "href") {
                     attributeValue = self.documentURLTransformer.transformURL(
                       attributeValue,
-                      self.xmldoc.url
+                      self.xmldoc.url,
                     );
                   }
                 } else if (attributeName == "srcset") {
                   attributeValue = attributeValue
                     .split(",")
-                    .map(value => self.resolveURL(value.trim()))
+                    .map((value) => self.resolveURL(value.trim()))
                     .join(",");
                 }
                 if (
@@ -1186,7 +1186,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   images.push({
                     image,
                     element: result as HTMLElement,
-                    fetcher
+                    fetcher,
                   });
                 }
               } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
@@ -1206,7 +1206,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                 attributeValue = Urls.transformURIs(
                   attributeValue,
                   self.xmldoc.url,
-                  self.documentURLTransformer
+                  self.documentURLTransformer,
                 );
               }
               if (attributeNS) {
@@ -1231,7 +1231,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                 attributeNS == Base.NS.XLINK
               ) {
                 self.page.fetchers.push(
-                  TaskUtil.loadElement(result, attributeValue)
+                  TaskUtil.loadElement(result, attributeValue),
                 );
               } else {
                 // When the document is not XML document (e.g. non-XML HTML)
@@ -1240,7 +1240,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   result.setAttributeNS(
                     attributeNS,
                     attributeName,
-                    attributeValue
+                    attributeValue,
                   );
                 } else {
                   result.setAttribute(attributeName, attributeValue);
@@ -1266,7 +1266,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   images.push({
                     image: image as HTMLElement,
                     element: result as HTMLElement,
-                    fetcher: imageFetcher
+                    fetcher: imageFetcher,
                   });
                 }
                 fetchers.push(imageFetcher);
@@ -1312,7 +1312,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           if (listItem) {
             result.setAttribute(
               "value",
-              computedStyle["ua-list-item-count"].stringValue()
+              computedStyle["ua-list-item-count"].stringValue(),
             );
           }
           self.viewNode = result;
@@ -1323,7 +1323,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   images,
                   imageResolution,
                   computedStyle,
-                  self.nodeContext.vertical
+                  self.nodeContext.vertical,
                 );
               }
               frame.finish(needToProcessChildren);
@@ -1342,14 +1342,14 @@ export class ViewFactory extends Base.SimpleEventTarget
     element: Element,
     cascStyle: CssCasc.ElementStyle,
     styler: CssStyler.AbstractStyler,
-    context: Exprs.Context
+    context: Exprs.Context,
   ) {
     const pseudoMap = this.getPseudoMap(
       cascStyle,
       this.regionIds,
       this.isFootnote,
       this.nodeContext,
-      context
+      context,
     );
     if (!pseudoMap) {
       return;
@@ -1363,11 +1363,11 @@ export class ViewFactory extends Base.SimpleEventTarget
         cascStyle,
         styler,
         context,
-        this.exprContentListener
+        this.exprContentListener,
       );
       this.nodeContext.afterIfContinues = new Selectors.AfterIfContinues(
         element,
-        shadowStyler
+        shadowStyler,
       );
     }
   }
@@ -1387,10 +1387,10 @@ export class ViewFactory extends Base.SimpleEventTarget
     }[],
     imageResolution: number,
     computedStyle: { [key: string]: Css.Val },
-    isVertical: boolean
+    isVertical: boolean,
   ) {
     const self = this;
-    images.forEach(param => {
+    images.forEach((param) => {
       if (param.fetcher.get().get() === "load") {
         const img = param.image;
         let scaledWidth = (img as HTMLImageElement).width / imageResolution;
@@ -1401,25 +1401,25 @@ export class ViewFactory extends Base.SimpleEventTarget
             if (computedStyle["border-left-style"] !== Css.ident.none) {
               scaledWidth += Css.toNumber(
                 computedStyle["border-left-width"],
-                self.context
+                self.context,
               );
             }
             if (computedStyle["border-right-style"] !== Css.ident.none) {
               scaledWidth += Css.toNumber(
                 computedStyle["border-right-width"],
-                self.context
+                self.context,
               );
             }
             if (computedStyle["border-top-style"] !== Css.ident.none) {
               scaledHeight += Css.toNumber(
                 computedStyle["border-top-width"],
-                self.context
+                self.context,
               );
             }
             if (computedStyle["border-bottom-style"] !== Css.ident.none) {
               scaledHeight += Css.toNumber(
                 computedStyle["border-bottom-width"],
-                self.context
+                self.context,
               );
             }
           }
@@ -1450,8 +1450,8 @@ export class ViewFactory extends Base.SimpleEventTarget
                   "max-width",
                   `${Math.min(
                     scaledWidth,
-                    Css.toNumber(numericMaxWidth, self.context)
-                  )}px`
+                    Css.toNumber(numericMaxWidth, self.context),
+                  )}px`,
                 );
               } else if (numericMaxHeight.unit !== "%") {
                 Base.setCSSProperty(
@@ -1459,8 +1459,8 @@ export class ViewFactory extends Base.SimpleEventTarget
                   "max-height",
                   `${Math.min(
                     scaledHeight,
-                    Css.toNumber(numericMaxHeight, self.context)
-                  )}px`
+                    Css.toNumber(numericMaxHeight, self.context),
+                  )}px`,
                 );
               } else {
                 if (isVertical) {
@@ -1497,8 +1497,8 @@ export class ViewFactory extends Base.SimpleEventTarget
                   "min-width",
                   `${Math.max(
                     scaledWidth,
-                    Css.toNumber(numericMinWidth, self.context)
-                  )}px`
+                    Css.toNumber(numericMinWidth, self.context),
+                  )}px`,
                 );
               } else if (numericMinHeight.unit !== "%") {
                 Base.setCSSProperty(
@@ -1506,8 +1506,8 @@ export class ViewFactory extends Base.SimpleEventTarget
                   "min-height",
                   `${Math.max(
                     scaledHeight,
-                    Css.toNumber(numericMinHeight, self.context)
-                  )}px`
+                    Css.toNumber(numericMinHeight, self.context),
+                  )}px`,
                 );
               } else {
                 if (isVertical) {
@@ -1526,16 +1526,16 @@ export class ViewFactory extends Base.SimpleEventTarget
   private preprocessElementStyle(computedStyle: { [key: string]: Css.Val }) {
     const self = this;
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE
+      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
-    hooks.forEach(hook => {
+    hooks.forEach((hook) => {
       hook(self.nodeContext, computedStyle);
     });
   }
 
   private findAndProcessRepeatingElements(
     element: Element,
-    styler: CssStyler.AbstractStyler
+    styler: CssStyler.AbstractStyler,
   ) {
     for (
       let child: Node = element.firstChild;
@@ -1551,7 +1551,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         this.nodeContext.vertical,
         this.nodeContext.direction === "rtl",
         elementStyle,
-        computedStyle
+        computedStyle,
       );
       const processRepeatOnBreak = this.processRepeatOnBreak(computedStyle);
       if (!processRepeatOnBreak) {
@@ -1568,11 +1568,11 @@ export class ViewFactory extends Base.SimpleEventTarget
       const parentFormattingContext = parent && parent.formattingContext;
       this.nodeContext.formattingContext = new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
         parentFormattingContext,
-        this.nodeContext.sourceNode as Element
+        this.nodeContext.sourceNode as Element,
       );
       (this.nodeContext
         .formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext).initializeRepetitiveElements(
-        this.nodeContext.vertical
+        this.nodeContext.vertical,
       );
       return;
     }
@@ -1603,7 +1603,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     this.preprocessTextContent().then(() => {
       const offsetInNode = self.offsetInNode || 0;
       const textContent = Diff.restoreNewText(
-        self.nodeContext.preprocessedTextContent
+        self.nodeContext.preprocessedTextContent,
       ).substr(offsetInNode);
       self.viewNode = document.createTextNode(textContent);
       frame.finish(true);
@@ -1620,7 +1620,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     let textContent = (originl = self.sourceNode.textContent);
     const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
     const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
-      Plugin.HOOKS.PREPROCESS_TEXT_CONTENT
+      Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
     );
     let index = 0;
     frame
@@ -1629,16 +1629,16 @@ export class ViewFactory extends Base.SimpleEventTarget
           return Task.newResult(false);
         }
         return hooks[index++](self.nodeContext, textContent).thenAsync(
-          processedText => {
+          (processedText) => {
             textContent = processedText;
             return Task.newResult(true);
-          }
+          },
         );
       })
       .then(() => {
         self.nodeContext.preprocessedTextContent = Diff.diffChars(
           originl,
-          textContent
+          textContent,
         );
         frame.finish(true);
       });
@@ -1650,7 +1650,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   createNodeView(
     firstTime: boolean,
-    atUnforcedBreak: boolean
+    atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
     const self = this;
     const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
@@ -1666,7 +1666,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         result = self.createTextNodeView();
       }
     }
-    result.then(processChildren => {
+    result.then((processChildren) => {
       needToProcessChildren = processChildren;
       self.nodeContext.viewNode = self.viewNode;
       if (self.viewNode) {
@@ -1688,7 +1688,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   setCurrent(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
-    atUnforcedBreak?: boolean
+    atUnforcedBreak?: boolean,
   ): Task.Result<boolean> {
     this.nodeContext = nodeContext;
     if (nodeContext) {
@@ -1812,7 +1812,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       const child = pos.sourceNode.firstChild;
       if (child) {
         return this.processShadowContent(
-          new Vtree.NodeContext(child, pos, boxOffset)
+          new Vtree.NodeContext(child, pos, boxOffset),
         );
       }
 
@@ -1831,7 +1831,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   isTransclusion(
     element: Element,
     elementStyle: CssCasc.ElementStyle,
-    transclusionType: string | null
+    transclusionType: string | null,
   ) {
     const proc = CssCasc.getProp(elementStyle, "hyperlink-processing");
     if (!proc) {
@@ -1849,7 +1849,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   nextInTree(
     position: Vtree.NodeContext,
-    atUnforcedBreak?: boolean
+    atUnforcedBreak?: boolean,
   ): Task.Result<Vtree.NodeContext> {
     let nodeContext = this.nextPositionInTree(position);
     if (!nodeContext || nodeContext.after) {
@@ -1857,7 +1857,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     }
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("nextInTree");
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(
-      processChildren => {
+      (processChildren) => {
         if (!nodeContext.viewNode || !processChildren) {
           nodeContext = nodeContext.modify();
           nodeContext.after = true; // skip
@@ -1867,7 +1867,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         }
         this.dispatchEvent({ type: "nextInTree", nodeContext } as any);
         frame.finish(nodeContext);
-      }
+      },
     );
     return frame.result();
   }
@@ -1886,7 +1886,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
   applyComputedStyles(
     target: Element,
-    computedStyle: { [key: string]: Css.Val }
+    computedStyle: { [key: string]: Css.Val },
   ) {
     const bg = computedStyle["background-image"];
     if (bg) {
@@ -1902,8 +1902,8 @@ export class ViewFactory extends Base.SimpleEventTarget
       value = value.visit(
         new CssProp.UrlTransformVisitor(
           this.xmldoc.url,
-          this.documentURLTransformer
-        )
+          this.documentURLTransformer,
+        ),
       );
       if (
         value.isNumeric() &&
@@ -1919,7 +1919,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       ) {
         // Set it after page layout is done.
         this.page.delayedItems.push(
-          new Vtree.DelayedItem(target, propName, value)
+          new Vtree.DelayedItem(target, propName, value),
         );
         continue;
       }
@@ -1933,7 +1933,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   applyPseudoelementStyle(
     nodeContext: Vtree.NodeContext,
     pseudoName: string,
-    target: Element
+    target: Element,
   ): void {
     if (nodeContext.after) {
       return;
@@ -1956,7 +1956,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       nodeContext.vertical,
       nodeContext.direction === "rtl",
       elementStyle,
-      computedStyle
+      computedStyle,
     );
     const content = computedStyle["content"];
     if (Vtree.nonTrivialContent(content)) {
@@ -1965,8 +1965,8 @@ export class ViewFactory extends Base.SimpleEventTarget
           target,
           this.context,
           content,
-          this.exprContentListener
-        )
+          this.exprContentListener,
+        ),
       );
       delete computedStyle["content"];
     }
@@ -1978,7 +1978,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   peelOff(
     nodeContext: Vtree.NodeContext,
-    nodeOffset: number
+    nodeOffset: number,
   ): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("peelOff");
     const firstPseudo = nodeContext.firstPseudo;
@@ -2010,7 +2010,7 @@ export class ViewFactory extends Base.SimpleEventTarget
           nodeContext = new Vtree.NodeContext(
             pn.sourceNode,
             nodeContext,
-            boxOffset
+            boxOffset,
           );
           if (arr.length == 0) {
             nodeContext.offsetInNode = offsetInNode;
@@ -2049,7 +2049,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   applyFootnoteStyle(
     vertical: boolean,
     rtl: boolean,
-    target: Element
+    target: Element,
   ): boolean {
     const computedStyle = {};
     const pseudoMap = CssCasc.getStyleMap(this.footnoteStyle, "_pseudos");
@@ -2057,7 +2057,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       vertical,
       rtl,
       this.footnoteStyle,
-      computedStyle
+      computedStyle,
     );
     if (pseudoMap && pseudoMap["before"]) {
       const childComputedStyle = {};
@@ -2078,7 +2078,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
     if (nodeContext) {
-      nodeContext.walkUpBlocks(block => {
+      nodeContext.walkUpBlocks((block) => {
         const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
         if (!boxDecorationBreak || boxDecorationBreak === "slice") {
           const elem = block.viewNode as Element;
@@ -2105,7 +2105,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   convertLengthToPx(
     numeric: Css.Numeric,
     viewNode: Node,
-    clientLayout: Vtree.ClientLayout
+    clientLayout: Vtree.ClientLayout,
   ): number | Css.Numeric {
     const num = numeric.num;
     const unit = numeric.unit;
@@ -2116,13 +2116,13 @@ export class ViewFactory extends Base.SimpleEventTarget
       }
       Asserts.assert(elem);
       const fontSize = parseFloat(
-        clientLayout.getElementComputedStyle(elem as Element)["font-size"]
+        clientLayout.getElementComputedStyle(elem as Element)["font-size"],
       );
       Asserts.assert(this.context);
       return CssCasc.convertFontRelativeLengthToPx(
         numeric,
         fontSize,
-        this.context
+        this.context,
       ).num;
     } else {
       const unitSize = this.context.queryUnitSize(unit, false);
@@ -2139,7 +2139,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   isSameNodePositionStep(
     step1: Vtree.NodePositionStep,
-    step2: Vtree.NodePositionStep
+    step2: Vtree.NodePositionStep,
   ): boolean {
     if (step1.shadowContext) {
       if (!step2.shadowContext) {
@@ -2168,7 +2168,7 @@ export class ViewFactory extends Base.SimpleEventTarget
    */
   isSameNodePosition(
     nodePosition1: Vtree.NodePosition,
-    nodePosition2: Vtree.NodePosition
+    nodePosition2: Vtree.NodePosition,
   ): boolean {
     return (
       nodePosition1.offsetInNode === nodePosition2.offsetInNode &&
@@ -2202,7 +2202,7 @@ export const fb2Remap = {
   emphasis: "em",
   strong: "strong",
   style: "span",
-  strikethrough: "del"
+  strikethrough: "del",
 };
 
 export const propertiesNotPassedToDOM = {
@@ -2214,7 +2214,7 @@ export const propertiesNotPassedToDOM = {
   "flow-options": true,
   "flow-priority": true,
   "footnote-policy": true,
-  page: true
+  page: true,
 };
 
 export class DefaultClientLayout implements Vtree.ClientLayout {
@@ -2228,7 +2228,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
 
   private subtractOffsets(
     rect: Vtree.ClientRect,
-    originRect: Vtree.ClientRect
+    originRect: Vtree.ClientRect,
   ): Vtree.ClientRect {
     const viewportLeft = originRect.left;
     const viewportTop = originRect.top;
@@ -2238,7 +2238,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
       right: rect.right - viewportLeft,
       bottom: rect.bottom - viewportTop,
       width: rect.width,
-      height: rect.height
+      height: rect.height,
     } as Vtree.ClientRect;
   }
 
@@ -2248,8 +2248,8 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   getRangeClientRects(range: Range): ClientRect[] {
     const rects = range["getClientRects"]();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
-    return Array.from(rects).map(rect =>
-      this.subtractOffsets(rect, layoutBoxRect)
+    return Array.from(rects).map((rect) =>
+      this.subtractOffsets(rect, layoutBoxRect),
     );
   }
 
@@ -2285,7 +2285,7 @@ export class Viewport {
     public readonly fontSize: number,
     opt_root?: HTMLElement,
     opt_width?: number,
-    opt_height?: number
+    opt_height?: number,
   ) {
     this.document = window.document;
     this.root = opt_root || this.document.body;
@@ -2300,7 +2300,7 @@ export class Viewport {
       contentContainer = this.document.createElement("div");
       contentContainer.setAttribute(
         "data-vivliostyle-spread-container",
-        "true"
+        "true",
       );
       outerZoomBox.appendChild(contentContainer);
     }

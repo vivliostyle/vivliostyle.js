@@ -21,6 +21,7 @@ import * as AdaptViewer from "./adaptviewer";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Profile from "./profile";
+import { ReadyState } from "./constants";
 
 const PageProgression = Constants.PageProgression;
 
@@ -33,10 +34,10 @@ const PageProgression = Constants.PageProgression;
  * - debug: Debug flag.
  */
 export type ViewerSettings = {
-  userAgentRootURL: string;
+  userAgentRootURL?: string;
   viewportElement: HTMLElement;
-  window: Window | undefined;
-  debug: boolean;
+  window?: Window;
+  debug?: boolean;
 };
 
 /**
@@ -55,14 +56,14 @@ export type ViewerSettings = {
  *   paper size).
  */
 export type ViewerOptions = {
-  autoResize: boolean | undefined;
-  fontSize: number | undefined;
-  pageBorderWidth: number | undefined;
-  renderAllPages: boolean | undefined;
-  pageViewMode: PageViewMode | undefined;
-  zoom: number | undefined;
-  fitToScreen: boolean | undefined;
-  defaultPaperSize: { width: number; height: number } | undefined;
+  autoResize?: boolean;
+  fontSize?: number;
+  pageBorderWidth?: number;
+  renderAllPages?: boolean;
+  pageViewMode?: PageViewMode;
+  zoom?: number;
+  fitToScreen?: boolean;
+  defaultPaperSize?: { width: number; height: number };
 };
 
 function getDefaultViewerOptions(): ViewerOptions {
@@ -74,13 +75,13 @@ function getDefaultViewerOptions(): ViewerOptions {
     pageViewMode: PageViewMode.AUTO_SPREAD,
     zoom: 1,
     fitToScreen: false,
-    defaultPaperSize: undefined
+    defaultPaperSize: undefined,
   };
 }
 
 function convertViewerOptions(options: ViewerOptions): object {
   const converted = {};
-  Object.keys(options).forEach(key => {
+  Object.keys(options).forEach((key) => {
     const v = options[key];
     switch (key) {
       case "autoResize":
@@ -135,8 +136,8 @@ export type SingleDocumentOptions =
   | string
   | {
       url: string;
-      startPage: number | undefined;
-      skipPagesBefore: number | undefined;
+      startPage?: number;
+      skipPagesBefore?: number;
     };
 
 /**
@@ -147,17 +148,18 @@ export class Viewer {
   private viewer_: AdaptViewer.Viewer;
   private options: ViewerOptions;
   private eventTarget: Base.SimpleEventTarget;
+  readyState: ReadyState;
 
   constructor(
     private readonly settings: ViewerSettings,
-    opt_options?: ViewerOptions
+    opt_options?: ViewerOptions,
   ) {
     Constants.setDebug(settings.debug);
     this.viewer_ = new AdaptViewer.Viewer(
       settings["window"] || window,
       settings["viewportElement"],
       "main",
-      this.dispatcher.bind(this)
+      this.dispatcher.bind(this),
     );
     this.options = getDefaultViewerOptions();
     if (opt_options) {
@@ -167,7 +169,7 @@ export class Viewer {
     Object.defineProperty(this, "readyState", {
       get() {
         return this.viewer_.readyState;
-      }
+      },
     });
   }
 
@@ -177,7 +179,7 @@ export class Viewer {
   setOptions(options: ViewerOptions) {
     const command = Object.assign(
       { a: "configure" },
-      convertViewerOptions(options)
+      convertViewerOptions(options),
     );
     this.viewer_.sendCommand(command);
     Object.assign(this.options, options);
@@ -187,7 +189,7 @@ export class Viewer {
     /** @dict */
     const event = { type: msg["t"] };
     const o = msg as object;
-    Object.keys(o).forEach(key => {
+    Object.keys(o).forEach((key) => {
       if (key !== "t") {
         event[key] = o[key];
       }
@@ -205,7 +207,7 @@ export class Viewer {
     this.eventTarget.addEventListener(
       type,
       listener as Base.EventListener,
-      false
+      false,
     );
   }
 
@@ -218,7 +220,7 @@ export class Viewer {
     this.eventTarget.removeEventListener(
       type,
       listener as Base.EventListener,
-      false
+      false,
     );
   }
 
@@ -228,19 +230,19 @@ export class Viewer {
   loadDocument(
     singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[],
     opt_documentOptions?: DocumentOptions,
-    opt_viewerOptions?: ViewerOptions
+    opt_viewerOptions?: ViewerOptions,
   ) {
     if (!singleDocumentOptions) {
       this.eventTarget.dispatchEvent({
         type: "error",
-        content: "No URL specified"
+        content: "No URL specified",
       });
     }
     this.loadDocumentOrPublication(
       singleDocumentOptions,
       null,
       opt_documentOptions,
-      opt_viewerOptions
+      opt_viewerOptions,
     );
   }
 
@@ -250,19 +252,19 @@ export class Viewer {
   loadPublication(
     pubUrl: string,
     opt_documentOptions?: DocumentOptions,
-    opt_viewerOptions?: ViewerOptions
+    opt_viewerOptions?: ViewerOptions,
   ) {
     if (!pubUrl) {
       this.eventTarget.dispatchEvent({
         type: "error",
-        content: "No URL specified"
+        content: "No URL specified",
       });
     }
     this.loadDocumentOrPublication(
       null,
       pubUrl,
       opt_documentOptions,
-      opt_viewerOptions
+      opt_viewerOptions,
     );
   }
 
@@ -276,22 +278,22 @@ export class Viewer {
       | null,
     pubUrl: string | null,
     opt_documentOptions?: DocumentOptions,
-    opt_viewerOptions?: ViewerOptions
+    opt_viewerOptions?: ViewerOptions,
   ) {
     const documentOptions = opt_documentOptions || {};
 
     function convertStyleSheetArray(arr) {
       if (arr) {
-        return arr.map(s => ({ url: s.url || null, text: s.text || null }));
+        return arr.map((s) => ({ url: s.url || null, text: s.text || null }));
       } else {
         return undefined;
       }
     }
     const authorStyleSheet = convertStyleSheetArray(
-      documentOptions["authorStyleSheet"]
+      documentOptions["authorStyleSheet"],
     );
     const userStyleSheet = convertStyleSheetArray(
-      documentOptions["userStyleSheet"]
+      documentOptions["userStyleSheet"],
     );
     if (opt_viewerOptions) {
       Object.assign(this.options, opt_viewerOptions);
@@ -304,9 +306,9 @@ export class Viewer {
         document: documentOptions["documentObject"],
         fragment: documentOptions["fragment"],
         authorStyleSheet: authorStyleSheet,
-        userStyleSheet: userStyleSheet
+        userStyleSheet: userStyleSheet,
       },
-      convertViewerOptions(this.options)
+      convertViewerOptions(this.options),
     );
     if (this.initialized) {
       this.viewer_.sendCommand(command);
@@ -346,12 +348,12 @@ export class Viewer {
     if (nav === Navigation.EPAGE) {
       this.viewer_.sendCommand({
         a: "moveTo",
-        epage: opt_epage
+        epage: opt_epage,
       });
     } else {
       this.viewer_.sendCommand({
         a: "moveTo",
-        where: this.resolveNavigation(nav)
+        where: this.resolveNavigation(nav),
       });
     }
   }
@@ -388,7 +390,7 @@ export class Viewer {
     this.viewer_.sendCommand({
       a: "toc",
       v: visibility,
-      autohide: opt_autohide
+      autohide: opt_autohide,
     });
   }
 
@@ -405,7 +407,7 @@ export class Viewer {
 }
 
 function convertSingleDocumentOptions(
-  singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[]
+  singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[],
 ): AdaptViewer.SingleDocumentParam[] | null {
   function toNumberOrNull(num: any): number | null {
     return typeof num === "number" ? num : null;
@@ -416,13 +418,13 @@ function convertSingleDocumentOptions(
       return {
         url: opt,
         startPage: null,
-        skipPagesBefore: null
+        skipPagesBefore: null,
       } as AdaptViewer.SingleDocumentParam;
     } else {
       return {
         url: opt["url"],
         startPage: toNumberOrNull(opt["startPage"]),
-        skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"])
+        skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"]),
       } as AdaptViewer.SingleDocumentParam;
     }
   }
@@ -445,7 +447,7 @@ export enum Navigation {
   RIGHT = "right",
   FIRST = "first",
   LAST = "last",
-  EPAGE = "epage"
+  EPAGE = "epage",
 }
 
 export type ZoomType = AdaptViewer.ZoomType;
@@ -457,7 +459,7 @@ export const PageViewMode = AdaptViewer.PageViewMode;
 export const viewer = {
   Viewer,
   PageViewMode,
-  ZoomType
+  ZoomType,
 };
 
 Profile.profiler.forceRegisterEndTiming("load_vivliostyle");

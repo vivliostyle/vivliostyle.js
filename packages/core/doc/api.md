@@ -3,6 +3,7 @@
 ### Table of Contents
 
 - [API](#api)
+
   - [constants](#constants)
     - [`PageProgression`](#constantspageprogression)
     - [`PageSide`](#constantspageside)
@@ -22,6 +23,7 @@
     - [`ZoomType`](#viewerzoomtype)
 
 - [Classes](#classes)
+
   - [`Viewer`](#viewer-1)
     - [`addListener(type, listener)`](#vieweraddlistenertype-listener)
     - [`getCurrentPageProgression()`](#viewergetcurrentpageprogression)
@@ -254,7 +256,7 @@ Options for a single source document.
 
 - `url` (string) — URL of the document.
 - `startPage` (number, optional) — If specified, the `page` page-based counter is set to the specified value on the first page of the document. It is equivalent to specifying `counter-reset: page [specified value - 1]` on that page.
-- `skipPagesBefore` (number, optional) — If specified, the `page` page-based counter is incremented by the specified value *before* updating page-based counters on the first page of the document. This option is ignored if `startPageNumber` option is also specified.
+- `skipPagesBefore` (number, optional) — If specified, the `page` page-based counter is incremented by the specified value _before_ updating page-based counters on the first page of the document. This option is ignored if `startPageNumber` option is also specified.
 
 ### `ViewerSettings`
 
@@ -277,3 +279,32 @@ Viewer options that can be set after the Viewer object is constructed.
 - `zoom` (number, optional) — Zoom factor with which pages are displayed. default: 1
 - `fitToScreen` (boolean, optional) — Auto adjust zoom factor to fit the screen. default: false
 - `defaultPaperSize` ({width: number, height: number}, optional) — Default paper size in px. Effective when @page size is set to auto. default: undefined (means the windows size is used as paper size).
+
+## print
+
+### `printHTML`
+
+Allows page-layouting using the vivliostyle for printing within a website without destroying the original layout
+
+```js
+import { printHTML } from "@vivliostyle/core";
+
+const htmlDoc = `<!doctype html>
+<html>
+    <head>
+        <style>
+        ... Add your CSS code here ...
+        </style>
+    </head>
+    <body>
+        ... Add your HTML code here ...
+    </body>
+</html>`;
+
+const config = {
+  title: "My printed page",
+  printCallback: (iframeWin) => iframeWin.print(), // optional: only needed if calling something other than window.print() for printing.
+};
+
+printHTML(htmlDoc, config);
+```
