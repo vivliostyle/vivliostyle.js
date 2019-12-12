@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 const webpack = require("webpack");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 
-const config = (outputFilename, tsConfigName) => ({
-  mode: process.env.NODE_ENV === "production" ? "production" : "development",
-  entry:
-    process.env.NODE_ENV === "production"
-      ? "./src/ts/main.ts"
-      : "./src/ts/main-dev.ts",
+const isProduction = process.env.NODE_ENV === "production";
+const outputDir = path.join(__dirname, "lib", "js");
+
+module.exports = {
+  mode: isProduction ? "production" : "development",
+  entry: "./src/ts/main.ts",
   devtool: "source-map",
   output: {
-    path: path.join(__dirname, "build", "js"),
-    filename:
-      process.env.NODE_ENV === "development"
-        ? outputFilename + ".dev.js" // "development"
-        : outputFilename + ".min.js", // "production" or "debug"
+    path: outputDir,
+    filename: isProduction
+      ? "vivliostyle-viewer.min.js" // "production" or "debug"
+      : "vivliostyle-viewer.dev.js", // "development"
     library: "@vivliostyle/viewer",
     libraryTarget: "umd",
     libraryExport: "default",
@@ -29,7 +30,7 @@ const config = (outputFilename, tsConfigName) => ({
         test: /\.ts$/,
         loader: "ts-loader",
         options: {
-          configFile: tsConfigName,
+          configFile: "tsconfig.json",
         },
       },
     ],
@@ -37,7 +38,7 @@ const config = (outputFilename, tsConfigName) => ({
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: process.env.NODE_ENV,
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       },
     }),
     new CircularDependencyPlugin({
@@ -52,6 +53,4 @@ const config = (outputFilename, tsConfigName) => ({
       }),
     ],
   },
-});
-
-module.exports = config("vivliostyle-viewer", "tsconfig.json");
+};

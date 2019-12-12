@@ -1,6 +1,6 @@
 {
-  "include": ["typings/**/*.ts", "src/ts/**/*.ts"],
-  "exclude": ["node_modules"],
+  "include": ["types/**/*.ts", "src/ts/**/*.ts"],
+  "exclude": ["node_modules", "examples"],
   "compilerOptions": {
     /* Basic Options */
     "target": "ES2018" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */,

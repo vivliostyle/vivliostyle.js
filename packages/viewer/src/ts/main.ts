@@ -18,8 +18,19 @@
  */
 
 import vivliostyleInstance from "@vivliostyle/core";
-import vivliostyle from "./models/vivliostyle";
+import vivliostyle, { Vivliostyle } from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
 
-vivliostyle.setInstance(vivliostyleInstance);
+declare global {
+  interface Window {
+    vivliostyle: Vivliostyle;
+  }
+}
+
+vivliostyle.setInstance(
+  process.env.NODE_ENV === "production"
+    ? vivliostyleInstance
+    : window.vivliostyle,
+);
+
 vivliostyleViewer.start();

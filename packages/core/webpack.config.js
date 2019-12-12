@@ -23,16 +23,17 @@ along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
 
 Vivliostyle core ${pkg.version}`;
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const config = (outputFilename, tsConfigName) => ({
-  mode: process.env.NODE_ENV === "production" ? "production" : "development",
+  mode: isProduction ? "production" : "development",
   entry: "./src/ts/vivliostyle.ts",
   devtool: "source-map",
   output: {
     path: path.join(__dirname, "lib"),
-    filename:
-      process.env.NODE_ENV === "development"
-        ? outputFilename + ".dev.js" // "development"
-        : outputFilename + ".min.js", // "production" or "debug"
+    filename: isProduction
+      ? outputFilename + ".min.js" // "production" or "debug"
+      : outputFilename + ".dev.js", // "development"
     library: "vivliostyle",
     libraryTarget: "umd",
     libraryExport: "default",
@@ -44,11 +45,14 @@ const config = (outputFilename, tsConfigName) => ({
     rules: [
       {
         test: /\.ts$/,
+        include: path.resolve(__dirname, "src"),
         use: [
           {
             loader: "ts-loader",
             options: {
               configFile: tsConfigName,
+              transpileOnly: true,
+              experimentalWatchApi: false,
             },
           },
         ],
@@ -61,7 +65,7 @@ const config = (outputFilename, tsConfigName) => ({
   },
   plugins: [
     new webpack.DefinePlugin({
-      DEBUG: JSON.stringify(process.env.NODE_ENV !== "production"),
+      DEBUG: JSON.stringify(!isProduction),
     }),
     new webpack.BannerPlugin({
       banner: bannerText,
@@ -72,40 +76,14 @@ const config = (outputFilename, tsConfigName) => ({
     }),
   ],
   optimization: {
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          // mangle: {
-          //   properties: {
-          //     keep_quoted: true,
-          //     regex: /^[a-z]{2,}[A-Z]\w*$/, // mangle camelCase property names
-          //     reserved: [ // list all camelCase property names to be reserved!!
-          //       "autoResize",
-          //       "docTitle",
-          //       "getCurrentPageProgression",
-          //       "getPageSizes",
-          //       "isTOCVisible",
-          //       "layoutStyle",
-          //       "loadDocument",
-          //       "loadPublication",
-          //       "loadXML",
-          //       "navigateToInternalUrl",
-          //       "navigateToPage",
-          //       "pageBorderWidth",
-          //       "printTimings",
-          //       "queryZoomFactor",
-          //       "setOptions",
-          //       "showTOC"
-          //     ]
-          //   }
-          // }
-        },
-      }),
-    ],
+    minimizer: isProduction ? [new TerserPlugin()] : [],
   },
 });
 
-module.exports = [
-  config("vivliostyle", "tsconfig.json"),
-  config("vivliostyle-es5", "tsconfig-es5.json"),
-];
+const targets = [config("vivliostyle", "tsconfig.json")];
+
+if (isProduction) {
+  targets.push(config("vivliostyle-es5", "tsconfig-es5.json"));
+}
+
+module.exports = targets;

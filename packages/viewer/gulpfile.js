@@ -11,55 +11,49 @@ const notify = require("gulp-notify");
 const path = require("path");
 const plumber = require("gulp-plumber");
 const rename = require("gulp-rename");
-const finder = require("find-package-json");
+const packageImporter = require("node-sass-package-importer");
 
 sass.compiler = require("node-sass");
 
 // Parameters
 const SRC_DIR = "src";
-const DEST_DIR = "build";
+const DEST_DIR = "lib";
 const DIRS = {
   fonts: { src: "fonts" },
-  html: { src: "html", dest: "", srcPattern: "*.ejs" },
+  html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
   resources: {
     src: "../core/resources",
     dest: "resources",
   },
-  mathjax: { src: "../../node_modules/mathjax", dest: "mathjax" },
-  plugin_resources: {
+  pluginResources: {
     src: "../core/plugins/*/resources",
     dest: "plugins",
   },
 };
-const VIVLIOSTYLE_JS_SRC_DIR = "../core/src";
+const VIVLIOSTYLE_JS_SRC_DIR = "../core/lib";
 const HTML_FILENAMES = {
   production: "vivliostyle-viewer.html",
   development: "vivliostyle-viewer-dev.html",
 };
 
 function getVersion(basePath) {
-  const version = JSON.parse(fs.readFileSync(basePath + "package.json", "utf8"))
-    .version;
-  return version.replace(/\.0$/, "");
+  const { version } = JSON.parse(
+    fs.readFileSync(path.join(basePath, "package.json"), "utf8"),
+  );
+  return version;
 }
-const versions = {
-  core: getVersion("../../node_modules/@vivliostyle/core/"),
-  viewer: getVersion(""),
-};
+const VERSION = getVersion("../..");
 
 // Utility functions
 function destDir(type) {
   const dirs = DIRS[type];
-  return (
-    DEST_DIR + "/" + (typeof dirs.dest === "string" ? dirs.dest : dirs.src)
-  );
+  const dirName = dirs.dest || dirs.src;
+  return path.join(DEST_DIR, dirName);
 }
-function srcPattern(type) {
-  return (
-    SRC_DIR + "/" + DIRS[type].src + "/" + (DIRS[type].srcPattern || "**/*")
-  );
-}
+
+const srcPattern = (type) =>
+  path.join(SRC_DIR, DIRS[type].src, DIRS[type].srcPattern || "**/*");
 
 // create a task simply copying files
 function copyTask(type) {
@@ -73,14 +67,22 @@ function copyTask(type) {
 }
 copyTask("fonts");
 copyTask("resources");
-copyTask("mathjax");
-copyTask("plugin_resources");
+copyTask("pluginResources");
 
 // HTML build
-function buildHtml(development) {
+function buildHtml(isDevelopment) {
   return gulp
     .src(srcPattern("html"))
-    .pipe(ejs({ development: development, versions: versions }))
+    .pipe(
+      ejs({
+        version: VERSION,
+        isDevelopment: isDevelopment,
+        viewerPath: isDevelopment
+          ? "js/vivliostyle-viewer.dev.js"
+          : "js/vivliostyle-viewer.min.js",
+        packageRoot: isDevelopment ? "../.." : "//unpkg.com/@vivliostyle",
+      }),
+    )
     .pipe(
       plumber({
         errorHandler: notify.onError("Error: <%= error.message %>"),
@@ -88,20 +90,16 @@ function buildHtml(development) {
     )
     .pipe(
       rename(
-        development ? HTML_FILENAMES.development : HTML_FILENAMES.production,
+        isDevelopment ? HTML_FILENAMES.development : HTML_FILENAMES.production,
       ),
     )
     .pipe(gulp.dest(destDir("html")));
 }
-gulp.task("build:html", function() {
-  return buildHtml(false);
-});
-gulp.task("build:html-dev", function() {
-  return buildHtml(true);
-});
+gulp.task("build:html", () => buildHtml(false));
+gulp.task("build:html-dev", () => buildHtml(true));
 
 // CSS build
-function buildCss(development) {
+function buildCss(isDevelopment) {
   return gulp
     .src(srcPattern("css"))
     .pipe(
@@ -111,44 +109,41 @@ function buildCss(development) {
     )
     .pipe(
       sass({
-        outputStyle: development ? "expanded" : "compressed",
+        importer: packageImporter({
+          extensions: [".scss", ".css"],
+        }),
+        outputStyle: isDevelopment ? "expanded" : "compressed",
       }).on("error", sass.logError),
     )
     .pipe(gulp.dest(path.resolve(destDir("css"))));
 }
-gulp.task("build:css", function() {
-  return buildCss(false);
-});
-gulp.task("build:css-dev", function() {
-  return buildCss(true);
-});
+gulp.task("build:css", () => buildCss(false));
+gulp.task("build:css-dev", () => buildCss(true));
 
 // build all
 gulp.task(
   "build",
   gulp.parallel(
     "build:html",
+    "build:css",
     "build:fonts",
     "build:resources",
-    "build:plugin_resources",
-    "build:css",
+    "build:pluginResources",
   ),
 );
 gulp.task(
   "build-dev",
   gulp.parallel(
     "build:html-dev",
+    "build:css-dev",
     "build:fonts",
     "build:resources",
-    "build:plugin_resources",
-    "build:css-dev",
+    "build:pluginResources",
   ),
 );
 
 // watch
-gulp.task("start-watching", function(done) {
-  done();
-});
+gulp.task("start-watching", (done) => done());
 gulp.task(
   "watch",
   gulp.series(gulp.parallel("start-watching", "build"), function(done) {
@@ -156,8 +151,8 @@ gulp.task(
     gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
     gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(
-      srcPattern("plugin_resources"),
-      gulp.task("build:plugin_resources"),
+      srcPattern("pluginResources"),
+      gulp.task("build:pluginResources"),
     );
     gulp.watch(srcPattern("css"), gulp.task("build:css"));
     done();
@@ -170,8 +165,8 @@ gulp.task(
     gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
     gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(
-      srcPattern("plugin_resources"),
-      gulp.task("build:plugin_resources"),
+      srcPattern("pluginResources"),
+      gulp.task("build:pluginResources"),
     );
     gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
     done();
@@ -179,7 +174,7 @@ gulp.task(
 );
 
 // serve
-function serve(development) {
+function serve(isDevelopment) {
   browserSync.init({
     browser:
       process.platform === "darwin"
@@ -193,7 +188,7 @@ function serve(development) {
     startPath: "/core/test/files/",
   });
   const target = [DEST_DIR + "/**/*"];
-  if (development) {
+  if (isDevelopment) {
     target.push(VIVLIOSTYLE_JS_SRC_DIR + "/**/*");
   }
   gulp.watch(target).on("change", browserSync.reload);
@@ -215,7 +210,7 @@ gulp.task(
 
 gulp.task("default", gulp.task("serve-dev"));
 
-// test
+// Test
 gulp.task("test-local", function(done) {
   const server = new KarmaServer(
     {
@@ -227,6 +222,7 @@ gulp.task("test-local", function(done) {
   );
   server.start();
 });
+
 gulp.task("test-sauce", function(done) {
   const server = new KarmaServer(
     {

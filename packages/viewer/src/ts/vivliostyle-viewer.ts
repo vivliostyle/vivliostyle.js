@@ -31,5 +31,5 @@ export default {
 
     if (window["__loaded"]) startViewer();
     else window.onload = startViewer;
-  }
+  },
 };

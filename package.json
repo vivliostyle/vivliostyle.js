@@ -3,10 +3,12 @@
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "version": "2019.11.100-pre",
   "scripts": {
+    "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
+    "dev": "lerna run dev --parallel",
+    "format": "lerna run format",
     "lint": "lerna run lint",
-    "test": "lerna run test",
-    "format": "lerna run format"
+    "test": "lerna run test"
   },
   "devDependencies": {
     "husky": "^3.1.0",

@@ -7,10 +7,10 @@
     "build-debug": "NODE_ENV=debug webpack",
     "build-dev": "NODE_ENV=development webpack",
     "dev": "NODE_ENV=development webpack -w",
-    "lint": "eslint --ext .ts src",
     "format": "prettier --write \"{src,test,scripts}/**/*.{html,js,css}\"",
-    "test": "test -z \"$SAUCE_USERNAME\" || karma start test/conf/karma-sauce.conf.js",
-    "test-local": "karma start test/conf/karma-local.conf.js",
+    "lint": "eslint --ext .ts src",
+    "test": "karma start test/conf/karma-local.conf.js",
+    "test-sauce": "test -z \"$SAUCE_USERNAME\" || karma start test/conf/karma-sauce.conf.js",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

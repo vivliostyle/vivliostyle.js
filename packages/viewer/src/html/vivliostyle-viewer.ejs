@@ -1,288 +1,289 @@
 <!DOCTYPE html>
 <html data-vivliostyle-paginated="true">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="google" content="notranslate"/>
-<title>Vivliostyle Viewer</title>
-<script src="https://wicg.github.io/visual-viewport/polyfill/visualViewport.js"></script>
-<script src="resources/mathjax-config.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+  <head>
+    <!-- Metadata -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="google" content="notranslate"/>
+    
+    <!-- WICG Visual Viewport -->
+    <script src="https://wicg.github.io/visual-viewport/polyfill/visualViewport.js"></script>
 
-<% if (development) { %>
-<script src="../../core/lib/vivliostyle.dev.js"></script>
-<script src="js/vivliostyle-viewer.dev.js"></script>
-<% } else { %>
-<script src="js/vivliostyle-viewer.min.js"></script>
-<% } %>
+    <!-- MathJax -->
+    <script src="<%= packageRoot %>/core/resources/mathjax-config.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
-<link rel="icon" href="resources/favicon.ico"/>
-<% if (development) { %>
-<link rel="stylesheet" href="../../core/resources/vivliostyle-viewport.css"/>
-<% } else { %>
-<link rel="stylesheet" href="//unpkg.com/@vivliostyle/core@2.0.0/resources/vivliostyle-viewport.css"/>
-<% } %>
+    <!-- Core -->
+    <% if (isDevelopment) { %>
+    <script src="../../../core/lib/vivliostyle.dev.js"></script>
+    <% } %>
+    <link rel="icon" href="<%= packageRoot %>/core/resources/favicon.ico"/>
+    <link rel="stylesheet" href="<%= packageRoot %>/core/resources/vivliostyle-viewport.css"/>
+    <link rel="stylesheet" href="<%= packageRoot %>/core/resources/vivliostyle-viewport-screen.css" media="screen"/>
 
-<link rel="stylesheet" href="resources/vivliostyle-viewport-screen.css" media="screen"/>
-<link rel="stylesheet" href="css/vivliostyle-viewer.css"/>
-<link rel="stylesheet" href="css/ui.arrows.css"/>
-<link rel="stylesheet" href="css/ui.menu-bar.css"/>
-<link rel="stylesheet" href="css/ui.message-dialog.css"/>
-<link rel="stylesheet" href="css/ui.loading-overlay.css"/>
-<style id="vivliostyle-page-rules"></style>
-</head>
-<body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
-<section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: !!viewer.state.status(), 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
-	<h1>Vivliostyle Viewer <small>(version:&nbsp;<%= versions.core.replace(/\.\d{14}$/, "") %>)</small></h1>
-	<input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl"/>
-	<p><strong>Supported document types:</strong></p>
-	<ul>
-		<li>(X)HTML document, with CSS for paged media</li>
-		<li>Web publication (a collection of HTML documents): specify URL of the primary entry page or manifest file.</li>
-		<li>Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.</li>
-	</ul>
-	<p>Notes:</p>
-	<ul>
-		<li>GitHub and Gist URLs can be directly specified. Vivliostyle loads raw github/gist content when such URL is specified.</li>
-		<li>⚠️Mixed Content (“http:” URL is specified to “https:” Vivliostyle Viewer) is usually blocked by browser.</li>
-		<li>⚠️Cross-Origin (request to different domain) is usually blocked by browser unless the server is configured to allow Cross-Origin Resource Sharing (CORS).</li>
-	</ul>
-	<p><strong>URL parameter options:</strong></p>
-	<ul>
-		<li><span>#<b>b</b>=&lt;document URL&gt;</span> or <span>#<b>x</b>=&lt;document URL&gt;</span>
-			<ul>
-				<li>#<b>b</b>= Book view. When (X)HTML document URL is specified, the URL is treated as primary entry page’s, and a series of HTML documents linked from the manifest or TOC (Table of Contents, e.g. marked up with <code>&lt;nav role="doc-toc"&gt;</code>)  are automatically loaded.</li>
-				<li>#<b>x</b>= (X)HTML document is simply loaded. Multiple documents can be specified as #<b>x</b>=&lt;1st HTML&gt;&amp;<b>x</b>=&lt;2nd HTML&gt;...</li>
-			</ul>
-		</li>
-		<li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]</span>
-			<ul>
-				<li><b>true</b>: Spread view</li>
-				<li><b>false</b>: Single page view</li>
-				<li><b>auto</b>: Auto spread view (default)</li>
-			</ul>
-		</li>
-		<li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]</span>
-			<ul>
-				<li><b>true</b>: for Print (all pages printable, page count works as expected)</li>
-				<li><b>false</b>: for Read (quick loading with rough page count)</li>
-			</ul>
-		</li>
-		<li><span>&amp;<b>style</b>=&lt;additional external style sheet URL&gt;</span></li>
-		<li><span>&amp;<b>userStyle</b>=&lt;user style sheet URL&gt;</span></li>
-	</ul>
-	<p>Options can also be set in the <a href="#" data-bind="click: settingsPanel.toggle">Settings</a> panel.</p>
-	<p>For more details, see documentation on <a href="https://vivliostyle.org"><strong>Vivliostyle.org</strong></a>.</p>
-	<ul>
-		<li><a href="https://vivliostyle.github.io/vivliostyle.js/docs/en/">Vivliostyle Viewer User’s Guide</a></li>
-		<li><a href="https://vivliostyle.github.io/vivliostyle.js/docs/ja/">Vivliostyle Viewer ユーザーガイド (日本語)</a></li>
-	</ul>
-</section>
-<div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true"></div>
-<span role="button" id="vivliostyle-page-navigation-left" title="navigate to left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled}"></span>
-<span role="button" id="vivliostyle-page-navigation-right" title="navigate to right" aria-keyshortcuts="ArrowRight" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}, attr: {'aria-disabled': navigation.isNavigateToRightDisabled}"></span>
-<div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()}">
-	<div class="vivliostyle-loading-spinner"></div>
-</div>
+    <!-- Viewer -->
+    <script src="<%= viewerPath %>"></script>
+    <link rel="stylesheet" href="css/vivliostyle-viewer.css"/>
+    <link rel="stylesheet" href="css/ui.arrows.css"/>
+    <link rel="stylesheet" href="css/ui.menu-bar.css"/>
+    <link rel="stylesheet" href="css/ui.message-dialog.css"/>
+    <link rel="stylesheet" href="css/ui.loading-overlay.css"/>
 
-<!-- MENU BAR -->
-<div role="toolbar" id="vivliostyle-menu-bar">
-	<ul class="vivliostyle-menu" id="vivliostyle-menu_settings">
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_settings-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened, 'pinned': settingsPanel.pinned}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S), Double click/type to pin" aria-keyshortcuts="S" data-bind="menuButton: true, click: settingsPanel.toggle, attr: {'aria-pressed': settingsPanel.opened()?'true':'false', 'aria-expanded': settingsPanel.opened()?'true':'false'}"></span>
-			<!-- MENU DETAIL -->
-			<div role="dialog" aria-label="Settings Panel" class="vivliostyle-menu-detail" tabindex="0" aria-hidden="true" data-bind="attr: {'aria-hidden': !settingsPanel.opened()?'true':'false'}">
-				<div class="vivliostyle-menu-detail-main">
-					<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-and-rendering" open data-bind="hidden: settingsPanel.isPageViewModeChangeDisabled">
-						<summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="P"><span>Page View and Rendering Mode</span></summary>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-mode" aria-keyshortcuts="V">
-							<legend class="vivliostyle-menu-detail-group-heading">Page Spread View</legend>
-							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="autoSpread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Auto</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single page</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
-							</ul>
-						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group">
-							<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span></label>
-							</div>
-							<div><small>On: for Print (all pages printable, page count works)</small></div>
-							<div><small>Off: for Read (quick loading with rough page count)</small></div>
-						</fieldset>
-					</details>
-					<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
-						<summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="U"><span>User Style Preferences</span></summary>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-size" aria-keyshortcuts="Z">
-							<legend class="vivliostyle-menu-detail-group-heading">Page Size</legend>
-							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-settings_page-size" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Default</span> <small>(=Auto unless specified in document)</small></label></li>
-								<li><label><input type="radio" name="vivliostyle-settings_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Auto</span> <small>(use entire window area)</small></label></li>
-								<li>
-									<div>
-										<label><input type="radio" name="vivliostyle-settings_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Preset</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='preset'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('preset');return true;}">
-											<select name="vivliostyle-settings_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageStyle.PresetSize, value: settingsPanel.state.pageStyle.presetSize, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='preset'?0:-1}">
-												<option data-bind="value: $data, text: description"></option>
-											</select>&#x2002;
-											<label><input type="checkbox" name="vivliostyle-settings_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageStyle.isLandscape, disable: settingsPanel.state.pageStyle.pageSizeMode()!='preset'" /> <span>Landscape</span></label>
-										</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<label><input type="radio" name="vivliostyle-settings_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Custom size:</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('custom');return true;}"><label>‣ <small>Width</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-width" data-bind="value: settingsPanel.state.pageStyle.customWidth, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
-											<label>‣ <small>Height</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-height" data-bind="value: settingsPanel.state.pageStyle.customHeight, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
-										</span>
-									</div>
-								</li>
-							</ul>
-						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="M">
-							<legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
-							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified in document)</small></label></li>
-								<li><label><input type="radio" name="vivliostyle-settings_page-margin" value="0" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Set page margin to 0</span></label></li>
-								<li>
-									<div>
-										<label><input type="radio" name="vivliostyle-settings_page-margin" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Custom margin:</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageMarginMode('custom');return true;}"><label>‣ <small>Top/Right/Bottom/Left</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-margin_custom" data-bind="value: settingsPanel.state.pageStyle.customMargin, attr: {tabindex: settingsPanel.state.pageStyle.pageMarginMode()=='custom'?0:-1}" /></label></span>
-									</div>
-								</li>
-								<li><label><input type="checkbox" name="vivliostyle-settings_first-page-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.firstPageMarginZero" /> <span>Set first page margin to 0</span></label>
-								<li><label><input type="checkbox" name="vivliostyle-settings_force-html-body-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.forceHtmlBodyMarginZero" /> <span>Force html/body margin to 0</span><!--  <small>(avoid big page+body margin)</small> --></label>
-							</ul>
-						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-breaks" aria-keyshortcuts="B">
-							<legend class="vivliostyle-menu-detail-group-heading">Page Breaks</legend>
-							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Default widows/orphans control</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="1" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Allow widows and orphans</span></label></li>
-								<li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="999" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Avoid page break inside paragraph</span></label></li>
-							</ul>
-						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_images" aria-keyshortcuts="I">
-							<legend class="vivliostyle-menu-detail-group-heading">Images</legend>
-							<ul class="vivliostyle-menu-detail-group">
-								<li><label><input type="checkbox" name="vivliostyle-settings_image-max-size-to-fit-page" data-bind="checked: settingsPanel.state.pageStyle.imageMaxSizeToFitPage" /> <span>Set image max-size to fit page</span></label></li>
-								<li>
-									<ul class="vivliostyle-menu-detail-group">
-										<li><label><input type="checkbox" name="vivliostyle-settings_image-keep-aspect-ratio" data-bind="checked: settingsPanel.state.pageStyle.imageKeepAspectRatio" /> <span>Keep aspect ratio</span></label></li>
-									</ul>
-								</li>
-							</ul>
-						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_text" aria-keyshortcuts="T">
-							<legend class="vivliostyle-menu-detail-group-heading">Text</legend>
-							<ul class="vivliostyle-menu-detail-group">
-								<li><label><span>Font size:</span> <input type="text" inputmode="numeric" autocomplete="off" name="vivliostyle-settings_viewer-font-size" data-bind="value: settingsPanel.state.pageStyle.viewerFontSizePercent" />%</label>
-									<ul class="vivliostyle-menu-detail-group">
-										<li>
-											<div>
-												<label><input type="checkbox" name="vivliostyle-settings_base-font-size-specified" data-bind="checked: settingsPanel.state.pageStyle.baseFontSizeSpecified" /> <span>Base font-size:</span></label>
-												<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontSizeSpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseFontSizeSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-font-size" data-bind="value: settingsPanel.state.pageStyle.baseFontSize, attr: {tabindex: settingsPanel.state.pageStyle.baseFontSizeSpecified()?0:-1}" /></span>
-											</div>
-										</li>
-									</ul>
-								</li>
-								<li>
-									<div>
-										<label><input type="checkbox" name="vivliostyle-settings_base-line-height-specified" data-bind="checked: settingsPanel.state.pageStyle.baseLineHeightSpecified" /> <span>Base line-height:</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseLineHeightSpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseLineHeightSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-line-height" data-bind="value: settingsPanel.state.pageStyle.baseLineHeight, attr: {tabindex: settingsPanel.state.pageStyle.baseLineHeightSpecified()?0:-1}" /></span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<label><input type="checkbox" name="vivliostyle-settings_base-font-family-specified" data-bind="checked: settingsPanel.state.pageStyle.baseFontFamilySpecified" /> <span>Base font-family:</span></label>
-										<span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontFamilySpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseFontFamilySpecified(true);return true;}"><input type="text" name="vivliostyle-settings_base-font-family" data-bind="value: settingsPanel.state.pageStyle.baseFontFamily, attr: {tabindex: settingsPanel.state.pageStyle.baseFontFamilySpecified()?0:-1}" /></span>
-									</div>
-								</li>
-							</ul>
-						</fieldset>
-						<fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
-							<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
-						</fieldset>
-						<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_css-details">
-							<summary class="vivliostyle-menu-detail-group-heading"><span>CSS Details</span></summary>
-							<div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
-							<textarea name="vivliostyle-settings_css-details" autocomplete="off" aria-keyshortcuts="C" rows="10" data-bind="value: settingsPanel.state.pageStyle.cssText"></textarea>
-						</details>
-						<details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_reset-user-style">
-							<summary class="vivliostyle-menu-detail-group-heading"><span>Reset User Style</span></summary>
-							<ul class="vivliostyle-menu-detail-group">
-								<li>
-									<label><input type="checkbox" name="vivliostyle-settings_reset-user-style" aria-keyshortcuts="R" data-bind="click: settingsPanel.resetUserStyle" /> <span>Reset all to default</span></label>
-								</li>
-							</ul>
-						</details>
-					</details>
-					<!--
-					<fieldset class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-xxxx" /> <span>Menu-Detail Item</span> <small>(Sample)</small></label></div>
-						<ul class="vivliostyle-menu-detail-group">
-							<li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-a" /> <span>Sample A</span> <small>(Abc De Fg.)</small></label></li>
-							<li class="vivliostyle-menu-disabled"><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-b" disabled /> <span>Sample B</span></label>
-								<ul class="vivliostyle-menu-detail-group">
-									<li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-c" disabled /> <span>Sample C</span></label></li>
-								</ul>
-							</li>
-						</ul>
-					</fieldset>
-					<fieldset class="vivliostyle-menu-detail-group">
-						<legend class="vivliostyle-menu-detail-group-heading">Menu-Detail Item <small>(Sample)</small></legend>
-						<ul class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
-							<li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-d" disabled /> <span>Sample D</span> <small>(Abc De Fg.)</small></label></li>
-						</ul>
-					</fieldset>
-					<fieldset class="vivliostyle-menu-detail-group">
-						<div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_paginate" /> <span>Paginate</span></label></div>
-						<div class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
-							<div><label><input type="checkbox" name="vivliostyle-settings_spread-view" disabled /> <span>Spread View</span></label></div>
-						</div>
-					</fieldset>
-					-->
-					<div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
-						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" aria-keyshortcuts="Enter" data-bind="menuButton: true, click: settingsPanel.apply">Apply</button></div>
-						<div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" aria-keyshortcuts="Escape" data-bind="menuButton: true, click: settingsPanel.cancel">Cancel</button></div>
-					</div>
-				</div>
-				<aside class="vivliostyle-menu-detail-aside">
-					<div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
-					<div class="version"><small>(<span>Core: <%= versions.core %>,</span> <span>UI: <%= versions.ui%></span>)</small></div>
-				</aside>
-			</div>
-		</li>
-	</ul>
-	<ul class="vivliostyle-menu" id="vivliostyle-menu_toc" data-bind="visible: !navigation.hideTOCNavigation">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_toc-toggle" data-bind="click: navigation.toggleTOC, css: {'vivliostyle-menu-disabled': navigation.isTOCToggleDisabled, 'on': viewer.tocVisible, 'pinned': viewer.tocPinned}"><span role="button" class="vivliostyle-menu-icon-button" title="Table of Contents (T), Double click/type to pin" aria-keyshortcuts="T" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isTOCToggleDisabled, 'aria-pressed': viewer.tocVisible()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span></li>
-	</ul>
-	<ul class="vivliostyle-menu" id="vivliostyle-menu_move" data-bind="visible: !navigation.hidePageNavigation">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-first" data-bind="click: navigation.navigateToFirst, css: {'vivliostyle-menu-disabled': navigation.isNavigateToFirstDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="First Page (Home)" aria-keyshortcuts="Home Meta+ArrowUp" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToFirstDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-previous" data-bind="click: navigation.navigateToPrevious, css: {'vivliostyle-menu-disabled': navigation.isNavigateToPreviousDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Previous Page (↑)" aria-keyshortcuts="ArrowUp PageUp" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToPreviousDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Next Page (↓)" aria-keyshortcuts="ArrowDown PageDown" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToNextDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Last Page (End)" aria-keyshortcuts="End Meta+ArrowDown" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToLastDisabled}"></span></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><input aria-label="Page number" id="vivliostyle-page-number" title="Go to Page… (G)" aria-keyshortcuts="G" data-bind="value: navigation.pageNumber, attr: {'aria-disabled': navigation.isPageNumberDisabled}" onfocus="setTimeout(()=>{this.setSelectionRange(0,this.value.length)},0)" type="text" inputmode="numeric" autocomplete="off"/></li>
-		<li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><span aria-label="Total pages" id="vivliostyle-total-pages" data-bind="text: navigation.totalPages"></span></li>
-	</ul>
-	<ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Out (O)" aria-keyshortcuts="O" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomOutDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="click: navigation.zoomIn, css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: In (I)" aria-keyshortcuts="I" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomInDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-to-actual-size" data-bind="click: navigation.zoomToActualSize, css: {'vivliostyle-menu-disabled': navigation.isZoomToActualSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Actual Size (1)" aria-keyshortcuts="1" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomToActualSizeDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-fit-to-screen" data-bind="click: navigation.toggleFitToScreen, css: {'vivliostyle-menu-disabled': navigation.isToggleFitToScreenDisabled, 'on': navigation.fitToScreen}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Fit to Screen (F)" aria-keyshortcuts="F" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isToggleFitToScreenDisabled, 'aria-pressed': navigation.fitToScreen()?'true':'false'}"></span></li>
-	</ul>
-	<ul class="vivliostyle-menu" id="vivliostyle-menu_text-size" data-bind="visible: !navigation.hideFontSizeChange">
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Smaller (-)" aria-keyshortcuts="-" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDecreaseFontSizeDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Larger (+)" aria-keyshortcuts="Plus" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isIncreaseFontSizeDisabled}"></span></li>
-		<li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default" data-bind="click: navigation.defaultFontSize, css: {'vivliostyle-menu-disabled': navigation.isDefaultFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Default Size (0)" aria-keyshortcuts="0" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDefaultFontSizeDisabled}"></span></li>
-	</ul>
-</div>
+    <style id="vivliostyle-page-rules"></style>
 
-<!-- MESSAGE DIALOG -->
-<div role="alertdialog" aria-label="Error messages" id="vivliostyle-message-dialog" data-bind="foreach: messageDialog.list, css: {'vivliostyle-message-dialog-shown': messageDialog.visible}, attr: {'aria-hidden': !messageDialog.visible()?'true':'false'}">
-	<div class="vivliostyle-message">
-		<p data-bind="css: type, text: $parent.messageDialog.getDisplayMessage(content)"></p>
-	</div>
-</div>
+    <title>Vivliostyle Viewer</title>
+  </head>
+  <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
+    <section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: !!viewer.state.status(), 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
+      <h1>Vivliostyle Viewer <small>(version:&nbsp;<%= version %>)</small></h1>
+      <input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl"/>
+      <p><strong>Supported document types:</strong></p>
+      <ul>
+        <li>(X)HTML document, with CSS for paged media</li>
+        <li>Web publication (a collection of HTML documents): specify URL of the primary entry page or manifest file.</li>
+        <li>Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.</li>
+      </ul>
+      <p>Notes:</p>
+      <ul>
+        <li>GitHub and Gist URLs can be directly specified. Vivliostyle loads raw github/gist content when such URL is specified.</li>
+        <li>⚠️Mixed Content (“http:” URL is specified to “https:” Vivliostyle Viewer) is usually blocked by browser.</li>
+        <li>⚠️Cross-Origin (request to different domain) is usually blocked by browser unless the server is configured to allow Cross-Origin Resource Sharing (CORS).</li>
+      </ul>
+      <p><strong>URL parameter options:</strong></p>
+      <ul>
+        <li><span>#<b>b</b>=&lt;document URL&gt;</span> or <span>#<b>x</b>=&lt;document URL&gt;</span>
+          <ul>
+            <li>#<b>b</b>= Book view. When (X)HTML document URL is specified, the URL is treated as primary entry page’s, and a series of HTML documents linked from the manifest or TOC (Table of Contents, e.g. marked up with <code>&lt;nav role="doc-toc"&gt;</code>)  are automatically loaded.</li>
+            <li>#<b>x</b>= (X)HTML document is simply loaded. Multiple documents can be specified as #<b>x</b>=&lt;1st HTML&gt;&amp;<b>x</b>=&lt;2nd HTML&gt;...</li>
+          </ul>
+        </li>
+        <li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]</span>
+          <ul>
+            <li><b>true</b>: Spread view</li>
+            <li><b>false</b>: Single page view</li>
+            <li><b>auto</b>: Auto spread view (default)</li>
+          </ul>
+        </li>
+        <li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]</span>
+          <ul>
+            <li><b>true</b>: for Print (all pages printable, page count works as expected)</li>
+            <li><b>false</b>: for Read (quick loading with rough page count)</li>
+          </ul>
+        </li>
+        <li><span>&amp;<b>style</b>=&lt;additional external style sheet URL&gt;</span></li>
+        <li><span>&amp;<b>userStyle</b>=&lt;user style sheet URL&gt;</span></li>
+      </ul>
+      <p>Options can also be set in the <a href="#" data-bind="click: settingsPanel.toggle">Settings</a> panel.</p>
+      <p>For more details, see documentation on <a href="https://vivliostyle.org"><strong>Vivliostyle.org</strong></a>.</p>
+      <ul>
+        <li><a href="https://vivliostyle.github.io/vivliostyle.js/docs/en/">Vivliostyle Viewer User’s Guide</a></li>
+        <li><a href="https://vivliostyle.github.io/vivliostyle.js/docs/ja/">Vivliostyle Viewer ユーザーガイド (日本語)</a></li>
+      </ul>
+    </section>
+    <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true"></div>
+    <span role="button" id="vivliostyle-page-navigation-left" title="navigate to left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled}"></span>
+    <span role="button" id="vivliostyle-page-navigation-right" title="navigate to right" aria-keyshortcuts="ArrowRight" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}, attr: {'aria-disabled': navigation.isNavigateToRightDisabled}"></span>
+    <div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()}">
+      <div class="vivliostyle-loading-spinner"></div>
+    </div>
 
-</body>
+    <!-- MENU BAR -->
+    <div role="toolbar" id="vivliostyle-menu-bar">
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_settings">
+        <li class="vivliostyle-menu-item" id="vivliostyle-menu-item_settings-toggle" data-bind="css: {'vivliostyle-menu-item_detail-opened': settingsPanel.opened, 'pinned': settingsPanel.pinned}"><span role="button" tabindex="0" class="vivliostyle-menu-icon-button" title="Settings (S), Double click/type to pin" aria-keyshortcuts="S" data-bind="menuButton: true, click: settingsPanel.toggle, attr: {'aria-pressed': settingsPanel.opened()?'true':'false', 'aria-expanded': settingsPanel.opened()?'true':'false'}"></span>
+          <!-- MENU DETAIL -->
+          <div role="dialog" aria-label="Settings Panel" class="vivliostyle-menu-detail" tabindex="0" aria-hidden="true" data-bind="attr: {'aria-hidden': !settingsPanel.opened()?'true':'false'}">
+            <div class="vivliostyle-menu-detail-main">
+              <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-and-rendering" open data-bind="hidden: settingsPanel.isPageViewModeChangeDisabled">
+                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="P"><span>Page View and Rendering Mode</span></summary>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-mode" aria-keyshortcuts="V">
+                  <legend class="vivliostyle-menu-detail-group-heading">Page Spread View</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="autoSpread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Auto</span></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single page</span></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
+                  </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group">
+                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span></label>
+                  </div>
+                  <div><small>On: for Print (all pages printable, page count works)</small></div>
+                  <div><small>Off: for Read (quick loading with rough page count)</small></div>
+                </fieldset>
+              </details>
+              <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
+                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="U"><span>User Style Preferences</span></summary>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-size" aria-keyshortcuts="Z">
+                  <legend class="vivliostyle-menu-detail-group-heading">Page Size</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="radio" name="vivliostyle-settings_page-size" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Default</span> <small>(=Auto unless specified in document)</small></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Auto</span> <small>(use entire window area)</small></label></li>
+                    <li>
+                      <div>
+                        <label><input type="radio" name="vivliostyle-settings_page-size" value="preset" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Preset</span></label>
+                        <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='preset'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('preset');return true;}">
+                          <select name="vivliostyle-settings_page-size_preset-select" data-bind="foreach: settingsPanel.state.pageStyle.PresetSize, value: settingsPanel.state.pageStyle.presetSize, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='preset'?0:-1}">
+                            <option data-bind="value: $data, text: description"></option>
+                          </select>&#x2002;
+                          <label><input type="checkbox" name="vivliostyle-settings_page-size_preset-landscape" data-bind="checked: settingsPanel.state.pageStyle.isLandscape, disable: settingsPanel.state.pageStyle.pageSizeMode()!='preset'" /> <span>Landscape</span></label>
+                        </span>
+                      </div>
+                    </li>
+                    <li>
+                      <div>
+                        <label><input type="radio" name="vivliostyle-settings_page-size" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Custom size:</span></label>
+                        <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageSizeMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageSizeMode('custom');return true;}"><label>‣ <small>Width</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-width" data-bind="value: settingsPanel.state.pageStyle.customWidth, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+                          <label>‣ <small>Height</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-size_custom-height" data-bind="value: settingsPanel.state.pageStyle.customHeight, attr: {tabindex: settingsPanel.state.pageStyle.pageSizeMode()=='custom'?0:-1}" /></label>
+                        </span>
+                      </div>
+                    </li>
+                  </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="M">
+                  <legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified in document)</small></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_page-margin" value="0" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Set page margin to 0</span></label></li>
+                    <li>
+                      <div>
+                        <label><input type="radio" name="vivliostyle-settings_page-margin" value="custom" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Custom margin:</span></label>
+                        <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': settingsPanel.state.pageStyle.pageMarginMode()!='custom'}, click: ()=>{settingsPanel.state.pageStyle.pageMarginMode('custom');return true;}"><label>‣ <small>Top/Right/Bottom/Left</small>: <input type="text" autocomplete="off" name="vivliostyle-settings_page-margin_custom" data-bind="value: settingsPanel.state.pageStyle.customMargin, attr: {tabindex: settingsPanel.state.pageStyle.pageMarginMode()=='custom'?0:-1}" /></label></span>
+                      </div>
+                    </li>
+                    <li><label><input type="checkbox" name="vivliostyle-settings_first-page-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.firstPageMarginZero" /> <span>Set first page margin to 0</span></label>
+                    <li><label><input type="checkbox" name="vivliostyle-settings_force-html-body-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.forceHtmlBodyMarginZero" /> <span>Force html/body margin to 0</span><!--  <small>(avoid big page+body margin)</small> --></label>
+                  </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-breaks" aria-keyshortcuts="B">
+                  <legend class="vivliostyle-menu-detail-group-heading">Page Breaks</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Default widows/orphans control</span></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="1" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Allow widows and orphans</span></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="999" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Avoid page break inside paragraph</span></label></li>
+                  </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_images" aria-keyshortcuts="I">
+                  <legend class="vivliostyle-menu-detail-group-heading">Images</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="checkbox" name="vivliostyle-settings_image-max-size-to-fit-page" data-bind="checked: settingsPanel.state.pageStyle.imageMaxSizeToFitPage" /> <span>Set image max-size to fit page</span></label></li>
+                    <li>
+                      <ul class="vivliostyle-menu-detail-group">
+                        <li><label><input type="checkbox" name="vivliostyle-settings_image-keep-aspect-ratio" data-bind="checked: settingsPanel.state.pageStyle.imageKeepAspectRatio" /> <span>Keep aspect ratio</span></label></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_text" aria-keyshortcuts="T">
+                  <legend class="vivliostyle-menu-detail-group-heading">Text</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><span>Font size:</span> <input type="text" inputmode="numeric" autocomplete="off" name="vivliostyle-settings_viewer-font-size" data-bind="value: settingsPanel.state.pageStyle.viewerFontSizePercent" />%</label>
+                      <ul class="vivliostyle-menu-detail-group">
+                        <li>
+                          <div>
+                            <label><input type="checkbox" name="vivliostyle-settings_base-font-size-specified" data-bind="checked: settingsPanel.state.pageStyle.baseFontSizeSpecified" /> <span>Base font-size:</span></label>
+                            <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontSizeSpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseFontSizeSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-font-size" data-bind="value: settingsPanel.state.pageStyle.baseFontSize, attr: {tabindex: settingsPanel.state.pageStyle.baseFontSizeSpecified()?0:-1}" /></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <div>
+                        <label><input type="checkbox" name="vivliostyle-settings_base-line-height-specified" data-bind="checked: settingsPanel.state.pageStyle.baseLineHeightSpecified" /> <span>Base line-height:</span></label>
+                        <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseLineHeightSpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseLineHeightSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_base-line-height" data-bind="value: settingsPanel.state.pageStyle.baseLineHeight, attr: {tabindex: settingsPanel.state.pageStyle.baseLineHeightSpecified()?0:-1}" /></span>
+                      </div>
+                    </li>
+                    <li>
+                      <div>
+                        <label><input type="checkbox" name="vivliostyle-settings_base-font-family-specified" data-bind="checked: settingsPanel.state.pageStyle.baseFontFamilySpecified" /> <span>Base font-family:</span></label>
+                        <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.baseFontFamilySpecified()}, click: ()=>{settingsPanel.state.pageStyle.baseFontFamilySpecified(true);return true;}"><input type="text" name="vivliostyle-settings_base-font-family" data-bind="value: settingsPanel.state.pageStyle.baseFontFamily, attr: {tabindex: settingsPanel.state.pageStyle.baseFontFamilySpecified()?0:-1}" /></span>
+                      </div>
+                    </li>
+                  </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
+                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
+                </fieldset>
+                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_css-details">
+                  <summary class="vivliostyle-menu-detail-group-heading"><span>CSS Details</span></summary>
+                  <div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
+                  <textarea name="vivliostyle-settings_css-details" autocomplete="off" aria-keyshortcuts="C" rows="10" data-bind="value: settingsPanel.state.pageStyle.cssText"></textarea>
+                </details>
+                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_reset-user-style">
+                  <summary class="vivliostyle-menu-detail-group-heading"><span>Reset User Style</span></summary>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li>
+                      <label><input type="checkbox" name="vivliostyle-settings_reset-user-style" aria-keyshortcuts="R" data-bind="click: settingsPanel.resetUserStyle" /> <span>Reset all to default</span></label>
+                    </li>
+                  </ul>
+                </details>
+              </details>
+              <!--
+              <fieldset class="vivliostyle-menu-detail-group">
+                <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-xxxx" /> <span>Menu-Detail Item</span> <small>(Sample)</small></label></div>
+                <ul class="vivliostyle-menu-detail-group">
+                  <li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-a" /> <span>Sample A</span> <small>(Abc De Fg.)</small></label></li>
+                  <li class="vivliostyle-menu-disabled"><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-b" disabled /> <span>Sample B</span></label>
+                    <ul class="vivliostyle-menu-detail-group">
+                      <li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-c" disabled /> <span>Sample C</span></label></li>
+                    </ul>
+                  </li>
+                </ul>
+              </fieldset>
+              <fieldset class="vivliostyle-menu-detail-group">
+                <legend class="vivliostyle-menu-detail-group-heading">Menu-Detail Item <small>(Sample)</small></legend>
+                <ul class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
+                  <li><label><input type="radio" name="vivliostyle-settings_page-yyyy" value="vivliostyle-settings_page-yyyy-d" disabled /> <span>Sample D</span> <small>(Abc De Fg.)</small></label></li>
+                </ul>
+              </fieldset>
+              <fieldset class="vivliostyle-menu-detail-group">
+                <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_paginate" /> <span>Paginate</span></label></div>
+                <div class="vivliostyle-menu-detail-group vivliostyle-menu-disabled">
+                  <div><label><input type="checkbox" name="vivliostyle-settings_spread-view" disabled /> <span>Spread View</span></label></div>
+                </div>
+              </fieldset>
+              -->
+              <div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
+                <div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" aria-keyshortcuts="Enter" data-bind="menuButton: true, click: settingsPanel.apply">Apply</button></div>
+                <div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" aria-keyshortcuts="Escape" data-bind="menuButton: true, click: settingsPanel.cancel">Cancel</button></div>
+              </div>
+            </div>
+            <aside class="vivliostyle-menu-detail-aside">
+              <div><small>Powered by</small> <a href="https://vivliostyle.org"><strong>Vivliostyle</strong></a> </div>
+              <div class="version"><small>(<span>Core: <%= version %>,</span> <span>UI: <%= version %></span>)</small></div>
+            </aside>
+          </div>
+        </li>
+      </ul>
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_toc" data-bind="visible: !navigation.hideTOCNavigation">
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_toc-toggle" data-bind="click: navigation.toggleTOC, css: {'vivliostyle-menu-disabled': navigation.isTOCToggleDisabled, 'on': viewer.tocVisible, 'pinned': viewer.tocPinned}"><span role="button" class="vivliostyle-menu-icon-button" title="Table of Contents (T), Double click/type to pin" aria-keyshortcuts="T" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isTOCToggleDisabled, 'aria-pressed': viewer.tocVisible()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span></li>
+      </ul>
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_move" data-bind="visible: !navigation.hidePageNavigation">
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-first" data-bind="click: navigation.navigateToFirst, css: {'vivliostyle-menu-disabled': navigation.isNavigateToFirstDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="First Page (Home)" aria-keyshortcuts="Home Meta+ArrowUp" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToFirstDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-previous" data-bind="click: navigation.navigateToPrevious, css: {'vivliostyle-menu-disabled': navigation.isNavigateToPreviousDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Previous Page (↑)" aria-keyshortcuts="ArrowUp PageUp" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToPreviousDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-next" data-bind="click: navigation.navigateToNext, css: {'vivliostyle-menu-disabled': navigation.isNavigateToNextDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Next Page (↓)" aria-keyshortcuts="ArrowDown PageDown" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToNextDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_move-last" data-bind="click: navigation.navigateToLast, css: {'vivliostyle-menu-disabled': navigation.isNavigateToLastDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Last Page (End)" aria-keyshortcuts="End Meta+ArrowDown" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isNavigateToLastDisabled}"></span></li>
+        <li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><input aria-label="Page number" id="vivliostyle-page-number" title="Go to Page… (G)" aria-keyshortcuts="G" data-bind="value: navigation.pageNumber, attr: {'aria-disabled': navigation.isPageNumberDisabled}" onfocus="setTimeout(()=>{this.setSelectionRange(0,this.value.length)},0)" type="text" inputmode="numeric" autocomplete="off"/></li>
+        <li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><span aria-label="Total pages" id="vivliostyle-total-pages" data-bind="text: navigation.totalPages"></span></li>
+      </ul>
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Out (O)" aria-keyshortcuts="O" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomOutDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="click: navigation.zoomIn, css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: In (I)" aria-keyshortcuts="I" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomInDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-to-actual-size" data-bind="click: navigation.zoomToActualSize, css: {'vivliostyle-menu-disabled': navigation.isZoomToActualSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Actual Size (1)" aria-keyshortcuts="1" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomToActualSizeDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-fit-to-screen" data-bind="click: navigation.toggleFitToScreen, css: {'vivliostyle-menu-disabled': navigation.isToggleFitToScreenDisabled, 'on': navigation.fitToScreen}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Fit to Screen (F)" aria-keyshortcuts="F" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isToggleFitToScreenDisabled, 'aria-pressed': navigation.fitToScreen()?'true':'false'}"></span></li>
+      </ul>
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_text-size" data-bind="visible: !navigation.hideFontSizeChange">
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Smaller (-)" aria-keyshortcuts="-" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDecreaseFontSizeDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Larger (+)" aria-keyshortcuts="Plus" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isIncreaseFontSizeDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default" data-bind="click: navigation.defaultFontSize, css: {'vivliostyle-menu-disabled': navigation.isDefaultFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Default Size (0)" aria-keyshortcuts="0" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDefaultFontSizeDisabled}"></span></li>
+      </ul>
+    </div>
+
+    <!-- MESSAGE DIALOG -->
+    <div role="alertdialog" aria-label="Error messages" id="vivliostyle-message-dialog" data-bind="foreach: messageDialog.list, css: {'vivliostyle-message-dialog-shown': messageDialog.visible}, attr: {'aria-hidden': !messageDialog.visible()?'true':'false'}">
+      <div class="vivliostyle-message">
+        <p data-bind="css: type, text: $parent.messageDialog.getDisplayMessage(content)"></p>
+      </div>
+    </div>
+  </body>
 </html>

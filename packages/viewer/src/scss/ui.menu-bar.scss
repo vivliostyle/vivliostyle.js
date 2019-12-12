@@ -4,7 +4,7 @@
 @import "./lib/_mixins";
 @import "./lib/_vars";
 
-@import "../../node_modules/font-awesome/scss/_variables";
+@import "~font-awesome/scss/_variables";
 @include at-font-face(
   "FontAwesome",
   "../fonts/fontawesome-webfont",
