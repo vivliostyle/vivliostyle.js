@@ -6,6 +6,7 @@
     "build": "NODE_ENV=production webpack",
     "build-debug": "NODE_ENV=debug webpack",
     "build-dev": "NODE_ENV=development webpack",
+    "clean": "shx rm -rf lib .cache",
     "dev": "NODE_ENV=development webpack -w",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js,html}}\"",
     "lint": "eslint --ext .ts src",
@@ -32,7 +33,6 @@
     "karma-webpack": "^4.0.2",
     "mustache": "^3.1.0",
     "parcel-bundler": "^1.12.4",
-    "prettier": "^1.18.2",
     "raw-loader": "^3.1.0",
     "ts-loader": "^6.1.0",
     "typescript": "^3.6.3",
@@ -43,7 +43,7 @@
   "license": "AGPL-3.0",
   "main": "lib/vivliostyle-es5.min.js",
   "bugs": {
-    "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
+    "url": "https://github.com/vivliostyle/vivliostyle/issues"
   },
   "files": [
     "doc/supported-features.md",
@@ -53,13 +53,13 @@
     "samples",
     "plugins/*/resources"
   ],
-  "homepage": "https://github.com/vivliostyle/vivliostyle.js",
+  "homepage": "https://github.com/vivliostyle/vivliostyle/packages/core",
   "module": "lib/vivliostyle.min.js",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vivliostyle/vivliostyle.js.git"
+    "url": "https://github.com/vivliostyle/vivliostyle.git"
   }
 }

@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+  - stable
+before_install:
+  - sudo pip install virtualenv
+script:
+  - scripts/npm-version.sh
+  - yarn lint
+  - yarn build
+  - yarn test-sauce
+# - scripts/wpt-sauce.sh
+after_success:
+  - scripts/after-success-hook.sh
+notifications:
+  email: false
+  slack:
+    secure: KMZdV6pnRPqcqxeZ0bHBM/4GXhBiJUPmONHWlrnCYaKnJyOvpBNHeL8ubdIKkYgc5X9LsHG7k5LGyfiRbmt/o1majMje/+Gadorb9DRJQ15ZbtPBllwOeLiFnr6WykSf7UbDnY5XgmD/eNRwU1KYSC+PvAJ53LlQy53BvZc7hcU=
+addons:
+  hosts:
+    - www.web-platform.test
+    - www1.web-platform.test
+    - www2.web-platform.test
+    - web-platform.test
+    - xn--n8j6ds53lwwkrqhv28a.web-platform.test
+    - xn--lve-6lad.web-platform.test
+  sauce_connect: true
