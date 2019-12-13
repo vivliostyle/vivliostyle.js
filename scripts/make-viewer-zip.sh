@@ -1,8 +1,8 @@
 #!/bin/bash
+set -ev
+
 # scripts/make-viewer-zip.sh <version>
 # must be run on /vivliostyle root
-
-set -ev
 
 dist=vivliostyle-js-$1
 

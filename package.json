@@ -3,7 +3,7 @@
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "version": "2019.11.100-pre",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap && lerna run build --scope @vivliostyle/core",
     "build": "lerna run build",
     "dev": "lerna run dev --parallel",
     "format": "lerna run format",
