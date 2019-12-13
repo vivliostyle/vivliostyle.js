@@ -4,7 +4,6 @@ node_js:
 before_install:
   - sudo pip install virtualenv
 script:
-  - scripts/npm-version.sh
   - yarn lint
   - yarn build
   - yarn test-sauce

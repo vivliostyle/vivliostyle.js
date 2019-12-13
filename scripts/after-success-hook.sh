@@ -2,15 +2,10 @@
 set -ev
 
 if [ "${TRAVIS_PULL_REQUEST}" = "false" -a \( "${TRAVIS_BRANCH}" = "master" -o "${TRAVIS_TAG}" != "" \) ]; then
-    # build documents
-    scripts/build-documents.sh
+    # publish canary packages
+    scripts/publish-canary-packages.sh
 
-    # publish to npm
-    scripts/publish-packages.sh
-
-    # make zip archive
+    # deploy Vivliostyle Viewer to GitHub Pages
     scripts/make-viewer-zip.sh ${version}
-
-    # deploy to gh-pages
     scripts/deploy-viewer.sh
 fi

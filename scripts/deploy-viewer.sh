@@ -17,15 +17,12 @@ cd ../
 git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle.git vivliostyle
 cd vivliostyle
 
-# increment version in package.json (`npm version`)
-scripts/npm-version.sh
-
 yarn install
 yarn build
 # yarn test-sauce
 
 # make self-contained package
-version=$(grep '^ *"version":' ./package.json | sed -e 's/^.*"\([^"]*\)",$/\1/' | sed -e 's/\.0$//')
+version=$(grep '^ *"version":' package.json | sed -e 's/^.*"\([^"]*\)",$/\1/' | sed -e 's/\.0$//')
 scripts/make-viewer-zip.sh ${version}
 
 # move on parent

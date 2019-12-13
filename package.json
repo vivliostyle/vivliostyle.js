@@ -1,15 +1,24 @@
 {
   "name": "vivliostyle",
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
-  "version": "2019.11.100-pre",
   "scripts": {
     "bootstrap": "lerna bootstrap && lerna run build --scope @vivliostyle/core",
     "build": "lerna run build",
+    "clean": "lerna run clean",
     "dev": "lerna run dev --parallel",
     "format": "lerna run format",
     "lint": "lerna run lint",
-    "test": "lerna run test",
-    "test-sauce": "lerna run test-sauce"
+    "ship": "lerna publish from-package",
+    "ship:canary": "lerna publish --canary",
+    "test": "lerna run test --parallel",
+    "test-sauce": "lerna run test-sauce",
+    "version:amend": "git tag --points-at HEAD | xargs -I{} git tag --delete {} && git reset --hard HEAD^",
+    "version:manual": "lerna version --changelog-preset=angular --create-release github",
+    "version:manual:dry": "lerna version --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks",
+    "version:prerelease": "lerna version --conventional-commits --conventional-prerelease --changelog-preset=angular --create-release github",
+    "version:prerelease:dry": "lerna version --conventional-commits --conventional-prerelease --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks",
+    "version:up": "lerna version --conventional-commits --changelog-preset=angular --create-release github",
+    "version:up:dry": "lerna version --conventional-commits --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks"
   },
   "devDependencies": {
     "husky": "^3.1.0",
