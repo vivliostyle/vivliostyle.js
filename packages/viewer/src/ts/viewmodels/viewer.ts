@@ -234,6 +234,7 @@ class Viewer {
         );
         // old name
       } else {
+        // FIXME: remove this
         // @ts-ignore: Unreachable code TS2339
         this.viewer_.loadEPUB(
           documentOptions.bookUrl(),

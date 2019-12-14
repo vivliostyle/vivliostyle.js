@@ -23,6 +23,13 @@ import * as Constants from "./constants";
 import * as Profile from "./profile";
 import { ReadyState } from "./constants";
 
+export interface Payload {
+  type: string;
+  internal: boolean;
+  href: string;
+  content: string;
+}
+
 const PageProgression = Constants.PageProgression;
 
 /**
@@ -203,7 +210,7 @@ export class Viewer {
    * @param type Event type.
    * @param listener Listener function.
    */
-  addListener(type: string, listener: (p1: { type: string }) => void) {
+  addListener(type: string, listener: (payload: Payload) => void) {
     this.eventTarget.addEventListener(
       type,
       listener as Base.EventListener,
@@ -216,7 +223,7 @@ export class Viewer {
    * @param type Event type.
    * @param listener Listener function.
    */
-  removeListener(type: string, listener: (p1: { type: string }) => void) {
+  removeListener(type: string, listener: (payload: Payload) => void) {
     this.eventTarget.removeEventListener(
       type,
       listener as Base.EventListener,
