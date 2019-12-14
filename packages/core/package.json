@@ -55,8 +55,8 @@
     "webpack-cli": "^3.3.9"
   },
   "types": "lib/cjs/vivliostyle.d.ts",
-  "main": "lib/cjs/vivliostyle.js",
   "module": "lib/esm/vivliostyle.js",
+  "main": "lib/cjs/vivliostyle.js",
   "unpkg": "lib/vivliostyle.js",
   "author": "Vivliostyle Foundation",
   "license": "AGPL-3.0",

@@ -229,7 +229,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       if (index == 0) {
         break;
       }
-      if (DEBUG) {
+      if (VIVLIOSTYLE_DEBUG) {
         if (index < children.length) {
           const elemOffset = self.getElementOffset(children[index]);
           if (elemOffset <= offset) {

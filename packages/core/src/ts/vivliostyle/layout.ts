@@ -1818,7 +1818,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
       "processLineStyling",
     );
-    if (DEBUG) {
+    if (VIVLIOSTYLE_DEBUG) {
       validateCheckPoints(checkPoints);
     }
     let lastCheckPoints = checkPoints.concat([]); // make a copy
@@ -1869,7 +1869,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       })
       .then(() => {
         Array.prototype.push.apply(checkPoints, lastCheckPoints);
-        if (DEBUG) {
+        if (VIVLIOSTYLE_DEBUG) {
           validateCheckPoints(checkPoints);
         }
         frame.finish(resNodeContext);
@@ -2020,7 +2020,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     index: number;
     checkPointIndex: number;
   } {
-    if (DEBUG) {
+    if (VIVLIOSTYLE_DEBUG) {
       validateCheckPoints(checkPoints);
     }
 

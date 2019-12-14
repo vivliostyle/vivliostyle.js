@@ -23,7 +23,7 @@ import urlParameters from "../stores/url-parameters";
 import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions, { FitToScreen } from "./zoom-options";
 import { CoreViewerOptions } from "@vivliostyle/core";
-import { AdaptivePageViewMode } from "@vivliostyle/core/lib/vivliostyle/adaptive-viewer";
+import { PageViewMode as AdaptivePageViewMode } from "@vivliostyle/core";
 
 type Options = {
   renderAllPages: Observable<unknown>;

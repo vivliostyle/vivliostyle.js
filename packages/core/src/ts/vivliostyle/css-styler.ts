@@ -687,7 +687,7 @@ export class Styler implements AbstractStyler {
         nodeOffset += node.textContent.length;
       } else {
         const elem = node as Element;
-        if (DEBUG) {
+        if (VIVLIOSTYLE_DEBUG) {
           if (nodeOffset != this.xmldoc.getElementOffset(elem)) {
             throw new Error("Inconsistent offset");
           }
@@ -987,7 +987,7 @@ export class Styler implements AbstractStyler {
             this.primary = false;
           }
         }
-        if (DEBUG) {
+        if (VIVLIOSTYLE_DEBUG) {
           const offset = this.xmldoc.getElementOffset(this.last as Element);
           if (offset != this.lastOffset) {
             throw new Error("Inconsistent offset");

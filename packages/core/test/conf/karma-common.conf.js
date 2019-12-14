@@ -58,7 +58,9 @@ module.exports = function(config) {
       },
       plugins: [
         new webpack.DefinePlugin({
-          DEBUG: JSON.stringify(process.env.NODE_ENV !== "production"),
+          VIVLIOSTYLE_DEBUG: JSON.stringify(
+            process.env.NODE_ENV !== "production",
+          ),
         }),
       ],
     },

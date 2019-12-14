@@ -10,7 +10,7 @@ module.exports = {
     jasmine: true,
   },
   globals: {
-    DEBUG: true,
+    VIVLIOSTYLE_DEBUG: true,
     globalThis: false,
   },
   extends: [

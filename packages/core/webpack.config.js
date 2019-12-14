@@ -65,7 +65,7 @@ const config = (outputFilename, tsConfigName) => ({
   },
   plugins: [
     new webpack.DefinePlugin({
-      DEBUG: JSON.stringify(!isProduction),
+      VIVLIOSTYLE_DEBUG: JSON.stringify(!isProduction),
     }),
     new webpack.BannerPlugin({
       banner: bannerText,

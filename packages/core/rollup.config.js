@@ -7,6 +7,7 @@ import pkg from "./package.json";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import strip from "rollup-plugin-strip";
 import ts from "@wessberg/rollup-plugin-ts";
+import replace from "@rollup/plugin-replace";
 
 const input = "src/ts/vivliostyle.ts";
 const banner = `\
@@ -27,6 +28,7 @@ const plugins = [
   string({
     include: ["src/ts/resources/*", "resources/*"],
   }),
+  replace({ VIVLIOSTYLE_DEBUG: JSON.stringify(isDevelopment) }),
   nodeResolve({
     mainFields: ["browser", "main"],
   }),
@@ -46,7 +48,7 @@ const plugins = [
         ],
       })
     : {},
-  !isDevelopment ? babel() : babel(),
+  !isDevelopment ? babel() : {},
   !isDevelopment ? terser() : {},
 ];
 

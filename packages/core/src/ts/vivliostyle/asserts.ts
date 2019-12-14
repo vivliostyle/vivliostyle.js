@@ -18,7 +18,7 @@
  */
 
 export function assert(cond: any): void {
-  if (DEBUG) {
+  if (VIVLIOSTYLE_DEBUG) {
     if (!cond) {
       throw new Error("Assertion failed");
     }
@@ -26,7 +26,7 @@ export function assert(cond: any): void {
 }
 
 export function fail(message: string): void {
-  if (DEBUG) {
+  if (VIVLIOSTYLE_DEBUG) {
     throw new Error(`Failure: ${message}`);
   }
 }

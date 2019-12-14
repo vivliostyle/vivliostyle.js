@@ -2598,7 +2598,7 @@ export class CascadeInstance {
     this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
     this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
-    if (DEBUG) {
+    if (VIVLIOSTYLE_DEBUG) {
       this.elementStack = [];
     }
   }
@@ -2818,7 +2818,7 @@ export class CascadeInstance {
     baseStyle: ElementStyle,
     elementOffset: number,
   ): void {
-    if (DEBUG) {
+    if (VIVLIOSTYLE_DEBUG) {
       this.elementStack.push(element);
     }
 
@@ -3040,7 +3040,7 @@ export class CascadeInstance {
   }
 
   popElement(element: Element): void {
-    if (DEBUG) {
+    if (VIVLIOSTYLE_DEBUG) {
       const e = this.elementStack.pop();
       if (e !== element) {
         throw new Error("Invalid call to popElement");

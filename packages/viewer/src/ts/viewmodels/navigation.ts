@@ -25,7 +25,7 @@ import keyUtil from "../utils/key-util";
 import Vivliostyle from "../vivliostyle";
 import SettingsPanel from "./settings-panel";
 import Viewer from "./viewer";
-import { CoreViewer } from "@vivliostyle/core";
+import { CoreViewer, ReadyState, PageProgression } from "@vivliostyle/core";
 
 const { Keys } = keyUtil;
 
@@ -37,6 +37,27 @@ export type NavigationOptions = {
 };
 
 class Navigation {
+  static PREVIOUS(PREVIOUS: any) {
+    throw new Error("Method not implemented.");
+  }
+  static NEXT(NEXT: any) {
+    throw new Error("Method not implemented.");
+  }
+  static LEFT(LEFT: any) {
+    throw new Error("Method not implemented.");
+  }
+  static RIGHT(RIGHT: any) {
+    throw new Error("Method not implemented.");
+  }
+  static FIRST(FIRST: any) {
+    throw new Error("Method not implemented.");
+  }
+  static LAST(LAST: any) {
+    throw new Error("Method not implemented.");
+  }
+  static EPAGE(EPAGE: any, epage: any) {
+    throw new Error("Method not implemented.");
+  }
   private viewerOptions_: ViewerOptions;
   private viewer_: Viewer;
   private settingsPanel_: SettingsPanel;
@@ -120,7 +141,7 @@ class Navigation {
       }
       if (
         this.viewerOptions_.renderAllPages() &&
-        this.viewer_.state.status() != Vivliostyle.Constants.ReadyState.COMPLETE
+        this.viewer_.state.status() != ReadyState.COMPLETE
       ) {
         return false;
       }
@@ -134,10 +155,7 @@ class Navigation {
       if (this.viewer_.state.pageProgression === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
-      if (
-        this.viewer_.state.pageProgression() ===
-        Vivliostyle.Constants.PageProgression.LTR
-      ) {
+      if (this.viewer_.state.pageProgression() === PageProgression.LTR) {
         return this.isNavigateToPreviousDisabled();
       } else {
         return this.isNavigateToNextDisabled();
@@ -151,10 +169,7 @@ class Navigation {
       if (this.viewer_.state.pageProgression === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
-      if (
-        this.viewer_.state.pageProgression() ===
-        Vivliostyle.Constants.PageProgression.LTR
-      ) {
+      if (this.viewer_.state.pageProgression() === PageProgression.LTR) {
         return this.isNavigateToNextDisabled();
       } else {
         return this.isNavigateToPreviousDisabled();
@@ -172,7 +187,7 @@ class Navigation {
       }
       if (
         this.viewerOptions_.renderAllPages() &&
-        this.viewer_.state.status() != Vivliostyle.Constants.ReadyState.COMPLETE
+        this.viewer_.state.status() != ReadyState.COMPLETE
       ) {
         return true;
       }
@@ -271,8 +286,7 @@ class Navigation {
 
         setTimeout(() => {
           if (
-            this.viewer_.state.status() !=
-              Vivliostyle.Constants.ReadyState.LOADING &&
+            this.viewer_.state.status() != ReadyState.LOADING &&
             this.viewer_.epage() === epageOld
           ) {
             pageNumberElem.value = pageNumberOld.toString();
@@ -376,7 +390,7 @@ class Navigation {
     if (!this.isZoomInDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(
-        zoom.zoomIn((this.viewer_ as unknown) as CoreViewer.CoreViewer),
+        zoom.zoomIn((this.viewer_ as unknown) as CoreViewer),
       ); // TODO: test if it's ok to treat viewer_ as CoreViewer
       return true;
     } else {
@@ -388,7 +402,7 @@ class Navigation {
     if (!this.isZoomOutDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(
-        zoom.zoomOut((this.viewer_ as unknown) as CoreViewer.CoreViewer),
+        zoom.zoomOut((this.viewer_ as unknown) as CoreViewer),
       ); // TODO: test if it's ok to treat viewer_ as CoreViewer
       return true;
     } else {

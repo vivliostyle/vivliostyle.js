@@ -18,8 +18,9 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Vivliostyle from "../vivliostyle";
-import { CoreViewer } from "@vivliostyle/core";
+import { ReadyState, PageProgression, profiler } from "@vivliostyle/core";
+// import {ReadyState} from "../vivliostyle";
+import { CoreViewer, Navigation } from "@vivliostyle/core";
 import ko, { Observable, PureComputed } from "knockout";
 
 import DocumentOptions from "../models/document-options";
@@ -46,7 +47,7 @@ export type ViewerSettings = {
 
 class Viewer {
   private viewerOptions_: ViewerOptions;
-  private coreViewer_: Vivliostyle.CoreViewer.CoreViewer;
+  private coreViewer_: CoreViewer;
   private state_: PrivateState;
 
   // FIXME: In used in viewmodels/navigation. This property is desirable private access.
@@ -64,13 +65,10 @@ class Viewer {
   constructor(viewerSettings?: ViewerSettings, viewerOptions?: ViewerOptions) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = null;
-    this.coreViewer_ = new CoreViewer.CoreViewer(
-      viewerSettings,
-      viewerOptions.toObject(),
-    );
+    this.coreViewer_ = new CoreViewer(viewerSettings, viewerOptions.toObject());
     const state_ = (this.state_ = {
-      status: obs.readonlyObservable(Vivliostyle.ReadyState.LOADING),
-      pageProgression: obs.readonlyObservable(Vivliostyle.PageProgression.LTR),
+      status: obs.readonlyObservable(ReadyState.LOADING),
+      pageProgression: obs.readonlyObservable(PageProgression.LTR),
     });
     this.state = {
       status: state_.status.getter.extend({
@@ -79,8 +77,7 @@ class Viewer {
       }),
       navigatable: ko.pureComputed(
         () =>
-          state_.status.value() &&
-          state_.status.value() !== Vivliostyle.ReadyState.LOADING,
+          state_.status.value() && state_.status.value() !== ReadyState.LOADING,
       ),
       pageProgression: state_.pageProgression.getter,
     };
@@ -115,8 +112,8 @@ class Viewer {
     this.coreViewer_.addListener("readystatechange", () => {
       const readyState = this.coreViewer_.readyState;
       if (
-        readyState === Vivliostyle.ReadyState.INTERACTIVE ||
-        readyState === Vivliostyle.ReadyState.COMPLETE
+        readyState === ReadyState.INTERACTIVE ||
+        readyState === ReadyState.COMPLETE
       ) {
         this.state_.pageProgression.value(
           this.coreViewer_.getCurrentPageProgression(),
@@ -126,7 +123,7 @@ class Viewer {
     });
     this.coreViewer_.addListener("loaded", () => {
       if (this.viewerOptions_.profile()) {
-        Vivliostyle.profiler.printTimings();
+        profiler.printTimings();
       }
     });
     this.coreViewer_.addListener("nav", (payload) => {
@@ -211,7 +208,7 @@ class Viewer {
     documentOptions: DocumentOptions,
     viewerOptions: ViewerOptions,
   ): void {
-    this.state_.status.value(Vivliostyle.ReadyState.LOADING);
+    this.state_.status.value(ReadyState.LOADING);
     if (viewerOptions) {
       this.viewerOptions_.copyFrom(viewerOptions);
     }

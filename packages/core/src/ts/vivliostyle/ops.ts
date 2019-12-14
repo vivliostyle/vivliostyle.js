@@ -587,7 +587,7 @@ export class StyleInstance extends Exprs.Context
 
       // E. First enabled page master is used for the next page
       if (!enabled || enabled === Css.ident._true) {
-        if (DEBUG) {
+        if (VIVLIOSTYLE_DEBUG) {
           this.dumpLocation(currentPosition);
         }
 

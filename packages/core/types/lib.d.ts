@@ -17,7 +17,7 @@
 
 // This provides build environment, NODE_ENV is 'production' or not.
 // The variable is injected by webpack.
-declare var DEBUG: boolean;
+declare var VIVLIOSTYLE_DEBUG: boolean;
 
 // For import from resources with raw-loader
 declare module "*.css";
