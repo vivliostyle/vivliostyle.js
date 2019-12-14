@@ -18,18 +18,18 @@
  *
  * @fileoverview Vtree - Basic view tree data structures and support utilities.
  */
-import * as Asserts from "./asserts";
+import { assert } from "./asserts";
+import * as CssParser from "./css-parser";
+import * as CssTokenizer from "./css-tokenizer";
+import * as CssProp from "./css-prop";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Css from "./css";
-import * as CssParse from "./cssparse";
-import * as CssProp from "./cssprop";
-import * as CssTok from "./csstok";
 import * as Diff from "./diff";
-import * as Exprs from "./exprs";
-import * as Geom from "./geom";
-import * as TaskUtil from "./taskutil";
-import { PageFloats, Selectors, Vtree, XmlDoc } from "./types";
+import * as Exprs from "./expressions";
+import * as GeometryUtil from "./geometry-util";
+import * as TaskUtil from "./task-util";
+import { Vtree, PageFloats, XmlDoc, Selectors } from "./types";
 
 export const delayedProps = {
   transform: true,
@@ -1037,8 +1037,8 @@ export class Container implements Vtree.Container {
   height: number = 0;
   originX: number = 0;
   originY: number = 0;
-  exclusions: Geom.Shape[] = null;
-  innerShape: Geom.Shape = null;
+  exclusions: GeometryUtil.Shape[] = null;
+  innerShape: GeometryUtil.Shape = null;
   computedBlockSize: number = 0;
   snapWidth: number = 0;
   snapHeight: number = 0;
@@ -1194,18 +1194,18 @@ export class Container implements Vtree.Container {
     }
   }
 
-  getInnerShape(): Geom.Shape {
+  getInnerShape(): GeometryUtil.Shape {
     const rect = this.getInnerRect();
     if (this.innerShape) {
       return this.innerShape.withOffset(rect.x1, rect.y1);
     }
-    return Geom.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
+    return GeometryUtil.shapeForRect(rect.x1, rect.y1, rect.x2, rect.y2);
   }
 
-  getInnerRect(): Geom.Rect {
+  getInnerRect(): GeometryUtil.Rect {
     const offsetX = this.originX + this.left + this.getInsetLeft();
     const offsetY = this.originY + this.top + this.getInsetTop();
-    return new Geom.Rect(
+    return new GeometryUtil.Rect(
       offsetX,
       offsetY,
       offsetX + this.width,
@@ -1213,13 +1213,13 @@ export class Container implements Vtree.Container {
     );
   }
 
-  getPaddingRect(): Geom.Rect {
+  getPaddingRect(): GeometryUtil.Rect {
     const paddingX =
       this.originX + this.left + this.marginLeft + this.borderLeft;
     const paddingY = this.originY + this.top + this.marginTop + this.borderTop;
     const paddingWidth = this.paddingLeft + this.width + this.paddingRight;
     const paddingHeight = this.paddingTop + this.height + this.paddingBottom;
-    return new Geom.Rect(
+    return new GeometryUtil.Rect(
       paddingX,
       paddingY,
       paddingX + paddingWidth,
@@ -1227,7 +1227,10 @@ export class Container implements Vtree.Container {
     );
   }
 
-  getOuterShape(outerShapeProp: Css.Val, context: Exprs.Context): Geom.Shape {
+  getOuterShape(
+    outerShapeProp: Css.Val,
+    context: Exprs.Context,
+  ): GeometryUtil.Shape {
     const rect = this.getOuterRect();
     return CssProp.toShape(
       outerShapeProp,
@@ -1239,13 +1242,13 @@ export class Container implements Vtree.Container {
     );
   }
 
-  getOuterRect(): Geom.Rect {
+  getOuterRect(): GeometryUtil.Rect {
     const outerX = this.originX + this.left;
     const outerY = this.originY + this.top;
     const outerWidth = this.getInsetLeft() + this.width + this.getInsetRight();
     const outerHeight =
       this.getInsetTop() + this.height + this.getInsetBottom();
-    return new Geom.Rect(
+    return new GeometryUtil.Rect(
       outerX,
       outerY,
       outerX + outerWidth,
@@ -1305,13 +1308,13 @@ export class ContentPropertyHandler extends Css.Visitor {
       if (ex instanceof Exprs.Named) {
         // For env(pub-title) and env(doc-title)
         // Need to unquote the result. To be consistent with cssparse.evaluateExprToCSS()
-        val = CssParse.parseValue(
+        val = CssParser.parseValue(
           ex.scope,
-          new CssTok.Tokenizer(val, null),
+          new CssTokenizer.Tokenizer(val, null),
           "",
         ).stringValue();
       }
-      Asserts.assert(this.elem.ownerDocument);
+      assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
       this.visitStrInner(val, node);
     }

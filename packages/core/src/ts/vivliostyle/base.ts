@@ -19,6 +19,7 @@
  * @fileoverview Base - Common utilities.
  */
 import * as Logging from "./logging";
+import * as Asserts from "./asserts";
 
 export let emptyObj = {};
 
@@ -596,12 +597,6 @@ export function unescapeStrFromHex(str: string, prefix?: string): string {
   return str.replace(regexp, unescapeChar);
 }
 
-export function assert(cond: boolean): void {
-  if (!cond) {
-    throw new Error("Assert failed");
-  }
-}
-
 /**
  * Function good is defined for ints from 0 to high-1. It is such that for
  * each i between 1 and high-1 !good(i-1) || good(i) is true. In other words,
@@ -616,11 +611,9 @@ export function binarySearch(
   let l = 0;
   let h = high;
   while (true) {
-    if (DEBUG) {
-      assert(l <= h);
-      assert(l == 0 || !good(l - 1));
-      assert(h == high || good(h));
-    }
+    Asserts.assert(l <= h);
+    Asserts.assert(l == 0 || !good(l - 1));
+    Asserts.assert(h == high || good(h));
     if (l == h) {
       return l;
     }

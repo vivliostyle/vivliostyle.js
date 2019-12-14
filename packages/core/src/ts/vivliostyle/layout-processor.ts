@@ -16,9 +16,9 @@
  *
  * @fileoverview LayoutProcessor - Definitions of LayoutProcessor.
  */
-import * as BreakPosition from "./breakposition";
+import * as BreakPosition from "./break-position";
 import * as Display from "./display";
-import * as LayoutHelper from "./layouthelper";
+import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
 import * as Task from "./task";
 import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";

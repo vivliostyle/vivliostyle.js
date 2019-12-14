@@ -17,20 +17,6 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyleInstance from "@vivliostyle/core";
-import vivliostyle, { Vivliostyle } from "./models/vivliostyle";
 import vivliostyleViewer from "./vivliostyle-viewer";
-
-declare global {
-  interface Window {
-    vivliostyle: Vivliostyle;
-  }
-}
-
-vivliostyle.setInstance(
-  process.env.NODE_ENV === "production"
-    ? vivliostyleInstance
-    : window.vivliostyle,
-);
 
 vivliostyleViewer.start();

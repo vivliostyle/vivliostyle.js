@@ -28,38 +28,38 @@ import * as Columns from "./columns";
 import * as Constants from "./constants";
 import * as Counters from "./counters";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import * as CssProp from "./cssprop";
-import * as CssStyler from "./cssstyler";
-import * as CssTok from "./csstok";
-import * as CssValid from "./cssvalid";
-import * as Exprs from "./exprs";
+import * as CssCascade from "./css-cascade";
+import * as CssParser from "./css-parser";
+import * as CssProp from "./css-prop";
+import * as CssStyler from "./css-styler";
+import * as CssTokenizer from "./css-tokenizer";
+import * as CssValidator from "./css-validator";
+import * as Exprs from "./expressions";
 import * as Font from "./font";
-import * as Geom from "./geom";
-import * as LayoutImpl from "./layout";
-import * as LayoutProcessor from "./layoutprocessor";
+import * as GeometryUtil from "./geometry-util";
+import * as Layout from "./layout";
+import * as LayoutProcessor from "./layout-processor";
 import * as Logging from "./logging";
 import * as Net from "./net";
-import * as PageFloats from "./pagefloats";
+import * as PageFloats from "./page-floats";
 import * as Pages from "./pages";
 import * as Plugin from "./plugin";
-import * as Pm from "./pm";
+import * as PageMaster from "./page-master";
 import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
-import { Layout } from "./types";
-import UserAgentBaseCss from "../../resources/user-agent-base.css";
-import UserAgentPageCss from "../../resources/user-agent-page.css";
+import * as XmlDoc from "./xml-doc";
+import { Layout as LayoutType } from "./types";
+import UserAgentBaseCss from "../resources/user-agent-base.css";
+import UserAgentPageCss from "../resources/user-agent-page.css";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> = new TaskUtil.Fetcher(
   () => {
     const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
-    const validatorSet = CssValid.baseValidatorSet();
+    const validatorSet = CssValidator.baseValidatorSet();
     const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
-    const handler = new CssCasc.CascadeParserHandler(
+    const handler = new CssCascade.CascadeParserHandler(
       null,
       null,
       null,
@@ -68,9 +68,9 @@ export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> = new TaskUtil.F
       validatorSet,
       true,
     );
-    handler.startStylesheet(CssParse.StylesheetFlavor.USER_AGENT);
-    CssCasc.setUABaseCascade(handler.cascade);
-    CssParse.parseStylesheetFromText(
+    handler.startStylesheet(CssParser.StylesheetFlavor.USER_AGENT);
+    CssCascade.setUABaseCascade(handler.cascade);
+    CssParser.parseStylesheetFromText(
       UserAgentBaseCss,
       handler,
       url,
@@ -87,7 +87,7 @@ export function loadUABase(): Task.Result<boolean> {
 }
 
 export type FontFace = {
-  properties: CssCasc.ElementStyle;
+  properties: CssCascade.ElementStyle;
   condition: Exprs.Val;
 };
 
@@ -95,19 +95,19 @@ export class Style {
   fontDeobfuscator:
     | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
     | null;
-  validatorSet: CssValid.ValidatorSet;
+  validatorSet: CssValidator.ValidatorSet;
 
   constructor(
     public readonly store: OPSDocStore,
     public readonly rootScope: Exprs.LexicalScope,
     public readonly pageScope: Exprs.LexicalScope,
-    public readonly cascade: CssCasc.Cascade,
-    public readonly rootBox: Pm.RootPageBox,
+    public readonly cascade: CssCascade.Cascade,
+    public readonly rootBox: PageMaster.RootPageBox,
     public readonly fontFaces: FontFace[],
-    public readonly footnoteProps: CssCasc.ElementStyle,
-    public readonly flowProps: { [key: string]: CssCasc.ElementStyle },
-    public readonly viewportProps: CssCasc.ElementStyle[],
-    public readonly pageProps: { [key: string]: CssCasc.ElementStyle },
+    public readonly footnoteProps: CssCascade.ElementStyle,
+    public readonly flowProps: { [key: string]: CssCascade.ElementStyle },
+    public readonly viewportProps: CssCascade.ElementStyle[],
+    public readonly pageProps: { [key: string]: CssCascade.ElementStyle },
   ) {
     this.fontDeobfuscator = store.fontDeobfuscator;
     this.validatorSet = store.validatorSet;
@@ -152,7 +152,7 @@ export class Style {
         viewportHeight,
         fontSize,
       );
-      const viewportProps = CssCasc.mergeAll(context, this.viewportProps);
+      const viewportProps = CssCascade.mergeAll(context, this.viewportProps);
       const width = viewportProps["width"];
       const height = viewportProps["height"];
       const textZoom = viewportProps["text-zoom"];
@@ -193,17 +193,20 @@ export class Style {
 
 //-------------------------------------------------------------------------------
 export class StyleInstance extends Exprs.Context
-  implements CssStyler.FlowListener, Pm.InstanceHolder, Vgen.StylerProducer {
+  implements
+    CssStyler.FlowListener,
+    PageMaster.InstanceHolder,
+    Vgen.StylerProducer {
   lang: string | null;
   primaryFlows = { body: true } as { [key: string]: boolean };
-  rootPageBoxInstance: Pm.RootPageBoxInstance = null;
+  rootPageBoxInstance: PageMaster.RootPageBoxInstance = null;
   styler: CssStyler.Styler = null;
   stylerMap: { [key: string]: CssStyler.Styler } = null;
   currentLayoutPosition: Vtree.LayoutPosition = null;
   layoutPositionAtPageStart: Vtree.LayoutPosition = null;
   lookupOffset: number = 0;
   faces: Font.DocumentFaces;
-  pageBoxInstances: { [key: string]: Pm.PageBoxInstance } = {};
+  pageBoxInstances: { [key: string]: PageMaster.PageBoxInstance } = {};
   pageManager: Pages.PageManager = null;
   private rootPageFloatLayoutContext: PageFloats.PageFloatLayoutContext;
   pageBreaks: { [key: string]: boolean } = {};
@@ -243,7 +246,7 @@ export class StyleInstance extends Exprs.Context
     this.pageProgression = pageProgression || null;
     for (const flowName in style.flowProps) {
       const flowStyle = style.flowProps[flowName];
-      const consume = CssCasc.getProp(flowStyle, "flow-consume");
+      const consume = CssCascade.getProp(flowStyle, "flow-consume");
       if (consume) {
         const consumeVal = consume.evaluate(this, "flow-consume");
         if (consumeVal == Css.ident.all) {
@@ -285,7 +288,7 @@ export class StyleInstance extends Exprs.Context
       self.pageProgression = Pages.resolvePageProgression(docElementStyle);
     }
     const rootBox = this.style.rootBox;
-    this.rootPageBoxInstance = new Pm.RootPageBoxInstance(rootBox);
+    this.rootPageBoxInstance = new PageMaster.RootPageBoxInstance(rootBox);
     const cascadeInstance = this.style.cascade.createInstance(
       self,
       counterListener,
@@ -372,14 +375,14 @@ export class StyleInstance extends Exprs.Context
   /**
    * @override
    */
-  registerInstance(key: string, instance: Pm.PageBoxInstance): void {
+  registerInstance(key: string, instance: PageMaster.PageBoxInstance): void {
     this.pageBoxInstances[key] = instance;
   }
 
   /**
    * @override
    */
-  lookupInstance(key: string): Pm.PageBoxInstance {
+  lookupInstance(key: string): PageMaster.PageBoxInstance {
     return this.pageBoxInstances[key];
   }
 
@@ -436,7 +439,7 @@ export class StyleInstance extends Exprs.Context
    * @return document offset of the given layoutPosition
    */
   getPosition(
-    layoutPosition: Vtree.LayoutPosition | undefined,
+    layoutPosition?: Vtree.LayoutPosition,
     noLookAhead?: boolean,
   ): number {
     if (!layoutPosition) {
@@ -525,8 +528,8 @@ export class StyleInstance extends Exprs.Context
    * @param cascadedPageStyle Cascaded page style specified in page context
    */
   selectPageMaster(
-    cascadedPageStyle: CssCasc.ElementStyle,
-  ): Pm.PageMasterInstance {
+    cascadedPageStyle: CssCascade.ElementStyle,
+  ): PageMaster.PageMasterInstance {
     const self = this;
     const cp = this.currentLayoutPosition;
 
@@ -542,8 +545,8 @@ export class StyleInstance extends Exprs.Context
 
     // 2. Page master selection: for each page master:
     const pageMasters = this.rootPageBoxInstance
-      .children as Pm.PageMasterInstance[];
-    let pageMaster: Pm.PageMasterInstance;
+      .children as PageMaster.PageMasterInstance[];
+    let pageMaster: PageMaster.PageMasterInstance;
     for (let i = 0; i < pageMasters.length; i++) {
       pageMaster = pageMasters[i];
 
@@ -633,7 +636,7 @@ export class StyleInstance extends Exprs.Context
     return false;
   }
 
-  setFormattingContextToColumn(column: Layout.Column, flowName: string) {
+  setFormattingContextToColumn(column: LayoutType.Column, flowName: string) {
     const flow = this.currentLayoutPosition.flows[flowName];
     if (!flow.formattingContext) {
       flow.formattingContext = new LayoutProcessor.BlockFormattingContext(null);
@@ -641,7 +644,7 @@ export class StyleInstance extends Exprs.Context
     column.flowRootFormattingContext = flow.formattingContext;
   }
 
-  layoutDeferredPageFloats(column: Layout.Column): Task.Result<boolean> {
+  layoutDeferredPageFloats(column: LayoutType.Column): Task.Result<boolean> {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
     const deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
     const frame = Task.newFrame<boolean>("layoutDeferredPageFloats");
@@ -704,7 +707,7 @@ export class StyleInstance extends Exprs.Context
   }
 
   getLastAfterPositionIfDeferredFloatsExists(
-    column: Layout.Column,
+    column: LayoutType.Column,
     newPosition: Vtree.ChunkPosition | null,
   ): Vtree.ChunkPosition | null {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
@@ -732,7 +735,10 @@ export class StyleInstance extends Exprs.Context
   /**
    * @return holding true
    */
-  layoutColumn(column: Layout.Column, flowName: string): Task.Result<boolean> {
+  layoutColumn(
+    column: LayoutType.Column,
+    flowName: string,
+  ): Task.Result<boolean> {
     const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
     if (!flowPosition || !this.matchPageSide(flowPosition.startSide)) {
       return Task.newResult(true);
@@ -904,21 +910,21 @@ export class StyleInstance extends Exprs.Context
 
   createLayoutConstraint(
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
-  ): Layout.LayoutConstraint {
+  ): LayoutType.LayoutConstraint {
     const pageIndex = this.currentLayoutPosition.page - 1;
     const counterConstraint = this.counterStore.createLayoutConstraint(
       pageIndex,
     );
-    return new LayoutImpl.AllLayoutConstraint(
+    return new Layout.AllLayoutConstraint(
       [counterConstraint].concat(pageFloatLayoutContext.getLayoutConstraints()),
     );
   }
 
   private createAndLayoutColumn(
-    boxInstance: Pm.PageBoxInstance,
+    boxInstance: PageMaster.PageBoxInstance,
     offsetX: number,
     offsetY: number,
-    exclusions: Geom.Shape[],
+    exclusions: GeometryUtil.Shape[],
     layoutContainer: Vtree.Container,
     currentColumnIndex: number,
     flowNameStr: string,
@@ -926,10 +932,10 @@ export class StyleInstance extends Exprs.Context
     columnCount: number,
     columnGap: number,
     columnWidth: number,
-    innerShape: Geom.Shape,
+    innerShape: GeometryUtil.Shape,
     layoutContext: Vtree.LayoutContext,
     forceNonFitting: boolean,
-  ): Task.Result<Layout.Column> {
+  ): Task.Result<LayoutType.Column> {
     const self = this;
     const dontApplyExclusions = boxInstance.vertical
       ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
@@ -945,10 +951,10 @@ export class StyleInstance extends Exprs.Context
       null,
     );
     const positionAtColumnStart = self.currentLayoutPosition.clone();
-    const frame: Task.Frame<Layout.Column> = Task.newFrame(
+    const frame: Task.Frame<LayoutType.Column> = Task.newFrame(
       "createAndLayoutColumn",
     );
-    let column: Layout.Column;
+    let column: LayoutType.Column;
     frame
       .loopWithFrame((loopFrame) => {
         const layoutConstraint = self.createLayoutConstraint(
@@ -958,7 +964,7 @@ export class StyleInstance extends Exprs.Context
           const columnContainer = self.viewport.document.createElement("div");
           Base.setCSSProperty(columnContainer, "position", "absolute");
           boxContainer.appendChild(columnContainer);
-          column = new LayoutImpl.Column(
+          column = new Layout.Column(
             columnContainer,
             layoutContext,
             self.clientLayout,
@@ -991,7 +997,7 @@ export class StyleInstance extends Exprs.Context
           column.originX = offsetX;
           column.originY = offsetY;
         } else {
-          column = new LayoutImpl.Column(
+          column = new Layout.Column(
             boxContainer,
             layoutContext,
             self.clientLayout,
@@ -1036,12 +1042,12 @@ export class StyleInstance extends Exprs.Context
 
   setPagePageFloatLayoutContextContainer(
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
-    boxInstance: Pm.PageBoxInstance,
+    boxInstance: PageMaster.PageBoxInstance,
     layoutContainer: Vtree.Container,
   ) {
     if (
       boxInstance instanceof Pages.PageRulePartitionInstance ||
-      (boxInstance instanceof Pm.PageMasterInstance &&
+      (boxInstance instanceof PageMaster.PageMasterInstance &&
         !(boxInstance instanceof Pages.PageRuleMasterInstance))
     ) {
       pagePageFloatLayoutContext.setContainer(layoutContainer);
@@ -1050,11 +1056,11 @@ export class StyleInstance extends Exprs.Context
 
   getRegionPageFloatLayoutContext(
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
-    boxInstance: Pm.PageBoxInstance,
+    boxInstance: PageMaster.PageBoxInstance,
     layoutContainer: Vtree.Container,
     flowName: string,
   ): PageFloats.PageFloatLayoutContext {
-    Asserts.assert(boxInstance instanceof Pm.PartitionInstance);
+    Asserts.assert(boxInstance instanceof PageMaster.PartitionInstance);
     const writingMode = boxInstance.getProp(this, "writing-mode") || null;
     const direction = boxInstance.getProp(this, "direction") || null;
     return new PageFloats.PageFloatLayoutContext(
@@ -1070,15 +1076,15 @@ export class StyleInstance extends Exprs.Context
 
   layoutFlowColumnsWithBalancing(
     page: Vtree.Page,
-    boxInstance: Pm.PageBoxInstance,
+    boxInstance: PageMaster.PageBoxInstance,
     offsetX: number,
     offsetY: number,
-    exclusions: Geom.Shape[],
+    exclusions: GeometryUtil.Shape[],
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     layoutContainer: Vtree.Container,
     flowNameStr: string,
     columnCount: number,
-  ): Task.Result<Layout.Column[]> {
+  ): Task.Result<LayoutType.Column[]> {
     const self = this;
     const positionAtContainerStart = self.currentLayoutPosition.clone();
     const regionPageFloatLayoutContext = self.getRegionPageFloatLayoutContext(
@@ -1158,19 +1164,19 @@ export class StyleInstance extends Exprs.Context
 
   layoutFlowColumns(
     page: Vtree.Page,
-    boxInstance: Pm.PageBoxInstance,
+    boxInstance: PageMaster.PageBoxInstance,
     offsetX: number,
     offsetY: number,
-    exclusions: Geom.Shape[],
+    exclusions: GeometryUtil.Shape[],
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     layoutContainer: Vtree.Container,
     flowNameStr: string,
     columnCount: number,
     forceNonFitting: boolean,
-  ): Task.Result<Layout.Column[] | null> {
+  ): Task.Result<LayoutType.Column[] | null> {
     const self = this;
-    const frame: Task.Frame<Layout.Column[] | null> = Task.newFrame(
+    const frame: Task.Frame<LayoutType.Column[] | null> = Task.newFrame(
       "layoutFlowColumns",
     );
     const positionAtContainerStart = self.currentLayoutPosition.clone();
@@ -1208,8 +1214,8 @@ export class StyleInstance extends Exprs.Context
       this.documentURLTransformer,
     );
     let columnIndex = 0;
-    let column: Layout.Column = null;
-    let columns: Layout.Column[] = [];
+    let column: LayoutType.Column = null;
+    let columns: LayoutType.Column[] = [];
     frame
       .loopWithFrame((loopFrame) => {
         self
@@ -1285,11 +1291,11 @@ export class StyleInstance extends Exprs.Context
    */
   layoutContainer(
     page: Vtree.Page,
-    boxInstance: Pm.PageBoxInstance,
+    boxInstance: PageMaster.PageBoxInstance,
     parentContainer: HTMLElement,
     offsetX: number,
     offsetY: number,
-    exclusions: Geom.Shape[],
+    exclusions: GeometryUtil.Shape[],
     pagePageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ): Task.Result<boolean> {
     const self = this;
@@ -1553,7 +1559,7 @@ export class StyleInstance extends Exprs.Context
 
   layoutNextPage(
     page: Vtree.Page,
-    cp: Vtree.LayoutPosition | undefined,
+    cp?: Vtree.LayoutPosition,
   ): Task.Result<Vtree.LayoutPosition> {
     const self = this;
 
@@ -1578,7 +1584,7 @@ export class StyleInstance extends Exprs.Context
 
     // Resolve page size before page master selection.
     const cascadedPageStyle = isTocBox
-      ? ({} as CssCasc.ElementStyle)
+      ? ({} as CssCascade.ElementStyle)
       : self.pageManager.getCascadedPageStyle();
     const pageMaster = self.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
@@ -1726,7 +1732,7 @@ export class StyleInstance extends Exprs.Context
   }
 }
 
-export class BaseParserHandler extends CssCasc.CascadeParserHandler {
+export class BaseParserHandler extends CssCascade.CascadeParserHandler {
   insideRegion: boolean = false;
 
   constructor(
@@ -1759,7 +1765,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
     pseudoName: string | null,
     classes: string[],
   ): void {
-    const pageMaster = new Pm.PageMaster(
+    const pageMaster = new PageMaster.PageMaster(
       this.masterHandler.pageScope,
       name,
       pseudoName,
@@ -1769,7 +1775,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
       this.owner.getBaseSpecificity(),
     );
     this.masterHandler.pushHandler(
-      new Pm.PageMasterParserHandler(
+      new PageMaster.PageMasterParserHandler(
         pageMaster.scope,
         this.masterHandler,
         pageMaster,
@@ -1796,7 +1802,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
    */
   startDefineRule(): void {
     this.masterHandler.pushHandler(
-      new CssCasc.DefineParserHandler(this.scope, this.owner),
+      new CssCascade.DefineParserHandler(this.scope, this.owner),
     );
   }
 
@@ -1804,13 +1810,13 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
    * @override
    */
   startFontFaceRule(): void {
-    const properties = {} as CssCasc.ElementStyle;
+    const properties = {} as CssCascade.ElementStyle;
     this.masterHandler.fontFaces.push({
       properties,
       condition: this.condition,
     });
     this.masterHandler.pushHandler(
-      new CssCasc.PropSetParserHandler(
+      new CssCascade.PropSetParserHandler(
         this.scope,
         this.owner,
         null,
@@ -1826,11 +1832,11 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
   startFlowRule(flowName: string): void {
     let style = this.masterHandler.flowProps[flowName];
     if (!style) {
-      style = {} as CssCasc.ElementStyle;
+      style = {} as CssCascade.ElementStyle;
       this.masterHandler.flowProps[flowName] = style;
     }
     this.masterHandler.pushHandler(
-      new CssCasc.PropSetParserHandler(
+      new CssCascade.PropSetParserHandler(
         this.scope,
         this.owner,
         null,
@@ -1844,10 +1850,10 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
    * @override
    */
   startViewportRule(): void {
-    const viewportProps = {} as CssCasc.ElementStyle;
+    const viewportProps = {} as CssCascade.ElementStyle;
     this.masterHandler.viewportProps.push(viewportProps);
     this.masterHandler.pushHandler(
-      new CssCasc.PropSetParserHandler(
+      new CssCascade.PropSetParserHandler(
         this.scope,
         this.owner,
         this.condition,
@@ -1863,15 +1869,15 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
   startFootnoteRule(pseudoelem: string | null): void {
     let style = this.masterHandler.footnoteProps;
     if (pseudoelem) {
-      const pseudos = CssCasc.getMutableStyleMap(style, "_pseudos");
+      const pseudos = CssCascade.getMutableStyleMap(style, "_pseudos");
       style = pseudos[pseudoelem];
       if (!style) {
-        style = {} as CssCasc.ElementStyle;
+        style = {} as CssCascade.ElementStyle;
         pseudos[pseudoelem] = style;
       }
     }
     this.masterHandler.pushHandler(
-      new CssCasc.PropSetParserHandler(
+      new CssCascade.PropSetParserHandler(
         this.scope,
         this.owner,
         null,
@@ -1908,7 +1914,7 @@ export class BaseParserHandler extends CssCasc.CascadeParserHandler {
    * @override
    */
   startRuleBody(): void {
-    CssCasc.CascadeParserHandler.prototype.startRuleBody.call(this);
+    CssCascade.CascadeParserHandler.prototype.startRuleBody.call(this);
     if (this.insideRegion) {
       this.insideRegion = false;
       const regionId = `R${this.masterHandler.regionCount++}`;
@@ -1950,24 +1956,24 @@ export function processViewportMeta(meta: Element): string {
   return "";
 }
 
-export class StyleParserHandler extends CssParse.DispatchParserHandler {
+export class StyleParserHandler extends CssParser.DispatchParserHandler {
   rootScope: Exprs.LexicalScope;
   pageScope: Exprs.LexicalScope;
-  rootBox: Pm.RootPageBox;
+  rootBox: PageMaster.RootPageBox;
   cascadeParserHandler: BaseParserHandler;
   regionCount: number = 0;
   fontFaces = [] as FontFace[];
-  footnoteProps = {} as CssCasc.ElementStyle;
-  flowProps = {} as { [key: string]: CssCasc.ElementStyle };
-  viewportProps = [] as CssCasc.ElementStyle[];
-  pageProps = {} as { [key: string]: CssCasc.ElementStyle };
+  footnoteProps = {} as CssCascade.ElementStyle;
+  flowProps = {} as { [key: string]: CssCascade.ElementStyle };
+  viewportProps = [] as CssCascade.ElementStyle[];
+  pageProps = {} as { [key: string]: CssCascade.ElementStyle };
   slave: BaseParserHandler;
 
-  constructor(public readonly validatorSet: CssValid.ValidatorSet) {
+  constructor(public readonly validatorSet: CssValidator.ValidatorSet) {
     super();
     this.rootScope = new Exprs.LexicalScope(null);
     this.pageScope = new Exprs.LexicalScope(this.rootScope);
-    this.rootBox = new Pm.RootPageBox(this.rootScope);
+    this.rootBox = new PageMaster.RootPageBox(this.rootScope);
     this.cascadeParserHandler = new BaseParserHandler(this, null, null, null);
     this.slave = this.cascadeParserHandler;
   }
@@ -1975,7 +1981,7 @@ export class StyleParserHandler extends CssParse.DispatchParserHandler {
   /**
    * @override
    */
-  error(mnemonics: string, token: CssTok.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token): void {
     Logging.logger.warn("CSS parser:", mnemonics);
   }
 }
@@ -1983,7 +1989,7 @@ export class StyleParserHandler extends CssParse.DispatchParserHandler {
 export type StyleSource = {
   url: string;
   text: string | null;
-  flavor: CssParse.StylesheetFlavor;
+  flavor: CssParser.StylesheetFlavor;
   classes: string | null;
   media: string | null;
 };
@@ -2000,7 +2006,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   styleFetcherByKey: { [key: string]: TaskUtil.Fetcher<Style> } = {};
   styleByDocURL: { [key: string]: Style } = {};
   triggersByDocURL: { [key: string]: Vtree.Trigger[] } = {};
-  validatorSet: CssValid.ValidatorSet = null;
+  validatorSet: CssValidator.ValidatorSet = null;
   private styleSheets: StyleSource[] = [];
   private triggerSingleDocumentPreprocessing: boolean = false;
 
@@ -2022,7 +2028,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       Base.resourceBaseURL,
     );
     const frame = Task.newFrame<boolean>("OPSDocStore.init");
-    this.validatorSet = CssValid.baseValidatorSet();
+    this.validatorSet = CssValidator.baseValidatorSet();
     loadUABase().then(() => {
       this.load(userAgentXML).then(() => {
         this.triggerSingleDocumentPreprocessing = true;
@@ -2069,7 +2075,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     this.styleSheets.push({
       url,
       text: stylesheet.text,
-      flavor: CssParse.StylesheetFlavor.AUTHOR,
+      flavor: CssParser.StylesheetFlavor.AUTHOR,
       classes: null,
       media: null,
     });
@@ -2083,7 +2089,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     this.styleSheets.push({
       url,
       text: stylesheet.text,
-      flavor: CssParse.StylesheetFlavor.USER,
+      flavor: CssParser.StylesheetFlavor.USER,
       classes: null,
       media: null,
     });
@@ -2144,7 +2150,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         sources.push({
           url: userAgentURL,
           text: UserAgentPageCss,
-          flavor: CssParse.StylesheetFlavor.USER_AGENT,
+          flavor: CssParser.StylesheetFlavor.USER_AGENT,
           classes: null,
           media: null,
         });
@@ -2165,7 +2171,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                 sources.push({
                   url,
                   text: child.textContent,
-                  flavor: CssParse.StylesheetFlavor.AUTHOR,
+                  flavor: CssParser.StylesheetFlavor.AUTHOR,
                   classes: title ? classes : null,
                   media,
                 });
@@ -2185,7 +2191,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                     text: null,
                     classes: title ? classes : null,
                     media,
-                    flavor: CssParse.StylesheetFlavor.AUTHOR,
+                    flavor: CssParser.StylesheetFlavor.AUTHOR,
                   });
                 }
               } else if (
@@ -2195,7 +2201,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                 sources.push({
                   url,
                   text: processViewportMeta(child),
-                  flavor: CssParse.StylesheetFlavor.AUTHOR,
+                  flavor: CssParser.StylesheetFlavor.AUTHOR,
                   classes: null,
                   media: null,
                 });
@@ -2208,7 +2214,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                 sources.push({
                   url,
                   text: child.textContent,
-                  flavor: CssParse.StylesheetFlavor.AUTHOR,
+                  flavor: CssParser.StylesheetFlavor.AUTHOR,
                   classes: null,
                   media: null,
                 });
@@ -2226,7 +2232,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                     text: null,
                     classes: null,
                     media: null,
-                    flavor: CssParse.StylesheetFlavor.AUTHOR,
+                    flavor: CssParser.StylesheetFlavor.AUTHOR,
                   });
                 }
               }
@@ -2267,7 +2273,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   const source = sources[index++];
                   sph.startStylesheet(source.flavor);
                   if (source.text !== null) {
-                    return CssParse.parseStylesheetFromText(
+                    return CssParser.parseStylesheetFromText(
                       source.text,
                       sph,
                       source.url,
@@ -2275,7 +2281,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                       source.media,
                     ).thenReturn(true);
                   } else {
-                    return CssParse.parseStylesheetFromURL(
+                    return CssParser.parseStylesheetFromURL(
                       source.url,
                       sph,
                       source.classes,

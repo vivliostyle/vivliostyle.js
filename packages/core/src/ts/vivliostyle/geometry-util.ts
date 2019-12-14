@@ -18,7 +18,7 @@
  *
  * @fileoverview Geom - Geometric utilities.
  */
-import * as Logging from "../vivliostyle/logging";
+import * as Logging from "./logging";
 
 export class Rect {
   constructor(

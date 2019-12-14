@@ -21,9 +21,9 @@
 import * as Base from "./base";
 import * as Logging from "./logging";
 import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as TaskUtil from "./task-util";
 import { Net, XmlDoc } from "./types";
-import UserAgentXml from "../../resources/user-agent.xml";
+import UserAgentXml from "../resources/user-agent.xml";
 
 /**
  * @enum {string}

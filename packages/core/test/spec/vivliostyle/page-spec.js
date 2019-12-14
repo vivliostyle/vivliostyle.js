@@ -16,8 +16,8 @@
  */
 
 import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as adapt_csscasc from "../../../src/ts/vivliostyle/csscasc";
-import * as adapt_cssparse from "../../../src/ts/vivliostyle/cssparse";
+import * as adapt_csscasc from "../../../src/ts/vivliostyle/css-cascade";
+import * as adapt_cssparse from "../../../src/ts/vivliostyle/css-parser";
 import * as vivliostyle_pages from "../../../src/ts/vivliostyle/pages";
 
 describe("page", function() {

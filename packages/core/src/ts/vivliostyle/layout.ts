@@ -21,26 +21,301 @@
  * Instead it goes through the layout interface that gives it one view tree
  * node at a time.
  */
+import * as LayoutRetryers from "./layout-retryers";
 import * as Asserts from "./asserts";
-import * as Base from "./base";
-import * as Break from "./break";
-import * as BreakPosition from "./breakposition";
-import * as Css from "./css";
-import * as Diff from "./diff";
-import * as Geom from "./geom";
-import * as LayoutHelper from "./layouthelper";
-import * as LayoutProcessor from "./layoutprocessor";
-import * as LayoutRetryers from "./layoutretryers";
-import * as Logging from "./logging";
-import * as PageFloats from "./pagefloats";
-import * as Plugin from "./plugin";
-import * as Selectors from "./selectors";
 import * as Shared from "./shared";
 import * as Sizing from "./sizing";
+import * as Break from "./break";
+import * as Logging from "./logging";
+import * as Diff from "./diff";
+import * as Base from "./base";
+import * as BreakPosition from "./break-position";
+import * as Css from "./css";
+import * as GeometryUtil from "./geometry-util";
+import * as LayoutHelper from "./layout-helper";
+import * as LayoutProcessor from "./layout-processor";
+import * as PageFloats from "./page-floats";
+import * as Plugin from "./plugin";
+import * as Matchers from "./matchers";
+import * as PseudoElement from "./pseudo-element";
 import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as VtreeImpl from "./vtree";
-import { Layout, RepetitiveElement, Table, Vtree } from "./types";
+import {
+  Layout,
+  RepetitiveElement,
+  Table,
+  Vtree,
+  Selectors,
+  FragmentLayoutConstraintType,
+} from "./types";
+
+export const isInstanceOfAfterIfContinuesLayoutConstraint =
+  Selectors.isInstanceOfAfterIfContinuesLayoutConstraint;
+export const registerFragmentIndex =
+  Matchers.NthFragmentMatcher.registerFragmentIndex;
+export const clearFragmentIndices =
+  Matchers.NthFragmentMatcher.clearFragmentIndices;
+
+export class AfterIfContinues implements Selectors.AfterIfContinues {
+  constructor(
+    public readonly sourceNode: Element,
+    public readonly styler: PseudoElement.PseudoelementStyler,
+  ) {}
+
+  createElement(
+    column: Layout.Column,
+    parentNodeContext: Vtree.NodeContext,
+  ): Task.Result<Element> {
+    const doc = parentNodeContext.viewNode.ownerDocument;
+    const viewRoot = doc.createElement("div");
+    const pseudoColumn = new PseudoColumn(column, viewRoot, parentNodeContext);
+    const initialPageBreakType = pseudoColumn.getColumn().pageBreakType;
+    pseudoColumn.getColumn().pageBreakType = null;
+    return pseudoColumn
+      .layout(this.createNodePositionForPseudoElement(), true)
+      .thenAsync(() => {
+        this.styler.contentProcessed["after-if-continues"] = false;
+        pseudoColumn.getColumn().pageBreakType = initialPageBreakType;
+        const pseudoElement = viewRoot.firstChild as Element;
+        Base.setCSSProperty(pseudoElement, "display", "block");
+        return Task.newResult(pseudoElement);
+      });
+  }
+
+  private createNodePositionForPseudoElement(): Vtree.ChunkPosition {
+    const sourceNode = PseudoElement.document.createElementNS(
+      Base.NS.XHTML,
+      "div",
+    );
+    PseudoElement.setPseudoName(sourceNode, "after-if-continues");
+    const shadowContext = this.createShadowContext(sourceNode);
+    const step = {
+      node: sourceNode,
+      shadowType: shadowContext.type,
+      shadowContext,
+      nodeShadow: null,
+      shadowSibling: null,
+    };
+    const nodePosition = {
+      steps: [step],
+      offsetInNode: 0,
+      after: false,
+      preprocessedTextContent: null,
+    };
+    return new VtreeImpl.ChunkPosition(nodePosition as any);
+  }
+
+  private createShadowContext(root: Element): Vtree.ShadowContext {
+    return new VtreeImpl.ShadowContext(
+      this.sourceNode,
+      root,
+      null,
+      null,
+      null,
+      Vtree.ShadowType.ROOTED,
+      this.styler,
+    );
+  }
+}
+
+export class AfterIfContinuesLayoutConstraint
+  implements Selectors.AfterIfContinuesLayoutConstraint {
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType =
+    "AfterIfContinue";
+
+  constructor(
+    public nodeContext: Vtree.NodeContext,
+    public afterIfContinues: Selectors.AfterIfContinues,
+    public pseudoElementHeight: number,
+  ) {}
+
+  /** @override */
+  allowLayout(
+    nodeContext: Vtree.NodeContext,
+    overflownNodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ): boolean {
+    if (
+      (overflownNodeContext && !nodeContext) ||
+      (nodeContext && nodeContext.overflow)
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /** @override */
+  nextCandidate(nodeContext: Vtree.NodeContext): boolean {
+    return false;
+  }
+
+  /** @override */
+  postLayout(
+    allowed: boolean,
+    positionAfter: Vtree.NodeContext,
+    initialPosition: Vtree.NodeContext,
+    column: Layout.Column,
+  ) {}
+
+  /** @override */
+  finishBreak(
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ): Task.Result<boolean> {
+    if (!this.getRepetitiveElements().affectTo(nodeContext)) {
+      return Task.newResult(true);
+    }
+    return this.afterIfContinues
+      .createElement(column, this.nodeContext)
+      .thenAsync((element) => {
+        this.nodeContext.viewNode.appendChild(element);
+        return Task.newResult(true);
+      });
+  }
+
+  getRepetitiveElements() {
+    return new AfterIfContinuesElementsOffset(
+      this.nodeContext,
+      this.pseudoElementHeight,
+    );
+  }
+
+  /** @override */
+  equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
+    if (!(constraint instanceof AfterIfContinuesLayoutConstraint)) {
+      return false;
+    }
+    return (
+      this.afterIfContinues ==
+      (constraint as AfterIfContinuesLayoutConstraint).afterIfContinues
+    );
+  }
+
+  /** @override */
+  getPriorityOfFinishBreak(): number {
+    return 9;
+  }
+}
+
+export class AfterIfContinuesElementsOffset
+  implements Selectors.AfterIfContinuesElementsOffset {
+  constructor(public nodeContext, public pseudoElementHeight) {}
+
+  /** @override */
+  calculateOffset(nodeContext: Vtree.NodeContext): number {
+    if (!this.affectTo(nodeContext)) {
+      return 0;
+    }
+    return this.pseudoElementHeight;
+  }
+
+  /** @override */
+  calculateMinimumOffset(nodeContext: Vtree.NodeContext): number {
+    return this.calculateOffset(nodeContext);
+  }
+
+  affectTo(nodeContext: Vtree.NodeContext): boolean {
+    if (!nodeContext) {
+      return false;
+    }
+    const sourceNode = nodeContext.shadowContext
+      ? nodeContext.shadowContext.owner
+      : nodeContext.sourceNode;
+    if (sourceNode === this.nodeContext.sourceNode) {
+      return !!nodeContext.after;
+    }
+    for (let n = sourceNode.parentNode; n; n = n.parentNode) {
+      if (n === this.nodeContext.sourceNode) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+function processAfterIfContinuesOfNodeContext(
+  nodeContext: Vtree.NodeContext,
+  column: Layout.Column,
+): Task.Result<Vtree.NodeContext> {
+  if (
+    !nodeContext ||
+    !nodeContext.afterIfContinues ||
+    nodeContext.after ||
+    column.isFloatNodeContext(nodeContext)
+  ) {
+    return Task.newResult(nodeContext);
+  }
+  const afterIfContinues = nodeContext.afterIfContinues;
+  return afterIfContinues
+    .createElement(column, nodeContext)
+    .thenAsync((pseudoElement) => {
+      Asserts.assert(nodeContext !== null);
+      const pseudoElementHeight = calculatePseudoElementHeight(
+        nodeContext,
+        column,
+        pseudoElement,
+      );
+      column.fragmentLayoutConstraints.push(
+        new AfterIfContinuesLayoutConstraint(
+          nodeContext as Vtree.NodeContext,
+          afterIfContinues,
+          pseudoElementHeight,
+        ),
+      );
+      return Task.newResult(nodeContext);
+    });
+}
+
+export function processAfterIfContinues(
+  result: Task.Result<Vtree.NodeContext>,
+  column: Layout.Column,
+): Task.Result<Vtree.NodeContext> {
+  return result.thenAsync((nodeContext) =>
+    processAfterIfContinuesOfNodeContext(nodeContext, column),
+  );
+}
+
+export function processAfterIfContinuesOfAncestors(
+  nodeContext: Vtree.NodeContext,
+  column: Layout.Column,
+): Task.Result<boolean> {
+  const frame: Task.Frame<boolean> = Task.newFrame(
+    "processAfterIfContinuesOfAncestors",
+  );
+  let current: Vtree.NodeContext = nodeContext;
+  frame
+    .loop(() => {
+      if (current !== null) {
+        const result = processAfterIfContinuesOfNodeContext(current, column);
+        current = current.parent;
+        return result.thenReturn(true);
+      } else {
+        return Task.newResult(false);
+      }
+    })
+    .then(() => {
+      frame.finish(true);
+    });
+  return frame.result();
+}
+
+export function calculatePseudoElementHeight(
+  nodeContext: Vtree.NodeContext,
+  column: Layout.Column,
+  pseudoElement: Element,
+): number {
+  const parentNode = nodeContext.viewNode as Element;
+  parentNode.appendChild(pseudoElement);
+  const height = LayoutHelper.getElementHeight(
+    pseudoElement,
+    column,
+    nodeContext.vertical,
+  );
+  parentNode.removeChild(pseudoElement);
+  return height;
+}
 
 export const mediaTags = {
   img: true,
@@ -174,9 +449,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   beforeEdge: number = 0;
   afterEdge: number = 0;
   footnoteEdge: number = 0;
-  box: Geom.Rect = null;
+  box: GeometryUtil.Rect = null;
   chunkPositions: Vtree.ChunkPosition[] = null;
-  bands: Geom.Band[] = null;
+  bands: GeometryUtil.Band[] = null;
   overflown: boolean = false;
   breakPositions: BreakPosition.BreakPosition[] = null;
   pageBreakType: string | null = null;
@@ -237,7 +512,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
   }
 
-  getExclusions(): Geom.Shape[] {
+  getExclusions(): GeometryUtil.Shape[] {
     const pageFloatExclusions = this.pageFloatLayoutContext.getFloatFragmentExclusions();
     return this.exclusions.concat(pageFloatExclusions);
   }
@@ -401,7 +676,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     atUnforcedBreak?: boolean,
   ): Task.Result<Vtree.NodeContext> {
     const cont = this.layoutContext.nextInTree(position, atUnforcedBreak);
-    return Selectors.processAfterIfContinues(cont, this);
+    return processAfterIfContinues(cont, this);
   }
 
   /**
@@ -621,9 +896,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   /**
    * Reads element's computed CSS margin.
    */
-  getComputedMargin(element: Element): Geom.Insets {
+  getComputedMargin(element: Element): GeometryUtil.Insets {
     const style = this.clientLayout.getElementComputedStyle(element);
-    const insets = new Geom.Insets(0, 0, 0, 0);
+    const insets = new GeometryUtil.Insets(0, 0, 0, 0);
     if (style) {
       insets.left = this.parseComputedLength(style.marginLeft);
       insets.top = this.parseComputedLength(style.marginTop);
@@ -636,9 +911,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   /**
    * Reads element's computed padding + borders.
    */
-  getComputedPaddingBorder(element: Element): Geom.Insets {
+  getComputedPaddingBorder(element: Element): GeometryUtil.Insets {
     const style = this.clientLayout.getElementComputedStyle(element);
-    const insets = new Geom.Insets(0, 0, 0, 0);
+    const insets = new GeometryUtil.Insets(0, 0, 0, 0);
     if (style) {
       insets.left =
         this.parseComputedLength(style.borderLeftWidth) +
@@ -660,9 +935,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Reads element's computed CSS insets(margins + border + padding or margins :
    * depends on box-sizing)
    */
-  getComputedInsets(element: Element): Geom.Insets {
+  getComputedInsets(element: Element): GeometryUtil.Insets {
     const style = this.clientLayout.getElementComputedStyle(element);
-    const insets = new Geom.Insets(0, 0, 0, 0);
+    const insets = new GeometryUtil.Insets(0, 0, 0, 0);
     if (style) {
       if (style.boxSizing == "border-box") {
         return this.getComputedMargin(element);
@@ -744,7 +1019,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     self.buildDeepElementView(nodeContext).then((nodeContextAfter) => {
       const floatBBox = self.clientLayout.getElementClientRect(element);
       const margin = self.getComputedMargin(element);
-      let floatBox = new Geom.Rect(
+      let floatBox = new GeometryUtil.Rect(
         floatBBox.left - margin.left,
         floatBBox.top - margin.top,
         floatBBox.right + margin.right,
@@ -794,7 +1069,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
 
       // box is rotated for vertical orientation
-      let box = new Geom.Rect(
+      let box = new GeometryUtil.Rect(
         x1,
         self.getBoxDir() * self.beforeEdge,
         x2,
@@ -802,7 +1077,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       );
       let floatHorBox = floatBox;
       if (self.vertical) {
-        floatHorBox = Geom.rotateBox(floatBox);
+        floatHorBox = GeometryUtil.rotateBox(floatBox);
       }
       const dir = self.getBoxDir();
       if (floatHorBox.y1 < self.bottommostFloatTop * dir) {
@@ -810,9 +1085,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatHorBox.y1 = self.bottommostFloatTop * dir;
         floatHorBox.y2 = floatHorBox.y1 + boxExtent;
       }
-      Geom.positionFloat(box, self.bands, floatHorBox, floatSide);
+      GeometryUtil.positionFloat(box, self.bands, floatHorBox, floatSide);
       if (self.vertical) {
-        floatBox = Geom.unrotateBox(floatHorBox);
+        floatBox = GeometryUtil.unrotateBox(floatHorBox);
       }
       const insets = self.getComputedInsets(element);
       Base.setCSSProperty(
@@ -883,16 +1158,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (!self.isOverflown(floatBoxEdge) || self.breakPositions.length == 0) {
         // no overflow
         self.killFloats();
-        box = new Geom.Rect(
+        box = new GeometryUtil.Rect(
           self.getLeftEdge(),
           self.getTopEdge(),
           self.getRightEdge(),
           self.getBottomEdge(),
         );
         if (self.vertical) {
-          box = Geom.rotateBox(box);
+          box = GeometryUtil.rotateBox(box);
         }
-        Geom.addFloatToBands(box, self.bands, floatHorBox, null, floatSide);
+        GeometryUtil.addFloatToBands(
+          box,
+          self.bands,
+          floatHorBox,
+          null,
+          floatSide,
+        );
         self.createFloats();
         if (floatSide == "left") {
           self.leftFloatEdge = floatBoxEdge;
@@ -2992,7 +3273,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.element.removeChild(probe);
     const offsetX = this.originX + this.left + this.getInsetLeft();
     const offsetY = this.originY + this.top + this.getInsetTop();
-    this.box = new Geom.Rect(
+    this.box = new GeometryUtil.Rect(
       offsetX,
       offsetY,
       offsetX + this.width,
@@ -3022,7 +3303,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.rightFloatEdge = this.beforeEdge;
     this.bottommostFloatTop = this.beforeEdge;
     this.footnoteEdge = this.afterEdge;
-    this.bands = Geom.shapesToBands(
+    this.bands = GeometryUtil.shapesToBands(
       this.box,
       [this.getInnerShape()],
       this.getExclusions(),
@@ -3393,6 +3674,112 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 }
 
+/**
+ * Represents a "pseudo"-column nested inside a real column.
+ * This class is created to handle parallel fragmented flows (e.g. table columns
+ * in a single table row). A pseudo-column behaves in the same way as the
+ * original column, sharing its properties. Property changes on the
+ * pseudo-column are not propagated to the original column. The LayoutContext of
+ * the original column is also cloned and used by the pseudo-column, not to
+ * propagate state changes of the LayoutContext caused by the pseudo-column.
+ * @param column The original (parent) column
+ * @param viewRoot Root element for the pseudo-column, i.e., the root of the
+ *     fragmented flow.
+ * @param parentNodeContext A NodeContext generating this PseudoColumn
+ */
+export class PseudoColumn {
+  startNodeContexts: Vtree.NodeContext[] = [];
+  private column: Layout.Column;
+  constructor(
+    column: Layout.Column,
+    viewRoot: Element,
+    parentNodeContext: Vtree.NodeContext,
+  ) {
+    this.column = Object.create(column) as Layout.Column;
+    this.column.element = viewRoot;
+    this.column.layoutContext = column.layoutContext.clone();
+    this.column.stopAtOverflow = false;
+    this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
+    this.column.pseudoParent = column;
+    const parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(
+      parentNodeContext,
+    );
+    this.column.footnoteEdge =
+      this.column.footnoteEdge - parentClonedPaddingBorder;
+    const pseudoColumn = this;
+    this.column.openAllViews = function(position) {
+      return Column.prototype.openAllViews
+        .call(this, position)
+        .thenAsync((result) => {
+          pseudoColumn.startNodeContexts.push(result.copy());
+          return Task.newResult(result);
+        });
+    };
+  }
+  /**
+   * @param chunkPosition starting position.
+   * @return holding end position.
+   */
+  layout(
+    chunkPosition: Vtree.ChunkPosition,
+    leadingEdge: boolean,
+  ): Task.Result<Vtree.ChunkPosition> {
+    return this.column.layout(chunkPosition, leadingEdge);
+  }
+  findAcceptableBreakPosition(
+    allowBreakAtStartPosition: boolean,
+  ): Layout.BreakPositionAndNodeContext {
+    const p = this.column.findAcceptableBreakPosition();
+    if (allowBreakAtStartPosition) {
+      const startNodeContext = this.startNodeContexts[0].copy();
+      const bp = new BreakPosition.EdgeBreakPosition(
+        startNodeContext,
+        null,
+        startNodeContext.overflow,
+        0,
+      );
+      bp.findAcceptableBreak(this.column, 0);
+      if (!p.nodeContext) {
+        return { breakPosition: bp, nodeContext: startNodeContext };
+      }
+    }
+    return p;
+  }
+  /**
+   * @return holing true
+   */
+  finishBreak(
+    nodeContext: Vtree.NodeContext,
+    forceRemoveSelf: boolean,
+    endOfColumn: boolean,
+  ): Task.Result<boolean> {
+    return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfColumn);
+  }
+  doFinishBreakOfFragmentLayoutConstraints(positionAfter: Vtree.NodeContext) {
+    this.column.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
+  }
+  isStartNodeContext(nodeContext: Vtree.NodeContext): boolean {
+    const startNodeContext = this.startNodeContexts[0];
+    return (
+      startNodeContext.viewNode === nodeContext.viewNode &&
+      startNodeContext.after === nodeContext.after &&
+      startNodeContext.offsetInNode === nodeContext.offsetInNode
+    );
+  }
+  isLastAfterNodeContext(nodeContext: Vtree.NodeContext): boolean {
+    return VtreeImpl.isSameNodePosition(
+      nodeContext.toNodePosition(),
+      this.column.lastAfterPosition,
+    );
+  }
+  getColumnElement(): Element {
+    return this.column.element;
+  }
+  getColumn(): Layout.Column {
+    return this.column;
+  }
+}
+
 export const firstCharPattern = /^[^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*([A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527][^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*)?/;
 
 export type SinglePageFloatLayoutResult = Layout.SinglePageFloatLayoutResult;
@@ -3615,16 +4002,14 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
       "DefaultLayoutMode.doLayout",
     );
 
-    Selectors.processAfterIfContinuesOfAncestors(nodeContext, column).then(
-      () => {
-        column
-          .doLayout(nodeContext, this.leadingEdge, this.breakAfter)
-          .then((result) => {
-            this.context.overflownNodeContext = result.overflownNodeContext;
-            frame.finish(result.nodeContext);
-          });
-      },
-    );
+    processAfterIfContinuesOfAncestors(nodeContext, column).then(() => {
+      column
+        .doLayout(nodeContext, this.leadingEdge, this.breakAfter)
+        .then((result) => {
+          this.context.overflownNodeContext = result.overflownNodeContext;
+          frame.finish(result.nodeContext);
+        });
+    });
     return frame.result();
   }
 
@@ -3676,7 +4061,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
 
 export class PageFloatArea extends Column implements Layout.PageFloatArea {
   private rootViewNodes: Element[] = [];
-  private floatMargins: Geom.Insets[] = [];
+  private floatMargins: GeometryUtil.Insets[] = [];
   adjustContentRelativeSize: boolean = true;
 
   constructor(

@@ -19,7 +19,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Css from "./css";
-import * as PageFloats from "./pagefloats";
+import * as PageFloats from "./page-floats";
 import * as Task from "./task";
 import * as Vtree from "./vtree";
 import { Layout } from "./types";

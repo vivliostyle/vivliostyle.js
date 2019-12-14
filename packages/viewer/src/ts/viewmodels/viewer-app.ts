@@ -18,17 +18,18 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "../models/vivliostyle";
+import Vivliostyle from "../vivliostyle";
+
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
-import Viewer from "./viewer";
+import ViewerUI from "./viewer";
 import Navigation from "./navigation";
 import SettingsPanel from "./settings-panel";
 import MessageDialog from "./message-dialog";
+import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
-import urlParameters from "../stores/url-parameters";
 
 function ViewerApp(): void {
   this.documentOptions = new DocumentOptions();
@@ -39,7 +40,7 @@ function ViewerApp(): void {
   );
 
   if (this.viewerOptions.profile()) {
-    vivliostyle.profile.profiler.enable();
+    Vivliostyle.profiler.enable();
   }
   this.isDebug = urlParameters.getParameter("debug")[0] === "true";
   this.viewerSettings = {
@@ -60,9 +61,9 @@ function ViewerApp(): void {
   urlParameters.removeParameter("profile", true);
   urlParameters.removeParameter("debug", true);
 
-  this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
+  this.viewer = new ViewerUI(this.viewerSettings, this.viewerOptions);
 
-  this.viewer.inputUrl.subscribe((inputUrl) => {
+  this.viewer.inputUrl.subscribe((inputUrl: string) => {
     if (inputUrl != "") {
       if (!urlParameters.hasParameter("b")) {
         // Push current URL to browser history to enable to go back here when browser Back button is clicked.

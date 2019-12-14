@@ -2,4 +2,6 @@ test/files/table/table_col_width_vertical.html
 test/files/table/table_col_width.html
 test/files/table/table_vertical_align_vertical.html
 test/files/table/table_vertical_align.html
+*.erb
+doc/*.md
 package.json

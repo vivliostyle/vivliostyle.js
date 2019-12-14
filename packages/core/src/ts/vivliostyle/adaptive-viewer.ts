@@ -22,13 +22,13 @@ import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
-import * as Exprs from "./exprs";
+import * as Exprs from "./expressions";
 import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Plugin from "./plugin";
 import * as Profile from "./profile";
 import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 
@@ -62,7 +62,7 @@ export type SingleDocumentParam = {
   skipPagesBefore: number | null;
 };
 
-export class Viewer {
+export class AdaptiveViewer {
   fontMapper: Font.Mapper;
   kick: () => void;
   sendCommand: (p1: Base.JSON | string) => void;
@@ -159,17 +159,17 @@ export class Viewer {
   }
 
   addLogListeners() {
-    const LogLevel = Logging.LogLevel;
-    Logging.logger.addListener(LogLevel.DEBUG, (info) => {
+    const logLevel = Logging.LogLevel;
+    Logging.logger.addListener(logLevel.DEBUG, (info) => {
       this.callback({ t: "debug", content: info });
     });
-    Logging.logger.addListener(LogLevel.INFO, (info) => {
+    Logging.logger.addListener(logLevel.INFO, (info) => {
       this.callback({ t: "info", content: info });
     });
-    Logging.logger.addListener(LogLevel.WARN, (info) => {
+    Logging.logger.addListener(logLevel.WARN, (info) => {
       this.callback({ t: "warn", content: info });
     });
-    Logging.logger.addListener(LogLevel.ERROR, (info) => {
+    Logging.logger.addListener(logLevel.ERROR, (info) => {
       this.callback({ t: "error", content: info });
     });
   }

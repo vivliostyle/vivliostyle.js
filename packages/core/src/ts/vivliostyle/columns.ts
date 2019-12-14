@@ -19,8 +19,8 @@
  */
 import * as Asserts from "./asserts";
 import * as Css from "./css";
-import * as MathUtil from "./mathutil";
-import * as PageFloats from "./pagefloats";
+import * as MathUtil from "./math-util";
+import * as PageFloats from "./page-floats";
 import * as Task from "./task";
 import * as Vtree from "./vtree";
 import { Layout } from "./types";
@@ -28,9 +28,7 @@ import { Layout } from "./types";
 export type ColumnLayoutResult = {
   columns: Layout.Column[];
   position: Vtree.LayoutPosition;
-  columnPageFloatLayoutContexts:
-    | undefined
-    | PageFloats.PageFloatLayoutContext[];
+  columnPageFloatLayoutContexts?: PageFloats.PageFloatLayoutContext[];
 };
 
 export type ColumnGenerator = () => Task.Result<ColumnLayoutResult | null>;

@@ -18,6 +18,7 @@
  */
 
 import ko from "knockout";
+
 import ViewerApp from "./viewmodels/viewer-app";
 
 import "./bindings/menuButton";

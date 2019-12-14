@@ -17,7 +17,7 @@ module.exports = {
     filename: isProduction
       ? "vivliostyle-viewer.min.js" // "production" or "debug"
       : "vivliostyle-viewer.dev.js", // "development"
-    library: "@vivliostyle/viewer",
+    library: "VivliostyleViewer",
     libraryTarget: "umd",
     libraryExport: "default",
   },

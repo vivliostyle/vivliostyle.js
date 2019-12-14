@@ -18,14 +18,14 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Vivliostyle from "../vivliostyle";
+import { CoreViewer } from "@vivliostyle/core";
 import ko, { Observable, PureComputed } from "knockout";
-import { Viewer as VivliostyleViewer } from "@vivliostyle/core";
-import obs, { ReadonlyObservable } from "../utils/observable-util";
-import Logger from "../logging/logger";
+
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
-import vivliostyle from "../models/vivliostyle";
-import { Navigation } from "@vivliostyle/core/lib/vivliostyle/viewer";
+import Logger from "../logging/logger";
+import obs, { ReadonlyObservable } from "../utils/observable-util";
 
 type State = {
   status: PureComputed<unknown>;
@@ -46,7 +46,7 @@ export type ViewerSettings = {
 
 class Viewer {
   private viewerOptions_: ViewerOptions;
-  private viewer_: VivliostyleViewer;
+  private coreViewer_: Vivliostyle.CoreViewer.CoreViewer;
   private state_: PrivateState;
 
   // FIXME: In used in viewmodels/navigation. This property is desirable private access.
@@ -64,15 +64,13 @@ class Viewer {
   constructor(viewerSettings?: ViewerSettings, viewerOptions?: ViewerOptions) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = null;
-    this.viewer_ = new vivliostyle.viewer.Viewer(
+    this.coreViewer_ = new CoreViewer.CoreViewer(
       viewerSettings,
       viewerOptions.toObject(),
     );
     const state_ = (this.state_ = {
-      status: obs.readonlyObservable(vivliostyle.constants.ReadyState.LOADING),
-      pageProgression: obs.readonlyObservable(
-        vivliostyle.constants.PageProgression.LTR,
-      ),
+      status: obs.readonlyObservable(Vivliostyle.ReadyState.LOADING),
+      pageProgression: obs.readonlyObservable(Vivliostyle.PageProgression.LTR),
     });
     this.state = {
       status: state_.status.getter.extend({
@@ -82,7 +80,7 @@ class Viewer {
       navigatable: ko.pureComputed(
         () =>
           state_.status.value() &&
-          state_.status.value() !== vivliostyle.constants.ReadyState.LOADING,
+          state_.status.value() !== Vivliostyle.ReadyState.LOADING,
       ),
       pageProgression: state_.pageProgression.getter,
     };
@@ -102,36 +100,36 @@ class Viewer {
 
   setupViewerEventHandler(): void {
     const logger = Logger.getLogger();
-    this.viewer_.addListener("debug", (payload) => {
+    this.coreViewer_.addListener("debug", (payload) => {
       logger.debug(payload.content);
     });
-    this.viewer_.addListener("info", (payload) => {
+    this.coreViewer_.addListener("info", (payload) => {
       logger.info(payload.content);
     });
-    this.viewer_.addListener("warn", (payload) => {
+    this.coreViewer_.addListener("warn", (payload) => {
       logger.warn(payload.content);
     });
-    this.viewer_.addListener("error", (payload) => {
+    this.coreViewer_.addListener("error", (payload) => {
       logger.error(payload.content);
     });
-    this.viewer_.addListener("readystatechange", () => {
-      const readyState = this.viewer_.readyState;
+    this.coreViewer_.addListener("readystatechange", () => {
+      const readyState = this.coreViewer_.readyState;
       if (
-        readyState === vivliostyle.constants.ReadyState.INTERACTIVE ||
-        readyState === vivliostyle.constants.ReadyState.COMPLETE
+        readyState === Vivliostyle.ReadyState.INTERACTIVE ||
+        readyState === Vivliostyle.ReadyState.COMPLETE
       ) {
         this.state_.pageProgression.value(
-          this.viewer_.getCurrentPageProgression(),
+          this.coreViewer_.getCurrentPageProgression(),
         );
       }
       this.state_.status.value(readyState);
     });
-    this.viewer_.addListener("loaded", () => {
+    this.coreViewer_.addListener("loaded", () => {
       if (this.viewerOptions_.profile()) {
-        vivliostyle.profile.profiler.printTimings();
+        Vivliostyle.profiler.printTimings();
       }
     });
-    this.viewer_.addListener("nav", (payload) => {
+    this.coreViewer_.addListener("nav", (payload) => {
       const {
         cfi,
         first,
@@ -141,6 +139,7 @@ class Viewer {
         metadata,
         docTitle,
       } = payload;
+
       if (cfi) {
         this.documentOptions_.fragment(cfi);
       }
@@ -176,7 +175,7 @@ class Viewer {
       }
 
       const tocVisibleOld = this.tocVisible();
-      const tocVisibleNew = this.viewer_.isTOCVisible();
+      const tocVisibleNew = this.coreViewer_.isTOCVisible();
       if (tocVisibleOld && !tocVisibleNew) {
         // When resize, TOC box will be regenerated and hidden temporarily.
         // So keep TOC toggle button status on.
@@ -184,7 +183,7 @@ class Viewer {
         this.tocVisible(tocVisibleNew);
       }
     });
-    this.viewer_.addListener("hyperlink", (payload) => {
+    this.coreViewer_.addListener("hyperlink", (payload) => {
       if (payload.internal) {
         this.navigateToInternalUrl(payload.href);
 
@@ -204,7 +203,7 @@ class Viewer {
   setupViewerOptionSubscriptions(): void {
     ko.computed(function() {
       const viewerOptions = this.viewerOptions_.toObject();
-      this.viewer_.setOptions(viewerOptions);
+      this.coreViewer_.setOptions(viewerOptions);
     }, this).extend({ rateLimit: 0 });
   }
 
@@ -212,22 +211,22 @@ class Viewer {
     documentOptions: DocumentOptions,
     viewerOptions: ViewerOptions,
   ): void {
-    this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
+    this.state_.status.value(Vivliostyle.ReadyState.LOADING);
     if (viewerOptions) {
       this.viewerOptions_.copyFrom(viewerOptions);
     }
     this.documentOptions_ = documentOptions;
 
     if (documentOptions.xUrl()) {
-      this.viewer_.loadDocument(
+      this.coreViewer_.loadDocument(
         documentOptions.xUrl(),
         documentOptions.toObject(),
         this.viewerOptions_.toObject(),
       );
     } else if (documentOptions.bookUrl()) {
-      if (this.viewer_.loadPublication) {
+      if (this.coreViewer_.loadPublication) {
         // new name
-        this.viewer_.loadPublication(
+        this.coreViewer_.loadPublication(
           documentOptions.bookUrl(),
           documentOptions.toObject(),
           this.viewerOptions_.toObject(),
@@ -236,7 +235,7 @@ class Viewer {
       } else {
         // FIXME: remove this
         // @ts-ignore: Unreachable code TS2339
-        this.viewer_.loadEPUB(
+        this.coreViewer_.loadEPUB(
           documentOptions.bookUrl(),
           documentOptions.toObject(),
           this.viewerOptions_.toObject(),
@@ -249,39 +248,39 @@ class Viewer {
   }
 
   navigateToPrevious(): void {
-    this.viewer_.navigateToPage(Navigation.PREVIOUS);
+    this.coreViewer_.navigateToPage(Navigation.PREVIOUS);
   }
 
   navigateToNext(): void {
-    this.viewer_.navigateToPage(Navigation.NEXT);
+    this.coreViewer_.navigateToPage(Navigation.NEXT);
   }
 
   navigateToLeft(): void {
-    this.viewer_.navigateToPage(Navigation.LEFT);
+    this.coreViewer_.navigateToPage(Navigation.LEFT);
   }
 
   navigateToRight(): void {
-    this.viewer_.navigateToPage(Navigation.RIGHT);
+    this.coreViewer_.navigateToPage(Navigation.RIGHT);
   }
 
   navigateToFirst(): void {
-    this.viewer_.navigateToPage(Navigation.FIRST);
+    this.coreViewer_.navigateToPage(Navigation.FIRST);
   }
 
   navigateToLast(): void {
-    this.viewer_.navigateToPage(Navigation.LAST);
+    this.coreViewer_.navigateToPage(Navigation.LAST);
   }
 
   navigateToEPage(epage): void {
-    this.viewer_.navigateToPage(Navigation.EPAGE, epage);
+    this.coreViewer_.navigateToPage(Navigation.EPAGE, epage);
   }
 
   navigateToInternalUrl(href): void {
-    this.viewer_.navigateToInternalUrl(href);
+    this.coreViewer_.navigateToInternalUrl(href);
   }
 
   queryZoomFactor(type): number {
-    return this.viewer_.queryZoomFactor(type);
+    return this.coreViewer_.queryZoomFactor(type);
   }
 
   epageToPageNumber(epage): number {
@@ -300,14 +299,14 @@ class Viewer {
   }
 
   showTOC(shown?: boolean, autoHide?: boolean): void {
-    if (this.viewer_.isTOCVisible() == null) {
+    if (this.coreViewer_.isTOCVisible() == null) {
       // TOC is unavailable
       return;
     }
     const show = shown == null ? !this.tocVisible() : shown;
     this.tocVisible(show);
     this.tocPinned(show ? !autoHide : false);
-    this.viewer_.showTOC(show, autoHide);
+    this.coreViewer_.showTOC(show, autoHide);
   }
 }
 

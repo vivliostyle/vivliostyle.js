@@ -2,6 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const CircularDependencyPlugin = require("circular-dependency-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+
 const pkg = require("./package.json");
 
 const bannerText = `Copyright 2013 Google, Inc.
@@ -30,16 +31,16 @@ const config = (outputFilename, tsConfigName) => ({
   entry: "./src/ts/vivliostyle.ts",
   devtool: "source-map",
   output: {
-    path: path.join(__dirname, "lib"),
+    path: path.join(__dirname, "browser"),
     filename: isProduction
-      ? outputFilename + ".min.js" // "production" or "debug"
-      : outputFilename + ".dev.js", // "development"
-    library: "vivliostyle",
+      ? outputFilename + ".production.js" // "production" or "debug"
+      : outputFilename + ".development.js", // "development"
+    library: "Vivliostyle",
     libraryTarget: "umd",
-    libraryExport: "default",
+    libraryExport: "",
   },
   resolve: {
-    extensions: [".js", ".ts"],
+    extensions: [".js", ".mjs", ".ts"],
   },
   module: {
     rules: [
@@ -80,9 +81,5 @@ const config = (outputFilename, tsConfigName) => ({
 });
 
 const targets = [config("vivliostyle", "tsconfig.json")];
-
-if (isProduction) {
-  targets.push(config("vivliostyle-es5", "tsconfig-es5.json"));
-}
 
 module.exports = targets;

@@ -19,7 +19,7 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as LayoutProcessor from "./layoutprocessor";
+import * as LayoutProcessor from "./layout-processor";
 import * as Logging from "./logging";
 import * as Task from "./task";
 import { Layout, Vtree } from "./types";
@@ -77,7 +77,7 @@ export enum HOOKS {
   PREPROCESS_ELEMENT_STYLE = "PREPROCESS_ELEMENT_STYLE",
 
   /**
-   * Called before geting CssCasc.polyfilledInheritedProps.
+   * Called before geting CssCascade.polyfilledInheritedProps.
    *
    * The hook return a array of polyfilled inherited property name.
    */

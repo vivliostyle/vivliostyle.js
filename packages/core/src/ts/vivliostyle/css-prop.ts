@@ -21,8 +21,8 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as Exprs from "./exprs";
-import * as Geom from "./geom";
+import * as Exprs from "./expressions";
+import * as GeometryUtil from "./geometry-util";
 import * as Logging from "./logging";
 
 //---------------------- value parsers ----------------------------------
@@ -146,7 +146,7 @@ export class ShapeVisitor extends Css.Visitor {
     width: number,
     height: number,
     context: Exprs.Context,
-  ): Geom.Shape {
+  ): GeometryUtil.Shape {
     if (this.coords.length > 0) {
       const numbers: number[] = [];
       this.coords.forEach((coord, i) => {
@@ -163,16 +163,18 @@ export class ShapeVisitor extends Css.Visitor {
       switch (this.name) {
         case "polygon":
           if (numbers.length % 2 == 0) {
-            const points: Geom.Point[] = [];
+            const points: GeometryUtil.Point[] = [];
             for (let k = 0; k < numbers.length; k += 2) {
-              points.push(new Geom.Point(x + numbers[k], y + numbers[k + 1]));
+              points.push(
+                new GeometryUtil.Point(x + numbers[k], y + numbers[k + 1]),
+              );
             }
-            return new Geom.Shape(points);
+            return new GeometryUtil.Shape(points);
           }
           break;
         case "rectangle":
           if (numbers.length == 4) {
-            return Geom.shapeForRect(
+            return GeometryUtil.shapeForRect(
               x + numbers[0],
               y + numbers[1],
               x + numbers[0] + numbers[2],
@@ -182,7 +184,7 @@ export class ShapeVisitor extends Css.Visitor {
           break;
         case "ellipse":
           if (numbers.length == 4) {
-            return Geom.shapeForEllipse(
+            return GeometryUtil.shapeForEllipse(
               x + numbers[0],
               y + numbers[1],
               numbers[2],
@@ -192,7 +194,7 @@ export class ShapeVisitor extends Css.Visitor {
           break;
         case "circle":
           if (numbers.length == 3) {
-            return Geom.shapeForEllipse(
+            return GeometryUtil.shapeForEllipse(
               x + numbers[0],
               y + numbers[1],
               numbers[2],
@@ -213,7 +215,7 @@ export function toShape(
   width: number,
   height: number,
   context: Exprs.Context,
-): Geom.Shape {
+): GeometryUtil.Shape {
   if (val) {
     const visitor = new ShapeVisitor();
     try {
@@ -223,7 +225,7 @@ export function toShape(
       Logging.logger.warn(err, "toShape:");
     }
   }
-  return Geom.shapeForRect(x, y, x + width, y + height);
+  return GeometryUtil.shapeForRect(x, y, x + width, y + height);
 }
 
 export class CountersVisitor extends Css.Visitor {

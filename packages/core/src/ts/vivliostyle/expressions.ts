@@ -31,7 +31,7 @@ export type Preferences = {
   spreadView: boolean;
   pageBorder: number;
   enabledMediaTypes: { [key: string]: boolean };
-  defaultPaperSize: { [key: string]: number } | undefined;
+  defaultPaperSize?: { [key: string]: number };
 };
 
 export function defaultPreferences(): Preferences {

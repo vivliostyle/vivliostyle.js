@@ -21,23 +21,23 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssProp from "./cssprop";
-import * as CssStyler from "./cssstyler";
+import * as CssCascade from "./css-cascade";
+import * as CssProp from "./css-prop";
+import * as CssStyler from "./css-styler";
 import * as Diff from "./diff";
 import * as Display from "./display";
-import * as Exprs from "./exprs";
+import * as Exprs from "./expressions";
 import * as Font from "./font";
 import * as Matchers from "./matchers";
-import * as PageFloats from "./pagefloats";
+import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
-import * as PseudoElement from "./pseudoelement";
-import * as RepetitiveElement from "./repetitiveelement";
-import * as Selectors from "./selectors";
+import * as PseudoElement from "./pseudo-element";
+import * as RepetitiveElement from "./repetitive-element";
 import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as TaskUtil from "./task-util";
 import * as Urls from "./urls";
 import * as Vtree from "./vtree";
+import * as Layout from "./layout";
 import { XmlDoc } from "./types";
 
 const namespacePrefixMap = {};
@@ -148,7 +148,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     public readonly regionIds: string[],
     public readonly xmldoc: XmlDoc.XMLDocHolder,
     public readonly docFaces: Font.DocumentFaces,
-    public readonly footnoteStyle: CssCasc.ElementStyle,
+    public readonly footnoteStyle: CssCascade.ElementStyle,
     public readonly stylerProducer: StylerProducer,
     public readonly page: Vtree.Page,
     public readonly customRenderer: CustomRenderer,
@@ -184,7 +184,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   createPseudoelementShadow(
     element: Element,
     isRoot: boolean,
-    cascStyle: CssCasc.ElementStyle,
+    cascStyle: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
@@ -265,35 +265,35 @@ export class ViewFactory extends Base.SimpleEventTarget
   }
 
   getPseudoMap(
-    cascStyle: CssCasc.ElementStyle,
+    cascStyle: CssCascade.ElementStyle,
     regionIds: string[],
     isFootnote: boolean,
     nodeContext: Vtree.NodeContext,
     context: Exprs.Context,
   ) {
-    const pseudoMap = CssCasc.getStyleMap(cascStyle, "_pseudos");
+    const pseudoMap = CssCascade.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) {
       return null;
     }
     const computedPseudoStyleMap = {};
     for (const key in pseudoMap) {
       const computedPseudoStyle = (computedPseudoStyleMap[key] = {});
-      CssCasc.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
-      CssCasc.mergeViewConditionalStyles(
+      CssCascade.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
+      CssCascade.mergeViewConditionalStyles(
         computedPseudoStyle,
         context,
         pseudoMap[key],
       );
-      CssCasc.forEachStylesInRegion(
+      CssCascade.forEachStylesInRegion(
         pseudoMap[key],
         regionIds,
         isFootnote,
         (regionId, regionStyle) => {
-          CssCasc.mergeStyle(computedPseudoStyle, regionStyle, context);
-          CssCasc.forEachViewConditionalStyles(
+          CssCascade.mergeStyle(computedPseudoStyle, regionStyle, context);
+          CssCascade.forEachViewConditionalStyles(
             regionStyle,
             (viewConditionalStyles) => {
-              CssCasc.mergeStyle(
+              CssCascade.mergeStyle(
                 computedPseudoStyle,
                 viewConditionalStyles,
                 context,
@@ -342,7 +342,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   createShadows(
     element: Element,
     isRoot,
-    cascStyle: CssCasc.ElementStyle,
+    cascStyle: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
@@ -449,21 +449,21 @@ export class ViewFactory extends Base.SimpleEventTarget
   computeStyle(
     vertical: boolean,
     rtl: boolean,
-    style: CssCasc.ElementStyle,
+    style: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
   ): boolean {
     const context = this.context;
-    const cascMap = CssCasc.flattenCascadedStyle(
+    const cascMap = CssCascade.flattenCascadedStyle(
       style,
       context,
       this.regionIds,
       this.isFootnote,
       this.nodeContext,
     );
-    vertical = CssCasc.isVertical(cascMap, context, vertical);
-    rtl = CssCasc.isRtl(cascMap, context, rtl);
+    vertical = CssCascade.isVertical(cascMap, context, vertical);
+    rtl = CssCascade.isRtl(cascMap, context, rtl);
     const self = this;
-    CssCasc.convertToPhysical(
+    CssCascade.convertToPhysical(
       cascMap,
       computedStyle,
       vertical,
@@ -495,8 +495,8 @@ export class ViewFactory extends Base.SimpleEventTarget
   }
 
   private inheritFromSourceParent(
-    elementStyle: CssCasc.ElementStyle,
-  ): { lang: string | null; elementStyle: CssCasc.ElementStyle } {
+    elementStyle: CssCascade.ElementStyle,
+  ): { lang: string | null; elementStyle: CssCascade.ElementStyle } {
     let node = this.nodeContext.sourceNode;
     const styles = [];
     let lang: string | null = null;
@@ -528,9 +528,12 @@ export class ViewFactory extends Base.SimpleEventTarget
     const isRoot = steps === 0;
     const fontSize = this.context.queryUnitSize("em", isRoot);
     const props = {
-      "font-size": new CssCasc.CascadeValue(new Css.Numeric(fontSize, "px"), 0),
-    } as CssCasc.ElementStyle;
-    const inheritanceVisitor = new CssCasc.InheritanceVisitor(
+      "font-size": new CssCascade.CascadeValue(
+        new Css.Numeric(fontSize, "px"),
+        0,
+      ),
+    } as CssCascade.ElementStyle;
+    const inheritanceVisitor = new CssCascade.InheritanceVisitor(
       props,
       this.context,
     );
@@ -538,21 +541,21 @@ export class ViewFactory extends Base.SimpleEventTarget
       const style = styles[i];
       const propList = [];
       for (const propName in style) {
-        if (CssCasc.isInherited(propName)) {
+        if (CssCascade.isInherited(propName)) {
           propList.push(propName);
         }
       }
       propList.sort(Css.processingOrderFn);
       for (const name of propList) {
         inheritanceVisitor.setPropName(name);
-        const value = CssCasc.getProp(style, name);
+        const value = CssCascade.getProp(style, name);
         if (value.value !== Css.ident.inherit) {
           props[name] = value.filterValue(inheritanceVisitor);
         }
       }
     }
     for (const sname in elementStyle) {
-      if (!CssCasc.isInherited(sname)) {
+      if (!CssCascade.isInherited(sname)) {
         props[sname] = elementStyle[sname];
       }
     }
@@ -572,7 +575,7 @@ export class ViewFactory extends Base.SimpleEventTarget
   }
 
   transferPolyfilledInheritedProps(computedStyle: { [key: string]: Css.Val }) {
-    const polyfilledInheritedProps = CssCasc.getPolyfilledInheritedProps().filter(
+    const polyfilledInheritedProps = CssCascade.getPolyfilledInheritedProps().filter(
       (name) => computedStyle[name],
     );
     if (polyfilledInheritedProps.length) {
@@ -1340,7 +1343,7 @@ export class ViewFactory extends Base.SimpleEventTarget
 
   private processAfterIfcontinues(
     element: Element,
-    cascStyle: CssCasc.ElementStyle,
+    cascStyle: CssCascade.ElementStyle,
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
   ) {
@@ -1365,7 +1368,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         context,
         this.exprContentListener,
       );
-      this.nodeContext.afterIfContinues = new Selectors.AfterIfContinues(
+      this.nodeContext.afterIfContinues = new Layout.AfterIfContinues(
         element,
         shadowStyler,
       );
@@ -1830,10 +1833,10 @@ export class ViewFactory extends Base.SimpleEventTarget
 
   isTransclusion(
     element: Element,
-    elementStyle: CssCasc.ElementStyle,
+    elementStyle: CssCascade.ElementStyle,
     transclusionType: string | null,
   ) {
-    const proc = CssCasc.getProp(elementStyle, "hyperlink-processing");
+    const proc = CssCascade.getProp(elementStyle, "hyperlink-processing");
     if (!proc) {
       return false;
     }
@@ -1943,7 +1946,7 @@ export class ViewFactory extends Base.SimpleEventTarget
       ? (nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
       : this.styler;
     let elementStyle = styler.getStyle(element, false);
-    const pseudoMap = CssCasc.getStyleMap(elementStyle, "_pseudos");
+    const pseudoMap = CssCascade.getStyleMap(elementStyle, "_pseudos");
     if (!pseudoMap) {
       return;
     }
@@ -2052,7 +2055,7 @@ export class ViewFactory extends Base.SimpleEventTarget
     target: Element,
   ): boolean {
     const computedStyle = {};
-    const pseudoMap = CssCasc.getStyleMap(this.footnoteStyle, "_pseudos");
+    const pseudoMap = CssCascade.getStyleMap(this.footnoteStyle, "_pseudos");
     vertical = this.computeStyle(
       vertical,
       rtl,
@@ -2119,7 +2122,7 @@ export class ViewFactory extends Base.SimpleEventTarget
         clientLayout.getElementComputedStyle(elem as Element)["font-size"],
       );
       Asserts.assert(this.context);
-      return CssCasc.convertFontRelativeLengthToPx(
+      return CssCascade.convertFontRelativeLengthToPx(
         numeric,
         fontSize,
         this.context,

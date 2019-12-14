@@ -20,8 +20,8 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as CssTok from "./csstok";
-import * as Exprs from "./exprs";
+import * as CssTokenizer from "./css-tokenizer";
+import * as Exprs from "./expressions";
 import * as Logging from "./logging";
 import * as Net from "./net";
 import * as Task from "./task";
@@ -94,14 +94,14 @@ export function colorFromHash(text: string): Css.Color {
   throw new Error("E_CSS_COLOR");
 }
 
-export class ParserHandler implements CssTok.TokenizerHandler {
+export class ParserHandler implements CssTokenizer.TokenizerHandler {
   flavor: StylesheetFlavor;
 
   constructor(public scope: Exprs.LexicalScope) {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
-  getCurrentToken(): CssTok.Token {
+  getCurrentToken(): CssTokenizer.Token {
     return null;
   }
 
@@ -109,7 +109,7 @@ export class ParserHandler implements CssTok.TokenizerHandler {
     return this.scope;
   }
 
-  error(mnemonics: string, token: CssTok.Token): void {}
+  error(mnemonics: string, token: CssTokenizer.Token): void {}
 
   startStylesheet(flavor: StylesheetFlavor): void {
     this.flavor = flavor;
@@ -128,7 +128,7 @@ export class ParserHandler implements CssTok.TokenizerHandler {
   attributeSelector(
     ns: string,
     name: string,
-    op: CssTok.TokenType,
+    op: CssTokenizer.TokenType,
     value: string | null,
   ): void {}
 
@@ -225,7 +225,7 @@ export class ParserHandler implements CssTok.TokenizerHandler {
 
 export class DispatchParserHandler extends ParserHandler {
   stack: ParserHandler[] = [];
-  tokenizer: CssTok.Tokenizer = null;
+  tokenizer: CssTokenizer.Tokenizer = null;
   slave: ParserHandler = null;
 
   constructor() {
@@ -244,7 +244,7 @@ export class DispatchParserHandler extends ParserHandler {
   /**
    * @override
    */
-  getCurrentToken(): CssTok.Token {
+  getCurrentToken(): CssTokenizer.Token {
     if (this.tokenizer) {
       return this.tokenizer.token();
     }
@@ -262,14 +262,14 @@ export class DispatchParserHandler extends ParserHandler {
    * Forwards call to slave.
    * @override
    */
-  error(mnemonics: string, token: CssTok.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token): void {
     this.slave.error(mnemonics, token);
   }
 
   /**
    * Called by a slave.
    */
-  errorMsg(mnemonics: string, token: CssTok.Token): void {
+  errorMsg(mnemonics: string, token: CssTokenizer.Token): void {
     Logging.logger.warn(mnemonics);
   }
 
@@ -327,7 +327,7 @@ export class DispatchParserHandler extends ParserHandler {
   attributeSelector(
     ns: string,
     name: string,
-    op: CssTok.TokenType,
+    op: CssTokenizer.TokenType,
     value: string | null,
   ): void {
     this.slave.attributeSelector(ns, name, op, value);
@@ -532,14 +532,14 @@ export class SkippingParserHandler extends ParserHandler {
   /**
    * @override
    */
-  getCurrentToken(): CssTok.Token {
+  getCurrentToken(): CssTokenizer.Token {
     return this.owner.getCurrentToken();
   }
 
   /**
    * @override
    */
-  error(mnemonics: string, token: CssTok.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token): void {
     this.owner.errorMsg(mnemonics, token);
   }
 
@@ -794,143 +794,148 @@ export enum Action {
   DONE = 200,
 }
 
-export const OP_MEDIA_AND: number = CssTok.TokenType.LAST + 1;
+export const OP_MEDIA_AND: number = CssTokenizer.TokenType.LAST + 1;
 
 (() => {
-  actionsBase[CssTok.TokenType.IDENT] = Action.IDENT;
-  actionsBase[CssTok.TokenType.STAR] = Action.SELECTOR_START;
-  actionsBase[CssTok.TokenType.HASH] = Action.SELECTOR_START;
-  actionsBase[CssTok.TokenType.CLASS] = Action.SELECTOR_START;
-  actionsBase[CssTok.TokenType.O_BRK] = Action.SELECTOR_START;
-  actionsBase[CssTok.TokenType.COLON] = Action.SELECTOR_START;
-  actionsBase[CssTok.TokenType.AT] = Action.AT;
-  actionsBase[CssTok.TokenType.C_BRC] = Action.RULE_END;
-  actionsBase[CssTok.TokenType.EOF] = Action.DONE;
-  actionsStyleAttribute[CssTok.TokenType.IDENT] = Action.PROP;
-  actionsStyleAttribute[CssTok.TokenType.EOF] = Action.DONE;
-  actionsSelectorStart[CssTok.TokenType.IDENT] = Action.SELECTOR_NAME;
-  actionsSelectorStart[CssTok.TokenType.STAR] = Action.SELECTOR_ANY;
-  actionsSelectorStart[CssTok.TokenType.HASH] = Action.SELECTOR_ID;
-  actionsSelectorStart[CssTok.TokenType.CLASS] = Action.SELECTOR_CLASS;
-  actionsSelectorStart[CssTok.TokenType.O_BRK] = Action.SELECTOR_ATTR;
-  actionsSelectorStart[CssTok.TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS;
+  actionsBase[CssTokenizer.TokenType.IDENT] = Action.IDENT;
+  actionsBase[CssTokenizer.TokenType.STAR] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.HASH] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.COLON] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.AT] = Action.AT;
+  actionsBase[CssTokenizer.TokenType.C_BRC] = Action.RULE_END;
+  actionsBase[CssTokenizer.TokenType.EOF] = Action.DONE;
+  actionsStyleAttribute[CssTokenizer.TokenType.IDENT] = Action.PROP;
+  actionsStyleAttribute[CssTokenizer.TokenType.EOF] = Action.DONE;
+  actionsSelectorStart[CssTokenizer.TokenType.IDENT] = Action.SELECTOR_NAME;
+  actionsSelectorStart[CssTokenizer.TokenType.STAR] = Action.SELECTOR_ANY;
+  actionsSelectorStart[CssTokenizer.TokenType.HASH] = Action.SELECTOR_ID;
+  actionsSelectorStart[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_CLASS;
+  actionsSelectorStart[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_ATTR;
+  actionsSelectorStart[CssTokenizer.TokenType.COLON] =
+    Action.SELECTOR_PSEUDOCLASS;
 
-  actionsSelector[CssTok.TokenType.GT] = Action.SELECTOR_CHILD;
-  actionsSelector[CssTok.TokenType.PLUS] = Action.SELECTOR_SIBLING;
-  actionsSelector[CssTok.TokenType.TILDE] = Action.SELECTOR_FOLLOWING_SIBLING;
-  actionsSelector[CssTok.TokenType.IDENT] = Action.SELECTOR_NAME_1;
-  actionsSelector[CssTok.TokenType.STAR] = Action.SELECTOR_ANY_1;
-  actionsSelector[CssTok.TokenType.HASH] = Action.SELECTOR_ID_1;
-  actionsSelector[CssTok.TokenType.CLASS] = Action.SELECTOR_CLASS_1;
-  actionsSelector[CssTok.TokenType.O_BRK] = Action.SELECTOR_ATTR_1;
-  actionsSelector[CssTok.TokenType.O_BRC] = Action.SELECTOR_BODY;
-  actionsSelector[CssTok.TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS_1;
-  actionsSelector[CssTok.TokenType.COL_COL] = Action.SELECTOR_PSEUDOELEM;
-  actionsSelector[CssTok.TokenType.COMMA] = Action.SELECTOR_NEXT;
-  actionsSelectorInFunc[CssTok.TokenType.IDENT] = Action.SELECTOR_NAME_1;
-  actionsSelectorInFunc[CssTok.TokenType.STAR] = Action.SELECTOR_ANY_1;
-  actionsSelectorInFunc[CssTok.TokenType.HASH] = Action.SELECTOR_ID_1;
-  actionsSelectorInFunc[CssTok.TokenType.CLASS] = Action.SELECTOR_CLASS_1;
-  actionsSelectorInFunc[CssTok.TokenType.O_BRK] = Action.SELECTOR_ATTR_1;
-  actionsSelectorInFunc[CssTok.TokenType.C_PAR] = Action.DONE;
-  actionsSelectorInFunc[CssTok.TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS_1;
-  actionsSelectorCont[CssTok.TokenType.IDENT] = Action.SELECTOR_NAME;
-  actionsSelectorCont[CssTok.TokenType.STAR] = Action.SELECTOR_ANY;
-  actionsSelectorCont[CssTok.TokenType.HASH] = Action.SELECTOR_ID;
-  actionsSelectorCont[CssTok.TokenType.CLASS] = Action.SELECTOR_CLASS;
-  actionsSelectorCont[CssTok.TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS;
-  actionsSelectorCont[CssTok.TokenType.COL_COL] = Action.SELECTOR_PSEUDOELEM;
-  actionsSelectorCont[CssTok.TokenType.O_BRK] = Action.SELECTOR_ATTR;
-  actionsSelectorCont[CssTok.TokenType.O_BRC] = Action.SELECTOR_BODY;
-  actionsPropVal[CssTok.TokenType.IDENT] = Action.VAL_IDENT;
-  actionsPropVal[CssTok.TokenType.HASH] = Action.VAL_HASH;
-  actionsPropVal[CssTok.TokenType.NUM] = Action.VAL_NUM;
-  actionsPropVal[CssTok.TokenType.INT] = Action.VAL_INT;
-  actionsPropVal[CssTok.TokenType.NUMERIC] = Action.VAL_NUMERIC;
-  actionsPropVal[CssTok.TokenType.STR] = Action.VAL_STR;
-  actionsPropVal[CssTok.TokenType.URL] = Action.VAL_URL;
-  actionsPropVal[CssTok.TokenType.COMMA] = Action.VAL_COMMA;
-  actionsPropVal[CssTok.TokenType.SLASH] = Action.VAL_SLASH;
-  actionsPropVal[CssTok.TokenType.FUNC] = Action.VAL_FUNC;
-  actionsPropVal[CssTok.TokenType.C_PAR] = Action.VAL_C_PAR;
-  actionsPropVal[CssTok.TokenType.SEMICOL] = Action.VAL_END;
-  actionsPropVal[CssTok.TokenType.C_BRC] = Action.VAL_BRC;
-  actionsPropVal[CssTok.TokenType.BANG] = Action.VAL_BANG;
-  actionsPropVal[CssTok.TokenType.PLUS] = Action.VAL_PLUS;
-  actionsPropVal[CssTok.TokenType.EOF] = Action.VAL_FINISH;
-  actionsExprVal[CssTok.TokenType.IDENT] = Action.EXPR_IDENT;
-  actionsExprVal[CssTok.TokenType.NUM] = Action.EXPR_NUM;
-  actionsExprVal[CssTok.TokenType.INT] = Action.EXPR_NUM;
-  actionsExprVal[CssTok.TokenType.NUMERIC] = Action.EXPR_NUMERIC;
-  actionsExprVal[CssTok.TokenType.STR] = Action.EXPR_STR;
-  actionsExprVal[CssTok.TokenType.O_PAR] = Action.EXPR_O_PAR;
-  actionsExprVal[CssTok.TokenType.FUNC] = Action.EXPR_FUNC;
-  actionsExprVal[CssTok.TokenType.BANG] = Action.EXPR_PREFIX;
-  actionsExprVal[CssTok.TokenType.MINUS] = Action.EXPR_PREFIX;
-  actionsExprVal[CssTok.TokenType.DOLLAR] = Action.EXPR_PARAM;
-  actionsExprOp[CssTok.TokenType.IDENT] = Action.EXPR_INFIX_NAME;
-  actionsExprOp[CssTok.TokenType.COMMA] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.GT] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.LT] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.GT_EQ] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.LT_EQ] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.EQ] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.EQ_EQ] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.BANG_EQ] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.AMP_AMP] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.BAR_BAR] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.PLUS] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.MINUS] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.SLASH] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.PERCENT] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.STAR] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.COLON] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.QMARK] = Action.EXPR_INFIX;
-  actionsExprOp[CssTok.TokenType.C_PAR] = Action.EXPR_C_PAR;
-  actionsExprOp[CssTok.TokenType.O_BRC] = Action.EXPR_O_BRC;
-  actionsExprOp[CssTok.TokenType.SEMICOL] = Action.EXPR_SEMICOL;
-  actionsError[CssTok.TokenType.EOF] = Action.DONE;
-  actionsError[CssTok.TokenType.O_BRC] = Action.ERROR_PUSH;
-  actionsError[CssTok.TokenType.C_BRC] = Action.ERROR_POP;
-  actionsError[CssTok.TokenType.O_BRK] = Action.ERROR_PUSH;
-  actionsError[CssTok.TokenType.C_BRK] = Action.ERROR_POP;
-  actionsError[CssTok.TokenType.O_PAR] = Action.ERROR_PUSH;
-  actionsError[CssTok.TokenType.C_PAR] = Action.ERROR_POP;
-  actionsError[CssTok.TokenType.SEMICOL] = Action.ERROR_SEMICOL;
-  actionsErrorDecl[CssTok.TokenType.EOF] = Action.DONE;
-  actionsErrorDecl[CssTok.TokenType.O_BRC] = Action.ERROR_PUSH;
-  actionsErrorDecl[CssTok.TokenType.C_BRC] = Action.ERROR_POP_DECL;
-  actionsErrorDecl[CssTok.TokenType.O_BRK] = Action.ERROR_PUSH;
-  actionsErrorDecl[CssTok.TokenType.C_BRK] = Action.ERROR_POP;
-  actionsErrorDecl[CssTok.TokenType.O_PAR] = Action.ERROR_PUSH;
-  actionsErrorDecl[CssTok.TokenType.C_PAR] = Action.ERROR_POP;
-  actionsErrorDecl[CssTok.TokenType.SEMICOL] = Action.ERROR_SEMICOL;
-  actionsErrorSelector[CssTok.TokenType.EOF] = Action.DONE;
-  actionsErrorSelector[CssTok.TokenType.O_BRC] = Action.ERROR_PUSH;
-  actionsErrorSelector[CssTok.TokenType.C_BRC] = Action.ERROR_POP;
-  actionsErrorSelector[CssTok.TokenType.O_BRK] = Action.ERROR_PUSH;
-  actionsErrorSelector[CssTok.TokenType.C_BRK] = Action.ERROR_POP;
-  actionsErrorSelector[CssTok.TokenType.O_PAR] = Action.ERROR_PUSH;
-  actionsErrorSelector[CssTok.TokenType.C_PAR] = Action.ERROR_POP;
-  priority[CssTok.TokenType.C_PAR] = 0;
-  priority[CssTok.TokenType.COMMA] = 0;
-  priority[CssTok.TokenType.QMARK] = 1;
-  priority[CssTok.TokenType.COLON] = 1;
-  priority[CssTok.TokenType.AMP_AMP] = 2;
-  priority[CssTok.TokenType.BAR_BAR] = 2;
-  priority[CssTok.TokenType.LT] = 3;
-  priority[CssTok.TokenType.GT] = 3;
-  priority[CssTok.TokenType.LT_EQ] = 3;
-  priority[CssTok.TokenType.GT_EQ] = 3;
-  priority[CssTok.TokenType.EQ] = 3;
-  priority[CssTok.TokenType.EQ_EQ] = 3;
-  priority[CssTok.TokenType.BANG_EQ] = 3;
-  priority[CssTok.TokenType.PLUS] = 4;
-  priority[CssTok.TokenType.MINUS] = 4;
-  priority[CssTok.TokenType.STAR] = 5;
-  priority[CssTok.TokenType.SLASH] = 5;
-  priority[CssTok.TokenType.PERCENT] = 5;
-  priority[CssTok.TokenType.EOF] = 6;
+  actionsSelector[CssTokenizer.TokenType.GT] = Action.SELECTOR_CHILD;
+  actionsSelector[CssTokenizer.TokenType.PLUS] = Action.SELECTOR_SIBLING;
+  actionsSelector[CssTokenizer.TokenType.TILDE] =
+    Action.SELECTOR_FOLLOWING_SIBLING;
+  actionsSelector[CssTokenizer.TokenType.IDENT] = Action.SELECTOR_NAME_1;
+  actionsSelector[CssTokenizer.TokenType.STAR] = Action.SELECTOR_ANY_1;
+  actionsSelector[CssTokenizer.TokenType.HASH] = Action.SELECTOR_ID_1;
+  actionsSelector[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_CLASS_1;
+  actionsSelector[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_ATTR_1;
+  actionsSelector[CssTokenizer.TokenType.O_BRC] = Action.SELECTOR_BODY;
+  actionsSelector[CssTokenizer.TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS_1;
+  actionsSelector[CssTokenizer.TokenType.COL_COL] = Action.SELECTOR_PSEUDOELEM;
+  actionsSelector[CssTokenizer.TokenType.COMMA] = Action.SELECTOR_NEXT;
+  actionsSelectorInFunc[CssTokenizer.TokenType.IDENT] = Action.SELECTOR_NAME_1;
+  actionsSelectorInFunc[CssTokenizer.TokenType.STAR] = Action.SELECTOR_ANY_1;
+  actionsSelectorInFunc[CssTokenizer.TokenType.HASH] = Action.SELECTOR_ID_1;
+  actionsSelectorInFunc[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_CLASS_1;
+  actionsSelectorInFunc[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_ATTR_1;
+  actionsSelectorInFunc[CssTokenizer.TokenType.C_PAR] = Action.DONE;
+  actionsSelectorInFunc[CssTokenizer.TokenType.COLON] =
+    Action.SELECTOR_PSEUDOCLASS_1;
+  actionsSelectorCont[CssTokenizer.TokenType.IDENT] = Action.SELECTOR_NAME;
+  actionsSelectorCont[CssTokenizer.TokenType.STAR] = Action.SELECTOR_ANY;
+  actionsSelectorCont[CssTokenizer.TokenType.HASH] = Action.SELECTOR_ID;
+  actionsSelectorCont[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_CLASS;
+  actionsSelectorCont[CssTokenizer.TokenType.COLON] =
+    Action.SELECTOR_PSEUDOCLASS;
+  actionsSelectorCont[CssTokenizer.TokenType.COL_COL] =
+    Action.SELECTOR_PSEUDOELEM;
+  actionsSelectorCont[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_ATTR;
+  actionsSelectorCont[CssTokenizer.TokenType.O_BRC] = Action.SELECTOR_BODY;
+  actionsPropVal[CssTokenizer.TokenType.IDENT] = Action.VAL_IDENT;
+  actionsPropVal[CssTokenizer.TokenType.HASH] = Action.VAL_HASH;
+  actionsPropVal[CssTokenizer.TokenType.NUM] = Action.VAL_NUM;
+  actionsPropVal[CssTokenizer.TokenType.INT] = Action.VAL_INT;
+  actionsPropVal[CssTokenizer.TokenType.NUMERIC] = Action.VAL_NUMERIC;
+  actionsPropVal[CssTokenizer.TokenType.STR] = Action.VAL_STR;
+  actionsPropVal[CssTokenizer.TokenType.URL] = Action.VAL_URL;
+  actionsPropVal[CssTokenizer.TokenType.COMMA] = Action.VAL_COMMA;
+  actionsPropVal[CssTokenizer.TokenType.SLASH] = Action.VAL_SLASH;
+  actionsPropVal[CssTokenizer.TokenType.FUNC] = Action.VAL_FUNC;
+  actionsPropVal[CssTokenizer.TokenType.C_PAR] = Action.VAL_C_PAR;
+  actionsPropVal[CssTokenizer.TokenType.SEMICOL] = Action.VAL_END;
+  actionsPropVal[CssTokenizer.TokenType.C_BRC] = Action.VAL_BRC;
+  actionsPropVal[CssTokenizer.TokenType.BANG] = Action.VAL_BANG;
+  actionsPropVal[CssTokenizer.TokenType.PLUS] = Action.VAL_PLUS;
+  actionsPropVal[CssTokenizer.TokenType.EOF] = Action.VAL_FINISH;
+  actionsExprVal[CssTokenizer.TokenType.IDENT] = Action.EXPR_IDENT;
+  actionsExprVal[CssTokenizer.TokenType.NUM] = Action.EXPR_NUM;
+  actionsExprVal[CssTokenizer.TokenType.INT] = Action.EXPR_NUM;
+  actionsExprVal[CssTokenizer.TokenType.NUMERIC] = Action.EXPR_NUMERIC;
+  actionsExprVal[CssTokenizer.TokenType.STR] = Action.EXPR_STR;
+  actionsExprVal[CssTokenizer.TokenType.O_PAR] = Action.EXPR_O_PAR;
+  actionsExprVal[CssTokenizer.TokenType.FUNC] = Action.EXPR_FUNC;
+  actionsExprVal[CssTokenizer.TokenType.BANG] = Action.EXPR_PREFIX;
+  actionsExprVal[CssTokenizer.TokenType.MINUS] = Action.EXPR_PREFIX;
+  actionsExprVal[CssTokenizer.TokenType.DOLLAR] = Action.EXPR_PARAM;
+  actionsExprOp[CssTokenizer.TokenType.IDENT] = Action.EXPR_INFIX_NAME;
+  actionsExprOp[CssTokenizer.TokenType.COMMA] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.GT] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.LT] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.GT_EQ] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.LT_EQ] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.EQ] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.EQ_EQ] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.BANG_EQ] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.AMP_AMP] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.BAR_BAR] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.PLUS] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.MINUS] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.SLASH] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.PERCENT] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.STAR] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.COLON] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.QMARK] = Action.EXPR_INFIX;
+  actionsExprOp[CssTokenizer.TokenType.C_PAR] = Action.EXPR_C_PAR;
+  actionsExprOp[CssTokenizer.TokenType.O_BRC] = Action.EXPR_O_BRC;
+  actionsExprOp[CssTokenizer.TokenType.SEMICOL] = Action.EXPR_SEMICOL;
+  actionsError[CssTokenizer.TokenType.EOF] = Action.DONE;
+  actionsError[CssTokenizer.TokenType.O_BRC] = Action.ERROR_PUSH;
+  actionsError[CssTokenizer.TokenType.C_BRC] = Action.ERROR_POP;
+  actionsError[CssTokenizer.TokenType.O_BRK] = Action.ERROR_PUSH;
+  actionsError[CssTokenizer.TokenType.C_BRK] = Action.ERROR_POP;
+  actionsError[CssTokenizer.TokenType.O_PAR] = Action.ERROR_PUSH;
+  actionsError[CssTokenizer.TokenType.C_PAR] = Action.ERROR_POP;
+  actionsError[CssTokenizer.TokenType.SEMICOL] = Action.ERROR_SEMICOL;
+  actionsErrorDecl[CssTokenizer.TokenType.EOF] = Action.DONE;
+  actionsErrorDecl[CssTokenizer.TokenType.O_BRC] = Action.ERROR_PUSH;
+  actionsErrorDecl[CssTokenizer.TokenType.C_BRC] = Action.ERROR_POP_DECL;
+  actionsErrorDecl[CssTokenizer.TokenType.O_BRK] = Action.ERROR_PUSH;
+  actionsErrorDecl[CssTokenizer.TokenType.C_BRK] = Action.ERROR_POP;
+  actionsErrorDecl[CssTokenizer.TokenType.O_PAR] = Action.ERROR_PUSH;
+  actionsErrorDecl[CssTokenizer.TokenType.C_PAR] = Action.ERROR_POP;
+  actionsErrorDecl[CssTokenizer.TokenType.SEMICOL] = Action.ERROR_SEMICOL;
+  actionsErrorSelector[CssTokenizer.TokenType.EOF] = Action.DONE;
+  actionsErrorSelector[CssTokenizer.TokenType.O_BRC] = Action.ERROR_PUSH;
+  actionsErrorSelector[CssTokenizer.TokenType.C_BRC] = Action.ERROR_POP;
+  actionsErrorSelector[CssTokenizer.TokenType.O_BRK] = Action.ERROR_PUSH;
+  actionsErrorSelector[CssTokenizer.TokenType.C_BRK] = Action.ERROR_POP;
+  actionsErrorSelector[CssTokenizer.TokenType.O_PAR] = Action.ERROR_PUSH;
+  actionsErrorSelector[CssTokenizer.TokenType.C_PAR] = Action.ERROR_POP;
+  priority[CssTokenizer.TokenType.C_PAR] = 0;
+  priority[CssTokenizer.TokenType.COMMA] = 0;
+  priority[CssTokenizer.TokenType.QMARK] = 1;
+  priority[CssTokenizer.TokenType.COLON] = 1;
+  priority[CssTokenizer.TokenType.AMP_AMP] = 2;
+  priority[CssTokenizer.TokenType.BAR_BAR] = 2;
+  priority[CssTokenizer.TokenType.LT] = 3;
+  priority[CssTokenizer.TokenType.GT] = 3;
+  priority[CssTokenizer.TokenType.LT_EQ] = 3;
+  priority[CssTokenizer.TokenType.GT_EQ] = 3;
+  priority[CssTokenizer.TokenType.EQ] = 3;
+  priority[CssTokenizer.TokenType.EQ_EQ] = 3;
+  priority[CssTokenizer.TokenType.BANG_EQ] = 3;
+  priority[CssTokenizer.TokenType.PLUS] = 4;
+  priority[CssTokenizer.TokenType.MINUS] = 4;
+  priority[CssTokenizer.TokenType.STAR] = 5;
+  priority[CssTokenizer.TokenType.SLASH] = 5;
+  priority[CssTokenizer.TokenType.PERCENT] = 5;
+  priority[CssTokenizer.TokenType.EOF] = 6;
   priority[OP_MEDIA_AND] = 2;
 })();
 
@@ -962,7 +967,7 @@ export class Parser {
 
   constructor(
     public actions: Action[],
-    public tokenizer: CssTok.Tokenizer,
+    public tokenizer: CssTokenizer.Tokenizer,
     public readonly handler: ParserHandler,
     public baseURL: string,
   ) {
@@ -984,7 +989,7 @@ export class Parser {
     return arr;
   }
 
-  valStackReduce(sep: string, token: CssTok.Token): Css.Val {
+  valStackReduce(sep: string, token: CssTokenizer.Token): Css.Val {
     const valStack = this.valStack;
     let index = valStack.length;
     let v;
@@ -1031,21 +1036,21 @@ export class Parser {
     return valStack[0] as Css.Val;
   }
 
-  exprError(mnemonics: string, token: CssTok.Token) {
+  exprError(mnemonics: string, token: CssTokenizer.Token) {
     this.actions = this.propName ? actionsErrorDecl : actionsError;
     this.handler.error(mnemonics, token);
   }
 
-  exprStackReduce(op: number, token: CssTok.Token): boolean {
+  exprStackReduce(op: number, token: CssTokenizer.Token): boolean {
     const valStack = this.valStack;
     const handler = this.handler;
     let val = valStack.pop() as Exprs.Val;
     let val2: Exprs.Val;
     while (true) {
       let tok = valStack.pop();
-      if (op == CssTok.TokenType.C_PAR) {
+      if (op == CssTokenizer.TokenType.C_PAR) {
         const args: Exprs.Val[] = [val];
-        while (tok == CssTok.TokenType.COMMA) {
+        while (tok == CssTokenizer.TokenType.COMMA) {
           args.unshift(valStack.pop());
           tok = valStack.pop();
         }
@@ -1069,11 +1074,11 @@ export class Parser {
               Exprs.makeQualifiedName(name1, name2),
               args,
             );
-            op = CssTok.TokenType.EOF;
+            op = CssTokenizer.TokenType.EOF;
             continue;
           }
         }
-        if (tok == CssTok.TokenType.O_PAR) {
+        if (tok == CssTokenizer.TokenType.O_PAR) {
           if (val.isMediaName()) {
             val = new Exprs.MediaTest(
               handler.getScope(),
@@ -1081,7 +1086,7 @@ export class Parser {
               null,
             );
           }
-          op = CssTok.TokenType.EOF;
+          op = CssTokenizer.TokenType.EOF;
           continue;
         }
       } else {
@@ -1093,9 +1098,9 @@ export class Parser {
       }
       if ((tok as number) < 0) {
         // prefix
-        if (tok == -CssTok.TokenType.BANG) {
+        if (tok == -CssTokenizer.TokenType.BANG) {
           val = new Exprs.Not(handler.getScope(), val);
-        } else if (tok == -CssTok.TokenType.MINUS) {
+        } else if (tok == -CssTokenizer.TokenType.MINUS) {
           val = new Exprs.Negate(handler.getScope(), val);
         } else {
           this.exprError("F_UNEXPECTED_STATE", token);
@@ -1109,53 +1114,53 @@ export class Parser {
         }
         val2 = valStack.pop() as Exprs.Val;
         switch (tok) {
-          case CssTok.TokenType.AMP_AMP:
+          case CssTokenizer.TokenType.AMP_AMP:
             val = new Exprs.And(handler.getScope(), val2, val);
             break;
           case OP_MEDIA_AND:
             val = new Exprs.AndMedia(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.BAR_BAR:
+          case CssTokenizer.TokenType.BAR_BAR:
             val = new Exprs.Or(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.LT:
+          case CssTokenizer.TokenType.LT:
             val = new Exprs.Lt(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.GT:
+          case CssTokenizer.TokenType.GT:
             val = new Exprs.Gt(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.LT_EQ:
+          case CssTokenizer.TokenType.LT_EQ:
             val = new Exprs.Le(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.GT_EQ:
+          case CssTokenizer.TokenType.GT_EQ:
             val = new Exprs.Ge(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.EQ:
-          case CssTok.TokenType.EQ_EQ:
+          case CssTokenizer.TokenType.EQ:
+          case CssTokenizer.TokenType.EQ_EQ:
             val = new Exprs.Eq(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.BANG_EQ:
+          case CssTokenizer.TokenType.BANG_EQ:
             val = new Exprs.Ne(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.PLUS:
+          case CssTokenizer.TokenType.PLUS:
             val = new Exprs.Add(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.MINUS:
+          case CssTokenizer.TokenType.MINUS:
             val = new Exprs.Subtract(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.STAR:
+          case CssTokenizer.TokenType.STAR:
             val = new Exprs.Multiply(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.SLASH:
+          case CssTokenizer.TokenType.SLASH:
             val = new Exprs.Divide(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.PERCENT:
+          case CssTokenizer.TokenType.PERCENT:
             val = new Exprs.Modulo(handler.getScope(), val2, val);
             break;
-          case CssTok.TokenType.COLON:
+          case CssTokenizer.TokenType.COLON:
             if (valStack.length > 1) {
               switch (valStack[valStack.length - 1]) {
-                case CssTok.TokenType.QMARK:
+                case CssTokenizer.TokenType.QMARK:
                   valStack.pop();
                   val = new Exprs.Cond(
                     handler.getScope(),
@@ -1164,7 +1169,7 @@ export class Parser {
                     val,
                   );
                   break;
-                case CssTok.TokenType.O_PAR:
+                case CssTokenizer.TokenType.O_PAR:
                   if (val2.isMediaName()) {
                     val = new Exprs.MediaTest(
                       handler.getScope(),
@@ -1182,14 +1187,14 @@ export class Parser {
               return false;
             }
             break;
-          case CssTok.TokenType.QMARK:
-            if (op != CssTok.TokenType.COLON) {
+          case CssTokenizer.TokenType.QMARK:
+            if (op != CssTokenizer.TokenType.COLON) {
               this.exprError("E_CSS_EXPR_COND", token);
               return false;
             }
 
           // fall through
-          case CssTok.TokenType.O_PAR:
+          case CssTokenizer.TokenType.O_PAR:
             // don't reduce
             valStack.push(val2);
             valStack.push(tok);
@@ -1210,14 +1215,14 @@ export class Parser {
     while (true) {
       const token = this.tokenizer.token();
       switch (token.type) {
-        case CssTok.TokenType.IDENT:
+        case CssTokenizer.TokenType.IDENT:
           arr.push(token.text);
           break;
-        case CssTok.TokenType.PLUS:
+        case CssTokenizer.TokenType.PLUS:
           arr.push("+");
           break;
-        case CssTok.TokenType.NUM:
-        case CssTok.TokenType.INT:
+        case CssTokenizer.TokenType.NUM:
+        case CssTokenizer.TokenType.INT:
           arr.push(token.num);
           break;
         default:
@@ -1234,13 +1239,13 @@ export class Parser {
   private readNthPseudoParams(): number[] | null {
     let hasLeadingPlus = false;
     let token = this.tokenizer.token();
-    if (token.type === CssTok.TokenType.PLUS) {
+    if (token.type === CssTokenizer.TokenType.PLUS) {
       // '+'
       hasLeadingPlus = true;
       this.tokenizer.consume();
       token = this.tokenizer.token();
     } else if (
-      token.type === CssTok.TokenType.IDENT &&
+      token.type === CssTokenizer.TokenType.IDENT &&
       (token.text === "even" || token.text === "odd")
     ) {
       // 'even' or 'odd'
@@ -1248,14 +1253,14 @@ export class Parser {
       return [2, token.text === "odd" ? 1 : 0];
     }
     switch (token.type) {
-      case CssTok.TokenType.NUMERIC:
+      case CssTokenizer.TokenType.NUMERIC:
         if (hasLeadingPlus && token.num < 0) {
           // reject '+-an'
           return null;
         }
 
       // FALLTHROUGH
-      case CssTok.TokenType.IDENT:
+      case CssTokenizer.TokenType.IDENT:
         if (hasLeadingPlus && token.text.charAt(0) === "-") {
           // reject '+-n'
           return null;
@@ -1267,20 +1272,21 @@ export class Parser {
             return null;
           }
           let a = token.text === "-n" ? -1 : 1;
-          if (token.type === CssTok.TokenType.NUMERIC) {
+          if (token.type === CssTokenizer.TokenType.NUMERIC) {
             a = token.num;
           }
           let b = 0;
           this.tokenizer.consume();
           token = this.tokenizer.token();
-          const hasMinusSign = token.type === CssTok.TokenType.MINUS;
-          const hasSign = token.type === CssTok.TokenType.PLUS || hasMinusSign;
+          const hasMinusSign = token.type === CssTokenizer.TokenType.MINUS;
+          const hasSign =
+            token.type === CssTokenizer.TokenType.PLUS || hasMinusSign;
           if (hasSign) {
             // 'an +b', 'an - b'
             this.tokenizer.consume();
             token = this.tokenizer.token();
           }
-          if (token.type === CssTok.TokenType.INT) {
+          if (token.type === CssTokenizer.TokenType.INT) {
             b = token.num;
 
             if (1 / b === 1 / -0) {
@@ -1313,12 +1319,12 @@ export class Parser {
             return null;
           }
           let a = token.text === "-n-" ? -1 : 1;
-          if (token.type === CssTok.TokenType.NUMERIC) {
+          if (token.type === CssTokenizer.TokenType.NUMERIC) {
             a = token.num;
           }
           this.tokenizer.consume();
           token = this.tokenizer.token();
-          if (token.type === CssTok.TokenType.INT) {
+          if (token.type === CssTokenizer.TokenType.INT) {
             if (token.num < 0 || 1 / token.num === 1 / -0) {
               // reject 'an- -b', 'an- -0'
               return null;
@@ -1337,7 +1343,7 @@ export class Parser {
             }
             this.tokenizer.consume();
             return [
-              token.type === CssTok.TokenType.NUMERIC ? token.num : 1,
+              token.type === CssTokenizer.TokenType.NUMERIC ? token.num : 1,
               parseInt(r[1], 10),
             ];
           }
@@ -1350,7 +1356,7 @@ export class Parser {
           }
         }
         return null;
-      case CssTok.TokenType.INT:
+      case CssTokenizer.TokenType.INT:
         if (hasLeadingPlus && (token.precededBySpace || token.num < 0)) {
           return null;
         }
@@ -1432,8 +1438,8 @@ export class Parser {
     const handler = this.handler;
     const tokenizer = this.tokenizer;
     const valStack = this.valStack;
-    let token: CssTok.Token;
-    let token1: CssTok.Token;
+    let token: CssTokenizer.Token;
+    let token1: CssTokenizer.Token;
     let ns: string | null;
     let text: string | null;
     let num: number;
@@ -1448,7 +1454,7 @@ export class Parser {
       switch (this.actions[token.type]) {
         case Action.IDENT:
           // figure out if this is a property assignment or selector
-          if (tokenizer.nthToken(1).type != CssTok.TokenType.COLON) {
+          if (tokenizer.nthToken(1).type != CssTokenizer.TokenType.COLON) {
             // cannot be property assignment
             if (this.isInsidePropertyOnlyRule()) {
               handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
@@ -1462,8 +1468,8 @@ export class Parser {
           token1 = tokenizer.nthToken(2);
           if (
             token1.precededBySpace ||
-            (token1.type != CssTok.TokenType.IDENT &&
-              token1.type != CssTok.TokenType.FUNC)
+            (token1.type != CssTokenizer.TokenType.IDENT &&
+              token1.type != CssTokenizer.TokenType.FUNC)
           ) {
             // cannot be a selector
           } else {
@@ -1479,7 +1485,7 @@ export class Parser {
           continue;
         case Action.PROP:
           // figure out if this is a property assignment or selector
-          if (tokenizer.nthToken(1).type != CssTok.TokenType.COLON) {
+          if (tokenizer.nthToken(1).type != CssTokenizer.TokenType.COLON) {
             // cannot be property assignment
             this.actions = actionsErrorDecl;
             handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
@@ -1507,14 +1513,14 @@ export class Parser {
 
         // fall through
         case Action.SELECTOR_NAME:
-          if (tokenizer.nthToken(1).type == CssTok.TokenType.BAR) {
+          if (tokenizer.nthToken(1).type == CssTokenizer.TokenType.BAR) {
             tokenizer.consume();
             tokenizer.consume();
             ns = this.namespacePrefixToURI[token.text];
             if (ns != null) {
               token = tokenizer.token();
               switch (token.type) {
-                case CssTok.TokenType.IDENT:
+                case CssTokenizer.TokenType.IDENT:
                   handler.tagSelector(ns, token.text);
                   if (parsingFunctionParam) {
                     this.actions = actionsSelectorInFunc;
@@ -1523,7 +1529,7 @@ export class Parser {
                   }
                   tokenizer.consume();
                   break;
-                case CssTok.TokenType.STAR:
+                case CssTokenizer.TokenType.STAR:
                   handler.tagSelector(ns, null);
                   if (parsingFunctionParam) {
                     this.actions = actionsSelectorInFunc;
@@ -1560,12 +1566,12 @@ export class Parser {
 
         // fall through
         case Action.SELECTOR_ANY:
-          if (tokenizer.nthToken(1).type == CssTok.TokenType.BAR) {
+          if (tokenizer.nthToken(1).type == CssTokenizer.TokenType.BAR) {
             tokenizer.consume();
             tokenizer.consume();
             token = tokenizer.token();
             switch (token.type) {
-              case CssTok.TokenType.IDENT:
+              case CssTokenizer.TokenType.IDENT:
                 handler.tagSelector(null, token.text);
                 if (parsingFunctionParam) {
                   this.actions = actionsSelectorInFunc;
@@ -1574,7 +1580,7 @@ export class Parser {
                 }
                 tokenizer.consume();
                 break;
-              case CssTok.TokenType.STAR:
+              case CssTokenizer.TokenType.STAR:
                 handler.tagSelector(null, null);
                 if (parsingFunctionParam) {
                   this.actions = actionsSelectorInFunc;
@@ -1637,7 +1643,7 @@ export class Parser {
           tokenizer.consume();
           token = tokenizer.token();
           pseudoclassType: switch (token.type) {
-            case CssTok.TokenType.IDENT:
+            case CssTokenizer.TokenType.IDENT:
               handler.pseudoclassSelector(token.text, null);
               tokenizer.consume();
               if (parsingFunctionParam) {
@@ -1646,7 +1652,7 @@ export class Parser {
                 this.actions = actionsSelector;
               }
               continue;
-            case CssTok.TokenType.FUNC:
+            case CssTokenizer.TokenType.FUNC:
               text = token.text;
               tokenizer.consume();
               switch (text) {
@@ -1670,7 +1676,7 @@ export class Parser {
                 case "lang":
                 case "href-epub-type":
                   token = tokenizer.token();
-                  if (token.type === CssTok.TokenType.IDENT) {
+                  if (token.type === CssTokenizer.TokenType.IDENT) {
                     params = [token.text];
                     tokenizer.consume();
                     break;
@@ -1692,7 +1698,7 @@ export class Parser {
                   params = this.readPseudoParams();
               }
               token = tokenizer.token();
-              if (token.type == CssTok.TokenType.C_PAR) {
+              if (token.type == CssTokenizer.TokenType.C_PAR) {
                 handler.pseudoclassSelector(text as string, params);
                 tokenizer.consume();
                 if (parsingFunctionParam) {
@@ -1711,7 +1717,7 @@ export class Parser {
           tokenizer.consume();
           token = tokenizer.token();
           switch (token.type) {
-            case CssTok.TokenType.IDENT:
+            case CssTokenizer.TokenType.IDENT:
               handler.pseudoelementSelector(token.text, null);
               if (parsingFunctionParam) {
                 this.actions = actionsSelectorInFunc;
@@ -1720,7 +1726,7 @@ export class Parser {
               }
               tokenizer.consume();
               continue;
-            case CssTok.TokenType.FUNC:
+            case CssTokenizer.TokenType.FUNC:
               text = token.text;
               tokenizer.consume();
               if (text == "nth-fragment") {
@@ -1732,7 +1738,7 @@ export class Parser {
                 params = this.readPseudoParams();
               }
               token = tokenizer.token();
-              if (token.type == CssTok.TokenType.C_PAR) {
+              if (token.type == CssTokenizer.TokenType.C_PAR) {
                 handler.pseudoelementSelector(text as string, params);
                 if (parsingFunctionParam) {
                   this.actions = actionsSelectorInFunc;
@@ -1756,13 +1762,13 @@ export class Parser {
         case Action.SELECTOR_ATTR:
           tokenizer.consume();
           token = tokenizer.token();
-          if (token.type == CssTok.TokenType.IDENT) {
+          if (token.type == CssTokenizer.TokenType.IDENT) {
             text = token.text;
             tokenizer.consume();
-          } else if (token.type == CssTok.TokenType.STAR) {
+          } else if (token.type == CssTokenizer.TokenType.STAR) {
             text = null;
             tokenizer.consume();
-          } else if (token.type == CssTok.TokenType.BAR) {
+          } else if (token.type == CssTokenizer.TokenType.BAR) {
             text = "";
           } else {
             this.actions = actionsErrorSelector;
@@ -1771,7 +1777,7 @@ export class Parser {
             continue;
           }
           token = tokenizer.token();
-          if (token.type == CssTok.TokenType.BAR) {
+          if (token.type == CssTokenizer.TokenType.BAR) {
             ns = text ? this.namespacePrefixToURI[text] : text;
             if (ns == null) {
               this.actions = actionsErrorSelector;
@@ -1781,7 +1787,7 @@ export class Parser {
             }
             tokenizer.consume();
             token = tokenizer.token();
-            if (token.type != CssTok.TokenType.IDENT) {
+            if (token.type != CssTokenizer.TokenType.IDENT) {
               this.actions = actionsErrorSelector;
               handler.error("E_CSS_ATTR_NAME_EXPECTED", token);
               continue;
@@ -1793,22 +1799,22 @@ export class Parser {
             ns = "";
           }
           switch (token.type) {
-            case CssTok.TokenType.EQ:
-            case CssTok.TokenType.TILDE_EQ:
-            case CssTok.TokenType.BAR_EQ:
-            case CssTok.TokenType.HAT_EQ:
-            case CssTok.TokenType.DOLLAR_EQ:
-            case CssTok.TokenType.STAR_EQ:
-            case CssTok.TokenType.COL_COL:
+            case CssTokenizer.TokenType.EQ:
+            case CssTokenizer.TokenType.TILDE_EQ:
+            case CssTokenizer.TokenType.BAR_EQ:
+            case CssTokenizer.TokenType.HAT_EQ:
+            case CssTokenizer.TokenType.DOLLAR_EQ:
+            case CssTokenizer.TokenType.STAR_EQ:
+            case CssTokenizer.TokenType.COL_COL:
               num = token.type;
               tokenizer.consume();
               token = tokenizer.token();
               break;
-            case CssTok.TokenType.C_BRK:
+            case CssTokenizer.TokenType.C_BRK:
               handler.attributeSelector(
                 ns as string,
                 text as string,
-                CssTok.TokenType.EOF,
+                CssTokenizer.TokenType.EOF,
                 null,
               );
               if (parsingFunctionParam) {
@@ -1824,8 +1830,8 @@ export class Parser {
               continue;
           }
           switch (token.type) {
-            case CssTok.TokenType.IDENT:
-            case CssTok.TokenType.STR:
+            case CssTokenizer.TokenType.IDENT:
+            case CssTokenizer.TokenType.STR:
               handler.attributeSelector(
                 ns as string,
                 text as string,
@@ -1840,7 +1846,7 @@ export class Parser {
               handler.error("E_CSS_ATTR_VAL_EXPECTED", token);
               continue;
           }
-          if (token.type != CssTok.TokenType.C_BRK) {
+          if (token.type != CssTokenizer.TokenType.C_BRK) {
             this.actions = actionsErrorSelector;
             handler.error("E_CSS_ATTR", token);
             continue;
@@ -1960,11 +1966,11 @@ export class Parser {
           token = tokenizer.token();
           token1 = tokenizer.nthToken(1);
           if (
-            token.type == CssTok.TokenType.IDENT &&
+            token.type == CssTokenizer.TokenType.IDENT &&
             token.text.toLowerCase() == "important" &&
-            (token1.type == CssTok.TokenType.SEMICOL ||
-              token1.type == CssTok.TokenType.EOF ||
-              token1.type == CssTok.TokenType.C_BRC)
+            (token1.type == CssTokenizer.TokenType.SEMICOL ||
+              token1.type == CssTokenizer.TokenType.EOF ||
+              token1.type == CssTokenizer.TokenType.C_BRC)
           ) {
             tokenizer.consume();
             this.propImportant = true;
@@ -1975,9 +1981,9 @@ export class Parser {
         case Action.VAL_PLUS:
           token1 = tokenizer.nthToken(1);
           switch (token1.type) {
-            case CssTok.TokenType.NUM:
-            case CssTok.TokenType.NUMERIC:
-            case CssTok.TokenType.INT:
+            case CssTokenizer.TokenType.NUM:
+            case CssTokenizer.TokenType.NUMERIC:
+            case CssTokenizer.TokenType.INT:
               if (!token1.precededBySpace) {
                 // Plus before number, ignore
                 tokenizer.consume();
@@ -2023,9 +2029,9 @@ export class Parser {
           continue;
         case Action.EXPR_IDENT:
           token1 = tokenizer.nthToken(1);
-          if (token1.type == CssTok.TokenType.CLASS) {
+          if (token1.type == CssTokenizer.TokenType.CLASS) {
             if (
-              tokenizer.nthToken(2).type == CssTok.TokenType.O_PAR &&
+              tokenizer.nthToken(2).type == CssTokenizer.TokenType.O_PAR &&
               !tokenizer.nthToken(2).precededBySpace
             ) {
               valStack.push(token.text, token1.text, "(");
@@ -2096,7 +2102,10 @@ export class Parser {
         case Action.EXPR_PARAM:
           tokenizer.consume();
           token = tokenizer.token();
-          if (token.type != CssTok.TokenType.INT || token.precededBySpace) {
+          if (
+            token.type != CssTokenizer.TokenType.INT ||
+            token.precededBySpace
+          ) {
             this.exprError("E_CSS_SYNTAX", token);
           } else {
             valStack.push(new Exprs.Param(handler.getScope(), token.num));
@@ -2135,7 +2144,7 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_O_BRC:
-          if (this.exprStackReduce(CssTok.TokenType.C_PAR, token)) {
+          if (this.exprStackReduce(CssTokenizer.TokenType.C_PAR, token)) {
             if (this.propName || this.exprContext == ExprContext.IMPORT) {
               this.exprError("E_CSS_UNEXPECTED_BRC", token);
             } else {
@@ -2152,7 +2161,7 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_SEMICOL:
-          if (this.exprStackReduce(CssTok.TokenType.C_PAR, token)) {
+          if (this.exprStackReduce(CssTokenizer.TokenType.C_PAR, token)) {
             if (this.propName || this.exprContext != ExprContext.IMPORT) {
               this.exprError("E_CSS_UNEXPECTED_SEMICOL", token);
             } else {
@@ -2184,15 +2193,15 @@ export class Parser {
               tokenizer.consume();
               token = tokenizer.token();
               if (
-                token.type == CssTok.TokenType.STR ||
-                token.type == CssTok.TokenType.URL
+                token.type == CssTokenizer.TokenType.STR ||
+                token.type == CssTokenizer.TokenType.URL
               ) {
                 this.importURL = token.text;
                 tokenizer.consume();
                 token = tokenizer.token();
                 if (
-                  token.type == CssTok.TokenType.SEMICOL ||
-                  token.type == CssTok.TokenType.EOF
+                  token.type == CssTokenizer.TokenType.SEMICOL ||
+                  token.type == CssTokenizer.TokenType.EOF
                 ) {
                   this.importReady = true;
                   tokenizer.consume();
@@ -2212,14 +2221,14 @@ export class Parser {
               tokenizer.consume();
               token = tokenizer.token();
               switch (token.type) {
-                case CssTok.TokenType.IDENT:
+                case CssTokenizer.TokenType.IDENT:
                   text = token.text; // Prefix
                   tokenizer.consume();
                   token = tokenizer.token();
                   if (
-                    (token.type == CssTok.TokenType.STR ||
-                      token.type == CssTok.TokenType.URL) &&
-                    tokenizer.nthToken(1).type == CssTok.TokenType.SEMICOL
+                    (token.type == CssTokenizer.TokenType.STR ||
+                      token.type == CssTokenizer.TokenType.URL) &&
+                    tokenizer.nthToken(1).type == CssTokenizer.TokenType.SEMICOL
                   ) {
                     this.namespacePrefixToURI[text] = token.text;
                     tokenizer.consume();
@@ -2227,9 +2236,11 @@ export class Parser {
                     continue;
                   }
                   break;
-                case CssTok.TokenType.STR:
-                case CssTok.TokenType.URL:
-                  if (tokenizer.nthToken(1).type == CssTok.TokenType.SEMICOL) {
+                case CssTokenizer.TokenType.STR:
+                case CssTokenizer.TokenType.URL:
+                  if (
+                    tokenizer.nthToken(1).type == CssTokenizer.TokenType.SEMICOL
+                  ) {
                     this.defaultNamespaceURI = token.text;
                     tokenizer.consume();
                     tokenizer.consume();
@@ -2246,8 +2257,8 @@ export class Parser {
               tokenizer.consume();
               token = tokenizer.token();
               if (
-                token.type == CssTok.TokenType.STR &&
-                tokenizer.nthToken(1).type == CssTok.TokenType.SEMICOL
+                token.type == CssTokenizer.TokenType.STR &&
+                tokenizer.nthToken(1).type == CssTokenizer.TokenType.SEMICOL
               ) {
                 text = token.text.toLowerCase();
                 if (text != "utf-8" && text != "utf-16") {
@@ -2264,7 +2275,7 @@ export class Parser {
             case "-epubx-page-template":
             case "-epubx-define":
             case "-epubx-viewport":
-              if (tokenizer.nthToken(1).type == CssTok.TokenType.O_BRC) {
+              if (tokenizer.nthToken(1).type == CssTokenizer.TokenType.O_BRC) {
                 tokenizer.consume();
                 tokenizer.consume();
                 switch (text) {
@@ -2290,18 +2301,18 @@ export class Parser {
               tokenizer.consume();
               token = tokenizer.token();
               switch (token.type) {
-                case CssTok.TokenType.O_BRC:
+                case CssTokenizer.TokenType.O_BRC:
                   tokenizer.consume();
                   handler.startFootnoteRule(null);
                   this.ruleStack.push(text);
                   handler.startRuleBody();
                   continue;
-                case CssTok.TokenType.COL_COL:
+                case CssTokenizer.TokenType.COL_COL:
                   tokenizer.consume();
                   token = tokenizer.token();
                   if (
-                    token.type == CssTok.TokenType.IDENT &&
-                    tokenizer.nthToken(1).type == CssTok.TokenType.O_BRC
+                    token.type == CssTokenizer.TokenType.IDENT &&
+                    tokenizer.nthToken(1).type == CssTokenizer.TokenType.O_BRC
                   ) {
                     text = token.text;
                     tokenizer.consume();
@@ -2344,7 +2355,7 @@ export class Parser {
             case "left-top":
               tokenizer.consume();
               token = tokenizer.token();
-              if (token.type == CssTok.TokenType.O_BRC) {
+              if (token.type == CssTokenizer.TokenType.O_BRC) {
                 tokenizer.consume();
                 handler.startPageMarginBoxRule(text);
                 this.ruleStack.push(text);
@@ -2368,8 +2379,8 @@ export class Parser {
               continue;
             case "-epubx-flow":
               if (
-                tokenizer.nthToken(1).type == CssTok.TokenType.IDENT &&
-                tokenizer.nthToken(2).type == CssTok.TokenType.O_BRC
+                tokenizer.nthToken(1).type == CssTokenizer.TokenType.IDENT &&
+                tokenizer.nthToken(2).type == CssTokenizer.TokenType.O_BRC
               ) {
                 handler.startFlowRule(tokenizer.nthToken(1).text);
                 tokenizer.consume();
@@ -2388,14 +2399,14 @@ export class Parser {
               let ruleName: string | null = null;
               let rulePseudoName: string | null = null;
               const classes: string[] = [];
-              if (token.type == CssTok.TokenType.IDENT) {
+              if (token.type == CssTokenizer.TokenType.IDENT) {
                 ruleName = token.text;
                 tokenizer.consume();
                 token = tokenizer.token();
               }
               if (
-                token.type == CssTok.TokenType.COLON &&
-                tokenizer.nthToken(1).type == CssTok.TokenType.IDENT
+                token.type == CssTokenizer.TokenType.COLON &&
+                tokenizer.nthToken(1).type == CssTokenizer.TokenType.IDENT
               ) {
                 rulePseudoName = tokenizer.nthToken(1).text;
                 tokenizer.consume();
@@ -2403,10 +2414,10 @@ export class Parser {
                 token = tokenizer.token();
               }
               while (
-                token.type == CssTok.TokenType.FUNC &&
+                token.type == CssTokenizer.TokenType.FUNC &&
                 token.text.toLowerCase() == "class" &&
-                tokenizer.nthToken(1).type == CssTok.TokenType.IDENT &&
-                tokenizer.nthToken(2).type == CssTok.TokenType.C_PAR
+                tokenizer.nthToken(1).type == CssTokenizer.TokenType.IDENT &&
+                tokenizer.nthToken(2).type == CssTokenizer.TokenType.C_PAR
               ) {
                 classes.push(tokenizer.nthToken(1).text);
                 tokenizer.consume();
@@ -2414,7 +2425,7 @@ export class Parser {
                 tokenizer.consume();
                 token = tokenizer.token();
               }
-              if (token.type == CssTok.TokenType.O_BRC) {
+              if (token.type == CssTokenizer.TokenType.O_BRC) {
                 tokenizer.consume();
                 switch (text) {
                   case "-epubx-page-master":
@@ -2493,7 +2504,7 @@ export class Parser {
           }
           if (
             this.errorBrackets.length == 0 &&
-            token.type == CssTok.TokenType.C_BRC
+            token.type == CssTokenizer.TokenType.C_BRC
           ) {
             this.actions = actionsBase;
           }
@@ -2519,14 +2530,14 @@ export class Parser {
             return true;
           }
           if (parsingMediaQuery) {
-            if (this.exprStackReduce(CssTok.TokenType.C_PAR, token)) {
+            if (this.exprStackReduce(CssTokenizer.TokenType.C_PAR, token)) {
               this.result = valStack.pop() as Css.Val;
               return true;
             }
             return false;
           }
           if (parsingFunctionParam) {
-            if (token.type == CssTok.TokenType.INVALID) {
+            if (token.type == CssTokenizer.TokenType.INVALID) {
               handler.error(token.text, token);
             } else {
               handler.error("E_CSS_SYNTAX", token);
@@ -2544,7 +2555,7 @@ export class Parser {
             this.actions !== actionsErrorSelector &&
             this.actions !== actionsErrorDecl
           ) {
-            if (token.type == CssTok.TokenType.INVALID) {
+            if (token.type == CssTokenizer.TokenType.INVALID) {
               handler.error(token.text, token);
             } else {
               handler.error("E_CSS_SYNTAX", token);
@@ -2572,7 +2583,7 @@ export class ErrorHandler extends ParserHandler {
   /**
    * @override
    */
-  error(mnemonics: string, token: CssTok.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token): void {
     throw new Error(mnemonics);
   }
 
@@ -2585,7 +2596,7 @@ export class ErrorHandler extends ParserHandler {
 }
 
 export function parseStylesheet(
-  tokenizer: CssTok.Tokenizer,
+  tokenizer: CssTokenizer.Tokenizer,
   handler: ParserHandler,
   baseURL: string,
   classes: string | null,
@@ -2596,7 +2607,7 @@ export function parseStylesheet(
   let condition: Css.Expr = null;
   if (media) {
     condition = parseMediaQuery(
-      new CssTok.Tokenizer(media, handler),
+      new CssTokenizer.Tokenizer(media, handler),
       handler,
       baseURL,
     );
@@ -2658,7 +2669,7 @@ export function parseStylesheetFromText(
   return Task.handle(
     "parseStylesheetFromText",
     (frame) => {
-      const tok = new CssTok.Tokenizer(text, handler);
+      const tok = new CssTokenizer.Tokenizer(text, handler);
       parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
     },
     (frame, err) => {
@@ -2705,7 +2716,7 @@ export function parseStylesheetFromURL(
 
 export function parseValue(
   scope: Exprs.LexicalScope,
-  tokenizer: CssTok.Tokenizer,
+  tokenizer: CssTokenizer.Tokenizer,
   baseURL: string,
 ): Css.Val {
   const parser = new Parser(
@@ -2719,7 +2730,7 @@ export function parseValue(
 }
 
 export function parseStyleAttribute(
-  tokenizer: CssTok.Tokenizer,
+  tokenizer: CssTokenizer.Tokenizer,
   handler: ParserHandler,
   baseURL: string,
 ): void {
@@ -2728,7 +2739,7 @@ export function parseStyleAttribute(
 }
 
 export function parseMediaQuery(
-  tokenizer: CssTok.Tokenizer,
+  tokenizer: CssTokenizer.Tokenizer,
   handler: ParserHandler,
   baseURL: string,
 ): Css.Expr {
@@ -2777,7 +2788,7 @@ export function evaluateExprToCSS(
       // TODO: where baseURL should come from???
       return parseValue(
         val.scope,
-        new CssTok.Tokenizer(result as string, null),
+        new CssTokenizer.Tokenizer(result as string, null),
         "",
       );
     case "boolean":

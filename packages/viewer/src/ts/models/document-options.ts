@@ -19,8 +19,9 @@
  */
 
 import ko, { Observable } from "knockout";
-import urlParameters from "../stores/url-parameters";
+
 import PageStyle from "./page-style";
+import urlParameters from "../stores/url-parameters";
 import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL() {

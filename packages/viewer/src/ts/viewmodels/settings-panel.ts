@@ -19,12 +19,13 @@
  */
 
 import ko, { Observable, PureComputed } from "knockout";
-import DocumentOptions from "../models/document-options";
+
+import Viewer from "./viewer";
 import PageStyle from "../models/page-style";
 import PageViewMode from "../models/page-view-mode";
 import ViewerOptions from "../models/viewer-options";
+import DocumentOptions from "../models/document-options";
 import keyUtil from "../utils/key-util";
-import Viewer from "./viewer";
 
 type State = {
   viewerOptions: ViewerOptions;

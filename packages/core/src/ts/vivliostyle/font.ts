@@ -20,12 +20,12 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as Exprs from "./exprs";
+import * as CssCascade from "./css-cascade";
+import * as Exprs from "./expressions";
 import * as Logging from "./logging";
 import * as Net from "./net";
 import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as TaskUtil from "./task-util";
 
 export const traitProps: { [key: string]: Css.Val } = {
   "font-style": Css.ident.normal,
@@ -57,12 +57,12 @@ export function fillDefaults(properties: { [key: string]: Css.Val }): void {
 }
 
 export function prepareProperties(
-  properties: CssCasc.ElementStyle,
+  properties: CssCascade.ElementStyle,
   context: Exprs.Context,
 ): { [key: string]: Css.Val } {
   const result = {} as { [key: string]: Css.Val };
   for (const prop in properties) {
-    result[prop] = CssCasc.getProp(properties, prop).evaluate(context, prop);
+    result[prop] = CssCascade.getProp(properties, prop).evaluate(context, prop);
   }
   fillDefaults(result);
   return result;

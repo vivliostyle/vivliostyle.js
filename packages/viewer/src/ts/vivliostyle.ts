@@ -17,33 +17,14 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Profiler, Viewer } from "@vivliostyle/core";
-import vivliostyle from "@vivliostyle/core";
+import Vivliostyle from "@vivliostyle/core";
 
-type Constants = typeof vivliostyle.constants;
-
-export type Vivliostyle = {
-  viewer: Viewer;
-  constants: Constants;
-  profile: Profiler;
-};
-
-class VivliostyleImpl {
-  viewer: null | Viewer;
-  constants: null | Constants;
-  profile: null | Profiler;
-
-  constructor() {
-    this.viewer = null;
-    this.constants = null;
-    this.profile = null;
-  }
-
-  setInstance(vivliostyle: Vivliostyle): void {
-    this.viewer = vivliostyle.viewer;
-    this.constants = vivliostyle.constants;
-    this.profile = vivliostyle.profile;
+declare global {
+  interface Window {
+    Vivliostyle: typeof Vivliostyle;
   }
 }
 
-export default new VivliostyleImpl();
+export default process.env.NODE_ENV === "production"
+  ? Vivliostyle
+  : window.Vivliostyle;

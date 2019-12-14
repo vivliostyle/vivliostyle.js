@@ -19,11 +19,13 @@
  */
 
 import ko, { PureComputed } from "knockout";
+
 import ViewerOptions from "../models/viewer-options";
 import keyUtil from "../utils/key-util";
-import vivliostyle from "../models/vivliostyle";
+import Vivliostyle from "../vivliostyle";
 import SettingsPanel from "./settings-panel";
 import Viewer from "./viewer";
+import { CoreViewer } from "@vivliostyle/core";
 
 const { Keys } = keyUtil;
 
@@ -118,7 +120,7 @@ class Navigation {
       }
       if (
         this.viewerOptions_.renderAllPages() &&
-        this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE
+        this.viewer_.state.status() != Vivliostyle.Constants.ReadyState.COMPLETE
       ) {
         return false;
       }
@@ -134,7 +136,7 @@ class Navigation {
       }
       if (
         this.viewer_.state.pageProgression() ===
-        vivliostyle.constants.PageProgression.LTR
+        Vivliostyle.Constants.PageProgression.LTR
       ) {
         return this.isNavigateToPreviousDisabled();
       } else {
@@ -151,7 +153,7 @@ class Navigation {
       }
       if (
         this.viewer_.state.pageProgression() ===
-        vivliostyle.constants.PageProgression.LTR
+        Vivliostyle.Constants.PageProgression.LTR
       ) {
         return this.isNavigateToNextDisabled();
       } else {
@@ -170,7 +172,7 @@ class Navigation {
       }
       if (
         this.viewerOptions_.renderAllPages() &&
-        this.viewer_.state.status() != vivliostyle.constants.ReadyState.COMPLETE
+        this.viewer_.state.status() != Vivliostyle.Constants.ReadyState.COMPLETE
       ) {
         return true;
       }
@@ -270,7 +272,7 @@ class Navigation {
         setTimeout(() => {
           if (
             this.viewer_.state.status() !=
-              vivliostyle.constants.ReadyState.LOADING &&
+              Vivliostyle.Constants.ReadyState.LOADING &&
             this.viewer_.epage() === epageOld
           ) {
             pageNumberElem.value = pageNumberOld.toString();
@@ -373,7 +375,9 @@ class Navigation {
   zoomIn(): boolean {
     if (!this.isZoomInDisabled()) {
       const zoom = this.viewerOptions_.zoom();
-      this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
+      this.viewerOptions_.zoom(
+        zoom.zoomIn((this.viewer_ as unknown) as CoreViewer.CoreViewer),
+      ); // TODO: test if it's ok to treat viewer_ as CoreViewer
       return true;
     } else {
       return false;
@@ -383,7 +387,9 @@ class Navigation {
   zoomOut(): boolean {
     if (!this.isZoomOutDisabled()) {
       const zoom = this.viewerOptions_.zoom();
-      this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
+      this.viewerOptions_.zoom(
+        zoom.zoomOut((this.viewer_ as unknown) as CoreViewer.CoreViewer),
+      ); // TODO: test if it's ok to treat viewer_ as CoreViewer
       return true;
     } else {
       return false;

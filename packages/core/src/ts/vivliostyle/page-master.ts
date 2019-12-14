@@ -20,10 +20,10 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import * as CssValid from "./cssvalid";
-import * as Exprs from "./exprs";
+import * as CssCascade from "./css-cascade";
+import * as CssParser from "./css-parser";
+import * as CssValidator from "./css-validator";
+import * as Exprs from "./expressions";
 import * as Font from "./font";
 import * as Vtree from "./vtree";
 
@@ -37,7 +37,7 @@ export abstract class PageBox<
   I extends PageBoxInstance = PageBoxInstance<any>
 > {
   // styles specified in the at-rule
-  specified: CssCasc.ElementStyle = {};
+  specified: CssCascade.ElementStyle = {};
   children: PageBox[] = [];
   pageMaster: PageMaster = null;
   index: number = 0;
@@ -108,8 +108,8 @@ export abstract class PageBox<
 export class RootPageBox extends PageBox<RootPageBoxInstance> {
   constructor(scope: Exprs.LexicalScope) {
     super(scope, null, null, [], null);
-    this.specified["width"] = new CssCasc.CascadeValue(Css.fullWidth, 0);
-    this.specified["height"] = new CssCasc.CascadeValue(Css.fullHeight, 0);
+    this.specified["width"] = new CssCascade.CascadeValue(Css.fullWidth, 0);
+    this.specified["height"] = new CssCascade.CascadeValue(Css.fullHeight, 0);
   }
 }
 
@@ -162,17 +162,23 @@ export class PageMaster<
       this._scope = new PageMasterScope(scope, this);
     }
     this.pageMaster = this;
-    this.specified["width"] = new CssCasc.CascadeValue(Css.fullWidth, 0);
-    this.specified["height"] = new CssCasc.CascadeValue(Css.fullHeight, 0);
-    this.specified["wrap-flow"] = new CssCasc.CascadeValue(Css.ident.auto, 0);
-    this.specified["position"] = new CssCasc.CascadeValue(
+    this.specified["width"] = new CssCascade.CascadeValue(Css.fullWidth, 0);
+    this.specified["height"] = new CssCascade.CascadeValue(Css.fullHeight, 0);
+    this.specified["wrap-flow"] = new CssCascade.CascadeValue(
+      Css.ident.auto,
+      0,
+    );
+    this.specified["position"] = new CssCascade.CascadeValue(
       Css.ident.relative,
       0,
     );
-    this.specified["overflow"] = new CssCasc.CascadeValue(Css.ident.visible, 0);
+    this.specified["overflow"] = new CssCascade.CascadeValue(
+      Css.ident.visible,
+      0,
+    );
 
     // Shift 1px to workaround Chrome printing bug
-    // this.specified["top"] = new CssCasc.CascadeValue(new Css.Numeric(-1, "px"), 0);
+    // this.specified["top"] = new CssCascade.CascadeValue(new Css.Numeric(-1, "px"), 0);
   }
 
   /**
@@ -233,7 +239,10 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
     if (name) {
       this.pageMaster.keyMap[name] = this.key;
     }
-    this.specified["wrap-flow"] = new CssCasc.CascadeValue(Css.ident.auto, 0);
+    this.specified["wrap-flow"] = new CssCascade.CascadeValue(
+      Css.ident.auto,
+      0,
+    );
   }
 
   /**
@@ -416,7 +425,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   /**
    * cascaded styles, geometric ones converted to Css.Expr
    */
-  protected cascaded: CssCasc.ElementStyle = {};
+  protected cascaded: CssCascade.ElementStyle = {};
   style: { [key: string]: Css.Val } = {};
   private autoWidth: Exprs.Native = null;
   private autoHeight: Exprs.Native = null;
@@ -530,8 +539,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         altName = this.vertical ? "height" : "width";
       } else {
         const map = this.vertical
-          ? CssCasc.couplingMapVert
-          : CssCasc.couplingMapHor;
+          ? CssCascade.couplingMapVert
+          : CssCascade.couplingMapHor;
         altName = name;
         for (const key in map) {
           altName = altName.replace(key, map[key]);
@@ -946,24 +955,24 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     const regionIds = this.parentInstance
       ? this.parentInstance.getActiveRegions(context)
       : null;
-    const cascMap = CssCasc.flattenCascadedStyle(
+    const cascMap = CssCascade.flattenCascadedStyle(
       this.cascaded,
       context,
       regionIds,
       false,
       null,
     );
-    this.vertical = CssCasc.isVertical(
+    this.vertical = CssCascade.isVertical(
       cascMap,
       context,
       this.parentInstance ? this.parentInstance.vertical : false,
     );
-    this.rtl = CssCasc.isRtl(
+    this.rtl = CssCascade.isRtl(
       cascMap,
       context,
       this.parentInstance ? this.parentInstance.rtl : false,
     );
-    CssCasc.convertToPhysical(
+    CssCascade.convertToPhysical(
       cascMap,
       style,
       this.vertical,
@@ -989,7 +998,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   getProp(context: Exprs.Context, name: string): Css.Val {
     let val = this.style[name];
     if (val) {
-      val = CssParse.evaluateCSSToCSS(context, val, name);
+      val = CssParser.evaluateCSSToCSS(context, val, name);
     }
     return val;
   }
@@ -997,13 +1006,13 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   getPropAsNumber(context: Exprs.Context, name: string): number {
     let val = this.style[name];
     if (val) {
-      val = CssParse.evaluateCSSToCSS(context, val, name);
+      val = CssParser.evaluateCSSToCSS(context, val, name);
     }
     return Css.toNumber(val, context);
   }
 
   getSpecial(context: Exprs.Context, name: string): Css.Val[] {
-    const arr = CssCasc.getSpecial(this.cascaded, name);
+    const arr = CssCascade.getSpecial(this.cascaded, name);
     if (arr) {
       const result = [] as Css.Val[];
       for (let i = 0; i < arr.length; i++) {
@@ -1463,14 +1472,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   }
 
   applyCascadeAndInit(
-    cascade: CssCasc.CascadeInstance,
-    docElementStyle: CssCasc.ElementStyle,
+    cascade: CssCascade.CascadeInstance,
+    docElementStyle: CssCascade.ElementStyle,
   ): void {
     const style = this.cascaded;
     const specified = this.pageBox.specified;
     for (const name in specified) {
-      if (CssCasc.isPropName(name)) {
-        CssCasc.setProp(style, name, CssCasc.getProp(specified, name));
+      if (CssCascade.isPropName(name)) {
+        CssCascade.setProp(style, name, CssCascade.getProp(specified, name));
       }
     }
     if (this.pageBox.pseudoName == userAgentPageMasterPseudo) {
@@ -1490,7 +1499,11 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     cascade.pushRule(this.pageBox.classes, null, style);
     if (style["content"]) {
       style["content"] = style["content"].filterValue(
-        new CssCasc.ContentPropVisitor(cascade, null, cascade.counterResolver),
+        new CssCascade.ContentPropVisitor(
+          cascade,
+          null,
+          cascade.counterResolver,
+        ),
       );
     }
     this.init(cascade.context);
@@ -1627,8 +1640,8 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
    * @override
    */
   applyCascadeAndInit(
-    cascade: CssCasc.CascadeInstance,
-    docElementStyle: CssCasc.ElementStyle,
+    cascade: CssCascade.CascadeInstance,
+    docElementStyle: CssCascade.ElementStyle,
   ): void {
     super.applyCascadeAndInit(cascade, docElementStyle);
 
@@ -1774,13 +1787,13 @@ export class PartitionInstance<
 }
 
 //--------------------- parsing -----------------------
-export class PageBoxParserHandler extends CssParse.SlaveParserHandler
-  implements CssValid.PropertyReceiver {
+export class PageBoxParserHandler extends CssParser.SlaveParserHandler
+  implements CssValidator.PropertyReceiver {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
     public readonly target: PageBox,
-    public readonly validatorSet: CssValid.ValidatorSet,
+    public readonly validatorSet: CssValidator.ValidatorSet,
   ) {
     super(scope, owner, false);
   }
@@ -1815,11 +1828,11 @@ export class PageBoxParserHandler extends CssParse.SlaveParserHandler
    * @override
    */
   simpleProperty(name: string, value: Css.Val, important): void {
-    this.target.specified[name] = new CssCasc.CascadeValue(
+    this.target.specified[name] = new CssCascade.CascadeValue(
       value,
       important
-        ? CssParse.SPECIFICITY_STYLE
-        : CssParse.SPECIFICITY_STYLE_IMPORTANT,
+        ? CssParser.SPECIFICITY_STYLE
+        : CssParser.SPECIFICITY_STYLE_IMPORTANT,
     );
   }
 }
@@ -1827,9 +1840,9 @@ export class PageBoxParserHandler extends CssParse.SlaveParserHandler
 export class PartitionParserHandler extends PageBoxParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
     target: Partition,
-    validatorSet: CssValid.ValidatorSet,
+    validatorSet: CssValidator.ValidatorSet,
   ) {
     super(scope, owner, target, validatorSet);
   }
@@ -1838,13 +1851,16 @@ export class PartitionParserHandler extends PageBoxParserHandler {
 export class PartitionGroupParserHandler extends PageBoxParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
     target: PartitionGroup,
-    validatorSet: CssValid.ValidatorSet,
+    validatorSet: CssValidator.ValidatorSet,
   ) {
     super(scope, owner, target, validatorSet);
-    target.specified["width"] = new CssCasc.CascadeValue(Css.hundredPercent, 0);
-    target.specified["height"] = new CssCasc.CascadeValue(
+    target.specified["width"] = new CssCascade.CascadeValue(
+      Css.hundredPercent,
+      0,
+    );
+    target.specified["height"] = new CssCascade.CascadeValue(
       Css.hundredPercent,
       0,
     );
@@ -1902,9 +1918,9 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
 export class PageMasterParserHandler extends PageBoxParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
     target: PageMaster,
-    validatorSet: CssValid.ValidatorSet,
+    validatorSet: CssValidator.ValidatorSet,
   ) {
     super(scope, owner, target, validatorSet);
   }

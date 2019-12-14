@@ -16,16 +16,16 @@
  *
  */
 
-export { PageProgression, PageSide, ReadyState } from "./vivliostyle/constants";
-export { registerHook, removeHook } from "./vivliostyle/plugin";
-export { Profiler } from "./vivliostyle/profile";
-export { Viewer, PageViewMode, ZoomType } from "./vivliostyle/viewer";
-export { printHTML } from "./vivliostyle/print";
+export * from "./vivliostyle/constants";
+export * from "./vivliostyle/plugin";
+export * from "./vivliostyle/profile";
+export * from "./vivliostyle/core-viewer";
+export * from "./vivliostyle/print";
 
-// leave 'export default' clause for backward compatibility
-import { constants } from "./vivliostyle/constants";
-import { plugin } from "./vivliostyle/plugin";
-import { profile } from "./vivliostyle/profile";
-import { viewer } from "./vivliostyle/viewer";
-import { printHTML } from "./vivliostyle/print";
-export default { constants, plugin, profile, viewer, printHTML };
+// NOTE: leave 'export default' clause for backward compatibility
+// only useful for nonESM browser environment
+// import { constants } from "./vivliostyle/constants";
+// import { plugin } from "./vivliostyle/plugin";
+// import { profile } from "./vivliostyle/profile";
+// import { coreviewer } from "./vivliostyle/core-viewer";
+// export default { constants, plugin, profile, coreviewer };

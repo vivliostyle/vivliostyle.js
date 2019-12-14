@@ -1,3 +1,5 @@
+import Vivliostyle from "@vivliostyle/core";
+
 /*
  * Copyright 2016 Trim-marks Inc.
  *
@@ -16,8 +18,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { PageViewMode as CorePageViewMode } from "@vivliostyle/core/lib/vivliostyle/viewer";
 
 export class PageViewModeInstance {
   toSpreadViewString() {
@@ -78,11 +78,11 @@ const PageViewMode = {
   },
   of(name: string) {
     switch (name) {
-      case CorePageViewMode.SPREAD:
+      case PageViewMode.SPREAD:
         return this.SPREAD;
-      case CorePageViewMode.SINGLE_PAGE:
+      case PageViewMode.SINGLE_PAGE:
         return this.SINGLE_PAGE;
-      case CorePageViewMode.AUTO_SPREAD:
+      case PageViewMode.AUTO_SPREAD:
         return this.AUTO_SPREAD;
       default:
         throw new Error(`Invalid PageViewMode name: ${name}`);

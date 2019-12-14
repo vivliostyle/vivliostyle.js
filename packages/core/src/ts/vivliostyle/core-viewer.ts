@@ -17,17 +17,23 @@
  *
  * @fileoverview Viewer - Vivliostyle Viewer class
  */
-import * as AdaptViewer from "./adaptviewer";
+import * as AdaptiveViewer from "./adaptive-viewer";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Profile from "./profile";
-import { ReadyState } from "./constants";
 
 export interface Payload {
   type: string;
   internal: boolean;
   href: string;
   content: string;
+  cfi: string;
+  first: boolean;
+  last: boolean;
+  epage: unknown;
+  epageCount: number;
+  metadata: unknown;
+  docTitle: string;
 }
 
 const PageProgression = Constants.PageProgression;
@@ -40,7 +46,7 @@ const PageProgression = Constants.PageProgression;
  * - window: Window object. If omitted, current `window` is used.
  * - debug: Debug flag.
  */
-export type ViewerSettings = {
+export type CoreViewerSettings = {
   userAgentRootURL?: string;
   viewportElement: HTMLElement;
   window?: Window;
@@ -62,31 +68,31 @@ export type ViewerSettings = {
  *   is set to auto. default: undefined (means the windows size is used as
  *   paper size).
  */
-export type ViewerOptions = {
+export type CoreViewerOptions = {
   autoResize?: boolean;
   fontSize?: number;
   pageBorderWidth?: number;
   renderAllPages?: boolean;
-  pageViewMode?: PageViewMode;
+  pageViewMode?: AdaptiveViewer.PageViewMode;
   zoom?: number;
   fitToScreen?: boolean;
   defaultPaperSize?: { width: number; height: number };
 };
 
-function getDefaultViewerOptions(): ViewerOptions {
+function getDefaultViewerOptions(): CoreViewerOptions {
   return {
     autoResize: true,
     fontSize: 16,
     pageBorderWidth: 1,
     renderAllPages: true,
-    pageViewMode: PageViewMode.AUTO_SPREAD,
+    pageViewMode: AdaptiveViewer.PageViewMode.AUTO_SPREAD,
     zoom: 1,
     fitToScreen: false,
     defaultPaperSize: undefined,
   };
 }
 
-function convertViewerOptions(options: ViewerOptions): object {
+function convertViewerOptions(options: CoreViewerOptions): object {
   const converted = {};
   Object.keys(options).forEach((key) => {
     const v = options[key];
@@ -118,14 +124,10 @@ function convertViewerOptions(options: ViewerOptions): object {
  *   the style sheet.
  */
 export type DocumentOptions = {
-  documentObject: Document | undefined;
-  fragment: string | undefined;
-  authorStyleSheet:
-    | { url: string | undefined; text: string | undefined }[]
-    | undefined;
-  userStyleSheet:
-    | { url: string | undefined; text: string | undefined }[]
-    | undefined;
+  documentObject?: Document;
+  fragment?: string;
+  authorStyleSheet?: { url?: string; text?: string }[];
+  userStyleSheet?: { url?: string; text?: string }[];
 };
 
 /**
@@ -150,19 +152,19 @@ export type SingleDocumentOptions =
 /**
  * Vivliostyle Viewer class.
  */
-export class Viewer {
+export class CoreViewer {
   private initialized: boolean = false;
-  private viewer_: AdaptViewer.Viewer;
-  private options: ViewerOptions;
+  private adaptViewer_: AdaptiveViewer.AdaptiveViewer;
+  private options: CoreViewerOptions;
   private eventTarget: Base.SimpleEventTarget;
-  readyState: ReadyState;
+  readyState: Constants.ReadyState;
 
   constructor(
-    private readonly settings: ViewerSettings,
-    opt_options?: ViewerOptions,
+    private readonly settings: CoreViewerSettings,
+    opt_options?: CoreViewerOptions,
   ) {
     Constants.setDebug(settings.debug);
-    this.viewer_ = new AdaptViewer.Viewer(
+    this.adaptViewer_ = new AdaptiveViewer.AdaptiveViewer(
       settings["window"] || window,
       settings["viewportElement"],
       "main",
@@ -175,7 +177,7 @@ export class Viewer {
     this.eventTarget = new Base.SimpleEventTarget();
     Object.defineProperty(this, "readyState", {
       get() {
-        return this.viewer_.readyState;
+        return this.adaptViewer_.readyState;
       },
     });
   }
@@ -183,12 +185,12 @@ export class Viewer {
   /**
    * Set ViewerOptions to the viewer.
    */
-  setOptions(options: ViewerOptions) {
+  setOptions(options: CoreViewerOptions) {
     const command = Object.assign(
       { a: "configure" },
       convertViewerOptions(options),
     );
-    this.viewer_.sendCommand(command);
+    this.adaptViewer_.sendCommand(command);
     Object.assign(this.options, options);
   }
 
@@ -237,7 +239,7 @@ export class Viewer {
   loadDocument(
     singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[],
     opt_documentOptions?: DocumentOptions,
-    opt_viewerOptions?: ViewerOptions,
+    opt_viewerOptions?: CoreViewerOptions,
   ) {
     if (!singleDocumentOptions) {
       this.eventTarget.dispatchEvent({
@@ -259,7 +261,7 @@ export class Viewer {
   loadPublication(
     pubUrl: string,
     opt_documentOptions?: DocumentOptions,
-    opt_viewerOptions?: ViewerOptions,
+    opt_viewerOptions?: CoreViewerOptions,
   ) {
     if (!pubUrl) {
       this.eventTarget.dispatchEvent({
@@ -285,7 +287,7 @@ export class Viewer {
       | null,
     pubUrl: string | null,
     opt_documentOptions?: DocumentOptions,
-    opt_viewerOptions?: ViewerOptions,
+    opt_viewerOptions?: CoreViewerOptions,
   ) {
     const documentOptions = opt_documentOptions || {};
 
@@ -318,10 +320,10 @@ export class Viewer {
       convertViewerOptions(this.options),
     );
     if (this.initialized) {
-      this.viewer_.sendCommand(command);
+      this.adaptViewer_.sendCommand(command);
     } else {
       this.initialized = true;
-      this.viewer_.initEmbed(command);
+      this.adaptViewer_.initEmbed(command);
     }
   }
 
@@ -330,7 +332,7 @@ export class Viewer {
    * loaded, returns null.
    */
   getCurrentPageProgression(): Constants.PageProgression | null {
-    return this.viewer_.getCurrentPageProgression();
+    return this.adaptViewer_.getCurrentPageProgression();
   }
 
   private resolveNavigation(nav: Navigation): Navigation {
@@ -353,12 +355,12 @@ export class Viewer {
    */
   navigateToPage(nav: Navigation, opt_epage?: number) {
     if (nav === Navigation.EPAGE) {
-      this.viewer_.sendCommand({
+      this.adaptViewer_.sendCommand({
         a: "moveTo",
         epage: opt_epage,
       });
     } else {
-      this.viewer_.sendCommand({
+      this.adaptViewer_.sendCommand({
         a: "moveTo",
         where: this.resolveNavigation(nav),
       });
@@ -369,7 +371,7 @@ export class Viewer {
    * Navigate to the specified internal URL.
    */
   navigateToInternalUrl(url: string) {
-    this.viewer_.sendCommand({ a: "moveTo", url: url });
+    this.adaptViewer_.sendCommand({ a: "moveTo", url: url });
   }
 
   /**
@@ -377,11 +379,12 @@ export class Viewer {
    */
   isTOCVisible(): boolean | null {
     if (
-      this.viewer_.opfView &&
-      this.viewer_.opfView.opf &&
-      (this.viewer_.opfView.opf.xhtmlToc || this.viewer_.opfView.opf.ncxToc)
+      this.adaptViewer_.opfView &&
+      this.adaptViewer_.opfView.opf &&
+      (this.adaptViewer_.opfView.opf.xhtmlToc ||
+        this.adaptViewer_.opfView.opf.ncxToc)
     ) {
-      return !!this.viewer_.opfView.isTOCVisible();
+      return !!this.adaptViewer_.opfView.isTOCVisible();
     } else {
       return null;
     }
@@ -394,7 +397,7 @@ export class Viewer {
    */
   showTOC(opt_show?: boolean | null, opt_autohide?: boolean) {
     const visibility = opt_show == null ? "toggle" : opt_show ? "show" : "hide";
-    this.viewer_.sendCommand({
+    this.adaptViewer_.sendCommand({
       a: "toc",
       v: visibility,
       autohide: opt_autohide,
@@ -404,18 +407,18 @@ export class Viewer {
   /**
    * Returns zoom factor corresponding to the specified zoom type.
    */
-  queryZoomFactor(type: ZoomType): number {
-    return this.viewer_.queryZoomFactor(type);
+  queryZoomFactor(type: AdaptiveViewer.ZoomType): number {
+    return this.adaptViewer_.queryZoomFactor(type);
   }
 
   getPageSizes(): { width: number; height: number }[] {
-    return this.viewer_.pageSizes;
+    return this.adaptViewer_.pageSizes;
   }
 }
 
 function convertSingleDocumentOptions(
   singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[],
-): AdaptViewer.SingleDocumentParam[] | null {
+): AdaptiveViewer.SingleDocumentParam[] | null {
   function toNumberOrNull(num: any): number | null {
     return typeof num === "number" ? num : null;
   }
@@ -426,13 +429,13 @@ function convertSingleDocumentOptions(
         url: opt,
         startPage: null,
         skipPagesBefore: null,
-      } as AdaptViewer.SingleDocumentParam;
+      } as AdaptiveViewer.SingleDocumentParam;
     } else {
       return {
         url: opt["url"],
         startPage: toNumberOrNull(opt["startPage"]),
         skipPagesBefore: toNumberOrNull(opt["skipPagesBefore"]),
-      } as AdaptViewer.SingleDocumentParam;
+      } as AdaptiveViewer.SingleDocumentParam;
     }
   }
   if (Array.isArray(singleDocumentOptions)) {
@@ -457,14 +460,14 @@ export enum Navigation {
   EPAGE = "epage",
 }
 
-export type ZoomType = AdaptViewer.ZoomType;
-export const ZoomType = AdaptViewer.ZoomType;
+export type ZoomType = AdaptiveViewer.ZoomType;
+export const ZoomType = AdaptiveViewer.ZoomType;
 
-export type PageViewMode = AdaptViewer.PageViewMode;
-export const PageViewMode = AdaptViewer.PageViewMode;
+export type PageViewMode = AdaptiveViewer.PageViewMode;
+export const PageViewMode = AdaptiveViewer.PageViewMode;
 
 export const viewer = {
-  Viewer,
+  CoreViewer,
   PageViewMode,
   ZoomType,
 };

@@ -23,12 +23,12 @@ import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import * as CssProp from "./cssprop";
-import * as CssValid from "./cssvalid";
+import * as CssCascade from "./css-cascade";
+import * as CssParser from "./css-parser";
+import * as CssProp from "./css-prop";
+import * as CssValidator from "./css-validator";
 import * as Display from "./display";
-import * as Exprs from "./exprs";
+import * as Exprs from "./expressions";
 import * as Vtree from "./vtree";
 import { CssStyler, XmlDoc } from "./types";
 
@@ -152,7 +152,7 @@ export class Box {
 
   constructor(
     public readonly context: Exprs.Context,
-    public readonly style: CssCasc.ElementStyle,
+    public readonly style: CssCascade.ElementStyle,
     public readonly offset: number,
     public readonly isRoot: boolean,
     public readonly flowChunk: Vtree.FlowChunk,
@@ -329,7 +329,7 @@ export class BoxStack {
    *     element is specified a new `flow-into` value)
    */
   push(
-    style: CssCasc.ElementStyle,
+    style: CssCascade.ElementStyle,
     offset: number,
     isRoot: boolean,
     newFlowChunk?: Vtree.FlowChunk,
@@ -447,16 +447,16 @@ export class BoxStack {
 
 export class Styler implements AbstractStyler {
   root: Element;
-  cascadeHolder: CssCasc.Cascade;
+  cascadeHolder: CssCascade.Cascade;
   last: Node;
-  rootStyle = {} as CssCasc.ElementStyle;
-  styleMap: { [key: string]: CssCasc.ElementStyle } = {};
+  rootStyle = {} as CssCascade.ElementStyle;
+  styleMap: { [key: string]: CssCascade.ElementStyle } = {};
   flows = {} as { [key: string]: Vtree.Flow };
   flowChunks = [] as Vtree.FlowChunk[];
   flowListener: FlowListener = null;
   flowToReach: string | null = null;
   idToReach: string | null = null;
-  cascade: CssCasc.CascadeInstance;
+  cascade: CssCascade.CascadeInstance;
   offsetMap: SlipMap;
   primary: boolean = true;
   primaryStack = [] as boolean[];
@@ -469,13 +469,13 @@ export class Styler implements AbstractStyler {
 
   constructor(
     public readonly xmldoc: XmlDoc.XMLDocHolder,
-    cascade: CssCasc.Cascade,
+    cascade: CssCascade.Cascade,
     public readonly scope: Exprs.LexicalScope,
     public readonly context: Exprs.Context,
     public readonly primaryFlows: { [key: string]: boolean },
-    public readonly validatorSet: CssValid.ValidatorSet,
-    public readonly counterListener: CssCasc.CounterListener,
-    counterResolver: CssCasc.CounterResolver,
+    public readonly validatorSet: CssValidator.ValidatorSet,
+    public readonly counterListener: CssCascade.CounterListener,
+    counterResolver: CssCascade.CounterResolver,
   ) {
     this.root = xmldoc.root;
     this.cascadeHolder = cascade;
@@ -508,8 +508,8 @@ export class Styler implements AbstractStyler {
   }
 
   hasProp(
-    style: CssCasc.ElementStyle,
-    map: CssValid.ValueMap,
+    style: CssCascade.ElementStyle,
+    map: CssValidator.ValueMap,
     name: string,
   ): boolean {
     const cascVal = style[name];
@@ -517,8 +517,8 @@ export class Styler implements AbstractStyler {
   }
 
   transferPropsToRoot(
-    srcStyle: CssCasc.ElementStyle,
-    map: CssValid.ValueMap,
+    srcStyle: CssCascade.ElementStyle,
+    map: CssValidator.ValueMap,
   ): void {
     for (const pname in map) {
       const cascval = srcStyle[pname];
@@ -528,9 +528,9 @@ export class Styler implements AbstractStyler {
       } else {
         const val = map[pname];
         if (val) {
-          this.rootStyle[pname] = new CssCasc.CascadeValue(
+          this.rootStyle[pname] = new CssCascade.CascadeValue(
             val,
-            CssParse.SPECIFICITY_AUTHOR,
+            CssParser.SPECIFICITY_AUTHOR,
           );
         }
       }
@@ -542,7 +542,10 @@ export class Styler implements AbstractStyler {
    * level to this.rootStyle.
    * @param elemStyle (source) element style
    */
-  postprocessTopStyle(elemStyle: CssCasc.ElementStyle, isBody: boolean): void {
+  postprocessTopStyle(
+    elemStyle: CssCascade.ElementStyle,
+    isBody: boolean,
+  ): void {
     ["writing-mode", "direction"].forEach((propName) => {
       if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
         // Copy it over, but keep it at the root element as well.
@@ -613,7 +616,7 @@ export class Styler implements AbstractStyler {
     }
   }
 
-  getTopContainerStyle(): CssCasc.ElementStyle {
+  getTopContainerStyle(): CssCascade.ElementStyle {
     let offset = 0;
     while (!this.bodyReached) {
       offset += 5000;
@@ -624,13 +627,13 @@ export class Styler implements AbstractStyler {
     return this.rootStyle;
   }
 
-  getAttrStyle(elem: Element): CssCasc.ElementStyle {
+  getAttrStyle(elem: Element): CssCascade.ElementStyle {
     // skip cases in which elements for XML other than HTML or SVG
     // have 'style' attribute not for CSS declaration
     if ((elem as any).style instanceof CSSStyleDeclaration) {
       const styleAttrValue = elem.getAttribute("style");
       if (styleAttrValue) {
-        return CssCasc.parseStyleAttribute(
+        return CssCascade.parseStyleAttribute(
           this.scope,
           this.validatorSet,
           this.xmldoc.url,
@@ -638,7 +641,7 @@ export class Styler implements AbstractStyler {
         );
       }
     }
-    return {} as CssCasc.ElementStyle;
+    return {} as CssCascade.ElementStyle;
   }
 
   /**
@@ -660,7 +663,7 @@ export class Styler implements AbstractStyler {
     if (offset < rootOffset) {
       const rootStyle = this.getStyle(this.root, false);
       Asserts.assert(rootStyle);
-      const flowName = CssCasc.getProp(rootStyle, "flow-into");
+      const flowName = CssCascade.getProp(rootStyle, "flow-into");
       const flowNameStr = flowName
         ? flowName.evaluate(context, "flow-into").toString()
         : "body";
@@ -763,7 +766,7 @@ export class Styler implements AbstractStyler {
 
   private encounteredFlowElement(
     flowName: string,
-    style: CssCasc.ElementStyle,
+    style: CssCascade.ElementStyle,
     elem: Element,
     startOffset: number,
   ): Vtree.FlowChunk {
@@ -1014,7 +1017,7 @@ export class Styler implements AbstractStyler {
   /**
    * @override
    */
-  getStyle(element: Element, deep: boolean): CssCasc.ElementStyle {
+  getStyle(element: Element, deep: boolean): CssCascade.ElementStyle {
     let offset = this.xmldoc.getElementOffset(element);
     const key = `e${offset}`;
     if (deep) {

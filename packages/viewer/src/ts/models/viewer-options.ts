@@ -22,22 +22,8 @@ import ko, { Observable } from "knockout";
 import urlParameters from "../stores/url-parameters";
 import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions, { FitToScreen } from "./zoom-options";
-import { ViewerOptions as CoreViewerOptions } from "@vivliostyle/core/lib/vivliostyle/viewer";
-
-type Modify<T, R> = Omit<T, keyof R> & R;
-type Resolved<T> = T extends Observable<infer R> ? R : T;
-type ResolvedObject<T> = {
-  [k in keyof T]: Resolved<T[k]>;
-};
-type ResolvedOptions =
-  | Modify<
-      ResolvedObject<Options>,
-      {
-        pageViewMode: string;
-        zoom: number;
-      }
-    >
-  | { fitToScreen: null | boolean };
+import { CoreViewerOptions } from "@vivliostyle/core";
+import { AdaptivePageViewMode } from "@vivliostyle/core/lib/vivliostyle/adaptive-viewer";
 
 type Options = {
   renderAllPages: Observable<unknown>;
@@ -174,7 +160,7 @@ class ViewerOptions {
     return {
       renderAllPages: this.renderAllPages() as boolean,
       fontSize: Number(this.fontSize()),
-      pageViewMode: this.pageViewMode().toString(),
+      pageViewMode: this.pageViewMode().toString() as AdaptivePageViewMode,
       zoom: this.zoom().zoom,
       fitToScreen: this.zoom().fitToScreen,
     };

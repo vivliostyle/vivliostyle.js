@@ -18,8 +18,6 @@
  * @fileoverview LayoutUtil - Utilities related to layout.
  */
 import * as Break from "./break";
-import * as BreakPosition from "./breakposition";
-import * as LayoutImpl from "./layout";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
@@ -328,120 +326,5 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       }
       return Task.newResult(true);
     });
-  }
-}
-
-/**
- * Represents a "pseudo"-column nested inside a real column.
- * This class is created to handle parallel fragmented flows (e.g. table columns
- * in a single table row). A pseudo-column behaves in the same way as the
- * original column, sharing its properties. Property changes on the
- * pseudo-column are not propagated to the original column. The LayoutContext of
- * the original column is also cloned and used by the pseudo-column, not to
- * propagate state changes of the LayoutContext caused by the pseudo-column.
- * @param column The original (parent) column
- * @param viewRoot Root element for the pseudo-column, i.e., the root of the
- *     fragmented flow.
- * @param parentNodeContext A NodeContext generating this PseudoColumn
- */
-export class PseudoColumn {
-  startNodeContexts: Vtree.NodeContext[] = [];
-  private column: Layout.Column;
-
-  constructor(
-    column: Layout.Column,
-    viewRoot: Element,
-    parentNodeContext: Vtree.NodeContext,
-  ) {
-    this.column = Object.create(column) as Layout.Column;
-    this.column.element = viewRoot;
-    this.column.layoutContext = column.layoutContext.clone();
-    this.column.stopAtOverflow = false;
-    this.column.flowRootFormattingContext = parentNodeContext.formattingContext;
-    this.column.pseudoParent = column;
-    const parentClonedPaddingBorder = this.column.calculateClonedPaddingBorder(
-      parentNodeContext,
-    );
-    this.column.footnoteEdge =
-      this.column.footnoteEdge - parentClonedPaddingBorder;
-    const pseudoColumn = this;
-    this.column.openAllViews = function(position) {
-      return LayoutImpl.Column.prototype.openAllViews
-        .call(this, position)
-        .thenAsync((result) => {
-          pseudoColumn.startNodeContexts.push(result.copy());
-          return Task.newResult(result);
-        });
-    };
-  }
-
-  /**
-   * @param chunkPosition starting position.
-   * @return holding end position.
-   */
-  layout(
-    chunkPosition: Vtree.ChunkPosition,
-    leadingEdge: boolean,
-  ): Task.Result<Vtree.ChunkPosition> {
-    return this.column.layout(chunkPosition, leadingEdge);
-  }
-
-  findAcceptableBreakPosition(
-    allowBreakAtStartPosition: boolean,
-  ): Layout.BreakPositionAndNodeContext {
-    const p = this.column.findAcceptableBreakPosition();
-    if (allowBreakAtStartPosition) {
-      const startNodeContext = this.startNodeContexts[0].copy();
-      const bp = new BreakPosition.EdgeBreakPosition(
-        startNodeContext,
-        null,
-        startNodeContext.overflow,
-        0,
-      );
-      bp.findAcceptableBreak(this.column, 0);
-      if (!p.nodeContext) {
-        return { breakPosition: bp, nodeContext: startNodeContext };
-      }
-    }
-    return p;
-  }
-
-  /**
-   * @return holing true
-   */
-  finishBreak(
-    nodeContext: Vtree.NodeContext,
-    forceRemoveSelf: boolean,
-    endOfColumn: boolean,
-  ): Task.Result<boolean> {
-    return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfColumn);
-  }
-
-  doFinishBreakOfFragmentLayoutConstraints(positionAfter: Vtree.NodeContext) {
-    this.column.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
-  }
-
-  isStartNodeContext(nodeContext: Vtree.NodeContext): boolean {
-    const startNodeContext = this.startNodeContexts[0];
-    return (
-      startNodeContext.viewNode === nodeContext.viewNode &&
-      startNodeContext.after === nodeContext.after &&
-      startNodeContext.offsetInNode === nodeContext.offsetInNode
-    );
-  }
-
-  isLastAfterNodeContext(nodeContext: Vtree.NodeContext): boolean {
-    return VtreeImpl.isSameNodePosition(
-      nodeContext.toNodePosition(),
-      this.column.lastAfterPosition,
-    );
-  }
-
-  getColumnElement(): Element {
-    return this.column.element;
-  }
-
-  getColumn(): Layout.Column {
-    return this.column;
   }
 }

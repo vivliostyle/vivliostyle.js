@@ -15,11 +15,11 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_cssparse from "../../../src/ts/vivliostyle/cssparse";
-import * as adapt_csstok from "../../../src/ts/vivliostyle/csstok";
+import * as adapt_cssparse from "../../../src/ts/vivliostyle/css-parser";
+import * as adapt_csstok from "../../../src/ts/vivliostyle/css-tokenizer";
 import * as adapt_task from "../../../src/ts/vivliostyle/task";
 
-describe("cssparse", function() {
+describe("css-parser", function() {
   describe("Parser", function() {
     var handler = new adapt_cssparse.ParserHandler(null);
 

@@ -16,9 +16,9 @@
  */
 
 import * as adapt_base from "../../../src/ts/vivliostyle/base";
-import * as adapt_xmldoc from "../../../src/ts/vivliostyle/xmldoc";
+import * as adapt_xmldoc from "../../../src/ts/vivliostyle/xml-doc";
 
-describe("xmldoc", function() {
+describe("xml-doc", function() {
   describe("XMLDocHolder", function() {
     var url = "foobar";
 

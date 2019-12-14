@@ -18,9 +18,9 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssStyler from "./cssstyler";
-import * as Exprs from "./exprs";
+import * as CssCascade from "./css-cascade";
+import * as CssStyler from "./css-styler";
+import * as Exprs from "./expressions";
 import * as Vtree from "./vtree";
 import { PseudoElement } from "./types";
 
@@ -64,7 +64,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
 
   constructor(
     public readonly element: Element,
-    public style: CssCasc.ElementStyle,
+    public style: CssCascade.ElementStyle,
     public styler: CssStyler.AbstractStyler,
     public readonly context: Exprs.Context,
     public readonly exprContentListener: Vtree.ExprContentListener,
@@ -73,14 +73,14 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   /**
    * @override
    */
-  getStyle(element: Element, deep: boolean): CssCasc.ElementStyle {
+  getStyle(element: Element, deep: boolean): CssCascade.ElementStyle {
     const pseudoName = getPseudoName(element);
     if (this.styler && pseudoName && pseudoName.match(/after$/)) {
       this.style = this.styler.getStyle(this.element, true);
       this.styler = null;
     }
-    const pseudoMap = CssCasc.getStyleMap(this.style, "_pseudos");
-    const style = pseudoMap[pseudoName] || ({} as CssCasc.ElementStyle);
+    const pseudoMap = CssCascade.getStyleMap(this.style, "_pseudos");
+    const style = pseudoMap[pseudoName] || ({} as CssCascade.ElementStyle);
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
       let nest = 1;
       let r: RegExpMatchArray;
@@ -89,7 +89,10 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
       } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {
         nest = (r[1] as any) - 0;
       }
-      style["x-first-pseudo"] = new CssCasc.CascadeValue(new Css.Int(nest), 0);
+      style["x-first-pseudo"] = new CssCascade.CascadeValue(
+        new Css.Int(nest),
+        0,
+      );
     }
     return style;
   }

@@ -16,9 +16,9 @@
  */
 
 import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as vivliostyle_pagefloat from "../../../src/ts/vivliostyle/pagefloats";
+import * as vivliostyle_pagefloat from "../../../src/ts/vivliostyle/page-floats";
 
-describe("pagefloats", function() {
+describe("page-floats", function() {
   var module = vivliostyle_pagefloat;
   var FloatReference = module.FloatReference;
   var PageFloat = module.PageFloat;

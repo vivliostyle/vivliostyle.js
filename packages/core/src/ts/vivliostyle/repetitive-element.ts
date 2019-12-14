@@ -19,22 +19,22 @@
  * by repeat-on-break property.
  */
 import * as Asserts from "./asserts";
-import * as LayoutHelper from "./layouthelper";
-import * as LayoutProcessor from "./layoutprocessor";
-import * as LayoutRetryers from "./layoutretryers";
-import * as LayoutUtil from "./layoututil";
+import * as LayoutHelper from "./layout-helper";
+import * as LayoutProcessor from "./layout-processor";
+import * as LayoutRetryers from "./layout-retryers";
+import * as LayoutUtil from "./layout-util";
 import * as Plugin from "./plugin";
-import * as Selectors from "./selectors";
 import * as Shared from "./shared";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
+import * as Layout from "./layout";
 import {
-  FormattingContextType,
-  FragmentLayoutConstraintType,
-  Layout,
   RepetitiveElement,
+  Layout as LayoutType,
   Table,
   Vtree,
+  FormattingContextType,
+  FragmentLayoutConstraintType,
 } from "./types";
 
 export class RepetitiveElementsOwnerFormattingContext
@@ -179,7 +179,7 @@ export class RepetitiveElements
     this.footerViewNode = nodeContext.viewNode as Element;
   }
 
-  updateHeight(column: Layout.Column) {
+  updateHeight(column: LayoutType.Column) {
     if (this.headerViewNode) {
       this.headerHeight = LayoutHelper.getElementHeight(
         this.headerViewNode,
@@ -207,7 +207,7 @@ export class RepetitiveElements
   appendHeaderToFragment(
     rootNodeContext: Vtree.NodeContext,
     firstChild: Node | null,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<boolean> {
     if (!this.headerNodePosition || this.isSkipHeader) {
       return Task.newResult(true);
@@ -223,7 +223,7 @@ export class RepetitiveElements
   appendFooterToFragment(
     rootNodeContext: Vtree.NodeContext,
     firstChild: Node | null,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<boolean> {
     if (!this.footerNodePosition || this.isSkipFooter) {
       return Task.newResult(true);
@@ -243,13 +243,13 @@ export class RepetitiveElements
     nodePosition: Vtree.NodePosition,
     rootNodeContext: Vtree.NodeContext,
     firstChild: Node | null,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<boolean> {
     const doc = rootNodeContext.viewNode.ownerDocument;
     const rootViewNode = rootNodeContext.viewNode as Element;
     const viewRoot = doc.createElement("div");
     rootViewNode.appendChild(viewRoot);
-    const pseudoColumn = new LayoutUtil.PseudoColumn(
+    const pseudoColumn = new Layout.PseudoColumn(
       column,
       viewRoot,
       rootNodeContext,
@@ -458,7 +458,7 @@ export class RepetitiveElements
 /**
  * @abstract
  */
-export abstract class LayoutEntireBlock implements Layout.LayoutMode {
+export abstract class LayoutEntireBlock implements LayoutType.LayoutMode {
   constructor(
     public formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   ) {}
@@ -468,13 +468,13 @@ export abstract class LayoutEntireBlock implements Layout.LayoutMode {
    */
   abstract doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext>;
 
   /**
    * @override
    */
-  accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean {
+  accept(nodeContext: Vtree.NodeContext, column: LayoutType.Column): boolean {
     return !!nodeContext;
   }
 
@@ -484,7 +484,7 @@ export abstract class LayoutEntireBlock implements Layout.LayoutMode {
   postLayout(
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
     accepted: boolean,
   ): boolean {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
@@ -502,7 +502,7 @@ export abstract class LayoutEntireBlock implements Layout.LayoutMode {
 /**
  * @abstract
  */
-export abstract class LayoutFragmentedBlock implements Layout.LayoutMode {
+export abstract class LayoutFragmentedBlock implements LayoutType.LayoutMode {
   constructor(
     public formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   ) {}
@@ -512,13 +512,13 @@ export abstract class LayoutFragmentedBlock implements Layout.LayoutMode {
    */
   abstract doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext>;
 
   /**
    * @override
    */
-  accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean {
+  accept(nodeContext: Vtree.NodeContext, column: LayoutType.Column): boolean {
     return true;
   }
 
@@ -528,7 +528,7 @@ export abstract class LayoutFragmentedBlock implements Layout.LayoutMode {
   postLayout(
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
     accepted: boolean,
   ): boolean {
     return accepted;
@@ -548,7 +548,7 @@ export class LayoutEntireOwnerBlock extends LayoutEntireBlock {
    */
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext> {
     // FIXME: LayoutEntireBlock.prototype.doLayout is undefined because it's abstract method.
     //        Probably, removing this call is ok.
@@ -559,7 +559,7 @@ export class LayoutEntireOwnerBlock extends LayoutEntireBlock {
   /**
    * @override
    */
-  accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean {
+  accept(nodeContext: Vtree.NodeContext, column: LayoutType.Column): boolean {
     return false;
   }
 }
@@ -577,7 +577,7 @@ export class LayoutFragmentedOwnerBlock extends LayoutFragmentedBlock {
    */
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext> {
     if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
       column.fragmentLayoutConstraints.unshift(
@@ -605,7 +605,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
   allowLayout(
     nodeContext: Vtree.NodeContext,
     overflownNodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): boolean {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
@@ -646,7 +646,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
     allowed: boolean,
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ) {
     const repetitiveElements = this.getRepetitiveElements();
     if (!repetitiveElements) {
@@ -667,7 +667,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
   /** @override */
   finishBreak(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<boolean> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       this.nodeContext.formattingContext,
@@ -696,7 +696,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
   }
 
   /** @override */
-  equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
+  equalsTo(constraint: LayoutType.FragmentLayoutConstraint): boolean {
     if (!(constraint instanceof RepetitiveElementsOwnerLayoutConstraint)) {
       return false;
     }
@@ -727,7 +727,7 @@ export class RepetitiveElementsOwnerLayoutRetryer extends LayoutRetryers.Abstrac
   /**
    * @override
    */
-  resolveLayoutMode(nodeContext: Vtree.NodeContext): Layout.LayoutMode {
+  resolveLayoutMode(nodeContext: Vtree.NodeContext): LayoutType.LayoutMode {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (
       !nodeContext.belongsTo(this.formattingContext) &&
@@ -754,7 +754,7 @@ export class RepetitiveElementsOwnerLayoutRetryer extends LayoutRetryers.Abstrac
 export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   constructor(
     public readonly formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
-    public readonly column: Layout.Column,
+    public readonly column: LayoutType.Column,
   ) {
     super();
   }
@@ -831,7 +831,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
 export class FragmentedBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   constructor(
     public readonly formattingContext: RepetitiveElementsOwnerFormattingContext,
-    public readonly column: Layout.Column,
+    public readonly column: LayoutType.Column,
   ) {
     super();
   }
@@ -842,7 +842,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
   implements LayoutProcessor.LayoutProcessor {
   layout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
     leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext> {
     if (column.isFloatNodeContext(nodeContext)) {
@@ -894,7 +894,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
 
   doInitialLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
@@ -908,7 +908,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
 
   private layoutEntireBlock(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
@@ -923,14 +923,14 @@ export class RepetitiveElementsOwnerLayoutProcessor
 
   doLayout(
     nodeContext: Vtree.NodeContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
     );
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("doLayout");
     const cont = column.layoutContext.nextInTree(nodeContext, false);
-    Selectors.processAfterIfContinues(cont, column).then((resNodeContext) => {
+    Layout.processAfterIfContinues(cont, column).then((resNodeContext) => {
       let nextNodeContext = resNodeContext;
       frame
         .loopWithFrame((loopFrame) => {
@@ -986,7 +986,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
    * @override
    */
   finishBreak(
-    column: Layout.Column,
+    column: LayoutType.Column,
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean,
@@ -1004,7 +1004,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
    * @override
    */
   clearOverflownViewNodes(
-    column: Layout.Column,
+    column: LayoutType.Column,
     parentNodeContext: Vtree.NodeContext,
     nodeContext: Vtree.NodeContext,
     removeSelf: boolean,
@@ -1039,7 +1039,7 @@ function eachAncestorNodeContext(
 
 export function appendHeaderToAncestors(
   nodeContext: Vtree.NodeContext,
-  column: Layout.Column,
+  column: LayoutType.Column,
 ): void {
   if (!nodeContext) {
     return;
@@ -1060,7 +1060,7 @@ export function appendHeaderToAncestors(
 export function appendHeader(
   formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   nodeContext: Vtree.NodeContext,
-  column: Layout.Column,
+  column: LayoutType.Column,
 ): Task.Result<boolean> {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
@@ -1080,7 +1080,7 @@ export function appendHeader(
 export function appendFooter(
   formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   nodeContext: Vtree.NodeContext,
-  column: Layout.Column,
+  column: LayoutType.Column,
 ): Task.Result<boolean> {
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {

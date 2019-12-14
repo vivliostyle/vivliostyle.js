@@ -16,23 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CssCasc - CSS Cascade.
+ * @fileoverview CssCascade - CSS Cascade.
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
-import * as CssParse from "./cssparse";
-import * as CssProp from "./cssprop";
-import * as CssTok from "./csstok";
-import * as CssValid from "./cssvalid";
-import * as Exprs from "./exprs";
+import * as CssParser from "./css-parser";
+import * as CssProp from "./css-prop";
+import * as CssTokenizer from "./css-tokenizer";
+import * as CssValidator from "./css-validator";
+import * as Exprs from "./expressions";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssCasc } from "./types";
+import { CssCascade } from "./types";
 
-export interface ElementStyle extends CssCasc.ElementStyle {}
+export interface ElementStyle extends CssCascade.ElementStyle {}
 
 export const inheritedProps = {
   azimuth: true,
@@ -270,7 +270,7 @@ export class CascadeValue {
   }
 
   evaluate(context: Exprs.Context, propName: string): Css.Val {
-    return CssParse.evaluateCSSToCSS(context, this.value, propName);
+    return CssParser.evaluateCSSToCSS(context, this.value, propName);
   }
 
   isEnabled(context: Exprs.Context): boolean {
@@ -568,7 +568,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
    */
   visitExpr(expr: Css.Expr): Css.Val {
     if (this.propName == "font-size") {
-      const val = CssParse.evaluateCSSToCSS(this.context, expr, this.propName);
+      const val = CssParser.evaluateCSSToCSS(this.context, expr, this.propName);
       return val.visit(this);
     }
     return expr;
@@ -3093,8 +3093,8 @@ export function setUABaseCascade(value: Cascade): void {
 }
 
 //------------- parsing ------------
-export class CascadeParserHandler extends CssParse.SlaveParserHandler
-  implements CssValid.PropertyReceiver {
+export class CascadeParserHandler extends CssParser.SlaveParserHandler
+  implements CssValidator.PropertyReceiver {
   chain: ChainedAction[] = null;
   specificity: number = 0;
   elementStyle: ElementStyle = null;
@@ -3108,11 +3108,11 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
 
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
     public readonly condition: Exprs.Val,
     parent: CascadeParserHandler,
     public readonly regionId: string | null,
-    public readonly validatorSet: CssValid.ValidatorSet,
+    public readonly validatorSet: CssValidator.ValidatorSet,
     topLevel: boolean,
   ) {
     super(scope, owner, topLevel);
@@ -3357,7 +3357,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
   attributeSelector(
     ns: string,
     name: string,
-    op: CssTok.TokenType,
+    op: CssTokenizer.TokenType,
     value: string | null,
   ): void {
     this.specificity += 256;
@@ -3365,13 +3365,13 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
     value = value || "";
     let action;
     switch (op) {
-      case CssTok.TokenType.EOF:
+      case CssTokenizer.TokenType.EOF:
         action = new CheckAttributePresentAction(ns, name);
         break;
-      case CssTok.TokenType.EQ:
+      case CssTokenizer.TokenType.EQ:
         action = new CheckAttributeEqAction(ns, name, value);
         break;
-      case CssTok.TokenType.TILDE_EQ:
+      case CssTokenizer.TokenType.TILDE_EQ:
         if (!value || value.match(/\s/)) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3382,14 +3382,14 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           );
         }
         break;
-      case CssTok.TokenType.BAR_EQ:
+      case CssTokenizer.TokenType.BAR_EQ:
         action = new CheckAttributeRegExpAction(
           ns,
           name,
           new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`),
         );
         break;
-      case CssTok.TokenType.HAT_EQ:
+      case CssTokenizer.TokenType.HAT_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3400,7 +3400,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           );
         }
         break;
-      case CssTok.TokenType.DOLLAR_EQ:
+      case CssTokenizer.TokenType.DOLLAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3411,7 +3411,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           );
         }
         break;
-      case CssTok.TokenType.STAR_EQ:
+      case CssTokenizer.TokenType.STAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3422,7 +3422,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
           );
         }
         break;
-      case CssTok.TokenType.COL_COL:
+      case CssTokenizer.TokenType.COL_COL:
         if (value == "supported") {
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
@@ -3526,7 +3526,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
   /**
    * @override
    */
-  error(mnemonics: string, token: CssTok.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
     if (this.state == ParseState.SELECTOR) {
       this.state = ParseState.TOP;
@@ -3536,7 +3536,7 @@ export class CascadeParserHandler extends CssParse.SlaveParserHandler
   /**
    * @override
    */
-  startStylesheet(flavor: CssParse.StylesheetFlavor): void {
+  startStylesheet(flavor: CssParser.StylesheetFlavor): void {
     super.startStylesheet(flavor);
     this.state = ParseState.TOP;
   }
@@ -3744,7 +3744,7 @@ export class NotParameterParserHandler extends CascadeParserHandler {
   /**
    * @override
    */
-  error(mnemonics: string, token: CssTok.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
     this.owner.popHandler();
   }
@@ -3753,10 +3753,10 @@ export class NotParameterParserHandler extends CascadeParserHandler {
 /**
  * @override
  */
-export class DefineParserHandler extends CssParse.SlaveParserHandler {
+export class DefineParserHandler extends CssParser.SlaveParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
   ) {
     super(scope, owner, false);
   }
@@ -3775,16 +3775,16 @@ export class DefineParserHandler extends CssParse.SlaveParserHandler {
   }
 }
 
-export class PropSetParserHandler extends CssParse.SlaveParserHandler
-  implements CssValid.PropertyReceiver {
+export class PropSetParserHandler extends CssParser.SlaveParserHandler
+  implements CssValidator.PropertyReceiver {
   order: number;
 
   constructor(
     scope: Exprs.LexicalScope,
-    owner: CssParse.DispatchParserHandler,
+    owner: CssParser.DispatchParserHandler,
     public readonly condition: Exprs.Val,
     public readonly elementStyle: ElementStyle,
-    public readonly validatorSet: CssValid.ValidatorSet,
+    public readonly validatorSet: CssValidator.ValidatorSet,
   ) {
     super(scope, owner, false);
     this.order = 0;
@@ -3840,14 +3840,14 @@ export class PropSetParserHandler extends CssParse.SlaveParserHandler
   }
 }
 
-export class PropertyParserHandler extends CssParse.ErrorHandler
-  implements CssValid.PropertyReceiver {
+export class PropertyParserHandler extends CssParser.ErrorHandler
+  implements CssValidator.PropertyReceiver {
   elementStyle = {} as ElementStyle;
   order: number = 0;
 
   constructor(
     scope: Exprs.LexicalScope,
-    public readonly validatorSet: CssValid.ValidatorSet,
+    public readonly validatorSet: CssValidator.ValidatorSet,
   ) {
     super(scope);
   }
@@ -3887,8 +3887,8 @@ export class PropertyParserHandler extends CssParse.ErrorHandler
    */
   simpleProperty(name: string, value: Css.Val, important): void {
     let specificity = important
-      ? CssParse.SPECIFICITY_STYLE_IMPORTANT
-      : CssParse.SPECIFICITY_STYLE;
+      ? CssParser.SPECIFICITY_STYLE_IMPORTANT
+      : CssParser.SPECIFICITY_STYLE;
     specificity += this.order;
     this.order += ORDER_INCREMENT;
     const cascval = new CascadeValue(value, specificity);
@@ -3924,14 +3924,14 @@ export function mergeViewConditionalStyles(
 
 export function parseStyleAttribute(
   scope: Exprs.LexicalScope,
-  validatorSet: CssValid.ValidatorSet,
+  validatorSet: CssValidator.ValidatorSet,
   baseURL: string,
   styleAttrValue: string,
 ): ElementStyle {
   const handler = new PropertyParserHandler(scope, validatorSet);
-  const tokenizer = new CssTok.Tokenizer(styleAttrValue, handler);
+  const tokenizer = new CssTokenizer.Tokenizer(styleAttrValue, handler);
   try {
-    CssParse.parseStyleAttribute(tokenizer, handler, baseURL);
+    CssParser.parseStyleAttribute(tokenizer, handler, baseURL);
   } catch (err) {
     Logging.logger.warn(err, "Style attribute parse error:");
   }

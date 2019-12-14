@@ -19,13 +19,13 @@
  */
 import * as Asserts from "./asserts";
 import * as Css from "./css";
-import * as Geom from "./geom";
+import * as GeometryUtil from "./geometry-util";
 import * as Logging from "./logging";
-import * as Logical from "./logical";
+import * as Logical from "./css-logical-props";
 import * as Sizing from "./sizing";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
-import { Layout, PageFloats, Vtree } from "./types";
+import { PageFloats, Vtree, Layout as LayoutType } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
 export type FloatReference = PageFloats.FloatReference;
@@ -203,11 +203,11 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
     return null;
   }
 
-  getOuterShape(): Geom.Shape {
+  getOuterShape(): GeometryUtil.Shape {
     return this.area.getOuterShape(null, null);
   }
 
-  getOuterRect(): Geom.Rect {
+  getOuterRect(): GeometryUtil.Rect {
     return this.area.getOuterRect();
   }
 
@@ -278,7 +278,7 @@ export class PageFloatLayoutContext
   private floatAnchors: { [key in PageFloatID]: Node } = {};
   private floatsDeferredToNext: PageFloatContinuation[] = [];
   private floatsDeferredFromPrevious: PageFloatContinuation[];
-  private layoutConstraints: Layout.LayoutConstraint[] = [];
+  private layoutConstraints: LayoutType.LayoutConstraint[] = [];
   private locked: boolean = false;
 
   constructor(
@@ -1075,7 +1075,7 @@ export class PageFloatLayoutContext
    *     indicates that the float area does not fit inside the container
    */
   setFloatAreaDimensions(
-    area: Layout.PageFloatArea,
+    area: LayoutType.PageFloatArea,
     floatReference: FloatReference,
     floatSide: string,
     anchorEdge: number | null,
@@ -1153,7 +1153,7 @@ export class PageFloatLayoutContext
       let openRect = getRect(area.bands, rect);
       if (openRect) {
         if (area.vertical) {
-          openRect = Geom.unrotateBox(openRect);
+          openRect = GeometryUtil.unrotateBox(openRect);
         }
         blockStart = area.vertical
           ? Math.min(blockStart, openRect.x2)
@@ -1172,10 +1172,10 @@ export class PageFloatLayoutContext
     let outerInlineSize: number;
     if (init) {
       const rect = area.vertical
-        ? Geom.rotateBox(
-            new Geom.Rect(blockEnd, inlineStart, blockStart, inlineEnd),
+        ? GeometryUtil.rotateBox(
+            new GeometryUtil.Rect(blockEnd, inlineStart, blockStart, inlineEnd),
           )
-        : new Geom.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
+        : new GeometryUtil.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
       if (
         logicalFloatSide === "block-start" ||
         logicalFloatSide === "snap-block" ||
@@ -1183,7 +1183,7 @@ export class PageFloatLayoutContext
       ) {
         if (
           !limitBlockStartEndValueWithOpenRect(
-            Geom.findUppermostFullyOpenRect,
+            GeometryUtil.findUppermostFullyOpenRect,
             rect,
           )
         ) {
@@ -1197,7 +1197,7 @@ export class PageFloatLayoutContext
       ) {
         if (
           !limitBlockStartEndValueWithOpenRect(
-            Geom.findBottommostFullyOpenRect,
+            GeometryUtil.findBottommostFullyOpenRect,
             rect,
           )
         ) {
@@ -1290,7 +1290,7 @@ export class PageFloatLayoutContext
     return logicalFloatSide;
   }
 
-  getFloatFragmentExclusions(): Geom.Shape[] {
+  getFloatFragmentExclusions(): GeometryUtil.Shape[] {
     const result = this.floatFragments.map((fragment) =>
       fragment.getOuterShape(),
     );
@@ -1342,7 +1342,7 @@ export class PageFloatLayoutContext
       );
   }
 
-  getPageFloatClearEdge(clear: string, column: Layout.Column): number {
+  getPageFloatClearEdge(clear: string, column: LayoutType.Column): number {
     function isContinuationOfAlreadyAppearedFloat(context) {
       return (continuation) =>
         context.isAnchorAlreadyAppeared(continuation.float.getId());
@@ -1471,13 +1471,13 @@ export class PageFloatLayoutContext
     return result;
   }
 
-  getLayoutConstraints(): Layout.LayoutConstraint[] {
+  getLayoutConstraints(): LayoutType.LayoutConstraint[] {
     const constraints = this.parent ? this.parent.getLayoutConstraints() : [];
     return constraints.concat(this.layoutConstraints);
   }
 
   addLayoutConstraint(
-    layoutConstraint: Layout.LayoutConstraint,
+    layoutConstraint: LayoutType.LayoutConstraint,
     floatReference: FloatReference,
   ) {
     if (floatReference === this.floatReference) {
@@ -1490,7 +1490,7 @@ export class PageFloatLayoutContext
     }
   }
 
-  isColumnFullWithPageFloats(column: Layout.Column): boolean {
+  isColumnFullWithPageFloats(column: LayoutType.Column): boolean {
     const layoutContext = column.layoutContext;
     const clientLayout = column.clientLayout;
     Asserts.assert(clientLayout);
@@ -1623,7 +1623,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   createPageFloat(
     nodeContext: Vtree.NodeContext,
     pageFloatLayoutContext: PageFloatLayoutContext,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ): Task.Result<PageFloat> {
     let floatReference = nodeContext.floatReference;
     Asserts.assert(nodeContext.floatSide);
@@ -1657,7 +1657,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   createPageFloatFragment(
     continuations: PageFloatContinuation[],
     floatSide: string,
-    floatArea: Layout.PageFloatArea,
+    floatArea: LayoutType.PageFloatArea,
     continues: boolean,
   ): PageFloatFragment {
     const f = continuations[0].float;
@@ -1684,9 +1684,9 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
    * @override
    */
   adjustPageFloatArea(
-    floatArea: Layout.PageFloatArea,
+    floatArea: LayoutType.PageFloatArea,
     floatContainer: Vtree.Container,
-    column: Layout.Column,
+    column: LayoutType.Column,
   ) {}
 
   /**

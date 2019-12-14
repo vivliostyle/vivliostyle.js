@@ -19,10 +19,10 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as Diff from "./diff";
-import * as Exprs from "./exprs";
-import * as Geom from "./geom";
+import * as Exprs from "./expressions";
+import * as GeometryUtil from "./geometry-util";
 import * as Task from "./task";
-import * as TaskUtil from "./taskutil";
+import * as TaskUtil from "./task-util";
 
 export type FormattingContextType =
   | "Block"
@@ -35,13 +35,13 @@ export type FragmentLayoutConstraintType =
   | "RepetitiveElementsOwner"
   | "TableRow";
 
-export namespace CssCasc {
+export namespace CssCascade {
   export interface ElementStyle {}
 }
 
 export namespace CssStyler {
   export interface AbstractStyler {
-    getStyle(element: Element, deep: boolean): CssCasc.ElementStyle;
+    getStyle(element: Element, deep: boolean): CssCascade.ElementStyle;
     processContent(element: Element, styles: { [key: string]: Css.Val });
   }
 }
@@ -140,9 +140,9 @@ export namespace Layout {
     beforeEdge: number;
     afterEdge: number;
     footnoteEdge: number;
-    box: Geom.Rect;
+    box: GeometryUtil.Rect;
     chunkPositions: Vtree.ChunkPosition[];
-    bands: Geom.Band[];
+    bands: GeometryUtil.Band[];
     overflown: boolean;
     breakPositions: BreakPosition[];
     pageBreakType: string | null;
@@ -179,7 +179,7 @@ export namespace Layout {
     isFloatNodeContext(nodeContext: Vtree.NodeContext): boolean;
     stopByOverflow(nodeContext: Vtree.NodeContext): boolean;
     isOverflown(edge: number): boolean;
-    getExclusions(): Geom.Shape[];
+    getExclusions(): GeometryUtil.Shape[];
     openAllViews(position: Vtree.NodePosition): Task.Result<Vtree.NodeContext>;
     calculateOffsetInNodeForNodeContext(position: Vtree.NodePosition): number;
     /**
@@ -256,16 +256,16 @@ export namespace Layout {
     /**
      * Reads element's computed CSS margin.
      */
-    getComputedMargin(element: Element): Geom.Insets;
+    getComputedMargin(element: Element): GeometryUtil.Insets;
     /**
      * Reads element's computed padding + borders.
      */
-    getComputedPaddingBorder(element: Element): Geom.Insets;
+    getComputedPaddingBorder(element: Element): GeometryUtil.Insets;
     /**
      * Reads element's computed CSS insets(margins + border + padding or margins :
      * depends on box-sizing)
      */
-    getComputedInsets(element: Element): Geom.Insets;
+    getComputedInsets(element: Element): GeometryUtil.Insets;
     /**
      * Set element's computed CSS insets to Column Container
      */
@@ -685,8 +685,8 @@ export namespace PageFloats {
 
     hasFloat(float: PageFloat): boolean;
     findNotAllowedFloat(context: PageFloatLayoutContext): PageFloat | null;
-    getOuterShape(): Geom.Shape;
-    getOuterRect(): Geom.Rect;
+    getOuterShape(): GeometryUtil.Shape;
+    getOuterRect(): GeometryUtil.Rect;
     getOrder(): number;
     shouldBeStashedBefore(float: PageFloat): boolean;
     addContinuations(continuations: PageFloatContinuation[]): void;
@@ -780,7 +780,7 @@ export namespace PageFloats {
       force: boolean,
       condition: PageFloatPlacementCondition,
     ): string | null;
-    getFloatFragmentExclusions(): Geom.Shape[];
+    getFloatFragmentExclusions(): GeometryUtil.Shape[];
     getMaxReachedAfterEdge(): number;
     getBlockStartEdgeOfBlockEndFloats(): number;
     getPageFloatClearEdge(clear: string, column: Layout.Column): number;
@@ -866,7 +866,7 @@ export namespace PseudoElement {
   export interface PseudoelementStyler extends CssStyler.AbstractStyler {
     contentProcessed: { [key: string]: boolean };
     readonly element: Element;
-    style: CssCasc.ElementStyle;
+    style: CssCascade.ElementStyle;
     styler: CssStyler.AbstractStyler;
     readonly context: Exprs.Context;
     readonly exprContentListener: Vtree.ExprContentListener;
@@ -1182,8 +1182,8 @@ export namespace Vtree {
     height: number;
     originX: number;
     originY: number;
-    exclusions: Geom.Shape[];
-    innerShape: Geom.Shape;
+    exclusions: GeometryUtil.Shape[];
+    innerShape: GeometryUtil.Shape;
     computedBlockSize: number;
     snapWidth: number;
     snapHeight: number;
@@ -1214,11 +1214,14 @@ export namespace Vtree {
     setBlockPosition(start: number, extent: number): void;
     setInlinePosition(start: number, extent: number): void;
     clear(): void;
-    getInnerShape(): Geom.Shape;
-    getInnerRect(): Geom.Rect;
-    getPaddingRect(): Geom.Rect;
-    getOuterShape(outerShapeProp: Css.Val, context: Exprs.Context): Geom.Shape;
-    getOuterRect(): Geom.Rect;
+    getInnerShape(): GeometryUtil.Shape;
+    getInnerRect(): GeometryUtil.Rect;
+    getPaddingRect(): GeometryUtil.Rect;
+    getOuterShape(
+      outerShapeProp: Css.Val,
+      context: Exprs.Context,
+    ): GeometryUtil.Shape;
+    getOuterRect(): GeometryUtil.Rect;
   }
 
   /**

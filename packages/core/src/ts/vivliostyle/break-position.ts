@@ -17,7 +17,7 @@
  * @fileoverview BreakPosition - Definitions of BreakPosition.
  */
 import * as Break from "./break";
-import * as LayoutHelper from "./layouthelper";
+import * as LayoutHelper from "./layout-helper";
 import { Layout, RepetitiveElement, Vtree } from "./types";
 
 /**

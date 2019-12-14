@@ -15,9 +15,9 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_logical from "../../../src/ts/vivliostyle/logical";
+import * as vivliostyle_logical from "../../../src/ts/vivliostyle/css-logical-props";
 
-describe("logical", function() {
+describe("css-logical-props", function() {
   "use strict";
 
   var l = vivliostyle_logical;
@@ -274,7 +274,7 @@ describe("logical", function() {
       );
     });
 
-    it("returns original properties when they are already logical", function() {
+    it("returns original properties when they are already css-logical-props", function() {
       expect(l.toLogical("inline-start", "vertical-rl")).toBe("inline-start");
       expect(l.toLogical("inline-end", "vertical-rl")).toBe("inline-end");
       expect(l.toLogical("block-start", "vertical-rl")).toBe("block-start");

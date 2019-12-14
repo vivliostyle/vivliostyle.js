@@ -20,24 +20,24 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as Cfi from "./cfi";
+import * as CFI from "./cfi";
 import * as Constants from "./constants";
 import * as Counters from "./counters";
 import * as Css from "./css";
-import * as CssCasc from "./csscasc";
-import * as CssParse from "./cssparse";
-import * as CssTok from "./csstok";
-import * as Exprs from "./exprs";
+import * as CssCascade from "./css-cascade";
+import * as CssParser from "./css-parser";
+import * as CssTokenizer from "./css-tokenizer";
+import * as Exprs from "./expressions";
 import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Net from "./net";
-import * as Ops from "./ops";
-import * as Sha1 from "./sha1";
+import * as OPS from "./ops";
+import * as SHA1 from "./sha1";
 import * as Task from "./task";
 import * as Toc from "./toc";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
+import * as XmlDoc from "./xml-doc";
 
 export type Position = {
   spineIndex: number;
@@ -45,7 +45,7 @@ export type Position = {
   offsetInItem: number;
 };
 
-export class EPUBDocStore extends Ops.OPSDocStore {
+export class EPUBDocStore extends OPS.OPSDocStore {
   plainXMLStore: XmlDoc.XMLDocStore;
   jsonStore: Net.JSONStore;
   opfByURL: { [key: string]: OPFDoc } = {};
@@ -433,7 +433,7 @@ export function getOPFItemId(item: OPFItem): string | null {
 
 export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
   // TODO: use UTF8 of uid
-  const sha1Sum = Sha1.bytesToSHA1Int8(uid);
+  const sha1Sum = SHA1.bytesToSHA1Int8(uid);
   return (blob) => {
     const frame = Task.newFrame("deobfuscator") as Task.Frame<Blob>;
     let head: Blob;
@@ -459,7 +459,7 @@ export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
 }
 
 export function makeObfuscationKey(uid: string): string {
-  return `1040:${Sha1.bytesToSHA1Hex(uid)}`;
+  return `1040:${SHA1.bytesToSHA1Hex(uid)}`;
 }
 
 export type RawMetaItem = {
@@ -680,7 +680,7 @@ export function getMathJaxHub(): object {
 
 export function checkMathJax(): void {
   if (getMathJaxHub()) {
-    CssCasc.supportedNamespaces[Base.NS.MATHML] = true;
+    CssCascade.supportedNamespaces[Base.NS.MATHML] = true;
   }
 }
 
@@ -725,9 +725,9 @@ export class OPFDoc {
     checkMathJax();
   }
 
-  createDocumentURLTransformer() {
+  // FIXME: TS4055
+  createDocumentURLTransformer(): Base.DocumentURLTransformer {
     const self = this;
-
     class OPFDocumentURLTransformer implements Base.DocumentURLTransformer {
       /**
        * @override
@@ -1209,7 +1209,7 @@ export class OPFDoc {
       if (node) {
         const startOffset = xmldoc.getNodeOffset(node, 0, false);
         const offsetInNode = offsetInItem - startOffset;
-        const fragment = new Cfi.Fragment();
+        const fragment = new CFI.Fragment();
         fragment.prependPathFromNode(node, offsetInNode, false, null);
         if (item.itemRefElement) {
           fragment.prependPathFromNode(item.itemRefElement, 0, false, null);
@@ -1230,7 +1230,7 @@ export class OPFDoc {
           frame.finish(null);
           return;
         }
-        let fragment = new Cfi.Fragment();
+        let fragment = new CFI.Fragment();
         fragment.fromString(fragstr);
         let item: OPFItem;
         if (self.opfXML) {
@@ -1368,7 +1368,7 @@ export const makePageAndPosition = (
 export type OPFViewItem = {
   item: OPFItem;
   xmldoc: XmlDoc.XMLDocHolder;
-  instance: Ops.StyleInstance;
+  instance: OPS.StyleInstance;
   layoutPositions: Vtree.LayoutPosition[];
   pages: Vtree.Page[];
   complete: boolean;
@@ -2228,9 +2228,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
         viewport.width,
         viewport.height,
       );
-      const cssMatrix = CssParse.parseValue(
+      const cssMatrix = CssParser.parseValue(
         null,
-        new CssTok.Tokenizer(matrix, null),
+        new CssTokenizer.Tokenizer(matrix, null),
         "",
       );
       page.delayedItems.push(
@@ -2510,7 +2510,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         }
       }
       self.counterStore.forceSetPageCounter(pageNumberOffset);
-      const instance = new Ops.StyleInstance(
+      const instance = new OPS.StyleInstance(
         style,
         xmldoc,
         self.opf.lang,

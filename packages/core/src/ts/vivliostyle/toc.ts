@@ -21,13 +21,13 @@
 import * as Base from "./base";
 import * as Counters from "./counters";
 import * as Css from "./css";
-import * as Exprs from "./exprs";
+import * as Exprs from "./expressions";
 import * as Font from "./font";
-import * as Ops from "./ops";
+import * as OPS from "./ops";
 import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
-import * as XmlDoc from "./xmldoc";
+import * as XmlDoc from "./xml-doc";
 
 // closed: 25B8
 // open: 25BE
@@ -41,10 +41,10 @@ export const bulletEmpty = "\u25b9";
 export class TOCView implements Vgen.CustomRendererFactory {
   pref: Exprs.Preferences;
   page: Vtree.Page = null;
-  instance: Ops.StyleInstance = null;
+  instance: OPS.StyleInstance = null;
 
   constructor(
-    public readonly store: Ops.OPSDocStore,
+    public readonly store: OPS.OPSDocStore,
     public readonly url: string,
     public readonly lang: string | null,
     public readonly clientLayout: Vtree.ClientLayout,
@@ -251,7 +251,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         viewportSize.height,
       );
       const customRenderer = self.makeCustomRenderer(xmldoc);
-      const instance = new Ops.StyleInstance(
+      const instance = new OPS.StyleInstance(
         style,
         xmldoc,
         self.lang,

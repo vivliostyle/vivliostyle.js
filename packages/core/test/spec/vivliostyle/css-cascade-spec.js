@@ -16,12 +16,12 @@
  */
 
 import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as adapt_csscasc from "../../../src/ts/vivliostyle/csscasc";
-import * as adapt_csstok from "../../../src/ts/vivliostyle/csstok";
+import * as adapt_csscasc from "../../../src/ts/vivliostyle/css-cascade";
+import * as adapt_csstok from "../../../src/ts/vivliostyle/css-tokenizer";
 import * as vivliostyle_plugin from "../../../src/ts/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 
-describe("csscasc", function() {
+describe("css-cascade", function() {
   describe("IsNthSiblingAction", function() {
     it("when a=0, matches if currentSiblingOrder=b", function() {
       var action = new adapt_csscasc.IsNthSiblingAction(0, 3);

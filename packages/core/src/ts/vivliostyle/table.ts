@@ -19,25 +19,25 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as BreakPosition from "./breakposition";
+import * as BreakPosition from "./break-position";
 import * as Css from "./css";
-import * as LayoutHelper from "./layouthelper";
-import * as LayoutProcessor from "./layoutprocessor";
-import * as LayoutRetryers from "./layoutretryers";
-import * as LayoutUtil from "./layoututil";
+import * as LayoutHelper from "./layout-helper";
+import * as LayoutProcessor from "./layout-processor";
+import * as LayoutRetryers from "./layout-retryers";
+import * as LayoutUtil from "./layout-util";
 import * as Plugin from "./plugin";
-import * as RepetitiveElementImpl from "./repetitiveelement";
-import * as Selectors from "./selectors";
+import * as RepetitiveElementImpl from "./repetitive-element";
 import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as VtreeImpl from "./vtree";
+import * as Layout from "./layout";
 import {
+  Table,
+  RepetitiveElement,
+  Vtree,
   FormattingContextType,
   FragmentLayoutConstraintType,
-  Layout,
-  RepetitiveElement,
-  Table,
-  Vtree,
+  Layout as LayoutType,
 } from "./types";
 
 export class TableRow {
@@ -95,7 +95,7 @@ export class TableSlot {
 }
 
 export class TableCellFragment {
-  pseudoColumn: LayoutUtil.PseudoColumn;
+  pseudoColumn: Layout.PseudoColumn;
   empty: boolean = false;
 
   constructor(
@@ -103,7 +103,7 @@ export class TableCellFragment {
     pseudoColumnContainer: Element,
     public readonly cellNodeContext: Vtree.NodeContext,
   ) {
-    this.pseudoColumn = new LayoutUtil.PseudoColumn(
+    this.pseudoColumn = new Layout.PseudoColumn(
       column,
       pseudoColumnContainer,
       cellNodeContext,
@@ -558,7 +558,7 @@ export class TableFormattingContext
   }
 
   private collectElementsOffsetFromColumn(
-    column: Layout.Column,
+    column: LayoutType.Column,
     repetitiveElements: RepetitiveElement.ElementsOffset[],
   ) {
     column.fragmentLayoutConstraints.forEach((constraint) => {
@@ -1130,11 +1130,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           .layoutContext as Vgen.ViewFactory).xmldoc.getElementOffset(
           tdNodeStep.node as Element,
         );
-        Selectors.registerFragmentIndex(
-          offset,
-          tdNodeStep.fragmentIndex + 1,
-          1,
-        );
+        Layout.registerFragmentIndex(offset, tdNodeStep.fragmentIndex + 1, 1);
       }
     });
   }
@@ -1632,7 +1628,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     breakOnEdge: string | null,
     overflows: boolean,
     columnBlockSize: number,
-  ): Layout.BreakPosition {
+  ): LayoutType.BreakPosition {
     return new BetweenTableRowBreakPosition(
       position,
       breakOnEdge,
@@ -1811,7 +1807,7 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   /**
    * @override
    */
-  resolveLayoutMode(nodeContext: Vtree.NodeContext): Layout.LayoutMode {
+  resolveLayoutMode(nodeContext: Vtree.NodeContext): LayoutType.LayoutMode {
     const repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
     if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
       return new LayoutEntireTable(this.tableFormattingContext, this.processor);

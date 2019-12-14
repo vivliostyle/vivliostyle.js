@@ -19,10 +19,10 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
-import * as CssCasc from "./csscasc";
-import * as CssProp from "./cssprop";
-import * as CssStyler from "./cssstyler";
-import * as Exprs from "./exprs";
+import * as CssCascade from "./css-cascade";
+import * as CssProp from "./css-prop";
+import * as CssStyler from "./css-styler";
+import * as Exprs from "./expressions";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import { Layout } from "./types";
@@ -31,8 +31,8 @@ import { Layout } from "./types";
  * Clone counter values.
  */
 function cloneCounterValues(
-  counters: CssCasc.CounterValues,
-): CssCasc.CounterValues {
+  counters: CssCascade.CounterValues,
+): CssCascade.CounterValues {
   const result = {};
   Object.keys(counters).forEach((name) => {
     result[name] = Array.from(counters[name]);
@@ -48,7 +48,7 @@ function cloneCounterValues(
  * @param resolved If the reference is already resolved or not
  */
 export class TargetCounterReference {
-  pageCounters: CssCasc.CounterValues = null;
+  pageCounters: CssCascade.CounterValues = null;
   spineIndex: number = -1;
   pageIndex: number = -1;
 
@@ -91,7 +91,7 @@ export class TargetCounterReference {
   }
 }
 
-class CounterListener implements CssCasc.CounterListener {
+class CounterListener implements CssCascade.CounterListener {
   constructor(
     public readonly counterStore: CounterStore,
     public readonly baseURL: string,
@@ -100,7 +100,7 @@ class CounterListener implements CssCasc.CounterListener {
   /**
    * @override
    */
-  countersOfId(id: string, counters: CssCasc.CounterValues) {
+  countersOfId(id: string, counters: CssCascade.CounterValues) {
     id = this.counterStore.documentURLTransformer.transformFragment(
       id,
       this.baseURL,
@@ -113,7 +113,7 @@ class CounterListener implements CssCasc.CounterListener {
   }
 }
 
-class CounterResolver implements CssCasc.CounterResolver {
+class CounterResolver implements CssCascade.CounterResolver {
   styler: CssStyler.Styler | null = null;
 
   constructor(
@@ -208,7 +208,7 @@ class CounterResolver implements CssCasc.CounterResolver {
     id: string | null,
     transformedId: string,
     lookForElement: boolean,
-  ): CssCasc.CounterValues | null {
+  ): CssCascade.CounterValues | null {
     let targetCounters = this.counterStore.countersById[transformedId];
     if (!targetCounters && lookForElement && id) {
       this.styler.styleUntilIdIsReached(id);
@@ -225,7 +225,7 @@ class CounterResolver implements CssCasc.CounterResolver {
    */
   private getTargetPageCounters(
     transformedId: string,
-  ): CssCasc.CounterValues | null {
+  ): CssCascade.CounterValues | null {
     if (this.counterStore.currentPage.elementsById[transformedId]) {
       return this.counterStore.currentPageCounters;
     } else {
@@ -343,11 +343,11 @@ class CounterResolver implements CssCasc.CounterResolver {
 }
 
 export class CounterStore {
-  countersById: { [key: string]: CssCasc.CounterValues } = {};
-  pageCountersById: { [key: string]: CssCasc.CounterValues } = {};
-  currentPageCounters: CssCasc.CounterValues = {};
-  previousPageCounters: CssCasc.CounterValues = {};
-  currentPageCountersStack: CssCasc.CounterValues[] = [];
+  countersById: { [key: string]: CssCascade.CounterValues } = {};
+  pageCountersById: { [key: string]: CssCascade.CounterValues } = {};
+  currentPageCounters: CssCascade.CounterValues = {};
+  previousPageCounters: CssCascade.CounterValues = {};
+  currentPageCountersStack: CssCascade.CounterValues[] = [];
   pageIndicesById: {
     [key: string]: { spineIndex: number; pageIndex: number };
   } = {};
@@ -368,7 +368,7 @@ export class CounterStore {
     this.currentPageCounters["page"] = [0];
   }
 
-  createCounterListener(baseURL: string): CssCasc.CounterListener {
+  createCounterListener(baseURL: string): CssCascade.CounterListener {
     return new CounterListener(this, baseURL);
   }
 
@@ -376,7 +376,7 @@ export class CounterStore {
     baseURL: string,
     rootScope: Exprs.LexicalScope,
     pageScope: Exprs.LexicalScope,
-  ): CssCasc.CounterResolver {
+  ): CssCascade.CounterResolver {
     return new CounterResolver(this, baseURL, rootScope, pageScope);
   }
 
@@ -410,7 +410,7 @@ export class CounterStore {
    * page.
    */
   updatePageCounters(
-    cascadedPageStyle: CssCasc.ElementStyle,
+    cascadedPageStyle: CssCascade.ElementStyle,
     context: Exprs.Context,
   ) {
     // Save page counters to previousPageCounters before updating
@@ -461,7 +461,7 @@ export class CounterStore {
    * Save current page-based counters values and set them to the values passed
    * in. The saved counter values can be restored by popPageCounters method.
    */
-  pushPageCounters(counters: CssCasc.CounterValues) {
+  pushPageCounters(counters: CssCascade.CounterValues) {
     this.currentPageCountersStack.push(this.currentPageCounters);
     this.currentPageCounters = cloneCounterValues(counters);
   }
@@ -579,7 +579,7 @@ export class CounterStore {
   ): {
     spineIndex: number;
     pageIndex: number;
-    pageCounters: CssCasc.CounterValues;
+    pageCounters: CssCascade.CounterValues;
     refs: TargetCounterReference[];
   }[] {
     let refs: TargetCounterReference[] = [];
@@ -596,13 +596,13 @@ export class CounterStore {
     const result: {
       spineIndex: number;
       pageIndex: number;
-      pageCounters: CssCasc.CounterValues;
+      pageCounters: CssCascade.CounterValues;
       refs: TargetCounterReference[];
     }[] = [];
     let o: {
       spineIndex: number;
       pageIndex: number;
-      pageCounters: CssCasc.CounterValues;
+      pageCounters: CssCascade.CounterValues;
       refs: TargetCounterReference[];
     } = null;
     refs.forEach((ref) => {
