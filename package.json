@@ -28,6 +28,8 @@
     "pretty-quick": "^2.0.1",
     "shx": "^0.3.2"
   },
+  "author": "Vivliostyle Foundation",
+  "license": "AGPL-3.0",
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
