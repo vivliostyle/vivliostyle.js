@@ -1,0 +1,18 @@
+cache: false
+language: node_js
+node_js:
+  - stable
+script:
+  - scripts/update-version.sh
+  - npm run lint-scripts
+  - npm run lint-styles
+  - npm run build
+# - npm run test-sauce
+after_success:
+  - scripts/travis-after-success.sh
+notifications:
+  email: false
+  slack:
+    secure: PA/fBbFY8KP6ZEFsyOEJlONRnUkOGKq4KxTO1uB65MN9sg2aITmULafDNn6rs2oZzbVYp+ngqy/6V+KfU0Fk+3kmsGxlrEPHgDv+ePyTHyin8F5COqFttn90RcH0O1q/6YrJbBfSQglOIBKeOlSJ0uQrwn+ucLmjZMPUasC7d6svWUuqDq8tZERAw9p/abym2gMqJ92dOMpugBYeTg+7NQL+PGt5HoElpQdEK1+cYndBTZLI/TyzUx2ADtMEBAJ2g4vcXvgBLmagybCjQC/atlKK2BP4PJzdIn/woMdZa4Ebtxk1ki8an3fCFv+TqsmBVHfyClXpzXsdFAUOm3pvrvI22jksbO2WThvp6hhPP+THOw6LLg/tX5vIeLFGCj3o7YLM1MrQ6z9hLOamuHu7p8G6pwbUhxzBOCOalGvGTDMRyHKxjLfH2ru24/xi+af2TdjQlDsyKkZXfftWsaazjWWU4BTvDEKd4SFDP1uDbpLe8BweRx3RzUY1LsykO/6TA3LTG6fLNdUwKbsPIueZrmgt8/xIQLjwfac0KZmDIIheO5r0ms8rEer3Bg0EUxXwENCBDWcrhKqs+9N2InFB1W+h2ZCLjYsxXUftG/fLqUdNn9k1aLWYrAqTF7NtA4sy1cg1Q7x8t81EXHEyNbwuyfYpbKnZYUS8xeI9Kd5iTbo=
+addons:
+  sauce_connect: true

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, user-scalable=yes" />
+    <title>Vivliostyle Viewer ユーザーガイド＆サンプル</title>
+    <link rel="icon" type="image/png" href="../images/vivliostyle-icon.png" />
+    <link href="../stylesheets/summary/summary.css" rel="stylesheet" type="text/css" />
+    <link href="../stylesheets/common.css" rel="stylesheet" type="text/css" />
+    <script src="../javascripts/users-guide.js"></script>
+</head>
+<body class="sample">
+<div class="section-content">
+    <header id="page-header">
+        <div class="hgroup">
+            <h1>Vivliostyle <small>CSS組版</small></h1>
+        </div>
+    </header>
+
+    <div class="section-body" id="page-body">
+        <section id="toc">
+            <div class="section-content">
+                <h2>目次</h2>
+                <nav>
+                    <ol>
+                        <li><a href="#guide">Vivliostyle Viewer ユーザーガイド</a>
+                            <ol>
+                                <li><a href="#use">使い方</a></li>
+                                <li><a href="#htmlview">Vivliostyle Viewer で表示するHTML文書の指定</a></li>
+                                <li><a href="#epubview">EPUBを表示するには</a></li>
+                                <li><a href="#webpubview">Web出版物を表示するには</a></li>
+                                <!-- <li><a href="#multihtml">複数のHTMLファイルを指定するには</a></li> -->
+                                <li><a href="#spread">見開きページ表示を指定するには</a></li>
+                                <li><a href="#addstyle">スタイルシートを指定するには</a></li>
+                                <li><a href="#print">Vivliostyle Viewer から印刷・PDF出力を行うには</a></li>
+                                <li><a href="#features">VivliostyleがサポートするCSSの機能</a></li>
+                                <li><a href="#docs">その他のドキュメント</a></li>
+                            </ol>
+                        </li>
+                        <li><a href="#TestSamples">サンプル</a></li>
+                    </ol>
+                </nav>
+            </div>
+        </section>
+        <section>
+            <div class="section-content">
+                <h2 id="guide">Vivliostyle Viewer ユーザーガイド</h2>
+
+                <p>Vivliostyle Viewer は、HTML+CSS文書を組版・表示するWebアプリケーションです。</p>
+
+                <h3 id="use">使い方</h3>
+
+                <p>Vivliostyle Viewer をローカル環境で利用する場合は、配布パッケージに同梱の <a href="https://github.com/vivliostyle/vivliostyle-ui/blob/master/dist/README.ja.md"><code>README.ja.md</code>（オンラインで読む）</a>に記載の「使い方」の手順にしたがってWebサーバーを起動してください。</p>
+
+                <p>公開されているオンラインの Vivliostyle Viewer (<code class="url"><a href="https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html">https://vivliostyle.github.io/vivliostyle.js/viewer/vivliostyle-viewer.html</a></code>) も利用できます（これは常に開発最新版に更新されてます）。</p>
+
+                <p><code>viewer</code> フォルダ内 <code>vivliostyle-viewer.html</code> が Vivliostyle Viewer 本体です。</p>
+
+                <p>パラメータを指定しないで <a href="../../viewer/vivliostyle-viewer.html">Vivliostyle Viewer</a> を開くと、文書URLの入力欄（“Input a document URL”）と次のように使い方の説明が表示されます：</p>
+
+<blockquote>
+    <p><strong>サポートされている文書の種類：</strong></p>
+    <ul>
+        <li>(X)HTML文書＋ページメディア用のCSS</li>
+        <li>Web出版物（複数のHTML文書からなるコレクション）：プライマリーエントリーページまたはマニフェストファイルのURLを指定します。</li>
+        <li>ZIP解凍済みのEPUB：OPFファイルのURLまたは解凍されたEPUBファイルのトップディレクトリを指定します。</li>
+    </ul>
+    <p>注：</p>
+    <ul>
+        <li> GitHubとGistのURLを直接指定することができます。そのようなURLが指定された場合、Vivliostyle は github/gist の raw コンテンツをロードします。</li>
+        <li>⚠️Mixedコンテンツ（“http:” のURLが “https:” の Vivliostyle Viewer に指定された場合）は通常ブラウザによってブロックされます。</li>
+        <li>⚠️Cross-Origin（異なるドメインへのリクエスト）は、サーバーが Cross-Origin Resource
+            Sharing (CORS) を許可するように設定されていない限り、通常はブラウザによってブロックされます。</li>
+    </ul>
+    <p><strong>URLパラメータのオプション：</strong></p>
+    <ul>
+        <li><span>#<b>b</b>=&lt;文書のURL&gt;</span> または <span>#<b>x</b>=&lt;文書のURL&gt;</span>
+            <ul>
+                <li>#<b>b</b>= Book閲覧。(X)HTML文書のURLが指定された場合、そのURLはプライマリーエントリーページのものとして扱われ、マニフェストまたは目次（<code>&lt;nav role="doc-toc"&gt;</code> などでマークアップ）からリンクされた一連のHTML文書が自動的に読み込まれます。</li>
+                <li>#<b>x</b>= (X)HTML文書が単純に読み込まれます。複数の文書を #<b>x</b>=&lt;最初のHTML&gt;&amp;<b>x</b>=&lt;2番目のHTML&gt;... のようにして指定することもできます。</li>
+            </ul>
+        </li>
+        <li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]</span>
+            <ul>
+                <li><b>true</b>：見開き表示</li>
+                <li><b>false</b>：単一ページ表示</li>
+                <li><b>auto</b>：自動見開き表示（デフォルト）</li>
+            </ul>
+        </li>
+        <li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]</span>
+            <ul>
+                <li><b>true</b>：印刷向き（すべてのページが印刷可能で、ページ番号は期待されるとおりに機能します）</li>
+                <li><b>false</b>：閲覧向き（おおまかなページ番号を使って、クイックロード）</li>
+            </ul>
+        </li>
+        <li><span>&amp;<b>style</b>=&lt;追加の外部スタイルシートのURL&gt;</span></li>
+        <li><span>&amp;<b>userStyle</b>=&lt;ユーザースタイルシートのURL&gt;</span></li>
+    </ul>
+    <p>オプションは設定パネル（<strong>Settings</strong>）でも設定できます。</p>
+</blockquote>
+
+                <h3 id="htmlview">Vivliostyle Viewer で表示するHTML文書の指定</h3>
+
+                <p>HTMLファイルを Vivliostyle Viewer で表示するには、Webサーバーが読み込める場所（上記手順にしたがってWebサーバーを起動している場合は、配布パッケージを解凍してできたフォルダ内）にそのファイル（およびそのファイルから読み込まれるCSSや画像ファイル）を置いた上で、次のようにパラメータを付加したURLをブラウザで開きます:</p>
+
+                <div class="code">⟨Vivliostyle Viewer のURL⟩<code>#x=</code>⟨表示するファイルのURL (Vivliostyle Viewer からの相対)⟩</div>
+
+                <p>注: Vivliostyle Viewer 本体とは別ドメインの文書を読み込もうとする場合、文書があるWebサーバーの設定によって、文書が読み込めない場合があります。文書を読み込ませるためには、サーバー側で CORS (Cross-Origin Resource Sharing)の設定が必要です。</p>
+
+                <p>注: 数式の表示（MathMLおよびTeX形式に対応）にインターネット上のJavaScriptライブラリー(<a href="https://www.mathjax.org/">MathJax</a>)を使用するため、文書に数式が含まれる場合はインターネット接続が必要です。</p>
+
+                <p>例: HTMLファイル <a href="../../samples/gon/index.html"><code>samples/gon/index.html</code></a> を表示する場合: </p>
+
+                <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html</code></a></div>
+
+                <p>テキストボックスに文書ファイルのパス（または URL）を入力すると、その文書を表示する Vivliostyle Viewer のURLを下に表示します: <input id="file-path-input" type="text" value="samples/gon/index.html" size="30"/></p>
+
+                <div class="code"><a id="input-file-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=../samples/gon/index.html"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=<span id="input-file-path-fragment">../samples/gon/index.html</span></code></a></div>
+
+                <p>Web上に公開されている(X)HTML文書を表示する例：</p>
+                <ul>
+                    <li><a href="https://www.aozora.gr.jp/">青空文庫</a> の<a href="https://www.aozora.gr.jp/cards/000121/card628.html">『ごん狐』</a>のXHTMLのURLを指定：
+                        <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#x=https://www.aozora.gr.jp/cards/000121/files/628_14895.html"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#x=https://www.aozora.gr.jp/cards/000121/files/628_14895.html</code></a></div>
+                    </li>
+                </ul>
+
+                <h3 id="epubview">EPUBを表示するには</h3>
+
+                <p>ZIP解凍済みのEPUBファイルを表示することができます。その場合、次のパラメータを指定します:</p>
+
+                <div class="code"><code>#b=</code>⟨表示する解凍済みEPUBフォルダのURL (Vivliostyle Viewer からの相対)⟩</div>
+
+                <p>例: <a href="../../samples/niimi/"><code>samples/niimi/</code></a> フォルダに解凍済みのEPUBファイルを表示する場合: </p>
+
+                <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../samples/niimi/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=../samples/niimi/</code></a></div>
+
+                <p>テキストボックスにEPUBフォルダのパス（またはURL）を入力すると、その文書を表示するVivliostyle ViewerのURLを下に表示します: <input id="epub-path-input" type="text" value="samples/niimi/" size="30"/></p>
+
+                <div class="code"><a id="input-epub-path-link" class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=../samples/niimi/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=<span id="input-epub-path-fragment">../samples/niimi/</span></code></a></div>
+
+                <p>GitHub上に公開されているZIP解凍済みのEPUBファイルを表示する例：</p>
+                <ul>
+                    <li><a href="https://github.com/IDPF/epub3-samples/">IDPF/epub3-samples</a> の<a href="https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/">『Accessible EPUB 3』</a>
+                        <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/</code></a></div>
+                    </li>
+                </ul>
+
+                <h3 id="webpubview">Web出版物を表示するには</h3>
+
+                <p>Web出版物（複数のHTML文書からなるコレクション）を表示するには、次のパラメータを指定します:</p>
+
+                <div class="code"><code>#b=</code>⟨プライマリーエントリーページのHTML文書またはマニフェストファイルのURL (Vivliostyle Viewer からの相対)⟩</div>
+
+                <p>Web出版物のマニフェストの形式については、W3Cドラフトの <a href="https://w3c.github.io/wpub/">Web Publications</a> および <a href="https://github.com/readium/webpub-manifest/">Readium Web Publication Manifest</a> をサポートしています。</p>
+
+                <p>Web出版物のマニフェストが存在しなくても、指定したHTML文書内の目次要素内に他のHTML文書へのリンクがある場合は、それらの文書が自動的にロードされます。Vivliostyle はHTML文書内の次のCSSセレクタにマッチする要素を目次要素として扱います: <code>[role=doc-toc], [role=directory], nav li, .toc, #toc</code></p>
+
+                <p>Web上に公開されている複数のHTML文書からなる出版物を表示する例：</p>
+                <ul>
+                    <li><a href="https://drafts.csswg.org/">CSS Working Group Editor Drafts</a> の<a href="https://drafts.csswg.org/css2/">『Cascading Style Sheets Level 2 Revision 2 (CSS 2.2) Specification』</a>
+                        <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=https://drafts.csswg.org/css2/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=https://drafts.csswg.org/css2/</code></a></div>
+                    </li>
+                    <!-- <li><a href="https://whatwg.org/">WHATWG</a> の<a href="https://html.spec.whatwg.org/multipage/">『HTML Living Standard』</a>
+                        <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=https://html.spec.whatwg.org/multipage/"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=https://html.spec.whatwg.org/multipage/</code></a></div>
+                    </li> -->
+                </ul>
+
+                <!-- <h3 id="multihtml">複数のHTMLファイルを指定するには</h3>
+
+                <p>複数のHTMLファイルを Vivliostyle Viewer でまとめて表示するには、Web出版物の形式にして上記の方法で指定するか、または、次のように直接複数のHTMLファイルを指定します:</p>
+
+                <div class="code"><code>#x=</code>⟨最初のHTMLファイルのURL⟩<code>&amp;x=</code>⟨2番目のHTMLファイルのURL⟩…<code>&amp;x=</code>⟨n番目のHTMLファイルのURL⟩</div> -->
+
+                <h3 id="spread">見開きページ表示を指定するには</h3>
+
+                <p>Vivliostyle Viewer は、表示領域の横幅が大きいとき（高さの1.45倍以上）、自動的に見開きページ表示にします。これを変えるには次の指定をURLに追加します:</p>
+
+                <div class="code"><code>&amp;spread=true  </code> （常に見開きページ表示）</div>
+                <div class="code"><code>&amp;spread=false </code> （常に単ページ表示）</div>
+                <div class="code"><code>&amp;spread=auto  </code> （自動切り替え＝デフォルト）</div>
+
+                <p>Vivliostyle Viewer の設定パネル（画面右上のアイコン <img class="icon" src="../images/vivliostyle-icon.png" alt="[Setting]"/> をクリックして開く）でも、ページ表示モードの変更ができます。</p>
+
+                <h3 id="addstyle">スタイルシートを指定するには</h3>
+
+                <p>HTMLファイルに指定されているスタイルシートに加えて、追加のスタイルシート（CSSファイル）を使うには、次の指定をURLに追加します:</p>
+
+                <div class="code"><code>&amp;style=</code>⟨スタイルシートのURL (Vivliostyle Viewer からの相対)⟩</div>
+
+                <p>この方法で指定したスタイルシートは、HTMLファイルで指定されているスタイルシートと同様（制作者スタイルシート）の扱いで、よりあとに指定されたことになるので、CSSのカスケーディング規則により、HTMLファイルからのスタイルの指定を上書きすることになります。</p>
+                
+                <p>これに対して、次のようにしてユーザースタイルシート（スタイル指定に <code>!important</code> を付けないかぎり、制作者スタイルシートのスタイル指定を上書きしない）の指定もできます:</p>
+
+                <div class="code"><code>&amp;userStyle=</code>⟨ユーザースタイルシートのURL (Vivliostyle Viewer からの相対)⟩</div>
+
+                <p>複数個の <code>&amp;style=</code> あるいは <code>&amp;userStyle=</code> を使うことで、複数個のスタイルシートを指定できます。</p>
+                
+                <p>データURLも利用できます。例えば:</p>
+
+                <div class="code"><code class="url">&amp;userStyle=data:,html{writing-mode:vertical-rl}</code></div>
+
+                <p>ユーザースタイルの設定は、設定パネルの <strong>User Style Preferences</strong> からも行うことができます。設定内容のCSSは設定パネルの <strong>CSS Details</strong> で確認することができます。</p>
+
+                <p>Web上に公開されている文書に、設定パネルからユーザースタイルの設定を加えた例：</p>
+                <ul>
+                    <li><a href="https://drafts.csswg.org/">CSS Working Group Editor Drafts</a> の<a href="https://drafts.csswg.org/css2/">『Cascading Style Sheets Level 2 Revision 2 (CSS 2.2) Specification』</a>
+                        <div class="code"><a class="replace-href" href="http://localhost:8000/viewer/vivliostyle-viewer.html#b=https://drafts.csswg.org/css2/&userStyle=data:,/*%3Cviewer%3E*/%0A@page%20%7B%20size:%20A4;%20%7D%0A/*%3C/viewer%3E*/%0A%0A@page%20:first%20%7B%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%7D%0A%0A@page%20:left%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20env(pub-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D%0A%0A@page%20:right%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20env(doc-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D&renderAllPages=true"><code class="url"><span class="root-url">http://localhost:8000</span>/viewer/vivliostyle-viewer.html#b=https://drafts.csswg.org/css2/&userStyle=data:,/*%3Cviewer%3E*/%0A@page%20%7B%20size:%20A4;%20%7D%0A/*%3C/viewer%3E*/%0A%0A@page%20:first%20%7B%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%7D%0A%0A@page%20:left%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20env(pub-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D%0A%0A@page%20:right%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20env(doc-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D&renderAllPages=true</code></a></div>
+                    </li>
+                </ul>
+
+                <p>この例のように、設定パネルからスタイルの設定を行うと、ユーザースタイルのCSS内のコメント <code>/*&lt;viewer&gt;*/</code> と <code>/*&lt;/viewer&gt;*/</code> で囲んだ部分に、設定パネルの項目から設定したスタイルのCSSコードが生成され、設定パネルの <strong>CSS Details</strong> に表示されます。ユーザー独自のCSSコードをそれに追加することができます。この例ではページヘッダーとページフッターを追加しています。</p>
+
+                <h3 id="print">Vivliostyle Viewer から印刷・PDF出力を行うには</h3>
+
+                <p>ブラウザの印刷・PDF出力機能を利用できます。例えば、Google Chrome で PDF に出力するには、メニューから「印刷」を開き、出力先として「PDFに保存」、背景のグラフィック ON と指定して「保存」します。</p>
+
+                <p><strong>注意:</strong> 文書の全ページを印刷する場合、設定パネルで <strong>Render All Pages</strong> が On になっていることを確認してください。これが Off の場合、すでに表示されたページしか印刷できず、またページ番号が正しく出力されません。</p>
+
+                <h3 id="features">VivliostyleがサポートするCSSの機能</h3>
+
+                <p>VivliostyleがサポートするCSSの機能については <a href="../en/supported-features.html">“Features supported by Vivliostyle”（英語）</a>を参照してください。</p>
+
+                <h3 id="docs">その他のドキュメント</h3>
+
+                <p>その他のドキュメントは <a href="https://vivliostyle.org/ja/docs/">Vivliostyle ドキュメント</a> にあります。</p>
+            </div>
+        </section>
+
+        <section id="testsample">
+            <div class="section-content">
+                <h2 id="TestSamples">サンプル</h2>
+
+                <div class="mc-container">
+                    <div class="mc-box">
+                        <h3>固定ページサイズ</h3>
+
+                        <h4>和文 文庫本フォーマット『ごん狐』</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/gon/index.html" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/gon/index.html" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/gon" class="fa fa-source">Source</a></p>
+
+                        <h4>和文 段組フォーマット『白馬岳』</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/shirouma/index.html" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/shirouma/index.html" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/shirouma" class="fa fa-source">Source</a></p>
+
+                        <h4>欧文 Web Fonts サンプル “Wood Engraving”</h4>
+                        <dl class="file-link">
+                            <dt>Justification & hyphenation あり</dt>
+                            <dd><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/wood/index.html" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/wood/index.html" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/wood" class="fa fa-source">Source</a></dd>
+                            <dt>Justification & hyphenation 無し</dt>
+                            <dd><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/wood_chrome/index.html" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/wood_chrome/index.html" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/wood_chrome" class="fa fa-source">Source</a></dd>
+                        </dl>
+                    </div>
+
+                    <div class="mc-box">
+                        <h3>可変ページサイズ</h3>
+
+                        <h4>英語 “The Malay Archipelago”</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/variable-page-size/TheMalayArchipelago/main.xhtml" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/variable-page-size/TheMalayArchipelago/main.xhtml" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/variable-page-size/TheMalayArchipelago" class="fa fa-source">Source</a></p>
+
+                        <h4>日本語 横書き “高瀬舟”</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/variable-page-size/ja-horizontal/Takasebune/main.xhtml" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/variable-page-size/ja-horizontal/Takasebune/main.xhtml" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/variable-page-size/ja-horizontal/Takasebune" class="fa fa-source">Source</a></p>
+
+                        <h4>日本語 縦書き “高瀬舟”</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/variable-page-size/ja-vertical/Takasebune/main.xhtml" class="fa fa-spreadview">Page/Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/variable-page-size/ja-vertical/Takasebune/main.xhtml" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/variable-page-size/ja-vertical/Takasebune" class="fa fa-source">Source</a></p>
+                    </div>
+
+                    <div class="mc-box">
+                        <h3>Adaptive Layout</h3>
+
+                        <h4>“Apollo 8”</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/apollo8/index.xhtml&amp;spread=false" class="fa fa-pageview">Page View</a>&#x2002; <a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/apollo8/index.xhtml&amp;spread=true" class="fa fa-spreadview">Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/apollo8/index.xhtml" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/adaptive-layout/apollo8" class="fa fa-source">Source</a></p>
+
+                        <h4>“Candle”</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/candle/index.xhtml&amp;spread=false" class="fa fa-pageview">Page View</a>&#x2002; <a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/candle/index.xhtml&amp;spread=true" class="fa fa-spreadview">Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/candle/index.xhtml" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/adaptive-layout/candle" class="fa fa-source">Source</a></p>
+
+                        <h4>“Advanced Adaptive Layout”</h4>
+                        <p><a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/adaptive/main.xhtml&amp;spread=false" class="fa fa-pageview">Page View</a>&#x2002; <a href="../../viewer/vivliostyle-viewer.html#x=https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/adaptive/main.xhtml&amp;spread=true" class="fa fa-spreadview">Spread View</a>&#x2002; <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/adaptive-layout/adaptive/main.xhtml" class="fa fa-rawhtml">Raw HTML</a>&#x2002; <a href="https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/samples/adaptive-layout/adaptive" class="fa fa-source">Source</a></p>
+                        <p class="spc">(from Peter Sorotokin's <a href="http://sorotokin.com/adaptive-layout/">Adaptive Layout</a>)</p>
+                    </div>
+                </div>
+
+                <ul class="note">
+                    <li><b>Page/Spread View</b>: 自動見開き表示（online Vivliostyle Viewer）</li>
+                    <li><b>Page View</b>: 単ページ表示（online Vivliostyle Viewer）</li>
+                    <li><b>Spread View</b>: 見開き表示（online Vivliostyle Viewer）</li>
+                    <li><b>Raw HTML</b>: 通常HTML表示</li>
+                    <li><b>Source</b>: GitHub上のソースファイル（HTMLやCSS）へ</li>
+                </ul>
+
+                <h3>その他のサンプル</h3>
+
+                <p>その他のサンプルは <a href="https://vivliostyle.org/ja/samples/">Vivliostyle サンプル</a> にあります。</p>
+            </div>
+        </section>
+    </div>
+    <footer id="page-footer">
+        <div class="pgroup">
+            <p><a href="https://vivliostyle.org"><img class="icon" src="../images/vivliostyle-icon.png" alt="[Vivliostyle logo]"/> <span>Vivliostyle Foundation</span></a></p>
+        </div>
+    </footer>
+
+</div>
+</body>
+</html>

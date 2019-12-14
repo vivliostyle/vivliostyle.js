@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ $(which ruby) ]; then
+    ruby -rwebrick -e "system 'open http://localhost:8000' or system 'start http://localhost:8000'; WEBrick::HTTPServer.new(DocumentRoot: '.', Port: 8000, RequestCallback: Proc.new{|req,res| res['Access-Control-Allow-Origin'] = '*'}).start" -Eascii-8bit:ascii-8bit
+elif [ $(which python) ]; then
+    python -m http.server 8000
+    if [ $? -ne 0 ]; then
+        python -m SimpleHTTPServer 8000
+    fi
+elif [ $(which npm) ]; then
+    if [ ! -e "node_modules/http-server" ]; then
+        npm install http-server
+    fi
+    node node_modules/http-server/bin/http-server -p 8000 -o -c-1
+else
+    echo "Please install Ruby or Python or Node.js and rerun this script, or use your favorite HTTP server."
+    exit 1
+fi
