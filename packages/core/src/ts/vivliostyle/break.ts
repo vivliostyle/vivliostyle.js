@@ -159,4 +159,4 @@ export function startSideValueToBreakValue(
   }
 }
 
-Plugin.plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);
+Plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

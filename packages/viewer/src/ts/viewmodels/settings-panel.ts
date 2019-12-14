@@ -114,7 +114,7 @@ class SettingsPanel {
     }, this);
   }
 
-  close() {
+  close(): boolean {
     this.opened(false);
     this.pinned(false);
     const viewportElement = document.getElementById(
@@ -124,7 +124,7 @@ class SettingsPanel {
     return true;
   }
 
-  toggle() {
+  toggle(): void {
     if (!this.opened()) {
       if (!this.viewer_.tocPinned()) {
         this.viewer_.showTOC(false); // Hide TOC box
@@ -156,7 +156,7 @@ class SettingsPanel {
     }
   }
 
-  apply() {
+  apply(): void {
     if (
       this.state.renderAllPages() === this.viewerOptions_.renderAllPages() &&
       this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)
@@ -180,13 +180,13 @@ class SettingsPanel {
     }
   }
 
-  cancel() {
+  cancel(): void {
     this.state.viewerOptions.copyFrom(this.viewerOptions_);
     this.state.pageStyle.copyFrom(this.documentOptions_.pageStyle);
     this.close();
   }
 
-  resetUserStyle() {
+  resetUserStyle(): boolean {
     this.state.pageStyle.copyFrom(this.defaultPageStyle);
     this.state.viewerOptions.fontSize(
       ViewerOptions.getDefaultValues().fontSize,
@@ -200,7 +200,7 @@ class SettingsPanel {
     return true;
   }
 
-  focusToFirstItem(outerElemParam?: Element) {
+  focusToFirstItem(outerElemParam?: Element): void {
     const outerElem = outerElemParam || this.settingsToggle;
     const inputElem = ["input", "textarea", "summary"].includes(
       outerElem.localName,
@@ -228,7 +228,7 @@ class SettingsPanel {
     }
   }
 
-  handleKey(key) {
+  handleKey(key): boolean {
     const isSettingsActive =
       this.opened() && this.settingsToggle.contains(document.activeElement);
     const isInInput =

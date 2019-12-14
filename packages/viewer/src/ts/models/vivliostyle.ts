@@ -38,7 +38,7 @@ class VivliostyleImpl {
     this.profile = null;
   }
 
-  setInstance(vivliostyle: Vivliostyle) {
+  setInstance(vivliostyle: Vivliostyle): void {
     this.viewer = vivliostyle.viewer;
     this.constants = vivliostyle.constants;
     this.profile = vivliostyle.profile;

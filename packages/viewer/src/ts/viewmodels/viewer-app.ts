@@ -30,7 +30,7 @@ import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
 import urlParameters from "../stores/url-parameters";
 
-function ViewerApp() {
+function ViewerApp(): void {
   this.documentOptions = new DocumentOptions();
   this.viewerOptions = new ViewerOptions();
 
@@ -113,7 +113,7 @@ function ViewerApp() {
     navigationOptions,
   );
 
-  this.handleKey = (data, event) => {
+  this.handleKey = (data, event): boolean => {
     const key = keyUtil.identifyKeyFromEvent(event);
     if (document.activeElement.id === "vivliostyle-input-url") {
       if (key === "Enter" && event.keyCode === 13) {
@@ -140,7 +140,7 @@ function ViewerApp() {
 
   this.viewer.loadDocument(this.documentOptions);
 
-  window.onhashchange = () => {
+  window.onhashchange = (): void => {
     if (window.location.href != urlParameters.storedUrl) {
       // Reload when address bar change is detected
       window.location.reload();

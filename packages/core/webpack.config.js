@@ -51,7 +51,6 @@ const config = (outputFilename, tsConfigName) => ({
             loader: "ts-loader",
             options: {
               configFile: tsConfigName,
-              transpileOnly: true,
               experimentalWatchApi: false,
             },
           },

@@ -1,7 +1,7 @@
 // Johannes Wilm
 // Vivliostyle Foundation
 
-import { viewer } from "./viewer";
+import { Viewer as CoreViewer } from "./viewer";
 import viewportCss from "../../../resources/vivliostyle-viewport.css";
 import viewportScreenCss from "../../../resources/vivliostyle-viewport-screen.css";
 
@@ -101,7 +101,7 @@ class VivliostylePrint {
         type: "text/html",
       }),
       docURL = URL.createObjectURL(docBlob),
-      Viewer = new viewer.Viewer(
+      Viewer = new CoreViewer(
         {
           viewportElement: this.iframeWin.document.body
             .firstElementChild as HTMLElement,

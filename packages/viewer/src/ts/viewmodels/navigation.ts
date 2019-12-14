@@ -316,7 +316,7 @@ class Navigation {
     });
   }
 
-  navigateToPrevious() {
+  navigateToPrevious(): boolean {
     if (!this.isNavigateToPreviousDisabled()) {
       this.viewer_.navigateToPrevious();
       return true;
@@ -325,7 +325,7 @@ class Navigation {
     }
   }
 
-  navigateToNext() {
+  navigateToNext(): boolean {
     if (!this.isNavigateToNextDisabled()) {
       this.viewer_.navigateToNext();
       return true;
@@ -334,7 +334,7 @@ class Navigation {
     }
   }
 
-  navigateToLeft() {
+  navigateToLeft(): boolean {
     if (!this.isNavigateToLeftDisabled()) {
       this.viewer_.navigateToLeft();
       return true;
@@ -343,7 +343,7 @@ class Navigation {
     }
   }
 
-  navigateToRight() {
+  navigateToRight(): boolean {
     if (!this.isNavigateToRightDisabled()) {
       this.viewer_.navigateToRight();
       return true;
@@ -352,7 +352,7 @@ class Navigation {
     }
   }
 
-  navigateToFirst() {
+  navigateToFirst(): boolean {
     if (!this.isNavigateToFirstDisabled()) {
       this.viewer_.navigateToFirst();
       return true;
@@ -361,7 +361,7 @@ class Navigation {
     }
   }
 
-  navigateToLast() {
+  navigateToLast(): boolean {
     if (!this.isNavigateToLastDisabled()) {
       this.viewer_.navigateToLast();
       return true;
@@ -370,7 +370,7 @@ class Navigation {
     }
   }
 
-  zoomIn() {
+  zoomIn(): boolean {
     if (!this.isZoomInDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(zoom.zoomIn(this.viewer_));
@@ -380,7 +380,7 @@ class Navigation {
     }
   }
 
-  zoomOut() {
+  zoomOut(): boolean {
     if (!this.isZoomOutDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(zoom.zoomOut(this.viewer_));
@@ -390,7 +390,7 @@ class Navigation {
     }
   }
 
-  zoomToActualSize() {
+  zoomToActualSize(): boolean {
     if (!this.isZoomToActualSizeDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(zoom.zoomToActualSize());
@@ -400,7 +400,7 @@ class Navigation {
     }
   }
 
-  toggleFitToScreen() {
+  toggleFitToScreen(): boolean {
     if (!this.isToggleFitToScreenDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(zoom.toggleFitToScreen());
@@ -410,7 +410,7 @@ class Navigation {
     }
   }
 
-  increaseFontSize() {
+  increaseFontSize(): boolean {
     if (!this.isIncreaseFontSizeDisabled()) {
       let fontSize = Number(this.viewerOptions_.fontSize());
       // fontSize *= 1.25;
@@ -433,7 +433,7 @@ class Navigation {
     }
   }
 
-  decreaseFontSize() {
+  decreaseFontSize(): boolean {
     if (!this.isDecreaseFontSizeDisabled()) {
       let fontSize = Number(this.viewerOptions_.fontSize());
       // fontSize *= 0.8;
@@ -456,7 +456,7 @@ class Navigation {
     }
   }
 
-  defaultFontSize() {
+  defaultFontSize(): boolean {
     if (!this.isDefaultFontSizeDisabled()) {
       const fontSize = ViewerOptions.getDefaultValues().fontSize;
       this.viewerOptions_.fontSize(fontSize);
@@ -467,7 +467,7 @@ class Navigation {
     }
   }
 
-  updateFontSizeSettings() {
+  updateFontSizeSettings(): void {
     // Update setting panel "Font Size".
     this.settingsPanel_.state.viewerOptions.fontSize(
       this.viewerOptions_.fontSize(),
@@ -483,7 +483,7 @@ class Navigation {
     }
   }
 
-  onclickViewport() {
+  onclickViewport(): boolean {
     if (this.settingsPanel_.justClicked) {
       return true;
     }
@@ -499,7 +499,7 @@ class Navigation {
     return true;
   }
 
-  toggleTOC() {
+  toggleTOC(): boolean {
     if (!this.isTOCToggleDisabled()) {
       let intervalID: NodeJS.Timeout | null = null;
 
@@ -552,17 +552,17 @@ class Navigation {
     }
   }
 
-  navigateTOC(key) {
+  navigateTOC(key): boolean {
     const selecter =
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
     const nodes = Array.from(document.querySelectorAll(selecter));
     let index = nodes.indexOf(document.activeElement);
 
-    const isButton = (index) => {
+    const isButton = (index): boolean => {
       return nodes[index] && nodes[index].getAttribute("role") === "button";
     };
-    const isExpanded = (index) => {
+    const isExpanded = (index): boolean => {
       return (
         nodes[index] && nodes[index].getAttribute("aria-expanded") === "true"
       );
@@ -645,7 +645,7 @@ class Navigation {
     return true;
   }
 
-  handleKey(key) {
+  handleKey(key): boolean {
     const isSettingsActive =
       this.settingsPanel_.opened() &&
       this.settingsPanel_.settingsToggle.contains(document.activeElement);

@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "./vivliostyle";
+import { PageViewMode as CorePageViewMode } from "@vivliostyle/core/lib/vivliostyle/viewer";
 
 export class PageViewModeInstance {
   toSpreadViewString() {
@@ -38,7 +38,7 @@ export class PageViewModeInstance {
         throw new Error("Invalid PageViewMode");
     }
   }
-  toString() {
+  toString(): string {
     switch (this) {
       // FIXME: We want to stop disabling this rule to future
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -65,7 +65,7 @@ const PageViewMode = {
   defaultMode() {
     return this.AUTO_SPREAD;
   },
-  fromSpreadViewString(str) {
+  fromSpreadViewString(str: string) {
     switch (str) {
       case "true":
         return this.SPREAD;
@@ -76,13 +76,13 @@ const PageViewMode = {
         return this.AUTO_SPREAD;
     }
   },
-  of(name) {
+  of(name: string) {
     switch (name) {
-      case vivliostyle.viewer.PageViewMode.SPREAD:
+      case CorePageViewMode.SPREAD:
         return this.SPREAD;
-      case vivliostyle.viewer.PageViewMode.SINGLE_PAGE:
+      case CorePageViewMode.SINGLE_PAGE:
         return this.SINGLE_PAGE;
-      case vivliostyle.viewer.PageViewMode.AUTO_SPREAD:
+      case CorePageViewMode.AUTO_SPREAD:
         return this.AUTO_SPREAD;
       default:
         throw new Error(`Invalid PageViewMode name: ${name}`);

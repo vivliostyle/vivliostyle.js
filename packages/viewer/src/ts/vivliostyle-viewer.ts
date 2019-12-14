@@ -24,8 +24,8 @@ import "./bindings/menuButton";
 import "./bindings/swipePages";
 
 export default {
-  start() {
-    function startViewer() {
+  start(): void {
+    function startViewer(): void {
       ko.applyBindings(new ViewerApp());
     }
 

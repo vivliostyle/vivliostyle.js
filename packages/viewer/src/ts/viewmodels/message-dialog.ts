@@ -37,7 +37,7 @@ class MessageDialog {
     this.visible = ko.pureComputed(() => queue().length > 0);
   }
 
-  getDisplayMessage(errorInfo: ErrorInfo) {
+  getDisplayMessage(errorInfo: ErrorInfo): string {
     const e = errorInfo.error;
     let msg = e && (e.toString() || e.frameTrace || e.stack);
     if (msg) {

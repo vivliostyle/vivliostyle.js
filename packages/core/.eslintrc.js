@@ -11,6 +11,7 @@ module.exports = {
   },
   globals: {
     DEBUG: true,
+    globalThis: false,
   },
   extends: [
     "eslint:recommended",
@@ -146,7 +147,7 @@ module.exports = {
     // "block-spacing": "off",
     // "brace-style": "off",
     // "camelcase": "off",
-    "comma-dangle": "error",
+    "comma-dangle": ["error", "only-multiline"],
     "comma-spacing": "error",
     "comma-style": ["error", "last"],
     // "computed-property-spacing": "off",

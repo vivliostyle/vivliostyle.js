@@ -17,8 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Viewer as VivliostyleViewer } from "@vivliostyle/core";
-import vivliostyle from "./vivliostyle";
+import { Viewer, ZoomType } from "@vivliostyle/core";
 
 class ZoomOptions {
   zoom: number;
@@ -29,33 +28,34 @@ class ZoomOptions {
   get fitToScreen(): null | boolean {
     return null;
   }
-  getCurrentZoomFactor(_viewer?: VivliostyleViewer) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getCurrentZoomFactor(_viewer?: Viewer): number {
     return 1;
   }
-  toggleFitToScreen() {
+  toggleFitToScreen(): ZoomOptions {
     return new ZoomOptions(1);
   }
-  zoomIn(viewer: VivliostyleViewer) {
+  zoomIn(viewer: Viewer): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
   }
-  zoomOut(viewer: VivliostyleViewer) {
+  zoomOut(viewer: Viewer): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
   }
-  zoomToActualSize() {
+  zoomToActualSize(): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(1);
   }
-  static createDefaultOptions() {
+  static createDefaultOptions(): FitToScreen {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FitToScreen();
   }
-  static createFromZoomFactor(zoom) {
+  static createFromZoomFactor(zoom): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(zoom);
@@ -66,28 +66,26 @@ export class FitToScreen extends ZoomOptions {
   constructor() {
     super(1);
   }
-  get fitToScreen() {
+  get fitToScreen(): boolean {
     return true;
   }
-  toggleFitToScreen() {
+  toggleFitToScreen(): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(1);
   }
-  getCurrentZoomFactor(viewer: VivliostyleViewer) {
-    return viewer.queryZoomFactor(
-      vivliostyle.viewer.ZoomType.FIT_INSIDE_VIEWPORT,
-    );
+  getCurrentZoomFactor(viewer: Viewer): number {
+    return viewer.queryZoomFactor(ZoomType.FIT_INSIDE_VIEWPORT);
   }
 }
 class FixedZoomFactor extends ZoomOptions {
-  get fitToScreen() {
+  get fitToScreen(): boolean {
     return false;
   }
-  toggleFitToScreen() {
+  toggleFitToScreen(): FitToScreen {
     return new FitToScreen();
   }
-  getCurrentZoomFactor() {
+  getCurrentZoomFactor(): number {
     return this.zoom;
   }
 }

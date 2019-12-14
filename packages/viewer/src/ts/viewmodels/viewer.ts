@@ -25,6 +25,7 @@ import Logger from "../logging/logger";
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
 import vivliostyle from "../models/vivliostyle";
+import { Navigation } from "@vivliostyle/core/lib/vivliostyle/viewer";
 
 type State = {
   status: PureComputed<unknown>;
@@ -99,7 +100,7 @@ class Viewer {
     this.setupViewerOptionSubscriptions();
   }
 
-  setupViewerEventHandler() {
+  setupViewerEventHandler(): void {
     const logger = Logger.getLogger();
     this.viewer_.addListener("debug", (payload) => {
       logger.debug(payload.content);
@@ -200,14 +201,17 @@ class Viewer {
     });
   }
 
-  setupViewerOptionSubscriptions() {
+  setupViewerOptionSubscriptions(): void {
     ko.computed(function() {
       const viewerOptions = this.viewerOptions_.toObject();
       this.viewer_.setOptions(viewerOptions);
     }, this).extend({ rateLimit: 0 });
   }
 
-  loadDocument(documentOptions: DocumentOptions, viewerOptions: ViewerOptions) {
+  loadDocument(
+    documentOptions: DocumentOptions,
+    viewerOptions: ViewerOptions,
+  ): void {
     this.state_.status.value(vivliostyle.constants.ReadyState.LOADING);
     if (viewerOptions) {
       this.viewerOptions_.copyFrom(viewerOptions);
@@ -221,70 +225,72 @@ class Viewer {
         this.viewerOptions_.toObject(),
       );
     } else if (documentOptions.bookUrl()) {
-      if (this.viewer_.loadPublication)
+      if (this.viewer_.loadPublication) {
         // new name
         this.viewer_.loadPublication(
           documentOptions.bookUrl(),
           documentOptions.toObject(),
           this.viewerOptions_.toObject(),
         );
-      // old name
-      else
+        // old name
+      } else {
+        // @ts-ignore: Unreachable code TS2339
         this.viewer_.loadEPUB(
           documentOptions.bookUrl(),
           documentOptions.toObject(),
           this.viewerOptions_.toObject(),
         );
+      }
     } else {
       // No document specified, show welcome page
       this.state_.status.value("");
     }
   }
 
-  navigateToPrevious() {
-    this.viewer_.navigateToPage("previous");
+  navigateToPrevious(): void {
+    this.viewer_.navigateToPage(Navigation.PREVIOUS);
   }
 
-  navigateToNext() {
-    this.viewer_.navigateToPage("next");
+  navigateToNext(): void {
+    this.viewer_.navigateToPage(Navigation.NEXT);
   }
 
-  navigateToLeft() {
-    this.viewer_.navigateToPage("left");
+  navigateToLeft(): void {
+    this.viewer_.navigateToPage(Navigation.LEFT);
   }
 
-  navigateToRight() {
-    this.viewer_.navigateToPage("right");
+  navigateToRight(): void {
+    this.viewer_.navigateToPage(Navigation.RIGHT);
   }
 
-  navigateToFirst() {
-    this.viewer_.navigateToPage("first");
+  navigateToFirst(): void {
+    this.viewer_.navigateToPage(Navigation.FIRST);
   }
 
-  navigateToLast() {
-    this.viewer_.navigateToPage("last");
+  navigateToLast(): void {
+    this.viewer_.navigateToPage(Navigation.LAST);
   }
 
-  navigateToEPage(epage) {
-    this.viewer_.navigateToPage("epage", epage);
+  navigateToEPage(epage): void {
+    this.viewer_.navigateToPage(Navigation.EPAGE, epage);
   }
 
-  navigateToInternalUrl(href) {
+  navigateToInternalUrl(href): void {
     this.viewer_.navigateToInternalUrl(href);
   }
 
-  queryZoomFactor(type) {
+  queryZoomFactor(type): number {
     return this.viewer_.queryZoomFactor(type);
   }
 
-  epageToPageNumber(epage) {
+  epageToPageNumber(epage): number {
     if (!epage && epage != 0) {
       return undefined;
     }
     const pageNumber = Math.round(epage + 1);
     return pageNumber;
   }
-  epageFromPageNumber(pageNumber) {
+  epageFromPageNumber(pageNumber): number {
     if (!pageNumber && pageNumber != 0) {
       return undefined;
     }
@@ -292,7 +298,7 @@ class Viewer {
     return epage;
   }
 
-  showTOC(shown?: boolean, autoHide?: boolean) {
+  showTOC(shown?: boolean, autoHide?: boolean): void {
     if (this.viewer_.isTOCVisible() == null) {
       // TOC is unavailable
       return;
