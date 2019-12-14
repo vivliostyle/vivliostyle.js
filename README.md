@@ -4,14 +4,14 @@
 
 HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
-- [🌏Vivliostyle website (vivliostyle.org)](https://vivliostyle.org)
-- [📖Documentation](https://vivliostyle.org/docs/)
-- [🤝Join Community](https://vivliostyle.org/community/)
+- 🌏 [Vivliostyle website (vivliostyle.org)](https://vivliostyle.org)
+- 📖 [Documentation](https://vivliostyle.org/docs/)
+- 🤝 [Join Community](https://vivliostyle.org/community/)
 
 ## Packages
 
-- [vivliostyle-core](https://github.com/vivliostyle/vivliostyle/packages/core)
-- [vivliostyle-viewer](https://github.com/vivliostyle/vivliostyle/packages/viewer)
+- [vivliostyle-core](https://github.com/vivliostyle/vivliostyle/tree/master/packages/core)
+- [vivliostyle-viewer](https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer)
 - [vivliostyle-cli](https://github.com/vivliostyle/vivliostyle-cli)
 
 ## Contribution
