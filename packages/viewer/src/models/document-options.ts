@@ -82,7 +82,7 @@ class DocumentOptions {
     });
 
     // read userStyle=data:.<cssText> URL parameter
-    urlOptions.userStyleSheet.find((userStyle, index) => {
+    urlOptions.userStyleSheet.find((userStyle: string, index) => {
       // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
       if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(userStyle)) {
         this.dataUserStyleIndex = index;
@@ -104,7 +104,7 @@ class DocumentOptions {
     });
   }
 
-  toObject(): DocumentOptionsType[] {
+  toObject(): DocumentOptionsType {
     function convertStyleSheetArray(arr): { url?: string; text: string }[] {
       return arr.map((url) => ({
         url,

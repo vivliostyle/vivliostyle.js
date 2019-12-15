@@ -20,7 +20,7 @@
 
 import {
   CoreViewerOptions,
-  PageViewMode as AdaptivePageViewMode,
+  PageViewMode as CorePageViewMode,
 } from "@vivliostyle/core";
 import ko, { Observable } from "knockout";
 
@@ -40,8 +40,8 @@ interface ViewerOptionsType {
   renderAllPages: boolean;
   fontSize: number;
   profile: boolean;
-  pageViewMode: unknown;
-  zoom?: FitToScreen;
+  pageViewMode: PageViewModeInstance;
+  zoom: FitToScreen | undefined;
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
@@ -70,6 +70,7 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
     pageViewMode: PageViewMode.fromSpreadViewString(
       urlParameters.getParameter("spread")[0],
     ),
+    zoom: undefined,
   };
 }
 
@@ -172,7 +173,7 @@ class ViewerOptions {
     return {
       renderAllPages: this.renderAllPages() as boolean,
       fontSize: Number(this.fontSize()),
-      pageViewMode: this.pageViewMode().toString() as AdaptivePageViewMode,
+      pageViewMode: this.pageViewMode().toString() as CorePageViewMode,
       fitToScreen: this.zoom().fitToScreen,
       zoom: this.zoom().zoom,
     };

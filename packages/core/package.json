@@ -10,7 +10,7 @@
     "clean": "shx rm -rf lib/* browser .cache",
     "dev": "NODE_ENV=development rollup -c -w",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js,html}}\"",
-    "lint": "eslint src --ext .ts -f codeframe",
+    "lint": "eslint src --fix --ext .ts -f codeframe",
     "test": "karma start test/conf/karma-local.conf.js",
     "test-sauce": "test -z \"$SAUCE_USERNAME\" || karma start test/conf/karma-sauce.conf.js",
     "typecheck": "tsc --noEmit"

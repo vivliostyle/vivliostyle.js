@@ -62,10 +62,10 @@ const PageViewMode = {
   AUTO_SPREAD: new PageViewModeInstance(),
   SINGLE_PAGE: new PageViewModeInstance(),
   SPREAD: new PageViewModeInstance(),
-  defaultMode(): string {
+  defaultMode(): CorePageViewMode {
     return this.AUTO_SPREAD;
   },
-  fromSpreadViewString(str: string): string {
+  fromSpreadViewString(str: string): CorePageViewMode {
     switch (str) {
       case "true":
         return this.SPREAD;
