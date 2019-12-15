@@ -1,3 +1,5 @@
+/* eslint-disable import/export */
+// TODO: adapt new module structure
 /*
  * Copyright 2015 Trim-marks Inc.
  *
