@@ -3,8 +3,8 @@
   "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
   "version": "2019.11.100-pre",
   "scripts": {
-    "build-dev": "yarn clean && gulp build-dev && NODE_ENV=development rollup -c",
-    "build": "yarn clean && gulp build && NODE_ENV=production rollup -c",
+    "build-dev": "gulp build-dev && NODE_ENV=development rollup -c",
+    "build": "gulp build && NODE_ENV=production rollup -c",
     "clean": "shx rm -rf lib/* .cache",
     "dev": "run-p dev:*",
     "dev:html": "gulp serve-dev",
@@ -15,12 +15,12 @@
     "lint:css": "stylelint src/scss/{*.*,**/*.*}",
     "serve": "yarn build && gulp serve",
     "test": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
-    "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
-    "typecheck": "tsc --noEmit"
+    "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
   },
   "dependencies": {
     "@vivliostyle/core": "^2019.11.100-pre",
-    "font-awesome": "^4.7.0"
+    "font-awesome": "^4.7.0",
+    "knockout": "^3.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
@@ -34,7 +34,6 @@
     "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-prettier": "^3.1.1",
-    "find-package-json": "^1.2.0",
     "gulp": "^4.0.2",
     "gulp-changed": "^4.0.0",
     "gulp-ejs": "^5.0.0",
@@ -45,22 +44,16 @@
     "jasmine-core": "^3.4.0",
     "karma": "^4.2.0",
     "karma-jasmine": "^2.0.1",
+    "karma-rollup-preprocessor": "^7.0.2",
     "karma-sauce-launcher": "^2.0.2",
     "karma-typescript-preprocessor": "^0.4.0",
     "karma-verbose-reporter": "0.0.6",
-    "karma-webpack": "^4.0.2",
-    "knockout": "^3.5.0",
     "node-sass": "^4.12.0",
     "node-sass-package-importer": "^5.3.2",
     "stylelint": "^12.0.0",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-scss": "^3.11.0",
-    "terser-webpack-plugin": "^2.3.0",
-    "tinyify": "^2.5.1",
-    "ts-loader": "^6.2.0",
-    "typescript": "^3.6.3",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "typescript": "^3.6.3"
   },
   "author": "Vivliostyle Foundation",
   "license": "AGPL-3.0",

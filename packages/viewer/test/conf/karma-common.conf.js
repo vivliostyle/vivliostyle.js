@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const webpackConfig = require("../../webpack.config");
+const rollupConfig = require("../../rollup.config.js");
 
 const TEST_FILES = "test/spec/**/*.js";
 
@@ -28,19 +28,12 @@ module.exports = function(config) {
     basePath: "../..",
     frameworks: ["jasmine"],
     preprocessors: {
-      [TEST_FILES]: ["webpack"],
+      [TEST_FILES]: ["rollup"],
     },
     files: [TEST_FILES],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    webpack: {
-      mode: webpackConfig.mode,
-      entry: webpackConfig.entry,
-      module: webpackConfig.module,
-      output: webpackConfig.output,
-      plugins: webpackConfig.plugins,
-      resolve: webpackConfig.resolve,
-    },
+    rollupPreprocessor: rollupConfig,
   };
 };
