@@ -32,7 +32,7 @@ const VIEWER_HTML_FILES = {
   development: "vivliostyle-viewer-dev.html",
 };
 const VIEWER_JS_FILES = {
-  production: pkg.main,
+  production: path.relative(DEST_DIR, pkg.main),
   development: "js/vivliostyle-viewer-dev.js",
 };
 const VERSION = pkg.verison;
