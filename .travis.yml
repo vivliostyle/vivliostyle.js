@@ -4,8 +4,8 @@ node_js:
 before_install:
   - sudo pip install virtualenv # for wpt_sauce
 script:
-  - yarn lint
   - yarn build
+  - yarn lint
   - yarn test-sauce
 # - scripts/wpt-sauce.sh
 # after_success: TODO: uncheck after the merger
