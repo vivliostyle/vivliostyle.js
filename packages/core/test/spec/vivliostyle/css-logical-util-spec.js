@@ -15,9 +15,9 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_logical from "../../../src/vivliostyle/css-logical-props";
+import * as vivliostyle_logical from "../../../src/vivliostyle/css-logical-util";
 
-describe("css-logical-props", function() {
+describe("css-logical-util", function() {
   "use strict";
 
   var l = vivliostyle_logical;

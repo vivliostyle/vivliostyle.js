@@ -33,7 +33,7 @@ const plugins = [
   }),
   // Replace require() statements refering non-JS resources with its contents
   string({
-    include: ["src/resources/*", "resources/*"],
+    include: ["src/vivliostyle/assets/*", "resources/*"],
   }),
   // Replace conditional variable with value
   replace({ VIVLIOSTYLE_DEBUG: JSON.stringify(isDevelopment) }),
@@ -80,7 +80,9 @@ const buildStep = [
     ],
     plugins,
     watch: {
-      clearScreen: false,
+      clearScreen: true,
+      exclude: ["*"],
+      include: ["src/**/*.ts"],
     },
   },
 ];

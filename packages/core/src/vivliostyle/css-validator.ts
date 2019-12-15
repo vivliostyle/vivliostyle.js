@@ -23,7 +23,7 @@ import * as Css from "./css";
 import * as CssParser from "./css-parser";
 import * as CssTokenizer from "./css-tokenizer";
 import * as Logging from "./logging";
-import ValidationTxt from "../resources/validation.txt";
+import ValidationTxt from "./assets/validation.txt";
 
 export interface PropertyReceiver {
   unknownProperty(name: string, value: Css.Val): void;

@@ -18,10 +18,10 @@
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
-import * as vivliostyle_pages from "../../../src/vivliostyle/pages";
+import * as vivliostyle_css_page from "../../../src/vivliostyle/css-page";
 
-describe("page", function() {
-  var module = vivliostyle_pages;
+describe("css-page", function() {
+  var module = vivliostyle_css_page;
   var expected;
 
   describe("resolvePageSizeAndBleed", function() {
@@ -194,7 +194,7 @@ describe("page", function() {
     var pageProps, handler;
 
     function createHandler() {
-      return new vivliostyle_pages.PageParserHandler(
+      return new vivliostyle_css_page.PageParserHandler(
         null,
         new adapt_cssparse.DispatchParserHandler(),
         null,
