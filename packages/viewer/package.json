@@ -1,6 +1,6 @@
 {
   "name": "@vivliostyle/viewer",
-  "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
+  "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser.",
   "version": "2.0.0-pre.0",
   "scripts": {
     "build": "gulp build && NODE_ENV=production rollup -c",
@@ -67,7 +67,7 @@
     "lib/fonts",
     "lib/css"
   ],
-  "homepage": "https://github.com/vivliostyle/vivliostyle/packages/viewer",
+  "homepage": "https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer",
   "keywords": [
     "vivliostyle"
   ],

@@ -1,6 +1,6 @@
-# Vivliostyle UI
+# Vivliostyle Viewer
 
-Vivliostyle UI is a UI component used with [Vivliostyle.js (core engine)](https://github.com/vivliostyle/vivliostyle.js) to make Vivliostyle Viewer, a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+Vivliostyle Viewer is a UI component used with [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle/tree/master/packages/core) to make Vivliostyle Viewer, a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 ## Try Vivliostyle Viewer
 
@@ -10,11 +10,11 @@ Vivliostyle UI is a UI component used with [Vivliostyle.js (core engine)](https:
 
 Please send them to
 
-- GitHub Issues: <https://github.com/vivliostyle/vivliostyle-ui/issues>
+- GitHub Issues: <https://github.com/vivliostyle/vivliostyle/issues>
 
 ## Development
 
-See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
+See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle/wiki/Development).
 
 ## License
 
@@ -23,5 +23,4 @@ Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
 ## Documentation
 
 - [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
-
 - [Vivliostyle Documentation](https://vivliostyle.org/docs/)

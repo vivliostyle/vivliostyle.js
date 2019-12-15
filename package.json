@@ -12,15 +12,17 @@
     "preship": "yarn clean && yarn build",
     "ship": "lerna publish from-package",
     "ship:canary": "lerna publish --canary",
+    "ship:pre": "yarn ship --dist-tag next",
     "test": "lerna run test --parallel",
     "test-sauce": "lerna run test-sauce",
     "version:amend": "git tag --points-at HEAD | xargs -I{} git tag --delete {} && git reset --hard HEAD^",
-    "version:manual": "lerna version --changelog-preset=angular --create-release github",
-    "version:manual:dry": "lerna version --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks",
-    "version:prerelease": "lerna version --conventional-commits --conventional-prerelease --changelog-preset=angular --create-release github",
-    "version:prerelease:dry": "lerna version --conventional-commits --conventional-prerelease --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks",
-    "version:up": "lerna version --conventional-commits --changelog-preset=angular --create-release github",
-    "version:up:dry": "lerna version --conventional-commits --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks"
+    "version:bump": "lerna version --conventional-commits --create-release github",
+    "version:bump:dry": "yarn version:bump --no-git-tag-version --no-push --no-commit-hooks",
+    "version:graduate": "lerna version --conventional-commits --conventional-graduate --create-release github",
+    "version:manual": "lerna version",
+    "version:manual:dry": "yarn version:manual --no-git-tag-version --no-push --no-commit-hooks",
+    "version:pre": "lerna version --conventional-commits --conventional-prerelease --create-release github",
+    "version:pre:dry": "yarn version:pre --no-git-tag-version --no-push --no-commit-hooks"
   },
   "devDependencies": {
     "eslint": "^6.7.2",

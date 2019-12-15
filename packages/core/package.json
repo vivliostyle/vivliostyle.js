@@ -1,6 +1,6 @@
 {
   "name": "@vivliostyle/core",
-  "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
+  "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.",
   "version": "2.0.0-pre.0",
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
@@ -65,7 +65,7 @@
     "lib",
     "resources"
   ],
-  "homepage": "https://github.com/vivliostyle/vivliostyle/packages/core",
+  "homepage": "https://github.com/vivliostyle/vivliostyle/tree/master/packages/core",
   "keywords": [
     "vivliostyle"
   ],

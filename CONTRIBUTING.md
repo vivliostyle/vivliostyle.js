@@ -29,3 +29,27 @@ yarn dev
 yarn lint
 yarn format
 ```
+
+## Release Flow
+
+```
+yarn format
+yarn lint
+yarn test
+```
+
+### Pre-release
+
+```
+yarn version:pre
+```
+
+```
+yarn version:bump
+```
+
+### Stable
+
+```
+yarn version:graduate
+```
