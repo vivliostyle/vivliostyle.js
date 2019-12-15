@@ -33,7 +33,7 @@
   "license": "AGPL-3.0",
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged"
+      "pre-commit": "yarn lint && pretty-quick --staged"
     }
   },
   "private": true,

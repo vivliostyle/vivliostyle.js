@@ -29,12 +29,12 @@ import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
 import * as Layout from "./layout";
 import {
-  RepetitiveElement,
-  Layout as LayoutType,
-  Table,
-  Vtree,
   FormattingContextType,
   FragmentLayoutConstraintType,
+  Layout as LayoutType,
+  RepetitiveElement,
+  Table,
+  Vtree,
 } from "./types";
 
 export class RepetitiveElementsOwnerFormattingContext

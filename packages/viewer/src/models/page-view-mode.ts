@@ -20,7 +20,7 @@
 import { PageViewMode as CorePageViewMode } from "@vivliostyle/core";
 
 export class PageViewModeInstance {
-  toSpreadViewString() {
+  toSpreadViewString(): string {
     switch (this) {
       // FIXME: We want to stop disabling this rule to future
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -62,10 +62,10 @@ const PageViewMode = {
   AUTO_SPREAD: new PageViewModeInstance(),
   SINGLE_PAGE: new PageViewModeInstance(),
   SPREAD: new PageViewModeInstance(),
-  defaultMode() {
+  defaultMode(): string {
     return this.AUTO_SPREAD;
   },
-  fromSpreadViewString(str: string) {
+  fromSpreadViewString(str: string): string {
     switch (str) {
       case "true":
         return this.SPREAD;

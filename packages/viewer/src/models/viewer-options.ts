@@ -18,12 +18,15 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import {
+  CoreViewerOptions,
+  PageViewMode as AdaptivePageViewMode,
+} from "@vivliostyle/core";
 import ko, { Observable } from "knockout";
+
 import urlParameters from "../stores/url-parameters";
 import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions, { FitToScreen } from "./zoom-options";
-import { CoreViewerOptions } from "@vivliostyle/core";
-import { PageViewMode as AdaptivePageViewMode } from "@vivliostyle/core";
 
 type Options = {
   renderAllPages: Observable<unknown>;
@@ -33,7 +36,15 @@ type Options = {
   zoom: Observable<ZoomOptions>;
 };
 
-function getViewerOptionsFromURL() {
+interface ViewerOptionsType {
+  renderAllPages: boolean;
+  fontSize: number;
+  profile: boolean;
+  pageViewMode: unknown;
+  zoom?: FitToScreen;
+}
+
+function getViewerOptionsFromURL(): ViewerOptionsType {
   const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
   const fontSizeStr = urlParameters.getParameter("fontSize")[0];
   const r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
@@ -62,7 +73,7 @@ function getViewerOptionsFromURL() {
   };
 }
 
-function getDefaultValues() {
+function getDefaultValues(): ViewerOptionsType {
   const isNotBook = urlParameters.hasParameter("x");
   return {
     renderAllPages: isNotBook,
@@ -79,6 +90,7 @@ class ViewerOptions {
   profile: Observable<unknown>;
   pageViewMode: Observable<PageViewModeInstance>;
   zoom: Observable<ZoomOptions>;
+
   static getDefaultValues: () => {
     renderAllPages: boolean;
     fontSize: number;
@@ -148,7 +160,7 @@ class ViewerOptions {
     }
   }
 
-  copyFrom(other: Options) {
+  copyFrom(other: Options): void {
     this.renderAllPages(other.renderAllPages());
     this.fontSize(other.fontSize());
     this.profile(other.profile());
@@ -161,8 +173,8 @@ class ViewerOptions {
       renderAllPages: this.renderAllPages() as boolean,
       fontSize: Number(this.fontSize()),
       pageViewMode: this.pageViewMode().toString() as AdaptivePageViewMode,
-      zoom: this.zoom().zoom,
       fitToScreen: this.zoom().fitToScreen,
+      zoom: this.zoom().zoom,
     };
   }
 }

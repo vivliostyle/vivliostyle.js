@@ -40,7 +40,7 @@ declare global {
 }
 
 ko.bindingHandlers.swipePages = {
-  init(element, valueAccessor) {
+  init(element, valueAccessor): void {
     if (supportTouchEvents && ko.unwrap(valueAccessor())) {
       element.addEventListener("touchstart", (event) => {
         if (event.touches.length > 1) {

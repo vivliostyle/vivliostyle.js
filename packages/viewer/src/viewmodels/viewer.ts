@@ -18,9 +18,13 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReadyState, PageProgression, profiler } from "@vivliostyle/core";
-// import {ReadyState} from "../vivliostyle";
-import { CoreViewer, Navigation } from "@vivliostyle/core";
+import {
+  CoreViewer,
+  Navigation,
+  ReadyState,
+  PageProgression,
+  profiler,
+} from "@vivliostyle/core";
 import ko, { Observable, PureComputed } from "knockout";
 
 import DocumentOptions from "../models/document-options";
@@ -221,23 +225,11 @@ class Viewer {
         this.viewerOptions_.toObject(),
       );
     } else if (documentOptions.bookUrl()) {
-      if (this.coreViewer_.loadPublication) {
-        // new name
-        this.coreViewer_.loadPublication(
-          documentOptions.bookUrl(),
-          documentOptions.toObject(),
-          this.viewerOptions_.toObject(),
-        );
-        // old name
-      } else {
-        // FIXME: remove this
-        // @ts-ignore: Unreachable code TS2339
-        this.coreViewer_.loadEPUB(
-          documentOptions.bookUrl(),
-          documentOptions.toObject(),
-          this.viewerOptions_.toObject(),
-        );
-      }
+      this.coreViewer_.loadPublication(
+        documentOptions.bookUrl(),
+        documentOptions.toObject(),
+        this.viewerOptions_.toObject(),
+      );
     } else {
       // No document specified, show welcome page
       this.state_.status.value("");

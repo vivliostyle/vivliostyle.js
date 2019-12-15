@@ -25,7 +25,7 @@ import * as Logical from "./css-logical-props";
 import * as Sizing from "./sizing";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
-import { PageFloats, Vtree, Layout as LayoutType } from "./types";
+import { Layout as LayoutType, PageFloats, Vtree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
 export type FloatReference = PageFloats.FloatReference;

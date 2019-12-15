@@ -24,7 +24,7 @@ import PageStyle from "./page-style";
 import urlParameters from "../stores/url-parameters";
 import stringUtil from "../utils/string-util";
 
-function getDocumentOptionsFromURL() {
+function getDocumentOptionsFromURL(): DocumentOptionsType {
   const bookUrl = urlParameters.getParameter("b");
   const xUrl = urlParameters.getParameter("x");
   const fragment = urlParameters.getParameter("f");
@@ -37,6 +37,16 @@ function getDocumentOptionsFromURL() {
     authorStyleSheet: style.length ? style : [],
     userStyleSheet: userStyle.length ? userStyle : [],
   };
+}
+
+interface DocumentOptionsType {
+  pageStyle?: PageStyle;
+  dataUserStyleIndex?: number;
+  bookUrl?: string;
+  xUrl?: Array<string> | null;
+  fragment?: string;
+  authorStyleSheet?: Array<unknown>;
+  userStyleSheet?: Array<unknown>;
 }
 
 class DocumentOptions {
@@ -94,8 +104,8 @@ class DocumentOptions {
     });
   }
 
-  toObject() {
-    function convertStyleSheetArray(arr) {
+  toObject(): DocumentOptionsType[] {
+    function convertStyleSheetArray(arr): { url?: string; text: string }[] {
       return arr.map((url) => ({
         url,
       }));
@@ -114,7 +124,7 @@ class DocumentOptions {
     };
   }
 
-  updateUserStyleSheetFromCSSText(cssText?: string) {
+  updateUserStyleSheetFromCSSText(cssText?: string): void {
     if (cssText == undefined) {
       cssText = this.pageStyle.toCSSText();
     }

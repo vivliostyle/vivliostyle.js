@@ -32,12 +32,12 @@ import * as Vgen from "./vgen";
 import * as VtreeImpl from "./vtree";
 import * as Layout from "./layout";
 import {
-  Table,
-  RepetitiveElement,
-  Vtree,
   FormattingContextType,
   FragmentLayoutConstraintType,
   Layout as LayoutType,
+  RepetitiveElement,
+  Table,
+  Vtree,
 } from "./types";
 
 export class TableRow {

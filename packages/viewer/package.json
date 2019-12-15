@@ -11,12 +11,13 @@
     "dev:webpack": "NODE_ENV=development webpack -w",
     "format": "prettier --write \"{*.{js,md,json},{src,test}/**/*.{ts,js}}\"",
     "lint": "run-p lint:*",
-    "lint:scripts": "eslint src/ts --ext .ts -f codeframe",
+    "lint:scripts": "eslint src --ext .ts -f codeframe",
     "lint:styles": "stylelint src/scss/{*.*,**/*.*}",
-    "serve": "gulp serve",
+    "serve-production": "gulp serve",
     "setup-local-vivliostyle": "node scripts/setup-local-vivliostyle.js",
     "test": "NODE_ENV=development gulp test-local",
-    "test-sauce": "NODE_ENV=development gulp test-sauce"
+    "test-sauce": "NODE_ENV=development gulp test-sauce",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vivliostyle/core": "^2019.11.100-pre",

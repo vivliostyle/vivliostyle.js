@@ -146,7 +146,7 @@ class PageStyle {
     this.afterOtherStyle = ko.observable("");
 
     this.viewerFontSize = null;
-    this.setViewerFontSizeObservable = (viewerFontSizeObservable) => {
+    this.setViewerFontSizeObservable = (viewerFontSizeObservable): void => {
       this.viewerFontSize = viewerFontSizeObservable;
       const elem = document.getElementsByName(
         "vivliostyle-settings_viewer-font-size",
@@ -280,7 +280,7 @@ class PageStyle {
     return px;
   }
 
-  fromCSSText(cssText: string) {
+  fromCSSText(cssText: string): void {
     const r = this.pageStyleRegExp.exec(cssText);
     if (r) {
       const [
@@ -472,8 +472,8 @@ class PageStyle {
     }
   }
 
-  toCSSText() {
-    function imp(important) {
+  toCSSText(): string {
+    function imp(important): string {
       return important ? " !important" : "";
     }
 
@@ -635,7 +635,7 @@ class PageStyle {
     return cssText;
   }
 
-  copyFrom(other) {
+  copyFrom(other): void {
     this.pageSizeMode(other.pageSizeMode());
     this.presetSize(other.presetSize());
     this.isLandscape(other.isLandscape());
@@ -675,7 +675,7 @@ class PageStyle {
     }
   }
 
-  equivalentTo(other) {
+  equivalentTo(other): boolean {
     if (this.pageSizeMode() !== other.pageSizeMode()) return false;
     if (
       this.pageSizeMode() === Mode.Preset &&

@@ -29,7 +29,7 @@ enum LogLevel {
 export default class Logger {
   logLevel: LogLevel;
 
-  static getLogger() {
+  static getLogger(): Logger {
     return new Logger();
   }
 
@@ -37,11 +37,11 @@ export default class Logger {
     this.logLevel = LogLevel.Error;
   }
 
-  setLogLevel(logLevel) {
+  setLogLevel(logLevel): void {
     this.logLevel = logLevel;
   }
 
-  debug(content) {
+  debug(content): void {
     if (this.logLevel === LogLevel.Debug) {
       messageQueue.push({
         type: "debug",
@@ -50,7 +50,7 @@ export default class Logger {
     }
   }
 
-  info(content) {
+  info(content): void {
     if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info) {
       messageQueue.push({
         type: "info",
@@ -59,7 +59,7 @@ export default class Logger {
     }
   }
 
-  warn(content) {
+  warn(content): void {
     if (
       this.logLevel === LogLevel.Debug ||
       this.logLevel === LogLevel.Info ||
@@ -72,7 +72,7 @@ export default class Logger {
     }
   }
 
-  error(content) {
+  error(content): void {
     if (
       this.logLevel === LogLevel.Debug ||
       this.logLevel === LogLevel.Info ||

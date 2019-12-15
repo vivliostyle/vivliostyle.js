@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * Copyright 2015 Trim-marks Inc.
  * Copyright 2018 Vivliostyle Foundation
@@ -7,7 +8,7 @@
  * Vivliostyle UI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * (at your option) unknown later version.
  *
  * Vivliostyle UI is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,14 +19,13 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CoreViewer, ReadyState, PageProgression } from "@vivliostyle/core";
 import ko, { PureComputed } from "knockout";
 
 import ViewerOptions from "../models/viewer-options";
 import keyUtil from "../utils/key-util";
-import Vivliostyle from "../vivliostyle";
 import SettingsPanel from "./settings-panel";
 import Viewer from "./viewer";
-import { CoreViewer, ReadyState, PageProgression } from "@vivliostyle/core";
 
 const { Keys } = keyUtil;
 
@@ -37,25 +37,25 @@ export type NavigationOptions = {
 };
 
 class Navigation {
-  static PREVIOUS(PREVIOUS: any) {
+  static PREVIOUS(PREVIOUS: unknown): void {
     throw new Error("Method not implemented.");
   }
-  static NEXT(NEXT: any) {
+  static NEXT(NEXT: unknown): void {
     throw new Error("Method not implemented.");
   }
-  static LEFT(LEFT: any) {
+  static LEFT(LEFT: unknown): void {
     throw new Error("Method not implemented.");
   }
-  static RIGHT(RIGHT: any) {
+  static RIGHT(RIGHT: unknown): void {
     throw new Error("Method not implemented.");
   }
-  static FIRST(FIRST: any) {
+  static FIRST(FIRST: unknown): void {
     throw new Error("Method not implemented.");
   }
-  static LAST(LAST: any) {
+  static LAST(LAST: unknown): void {
     throw new Error("Method not implemented.");
   }
-  static EPAGE(EPAGE: any, epage: any) {
+  static EPAGE(EPAGE: unknown, epage: unknown): void {
     throw new Error("Method not implemented.");
   }
   private viewerOptions_: ViewerOptions;

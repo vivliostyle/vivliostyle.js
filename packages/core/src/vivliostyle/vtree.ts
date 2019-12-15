@@ -18,18 +18,18 @@
  *
  * @fileoverview Vtree - Basic view tree data structures and support utilities.
  */
-import { assert } from "./asserts";
-import * as CssParser from "./css-parser";
-import * as CssTokenizer from "./css-tokenizer";
-import * as CssProp from "./css-prop";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Css from "./css";
+import * as CssParser from "./css-parser";
+import * as CssProp from "./css-prop";
+import * as CssTokenizer from "./css-tokenizer";
 import * as Diff from "./diff";
 import * as Exprs from "./expressions";
 import * as GeometryUtil from "./geometry-util";
 import * as TaskUtil from "./task-util";
-import { Vtree, PageFloats, XmlDoc, Selectors } from "./types";
+import { assert } from "./asserts";
+import { PageFloats, Selectors, Vtree, XmlDoc } from "./types";
 
 export const delayedProps = {
   transform: true,

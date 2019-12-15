@@ -23,7 +23,7 @@ import ko from "knockout";
 const supportTouchEvents = "ontouchstart" in window;
 
 ko.bindingHandlers.menuButton = {
-  init(element, valueAccessor) {
+  init(element, valueAccessor): void {
     if (ko.unwrap(valueAccessor())) {
       if (supportTouchEvents) {
         element.addEventListener("touchstart", () => {

@@ -42,12 +42,12 @@ import * as Task from "./task";
 import * as Vgen from "./vgen";
 import * as VtreeImpl from "./vtree";
 import {
+  FragmentLayoutConstraintType,
   Layout,
   RepetitiveElement,
+  Selectors,
   Table,
   Vtree,
-  Selectors,
-  FragmentLayoutConstraintType,
 } from "./types";
 
 export const isInstanceOfAfterIfContinuesLayoutConstraint =

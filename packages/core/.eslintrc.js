@@ -10,7 +10,7 @@ module.exports = {
     jasmine: true,
   },
   globals: {
-    VIVLIOSTYLE_DEBUG: true,
+    VIVLIOSTYLE_DEBUG: false,
     globalThis: false,
   },
   extends: [
@@ -230,7 +230,7 @@ module.exports = {
     "unicode-bom": ["error", "never"],
     // "wrap-regex": "error",
     "no-control-regex": "off",
-    "sort-imports": "warn",
+    "sort-imports": "off",
     "prettier/prettier": "warn",
   },
 };
