@@ -21,7 +21,7 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
 import * as Logging from "./logging";
 

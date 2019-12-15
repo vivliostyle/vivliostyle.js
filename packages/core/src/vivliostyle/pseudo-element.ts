@@ -20,7 +20,7 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssStyler from "./css-styler";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Vtree from "./vtree";
 import { PseudoElement } from "./types";
 

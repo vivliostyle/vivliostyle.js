@@ -34,7 +34,7 @@ import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
 import * as CssTokenizer from "./css-tokenizer";
 import * as CssValidator from "./css-validator";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as GeometryUtil from "./geometry-util";
 import * as Layout from "./layout";
@@ -42,7 +42,7 @@ import * as LayoutProcessor from "./layout-processor";
 import * as Logging from "./logging";
 import * as Net from "./net";
 import * as PageFloats from "./page-floats";
-import * as Pages from "./pages";
+import * as CssPage from "./css-page";
 import * as Plugin from "./plugin";
 import * as PageMaster from "./page-master";
 import * as Task from "./task";
@@ -207,7 +207,7 @@ export class StyleInstance extends Exprs.Context
   lookupOffset: number = 0;
   faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: PageMaster.PageBoxInstance } = {};
-  pageManager: Pages.PageManager = null;
+  pageManager: CssPage.PageManager = null;
   private rootPageFloatLayoutContext: PageFloats.PageFloatLayoutContext;
   pageBreaks: { [key: string]: boolean } = {};
   pageProgression: Constants.PageProgression | null = null;
@@ -285,7 +285,7 @@ export class StyleInstance extends Exprs.Context
     self.stylerMap[self.xmldoc.url] = self.styler;
     const docElementStyle = self.styler.getTopContainerStyle();
     if (!self.pageProgression) {
-      self.pageProgression = Pages.resolvePageProgression(docElementStyle);
+      self.pageProgression = CssPage.resolvePageProgression(docElementStyle);
     }
     const rootBox = this.style.rootBox;
     this.rootPageBoxInstance = new PageMaster.RootPageBoxInstance(rootBox);
@@ -300,7 +300,7 @@ export class StyleInstance extends Exprs.Context
       docElementStyle,
     );
     this.rootPageBoxInstance.resolveAutoSizing(self);
-    this.pageManager = new Pages.PageManager(
+    this.pageManager = new CssPage.PageManager(
       cascadeInstance,
       this.style.pageScope,
       this.rootPageBoxInstance,
@@ -321,8 +321,8 @@ export class StyleInstance extends Exprs.Context
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = self.style.pageProps;
     Object.keys(pageProps).forEach((selector) => {
-      const pageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
-        Pages.resolvePageSizeAndBleed(pageProps[selector] as any),
+      const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
+        CssPage.resolvePageSizeAndBleed(pageProps[selector] as any),
         this,
       );
       this.pageSheetSize[selector] = {
@@ -551,7 +551,7 @@ export class StyleInstance extends Exprs.Context
       pageMaster = pageMasters[i];
 
       // Skip a page master generated for @page rules
-      if (pageMaster.pageBox.pseudoName === Pages.pageRuleMasterPseudoName) {
+      if (pageMaster.pageBox.pseudoName === CssPage.pageRuleMasterPseudoName) {
         continue;
       }
       let coeff = 1;
@@ -1046,9 +1046,9 @@ export class StyleInstance extends Exprs.Context
     layoutContainer: Vtree.Container,
   ) {
     if (
-      boxInstance instanceof Pages.PageRulePartitionInstance ||
+      boxInstance instanceof CssPage.PageRulePartitionInstance ||
       (boxInstance instanceof PageMaster.PageMasterInstance &&
-        !(boxInstance instanceof Pages.PageRuleMasterInstance))
+        !(boxInstance instanceof CssPage.PageRuleMasterInstance))
     ) {
       pagePageFloatLayoutContext.setContainer(layoutContainer);
     }
@@ -1603,12 +1603,12 @@ export class StyleInstance extends Exprs.Context
       self.counterStore.updatePageCounters(cascadedPageStyle, self);
 
       // setup bleed area and crop marks
-      const evaluatedPageSizeAndBleed = Pages.evaluatePageSizeAndBleed(
-        Pages.resolvePageSizeAndBleed(cascadedPageStyle as any),
+      const evaluatedPageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
+        CssPage.resolvePageSizeAndBleed(cascadedPageStyle as any),
         this,
       );
       self.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
-      Pages.addPrinterMarks(
+      CssPage.addPrinterMarks(
         cascadedPageStyle,
         evaluatedPageSizeAndBleed,
         page,
@@ -1703,7 +1703,7 @@ export class StyleInstance extends Exprs.Context
    * context.
    */
   private setPageSizeAndBleed(
-    evaluatedPageSizeAndBleed: Pages.EvaluatedPageSizeAndBleed,
+    evaluatedPageSizeAndBleed: CssPage.EvaluatedPageSizeAndBleed,
     page: Vtree.Page,
   ) {
     this.actualPageWidth = evaluatedPageSizeAndBleed.pageWidth;
@@ -1899,7 +1899,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
    * @override
    */
   startPageRule(): void {
-    const pageHandler = new Pages.PageParserHandler(
+    const pageHandler = new CssPage.PageParserHandler(
       this.masterHandler.pageScope,
       this.masterHandler,
       this,

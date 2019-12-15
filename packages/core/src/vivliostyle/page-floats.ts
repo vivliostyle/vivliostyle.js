@@ -21,7 +21,7 @@ import * as Asserts from "./asserts";
 import * as Css from "./css";
 import * as GeometryUtil from "./geometry-util";
 import * as Logging from "./logging";
-import * as Logical from "./css-logical-props";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as Sizing from "./sizing";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
@@ -71,7 +71,7 @@ export function resolveInlineFloatDirection(
 ): string {
   const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {
-    floatSide = Logical.toLogical(floatSide, writingMode, direction);
+    floatSide = CssLogicalUtil.toLogical(floatSide, writingMode, direction);
   }
   if (floatSide === "block-start") {
     floatSide = "inline-start";
@@ -80,8 +80,12 @@ export function resolveInlineFloatDirection(
     floatSide = "inline-end";
   }
   if (floatSide === "inline-start" || floatSide === "inline-end") {
-    const physicalValue = Logical.toPhysical(floatSide, writingMode, direction);
-    const lineRelativeValue = Logical.toLineRelative(
+    const physicalValue = CssLogicalUtil.toPhysical(
+      floatSide,
+      writingMode,
+      direction,
+    );
+    const lineRelativeValue = CssLogicalUtil.toLineRelative(
       physicalValue,
       writingMode,
     );
@@ -791,13 +795,13 @@ export class PageFloatLayoutContext
   private toLogical(side: string): string {
     const writingMode = this.writingMode.toString();
     const direction = this.direction.toString();
-    return Logical.toLogical(side, writingMode, direction);
+    return CssLogicalUtil.toLogical(side, writingMode, direction);
   }
 
   private toPhysical(side: string): string {
     const writingMode = this.writingMode.toString();
     const direction = this.direction.toString();
-    return Logical.toPhysical(side, writingMode, direction);
+    return CssLogicalUtil.toPhysical(side, writingMode, direction);
   }
 
   removeEndFloatFragments(floatSide: string) {

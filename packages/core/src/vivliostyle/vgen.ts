@@ -26,7 +26,7 @@ import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
 import * as Diff from "./diff";
 import * as Display from "./display";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Matchers from "./matchers";
 import * as PageFloats from "./page-floats";

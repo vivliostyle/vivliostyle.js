@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CssParse - CSS Parser.
+ * @fileoverview CssParser - CSS Parser.
  */
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssTokenizer from "./css-tokenizer";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Logging from "./logging";
 import * as Net from "./net";
 import * as Task from "./task";

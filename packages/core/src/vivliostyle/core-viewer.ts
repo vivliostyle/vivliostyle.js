@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Viewer - Vivliostyle Viewer class
+ * @fileoverview CoreViewer - Vivliostyle CoreViewer class
  */
 import * as AdaptiveViewer from "./adaptive-viewer";
 import * as Base from "./base";

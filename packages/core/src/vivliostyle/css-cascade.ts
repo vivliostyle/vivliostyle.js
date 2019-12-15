@@ -25,7 +25,7 @@ import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
 import * as CssTokenizer from "./css-tokenizer";
 import * as CssValidator from "./css-validator";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";

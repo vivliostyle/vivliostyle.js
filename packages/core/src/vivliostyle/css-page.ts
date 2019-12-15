@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Pages - `@page` rule (CSS Paged Media) support
+ * @fileoverview CssPage - `@page` rule (CSS Paged Media) support https://drafts.csswg.org/css-page/
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
@@ -24,7 +24,7 @@ import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as PageMaster from "./page-master";
 import * as Sizing from "./sizing";

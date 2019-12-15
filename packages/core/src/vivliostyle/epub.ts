@@ -27,7 +27,7 @@ import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssParser from "./css-parser";
 import * as CssTokenizer from "./css-tokenizer";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Net from "./net";

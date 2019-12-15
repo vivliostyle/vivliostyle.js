@@ -28,7 +28,7 @@ import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
 import * as CssValidator from "./css-validator";
 import * as Display from "./display";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Vtree from "./vtree";
 import { CssStyler, XmlDoc } from "./types";
 

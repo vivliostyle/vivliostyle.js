@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview AdaptViewer - Viewer implementation.
+ * @fileoverview AdaptiveViewer - Viewer implementation.
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Plugin from "./plugin";

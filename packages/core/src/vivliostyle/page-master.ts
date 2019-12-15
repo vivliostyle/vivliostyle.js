@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Pm - Deal with page masters, partition groups, and partitions.
+ * @fileoverview PageMaster - Deal with page masters, partition groups, and partitions.
  */
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Vtree from "./vtree";
 

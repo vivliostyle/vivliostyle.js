@@ -22,7 +22,7 @@ import * as Base from "./base";
 import * as CssCascade from "./css-cascade";
 import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import { Layout } from "./types";

@@ -25,7 +25,7 @@ import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
 import * as CssTokenizer from "./css-tokenizer";
 import * as Diff from "./diff";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
 import * as TaskUtil from "./task-util";
 import { assert } from "./asserts";

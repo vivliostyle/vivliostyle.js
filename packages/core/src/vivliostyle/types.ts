@@ -19,7 +19,7 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as Diff from "./diff";
-import * as Exprs from "./expressions";
+import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";

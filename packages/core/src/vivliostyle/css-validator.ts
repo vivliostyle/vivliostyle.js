@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview CssValid - Parse validation rules (validation.txt), validate
+ * @fileoverview CssValidator - Parse validation rules (validation.txt), validate
  * properties and shorthands.
  */
 import * as Css from "./css";
