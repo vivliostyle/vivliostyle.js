@@ -53,11 +53,11 @@
     "webpack-cli": "^3.3.9"
   },
   "types": "lib/vivliostyle.d.ts",
-  "main": "lib/cjs/vivliostyle.js",
   "module": "lib/esm/vivliostyle.js",
-  "browser": "lib/vivliostyle.js",
+  "main": "lib/cjs/vivliostyle.js",
   "author": "Vivliostyle Foundation",
   "license": "AGPL-3.0",
+  "browser": "lib/vivliostyle.js",
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle/issues"
   },
@@ -66,6 +66,9 @@
     "resources"
   ],
   "homepage": "https://github.com/vivliostyle/vivliostyle/packages/core",
+  "keywords": [
+    "vivliostyle"
+  ],
   "publishConfig": {
     "access": "public"
   },

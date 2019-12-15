@@ -9,7 +9,7 @@
     "dev": "lerna run dev --parallel",
     "format": "lerna run format",
     "lint": "lerna run lint",
-    "preship": "yarn clean && yarn build && yarn test",
+    "preship": "yarn clean && yarn build",
     "ship": "lerna publish from-package",
     "ship:canary": "lerna publish --canary",
     "test": "lerna run test --parallel",

@@ -3,16 +3,16 @@
   "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
   "version": "2.0.0-pre.0",
   "scripts": {
-    "build-dev": "gulp build-dev && NODE_ENV=development rollup -c",
     "build": "gulp build && NODE_ENV=production rollup -c",
+    "build-dev": "gulp build-dev && NODE_ENV=development rollup -c",
     "clean": "shx rm -rf lib/* .cache",
     "dev": "run-p dev:*",
     "dev:html": "gulp serve-dev",
     "dev:ts": "NODE_ENV=development rollup -c -w",
     "format": "prettier --write \"{*.{js,md,json},{src,test}/**/*.{ts,js}}\"",
     "lint": "run-p lint:*",
-    "lint:ts": "eslint src --fix --ext .ts -f codeframe",
     "lint:css": "stylelint src/scss/{*.*,**/*.*}",
+    "lint:ts": "eslint src --fix --ext .ts -f codeframe",
     "serve": "yarn build && gulp serve",
     "test": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
     "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
@@ -55,12 +55,12 @@
     "stylelint-scss": "^3.11.0",
     "typescript": "^3.6.3"
   },
+  "main": "lib/js/vivliostyle-viewer.js",
   "author": "Vivliostyle Foundation",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle/issues"
   },
-  "main": "lib/js/vivliostyle-viewer.js",
   "files": [
     "lib/vivliostyle-viewer.html",
     "lib/js/vivliostyle-viewer.min.js*",
@@ -68,6 +68,9 @@
     "lib/css"
   ],
   "homepage": "https://github.com/vivliostyle/vivliostyle/packages/viewer",
+  "keywords": [
+    "vivliostyle"
+  ],
   "publishConfig": {
     "access": "public"
   },
