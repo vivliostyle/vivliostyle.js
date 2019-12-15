@@ -1,5 +1,5 @@
+import path from "path";
 import ts from "@wessberg/rollup-plugin-ts";
-// import { string } from "rollup-plugin-string";
 import replace from "@rollup/plugin-replace";
 import nodeResolve from "rollup-plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
@@ -8,6 +8,7 @@ import strip from "rollup-plugin-strip";
 import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
 import pkg from "./package.json";
+import corePkg from "../core/package.json";
 
 const input = "src/main.ts";
 const banner = `\
@@ -87,6 +88,6 @@ export default {
   watch: {
     clearScreen: false,
     exclude: ["*"],
-    include: ["../core/lib/vivliostyle.js", "src/**/*.ts"],
+    include: [path.join("..", "core", corePkg.main), "src/**/*.ts"],
   },
 };
