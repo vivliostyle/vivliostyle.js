@@ -1,4 +1,6 @@
-# API Reference
+---
+title: API Reference
+---
 
 ### Table of Contents
 

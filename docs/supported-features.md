@@ -1,4 +1,4 @@
-# Features supported by Vivliostyle<%= $version %>
+# Features supported by Vivliostyle<%= \$version %>
 
 The Vivliostyle uses a two-layer architecture, with some of its functionality implemented purely in javascript, and some being delegated all or in part to the browser engine on top of which Vivliostyle is running. In the following list <quote>Supported in all browsers</quote> indicates that features implemented in Javascript that will work regardless of the browser engine. Other features' availability and behavior do vary based on what is supported by the underlying browser engine.
 
@@ -8,7 +8,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 - [Supported CSS-wide keywords](https://www.w3.org/TR/css-values/#common-keywords): `inherit`
   - Supported in all browsers
-  - `initial` and `unset` are *not* supported.
+  - `initial` and `unset` are _not_ supported.
 - [Supported length units](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
   - Supported in all browsers
 - Supported color values
@@ -182,15 +182,15 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Vivliostyle specific media type `vivliostyle` is enabled in addition to `print` media.
 - Supported media features
   - [`(min-|max-)width`](https://www.w3.org/TR/css3-mediaqueries/#width)
-      - Supported in all browsers
+    - Supported in all browsers
   - [`(min-|max-)height`](https://www.w3.org/TR/css3-mediaqueries/#height)
-      - Supported in all browsers
+    - Supported in all browsers
   - [`(min-|max-)device-width`](https://www.w3.org/TR/css3-mediaqueries/#device-width)
-      - Supported in all browsers
+    - Supported in all browsers
   - [`(min-|max-)device-height`](https://www.w3.org/TR/css3-mediaqueries/#device-height)
-      - Supported in all browsers
+    - Supported in all browsers
   - [`(min-|max-)color`](https://www.w3.org/TR/css3-mediaqueries/#color)
-      - Supported in all browsers
+    - Supported in all browsers
 
 ## Properties
 
@@ -864,14 +864,14 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
 
 ### [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/)
 
-  - [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
-    - Support depends on browser capabilities
-  - [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
-    - Support depends on browser capabilities
-  - [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
-    - Support depends on browser capabilities
-  - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
-    - Support depends on browser capabilities
+- [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
+  - Support depends on browser capabilities
+- [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
+  - Support depends on browser capabilities
+- [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
+  - Support depends on browser capabilities
+- [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
+  - Support depends on browser capabilities
 
 ### [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/)
 
@@ -882,6 +882,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 
 ## [CSS Page Floats 3](https://drafts.csswg.org/css-page-floats-3/)
+
 - [clear](https://drafts.csswg.org/css-page-floats-3/#propdef-clear)
   - Supports [`none`, `left`, `right`, `top`, `bottom`, `both`, `all`, `same`](https://drafts.csswg.org/css-page-floats-3/#propdef-clear) values.
   - When `all` is specified on a block-level box (not a page float), the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
@@ -896,11 +897,13 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Supported in all browsers
 
 ## [CSS GCPM 3](https://www.w3.org/TR/css-gcpm-3/)
+
 - [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
   - Supports [`auto`, `line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) values.
   - Supported in all browsers
 
 ## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
+
 - [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
   - Allowed prefixes: webkit
   - Support depends on browser capabilities
@@ -918,6 +921,7 @@ Properties where <quote>Allowed prefixes</quote> is indicated may be used with a
   - Support depends on browser capabilities
 
 ## [CSS Logical Properties and Values 1](https://www.w3.org/TR/css-logical-1/)
+
 - [block-size, inline-size, min-block-size, min-inline-size, max-block-size, max-inline-size](https://www.w3.org/TR/css-logical-1/#dimension-properties)
   - Supported in all browsers
 - [margin-block-start, margin-block-end, margin-inline-start, margin-inline-end, margin-block, margin-inline](https://www.w3.org/TR/css-logical-1/#margin-properties)
