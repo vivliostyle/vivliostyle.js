@@ -19,21 +19,18 @@ sass.compiler = require("node-sass");
 // Parameters
 const SRC_DIR = "src";
 const DEST_DIR = "lib";
-const DIRS = {
+const RESOURCE_MAP = {
+  core: { src: "../../core/lib", dest: "js", srcPattern: "vivliostyle.js" },
   fonts: { src: "fonts" },
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
   resources: {
-    src: "../core/resources",
+    src: "../../core/resources",
     dest: "resources",
   },
-  pluginResources: {
-    src: "../core/plugins/*/resources",
-    dest: "plugins",
-  },
 };
-const VIVLIOSTYLE_JS_SRC_DIR = "../core/lib";
-const HTML_FILENAMES = {
+const CORE_SRC_DIR = "../core/lib";
+const VIEWER_HTML_FILENAMES = {
   production: "vivliostyle-viewer.html",
   development: "vivliostyle-viewer-dev.html",
 };
@@ -48,27 +45,32 @@ const VERSION = getVersion(".");
 
 // Utility functions
 function destDir(type) {
-  const dirs = DIRS[type];
-  const dirName = dirs.dest || dirs.src;
+  const dirs = RESOURCE_MAP[type];
+  const dirName = dirs.dest ? dirs.dest : dirs.src;
   return path.join(DEST_DIR, dirName);
 }
 
 const srcPattern = (type) =>
-  path.join(SRC_DIR, DIRS[type].src, DIRS[type].srcPattern || "**/*");
+  path.resolve(
+    SRC_DIR,
+    RESOURCE_MAP[type].src,
+    RESOURCE_MAP[type].srcPattern || "**/*",
+  );
 
 // create a task simply copying files
-function copyTask(type) {
+function createCopyTask(type) {
   const dest = destDir(type);
   return gulp.task("build:" + type, function() {
+    console.log(srcPattern(type), dest);
     return gulp
       .src(srcPattern(type))
       .pipe(changed(dest))
       .pipe(gulp.dest(dest));
   });
 }
-copyTask("fonts");
-copyTask("resources");
-copyTask("pluginResources");
+createCopyTask("core");
+createCopyTask("fonts");
+createCopyTask("resources");
 
 // HTML build
 function buildHtml(isDevelopment) {
@@ -91,7 +93,9 @@ function buildHtml(isDevelopment) {
     )
     .pipe(
       rename(
-        isDevelopment ? HTML_FILENAMES.development : HTML_FILENAMES.production,
+        isDevelopment
+          ? VIEWER_HTML_FILENAMES.development
+          : VIEWER_HTML_FILENAMES.production,
       ),
     )
     .pipe(gulp.dest(destDir("html")));
@@ -129,7 +133,7 @@ gulp.task(
     "build:css",
     "build:fonts",
     "build:resources",
-    "build:pluginResources",
+    "build:core",
   ),
 );
 gulp.task(
@@ -139,77 +143,8 @@ gulp.task(
     "build:css-dev",
     "build:fonts",
     "build:resources",
-    "build:pluginResources",
   ),
 );
-
-// watch
-gulp.task("start-watching", (done) => done());
-gulp.task(
-  "watch",
-  gulp.series(gulp.parallel("start-watching", "build"), function(done) {
-    gulp.watch(srcPattern("html"), gulp.task("build:html"));
-    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
-    gulp.watch(
-      srcPattern("pluginResources"),
-      gulp.task("build:pluginResources"),
-    );
-    gulp.watch(srcPattern("css"), gulp.task("build:css"));
-    done();
-  }),
-);
-gulp.task(
-  "watch-dev",
-  gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
-    gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
-    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
-    gulp.watch(
-      srcPattern("pluginResources"),
-      gulp.task("build:pluginResources"),
-    );
-    gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
-    done();
-  }),
-);
-
-// serve
-function serve(isDevelopment) {
-  browserSync.init({
-    browser:
-      process.platform === "darwin"
-        ? "google chrome"
-        : process.platform === "win32"
-        ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-        : "chromium-browser",
-    server: {
-      baseDir: "../",
-    },
-    startPath: "/core/test/files/",
-  });
-  const target = [DEST_DIR + "/**/*"];
-  if (isDevelopment) {
-    target.push(VIVLIOSTYLE_JS_SRC_DIR + "/**/*");
-  }
-  gulp.watch(target).on("change", browserSync.reload);
-}
-gulp.task(
-  "serve",
-  gulp.series("watch", function(done) {
-    serve(false);
-    done();
-  }),
-);
-gulp.task(
-  "serve-dev",
-  gulp.series("watch-dev", function(done) {
-    serve(true);
-    done();
-  }),
-);
-
-gulp.task("default", gulp.task("serve-dev"));
 
 // Test
 gulp.task("test-local", function(done) {
@@ -235,3 +170,64 @@ gulp.task("test-sauce", function(done) {
   );
   server.start();
 });
+
+// watch
+gulp.task("start-watching", (done) => done());
+gulp.task(
+  "watch",
+  gulp.series(gulp.parallel("start-watching", "build"), function(done) {
+    gulp.watch(srcPattern("html"), gulp.task("build:html"));
+    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
+    gulp.watch(srcPattern("css"), gulp.task("build:css"));
+    done();
+  }),
+);
+gulp.task(
+  "watch-dev",
+  gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
+    gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
+    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
+    gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
+    done();
+  }),
+);
+
+// serve
+function serve(isDevelopment) {
+  browserSync.init({
+    browser:
+      process.platform === "darwin"
+        ? "google chrome"
+        : process.platform === "win32"
+        ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+        : "chromium-browser",
+    server: {
+      baseDir: "../",
+    },
+    startPath: "/core/test/files/",
+  });
+  const target = [DEST_DIR + "/**/*"];
+  if (isDevelopment) {
+    target.push(srcPattern("core"));
+    target.push(CORE_SRC_DIR + "/**/*");
+  }
+  gulp.watch(target).on("change", browserSync.reload);
+}
+gulp.task(
+  "serve",
+  gulp.series("watch", function(done) {
+    serve(false);
+    done();
+  }),
+);
+gulp.task(
+  "serve-dev",
+  gulp.series("watch-dev", function(done) {
+    serve(true);
+    done();
+  }),
+);
+
+gulp.task("default", gulp.task("serve-dev"));

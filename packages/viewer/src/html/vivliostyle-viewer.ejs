@@ -11,16 +11,17 @@
     <script src="https://wicg.github.io/visual-viewport/polyfill/visualViewport.js"></script>
 
     <!-- MathJax -->
-    <script src="<%= packageRoot %>/core/resources/mathjax-config.js"></script>
+    <script src="resources/mathjax-config.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
     <!-- Core -->
     <% if (isDevelopment) { %>
+    <!-- Inject development version -->
     <script src="../../core/lib/vivliostyle.js"></script>
     <% } %>
-    <link rel="icon" href="<%= packageRoot %>/core/resources/favicon.ico"/>
-    <link rel="stylesheet" href="<%= packageRoot %>/core/resources/vivliostyle-viewport.css"/>
-    <link rel="stylesheet" href="<%= packageRoot %>/core/resources/vivliostyle-viewport-screen.css" media="screen"/>
+    <link rel="icon" href="resources/favicon.ico"/>
+    <link rel="stylesheet" href="resources/vivliostyle-viewport.css"/>
+    <link rel="stylesheet" href="resources/vivliostyle-viewport-screen.css" media="screen"/>
 
     <!-- Viewer -->
     <script src="<%= viewerPath %>"></script>

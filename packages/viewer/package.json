@@ -68,7 +68,10 @@
     "url": "https://github.com/vivliostyle/vivliostyle/issues"
   },
   "files": [
-    "lib"
+    "lib/vivliostyle-viewer.html",
+    "lib/js/vivliostyle-viewer.min.js*",
+    "lib/fonts",
+    "lib/css"
   ],
   "homepage": "https://github.com/vivliostyle/vivliostyle/packages/viewer",
   "publishConfig": {
