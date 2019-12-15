@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Table column width</title>
+    <style>
+      @page {
+        size: 820px;
+      }
+      @-epubx-page-template {
+        .partition {
+          width: 198px;
+          height: 398px;
+          border: rgba(0, 0, 255, 0.2) solid 1px;
+          -epubx-flow-from: body;
+          writing-mode: vertical-rl;
+        }
+        .left {
+          top: 10px;
+        }
+        .right {
+          bottom: 10px;
+        }
+
+        @-epubx-page-master {
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            font-size: 10px;
+            line-height: 10px;
+            text-align: center;
+            content: counter(page);
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 610px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 410px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 210px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            right: 10px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 610px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 410px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 210px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            right: 10px;
+          }
+        }
+      }
+      :root {
+        writing-mode: vertical-rl;
+        font-size: 10px;
+        line-height: 12px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 10px 0;
+      }
+      section {
+        break-after: column;
+      }
+      table {
+        border: 2px black solid;
+        border-spacing: 2px;
+      }
+      figure {
+        margin: 0;
+        border: 2px black solid;
+        border-collapse: separate;
+        border-spacing: 2px;
+        display: table;
+      }
+      figcaption {
+        display: table-caption;
+        caption-side: bottom;
+      }
+      caption {
+        caption-side: bottom;
+      }
+      .border-collapse {
+        border-collapse: collapse;
+      }
+      tr,
+      .tr {
+        border: 1px blue solid;
+      }
+      th,
+      td,
+      .th,
+      .td {
+        border: 1px gray solid;
+        line-height: 16px;
+      }
+      th > div,
+      td > div,
+      .th > div,
+      .td > div {
+        background: #ddd;
+      }
+      .tr {
+        display: table-row;
+      }
+      .th,
+      .td {
+        display: table-cell;
+      }
+      .highlight {
+        background: #ffdddd;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <table>
+        <caption>
+          (1) Fragment between rows; border-collapse: separate
+        </caption>
+        <colgroup></colgroup>
+        <colgroup span="2" class="highlight"></colgroup>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 50px">
+              minimum<br />
+              content<br />
+              width =<br />
+              50px.<br />
+              height<br />
+              of this<br />
+              cell =<br />
+              128px.<br />
+            </div>
+          </td>
+          <td>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (2) Fragment between rows; border-collapse: collapse
+        </caption>
+        <col>
+        <colgroup>
+          <col span="2" class="highlight" />
+        </colgroup>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 50px; width: 132px;">
+              minimum content width = 50px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (3) Fragment between rows; border-collapse: separate
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 127px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 48px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (4) Fragment between rows; border-collapse: collapse
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 132px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 48px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (5) Fragment between rows; tbody; border-collapse: separate
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 50px; width: 127px;">
+                minimum content width = 50px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (6) Fragment between rows; tbody; border-collapse: collapse
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 50px; width: 132px;">
+                minimum content width = 50px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (7) Fragment between rows; tbody; border-collapse: separate
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 127px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 48px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (8) Fragment between rows; tbody; border-collapse: collapse
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width:132px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 48px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (9) Fragment inside a row; border-collapse: separate
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 50px; width: 115px;">
+              minimum content width = 50px.
+            </div>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (10) Fragment inside a row; border-collapse: collapse
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 50px; width: 131px;">
+              minimum content width = 50px.
+            </div>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (11) Fragment inside a row; border-collapse: separate
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 125px;">
+              min-content width = 60px.
+            </div>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 48px;">
+              min-content width = 80px.
+            </div>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (12) Fragment inside a row; border-collapse: collapse
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px; width: 131px;">
+              min-content width = 60px.
+            </div>
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 80px; width: 48px;">
+              min-content width = 80px.
+            </div>
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (13) Fragment inside a row; tbody; border-collapse: separate
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 50px; width: 125px;">
+                minimum content width = 50px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (14) Fragment inside a row; tbody; border-collapse: collapse
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 50px; width: 118px;">
+                minimum content width = 50px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (15) Fragment inside a row; tbody; border-collapse: separate
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 125px;">
+                min-content width = 60px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 48px;">
+                min-content width = 80px.
+              </div>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (16) Fragment inside a row; tbody; border-collapse: collapse
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 118px;">
+                min-content width = 60px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 48px;">
+                min-content width = 80px.
+              </div>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <table class="border-collapse">
+        <caption>
+          (17) Fragment inside a row; tbody; border-collapse: collapse
+        </caption>
+        <tbody>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+              <div style="height: 100px; width: 36px;">
+                minimum content width = 100px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 160px;">
+                min-content width = 60px.
+              </div>
+              <div style="height: 60px; width: 48px;">
+                minimum content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 48px;">
+                min-content width = 80px.
+              </div>
+              <div style="height: 70px; width: 48px;">
+                minimum content width = 70px.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 60px; width: 48px;">
+                min-content width = 60px.
+              </div>
+            </td>
+            <td>
+              <div style="height: 80px; width: 36px;">
+                min-content width = 80px.
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <figure>
+        <figcaption>
+          (18) Non-table elements with table display values
+        </figcaption>
+        <div class="tr">
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </div>
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </div>
+          <div class="td">
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </div>
+        </div>
+        <div class="tr">
+          <div class="td">
+            <div style="height: 100px; width: 36px;">
+              minimum content width = 100px.
+            </div>
+          </div>
+          <div class="td">
+            <div style="height: 50px; width: 127px;">
+              minimum content width = 50px.
+            </div>
+          </div>
+          <div class="td">
+            <div style="height: 70px; width: 48px;">
+              minimum content width = 70px.
+            </div>
+          </div>
+        </div>
+        <div class="tr">
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </div>
+          <div class="td">
+            <div style="height: 60px; width: 48px;">
+              min-content width = 60px.
+            </div>
+          </div>
+          <div class="td">
+            <div style="height: 80px; width: 36px;">
+              min-content width = 80px.
+            </div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <section>
+      <table>
+        <caption>
+          (19) A single row continues over two page breaks
+        </caption>
+        <tr>
+          <td>
+            <div style="height: 100px">
+              min-content width = <span style="float: right">100px.</span>
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 50px">
+              min-content width = 50px.
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            (1) Narrow col.<br />
+            (2) Narrow col.<br />
+            (3) Narrow col.<br />
+            (4) Narrow col.<br />
+            (5) Narrow col.<br />
+            (6) Narrow col.<br />
+            (7) Narrow col.<br />
+            (8) Narrow col.<br />
+            (9) Narrow col.<br />
+            (10) Narrow col.<br />
+            (11) Narrow col.<br />
+            (12) Narrow col.<br />
+            (13) Narrow col.<br />
+            (14) Narrow col.<br />
+            (15) Narrow col.<br />
+            (16) Narrow col.<br />
+            (17) Narrow col.<br />
+            (18) Narrow col.<br />
+            (19) Narrow col.<br />
+            (20) Narrow col.<br />
+            (21) Narrow col.<br />
+            (22) Narrow col.<br />
+          </td>
+          <td>
+            (1) Long column. Long column.<br />
+            (2) Long column. Long column.<br />
+            (3) Long column. Long column.<br />
+            (4) Long column. Long column.<br />
+            (5) Long column. Long column.<br />
+            (6) Long column. Long column.<br />
+            (7) Long column. Long column.<br />
+            (8) Long column. Long column.<br />
+            (9) Long column. Long column.<br />
+            (10) Long column. Long column.<br />
+            (11) Long column. Long column.<br />
+            (12) Long column. Long column.<br />
+            (13) Long column. Long column.<br />
+            (14) Long column. Long column.<br />
+            (15) Long column. Long column.<br />
+            (16) Long column. Long column.<br />
+            (17) Long column. Long column.<br />
+            (18) Long column. Long column.<br />
+            (19) Long column. Long column.<br />
+            (20) Long column. Long column.<br />
+            (21) Long column. Long column.<br />
+            (22) Long column. Long column.<br />
+          </td>
+          <td>
+            (1) Narrow col.<br />
+            (2) Narrow col.<br />
+            (3) Narrow col.<br />
+            (4) Narrow col.<br />
+            (5) Narrow col.<br />
+            (6) Narrow col.<br />
+            (7) Narrow col.<br />
+            (8) Narrow col.<br />
+            (9) Narrow col.<br />
+            (10) Narrow col.<br />
+            (11) Narrow col.<br />
+            (12) Narrow col.<br />
+            (13) Narrow col.<br />
+            (14) Narrow col.<br />
+            (15) Narrow col.<br />
+            (16) Narrow col.<br />
+            (17) Narrow col.<br />
+            (18) Narrow col.<br />
+            (19) Narrow col.<br />
+            (20) Narrow col.<br />
+            (21) Narrow col.<br />
+            (22) Narrow col.<br />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div style="height: 50px">
+              min-content width = 50px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 60px">
+              min-content width = 60px.
+            </div>
+          </td>
+          <td>
+            <div style="height: 100px">
+              min-content width = 100px.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </section>
+  </body>
+</html>

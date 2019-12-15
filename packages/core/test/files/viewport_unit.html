@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>viewport-percentage units</title>
+    <style>
+      @page {
+        margin: 10%;
+        border: 15px dashed;
+        padding: 15px;
+        background: #fff;
+      }
+
+      html {
+        background: #ccc;
+        outline: 1px dotted;
+      }
+
+      body {
+        margin: 15%;
+        padding: 10%;
+        background: #fff;
+        outline: 1px dashed;
+      }
+
+      p {
+        break-before: page;
+        break-inside: avoid;
+        break-after: avoid;
+      }
+
+      div:nth-of-type(1) {
+        background: aqua;
+        width: 50%;
+      }
+      div:nth-of-type(2) {
+        background: orange;
+        width: 25vw;
+      }
+      div:nth-of-type(3) {
+        background: lime;
+        width: 25vi;
+      }
+
+      div:nth-of-type(4) {
+        background: aqua;
+        height: 25vh;
+        display: inline-block;
+      }
+      div:nth-of-type(5) {
+        background: orange;
+        height: 25vb;
+        display: inline-block;
+      }
+
+      div:nth-of-type(6) {
+        background: aqua;
+        height: 25vmin;
+        display: inline-block;
+      }
+      div:nth-of-type(7) {
+        background: orange;
+        height: 25vmax;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <p>The following blocks must have same width:</p>
+    <hr />
+    <div>width: 50%</div>
+    <div>width: 25vw</div>
+    <div>width: 25vi</div>
+    <hr />
+    <p>The following blocks must have same height:</p>
+    <div>height: 25vh</div>
+    <div>height: 25vb</div>
+    <p>
+      The next left side block is lower than the right side one, or same height
+      when page is square:
+    </p>
+    <div>height: 25vmin</div>
+    <div>height: 25vmax</div>
+  </body>
+</html>

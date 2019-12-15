@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Deferred floats</title>
+    <style>
+      @page {
+        size: 400px 220px;
+        margin: 10px;
+      }
+      :root,
+      html {
+        line-height: 20px;
+        column-count: 2;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0;
+      }
+      .float {
+        float: block-start;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 3px;
+        border: blue solid 2px;
+      }
+      .region-float {
+        float-reference: region;
+      }
+      .column-float {
+        float-reference: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="float region-float">
+      float1<br />
+      occupies<br />
+      4<br />
+      lines
+    </div>
+    <p>
+      There should be 3 floats in total. float 1 should be on page 1 and float
+      2/3 should be on page 2.
+    </p>
+    <p>
+      There should be 3 floats in total. float 1 should be on page 1 and float
+      2/3 should be on page 2.
+    </p>
+    <div class="float region-float">
+      float2<br />
+      This<br />
+      float<br />
+      occupies<br />
+      7<br />
+      lines<br />
+      blah
+    </div>
+    <div class="float column-float">
+      float3
+    </div>
+  </body>
+</html>

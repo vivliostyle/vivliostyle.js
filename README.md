@@ -1,50 +1,98 @@
-# Vivliostyle.js
+# Vivliostyle
 
-JavaScript Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+[![Build Status](https://travis-ci.org/vivliostyle/vivliostyle.svg?branch=master)](https://travis-ci.org/vivliostyle/vivliostyle)
 
-(Source code of Vivliostyle.js is [now written in TypeScript](https://github.com/vivliostyle/vivliostyle.js/tree/master/src/ts).)
+HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
-## Try Vivliostyle.js
+- 🌏 [Vivliostyle website (vivliostyle.org)](https://vivliostyle.org)
+- 📖 [Documentation](https://vivliostyle.org/docs/)
+- 🤝 [Join Community](https://vivliostyle.org/community/)
 
-[Vivliostyle Viewer samples](https://vivliostyle.org/samples/)
+## Official Packages
 
-## Bug reports & feature requests
+### [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle/tree/master/packages/core) (vivliostyle-core)
 
-Please send them to
+Vivliostyle can be installed from [npm](https://www.npmjs.com/package/vivliostyle):
 
-- [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues)
+```
+npm install @vivliostyle/core
+```
 
-## Using Vivliostyle.js
+See [API Reference](https://github.com/vivliostyle/vivliostyle/blob/master/tree/master/packages/core/doc/api.md).
 
-### Using Vivliostyle Viewer package
+#### `printHTML`
+
+```js
+import { printHTML } from "@vivliostyle/core";
+
+const htmlDoc = `<!doctype html>
+<html>
+    <head>
+        <style>
+        ... Add your CSS code here ...
+        </style>
+    </head>
+    <body>
+        ... Add your HTML code here ...
+    </body>
+</html>`,
+  config = {
+    title: "my printed page",
+    printCallback: (iframeWin) => iframeWin.print(), // optional: only needed if calling something other than window.print() for printing.
+  };
+
+printHTML(htmlDoc, config);
+```
+
+### [Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer) (vivliostyle-viewer)
+
+- [User’s Guide](https://vivliostyle.github.io/vivliostyle/docs/en/)
+- [Samples](https://vivliostyle.org/samples/)
+- [Source Code](https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer)
 
 Download the Vivliostyle Viewer package from <https://vivliostyle.org/download/> and follow the instruction in it.
 
-See [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
+Alos see [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle/docs/en/) for further information.
 
-See <https://github.com/vivliostyle/vivliostyle-ui> for source code of the UI.
+### [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) (vivliostyle-cli)
 
-### Using vivliostyle-savepdf CLI tool
+See [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli), the save PDF command line tool with Vivliostyle and headless Chrome.
 
-See [vivliostyle-savepdf](https://github.com/vivliostyle/vivliostyle-savepdf/), the save PDF command line tool with Vivliostyle and headless Chrome.
+## Contribution
 
-### Integrating Vivliostyle.js into web sites
+- [Contribution Guide](./CONTRIBUTING.md) for development setup.
+- [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
 
-Vivliostyle.js can be installed from [npm](https://www.npmjs.com/package/vivliostyle):
+### Bug Reports & Feature Requests
 
-```
-npm install vivliostyle
-```
+Please report on [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues).
 
-See [API Reference](https://github.com/vivliostyle/vivliostyle.js/blob/master/doc/api.md).
+### Contributors
 
-#### Using vivliostyle-print library
+list of contributors, generated from `git shortlog -sn`.
 
-See [vivliostyle-print](https://github.com/vivliostyle/vivliostyle-print/) for integrating printing with Vivliostyle.
-
-## Development
-
-See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
+- KAWAKUBO Toru
+- MurakamiShinyu
+- unageanu
+- kwkbtr
+- Satoshi KOJIMA
+- Shinyu Murakami
+- Shota Kubota
+- Johannes Wilm
+- spring-raining
+- Peter Sorotokin
+- Satoshi Kojima
+- Satoru MATSUSHIMA (℠)
+- Yasuaki Uechi
+- kubosho
+- U-birksu\peter
+- spring_raining
+- Masaya Yamauchi
+- takanakahiko
+- Hiroshi Hatake
+- Florian Rivoal
+- Seiya Konno
+- nulltask
 
 ## License
 
@@ -56,9 +104,3 @@ Vivliostyle.js contains following components:
 
 - [fast-diff](https://www.npmjs.com/package/fast-diff)
   - Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-## Other Documentation
-
-- [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
-
-- [Vivliostyle Documentation](https://vivliostyle.org/docs/)

@@ -1,60 +1,54 @@
 {
   "name": "vivliostyle",
-  "version": "2019.11.100-pre",
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "scripts": {
-    "lint": "eslint --ext .ts src",
-    "lint-fix": "eslint --fix --ext .ts src",
-    "build": "NODE_ENV=production webpack",
-    "build-dev": "NODE_ENV=development webpack",
-    "build-debug": "NODE_ENV=debug webpack",
-    "typecheck": "tsc --noEmit",
-    "test": "test -z \"$SAUCE_USERNAME\" || karma start test/conf/karma-sauce.conf.js",
-    "test-local": "karma start test/conf/karma-local.conf.js"
+    "bootstrap": "lerna bootstrap && lerna run build --scope @vivliostyle/core",
+    "build": "lerna run build",
+    "clean": "lerna run clean",
+    "dev": "lerna run dev --parallel",
+    "format": "lerna run format",
+    "lint": "lerna run lint",
+    "ship": "lerna publish from-package",
+    "ship:canary": "lerna publish --canary",
+    "test": "lerna run test",
+    "test-sauce": "lerna run test-sauce",
+    "version:amend": "git tag --points-at HEAD | xargs -I{} git tag --delete {} && git reset --hard HEAD^",
+    "version:manual": "lerna version --changelog-preset=angular --create-release github",
+    "version:manual:dry": "lerna version --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks",
+    "version:prerelease": "lerna version --conventional-commits --conventional-prerelease --changelog-preset=angular --create-release github",
+    "version:prerelease:dry": "lerna version --conventional-commits --conventional-prerelease --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks",
+    "version:up": "lerna version --conventional-commits --changelog-preset=angular --create-release github",
+    "version:up:dry": "lerna version --conventional-commits --changelog-preset=angular --no-git-tag-version --no-push --no-commit-hooks"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vivliostyle/vivliostyle.js.git"
+  "devDependencies": {
+    "eslint": "^6.7.2",
+    "husky": "^3.1.0",
+    "lerna": "^3.19.0",
+    "lint-staged": "^9.5.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.19.1",
+    "pretty-quick": "^2.0.1",
+    "shx": "^0.3.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && pretty-quick --staged"
+    }
   },
   "author": "Vivliostyle Foundation",
-  "bugs": {
-    "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
-  },
   "license": "AGPL-3.0",
-  "files": [
-    "doc/supported-features.md",
-    "doc/supported-features.html",
-    "lib",
-    "resources",
-    "samples",
-    "plugins/*/resources"
-  ],
-  "main": "lib/vivliostyle-es5.min.js",
-  "module": "lib/vivliostyle.min.js",
-  "homepage": "https://github.com/vivliostyle/vivliostyle.js",
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.3.0",
-    "@typescript-eslint/parser": "^2.3.0",
-    "circular-dependency-plugin": "^5.2.0",
-    "eslint": "^6.4.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-prettier": "^3.1.0",
-    "fast-diff": "^1.2.0",
-    "jasmine-core": "^3.4.0",
-    "karma": "^4.3.0",
-    "karma-cli": "^2.0.0",
-    "karma-jasmine": "^2.0.1",
-    "karma-sauce-launcher": "^2.0.2",
-    "karma-sourcemap-loader": "^0.3.7",
-    "karma-typescript-preprocessor": "^0.4.0",
-    "karma-verbose-reporter": "0.0.6",
-    "karma-webpack": "^4.0.2",
-    "mustache": "^3.1.0",
-    "prettier": "^1.18.2",
-    "raw-loader": "^3.1.0",
-    "ts-loader": "^6.1.0",
-    "typescript": "^3.6.3",
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9"
-  }
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vivliostyle/vivliostyle.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

@@ -1,0 +1,7 @@
+{
+  "packages": ["packages/*"],
+  "useWorkspaces": true,
+  "npmClient": "yarn",
+  "version": "2019.11.100-pre",
+  "includeMergedTags": true
+}

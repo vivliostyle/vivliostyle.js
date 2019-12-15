@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>box-decoration-break</title>
+    <style>
+      @page {
+        size: 880px;
+      }
+      @-epubx-page-template {
+        .container {
+          -epubx-flow-from: body;
+          column-count: 4;
+          column-gap: 10px;
+          column-rule: 1px solid black;
+          border: 2px solid blue;
+          margin: 30px;
+          overflow: visible;
+        }
+        @-epubx-page-master {
+          -epubx-enabled: -epubx-expr(page-number < 3);
+          @-epubx-partition class(container) {
+            width: 820px;
+            height: 300px;
+            top: 350px;
+          }
+          @-epubx-partition class(container) {
+            width: 820px;
+            height: 300px;
+          }
+        }
+        @-epubx-page-master {
+          -epubx-enabled: -epubx-expr(page-number >= 3);
+          @-epubx-partition class(container) {
+            writing-mode: vertical-rl;
+            width: 300px;
+            height: 820px;
+          }
+          @-epubx-partition class(container) {
+            writing-mode: vertical-rl;
+            width: 300px;
+            height: 820px;
+            left: 350px;
+          }
+        }
+      }
+
+      * {
+        margin: 0;
+      }
+      html {
+        widows: 1;
+        orphans: 1;
+        line-height: 25px;
+      }
+      section {
+        break-after: region;
+      }
+      section.vertical {
+        writing-mode: vertical-rl;
+      }
+      table {
+        border-spacing: 1px;
+      }
+      td {
+        padding: 0;
+      }
+      div,
+      table {
+        margin: 10px;
+        border: 3px solid green;
+        padding: 3px;
+        border-radius: 10px;
+      }
+      .horizontal div,
+      .horizontal table {
+        margin-bottom: 30px;
+        border-top: 4px solid brown;
+        border-bottom: 6px solid orange;
+        padding-top: 10px;
+        padding-bottom: 15px;
+        background: linear-gradient(
+          56deg,
+          rgb(0, 255, 94),
+          rgb(255, 255, 250) 77%
+        );
+        box-shadow: 3px 5px 1px gold;
+      }
+      .vertical div,
+      .vertical table {
+        margin-left: 30px;
+        border-right: 4px solid brown;
+        border-left: 6px solid orange;
+        padding-right: 10px;
+        padding-left: 15px;
+        background: linear-gradient(
+          124deg,
+          rgb(0, 255, 94),
+          rgb(255, 255, 250) 77%
+        );
+        box-shadow: -3px 5px 1px gold;
+      }
+      .slice {
+        box-decoration-break: slice;
+      }
+      .clone {
+        box-decoration-break: clone;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="horizontal">
+      <div class="slice">
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+      </div>
+      <div class="clone">
+        box-decoration-break: clone<br />
+        box-decoration-break: clone<br />
+        box-decoration-break: clone<br />
+        box-decoration-break: clone<br />
+      </div>
+      <div class="slice">
+        (slice) not fragmented, should have bottom padding &amp; border
+      </div>
+      <div class="clone">
+        Another block not fragmented (box-decoration-break: clone)
+      </div>
+    </section>
+
+    <section class="horizontal">
+      <div class="slice">
+        <p>
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+        </p>
+        <p>
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+        </p>
+      </div>
+      <div class="clone">
+        <p>
+          box-decoration-break: clone<br />
+          box-decoration-break: clone<br />
+        </p>
+        <p>
+          box-decoration-break: clone<br />
+          box-decoration-break: clone<br />
+        </p>
+      </div>
+      <div class="slice">
+        (slice) not fragmented, should have bottom padding &amp; border
+      </div>
+      <div class="clone">
+        Another block not fragmented (box-decoration-break: clone)
+      </div>
+    </section>
+
+    <section class="horizontal">
+      <table class="slice">
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+      </table>
+
+      <table class="clone" style="margin-top: 40px">
+        <tr>
+          <td>box-decoration-break: clone</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: clone</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: clone</td>
+        </tr>
+      </table>
+
+      <table class="slice">
+        <tr>
+          <td>
+            (slice) not fragmented, should have bottom padding &amp; border
+          </td>
+        </tr>
+      </table>
+
+      <table class="clone">
+        <tr>
+          <td>Another block not fragmented (box-decoration-break: clone)</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="horizontal">
+      <table class="slice">
+        <tr>
+          <td>
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+          </td>
+        </tr>
+      </table>
+
+      <table class="clone">
+        <tr>
+          <td>
+            box-decoration-break: clone<br />
+            box-decoration-break: clone<br />
+            box-decoration-break: clone<br />
+          </td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="vertical">
+      <div class="slice">
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+        box-decoration-break: slice<br />
+      </div>
+      <div class="clone">
+        box-decoration-break: clone<br />
+        box-decoration-break: clone<br />
+        box-decoration-break: clone<br />
+        box-decoration-break: clone<br />
+      </div>
+      <div class="slice">
+        (slice) not fragmented, should have left padding &amp; border
+      </div>
+      <div class="clone">
+        Another block not fragmented (box-decoration-break: clone)
+      </div>
+    </section>
+
+    <section class="vertical">
+      <div class="slice">
+        <p>
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+        </p>
+        <p>
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+          box-decoration-break: slice<br />
+        </p>
+      </div>
+      <div class="clone">
+        <p>
+          box-decoration-break: clone<br />
+          box-decoration-break: clone<br />
+        </p>
+        <p>
+          box-decoration-break: clone<br />
+          box-decoration-break: clone<br />
+        </p>
+      </div>
+      <div class="slice">
+        (slice) not fragmented, should have left padding &amp; border
+      </div>
+      <div class="clone">
+        Another block not fragmented (box-decoration-break: clone)
+      </div>
+    </section>
+
+    <section class="vertical">
+      <table class="slice">
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: slice</td>
+        </tr>
+      </table>
+
+      <table class="clone" style="margin-top: 40px">
+        <tr>
+          <td>box-decoration-break: clone</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: clone</td>
+        </tr>
+        <tr>
+          <td>box-decoration-break: clone</td>
+        </tr>
+      </table>
+
+      <table class="slice">
+        <tr>
+          <td>
+            (slice) not fragmented, should have bottom padding &amp; border
+          </td>
+        </tr>
+      </table>
+
+      <table class="clone">
+        <tr>
+          <td>Another block not fragmented (box-decoration-break: clone)</td>
+        </tr>
+      </table>
+    </section>
+
+    <section class="vertical">
+      <table class="slice">
+        <tr>
+          <td>
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+            box-decoration-break: slice<br />
+          </td>
+        </tr>
+      </table>
+
+      <table class="clone">
+        <tr>
+          <td>
+            box-decoration-break: clone<br />
+            box-decoration-break: clone<br />
+            box-decoration-break: clone<br />
+          </td>
+        </tr>
+      </table>
+    </section>
+  </body>
+</html>

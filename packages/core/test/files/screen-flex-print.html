@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>test</title>
+    <style>
+      @page {
+        size: 400px 200px;
+        margin: 0;
+      }
+
+      * {
+        margin: 0;
+      }
+
+      html,
+      body,
+      body > div {
+        width: 400px;
+        height: 200px;
+        font-family: Lato;
+      }
+
+      .page {
+        position: relative;
+        width: 400px;
+        height: 200px;
+        outline: orange solid 2px;
+        outline-offset: -2px;
+        page-break-after: always;
+      }
+
+      .abs {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
+
+      .row-flex {
+        margin-top: -10px;
+        padding-top: 10px;
+        display: flex;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .column-flex {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        height: 50px;
+        font-size: 32px;
+        line-height: 1;
+        background: rgba(0, 255, 0, 0.1);
+      }
+
+      .subtitle {
+        display: block;
+        font-size: 13px;
+        background: rgba(255, 0, 0, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="a" class="screen-flex">
+      <div class="page">
+        "AAA" in the next page should entirely be inside the page when print.
+      </div>
+      <div class="page">
+        <div class="abs">
+          <div class="row-flex">
+            <div class="column-flex">
+              <span class="subtitle">AAA</span>
+              <span>BBB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

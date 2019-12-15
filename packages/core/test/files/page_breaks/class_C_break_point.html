@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Class C break point</title>
+    <style>
+      @page {
+        size: 220px;
+        margin: 10px;
+      }
+      :root {
+        column-count: 2;
+        column-fill: auto;
+        font-size: 16px;
+        line-height: 20px;
+        orphans: 1;
+        widows: 1;
+      }
+      body {
+        margin: 0;
+      }
+      section {
+        break-after: page;
+      }
+      td {
+        padding: 0;
+        padding-top: 1px;
+      }
+      .outer {
+        border: 3px solid blue;
+        padding: 6px 2px;
+      }
+      .inner {
+        margin: 5px 1px;
+        border: 2px solid orange;
+        padding: 5px 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="outer">
+        <div class="inner">
+          1<br />
+          2<br />
+          3<br />
+          4<br />
+          5<br />
+          6<br />
+          7<br />
+          8<br />
+        </div>
+      </div>
+      <p>↑ Should not be broken between blue and orange borders.</p>
+    </section>
+    <section>
+      <table class="outer">
+        <tbody class="inner">
+          <tr>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>3</td>
+          </tr>
+          <tr>
+            <td>4</td>
+          </tr>
+          <tr>
+            <td>5</td>
+          </tr>
+          <tr>
+            <td>6</td>
+          </tr>
+          <tr>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td>8</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>↑ Should not be broken after "8" (inside blue border).</p>
+    </section>
+    <section>
+      <div class="outer" style="height: 190px">
+        <div class="inner">
+          1<br />
+          2<br />
+          3<br />
+          4<br />
+          5<br />
+          6<br />
+          7<br />
+        </div>
+      </div>
+      <p>
+        ↑ Should be broken between blue and orange borders. (not implemented
+        yet)
+      </p>
+    </section>
+  </body>
+</html>

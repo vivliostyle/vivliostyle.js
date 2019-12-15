@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Table at flow root</title>
+    <style>
+      @-epubx-page-template {
+        @-epubx-page-master {
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            top: 210px;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: table;
+            top: 110px;
+            height: 90px;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: table;
+            top: 10px;
+            height: 90px;
+          }
+        }
+        .table {
+          -epubx-flow-into: table;
+          display: table;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table">There should be a text "body" below.</div>
+    <div class="table">
+      <div style="display: table-row; height: 85px">
+        There should be a text "body" below.
+      </div>
+    </div>
+    body
+  </body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>break-before/after: left/right</title>
+    <style>
+      @-epubx-page-template {
+        @-epubx-flow sub {
+          -epubx-flow-consume: all;
+        }
+        @-epubx-page-master {
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            width: 40%;
+            border: blue solid;
+          }
+          @-epubx-partition {
+            -epubx-flow-from: sub;
+            width: 40%;
+            right: 0;
+            border: orange solid;
+          }
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            content: counter(page);
+            text-align: center;
+            height: 20px;
+          }
+        }
+      }
+
+      div {
+        margin: 8px;
+      }
+      .sub {
+        -epubx-flow-into: sub;
+      }
+      .break-before-page {
+        break-before: page;
+      }
+      .break-after-page {
+        break-after: page;
+      }
+      .break-before-right {
+        break-before: right;
+      }
+      .break-after-right {
+        break-after: right;
+      }
+      .break-before-left {
+        break-before: left;
+      }
+      .break-after-left {
+        break-after: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div>This <i>body</i> should be on the 1st (right) page.</div>
+    <div class="sub">This <i>sub</i> should be on the 1st (right) page.</div>
+    <div class="break-before-page">
+      (break-before: page) This <i>body</i> should be on the 2nd (left) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 2nd (left) page.</div>
+    <div class="break-after-page">
+      (break-after: page) This <i>body</i> should be on the 2nd (left) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 3rd (right) page.</div>
+    <div>
+      This <i>body</i> should be on the 3rd (right) page. The next (4th, left)
+      page should be empty.
+    </div>
+    <div class="break-before-right">
+      (break-before: right) This <i>body</i> should be on the 5th (right) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 5th (right) page.</div>
+    <div class="break-after-right">
+      (break-after: right) This <i>body</i> should be on the 5th (right) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 6th (left) page.</div>
+    <div class="break-after-page">
+      (break-after: page) This <i>body</i> should be on the 7th (right) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 8th (left) page.</div>
+    <div class="break-before-right">
+      (break-before: right) This <i>body</i> should be on the 9th (right) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 9th (right) page.</div>
+    <div class="break-before-page">
+      (break-before: page) This <i>body</i> should be on the 10th (left) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 10th (left) page.</div>
+    <div class="break-before-right">
+      (break-before: right) This <i>body</i> should be on the 11th (right) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 11th (right) page.</div>
+    <div class="break-before-left">
+      (break-before: left) This <i>body</i> should be on the 12th (left) page.
+      The next (13th, right) page should be empty.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 12th (left) page.</div>
+    <div class="break-before-left">
+      (break-before: left) This <i>body</i> should be on the 14th (left) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 14th (left) page.</div>
+    <div class="break-after-left">
+      (break-after: left) This <i>body</i> should be on the 14th (left) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 15th (right) page.</div>
+    <div class="break-after-page">
+      (break-after: page) This <i>body</i> should be on the 16th (left) page.
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 17th (right) page.</div>
+    <div class="break-before-left">
+      (break-after: left) This <i>body</i> should be on the 18th (left) page.
+    </div>
+    <div class="break-before-page">
+      <div class="break-before-page">
+        (break-before: page inside break-before: page) This <i>body</i> should
+        be on the 19th (right) page.
+      </div>
+    </div>
+    <div class="sub">This <i>sub</i> should be on the 19th (right) page.</div>
+  </body>
+</html>

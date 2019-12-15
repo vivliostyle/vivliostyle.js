@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Attribute selectors</title>
+    <style>
+      p {
+        color: red;
+      }
+      [data-foo~="baz"] {
+        color: green;
+      }
+      [data-foo~="bar baz"] {
+        color: red;
+      }
+      [data-foo~=""] {
+        color: red;
+      }
+      [data-foo|="bar"] {
+        color: green;
+      }
+      [data-foo|=""] {
+        color: green;
+      }
+      [data-foo^="baz"] {
+        color: green;
+      }
+      [data-foo^=""] {
+        color: red;
+      }
+      [data-foo$="bazz"] {
+        color: green;
+      }
+      [data-foo$=""] {
+        color: red;
+      }
+      [data-foo*="o b"] {
+        color: green;
+      }
+      [data-foo*=""] {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <p data-foo="bar baz">
+      This paragraph should be green. (using <code>~=</code> selector)
+    </p>
+    <p data-foo="bar-baz">
+      This paragraph should be green. (using <code>|=</code> selector)
+    </p>
+    <div data-foo="-baz">
+      This paragraph should be green. (using <code>|=</code> selector with an
+      empty string)
+    </div>
+    <p data-foo="bazbar">
+      This paragraph should be green. (using <code>^=</code> selector)
+    </p>
+    <p data-foo="barbazz">
+      This paragraph should be green. (using <code>$=</code> selector)
+    </p>
+    <p data-foo="foo bar">
+      This paragraph should be green. (using <code>*=</code> selector)
+    </p>
+    This sentence should not be green.
+  </body>
+</html>

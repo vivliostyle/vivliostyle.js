@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clear page floats</title>
+    <style>
+      @page {
+        size: 640px;
+        margin: 20px;
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      :root {
+        column-count: 3;
+        column-rule: 1px dashed gray;
+      }
+      section {
+        break-after: column;
+      }
+
+      .block-start {
+        float: block-start;
+      }
+      .block-end {
+        float: block-end;
+      }
+      .block-start,
+      .block-end {
+        width: 120px;
+        height: 100px;
+        border: 2px blue solid;
+      }
+      .page-float {
+        float-reference: page;
+      }
+      .column-float {
+        float-reference: column;
+      }
+
+      .clear-all {
+        clear: all;
+        border: 2px green dashed;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>(1-1) Text</p>
+      <div class="column-float block-start">
+        (1-2) column block-start float on P1, col 1
+      </div>
+      <div class="column-float block-start">
+        (1-3) column block-start float on P1, col 1
+      </div>
+      <p class="clear-all">
+        (1-4) p with clear: all; should be on P1, col 1, below (1-2) and (1-3)
+      </p>
+      <div class="column-float block-end">
+        (1-5) column block-end float on P1, col 1
+      </div>
+      <div class="column-float block-end">
+        (1-6) column block-end float on P1, col 1
+      </div>
+      <p>(1-7) Text</p>
+    </section>
+    <section>
+      <p>(2-1) Text</p>
+      <div class="column-float block-start">
+        (2-2) column block-start float on P1, col 2
+      </div>
+      <div class="column-float block-end">
+        (2-3) column block-end float on P1, col2
+      </div>
+      <div class="column-float block-end">
+        (2-4) column block-end float on P1, col2
+      </div>
+      <div class="column-float block-start">
+        (2-5) column block-start float on P1, col 2
+      </div>
+      <div class="column-float block-start">
+        (2-6) column block-start float on P1, col 2
+      </div>
+      <div class="column-float block-start">
+        (2-7) column block-start float on P1, col 3
+      </div>
+      <p class="clear-all">
+        (2-8) p with clear: all; should be on P1, col 3, below (2-7) and
+        wrapping around (2-9)
+      </p>
+      <div class="column-float block-start">
+        (2-9) column block-start float on P1, col 3
+      </div>
+      <div class="column-float block-end">
+        (2-10) column block-end float on P1, col3
+      </div>
+      <p>(2-11) Text</p>
+    </section>
+    <section>
+      <p>(3-1) Text</p>
+      <div class="page-float block-start">
+        (3-2) page block-start float on P2
+      </div>
+      <p class="clear-all">
+        (3-3) p with clear: all; should be on P2, col1, below (3-2) and wrapping
+        around (3-6)
+      </p>
+    </section>
+    <section>
+      <p>(3-4) Text</p>
+      <div class="column-float block-start">
+        (3-5) column block-start float on P2, col2
+      </div>
+      <div class="page-float block-start">
+        (3-6) page block-start float on P2
+      </div>
+      <p class="clear-all">
+        (3-7) p with clear: all; should be on P2, col2, below (3-2), (3-5) and
+        (3-6)
+      </p>
+      <div class="page-float block-end">(3-8) page block-end float on P2</div>
+      <p>(3-9) Text</p>
+      <div class="column-float block-end">
+        (3-10) column block-end float on P2, col2
+      </div>
+      <p class="clear-all">
+        (3-11) p with clear: all; should be on P3, col1 and wrapping around
+        (3-12)
+      </p>
+      <div class="page-float block-start">
+        (3-12) page block-start float on P3
+      </div>
+      <div class="page-float block-start">
+        (3-13) page block-start float on P3
+      </div>
+      <div class="page-float block-start">
+        (3-14) page block-start float on P3
+      </div>
+      <p class="clear-all">
+        (3-15) p with clear: all; should be on P3, col1, below (3-12), (3-13)
+        and (3-14)
+      </p>
+      <div class="page-float block-start">
+        (3-16) page block-end float on P3
+      </div>
+      <div class="page-float block-start">
+        (3-17) page block-end float on P3
+      </div>
+      <div class="page-float block-start">
+        (3-18) page block-start float on P4
+      </div>
+      <p>(3-19) Text</p>
+      <p class="clear-all">
+        (3-20) p with clear: all; should be on P4, col1, below (3-18)
+      </p>
+    </section>
+  </body>
+</html>

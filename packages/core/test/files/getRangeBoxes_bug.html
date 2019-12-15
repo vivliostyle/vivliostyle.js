@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>getRangeBoxes bug</title>
+    <style>
+      @page {
+        size: 430px 120px;
+        margin: 10px;
+        @bottom-center {
+          content: counter(page);
+          font-size: 10px;
+          line-height: 10px;
+        }
+      }
+
+      :root {
+        line-height: 20px;
+        columns: 2;
+      }
+
+      body,
+      p {
+        margin: 0;
+      }
+
+      section {
+        break-after: page;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>
+        1 The left column<br />
+        2 should have<br />
+        3 five lines
+      </p>
+      <p>
+        4<br />
+        <span
+          >5<br />
+          6<br />
+          7<br />
+          8</span
+        >
+      </p>
+    </section>
+
+    <section>
+      <p>
+        1 The left column<br />
+        2 should have<br />
+        3 five lines
+      </p>
+      <p>
+        4<br />
+        <span
+          >5<br />
+          6<br />
+          7<br />
+          8</span
+        ><span></span>
+      </p>
+    </section>
+
+    <section>
+      <p>
+        1 The left column<br />
+        2 should have<br />
+        3 five lines
+      </p>
+      <p>
+        4<br />
+        5<br />
+        6<br />
+        7<br />
+        8
+      </p>
+    </section>
+  </body>
+</html>

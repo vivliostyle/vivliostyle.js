@@ -1,16 +1,15 @@
 language: node_js
 node_js:
-- stable
+  - stable
 before_install:
-- sudo pip install virtualenv
+  - sudo pip install virtualenv # for wpt_sauce
 script:
-- build/update-version.sh
-- npm run lint
-- npm run build
-- npm test
-# - build/wpt-sauce.sh
-after_success:
-- build/travis-after-success.sh
+  - yarn build
+  - yarn lint
+  - yarn test-sauce
+# - scripts/wpt-sauce.sh
+# after_success: TODO: uncheck after the merger
+#   - scripts/after-success-hook.sh
 notifications:
   email: false
   slack:

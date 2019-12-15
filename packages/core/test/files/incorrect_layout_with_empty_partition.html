@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      h1 {
+        font-size: 50px;
+      }
+      p {
+        page-break-after: always;
+      }
+
+      @-epubx-page-template {
+        h1 {
+          -epubx-flow-into: titles;
+        }
+        @-epubx-page-master {
+          background: red;
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: lightgray;
+
+            /* this should be 0 on pages without a titles partition*/
+            top: -epubx-expr(titles.height);
+          }
+          @-epubx-partition titles {
+            -epubx-flow-from: titles;
+            left: 0;
+            right: 0;
+            top: 0;
+            background: lightgray;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Title</h1>
+    <p>This page should be gray and have a title.</p>
+    <p>This page should be gray and there should be no red.</p>
+  </body>
+</html>

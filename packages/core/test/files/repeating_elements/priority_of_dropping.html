@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>repeat-on-break: auto</title>
+    <style>
+      @page {
+        size: 820px;
+      }
+      @-epubx-page-template {
+        .partition {
+          width: 398px;
+          height: 198px;
+          border: rgba(0, 0, 255, 0.2) solid 1px;
+          -epubx-flow-from: body;
+        }
+        .left {
+          left: 10px;
+        }
+        .right {
+          right: 10px;
+        }
+
+        @-epubx-page-master {
+          @-epubx-partition {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            font-size: 10px;
+            line-height: 10px;
+            text-align: center;
+            content: counter(page);
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(right) {
+            top: 10px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 610px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 410px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 210px;
+          }
+          @-epubx-partition class(partition) class(left) {
+            top: 10px;
+          }
+        }
+      }
+      :root {
+        font-size: 10px;
+        line-height: 12px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0 10px;
+      }
+      section {
+        break-after: column;
+      }
+      h1 {
+        font-size: 10px;
+        font-weight: normal;
+      }
+
+      .header {
+        repeat-on-break: header;
+        background-color: #ff9999 !important;
+      }
+      .footer {
+        repeat-on-break: footer;
+        background-color: #9999ff !important;
+      }
+
+      table {
+        border: 2px black solid;
+        border-spacing: 2px;
+      }
+      caption {
+        caption-side: bottom;
+      }
+      tr,
+      .tr {
+        border: 1px blue solid;
+      }
+      th,
+      td,
+      .th,
+      .td {
+        border: 1px gray solid;
+        line-height: 16px;
+        vertical-align: top;
+      }
+      td {
+      }
+      thead,
+      .thead {
+        background-color: #ffaaaa;
+      }
+      tfoot,
+      .tfoot {
+        background-color: #aaaaff;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>
+        (1) The footer dropping takes precedence over the page break after the
+        paragraph
+      </h1>
+      <p>paragraph</p>
+      <div>
+        <div class="header" style="height: 50px">header</div>
+        <div class="c1" style="height: 80px">
+          this content laid out in page 1 with header
+        </div>
+        <div class="c2" style="height: 80px">
+          this content laid out in page 2 with header, footer
+        </div>
+        <div class="c3" style="height: 80px">
+          this content laid out in page 3 with header, footer
+        </div>
+        <div class="footer" style="height: 50px">footer</div>
+      </div>
+    </section>
+
+    <section>Empty</section>
+
+    <section>
+      <h1>
+        (2) The child and parent footer dropping takes precedence over the page
+        break after parent content
+      </h1>
+      <div>
+        <div class="p1" style="height: 30px">
+          this content laid out in page 1 with parent header, child header
+        </div>
+        <div>
+          <div class="c1" style="height: 40px">
+            this content laid out in page 1 with parent header, child header
+          </div>
+          <div class="c2" style="height: 40px">
+            this content laid out in page 2 with parent header, parent footer,
+            child footer
+          </div>
+          <div class="child header" style="height: 40px">child header</div>
+          <div class="child footer" style="height: 50px">child footer</div>
+        </div>
+        <div class="header" style="height: 40px">parent header</div>
+        <div class="footer" style="height: 40px">parent footer</div>
+      </div>
+    </section>
+
+    <section>Empty</section>
+    <section>Empty</section>
+
+    <section>
+      <h1>
+        (3) The child and parent footer dropping takes precedence over the page
+        break after parent content
+      </h1>
+      <div>
+        <div class="header" style="height: 30px">parent header</div>
+        <div style="height: 30px">
+          this content laid out in page 1 with parent header, child header and
+          footer
+        </div>
+        <div>
+          <div class="child header" style="height: 40px">child header</div>
+          <div style="height: 20px">
+            this content laid out in page 1 with parent header, child header and
+            footer
+          </div>
+          <div style="height: 20px">
+            this content laid out in page 1 with parent header, child header and
+            footer
+          </div>
+          <div class="child footer" style="height: 20px">child footer</div>
+        </div>
+        <div style="height: 30px">
+          this content laid out in page 2 with parent header, parent footer
+        </div>
+        <div class="footer" style="height: 50px">parent footer</div>
+      </div>
+    </section>
+
+    <section>Empty</section>
+    <section>Empty</section>
+
+    <section>
+      <h1>
+        (4) The footer dropping takes precedence over the page break after the
+        paragraph
+      </h1>
+      <p>paragraph</p>
+      <table class="table1">
+        <thead>
+          <tr>
+            <td><div style="height:30px">header</div></td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="c1" style="height: 80px">
+                this content laid out in page 1 with header
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="c2" style="height: 80px">
+                this content laid out in page 2 with header, footer
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="c3" style="height: 80px">
+                this content laid out in page 3 with header, footer
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><div style="height:50px">footer</div></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <section>Empty</section>
+
+    <section>
+      <h1>
+        (5) The child and parent footer dropping takes precedence over the page
+        break after parent content
+      </h1>
+      <table class="table1">
+        <thead>
+          <tr>
+            <td><div style="height:30px">parent header</div></td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="p1" style="height: 30px">
+                this content laid out in page 1 with parent header, child header
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div>
+                <div class="c1" style="height: 40px">
+                  this content laid out in page 1 with parent header, child
+                  header
+                </div>
+                <div class="c2" style="height: 40px">
+                  this content laid out in page 2 with parent header/footer,
+                  child header
+                </div>
+                <div class="c3" style="height: 40px">
+                  this content laid out in page 2 with parent header/footer,
+                  child header
+                </div>
+                <div class="c4" style="height: 40px">
+                  this content laid out in page 3 with parent header/footer,
+                  child footer
+                </div>
+                <div class="child header" style="height: 40px">
+                  child header
+                </div>
+                <div class="child footer" style="height: 50px">
+                  child footer
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><div style="height:30px">parent footer</div></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <section>Empty</section>
+
+    <section>
+      <h1>
+        (6) The child and parent footer dropping takes precedence over the page
+        break after parent content
+      </h1>
+      <table class="table1">
+        <thead>
+          <tr>
+            <td><div style="height:30px">parent header</div></td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="p1" style="height: 30px">
+                this content laid out in page 1 with parent header, child header
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <table class="table2">
+                <thead>
+                  <tr>
+                    <td><div style="height:30px">header</div></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="c1" style="height: 30px">
+                        this content laid out in page 1 with parent header,
+                        child header
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="c2" style="height: 30px">
+                        this content laid out in page 2 with parent
+                        header/footer, child header/footer
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="c3" style="height: 30px">
+                        this content laid out in page 3 with parent
+                        header/footer, child header/footer
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="c4" style="height: 30px">
+                        this content laid out in page 4 with parent
+                        header/footer, child header/footer
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td><div style="height:40px">footer</div></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><div style="height:30px">parent footer</div></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <section>
+      <h1>
+        (7) The child and parent footer dropping takes precedence over the page
+        break after parent content1
+      </h1>
+      <div>
+        <div class="p1" style="height: 30px">
+          this content laid out in page 1 with parent header, child header
+        </div>
+        <table class="table2">
+          <thead>
+            <tr>
+              <td><div style="height:20px">header</div></td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="c1" style="height: 30px">
+                  this content laid out in page 1 with parent header, child
+                  header
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="c2" style="height: 30px">
+                  this content laid out in page 2 with parent header/footer,
+                  child header/footer
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="c3" style="height: 30px">
+                  this content laid out in page 3 with parent header/footer,
+                  child header/footer
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="c4" style="height: 30px">
+                  this content laid out in page 4 with parent header/footer,
+                  child header/footer
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td><div style="height:40px">footer</div></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="header" style="height: 40px">parent header</div>
+        <div class="footer" style="height: 40px">parent footer</div>
+      </div>
+    </section>
+
+    <section>
+      <h1>
+        (8) the page break after the paragraph takes precedence over the footer
+        dropping if `break-inside: avoid` specified in the styles of owner
+        element
+      </h1>
+      <p>paragraph</p>
+      <div style="break-inside: avoid">
+        <div class="header" style="height: 50px">header</div>
+        <div class="c1" style="height: 80px">
+          this content laid out in page 2 with header, footer
+        </div>
+        <div class="c2" style="height: 80px">
+          this content laid out in page 3 with header, footer
+        </div>
+        <div class="c3" style="height: 80px">
+          this content laid out in page 4 with header, footer
+        </div>
+        <div class="footer" style="height: 50px">footer</div>
+      </div>
+    </section>
+  </body>
+</html>

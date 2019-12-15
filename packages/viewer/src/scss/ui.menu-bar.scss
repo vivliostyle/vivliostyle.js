@@ -1,0 +1,742 @@
+/* stylelint-disable no-duplicate-selectors, no-descending-specificity */
+@charset "utf-8";
+
+@import "./lib/_mixins";
+@import "./lib/_vars";
+
+@import "~font-awesome/scss/_variables";
+@include at-font-face(
+  "FontAwesome",
+  "../fonts/fontawesome-webfont",
+  "#fontawesomeregular"
+);
+
+// ================================================================================
+// + Setting
+// --------------------------------------------------------------------------------
+
+// - Animation
+// --------------------------------------------------------------------------------
+
+@keyframes GLOW {
+  0% {
+    opacity: 0.5;
+  }
+  25% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  75% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+$animation-GLOW: GLOW 1s linear 0s infinite normal;
+
+@keyframes FLIP {
+  0.0% {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  12.5% {
+    transform: rotateY(90deg);
+    opacity: 0.75;
+  }
+  25.0%,
+  50.0% {
+    transform: rotateY(180deg);
+    opacity: 1;
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+  }
+  62.5% {
+    transform: rotateY(270deg);
+    opacity: 0.75;
+  }
+  75.0%,
+  100.0% {
+    transform: rotateY(360deg);
+    opacity: 1;
+  }
+}
+$animation-FLIP: FLIP 2s ease 0s infinite normal;
+
+// ================================================================================
+// + Menu-Bar
+// --------------------------------------------------------------------------------
+
+#vivliostyle-menu-bar {
+  box-sizing: border-box;
+  position: fixed;
+  z-index: 88888888;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: $menu-icon-height;
+  font-family: $sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  color: white;
+  background: black;
+  box-shadow: $menu-box-shadow;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-text-size-adjust: 100%;
+  @include prefix(user-select, none); // prevent unwanted text selection
+  * {
+    margin: 0;
+    padding: 0;
+    border: none 0;
+  }
+  li {
+    list-style: none outside;
+    display: block;
+  }
+  &:before,
+  &:after {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    top: $menu-icon-height * 0.5 * 0.6;
+    width: 100%;
+    height: $menu-icon-height * 0.5;
+    text-align: center;
+    transition: linear 0.2s;
+    @media screen and (max-width: 1117px) {
+      right: $menu-icon-width + $menu-icon-offset-x * 4;
+      width: 362px / (80px / ($menu-icon-height * 0.5));
+      text-align: right;
+    }
+    @media screen and (max-width: 649px) {
+      animation: none !important;
+      opacity: 0 !important;
+    }
+  }
+  &:before {
+    content: "";
+    background: transparent no-repeat center center $vivliostyle-logo-type;
+    background-size: contain;
+    opacity: 1;
+  }
+}
+
+// - Menu-Bar > Menu & Menu-Item
+// --------------------------------------------------------------------------------
+
+#vivliostyle-menu-bar {
+  > ul.vivliostyle-menu {
+    position: relative;
+    z-index: 10;
+    float: left;
+    padding-right: 1px;
+    background: rgba(0, 0, 0, 0.4);
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      right: 0;
+      top: 1px;
+      width: 1px;
+      height: $menu-icon-height - 2px;
+      background: rgb(64, 64, 64);
+    }
+    //&:first-child/*, &#vivliostyle-menu_settings*/ { padding-left: 0; &:before { display: none; } }
+    &#vivliostyle-menu_settings {
+      float: right;
+      margin-left: -7px;
+      padding-right: 0;
+      z-index: 11;
+    }
+    > li.vivliostyle-menu-item {
+      display: table-cell;
+      position: relative;
+      width: $menu-icon-width;
+      height: $menu-icon-height;
+      > .vivliostyle-menu-icon-button,
+      > .vivliostyle-menu-icon-button:before,
+      > .vivliostyle-menu-icon-button:after {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+      }
+      > .vivliostyle-menu-icon-button {
+        left: $menu-icon-offset-x;
+        top: $menu-icon-offset-y;
+        width: $menu-icon-width - $menu-icon-offset-x * 2;
+        height: $menu-icon-height - $menu-icon-offset-y * 2;
+        border-radius: 2px;
+        color: transparent;
+        cursor: pointer;
+        &,
+        &:before,
+        &:after {
+          transition: linear 0.1s;
+        }
+        &:before,
+        &:after {
+          color: white;
+        }
+        &:before {
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          line-height: $menu-icon-height - $menu-icon-offset-y * 2;
+          font-size: $menu-icon-height * 0.45;
+          text-align: center;
+          @include font-icon("FontAwesome");
+        }
+        &:after {
+          width: 1em;
+          height: 1em;
+          line-height: 1;
+          text-align: center;
+          font-size: $menu-icon-height * 0.35;
+          //font-weight: bold;
+        }
+        &.hover {
+          &:before,
+          &:after {
+            color: black;
+          }
+          background: rgba(255, 255, 255, 0.75);
+        }
+        &.active {
+          &:before,
+          &:after {
+            color: black;
+          }
+          background: rgba(255, 255, 255, 1);
+        }
+      }
+      &.vivliostyle-menu-item_detail-opened > span {
+        &:before,
+        &:after {
+          color: black;
+        }
+        background: rgba(255, 255, 255, 1);
+        &.hover {
+          &:before,
+          &:after {
+            color: black;
+          }
+          background: rgba(255, 255, 255, 0.75);
+        }
+        &.active {
+          &:before,
+          &:after {
+            color: white;
+          }
+          background: transparent;
+        }
+      }
+      &.vivliostyle-menu-disabled > span {
+        cursor: default;
+        &:before,
+        &:after {
+          color: rgb(128, 128, 128) !important;
+        }
+        background: transparent !important;
+      }
+      &#vivliostyle-menu-item_page-number.vivliostyle-menu-disabled
+        > #vivliostyle-page-number {
+        background: transparent;
+      }
+    }
+  }
+}
+
+// - Menu-Bar > Menu > Menu-Item (Variation)
+// --------------------------------------------------------------------------------
+
+#vivliostyle-menu-bar {
+  > ul.vivliostyle-menu {
+    > li.vivliostyle-menu-item {
+      &#vivliostyle-menu-item_toc-toggle
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-list;
+        top: 0.05em;
+      }
+      //	&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
+      &#vivliostyle-menu-item_move-first
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-chevron-up;
+      }
+      &#vivliostyle-menu-item_move-previous
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-chevron-up;
+      }
+      //	&#vivliostyle-menu-item_move-right        >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-right; }
+      &#vivliostyle-menu-item_move-next > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-chevron-down;
+      }
+      &#vivliostyle-menu-item_move-last > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-chevron-down;
+      }
+      &#vivliostyle-menu-item_zoom-out > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-search-minus;
+      }
+      //	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
+      &#vivliostyle-menu-item_zoom-fit-to-screen
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-arrows-alt /*$fa-var-search*/;
+        top: 0.05em; /*font-size: $menu-icon-height * 0.36;*/
+      }
+      &#vivliostyle-menu-item_zoom-in > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-search-plus;
+      }
+      &#vivliostyle-menu-item_zoom-to-actual-size
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-search;
+      }
+      &#vivliostyle-menu-item_text-size-smaller
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-font;
+      }
+      &#vivliostyle-menu-item_text-size-default
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-font;
+      }
+      &#vivliostyle-menu-item_text-size-larger
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-font;
+      }
+      &#vivliostyle-menu-item_move-first > .vivliostyle-menu-icon-button:after {
+        content: "";
+        border-top: solid 2px;
+        top: 8px;
+        left: 8px;
+        width: 16px;
+      }
+      &#vivliostyle-menu-item_move-last > .vivliostyle-menu-icon-button:after {
+        content: "";
+        border-bottom: solid 2px;
+        bottom: 7px;
+        left: 8px;
+        width: 16px;
+      }
+
+      &#vivliostyle-menu-item_page-number > #vivliostyle-page-number {
+        color: inherit;
+        background-color: #444;
+        font-size: 12px;
+        text-align: right;
+        white-space: pre;
+        position: absolute;
+        top: 8px;
+        width: 32px;
+        height: 20px;
+      }
+      &#vivliostyle-menu-item_total-pages > #vivliostyle-total-pages {
+        text-align: left;
+        white-space: pre;
+        position: absolute;
+        top: 13px;
+        font-size: 11.5px;
+        @include prefix(user-select, text);
+
+        &::before {
+          content: "/\A0";
+        }
+      }
+
+      //	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: "="; left: $menu-icon-width * 0.2625; top: $menu-icon-height * 0.2; }
+      //	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: ""; border: solid 1px; border-radius: 2px; width: 2.1em; height: 2.1em; left: $menu-icon-width * 0.17; top: $menu-icon-height * 0.18; }
+      &#vivliostyle-menu-item_zoom-to-actual-size
+        > .vivliostyle-menu-icon-button:after {
+        content: "1";
+        left: calc(46% - 1em / 2);
+        top: $menu-icon-height * 0.28;
+      }
+      &#vivliostyle-menu-item_text-size-smaller
+        > .vivliostyle-menu-icon-button:after {
+        content: "\2212";
+      }
+      &#vivliostyle-menu-item_text-size-default
+        > .vivliostyle-menu-icon-button:after {
+        content: "=";
+      }
+      &#vivliostyle-menu-item_text-size-larger
+        > .vivliostyle-menu-icon-button:after {
+        content: "+";
+      }
+      &#vivliostyle-menu-item_text-size-smaller
+        > .vivliostyle-menu-icon-button:after,
+      &#vivliostyle-menu-item_text-size-default
+        > .vivliostyle-menu-icon-button:after,
+      &#vivliostyle-menu-item_text-size-larger
+        > .vivliostyle-menu-icon-button:after {
+        right: $menu-icon-width * 0.05;
+        top: $menu-icon-height * 0.15;
+      }
+      //	&#vivliostyle-menu-item_settings-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
+      //	&#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
+      &#vivliostyle-menu-item_toc-toggle.on,
+      &#vivliostyle-menu-item_zoom-fit-to-screen.on {
+        > .vivliostyle-menu-icon-button {
+          &:before,
+          &:after {
+            color: black;
+          }
+          background: rgba(255, 255, 255, 0.55);
+          &.hover {
+            background: rgba(255, 255, 255, 0.75);
+          }
+        }
+      }
+      &#vivliostyle-menu-item_toc-toggle.on.pinned {
+        > .vivliostyle-menu-icon-button {
+          background: rgba(255, 255, 255, 0.85);
+        }
+      }
+      &#vivliostyle-menu-item_settings-toggle {
+        > .vivliostyle-menu-icon-button {
+          background-image: $vivliostyle-logo-mark;
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: contain;
+          -webkit-filter: grayscale(0%);
+          filter: grayscale(0%);
+          @media (hover: hover), (-moz-touch-enabled: 0) {
+            &:hover {
+              opacity: 0.75;
+              -webkit-filter: grayscale(50%);
+              filter: grayscale(50%);
+            }
+          }
+          &::after {
+            content: $fa-var-ellipsis-h;
+            font-size: $menu-icon-height * 0.75;
+            line-height: 0.5em;
+            text-align: right;
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 0.5em;
+            right: 0;
+            bottom: -0.67em;
+            padding: 0 2px;
+            overflow: hidden;
+            color: rgba(0, 0, 0, 0.25);
+            @include font-icon("FontAwesome");
+          }
+        }
+      }
+      &#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened {
+        > .vivliostyle-menu-icon-button {
+          -webkit-filter: grayscale(100%);
+          filter: grayscale(100%);
+        }
+      }
+      &#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened.pinned {
+        > .vivliostyle-menu-icon-button {
+          -webkit-filter: grayscale(100%) brightness(150%);
+          filter: grayscale(100%) brightness(150%);
+        }
+      }
+      &#vivliostyle-menu-item_zoom-to-actual-size {
+        @media screen and (max-width: $menu-icon-width * 15 - 3px) {
+          display: none;
+        }
+      }
+      &#vivliostyle-menu-item_move-previous,
+      &#vivliostyle-menu-item_move-next {
+        @media screen and (max-width: $menu-icon-width * 14 - 3px) {
+          display: none;
+        }
+      }
+      &#vivliostyle-menu-item_zoom-fit-to-screen {
+        @media screen and (max-width: $menu-icon-width * 12 - 3px) {
+          display: none;
+        }
+      }
+      &#vivliostyle-menu-item_text-size-default {
+        @media screen and (max-width: $menu-icon-width * 9 - 3px - 2px) {
+          display: none;
+        }
+      }
+    }
+    &#vivliostyle-menu_zoom {
+      @media screen and (max-width: $menu-icon-width * 11 - 3px) {
+        display: none;
+      }
+    }
+  }
+}
+
+// - Menu-Bar > Menu > Menu-Item > Menu-Detail
+// --------------------------------------------------------------------------------
+
+#vivliostyle-menu-bar {
+  ul.vivliostyle-menu {
+    li.vivliostyle-menu-item {
+      .vivliostyle-menu-detail {
+        box-sizing: border-box;
+        display: none;
+        position: fixed;
+        right: 0;
+        top: $menu-icon-height;
+        padding: 0 2px;
+        width: 100vw;
+        max-width: 320px;
+        max-width: -moz-min-content;
+        max-width: min-content; // make it resizable with CSS Details textarea
+        height: calc(100% - #{$menu-icon-height});
+        line-height: 1;
+        color: $menu-fg-color;
+        .vivliostyle-menu-disabled {
+          color: $menu-disabled-fg-color;
+        }
+        background: $menu-bg-color;
+        box-shadow: $menu-box-shadow;
+        @include prefix(user-select, text);
+        &:focus {
+          outline: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        details[open] > summary > span {
+          text-decoration: underline;
+        }
+        select {
+          color: inherit;
+          font-size: 12px;
+        }
+        input[type="text"] {
+          color: inherit;
+          font-size: 12px;
+          box-sizing: border-box;
+          padding: 0 2px;
+          width: 5.5em;
+          &[name="vivliostyle-settings_page-margin_custom"] {
+            width: 9em;
+          }
+          &[name="vivliostyle-settings_base-font-family"] {
+            width: 11.5em;
+          }
+          &[name="vivliostyle-settings_viewer-font-size"] {
+            width: 4.5em;
+            text-align: right;
+          }
+          &[disabled] {
+            color: $menu-disabled-fg-color;
+          }
+        }
+        input[type="radio"]:checked + span,
+        input[type="checkbox"]:checked + span {
+          text-decoration: underline;
+        }
+        button,
+        .vivliostyle-menu-button {
+          display: inline-block;
+          position: relative;
+          box-sizing: border-box;
+          padding: 0.6em 1.5em;
+          border: solid 1px rgb(128, 128, 128);
+          border-radius: 1.5em;
+          height: 2.5em;
+          line-height: 1em;
+          font-size: 12px;
+          font-weight: bold;
+          min-width: 7em;
+          cursor: pointer;
+          &.vivliostyle-menu-button-positive {
+            color: black;
+            background: white;
+            box-shadow: 0 0 3px 0 black;
+          }
+          &.vivliostyle-menu-button-negative {
+            color: black;
+            background: rgb(200, 200, 200);
+          }
+          &.hover {
+            color: white !important;
+            background: black !important;
+            transition: 0.1s linear;
+          }
+          &.active {
+            background: rgb(128, 128, 128) !important;
+            transition: 0 linear;
+          }
+          transition: 0.15s linear;
+        }
+        small {
+          font-size: 0.9em;
+        }
+        > .vivliostyle-menu-detail-main {
+          overflow-y: auto;
+          height: calc(100% - 56px);
+          font-size: 14px;
+          -webkit-overflow-scrolling: touch;
+          @media screen and (min-width: 320px) {
+            min-width: 316px; // make it resizable with CSS Details textarea
+          }
+          .vivliostyle-menu-detail-group {
+            position: relative;
+            .vivliostyle-menu-detail-group-heading {
+              font-weight: bold;
+              > label > input[type="checkbox"] {
+                margin-left: -1.25em;
+              }
+            }
+          }
+          .vivliostyle-menu-detail-group-buttons {
+            text-align: center;
+            > div,
+            > li {
+              text-align: center;
+            }
+          }
+          .vivliostyle-menu-detail-group-inline {
+            > div,
+            > li {
+              display: inline-block;
+              margin-left: 10px;
+              &:first-child {
+                margin-left: 0;
+              }
+            }
+          }
+          > .vivliostyle-menu-detail-group {
+            border-top: solid 1px rgba(255, 255, 255, 1);
+            padding: 12px 4px;
+            line-height: 1.5;
+            &:first-child {
+              border-top: none 0;
+            }
+            .vivliostyle-menu-detail-group {
+              padding-left: 1.3em;
+              margin-top: 0.8em;
+            }
+            > .vivliostyle-menu-detail-group {
+              font-size: 0.9em;
+              padding-left: 1.1em;
+              > textarea {
+                display: block;
+                line-height: 1.3;
+                font-size: 1em;
+                font-family: monospace;
+                margin: 0.5em 0;
+                padding: 2px;
+                box-sizing: border-box;
+                width: 100%;
+              }
+            }
+            ul.vivliostyle-menu-detail-group {
+              margin-top: 0;
+              padding-bottom: 0.1em;
+              &:before {
+                content: "";
+                display: block;
+                position: absolute;
+                left: 0.4em;
+                top: 0;
+                width: 1px;
+                height: 100%;
+                border-left: solid 1px rgb(160, 160, 160);
+              }
+              li {
+                margin-top: 0.25em;
+                > label:first-child {
+                  display: inline-block;
+                  margin-left: 1.25em;
+                  > *:first-child {
+                    margin-left: -1.5em;
+                  }
+                }
+                > div:first-child:last-child {
+                  display: block;
+                  margin-left: 1.25em;
+                  > label:first-child {
+                    > *:first-child {
+                      margin-left: -1.5em;
+                    }
+                    + span {
+                      white-space: nowrap;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        > .vivliostyle-menu-detail-aside {
+          box-sizing: border-box;
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          border-top: solid 1px rgba(255, 255, 255, 0.8);
+          padding: 0.75em 10px;
+          width: 100%;
+          text-align: center;
+          color: rgb(128, 128, 128);
+          background: rgba(255, 255, 255, 0.75);
+          font-size: 12px;
+          line-height: 1.2;
+          small {
+            font-size: 10px;
+            letter-spacing: -0.05em;
+          }
+          a {
+            color: rgb(128, 128, 128);
+            text-decoration: none;
+            border-bottom: solid 1px rgb(192, 192, 192);
+            transition: linear 0.1s;
+            @media (hover: hover), (-moz-touch-enabled: 0) {
+              &:hover {
+                color: black;
+                border-bottom-color: black;
+              }
+            }
+            small {
+              letter-spacing: 0;
+            }
+          }
+          > .version {
+            margin-top: 0.3em;
+            span {
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+      &.vivliostyle-menu-item_detail-opened .vivliostyle-menu-detail {
+        display: block;
+      }
+    }
+  }
+}
+
+// ================================================================================
+// + Viewer-Viewport
+// --------------------------------------------------------------------------------
+
+@media screen {
+  #vivliostyle-viewer-viewport {
+    margin-top: $menu-icon-height;
+    height: calc(100vh - #{$menu-icon-height});
+    width: 100vw;
+  }
+}
+
+// ================================================================================
+// + TOC Box
+// --------------------------------------------------------------------------------
+
+[data-vivliostyle-toc-box] {
+  z-index: 2000; // need greater than navigation-left button's z-index
+  &:focus {
+    outline: 1px solid rgba(0, 0, 0, 0.15);
+  }
+  :focus {
+    box-shadow: 0 0 4px 2px #4d90fe;
+    outline: none;
+  }
+  [role="button"]:focus {
+    text-shadow: 1px 0 5px #4d90fe, -1px 0 5px #4d90fe;
+    box-shadow: none;
+    outline: none;
+  }
+}

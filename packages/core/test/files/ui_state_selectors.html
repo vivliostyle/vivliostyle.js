@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>UI state selectors</title>
+    <style>
+      input[type="text"] {
+        border: solid red;
+        width: 200px;
+      }
+      input[type="text"]:enabled {
+        border: solid green;
+      }
+      input[type="text"]:disabled {
+        border: solid green;
+      }
+
+      button {
+        color: red;
+      }
+      button:enabled {
+        color: green;
+      }
+      button:disabled {
+        color: green;
+      }
+
+      select {
+        border: solid red;
+      }
+      select:enabled {
+        border: solid green;
+      }
+      select:disabled {
+        border: solid green;
+      }
+
+      datalist {
+        display: block;
+      }
+      datalist option {
+        color: red;
+      }
+      datalist.enabled-option option:enabled {
+        color: green;
+      }
+      datalist.disabled-option option:disabled {
+        color: green;
+      }
+
+      textarea {
+        color: red;
+      }
+      textarea:enabled {
+        color: green;
+      }
+      textarea:disabled {
+        color: green;
+      }
+
+      keygen {
+        border: solid red;
+      }
+      keygen:enabled {
+        border: solid green;
+      }
+      keygen:disabled {
+        border: solid green;
+      }
+
+      fieldset {
+        border: solid red;
+        color: red;
+      }
+      fieldset:enabled {
+        border: solid green;
+        color: green;
+      }
+      fieldset:disabled {
+        border: solid green;
+        color: green;
+      }
+
+      input[type="checkbox"] {
+        color: red;
+      }
+      input[type="checkbox"]::after {
+        content: "input[type=checkbox]";
+        padding-left: 0.5em;
+      }
+      input[type="checkbox"]:checked {
+        color: green;
+      }
+      input[type="checkbox"]:checked::before {
+        content: "checked";
+        padding-left: 2em;
+      }
+
+      datalist.selected-option option:checked {
+        color: green;
+      }
+
+      div {
+        color: green;
+      }
+      div:disabled {
+        color: red;
+      }
+      div:checked {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <p><input type="text" placeholder="enabled input[type=text]" /></p>
+    <p><button>enabled button</button></p>
+    <p>
+      <select
+        ><option>enabled select</option></select
+      >
+    </p>
+    <p>
+      <datalist class="enabled-option">
+        <option>enabled option</option>
+      </datalist>
+    </p>
+    <p><textarea>enabled textarea</textarea></p>
+    <p><keygen></keygen></p>
+    <fieldset><legend>enabled fieldset</legend></fieldset>
+
+    <p>
+      <input type="text" placeholder="disabled input[type=text]" disabled />
+    </p>
+    <p><button disabled>disabled button</button></p>
+    <p>
+      <select disabled
+        ><option>disabled select</option></select
+      >
+    </p>
+    <p>
+      <datalist class="disabled-option">
+        <option disabled>disabled option</option>
+      </datalist>
+    </p>
+    <p><textarea disabled>disabled textarea</textarea></p>
+    <p><keygen disabled></keygen></p>
+    <fieldset disabled><legend>disabled fieldset</legend></fieldset>
+
+    <p><input type="checkbox" checked /></p>
+    <p>
+      <datalist class="selected-option">
+        <option selected>selected option</option>
+      </datalist>
+    </p>
+
+    <div checked disabled>
+      div element with 'checked' and 'disabled' attributes
+    </div>
+  </body>
+</html>
