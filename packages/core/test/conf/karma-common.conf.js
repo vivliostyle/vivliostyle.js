@@ -39,7 +39,7 @@ module.exports = function(config) {
     webpack: {
       mode:
         process.env.NODE_ENV === "production" ? "production" : "development",
-      entry: "./src/ts/vivliostyle.ts",
+      entry: "./src/vivliostyle.ts",
       devtool: "inline-source-map",
       resolve: {
         extensions: [".ts", ".js"],

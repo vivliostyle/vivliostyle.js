@@ -9,7 +9,7 @@ import strip from "rollup-plugin-strip";
 import ts from "@wessberg/rollup-plugin-ts";
 import replace from "@rollup/plugin-replace";
 
-const input = "src/ts/vivliostyle.ts";
+const input = "src/vivliostyle.ts";
 const banner = `\
 /**
  * ${pkg.name} v${pkg.version}
@@ -26,7 +26,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const plugins = [
   ts({ tsconfig: "tsconfig.json" }),
   string({
-    include: ["src/ts/resources/*", "resources/*"],
+    include: ["src/resources/*", "resources/*"],
   }),
   replace({ VIVLIOSTYLE_DEBUG: JSON.stringify(isDevelopment) }),
   nodeResolve({

@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_epub from "../../../src/ts/vivliostyle/epub";
+import * as adapt_epub from "../../../src/vivliostyle/epub";
 
 describe("epub", function() {
   describe("OPFDoc", function() {

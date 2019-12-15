@@ -17,11 +17,11 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import stringUtil from "../../../src/ts/utils/string-util";
-import urlParameters from "../../../src/ts/stores/url-parameters";
+// import stringUtil from "../../../src/utils/string-util";
+import urlParameters from "../../../src/stores/url-parameters";
 
 describe("URLParameterStore", function() {
-  var history, location;
+  let history, location;
 
   beforeEach(function() {
     history = urlParameters.history;
@@ -70,7 +70,7 @@ describe("URLParameterStore", function() {
     });
 
     it("can retrieve a value for a unicode key", function() {
-      var key = "あいうえお";
+      const key = "あいうえお";
       urlParameters.location = {
         href: "http://example.com#aa=bb&" + key + "=dd",
       };
@@ -165,6 +165,7 @@ describe("URLParameterStore", function() {
     });
 
     it("use history.replaceState if available", function() {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       urlParameters.history.replaceState = function() {};
       spyOn(urlParameters.history, "replaceState");
       urlParameters.location = { href: "http://example.com" };

@@ -15,8 +15,8 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_base from "../../../src/ts/vivliostyle/base";
-import * as adapt_xmldoc from "../../../src/ts/vivliostyle/xml-doc";
+import * as adapt_base from "../../../src/vivliostyle/base";
+import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 
 describe("xml-doc", function() {
   describe("XMLDocHolder", function() {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /*
  * Copyright 2015 Trim-marks Inc.
  *
@@ -18,16 +19,16 @@
  */
 
 import ko from "knockout";
-import ViewerOptions from "../../../src/ts/models/viewer-options";
-import ZoomOptions from "../../../src/ts/models/zoom-options";
-import Navigation from "../../../src/ts/viewmodels/navigation";
+import ViewerOptions from "../../../src/models/viewer-options";
+import ZoomOptions from "../../../src/models/zoom-options";
+import Navigation from "../../../src/viewmodels/navigation";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("Navigation", function() {
-  var viewerOptions;
-  var viewer;
-  var settingsPanel;
-  var defaultNavigationOptions = {
+  let viewerOptions;
+  let viewer;
+  let settingsPanel;
+  const defaultNavigationOptions = {
     disablePageNavigation: false,
     disableZoom: false,
     disableFontSizeChange: false,
@@ -65,10 +66,10 @@ describe("Navigation", function() {
 
   // describe("isDisabled", function() {
   //     it("is true if viewer.state.navigatable is false", function() {
-  //         var navigation = createNavigation();
+  //         let navigation = createNavigation();
   //         expect(navigation.isDisabled()).toBe(true);
 
-  //         var isDisabled = true;
+  //         let isDisabled = true;
   //         navigation.isDisabled.subscribe(function(value) {
   //             isDisabled = value;
   //         });
@@ -78,7 +79,7 @@ describe("Navigation", function() {
   //     });
 
   //     it("is true if settingsPanel.opened is true", function() {
-  //         var navigation = createNavigation();
+  //         let navigation = createNavigation();
   //         viewer.state.navigatable(true);
 
   //         expect(navigation.isDisabled()).toBe(false);
@@ -95,18 +96,18 @@ describe("Navigation", function() {
     });
 
     // it("calls viewer's navigateToPrevious and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var ret = navigation.navigateToPrevious();
+    //     let ret = navigation.navigateToPrevious();
 
     //     expect(viewer.navigateToPrevious).toHaveBeenCalled();
     //     expect(ret).toBe(true);
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var ret = navigation.navigateToPrevious();
+      let ret = navigation.navigateToPrevious();
 
       expect(viewer.navigateToPrevious).not.toHaveBeenCalled();
       expect(ret).toBe(false);
@@ -127,18 +128,18 @@ describe("Navigation", function() {
     });
 
     // it("calls viewer's navigateToNext and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var ret = navigation.navigateToNext();
+    //     let ret = navigation.navigateToNext();
 
     //     expect(viewer.navigateToNext).toHaveBeenCalled();
     //     expect(ret).toBe(true);
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var ret = navigation.navigateToNext();
+      let ret = navigation.navigateToNext();
 
       expect(viewer.navigateToNext).not.toHaveBeenCalled();
       expect(ret).toBe(false);
@@ -159,18 +160,18 @@ describe("Navigation", function() {
     });
 
     // it("calls viewer's navigateToLeft and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var ret = navigation.navigateToLeft();
+    //     let ret = navigation.navigateToLeft();
 
     //     expect(viewer.navigateToLeft).toHaveBeenCalled();
     //     expect(ret).toBe(true);
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var ret = navigation.navigateToLeft();
+      let ret = navigation.navigateToLeft();
 
       expect(viewer.navigateToLeft).not.toHaveBeenCalled();
       expect(ret).toBe(false);
@@ -191,18 +192,18 @@ describe("Navigation", function() {
     });
 
     // it("calls viewer's navigateToRight and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var ret = navigation.navigateToRight();
+    //     let ret = navigation.navigateToRight();
 
     //     expect(viewer.navigateToRight).toHaveBeenCalled();
     //     expect(ret).toBe(true);
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var ret = navigation.navigateToRight();
+      let ret = navigation.navigateToRight();
 
       expect(viewer.navigateToRight).not.toHaveBeenCalled();
       expect(ret).toBe(false);
@@ -223,18 +224,18 @@ describe("Navigation", function() {
     });
 
     // it("calls viewer's navigateToFirst and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var ret = navigation.navigateToFirst();
+    //     let ret = navigation.navigateToFirst();
 
     //     expect(viewer.navigateToFirst).toHaveBeenCalled();
     //     expect(ret).toBe(true);
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var ret = navigation.navigateToFirst();
+      let ret = navigation.navigateToFirst();
 
       expect(viewer.navigateToFirst).not.toHaveBeenCalled();
       expect(ret).toBe(false);
@@ -255,18 +256,18 @@ describe("Navigation", function() {
     });
 
     // it("calls viewer's navigateToLast and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var ret = navigation.navigateToLast();
+    //     let ret = navigation.navigateToLast();
 
     //     expect(viewer.navigateToLast).toHaveBeenCalled();
     //     expect(ret).toBe(true);
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var ret = navigation.navigateToLast();
+      let ret = navigation.navigateToLast();
 
       expect(viewer.navigateToLast).not.toHaveBeenCalled();
       expect(ret).toBe(false);
@@ -283,13 +284,13 @@ describe("Navigation", function() {
 
   describe("hidePageNavigation", function() {
     it("is false by default", function() {
-      var navigation = createNavigation();
+      const navigation = createNavigation();
 
       expect(navigation.hidePageNavigation).toBe(false);
     });
 
     it("is set to true by navigationOptions", function() {
-      var navigation = createNavigation({ disablePageNavigation: true });
+      const navigation = createNavigation({ disablePageNavigation: true });
 
       expect(navigation.hidePageNavigation).toBe(true);
     });
@@ -300,10 +301,10 @@ describe("Navigation", function() {
       spyOn(viewer, "queryZoomFactor").and.returnValue(1);
     });
     // it("increases zoom factor stored in ViewerOptions model and returns true", function () {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var zoom = viewerOptions.zoom().zoom;
-    //     var ret = navigation.zoomIn();
+    //     let zoom = viewerOptions.zoom().zoom;
+    //     let ret = navigation.zoomIn();
 
     //     expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
     //     expect(viewerOptions.zoom().zoom).toBe(zoom * 1.25);
@@ -320,10 +321,10 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var zoom = viewerOptions.zoom().zoom;
-      var ret = navigation.zoomIn();
+      let zoom = viewerOptions.zoom().zoom;
+      let ret = navigation.zoomIn();
 
       expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
       expect(viewerOptions.zoom().zoom).toBe(zoom);
@@ -348,10 +349,10 @@ describe("Navigation", function() {
       spyOn(viewer, "queryZoomFactor").and.returnValue(1);
     });
     // it("decreases zoom factor stored in ViewerOptions model and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var zoom = viewerOptions.zoom().zoom;
-    //     var ret = navigation.zoomOut();
+    //     let zoom = viewerOptions.zoom().zoom;
+    //     let ret = navigation.zoomOut();
 
     //     expect(viewer.queryZoomFactor).toHaveBeenCalledWith("fit inside viewport");
     //     expect(viewerOptions.zoom().zoom).toBe(zoom * 0.8);
@@ -368,10 +369,10 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var zoom = viewerOptions.zoom().zoom;
-      var ret = navigation.zoomOut();
+      let zoom = viewerOptions.zoom().zoom;
+      let ret = navigation.zoomOut();
 
       expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
       expect(viewerOptions.zoom().zoom).toBe(zoom);
@@ -396,10 +397,10 @@ describe("Navigation", function() {
       spyOn(viewer, "queryZoomFactor").and.returnValue(2);
     });
     // it("set zoom factor stored in ViewerOptions model to 1 and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var zoom = viewerOptions.zoom().zoom;
-    //     var ret = navigation.zoomToActualSize();
+    //     let zoom = viewerOptions.zoom().zoom;
+    //     let ret = navigation.zoomToActualSize();
 
     //     expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
     //     expect(viewerOptions.zoom().zoom).toBe(1);
@@ -415,10 +416,10 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var zoom = viewerOptions.zoom().zoom;
-      var ret = navigation.zoomToActualSize();
+      let zoom = viewerOptions.zoom().zoom;
+      let ret = navigation.zoomToActualSize();
 
       expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
       expect(viewerOptions.zoom().zoom).toBe(zoom);
@@ -444,10 +445,10 @@ describe("Navigation", function() {
     });
 
     // it("query zoom factor for 'fit inside viewport' to the viewer and set returned zoom factor in ViewerOptions model and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
     //     viewerOptions.zoom(ZoomOptions.createFromZoomFactor(2));
-    //     var ret = navigation.toggleFitToScreen();
+    //     let ret = navigation.toggleFitToScreen();
 
     //     expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
     //     expect(viewerOptions.zoom().zoom).toBe(1);
@@ -464,10 +465,10 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
       viewerOptions.zoom(ZoomOptions.createFromZoomFactor(2));
-      var ret = navigation.toggleFitToScreen();
+      let ret = navigation.toggleFitToScreen();
 
       expect(viewer.queryZoomFactor).not.toHaveBeenCalled();
       expect(viewerOptions.zoom().zoom).toBe(2);
@@ -488,13 +489,13 @@ describe("Navigation", function() {
 
   describe("hideZoom", function() {
     it("is false by default", function() {
-      var navigation = createNavigation();
+      const navigation = createNavigation();
 
       expect(navigation.hideZoom).toBe(false);
     });
 
     it("is set to true by navigationOptions", function() {
-      var navigation = createNavigation({ disableZoom: true });
+      const navigation = createNavigation({ disableZoom: true });
 
       expect(navigation.hideZoom).toBe(true);
     });
@@ -502,10 +503,10 @@ describe("Navigation", function() {
 
   describe("increaseFontSize", function() {
     // it("increases font size stored in ViewerOptions model and returns true", function () {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var fontSize = viewerOptions.fontSize();
-    //     var ret = navigation.increaseFontSize();
+    //     let fontSize = viewerOptions.fontSize();
+    //     let ret = navigation.increaseFontSize();
 
     //     expect(viewerOptions.fontSize()).toBe(fontSize * 1.25);
     //     expect(ret).toBe(true);
@@ -517,10 +518,10 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var fontSize = viewerOptions.fontSize();
-      var ret = navigation.increaseFontSize();
+      const fontSize = viewerOptions.fontSize();
+      let ret = navigation.increaseFontSize();
 
       expect(viewerOptions.fontSize()).toBe(fontSize);
       expect(ret).toBe(false);
@@ -537,10 +538,10 @@ describe("Navigation", function() {
 
   describe("decreaseFontSize", function() {
     // it("decreases font size stored in ViewerOptions model and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var fontSize = viewerOptions.fontSize();
-    //     var ret = navigation.decreaseFontSize();
+    //     let fontSize = viewerOptions.fontSize();
+    //     let ret = navigation.decreaseFontSize();
 
     //     expect(viewerOptions.fontSize()).toBe(fontSize * 0.8);
     //     expect(ret).toBe(true);
@@ -552,10 +553,10 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var fontSize = viewerOptions.fontSize();
-      var ret = navigation.decreaseFontSize();
+      const fontSize = viewerOptions.fontSize();
+      let ret = navigation.decreaseFontSize();
 
       expect(viewerOptions.fontSize()).toBe(fontSize);
       expect(ret).toBe(false);
@@ -572,11 +573,11 @@ describe("Navigation", function() {
 
   describe("defaultFontSize", function() {
     // it("set font size stored in ViewerOptions model to default and returns true", function() {
-    //     var navigation = createNavigation();
+    //     let navigation = createNavigation();
     //     setDisabled(false);
-    //     var fontSize = ViewerOptions.getDefaultValues().fontSize;
+    //     let fontSize = ViewerOptions.getDefaultValues().fontSize;
     //     viewerOptions.fontSize(20);
-    //     var ret = navigation.defaultFontSize();
+    //     let ret = navigation.defaultFontSize();
 
     //     expect(viewerOptions.fontSize()).toBe(fontSize);
     //     expect(ret).toBe(true);
@@ -589,11 +590,11 @@ describe("Navigation", function() {
     // });
 
     it("do nothing and returns false when navigation is disabled", function() {
-      var navigation = createNavigation();
+      let navigation = createNavigation();
       setDisabled(true);
-      var fontSize = 20;
+      const fontSize = 20;
       viewerOptions.fontSize(20);
-      var ret = navigation.defaultFontSize();
+      let ret = navigation.defaultFontSize();
 
       expect(viewerOptions.fontSize()).toBe(fontSize);
       expect(ret).toBe(false);
@@ -610,13 +611,13 @@ describe("Navigation", function() {
 
   describe("hideFontSizeChange", function() {
     it("is false by default", function() {
-      var navigation = createNavigation();
+      const navigation = createNavigation();
 
       expect(navigation.hideFontSizeChange).toBe(false);
     });
 
     it("is set to true by navigationOptions", function() {
-      var navigation = createNavigation({ disableFontSizeChange: true });
+      const navigation = createNavigation({ disableFontSizeChange: true });
 
       expect(navigation.hideFontSizeChange).toBe(true);
     });

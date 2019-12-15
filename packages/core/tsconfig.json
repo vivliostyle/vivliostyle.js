@@ -1,5 +1,5 @@
 {
-  "include": ["types/**/*.ts", "src/ts/**/*.ts"],
+  "include": ["types/**/*.ts", "src/**/*.ts", "src/vivliostyle.ts"],
   "exclude": ["node_modules", "examples"],
   "compilerOptions": {
     /* Basic Options */

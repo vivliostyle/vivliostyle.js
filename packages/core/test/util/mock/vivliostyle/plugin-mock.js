@@ -16,7 +16,7 @@
  */
 // goog.provide("vivliostyle.test.util.mock.plugin");
 
-import * as vivliostyle_plugin from "../../../../src/ts/vivliostyle/plugin";
+import * as vivliostyle_plugin from "../../../../src/vivliostyle/plugin";
 
 // (function() {
 //     var pluginMock = vivliostyle.test.util.mock.plugin;

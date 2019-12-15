@@ -17,11 +17,11 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import PageStyle from "../../../src/ts/models/page-style";
+import PageStyle from "../../../src/models/page-style";
 
 describe("PageStyle", function() {
   function makeDummyPageStyle() {
-    var pageStyle = new PageStyle();
+    const pageStyle = new PageStyle();
     pageStyle.mode(PageStyle.Mode.PRESET);
     pageStyle.presetSize(PageStyle.PresetSize[3]);
     pageStyle.isLandscape(true);
@@ -42,7 +42,7 @@ describe("PageStyle", function() {
 
   describe("constructor", function() {
     it("copies parameters from the argument", function() {
-      var pageStyle = new PageStyle(makeDummyPageStyle());
+      const pageStyle = new PageStyle(makeDummyPageStyle());
 
       verifyDummyPageStyle(pageStyle);
     });
@@ -50,7 +50,7 @@ describe("PageStyle", function() {
 
   describe("copyFrom", function() {
     it("copies parameters from the argument to itself", function() {
-      var pageStyle = new PageStyle();
+      const pageStyle = new PageStyle();
       pageStyle.copyFrom(makeDummyPageStyle());
 
       verifyDummyPageStyle(pageStyle);
@@ -58,28 +58,28 @@ describe("PageStyle", function() {
   });
 
   describe("equivalentTo", function() {
-    var dummy;
+    let dummy;
 
     beforeEach(function() {
       dummy = makeDummyPageStyle();
     });
 
     it("returns false if isImportant is different", function() {
-      var pageStyle = new PageStyle(dummy);
+      const pageStyle = new PageStyle(dummy);
       pageStyle.isImportant(false);
 
       expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
     it("returns false if mode is different", function() {
-      var pageStyle = new PageStyle(dummy);
+      const pageStyle = new PageStyle(dummy);
       pageStyle.mode(PageStyle.Mode.AUTO);
 
       expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
     it("when mode is AUTO, other parameters (other than isImportant) doesn't matter", function() {
-      var pageStyle = new PageStyle(dummy);
+      const pageStyle = new PageStyle(dummy);
       dummy.mode(PageStyle.Mode.AUTO);
       pageStyle.mode(PageStyle.Mode.AUTO);
 
@@ -103,7 +103,7 @@ describe("PageStyle", function() {
     });
 
     it("when mode is PRESET, customWidth and customHeight doesn't matter", function() {
-      var pageStyle = new PageStyle(dummy);
+      const pageStyle = new PageStyle(dummy);
       dummy.mode(PageStyle.Mode.PRESET);
       pageStyle.mode(PageStyle.Mode.PRESET);
 
@@ -128,7 +128,7 @@ describe("PageStyle", function() {
     });
 
     it("when mode is CUSTOM, presetSize and isLandscape doesn't matter", function() {
-      var pageStyle = new PageStyle(dummy);
+      const pageStyle = new PageStyle(dummy);
       dummy.mode(PageStyle.Mode.CUSTOM);
       pageStyle.mode(PageStyle.Mode.CUSTOM);
 
@@ -155,7 +155,7 @@ describe("PageStyle", function() {
 
   describe("toCSSDeclarationString", function() {
     it("returns corresponding CSS declaration string", function() {
-      var pageStyle = makeDummyPageStyle();
+      const pageStyle = makeDummyPageStyle();
       pageStyle.mode(PageStyle.Mode.AUTO);
 
       expect(pageStyle.toCSSDeclarationString()).toBe("size: auto !important;");

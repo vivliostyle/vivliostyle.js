@@ -15,10 +15,10 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as adapt_csscasc from "../../../src/ts/vivliostyle/css-cascade";
-import * as adapt_cssparse from "../../../src/ts/vivliostyle/css-parser";
-import * as vivliostyle_pages from "../../../src/ts/vivliostyle/pages";
+import * as adapt_css from "../../../src/vivliostyle/css";
+import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
+import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
+import * as vivliostyle_pages from "../../../src/vivliostyle/pages";
 
 describe("page", function() {
   var module = vivliostyle_pages;

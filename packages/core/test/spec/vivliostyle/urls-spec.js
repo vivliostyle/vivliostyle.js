@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_urls from "../../../src/ts/vivliostyle/urls";
+import * as vivliostyle_urls from "../../../src/vivliostyle/urls";
 
 describe("urls", function() {
   var module = vivliostyle_urls;

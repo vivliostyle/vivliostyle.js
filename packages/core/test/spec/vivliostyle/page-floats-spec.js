@@ -15,8 +15,8 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as vivliostyle_pagefloat from "../../../src/ts/vivliostyle/page-floats";
+import * as adapt_css from "../../../src/vivliostyle/css";
+import * as vivliostyle_pagefloat from "../../../src/vivliostyle/page-floats";
 
 describe("page-floats", function() {
   var module = vivliostyle_pagefloat;

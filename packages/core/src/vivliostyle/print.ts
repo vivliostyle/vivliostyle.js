@@ -2,8 +2,8 @@
 // Vivliostyle Foundation
 
 import * as CoreViewer from "./core-viewer";
-import viewportCss from "../../../resources/vivliostyle-viewport.css";
-import viewportScreenCss from "../../../resources/vivliostyle-viewport-screen.css";
+import viewportCss from "../../resources/vivliostyle-viewport.css";
+import viewportScreenCss from "../../resources/vivliostyle-viewport-screen.css";
 
 interface IFrameWindowForPrint {
   printInstance?: VivliostylePrint;

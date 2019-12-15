@@ -17,12 +17,12 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import obs from "../../../src/ts/utils/observable-util";
+import obs from "../../../src/utils/observable-util";
 
 describe("Observable Utils", function() {
   describe("readonlyObservable", function() {
     it("returns a getter and a writable observable", function() {
-      var o = obs.readonlyObservable(1);
+      const o = obs.readonlyObservable(1);
 
       expect(o.getter()).toBe(1);
       expect(o.value()).toBe(1);
@@ -34,8 +34,8 @@ describe("Observable Utils", function() {
     });
 
     it("the getter notifies when the value is updated", function() {
-      var o = obs.readonlyObservable(1);
-      var x = 1;
+      const o = obs.readonlyObservable(1);
+      let x = 1;
       o.getter.subscribe(function(y) {
         x = y;
       });
@@ -45,7 +45,7 @@ describe("Observable Utils", function() {
     });
 
     it("throws when trying to write on the getter", function() {
-      var o = obs.readonlyObservable(1);
+      const o = obs.readonlyObservable(1);
       function set() {
         o.getter(2);
       }

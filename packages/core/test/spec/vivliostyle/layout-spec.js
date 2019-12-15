@@ -15,11 +15,11 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_layout from "../../../src/ts/vivliostyle/layout";
-import * as adapt_vtree from "../../../src/ts/vivliostyle/vtree";
-import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as adapt_csscasc from "../../../src/ts/vivliostyle/css-cascade";
-import * as vivliostyle_matchers from "../../../src/ts/vivliostyle/matchers";
+import * as adapt_layout from "../../../src/vivliostyle/layout";
+import * as adapt_vtree from "../../../src/vivliostyle/vtree";
+import * as adapt_css from "../../../src/vivliostyle/css";
+import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
+import * as vivliostyle_matchers from "../../../src/vivliostyle/matchers";
 
 describe("layout", function() {
   describe("adapt_layout.TextNodeBreaker", function() {

@@ -18,15 +18,16 @@
  */
 
 module.exports = function(config) {
-  var commonConfig = require("./karma-common.conf")(config);
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const commonConfig = require("./karma-common.conf")(config);
 
-  var options = {
+  const options = {
     reporters: ["verbose"],
     autoWatch: true,
     captureTimeout: 120000,
   };
-  for (var key in commonConfig) {
-    if (commonConfig.hasOwnProperty(key)) {
+  for (const key in commonConfig) {
+    if (hasOwnProperty.hasOwnProperty.call(commonConfig, key)) {
       options[key] = commonConfig[key];
     }
   }

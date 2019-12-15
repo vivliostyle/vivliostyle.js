@@ -17,10 +17,12 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const webpackConfig = require("../../webpack.config");
 
 const TEST_FILES = "test/spec/**/*.js";
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 module.exports = function(config) {
   return {
     basePath: "../..",

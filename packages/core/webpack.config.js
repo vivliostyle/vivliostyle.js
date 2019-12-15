@@ -28,7 +28,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const config = (outputFilename, tsConfigName) => ({
   mode: isProduction ? "production" : "development",
-  entry: "./src/ts/vivliostyle.ts",
+  entry: "./src/vivliostyle.ts",
   devtool: "source-map",
   output: {
     path: path.join(__dirname, "browser"),

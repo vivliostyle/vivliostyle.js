@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "../../../src/ts/models/vivliostyle";
+import vivliostyle from "../../../src/vivliostyle";
 
 export default function() {
   beforeAll(function() {

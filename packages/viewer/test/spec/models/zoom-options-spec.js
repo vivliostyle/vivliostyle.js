@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ZoomOptions from "../../../src/ts/models/zoom-options";
+import ZoomOptions from "../../../src/models/zoom-options";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("ZoomOptions", () => {

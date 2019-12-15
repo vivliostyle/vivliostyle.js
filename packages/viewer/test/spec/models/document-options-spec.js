@@ -17,11 +17,11 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DocumentOptions from "../../../src/ts/models/document-options";
-import urlParameters from "../../../src/ts/stores/url-parameters";
+import DocumentOptions from "../../../src/models/document-options";
+import urlParameters from "../../../src/stores/url-parameters";
 
 describe("DocumentOptions", function() {
-  var history, location;
+  let history, location;
 
   beforeEach(function() {
     history = urlParameters.history;
@@ -39,7 +39,7 @@ describe("DocumentOptions", function() {
       urlParameters.location = {
         href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html",
       };
-      var options = new DocumentOptions();
+      let options = new DocumentOptions();
 
       expect(options.epubUrl()).toBe("");
       expect(options.url()).toEqual(["abc/def.html", "jkl/mno.html"]);
@@ -64,7 +64,7 @@ describe("DocumentOptions", function() {
     urlParameters.location = {
       href: "http://example.com#x=abc/def.html&f=ghi",
     };
-    var options = new DocumentOptions();
+    const options = new DocumentOptions();
     options.fragment("jkl%25");
 
     expect(urlParameters.location.href).toBe(
@@ -74,7 +74,7 @@ describe("DocumentOptions", function() {
 
   describe("toObject", function() {
     it("converts parameters to an object except url", function() {
-      var options = new DocumentOptions();
+      const options = new DocumentOptions();
       options.url("abc/def.html");
       options.fragment("ghi");
       options.authorStyleSheet(["style1", "style2"]);

@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_logging from "../../../src/ts/vivliostyle/logging";
+import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
 import "../../util/mock/vivliostyle/logging-mock";
 
 // FIXME: cannot assign to vivliostyle_loggingg.mockConsole and vivliostyle_loggingg.logger

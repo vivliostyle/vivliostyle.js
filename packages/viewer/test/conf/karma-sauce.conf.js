@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /*
  * Copyright 2015 Trim-marks Inc.
  *
@@ -18,8 +19,9 @@
  */
 
 module.exports = function(config) {
-  var commonConfig = require("./karma-common.conf")(config);
-  var customLaunchers = {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const commonConfig = require("./karma-common.conf")(config);
+  const customLaunchers = {
     sl_chrome: {
       base: "SauceLabs",
       browserName: "chrome",
@@ -42,7 +44,7 @@ module.exports = function(config) {
     },
   };
 
-  var options = {
+  const options = {
     reporters: ["verbose", "saucelabs"],
     sauceLabs: {
       build: process.env.TRAVIS_BUILD_NUMBER,
@@ -56,8 +58,8 @@ module.exports = function(config) {
     browsers: Object.keys(customLaunchers),
     singleRun: true,
   };
-  for (var key in commonConfig) {
-    if (commonConfig.hasOwnProperty(key)) {
+  for (const key in commonConfig) {
+    if (Object.prototype.hasOwnProperty.call(commonConfig, key)) {
       options[key] = commonConfig[key];
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 "use strict";
 
 const browserSync = require("browser-sync").create();
@@ -43,7 +44,7 @@ function getVersion(basePath) {
   );
   return version;
 }
-const VERSION = getVersion("../..");
+const VERSION = getVersion(".");
 
 // Utility functions
 function destDir(type) {

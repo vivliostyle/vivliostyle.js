@@ -10,7 +10,7 @@ const outputDir = path.join(__dirname, "lib", "js");
 
 module.exports = {
   mode: isProduction ? "production" : "development",
-  entry: "./src/ts/main.ts",
+  entry: "./src/main.ts",
   devtool: "source-map",
   output: {
     path: outputDir,

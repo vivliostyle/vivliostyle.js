@@ -17,15 +17,15 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import vivliostyle from "../../../src/ts/models/vivliostyle";
-import PageViewMode from "../../../src/ts/models/page-view-mode";
-import ViewerOptions from "../../../src/ts/models/viewer-options";
-import ZoomOptions from "../../../src/ts/models/zoom-options";
-import urlParameters from "../../../src/ts/stores/url-parameters";
+import vivliostyle from "../../../src/vivliostyle";
+import PageViewMode from "../../../src/models/page-view-mode";
+import ViewerOptions from "../../../src/models/viewer-options";
+import ZoomOptions from "../../../src/models/zoom-options";
+import urlParameters from "../../../src/stores/url-parameters";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
 describe("ViewerOptions", function() {
-  var history, location;
+  let history, location;
 
   vivliostyleMock();
 
@@ -43,7 +43,7 @@ describe("ViewerOptions", function() {
   describe("constructor", function() {
     it("retrieves parameters from URL", function() {
       urlParameters.location = { href: "http://example.com#spread=true" };
-      var options = new ViewerOptions();
+      let options = new ViewerOptions();
 
       expect(options.pageViewMode()).toEqual(PageViewMode.SPREAD);
 
@@ -59,11 +59,11 @@ describe("ViewerOptions", function() {
     });
 
     it("copies parameters from the argument", function() {
-      var other = new ViewerOptions();
+      const other = new ViewerOptions();
       other.pageViewMode(PageViewMode.SINGLE_PAGE);
       other.fontSize(20);
       other.zoom(ZoomOptions.createFromZoomFactor(1.2));
-      var options = new ViewerOptions(other);
+      const options = new ViewerOptions(other);
 
       expect(options.pageViewMode()).toBe(PageViewMode.SINGLE_PAGE);
       expect(options.fontSize()).toBe(20);
@@ -74,7 +74,7 @@ describe("ViewerOptions", function() {
 
   it("write spread option back to URL when update if it is constructed with no argument", function() {
     urlParameters.location = { href: "http://example.com#spread=true" };
-    var options = new ViewerOptions();
+    let options = new ViewerOptions();
     options.pageViewMode(PageViewMode.SINGLE_PAGE);
 
     expect(urlParameters.location.href).toBe("http://example.com#spread=false");
@@ -88,7 +88,7 @@ describe("ViewerOptions", function() {
     // expect(urlParameters.location.href).toBe("http://example.com#spread=auto");
 
     // not write back if it is constructed with another ViewerOptions
-    var other = new ViewerOptions();
+    const other = new ViewerOptions();
     other.pageViewMode(PageViewMode.SINGLE_PAGE);
     other.fontSize(20);
     other.zoom(ZoomOptions.createFromZoomFactor(1.2));
@@ -100,11 +100,11 @@ describe("ViewerOptions", function() {
 
   describe("copyFrom", function() {
     it("copies parameters from the argument to itself", function() {
-      var options = new ViewerOptions();
+      const options = new ViewerOptions();
       options.pageViewMode(PageViewMode.SPREAD);
       options.fontSize(10);
       options.zoom(ZoomOptions.createFromZoomFactor(1.4));
-      var other = new ViewerOptions();
+      const other = new ViewerOptions();
       other.pageViewMode(PageViewMode.SINGLE_PAGE);
       other.fontSize(20);
       other.zoom(ZoomOptions.createFromZoomFactor(1.2));
@@ -119,7 +119,7 @@ describe("ViewerOptions", function() {
 
   describe("toObject", function() {
     it("converts parameters to an object", function() {
-      var options = new ViewerOptions();
+      const options = new ViewerOptions();
       options.pageViewMode(PageViewMode.SPREAD);
       options.fontSize(20);
       options.zoom(ZoomOptions.createFromZoomFactor(1.2));

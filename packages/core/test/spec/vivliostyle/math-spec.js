@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_mathutil from "../../../src/ts/vivliostyle/math-util";
+import * as vivliostyle_mathutil from "../../../src/vivliostyle/math-util";
 
 describe("math", function() {
   describe("mean", function() {

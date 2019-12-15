@@ -15,10 +15,10 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as adapt_css from "../../../src/ts/vivliostyle/css";
-import * as adapt_csscasc from "../../../src/ts/vivliostyle/css-cascade";
-import * as adapt_csstok from "../../../src/ts/vivliostyle/css-tokenizer";
-import * as vivliostyle_plugin from "../../../src/ts/vivliostyle/plugin";
+import * as adapt_css from "../../../src/vivliostyle/css";
+import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
+import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
+import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 
 describe("css-cascade", function() {

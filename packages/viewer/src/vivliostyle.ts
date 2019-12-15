@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Vivliostyle from "@vivliostyle/core";
+import * as Vivliostyle from "@vivliostyle/core";
 
 declare global {
   interface Window {

@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as vivliostyle_diff from "../../../src/ts/vivliostyle/diff";
+import * as vivliostyle_diff from "../../../src/vivliostyle/diff";
 
 describe("diff", function() {
   describe("#diff", function() {
