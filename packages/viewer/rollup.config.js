@@ -1,5 +1,5 @@
 import ts from "@wessberg/rollup-plugin-ts";
-import { string } from "rollup-plugin-string";
+// import { string } from "rollup-plugin-string";
 import replace from "@rollup/plugin-replace";
 import nodeResolve from "rollup-plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
@@ -9,7 +9,7 @@ import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
 import pkg from "./package.json";
 
-const input = "src/vivliostyle.ts";
+const input = "src/main.ts";
 const banner = `\
 /**
  * ${pkg.name} v${pkg.version}
@@ -29,17 +29,14 @@ const plugins = [
     tsconfig: (resolvedConfig) => ({
       ...resolvedConfig,
       inlineSourceMap: isDevelopment,
+      inlineSources: isDevelopment,
     }),
   }),
-  // Replace require() statements refering non-JS resources with its contents
-  string({
-    include: ["src/resources/*", "resources/*"],
-  }),
   // Replace conditional variable with value
-  replace({ VIVLIOSTYLE_DEBUG: JSON.stringify(isDevelopment) }),
+  replace({ "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV) }),
   // Resolve module path in node_modules according to package.json's props
   nodeResolve({
-    mainFields: ["browser", "main"],
+    mainFields: ["main", "module"],
   }),
   // Grab source maps from other module's sourceMappingURLs
   sourcemaps(),
@@ -66,50 +63,6 @@ const plugins = [
   !isDevelopment ? terser() : {},
 ];
 
-const buildStep = [
-  // UMD
-  {
-    input,
-    output: [
-      {
-        file: pkg.main,
-        format: "cjs",
-        sourcemap: true,
-        banner,
-      },
-    ],
-    plugins,
-    watch: {
-      clearScreen: false,
-    },
-  },
-];
-
-if (!isDevelopment) {
-  buildStep.push(
-    // CJS and ES Modules
-    {
-      input,
-      output: [
-        {
-          file: pkg.module,
-          format: "es",
-          sourcemap: true,
-          banner,
-        },
-        {
-          name: "Vivliostyle",
-          file: pkg.browser,
-          format: "umd",
-          sourcemap: true,
-          banner,
-        },
-      ],
-      plugins,
-    },
-  );
-}
-
 // Show build pipeline
 console.log(
   plugins
@@ -118,4 +71,22 @@ console.log(
     .join(" -> "),
 );
 
-export default buildStep;
+export default {
+  // UMD
+  input,
+  output: [
+    {
+      name: "VivliostyleViewer",
+      file: isDevelopment ? "lib/js/vivliostyle-viewer-dev.js" : pkg.main,
+      format: "umd",
+      sourcemap: "inline",
+      banner,
+    },
+  ],
+  plugins,
+  watch: {
+    clearScreen: false,
+    exclude: ["*"],
+    include: ["../core/lib/vivliostyle.js", "src/**/*.ts"],
+  },
+};

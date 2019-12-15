@@ -3,17 +3,17 @@
   "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser",
   "version": "2019.11.100-pre",
   "scripts": {
-    "build": "gulp build && NODE_ENV=production webpack",
-    "build-dev": "gulp build-dev && NODE_ENV=development webpack",
-    "clean": "shx rm -rf lib .cache",
+    "build-dev": "yarn clean && gulp build-dev && NODE_ENV=development rollup -c",
+    "build": "yarn clean && gulp build && NODE_ENV=production rollup -c",
+    "clean": "shx rm -rf lib/* .cache",
     "dev": "run-p dev:*",
-    "dev:serve": "gulp serve-dev",
-    "dev:webpack": "NODE_ENV=development webpack -w",
+    "dev:html": "gulp serve-dev",
+    "dev:ts": "NODE_ENV=development rollup -c -w",
     "format": "prettier --write \"{*.{js,md,json},{src,test}/**/*.{ts,js}}\"",
     "lint": "run-p lint:*",
-    "lint:scripts": "eslint src --fix --ext .ts -f codeframe",
-    "lint:styles": "stylelint src/scss/{*.*,**/*.*}",
-    "serve-production": "gulp serve",
+    "lint:ts": "eslint src --fix --ext .ts -f codeframe",
+    "lint:css": "stylelint src/scss/{*.*,**/*.*}",
+    "serve": "yarn build && gulp serve",
     "test": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
     "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
     "typecheck": "tsc --noEmit"
@@ -67,6 +67,7 @@
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle/issues"
   },
+  "main": "lib/js/vivliostyle-viewer.js",
   "files": [
     "lib/vivliostyle-viewer.html",
     "lib/js/vivliostyle-viewer.min.js*",

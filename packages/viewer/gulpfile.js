@@ -1,47 +1,41 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-"use strict";
-
-const browserSync = require("browser-sync").create();
-const changed = require("gulp-changed");
-const sass = require("gulp-sass");
-const ejs = require("gulp-ejs");
 const fs = require("fs");
-const gulp = require("gulp");
-const KarmaServer = require("karma").Server;
-const notify = require("gulp-notify");
 const path = require("path");
-const plumber = require("gulp-plumber");
+const KarmaServer = require("karma").Server;
+const browserSync = require("browser-sync").create();
+const gulp = require("gulp");
+const ejs = require("gulp-ejs");
+const sass = require("gulp-sass");
+const notify = require("gulp-notify");
 const rename = require("gulp-rename");
+const changed = require("gulp-changed");
+const plumber = require("gulp-plumber");
 const packageImporter = require("node-sass-package-importer");
-
 sass.compiler = require("node-sass");
+const pkg = require("./package.json");
 
 // Parameters
 const SRC_DIR = "src";
 const DEST_DIR = "lib";
 const RESOURCE_MAP = {
-  core: { src: "../../core/lib", dest: "js", srcPattern: "vivliostyle.js" },
+  core: { src: "../../core/lib", dest: "js", srcPattern: "*.js" },
   fonts: { src: "fonts" },
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
-  resources: {
+  coreResources: {
     src: "../../core/resources",
     dest: "resources",
   },
 };
-const CORE_SRC_DIR = "../core/lib";
-const VIEWER_HTML_FILENAMES = {
-  production: "vivliostyle-viewer.html",
+const VIEWER_HTML_FILES = {
+  production: "index.html",
   development: "vivliostyle-viewer-dev.html",
 };
-
-function getVersion(basePath) {
-  const { version } = JSON.parse(
-    fs.readFileSync(path.join(basePath, "package.json"), "utf8"),
-  );
-  return version;
-}
-const VERSION = getVersion(".");
+const VIEWER_JS_FILES = {
+  production: pkg.main,
+  development: "js/vivliostyle-viewer-dev.js",
+};
+const VERSION = pkg.verison;
 
 // Utility functions
 function destDir(type) {
@@ -61,28 +55,26 @@ const srcPattern = (type) =>
 function createCopyTask(type) {
   const dest = destDir(type);
   return gulp.task("build:" + type, function() {
-    console.log(srcPattern(type), dest);
     return gulp
       .src(srcPattern(type))
       .pipe(changed(dest))
       .pipe(gulp.dest(dest));
   });
 }
-createCopyTask("core");
 createCopyTask("fonts");
-createCopyTask("resources");
+createCopyTask("coreResources");
 
-// HTML build
+// Build HTML
 function buildHtml(isDevelopment) {
   return gulp
     .src(srcPattern("html"))
     .pipe(
       ejs({
+        isDevelopment,
         version: VERSION,
-        isDevelopment: isDevelopment,
         viewerPath: isDevelopment
-          ? "js/vivliostyle-viewer.dev.js"
-          : "js/vivliostyle-viewer.min.js",
+          ? VIEWER_JS_FILES.development
+          : VIEWER_JS_FILES.production,
         packageRoot: isDevelopment ? "../.." : "//unpkg.com/@vivliostyle",
       }),
     )
@@ -94,8 +86,8 @@ function buildHtml(isDevelopment) {
     .pipe(
       rename(
         isDevelopment
-          ? VIEWER_HTML_FILENAMES.development
-          : VIEWER_HTML_FILENAMES.production,
+          ? VIEWER_HTML_FILES.development
+          : VIEWER_HTML_FILES.production,
       ),
     )
     .pipe(gulp.dest(destDir("html")));
@@ -103,7 +95,7 @@ function buildHtml(isDevelopment) {
 gulp.task("build:html", () => buildHtml(false));
 gulp.task("build:html-dev", () => buildHtml(true));
 
-// CSS build
+// Build CSS
 function buildCss(isDevelopment) {
   return gulp
     .src(srcPattern("css"))
@@ -132,8 +124,7 @@ gulp.task(
     "build:html",
     "build:css",
     "build:fonts",
-    "build:resources",
-    "build:core",
+    "build:coreResources",
   ),
 );
 gulp.task(
@@ -142,7 +133,7 @@ gulp.task(
     "build:html-dev",
     "build:css-dev",
     "build:fonts",
-    "build:resources",
+    "build:coreResources",
   ),
 );
 
@@ -177,9 +168,9 @@ gulp.task(
   "watch",
   gulp.series(gulp.parallel("start-watching", "build"), function(done) {
     gulp.watch(srcPattern("html"), gulp.task("build:html"));
-    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(srcPattern("css"), gulp.task("build:css"));
+    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+    gulp.watch(srcPattern("coreResources"), gulp.task("build:coreResources"));
     done();
   }),
 );
@@ -187,9 +178,9 @@ gulp.task(
   "watch-dev",
   gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
     gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
-    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
+    gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
+    gulp.watch(srcPattern("coreResources"), gulp.task("build:coreResources"));
     done();
   }),
 );
@@ -211,7 +202,6 @@ function serve(isDevelopment) {
   const target = [DEST_DIR + "/**/*"];
   if (isDevelopment) {
     target.push(srcPattern("core"));
-    target.push(CORE_SRC_DIR + "/**/*");
   }
   gulp.watch(target).on("change", browserSync.reload);
 }

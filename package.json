@@ -2,8 +2,9 @@
   "name": "vivliostyle",
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "scripts": {
-    "bootstrap": "lerna bootstrap && lerna run build --scope @vivliostyle/core",
+    "bootstrap": "lerna bootstrap && yarn build-dev",
     "build": "lerna run build",
+    "build-dev": "lerna run build-dev",
     "clean": "lerna run clean",
     "dev": "lerna run dev --parallel",
     "format": "lerna run format",

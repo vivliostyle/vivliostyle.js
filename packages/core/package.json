@@ -4,7 +4,7 @@
   "version": "2019.11.100-pre",
   "scripts": {
     "build": "yarn clean && run-p build:*",
-    "build-dev": "NODE_ENV=development rollup -c",
+    "build-dev": "yarn clean && NODE_ENV=development rollup -c",
     "build-documents": "./scripts/build-documents.sh",
     "build:cjs": "NODE_ENV=production rollup -c",
     "clean": "shx rm -rf lib/* browser .cache",
@@ -54,10 +54,10 @@
     "webpack": "^4.40.2",
     "webpack-cli": "^3.3.9"
   },
-  "types": "lib/cjs/vivliostyle.d.ts",
+  "types": "lib/vivliostyle.d.ts",
   "module": "lib/esm/vivliostyle.js",
   "main": "lib/cjs/vivliostyle.js",
-  "unpkg": "lib/vivliostyle.js",
+  "browser": "lib/vivliostyle.js",
   "author": "Vivliostyle Foundation",
   "license": "AGPL-3.0",
   "bugs": {
