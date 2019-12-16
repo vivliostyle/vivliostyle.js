@@ -32,8 +32,8 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
     cp -R ${VIEWER_ARTIFACTS} "${CANARY_VIEWER_ROOT}/"
     cp -R "${ARCHIVE_PATH}" "${CANARY_VIEWER_ROOT}/vivliostyle-canary.zip"
 
-    # if stable release (v2.0.0, v3.10.100, ...)
-    if [ "${TRAVIS_TAG}" != "" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    # if tagged release
+    if [ "${TRAVIS_TAG}" != "" ]; then
         VERSION=$(echo ${TRAVIS_TAG} | sed 's/^v\(.*\)/\1/')
         TAGGED_VIEWER_ROOT="vivliostyle.github.io/viewer/${TRAVIS_TAG}"
 
@@ -42,23 +42,6 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
         cp -R ${VIEWER_ARTIFACTS} "${TAGGED_VIEWER_ROOT}/"
         # cp -R "${ARCHIVE_PATH}" "${TAGGED_VIEWER_ROOT}/vivliostyle-${VERSION}.zip"
         echo "${TRAVIS_TAG},${VERSION}" >> vivliostyle.github.io/_data/releases.csv
-
-        # copy latest resources to vivliostyle.org
-        git clone --depth=1 --branch=master git@github-vivliostyle-org:vivliostyle/vivliostyle.org.git vivliostyle.org
-        mkdir -p vivliostyle.org/viewer
-        cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
-        cp -R ${ARCHIVE_PATH} vivliostyle.org/viewer/vivliostyle-latest.zip
-        mkdir -p vivliostyle.org/docs/user-guide/
-        cp -R docs/user-guide/* vivliostyle.org/docs/user-guide/
-        cp    docs/supported-features.md vivliostyle.org/docs/
-
-        # commit changes to vivliostyle.org
-        cd vivliostyle.org
-        git add .
-        git status
-        git commit -m "Update vivliostyle latest release (original commit: $TRAVIS_COMMIT)"
-        git push origin master
-        cd ..
 
         # publish to npm
         echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
@@ -75,6 +58,26 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
             --name "${TRAVIS_TAG}" \
             --body "${CHANGELOG}" \
             ${ARCHIVE_PATH}
+
+        # if stable release (v2.0.0, v3.10.100, ...)
+        if [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # copy latest resources to vivliostyle.org
+            git clone --depth=1 --branch=master git@github-vivliostyle-org:vivliostyle/vivliostyle.org.git vivliostyle.org
+            mkdir -p vivliostyle.org/viewer
+            cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
+            cp -R ${ARCHIVE_PATH} vivliostyle.org/viewer/vivliostyle-latest.zip
+            mkdir -p vivliostyle.org/docs/user-guide/
+            cp -R docs/user-guide/* vivliostyle.org/docs/user-guide/
+            cp    docs/supported-features.md vivliostyle.org/docs/
+
+            # commit changes to vivliostyle.org
+            cd vivliostyle.org
+            git add .
+            git status
+            git commit -m "Update vivliostyle latest release (original commit: $TRAVIS_COMMIT)"
+            git push origin master
+            cd ..
+        fi
     fi
 
     # commit changes to vivliostyle.github.io
