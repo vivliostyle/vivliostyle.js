@@ -66,5 +66,5 @@ yarn version:graduate
 
 ## Commit Message Guideline
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in `CHANGELOG.md`.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
