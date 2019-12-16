@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/viewer",
   "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser.",
-  "version": "2.0.0-pre.1",
+  "version": "2.0.0-pre.3",
   "scripts": {
     "build": "gulp build && NODE_ENV=production rollup -c",
     "build-dev": "gulp build-dev && NODE_ENV=development rollup -c",
@@ -18,7 +18,7 @@
     "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
   },
   "dependencies": {
-    "@vivliostyle/core": "^2.0.0-pre.1",
+    "@vivliostyle/core": "^2.0.0-pre.3",
     "font-awesome": "^4.7.0",
     "knockout": "^3.5.0"
   },
