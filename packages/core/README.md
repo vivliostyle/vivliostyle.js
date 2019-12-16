@@ -1,5 +1,12 @@
 # Vivliostyle Core
 
+[![npm][npm]][npm-url]
+[![npm][npm-next]][npm-url]
+[![Build Status][build-status]][build-status-url]
+[![deps][deps]][deps-url]
+[![Install Size][size]][size-url]
+[![Downloads][downloads]][downloads-url]
+
 JavaScript Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 ## Try Vivliostyle
@@ -55,3 +62,15 @@ Vivliostyle contains following components:
 
 - [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
 - [Vivliostyle Documentation](https://vivliostyle.org/docs/)
+
+[npm]: https://img.shields.io/npm/v/@vivliostyle/core/latest
+[npm-next]: https://img.shields.io/npm/v/@vivliostyle/core/next
+[npm-url]: https://www.npmjs.com/package/@vivliostyle/core
+[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.svg
+[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle
+[deps]: https://img.shields.io/david/vivliostyle/vivliostyle?path=packages%2Fcore
+[deps-url]: https://www.npmjs.com/package/@vivliostyle/corhttps://david-dm.org/vivliostyle/vivliostyle/?path=packages/core
+[size]: https://packagephobia.now.sh/badge?p=@vivliostyle/core
+[size-url]: https://packagephobia.now.sh/result?p=@vivliostyle/core
+[downloads]: https://img.shields.io/npm/dw/@vivliostyle/core.svg
+[downloads-url]: https://www.npmjs.com/package/@vivliostyle/core

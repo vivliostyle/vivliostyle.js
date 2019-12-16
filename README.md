@@ -1,6 +1,10 @@
 # Vivliostyle
 
-[![Build Status](https://travis-ci.org/vivliostyle/vivliostyle.svg?branch=master)](https://travis-ci.org/vivliostyle/vivliostyle)
+![GitHub tag][github-tag]
+[![Build Status][build-status]][build-status-url]
+[![GitHub contributors][contributors]][contributors-url]
+[![Issue resolution][issue-resolution]][issue-resolution-url]
+[![PR's welcome][pr-welcome]][pr-welcome-url]
 
 HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
@@ -104,3 +108,13 @@ Vivliostyle.js contains following components:
 
 - [fast-diff](https://www.npmjs.com/package/fast-diff)
   - Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+[github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle
+[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.svg
+[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle
+[contributors]: https://img.shields.io/github/contributors/vivliostyle/vivliostyle.svg
+[contributors-url]: https://github.com/vivliostyle/vivliostyle/graphs/contributors
+[issue-resolution]: https://isitmaintained.com/badge/resolution/vivliostyle/vivliostyle.svg
+[issue-resolution-url]: https://github.com/vivliostyle/vivliostyle/issues
+[pr-welcome]: https://img.shields.io/badge/PRs%20-welcome-brightgreen.svg
+[pr-welcome-url]: https://github.com/vivliostyle/vivliostyle/blob/master/CONTRIBUTING.md
