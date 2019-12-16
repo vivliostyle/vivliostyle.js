@@ -63,6 +63,18 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
         # publish to npm
         echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
         yarn ship --yes
+
+        # GitHub releases
+        npm i -g conventional-changelog-cli github-release-cli
+        CHANGELOG=$(conventional-changelog -p angular)
+        github-release upload \
+            --token "${GH_TOKEN}" \
+            --owner vivliostyle \
+            --repo vivliostyle \
+            --tag "${TRAVIS_TAG}" \
+            --name "${TRAVIS_TAG}" \
+            --body "${CHANGELOG}" \
+            ${ARCHIVE_PATH}
     fi
 
     # commit changes to vivliostyle.github.io
