@@ -9,7 +9,7 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
 
     # git
     git config user.email "murakami@vivliostyle.org"
-    git config user.name "MurakamiShinyu (CI)"
+    git config user.name "Vivliostyle Bot"
     echo -e "$GITHUB_DEPLOY_KEY" | base64 -d > ~/.ssh/deploy.key
     echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_ORG" | base64 -d > ~/.ssh/deploy-vivliostyle-org.key
     echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO" | base64 -d > ~/.ssh/deploy-vivliostyle-github-io.key
