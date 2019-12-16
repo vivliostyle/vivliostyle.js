@@ -8,8 +8,8 @@ script:
   - yarn lint
   - yarn test-sauce
 # - scripts/wpt-sauce.sh
-# after_success: TODO: uncheck after the merger
-#   - scripts/after-success-hook.sh
+after_success:
+  - scripts/after-success-hook.sh
 notifications:
   email: false
   slack:
