@@ -10,12 +10,21 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
     # git
     git config user.email "murakami@vivliostyle.org"
     git config user.name "MurakamiShinyu (CI)"
+    echo -e "$GITHUB_DEPLOY_KEY" | base64 -d > ~/.ssh/deploy.key
+    echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_ORG" | base64 -d > ~/.ssh/deploy-vivliostyle-org.key
+    echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO" | base64 -d > ~/.ssh/deploy-vivliostyle-github-io.key
+    chmod 600 ~/.ssh/deploy.key
+    chmod 600 ~/.ssh/deploy-vivliostyle-org.key
+    chmod 600 ~/.ssh/deploy-vivliostyle-github-io.key
+    echo -e "Host github.com\n\tStrictHostKeyChecking no\nHostName github.com\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
+    echo -e "Host github-vivliostyle-org\n\tStrictHostKeyChecking no\nHostName github.com\nIdentityFile ~/.ssh/deploy-vivliostyle-org.key\n" >> ~/.ssh/config
+    echo -e "Host github-vivliostyle-github-io\n\tStrictHostKeyChecking no\nHostName github.com\nIdentityFile ~/.ssh/deploy-vivliostyle-github-io.key\n" >> ~/.ssh/config
 
     # generate archive
     scripts/generate-viewer-archive.sh "${ARCHIVE_DIR}" "${ARCHIVE_PATH}"
 
     # fetch vivliostyle.github.io
-    git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle.github.io.git vivliostyle.github.io
+    git clone --depth=1 --branch=master git@github-vivliostyle-github-io:vivliostyle/vivliostyle.github.io.git vivliostyle.github.io
 
     # copy canary viewer to vivliostyle.github.io
     CANARY_VIEWER_ROOT="vivliostyle.github.io/viewer"
@@ -29,24 +38,21 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
         TAGGED_VIEWER_ROOT="vivliostyle.github.io/viewer/${TRAVIS_TAG}"
 
         # copy tagged resources to vivliostyle.github.io
-        mkdir -p "${TAGGED_VIEWER_ROOT}"
+        mkdir -p ${TAGGED_VIEWER_ROOT}
         cp -R ${VIEWER_ARTIFACTS} "${TAGGED_VIEWER_ROOT}/"
         # cp -R "${ARCHIVE_PATH}" "${TAGGED_VIEWER_ROOT}/vivliostyle-${VERSION}.zip"
         echo "${TRAVIS_TAG},${VERSION}" >> vivliostyle.github.io/_data/releases.csv
 
         # copy latest resources to vivliostyle.org
-        git clone --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle.org.git vivliostyle.org
-        mkdir -p "vivliostyle.org/viewer"
-        cp -R ${VIEWER_ARTIFACTS} "vivliostyle.org/viewer/"
-        cp -R "${ARCHIVE_PATH}" "vivliostyle.org/viewer/vivliostyle-latest.zip"
-        mkdir -p "vivliostyle.org/docs/user-guide/"
+        git clone --depth=1 --branch=master git@github-vivliostyle-org:vivliostyle/vivliostyle.org.git vivliostyle.org
+        mkdir -p vivliostyle.org/viewer
+        cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
+        cp -R ${ARCHIVE_PATH} vivliostyle.org/viewer/vivliostyle-latest.zip
+        mkdir -p vivliostyle.org/docs/user-guide/
         cp -R docs/user-guide/* vivliostyle.org/docs/user-guide/
         cp    docs/supported-features.md vivliostyle.org/docs/
 
         # commit changes to vivliostyle.org
-        echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_ORG" | base64 -d > ~/.ssh/deploy-vivliostyle-org.key
-        chmod 600 ~/.ssh/deploy-vivliostyle-org.key
-        echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy-vivliostyle-org.key\n" >> ~/.ssh/config
         cd vivliostyle.org
         git add .
         git status
@@ -60,9 +66,6 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
     fi
 
     # commit changes to vivliostyle.github.io
-    echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO" | base64 -d > ~/.ssh/deploy-vivliostyle-github-io.key
-    chmod 600 ~/.ssh/deploy-vivliostyle-github-io.key
-    echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy-vivliostyle-github-io.key\n" >> ~/.ssh/config
     cd vivliostyle.github.io
     git add .
     git status
@@ -72,5 +75,4 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; 
 
     # cleanup
     rm -rf vivliostyle.github.io vivliostyle.org
-    echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
 fi
