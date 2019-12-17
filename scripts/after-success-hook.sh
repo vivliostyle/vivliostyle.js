@@ -73,14 +73,26 @@ if [[ $TAGGED_RELEASE = true ]]; then
     npm i -g conventional-changelog-cli github-release-cli
     CHANGELOG=$(conventional-changelog -p angular)
     echo "===> CHANGELOG=${CHANGELOG}"
-    github-release upload \
-        --token "${GH_TOKEN}" \
-        --owner vivliostyle \
-        --repo vivliostyle \
-        --tag "${TRAVIS_TAG}" \
-        --name "${TRAVIS_TAG}" \
-        --body "${CHANGELOG}" \
-        ${ARCHIVE_PATH}
+    if [[ $STABLE_RELEASE = true ]]; then
+        github-release upload \
+            --token "${GH_TOKEN}" \
+            --owner vivliostyle \
+            --repo vivliostyle \
+            --tag "${TRAVIS_TAG}" \
+            --name "${TRAVIS_TAG}" \
+            --body "${CHANGELOG}" \
+            ${ARCHIVE_PATH}
+    else
+        github-release upload \
+            --token "${GH_TOKEN}" \
+            --owner vivliostyle \
+            --repo vivliostyle \
+            --tag "${TRAVIS_TAG}" \
+            --name "${TRAVIS_TAG}" \
+            --body "${CHANGELOG}" \
+            --prerelease \
+            ${ARCHIVE_PATH}
+    fi
 
     # if stable release (v2.0.0, v3.10.100, ...)
     if [[ $STABLE_RELEASE = true ]]; then
@@ -98,10 +110,7 @@ if [[ $TAGGED_RELEASE = true ]]; then
         git clone -q --depth=1 --branch=master git@github-vivliostyle-org:vivliostyle/vivliostyle.org.git vivliostyle.org
         mkdir -p vivliostyle.org/viewer
         cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
-        cp -R ${ARCHIVE_PATH} vivliostyle.org/viewer/vivliostyle-latest.zip
-        mkdir -p vivliostyle.org/docs/user-guide/
-        cp -R docs/user-guide/* vivliostyle.org/docs/user-guide/
-        cp    docs/supported-features.md vivliostyle.org/docs/
+        cp -R ${ARCHIVE_PATH} vivliostyle.org/downloads/vivliostyle-latest.zip
 
         echo "===> Pushing changes to vivliostyle.org"
         cd vivliostyle.org

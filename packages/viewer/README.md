@@ -9,9 +9,38 @@
 
 Vivliostyle Viewer is a UI component used with [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle/tree/master/packages/core) to make Vivliostyle Viewer, a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
+- View samples online: <https://vivliostyle.org/samples/>
+- Download release version: <https://github.com/vivliostyle/vivliostyle/releases>
+- Download latest development version: <https://vivliostyle.org/downloads/vivliostyle-latest.zip>
+
 ## Try Vivliostyle Viewer
 
-- [Vivliostyle Viewer samples](https://vivliostyle.org/samples/)
+- [Vivliostyle Viewer samples](https://vivliostyle.org/samples)
+
+## How to use
+
+1. Unzip the downloaded ZIP file.
+2. Open a terminal or a command prompt and navigate to the folder (`vivliostyle-[version]`) generated in the step 1.
+3. Run the following command:
+
+```
+(Shell environment like macOS or Linux)
+> ./start-webserver
+(Windows)
+> .\start-webserver
+```
+
+This command starts a web server if either of Node.js, Ruby, Python is installed.
+
+If a message
+
+```
+Please install Node.js or Python or Ruby and rerun this script, or use your favorite HTTP server.
+```
+
+is shown, install either of them and rerun the command, or start your favorite web server.
+
+4. Open <http://localhost:8000> with a web browser.
 
 ## Bug reports & feature requests
 
@@ -29,8 +58,8 @@ Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
 
 ## Documentation
 
-- [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
 - [Vivliostyle Documentation](https://vivliostyle.org/docs/)
+- [Vivliostyle Viewer User’s Guide](https://vivliostyle.org/docs/user-guide)
 
 [npm]: https://img.shields.io/npm/v/@vivliostyle/viewer/latest
 [npm-next]: https://img.shields.io/npm/v/@vivliostyle/viewer/next

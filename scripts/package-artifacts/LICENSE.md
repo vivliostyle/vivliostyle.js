@@ -1,4 +1,6 @@
-# License
+---
+title: License
+---
 
 Vivliostyle Viewer is licensed under [AGPL Version 3](licenses/agpl-3.0.txt).
 

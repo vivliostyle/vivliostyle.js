@@ -9,12 +9,10 @@ echo "Generating ${archiveName} from ${archiveDir}"
 
 mkdir ${archiveDir}
 cp    ./CHANGELOG.md ${archiveDir}/
-cp -R ./docs/user-guide/* ${archiveDir}/
 
 mkdir ${archiveDir}/viewer/
 cp -R ./packages/viewer/lib/* ${archiveDir}/viewer/
-cp    ./docs/supported-features.md ${archiveDir}/docs/en/
-cp    ./scripts/package-artifacts/start-webserver* ${archiveDir}/
+cp -R ./scripts/package-artifacts/* ${archiveDir}/
 
 zip -qr ${archiveName} ${archiveDir}
 rm -rf ${archiveDir}
