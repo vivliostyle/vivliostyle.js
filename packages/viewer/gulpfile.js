@@ -35,7 +35,7 @@ const VIEWER_JS_FILES = {
   production: path.relative(DEST_DIR, pkg.main),
   development: "js/vivliostyle-viewer-dev.js",
 };
-const VERSION = pkg.verison;
+const VERSION = pkg.version;
 
 // Utility functions
 function destDir(type) {
