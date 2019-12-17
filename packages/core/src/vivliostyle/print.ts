@@ -1,7 +1,7 @@
 // Johannes Wilm
 // Vivliostyle Foundation
 
-import * as CoreViewer from "./core-viewer";
+import { CoreViewer } from "./core-viewer";
 import viewportCss from "../../resources/vivliostyle-viewport.css";
 import viewportScreenCss from "../../resources/vivliostyle-viewport-screen.css";
 
@@ -9,7 +9,7 @@ interface IFrameWindowForPrint {
   printInstance?: VivliostylePrint;
 }
 
-interface PrintConfig {
+export interface PrintConfig {
   title: string;
   printCallback: (iframeWin: Window) => void;
   hideIframe: boolean;
@@ -101,7 +101,7 @@ class VivliostylePrint {
         type: "text/html",
       }),
       docURL = URL.createObjectURL(docBlob),
-      Viewer = new CoreViewer.CoreViewer(
+      Viewer = new CoreViewer(
         {
           viewportElement: this.iframeWin.document.body
             .firstElementChild as HTMLElement,
