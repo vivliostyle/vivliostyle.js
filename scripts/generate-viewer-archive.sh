@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ev
+set -e
 
 # must be run on /vivliostyle root
 

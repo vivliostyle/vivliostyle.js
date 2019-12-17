@@ -34,26 +34,31 @@ yarn format
 
 ### Release Flow
 
+Before proceeding with the release process, run the following code to ensure that a production build has been created.
+
 ```
-yarn format
 yarn lint
 yarn test
+yarn clean
+yarn build
 ```
 
-#### Pre-release
+#### 1. Pre-release
 
-```
-yarn version:pre
-```
+Run `yarn version:pre` to create pre-release. And run `yarn version:bump` to increment pre-release count.
 
-```
-yarn version:bump
-```
+#### 2. Stable release
 
-#### Stable
+If current version is pre-release (e.g. v2.0.0-pre.4), run:
 
 ```
 yarn version:graduate
+```
+
+To bump up version from stable version to stable version (e.g. v2.0.0 -> v2.0.1):
+
+```
+yarn version:bump
 ```
 
 ## Consistent Naming Guideline

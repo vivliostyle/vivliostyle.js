@@ -1,10 +1,29 @@
 #!/bin/bash
-set -ev
+set -eo pipefail
 
+if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)?$ ]]; then
+    TAGGED_RELEASE=true
+else
+    TAGGED_RELEASE=false
+fi
+if [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    STABLE_RELEASE=true
+else
+    STABLE_RELEASE=false
+fi
+if [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9._]+$ ]]; then
+    PRE_RELEASE=true
+else
+    PRE_RELEASE=false
+fi
+
+echo "===> TAGGED_RELEASE=${TAGGED_RELEASE}"
+echo "===> STABLE_RELEASE=${STABLE_RELEASE}"
+echo "===> PRE_RELEASE=${PRE_RELEASE}"
 
 # if stable or pre-release tag push
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)?$ ]]; then
-    # git
+if [[ $TAGGED_RELEASE = true ]]; then
+    echo "===> Configuring credentials"
     git config user.email "travis@travis-ci.org"
     git config user.name "Travis CI"
     echo -e "$GITHUB_DEPLOY_KEY" | base64 -d > ~/.ssh/deploy.key
@@ -20,26 +39,40 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]
     ARCHIVE_DIR="vivliostyle"
     ARCHIVE_PATH="vivliostyle.zip"
     VIEWER_ARTIFACTS=packages/viewer/lib/*
+    echo "===> ARCHIVE_DIR=${ARCHIVE_DIR}"
+    echo "===> ARCHIVE_PATH=${ARCHIVE_PATH}"
+    echo "===> VIEWER_ARTIFACTS=${VIEWER_ARTIFACTS}"
 
     # generate archive
+    echo "===> Generating Viewer Archive"
     scripts/generate-viewer-archive.sh "${ARCHIVE_DIR}" "${ARCHIVE_PATH}"
 
     # fetch vivliostyle.github.io
-    git clone --depth=1 --branch=master git@github-vivliostyle-github-io:vivliostyle/vivliostyle.github.io.git vivliostyle.github.io
+    echo "===> Cloning vivliostyle.github.io"
+    # git clone -q --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle.github.io.git vivliostyle.github.io
+    git clone -q --depth=1 --branch=master git@github-vivliostyle-github-io:vivliostyle/vivliostyle.github.io.git vivliostyle.github.io
 
     # copy canary viewer to vivliostyle.github.io
+    echo "===> Copying viewer to vivliostyle.github.io/viewer"
     CANARY_VIEWER_ROOT="vivliostyle.github.io/viewer"
     mkdir -p "${CANARY_VIEWER_ROOT}"
     cp -R ${VIEWER_ARTIFACTS} "${CANARY_VIEWER_ROOT}/"
     cp -R "${ARCHIVE_PATH}" "${CANARY_VIEWER_ROOT}/vivliostyle-canary.zip"
 
     # publish to npm
+    echo "===> Publishing packages in npm"
     echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-    yarn ship --yes --pre-dist-tag next
+    if [[ $STABLE_RELEASE = true ]]; then
+        yarn ship --yes
+    else
+        yarn ship --yes --dist-tag next
+    fi
     
     # GitHub releases
+    echo "===> Creating GitHub Release"
     npm i -g conventional-changelog-cli github-release-cli
     CHANGELOG=$(conventional-changelog -p angular)
+    echo "===> CHANGELOG=${CHANGELOG}"
     github-release upload \
         --token "${GH_TOKEN}" \
         --owner vivliostyle \
@@ -50,18 +83,19 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]
         ${ARCHIVE_PATH}
 
     # if stable release (v2.0.0, v3.10.100, ...)
-    if [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    if [[ $STABLE_RELEASE = true ]]; then
         VERSION=$(echo ${TRAVIS_TAG} | sed 's/^v\(.*\)/\1/')
         TAGGED_VIEWER_ROOT="vivliostyle.github.io/viewer/${TRAVIS_TAG}"
+        echo "===> VERSION=${VERSION} TAGGED_VIEWER_ROOT=${TAGGED_VIEWER_ROOT}"
 
-        # copy tagged resources to vivliostyle.github.io
+        echo "===> Copying viewer to ${TAGGED_VIEWER_ROOT}"
         mkdir -p ${TAGGED_VIEWER_ROOT}
         cp -R ${VIEWER_ARTIFACTS} "${TAGGED_VIEWER_ROOT}/"
-        # cp -R "${ARCHIVE_PATH}" "${TAGGED_VIEWER_ROOT}/vivliostyle-${VERSION}.zip"
         echo "${TRAVIS_TAG},${VERSION}" >> vivliostyle.github.io/_data/releases.csv
 
-        # copy latest resources to vivliostyle.org
-        git clone --depth=1 --branch=master git@github-vivliostyle-org:vivliostyle/vivliostyle.org.git vivliostyle.org
+        echo "===> Copying viewer to vivliostyle.org/viewer"
+        # git clone -q --depth=1 --branch=master git@github.com:vivliostyle/vivliostyle.org.git vivliostyle.org
+        git clone -q --depth=1 --branch=master git@github-vivliostyle-org:vivliostyle/vivliostyle.org.git vivliostyle.org
         mkdir -p vivliostyle.org/viewer
         cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
         cp -R ${ARCHIVE_PATH} vivliostyle.org/viewer/vivliostyle-latest.zip
@@ -69,23 +103,23 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]
         cp -R docs/user-guide/* vivliostyle.org/docs/user-guide/
         cp    docs/supported-features.md vivliostyle.org/docs/
 
-        # commit changes to vivliostyle.org
+        echo "===> Pushing changes to vivliostyle.org"
         cd vivliostyle.org
         git add .
         git status
-        git commit -m "Update vivliostyle latest release (original commit: $TRAVIS_COMMIT)"
+        git commit -m "Update Vivliostyle latest release (original commit: $TRAVIS_COMMIT)"
         git push origin master
         cd ..
     fi
 
-    # commit changes to vivliostyle.github.io
+    echo "===> Pushing changes to vivliostyle.github.io"
     cd vivliostyle.github.io
     git add .
     git status
-    git commit -m "Update vivliostyle (original commit: $TRAVIS_COMMIT)"
+    git commit -m "Update Vivliostyle pre-release (original commit: $TRAVIS_COMMIT)"
     git push origin master
     cd ..
 
-    # cleanup
+    echo "===> Cleaning up"
     rm -rf vivliostyle.github.io vivliostyle.org
 fi
