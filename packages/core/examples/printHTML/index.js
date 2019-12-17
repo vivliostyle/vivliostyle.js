@@ -1,18 +1,16 @@
-import { printHTML } from "../lib/vivliostyle-es5.js";
-
 document.getElementById("print").addEventListener("click", () => {
-  const html = document.getElementById("html").value,
-    css = document.getElementById("css").value,
-    title = document.getElementById("title").value,
-    htmlDoc = `
-        <!doctype html>
-        <html>
-            <head>
-                <title>${title}</title>
-                <style>${css}</style>
-            <head>
-            <body>${html}</body>
-        </html>`,
+  const html = document.getElementById("html").value;
+  const css = document.getElementById("css").value;
+  const title = document.getElementById("title").value;
+  const htmlDoc = `
+      <!doctype html>
+      <html>
+          <head>
+              <title>${title}</title>
+              <style>${css}</style>
+          <head>
+          <body>${html}</body>
+      </html>`,
     printCallback = (iframeWin) => {
       const pageCount = iframeWin.document.querySelectorAll(
         "[data-vivliostyle-page-container]",
@@ -21,7 +19,7 @@ document.getElementById("print").addEventListener("click", () => {
       iframeWin.print();
     };
 
-  printHTML(htmlDoc, {
+  Vivliostyle.printHTML(htmlDoc, {
     title,
     printCallback,
     hideIframe: true, // Whether to use a hidden iframe (default: true)
