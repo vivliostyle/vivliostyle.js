@@ -9,6 +9,6 @@ fold_end() {
   echo -e "\ntravis_fold:end:$1\r"
 }
 
-fold_start
+fold_start test-sauce Sauce
 yarn test-sauce
-fold_end
+fold_end test-sauce
