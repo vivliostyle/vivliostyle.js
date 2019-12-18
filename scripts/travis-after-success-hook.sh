@@ -98,7 +98,7 @@ if [[ $BUILD_PACKAGE = true ]]; then
     git add .
     git status
     git commit -m "Update Vivliostyle Canary (original commit: $TRAVIS_COMMIT)"
-    [[ $DEBUG_HOOK = false ]] && git push origin master
+    [[ $DEBUG_HOOK = false ]] && git push origin gh-pages
     cd ..
 
     if [[ $TAGGED_RELEASE = true ]]; then
@@ -154,7 +154,7 @@ if [[ $BUILD_PACKAGE = true ]]; then
         cd vivliostyle.github.io
         git add .
         git status
-        git commit -m "Update Vivliostyle pre-release (original commit: $TRAVIS_COMMIT)"
+        git commit -m "Update Vivliostyle Pre-release (original commit: $TRAVIS_COMMIT)"
         [[ $DEBUG_HOOK = false ]] && git push origin master
         cd ..
 
@@ -173,7 +173,7 @@ if [[ $BUILD_PACKAGE = true ]]; then
             cd vivliostyle.org
             git add .
             git status
-            git commit -m "Update Vivliostyle latest release (original commit: $TRAVIS_COMMIT)"
+            git commit -m "Update Vivliostyle Latest release (original commit: $TRAVIS_COMMIT)"
             [[ $DEBUG_HOOK = false ]] && git push origin master
             cd ..
         fi

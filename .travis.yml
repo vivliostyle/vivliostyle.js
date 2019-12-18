@@ -6,10 +6,10 @@ before_install:
 script:
   - yarn build
   - yarn lint
-  - yarn test-sauce
+  - ./scripts/travis-test-sauce.sh
 # - scripts/wpt-sauce.sh
 after_success:
-  - scripts/after-success-hook.sh
+  - scripts/travis-after-success-hook.sh
 notifications:
   email: false
   slack:

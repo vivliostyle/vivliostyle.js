@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ev
 
+# TODO: fix needed
+
 WORKDIR=work
 
 cd ../..
