@@ -62,8 +62,8 @@
     "url": "https://github.com/vivliostyle/vivliostyle/issues"
   },
   "files": [
-    "lib/vivliostyle-viewer.html",
-    "lib/js/vivliostyle-viewer.min.js*",
+    "lib/index.html",
+    "lib/js/vivliostyle-viewer.js*",
     "lib/fonts",
     "lib/css"
   ],

@@ -27,7 +27,7 @@
           >
         </td>
         <td>
-          <a href="../../../viewer/lib/vivliostyle-viewer.html">prod</a>
+          <a href="../../../viewer/lib/index.html">prod</a>
         </td>
         <td>Vivliostyle Viewer start page</td>
       </tr>
@@ -87,10 +87,7 @@
           );
           tr.appendChild(dev);
 
-          var prod = makeTd(
-            "../../../viewer/lib/vivliostyle-viewer.html#x=" + path,
-            "prod",
-          );
+          var prod = makeTd("../../../viewer/lib/index.html#x=" + path, "prod");
           tr.appendChild(prod);
 
           var raw = makeTd(entry.file, entry.title);
