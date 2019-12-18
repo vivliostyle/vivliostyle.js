@@ -7,6 +7,9 @@ archiveDir=${1:-vivliostyle-latest}
 archiveName=${2:-vivliostyle.zip}
 echo "Generating ${archiveName} from ${archiveDir}"
 
+yarn clean
+yarn build
+
 mkdir ${archiveDir}
 cp    ./CHANGELOG.md ${archiveDir}/
 

@@ -45,7 +45,7 @@ yarn build
 
 #### 1. Pre-release
 
-Run `yarn version:pre` to create pre-release. And run `yarn version:bump` to increment pre-release count.
+Run `yarn version:prerelease` to create pre-release. And run `yarn version:bump` to increment pre-release count.
 
 #### 2. Stable release
 

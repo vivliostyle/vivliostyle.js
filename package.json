@@ -11,17 +11,13 @@
     "lint": "lerna run lint",
     "ship": "lerna publish from-package",
     "ship:canary": "lerna publish --canary",
-    "ship:pre": "yarn ship --dist-tag next",
+    "ship:prerelease": "yarn ship --dist-tag next",
     "test": "lerna run test --parallel",
     "test-sauce": "lerna run test-sauce",
     "version:amend": "git tag --points-at HEAD | xargs -I{} git tag --delete {} && git reset --hard HEAD^",
     "version:bump": "lerna version --conventional-commits",
-    "version:bump:dry": "yarn version:bump --no-git-tag-version --no-push --no-commit-hooks",
     "version:graduate": "lerna version --conventional-commits --conventional-graduate",
-    "version:manual": "lerna version",
-    "version:manual:dry": "yarn version:manual --no-git-tag-version --no-push --no-commit-hooks",
-    "version:pre": "lerna version --conventional-commits --conventional-prerelease",
-    "version:pre:dry": "yarn version:pre --no-git-tag-version --no-push --no-commit-hooks"
+    "version:prerelease": "lerna version --conventional-commits --conventional-prerelease"
   },
   "devDependencies": {
     "eslint": "^6.7.2",
