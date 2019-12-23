@@ -1,0 +1,8 @@
+.env
+.envrc
+.vscode
+.github
+/packages/core/lib
+/packages/core/test
+/packages/viewer/lib
+/packages/viewer/test

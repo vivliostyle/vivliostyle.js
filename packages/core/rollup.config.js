@@ -1,10 +1,10 @@
 import ts from "@wessberg/rollup-plugin-ts";
 import { string } from "rollup-plugin-string";
 import replace from "@rollup/plugin-replace";
-import nodeResolve from "rollup-plugin-node-resolve";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
-import commonJS from "rollup-plugin-commonjs";
-import strip from "rollup-plugin-strip";
+import commonJS from "@rollup/plugin-commonjs";
+import strip from "@rollup/plugin-strip";
 import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
 import pkg from "./package.json";

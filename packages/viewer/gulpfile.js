@@ -18,12 +18,16 @@ const pkg = require("./package.json");
 const SRC_DIR = "src";
 const DEST_DIR = "lib";
 const RESOURCE_MAP = {
-  core: { src: "../../core/lib", dest: "js", srcPattern: "*.js" },
+  core: {
+    src: "node_modules/@vivliostyle/core/lib",
+    dest: "js",
+    srcPattern: "*.js",
+  },
   fonts: { src: "fonts" },
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
   coreResources: {
-    src: "../../core/resources",
+    src: "node_modules/@vivliostyle/core/resources",
     dest: "resources",
   },
 };
