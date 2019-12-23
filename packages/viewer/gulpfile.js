@@ -19,7 +19,7 @@ const SRC_DIR = "src";
 const DEST_DIR = "lib";
 const RESOURCE_MAP = {
   core: {
-    src: "node_modules/@vivliostyle/core/lib",
+    src: "../node_modules/@vivliostyle/core/lib",
     dest: "js",
     srcPattern: "*.js",
   },
@@ -27,7 +27,7 @@ const RESOURCE_MAP = {
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
   coreResources: {
-    src: "node_modules/@vivliostyle/core/resources",
+    src: "../node_modules/@vivliostyle/core/resources",
     dest: "resources",
   },
 };
