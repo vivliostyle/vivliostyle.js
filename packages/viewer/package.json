@@ -18,20 +18,20 @@
     "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
   },
   "dependencies": {
-    "@vivliostyle/core": "^2.0.0-pre.5",
+    "@vivliostyle/core": "^2.0.0-pre.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@types/node": "^12.12.17",
-    "@typescript-eslint/eslint-plugin": "^2.3.2",
-    "@typescript-eslint/parser": "^2.3.2",
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "@types/node": "^12.12.21",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
     "browser-sync": "^2.26.7",
     "circular-dependency-plugin": "^5.2.0",
-    "eslint": "^6.7.2",
+    "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-prettier": "^3.1.2",
     "font-awesome": "^4.7.0",
     "gulp": "^4.0.2",
     "gulp-changed": "^4.0.0",
@@ -53,7 +53,7 @@
     "stylelint": "^12.0.0",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-scss": "^3.11.0",
-    "typescript": "^3.6.3"
+    "typescript": "^3.7.4"
   },
   "main": "lib/js/vivliostyle-viewer.js",
   "author": "Vivliostyle Foundation",
