@@ -95,22 +95,22 @@ if [[ $CANARY_RELEASE = true ]] || [[ $IS_VALID_TAG = true ]]; then
 fi
 
 # Canary
-if [[ $CANARY_RELEASE = true ]]; then
-    echo "===> Cloning gh-pages"
-    git clone -q --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.git gh-pages
-    echo "===> Copying viewer to gh-pages/viewer"
-    CANARY_VIEWER_ROOT="gh-pages/viewer"
-    mkdir -p "${CANARY_VIEWER_ROOT}"
-    cp -R ${VIEWER_ARTIFACTS} "gh-pages/viewer/"
-    cp -R "${ARCHIVE_PATH}" "gh-pages/downloads/vivliostyle-canary.zip"
-    echo "===> Pushing changes to gh-pages"
-    cd gh-pages
-    git add .
-    git status
-    git commit -m "Update Vivliostyle Canary (original commit: $TRAVIS_COMMIT)"
-    [[ $DEBUG_HOOK = false ]] && git push origin gh-pages
-    cd ..
-fi
+# if [[ $CANARY_RELEASE = true ]]; then
+#     echo "===> Cloning gh-pages"
+#     git clone -q --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.git gh-pages
+#     echo "===> Copying viewer to gh-pages/viewer"
+#     CANARY_VIEWER_ROOT="gh-pages/viewer"
+#     mkdir -p "${CANARY_VIEWER_ROOT}"
+#     cp -R ${VIEWER_ARTIFACTS} "gh-pages/viewer/"
+#     cp -R "${ARCHIVE_PATH}" "gh-pages/downloads/vivliostyle-canary.zip"
+#     echo "===> Pushing changes to gh-pages"
+#     cd gh-pages
+#     git add .
+#     git status
+#     git commit -m "Update Vivliostyle Canary (original commit: $TRAVIS_COMMIT)"
+#     [[ $DEBUG_HOOK = false ]] && git push origin gh-pages
+#     cd ..
+# fi
 
 # if stable or pre-release tag push
 if [[ $IS_VALID_TAG = true ]]; then
