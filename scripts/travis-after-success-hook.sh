@@ -132,23 +132,23 @@ if [[ $IS_VALID_TAG = true ]]; then
     cp ${ARCHIVE_PATH} ${TAGGED_ARCHIVE}
     if [[ $STABLE_RELEASE = true ]]; then
         [[ $DEBUG_HOOK = false ]] && github-release upload \
+            "${TAGGED_ARCHIVE}" \
             --token "${GH_TOKEN}" \
             --owner vivliostyle \
             --repo vivliostyle \
             --tag "${TRAVIS_TAG}" \
             --name "${TRAVIS_TAG}" \
-            --body "${CHANGELOG}" \
-            "${TAGGED_ARCHIVE}"
+            --body "${CHANGELOG}"
     else
         [[ $DEBUG_HOOK = false ]] && github-release upload \
+            "${TAGGED_ARCHIVE}" \
             --token "${GH_TOKEN}" \
             --owner vivliostyle \
             --repo vivliostyle \
             --tag "${TRAVIS_TAG}" \
             --name "${TRAVIS_TAG}" \
             --body "${CHANGELOG}" \
-            --prerelease \
-            "${TAGGED_ARCHIVE}"
+            --pre-release
     fi
 
     # Tagged Viewer
