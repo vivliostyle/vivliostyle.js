@@ -36,15 +36,20 @@ function build-archive() {
 }
 
 function inject-env-var() {
-    if [ ${TRAVIS_PULL_REQUEST} = "false" ] && ( [[ ${TRAVIS_BRANCH} = "master" ]] || [[ ${TRAVIS_TAG} != "" ]] ); then
+    if [[ ${TRAVIS_BRANCH} = ${TRAVIS_TAG} ]]; then
+        IS_TAG_BUILD=true
+    else
+        IS_TAG_BUILD=false
+    fi
+    if [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)?$ ]]; then
+        IS_VALID_TAG=true
+    else
+        IS_VALID_TAG=false
+    fi
+    if [[ ${TRAVIS_PULL_REQUEST} = false ]] && [[ $IS_TAG_BUILD == false ]]; then
         CANARY_RELEASE=true
     else
         CANARY_RELEASE=false
-    fi
-    if [ ${TRAVIS_PULL_REQUEST} = "false" ] && [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9._]+)?$ ]]; then
-        TAGGED_RELEASE=true
-    else
-        TAGGED_RELEASE=false
     fi
     if [[ ${TRAVIS_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         STABLE_RELEASE=true
@@ -65,14 +70,18 @@ function inject-env-var() {
 # for DEBUG
 if [[ $DEBUG_HOOK = true ]]; then
     TRAVIS_PULL_REQUEST=false
-    TRAVIS_BRANCH=v2.0.0-pre
-    TRAVIS_TAG=v2.0.0-pre
+    TRAVIS_BRANCH=master
+    TRAVIS_TAG=
 fi
 inject-env-var
 
 echo "===> DEBUG_HOOK=${DEBUG_HOOK}"
-echo "===> BUILD_PACKAGE=${BUILD_PACKAGE}"
-echo "===> TAGGED_RELEASE=${TAGGED_RELEASE}"
+echo "===> TRAVIS_BRANCH=${TRAVIS_BRANCH}"
+echo "===> TRAVIS_TAG=${TRAVIS_TAG}"
+echo "===> TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}"
+echo "===> IS_TAG_BUILD=${IS_TAG_BUILD}"
+echo "===> IS_VALID_TAG=${IS_VALID_TAG}"
+echo "===> CANARY_RELEASE=${CANARY_RELEASE}"
 echo "===> STABLE_RELEASE=${STABLE_RELEASE}"
 echo "===> PRE_RELEASE=${PRE_RELEASE}"
 echo "===> ARCHIVE_DIR=${ARCHIVE_DIR}"
@@ -80,13 +89,13 @@ echo "===> ARCHIVE_PATH=${ARCHIVE_PATH}"
 echo "===> VIEWER_ARTIFACTS=${VIEWER_ARTIFACTS}"
 echo "===> VERSION=${VERSION}"
 
-if [[ $CANARY_RELEASE = true ]] || [[ $TAGGED_RELEASE = true ]]; then
+if [[ $CANARY_RELEASE = true ]] || [[ $IS_VALID_TAG = true ]]; then
     [[ $DEBUG_HOOK = false ]] && setup-git
     build-archive "${ARCHIVE_DIR}" "${ARCHIVE_PATH}"
 fi
 
+# Canary
 if [[ $CANARY_RELEASE = true ]]; then
-    # Canary
     echo "===> Cloning gh-pages"
     git clone -q --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.git gh-pages
     echo "===> Copying viewer to gh-pages/viewer"
@@ -101,9 +110,10 @@ if [[ $CANARY_RELEASE = true ]]; then
     git commit -m "Update Vivliostyle Canary (original commit: $TRAVIS_COMMIT)"
     [[ $DEBUG_HOOK = false ]] && git push origin gh-pages
     cd ..
-elif [[ $TAGGED_RELEASE = true ]]; then
-    # if stable or pre-release tag push
+fi
 
+# if stable or pre-release tag push
+if [[ $IS_VALID_TAG = true ]]; then
     # publish to npm
     echo "===> Publishing packages in npm"
     [[ $DEBUG_HOOK = false ]] && echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
@@ -183,7 +193,7 @@ elif [[ $TAGGED_RELEASE = true ]]; then
     fi
 fi
 
-if [[ $CANARY_RELEASE = true ]] || [[ $TAGGED_RELEASE = true ]]; then
+if [[ $CANARY_RELEASE = true ]] || [[ $IS_VALID_TAG = true ]]; then
     echo "===> Cleaning up"
     rm -rf vivliostyle.github.io vivliostyle.org gh-pages
 fi
