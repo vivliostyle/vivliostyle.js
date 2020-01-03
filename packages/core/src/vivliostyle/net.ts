@@ -114,26 +114,30 @@ export function ajax(
       );
       request.send(opt_data);
     } else {
-      if (/^file:|^https?:\/\/[^/]+\.githubusercontent\.com|\.opf$/.test(url)) {
-        // File or GitHub raw URL or .opf
+      if (
+        /^file:|^https?:\/\/[^/]+\.githubusercontent\.com|\.(xhtml|xht|opf)$/i.test(
+          url,
+        )
+      ) {
+        // File or GitHub raw URL or .xht(ml) or .opf
         if (
           /\/aozorabunko\/[^/]+\/cards\/[^/]+\/files\/[^/.]+\.html$/.test(url)
         ) {
           // Aozorabunko's (X)HTML support
           request.overrideMimeType("text/html; charset=Shift_JIS");
-        } else if (/\.(html|htm)$/.test(url)) {
+        } else if (/\.(html|htm)$/i.test(url)) {
           request.overrideMimeType("text/html; charset=UTF-8");
-        } else if (/\.(xhtml|xht|xml|opf)$/.test(url)) {
+        } else if (/\.(xhtml|xht|xml|opf)$/i.test(url)) {
           request.overrideMimeType("application/xml; charset=UTF-8");
-        } else if (/\.(txt|css)$/.test(url)) {
+        } else if (/\.(txt|css)$/i.test(url)) {
           request.overrideMimeType("text/plain; charset=UTF-8");
         } else {
           // fallback to HTML
           request.overrideMimeType("text/html; charset=UTF-8");
         }
-      } else if (/^data:,(<|%3C|%3c)/.test(url)) {
+      } else if (/^data:,(<|%3c)/i.test(url)) {
         request.overrideMimeType("text/html; charset=UTF-8");
-      } else if (/^data:,/.test(url)) {
+      } else if (/^data:,/i.test(url)) {
         request.overrideMimeType("text/plain; charset=UTF-8");
       }
       request.send(null);

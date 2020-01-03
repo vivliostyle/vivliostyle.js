@@ -72,7 +72,7 @@ export function setResourceBaseURL(value: string): void {
  * @return resolved (absolute) URL
  */
 export function resolveURL(relURL: string, baseURL: string): string {
-  if (baseURL.startsWith("data:")) {
+  if (/^data:/i.test(baseURL)) {
     return relURL || baseURL;
   }
   if (!baseURL || relURL.match(/^\w{2,}:/)) {
