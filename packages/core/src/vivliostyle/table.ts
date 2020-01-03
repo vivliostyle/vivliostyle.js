@@ -516,9 +516,9 @@ export class TableFormattingContext
       if (index >= position.rowIndex) {
         return repetitiveElements;
       }
-      const cellFragment = this.getCellFragmentOfCell(
-        row[position.columnIndex].cell,
-      );
+      const cellFragment =
+        row[position.columnIndex] &&
+        this.getCellFragmentOfCell(row[position.columnIndex].cell);
       if (!cellFragment || collected.includes(cellFragment)) {
         return repetitiveElements;
       }
