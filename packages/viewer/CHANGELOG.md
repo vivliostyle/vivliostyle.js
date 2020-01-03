@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-pre.7](https://github.com/vivliostyle/vivliostyle/compare/v2.0.0-pre.6...v2.0.0-pre.7) (2020-01-03)
+
+**Note:** Version bump only for package @vivliostyle/viewer
+
 # [2.0.0-pre.6](https://github.com/vivliostyle/vivliostyle/compare/v2.0.0-pre.5...v2.0.0-pre.6) (2019-12-23)
 
 **Note:** Version bump only for package @vivliostyle/viewer
