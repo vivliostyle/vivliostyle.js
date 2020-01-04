@@ -6,3 +6,4 @@
 /packages/core/test
 /packages/viewer/lib
 /packages/viewer/test
+*.zip
