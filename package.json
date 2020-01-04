@@ -10,7 +10,7 @@
     "dev": "lerna run dev --parallel",
     "format": "lerna run format",
     "lint": "lerna run lint",
-    "now-build": "yarn build && ./scripts/create-archive.js",
+    "now-build": "VIVLIOSTYLE_VERSION=canary yarn build && ./scripts/create-archive.js vivliostyle-canary vivliostyle-canary.zip",
     "ship": "lerna publish from-package",
     "ship:canary": "lerna publish --canary",
     "ship:prerelease": "yarn ship --dist-tag next",
