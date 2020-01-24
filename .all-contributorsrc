@@ -1,0 +1,144 @@
+{
+  "projectName": "vivliostyle",
+  "projectOwner": "vivliostyle",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 80,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "sorotokin",
+      "name": "sorotokin",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/11699780?v=4",
+      "profile": "https://github.com/sorotokin",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kwkbtr",
+      "name": "KAWAKUBO Toru",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/3595560?v=4",
+      "profile": "http://kwkbtr.info",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "satorumurmur",
+      "name": "Satoru MATSUSHIMA (℠)",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3631499?v=4",
+      "profile": "https://bibi.epub.link",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "nulltask",
+      "name": "Seiya Konno",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/291185?v=4",
+      "profile": "http://null.ly",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "johanneswilm",
+      "name": "Johannes Wilm",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/595512?v=4",
+      "profile": "http://www.johanneswilm.org",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "frivoal",
+      "name": "Florian Rivoal",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/113268?v=4",
+      "profile": "https://florian.rivoal.net",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "skoji",
+      "name": "Satoshi KOJIMA",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/119629?v=4",
+      "profile": "https://skoji.jp",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "unageanu",
+      "name": "Masaya Yamauchi",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/11205?v=4",
+      "profile": "http://unageanu.hatenablog.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "MurakamiShinyu",
+      "name": "Shinyu Murakami",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/3324737?v=4",
+      "profile": "https://vivliostyle.org",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "kubosho",
+      "name": "Shota Kubota",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/430267?v=4",
+      "profile": "https://blog.kubosho.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "spring-raining",
+      "name": "spring-raining",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1771005?v=4",
+      "profile": "https://harusamex.com",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "cosmo0920",
+      "name": "Hiroshi Hatake",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/700876?v=4",
+      "profile": "http://cosmo0920.wordpress.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "takanakahiko",
+      "name": "takanakahiko",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/10114717?v=4",
+      "profile": "https://twitter.com/takanakahiko",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "uetchy",
+      "name": "Yasuaki Uechi",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/431808?v=4",
+      "profile": "https://uechi.io",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
