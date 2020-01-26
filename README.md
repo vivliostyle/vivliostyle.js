@@ -46,32 +46,40 @@ See [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli), the save 
 
 Please report on [GitHub Issues](https://github.com/vivliostyle/vivliostyle/issues).
 
-### Contributors
+### Contributors ✨
 
-list of contributors, generated from `git shortlog -sn`.
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
-- KAWAKUBO Toru
-- MurakamiShinyu
-- unageanu
-- kwkbtr
-- Satoshi KOJIMA
-- Shinyu Murakami
-- Shota Kubota
-- Johannes Wilm
-- spring-raining
-- Peter Sorotokin
-- Satoshi Kojima
-- Satoru MATSUSHIMA (℠)
-- Yasuaki Uechi
-- kubosho
-- U-birksu\peter
-- spring_raining
-- Masaya Yamauchi
-- takanakahiko
-- Hiroshi Hatake
-- Florian Rivoal
-- Seiya Konno
-- nulltask
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/sorotokin"><img src="https://avatars3.githubusercontent.com/u/11699780?v=4" width="80px;" alt=""/><br /><sub><b>sorotokin</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=sorotokin" title="Code">💻</a></td>
+    <td align="center"><a href="http://kwkbtr.info"><img src="https://avatars3.githubusercontent.com/u/3595560?v=4" width="80px;" alt=""/><br /><sub><b>KAWAKUBO Toru</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=kwkbtr" title="Code">💻</a></td>
+    <td align="center"><a href="https://bibi.epub.link"><img src="https://avatars0.githubusercontent.com/u/3631499?v=4" width="80px;" alt=""/><br /><sub><b>Satoru MATSUSHIMA (℠)</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=satorumurmur" title="Code">💻</a></td>
+    <td align="center"><a href="http://null.ly"><img src="https://avatars2.githubusercontent.com/u/291185?v=4" width="80px;" alt=""/><br /><sub><b>Seiya Konno</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=nulltask" title="Code">💻</a></td>
+    <td align="center"><a href="http://www.johanneswilm.org"><img src="https://avatars2.githubusercontent.com/u/595512?v=4" width="80px;" alt=""/><br /><sub><b>Johannes Wilm</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=johanneswilm" title="Code">💻</a></td>
+    <td align="center"><a href="https://florian.rivoal.net"><img src="https://avatars0.githubusercontent.com/u/113268?v=4" width="80px;" alt=""/><br /><sub><b>Florian Rivoal</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=frivoal" title="Code">💻</a></td>
+    <td align="center"><a href="https://skoji.jp"><img src="https://avatars1.githubusercontent.com/u/119629?v=4" width="80px;" alt=""/><br /><sub><b>Satoshi KOJIMA</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=skoji" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://unageanu.hatenablog.com/"><img src="https://avatars2.githubusercontent.com/u/11205?v=4" width="80px;" alt=""/><br /><sub><b>Masaya Yamauchi</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=unageanu" title="Code">💻</a></td>
+    <td align="center"><a href="https://vivliostyle.org"><img src="https://avatars1.githubusercontent.com/u/3324737?v=4" width="80px;" alt=""/><br /><sub><b>Shinyu Murakami</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=MurakamiShinyu" title="Code">💻</a> <a href="https://github.com/vivliostyle/vivliostyle/commits?author=MurakamiShinyu" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://blog.kubosho.com"><img src="https://avatars0.githubusercontent.com/u/430267?v=4" width="80px;" alt=""/><br /><sub><b>Shota Kubota</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=kubosho" title="Code">💻</a></td>
+    <td align="center"><a href="https://harusamex.com"><img src="https://avatars1.githubusercontent.com/u/1771005?v=4" width="80px;" alt=""/><br /><sub><b>spring-raining</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=spring-raining" title="Code">💻</a> <a href="https://github.com/vivliostyle/vivliostyle/commits?author=spring-raining" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://cosmo0920.wordpress.com/"><img src="https://avatars1.githubusercontent.com/u/700876?v=4" width="80px;" alt=""/><br /><sub><b>Hiroshi Hatake</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=cosmo0920" title="Code">💻</a></td>
+    <td align="center"><a href="https://twitter.com/takanakahiko"><img src="https://avatars3.githubusercontent.com/u/10114717?v=4" width="80px;" alt=""/><br /><sub><b>takanakahiko</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=takanakahiko" title="Code">💻</a></td>
+    <td align="center"><a href="https://uechi.io"><img src="https://avatars0.githubusercontent.com/u/431808?v=4" width="80px;" alt=""/><br /><sub><b>Yasuaki Uechi</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle/commits?author=uetchy" title="Code">💻</a> <a href="https://github.com/vivliostyle/vivliostyle/commits?author=uetchy" title="Documentation">📖</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## License
 
