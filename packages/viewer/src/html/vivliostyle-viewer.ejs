@@ -35,11 +35,20 @@
     <section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: !!viewer.state.status(), 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
       <h1>Vivliostyle Viewer <small>(version:&nbsp;<%= version %>)</small></h1>
       <input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl"/>
+      <div id="vivliostyle-input-options">
+        <label><input id="vivliostyle-book-mode" type="checkbox" data-bind="checked: settingsPanel.state.bookMode, disable: settingsPanel.isBookModeChangeDisabled" />&nbsp;<b>Book Mode</b></label>&emsp;
+        <label><input id="vivliostyle-render-all-pages" type="checkbox" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" />&nbsp;<b>Render All Pages</b></label>&emsp;
+        <button id="vivliostyle-input-apply" type="button" data-bind="click: settingsPanel.apply, disable: !viewer.inputUrl()">Apply</button>
+      </div>
       <p><strong>Supported document types:</strong></p>
       <ul>
-        <li>(X)HTML document, with CSS for paged media</li>
-        <li>Web publication (a collection of HTML documents): specify URL of the primary entry page or manifest file.</li>
-        <li>Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.</li>
+        <li>HTML documents, with CSS for paged media</li>
+        <li>Book-like publications, with Table of Contents (<b>Book Mode</b>:&nbsp;On)</span>
+          <ul>
+            <li>Web publications (a collection of HTML documents): specify URL of the primary entry page or manifest file.</li>
+            <li>Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.</li>
+          </ul>
+        </li>
       </ul>
       <p>Notes:</p>
       <ul>
@@ -49,23 +58,28 @@
       </ul>
       <p><strong>URL parameter options:</strong></p>
       <ul>
-        <li><span>#<b>b</b>=&lt;document URL&gt;</span> or <span>#<b>x</b>=&lt;document URL&gt;</span>
+        <li><span>#<b>src</b>=&lt;document URL&gt;</span></li>
+        <li><span>&amp;<b>bookMode</b>=[<b>true</b> | <b>false</b>]&emsp;(<b>Book Mode</b>)</span>
           <ul>
-            <li>#<b>b</b>= Book view. When (X)HTML document URL is specified, the URL is treated as primary entry page’s, and a series of HTML documents linked from the manifest or TOC (Table of Contents, e.g. marked up with <code>&lt;nav role="doc-toc"&gt;</code>)  are automatically loaded.</li>
-            <li>#<b>x</b>= (X)HTML document is simply loaded. Multiple documents can be specified as #<b>x</b>=&lt;1st HTML&gt;&amp;<b>x</b>=&lt;2nd HTML&gt;...</li>
+            <li><b>true</b>: for Book-like publications, with Table of Contents.
+              <ul>
+                <li>When an HTML document URL is specified, a series of HTML documents linked from the publication manifest or Table of Contents (e.g., marked up with <code>&lt;nav role="doc-toc"&gt;</code>) are automatically loaded.</li>
+              </ul>
+            </li>
+            <li><b>false</b> (default): for single HTML documents</li>
           </ul>
         </li>
-        <li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]</span>
+        <li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]&emsp;(<b>Render All Pages</b>)</span>
+          <ul>
+            <li><b>true</b> (default): for Print (all pages printable, page count works as expected)</li>
+            <li><b>false</b>: for Read (quick loading with rough page count)</li>
+          </ul>
+        </li>
+        <li><span>&amp;<b>spread</b>=[<b>true</b> | <b>false</b> | <b>auto</b>]&emsp;(<b>Page Spread View</b>)</span>
           <ul>
             <li><b>true</b>: Spread view</li>
             <li><b>false</b>: Single page view</li>
-            <li><b>auto</b>: Auto spread view (default)</li>
-          </ul>
-        </li>
-        <li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]</span>
-          <ul>
-            <li><b>true</b>: for Print (all pages printable, page count works as expected)</li>
-            <li><b>false</b>: for Read (quick loading with rough page count)</li>
+            <li><b>auto</b> (default): Auto spread view</li>
           </ul>
         </li>
         <li><span>&amp;<b>style</b>=&lt;additional external style sheet URL&gt;</span></li>
@@ -74,8 +88,8 @@
       <p>Options can also be set in the <a href="#" data-bind="click: settingsPanel.toggle">Settings</a> panel.</p>
       <p>For more details, see documentation on <a href="https://vivliostyle.org"><strong>Vivliostyle.org</strong></a>.</p>
       <ul>
-        <li><a href="https://vivliostyle.org/docs/user-guide">Vivliostyle Viewer User’s Guide</a></li>
-        <li><a href="https://vivliostyle.org/ja/docs/user-guide">Vivliostyle Viewer ユーザーガイド (日本語)</a></li>
+        <li><a href="https://docs.vivliostyle.org/#/user-guide">User Guide</a></li>
+        <li><a href="https://docs.vivliostyle.org/#/ja/user-guide">ユーザーガイド (日本語)</a></li>
       </ul>
     </section>
     <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true"></div>
@@ -101,6 +115,12 @@
                     <li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="singlePage" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Single page</span></label></li>
                     <li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
                   </ul>
+                </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group">
+                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_book-mode" aria-keyshortcuts="B" data-bind="checked: settingsPanel.state.bookMode, disable: settingsPanel.isBookModeChangeDisabled" /> <span>Book Mode</span></label>
+                  </div>
+                  <div><small>On: for Book-like publications, with Table of Contents</small></div>
+                  <div><small>Off: for single HTML documents</small></div>
                 </fieldset>
                 <fieldset class="vivliostyle-menu-detail-group">
                   <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span></label>
@@ -152,7 +172,7 @@
                     <li><label><input type="checkbox" name="vivliostyle-settings_force-html-body-margin-zero" data-bind="checked: settingsPanel.state.pageStyle.forceHtmlBodyMarginZero" /> <span>Force html/body margin to 0</span><!--  <small>(avoid big page+body margin)</small> --></label>
                   </ul>
                 </fieldset>
-                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-breaks" aria-keyshortcuts="B">
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-breaks" aria-keyshortcuts="K">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Breaks</legend>
                   <ul class="vivliostyle-menu-detail-group">
                     <li><label><input type="radio" name="vivliostyle-settings_widows-orphans" value="" required data-bind="checked: settingsPanel.state.pageStyle.widowsOrphans" /> <span>Default widows/orphans control</span></label></li>

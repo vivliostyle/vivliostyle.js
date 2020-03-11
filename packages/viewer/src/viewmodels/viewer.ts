@@ -218,18 +218,20 @@ class Viewer {
     }
     this.documentOptions_ = documentOptions;
 
-    if (documentOptions.xUrl()) {
-      this.coreViewer_.loadDocument(
-        documentOptions.xUrl(),
-        documentOptions.toObject(),
-        this.viewerOptions_.toObject(),
-      );
-    } else if (documentOptions.bookUrl()) {
-      this.coreViewer_.loadPublication(
-        documentOptions.bookUrl(),
-        documentOptions.toObject(),
-        this.viewerOptions_.toObject(),
-      );
+    if (documentOptions.srcUrls()) {
+      if (!documentOptions.bookMode()) {
+        this.coreViewer_.loadDocument(
+          documentOptions.srcUrls(),
+          documentOptions.toObject(),
+          this.viewerOptions_.toObject(),
+        );
+      } else {
+        this.coreViewer_.loadPublication(
+          documentOptions.srcUrls()[0],
+          documentOptions.toObject(),
+          this.viewerOptions_.toObject(),
+        );
+      }
     } else {
       // No document specified, show welcome page
       this.state_.status.value("");

@@ -31,7 +31,8 @@ type State = {
   viewerOptions: ViewerOptions;
   pageStyle: PageStyle;
   pageViewMode: PureComputed<string>;
-  renderAllPages: PureComputed<unknown>;
+  bookMode: Observable<boolean>;
+  renderAllPages: PureComputed<boolean>;
 };
 
 const { Keys } = keyUtil;
@@ -44,6 +45,7 @@ class SettingsPanel {
   isPageStyleChangeDisabled: boolean;
   isOverrideDocumentStyleSheetDisabled: boolean;
   isPageViewModeChangeDisabled: boolean;
+  isBookModeChangeDisabled: boolean;
   isRenderAllPagesChangeDisabled: boolean;
   justClicked: boolean; // double click check
   settingsToggle: HTMLElement;
@@ -66,6 +68,7 @@ class SettingsPanel {
     this.isPageStyleChangeDisabled = !!settingsPanelOptions.disablePageStyleChange;
     this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
     this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
+    this.isBookModeChangeDisabled = !!settingsPanelOptions.disableBookModeChange;
     this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
 
     this.justClicked = false;
@@ -87,6 +90,7 @@ class SettingsPanel {
           this.state.viewerOptions.pageViewMode(PageViewMode.of(value));
         },
       }),
+      bookMode: ko.observable(documentOptions.bookMode()),
       renderAllPages: ko.pureComputed({
         read: () => {
           return this.state.viewerOptions.renderAllPages();
@@ -113,6 +117,13 @@ class SettingsPanel {
     messageDialog.visible.subscribe(function(visible) {
       if (visible) this.close();
     }, this);
+
+    this.state.bookMode.subscribe((bookMode) => {
+      documentOptions.bookMode(bookMode);
+    });
+    this.state.renderAllPages.subscribe((renderAllPages) => {
+      viewerOptions.renderAllPages(renderAllPages);
+    });
   }
 
   close(): boolean {
@@ -158,22 +169,12 @@ class SettingsPanel {
   }
 
   apply(): void {
-    if (
-      this.state.renderAllPages() === this.viewerOptions_.renderAllPages() &&
-      this.state.pageStyle.equivalentTo(this.documentOptions_.pageStyle)
-    ) {
-      this.viewerOptions_.copyFrom(this.state.viewerOptions);
-    } else {
-      this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
-      if (this.documentOptions_.pageStyle.baseFontSizeSpecified()) {
-        // Update userStylesheet when base font-size is specified
-        this.documentOptions_.updateUserStyleSheetFromCSSText();
-      }
-      this.viewer_.loadDocument(
-        this.documentOptions_,
-        this.state.viewerOptions,
-      );
+    this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
+    if (this.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+      // Update userStylesheet when base font-size is specified
+      this.documentOptions_.updateUserStyleSheetFromCSSText();
     }
+    this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
     if (this.pinned()) {
       this.focusToFirstItem();
     } else {
@@ -274,6 +275,15 @@ class SettingsPanel {
           return false;
         }
         return true;
+      case "b":
+      case "B":
+        if (isHotKeyEnabled) {
+          this.focusToFirstItem(
+            document.getElementsByName("vivliostyle-settings_book-mode")[0],
+          );
+          return false;
+        }
+        return true;
       case "a":
       case "A":
         if (isHotKeyEnabled) {
@@ -313,8 +323,8 @@ class SettingsPanel {
           return false;
         }
         return true;
-      case "b":
-      case "B":
+      case "k":
+      case "K":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementById("vivliostyle-settings_page-breaks"),
