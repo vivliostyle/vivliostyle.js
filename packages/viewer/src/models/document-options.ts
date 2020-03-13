@@ -25,15 +25,30 @@ import urlParameters from "../stores/url-parameters";
 import stringUtil from "../utils/string-util";
 
 function getDocumentOptionsFromURL(): DocumentOptionsType {
-  const bookUrl = urlParameters.getParameter("b");
-  const xUrl = urlParameters.getParameter("x");
-  const fragment = urlParameters.getParameter("f");
+  const srcUrls = urlParameters.getParameter("src");
+  const bUrls = urlParameters.getParameter("b"); // (deprecated) => src & bookMode=true
+  const xUrls = urlParameters.getParameter("x"); // (deprecated) => src
+  const bookMode = urlParameters.getParameter("bookMode")[0];
+  const fragment = urlParameters.getParameter("f")[0];
   const style = urlParameters.getParameter("style");
   const userStyle = urlParameters.getParameter("userStyle");
   return {
-    bookUrl: bookUrl[0] || null, // bookUrl and xUrl are exclusive
-    xUrl: !bookUrl[0] && xUrl.length && xUrl[0] ? xUrl : null,
-    fragment: fragment[0] || null,
+    srcUrls: srcUrls.length
+      ? srcUrls
+      : bUrls.length
+      ? bUrls
+      : xUrls.length
+      ? xUrls
+      : null,
+    bookMode:
+      bookMode === "true"
+        ? true
+        : bookMode === "false"
+        ? false
+        : bUrls.length
+        ? true
+        : false,
+    fragment: fragment || null,
     authorStyleSheet: style.length ? style : [],
     userStyleSheet: userStyle.length ? userStyle : [],
   };
@@ -42,8 +57,8 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
 interface DocumentOptionsType {
   pageStyle?: PageStyle;
   dataUserStyleIndex?: number;
-  bookUrl?: string;
-  xUrl?: Array<string> | null;
+  srcUrls?: Array<string>;
+  bookMode?: boolean;
   fragment?: string;
   authorStyleSheet?: Array<unknown>;
   userStyleSheet?: Array<unknown>;
@@ -52,21 +67,29 @@ interface DocumentOptionsType {
 class DocumentOptions {
   pageStyle: PageStyle;
   dataUserStyleIndex: number;
-  bookUrl?: Observable<string>;
-  xUrl?: Observable<Array<string> | null>;
+  srcUrls?: Observable<Array<string> | null>;
+  bookMode: Observable<boolean>;
   fragment?: Observable<string>;
   authorStyleSheet?: Observable<Array<unknown>>;
   userStyleSheet?: Observable<Array<unknown>>;
 
   constructor() {
     const urlOptions = getDocumentOptionsFromURL();
-    this.bookUrl = ko.observable(urlOptions.bookUrl || "");
-    this.xUrl = ko.observable(urlOptions.xUrl || null);
+    this.srcUrls = ko.observable(urlOptions.srcUrls || null);
+    this.bookMode = ko.observable(urlOptions.bookMode);
     this.fragment = ko.observable(urlOptions.fragment || "");
     this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
     this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
     this.pageStyle = new PageStyle();
     this.dataUserStyleIndex = -1;
+
+    this.bookMode.subscribe((bookMode) => {
+      if (!bookMode) {
+        urlParameters.removeParameter("bookMode");
+      } else {
+        urlParameters.setParameter("bookMode", bookMode.toString());
+      }
+    });
 
     // write fragment back to URL when updated
     this.fragment.subscribe((fragment) => {

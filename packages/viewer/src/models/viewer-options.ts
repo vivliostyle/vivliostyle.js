@@ -29,9 +29,9 @@ import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions, { FitToScreen } from "./zoom-options";
 
 type Options = {
-  renderAllPages: Observable<unknown>;
+  renderAllPages: Observable<boolean>;
   fontSize: Observable<number | string>;
-  profile: Observable<unknown>;
+  profile: Observable<boolean>;
   pageViewMode: Observable<PageViewModeInstance>;
   zoom: Observable<ZoomOptions>;
 };
@@ -64,6 +64,8 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
         ? true
         : renderAllPages === "false"
         ? false
+        : urlParameters.hasParameter("b")
+        ? false
         : null,
     fontSize,
     profile: urlParameters.getParameter("profile")[0] === "true",
@@ -75,9 +77,8 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
 }
 
 function getDefaultValues(): ViewerOptionsType {
-  const isNotBook = urlParameters.hasParameter("x");
   return {
-    renderAllPages: isNotBook,
+    renderAllPages: true,
     fontSize: 16,
     profile: false,
     pageViewMode: PageViewMode.defaultMode(),
@@ -86,9 +87,9 @@ function getDefaultValues(): ViewerOptionsType {
 }
 
 class ViewerOptions {
-  renderAllPages: Observable<unknown>;
+  renderAllPages: Observable<boolean>;
   fontSize: Observable<number | string>;
-  profile: Observable<unknown>;
+  profile: Observable<boolean>;
   pageViewMode: Observable<PageViewModeInstance>;
   zoom: Observable<ZoomOptions>;
 
@@ -96,7 +97,7 @@ class ViewerOptions {
     renderAllPages: boolean;
     fontSize: number;
     profile: boolean;
-    pageViewMode: unknown;
+    pageViewMode: PageViewModeInstance;
     zoom: FitToScreen;
   };
 

@@ -59,6 +59,7 @@ html[data-vivliostyle-paginated] {
   z-index: 1;
   overflow: auto;
   box-sizing: border-box;
+  max-width: 60rem;
   padding: 4px 16px;
   margin-top: $menu-icon-height;
   background: #f0f0f0;
@@ -80,7 +81,7 @@ html[data-vivliostyle-paginated] {
     }
   }
 
-  > input {
+  > #vivliostyle-input-url {
     font-size: 1rem;
     background: white;
     display: block;
@@ -89,7 +90,20 @@ html[data-vivliostyle-paginated] {
     padding: 4px;
     border: 2px solid #808080;
     border-radius: 6px;
-    margin: 1em 0;
+  }
+
+  > #vivliostyle-input-options {
+    line-height: 2;
+    margin: 0.5em 0 1em;
+
+    > button {
+      margin: 0 2px;
+      padding: 5px 7px;
+      line-height: 1em;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   }
 
   p {
@@ -111,5 +125,10 @@ html[data-vivliostyle-paginated] {
       font-size: 1.25em;
       font-weight: 400;
     }
+  }
+
+  b {
+    font-weight: bold;
+    white-space: nowrap;
   }
 }

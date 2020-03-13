@@ -49,13 +49,29 @@ function ViewerApp(): void {
     debug: this.isDebug,
   };
 
-  // Remove redundant or ineffective URL parameters
-  if (urlParameters.getParameter("b")[0]) {
-    urlParameters.removeParameter("b", true); // only first one is effective
-    urlParameters.removeParameter("x"); // x= is ineffective when b= is given
+  // Replace deprecated "b" and "x" to "src" & "bookMode"
+  const srcUrls = urlParameters.getParameter("src");
+  const bUrls = urlParameters.getParameter("b"); // (deprecated) => src & bookMode=true & renderAllPages=false
+  const xUrls = urlParameters.getParameter("x"); // (deprecated) => src
+  if (!srcUrls.length) {
+    if (bUrls.length) {
+      urlParameters.setParameter("src", bUrls[0]);
+      urlParameters.setParameter("bookMode", "true");
+      if (!urlParameters.hasParameter("renderAllPages")) {
+        urlParameters.setParameter("renderAllPages", "false");
+      }
+    } else if (xUrls.length) {
+      xUrls.forEach((x, i) => {
+        urlParameters.setParameter("src", x, i);
+      });
+    }
   }
+  // Remove redundant or ineffective URL parameters
+  urlParameters.removeParameter("b");
+  urlParameters.removeParameter("x");
   urlParameters.removeParameter("f", true); // only first one is effective
   urlParameters.removeParameter("spread", true);
+  urlParameters.removeParameter("bookMode", true);
   urlParameters.removeParameter("renderAllPages", true);
   urlParameters.removeParameter("fontSize", true);
   urlParameters.removeParameter("profile", true);
@@ -65,7 +81,7 @@ function ViewerApp(): void {
 
   this.viewer.inputUrl.subscribe((inputUrl: string) => {
     if (inputUrl != "") {
-      if (!urlParameters.hasParameter("b")) {
+      if (!urlParameters.hasParameter("src")) {
         // Push current URL to browser history to enable to go back here when browser Back button is clicked.
         if (urlParameters.history.pushState)
           urlParameters.history.pushState(null, "");
@@ -78,9 +94,10 @@ function ViewerApp(): void {
           inputUrl,
         );
       }
-      urlParameters.setParameter("b", inputUrl);
+      urlParameters.setParameter("src", inputUrl);
+      this.documentOptions.srcUrls(urlParameters.getParameter("src"));
     } else {
-      urlParameters.removeParameter("b");
+      urlParameters.removeParameter("src");
     }
   });
 
@@ -89,6 +106,7 @@ function ViewerApp(): void {
   const settingsPanelOptions = {
     disablePageStyleChange: false,
     disablePageViewModeChange: false,
+    disableBookModeChange: false,
     disableRenderAllPagesChange: false,
   };
 
@@ -118,7 +136,6 @@ function ViewerApp(): void {
     const key = keyUtil.identifyKeyFromEvent(event);
     if (document.activeElement.id === "vivliostyle-input-url") {
       if (key === "Enter" && event.keyCode === 13) {
-        this.documentOptions.bookUrl(urlParameters.getParameter("b")[0]);
         this.viewer.loadDocument(this.documentOptions);
         return false;
       }

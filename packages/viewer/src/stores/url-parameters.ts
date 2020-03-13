@@ -81,6 +81,10 @@ class URLParameterStore {
       updated = `${url +
         (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") +
         name}=${value}`;
+      if (name === "src") {
+        // "src" should be the first parameter
+        updated = updated.replace(/#(?!src)(.*?)&(src=[^&]*)/, "#$2&$1");
+      }
     }
     if (this.history !== null && this.history.replaceState) {
       this.history.replaceState(null, "", updated);
