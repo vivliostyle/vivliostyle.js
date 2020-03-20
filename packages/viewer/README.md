@@ -7,10 +7,10 @@
 [![Install Size][size]][size-url]
 [![Downloads][downloads]][downloads-url]
 
-Vivliostyle Viewer is a UI component used with [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle/tree/master/packages/core) to make Vivliostyle Viewer, a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+Vivliostyle Viewer is a UI component used with [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core) to make Vivliostyle Viewer, a Web application for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 - View samples online: <https://vivliostyle.org/samples/>
-- Download release version: <https://github.com/vivliostyle/vivliostyle/releases>
+- Download release version: <https://github.com/vivliostyle/vivliostyle.js/releases>
 - Download latest development version: <https://vivliostyle.org/downloads/vivliostyle-latest.zip>
 
 ## Try Vivliostyle Viewer
@@ -46,11 +46,11 @@ is shown, install either of them and rerun the command, or start your favorite w
 
 Please send them to
 
-- GitHub Issues: <https://github.com/vivliostyle/vivliostyle/issues>
+- GitHub Issues: <https://github.com/vivliostyle/vivliostyle.js/issues>
 
 ## Development
 
-See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle/wiki/Development).
+See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
 
 ## License
 

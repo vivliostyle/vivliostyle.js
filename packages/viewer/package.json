@@ -69,7 +69,7 @@
   "author": "Vivliostyle Foundation",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/vivliostyle/vivliostyle/issues"
+    "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
   },
   "files": [
     "lib/index.html",
@@ -78,7 +78,7 @@
     "lib/css",
     "lib/resources"
   ],
-  "homepage": "https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer",
+  "homepage": "https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer",
   "keywords": [
     "vivliostyle"
   ],

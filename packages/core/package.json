@@ -56,13 +56,13 @@
   "license": "AGPL-3.0",
   "browser": "lib/vivliostyle.js",
   "bugs": {
-    "url": "https://github.com/vivliostyle/vivliostyle/issues"
+    "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
   },
   "files": [
     "lib",
     "resources"
   ],
-  "homepage": "https://github.com/vivliostyle/vivliostyle/tree/master/packages/core",
+  "homepage": "https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core",
   "keywords": [
     "vivliostyle"
   ],

@@ -2,10 +2,10 @@
 
 Vivliostyle Viewer は、HTML+CSS 文書を美しくページ組版・表示する Web アプリケーションであり、EPUB や Web 出版物をサポートします。
 
-このパッケージは[Vivliostyle Core](https://github.com/vivliostyle/vivliostyle/tree/master/packages/core)と[Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer)を組み合わせたものです。
+このパッケージは[Vivliostyle Core](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core)と[Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)を組み合わせたものです。
 
 - オンラインでサンプルを見る <https://vivliostyle.org/samples>
-- リリース版のダウンロード <https://github.com/vivliostyle/vivliostyle/releases>
+- リリース版のダウンロード <https://github.com/vivliostyle/vivliostyle.js/releases>
 - 開発最新版のダウンロード <http://vivliostyle.org/downloads/vivliostyle-latest.zip>
 
 ## 使い方
@@ -37,7 +37,7 @@ Please install Node or Python or Ruby and rerun this script, or use your favorit
 
 以下にお寄せください。
 
-- GitHub Issues: <https://github.com/vivliostyle/vivliostyle/issues>
+- GitHub Issues: <https://github.com/vivliostyle/vivliostyle.js/issues>
 
 ## ソースコード
 

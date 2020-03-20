@@ -17,7 +17,7 @@ JavaScript Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web
 
 Please send them to
 
-- [GitHub Issues](https://github.com/vivliostyle/vivliostyle/issues)
+- [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues)
 
 ## Use Vivliostyle
 
@@ -27,7 +27,7 @@ Download the Vivliostyle Viewer from <https://vivliostyle.org/download/> and fol
 
 See [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
 
-See <https://github.com/vivliostyle/vivliostyle/tree/master/packages/viewer> for source code of the Viewer.
+See <https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer> for source code of the Viewer.
 
 ### Vivliostyle CLI
 
@@ -45,7 +45,7 @@ See [API Reference](https://vivliostyle.org/docs/api).
 
 ## Development
 
-See [Vivliostyle Development Guide](https://github.com/vivliostyle/vivliostyle/wiki/Development).
+See [Vivliostyle Development Guide](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
 
 ## License
 
