@@ -99,7 +99,7 @@ fi
 # Canary
 # if [[ $CANARY_RELEASE = true ]]; then
 #     echo "===> Cloning gh-pages"
-#     git clone -q --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.git gh-pages
+#     git clone -q --depth=1 --branch=gh-pages git@github.com:vivliostyle/vivliostyle.js.git gh-pages
 #     echo "===> Copying viewer to gh-pages/viewer"
 #     CANARY_VIEWER_ROOT="gh-pages/viewer"
 #     mkdir -p "${CANARY_VIEWER_ROOT}"

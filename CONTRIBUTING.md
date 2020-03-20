@@ -7,8 +7,8 @@
 ### Setup
 
 ```
-git clone https://github.com/vivliostyle/vivliostyle.git
-cd vivliostyle
+git clone https://github.com/vivliostyle/vivliostyle.js.git
+cd vivliostyle.js
 yarn install
 yarn bootstrap
 ```
