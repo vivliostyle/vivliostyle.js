@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-pre.9](https://github.com/vivliostyle/vivliostyle/compare/v2.0.0-pre.8...v2.0.0-pre.9) (2020-03-20)
+
+**Note:** Version bump only for package vivliostyle
+
 # [2.0.0-pre.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.0.0-pre.7...v2.0.0-pre.8) (2020-03-16)
 
 ### Features
