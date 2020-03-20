@@ -7,7 +7,7 @@ const archiver = require("archiver");
 
 const argv = process.argv.slice(2);
 const archiveDir = argv[0] || `vivliostyle-latest`;
-const archiveName = argv[1] || `vivliostyle.zip`;
+const archiveName = argv[1] || `vivliostyle-viewer.zip`;
 console.log(`Generating ${archiveName} from ${archiveDir}`);
 
 shell.mkdir(archiveDir);

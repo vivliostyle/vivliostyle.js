@@ -21,7 +21,7 @@ function setup-git() {
 function build-archive() {
     echo "===> Generating Viewer Archive"
     archiveDir=${1:-vivliostyle-latest}
-    archiveName=${2:-vivliostyle.zip}
+    archiveName=${2:-vivliostyle-viewer.zip}
     echo "Generating ${archiveName} from ${archiveDir}"
 
     mkdir ${archiveDir}
@@ -31,7 +31,9 @@ function build-archive() {
     cp -R ./packages/viewer/lib/* ${archiveDir}/viewer/
     cp -R ./scripts/package-artifacts/* ${archiveDir}/
 
-    zip -qr ${archiveName} ${archiveDir}
+    cd ${archiveDir}
+    zip -qr ../${archiveName} .
+    cd ..
     rm -rf ${archiveDir}
 }
 
@@ -62,7 +64,7 @@ function inject-env-var() {
         PRE_RELEASE=false
     fi
     ARCHIVE_DIR="vivliostyle"
-    ARCHIVE_PATH="vivliostyle.zip"
+    ARCHIVE_PATH="vivliostyle-viewer.zip"
     VIEWER_ARTIFACTS=packages/viewer/lib/*
     VERSION=$(echo ${TRAVIS_TAG} | sed 's/^v\(.*\)/\1/')
 }
@@ -102,7 +104,7 @@ fi
 #     CANARY_VIEWER_ROOT="gh-pages/viewer"
 #     mkdir -p "${CANARY_VIEWER_ROOT}"
 #     cp -R ${VIEWER_ARTIFACTS} "gh-pages/viewer/"
-#     cp -R "${ARCHIVE_PATH}" "gh-pages/downloads/vivliostyle-canary.zip"
+#     cp -R "${ARCHIVE_PATH}" "gh-pages/downloads/vivliostyle-viewer-canary.zip"
 #     echo "===> Pushing changes to gh-pages"
 #     cd gh-pages
 #     git add .
@@ -128,7 +130,7 @@ if [[ $IS_VALID_TAG = true ]]; then
     npm i -g conventional-changelog-cli github-release-cli
     CHANGELOG=$(conventional-changelog -p angular)
     echo "===> CHANGELOG=${CHANGELOG}"
-    TAGGED_ARCHIVE="vivliostyle-${VERSION}.zip"
+    TAGGED_ARCHIVE="vivliostyle-viewer-${VERSION}.zip"
     cp ${ARCHIVE_PATH} ${TAGGED_ARCHIVE}
     if [[ $STABLE_RELEASE = true ]]; then
         [[ $DEBUG_HOOK = false ]] && github-release upload \
@@ -182,7 +184,7 @@ if [[ $IS_VALID_TAG = true ]]; then
         git clone -q --depth=1 --branch=master git@${VIVLIOSTYLE_ORG_GIT_HOST}:vivliostyle/vivliostyle.org.git vivliostyle.org
         mkdir -p vivliostyle.org/viewer
         cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
-        cp -R ${ARCHIVE_PATH} vivliostyle.org/downloads/vivliostyle-latest.zip
+        cp -R ${ARCHIVE_PATH} vivliostyle.org/downloads/vivliostyle-viewer-latest.zip
         echo "===> Pushing changes to vivliostyle.org"
         cd vivliostyle.org
         git add .
