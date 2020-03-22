@@ -8,7 +8,7 @@ HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 [![PR's welcome][pr-welcome]][pr-welcome-url]
 
 🌏 [Vivliostyle website](https://vivliostyle.org)  
-📖 [Documentation](https://vivliostyle.org/docs/)  
+📖 [Documentation](https://docs.vivliostyle.org)  
 🤝 [Join Community](https://vivliostyle.org/community/)
 
 ## Official Packages
@@ -21,17 +21,17 @@ Vivliostyle can be installed from [npm](https://www.npmjs.com/package/@vivliosty
 npm install @vivliostyle/core
 ```
 
-See [API Reference](https://vivliostyle.org/docs/api).
+See [API Reference](https://docs.vivliostyle.org/#/api).
 
 ### Vivliostyle Viewer [`vivliostyle-viewer`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)
 
-- [User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/)
+- [User Guide](https://docs.vivliostyle.org/#/user-guide)
 - [Samples](https://vivliostyle.org/samples/)
 - [Source Code](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)
 
-Download the Vivliostyle Viewer package from <https://vivliostyle.org/download/> and follow the instruction in it.
+Download the Vivliostyle Viewer package from <https://vivliostyle.github.io> and follow the instruction in it.
 
-Alos see [Vivliostyle Viewer User’s Guide](https://vivliostyle.github.io/vivliostyle.js/docs/en/) for further information.
+See also [Vivliostyle Viewer User Guide](https://docs.vivliostyle.org/#/user-guide) for further information.
 
 ### Vivliostyle CLI [`vivliostyle-cli`](https://github.com/vivliostyle/vivliostyle-cli)
 
@@ -92,11 +92,11 @@ Vivliostyle contains following components:
 - [fast-diff](https://www.npmjs.com/package/fast-diff)
   - Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-[github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle
+[github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases
-[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.svg
-[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle
-[contributors]: https://img.shields.io/github/contributors/vivliostyle/vivliostyle.svg
+[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.js.svg
+[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle.js
+[contributors]: https://img.shields.io/github/contributors/vivliostyle/vivliostyle.js.svg
 [contributors-url]: https://github.com/vivliostyle/vivliostyle.js/graphs/contributors
 [pr-welcome]: https://img.shields.io/badge/PRs%20-welcome-brightgreen.svg
 [pr-welcome-url]: https://github.com/vivliostyle/vivliostyle.js/blob/master/CONTRIBUTING.md

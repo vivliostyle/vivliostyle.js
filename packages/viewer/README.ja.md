@@ -6,13 +6,13 @@ Vivliostyle Viewer は、HTML+CSS 文書を美しくページ組版・表示す�
 
 - オンラインでサンプルを見る <https://vivliostyle.org/samples>
 - リリース版のダウンロード <https://github.com/vivliostyle/vivliostyle.js/releases>
-- 開発最新版のダウンロード <http://vivliostyle.org/downloads/vivliostyle-latest.zip>
+- 開発最新版のダウンロード <https://vivliostyle.github.io>
 
 ## 使い方
 
 1. ダウンロードした ZIP ファイルを展開する
 
-2. ターミナルまたはコマンドプロンプトを開き、1.の展開で作られたフォルダ(`vivliostyle-js-[version]`)に移動する
+2. ターミナルまたはコマンドプロンプトを開き、1.の展開で作られたフォルダに移動する
 
 3. 以下のコマンドを実行する
 
@@ -41,9 +41,9 @@ Please install Node or Python or Ruby and rerun this script, or use your favorit
 
 ## ソースコード
 
-- Vivliostyle on GitHub: <https://github.com/vivliostyle/vivliostyle>
+- Vivliostyle.js on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
 
 ## ドキュメント
 
-- [Vivliostyle ドキュメント](https://vivliostyle.org/ja/docs/)
-- [Vivliostyle Viewer ユーザーガイド](https://vivliostyle.org/ja/docs/user-guide)
+- [Vivliostyle ドキュメント](https://docs.vivliostyle.org/#/ja/)
+- [Vivliostyle Viewer ユーザーガイド](https://docs.vivliostyle.org/#/ja/user-guide)

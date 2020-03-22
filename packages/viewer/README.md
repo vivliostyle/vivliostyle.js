@@ -11,7 +11,7 @@ Vivliostyle Viewer is a UI component used with [Vivliostyle Core](https://github
 
 - View samples online: <https://vivliostyle.org/samples/>
 - Download release version: <https://github.com/vivliostyle/vivliostyle.js/releases>
-- Download latest development version: <https://vivliostyle.org/downloads/vivliostyle-latest.zip>
+- Download latest development version: <https://vivliostyle.github.io>
 
 ## Try Vivliostyle Viewer
 
@@ -20,7 +20,7 @@ Vivliostyle Viewer is a UI component used with [Vivliostyle Core](https://github
 ## How to use
 
 1. Unzip the downloaded ZIP file.
-2. Open a terminal or a command prompt and navigate to the folder (`vivliostyle-[version]`) generated in the step 1.
+2. Open a terminal or a command prompt and navigate to the folder generated in the step 1.
 3. Run the following command:
 
 ```
@@ -58,16 +58,16 @@ Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
 
 ## Documentation
 
-- [Vivliostyle Documentation](https://vivliostyle.org/docs/)
-- [Vivliostyle Viewer User’s Guide](https://vivliostyle.org/docs/user-guide)
+- [Vivliostyle Documentation](https://docs.vivliostyle.org)
+- [Vivliostyle Viewer User’s Guide](https://docs.vivliostyle.org/#/user-guide)
 
 [npm]: https://img.shields.io/npm/v/@vivliostyle/viewer/latest
 [npm-next]: https://img.shields.io/npm/v/@vivliostyle/viewer/next
 [npm-url]: https://www.npmjs.com/package/@vivliostyle/viewer
-[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.svg
-[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle
-[deps]: https://img.shields.io/david/vivliostyle/vivliostyle?path=packages%2Fviewer
-[deps-url]: https://www.npmjs.com/package/@vivliostyle/corhttps://david-dm.org/vivliostyle/vivliostyle/?path=packages/viewer
+[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.js.svg
+[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle.js
+[deps]: https://img.shields.io/david/vivliostyle/vivliostyle.js?path=packages/viewer
+[deps-url]: https://david-dm.org/vivliostyle/vivliostyle.js/?path=packages/viewer
 [size]: https://packagephobia.now.sh/badge?p=@vivliostyle/viewer
 [size-url]: https://packagephobia.now.sh/result?p=@vivliostyle/viewer
 [downloads]: https://img.shields.io/npm/dw/@vivliostyle/viewer.svg
