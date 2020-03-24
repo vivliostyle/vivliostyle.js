@@ -17,10 +17,9 @@ exit /b 0
 
 :START
 setlocal
-set OPEN_PATH=%1
-set PORT=%2
+set OPEN_PATH="%~1"
+set PORT=%~2
 if "%PORT%" == "" set PORT=8000
-set OPEN_URL=http://127.0.0.1:%PORT%/%OPEN_PATH%
 
 set DIR=%~dp0
 path %DIR%;%PATH%
@@ -34,14 +33,17 @@ where /q npm && (
 )
 :FALLBACK1
 
+set OPEN_URL="http://127.0.0.1:%PORT%/"%OPEN_PATH%
+set OPEN_URL=%OPEN_URL:""=%
+
 where /q ruby && (
-    start %OPEN_URL%
+    start "" %OPEN_URL%
     ruby -run -e httpd . -p %PORT%
     exit /b 0
 )
 
 where /q python && (
-    start %OPEN_URL%
+    start "" %OPEN_URL%
     python -m SimpleHTTPServer %PORT% || python -m http.server %PORT%
     exit /b 0
 )

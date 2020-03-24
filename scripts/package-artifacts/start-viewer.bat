@@ -29,13 +29,22 @@ if "%REL_DIR%" == "%ABS_DIR%" (
     set REL_DIR=%REL_DIR:~3%
     cd /d !ROOT_DIR!
 )
-set VIEWER=%REL_DIR%viewer/
-set ARGS=%*"
-set ARGS=!ARGS:"=!
-if not "%ARGS%" == "" (
-    set VIEWER="%VIEWER%#src=%ARGS: =&%"
+set VIEWER="%REL_DIR%viewer/"
+if not "%~1" == "" (
+    set VIEWER=%VIEWER%"#src=%~1"
 )
+:LOOP
+shift
+set PARAM="%~1"
+if not %PARAM% == "" (
+    set VIEWER=%VIEWER%"&"%PARAM%
+    echo %PARAM% | findstr "=" || (
+        set VIEWER=!VIEWER!"=%~2"
+        shift
+    )
+    goto LOOP
+)
+set VIEWER=%VIEWER:""=%
 set VIEWER=%VIEWER:\=/%
-set VIEWER=!VIEWER: =%%20!
 
 call "%REL_DIR%start-webserver" %VIEWER% 8000
