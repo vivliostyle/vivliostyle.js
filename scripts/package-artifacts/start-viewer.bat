@@ -30,8 +30,8 @@ if "%REL_DIR%" == "%ABS_DIR%" (
     cd /d !ROOT_DIR!
 )
 set VIEWER=%REL_DIR%viewer/
-set ARGS=%*
-set ARGS=%ARGS:"=%
+set ARGS=%*"
+set ARGS=!ARGS:"=!
 if not "%ARGS%" == "" (
     set VIEWER="%VIEWER%#src=%ARGS: =&%"
 )
