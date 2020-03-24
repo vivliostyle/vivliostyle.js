@@ -1,0 +1,41 @@
+#!/bin/sh
+
+if [ "$1" = "--help" -o "$1" = "-h" ]; then
+  echo "
+Usage: $(basename "$0") [<document URL> [<parameter>=<value> ...] ]
+
+Start a local web server and open the Vivliostyle Viewer in browser.
+
+Options:
+
+  <document URL>          URL or a file path relative to the viewer URL.
+
+  <parameter>=<value> ... option parameters for the viewer.
+
+    Example: $(basename "$0") /example/mybook.html bookMode=true renderAllPages=false
+
+  -h, --help
+
+See Vivliostyle User Guide for details.
+"
+  exit 0
+fi
+
+ABS_DIR=$(cd "$(dirname "$0")"; pwd)
+REL_DIR=${ABS_DIR#$PWD/}
+if [ "$REL_DIR" = "$ABS_DIR" ]; then
+  ROOT_DIR=/
+  if [ "$(uname -o 2>/dev/null)" = 'Msys' -a "${ABS_DIR:2:1}" = "/" ]; then
+    ROOT_DIR=${ABS_DIR:0:3}
+  fi
+  REL_DIR=${REL_DIR#$ROOT_DIR}
+  cd $ROOT_DIR
+fi
+
+VIEWER=$REL_DIR/viewer/
+if [ $# -ne 0 ]; then
+  VIEWER=$VIEWER#src="$(IFS="&"; echo "$*")"
+fi
+VIEWER=${VIEWER// /%20}
+
+"$REL_DIR/start-webserver" "$VIEWER" 8000 
