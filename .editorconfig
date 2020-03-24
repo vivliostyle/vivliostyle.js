@@ -9,3 +9,6 @@ insert_final_newline = true
 [*.ts]
 indent_size = 2
 trim_trailing_whitespace = true
+
+[*.bat]
+end_of_line = crlf
