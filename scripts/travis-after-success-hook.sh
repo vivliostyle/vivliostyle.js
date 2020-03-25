@@ -25,7 +25,10 @@ function build-archive() {
     echo "Generating ${archiveName} from ${archiveDir}"
 
     mkdir ${archiveDir}
-    cp    ./CHANGELOG.md ${archiveDir}/
+    cp ./CHANGELOG.md ${archiveDir}/
+    cp ./packages/viewer/README*.md ${archiveDir}/
+    git clone -q --depth=1 --branch=master https://github.com/vivliostyle/docs.vivliostyle.org.git ${archiveDir}/docs
+    rm -rf ${archiveDir}/docs/{.git,.gitignore,CNAME}
 
     mkdir ${archiveDir}/viewer/
     cp -R ./packages/viewer/lib/* ${archiveDir}/viewer/
