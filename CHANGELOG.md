@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-pre.10](https://github.com/vivliostyle/vivliostyle.js/compare/v2.0.0-pre.9...v2.0.0-pre.10) (2020-03-26)
+
+### Features
+
+- update "start-webserver" and add "start-viewer" scripts/batch files ([b4ac9ea](https://github.com/vivliostyle/vivliostyle.js/commit/b4ac9eaffd4980cf69440327ccf25499b7420d96))
+
 # [2.0.0-pre.9](https://github.com/vivliostyle/vivliostyle/compare/v2.0.0-pre.8...v2.0.0-pre.9) (2020-03-20)
 
 **Note:** Version bump only for package vivliostyle

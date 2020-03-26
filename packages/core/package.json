@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/core",
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.",
-  "version": "2.0.0-pre.9",
+  "version": "2.0.0-pre.10",
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
     "build-dev": "NODE_ENV=development rollup -c",
