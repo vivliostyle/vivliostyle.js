@@ -32,7 +32,7 @@ if command -v npm >&/dev/null; then
   if ! command -v http-server; then
     npm install http-server --prefix "$DIR"
   fi
-  http-server . -p $PORT -c-1 --cors -o "$OPEN_PATH"
+  http-server . -p $PORT -c-1 --cors --no-dotfiles -o "$OPEN_PATH"
 elif command -v ruby; then
   open_url
   ruby -run -e httpd . -p $PORT

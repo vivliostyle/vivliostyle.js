@@ -4,7 +4,7 @@ if [ "$1" = "--help" -o "$1" = "-h" ]; then
   echo "
 Usage: $(basename "$0") [<document URL> [<parameter>=<value> ...] ]
 
-Start a local web server and open the Vivliostyle Viewer in browser.
+Start a local web server and open Vivliostyle Viewer in browser.
 
 Options:
 
@@ -21,7 +21,7 @@ See Vivliostyle User Guide for details.
   exit 0
 fi
 
-ABS_DIR=$(cd "$(dirname "$0")"; pwd)
+ABS_DIR=$(cd "$(dirname "$0")"; pwd)/
 REL_DIR=${ABS_DIR#$PWD/}
 if [ "$REL_DIR" = "$ABS_DIR" ]; then
   ROOT_DIR=/

@@ -3,7 +3,7 @@ if not "%~1" == "--help" if not "%~1" == "-h" if not "%~1" == "/?" goto START
 echo.
 echo Usage: %~n0 [^<document URL^> [^<parameter^>=^<value^> ...] ]
 echo.
-echo Start a local web server and open the Vivliostyle Viewer in browser.
+echo Start a local web server and open Vivliostyle Viewer in browser.
 echo.
 echo Options:
 echo.

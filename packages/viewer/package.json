@@ -76,7 +76,8 @@
     "lib/js/vivliostyle-viewer.js*",
     "lib/fonts",
     "lib/css",
-    "lib/resources"
+    "lib/resources",
+    "docs/index.html"
   ],
   "homepage": "https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer",
   "keywords": [

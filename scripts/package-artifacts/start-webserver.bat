@@ -28,7 +28,7 @@ where /q npm && (
     where /q http-server || (
         call npm install http-server --prefix %DIR% || goto FALLBACK1
     )
-    call http-server . -p %PORT% -c-1 --cors -o %OPEN_PATH%
+    call http-server . -p %PORT% -c-1 --cors --no-dotfiles -o %OPEN_PATH%
     exit /b 0
 )
 :FALLBACK1
