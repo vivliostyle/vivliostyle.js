@@ -35,3 +35,5 @@ const archive = archiver("zip", {
 archive.pipe(output);
 archive.directory(archiveDir, false);
 archive.finalize();
+
+shell.cp("-R", "./packages/viewer/docs", "./packages/viewer/lib/");
