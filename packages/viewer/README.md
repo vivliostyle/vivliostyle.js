@@ -54,7 +54,7 @@ See [Vivliostyle.js Development](https://github.com/vivliostyle/vivliostyle.js/w
 
 ## License
 
-Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
+Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
 ## Documentation
 

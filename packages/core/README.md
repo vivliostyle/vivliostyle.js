@@ -23,7 +23,7 @@ Please send them to
 
 ### Vivliostyle Viewer
 
-Download the Vivliostyle Viewer from <https://vivliostyle.org/download/> and follow the instruction in it.
+Download the Vivliostyle Viewer from <https://vivliostyle.github.io> and follow the instruction in it.
 
 See [Vivliostyle Viewer User Guide](https://docs.vivliostyle.org/#/user-guide)
 
@@ -49,11 +49,11 @@ See [Vivliostyle Development Guide](https://github.com/vivliostyle/vivliostyle.j
 
 ## License
 
-Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
+Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
-Vivliostyle is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
-Vivliostyle contains following components:
+Vivliostyle Core contains following components:
 
 - [fast-diff](https://www.npmjs.com/package/fast-diff)
   - Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)

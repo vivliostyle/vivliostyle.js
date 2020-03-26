@@ -83,14 +83,9 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## License
 
-Licensed under [AGPL Version 3](http://www.gnu.org/licenses/agpl.html).
+Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
-Vivliostyle is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
-
-Vivliostyle contains following components:
-
-- [fast-diff](https://www.npmjs.com/package/fast-diff)
-  - Licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+Vivliostyle is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 [github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases
