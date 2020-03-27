@@ -20,6 +20,7 @@
 import * as AdaptiveViewer from "./adaptive-viewer";
 import * as Base from "./base";
 import * as Constants from "./constants";
+import * as Epub from "./epub";
 import * as Profile from "./profile";
 import * as Toc from "./toc";
 
@@ -422,6 +423,24 @@ export class CoreViewer {
    */
   getTOC(): Toc.TOCItem[] {
     return this.adaptViewer_.opfView?.tocView?.getTOC();
+  }
+
+  /**
+   * Returns metadata for the publication. Metadata is
+   * organized as an object of fully-qualified IRI properties
+   * containing arrays of metadata entries. The first element
+   * in the array is primary and should be used by default. Other
+   * entries may overload or refine that metadata.
+   */
+  getMetadata(): Epub.Meta {
+    return this.adaptViewer_.opf.getMetadata();
+  }
+
+  /**
+   * Returns the cover for an EPUB publication, if specified.
+   */
+  getCover(): Epub.OPFItem | null {
+    return this.adaptViewer_.opf.cover;
   }
 }
 
