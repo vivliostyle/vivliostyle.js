@@ -474,6 +474,7 @@ type RawMetaItem = {
   scheme: string | null;
   lang: string | null;
   order: number;
+  role: string | null;
 };
 
 export interface Meta {
@@ -494,9 +495,10 @@ export const predefinedPrefixes = {
   rendition: "http://www.idpf.org/vocab/rendition/#",
   onix: "http://www.editeur.org/ONIX/book/codelists/current.html#",
   xsd: "http://www.w3.org/2001/XMLSchema#",
+  opf: "http://www.idpf.org/2007/opf",
 };
 
-export const defaultIRI = "http://idpf.org/epub/vocab/package/#";
+export const defaultIRI = "http://idpf.org/epub/vocab/package/meta/#";
 
 export const metaTerms = {
   language: `${predefinedPrefixes["dcterms"]}language`,
@@ -506,6 +508,7 @@ export const metaTerms = {
   titleType: `${defaultIRI}title-type`,
   displaySeq: `${defaultIRI}display-seq`,
   alternateScript: `${defaultIRI}alternate-script`,
+  role: `${defaultIRI}role`,
 };
 
 export function getMetadataComparator(
@@ -604,6 +607,7 @@ export function readMetadata(
           refines: node.getAttribute("refines"),
           lang: null,
           scheme: resolveProperty(node.getAttribute("scheme")),
+          role: null,
         };
       }
     } else if (node.namespaceURI == Base.NS.DC) {
@@ -615,6 +619,7 @@ export function readMetadata(
         id: node.getAttribute("id"),
         refines: null,
         scheme: null,
+        role: node.getAttribute("role") || node.getAttribute("opf:role"),
       };
     }
     return null;
@@ -632,32 +637,39 @@ export function readMetadata(
         if (rawItem.scheme) {
           entry["s"] = rawItem.scheme;
         }
-        if (rawItem.id || rawItem.lang) {
-          let refs = rawItemsByTarget[`#${rawItem.id}`];
-          if (refs || rawItem.lang) {
-            if (rawItem.lang) {
-              // Special handling for xml:lang
-              const langItem = {
-                name: metaTerms.language,
-                value: rawItem.lang,
-                lang: null,
-                id: null,
-                refines: rawItem.id,
-                scheme: null,
-                order: rawItem.order,
-              };
-              if (refs) {
-                refs.push(langItem);
-              } else {
-                refs = [langItem];
-              }
-            }
-            const entryMap = Base.multiIndexArray(
-              refs,
-              (rawItem) => rawItem.name,
-            );
-            entry["r"] = makeMetadata(entryMap);
+        let refs = rawItemsByTarget[`#${rawItem.id}`] || [];
+        if (refs.length || rawItem.lang || rawItem.role) {
+          if (rawItem.lang) {
+            // Special handling for xml:lang
+            refs.push({
+              name: metaTerms.language,
+              value: rawItem.lang,
+              lang: null,
+              id: null,
+              refines: rawItem.id,
+              scheme: null,
+              order: rawItem.order,
+              role: null,
+            });
           }
+          if (rawItem.role) {
+            // Special handling for opf:role
+            refs.push({
+              name: metaTerms.role,
+              value: rawItem.role,
+              lang: null,
+              id: null,
+              refines: rawItem.id,
+              scheme: null,
+              order: rawItem.order,
+              role: null,
+            });
+          }
+          const entryMap = Base.multiIndexArray(
+            refs,
+            (rawItem) => rawItem.name,
+          );
+          entry["r"] = makeMetadata(entryMap);
         }
         return entry;
       }),
