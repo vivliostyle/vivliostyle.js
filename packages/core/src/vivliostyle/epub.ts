@@ -462,7 +462,11 @@ export function makeObfuscationKey(uid: string): string {
   return `1040:${SHA1.bytesToSHA1Hex(uid)}`;
 }
 
-export type RawMetaItem = {
+type RawMeta = {
+  [key: string]: RawMetaItem[];
+};
+
+type RawMetaItem = {
   name: string;
   value: string;
   id: string | null;
@@ -471,6 +475,17 @@ export type RawMetaItem = {
   lang: string | null;
   order: number;
 };
+
+export interface Meta {
+  [key: string]: MetaItem[];
+}
+
+export interface MetaItem {
+  v: string;
+  o?: number;
+  s?: string;
+  r?: Meta;
+}
 
 export const predefinedPrefixes = {
   dcterms: "http://purl.org/dc/terms/",
@@ -496,7 +511,7 @@ export const metaTerms = {
 export function getMetadataComparator(
   term: string,
   lang: string,
-): (p1: Base.JSON, p2: Base.JSON) => number {
+): (p1: MetaItem, p2: MetaItem) => number {
   const empty = {};
   return (item1, item2) => {
     let m1: boolean;
@@ -539,7 +554,7 @@ export function getMetadataComparator(
 export function readMetadata(
   mroot: XmlDoc.NodeList,
   prefixes: string | null,
-): Base.JSON {
+): Meta {
   // Parse prefix map (if any)
   let prefixMap;
   if (!prefixes) {
@@ -579,25 +594,25 @@ export function readMetadata(
   // List of metadata items.
   const rawItems = mroot.childElements().forEachNonNull((node: Element) => {
     if (node.localName == "meta") {
-      const p = resolveProperty((node as Element).getAttribute("property"));
+      const p = resolveProperty(node.getAttribute("property"));
       if (p) {
         return {
           name: p,
           value: node.textContent,
-          id: (node as Element).getAttribute("id"),
+          id: node.getAttribute("id"),
           order: order++,
-          refines: (node as Element).getAttribute("refines"),
+          refines: node.getAttribute("refines"),
           lang: null,
-          scheme: resolveProperty((node as Element).getAttribute("scheme")),
+          scheme: resolveProperty(node.getAttribute("scheme")),
         };
       }
     } else if (node.namespaceURI == Base.NS.DC) {
       return {
         name: predefinedPrefixes["dcterms"] + node.localName,
         order: order++,
-        lang: (node as Element).getAttribute("xml:lang"),
+        lang: node.getAttribute("xml:lang"),
         value: node.textContent,
-        id: (node as Element).getAttribute("id"),
+        id: node.getAttribute("id"),
         refines: null,
         scheme: null,
       };
@@ -610,10 +625,8 @@ export function readMetadata(
     rawItems,
     (rawItem) => rawItem.refines,
   );
-  const makeMetadata = (map: {
-    [key: string]: any[];
-  }): { [key: string]: any[] } =>
-    Base.mapObj(map, (rawItemArr, itemName) =>
+  const makeMetadata = (map: RawMeta): Meta =>
+    Base.mapObj(map, (rawItemArr, _itemName) =>
       rawItemArr.map((rawItem) => {
         const entry = { v: rawItem.value, o: rawItem.order };
         if (rawItem.scheme) {
@@ -658,7 +671,7 @@ export function readMetadata(
   if (metadata[metaTerms.language]) {
     lang = metadata[metaTerms.language][0]["v"];
   }
-  const sortMetadata = (metadata: { [key: string]: any[] }) => {
+  const sortMetadata = (metadata: Meta) => {
     for (const term in metadata) {
       const arr = metadata[term];
       arr.sort(getMetadataComparator(term, lang));
@@ -713,7 +726,7 @@ export class OPFDoc {
   prePaginated: boolean = false;
   epageIsRenderedPage: boolean = true;
   epageCountCallback: (p1: number) => void | null = null;
-  metadata: Base.JSON = {};
+  metadata: Meta = {};
   ncxToc: OPFItem = null;
   xhtmlToc: OPFItem = null;
   cover: OPFItem = null;
@@ -787,7 +800,7 @@ export class OPFDoc {
    * - "r" - refinement submetadata (organized just like the top-level
    * metadata).
    */
-  getMetadata(): Base.JSON {
+  getMetadata(): Meta {
     return this.metadata;
   }
 
