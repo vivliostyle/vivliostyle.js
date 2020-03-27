@@ -21,6 +21,7 @@ import * as AdaptiveViewer from "./adaptive-viewer";
 import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Profile from "./profile";
+import * as Toc from "./toc";
 
 export interface Payload {
   type: string;
@@ -413,6 +414,14 @@ export class CoreViewer {
 
   getPageSizes(): { width: number; height: number }[] {
     return this.adaptViewer_.pageSizes;
+  }
+
+  /**
+   * Returns the current structure of the TOC once it has
+   * been shown, or the empty array if there is no TOC.
+   */
+  getTOC(): Toc.TOCItem[] {
+    return this.adaptViewer_.opfView?.tocView?.getTOC();
   }
 }
 

@@ -38,6 +38,12 @@ export const bulletOpen = "\u25be";
 
 export const bulletEmpty = "\u25b9";
 
+export type TOCItem = {
+  id: string;
+  title: string;
+  children: TOCItem[];
+};
+
 export class TOCView implements Vgen.CustomRendererFactory {
   pref: Exprs.Preferences;
   page: Vtree.Page = null;
@@ -293,6 +299,35 @@ export class TOCView implements Vgen.CustomRendererFactory {
 
   isTOCVisible(): boolean {
     return !!this.page && this.page.container.style.visibility === "visible";
+  }
+
+  getTOC(): TOCItem[] {
+    if (!this.page) {
+      return [];
+    }
+
+    function exportTree(tag): TOCItem[] {
+      if (!tag) {
+        return [];
+      }
+      const links = tag.querySelectorAll(":scope > [role=treeitem] > a[href]");
+      return Array.from(links).map(exportLink);
+    }
+
+    function exportLink(tag): TOCItem {
+      const url = new URL(tag.href);
+      const [, id] = url.hash.match(/^#(.*)$/);
+
+      const title = tag.innerText;
+
+      const container = tag.parentElement.querySelector("[role=group]");
+      const children = exportTree(container);
+
+      return { id, title, children };
+    }
+
+    const topLevelTree = this.page.container.querySelector("[role=tree]");
+    return exportTree(topLevelTree);
   }
 }
 
