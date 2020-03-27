@@ -504,17 +504,17 @@ export function getMetadataComparator(
     const r1 = item1["r"] || empty;
     const r2 = item2["r"] || empty;
     if (term == metaTerms.title) {
-      m1 = r1[metaTerms.titleType] == "main";
-      m2 = r2[metaTerms.titleType] == "main";
+      m1 = r1[metaTerms.titleType]?.[0].v == "main";
+      m2 = r2[metaTerms.titleType]?.[0].v == "main";
       if (m1 != m2) {
         return m1 ? -1 : 1;
       }
     }
-    let i1 = parseInt(r1[metaTerms.displaySeq], 10);
+    let i1 = parseInt(r1[metaTerms.displaySeq]?.[0].v, 10);
     if (isNaN(i1)) {
       i1 = Number.MAX_VALUE;
     }
-    let i2 = parseInt(r2[metaTerms.displaySeq], 10);
+    let i2 = parseInt(r2[metaTerms.displaySeq]?.[0].v, 10);
     if (isNaN(i2)) {
       i2 = Number.MAX_VALUE;
     }
@@ -522,8 +522,12 @@ export function getMetadataComparator(
       return i1 - i2;
     }
     if (term != metaTerms.language && lang) {
-      m1 = (r1[metaTerms.language] || r1[metaTerms.alternateScript]) == lang;
-      m2 = (r2[metaTerms.language] || r2[metaTerms.alternateScript]) == lang;
+      m1 =
+        (r1[metaTerms.language] || r1[metaTerms.alternateScript])?.[0].v ==
+        lang;
+      m2 =
+        (r2[metaTerms.language] || r2[metaTerms.alternateScript])?.[0].v ==
+        lang;
       if (m1 != m2) {
         return m1 ? -1 : 1;
       }
@@ -612,11 +616,11 @@ export function readMetadata(
     Base.mapObj(map, (rawItemArr, itemName) =>
       rawItemArr.map((rawItem) => {
         const entry = { v: rawItem.value, o: rawItem.order };
-        if (rawItem.schema) {
+        if (rawItem.scheme) {
           entry["s"] = rawItem.scheme;
         }
         if (rawItem.id || rawItem.lang) {
-          let refs = rawItemsByTarget[rawItem.id];
+          let refs = rawItemsByTarget[`#${rawItem.id}`];
           if (refs || rawItem.lang) {
             if (rawItem.lang) {
               // Special handling for xml:lang
