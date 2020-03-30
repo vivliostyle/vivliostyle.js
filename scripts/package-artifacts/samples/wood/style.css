@@ -1,0 +1,101 @@
+html {
+  /* writing mode */
+  writing-mode: horizontal-tb;
+  orphans: 2;
+  widows: 2;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+@page {
+  size: 144mm 217mm;
+  margin-top: 20mm;
+  margin-bottom: 20mm;
+  margin-left: 20mm;
+  margin-right: 20mm;
+  /* The followings are inherited to page-margin boxes */
+  font-family: "Quattrocento", Georgia, serif;
+  font-size: 9pt;
+  vertical-align: top;
+}
+@page :left {
+  /* top-left header */
+  @top-left {
+    content: "Wood Engraving";
+    margin-top: 10mm;
+    margin-bottom: 4mm;
+    border-bottom: 2pt solid #000;
+  }
+  /* bottom-left page number */
+  @bottom-left {
+    content: counter(page);
+    margin-top: 6mm;
+  }
+}
+@page :right {
+  /* top-right header (only for border) */
+  @top-right {
+    content: "";
+    margin-bottom: 4mm;
+    border-bottom: 2pt solid #000;
+  }
+  /* bottom-right page number */
+  @bottom-right {
+    content: counter(page);
+    margin-top: 6mm;
+  }
+}
+html {
+  font-family: "Quattrocento", Georgia, serif;
+  font-weight: normal;
+  font-size: 83.3333333333%;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 2em;
+  line-height: 1em;
+  margin-bottom: 0.5em;
+  text-indent: 0;
+  /* forbid page/column break after it */
+  break-after: avoid;
+}
+
+h2 {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-indent: 0;
+  /* forbid page/column break after it */
+  break-after: avoid;
+  line-height: 32pt;
+  margin-top: 16pt;
+}
+
+p {
+  text-indent: 2em;
+  text-align: justify;
+  hyphens: auto;
+}
+
+p.dropcap {
+  text-indent: 0;
+  min-width: 20pt;
+}
+
+p.dropcap span.dropcap {
+  font-size: 3.6em;
+  float: left;
+  line-height: 1;
+  margin-right: 0.0625em;
+  margin-bottom: -0.2em;
+}
+
+p.author {
+  text-indent: 0;
+  text-align: right;
+}

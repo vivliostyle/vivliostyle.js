@@ -1,0 +1,157 @@
+@charset "UTF-8";
+html {
+  /* 組み方向 */
+  -epub-writing-mode: vertical-rl;
+  -ms-writing-mode: tb-rl;
+  writing-mode: vertical-rl;
+
+  orphans: 1;
+  widows: 1;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+@page {
+  size: 105mm 148mm;
+  width: 240pt;
+  height: 331.5pt;
+  margin-top: 15mm;
+  margin-bottom: auto;
+  margin-left: auto;
+  margin-right: auto;
+  /* 以下、マージンボックスに継承される */
+  font-size: 6pt;
+  font-family: "游明朝", "YuMincho", serif;
+  /* 本来不要（ルート要素の指定が継承される）だが、現時点のvivliostyle.jsの制限により必要 */
+  vertical-align: top;
+}
+@page :left {
+  margin-right: 10mm;
+  @top-left {
+    content: counter(page) "　　ごん狐";
+    margin-left: 3.75pt;
+    margin-top: 6mm;
+    writing-mode: horizontal-tb;
+    /* CSS仕様上は@pageルール内に書けばよいが、現時点のvivliostyle.jsの制限によりここに書く */
+  }
+}
+@page :right {
+  margin-left: 10mm;
+  /* 右下ノンブル */
+  @top-right {
+    content: counter(page);
+    margin-right: 3.75pt;
+    margin-top: 6mm;
+    writing-mode: horizontal-tb;
+    /* CSS仕様上は@pageルール内に書けばよいが、現時点のvivliostyle.jsの制限によりここに書く */
+  }
+}
+
+html {
+  /* フォント */
+  font-family: "游明朝", "YuMincho", serif;
+  font-weight: normal;
+  /* 行末揃え */
+  text-align: justify;
+  font-size: 8.5pt;
+  line-height: 16pt;
+}
+
+h1 {
+  /* フォント */
+  font-weight: bold;
+  /* フォントサイズ */
+  font-size: 11.5pt;
+  /* 字下げ */
+  text-indent: 0;
+  /* 直後の改ページ・改段禁止 */
+  break-after: avoid;
+  line-height: 48pt;
+  letter-spacing: 1em;
+}
+
+h2 {
+  /* フォント */
+  font-weight: normal;
+  /* フォントサイズ */
+  font-size: 10pt;
+  /* 字下げ */
+  text-indent: 6em;
+  /* 直後の改ページ・改段禁止 */
+  break-after: avoid;
+  line-height: 32pt;
+}
+
+h1 + h2 {
+  margin-right: 16pt;
+}
+
+ruby > rt {
+  font-size: 4pt;
+}
+
+p {
+  text-indent: 1em;
+  hanging-punctuation: force-end;
+}
+
+hr {
+  border: none;
+  border-right: 1pt solid black;
+  height: 6em;
+  margin: auto 8.5pt;
+}
+
+/* 縦中横 */
+.tcy {
+  -webkit-text-combine: horizontal;
+  text-combine: horizontal;
+  -ms-text-combine-horizontal: all;
+  text-combine-horizontal: all;
+  text-combine-upright: all;
+}
+
+/* 圏点（ゴマ） */
+em.sesame_dot {
+  font-style: normal;
+  -webkit-text-emphasis-style: sesame;
+  text-emphasis-style: sesame;
+}
+
+/*著作者*/
+.author {
+  position: absolute;
+  bottom: 0;
+  font-size: 8.5pt;
+  margin-top: 50pt;
+  letter-spacing: normal;
+}
+
+/*画像＋キャプション*/
+figure {
+  display: block;
+  width: 236pt;
+  -ms-writing-mode: lr-tb;
+  -webkit-writing-mode: horizontal-tb;
+  writing-mode: horizontal-tb;
+}
+
+figure img {
+  width: 100%;
+  height: auto;
+  vertical-align: bottom;
+}
+
+figcaption {
+  text-align: left;
+  font-size: 7pt;
+}
+
+/*奥付*/
+.colophon {
+  font-size: 7pt;
+  margin-right: 48pt;
+}
