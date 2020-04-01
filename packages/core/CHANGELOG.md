@@ -7,7 +7,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @vivliostyle/core
 
-# [2.0.0-pre.9](https://github.com/vivliostyle/vivliostyle/compare/v2.0.0-pre.8...v2.0.0-pre.9) (2020-03-20)
+# [2.0.0-pre.9](https://github.com/vivliostyle/vivliostyle.js/compare/v2.0.0-pre.8...v2.0.0-pre.9) (2020-03-20)
 
 **Note:** Version bump only for package @vivliostyle/core
 

@@ -1,6 +1,6 @@
 # Contribution Guide
 
-> To get started, <a href="https://www.clahub.com/agreements/vivliostyle/vivliostyle">sign the Contributor License Agreement</a>.
+> To get started, <a href="https://www.clahub.com/agreements/vivliostyle/vivliostyle.js">sign the Contributor License Agreement</a>.
 
 ## Build Guideline
 
