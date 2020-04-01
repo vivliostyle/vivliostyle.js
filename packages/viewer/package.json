@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/viewer",
   "description": "Vivliostyle Viewer UI component, for rich paged viewing and printing in browser.",
-  "version": "2.0.0-pre.10",
+  "version": "2.0.0-pre.11",
   "scripts": {
     "build": "gulp build && NODE_ENV=production rollup -c",
     "build-dev": "gulp build-dev && NODE_ENV=development rollup -c",
@@ -27,7 +27,7 @@
     "@types/node": "^12.12.21",
     "@typescript-eslint/eslint-plugin": "^2.12.0",
     "@typescript-eslint/parser": "^2.12.0",
-    "@vivliostyle/core": "^2.0.0-pre.10",
+    "@vivliostyle/core": "^2.0.0-pre.11",
     "@wessberg/rollup-plugin-ts": "^1.1.83",
     "browser-sync": "^2.26.7",
     "circular-dependency-plugin": "^5.2.0",
