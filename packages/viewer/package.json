@@ -17,9 +17,6 @@
     "test": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
     "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
   },
-  "dependencies": {
-    "@vivliostyle/core": "^2.0.0-pre.10"
-  },
   "devDependencies": {
     "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.7",
@@ -30,6 +27,7 @@
     "@types/node": "^12.12.21",
     "@typescript-eslint/eslint-plugin": "^2.12.0",
     "@typescript-eslint/parser": "^2.12.0",
+    "@vivliostyle/core": "^2.0.0-pre.10",
     "@wessberg/rollup-plugin-ts": "^1.1.83",
     "browser-sync": "^2.26.7",
     "circular-dependency-plugin": "^5.2.0",
