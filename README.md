@@ -1,6 +1,6 @@
-<img src="https://vivliostyle.org/assets/vivliostyle-logo.png" width="300" alt="Vivliostyle" /><br/>
+<img src="https://vivliostyle.org/assets/vivliostyle-logo.svg" width="300" alt="Vivliostyle" /><br/>
 
-HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+Vivliostyle.js — HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support
 
 [![GitHub tag][github-tag]][github-tag-url]
 [![Build Status][build-status]][build-status-url]
@@ -8,14 +8,21 @@ HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 [![PR's welcome][pr-welcome]][pr-welcome-url]
 
 🌏 [Vivliostyle website](https://vivliostyle.org)  
-📖 [Documentation](https://docs.vivliostyle.org)  
+📖 [Documents](https://vivliostyle.org/documents/)  
 🤝 [Join Community](https://vivliostyle.org/community/)
 
 ## Official Packages
 
+### Vivliostyle Viewer [`vivliostyle-viewer`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)
+
+Use online [Vivliostyle Viewer](https://vivliostyle.org/viewer/), or download a distribution package from <https://vivliostyle.github.io>.
+
+- [User Guide](https://docs.vivliostyle.org/#/user-guide)
+- [Samples](https://vivliostyle.org/samples/)
+
 ### Vivliostyle Core [`vivliostyle-core`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core)
 
-Vivliostyle can be installed from [npm](https://www.npmjs.com/package/@vivliostyle/core):
+To integrate Vivliostyle Core in your project, install it as follows:
 
 ```
 npm install @vivliostyle/core
@@ -23,19 +30,13 @@ npm install @vivliostyle/core
 
 See [API Reference](https://docs.vivliostyle.org/#/api).
 
-### Vivliostyle Viewer [`vivliostyle-viewer`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)
-
-- [User Guide](https://docs.vivliostyle.org/#/user-guide)
-- [Samples](https://vivliostyle.org/samples/)
-- [Source Code](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)
-
-Download the Vivliostyle Viewer package from <https://vivliostyle.github.io> and follow the instruction in it.
-
-See also [Vivliostyle Viewer User Guide](https://docs.vivliostyle.org/#/user-guide) for further information.
-
 ### Vivliostyle CLI [`vivliostyle-cli`](https://github.com/vivliostyle/vivliostyle-cli)
 
-See [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli), the save PDF command line tool with Vivliostyle and headless Chrome.
+[Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) is a command-line interface for Vivliostyle.
+
+### Vivliostyle Print [`vivliostyle-print`](https://github.com/vivliostyle/vivliostyle-print)
+
+[Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print) allows page-layouting using the Vivliostyle Core for printing within a website without destroying the original layout.
 
 ## Contribution
 
@@ -85,7 +86,11 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
-Vivliostyle is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+## Other Documentation
+
+- [Vivliostyle Documents](https://vivliostyle.org/documents/)
 
 [github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases

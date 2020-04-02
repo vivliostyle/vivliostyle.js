@@ -2,36 +2,43 @@
 
 Vivliostyle Viewer は、HTML+CSS 文書を美しくページ組版・表示する Web アプリケーションであり、EPUB や Web 出版物をサポートします。
 
-このパッケージは[Vivliostyle Core](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core)と[Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)を組み合わせたものです。
-
-- オンラインでサンプルを見る <https://vivliostyle.org/samples>
-- リリース版のダウンロード <https://github.com/vivliostyle/vivliostyle.js/releases>
-- 開発最新版のダウンロード <https://vivliostyle.github.io>
+- オンライン Vivliostyle Viewer : <https://vivliostyle.org/viewer/>
+- Vivliostyle Viewer をダウンロード: <https://vivliostyle.github.io>
+- オンラインでサンプルを見る: <https://vivliostyle.org/samples/>
 
 ## 使い方
 
-1. ダウンロードした ZIP ファイルを展開する
+### 配布パッケージ `vivliostyle-viewer-*.zip` を使う場合
 
-2. ターミナルまたはコマンドプロンプトを開き、1.の展開で作られたフォルダに移動する
-
-3. 以下のコマンドを実行する
-
-```
-（macOS, Linuxなど、シェルがある環境）
-> ./start-webserver
-（Windows）
-> .\start-webserver
-```
-
-Node, Ruby, Python のいずれかがインストールされている場合、このコマンドで web サーバーが起動します。
+1. ダウンロードした ZIP ファイルを解凍する
+2. ターミナル（または Windows コマンドプロンプト）を開く
+3. 解凍したディレクトリにある `start-webserver` または `start-viewer` スクリプト（または Windows バッチ）ファイルを実行します。例えば:
 
 ```
-Please install Node or Python or Ruby and rerun this script, or use your favorite HTTP server.
+$ ./vivliostyle-viewer-latest/start-webserver
 ```
 
-と表示された場合は、これらのいずれかをインストールしてから再実行するか、お好きな web サーバーを起動してください。
+あるいは Windows コマンドプロンプトなら
 
-4. ブラウザで<http://localhost:8000>を開く
+```
+> vivliostyle-viewer-latest\start-webserver
+```
+
+もし次のメッセージ、
+
+```
+Please install Node.js or Ruby or Python and rerun this script, or use your favorite HTTP server.
+```
+
+が表示された場合は、これらのいずれか（[Node.js](https://nodejs.org/) がお勧め）をインストールしてから再実行するか、お好きな web サーバーを起動してください。
+
+`start-webserver` スクリプトはローカル Web サーバーを起動し、デフォルトのブラウザーを開きます。現在のディレクトリが Web サーバーのルートとして使用されます。使用方法のヘルプを表示するには、`start-webserver --help` を実行してください。
+
+`start-viewer` スクリプトはローカル Web サーバーを起動し（`start-webserver` を呼び出します）、ブラウザーで Vivliostyle Viewer（ `./viewer/` に配置）を開きます。 使用方法のヘルプを表示するには、`start-viewer --help` を実行してください。
+
+## ドキュメント
+
+オンラインの [Vivliostyle Documents](https://vivliostyle.org/documents/) が最新ドキュメントです。あるいは、配布パッケージ版の `./docs/` にあるドキュメントをローカル Web サーバー上で見ることができます。
 
 ## 不具合報告・要望
 
@@ -43,7 +50,6 @@ Please install Node or Python or Ruby and rerun this script, or use your favorit
 
 - Vivliostyle.js on GitHub: <https://github.com/vivliostyle/vivliostyle.js>
 
-## ドキュメント
+## License
 
-- [Vivliostyle ドキュメント](https://docs.vivliostyle.org/#/ja/)
-- [Vivliostyle Viewer ユーザーガイド](https://docs.vivliostyle.org/#/ja/user-guide)
+Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).

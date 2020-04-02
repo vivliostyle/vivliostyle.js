@@ -7,35 +7,13 @@
 [![Install Size][size]][size-url]
 [![Downloads][downloads]][downloads-url]
 
-JavaScript Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
+Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support
 
-## Try Vivliostyle
+🌏 [Vivliostyle website](https://vivliostyle.org)  
+📖 [Documents](https://vivliostyle.org/documents/)  
+🤝 [Join Community](https://vivliostyle.org/community/)
 
-[Vivliostyle Viewer samples](https://vivliostyle.org/samples/)
-
-## Bug reports & feature requests
-
-Please send them to
-
-- [GitHub Issues](https://github.com/vivliostyle/vivliostyle.js/issues)
-
-## Use Vivliostyle
-
-### Vivliostyle Viewer
-
-Download the Vivliostyle Viewer from <https://vivliostyle.github.io> and follow the instruction in it.
-
-See [Vivliostyle Viewer User Guide](https://docs.vivliostyle.org/#/user-guide)
-
-See <https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer> for source code of the Viewer.
-
-### Vivliostyle CLI
-
-Check ouut [vivliostyle-cli](https://github.com/vivliostyle/vivliostyle-cli/), a command line tool armed with Vivliostyle and headless Chrome to generate PDF from source file.
-
-### Integrate Vivliostyle.js with web site
-
-Vivliostyle can be installed via [npm](https://www.npmjs.com/package/@vivliostyle/core):
+## Integrate Vivliostyle Core in your project
 
 ```
 npm install @vivliostyle/core
@@ -43,9 +21,16 @@ npm install @vivliostyle/core
 
 See [API Reference](https://docs.vivliostyle.org/#/api).
 
+## Vivliostyle official packages using Vivliostyle Core
+
+- [Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer), CSS typesetting and rich paged viewing in your browser
+- [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli), a command-line interface for Vivliostyle.
+- [Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print), allows page-layouting using the Vivliostyle Core for printing within a website without destroying the original layout.
+
 ## Development
 
-See [Vivliostyle Development Guide](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
+- [Contribution Guide](https://github.com/vivliostyle/vivliostyle.js/tree/master/CONTRIBUTING.md) for development setup.
+- [Development Wiki](https://github.com/vivliostyle/vivliostyle.js/wiki/Development).
 
 ## License
 
@@ -60,7 +45,7 @@ Vivliostyle Core contains following components:
 
 ## Other Documentation
 
-- [Vivliostyle Documentation](https://docs.vivliostyle.org)
+- [Vivliostyle Documents](https://vivliostyle.org/documents/)
 
 [npm]: https://img.shields.io/npm/v/@vivliostyle/core/latest
 [npm-next]: https://img.shields.io/npm/v/@vivliostyle/core/next
