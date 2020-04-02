@@ -94,7 +94,7 @@ export function initIFrame(iframe: HTMLIFrameElement): void {
         name: "adapt",
         version: "0.1",
         layoutStyle: "paginated",
-        hasFeature: function(name, version) {
+        hasFeature: function (name, version) {
           switch (name) {
             case "mouse-events":
               return true;

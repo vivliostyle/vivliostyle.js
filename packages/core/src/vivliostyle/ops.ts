@@ -111,7 +111,7 @@ export class Style {
   ) {
     this.fontDeobfuscator = store.fontDeobfuscator;
     this.validatorSet = store.validatorSet;
-    this.pageScope.defineBuiltIn("has-content", function(name) {
+    this.pageScope.defineBuiltIn("has-content", function (name) {
       name = name as string;
       const styleInstance = this as StyleInstance;
       const cp = styleInstance.currentLayoutPosition;
@@ -127,7 +127,7 @@ export class Style {
       "page-number",
       new Exprs.Native(
         this.pageScope,
-        function() {
+        function () {
           const styleInstance = this as StyleInstance;
           return (
             styleInstance.pageNumberOffset +
@@ -1727,8 +1727,9 @@ export class StyleInstance extends Exprs.Context
 
     // Shift 0.01px to workaround Firefox printing problem
     // (This small value (< 1/64 px) has no effect to Chrome)
-    page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed +
-      0.01}px`;
+    page.bleedBox.style.paddingTop = `${
+      evaluatedPageSizeAndBleed.bleed + 0.01
+    }px`;
   }
 }
 

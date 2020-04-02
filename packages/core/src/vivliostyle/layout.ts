@@ -1743,8 +1743,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const spanRect = this.clientLayout.getElementClientRect(span);
     const brRect = this.clientLayout.getElementClientRect(br);
     if (nodeContext.vertical) {
-      (br as HTMLElement).style.marginRight = `${brRect.right -
-        spanRect.right}px`;
+      (br as HTMLElement).style.marginRight = `${
+        brRect.right - spanRect.right
+      }px`;
       (br as HTMLElement).style.width = "0px";
     } else {
       (br as HTMLElement).style.marginTop = `${spanRect.top - brRect.top}px`;
@@ -3707,7 +3708,7 @@ export class PseudoColumn {
     this.column.footnoteEdge =
       this.column.footnoteEdge - parentClonedPaddingBorder;
     const pseudoColumn = this;
-    this.column.openAllViews = function(position) {
+    this.column.openAllViews = function (position) {
       return Column.prototype.openAllViews
         .call(this, position)
         .thenAsync((result) => {

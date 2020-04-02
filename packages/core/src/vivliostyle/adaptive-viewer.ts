@@ -521,11 +521,13 @@ export class AdaptiveViewer {
       let rightWidth = parseFloat(spread.right.container.style.width);
       if (leftWidth && rightWidth && leftWidth !== rightWidth) {
         if (leftWidth < rightWidth) {
-          spread.left.container.style.marginLeft = `${rightWidth -
-            leftWidth}px`;
+          spread.left.container.style.marginLeft = `${
+            rightWidth - leftWidth
+          }px`;
         } else {
-          spread.right.container.style.marginRight = `${leftWidth -
-            rightWidth}px`;
+          spread.right.container.style.marginRight = `${
+            leftWidth - rightWidth
+          }px`;
         }
       }
     }

@@ -67,26 +67,26 @@ export type Trigger = {
 };
 
 export const actions = {
-  show: function(obj) {
+  show: function (obj) {
     obj.style.visibility = "visible";
   },
-  hide: function(obj) {
+  hide: function (obj) {
     obj.style.visibility = "hidden";
   },
-  play: function(obj) {
+  play: function (obj) {
     obj.currentTime = 0;
     obj.play();
   },
-  pause: function(obj) {
+  pause: function (obj) {
     obj.pause();
   },
-  resume: function(obj) {
+  resume: function (obj) {
     obj.play();
   },
-  mute: function(obj) {
+  mute: function (obj) {
     obj.muted = true;
   },
-  unmute: function(obj) {
+  unmute: function (obj) {
     obj.muted = false;
   },
 };

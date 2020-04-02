@@ -2103,7 +2103,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     style[extentName] = new Css.Expr(
       new Exprs.Native(
         scope,
-        function() {
+        function () {
           const value = getComputedValues(this).extent;
           return value === null ? 0 : value;
         },
@@ -2113,7 +2113,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     style[`margin-${insideName}`] = new Css.Expr(
       new Exprs.Native(
         scope,
-        function() {
+        function () {
           const value = getComputedValues(this).marginInside;
           return value === null ? 0 : value;
         },
@@ -2123,7 +2123,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     style[`margin-${outsideName}`] = new Css.Expr(
       new Exprs.Native(
         scope,
-        function() {
+        function () {
           const value = getComputedValues(this).marginOutside;
           return value === null ? 0 : value;
         },

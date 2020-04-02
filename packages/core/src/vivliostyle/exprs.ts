@@ -160,42 +160,42 @@ export class LexicalScope {
       builtIns["css-string"] = cssString;
       builtIns["css-name"] = cssIdent;
       builtIns["typeof"] = (x) => typeof x;
-      this.defineBuiltInName("page-width", function() {
+      this.defineBuiltInName("page-width", function () {
         return this.pageWidth();
       });
-      this.defineBuiltInName("page-height", function() {
+      this.defineBuiltInName("page-height", function () {
         return this.pageHeight();
       });
-      this.defineBuiltInName("pref-font-family", function() {
+      this.defineBuiltInName("pref-font-family", function () {
         return this.pref.fontFamily;
       });
-      this.defineBuiltInName("pref-night-mode", function() {
+      this.defineBuiltInName("pref-night-mode", function () {
         return this.pref.nightMode;
       });
-      this.defineBuiltInName("pref-hyphenate", function() {
+      this.defineBuiltInName("pref-hyphenate", function () {
         return this.pref.hyphenate;
       });
-      this.defineBuiltInName("pref-margin", function() {
+      this.defineBuiltInName("pref-margin", function () {
         return this.pref.margin;
       });
-      this.defineBuiltInName("pref-line-height", function() {
+      this.defineBuiltInName("pref-line-height", function () {
         return this.pref.lineHeight;
       });
-      this.defineBuiltInName("pref-column-width", function() {
+      this.defineBuiltInName("pref-column-width", function () {
         return this.pref.columnWidth * this.fontSize;
       });
-      this.defineBuiltInName("pref-horizontal", function() {
+      this.defineBuiltInName("pref-horizontal", function () {
         return this.pref.horizontal;
       });
-      this.defineBuiltInName("pref-spread-view", function() {
+      this.defineBuiltInName("pref-spread-view", function () {
         return this.pref.spreadView;
       });
 
       // For env(pub-title) and env(doc-title)
-      this.defineBuiltInName("pub-title", function() {
+      this.defineBuiltInName("pub-title", function () {
         return cssString(this.pubTitle ? this.pubTitle : "");
       });
-      this.defineBuiltInName("doc-title", function() {
+      this.defineBuiltInName("doc-title", function () {
         return cssString(this.docTitle ? this.docTitle : "");
       });
     }
@@ -323,7 +323,7 @@ export class Context {
     public readonly viewportHeight: number,
     fontSize: number,
   ) {
-    this.pageWidth = function() {
+    this.pageWidth = function () {
       if (this.actualPageWidth) {
         return this.actualPageWidth;
       } else {
@@ -332,7 +332,7 @@ export class Context {
           : viewportWidth;
       }
     };
-    this.pageHeight = function() {
+    this.pageHeight = function () {
       if (this.actualPageHeight) {
         return this.actualPageHeight;
       } else {
@@ -340,7 +340,7 @@ export class Context {
       }
     };
     this.initialFontSize = fontSize;
-    this.fontSize = function() {
+    this.fontSize = function () {
       if (this.rootFontSize) {
         return this.rootFontSize;
       } else {

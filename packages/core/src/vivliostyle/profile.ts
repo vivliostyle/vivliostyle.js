@@ -72,9 +72,9 @@ export class Profiler {
         if (l > 1) {
           st += `(${i})`;
         }
-        st += ` => start: ${t["start"]}, end: ${t["end"]}, duration: ${t[
-          "end"
-        ] - t["start"]}\n`;
+        st += ` => start: ${t["start"]}, end: ${t["end"]}, duration: ${
+          t["end"] - t["start"]
+        }\n`;
       }
     });
     Logging.logger.info(st);
