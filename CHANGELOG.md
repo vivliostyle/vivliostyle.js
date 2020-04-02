@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0-pre.12](https://github.com/vivliostyle/vivliostyle.js/compare/v2.0.0-pre.11...v2.0.0-pre.12) (2020-04-02)
+
+### Bug Fixes
+
+- use generics for setTimeout ([9cedc74](https://github.com/vivliostyle/vivliostyle.js/commit/9cedc7486e6c3508f0f406be6bd025667d338c20))
+
 # [2.0.0-pre.11](https://github.com/vivliostyle/vivliostyle.js/compare/v2.0.0-pre.10...v2.0.0-pre.11) (2020-04-01)
 
 **Note:** Version bump only for package vivliostyle

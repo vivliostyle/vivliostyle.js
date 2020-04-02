@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/viewer",
   "description": "Vivliostyle Viewer - HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
-  "version": "2.0.0-pre.11",
+  "version": "2.0.0-pre.12",
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "gulp build && NODE_ENV=production rollup -c",
@@ -29,7 +29,7 @@
     "@types/node": "^13.9.8",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
-    "@vivliostyle/core": "^2.0.0-pre.11",
+    "@vivliostyle/core": "^2.0.0-pre.12",
     "browser-sync": "^2.26.7",
     "circular-dependency-plugin": "^5.2.0",
     "eslint": "^6.8.0",
