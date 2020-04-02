@@ -521,7 +521,7 @@ class Navigation {
 
   toggleTOC(): boolean {
     if (!this.isTOCToggleDisabled()) {
-      let intervalID: NodeJS.Timeout | null = null;
+      let intervalID: ReturnType<typeof setTimeout> | null = null;
 
       if (!this.viewer_.tocVisible()) {
         if (this.justClicked) {
