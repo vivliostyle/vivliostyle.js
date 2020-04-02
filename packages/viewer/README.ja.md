@@ -4,7 +4,7 @@ Vivliostyle Viewer は、HTML+CSS 文書を美しくページ組版・表示す�
 
 - オンライン Vivliostyle Viewer : <https://vivliostyle.org/viewer/>
 - Vivliostyle Viewer をダウンロード: <https://vivliostyle.github.io>
-- オンラインでサンプルを見る: <https://vivliostyle.org/samples/>
+- オンラインでサンプルを見る: <https://vivliostyle.org/ja/samples/>
 
 ## 使い方
 
@@ -38,7 +38,7 @@ Please install Node.js or Ruby or Python and rerun this script, or use your favo
 
 ## ドキュメント
 
-オンラインの [Vivliostyle Documents](https://vivliostyle.org/documents/) が最新ドキュメントです。あるいは、配布パッケージ版の `./docs/` にあるドキュメントをローカル Web サーバー上で見ることができます。
+オンラインの [Vivliostyle Documents](https://vivliostyle.org/ja/documents/) が最新ドキュメントです。あるいは、配布パッケージ版の `./docs/` にあるドキュメントをローカル Web サーバー上で見ることができます。
 
 ## 不具合報告・要望
 
