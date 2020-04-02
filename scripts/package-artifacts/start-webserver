@@ -2,7 +2,7 @@
 
 if [ "$1" = "--help" -o "$1" = "-h" ]; then
   echo "
-Usage: $(basename "$0") [^<path^> [^<port^>] ]
+Usage: $(basename "$0") [<path> [<port>] ]
 
 Start a local web server and open the default browser.
 
