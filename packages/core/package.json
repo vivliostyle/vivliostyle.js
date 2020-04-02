@@ -1,6 +1,6 @@
 {
   "name": "@vivliostyle/core",
-  "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.",
+  "description": "Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support",
   "version": "2.0.0-pre.11",
   "author": "Vivliostyle Foundation",
   "scripts": {
