@@ -1,5 +1,5 @@
 import path from "path";
-import ts from "@wessberg/rollup-plugin-ts";
+import typescript from "@rollup/plugin-typescript";
 import replace from "@rollup/plugin-replace";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
@@ -26,12 +26,9 @@ const isDevelopment = process.env.NODE_ENV === "development";
 // Plugins
 const plugins = [
   // Transpile TypeScript into JavaScript
-  ts({
-    tsconfig: (resolvedConfig) => ({
-      ...resolvedConfig,
-      inlineSourceMap: isDevelopment,
-      inlineSources: isDevelopment,
-    }),
+  typescript({
+    inlineSourceMap: isDevelopment,
+    inlineSources: isDevelopment,
   }),
   // Replace conditional variable with value
   replace({ "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV) }),

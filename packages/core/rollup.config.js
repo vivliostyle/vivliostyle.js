@@ -1,4 +1,4 @@
-import ts from "@wessberg/rollup-plugin-ts";
+import typescript from "@rollup/plugin-typescript";
 import { string } from "rollup-plugin-string";
 import replace from "@rollup/plugin-replace";
 import nodeResolve from "@rollup/plugin-node-resolve";
@@ -25,12 +25,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 // Plugins
 const plugins = [
   // Transpile TypeScript into JavaScript
-  ts({
-    tsconfig: (resolvedConfig) => ({
-      ...resolvedConfig,
-      inlineSourceMap: isDevelopment,
-    }),
-  }),
+  typescript({ inlineSourceMap: isDevelopment }),
   // Replace require() statements refering non-JS resources with its contents
   string({
     include: ["src/vivliostyle/assets/*", "resources/*"],
