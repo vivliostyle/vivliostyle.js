@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/core",
   "description": "Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support",
-  "version": "2.0.0-pre.13",
+  "version": "2.0.0",
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
