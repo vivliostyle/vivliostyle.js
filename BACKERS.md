@@ -7,6 +7,7 @@ Munehiro Yamamoto⭐️
 nishinos🌟
 <p><a href="https://github.com/vvakame"><img src="https://avatars3.githubusercontent.com/u/1988266?s=460&amp;v=4" title="Masahiro Wakame" width="60" height="60" style="max-width:100%;"></a>
 Masahiro Wakame🌟
+
 ## Basic Sponsor
 <p><a href="https://github.com/hidaruma"><img src="https://avatars3.githubusercontent.com/u/12541582?s=460&amp;v=4" title="Tatsuro YOKOTA" width="60" height="60" style="max-width:100%;"></a>
 Tatsuro YOKOTA🌹
