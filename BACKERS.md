@@ -1,6 +1,6 @@
 # Backers
 Vivliostyle is an independent, open source project based on AGPLv3. Our project would not be able to continue its development without the support of backers.
-The current amount of support is $17.00 per month. Please consider helping us.
+The current amount of support is **$17.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
