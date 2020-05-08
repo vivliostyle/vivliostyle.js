@@ -1,5 +1,8 @@
 # Backers
-Below you'll find a list of the wonderful people and organizations that have made financial contributions to Vivliostyle Project. Please consider joining them in supporting open source by making your own contribution on [GitHub Sponsors](https://github.com/sponsors/vivliostyle).
+Vivliostyle is an independent, open source project based on AGPLv3. Our project would not be able to continue its development without the support of backers.
+The current amount of support is $17.00 per month. Please consider helping us.
+
+- [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
 ## Basic Sponsors
 <p><a href="https://github.com/hidaruma"><img src="https://avatars3.githubusercontent.com/u/12541582?s=460&amp;v=4" title="Tatsuro YOKOTA" width="60" height="60" style="max-width:100%;"></a>
