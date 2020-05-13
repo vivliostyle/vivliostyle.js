@@ -462,7 +462,11 @@ export function makeObfuscationKey(uid: string): string {
   return `1040:${SHA1.bytesToSHA1Hex(uid)}`;
 }
 
-export type RawMetaItem = {
+type RawMeta = {
+  [key: string]: RawMetaItem[];
+};
+
+type RawMetaItem = {
   name: string;
   value: string;
   id: string | null;
@@ -470,7 +474,19 @@ export type RawMetaItem = {
   scheme: string | null;
   lang: string | null;
   order: number;
+  role: string | null;
 };
+
+export interface Meta {
+  [key: string]: MetaItem[];
+}
+
+export interface MetaItem {
+  v: string;
+  o?: number;
+  s?: string;
+  r?: Meta;
+}
 
 export const predefinedPrefixes = {
   dcterms: "http://purl.org/dc/terms/",
@@ -479,9 +495,10 @@ export const predefinedPrefixes = {
   rendition: "http://www.idpf.org/vocab/rendition/#",
   onix: "http://www.editeur.org/ONIX/book/codelists/current.html#",
   xsd: "http://www.w3.org/2001/XMLSchema#",
+  opf: "http://www.idpf.org/2007/opf",
 };
 
-export const defaultIRI = "http://idpf.org/epub/vocab/package/#";
+export const defaultIRI = "http://idpf.org/epub/vocab/package/meta/#";
 
 export const metaTerms = {
   language: `${predefinedPrefixes["dcterms"]}language`,
@@ -491,12 +508,13 @@ export const metaTerms = {
   titleType: `${defaultIRI}title-type`,
   displaySeq: `${defaultIRI}display-seq`,
   alternateScript: `${defaultIRI}alternate-script`,
+  role: `${defaultIRI}role`,
 };
 
 export function getMetadataComparator(
   term: string,
   lang: string,
-): (p1: Base.JSON, p2: Base.JSON) => number {
+): (p1: MetaItem, p2: MetaItem) => number {
   const empty = {};
   return (item1, item2) => {
     let m1: boolean;
@@ -504,17 +522,17 @@ export function getMetadataComparator(
     const r1 = item1["r"] || empty;
     const r2 = item2["r"] || empty;
     if (term == metaTerms.title) {
-      m1 = r1[metaTerms.titleType] == "main";
-      m2 = r2[metaTerms.titleType] == "main";
+      m1 = r1[metaTerms.titleType]?.[0].v == "main";
+      m2 = r2[metaTerms.titleType]?.[0].v == "main";
       if (m1 != m2) {
         return m1 ? -1 : 1;
       }
     }
-    let i1 = parseInt(r1[metaTerms.displaySeq], 10);
+    let i1 = parseInt(r1[metaTerms.displaySeq]?.[0].v, 10);
     if (isNaN(i1)) {
       i1 = Number.MAX_VALUE;
     }
-    let i2 = parseInt(r2[metaTerms.displaySeq], 10);
+    let i2 = parseInt(r2[metaTerms.displaySeq]?.[0].v, 10);
     if (isNaN(i2)) {
       i2 = Number.MAX_VALUE;
     }
@@ -522,8 +540,12 @@ export function getMetadataComparator(
       return i1 - i2;
     }
     if (term != metaTerms.language && lang) {
-      m1 = (r1[metaTerms.language] || r1[metaTerms.alternateScript]) == lang;
-      m2 = (r2[metaTerms.language] || r2[metaTerms.alternateScript]) == lang;
+      m1 =
+        (r1[metaTerms.language] || r1[metaTerms.alternateScript])?.[0].v ==
+        lang;
+      m2 =
+        (r2[metaTerms.language] || r2[metaTerms.alternateScript])?.[0].v ==
+        lang;
       if (m1 != m2) {
         return m1 ? -1 : 1;
       }
@@ -535,7 +557,7 @@ export function getMetadataComparator(
 export function readMetadata(
   mroot: XmlDoc.NodeList,
   prefixes: string | null,
-): Base.JSON {
+): Meta {
   // Parse prefix map (if any)
   let prefixMap;
   if (!prefixes) {
@@ -575,27 +597,29 @@ export function readMetadata(
   // List of metadata items.
   const rawItems = mroot.childElements().forEachNonNull((node: Element) => {
     if (node.localName == "meta") {
-      const p = resolveProperty((node as Element).getAttribute("property"));
+      const p = resolveProperty(node.getAttribute("property"));
       if (p) {
         return {
           name: p,
           value: node.textContent,
-          id: (node as Element).getAttribute("id"),
+          id: node.getAttribute("id"),
           order: order++,
-          refines: (node as Element).getAttribute("refines"),
+          refines: node.getAttribute("refines"),
           lang: null,
-          scheme: resolveProperty((node as Element).getAttribute("scheme")),
+          scheme: resolveProperty(node.getAttribute("scheme")),
+          role: null,
         };
       }
     } else if (node.namespaceURI == Base.NS.DC) {
       return {
         name: predefinedPrefixes["dcterms"] + node.localName,
         order: order++,
-        lang: (node as Element).getAttribute("xml:lang"),
+        lang: node.getAttribute("xml:lang"),
         value: node.textContent,
-        id: (node as Element).getAttribute("id"),
+        id: node.getAttribute("id"),
         refines: null,
         scheme: null,
+        role: node.getAttribute("role") || node.getAttribute("opf:role"),
       };
     }
     return null;
@@ -606,41 +630,46 @@ export function readMetadata(
     rawItems,
     (rawItem) => rawItem.refines,
   );
-  const makeMetadata = (map: {
-    [key: string]: any[];
-  }): { [key: string]: any[] } =>
-    Base.mapObj(map, (rawItemArr, itemName) =>
+  const makeMetadata = (map: RawMeta): Meta =>
+    Base.mapObj(map, (rawItemArr, _itemName) =>
       rawItemArr.map((rawItem) => {
         const entry = { v: rawItem.value, o: rawItem.order };
-        if (rawItem.schema) {
+        if (rawItem.scheme) {
           entry["s"] = rawItem.scheme;
         }
-        if (rawItem.id || rawItem.lang) {
-          let refs = rawItemsByTarget[rawItem.id];
-          if (refs || rawItem.lang) {
-            if (rawItem.lang) {
-              // Special handling for xml:lang
-              const langItem = {
-                name: metaTerms.language,
-                value: rawItem.lang,
-                lang: null,
-                id: null,
-                refines: rawItem.id,
-                scheme: null,
-                order: rawItem.order,
-              };
-              if (refs) {
-                refs.push(langItem);
-              } else {
-                refs = [langItem];
-              }
-            }
-            const entryMap = Base.multiIndexArray(
-              refs,
-              (rawItem) => rawItem.name,
-            );
-            entry["r"] = makeMetadata(entryMap);
+        let refs = rawItemsByTarget[`#${rawItem.id}`] || [];
+        if (refs.length || rawItem.lang || rawItem.role) {
+          if (rawItem.lang) {
+            // Special handling for xml:lang
+            refs.push({
+              name: metaTerms.language,
+              value: rawItem.lang,
+              lang: null,
+              id: null,
+              refines: rawItem.id,
+              scheme: null,
+              order: rawItem.order,
+              role: null,
+            });
           }
+          if (rawItem.role) {
+            // Special handling for opf:role
+            refs.push({
+              name: metaTerms.role,
+              value: rawItem.role,
+              lang: null,
+              id: null,
+              refines: rawItem.id,
+              scheme: null,
+              order: rawItem.order,
+              role: null,
+            });
+          }
+          const entryMap = Base.multiIndexArray(
+            refs,
+            (rawItem) => rawItem.name,
+          );
+          entry["r"] = makeMetadata(entryMap);
         }
         return entry;
       }),
@@ -654,7 +683,7 @@ export function readMetadata(
   if (metadata[metaTerms.language]) {
     lang = metadata[metaTerms.language][0]["v"];
   }
-  const sortMetadata = (metadata: { [key: string]: any[] }) => {
+  const sortMetadata = (metadata: Meta) => {
     for (const term in metadata) {
       const arr = metadata[term];
       arr.sort(getMetadataComparator(term, lang));
@@ -709,7 +738,7 @@ export class OPFDoc {
   prePaginated: boolean = false;
   epageIsRenderedPage: boolean = true;
   epageCountCallback: (p1: number) => void | null = null;
-  metadata: Base.JSON = {};
+  metadata: Meta = {};
   ncxToc: OPFItem = null;
   xhtmlToc: OPFItem = null;
   cover: OPFItem = null;
@@ -783,7 +812,7 @@ export class OPFDoc {
    * - "r" - refinement submetadata (organized just like the top-level
    * metadata).
    */
-  getMetadata(): Base.JSON {
+  getMetadata(): Meta {
     return this.metadata;
   }
 
