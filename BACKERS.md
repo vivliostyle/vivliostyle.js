@@ -1,6 +1,6 @@
 # Backers
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **$27.00 per month**. Please consider helping us.
+The current amount of support is **$30.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -17,3 +17,5 @@ Munehiro Yamamoto⭐️
 nishinos🌟
 <p><a href="https://github.com/vvakame"><img src="https://avatars2.githubusercontent.com/u/125332?s=460&amp;v=4" title="Masahiro Wakame" width="60" height="60" style="max-width:100%;"></a>
 Masahiro Wakame🌟
+<p><a href="https://github.com/munepi"><img src="https://avatars2.githubusercontent.com/u/119629?s=460&amp;v=4" title="Satoshi KOJIMA" width="60" height="60" style="max-width:100%;"></a>
+Satoshi KOJIMA🌟
