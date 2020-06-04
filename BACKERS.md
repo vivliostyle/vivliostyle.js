@@ -17,5 +17,5 @@ Munehiro Yamamoto⭐️
 nishinos🌟
 <p><a href="https://github.com/vvakame"><img src="https://avatars2.githubusercontent.com/u/125332?s=460&amp;v=4" title="Masahiro Wakame" width="60" height="60" style="max-width:100%;"></a>
 Masahiro Wakame🌟
-<p><a href="https://github.com/munepi"><img src="https://avatars2.githubusercontent.com/u/119629?s=460&amp;v=4" title="Satoshi KOJIMA" width="60" height="60" style="max-width:100%;"></a>
+<p><a href="https://github.com/skoji"><img src="https://avatars2.githubusercontent.com/u/119629?s=460&amp;v=4" title="Satoshi KOJIMA" width="60" height="60" style="max-width:100%;"></a>
 Satoshi KOJIMA🌟
