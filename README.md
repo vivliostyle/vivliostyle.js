@@ -57,7 +57,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://github.com/sorotokin"><img src="https://avatars3.githubusercontent.com/u/11699780?v=4" width="80px;" alt=""/><br /><sub><b>sorotokin</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=sorotokin" title="Code">💻</a></td>
-    <td align="center"><a href="http://kwkbtr.info"><img src="https://avatars3.githubusercontent.com/u/3595560?v=4" width="80px;" alt=""/><br /><sub><b>KAWAKUBO Toru</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=kwkbtr" title="Code">💻</a></td>
+    <td align="center"><a href="http://kwkbtr.info"><img src="https://avatars3.githubusercontent.com/u/3595560?v=4" width="80px;" alt=""/><br /><sub><b>KAWAKUBO Toru</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=kwkbtr@vivliostyle.com" title="Code">💻</a></td>
     <td align="center"><a href="https://bibi.epub.link"><img src="https://avatars0.githubusercontent.com/u/3631499?v=4" width="80px;" alt=""/><br /><sub><b>Satoru MATSUSHIMA (℠)</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=satorumurmur" title="Code">💻</a></td>
     <td align="center"><a href="http://null.ly"><img src="https://avatars2.githubusercontent.com/u/291185?v=4" width="80px;" alt=""/><br /><sub><b>Seiya Konno</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=nulltask" title="Code">💻</a></td>
     <td align="center"><a href="http://www.johanneswilm.org"><img src="https://avatars2.githubusercontent.com/u/595512?v=4" width="80px;" alt=""/><br /><sub><b>Johannes Wilm</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=johanneswilm" title="Code">💻</a></td>
@@ -80,7 +80,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
-
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
