@@ -73,6 +73,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://twitter.com/takanakahiko"><img src="https://avatars3.githubusercontent.com/u/10114717?v=4" width="80px;" alt=""/><br /><sub><b>takanakahiko</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=takanakahiko" title="Code">💻</a></td>
     <td align="center"><a href="https://uechi.io"><img src="https://avatars0.githubusercontent.com/u/431808?v=4" width="80px;" alt=""/><br /><sub><b>Yasuaki Uechi</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=uetchy" title="Code">💻</a> <a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=uetchy" title="Documentation">📖</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://waldowski.me/"><img src="https://avatars2.githubusercontent.com/u/170812?v=4" width="80px;" alt=""/><br /><sub><b>Zachary Waldowski</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=zwaldowski" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->

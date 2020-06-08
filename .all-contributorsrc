@@ -1,5 +1,5 @@
 {
-  "projectName": "vivliostyle",
+  "projectName": "vivliostyle.js",
   "projectOwner": "vivliostyle",
   "repoType": "github",
   "repoHost": "https://github.com",
@@ -137,6 +137,15 @@
       "contributions": [
         "code",
         "doc"
+      ]
+    },
+    {
+      "login": "zwaldowski",
+      "name": "Zachary Waldowski",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/170812?v=4",
+      "profile": "https://waldowski.me/",
+      "contributions": [
+        "code"
       ]
     }
   ],
