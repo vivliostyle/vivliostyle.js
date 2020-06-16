@@ -15,9 +15,14 @@
     "test:watch": "react-scripts test --env=jsdom"
   },
   "dependencies": {
+    "@chakra-ui/core": "^0.8.0",
+    "@emotion/core": "^10.0.28",
+    "@emotion/styled": "^10.0.27",
     "@vivliostyle/core": "^2.0.0",
     "@vivliostyle/viewer": "^2.0.0",
-    "react-helmet": "^6.1.0"
+    "emotion-theming": "^10.0.27",
+    "react-helmet": "^6.1.0",
+    "react-spinners": "^0.8.3"
   },
   "peerDependencies": {
     "react": "^16.13.1"

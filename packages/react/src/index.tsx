@@ -2,6 +2,7 @@ import * as React from "react";
 import styles from "./styles.module.css";
 
 export { Renderer } from "./renderer";
+export { VivliostyleViewer } from "./viewer";
 
 interface Props {
   text: string;

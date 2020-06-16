@@ -1,37 +1,77 @@
 import React, { useRef, useEffect } from "react";
+import styled from "@emotion/styled";
+import { CoreViewer, Payload, ReadyState } from "@vivliostyle/core";
 
-import { CoreViewer, Payload } from "@vivliostyle/core";
+type MessageType = "debug" | "info" | "warn";
 
-type EventCallbackFn = (payload: Payload) => void;
 interface RendererProps {
   entrypoint: string;
-  onLoad?: EventCallbackFn;
-  onError?: EventCallbackFn;
-}
-
-function addListener(
-  ref: CoreViewer,
-  event: string,
-  fn: EventCallbackFn | undefined,
-) {
-  fn && ref.addListener(event, fn);
+  onLoad?: () => void;
+  onMessage?: (message: string, type: MessageType) => void;
+  onError?: (error: string) => void;
+  onReadyStateChange?: (state: ReadyState) => void;
 }
 
 export const Renderer: React.FC<RendererProps> = ({
   entrypoint,
   onLoad,
+  onMessage,
   onError,
+  onReadyStateChange,
 }) => {
-  const coreRef = useRef<HTMLDivElement>(null);
-  const viewer = useRef<CoreViewer>();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const instanceRef = useRef<CoreViewer>();
 
   useEffect(() => {
-    viewer.current = new CoreViewer({
-      viewportElement: coreRef.current!,
+    instanceRef.current = new CoreViewer({
+      viewportElement: containerRef.current!,
     });
-    viewer.current.loadDocument(entrypoint, undefined, {});
-    addListener(viewer.current, "loaded", onLoad);
-    addListener(viewer.current, "error", onError);
+    const instance = instanceRef.current!;
+
+    function handleMessage(payload: Payload, type: MessageType) {
+      onMessage && onMessage(payload.content, type);
+    }
+
+    const handleDebug = (payload: Payload) => handleMessage(payload, "debug");
+    const handleInfo = (payload: Payload) => handleMessage(payload, "info");
+    const handleWarn = (payload: Payload) => handleMessage(payload, "warn");
+
+    function handleError(payload: Payload) {
+      onError && onError(payload.content);
+    }
+
+    function handleReadyStateChange() {
+      const { readyState } = instanceRef.current!;
+      onReadyStateChange && onReadyStateChange(readyState);
+    }
+
+    function handleLoaded() {
+      onLoad && onLoad();
+    }
+
+    instance.addListener("debug", handleDebug);
+    instance.addListener("info", handleInfo);
+    instance.addListener("warn", handleWarn);
+    instance.addListener("error", handleError);
+    instance.addListener("readystatechange", handleReadyStateChange);
+    instance.addListener("loaded", handleLoaded);
+
+    instance.loadDocument(entrypoint, undefined, {});
+
+    return () => {
+      onReadyStateChange && onReadyStateChange(ReadyState.LOADING);
+      instance.removeListener("debug", handleDebug);
+      instance.removeListener("info", handleInfo);
+      instance.removeListener("warn", handleWarn);
+      instance.removeListener("error", handleError);
+      instance.removeListener("readystatechange", handleReadyStateChange);
+      instance.removeListener("loaded", handleLoaded);
+      containerRef.current!.innerHTML = "";
+    };
   }, [entrypoint]);
-  return <div ref={coreRef} />;
+  return <Container ref={containerRef} />;
 };
+
+const Container = styled.div`
+  position: relative;
+`;
