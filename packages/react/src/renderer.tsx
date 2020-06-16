@@ -1,31 +1,52 @@
 import React, { useRef, useEffect } from "react";
 import styled from "@emotion/styled";
-import { CoreViewer, Payload, ReadyState } from "@vivliostyle/core";
+import {
+  CoreViewer,
+  Payload,
+  ReadyState,
+  CoreViewerOptions,
+  Navigation,
+} from "@vivliostyle/core";
 
-type MessageType = "debug" | "info" | "warn";
+export type MessageType = "debug" | "info" | "warn";
+export type NavigationPayload = Omit<Payload, "internal" | "href" | "content">;
+export type HyperlinkPayload = Pick<Payload, "internal" | "href">;
 
 interface RendererProps {
-  entrypoint: string;
-  onLoad?: () => void;
+  source: string;
+  page: number;
+  style?: React.CSSProperties;
+  options?: CoreViewerOptions;
   onMessage?: (message: string, type: MessageType) => void;
   onError?: (error: string) => void;
   onReadyStateChange?: (state: ReadyState) => void;
+  onLoaded?: () => void;
+  onNavigation?: (payload: NavigationPayload) => void;
+  onHyperlink?: (payload: HyperlinkPayload) => void;
 }
 
 export const Renderer: React.FC<RendererProps> = ({
-  entrypoint,
-  onLoad,
+  source,
+  page,
+  style,
+  options,
   onMessage,
   onError,
   onReadyStateChange,
+  onLoaded,
+  onNavigation,
+  onHyperlink,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<CoreViewer>();
 
   useEffect(() => {
-    instanceRef.current = new CoreViewer({
-      viewportElement: containerRef.current!,
-    });
+    instanceRef.current = new CoreViewer(
+      {
+        viewportElement: containerRef.current!,
+      },
+      options,
+    );
     const instance = instanceRef.current!;
 
     function handleMessage(payload: Payload, type: MessageType) {
@@ -46,7 +67,15 @@ export const Renderer: React.FC<RendererProps> = ({
     }
 
     function handleLoaded() {
-      onLoad && onLoad();
+      onLoaded && onLoaded();
+    }
+
+    function handleNavigation(payload: NavigationPayload) {
+      onNavigation && onNavigation(payload);
+    }
+
+    function handleHyperlink(payload: HyperlinkPayload) {
+      onHyperlink && onHyperlink(payload);
     }
 
     instance.addListener("debug", handleDebug);
@@ -55,8 +84,10 @@ export const Renderer: React.FC<RendererProps> = ({
     instance.addListener("error", handleError);
     instance.addListener("readystatechange", handleReadyStateChange);
     instance.addListener("loaded", handleLoaded);
+    instance.addListener("nav", handleNavigation);
+    instance.addListener("hyperlink", handleHyperlink);
 
-    instance.loadDocument(entrypoint, undefined, {});
+    instance.loadDocument(source, undefined, {});
 
     return () => {
       onReadyStateChange && onReadyStateChange(ReadyState.LOADING);
@@ -66,12 +97,19 @@ export const Renderer: React.FC<RendererProps> = ({
       instance.removeListener("error", handleError);
       instance.removeListener("readystatechange", handleReadyStateChange);
       instance.removeListener("loaded", handleLoaded);
+      instance.removeListener("nav", handleNavigation);
+      instance.removeListener("hyperlink", handleHyperlink);
       containerRef.current!.innerHTML = "";
     };
-  }, [entrypoint]);
-  return <Container ref={containerRef} />;
+  }, [source]);
+
+  useEffect(() => {
+    instanceRef.current?.navigateToPage(Navigation.EPAGE, page);
+  }, [page]);
+
+  return <Container ref={containerRef} style={style} />;
 };
 
 const Container = styled.div`
-  position: relative;
+  /* position: relative; */
 `;

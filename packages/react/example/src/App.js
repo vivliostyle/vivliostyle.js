@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { VivliostyleViewer } from "@vivliostyle/react";
-// import "@vivliostyle/react/dist/index.css";
+import "@vivliostyle/react/dist/index.css";
 
 const App = () => {
   const [source, setSource] = useState(
