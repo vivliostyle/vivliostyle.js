@@ -15,7 +15,7 @@ export const VivliostyleViewer: React.FC<VivliostyleViewerProps> = ({
   source,
 }) => {
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [lastNav, setLastNav] = useState<NavigationPayload>();
 
   function handleStateChange(state: ReadyState) {
@@ -34,13 +34,13 @@ export const VivliostyleViewer: React.FC<VivliostyleViewerProps> = ({
 
   function nextPage() {
     if (!lastNav?.epageCount) return;
-    if (page + 1 >= lastNav.epageCount) return;
+    if (page >= lastNav.epageCount) return;
     console.log(page, lastNav.epageCount);
     setPage((page) => page + 1);
   }
 
   function prevPage() {
-    setPage((page) => Math.max(0, page - 1));
+    setPage((page) => Math.max(1, page - 1));
   }
 
   return (

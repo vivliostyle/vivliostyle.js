@@ -8,6 +8,8 @@ import {
   Navigation,
 } from "@vivliostyle/core";
 
+import { epageFromPageNumber } from "./epage";
+
 export type MessageType = "debug" | "info" | "warn";
 export type NavigationPayload = Omit<Payload, "internal" | "href" | "content">;
 export type HyperlinkPayload = Pick<Payload, "internal" | "href">;
@@ -104,12 +106,16 @@ export const Renderer: React.FC<RendererProps> = ({
   }, [source]);
 
   useEffect(() => {
-    instanceRef.current?.navigateToPage(Navigation.EPAGE, page);
+    const epage = epageFromPageNumber(page);
+    instanceRef.current?.navigateToPage(Navigation.EPAGE, epage);
   }, [page]);
 
   return <Container ref={containerRef} style={style} />;
 };
 
 const Container = styled.div`
-  /* position: relative; */
+  position: relative;
+  display: flex;
+  overflow: auto;
+  background: #aaaaaa;
 `;
