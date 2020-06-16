@@ -45,7 +45,7 @@
     "webpack-cli": "^3.3.11"
   },
   "types": "lib/vivliostyle.d.ts",
-  "main": "lib/cjs/vivliostyle.js",
+  "main": "lib/vivliostyle.js",
   "module": "lib/esm/vivliostyle.js",
   "browser": "lib/vivliostyle.js",
   "files": [
