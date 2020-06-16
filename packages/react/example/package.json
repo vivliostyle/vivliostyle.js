@@ -1,7 +1,5 @@
 {
-  "name": "react-vivliostyle-viewer-example",
-  "homepage": "https://uetchy.github.io/react-vivliostyle-viewer",
-  "version": "0.0.0",
+  "name": "@vivliostyle/react-example",
   "private": true,
   "dependencies": {
     "react": "link:../node_modules/react",
@@ -14,9 +12,6 @@
     "build": "node ../../../node_modules/react-scripts/bin/react-scripts.js build",
     "test": "node ../../../node_modules/react-scripts/bin/react-scripts.js test",
     "eject": "node ../../../node_modules/react-scripts/bin/react-scripts.js eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": [
     ">0.2%",

@@ -23,7 +23,3 @@ function App() {
   return <Renderer entrypoint={sample} />;
 }
 ```
-
-## License
-
-MIT © [uetchy](https://github.com/uetchy)

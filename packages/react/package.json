@@ -48,7 +48,7 @@
     "url": "git://github.com/vivliostyle/vivliostyle.js.git",
     "directory": "packages/react"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "engines": {
     "node": ">=10"
   },
