@@ -1,0 +1,56 @@
+{
+  "name": "@vivliostyle/react",
+  "description": "React component for Vivliostyle",
+  "version": "0.0.0",
+  "author": "Yasuaki Uechi <y@uechi.io>",
+  "scripts": {
+    "build": "microbundle-crl --no-compress --format modern,cjs",
+    "deploy": "gh-pages -d example/build",
+    "predeploy": "cd example && yarn install && yarn run build",
+    "prepublish": "run-s build",
+    "start": "microbundle-crl watch --no-compress --format modern,cjs",
+    "test": "run-s test:unit test:lint test:build",
+    "test:build": "run-s build",
+    "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
+    "test:watch": "react-scripts test --env=jsdom"
+  },
+  "dependencies": {
+    "@vivliostyle/core": "^2.0.0",
+    "@vivliostyle/viewer": "^2.0.0",
+    "react-helmet": "^6.1.0"
+  },
+  "peerDependencies": {
+    "react": "^16.13.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.0",
+    "@types/react": "^16.9.27",
+    "@types/react-helmet": "^6.0.0",
+    "cross-env": "^7.0.2",
+    "gh-pages": "^3.0.0",
+    "microbundle-crl": "^0.13.8",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "^3.4.1"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.modern.js",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vivliostyle/vivliostyle.js.git",
+    "directory": "packages/react"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=10"
+  },
+  "source": "src/index.tsx"
+}
