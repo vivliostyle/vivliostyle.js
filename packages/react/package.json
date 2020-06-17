@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/react",
   "description": "React component for Vivliostyle",
-  "version": "0.0.0",
+  "version": "2.1.0-pre.0",
   "author": "Yasuaki Uechi <y@uechi.io>",
   "scripts": {
     "build": "microbundle-crl --no-compress --format modern,cjs",
