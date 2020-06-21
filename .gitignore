@@ -1,4 +1,6 @@
 .vscode
+.vercel
+.now
 
 docs/anchors.json
 docs/supported-features.html
