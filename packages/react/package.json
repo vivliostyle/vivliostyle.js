@@ -8,20 +8,22 @@
     "deploy": "gh-pages -d example/build",
     "predeploy": "cd example && yarn install && yarn run build",
     "prepublish": "run-s build",
-    "start": "microbundle-crl watch --no-compress --format modern,cjs",
+    "dev": "run-p dev:*",
+    "dev:react": "microbundle-crl watch --no-compress --format modern,cjs",
+    "dev:example": "yarn --cwd example start",
     "test": "run-s test:unit test:lint test:build",
     "test:build": "run-s build",
     "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom"
   },
   "dependencies": {
-    "@chakra-ui/core": "^0.8.0",
+    "@chakra-ui/core": "^1.0.0-next.1",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
     "@vivliostyle/core": "^2.1.0-pre.0",
     "emotion-theming": "^10.0.27",
     "react-helmet": "^6.1.0",
-    "react-spinners": "^0.8.3"
+    "react-spinners": "^0.9.0"
   },
   "peerDependencies": {
     "react": "^16.13.1"
