@@ -32,7 +32,7 @@ type Options = {
   renderAllPages: Observable<boolean>;
   fontSize: Observable<number | string>;
   profile: Observable<boolean>;
-  pageViewMode: Observable<PageViewModeInstance>;
+  pageViewMode: Observable<CorePageViewMode>;
   zoom: Observable<ZoomOptions>;
 };
 
@@ -40,7 +40,7 @@ interface ViewerOptionsType {
   renderAllPages: boolean;
   fontSize: number;
   profile: boolean;
-  pageViewMode: PageViewModeInstance;
+  pageViewMode: CorePageViewMode;
   zoom: FitToScreen | undefined;
 }
 
@@ -90,14 +90,14 @@ class ViewerOptions {
   renderAllPages: Observable<boolean>;
   fontSize: Observable<number | string>;
   profile: Observable<boolean>;
-  pageViewMode: Observable<PageViewModeInstance>;
+  pageViewMode: Observable<CorePageViewMode>;
   zoom: Observable<ZoomOptions>;
 
   static getDefaultValues: () => {
     renderAllPages: boolean;
     fontSize: number;
     profile: boolean;
-    pageViewMode: PageViewModeInstance;
+    pageViewMode: CorePageViewMode;
     zoom: FitToScreen;
   };
 
@@ -130,7 +130,7 @@ class ViewerOptions {
         } else {
           urlParameters.setParameter(
             "spread",
-            pageViewMode.toSpreadViewString(),
+            ((pageViewMode as unknown) as PageViewModeInstance).toSpreadViewString(),
           );
         }
       });
