@@ -19,6 +19,7 @@ const SRC_DIR = "src";
 const DEST_DIR = "lib";
 const RESOURCE_MAP = {
   core: {
+    // only for development purpose
     src: "../node_modules/@vivliostyle/core/lib",
     dest: "js",
     srcPattern: "*.js",
@@ -26,8 +27,8 @@ const RESOURCE_MAP = {
   fonts: { src: "fonts" },
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
-  coreResources: {
-    src: "../node_modules/@vivliostyle/core/resources",
+  resources: {
+    src: "../resources",
     dest: "resources",
   },
 };
@@ -60,15 +61,12 @@ const srcPattern = (type) =>
 // create a task simply copying files
 function createCopyTask(type) {
   const dest = destDir(type);
-  return gulp.task("build:" + type, function() {
-    return gulp
-      .src(srcPattern(type))
-      .pipe(changed(dest))
-      .pipe(gulp.dest(dest));
+  return gulp.task("build:" + type, function () {
+    return gulp.src(srcPattern(type)).pipe(changed(dest)).pipe(gulp.dest(dest));
   });
 }
 createCopyTask("fonts");
-createCopyTask("coreResources");
+createCopyTask("resources");
 
 // Build HTML
 function buildHtml(isDevelopment) {
@@ -126,12 +124,7 @@ gulp.task("build:css-dev", () => buildCss(true));
 // build all
 gulp.task(
   "build",
-  gulp.parallel(
-    "build:html",
-    "build:css",
-    "build:fonts",
-    "build:coreResources",
-  ),
+  gulp.parallel("build:html", "build:css", "build:fonts", "build:resources"),
 );
 gulp.task(
   "build-dev",
@@ -139,29 +132,29 @@ gulp.task(
     "build:html-dev",
     "build:css-dev",
     "build:fonts",
-    "build:coreResources",
+    "build:resources",
   ),
 );
 
 // Test
-gulp.task("test-local", function(done) {
+gulp.task("test-local", function (done) {
   const server = new KarmaServer(
     {
       configFile: process.cwd() + "/test/conf/karma-local.conf",
     },
-    function(exitStatus) {
+    function (exitStatus) {
       done(exitStatus ? "Some tests failed" : undefined);
     },
   );
   server.start();
 });
 
-gulp.task("test-sauce", function(done) {
+gulp.task("test-sauce", function (done) {
   const server = new KarmaServer(
     {
       configFile: process.cwd() + "/test/conf/karma-sauce.conf",
     },
-    function(exitStatus) {
+    function (exitStatus) {
       done(exitStatus ? "Some tests failed" : undefined);
     },
   );
@@ -172,21 +165,21 @@ gulp.task("test-sauce", function(done) {
 gulp.task("start-watching", (done) => done());
 gulp.task(
   "watch",
-  gulp.series(gulp.parallel("start-watching", "build"), function(done) {
+  gulp.series(gulp.parallel("start-watching", "build"), function (done) {
     gulp.watch(srcPattern("html"), gulp.task("build:html"));
     gulp.watch(srcPattern("css"), gulp.task("build:css"));
     gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("coreResources"), gulp.task("build:coreResources"));
+    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     done();
   }),
 );
 gulp.task(
   "watch-dev",
-  gulp.series(gulp.parallel("start-watching", "build-dev"), function(done) {
+  gulp.series(gulp.parallel("start-watching", "build-dev"), function (done) {
     gulp.watch(srcPattern("html"), gulp.task("build:html-dev"));
     gulp.watch(srcPattern("css"), gulp.task("build:css-dev"));
     gulp.watch(srcPattern("fonts"), gulp.task("build:fonts"));
-    gulp.watch(srcPattern("coreResources"), gulp.task("build:coreResources"));
+    gulp.watch(srcPattern("resources"), gulp.task("build:resources"));
     done();
   }),
 );
@@ -213,14 +206,14 @@ function serve(isDevelopment) {
 }
 gulp.task(
   "serve",
-  gulp.series("watch", function(done) {
+  gulp.series("watch", function (done) {
     serve(false);
     done();
   }),
 );
 gulp.task(
   "serve-dev",
-  gulp.series("watch-dev", function(done) {
+  gulp.series("watch-dev", function (done) {
     serve(true);
     done();
   }),

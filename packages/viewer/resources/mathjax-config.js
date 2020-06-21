@@ -34,7 +34,7 @@ window.MathJax = {
   "fast-preview": {
     disabled: true,
   },
-  AuthorInit: function() {
+  AuthorInit: function () {
     MathJax.Hub.processSectionDelay = 0;
   },
 };

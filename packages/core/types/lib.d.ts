@@ -19,11 +19,6 @@
 // The variable is injected by webpack.
 declare var VIVLIOSTYLE_DEBUG: boolean;
 
-// For import from resources with raw-loader
-declare module "*.css";
-declare module "*.txt";
-declare module "*.xml";
-
 interface Element {
   // `setAttribute` seems to allow non-string values.
   // https://github.com/Microsoft/TypeScript/issues/15368

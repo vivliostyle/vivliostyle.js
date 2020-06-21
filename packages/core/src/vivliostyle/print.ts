@@ -2,8 +2,7 @@
 // Vivliostyle Foundation
 
 import { CoreViewer } from "./core-viewer";
-import viewportCss from "../../resources/vivliostyle-viewport.css";
-import viewportScreenCss from "../../resources/vivliostyle-viewport-screen.css";
+import { VivliostyleViewportCss, VivliostyleViewportScreenCss } from "./assets";
 
 interface IFrameWindowForPrint {
   printInstance?: VivliostylePrint;
@@ -60,8 +59,8 @@ class VivliostylePrint {
           <meta charset='utf-8'/>
           <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
           <title>${this.title}</title>
-          <style>${viewportCss}</style>
-          <style>${viewportScreenCss}</style>
+          <style>${VivliostyleViewportCss}</style>
+          <style>${VivliostyleViewportScreenCss}</style>
           <style>
             html[data-vivliostyle-paginated] {
               width: 100%;
