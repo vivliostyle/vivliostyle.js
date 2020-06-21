@@ -18,6 +18,7 @@
 /*eslint-env node */
 
 const webpack = require("webpack");
+const karmaWebpack = require("karma-webpack");
 
 var testFiles = [
   "test/util/dom.js",
@@ -28,7 +29,7 @@ var testFiles = [
   // "plugins/*/test/spec/**/*.js"
 ];
 
-module.exports = function(config) {
+module.exports = function (config) {
   return {
     basePath: "../..",
     frameworks: ["jasmine"],
@@ -39,7 +40,7 @@ module.exports = function(config) {
     webpack: {
       mode:
         process.env.NODE_ENV === "production" ? "production" : "development",
-      entry: "./src/vivliostyle.ts",
+      entry: "../src/vivliostyle.ts",
       devtool: "inline-source-map",
       resolve: {
         extensions: [".ts", ".js"],

@@ -23,18 +23,18 @@ import * as vivliostyle_plugin from "../../../../src/vivliostyle/plugin";
 
 // FIXME: cannot access to vivliostyle_plugin.hooks
 
-export const setup = function() {
+export const setup = function () {
   var originalHooks;
-  beforeAll(function() {
+  beforeAll(function () {
     // originalHooks = vivliostyle_plugin.hooks;
   });
-  beforeEach(function() {
+  beforeEach(function () {
     // var hooks = vivliostyle_plugin.hooks = {};
     // Object.keys(originalHooks).forEach(function(name) {
     //     hooks[name] = Array.from(originalHooks[name]);
     // });
   });
-  afterAll(function() {
+  afterAll(function () {
     // vivliostyle_plugin.hooks = originalHooks;
   });
 };
