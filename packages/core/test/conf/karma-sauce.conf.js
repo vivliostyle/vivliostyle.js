@@ -16,7 +16,7 @@
  */
 /*eslint-env node */
 /*eslint global-require: "off", no-process-env: "off" */
-module.exports = function(config) {
+module.exports = function (config) {
   var commonConfig = require("./karma-common.conf")(config);
   var customLaunchers = {
     sl_chrome: {

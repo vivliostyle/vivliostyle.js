@@ -51,8 +51,7 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
 import { Layout as LayoutType } from "./types";
-import UserAgentBaseCss from "./assets/user-agent-base.css";
-import UserAgentPageCss from "./assets/user-agent-page.css";
+import { UserAgentBaseCss, UserAgentPageCss } from "./assets";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> = new TaskUtil.Fetcher(
   () => {

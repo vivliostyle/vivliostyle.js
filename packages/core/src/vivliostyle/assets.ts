@@ -1,3 +1,211 @@
+// vivliostyle-viewport-screen.css
+export const VivliostyleViewportScreenCss = `
+/*
+ * Copyright 2017 Trim-marks Inc.
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+@media screen {
+
+    [data-vivliostyle-viewer-viewport] {
+        background: #AAAAAA;
+    }
+
+    [data-vivliostyle-page-container] {
+        background: white;
+    }
+
+    [data-vivliostyle-viewer-viewport] {
+        display: -webkit-flex;
+        display: flex;
+        overflow: auto;
+        position: relative;
+    }
+
+    [data-vivliostyle-outer-zoom-box] {
+        margin: auto;
+        overflow: hidden;
+        -webkit-flex: none;
+        flex: none;
+    }
+
+    [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex: none;
+        flex: none;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -moz-transform-origin: left top;
+        -ms-transform-origin: left top;
+        -webkit-transform-origin: left top;
+        transform-origin: left top;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] [data-vivliostyle-spread-container] {
+        -webkit-flex-direction: row;
+        flex-direction: row;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] [data-vivliostyle-spread-container] {
+        -webkit-flex-direction: row-reverse;
+        flex-direction: row-reverse;
+    }
+
+    [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
+        margin: 0 auto;
+        -webkit-flex: none;
+        flex: none;
+        transform-origin: center top;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
+        margin-right: 1px;
+        transform-origin: right top;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=right] {
+        margin-left: 1px;
+        transform-origin: left top;
+    }
+
+    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-unpaired-page=true] {
+        margin-left: auto;
+        margin-right: auto;
+        transform-origin: center top;
+    }
+
+}
+`;
+
+// vivliostyle-viewport.css
+export const VivliostyleViewportCss = `
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+[data-vivliostyle-layout-box] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+[data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+    right: auto;
+    bottom: auto;
+    overflow: visible;
+    z-index: auto;
+}
+
+[data-vivliostyle-page-container] {
+    position: relative;
+    overflow: hidden;
+}
+
+[data-vivliostyle-bleed-box] {
+    position: absolute;
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+
+[data-vivliostyle-page-box] ~ [data-vivliostyle-page-box] {
+    display: none;
+}
+
+[data-vivliostyle-toc-box] {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    overflow: scroll;
+    overflow-x: hidden;
+    background: rgba(248,248,248,0.9);
+    border-radius: 2px;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+
+@media print {
+    [data-vivliostyle-toc-box] {
+        display: none;
+    }
+
+    [data-vivliostyle-outer-zoom-box], [data-vivliostyle-spread-container] {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    [data-vivliostyle-spread-container], [data-vivliostyle-page-container] {
+        -moz-transform: none !important;
+        -ms-transform: none !important;
+        -webkit-transform: none !important;
+        transform: none !important;
+    }
+
+    [data-vivliostyle-page-container] {
+        display: block !important;
+        max-width: 100%;
+        height: 100% !important;
+        max-height: 100%;
+    }
+
+    /* Workaround for Chrome printing problem */
+    /* [data-vivliostyle-page-box] {
+        padding-bottom: 0 !important;
+        overflow: visible !important;
+    } */
+    [data-vivliostyle-bleed-box] > div > div::before {
+        display: block;
+        content: "";
+        padding-top: 0.015625px;
+        margin-bottom: -0.015625px;
+    }
+
+    /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
+    @-moz-document regexp('.*') {
+        [data-vivliostyle-page-container]:nth-last-child(n+2) {
+            top: -1px;
+            margin-top: 1px;
+            margin-bottom: -1px;
+        }
+    }
+}
+`;
+
+// validation.txt
+export const ValidationTxt = `
 /*
  * Copyright 2013 Google, Inc.
  * Copyright 2015 Trim-marks Inc.
@@ -605,3 +813,872 @@ inset-inline = INSETS inline-start inline-end;
 [adapt,webkit]after = block-end;
 [adapt,webkit]start = inline-start;
 [adapt,webkit]end = inline-end;
+
+`;
+
+// user-agent.xml
+export const UserAgentXml = `
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:s="http://www.pyroxy.com/ns/shadow">
+<head>
+<style><![CDATA[
+
+.footnote-content {
+  float: footnote;
+}
+
+.table-cell-container {
+  display: block;
+}
+
+]]></style>
+</head>
+<body>
+
+<s:template id="footnote"><s:content/><s:include class="footnote-content"/></s:template>
+
+<s:template id="table-cell"><div data-vivliostyle-flow-root="true" class="table-cell-container"><s:content/></div></s:template>
+
+</body>
+</html>`;
+
+// user-agent-page.css
+export const UserAgentPageCss = `
+@namespace html "http://www.w3.org/1999/xhtml";
+@namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
+
+html|body,
+fb2|body {
+  hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
+}
+
+@-adapt-footnote-area {
+  display: block;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+}
+
+@-adapt-footnote-area ::before {
+  display: block;
+  border-block-start-width: 1px;
+  border-block-start-style: solid;
+  border-block-start-color: black;
+  margin-block-end: 0.4em;
+  margin-inline-start: 0;
+  margin-inline-end: 60%;
+}
+
+/* default page master */
+@-epubx-page-master :background-host {
+  @-epubx-partition :layout-host {
+    -epubx-flow-from: body;
+    top: -epubx-expr(header.margin-bottom-edge);
+    bottom: -epubx-expr(page-height - footer.margin-top-edge);
+    left: 0px;
+    right: 0px;
+    column-width: 25em;
+  }
+  @-epubx-partition footer :oeb-page-foot {
+    writing-mode: horizontal-tb;
+    -epubx-flow-from: oeb-page-foot;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+  }
+  @-epubx-partition header :oeb-page-head {
+    writing-mode: horizontal-tb;
+    -epubx-flow-from: oeb-page-head;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+  }
+}
+
+@page {
+  @top-left-corner {
+    text-align: right;
+    vertical-align: middle;
+  }
+  @top-left {
+    text-align: left;
+    vertical-align: middle;
+  }
+  @top-center {
+    text-align: center;
+    vertical-align: middle;
+  }
+  @top-right {
+    text-align: right;
+    vertical-align: middle;
+  }
+  @top-right-corner {
+    text-align: left;
+    vertical-align: middle;
+  }
+  @left-top {
+    text-align: center;
+    vertical-align: top;
+  }
+  @left-middle {
+    text-align: center;
+    vertical-align: middle;
+  }
+  @left-bottom {
+    text-align: center;
+    vertical-align: bottom;
+  }
+  @right-top {
+    text-align: center;
+    vertical-align: top;
+  }
+  @right-middle {
+    text-align: center;
+    vertical-align: middle;
+  }
+  @right-bottom {
+    text-align: center;
+    vertical-align: bottom;
+  }
+  @bottom-left-corner {
+    text-align: right;
+    vertical-align: middle;
+  }
+  @bottom-left {
+    text-align: left;
+    vertical-align: middle;
+  }
+  @bottom-center {
+    text-align: center;
+    vertical-align: middle;
+  }
+  @bottom-right {
+    text-align: right;
+    vertical-align: middle;
+  }
+  @bottom-right-corner {
+    text-align: left;
+    vertical-align: middle;
+  }
+}
+
+@media print {
+  @page {
+    margin: 10%;
+  }
+}
+`;
+
+// user-agent-base.css
+export const UserAgentBaseCss = `
+@namespace html "http://www.w3.org/1999/xhtml";
+
+html|html,
+html|address,
+html|blockquote,
+html|body,
+html|dd,
+html|div,
+html|dl,
+html|dt,
+html|fieldset,
+html|form,
+html|frame,
+html|frameset,
+html|h1,
+html|h2,
+html|h3,
+html|h4,
+html|h5,
+html|h6,
+html|noframes,
+html|ol,
+html|p,
+html|ul,
+html|center,
+html|dir,
+html|hr,
+html|menu,
+html|pre,
+html|article,
+html|section,
+html|nav,
+html|aside,
+html|hgroup,
+html|footer,
+html|header,
+html|figure,
+html|figcaption,
+html|main {
+  display: block;
+  unicode-bidi: normal;
+}
+html|li {
+  display: list-item;
+}
+html|head {
+  display: none !important;
+}
+html|table {
+  display: table;
+}
+html|tr {
+  display: table-row;
+}
+html|thead {
+  display: table-header-group;
+  break-after: avoid;
+}
+html|tbody {
+  display: table-row-group;
+}
+html|tfoot {
+  display: table-footer-group;
+  break-before: avoid;
+}
+html|col {
+  display: table-column;
+}
+html|colgroup {
+  display: table-column-group;
+}
+html|td,
+html|th {
+  display: table-cell;
+}
+html|caption {
+  display: table-caption;
+  text-align: center;
+}
+html|th {
+  font-weight: bolder;
+  text-align: center;
+}
+html|script {
+  display: none;
+}
+html|body {
+  margin: 8px;
+}
+html|h1 {
+  font-size: 2em;
+  margin-block-start: 0.67em;
+  margin-block-end: 0.67em;
+  margin-inline-start: 0em;
+  margin-inline-end: 0em;
+}
+html|h2 {
+  font-size: 1.5em;
+  margin-block-start: 0.75em;
+  margin-block-end: 0.75em;
+  margin-inline-start: 0em;
+  margin-inline-end: 0em;
+}
+html|h3 {
+  font-size: 1.17em;
+  margin-block-start: 0.83em;
+  margin-block-end: 0.83em;
+  margin-inline-start: 0em;
+  margin-inline-end: 0em;
+}
+html|h4,
+html|p,
+html|blockquote,
+html|ul,
+html|fieldset,
+html|form,
+html|ol,
+html|dl,
+html|dir,
+html|menu,
+html|h5,
+html|h6 {
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0em;
+  margin-inline-end: 0em;
+}
+html|h5 {
+  font-size: 0.83em;
+}
+html|h6 {
+  font-size: 0.75em;
+}
+html|h1,
+html|h2,
+html|h3,
+html|h4,
+html|h5,
+html|h6,
+html|b,
+html|strong {
+  font-weight: bolder;
+}
+html|h1,
+html|h2,
+html|h3,
+html|h4,
+html|h5,
+html|h6 {
+  break-after: avoid;
+}
+html|blockquote {
+  margin-block-start: 0px;
+  margin-block-end: 0px;
+  margin-inline-start: 40px;
+  margin-inline-end: 40px;
+}
+html|i,
+html|cite,
+html|em,
+html|var,
+html|address {
+  font-style: italic;
+}
+html|pre,
+html|tt,
+html|code,
+html|kbd,
+html|samp {
+  font-family: monospace;
+}
+html|pre {
+  white-space: pre;
+}
+html|button,
+html|textarea,
+html|input,
+html|select {
+  display: inline-block;
+}
+html|big {
+  font-size: 1.17em;
+}
+html|small,
+html|sub,
+html|sup {
+  font-size: 0.83em;
+}
+html|sub {
+  vertical-align: sub;
+}
+html|sup {
+  vertical-align: super;
+}
+html|table {
+  border-spacing: 2px;
+}
+html|thead,
+html|tbody,
+html|tfoot {
+  vertical-align: middle;
+}
+/* for XHTML tables without tbody */
+html|table > html|tr {
+  vertical-align: middle;
+}
+html|td,
+html|th {
+  vertical-align: inherit;
+}
+html|s,
+html|strike,
+html|del {
+  text-decoration: line-through;
+}
+html|hr {
+  border: 1px inset;
+}
+html|ol,
+html|ul,
+html|dir,
+html|menu,
+html|dd {
+  margin: 0px;
+  margin-inline-start: 40px;
+}
+html|ol {
+  list-style-type: decimal;
+}
+html|ol html|ul,
+html|ul html|ol,
+html|ul html|ul,
+html|ol html|ol {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+html|u,
+html|ins {
+  text-decoration: underline;
+}
+html|center {
+  text-align: center;
+}
+html|q:before {
+  content: open-quote;
+}
+html|q:after {
+  content: close-quote;
+}
+
+html|audio,
+html|video {
+  break-inside: avoid;
+}
+
+html|ruby {
+  display: ruby;
+}
+html|rp {
+  display: none;
+}
+html|rbc {
+  display: ruby-base-container;
+}
+html|rtc {
+  display: ruby-text-container;
+}
+html|rb {
+  display: ruby-base;
+  white-space: nowrap;
+}
+html|rt {
+  display: ruby-text;
+}
+html|ruby,
+html|rb,
+html|rt,
+html|rbc,
+html|rtc {
+  unicode-bidi: isolate;
+}
+
+html|rtc,
+html|rt {
+  font-variant-east-asian: ruby;
+  text-emphasis: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+html|rtc:lang(zh),
+html|rt:lang(zh) {
+  ruby-align: center;
+}
+
+html|rtc,
+html|rt {
+  font-size: 50%;
+}
+
+html|rtc:lang(zh-TW),
+html|rt:lang(zh-TW) {
+  font-size: 30%;
+}
+
+html|rtc > html|rt,
+html|rtc > html|rt:lang(zh-TW) {
+  font-size: 100%;
+}
+
+/* Bidi settings */
+html|bdo[dir="ltr"] {
+  direction: ltr;
+  unicode-bidi: bidi-override;
+}
+html|bdo[dir="rtl"] {
+  direction: rtl;
+  unicode-bidi: bidi-override;
+}
+html|*[dir="ltr"] {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+html|*[dir="rtl"] {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+/*------------------ epub-specific ---------------------*/
+
+@namespace epub "http://www.idpf.org/2007/ops";
+
+html|a[epub|type="noteref"] {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0.01;
+}
+
+html|a[epub|type="noteref"]:href-epub-type(footnote) {
+  -adapt-template: url(user-agent.xml#footnote);
+  text-decoration: none;
+}
+
+html|aside[epub|type="footnote"] {
+  display: none;
+}
+
+html|aside[epub|type="footnote"]:footnote-content {
+  display: block;
+  margin: 0.25em;
+  font-size: 1.2em;
+  line-height: 1.2;
+}
+
+epub|trigger {
+  display: none;
+}
+
+epub|switch {
+  display: inline;
+}
+
+epub|default {
+  display: inline;
+}
+
+epub|case {
+  display: none;
+}
+
+epub|case[required-namespace::supported] {
+  display: inline;
+}
+
+epub|case[required-namespace::supported] ~ epub|case {
+  display: none;
+}
+
+epub|case[required-namespace::supported] ~ epub|default {
+  display: none;
+}
+
+/*--------------- ncx and toc ----------------------*/
+
+@namespace ncx "http://www.daisy.org/z3986/2005/ncx/";
+
+ncx|ncx {
+  display: block;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+ncx|content {
+  display: none;
+}
+
+body > * {
+  -adapt-behavior: body-child;
+}
+
+[role="doc-toc"],
+[role="directory"],
+nav,
+.toc,
+#toc,
+#table-of-contents,
+#contents {
+  -adapt-behavior: toc-root;
+}
+
+[role="doc-toc"] a,
+[role="directory"] a,
+nav a,
+.toc a,
+#toc a,
+ncx|navLabel {
+  -adapt-behavior: toc-node-anchor;
+}
+
+[role="doc-toc"] li,
+[role="directory"] li,
+nav li,
+.toc li,
+#toc li,
+ncx|navPoint {
+  -adapt-behavior: toc-node;
+}
+
+[role="doc-toc"] li > *:first-child,
+[role="directory"] li > *:first-child,
+nav li > *:first-child,
+.toc li > *:first-child,
+#toc li > *:first-child {
+  -adapt-behavior: toc-node-first-child;
+}
+
+[role="doc-toc"] ol,
+[role="directory"] ol,
+nav ol,
+.toc ol,
+#toc ol,
+[role="doc-toc"] ul,
+[role="directory"] ul,
+nav ul,
+.toc ul,
+#toc ul,
+ol[role="doc-toc"],
+ol[role="directory"],
+ol.toc,
+ol#toc,
+ul[role="doc-toc"],
+ul[role="directory"],
+ul.toc,
+ul#toc {
+  -adapt-behavior: toc-container;
+}
+
+/*---------------- fb2 ---------------------*/
+
+@namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
+
+fb2|FictionBook {
+  display: block;
+}
+
+fb2|body {
+  font-family: serif;
+  margin: 8px;
+  column-width: 25em;
+}
+
+fb2|a {
+  line-height: 0.1;
+  vertical-align: super;
+  font-size: 0.7em;
+}
+
+fb2|sub {
+  line-height: 0.1;
+  font-size: 0.7em;
+}
+
+fb2|sup {
+  line-height: 0.1;
+  font-size: 0.7em;
+}
+
+fb2|table {
+  display: table;
+  font-size: 0.8em;
+  font-family: sans-serif;
+  margin: 0.5em;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+fb2|td {
+  border: 1px solid black;
+  padding: 0.3em;
+}
+
+fb2|th {
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid black;
+  background-color: #cee;
+  padding: 0.3em;
+}
+
+fb2|code {
+  font-family: monospace;
+}
+
+fb2|p {
+  display: block;
+  margin: 0px;
+  text-indent: 1.5em;
+  text-align: justify;
+}
+
+fb2|title fb2|p {
+  margin: 0px 0px 0.5em 0px;
+  text-indent: 0px;
+  text-align: inherit;
+}
+
+fb2|title {
+  font-size: 2.2em;
+  font-weight: bold;
+  break-inside: avoid;
+  break-after: avoid;
+  text-align: center;
+  margin: 1em 0px 0.5em 0px;
+  display: block;
+}
+
+fb2|section {
+  display: block;
+}
+
+fb2|section fb2|title {
+  font-size: 1.8em;
+  text-align: center;
+  margin: 1em 0px 0.5em 0px;
+}
+
+fb2|section fb2|section fb2|title {
+  font-size: 1.5em;
+  text-align: left;
+  margin: 1em 0px 0.5em 1.5625em;
+}
+
+fb2|section fb2|section fb2|section fb2|title {
+  font-size: 1.3em;
+  text-align: left;
+  margin: 1em 0px 0.5em 1.923em;
+}
+
+fb2|section fb2|section fb2|section fb2|section fb2|title {
+  font-size: 1.2em;
+  text-align: left;
+  margin: 1em 0px 0.5em 2.083em;
+}
+
+fb2|section fb2|section fb2|section fb2|section fb2|section fb2|title {
+  font-size: 1.1em;
+  text-align: left;
+  margin: 1em 0px 0.5em 2.272em;
+}
+
+fb2|section
+  fb2|section
+  fb2|section
+  fb2|section
+  fb2|section
+  fb2|section
+  fb2|title {
+  text-align: left;
+  margin: 1em 0px 0.5em 2.5em;
+}
+
+fb2|epigraph {
+  text-align: left;
+  font-style: italic;
+  margin: 1em 1em 2em 30%;
+  display: block;
+}
+
+fb2|image {
+  text-align: center;
+  padding: 3px;
+}
+
+fb2|image::inner {
+  max-width: 95%;
+}
+
+fb2|image::after {
+  display: block;
+  content: attr(title);
+}
+
+fb2|v {
+  text-indent: -1em;
+  padding-left: 1em;
+  margin: 0px;
+  display: block;
+}
+fb2|poem {
+  margin: 0.5em 0px 0.5em 2em;
+  display: block;
+}
+fb2|date {
+  margin: 0.5em 0px 0.5em 50%;
+  font-style: italic;
+  display: block;
+}
+fb2|stanza {
+  margin: 0.5em 0px;
+  break-inside: avoid;
+  display: block;
+}
+fb2|empty-line {
+  height: 1em;
+  margin: 0px;
+  display: block;
+}
+fb2|cite {
+  margin: 0.5em 0px 0.5em 1em;
+  font-size: 0.95em;
+  display: block;
+}
+fb2|subtitle {
+  text-indent: 0px;
+  text-align: center;
+  font-style: italic;
+  font-weight: bold;
+  margin: 0.5em 2em;
+  break-inside: avoid;
+  break-after: avoid;
+  display: block;
+}
+fb2|annotation {
+  margin: 1em 0px 1em 2em;
+  text-indent: 0px;
+  font-style: italic;
+  display: block;
+}
+fb2|text-author {
+  text-indent: 0px;
+  margin: 0.2em 0px 0px 3em;
+  display: block;
+}
+fb2|emphasis {
+  font-style: italic;
+}
+fb2|strong {
+  font-weight: bold;
+}
+fb2|strikethrough {
+  text-decoration: line-through;
+}
+fb2|*.italic {
+  font-style: italic;
+}
+fb2|*.bold {
+  font-weight: bold;
+}
+
+fb2|binary,
+fb2|description,
+fb2|stylesheet {
+  display: none;
+}
+
+fb2|a[type="note"] {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0.01;
+  text-decoration: none;
+  -adapt-template: url(user-agent.xml#footnote);
+}
+
+fb2|body[name="notes"] {
+  display: none;
+}
+
+fb2|body[name="notes"] fb2|title {
+  display: inline;
+  vertical-align: super;
+  line-height: 0.01;
+  text-align: left;
+  font-size: 0.75em;
+  font-weight: bold;
+  margin: 0px;
+}
+
+fb2|body[name="notes"] fb2|p {
+  text-indent: 0px;
+  display: inline; /* for now */
+}
+
+fb2|body[name="notes"] fb2|p + fb2|p {
+  display: block;
+}
+
+fb2|body[name="notes"] fb2|section {
+  text-indent: 0px;
+  line-height: 1.2;
+  font-size: 1.2em;
+}
+`;

@@ -107,14 +107,14 @@ class SettingsPanel {
 
     this.defaultPageStyle = new PageStyle();
 
-    ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function(
+    ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function (
       methodName,
     ) {
       this[methodName] = this[methodName].bind(this);
     },
     this);
 
-    messageDialog.visible.subscribe(function(visible) {
+    messageDialog.visible.subscribe(function (visible) {
       if (visible) this.close();
     }, this);
 
