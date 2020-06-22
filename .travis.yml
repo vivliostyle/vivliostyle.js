@@ -4,7 +4,8 @@ node_js:
 before_install:
   - sudo pip install virtualenv # for wpt_sauce
 script:
-  - yarn build
+  - yarn bootstrap
+  - yarn build-dev
   - yarn lint
   - ./scripts/travis-test-sauce.sh
 # - scripts/wpt-sauce.sh
