@@ -13,30 +13,30 @@ Vivliostyle.js — HTML+CSS typesetting and rich paged viewing with EPUB/Web pub
 
 ## Official Packages
 
-### Vivliostyle Viewer [`vivliostyle-viewer`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer)
+### [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/core)](https://www.npmjs.com/package/@vivliostyle/core) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/core)](https://www.npmjs.com/package/@vivliostyle/core)
 
-Use online [Vivliostyle Viewer](https://vivliostyle.org/viewer/), or download a distribution package from <https://vivliostyle.github.io>.
+Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support.
+
+### [Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/viewer)](https://www.npmjs.com/package/@vivliostyle/viewer) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/viewer)](https://www.npmjs.com/package/@vivliostyle/viewer)
+
+Use [officially-hosted Vivliostyle Viewer](https://vivliostyle.org/viewer/) or download a distribution package from <https://vivliostyle.github.io>.
 
 - [User Guide](https://docs.vivliostyle.org/#/user-guide)
 - [Samples](https://vivliostyle.org/samples/)
 
-### Vivliostyle Core [`vivliostyle-core`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core)
-
-To integrate Vivliostyle Core in your project, install it as follows:
-
-```
-npm install @vivliostyle/core
-```
-
 See [API Reference](https://docs.vivliostyle.org/#/api).
 
-### Vivliostyle CLI [`vivliostyle-cli`](https://github.com/vivliostyle/vivliostyle-cli)
+### [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/cli)](https://www.npmjs.com/package/@vivliostyle/cli) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/cli)](https://www.npmjs.com/package/@vivliostyle/cli)
 
-[Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) is a command-line interface for Vivliostyle.
+[Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) is a command-line interface of Vivliostyle.
 
-### Vivliostyle Print [`vivliostyle-print`](https://github.com/vivliostyle/vivliostyle-print)
+### [Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print)
 
-[Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print) allows page-layouting using the Vivliostyle Core for printing within a website without destroying the original layout.
+[Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print) allows page-layouting using Vivliostyle Core for printing within a website without destroying the original layout.
+
+### [Vivliostyle Flavored Markdown](https://github.com/vivliostyle/vfm) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/vfm)](https://www.npmjs.com/package/@vivliostyle/vfm) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/vfm)](https://www.npmjs.com/package/@vivliostyle/vfm)
+
+Vivliostyle Flavored Markdown (VFM), a Markdown syntax optimized for book authoring. It is standardized and published for Vivliostyle and its sibling projects.
 
 ## Contribution
 
@@ -80,6 +80,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
@@ -89,10 +90,6 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
 Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
-
-## Other Documentation
-
-- [Vivliostyle Documents](https://vivliostyle.org/documents/)
 
 [github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases
