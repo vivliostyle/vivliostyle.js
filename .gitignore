@@ -1,3 +1,4 @@
+*.code-workspace
 .vscode
 .vercel
 .now
