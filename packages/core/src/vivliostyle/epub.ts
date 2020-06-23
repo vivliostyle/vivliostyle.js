@@ -100,7 +100,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
   loadPubDoc(url: string, haveZipMetadata: boolean): Task.Result<OPFDoc> {
     const frame: Task.Frame<OPFDoc> = Task.newFrame("loadPubDoc");
 
-    Net.ajax(url, null, "HEAD").then((response) => {
+    Net.ajax(url, null, "GET").then((response) => {
       if (response.status >= 400) {
         // This url can be the root of an unzipped EPUB.
         this.loadEPUBDoc(url, haveZipMetadata).then((opf) => {
