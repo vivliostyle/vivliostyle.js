@@ -11,32 +11,38 @@ Vivliostyle.js — HTML+CSS typesetting and rich paged viewing with EPUB/Web pub
 📖 [Documents](https://vivliostyle.org/documents/)  
 🤝 [Join Community](https://vivliostyle.org/community/)
 
-## Official Packages
+## Packages
 
-### [Vivliostyle Core](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/core)](https://www.npmjs.com/package/@vivliostyle/core) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/core)](https://www.npmjs.com/package/@vivliostyle/core)
+### [`@vivliostyle/core`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/core)](https://www.npmjs.com/package/@vivliostyle/core) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/core)](https://www.npmjs.com/package/@vivliostyle/core)
 
-Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support.
+A core library for HTML+CSS typesetting with EPUB/Web publications support.
 
-### [Vivliostyle Viewer](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/viewer)](https://www.npmjs.com/package/@vivliostyle/viewer) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/viewer)](https://www.npmjs.com/package/@vivliostyle/viewer)
+See [API Reference](https://docs.vivliostyle.org/#/api) for further details.
+
+### [`@vivliostyle/viewer`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/viewer)](https://www.npmjs.com/package/@vivliostyle/viewer) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/viewer)](https://www.npmjs.com/package/@vivliostyle/viewer)
+
+A web app provides intuitive UI for Vivliostyle.
 
 Use [officially-hosted Vivliostyle Viewer](https://vivliostyle.org/viewer/) or download a distribution package from <https://vivliostyle.github.io>.
 
 - [User Guide](https://docs.vivliostyle.org/#/user-guide)
 - [Samples](https://vivliostyle.org/samples/)
 
-See [API Reference](https://docs.vivliostyle.org/#/api).
+### [`@vivliostyle/cli`](https://github.com/vivliostyle/vivliostyle-cli) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/cli)](https://www.npmjs.com/package/@vivliostyle/cli) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/cli)](https://www.npmjs.com/package/@vivliostyle/cli)
 
-### [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/cli)](https://www.npmjs.com/package/@vivliostyle/cli) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/cli)](https://www.npmjs.com/package/@vivliostyle/cli)
+A command-line interface of Vivliostyle.
 
-[Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) is a command-line interface of Vivliostyle.
+### [`@vivliostyle/react`](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/react) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/react)](https://www.npmjs.com/package/@vivliostyle/react) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/react)](https://www.npmjs.com/package/@vivliostyle/react)
 
-### [Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print)
+Use React component as a Vivliostyle renderer.
 
-[Vivliostyle Print](https://github.com/vivliostyle/vivliostyle-print) allows page-layouting using Vivliostyle Core for printing within a website without destroying the original layout.
+### [`@vivliostyle/print`](https://github.com/vivliostyle/vivliostyle-print) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print)
 
-### [Vivliostyle Flavored Markdown](https://github.com/vivliostyle/vfm) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/vfm)](https://www.npmjs.com/package/@vivliostyle/vfm) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/vfm)](https://www.npmjs.com/package/@vivliostyle/vfm)
+Vivliostyle Print allows page-layouting using Vivliostyle Core for printing within a website without destroying the original layout.
 
-Vivliostyle Flavored Markdown (VFM), a Markdown syntax optimized for book authoring. It is standardized and published for Vivliostyle and its sibling projects.
+### [`@vivliostyle/vfm`](https://github.com/vivliostyle/vfm) [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/vfm)](https://www.npmjs.com/package/@vivliostyle/vfm) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/vfm)](https://www.npmjs.com/package/@vivliostyle/vfm)
+
+Vivliostyle Flavored Markdown (VFM) is a Markdown syntax optimized for book authoring. It is standardized and published for Vivliostyle and its sibling projects.
 
 ## Contribution
 
