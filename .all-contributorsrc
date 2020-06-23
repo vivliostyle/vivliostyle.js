@@ -89,7 +89,8 @@
       "profile": "https://vivliostyle.org",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "talk"
       ]
     },
     {
@@ -108,7 +109,8 @@
       "profile": "https://harusamex.com",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "talk"
       ]
     },
     {
@@ -136,7 +138,9 @@
       "profile": "https://uechi.io",
       "contributions": [
         "code",
-        "doc"
+        "doc",
+        "design",
+        "talk"
       ]
     },
     {
@@ -146,6 +150,46 @@
       "profile": "https://waldowski.me/",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "yamasy1549",
+      "name": "yamasy1549",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/7820884?v=4",
+      "profile": "http://yamasy.info/",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "ogwata",
+      "name": "OGATA Katsuhiro",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/31482860?v=4",
+      "profile": "https://twitter.com/ogwata",
+      "contributions": [
+        "blog",
+        "eventOrganizing"
+      ]
+    },
+    {
+      "login": "akabekobeko",
+      "name": "akabeko",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1257526?v=4",
+      "profile": "https://akabeko.me/",
+      "contributions": [
+        "content",
+        "ideas"
+      ]
+    },
+    {
+      "login": "youchan",
+      "name": "youchan",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/222183?v=4",
+      "profile": "http://youchan.org/",
+      "contributions": [
+        "code",
+        "talk"
       ]
     }
   ],
