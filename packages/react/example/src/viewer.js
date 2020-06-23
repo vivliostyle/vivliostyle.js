@@ -1,24 +1,15 @@
 import React, { useState } from "react";
-import { ReadyState } from "@vivliostyle/core";
 import styled from "@emotion/styled";
-import { ThemeProvider } from "@chakra-ui/core";
-import { theme } from "@chakra-ui/core";
-import { Spinner, Button, Flex } from "@chakra-ui/core";
+import { ReadyState } from "@vivliostyle/core";
 
-import { Renderer, NavigationPayload } from "./renderer";
+import { Renderer } from "../../src/renderer";
 
-interface VivliostyleViewerProps {
-  source: string;
-}
-
-export const VivliostyleViewer: React.FC<VivliostyleViewerProps> = ({
-  source,
-}) => {
+export const VivliostyleViewer = ({ source }) => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [lastNav, setLastNav] = useState<NavigationPayload>();
+  const [lastNav, setLastNav] = useState();
 
-  function handleStateChange(state: ReadyState) {
+  function handleStateChange(state) {
     console.log(state);
 
     if (state === ReadyState.COMPLETE) {
@@ -28,7 +19,7 @@ export const VivliostyleViewer: React.FC<VivliostyleViewerProps> = ({
     }
   }
 
-  function handleNavigation(payload: NavigationPayload) {
+  function handleNavigation(payload) {
     setLastNav(payload);
   }
 
@@ -44,7 +35,8 @@ export const VivliostyleViewer: React.FC<VivliostyleViewerProps> = ({
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <div>
+      <CSSReset />
       <Flex>
         <Button variantColor="green" onClick={prevPage}>
           Prev
@@ -60,19 +52,9 @@ export const VivliostyleViewer: React.FC<VivliostyleViewerProps> = ({
           onReadyStateChange={handleStateChange}
           onNavigation={handleNavigation}
         />
-        {loading && (
-          <OverflowView>
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="blue.500"
-              size="xl"
-            />
-          </OverflowView>
-        )}
+        {loading && <OverflowView>Loading</OverflowView>}
       </Container>
-    </ThemeProvider>
+    </div>
   );
 };
 

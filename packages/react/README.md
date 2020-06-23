@@ -14,7 +14,6 @@ yarn add @vivliostyle/react
 import React from "react";
 
 import { Renderer } from "@vivliostyle/react";
-import "@vivliostyle/react/dist/index.css";
 
 function App() {
   const sample =

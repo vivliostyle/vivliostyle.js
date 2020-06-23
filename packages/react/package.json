@@ -4,26 +4,23 @@
   "version": "2.1.0-pre.0",
   "author": "Yasuaki Uechi <y@uechi.io>",
   "scripts": {
-    "build": "microbundle-crl --no-compress --format modern,cjs",
+    "build": "microbundle-crl --format modern,cjs",
+    "build-dev": "microbundle-crl --no-compress --format cjs",
     "deploy": "gh-pages -d example/build",
+    "dev": "run-p dev:*",
+    "dev:example": "yarn --cwd example start",
+    "dev:react": "microbundle-crl watch --no-compress --format modern",
     "predeploy": "cd example && yarn install && yarn run build",
     "prepublish": "run-s build",
-    "dev": "run-p dev:*",
-    "dev:react": "microbundle-crl watch --no-compress --format modern,cjs",
-    "dev:example": "yarn --cwd example start",
     "test": "run-s test:unit test:lint test:build",
     "test:build": "run-s build",
     "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom"
   },
   "dependencies": {
-    "@chakra-ui/core": "^1.0.0-next.1",
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
-    "@vivliostyle/core": "^2.1.0-pre.0",
-    "emotion-theming": "^10.0.27",
-    "react-helmet": "^6.1.0",
-    "react-spinners": "^0.9.0"
+    "@vivliostyle/core": "^2.1.0-pre.0"
   },
   "peerDependencies": {
     "react": "^16.13.1"
@@ -31,7 +28,6 @@
   "devDependencies": {
     "@types/jest": "^26.0.0",
     "@types/react": "^16.9.27",
-    "@types/react-helmet": "^6.0.0",
     "cross-env": "^7.0.2",
     "gh-pages": "^3.0.0",
     "microbundle-crl": "^0.13.8",
@@ -41,8 +37,10 @@
     "react-dom": "^16.13.1",
     "react-scripts": "^3.4.1"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.modern.js",
+  "source": "src/index.tsx",
+  "types": "dist/index.d.ts",
+  "main": "dist/react-vivliostyle.js",
+  "module": "dist/react-vivliostyle.modern.js",
   "files": [
     "dist"
   ],
@@ -55,8 +53,16 @@
     "directory": "packages/react"
   },
   "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
+  },
   "engines": {
     "node": ">=10"
   },
-  "source": "src/index.tsx"
+  "homepage": "https://vivliostyle.org",
+  "keywords": [
+    "publication",
+    "react",
+    "vivliostyle"
+  ]
 }
