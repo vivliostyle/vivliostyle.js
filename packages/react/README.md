@@ -1,6 +1,8 @@
-# Vivliostyle Viewer for React
+# @vivliostyle/react
 
 [![NPM](https://img.shields.io/npm/v/@vivliostyle/react.svg)](https://www.npmjs.com/package/@vivliostyle/react)
+
+Use React component as a Vivliostyle renderer.
 
 ## Install
 
@@ -8,7 +10,7 @@
 yarn add @vivliostyle/react
 ```
 
-## Usage
+## Use
 
 ```tsx
 import React from "react";
@@ -43,4 +45,4 @@ function App() {
 }
 ```
 
-See [example/src/App.js](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/react/example/src/App.js).
+See [example](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/react/example).
