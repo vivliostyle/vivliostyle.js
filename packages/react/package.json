@@ -6,6 +6,7 @@
   "scripts": {
     "build": "microbundle-crl --format modern,cjs",
     "build-dev": "microbundle-crl --no-compress --format cjs",
+    "clean": "shx rm -rf dist",
     "deploy": "gh-pages -d example/build",
     "dev": "run-p dev:*",
     "dev:example": "yarn --cwd example start",
