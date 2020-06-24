@@ -45,4 +45,4 @@ function App() {
 }
 ```
 
-See [example](https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/react/example).
+Run `yarn storybook` to see the Storybook.

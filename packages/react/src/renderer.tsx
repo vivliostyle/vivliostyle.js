@@ -185,6 +185,7 @@ export const Renderer: React.FC<RendererProps> = ({
 
     const cleanup = registerEventHandlers();
     return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
   // sync location
@@ -216,7 +217,6 @@ const Container = styled.div<RendererTheme>`
     }
 
     [data-vivliostyle-viewer-viewport] {
-      /* background: #ececec; */
       display: flex;
       overflow: auto;
       position: relative;
