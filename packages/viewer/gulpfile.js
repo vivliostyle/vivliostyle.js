@@ -18,12 +18,6 @@ const pkg = require("./package.json");
 const SRC_DIR = "src";
 const DEST_DIR = "lib";
 const RESOURCE_MAP = {
-  core: {
-    // only for development purpose
-    src: "../node_modules/@vivliostyle/core/lib",
-    dest: "js",
-    srcPattern: "*.js",
-  },
   fonts: { src: "fonts" },
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
   css: { src: "scss", dest: "css", srcPattern: "*.scss" },
@@ -199,9 +193,6 @@ function serve(isDevelopment) {
     startPath: "/core/test/files/",
   });
   const target = [DEST_DIR + "/**/*"];
-  if (isDevelopment) {
-    target.push(srcPattern("core"));
-  }
   gulp.watch(target).on("change", browserSync.reload);
 }
 gulp.task(
