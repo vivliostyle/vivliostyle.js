@@ -1,3 +1,5 @@
+![logo](https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/.github/vivliostyle-react.png)
+
 # @vivliostyle/react
 
 [![NPM](https://img.shields.io/npm/v/@vivliostyle/react.svg)](https://www.npmjs.com/package/@vivliostyle/react)
