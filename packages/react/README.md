@@ -1,4 +1,4 @@
-![logo](https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/.github/vivliostyle-react.png)
+<img src="https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/.github/vivliostyle-react.png" width="200" />
 
 # @vivliostyle/react
 
