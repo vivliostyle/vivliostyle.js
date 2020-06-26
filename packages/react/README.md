@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/.github/vivliostyle-react.png" width="200" />
 
-# @vivliostyle/react
+# React Vivliostyle
 
 [![NPM](https://img.shields.io/npm/v/@vivliostyle/react.svg)](https://www.npmjs.com/package/@vivliostyle/react)
 
