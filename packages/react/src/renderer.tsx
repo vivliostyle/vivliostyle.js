@@ -1,13 +1,12 @@
-import React, { useRef, useEffect } from "react";
 import styled from "@emotion/styled";
 import {
   CoreViewer,
-  Payload,
-  ReadyState,
   Navigation,
   PageViewMode,
+  Payload,
+  ReadyState,
 } from "@vivliostyle/core";
-
+import React, { useEffect, useRef } from "react";
 import { epageFromPageNumber } from "./epage";
 
 export type MessageType = "debug" | "info" | "warn";
@@ -32,7 +31,8 @@ type ChildrenFunction = ({
 interface RendererTheme {
   fontSize?: number;
   background?: string;
-  userStylesheet?: string;
+  userStyleSheet?: string;
+  authorStyleSheet?: string;
 }
 
 interface RendererProps {
@@ -54,7 +54,7 @@ interface RendererProps {
   onLoad?: (state: VolatileState) => void;
   onNavigation?: (state: VolatileState) => void;
   onHyperlink?: (payload: HyperlinkPayload) => void;
-  children: React.ReactNode | ChildrenFunction;
+  children?: React.ReactNode | ChildrenFunction;
 }
 
 export const Renderer: React.FC<RendererProps> = ({
@@ -65,7 +65,12 @@ export const Renderer: React.FC<RendererProps> = ({
   autoResize = true,
   pageViewMode = PageViewMode.SINGLE_PAGE,
   defaultPaperSize,
-  theme: { fontSize = 16, background = "#ececec", userStylesheet } = {},
+  theme: {
+    fontSize = 16,
+    background = "#ececec",
+    userStyleSheet,
+    authorStyleSheet,
+  } = {},
   style,
   onMessage,
   onError,
@@ -79,15 +84,7 @@ export const Renderer: React.FC<RendererProps> = ({
   const instanceRef = useRef<CoreViewer>();
   const stateRef = React.useRef<VolatileState>();
 
-  function loadSource() {
-    const instance = instanceRef.current!;
-    const isPublication = source.endsWith(".json");
-    const documentOptions = {
-      ...(userStylesheet
-        ? { userStyleSheet: [{ text: userStylesheet }] }
-        : null),
-    };
-
+  function setViewerOptions() {
     const viewerOptions = {
       fontSize,
       pageViewMode,
@@ -98,15 +95,41 @@ export const Renderer: React.FC<RendererProps> = ({
       pageBorderWidth: 1,
       fitToScreen: false,
     };
+    instanceRef.current!.setOptions(viewerOptions);
+  }
+
+  function loadSource() {
+    const instance = instanceRef.current!;
+    const isPublication = source.endsWith(".json");
+    const documentOptions = {
+      ...(userStyleSheet
+        ? {
+            userStyleSheet: [
+              {
+                [userStyleSheet.endsWith(".css")
+                  ? "url"
+                  : "text"]: userStyleSheet,
+              },
+            ],
+          }
+        : null),
+      ...(authorStyleSheet
+        ? {
+            authorStyleSheet: [
+              {
+                [authorStyleSheet.endsWith(".css")
+                  ? "url"
+                  : "text"]: authorStyleSheet,
+              },
+            ],
+          }
+        : null),
+    };
 
     if (isPublication) {
-      instance.loadPublication(source, documentOptions, viewerOptions);
+      instance.loadPublication(source, documentOptions);
     } else {
-      instance.loadDocument(
-        { url: source, startPage: page },
-        documentOptions,
-        viewerOptions,
-      );
+      instance.loadDocument({ url: source, startPage: page }, documentOptions);
     }
   }
 
@@ -181,12 +204,24 @@ export const Renderer: React.FC<RendererProps> = ({
   // initialize document and event handlers
   useEffect(() => {
     initInstance();
+    setViewerOptions();
     loadSource();
 
     const cleanup = registerEventHandlers();
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source]);
+  }, [source, authorStyleSheet, userStyleSheet]);
+
+  useEffect(() => {
+    setViewerOptions();
+  }, [
+    fontSize,
+    pageViewMode,
+    zoom,
+    renderAllPages,
+    autoResize,
+    defaultPaperSize,
+  ]);
 
   // sync location
   useEffect(() => {
@@ -206,9 +241,6 @@ export const Renderer: React.FC<RendererProps> = ({
 };
 
 const Container = styled.div<RendererTheme>`
-  position: relative;
-  display: flex;
-  overflow: auto;
   background: ${({ background }) => background};
 
   @media screen {

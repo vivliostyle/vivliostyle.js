@@ -22,6 +22,8 @@ export const Basic = () => (
     theme={{
       fontSize: number("Font Size", 16),
       background: color("Background", "#ececec"),
+      authorStyleSheet: text("Author Stylesheet", undefined),
+      userStyleSheet: text("User Stylesheet", undefined),
     }}
     renderAllPages={boolean("Render All Pages", true)}
     autoResize={boolean("Auto Resize", true)}
