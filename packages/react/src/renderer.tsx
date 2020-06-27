@@ -28,13 +28,6 @@ type ChildrenFunction = ({
   reload: () => void;
 }) => React.ReactNode;
 
-interface RendererTheme {
-  fontSize?: number;
-  background?: string;
-  userStyleSheet?: string;
-  authorStyleSheet?: string;
-}
-
 interface RendererProps {
   source: string;
   page?: number;
@@ -46,7 +39,11 @@ interface RendererProps {
     width: number;
     height: number;
   };
-  theme?: RendererTheme;
+
+  fontSize?: number;
+  background?: string;
+  userStyleSheet?: string;
+  authorStyleSheet?: string;
   style?: React.CSSProperties;
   onMessage?: (message: string, type: MessageType) => void;
   onError?: (error: string) => void;
@@ -61,16 +58,14 @@ export const Renderer: React.FC<RendererProps> = ({
   source,
   page = 1,
   zoom = 1,
+  fontSize = 16,
+  background = "#ececec",
   renderAllPages = true,
   autoResize = true,
   pageViewMode = PageViewMode.SINGLE_PAGE,
   defaultPaperSize,
-  theme: {
-    fontSize = 16,
-    background = "#ececec",
-    userStyleSheet,
-    authorStyleSheet,
-  } = {},
+  userStyleSheet,
+  authorStyleSheet,
   style,
   onMessage,
   onError,
@@ -240,7 +235,7 @@ export const Renderer: React.FC<RendererProps> = ({
   return container;
 };
 
-const Container = styled.div<RendererTheme>`
+const Container = styled.div<Pick<RendererProps, "background">>`
   background: ${({ background }) => background};
 
   @media screen {

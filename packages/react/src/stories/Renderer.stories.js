@@ -19,12 +19,8 @@ export const Basic = () => (
     source={select("Source", SOURCES, SOURCES[0])}
     page={number("Page", 1)}
     zoom={number("Zoom", 1)}
-    theme={{
-      fontSize: number("Font Size", 16),
-      background: color("Background", "#ececec"),
-      authorStyleSheet: text("Author Stylesheet", undefined),
-      userStyleSheet: text("User Stylesheet", undefined),
-    }}
+    fontSize={number("Font Size", 16)}
+    background={color("Background", "#ececec")}
     renderAllPages={boolean("Render All Pages", true)}
     autoResize={boolean("Auto Resize", true)}
     pageViewMode={select(
@@ -33,6 +29,8 @@ export const Basic = () => (
       "singlePage",
     )}
     defaultPaperSize={text("Default Paper Size", undefined)}
+    authorStyleSheet={text("Author Stylesheet", undefined)}
+    userStyleSheet={text("User Stylesheet", undefined)}
     onLoad={action("loaded")}
     onError={action("error")}
     onNavigation={action("navigation")}
