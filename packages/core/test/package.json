@@ -2,7 +2,7 @@
   "name": "core-test",
   "scripts": {
     "test": "karma start conf/karma-local.conf.js",
-    "test-sauce": "test -z \"$SAUCE_USERNAME\" || karma start test/conf/karma-sauce.conf.js"
+    "test-sauce": "test -z \"$SAUCE_USERNAME\" || karma start conf/karma-sauce.conf.js"
   },
   "devDependencies": {
     "jasmine-core": "^3.4.0",
