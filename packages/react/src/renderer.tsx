@@ -39,7 +39,8 @@ interface RendererProps {
     width: number;
     height: number;
   };
-
+  pageBorderWidth?: number;
+  fitToScreen?: boolean;
   fontSize?: number;
   background?: string;
   userStyleSheet?: string;
@@ -64,6 +65,8 @@ export const Renderer: React.FC<RendererProps> = ({
   autoResize = true,
   pageViewMode = PageViewMode.SINGLE_PAGE,
   defaultPaperSize,
+  pageBorderWidth = 1,
+  fitToScreen = false,
   userStyleSheet,
   authorStyleSheet,
   style,
@@ -87,8 +90,8 @@ export const Renderer: React.FC<RendererProps> = ({
       renderAllPages,
       autoResize,
       defaultPaperSize,
-      pageBorderWidth: 1,
-      fitToScreen: false,
+      pageBorderWidth,
+      fitToScreen,
     };
     instanceRef.current!.setOptions(viewerOptions);
   }
@@ -124,7 +127,16 @@ export const Renderer: React.FC<RendererProps> = ({
     if (isPublication) {
       instance.loadPublication(source, documentOptions);
     } else {
-      instance.loadDocument({ url: source, startPage: page }, documentOptions);
+      instance.loadDocument({ url: source, startPage: page }, documentOptions, {
+        fontSize,
+        pageViewMode,
+        zoom: 1,
+        renderAllPages,
+        autoResize,
+        defaultPaperSize,
+        pageBorderWidth,
+        fitToScreen: false,
+      });
     }
   }
 
@@ -216,6 +228,8 @@ export const Renderer: React.FC<RendererProps> = ({
     renderAllPages,
     autoResize,
     defaultPaperSize,
+    pageBorderWidth,
+    fitToScreen,
   ]);
 
   // sync location
@@ -236,6 +250,7 @@ export const Renderer: React.FC<RendererProps> = ({
 };
 
 const Container = styled.div<Pick<RendererProps, "background">>`
+  overflow: scroll;
   background: ${({ background }) => background};
 
   @media screen {
@@ -295,6 +310,100 @@ const Container = styled.div<Pick<RendererProps, "background">>`
       margin-left: auto;
       margin-right: auto;
       transform-origin: center top;
+    }
+  }
+
+  /* vivliostyle-viewport */
+  [data-vivliostyle-layout-box] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+    right: auto;
+    bottom: auto;
+    overflow: visible;
+    z-index: auto;
+  }
+
+  [data-vivliostyle-page-container] {
+    position: relative;
+    overflow: hidden;
+  }
+
+  [data-vivliostyle-bleed-box] {
+    position: absolute;
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-vivliostyle-page-box] ~ [data-vivliostyle-page-box] {
+    display: none;
+  }
+
+  [data-vivliostyle-toc-box] {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    overflow: scroll;
+    overflow-x: hidden;
+    background: rgba(248, 248, 248, 0.9);
+    border-radius: 2px;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  @media print {
+    [data-vivliostyle-toc-box] {
+      display: none;
+    }
+
+    [data-vivliostyle-outer-zoom-box],
+    [data-vivliostyle-spread-container] {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    [data-vivliostyle-spread-container],
+    [data-vivliostyle-page-container] {
+      -moz-transform: none !important;
+      -ms-transform: none !important;
+      -webkit-transform: none !important;
+      transform: none !important;
+    }
+
+    [data-vivliostyle-page-container] {
+      display: block !important;
+      max-width: 100%;
+      height: 100% !important;
+      max-height: 100%;
+    }
+
+    /* Workaround for Chrome printing problem */
+    /* [data-vivliostyle-page-box] {
+        padding-bottom: 0 !important;
+        overflow: visible !important;
+    } */
+    [data-vivliostyle-bleed-box] > div > div::before {
+      display: block;
+      content: "";
+      padding-top: 0.015625px;
+      margin-bottom: -0.015625px;
+    }
+
+    /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
+    @-moz-document regexp('.*') {
+      [data-vivliostyle-page-container]:nth-last-child(n + 2) {
+        top: -1px;
+        margin-top: 1px;
+        margin-bottom: -1px;
+      }
     }
   }
 `;
