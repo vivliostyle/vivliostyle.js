@@ -32,14 +32,14 @@
     "shelljs": "^0.8.4",
     "shx": "^0.3.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vivliostyle/vivliostyle.js.git"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "doctoc README.md && git add README.md && pretty-quick --staged"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vivliostyle/vivliostyle.js.git"
   },
   "license": "AGPL-3.0",
   "private": true,

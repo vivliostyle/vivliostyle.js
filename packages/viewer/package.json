@@ -85,12 +85,12 @@
     "url": "https://github.com/vivliostyle/vivliostyle.js.git",
     "directory": "packages/viewer"
   },
-  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
   },
   "homepage": "https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/viewer",
   "keywords": [
     "vivliostyle"
-  ]
+  ],
+  "license": "AGPL-3.0"
 }

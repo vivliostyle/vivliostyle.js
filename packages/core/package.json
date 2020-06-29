@@ -10,7 +10,8 @@
     "dev": "yarn build-dev --watch",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js,html}}\"",
     "lint": "eslint src --fix --ext .ts -f codeframe",
-    "test": "yarn --cwd test test"
+    "test": "yarn --cwd test install && yarn --cwd test test",
+    "test-sauce": "yarn --cwd test install && yarn --cwd test test-sauce"
   },
   "dependencies": {
     "fast-diff": "^1.2.0"
@@ -43,12 +44,12 @@
     "url": "https://github.com/vivliostyle/vivliostyle.js.git",
     "directory": "packages/core"
   },
-  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
   },
   "homepage": "https://github.com/vivliostyle/vivliostyle.js/tree/master/packages/core",
   "keywords": [
     "vivliostyle"
-  ]
+  ],
+  "license": "AGPL-3.0"
 }

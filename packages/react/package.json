@@ -57,17 +57,17 @@
     "url": "git://github.com/vivliostyle/vivliostyle.js.git",
     "directory": "packages/react"
   },
-  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/vivliostyle/vivliostyle.js/issues"
-  },
-  "engines": {
-    "node": ">=10"
   },
   "homepage": "https://vivliostyle.org",
   "keywords": [
     "publication",
     "react",
     "vivliostyle"
-  ]
+  ],
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=10"
+  }
 }
