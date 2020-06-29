@@ -5,7 +5,7 @@ DEBUG_HOOK=false
 
 function setup-git() {
     echo "===> Configuring credentials"
-    git config user.email "travis@travis-ci.org"
+    git config user.email "travis@travis-ci.com"
     git config user.name "Travis CI"
     echo -e "$GITHUB_DEPLOY_KEY" | base64 -d > ~/.ssh/deploy.key
     echo -e "$GITHUB_DEPLOY_KEY_VIVLIOSTYLE_ORG" | base64 -d > ~/.ssh/deploy-vivliostyle-org.key

@@ -50,8 +50,8 @@ Vivliostyle Core contains following components:
 [npm]: https://img.shields.io/npm/v/@vivliostyle/core/latest
 [npm-next]: https://img.shields.io/npm/v/@vivliostyle/core/next
 [npm-url]: https://www.npmjs.com/package/@vivliostyle/core
-[build-status]: https://travis-ci.org/vivliostyle/vivliostyle.js.svg
-[build-status-url]: https://travis-ci.org/vivliostyle/vivliostyle.js
+[build-status]: https://travis-ci.com/vivliostyle/vivliostyle.js.svg?branch=master
+[build-status-url]: https://travis-ci.com/vivliostyle/vivliostyle.js
 [deps]: https://img.shields.io/david/vivliostyle/vivliostyle.js?path=packages/core
 [deps-url]: https://david-dm.org/vivliostyle/vivliostyle.js/?path=packages/core
 [size]: https://packagephobia.now.sh/badge?p=@vivliostyle/core
