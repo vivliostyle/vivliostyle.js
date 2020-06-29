@@ -45,7 +45,7 @@ yarn build
 
 #### 1. Pre-release
 
-Run `yarn version:prerelease` to create pre-release. And run `yarn version:bump` to increment pre-release count.
+Run `yarn version:prerelease` to create pre-release. And run `yarn version:prerelease` to increment pre-release count.
 
 #### 2. Stable release
 
@@ -60,6 +60,10 @@ To bump up version from stable version to stable version (e.g. v2.0.0 -> v2.0.1)
 ```
 yarn version:bump
 ```
+
+#### 3. Publish
+
+After running `yarn version:*` command above, just `git push` and CI will do the rest of publishing process.
 
 ## Consistent Naming Guideline
 

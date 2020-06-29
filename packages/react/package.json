@@ -4,7 +4,7 @@
   "version": "2.1.0-pre.0",
   "author": "Yasuaki Uechi <y@uechi.io>",
   "scripts": {
-    "build": "microbundle-crl --format modern,cjs",
+    "build": "microbundle-crl --format modern,cjs && shx rm -rf dist/stories",
     "build-dev": "microbundle-crl --no-compress --format cjs",
     "build-storybook": "build-storybook",
     "clean": "shx rm -rf dist",
