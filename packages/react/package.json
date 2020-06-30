@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/react",
   "description": "React component for Vivliostyle",
-  "version": "2.1.0-pre.1",
+  "version": "2.1.0-pre.2",
   "author": "Yasuaki Uechi <y@uechi.io>",
   "scripts": {
     "build": "microbundle-crl --format modern,cjs && shx rm -rf dist/stories",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
-    "@vivliostyle/core": "^2.1.0-pre.1"
+    "@vivliostyle/core": "^2.1.0-pre.2"
   },
   "peerDependencies": {
     "react": "^16.13.1"
