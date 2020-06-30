@@ -32,7 +32,7 @@ export interface Payload {
   cfi: string;
   first: boolean;
   last: boolean;
-  epage: unknown;
+  epage: number;
   epageCount: number;
   metadata: unknown;
   docTitle: string;
