@@ -3,6 +3,6 @@
     "packages/*"
   ],
   "npmClient": "yarn",
-  "version": "2.1.0-pre.2",
+  "version": "2.1.0-pre.3",
   "includeMergedTags": true
 }
