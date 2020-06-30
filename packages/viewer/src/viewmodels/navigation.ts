@@ -572,7 +572,7 @@ class Navigation {
     }
   }
 
-  navigateTOC(key): boolean {
+  navigateTOC(key: string): boolean {
     const selecter =
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
@@ -665,7 +665,7 @@ class Navigation {
     return true;
   }
 
-  handleKey(key): boolean {
+  handleKey(key: string): boolean {
     const isSettingsActive =
       this.settingsPanel_.opened() &&
       this.settingsPanel_.settingsToggle.contains(document.activeElement);

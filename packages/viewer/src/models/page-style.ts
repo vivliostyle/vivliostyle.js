@@ -635,7 +635,7 @@ class PageStyle {
     return cssText;
   }
 
-  copyFrom(other): void {
+  copyFrom(other: PageStyle): void {
     this.pageSizeMode(other.pageSizeMode());
     this.presetSize(other.presetSize());
     this.isLandscape(other.isLandscape());
@@ -675,7 +675,7 @@ class PageStyle {
     }
   }
 
-  equivalentTo(other): boolean {
+  equivalentTo(other: PageStyle): boolean {
     if (this.pageSizeMode() !== other.pageSizeMode()) return false;
     if (
       this.pageSizeMode() === Mode.Preset &&

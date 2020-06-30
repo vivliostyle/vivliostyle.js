@@ -26,6 +26,7 @@ import PageViewMode from "../models/page-view-mode";
 import ViewerOptions from "../models/viewer-options";
 import DocumentOptions from "../models/document-options";
 import keyUtil from "../utils/key-util";
+import MessageDialog from "./message-dialog";
 
 type State = {
   viewerOptions: ViewerOptions;
@@ -58,8 +59,13 @@ class SettingsPanel {
     viewerOptions: ViewerOptions,
     documentOptions: DocumentOptions,
     viewer: Viewer,
-    messageDialog,
-    settingsPanelOptions,
+    messageDialog: MessageDialog,
+    settingsPanelOptions: {
+      disablePageStyleChange: boolean;
+      disablePageViewModeChange: boolean;
+      disableBookModeChange: boolean;
+      disableRenderAllPagesChange: boolean;
+    },
   ) {
     this.viewerOptions_ = viewerOptions;
     this.documentOptions_ = documentOptions;
@@ -215,14 +221,11 @@ class SettingsPanel {
         );
     if (inputElem) {
       for (
-        let e = inputElem.parentElement;
+        let e = inputElem.parentElement as HTMLDetailsElement;
         e && e != this.settingsToggle;
-        e = e.parentElement
+        e = e.parentElement as HTMLDetailsElement
       ) {
         if (e.localName == "details") {
-          // FIXME: Remove ts-ignore comment
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore
           e.open = true;
         }
       }
@@ -230,7 +233,7 @@ class SettingsPanel {
     }
   }
 
-  handleKey(key): boolean {
+  handleKey(key: string): boolean {
     const isSettingsActive =
       this.opened() && this.settingsToggle.contains(document.activeElement);
     const isInInput =

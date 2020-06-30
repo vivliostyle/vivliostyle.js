@@ -24,6 +24,7 @@ import {
   ReadyState,
   PageProgression,
   profiler,
+  ZoomType,
 } from "@vivliostyle/core";
 import ko, { Observable, PureComputed } from "knockout";
 
@@ -202,7 +203,7 @@ class Viewer {
   }
 
   setupViewerOptionSubscriptions(): void {
-    ko.computed(function() {
+    ko.computed(function () {
       const viewerOptions = this.viewerOptions_.toObject();
       this.coreViewer_.setOptions(viewerOptions);
     }, this).extend({ rateLimit: 0 });
@@ -262,26 +263,26 @@ class Viewer {
     this.coreViewer_.navigateToPage(Navigation.LAST);
   }
 
-  navigateToEPage(epage): void {
+  navigateToEPage(epage: number): void {
     this.coreViewer_.navigateToPage(Navigation.EPAGE, epage);
   }
 
-  navigateToInternalUrl(href): void {
+  navigateToInternalUrl(href: string): void {
     this.coreViewer_.navigateToInternalUrl(href);
   }
 
-  queryZoomFactor(type): number {
+  queryZoomFactor(type: ZoomType): number {
     return this.coreViewer_.queryZoomFactor(type);
   }
 
-  epageToPageNumber(epage): number {
+  epageToPageNumber(epage: number | undefined): number {
     if (!epage && epage != 0) {
       return undefined;
     }
     const pageNumber = Math.round(epage + 1);
     return pageNumber;
   }
-  epageFromPageNumber(pageNumber): number {
+  epageFromPageNumber(pageNumber: number | undefined): number {
     if (!pageNumber && pageNumber != 0) {
       return undefined;
     }

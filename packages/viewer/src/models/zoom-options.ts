@@ -22,7 +22,7 @@ import { CoreViewer, ZoomType } from "@vivliostyle/core";
 class ZoomOptions {
   zoom: number;
 
-  constructor(zoom) {
+  constructor(zoom: number) {
     this.zoom = zoom;
   }
   get fitToScreen(): null | boolean {
@@ -55,7 +55,7 @@ class ZoomOptions {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FitToScreen();
   }
-  static createFromZoomFactor(zoom): FixedZoomFactor {
+  static createFromZoomFactor(zoom: ZoomType): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(zoom);

@@ -37,11 +37,11 @@ export default class Logger {
     this.logLevel = LogLevel.Error;
   }
 
-  setLogLevel(logLevel): void {
+  setLogLevel(logLevel: LogLevel): void {
     this.logLevel = logLevel;
   }
 
-  debug(content): void {
+  debug(content: unknown): void {
     if (this.logLevel === LogLevel.Debug) {
       messageQueue.push({
         type: "debug",
@@ -50,7 +50,7 @@ export default class Logger {
     }
   }
 
-  info(content): void {
+  info(content: unknown): void {
     if (this.logLevel === LogLevel.Debug || this.logLevel === LogLevel.Info) {
       messageQueue.push({
         type: "info",
@@ -59,7 +59,7 @@ export default class Logger {
     }
   }
 
-  warn(content): void {
+  warn(content: unknown): void {
     if (
       this.logLevel === LogLevel.Debug ||
       this.logLevel === LogLevel.Info ||
@@ -72,7 +72,7 @@ export default class Logger {
     }
   }
 
-  error(content): void {
+  error(content: unknown): void {
     if (
       this.logLevel === LogLevel.Debug ||
       this.logLevel === LogLevel.Info ||

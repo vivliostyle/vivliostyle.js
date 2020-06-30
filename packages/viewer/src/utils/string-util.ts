@@ -18,24 +18,22 @@
  */
 
 export default {
-  escapeUnicodeChar(ch): string {
+  escapeUnicodeChar(ch: string): string {
     return `\\u${(0x10000 | ch.charCodeAt(0)).toString(16).substring(1)}`;
   },
-  escapeUnicodeString(str): string {
+  escapeUnicodeString(str: string): string {
     return str.replace(/[^-a-zA-Z0-9_]/g, this.escapeUnicodeChar);
   },
-  percentEncodeAmpersandAndUnencodedPercent(str): string {
+  percentEncodeAmpersandAndUnencodedPercent(str: string): string {
     return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
   },
-  percentEncodeAmpersandAndPercent(str): string {
+  percentEncodeAmpersandAndPercent(str: string): string {
     return str.replace(/%/g, "%25").replace(/&/g, "%26");
   },
-  percentDecodeAmpersandAndPercent(str): string {
+  percentDecodeAmpersandAndPercent(str: string): string {
     return str.replace(/%26/g, "&").replace(/%25/g, "%");
   },
-  percentEncodeForDataURI(str): string {
-    return encodeURI(str)
-      .replace(/#/g, "%23")
-      .replace(/&/g, "%26");
+  percentEncodeForDataURI(str: string): string {
+    return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
   },
 };
