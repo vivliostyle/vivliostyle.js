@@ -5,7 +5,7 @@ before_install:
   - sudo pip install virtualenv # for wpt_sauce
 script:
   - yarn bootstrap
-  - yarn build-dev
+  - yarn build
   - yarn lint
   - ./scripts/travis-test-sauce.sh
 # - scripts/wpt-sauce.sh
