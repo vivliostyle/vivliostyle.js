@@ -4,8 +4,8 @@
   "version": "2.1.0-pre.1",
   "author": "Vivliostyle Foundation",
   "scripts": {
-    "build": "microbundle --format cjs,umd,esm --define VIVLIOSTYLE_DEBUG=false",
-    "build-dev": "microbundle --no-compress --format cjs --define VIVLIOSTYLE_DEBUG=false",
+    "build": "microbundle --format cjs,umd,esm --name Vivliostyle --define VIVLIOSTYLE_DEBUG=false",
+    "build-dev": "microbundle --no-compress --format cjs --name Vivliostyle --define VIVLIOSTYLE_DEBUG=false",
     "clean": "shx rm -rf lib/* .cache",
     "dev": "yarn build-dev --watch",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js,html}}\"",
@@ -34,7 +34,8 @@
   "esmodule": "lib/vivliostyle.modern.js",
   "unpkg": "lib/vivliostyle.umd.js",
   "files": [
-    "lib"
+    "lib",
+    "resources"
   ],
   "publishConfig": {
     "access": "public"

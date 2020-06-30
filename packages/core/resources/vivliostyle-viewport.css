@@ -1,0 +1,111 @@
+/*
+ * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+[data-vivliostyle-layout-box] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+[data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+  right: auto;
+  bottom: auto;
+  overflow: visible;
+  z-index: auto;
+}
+
+[data-vivliostyle-page-container] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-vivliostyle-bleed-box] {
+  position: absolute;
+  overflow: hidden;
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+[data-vivliostyle-page-box] ~ [data-vivliostyle-page-box] {
+  display: none;
+}
+
+[data-vivliostyle-toc-box] {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  overflow: scroll;
+  overflow-x: hidden;
+  background: rgba(248, 248, 248, 0.9);
+  border-radius: 2px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+@media print {
+  [data-vivliostyle-toc-box] {
+    display: none;
+  }
+
+  [data-vivliostyle-outer-zoom-box],
+  [data-vivliostyle-spread-container] {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  [data-vivliostyle-spread-container],
+  [data-vivliostyle-page-container] {
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -webkit-transform: none !important;
+    transform: none !important;
+  }
+
+  [data-vivliostyle-page-container] {
+    display: block !important;
+    max-width: 100%;
+    height: 100% !important;
+    max-height: 100%;
+  }
+
+  /* Workaround for Chrome printing problem */
+  /* [data-vivliostyle-page-box] {
+        padding-bottom: 0 !important;
+        overflow: visible !important;
+    } */
+  [data-vivliostyle-bleed-box] > div > div::before {
+    display: block;
+    content: "";
+    padding-top: 0.015625px;
+    margin-bottom: -0.015625px;
+  }
+
+  /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
+  @-moz-document regexp('.*') {
+    [data-vivliostyle-page-container]:nth-last-child(n + 2) {
+      top: -1px;
+      margin-top: 1px;
+      margin-bottom: -1px;
+    }
+  }
+}
