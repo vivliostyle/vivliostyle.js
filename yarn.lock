@@ -8256,6 +8256,11 @@ es6-weak-map@^2.0.1:
     es6-iterator "^2.0.3"
     es6-symbol "^3.1.1"
 
+esbuild@^0.5.16:
+  version "0.5.16"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.5.16.tgz#064829468df674517b0a0691665f223be80893ee"
+  integrity sha512-ICNKE1Klrnx2NN/MVDX3KP4RXxheOPHfloRgILquV5LUX1qNxbeSNX1+l97VET+bAl5FsZrGQfOyJ5hytLYhFA==
+
 escalade@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/escalade/-/escalade-3.0.1.tgz#52568a77443f6927cd0ab9c73129137533c965ed"
