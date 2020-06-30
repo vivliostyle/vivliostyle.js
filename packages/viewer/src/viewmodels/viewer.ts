@@ -58,7 +58,7 @@ class Viewer {
   // FIXME: In used in viewmodels/navigation. This property is desirable private access.
   documentOptions_: null | DocumentOptions;
 
-  epage: Observable<unknown>;
+  epage: Observable<number>;
   epageCount: Observable<number>;
   firstPage: Observable<boolean>;
   inputUrl: Observable<string>;

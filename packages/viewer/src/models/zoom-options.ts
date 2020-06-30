@@ -55,7 +55,7 @@ class ZoomOptions {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FitToScreen();
   }
-  static createFromZoomFactor(zoom: ZoomType): FixedZoomFactor {
+  static createFromZoomFactor(zoom: number): FixedZoomFactor {
     // FIXME: We want to stop disabling this rule to future
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(zoom);

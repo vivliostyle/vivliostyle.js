@@ -110,7 +110,7 @@ class PageStyle {
   static PresetSize = PRESET_SIZE;
   PresetSize = PageStyle.PresetSize;
 
-  constructor(pageStyle?: unknown) {
+  constructor(pageStyle?: PageStyle) {
     this.pageSizeMode = ko.observable(Mode.Default);
     this.presetSize = ko.observable(PRESET_SIZE[1]);
     this.isLandscape = ko.observable(false);
