@@ -22,7 +22,7 @@
     "version:prerelease": "lerna version --conventional-commits --conventional-prerelease --preid pre"
   },
   "devDependencies": {
-    "archiver": "^3.1.1",
+    "archiver": "^4.0.1",
     "doctoc": "^1.4.0",
     "husky": "^4.2.3",
     "lerna": "^3.20.2",
