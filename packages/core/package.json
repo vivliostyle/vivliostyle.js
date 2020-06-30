@@ -4,7 +4,7 @@
   "version": "2.1.0-pre.1",
   "author": "Vivliostyle Foundation",
   "scripts": {
-    "build": "microbundle --format cjs,umd,esm --name Vivliostyle --define VIVLIOSTYLE_DEBUG=false",
+    "build": "microbundle --format cjs,umd --name Vivliostyle --define VIVLIOSTYLE_DEBUG=false",
     "build-dev": "microbundle --no-compress --format cjs --name Vivliostyle --define VIVLIOSTYLE_DEBUG=false",
     "clean": "shx rm -rf lib/* .cache",
     "dev": "yarn build-dev --watch",
@@ -17,9 +17,9 @@
     "fast-diff": "^1.2.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.26.0",
-    "@typescript-eslint/parser": "^2.26.0",
-    "eslint": "^6.8.0",
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
+    "eslint": "^7.3.1",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "^3.1.2",
@@ -31,7 +31,6 @@
   "types": "lib/vivliostyle.d.ts",
   "main": "lib/vivliostyle.js",
   "module": "lib/vivliostyle.esm.js",
-  "esmodule": "lib/vivliostyle.modern.js",
   "unpkg": "lib/vivliostyle.umd.js",
   "files": [
     "lib",

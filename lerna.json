@@ -2,7 +2,6 @@
   "packages": [
     "packages/*"
   ],
-  "useWorkspaces": true,
   "npmClient": "yarn",
   "version": "2.1.0-pre.1",
   "includeMergedTags": true

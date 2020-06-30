@@ -9,7 +9,6 @@
     "build-storybook": "build-storybook",
     "clean": "shx rm -rf dist",
     "dev": "yarn storybook",
-    "prepublish": "yarn build",
     "storybook": "start-storybook -p 9009",
     "test": "run-s test:build",
     "test:build": "yarn build",
