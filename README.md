@@ -11,6 +11,7 @@ Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web 
 📖 [Documentation](https://vivliostyle.org/documents/)  
 🤝 [Join Community](https://vivliostyle.org/community/)  
 🕶 [Awesome Vivliostyle](https://github.com/vivliostyle/awesome-vivliostyle)
+💅 [Vivliostyle Themes](https://github.com/vivliostyle/themes#readme)
 
 ## Table of contents
 
@@ -75,6 +76,19 @@ Vivliostyle Flavored Markdown (VFM) is a Markdown syntax optimized for book auth
 [![npm: version](https://flat.badgen.net/npm/v/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print) [![npm: total downloads](https://flat.badgen.net/npm/dt/@vivliostyle/print)](https://www.npmjs.com/package/@vivliostyle/print)
 
 Vivliostyle Print allows page-layouting using Vivliostyle Core for printing within a website without destroying the original layout.
+
+### [`create-book`](https://github.com/vivliostyle/create-book)
+
+[![npm: version](https://flat.badgen.net/npm/v/create-book)](https://www.npmjs.com/package/create-book) [![npm: total downloads](https://flat.badgen.net/npm/dt/create-book)](https://www.npmjs.com/package/create-book)
+
+The fastest way to start writing book with Vivliostyle ecosystem.
+
+### [create-vivliostyle-theme](packages/create-vivliostyle-theme)
+
+[![](https://img.shields.io/npm/v/create-vivliostyle-theme.svg)](https://npmjs.com/package/create-vivliostyle-theme)
+[![npm: total downloads](https://flat.badgen.net/npm/dt/create-vivliostyle-theme)](https://npmjs.com/package/create-vivliostyle-theme)
+
+Create Vivliostyle theme at ease.
 
 ## Contribution
 
