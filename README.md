@@ -10,7 +10,7 @@ Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web 
 🌏 [Vivliostyle.org](https://vivliostyle.org)  
 📖 [Documentation](https://vivliostyle.org/documents/)  
 🤝 [Join Community](https://vivliostyle.org/community/)  
-🕶 [Awesome Vivliostyle](https://github.com/vivliostyle/awesome-vivliostyle)
+🕶 [Awesome Vivliostyle](https://github.com/vivliostyle/awesome-vivliostyle)  
 💅 [Vivliostyle Themes](https://github.com/vivliostyle/themes#readme)
 
 ## Table of contents
