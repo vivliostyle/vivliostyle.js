@@ -21,11 +21,4 @@ export * from "./vivliostyle/plugin";
 export * from "./vivliostyle/profile";
 export * from "./vivliostyle/core-viewer";
 export * from "./vivliostyle/print";
-
-// NOTE: leave 'export default' clause for backward compatibility
-// only useful for nonESM browser environment
-// import { constants } from "./vivliostyle/constants";
-// import { plugin } from "./vivliostyle/plugin";
-// import { profile } from "./vivliostyle/profile";
-// import { coreviewer } from "./vivliostyle/core-viewer";
-// export default { constants, plugin, profile, coreviewer };
+export * from "./vivliostyle/assets";

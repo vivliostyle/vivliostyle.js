@@ -67,12 +67,3 @@ export enum ReadyState {
   INTERACTIVE = "interactive",
   COMPLETE = "complete",
 }
-
-/**
- * Pubilc members of the bundled library.
- */
-export const constants = {
-  PageProgression,
-  PageSide,
-  ReadyState,
-};

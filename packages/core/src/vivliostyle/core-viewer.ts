@@ -494,10 +494,4 @@ export const ZoomType = AdaptiveViewer.ZoomType;
 export type PageViewMode = AdaptiveViewer.PageViewMode;
 export const PageViewMode = AdaptiveViewer.PageViewMode;
 
-export const viewer = {
-  CoreViewer,
-  PageViewMode,
-  ZoomType,
-};
-
 Profile.profiler.forceRegisterEndTiming("load_vivliostyle");
