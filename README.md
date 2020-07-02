@@ -18,7 +18,6 @@ Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Packages](#packages)
   - [`@vivliostyle/core`](#vivliostylecore)
   - [`@vivliostyle/viewer`](#vivliostyleviewer)
@@ -86,7 +85,7 @@ Vivliostyle Print allows page-layouting using Vivliostyle Core for printing with
 
 The fastest way to start writing book with Vivliostyle ecosystem.
 
-### [`create-vivliostyle-theme`](packages/create-vivliostyle-theme)
+### [`create-vivliostyle-theme`](https://github.com/vivliostyle/themes/tree/master/packages/create-vivliostyle-theme)
 
 [![](https://img.shields.io/npm/v/create-vivliostyle-theme.svg)](https://npmjs.com/package/create-vivliostyle-theme)
 [![npm: total downloads](https://flat.badgen.net/npm/dt/create-vivliostyle-theme)](https://npmjs.com/package/create-vivliostyle-theme)
