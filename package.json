@@ -34,7 +34,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "doctoc README.md && git add README.md && pretty-quick --staged"
+      "pre-commit": "doctoc README.md CONTRIBUTING.md && git add *.md && pretty-quick --staged"
     }
   },
   "repository": {
