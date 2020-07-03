@@ -149,6 +149,10 @@ Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
 Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
+## Credits
+
+[![Testing Powered By SauceLabs](https://saucelabs.github.io/images/opensauce/powered-by-saucelabs-badge-white.png?sanitize=true "Testing Powered By SauceLabs")](https://saucelabs.com)
+
 [github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases
 [build-status]: https://travis-ci.com/vivliostyle/vivliostyle.js.svg?branch=master
