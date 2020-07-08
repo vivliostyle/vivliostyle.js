@@ -21,5 +21,7 @@ Satoshi KOJIMA🌟
 Munehiro Yamamoto⭐️
 <p><a href="https://github.com/zonuexe"><img src="https://avatars3.githubusercontent.com/u/822086?s=460&amp;v=4" title="USAMI Kenta" width="60" height="60" style="max-width:100%;"></a>
 USAMI Kenta⭐️
-  <p><a href="https://github.com/niszet"><img src="https://avatars3.githubusercontent.com/u/28832585?s=460&amp;v=4" title="niszet" width="60" height="60" style="max-width:100%;"></a>
+<p><a href="https://github.com/niszet"><img src="https://avatars3.githubusercontent.com/u/28832585?s=460&amp;v=4" title="niszet" width="60" height="60" style="max-width:100%;"></a>
 niszet⭐️
+<p><a href="https://github.com/yuji-1980"><img src="https://avatars3.githubusercontent.com/u/67959695?s=460&amp;v=4" title="niszet" width="60" height="60" style="max-width:100%;"></a>
+yuji-1980⭐️
