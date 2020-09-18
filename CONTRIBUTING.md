@@ -7,20 +7,19 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Contribution Guide](#contribution-guide)
-  - [Build Guideline](#build-guideline)
-    - [Setup](#setup)
-    - [Build](#build)
-    - [Watch](#watch)
-    - [Lint & Format](#lint--format)
-    - [Release Flow](#release-flow)
-      - [1. Pre-release](#1-pre-release)
-      - [2. Stable release](#2-stable-release)
-      - [3. Publish](#3-publish)
-  - [Consistent Naming Guideline](#consistent-naming-guideline)
-  - [Commit Message Guideline](#commit-message-guideline)
-  - [Troubleshooting](#troubleshooting)
-    - [Cannot find `node_modules/@vivliostyle/core`](#cannot-find-node_modulesvivliostylecore)
+- [Build Guideline](#build-guideline)
+  - [Setup](#setup)
+  - [Build](#build)
+  - [Watch](#watch)
+  - [Lint & Format](#lint--format)
+  - [Release Flow](#release-flow)
+    - [1. Pre-release](#1-pre-release)
+    - [2. Stable release](#2-stable-release)
+    - [3. Publish](#3-publish)
+- [Consistent Naming Guideline](#consistent-naming-guideline)
+- [Commit Message Guideline](#commit-message-guideline)
+- [Troubleshooting](#troubleshooting)
+  - [Cannot find `node_modules/@vivliostyle/core`](#cannot-find-node_modulesvivliostylecore)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
