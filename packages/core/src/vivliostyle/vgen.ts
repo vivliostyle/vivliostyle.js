@@ -1148,7 +1148,7 @@ export class ViewFactory extends Base.SimpleEventTarget
                   // (only first time).
                   if (firstTime) {
                     attributeValue = self.documentURLTransformer.transformFragment(
-                      attributeValue,
+                      encodeURIComponent(attributeValue),
                       self.xmldoc.url,
                     );
                     result.setAttribute(attributeName, attributeValue);

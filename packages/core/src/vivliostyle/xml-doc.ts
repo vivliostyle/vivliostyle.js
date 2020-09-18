@@ -254,7 +254,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
         node = next;
         lastGood = node;
         nodeOffset += (next.textContent as string).length;
-        if (nodeOffset > offset) {
+        if (nodeOffset > offset && !/^\s*$/.test(next.textContent)) {
           break;
         }
       } else {
@@ -264,6 +264,10 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
         }
       }
       next = node.nextSibling;
+    }
+    if (next && lastGood && /^\s*$/.test(lastGood.textContent)) {
+      // skip white-space text node
+      lastGood = next;
     }
     return lastGood || element;
   }
@@ -315,7 +319,7 @@ export enum DOMParserSupportedType {
   TEXT_HTML = "text/html",
   TEXT_XML = "text/xml",
   APPLICATION_XML = "application/xml",
-  APPLICATION_XHTML_XML = "application/xhtml_xml",
+  APPLICATION_XHTML_XML = "application/xhtml+xml",
   IMAGE_SVG_XML = "image/svg+xml",
 }
 
@@ -331,7 +335,7 @@ export function parseAndReturnNullIfError(
   const parser = opt_parser || new DOMParser();
   let doc: Document;
   try {
-    doc = parser.parseFromString(str, type as SupportedType);
+    doc = parser.parseFromString(str, type as DOMParserSupportedType);
   } catch (e) {}
   if (!doc) {
     return null;

@@ -763,7 +763,9 @@ export class OPFDoc {
        */
       transformFragment(fragment: string, baseURL: string): string {
         const url = baseURL + (fragment ? `#${fragment}` : "");
-        return transformedIdPrefix + Base.escapeNameStrToHex(url, ":");
+        return (
+          transformedIdPrefix + Base.escapeNameStrToHex(decodeURI(url), ":")
+        );
       }
 
       /**
