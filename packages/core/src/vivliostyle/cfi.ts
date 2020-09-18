@@ -31,7 +31,7 @@ export type Position = {
 export function getId(node: Node): string | null {
   if (node.nodeType == 1) {
     const idtxt = (node as Element).getAttribute("id");
-    if (idtxt && idtxt.match(/^[-a-zA-Z_0-9.\u007F-\uFFFF]+$/)) {
+    if (idtxt) {
       return idtxt;
     }
   }
@@ -240,7 +240,7 @@ export class Fragment {
     if (!r) {
       throw new Error("E_CFI_NOT_CFI");
     }
-    const str = r[1];
+    const str = decodeURIComponent(r[1]);
     let i = 0;
     const steps = [];
     while (true) {
@@ -252,9 +252,7 @@ export class Fragment {
           i++;
           r = str
             .substr(i)
-            .match(
-              /^(0|[1-9][0-9]*)(\[([-a-zA-Z_0-9.\u007F-\uFFFF]+)(;([^\]]|\^\])*)?\])?/,
-            );
+            .match(/^(0|[1-9][0-9]*)(\[(.*?)(;([^\]]|\^\])*)?\])?/);
           if (!r) {
             throw new Error("E_CFI_NUMBER_EXPECTED");
           }
@@ -429,6 +427,6 @@ export class Fragment {
       this.steps[i].appendTo(sb);
     }
     sb.append(")");
-    return sb.toString();
+    return sb.toString().replace(/%/g, "%25");
   }
 }
