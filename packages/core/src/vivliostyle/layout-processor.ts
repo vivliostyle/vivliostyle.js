@@ -26,6 +26,7 @@ import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
 /**
  * Processor doing some special layout (e.g. table layout)
  */
+// eslint-disable-next-line no-redeclare
 export interface LayoutProcessor {
   /**
    * Do actual layout in the column starting from given NodeContext.

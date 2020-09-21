@@ -269,7 +269,7 @@ export type Spread = {
 export const SPECIAL_ATTR = "data-adapt-spec";
 
 export const Whitespace = Vtree.Whitespace;
-export type Whitespace = Vtree.Whitespace;
+export type Whitespace = Vtree.Whitespace; // eslint-disable-line no-redeclare
 
 /**
  * Resolves Whitespace value from a value of 'white-space' property
@@ -498,7 +498,7 @@ export function makeNodeContextFromNodePositionStep(
 }
 
 export const ShadowType = Vtree.ShadowType;
-export type ShadowType = Vtree.ShadowType;
+export type ShadowType = Vtree.ShadowType; // eslint-disable-line no-redeclare
 
 /**
  * Data about shadow tree instance.

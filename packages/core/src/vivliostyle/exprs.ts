@@ -77,6 +77,7 @@ type Special = Pending;
  * Special marker value that indicates that the expression result is being
  * calculated.
  */
+// eslint-disable-next-line no-redeclare
 export const Special = {
   PENDING: {} as Pending,
 };

@@ -28,7 +28,7 @@ import * as VtreeImpl from "./vtree";
 import { Layout as LayoutType, PageFloats, Vtree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
-export type FloatReference = PageFloats.FloatReference;
+export type FloatReference = PageFloats.FloatReference; // eslint-disable-line no-redeclare
 
 type PageFloatID = PageFloats.PageFloatID;
 

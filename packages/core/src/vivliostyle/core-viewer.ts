@@ -489,9 +489,9 @@ export enum Navigation {
 }
 
 export type ZoomType = AdaptiveViewer.ZoomType;
-export const ZoomType = AdaptiveViewer.ZoomType;
+export const ZoomType = AdaptiveViewer.ZoomType; // eslint-disable-line no-redeclare
 
 export type PageViewMode = AdaptiveViewer.PageViewMode;
-export const PageViewMode = AdaptiveViewer.PageViewMode;
+export const PageViewMode = AdaptiveViewer.PageViewMode; // eslint-disable-line no-redeclare
 
 Profile.profiler.forceRegisterEndTiming("load_vivliostyle");
