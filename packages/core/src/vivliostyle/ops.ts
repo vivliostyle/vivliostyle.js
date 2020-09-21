@@ -191,7 +191,8 @@ export class Style {
 }
 
 //-------------------------------------------------------------------------------
-export class StyleInstance extends Exprs.Context
+export class StyleInstance
+  extends Exprs.Context
   implements
     CssStyler.FlowListener,
     PageMaster.InstanceHolder,

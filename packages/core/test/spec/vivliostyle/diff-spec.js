@@ -17,9 +17,9 @@
 
 import * as vivliostyle_diff from "../../../src/vivliostyle/diff";
 
-describe("diff", function() {
-  describe("#diff", function() {
-    it("calculates differences of two blocks of text.", function() {
+describe("diff", function () {
+  describe("#diff", function () {
+    it("calculates differences of two blocks of text.", function () {
       expect(vivliostyle_diff.diffChars("aあb", "aあb")).toEqual([[0, "aあb"]]);
       expect(vivliostyle_diff.diffChars("aあb", "axあいうb")).toEqual([
         [0, "a"],
@@ -61,8 +61,8 @@ describe("diff", function() {
     });
   });
 
-  describe("#restoreOriginalText", function() {
-    it("restores the old text from changes.", function() {
+  describe("#restoreOriginalText", function () {
+    it("restores the old text from changes.", function () {
       var diff = vivliostyle_diff.diffChars("aあb", "aあb");
       expect(vivliostyle_diff.restoreOriginalText(diff)).toEqual("aあb");
 
@@ -86,8 +86,8 @@ describe("diff", function() {
     });
   });
 
-  describe("#restoreNewText", function() {
-    it("restores the new text from changes.", function() {
+  describe("#restoreNewText", function () {
+    it("restores the new text from changes.", function () {
       var diff = vivliostyle_diff.diffChars("aあb", "aあb");
       expect(vivliostyle_diff.restoreNewText(diff)).toEqual("aあb");
 
@@ -111,8 +111,8 @@ describe("diff", function() {
     });
   });
 
-  describe("#resolveNewIndex", function() {
-    it("resolves new index from old index.", function() {
+  describe("#resolveNewIndex", function () {
+    it("resolves new index from old index.", function () {
       var diff = vivliostyle_diff.diffChars("abc", "a-b-c");
       expect(vivliostyle_diff.resolveNewIndex(diff, 0)).toBe(0);
       expect(vivliostyle_diff.resolveNewIndex(diff, 1)).toBe(2);
@@ -204,8 +204,8 @@ describe("diff", function() {
     });
   });
 
-  describe("#resolveOriginalIndex", function() {
-    it("resolves original index from new index.", function() {
+  describe("#resolveOriginalIndex", function () {
+    it("resolves original index from new index.", function () {
       var diff = vivliostyle_diff.diffChars("abc", "a-b-c");
       expect(vivliostyle_diff.resolveOriginalIndex(diff, 0)).toBe(0);
       expect(vivliostyle_diff.resolveOriginalIndex(diff, 1)).toBe(0);

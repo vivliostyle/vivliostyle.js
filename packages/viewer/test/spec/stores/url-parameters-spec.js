@@ -20,22 +20,22 @@
 // import stringUtil from "../../../src/utils/string-util";
 import urlParameters from "../../../src/stores/url-parameters";
 
-describe("URLParameterStore", function() {
+describe("URLParameterStore", function () {
   let history, location;
 
-  beforeEach(function() {
+  beforeEach(function () {
     history = urlParameters.history;
     urlParameters.history = {};
     location = urlParameters.location;
   });
 
-  afterEach(function() {
+  afterEach(function () {
     urlParameters.history = history;
     urlParameters.location = location;
   });
 
-  describe("getBaseURL", function() {
-    it("returns a URL of a directory in which the viewer entry point is located", function() {
+  describe("getBaseURL", function () {
+    it("returns a URL of a directory in which the viewer entry point is located", function () {
       urlParameters.location = {
         href: "http://example.com/aa/bb/cc/viewer.html?foo#x=bar",
       };
@@ -54,8 +54,8 @@ describe("URLParameterStore", function() {
     });
   });
 
-  describe("getParameter", function() {
-    it("returns an array containing values corresponding to the key in the URL hash", function() {
+  describe("getParameter", function () {
+    it("returns an array containing values corresponding to the key in the URL hash", function () {
       urlParameters.location = { href: "http://example.com#aa=bb&cc=dd&cc=ee" };
 
       expect(urlParameters.getParameter("aa")).toEqual(["bb"]);
@@ -69,7 +69,7 @@ describe("URLParameterStore", function() {
       expect(urlParameters.getParameter("cc")).toEqual(["dd", "ee"]);
     });
 
-    it("can retrieve a value for a unicode key", function() {
+    it("can retrieve a value for a unicode key", function () {
       const key = "あいうえお";
       urlParameters.location = {
         href: "http://example.com#aa=bb&" + key + "=dd",
@@ -78,7 +78,7 @@ describe("URLParameterStore", function() {
       expect(urlParameters.getParameter(key)).toEqual(["dd"]);
     });
 
-    it("can retrieve values containing '=', percent-encoded '&' and '%'", function() {
+    it("can retrieve values containing '=', percent-encoded '&' and '%'", function () {
       urlParameters.location = {
         href: "http://example.com#aa=foo%2525bar%26baz&bb=c=d",
       };
@@ -87,7 +87,7 @@ describe("URLParameterStore", function() {
       expect(urlParameters.getParameter("bb")).toEqual(["c=d"]);
     });
 
-    it("does not percent-decode when dontPercentDecode=true", function() {
+    it("does not percent-decode when dontPercentDecode=true", function () {
       urlParameters.location = {
         href: "http://example.com#aa=foo%2525bar%26baz",
       };
@@ -98,8 +98,8 @@ describe("URLParameterStore", function() {
     });
   });
 
-  describe("setParameter", function() {
-    it("add the parameter to the URL hash if not exists", function() {
+  describe("setParameter", function () {
+    it("add the parameter to the URL hash if not exists", function () {
       urlParameters.location = { href: "http://example.com" };
       urlParameters.setParameter("cc", "dd");
 
@@ -113,7 +113,7 @@ describe("URLParameterStore", function() {
       );
     });
 
-    it("replaces the parameter in the URL hash if already exists", function() {
+    it("replaces the parameter in the URL hash if already exists", function () {
       urlParameters.location = { href: "http://example.com#cc=dd" };
       urlParameters.setParameter("cc", "ee");
 
@@ -127,7 +127,7 @@ describe("URLParameterStore", function() {
       );
     });
 
-    it("can set a value for a unicode key", function() {
+    it("can set a value for a unicode key", function () {
       urlParameters.location = { href: "http://example.com#aa=bb" };
       urlParameters.setParameter("あいうえお", "かきくけこ");
 
@@ -145,7 +145,7 @@ describe("URLParameterStore", function() {
       );
     });
 
-    it("can set values containing '=', '&' and '%'", function() {
+    it("can set values containing '=', '&' and '%'", function () {
       urlParameters.location = { href: "http://example.com#aa=bb" };
       urlParameters.setParameter("aa", "foo%25bar&baz");
       urlParameters.setParameter("bb", "c=d");
@@ -155,7 +155,7 @@ describe("URLParameterStore", function() {
       );
     });
 
-    it("does not percent-encode when dontPercentEncode=true", function() {
+    it("does not percent-encode when dontPercentEncode=true", function () {
       urlParameters.location = { href: "http://example.com#aa=bb" };
       urlParameters.setParameter("aa", "foo%25bar", true);
 
@@ -164,9 +164,9 @@ describe("URLParameterStore", function() {
       );
     });
 
-    it("use history.replaceState if available", function() {
+    it("use history.replaceState if available", function () {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      urlParameters.history.replaceState = function() {};
+      urlParameters.history.replaceState = function () {};
       spyOn(urlParameters.history, "replaceState");
       urlParameters.location = { href: "http://example.com" };
       urlParameters.setParameter("cc", "dd");

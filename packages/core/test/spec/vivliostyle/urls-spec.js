@@ -17,16 +17,16 @@
 
 import * as vivliostyle_urls from "../../../src/vivliostyle/urls";
 
-describe("urls", function() {
+describe("urls", function () {
   var module = vivliostyle_urls;
   var transformer = {
-    transformURL: function(m1, baaseUrl) {
+    transformURL: function (m1, baaseUrl) {
       return baaseUrl + "|" + m1 + "|";
     },
   };
 
-  describe("transformURIs", function() {
-    it("transform all urls in the attribute value.", function() {
+  describe("transformURIs", function () {
+    it("transform all urls in the attribute value.", function () {
       expect(
         module.transformURIs(
           'URL( "http://foo.com/test/?x=#bar" ),' +
@@ -39,7 +39,7 @@ describe("urls", function() {
         'url("aaa|http://foo.com/test/?x=#bar|" ),url(aaa|#test| ), url(\'aaa|#test?x="|\') url other text',
       );
     });
-    it("transform all urls with url-modifier.", function() {
+    it("transform all urls with url-modifier.", function () {
       expect(
         module.transformURIs(
           'URL( "http://foo.com/test/?x=#bar" test modifiers ),' +
@@ -52,7 +52,7 @@ describe("urls", function() {
         'url("aaa|http://foo.com/test/?x=#bar|" test modifiers ),url(aaa|#test| rgb(100, 200, 50 ) test ), url(\'aaa|#test?x="|\' calc(50% - 2em)) url other text',
       );
     });
-    it("transform all urls with escape.", function() {
+    it("transform all urls with escape.", function () {
       expect(
         module.transformURIs(
           'URL( "aa\\"\\\'\\2F\\27 \\22  \\\r\\\nbb" \\"\\\'\\2F\\27 \\22  \\\r\\\n),' +

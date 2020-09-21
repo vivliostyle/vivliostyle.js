@@ -355,7 +355,8 @@ export type BreakPositionAndNodeContext = Layout.BreakPositionAndNodeContext;
  * Potential breaking position inside CSS box (between lines).
  * @param checkPoints array of breaking points for breakable block
  */
-export class BoxBreakPosition extends BreakPosition.AbstractBreakPosition
+export class BoxBreakPosition
+  extends BreakPosition.AbstractBreakPosition
   implements Layout.BoxBreakPosition {
   private alreadyEvaluated: boolean = false;
   breakNodeContext: Vtree.NodeContext = null;

@@ -24,7 +24,7 @@ import ViewerOptions from "../../../src/models/viewer-options";
 import PageViewMode from "../../../src/models/page-view-mode";
 import SettingsPanel from "../../../src/viewmodels/settings-panel";
 
-describe("SettingsPanel", function() {
+describe("SettingsPanel", function () {
   let documentOptions;
   let viewerOptions;
   let viewer;
@@ -35,14 +35,14 @@ describe("SettingsPanel", function() {
     disablePageViewModeChange: false,
   };
 
-  beforeEach(function() {
+  beforeEach(function () {
     documentOptions = new DocumentOptions();
     documentOptions.pageSize.customWidth("100mm");
     viewerOptions = new ViewerOptions();
     viewerOptions.pageViewMode(PageViewMode.SPREAD);
     viewerOptions.fontSize(10);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    viewer = { loadDocument: function() {} };
+    viewer = { loadDocument: function () {} };
     messageDialog = { visible: ko.observable(false) };
   });
 
@@ -56,8 +56,8 @@ describe("SettingsPanel", function() {
     );
   }
 
-  describe("constructor", function() {
-    it("stores the options to 'state' property", function() {
+  describe("constructor", function () {
+    it("stores the options to 'state' property", function () {
       const settingsPanel = createSettingsPanel();
 
       expect(settingsPanel.state.viewerOptions.pageViewMode()).toBe(
@@ -95,8 +95,8 @@ describe("SettingsPanel", function() {
   //     expect(settingsPanel.opened()).toBe(false);
   // });
 
-  describe("apply", function() {
-    it("writes parameters from this.state.viewerOptions to the original ViewerOptions if the page size is not changed", function() {
+  describe("apply", function () {
+    it("writes parameters from this.state.viewerOptions to the original ViewerOptions if the page size is not changed", function () {
       const settingsPanel = createSettingsPanel();
       settingsPanel.state.viewerOptions.pageViewMode(PageViewMode.SINGLE_PAGE);
       settingsPanel.state.viewerOptions.fontSize(20);
@@ -110,7 +110,7 @@ describe("SettingsPanel", function() {
       expect(viewerOptions.fontSize()).toBe(20);
     });
 
-    it("writes parameters from this.state.pageSize to the original DocumentOptions and call viewer.loadDocument if the page size is changed", function() {
+    it("writes parameters from this.state.pageSize to the original DocumentOptions and call viewer.loadDocument if the page size is changed", function () {
       const settingsPanel = createSettingsPanel();
       settingsPanel.state.viewerOptions.pageViewMode(PageViewMode.SINGLE_PAGE);
       settingsPanel.state.viewerOptions.fontSize(20);
@@ -131,8 +131,8 @@ describe("SettingsPanel", function() {
     });
   });
 
-  describe("reset", function() {
-    it("writes parameters from the original ViewerOptions to this.state.viewerOptions", function() {
+  describe("reset", function () {
+    it("writes parameters from the original ViewerOptions to this.state.viewerOptions", function () {
       const settingsPanel = createSettingsPanel();
       settingsPanel.state.viewerOptions.pageViewMode(PageViewMode.SINGLE_PAGE);
       settingsPanel.state.viewerOptions.fontSize(20);
@@ -148,8 +148,8 @@ describe("SettingsPanel", function() {
     });
   });
 
-  describe("UI disabled flags", function() {
-    it("all flags are false by default", function() {
+  describe("UI disabled flags", function () {
+    it("all flags are false by default", function () {
       const settingsPanel = createSettingsPanel();
 
       expect(settingsPanel.isPageSizeChangeDisabled).toBe(false);
@@ -157,7 +157,7 @@ describe("SettingsPanel", function() {
       expect(settingsPanel.isPageViewModeChangeDisabled).toBe(false);
     });
 
-    it("page size change and 'override document style sheet' are disabled by disablePageSizeChange=true in settingsPanelOptions", function() {
+    it("page size change and 'override document style sheet' are disabled by disablePageSizeChange=true in settingsPanelOptions", function () {
       const settingsPanel = createSettingsPanel({
         disablePageSizeChange: true,
       });
@@ -167,7 +167,7 @@ describe("SettingsPanel", function() {
       expect(settingsPanel.isPageViewModeChangeDisabled).toBe(false);
     });
 
-    it("page view mode change is disabled by disablePageViewModeChangeChange=true in settingsPanelOptions", function() {
+    it("page view mode change is disabled by disablePageViewModeChangeChange=true in settingsPanelOptions", function () {
       const settingsPanel = createSettingsPanel({
         disablePageViewModeChange: true,
       });

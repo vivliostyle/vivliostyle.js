@@ -20,7 +20,7 @@ import * as vivliostyle_columns from "../../../src/vivliostyle/columns";
 
 // FIXME: cannot spyOn(module, "...")
 
-describe("column", function() {
+describe("column", function () {
   var module = vivliostyle_columns;
   var ColumnBalancer = module.ColumnBalancer;
   var BalanceLastColumnBalancer = module.BalanceLastColumnBalancer;
@@ -28,7 +28,7 @@ describe("column", function() {
 
   var parentNode;
 
-  beforeEach(function() {
+  beforeEach(function () {
     parentNode = {
       appendChild: jasmine.createSpy("appendChild"),
       removeChild: jasmine.createSpy("removeChild"),
@@ -66,7 +66,7 @@ describe("column", function() {
     };
   }
 
-  describe("ColumnBalancer", function() {
+  describe("ColumnBalancer", function () {
     var columns,
       columnPageFloatLayoutContexts,
       regionPageFloatLayoutContext,
@@ -86,13 +86,13 @@ describe("column", function() {
       );
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       columns = [1, 2, 3].map(createDummyColumn);
       balancer = createBalancer(false);
     });
 
-    describe("savePageFloatLayoutContexts", function() {
-      it("detaches column PageFloatLayoutContexts and save them in the passed ColumnLayoutResult", function() {
+    describe("savePageFloatLayoutContexts", function () {
+      it("detaches column PageFloatLayoutContexts and save them in the passed ColumnLayoutResult", function () {
         var layoutResult = { columns: columns };
         balancer.savePageFloatLayoutContexts(layoutResult);
 
@@ -103,8 +103,8 @@ describe("column", function() {
       });
     });
 
-    describe("restoreContents", function() {
-      it("restore column elements and column PageFloatLayoutContexts with new ones", function() {
+    describe("restoreContents", function () {
+      it("restore column elements and column PageFloatLayoutContexts with new ones", function () {
         var newColumns = [1, 2, 3].map(createDummyColumn);
         var newColumnPageFloatLayoutContexts = [];
         var newLayoutResult = {
@@ -113,7 +113,7 @@ describe("column", function() {
         };
         balancer.restoreContents(newLayoutResult);
 
-        newColumns.forEach(function(c) {
+        newColumns.forEach(function (c) {
           expect(layoutContainer.element.appendChild).toHaveBeenCalledWith(
             c.element,
           );
@@ -124,8 +124,8 @@ describe("column", function() {
       });
     });
 
-    describe("postBalance", function() {
-      it("resets the layoutContainer's block size to the initial value", function() {
+    describe("postBalance", function () {
+      it("resets the layoutContainer's block size to the initial value", function () {
         layoutContainer.height = 900;
         balancer.postBalance();
         expect(layoutContainer.height).toBe(1000);
@@ -138,7 +138,7 @@ describe("column", function() {
     });
   });
 
-  describe("BalanceLastColumnBalancer", function() {
+  describe("BalanceLastColumnBalancer", function () {
     function createBalancer(columnCount, vertical) {
       return new BalanceLastColumnBalancer(
         null,
@@ -148,8 +148,8 @@ describe("column", function() {
       );
     }
 
-    describe("preBalance", function() {
-      it("sets layoutContainer's block size to the minimum block size for contents", function() {
+    describe("preBalance", function () {
+      it("sets layoutContainer's block size to the minimum block size for contents", function () {
         var balancer = createBalancer(3, false);
         var layoutResult = { columns: [800, 680, 899].map(createDummyColumn) };
         balancer.preBalance(layoutResult);
@@ -157,7 +157,7 @@ describe("column", function() {
         expect(balancer.layoutContainer.height).toBe(793);
       });
 
-      it("stores the original position at the end of the region", function() {
+      it("stores the original position at the end of the region", function () {
         var balancer = createBalancer(3, false);
         var layoutResult = {
           columns: [800, 680, 899].map(createDummyColumn),
@@ -169,8 +169,8 @@ describe("column", function() {
       });
     });
 
-    describe("checkPosition", function() {
-      it("checks whether the new position is equivalent to the original position", function() {
+    describe("checkPosition", function () {
+      it("checks whether the new position is equivalent to the original position", function () {
         var balancer = createBalancer(3, false);
         var layoutResult = {
           columns: [800, 680, 899].map(createDummyColumn),
@@ -203,8 +203,8 @@ describe("column", function() {
       });
     });
 
-    describe("calculatePenalty", function() {
-      it("returns Infinity if the position at the end of the region changes", function() {
+    describe("calculatePenalty", function () {
+      it("returns Infinity if the position at the end of the region changes", function () {
         var balancer = createBalancer(3, false);
         spyOn(balancer, "checkPosition").and.returnValue(false);
         var layoutResult = { position: {} };
@@ -215,7 +215,7 @@ describe("column", function() {
         );
       });
 
-      it("returns Infinity if the last column is longer than any other column", function() {
+      it("returns Infinity if the last column is longer than any other column", function () {
         var balancer = createBalancer(3, false);
         spyOn(balancer, "checkPosition").and.returnValue(true);
         var layoutResult = {
@@ -226,7 +226,7 @@ describe("column", function() {
         expect(balancer.calculatePenalty(layoutResult)).toBe(Infinity);
       });
 
-      it("returns the maximum block size of the columns", function() {
+      it("returns the maximum block size of the columns", function () {
         var balancer = createBalancer(3, false);
         spyOn(balancer, "checkPosition").and.returnValue(true);
         var layoutResult = {
@@ -238,14 +238,14 @@ describe("column", function() {
       });
     });
 
-    describe("hasNextCandidate", function() {
+    describe("hasNextCandidate", function () {
       var balancer;
 
-      beforeEach(function() {
+      beforeEach(function () {
         balancer = createBalancer(3, false);
       });
 
-      it("returns true if it is the first attempt (candidates.length=1)", function() {
+      it("returns true if it is the first attempt (candidates.length=1)", function () {
         var candidates = [{}];
 
         expect(balancer.hasNextCandidate(candidates)).toBe(true);
@@ -260,7 +260,7 @@ describe("column", function() {
       //     expect(module.canReduceContainerSize).toHaveBeenCalledWith(candidates);
       // });
 
-      it("returns if the current block size of the layoutContainer is smaller than the original size if the position of the last candidate is different from the original position", function() {
+      it("returns if the current block size of the layoutContainer is smaller than the original size if the position of the last candidate is different from the original position", function () {
         spyOn(balancer, "checkPosition").and.returnValue(false);
         var candidates = [{}, { layoutResult: { position: {} } }];
 
@@ -274,7 +274,7 @@ describe("column", function() {
         expect(balancer.hasNextCandidate(candidates)).toBe(false);
       });
 
-      it("returns if the current block size of the layoutContainer is smaller than the original size if the last column of the last candidate is longer than any other column", function() {
+      it("returns if the current block size of the layoutContainer is smaller than the original size if the last column of the last candidate is longer than any other column", function () {
         spyOn(balancer, "checkPosition").and.returnValue(true);
         var candidates = [
           {},
@@ -293,7 +293,7 @@ describe("column", function() {
         expect(balancer.hasNextCandidate(candidates)).toBe(false);
       });
 
-      it("sets foundUpperBound to true and returns true if the position of the last candidate is same as the original position and the last column of the last candidate is not longer than some other columns", function() {
+      it("sets foundUpperBound to true and returns true if the position of the last candidate is same as the original position and the last column of the last candidate is not longer than some other columns", function () {
         spyOn(balancer, "checkPosition").and.returnValue(true);
         var candidates = [
           {},
@@ -310,10 +310,10 @@ describe("column", function() {
       });
     });
 
-    describe("updateCondition", function() {
+    describe("updateCondition", function () {
       var balancer;
 
-      beforeEach(function() {
+      beforeEach(function () {
         balancer = createBalancer(3, false);
       });
 
@@ -326,7 +326,7 @@ describe("column", function() {
       //     expect(module.reduceContainerSize).toHaveBeenCalledWith(candidates, balancer.layoutContainer);
       // });
 
-      it("increase the block size of layoutContainer by 10% of the original container block size", function() {
+      it("increase the block size of layoutContainer by 10% of the original container block size", function () {
         balancer.layoutContainer.height = 800;
         balancer.updateCondition([]);
 
@@ -340,7 +340,7 @@ describe("column", function() {
     });
   });
 
-  describe("BalanceNonLastColumnBalancer", function() {
+  describe("BalanceNonLastColumnBalancer", function () {
     function createBalancer(vertical) {
       return new BalanceNonLastColumnBalancer(
         null,
@@ -349,13 +349,13 @@ describe("column", function() {
       );
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       // spyOn(module, "canReduceContainerSize");
       // spyOn(module, "reduceContainerSize");
     });
 
-    describe("calculatePenalty", function() {
-      it("returns 0 if all columns have the same computedBlockSize", function() {
+    describe("calculatePenalty", function () {
+      it("returns 0 if all columns have the same computedBlockSize", function () {
         var balancer = createBalancer(false);
         var layoutResult = {
           columns: [1000, 1000, 1000].map(createDummyColumn),
@@ -364,7 +364,7 @@ describe("column", function() {
         expect(balancer.calculatePenalty(layoutResult)).toBe(0);
       });
 
-      it("returns a positive value when not all columns have the same computedBlockSize", function() {
+      it("returns a positive value when not all columns have the same computedBlockSize", function () {
         var balancer = createBalancer(false);
         var layoutResult = {
           columns: [1000, 999, 1000].map(createDummyColumn),
@@ -373,7 +373,7 @@ describe("column", function() {
         expect(balancer.calculatePenalty(layoutResult)).toBeGreaterThan(0);
       });
 
-      it("returns a greater value when computedBlockSizes of columns have a greater variance", function() {
+      it("returns a greater value when computedBlockSizes of columns have a greater variance", function () {
         var balancer = createBalancer(false);
         var layoutResult1 = {
           columns: [1000, 999, 999].map(createDummyColumn),
@@ -387,7 +387,7 @@ describe("column", function() {
         expect(penalty2).toBeGreaterThan(penalty1);
       });
 
-      it("excludes columns ending with forced breaks", function() {
+      it("excludes columns ending with forced breaks", function () {
         var balancer = createBalancer(false);
         var layoutResult = {
           columns: [1000, 900, 1000].map(createDummyColumn),
@@ -419,14 +419,14 @@ describe("column", function() {
     // });
   });
 
-  describe("canReduceContainerSize", function() {
-    it("returns false when penalty of the last candidate is 0", function() {
+  describe("canReduceContainerSize", function () {
+    it("returns false when penalty of the last candidate is 0", function () {
       var candidates = [{}, { penalty: 0 }];
 
       expect(module.canReduceContainerSize(candidates)).toBe(false);
     });
 
-    it("returns false if penalty of the last candidate is equal or greater than the previous candidate", function() {
+    it("returns false if penalty of the last candidate is equal or greater than the previous candidate", function () {
       var candidates = [
         {},
         {
@@ -456,7 +456,7 @@ describe("column", function() {
       expect(module.canReduceContainerSize(candidates)).toBe(false);
     });
 
-    it("returns false if the last max column block size is equal or less than the max block size of column page floats + 1px", function() {
+    it("returns false if the last max column block size is equal or less than the max block size of column page floats + 1px", function () {
       var candidates = [
         {},
         {
@@ -465,7 +465,7 @@ describe("column", function() {
               [950, 949],
               [700, 0],
               [800, 0],
-            ].map(function(a) {
+            ].map(function (a) {
               return createDummyColumn(a[0], a[1]);
             }),
           },
@@ -476,8 +476,8 @@ describe("column", function() {
     });
   });
 
-  describe("reduceContainerSize", function() {
-    it("sets a value slightly smaller than the last max column block size to the layoutContainer's block size", function() {
+  describe("reduceContainerSize", function () {
+    it("sets a value slightly smaller than the last max column block size to the layoutContainer's block size", function () {
       var candidates = [
         {},
         { layoutResult: { columns: [901, 700, 800].map(createDummyColumn) } },

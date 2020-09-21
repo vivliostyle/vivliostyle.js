@@ -21,8 +21,8 @@
 
 import vivliostyle from "../../../src/vivliostyle";
 
-export default function() {
-  beforeAll(function() {
+export default function () {
+  beforeAll(function () {
     vivliostyle.setInstance({
       viewer: {
         PageViewMode: {
@@ -38,7 +38,7 @@ export default function() {
     });
   });
 
-  afterAll(function() {
+  afterAll(function () {
     vivliostyle.setInstance({
       viewer: null,
       constants: null,

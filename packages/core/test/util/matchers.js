@@ -22,16 +22,16 @@ function isSameNode(node1, node2) {
 }
 
 var matchers = {
-  toBeSameNodeAs: function() {
+  toBeSameNodeAs: function () {
     return {
-      compare: function(node1, node2) {
+      compare: function (node1, node2) {
         return { pass: isSameNode(node1, node2) };
       },
     };
   },
 };
 
-export const addMatchers = function() {
+export const addMatchers = function () {
   jasmine.addMatchers(matchers);
 };
 // })();

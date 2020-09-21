@@ -17,15 +17,15 @@
 
 import * as vivliostyle_mathutil from "../../../src/vivliostyle/math-util";
 
-describe("math", function() {
-  describe("mean", function() {
-    it("calculates mean of numbers stored in an array", function() {
+describe("math", function () {
+  describe("mean", function () {
+    it("calculates mean of numbers stored in an array", function () {
       expect(vivliostyle_mathutil.mean([1, 2, 3, 4])).toBe(2.5);
     });
   });
 
-  describe("variance", function() {
-    it("calculates variance of numbers stored in an array", function() {
+  describe("variance", function () {
+    it("calculates variance of numbers stored in an array", function () {
       expect(vivliostyle_mathutil.variance([1, 2, 3, 4])).toBe(1.25);
     });
   });

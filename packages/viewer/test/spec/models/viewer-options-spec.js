@@ -24,24 +24,24 @@ import ZoomOptions from "../../../src/models/zoom-options";
 import urlParameters from "../../../src/stores/url-parameters";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
-describe("ViewerOptions", function() {
+describe("ViewerOptions", function () {
   let history, location;
 
   vivliostyleMock();
 
-  beforeEach(function() {
+  beforeEach(function () {
     history = urlParameters.history;
     urlParameters.history = {};
     location = urlParameters.location;
   });
 
-  afterEach(function() {
+  afterEach(function () {
     urlParameters.history = history;
     urlParameters.location = location;
   });
 
-  describe("constructor", function() {
-    it("retrieves parameters from URL", function() {
+  describe("constructor", function () {
+    it("retrieves parameters from URL", function () {
       urlParameters.location = { href: "http://example.com#spread=true" };
       let options = new ViewerOptions();
 
@@ -58,7 +58,7 @@ describe("ViewerOptions", function() {
       expect(options.pageViewMode()).toBe(PageViewMode.AUTO_SPREAD);
     });
 
-    it("copies parameters from the argument", function() {
+    it("copies parameters from the argument", function () {
       const other = new ViewerOptions();
       other.pageViewMode(PageViewMode.SINGLE_PAGE);
       other.fontSize(20);
@@ -72,7 +72,7 @@ describe("ViewerOptions", function() {
     });
   });
 
-  it("write spread option back to URL when update if it is constructed with no argument", function() {
+  it("write spread option back to URL when update if it is constructed with no argument", function () {
     urlParameters.location = { href: "http://example.com#spread=true" };
     let options = new ViewerOptions();
     options.pageViewMode(PageViewMode.SINGLE_PAGE);
@@ -98,8 +98,8 @@ describe("ViewerOptions", function() {
     expect(urlParameters.location.href).toBe("http://example.com#spread=false");
   });
 
-  describe("copyFrom", function() {
-    it("copies parameters from the argument to itself", function() {
+  describe("copyFrom", function () {
+    it("copies parameters from the argument to itself", function () {
       const options = new ViewerOptions();
       options.pageViewMode(PageViewMode.SPREAD);
       options.fontSize(10);
@@ -117,8 +117,8 @@ describe("ViewerOptions", function() {
     });
   });
 
-  describe("toObject", function() {
-    it("converts parameters to an object", function() {
+  describe("toObject", function () {
+    it("converts parameters to an object", function () {
       const options = new ViewerOptions();
       options.pageViewMode(PageViewMode.SPREAD);
       options.fontSize(20);

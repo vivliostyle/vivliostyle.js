@@ -20,12 +20,12 @@ import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as vivliostyle_css_page from "../../../src/vivliostyle/css-page";
 
-describe("css-page", function() {
+describe("css-page", function () {
   var module = vivliostyle_css_page;
   var expected;
 
-  describe("resolvePageSizeAndBleed", function() {
-    beforeEach(function() {
+  describe("resolvePageSizeAndBleed", function () {
+    beforeEach(function () {
       expected = {
         width: adapt_css.fullWidth,
         height: adapt_css.fullHeight,
@@ -34,19 +34,19 @@ describe("css-page", function() {
       };
     });
 
-    it("has fullWidth and fullHeight when nothing specified", function() {
+    it("has fullWidth and fullHeight when nothing specified", function () {
       var resolved = module.resolvePageSizeAndBleed({});
       expect(resolved).toEqual(expected);
     });
 
-    it("has fullWidth and fullHeight when size=auto", function() {
+    it("has fullWidth and fullHeight when size=auto", function () {
       var resolved = module.resolvePageSizeAndBleed({
         size: new adapt_csscasc.CascadeValue(adapt_css.ident.auto, 0),
       });
       expect(resolved).toEqual(expected);
     });
 
-    it("has the same width and height when only one length is specified in size property", function() {
+    it("has the same width and height when only one length is specified in size property", function () {
       var resolved = module.resolvePageSizeAndBleed({
         size: new adapt_csscasc.CascadeValue(
           new adapt_css.Numeric(10, "cm"),
@@ -58,7 +58,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("has the width and height specified in size property", function() {
+    it("has the width and height specified in size property", function () {
       var resolved = module.resolvePageSizeAndBleed({
         size: new adapt_csscasc.CascadeValue(
           new adapt_css.SpaceList([
@@ -73,7 +73,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("has fullWidth and fullHeight when portrait of landscape is specified alone in size property", function() {
+    it("has fullWidth and fullHeight when portrait of landscape is specified alone in size property", function () {
       var resolved = module.resolvePageSizeAndBleed({
         size: new adapt_csscasc.CascadeValue(adapt_css.getName("portrait"), 0),
       });
@@ -85,7 +85,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("has the width and height of the paper size specified in size property", function() {
+    it("has the width and height of the paper size specified in size property", function () {
       var resolved = module.resolvePageSizeAndBleed({
         size: new adapt_csscasc.CascadeValue(adapt_css.getName("A5"), 0),
       });
@@ -120,7 +120,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("has the default bleed offset value when 'crop' and/or 'cross' value is specified in 'marks' property", function() {
+    it("has the default bleed offset value when 'crop' and/or 'cross' value is specified in 'marks' property", function () {
       var resolved = module.resolvePageSizeAndBleed({
         marks: new adapt_csscasc.CascadeValue(adapt_css.ident.none, 0),
       });
@@ -152,7 +152,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("has the bleed value specified in 'bleed' property when it is specified with a concrete length", function() {
+    it("has the bleed value specified in 'bleed' property when it is specified with a concrete length", function () {
       var resolved = module.resolvePageSizeAndBleed({
         bleed: new adapt_csscasc.CascadeValue(
           new adapt_css.Numeric(5, "mm"),
@@ -163,7 +163,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("'auto' bleed value computes to 6pt if 'marks' has 'crop'", function() {
+    it("'auto' bleed value computes to 6pt if 'marks' has 'crop'", function () {
       expected.bleedOffset = module.defaultBleedOffset;
       expected.bleed = new adapt_css.Numeric(6, "pt");
 
@@ -179,7 +179,7 @@ describe("css-page", function() {
       expect(resolved).toEqual(expected);
     });
 
-    it("'auto' bleed value computes to zero if 'marks' does not has 'crop'", function() {
+    it("'auto' bleed value computes to zero if 'marks' does not has 'crop'", function () {
       var resolved = module.resolvePageSizeAndBleed({
         bleed: new adapt_csscasc.CascadeValue(adapt_css.ident.auto, 0),
         marks: new adapt_csscasc.CascadeValue(adapt_css.ident.cross, 0),
@@ -190,7 +190,7 @@ describe("css-page", function() {
     });
   });
 
-  describe("PageParserHandler", function() {
+  describe("PageParserHandler", function () {
     var pageProps, handler;
 
     function createHandler() {
@@ -203,12 +203,12 @@ describe("css-page", function() {
       );
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       pageProps = {};
       handler = createHandler();
     });
 
-    it("'bleed' and 'marks' specified in @page rule without page selectors are effective", function() {
+    it("'bleed' and 'marks' specified in @page rule without page selectors are effective", function () {
       handler.startSelectorRule();
       handler.startRuleBody();
       handler.simpleProperty("size", new adapt_css.Numeric(100, "px"));
@@ -225,7 +225,7 @@ describe("css-page", function() {
       expect(pageProps[""].marks.value).toBe(adapt_css.ident.crop);
     });
 
-    it("'bleed' and 'marks' specified in @page rules with page selectors are ignored", function() {
+    it("'bleed' and 'marks' specified in @page rules with page selectors are ignored", function () {
       handler.startSelectorRule();
       handler.pseudoclassSelector("left", null);
       handler.startRuleBody();

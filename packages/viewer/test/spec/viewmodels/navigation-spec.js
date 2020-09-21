@@ -24,7 +24,7 @@ import ZoomOptions from "../../../src/models/zoom-options";
 import Navigation from "../../../src/viewmodels/navigation";
 import vivliostyleMock from "../../mock/models/vivliostyle";
 
-describe("Navigation", function() {
+describe("Navigation", function () {
   let viewerOptions;
   let viewer;
   let settingsPanel;
@@ -36,17 +36,17 @@ describe("Navigation", function() {
 
   vivliostyleMock();
 
-  beforeEach(function() {
+  beforeEach(function () {
     viewerOptions = new ViewerOptions();
     viewer = {
       state: { navigatable: ko.observable(false) },
-      navigateToPrevious: function() {},
-      navigateToNext: function() {},
-      navigateToLeft: function() {},
-      navigateToRight: function() {},
-      navigateToFirst: function() {},
-      navigateToLast: function() {},
-      queryZoomFactor: function() {},
+      navigateToPrevious: function () {},
+      navigateToNext: function () {},
+      navigateToLeft: function () {},
+      navigateToRight: function () {},
+      navigateToFirst: function () {},
+      navigateToLast: function () {},
+      queryZoomFactor: function () {},
     };
     settingsPanel = { opened: ko.observable(false) };
   });
@@ -90,8 +90,8 @@ describe("Navigation", function() {
   //     });
   // });
 
-  describe("navigateToPrevious", function() {
-    beforeEach(function() {
+  describe("navigateToPrevious", function () {
+    beforeEach(function () {
       spyOn(viewer, "navigateToPrevious");
     });
 
@@ -104,7 +104,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let ret = navigation.navigateToPrevious();
@@ -122,8 +122,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("navigateToNext", function() {
-    beforeEach(function() {
+  describe("navigateToNext", function () {
+    beforeEach(function () {
       spyOn(viewer, "navigateToNext");
     });
 
@@ -136,7 +136,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let ret = navigation.navigateToNext();
@@ -154,8 +154,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("navigateToLeft", function() {
-    beforeEach(function() {
+  describe("navigateToLeft", function () {
+    beforeEach(function () {
       spyOn(viewer, "navigateToLeft");
     });
 
@@ -168,7 +168,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let ret = navigation.navigateToLeft();
@@ -186,8 +186,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("navigateToRight", function() {
-    beforeEach(function() {
+  describe("navigateToRight", function () {
+    beforeEach(function () {
       spyOn(viewer, "navigateToRight");
     });
 
@@ -200,7 +200,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let ret = navigation.navigateToRight();
@@ -218,8 +218,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("navigateToFirst", function() {
-    beforeEach(function() {
+  describe("navigateToFirst", function () {
+    beforeEach(function () {
       spyOn(viewer, "navigateToFirst");
     });
 
@@ -232,7 +232,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let ret = navigation.navigateToFirst();
@@ -250,8 +250,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("navigateToLast", function() {
-    beforeEach(function() {
+  describe("navigateToLast", function () {
+    beforeEach(function () {
       spyOn(viewer, "navigateToLast");
     });
 
@@ -264,7 +264,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let ret = navigation.navigateToLast();
@@ -282,22 +282,22 @@ describe("Navigation", function() {
     });
   });
 
-  describe("hidePageNavigation", function() {
-    it("is false by default", function() {
+  describe("hidePageNavigation", function () {
+    it("is false by default", function () {
       const navigation = createNavigation();
 
       expect(navigation.hidePageNavigation).toBe(false);
     });
 
-    it("is set to true by navigationOptions", function() {
+    it("is set to true by navigationOptions", function () {
       const navigation = createNavigation({ disablePageNavigation: true });
 
       expect(navigation.hidePageNavigation).toBe(true);
     });
   });
 
-  describe("zoomIn", function() {
-    beforeEach(function() {
+  describe("zoomIn", function () {
+    beforeEach(function () {
       spyOn(viewer, "queryZoomFactor").and.returnValue(1);
     });
     // it("increases zoom factor stored in ViewerOptions model and returns true", function () {
@@ -320,7 +320,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let zoom = viewerOptions.zoom().zoom;
@@ -344,8 +344,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("zoomOut", function() {
-    beforeEach(function() {
+  describe("zoomOut", function () {
+    beforeEach(function () {
       spyOn(viewer, "queryZoomFactor").and.returnValue(1);
     });
     // it("decreases zoom factor stored in ViewerOptions model and returns true", function() {
@@ -368,7 +368,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let zoom = viewerOptions.zoom().zoom;
@@ -392,8 +392,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("zoomToActualSize", function() {
-    beforeEach(function() {
+  describe("zoomToActualSize", function () {
+    beforeEach(function () {
       spyOn(viewer, "queryZoomFactor").and.returnValue(2);
     });
     // it("set zoom factor stored in ViewerOptions model to 1 and returns true", function() {
@@ -415,7 +415,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       let zoom = viewerOptions.zoom().zoom;
@@ -439,8 +439,8 @@ describe("Navigation", function() {
     });
   });
 
-  describe("toggleFitToScreen", function() {
-    beforeEach(function() {
+  describe("toggleFitToScreen", function () {
+    beforeEach(function () {
       spyOn(viewer, "queryZoomFactor").and.returnValue(1.2);
     });
 
@@ -464,7 +464,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       viewerOptions.zoom(ZoomOptions.createFromZoomFactor(2));
@@ -487,21 +487,21 @@ describe("Navigation", function() {
     });
   });
 
-  describe("hideZoom", function() {
-    it("is false by default", function() {
+  describe("hideZoom", function () {
+    it("is false by default", function () {
       const navigation = createNavigation();
 
       expect(navigation.hideZoom).toBe(false);
     });
 
-    it("is set to true by navigationOptions", function() {
+    it("is set to true by navigationOptions", function () {
       const navigation = createNavigation({ disableZoom: true });
 
       expect(navigation.hideZoom).toBe(true);
     });
   });
 
-  describe("increaseFontSize", function() {
+  describe("increaseFontSize", function () {
     // it("increases font size stored in ViewerOptions model and returns true", function () {
     //     let navigation = createNavigation();
     //     setDisabled(false);
@@ -517,7 +517,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       const fontSize = viewerOptions.fontSize();
@@ -536,7 +536,7 @@ describe("Navigation", function() {
     });
   });
 
-  describe("decreaseFontSize", function() {
+  describe("decreaseFontSize", function () {
     // it("decreases font size stored in ViewerOptions model and returns true", function() {
     //     let navigation = createNavigation();
     //     setDisabled(false);
@@ -552,7 +552,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       const fontSize = viewerOptions.fontSize();
@@ -571,7 +571,7 @@ describe("Navigation", function() {
     });
   });
 
-  describe("defaultFontSize", function() {
+  describe("defaultFontSize", function () {
     // it("set font size stored in ViewerOptions model to default and returns true", function() {
     //     let navigation = createNavigation();
     //     setDisabled(false);
@@ -589,7 +589,7 @@ describe("Navigation", function() {
     //     expect(ret).toBe(true);
     // });
 
-    it("do nothing and returns false when navigation is disabled", function() {
+    it("do nothing and returns false when navigation is disabled", function () {
       let navigation = createNavigation();
       setDisabled(true);
       const fontSize = 20;
@@ -609,14 +609,14 @@ describe("Navigation", function() {
     });
   });
 
-  describe("hideFontSizeChange", function() {
-    it("is false by default", function() {
+  describe("hideFontSizeChange", function () {
+    it("is false by default", function () {
       const navigation = createNavigation();
 
       expect(navigation.hideFontSizeChange).toBe(false);
     });
 
-    it("is set to true by navigationOptions", function() {
+    it("is set to true by navigationOptions", function () {
       const navigation = createNavigation({ disableFontSizeChange: true });
 
       expect(navigation.hideFontSizeChange).toBe(true);

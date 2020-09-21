@@ -20,22 +20,22 @@
 import DocumentOptions from "../../../src/models/document-options";
 import urlParameters from "../../../src/stores/url-parameters";
 
-describe("DocumentOptions", function() {
+describe("DocumentOptions", function () {
   let history, location;
 
-  beforeEach(function() {
+  beforeEach(function () {
     history = urlParameters.history;
     urlParameters.history = {};
     location = urlParameters.location;
   });
 
-  afterEach(function() {
+  afterEach(function () {
     urlParameters.history = history;
     urlParameters.location = location;
   });
 
-  describe("constructor", function() {
-    it("retrieves parameters from URL", function() {
+  describe("constructor", function () {
+    it("retrieves parameters from URL", function () {
       urlParameters.location = {
         href: "http://example.com#x=abc/def.html&f=ghi%25&x=jkl/mno.html",
       };
@@ -60,7 +60,7 @@ describe("DocumentOptions", function() {
     });
   });
 
-  it("write fragment back to URL when updated", function() {
+  it("write fragment back to URL when updated", function () {
     urlParameters.location = {
       href: "http://example.com#x=abc/def.html&f=ghi",
     };
@@ -72,8 +72,8 @@ describe("DocumentOptions", function() {
     );
   });
 
-  describe("toObject", function() {
-    it("converts parameters to an object except url", function() {
+  describe("toObject", function () {
+    it("converts parameters to an object except url", function () {
       const options = new DocumentOptions();
       options.url("abc/def.html");
       options.fragment("ghi");

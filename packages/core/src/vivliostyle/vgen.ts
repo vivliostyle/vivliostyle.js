@@ -111,7 +111,8 @@ export interface StylerProducer {
   getStylerForDoc(xmldoc: XmlDoc.XMLDocHolder): CssStyler.AbstractStyler;
 }
 
-export class ViewFactory extends Base.SimpleEventTarget
+export class ViewFactory
+  extends Base.SimpleEventTarget
   implements Vtree.LayoutContext {
   private static SVG_URL_ATTRIBUTES: string[] = [
     "color-profile",

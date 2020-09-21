@@ -21,9 +21,9 @@ import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 
-describe("css-cascade", function() {
-  describe("IsNthSiblingAction", function() {
-    it("when a=0, matches if currentSiblingOrder=b", function() {
+describe("css-cascade", function () {
+  describe("IsNthSiblingAction", function () {
+    it("when a=0, matches if currentSiblingOrder=b", function () {
       var action = new adapt_csscasc.IsNthSiblingAction(0, 3);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -36,7 +36,7 @@ describe("css-cascade", function() {
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("when a is non-zero, matches if non-negative n which satisfies currentSiblingOrder=an+b exists", function() {
+    it("when a is non-zero, matches if non-negative n which satisfies currentSiblingOrder=an+b exists", function () {
       var action = new adapt_csscasc.IsNthSiblingAction(3, 0);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -134,7 +134,7 @@ describe("css-cascade", function() {
     });
   });
 
-  describe("IsNthSiblingOfTypeAction", function() {
+  describe("IsNthSiblingOfTypeAction", function () {
     function dummyCascadeInstance(counts) {
       var element = { namespaceURI: "foo", localName: "bar" };
       var currentSiblingTypeCounts = {};
@@ -146,7 +146,7 @@ describe("css-cascade", function() {
       };
     }
 
-    it("when a=0, matches if currentSiblingTypeCounts[namespace][locaName]=b", function() {
+    it("when a=0, matches if currentSiblingTypeCounts[namespace][locaName]=b", function () {
       var action = new adapt_csscasc.IsNthSiblingOfTypeAction(0, 3);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -159,7 +159,7 @@ describe("css-cascade", function() {
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("when a is non-zero, matches if non-negative n which satisfies currentSiblingTypeCounts[namespace][locaName]=an+b exists", function() {
+    it("when a is non-zero, matches if non-negative n which satisfies currentSiblingTypeCounts[namespace][locaName]=an+b exists", function () {
       var action = new adapt_csscasc.IsNthSiblingOfTypeAction(3, 0);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -257,7 +257,7 @@ describe("css-cascade", function() {
     });
   });
 
-  describe("IsNthLastSiblingAction", function() {
+  describe("IsNthLastSiblingAction", function () {
     function dummyCascadeInstance(count) {
       return {
         currentFollowingSiblingOrder: null,
@@ -266,7 +266,7 @@ describe("css-cascade", function() {
       };
     }
 
-    it("when a=0, matches if currentFollowingSiblingOrder=b", function() {
+    it("when a=0, matches if currentFollowingSiblingOrder=b", function () {
       var action = new adapt_csscasc.IsNthLastSiblingAction(0, 3);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -283,7 +283,7 @@ describe("css-cascade", function() {
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(3);
     });
 
-    it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingOrder=an+b exists", function() {
+    it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingOrder=an+b exists", function () {
       var action = new adapt_csscasc.IsNthLastSiblingAction(3, 0);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -427,11 +427,11 @@ describe("css-cascade", function() {
     });
   });
 
-  describe("IsNthLastSiblingOfTypeAction", function() {
+  describe("IsNthLastSiblingOfTypeAction", function () {
     function dummyCascadeInstance(counts) {
       var currentElement = { namespaceURI: "foo", localName: "bar" };
       var element = currentElement;
-      Object.keys(counts).forEach(function(name) {
+      Object.keys(counts).forEach(function (name) {
         for (var i = counts[name]; i > 0; i--) {
           element = element.nextElementSibling = {
             namespaceURI: currentElement.namespaceURI,
@@ -447,7 +447,7 @@ describe("css-cascade", function() {
       };
     }
 
-    it("when a=0, matches if currentFollowingSiblingTypeCounts[namespace][locaName]=b", function() {
+    it("when a=0, matches if currentFollowingSiblingTypeCounts[namespace][locaName]=b", function () {
       var action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(0, 3);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -468,7 +468,7 @@ describe("css-cascade", function() {
       });
     });
 
-    it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingTypeCounts[namespace][locaName]=an+b exists", function() {
+    it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingTypeCounts[namespace][locaName]=an+b exists", function () {
       var action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(3, 0);
       var chained = (action.chained = jasmine.createSpyObj("chianed", [
         "apply",
@@ -658,7 +658,7 @@ describe("css-cascade", function() {
     });
   });
 
-  describe("IsEmptyAction", function() {
+  describe("IsEmptyAction", function () {
     function dummyCascadeInstance(children) {
       if (children) {
         var node = children[0];
@@ -672,16 +672,16 @@ describe("css-cascade", function() {
     var action = new adapt_csscasc.IsEmptyAction();
     var chained;
 
-    beforeEach(function() {
+    beforeEach(function () {
       chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
     });
 
-    it("applies if the element has no children", function() {
+    it("applies if the element has no children", function () {
       action.apply(dummyCascadeInstance(null));
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("applies if the element has only comment nodes or empty text nodes (length=0) as its children", function() {
+    it("applies if the element has only comment nodes or empty text nodes (length=0) as its children", function () {
       action.apply(
         dummyCascadeInstance([
           { nodeType: Node.COMMENT_NODE, length: 10 },
@@ -691,12 +691,12 @@ describe("css-cascade", function() {
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("not applies if the element has an element child", function() {
+    it("not applies if the element has an element child", function () {
       action.apply(dummyCascadeInstance([{ nodeType: Node.ELEMENT_NODE }]));
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("not applies if the element has a non-empty text node as a child", function() {
+    it("not applies if the element has a non-empty text node as a child", function () {
       action.apply(
         dummyCascadeInstance([{ nodeType: Node.TEXT_NODE, length: 1 }]),
       );
@@ -704,93 +704,93 @@ describe("css-cascade", function() {
     });
   });
 
-  describe("IsEnabledAction", function() {
+  describe("IsEnabledAction", function () {
     var action = new adapt_csscasc.IsEnabledAction();
     var chained;
 
-    beforeEach(function() {
+    beforeEach(function () {
       chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
     });
 
-    it("applies if the element's 'disabled' property is false (not undefined)", function() {
+    it("applies if the element's 'disabled' property is false (not undefined)", function () {
       action.apply({ currentElement: { disabled: false } });
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("not applies if the element's 'disabled' property is true", function() {
+    it("not applies if the element's 'disabled' property is true", function () {
       action.apply({ currentElement: { disabled: true } });
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("applies if the element does not have 'disabled' property", function() {
+    it("applies if the element does not have 'disabled' property", function () {
       action.apply({ currentElement: {} });
       expect(chained.apply).not.toHaveBeenCalled();
     });
   });
 
-  describe("IsDisabledAction", function() {
+  describe("IsDisabledAction", function () {
     var action = new adapt_csscasc.IsDisabledAction();
     var chained;
 
-    beforeEach(function() {
+    beforeEach(function () {
       chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
     });
 
-    it("applies if the element's 'disabled' property is true", function() {
+    it("applies if the element's 'disabled' property is true", function () {
       action.apply({ currentElement: { disabled: true } });
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("not applies if the element's 'disabled' property is false (not undefined)", function() {
+    it("not applies if the element's 'disabled' property is false (not undefined)", function () {
       action.apply({ currentElement: { disabled: false } });
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("applies if the element does not have 'disabled' property", function() {
+    it("applies if the element does not have 'disabled' property", function () {
       action.apply({ currentElement: {} });
       expect(chained.apply).not.toHaveBeenCalled();
     });
   });
 
-  describe("IsCheckedAction", function() {
+  describe("IsCheckedAction", function () {
     var action = new adapt_csscasc.IsCheckedAction();
     var chained;
 
-    beforeEach(function() {
+    beforeEach(function () {
       chained = action.chained = jasmine.createSpyObj("chianed", ["apply"]);
     });
 
-    it("applies if the element's 'selected' property is true", function() {
+    it("applies if the element's 'selected' property is true", function () {
       action.apply({ currentElement: { selected: true } });
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("applies if the element's 'checked' property is true", function() {
+    it("applies if the element's 'checked' property is true", function () {
       action.apply({ currentElement: { checked: true } });
       expect(chained.apply).toHaveBeenCalled();
     });
 
-    it("not applies if the element's 'selected' property is false (not undefined)", function() {
+    it("not applies if the element's 'selected' property is false (not undefined)", function () {
       action.apply({ currentElement: { selected: false } });
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("not applies if the element's 'checked' property is false (not undefined)", function() {
+    it("not applies if the element's 'checked' property is false (not undefined)", function () {
       action.apply({ currentElement: { checked: false } });
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("applies if the element does not have 'selected' nor 'checked' property", function() {
+    it("applies if the element does not have 'selected' nor 'checked' property", function () {
       action.apply({ currentElement: {} });
       expect(chained.apply).not.toHaveBeenCalled();
     });
   });
 
-  describe("CascadeParserHandler", function() {
-    describe("simpleProperty", function() {
+  describe("CascadeParserHandler", function () {
+    describe("simpleProperty", function () {
       vivliostyle_test_util_mock_plugin.setup();
 
-      it("convert property declaration by calling functions registered to 'SIMPLE_PROPERTY' hook", function() {
+      it("convert property declaration by calling functions registered to 'SIMPLE_PROPERTY' hook", function () {
         function hook1(original) {
           return {
             name: original["name"] + "1",
@@ -829,16 +829,16 @@ describe("css-cascade", function() {
       });
     });
 
-    describe("attributeSelector", function() {
+    describe("attributeSelector", function () {
       var handler;
 
-      beforeEach(function() {
+      beforeEach(function () {
         handler = new adapt_csscasc.CascadeParserHandler();
         handler.startSelectorRule();
       });
 
-      describe("Attribute presence selector", function() {
-        it("use CheckAttributePresentAction when the operator is EOF (no operator)", function() {
+      describe("Attribute presence selector", function () {
+        it("use CheckAttributePresentAction when the operator is EOF (no operator)", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -856,8 +856,8 @@ describe("css-cascade", function() {
         });
       });
 
-      describe("Attribute equality selector", function() {
-        it("use CheckAttributeEqAction when the operator is '='", function() {
+      describe("Attribute equality selector", function () {
+        it("use CheckAttributeEqAction when the operator is '='", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -876,8 +876,8 @@ describe("css-cascade", function() {
         });
       });
 
-      describe("~= attribute selector", function() {
-        it("use CheckAttributeRegExpAction when the value is not empty and contains no whitespaces", function() {
+      describe("~= attribute selector", function () {
+        it("use CheckAttributeRegExpAction when the value is not empty and contains no whitespaces", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -898,7 +898,7 @@ describe("css-cascade", function() {
           expect("abar b".match(regexp)).toBeFalsy();
         });
 
-        it("represents nothing when the value contains whitespaces", function() {
+        it("represents nothing when the value contains whitespaces", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -914,7 +914,7 @@ describe("css-cascade", function() {
           expect(action.condition).toBe("");
         });
 
-        it("represents nothing when the value is an empty string", function() {
+        it("represents nothing when the value is an empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -931,8 +931,8 @@ describe("css-cascade", function() {
         });
       });
 
-      describe("|= attribute selector", function() {
-        it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
+      describe("|= attribute selector", function () {
+        it("use CheckAttributeRegExpAction when the value is a non-empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -954,7 +954,7 @@ describe("css-cascade", function() {
           expect("a-bar-b".match(regexp)).toBeFalsy();
         });
 
-        it("also use CheckAttributeRegExpAction when the value is an empty string", function() {
+        it("also use CheckAttributeRegExpAction when the value is an empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -976,8 +976,8 @@ describe("css-cascade", function() {
         });
       });
 
-      describe("^= attribute selector", function() {
-        it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
+      describe("^= attribute selector", function () {
+        it("use CheckAttributeRegExpAction when the value is a non-empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -999,7 +999,7 @@ describe("css-cascade", function() {
           expect("a-bar-b".match(regexp)).toBeFalsy();
         });
 
-        it("represents nothing when the value is an empty string", function() {
+        it("represents nothing when the value is an empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -1016,8 +1016,8 @@ describe("css-cascade", function() {
         });
       });
 
-      describe("$= attribute selector", function() {
-        it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
+      describe("$= attribute selector", function () {
+        it("use CheckAttributeRegExpAction when the value is a non-empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -1039,7 +1039,7 @@ describe("css-cascade", function() {
           expect("bbarb".match(regexp)).toBeFalsy();
         });
 
-        it("represents nothing when the value is an empty string", function() {
+        it("represents nothing when the value is an empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -1056,8 +1056,8 @@ describe("css-cascade", function() {
         });
       });
 
-      describe("*= attribute selector", function() {
-        it("use CheckAttributeRegExpAction when the value is a non-empty string", function() {
+      describe("*= attribute selector", function () {
+        it("use CheckAttributeRegExpAction when the value is a non-empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -1079,7 +1079,7 @@ describe("css-cascade", function() {
           expect("foo".match(regexp)).toBeFalsy();
         });
 
-        it("represents nothing when the value is an empty string", function() {
+        it("represents nothing when the value is an empty string", function () {
           handler.attributeSelector(
             "ns",
             "foo",
@@ -1096,7 +1096,7 @@ describe("css-cascade", function() {
         });
       });
 
-      it("represents nothing when an unsupported operator is passed", function() {
+      it("represents nothing when an unsupported operator is passed", function () {
         handler.attributeSelector("ns", "foo", null, "bar");
 
         expect(handler.chain.length).toBe(1);

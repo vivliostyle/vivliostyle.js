@@ -2647,7 +2647,8 @@ export function mergeInPageRule(
  * later used for adding `@page` rules to the real DOM, which are then used by
  * the PDF renderer (Chromium) to determine page sizes.
  */
-export class PageParserHandler extends CssCascade.CascadeParserHandler
+export class PageParserHandler
+  extends CssCascade.CascadeParserHandler
   implements CssValidator.PropertyReceiver {
   private currentPageSelectors: {
     selectors: string[] | null;
@@ -2865,7 +2866,8 @@ export class PageParserHandler extends CssCascade.CascadeParserHandler
 /**
  * Parser handler for a page-margin box rule.
  */
-export class PageMarginBoxParserHandler extends CssParser.SlaveParserHandler
+export class PageMarginBoxParserHandler
+  extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver {
   constructor(
     scope: Exprs.LexicalScope,

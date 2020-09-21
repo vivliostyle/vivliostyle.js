@@ -18,7 +18,7 @@
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as vivliostyle_pagefloat from "../../../src/vivliostyle/page-floats";
 
-describe("page-floats", function() {
+describe("page-floats", function () {
   var module = vivliostyle_pagefloat;
   var FloatReference = module.FloatReference;
   var PageFloat = module.PageFloat;
@@ -35,14 +35,14 @@ describe("page-floats", function() {
     };
   }
 
-  describe("PageFloatStore", function() {
+  describe("PageFloatStore", function () {
     var store;
-    beforeEach(function() {
+    beforeEach(function () {
       store = new PageFloatStore();
     });
 
-    describe("#addPageFloat", function() {
-      it("adds a PageFloat", function() {
+    describe("#addPageFloat", function () {
+      it("adds a PageFloat", function () {
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -58,7 +58,7 @@ describe("page-floats", function() {
         expect(store.floats).toContain(float);
       });
 
-      it("assign a new ID to the PageFloat", function() {
+      it("assign a new ID to the PageFloat", function () {
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -85,7 +85,7 @@ describe("page-floats", function() {
         expect(float.id).toBe("pf1");
       });
 
-      it("throws an error if a float with the same node position is already registered", function() {
+      it("throws an error if a float with the same node position is already registered", function () {
         var nodePosition = dummyNodePosition();
         var float = new PageFloat(
           nodePosition,
@@ -106,14 +106,14 @@ describe("page-floats", function() {
           "body",
         );
 
-        expect(function() {
+        expect(function () {
           store.addPageFloat(float);
         }).toThrow();
       });
     });
 
-    describe("#findPageFloatByNodePosition", function() {
-      it("returns a registered page float associated with the specified node position", function() {
+    describe("#findPageFloatByNodePosition", function () {
+      it("returns a registered page float associated with the specified node position", function () {
         var nodePosition = dummyNodePosition();
         var float = new PageFloat(
           nodePosition,
@@ -127,7 +127,7 @@ describe("page-floats", function() {
         expect(store.findPageFloatByNodePosition(nodePosition)).toBe(float);
       });
 
-      it("returns null when no page float with the specified node position is registered", function() {
+      it("returns null when no page float with the specified node position is registered", function () {
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -142,9 +142,9 @@ describe("page-floats", function() {
     });
   });
 
-  describe("PageFloatLayoutContext", function() {
+  describe("PageFloatLayoutContext", function () {
     var rootContext;
-    beforeEach(function() {
+    beforeEach(function () {
       rootContext = new PageFloatLayoutContext(
         null,
         null,
@@ -156,8 +156,8 @@ describe("page-floats", function() {
       );
     });
 
-    describe("constructor", function() {
-      it("uses writing-mode and direction values of the parent if they are not specified", function() {
+    describe("constructor", function () {
+      it("uses writing-mode and direction values of the parent if they are not specified", function () {
         var context = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -185,7 +185,7 @@ describe("page-floats", function() {
         expect(context.direction).toBe(adapt_css.ident.rtl);
       });
 
-      it("registers itself to the parent as a child", function() {
+      it("registers itself to the parent as a child", function () {
         var pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -212,8 +212,8 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#getPreviousSibling", function() {
-      it("returns null if the parent has no children preceding the child", function() {
+    describe("#getPreviousSibling", function () {
+      it("returns null if the parent has no children preceding the child", function () {
         var context = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -227,7 +227,7 @@ describe("page-floats", function() {
         expect(context.getPreviousSibling()).toBe(null);
       });
 
-      it("returns the previous sibling if it has the same floatReference", function() {
+      it("returns the previous sibling if it has the same floatReference", function () {
         var context1 = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -261,7 +261,7 @@ describe("page-floats", function() {
         expect(context1.getPreviousSibling()).toBe(null);
       });
 
-      it("returns the last context with the same floatReference, the same flow and the same generating element", function() {
+      it("returns the last context with the same floatReference, the same flow and the same generating element", function () {
         var context1 = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -373,8 +373,8 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#findPageFloatByNodePosition", function() {
-      it("returns a page float registered by PageFloatLayoutContext with the same root PageFloatLayoutContext", function() {
+    describe("#findPageFloatByNodePosition", function () {
+      it("returns a page float registered by PageFloatLayoutContext with the same root PageFloatLayoutContext", function () {
         var context1 = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -427,8 +427,8 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#forbid, #isForbidden", function() {
-      it("returns if the page float is forbidden in the context by #forbid method", function() {
+    describe("#forbid, #isForbidden", function () {
+      it("returns if the page float is forbidden in the context by #forbid method", function () {
         var context = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -454,7 +454,7 @@ describe("page-floats", function() {
         expect(context.isForbidden(float)).toBe(true);
       });
 
-      it("returns true if the page float is forbidden by one of ancestors of the context", function() {
+      it("returns true if the page float is forbidden by one of ancestors of the context", function () {
         var pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -494,7 +494,7 @@ describe("page-floats", function() {
         columnContext.forbid(float);
 
         expect(columnContext.isForbidden(float)).toBe(true);
-        expect(function() {
+        expect(function () {
           regionContext.isForbidden(float);
         }).toThrow();
 
@@ -522,7 +522,7 @@ describe("page-floats", function() {
 
         expect(columnContext.isForbidden(float)).toBe(true);
         expect(regionContext.isForbidden(float)).toBe(true);
-        expect(function() {
+        expect(function () {
           pageContext.isForbidden(float);
         }).toThrow();
 
@@ -559,7 +559,7 @@ describe("page-floats", function() {
 
         expect(columnContext.isForbidden(float)).toBe(false);
         expect(regionContext.isForbidden(float)).toBe(false);
-        expect(function() {
+        expect(function () {
           pageContext.isForbidden(float);
         }).toThrow();
 
@@ -645,7 +645,7 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#addPageFloatFragment, #findPageFloatFragment", function() {
+    describe("#addPageFloatFragment, #findPageFloatFragment", function () {
       var pageContext, regionContext, columnContext, area;
       function reset() {
         pageContext = new PageFloatLayoutContext(
@@ -675,17 +675,17 @@ describe("page-floats", function() {
           null,
           null,
         );
-        [pageContext, regionContext, columnContext].forEach(function(context) {
+        [pageContext, regionContext, columnContext].forEach(function (context) {
           spyOn(context, "invalidate");
           spyOn(context, "addPageFloatFragment").and.callThrough();
         });
       }
-      beforeEach(function() {
+      beforeEach(function () {
         area = { getOuterShape: jasmine.createSpy("getOuterShape") };
         reset();
       });
 
-      it("A PageFloatFragment added by #addPageFloatFragment can be retrieved by #findPageFloatFragment", function() {
+      it("A PageFloatFragment added by #addPageFloatFragment can be retrieved by #findPageFloatFragment", function () {
         pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -718,7 +718,7 @@ describe("page-floats", function() {
         expect(pageContext.findPageFloatFragment(float)).toBe(fragment);
       });
 
-      it("A PageFloatFragment stored in one of the ancestors can be retrieved by #findPageFloatFragment", function() {
+      it("A PageFloatFragment stored in one of the ancestors can be retrieved by #findPageFloatFragment", function () {
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.REGION,
@@ -747,7 +747,7 @@ describe("page-floats", function() {
 
         expect(columnContext.findPageFloatFragment(float)).toBe(fragment);
         expect(regionContext.findPageFloatFragment(float)).toBe(fragment);
-        expect(function() {
+        expect(function () {
           pageContext.findPageFloatFragment(float);
         }).toThrow();
 
@@ -791,7 +791,7 @@ describe("page-floats", function() {
         expect(pageContext.findPageFloatFragment(float)).toBe(fragment);
       });
 
-      it("When a PageFloatFragment is added by #addPageFloatFragment, the corresponding PageFloatLayoutContext is invalidated", function() {
+      it("When a PageFloatFragment is added by #addPageFloatFragment, the corresponding PageFloatLayoutContext is invalidated", function () {
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -872,9 +872,9 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#removePageFloatFragment", function() {
+    describe("#removePageFloatFragment", function () {
       var container, context, float, area, fragment;
-      beforeEach(function() {
+      beforeEach(function () {
         context = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -911,7 +911,7 @@ describe("page-floats", function() {
         context.invalidate.calls.reset();
       });
 
-      it("removes the specified PageFloatFragment", function() {
+      it("removes the specified PageFloatFragment", function () {
         expect(context.findPageFloatFragment(float)).toBe(fragment);
 
         context.removePageFloatFragment(fragment);
@@ -919,7 +919,7 @@ describe("page-floats", function() {
         expect(context.findPageFloatFragment(float)).toBe(null);
       });
 
-      it("detaches the view node of the fragment", function() {
+      it("detaches the view node of the fragment", function () {
         context.removePageFloatFragment(fragment);
 
         expect(area.element.parentNode.removeChild).toHaveBeenCalledWith(
@@ -927,16 +927,16 @@ describe("page-floats", function() {
         );
       });
 
-      it("invalidates the context", function() {
+      it("invalidates the context", function () {
         context.removePageFloatFragment(fragment);
 
         expect(context.invalidate).toHaveBeenCalled();
       });
     });
 
-    describe("#registerPageFloatAnchor", function() {
+    describe("#registerPageFloatAnchor", function () {
       var pageContext, regionContext, columnContext, float, anchorViewNode;
-      beforeEach(function() {
+      beforeEach(function () {
         pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -967,7 +967,7 @@ describe("page-floats", function() {
         anchorViewNode = {};
       });
 
-      it("stores the anchor view node", function() {
+      it("stores the anchor view node", function () {
         float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -982,9 +982,9 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#isAnchorAlreadyAppeared", function() {
+    describe("#isAnchorAlreadyAppeared", function () {
       var container, context, float, id, anchorViewNode;
-      beforeEach(function() {
+      beforeEach(function () {
         container = {
           element: {
             contains: jasmine.createSpy("contains"),
@@ -1011,11 +1011,11 @@ describe("page-floats", function() {
         anchorViewNode = {};
       });
 
-      it("returns false if the anchor view node is not registered", function() {
+      it("returns false if the anchor view node is not registered", function () {
         expect(context.isAnchorAlreadyAppeared(id)).toBe(false);
       });
 
-      it("returns false if the anchor view node if registered but not contained in the container", function() {
+      it("returns false if the anchor view node if registered but not contained in the container", function () {
         container.element.contains.and.returnValue(false);
         context.registerPageFloatAnchor(float, anchorViewNode);
 
@@ -1023,7 +1023,7 @@ describe("page-floats", function() {
         expect(container.element.contains).toHaveBeenCalledWith(anchorViewNode);
       });
 
-      it("returns true if the anchor view node if registered and contained in the container", function() {
+      it("returns true if the anchor view node if registered and contained in the container", function () {
         container.element.contains.and.returnValue(true);
         context.registerPageFloatAnchor(float, anchorViewNode);
 
@@ -1031,7 +1031,7 @@ describe("page-floats", function() {
         expect(container.element.contains).toHaveBeenCalledWith(anchorViewNode);
       });
 
-      it("returns true if the float is deferred from a previous fragment", function() {
+      it("returns true if the float is deferred from a previous fragment", function () {
         container.element.contains.and.returnValue(false);
         context.floatsDeferredFromPrevious.push(
           new PageFloatContinuation(float, {}),
@@ -1041,9 +1041,9 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#deferPageFloat", function() {
+    describe("#deferPageFloat", function () {
       var pageContext, regionContext, columnContext, float;
-      beforeEach(function() {
+      beforeEach(function () {
         pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -1073,7 +1073,7 @@ describe("page-floats", function() {
         );
       });
 
-      it("stores a PageFloatContinuation as a deferred float", function() {
+      it("stores a PageFloatContinuation as a deferred float", function () {
         float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -1088,7 +1088,7 @@ describe("page-floats", function() {
         expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
       });
 
-      it("replaces an existing deferred PageFloatContinuation with new one if there exists a deferred continuation of the same float", function() {
+      it("replaces an existing deferred PageFloatContinuation with new one if there exists a deferred continuation of the same float", function () {
         float = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -1120,7 +1120,7 @@ describe("page-floats", function() {
         );
       });
 
-      it("stores a PageFloatContinuation in the corresponding context as a deferred float", function() {
+      it("stores a PageFloatContinuation in the corresponding context as a deferred float", function () {
         float = new PageFloat(
           dummyNodePosition(),
           FloatReference.REGION,
@@ -1137,7 +1137,7 @@ describe("page-floats", function() {
       });
     });
 
-    describe("getDeferredPageFloatContinuations", function() {
+    describe("getDeferredPageFloatContinuations", function () {
       function addPageFloat(floatReference, context, flowName) {
         var float = new PageFloat(
           dummyNodePosition(),
@@ -1159,7 +1159,7 @@ describe("page-floats", function() {
         cont4,
         cont5,
         cont6;
-      beforeEach(function() {
+      beforeEach(function () {
         pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -1206,7 +1206,7 @@ describe("page-floats", function() {
         columnContext.floatsDeferredFromPrevious.push(cont6);
       });
 
-      it("returns all deferred PageFloatContinuations with the corresponding flow name in order of page, region and column", function() {
+      it("returns all deferred PageFloatContinuations with the corresponding flow name in order of page, region and column", function () {
         expect(columnContext.getDeferredPageFloatContinuations()).toEqual([
           cont1,
           cont3,
@@ -1219,7 +1219,7 @@ describe("page-floats", function() {
         ]);
       });
 
-      it("returns all deferred PageFLoatContinuations in order of page, region and column when the context does not have a flow name and no flow name is specified as an argument", function() {
+      it("returns all deferred PageFLoatContinuations in order of page, region and column when the context does not have a flow name and no flow name is specified as an argument", function () {
         expect(pageContext.getDeferredPageFloatContinuations()).toEqual([
           cont1,
           cont2,
@@ -1227,7 +1227,7 @@ describe("page-floats", function() {
       });
     });
 
-    describe("getPageFloatContinuationsDeferredToNext", function() {
+    describe("getPageFloatContinuationsDeferredToNext", function () {
       var pageContext,
         regionContext,
         columnContext,
@@ -1237,7 +1237,7 @@ describe("page-floats", function() {
         cont4,
         cont5,
         cont6;
-      beforeEach(function() {
+      beforeEach(function () {
         pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -1278,7 +1278,7 @@ describe("page-floats", function() {
         columnContext.floatsDeferredToNext.push(cont6);
       });
 
-      it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresonding flow name in order of page, region and column", function() {
+      it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresonding flow name in order of page, region and column", function () {
         expect(
           columnContext.getPageFloatContinuationsDeferredToNext(),
         ).toEqual([cont1, cont3, cont5]);
@@ -1287,7 +1287,7 @@ describe("page-floats", function() {
         ).toEqual([cont2, cont4, cont6]);
       });
 
-      it("returns all PageFLoatContinuations deferred to the next fragmentainer in order of page, region and column when the context does not have a flow name and no flow name is specified as an argument", function() {
+      it("returns all PageFLoatContinuations deferred to the next fragmentainer in order of page, region and column when the context does not have a flow name and no flow name is specified as an argument", function () {
         expect(pageContext.getPageFloatContinuationsDeferredToNext()).toEqual([
           cont1,
           cont2,
@@ -1295,7 +1295,7 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#finish", function() {
+    describe("#finish", function () {
       var context,
         float1,
         cont1,
@@ -1306,7 +1306,7 @@ describe("page-floats", function() {
         cont3,
         float4,
         cont4;
-      beforeEach(function() {
+      beforeEach(function () {
         context = new PageFloatLayoutContext(
           rootContext,
           FloatReference.COLUMN,
@@ -1373,7 +1373,7 @@ describe("page-floats", function() {
         context.floatsDeferredToNext = [cont3];
       });
 
-      it("Removes and forbids the last fragment whose anchor have not appeared", function() {
+      it("Removes and forbids the last fragment whose anchor have not appeared", function () {
         context.isAnchorAlreadyAppeared.and.returnValue(false);
         context.finish();
 
@@ -1386,8 +1386,8 @@ describe("page-floats", function() {
         expect(context.floatsDeferredToNext).toEqual([cont3]);
       });
 
-      it("Removes the last fragment whose anchor have not appeared", function() {
-        context.isAnchorAlreadyAppeared.and.callFake(function(floatId) {
+      it("Removes the last fragment whose anchor have not appeared", function () {
+        context.isAnchorAlreadyAppeared.and.callFake(function (floatId) {
           return floatId === float2.getId();
         });
         context.finish();
@@ -1401,7 +1401,7 @@ describe("page-floats", function() {
         expect(context.floatsDeferredToNext).toEqual([cont3]);
       });
 
-      it("Removes floats deferred to next fragmentainers if their anchors have not appeared", function() {
+      it("Removes floats deferred to next fragmentainers if their anchors have not appeared", function () {
         var float5 = new PageFloat(
           dummyNodePosition(),
           FloatReference.COLUMN,
@@ -1412,7 +1412,7 @@ describe("page-floats", function() {
         context.addPageFloat(float5);
         var cont5 = new PageFloatContinuation(float5, {});
         context.floatsDeferredToNext = [cont3, cont5];
-        context.isAnchorAlreadyAppeared.and.callFake(function(id) {
+        context.isAnchorAlreadyAppeared.and.callFake(function (id) {
           return id === float1.getId() || id === float2.getId();
         });
         context.finish();
@@ -1421,7 +1421,7 @@ describe("page-floats", function() {
         expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
       });
 
-      it("Transfer floats deferred from previous fragmentainers and not laid out yet if all anchor view nodes of the float fragments have already appeared", function() {
+      it("Transfer floats deferred from previous fragmentainers and not laid out yet if all anchor view nodes of the float fragments have already appeared", function () {
         expect(context.findPageFloatFragment(float1)).toBe(fragment1);
         expect(context.findPageFloatFragment(float2)).toBe(fragment2);
 
@@ -1433,9 +1433,9 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#invalidate", function() {
+    describe("#invalidate", function () {
       var container, context;
-      beforeEach(function() {
+      beforeEach(function () {
         container = {
           clear: jasmine.createSpy("clear"),
           element: {},
@@ -1451,7 +1451,7 @@ describe("page-floats", function() {
         );
       });
 
-      it("invalidate the container", function() {
+      it("invalidate the container", function () {
         expect(context.isInvalidated()).toBe(false);
 
         context.invalidate();
@@ -1460,7 +1460,7 @@ describe("page-floats", function() {
         expect(context.isInvalidated()).toBe(true);
       });
 
-      it("removes all registered anchor view nodes", function() {
+      it("removes all registered anchor view nodes", function () {
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.PAGE,
@@ -1479,7 +1479,7 @@ describe("page-floats", function() {
         expect(Object.keys(context.floatAnchors).length).toBe(0);
       });
 
-      it("clears children", function() {
+      it("clears children", function () {
         var child = new PageFloatLayoutContext(
           context,
           FloatReference.REGION,
@@ -1513,12 +1513,12 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#isInvalidated", function() {
+    describe("#isInvalidated", function () {
       function container() {
         return { clear: jasmine.createSpy("clear") };
       }
 
-      it("returns true if one of its ancestors is invalidated", function() {
+      it("returns true if one of its ancestors is invalidated", function () {
         var pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -1579,8 +1579,8 @@ describe("page-floats", function() {
       });
     });
 
-    describe("#getFloatFragmentExclusions", function() {
-      it("returns an array of exclusions of PageFloatFragments", function() {
+    describe("#getFloatFragmentExclusions", function () {
+      it("returns an array of exclusions of PageFloatFragments", function () {
         var context = new PageFloatLayoutContext(
           rootContext,
           FloatReference.COLUMN,
@@ -1640,7 +1640,7 @@ describe("page-floats", function() {
         expect(context.getFloatFragmentExclusions()).toEqual([shape1, shape2]);
       });
 
-      it("returns an array of exclusions of PageFloatFragments, including those registered in the parent context", function() {
+      it("returns an array of exclusions of PageFloatFragments, including those registered in the parent context", function () {
         var regionContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.REGION,

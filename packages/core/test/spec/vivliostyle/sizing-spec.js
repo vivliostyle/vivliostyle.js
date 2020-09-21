@@ -21,7 +21,7 @@ import * as vivliostyle_sizing from "../../../src/vivliostyle/sizing";
 import * as vivliostyle_test_util_dom from "../../util/dom";
 import * as vivliostyle_test_util_matchers from "../../util/matchers";
 
-describe("sizing", function() {
+describe("sizing", function () {
   "use strict";
 
   var domUtil = vivliostyle_test_util_dom;
@@ -33,7 +33,7 @@ describe("sizing", function() {
 
   beforeAll(vivliostyle_test_util_matchers.addMatchers);
 
-  beforeEach(function() {
+  beforeEach(function () {
     var container = domUtil.getDummyContainer();
     var doc = container.ownerDocument;
     containingBlock = doc.createElement("div");
@@ -197,9 +197,9 @@ describe("sizing", function() {
   var minContentInlineSize = 30;
   var idealBlockSize = 30 + 20 + 20;
 
-  describe("getSize", function() {
-    describe("fill-available inline size", function() {
-      it("is the available inline size minus element's margins, border, and padding", function() {
+  describe("getSize", function () {
+    describe("fill-available inline size", function () {
+      it("is the available inline size minus element's margins, border, and padding", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.FILL_AVAILABLE_INLINE_SIZE,
         ]);
@@ -226,7 +226,7 @@ describe("sizing", function() {
         expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
       });
 
-      it("any auto margin is treated as zero", function() {
+      it("any auto margin is treated as zero", function () {
         element.style.marginLeft = "auto";
 
         var size = sizing.getSize(clientLayout, element, [
@@ -250,7 +250,7 @@ describe("sizing", function() {
         expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
       });
 
-      it("is the available inline size minus element's margins, border, and padding (in vertical writing mode)", function() {
+      it("is the available inline size minus element's margins, border, and padding (in vertical writing mode)", function () {
         setVertical();
 
         var size = sizing.getSize(clientLayout, element, [
@@ -283,7 +283,7 @@ describe("sizing", function() {
         expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
       });
 
-      it("any auto margin is treated as zero (in vertical writing mode)", function() {
+      it("any auto margin is treated as zero (in vertical writing mode)", function () {
         setVertical();
         element.style.marginTop = "auto";
 
@@ -308,7 +308,7 @@ describe("sizing", function() {
         expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [
           Size.FILL_AVAILABLE_INLINE_SIZE,
         ]);
@@ -317,8 +317,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("fill-available width", function() {
-      it("is fill-available inline size in horizontal writing mode", function() {
+    describe("fill-available width", function () {
+      it("is fill-available inline size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.FILL_AVAILABLE_WIDTH,
         ]);
@@ -332,8 +332,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("fill-available height", function() {
-      it("is fill-available inline size in vertical writing mode", function() {
+    describe("fill-available height", function () {
+      it("is fill-available inline size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.FILL_AVAILABLE_HEIGHT,
@@ -348,8 +348,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("max-content inline size", function() {
-      it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken", function() {
+    describe("max-content inline size", function () {
+      it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MAX_CONTENT_INLINE_SIZE,
         ]);
@@ -360,7 +360,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken (in vertical writing mode)", function() {
+      it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken (in vertical writing mode)", function () {
         setVertical();
 
         var size = sizing.getSize(clientLayout, element, [
@@ -373,15 +373,15 @@ describe("sizing", function() {
         );
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.MAX_CONTENT_INLINE_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
     });
 
-    describe("max-content block size", function() {
-      it('is "ideal" size in the block axis', function() {
+    describe("max-content block size", function () {
+      it('is "ideal" size in the block axis', function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MAX_CONTENT_BLOCK_SIZE,
         ]);
@@ -389,7 +389,7 @@ describe("sizing", function() {
         expect(size[Size.MAX_CONTENT_BLOCK_SIZE]).toBe(idealBlockSize);
       });
 
-      it('is "ideal" size in the block axis (in vertical writing mode)', function() {
+      it('is "ideal" size in the block axis (in vertical writing mode)', function () {
         setVertical();
 
         var size = sizing.getSize(clientLayout, element, [
@@ -399,15 +399,15 @@ describe("sizing", function() {
         expect(size[Size.MAX_CONTENT_BLOCK_SIZE]).toBe(idealBlockSize);
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.MAX_CONTENT_BLOCK_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
     });
 
-    describe("max-content width", function() {
-      it("is max-content inline size in horizontal writing mode", function() {
+    describe("max-content width", function () {
+      it("is max-content inline size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MAX_CONTENT_WIDTH,
         ]);
@@ -420,7 +420,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is max-content block size in vertical writing mode", function() {
+      it("is max-content block size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.MAX_CONTENT_WIDTH,
@@ -435,8 +435,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("max-content height", function() {
-      it("is max-content block size in horizontal writing mode", function() {
+    describe("max-content height", function () {
+      it("is max-content block size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MAX_CONTENT_HEIGHT,
         ]);
@@ -449,7 +449,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is max-content inline size in vertical writing mode", function() {
+      it("is max-content inline size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.MAX_CONTENT_HEIGHT,
@@ -464,8 +464,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("min-content inline size", function() {
-      it("is the narrowest inline size it could take if all soft wrap opportunities were taken", function() {
+    describe("min-content inline size", function () {
+      it("is the narrowest inline size it could take if all soft wrap opportunities were taken", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MIN_CONTENT_INLINE_SIZE,
         ]);
@@ -473,7 +473,7 @@ describe("sizing", function() {
         expect(size[Size.MIN_CONTENT_INLINE_SIZE]).toBe(minContentInlineSize);
       });
 
-      it("is the narrowest inline size it could take if all soft wrap opportunities were taken (in vertical writing mode)", function() {
+      it("is the narrowest inline size it could take if all soft wrap opportunities were taken (in vertical writing mode)", function () {
         setVertical();
 
         var size = sizing.getSize(clientLayout, element, [
@@ -483,15 +483,15 @@ describe("sizing", function() {
         expect(size[Size.MIN_CONTENT_INLINE_SIZE]).toBe(minContentInlineSize);
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.MIN_CONTENT_INLINE_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
     });
 
-    describe("min-content block size", function() {
-      it('is "ideal" size in the block axis', function() {
+    describe("min-content block size", function () {
+      it('is "ideal" size in the block axis', function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MIN_CONTENT_BLOCK_SIZE,
         ]);
@@ -499,7 +499,7 @@ describe("sizing", function() {
         expect(size[Size.MIN_CONTENT_BLOCK_SIZE]).toBe(idealBlockSize);
       });
 
-      it('is "ideal" size in the block axis (in vertical writing mode)', function() {
+      it('is "ideal" size in the block axis (in vertical writing mode)', function () {
         setVertical();
 
         var size = sizing.getSize(clientLayout, element, [
@@ -509,15 +509,15 @@ describe("sizing", function() {
         expect(size[Size.MIN_CONTENT_BLOCK_SIZE]).toBe(idealBlockSize);
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.MIN_CONTENT_BLOCK_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
     });
 
-    describe("min-content width", function() {
-      it("is min-content inline size in horizontal writing mode", function() {
+    describe("min-content width", function () {
+      it("is min-content inline size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MIN_CONTENT_WIDTH,
         ]);
@@ -530,7 +530,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is min-content block size in vertical writing mode", function() {
+      it("is min-content block size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.MIN_CONTENT_WIDTH,
@@ -545,8 +545,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("min-content height", function() {
-      it("is min-content block size in horizontal writing mode", function() {
+    describe("min-content height", function () {
+      it("is min-content block size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.MIN_CONTENT_HEIGHT,
         ]);
@@ -559,7 +559,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is min-content inline size in vertical writing mode", function() {
+      it("is min-content inline size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.MIN_CONTENT_HEIGHT,
@@ -574,8 +574,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("fit-content inline size", function() {
-      it("equals min-content size when (fill-available size) < (min-content size)", function() {
+    describe("fit-content inline size", function () {
+      it("equals min-content size when (fill-available size) < (min-content size)", function () {
         containingBlock.style.width =
           horizontalMarginAndBorderAndPadding + minContentInlineSize - 1 + "px";
 
@@ -586,7 +586,7 @@ describe("sizing", function() {
         expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(minContentInlineSize);
       });
 
-      it("equals fill-available size when (min-content size) <= (fill-available size) <= (max-content size)", function() {
+      it("equals fill-available size when (min-content size) <= (fill-available size) <= (max-content size)", function () {
         containingBlock.style.width =
           horizontalMarginAndBorderAndPadding + minContentInlineSize + 1 + "px";
 
@@ -610,7 +610,7 @@ describe("sizing", function() {
         );
       });
 
-      it("equals max-content size when (max-content size) < (fill-available size)", function() {
+      it("equals max-content size when (max-content size) < (fill-available size)", function () {
         containingBlock.style.width =
           horizontalMarginAndBorderAndPadding + maxContentInlineSize + 1 + "px";
 
@@ -624,13 +624,13 @@ describe("sizing", function() {
         );
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_INLINE_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
 
-      it("equals min-content size when (fill-available size) < (min-content size) (in vertical writing mode)", function() {
+      it("equals min-content size when (fill-available size) < (min-content size) (in vertical writing mode)", function () {
         setVertical();
         containingBlock.style.height =
           verticalMarginAndBorderAndPadding + minContentInlineSize - 1 + "px";
@@ -642,7 +642,7 @@ describe("sizing", function() {
         expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(minContentInlineSize);
       });
 
-      it("equals fill-available size when (min-content size) <= (fill-available size) <= (max-content size) (in vertical writing mode)", function() {
+      it("equals fill-available size when (min-content size) <= (fill-available size) <= (max-content size) (in vertical writing mode)", function () {
         setVertical();
         containingBlock.style.height =
           verticalMarginAndBorderAndPadding + minContentInlineSize + 1 + "px";
@@ -667,7 +667,7 @@ describe("sizing", function() {
         );
       });
 
-      it("equals max-content size when (max-content size) < (fill-available size) (in vertical writing mode)", function() {
+      it("equals max-content size when (max-content size) < (fill-available size) (in vertical writing mode)", function () {
         setVertical();
         containingBlock.style.height =
           verticalMarginAndBorderAndPadding + maxContentInlineSize + 1 + "px";
@@ -682,15 +682,15 @@ describe("sizing", function() {
         );
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_BLOCK_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
     });
 
-    describe("fit-content block size", function() {
-      it('is "ideal" size in the block axis', function() {
+    describe("fit-content block size", function () {
+      it('is "ideal" size in the block axis', function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.FIT_CONTENT_BLOCK_SIZE,
         ]);
@@ -698,7 +698,7 @@ describe("sizing", function() {
         expect(size[Size.FIT_CONTENT_BLOCK_SIZE]).toBe(idealBlockSize);
       });
 
-      it('is "ideal" size in the block axis (in vertical writing mode)', function() {
+      it('is "ideal" size in the block axis (in vertical writing mode)', function () {
         setVertical();
 
         var size = sizing.getSize(clientLayout, element, [
@@ -708,15 +708,15 @@ describe("sizing", function() {
         expect(size[Size.FIT_CONTENT_BLOCK_SIZE]).toBe(idealBlockSize);
       });
 
-      it("the original properties and DOM structure are restored after measurement", function() {
+      it("the original properties and DOM structure are restored after measurement", function () {
         sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_BLOCK_SIZE]);
 
         checkOriginalPropertiesAndDOMStructure();
       });
     });
 
-    describe("fit-content width", function() {
-      it("is fit-content inline size in horizontal writing mode", function() {
+    describe("fit-content width", function () {
+      it("is fit-content inline size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.FIT_CONTENT_WIDTH,
         ]);
@@ -729,7 +729,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is fit-content block size in vertical writing mode", function() {
+      it("is fit-content block size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.FIT_CONTENT_WIDTH,
@@ -744,8 +744,8 @@ describe("sizing", function() {
       });
     });
 
-    describe("fit-content height", function() {
-      it("is fit-content block size in horizontal writing mode", function() {
+    describe("fit-content height", function () {
+      it("is fit-content block size in horizontal writing mode", function () {
         var size = sizing.getSize(clientLayout, element, [
           Size.FIT_CONTENT_HEIGHT,
         ]);
@@ -758,7 +758,7 @@ describe("sizing", function() {
         );
       });
 
-      it("is fit-content inline size in vertical writing mode", function() {
+      it("is fit-content inline size in vertical writing mode", function () {
         setVertical();
         var size = sizing.getSize(clientLayout, element, [
           Size.FIT_CONTENT_HEIGHT,

@@ -23,7 +23,7 @@ const rollupConfig = require("../../rollup.config.js");
 const TEST_FILES = "test/spec/**/*.js";
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-module.exports = function(config) {
+module.exports = function (config) {
   return {
     basePath: "../..",
     frameworks: ["jasmine"],

@@ -20,14 +20,14 @@ import "../../util/mock/vivliostyle/logging-mock";
 
 // FIXME: cannot assign to vivliostyle_loggingg.mockConsole and vivliostyle_loggingg.logger
 
-describe("logging", function() {
+describe("logging", function () {
   "use strict";
 
-  describe("Logger", function() {
+  describe("Logger", function () {
     var logger = vivliostyle_logging.logger;
     // var mockConsole = vivliostyle_logging.mockConsole;
 
-    beforeEach(function() {
+    beforeEach(function () {
       // spyOn(mockConsole, "debug");
       // spyOn(mockConsole, "info");
       // spyOn(mockConsole, "warn");
@@ -60,7 +60,7 @@ describe("logging", function() {
     //     expect(mockConsole.error).toHaveBeenCalledWith(str1, str2, "\n", msg, "\n", frameTrace);
     // });
 
-    it("calls log listners registered with addListener method", function() {
+    it("calls log listners registered with addListener method", function () {
       var debugListener = jasmine.createSpy("debug listener");
       logger.addListener(vivliostyle_logging.LogLevel.DEBUG, debugListener);
       logger.debug(error, str1, str2);

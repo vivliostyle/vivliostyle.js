@@ -72,7 +72,8 @@ export function calculateOffset(
 /**
  * Potential edge breaking position.
  */
-export class EdgeBreakPosition extends AbstractBreakPosition
+export class EdgeBreakPosition
+  extends AbstractBreakPosition
   implements Layout.EdgeBreakPosition {
   overflowIfRepetitiveElementsDropped: boolean;
   protected isEdgeUpdated: boolean = false;

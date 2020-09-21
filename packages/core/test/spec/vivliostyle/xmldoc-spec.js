@@ -18,12 +18,12 @@
 import * as adapt_base from "../../../src/vivliostyle/base";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 
-describe("xml-doc", function() {
-  describe("XMLDocHolder", function() {
+describe("xml-doc", function () {
+  describe("XMLDocHolder", function () {
     var url = "foobar";
 
-    describe("getElement", function() {
-      it("returns an element if there is one with the specified ID", function() {
+    describe("getElement", function () {
+      it("returns an element if there is one with the specified ID", function () {
         var doc = new DOMParser().parseFromString(
           "<foo><bar id='baz'></bar></foo>",
           "text/xml",
@@ -34,7 +34,7 @@ describe("xml-doc", function() {
         expect(e instanceof Element).toBe(true);
       });
 
-      it("returns an element if there is one with the specified name", function() {
+      it("returns an element if there is one with the specified name", function () {
         var doc = new DOMParser().parseFromString(
           "<html><head></head><body><bar name='baz'></bar></body></html>",
           "text/html",
@@ -45,7 +45,7 @@ describe("xml-doc", function() {
         expect(e instanceof Element).toBe(true);
       });
 
-      it("returns null if nothing found", function() {
+      it("returns null if nothing found", function () {
         var doc = new DOMParser().parseFromString(
           "<foo><bar></bar></foo>",
           "text/xml",
@@ -58,9 +58,9 @@ describe("xml-doc", function() {
     });
   });
 
-  describe("parseAndReturnNullIfError", function() {
-    it("uses a parser passed by an optional argument", function() {
-      var parser = { parseFromString: function() {} };
+  describe("parseAndReturnNullIfError", function () {
+    it("uses a parser passed by an optional argument", function () {
+      var parser = { parseFromString: function () {} };
       spyOn(parser, "parseFromString");
 
       adapt_xmldoc.parseAndReturnNullIfError("<test>", "text/xml", parser);
@@ -68,7 +68,7 @@ describe("xml-doc", function() {
       expect(parser.parseFromString).toHaveBeenCalledWith("<test>", "text/xml");
     });
 
-    it("returns a Document object when no error occurs", function() {
+    it("returns a Document object when no error occurs", function () {
       var d = adapt_xmldoc.parseAndReturnNullIfError(
         "<a>a<b></b></a>",
         "text/xml",
@@ -81,7 +81,7 @@ describe("xml-doc", function() {
       expect(d.documentElement.childNodes[1].localName).toBe("b");
     });
 
-    it("returns null when a parse error occurs", function() {
+    it("returns null when a parse error occurs", function () {
       expect(adapt_xmldoc.parseAndReturnNullIfError("<test", "text/xml")).toBe(
         null,
       );
@@ -91,20 +91,20 @@ describe("xml-doc", function() {
     });
   });
 
-  describe("parseXMLResource", function() {
-    it("returns an already parsed Document if present", function(done) {
+  describe("parseXMLResource", function () {
+    it("returns an already parsed Document if present", function (done) {
       var docStore = adapt_xmldoc.newXMLDocStore();
       var result = adapt_xmldoc.parseXMLResource(
         { responseXML: document },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         expect(docHolder.document).toBe(document);
         done();
       });
     });
 
-    it("uses given contentType to parse the source", function(done) {
+    it("uses given contentType to parse the source", function (done) {
       var htmlText = "<html></html>";
       var doneHtml = false,
         doneXml = false,
@@ -120,7 +120,7 @@ describe("xml-doc", function() {
         { responseText: htmlText, contentType: "text/html" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.namespaceURI).toBe(adapt_base.NS.XHTML);
         doneHtml = true;
@@ -132,7 +132,7 @@ describe("xml-doc", function() {
         { responseText: htmlText, contentType: "text/xml" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.namespaceURI).toBe(null);
         expect(doc.documentElement.localName).toBe("html");
@@ -145,7 +145,7 @@ describe("xml-doc", function() {
         { responseText: "<svg></svg>", contentType: "image/svg+xml" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.localName).toBe("svg");
         doneSvg = true;
@@ -153,20 +153,20 @@ describe("xml-doc", function() {
       });
     });
 
-    it("can parse application/*+xml source as an XML", function(done) {
+    it("can parse application/*+xml source as an XML", function (done) {
       var docStore = adapt_xmldoc.newXMLDocStore();
       var result = adapt_xmldoc.parseXMLResource(
         { responseText: "<foo></foo>", contentType: "application/foo+xml" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.localName).toBe("foo");
         done();
       });
     });
 
-    it("can infer contentType from file extension", function(done) {
+    it("can infer contentType from file extension", function (done) {
       var htmlText = "<html></html>";
       var doneHtml = false,
         doneXml = false,
@@ -182,7 +182,7 @@ describe("xml-doc", function() {
         { responseText: htmlText, contentType: null, url: "foo.html" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.namespaceURI).toBe(adapt_base.NS.XHTML);
         doneHtml = true;
@@ -198,7 +198,7 @@ describe("xml-doc", function() {
         },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.namespaceURI).toBe(null);
         expect(doc.documentElement.localName).toBe("html");
@@ -215,7 +215,7 @@ describe("xml-doc", function() {
         },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.localName).toBe("svg");
         doneSvg = true;
@@ -223,7 +223,7 @@ describe("xml-doc", function() {
       });
     });
 
-    it("assumes XML if contentType and file extension are both unavailable, but treats the document as HTML or SVG if the root element's localName is html or svg and namespaceURI is absent", function(done) {
+    it("assumes XML if contentType and file extension are both unavailable, but treats the document as HTML or SVG if the root element's localName is html or svg and namespaceURI is absent", function (done) {
       var doneXml = false,
         doneHtml = false,
         doneSvg = false;
@@ -238,7 +238,7 @@ describe("xml-doc", function() {
         { responseText: "<foo></foo>", contentType: null, url: "foo/" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.namespaceURI).toBe(null);
         expect(doc.documentElement.localName).toBe("foo");
@@ -251,7 +251,7 @@ describe("xml-doc", function() {
         { responseText: "<html></html>", contentType: null, url: "foo/" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.namespaceURI).toBe(adapt_base.NS.XHTML);
         doneHtml = true;
@@ -263,7 +263,7 @@ describe("xml-doc", function() {
         { responseText: "<svg></svg>", contentType: null, url: "foo/" },
         docStore,
       );
-      result.then(function(docHolder) {
+      result.then(function (docHolder) {
         var doc = docHolder.document;
         expect(doc.documentElement.localName).toBe("svg");
         doneSvg = true;

@@ -21,7 +21,7 @@
 
 var dummyElements = [];
 
-afterEach(function() {
+afterEach(function () {
   var e;
   while ((e = dummyElements.shift())) {
     if (e.parentNode) {
@@ -30,11 +30,11 @@ afterEach(function() {
   }
 });
 
-export const getWindow = function() {
+export const getWindow = function () {
   return window;
 };
 
-export const getDummyContainer = function() {
+export const getDummyContainer = function () {
   var e = document.createElement("div");
   document.body.appendChild(e);
   dummyElements.push(e);

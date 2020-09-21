@@ -19,9 +19,9 @@
 
 import obs from "../../../src/utils/observable-util";
 
-describe("Observable Utils", function() {
-  describe("readonlyObservable", function() {
-    it("returns a getter and a writable observable", function() {
+describe("Observable Utils", function () {
+  describe("readonlyObservable", function () {
+    it("returns a getter and a writable observable", function () {
       const o = obs.readonlyObservable(1);
 
       expect(o.getter()).toBe(1);
@@ -33,10 +33,10 @@ describe("Observable Utils", function() {
       expect(o.value()).toBe(2);
     });
 
-    it("the getter notifies when the value is updated", function() {
+    it("the getter notifies when the value is updated", function () {
       const o = obs.readonlyObservable(1);
       let x = 1;
-      o.getter.subscribe(function(y) {
+      o.getter.subscribe(function (y) {
         x = y;
       });
       o.value(2);
@@ -44,7 +44,7 @@ describe("Observable Utils", function() {
       expect(x).toBe(2);
     });
 
-    it("throws when trying to write on the getter", function() {
+    it("throws when trying to write on the getter", function () {
       const o = obs.readonlyObservable(1);
       function set() {
         o.getter(2);

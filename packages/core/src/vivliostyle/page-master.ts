@@ -1787,7 +1787,8 @@ export class PartitionInstance<
 }
 
 //--------------------- parsing -----------------------
-export class PageBoxParserHandler extends CssParser.SlaveParserHandler
+export class PageBoxParserHandler
+  extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver {
   constructor(
     scope: Exprs.LexicalScope,

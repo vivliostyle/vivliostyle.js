@@ -20,15 +20,15 @@ import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/
 
 // FIXME: cannot access to vivliostyle_plugin.hooks
 
-describe("plugin", function() {
+describe("plugin", function () {
   "use strict";
 
-  var fn1 = function() {},
-    fn2 = function() {};
+  var fn1 = function () {},
+    fn2 = function () {};
   var hookName = vivliostyle_plugin.HOOKS["SIMPLE_PROPERTY"];
 
   vivliostyle_test_util_mock_plugin.setup();
-  beforeEach(function() {
+  beforeEach(function () {
     // vivliostyle_plugin.hooks = {};
   });
 
@@ -57,7 +57,7 @@ describe("plugin", function() {
   //     });
   // });
 
-  describe("removeHook", function() {
+  describe("removeHook", function () {
     // it("removes a function", function() {
     //     vivliostyle_plugin.registerHook(hookName, fn1);
     //     var hooks = vivliostyle_plugin.getHooksForName(hookName);
@@ -68,7 +68,7 @@ describe("plugin", function() {
     //     expect(hooks).toEqual([]);
     // });
 
-    it("removes one function at a time", function() {
+    it("removes one function at a time", function () {
       vivliostyle_plugin.registerHook(hookName, fn1);
       vivliostyle_plugin.registerHook(hookName, fn2);
       vivliostyle_plugin.registerHook(hookName, fn1);

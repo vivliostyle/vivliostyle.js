@@ -78,9 +78,9 @@ class URLParameterStore {
       const start = r.index + r[0].length - l;
       updated = url.substring(0, start) + value + url.substring(start + l);
     } else {
-      updated = `${url +
-        (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") +
-        name}=${value}`;
+      updated = `${
+        url + (url.match(/[#&]$/) ? "" : url.match(/#/) ? "&" : "#") + name
+      }=${value}`;
       if (name === "src") {
         // "src" should be the first parameter
         updated = updated.replace(/#(?!src)(.*?)&(src=[^&]*)/, "#$2&$1");

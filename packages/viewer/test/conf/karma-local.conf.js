@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = function(config) {
+module.exports = function (config) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const commonConfig = require("./karma-common.conf")(config);
 

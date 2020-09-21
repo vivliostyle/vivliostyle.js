@@ -1447,7 +1447,8 @@ export class AbstractConditionItem {
   }
 }
 
-export class DescendantConditionItem extends AbstractConditionItem
+export class DescendantConditionItem
+  extends AbstractConditionItem
   implements ConditionItem {
   constructor(
     condition: string,
@@ -1490,7 +1491,8 @@ export class DescendantConditionItem extends AbstractConditionItem
   }
 }
 
-export class ChildConditionItem extends AbstractConditionItem
+export class ChildConditionItem
+  extends AbstractConditionItem
   implements ConditionItem {
   constructor(
     condition: string,
@@ -1537,7 +1539,8 @@ export class ChildConditionItem extends AbstractConditionItem
   }
 }
 
-export class AdjacentSiblingConditionItem extends AbstractConditionItem
+export class AdjacentSiblingConditionItem
+  extends AbstractConditionItem
   implements ConditionItem {
   fired: boolean = false;
 
@@ -1588,7 +1591,8 @@ export class AdjacentSiblingConditionItem extends AbstractConditionItem
   }
 }
 
-export class FollowingSiblingConditionItem extends AbstractConditionItem
+export class FollowingSiblingConditionItem
+  extends AbstractConditionItem
   implements ConditionItem {
   fired: boolean = false;
 
@@ -3093,7 +3097,8 @@ export function setUABaseCascade(value: Cascade): void {
 }
 
 //------------- parsing ------------
-export class CascadeParserHandler extends CssParser.SlaveParserHandler
+export class CascadeParserHandler
+  extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver {
   chain: ChainedAction[] = null;
   specificity: number = 0;
@@ -3775,7 +3780,8 @@ export class DefineParserHandler extends CssParser.SlaveParserHandler {
   }
 }
 
-export class PropSetParserHandler extends CssParser.SlaveParserHandler
+export class PropSetParserHandler
+  extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver {
   order: number;
 
@@ -3840,7 +3846,8 @@ export class PropSetParserHandler extends CssParser.SlaveParserHandler
   }
 }
 
-export class PropertyParserHandler extends CssParser.ErrorHandler
+export class PropertyParserHandler
+  extends CssParser.ErrorHandler
   implements CssValidator.PropertyReceiver {
   elementStyle = {} as ElementStyle;
   order: number = 0;

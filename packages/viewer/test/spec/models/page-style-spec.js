@@ -19,7 +19,7 @@
 
 import PageStyle from "../../../src/models/page-style";
 
-describe("PageStyle", function() {
+describe("PageStyle", function () {
   function makeDummyPageStyle() {
     const pageStyle = new PageStyle();
     pageStyle.mode(PageStyle.Mode.PRESET);
@@ -40,16 +40,16 @@ describe("PageStyle", function() {
     expect(pageStyle.isImportant()).toBe(true);
   }
 
-  describe("constructor", function() {
-    it("copies parameters from the argument", function() {
+  describe("constructor", function () {
+    it("copies parameters from the argument", function () {
       const pageStyle = new PageStyle(makeDummyPageStyle());
 
       verifyDummyPageStyle(pageStyle);
     });
   });
 
-  describe("copyFrom", function() {
-    it("copies parameters from the argument to itself", function() {
+  describe("copyFrom", function () {
+    it("copies parameters from the argument to itself", function () {
       const pageStyle = new PageStyle();
       pageStyle.copyFrom(makeDummyPageStyle());
 
@@ -57,28 +57,28 @@ describe("PageStyle", function() {
     });
   });
 
-  describe("equivalentTo", function() {
+  describe("equivalentTo", function () {
     let dummy;
 
-    beforeEach(function() {
+    beforeEach(function () {
       dummy = makeDummyPageStyle();
     });
 
-    it("returns false if isImportant is different", function() {
+    it("returns false if isImportant is different", function () {
       const pageStyle = new PageStyle(dummy);
       pageStyle.isImportant(false);
 
       expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
-    it("returns false if mode is different", function() {
+    it("returns false if mode is different", function () {
       const pageStyle = new PageStyle(dummy);
       pageStyle.mode(PageStyle.Mode.AUTO);
 
       expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
-    it("when mode is AUTO, other parameters (other than isImportant) doesn't matter", function() {
+    it("when mode is AUTO, other parameters (other than isImportant) doesn't matter", function () {
       const pageStyle = new PageStyle(dummy);
       dummy.mode(PageStyle.Mode.AUTO);
       pageStyle.mode(PageStyle.Mode.AUTO);
@@ -102,7 +102,7 @@ describe("PageStyle", function() {
       expect(pageStyle.equivalentTo(dummy)).toBe(true);
     });
 
-    it("when mode is PRESET, customWidth and customHeight doesn't matter", function() {
+    it("when mode is PRESET, customWidth and customHeight doesn't matter", function () {
       const pageStyle = new PageStyle(dummy);
       dummy.mode(PageStyle.Mode.PRESET);
       pageStyle.mode(PageStyle.Mode.PRESET);
@@ -127,7 +127,7 @@ describe("PageStyle", function() {
       expect(pageStyle.equivalentTo(dummy)).toBe(false);
     });
 
-    it("when mode is CUSTOM, presetSize and isLandscape doesn't matter", function() {
+    it("when mode is CUSTOM, presetSize and isLandscape doesn't matter", function () {
       const pageStyle = new PageStyle(dummy);
       dummy.mode(PageStyle.Mode.CUSTOM);
       pageStyle.mode(PageStyle.Mode.CUSTOM);
@@ -153,8 +153,8 @@ describe("PageStyle", function() {
     });
   });
 
-  describe("toCSSDeclarationString", function() {
-    it("returns corresponding CSS declaration string", function() {
+  describe("toCSSDeclarationString", function () {
+    it("returns corresponding CSS declaration string", function () {
       const pageStyle = makeDummyPageStyle();
       pageStyle.mode(PageStyle.Mode.AUTO);
 

@@ -18,12 +18,12 @@
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as vivliostyle_break from "../../../src/vivliostyle/break";
 
-describe("break", function() {
-  describe("convertPageBreakAliases", function() {
+describe("break", function () {
+  describe("convertPageBreakAliases", function () {
     var convertPageBreakAliases = vivliostyle_break.convertPageBreakAliases;
 
-    it("converts page-break-before/after to break-before/after", function() {
-      ["before", "after"].forEach(function(side) {
+    it("converts page-break-before/after to break-before/after", function () {
+      ["before", "after"].forEach(function (side) {
         var breakProp = "break-" + side;
         var original = {
           name: "page-" + breakProp,
@@ -59,7 +59,7 @@ describe("break", function() {
       });
     });
 
-    it("converts page-break-inside to break-inside", function() {
+    it("converts page-break-inside to break-inside", function () {
       var original = {
         name: "page-break-inside",
         important: false,
@@ -79,11 +79,11 @@ describe("break", function() {
     });
   });
 
-  describe("resolveEffectiveBreakValue", function() {
+  describe("resolveEffectiveBreakValue", function () {
     var resolveEffectiveBreakValue =
       vivliostyle_break.resolveEffectiveBreakValue;
 
-    it("If one of the argument is null, return the other", function() {
+    it("If one of the argument is null, return the other", function () {
       expect(resolveEffectiveBreakValue(null, null)).toBe(null);
       expect(resolveEffectiveBreakValue(null, "avoid-page")).toBe("avoid-page");
       expect(resolveEffectiveBreakValue("avoid-region", null)).toBe(
@@ -91,22 +91,22 @@ describe("break", function() {
       );
     });
 
-    it("returns a forced break value if present", function() {
+    it("returns a forced break value if present", function () {
       expect(resolveEffectiveBreakValue("avoid-page", "region")).toBe("region");
       expect(resolveEffectiveBreakValue("region", "avoid-page")).toBe("region");
     });
 
-    it("honor both values when they are forced break values", function() {
+    it("honor both values when they are forced break values", function () {
       expect(resolveEffectiveBreakValue("region", "column")).toBe("region");
       expect(resolveEffectiveBreakValue("page", "region")).toBe("page");
       expect(resolveEffectiveBreakValue("page", "column")).toBe("page");
     });
 
-    it("returns the second one if both forced break values are conflicting each other", function() {
+    it("returns the second one if both forced break values are conflicting each other", function () {
       expect(resolveEffectiveBreakValue("left", "right")).toBe("right");
     });
 
-    it("returns an avoid break value if the other is auto", function() {
+    it("returns an avoid break value if the other is auto", function () {
       expect(resolveEffectiveBreakValue("avoid-region", "auto")).toBe(
         "avoid-region",
       );
@@ -115,13 +115,13 @@ describe("break", function() {
       );
     });
 
-    it("returns the second one if both are avoid break values", function() {
+    it("returns the second one if both are avoid break values", function () {
       expect(resolveEffectiveBreakValue("avoid-page", "avoid-column")).toBe(
         "avoid-column",
       );
     });
 
-    it("returns auto if both are auto", function() {
+    it("returns auto if both are auto", function () {
       expect(resolveEffectiveBreakValue("auto", "auto")).toBe("auto");
     });
   });

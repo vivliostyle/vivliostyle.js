@@ -21,17 +21,17 @@ import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as vivliostyle_matchers from "../../../src/vivliostyle/matchers";
 
-describe("layout", function() {
-  describe("adapt_layout.TextNodeBreaker", function() {
+describe("layout", function () {
+  describe("adapt_layout.TextNodeBreaker", function () {
     var breaker;
     var textNode, nodeContext;
-    beforeEach(function() {
+    beforeEach(function () {
       breaker = new adapt_layout.TextNodeBreaker();
 
       textNode = {
         length: 17,
         data: "abcdeabcde\u00ADf ghij",
-        replaceData: function() {},
+        replaceData: function () {},
       };
       spyOn(textNode, "replaceData").and.callThrough();
 
@@ -46,12 +46,12 @@ describe("layout", function() {
       nodeContext.hyphenateCharacter = "_";
       nodeContext.offsetInNode = 0;
     });
-    afterEach(function() {
+    afterEach(function () {
       textNode.replaceData.calls.reset();
     });
 
-    describe("#breakTextNode", function() {
-      it("increments `offsetInNode` when nodeContext#after is true.", function() {
+    describe("#breakTextNode", function () {
+      it("increments `offsetInNode` when nodeContext#after is true.", function () {
         nodeContext.after = true;
         var newContext = breaker.breakTextNode(textNode, nodeContext, 8);
         expect(newContext.offsetInNode).toEqual(17);
@@ -60,7 +60,7 @@ describe("layout", function() {
         );
         expect(textNode.replaceData).not.toHaveBeenCalled();
       });
-      it("removes characters after split point and inserts a hyphenation character when splits a text node at the soft-hyphen character.", function() {
+      it("removes characters after split point and inserts a hyphenation character when splits a text node at the soft-hyphen character.", function () {
         var newContext = breaker.breakTextNode(textNode, nodeContext, 13);
         expect(newContext.offsetInNode).toEqual(11);
         expect(newContext.preprocessedTextContent).toEqual(
@@ -68,7 +68,7 @@ describe("layout", function() {
         );
         expect(textNode.replaceData).toHaveBeenCalledWith(10, 7, "_");
       });
-      it("removes characters after split point but does not insert a hyphenation character when splits a text node at the soft-hyphen character and NodeContext#breakWord is true.", function() {
+      it("removes characters after split point but does not insert a hyphenation character when splits a text node at the soft-hyphen character and NodeContext#breakWord is true.", function () {
         nodeContext.breakWord = true;
         var newContext = breaker.breakTextNode(textNode, nodeContext, 13);
         expect(newContext.offsetInNode).toEqual(11);
@@ -77,7 +77,7 @@ describe("layout", function() {
         );
         expect(textNode.replaceData).toHaveBeenCalledWith(10, 7, "");
       });
-      it("removes characters after split point but does not insert a hyphenation character when splits a text node at the space character.", function() {
+      it("removes characters after split point but does not insert a hyphenation character when splits a text node at the space character.", function () {
         var newContext = breaker.breakTextNode(textNode, nodeContext, 15);
         expect(newContext.offsetInNode).toEqual(13);
         expect(newContext.preprocessedTextContent).toEqual(
@@ -85,7 +85,7 @@ describe("layout", function() {
         );
         expect(textNode.replaceData).toHaveBeenCalledWith(13, 4, "");
       });
-      it("removes characters after split point and inserts a hyphenation character when splits a text node at the normal character.", function() {
+      it("removes characters after split point and inserts a hyphenation character when splits a text node at the normal character.", function () {
         var newContext = breaker.breakTextNode(textNode, nodeContext, 10);
         expect(newContext.offsetInNode).toEqual(8);
         expect(newContext.preprocessedTextContent).toEqual(
@@ -93,7 +93,7 @@ describe("layout", function() {
         );
         expect(textNode.replaceData).toHaveBeenCalledWith(8, 9, "_");
       });
-      it("removes characters after split point but does not insert a hyphenation character when splits a text node at the normal character and NodeContext#breakWord is true.", function() {
+      it("removes characters after split point but does not insert a hyphenation character when splits a text node at the normal character and NodeContext#breakWord is true.", function () {
         nodeContext.breakWord = true;
         var newContext = breaker.breakTextNode(textNode, nodeContext, 10);
         expect(newContext.offsetInNode).toEqual(8);
@@ -105,8 +105,8 @@ describe("layout", function() {
     });
   });
 
-  describe("adapt_layout.resolveHyphenateCharacter", function() {
-    it("returns a value of `hyphenateCharacter` in the nodeContext.", function() {
+  describe("adapt_layout.resolveHyphenateCharacter", function () {
+    it("returns a value of `hyphenateCharacter` in the nodeContext.", function () {
       expect(
         adapt_layout.resolveHyphenateCharacter({
           hyphenateCharacter: "a",
@@ -114,20 +114,20 @@ describe("layout", function() {
         }),
       ).toEqual("a");
     });
-    it("returns a value of `hyphenateCharacter` in the parent nodeContext if nodeContext's `hyphenateCharacter` is undefined.", function() {
+    it("returns a value of `hyphenateCharacter` in the parent nodeContext if nodeContext's `hyphenateCharacter` is undefined.", function () {
       expect(
         adapt_layout.resolveHyphenateCharacter({
           parent: { hyphenateCharacter: "b" },
         }),
       ).toEqual("b");
     });
-    it("returns a default value if `hyphenateCharacter` of nodeContext and parent nodeContext are undefined.", function() {
+    it("returns a default value if `hyphenateCharacter` of nodeContext and parent nodeContext are undefined.", function () {
       expect(adapt_layout.resolveHyphenateCharacter({})).toEqual("-");
     });
   });
 });
 
-describe("selectors", function() {
+describe("selectors", function () {
   const NthFragmentMatcher = vivliostyle_matchers.NthFragmentMatcher;
   const AllMatcher = vivliostyle_matchers.AllMatcher;
   const AnyMatcher = vivliostyle_matchers.AnyMatcher;
@@ -136,146 +136,146 @@ describe("selectors", function() {
   const registerFragmentIndex = adapt_layout.registerFragmentIndex;
   const clearFragmentIndices = adapt_layout.clearFragmentIndices;
 
-  beforeEach(function() {
+  beforeEach(function () {
     clearFragmentIndices();
   });
 
-  describe("NthFragmentMatcher", function() {
-    describe("#matches", function() {
-      describe("nth-fragment(2n+1)", function() {
+  describe("NthFragmentMatcher", function () {
+    describe("#matches", function () {
+      describe("nth-fragment(2n+1)", function () {
         var matcher = new NthFragmentMatcher(100, 2, 1);
-        it("matches 1", function() {
+        it("matches 1", function () {
           registerFragmentIndex(100, 1);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 2", function() {
+        it("does not match 2", function () {
           registerFragmentIndex(100, 2);
           expect(matcher.matches()).toBe(false);
         });
-        it("matches 3", function() {
+        it("matches 3", function () {
           registerFragmentIndex(100, 3);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 4", function() {
+        it("does not match 4", function () {
           registerFragmentIndex(100, 4);
           expect(matcher.matches()).toBe(false);
         });
-        it("matches 5", function() {
+        it("matches 5", function () {
           registerFragmentIndex(100, 5);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 6", function() {
+        it("does not match 6", function () {
           registerFragmentIndex(100, 6);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 1 when nodeContext.fragmentSelectorIds does not include fragmentSelectorId", function() {
+        it("does not match 1 when nodeContext.fragmentSelectorIds does not include fragmentSelectorId", function () {
           expect(matcher.matches()).toBe(false);
         });
       });
-      describe("nth-fragment(1)", function() {
+      describe("nth-fragment(1)", function () {
         var matcher = new NthFragmentMatcher(100, 0, 1);
-        it("matches 1", function() {
+        it("matches 1", function () {
           registerFragmentIndex(100, 1);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 2", function() {
+        it("does not match 2", function () {
           registerFragmentIndex(100, 2);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 3", function() {
+        it("does not match 3", function () {
           registerFragmentIndex(100, 3);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 4", function() {
+        it("does not match 4", function () {
           registerFragmentIndex(100, 4);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 5", function() {
+        it("does not match 5", function () {
           registerFragmentIndex(100, 5);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 6", function() {
+        it("does not match 6", function () {
           registerFragmentIndex(100, 6);
           expect(matcher.matches()).toBe(false);
         });
       });
-      describe("nth-fragment(4)", function() {
+      describe("nth-fragment(4)", function () {
         var matcher = new NthFragmentMatcher(100, 0, 4);
-        it("does not match 1", function() {
+        it("does not match 1", function () {
           registerFragmentIndex(100, 1);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 2", function() {
+        it("does not match 2", function () {
           registerFragmentIndex(100, 2);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 3", function() {
+        it("does not match 3", function () {
           registerFragmentIndex(100, 3);
           expect(matcher.matches()).toBe(false);
         });
-        it("matches 4", function() {
+        it("matches 4", function () {
           registerFragmentIndex(100, 4);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 5", function() {
+        it("does not match 5", function () {
           registerFragmentIndex(100, 5);
           expect(matcher.matches()).toBe(false);
         });
-        it("does not match 6", function() {
+        it("does not match 6", function () {
           registerFragmentIndex(100, 6);
           expect(matcher.matches()).toBe(false);
         });
       });
-      describe("nth-fragment(n)", function() {
+      describe("nth-fragment(n)", function () {
         var matcher = new NthFragmentMatcher(100, 1, 0);
-        it("matches 1", function() {
+        it("matches 1", function () {
           registerFragmentIndex(100, 1);
           expect(matcher.matches()).toBe(true);
         });
-        it("matches 2", function() {
+        it("matches 2", function () {
           registerFragmentIndex(100, 2);
           expect(matcher.matches()).toBe(true);
         });
-        it("matches 3", function() {
+        it("matches 3", function () {
           registerFragmentIndex(100, 3);
           expect(matcher.matches()).toBe(true);
         });
-        it("matches 4", function() {
+        it("matches 4", function () {
           registerFragmentIndex(100, 4);
           expect(matcher.matches()).toBe(true);
         });
-        it("matches 5", function() {
+        it("matches 5", function () {
           registerFragmentIndex(100, 5);
           expect(matcher.matches()).toBe(true);
         });
-        it("matches 6", function() {
+        it("matches 6", function () {
           registerFragmentIndex(100, 6);
           expect(matcher.matches()).toBe(true);
         });
       });
-      describe("nth-fragment(2n)", function() {
+      describe("nth-fragment(2n)", function () {
         var matcher = new NthFragmentMatcher(100, 2, 0);
-        it("does not match 1", function() {
+        it("does not match 1", function () {
           registerFragmentIndex(100, 1);
           expect(matcher.matches()).toBe(false);
         });
-        it("matches 2", function() {
+        it("matches 2", function () {
           registerFragmentIndex(100, 2);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 3", function() {
+        it("does not match 3", function () {
           registerFragmentIndex(100, 3);
           expect(matcher.matches()).toBe(false);
         });
-        it("matches 4", function() {
+        it("matches 4", function () {
           registerFragmentIndex(100, 4);
           expect(matcher.matches()).toBe(true);
         });
-        it("does not match 5", function() {
+        it("does not match 5", function () {
           registerFragmentIndex(100, 5);
           expect(matcher.matches()).toBe(false);
         });
-        it("matches 6", function() {
+        it("matches 6", function () {
           registerFragmentIndex(100, 6);
           expect(matcher.matches()).toBe(true);
         });
@@ -283,42 +283,42 @@ describe("selectors", function() {
     });
   });
 
-  describe("AllMatcher", function() {
-    describe("#matches", function() {
-      it("matches If all matchers return true", function() {
+  describe("AllMatcher", function () {
+    describe("#matches", function () {
+      it("matches If all matchers return true", function () {
         var matcher = new AllMatcher([
           {
-            matches: function() {
+            matches: function () {
               return true;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return true;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return true;
             },
           },
         ]);
         expect(matcher.matches()).toBe(true);
       });
-      it("does not match if some matchers return false", function() {
+      it("does not match if some matchers return false", function () {
         var matcher = new AllMatcher([
           {
-            matches: function() {
+            matches: function () {
               return true;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return false;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return true;
             },
           },
@@ -328,42 +328,42 @@ describe("selectors", function() {
     });
   });
 
-  describe("AnyMatcher", function() {
-    describe("#matches", function() {
-      it("matches If some matchers return true", function() {
+  describe("AnyMatcher", function () {
+    describe("#matches", function () {
+      it("matches If some matchers return true", function () {
         var matcher = new AnyMatcher([
           {
-            matches: function() {
+            matches: function () {
               return false;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return true;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return false;
             },
           },
         ]);
         expect(matcher.matches()).toBe(true);
       });
-      it("does not match if all matchers return false", function() {
+      it("does not match if all matchers return false", function () {
         var matcher = new AnyMatcher([
           {
-            matches: function() {
+            matches: function () {
               return false;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return false;
             },
           },
           {
-            matches: function() {
+            matches: function () {
               return false;
             },
           },
@@ -373,8 +373,8 @@ describe("selectors", function() {
     });
   });
 
-  describe("#mergeViewConditionalStyles", function() {
-    it("merge styles associated with a fragment selector if the fragment selector matches a nodeContext", function() {
+  describe("#mergeViewConditionalStyles", function () {
+    it("merge styles associated with a fragment selector if the fragment selector matches a nodeContext", function () {
       var style = {
         _viewConditionalStyles: [
           {
@@ -430,12 +430,12 @@ describe("selectors", function() {
       );
     });
 
-    it("do nothing if the fragment selector does not match a nodeContext", function() {
+    it("do nothing if the fragment selector does not match a nodeContext", function () {
       var style = {
         _viewConditionalStyles: [
           {
             matcher: {
-              matches: function() {
+              matches: function () {
                 return false;
               },
             },
@@ -449,7 +449,7 @@ describe("selectors", function() {
           },
           {
             matcher: {
-              matches: function() {
+              matches: function () {
                 return false;
               },
             },
@@ -469,7 +469,7 @@ describe("selectors", function() {
       expect(cascMap["display"]).toBe(undefined);
     });
 
-    it("do nothing if styles associated with fragment selectors are not registered", function() {
+    it("do nothing if styles associated with fragment selectors are not registered", function () {
       var style = {};
       var cascMap = {};
       registerFragmentIndex(100, 3, 0);

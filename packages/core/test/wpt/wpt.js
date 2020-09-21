@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
-(function() {
+(function () {
   function getURLParams() {
     var params = {};
     var r = /([^=]+)=(.*)/;
     var a = window.location.search.substring(1).split("&");
-    a.forEach(function(pair) {
+    a.forEach(function (pair) {
       var m = pair.match(r);
       if (m) {
         params[m[1]] = m[2];
