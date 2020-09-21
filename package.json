@@ -23,13 +23,13 @@
     "version:prerelease": "lerna version --conventional-commits --conventional-prerelease --preid pre"
   },
   "devDependencies": {
-    "archiver": "^4.0.1",
+    "archiver": "^5.0.2",
     "doctoc": "^1.4.0",
     "husky": "^4.2.3",
     "lerna": "^3.20.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.0.2",
-    "pretty-quick": "^2.0.1",
+    "pretty-quick": "^3.0.2",
     "shelljs": "^0.8.4",
     "shx": "^0.3.2"
   },

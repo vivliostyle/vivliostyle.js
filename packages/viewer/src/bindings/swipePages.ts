@@ -25,20 +25,6 @@ let xStart = null;
 let yStart = null;
 let arrowButton = null;
 
-declare global {
-  interface Window {
-    visualViewport?: {
-      offsetLeft: Readonly<number>;
-      offsetTop: Readonly<number>;
-      pageLeft: Readonly<number>;
-      pageTop: Readonly<number>;
-      width: Readonly<number>;
-      height: Readonly<number>;
-      scale: Readonly<number>;
-    };
-  }
-}
-
 ko.bindingHandlers.swipePages = {
   init(element, valueAccessor): void {
     if (supportTouchEvents && ko.unwrap(valueAccessor())) {
