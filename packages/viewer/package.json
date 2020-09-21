@@ -9,7 +9,7 @@
     "clean": "shx rm -rf lib/* .cache",
     "dev": "run-p dev:*",
     "dev:html": "gulp serve-dev",
-    "dev:ts": "NODE_ENV=development rollup -c -w",
+    "dev:ts": "NODE_ENV=development rollup -c -w --watch.buildDelay 1000",
     "format": "prettier --write \"{*.{js,md,json},{src,test}/**/*.{ts,js}}\"",
     "lint": "run-p lint:*",
     "lint:css": "stylelint src/scss/{*.*,**/*.*}",
