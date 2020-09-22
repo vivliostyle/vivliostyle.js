@@ -1,0 +1,85 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Attributes on list elements</title>
+  </head>
+  <body>
+    <h1>Attributes on list elements</h1>
+
+    <nav role="doc-toc" hidden>
+      <h1>Table of Contents</h1>
+      <p>This Table of Contents must not be displayed in the page because the 'hidden' attribute is specified on the 'nav' element.</p>
+      <ol start="5" type="I">
+        <li><a href="#test-ol">Test OL</a></li>
+        <li value="10"><a href="#test-ul">Test UL</a></li>
+      </ol>
+    </nav>
+
+    <section id="test-ol">
+      <h2>Test OL</h2>
+      <ol start="5" type="I">
+        <li>must be "V."</li>
+        <li>must be "VI."
+          <ol>
+            <li>must be "1."</li>
+            <li>must be "2."</li>
+            <li>must be "3."</li>
+          </ol>
+        </li>
+        <li type="1">must be "7."</li>
+        <li type="a">must be "h."</li>
+        <li type="A">must be "I."</li>
+        <li value="20">must be "XX."
+          <ol type="i">
+            <li>must be "i."</li>
+            <li>must be "ii."</li>
+            <li>must be "iii."</li>
+          </ol>
+        </li>
+        <li type="1">must be "21."
+          <ol>
+            <li>must be "1."</li>
+            <li hidden>must be hidden</li>
+            <li>must be "2."</li>
+            <li hidden value="10">must be hidden</li>
+            <li>must be "3."</li>
+          </ol>
+        </li>
+      </ol>
+    </section>
+
+    <section id="test-ul" style="break-before: page;">
+      <h2>Test UL</h2>
+      <ul>
+        <li>disc
+          <ul>
+            <li>circle
+              <ul>
+                <li>square
+                  <ul>
+                    <li>square</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <ul type="square">
+        <li>square</li>
+        <li type="circle">circle
+          <ul>
+            <li>circle
+              <ul>
+                <li>square
+                  <ul type="circle">
+                    <li>circle</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li type="disc">disc</li>
+      </ul>
+    </section>

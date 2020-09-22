@@ -108,6 +108,8 @@ module.exports = [
         title: "page viewport-percentage units with calc()",
       },
       { file: "link-to-viewer.html", title: "Link to Vivliostyle Viewer" },
+      { file: "print_media/styles-in-body.html", title: "Style elements in the body elements" },
+      { file: "lists-attributes.html", title: "Attributes on list elements" },
     ],
   },
   {

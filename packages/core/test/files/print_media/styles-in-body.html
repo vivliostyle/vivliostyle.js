@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Style elements in the body elements</title>
+  </head>
+  <body>
+    <p>This test is same as <a href="index.html">Print media test</a> but the <code>style</code> and <code>link[rel="stylesheet"]</code> elements are inside the <code>body</code> element.</p>
+      
+    </body></code></p>
+    <style>
+      .link_all,
+      .link_print,
+      .link_tv_or_print,
+      .import_all,
+      .import_print,
+      .import_tv_or_print,
+      .at_media_all,
+      .at_media_print,
+      .at_media_tv_or_print,
+      .style_all,
+      .style_print,
+      .style_tv_or_print {
+        color: red;
+      }
+      .link_tv,
+      .link_tv_or_print_nocolor,
+      .import_tv,
+      .import_tv_or_print_nocolor,
+      .at_media_tv,
+      .at_media_tv_or_print_nocolor,
+      .style_tv,
+      .style_tv_or_print_nocolor {
+        color: green;
+      }
+
+      @import url(import_all.css) all;
+      @import url(import_print.css) print;
+      @import url(import_tv.css) tv;
+      @import url(import_tv_or_print.css) tv, print;
+      @import url(import_tv_or_print_nocolor.css) tv, print and (color: 0);
+
+      @media all {
+        .at_media_all {
+          color: green;
+        }
+      }
+      @media print {
+        .at_media_print {
+          color: green;
+        }
+      }
+      @media tv {
+        .at_media_tv {
+          color: red;
+        }
+      }
+      @media tv, print {
+        .at_media_tv_or_print {
+          color: green;
+        }
+      }
+      @media tv, print and (color: 0) {
+        .at_media_tv_or_print_nocolor {
+          color: red;
+        }
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" media="all" href="link_all.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="print"
+      href="link_print.css"
+    />
+    <link rel="stylesheet" type="text/css" media="tv" href="link_tv.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="tv, print"
+      href="link_tv_or_print.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="tv, print and (color:0)"
+      href="link_tv_or_print_nocolor.css"
+    />
+    <style type="text/css" media="all">
+      .style_all {
+        color: green;
+      }
+    </style>
+    <style type="text/css" media="print">
+      .style_print {
+        color: green;
+      }
+    </style>
+    <style type="text/css" media="tv">
+      .style_tv {
+        color: red;
+      }
+    </style>
+    <style type="text/css" media="tv, print">
+      .style_tv_or_print {
+        color: green;
+      }
+    </style>
+    <style type="text/css" media="tv, print and (color:0)">
+      .style_tv_or_print_nocolor {
+        color: red;
+      }
+    </style>
+    <p class="link_all">
+      This text should be green. (<code>link</code> element with
+      <code>media="all"</code>)
+    </p>
+    <p class="link_print">
+      This text should be green. (<code>link</code> element with
+      <code>media="print"</code>)
+    </p>
+    <p class="link_tv">
+      This text should not be red. (<code>link</code> element with
+      <code>media="tv"</code>)
+    </p>
+    <p class="link_tv_or_print">
+      This text should be green. (<code>link</code> element with
+      <code>media="tv, print"</code>)
+    </p>
+    <p class="link_tv_or_print_nocolor">
+      This text should not be red. (<code>link</code> element with
+      <code>media="tv, print and (color:0)"</code>)
+    </p>
+
+    <p class="import_all">
+      This text should be green. (<code>@import all</code> from
+      <code>style</code> element)
+    </p>
+    <p class="import_print">
+      This text should be green. (<code>@import print</code> from
+      <code>style</code> element)
+    </p>
+    <p class="import_tv">
+      This text should not be red. (<code>@import tv</code> from
+      <code>style</code> element)
+    </p>
+    <p class="import_tv_or_print">
+      This text should be green. (<code>@import tv, print</code> from
+      <code>style</code> element)
+    </p>
+    <p class="import_tv_or_print_nocolor">
+      This text should not be red. (<code>@import tv, print and (color:0)</code>
+      from <code>style</code> element)
+    </p>
+
+    <p class="at_media_all">
+      This text should be green. (<code>@media all</code> in
+      <code>style</code> element)
+    </p>
+    <p class="at_media_print">
+      This text should be green. (<code>@media print</code> in
+      <code>style</code> element)
+    </p>
+    <p class="at_media_tv">
+      This text should not be red. (<code>@media tv</code> in
+      <code>style</code> element)
+    </p>
+    <p class="at_media_tv_or_print">
+      This text should be green. (<code>@media tv, print</code> in
+      <code>style</code> element)
+    </p>
+    <p class="at_media_tv_or_print_nocolor">
+      This text should not be red. (<code>@media tv, print and (color:0)</code>
+      in <code>style</code> element)
+    </p>
+
+    <p class="style_all">
+      This text should be green. (<code>style</code> element with
+      <code>media="all"</code>)
+    </p>
+    <p class="style_print">
+      This text should be green. (<code>style</code> element with
+      <code>media="print"</code>)
+    </p>
+    <p class="style_tv">
+      This text should not be red. (<code>style</code> element with
+      <code>media="tv"</code>)
+    </p>
+    <p class="style_tv_or_print">
+      This text should be green. (<code>style</code> element with
+      <code>media="tv, print"</code>)
+    </p>
+    <p class="style_tv_or_print_nocolor">
+      This text should not be red. (<code>style</code> element with
+      <code>media="tv, print and (color:0)"</code>)
+    </p>
+  </body>
+</html>
