@@ -2583,7 +2583,6 @@ export class CascadeInstance {
   viewConditions: { [key: string]: Matchers.Matcher[] } = {};
   dependentConditions: string[] = [];
   elementStack: Element[];
-  currentDoc?: Document | null;
 
   constructor(
     cascade: Cascade,
@@ -2747,13 +2746,21 @@ export class CascadeInstance {
       if (!resetMap) {
         resetMap = {};
       }
-      resetMap["ua-list-item"] = 0;
+      resetMap["ua-list-item"] = ((this.currentElement as any)?.start ?? 1) - 1;
     }
     if (displayVal === Css.ident.list_item) {
       if (!incrementMap) {
         incrementMap = {};
       }
       incrementMap["ua-list-item"] = 1;
+      if (
+        /^\s*[-+]?\d/.test(this.currentElement?.getAttribute("value") ?? "")
+      ) {
+        if (!resetMap) {
+          resetMap = {};
+        }
+        resetMap["ua-list-item"] = (this.currentElement as any).value - 1;
+      }
     }
     if (resetMap) {
       for (const resetCounterName in resetMap) {
@@ -2852,14 +2859,6 @@ export class CascadeInstance {
       this.currentEpubTypes = types.split(/\s+/);
     } else {
       this.currentEpubTypes = EMPTY;
-    }
-    if (
-      this.currentLocalName == "style" &&
-      this.currentNamespace == Base.NS.FB2
-    ) {
-      // special case
-      const className = element.getAttribute("name") || "";
-      this.currentClassNames = [className];
     }
     const lang = Base.getLangAttribute(element);
     if (lang) {
@@ -3003,8 +3002,7 @@ export class CascadeInstance {
       // CSS
       this.applyAction(this.code.pagetypes, "*");
     }
-    this.currentElement = null;
-    this.currentDoc = null;
+
     this.stack.push([]);
     for (let depth = 1; depth >= -1; --depth) {
       const list = this.stack[this.stack.length - depth - 2];
