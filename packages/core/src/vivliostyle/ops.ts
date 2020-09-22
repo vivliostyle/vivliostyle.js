@@ -2155,38 +2155,36 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           classes: null,
           media: null,
         });
-        const head = xmldoc.head;
-        if (!isTocBox && head) {
-          for (let c: Node = head.firstChild; c; c = c.nextSibling) {
-            if (c.nodeType != 1) {
-              continue;
-            }
-            const child = c as Element;
-            const ns = child.namespaceURI;
-            const localName = child.localName;
+        if (!isTocBox) {
+          const elemList = xmldoc.document.querySelectorAll(
+            "style, link, meta",
+          );
+          for (const elem of elemList) {
+            const ns = elem.namespaceURI;
+            const localName = elem.localName;
             if (ns == Base.NS.XHTML) {
               if (localName == "style") {
-                const classes = child.getAttribute("class");
-                const media = child.getAttribute("media");
-                const title = child.getAttribute("title");
+                const classes = elem.getAttribute("class");
+                const media = elem.getAttribute("media");
+                const title = elem.getAttribute("title");
                 sources.push({
                   url,
-                  text: child.textContent,
+                  text: elem.textContent,
                   flavor: CssParser.StylesheetFlavor.AUTHOR,
                   classes: title ? classes : null,
                   media,
                 });
               } else if (localName == "link") {
-                const rel = child.getAttribute("rel");
-                const classes = child.getAttribute("class");
-                const media = child.getAttribute("media");
+                const rel = elem.getAttribute("rel");
+                const classes = elem.getAttribute("class");
+                const media = elem.getAttribute("media");
                 if (
                   rel == "stylesheet" ||
                   (rel == "alternate stylesheet" && classes)
                 ) {
-                  let src = child.getAttribute("href");
+                  let src = elem.getAttribute("href");
                   src = Base.resolveURL(src, url);
-                  const title = child.getAttribute("title");
+                  const title = elem.getAttribute("title");
                   sources.push({
                     url: src,
                     text: null,
@@ -2197,50 +2195,18 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                 }
               } else if (
                 localName == "meta" &&
-                child.getAttribute("name") == "viewport"
+                elem.getAttribute("name") == "viewport"
               ) {
                 sources.push({
                   url,
-                  text: processViewportMeta(child),
+                  text: processViewportMeta(elem),
                   flavor: CssParser.StylesheetFlavor.AUTHOR,
                   classes: null,
                   media: null,
                 });
-              }
-            } else if (ns == Base.NS.FB2) {
-              if (
-                localName == "stylesheet" &&
-                child.getAttribute("type") == "text/css"
-              ) {
-                sources.push({
-                  url,
-                  text: child.textContent,
-                  flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  classes: null,
-                  media: null,
-                });
-              }
-            } else if (ns == Base.NS.SSE && localName === "property") {
-              // look for stylesheet specification like:
-              // <property><name>stylesheet</name><value>style.css</value></property>
-              const name = child.getElementsByTagName("name")[0];
-              if (name && name.textContent === "stylesheet") {
-                const value = child.getElementsByTagName("value")[0];
-                if (value) {
-                  const src = Base.resolveURL(value.textContent, url);
-                  sources.push({
-                    url: src,
-                    text: null,
-                    classes: null,
-                    media: null,
-                    flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  });
-                }
               }
             }
           }
-        }
-        if (!isTocBox) {
           for (let i = 0; i < self.styleSheets.length; i++) {
             sources.push(self.styleSheets[i]);
           }
