@@ -2,12 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Style elements in the body elements</title>
+    <title>Style elements in the body element</title>
   </head>
   <body>
     <p>This test is same as <a href="index.html">Print media test</a> but the <code>style</code> and <code>link[rel="stylesheet"]</code> elements are inside the <code>body</code> element.</p>
-      
-    </body></code></p>
     <style>
       .link_all,
       .link_print,
@@ -33,7 +31,9 @@
       .style_tv_or_print_nocolor {
         color: green;
       }
+    </style>
 
+    <style>
       @import url(import_all.css) all;
       @import url(import_print.css) print;
       @import url(import_tv.css) tv;
