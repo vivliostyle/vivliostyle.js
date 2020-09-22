@@ -983,30 +983,6 @@ export class ViewFactory
         } else if (ns == Base.NS.epub) {
           tag = "span";
           ns = Base.NS.XHTML;
-        } else if (ns == Base.NS.FB2) {
-          ns = Base.NS.XHTML;
-          if (tag == "image") {
-            tag = "div";
-            const imageRef = element.getAttributeNS(Base.NS.XLINK, "href");
-            if (imageRef && imageRef.charAt(0) == "#") {
-              const imageBinary = self.xmldoc.getElement(imageRef);
-              if (imageBinary) {
-                inner = self.createElement(ns, "img");
-                const mediaType =
-                  imageBinary.getAttribute("content-type") || "image/jpeg";
-                const innerSrc = `data:${mediaType};base64,${imageBinary.textContent.replace(
-                  /[ \t\n\t]/g,
-                  "",
-                )}`;
-                fetchers.push(TaskUtil.loadElement(inner, innerSrc));
-              }
-            }
-          } else {
-            tag = fb2Remap[tag];
-          }
-          if (!tag) {
-            tag = self.nodeContext.inline ? "span" : "div";
-          }
         } else if (ns == Base.NS.NCX) {
           ns = Base.NS.XHTML;
           if (tag == "ncx" || tag == "navPoint") {
@@ -1128,153 +1104,151 @@ export class ViewFactory
             cssWidth === Css.ident.auto || (!cssWidth && !attrWidth);
           const hasAutoHeight =
             cssHeight === Css.ident.auto || (!cssHeight && !attrHeight);
-          if (element.namespaceURI != Base.NS.FB2 || tag == "td") {
-            const attributes = element.attributes;
-            const attributeCount = attributes.length;
-            let delayedSrc: string | null = null;
-            for (let i = 0; i < attributeCount; i++) {
-              const attribute = attributes[i];
-              const attributeNS = attribute.namespaceURI;
-              let attributeName = attribute.localName;
-              let attributeValue = attribute.nodeValue;
-              if (!attributeNS) {
-                if (attributeName.match(/^on/)) {
-                  continue; // don't propagate JavaScript code
+          const attributes = element.attributes;
+          const attributeCount = attributes.length;
+          let delayedSrc: string | null = null;
+          for (let i = 0; i < attributeCount; i++) {
+            const attribute = attributes[i];
+            const attributeNS = attribute.namespaceURI;
+            let attributeName = attribute.localName;
+            let attributeValue = attribute.nodeValue;
+            if (!attributeNS) {
+              if (attributeName.match(/^on/)) {
+                continue; // don't propagate JavaScript code
+              }
+              if (attributeName == "style") {
+                continue; // we do styling ourselves
+              }
+              if (attributeName == "id" || attributeName == "name") {
+                // Propagate transformed ids and collect them on the page
+                // (only first time).
+                if (firstTime) {
+                  attributeValue = self.documentURLTransformer.transformFragment(
+                    encodeURIComponent(attributeValue),
+                    self.xmldoc.url,
+                  );
+                  result.setAttribute(attributeName, attributeValue);
+                  self.page.registerElementWithId(result, attributeValue);
+                  continue;
                 }
-                if (attributeName == "style") {
-                  continue; // we do styling ourselves
-                }
-                if (attributeName == "id" || attributeName == "name") {
-                  // Propagate transformed ids and collect them on the page
-                  // (only first time).
-                  if (firstTime) {
-                    attributeValue = self.documentURLTransformer.transformFragment(
-                      encodeURIComponent(attributeValue),
-                      self.xmldoc.url,
-                    );
-                    result.setAttribute(attributeName, attributeValue);
-                    self.page.registerElementWithId(result, attributeValue);
-                    continue;
-                  }
-                }
+              }
 
-                // TODO: understand the element we are working with.
-                if (
-                  attributeName == "src" ||
-                  attributeName == "href" ||
-                  attributeName == "poster"
-                ) {
-                  attributeValue = self.resolveURL(attributeValue);
-                  if (attributeName === "href") {
-                    attributeValue = self.documentURLTransformer.transformURL(
-                      attributeValue,
-                      self.xmldoc.url,
-                    );
-                  }
-                } else if (attributeName == "srcset") {
-                  attributeValue = attributeValue
-                    .split(",")
-                    .map((value) => self.resolveURL(value.trim()))
-                    .join(",");
+              // TODO: understand the element we are working with.
+              if (
+                attributeName == "src" ||
+                attributeName == "href" ||
+                attributeName == "poster"
+              ) {
+                attributeValue = self.resolveURL(attributeValue);
+                if (attributeName === "href") {
+                  attributeValue = self.documentURLTransformer.transformURL(
+                    attributeValue,
+                    self.xmldoc.url,
+                  );
                 }
-                if (
-                  attributeName === "poster" &&
-                  tag === "video" &&
-                  ns === Base.NS.XHTML &&
-                  hasAutoWidth &&
-                  hasAutoHeight
-                ) {
-                  const image = new Image();
-                  const fetcher = TaskUtil.loadElement(image, attributeValue);
-                  fetchers.push(fetcher);
-                  images.push({
-                    image,
-                    element: result as HTMLElement,
-                    fetcher,
-                  });
-                }
-              } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
-                continue; // namespace declaration (in Firefox)
-              } else if (attributeNS == Base.NS.XLINK) {
-                if (attributeName == "href") {
-                  attributeValue = self.resolveURL(attributeValue);
-                }
-              }
-              if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
-                // Workaround for Edge bug
-                // See
-                // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
-                attributeName = attributeName.toLowerCase();
-              }
-              if (self.isSVGUrlAttribute(attributeName)) {
-                attributeValue = Urls.transformURIs(
-                  attributeValue,
-                  self.xmldoc.url,
-                  self.documentURLTransformer,
-                );
-              }
-              if (attributeNS) {
-                const attributePrefix = namespacePrefixMap[attributeNS];
-                if (attributePrefix) {
-                  attributeName = `${attributePrefix}:${attributeName}`;
-                }
+              } else if (attributeName == "srcset") {
+                attributeValue = attributeValue
+                  .split(",")
+                  .map((value) => self.resolveURL(value.trim()))
+                  .join(",");
               }
               if (
-                attributeName == "src" &&
-                !attributeNS &&
-                (tag == "img" || tag == "input") &&
-                ns == Base.NS.XHTML
+                attributeName === "poster" &&
+                tag === "video" &&
+                ns === Base.NS.XHTML &&
+                hasAutoWidth &&
+                hasAutoHeight
               ) {
-                // HTML img element should start loading only once all
-                // attributes are assigned.
-                delayedSrc = attributeValue;
-              } else if (
-                attributeName == "href" &&
-                tag == "image" &&
-                ns == Base.NS.SVG &&
-                attributeNS == Base.NS.XLINK
-              ) {
-                self.page.fetchers.push(
-                  TaskUtil.loadElement(result, attributeValue),
-                );
-              } else {
-                // When the document is not XML document (e.g. non-XML HTML)
-                // attributeNS can be null
-                if (attributeNS) {
-                  result.setAttributeNS(
-                    attributeNS,
-                    attributeName,
-                    attributeValue,
-                  );
-                } else {
-                  result.setAttribute(attributeName, attributeValue);
-                }
+                const image = new Image();
+                const fetcher = TaskUtil.loadElement(image, attributeValue);
+                fetchers.push(fetcher);
+                images.push({
+                  image,
+                  element: result as HTMLElement,
+                  fetcher,
+                });
+              }
+            } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
+              continue; // namespace declaration (in Firefox)
+            } else if (attributeNS == Base.NS.XLINK) {
+              if (attributeName == "href") {
+                attributeValue = self.resolveURL(attributeValue);
               }
             }
-            if (delayedSrc) {
-              const image = tag === "input" ? new Image() : result;
-              const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
-              if (image !== result) {
-                (result as HTMLImageElement).src = delayedSrc;
+            if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
+              // Workaround for Edge bug
+              // See
+              // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
+              attributeName = attributeName.toLowerCase();
+            }
+            if (self.isSVGUrlAttribute(attributeName)) {
+              attributeValue = Urls.transformURIs(
+                attributeValue,
+                self.xmldoc.url,
+                self.documentURLTransformer,
+              );
+            }
+            if (attributeNS) {
+              const attributePrefix = namespacePrefixMap[attributeNS];
+              if (attributePrefix) {
+                attributeName = `${attributePrefix}:${attributeName}`;
               }
-              if (!hasAutoWidth && !hasAutoHeight) {
-                // No need to wait for the image, does not affect layout
-                self.page.fetchers.push(imageFetcher);
+            }
+            if (
+              attributeName == "src" &&
+              !attributeNS &&
+              (tag == "img" || tag == "input") &&
+              ns == Base.NS.XHTML
+            ) {
+              // HTML img element should start loading only once all
+              // attributes are assigned.
+              delayedSrc = attributeValue;
+            } else if (
+              attributeName == "href" &&
+              tag == "image" &&
+              ns == Base.NS.SVG &&
+              attributeNS == Base.NS.XLINK
+            ) {
+              self.page.fetchers.push(
+                TaskUtil.loadElement(result, attributeValue),
+              );
+            } else {
+              // When the document is not XML document (e.g. non-XML HTML)
+              // attributeNS can be null
+              if (attributeNS) {
+                result.setAttributeNS(
+                  attributeNS,
+                  attributeName,
+                  attributeValue,
+                );
               } else {
-                if (
-                  hasAutoWidth &&
-                  hasAutoHeight &&
-                  imageResolution &&
-                  imageResolution !== 1
-                ) {
-                  images.push({
-                    image: image as HTMLElement,
-                    element: result as HTMLElement,
-                    fetcher: imageFetcher,
-                  });
-                }
-                fetchers.push(imageFetcher);
+                result.setAttribute(attributeName, attributeValue);
               }
+            }
+          }
+          if (delayedSrc) {
+            const image = tag === "input" ? new Image() : result;
+            const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
+            if (image !== result) {
+              (result as HTMLImageElement).src = delayedSrc;
+            }
+            if (!hasAutoWidth && !hasAutoHeight) {
+              // No need to wait for the image, does not affect layout
+              self.page.fetchers.push(imageFetcher);
+            } else {
+              if (
+                hasAutoWidth &&
+                hasAutoHeight &&
+                imageResolution &&
+                imageResolution !== 1
+              ) {
+                images.push({
+                  image: image as HTMLElement,
+                  element: result as HTMLElement,
+                  fetcher: imageFetcher,
+                });
+              }
+              fetchers.push(imageFetcher);
             }
           }
           delete computedStyle["content"];
@@ -2189,25 +2163,6 @@ export class ViewFactory
     return !!PseudoElement.getPseudoName(elem);
   }
 }
-
-export const fb2Remap = {
-  a: "a",
-  sub: "sub",
-  sup: "sup",
-  table: "table",
-  tr: "tr",
-  td: "td",
-  th: "th",
-  code: "code",
-  body: "div",
-  p: "p",
-  v: "p",
-  date: "p",
-  emphasis: "em",
-  strong: "strong",
-  style: "span",
-  strikethrough: "del",
-};
 
 export const propertiesNotPassedToDOM = {
   "box-decoration-break": true,

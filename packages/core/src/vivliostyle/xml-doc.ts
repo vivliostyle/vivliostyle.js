@@ -68,46 +68,6 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
         }
       }
       this.lang = this.root.getAttribute("lang");
-    } else if (this.root.namespaceURI == Base.NS.FB2) {
-      head = this.root;
-      for (
-        let child: Node = this.root.firstChild;
-        child;
-        child = child.nextSibling
-      ) {
-        if (child.nodeType != 1) {
-          continue;
-        }
-        const elem = child as Element;
-        if (elem.namespaceURI == Base.NS.FB2) {
-          if (elem.localName == "body") {
-            body = elem;
-          }
-        }
-      }
-      const langs = this.doc()
-        .child("FictionBook")
-        .child("description")
-        .child("title-info")
-        .child("lang")
-        .textContent();
-      if (langs.length > 0) {
-        this.lang = langs[0];
-      }
-    } else if (this.root.namespaceURI == Base.NS.SSE) {
-      // treat <meta> element as "head" of the document
-      for (
-        let elem = this.root.firstElementChild;
-        elem;
-        elem = elem.nextElementSibling
-      ) {
-        const localName = elem.localName;
-        if (localName === "meta") {
-          head = elem;
-        } else if (localName === "body") {
-          body = elem;
-        }
-      }
     }
     this.body = body as Element;
     this.head = head as Element;

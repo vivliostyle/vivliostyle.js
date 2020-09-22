@@ -1158,7 +1158,7 @@ export class OPFDoc {
         "nav li a[href]," +
         ".toc a[href]," +
         "#toc a[href]";
-      Array.from(doc.querySelectorAll(selector)).forEach((anchorElem) => {
+      for (const anchorElem of doc.querySelectorAll(selector)) {
         const hrefNoFragment = Base.stripFragment(
           Base.resolveURL(anchorElem.getAttribute("href"), this.pubURL),
         );
@@ -1167,7 +1167,7 @@ export class OPFDoc {
         if (manifestObj["readingOrder"].indexOf(url) == -1) {
           manifestObj["readingOrder"].push(url);
         }
-      });
+      }
     }
 
     const params = [];
@@ -2397,45 +2397,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
-  // TODO move makeSSEView to a more appropriate class (SSE XML content is not
-  // allowed in EPUB)
-  /**
-   * @param computedStyle
-   */
-  makeSSEView(
-    xmldoc: XmlDoc.XMLDocHolder,
-    srcElem: Element,
-    viewParent: Element,
-    computedStyle: { [key: string]: Css.Val },
-  ): Task.Result<Element> {
-    const doc = viewParent ? viewParent.ownerDocument : this.viewport.document;
-    const srcTagName = srcElem.localName;
-    let tagName: string;
-    switch (srcTagName) {
-      case "t":
-      case "tab":
-      case "ec":
-      case "nt":
-      case "fraction":
-      case "comment":
-      case "mark":
-        tagName = "span";
-        break;
-      case "ruby":
-      case "rp":
-      case "rt":
-        tagName = srcTagName;
-        break;
-      default:
-        tagName = "div";
-    }
-    const result = doc.createElement(tagName);
-    result.setAttribute("data-adapt-process-children", "true");
-
-    // Need to cast because we need {Element}, not {!Element}
-    return Task.newResult(result as Element);
-  }
-
   /**
    * @override
    */
@@ -2453,8 +2414,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
         return self.makeObjectView(xmldoc, srcElem, viewParent, computedStyle);
       } else if (srcElem.namespaceURI == Base.NS.MATHML) {
         return self.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
-      } else if (srcElem.namespaceURI == Base.NS.SSE) {
-        return self.makeSSEView(xmldoc, srcElem, viewParent, computedStyle);
       } else if (
         (srcElem as HTMLElement).dataset &&
         (srcElem as HTMLElement).dataset["mathTypeset"] == "true"

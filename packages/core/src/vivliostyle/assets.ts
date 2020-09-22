@@ -845,10 +845,8 @@ export const UserAgentXml = `
 // user-agent-page.css
 export const UserAgentPageCss = `
 @namespace html "http://www.w3.org/1999/xhtml";
-@namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
 
-html|body,
-fb2|body {
+html|body {
   hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
 }
 
@@ -1053,6 +1051,9 @@ html|th {
   font-weight: bolder;
   text-align: center;
 }
+html|*[hidden],
+html|link,
+html|style,
 html|script {
   display: none;
 }
@@ -1196,15 +1197,12 @@ html|dd {
   margin: 0px;
   margin-inline-start: 40px;
 }
-html|ol {
-  list-style-type: decimal;
-}
 html|ol html|ul,
 html|ul html|ol,
 html|ul html|ul,
 html|ol html|ol {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 html|u,
 html|ins {
@@ -1425,260 +1423,5 @@ ul[role="directory"],
 ul.toc,
 ul#toc {
   -adapt-behavior: toc-container;
-}
-
-/*---------------- fb2 ---------------------*/
-
-@namespace fb2 "http://www.gribuser.ru/xml/fictionbook/2.0";
-
-fb2|FictionBook {
-  display: block;
-}
-
-fb2|body {
-  font-family: serif;
-  margin: 8px;
-  column-width: 25em;
-}
-
-fb2|a {
-  line-height: 0.1;
-  vertical-align: super;
-  font-size: 0.7em;
-}
-
-fb2|sub {
-  line-height: 0.1;
-  font-size: 0.7em;
-}
-
-fb2|sup {
-  line-height: 0.1;
-  font-size: 0.7em;
-}
-
-fb2|table {
-  display: table;
-  font-size: 0.8em;
-  font-family: sans-serif;
-  margin: 0.5em;
-  border-collapse: collapse;
-  border: 1px solid black;
-}
-
-fb2|td {
-  border: 1px solid black;
-  padding: 0.3em;
-}
-
-fb2|th {
-  font-weight: bold;
-  text-align: center;
-  border: 1px solid black;
-  background-color: #cee;
-  padding: 0.3em;
-}
-
-fb2|code {
-  font-family: monospace;
-}
-
-fb2|p {
-  display: block;
-  margin: 0px;
-  text-indent: 1.5em;
-  text-align: justify;
-}
-
-fb2|title fb2|p {
-  margin: 0px 0px 0.5em 0px;
-  text-indent: 0px;
-  text-align: inherit;
-}
-
-fb2|title {
-  font-size: 2.2em;
-  font-weight: bold;
-  break-inside: avoid;
-  break-after: avoid;
-  text-align: center;
-  margin: 1em 0px 0.5em 0px;
-  display: block;
-}
-
-fb2|section {
-  display: block;
-}
-
-fb2|section fb2|title {
-  font-size: 1.8em;
-  text-align: center;
-  margin: 1em 0px 0.5em 0px;
-}
-
-fb2|section fb2|section fb2|title {
-  font-size: 1.5em;
-  text-align: left;
-  margin: 1em 0px 0.5em 1.5625em;
-}
-
-fb2|section fb2|section fb2|section fb2|title {
-  font-size: 1.3em;
-  text-align: left;
-  margin: 1em 0px 0.5em 1.923em;
-}
-
-fb2|section fb2|section fb2|section fb2|section fb2|title {
-  font-size: 1.2em;
-  text-align: left;
-  margin: 1em 0px 0.5em 2.083em;
-}
-
-fb2|section fb2|section fb2|section fb2|section fb2|section fb2|title {
-  font-size: 1.1em;
-  text-align: left;
-  margin: 1em 0px 0.5em 2.272em;
-}
-
-fb2|section
-  fb2|section
-  fb2|section
-  fb2|section
-  fb2|section
-  fb2|section
-  fb2|title {
-  text-align: left;
-  margin: 1em 0px 0.5em 2.5em;
-}
-
-fb2|epigraph {
-  text-align: left;
-  font-style: italic;
-  margin: 1em 1em 2em 30%;
-  display: block;
-}
-
-fb2|image {
-  text-align: center;
-  padding: 3px;
-}
-
-fb2|image::inner {
-  max-width: 95%;
-}
-
-fb2|image::after {
-  display: block;
-  content: attr(title);
-}
-
-fb2|v {
-  text-indent: -1em;
-  padding-left: 1em;
-  margin: 0px;
-  display: block;
-}
-fb2|poem {
-  margin: 0.5em 0px 0.5em 2em;
-  display: block;
-}
-fb2|date {
-  margin: 0.5em 0px 0.5em 50%;
-  font-style: italic;
-  display: block;
-}
-fb2|stanza {
-  margin: 0.5em 0px;
-  break-inside: avoid;
-  display: block;
-}
-fb2|empty-line {
-  height: 1em;
-  margin: 0px;
-  display: block;
-}
-fb2|cite {
-  margin: 0.5em 0px 0.5em 1em;
-  font-size: 0.95em;
-  display: block;
-}
-fb2|subtitle {
-  text-indent: 0px;
-  text-align: center;
-  font-style: italic;
-  font-weight: bold;
-  margin: 0.5em 2em;
-  break-inside: avoid;
-  break-after: avoid;
-  display: block;
-}
-fb2|annotation {
-  margin: 1em 0px 1em 2em;
-  text-indent: 0px;
-  font-style: italic;
-  display: block;
-}
-fb2|text-author {
-  text-indent: 0px;
-  margin: 0.2em 0px 0px 3em;
-  display: block;
-}
-fb2|emphasis {
-  font-style: italic;
-}
-fb2|strong {
-  font-weight: bold;
-}
-fb2|strikethrough {
-  text-decoration: line-through;
-}
-fb2|*.italic {
-  font-style: italic;
-}
-fb2|*.bold {
-  font-weight: bold;
-}
-
-fb2|binary,
-fb2|description,
-fb2|stylesheet {
-  display: none;
-}
-
-fb2|a[type="note"] {
-  font-size: 0.75em;
-  vertical-align: super;
-  line-height: 0.01;
-  text-decoration: none;
-  -adapt-template: url(user-agent.xml#footnote);
-}
-
-fb2|body[name="notes"] {
-  display: none;
-}
-
-fb2|body[name="notes"] fb2|title {
-  display: inline;
-  vertical-align: super;
-  line-height: 0.01;
-  text-align: left;
-  font-size: 0.75em;
-  font-weight: bold;
-  margin: 0px;
-}
-
-fb2|body[name="notes"] fb2|p {
-  text-indent: 0px;
-  display: inline; /* for now */
-}
-
-fb2|body[name="notes"] fb2|p + fb2|p {
-  display: block;
-}
-
-fb2|body[name="notes"] fb2|section {
-  text-indent: 0px;
-  line-height: 1.2;
-  font-size: 1.2em;
 }
 `;
