@@ -198,7 +198,6 @@ export interface DocumentURLTransformer {
  * @enum {string}
  */
 export enum NS {
-  FB2 = "http://www.gribuser.ru/xml/fictionbook/2.0",
   epub = "http://www.idpf.org/2007/ops",
   EV = "http://www.w3.org/2001/xml-events",
   MATHML = "http://www.w3.org/1998/Math/MathML",
@@ -209,7 +208,6 @@ export enum NS {
   SVG = "http://www.w3.org/2000/svg",
   DC = "http://purl.org/dc/elements/1.1/",
   NCX = "http://www.daisy.org/z3986/2005/ncx/",
-  SSE = "http://example.com/sse", // temporary dummy namespace
 }
 
 /**

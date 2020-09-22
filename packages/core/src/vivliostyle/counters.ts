@@ -670,12 +670,12 @@ export class CounterStore {
   finishLastPage(viewport: Vgen.Viewport) {
     const nodes = viewport.root.querySelectorAll(`[${PAGES_COUNTER_ATTR}]`);
     const pages = this.currentPageCounters["page"][0];
-    Array.from(nodes).forEach((node) => {
+    for (const node of nodes) {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
       const i = this.pagesCounterExprs.findIndex((o) => o.expr.key === key);
       Asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
-    });
+    }
   }
 
   createLayoutConstraint(pageIndex: number): Layout.LayoutConstraint {

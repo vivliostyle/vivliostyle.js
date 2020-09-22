@@ -496,7 +496,6 @@ export class Styler implements AbstractStyler {
     this.postprocessTopStyle(style, false);
     switch (this.root.namespaceURI) {
       case Base.NS.XHTML:
-      case Base.NS.FB2:
         this.bodyReached = false;
         break;
     }
