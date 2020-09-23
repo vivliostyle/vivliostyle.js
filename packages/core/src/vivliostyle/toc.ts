@@ -247,6 +247,15 @@ export class TOCView implements Vgen.CustomRendererFactory {
         xmldoc.body.setAttribute("data-vivliostyle-primary-entry", true);
       }
 
+      // Make hidden TOC visible in TOC box
+      for (const elem of xmldoc.document.querySelectorAll(
+        "[role=doc-toc], [role=directory], nav, .toc, #toc",
+      )) {
+        if (elem.hasAttribute("hidden")) {
+          elem.removeAttribute("hidden");
+        }
+      }
+
       const style = self.store.getStyleForDoc(xmldoc);
       const viewportSize = style.sizeViewport(width, 100000, fontSize);
       viewport = new Vgen.Viewport(
