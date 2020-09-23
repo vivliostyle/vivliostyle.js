@@ -1159,8 +1159,13 @@ export class OPFDoc {
         ".toc a[href]," +
         "#toc a[href]";
       for (const anchorElem of doc.querySelectorAll(selector)) {
+        const href = anchorElem.getAttribute("href");
+        if (/^(https?:)?\/\//.test(href)) {
+          // Avoid link to external resources
+          continue;
+        }
         const hrefNoFragment = Base.stripFragment(
-          Base.resolveURL(anchorElem.getAttribute("href"), this.pubURL),
+          Base.resolveURL(href, this.pubURL),
         );
         const path = this.getPathFromURL(hrefNoFragment);
         const url = path !== null ? encodeURI(path) : hrefNoFragment;
