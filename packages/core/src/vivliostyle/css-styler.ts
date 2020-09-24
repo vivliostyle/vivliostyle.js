@@ -545,12 +545,12 @@ export class Styler implements AbstractStyler {
     elemStyle: CssCascade.ElementStyle,
     isBody: boolean,
   ): void {
-    ["writing-mode", "direction"].forEach((propName) => {
+    for (const propName of ["writing-mode", "direction"]) {
       if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
         // Copy it over, but keep it at the root element as well.
         this.rootStyle[propName] = elemStyle[propName];
       }
-    });
+    }
     if (!this.rootBackgroundAssigned) {
       const backgroundColor = this.hasProp(
         elemStyle,

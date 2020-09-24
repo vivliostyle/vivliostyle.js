@@ -29,17 +29,17 @@ function createRegExpMap(
   toPhysical: boolean,
 ): { [key: string]: { [key: string]: ConversionMap[] } } {
   const map = {};
-  Object.keys(valueMaps as object).forEach((writingMode) => {
+  for (const writingMode of Object.keys(valueMaps as object)) {
     const dest = (map[writingMode] = {});
     const src = valueMaps[writingMode];
-    Object.keys(src as object).forEach((direction) => {
+    for (const direction of Object.keys(src as object)) {
       dest[direction] = src[direction].map((p) => {
         const from = toPhysical ? p.logical : p.physical;
         const to = toPhysical ? p.physical : p.logical;
         return { regexp: new RegExp(`(-?)${from}(-?)`), to: `\$1${to}\$2` };
       });
-    });
-  });
+    }
+  }
   return map;
 }
 

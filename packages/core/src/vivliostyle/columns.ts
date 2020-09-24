@@ -140,9 +140,9 @@ export abstract class ColumnBalancer {
 
   private restoreContents(newLayoutResult: ColumnLayoutResult) {
     const parent = this.layoutContainer.element;
-    newLayoutResult.columns.forEach((c) => {
+    for (const c of newLayoutResult.columns) {
       parent.appendChild(c.element);
-    });
+    }
     Asserts.assert(newLayoutResult.columnPageFloatLayoutContexts);
     this.regionPageFloatLayoutContext.attachChildren(
       newLayoutResult.columnPageFloatLayoutContexts,

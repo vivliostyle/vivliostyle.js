@@ -1105,7 +1105,7 @@ export class OPFDoc {
       "",
       new DOMParser().parseFromString("<spine></spine>", "text/xml"),
     ));
-    params.forEach((param) => {
+    for (const param of params) {
       const item = new OPFItem();
       item.initWithParam(param);
       Asserts.assert(item.id);
@@ -1120,7 +1120,7 @@ export class OPFDoc {
       }
       this.itemMapByPath[path] = item;
       this.items.push(item);
-    });
+    }
     if (doc) {
       return this.store.addDocument(params[0].url, doc);
     } else {
@@ -1181,7 +1181,7 @@ export class OPFDoc {
     [manifestObj["readingOrder"], manifestObj["resources"]].forEach(
       (readingOrderOrResources) => {
         if (readingOrderOrResources instanceof Array) {
-          readingOrderOrResources.forEach((itemObj) => {
+          for (const itemObj of readingOrderOrResources) {
             const isInReadingOrder = manifestObj["readingOrder"].includes(
               itemObj,
             );
@@ -1214,7 +1214,7 @@ export class OPFDoc {
 
               //TODO: items not in readingOrder should be excluded from linear reading but available with internal link navigation.
             }
-          });
+          }
         }
       },
     );
@@ -1930,9 +1930,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
         const nextPage = nextViewItem && nextViewItem.pages[0];
         const currentPage = viewItem.pages[viewItem.pages.length - 1];
         if (nextPage && currentPage && nextPage.side == currentPage.side) {
-          nextViewItem.pages.forEach((page) => {
+          for (const page of nextViewItem.pages) {
             if (page.container) page.container.remove();
-          });
+          }
           this.spineItems[spineIndex] = null;
           this.spineItemLoadingContinuations[spineIndex] = null;
         }
@@ -2538,9 +2538,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
         };
         self.spineItems[spineIndex] = viewItem;
         frame.finish(viewItem);
-        loadingContinuations.forEach((c) => {
+        for (const c of loadingContinuations) {
           c.schedule(viewItem);
-        });
+        }
       });
     });
     return frame.result();

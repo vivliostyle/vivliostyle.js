@@ -433,11 +433,11 @@ export class AdaptiveViewer {
     const hooks: Plugin.ConfigurationHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.CONFIGURATION,
     );
-    hooks.forEach((hook) => {
+    for (const hook of hooks) {
       const result = hook(command);
       this.needResize = result.needResize || this.needResize;
       this.needRefresh = result.needRefresh || this.needRefresh;
-    });
+    }
   }
 
   /**
@@ -469,11 +469,11 @@ export class AdaptiveViewer {
       pages.push(this.currentSpread.left);
       pages.push(this.currentSpread.right);
     }
-    pages.forEach((page) => {
+    for (const page of pages) {
       if (page) {
         fn(page);
       }
-    });
+    }
   }
 
   private removePageListeners() {
@@ -680,11 +680,11 @@ export class AdaptiveViewer {
   ) {
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
       let styleText = "";
-      Object.keys(pageSheetSize).forEach((selector) => {
+      for (const selector of Object.keys(pageSheetSize)) {
         styleText += `@page ${selector}{margin:0;size:`;
         const size = pageSheetSize[selector];
         styleText += `${size.width}px ${size.height}px;}`;
-      });
+      }
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }

@@ -348,9 +348,9 @@ export function createCornerMark(
   const line2 = createPrinterMarkElement(doc, lineWidth);
   line2.setAttribute("points", points2.map((p) => p.join(",")).join(" "));
   mark.appendChild(line2);
-  position.split(" ").forEach((side) => {
+  for (const side of position.split(" ")) {
     (mark as any).style[side] = `${offset}px`;
-  });
+  }
   return mark;
 }
 
@@ -418,7 +418,7 @@ export function createCrossMark(
       opposite = CrossMarkPosition.LEFT;
       break;
   }
-  Object.keys(CrossMarkPosition).forEach((key) => {
+  for (const key of Object.keys(CrossMarkPosition)) {
     const side = CrossMarkPosition[key];
     if (side === position) {
       (mark as any).style[side] = `${offset}px`;
@@ -426,7 +426,7 @@ export function createCrossMark(
       (mark as any).style[side] = "0";
       (mark as any).style[`margin-${side}`] = "auto";
     }
-  });
+  }
   return mark;
 }
 
@@ -445,13 +445,13 @@ export function addPrinterMarks(
   if (marks) {
     const value = marks.value;
     if (value.isSpaceList()) {
-      value.values.forEach((v) => {
+      for (const v of value.values) {
         if (v === Css.ident.crop) {
           crop = true;
         } else if (v === Css.ident.cross) {
           cross = true;
         }
-      });
+      }
     } else if (value === Css.ident.crop) {
       crop = true;
     } else if (value === Css.ident.cross) {
@@ -478,7 +478,7 @@ export function addPrinterMarks(
 
   // corner marks
   if (crop) {
-    Object.keys(CornerMarkPosition).forEach((key) => {
+    for (const key of Object.keys(CornerMarkPosition)) {
       const position = CornerMarkPosition[key];
       const mark = createCornerMark(
         doc,
@@ -489,12 +489,12 @@ export function addPrinterMarks(
         printerMarkOffset,
       );
       container.appendChild(mark);
-    });
+    }
   }
 
   // cross marks
   if (cross) {
-    Object.keys(CrossMarkPosition).forEach((key) => {
+    for (const key of Object.keys(CrossMarkPosition)) {
       const position = CrossMarkPosition[key];
       const mark = createCrossMark(
         doc,
@@ -504,7 +504,7 @@ export function addPrinterMarks(
         printerMarkOffset,
       );
       container.appendChild(mark);
-    });
+    }
   }
 }
 
@@ -539,13 +539,13 @@ export const propertiesAppliedToPartition = (() => {
     "outline-style": true,
     "outline-color": true,
   };
-  sides.forEach((side) => {
+  for (const side of sides) {
     props[`margin-${side}`] = true;
     props[`padding-${side}`] = true;
     props[`border-${side}-width`] = true;
     props[`border-${side}-style`] = true;
     props[`border-${side}-color`] = true;
-  });
+  }
   return props;
 })();
 
@@ -769,7 +769,7 @@ export class PageRuleMaster extends PageMaster.PageMaster<
     const marginBoxesMap = style[marginBoxesKey];
     if (marginBoxesMap) {
       const self = this;
-      pageMarginBoxNames.forEach((name) => {
+      for (const name of pageMarginBoxNames) {
         if (marginBoxesMap[name]) {
           self.pageMarginBoxes[name] = new PageMarginBoxPartition(
             self.scope,
@@ -778,7 +778,7 @@ export class PageRuleMaster extends PageMaster.PageMaster<
             style,
           );
         }
-      });
+      }
     }
   }
 
@@ -1120,7 +1120,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<
     const maxOuterSizes: {
       [key in MarginBoxPositionAlongVariableDimension]?: number;
     } = {};
-    Object.keys(containers).forEach((n) => {
+    for (const n of Object.keys(containers)) {
       const name = n as MarginBoxPositionAlongVariableDimension;
       const maxSize = PageMaster.toExprAuto(
         scope,
@@ -1142,23 +1142,23 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<
           needRecalculate = true;
         }
       }
-    });
+    }
     if (needRecalculate) {
       sizes = this.getSizesOfMarginBoxesAlongVariableDimension(
         boxParams,
         evaluatedDim.extent,
       );
       needRecalculate = false;
-      [START, CENTER, END].forEach((name) => {
+      for (const name of [START, CENTER, END]) {
         sizes[name] = maxOuterSizes[name] || sizes[name];
-      });
+      }
     }
 
     // Check min-width/min-height
     const minOuterSizes: {
       [key in MarginBoxPositionAlongVariableDimension]?: number;
     } = {};
-    Object.keys(containers).forEach((n) => {
+    for (const n of Object.keys(containers)) {
       const name = n as MarginBoxPositionAlongVariableDimension;
       const minSize = PageMaster.toExprAuto(
         scope,
@@ -1180,22 +1180,22 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<
           needRecalculate = true;
         }
       }
-    });
+    }
     if (needRecalculate) {
       sizes = this.getSizesOfMarginBoxesAlongVariableDimension(
         boxParams,
         evaluatedDim.extent,
       );
-      [START, CENTER, END].forEach((name) => {
+      for (const name of [START, CENTER, END]) {
         sizes[name] = minOuterSizes[name] || sizes[name];
-      });
+      }
     }
 
     // set sizes
     const endEdge = evaluatedDim.start + evaluatedDim.extent;
     const startEndSum =
       evaluatedDim.start + (evaluatedDim.start + evaluatedDim.extent);
-    [START, CENTER, END].forEach((name) => {
+    for (const name of [START, CENTER, END]) {
       const outerSize = sizes[name];
       if (outerSize) {
         const container = containers[name];
@@ -1223,7 +1223,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<
           );
         }
       }
-    });
+    }
   }
 
   private getSizesOfMarginBoxesAlongVariableDimension(
@@ -2028,16 +2028,16 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
       };
       const pageMarginValue = pageMargin.evaluate(context);
       let borderAndPadding = 0;
-      [
+      for (const x of [
         borderInsideWidth,
         paddingInside,
         paddingOutside,
         borderOutsideWidth,
-      ].forEach((x) => {
+      ]) {
         if (x) {
           borderAndPadding += x.evaluate(context) as number;
         }
-      });
+      }
       if (result.marginInside === null || result.marginOutside === null) {
         const total =
           borderAndPadding +
@@ -2414,11 +2414,11 @@ export class PageManager {
     // Transfer counter properties to the page style so that these specified in
     // the page master are also effective. Note that these values (if specified)
     // always override values in page contexts.
-    ["counter-reset", "counter-increment"].forEach((name) => {
+    for (const name of ["counter-reset", "counter-increment"]) {
       if (pageMasterStyle[name]) {
         style[name] = pageMasterStyle[name];
       }
-    });
+    }
     const pageMasterInstance = newPageMaster.createInstance(
       this.rootPageBoxInstance,
     ) as PageMaster.PageMasterInstance;
@@ -2785,12 +2785,12 @@ export class PageParserHandler
       // we can simply overwrite without considering specificity
       // since 'bleed' and 'marks' always come from a page rule without page
       // selectors.
-      Object.keys(pageProps).forEach((selector) => {
+      for (const selector of Object.keys(pageProps)) {
         CssCascade.setProp(pageProps[selector], name, cascVal);
-      });
+      }
     } else if (name === "size") {
       const noPageSelectorProps = pageProps[""];
-      this.currentPageSelectors.forEach((s) => {
+      for (const s of this.currentPageSelectors) {
         // update specificity to reflect the specificity of the selector
         let result = new CssCascade.CascadeValue(
           cascVal.value,
@@ -2804,11 +2804,11 @@ export class PageParserHandler
           props = pageProps[selector] = {} as CssCascade.ElementStyle;
           CssCascade.setProp(props, name, result);
           if (noPageSelectorProps) {
-            ["bleed", "marks"].forEach((n) => {
+            for (const n of ["bleed", "marks"]) {
               if (noPageSelectorProps[n]) {
                 CssCascade.setProp(props, n, noPageSelectorProps[n]);
               }
-            }, this);
+            }
           }
         } else {
           // consider specificity when setting 'size' property.
@@ -2820,7 +2820,7 @@ export class PageParserHandler
             : result;
           CssCascade.setProp(props, name, result);
         }
-      });
+      }
     }
   }
 

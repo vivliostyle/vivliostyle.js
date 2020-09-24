@@ -1513,22 +1513,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       })
       .then(() => {
         if (failed) {
-          newFragments.forEach((fragment) => {
+          for (const fragment of newFragments) {
             context.removePageFloatFragment(fragment, true);
-          });
-          newFloatAreas.forEach((area) => {
+          }
+          for (const area of newFloatAreas) {
             const elem = area.element;
             if (elem && elem.parentNode) {
               elem.parentNode.removeChild(elem);
             }
-          });
+          }
         } else {
-          stashedFloatFragments.forEach((fragment) => {
+          for (const fragment of stashedFloatFragments) {
             const elem = fragment.area.element;
             if (elem && elem.parentNode) {
               elem.parentNode.removeChild(elem);
             }
-          });
+          }
         }
         frame.finish(!failed);
       });
@@ -2008,9 +2008,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const hooks: Plugin.PostLayoutBlockHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
     );
-    hooks.forEach((hook) => {
+    for (const hook of hooks) {
       hook(nodeContext, checkPoints, this);
-    });
+    }
   }
 
   findEndOfLine(
@@ -3648,7 +3648,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   collectElementsOffset(): RepetitiveElement.ElementsOffset[] {
     const repetitiveElements: RepetitiveElement.ElementsOffset[] = [];
     for (let current: Column = this; current; current = current.pseudoParent) {
-      current.fragmentLayoutConstraints.forEach((constraint) => {
+      for (const constraint of current.fragmentLayoutConstraints) {
         if (
           RepetitiveElement.isInstanceOfRepetitiveElementsOwnerLayoutConstraint(
             constraint,
@@ -3664,13 +3664,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           repetitiveElements.push(repetitiveElement);
         }
         if (Table.isInstanceOfTableRowLayoutConstraint(constraint)) {
-          constraint
-            .getElementsOffsetsForTableCell(this)
-            .forEach((repetitiveElement) => {
-              repetitiveElements.push(repetitiveElement);
-            });
+          for (const repetitiveElement of constraint.getElementsOffsetsForTableCell(
+            this,
+          )) {
+            repetitiveElements.push(repetitiveElement);
+          }
         }
-      });
+      }
     }
     return repetitiveElements;
   }
@@ -4054,9 +4054,9 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
       // depending on the value of Column#forceNonfitting.
       accepted = !hasNextCandidate;
     }
-    column.fragmentLayoutConstraints.forEach((constraint) => {
+    for (const constraint of column.fragmentLayoutConstraints) {
       constraint.postLayout(accepted, positionAfter, initialPosition, column);
-    });
+    }
     return accepted;
   }
 }
@@ -4102,14 +4102,14 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     const refHeight = containingBlockRect.y2 - containingBlockRect.y1;
 
     function convertPercentageToPx(props: string[], refValue: number) {
-      props.forEach((propName) => {
+      for (const propName of props) {
         const valueString = Base.getCSSProperty(target, propName);
         if (valueString && valueString.charAt(valueString.length - 1) === "%") {
           const percentageValue = parseFloat(valueString);
           const value = (refValue * percentageValue) / 100;
           Base.setCSSProperty(target, propName, `${value}px`);
         }
-      });
+      }
     }
     convertPercentageToPx(["width", "max-width", "min-width"], refWidth);
     convertPercentageToPx(["height", "max-height", "min-height"], refHeight);
