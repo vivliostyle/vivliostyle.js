@@ -112,7 +112,7 @@ if [[ $IS_VALID_TAG = true ]]; then
     
     # GitHub releases
     echo "===> Creating GitHub Release"
-    npm i -g conventional-changelog-cli github-release-cli
+    npm i -g conventional-changelog-cli github-release-cli@1.3.1
     CHANGELOG=$(conventional-changelog -p angular)
     echo "===> CHANGELOG=${CHANGELOG}"
     TAGGED_ARCHIVE="vivliostyle-viewer-${VERSION}.zip"
@@ -122,7 +122,7 @@ if [[ $IS_VALID_TAG = true ]]; then
             "${TAGGED_ARCHIVE}" \
             --token "${GH_TOKEN}" \
             --owner vivliostyle \
-            --repo vivliostyle \
+            --repo vivliostyle.js \
             --tag "${TRAVIS_TAG}" \
             --name "${TRAVIS_TAG}" \
             --body "${CHANGELOG}"
@@ -131,11 +131,11 @@ if [[ $IS_VALID_TAG = true ]]; then
             "${TAGGED_ARCHIVE}" \
             --token "${GH_TOKEN}" \
             --owner vivliostyle \
-            --repo vivliostyle \
+            --repo vivliostyle.js \
             --tag "${TRAVIS_TAG}" \
             --name "${TRAVIS_TAG}" \
             --body "${CHANGELOG}" \
-            --pre-release
+            --prerelease
     fi
 
     # Tagged Viewer

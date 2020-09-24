@@ -35,7 +35,13 @@ const VIEWER_JS_FILES = {
   development: "js/vivliostyle-viewer-dev.js",
 };
 
-const VERSION = process.env["VIVLIOSTYLE_VERSION"] || pkg.version;
+const VIVLIOSTYLE_VERSION = process.env["VIVLIOSTYLE_VERSION"];
+const VERSION =
+  VIVLIOSTYLE_VERSION === "canary"
+    ? pkg.version +
+      "-canary-" +
+      new Date().toISOString().replace(/[-:]|\.\d+/g, "")
+    : VIVLIOSTYLE_VERSION || pkg.version;
 console.log(`Building Vivliostyle Viewer [version=${VERSION}]`);
 
 // Utility functions
