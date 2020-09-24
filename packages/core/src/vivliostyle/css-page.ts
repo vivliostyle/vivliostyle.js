@@ -768,12 +768,11 @@ export class PageRuleMaster extends PageMaster.PageMaster<
   createPageMarginBoxes(style: CssCascade.ElementStyle) {
     const marginBoxesMap = style[marginBoxesKey];
     if (marginBoxesMap) {
-      const self = this;
       for (const name of pageMarginBoxNames) {
         if (marginBoxesMap[name]) {
-          self.pageMarginBoxes[name] = new PageMarginBoxPartition(
-            self.scope,
-            self,
+          this.pageMarginBoxes[name] = new PageMarginBoxPartition(
+            this.scope,
+            this,
             name,
             style,
           );

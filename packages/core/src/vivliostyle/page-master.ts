@@ -951,7 +951,6 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     holder.registerInstance(this.pageBox.key, this);
     const scope = this.pageBox.scope;
     const style = this.style;
-    const self = this;
     const regionIds = this.parentInstance
       ? this.parentInstance.getActiveRegions(context)
       : null;
@@ -981,12 +980,12 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     );
     this.autoWidth = new Exprs.Native(
       scope,
-      () => self.calculatedWidth,
+      () => this.calculatedWidth,
       "autoWidth",
     );
     this.autoHeight = new Exprs.Native(
       scope,
-      () => self.calculatedHeight,
+      () => this.calculatedHeight,
       "autoHeight",
     );
     this.initHorizontal();

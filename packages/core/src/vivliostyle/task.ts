@@ -259,10 +259,9 @@ export class Scheduler {
       timeout = this.timeout;
     }
     this.wakeupTime = now + timeout;
-    const self = this;
     this.timeoutToken = this.timer.setTimeout(() => {
-      self.timeoutToken = null;
-      self.doTimeSlice();
+      this.timeoutToken = null;
+      this.doTimeSlice();
     }, timeout);
   }
 
@@ -467,9 +466,8 @@ export class Task {
       frame.finish(this.result);
     } else {
       const continuation = frame.suspend(this);
-      const self = this;
       this.whenDone(() => {
-        continuation.schedule(self.result);
+        continuation.schedule(this.result);
       });
     }
     return frame.result();
@@ -896,19 +894,18 @@ export class EventSource {
     type: string,
     opt_preventDefault?: boolean,
   ): void {
-    const self = this;
     const listener = (event) => {
       if (opt_preventDefault) {
         event.preventDefault();
       }
-      if (self.tail.event) {
-        self.tail.next = new EventItem(event);
-        self.tail = self.tail.next;
+      if (this.tail.event) {
+        this.tail.next = new EventItem(event);
+        this.tail = this.tail.next;
       } else {
-        self.tail.event = event;
-        const continuation = self.continuation;
+        this.tail.event = event;
+        const continuation = this.continuation;
         if (continuation) {
-          self.continuation = null;
+          this.continuation = null;
           continuation.schedule(true);
         }
       }
@@ -941,23 +938,22 @@ export class EventSource {
    */
   nextEvent(): Result<Base.Event> {
     const frame: Frame<Base.Event> = newFrame("EventSource.nextEvent");
-    const self = this;
     const readEvent = () => {
-      if (self.head.event) {
-        const event = self.head.event;
-        if (self.head.next) {
-          self.head = self.head.next;
+      if (this.head.event) {
+        const event = this.head.event;
+        if (this.head.next) {
+          this.head = this.head.next;
         } else {
-          self.head.event = null;
+          this.head.event = null;
         }
         frame.finish(event);
-      } else if (self.continuation) {
+      } else if (this.continuation) {
         throw new Error("E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING");
       } else {
         const frameInternal: Frame<boolean> = newFrame(
           "EventSource.nextEventInternal",
         );
-        self.continuation = frameInternal.suspend(self);
+        this.continuation = frameInternal.suspend(this);
         frameInternal.result().then(readEvent);
       }
     };

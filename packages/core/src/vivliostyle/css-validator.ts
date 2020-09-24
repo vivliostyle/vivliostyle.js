@@ -1713,7 +1713,6 @@ export class ValidatorSet {
       let op = "";
       let val: ValidatingGroup;
       let expectval = true;
-      const self = this;
       const reduce = (): ValidatingGroup => {
         if (vals.length == 0) {
           throw new Error("No values");
@@ -1721,7 +1720,7 @@ export class ValidatorSet {
         if (vals.length == 1) {
           return vals[0];
         }
-        return self.newGroup(op, vals);
+        return this.newGroup(op, vals);
       };
       const setop = (currop: string): void => {
         if (expectval) {

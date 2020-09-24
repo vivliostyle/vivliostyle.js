@@ -218,23 +218,22 @@ export class Mapper {
     documentFaces: DocumentFaces,
   ): Task.Result<Face> {
     const frame: Task.Frame<Face> = Task.newFrame("initFont");
-    const self = this;
     const src = srcFace.src as string;
     const props = {} as { [key: string]: Css.Val };
     for (const prop in traitProps) {
       props[prop] = srcFace.properties[prop];
     }
-    const fontFamily = self.getViewFontFamily(srcFace, documentFaces);
+    const fontFamily = this.getViewFontFamily(srcFace, documentFaces);
     props["font-family"] = Css.getName(fontFamily);
     const viewFontFace = new Face(props);
-    const probe = self.body.ownerDocument.createElement("span") as HTMLElement;
+    const probe = this.body.ownerDocument.createElement("span") as HTMLElement;
     probe.textContent = "M";
     const killTime = new Date().valueOf() + 1000;
-    const style = self.head.ownerDocument.createElement("style");
+    const style = this.head.ownerDocument.createElement("style");
     const bogusData = bogusFontData + bogusFontCounter++;
     style.textContent = viewFontFace.makeAtRule("", Net.makeBlob([bogusData]));
-    self.head.appendChild(style);
-    self.body.appendChild(probe);
+    this.head.appendChild(style);
+    this.body.appendChild(probe);
     probe.style.visibility = "hidden";
     probe.style.fontFamily = fontFamily;
     for (const pname in traitProps) {
@@ -267,7 +266,7 @@ export class Mapper {
         } else {
           Logging.logger.warn("Failed to load font:", src);
         }
-        self.body.removeChild(probe);
+        this.body.removeChild(probe);
         frame.finish(viewFontFace);
       });
     return frame.result();
@@ -279,7 +278,6 @@ export class Mapper {
   ): TaskUtil.Fetcher<Face> {
     const src = srcFace.src as string;
     let fetcher = this.srcURLMap[src];
-    const self = this;
     if (fetcher) {
       fetcher.piggyback((viewFaceParam) => {
         const viewFace = viewFaceParam as Face;
@@ -303,13 +301,13 @@ export class Mapper {
               return;
             }
             deobfuscator(xhr.responseBlob).then((fontBytes) => {
-              self
-                .initFont(srcFace, fontBytes, documentFaces)
-                .thenFinish(frame);
+              this.initFont(srcFace, fontBytes, documentFaces).thenFinish(
+                frame,
+              );
             });
           });
         } else {
-          self.initFont(srcFace, null, documentFaces).thenFinish(frame);
+          this.initFont(srcFace, null, documentFaces).thenFinish(frame);
         }
         return frame.result();
       }, `loadFont ${src}`);

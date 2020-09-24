@@ -101,13 +101,13 @@ export function keydown(evt: KeyboardEvent): void {
     /*
   } else if (key === "n" || keyIdentifier === "U+004E") {
   // N - night toggle
-  self.pref.nightMode = !self.pref.nightMode;
-  self.viewport = null;
-  self.resize().thenFinish(frame);
+  this.pref.nightMode = !this.pref.nightMode;
+  this.viewport = null;
+  this.resize().thenFinish(frame);
   } else if (key === "v" || keyIdentifier === "U+0056") {
-  self.pref.horizontal = !self.pref.horizontal;
-  self.viewport = null;
-  self.resize().thenFinish(frame);
+  this.pref.horizontal = !this.pref.horizontal;
+  this.viewport = null;
+  this.resize().thenFinish(frame);
   */
   } else if (key === "t" || keyIdentifier === "U+0054") {
     sendCommand({ a: "toc", v: "toggle", autohide: true });

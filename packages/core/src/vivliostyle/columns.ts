@@ -70,29 +70,28 @@ export abstract class ColumnBalancer {
   balanceColumns(
     layoutResult: ColumnLayoutResult,
   ): Task.Result<ColumnLayoutResult> {
-    const self = this;
     const frame: Task.Frame<ColumnLayoutResult> = Task.newFrame(
       "ColumnBalancer#balanceColumns",
     );
-    self.preBalance(layoutResult);
-    self.savePageFloatLayoutContexts(layoutResult);
-    self.layoutContainer.clear();
-    const candidates = [self.createTrialResult(layoutResult)];
+    this.preBalance(layoutResult);
+    this.savePageFloatLayoutContexts(layoutResult);
+    this.layoutContainer.clear();
+    const candidates = [this.createTrialResult(layoutResult)];
     frame
       .loopWithFrame((loopFrame) => {
-        if (!self.hasNextCandidate(candidates)) {
+        if (!this.hasNextCandidate(candidates)) {
           loopFrame.breakLoop();
           return;
         }
-        self.updateCondition(candidates);
-        self.columnGenerator().then((layoutResult) => {
-          self.savePageFloatLayoutContexts(layoutResult);
-          self.layoutContainer.clear();
+        this.updateCondition(candidates);
+        this.columnGenerator().then((layoutResult) => {
+          this.savePageFloatLayoutContexts(layoutResult);
+          this.layoutContainer.clear();
           if (!layoutResult) {
             loopFrame.breakLoop();
             return;
           }
-          candidates.push(self.createTrialResult(layoutResult));
+          candidates.push(this.createTrialResult(layoutResult));
           loopFrame.continueLoop();
         });
       })
@@ -101,8 +100,8 @@ export abstract class ColumnBalancer {
           (prev, curr) => (curr.penalty < prev.penalty ? curr : prev),
           candidates[0],
         );
-        self.restoreContents(result.layoutResult);
-        self.postBalance();
+        this.restoreContents(result.layoutResult);
+        this.postBalance();
         frame.finish(result.layoutResult);
       });
     return frame.result();

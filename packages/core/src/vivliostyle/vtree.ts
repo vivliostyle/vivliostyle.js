@@ -139,7 +139,6 @@ export class Page extends Base.SimpleEventTarget {
     public readonly bleedBox: HTMLElement,
   ) {
     super();
-    const self = this;
     this.hrefHandler = (e: Event) => {
       const anchorElement = e.currentTarget as Element;
       const href =
@@ -156,7 +155,7 @@ export class Page extends Base.SimpleEventTarget {
             e.preventDefault();
           },
         };
-        self.dispatchEvent(evt);
+        this.dispatchEvent(evt);
       }
     };
   }

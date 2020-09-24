@@ -150,21 +150,21 @@ class CounterResolver implements CssCascade.CounterResolver {
     name: string,
     format: (p1: number | null) => string,
   ): Exprs.Val {
-    const self = this;
-
-    function getCounterNumber() {
-      const values = self.counterStore.currentPageCounters[name];
+    const getCounterNumber = () => {
+      const values = this.counterStore.currentPageCounters[name];
       return values && values.length ? values[values.length - 1] : null;
-    }
+    };
+
     const expr = new Exprs.Native(
       this.pageScope,
       () => format(getCounterNumber()),
       `page-counter-${name}`,
     );
 
-    function arrayFormat(arr) {
+    const arrayFormat = (arr) => {
       return format(arr[0]);
-    }
+    };
+
     this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
     return expr;
   }
@@ -176,11 +176,10 @@ class CounterResolver implements CssCascade.CounterResolver {
     name: string,
     format: (p1: number[]) => string,
   ): Exprs.Val {
-    const self = this;
+    const getCounterNumbers = () => {
+      return this.counterStore.currentPageCounters[name] || [];
+    };
 
-    function getCounterNumbers() {
-      return self.counterStore.currentPageCounters[name] || [];
-    }
     const expr = new Exprs.Native(
       this.pageScope,
       () => format(getCounterNumbers()),
@@ -256,13 +255,12 @@ class CounterResolver implements CssCascade.CounterResolver {
         format(countersOfName[countersOfName.length - 1] || null),
       );
     }
-    const self = this;
     return new Exprs.Native(
       this.pageScope,
       () => {
         // Since This block is evaluated during layout, lookForElement
         // argument can be set to true.
-        counters = self.getTargetCounters(id, transformedId, true);
+        counters = this.getTargetCounters(id, transformedId, true);
 
         if (counters) {
           if (counters[name]) {
@@ -271,10 +269,10 @@ class CounterResolver implements CssCascade.CounterResolver {
             const countersOfName = counters[name];
             return format(countersOfName[countersOfName.length - 1] || null);
           } else {
-            const pageCounters = self.getTargetPageCounters(transformedId);
+            const pageCounters = this.getTargetPageCounters(transformedId);
             if (pageCounters) {
               // The target element has already been laid out.
-              self.counterStore.resolveReference(transformedId);
+              this.counterStore.resolveReference(transformedId);
               if (pageCounters[name]) {
                 const pageCountersOfName = pageCounters[name];
                 return format(
@@ -286,7 +284,7 @@ class CounterResolver implements CssCascade.CounterResolver {
               }
             } else {
               // The target element has not been laid out yet.
-              self.counterStore.saveReferenceOfCurrentPage(
+              this.counterStore.saveReferenceOfCurrentPage(
                 transformedId,
                 false,
               );
@@ -297,7 +295,7 @@ class CounterResolver implements CssCascade.CounterResolver {
           // The style of target element has not been calculated yet.
           // (The element is in another source document that is not parsed
           // yet)
-          self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+          this.counterStore.saveReferenceOfCurrentPage(transformedId, false);
           return "??"; // TODO more reasonable placeholder?
         }
       },
@@ -315,20 +313,19 @@ class CounterResolver implements CssCascade.CounterResolver {
   ): Exprs.Val {
     const id = this.getFragment(url);
     const transformedId = this.getTransformedId(url);
-    const self = this;
     return new Exprs.Native(
       this.pageScope,
       () => {
-        const pageCounters = self.getTargetPageCounters(transformedId);
+        const pageCounters = this.getTargetPageCounters(transformedId);
 
         if (!pageCounters) {
           // The target element has not been laid out yet.
-          self.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+          this.counterStore.saveReferenceOfCurrentPage(transformedId, false);
           return "??"; // TODO more reasonable placeholder?
         } else {
-          self.counterStore.resolveReference(transformedId);
+          this.counterStore.resolveReference(transformedId);
           const pageCountersOfName = pageCounters[name] || [];
-          const elementCounters = self.getTargetCounters(
+          const elementCounters = this.getTargetCounters(
             id,
             transformedId,
             true,

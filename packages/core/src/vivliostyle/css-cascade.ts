@@ -1943,10 +1943,9 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const numval = (arr && arr.length && arr[arr.length - 1]) || 0;
       return new Css.Str(this.format(numval, type));
     } else {
-      const self = this;
       const c = new Css.Expr(
         this.counterResolver.getPageCounterVal(counterName, (numval) =>
-          self.format(numval || 0, type),
+          this.format(numval || 0, type),
         ),
       );
       return new Css.SpaceList([c]);
@@ -1967,13 +1966,12 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         sb.append(this.format(arr[i], type));
       }
     }
-    const self = this;
     const c = new Css.Expr(
       this.counterResolver.getPageCountersVal(counterName, (numvals) => {
         const parts = [] as string[];
         if (numvals.length) {
           for (let i = 0; i < numvals.length; i++) {
-            parts.push(self.format(numvals[i], type));
+            parts.push(this.format(numvals[i], type));
           }
         }
         const elementCounters = sb.toString();
@@ -1983,7 +1981,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         if (parts.length) {
           return parts.join(separator);
         } else {
-          return self.format(0, type);
+          return this.format(0, type);
         }
       }),
     );
@@ -2000,12 +1998,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
     const counterName = values[1].toString();
     const type = values.length > 2 ? values[2].stringValue() : "decimal";
-    const self = this;
     const c = new Css.Expr(
       this.counterResolver.getTargetCounterVal(
         targetUrlStr,
         counterName,
-        (numval) => self.format(numval || 0, type),
+        (numval) => this.format(numval || 0, type),
       ),
     );
     return new Css.SpaceList([c]);
@@ -2022,17 +2019,16 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     const counterName = values[1].toString();
     const separator = values[2].stringValue();
     const type = values.length > 3 ? values[3].stringValue() : "decimal";
-    const self = this;
     const c = new Css.Expr(
       this.counterResolver.getTargetCountersVal(
         targetUrlStr,
         counterName,
         (numvals) => {
-          const parts = numvals.map((numval) => self.format(numval, type));
+          const parts = numvals.map((numval) => this.format(numval, type));
           if (parts.length) {
             return parts.join(separator);
           } else {
-            return self.format(0, type);
+            return this.format(0, type);
           }
         },
       ),
