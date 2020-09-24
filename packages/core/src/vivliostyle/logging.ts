@@ -93,9 +93,9 @@ export class Logger {
   private triggerListeners(level: LogLevel, args: ErrorInfo) {
     const listeners = this.listeners[level];
     if (listeners) {
-      listeners.forEach((listener) => {
+      for (const listener of listeners) {
         listener(args);
-      });
+      }
     }
   }
 

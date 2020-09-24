@@ -171,9 +171,9 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
    */
   getMinBreakPenalty(): number {
     let penalty = super.getMinBreakPenalty();
-    this.getAcceptableCellBreakPositions().forEach((bp) => {
+    for (const bp of this.getAcceptableCellBreakPositions()) {
       penalty += bp.breakPosition.getMinBreakPenalty();
-    });
+    }
     return penalty;
   }
 
@@ -260,9 +260,9 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     if (!formattingContext.isFreelyFragmentableRow(row)) {
       penalty += 10;
     }
-    this.getAcceptableCellBreakPositions().forEach((bp) => {
+    for (const bp of this.getAcceptableCellBreakPositions()) {
       penalty += bp.breakPosition.getMinBreakPenalty();
-    });
+    }
     return penalty;
   }
 
@@ -457,15 +457,15 @@ export class TableFormattingContext
   }
 
   updateCellSizes(clientLayout: Vtree.ClientLayout) {
-    this.rows.forEach((row) => {
-      row.cells.forEach((cell) => {
+    for (const row of this.rows) {
+      for (const cell of row.cells) {
         const rect = clientLayout.getElementClientRect(
           cell.viewElement as Element,
         );
         cell.viewElement = null;
         cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
-      });
-    });
+      }
+    }
   }
 
   /**
@@ -533,7 +533,7 @@ export class TableFormattingContext
 
   collectElementsOffsetOfHighestColumn(): RepetitiveElement.ElementsOffset[] {
     const elementsInColumn = [];
-    this.rows.forEach((row) => {
+    for (const row of this.rows) {
       row.cells.forEach((cell, index) => {
         if (!elementsInColumn[index]) {
           elementsInColumn[index] = { collected: [], elements: [] };
@@ -549,7 +549,7 @@ export class TableFormattingContext
         );
         state.collected.push(cellFragment);
       });
-    });
+    }
     return [
       new ElementsOffsetOfTableCell(
         elementsInColumn.map((entry) => entry.elements),
@@ -561,7 +561,7 @@ export class TableFormattingContext
     column: LayoutType.Column,
     repetitiveElements: RepetitiveElement.ElementsOffset[],
   ) {
-    column.fragmentLayoutConstraints.forEach((constraint) => {
+    for (const constraint of column.fragmentLayoutConstraints) {
       if (
         RepetitiveElement.isInstanceOfRepetitiveElementsOwnerLayoutConstraint(
           constraint,
@@ -571,13 +571,13 @@ export class TableFormattingContext
         repetitiveElements.push(repetitiveElement);
       }
       if (Table.isInstanceOfTableRowLayoutConstraint(constraint)) {
-        constraint
-          .getElementsOffsetsForTableCell(null)
-          .forEach((repetitiveElement) => {
-            repetitiveElements.push(repetitiveElement);
-          });
+        for (const repetitiveElement of constraint.getElementsOffsetsForTableCell(
+          null,
+        )) {
+          repetitiveElements.push(repetitiveElement);
+        }
       }
-    });
+    }
   }
 
   /** @override */
@@ -615,13 +615,13 @@ export class ElementsOffsetOfTableCell
 
   private calculateMaxOffsetOfColumn(nodeContext, resolver) {
     let maxOffset = 0;
-    this.repeatitiveElementsInColumns.forEach((repetitiveElements) => {
+    for (const repetitiveElements of this.repeatitiveElementsInColumns) {
       const offsets = BreakPosition.calculateOffset(
         nodeContext,
         repetitiveElements,
       );
       maxOffset = Math.max(maxOffset, resolver(offsets));
-    });
+    }
     return maxOffset;
   }
 }
@@ -994,7 +994,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     let cont = Task.newResult(true);
     let spanningCellRowIndex = 0;
     const occupiedSlotIndices = [];
-    rowSpanningCellBreakPositions.forEach((rowCellBreakPositions) => {
+    for (const rowCellBreakPositions of rowSpanningCellBreakPositions) {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
         const rowNodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
@@ -1017,7 +1017,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               columnIndex++;
             }
           }
-          rowCellBreakPositions.forEach((cellBreakPosition) => {
+          for (const cellBreakPosition of rowCellBreakPositions) {
             cont1 = cont1.thenAsync(() => {
               const cell = cellBreakPosition.cell;
               addDummyCellUntil(cell.anchorSlot.columnIndex);
@@ -1054,7 +1054,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
                   });
                 });
             });
-          });
+          }
           return cont1.thenAsync(() => {
             addDummyCellUntil(formattingContext.getColumnCount());
             spanningCellRowIndex++;
@@ -1062,7 +1062,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           });
         });
       });
-    });
+    }
     cont.then(() => {
       layoutContext
         .setCurrent(currentRow, true, state.atUnforcedBreak)
@@ -1116,7 +1116,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   private registerCellFragmentIndex() {
     const cells = this.formattingContext.getRowByIndex(this.currentRowIndex)
       .cells;
-    cells.forEach((cell) => {
+    for (const cell of cells) {
       const cellBreakPosition = this.formattingContext.cellBreakPositions[
         cell.columnIndex
       ];
@@ -1132,7 +1132,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         );
         Layout.registerFragmentIndex(offset, tdNodeStep.fragmentIndex + 1, 1);
       }
-    });
+    }
   }
 
   startTableCell(state: LayoutUtil.LayoutIteratorState): Task.Result<boolean> {
@@ -1377,7 +1377,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
 
   private normalizeAndGetColElements(colGroups: Element[]): Element[] {
     const cols = [];
-    colGroups.forEach((colGroup) => {
+    for (const colGroup of colGroups) {
       // Replace colgroup[span=n] with colgroup with n col elements
       let span = (colGroup as any).span;
       colGroup.removeAttribute("span");
@@ -1402,7 +1402,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         colGroup.appendChild(col);
         cols.push(col);
       }
-    });
+    }
     return cols;
   }
 
@@ -1472,9 +1472,9 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         `${colWidths[i]}px`,
       );
     });
-    colGroups.forEach((colGroup) => {
+    for (const colGroup of colGroups) {
       fragment.appendChild(colGroup.cloneNode(true));
-    });
+    }
     formattingContext.colGroups = fragment;
   }
 
@@ -1560,9 +1560,9 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     if (formattingContext.colGroups && rootViewNode) {
       const colGroups = this.getColGroupElements(rootViewNode);
       if (colGroups) {
-        colGroups.forEach((colGroup) => {
+        for (const colGroup of colGroups) {
           rootViewNode.removeChild(colGroup);
-        });
+        }
       }
     }
   }
@@ -2077,16 +2077,16 @@ export class TableRowLayoutConstraint
       positionAfter,
       formattingContext,
     );
-    this.cellFragmentLayoutConstraints.forEach((entry) => {
-      entry.constraints.forEach((constraint) => {
+    for (const entry of this.cellFragmentLayoutConstraints) {
+      for (const constraint of entry.constraints) {
         constraint.postLayout(
           allowed,
           entry.breakPosition,
           initialPosition,
           column,
         );
-      });
-    });
+      }
+    }
     if (!allowed) {
       const rootViewNode = formattingContext.getRootViewNode(this.nodeContext);
       new TableLayoutProcessor().removeColGroups(
@@ -2186,15 +2186,15 @@ export class TableRowLayoutConstraint
       if (!formattingContext.cellFragments[i]) {
         continue;
       }
-      formattingContext.cellFragments[i].forEach((cellFragment) => {
+      for (const cellFragment of formattingContext.cellFragments[i]) {
         if (!cellFragment) {
-          return;
+          continue;
         }
         cellFragments.push({
           fragment: cellFragment,
           breakPosition: cellFragment.findAcceptableBreakPosition().nodeContext,
         });
-      });
+      }
     }
     return cellFragments;
   }

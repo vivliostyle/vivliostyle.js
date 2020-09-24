@@ -233,7 +233,6 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     opt_required?: boolean,
     opt_message?: string,
   ): Task.Result<Resource> {
-    const self = this;
     const frame: Task.Frame<Resource> = Task.newFrame("fetch");
 
     // Hack for TOCView.showTOC()
@@ -251,7 +250,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
       url = `data:application/xml,${encodeURIComponent(UserAgentXml)}`;
     }
 
-    ajax(url, self.type).then((response) => {
+    ajax(url, this.type).then((response) => {
       if (response.status >= 400) {
         if (opt_required) {
           throw new Error(
@@ -270,9 +269,9 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
         // Restore "user-agent.xml" URL
         response.url = url = userAgentXmlUrl;
       }
-      self.parser(response, self).then((resource) => {
-        delete self.fetchers[url];
-        self.resources[url] = resource;
+      this.parser(response, this).then((resource) => {
+        delete this.fetchers[url];
+        this.resources[url] = resource;
         frame.finish(resource);
       });
     });
@@ -294,12 +293,11 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     }
     let fetcher = this.fetchers[url];
     if (!fetcher) {
-      const self = this;
       fetcher = new TaskUtil.Fetcher(
-        () => self.fetchInner(url, opt_required, opt_message),
+        () => this.fetchInner(url, opt_required, opt_message),
         `Fetch ${url}`,
       );
-      self.fetchers[url] = fetcher;
+      this.fetchers[url] = fetcher;
       fetcher.start();
     }
     return fetcher;

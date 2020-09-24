@@ -314,16 +314,15 @@ export class ViewFactory
     parentShadow: Vtree.ShadowContext,
     subShadow: Vtree.ShadowContext,
   ): Task.Result<Vtree.ShadowContext> {
-    const self = this;
     const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
       "createRefShadow",
     );
-    self.xmldoc.store.load(href).then((refDocParam) => {
+    this.xmldoc.store.load(href).then((refDocParam) => {
       const refDoc = refDocParam;
       if (refDoc) {
         const refElement = refDoc.getElement(href);
         if (refElement) {
-          const refStyler = self.stylerProducer.getStylerForDoc(refDoc);
+          const refStyler = this.stylerProducer.getStylerForDoc(refDoc);
           subShadow = new Vtree.ShadowContext(
             element,
             refElement,
@@ -349,7 +348,6 @@ export class ViewFactory
     context: Exprs.Context,
     shadowContext: Vtree.ShadowContext,
   ): Task.Result<Vtree.ShadowContext> {
-    const self = this;
     const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
       "createShadows",
     );
@@ -358,7 +356,7 @@ export class ViewFactory
     let cont: Task.Result<Vtree.ShadowContext>;
     if (templateURLVal instanceof Css.URL) {
       const url = (templateURLVal as Css.URL).url;
-      cont = self.createRefShadow(
+      cont = this.createRefShadow(
         url,
         Vtree.ShadowType.ROOTLESS,
         element,
@@ -375,7 +373,7 @@ export class ViewFactory
           let href = element.getAttribute("href");
           let xmldoc: XmlDoc.XMLDocHolder = null;
           if (href) {
-            xmldoc = shadowContext ? shadowContext.xmldoc : self.xmldoc;
+            xmldoc = shadowContext ? shadowContext.xmldoc : this.xmldoc;
           } else if (shadowContext) {
             if (shadowContext.owner.namespaceURI == Base.NS.XHTML) {
               href = shadowContext.owner.getAttribute("href");
@@ -384,11 +382,11 @@ export class ViewFactory
             }
             xmldoc = shadowContext.parentShadow
               ? shadowContext.parentShadow.xmldoc
-              : self.xmldoc;
+              : this.xmldoc;
           }
           if (href) {
             href = Base.resolveURL(href, xmldoc.url);
-            cont1 = self.createRefShadow(
+            cont1 = this.createRefShadow(
               href,
               Vtree.ShadowType.ROOTED,
               element,
@@ -408,7 +406,7 @@ export class ViewFactory
             "user-agent.xml#table-cell",
             Base.resourceBaseURL,
           );
-          cont2 = self.createRefShadow(
+          cont2 = this.createRefShadow(
             url,
             Vtree.ShadowType.ROOTLESS,
             element,
@@ -420,7 +418,7 @@ export class ViewFactory
         }
       });
       cont2.then((shadow) => {
-        shadow = self.createPseudoelementShadow(
+        shadow = this.createPseudoelementShadow(
           element,
           isRoot,
           cascStyle,
@@ -463,7 +461,6 @@ export class ViewFactory
     );
     vertical = CssCascade.isVertical(cascMap, context, vertical);
     rtl = CssCascade.isRtl(cascMap, context, rtl);
-    const self = this;
     CssCascade.convertToPhysical(
       cascMap,
       computedStyle,
@@ -472,7 +469,7 @@ export class ViewFactory
       (name, cascVal) => {
         let value = cascVal.evaluate(context, name);
         if (name == "font-family") {
-          value = self.docFaces.filterFontFamily(value);
+          value = this.docFaces.filterFontFamily(value);
         }
         return value;
       },
@@ -487,11 +484,11 @@ export class ViewFactory
       float,
       this.sourceNode === this.xmldoc.root,
     );
-    ["display", "position", "float"].forEach((name) => {
+    for (const name of ["display", "position", "float"]) {
       if (displayValues[name]) {
         computedStyle[name] = displayValues[name];
       }
-    });
+    }
     return vertical;
   }
 
@@ -587,7 +584,7 @@ export class ViewFactory
           props[n] = this.nodeContext.parent.inheritedProps[n];
         }
       }
-      polyfilledInheritedProps.forEach((name) => {
+      for (const name of polyfilledInheritedProps) {
         const value = computedStyle[name];
         if (value) {
           if (value instanceof Css.Int) {
@@ -609,7 +606,7 @@ export class ViewFactory
           }
           delete computedStyle[name];
         }
-      });
+      }
     }
   }
 
@@ -647,29 +644,28 @@ export class ViewFactory
     firstTime: boolean,
     atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
-    const self = this;
     let needToProcessChildren = true;
     const frame: Task.Frame<boolean> = Task.newFrame("createElementView");
 
     // Figure out element's styles
-    let element = self.sourceNode as Element;
-    const styler = self.nodeContext.shadowContext
-      ? (self.nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
-      : self.styler;
+    let element = this.sourceNode as Element;
+    const styler = this.nodeContext.shadowContext
+      ? (this.nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
+      : this.styler;
     let elementStyle = styler.getStyle(element, false);
-    if (!self.nodeContext.shadowContext) {
+    if (!this.nodeContext.shadowContext) {
       const offset = this.xmldoc.getElementOffset(element);
       Matchers.NthFragmentMatcher.registerFragmentIndex(
         offset,
-        self.nodeContext.fragmentIndex,
+        this.nodeContext.fragmentIndex,
         0,
       );
     }
     const computedStyle = {};
-    if (!self.nodeContext.parent) {
-      const inheritedValues = self.inheritFromSourceParent(elementStyle);
+    if (!this.nodeContext.parent) {
+      const inheritedValues = this.inheritFromSourceParent(elementStyle);
       elementStyle = inheritedValues.elementStyle;
-      self.nodeContext.lang = inheritedValues.lang;
+      this.nodeContext.lang = inheritedValues.lang;
     }
     const floatReference =
       elementStyle["float-reference"] &&
@@ -677,19 +673,19 @@ export class ViewFactory
         elementStyle["float-reference"].value.toString(),
       );
     if (
-      self.nodeContext.parent &&
+      this.nodeContext.parent &&
       floatReference &&
       PageFloats.isPageFloat(floatReference)
     ) {
       // Since a page float will be detached from a view node of its parent,
       // inherited properties need to be inherited from its source parent.
-      const inheritedValues = self.inheritFromSourceParent(elementStyle);
+      const inheritedValues = this.inheritFromSourceParent(elementStyle);
       elementStyle = inheritedValues.elementStyle;
-      self.nodeContext.lang = inheritedValues.lang;
+      this.nodeContext.lang = inheritedValues.lang;
     }
-    self.nodeContext.vertical = self.computeStyle(
-      self.nodeContext.vertical,
-      self.nodeContext.direction === "rtl",
+    this.nodeContext.vertical = this.computeStyle(
+      this.nodeContext.vertical,
+      this.nodeContext.direction === "rtl",
       elementStyle,
       computedStyle,
     );
@@ -697,12 +693,12 @@ export class ViewFactory
     this.transferPolyfilledInheritedProps(computedStyle);
     this.inheritLangAttribute();
     if (computedStyle["direction"]) {
-      self.nodeContext.direction = computedStyle["direction"].toString();
+      this.nodeContext.direction = computedStyle["direction"].toString();
     }
 
     // Sort out the properties
     const flow = computedStyle["flow-into"];
-    if (flow && flow.toString() != self.flowName) {
+    if (flow && flow.toString() != this.flowName) {
       // foreign flow, don't create a view
       frame.finish(false);
       return frame.result();
@@ -713,606 +709,599 @@ export class ViewFactory
       frame.finish(false);
       return frame.result();
     }
-    const isRoot = self.nodeContext.parent == null;
-    self.nodeContext.flexContainer = display === Css.ident.flex;
-    self
-      .createShadows(
-        element,
-        isRoot,
-        elementStyle,
-        computedStyle,
-        styler,
-        self.context,
-        self.nodeContext.shadowContext,
-      )
-      .then((shadowParam) => {
-        self.nodeContext.nodeShadow = shadowParam;
-        const position = computedStyle["position"];
-        let floatSide = computedStyle["float"];
-        let clearSide = computedStyle["clear"];
-        const writingMode = self.nodeContext.vertical
+    const isRoot = this.nodeContext.parent == null;
+    this.nodeContext.flexContainer = display === Css.ident.flex;
+    this.createShadows(
+      element,
+      isRoot,
+      elementStyle,
+      computedStyle,
+      styler,
+      this.context,
+      this.nodeContext.shadowContext,
+    ).then((shadowParam) => {
+      this.nodeContext.nodeShadow = shadowParam;
+      const position = computedStyle["position"];
+      let floatSide = computedStyle["float"];
+      let clearSide = computedStyle["clear"];
+      const writingMode = this.nodeContext.vertical
+        ? Css.ident.vertical_rl
+        : Css.ident.horizontal_tb;
+      const parentWritingMode = this.nodeContext.parent
+        ? this.nodeContext.parent.vertical
           ? Css.ident.vertical_rl
-          : Css.ident.horizontal_tb;
-        const parentWritingMode = self.nodeContext.parent
-          ? self.nodeContext.parent.vertical
-            ? Css.ident.vertical_rl
-            : Css.ident.horizontal_tb
-          : writingMode;
-        const isFlowRoot = Display.isFlowRoot(element);
-        self.nodeContext.establishesBFC = Display.establishesBFC(
-          display,
-          position,
-          floatSide,
-          computedStyle["overflow"],
-          writingMode,
-          parentWritingMode,
-          isFlowRoot,
-        );
-        self.nodeContext.containingBlockForAbsolute = Display.establishesCBForAbsolute(
-          position,
-        );
+          : Css.ident.horizontal_tb
+        : writingMode;
+      const isFlowRoot = Display.isFlowRoot(element);
+      this.nodeContext.establishesBFC = Display.establishesBFC(
+        display,
+        position,
+        floatSide,
+        computedStyle["overflow"],
+        writingMode,
+        parentWritingMode,
+        isFlowRoot,
+      );
+      this.nodeContext.containingBlockForAbsolute = Display.establishesCBForAbsolute(
+        position,
+      );
+      if (
+        this.nodeContext.isInsideBFC() &&
+        floatSide !== Css.ident.footnote &&
+        !(floatReference && PageFloats.isPageFloat(floatReference))
+      ) {
+        // When the element is already inside a block formatting context
+        // (except one from the root), float and clear can be controlled by
+        // the browser and we don't need to care.
+        floatSide = null;
+        clearSide = null;
+      }
+      let floating =
+        floatSide === Css.ident.left ||
+        floatSide === Css.ident.right ||
+        floatSide === Css.ident.top ||
+        floatSide === Css.ident.bottom ||
+        floatSide === Css.ident.inline_start ||
+        floatSide === Css.ident.inline_end ||
+        floatSide === Css.ident.block_start ||
+        floatSide === Css.ident.block_end ||
+        floatSide === Css.ident.snap_block ||
+        floatSide === Css.ident.footnote;
+      if (floatSide) {
+        // Don't want to set it in view DOM CSS.
+        delete computedStyle["float"];
+        if (floatSide === Css.ident.footnote) {
+          if (this.isFootnote) {
+            // No footnotes inside footnotes. this is most likely the root
+            // of the footnote body being rendered in footnote area. Treat
+            // as block.
+            floating = false;
+            computedStyle["display"] = Css.ident.block;
+          } else {
+            computedStyle["display"] = Css.ident.inline;
+          }
+        }
+      }
+      if (clearSide) {
+        if (clearSide === Css.ident.inherit) {
+          if (this.nodeContext.parent && this.nodeContext.parent.clearSide) {
+            clearSide = Css.getName(this.nodeContext.parent.clearSide);
+          }
+        }
         if (
-          self.nodeContext.isInsideBFC() &&
-          floatSide !== Css.ident.footnote &&
-          !(floatReference && PageFloats.isPageFloat(floatReference))
+          clearSide === Css.ident.left ||
+          clearSide === Css.ident.right ||
+          clearSide === Css.ident.top ||
+          clearSide === Css.ident.bottom ||
+          clearSide === Css.ident.both ||
+          clearSide === Css.ident.all ||
+          clearSide === Css.ident.same
         ) {
-          // When the element is already inside a block formatting context
-          // (except one from the root), float and clear can be controlled by
-          // the browser and we don't need to care.
-          floatSide = null;
-          clearSide = null;
-        }
-        let floating =
-          floatSide === Css.ident.left ||
-          floatSide === Css.ident.right ||
-          floatSide === Css.ident.top ||
-          floatSide === Css.ident.bottom ||
-          floatSide === Css.ident.inline_start ||
-          floatSide === Css.ident.inline_end ||
-          floatSide === Css.ident.block_start ||
-          floatSide === Css.ident.block_end ||
-          floatSide === Css.ident.snap_block ||
-          floatSide === Css.ident.footnote;
-        if (floatSide) {
-          // Don't want to set it in view DOM CSS.
-          delete computedStyle["float"];
-          if (floatSide === Css.ident.footnote) {
-            if (self.isFootnote) {
-              // No footnotes inside footnotes. self is most likely the root
-              // of the footnote body being rendered in footnote area. Treat
-              // as block.
-              floating = false;
-              computedStyle["display"] = Css.ident.block;
-            } else {
-              computedStyle["display"] = Css.ident.inline;
-            }
-          }
-        }
-        if (clearSide) {
-          if (clearSide === Css.ident.inherit) {
-            if (self.nodeContext.parent && self.nodeContext.parent.clearSide) {
-              clearSide = Css.getName(self.nodeContext.parent.clearSide);
-            }
-          }
+          delete computedStyle["clear"];
           if (
-            clearSide === Css.ident.left ||
-            clearSide === Css.ident.right ||
-            clearSide === Css.ident.top ||
-            clearSide === Css.ident.bottom ||
-            clearSide === Css.ident.both ||
-            clearSide === Css.ident.all ||
-            clearSide === Css.ident.same
+            computedStyle["display"] &&
+            computedStyle["display"] != Css.ident.inline
           ) {
-            delete computedStyle["clear"];
-            if (
-              computedStyle["display"] &&
-              computedStyle["display"] != Css.ident.inline
-            ) {
-              self.nodeContext.clearSide = clearSide.toString();
-            }
+            this.nodeContext.clearSide = clearSide.toString();
           }
         }
-        const listItem =
-          display === Css.ident.list_item &&
-          computedStyle["ua-list-item-count"];
-        if (
-          floating ||
-          (computedStyle["break-inside"] &&
-            computedStyle["break-inside"] !== Css.ident.auto)
-        ) {
-          self.nodeContext.breakPenalty++;
+      }
+      const listItem =
+        display === Css.ident.list_item && computedStyle["ua-list-item-count"];
+      if (
+        floating ||
+        (computedStyle["break-inside"] &&
+          computedStyle["break-inside"] !== Css.ident.auto)
+      ) {
+        this.nodeContext.breakPenalty++;
+      }
+      if (
+        display &&
+        display !== Css.ident.inline &&
+        Display.isInlineLevel(display)
+      ) {
+        // Don't break inside ruby, inline-block, etc.
+        this.nodeContext.breakPenalty++;
+      }
+      this.nodeContext.inline =
+        (!floating && !display) ||
+        Display.isInlineLevel(display) ||
+        Display.isRubyInternalDisplay(display);
+      this.nodeContext.display = display ? display.toString() : "inline";
+      this.nodeContext.floatSide = floating ? floatSide.toString() : null;
+      this.nodeContext.floatReference =
+        floatReference || PageFloats.FloatReference.INLINE;
+      this.nodeContext.floatMinWrapBlock =
+        computedStyle["float-min-wrap-block"] || null;
+      this.nodeContext.columnSpan = computedStyle["column-span"];
+      if (!this.nodeContext.inline) {
+        const breakAfter = computedStyle["break-after"];
+        if (breakAfter) {
+          this.nodeContext.breakAfter = breakAfter.toString();
         }
-        if (
-          display &&
-          display !== Css.ident.inline &&
-          Display.isInlineLevel(display)
-        ) {
-          // Don't break inside ruby, inline-block, etc.
-          self.nodeContext.breakPenalty++;
+        const breakBefore = computedStyle["break-before"];
+        if (breakBefore) {
+          this.nodeContext.breakBefore = breakBefore.toString();
         }
-        self.nodeContext.inline =
-          (!floating && !display) ||
-          Display.isInlineLevel(display) ||
-          Display.isRubyInternalDisplay(display);
-        self.nodeContext.display = display ? display.toString() : "inline";
-        self.nodeContext.floatSide = floating ? floatSide.toString() : null;
-        self.nodeContext.floatReference =
-          floatReference || PageFloats.FloatReference.INLINE;
-        self.nodeContext.floatMinWrapBlock =
-          computedStyle["float-min-wrap-block"] || null;
-        self.nodeContext.columnSpan = computedStyle["column-span"];
-        if (!self.nodeContext.inline) {
-          const breakAfter = computedStyle["break-after"];
-          if (breakAfter) {
-            self.nodeContext.breakAfter = breakAfter.toString();
+      }
+      this.nodeContext.verticalAlign =
+        (computedStyle["vertical-align"] &&
+          computedStyle["vertical-align"].toString()) ||
+        "baseline";
+      this.nodeContext.captionSide =
+        (computedStyle["caption-side"] &&
+          computedStyle["caption-side"].toString()) ||
+        "top";
+      const borderCollapse = computedStyle["border-collapse"];
+      if (!borderCollapse || borderCollapse === Css.getName("separate")) {
+        const borderSpacing = computedStyle["border-spacing"];
+        let inlineBorderSpacing;
+        let blockBorderSpacing;
+        if (borderSpacing) {
+          if (borderSpacing.isSpaceList()) {
+            inlineBorderSpacing = borderSpacing.values[0];
+            blockBorderSpacing = borderSpacing.values[1];
+          } else {
+            inlineBorderSpacing = blockBorderSpacing = borderSpacing;
           }
-          const breakBefore = computedStyle["break-before"];
-          if (breakBefore) {
-            self.nodeContext.breakBefore = breakBefore.toString();
+          if (inlineBorderSpacing.isNumeric()) {
+            this.nodeContext.inlineBorderSpacing = Css.toNumber(
+              inlineBorderSpacing,
+              this.context,
+            );
           }
-        }
-        self.nodeContext.verticalAlign =
-          (computedStyle["vertical-align"] &&
-            computedStyle["vertical-align"].toString()) ||
-          "baseline";
-        self.nodeContext.captionSide =
-          (computedStyle["caption-side"] &&
-            computedStyle["caption-side"].toString()) ||
-          "top";
-        const borderCollapse = computedStyle["border-collapse"];
-        if (!borderCollapse || borderCollapse === Css.getName("separate")) {
-          const borderSpacing = computedStyle["border-spacing"];
-          let inlineBorderSpacing;
-          let blockBorderSpacing;
-          if (borderSpacing) {
-            if (borderSpacing.isSpaceList()) {
-              inlineBorderSpacing = borderSpacing.values[0];
-              blockBorderSpacing = borderSpacing.values[1];
-            } else {
-              inlineBorderSpacing = blockBorderSpacing = borderSpacing;
-            }
-            if (inlineBorderSpacing.isNumeric()) {
-              self.nodeContext.inlineBorderSpacing = Css.toNumber(
-                inlineBorderSpacing,
-                self.context,
-              );
-            }
-            if (blockBorderSpacing.isNumeric()) {
-              self.nodeContext.blockBorderSpacing = Css.toNumber(
-                blockBorderSpacing,
-                self.context,
-              );
-            }
-          }
-        }
-        self.nodeContext.footnotePolicy = computedStyle["footnote-policy"];
-        const firstPseudo = computedStyle["x-first-pseudo"];
-        if (firstPseudo) {
-          const outerPseudo = self.nodeContext.parent
-            ? self.nodeContext.parent.firstPseudo
-            : null;
-          self.nodeContext.firstPseudo = new Vtree.FirstPseudo(
-            outerPseudo,
-            /** Css.Int */
-            firstPseudo.num,
-          );
-        }
-        if (!self.nodeContext.inline) {
-          self.processAfterIfcontinues(
-            element,
-            elementStyle,
-            styler,
-            self.context,
-          );
-        }
-        const whitespace = computedStyle["white-space"];
-        if (whitespace) {
-          const whitespaceValue = Vtree.whitespaceFromPropertyValue(
-            whitespace.toString(),
-          );
-          if (whitespaceValue !== null) {
-            self.nodeContext.whitespace = whitespaceValue;
+          if (blockBorderSpacing.isNumeric()) {
+            this.nodeContext.blockBorderSpacing = Css.toNumber(
+              blockBorderSpacing,
+              this.context,
+            );
           }
         }
-        const hyphenateCharacter = computedStyle["hyphenate-character"];
-        if (hyphenateCharacter && hyphenateCharacter !== Css.ident.auto) {
-          self.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
+      }
+      this.nodeContext.footnotePolicy = computedStyle["footnote-policy"];
+      const firstPseudo = computedStyle["x-first-pseudo"];
+      if (firstPseudo) {
+        const outerPseudo = this.nodeContext.parent
+          ? this.nodeContext.parent.firstPseudo
+          : null;
+        this.nodeContext.firstPseudo = new Vtree.FirstPseudo(
+          outerPseudo,
+          /** Css.Int */
+          firstPseudo.num,
+        );
+      }
+      if (!this.nodeContext.inline) {
+        this.processAfterIfcontinues(
+          element,
+          elementStyle,
+          styler,
+          this.context,
+        );
+      }
+      const whitespace = computedStyle["white-space"];
+      if (whitespace) {
+        const whitespaceValue = Vtree.whitespaceFromPropertyValue(
+          whitespace.toString(),
+        );
+        if (whitespaceValue !== null) {
+          this.nodeContext.whitespace = whitespaceValue;
         }
-        const wordBreak = computedStyle["word-break"];
-        const overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
-        self.nodeContext.breakWord =
-          wordBreak === Css.ident.break_all ||
-          overflowWrap === Css.ident.break_word;
+      }
+      const hyphenateCharacter = computedStyle["hyphenate-character"];
+      if (hyphenateCharacter && hyphenateCharacter !== Css.ident.auto) {
+        this.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
+      }
+      const wordBreak = computedStyle["word-break"];
+      const overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
+      this.nodeContext.breakWord =
+        wordBreak === Css.ident.break_all ||
+        overflowWrap === Css.ident.break_word;
 
-        // Resolve formatting context
-        self.resolveFormattingContext(
-          self.nodeContext,
+      // Resolve formatting context
+      this.resolveFormattingContext(
+        this.nodeContext,
+        firstTime,
+        display,
+        position,
+        floatSide,
+        isRoot,
+      );
+      if (
+        this.nodeContext.parent &&
+        this.nodeContext.parent.formattingContext
+      ) {
+        firstTime = this.nodeContext.parent.formattingContext.isFirstTime(
+          this.nodeContext,
           firstTime,
-          display,
-          position,
-          floatSide,
-          isRoot,
         );
-        if (
-          self.nodeContext.parent &&
-          self.nodeContext.parent.formattingContext
-        ) {
-          firstTime = self.nodeContext.parent.formattingContext.isFirstTime(
-            self.nodeContext,
-            firstTime,
-          );
-        }
-        if (!self.nodeContext.inline) {
-          self.nodeContext.repeatOnBreak = self.processRepeatOnBreak(
-            computedStyle,
-          );
-          self.findAndProcessRepeatingElements(element, styler);
-        }
+      }
+      if (!this.nodeContext.inline) {
+        this.nodeContext.repeatOnBreak = this.processRepeatOnBreak(
+          computedStyle,
+        );
+        this.findAndProcessRepeatingElements(element, styler);
+      }
 
-        // Create the view element
-        let custom = false;
-        let inner: Element = null;
-        const fetchers = [];
-        let ns = element.namespaceURI;
-        let tag = element.localName;
-        if (ns == Base.NS.XHTML) {
-          if (
-            tag == "html" ||
-            tag == "body" ||
-            tag == "script" ||
-            tag == "link" ||
-            tag == "meta"
-          ) {
-            tag = "div";
-          } else if (tag == "vide_") {
-            tag = "video";
-          } else if (tag == "audi_") {
-            tag = "audio";
-          } else if (tag == "object") {
-            custom = !!self.customRenderer;
-          }
-          if (element.getAttribute(PseudoElement.PSEUDO_ATTR)) {
-            if (
-              elementStyle["content"] &&
-              elementStyle["content"].value &&
-              elementStyle["content"].value.url
-            ) {
-              tag = "img";
-            }
-          }
-        } else if (ns == Base.NS.epub) {
-          tag = "span";
-          ns = Base.NS.XHTML;
-        } else if (ns == Base.NS.NCX) {
-          ns = Base.NS.XHTML;
-          if (tag == "ncx" || tag == "navPoint") {
-            tag = "div";
-          } else if (tag == "navLabel") {
-            // Cheat here. Translate source to HTML, so it will plug
-            // in into the rest of the pipeline.
-            tag = "span";
-            const navParent = element.parentNode;
-            if (navParent) {
-              // find the content element
-              let href: string | null = null;
-              for (let c: Node = navParent.firstChild; c; c = c.nextSibling) {
-                if (c.nodeType != 1) {
-                  continue;
-                }
-                const childElement = c as Element;
-                if (
-                  childElement.namespaceURI == Base.NS.NCX &&
-                  childElement.localName == "content"
-                ) {
-                  href = childElement.getAttribute("src");
-                  break;
-                }
-              }
-              if (href) {
-                tag = "a";
-                element = element.ownerDocument.createElementNS(ns, "a");
-                element.setAttribute("href", href);
-              }
-            }
-          } else {
-            tag = "span";
-          }
-        } else if (ns == Base.NS.SHADOW) {
-          ns = Base.NS.XHTML;
-          tag = self.nodeContext.inline ? "span" : "div";
-        } else {
-          custom = !!self.customRenderer;
-        }
-        if (listItem) {
-          if (firstTime) {
-            tag = "li";
-          } else {
-            tag = "div";
-            display = Css.ident.block;
-            computedStyle["display"] = display;
-          }
-        } else if (tag == "body" || tag == "li") {
-          tag = "div";
-        } else if (tag == "q") {
-          tag = "span";
-        } else if (tag == "a") {
-          const hp = computedStyle["hyperlink-processing"];
-          if (hp && hp.toString() != "normal") {
-            tag = "span";
-          }
-        }
-        if (computedStyle["behavior"]) {
-          const behavior = computedStyle["behavior"].toString();
-          if (behavior != "none" && self.customRenderer) {
-            custom = true;
-          }
-        }
+      // Create the view element
+      let custom = false;
+      let inner: Element = null;
+      const fetchers = [];
+      let ns = element.namespaceURI;
+      let tag = element.localName;
+      if (ns == Base.NS.XHTML) {
         if (
-          (element as HTMLElement).dataset &&
-          element.getAttribute("data-math-typeset") === "true"
+          tag == "html" ||
+          tag == "body" ||
+          tag == "script" ||
+          tag == "link" ||
+          tag == "meta"
         ) {
+          tag = "div";
+        } else if (tag == "vide_") {
+          tag = "video";
+        } else if (tag == "audi_") {
+          tag = "audio";
+        } else if (tag == "object") {
+          custom = !!this.customRenderer;
+        }
+        if (element.getAttribute(PseudoElement.PSEUDO_ATTR)) {
+          if (
+            elementStyle["content"] &&
+            elementStyle["content"].value &&
+            elementStyle["content"].value.url
+          ) {
+            tag = "img";
+          }
+        }
+      } else if (ns == Base.NS.epub) {
+        tag = "span";
+        ns = Base.NS.XHTML;
+      } else if (ns == Base.NS.NCX) {
+        ns = Base.NS.XHTML;
+        if (tag == "ncx" || tag == "navPoint") {
+          tag = "div";
+        } else if (tag == "navLabel") {
+          // Cheat here. Translate source to HTML, so it will plug
+          // in into the rest of the pipeline.
+          tag = "span";
+          const navParent = element.parentNode;
+          if (navParent) {
+            // find the content element
+            let href: string | null = null;
+            for (let c: Node = navParent.firstChild; c; c = c.nextSibling) {
+              if (c.nodeType != 1) {
+                continue;
+              }
+              const childElement = c as Element;
+              if (
+                childElement.namespaceURI == Base.NS.NCX &&
+                childElement.localName == "content"
+              ) {
+                href = childElement.getAttribute("src");
+                break;
+              }
+            }
+            if (href) {
+              tag = "a";
+              element = element.ownerDocument.createElementNS(ns, "a");
+              element.setAttribute("href", href);
+            }
+          }
+        } else {
+          tag = "span";
+        }
+      } else if (ns == Base.NS.SHADOW) {
+        ns = Base.NS.XHTML;
+        tag = this.nodeContext.inline ? "span" : "div";
+      } else {
+        custom = !!this.customRenderer;
+      }
+      if (listItem) {
+        if (firstTime) {
+          tag = "li";
+        } else {
+          tag = "div";
+          display = Css.ident.block;
+          computedStyle["display"] = display;
+        }
+      } else if (tag == "body" || tag == "li") {
+        tag = "div";
+      } else if (tag == "q") {
+        tag = "span";
+      } else if (tag == "a") {
+        const hp = computedStyle["hyperlink-processing"];
+        if (hp && hp.toString() != "normal") {
+          tag = "span";
+        }
+      }
+      if (computedStyle["behavior"]) {
+        const behavior = computedStyle["behavior"].toString();
+        if (behavior != "none" && this.customRenderer) {
           custom = true;
         }
-        let elemResult: Task.Result<Element>;
-        if (custom) {
-          const parentNode = self.nodeContext.parent
-            ? self.nodeContext.parent.viewNode
-            : null;
-          elemResult = self.customRenderer(
-            element,
-            parentNode as Element,
-            computedStyle,
-          );
+      }
+      if (
+        (element as HTMLElement).dataset &&
+        element.getAttribute("data-math-typeset") === "true"
+      ) {
+        custom = true;
+      }
+      let elemResult: Task.Result<Element>;
+      if (custom) {
+        const parentNode = this.nodeContext.parent
+          ? this.nodeContext.parent.viewNode
+          : null;
+        elemResult = this.customRenderer(
+          element,
+          parentNode as Element,
+          computedStyle,
+        );
+      } else {
+        elemResult = Task.newResult(null);
+      }
+      elemResult.then((result) => {
+        if (result) {
+          if (custom) {
+            needToProcessChildren =
+              result.getAttribute("data-adapt-process-children") == "true";
+          }
         } else {
-          elemResult = Task.newResult(null);
+          result = this.createElement(ns, tag);
         }
-        elemResult.then((result) => {
-          if (result) {
-            if (custom) {
-              needToProcessChildren =
-                result.getAttribute("data-adapt-process-children") == "true";
+        if (tag == "a") {
+          result.addEventListener("click", this.page.hrefHandler, false);
+        }
+        if (inner) {
+          this.applyPseudoelementStyle(this.nodeContext, "inner", inner);
+          result.appendChild(inner);
+        }
+        if (
+          result.localName == "iframe" &&
+          result.namespaceURI == Base.NS.XHTML
+        ) {
+          initIFrame(result as HTMLIFrameElement);
+        }
+        const imageResolution = this.nodeContext.inheritedProps[
+          "image-resolution"
+        ] as number | undefined;
+        const images: {
+          image: HTMLElement;
+          element: HTMLElement;
+          fetcher: TaskUtil.Fetcher<string>;
+        }[] = [];
+        const cssWidth = computedStyle["width"];
+        const cssHeight = computedStyle["height"];
+        const attrWidth = element.getAttribute("width");
+        const attrHeight = element.getAttribute("height");
+        const hasAutoWidth =
+          cssWidth === Css.ident.auto || (!cssWidth && !attrWidth);
+        const hasAutoHeight =
+          cssHeight === Css.ident.auto || (!cssHeight && !attrHeight);
+        const attributes = element.attributes;
+        const attributeCount = attributes.length;
+        let delayedSrc: string | null = null;
+        for (let i = 0; i < attributeCount; i++) {
+          const attribute = attributes[i];
+          const attributeNS = attribute.namespaceURI;
+          let attributeName = attribute.localName;
+          let attributeValue = attribute.nodeValue;
+          if (!attributeNS) {
+            if (attributeName.match(/^on/)) {
+              continue; // don't propagate JavaScript code
             }
-          } else {
-            result = self.createElement(ns, tag);
-          }
-          if (tag == "a") {
-            result.addEventListener("click", self.page.hrefHandler, false);
-          }
-          if (inner) {
-            self.applyPseudoelementStyle(self.nodeContext, "inner", inner);
-            result.appendChild(inner);
-          }
-          if (
-            result.localName == "iframe" &&
-            result.namespaceURI == Base.NS.XHTML
-          ) {
-            initIFrame(result as HTMLIFrameElement);
-          }
-          const imageResolution = self.nodeContext.inheritedProps[
-            "image-resolution"
-          ] as number | undefined;
-          const images: {
-            image: HTMLElement;
-            element: HTMLElement;
-            fetcher: TaskUtil.Fetcher<string>;
-          }[] = [];
-          const cssWidth = computedStyle["width"];
-          const cssHeight = computedStyle["height"];
-          const attrWidth = element.getAttribute("width");
-          const attrHeight = element.getAttribute("height");
-          const hasAutoWidth =
-            cssWidth === Css.ident.auto || (!cssWidth && !attrWidth);
-          const hasAutoHeight =
-            cssHeight === Css.ident.auto || (!cssHeight && !attrHeight);
-          const attributes = element.attributes;
-          const attributeCount = attributes.length;
-          let delayedSrc: string | null = null;
-          for (let i = 0; i < attributeCount; i++) {
-            const attribute = attributes[i];
-            const attributeNS = attribute.namespaceURI;
-            let attributeName = attribute.localName;
-            let attributeValue = attribute.nodeValue;
-            if (!attributeNS) {
-              if (attributeName.match(/^on/)) {
-                continue; // don't propagate JavaScript code
+            if (attributeName == "style") {
+              continue; // we do styling ourselves
+            }
+            if (attributeName == "id" || attributeName == "name") {
+              // Propagate transformed ids and collect them on the page
+              // (only first time).
+              if (firstTime) {
+                attributeValue = this.documentURLTransformer.transformFragment(
+                  encodeURIComponent(attributeValue),
+                  this.xmldoc.url,
+                );
+                result.setAttribute(attributeName, attributeValue);
+                this.page.registerElementWithId(result, attributeValue);
+                continue;
               }
-              if (attributeName == "style") {
-                continue; // we do styling ourselves
-              }
-              if (attributeName == "id" || attributeName == "name") {
-                // Propagate transformed ids and collect them on the page
-                // (only first time).
-                if (firstTime) {
-                  attributeValue = self.documentURLTransformer.transformFragment(
-                    encodeURIComponent(attributeValue),
-                    self.xmldoc.url,
-                  );
-                  result.setAttribute(attributeName, attributeValue);
-                  self.page.registerElementWithId(result, attributeValue);
-                  continue;
-                }
-              }
+            }
 
-              // TODO: understand the element we are working with.
-              if (
-                attributeName == "src" ||
-                attributeName == "href" ||
-                attributeName == "poster"
-              ) {
-                attributeValue = self.resolveURL(attributeValue);
-                if (attributeName === "href") {
-                  attributeValue = self.documentURLTransformer.transformURL(
-                    attributeValue,
-                    self.xmldoc.url,
-                  );
-                }
-              } else if (attributeName == "srcset") {
-                attributeValue = attributeValue
-                  .split(",")
-                  .map((value) => self.resolveURL(value.trim()))
-                  .join(",");
+            // TODO: understand the element we are working with.
+            if (
+              attributeName == "src" ||
+              attributeName == "href" ||
+              attributeName == "poster"
+            ) {
+              attributeValue = this.resolveURL(attributeValue);
+              if (attributeName === "href") {
+                attributeValue = this.documentURLTransformer.transformURL(
+                  attributeValue,
+                  this.xmldoc.url,
+                );
               }
-              if (
-                attributeName === "poster" &&
-                tag === "video" &&
-                ns === Base.NS.XHTML &&
-                hasAutoWidth &&
-                hasAutoHeight
-              ) {
-                const image = new Image();
-                const fetcher = TaskUtil.loadElement(image, attributeValue);
-                fetchers.push(fetcher);
-                images.push({
-                  image,
-                  element: result as HTMLElement,
-                  fetcher,
-                });
-              }
-            } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
-              continue; // namespace declaration (in Firefox)
-            } else if (attributeNS == Base.NS.XLINK) {
-              if (attributeName == "href") {
-                attributeValue = self.resolveURL(attributeValue);
-              }
-            }
-            if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
-              // Workaround for Edge bug
-              // See
-              // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
-              attributeName = attributeName.toLowerCase();
-            }
-            if (self.isSVGUrlAttribute(attributeName)) {
-              attributeValue = Urls.transformURIs(
-                attributeValue,
-                self.xmldoc.url,
-                self.documentURLTransformer,
-              );
-            }
-            if (attributeNS) {
-              const attributePrefix = namespacePrefixMap[attributeNS];
-              if (attributePrefix) {
-                attributeName = `${attributePrefix}:${attributeName}`;
-              }
+            } else if (attributeName == "srcset") {
+              attributeValue = attributeValue
+                .split(",")
+                .map((value) => this.resolveURL(value.trim()))
+                .join(",");
             }
             if (
-              attributeName == "src" &&
-              !attributeNS &&
-              (tag == "img" || tag == "input") &&
-              ns == Base.NS.XHTML
+              attributeName === "poster" &&
+              tag === "video" &&
+              ns === Base.NS.XHTML &&
+              hasAutoWidth &&
+              hasAutoHeight
             ) {
-              // HTML img element should start loading only once all
-              // attributes are assigned.
-              delayedSrc = attributeValue;
-            } else if (
-              attributeName == "href" &&
-              tag == "image" &&
-              ns == Base.NS.SVG &&
-              attributeNS == Base.NS.XLINK
+              const image = new Image();
+              const fetcher = TaskUtil.loadElement(image, attributeValue);
+              fetchers.push(fetcher);
+              images.push({
+                image,
+                element: result as HTMLElement,
+                fetcher,
+              });
+            }
+          } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
+            continue; // namespace declaration (in Firefox)
+          } else if (attributeNS == Base.NS.XLINK) {
+            if (attributeName == "href") {
+              attributeValue = this.resolveURL(attributeValue);
+            }
+          }
+          if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
+            // Workaround for Edge bug
+            // See
+            // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
+            attributeName = attributeName.toLowerCase();
+          }
+          if (this.isSVGUrlAttribute(attributeName)) {
+            attributeValue = Urls.transformURIs(
+              attributeValue,
+              this.xmldoc.url,
+              this.documentURLTransformer,
+            );
+          }
+          if (attributeNS) {
+            const attributePrefix = namespacePrefixMap[attributeNS];
+            if (attributePrefix) {
+              attributeName = `${attributePrefix}:${attributeName}`;
+            }
+          }
+          if (
+            attributeName == "src" &&
+            !attributeNS &&
+            (tag == "img" || tag == "input") &&
+            ns == Base.NS.XHTML
+          ) {
+            // HTML img element should start loading only once all
+            // attributes are assigned.
+            delayedSrc = attributeValue;
+          } else if (
+            attributeName == "href" &&
+            tag == "image" &&
+            ns == Base.NS.SVG &&
+            attributeNS == Base.NS.XLINK
+          ) {
+            this.page.fetchers.push(
+              TaskUtil.loadElement(result, attributeValue),
+            );
+          } else {
+            // When the document is not XML document (e.g. non-XML HTML)
+            // attributeNS can be null
+            if (attributeNS) {
+              result.setAttributeNS(attributeNS, attributeName, attributeValue);
+            } else {
+              result.setAttribute(attributeName, attributeValue);
+            }
+          }
+        }
+        if (delayedSrc) {
+          const image = tag === "input" ? new Image() : result;
+          const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
+          if (image !== result) {
+            (result as HTMLImageElement).src = delayedSrc;
+          }
+          if (!hasAutoWidth && !hasAutoHeight) {
+            // No need to wait for the image, does not affect layout
+            this.page.fetchers.push(imageFetcher);
+          } else {
+            if (
+              hasAutoWidth &&
+              hasAutoHeight &&
+              imageResolution &&
+              imageResolution !== 1
             ) {
-              self.page.fetchers.push(
-                TaskUtil.loadElement(result, attributeValue),
-              );
+              images.push({
+                image: image as HTMLElement,
+                element: result as HTMLElement,
+                fetcher: imageFetcher,
+              });
+            }
+            fetchers.push(imageFetcher);
+          }
+        }
+        delete computedStyle["content"];
+        const listStyleImage = computedStyle["list-style-image"];
+        if (listStyleImage && listStyleImage instanceof Css.URL) {
+          const listStyleURL = (listStyleImage as Css.URL).url;
+          fetchers.push(TaskUtil.loadElement(new Image(), listStyleURL));
+        }
+        this.preprocessElementStyle(computedStyle);
+        this.applyComputedStyles(result, computedStyle);
+        if (!this.nodeContext.inline) {
+          let blackList: { [key: string]: string } = null;
+          if (!firstTime) {
+            if (
+              this.nodeContext.inheritedProps["box-decoration-break"] !==
+              "clone"
+            ) {
+              blackList = this.nodeContext.vertical
+                ? frontEdgeBlackListVert
+                : frontEdgeBlackListHor;
             } else {
-              // When the document is not XML document (e.g. non-XML HTML)
-              // attributeNS can be null
-              if (attributeNS) {
-                result.setAttributeNS(
-                  attributeNS,
-                  attributeName,
-                  attributeValue,
-                );
-              } else {
-                result.setAttribute(attributeName, attributeValue);
-              }
-            }
-          }
-          if (delayedSrc) {
-            const image = tag === "input" ? new Image() : result;
-            const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
-            if (image !== result) {
-              (result as HTMLImageElement).src = delayedSrc;
-            }
-            if (!hasAutoWidth && !hasAutoHeight) {
-              // No need to wait for the image, does not affect layout
-              self.page.fetchers.push(imageFetcher);
-            } else {
-              if (
-                hasAutoWidth &&
-                hasAutoHeight &&
-                imageResolution &&
-                imageResolution !== 1
-              ) {
-                images.push({
-                  image: image as HTMLElement,
-                  element: result as HTMLElement,
-                  fetcher: imageFetcher,
-                });
-              }
-              fetchers.push(imageFetcher);
-            }
-          }
-          delete computedStyle["content"];
-          const listStyleImage = computedStyle["list-style-image"];
-          if (listStyleImage && listStyleImage instanceof Css.URL) {
-            const listStyleURL = (listStyleImage as Css.URL).url;
-            fetchers.push(TaskUtil.loadElement(new Image(), listStyleURL));
-          }
-          self.preprocessElementStyle(computedStyle);
-          self.applyComputedStyles(result, computedStyle);
-          if (!self.nodeContext.inline) {
-            let blackList: { [key: string]: string } = null;
-            if (!firstTime) {
-              if (
-                self.nodeContext.inheritedProps["box-decoration-break"] !==
-                "clone"
-              ) {
-                blackList = self.nodeContext.vertical
-                  ? frontEdgeBlackListVert
-                  : frontEdgeBlackListHor;
-              } else {
-                // When box-decoration-break: clone, cloned margins are always
-                // truncated to zero.
-                blackList = self.nodeContext.vertical
-                  ? frontEdgeUnforcedBreakBlackListVert
-                  : frontEdgeUnforcedBreakBlackListHor;
-              }
-            } else if (atUnforcedBreak) {
-              blackList = self.nodeContext.vertical
+              // When box-decoration-break: clone, cloned margins are always
+              // truncated to zero.
+              blackList = this.nodeContext.vertical
                 ? frontEdgeUnforcedBreakBlackListVert
                 : frontEdgeUnforcedBreakBlackListHor;
             }
-            if (blackList) {
-              for (const propName in blackList) {
-                Base.setCSSProperty(result, propName, blackList[propName]);
-              }
+          } else if (atUnforcedBreak) {
+            blackList = this.nodeContext.vertical
+              ? frontEdgeUnforcedBreakBlackListVert
+              : frontEdgeUnforcedBreakBlackListHor;
+          }
+          if (blackList) {
+            for (const propName in blackList) {
+              Base.setCSSProperty(result, propName, blackList[propName]);
             }
           }
-          if (listItem) {
-            result.setAttribute(
-              "value",
-              computedStyle["ua-list-item-count"].stringValue(),
-            );
-          }
-          self.viewNode = result;
-          if (fetchers.length) {
-            TaskUtil.waitForFetchers(fetchers).then(() => {
-              if (imageResolution > 0) {
-                self.modifyElemDimensionWithImageResolution(
-                  images,
-                  imageResolution,
-                  computedStyle,
-                  self.nodeContext.vertical,
-                );
-              }
-              frame.finish(needToProcessChildren);
-            });
-          } else {
-            frame.timeSlice().then(() => {
-              frame.finish(needToProcessChildren);
-            });
-          }
-        });
+        }
+        if (listItem) {
+          result.setAttribute(
+            "value",
+            computedStyle["ua-list-item-count"].stringValue(),
+          );
+        }
+        this.viewNode = result;
+        if (fetchers.length) {
+          TaskUtil.waitForFetchers(fetchers).then(() => {
+            if (imageResolution > 0) {
+              this.modifyElemDimensionWithImageResolution(
+                images,
+                imageResolution,
+                computedStyle,
+                this.nodeContext.vertical,
+              );
+            }
+            frame.finish(needToProcessChildren);
+          });
+        } else {
+          frame.timeSlice().then(() => {
+            frame.finish(needToProcessChildren);
+          });
+        }
       });
+    });
     return frame.result();
   }
 
@@ -1367,8 +1356,7 @@ export class ViewFactory
     computedStyle: { [key: string]: Css.Val },
     isVertical: boolean,
   ) {
-    const self = this;
-    images.forEach((param) => {
+    for (const param of images) {
       if (param.fetcher.get().get() === "load") {
         const img = param.image;
         let scaledWidth = (img as HTMLImageElement).width / imageResolution;
@@ -1379,25 +1367,25 @@ export class ViewFactory
             if (computedStyle["border-left-style"] !== Css.ident.none) {
               scaledWidth += Css.toNumber(
                 computedStyle["border-left-width"],
-                self.context,
+                this.context,
               );
             }
             if (computedStyle["border-right-style"] !== Css.ident.none) {
               scaledWidth += Css.toNumber(
                 computedStyle["border-right-width"],
-                self.context,
+                this.context,
               );
             }
             if (computedStyle["border-top-style"] !== Css.ident.none) {
               scaledHeight += Css.toNumber(
                 computedStyle["border-top-width"],
-                self.context,
+                this.context,
               );
             }
             if (computedStyle["border-bottom-style"] !== Css.ident.none) {
               scaledHeight += Css.toNumber(
                 computedStyle["border-bottom-width"],
-                self.context,
+                this.context,
               );
             }
           }
@@ -1428,7 +1416,7 @@ export class ViewFactory
                   "max-width",
                   `${Math.min(
                     scaledWidth,
-                    Css.toNumber(numericMaxWidth, self.context),
+                    Css.toNumber(numericMaxWidth, this.context),
                   )}px`,
                 );
               } else if (numericMaxHeight.unit !== "%") {
@@ -1437,7 +1425,7 @@ export class ViewFactory
                   "max-height",
                   `${Math.min(
                     scaledHeight,
-                    Css.toNumber(numericMaxHeight, self.context),
+                    Css.toNumber(numericMaxHeight, this.context),
                   )}px`,
                 );
               } else {
@@ -1475,7 +1463,7 @@ export class ViewFactory
                   "min-width",
                   `${Math.max(
                     scaledWidth,
-                    Css.toNumber(numericMinWidth, self.context),
+                    Css.toNumber(numericMinWidth, this.context),
                   )}px`,
                 );
               } else if (numericMinHeight.unit !== "%") {
@@ -1484,7 +1472,7 @@ export class ViewFactory
                   "min-height",
                   `${Math.max(
                     scaledHeight,
-                    Css.toNumber(numericMinHeight, self.context),
+                    Css.toNumber(numericMinHeight, this.context),
                   )}px`,
                 );
               } else {
@@ -1498,17 +1486,16 @@ export class ViewFactory
           }
         }
       }
-    });
+    }
   }
 
   private preprocessElementStyle(computedStyle: { [key: string]: Css.Val }) {
-    const self = this;
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
-    hooks.forEach((hook) => {
-      hook(self.nodeContext, computedStyle);
-    });
+    for (const hook of hooks) {
+      hook(this.nodeContext, computedStyle);
+    }
   }
 
   private findAndProcessRepeatingElements(
@@ -1576,14 +1563,13 @@ export class ViewFactory
   }
 
   private createTextNodeView(): Task.Result<boolean> {
-    const self = this;
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
     this.preprocessTextContent().then(() => {
-      const offsetInNode = self.offsetInNode || 0;
+      const offsetInNode = this.offsetInNode || 0;
       const textContent = Diff.restoreNewText(
-        self.nodeContext.preprocessedTextContent,
+        this.nodeContext.preprocessedTextContent,
       ).substr(offsetInNode);
-      self.viewNode = document.createTextNode(textContent);
+      this.viewNode = document.createTextNode(textContent);
       frame.finish(true);
     });
     return frame.result();
@@ -1593,9 +1579,8 @@ export class ViewFactory
     if (this.nodeContext.preprocessedTextContent != null) {
       return Task.newResult(true);
     }
-    const self = this;
     let originl: string;
-    let textContent = (originl = self.sourceNode.textContent);
+    let textContent = (originl = this.sourceNode.textContent);
     const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
     const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
@@ -1606,7 +1591,7 @@ export class ViewFactory
         if (index >= hooks.length) {
           return Task.newResult(false);
         }
-        return hooks[index++](self.nodeContext, textContent).thenAsync(
+        return hooks[index++](this.nodeContext, textContent).thenAsync(
           (processedText) => {
             textContent = processedText;
             return Task.newResult(true);
@@ -1614,7 +1599,7 @@ export class ViewFactory
         );
       })
       .then(() => {
-        self.nodeContext.preprocessedTextContent = Diff.diffChars(
+        this.nodeContext.preprocessedTextContent = Diff.diffChars(
           originl,
           textContent,
         );
@@ -1630,29 +1615,28 @@ export class ViewFactory
     firstTime: boolean,
     atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
-    const self = this;
     const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
     let result: Task.Result<boolean>;
     let needToProcessChildren = true;
-    if (self.sourceNode.nodeType == 1) {
-      result = self.createElementView(firstTime, atUnforcedBreak);
+    if (this.sourceNode.nodeType == 1) {
+      result = this.createElementView(firstTime, atUnforcedBreak);
     } else {
-      if (self.sourceNode.nodeType == 8) {
-        self.viewNode = null; // comment node
+      if (this.sourceNode.nodeType == 8) {
+        this.viewNode = null; // comment node
         result = Task.newResult(true);
       } else {
-        result = self.createTextNodeView();
+        result = this.createTextNodeView();
       }
     }
     result.then((processChildren) => {
       needToProcessChildren = processChildren;
-      self.nodeContext.viewNode = self.viewNode;
-      if (self.viewNode) {
-        const parent = self.nodeContext.parent
-          ? self.nodeContext.parent.viewNode
-          : self.viewRoot;
+      this.nodeContext.viewNode = this.viewNode;
+      if (this.viewNode) {
+        const parent = this.nodeContext.parent
+          ? this.nodeContext.parent.viewNode
+          : this.viewRoot;
         if (parent) {
-          parent.appendChild(self.viewNode);
+          parent.appendChild(this.viewNode);
         }
       }
       frame.finish(needToProcessChildren);
@@ -1980,7 +1964,6 @@ export class ViewFactory
     }
     let pn = arr.pop(); // container for that pseudoelement
     let shadowSibling = pn.shadowSibling;
-    const self = this;
     frame
       .loop(() => {
         while (arr.length > 0) {
@@ -2001,7 +1984,7 @@ export class ViewFactory
             ? pn.shadowSibling
             : shadowSibling;
           shadowSibling = null;
-          const result = self.setCurrent(nodeContext, false);
+          const result = this.setCurrent(nodeContext, false);
           if (result.isPending()) {
             return result;
           }

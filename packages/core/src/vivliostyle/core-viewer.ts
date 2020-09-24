@@ -96,7 +96,7 @@ function getDefaultViewerOptions(): CoreViewerOptions {
 
 function convertViewerOptions(options: CoreViewerOptions): object {
   const converted = {};
-  Object.keys(options).forEach((key) => {
+  for (const key of Object.keys(options)) {
     const v = options[key];
     switch (key) {
       case "autoResize":
@@ -108,7 +108,7 @@ function convertViewerOptions(options: CoreViewerOptions): object {
       default:
         converted[key] = v;
     }
-  });
+  }
   return converted;
 }
 
@@ -200,11 +200,11 @@ export class CoreViewer {
     /** @dict */
     const event = { type: msg["t"] };
     const o = msg as object;
-    Object.keys(o).forEach((key) => {
+    for (const key of Object.keys(o)) {
       if (key !== "t") {
         event[key] = o[key];
       }
-    });
+    }
     this.eventTarget.dispatchEvent(event);
   }
 

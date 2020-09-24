@@ -104,7 +104,6 @@ export class AdaptiveViewer {
     public readonly instanceId: string,
     public readonly callbackFn: (p1: Base.JSON) => void,
   ) {
-    const self = this;
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
     if (Constants.isDebug) {
       viewportElement.setAttribute("data-vivliostyle-debug", true);
@@ -116,8 +115,8 @@ export class AdaptiveViewer {
     this.kick = () => {};
     this.sendCommand = () => {};
     this.resizeListener = () => {
-      self.needResize = true;
-      self.kick();
+      this.needResize = true;
+      this.kick();
     };
     this.pageReplacedListener = this.pageReplacedListener.bind(this);
     this.hyperlinkListener = (evt) => {};
@@ -206,19 +205,18 @@ export class AdaptiveViewer {
     }[];
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadPublication");
-    const self = this;
-    self.configure(command).then(() => {
+    this.configure(command).then(() => {
       const store = new Epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
         const pubURL = Base.resolveURL(
           Base.convertSpecialURL(url),
-          self.window.location.href,
+          this.window.location.href,
         );
-        self.packageURL = [pubURL];
+        this.packageURL = [pubURL];
         store.loadPubDoc(pubURL, haveZipMetadata).then((opf) => {
           if (opf) {
-            self.opf = opf;
-            self.render(fragment).then(() => {
+            this.opf = opf;
+            this.render(fragment).then(() => {
               frame.finish(true);
             });
           } else {
@@ -248,23 +246,22 @@ export class AdaptiveViewer {
     // force relayout
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadXML");
-    const self = this;
-    self.configure(command).then(() => {
+    this.configure(command).then(() => {
       const store = new Epub.EPUBDocStore();
       store.init(authorStyleSheet, userStyleSheet).then(() => {
         const resolvedParams: Epub.OPFItemParam[] = params.map((p, index) => ({
           url: Base.resolveURL(
             Base.convertSpecialURL(p.url),
-            self.window.location.href,
+            this.window.location.href,
           ),
           index,
           startPage: p.startPage,
           skipPagesBefore: p.skipPagesBefore,
         }));
-        self.packageURL = resolvedParams.map((p) => p.url);
-        self.opf = new Epub.OPFDoc(store, "");
-        self.opf.initWithChapters(resolvedParams, doc).then(() => {
-          self.render(fragment).then(() => {
+        this.packageURL = resolvedParams.map((p) => p.url);
+        this.opf = new Epub.OPFDoc(store, "");
+        this.opf.initWithChapters(resolvedParams, doc).then(() => {
+          this.render(fragment).then(() => {
             frame.finish(true);
           });
         });
@@ -275,11 +272,10 @@ export class AdaptiveViewer {
 
   private render(fragment?: string | null): Task.Result<boolean> {
     this.cancelRenderingTask();
-    const self = this;
     let cont: Task.Result<boolean>;
     if (fragment) {
       cont = this.opf.resolveFragment(fragment).thenAsync((position) => {
-        self.pagePosition = position;
+        this.pagePosition = position;
         return Task.newResult(true);
       });
     } else {
@@ -287,7 +283,7 @@ export class AdaptiveViewer {
     }
     return cont.thenAsync(() => {
       Profile.profiler.registerEndTiming("beforeRender");
-      return self.resize();
+      return this.resize();
     });
   }
 
@@ -433,11 +429,11 @@ export class AdaptiveViewer {
     const hooks: Plugin.ConfigurationHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.CONFIGURATION,
     );
-    hooks.forEach((hook) => {
+    for (const hook of hooks) {
       const result = hook(command);
       this.needResize = result.needResize || this.needResize;
       this.needRefresh = result.needRefresh || this.needRefresh;
-    });
+    }
   }
 
   /**
@@ -469,11 +465,11 @@ export class AdaptiveViewer {
       pages.push(this.currentSpread.left);
       pages.push(this.currentSpread.right);
     }
-    pages.forEach((page) => {
+    for (const page of pages) {
       if (page) {
         fn(page);
       }
-    });
+    }
   }
 
   private removePageListeners() {
@@ -559,18 +555,17 @@ export class AdaptiveViewer {
 
   private reportPosition(): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame("reportPosition");
-    const self = this;
-    Asserts.assert(self.pagePosition);
-    self.opf
+    Asserts.assert(this.pagePosition);
+    this.opf
       .getCFI(this.pagePosition.spineIndex, this.pagePosition.offsetInItem)
       .then((cfi) => {
-        const page = self.currentPage;
+        const page = this.currentPage;
         const r =
-          self.waitForLoading && page.fetchers.length > 0
+          this.waitForLoading && page.fetchers.length > 0
             ? TaskUtil.waitForFetchers(page.fetchers)
             : Task.newResult(true);
         r.then(() => {
-          self.sendLocationNotification(page, cfi).thenFinish(frame);
+          this.sendLocationNotification(page, cfi).thenFinish(frame);
         });
       });
     return frame.result();
@@ -680,11 +675,11 @@ export class AdaptiveViewer {
   ) {
     if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
       let styleText = "";
-      Object.keys(pageSheetSize).forEach((selector) => {
+      for (const selector of Object.keys(pageSheetSize)) {
         styleText += `@page ${selector}{margin:0;size:`;
         const size = pageSheetSize[selector];
         styleText += `${size.width}px ${size.height}px;}`;
-      });
+      }
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }
@@ -730,14 +725,13 @@ export class AdaptiveViewer {
   private showCurrent(page: Vtree.Page, sync?: boolean): Task.Result<null> {
     this.needRefresh = false;
     this.removePageListeners();
-    const self = this;
     if (this.pref.spreadView) {
       return this.opfView
         .getSpread(this.pagePosition, sync)
         .thenAsync((spread) => {
-          self.showSpread(spread);
-          self.setSpreadZoom(spread);
-          self.currentPage = page;
+          this.showSpread(spread);
+          this.setSpreadZoom(spread);
+          this.currentPage = page;
           return Task.newResult(null);
         });
     } else {
@@ -842,7 +836,6 @@ export class AdaptiveViewer {
     if (this.sizeIsGood()) {
       return Task.newResult(true);
     }
-    const self = this;
     this.setReadyState(Constants.ReadyState.LOADING);
     this.cancelRenderingTask();
     const resizeTask = Task.currentTask()
@@ -851,14 +844,14 @@ export class AdaptiveViewer {
         Task.handle(
           "resize",
           (frame) => {
-            if (!self.opf) {
+            if (!this.opf) {
               frame.finish(false);
               return;
             }
-            self.renderTask = resizeTask;
+            this.renderTask = resizeTask;
             Profile.profiler.registerStartTiming("render (resize)");
-            self.reset();
-            if (self.pagePosition) {
+            this.reset();
+            if (this.pagePosition) {
               // When resizing, do not use the current page index, for a page
               // index corresponding to the current position in the document
               // (offsetInItem) can change due to different layout caused by
@@ -868,66 +861,67 @@ export class AdaptiveViewer {
               // keep pageIndex == 0 when offsetInItem == 0
               if (
                 !(
-                  self.pagePosition.pageIndex == 0 &&
-                  self.pagePosition.offsetInItem == 0
+                  this.pagePosition.pageIndex == 0 &&
+                  this.pagePosition.offsetInItem == 0
                 )
               ) {
-                self.pagePosition.pageIndex = -1;
+                this.pagePosition.pageIndex = -1;
               }
             }
 
             // epageCount counting depends renderAllPages mode
-            self.opf.setEPageCountMode(self.renderAllPages);
+            this.opf.setEPageCountMode(this.renderAllPages);
 
             // With renderAllPages option specified, the rendering is
             // performed after the initial page display, otherwise users are
             // forced to wait the rendering finish in front of a blank page.
-            self.opfView
-              .renderPagesUpto(self.pagePosition, !self.renderAllPages)
+            this.opfView
+              .renderPagesUpto(this.pagePosition, !this.renderAllPages)
               .then((result) => {
                 if (!result) {
                   frame.finish(false);
                   return;
                 }
-                self.pagePosition = result.position;
-                self.showCurrent(result.page, true).then(() => {
-                  self.setReadyState(Constants.ReadyState.INTERACTIVE);
+                this.pagePosition = result.position;
+                this.showCurrent(result.page, true).then(() => {
+                  this.setReadyState(Constants.ReadyState.INTERACTIVE);
 
-                  self.opf
+                  this.opf
                     .countEPages((epageCount) => {
                       const notification = {
                         t: "nav",
                         epageCount: epageCount,
-                        first: self.currentPage.isFirstPage,
-                        last: self.currentPage.isLastPage,
-                        metadata: self.opf.metadata,
-                        docTitle:
-                          self.opf.spine[self.pagePosition.spineIndex].title,
+                        first: this.currentPage.isFirstPage,
+                        last: this.currentPage.isLastPage,
+                        metadata: this.opf.metadata,
+                        docTitle: this.opf.spine[this.pagePosition.spineIndex]
+                          .title,
                       };
                       if (
-                        self.currentPage.isFirstPage ||
-                        (self.pagePosition.pageIndex == 0 &&
-                          self.opf.spine[self.pagePosition.spineIndex].epage)
+                        this.currentPage.isFirstPage ||
+                        (this.pagePosition.pageIndex == 0 &&
+                          this.opf.spine[this.pagePosition.spineIndex].epage)
                       ) {
-                        notification["epage"] =
-                          self.opf.spine[self.pagePosition.spineIndex].epage;
+                        notification["epage"] = this.opf.spine[
+                          this.pagePosition.spineIndex
+                        ].epage;
                       }
-                      self.callback(notification);
+                      this.callback(notification);
                     })
                     .then(() => {
-                      self.reportPosition().then((p) => {
-                        const r = self.renderAllPages
-                          ? self.opfView.renderAllPages()
+                      this.reportPosition().then((p) => {
+                        const r = this.renderAllPages
+                          ? this.opfView.renderAllPages()
                           : Task.newResult(null);
                         r.then(() => {
-                          if (self.renderTask === resizeTask) {
-                            self.renderTask = null;
+                          if (this.renderTask === resizeTask) {
+                            this.renderTask = null;
                           }
                           Profile.profiler.registerEndTiming("render (resize)");
-                          if (self.renderAllPages) {
-                            self.setReadyState(Constants.ReadyState.COMPLETE);
+                          if (this.renderAllPages) {
+                            this.setReadyState(Constants.ReadyState.COMPLETE);
                           }
-                          self.callback({ t: "loaded" });
+                          this.callback({ t: "loaded" });
                           frame.finish(p);
                         });
                       });
@@ -962,16 +956,15 @@ export class AdaptiveViewer {
       metadata: this.opf.metadata,
       docTitle: this.opf.spine[page.spineIndex].title,
     };
-    const self = this;
     this.opf
-      .getEPageFromPosition(self.pagePosition as Epub.Position)
+      .getEPageFromPosition(this.pagePosition as Epub.Position)
       .then((epage) => {
         notification["epage"] = epage;
-        notification["epageCount"] = self.opf.epageCount;
+        notification["epageCount"] = this.opf.epageCount;
         if (cfi) {
           notification["cfi"] = cfi;
         }
-        self.callback(notification);
+        this.callback(notification);
         frame.finish(true);
       });
     return frame.result();
@@ -985,7 +978,6 @@ export class AdaptiveViewer {
 
   moveTo(command: Base.JSON): Task.Result<boolean> {
     let method: () => Task.Result<Epub.PageAndPosition>;
-    const self = this;
     if (
       this.readyState !== Constants.ReadyState.COMPLETE &&
       command["where"] !== "next"
@@ -1019,41 +1011,41 @@ export class AdaptiveViewer {
       }
       if (m) {
         method = () =>
-          m.call(self.opfView, self.pagePosition, !self.renderAllPages);
+          m.call(this.opfView, this.pagePosition, !this.renderAllPages);
       }
     } else if (typeof command["epage"] == "number") {
       const epage = command["epage"] as number;
       method = () =>
-        self.opfView.navigateToEPage(
+        this.opfView.navigateToEPage(
           epage,
-          self.pagePosition,
-          !self.renderAllPages,
+          this.pagePosition,
+          !this.renderAllPages,
         );
     } else if (typeof command["url"] == "string") {
       const url = command["url"] as string;
       method = () =>
-        self.opfView.navigateTo(url, self.pagePosition, !self.renderAllPages);
+        this.opfView.navigateTo(url, this.pagePosition, !this.renderAllPages);
     } else {
       return Task.newResult(true);
     }
     const frame: Task.Frame<boolean> = Task.newFrame("moveTo");
-    method.call(self.opfView).then((result) => {
+    method.call(this.opfView).then((result) => {
       let cont: Task.Result<boolean>;
       if (result) {
-        self.pagePosition = result.position;
+        this.pagePosition = result.position;
         const innerFrame: Task.Frame<boolean> = Task.newFrame(
           "moveTo.showCurrent",
         );
         cont = innerFrame.result();
-        self.showCurrent(result.page, !self.renderAllPages).then(() => {
-          self.reportPosition().thenFinish(innerFrame);
+        this.showCurrent(result.page, !this.renderAllPages).then(() => {
+          this.reportPosition().thenFinish(innerFrame);
         });
       } else {
         cont = Task.newResult(true);
       }
       cont.then((res) => {
-        if (self.readyState === Constants.ReadyState.LOADING) {
-          self.setReadyState(Constants.ReadyState.INTERACTIVE);
+        if (this.readyState === Constants.ReadyState.LOADING) {
+          this.setReadyState(Constants.ReadyState.INTERACTIVE);
         }
         frame.finish(res);
       });
@@ -1080,7 +1072,6 @@ export class AdaptiveViewer {
       this.opfView.hideTOC();
       return Task.newResult(true);
     } else {
-      const self = this;
       const frame: Task.Frame<boolean> = Task.newFrame("showTOC");
       this.opfView.showTOC(autohide).then((page) => {
         if (page) {
@@ -1089,12 +1080,12 @@ export class AdaptiveViewer {
           }
           if (autohide) {
             const hideTOC = () => {
-              self.opfView.hideTOC();
+              this.opfView.hideTOC();
             };
             page.addEventListener("hyperlink", hideTOC, false);
             // page.container.addEventListener("click", hideTOC, false);
           }
-          page.addEventListener("hyperlink", self.hyperlinkListener, false);
+          page.addEventListener("hyperlink", this.hyperlinkListener, false);
         }
         frame.finish(true);
       });
@@ -1103,15 +1094,14 @@ export class AdaptiveViewer {
   }
 
   runCommand(command: Base.JSON): Task.Result<boolean> {
-    const self = this;
     const actionName = command["a"] || "";
     return Task.handle(
       "runCommand",
       (frame) => {
-        const action = self.actions[actionName];
+        const action = this.actions[actionName];
         if (action) {
-          action.call(self, command).then(() => {
-            self.callback({ t: "done", a: actionName });
+          action.call(this, command).then(() => {
+            this.callback({ t: "done", a: actionName });
             frame.finish(true);
           });
         } else {
@@ -1175,7 +1165,7 @@ export class AdaptiveViewer {
             const frameInternal: Task.Frame<boolean> = Task.newFrame(
               "waitForCommand",
             );
-            continuation = frameInternal.suspend(self);
+            continuation = frameInternal.suspend(this);
             frameInternal.result().then(() => {
               loopFrame.continueLoop();
             });

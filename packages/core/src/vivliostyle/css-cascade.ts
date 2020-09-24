@@ -449,7 +449,7 @@ export function mergeIn(
     { id: pseudoelement, styleKey: "_pseudos" },
     { id: regionId, styleKey: "_regions" },
   ];
-  hierarchy.forEach((item) => {
+  for (const item of hierarchy) {
     if (item.id) {
       const styleMap = getMutableStyleMap(target, item.styleKey);
       target = styleMap[item.id];
@@ -458,7 +458,7 @@ export function mergeIn(
         styleMap[item.id] = target;
       }
     }
-  });
+  }
   if (viewConditionMatcher) {
     const styleMap = getViewConditionalStyleMap(target);
     target = {} as ElementStyle;
@@ -1943,10 +1943,9 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const numval = (arr && arr.length && arr[arr.length - 1]) || 0;
       return new Css.Str(this.format(numval, type));
     } else {
-      const self = this;
       const c = new Css.Expr(
         this.counterResolver.getPageCounterVal(counterName, (numval) =>
-          self.format(numval || 0, type),
+          this.format(numval || 0, type),
         ),
       );
       return new Css.SpaceList([c]);
@@ -1967,13 +1966,12 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         sb.append(this.format(arr[i], type));
       }
     }
-    const self = this;
     const c = new Css.Expr(
       this.counterResolver.getPageCountersVal(counterName, (numvals) => {
         const parts = [] as string[];
         if (numvals.length) {
           for (let i = 0; i < numvals.length; i++) {
-            parts.push(self.format(numvals[i], type));
+            parts.push(this.format(numvals[i], type));
           }
         }
         const elementCounters = sb.toString();
@@ -1983,7 +1981,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         if (parts.length) {
           return parts.join(separator);
         } else {
-          return self.format(0, type);
+          return this.format(0, type);
         }
       }),
     );
@@ -2000,12 +1998,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
     const counterName = values[1].toString();
     const type = values.length > 2 ? values[2].stringValue() : "decimal";
-    const self = this;
     const c = new Css.Expr(
       this.counterResolver.getTargetCounterVal(
         targetUrlStr,
         counterName,
-        (numval) => self.format(numval || 0, type),
+        (numval) => this.format(numval || 0, type),
       ),
     );
     return new Css.SpaceList([c]);
@@ -2022,17 +2019,16 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     const counterName = values[1].toString();
     const separator = values[2].stringValue();
     const type = values.length > 3 ? values[3].stringValue() : "decimal";
-    const self = this;
     const c = new Css.Expr(
       this.counterResolver.getTargetCountersVal(
         targetUrlStr,
         counterName,
         (numvals) => {
-          const parts = numvals.map((numval) => self.format(numval, type));
+          const parts = numvals.map((numval) => this.format(numval, type));
           if (parts.length) {
             return parts.join(separator);
           } else {
-            return self.format(0, type);
+            return this.format(0, type);
           }
         },
       ),
@@ -2930,9 +2926,9 @@ export class CascadeInstance {
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
       const counters: { [key: string]: number[] } = {};
-      Object.keys(this.counters).forEach((name) => {
+      for (const name of Object.keys(this.counters)) {
         counters[name] = Array.from(this.counters[name]);
-      });
+      }
       this.counterListener.countersOfId(id, counters);
     }
     const pseudos = getStyleMap(this.currentStyle, "_pseudos");
@@ -3647,13 +3643,13 @@ export class CascadeParserHandler
       value = Css.ident.block;
     }
     const hooks = Plugin.getHooksForName("SIMPLE_PROPERTY");
-    hooks.forEach((hook) => {
+    for (const hook of hooks) {
       const original = { name: name, value: value, important: important };
       const converted = hook(original);
       name = converted["name"];
       value = converted["value"];
       important = converted["important"];
-    });
+    }
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
@@ -3909,12 +3905,12 @@ export function forEachViewConditionalStyles(
   if (!viewConditionalStyles) {
     return;
   }
-  viewConditionalStyles.forEach((entry) => {
+  for (const entry of viewConditionalStyles) {
     if (!entry.matcher.matches()) {
-      return;
+      continue;
     }
     callback(entry.styles);
-  });
+  }
 }
 
 export function mergeViewConditionalStyles(

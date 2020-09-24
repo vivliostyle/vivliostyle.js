@@ -91,10 +91,9 @@ export class SlipMap {
   }
 
   slippedByFixed(fixed: number): number {
-    const self = this;
     const index = Base.binarySearch(
       this.map.length,
-      (index) => fixed <= self.map[index].endFixed,
+      (index) => fixed <= this.map[index].endFixed,
     );
     const range = this.map[index];
     return range.endSlipped - Math.max(0, range.endStuckFixed - fixed);
@@ -104,10 +103,9 @@ export class SlipMap {
    * Smallest fixed for a given slipped.
    */
   fixedBySlipped(slipped: number): number {
-    const self = this;
     const index = Base.binarySearch(
       this.map.length,
-      (index) => slipped <= self.map[index].endSlipped,
+      (index) => slipped <= this.map[index].endSlipped,
     );
     const range = this.map[index];
     return range.endStuckFixed - (range.endSlipped - slipped);
@@ -545,12 +543,12 @@ export class Styler implements AbstractStyler {
     elemStyle: CssCascade.ElementStyle,
     isBody: boolean,
   ): void {
-    ["writing-mode", "direction"].forEach((propName) => {
+    for (const propName of ["writing-mode", "direction"]) {
       if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
         // Copy it over, but keep it at the root element as well.
         this.rootStyle[propName] = elemStyle[propName];
       }
-    });
+    }
     if (!this.rootBackgroundAssigned) {
       const backgroundColor = this.hasProp(
         elemStyle,

@@ -227,7 +227,6 @@ export class TOCView implements Vgen.CustomRendererFactory {
     if (this.page) {
       return Task.newResult(this.page as Vtree.Page);
     }
-    const self = this;
     const frame: Task.Frame<Vtree.Page> = Task.newFrame("showTOC");
     const page = new Vtree.Page(elem, elem);
     this.page = page;
@@ -256,7 +255,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         }
       }
 
-      const style = self.store.getStyleForDoc(xmldoc);
+      const style = this.store.getStyleForDoc(xmldoc);
       const viewportSize = style.sizeViewport(width, 100000, fontSize);
       viewport = new Vgen.Viewport(
         viewport.window,
@@ -265,33 +264,31 @@ export class TOCView implements Vgen.CustomRendererFactory {
         viewportSize.width,
         viewportSize.height,
       );
-      const customRenderer = self.makeCustomRenderer(xmldoc);
+      const customRenderer = this.makeCustomRenderer(xmldoc);
       const instance = new OPS.StyleInstance(
         style,
         xmldoc,
-        self.lang,
+        this.lang,
         viewport,
-        self.clientLayout,
-        self.fontMapper,
+        this.clientLayout,
+        this.fontMapper,
         customRenderer,
-        self.fallbackMap,
+        this.fallbackMap,
         0,
-        self.documentURLTransformer,
-        self.counterStore,
+        this.documentURLTransformer,
+        this.counterStore,
       );
-      self.instance = instance;
-      instance.pref = self.pref;
+      this.instance = instance;
+      instance.pref = this.pref;
       instance.init().then(() => {
         instance.layoutNextPage(page, null).then(() => {
-          Array.from(
-            page.container.querySelectorAll(
-              "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']",
-            ),
-          ).forEach((bodyChildElem) => {
+          for (const bodyChildElem of page.container.querySelectorAll(
+            "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']",
+          )) {
             bodyChildElem.setAttribute("aria-hidden", "true");
             bodyChildElem.setAttribute("hidden", "hidden");
-          });
-          self.setAutoHeight(elem, 2);
+          }
+          this.setAutoHeight(elem, 2);
           frame.finish(page);
         });
       });

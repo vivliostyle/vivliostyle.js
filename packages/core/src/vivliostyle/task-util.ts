@@ -47,17 +47,16 @@ export class Fetcher<T> {
    */
   start(): void {
     if (!this.task) {
-      const self = this;
       this.task = Task.currentTask()
         .getScheduler()
         .run(() => {
           const frame = Task.newFrame("Fetcher.run");
-          self.fetch().then((resource) => {
-            const piggibacks = self.piggybacks;
-            self.arrived = true;
-            self.resource = resource;
-            self.task = null;
-            self.piggybacks = [];
+          this.fetch().then((resource) => {
+            const piggibacks = this.piggybacks;
+            this.arrived = true;
+            this.resource = resource;
+            this.task = null;
+            this.piggybacks = [];
             if (piggibacks) {
               for (let i = 0; i < piggibacks.length; i++) {
                 try {

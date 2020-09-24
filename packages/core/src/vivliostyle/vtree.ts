@@ -139,7 +139,6 @@ export class Page extends Base.SimpleEventTarget {
     public readonly bleedBox: HTMLElement,
   ) {
     super();
-    const self = this;
     this.hrefHandler = (e: Event) => {
       const anchorElement = e.currentTarget as Element;
       const href =
@@ -156,7 +155,7 @@ export class Page extends Base.SimpleEventTarget {
             e.preventDefault();
           },
         };
-        self.dispatchEvent(evt);
+        this.dispatchEvent(evt);
       }
     };
   }
@@ -192,7 +191,7 @@ export class Page extends Base.SimpleEventTarget {
     // Remove ID of elements which eventually did not fit in the page
     // (Some nodes may have been removed after registration if they did not fit
     // in the page)
-    Object.keys(this.elementsById).forEach((id) => {
+    for (const id of Object.keys(this.elementsById)) {
       const elems = this.elementsById[id];
       for (let i = 0; i < elems.length; ) {
         if (this.container.contains(elems[i])) {
@@ -204,7 +203,7 @@ export class Page extends Base.SimpleEventTarget {
       if (elems.length === 0) {
         delete this.elementsById[id];
       }
-    });
+    }
     const list = this.delayedItems;
     for (let i = 0; i < list.length; i++) {
       const item = list[i];

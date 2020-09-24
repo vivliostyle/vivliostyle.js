@@ -145,7 +145,7 @@ export function getSize(
     throw new Error("Getting fill-available block size is not implemented");
   }
   const result = {} as { [key in Size]: number };
-  sizes.forEach((size) => {
+  for (const size of sizes) {
     let r: string;
     switch (size) {
       case Size.FILL_AVAILABLE_INLINE_SIZE:
@@ -196,7 +196,7 @@ export function getSize(
     result[size] = parseFloat(r);
     Base.setCSSProperty(element, "position", original.position);
     Base.setCSSProperty(element, "display", original.display);
-  });
+  }
   Base.setCSSProperty(element, "width", original.width);
   Base.setCSSProperty(element, "max-width", original.maxWidth);
   Base.setCSSProperty(element, "min-width", original.minWidth);

@@ -170,7 +170,6 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     // First, find the last element in the document, such that
     // this.getElementOffset(element) <= offset; if offest matches
     // exactly, just return it.
-    const self = this;
     let element = this.root;
     while (true) {
       elementOffset = this.getElementOffset(element);
@@ -183,7 +182,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       }
       const index = Base.binarySearch(children.length, (index) => {
         const child = children[index];
-        const childOffset = self.getElementOffset(child);
+        const childOffset = this.getElementOffset(child);
         return childOffset > offset;
       });
       if (index == 0) {
@@ -191,7 +190,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       }
       if (VIVLIOSTYLE_DEBUG) {
         if (index < children.length) {
-          const elemOffset = self.getElementOffset(children[index]);
+          const elemOffset = this.getElementOffset(children[index]);
           if (elemOffset <= offset) {
             throw new Error("Consistency check failed!");
           }
@@ -421,19 +420,17 @@ export class Predicate implements XmlDoc.Predicate {
   }
 
   withAttribute(name: string, value: string): Predicate {
-    const self = this;
     return new Predicate(
       (node) =>
-        self.check(node) &&
+        this.check(node) &&
         node.nodeType == 1 &&
         (node as Element).getAttribute(name) == value,
     );
   }
 
   withChild(name: string, opt_childPredicate?: Predicate): Predicate {
-    const self = this;
     return new Predicate((node) => {
-      if (!self.check(node)) {
+      if (!this.check(node)) {
         return false;
       }
       let list = new NodeList([node]);
