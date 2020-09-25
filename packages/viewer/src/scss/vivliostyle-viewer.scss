@@ -59,13 +59,16 @@ html[data-vivliostyle-paginated] {
   z-index: 1;
   overflow: auto;
   box-sizing: border-box;
-  max-width: 60rem;
   padding: 4px 16px;
   margin-top: $menu-icon-height;
   background: #f0f0f0;
   font-family: $sans-serif;
   font-size: 0.875rem;
   line-height: 1.5;
+
+  > * {
+    max-width: 48rem;
+  }
 
   > h1 {
     font-size: 1.75rem;
@@ -87,6 +90,7 @@ html[data-vivliostyle-paginated] {
     display: block;
     box-sizing: border-box;
     width: 100%;
+    max-width: 100%;
     padding: 4px;
     border: 2px solid #808080;
     border-radius: 6px;
