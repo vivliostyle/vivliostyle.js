@@ -2807,7 +2807,7 @@ export class PageParserHandler
               if (noPageSelectorProps[n]) {
                 CssCascade.setProp(props, n, noPageSelectorProps[n]);
               }
-            }, this);
+            });
           }
         } else {
           // consider specificity when setting 'size' property.
