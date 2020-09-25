@@ -449,7 +449,7 @@ export function mergeIn(
     { id: pseudoelement, styleKey: "_pseudos" },
     { id: regionId, styleKey: "_regions" },
   ];
-  for (const item of hierarchy) {
+  hierarchy.forEach((item) => {
     if (item.id) {
       const styleMap = getMutableStyleMap(target, item.styleKey);
       target = styleMap[item.id];
@@ -458,7 +458,7 @@ export function mergeIn(
         styleMap[item.id] = target;
       }
     }
-  }
+  });
   if (viewConditionMatcher) {
     const styleMap = getViewConditionalStyleMap(target);
     target = {} as ElementStyle;
@@ -2926,9 +2926,9 @@ export class CascadeInstance {
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
       const counters: { [key: string]: number[] } = {};
-      for (const name of Object.keys(this.counters)) {
+      Object.keys(this.counters).forEach((name) => {
         counters[name] = Array.from(this.counters[name]);
-      }
+      });
       this.counterListener.countersOfId(id, counters);
     }
     const pseudos = getStyleMap(this.currentStyle, "_pseudos");
@@ -3643,13 +3643,13 @@ export class CascadeParserHandler
       value = Css.ident.block;
     }
     const hooks = Plugin.getHooksForName("SIMPLE_PROPERTY");
-    for (const hook of hooks) {
+    hooks.forEach((hook) => {
       const original = { name: name, value: value, important: important };
       const converted = hook(original);
       name = converted["name"];
       value = converted["value"];
       important = converted["important"];
-    }
+    });
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
@@ -3905,12 +3905,12 @@ export function forEachViewConditionalStyles(
   if (!viewConditionalStyles) {
     return;
   }
-  for (const entry of viewConditionalStyles) {
+  viewConditionalStyles.forEach((entry) => {
     if (!entry.matcher.matches()) {
-      continue;
+      return;
     }
     callback(entry.styles);
-  }
+  });
 }
 
 export function mergeViewConditionalStyles(

@@ -34,9 +34,9 @@ function cloneCounterValues(
   counters: CssCascade.CounterValues,
 ): CssCascade.CounterValues {
   const result = {};
-  for (const name of Object.keys(counters)) {
+  Object.keys(counters).forEach((name) => {
     result[name] = Array.from(counters[name]);
-  }
+  });
   return result;
 }
 
@@ -523,7 +523,7 @@ export class CounterStore {
     const ids = Object.keys(this.currentPage.elementsById);
     if (ids.length > 0) {
       const currentPageCounters = cloneCounterValues(this.currentPageCounters);
-      for (const id of ids) {
+      ids.forEach((id) => {
         this.pageCountersById[id] = currentPageCounters;
         const oldPageIndex = this.pageIndicesById[id];
         if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
@@ -541,7 +541,7 @@ export class CounterStore {
           }
         }
         this.pageIndicesById[id] = { spineIndex, pageIndex };
-      }
+      });
     }
     const prevPageCounters = this.previousPageCounters;
     let ref: TargetCounterReference;
@@ -581,12 +581,12 @@ export class CounterStore {
   }[] {
     let refs: TargetCounterReference[] = [];
     const ids = Object.keys(page.elementsById);
-    for (const id of ids) {
+    ids.forEach((id) => {
       const idRefs = this.unresolvedReferences[id];
       if (idRefs) {
         refs = refs.concat(idRefs);
       }
-    }
+    });
     refs.sort(
       (r1, r2) => r1.spineIndex - r2.spineIndex || r1.pageIndex - r2.pageIndex,
     );
@@ -602,7 +602,7 @@ export class CounterStore {
       pageCounters: CssCascade.CounterValues;
       refs: TargetCounterReference[];
     } = null;
-    for (const ref of refs) {
+    refs.forEach((ref) => {
       if (
         !o ||
         o.spineIndex !== ref.spineIndex ||
@@ -618,7 +618,7 @@ export class CounterStore {
       } else {
         o.refs.push(ref);
       }
-    }
+    });
     return result;
   }
 

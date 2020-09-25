@@ -484,11 +484,11 @@ export class ViewFactory
       float,
       this.sourceNode === this.xmldoc.root,
     );
-    for (const name of ["display", "position", "float"]) {
+    ["display", "position", "float"].forEach((name) => {
       if (displayValues[name]) {
         computedStyle[name] = displayValues[name];
       }
-    }
+    });
     return vertical;
   }
 
@@ -584,7 +584,7 @@ export class ViewFactory
           props[n] = this.nodeContext.parent.inheritedProps[n];
         }
       }
-      for (const name of polyfilledInheritedProps) {
+      polyfilledInheritedProps.forEach((name) => {
         const value = computedStyle[name];
         if (value) {
           if (value instanceof Css.Int) {
@@ -606,7 +606,7 @@ export class ViewFactory
           }
           delete computedStyle[name];
         }
-      }
+      });
     }
   }
 
@@ -1356,7 +1356,7 @@ export class ViewFactory
     computedStyle: { [key: string]: Css.Val },
     isVertical: boolean,
   ) {
-    for (const param of images) {
+    images.forEach((param) => {
       if (param.fetcher.get().get() === "load") {
         const img = param.image;
         let scaledWidth = (img as HTMLImageElement).width / imageResolution;
@@ -1486,16 +1486,16 @@ export class ViewFactory
           }
         }
       }
-    }
+    });
   }
 
   private preprocessElementStyle(computedStyle: { [key: string]: Css.Val }) {
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
-    for (const hook of hooks) {
+    hooks.forEach((hook) => {
       hook(this.nodeContext, computedStyle);
-    }
+    });
   }
 
   private findAndProcessRepeatingElements(

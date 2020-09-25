@@ -464,7 +464,7 @@ export function setCSSProperty(
     if (!prefixedPropertyNames) {
       return;
     }
-    for (const prefixed of prefixedPropertyNames) {
+    prefixedPropertyNames.forEach((prefixed) => {
       if (prefixed === "-ms-writing-mode") {
         switch (value) {
           case "horizontal-tb":
@@ -487,7 +487,7 @@ export function setCSSProperty(
       if (elem && (elem as HTMLElement).style) {
         (elem as HTMLElement).style.setProperty(prefixed, value);
       }
-    }
+    });
   } catch (err) {
     Logging.logger.warn(err);
   }

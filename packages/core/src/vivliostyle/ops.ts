@@ -319,7 +319,7 @@ export class StyleInstance
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = this.style.pageProps;
-    for (const selector of Object.keys(pageProps)) {
+    Object.keys(pageProps).forEach((selector) => {
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
         CssPage.resolvePageSizeAndBleed(pageProps[selector] as any),
         this,
@@ -328,7 +328,7 @@ export class StyleInstance
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
         height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2,
       };
-    }
+    });
     return frame.result();
   }
 
@@ -1661,7 +1661,7 @@ export class StyleInstance
             : Constants.PageSide.RIGHT;
           this.processLinger();
           cp = this.currentLayoutPosition;
-          for (const flowName of Object.keys(cp.flowPositions)) {
+          Object.keys(cp.flowPositions).forEach((flowName) => {
             const flowPosition = cp.flowPositions[flowName];
             const breakAfter = flowPosition.breakAfter;
             if (
@@ -1670,7 +1670,7 @@ export class StyleInstance
             ) {
               flowPosition.breakAfter = null;
             }
-          }
+          });
         }
         this.currentLayoutPosition = this.layoutPositionAtPageStart = null;
         cp.highestSeenOffset = this.styler.getReachedOffset();

@@ -232,12 +232,12 @@ export function callback(msg: Base.JSON): void {
         "vivliostyle-page-navigation-right",
       );
       rightButton.addEventListener("click", navigateToRightPage, false);
-      for (const button of [leftButton, rightButton]) {
+      [leftButton, rightButton].forEach((button) => {
         button.setAttribute("data-vivliostyle-ui-state", "attention");
         window.setTimeout(() => {
           button.removeAttribute("data-vivliostyle-ui-state");
         }, 1000);
-      }
+      });
       break;
     }
     case "error":

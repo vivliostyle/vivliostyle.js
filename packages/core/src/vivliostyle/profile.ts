@@ -63,7 +63,7 @@ export class Profiler {
   printTimings() {
     const timestamps = this.timestamps;
     let st = "";
-    for (const name of Object.keys(timestamps)) {
+    Object.keys(timestamps).forEach((name) => {
       const stamps = timestamps[name];
       const l = stamps.length;
       for (let i = 0; i < l; i++) {
@@ -76,7 +76,7 @@ export class Profiler {
           t["end"] - t["start"]
         }\n`;
       }
-    }
+    });
     Logging.logger.info(st);
   }
 

@@ -282,12 +282,14 @@ export class TOCView implements Vgen.CustomRendererFactory {
       instance.pref = this.pref;
       instance.init().then(() => {
         instance.layoutNextPage(page, null).then(() => {
-          for (const bodyChildElem of page.container.querySelectorAll(
-            "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']",
-          )) {
+          Array.from(
+            page.container.querySelectorAll(
+              "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']",
+            ),
+          ).forEach((bodyChildElem) => {
             bodyChildElem.setAttribute("aria-hidden", "true");
             bodyChildElem.setAttribute("hidden", "hidden");
-          }
+          });
           this.setAutoHeight(elem, 2);
           frame.finish(page);
         });

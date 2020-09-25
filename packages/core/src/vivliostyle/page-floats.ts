@@ -228,9 +228,9 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
   }
 
   addContinuations(continuations: PageFloatContinuation[]) {
-    for (const c of continuations) {
+    continuations.forEach((c) => {
       this.continuations.push(c);
-    }
+    });
   }
 
   getFlowName(): string {
@@ -573,15 +573,15 @@ export class PageFloatLayoutContext
   getLastFollowingFloatInFragments(float: PageFloat): PageFloat | null {
     const order = float.getOrder();
     let lastFollowing: PageFloat = null;
-    for (const fragment of this.floatFragments) {
-      for (const c of fragment.continuations) {
+    this.floatFragments.forEach((fragment) => {
+      fragment.continuations.forEach((c) => {
         const f = c.float;
         const o = f.getOrder();
         if (o > order && (!lastFollowing || o > lastFollowing.getOrder())) {
           lastFollowing = f;
         }
-      }
-    }
+      });
+    });
     if (this.parent) {
       const lastFollowingOfParent = this.parent.getLastFollowingFloatInFragments(
         float,
@@ -712,17 +712,17 @@ export class PageFloatLayoutContext
         this.floatsDeferredToNext.splice(i, 1);
       }
     }
-    for (const continuation of this.floatsDeferredFromPrevious) {
+    this.floatsDeferredFromPrevious.forEach((continuation) => {
       if (
         this.floatsDeferredToNext.findIndex((c) => continuation.equals(c)) >= 0
       ) {
-        continue;
+        return;
       }
       if (this.floatFragments.some((f) => f.hasFloat(continuation.float))) {
-        continue;
+        return;
       }
       this.floatsDeferredToNext.push(continuation);
-    }
+    });
   }
 
   hasSameContainerAs(other: PageFloatLayoutContext): boolean {
@@ -739,49 +739,49 @@ export class PageFloatLayoutContext
       return;
     }
     if (this.container) {
-      for (const child of this.children) {
+      this.children.forEach((child) => {
         // Since the same container element is shared by a region page float
         // layout context and a column page float layout context in a single
         // column region, view elements of float fragments of the child (column)
         // context need to be removed here.
         if (this.hasSameContainerAs(child)) {
-          for (const fragment of child.floatFragments) {
+          child.floatFragments.forEach((fragment) => {
             const elem = fragment.area.element;
             if (elem && elem.parentNode) {
               elem.parentNode.removeChild(elem);
             }
-          }
+          });
         }
-      }
+      });
       this.container.clear();
     }
-    for (const child of this.children) {
+    this.children.forEach((child) => {
       child.layoutConstraints.splice(0);
-    }
+    });
     this.children.splice(0);
-    for (const k of Object.keys(this.floatAnchors)) {
+    Object.keys(this.floatAnchors).forEach((k) => {
       delete this.floatAnchors[k];
-    }
+    });
   }
 
   detachChildren(): PageFloatLayoutContext[] {
     const children = this.children.splice(0);
-    for (const child of children) {
-      for (const fragment of child.floatFragments) {
+    children.forEach((child) => {
+      child.floatFragments.forEach((fragment) => {
         const elem = fragment.area.element;
         if (elem && elem.parentNode) {
           elem.parentNode.removeChild(elem);
         }
-      }
-    }
+      });
+    });
     return children;
   }
 
   attachChildren(children: PageFloatLayoutContext[]) {
-    for (const child of children) {
+    children.forEach((child) => {
       this.children.push(child);
       child.reattachFloatFragments();
-    }
+    });
   }
 
   isInvalidated() {
@@ -856,9 +856,9 @@ export class PageFloatLayoutContext
       this.getParent(floatReference).restoreStashedFragments(floatReference);
       return;
     }
-    for (const stashed of this.stashedFloatFragments) {
+    this.stashedFloatFragments.forEach((stashed) => {
       this.addPageFloatFragment(stashed, true);
-    }
+    });
     this.stashedFloatFragments.splice(0);
   }
 
@@ -1308,9 +1308,9 @@ export class PageFloatLayoutContext
   private reattachFloatFragments() {
     const parent = this.container.element && this.container.element.parentNode;
     if (parent) {
-      for (const fragment of this.floatFragments) {
+      this.floatFragments.forEach((fragment) => {
         parent.appendChild(fragment.area.element);
-      }
+      });
     }
   }
 
@@ -1458,7 +1458,7 @@ export class PageFloatLayoutContext
           hasPrecedingFragmentInParents(parent, side))
       );
     }
-    for (const side of logicalSides) {
+    logicalSides.forEach((side) => {
       switch (side) {
         case "block-start":
         case "inline-start":
@@ -1471,7 +1471,7 @@ export class PageFloatLayoutContext
         default:
           throw new Error(`Unexpected side: ${side}`);
       }
-    }
+    });
     return result;
   }
 
