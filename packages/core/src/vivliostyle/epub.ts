@@ -147,9 +147,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
           // Web Publication Manifest
           this.loadAsJSON(url, true).then((manifestObj) => {
             if (!manifestObj) {
-              Logging.logger.error(
-                `Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`,
-              );
+              this.reportLoadError(url);
               frame.finish(null);
               return;
             }
@@ -225,9 +223,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     this.loadAsPlainXML(url, true, `Failed to fetch EPUB OPF ${url}`).then(
       (opfXML) => {
         if (!opfXML) {
-          Logging.logger.error(
-            `Received an empty response for EPUB OPF ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`,
-          );
+          this.reportLoadError(url);
         } else {
           this.loadAsPlainXML(`${pubURL}META-INF/encryption.xml`).then(
             (encXML) => {
@@ -263,9 +259,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     // Load the primary entry page (X)HTML
     this.load(url).then((xmldoc) => {
       if (!xmldoc) {
-        Logging.logger.error(
-          `Received an empty response for ${url}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`,
-        );
+        this.reportLoadError(url);
       } else if (
         xmldoc.document.querySelector(
           "a[href='META-INF/'],a[href$='/META-INF/']",
@@ -340,6 +334,49 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return frame.result();
   }
 
+  reportLoadError(docURL: string): void {
+    const removePath = (url: string) => {
+      return url.replace(/(?<![:/])[/?#].*/, "");
+    };
+    const likelyCorsProblem = () => {
+      const domain = removePath(docURL);
+      if (domain === removePath(Base.baseURL)) {
+        // same domain, no CORS problem
+        return false;
+      }
+      const urls = Object.keys(this.resources);
+      if (
+        urls.find((url) => this.resources[url] && removePath(url) === domain)
+      ) {
+        // if there is an already loaded resource with the same domain, no CORS problem
+        return false;
+      }
+      if (/\.(xhtml|xht|xml|opf)$/i.test(docURL)) {
+        // maybe, XML error
+        return false;
+      }
+      // likely, CORS problem
+      return true;
+    };
+
+    if (docURL.startsWith("data:")) {
+      Logging.logger.error(`Failed to load ${docURL}. Invalid data.`);
+    } else if (
+      docURL.startsWith("http:") &&
+      Base.baseURL.startsWith("https:")
+    ) {
+      Logging.logger.error(
+        `Failed to load ${docURL}. Mixed Content ("http:" content on "https:" context) is not allowed.`,
+      );
+    } else if (likelyCorsProblem()) {
+      Logging.logger.error(
+        `Failed to load ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`,
+      );
+    } else {
+      Logging.logger.error(`Failed to load ${docURL}. The target resource is invalid.`);
+    }
+  }
+
   /**
    * @override
    */
@@ -357,20 +394,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
       );
       r.then((xmldoc: XmlDoc.XMLDocHolder) => {
         if (!xmldoc) {
-          if (docURL.startsWith("data:")) {
-            Logging.logger.error(`Failed to load ${docURL}. Invalid data.`);
-          } else if (
-            docURL.startsWith("http:") &&
-            Base.baseURL.startsWith("https:")
-          ) {
-            Logging.logger.error(
-              `Failed to load ${docURL}. Mixed Content ("http:" content on "https:" context) is not allowed.`,
-            );
-          } else {
-            Logging.logger.error(
-              `Received an empty response for ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`,
-            );
-          }
+          this.reportLoadError(docURL);
         } else {
           frame.finish(xmldoc);
         }
