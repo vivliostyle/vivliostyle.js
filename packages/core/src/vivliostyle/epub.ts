@@ -373,7 +373,9 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         `Failed to load ${docURL}. This may be caused by the server not allowing cross-origin resource sharing (CORS).`,
       );
     } else {
-      Logging.logger.error(`Failed to load ${docURL}. The target resource is invalid.`);
+      Logging.logger.error(
+        `Failed to load ${docURL}. The target resource is invalid.`,
+      );
     }
   }
 
