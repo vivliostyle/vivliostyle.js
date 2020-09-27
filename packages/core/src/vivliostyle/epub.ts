@@ -203,8 +203,8 @@ export class EPUBDocStore extends OPS.OPSDocStore {
             return;
           }
         }
-        frame.finish(null);
       }
+      frame.finish(null);
     });
     return frame.result();
   }
