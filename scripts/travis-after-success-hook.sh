@@ -112,8 +112,14 @@ if [[ $IS_VALID_TAG = true ]]; then
     
     # GitHub releases
     echo "===> Creating GitHub Release"
-    npm i -g conventional-changelog-cli github-release-cli@1.3.1
-    CHANGELOG=$(conventional-changelog -p angular)
+    npm i -g github-release-cli@1.3.1
+    if [[ $STABLE_RELEASE = true ]]; then
+        # get change log after the previous stable release
+        CHANGELOG=$(sed -E -e '/^##? \['${VERSION//./\\.}'\]/,/^##? \[[0-9.]+\]/! d' CHANGELOG.md | sed -e '$ d')
+    else
+        # get change log after the previous (pre-)release
+        CHANGELOG=$(sed -E -e '/^##? \['${VERSION//./\\.}'\]/,/^##? /! d' CHANGELOG.md | sed -e '$ d')
+    fi
     echo "===> CHANGELOG=${CHANGELOG}"
     TAGGED_ARCHIVE="vivliostyle-viewer-${VERSION}.zip"
     cp ${ARCHIVE_PATH} ${TAGGED_ARCHIVE}
