@@ -1,5 +1,9 @@
 module.exports = [
   {
+    category: "Start page",
+    files: [{ file: "", title: "Vivliostyle Viewer start page" }],
+  },
+  {
     category: "General",
     files: [
       { file: "print_media/", title: "Print media" },
@@ -112,7 +116,11 @@ module.exports = [
         file: "print_media/styles-in-body.html",
         title: "Style elements in the body elements",
       },
-      { file: "lists-attributes.html", title: "Attributes on list elements" },
+      {
+        file: "lists-attributes.html",
+        title: "Attributes on list elements",
+        options: "&bookMode=true",
+      },
     ],
   },
   {
