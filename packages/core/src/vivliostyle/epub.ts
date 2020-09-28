@@ -1256,7 +1256,9 @@ export class OPFDoc {
       }
 
       if (!this.xhtmlToc) {
-        this.xhtmlToc = this.itemMapByPath[primaryEntryPath];
+        this.xhtmlToc = manifestUrl
+          ? this.items?.[0]
+          : this.itemMapByPath[primaryEntryPath];
       }
 
       frame.finish(true);
