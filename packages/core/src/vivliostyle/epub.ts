@@ -152,7 +152,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
               return;
             }
             const opf = new OPFDoc(this, url);
-            opf.initWithWebPubManifest(manifestObj).then(() => {
+            opf.initWithWebPubManifest(manifestObj, undefined, url).then(() => {
               frame.finish(opf);
             });
           });
@@ -288,12 +288,16 @@ export class EPUBDocStore extends OPS.OPSDocStore {
               frame.finish(opf);
             });
           } else {
-            this.loadAsJSON(
-              Base.resolveURL(manifestLink.getAttribute("href"), url),
-            ).then((manifestObj) => {
-              opf.initWithWebPubManifest(manifestObj, doc).then(() => {
-                frame.finish(opf);
-              });
+            const manifestUrl = Base.resolveURL(
+              manifestLink.getAttribute("href"),
+              url,
+            );
+            this.loadAsJSON(manifestUrl).then((manifestObj) => {
+              opf
+                .initWithWebPubManifest(manifestObj, doc, manifestUrl)
+                .then(() => {
+                  frame.finish(opf);
+                });
             });
           }
         } else {
@@ -1154,6 +1158,7 @@ export class OPFDoc {
   initWithWebPubManifest(
     manifestObj: Base.JSON,
     doc?: Document,
+    manifestUrl?: string,
   ): Task.Result<boolean> {
     if (manifestObj["readingProgression"]) {
       this.pageProgression = manifestObj["readingProgression"];
@@ -1225,7 +1230,10 @@ export class OPFDoc {
               /(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/.test(url)
             ) {
               const param = {
-                url: Base.resolveURL(Base.convertSpecialURL(url), this.pubURL),
+                url: Base.resolveURL(
+                  Base.convertSpecialURL(url),
+                  manifestUrl || this.pubURL,
+                ),
                 index: itemCount++,
                 startPage: null,
                 skipPagesBefore: null,
