@@ -226,14 +226,19 @@ export class Mapper {
     const fontFamily = this.getViewFontFamily(srcFace, documentFaces);
     props["font-family"] = Css.getName(fontFamily);
     const viewFontFace = new Face(props);
-    const probe = this.body.ownerDocument.createElement("span") as HTMLElement;
+    const probe = this.body.ownerDocument.createElement("span");
     probe.textContent = "M";
     const killTime = new Date().valueOf() + 1000;
     const style = this.head.ownerDocument.createElement("style");
     const bogusData = bogusFontData + bogusFontCounter++;
     style.textContent = viewFontFace.makeAtRule("", Net.makeBlob([bogusData]));
     this.head.appendChild(style);
-    this.body.appendChild(probe);
+    const probeCont = this.body.ownerDocument.createElement("span");
+    probeCont.style.width = "0";
+    probeCont.style.height = "0";
+    probeCont.style.overflow = "hidden";
+    probeCont.appendChild(probe);
+    this.body.appendChild(probeCont);
     probe.style.visibility = "hidden";
     probe.style.fontFamily = fontFamily;
     for (const pname in traitProps) {
@@ -266,7 +271,7 @@ export class Mapper {
         } else {
           Logging.logger.warn("Failed to load font:", src);
         }
-        this.body.removeChild(probe);
+        this.body.removeChild(probeCont);
         frame.finish(viewFontFace);
       });
     return frame.result();
