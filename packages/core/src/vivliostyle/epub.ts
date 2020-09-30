@@ -791,9 +791,7 @@ export class OPFDoc {
        */
       transformFragment(fragment: string, baseURL: string): string {
         const url = baseURL + (fragment ? `#${fragment}` : "");
-        return (
-          transformedIdPrefix + Base.escapeNameStrToHex(decodeURI(url), ":")
-        );
+        return transformedIdPrefix + Base.escapeNameStrToHex(url, ":");
       }
 
       /**
@@ -803,7 +801,7 @@ export class OPFDoc {
         const r = url.match(/^([^#]*)#?(.*)$/);
         if (r) {
           const path = r[1] || baseURL;
-          const fragment = r[2];
+          const fragment = decodeURIComponent(r[2]);
           if (path) {
             if (self.items.some((item) => item.src === path)) {
               return `#${this.transformFragment(fragment, path)}`;

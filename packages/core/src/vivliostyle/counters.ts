@@ -102,7 +102,7 @@ class CounterListener implements CssCascade.CounterListener {
    */
   countersOfId(id: string, counters: CssCascade.CounterValues) {
     id = this.counterStore.documentURLTransformer.transformFragment(
-      encodeURIComponent(id),
+      id,
       this.baseURL,
     );
     this.counterStore.countersById[id] = counters;

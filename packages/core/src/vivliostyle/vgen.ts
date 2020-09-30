@@ -1117,7 +1117,7 @@ export class ViewFactory
               // (only first time).
               if (firstTime) {
                 attributeValue = this.documentURLTransformer.transformFragment(
-                  encodeURIComponent(attributeValue),
+                  attributeValue,
                   this.xmldoc.url,
                 );
                 result.setAttribute(attributeName, attributeValue);
