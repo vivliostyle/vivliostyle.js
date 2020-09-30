@@ -340,7 +340,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
 
   reportLoadError(docURL: string): void {
     const removePath = (url: string) => {
-      return url.replace(/(?<![:/])[/?#].*/, "");
+      return url.replace(/([^:/?#]|^)[/?#].*/, "$1");
     };
     const likelyCorsProblem = () => {
       const domain = removePath(docURL);
