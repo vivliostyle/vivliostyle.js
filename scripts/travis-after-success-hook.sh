@@ -176,7 +176,7 @@ if [[ $IS_VALID_TAG = true ]]; then
         mkdir -p vivliostyle.org/viewer
         cp -R ${VIEWER_ARTIFACTS} vivliostyle.org/viewer/
         cp -R ${ARCHIVE_PATH} vivliostyle.org/downloads/vivliostyle-viewer-latest.zip
-        sed -i '' -E -e '/^(core|viewer|react):/,/^  version:/s/^(  version: ).+$/\1'${TRAVIS_TAG}'/' vivliostyle.org/_data/project.yml
+        sed --in-place -E -e '/^(core|viewer|react):/,/^  version:/s/^(  version: ).+$/\1'${TRAVIS_TAG}'/' vivliostyle.org/_data/project.yml
         echo "===> Pushing changes to vivliostyle.org"
         cd vivliostyle.org
         git add .
