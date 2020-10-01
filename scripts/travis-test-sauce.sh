@@ -10,4 +10,6 @@ fold_end() {
 
 fold_start test-sauce Sauce
 yarn test-sauce
+RET=$?
 fold_end test-sauce
+exit $RET
