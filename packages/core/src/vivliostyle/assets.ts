@@ -1,99 +1,4 @@
-// vivliostyle-viewport-screen.css
-export const VivliostyleViewportScreenCss = `
-/*
- * Copyright 2017 Trim-marks Inc.
- *
- * Vivliostyle.js is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Vivliostyle.js is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
-
-@media screen {
-
-    [data-vivliostyle-viewer-viewport] {
-        background: #AAAAAA;
-    }
-
-    [data-vivliostyle-page-container] {
-        background: white;
-    }
-
-    [data-vivliostyle-viewer-viewport] {
-        display: -webkit-flex;
-        display: flex;
-        overflow: auto;
-        position: relative;
-    }
-
-    [data-vivliostyle-outer-zoom-box] {
-        margin: auto;
-        overflow: hidden;
-        -webkit-flex: none;
-        flex: none;
-    }
-
-    [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
-        display: -webkit-flex;
-        display: flex;
-        -webkit-flex: none;
-        flex: none;
-        -webkit-justify-content: center;
-        justify-content: center;
-        -moz-transform-origin: left top;
-        -ms-transform-origin: left top;
-        -webkit-transform-origin: left top;
-        transform-origin: left top;
-    }
-
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=ltr] [data-vivliostyle-spread-container] {
-        -webkit-flex-direction: row;
-        flex-direction: row;
-    }
-
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression=rtl] [data-vivliostyle-spread-container] {
-        -webkit-flex-direction: row-reverse;
-        flex-direction: row-reverse;
-    }
-
-    [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
-        margin: 0 auto;
-        -webkit-flex: none;
-        flex: none;
-        transform-origin: center top;
-    }
-
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=left] {
-        margin-right: 1px;
-        transform-origin: right top;
-    }
-
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-page-side=right] {
-        margin-left: 1px;
-        transform-origin: left top;
-    }
-
-    [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view=true] [data-vivliostyle-page-container][data-vivliostyle-unpaired-page=true] {
-        margin-left: auto;
-        margin-right: auto;
-        transform-origin: center top;
-    }
-
-}
-`;
-
-// vivliostyle-viewport.css
-export const VivliostyleViewportCss = `
-/*
+/**
  * Copyright 2015 Trim-marks Inc.
  * Copyright 2019 Vivliostyle Foundation
  *
@@ -110,97 +15,180 @@ export const VivliostyleViewportCss = `
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * @fileoverview Assets - Bundle resources
  */
 
-[data-vivliostyle-layout-box] {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+// vivliostyle-viewport-screen.css
+export const VivliostyleViewportScreenCss = `
+@media screen {
+  [data-vivliostyle-viewer-viewport] {
+    background: #aaaaaa;
+  }
+
+  [data-vivliostyle-page-container] {
+    background: white;
+  }
+
+  [data-vivliostyle-viewer-viewport] {
+    display: -webkit-flex;
+    display: flex;
+    overflow: auto;
+    position: relative;
+  }
+
+  [data-vivliostyle-outer-zoom-box] {
+    margin: auto;
     overflow: hidden;
-    z-index: -1;
+    -webkit-flex: none;
+    flex: none;
+  }
+
+  [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex: none;
+    flex: none;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -moz-transform-origin: left top;
+    -ms-transform-origin: left top;
+    -webkit-transform-origin: left top;
+    transform-origin: left top;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression="ltr"]
+    [data-vivliostyle-spread-container] {
+    -webkit-flex-direction: row;
+    flex-direction: row;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression="rtl"]
+    [data-vivliostyle-spread-container] {
+    -webkit-flex-direction: row-reverse;
+    flex-direction: row-reverse;
+  }
+
+  [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
+    margin: 0 auto;
+    -webkit-flex: none;
+    flex: none;
+    transform-origin: center top;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view="true"]
+    [data-vivliostyle-page-container][data-vivliostyle-page-side="left"] {
+    margin-right: 1px;
+    transform-origin: right top;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view="true"]
+    [data-vivliostyle-page-container][data-vivliostyle-page-side="right"] {
+    margin-left: 1px;
+    transform-origin: left top;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view="true"]
+    [data-vivliostyle-page-container][data-vivliostyle-unpaired-page="true"] {
+    margin-left: auto;
+    margin-right: auto;
+    transform-origin: center top;
+  }
+}
+`;
+
+// vivliostyle-viewport.css
+export const VivliostyleViewportCss = `
+[data-vivliostyle-layout-box] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: -1;
 }
 
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
-    right: auto;
-    bottom: auto;
-    overflow: visible;
-    z-index: auto;
+  right: auto;
+  bottom: auto;
+  overflow: visible;
+  z-index: auto;
 }
 
 [data-vivliostyle-page-container] {
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 [data-vivliostyle-bleed-box] {
-    position: absolute;
-    overflow: hidden;
-    max-width: 100%;
-    max-height: 100%;
-    box-sizing: border-box;
+  position: absolute;
+  overflow: hidden;
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
 }
 
 [data-vivliostyle-page-box] ~ [data-vivliostyle-page-box] {
-    display: none;
+  display: none;
 }
 
 [data-vivliostyle-toc-box] {
-    position: absolute;
-    left: 3px;
-    top: 3px;
-    overflow: scroll;
-    overflow-x: hidden;
-    background: rgba(248,248,248,0.9);
-    border-radius: 2px;
-    box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  overflow: scroll;
+  overflow-x: hidden;
+  background: rgba(248, 248, 248, 0.9);
+  border-radius: 2px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 @media print {
-    [data-vivliostyle-toc-box] {
-        display: none;
-    }
+  [data-vivliostyle-toc-box] {
+    display: none;
+  }
 
-    [data-vivliostyle-outer-zoom-box], [data-vivliostyle-spread-container] {
-        width: 100% !important;
-        height: 100% !important;
-    }
+  [data-vivliostyle-outer-zoom-box],
+  [data-vivliostyle-spread-container] {
+    width: 100% !important;
+    height: 100% !important;
+  }
 
-    [data-vivliostyle-spread-container], [data-vivliostyle-page-container] {
-        -moz-transform: none !important;
-        -ms-transform: none !important;
-        -webkit-transform: none !important;
-        transform: none !important;
-    }
+  [data-vivliostyle-spread-container],
+  [data-vivliostyle-page-container] {
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -webkit-transform: none !important;
+    transform: none !important;
+  }
 
-    [data-vivliostyle-page-container] {
-        display: block !important;
-        max-width: 100%;
-        height: 100% !important;
-        max-height: 100%;
-    }
+  [data-vivliostyle-page-container] {
+    display: block !important;
+    max-width: 100%;
+    height: 100% !important;
+    max-height: 100%;
+  }
 
-    /* Workaround for Chrome printing problem */
-    /* [data-vivliostyle-page-box] {
+  /* Workaround for Chrome printing problem */
+  /* [data-vivliostyle-page-box] {
         padding-bottom: 0 !important;
         overflow: visible !important;
     } */
-    [data-vivliostyle-bleed-box] > div > div::before {
-        display: block;
-        content: "";
-        padding-top: 0.015625px;
-        margin-bottom: -0.015625px;
-    }
+  [data-vivliostyle-bleed-box] > div > div::before {
+    display: block;
+    content: "";
+    padding-top: 0.015625px;
+    margin-bottom: -0.015625px;
+  }
 
-    /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
-    @-moz-document regexp('.*') {
-        [data-vivliostyle-page-container]:nth-last-child(n+2) {
-            top: -1px;
-            margin-top: 1px;
-            margin-bottom: -1px;
-        }
+  /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
+  @-moz-document regexp('.*') {
+    [data-vivliostyle-page-container]:nth-last-child(n + 2) {
+      top: -1px;
+      margin-top: 1px;
+      margin-bottom: -1px;
     }
+  }
 }
 `;
 
