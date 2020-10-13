@@ -27,7 +27,7 @@ export const VivliostyleViewportScreenCss = `
 
   [data-vivliostyle-page-container] {
     background: white;
-    z-index: -2147483648;
+    z-index: 0;
   }
 
   [data-vivliostyle-viewer-viewport] {
