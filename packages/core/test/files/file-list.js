@@ -121,6 +121,10 @@ module.exports = [
         title: "Attributes on list elements",
         options: "&bookMode=true",
       },
+      {
+        file: "z-index-at-page.html",
+        title: "z-index on @page and page-margin boxes",
+      },
     ],
   },
   {
