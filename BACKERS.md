@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **\$38.00 per month**. Please consider helping us.
+The current amount of support is **\$48.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -11,6 +11,8 @@ The current amount of support is **\$38.00 per month**. Please consider helping 
 Tatsuro YOKOTA🌹
 <p><a href="https://github.com/youchan"><img src="https://avatars1.githubusercontent.com/u/222183?s=460&amp;v=4" title="youchan" width="60" height="60" style="max-width:100%;"></a>
 youchan🌹
+<p><a href="https://github.com/azettl"><img src="https://avatars1.githubusercontent.com/u/644570?s=460&amp;v=4" title="azettl" width="60" height="60" style="max-width:100%;"></a>
+azettl🌹
 
 ## Fan Sponsors
 
