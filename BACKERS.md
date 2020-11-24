@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **\$48.00 per month**. Please consider helping us.
+The current amount of support is **\$51.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -24,6 +24,8 @@ nishinos🌟
 Satoshi KOJIMA🌟
 <p><a href="https://github.com/y-mikou"><img src="https://avatars2.githubusercontent.com/u/11554223?s=460&amp;v=4" title="みこう悠長" width="60" height="60" style="max-width:100%;"></a>
 みこう悠長🌟
+<p><a href="https://github.com/74th"><img src="https://avatars2.githubusercontent.com/u/1060011?s=460&amp;v=4" title="Atsushi Morimoto" width="60" height="60" style="max-width:100%;"></a>
+Atsushi Morimoto🌟
 <p><a href="https://github.com/munepi"><img src="https://avatars3.githubusercontent.com/u/583148?s=460&amp;v=4" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
 Munehiro Yamamoto⭐️
 <p><a href="https://github.com/zonuexe"><img src="https://avatars3.githubusercontent.com/u/822086?s=460&amp;v=4" title="USAMI Kenta" width="60" height="60" style="max-width:100%;"></a>
