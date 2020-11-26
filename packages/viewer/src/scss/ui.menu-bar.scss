@@ -677,7 +677,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
           line-height: 1.2;
           small {
             font-size: 10px;
-            letter-spacing: -0.05em;
           }
           a {
             color: rgb(128, 128, 128);
@@ -689,9 +688,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                 color: black;
                 border-bottom-color: black;
               }
-            }
-            small {
-              letter-spacing: 0;
             }
           }
           > .version {

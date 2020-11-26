@@ -39,7 +39,7 @@ const VIVLIOSTYLE_VERSION = process.env["VIVLIOSTYLE_VERSION"];
 const VERSION =
   VIVLIOSTYLE_VERSION === "canary"
     ? pkg.version +
-      "-canary-" +
+      "+canary." +
       new Date().toISOString().replace(/[-:]|\.\d+/g, "")
     : VIVLIOSTYLE_VERSION || pkg.version;
 console.log(`Building Vivliostyle Viewer [version=${VERSION}]`);
