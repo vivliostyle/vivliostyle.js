@@ -145,17 +145,22 @@ class Viewer {
       if (cfi) {
         this.documentOptions_.fragment(cfi);
       }
-      if (first !== undefined) {
-        this.firstPage(first);
-      }
-      if (last !== undefined) {
-        this.lastPage(last);
-      }
+
+      // Note that `this.epage(epage)` has to be set before `this.lastPage(last)`
+      // because `this.lastPage(last)` invokes `navigation.totalPages()` that
+      // calls `navigation.pageNumber()` that uses `this.epage()`.
+
       if (epage !== undefined) {
         this.epage(epage);
       }
       if (epageCount !== undefined) {
         this.epageCount(epageCount);
+      }
+      if (first !== undefined) {
+        this.firstPage(first);
+      }
+      if (last !== undefined) {
+        this.lastPage(last);
       }
       if (metadata || docTitle) {
         const pubTitles =

@@ -716,7 +716,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 @media screen {
   #vivliostyle-viewer-viewport {
     margin-top: $menu-icon-height;
-    height: calc(100vh - #{$menu-icon-height});
+    margin-bottom: $page-slider-height;
+    height: calc(100vh - #{$menu-icon-height + $page-slider-height});
     width: 100vw;
   }
 }
@@ -738,5 +739,40 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     text-shadow: 1px 0 5px #4d90fe, -1px 0 5px #4d90fe;
     box-shadow: none;
     outline: none;
+  }
+}
+
+// ================================================================================
+// + Page Slider
+// --------------------------------------------------------------------------------
+
+#vivliostyle-page-slider-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: $page-slider-height;
+  box-sizing: border-box;
+  background: #888;
+  padding: 0 6px 3px;
+  color: white;
+  font-family: $sans-serif;
+  font-size: 10px;
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &::before {
+    content: "0%";
+    flex: none;
+  }
+  &::after {
+    content: "100%";
+    flex: none;
+  }
+  input {
+    flex: auto;
+    cursor: ew-resize;
   }
 }

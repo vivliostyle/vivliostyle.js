@@ -62,7 +62,7 @@ class Navigation {
   private viewer_: Viewer;
   private settingsPanel_: SettingsPanel;
 
-  fitToScreen: PureComputed<unknown>;
+  fitToScreen: PureComputed<boolean>;
   isDecreaseFontSizeDisabled: PureComputed<boolean>;
   isDefaultFontSizeDisabled: PureComputed<boolean>;
   isDisabled: PureComputed<boolean>;
@@ -74,13 +74,16 @@ class Navigation {
   isNavigateToFirstDisabled: PureComputed<boolean>;
   isNavigateToLastDisabled: PureComputed<boolean>;
   isPageNumberDisabled: PureComputed<boolean>;
+  isPageSliderDisabled: PureComputed<boolean>;
   isTOCToggleDisabled: PureComputed<boolean>;
   isToggleFitToScreenDisabled: PureComputed<boolean>;
   isZoomOutDisabled: PureComputed<boolean>;
   isZoomInDisabled: PureComputed<boolean>;
   isZoomToActualSizeDisabled: PureComputed<boolean>;
   pageNumber: PureComputed<number | string>;
-  totalPages: PureComputed<unknown>;
+  totalPages: PureComputed<number | string>;
+  pageSlider: PureComputed<number | string>;
+  pageSliderMax: PureComputed<number | string>;
   hideFontSizeChange: boolean;
   hidePageNavigation: boolean;
   hideTOCNavigation: boolean;
@@ -120,6 +123,13 @@ class Navigation {
 
     this.isPageNumberDisabled = ko.pureComputed(() => {
       return navigationDisabled();
+    });
+
+    this.isPageSliderDisabled = ko.pureComputed(() => {
+      if (navigationDisabled()) {
+        return true;
+      }
+      return this.totalPages() <= 1;
     });
 
     this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
@@ -311,6 +321,29 @@ class Navigation {
       return totalPages;
     });
 
+    this.pageSlider = ko.pureComputed({
+      read() {
+        return this.pageNumber();
+      },
+      write(pageNumberText: number | string) {
+        if (this.viewerOptions_.renderAllPages()) {
+          const pageNumber = Number(pageNumberText);
+          const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
+          this.viewer_.navigateToEPage(epageNav);
+        } else {
+          const pageNumberElem = document.getElementById(
+            "vivliostyle-page-number",
+          ) as HTMLInputElement;
+          pageNumberElem.value = String(pageNumberText);
+          // Here, changes `pageNumberElem.value` but not do `navigateToEPage()`.
+          // `navigateToEPage()` is called in `onmouseupPageSlider()` later.
+        }
+      },
+      owner: this,
+    });
+
+    this.pageSliderMax = this.totalPages;
+
     [
       "navigateToPrevious",
       "navigateToNext",
@@ -325,6 +358,10 @@ class Navigation {
       "increaseFontSize",
       "decreaseFontSize",
       "defaultFontSize",
+      "onfocusPageNumber",
+      "onmouseupPageSlider",
+      "onwheelPageSlider",
+      "onwheelViewport",
       "onclickViewport",
       "toggleTOC",
     ].forEach((methodName) => {
@@ -503,7 +540,71 @@ class Navigation {
     }
   }
 
-  onclickViewport(): boolean {
+  onfocusPageNumber(obj: unknown, event: Event): boolean {
+    const inputElem = event.currentTarget as HTMLInputElement;
+    setTimeout(() => {
+      inputElem.setSelectionRange(0, inputElem.value.length);
+    }, 0);
+    return true;
+  }
+
+  onmouseupPageSlider(obj: unknown, event: MouseEvent): boolean {
+    if (this.viewerOptions_.renderAllPages()) {
+      // already moved in `this.pageSlider.write()`
+      return true;
+    }
+    const pageNumberElem = document.getElementById(
+      "vivliostyle-page-number",
+    ) as HTMLInputElement;
+    const pageNumber = Number(pageNumberElem.value);
+    const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
+    this.viewer_.navigateToEPage(epageNav);
+
+    return true;
+  }
+
+  onwheelPageSlider(obj: unknown, event: WheelEvent): boolean {
+    event.preventDefault();
+    if (
+      event.deltaMode === 0 &&
+      Math.abs(event.deltaX) < 2 &&
+      Math.abs(event.deltaY) < 2
+    ) {
+      // ignore small move less than 2px
+      return true;
+    }
+    if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) {
+      if (event.deltaX < 0) {
+        this.navigateToLeft();
+      } else {
+        this.navigateToRight();
+      }
+    } else {
+      if (event.deltaY < 0) {
+        this.navigateToPrevious();
+      } else {
+        this.navigateToNext();
+      }
+    }
+    return true;
+  }
+
+  onwheelViewport(obj: unknown, event: WheelEvent): boolean {
+    const viewportElement = document.getElementById(
+      "vivliostyle-viewer-viewport",
+    );
+    if (
+      viewportElement.scrollWidth > viewportElement.clientWidth ||
+      viewportElement.scrollHeight > viewportElement.clientHeight
+    ) {
+      // When scrollable, wheel is used for scroll
+      return true;
+    }
+    return this.onwheelPageSlider(obj, event);
+  }
+
+  onclickViewport(obj: unknown, event: MouseEvent): boolean {
+    this.pageNumber();
     if (this.settingsPanel_.justClicked) {
       return true;
     }

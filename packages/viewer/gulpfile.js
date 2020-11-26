@@ -20,7 +20,7 @@ const DEST_DIR = "lib";
 const RESOURCE_MAP = {
   fonts: { src: "fonts" },
   html: { src: "html", dest: ".", srcPattern: "*.ejs" },
-  css: { src: "scss", dest: "css", srcPattern: "*.scss" },
+  css: { src: "scss", dest: "css", srcPattern: "**/*.scss" },
   resources: {
     src: "../resources",
     dest: "resources",
