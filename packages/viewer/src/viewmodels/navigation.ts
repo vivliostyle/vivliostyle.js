@@ -593,11 +593,14 @@ class Navigation {
     const viewportElement = document.getElementById(
       "vivliostyle-viewer-viewport",
     );
+    const isTOCActive =
+      this.viewer_.tocVisible() && viewportElement != document.activeElement;
     if (
+      isTOCActive ||
       viewportElement.scrollWidth > viewportElement.clientWidth ||
       viewportElement.scrollHeight > viewportElement.clientHeight
     ) {
-      // When scrollable, wheel is used for scroll
+      // When TOC is active or page is scrollable, wheel is used for those
       return true;
     }
     return this.onwheelPageSlider(obj, event);
