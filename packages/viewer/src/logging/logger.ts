@@ -81,7 +81,7 @@ export default class Logger {
     ) {
       if (
         (content as { error: Error })?.error
-          .toString()
+          ?.toString()
           .includes("history.replaceState()")
       ) {
         // Ignore Safari's error,
