@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.2.0...v2.2.1) (2020-11-26)
+
+### Bug Fixes
+
+- **viewer:** bug in v2.2.0 "TypeError: Cannot read property 'toString' of null" ([08cf029](https://github.com/vivliostyle/vivliostyle.js/commit/08cf02981b4fa42f31065730bc24ffbab5414b25))
+- **viewer:** Mouse wheel should be able to use to scroll TOC when TOC is active ([c6c5eb8](https://github.com/vivliostyle/vivliostyle.js/commit/c6c5eb8416ef6fcb174ec86ae53e59fd4e67c570))
+
 # [2.2.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.1.4...v2.2.0) (2020-11-26)
 
 ### Features
