@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.1.4...v2.2.0) (2020-11-26)
+
+### Features
+
+- **viewer:** Add page slider in Vivliostyle Viewer UI ([3e80c67](https://github.com/vivliostyle/vivliostyle.js/commit/3e80c678b2c5374361ddf81fe16b14c057800146)), closes [#670](https://github.com/vivliostyle/vivliostyle.js/issues/670)
+- **viewer:** Mouse wheel support for page navigation ([94113f6](https://github.com/vivliostyle/vivliostyle.js/commit/94113f6377dd9a503a4ae17437da50434590aa66))
+
 ## [2.1.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.1.3...v2.1.4) (2020-10-30)
 
 ### Bug Fixes
