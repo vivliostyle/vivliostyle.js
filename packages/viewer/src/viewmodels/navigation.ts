@@ -361,6 +361,7 @@ class Navigation {
       "onfocusPageNumber",
       "onmouseupPageSlider",
       "onwheelPageSlider",
+      "onwheelViewport",
       "onclickViewport",
       "toggleTOC",
     ].forEach((methodName) => {
@@ -573,19 +574,33 @@ class Navigation {
       return true;
     }
     if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) {
-      if (event.deltaX > 0) {
+      if (event.deltaX < 0) {
         this.navigateToLeft();
       } else {
         this.navigateToRight();
       }
     } else {
-      if (event.deltaY > 0) {
+      if (event.deltaY < 0) {
         this.navigateToPrevious();
       } else {
         this.navigateToNext();
       }
     }
     return true;
+  }
+
+  onwheelViewport(obj: unknown, event: WheelEvent): boolean {
+    const viewportElement = document.getElementById(
+      "vivliostyle-viewer-viewport",
+    );
+    if (
+      viewportElement.scrollWidth > viewportElement.clientWidth ||
+      viewportElement.scrollHeight > viewportElement.clientHeight
+    ) {
+      // When scrollable, wheel is used for scroll
+      return true;
+    }
+    return this.onwheelPageSlider(obj, event);
   }
 
   onclickViewport(obj: unknown, event: MouseEvent): boolean {

@@ -79,6 +79,16 @@ export default class Logger {
       this.logLevel === LogLevel.Warn ||
       this.logLevel === LogLevel.Error
     ) {
+      if (
+        (content as { error: Error })?.error
+          .toString()
+          .includes("history.replaceState()")
+      ) {
+        // Ignore Safari's error,
+        // "SecurityError: Attempt to use history.replaceState() more than 100 times per 30 seconds",
+        // that may occur during consecutive page move using page slider or mouse wheel
+        return;
+      }
       messageQueue.push({
         type: "error",
         content,
