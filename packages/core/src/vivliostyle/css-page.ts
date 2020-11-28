@@ -741,9 +741,7 @@ export const marginBoxesKey: string = "_marginBoxes";
  * Represent a page master generated for `@page` rules
  * @param style Cascaded style for `@page` rules
  */
-export class PageRuleMaster extends PageMaster.PageMaster<
-  PageRuleMasterInstance
-> {
+export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance> {
   private bodyPartitionKey: string;
   private pageMarginBoxes = {} as {
     [key: string]: PageMarginBoxPartition;
@@ -811,9 +809,7 @@ export class PageRuleMaster extends PageMaster.PageMaster<
  * Represent a partition placed in a PageRuleMaster
  * @param style Cascaded style for `@page` rules
  */
-export class PageRulePartition extends PageMaster.Partition<
-  PageRulePartitionInstance
-> {
+export class PageRulePartition extends PageMaster.Partition<PageRulePartitionInstance> {
   constructor(
     scope: Exprs.LexicalScope,
     parent: PageRuleMaster,
@@ -863,9 +859,7 @@ export class PageRulePartition extends PageMaster.Partition<
 /**
  * Represent a partition for a page-margin box
  */
-export class PageMarginBoxPartition extends PageMaster.Partition<
-  PageMarginBoxPartitionInstance
-> {
+export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPartitionInstance> {
   constructor(
     scope: Exprs.LexicalScope,
     parent: PageRuleMaster,
@@ -924,9 +918,7 @@ export type PageAreaDimension = {
   marginRight: Exprs.Val;
 };
 
-export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<
-  PageRuleMaster
-> {
+export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRuleMaster> {
   pageAreaDimension: PageAreaDimension | null = null;
   pageMarginBoxInstances: {
     [key: string]: PageMarginBoxPartitionInstance;
@@ -1588,9 +1580,7 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
   }
 }
 
-export class PageRulePartitionInstance extends PageMaster.PartitionInstance<
-  PageRulePartition
-> {
+export class PageRulePartitionInstance extends PageMaster.PartitionInstance<PageRulePartition> {
   borderBoxWidth: Exprs.Val = null;
   borderBoxHeight: Exprs.Val = null;
   marginTop: Exprs.Val = null;
@@ -1797,9 +1787,7 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<
   }
 }
 
-export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance<
-  PageMarginBoxPartition
-> {
+export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance<PageMarginBoxPartition> {
   boxInfo: PageMarginBoxInformation;
   suppressEmptyBoxGeneration: boolean = true;
 
