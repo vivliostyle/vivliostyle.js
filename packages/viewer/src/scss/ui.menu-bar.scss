@@ -723,7 +723,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
 // --------------------------------------------------------------------------------
 
 [data-vivliostyle-toc-box] {
-  z-index: 2000; // need greater than navigation-left button's z-index
+  &[aria-hidden="false"] {
+    z-index: 2000; // need greater than navigation-left button's z-index
+  }
   &:focus {
     outline: 1px solid rgba(0, 0, 0, 0.15);
   }
@@ -755,10 +757,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
   font-family: $sans-serif;
   font-size: 10px;
   line-height: 1;
-  display: flex;
   justify-content: center;
   align-items: center;
-
+  display: flex;
+  @media print {
+    display: none;
+  }
   &::before {
     content: "0%";
     flex: none;
@@ -770,5 +774,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
   input {
     flex: auto;
     cursor: ew-resize;
+  }
+  &:not([dir]) {
+    &::before,
+    &::after,
+    * {
+      visibility: hidden;
+    }
   }
 }
