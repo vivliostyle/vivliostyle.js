@@ -838,6 +838,12 @@ export const UserAgentPageCss = `
 :root {
   hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
 }
+:root[data-vivliostyle-epub-spine-properties~="page-spread-left"] > html|body {
+  break-before: left;
+}
+:root[data-vivliostyle-epub-spine-properties~="page-spread-right"] > html|body {
+  break-before: right;
+}
 
 @-adapt-footnote-area {
   display: block;

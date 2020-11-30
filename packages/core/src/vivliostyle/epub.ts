@@ -2469,6 +2469,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const item = this.opf.spine[spineIndex];
     const store = this.opf.store;
     store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
+      // EPUB Spine properties support
+      const epubSpineProperties = item.itemRefElement.getAttribute(
+        "properties",
+      );
+      if (epubSpineProperties) {
+        xmldoc.root.setAttribute(
+          "data-vivliostyle-epub-spine-properties",
+          epubSpineProperties,
+        );
+      }
       item.title = xmldoc.document.title;
       const style = store.getStyleForDoc(xmldoc);
       const customRenderer = this.makeCustomRenderer(xmldoc);
