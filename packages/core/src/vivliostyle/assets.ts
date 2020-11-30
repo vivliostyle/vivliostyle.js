@@ -835,7 +835,7 @@ export const UserAgentXml = `
 export const UserAgentPageCss = `
 @namespace html "http://www.w3.org/1999/xhtml";
 
-html|body {
+:root {
   hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
 }
 
