@@ -64,6 +64,21 @@ export function isForcedBreakValue(value: string | null): boolean {
   return !!forcedBreakValues[value];
 }
 
+export const spreadBreakValues: { [key: string]: boolean | null } = {
+  left: true,
+  right: true,
+  recto: true,
+  verso: true,
+};
+
+/**
+ * Returns if the value is one of left/right/recto/verso values.
+ * @param value The break value to be judged. Treats null as 'auto'.
+ */
+export function isSpreadBreakValue(value: string | null): boolean {
+  return !!spreadBreakValues[value];
+}
+
 export const avoidBreakValues: { [key: string]: boolean | null } = {
   avoid: true,
   "avoid-page": true,
@@ -102,6 +117,10 @@ export function resolveEffectiveBreakValue(
   if (!first) {
     return second;
   } else if (!second) {
+    return first;
+  } else if (isSpreadBreakValue(second)) {
+    return second;
+  } else if (isSpreadBreakValue(first)) {
     return first;
   } else {
     const firstIsForcedBreakValue = isForcedBreakValue(first);
