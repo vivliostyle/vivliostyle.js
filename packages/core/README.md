@@ -1,7 +1,6 @@
 # Vivliostyle Core
 
 [![npm][npm]][npm-url]
-[![npm][npm-next]][npm-url]
 [![Build Status][build-status]][build-status-url]
 [![deps][deps]][deps-url]
 [![Install Size][size]][size-url]
