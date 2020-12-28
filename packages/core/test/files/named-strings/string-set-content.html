@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>string-set with content() function</title>
+    <style>
+      body {
+        counter-reset: chapter;
+      }
+      h1 {
+        counter-increment: chapter;
+        string-set: header content(before) ": " content(text) content(after), FirstLetter content(first-letter);
+        break-before: page;
+      }
+      h1::before {
+        content: "Chapter " counter(chapter);
+        display: block;
+      }
+      h1::after {
+        content: "~";
+      }
+      @page {
+        @top-center {
+          content: string(header);
+        }
+        @top-right {
+          content: "First Letter: " string(FirstLetter);
+        }
+        @bottom-center {
+          content: "- " counter(page) " -";
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test</h1>
+    <p>The top-center page header output must be "Chapter 1: Test~"</p>
+    <p>The top-right page header output must be "First Letter: T"</p>
+    <h1>More test</h1>
+    <p>The top-center page header output must be "Chapter 2: More test~"</p>
+    <p>The top-right page header output must be "First Letter: M"</p>
+  </body>
+</html>

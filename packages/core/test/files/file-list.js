@@ -128,6 +128,23 @@ module.exports = [
     ],
   },
   {
+    category: "Named Strings",
+    files: [
+      {
+        file: "named-strings/named-strings.html",
+        title: "Named strings - string() function",
+      },
+      {
+        file: "named-strings/string-set-content.html",
+        title: "string-set with content() function",
+      },
+      {
+        file: "named-strings/string-set-attr.html",
+        title: "string-set with attr() function",
+      },
+    ],
+  },
+  {
     category: "Page breaks",
     files: [
       {

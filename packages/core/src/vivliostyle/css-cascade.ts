@@ -1761,6 +1761,8 @@ export interface CounterListener {
 }
 
 export interface CounterResolver {
+  setStyler(styler: any): void;
+
   /**
    * Returns an Exprs.Val, whose value is calculated at the layout time by
    * retrieving the innermost page-based counter (null if it does not exist) by
@@ -1796,7 +1798,21 @@ export interface CounterResolver {
     format: (p1: number[]) => string,
   ): Exprs.Val;
 
-  setStyler(styler: any);
+  /**
+   * Get value of the CSS string() function
+   * https://drafts.csswg.org/css-gcpm-3/#using-named-strings
+   */
+  getNamedStringVal(name: string, retrievePosition: string): Exprs.Val;
+
+  /**
+   * Set named string for the CSS string-set property
+   * https://drafts.csswg.org/css-gcpm-3/#setting-named-strings-the-string-set-pro
+   */
+  setNamedString(
+    name: string,
+    stringValue: string,
+    cascadeInstance: CascadeInstance,
+  ): void;
 }
 
 export class AttrValueFilterVisitor extends Css.FilterVisitor {
@@ -1855,6 +1871,24 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     }
     return defaultValue;
   }
+}
+
+/**
+ * Get concatenated string value from CSS `string-set` and `content` property
+ */
+function getStringValueFromCssContentVal(val: Css.Val): string {
+  // When this function is called, CSS `content()`, `attr()`, `counter()`
+  // values are already resolved to strings values. Remaining non-string values
+  // are ignored.
+  if (Vtree.nonTrivialContent(val)) {
+    if (val instanceof Css.Str) {
+      return val.stringValue();
+    }
+    if (val instanceof Css.SpaceList) {
+      return val.values.map((v) => getStringValueFromCssContentVal(v)).join("");
+    }
+  }
+  return "";
 }
 
 export class ContentPropVisitor extends Css.FilterVisitor {
@@ -2037,6 +2071,48 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   }
 
   /**
+   * CSS `string()` function
+   * https://drafts.csswg.org/css-gcpm-3/#using-named-strings
+   */
+  visitFuncString(values: Css.Val[]): Css.Val {
+    const name = values.length > 0 ? values[0].stringValue() : "";
+    const retrievePosition =
+      values.length > 1 ? values[1].stringValue() : "first";
+    const c = new Css.Expr(
+      this.counterResolver.getNamedStringVal(name, retrievePosition),
+    );
+    return new Css.SpaceList([c]);
+  }
+
+  /**
+   * CSS `content()` function
+   * https://drafts.csswg.org/css-gcpm-3/#content-function-header
+   */
+  visitFuncContent(values: Css.Val[]): Css.Val {
+    const pseudoName = values.length > 0 ? values[0].stringValue() : "text";
+    let stringValue = "";
+    switch (pseudoName) {
+      case "text":
+      case "first-letter":
+        stringValue = this.element.textContent.trim().replace(/\s+/g, " ");
+        if (pseudoName === "first-letter") {
+          const r = stringValue.match(Base.firstLetterPattern);
+          stringValue = r ? r[0] : "";
+        }
+        break;
+      case "before":
+      case "after":
+        {
+          const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
+          const val: Css.Val = pseudos?.[pseudoName]?.["content"]?.value;
+          stringValue = getStringValueFromCssContentVal(val);
+        }
+        break;
+    }
+    return new Css.Str(stringValue);
+  }
+
+  /**
    * @override
    */
   visitFunc(func: Css.Func): Css.Val {
@@ -2059,6 +2135,16 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "target-counters":
         if (func.values.length <= 4) {
           return this.visitFuncTargetCounters(func.values);
+        }
+        break;
+      case "string":
+        if (func.values.length <= 2) {
+          return this.visitFuncString(func.values);
+        }
+        break;
+      case "content":
+        if (func.values.length <= 1) {
+          return this.visitFuncContent(func.values);
         }
         break;
     }
@@ -2559,7 +2645,7 @@ export class CascadeInstance {
   currentPageType: string | null = null;
   isFirst: boolean = true;
   isRoot: boolean = true;
-  counters: { [key: string]: number[] } = {};
+  counters: CounterValues = {};
   counterScoping: { [key: string]: boolean }[] = [{}];
   quotes: Css.Str[];
   quoteDepth: number = 0;
@@ -2810,6 +2896,36 @@ export class CascadeInstance {
     }
   }
 
+  /**
+   * Process CSS string-set property
+   * https://drafts.csswg.org/css-gcpm-3/#setting-named-strings-the-string-set-pro
+   */
+  setNamedStrings(props: ElementStyle): void {
+    let stringSet: CascadeValue = props["string-set"];
+    if (!stringSet) {
+      return;
+    }
+    stringSet = stringSet.filterValue(
+      new ContentPropVisitor(this, this.currentElement, this.counterResolver),
+    );
+    const sets =
+      stringSet.value instanceof Css.CommaList
+        ? stringSet.value.values
+        : [stringSet.value];
+
+    for (const set of sets) {
+      if (set instanceof Css.SpaceList) {
+        const name = set.values[0].stringValue();
+        const stringValue = set.values
+          .slice(1)
+          .map((v) => getStringValueFromCssContentVal(v))
+          .join("");
+        this.counterResolver.setNamedString(name, stringValue, this);
+      }
+    }
+    delete props["string-set"];
+  }
+
   processPseudoelementProps(pseudoprops: ElementStyle, element: Element): void {
     this.pushCounters(pseudoprops);
     if (pseudoprops["content"]) {
@@ -2925,7 +3041,7 @@ export class CascadeInstance {
     const id =
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
-      const counters: { [key: string]: number[] } = {};
+      const counters: CounterValues = {};
       Object.keys(this.counters).forEach((name) => {
         counters[name] = Array.from(this.counters[name]);
       });
@@ -2951,6 +3067,10 @@ export class CascadeInstance {
         }
       }
     }
+
+    // process CSS string-set property
+    this.setNamedStrings(this.currentStyle);
+
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);
     }

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Test String-set with Attr</title>
+    <meta name="author" content="Test Author">
+    <style>
+      meta[name="author"] {
+        string-set: author attr(content);
+      }
+      title {
+        string-set: title content(text);
+      }
+      section {
+        string-set: section attr(title);
+        break-after: page;
+      }
+      @page {
+        @top-left {
+          content: string(title);
+        }
+        @top-center {
+          content: string(author);
+        }
+        @top-right {
+          content:  string(section);
+        }
+        @bottom-center {
+          content: "- " counter(page) " -";
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p>The top-left page header output must be "Test String-set with Attr", retrieved from the "title" element: 
+      <code>&lt;title&gt;Test String-set with Attr&lt;/title&gt;</code></p>
+    <p>The top-center page header output must be "Test Author", retrieved from the "content" attribute of the meta tag: 
+      <code>&lt;meta name="author" content="Test Author"&gt;</code></p>
+    
+    <section title="Section One">
+      <h1>Test Section 1</h1>
+      <p>The top-right page header output must be "Section One", retrieved from the "title" attribute of the section start tag:
+        <code>&lt;section title="Section One"&gt;</section></code></p>
+    </section>
+    <section title="Section Two">
+      <h1>Test Section 2</h1>
+      <p>The top-right page header output must be "Section Two", retrieved from the "title" attribute of the section start tag
+        <code>&lt;section title="Section Two"&gt;</section></code></p>
+    </section>
+  </body>
+</html>

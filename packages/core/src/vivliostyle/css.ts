@@ -568,10 +568,12 @@ export function appendList(
   toString: boolean,
 ): void {
   const length = values.length;
-  values[0].appendTo(buf, toString);
-  for (let i = 1; i < length; i++) {
-    buf.append(separator);
-    values[i].appendTo(buf, toString);
+  if (length > 0) {
+    values[0].appendTo(buf, toString);
+    for (let i = 1; i < length; i++) {
+      buf.append(separator);
+      values[i].appendTo(buf, toString);
+    }
   }
 }
 

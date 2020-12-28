@@ -1306,7 +1306,22 @@ export class StyleInstance
       "position",
       position ? (position as any).name : "absolute",
     );
-    parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
+
+    // The -epubx-page-master partitions are laid out in the reverse order
+    // (see the spec http://idpf.org/epub/pgt/ ),
+    // but for css-page rules, now use forward order, i.e., the page-area first.
+    // This is necessary for running headers named strings support.
+    const forwardOrderInLayout =
+      boxInstance instanceof CssPage.PageRuleMasterInstance;
+    const forwardOrderInTree =
+      boxInstance instanceof PageMaster.PartitionInstance;
+
+    if (forwardOrderInTree) {
+      parentContainer.appendChild(boxContainer);
+    } else {
+      parentContainer.insertBefore(boxContainer, parentContainer.firstChild);
+    }
+
     let layoutContainer = new Vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
     layoutContainer.exclusions = exclusions;
@@ -1474,11 +1489,12 @@ export class StyleInstance
         frame.finish(true);
         return;
       }
-      let i = boxInstance.children.length - 1;
+      let i = forwardOrderInLayout ? 0 : boxInstance.children.length - 1;
       frame
         .loop(() => {
-          while (i >= 0) {
-            const child = boxInstance.children[i--];
+          while (i >= 0 && i < boxInstance.children.length) {
+            const child =
+              boxInstance.children[forwardOrderInLayout ? i++ : i--];
             const r = this.layoutContainer(
               page,
               child,

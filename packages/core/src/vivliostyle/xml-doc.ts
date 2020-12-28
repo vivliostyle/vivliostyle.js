@@ -26,8 +26,6 @@ import { XmlDoc } from "./types";
 
 export type XMLDocStore = XmlDoc.XMLDocStore;
 
-export const ELEMENT_OFFSET_ATTR = "data-adapt-eloff";
-
 export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   lang: string | null = null;
   totalOffset: number = -1;
@@ -72,7 +70,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     this.body = body as Element;
     this.head = head as Element;
     this.last = this.root;
-    this.last.setAttribute(ELEMENT_OFFSET_ATTR, "0");
+    this.last.setAttribute(Base.ELEMENT_OFFSET_ATTR, "0");
   }
 
   doc(): XmlDoc.NodeList {
@@ -80,7 +78,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   }
 
   getElementOffset(element: Element): number {
-    const offsetStr = element.getAttribute(ELEMENT_OFFSET_ATTR);
+    const offsetStr = element.getAttribute(Base.ELEMENT_OFFSET_ATTR);
     if (offsetStr) {
       return parseInt(offsetStr, 10);
     }
@@ -103,7 +101,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       last = next;
       if (next.nodeType == 1) {
         const nextElement = next as Element;
-        nextElement.setAttribute(ELEMENT_OFFSET_ATTR, offset.toString());
+        nextElement.setAttribute(Base.ELEMENT_OFFSET_ATTR, offset.toString());
         ++offset;
       } else {
         offset += (next.textContent as string).length;

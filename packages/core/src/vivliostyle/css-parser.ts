@@ -977,7 +977,7 @@ export class Parser {
   extractVals(sep: string, index: number): Css.Val[] {
     const arr: Css.Val[] = [];
     const valStack = this.valStack;
-    while (true) {
+    while (index < valStack.length) {
       arr.push(valStack[index++] as Css.Val);
       if (index == valStack.length) {
         break;
