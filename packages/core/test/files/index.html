@@ -35,7 +35,7 @@
         var td = document.createElement("td");
         if (Array.isArray(links)) {
           td.appendChild(document.createTextNode(text + " "));
-          links.forEach(function(link, i) {
+          links.forEach(function (link, i) {
             td.appendChild(makeA(link, "[" + (i + 1) + "]"));
           });
         } else if (links) {
@@ -48,23 +48,25 @@
 
       var isLocal = /^(localhost|\d+\.\d+\.\d+\.\d+)$/.test(location.hostname);
       var dirLocal = "../../core/test/files/";
-      var urlOnline = "https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/";
+      var urlOnline =
+        "https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/";
 
       var fileList = module.exports;
-      fileList.forEach(function(group) {
+      fileList.forEach(function (group) {
         var heading = document.createElement("h2");
         heading.textContent = group.category;
+        heading.id = group.category.replace(/ /g, "_");
         document.body.appendChild(heading);
         var table = document.createElement("table");
         document.body.appendChild(table);
-        group.files.forEach(function(entry) {
+        group.files.forEach(function (entry) {
           var tr = document.createElement("tr");
           table.appendChild(tr);
 
           var path = "";
           if (Array.isArray(entry.file)) {
             path = entry.file
-              .map(function(file) {
+              .map(function (file) {
                 return dirLocal + file;
               })
               .join("&src=");
@@ -73,19 +75,53 @@
           }
 
           var parameterProd = path && "#src=" + path + (entry.options || "");
-          var parameterDev = (parameterProd ? parameterProd + "&" : "#") + "debug=true";
-          var parameterOnline = parameterProd.replace(new RegExp(dirLocal, "g"), urlOnline);
-          var parameterOld = parameterOnline.replace(/\bsrc=/g, /\bbookMode=true\b/.test(entry.options) ? "b=" : "x=");
+          var parameterDev =
+            (parameterProd ? parameterProd + "&" : "#") + "debug=true";
+          var parameterOnline = parameterProd.replace(
+            new RegExp(dirLocal, "g"),
+            urlOnline,
+          );
+          var parameterOld = parameterOnline.replace(
+            /\bsrc=/g,
+            /\bbookMode=true\b/.test(entry.options) ? "b=" : "x=",
+          );
 
           if (isLocal) {
-            tr.appendChild(makeTd("../../../viewer/lib/vivliostyle-viewer-dev.html" + parameterDev, "dev")).className = "dev";
-            tr.appendChild(makeTd("../../../viewer/lib/" + parameterProd, "prod")).className = "prod";
+            tr.appendChild(
+              makeTd(
+                "../../../viewer/lib/vivliostyle-viewer-dev.html" +
+                  parameterDev,
+                "dev",
+              ),
+            ).className = "dev";
+            tr.appendChild(
+              makeTd("../../../viewer/lib/" + parameterProd, "prod"),
+            ).className = "prod";
           }
-          tr.appendChild(makeTd("https://vivliostyle.now.sh/" + parameterOnline, "canary")).className = "canary";
-          tr.appendChild(makeTd("https://vivliostyle.org/viewer/" + parameterOnline, "stable")).className = "stable";
+          tr.appendChild(
+            makeTd("https://vivliostyle.now.sh/" + parameterOnline, "canary"),
+          ).className = "canary";
+          tr.appendChild(
+            makeTd(
+              "https://vivliostyle.org/viewer/" + parameterOnline,
+              "stable",
+            ),
+          ).className = "stable";
           tr.appendChild(makeTd(entry.file, entry.title)).className = "title";
-          tr.appendChild(makeTd("https://vivliostyle.github.io/viewer/2019.11.100/vivliostyle-viewer.html" + parameterOld, "2019.11")).className = "old";
-          tr.appendChild(makeTd("https://vivliostyle.github.io/viewer/2018.2/vivliostyle-viewer.html" + parameterOld, "2018.2")).className = "old";
+          tr.appendChild(
+            makeTd(
+              "https://vivliostyle.github.io/viewer/2019.11.100/vivliostyle-viewer.html" +
+                parameterOld,
+              "2019.11",
+            ),
+          ).className = "old";
+          tr.appendChild(
+            makeTd(
+              "https://vivliostyle.github.io/viewer/2018.2/vivliostyle-viewer.html" +
+                parameterOld,
+              "2018.2",
+            ),
+          ).className = "old";
         });
       });
     </script>
