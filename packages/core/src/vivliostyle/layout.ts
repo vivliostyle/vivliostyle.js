@@ -593,8 +593,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // first char
       if (position.viewNode.nodeType != 1) {
         const text = position.viewNode.textContent;
-        const r = text.match(firstCharPattern);
-        return this.layoutContext.peelOff(position, r[0].length);
+        const r = text.match(Base.firstLetterPattern);
+        return this.layoutContext.peelOff(position, r ? r[0].length : 0);
       }
     }
     return Task.newResult(position) as Task.Result<Vtree.NodeContext>;
@@ -3753,8 +3753,6 @@ export class PseudoColumn {
     return this.column;
   }
 }
-
-export const firstCharPattern = /^[^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*([A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527][^A-Za-z0-9_\u009E\u009F\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02AF\u037B-\u037D\u0386\u0388-\u0482\u048A-\u0527]*)?/;
 
 export type SinglePageFloatLayoutResult = Layout.SinglePageFloatLayoutResult;
 

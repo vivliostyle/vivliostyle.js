@@ -306,14 +306,16 @@ LIST_STYLE_TYPE = disc | circle | square | decimal | decimal-leading-zero | lowe
     hebrew | none;
 TYPE_OR_UNIT_IN_ATTR = string | color | url | integer | number | length | angle | time | frequency;
 ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [ STRING | IDENT | COLOR | INT | NUM | PLENGTH | ANGLE | POS_TIME | FREQUENCY]?);
-CONTENT = normal | none |
-    [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
+CONTENT_LIST = [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
     counters(IDENT STRING LIST_STYLE_TYPE?) | ATTR |
     target-counter([ STRING | URI ] IDENT LIST_STYLE_TYPE?) |
     target-counter(ATTR IDENT LIST_STYLE_TYPE?) |
     target-counters([ STRING | URI ] IDENT STRING LIST_STYLE_TYPE?) |
     target-counters(ATTR IDENT STRING LIST_STYLE_TYPE?) |
-    open-quote | close-quote | no-open-quote | no-close-quote ]+;
+    open-quote | close-quote | no-open-quote | no-close-quote |
+    content([ text | before | after | first-letter ]?) |
+    string(IDENT [first | start | last | first-except]?) ]+;
+CONTENT = normal | none | CONTENT_LIST;
 content = CONTENT;
 COUNTER = [ IDENT INT? ]+ | none;
 counter-increment = COUNTER;
@@ -500,7 +502,7 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 font-size-adjust = none | NNEG_NUM;
 [webkit]font-kerning = auto | normal | none;
 font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];
-font-feature-settings = COMMA( SPACE( STRING [ on | off | INT ]? )+ );
+font-feature-settings = COMMA( normal | SPACE( STRING [ on | off | INT ]? )+ );
 font-stretch = normal | wider | narrower | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded;
 
 /* CSS Images */
@@ -639,8 +641,10 @@ isolation = auto | isolate;
 background-blend-mode = COMMA( BLEND_MODE+ );
 
 /* CSS GCPM */
+string-set = COMMA( SPACE( IDENT CONTENT_LIST )+ | none );
 footnote-policy = auto | line;
 
+/* CSS Repeated Headers and Footers */
 [viv]repeat-on-break = auto | none | header | footer;
 
 DEFAULTS

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Counters
+ * @fileoverview Counters and named strings
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
@@ -113,8 +113,16 @@ class CounterListener implements CssCascade.CounterListener {
   }
 }
 
+/**
+ * Map for named string name, element offset, and the string value
+ */
+type NamedStringValues = {
+  [name: string]: { [elementOffset: number]: string };
+};
+
 class CounterResolver implements CssCascade.CounterResolver {
   styler: CssStyler.Styler | null = null;
+  namedStringValues: NamedStringValues = {};
 
   constructor(
     public readonly counterStore: CounterStore,
@@ -123,7 +131,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     public readonly pageScope: Exprs.LexicalScope,
   ) {}
 
-  setStyler(styler: CssStyler.Styler) {
+  setStyler(styler: CssStyler.Styler): void {
     this.styler = styler;
   }
 
@@ -336,6 +344,129 @@ class CounterResolver implements CssCascade.CounterResolver {
       },
       `target-counters-${name}-of-${url}`,
     );
+  }
+
+  /**
+   * Get value of the CSS string() function
+   * https://drafts.csswg.org/css-gcpm-3/#using-named-strings
+   */
+  getNamedStringVal(name: string, retrievePosition: string): Exprs.Val {
+    return new Exprs.Native(
+      this.pageScope,
+      () => {
+        const stringValues = this.namedStringValues[name];
+        if (!stringValues) {
+          return "";
+        }
+        const offsets = Object.keys(stringValues)
+          .map((a) => parseInt(a, 10))
+          .sort(Base.numberCompare);
+
+        const currentPage = this.counterStore.currentPage;
+        const pageStartOffset = currentPage.offset;
+        const pageLastOffset = Math.max(
+          pageStartOffset,
+          ...Array.from(
+            currentPage.container.querySelectorAll(
+              `[${Base.ELEMENT_OFFSET_ATTR}]`,
+            ),
+          ).map((e) => parseInt(e.getAttribute(Base.ELEMENT_OFFSET_ATTR), 10)),
+        );
+
+        let firstOffset = -1;
+        let startOffset = -1;
+        let lastOffset = -1;
+        let firstExceptOffset = -1;
+
+        for (let i = 0; i < offsets.length; i++) {
+          const offset = offsets[i];
+          const offsetPrev = i > 0 ? offsets[i - 1] : -1;
+          const offsetNext = i < offsets.length - 1 ? offsets[i + 1] : -1;
+          if (offset > pageLastOffset) {
+            break;
+          }
+          if (offset >= pageStartOffset) {
+            if (firstOffset < 0) {
+              firstOffset = offset;
+              firstExceptOffset = -1;
+            }
+            if (startOffset < 0) {
+              if (offset === pageStartOffset) {
+                startOffset = offset;
+              } else {
+                if (offsetPrev < firstOffset) {
+                  startOffset = offsetPrev;
+                }
+                // Check if the element at the offset is at beginning of the page
+                const elementAtOffset = currentPage.container.querySelector(
+                  `[${Base.ELEMENT_OFFSET_ATTR}="${offset}"]`,
+                );
+                if (!elementAtOffset) {
+                  // title or meta elements are not output, but should be treated as start
+                  if (startOffset < 0) {
+                    startOffset = offset;
+                  }
+                } else {
+                  let elementAtPageStartOffset = currentPage.container.querySelector(
+                    `[${Base.ELEMENT_OFFSET_ATTR}="${pageStartOffset}"]`,
+                  );
+                  if (!elementAtPageStartOffset) {
+                    // The element at pageStartOffset is not found when page break occured
+                    // within an element, so use the ancestor element with offset 0 instead.
+                    elementAtPageStartOffset = currentPage.container.querySelector(
+                      `[${Base.ELEMENT_OFFSET_ATTR}="0"]`,
+                    );
+                  }
+                  if (elementAtPageStartOffset) {
+                    // Find if the element at the offset is (the first child of)* the element at page start
+                    for (
+                      let element = elementAtPageStartOffset;
+                      element;
+                      element = element.firstElementChild
+                    ) {
+                      if (element === elementAtOffset) {
+                        startOffset = offset;
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            lastOffset = offset;
+          } else if (offsetNext > pageLastOffset || offsetNext < 0) {
+            firstOffset = startOffset = lastOffset = firstExceptOffset = offset;
+          }
+        }
+
+        const stringValue =
+          stringValues[
+            {
+              first: firstOffset,
+              start: startOffset,
+              last: lastOffset,
+              "first-except": firstExceptOffset,
+            }[retrievePosition]
+          ] || "";
+
+        return stringValue;
+      },
+      `named-string-${retrievePosition}-${name}`,
+    );
+  }
+
+  /**
+   * Set named string for the CSS string-set property
+   * https://drafts.csswg.org/css-gcpm-3/#setting-named-strings-the-string-set-pro
+   */
+  setNamedString(
+    name: string,
+    stringValue: string,
+    cascadeInstance: CssCascade.CascadeInstance,
+  ): void {
+    const values =
+      this.namedStringValues[name] || (this.namedStringValues[name] = {});
+    values[cascadeInstance.currentElementOffset] = stringValue;
   }
 }
 
