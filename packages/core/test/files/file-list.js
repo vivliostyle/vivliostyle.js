@@ -386,6 +386,10 @@ module.exports = [
         file: "page_floats/float-min-wrap-block_vertical.html",
         title: "float-min-wrap-block (vertical writing-mode)",
       },
+      {
+        file: "page_floats/target-counter-and-page-floats.html",
+        title: "Target-counter and Page Floats",
+      },
     ],
   },
   {

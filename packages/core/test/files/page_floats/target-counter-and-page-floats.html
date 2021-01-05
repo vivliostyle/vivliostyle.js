@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Target-counter and Page Floats</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 12mm;
+      }
+
+      section {
+        break-before: page;
+        break-after: page;
+      }
+
+      figure {
+        float-reference: page;
+        float: top;
+        margin: 0 0 1em;
+        width: 100%;
+        height: 50vh;
+        background: orange;
+      }
+
+      a::after {
+        content: " (Page " target-counter(attr(href url), page) ")";
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Target-counter and Page Floats</h1>
+    <nav role="doc-toc">
+      <ul>
+        <li>
+          <a href="#sect01">Section One</a>
+        </li>
+      </ul>
+    </nav>
+    <p>The link text above should be "Section One (Page 2)"</p>
+    <p>This page should have no "Page Float".</p>
+    <p>The 2nd page should have "Page Float One".</p>
+    <p>The 3rd page should have "Page Float Two".</p>
+    <section id="sect01">
+      <h2>Section One</h2>
+      <figure>Page Float One</figure>
+      <figure>Page Float Two</figure>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut at tortor
+        vitae tellus faucibus cursus. Nulla non elit faucibus, egestas lacus
+        quis, fringilla odio. Nulla eu diam eros. Etiam tincidunt sapien vel
+        urna maximus, vel mattis lacus molestie. Orci varius natoque penatibus
+        et magnis dis parturient montes, nascetur ridiculus mus. Curabitur
+        auctor, massa ut vestibulum varius, nulla quam vehicula neque, in
+        maximus mauris mauris non odio. Fusce enim sapien, finibus eget sagittis
+        vel, molestie in lorem. Phasellus ornare ullamcorper nunc, a pharetra
+        dolor fermentum vitae. Sed placerat erat id leo vulputate suscipit.
+        Donec in odio eget tortor posuere vestibulum sed vitae metus. Nulla
+        pulvinar lorem dui, id tincidunt lectus suscipit non. Nulla vitae tortor
+        libero. Ut ac risus elit.
+      </p>
+    </section>
+  </body>
+</html>
