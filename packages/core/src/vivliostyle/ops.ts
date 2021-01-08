@@ -645,6 +645,30 @@ export class StyleInstance
   layoutDeferredPageFloats(column: LayoutType.Column): Task.Result<boolean> {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
     const deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
+
+    // Prevent deferred page floats from appearing in the preceding pages,
+    // e.g., during re-layout the TOC page with target-counter() referencing
+    // later sections containing page floats.
+    if (
+      deferredFloats.length &&
+      deferredFloats[0].float.floatReference === "page"
+    ) {
+      const deferredFloatNode = deferredFloats[0].nodePosition.steps[0].node;
+      const deferredFloatOffset =
+        deferredFloatNode &&
+        this.xmldoc.getNodeOffset(deferredFloatNode, 0, false);
+      const pageStartPos = this.layoutPositionAtPageStart.flowPositions.body;
+      const pageStartOffset =
+        pageStartPos && this.getConsumedOffset(pageStartPos);
+      if (
+        deferredFloatOffset != null &&
+        pageStartOffset != null &&
+        deferredFloatOffset > pageStartOffset
+      ) {
+        return Task.newResult(true);
+      }
+    }
+
     const frame = Task.newFrame<boolean>("layoutDeferredPageFloats");
     let invalidated = false;
     let i = 0;
