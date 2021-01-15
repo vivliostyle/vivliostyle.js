@@ -212,10 +212,13 @@ export const Renderer: React.FC<RendererProps> = ({
   useEffect(() => {
     initInstance();
     setViewerOptions();
-    loadSource();
 
     const cleanup = registerEventHandlers();
     return cleanup;
+  }, []);
+
+  useEffect(() => {
+    loadSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, authorStyleSheet, userStyleSheet]);
 
