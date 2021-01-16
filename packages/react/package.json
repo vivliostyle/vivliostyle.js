@@ -21,7 +21,8 @@
     "@vivliostyle/core": "^2.4.1"
   },
   "peerDependencies": {
-    "react": "^16.13.1"
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.0.21",
