@@ -127,7 +127,7 @@ export const Renderer: React.FC<RendererProps> = ({
     if (isPublication) {
       instance.loadPublication(source, documentOptions);
     } else {
-      instance.loadDocument({ url: source, startPage: page }, documentOptions, {
+      instance.loadDocument({ url: source }, documentOptions, {
         fontSize,
         pageViewMode,
         zoom: 1,
