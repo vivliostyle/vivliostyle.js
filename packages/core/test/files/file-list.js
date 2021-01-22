@@ -72,6 +72,10 @@ module.exports = [
       { file: "relative_floats.html", title: "Floats with position: relative" },
       { file: "target-counter.html", title: "target-counter" },
       {
+        file: "target-counter-and-margin-bug.html",
+        title: "target-counter and margin bug",
+      },
+      {
         file: "exclusion_with_printer_marks.html",
         title: "Exclusion with printer marks",
       },

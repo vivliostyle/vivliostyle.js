@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Target-counter and margin bug</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 10mm;
+      }
+
+      section {
+        break-before: page;
+        margin-top: 50mm;
+      }
+
+      a::after {
+        content: " (Page " target-counter(attr(href url), page) ")";
+      }
+
+      code {
+        white-space: pre;
+        font-size: smaller;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Target-counter test</h1>
+    <nav role="doc-toc">
+      <ul>
+        <li>
+          <a href="#sect01">Section One</a>
+        </li>
+        <li>
+          <a href="#sect02">Section Two</a>
+        </li>
+      </ul>
+    </nav>
+    <section id="sect01">
+      <h2>Section One</h2>
+      <p>
+        Both this section and the next section start a new page (<code
+          >break-before: page</code
+        >) with a large top margin (<code>margin-top: 50mm</code>).
+      </p>
+      <p>The top margin must not be ignored!</p>
+    </section>
+    <section id="sect02">
+      <h2>Section Two</h2>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio
+        laboriosam dolores optio reprehenderit perspiciatis dicta provident
+        cumque nesciunt aliquid aperiam corrupti nemo ipsa hic, dignissimos
+        doloribus placeat molestiae illo impedit!
+      </p>
+    </section>
+  </body>
+</html>
