@@ -20,6 +20,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
+import * as Break from "./break";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssProp from "./css-prop";
@@ -1265,7 +1266,7 @@ export class ViewFactory
                 ? frontEdgeUnforcedBreakBlackListVert
                 : frontEdgeUnforcedBreakBlackListHor;
             }
-          } else if (atUnforcedBreak) {
+          } else if (atUnforcedBreak && !this.isAtForcedBreak()) {
             blackList = this.nodeContext.vertical
               ? frontEdgeUnforcedBreakBlackListVert
               : frontEdgeUnforcedBreakBlackListHor;
@@ -1303,6 +1304,30 @@ export class ViewFactory
       });
     });
     return frame.result();
+  }
+
+  /**
+   * Check if the current position is at a forced break
+   * (Fix for Issue #690)
+   */
+  private isAtForcedBreak(): boolean {
+    for (
+      let nodeContext = this.nodeContext;
+      nodeContext && !nodeContext.after;
+      nodeContext = nodeContext.parent
+    ) {
+      if (Break.isForcedBreakValue(nodeContext.breakBefore)) {
+        return true;
+      }
+      if (
+        nodeContext.parent &&
+        (nodeContext.parent.sourceNode as Element).firstElementChild !==
+          nodeContext.sourceNode
+      ) {
+        break;
+      }
+    }
+    return false;
   }
 
   private processAfterIfcontinues(
