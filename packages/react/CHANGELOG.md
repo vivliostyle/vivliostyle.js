@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.4.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.1...v2.4.2) (2021-01-25)
+
+### Bug Fixes
+
+- **react:** Add react-dom to peer deps ([3325031](https://github.com/vivliostyle/vivliostyle.js/commit/33250317db52c01c338796f1b5d72eb931a688c7))
+- **react:** init core-viewer once even if source is updated ([56f3d1b](https://github.com/vivliostyle/vivliostyle.js/commit/56f3d1b30440e5a21f88e43ea07aafa6e3ba3ec2))
+- **react:** remove incorrect startPage ([7f7951c](https://github.com/vivliostyle/vivliostyle.js/commit/7f7951c8e059af317254820a1529d4c2776130c9))
+
 ## [2.4.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.0...v2.4.1) (2021-01-12)
 
 **Note:** Version bump only for package @vivliostyle/react
