@@ -216,7 +216,7 @@ class Viewer {
 
   loadDocument(
     documentOptions: DocumentOptions,
-    viewerOptions: ViewerOptions,
+    viewerOptions?: ViewerOptions,
   ): void {
     this.state_.status.value(ReadyState.LOADING);
     if (viewerOptions) {
