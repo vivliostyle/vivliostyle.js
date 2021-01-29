@@ -42,6 +42,53 @@ class ViewerApp {
   navigation: Navigation;
 
   constructor() {
+    const flags =
+      (document.documentElement.getAttribute("data-vivliostyle-viewer-flags") ||
+        "") + (urlParameters.getParameter("flags")[0] || "");
+    const disableSettings = flags.includes("s");
+    const settingsPanelOptions = {
+      disablePageStyleChange: disableSettings || flags.includes("g"),
+      disablePageViewModeChange: disableSettings || flags.includes("v"),
+      disableBookModeChange: disableSettings || flags.includes("b"),
+      disableRenderAllPagesChange: disableSettings || flags.includes("a"),
+    };
+    const navigationOptions = {
+      disableTOCNavigation: flags.includes("t"),
+      disablePageNavigation: flags.includes("n"),
+      disableZoom: flags.includes("z"),
+      disableFontSizeChange: flags.includes("f"),
+    };
+    const disableContextMenu = flags.includes("c");
+    const disablePrint = flags.includes("p");
+
+    if (disableSettings) {
+      const welcome: HTMLElement = document.getElementById(
+        "vivliostyle-welcome",
+      );
+      if (welcome) {
+        welcome.remove();
+      }
+      const menuDetail: HTMLElement = document.querySelector(
+        ".vivliostyle-menu-detail",
+      );
+      const menuDetailMain: HTMLElement = document.querySelector(
+        ".vivliostyle-menu-detail-main",
+      );
+      if (menuDetail && menuDetailMain) {
+        menuDetailMain.style.visibility = "hidden";
+        menuDetail.style.height = "auto";
+      }
+    }
+    if (disableContextMenu) {
+      document.oncontextmenu = (): boolean => false;
+    }
+    if (disablePrint) {
+      const printStyle = document.createElement("style");
+      printStyle.setAttribute("media", "print");
+      printStyle.textContent = "*{display:none}";
+      document.head.appendChild(printStyle);
+    }
+
     this.documentOptions = new DocumentOptions();
     this.viewerOptions = new ViewerOptions();
 
@@ -86,6 +133,7 @@ class ViewerApp {
     urlParameters.removeParameter("fontSize", true);
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
+    urlParameters.removeParameter("flags", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 
@@ -113,13 +161,6 @@ class ViewerApp {
 
     this.messageDialog = new MessageDialog(messageQueue);
 
-    const settingsPanelOptions = {
-      disablePageStyleChange: false,
-      disablePageViewModeChange: false,
-      disableBookModeChange: false,
-      disableRenderAllPagesChange: false,
-    };
-
     this.settingsPanel = new SettingsPanel(
       this.viewerOptions,
       this.documentOptions,
@@ -127,13 +168,6 @@ class ViewerApp {
       this.messageDialog,
       settingsPanelOptions,
     );
-
-    const navigationOptions = {
-      disableTOCNavigation: false,
-      disablePageNavigation: false,
-      disableZoom: false,
-      disableFontSizeChange: false,
-    };
 
     this.navigation = new Navigation(
       this.viewerOptions,
