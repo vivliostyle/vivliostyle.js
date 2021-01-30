@@ -47,7 +47,7 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
         ? false
         : bUrls.length
         ? true
-        : false,
+        : null,
     fragment: fragment || null,
     authorStyleSheet: style.length ? style : [],
     userStyleSheet: userStyle.length ? userStyle : [],
@@ -73,10 +73,10 @@ class DocumentOptions {
   authorStyleSheet?: Observable<Array<unknown>>;
   userStyleSheet?: Observable<Array<unknown>>;
 
-  constructor() {
+  constructor(defaultBookMode: boolean) {
     const urlOptions = getDocumentOptionsFromURL();
     this.srcUrls = ko.observable(urlOptions.srcUrls || null);
-    this.bookMode = ko.observable(urlOptions.bookMode);
+    this.bookMode = ko.observable(urlOptions.bookMode ?? defaultBookMode);
     this.fragment = ko.observable(urlOptions.fragment || "");
     this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
     this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
@@ -84,7 +84,7 @@ class DocumentOptions {
     this.dataUserStyleIndex = -1;
 
     this.bookMode.subscribe((bookMode) => {
-      if (!bookMode) {
+      if (bookMode === defaultBookMode) {
         urlParameters.removeParameter("bookMode");
       } else {
         urlParameters.setParameter("bookMode", bookMode.toString());

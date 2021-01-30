@@ -28,14 +28,6 @@ import urlParameters from "../stores/url-parameters";
 import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions, { FitToScreen } from "./zoom-options";
 
-type Options = {
-  renderAllPages: Observable<boolean>;
-  fontSize: Observable<number | string>;
-  profile: Observable<boolean>;
-  pageViewMode: Observable<CorePageViewMode>;
-  zoom: Observable<ZoomOptions>;
-};
-
 interface ViewerOptionsType {
   renderAllPages: boolean;
   fontSize: number;
@@ -101,7 +93,14 @@ class ViewerOptions {
     zoom: FitToScreen;
   };
 
-  constructor(options?: Options) {
+  constructor(defaultRenderAllPages: boolean);
+  constructor(options: ViewerOptions);
+
+  constructor(arg: boolean | ViewerOptions) {
+    const defaultRenderAllPages: boolean =
+      typeof arg === "boolean" ? arg : undefined;
+    const options: ViewerOptions = typeof arg === "object" ? arg : undefined;
+
     this.renderAllPages = ko.observable();
     this.fontSize = ko.observable();
     this.profile = ko.observable();
@@ -113,11 +112,7 @@ class ViewerOptions {
     } else {
       const defaultValues = getDefaultValues();
       const urlOptions = getViewerOptionsFromURL();
-      this.renderAllPages(
-        urlOptions.renderAllPages !== null
-          ? urlOptions.renderAllPages
-          : defaultValues.renderAllPages,
-      );
+      this.renderAllPages(urlOptions.renderAllPages ?? defaultRenderAllPages);
       this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
       this.profile(urlOptions.profile || defaultValues.profile);
       this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
@@ -135,7 +130,7 @@ class ViewerOptions {
         }
       });
       this.renderAllPages.subscribe((renderAllPages) => {
-        if (renderAllPages === defaultValues.renderAllPages) {
+        if (renderAllPages === defaultRenderAllPages) {
           urlParameters.removeParameter("renderAllPages");
         } else {
           urlParameters.setParameter(
@@ -162,7 +157,7 @@ class ViewerOptions {
     }
   }
 
-  copyFrom(other: Options): void {
+  copyFrom(other: ViewerOptions): void {
     this.renderAllPages(other.renderAllPages());
     this.fontSize(other.fontSize());
     this.profile(other.profile());

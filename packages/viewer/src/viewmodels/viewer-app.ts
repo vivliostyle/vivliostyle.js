@@ -42,24 +42,33 @@ class ViewerApp {
   navigation: Navigation;
 
   constructor() {
-    const flags =
-      (document.documentElement.getAttribute("data-vivliostyle-viewer-flags") ||
-        "") + (urlParameters.getParameter("flags")[0] || "");
-    const disableSettings = flags.includes("s");
+    // Configuration flags
+    const flags = []
+      .concat(
+        document.documentElement.getAttribute(
+          "data-vivliostyle-viewer-flags",
+        ) ?? [],
+        urlParameters.getParameter("flags"),
+      )
+      .join();
+    const disableSettings = flags.includes("S");
     const settingsPanelOptions = {
-      disablePageStyleChange: disableSettings || flags.includes("g"),
-      disablePageViewModeChange: disableSettings || flags.includes("v"),
-      disableBookModeChange: disableSettings || flags.includes("b"),
-      disableRenderAllPagesChange: disableSettings || flags.includes("a"),
+      disablePageStyleChange: disableSettings || flags.includes("P"),
+      disablePageViewModeChange: disableSettings || flags.includes("V"),
+      disableBookModeChange: disableSettings || flags.includes("B"),
+      disableRenderAllPagesChange: disableSettings || flags.includes("A"),
     };
     const navigationOptions = {
-      disableTOCNavigation: flags.includes("t"),
-      disablePageNavigation: flags.includes("n"),
-      disableZoom: flags.includes("z"),
-      disableFontSizeChange: flags.includes("f"),
+      disableTOCNavigation: flags.includes("T"),
+      disablePageNavigation: flags.includes("N"),
+      disableZoom: flags.includes("Z"),
+      disableFontSizeChange: flags.includes("F"),
+      disablePageSlider: flags.includes("s"),
     };
     const disableContextMenu = flags.includes("c");
     const disablePrint = flags.includes("p");
+    const defaultBookMode = flags.includes("b");
+    const defaultRenderAllPages = !flags.includes("a");
 
     if (disableSettings) {
       const welcome: HTMLElement = document.getElementById(
@@ -89,8 +98,8 @@ class ViewerApp {
       document.head.appendChild(printStyle);
     }
 
-    this.documentOptions = new DocumentOptions();
-    this.viewerOptions = new ViewerOptions();
+    this.documentOptions = new DocumentOptions(defaultBookMode);
+    this.viewerOptions = new ViewerOptions(defaultRenderAllPages);
 
     this.documentOptions.pageStyle.setViewerFontSizeObservable(
       this.viewerOptions.fontSize,
@@ -133,7 +142,6 @@ class ViewerApp {
     urlParameters.removeParameter("fontSize", true);
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
-    urlParameters.removeParameter("flags", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 
