@@ -782,4 +782,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
       visibility: hidden;
     }
   }
+  &.vivliostyle-menu-disabled::before,
+  &.vivliostyle-menu-disabled::after,
+  &.vivliostyle-menu-disabled > * {
+    display: none;
+  }
 }

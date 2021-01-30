@@ -34,6 +34,7 @@ export type NavigationOptions = {
   disablePageNavigation: boolean;
   disableZoom: boolean;
   disableFontSizeChange: boolean;
+  disablePageSlider: boolean;
 };
 
 class Navigation {
@@ -84,6 +85,7 @@ class Navigation {
   totalPages: PureComputed<number | string>;
   pageSlider: PureComputed<number | string>;
   pageSliderMax: PureComputed<number | string>;
+  hidePageSlider: boolean;
   hideFontSizeChange: boolean;
   hidePageNavigation: boolean;
   hideTOCNavigation: boolean;
@@ -126,7 +128,7 @@ class Navigation {
     });
 
     this.isPageSliderDisabled = ko.pureComputed(() => {
-      if (navigationDisabled()) {
+      if (navigationOptions.disablePageSlider || navigationDisabled()) {
         return true;
       }
       return this.totalPages() <= 1;
@@ -252,6 +254,7 @@ class Navigation {
       );
     });
     this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
+    this.hidePageSlider = !!navigationOptions.disablePageSlider;
 
     this.pageNumber = ko.pureComputed({
       read() {
