@@ -2502,6 +2502,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           viewportSize.height,
         );
       }
+      const isVersoFirstPage = this.spineItems[0]?.instance.isVersoFirstPage;
       const previousViewItem = this.spineItems[spineIndex - 1];
       let pageNumberOffset: number;
       if (item.startPage !== null) {
@@ -2514,8 +2515,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
           // When navigate to a new spine item skipping the previous items,
           // give up calculate pageNumberOffset and use epage (or spineIndex if epage is unset).
           pageNumberOffset = item.epage || spineIndex;
-          if (!this.opf.prePaginated && pageNumberOffset % 2 == 0) {
+          if (
+            !this.opf.prePaginated &&
+            pageNumberOffset % 2 == (isVersoFirstPage ? 1 : 0)
+          ) {
             // Force to odd number to avoid unpaired page. (This is 0 based and even number is recto)
+            // (odd and even are reversed if isVersoFirstPage is true)
             pageNumberOffset++;
           }
         } else {
@@ -2542,6 +2547,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         this.opf.documentURLTransformer,
         this.counterStore,
         this.opf.pageProgression,
+        isVersoFirstPage,
       );
       instance.pref = this.pref;
 

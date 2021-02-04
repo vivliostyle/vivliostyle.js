@@ -842,10 +842,10 @@ export const UserAgentPageCss = `
 :root {
   hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
 }
-:root[data-vivliostyle-epub-spine-properties~="page-spread-left"] > html|body {
+:root[data-vivliostyle-epub-spine-properties~="page-spread-left"] {
   break-before: left;
 }
-:root[data-vivliostyle-epub-spine-properties~="page-spread-right"] > html|body {
+:root[data-vivliostyle-epub-spine-properties~="page-spread-right"] {
   break-before: right;
 }
 

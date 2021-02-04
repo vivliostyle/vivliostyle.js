@@ -2245,27 +2245,28 @@ export class PageManager {
    * Determine the page progression and define left/right/recto/verso pages.
    */
   private definePageProgression() {
-    // TODO If a page break is forced before the root element, recto/verso pages
+    // If a page break is forced before the root element, recto/verso pages
     // are no longer odd/even pages. left/right are reversed too.
     const scope = this.pageScope;
+    const styleInstance: any /* Ops.StyleInstance */ = this.context;
+    const isVersoFirstPage = styleInstance.isVersoFirstPage;
     const pageNumber = new Exprs.Named(scope, "page-number");
-    const isEvenPage = new Exprs.Eq(
+    const isVersoPage = new Exprs.Eq(
       scope,
       new Exprs.Modulo(scope, pageNumber, new Exprs.Const(scope, 2)),
-      scope.zero,
+      isVersoFirstPage ? scope.one : scope.zero,
     );
-    scope.defineName("recto-page", new Exprs.Not(scope, isEvenPage));
-    scope.defineName("verso-page", isEvenPage);
-    const styleInstance: any /* Ops.StyleInstance */ = this.context;
+    scope.defineName("recto-page", new Exprs.Not(scope, isVersoPage));
+    scope.defineName("verso-page", isVersoPage);
     const pageProgression =
       styleInstance.pageProgression ||
       resolvePageProgression(this.docElementStyle);
     if (pageProgression === Constants.PageProgression.LTR) {
-      scope.defineName("left-page", isEvenPage);
-      scope.defineName("right-page", new Exprs.Not(scope, isEvenPage));
+      scope.defineName("left-page", isVersoPage);
+      scope.defineName("right-page", new Exprs.Not(scope, isVersoPage));
     } else {
-      scope.defineName("left-page", new Exprs.Not(scope, isEvenPage));
-      scope.defineName("right-page", isEvenPage);
+      scope.defineName("left-page", new Exprs.Not(scope, isVersoPage));
+      scope.defineName("right-page", isVersoPage);
     }
   }
 
