@@ -964,6 +964,14 @@ export class Styler implements AbstractStyler {
           );
         } else {
           box = this.boxStack.push(style, this.lastOffset, elem === this.root);
+
+          // For not ignoring break-before on :root (issue #666)
+          if (elem === this.xmldoc.body) {
+            box.breakBefore = Break.resolveEffectiveBreakValue(
+              box.flowChunk.breakBefore,
+              box.breakBefore,
+            );
+          }
         }
         const blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
         this.registerForcedBreakOffset(
