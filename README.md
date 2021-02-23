@@ -158,8 +158,8 @@ Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout
 
 [github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases
-[build-status]: https://travis-ci.com/vivliostyle/vivliostyle.js.svg?branch=master
-[build-status-url]: https://travis-ci.com/vivliostyle/vivliostyle.js
+[build-status]: https://github.com/vivliostyle/vivliostyle.js/workflows/CI/badge.svg?branch=master
+[build-status-url]: https://github.com/vivliostyle/vivliostyle.js/actions?query=CI
 [sauce-test-status]: https://saucelabs.com/buildstatus/vivliostyle-test
 [sauce-test-status-url]: https://app.saucelabs.com/u/vivliostyle-test
 [contributors]: https://img.shields.io/github/contributors/vivliostyle/vivliostyle.js.svg
