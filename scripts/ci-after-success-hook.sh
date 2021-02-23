@@ -5,8 +5,8 @@ DEBUG_HOOK=false
 
 function setup-git() {
     echo "===> Configuring credentials"
-    git config user.email "vivliostyle@vivliostyle.org"
-    git config user.name "CI"
+    git config --global user.email "vivliostyle@vivliostyle.org"
+    git config --global user.name "Vivliostyle (CI)"
     mkdir -p ~/.ssh
     echo -e "$DEPLOY_KEY_VIVLIOSTYLE_ORG" | base64 -d > ~/.ssh/deploy-vivliostyle-org.key
     echo -e "$DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO" | base64 -d > ~/.ssh/deploy-vivliostyle-github-io.key
