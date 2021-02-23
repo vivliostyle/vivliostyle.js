@@ -115,7 +115,6 @@ if [[ $IS_VALID_TAG = true ]]; then
     
     # GitHub releases
     echo "===> Creating GitHub Release"
-    npm i -g github-release-cli@1.3.1
     if [[ $STABLE_RELEASE = true ]]; then
         # get change log after the previous stable release
         CHANGELOG=$(sed -E -e '/^##? \['${VERSION//./\\.}'\]/,/^##? \[[0-9.]+\]/! d' CHANGELOG.md | sed -e '$ d')
@@ -133,7 +132,7 @@ if [[ $IS_VALID_TAG = true ]]; then
             --owner vivliostyle \
             --repo vivliostyle.js \
             --tag "${TAG}" \
-            --name "${TAG}" \
+            --release-name "${TAG}" \
             --body "${CHANGELOG}"
     else
         [[ $DEBUG_HOOK = false ]] && github-release upload \
@@ -142,7 +141,7 @@ if [[ $IS_VALID_TAG = true ]]; then
             --owner vivliostyle \
             --repo vivliostyle.js \
             --tag "${TAG}" \
-            --name "${TAG}" \
+            --release-name "${TAG}" \
             --body "${CHANGELOG}" \
             --prerelease
     fi
