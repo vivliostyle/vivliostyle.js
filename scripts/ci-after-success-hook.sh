@@ -125,26 +125,15 @@ if [[ $IS_VALID_TAG = true ]]; then
     echo "===> CHANGELOG=${CHANGELOG}"
     TAGGED_ARCHIVE="vivliostyle-viewer-${VERSION}.zip"
     cp ${ARCHIVE_PATH} ${TAGGED_ARCHIVE}
-    if [[ $STABLE_RELEASE = true ]]; then
-        [[ $DEBUG_HOOK = false ]] && github-release upload \
-            "${TAGGED_ARCHIVE}" \
-            --token "${GITHUB_TOKEN}" \
-            --owner vivliostyle \
-            --repo vivliostyle.js \
-            --tag "${TAG}" \
-            --release-name "${TAG}" \
-            --body "${CHANGELOG}"
-    else
-        [[ $DEBUG_HOOK = false ]] && github-release upload \
-            "${TAGGED_ARCHIVE}" \
-            --token "${GITHUB_TOKEN}" \
-            --owner vivliostyle \
-            --repo vivliostyle.js \
-            --tag "${TAG}" \
-            --release-name "${TAG}" \
-            --body "${CHANGELOG}" \
-            --prerelease
-    fi
+    [[ $DEBUG_HOOK = false ]] && $(npm bin)/github-release upload \
+        "${TAGGED_ARCHIVE}" \
+        --token "${GITHUB_TOKEN}" \
+        --owner vivliostyle \
+        --repo vivliostyle.js \
+        --tag "${TAG}" \
+        --release-name "${TAG}" \
+        --body "${CHANGELOG}" \
+        $([[ $STABLE_RELEASE = false ]] && echo "--prerelease")
 
     # Tagged Viewer
     echo "===> Cloning vivliostyle.github.io"
