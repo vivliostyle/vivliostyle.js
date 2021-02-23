@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.5.0-pre.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.2...v2.5.0-pre.0) (2021-02-23)
+
+### Features
+
+- **viewer:** Configuration flags ([a0b155c](https://github.com/vivliostyle/vivliostyle.js/commit/a0b155cd04a8da49b5631adfcd0dc37fe9719808))
+- **viewer:** Configuration flags update ([2073f28](https://github.com/vivliostyle/vivliostyle.js/commit/2073f28cad3a04b379bbe42555e3b0c3f90ecd49)), closes [#692](https://github.com/vivliostyle/vivliostyle.js/issues/692)
+
 ## [2.4.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.1...v2.4.2) (2021-01-25)
 
 **Note:** Version bump only for package @vivliostyle/viewer
