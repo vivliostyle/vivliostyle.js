@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.5.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.4...v2.5.0) (2021-02-26)
+
+### Features
+
+- **core:** Support the :nth() page selector ([ad6f3e9](https://github.com/vivliostyle/vivliostyle.js/commit/ad6f3e9c788425097c7be3443b2032733c32cdb4)), closes [/github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563](https://github.com//github.com/vivliostyle/vivliostyle.js/issues/667/issues/issuecomment-738020563) [#667](https://github.com/vivliostyle/vivliostyle.js/issues/667)
+
 # [2.5.0-pre.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.3...v2.5.0-pre.4) (2021-02-23)
 
 **Note:** Version bump only for package @vivliostyle/core
