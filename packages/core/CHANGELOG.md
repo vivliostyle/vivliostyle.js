@@ -3,29 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.5.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.4...v2.5.0) (2021-02-26)
+# [2.5.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.0...v2.5.0) (2021-02-26)
 
 ### Features
 
-- **core:** Support the :nth() page selector ([ad6f3e9](https://github.com/vivliostyle/vivliostyle.js/commit/ad6f3e9c788425097c7be3443b2032733c32cdb4)), closes [/github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563](https://github.com//github.com/vivliostyle/vivliostyle.js/issues/667/issues/issuecomment-738020563) [#667](https://github.com/vivliostyle/vivliostyle.js/issues/667)
+- **core:** Support the :nth() page selector ([ad6f3e9](https://github.com/vivliostyle/vivliostyle.js/commit/ad6f3e9c788425097c7be3443b2032733c32cdb4)), closes [#667](https://github.com/vivliostyle/vivliostyle.js/issues/667)
 
-# [2.5.0-pre.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.3...v2.5.0-pre.4) (2021-02-23)
-
-**Note:** Version bump only for package @vivliostyle/core
-
-# [2.5.0-pre.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.2...v2.5.0-pre.3) (2021-02-23)
-
-**Note:** Version bump only for package @vivliostyle/core
-
-# [2.5.0-pre.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.1...v2.5.0-pre.2) (2021-02-23)
-
-**Note:** Version bump only for package @vivliostyle/core
-
-# [2.5.0-pre.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.0...v2.5.0-pre.1) (2021-02-23)
-
-**Note:** Version bump only for package @vivliostyle/core
-
-# [2.5.0-pre.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.2...v2.5.0-pre.0) (2021-02-23)
+## [2.5.0-pre.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.2...v2.5.0-pre.0) (2021-02-23)
 
 ### Bug Fixes
 

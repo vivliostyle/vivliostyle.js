@@ -3,39 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.5.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.4...v2.5.0) (2021-02-26)
+# [2.5.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.0...v2.5.0) (2021-02-26)
 
 ### Features
 
-- **core:** Support the :nth() page selector ([ad6f3e9](https://github.com/vivliostyle/vivliostyle.js/commit/ad6f3e9c788425097c7be3443b2032733c32cdb4)), closes [/github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563](https://github.com//github.com/vivliostyle/vivliostyle.js/issues/667/issues/issuecomment-738020563) [#667](https://github.com/vivliostyle/vivliostyle.js/issues/667)
+- **core:** Support the :nth() page selector ([ad6f3e9](https://github.com/vivliostyle/vivliostyle.js/commit/ad6f3e9c788425097c7be3443b2032733c32cdb4)), closes [#667](https://github.com/vivliostyle/vivliostyle.js/issues/667)
 
-# [2.5.0-pre.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.3...v2.5.0-pre.4) (2021-02-23)
-
-**Note:** Version bump only for package vivliostyle
-
-# [2.5.0-pre.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.2...v2.5.0-pre.3) (2021-02-23)
-
-**Note:** Version bump only for package vivliostyle
-
-# [2.5.0-pre.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.1...v2.5.0-pre.2) (2021-02-23)
-
-**Note:** Version bump only for package vivliostyle
-
-# [2.5.0-pre.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.5.0-pre.0...v2.5.0-pre.1) (2021-02-23)
-
-**Note:** Version bump only for package vivliostyle
-
-# [2.5.0-pre.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.2...v2.5.0-pre.0) (2021-02-23)
+## [2.5.0-pre.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.2...v2.5.0-pre.0) (2021-02-23)
 
 ### Bug Fixes
 
-- **core:** Missing source map ([f8add2b](https://github.com/vivliostyle/vivliostyle.js/commit/f8add2bc50b4a333c1d62806675adfa05eb3b61e)), closes [#695](https://github.com/vivliostyle/vivliostyle.js/issues/695)
 - **core:** spread break at beginning of a document does not work properly ([f1208bf](https://github.com/vivliostyle/vivliostyle.js/commit/f1208bf8d4a542970fdca64a0ff99679064715a7)), closes [#666](https://github.com/vivliostyle/vivliostyle.js/issues/666)
+- **core:** Missing source map ([f8add2b](https://github.com/vivliostyle/vivliostyle.js/commit/f8add2bc50b4a333c1d62806675adfa05eb3b61e)), closes [#695](https://github.com/vivliostyle/vivliostyle.js/issues/695)
 
 ### Features
 
-- **viewer:** Configuration flags ([a0b155c](https://github.com/vivliostyle/vivliostyle.js/commit/a0b155cd04a8da49b5631adfcd0dc37fe9719808))
-- **viewer:** Configuration flags update ([2073f28](https://github.com/vivliostyle/vivliostyle.js/commit/2073f28cad3a04b379bbe42555e3b0c3f90ecd49)), closes [#692](https://github.com/vivliostyle/vivliostyle.js/issues/692)
+- **viewer:** Configuration flags ([2073f28](https://github.com/vivliostyle/vivliostyle.js/commit/2073f28cad3a04b379bbe42555e3b0c3f90ecd49)), closes [#692](https://github.com/vivliostyle/vivliostyle.js/issues/692)
 
 ## [2.4.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.4.1...v2.4.2) (2021-01-25)
 
