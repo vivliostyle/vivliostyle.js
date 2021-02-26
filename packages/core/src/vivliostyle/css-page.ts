@@ -2568,6 +2568,37 @@ export class IsVersoPageAction extends CssCascade.ChainedAction {
   }
 }
 
+export class IsNthPageAction extends CssCascade.IsNthAction {
+  constructor(
+    public readonly scope: Exprs.LexicalScope,
+    public readonly a: number,
+    public readonly b: number,
+  ) {
+    super(a, b);
+  }
+
+  /**
+   * @override
+   */
+  apply(cascadeInstance: CssCascade.CascadeInstance): void {
+    const styleInstance: any /* Ops.StyleInstance */ = cascadeInstance.context;
+    let pageNumber = styleInstance.layoutPositionAtPageStart.page;
+    if (styleInstance.blankPageAtStart) {
+      pageNumber--;
+    }
+    if (pageNumber && this.matchANPlusB(pageNumber)) {
+      this.chained.apply(cascadeInstance);
+    }
+  }
+
+  /**
+   * @override
+   */
+  getPriority(): number {
+    return 2;
+  }
+}
+
 /**
  * Action applying an at-page rule
  */
@@ -2678,36 +2709,52 @@ export class PageParserHandler
    * @override
    */
   pseudoclassSelector(name: string, params: (number | string)[]): void {
+    name = name.toLowerCase();
     if (params) {
-      this.reportAndSkip(
-        `E_INVALID_PAGE_SELECTOR :${name}(${params.join("")})`,
-      );
-    }
-    this.currentPseudoPageClassSelectors.push(`:${name}`);
-    switch (name.toLowerCase()) {
-      case "first":
-        this.chain.push(new IsFirstPageAction(this.scope));
-        this.specificity += 256;
-        break;
-      case "left":
-        this.chain.push(new IsLeftPageAction(this.scope));
-        this.specificity += 1;
-        break;
-      case "right":
-        this.chain.push(new IsRightPageAction(this.scope));
-        this.specificity += 1;
-        break;
-      case "recto":
-        this.chain.push(new IsRectoPageAction(this.scope));
-        this.specificity += 1;
-        break;
-      case "verso":
-        this.chain.push(new IsVersoPageAction(this.scope));
-        this.specificity += 1;
-        break;
-      default:
-        this.reportAndSkip(`E_INVALID_PAGE_SELECTOR :${name}`);
-        break;
+      switch (name) {
+        case "nth":
+          {
+            const [a, b] = params as number[];
+            this.currentPseudoPageClassSelectors.push(
+              `:${name}(${a}n${b < 0 ? b : "+" + b})`,
+            );
+            this.chain.push(new IsNthPageAction(this.scope, a, b));
+            this.specificity += 256;
+          }
+          break;
+        default:
+          this.reportAndSkip(
+            `E_INVALID_PAGE_SELECTOR :${name}(${params.join("")})`,
+          );
+          break;
+      }
+    } else {
+      this.currentPseudoPageClassSelectors.push(`:${name}`);
+      switch (name) {
+        case "first":
+          this.chain.push(new IsFirstPageAction(this.scope));
+          this.specificity += 256;
+          break;
+        case "left":
+          this.chain.push(new IsLeftPageAction(this.scope));
+          this.specificity += 1;
+          break;
+        case "right":
+          this.chain.push(new IsRightPageAction(this.scope));
+          this.specificity += 1;
+          break;
+        case "recto":
+          this.chain.push(new IsRectoPageAction(this.scope));
+          this.specificity += 1;
+          break;
+        case "verso":
+          this.chain.push(new IsVersoPageAction(this.scope));
+          this.specificity += 1;
+          break;
+        default:
+          this.reportAndSkip(`E_INVALID_PAGE_SELECTOR :${name}`);
+          break;
+      }
     }
   }
 

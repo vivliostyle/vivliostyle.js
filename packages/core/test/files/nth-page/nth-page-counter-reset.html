@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nth() page selector &amp; page counter reset</title>
+    <style>
+      @page {
+        size: 12cm 10cm;
+        margin: 1.5cm;
+
+        @bottom-right {
+          content: "Page " counter(page);
+        }
+      }
+      @page :first {
+        @top-left {
+          content: ":first";
+        }
+      }
+      @page :nth(1) {
+        counter-reset: page 0;
+        @top-center {
+          content: ":nth(1)";
+        }
+      }
+      @page :nth(2) {
+        @top-center {
+          content: ":nth(2)";
+        }
+      }
+      @page :nth(3n) {
+        @top-center {
+          content: ":nth(3n)";
+        }
+      }
+      @page :nth(3n+2) {
+        @top-center {
+          content: ":nth(3n+2)";
+        }
+      }
+      @page :nth(7) {
+        counter-increment: page 2;
+        @top-center {
+          content: ":nth(7)";
+        }
+      }
+      @page :nth(9) {
+        counter-reset: page 100;
+        @top-center {
+          content: ":nth(9)";
+        }
+      }
+      @page :nth(odd) {
+        @top-right {
+          content: ":nth(odd)";
+        }
+      }
+      @page :nth(even) {
+        @top-right {
+          content: ":nth(even)";
+        }
+      }
+      @page :nth(-n+3) {
+        @bottom-left {
+          content: ":nth(-n+3)";
+        }
+      }
+      @page :nth(n+5) {
+        @bottom-left {
+          content: ":nth(n+5)";
+        }
+      }
+      @page :nth(3n-1) {
+        @bottom-center {
+          content: ":nth(3n-1)";
+        }
+      }
+
+      .test {
+        break-after: page;
+      }
+      .test table {
+        width: 80%;
+        margin: auto;
+        table-layout: fixed;
+      }
+      code {
+        font-size: smaller;
+      }
+      h1 {
+        font-size: large;
+      }
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Nth() page selector &amp; page counter reset</h1>
+    <div class="test">
+      <p>The 1st page header/footer should be:</p>
+      <table>
+        <tr>
+          <td>:first*</td>
+          <td>:nth(1)</td>
+          <td>:nth(odd)</td>
+        </tr>
+        <tr>
+          <td>:nth(-n+3)</td>
+          <td></td>
+          <td>Page 1</td>
+        </tr>
+      </table>
+      <p>* If this is not the first doc, “:first” will not appear.</p>
+      <p>
+        Page counter is reset by <code>counter-reset: page 0</code> (incremented
+        to 1).
+      </p>
+    </div>
+    <div class="test">
+      <p>The 2nd page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(3n+2)</td>
+          <td>:nth(even)</td>
+        </tr>
+        <tr>
+          <td>:nth(-n+3)</td>
+          <td>:nth(3n-1)</td>
+          <td>Page 2</td>
+        </tr>
+      </table>
+    </div>
+    <div class="test">
+      <p>The 3rd page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(3n)</td>
+          <td>:nth(odd)</td>
+        </tr>
+        <tr>
+          <td>:nth(-n+3)</td>
+          <td></td>
+          <td>Page 3</td>
+        </tr>
+      </table>
+    </div>
+    <div class="test">
+      <p>The 4th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>:nth(even)</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Page 4</td>
+        </tr>
+      </table>
+    </div>
+    <div class="test">
+      <p>The 5th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(3n+2)</td>
+          <td>:nth(odd)</td>
+        </tr>
+        <tr>
+          <td>:nth(n+5)</td>
+          <td>:nth(3n-1)</td>
+          <td>Page 5</td>
+        </tr>
+      </table>
+    </div>
+    <div class="test">
+      <p>The 6th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(3n)</td>
+          <td>:nth(even)</td>
+        </tr>
+        <tr>
+          <td>:nth(n+5)</td>
+          <td></td>
+          <td>Page 6</td>
+        </tr>
+      </table>
+    </div>
+    <div class="test">
+      <p>The 7th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(7)</td>
+          <td>:nth(odd)</td>
+        </tr>
+        <tr>
+          <td>:nth(n+5)</td>
+          <td></td>
+          <td>Page 8</td>
+        </tr>
+      </table>
+      <p>
+        Page counter is incremented by
+        <code>counter-increment: page 2</code> resulting in 8.
+      </p>
+    </div>
+    <div class="test">
+      <p>The 8th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(3n+2)</td>
+          <td>:nth(even)</td>
+        </tr>
+        <tr>
+          <td>:nth(n+5)</td>
+          <td>:nth(3n-1)</td>
+          <td>Page 9</td>
+        </tr>
+      </table>
+    </div>
+    <div class="test">
+      <p>The 9th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td>:nth(9)</td>
+          <td>:nth(odd)</td>
+        </tr>
+        <tr>
+          <td>:nth(n+5)</td>
+          <td></td>
+          <td>Page 101</td>
+        </tr>
+      </table>
+      <p>
+        Page counter is reset by
+        <code>counter-reset: page 100</code> (incremented to 101).
+      </p>
+    </div>
+  </body>
+</html>
