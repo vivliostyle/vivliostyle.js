@@ -212,7 +212,7 @@ export class StyleInstance
   pageBreaks: { [key: string]: boolean } = {};
   pageProgression: Constants.PageProgression | null = null;
   isVersoFirstPage: boolean = false;
-  needBlankPage: boolean = false;
+  blankPageAtStart: boolean = false;
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
@@ -297,7 +297,7 @@ export class StyleInstance
       if (this.pageNumberOffset === 0) {
         this.isVersoFirstPage = true;
       } else {
-        this.needBlankPage = true;
+        this.blankPageAtStart = true;
       }
     }
 
@@ -624,10 +624,9 @@ export class StyleInstance
 
         // The blank page caused by a spread break between two documents
         // should have no margin box content (issue #666)
-        if (this.needBlankPage) {
+        if (cp.page === 1 && this.blankPageAtStart) {
           pageMaster.style = {}; // clear root background-color/image
           cascadedPageStyle = {}; // clear margin boxes
-          this.needBlankPage = false;
           // TODO: support the :blank page selector
         }
 

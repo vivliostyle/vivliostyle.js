@@ -1687,6 +1687,7 @@ export class Parser {
                 case "nth-of-type":
                 case "nth-last-child":
                 case "nth-last-of-type":
+                case "nth":
                   params = this.readNthPseudoParams();
                   if (!params) {
                     break pseudoclassType;
