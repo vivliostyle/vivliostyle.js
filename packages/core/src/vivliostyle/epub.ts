@@ -2505,8 +2505,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
       const isVersoFirstPage = this.spineItems[0]?.instance.isVersoFirstPage;
       const previousViewItem = this.spineItems[spineIndex - 1];
       let pageNumberOffset: number;
+      let pageCounterOffset: number;
       if (item.startPage !== null) {
         pageNumberOffset = item.startPage - 1;
+        pageCounterOffset = pageNumberOffset;
       } else {
         if (
           spineIndex > 0 &&
@@ -2523,17 +2525,28 @@ export class OPFView implements Vgen.CustomRendererFactory {
             // (odd and even are reversed if isVersoFirstPage is true)
             pageNumberOffset++;
           }
+          pageCounterOffset = pageNumberOffset;
         } else {
           pageNumberOffset = previousViewItem
             ? previousViewItem.instance.pageNumberOffset +
               previousViewItem.pages.length
             : 0;
+          const counters = this.counterStore.currentPageCounters["page"];
+          pageCounterOffset =
+            !counters || !counters.length
+              ? pageNumberOffset
+              : counters[counters.length - 1];
+
+          // Note: The "page" counter value differs to the "page-number" value
+          // if the "page" counter has been reset by counter-reset/increment.
+          // (Fix for issue #701)
         }
         if (item.skipPagesBefore !== null) {
           pageNumberOffset += item.skipPagesBefore;
+          pageCounterOffset += item.skipPagesBefore;
         }
       }
-      this.counterStore.forceSetPageCounter(pageNumberOffset);
+      this.counterStore.forceSetPageCounter(pageCounterOffset);
       const instance = new OPS.StyleInstance(
         style,
         xmldoc,
