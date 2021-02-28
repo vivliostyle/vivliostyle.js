@@ -74,14 +74,21 @@
         margin: auto;
         table-layout: fixed;
       }
+      .test td {
+        text-align: center;
+      }
+      .test td:first-child {
+        text-align: left;
+      }
+      .test td:last-child {
+        text-align: right;
+      }
       code {
         font-size: smaller;
       }
-      h1 {
-        font-size: large;
-      }
       body {
         margin: 0;
+        line-height: 1.2;
       }
     </style>
   </head>
@@ -103,7 +110,7 @@
       </table>
       <p>
         * If this is not the first doc, “:first” will not appear, and the Page
-        numbering will be consecutive from the previous doc. A blank page is
+        numbering will be consecutive from the previous doc. A blank page may be
         inserted by <code>:root { break-before: recto; }</code>.
       </p>
     </div>

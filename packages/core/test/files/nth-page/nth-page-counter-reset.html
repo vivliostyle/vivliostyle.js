@@ -84,14 +84,21 @@
         margin: auto;
         table-layout: fixed;
       }
+      .test td {
+        text-align: center;
+      }
+      .test td:first-child {
+        text-align: left;
+      }
+      .test td:last-child {
+        text-align: right;
+      }
       code {
         font-size: smaller;
       }
-      h1 {
-        font-size: large;
-      }
       body {
         margin: 0;
+        line-height: 1.2;
       }
     </style>
   </head>
@@ -244,6 +251,21 @@
         Page counter is reset by
         <code>counter-reset: page 100</code> (incremented to 101).
       </p>
+    </div>
+    <div class="test">
+      <p>The 10th page header/footer should be:</p>
+      <table>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>:nth(even)</td>
+        </tr>
+        <tr>
+          <td>:nth(n+5)</td>
+          <td></td>
+          <td>Page 102</td>
+        </tr>
+      </table>
     </div>
   </body>
 </html>

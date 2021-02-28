@@ -135,15 +135,20 @@ module.exports = [
     category: "Nth page selector",
     files: [
       {
-        file: ["nth-page/nth-page.html", "nth-page/nth-page.html"],
-        title: "nth() page selector & blank page between two docs",
+        file: "nth-page/nth-page.html",
+        title: "nth() page selector",
+      },
+      {
+        file: "nth-page/nth-page-counter-reset.html",
+        title: "nth() page selector & page counter reset",
       },
       {
         file: [
+          "nth-page/nth-page.html",
           "nth-page/nth-page-counter-reset.html",
-          "nth-page/nth-page-counter-reset.html",
+          "nth-page/nth-page.html",
         ],
-        title: "nth() page selector & page counter reset",
+        title: "nth() page selector & page counter reset in multiple documents",
       },
     ],
   },
