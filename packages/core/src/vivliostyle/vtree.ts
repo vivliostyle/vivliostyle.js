@@ -30,6 +30,7 @@ import * as GeometryUtil from "./geometry-util";
 import * as TaskUtil from "./task-util";
 import { assert } from "./asserts";
 import { PageFloats, Selectors, Vtree, XmlDoc } from "./types";
+import { PseudoelementStyler } from "./pseudo-element";
 
 export const delayedProps = {
   transform: true,
@@ -756,6 +757,17 @@ export class NodeContext implements Vtree.NodeContext {
   toNodePosition(): NodePosition {
     let nc: NodeContext = this;
     const steps = [];
+
+    // Fix for issue #703
+    if (
+      nc.shadowType === Vtree.ShadowType.ROOTLESS &&
+      (nc.floatReference !== PageFloats.FloatReference.INLINE ||
+        nc.floatSide === "footnote") &&
+      nc.shadowContext.styler instanceof PseudoelementStyler
+    ) {
+      nc = nc.parent;
+    }
+
     do {
       // We need fully "peeled" path, so don't record first-XXX pseudoelement
       // containers
