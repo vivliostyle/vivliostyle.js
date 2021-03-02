@@ -687,6 +687,7 @@ export class StyleInstance
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
     const deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
 
+    // Fix for issue #681
     // Prevent deferred page floats from appearing in the preceding pages,
     // e.g., during re-layout the TOC page with target-counter() referencing
     // later sections containing page floats.
@@ -694,7 +695,8 @@ export class StyleInstance
       deferredFloats.length &&
       deferredFloats[0].float.floatReference === "page"
     ) {
-      const deferredFloatNode = deferredFloats[0].nodePosition.steps[0].node;
+      const deferredFloatNode =
+        deferredFloats[0].float.nodePosition.steps[0].node;
       const deferredFloatOffset =
         deferredFloatNode &&
         this.xmldoc.getNodeOffset(deferredFloatNode, 0, false);
