@@ -529,6 +529,10 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   private getFontSize() {
     const cascval = getProp(this.props, "font-size");
+    if (!cascval.value.isNumeric()) {
+      // FIXME: cascval may be Ident value e.g. "smaller"
+      return Exprs.defaultUnitSizes["em"];
+    }
     const n = cascval.value as Css.Numeric;
     if (!Exprs.isAbsoluteLengthUnit(n.unit)) {
       throw new Error("Unexpected state");
