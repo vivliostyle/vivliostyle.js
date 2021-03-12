@@ -19,12 +19,12 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
-    "esbuild": "^0.7.2",
+    "esbuild": "^0.9.0",
     "eslint": "^7.3.1",
-    "eslint-config-prettier": "^6.10.1",
+    "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "^3.1.2",
-    "microbundle": "^0.12.2",
+    "microbundle": "^0.13.0",
     "shx": "^0.3.2",
     "typescript": "^4.0.3"
   },

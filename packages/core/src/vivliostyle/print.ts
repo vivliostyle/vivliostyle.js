@@ -114,7 +114,7 @@ class VivliostylePrint {
           },
         },
       );
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       Viewer.addListener("readystatechange", () => {
         if (Viewer.readyState === "complete") {
           resolve();

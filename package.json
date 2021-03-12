@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "archiver": "^5.0.2",
-    "doctoc": "^1.4.0",
+    "doctoc": "^2.0.0",
     "github-release-cli": "^2.0.0",
     "husky": "^4.2.3",
     "lerna": "^3.20.2",

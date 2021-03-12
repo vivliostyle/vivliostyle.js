@@ -5,7 +5,6 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import commonJS from "@rollup/plugin-commonjs";
 import strip from "@rollup/plugin-strip";
-import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
 import pkg from "./package.json";
 import corePkg from "../core/package.json";
@@ -27,11 +26,14 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const plugins = [
   // Transpile TypeScript into JavaScript
   typescript({
-    inlineSourceMap: isDevelopment,
-    inlineSources: isDevelopment,
+    inlineSourceMap: false,
+    inlineSources: true,
   }),
   // Replace conditional variable with value
-  replace({ "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV) }),
+  replace({
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+    preventAssignment: true,
+  }),
   // Resolve module path in node_modules according to package.json's props
   nodeResolve({
     mainFields: ["main", "module"],
@@ -55,8 +57,6 @@ const plugins = [
         ],
       })
     : {},
-  // Cross-browser support
-  !isDevelopment ? babel() : {},
   // Minimize module size
   !isDevelopment ? terser() : {},
 ];
@@ -77,7 +77,7 @@ export default {
       name: "VivliostyleViewer",
       file: isDevelopment ? "lib/js/vivliostyle-viewer-dev.js" : pkg.main,
       format: "umd",
-      sourcemap: "inline",
+      sourcemap: true,
       banner,
     },
   ],
