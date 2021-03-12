@@ -719,7 +719,7 @@ export class ViewFactory
       computedStyle,
       styler,
       this.context,
-      this.nodeContext.shadowContext,
+      this.nodeContext.shadowContext as Vtree.ShadowContext,
     ).then((shadowParam) => {
       this.nodeContext.nodeShadow = shadowParam;
       const position = computedStyle["position"];
@@ -1707,16 +1707,14 @@ export class ViewFactory
     // content that will be inserted
     let contentNode: Node;
     let contentShadowType: Vtree.ShadowType;
-    let contentShadow: Vtree.ShadowContext;
+    const contentShadow = shadow.subShadow || shadow.parentShadow;
     if (shadow.subShadow) {
-      contentShadow = shadow.subShadow;
       contentNode = shadow.root;
       contentShadowType = shadow.type;
       if (contentShadowType == Vtree.ShadowType.ROOTLESS) {
         contentNode = contentNode.firstChild;
       }
     } else {
-      contentShadow = shadow.parentShadow;
       contentNode = shadow.owner.firstChild;
       contentShadowType = Vtree.ShadowType.ROOTLESS;
     }

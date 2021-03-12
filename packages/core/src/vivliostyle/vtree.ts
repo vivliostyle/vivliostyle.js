@@ -29,8 +29,14 @@ import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
 import * as TaskUtil from "./task-util";
 import { assert } from "./asserts";
-import { PageFloats, Selectors, Vtree, XmlDoc } from "./types";
-import { PseudoelementStyler } from "./pseudo-element";
+import {
+  CssStyler,
+  PageFloats,
+  PseudoElement,
+  Selectors,
+  Vtree,
+  XmlDoc,
+} from "./types";
 
 export const delayedProps = {
   transform: true,
@@ -513,7 +519,7 @@ export class ShadowContext implements Vtree.ShadowContext {
     public readonly parentShadow: ShadowContext,
     superShadow: ShadowContext,
     public readonly type: ShadowType,
-    public readonly styler: object,
+    public readonly styler: CssStyler.AbstractStyler,
   ) {
     if (superShadow) {
       superShadow.subShadow = this;
@@ -534,8 +540,8 @@ export class ShadowContext implements Vtree.ShadowContext {
 }
 
 export function isSameShadowContext(
-  sc1: ShadowContext,
-  sc2: ShadowContext,
+  sc1: Vtree.ShadowContext,
+  sc2: Vtree.ShadowContext,
 ): boolean {
   return sc1 === sc2 || (!!sc1 && !!sc2 && sc1.equals(sc2));
 }
@@ -566,8 +572,8 @@ export class NodeContext implements Vtree.NodeContext {
   shadowType: ShadowType;
 
   // parent's shadow type
-  shadowContext: ShadowContext;
-  nodeShadow: ShadowContext = null;
+  shadowContext: Vtree.ShadowContext;
+  nodeShadow: Vtree.ShadowContext = null;
   shadowSibling: NodeContext = null;
 
   // next "sibling" in the shadow tree
@@ -763,7 +769,9 @@ export class NodeContext implements Vtree.NodeContext {
       nc.shadowType === Vtree.ShadowType.ROOTLESS &&
       (nc.floatReference !== PageFloats.FloatReference.INLINE ||
         nc.floatSide === "footnote") &&
-      nc.shadowContext.styler instanceof PseudoelementStyler
+      (nc.shadowContext?.styler as PseudoElement.PseudoelementStyler)?.style?.[
+        "_pseudos"
+      ]
     ) {
       nc = nc.parent;
     }
