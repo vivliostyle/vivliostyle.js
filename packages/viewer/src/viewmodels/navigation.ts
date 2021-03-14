@@ -35,6 +35,7 @@ export type NavigationOptions = {
   disableZoom: boolean;
   disableFontSizeChange: boolean;
   disablePageSlider: boolean;
+  disablePrint: boolean;
 };
 
 class Navigation {
@@ -81,6 +82,7 @@ class Navigation {
   isZoomOutDisabled: PureComputed<boolean>;
   isZoomInDisabled: PureComputed<boolean>;
   isZoomToActualSizeDisabled: PureComputed<boolean>;
+  isPrintDisabled: PureComputed<boolean>;
   pageNumber: PureComputed<number | string>;
   totalPages: PureComputed<number | string>;
   pageSlider: PureComputed<number | string>;
@@ -90,6 +92,7 @@ class Navigation {
   hidePageNavigation: boolean;
   hideTOCNavigation: boolean;
   hideZoom: boolean;
+  hidePrint: boolean;
   justClicked: boolean;
 
   constructor(
@@ -256,6 +259,26 @@ class Navigation {
     this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
     this.hidePageSlider = !!navigationOptions.disablePageSlider;
 
+    this.isPrintDisabled = ko.pureComputed(() => {
+      if (
+        navigationOptions.disablePrint ||
+        this.isDisabled() ||
+        this.viewer_.state.status() != ReadyState.COMPLETE
+      ) {
+        return true;
+      }
+      return false;
+    });
+
+    this.hidePrint = !!navigationOptions.disablePrint;
+
+    if (navigationOptions.disablePrint) {
+      const printStyle = document.createElement("style");
+      printStyle.setAttribute("media", "print");
+      printStyle.textContent = "*{display:none}";
+      document.head.appendChild(printStyle);
+    }
+
     this.pageNumber = ko.pureComputed({
       read() {
         return this.viewer_.epageToPageNumber(this.viewer_.epage());
@@ -367,6 +390,7 @@ class Navigation {
       "onwheelViewport",
       "onclickViewport",
       "toggleTOC",
+      "print",
     ].forEach((methodName) => {
       this[methodName] = this[methodName].bind(this);
     });
@@ -846,6 +870,10 @@ class Navigation {
       case "I":
         viewportElement.focus();
         return !this.zoomIn();
+      case "p":
+      case "P":
+        viewportElement.focus();
+        return !this.print();
       case "f":
       case "F":
         viewportElement.focus();
@@ -873,6 +901,15 @@ class Navigation {
         return true;
       default:
         return true;
+    }
+  }
+
+  print(): boolean {
+    if (!this.isPrintDisabled()) {
+      window.print();
+      return true;
+    } else {
+      return false;
     }
   }
 }

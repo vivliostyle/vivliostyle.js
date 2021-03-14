@@ -308,6 +308,16 @@ class SettingsPanel {
           return false;
         }
         return true;
+      case "d":
+      case "D":
+        if (isHotKeyEnabled) {
+          this.focusToFirstItem(
+            document.getElementById("vivliostyle-settings_user-style_advanced")
+              .firstElementChild,
+          );
+          return false;
+        }
+        return true;
       case "z":
       case "Z":
         if (isHotKeyEnabled) {

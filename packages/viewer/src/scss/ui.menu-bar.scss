@@ -105,12 +105,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     height: $menu-icon-height * 0.5;
     text-align: center;
     transition: linear 0.2s;
-    @media screen and (max-width: 1117px) {
+    @media screen and (max-width: 1189px) {
       right: $menu-icon-width + $menu-icon-offset-x * 4;
       width: 362px / (80px / ($menu-icon-height * 0.5));
       text-align: right;
     }
-    @media screen and (max-width: 649px) {
+    @media screen and (max-width: 677px) {
       animation: none !important;
       opacity: 0 !important;
     }
@@ -304,6 +304,10 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         > .vivliostyle-menu-icon-button:before {
         content: $fa-var-font;
       }
+      &#vivliostyle-menu-item_print
+        > .vivliostyle-menu-icon-button:before {
+        content: $fa-var-print;
+      }
       &#vivliostyle-menu-item_move-first > .vivliostyle-menu-icon-button:after {
         content: "";
         border-top: solid 2px;
@@ -435,6 +439,11 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         > .vivliostyle-menu-icon-button {
           -webkit-filter: grayscale(100%) brightness(150%);
           filter: grayscale(100%) brightness(150%);
+        }
+      }
+      &#vivliostyle-menu-item_print {
+        @media screen and (max-width: $menu-icon-width * 16 - 3px) {
+          display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-to-actual-size {
@@ -578,7 +587,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
             .vivliostyle-menu-detail-group-heading {
               font-weight: bold;
               > label > input[type="checkbox"] {
-                margin-left: -1.25em;
+                margin-left: -1em;
               }
             }
           }
@@ -598,6 +607,10 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
                 margin-left: 0;
               }
             }
+            > .vivliostyle-menu-detail-group-heading {
+              margin-left: 0;
+              margin-right: 2em;
+            }
           }
           > .vivliostyle-menu-detail-group {
             border-top: solid 1px rgba(255, 255, 255, 1);
@@ -613,15 +626,21 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
             > .vivliostyle-menu-detail-group {
               font-size: 0.9em;
               padding-left: 1.1em;
-              > textarea {
-                display: block;
-                line-height: 1.3;
-                font-size: 1em;
-                font-family: monospace;
-                margin: 0.5em 0;
-                padding: 2px;
-                box-sizing: border-box;
-                width: 100%;
+            }
+            > #vivliostyle-settings_user-style_advanced {
+              padding-left: 0;
+              > .vivliostyle-menu-detail-group {
+                padding-left: 1.1em;
+                > textarea {
+                  display: block;
+                  line-height: 1.3;
+                  font-size: 1em;
+                  font-family: monospace;
+                  margin: 0.5em 0;
+                  padding: 2px;
+                  box-sizing: border-box;
+                  width: 100%;
+                }
               }
             }
             ul.vivliostyle-menu-detail-group {
