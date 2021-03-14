@@ -98,6 +98,9 @@ class Viewer {
 
     this.setupViewerEventHandler();
     this.setupViewerOptionSubscriptions();
+
+    // for Vivliostyle CLI
+    window["coreViewer"] = this.coreViewer_;
   }
 
   setupViewerEventHandler(): void {
