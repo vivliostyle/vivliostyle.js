@@ -12,7 +12,7 @@
 
     <!-- MathJax -->
     <script src="resources/mathjax-config.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 
     <!-- Viewer -->
     <script src="<%= viewerPath %>"></script>
@@ -106,7 +106,7 @@
           <div role="dialog" aria-label="Settings Panel" class="vivliostyle-menu-detail" tabindex="0" aria-hidden="true" data-bind="attr: {'aria-hidden': !settingsPanel.opened()?'true':'false'}">
             <div class="vivliostyle-menu-detail-main">
               <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-and-rendering" open data-bind="hidden: settingsPanel.isPageViewModeChangeDisabled">
-                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="P"><span>Page View and Rendering Mode</span></summary>
+                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="P"><span>Page View Mode</span></summary>
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-mode" aria-keyshortcuts="V">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Spread View</legend>
                   <ul class="vivliostyle-menu-detail-group">
@@ -115,25 +115,21 @@
                     <li><label><input type="radio" name="vivliostyle-settings_page-view-mode" value="spread" required data-bind="checked: settingsPanel.state.pageViewMode" /> <span>Spread</span></label></li>
                   </ul>
                 </fieldset>
-                <fieldset class="vivliostyle-menu-detail-group" data-bind="hidden: settingsPanel.isBookModeChangeDisabled">
-                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_book-mode" aria-keyshortcuts="B" data-bind="checked: settingsPanel.state.bookMode, disable: settingsPanel.isBookModeChangeDisabled" /> <span>Book Mode</span></label>
+                <fieldset class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-inline">
+                  <div class="vivliostyle-menu-detail-group-heading" data-bind="hidden: settingsPanel.isBookModeChangeDisabled">
+                    <label><input type="checkbox" name="vivliostyle-settings_book-mode" aria-keyshortcuts="B" data-bind="checked: settingsPanel.state.bookMode, disable: settingsPanel.isBookModeChangeDisabled" /> <span title="On: for Book-like publications, with Table of Contents&#x0a;Off: for single HTML documents">Book Mode</span></label>
                   </div>
-                  <div><small>On: for Book-like publications, with Table of Contents</small></div>
-                  <div><small>Off: for single HTML documents</small></div>
-                </fieldset>
-                <fieldset class="vivliostyle-menu-detail-group" data-bind="hidden: settingsPanel.isRenderAllPagesChangeDisabled">
-                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span>Render All Pages</span></label>
+                  <div class="vivliostyle-menu-detail-group-heading" data-bind="hidden: settingsPanel.isRenderAllPagesChangeDisabled">
+                    <label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span title="On: for Print (all pages printable, page count works)&#x0a;Off: for Read (quick loading with rough page count)">Render All Pages</span></label>
                   </div>
-                  <div><small>On: for Print (all pages printable, page count works)</small></div>
-                  <div><small>Off: for Read (quick loading with rough page count)</small></div>
                 </fieldset>
               </details>
-              <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
+              <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" open data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
                 <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="U"><span>User Style Preferences</span></summary>
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-size" aria-keyshortcuts="Z">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Size</legend>
                   <ul class="vivliostyle-menu-detail-group">
-                    <li><label><input type="radio" name="vivliostyle-settings_page-size" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Default</span> <small>(=Auto unless specified in document)</small></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_page-size" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Default</span> <small>(=Auto unless specified elsewhere)</small></label></li>
                     <li><label><input type="radio" name="vivliostyle-settings_page-size" value="auto" required data-bind="checked: settingsPanel.state.pageStyle.pageSizeMode" /> <span>Auto</span> <small>(use entire window area)</small></label></li>
                     <li>
                       <div>
@@ -156,10 +152,15 @@
                     </li>
                   </ul>
                 </fieldset>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
+                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
+                </fieldset>
+                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style_advanced" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
+                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="D"><span>Advanced</span></summary>
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="M">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
                   <ul class="vivliostyle-menu-detail-group">
-                    <li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified in document)</small></label></li>
+                    <li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified elsewhere)</small></label></li>
                     <li><label><input type="radio" name="vivliostyle-settings_page-margin" value="0" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Set page margin to 0</span></label></li>
                     <li>
                       <div>
@@ -217,9 +218,6 @@
                     </li>
                   </ul>
                 </fieldset>
-                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
-                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
-                </fieldset>
                 <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_css-details">
                   <summary class="vivliostyle-menu-detail-group-heading"><span>CSS Details</span></summary>
                   <div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
@@ -233,6 +231,7 @@
                     </li>
                   </ul>
                 </details>
+              </details>
               </details>
               <div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
                 <div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" aria-keyshortcuts="Enter" data-bind="menuButton: true, click: settingsPanel.apply">Apply</button></div>
@@ -257,16 +256,19 @@
         <li class="vivliostyle-menu-item" id="vivliostyle-menu-item_page-number" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><input aria-label="Page number" id="vivliostyle-page-number" title="Go to Page… (G)" aria-keyshortcuts="G" data-bind="value: navigation.pageNumber, attr: {'aria-disabled': navigation.isPageNumberDisabled}, event: {'focus': navigation.onfocusPageNumber,'wheel': navigation.onwheelPageSlider}" type="text" inputmode="numeric" autocomplete="off"/></li>
         <li class="vivliostyle-menu-item" id="vivliostyle-menu-item_total-pages" data-bind="css: {'vivliostyle-menu-disabled': navigation.isPageNumberDisabled}"><span aria-label="Total pages" id="vivliostyle-total-pages" tabindex="0" data-bind="text: navigation.totalPages"></span></li>
       </ul>
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_text-size" data-bind="visible: !navigation.hideFontSizeChange">
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Smaller (-)" aria-keyshortcuts="-" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDecreaseFontSizeDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Larger (+)" aria-keyshortcuts="Plus" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isIncreaseFontSizeDisabled}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default" data-bind="click: navigation.defaultFontSize, css: {'vivliostyle-menu-disabled': navigation.isDefaultFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Default Size (0)" aria-keyshortcuts="0" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDefaultFontSizeDisabled}"></span></li>
+      </ul>
       <ul class="vivliostyle-menu" id="vivliostyle-menu_zoom" data-bind="visible: !navigation.hideZoom">
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-out" data-bind="click: navigation.zoomOut, css: {'vivliostyle-menu-disabled': navigation.isZoomOutDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Out (O)" aria-keyshortcuts="O" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomOutDisabled}"></span></li>
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-in" data-bind="click: navigation.zoomIn, css: {'vivliostyle-menu-disabled': navigation.isZoomInDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: In (I)" aria-keyshortcuts="I" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomInDisabled}"></span></li>
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-to-actual-size" data-bind="click: navigation.zoomToActualSize, css: {'vivliostyle-menu-disabled': navigation.isZoomToActualSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Actual Size (1)" aria-keyshortcuts="1" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isZoomToActualSizeDisabled}"></span></li>
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_zoom-fit-to-screen" data-bind="click: navigation.toggleFitToScreen, css: {'vivliostyle-menu-disabled': navigation.isToggleFitToScreenDisabled, 'on': navigation.fitToScreen}"><span role="button" class="vivliostyle-menu-icon-button" title="Zoom: Fit to Screen (F)" aria-keyshortcuts="F" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isToggleFitToScreenDisabled, 'aria-pressed': navigation.fitToScreen()?'true':'false'}"></span></li>
       </ul>
-      <ul class="vivliostyle-menu" id="vivliostyle-menu_text-size" data-bind="visible: !navigation.hideFontSizeChange">
-        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-smaller" data-bind="click: navigation.decreaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isDecreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Smaller (-)" aria-keyshortcuts="-" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDecreaseFontSizeDisabled}"></span></li>
-        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-larger" data-bind="click: navigation.increaseFontSize, css: {'vivliostyle-menu-disabled': navigation.isIncreaseFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Larger (+)" aria-keyshortcuts="Plus" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isIncreaseFontSizeDisabled}"></span></li>
-        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_text-size-default" data-bind="click: navigation.defaultFontSize, css: {'vivliostyle-menu-disabled': navigation.isDefaultFontSizeDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Text: Default Size (0)" aria-keyshortcuts="0" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isDefaultFontSizeDisabled}"></span></li>
+      <ul class="vivliostyle-menu" id="vivliostyle-menu_print" data-bind="visible: !navigation.hidePrint">
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_print" data-bind="click: navigation.print, css: {'vivliostyle-menu-disabled': navigation.isPrintDisabled}"><span role="button" class="vivliostyle-menu-icon-button" title="Print (P)" aria-keyshortcuts="P" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isPrintDisabled}"></span></li>
       </ul>
     </div>
 

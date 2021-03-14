@@ -64,9 +64,9 @@ class ViewerApp {
       disableZoom: flags.includes("Z"),
       disableFontSizeChange: flags.includes("F"),
       disablePageSlider: flags.includes("s"),
+      disablePrint: flags.includes("p"),
     };
     const disableContextMenu = flags.includes("c");
-    const disablePrint = flags.includes("p");
     const defaultBookMode = flags.includes("b");
     const defaultRenderAllPages = !flags.includes("a");
 
@@ -90,12 +90,6 @@ class ViewerApp {
     }
     if (disableContextMenu) {
       document.oncontextmenu = (): boolean => false;
-    }
-    if (disablePrint) {
-      const printStyle = document.createElement("style");
-      printStyle.setAttribute("media", "print");
-      printStyle.textContent = "*{display:none}";
-      document.head.appendChild(printStyle);
     }
 
     this.documentOptions = new DocumentOptions(defaultBookMode);
