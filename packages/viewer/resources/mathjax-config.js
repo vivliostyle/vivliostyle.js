@@ -21,15 +21,15 @@ window.MathJax = {
   messageStyle: "none",
   skipStartupTypeset: true,
   CommonHTML: {
-    scale: 90,
+    // scale: 90,
     linebreaks: {
       automatic: true,
     },
-    styles: {
-      ".MJXc-display": {
-        margin: "0",
-      },
-    },
+    // styles: {
+    //   ".MJXc-display": {
+    //     margin: "0",
+    //   },
+    // },
   },
   "fast-preview": {
     disabled: true,
