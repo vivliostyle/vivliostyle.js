@@ -857,7 +857,7 @@ export class OPFDoc {
         epubBaseURL += "/";
       }
       return url.substr(0, epubBaseURL.length) == epubBaseURL
-        ? decodeURI(url.substr(epubBaseURL.length))
+        ? decodeURIComponent(url.substr(epubBaseURL.length))
         : null;
     } else {
       return url;
@@ -1013,7 +1013,7 @@ export class OPFDoc {
       const entry = zipMetadata[i];
       const encodedPath = entry["n"];
       if (encodedPath) {
-        const path = decodeURI(encodedPath);
+        const path = decodeURIComponent(encodedPath);
         const item = this.itemMapByPath[path];
         let mediaType: string | null = null;
         if (item) {
