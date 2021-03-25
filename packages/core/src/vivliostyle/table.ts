@@ -1151,6 +1151,11 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     }
     const cell = this.formattingContext.getRowByIndex(this.currentRowIndex)
       .cells[this.currentColumnIndex];
+    if (!cell) {
+      // Fix for Issue #712
+      state.break = true;
+      return Task.newResult(true);
+    }
     const afterNodeContext = nodeContext.copy().modify();
     afterNodeContext.after = true;
     state.nodeContext = afterNodeContext;
