@@ -58,11 +58,59 @@ export type PageSize = {
  * Named page sizes.
  */
 export const pageSizes: { [key: string]: PageSize } = {
+  a10: { width: new Css.Numeric(26, "mm"), height: new Css.Numeric(37, "mm") },
+  a9: { width: new Css.Numeric(37, "mm"), height: new Css.Numeric(52, "mm") },
+  a8: { width: new Css.Numeric(52, "mm"), height: new Css.Numeric(74, "mm") },
+  a7: { width: new Css.Numeric(74, "mm"), height: new Css.Numeric(105, "mm") },
+  a6: { width: new Css.Numeric(105, "mm"), height: new Css.Numeric(148, "mm") },
   a5: { width: new Css.Numeric(148, "mm"), height: new Css.Numeric(210, "mm") },
   a4: { width: new Css.Numeric(210, "mm"), height: new Css.Numeric(297, "mm") },
   a3: { width: new Css.Numeric(297, "mm"), height: new Css.Numeric(420, "mm") },
+  a2: { width: new Css.Numeric(420, "mm"), height: new Css.Numeric(594, "mm") },
+  a1: { width: new Css.Numeric(594, "mm"), height: new Css.Numeric(841, "mm") },
+  a0: { width: new Css.Numeric(841, "mm"), height: new Css.Numeric(1189, "mm") },
+  b10: { width: new Css.Numeric(31, "mm"), height: new Css.Numeric(44, "mm") },
+  b9: { width: new Css.Numeric(44, "mm"), height: new Css.Numeric(62, "mm") },
+  b8: { width: new Css.Numeric(62, "mm"), height: new Css.Numeric(88, "mm") },
+  b7: { width: new Css.Numeric(88, "mm"), height: new Css.Numeric(125, "mm") },
+  b6: { width: new Css.Numeric(125, "mm"), height: new Css.Numeric(176, "mm") },
   b5: { width: new Css.Numeric(176, "mm"), height: new Css.Numeric(250, "mm") },
   b4: { width: new Css.Numeric(250, "mm"), height: new Css.Numeric(353, "mm") },
+  b3: { width: new Css.Numeric(353, "mm"), height: new Css.Numeric(500, "mm") },
+  b2: { width: new Css.Numeric(500, "mm"), height: new Css.Numeric(707, "mm") },
+  b1: { width: new Css.Numeric(707, "mm"), height: new Css.Numeric(1000, "mm") },
+  b0: { width: new Css.Numeric(1000, "mm"), height: new Css.Numeric(1414, "mm") },
+  c10: { width: new Css.Numeric(28, "mm"), height: new Css.Numeric(40, "mm") },
+  c9: { width: new Css.Numeric(40, "mm"), height: new Css.Numeric(57, "mm") },
+  c8: { width: new Css.Numeric(57, "mm"), height: new Css.Numeric(81, "mm") },
+  c7: { width: new Css.Numeric(81, "mm"), height: new Css.Numeric(114, "mm") },
+  c6: { width: new Css.Numeric(114, "mm"), height: new Css.Numeric(162, "mm") },
+  c5: { width: new Css.Numeric(162, "mm"), height: new Css.Numeric(229, "mm") },
+  c4: { width: new Css.Numeric(229, "mm"), height: new Css.Numeric(324, "mm") },
+  c3: { width: new Css.Numeric(324, "mm"), height: new Css.Numeric(458, "mm") },
+  c2: { width: new Css.Numeric(458, "mm"), height: new Css.Numeric(648, "mm") },
+  c1: { width: new Css.Numeric(648, "mm"), height: new Css.Numeric(917, "mm") },
+  c0: { width: new Css.Numeric(917, "mm"), height: new Css.Numeric(1297, "mm") },
+  "jis-b10": {
+    width: new Css.Numeric(32, "mm"),
+    height: new Css.Numeric(45, "mm"),
+  },
+  "jis-b9": {
+    width: new Css.Numeric(45, "mm"),
+    height: new Css.Numeric(64, "mm"),
+  },
+  "jis-b8": {
+    width: new Css.Numeric(64, "mm"),
+    height: new Css.Numeric(91, "mm"),
+  },
+  "jis-b7": {
+    width: new Css.Numeric(91, "mm"),
+    height: new Css.Numeric(128, "mm"),
+  },
+  "jis-b6": {
+    width: new Css.Numeric(128, "mm"),
+    height: new Css.Numeric(182, "mm"),
+  },
   "jis-b5": {
     width: new Css.Numeric(182, "mm"),
     height: new Css.Numeric(257, "mm"),
@@ -70,6 +118,22 @@ export const pageSizes: { [key: string]: PageSize } = {
   "jis-b4": {
     width: new Css.Numeric(257, "mm"),
     height: new Css.Numeric(364, "mm"),
+  },
+  "jis-b3": {
+    width: new Css.Numeric(364, "mm"),
+    height: new Css.Numeric(515, "mm"),
+  },
+  "jis-b2": {
+    width: new Css.Numeric(515, "mm"),
+    height: new Css.Numeric(728, "mm"),
+  },
+  "jis-b1": {
+    width: new Css.Numeric(728, "mm"),
+    height: new Css.Numeric(1030, "mm"),
+  },
+  "jis-b0": {
+    width: new Css.Numeric(1030, "mm"),
+    height: new Css.Numeric(1456, "mm"),
   },
   letter: {
     width: new Css.Numeric(8.5, "in"),
