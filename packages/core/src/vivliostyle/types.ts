@@ -1313,6 +1313,7 @@ export namespace Vtree {
     fragmentIndex: number;
     afterIfContinues: Selectors.AfterIfContinues;
     footnotePolicy: Css.Ident | null;
+    pageType: string | null;
 
     sourceNode: Node;
     parent: NodeContext;

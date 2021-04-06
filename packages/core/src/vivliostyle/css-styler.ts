@@ -974,6 +974,15 @@ export class Styler implements AbstractStyler {
           }
         }
         const blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
+
+        if (blockStartOffset === 0) {
+          // Named page type at first page
+          const pageType = style["page"]?.value.toString();
+          if (pageType && pageType.toLowerCase() !== "auto") {
+            this.cascade.firstPageType = pageType;
+          }
+        }
+
         this.registerForcedBreakOffset(
           box.breakBefore,
           blockStartOffset,

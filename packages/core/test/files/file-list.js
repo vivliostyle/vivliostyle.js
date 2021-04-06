@@ -153,6 +153,20 @@ module.exports = [
     ],
   },
   {
+    category: "Named Pages",
+    files: [
+      {
+        file: "named-pages/named-pages.html",
+        title: "Named Pages",
+      },
+      // Not yet supported:
+      // {
+      //   file: "named-pages/page-groups.html",
+      //   title: "Page Groups",
+      // },
+    ],
+  },
+  {
     category: "Named Strings",
     files: [
       {

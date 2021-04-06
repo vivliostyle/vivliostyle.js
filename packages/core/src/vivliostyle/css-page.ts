@@ -2273,9 +2273,9 @@ export class PageManager {
   /**
    * Get cascaded page style specified in page context for the current page.
    */
-  getCascadedPageStyle(): CssCascade.ElementStyle {
+  getCascadedPageStyle(pageType: string): CssCascade.ElementStyle {
     const style = {} as CssCascade.ElementStyle;
-    this.cascadeInstance.pushRule([], "", style);
+    this.cascadeInstance.pushRule([], pageType, style);
     this.cascadeInstance.popRule();
     return style;
   }
