@@ -844,6 +844,19 @@ export class ViewFactory
         if (breakBefore) {
           this.nodeContext.breakBefore = breakBefore.toString();
         }
+        // Named page type
+        let pageType = computedStyle["page"]?.toString() || null;
+        if (!pageType || pageType.toLowerCase() === "auto") {
+          pageType = this.nodeContext.pageType;
+        } else {
+          this.nodeContext.pageType = pageType;
+        }
+        if (this.styler.cascade.currentPageType !== pageType) {
+          if (!this.isAtForcedBreak()) {
+            this.nodeContext.breakBefore = "page";
+          }
+          this.styler.cascade.currentPageType = pageType;
+        }
       }
       this.nodeContext.verticalAlign =
         (computedStyle["vertical-align"] &&

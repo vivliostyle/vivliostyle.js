@@ -309,6 +309,10 @@ export class StyleInstance
       counterResolver,
       this.lang,
     );
+
+    // Named page type at first page
+    this.styler.cascade.currentPageType = this.styler.cascade.firstPageType;
+
     this.rootPageBoxInstance.applyCascadeAndInit(
       cascadeInstance,
       docElementStyle,
@@ -1656,7 +1660,9 @@ export class StyleInstance
     // Resolve page size before page master selection.
     const cascadedPageStyle = isTocBox
       ? ({} as CssCascade.ElementStyle)
-      : this.pageManager.getCascadedPageStyle();
+      : this.pageManager.getCascadedPageStyle(
+          this.styler.cascade.currentPageType ?? "",
+        );
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content

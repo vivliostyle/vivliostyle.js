@@ -616,6 +616,7 @@ export class NodeContext implements Vtree.NodeContext {
   fragmentIndex: number = 1;
   afterIfContinues: Selectors.AfterIfContinues = null;
   footnotePolicy: Css.Ident | null = null;
+  pageType: string | null;
 
   constructor(
     public sourceNode: Node,
@@ -634,6 +635,7 @@ export class NodeContext implements Vtree.NodeContext {
     this.direction = parent ? parent.direction : "ltr";
     this.firstPseudo = parent ? parent.firstPseudo : null;
     this.formattingContext = parent ? parent.formattingContext : null;
+    this.pageType = parent ? parent.pageType : null;
   }
 
   resetView(): void {
