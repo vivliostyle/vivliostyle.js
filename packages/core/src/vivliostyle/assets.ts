@@ -511,7 +511,11 @@ object-fit = fill | contain | cover | none | scale-down;
 object-position = COMMA( SPACE(BG_POSITION_TERM{1,4})+ ); /* relaxed */
 
 /* CSS Paged Media */
-PAGE_SIZE = a5 | a4 | a3 | b5 | b4 | jis-b5 | jis-b4 | letter | legal | ledger;
+PAGE_SIZE = a10 | a9 | a8 | a7 | a6 | a5 | a4 | a3 | a2 | a1 | a0
+          | b10 | b9 | b8 | b7 | b6 | b5 | b4 | b3 | b2 | b1 | b0
+          | c10 | c9 | c8 | c7 | c6 | c5 | c4 | c3 | c2 | c1 | c0
+          | jis-b10 | jis-b9 | jis-b8 | jis-b7 | jis-b6 | jis-b5 | jis-b4 | jis-b3 | jis-b2 | jis-b1 | jis-b0
+          | letter | legal | ledger;
 bleed = auto | LENGTH;
 marks = none | [ crop || cross ];
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];

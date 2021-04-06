@@ -40,16 +40,53 @@ enum Mode {
 }
 
 const PRESET_SIZE: Array<PresetSize> = [
-  { name: "A5", description: "A5" },
-  { name: "A4", description: "A4" },
-  { name: "A3", description: "A3" },
-  { name: "B5", description: "B5 (ISO)" },
-  { name: "B4", description: "B4 (ISO)" },
-  { name: "JIS-B5", description: "B5 (JIS)" },
-  { name: "JIS-B4", description: "B4 (JIS)" },
-  { name: "letter", description: "letter" },
-  { name: "legal", description: "legal" },
-  { name: "ledger", description: "ledger" },
+  { name: "letter", description: "Letter" },
+  { name: "legal", description: "Legal" },
+  { name: "ledger", description: "Ledger" },
+  { name: "a10", description: "A10" },
+  { name: "a9", description: "A9" },
+  { name: "a8", description: "A8" },
+  { name: "a7", description: "A7" },
+  { name: "a6", description: "A6" },
+  { name: "a5", description: "A5" },
+  { name: "a4", description: "A4" },
+  { name: "a3", description: "A3" },
+  { name: "a2", description: "A2" },
+  { name: "a1", description: "A1" },
+  { name: "a0", description: "A0" },
+  { name: "b10", description: "B10 (ISO)" },
+  { name: "b9", description: "B9 (ISO)" },
+  { name: "b8", description: "B8 (ISO)" },
+  { name: "b7", description: "B7 (ISO)" },
+  { name: "b6", description: "B6 (ISO)" },
+  { name: "b5", description: "B5 (ISO)" },
+  { name: "b4", description: "B4 (ISO)" },
+  { name: "b3", description: "B3 (ISO)" },
+  { name: "b2", description: "B2 (ISO)" },
+  { name: "b1", description: "B1 (ISO)" },
+  { name: "b0", description: "B0 (ISO)" },
+  { name: "jis-b10", description: "JIS-B10" },
+  { name: "jis-b9", description: "JIS-B9" },
+  { name: "jis-b8", description: "JIS-B8" },
+  { name: "jis-b7", description: "JIS-B7" },
+  { name: "jis-b6", description: "JIS-B6" },
+  { name: "jis-b5", description: "JIS-B5" },
+  { name: "jis-b4", description: "JIS-B4" },
+  { name: "jis-b3", description: "JIS-B3" },
+  { name: "jis-b2", description: "JIS-B2" },
+  { name: "jis-b1", description: "JIS-B1" },
+  { name: "jis-b0", description: "JIS-B0" },
+  { name: "c10", description: "C10" },
+  { name: "c9", description: "C9" },
+  { name: "c8", description: "C8" },
+  { name: "c7", description: "C7" },
+  { name: "c6", description: "C6" },
+  { name: "c5", description: "C5" },
+  { name: "c4", description: "C4" },
+  { name: "c3", description: "C3" },
+  { name: "c2", description: "C2" },
+  { name: "c1", description: "C1" },
+  { name: "c0", description: "C0" },
 ];
 
 const CONSTANTS: Constants = {
@@ -112,7 +149,7 @@ class PageStyle {
 
   constructor(pageStyle?: PageStyle) {
     this.pageSizeMode = ko.observable(Mode.Default);
-    this.presetSize = ko.observable(PRESET_SIZE[1]);
+    this.presetSize = ko.observable(PRESET_SIZE[9]);
     this.isLandscape = ko.observable(false);
     this.customWidth = ko.observable(CONSTANTS.customWidth);
     this.customHeight = ko.observable(CONSTANTS.customHeight);
