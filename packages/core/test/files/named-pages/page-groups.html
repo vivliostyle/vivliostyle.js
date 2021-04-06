@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page Groups</title>
+    <style>
+      @page {
+        size: 18cm 18cm;
+        margin: 2cm 3cm;
+        border: 2px dotted;
+        @top-left-corner {
+          content: "Page " counter(page);
+          text-align: center;
+        }
+      }
+      @page A {
+        margin: 2cm 5cm;
+        border-style: dashed;
+        @top-left {
+          content: "Named Page A";
+        }
+      }
+      @page B {
+        margin: 5cm 3cm;
+        border-width: 4px;
+        @top-center {
+          content: "Named Page B";
+        }
+      }
+      @page :nth(n of A) {
+        @top-right {
+          content: "Page Group A";
+        }
+      }
+      @page :nth(n of B) {
+        @top-right-corner {
+          content: "Page Group B";
+          text-align: center;
+        }
+      }
+      @page :nth(5 of A) {
+        @bottom-left {
+          content: ":nth(5 of A)";
+        }
+      }
+      @page :nth(1 of B) {
+        @bottom-center {
+          content: ":nth(1 of B)";
+        }
+      }
+      @page :nth(5) {
+        @bottom-right {
+          content: ":nth(5)";
+        }
+      }
+      .A {
+        page: A;
+        break-before: page;
+      }
+      .B {
+        page: B;
+        break-before: page;
+      }
+      p {
+        break-inside: avoid-page;
+      }
+      p + p {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="A">
+      <h1>Page Group</h1>
+      <p>
+        Page Group A start.<br /><br />
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi congue
+        libero eu nunc malesuada, quis semper lacus dictum. Praesent in sem a
+        ligula malesuada gravida. Praesent nec velit mattis magna blandit
+        finibus non quis massa. Curabitur vitae varius lacus. Curabitur a luctus
+        ligula, id semper risus. Proin id convallis enim, eu hendrerit nibh. Sed
+        sapien mauris, fermentum et congue non, tincidunt vitae est.
+      </p>
+      <p>
+        Nam facilisis quis metus eu ultrices. Donec condimentum accumsan nisl,
+        vitae placerat eros faucibus eget. Nulla a ornare eros. Vestibulum
+        mattis vestibulum metus aliquet viverra. Nunc quis magna et dui pretium
+        posuere mollis vel mi. Proin facilisis, sem ut consectetur cursus, nibh
+        nisl dictum metus, vel porttitor nunc neque id nisi. Mauris eu blandit
+        libero.
+      </p>
+      <p>
+        Nullam sit amet erat dolor. Ut at fermentum sapien. Etiam sit amet
+        consectetur ante, a vulputate diam. Quisque finibus commodo pulvinar.
+        Suspendisse ut faucibus lorem. Proin et aliquam elit. In ac dui sit amet
+        ex viverra iaculis. Orci varius natoque penatibus et magnis dis
+        parturient montes, nascetur ridiculus mus. Vestibulum gravida metus non
+        convallis dictum. Nam sed accumsan ipsum, id accumsan lacus. Morbi
+        semper faucibus mauris, in accumsan magna rutrum quis. Suspendisse id
+        quam eget orci pulvinar varius. Nam sollicitudin ante enim, eu fringilla
+        tellus luctus eu. Ut iaculis viverra tortor, sed pharetra sapien auctor
+        elementum.
+      </p>
+      <p>
+        Integer vel dui ligula. Morbi quis ex feugiat purus dignissim blandit.
+        Sed ligula ligula, porttitor sit amet enim vel, euismod porta tortor.
+        Pellentesque bibendum quam eget felis condimentum ultricies. Etiam
+        cursus urna arcu, consequat egestas felis ornare maximus. Sed quis purus
+        ultrices, rhoncus dolor non, mollis nibh. Aliquam erat volutpat. Aenean
+        accumsan purus sit amet neque suscipit malesuada. Ut eget mattis sapien.
+        Aliquam non leo ipsum. Vestibulum quis eros elementum, posuere magna in,
+        condimentum turpis. Aliquam nec pellentesque tortor. Sed vitae ultricies
+        ligula. Ut commodo lobortis metus in consequat. Aenean bibendum
+        consectetur facilisis.
+      </p>
+      <div class="B">
+        <p>
+          Page Group B start.<br /><br />
+          The page footer will be: ":nth(5 of A)", ":nth(1 of B)", and
+          ":nth(5)"<br /><br />
+          Integer id magna ultricies, iaculis libero nec, congue nibh. Fusce
+          ullamcorper dui nisl, in euismod mi finibus malesuada. Proin erat
+          augue, tincidunt et justo eu, congue faucibus orci. Maecenas sapien
+          ipsum, cursus at condimentum nec, maximus at ligula. Mauris sit amet
+          placerat felis. Proin vulputate lobortis ipsum in suscipit. Fusce quis
+          interdum ex, malesuada luctus nisi. Nunc malesuada gravida arcu.
+          Integer eleifend, sapien nec bibendum posuere, justo tortor suscipit
+          orci, eget consectetur dui ex at eros. In hac habitasse platea
+          dictumst.<br /><br />
+          Page Group B end.
+        </p>
+      </div>
+      <p>
+        Cras id urna auctor, placerat ante non, lobortis augue. Nullam in dolor
+        at justo euismod commodo. Vestibulum sollicitudin eget eros ac
+        porttitor. Orci varius natoque penatibus et magnis dis parturient
+        montes, nascetur ridiculus mus. Nulla nibh lorem, finibus sit amet ipsum
+        quis, sodales aliquet lacus. In vitae urna convallis, fermentum ipsum
+        in, euismod neque. Aenean orci diam, mollis eget malesuada vel, molestie
+        id nisl.<br /><br />
+        Page Group A end.
+      </p>
+    </div>
+    <div class="A">
+      <p>
+        Page Group A (second) start.<br /><br />
+        Nunc vulputate enim vitae quam imperdiet, iaculis lobortis turpis
+        maximus. In viverra finibus mi. Fusce tristique sodales nulla nec
+        convallis. Duis at dapibus est, et blandit tortor. Pellentesque quis
+        odio ullamcorper mauris bibendum consectetur sed lacinia leo.
+        Suspendisse elit massa, consequat eget magna nec, facilisis eleifend
+        purus. Phasellus erat ex, hendrerit nec convallis eget, suscipit eget
+        mi. Pellentesque laoreet purus non quam imperdiet, in egestas tellus
+        luctus. Proin placerat, ante et cursus elementum, est nisl posuere mi,
+        at varius sem ante ac nibh. Interdum et malesuada fames ac ante ipsum
+        primis in faucibus.<br /><br />
+        Page Group A (second) end.
+      </p>
+    </div>
+  </body>
+</html>

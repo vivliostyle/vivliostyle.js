@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Named Pages</title>
+    <style>
+      @page {
+        size: 18cm 18cm;
+        margin: 2cm;
+        border: 2px dotted;
+        @bottom-center {
+          content: counter(page);
+        }
+        @top-center {
+          content: "default page";
+        }
+      }
+      @page narrow {
+        margin: 2cm 5cm;
+        border-style: dashed;
+        @top-center {
+          content: "narrow page";
+        }
+      }
+      @page wide {
+        margin: 5cm 2cm;
+        border-width: 4px;
+        @top-center {
+          content: "wide page";
+        }
+      }
+      body {
+        margin: 0;
+      }
+      .narrow {
+        page: narrow;
+      }
+      .wide {
+        page: wide;
+      }
+      .test {
+        border: 4px outset gray;
+        padding: 4px;
+        margin: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test narrow">
+      <h1>Named Pages</h1>
+      <p>This text is renderd on a 'narrow' page.</p>
+      <p>
+        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Reprehenderit,
+        esse facilis. Ut, illum, totam voluptatum dolorum neque commodi eum amet
+        eligendi sequi ad facilis quasi. Ipsam illo neque sunt corporis.
+      </p>
+    </div>
+    <div class="test wide">
+      <p>This text is renderd on a 'wide' page.</p>
+      <p>
+        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iure
+        cupiditate numquam enim hic sequi commodi, maxime quia nam illum ullam
+        perspiciatis maiores laudantium voluptas minima officiis error, quas qui
+        tenetur!
+      </p>
+    </div>
+    <div class="test wide">
+      <p>This text is renderd on a 'wide' page. (No forced page break)</p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Possimus quod
+        quisquam, recusandae porro dolorem eaque laborum nam quam provident quos
+        corrupti voluptatem ducimus quasi odit nihil autem officia sequi.
+        Molestias.
+      </p>
+      <div class="test narrow">
+        <p>
+          This text is renderd on a 'narrow' page. (Nested in the wide block)
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque tenetur
+          eum necessitatibus provident, voluptatem ullam sequi iste aut ipsam
+          nostrum esse ad enim porro, inventore placeat maiores numquam corporis
+          animi.
+        </p>
+      </div>
+      <div class="test">
+        <p>This text is renderd on a 'wide' page.</p>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Error quas
+          eos dicta quidem modi dolores aperiam numquam omnis laborum voluptas
+          corporis tempore porro, illum tempora illo facilis odit! Harum,
+          labore.
+        </p>
+      </div>
+    </div>
+    <div class="test">
+      <p>This text is renderd on a default page.</p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iste similique
+        distinctio possimus cupiditate, voluptatum beatae quas neque facere non
+        illum odit repellendus expedita optio minima nemo natus quod ipsa id!
+      </p>
+      <div class="test narrow">
+        <div class="test wide">
+          <p>This text is renderd on a 'wide' page.</p>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
+            officia nihil illo nobis nesciunt accusantium voluptates impedit
+            excepturi hic? Omnis similique molestias laborum? Praesentium ad
+            optio iusto explicabo omnis nisi!
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
