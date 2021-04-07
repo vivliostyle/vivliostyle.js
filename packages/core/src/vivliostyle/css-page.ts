@@ -68,7 +68,10 @@ export const pageSizes: { [key: string]: PageSize } = {
   a3: { width: new Css.Numeric(297, "mm"), height: new Css.Numeric(420, "mm") },
   a2: { width: new Css.Numeric(420, "mm"), height: new Css.Numeric(594, "mm") },
   a1: { width: new Css.Numeric(594, "mm"), height: new Css.Numeric(841, "mm") },
-  a0: { width: new Css.Numeric(841, "mm"), height: new Css.Numeric(1189, "mm") },
+  a0: {
+    width: new Css.Numeric(841, "mm"),
+    height: new Css.Numeric(1189, "mm"),
+  },
   b10: { width: new Css.Numeric(31, "mm"), height: new Css.Numeric(44, "mm") },
   b9: { width: new Css.Numeric(44, "mm"), height: new Css.Numeric(62, "mm") },
   b8: { width: new Css.Numeric(62, "mm"), height: new Css.Numeric(88, "mm") },
@@ -78,8 +81,14 @@ export const pageSizes: { [key: string]: PageSize } = {
   b4: { width: new Css.Numeric(250, "mm"), height: new Css.Numeric(353, "mm") },
   b3: { width: new Css.Numeric(353, "mm"), height: new Css.Numeric(500, "mm") },
   b2: { width: new Css.Numeric(500, "mm"), height: new Css.Numeric(707, "mm") },
-  b1: { width: new Css.Numeric(707, "mm"), height: new Css.Numeric(1000, "mm") },
-  b0: { width: new Css.Numeric(1000, "mm"), height: new Css.Numeric(1414, "mm") },
+  b1: {
+    width: new Css.Numeric(707, "mm"),
+    height: new Css.Numeric(1000, "mm"),
+  },
+  b0: {
+    width: new Css.Numeric(1000, "mm"),
+    height: new Css.Numeric(1414, "mm"),
+  },
   c10: { width: new Css.Numeric(28, "mm"), height: new Css.Numeric(40, "mm") },
   c9: { width: new Css.Numeric(40, "mm"), height: new Css.Numeric(57, "mm") },
   c8: { width: new Css.Numeric(57, "mm"), height: new Css.Numeric(81, "mm") },
@@ -90,7 +99,10 @@ export const pageSizes: { [key: string]: PageSize } = {
   c3: { width: new Css.Numeric(324, "mm"), height: new Css.Numeric(458, "mm") },
   c2: { width: new Css.Numeric(458, "mm"), height: new Css.Numeric(648, "mm") },
   c1: { width: new Css.Numeric(648, "mm"), height: new Css.Numeric(917, "mm") },
-  c0: { width: new Css.Numeric(917, "mm"), height: new Css.Numeric(1297, "mm") },
+  c0: {
+    width: new Css.Numeric(917, "mm"),
+    height: new Css.Numeric(1297, "mm"),
+  },
   "jis-b10": {
     width: new Css.Numeric(32, "mm"),
     height: new Css.Numeric(45, "mm"),
