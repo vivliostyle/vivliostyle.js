@@ -29,6 +29,7 @@ import * as Diff from "./diff";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
@@ -1225,7 +1226,11 @@ export class ViewFactory
             if (attributeNS) {
               result.setAttributeNS(attributeNS, attributeName, attributeValue);
             } else {
-              result.setAttribute(attributeName, attributeValue);
+              try {
+                result.setAttribute(attributeName, attributeValue);
+              } catch (err) {
+                Logging.logger.warn(err);
+              }
             }
           }
         }
@@ -1897,6 +1902,9 @@ export class ViewFactory
         continue;
       }
       let value = computedStyle[propName];
+      if (!value || value === Css.empty) {
+        continue;
+      }
       value = value.visit(
         new CssProp.UrlTransformVisitor(
           this.xmldoc.url,

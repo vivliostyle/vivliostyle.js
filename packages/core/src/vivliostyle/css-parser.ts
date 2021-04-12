@@ -2809,7 +2809,12 @@ export function evaluateCSSToCSS(
   propName: string,
 ): Css.Val {
   if (val.isExpr()) {
-    return evaluateExprToCSS(context, (val as Css.Expr).expr, propName);
+    try {
+      return evaluateExprToCSS(context, (val as Css.Expr).expr, propName);
+    } catch (err) {
+      Logging.logger.warn(err);
+    }
+    return Css.empty;
   }
   return val;
 }
