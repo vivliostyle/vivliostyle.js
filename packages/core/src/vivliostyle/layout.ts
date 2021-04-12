@@ -2124,8 +2124,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         if (node.nodeType != 1) {
           if (!haveStart) {
-            range.setStartBefore(node);
-            haveStart = true;
+            if (node.parentNode == null) {
+              endNotReached = false;
+            } else {
+              range.setStartBefore(node);
+              haveStart = true;
+            }
           }
           lastGood = node;
         } else if (wentUp) {
