@@ -25,7 +25,7 @@ import * as Asserts from "./asserts";
  * RegExp pattern for ::first-letter pseudo element:
  * https://drafts.csswg.org/css-pseudo-4/#first-letter-pseudo
  */
-export const firstLetterPattern = /^[\p{Zs}\p{P}\p{Mn}]*[\p{L}\p{N}]\p{Mn}*(?:\p{Zs}*\p{P}\p{Mn}*)*/u;
+export const firstLetterPattern = /^[\s\p{Zs}\p{P}\p{Mn}]*[\p{L}\p{N}]\p{Mn}*(?:[\s\p{Zs}]*\p{P}\p{Mn}*)*/u;
 /**
  * Indicates the offset position of an element in a document
  */
