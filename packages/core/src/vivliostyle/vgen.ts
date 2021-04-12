@@ -1902,6 +1902,9 @@ export class ViewFactory
         continue;
       }
       let value = computedStyle[propName];
+      if (!value || value === Css.empty) {
+        continue;
+      }
       value = value.visit(
         new CssProp.UrlTransformVisitor(
           this.xmldoc.url,

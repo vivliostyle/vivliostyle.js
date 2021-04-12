@@ -1346,6 +1346,7 @@ export class ContentPropertyHandler extends Css.Visitor {
 export function nonTrivialContent(val: Css.Val): boolean {
   return (
     val != null &&
+    val !== Css.empty &&
     val !== Css.ident.normal &&
     val !== Css.ident.none &&
     val !== Css.ident.inherit
