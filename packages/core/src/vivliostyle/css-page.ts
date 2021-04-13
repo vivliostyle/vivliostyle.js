@@ -2552,6 +2552,29 @@ export class IsFirstPageAction extends CssCascade.ChainedAction {
   }
 }
 
+export class IsBlankPageAction extends CssCascade.ChainedAction {
+  constructor(public readonly scope: Exprs.LexicalScope) {
+    super();
+  }
+
+  /**
+   * @override
+   */
+  apply(cascadeInstance: CssCascade.CascadeInstance): void {
+    const blankPage = new Exprs.Named(this.scope, "blank-page");
+    if (blankPage.evaluate(cascadeInstance.context)) {
+      this.chained.apply(cascadeInstance);
+    }
+  }
+
+  /**
+   * @override
+   */
+  getPriority(): number {
+    return 2;
+  }
+}
+
 export class IsLeftPageAction extends CssCascade.ChainedAction {
   constructor(public readonly scope: Exprs.LexicalScope) {
     super();
@@ -2809,6 +2832,10 @@ export class PageParserHandler
       switch (name) {
         case "first":
           this.chain.push(new IsFirstPageAction(this.scope));
+          this.specificity += 256;
+          break;
+        case "blank":
+          this.chain.push(new IsBlankPageAction(this.scope));
           this.specificity += 256;
           break;
         case "left":

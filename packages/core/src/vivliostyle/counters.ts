@@ -363,15 +363,21 @@ class CounterResolver implements CssCascade.CounterResolver {
           .sort(Base.numberCompare);
 
         const currentPage = this.counterStore.currentPage;
-        const pageStartOffset = currentPage.offset;
-        const pageLastOffset = Math.max(
-          pageStartOffset,
-          ...Array.from(
-            currentPage.container.querySelectorAll(
-              `[${Base.ELEMENT_OFFSET_ATTR}]`,
-            ),
-          ).map((e) => parseInt(e.getAttribute(Base.ELEMENT_OFFSET_ATTR), 10)),
-        );
+        const pageStartOffset = currentPage.isBlankPage
+          ? currentPage.offset - 1
+          : currentPage.offset;
+        const pageLastOffset = currentPage.isBlankPage
+          ? pageStartOffset
+          : Math.max(
+              pageStartOffset,
+              ...Array.from(
+                currentPage.container.querySelectorAll(
+                  `[${Base.ELEMENT_OFFSET_ATTR}]`,
+                ),
+              ).map((e) =>
+                parseInt(e.getAttribute(Base.ELEMENT_OFFSET_ATTR), 10),
+              ),
+            );
 
         let firstOffset = -1;
         let startOffset = -1;

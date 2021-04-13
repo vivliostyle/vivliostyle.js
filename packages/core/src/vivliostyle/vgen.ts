@@ -856,6 +856,7 @@ export class ViewFactory
           if (!this.isAtForcedBreak()) {
             this.nodeContext.breakBefore = "page";
           }
+          this.styler.cascade.previousPageType = this.styler.cascade.currentPageType;
           this.styler.cascade.currentPageType = pageType;
         }
       }

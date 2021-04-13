@@ -127,6 +127,7 @@ export class Page extends Base.SimpleEventTarget {
   dimensions: { width: number; height: number } = { width: 0, height: 0 };
   isFirstPage: boolean = false;
   isLastPage: boolean = false;
+  isBlankPage: boolean = false;
   isAutoPageWidth: boolean = true;
   isAutoPageHeight: boolean = true;
   spineIndex: number = 0;
@@ -956,6 +957,7 @@ export class LayoutPosition {
   page: number = 0;
   flows: { [key: string]: Flow } = {};
   flowPositions: { [key: string]: FlowPosition } = {};
+  isBlankPage: boolean = false;
 
   /**
    * flowPositions is built up to this offset.
@@ -969,6 +971,7 @@ export class LayoutPosition {
   clone(): LayoutPosition {
     const newcp = new LayoutPosition();
     newcp.page = this.page;
+    newcp.isBlankPage = this.isBlankPage;
     newcp.highestSeenNode = this.highestSeenNode;
     newcp.highestSeenOffset = this.highestSeenOffset;
     newcp.lookupPositionOffset = this.lookupPositionOffset;
