@@ -1227,11 +1227,11 @@ export class OPFDoc {
               encodingFormat === "application/xhtml+xml" ||
               /(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/.test(url)
             ) {
+              const baseUrl = manifestUrl
+                ? manifestUrl.replace(/\/[^/]+$/, "/")
+                : this.pubURL;
               const param = {
-                url: Base.resolveURL(
-                  Base.convertSpecialURL(url),
-                  manifestUrl || this.pubURL,
-                ),
+                url: Base.resolveURL(Base.convertSpecialURL(url), baseUrl),
                 index: itemCount++,
                 startPage: null,
                 skipPagesBefore: null,
