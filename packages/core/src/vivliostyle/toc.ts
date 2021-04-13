@@ -99,19 +99,12 @@ export class TOCView implements Vgen.CustomRendererFactory {
         switch (behavior.toString()) {
           case "body-child":
             if (
-              srcElem.parentElement.getAttribute(
-                "data-vivliostyle-primary-entry",
+              !srcElem.querySelector(
+                "[role=doc-toc], [role=directory], nav li a, .toc, #toc",
               )
             ) {
-              if (
-                !srcElem.querySelector(
-                  "[role=doc-toc], [role=directory], nav li a, .toc, #toc",
-                )
-              ) {
-                // When the TOC element is a part of the primaty entry (X)HTML,
-                // hide elements not containing TOC.
-                computedStyle["display"] = Css.ident.none;
-              }
+              // hide elements not containing TOC.
+              computedStyle["display"] = Css.ident.none;
             }
             break;
           case "toc-node-anchor":
@@ -238,13 +231,6 @@ export class TOCView implements Vgen.CustomRendererFactory {
     this.store.load(tocBoxUrl).then((xmldoc) => {
       // Mark if this doc is the primary entry page.
       const nonTocBoxDoc = this.store.resources[this.url];
-      if (
-        nonTocBoxDoc &&
-        nonTocBoxDoc.body &&
-        nonTocBoxDoc.body.getAttribute("data-vivliostyle-primary-entry")
-      ) {
-        xmldoc.body.setAttribute("data-vivliostyle-primary-entry", true);
-      }
 
       // Make hidden TOC visible in TOC box
       for (const elem of xmldoc.document.querySelectorAll(
