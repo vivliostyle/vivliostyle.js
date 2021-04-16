@@ -2936,7 +2936,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 breakAtTheEdge,
                 nodeContext.breakBefore,
               );
-              if (!this.layoutConstraint.allowLayout(nodeContext)) {
+              if (
+                !Break.isForcedBreakValue(breakAtTheEdge) && // Fix for issue #722
+                !this.layoutConstraint.allowLayout(nodeContext)
+              ) {
                 this.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext,
                   null,
