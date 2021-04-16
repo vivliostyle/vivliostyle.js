@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>The :blank page selector</title>
+    <style>
+      h1 {
+        break-before: right;
+        string-set: h1title content();
+      }
+
+      @page {
+        @top-center {
+          content: "Lorem Ipsum";
+        }
+        @top-right {
+          content: string(h1title);
+        }
+      }
+
+      @page :blank {
+        @top-center {
+          content: none;
+        }
+        @bottom-center {
+          content: "This page is intentionally left blank";
+        }
+      }
+
+      @page :right {
+        @bottom-right {
+          content: counter(page);
+        }
+      }
+
+      @page :left {
+        @bottom-left {
+          content: counter(page);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>One</h1>
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut voluptatibus
+      magni accusantium reprehenderit, saepe deleniti impedit dolore, rem
+      tempora dignissimos asperiores voluptate officia facere quis, cumque
+      maiores animi cupiditate voluptatem?
+    </p>
+    <p>
+      Sed hendrerit orci at justo interdum posuere. Class aptent taciti sociosqu
+      ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur
+      placerat nunc eros, ac posuere turpis posuere fringilla. Ut sed eros
+      consectetur, consequat leo sit amet, lobortis magna. Suspendisse sit amet
+      risus in arcu vehicula molestie non eu felis. Nunc at semper dui. Morbi
+      dapibus eu lacus ut sollicitudin. Mauris quis arcu varius, porta elit a,
+      venenatis sem. Praesent pulvinar rutrum urna sit amet efficitur. Cras
+      dapibus, justo quis facilisis lacinia, lacus metus pharetra velit, ut
+      eleifend metus purus ut augue. Praesent sagittis elit quis nisl convallis
+      accumsan. Vivamus ut eleifend lacus. Nullam consequat ipsum dui, at
+      aliquet sem pellentesque vitae. Proin vestibulum metus lorem, ac sodales
+      nisl efficitur vitae. Donec eu sem vitae nibh interdum scelerisque.
+    </p>
+    <h1>Two</h1>
+    <p>
+      Deleniti, aut! Nesciunt dolore accusantium sit vero, quidem animi, quasi
+      eos nostrum provident harum magnam, deserunt accusamus nobis sequi
+      necessitatibus incidunt ea! Lorem, ipsum dolor sit amet consectetur
+      adipisicing elit. Commodi aliquid maiores quam rerum rem repellat
+      provident veniam ex ab, hic magni, quod totam! Ex enim eaque, veniam
+      explicabo error nobis.
+    </p>
+    <p>
+      Dolor sit amet consectetur adipisicing elit. Veritatis sapiente
+      perspiciatis dolore ut ea dolores porro facere maxime numquam ipsum qui,
+      minus repellendus itaque. Consequuntur nihil provident vero reprehenderit
+      dignissimos!
+    </p>
+    <p>
+      Perferendis laborum corporis eos, officiis maxime sapiente iusto odit quod
+      quam eaque labore sequi fuga id, molestiae incidunt dicta consequatur,
+      dolore molestias?
+    </p>
+    <p>
+      Impedit accusantium quod porro nulla explicabo nisi ad modi laboriosam
+      praesentium ipsa fugit autem voluptate soluta consequatur a quae eaque,
+      nesciunt possimus.
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ut elit
+      sagittis, faucibus erat id, interdum risus. Donec faucibus magna ex,
+      varius aliquet libero convallis nec. In hac habitasse platea dictumst.
+      Mauris eget augue id ex accumsan suscipit. Pellentesque efficitur libero
+      nec rutrum venenatis. Vivamus nec augue interdum, condimentum dui id,
+      ultricies tortor. Fusce arcu lacus, aliquet posuere tristique vel, ornare
+      in lorem.
+    </p>
+    <p>
+      Donec viverra justo in consequat sodales. Suspendisse lacinia ante quis
+      volutpat molestie. Morbi lacinia orci nec malesuada lobortis. Vestibulum
+      in dolor in metus mollis iaculis ut id ex. Vestibulum quis sem vel ipsum
+      placerat volutpat ac nec erat. Donec bibendum a tellus vitae sagittis.
+      Donec sodales porta urna, id rhoncus libero luctus sit amet. Nam aliquam
+      gravida felis, ut tempus diam auctor non. Vivamus at porttitor risus,
+      sagittis condimentum massa. Vivamus congue interdum orci, ut porta libero
+      eleifend rutrum. Ut quis elit eget arcu sodales tristique. Praesent
+      ultrices posuere nisi, sit amet iaculis diam imperdiet in. Cras sed nisl
+      eu tellus laoreet feugiat. Ut rhoncus efficitur diam non sodales.
+    </p>
+    <p>
+      Phasellus sodales turpis non nisl eleifend, vel finibus risus tempus.
+      Integer auctor commodo ipsum vel accumsan. Sed hendrerit luctus odio, sit
+      amet congue nisl commodo quis. Quisque eu maximus metus. Etiam in
+      imperdiet nisi. In pulvinar ornare egestas. Nunc dapibus, mi sed lobortis
+      bibendum, diam felis bibendum ante, et faucibus risus ante at nulla. Donec
+      quis finibus lectus. Donec eget nisl vitae arcu fringilla pellentesque id
+      id leo. Etiam ac sagittis ex, tempus sollicitudin risus. Quisque quam
+      lectus, pulvinar sed bibendum non, gravida in felis. Nulla interdum lectus
+      sit amet gravida maximus. Vivamus mollis odio diam, et mollis erat
+      hendrerit eget. Aenean semper pharetra imperdiet. Nunc faucibus eget metus
+      et tincidunt. Phasellus mollis velit eget purus rutrum, et dictum augue
+      viverra.
+    </p>
+    <p>
+      Donec ante eros, lacinia non vestibulum eget, dignissim ut libero. Integer
+      maximus venenatis dolor, a dictum ante lacinia nec. Donec molestie vitae
+      lectus at elementum. Morbi gravida tortor eros, vel sodales justo dapibus
+      nec. Sed facilisis consequat dignissim. Ut sit amet luctus tellus, vel
+      eleifend purus. Morbi eget diam sed leo feugiat bibendum. Donec non
+      euismod eros. Vivamus accumsan posuere vestibulum. Donec eu augue turpis.
+      Mauris vitae ipsum et justo maximus interdum. Lorem ipsum dolor sit amet,
+      consectetur adipiscing elit.
+    </p>
+    <h1>Three</h1>
+    <p>
+      Aspernatur accusantium voluptatum quisquam quasi soluta commodi accusamus,
+      ex magnam ut omnis cum, esse qui et iste ipsum culpa molestias, nam ullam?
+      Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque iusto nemo
+      tempore quos earum optio quia officia maiores atque ut in accusantium
+      ratione, rerum quasi placeat unde magni sint dolore!
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius aut
+      perferendis consectetur numquam ad cumque quos, eligendi aperiam suscipit
+      saepe doloremque cum asperiores, illum velit laboriosam beatae dolorum
+      consequatur voluptate.
+    </p>
+    <p>
+      Maxime beatae natus porro quidem ad delectus, earum, laborum non modi eos
+      consectetur labore perferendis! Optio aut quo quae, minima quos sed.
+    </p>
+    <p>
+      Praesentium minus quae, pariatur dolorum similique, obcaecati sint
+      eligendi a sit quis harum, aliquam corporis sunt repellendus minima magni.
+      Ea, voluptates tempore!
+    </p>
+    <p>
+      Laudantium ex quia possimus, ea ipsum repudiandae, sint voluptatem vel
+      tenetur esse quisquam odit natus nemo suscipit dignissimos ut iusto
+      exercitationem necessitatibus. Lorem ipsum dolor sit amet consectetur,
+      adipisicing elit. Adipisci, impedit cum. Quam accusantium alias
+      consequatur vitae culpa mollitia saepe veniam aperiam hic adipisci
+      doloremque fugit, veritatis, praesentium ad autem quod. Lorem ipsum dolor
+      sit, amet consectetur adipisicing elit. Laborum accusantium similique enim
+      expedita odit! Excepturi, culpa voluptatum consequatur, expedita eaque
+      recusandae et nesciunt, delectus exercitationem molestiae ducimus tenetur!
+      Assumenda, repudiandae.
+    </p>
+    <p>
+      Vivamus id urna eget mi gravida malesuada at vel tortor. Praesent non
+      lectus est. Donec ac massa sem. Donec in posuere lectus. Donec sed elit
+      non ex tristique maximus ultrices eget massa. Aliquam a ex dapibus, luctus
+      massa vel, molestie diam. Aenean at lacinia ante. Nulla vel orci in mauris
+      rutrum mattis sed fermentum arcu. Maecenas a tortor vel ligula consequat
+      eleifend tempor id augue. In feugiat non libero a fringilla. Donec nec
+      aliquet eros, vel hendrerit nunc. Nullam sem magna, tempor ut gravida in,
+      ullamcorper eu tortor. Integer ultrices, dolor sed malesuada finibus,
+      velit sapien pellentesque arcu, ac maximus metus nisi non nulla. Quisque
+      auctor orci consequat, tempor elit egestas, fringilla mauris. Nulla
+      fermentum, erat scelerisque laoreet congue, odio sem rhoncus eros, sed
+      congue erat mauris quis magna. Pellentesque consectetur, ex nec lacinia
+      accumsan, dui tellus accumsan justo, ut auctor magna ex vel odio.
+    </p>
+    <p>
+      Nullam aliquam urna magna, vitae porta orci vestibulum ac. Proin tempus
+      nisi vel ipsum scelerisque, eu consequat nulla blandit. Donec et
+      vestibulum lacus. Duis venenatis commodo ex. Vivamus lobortis finibus
+      ultrices. Maecenas commodo tortor et metus auctor lacinia. Sed sed tempus
+      ipsum. Nam vel ante ex.
+    </p>
+    <p>
+      Ut vestibulum suscipit consectetur. Suspendisse velit odio, faucibus eu
+      porta vitae, scelerisque sit amet ligula. Maecenas felis justo, efficitur
+      quis vestibulum ut, eleifend ut lectus. Mauris a gravida urna, vitae
+      fermentum leo. Sed nec enim quis nibh fringilla efficitur. Curabitur
+      vehicula, sapien eu sodales placerat, dui ex dictum sapien, ac luctus
+      lectus ligula vel enim. Nulla eros odio, molestie id maximus ut, dignissim
+      non dolor. Donec cursus, turpis quis sollicitudin lacinia, lacus nisi
+      ornare erat, ac tincidunt sapien enim eget tortor. In malesuada ex odio,
+      vel malesuada odio condimentum at. Mauris vestibulum nec purus eu dictum.
+    </p>
+    <p>
+      Curabitur molestie diam non risus eleifend, eget rhoncus leo faucibus.
+      Nullam feugiat, sem sit amet suscipit iaculis, libero sapien volutpat
+      nunc, a gravida libero erat nec justo. Nunc cursus nisl vel ligula
+      condimentum sollicitudin. Morbi ut efficitur leo. Praesent non felis non
+      tortor vehicula hendrerit. Praesent non semper lorem. Sed ut hendrerit
+      quam, vitae mollis justo. Duis consequat iaculis elit quis bibendum. Duis
+      sit amet eleifend ipsum, sed rhoncus ante. Nam sit amet sem sed nibh
+      gravida aliquam a sed tellus. Nullam faucibus feugiat urna consectetur
+      lacinia.
+    </p>
+    <p>
+      Nullam convallis porttitor ornare. Nulla vel ante eget purus semper
+      tincidunt eget tempus risus. Nullam ullamcorper lobortis mi, nec eleifend
+      diam eleifend sagittis. Aliquam accumsan, ligula nec porttitor ultrices,
+      ex est hendrerit augue, quis condimentum erat eros non risus. Etiam sed
+      maximus justo, ut blandit elit. Praesent quis sem nunc. Duis nec eros
+      viverra, suscipit ex efficitur, eleifend odio. Sed eleifend ligula ut
+      condimentum scelerisque.
+    </p>
+    <p>
+      Nam nec pharetra velit. Suspendisse sagittis lectus eget tincidunt
+      bibendum. Suspendisse aliquam interdum dolor eu feugiat. Sed varius id
+      nibh eu blandit. Sed eros turpis, vehicula mattis commodo vel, euismod id
+      est. In tempor, felis non ultrices scelerisque, velit lectus tincidunt
+      tellus, vel scelerisque orci dui at lorem. Aenean dignissim ipsum quis
+      elit accumsan, sed suscipit velit tempus. Aenean congue auctor luctus. In
+      hac habitasse platea dictumst. Proin gravida pretium nulla sit amet
+      volutpat. Sed eget nunc id turpis vulputate ultrices. Nunc vitae nibh in
+      lacus imperdiet semper a vitae sapien. Nulla consectetur massa eu congue
+      laoreet. Phasellus vitae ligula et felis gravida accumsan sit amet id
+      magna.
+    </p>
+
+    <h1>Four</h1>
+    <p>
+      Numquam sit aliquid aspernatur exercitationem sunt porro libero iusto
+      voluptas illum, cum similique eligendi impedit quasi, harum laborum vel
+      minus mollitia nisi.
+    </p>
+    <p>
+      Curabitur eget mi enim. Fusce eget pulvinar nibh. Cras semper volutpat
+      libero ac bibendum. Fusce sollicitudin aliquet ex in luctus. Pellentesque
+      et neque odio. Maecenas suscipit massa quis egestas rutrum. Cras eu
+      pulvinar diam. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Sed in ex ut purus viverra malesuada. Morbi ullamcorper augue id lorem
+      congue, nec volutpat ligula tempus.
+    </p>
+  </body>
+</html>

@@ -2647,6 +2647,7 @@ export class CascadeInstance {
   currentNSTag: string = "";
   currentEpubTypes: string[] | null = null;
   currentPageType: string | null = null;
+  previousPageType: string | null = null;
   firstPageType: string | null = null;
   isFirst: boolean = true;
   isRoot: boolean = true;

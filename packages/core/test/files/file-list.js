@@ -132,6 +132,15 @@ module.exports = [
     ],
   },
   {
+    category: "Blank page selector",
+    files: [
+      {
+        file: "blank-page/blank-page.html",
+        title: "Blank page selector",
+      },
+    ],
+  },
+  {
     category: "Nth page selector",
     files: [
       {

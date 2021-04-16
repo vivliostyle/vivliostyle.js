@@ -136,6 +136,18 @@ export class Style {
         "page-number",
       ),
     );
+    this.pageScope.defineName(
+      "blank-page",
+      new Exprs.Native(
+        this.pageScope,
+        function () {
+          const styleInstance = this as StyleInstance;
+          const cp = styleInstance.currentLayoutPosition;
+          return cp?.isBlankPage;
+        },
+        "blank-page",
+      ),
+    );
   }
 
   sizeViewport(
@@ -1654,6 +1666,12 @@ export class StyleInstance
     }
     cp = this.currentLayoutPosition;
     cp.page++;
+
+    const startSide = cp.flowPositions["body"]?.startSide;
+    cp.isBlankPage =
+      startSide && startSide !== "any" && this.matchPageSide(startSide);
+    page.isBlankPage = cp.isBlankPage;
+
     this.clearScope(this.style.pageScope);
     this.layoutPositionAtPageStart = cp.clone();
 
@@ -1661,7 +1679,9 @@ export class StyleInstance
     const cascadedPageStyle = isTocBox
       ? ({} as CssCascade.ElementStyle)
       : this.pageManager.getCascadedPageStyle(
-          this.styler.cascade.currentPageType ?? "",
+          (page.isBlankPage
+            ? this.styler.cascade.previousPageType
+            : this.styler.cascade.currentPageType) ?? "",
         );
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
