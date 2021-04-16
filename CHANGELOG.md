@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.8.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.7.0...v2.8.0) (2021-04-16)
+
+### Bug Fixes
+
+- Failed to fetch documents when pub-manifest file has no file name extension ([7fd2e15](https://github.com/vivliostyle/vivliostyle.js/commit/7fd2e157af034c50f120658c182510ca66374949))
+- InvalidNodeTypeError: Failed to execute 'setStartBefore' on 'Range': the given Node has no parent ([836b64c](https://github.com/vivliostyle/vivliostyle.js/commit/836b64cd82e56dc391b3fa814ada256a2dadde2e)), closes [#715](https://github.com/vivliostyle/vivliostyle.js/issues/715)
+- Stops with error when CSS property value calc() has invalid expression ([61001a2](https://github.com/vivliostyle/vivliostyle.js/commit/61001a24abd7e327c34d1c52a834edf09b65f015)), closes [#717](https://github.com/vivliostyle/vivliostyle.js/issues/717)
+- Stops with InvalidCharacterError: Failed to execute 'setAttribute' on 'Element' ([f0253fa](https://github.com/vivliostyle/vivliostyle.js/commit/f0253fa8744af1111b84dc1766cf15e5db7c95af)), closes [#718](https://github.com/vivliostyle/vivliostyle.js/issues/718)
+- target-counter and forced page break caused layout problems ([377eaf9](https://github.com/vivliostyle/vivliostyle.js/commit/377eaf9da2d55c85ceee0814d553c3b3ee3ed83f)), closes [#722](https://github.com/vivliostyle/vivliostyle.js/issues/722)
+- The ::first-letter pseudo-element not applied when a newline is preceding the first letter ([546ed74](https://github.com/vivliostyle/vivliostyle.js/commit/546ed7449c4c5e3fd187b07de6efbab54f5123e9)), closes [#716](https://github.com/vivliostyle/vivliostyle.js/issues/716)
+- TOC panel should not have a whole document in web publication ([d95043b](https://github.com/vivliostyle/vivliostyle.js/commit/d95043b23f3a349875c520b53e957e8730f781d3)), closes [#720](https://github.com/vivliostyle/vivliostyle.js/issues/720)
+
+### Features
+
+- support :blank page selector ([7145f76](https://github.com/vivliostyle/vivliostyle.js/commit/7145f7631b58f9677c016b36cd57c8d2a268a469)), closes [#428](https://github.com/vivliostyle/vivliostyle.js/issues/428)
+
 # [2.7.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.6.2...v2.7.0) (2021-04-07)
 
 ### Features
