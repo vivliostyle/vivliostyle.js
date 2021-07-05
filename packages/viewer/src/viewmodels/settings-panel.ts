@@ -71,11 +71,15 @@ class SettingsPanel {
     this.documentOptions_ = documentOptions;
     this.viewer_ = viewer;
 
-    this.isPageStyleChangeDisabled = !!settingsPanelOptions.disablePageStyleChange;
+    this.isPageStyleChangeDisabled =
+      !!settingsPanelOptions.disablePageStyleChange;
     this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
-    this.isPageViewModeChangeDisabled = !!settingsPanelOptions.disablePageViewModeChange;
-    this.isBookModeChangeDisabled = !!settingsPanelOptions.disableBookModeChange;
-    this.isRenderAllPagesChangeDisabled = !!settingsPanelOptions.disableRenderAllPagesChange;
+    this.isPageViewModeChangeDisabled =
+      !!settingsPanelOptions.disablePageViewModeChange;
+    this.isBookModeChangeDisabled =
+      !!settingsPanelOptions.disableBookModeChange;
+    this.isRenderAllPagesChangeDisabled =
+      !!settingsPanelOptions.disableRenderAllPagesChange;
 
     this.justClicked = false;
     this.settingsToggle = document.getElementById(

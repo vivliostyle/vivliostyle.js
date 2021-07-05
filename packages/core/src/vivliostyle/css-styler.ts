@@ -873,9 +873,8 @@ export class Styler implements AbstractStyler {
             const box = this.boxStack.pop(this.lastOffset);
             let breakAfter: string | null = null;
             if (box.afterBox) {
-              const afterPseudoBreakBefore = box.afterBox.getBreakValue(
-                "before",
-              );
+              const afterPseudoBreakBefore =
+                box.afterBox.getBreakValue("before");
               this.registerForcedBreakOffset(
                 afterPseudoBreakBefore,
                 box.afterBox.atBlockStart

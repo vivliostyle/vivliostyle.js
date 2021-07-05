@@ -413,15 +413,17 @@ class CounterResolver implements CssCascade.CounterResolver {
                     startOffset = offset;
                   }
                 } else {
-                  let elementAtPageStartOffset = currentPage.container.querySelector(
-                    `[${Base.ELEMENT_OFFSET_ATTR}="${pageStartOffset}"]`,
-                  );
+                  let elementAtPageStartOffset =
+                    currentPage.container.querySelector(
+                      `[${Base.ELEMENT_OFFSET_ATTR}="${pageStartOffset}"]`,
+                    );
                   if (!elementAtPageStartOffset) {
                     // The element at pageStartOffset is not found when page break occured
                     // within an element, so use the ancestor element with offset 0 instead.
-                    elementAtPageStartOffset = currentPage.container.querySelector(
-                      `[${Base.ELEMENT_OFFSET_ATTR}="0"]`,
-                    );
+                    elementAtPageStartOffset =
+                      currentPage.container.querySelector(
+                        `[${Base.ELEMENT_OFFSET_ATTR}="0"]`,
+                      );
                   }
                   if (elementAtPageStartOffset) {
                     // Find if the element at the offset is (the first child of)* the element at page start
@@ -708,9 +710,7 @@ export class CounterStore {
   /**
    * Returns unresolved references pointing to the specified page.
    */
-  getUnresolvedRefsToPage(
-    page: Vtree.Page,
-  ): {
+  getUnresolvedRefsToPage(page: Vtree.Page): {
     spineIndex: number;
     pageIndex: number;
     pageCounters: CssCascade.CounterValues;

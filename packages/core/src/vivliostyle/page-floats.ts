@@ -262,7 +262,8 @@ export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   }
 }
 
-export type PageFloatPlacementCondition = PageFloats.PageFloatPlacementCondition;
+export type PageFloatPlacementCondition =
+  PageFloats.PageFloatPlacementCondition;
 
 /**
  * @param generatingNodePosition Source NodePosition generating the context.
@@ -270,7 +271,8 @@ export type PageFloatPlacementCondition = PageFloats.PageFloatPlacementCondition
  *     example page floats)
  */
 export class PageFloatLayoutContext
-  implements PageFloats.PageFloatLayoutContext {
+  implements PageFloats.PageFloatLayoutContext
+{
   private children: PageFloatLayoutContext[] = [];
   writingMode: Css.Val;
   direction: Css.Val;
@@ -583,9 +585,8 @@ export class PageFloatLayoutContext
       });
     });
     if (this.parent) {
-      const lastFollowingOfParent = this.parent.getLastFollowingFloatInFragments(
-        float,
-      );
+      const lastFollowingOfParent =
+        this.parent.getLastFollowingFloatInFragments(float);
       if (
         lastFollowingOfParent &&
         (!lastFollowing ||

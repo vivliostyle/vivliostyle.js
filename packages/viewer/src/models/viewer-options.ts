@@ -125,7 +125,9 @@ class ViewerOptions {
         } else {
           urlParameters.setParameter(
             "spread",
-            ((pageViewMode as unknown) as PageViewModeInstance).toSpreadViewString(),
+            (
+              pageViewMode as unknown as PageViewModeInstance
+            ).toSpreadViewString(),
           );
         }
       });

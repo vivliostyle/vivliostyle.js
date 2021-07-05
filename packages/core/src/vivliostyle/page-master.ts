@@ -34,7 +34,7 @@ export let keyCount: number = 1;
  * partition, and partition-group).
  */
 export abstract class PageBox<
-  I extends PageBoxInstance = PageBoxInstance<any>
+  I extends PageBoxInstance = PageBoxInstance<any>,
 > {
   // styles specified in the at-rule
   specified: CssCascade.ElementStyle = {};
@@ -142,7 +142,7 @@ export class PageMasterScope extends Exprs.LexicalScope {
  * Represent a page-master rule
  */
 export class PageMaster<
-  I extends PageMasterInstance = PageMasterInstance<any>
+  I extends PageMasterInstance = PageMasterInstance<any>,
 > extends PageBox<I> {
   keyMap: { [key: string]: string } = {};
 
@@ -270,7 +270,7 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
  * Represent a partition rule
  */
 export class Partition<
-  I extends PartitionInstance = PartitionInstance
+  I extends PartitionInstance = PartitionInstance,
 > extends PageBox<I> {
   constructor(
     scope: Exprs.LexicalScope,
@@ -1650,7 +1650,7 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
 }
 
 export class PageMasterInstance<
-  P extends PageMaster = PageMaster<PageMasterInstance<any>>
+  P extends PageMaster = PageMaster<PageMasterInstance<any>>,
 > extends PageBoxInstance<P> {
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
@@ -1687,7 +1687,7 @@ export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
 }
 
 export class PartitionInstance<
-  P extends Partition = Partition<PartitionInstance<any>>
+  P extends Partition = Partition<PartitionInstance<any>>,
 > extends PageBoxInstance<P> {
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
@@ -1777,7 +1777,8 @@ export class PartitionInstance<
 //--------------------- parsing -----------------------
 export class PageBoxParserHandler
   extends CssParser.SlaveParserHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,

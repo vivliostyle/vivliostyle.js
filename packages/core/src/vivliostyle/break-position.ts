@@ -26,7 +26,8 @@ import { Layout, RepetitiveElement, Vtree } from "./types";
 export type BreakPosition = Layout.BreakPosition;
 
 export abstract class AbstractBreakPosition
-  implements Layout.AbstractBreakPosition {
+  implements Layout.AbstractBreakPosition
+{
   abstract findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
@@ -74,7 +75,8 @@ export function calculateOffset(
  */
 export class EdgeBreakPosition
   extends AbstractBreakPosition
-  implements Layout.EdgeBreakPosition {
+  implements Layout.EdgeBreakPosition
+{
   overflowIfRepetitiveElementsDropped: boolean;
   protected isEdgeUpdated: boolean = false;
   private edge: number = 0;

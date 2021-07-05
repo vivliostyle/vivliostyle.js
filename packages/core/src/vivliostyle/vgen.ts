@@ -115,7 +115,8 @@ export interface StylerProducer {
 
 export class ViewFactory
   extends Base.SimpleEventTarget
-  implements Vtree.LayoutContext {
+  implements Vtree.LayoutContext
+{
   private static SVG_URL_ATTRIBUTES: string[] = [
     "color-profile",
     "clip-path",
@@ -316,9 +317,8 @@ export class ViewFactory
     parentShadow: Vtree.ShadowContext,
     subShadow: Vtree.ShadowContext,
   ): Task.Result<Vtree.ShadowContext> {
-    const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
-      "createRefShadow",
-    );
+    const frame: Task.Frame<Vtree.ShadowContext> =
+      Task.newFrame("createRefShadow");
     this.xmldoc.store.load(href).then((refDocParam) => {
       const refDoc = refDocParam;
       if (refDoc) {
@@ -350,9 +350,8 @@ export class ViewFactory
     context: Exprs.Context,
     shadowContext: Vtree.ShadowContext,
   ): Task.Result<Vtree.ShadowContext> {
-    const frame: Task.Frame<Vtree.ShadowContext> = Task.newFrame(
-      "createShadows",
-    );
+    const frame: Task.Frame<Vtree.ShadowContext> =
+      Task.newFrame("createShadows");
     const shadow: Vtree.ShadowContext = null;
     const templateURLVal = computedStyle["template"];
     let cont: Task.Result<Vtree.ShadowContext>;
@@ -494,9 +493,10 @@ export class ViewFactory
     return vertical;
   }
 
-  private inheritFromSourceParent(
-    elementStyle: CssCascade.ElementStyle,
-  ): { lang: string | null; elementStyle: CssCascade.ElementStyle } {
+  private inheritFromSourceParent(elementStyle: CssCascade.ElementStyle): {
+    lang: string | null;
+    elementStyle: CssCascade.ElementStyle;
+  } {
     let node = this.nodeContext.sourceNode;
     const styles = [];
     let lang: string | null = null;
@@ -575,9 +575,10 @@ export class ViewFactory
   }
 
   transferPolyfilledInheritedProps(computedStyle: { [key: string]: Css.Val }) {
-    const polyfilledInheritedProps = CssCascade.getPolyfilledInheritedProps().filter(
-      (name) => computedStyle[name],
-    );
+    const polyfilledInheritedProps =
+      CssCascade.getPolyfilledInheritedProps().filter(
+        (name) => computedStyle[name],
+      );
     if (polyfilledInheritedProps.length) {
       let props = this.nodeContext.inheritedProps;
       if (this.nodeContext.parent) {
@@ -744,9 +745,8 @@ export class ViewFactory
         parentWritingMode,
         isFlowRoot,
       );
-      this.nodeContext.containingBlockForAbsolute = Display.establishesCBForAbsolute(
-        position,
-      );
+      this.nodeContext.containingBlockForAbsolute =
+        Display.establishesCBForAbsolute(position);
       if (
         this.nodeContext.isInsideBFC() &&
         floatSide !== Css.ident.footnote &&
@@ -856,7 +856,8 @@ export class ViewFactory
           if (!this.isAtForcedBreak()) {
             this.nodeContext.breakBefore = "page";
           }
-          this.styler.cascade.previousPageType = this.styler.cascade.currentPageType;
+          this.styler.cascade.previousPageType =
+            this.styler.cascade.currentPageType;
           this.styler.cascade.currentPageType = pageType;
         }
       }
@@ -952,9 +953,8 @@ export class ViewFactory
         );
       }
       if (!this.nodeContext.inline) {
-        this.nodeContext.repeatOnBreak = this.processRepeatOnBreak(
-          computedStyle,
-        );
+        this.nodeContext.repeatOnBreak =
+          this.processRepeatOnBreak(computedStyle);
         this.findAndProcessRepeatingElements(element, styler);
       }
 
@@ -1575,14 +1575,15 @@ export class ViewFactory
       }
       const parent = this.nodeContext.parent;
       const parentFormattingContext = parent && parent.formattingContext;
-      this.nodeContext.formattingContext = new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
-        parentFormattingContext,
-        this.nodeContext.sourceNode as Element,
-      );
-      (this.nodeContext
-        .formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext).initializeRepetitiveElements(
-        this.nodeContext.vertical,
-      );
+      this.nodeContext.formattingContext =
+        new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
+          parentFormattingContext,
+          this.nodeContext.sourceNode as Element,
+        );
+      (
+        this.nodeContext
+          .formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext
+      ).initializeRepetitiveElements(this.nodeContext.vertical);
       return;
     }
   }

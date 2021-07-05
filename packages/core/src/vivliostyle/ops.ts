@@ -53,8 +53,8 @@ import * as XmlDoc from "./xml-doc";
 import { Layout as LayoutType } from "./types";
 import { UserAgentBaseCss, UserAgentPageCss } from "./assets";
 
-export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> = new TaskUtil.Fetcher(
-  () => {
+export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> =
+  new TaskUtil.Fetcher(() => {
     const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
     const validatorSet = CssValidator.baseValidatorSet();
     const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
@@ -77,9 +77,7 @@ export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> = new TaskUtil.F
       null,
     ).thenFinish(frame);
     return frame.result();
-  },
-  "uaStylesheetBaseFetcher",
-);
+  }, "uaStylesheetBaseFetcher");
 
 export function loadUABase(): Task.Result<boolean> {
   return uaStylesheetBaseFetcher.get();
@@ -208,7 +206,8 @@ export class StyleInstance
   implements
     CssStyler.FlowListener,
     PageMaster.InstanceHolder,
-    Vgen.StylerProducer {
+    Vgen.StylerProducer
+{
   lang: string | null;
   primaryFlows = { body: true } as { [key: string]: boolean };
   rootPageBoxInstance: PageMaster.RootPageBoxInstance = null;
@@ -670,9 +669,8 @@ export class StyleInstance
         ) - 1;
       const breakOffsetBeforeStart =
         forcedBreakOffsets[breakOffsetBeforeStartIndex];
-      const parentFlowPosition = this.layoutPositionAtPageStart.flowPositions[
-        parentFlowName
-      ];
+      const parentFlowPosition =
+        this.layoutPositionAtPageStart.flowPositions[parentFlowName];
       const parentStartOffset = this.getConsumedOffset(parentFlowPosition);
       if (breakOffsetBeforeStart < parentStartOffset) {
         return false;
@@ -699,7 +697,8 @@ export class StyleInstance
 
   layoutDeferredPageFloats(column: LayoutType.Column): Task.Result<boolean> {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
-    const deferredFloats = pageFloatLayoutContext.getDeferredPageFloatContinuations();
+    const deferredFloats =
+      pageFloatLayoutContext.getDeferredPageFloatContinuations();
 
     // Fix for issue #681
     // Prevent deferred page floats from appearing in the preceding pages,
@@ -737,9 +736,8 @@ export class StyleInstance
         }
         const continuation = deferredFloats[i++];
         const float = continuation.float;
-        const strategy = new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(
-          float,
-        );
+        const strategy =
+          new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(float);
         const pageFloatFragment = strategy.findPageFloatFragment(
           float,
           pageFloatLayoutContext,
@@ -762,7 +760,8 @@ export class StyleInstance
               loopFrame.breakLoop();
               return;
             }
-            const parentInvalidated = pageFloatLayoutContext.parent.isInvalidated();
+            const parentInvalidated =
+              pageFloatLayoutContext.parent.isInvalidated();
             if (parentInvalidated) {
               loopFrame.breakLoop();
               return;
@@ -790,7 +789,8 @@ export class StyleInstance
     newPosition: Vtree.ChunkPosition | null,
   ): Vtree.ChunkPosition | null {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
-    const deferredFloats = pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
+    const deferredFloats =
+      pageFloatLayoutContext.getPageFloatContinuationsDeferredToNext();
     if (deferredFloats.length > 0) {
       if (column.lastAfterPosition) {
         let result: Vtree.ChunkPosition;
@@ -912,10 +912,11 @@ export class StyleInstance
                 } else {
                   // not exclusive
                   const endOfColumn = !!newPosition || !!column.pageBreakType;
-                  const lastAfterPosition = this.getLastAfterPositionIfDeferredFloatsExists(
-                    column,
-                    newPosition,
-                  );
+                  const lastAfterPosition =
+                    this.getLastAfterPositionIfDeferredFloatsExists(
+                      column,
+                      newPosition,
+                    );
                   if (column.pageBreakType && lastAfterPosition) {
                     selected.chunkPosition = lastAfterPosition;
 
@@ -990,9 +991,8 @@ export class StyleInstance
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ): LayoutType.LayoutConstraint {
     const pageIndex = this.currentLayoutPosition.page - 1;
-    const counterConstraint = this.counterStore.createLayoutConstraint(
-      pageIndex,
-    );
+    const counterConstraint =
+      this.counterStore.createLayoutConstraint(pageIndex);
     return new Layout.AllLayoutConstraint(
       [counterConstraint].concat(pageFloatLayoutContext.getLayoutConstraints()),
     );
@@ -1207,9 +1207,8 @@ export class StyleInstance
       const columnFill =
         (boxInstance.getProp(this, "column-fill") as Css.Ident) ||
         Css.ident.balance;
-      const flowPosition = this.currentLayoutPosition.flowPositions[
-        flowNameStr
-      ];
+      const flowPosition =
+        this.currentLayoutPosition.flowPositions[flowNameStr];
       Asserts.assert(flowPosition);
       const columnBalancer = Columns.createColumnBalancer(
         columnCount,
@@ -1251,9 +1250,8 @@ export class StyleInstance
     columnCount: number,
     forceNonFitting: boolean,
   ): Task.Result<LayoutType.Column[] | null> {
-    const frame: Task.Frame<LayoutType.Column[] | null> = Task.newFrame(
-      "layoutFlowColumns",
-    );
+    const frame: Task.Frame<LayoutType.Column[] | null> =
+      Task.newFrame("layoutFlowColumns");
     const positionAtContainerStart = this.currentLayoutPosition.clone();
     const columnGap = boxInstance.getPropAsNumber(this, "column-gap");
 
@@ -1437,9 +1435,8 @@ export class StyleInstance
         if ((contentVal as any).url) {
           innerContainerTag = "img";
         }
-        const innerContainer = this.viewport.document.createElement(
-          innerContainerTag,
-        );
+        const innerContainer =
+          this.viewport.document.createElement(innerContainerTag);
         contentVal.visit(
           new Vtree.ContentPropertyHandler(
             innerContainer,
@@ -1516,9 +1513,8 @@ export class StyleInstance
             this.clientLayout,
             this.faces,
           );
-          const flowPosition = this.currentLayoutPosition.flowPositions[
-            flowNameStr
-          ];
+          const flowPosition =
+            this.currentLayoutPosition.flowPositions[flowNameStr];
           if (flowPosition && flowPosition.breakAfter === "region") {
             flowPosition.breakAfter = null;
           }
@@ -1729,9 +1725,8 @@ export class StyleInstance
       writingMode,
       direction,
     );
-    const frame: Task.Frame<Vtree.LayoutPosition> = Task.newFrame(
-      "layoutNextPage",
-    );
+    const frame: Task.Frame<Vtree.LayoutPosition> =
+      Task.newFrame("layoutNextPage");
     frame
       .loopWithFrame((loopFrame) => {
         // this.layoutContainer(page, pageMaster, page.bleedBox, bleedBoxPaddingEdge, bleedBoxPaddingEdge+1, // Compensate 'top: -1px' on page master
@@ -2189,9 +2184,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   }
 
   parseOPSResource(response: Net.Response): Task.Result<XmlDoc.XMLDocHolder> {
-    const frame: Task.Frame<XmlDoc.XMLDocHolder> = Task.newFrame(
-      "OPSDocStore.load",
-    );
+    const frame: Task.Frame<XmlDoc.XMLDocHolder> =
+      Task.newFrame("OPSDocStore.load");
     const url = response.url;
 
     // Hack for TOCView.showTOC()
@@ -2204,9 +2198,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           return;
         }
         if (this.triggerSingleDocumentPreprocessing) {
-          const hooks: Plugin.PreProcessSingleDocumentHook[] = Plugin.getHooksForName(
-            Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
-          );
+          const hooks: Plugin.PreProcessSingleDocumentHook[] =
+            Plugin.getHooksForName(Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT);
           for (let i = 0; i < hooks.length; i++) {
             try {
               hooks[i](xmldoc.document);
@@ -2247,9 +2240,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           media: null,
         });
         if (!isTocBox) {
-          const elemList = xmldoc.document.querySelectorAll(
-            "style, link, meta",
-          );
+          const elemList =
+            xmldoc.document.querySelectorAll("style, link, meta");
           for (const elem of elemList) {
             const ns = elem.namespaceURI;
             const localName = elem.localName;
@@ -2320,9 +2312,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         let fetcher = this.styleFetcherByKey[key];
         if (!fetcher) {
           fetcher = new TaskUtil.Fetcher(() => {
-            const innerFrame: Task.Frame<Style> = Task.newFrame(
-              "fetchStylesheet",
-            );
+            const innerFrame: Task.Frame<Style> =
+              Task.newFrame("fetchStylesheet");
             let index = 0;
             const sph = new StyleParserHandler(this.validatorSet);
             innerFrame

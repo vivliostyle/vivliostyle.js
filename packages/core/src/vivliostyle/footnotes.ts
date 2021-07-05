@@ -85,7 +85,8 @@ export class FootnoteFragment extends PageFloatFragment {
 }
 
 export class LineFootnotePolicyLayoutConstraint
-  implements Layout.LayoutConstraint {
+  implements Layout.LayoutConstraint
+{
   constructor(public readonly footnote: Footnote) {}
 
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
@@ -95,7 +96,8 @@ export class LineFootnotePolicyLayoutConstraint
 }
 
 export class FootnoteLayoutStrategy
-  implements PageFloats.PageFloatLayoutStrategy {
+  implements PageFloats.PageFloatLayoutStrategy
+{
   /**
    * @override
    */
@@ -122,9 +124,8 @@ export class FootnoteLayoutStrategy
 
     // If the region context has the same container as the page context,
     // use the page context as the context for the footnote.
-    const regionContext = pageFloatLayoutContext.getPageFloatLayoutContext(
-      floatReference,
-    );
+    const regionContext =
+      pageFloatLayoutContext.getPageFloatLayoutContext(floatReference);
     const pageContext = pageFloatLayoutContext.getPageFloatLayoutContext(
       PageFloats.FloatReference.PAGE,
     );

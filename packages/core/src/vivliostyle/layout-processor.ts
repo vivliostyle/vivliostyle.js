@@ -204,7 +204,8 @@ export class BlockLayoutProcessor implements LayoutProcessor {
 }
 
 export class BlockFormattingContext
-  implements LayoutProcessor.BlockFormattingContext {
+  implements LayoutProcessor.BlockFormattingContext
+{
   formattingContextType: FormattingContextType = "Block";
 
   constructor(private readonly parent: Vtree.FormattingContext) {}

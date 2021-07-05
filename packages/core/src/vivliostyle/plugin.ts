@@ -153,9 +153,7 @@ export type PreProcessElementStyleHook = (
 
 export type PolyfilledInheritedPropsHook = () => string[];
 
-export type ConfigurationHook = (
-  p1: Base.JSON,
-) => {
+export type ConfigurationHook = (p1: Base.JSON) => {
   needResize: boolean | null | undefined;
   needRefresh: boolean | null | undefined;
 };
