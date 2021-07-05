@@ -5,13 +5,12 @@ const KarmaServer = require("karma").Server;
 const browserSync = require("browser-sync").create();
 const gulp = require("gulp");
 const ejs = require("gulp-ejs");
-const sass = require("gulp-sass");
+const sass = require("gulp-sass")(require("sass"));
 const notify = require("gulp-notify");
 const rename = require("gulp-rename");
 const changed = require("gulp-changed");
 const plumber = require("gulp-plumber");
 const packageImporter = require("node-sass-package-importer");
-sass.compiler = require("node-sass");
 const pkg = require("./package.json");
 
 // Parameters
