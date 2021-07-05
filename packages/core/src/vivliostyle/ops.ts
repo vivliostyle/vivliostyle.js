@@ -228,8 +228,6 @@ export class StyleInstance
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
-  actualPageWidth: number;
-  actualPageHeight: number;
 
   constructor(
     public readonly style: Style,
@@ -2063,7 +2061,6 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
   flowProps = {} as { [key: string]: CssCascade.ElementStyle };
   viewportProps = [] as CssCascade.ElementStyle[];
   pageProps = {} as { [key: string]: CssCascade.ElementStyle };
-  slave: BaseParserHandler;
 
   constructor(public readonly validatorSet: CssValidator.ValidatorSet) {
     super();

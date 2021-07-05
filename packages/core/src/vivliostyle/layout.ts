@@ -466,7 +466,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   pseudoParent: Column = null;
   nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null = null;
   blockDistanceToBlockEndFloats: number = NaN;
-  computedBlockSize: number;
 
   constructor(
     element: Element,

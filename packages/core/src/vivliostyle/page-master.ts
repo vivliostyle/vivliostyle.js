@@ -144,7 +144,6 @@ export class PageMasterScope extends Exprs.LexicalScope {
 export class PageMaster<
   I extends PageMasterInstance = PageMasterInstance<any>
 > extends PageBox<I> {
-  pageMaster: PageMaster;
   keyMap: { [key: string]: string } = {};
 
   constructor(
@@ -225,8 +224,6 @@ export class PageMaster<
  * Represent a partition-group rule
  */
 export class PartitionGroup extends PageBox<PartitionGroupInstance> {
-  pageMaster: PageMaster;
-
   constructor(
     scope: Exprs.LexicalScope,
     name: string | null,
@@ -275,8 +272,6 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
 export class Partition<
   I extends PartitionInstance = PartitionInstance
 > extends PageBox<I> {
-  pageMaster: PageMaster;
-
   constructor(
     scope: Exprs.LexicalScope,
     name: string | null,
@@ -1657,8 +1652,6 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
 export class PageMasterInstance<
   P extends PageMaster = PageMaster<PageMasterInstance<any>>
 > extends PageBoxInstance<P> {
-  pageMasterInstance: PageMasterInstance;
-
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = this;
@@ -1687,8 +1680,6 @@ export class PageMasterInstance<
 }
 
 export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
-  pageMasterInstance: PageMasterInstance;
-
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
@@ -1698,8 +1689,6 @@ export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
 export class PartitionInstance<
   P extends Partition = Partition<PartitionInstance<any>>
 > extends PageBoxInstance<P> {
-  pageMasterInstance: PageMasterInstance;
-
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
