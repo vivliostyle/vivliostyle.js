@@ -206,7 +206,8 @@ export function callback(msg: Base.JSON): void {
   switch (msg["t"]) {
     case "loaded": {
       const viewer = msg["viewer"];
-      const pageProgression = (currentPageProgression = viewer.getCurrentPageProgression());
+      const pageProgression = (currentPageProgression =
+        viewer.getCurrentPageProgression());
       viewer.viewportElement.setAttribute(
         "data-vivliostyle-page-progression",
         pageProgression,

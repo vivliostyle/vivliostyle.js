@@ -244,10 +244,9 @@ export class ValidatingGroup {
       group.isPrimitive() &&
       this.isPrimitive()
     ) {
-      this.nodes[0].validator = (this.nodes[0]
-        .validator as PrimitiveValidator).combine(
-        group.nodes[0].validator as PrimitiveValidator,
-      );
+      this.nodes[0].validator = (
+        this.nodes[0].validator as PrimitiveValidator
+      ).combine(group.nodes[0].validator as PrimitiveValidator);
       return;
     }
     for (let i = 0; i < group.nodes.length; i++) {

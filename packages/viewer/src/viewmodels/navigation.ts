@@ -454,7 +454,7 @@ class Navigation {
     if (!this.isZoomInDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(
-        zoom.zoomIn((this.viewer_ as unknown) as CoreViewer),
+        zoom.zoomIn(this.viewer_ as unknown as CoreViewer),
       ); // TODO: test if it's ok to treat viewer_ as CoreViewer
       return true;
     } else {
@@ -466,7 +466,7 @@ class Navigation {
     if (!this.isZoomOutDisabled()) {
       const zoom = this.viewerOptions_.zoom();
       this.viewerOptions_.zoom(
-        zoom.zoomOut((this.viewer_ as unknown) as CoreViewer),
+        zoom.zoomOut(this.viewer_ as unknown as CoreViewer),
       ); // TODO: test if it's ok to treat viewer_ as CoreViewer
       return true;
     } else {

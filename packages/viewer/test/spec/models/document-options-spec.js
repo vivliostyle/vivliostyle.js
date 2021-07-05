@@ -47,8 +47,7 @@ describe("DocumentOptions", function () {
       expect(options.userStyleSheet()).toEqual([]);
 
       urlParameters.location = {
-        href:
-          "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3",
+        href: "http://example.com#b=abc/&f=ghi&style=style1&style=style2&userStyle=style3",
       };
       options = new DocumentOptions();
 

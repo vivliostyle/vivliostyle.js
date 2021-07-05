@@ -2074,9 +2074,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
       marginOutside: Exprs.Result;
     } = null;
 
-    function getComputedValues(
-      context: Exprs.Context,
-    ): {
+    function getComputedValues(context: Exprs.Context): {
       extent: Exprs.Result | null;
       marginInside: Exprs.Result | null;
       marginOutside: Exprs.Result | null;
@@ -2767,7 +2765,8 @@ export function mergeInPageRule(
  */
 export class PageParserHandler
   extends CssCascade.CascadeParserHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   private currentPageSelectors: {
     selectors: string[] | null;
     specificity: number;
@@ -3006,7 +3005,8 @@ export class PageParserHandler
  */
 export class PageMarginBoxParserHandler
   extends CssParser.SlaveParserHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,

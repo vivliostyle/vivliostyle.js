@@ -34,7 +34,7 @@ export let keyCount: number = 1;
  * partition, and partition-group).
  */
 export abstract class PageBox<
-  I extends PageBoxInstance = PageBoxInstance<any>
+  I extends PageBoxInstance = PageBoxInstance<any>,
 > {
   // styles specified in the at-rule
   specified: CssCascade.ElementStyle = {};
@@ -142,9 +142,8 @@ export class PageMasterScope extends Exprs.LexicalScope {
  * Represent a page-master rule
  */
 export class PageMaster<
-  I extends PageMasterInstance = PageMasterInstance<any>
+  I extends PageMasterInstance = PageMasterInstance<any>,
 > extends PageBox<I> {
-  pageMaster: PageMaster;
   keyMap: { [key: string]: string } = {};
 
   constructor(
@@ -225,8 +224,6 @@ export class PageMaster<
  * Represent a partition-group rule
  */
 export class PartitionGroup extends PageBox<PartitionGroupInstance> {
-  pageMaster: PageMaster;
-
   constructor(
     scope: Exprs.LexicalScope,
     name: string | null,
@@ -273,10 +270,8 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
  * Represent a partition rule
  */
 export class Partition<
-  I extends PartitionInstance = PartitionInstance
+  I extends PartitionInstance = PartitionInstance,
 > extends PageBox<I> {
-  pageMaster: PageMaster;
-
   constructor(
     scope: Exprs.LexicalScope,
     name: string | null,
@@ -1655,10 +1650,8 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
 }
 
 export class PageMasterInstance<
-  P extends PageMaster = PageMaster<PageMasterInstance<any>>
+  P extends PageMaster = PageMaster<PageMasterInstance<any>>,
 > extends PageBoxInstance<P> {
-  pageMasterInstance: PageMasterInstance;
-
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = this;
@@ -1687,8 +1680,6 @@ export class PageMasterInstance<
 }
 
 export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
-  pageMasterInstance: PageMasterInstance;
-
   constructor(parentInstance: PageBoxInstance, pageBox: PageBox) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
@@ -1696,10 +1687,8 @@ export class PartitionGroupInstance extends PageBoxInstance<PartitionGroup> {
 }
 
 export class PartitionInstance<
-  P extends Partition = Partition<PartitionInstance<any>>
+  P extends Partition = Partition<PartitionInstance<any>>,
 > extends PageBoxInstance<P> {
-  pageMasterInstance: PageMasterInstance;
-
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = parentInstance.pageMasterInstance;
@@ -1788,7 +1777,8 @@ export class PartitionInstance<
 //--------------------- parsing -----------------------
 export class PageBoxParserHandler
   extends CssParser.SlaveParserHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,

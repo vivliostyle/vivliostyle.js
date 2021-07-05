@@ -135,15 +135,8 @@ class Viewer {
       }
     });
     this.coreViewer_.addListener("nav", (payload) => {
-      const {
-        cfi,
-        first,
-        last,
-        epage,
-        epageCount,
-        metadata,
-        docTitle,
-      } = payload;
+      const { cfi, first, last, epage, epageCount, metadata, docTitle } =
+        payload;
 
       if (cfi) {
         this.documentOptions_.fragment(cfi);

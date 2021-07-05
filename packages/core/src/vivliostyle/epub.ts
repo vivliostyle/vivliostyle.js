@@ -1208,9 +1208,8 @@ export class OPFDoc {
       (readingOrderOrResources) => {
         if (readingOrderOrResources instanceof Array) {
           readingOrderOrResources.forEach((itemObj) => {
-            const isInReadingOrder = manifestObj["readingOrder"].includes(
-              itemObj,
-            );
+            const isInReadingOrder =
+              manifestObj["readingOrder"].includes(itemObj);
             const url =
               typeof itemObj === "string"
                 ? itemObj
@@ -1570,9 +1569,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
     viewItem: OPFViewItem,
     pos: Vtree.LayoutPosition,
   ): Task.Result<RenderSinglePageResult> {
-    const frame: Task.Frame<RenderSinglePageResult> = Task.newFrame(
-      "renderSinglePage",
-    );
+    const frame: Task.Frame<RenderSinglePageResult> =
+      Task.newFrame("renderSinglePage");
     let page = this.makePage(viewItem, pos);
     viewItem.instance.layoutNextPage(page, pos).then((posParam) => {
       pos = posParam as Vtree.LayoutPosition;
@@ -1762,9 +1760,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
    * Renders a page at the specified position.
    */
   renderPage(position: Position): Task.Result<PageAndPosition | null> {
-    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
-      "renderPage",
-    );
+    const frame: Task.Frame<PageAndPosition | null> =
+      Task.newFrame("renderPage");
     this.getPageViewItem(position.spineIndex).then((viewItem) => {
       if (!viewItem) {
         frame.finish(null);
@@ -1852,9 +1849,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
     position: Position,
     notAllPages: boolean,
   ): Task.Result<PageAndPosition | null> {
-    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
-      "renderPagesUpto",
-    );
+    const frame: Task.Frame<PageAndPosition | null> =
+      Task.newFrame("renderPagesUpto");
     if (!position) {
       position = { spineIndex: 0, pageIndex: 0, offsetInItem: 0 };
     }
@@ -2128,9 +2124,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
     position: Position,
     sync: boolean,
   ): Task.Result<PageAndPosition | null> {
-    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
-      "navigateToEPage",
-    );
+    const frame: Task.Frame<PageAndPosition | null> =
+      Task.newFrame("navigateToEPage");
     this.opf.resolveEPage(epage).then((position) => {
       if (position) {
         this.findPage(position, sync).thenFinish(frame);
@@ -2149,9 +2144,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
     position: Position,
     sync: boolean,
   ): Task.Result<PageAndPosition | null> {
-    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
-      "navigateToCFI",
-    );
+    const frame: Task.Frame<PageAndPosition | null> =
+      Task.newFrame("navigateToCFI");
     this.opf.resolveFragment(fragment).then((position) => {
       if (position) {
         this.findPage(position, sync).thenFinish(frame);
@@ -2210,9 +2204,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
       }
       return Task.newResult(null as PageAndPosition | null);
     }
-    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
-      "navigateTo",
-    );
+    const frame: Task.Frame<PageAndPosition | null> =
+      Task.newFrame("navigateTo");
     this.getPageViewItem(item.spineIndex).then((viewItem) => {
       if (!viewItem) {
         frame.finish(null);
@@ -2462,17 +2455,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
       loadingContinuations.push(cont);
       return frame.result();
     } else {
-      loadingContinuations = this.spineItemLoadingContinuations[
-        spineIndex
-      ] = [];
+      loadingContinuations = this.spineItemLoadingContinuations[spineIndex] =
+        [];
     }
     const item = this.opf.spine[spineIndex];
     const store = this.opf.store;
     store.load(item.src).then((xmldoc: XmlDoc.XMLDocHolder) => {
       // EPUB Spine properties support
-      const epubSpineProperties = item.itemRefElement.getAttribute(
-        "properties",
-      );
+      const epubSpineProperties =
+        item.itemRefElement.getAttribute("properties");
       if (epubSpineProperties) {
         xmldoc.root.setAttribute(
           "data-vivliostyle-epub-spine-properties",

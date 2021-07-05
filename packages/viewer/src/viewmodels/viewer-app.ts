@@ -150,9 +150,8 @@ class ViewerApp {
           // seems start tag, so convert to data url
           inputUrl = "data:," + stringUtil.percentEncodeForDataURI(inputUrl);
         } else {
-          inputUrl = stringUtil.percentEncodeAmpersandAndUnencodedPercent(
-            inputUrl,
-          );
+          inputUrl =
+            stringUtil.percentEncodeAmpersandAndUnencodedPercent(inputUrl);
         }
         urlParameters.setParameter("src", inputUrl);
         this.documentOptions.srcUrls(urlParameters.getParameter("src"));

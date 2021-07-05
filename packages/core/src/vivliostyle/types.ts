@@ -401,9 +401,10 @@ export namespace Layout {
       force: boolean,
     ): Vtree.NodeContext;
     getAfterEdgeOfBlockContainer(nodeContext: Vtree.NodeContext): number;
-    findFirstOverflowingEdgeAndCheckPoint(
-      checkPoints: Vtree.NodeContext[],
-    ): { edge: number; checkPoint: Vtree.NodeContext | null };
+    findFirstOverflowingEdgeAndCheckPoint(checkPoints: Vtree.NodeContext[]): {
+      edge: number;
+      checkPoint: Vtree.NodeContext | null;
+    };
     findEdgeBreakPosition(bp: EdgeBreakPosition): Vtree.NodeContext;
     /**
      * Finalize a line break.

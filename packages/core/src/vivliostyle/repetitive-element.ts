@@ -38,7 +38,8 @@ import {
 } from "./types";
 
 export class RepetitiveElementsOwnerFormattingContext
-  implements RepetitiveElement.RepetitiveElementsOwnerFormattingContext {
+  implements RepetitiveElement.RepetitiveElementsOwnerFormattingContext
+{
   formattingContextType: FormattingContextType = "RepetitiveElementsOwner";
   isRoot: boolean = false;
   repetitiveElements: RepetitiveElement.RepetitiveElements = null;
@@ -123,7 +124,8 @@ export class RepetitiveElementsOwnerFormattingContext
 export type ElementsOffset = RepetitiveElement.ElementsOffset;
 
 export class RepetitiveElements
-  implements RepetitiveElement.RepetitiveElements {
+  implements RepetitiveElement.RepetitiveElements
+{
   private headerSourceNode: Element | null = null;
   private footerSourceNode: Element | null = null;
   private headerViewNode: Element | null = null;
@@ -589,7 +591,8 @@ export class LayoutFragmentedOwnerBlock extends LayoutFragmentedBlock {
 }
 
 export class RepetitiveElementsOwnerLayoutConstraint
-  implements RepetitiveElement.RepetitiveElementsOwnerLayoutConstraint {
+  implements RepetitiveElement.RepetitiveElementsOwnerLayoutConstraint
+{
   flagmentLayoutConstraintType: FragmentLayoutConstraintType =
     "RepetitiveElementsOwner";
   nodeContext: Vtree.NodeContext;
@@ -791,7 +794,8 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
           break;
       }
       if (!repetitiveElements.firstContentSourceNode) {
-        repetitiveElements.firstContentSourceNode = nodeContext.sourceNode as Element;
+        repetitiveElements.firstContentSourceNode =
+          nodeContext.sourceNode as Element;
       }
     }
     return LayoutUtil.EdgeSkipper.prototype.startNonInlineElementNode.call(
@@ -839,7 +843,8 @@ export class FragmentedBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
 
 export class RepetitiveElementsOwnerLayoutProcessor
   extends LayoutProcessor.BlockLayoutProcessor
-  implements LayoutProcessor.LayoutProcessor {
+  implements LayoutProcessor.LayoutProcessor
+{
   layout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
@@ -875,9 +880,8 @@ export class RepetitiveElementsOwnerLayoutProcessor
   }
 
   startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean {
-    const formattingContext = getRepetitiveElementsOwnerFormattingContextOrNull(
-      nodeContext,
-    );
+    const formattingContext =
+      getRepetitiveElementsOwnerFormattingContextOrNull(nodeContext);
     const repetitiveElements = formattingContext.getRepetitiveElements();
     if (!repetitiveElements) {
       return false;

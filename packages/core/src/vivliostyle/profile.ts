@@ -98,9 +98,8 @@ export class Profiler {
     this.registerTiming = registerTiming;
 
     // hack to export (non-prototype) methods
-    this[
-      "registerStartTiming"
-    ] = this.registerStartTiming = registerStartTiming;
+    this["registerStartTiming"] = this.registerStartTiming =
+      registerStartTiming;
     this["registerEndTiming"] = this.registerEndTiming = registerEndTiming;
   }
 

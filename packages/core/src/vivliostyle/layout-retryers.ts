@@ -93,7 +93,8 @@ export abstract class AbstractLayoutRetryer {
       column.fragmentLayoutConstraints,
     );
     if (nodeContext.formattingContext) {
-      this.initialStateOfFormattingContext = nodeContext.formattingContext.saveState();
+      this.initialStateOfFormattingContext =
+        nodeContext.formattingContext.saveState();
     }
   }
 

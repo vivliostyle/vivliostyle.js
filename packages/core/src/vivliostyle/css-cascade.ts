@@ -1453,7 +1453,8 @@ export class AbstractConditionItem {
 
 export class DescendantConditionItem
   extends AbstractConditionItem
-  implements ConditionItem {
+  implements ConditionItem
+{
   constructor(
     condition: string,
     viewConditionId: string | null,
@@ -1497,7 +1498,8 @@ export class DescendantConditionItem
 
 export class ChildConditionItem
   extends AbstractConditionItem
-  implements ConditionItem {
+  implements ConditionItem
+{
   constructor(
     condition: string,
     viewConditionId: string | null,
@@ -1545,7 +1547,8 @@ export class ChildConditionItem
 
 export class AdjacentSiblingConditionItem
   extends AbstractConditionItem
-  implements ConditionItem {
+  implements ConditionItem
+{
   fired: boolean = false;
 
   constructor(
@@ -1597,7 +1600,8 @@ export class AdjacentSiblingConditionItem
 
 export class FollowingSiblingConditionItem
   extends AbstractConditionItem
-  implements ConditionItem {
+  implements ConditionItem
+{
   fired: boolean = false;
 
   constructor(
@@ -3013,12 +3017,13 @@ export class CascadeInstance {
       this.currentFollowingSiblingOrder = null;
     }
     followingSiblingOrderStack.push(null);
-    const followingSiblingTypeCountsStack = this
-      .followingSiblingTypeCountsStack;
-    const currentFollowingSiblingTypeCounts = (this.currentFollowingSiblingTypeCounts =
-      followingSiblingTypeCountsStack[
-        followingSiblingTypeCountsStack.length - 1
-      ]);
+    const followingSiblingTypeCountsStack =
+      this.followingSiblingTypeCountsStack;
+    const currentFollowingSiblingTypeCounts =
+      (this.currentFollowingSiblingTypeCounts =
+        followingSiblingTypeCountsStack[
+          followingSiblingTypeCountsStack.length - 1
+        ]);
     if (
       currentFollowingSiblingTypeCounts &&
       currentFollowingSiblingTypeCounts[this.currentNamespace]
@@ -3219,7 +3224,8 @@ export function setUABaseCascade(value: Cascade): void {
 //------------- parsing ------------
 export class CascadeParserHandler
   extends CssParser.SlaveParserHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   chain: ChainedAction[] = null;
   specificity: number = 0;
   elementStyle: ElementStyle = null;
@@ -3902,7 +3908,8 @@ export class DefineParserHandler extends CssParser.SlaveParserHandler {
 
 export class PropSetParserHandler
   extends CssParser.SlaveParserHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   order: number;
 
   constructor(
@@ -3968,7 +3975,8 @@ export class PropSetParserHandler
 
 export class PropertyParserHandler
   extends CssParser.ErrorHandler
-  implements CssValidator.PropertyReceiver {
+  implements CssValidator.PropertyReceiver
+{
   elementStyle = {} as ElementStyle;
   order: number = 0;
 

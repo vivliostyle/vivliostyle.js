@@ -76,9 +76,10 @@ describe("css-parser", function () {
         it("takes one identifier as an argument", function (done) {
           parse(done, ":href-epub-type(foo) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("href-epub-type", ["foo"]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "href-epub-type",
+              ["foo"],
+            );
           });
         });
 
@@ -101,18 +102,20 @@ describe("css-parser", function () {
         it("can take 'odd' argument", function (done) {
           parse(done, ":nth-child(odd) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, 1]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 1],
+            );
           });
         });
 
         it("can take 'even' argument", function (done) {
           parse(done, ":nth-child(even) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 0],
+            );
           });
         });
 
@@ -140,9 +143,10 @@ describe("css-parser", function () {
         it("can take 'n -0' argument", function (done) {
           parse(done, ":nth-child(n -0) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 0],
+            );
           });
         });
 
@@ -163,9 +167,10 @@ describe("css-parser", function () {
         it("can take 'n -a' argument", function (done) {
           parse(done, ":nth-child(n -3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, -3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, -3],
+            );
           });
         });
 
@@ -186,45 +191,50 @@ describe("css-parser", function () {
         it("can take 'n+a' argument", function (done) {
           parse(done, ":nth-child(n+3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 3],
+            );
           });
         });
 
         it("can take 'n +a' argument", function (done) {
           parse(done, ":nth-child(n +3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 3],
+            );
           });
         });
 
         it("can take 'n + a' argument", function (done) {
           parse(done, ":nth-child(n + 3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 3],
+            );
           });
         });
 
         it("can take 'n - a' argument", function (done) {
           parse(done, ":nth-child(n - 3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, -3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, -3],
+            );
           });
         });
 
         it("can take 'n - 0' argument", function (done) {
           parse(done, ":nth-child(n - 0) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 0],
+            );
           });
         });
 
@@ -252,45 +262,50 @@ describe("css-parser", function () {
         it("can take 'n' argument", function (done) {
           parse(done, ":nth-child(n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 0],
+            );
           });
         });
 
         it("can take 'n' argument with a plus sign", function (done) {
           parse(done, ":nth-child(+n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, 0],
+            );
           });
         });
 
         it("can take 'an' argument", function (done) {
           parse(done, ":nth-child(2n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 0],
+            );
           });
         });
 
         it("can take '-an' argument", function (done) {
           parse(done, ":nth-child(-2n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [-2, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [-2, 0],
+            );
           });
         });
 
         it("can take 'an' argument with a plus sign", function (done) {
           parse(done, ":nth-child(+2n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 0],
+            );
           });
         });
 
@@ -318,9 +333,10 @@ describe("css-parser", function () {
         it("can take 'n' argument with a minus sign", function (done) {
           parse(done, ":nth-child(-n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [-1, 0]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [-1, 0],
+            );
           });
         });
 
@@ -334,36 +350,40 @@ describe("css-parser", function () {
         it("can take '-n+b' argument", function (done) {
           parse(done, ":nth-child(-n+3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [-1, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [-1, 3],
+            );
           });
         });
 
         it("can take 'an -b' argument", function (done) {
           parse(done, ":nth-child(2n -1) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, -1]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, -1],
+            );
           });
         });
 
         it("can take 'an + b' argument", function (done) {
           parse(done, ":nth-child(2n + 3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 3],
+            );
           });
         });
 
         it("can take 'an- b' argument", function (done) {
           parse(done, ":nth-child(2n- 1) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, 1]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 1],
+            );
           });
         });
 
@@ -433,36 +453,40 @@ describe("css-parser", function () {
         it("can take 'n-b' argument", function (done) {
           parse(done, ":nth-child(n-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, -3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, -3],
+            );
           });
         });
 
         it("can take '+n-b' argument", function (done) {
           parse(done, ":nth-child(+n-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [1, -3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [1, -3],
+            );
           });
         });
 
         it("can take 'an-b' argument", function (done) {
           parse(done, ":nth-child(2n-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [2, -3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, -3],
+            );
           });
         });
 
         it("can take '-n-b argument", function (done) {
           parse(done, ":nth-child(-n-10) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [-1, -10]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [-1, -10],
+            );
           });
         });
 
@@ -476,18 +500,20 @@ describe("css-parser", function () {
         it("can take 'b' argument", function (done) {
           parse(done, ":nth-child(3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [0, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [0, 3],
+            );
           });
         });
 
         it("can take '+b' argument", function (done) {
           parse(done, ":nth-child(+3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [0, 3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [0, 3],
+            );
           });
         });
 
@@ -501,9 +527,10 @@ describe("css-parser", function () {
         it("can take '-b' argument", function (done) {
           parse(done, ":nth-child(-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoclassSelector,
-            ).toHaveBeenCalledWith("nth-child", [0, -3]);
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [0, -3],
+            );
           });
         });
 
@@ -610,18 +637,20 @@ describe("css-parser", function () {
         it("can take 'odd' argument", function (done) {
           parse(done, "div::nth-fragment(odd) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, 1]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, 1],
+            );
           });
         });
 
         it("can take 'even' argument", function (done) {
           parse(done, "div::nth-fragment(even) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, 0],
+            );
           });
         });
 
@@ -649,9 +678,10 @@ describe("css-parser", function () {
         it("can take 'n -0' argument", function (done) {
           parse(done, "div::nth-fragment(n -0) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 0],
+            );
           });
         });
 
@@ -672,9 +702,10 @@ describe("css-parser", function () {
         it("can take 'n -a' argument", function (done) {
           parse(done, "div::nth-fragment(n -3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, -3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, -3],
+            );
           });
         });
 
@@ -695,45 +726,50 @@ describe("css-parser", function () {
         it("can take 'n+a' argument", function (done) {
           parse(done, "div::nth-fragment(n+3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 3],
+            );
           });
         });
 
         it("can take 'n +a' argument", function (done) {
           parse(done, "div::nth-fragment(n +3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 3],
+            );
           });
         });
 
         it("can take 'n + a' argument", function (done) {
           parse(done, "div::nth-fragment(n + 3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 3],
+            );
           });
         });
 
         it("can take 'n - a' argument", function (done) {
           parse(done, "div::nth-fragment(n - 3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, -3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, -3],
+            );
           });
         });
 
         it("can take 'n - 0' argument", function (done) {
           parse(done, "div::nth-fragment(n - 0) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 0],
+            );
           });
         });
 
@@ -761,45 +797,50 @@ describe("css-parser", function () {
         it("can take 'n' argument", function (done) {
           parse(done, "div::nth-fragment(n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 0],
+            );
           });
         });
 
         it("can take 'n' argument with a plus sign", function (done) {
           parse(done, "div::nth-fragment(+n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, 0],
+            );
           });
         });
 
         it("can take 'an' argument", function (done) {
           parse(done, "div::nth-fragment(2n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, 0],
+            );
           });
         });
 
         it("can take '-an' argument", function (done) {
           parse(done, "div::nth-fragment(-2n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [-2, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [-2, 0],
+            );
           });
         });
 
         it("can take 'an' argument with a plus sign", function (done) {
           parse(done, "div::nth-fragment(+2n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, 0],
+            );
           });
         });
 
@@ -827,9 +868,10 @@ describe("css-parser", function () {
         it("can take 'n' argument with a minus sign", function (done) {
           parse(done, "div::nth-fragment(-n) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [-1, 0]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [-1, 0],
+            );
           });
         });
 
@@ -843,36 +885,40 @@ describe("css-parser", function () {
         it("can take '-n+b' argument", function (done) {
           parse(done, "div::nth-fragment(-n+3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [-1, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [-1, 3],
+            );
           });
         });
 
         it("can take 'an -b' argument", function (done) {
           parse(done, "div::nth-fragment(2n -1) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, -1]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, -1],
+            );
           });
         });
 
         it("can take 'an + b' argument", function (done) {
           parse(done, "div::nth-fragment(2n + 3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, 3],
+            );
           });
         });
 
         it("can take 'an- b' argument", function (done) {
           parse(done, "div::nth-fragment(2n- 1) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, 1]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, 1],
+            );
           });
         });
 
@@ -942,36 +988,40 @@ describe("css-parser", function () {
         it("can take 'n-b' argument", function (done) {
           parse(done, "div::nth-fragment(n-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, -3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, -3],
+            );
           });
         });
 
         it("can take '+n-b' argument", function (done) {
           parse(done, "div::nth-fragment(+n-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [1, -3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [1, -3],
+            );
           });
         });
 
         it("can take 'an-b' argument", function (done) {
           parse(done, "div::nth-fragment(2n-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [2, -3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [2, -3],
+            );
           });
         });
 
         it("can take '-n-b argument", function (done) {
           parse(done, "div::nth-fragment(-n-10) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [-1, -10]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [-1, -10],
+            );
           });
         });
 
@@ -985,18 +1035,20 @@ describe("css-parser", function () {
         it("can take 'b' argument", function (done) {
           parse(done, "div::nth-fragment(3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [0, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [0, 3],
+            );
           });
         });
 
         it("can take '+b' argument", function (done) {
           parse(done, "div::nth-fragment(+3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [0, 3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [0, 3],
+            );
           });
         });
 
@@ -1010,9 +1062,10 @@ describe("css-parser", function () {
         it("can take '-b' argument", function (done) {
           parse(done, "div::nth-fragment(-3) {}", function () {
             expect(handler.error).not.toHaveBeenCalled();
-            expect(
-              handler.pseudoelementSelector,
-            ).toHaveBeenCalledWith("nth-fragment", [0, -3]);
+            expect(handler.pseudoelementSelector).toHaveBeenCalledWith(
+              "nth-fragment",
+              [0, -3],
+            );
           });
         });
 

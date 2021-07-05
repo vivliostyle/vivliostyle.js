@@ -25,7 +25,8 @@ import * as Asserts from "./asserts";
  * RegExp pattern for ::first-letter pseudo element:
  * https://drafts.csswg.org/css-pseudo-4/#first-letter-pseudo
  */
-export const firstLetterPattern = /^[\s\p{Zs}\p{P}\p{Mn}]*[\p{L}\p{N}]\p{Mn}*(?:[\s\p{Zs}]*\p{P}\p{Mn}*)*/u;
+export const firstLetterPattern =
+  /^[\s\p{Zs}\p{P}\p{Mn}]*[\p{L}\p{N}]\p{Mn}*(?:[\s\p{Zs}]*\p{P}\p{Mn}*)*/u;
 /**
  * Indicates the offset position of an element in a document
  */
@@ -162,32 +163,36 @@ export function resolveURL(relURL: string, baseURL: string): string {
 export function convertSpecialURL(url: string): string {
   let r: RegExpMatchArray;
   if (
-    (r = /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
-      url,
-    ))
+    (r =
+      /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
+        url,
+      ))
   ) {
     // Convert GitHub URL to GitHub raw URL
     url = `${r[1]}//raw.githubusercontent.com/${r[2]}/${r[3] ? "" : "master/"}${
       r[4]
     }`;
   } else if (
-    (r = /^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/.exec(
-      url,
-    ))
+    (r =
+      /^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/.exec(
+        url,
+      ))
   ) {
     // Convert Aozorabunko (X)HTML URL to GitHub raw URL
     url = `${r[1]}//raw.githubusercontent.com/aozorabunko/aozorabunko/master/${r[2]}`;
   } else if (
-    (r = /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/.exec(
-      url,
-    ))
+    (r =
+      /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(\/|$)(raw(\/|$))?(.*)$/.exec(
+        url,
+      ))
   ) {
     // Convert Gist URL to Gist raw URL
     url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
   } else if (
-    (r = /^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/.exec(
-      url,
-    ))
+    (r =
+      /^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/.exec(
+        url,
+      ))
   ) {
     // Convert JS Bin URL to JS Bin output URL
     url = `${r[1]}//output.jsbin.com/${r[2]}${r[3]}/`;

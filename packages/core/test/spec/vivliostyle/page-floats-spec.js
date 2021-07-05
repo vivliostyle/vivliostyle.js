@@ -1279,9 +1279,9 @@ describe("page-floats", function () {
       });
 
       it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresonding flow name in order of page, region and column", function () {
-        expect(
-          columnContext.getPageFloatContinuationsDeferredToNext(),
-        ).toEqual([cont1, cont3, cont5]);
+        expect(columnContext.getPageFloatContinuationsDeferredToNext()).toEqual(
+          [cont1, cont3, cont5],
+        );
         expect(
           columnContext.getPageFloatContinuationsDeferredToNext("bar"),
         ).toEqual([cont2, cont4, cont6]);

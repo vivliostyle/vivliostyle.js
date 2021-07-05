@@ -96,9 +96,8 @@ export class LayoutIterator {
   ): Task.Result<Vtree.NodeContext> {
     const strategy = this.strategy;
     const state = strategy.initialState(initialNodeContext);
-    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
-      "LayoutIterator",
-    );
+    const frame: Task.Frame<Vtree.NodeContext> =
+      Task.newFrame("LayoutIterator");
     frame
       .loopWithFrame((loopFrame) => {
         let r: void | Task.Result<boolean>;

@@ -142,7 +142,8 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
     columnBlockSize: number,
   ) {
     super(position, breakOnEdge, overflows, columnBlockSize);
-    this.formattingContext = position.formattingContext as TableFormattingContext;
+    this.formattingContext =
+      position.formattingContext as TableFormattingContext;
   }
 
   /**
@@ -297,7 +298,8 @@ export type BrokenTableCellPosition = {
  */
 export class TableFormattingContext
   extends RepetitiveElementImpl.RepetitiveElementsOwnerFormattingContext
-  implements Table.TableFormattingContext {
+  implements Table.TableFormattingContext
+{
   formattingContextType: FormattingContextType = "Table";
   vertical: boolean = false;
   columnCount: number = -1;
@@ -592,7 +594,8 @@ export class TableFormattingContext
 }
 
 export class ElementsOffsetOfTableCell
-  implements RepetitiveElement.ElementsOffset {
+  implements RepetitiveElement.ElementsOffset
+{
   constructor(
     public readonly repeatitiveElementsInColumns: RepetitiveElement.ElementsOffset[][],
   ) {}
@@ -755,7 +758,8 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             new TableRow(this.rowIndex, nodeContext.sourceNode),
           );
           if (!repetitiveElements.firstContentSourceNode) {
-            repetitiveElements.firstContentSourceNode = nodeContext.sourceNode as Element;
+            repetitiveElements.firstContentSourceNode =
+              nodeContext.sourceNode as Element;
           }
         }
         break;
@@ -922,9 +926,8 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         `${this.getColSpanningCellWidth(cell)}px`,
       );
     }
-    const pseudoColumnContainer = cellViewNode.ownerDocument.createElement(
-      "div",
-    );
+    const pseudoColumnContainer =
+      cellViewNode.ownerDocument.createElement("div");
     cellViewNode.appendChild(pseudoColumnContainer);
     const cellFragment = new TableCellFragment(
       this.column,
@@ -980,7 +983,8 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     state: LayoutUtil.LayoutIteratorState,
   ): Task.Result<boolean> {
     const formattingContext = this.formattingContext;
-    const rowSpanningCellBreakPositions = this.extractRowSpanningCellBreakPositions();
+    const rowSpanningCellBreakPositions =
+      this.extractRowSpanningCellBreakPositions();
     const rowCount = rowSpanningCellBreakPositions.reduce((s) => s + 1, 0);
     if (rowCount === 0) {
       return Task.newResult(true);
@@ -1008,9 +1012,8 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           function addDummyCellUntil(upperColumnIndex) {
             while (columnIndex < upperColumnIndex) {
               if (!occupiedSlotIndices.includes(columnIndex)) {
-                const dummy = rowNodeContext.viewNode.ownerDocument.createElement(
-                  "td",
-                );
+                const dummy =
+                  rowNodeContext.viewNode.ownerDocument.createElement("td");
                 Base.setCSSProperty(dummy, "padding", "0");
                 rowNodeContext.viewNode.appendChild(dummy);
               }
@@ -1022,10 +1025,11 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               const cell = cellBreakPosition.cell;
               addDummyCellUntil(cell.anchorSlot.columnIndex);
               const cellNodePosition = cellBreakPosition.cellNodePosition;
-              const cellNodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
-                cellNodePosition.steps[0],
-                rowNodeContext,
-              );
+              const cellNodeContext =
+                VtreeImpl.makeNodeContextFromNodePositionStep(
+                  cellNodePosition.steps[0],
+                  rowNodeContext,
+                );
               cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
               cellNodeContext.after = cellNodePosition.after;
               cellNodeContext.fragmentIndex =
@@ -1114,22 +1118,21 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   private registerCellFragmentIndex() {
-    const cells = this.formattingContext.getRowByIndex(this.currentRowIndex)
-      .cells;
+    const cells = this.formattingContext.getRowByIndex(
+      this.currentRowIndex,
+    ).cells;
     cells.forEach((cell) => {
-      const cellBreakPosition = this.formattingContext.cellBreakPositions[
-        cell.columnIndex
-      ];
+      const cellBreakPosition =
+        this.formattingContext.cellBreakPositions[cell.columnIndex];
       if (
         cellBreakPosition &&
         cellBreakPosition.cell.anchorSlot.columnIndex ==
           cell.anchorSlot.columnIndex
       ) {
         const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
-        const offset = (this.column
-          .layoutContext as Vgen.ViewFactory).xmldoc.getElementOffset(
-          tdNodeStep.node as Element,
-        );
+        const offset = (
+          this.column.layoutContext as Vgen.ViewFactory
+        ).xmldoc.getElementOffset(tdNodeStep.node as Element);
         Layout.registerFragmentIndex(offset, tdNodeStep.fragmentIndex + 1, 1);
       }
     });
@@ -1162,7 +1165,8 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     const frame = Task.newFrame<boolean>("startTableCell");
     let cont: Task.Result<Vtree.ChunkPosition>;
     if (this.hasBrokenCellAtSlot(cell.anchorSlot.columnIndex)) {
-      const cellBreakPosition = this.formattingContext.cellBreakPositions.shift();
+      const cellBreakPosition =
+        this.formattingContext.cellBreakPositions.shift();
       nodeContext.fragmentIndex =
         cellBreakPosition.cellNodePosition.steps[0].fragmentIndex + 1;
       cont = Task.newResult(cellBreakPosition.breakChunkPosition);
@@ -1681,9 +1685,8 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       if (!nodeContext.after) {
         cells = formattingContext.getCellsFallingOnRow(rowIndex);
       } else {
-        cells = formattingContext.getRowSpanningCellsOverflowingTheRow(
-          rowIndex,
-        );
+        cells =
+          formattingContext.getRowSpanningCellsOverflowingTheRow(rowIndex);
       }
       if (cells.length) {
         const frame = Task.newFrame<boolean>(
@@ -1698,8 +1701,8 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
             }
             const cell = cells[i++];
             const cellFragment = formattingContext.getCellFragmentOfCell(cell);
-            const breakNodeContext = cellFragment.findAcceptableBreakPosition()
-              .nodeContext;
+            const breakNodeContext =
+              cellFragment.findAcceptableBreakPosition().nodeContext;
             Asserts.assert(breakNodeContext);
             const cellNodeContext = cellFragment.cellNodeContext;
             const cellNodePosition = cellNodeContext.toNodePosition();
@@ -1711,7 +1714,8 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
               breakChunkPosition,
               cell,
             } as BrokenTableCellPosition);
-            const cellViewNode = cellNodeContext.viewNode as HTMLTableCellElement;
+            const cellViewNode =
+              cellNodeContext.viewNode as HTMLTableCellElement;
             cellFragment.column.layoutContext.processFragmentedBlockEdge(
               cellFragment.cellNodeContext,
             );
@@ -1813,7 +1817,8 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
    * @override
    */
   resolveLayoutMode(nodeContext: Vtree.NodeContext): LayoutType.LayoutMode {
-    const repetitiveElements = this.tableFormattingContext.getRepetitiveElements();
+    const repetitiveElements =
+      this.tableFormattingContext.getRepetitiveElements();
     if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
       return new LayoutEntireTable(this.tableFormattingContext, this.processor);
     } else {
@@ -1838,9 +1843,8 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
    */
   clearNodes(initialPosition: Vtree.NodeContext) {
     super.clearNodes(initialPosition);
-    const rootViewNode = this.tableFormattingContext.getRootViewNode(
-      initialPosition,
-    );
+    const rootViewNode =
+      this.tableFormattingContext.getRootViewNode(initialPosition);
     this.processor.removeColGroups(this.tableFormattingContext, rootViewNode);
   }
 
@@ -1901,7 +1905,8 @@ export class EntireTableBreakPosition extends BreakPosition.EdgeBreakPosition {
 }
 
 export class EntireTableLayoutConstraint
-  implements Layout.FragmentLayoutConstraint {
+  implements Layout.FragmentLayoutConstraint
+{
   flagmentLayoutConstraintType: FragmentLayoutConstraintType = "EntireTable";
 
   constructor(public tableRootNode: Node) {}
@@ -2007,7 +2012,8 @@ export class LayoutFragmentedTable extends RepetitiveElementImpl.LayoutFragmente
 
 export class TableRowLayoutConstraint
   extends RepetitiveElementImpl.RepetitiveElementsOwnerLayoutConstraint
-  implements Table.TableRowLayoutConstraint {
+  implements Table.TableRowLayoutConstraint
+{
   flagmentLayoutConstraintType: FragmentLayoutConstraintType = "TableRow";
   cellFragmentLayoutConstraints: {
     constraints: Layout.FragmentLayoutConstraint[];
@@ -2078,10 +2084,11 @@ export class TableRowLayoutConstraint
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext,
     );
-    this.cellFragmentLayoutConstraints = this.collectCellFragmentLayoutConstraints(
-      positionAfter,
-      formattingContext,
-    );
+    this.cellFragmentLayoutConstraints =
+      this.collectCellFragmentLayoutConstraints(
+        positionAfter,
+        formattingContext,
+      );
     this.cellFragmentLayoutConstraints.forEach((entry) => {
       entry.constraints.forEach((constraint) => {
         constraint.postLayout(
@@ -2168,8 +2175,8 @@ export class TableRowLayoutConstraint
   }[] {
     return this.getCellFragemnts(nodeContext, formattingContext).map(
       (entry) => ({
-        constraints: entry.fragment.pseudoColumn.getColumn()
-          .fragmentLayoutConstraints,
+        constraints:
+          entry.fragment.pseudoColumn.getColumn().fragmentLayoutConstraints,
         breakPosition: entry.breakPosition,
       }),
     );

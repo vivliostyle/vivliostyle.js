@@ -894,17 +894,16 @@ export class AdaptiveViewer {
                         first: this.currentPage.isFirstPage,
                         last: this.currentPage.isLastPage,
                         metadata: this.opf.metadata,
-                        docTitle: this.opf.spine[this.pagePosition.spineIndex]
-                          .title,
+                        docTitle:
+                          this.opf.spine[this.pagePosition.spineIndex].title,
                       };
                       if (
                         this.currentPage.isFirstPage ||
                         (this.pagePosition.pageIndex == 0 &&
                           this.opf.spine[this.pagePosition.spineIndex].epage)
                       ) {
-                        notification["epage"] = this.opf.spine[
-                          this.pagePosition.spineIndex
-                        ].epage;
+                        notification["epage"] =
+                          this.opf.spine[this.pagePosition.spineIndex].epage;
                       }
                       this.callback(notification);
                     })
@@ -1033,9 +1032,8 @@ export class AdaptiveViewer {
       let cont: Task.Result<boolean>;
       if (result) {
         this.pagePosition = result.position;
-        const innerFrame: Task.Frame<boolean> = Task.newFrame(
-          "moveTo.showCurrent",
-        );
+        const innerFrame: Task.Frame<boolean> =
+          Task.newFrame("moveTo.showCurrent");
         cont = innerFrame.result();
         this.showCurrent(result.page, !this.renderAllPages).then(() => {
           this.reportPosition().thenFinish(innerFrame);
@@ -1162,9 +1160,8 @@ export class AdaptiveViewer {
               loopFrame.continueLoop();
             });
           } else {
-            const frameInternal: Task.Frame<boolean> = Task.newFrame(
-              "waitForCommand",
-            );
+            const frameInternal: Task.Frame<boolean> =
+              Task.newFrame("waitForCommand");
             continuation = frameInternal.suspend(this);
             frameInternal.result().then(() => {
               loopFrame.continueLoop();
