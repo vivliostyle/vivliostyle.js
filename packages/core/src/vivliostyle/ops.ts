@@ -639,8 +639,12 @@ export class StyleInstance
         // should have no margin box content (issue #666)
         if (cp.page === 1 && this.blankPageAtStart) {
           pageMaster.style = {}; // clear root background-color/image
+          const size = cascadedPageStyle["size"];
           cascadedPageStyle = {}; // clear margin boxes
-          // TODO: support the :blank page selector
+          if (size) {
+            // Restore page size (fix for issue #743)
+            cascadedPageStyle["size"] = size;
+          }
         }
 
         // Apply @page rules
