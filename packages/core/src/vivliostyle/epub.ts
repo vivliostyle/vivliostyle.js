@@ -2212,28 +2212,14 @@ export class OPFView implements Vgen.CustomRendererFactory {
         return;
       }
       const target = viewItem.xmldoc.getElement(href);
-      if (target) {
-        this.findPage(
-          {
-            spineIndex: item.spineIndex,
-            pageIndex: -1,
-            offsetInItem: viewItem.xmldoc.getElementOffset(target),
-          },
-          sync,
-        ).thenFinish(frame);
-      } else if (position.spineIndex !== item.spineIndex) {
-        // no fragment, different spine item
-        this.findPage(
-          {
-            spineIndex: item.spineIndex,
-            pageIndex: 0,
-            offsetInItem: -1,
-          },
-          sync,
-        ).thenFinish(frame);
-      } else {
-        frame.finish(null);
-      }
+      this.findPage(
+        {
+          spineIndex: item.spineIndex,
+          pageIndex: -1,
+          offsetInItem: target ? viewItem.xmldoc.getElementOffset(target) : 0,
+        },
+        sync,
+      ).thenFinish(frame);
     });
     return frame.result();
   }
