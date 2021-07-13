@@ -170,6 +170,13 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     if (!nodeContext.viewNode.parentNode) {
       return;
     }
+    // Fix for issue #740
+    if (
+      nodeContext.shadowType === Vtree.ShadowType.ROOTLESS &&
+      LayoutHelper.isSpecialNodeContext(nodeContext)
+    ) {
+      return;
+    }
     const parentNode = nodeContext.viewNode.parentNode;
     LayoutHelper.removeFollowingSiblings(parentNode, nodeContext.viewNode);
     if (removeSelf) {
