@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.8.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.8.0...v2.8.1) (2021-07-14)
+
+### Bug Fixes
+
+- inherited text-indent ignored after page/column break ([32aba92](https://github.com/vivliostyle/vivliostyle.js/commit/32aba928339134d26a43103a007e1c52e2dd3aac)), closes [#737](https://github.com/vivliostyle/vivliostyle.js/issues/737)
+- Problem on navigation to document URL without fragment from TOC ([a948394](https://github.com/vivliostyle/vivliostyle.js/commit/a948394535ef2a43d92be26aa479910219a700f2)), closes [#736](https://github.com/vivliostyle/vivliostyle.js/issues/736)
+- Text disappears at page break when footnote or page float is given on before pseudo element ([d78a168](https://github.com/vivliostyle/vivliostyle.js/commit/d78a168a0b46091c05a85f02db3d8248e76c2e9e)), closes [#740](https://github.com/vivliostyle/vivliostyle.js/issues/740)
+- typescript error TS2612: Property 'xxx' will overwrite the base property ([e8c52ea](https://github.com/vivliostyle/vivliostyle.js/commit/e8c52eaefbeb56e6d7333bdb573376d580f272de))
+- Unnecessary reformatting when resizing window ([51e2f99](https://github.com/vivliostyle/vivliostyle.js/commit/51e2f995336343993adbdeda27a42a827b687fa4)), closes [#743](https://github.com/vivliostyle/vivliostyle.js/issues/743)
+
 # [2.8.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.7.0...v2.8.0) (2021-04-16)
 
 ### Bug Fixes
