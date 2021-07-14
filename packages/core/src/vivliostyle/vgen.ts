@@ -1292,6 +1292,10 @@ export class ViewFactory
           }
           if (blackList) {
             for (const propName in blackList) {
+              // Fix for issue #737
+              if (propName === "text-indent" && !this.isParagraph(element)) {
+                continue;
+              }
               Base.setCSSProperty(result, propName, blackList[propName]);
             }
           }
@@ -1323,6 +1327,67 @@ export class ViewFactory
       });
     });
     return frame.result();
+  }
+
+  private isParagraph(element: Element): boolean {
+    switch (element.localName) {
+      case "p":
+        return true;
+      case "html":
+      case "body":
+      case "main":
+      case "article":
+      case "section":
+        return false;
+    }
+    const textLevelElements = {
+      a: true,
+      abbr: true,
+      b: true,
+      bdi: true,
+      bdo: true,
+      cite: true,
+      code: true,
+      data: true,
+      del: true,
+      dfn: true,
+      em: true,
+      i: true,
+      ins: true,
+      kbd: true,
+      mark: true,
+      q: true,
+      ruby: true,
+      s: true,
+      samp: true,
+      small: true,
+      span: true,
+      strong: true,
+      sub: true,
+      sup: true,
+      time: true,
+      u: true,
+      var: true,
+    };
+    for (
+      let childNode = element.firstChild;
+      childNode;
+      childNode = childNode.nextSibling
+    ) {
+      switch (childNode.nodeType) {
+        case Node.TEXT_NODE:
+          if (childNode.nodeValue.trim().length > 0) {
+            return true;
+          }
+          break;
+        case Node.ELEMENT_NODE:
+          if (textLevelElements[(childNode as Element).localName]) {
+            return true;
+          }
+          break;
+      }
+    }
+    return false;
   }
 
   /**
