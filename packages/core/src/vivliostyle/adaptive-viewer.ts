@@ -731,7 +731,8 @@ export class AdaptiveViewer {
         .thenAsync((spread) => {
           this.showSpread(spread);
           this.setSpreadZoom(spread);
-          this.currentPage = page;
+          this.currentPage =
+            page.side === Constants.PageSide.LEFT ? spread.left : spread.right;
           return Task.newResult(null);
         });
     } else {
@@ -1149,7 +1150,7 @@ export class AdaptiveViewer {
             });
           } else if (viewer.needRefresh) {
             if (viewer.currentPage) {
-              viewer.showCurrent(viewer.currentPage).then(() => {
+              viewer.showCurrent(viewer.currentPage, true).then(() => {
                 loopFrame.continueLoop();
               });
             }
