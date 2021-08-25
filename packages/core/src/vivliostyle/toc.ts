@@ -310,7 +310,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
 
     function exportLink(tag): TOCItem {
       const url = new URL(tag.href);
-      const [, id] = url.hash.match(/^#(.*)$/);
+      const [, id] = url.hash.match(/^#?(.*)$/);
 
       const title = tag.innerText;
 
