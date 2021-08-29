@@ -1195,10 +1195,6 @@ export class Named extends Val {
  * Named value.
  */
 export class MediaName extends Val {
-  // FIXME: This property is added to reduce TypeScript error on `dependCore`
-  // but it is never initialized. Is it really correct code?
-  value: Val;
-
   constructor(scope: LexicalScope, public not: boolean, public name: string) {
     super(scope);
   }
@@ -1218,19 +1214,6 @@ export class MediaName extends Val {
    */
   evaluateCore(context: Context): Result {
     return context.evalMediaName(this.name, this.not);
-  }
-
-  /**
-   * @override
-   */
-  dependCore(
-    other: Val,
-    context: Context,
-    dependencyCache: DependencyCache,
-  ): boolean {
-    return (
-      other === this || this.value.dependOuter(other, context, dependencyCache)
-    );
   }
 
   /**
