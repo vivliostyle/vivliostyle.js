@@ -44,6 +44,9 @@
     "url": "https://github.com/vivliostyle/vivliostyle.js.git"
   },
   "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=12"
+  },
   "private": true,
   "workspaces": [
     "packages/*"
