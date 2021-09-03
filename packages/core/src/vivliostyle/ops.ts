@@ -457,6 +457,52 @@ export class StyleInstance
     }
   }
 
+  /**
+   * @override
+   */
+  evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
+    if (isFunc) {
+      if (name === "selector") {
+        // TODO: `@supports selector(...)`
+      }
+      return false;
+    }
+    if (!name) {
+      // `(...)` without `name:`
+      return false;
+    }
+
+    let supported = true;
+
+    class SupportsReceiver implements CssValidator.PropertyReceiver {
+      unknownProperty(name: string, value: Css.Val): void {
+        supported = false;
+      }
+      invalidPropertyValue(name: string, value: Css.Val): void {
+        supported = false;
+      }
+      simpleProperty(name: string, value: Css.Val, important): void {}
+    }
+
+    const supportsReceiver = new SupportsReceiver();
+    const val = CssParser.parseValue(
+      this.style.rootScope,
+      new CssTokenizer.Tokenizer(value, null),
+      "",
+    );
+    if (!val) {
+      return false;
+    }
+    const validatorSet = (this.xmldoc.store as OPSDocStore).validatorSet;
+    validatorSet.validatePropertyAndHandleShorthand(
+      name,
+      val,
+      false,
+      supportsReceiver,
+    );
+    return supported;
+  }
+
   getConsumedOffset(flowPosition: Vtree.FlowPosition): number {
     let offset = Number.POSITIVE_INFINITY;
     for (let i = 0; i < flowPosition.positions.length; i++) {

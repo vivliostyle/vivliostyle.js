@@ -794,6 +794,8 @@ export enum Action {
 }
 
 export const OP_MEDIA_AND: number = CssTokenizer.TokenType.LAST + 1;
+export const OP_MEDIA_OR: number = CssTokenizer.TokenType.LAST + 2;
+export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
 
 (() => {
   actionsBase[CssTokenizer.TokenType.IDENT] = Action.IDENT;
@@ -936,6 +938,7 @@ export const OP_MEDIA_AND: number = CssTokenizer.TokenType.LAST + 1;
   priority[CssTokenizer.TokenType.PERCENT] = 5;
   priority[CssTokenizer.TokenType.EOF] = 6;
   priority[OP_MEDIA_AND] = 2;
+  priority[OP_MEDIA_OR] = 2;
 })();
 
 /**
@@ -946,6 +949,7 @@ export enum ExprContext {
   WHEN,
   MEDIA,
   IMPORT,
+  SUPPORTS,
 }
 
 export class Parser {
@@ -1037,7 +1041,9 @@ export class Parser {
 
   exprError(mnemonics: string, token: CssTokenizer.Token) {
     this.actions = this.propName ? actionsErrorDecl : actionsError;
-    this.handler.error(mnemonics, token);
+    // this.handler.error(mnemonics, token);
+    // (should not throw error by expression syntax errors)
+    Logging.logger.warn(mnemonics);
   }
 
   exprStackReduce(op: number, token: CssTokenizer.Token): boolean {
@@ -1059,7 +1065,7 @@ export class Parser {
             while (args.length >= 2) {
               const e1 = args.shift();
               const e2 = args.shift();
-              const er = new Exprs.OrMedia(handler.getScope(), e1, e2);
+              const er = new Exprs.Comma(handler.getScope(), e1, e2);
               args.unshift(er);
             }
             valStack.push(new Css.Expr(args[0]));
@@ -1101,6 +1107,9 @@ export class Parser {
           val = new Exprs.Not(handler.getScope(), val);
         } else if (tok == -CssTokenizer.TokenType.MINUS) {
           val = new Exprs.Negate(handler.getScope(), val);
+        } else if (tok == -OP_MEDIA_NOT) {
+          // `not` operator in `@media` or `@supports`
+          val = new Exprs.NotMedia(handler.getScope(), val);
         } else {
           this.exprError("F_UNEXPECTED_STATE", token);
           return false;
@@ -1117,7 +1126,12 @@ export class Parser {
             val = new Exprs.And(handler.getScope(), val2, val);
             break;
           case OP_MEDIA_AND:
+            // `and` operator in `@media` or `@supports`
             val = new Exprs.AndMedia(handler.getScope(), val2, val);
+            break;
+          case OP_MEDIA_OR:
+            // `or` operator in `@media` or `@supports`
+            val = new Exprs.OrMedia(handler.getScope(), val2, val);
             break;
           case CssTokenizer.TokenType.BAR_BAR:
             val = new Exprs.Or(handler.getScope(), val2, val);
@@ -1207,6 +1221,74 @@ export class Parser {
     }
     valStack.push(val);
     return false;
+  }
+
+  readSupportsTest(token: CssTokenizer.Token): Exprs.SupportsTest {
+    // `@supports (prop-name:...)`
+    // `@supports func-name(...)`
+    const isFunc = token.type === CssTokenizer.TokenType.FUNC;
+    const tokenizer = this.tokenizer;
+    let startPosition: number;
+    let name: string;
+    if (isFunc) {
+      name = token.text;
+      startPosition = token.position + name.length + 1;
+    } else if (token.type === CssTokenizer.TokenType.O_PAR) {
+      const token1 = tokenizer.nthToken(1);
+      const token2 = tokenizer.nthToken(2);
+      if (
+        token1.type === CssTokenizer.TokenType.IDENT &&
+        token2.type === CssTokenizer.TokenType.COLON
+      ) {
+        tokenizer.consume();
+        tokenizer.consume();
+        name = token1.text;
+        startPosition = token2.position + 1;
+      } else if (
+        token1.type === CssTokenizer.TokenType.O_PAR ||
+        token1.type === CssTokenizer.TokenType.FUNC ||
+        (token1.type === CssTokenizer.TokenType.IDENT &&
+          token1.text.toLowerCase() === "not" &&
+          (token2.type === CssTokenizer.TokenType.O_PAR ||
+            token2.type === CssTokenizer.TokenType.FUNC))
+      ) {
+        return null;
+      } else {
+        // Unknown `(...)` syntax, read until `)` and evaluate to false
+        startPosition = token.position + 1;
+      }
+    } else {
+      return null;
+    }
+    let parLevel = 0;
+    let tokenN: CssTokenizer.Token;
+    while (parLevel >= 0) {
+      tokenizer.consume();
+      tokenN = tokenizer.token();
+      switch (tokenN.type) {
+        case CssTokenizer.TokenType.C_PAR:
+          parLevel--;
+          break;
+        case CssTokenizer.TokenType.O_PAR:
+        case CssTokenizer.TokenType.FUNC:
+          parLevel++;
+          break;
+        case CssTokenizer.TokenType.INVALID:
+        case CssTokenizer.TokenType.EOF:
+          this.exprError("E_CSS_UNEXPECTED_EOF", tokenN);
+          return null;
+      }
+    }
+    tokenizer.consume();
+    const endPosition = tokenN.position;
+    const value = tokenizer.input.substring(startPosition, endPosition).trim();
+    const supportsTest = new Exprs.SupportsTest(
+      this.handler.getScope(),
+      name,
+      value,
+      isFunc,
+    );
+    return supportsTest;
   }
 
   readPseudoParams(): (number | string)[] {
@@ -1429,10 +1511,10 @@ export class Parser {
 
   runParser(
     count: number,
-    parsingValue,
+    parsingValue: boolean,
     parsingStyleAttr: boolean,
-    parsingMediaQuery,
-    parsingFunctionParam,
+    parsingMediaQuery: boolean,
+    parsingFunctionParam: boolean,
   ): boolean {
     const handler = this.handler;
     const tokenizer = this.tokenizer;
@@ -2065,6 +2147,18 @@ export class Parser {
                   new Exprs.MediaName(handler.getScope(), false, token.text),
                 );
               }
+            } else if (
+              this.exprContext === ExprContext.SUPPORTS &&
+              token.text.toLowerCase() === "not" &&
+              valStack[valStack.length - 1] !== OP_MEDIA_AND &&
+              valStack[valStack.length - 1] !== OP_MEDIA_OR &&
+              (token1.type === CssTokenizer.TokenType.O_PAR ||
+                token1.type === CssTokenizer.TokenType.FUNC)
+            ) {
+              // for `@supports not (...)`
+              valStack.push(-OP_MEDIA_NOT);
+              tokenizer.consume();
+              continue;
             } else {
               valStack.push(new Exprs.Named(handler.getScope(), token.text));
             }
@@ -2073,6 +2167,12 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_FUNC:
+          if (this.exprContext === ExprContext.SUPPORTS) {
+            // `@supports selector(...)`
+            valStack.push(this.readSupportsTest(token));
+            this.actions = actionsExprOp;
+            continue;
+          }
           valStack.push(null, token.text, "(");
           tokenizer.consume();
           continue;
@@ -2124,10 +2224,24 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_INFIX_NAME:
-          if (token.text.toLowerCase() == "and") {
+            // `and` or `or` operator in `@media` or `@supports`
+            if (
+            token.text.toLowerCase() === "and" &&
+            valStack[valStack.length - 2] !== OP_MEDIA_OR &&
+            valStack[valStack.length - 2] !== -OP_MEDIA_NOT
+          ) {
             this.actions = actionsExprVal;
             this.exprStackReduce(OP_MEDIA_AND, token);
             valStack.push(OP_MEDIA_AND);
+            tokenizer.consume();
+          } else if (
+            token.text.toLowerCase() === "or" &&
+            valStack[valStack.length - 2] !== OP_MEDIA_AND &&
+            valStack[valStack.length - 2] !== -OP_MEDIA_NOT
+          ) {
+            this.actions = actionsExprVal;
+            this.exprStackReduce(OP_MEDIA_OR, token);
+            valStack.push(OP_MEDIA_OR);
             tokenizer.consume();
           } else {
             this.exprError("E_CSS_SYNTAX", token);
@@ -2135,11 +2249,7 @@ export class Parser {
           continue;
         case Action.EXPR_C_PAR:
           if (this.exprStackReduce(token.type, token)) {
-            if (this.propName) {
-              this.actions = actionsPropVal;
-            } else {
-              this.exprError("E_CSS_UNBALANCED_PAR", token);
-            }
+            this.actions = actionsPropVal;
           }
           tokenizer.consume();
           continue;
@@ -2164,6 +2274,10 @@ export class Parser {
           if (this.exprStackReduce(CssTokenizer.TokenType.C_PAR, token)) {
             if (this.propName || this.exprContext != ExprContext.IMPORT) {
               this.exprError("E_CSS_UNEXPECTED_SEMICOL", token);
+              // `@media ...;` and `@supports ...;` should be ok
+              this.actions = actionsBase;
+              tokenizer.consume();
+              return false;
             } else {
               this.importCondition = valStack.pop() as Css.Expr;
               this.importReady = true;
@@ -2175,6 +2289,15 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_O_PAR:
+          if (this.exprContext === ExprContext.SUPPORTS) {
+            // `@supports (...)`
+            const supportsTest = this.readSupportsTest(token);
+            if (supportsTest) {
+              valStack.push(supportsTest);
+              this.actions = actionsExprOp;
+              continue;
+            }
+          }
           valStack.push(token.type);
           tokenizer.consume();
           continue;
@@ -2377,6 +2500,13 @@ export class Parser {
               this.actions = actionsExprVal;
               valStack.push("{");
               continue;
+            case "supports":
+              tokenizer.consume();
+              this.propName = null; // signals @ rule
+              this.exprContext = ExprContext.SUPPORTS;
+              this.actions = actionsExprVal;
+              valStack.push("{");
+              continue;
             case "-epubx-flow":
               if (
                 tokenizer.nthToken(1).type == CssTokenizer.TokenType.IDENT &&
@@ -2557,6 +2687,19 @@ export class Parser {
           ) {
             if (token.type == CssTokenizer.TokenType.INVALID) {
               handler.error(token.text, token);
+            } else if (token.type === CssTokenizer.TokenType.O_BRC) {
+              // `@media {...}` and `@supports {...}` should be ok
+              handler.startMediaRule(valStack.pop() as Css.Expr);
+              this.ruleStack.push("media");
+              handler.startRuleBody();
+              this.actions = actionsBase;
+              tokenizer.consume();
+              continue;
+            } else if (token.type === CssTokenizer.TokenType.SEMICOL) {
+              // `@media;` and `@supports;` should be ok
+              this.actions = actionsBase;
+              tokenizer.consume();
+              return false;
             } else {
               handler.error("E_CSS_SYNTAX", token);
             }
