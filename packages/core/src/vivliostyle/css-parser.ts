@@ -2224,8 +2224,8 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.EXPR_INFIX_NAME:
-            // `and` or `or` operator in `@media` or `@supports`
-            if (
+          // `and` or `or` operator in `@media` or `@supports`
+          if (
             token.text.toLowerCase() === "and" &&
             valStack[valStack.length - 2] !== OP_MEDIA_OR &&
             valStack[valStack.length - 2] !== -OP_MEDIA_NOT
