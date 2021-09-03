@@ -17,6 +17,9 @@
  */
 
 window.MathJax = {
+  MathML: {
+    extensions: ["content-mathml.js"],
+  },
   showProcessingMessages: false,
   messageStyle: "none",
   skipStartupTypeset: true,
