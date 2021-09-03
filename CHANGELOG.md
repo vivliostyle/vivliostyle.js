@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.9.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.8.1...v2.9.0) (2021-09-03)
+
+### Bug Fixes
+
+- "TypeError: Cannot read property '1' of null" occured in getTOC() ([d4539f7](https://github.com/vivliostyle/vivliostyle.js/commit/d4539f7d934ac0a856a9fb45befd205632a29d96))
+- Vivliostyle Viewer stops working when window resizing on renderAllPages=false mode ([5ae9298](https://github.com/vivliostyle/vivliostyle.js/commit/5ae92980051fa4d816b47ed0ba8e7227670ba5da)), closes [#752](https://github.com/vivliostyle/vivliostyle.js/issues/752)
+- **viewer:** HTML markup errors in the Vivliostyle Viewer start page ([aed4ea9](https://github.com/vivliostyle/vivliostyle.js/commit/aed4ea917a1e040dbfa5fdff0662621bff9dc141)), closes [#755](https://github.com/vivliostyle/vivliostyle.js/issues/755)
+
+### Features
+
+- Support the `[@supports](https://github.com/supports)` CSS at-rule ([08efaef](https://github.com/vivliostyle/vivliostyle.js/commit/08efaef17b7c430ef0e3e30029480d3bb0953655)), closes [#730](https://github.com/vivliostyle/vivliostyle.js/issues/730)
+- **viewer:** Add Content MathML extension in mathjax-config ([e01ffa0](https://github.com/vivliostyle/vivliostyle.js/commit/e01ffa07198fc6b7512469903372ac199bbe7063))
+
 ## [2.8.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.8.0...v2.8.1) (2021-07-14)
 
 ### Bug Fixes

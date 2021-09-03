@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.9.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.8.1...v2.9.0) (2021-09-03)
+
+### Bug Fixes
+
+- **viewer:** HTML markup errors in the Vivliostyle Viewer start page ([aed4ea9](https://github.com/vivliostyle/vivliostyle.js/commit/aed4ea917a1e040dbfa5fdff0662621bff9dc141)), closes [#755](https://github.com/vivliostyle/vivliostyle.js/issues/755)
+
+### Features
+
+- **viewer:** Add Content MathML extension in mathjax-config ([e01ffa0](https://github.com/vivliostyle/vivliostyle.js/commit/e01ffa07198fc6b7512469903372ac199bbe7063))
+
 ## [2.8.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.8.0...v2.8.1) (2021-07-14)
 
 **Note:** Version bump only for package @vivliostyle/viewer
