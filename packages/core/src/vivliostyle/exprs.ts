@@ -524,6 +524,10 @@ export class Context {
     return false;
   }
 
+  evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
+    return false;
+  }
+
   queryVal(scope: LexicalScope, key: string): Result | undefined {
     const s = this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
@@ -818,6 +822,19 @@ export class Not extends Prefix {
   }
 }
 
+export class NotMedia extends Not {
+  constructor(scope: LexicalScope, val: Val) {
+    super(scope, val);
+  }
+
+  /**
+   * @override
+   */
+  getOp(): string {
+    return "not ";
+  }
+}
+
 export class Negate extends Prefix {
   constructor(scope: LexicalScope, val: Val) {
     super(scope, val);
@@ -891,7 +908,7 @@ export class Or extends Logical {
   }
 }
 
-export class OrMedia extends Or {
+export class Comma extends Or {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
     super(scope, lhs, rhs);
   }
@@ -901,6 +918,19 @@ export class OrMedia extends Or {
    */
   getOp(): string {
     return ", ";
+  }
+}
+
+export class OrMedia extends Or {
+  constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
+    super(scope, lhs, rhs);
+  }
+
+  /**
+   * @override
+   */
+  getOp(): string {
+    return " or ";
   }
 }
 
@@ -1515,6 +1545,40 @@ export class MediaTest extends Val {
     }
     const r = new MediaTest(this.scope, this.name, value);
     return r;
+  }
+}
+
+export class SupportsTest extends Val {
+  constructor(
+    scope: LexicalScope,
+    public name: string,
+    public value: string,
+    public isFunc: boolean,
+  ) {
+    super(scope);
+  }
+
+  /**
+   * @override
+   */
+  appendTo(buf: Base.StringBuffer, priority: number): void {
+    if (this.isFunc) {
+      buf.append(this.name);
+    }
+    buf.append("(");
+    if (!this.isFunc && this.name) {
+      buf.append(this.name);
+      buf.append(":");
+    }
+    buf.append(this.value);
+    buf.append(")");
+  }
+
+  /**
+   * @override
+   */
+  evaluateCore(context: Context): Result {
+    return context.evalSupportsTest(this.name, this.value, this.isFunc);
   }
 }
 

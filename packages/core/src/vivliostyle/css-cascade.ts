@@ -324,7 +324,12 @@ export class ConditionalCascadeValue extends CascadeValue {
   }
 
   isEnabled(context: Exprs.Context): boolean {
-    return !!this.condition.evaluate(context);
+    try {
+      return !!this.condition.evaluate(context);
+    } catch (err) {
+      Logging.logger.warn(err);
+    }
+    return false;
   }
 }
 
