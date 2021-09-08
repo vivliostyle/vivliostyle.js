@@ -2781,7 +2781,7 @@ export class PageParserHandler
     validatorSet: CssValidator.ValidatorSet,
     private readonly pageProps: { [key: string]: CssCascade.ElementStyle },
   ) {
-    super(scope, owner, null, parent, null, validatorSet, false);
+    super(scope, owner, parent?.condition, parent, null, validatorSet, false);
   }
 
   /**
