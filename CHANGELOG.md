@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.9.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.9.0...v2.9.1) (2021-09-08)
+
+### Bug Fixes
+
+- Page at-rule in conditional rule is applied even if condition is false ([b114396](https://github.com/vivliostyle/vivliostyle.js/commit/b11439676d49eb075174b288f4c7a5838f21c7db))
+
 # [2.9.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.8.1...v2.9.0) (2021-09-03)
 
 ### Bug Fixes
