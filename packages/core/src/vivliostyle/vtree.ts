@@ -293,6 +293,7 @@ export function whitespaceFromPropertyValue(
       return Whitespace.NEWLINE;
     case "pre":
     case "pre-wrap":
+    case "break-spaces":
       return Whitespace.PRESERVE;
     default:
       return null;
