@@ -929,9 +929,11 @@ export class ViewFactory
         this.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
       }
       const wordBreak = computedStyle["word-break"];
+      const lineBreak = computedStyle["line-break"];
       const overflowWrap = computedStyle["overflow-wrap"];
       this.nodeContext.breakWord =
         wordBreak === Css.ident.break_all ||
+        lineBreak === Css.ident.anywhere ||
         overflowWrap === Css.ident.break_word ||
         overflowWrap === Css.ident.anywhere;
 

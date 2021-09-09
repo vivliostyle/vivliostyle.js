@@ -531,7 +531,7 @@ ruby-position = over | under | inter-character;
 [moz]text-size-adjust = auto | none | POS_PERCENTAGE;
 
 /* CSS Text */
-[webkit]line-break = auto | loose | normal | strict;
+[webkit]line-break = auto | loose | normal | strict | anywhere;
 overflow-wrap = normal | break-word | anywhere;
 [moz]tab-size = NNEG_INT | NNEG_LENGTH;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
