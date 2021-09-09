@@ -121,7 +121,6 @@ export const inheritedProps = {
   widows: true,
   "word-break": true,
   "word-spacing": true,
-  "word-wrap": true,
   "writing-mode": true,
 };
 

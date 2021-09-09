@@ -532,12 +532,11 @@ ruby-position = over | under | inter-character;
 
 /* CSS Text */
 [webkit]line-break = auto | loose | normal | strict;
-overflow-wrap = normal | break-word;
+overflow-wrap = normal | break-word | anywhere;
 [moz]tab-size = NNEG_INT | NNEG_LENGTH;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-word-wrap = normal | break-word;
 
 /* CSS Text Decoration */
 [webkit]text-decoration-color = COLOR;
@@ -783,6 +782,7 @@ inset-block = INSETS block-start block-end;
 inset-inline = INSETS inline-start inline-end;
 
 /* old names  */
+word-wrap = overflow-wrap;
 [adapt,webkit]margin-before = margin-block-start;
 [adapt,webkit]margin-after = margin-block-end;
 [adapt,webkit]margin-start = margin-inline-start;

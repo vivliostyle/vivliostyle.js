@@ -707,6 +707,7 @@ export const ident: { [key: string]: Ident } = {
   absolute: getName("absolute"),
   all: getName("all"),
   always: getName("always"),
+  anywhere: getName("anywhere"),
   auto: getName("auto"),
   avoid: getName("avoid"),
   balance: getName("balance"),
