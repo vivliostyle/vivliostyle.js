@@ -369,7 +369,7 @@ export function cssToJSProp(prefix: string, cssPropName: string): string {
   );
 }
 
-export const knownPrefixes = ["", "-webkit-", "-moz-", "-ms-", "-o-", "-epub-"];
+export const knownPrefixes = ["", "-webkit-", "-moz-"];
 
 export const propNameMap = {};
 
@@ -377,20 +377,8 @@ export function checkIfPropertySupported(
   prefix: string,
   prop: string,
 ): boolean {
-  // Special case
-  if (prop === "writing-mode") {
-    const probe = document.createElement("span");
-    if (prefix === "-ms-") {
-      probe.style.setProperty(prefix + prop, "tb-rl");
-      return probe.style["writing-mode"] === "tb-rl";
-    } else {
-      probe.style.setProperty(prefix + prop, "vertical-rl");
-      return probe.style[prefix + prop] === "vertical-rl";
-    }
-  } else {
-    const style = document.documentElement.style;
-    return typeof style[cssToJSProp(prefix, prop)] === "string";
-  }
+  const style = document.documentElement.style;
+  return typeof style[cssToJSProp(prefix, prop)] === "string";
 }
 
 export function getPrefixedPropertyNames(prop: string): string[] | null {
@@ -408,13 +396,6 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
       ) {
         propNameMap[prop] = ["-webkit-text-combine"];
         return ["-webkit-text-combine"];
-      }
-      break;
-    case "writing-mode":
-      // Special case: prefer '-ms-writing-mode' to 'writing-mode'
-      if (checkIfPropertySupported("-ms-", "writing-mode")) {
-        propNameMap[prop] = ["-ms-writing-mode"];
-        return ["-ms-writing-mode"];
       }
       break;
     case "filter":
@@ -480,19 +461,7 @@ export function setCSSProperty(
       return;
     }
     prefixedPropertyNames.forEach((prefixed) => {
-      if (prefixed === "-ms-writing-mode") {
-        switch (value) {
-          case "horizontal-tb":
-            value = "lr-tb";
-            break;
-          case "vertical-rl":
-            value = "tb-rl";
-            break;
-          case "vertical-lr":
-            value = "tb-lr";
-            break;
-        }
-      } else if (prefixed === "-webkit-text-combine") {
+      if (prefixed === "-webkit-text-combine") {
         switch (value) {
           case "all":
             value = "horizontal";

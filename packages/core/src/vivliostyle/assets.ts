@@ -52,7 +52,6 @@ export const VivliostyleViewportScreenCss = `
     -webkit-justify-content: center;
     justify-content: center;
     -moz-transform-origin: left top;
-    -ms-transform-origin: left top;
     -webkit-transform-origin: left top;
     transform-origin: left top;
   }
@@ -158,7 +157,6 @@ export const VivliostyleViewportCss = `
   [data-vivliostyle-spread-container],
   [data-vivliostyle-page-container] {
     -moz-transform: none !important;
-    -ms-transform: none !important;
     -webkit-transform: none !important;
     transform: none !important;
   }
@@ -400,7 +398,7 @@ width = PAPLENGTH | POS_NUM ;
 word-spacing = normal | LENGTH_OR_NUM;
 z-index = auto | INT;
 
-[epub,moz,ms,webkit]hyphens = auto | manual | none;
+[epub,moz,webkit]hyphens = auto | manual | none;
 [webkit]hyphenate-character = auto | STRING;
 
 /* css-logical */
@@ -439,12 +437,12 @@ SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENG
     polygon( SPACE(PLENGTH+)+ );
 [epubx]shape-inside = SHAPE;
 [epubx,webkit]shape-outside = SHAPE;
-[epubx,ms]wrap-flow = auto | both | start | end | maximum | clear | around /* epub al */;
+[epubx]wrap-flow = auto | both | start | end | maximum | clear | around /* epub al */;
 
 TRANSFORM_FUNCTION = matrix(NUM{6}) | translate(PLENGTH{1,2}) | translateX(PLENGTH) | translateY(PLENGTH) |
  scale(NUM{1,2}) | scaleX(NUM) | scaleY(NUM) | rotate(ANGLE) | skewX(ANGLE) | skewY(ANGLE);
-[epub,ms]transform = none | TRANSFORM_FUNCTION+;
-[epub,ms]transform-origin = [[[ top | bottom | left | right] PLENGTH?] | center | PLENGTH]{1,2}; /* relaxed */
+[epub]transform = none | TRANSFORM_FUNCTION+;
+[epub]transform-origin = [[[ top | bottom | left | right] PLENGTH?] | center | PLENGTH]{1,2}; /* relaxed */
 
 BOX = border-box | padding-box | content-box;
 SHADOW = SPACE(inset || LENGTH{2,4} || COLOR); /* relaxed */
@@ -530,16 +528,16 @@ ruby-align = start | center | space-between | space-around;
 ruby-position = over | under | inter-character;
 
 /* CSS Size Adjust */
-[moz,ms]text-size-adjust = auto | none | POS_PERCENTAGE;
+[moz]text-size-adjust = auto | none | POS_PERCENTAGE;
 
 /* CSS Text */
-[ms,webkit]line-break = auto | loose | normal | strict;
+[webkit]line-break = auto | loose | normal | strict;
 overflow-wrap = normal | break-word;
 [moz]tab-size = NNEG_INT | NNEG_LENGTH;
-[moz,ms]text-align-last = auto | start | end | left | right | center | justify;
-[ms]text-justify = auto | none | inter-word | inter-character | inter-ideograph /* specified in UA stylesheet for IE */;
-[ms]word-break = normal | keep-all | break-all | break-word;
-[ms]word-wrap = normal | break-word;
+[moz]text-align-last = auto | start | end | left | right | center | justify;
+text-justify = auto | none | inter-word | inter-character;
+word-break = normal | keep-all | break-all | break-word;
+word-wrap = normal | break-word;
 
 /* CSS Text Decoration */
 [webkit]text-decoration-color = COLOR;
@@ -549,19 +547,18 @@ overflow-wrap = normal | break-word;
 [epub,webkit]text-emphasis-color = COLOR;
 [webkit]text-emphasis-position = [ over | under ] [ right | left ];
 [epub,webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
-[ms,webkit]text-underline-position = auto | [ under || [ left | right ]];
+[webkit]text-underline-position = auto | [ under || [ left | right ]];
 
 /* CSS Transforms */
-[ms,webkit]backface-visibility = visible | hidden;
+[webkit]backface-visibility = visible | hidden;
 
 /* CSS UI */
 box-sizing = content-box | padding-box | border-box;
-[ms]text-overflow = [clip | ellipsis | STRING]{1,2};
+text-overflow = [clip | ellipsis | STRING]{1,2};
 
 /* CSS Writing Modes */
-[webkit]text-combine = none | horizontal;
-[epub,ms]text-combine-horizontal = none | all | [ digits POS_INT? ]; /* relaxed */
-text-combine-upright = none | all | [ digits POS_INT? ]; /* relaxed */
+[epub,webkit]text-combine = none | horizontal;
+text-combine-upright = none | all; /* relaxed */
 [epub,webkit]text-orientation = mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;
 unicode-bidi = normal | embed | isolate | bidi-override | isolate-override | plaintext;
 [epub,webkit]writing-mode = horizontal-tb | vertical-rl | lr-tb | rl-tb | tb-rl | lr | rl | tb;
@@ -581,7 +578,7 @@ align-self = auto | flex-start | flex-end | center | baseline | stretch;
 align-content = flex-start | flex-end | center | space-between | space-around | stretch;
 
 /* Pointer Events */
-[ms]touch-action = auto | none | [ pan-x || pan-y ] | manipulation;
+touch-action = auto | none | [ pan-x || pan-y ] | manipulation;
 
 /* SVG 2 */
 OPACITY_VALUE = NUM | PERCENTAGE;
