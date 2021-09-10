@@ -388,6 +388,9 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
     return prefixed;
   }
   switch (prop) {
+    case "behavior":
+      propNameMap[prop] = null;
+      return null;
     case "text-combine-upright":
       // Special case for Safari
       if (
