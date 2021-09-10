@@ -1784,7 +1784,7 @@ export class ViewFactory
     if (
       pos.shadowContext == null ||
       (pos.sourceNode as Element).localName != "content" ||
-      pos.sourceNode.namespaceURI != Base.NS.SHADOW
+      (pos.sourceNode as Element).namespaceURI != Base.NS.SHADOW
     ) {
       return pos;
     }
@@ -2349,7 +2349,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getRangeClientRects(range: Range): ClientRect[] {
+  getRangeClientRects(range: Range): Vtree.ClientRect[] {
     const rects = range["getClientRects"]();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map((rect) =>
@@ -2360,7 +2360,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getElementClientRect(element: Element): ClientRect {
+  getElementClientRect(element: Element): Vtree.ClientRect {
     const htmlElement = element as HTMLElement;
     const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();

@@ -2540,7 +2540,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (flowPosition.after) {
       return true; // may be an empty block
     }
-    switch (flowPosition.sourceNode.namespaceURI) {
+    switch ((flowPosition.sourceNode as Element).namespaceURI) {
       case Base.NS.SVG:
         return false;
     }
