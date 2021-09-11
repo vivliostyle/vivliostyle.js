@@ -331,7 +331,6 @@ FAMILY_LIST = COMMA( FAMILY+ );
 font-family = FAMILY_LIST;
 font-size = xx-small | x-small | small | medium | large | x-large | xx-large | larger | smaller | PPLENGTH | POS_NUM;
 font-style = normal | italic | oblique;
-font-variant = normal | small-caps;
 font-weight = normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 height = PAPLENGTH | POS_NUM ;
 left = APLENGTH;
@@ -479,11 +478,26 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 [adapt]behavior = IDENT;
 
 /* CSS Fonts */
+COMMON_LIG_VALUES        = [ common-ligatures | no-common-ligatures ];
+DISCRETIONARY_LIG_VALUES = [ discretionary-ligatures | no-discretionary-ligatures ];
+HISTORICAL_LIG_VALUES    = [ historical-ligatures | no-historical-ligatures ];
+CONTEXTUAL_ALT_VALUES    = [ contextual | no-contextual ];
+font-variant-ligatures = normal | none | [ COMMON_LIG_VALUES || DISCRETIONARY_LIG_VALUES || HISTORICAL_LIG_VALUES || CONTEXTUAL_ALT_VALUES ];
+font-variant-caps = normal | small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps;
+NUMERIC_FIGURE_VALUES   = [ lining-nums | oldstyle-nums ];
+NUMERIC_SPACING_VALUES  = [ proportional-nums | tabular-nums ];
+NUMERIC_FRACTION_VALUES = [ diagonal-fractions | stacked-fractions ];
+font-variant-numeric = normal | [ NUMERIC_FIGURE_VALUES || NUMERIC_SPACING_VALUES || NUMERIC_FRACTION_VALUES || ordinal || slashed-zero ];
+EAST_ASIAN_VARIANT_VALUES = [ jis78 | jis83 | jis90 | jis04 | simplified | traditional ];
+EAST_ASIAN_WIDTH_VALUES   = [ full-width | proportional-width ];
+font-variant-east-asian = normal | [ EAST_ASIAN_VARIANT_VALUES || EAST_ASIAN_WIDTH_VALUES || ruby ];
+font-variant_css2 = normal | small-caps; /* for font shorthand */
 font-size-adjust = none | NNEG_NUM;
 [webkit]font-kerning = auto | normal | none;
-font-variant-east-asian = normal | [[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ] || [ full-width | proportional-width ] || ruby];
 font-feature-settings = COMMA( normal | SPACE( STRING [ on | off | INT ]? )+ );
-font-stretch = normal | wider | narrower | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded;
+FONT_STRETCH_CSS3_VALUES = normal | wider | narrower | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded;
+font-stretch = FONT_STRETCH_CSS3_VALUES | PERCENTAGE;
+font-stretch_css3 = FONT_STRETCH_CSS3_VALUES; /* for font shorthand */
 
 /* CSS Images */
 image-resolution = RESOLUTION;
@@ -675,7 +689,13 @@ flex-wrap: nowrap;
 font-family: serif;
 font-style: normal;
 font-size: medium;
-font-variant: normal;
+font-size-adjust: none;
+font-kerning: auto;
+font-feature-settings: normal;
+font-variant-ligatures: normal;
+font-variant-caps: normal;
+font-variant-numeric: normal;
+font-variant-east-asian: normal;
 font-weight: normal;
 font-stretch: normal;
 line-height: normal;
@@ -734,7 +754,8 @@ outline = outline-width outline-style outline-color;
 list-style = list-style-type list-style-position list-style-image;
 margin = INSETS margin-top margin-right margin-bottom margin-left;
 padding = INSETS padding-top padding-right padding-bottom padding-left;
-font = FONT font-style font-variant font-weight font-stretch /* font-size line-height font-family are special-cased */;
+font = FONT font-style font-variant_css2 font-weight font-stretch_css3 /* font-size line-height font-family are special-cased */;
+font-variant = font-variant-ligatures font-variant-caps font-variant-numeric font-variant-east-asian;
 [epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
 marker = INSETS marker-start marker-mid marker-end;
 

@@ -1337,7 +1337,16 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
    */
   init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
     super.init(syntax, propList);
-    this.propList.push("font-family", "line-height", "font-size");
+    this.propList.push(
+      "font-family",
+      "line-height",
+      "font-size",
+      "font-stretch",
+      "font-variant-ligatures",
+      "font-variant-caps",
+      "font-variant-numeric",
+      "font-variant-east-asian",
+    );
   }
 
   /**
@@ -1345,6 +1354,17 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
    */
   validateList(list: Css.Val[]): number {
     let index = super.validateList(list);
+
+    const fontVariant = this.values["font-variant_css2"];
+    if (fontVariant) {
+      delete this.values["font-variant_css2"];
+      this.values["font-variant-caps"] = fontVariant;
+    }
+    const fontStretch = this.values["font-stretch_css3"];
+    if (fontStretch) {
+      delete this.values["font-stretch_css3"];
+      this.values["font-stretch"] = fontStretch;
+    }
 
     // must at least have font-size and font-family at the end
     if (index + 2 > list.length) {
@@ -1952,7 +1972,10 @@ export class ValidatorSet {
           case CssTokenizer.TokenType.IDENT:
             if (this.validators[token.text]) {
               syntax.push(shorthandValidator.syntaxNodeForProperty(token.text));
-              propList.push(token.text);
+              // `font-variant_css2` and `font-stretch_css3` are not real properties
+              if (!token.text.includes("_")) {
+                propList.push(token.text);
+              }
             } else if (
               this.shorthands[token.text] instanceof InsetsShorthandValidator
             ) {
