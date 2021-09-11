@@ -929,10 +929,13 @@ export class ViewFactory
         this.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
       }
       const wordBreak = computedStyle["word-break"];
-      const overflowWrap = computedStyle["overflow-wrap"] || ["word-wrap"];
+      const lineBreak = computedStyle["line-break"];
+      const overflowWrap = computedStyle["overflow-wrap"];
       this.nodeContext.breakWord =
         wordBreak === Css.ident.break_all ||
-        overflowWrap === Css.ident.break_word;
+        lineBreak === Css.ident.anywhere ||
+        overflowWrap === Css.ident.break_word ||
+        overflowWrap === Css.ident.anywhere;
 
       // Resolve formatting context
       this.resolveFormattingContext(
@@ -1781,7 +1784,7 @@ export class ViewFactory
     if (
       pos.shadowContext == null ||
       (pos.sourceNode as Element).localName != "content" ||
-      pos.sourceNode.namespaceURI != Base.NS.SHADOW
+      (pos.sourceNode as Element).namespaceURI != Base.NS.SHADOW
     ) {
       return pos;
     }
@@ -2346,7 +2349,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getRangeClientRects(range: Range): ClientRect[] {
+  getRangeClientRects(range: Range): Vtree.ClientRect[] {
     const rects = range["getClientRects"]();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map((rect) =>
@@ -2357,7 +2360,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   /**
    * @override
    */
-  getElementClientRect(element: Element): ClientRect {
+  getElementClientRect(element: Element): Vtree.ClientRect {
     const htmlElement = element as HTMLElement;
     const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
