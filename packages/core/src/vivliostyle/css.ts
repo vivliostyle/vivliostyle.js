@@ -67,6 +67,10 @@ export class Visitor {
     throw new Error("E_CSS_URL_NOT_ALLOWED");
   }
 
+  visitURange(urange: URange): Val {
+    throw new Error("E_CSS_URANGE_NOT_ALLOWED");
+  }
+
   visitSpaceList(list: SpaceList): Val {
     throw new Error("E_CSS_LIST_NOT_ALLOWED");
   }
@@ -161,6 +165,13 @@ export class FilterVisitor extends Visitor {
    */
   visitURL(url: URL): Val {
     return url;
+  }
+
+  /**
+   * @override
+   */
+  visitURange(urange: URange): Val {
+    return urange;
   }
 
   /**
@@ -561,6 +572,26 @@ export class URL extends Val {
   }
 }
 
+export class URange extends Val {
+  constructor(public urangeText: string) {
+    super();
+  }
+
+  /**
+   * @override
+   */
+  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+    buf.append(this.urangeText);
+  }
+
+  /**
+   * @override
+   */
+  visit(visitor: any): any {
+    return visitor.visitURange(this);
+  }
+}
+
 export function appendList(
   buf: Base.StringBuffer,
   values: Val[],
@@ -777,6 +808,8 @@ export const fullWidth: Numeric = new Numeric(100, "pvw");
 export const fullHeight: Numeric = new Numeric(100, "pvh");
 
 export const numericZero: Numeric = new Numeric(0, "px");
+
+export const fullURange: URange = new URange("U+0-10FFFF");
 
 export const processingOrder = {
   "font-size": 1,

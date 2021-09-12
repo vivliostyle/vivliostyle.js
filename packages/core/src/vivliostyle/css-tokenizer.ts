@@ -85,6 +85,7 @@ export enum TokenType {
   MINUS,
   BAR_BAR,
   AMP_AMP,
+  URANGE,
 
   // those can have "=" at the end
   BANG = 31,
@@ -1711,6 +1712,21 @@ export class Tokenizer {
           // don't consume current char
           // tokenType should be set already
           tokenText = input.substring(tokenPosition, position);
+
+          // unicode-range support
+          if (
+            (tokenType === TokenType.URANGE && charCode === 63) ||
+            (tokenType === TokenType.IDENT &&
+              tokenText.toLowerCase() === "u" &&
+              /^\+[?0-9a-fA-F]/.test(input.substr(position, 2)) &&
+              /\bunicode-range\s*:\s*(u\+[-?0-9a-f]+\s*,\s*)*u$/i.test(
+                input.substr(0, position),
+              ))
+          ) {
+            tokenType = TokenType.URANGE;
+            position++;
+            continue;
+          }
           break;
         case Action.IDNTESC:
           backslashPos = position++;

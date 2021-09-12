@@ -498,6 +498,7 @@ font-feature-settings = COMMA( normal | SPACE( STRING [ on | off | INT ]? )+ );
 FONT_STRETCH_CSS3_VALUES = normal | wider | narrower | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded;
 font-stretch = FONT_STRETCH_CSS3_VALUES | PERCENTAGE;
 font-stretch_css3 = FONT_STRETCH_CSS3_VALUES; /* for font shorthand */
+unicode-range = COMMA( URANGE+ );
 
 /* CSS Images */
 image-resolution = RESOLUTION;
