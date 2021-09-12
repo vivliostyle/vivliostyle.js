@@ -350,6 +350,8 @@ export const ALLOW_ZERO_PERCENT = 1024;
 
 export const ALLOW_SLASH = 2048;
 
+export const ALLOW_URANGE = 4096;
+
 export type ValueMap = {
   [key: string]: Css.Val;
 };
@@ -503,6 +505,16 @@ export class PrimitiveValidator extends PropertyValidator {
   visitURL(url: Css.URL): Css.Val {
     if (this.allowed & ALLOW_URL) {
       return url;
+    }
+    return null;
+  }
+
+  /**
+   * @override
+   */
+  visitURange(urange: Css.URange): Css.Val {
+    if (this.allowed & ALLOW_URANGE) {
+      return urange;
     }
     return null;
   }
@@ -761,6 +773,13 @@ export class ListValidator extends PropertyValidator {
    */
   visitURL(url: Css.URL): Css.Val {
     return this.validateSingle(url);
+  }
+
+  /**
+   * @override
+   */
+  visitURange(urange: Css.URange): Css.Val {
+    return this.validateSingle(urange);
   }
 
   /**
@@ -1647,6 +1666,9 @@ export class ValidatorSet {
     );
     this.namedValidators["URI"] = this.primitive(
       new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS),
+    );
+    this.namedValidators["URANGE"] = this.primitive(
+      new PrimitiveValidator(ALLOW_URANGE, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["IDENT"] = this.primitive(
       new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS),

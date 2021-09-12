@@ -790,6 +790,7 @@ export enum Action {
   VAL_PLUS,
   SELECTOR_PSEUDOCLASS_1,
   SELECTOR_FOLLOWING_SIBLING,
+  VAL_URANGE,
   DONE = 200,
 }
 
@@ -855,6 +856,7 @@ export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
   actionsPropVal[CssTokenizer.TokenType.NUMERIC] = Action.VAL_NUMERIC;
   actionsPropVal[CssTokenizer.TokenType.STR] = Action.VAL_STR;
   actionsPropVal[CssTokenizer.TokenType.URL] = Action.VAL_URL;
+  actionsPropVal[CssTokenizer.TokenType.URANGE] = Action.VAL_URANGE;
   actionsPropVal[CssTokenizer.TokenType.COMMA] = Action.VAL_COMMA;
   actionsPropVal[CssTokenizer.TokenType.SLASH] = Action.VAL_SLASH;
   actionsPropVal[CssTokenizer.TokenType.FUNC] = Action.VAL_FUNC;
@@ -2015,6 +2017,10 @@ export class Parser {
           continue;
         case Action.VAL_URL:
           valStack.push(new Css.URL(Base.resolveURL(token.text, this.baseURL)));
+          tokenizer.consume();
+          continue;
+        case Action.VAL_URANGE:
+          valStack.push(new Css.URange(token.text));
           tokenizer.consume();
           continue;
         case Action.VAL_COMMA:

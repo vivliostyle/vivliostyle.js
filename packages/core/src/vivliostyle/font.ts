@@ -31,6 +31,7 @@ export const traitProps: { [key: string]: Css.Val } = {
   "font-style": Css.ident.normal,
   "font-stretch": Css.ident.normal,
   "font-weight": Css.ident.normal,
+  "unicode-range": Css.fullURange,
 };
 
 export const bogusFontData = `OTTO${new Date().valueOf()}`;
