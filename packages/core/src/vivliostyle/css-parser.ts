@@ -831,6 +831,10 @@ export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
   actionsSelector[CssTokenizer.TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS_1;
   actionsSelector[CssTokenizer.TokenType.COL_COL] = Action.SELECTOR_PSEUDOELEM;
   actionsSelector[CssTokenizer.TokenType.COMMA] = Action.SELECTOR_NEXT;
+  actionsSelectorInFunc[CssTokenizer.TokenType.GT] = Action.SELECTOR_CHILD;
+  actionsSelectorInFunc[CssTokenizer.TokenType.PLUS] = Action.SELECTOR_SIBLING;
+  actionsSelectorInFunc[CssTokenizer.TokenType.TILDE] =
+    Action.SELECTOR_FOLLOWING_SIBLING;
   actionsSelectorInFunc[CssTokenizer.TokenType.IDENT] = Action.SELECTOR_NAME_1;
   actionsSelectorInFunc[CssTokenizer.TokenType.STAR] = Action.SELECTOR_ANY_1;
   actionsSelectorInFunc[CssTokenizer.TokenType.HASH] = Action.SELECTOR_ID_1;
@@ -1985,8 +1989,15 @@ export class Parser {
           try {
             valStack.push(colorFromHash(token.text));
           } catch (err) {
-            handler.error("E_CSS_COLOR", token);
-            this.actions = actionsError;
+            if (this.actions === actionsPropVal && tokenizer.hasMark()) {
+              tokenizer.reset();
+              this.actions = actionsSelectorStart;
+              handler.startSelectorRule();
+              continue;
+            } else {
+              handler.error("E_CSS_COLOR", token);
+              this.actions = actionsError;
+            }
           }
           tokenizer.consume();
           continue;
