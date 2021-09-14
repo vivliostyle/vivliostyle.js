@@ -1994,10 +1994,9 @@ export class Parser {
               this.actions = actionsSelectorStart;
               handler.startSelectorRule();
               continue;
-            } else {
-              handler.error("E_CSS_COLOR", token);
-              this.actions = actionsError;
             }
+            handler.error("E_CSS_COLOR", token);
+            this.actions = actionsError;
           }
           tokenizer.consume();
           continue;
