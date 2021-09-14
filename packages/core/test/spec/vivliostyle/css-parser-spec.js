@@ -597,6 +597,13 @@ describe("css-parser", function () {
             expect(handler.endFuncWithSelector).toHaveBeenCalled();
           });
         });
+        it("can take adjacent selector", function (done) {
+          parse(done, ":not(div + .foo) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
+            expect(handler.endFuncWithSelector).toHaveBeenCalled();
+          });
+        });
         it("error if selector is invalid", function (done) {
           parse(done, ":not(.) {}", function () {
             expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
@@ -606,13 +613,6 @@ describe("css-parser", function () {
         });
         it("error if multiple selectors", function (done) {
           parse(done, ":not(div, .foo) {}", function () {
-            expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-            expect(handler.error).toHaveBeenCalled();
-            expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
-          });
-        });
-        it("error if adjacent selector is specified", function (done) {
-          parse(done, ":not(div + .foo) {}", function () {
             expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
             expect(handler.error).toHaveBeenCalled();
             expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
