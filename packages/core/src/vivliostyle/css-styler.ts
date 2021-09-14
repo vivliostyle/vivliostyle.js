@@ -364,7 +364,12 @@ export class BoxStack {
 
   encounteredTextNode(node: Node) {
     const box = this.lastBox();
-    if ((this.atBlockStart || this.atFlowStart) && box.hasBox()) {
+    if (
+      (node.nodeType === Node.TEXT_NODE ||
+        node.nodeType === Node.CDATA_SECTION_NODE) &&
+      (this.atBlockStart || this.atFlowStart) &&
+      box.hasBox()
+    ) {
       const whitespaceValue = box
         .styleValue("white-space", Css.ident.normal)
         .toString();
@@ -1012,6 +1017,11 @@ export class Styler implements AbstractStyler {
           this.offsetMap.addStuckRange(this.lastOffset);
         } else {
           this.offsetMap.addSlippedRange(this.lastOffset);
+        }
+        if (this.bodyReached && blockStartOffset === 0) {
+          // body reached but the named page type at first page is not determined
+          // (Fix for issue #770)
+          continue;
         }
         if (startOffset < this.lastOffset) {
           if (targetSlippedOffset < 0) {
