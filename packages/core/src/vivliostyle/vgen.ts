@@ -1967,6 +1967,11 @@ export class ViewFactory
     }
     const isRelativePositioned =
       computedStyle["position"] === Css.ident.relative;
+    const isRoot =
+      this.nodeContext?.parent === null &&
+      this.sourceNode?.parentElement === null &&
+      !!this.viewRoot?.parentElement;
+
     for (const propName in computedStyle) {
       if (propertiesNotPassedToDOM[propName]) {
         continue;
@@ -2005,7 +2010,16 @@ export class ViewFactory
           continue;
         }
       }
-      Base.setCSSProperty(target, propName, value.toString());
+      if (isRoot && CssCascade.isInherited(propName)) {
+        // Fix for Issue #568
+        Base.setCSSProperty(
+          this.viewRoot.parentElement,
+          propName,
+          value.toString(),
+        );
+      } else {
+        Base.setCSSProperty(target, propName, value.toString());
+      }
     }
   }
 
