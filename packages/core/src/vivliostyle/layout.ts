@@ -2737,7 +2737,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     forcedBreakValue: string | null,
   ): Task.Result<Vtree.NodeContext> {
     const fc = nodeContext.after
-      ? nodeContext.parent && nodeContext.parent.formattingContext
+      ? nodeContext.parent?.formattingContext
       : nodeContext.formattingContext;
     if (fc && !this.isBFC(fc)) {
       return Task.newResult(nodeContext);
@@ -2949,7 +2949,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 nodeContext.breakBefore,
               );
               if (
-                !Break.isForcedBreakValue(breakAtTheEdge) && // Fix for issue #722
+                (nodeContext.pageType != nodeContext.parent?.pageType || // Fix for issue #771
+                  !Break.isForcedBreakValue(breakAtTheEdge)) && // Fix for issue #722
                 !this.layoutConstraint.allowLayout(nodeContext)
               ) {
                 this.checkOverflowAndSaveEdgeAndBreakPosition(
