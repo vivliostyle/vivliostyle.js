@@ -2803,6 +2803,11 @@ export class CascadeInstance {
     if (display) {
       displayVal = display.evaluate(this.context);
     }
+    let floatVal = Css.ident.inline;
+    const float = props["float"];
+    if (float) {
+      floatVal = float.evaluate(this.context);
+    }
     let resetMap: { [key: string]: number } = null;
     let incrementMap: { [key: string]: number } = null;
     let setMap: { [key: string]: number } = null;
@@ -2848,6 +2853,38 @@ export class CascadeInstance {
           resetMap = {};
         }
         resetMap["ua-list-item"] = (this.currentElement as any).value - 1;
+      }
+    }
+    if (this.currentElement?.parentNode.nodeType === Node.DOCUMENT_NODE) {
+      if (!resetMap) {
+        resetMap = {};
+      }
+      // `counter-reset: footnote 0` is implicitly applied on the root element
+      if (resetMap["footnote"] === undefined) {
+        resetMap["footnote"] = 0;
+      }
+    }
+    if (floatVal === Css.ident.footnote) {
+      if (!incrementMap) {
+        incrementMap = {};
+      }
+      // `counter-increment: footnote 1` is implicitly applied on the
+      // element (or pseudo element) with `float: footnote`,
+      // unless `counter-increment: footnote` is explicitly specified
+      // on the element (parent element of the pseudo element).
+      if (incrementMap["footnote"] === undefined) {
+        const incrPropValue = this.currentStyle["counter-increment"]?.value;
+        if (
+          !incrPropValue ||
+          !(
+            incrPropValue === Css.ident.footnote ||
+            incrPropValue.values?.find(
+              (v: Css.Ident) => v === Css.ident.footnote,
+            )
+          )
+        ) {
+          incrementMap["footnote"] = 1;
+        }
       }
     }
     if (resetMap) {
