@@ -463,17 +463,29 @@ export function setCSSProperty(
     if (!prefixedPropertyNames) {
       return;
     }
+    const elemStyle = (elem as HTMLElement)?.style;
+    if (!elemStyle) {
+      return;
+    }
     prefixedPropertyNames.forEach((prefixed) => {
-      if (prefixed === "-webkit-text-combine") {
-        switch (value) {
-          case "all":
-            value = "horizontal";
-            break;
-        }
+      switch (prefixed) {
+        case "-webkit-text-combine": // for Safari
+          switch (value) {
+            case "all":
+              value = "horizontal";
+              break;
+          }
+          break;
+        case "text-combine-upright":
+          switch (value) {
+            case "all":
+              // workaround for Chrome 93 bug https://crbug.com/1242755
+              elemStyle.setProperty("text-indent", "0");
+              break;
+          }
+          break;
       }
-      if (elem && (elem as HTMLElement).style) {
-        (elem as HTMLElement).style.setProperty(prefixed, value);
-      }
+      elemStyle.setProperty(prefixed, value);
     });
   } catch (err) {
     Logging.logger.warn(err);
