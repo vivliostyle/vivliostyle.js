@@ -2878,9 +2878,7 @@ export class CascadeInstance {
           !incrPropValue ||
           !(
             incrPropValue === Css.ident.footnote ||
-            incrPropValue.values?.find(
-              (v: Css.Ident) => v === Css.ident.footnote,
-            )
+            incrPropValue.values?.includes(Css.ident.footnote)
           )
         ) {
           incrementMap["footnote"] = 1;
