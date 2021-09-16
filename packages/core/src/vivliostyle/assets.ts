@@ -1061,9 +1061,6 @@ html|style,
 html|script {
   display: none;
 }
-html|body {
-  margin: 8px;
-}
 html|h1 {
   font-size: 2em;
   margin-block-start: 0.67em;
