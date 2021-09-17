@@ -590,6 +590,7 @@ export class Styler implements AbstractStyler {
     }
     if (!isBody) {
       const fontSize = elemStyle["font-size"];
+      let isRelativeFontSize = true;
       if (fontSize) {
         const val = fontSize.evaluate(this.context);
         let px = val.num;
@@ -611,9 +612,11 @@ export class Styler implements AbstractStyler {
             if (unitSize) {
               px *= unitSize;
             }
+            isRelativeFontSize = false;
           }
         }
         this.context.rootFontSize = px;
+        this.context.isRelativeRootFontSize = isRelativeFontSize;
       }
     }
   }

@@ -526,7 +526,9 @@ export class ViewFactory
       }
     }
     const isRoot = steps === 0;
-    const fontSize = this.context.queryUnitSize("em", isRoot);
+    const fontSize = this.context.isRelativeRootFontSize
+      ? this.context.initialFontSize // Fix for issue #549
+      : this.context.queryUnitSize("em", isRoot);
     const props = {
       "font-size": new CssCascade.CascadeValue(
         new Css.Numeric(fontSize, "px"),

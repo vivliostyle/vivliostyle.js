@@ -309,6 +309,7 @@ export class Context {
   pageHeight: () => number;
   initialFontSize: number;
   rootFontSize: number | null = null;
+  isRelativeRootFontSize: boolean | null = null;
   fontSize: () => number;
   pref: Preferences;
   scopes: { [key: string]: ScopeContext } = {};
