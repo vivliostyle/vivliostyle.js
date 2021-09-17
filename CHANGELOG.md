@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.10.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.9.1...v2.10.0) (2021-09-17)
+
+### Bug Fixes
+
+- Default body margin should be 0 in paged media ([874a518](https://github.com/vivliostyle/vivliostyle.js/commit/874a51828e85034aed6533f0659860f1a39edca6)), closes [#776](https://github.com/vivliostyle/vivliostyle.js/issues/776)
+- Footnote counter should be predefined and available by default ([16096b2](https://github.com/vivliostyle/vivliostyle.js/commit/16096b2dc619f6e0cf702084f0dc3a09edce21f3)), closes [#723](https://github.com/vivliostyle/vivliostyle.js/issues/723)
+- Named page at the first page is not applied when HTML head part is big ([0f696dc](https://github.com/vivliostyle/vivliostyle.js/commit/0f696dce748c3a9680187da10115d8e13dc0606b)), closes [#770](https://github.com/vivliostyle/vivliostyle.js/issues/770)
+- Named page not properly changed when target-counter refers the page ([c303c2b](https://github.com/vivliostyle/vivliostyle.js/commit/c303c2bf3c1234dc0a333931eadb224bde505a35)), closes [#771](https://github.com/vivliostyle/vivliostyle.js/issues/771)
+- Percentage font-size on :root causes wrong font-size in table with page/column breaks ([6f0e6c3](https://github.com/vivliostyle/vivliostyle.js/commit/6f0e6c3e6b4d04971e4541f905d3b3f20118760a)), closes [#549](https://github.com/vivliostyle/vivliostyle.js/issues/549)
+- prevent useless warning "Property not supported by the browser: behavior" ([1462a89](https://github.com/vivliostyle/vivliostyle.js/commit/1462a892f1e87018c45a96105939f26c087a00bf))
+- Remove -ms- prefixed properties for no-longer supported browsers ([7e7bf1b](https://github.com/vivliostyle/vivliostyle.js/commit/7e7bf1b10e626257fae5653091c138b5a4b9bd26))
+- Root element styles should be inherited to the page context ([1a41185](https://github.com/vivliostyle/vivliostyle.js/commit/1a4118538f6b7cfb80a9174fc1ee4300a9b69501)), closes [#568](https://github.com/vivliostyle/vivliostyle.js/issues/568)
+- text-combine-upright with text-indent does not work properly ([1cabb91](https://github.com/vivliostyle/vivliostyle.js/commit/1cabb91fae7ff4abc0c56ff907173e6770ef578c))
+- The :not() selector not working when the argument has ID selector ([60a127f](https://github.com/vivliostyle/vivliostyle.js/commit/60a127f11cfaa5071f58eb211b91431c3ab78eec)), closes [#769](https://github.com/vivliostyle/vivliostyle.js/issues/769)
+
+### Features
+
+- Add support for `line-break: anywhere` ([ba60007](https://github.com/vivliostyle/vivliostyle.js/commit/ba60007f189a401a5c5508c3ac0147799d075793))
+- Add support for `overflow-wrap: anywhere` ([96564af](https://github.com/vivliostyle/vivliostyle.js/commit/96564af3739b25d37954c755e1eba625eaf34a1e))
+- Add support for `white-space: break-spaces` ([f563b61](https://github.com/vivliostyle/vivliostyle.js/commit/f563b61f6fe70f2e0df75df59e1e46fe9ffa1484))
+- Add support for the font-variant-\* properties ([504896b](https://github.com/vivliostyle/vivliostyle.js/commit/504896bc9a388c22a7f02ac4704778063472f741)), closes [#592](https://github.com/vivliostyle/vivliostyle.js/issues/592)
+- Support the min-content, max-content, and fit-content values for width and height ([9ce72b0](https://github.com/vivliostyle/vivliostyle.js/commit/9ce72b0bd0b65380516bc1e40d25561c87f86e4d)), closes [#605](https://github.com/vivliostyle/vivliostyle.js/issues/605)
+- Support unicode-range descriptor ([a3f488f](https://github.com/vivliostyle/vivliostyle.js/commit/a3f488f86fe264e3dd1a895de9f0495a2c489aa1)), closes [#598](https://github.com/vivliostyle/vivliostyle.js/issues/598)
+
 ## [2.9.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.9.0...v2.9.1) (2021-09-08)
 
 ### Bug Fixes
