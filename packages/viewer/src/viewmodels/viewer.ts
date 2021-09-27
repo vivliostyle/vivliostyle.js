@@ -34,14 +34,14 @@ import Logger from "../logging/logger";
 import obs, { ReadonlyObservable } from "../utils/observable-util";
 
 type State = {
-  status: PureComputed<unknown>;
-  pageProgression: PureComputed<unknown>;
+  status: PureComputed<ReadyState>;
+  pageProgression: PureComputed<PageProgression>;
   navigatable?: PureComputed<boolean>;
 };
 
 type PrivateState = {
-  status: ReadonlyObservable<unknown>;
-  pageProgression: ReadonlyObservable<unknown>;
+  status: ReadonlyObservable<ReadyState>;
+  pageProgression: ReadonlyObservable<PageProgression>;
 };
 
 export type ViewerSettings = {
@@ -51,13 +51,11 @@ export type ViewerSettings = {
 };
 
 class Viewer {
-  private viewerOptions_: ViewerOptions;
-  private coreViewer_: CoreViewer;
-  private state_: PrivateState;
+  private viewerOptions: ViewerOptions;
+  private coreViewer: CoreViewer;
+  private privState: PrivateState;
 
-  // FIXME: In used in viewmodels/navigation. This property is desirable private access.
-  documentOptions_: null | DocumentOptions;
-
+  documentOptions: null | DocumentOptions;
   epage: Observable<number>;
   epageCount: Observable<number>;
   firstPage: Observable<boolean>;
@@ -65,26 +63,27 @@ class Viewer {
   state: State;
   lastPage: Observable<boolean>;
   tocVisible: Observable<boolean>;
-  tocPinned: Observable<unknown>;
+  tocPinned: Observable<boolean>;
 
   constructor(viewerSettings?: ViewerSettings, viewerOptions?: ViewerOptions) {
-    this.viewerOptions_ = viewerOptions;
-    this.documentOptions_ = null;
-    this.coreViewer_ = new CoreViewer(viewerSettings, viewerOptions.toObject());
-    const state_ = (this.state_ = {
+    this.viewerOptions = viewerOptions;
+    this.documentOptions = null;
+    this.coreViewer = new CoreViewer(viewerSettings, viewerOptions.toObject());
+    const privState1 = (this.privState = {
       status: obs.readonlyObservable(ReadyState.LOADING),
       pageProgression: obs.readonlyObservable(PageProgression.LTR),
     });
     this.state = {
-      status: state_.status.getter.extend({
+      status: privState1.status.getter.extend({
         rateLimit: { timeout: 100, method: "notifyWhenChangesStop" },
         notify: "always",
       }),
       navigatable: ko.pureComputed(
         () =>
-          state_.status.value() && state_.status.value() !== ReadyState.LOADING,
+          privState1.status.value() &&
+          privState1.status.value() !== ReadyState.LOADING,
       ),
-      pageProgression: state_.pageProgression.getter,
+      pageProgression: privState1.pageProgression.getter,
     };
 
     this.epage = ko.observable();
@@ -100,46 +99,46 @@ class Viewer {
     this.setupViewerOptionSubscriptions();
 
     // for Vivliostyle CLI
-    window["coreViewer"] = this.coreViewer_;
+    window["coreViewer"] = this.coreViewer;
   }
 
   setupViewerEventHandler(): void {
     const logger = Logger.getLogger();
-    this.coreViewer_.addListener("debug", (payload) => {
+    this.coreViewer.addListener("debug", (payload) => {
       logger.debug(payload.content);
     });
-    this.coreViewer_.addListener("info", (payload) => {
+    this.coreViewer.addListener("info", (payload) => {
       logger.info(payload.content);
     });
-    this.coreViewer_.addListener("warn", (payload) => {
+    this.coreViewer.addListener("warn", (payload) => {
       logger.warn(payload.content);
     });
-    this.coreViewer_.addListener("error", (payload) => {
+    this.coreViewer.addListener("error", (payload) => {
       logger.error(payload.content);
     });
-    this.coreViewer_.addListener("readystatechange", () => {
-      const readyState = this.coreViewer_.readyState;
+    this.coreViewer.addListener("readystatechange", () => {
+      const readyState = this.coreViewer.readyState;
       if (
         readyState === ReadyState.INTERACTIVE ||
         readyState === ReadyState.COMPLETE
       ) {
-        this.state_.pageProgression.value(
-          this.coreViewer_.getCurrentPageProgression(),
+        this.privState.pageProgression.value(
+          this.coreViewer.getCurrentPageProgression(),
         );
       }
-      this.state_.status.value(readyState);
+      this.privState.status.value(readyState);
     });
-    this.coreViewer_.addListener("loaded", () => {
-      if (this.viewerOptions_.profile()) {
+    this.coreViewer.addListener("loaded", () => {
+      if (this.viewerOptions.profile()) {
         profiler.printTimings();
       }
     });
-    this.coreViewer_.addListener("nav", (payload) => {
+    this.coreViewer.addListener("nav", (payload) => {
       const { cfi, first, last, epage, epageCount, metadata, docTitle } =
         payload;
 
       if (cfi) {
-        this.documentOptions_.fragment(cfi);
+        this.documentOptions.fragment(cfi);
       }
 
       // Note that `this.epage(epage)` has to be set before `this.lastPage(last)`
@@ -178,7 +177,7 @@ class Viewer {
       }
 
       const tocVisibleOld = this.tocVisible();
-      const tocVisibleNew = this.coreViewer_.isTOCVisible();
+      const tocVisibleNew = this.coreViewer.isTOCVisible();
       if (tocVisibleOld && !tocVisibleNew) {
         // When resize, TOC box will be regenerated and hidden temporarily.
         // So keep TOC toggle button status on.
@@ -186,7 +185,7 @@ class Viewer {
         this.tocVisible(tocVisibleNew);
       }
     });
-    this.coreViewer_.addListener("hyperlink", (payload) => {
+    this.coreViewer.addListener("hyperlink", (payload) => {
       if (payload.internal) {
         this.navigateToInternalUrl(payload.href);
 
@@ -205,8 +204,8 @@ class Viewer {
 
   setupViewerOptionSubscriptions(): void {
     ko.computed(function () {
-      const viewerOptions = this.viewerOptions_.toObject();
-      this.coreViewer_.setOptions(viewerOptions);
+      const viewerOptions = this.viewerOptions.toObject();
+      this.coreViewer.setOptions(viewerOptions);
     }, this).extend({ rateLimit: 0 });
   }
 
@@ -214,66 +213,66 @@ class Viewer {
     documentOptions: DocumentOptions,
     viewerOptions?: ViewerOptions,
   ): void {
-    this.state_.status.value(ReadyState.LOADING);
+    this.privState.status.value(ReadyState.LOADING);
     if (viewerOptions) {
-      this.viewerOptions_.copyFrom(viewerOptions);
+      this.viewerOptions.copyFrom(viewerOptions);
     }
-    this.documentOptions_ = documentOptions;
+    this.documentOptions = documentOptions;
 
     if (documentOptions.srcUrls()) {
       if (!documentOptions.bookMode()) {
-        this.coreViewer_.loadDocument(
+        this.coreViewer.loadDocument(
           documentOptions.srcUrls(),
           documentOptions.toObject(),
-          this.viewerOptions_.toObject(),
+          this.viewerOptions.toObject(),
         );
       } else {
-        this.coreViewer_.loadPublication(
+        this.coreViewer.loadPublication(
           documentOptions.srcUrls()[0],
           documentOptions.toObject(),
-          this.viewerOptions_.toObject(),
+          this.viewerOptions.toObject(),
         );
       }
     } else {
       // No document specified, show welcome page
-      this.state_.status.value("");
+      this.privState.status.value(undefined);
     }
   }
 
   navigateToPrevious(): void {
-    this.coreViewer_.navigateToPage(Navigation.PREVIOUS);
+    this.coreViewer.navigateToPage(Navigation.PREVIOUS);
   }
 
   navigateToNext(): void {
-    this.coreViewer_.navigateToPage(Navigation.NEXT);
+    this.coreViewer.navigateToPage(Navigation.NEXT);
   }
 
   navigateToLeft(): void {
-    this.coreViewer_.navigateToPage(Navigation.LEFT);
+    this.coreViewer.navigateToPage(Navigation.LEFT);
   }
 
   navigateToRight(): void {
-    this.coreViewer_.navigateToPage(Navigation.RIGHT);
+    this.coreViewer.navigateToPage(Navigation.RIGHT);
   }
 
   navigateToFirst(): void {
-    this.coreViewer_.navigateToPage(Navigation.FIRST);
+    this.coreViewer.navigateToPage(Navigation.FIRST);
   }
 
   navigateToLast(): void {
-    this.coreViewer_.navigateToPage(Navigation.LAST);
+    this.coreViewer.navigateToPage(Navigation.LAST);
   }
 
   navigateToEPage(epage: number): void {
-    this.coreViewer_.navigateToPage(Navigation.EPAGE, epage);
+    this.coreViewer.navigateToPage(Navigation.EPAGE, epage);
   }
 
   navigateToInternalUrl(href: string): void {
-    this.coreViewer_.navigateToInternalUrl(href);
+    this.coreViewer.navigateToInternalUrl(href);
   }
 
   queryZoomFactor(type: ZoomType): number {
-    return this.coreViewer_.queryZoomFactor(type);
+    return this.coreViewer.queryZoomFactor(type);
   }
 
   epageToPageNumber(epage: number | undefined): number {
@@ -292,14 +291,14 @@ class Viewer {
   }
 
   showTOC(shown?: boolean, autoHide?: boolean): void {
-    if (this.coreViewer_.isTOCVisible() == null) {
+    if (this.coreViewer.isTOCVisible() == null) {
       // TOC is unavailable
       return;
     }
     const show = shown == null ? !this.tocVisible() : shown;
     this.tocVisible(show);
     this.tocPinned(show ? !autoHide : false);
-    this.coreViewer_.showTOC(show, autoHide);
+    this.coreViewer.showTOC(show, autoHide);
   }
 }
 

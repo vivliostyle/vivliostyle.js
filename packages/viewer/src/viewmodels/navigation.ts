@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * Copyright 2015 Trim-marks Inc.
  * Copyright 2018 Vivliostyle Foundation
@@ -19,7 +18,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CoreViewer, ReadyState, PageProgression } from "@vivliostyle/core";
+import { ReadyState, PageProgression } from "@vivliostyle/core";
 import ko, { PureComputed } from "knockout";
 
 import ViewerOptions from "../models/viewer-options";
@@ -39,31 +38,6 @@ export type NavigationOptions = {
 };
 
 class Navigation {
-  static PREVIOUS(PREVIOUS: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  static NEXT(NEXT: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  static LEFT(LEFT: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  static RIGHT(RIGHT: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  static FIRST(FIRST: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  static LAST(LAST: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  static EPAGE(EPAGE: unknown, epage: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  private viewerOptions_: ViewerOptions;
-  private viewer_: Viewer;
-  private settingsPanel_: SettingsPanel;
-
   fitToScreen: PureComputed<boolean>;
   isDecreaseFontSizeDisabled: PureComputed<boolean>;
   isDefaultFontSizeDisabled: PureComputed<boolean>;
@@ -96,20 +70,17 @@ class Navigation {
   justClicked: boolean;
 
   constructor(
-    viewerOptions: ViewerOptions,
-    viewer: Viewer,
-    settingsPanel: SettingsPanel,
+    private viewerOptions: ViewerOptions,
+    private viewer: Viewer,
+    private settingsPanel: SettingsPanel,
     navigationOptions: NavigationOptions,
   ) {
-    this.viewerOptions_ = viewerOptions;
-    this.viewer_ = viewer;
-    this.settingsPanel_ = settingsPanel;
     this.justClicked = false; // double click check
 
     this.isDisabled = ko.pureComputed(() => {
       return (
-        (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) ||
-        !this.viewer_.state.navigatable()
+        (this.settingsPanel.opened() && !this.settingsPanel.pinned()) ||
+        !this.viewer.state.navigatable()
       );
     });
 
@@ -141,36 +112,36 @@ class Navigation {
       if (navigationDisabled()) {
         return true;
       }
-      if (this.viewer_.state.status === undefined) {
+      if (this.viewer.state.status === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
-      return this.viewer_.firstPage();
+      return this.viewer.firstPage();
     });
 
     this.isNavigateToNextDisabled = ko.pureComputed(() => {
       if (navigationDisabled()) {
         return true;
       }
-      if (this.viewer_.state.status === undefined) {
+      if (this.viewer.state.status === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
       if (
-        this.viewerOptions_.renderAllPages() &&
-        this.viewer_.state.status() != ReadyState.COMPLETE
+        this.viewerOptions.renderAllPages() &&
+        this.viewer.state.status() != ReadyState.COMPLETE
       ) {
         return false;
       }
-      return this.viewer_.lastPage();
+      return this.viewer.lastPage();
     });
 
     this.isNavigateToLeftDisabled = ko.pureComputed(() => {
       if (navigationDisabled()) {
         return true;
       }
-      if (this.viewer_.state.pageProgression === undefined) {
+      if (this.viewer.state.pageProgression === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
-      if (this.viewer_.state.pageProgression() === PageProgression.LTR) {
+      if (this.viewer.state.pageProgression() === PageProgression.LTR) {
         return this.isNavigateToPreviousDisabled();
       } else {
         return this.isNavigateToNextDisabled();
@@ -181,10 +152,10 @@ class Navigation {
       if (navigationDisabled()) {
         return true;
       }
-      if (this.viewer_.state.pageProgression === undefined) {
+      if (this.viewer.state.pageProgression === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
-      if (this.viewer_.state.pageProgression() === PageProgression.LTR) {
+      if (this.viewer.state.pageProgression() === PageProgression.LTR) {
         return this.isNavigateToNextDisabled();
       } else {
         return this.isNavigateToPreviousDisabled();
@@ -197,16 +168,16 @@ class Navigation {
       if (navigationDisabled()) {
         return true;
       }
-      if (this.viewer_.state.status === undefined) {
+      if (this.viewer.state.status === undefined) {
         return false; // needed for test/spec/viewmodels/navigation-spec.js
       }
       if (
-        this.viewerOptions_.renderAllPages() &&
-        this.viewer_.state.status() != ReadyState.COMPLETE
+        this.viewerOptions.renderAllPages() &&
+        this.viewer.state.status() != ReadyState.COMPLETE
       ) {
         return true;
       }
-      return this.viewer_.lastPage();
+      return this.viewer.lastPage();
     });
 
     this.hidePageNavigation = !!navigationOptions.disablePageNavigation;
@@ -232,7 +203,7 @@ class Navigation {
       if (fontSizeChangeDisabled()) {
         return true;
       }
-      if (this.viewerOptions_.fontSize() >= 72) {
+      if (this.viewerOptions.fontSize() >= 72) {
         return true;
       }
       return false;
@@ -241,7 +212,7 @@ class Navigation {
       if (fontSizeChangeDisabled()) {
         return true;
       }
-      if (this.viewerOptions_.fontSize() <= 5) {
+      if (this.viewerOptions.fontSize() <= 5) {
         return true;
       }
       return false;
@@ -253,7 +224,7 @@ class Navigation {
       return (
         navigationOptions.disableTOCNavigation ||
         this.isDisabled() ||
-        this.viewer_.tocVisible() == null
+        this.viewer.tocVisible() == null
       );
     });
     this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
@@ -263,7 +234,7 @@ class Navigation {
       if (
         navigationOptions.disablePrint ||
         this.isDisabled() ||
-        this.viewer_.state.status() != ReadyState.COMPLETE
+        this.viewer.state.status() != ReadyState.COMPLETE
       ) {
         return true;
       }
@@ -281,11 +252,11 @@ class Navigation {
 
     this.pageNumber = ko.pureComputed({
       read() {
-        return this.viewer_.epageToPageNumber(this.viewer_.epage());
+        return this.viewer.epageToPageNumber(this.viewer.epage());
       },
       write(pageNumberText: number | string) {
-        const epageOld = this.viewer_.epage();
-        const pageNumberOld = this.viewer_.epageToPageNumber(epageOld);
+        const epageOld = this.viewer.epage();
+        const pageNumberOld = this.viewer.epageToPageNumber(epageOld);
 
         // Accept non-integer, convert fullwidth to ascii
         let pageNumber =
@@ -303,8 +274,8 @@ class Navigation {
         if (pageNumber < 1) {
           pageNumber = 1;
         } else {
-          const epageCount = this.viewer_.epageCount();
-          if (this.viewerOptions_.renderAllPages()) {
+          const epageCount = this.viewer.epageCount();
+          if (this.viewerOptions.renderAllPages()) {
             if (pageNumber > epageCount) {
               pageNumber = epageCount;
             }
@@ -313,17 +284,17 @@ class Navigation {
             pageNumber = epageCount + 1;
           }
         }
-        const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
+        const epageNav = this.viewer.epageFromPageNumber(pageNumber);
         const pageNumberElem = document.getElementById(
           "vivliostyle-page-number",
         ) as HTMLInputElement;
         pageNumberElem.value = pageNumber.toString();
-        this.viewer_.navigateToEPage(epageNav);
+        this.viewer.navigateToEPage(epageNav);
 
         setTimeout(() => {
           if (
-            this.viewer_.state.status() != ReadyState.LOADING &&
-            this.viewer_.epage() === epageOld
+            this.viewer.state.status() != ReadyState.LOADING &&
+            this.viewer.epage() === epageOld
           ) {
             pageNumberElem.value = pageNumberOld.toString();
           }
@@ -334,12 +305,12 @@ class Navigation {
     });
 
     this.totalPages = ko.pureComputed(() => {
-      let totalPages = this.viewer_.epageCount();
+      let totalPages = this.viewer.epageCount();
       if (!totalPages) {
         return totalPages;
       }
       const pageNumber = Number(this.pageNumber());
-      if (this.viewer_.lastPage()) {
+      if (this.viewer.lastPage()) {
         totalPages = pageNumber;
       } else if (pageNumber >= totalPages) {
         totalPages++;
@@ -352,10 +323,10 @@ class Navigation {
         return this.pageNumber();
       },
       write(pageNumberText: number | string) {
-        if (this.viewerOptions_.renderAllPages()) {
+        if (this.viewerOptions.renderAllPages()) {
           const pageNumber = Number(pageNumberText);
-          const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
-          this.viewer_.navigateToEPage(epageNav);
+          const epageNav = this.viewer.epageFromPageNumber(pageNumber);
+          this.viewer.navigateToEPage(epageNav);
         } else {
           const pageNumberElem = document.getElementById(
             "vivliostyle-page-number",
@@ -398,7 +369,7 @@ class Navigation {
 
   navigateToPrevious(): boolean {
     if (!this.isNavigateToPreviousDisabled()) {
-      this.viewer_.navigateToPrevious();
+      this.viewer.navigateToPrevious();
       return true;
     } else {
       return false;
@@ -407,7 +378,7 @@ class Navigation {
 
   navigateToNext(): boolean {
     if (!this.isNavigateToNextDisabled()) {
-      this.viewer_.navigateToNext();
+      this.viewer.navigateToNext();
       return true;
     } else {
       return false;
@@ -416,7 +387,7 @@ class Navigation {
 
   navigateToLeft(): boolean {
     if (!this.isNavigateToLeftDisabled()) {
-      this.viewer_.navigateToLeft();
+      this.viewer.navigateToLeft();
       return true;
     } else {
       return false;
@@ -425,7 +396,7 @@ class Navigation {
 
   navigateToRight(): boolean {
     if (!this.isNavigateToRightDisabled()) {
-      this.viewer_.navigateToRight();
+      this.viewer.navigateToRight();
       return true;
     } else {
       return false;
@@ -434,7 +405,7 @@ class Navigation {
 
   navigateToFirst(): boolean {
     if (!this.isNavigateToFirstDisabled()) {
-      this.viewer_.navigateToFirst();
+      this.viewer.navigateToFirst();
       return true;
     } else {
       return false;
@@ -443,7 +414,7 @@ class Navigation {
 
   navigateToLast(): boolean {
     if (!this.isNavigateToLastDisabled()) {
-      this.viewer_.navigateToLast();
+      this.viewer.navigateToLast();
       return true;
     } else {
       return false;
@@ -452,10 +423,8 @@ class Navigation {
 
   zoomIn(): boolean {
     if (!this.isZoomInDisabled()) {
-      const zoom = this.viewerOptions_.zoom();
-      this.viewerOptions_.zoom(
-        zoom.zoomIn(this.viewer_ as unknown as CoreViewer),
-      ); // TODO: test if it's ok to treat viewer_ as CoreViewer
+      const zoom = this.viewerOptions.zoom();
+      this.viewerOptions.zoom(zoom.zoomIn(this.viewer));
       return true;
     } else {
       return false;
@@ -464,10 +433,8 @@ class Navigation {
 
   zoomOut(): boolean {
     if (!this.isZoomOutDisabled()) {
-      const zoom = this.viewerOptions_.zoom();
-      this.viewerOptions_.zoom(
-        zoom.zoomOut(this.viewer_ as unknown as CoreViewer),
-      ); // TODO: test if it's ok to treat viewer_ as CoreViewer
+      const zoom = this.viewerOptions.zoom();
+      this.viewerOptions.zoom(zoom.zoomOut(this.viewer));
       return true;
     } else {
       return false;
@@ -476,8 +443,8 @@ class Navigation {
 
   zoomToActualSize(): boolean {
     if (!this.isZoomToActualSizeDisabled()) {
-      const zoom = this.viewerOptions_.zoom();
-      this.viewerOptions_.zoom(zoom.zoomToActualSize());
+      const zoom = this.viewerOptions.zoom();
+      this.viewerOptions.zoom(zoom.zoomToActualSize());
       return true;
     } else {
       return false;
@@ -486,8 +453,8 @@ class Navigation {
 
   toggleFitToScreen(): boolean {
     if (!this.isToggleFitToScreenDisabled()) {
-      const zoom = this.viewerOptions_.zoom();
-      this.viewerOptions_.zoom(zoom.toggleFitToScreen());
+      const zoom = this.viewerOptions.zoom();
+      this.viewerOptions.zoom(zoom.toggleFitToScreen());
       return true;
     } else {
       return false;
@@ -496,7 +463,7 @@ class Navigation {
 
   increaseFontSize(): boolean {
     if (!this.isIncreaseFontSizeDisabled()) {
-      let fontSize = Number(this.viewerOptions_.fontSize());
+      let fontSize = Number(this.viewerOptions.fontSize());
       // fontSize *= 1.25;
       if (fontSize < 10) {
         fontSize = Math.floor(fontSize) + 1;
@@ -509,7 +476,7 @@ class Navigation {
       } else {
         fontSize = 72;
       }
-      this.viewerOptions_.fontSize(fontSize);
+      this.viewerOptions.fontSize(fontSize);
       this.updateFontSizeSettings();
       return true;
     } else {
@@ -519,7 +486,7 @@ class Navigation {
 
   decreaseFontSize(): boolean {
     if (!this.isDecreaseFontSizeDisabled()) {
-      let fontSize = Number(this.viewerOptions_.fontSize());
+      let fontSize = Number(this.viewerOptions.fontSize());
       // fontSize *= 0.8;
       if (fontSize > 40) {
         fontSize = (Math.ceil(fontSize / 8) - 1) * 8;
@@ -532,7 +499,7 @@ class Navigation {
       } else {
         fontSize = 5;
       }
-      this.viewerOptions_.fontSize(fontSize);
+      this.viewerOptions.fontSize(fontSize);
       this.updateFontSizeSettings();
       return true;
     } else {
@@ -543,7 +510,7 @@ class Navigation {
   defaultFontSize(): boolean {
     if (!this.isDefaultFontSizeDisabled()) {
       const fontSize = ViewerOptions.getDefaultValues().fontSize;
-      this.viewerOptions_.fontSize(fontSize);
+      this.viewerOptions.fontSize(fontSize);
       this.updateFontSizeSettings();
       return true;
     } else {
@@ -553,20 +520,18 @@ class Navigation {
 
   updateFontSizeSettings(): void {
     // Update setting panel "Font Size".
-    this.settingsPanel_.state.viewerOptions.fontSize(
-      this.viewerOptions_.fontSize(),
+    this.settingsPanel.state.viewerOptions.fontSize(
+      this.viewerOptions.fontSize(),
     );
 
-    if (this.viewer_.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+    if (this.viewer.documentOptions.pageStyle.baseFontSizeSpecified()) {
       // Update userStylesheet when base font-size is specified
-      this.viewer_.documentOptions_.updateUserStyleSheetFromCSSText();
-      this.viewer_.loadDocument(
-        this.viewer_.documentOptions_,
-        this.viewerOptions_,
-      );
+      this.viewer.documentOptions.updateUserStyleSheetFromCSSText();
+      this.viewer.loadDocument(this.viewer.documentOptions, this.viewerOptions);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onfocusPageNumber(obj: unknown, event: Event): boolean {
     const inputElem = event.currentTarget as HTMLInputElement;
     setTimeout(() => {
@@ -575,8 +540,9 @@ class Navigation {
     return true;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onmouseupPageSlider(obj: unknown, event: MouseEvent): boolean {
-    if (this.viewerOptions_.renderAllPages()) {
+    if (this.viewerOptions.renderAllPages()) {
       // already moved in `this.pageSlider.write()`
       return true;
     }
@@ -584,12 +550,13 @@ class Navigation {
       "vivliostyle-page-number",
     ) as HTMLInputElement;
     const pageNumber = Number(pageNumberElem.value);
-    const epageNav = this.viewer_.epageFromPageNumber(pageNumber);
-    this.viewer_.navigateToEPage(epageNav);
+    const epageNav = this.viewer.epageFromPageNumber(pageNumber);
+    this.viewer.navigateToEPage(epageNav);
 
     return true;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onwheelPageSlider(obj: unknown, event: WheelEvent): boolean {
     event.preventDefault();
     if (
@@ -621,7 +588,7 @@ class Navigation {
       "vivliostyle-viewer-viewport",
     );
     const isTOCActive =
-      this.viewer_.tocVisible() && viewportElement != document.activeElement;
+      this.viewer.tocVisible() && viewportElement != document.activeElement;
     if (
       isTOCActive ||
       viewportElement.scrollWidth > viewportElement.clientWidth ||
@@ -633,19 +600,20 @@ class Navigation {
     return this.onwheelPageSlider(obj, event);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onclickViewport(obj: unknown, event: MouseEvent): boolean {
     this.pageNumber();
-    if (this.settingsPanel_.justClicked) {
+    if (this.settingsPanel.justClicked) {
       return true;
     }
-    if (this.viewer_.tocVisible() && !this.viewer_.tocPinned()) {
+    if (this.viewer.tocVisible() && !this.viewer.tocPinned()) {
       const tocBox = document.querySelector("[data-vivliostyle-toc-box]");
       if (tocBox && !tocBox.contains(document.activeElement)) {
         this.toggleTOC();
       }
     }
-    if (this.settingsPanel_.opened() && !this.settingsPanel_.pinned()) {
-      this.settingsPanel_.close();
+    if (this.settingsPanel.opened() && !this.settingsPanel.pinned()) {
+      this.settingsPanel.close();
     }
     return true;
   }
@@ -654,12 +622,12 @@ class Navigation {
     if (!this.isTOCToggleDisabled()) {
       let intervalID: ReturnType<typeof setTimeout> | null = null;
 
-      if (!this.viewer_.tocVisible()) {
+      if (!this.viewer.tocVisible()) {
         if (this.justClicked) {
-          this.viewer_.showTOC(true, false); // autohide=false
+          this.viewer.showTOC(true, false); // autohide=false
           this.justClicked = false;
         } else {
-          this.viewer_.showTOC(true, true); // autohide=true
+          this.viewer.showTOC(true, true); // autohide=true
           this.justClicked = true;
         }
         // Here use timer for two purposes:
@@ -680,14 +648,14 @@ class Navigation {
         }, 300);
       } else if (this.justClicked) {
         // Double click to keep TOC box visible during TOC navigation
-        this.viewer_.showTOC(true, false); // autohide=false
+        this.viewer.showTOC(true, false); // autohide=false
         this.justClicked = false;
       } else {
         if (intervalID !== null) {
           clearInterval(intervalID);
           intervalID = null;
         }
-        this.viewer_.showTOC(false);
+        this.viewer.showTOC(false);
 
         this.justClicked = true;
         setTimeout(() => {
@@ -798,8 +766,8 @@ class Navigation {
 
   handleKey(key: string): boolean {
     const isSettingsActive =
-      this.settingsPanel_.opened() &&
-      this.settingsPanel_.settingsToggle.contains(document.activeElement);
+      this.settingsPanel.opened() &&
+      this.settingsPanel.settingsToggle.contains(document.activeElement);
 
     if (isSettingsActive) {
       return true;
@@ -815,7 +783,7 @@ class Navigation {
       viewportElement.scrollHeight > viewportElement.clientHeight;
     const isPageNumberInput = pageNumberElem === document.activeElement;
     const isTOCActive =
-      this.viewer_.tocVisible() &&
+      this.viewer.tocVisible() &&
       !isPageNumberInput &&
       viewportElement != document.activeElement;
 
@@ -887,7 +855,7 @@ class Navigation {
         viewportElement.focus();
         return !this.toggleTOC();
       case Keys.Escape:
-        if (this.viewer_.tocVisible()) {
+        if (this.viewer.tocVisible()) {
           return !this.toggleTOC();
         }
         viewportElement.focus();

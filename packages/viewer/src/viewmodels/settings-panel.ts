@@ -39,10 +39,6 @@ type State = {
 const { Keys } = keyUtil;
 
 class SettingsPanel {
-  private viewerOptions_: ViewerOptions;
-  private documentOptions_: DocumentOptions;
-  private viewer_: Viewer;
-
   isPageStyleChangeDisabled: boolean;
   isOverrideDocumentStyleSheetDisabled: boolean;
   isPageViewModeChangeDisabled: boolean;
@@ -56,9 +52,9 @@ class SettingsPanel {
   defaultPageStyle: PageStyle;
 
   constructor(
-    viewerOptions: ViewerOptions,
-    documentOptions: DocumentOptions,
-    viewer: Viewer,
+    private viewerOptions: ViewerOptions,
+    private documentOptions: DocumentOptions,
+    private viewer: Viewer,
     messageDialog: MessageDialog,
     settingsPanelOptions: {
       disablePageStyleChange: boolean;
@@ -67,10 +63,6 @@ class SettingsPanel {
       disableRenderAllPagesChange: boolean;
     },
   ) {
-    this.viewerOptions_ = viewerOptions;
-    this.documentOptions_ = documentOptions;
-    this.viewer_ = viewer;
-
     this.isPageStyleChangeDisabled =
       !!settingsPanelOptions.disablePageStyleChange;
     this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
@@ -148,8 +140,8 @@ class SettingsPanel {
 
   toggle(): void {
     if (!this.opened()) {
-      if (!this.viewer_.tocPinned()) {
-        this.viewer_.showTOC(false); // Hide TOC box
+      if (!this.viewer.tocPinned()) {
+        this.viewer.showTOC(false); // Hide TOC box
       }
       this.opened(true);
 
@@ -179,12 +171,12 @@ class SettingsPanel {
   }
 
   apply(): void {
-    this.documentOptions_.pageStyle.copyFrom(this.state.pageStyle);
-    if (this.documentOptions_.pageStyle.baseFontSizeSpecified()) {
+    this.documentOptions.pageStyle.copyFrom(this.state.pageStyle);
+    if (this.documentOptions.pageStyle.baseFontSizeSpecified()) {
       // Update userStylesheet when base font-size is specified
-      this.documentOptions_.updateUserStyleSheetFromCSSText();
+      this.documentOptions.updateUserStyleSheetFromCSSText();
     }
-    this.viewer_.loadDocument(this.documentOptions_, this.state.viewerOptions);
+    this.viewer.loadDocument(this.documentOptions, this.state.viewerOptions);
     if (this.pinned()) {
       this.focusToFirstItem();
     } else {
@@ -193,8 +185,8 @@ class SettingsPanel {
   }
 
   cancel(): void {
-    this.state.viewerOptions.copyFrom(this.viewerOptions_);
-    this.state.pageStyle.copyFrom(this.documentOptions_.pageStyle);
+    this.state.viewerOptions.copyFrom(this.viewerOptions);
+    this.state.pageStyle.copyFrom(this.documentOptions.pageStyle);
     this.close();
   }
 
