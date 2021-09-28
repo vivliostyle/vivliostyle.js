@@ -45,7 +45,6 @@ ko.bindingHandlers.menuButton = {
         element.addEventListener("mouseout", () => {
           ko.utils.toggleDomNodeCssClass(element, "hover", false);
           ko.utils.toggleDomNodeCssClass(element, "active", false);
-          window.getSelection().removeAllRanges(); // prevent unwanted text selection
         });
       }
     }
