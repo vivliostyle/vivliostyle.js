@@ -30,6 +30,7 @@ const { Keys } = keyUtil;
 
 export type NavigationOptions = {
   disableTOCNavigation: boolean;
+  disableFind: boolean;
   disablePageNavigation: boolean;
   disableZoom: boolean;
   disableFontSizeChange: boolean;
@@ -57,6 +58,7 @@ class Navigation {
   isZoomInDisabled: PureComputed<boolean>;
   isZoomToActualSizeDisabled: PureComputed<boolean>;
   isPrintDisabled: PureComputed<boolean>;
+  isFindBoxDisabled: PureComputed<boolean>;
   pageNumber: PureComputed<number | string>;
   totalPages: PureComputed<number | string>;
   pageSlider: PureComputed<number | string>;
@@ -67,6 +69,7 @@ class Navigation {
   hideTOCNavigation: boolean;
   hideZoom: boolean;
   hidePrint: boolean;
+  hideFind: boolean;
   justClicked: boolean;
 
   constructor(
@@ -230,6 +233,11 @@ class Navigation {
     this.hideTOCNavigation = !!navigationOptions.disableTOCNavigation;
     this.hidePageSlider = !!navigationOptions.disablePageSlider;
 
+    this.isFindBoxDisabled = ko.pureComputed(() => {
+      return navigationOptions.disableFind || this.isDisabled();
+    });
+    this.hideFind = !!navigationOptions.disableFind;
+
     this.isPrintDisabled = ko.pureComputed(() => {
       if (
         navigationOptions.disablePrint ||
@@ -291,7 +299,7 @@ class Navigation {
         pageNumberElem.value = pageNumber.toString();
         this.viewer.navigateToEPage(epageNav);
 
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (
             this.viewer.state.status() != ReadyState.LOADING &&
             this.viewer.epage() === epageOld
@@ -534,7 +542,7 @@ class Navigation {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onfocusPageNumber(obj: unknown, event: Event): boolean {
     const inputElem = event.currentTarget as HTMLInputElement;
-    setTimeout(() => {
+    window.setTimeout(() => {
       inputElem.setSelectionRange(0, inputElem.value.length);
     }, 0);
     return true;
@@ -620,7 +628,7 @@ class Navigation {
 
   toggleTOC(): boolean {
     if (!this.isTOCToggleDisabled()) {
-      let intervalID: ReturnType<typeof setTimeout> | null = null;
+      let intervalID = 0;
 
       if (!this.viewer.tocVisible()) {
         if (this.justClicked) {
@@ -633,7 +641,7 @@ class Navigation {
         // Here use timer for two purposes:
         // - Check double click to make TOC box pinned.
         // - Move focus to TOC box when TOC box becomes visible.
-        intervalID = setInterval(() => {
+        intervalID = window.setInterval(() => {
           const tocBox = document.querySelector(
             "[data-vivliostyle-toc-box]",
           ) as HTMLElement;
@@ -641,8 +649,8 @@ class Navigation {
             tocBox.tabIndex = 0;
             tocBox.focus();
 
-            clearInterval(intervalID);
-            intervalID = null;
+            window.clearInterval(intervalID);
+            intervalID = 0;
           }
           this.justClicked = false;
         }, 300);
@@ -651,14 +659,14 @@ class Navigation {
         this.viewer.showTOC(true, false); // autohide=false
         this.justClicked = false;
       } else {
-        if (intervalID !== null) {
-          clearInterval(intervalID);
-          intervalID = null;
+        if (intervalID) {
+          window.clearInterval(intervalID);
+          intervalID = 0;
         }
         this.viewer.showTOC(false);
 
         this.justClicked = true;
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (this.justClicked) {
             document.getElementById("vivliostyle-viewer-viewport").focus();
             this.justClicked = false;
@@ -672,10 +680,10 @@ class Navigation {
   }
 
   navigateTOC(key: string): boolean {
-    const selecter =
+    const selector =
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
-    const nodes = Array.from(document.querySelectorAll(selecter));
+    const nodes = Array.from(document.querySelectorAll(selector));
     let index = nodes.indexOf(document.activeElement);
 
     const isButton = (index): boolean => {

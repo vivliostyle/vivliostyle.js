@@ -26,6 +26,7 @@ import messageQueue from "../models/message-queue";
 import Viewer, { ViewerSettings } from "./viewer";
 import Navigation from "./navigation";
 import SettingsPanel from "./settings-panel";
+import FindBox from "./find-box";
 import MessageDialog from "./message-dialog";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
@@ -40,6 +41,7 @@ class ViewerApp {
   messageDialog: MessageDialog;
   settingsPanel: SettingsPanel;
   navigation: Navigation;
+  findBox: FindBox;
 
   constructor() {
     // Configuration flags
@@ -60,6 +62,7 @@ class ViewerApp {
     };
     const navigationOptions = {
       disableTOCNavigation: flags.includes("T"),
+      disableFind: flags.includes("f"),
       disablePageNavigation: flags.includes("N"),
       disableZoom: flags.includes("Z"),
       disableFontSizeChange: flags.includes("F"),
@@ -134,6 +137,7 @@ class ViewerApp {
     urlParameters.removeParameter("bookMode", true);
     urlParameters.removeParameter("renderAllPages", true);
     urlParameters.removeParameter("fontSize", true);
+    urlParameters.removeParameter("find", true);
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
 
@@ -177,6 +181,19 @@ class ViewerApp {
       navigationOptions,
     );
 
+    this.findBox = new FindBox(this.viewer, this.navigation);
+
+    const findingText = decodeURIComponent(
+      urlParameters.getParameter("find")[0] ?? "",
+    );
+    if (findingText) {
+      this.findBox.text(findingText);
+
+      // TODO(?): Do find after the document is loaded
+      // this.findBox.open();
+      // this.findBox.findNext();
+    }
+
     this.viewer.loadDocument(this.documentOptions);
 
     window.onhashchange = (): void => {
@@ -187,24 +204,45 @@ class ViewerApp {
     };
   }
 
+  /**
+   * @returns true if the key remains unconsumed
+   */
   handleKey(data: ViewerApp, event: KeyboardEvent): boolean {
+    if (
+      event.isComposing ||
+      (event.keyCode &&
+        ((event.key === "Enter" &&
+          event.keyCode !== 13 &&
+          event.keyCode !== 16) ||
+          (event.key === "Escape" && event.keyCode !== 27)))
+    ) {
+      // Enter/Escape key may be pressed to confirm/cancel kana-kanji conversion.
+      return true;
+    }
     const key = keyUtil.identifyKeyFromEvent(event);
     if (document.activeElement.id === "vivliostyle-input-url") {
-      if (key === "Enter" && event.keyCode === 13) {
+      if (key === "Enter") {
         this.viewer.loadDocument(this.documentOptions);
         return false;
       }
       return true;
     }
+    if (document.activeElement.id === "vivliostyle-find-box") {
+      return this.findBox.handleKey(key, event, true);
+    }
+    let ret = this.findBox.handleKey(key, event, false);
+    if (!ret) {
+      return false;
+    }
     if (
-      (!(key === "Home" || key === "End") &&
+      (!(key === "Home" || key === "End" || key === "p" || key === "P") &&
         (event.ctrlKey || event.metaKey)) ||
       event.altKey ||
       event.shiftKey
     ) {
       return true;
     }
-    let ret = this.settingsPanel.handleKey(key);
+    ret = this.settingsPanel.handleKey(key);
     if (ret) {
       ret = this.navigation.handleKey(key);
     }

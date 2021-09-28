@@ -23,7 +23,7 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
 // --------------------------------------------------------------------------------
 
 @mixin spinner($size, $color: #fff) {
-  $border-width: $size / 10;
+  $border-width: $size * 0.1;
   $color-dark: rgba($color, 0.2);
 
   position: relative;

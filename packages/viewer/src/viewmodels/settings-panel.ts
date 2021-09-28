@@ -152,7 +152,7 @@ class SettingsPanel {
         this.pinned(false);
         this.justClicked = true;
         this.focusToFirstItem();
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.justClicked = false;
         }, 300);
       }
@@ -164,7 +164,7 @@ class SettingsPanel {
       this.close();
 
       this.justClicked = true;
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.justClicked = false;
       }, 300);
     }
@@ -195,7 +195,7 @@ class SettingsPanel {
     this.state.viewerOptions.fontSize(
       ViewerOptions.getDefaultValues().fontSize,
     );
-    setTimeout(() => {
+    window.setTimeout(() => {
       const elem = document.getElementsByName(
         "vivliostyle-settings_reset-user-style",
       )[0] as HTMLInputElement;

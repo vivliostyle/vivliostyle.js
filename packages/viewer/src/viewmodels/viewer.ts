@@ -133,12 +133,22 @@ class Viewer {
         profiler.printTimings();
       }
     });
+    let timeoutID = 0;
     this.coreViewer.addListener("nav", (payload) => {
       const { cfi, first, last, epage, epageCount, metadata, docTitle } =
         payload;
 
       if (cfi) {
-        this.documentOptions.fragment(cfi);
+        if (timeoutID) {
+          // Prevent SecurityError,
+          // "Too many calls to Location or History APIs within a short timeframe" (Firefox)
+          // "Attempt to use history.replaceState() more than 100 times per 30 seconds" (Safari)
+          window.clearTimeout(timeoutID);
+        }
+        timeoutID = window.setTimeout(() => {
+          this.documentOptions.fragment(cfi);
+          timeoutID = 0;
+        }, 300);
       }
 
       // Note that `this.epage(epage)` has to be set before `this.lastPage(last)`
