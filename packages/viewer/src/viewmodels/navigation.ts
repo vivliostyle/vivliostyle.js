@@ -198,7 +198,11 @@ class Navigation {
     this.fitToScreen = ko.pureComputed(() => viewerOptions.zoom().fitToScreen);
 
     const fontSizeChangeDisabled = ko.pureComputed(() => {
-      return navigationOptions.disableFontSizeChange || this.isDisabled();
+      return (
+        navigationOptions.disableFontSizeChange ||
+        this.isDisabled() ||
+        this.viewer.state.fixedLayout()
+      );
     });
 
     // Font size limit (max:72, min:5) is hard coded in vivliostyle.js/src/adapt/viewer.js.
@@ -234,7 +238,11 @@ class Navigation {
     this.hidePageSlider = !!navigationOptions.disablePageSlider;
 
     this.isFindBoxDisabled = ko.pureComputed(() => {
-      return navigationOptions.disableFind || this.isDisabled();
+      return (
+        navigationOptions.disableFind ||
+        this.isDisabled() ||
+        this.viewer.state.fixedLayout()
+      );
     });
     this.hideFind = !!navigationOptions.disableFind;
 

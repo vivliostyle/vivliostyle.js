@@ -37,6 +37,7 @@ type State = {
   status: PureComputed<ReadyState>;
   pageProgression: PureComputed<PageProgression>;
   navigatable?: PureComputed<boolean>;
+  fixedLayout?: Observable<boolean>;
 };
 
 type PrivateState = {
@@ -83,6 +84,7 @@ class Viewer {
           privState1.status.value() &&
           privState1.status.value() !== ReadyState.LOADING,
       ),
+      fixedLayout: ko.observable(),
       pageProgression: privState1.pageProgression.getter,
     };
 
@@ -168,9 +170,8 @@ class Viewer {
         this.lastPage(last);
       }
       if (metadata || docTitle) {
-        const pubTitles =
-          metadata && metadata["http://purl.org/dc/terms/title"];
-        const pubTitle = pubTitles && pubTitles[0] && pubTitles[0]["v"];
+        const pubTitle =
+          metadata?.["http://purl.org/dc/terms/title"]?.[0]?.["v"];
         if (!pubTitle) {
           document.title = docTitle ? docTitle : "Vivliostyle Viewer";
         } else if (
@@ -183,6 +184,11 @@ class Viewer {
           document.title = pubTitle;
         } else {
           document.title = `${docTitle} | ${pubTitle}`;
+        }
+        const layout =
+          metadata?.["http://www.idpf.org/vocab/rendition/#layout"]?.[0]?.["v"];
+        if (layout) {
+          this.state.fixedLayout(layout === "pre-paginated");
         }
       }
 
