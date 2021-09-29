@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.11.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.10.0...v2.11.0) (2021-09-29)
+
+### Bug Fixes
+
+- **viewer:** unwanted text deselection when mouse out of buttons ([63c5335](https://github.com/vivliostyle/vivliostyle.js/commit/63c533537518084822fec004d1f252adef8286e7))
+
+### Features
+
+- **viewer:** Add basic text find feature ([f85d731](https://github.com/vivliostyle/vivliostyle.js/commit/f85d7313eab142e7f0b4f4967230c5d8f02b63f8)), closes [#575](https://github.com/vivliostyle/vivliostyle.js/issues/575)
+- **viewer:** Disable Find and Text Smaller/Larger buttons for fixed layout EPUBs ([fa0ae2e](https://github.com/vivliostyle/vivliostyle.js/commit/fa0ae2e3aad8a91eb3d7b6be76ad91bba0aedaff))
+
 # [2.10.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.9.1...v2.10.0) (2021-09-17)
 
 ### Bug Fixes

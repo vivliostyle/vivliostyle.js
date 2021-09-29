@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/viewer",
   "description": "Vivliostyle Viewer - HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
-  "version": "2.10.0",
+  "version": "2.11.0",
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "gulp build && NODE_ENV=production rollup -c",
