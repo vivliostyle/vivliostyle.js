@@ -65,7 +65,7 @@ describe("base", function () {
       );
     });
 
-    it("unescape a string containing 4-digit hex codes with '\\u' prefix to the orignal string when prefix is not specified", function () {
+    it("unescape a string containing 4-digit hex codes with '\\u' prefix to the original string when prefix is not specified", function () {
       expect(
         module.unescapeStrFromHex("abc-_\\u003a\\u0025\\u002f\\u005c"),
       ).toBe("abc-_:%/\\");
