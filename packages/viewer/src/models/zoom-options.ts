@@ -17,7 +17,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CoreViewer, ZoomType } from "@vivliostyle/core";
+import { ZoomType } from "@vivliostyle/core";
+import Viewer from "../viewmodels/viewer";
 
 class ZoomOptions {
   zoom: number;
@@ -29,35 +30,25 @@ class ZoomOptions {
     return null;
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getCurrentZoomFactor(_viewer?: CoreViewer): number {
+  getCurrentZoomFactor(viewer?: Viewer): number {
     return 1;
   }
   toggleFitToScreen(): ZoomOptions {
     return new ZoomOptions(1);
   }
-  zoomIn(viewer: CoreViewer): FixedZoomFactor {
-    // FIXME: We want to stop disabling this rule to future
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  zoomIn(viewer: Viewer): FixedZoomFactor {
     return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 1.25);
   }
-  zoomOut(viewer: CoreViewer): FixedZoomFactor {
-    // FIXME: We want to stop disabling this rule to future
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  zoomOut(viewer: Viewer): FixedZoomFactor {
     return new FixedZoomFactor(this.getCurrentZoomFactor(viewer) * 0.8);
   }
   zoomToActualSize(): FixedZoomFactor {
-    // FIXME: We want to stop disabling this rule to future
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(1);
   }
   static createDefaultOptions(): FitToScreen {
-    // FIXME: We want to stop disabling this rule to future
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FitToScreen();
   }
   static createFromZoomFactor(zoom: number): FixedZoomFactor {
-    // FIXME: We want to stop disabling this rule to future
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(zoom);
   }
 }
@@ -70,11 +61,9 @@ export class FitToScreen extends ZoomOptions {
     return true;
   }
   toggleFitToScreen(): FixedZoomFactor {
-    // FIXME: We want to stop disabling this rule to future
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new FixedZoomFactor(1);
   }
-  getCurrentZoomFactor(viewer: CoreViewer): number {
+  getCurrentZoomFactor(viewer: Viewer): number {
     return viewer.queryZoomFactor(ZoomType.FIT_INSIDE_VIEWPORT);
   }
 }

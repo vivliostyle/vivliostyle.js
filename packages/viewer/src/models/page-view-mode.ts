@@ -22,16 +22,10 @@ import { PageViewMode as CorePageViewMode } from "@vivliostyle/core";
 export class PageViewModeInstance {
   toSpreadViewString(): string {
     switch (this) {
-      // FIXME: We want to stop disabling this rule to future
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       case PageViewMode.SPREAD:
         return "true";
-      // FIXME: We want to stop disabling this rule to future
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       case PageViewMode.SINGLE_PAGE:
         return "false";
-      // FIXME: We want to stop disabling this rule to future
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       case PageViewMode.AUTO_SPREAD:
         return "auto";
       default:
@@ -40,16 +34,10 @@ export class PageViewModeInstance {
   }
   toString(): string {
     switch (this) {
-      // FIXME: We want to stop disabling this rule to future
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       case PageViewMode.SPREAD:
         return "spread"; // vivliostyle.viewer.PageViewMode.SPREAD;
-      // FIXME: We want to stop disabling this rule to future
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       case PageViewMode.SINGLE_PAGE:
         return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
-      // FIXME: We want to stop disabling this rule to future
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
       case PageViewMode.AUTO_SPREAD:
         return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
       default:

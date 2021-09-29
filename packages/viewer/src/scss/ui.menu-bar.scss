@@ -105,12 +105,13 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     height: $menu-icon-height * 0.5;
     text-align: center;
     transition: linear 0.2s;
-    @media screen and (max-width: 1189px) {
+    @media screen and (max-width: 1261px) {
       right: $menu-icon-width + $menu-icon-offset-x * 4;
-      width: 362px / (80px / ($menu-icon-height * 0.5));
+      // width: 362px / (80px / ($menu-icon-height * 0.5));
+      width: $menu-icon-height * 2.2625;
       text-align: right;
     }
-    @media screen and (max-width: 677px) {
+    @media screen and (max-width: 713px) {
       animation: none !important;
       opacity: 0 !important;
     }
@@ -260,6 +261,14 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         content: $fa-var-list;
         top: 0.05em;
       }
+      &#vivliostyle-menu-item_find-toggle {
+        > .vivliostyle-menu-icon-button:before {
+          content: $fa-var-search;
+        }
+        &:not(.on) > #vivliostyle-menu-find-box {
+          display: none;
+        }
+      }
       //	&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
       &#vivliostyle-menu-item_move-first
         > .vivliostyle-menu-icon-button:before {
@@ -304,8 +313,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         > .vivliostyle-menu-icon-button:before {
         content: $fa-var-font;
       }
-      &#vivliostyle-menu-item_print
-        > .vivliostyle-menu-icon-button:before {
+      &#vivliostyle-menu-item_print > .vivliostyle-menu-icon-button:before {
         content: $fa-var-print;
       }
       &#vivliostyle-menu-item_move-first > .vivliostyle-menu-icon-button:after {
@@ -378,6 +386,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
       }
       //	&#vivliostyle-menu-item_settings-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
       //	&#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
+      &#vivliostyle-menu-item_find-toggle.on,
       &#vivliostyle-menu-item_toc-toggle.on,
       &#vivliostyle-menu-item_zoom-fit-to-screen.on {
         > .vivliostyle-menu-icon-button {
@@ -442,34 +451,34 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         }
       }
       &#vivliostyle-menu-item_print {
-        @media screen and (max-width: $menu-icon-width * 16 - 3px) {
+        @media screen and (max-width: $menu-icon-width * 15 - 3px) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-to-actual-size {
-        @media screen and (max-width: $menu-icon-width * 15 - 3px) {
+        @media screen and (max-width: $menu-icon-width * 14 - 3px) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_move-previous,
       &#vivliostyle-menu-item_move-next {
-        @media screen and (max-width: $menu-icon-width * 14 - 3px) {
+        @media screen and (max-width: $menu-icon-width * 17 - 3px) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-fit-to-screen {
-        @media screen and (max-width: $menu-icon-width * 12 - 3px) {
+        @media screen and (max-width: $menu-icon-width * 13 - 3px) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_text-size-default {
-        @media screen and (max-width: $menu-icon-width * 9 - 3px - 2px) {
+        @media screen and (max-width: $menu-icon-width * 10 - 3px - 2px) {
           display: none;
         }
       }
     }
     &#vivliostyle-menu_zoom {
-      @media screen and (max-width: $menu-icon-width * 11 - 3px) {
+      @media screen and (max-width: $menu-icon-width * 12 - 3px) {
         display: none;
       }
     }
@@ -756,6 +765,70 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     text-shadow: 1px 0 5px #4d90fe, -1px 0 5px #4d90fe;
     box-shadow: none;
     outline: none;
+  }
+}
+
+// ================================================================================
+// + Find Box
+// --------------------------------------------------------------------------------
+
+#vivliostyle-menu-find-box {
+  position: absolute;
+  top: $menu-icon-height + $menu-icon-offset-y;
+  left: $menu-icon-offset-x;
+  height: $menu-icon-height;
+  background: $menu-bg-color;
+  box-shadow: $menu-box-shadow;
+  box-sizing: border-box;
+  padding: 2px;
+  display: flex;
+  color: black;
+  width: $menu-icon-width * 10;
+  @media screen and (max-width: 450px) {
+    width: 80vw;
+  }
+
+  #vivliostyle-find-box {
+    flex: auto;
+    background: white;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px;
+  }
+  #vivliostyle-find-status {
+    flex: none;
+    width: min-content;
+    font-size: 12px;
+    line-height: 30px;
+    background: white;
+    padding: 0 3px;
+    color: gray;
+    white-space: nowrap;
+  }
+  #vivliostyle-find-previous,
+  #vivliostyle-find-next {
+    flex: none;
+    width: $menu-icon-width;
+    text-align: center;
+    line-height: 30px;
+    color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0);
+    @include font-icon("FontAwesome");
+
+    &.hover {
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(0, 0, 0, 0.2);
+    }
+    &.active {
+      color: rgba(255, 255, 255, 1);
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+  #vivliostyle-find-previous::before {
+    content: $fa-var-chevron-up;
+  }
+  #vivliostyle-find-next::before {
+    content: $fa-var-chevron-down;
   }
 }
 
