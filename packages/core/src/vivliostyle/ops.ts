@@ -1110,12 +1110,6 @@ export class StyleInstance
               layoutContainer.paddingLeft,
               layoutContainer.width,
             );
-            // Fix for issue #544
-            Base.setCSSProperty(
-              column.element,
-              "right",
-              `${layoutContainer.paddingRight}px`,
-            );
             column.setVerticalPosition(columnY, columnWidth);
           } else {
             const columnX =
