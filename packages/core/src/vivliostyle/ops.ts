@@ -1106,8 +1106,11 @@ export class StyleInstance
             const columnY =
               currentColumnIndex * (columnWidth + columnGap) +
               layoutContainer.paddingTop;
+            const outerWidth = parseFloat(
+              (boxContainer as HTMLElement).style.width,
+            );
             column.setHorizontalPosition(
-              layoutContainer.paddingLeft,
+              layoutContainer.paddingLeft + outerWidth - layoutContainer.width,
               layoutContainer.width,
             );
             column.setVerticalPosition(columnY, columnWidth);
