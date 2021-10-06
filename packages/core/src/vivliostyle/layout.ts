@@ -432,6 +432,10 @@ export function validateCheckPoints(checkPoints: Vtree.NodeContext[]): void {
 export function isSpecialInlineDisplay(display: string): boolean {
   switch (display) {
     case "ruby":
+    case "ruby-base":
+    case "ruby-base-container":
+    case "ruby-text":
+    case "ruby-text-container":
     case "inline-block":
     case "inline-flex":
     case "inline-grid":
@@ -2147,7 +2151,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // Skip special
           seekRange = !haveStart;
         } else if (
-          (node as Element).localName == "ruby" ||
+          /^r(uby|[bt]c?)$/.test((node as Element).localName) ||
           isSpecialInlineDisplay(
             this.clientLayout.getElementComputedStyle(node as Element).display,
           )
@@ -3356,7 +3360,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @param checkPoints array of breaking points for breakable block
    */
   saveBoxBreakPosition(checkPoints: Vtree.NodeContext[]): void {
-    const penalty = checkPoints[0].breakPenalty;
+    let penalty = checkPoints[0].breakPenalty;
+    if (penalty) {
+      // Fix for issue #546
+      let block = checkPoints[0];
+      while (block.parent && block.inline) {
+        block = block.parent;
+      }
+      penalty = block.breakPenalty;
+    }
     const bp = new BoxBreakPosition(checkPoints, penalty);
     this.breakPositions.push(bp);
   }
