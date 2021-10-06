@@ -1243,13 +1243,6 @@ html|rb {
 html|rt {
   display: ruby-text;
 }
-html|ruby,
-html|rb,
-html|rt,
-html|rbc,
-html|rtc {
-  unicode-bidi: isolate;
-}
 
 html|rtc,
 html|rt {
