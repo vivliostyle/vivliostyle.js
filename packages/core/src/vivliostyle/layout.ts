@@ -2892,6 +2892,29 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             const style = (nodeContext.viewNode as HTMLElement).style;
             if (nodeContext.after) {
+              const element = nodeContext.sourceNode as Element;
+              // Make breakable after svg and math elements
+              // (Fix for issue #750)
+              if (
+                element.localName === "svg" ||
+                element.localName === "math" ||
+                element.getAttribute("data-math-typeset") === "true"
+              ) {
+                onStartEdges = false;
+                lastAfterNodeContext = nodeContext.copy();
+                trailingEdgeContexts.push(lastAfterNodeContext);
+                breakAtTheEdge = Break.resolveEffectiveBreakValue(
+                  null,
+                  nodeContext.breakAfter,
+                );
+                this.checkOverflowAndSaveEdgeAndBreakPosition(
+                  lastAfterNodeContext,
+                  null,
+                  !this.stopAtOverflow,
+                  breakAtTheEdge,
+                );
+                break;
+              }
               // Skip an empty inline box at the start of a block
               // (An anonymous block consisting entirely of
               // collapsible white space is removed from the rendering tree)
