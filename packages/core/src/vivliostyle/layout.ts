@@ -1016,7 +1016,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   layoutFloat(nodeContext: Vtree.NodeContext): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("layoutFloat");
     const element = nodeContext.viewNode as Element;
-    const floatSide = nodeContext.floatSide as string;
+    const floatSide = PageFloats.resolveInlineFloatDirection(
+      nodeContext.floatSide,
+      nodeContext.vertical,
+      nodeContext.direction,
+    );
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
     Base.setCSSProperty(element, "vertical-align", "top");
