@@ -149,7 +149,7 @@ export function handle<T>(
     code(frame);
   } catch (err) {
     // synchronous exception
-    frame.task.raise(err, frame);
+    frame.task.raise(err as Error, frame);
   }
   return frame.result();
 }
@@ -327,7 +327,7 @@ export class Scheduler {
           done();
         });
       } catch (err) {
-        task.raise(err);
+        task.raise(err as Error);
         done();
       }
     });
@@ -704,7 +704,7 @@ export class Frame<T> {
       try {
         this.callback(res);
       } catch (err) {
-        this.task.raise(err, frame);
+        this.task.raise(err as Error, frame);
       }
 
       // callback was called
@@ -745,7 +745,7 @@ export class Frame<T> {
           this.state = FrameState.DEAD;
         } catch (err) {
           this.state = FrameState.DEAD;
-          task.raise(err, frame);
+          task.raise(err as Error, frame);
         }
         break;
       }
@@ -805,7 +805,7 @@ export class Frame<T> {
         }
         frame.finish(true);
       } catch (err) {
-        frame.task.raise(err, frame);
+        frame.task.raise(err as Error, frame);
       }
     };
     step(true);
