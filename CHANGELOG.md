@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.11.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.0...v2.11.1) (2021-10-08)
+
+### Bug Fixes
+
+- column-fill:balance on vertical writing mode causes columns left-aligned ([fe55f36](https://github.com/vivliostyle/vivliostyle.js/commit/fe55f36543879541b3028ee52bca94d805f21879)), closes [#544](https://github.com/vivliostyle/vivliostyle.js/issues/544)
+- column-fill:balance on vertical writing mode causes columns left-aligned ([bc7767b](https://github.com/vivliostyle/vivliostyle.js/commit/bc7767b899b786719728bcc51bc1ed0ed9c8ea61)), closes [#544](https://github.com/vivliostyle/vivliostyle.js/issues/544)
+- Consecutive ruby elements cause line overflow ([7c57ddb](https://github.com/vivliostyle/vivliostyle.js/commit/7c57ddbd7602c31da084b93024ad8d730fe3a0d2))
+- float:inline-start and inline-end misinterpreted as float:right ([2e71481](https://github.com/vivliostyle/vivliostyle.js/commit/2e714815265dbcba2fd938e40f2d7c5452f23018)), closes [#789](https://github.com/vivliostyle/vivliostyle.js/issues/789)
+- Inline-block or ruby at beginning of a block causes unexpected page/column break ([0631dfe](https://github.com/vivliostyle/vivliostyle.js/commit/0631dfe69cf4d10dd9529b79874163d4242e2c2c)), closes [#546](https://github.com/vivliostyle/vivliostyle.js/issues/546)
+- No break opportunity between math or svg ([ea08a02](https://github.com/vivliostyle/vivliostyle.js/commit/ea08a020d3db9a8e35e7e8cf6cb82d6154c04023)), closes [#750](https://github.com/vivliostyle/vivliostyle.js/issues/750)
+
 # [2.11.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.10.0...v2.11.0) (2021-09-29)
 
 ### Bug Fixes
