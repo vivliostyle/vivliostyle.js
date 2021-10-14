@@ -111,20 +111,16 @@ export function calculateEdge(
     if (vertical && Base.checkVerticalBBoxBug(document.body)) {
       boxes = fixBoxesForNode(clientLayout, boxes, node);
     }
-    let maxSize = 0;
-
-    // Get first of the widest boxes (works around Chrome results for soft
-    // hyphens).
-    for (const box of boxes) {
-      const boxSize = vertical ? box.bottom - box.top : box.right - box.left;
-      if (
-        box.right > box.left &&
-        box.bottom > box.top &&
-        (isNaN(edge) || boxSize > maxSize)
-      ) {
-        edge = vertical ? box.left : box.bottom;
-        maxSize = boxSize;
-      }
+    if (vertical) {
+      edge = Math.min.apply(
+        null,
+        boxes.map((box) => box.left),
+      );
+    } else {
+      edge = Math.max.apply(
+        null,
+        boxes.map((box) => box.bottom),
+      );
     }
     return edge;
   }
