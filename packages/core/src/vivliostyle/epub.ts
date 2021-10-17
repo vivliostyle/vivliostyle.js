@@ -2232,6 +2232,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
     pageCont.style.position = "absolute";
     pageCont.style.top = "0";
     pageCont.style.left = "0";
+
+    // Workaround for Chromium problem (issues #758 and #793).
+    // Chromium currently uses legacy engine for multicol and print
+    // and uses new engine (LayoutNG) for non-multicol screen,
+    // so need to use multicol to match screen and print layouts.
+    // This will be unnecessary when the Chromium issue is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=829028
+    pageCont.style.columnCount = "1";
+    pageCont.style.height = "99999999px";
+
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
       pageCont.setAttribute("aria-hidden", "true");
