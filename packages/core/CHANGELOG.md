@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.11.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.1...v2.11.2) (2021-10-17)
+
+### Bug Fixes
+
+- Workaround for Chromium problem of inconsistent screen and print layout ([08f2337](https://github.com/vivliostyle/vivliostyle.js/commit/08f23370cc1aa82231a9705cbe597f4137955fc7)), closes [#758](https://github.com/vivliostyle/vivliostyle.js/issues/758) [#793](https://github.com/vivliostyle/vivliostyle.js/issues/793)
+- Wrong hyphenation at bottom of page ([bcbc72c](https://github.com/vivliostyle/vivliostyle.js/commit/bcbc72c45f35879351e495b69ddb22d8b41852b0)), closes [#792](https://github.com/vivliostyle/vivliostyle.js/issues/792)
+
 ## [2.11.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.0...v2.11.1) (2021-10-08)
 
 ### Bug Fixes
