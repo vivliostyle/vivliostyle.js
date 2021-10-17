@@ -111,6 +111,10 @@ export function calculateEdge(
     if (vertical && Base.checkVerticalBBoxBug(document.body)) {
       boxes = fixBoxesForNode(clientLayout, boxes, node);
     }
+    boxes = boxes.filter((box) => box.right > box.left && box.bottom > box.top);
+    if (!boxes.length) {
+      return NaN;
+    }
     if (vertical) {
       edge = Math.min.apply(
         null,
