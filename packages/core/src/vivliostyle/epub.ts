@@ -292,7 +292,11 @@ export class EPUBDocStore extends OPS.OPSDocStore {
               manifestLink.getAttribute("href"),
               url,
             );
-            this.loadAsJSON(manifestUrl).then((manifestObj) => {
+            this.loadAsJSON(
+              manifestUrl,
+              true,
+              `Failed to fetch Publication Manifest ${manifestUrl}`,
+            ).then((manifestObj) => {
               opf
                 .initWithWebPubManifest(manifestObj, doc, manifestUrl)
                 .then(() => {
