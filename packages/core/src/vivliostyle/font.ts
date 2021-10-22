@@ -283,7 +283,8 @@ export class Mapper {
     documentFaces: DocumentFaces,
   ): TaskUtil.Fetcher<Face> {
     const src = srcFace.src as string;
-    let fetcher = this.srcURLMap[src];
+    const srcFamilySrc = srcFace.family + ";" + src;
+    let fetcher = this.srcURLMap[srcFamilySrc];
     if (fetcher) {
       fetcher.piggyback((viewFaceParam) => {
         const viewFace = viewFaceParam as Face;
@@ -317,7 +318,7 @@ export class Mapper {
         }
         return frame.result();
       }, `loadFont ${src}`);
-      this.srcURLMap[src] = fetcher;
+      this.srcURLMap[srcFamilySrc] = fetcher;
       fetcher.start();
     }
     return fetcher;
