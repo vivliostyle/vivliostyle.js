@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Trim-marks Inc.
+ * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.
  *
@@ -19,19 +20,19 @@
 
 import ko from "knockout";
 
-import ViewerApp from "./viewmodels/viewer-app";
-
-import "./bindings/menuButton";
-import "./bindings/swipePages";
-import "./bindings/textSelection";
-
-export default {
-  start(): void {
-    function startViewer(): void {
-      ko.applyBindings(new ViewerApp());
+const supportTouchEvents = "ontouchstart" in window;
+ko.bindingHandlers.textSelection = {
+  init(element, valueAccessor): void {
+    if (ko.unwrap(valueAccessor())) {
+      if (supportTouchEvents) {
+        element.addEventListener("touchend", () => {
+          console.log(document.getSelection());
+        });
+      } else {
+        element.addEventListener("mouseup", () => {
+          console.log(document.getSelection());
+        });
+      }
     }
-
-    if (window["__loaded"]) startViewer();
-    else window.onload = startViewer;
   },
 };

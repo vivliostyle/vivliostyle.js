@@ -88,7 +88,7 @@
       </ul>
       <p><a href="https://vivliostyle.org"><img src="resources/vivliostyle-logo.svg" alt="Vivliostyle"/></a></p>
     </section>
-    <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true, event: {'wheel': navigation.onwheelViewport}"></div>
+    <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true, textSelection: true, event: {'wheel': navigation.onwheelViewport}"></div>
     <span role="button" id="vivliostyle-page-navigation-left" title="navigate to left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled}"></span>
     <span role="button" id="vivliostyle-page-navigation-right" title="navigate to right" aria-keyshortcuts="ArrowRight" data-bind="click: navigation.navigateToRight, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToRightDisabled()}, attr: {'aria-disabled': navigation.isNavigateToRightDisabled}"></span>
     <div id="vivliostyle-page-slider-bar" data-bind="attr: {'dir': viewer.state.pageProgression}, css: {'vivliostyle-menu-disabled': navigation.hidePageSlider}">
