@@ -2012,10 +2012,14 @@ export class ViewFactory
           continue;
         }
       }
-      if (isRoot && CssCascade.isInherited(propName)) {
+      if (
+        isRoot &&
+        this.page.pageAreaElement &&
+        CssCascade.isInherited(propName)
+      ) {
         // Fix for Issue #568
         Base.setCSSProperty(
-          this.viewRoot.parentElement,
+          this.page.pageAreaElement.parentElement,
           propName,
           value.toString(),
         );
