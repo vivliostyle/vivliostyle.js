@@ -22,17 +22,21 @@ import ko from "knockout";
 
 const supportTouchEvents = "ontouchstart" in window;
 
-const highlightSelection = (selection: Selection, parent: HTMLElement) => {
+const highlightSelection = (selection: Selection): void => {
   if (selection.type == "Range") {
     const range = selection.getRangeAt(0);
+    const parent = range.startContainer.parentElement.closest(
+      "[data-vivliostyle-page-container='true']",
+    );
+    const parentRect = parent.getBoundingClientRect();
     const rects = range.getClientRects();
     for (const rect of rects) {
       const div = document.createElement("div");
       div.style.position = "absolute";
       div.style.margin = "0";
       div.style.padding = "0";
-      div.style.top = `${rect.top - parent.offsetTop}px`;
-      div.style.left = `${rect.left - parent.offsetLeft}px`;
+      div.style.top = `${rect.top - parentRect.top}px`;
+      div.style.left = `${rect.left - parentRect.left}px`;
       div.style.width = `${rect.width}px`;
       div.style.height = `${rect.height}px`;
       div.style.background = "rgba(255, 0, 0, 0.2)";
@@ -47,11 +51,11 @@ ko.bindingHandlers.textSelection = {
     if (ko.unwrap(valueAccessor())) {
       if (supportTouchEvents) {
         element.addEventListener("touchend", () => {
-          highlightSelection(document.getSelection(), element);
+          highlightSelection(document.getSelection());
         });
       } else {
         element.addEventListener("mouseup", () => {
-          highlightSelection(document.getSelection(), element);
+          highlightSelection(document.getSelection());
         });
       }
     }
