@@ -92,6 +92,9 @@ export function calculateEdge(
       }
     }
     return NaN;
+  } else if (node.parentElement.localName === "rt") {
+    // Fix for issue #804
+    return NaN;
   } else {
     let edge = NaN;
     const range = node.ownerDocument.createRange();
