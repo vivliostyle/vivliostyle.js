@@ -2049,7 +2049,8 @@ export class ViewFactory
     if (numeric.unit === "%" || numeric.unit === "em") {
       const parentElem = this.nodeContext?.parent?.viewNode as Element;
       const parentFontSize =
-        parentElem && parseFloat(window.getComputedStyle(parentElem).fontSize);
+        parentElem &&
+        parseFloat(this.viewport.window.getComputedStyle(parentElem).fontSize);
       fontSizeInPx =
         (parentFontSize * numeric.num) / (numeric.unit === "%" ? 100 : 1);
     } else {
@@ -2370,7 +2371,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
    * @override
    */
   getRangeClientRects(range: Range): Vtree.ClientRect[] {
-    const rects = range["getClientRects"]();
+    const rects = range.getClientRects();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map((rect) =>
       this.subtractOffsets(rect, layoutBoxRect),
