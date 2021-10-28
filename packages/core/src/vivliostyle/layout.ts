@@ -1770,16 +1770,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return;
     }
     if (endOfColumn) {
-      let textAlign = "";
-      for (
-        let parent = nodeContext.parent;
-        parent && !textAlign;
-        parent = parent.parent
-      ) {
-        if (!parent.inline && parent.viewNode) {
-          textAlign = (parent.viewNode as HTMLElement).style.textAlign;
-        }
-      }
+      const parentElem = nodeContext.parent?.viewNode as Element;
+      const textAlign =
+        parentElem &&
+        this.clientLayout.getElementComputedStyle(parentElem).textAlign;
       if (textAlign !== "justify") {
         return;
       }
