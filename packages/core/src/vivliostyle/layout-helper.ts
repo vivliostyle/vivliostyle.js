@@ -80,6 +80,13 @@ export function calculateEdge(
   if (!node) {
     return NaN;
   }
+  const element = node.nodeType == 1 ? (node as Element) : node.parentElement;
+  if (element?.localName === "rt" && (element as HTMLElement).style["zoom"]) {
+    // "zoom" is set in fixRubyTextFontSize() to fix the issue #673 for Chrome.
+    // when zoom is set, it is hard to get the edge value, so return NaN.
+    // (Fix for issues #804 and #808)
+    return NaN;
+  }
   if (node.nodeType == 1) {
     if (nodeContext.after || !nodeContext.inline) {
       const cbox = clientLayout.getElementClientRect(node as Element);
@@ -91,9 +98,6 @@ export function calculateEdge(
         }
       }
     }
-    return NaN;
-  } else if (node.parentElement.localName === "rt") {
-    // Fix for issue #804
     return NaN;
   } else {
     let edge = NaN;
