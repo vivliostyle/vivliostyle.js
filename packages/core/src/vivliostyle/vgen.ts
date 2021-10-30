@@ -2384,6 +2384,16 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   getElementClientRect(element: Element): Vtree.ClientRect {
     const htmlElement = element as HTMLElement;
     const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
+    if (
+      rect.left === 0 &&
+      rect.top === 0 &&
+      rect.right === 0 &&
+      rect.bottom === 0
+    ) {
+      // getBoundingClientRect() returns 0,0,0,0 for WBR element (Chrome)
+      // (Fix for issue #802)
+      return rect;
+    }
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return this.subtractOffsets(rect, layoutBoxRect);
   }

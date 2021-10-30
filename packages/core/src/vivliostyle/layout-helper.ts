@@ -90,6 +90,16 @@ export function calculateEdge(
   if (node.nodeType == 1) {
     if (nodeContext.after || !nodeContext.inline) {
       const cbox = clientLayout.getElementClientRect(node as Element);
+      if (
+        cbox.left === 0 &&
+        cbox.top === 0 &&
+        cbox.right === 0 &&
+        cbox.bottom === 0
+      ) {
+        // getBoundingClientRect() returns 0,0,0,0 for WBR element (Chrome)
+        // (Fix for issue #802)
+        return NaN;
+      }
       if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
         if (nodeContext.after) {
           return vertical ? cbox.left : cbox.bottom;
