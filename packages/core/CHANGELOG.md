@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.11.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.2...v2.11.3) (2021-10-31)
+
+### Bug Fixes
+
+- Error: E_FONT_FAMILY_INCONSISTENT ([9d7be19](https://github.com/vivliostyle/vivliostyle.js/commit/9d7be19df541706519a5709499a6d34b9c018efc)), closes [#797](https://github.com/vivliostyle/vivliostyle.js/issues/797)
+- Page/column last line not justified when justify is specified on root ([e2c9706](https://github.com/vivliostyle/vivliostyle.js/commit/e2c97064299c72b23950b244f3c2c38cba5d7aee)), closes [#803](https://github.com/vivliostyle/vivliostyle.js/issues/803)
+- Root element styles not inherited to page context in multi-column layout ([83f8ee7](https://github.com/vivliostyle/vivliostyle.js/commit/83f8ee715f3a3d57e2f8ba257ee795fe8b746654)), closes [#800](https://github.com/vivliostyle/vivliostyle.js/issues/800)
+- Ruby broken when page float exists ([376db9a](https://github.com/vivliostyle/vivliostyle.js/commit/376db9afcce7c8884ed3809717d5fb41ecc25f44)), closes [#804](https://github.com/vivliostyle/vivliostyle.js/issues/804)
+- Ruby with rp elements broken at page break ([11ad5cf](https://github.com/vivliostyle/vivliostyle.js/commit/11ad5cf9e26b665e0e58ea171211ba47b7cae542)), closes [#808](https://github.com/vivliostyle/vivliostyle.js/issues/808)
+- Text overflow at column/page break ([824d5b6](https://github.com/vivliostyle/vivliostyle.js/commit/824d5b642ce752f23ce0bd179f06a23374eace14)), closes [#811](https://github.com/vivliostyle/vivliostyle.js/issues/811)
+- Text overflow at column/page break when wbr tag is used ([57e358a](https://github.com/vivliostyle/vivliostyle.js/commit/57e358ab01348ea9e7865bf0e0fe47bf2b513162)), closes [#802](https://github.com/vivliostyle/vivliostyle.js/issues/802)
+- TypeError: Cannot read properties of null (reading 'readingProgression') ([b5d4acd](https://github.com/vivliostyle/vivliostyle.js/commit/b5d4acd7288fa0e44e61ac17ca26915b54201608)), closes [#796](https://github.com/vivliostyle/vivliostyle.js/issues/796)
+
 ## [2.11.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.1...v2.11.2) (2021-10-17)
 
 ### Bug Fixes
