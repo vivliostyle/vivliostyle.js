@@ -81,11 +81,17 @@ export function calculateEdge(
     return NaN;
   }
   const element = node.nodeType == 1 ? (node as Element) : node.parentElement;
-  if (element?.localName === "rt" && (element as HTMLElement).style["zoom"]) {
-    // "zoom" is set in fixRubyTextFontSize() to fix the issue #673 for Chrome.
-    // when zoom is set, it is hard to get the edge value, so return NaN.
-    // (Fix for issues #804 and #808)
-    return NaN;
+  if (element && element instanceof HTMLElement) {
+    if (element.localName === "rt" && element.style["zoom"]) {
+      // "zoom" is set in fixRubyTextFontSize() to fix the issue #673 for Chrome.
+      // when zoom is set, it is hard to get the edge value, so return NaN.
+      // (Fix for issues #804 and #808)
+      return NaN;
+    }
+    if (/^([\d\.]|super|(text-)?top)/.test(element.style.verticalAlign)) {
+      // (Fix for issue #811)
+      return NaN;
+    }
   }
   if (node.nodeType == 1) {
     if (nodeContext.after || !nodeContext.inline) {
