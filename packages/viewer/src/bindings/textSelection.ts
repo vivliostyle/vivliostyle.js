@@ -25,6 +25,8 @@ const supportTouchEvents = "ontouchstart" in window;
 const highlightSelection = (selection: Selection): void => {
   if (selection.type == "Range") {
     const range = selection.getRangeAt(0);
+
+    // TODO; collect all active page container and check boundary.
     const parent = range.startContainer.parentElement.closest(
       "[data-vivliostyle-page-container='true']",
     );
@@ -51,16 +53,77 @@ const highlightSelection = (selection: Selection): void => {
   }
 };
 
+const selectPosInfo = (node: Node, offset: number) => {
+  const e = node.parentElement.closest("[data-adapt-eloff]");
+  const eloff = e.getAttribute("data-adapt-eloff");
+  const es = document.querySelectorAll(`[data-adapt-eloff='${eloff}']`);
+  let count = 0;
+  let lastNodeType = -1;
+  let lastNodeTextLength = 0;
+  for (const siblingE of es.values()) {
+    if (siblingE == e) {
+      break;
+    }
+    const children = [...siblingE.childNodes].filter(
+      (x) =>
+        !(x.nodeType == 1 && (x as Element).hasAttribute("data-adapt-spec")),
+    );
+    let childrenCount = children.length;
+    if (childrenCount > 0) {
+      if (children[0].nodeType == 3 && lastNodeType == 3) {
+        childrenCount -= 1;
+      }
+      const lastNode = children[children.length - 1];
+      lastNodeType = lastNode.nodeType;
+      if (lastNodeType == 3) {
+        lastNodeTextLength = (lastNode as Text).data.length;
+      } else {
+        lastNodeTextLength = 0;
+      }
+    }
+    count += childrenCount;
+  }
+
+  const children = e.childNodes;
+  let nodeIndex = [...children].indexOf(node as ChildNode);
+  if (nodeIndex == 0 && node.nodeType == 3 && lastNodeType == 3) {
+    offset += lastNodeTextLength;
+  } else {
+    count += nodeIndex + 1;
+  }
+
+  return {
+    eloff: eloff,
+    nodeIndex: count,
+    offset: offset,
+  };
+};
+
+const processSelection = (selection: Selection): void => {
+  const range = selection.getRangeAt(0);
+  console.log(
+    `start: ${JSON.stringify(
+      selectPosInfo(range.startContainer, range.startOffset),
+    )}`,
+  );
+  console.log(
+    `end: ${JSON.stringify(
+      selectPosInfo(range.endContainer, range.endOffset),
+    )}`,
+  );
+  highlightSelection(selection);
+};
+
 ko.bindingHandlers.textSelection = {
   init(element, valueAccessor): void {
     if (ko.unwrap(valueAccessor())) {
       if (supportTouchEvents) {
         element.addEventListener("touchend", () => {
-          highlightSelection(document.getSelection());
+          processSelection(document.getSelection());
         });
       } else {
         element.addEventListener("mouseup", () => {
-          highlightSelection(document.getSelection());
+          processSelection(document.getSelection());
         });
       }
     }
