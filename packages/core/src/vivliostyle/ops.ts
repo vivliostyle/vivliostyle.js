@@ -21,6 +21,7 @@
  */
 import "./footnotes";
 import "./table";
+import "./text-polyfill";
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+  <meta charset="UTF-8">
+  <title>text-spacing测试</title>
+  <style>
+    p {
+      border: 1px solid silver;
+      text-align: justify;
+    }
+    b {
+      font-weight: bold;
+      color: maroon;
+    }
+    i {
+      font-style: normal;
+      font-size: 80%;
+      color: navy;
+    }
+    #test-ts-none {
+      text-spacing: none;
+    }
+    #test-ts-normal {
+      text-spacing: normal;
+    }
+    #test-ts-auto {
+      text-spacing: auto;
+    }
+    #test-ts-auto-equiv {
+      text-spacing: trim-start ideograph-alpha ideograph-numeric;
+    }
+    #test-ts-space-start {
+      text-spacing: space-start;
+    }
+    #test-ts-space-first {
+      text-spacing: space-first;
+    }
+    #test-ts-space-end {
+      text-spacing: space-end;
+    }
+    #test-ts-ideograph-alpha {
+      text-spacing: ideograph-alpha;
+    }
+    #test-ts-ideograph-numeric {
+      text-spacing: ideograph-numeric;
+    }
+  </style>
+</head>
+<body>
+  <h1>排版的CSS属性，「text-spacing」测试</h1>
+  <section id="test-ts-default">
+    <h2>default</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-none">
+    <h2>text-spacing: none</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-normal">
+    <h2>text-spacing: normal</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-auto">
+    <h2>text-spacing: auto</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-auto-equiv">
+    <h2>text-spacing: trim-start ideograph-alpha ideograph-numeric</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-space-start">
+    <h2>text-spacing: space-start</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-space-first">
+    <h2>text-spacing: space-first</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-space-end">
+    <h2>text-spacing: space-end</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-ideograph-alpha">
+    <h2>text-spacing: ideograph-alpha</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+  <section id="test-ts-ideograph-numeric">
+    <h2>text-spacing: ideograph-numeric</h2>
+    <p>〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b></p>
+  </section>
+
+</body>
+</html>

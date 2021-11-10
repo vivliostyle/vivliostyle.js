@@ -106,6 +106,7 @@ export const inheritedProps = {
   "text-justify": true,
   "text-rendering": true,
   "text-size-adjust": true,
+  "text-spacing": true,
   "text-transform": true,
   "text-underline-position": true,
   visibility: true,

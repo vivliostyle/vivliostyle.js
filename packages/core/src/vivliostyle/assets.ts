@@ -535,6 +535,9 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
+text-spacing = normal | none | auto | [[ trim-start | space-start | space-first ] ||
+    [ trim-end | space-end | allow-end ] || [ trim-adjacent | space-adjacent ] ||
+    no-compress || ideograph-alpha || ideograph-numeric || punctuation];
 
 /* CSS Text Decoration */
 [webkit]text-decoration-color = COLOR;
@@ -1417,5 +1420,30 @@ ul[role="directory"],
 ul.toc,
 ul#toc {
   -adapt-behavior: toc-container;
+}
+`;
+
+// text-polyfill.css
+export const TextPolyfillCss = `
+viv-ts-open:not(.viv-ts-trim,.viv-ts-space)::before,
+viv-ts-close:not(.viv-ts-trim,.viv-ts-space)::after {
+  content: " ";
+  font-family: Courier, monospace;
+  font-size: 83.3%;
+  text-orientation: mixed;
+  visibility: hidden;
+}
+viv-ts-open:not(.viv-ts-space) > viv-ts-inner {
+  margin-inline-start: -0.5em;
+}
+viv-ts-close:not(.viv-ts-space) > viv-ts-inner {
+  margin-inline-end: -0.5em;
+}
+viv-ts-thin-sp::after {
+  content: " ";
+  font-family: Times, serif;
+  font-size: 66.6%;
+  text-orientation: mixed;
+  visibility: hidden;
 }
 `;
