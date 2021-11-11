@@ -1430,6 +1430,7 @@ viv-ts-close:not(.viv-ts-trim,.viv-ts-space)::after {
   content: " ";
   font-family: Courier, monospace;
   font-size: 83.3%;
+  line-height: 1;
   text-orientation: mixed;
   visibility: hidden;
 }
@@ -1443,6 +1444,7 @@ viv-ts-thin-sp::after {
   content: " ";
   font-family: Times, serif;
   font-size: 66.6%;
+  line-height: 1;
   text-orientation: mixed;
   visibility: hidden;
 }

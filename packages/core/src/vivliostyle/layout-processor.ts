@@ -177,10 +177,15 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     ) {
       return;
     }
-    const parentNode = nodeContext.viewNode.parentNode;
-    LayoutHelper.removeFollowingSiblings(parentNode, nodeContext.viewNode);
+    let node = nodeContext.viewNode;
+    if (node.parentElement?.localName === "viv-ts-inner") {
+      // special element for text-spacing
+      node = node.parentElement.parentElement;
+    }
+    const parentNode = node.parentNode;
+    LayoutHelper.removeFollowingSiblings(parentNode, node);
     if (removeSelf) {
-      parentNode.removeChild(nodeContext.viewNode);
+      parentNode.removeChild(node);
     }
   }
 

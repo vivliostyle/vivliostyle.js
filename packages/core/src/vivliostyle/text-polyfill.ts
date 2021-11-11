@@ -178,7 +178,7 @@ class TextSpacingPolyfill {
     for (let node = nodeIter.nextNode(); node; node = nodeIter.nextNode()) {
       const textArr = node.textContent
         .replace(
-          /\p{P}\p{M}*(?!\p{M})|.(?=\p{P})|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gu,
+          /\p{P}\p{M}*(?=\P{M})|.(?=\p{P})|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gu,
           "$&\x00",
         )
         .split("\x00");
@@ -211,6 +211,7 @@ class TextSpacingPolyfill {
         p.inline &&
         !p.display &&
         p.parent &&
+        p.viewNode.parentNode &&
         p.viewNode.nodeType === Node.TEXT_NODE &&
         p.viewNode.textContent.length > 0
       ) {
@@ -218,7 +219,7 @@ class TextSpacingPolyfill {
           p.lang ??
             p.parent.lang ??
             nodeContext.lang ??
-            nodeContext?.parent.lang,
+            nodeContext.parent?.lang,
         );
         const textSpacing = textSpacingFromPropertyValue(
           p.inheritedProps["text-spacing"],

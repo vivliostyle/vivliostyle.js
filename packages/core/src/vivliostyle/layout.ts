@@ -601,7 +601,26 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (position.viewNode.nodeType != 1) {
         const text = position.viewNode.textContent;
         const r = text.match(Base.firstLetterPattern);
-        return this.layoutContext.peelOff(position, r ? r[0].length : 0);
+        let firstLetterLength = r ? r[0].length : 0;
+        if (
+          !r &&
+          position.sourceNode instanceof Text &&
+          position.sourceNode.nextSibling instanceof Text &&
+          text === position.sourceNode.textContent
+        ) {
+          // The text '“Foo' may be split to '“' and 'Foo'
+          const text2 = text + position.sourceNode.nextSibling.textContent;
+          const r2 = text2.match(Base.firstLetterPattern);
+          if (r2) {
+            const firstLetterText = r2[0];
+            firstLetterLength = firstLetterText.length;
+            position.sourceNode.textContent = firstLetterText;
+            position.viewNode.textContent = firstLetterText;
+            position.sourceNode.nextSibling.textContent =
+              text2.substr(firstLetterLength);
+          }
+        }
+        return this.layoutContext.peelOff(position, firstLetterLength);
       }
     }
     return Task.newResult(position) as Task.Result<Vtree.NodeContext>;
@@ -1778,7 +1797,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         return;
       }
     }
-    const node = nodeContext.viewNode;
+    let node = nodeContext.viewNode;
+    if (node.parentElement?.localName === "viv-ts-inner") {
+      // special element for text-spacing
+      node = node.parentElement.parentElement;
+    }
     const doc = node.ownerDocument;
     const insertAfter =
       endOfColumn && (nodeContext.after || node.nodeType != 1);
@@ -2082,7 +2105,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const position = this.findEndOfLine(edgePosition, checkPoints, true);
     let nodeContext = position.nodeContext;
     const viewNode = nodeContext.viewNode;
-    if (viewNode.nodeType != 1) {
+    if (
+      viewNode.nodeType != 1 &&
+      viewNode.parentElement?.localName !== "viv-ts-inner"
+    ) {
       const textNode = viewNode as Text;
       const textNodeBreaker = this.resolveTextNodeBreaker(nodeContext);
       nodeContext = textNodeBreaker.breakTextNode(
