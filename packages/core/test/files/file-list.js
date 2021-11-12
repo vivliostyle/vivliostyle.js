@@ -149,6 +149,15 @@ module.exports = [
     ],
   },
   {
+    category: "Hanging Punctuation",
+    files: [
+      {
+        file: "text-spacing/hanging-punctuation.html",
+        title: "Hanging Punctuation",
+      },
+    ],
+  },
+  {
     category: "Blank page selector",
     files: [
       {

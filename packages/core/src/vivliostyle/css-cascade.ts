@@ -61,6 +61,7 @@ export const inheritedProps = {
   "font-variant-east-asian": true,
   "font-weight": true,
   "glyph-orientation-vertical": true,
+  "hanging-punctuation": true,
   hyphens: true,
   "hyphenate-character": true,
   "hyphenate-limit-chars": true,
