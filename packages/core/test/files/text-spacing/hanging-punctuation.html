@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Hanging-punctuation Test</title>
+  <style>
+    p {
+      border: 1px solid silver;
+      text-align: justify;
+      inline-size: 20em;
+      margin-inline-start: 1em;
+      margin-inline-end: 1em;
+    }
+    p:nth-of-type(n+2) {
+      inline-size: auto;
+    }
+    #test-hp-none p {
+      hanging-punctuation: none;
+    }
+    #test-hp-first p {
+      hanging-punctuation: first;
+    }
+    #test-hp-force-end p {
+      hanging-punctuation: force-end;
+    }
+    #test-hp-allow-end p {
+      hanging-punctuation: allow-end;
+    }
+    #test-hp-last p {
+      hanging-punctuation: last;
+      text-align: end;
+    }
+    #test-hp-first-last p {
+      hanging-punctuation: first last;
+      text-align-last: justify;
+    }
+    #test-hp-first-force-end-with-text-indent-and-ts-auto p {
+      hanging-punctuation: first force-end;
+      text-indent: 1em;
+      text-spacing: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hanging-punctuation Test</h1>
+  <section id="test-hp-none">
+    <h2>hanging-punctuation: none</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-hp-force-end">
+    <h2>hanging-punctuation: force-end</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-hp-allow-end">
+    <h2>hanging-punctuation: allow-end</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-hp-first">
+    <h2>hanging-punctuation: first</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-hp-last">
+    <h2>hanging-punctuation: last;<br>text-align: end;</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-hp-first-last">
+    <h2>hanging-punctuation: first last;<br>text-align-last: justify;</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-hp-first-force-end-with-text-indent-and-ts-auto">
+    <h2>hanging-punctuation: first end;<br>text-indent: 1em;<br>text-spacing: auto;</h2>
+    <p>『二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。一二三四五六七八九十。』</p>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+
+</body>
+</html>

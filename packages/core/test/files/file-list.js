@@ -132,6 +132,32 @@ module.exports = [
     ],
   },
   {
+    category: "Text Spacing",
+    files: [
+      {
+        file: "text-spacing/text-spacing-ja.html",
+        title: "Text Spacing (Japanese)",
+      },
+      {
+        file: "text-spacing/text-spacing-zh-hans.html",
+        title: "Text Spacing (Chinese, Simplified)",
+      },
+      {
+        file: "text-spacing/text-spacing-zh-hant.html",
+        title: "Text Spacing (Chinese, Traditional)",
+      },
+    ],
+  },
+  {
+    category: "Hanging Punctuation",
+    files: [
+      {
+        file: "text-spacing/hanging-punctuation.html",
+        title: "Hanging Punctuation",
+      },
+    ],
+  },
+  {
     category: "Blank page selector",
     files: [
       {
