@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.12.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.3...v2.12.0) (2021-11-13)
+
+### Features
+
+- Support CSS hanging-punctuation property ([f85b36e](https://github.com/vivliostyle/vivliostyle.js/commit/f85b36e6cbae67f3d137f856ef202fd53d640c4f))
+- Support CSS text-spacing property ([dfebffb](https://github.com/vivliostyle/vivliostyle.js/commit/dfebffbac1bf1ea3872c7f02e47419c250a2af34)), closes [#595](https://github.com/vivliostyle/vivliostyle.js/issues/595)
+
 ## [2.11.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.2...v2.11.3) (2021-10-31)
 
 ### Bug Fixes
