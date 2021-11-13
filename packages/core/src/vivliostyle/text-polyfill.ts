@@ -232,7 +232,7 @@ class TextSpacingPolyfill {
     for (let node = nodeIter.nextNode(); node; node = nodeIter.nextNode()) {
       const textArr = node.textContent
         .replace(
-          /\p{P}\p{M}*(?=\P{M})|.(?=\p{P})|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
+          /[\p{Ps}\p{Pe}\p{Pf}\p{Pi}'"、。，．：；､｡]\p{M}*(?=\P{M})|.(?=[\p{Ps}\p{Pe}\p{Pf}\p{Pi}'"、。，．：；､｡])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
           "$&\x00",
         )
         .split("\x00");
@@ -255,6 +255,7 @@ class TextSpacingPolyfill {
     checkPoints: Vtree.NodeContext[],
     column: Layout.Column,
   ): void {
+    const isFirstFragment = !nodeContext || nodeContext.fragmentIndex === 1;
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
       if (
@@ -269,8 +270,8 @@ class TextSpacingPolyfill {
         const lang = normalizeLang(
           p.lang ??
             p.parent.lang ??
-            nodeContext.lang ??
-            nodeContext.parent?.lang,
+            nodeContext?.lang ??
+            nodeContext?.parent?.lang,
         );
         const textSpacing = textSpacingFromPropertyValue(
           p.inheritedProps["text-spacing"],
@@ -281,7 +282,7 @@ class TextSpacingPolyfill {
 
         let prevNode: Node = null;
         let nextNode: Node = null;
-        let isFirstInBlock = i === 0 && nodeContext.fragmentIndex === 1;
+        let isFirstInBlock = i === 0 && isFirstFragment;
         let isFirstAfterForcedLineBreak = false;
         let isLastInBlock = false;
 
@@ -330,7 +331,7 @@ class TextSpacingPolyfill {
           ) {
             break;
           }
-          if (prev === 0 && nodeContext.fragmentIndex === 1) {
+          if (prev === 0 && isFirstFragment) {
             isFirstInBlock = true;
             isFirstAfterForcedLineBreak = true;
           }
@@ -370,7 +371,6 @@ class TextSpacingPolyfill {
           lang,
           p.vertical,
         );
-        isFirstInBlock = false;
       }
     }
   }

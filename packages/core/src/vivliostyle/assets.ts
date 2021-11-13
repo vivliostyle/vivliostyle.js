@@ -1430,7 +1430,7 @@ viv-ts-open:not(.viv-ts-trim,.viv-ts-space,.viv-hang-first)::before,
 viv-ts-close:not(.viv-ts-trim,.viv-ts-space,.viv-hang-last)::after {
   content: " ";
   font-family: Courier, monospace;
-  font-size: 83.3%;
+  font-size: 83%;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
@@ -1442,7 +1442,7 @@ viv-ts-close:not(.viv-ts-space,.viv-hang-last,.viv-hang-end:not(.viv-ts-trim)) >
   margin-inline-end: -0.5em;
 }
 viv-ts-close.viv-hang-end:not(.viv-ts-trim,.viv-hang-hw)::after {
-  font-size: 166.6%;
+  font-size: 166%;
 }
 viv-ts-close.viv-hang-end:not(.viv-ts-trim) > viv-ts-inner,
 viv-ts-close.viv-hang-last > viv-ts-inner {
