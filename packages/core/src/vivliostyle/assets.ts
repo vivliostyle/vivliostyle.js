@@ -1444,7 +1444,12 @@ viv-ts-close:not(.viv-ts-space,.viv-hang-last,.viv-hang-end:not(.viv-ts-trim)) >
 viv-ts-close.viv-hang-end:not(.viv-ts-trim,.viv-hang-hw)::after {
   font-size: 166%;
 }
-viv-ts-close.viv-hang-end:not(.viv-ts-trim) > viv-ts-inner,
+viv-ts-close.viv-hang-end:not(.viv-ts-trim) > viv-ts-inner {
+  margin-inline-end: -1em;
+}
+viv-ts-close.viv-hang-end.viv-hang-hw > viv-ts-inner {
+  margin-inline-end: -0.5em;
+}
 viv-ts-close.viv-hang-last > viv-ts-inner {
   display: inline-block;
   inline-size: 0;
