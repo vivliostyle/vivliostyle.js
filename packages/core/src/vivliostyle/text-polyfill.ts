@@ -16,6 +16,7 @@
  *
  * @fileoverview TextPolyfill - CSS text-spacing and hanging-punctuation support.
  */
+import * as Base from "./base";
 import * as Css from "./css";
 import * as Layout from "./layout";
 import * as Plugin from "./plugin";
@@ -230,6 +231,12 @@ class TextSpacingPolyfill {
       NodeFilter.SHOW_TEXT,
     );
     for (let node = nodeIter.nextNode(); node; node = nodeIter.nextNode()) {
+      if (
+        node.parentElement.namespaceURI !== Base.NS.XHTML ||
+        node.parentElement.dataset?.["mathTypeset"] === "true"
+      ) {
+        continue;
+      }
       const textArr = node.textContent
         .replace(
           /[\p{Ps}\p{Pe}\p{Pf}\p{Pi}'"、。，．：；､｡]\p{M}*(?=\P{M})|.(?=[\p{Ps}\p{Pe}\p{Pf}\p{Pi}'"、。，．：；､｡])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
