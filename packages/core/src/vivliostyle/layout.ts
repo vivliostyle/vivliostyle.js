@@ -2329,6 +2329,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     bp: BoxBreakPosition,
     force: boolean,
   ): Vtree.NodeContext {
+    // Workaround for issue #816 (Text with ruby overflowed at column/page break)
+    const parentNode = this.element.parentNode;
+    const nextSibling = this.element.nextSibling;
+    parentNode.removeChild(this.element);
+    parentNode.insertBefore(this.element, nextSibling);
+
     const checkPoints = bp.checkPoints;
     let block = checkPoints[0];
     while (block.parent && block.inline) {
