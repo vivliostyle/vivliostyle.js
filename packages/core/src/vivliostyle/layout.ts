@@ -429,23 +429,6 @@ export function validateCheckPoints(checkPoints: Vtree.NodeContext[]): void {
   }
 }
 
-export function isSpecialInlineDisplay(display: string): boolean {
-  switch (display) {
-    case "ruby":
-    case "ruby-base":
-    case "ruby-base-container":
-    case "ruby-text":
-    case "ruby-text-container":
-    case "inline-block":
-    case "inline-flex":
-    case "inline-grid":
-    case "inline-list-item":
-    case "inline-table":
-      return true;
-  }
-  return false;
-}
-
 export class Column extends VtreeImpl.Container implements Layout.Column {
   last: Node;
   viewDocument: Document;
@@ -2176,7 +2159,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           seekRange = !haveStart;
         } else if (
           /^r(uby|[bt]c?)$/.test((node as Element).localName) ||
-          isSpecialInlineDisplay(
+          LayoutHelper.isSpecialInlineDisplay(
             this.clientLayout.getElementComputedStyle(node as Element).display,
           )
         ) {
