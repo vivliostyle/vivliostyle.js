@@ -192,14 +192,35 @@ export function isSpecial(e: Element): boolean {
   return !!e.getAttribute(VtreeImpl.SPECIAL_ATTR);
 }
 
+const specialInlineDisplayTypes = {
+  ruby: true,
+  "ruby-base": true,
+  "ruby-base-container": true,
+  "ruby-text": true,
+  "ruby-text-container": true,
+  "inline-block": true,
+  "inline-flex": true,
+  "inline-grid": true,
+  "inline-list-item": true,
+  "inline-table": true,
+};
+
+export function isSpecialInlineDisplay(display: string): boolean {
+  return !!specialInlineDisplayTypes[display];
+}
+
 export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {
   if (!nodeContext) {
     return false;
   }
   const viewNode = nodeContext.viewNode;
-  if (viewNode && viewNode.nodeType === 1) {
-    return isSpecial(viewNode as Element);
-  } else {
-    return false;
+  if (viewNode && viewNode.nodeType === 1 && isSpecial(viewNode as Element)) {
+    return true;
   }
+  for (let p = nodeContext.parent; p; p = p.parent) {
+    if (isSpecialInlineDisplay(p.display)) {
+      return true;
+    }
+  }
+  return false;
 }
