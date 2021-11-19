@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.12.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.0...v2.12.1) (2021-11-19)
+
+### Bug Fixes
+
+- MathJax not enabled with inline TeX notation ([e7da5a2](https://github.com/vivliostyle/vivliostyle.js/commit/e7da5a21ff7f9bbaca1cbaff0864b4e797ec3683)), closes [#815](https://github.com/vivliostyle/vivliostyle.js/issues/815)
+- Ruby broken at column/page break ([5dfc049](https://github.com/vivliostyle/vivliostyle.js/commit/5dfc0490a2edde4054a8e2a6c4297af095be60c4)), closes [#821](https://github.com/vivliostyle/vivliostyle.js/issues/821)
+- Text with ruby overflowed at column/page break ([f15534d](https://github.com/vivliostyle/vivliostyle.js/commit/f15534d71157d1245e81eea8247f0ce3f7f92cf7)), closes [#816](https://github.com/vivliostyle/vivliostyle.js/issues/816)
+
 # [2.12.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.11.3...v2.12.0) (2021-11-13)
 
 ### Features
