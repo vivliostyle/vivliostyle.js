@@ -56,7 +56,11 @@ const highlightSelection = (selection: Selection): void => {
 const selectPosInfo = (node: Node, offset: number) => {
   const e = node.parentElement.closest("[data-adapt-eloff]");
   const eloff = e.getAttribute("data-adapt-eloff");
-  const es = document.querySelectorAll(`[data-adapt-eloff='${eloff}']`);
+  const eloffAttrSelector = `[data-adapt-eloff='${eloff}']`;
+  const es = Array.from(document.querySelectorAll(eloffAttrSelector)).filter(
+    (e) => !e.querySelector(eloffAttrSelector),
+  );
+
   let count = 0;
   let lastNodeType = -1;
   let lastNodeTextLength = 0;
