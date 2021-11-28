@@ -19,6 +19,7 @@
 
 import ko from "knockout";
 import applyTransformToRect from "../utils/scale-util";
+import urlParameters from "../stores/url-parameters";
 
 const supportTouchEvents = "ontouchstart" in window;
 
@@ -58,10 +59,26 @@ const collectElementsWithEloff = (eloff: number): Element[] => {
   );
 };
 
-interface SelectPosition {
-  eloff: number;
-  nodeIndex: number;
-  offset: number;
+class SelectPosition {
+  constructor(
+    readonly eloff: number,
+    readonly nodeIndex: number,
+    readonly offset: number,
+  ) {}
+
+  toString(): string {
+    return `${this.eloff},${this.nodeIndex},${this.offset}`;
+  }
+}
+
+class Mark {
+  constructor(readonly start: SelectPosition, readonly end: SelectPosition) {
+    // TODO; generete id
+  }
+
+  toString(): string {
+    return `[${this.start}],[${this.end}]`;
+  }
 }
 
 const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
@@ -103,11 +120,7 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     count += nodeIndex + 1;
   }
 
-  return {
-    eloff: eloff,
-    nodeIndex: count - 1,
-    offset: offset,
-  };
+  return new SelectPosition(eloff, count - 1, offset);
 };
 
 const selectedPositionToNode = (pos: SelectPosition): [Node, number] | null => {
@@ -197,6 +210,9 @@ const processSelection = (selection: Selection): void => {
       newRange.setStart(reStart[0], reStart[1]);
       newRange.setEnd(reEnd[0], reEnd[1]);
       hightlightRange(newRange, "rgba(0, 255, 0, 0.2)");
+      const mark = new Mark(start, end);
+      urlParameters.setParameter("mark", mark.toString());
+      console.log(urlParameters.getParameter("mark"));
     } else {
       console.error("something wrong");
     }
