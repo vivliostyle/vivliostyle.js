@@ -157,7 +157,16 @@ class SelectPosition {
   ) {}
 
   toString(): string {
-    return `${this.eloff},${this.nodeIndex},${this.offset}`;
+    return `${this.eloff}-${this.nodeIndex}-${this.offset}`;
+  }
+
+  static fromString(str: string): SelectPosition {
+    const [eloff, nodeIndex, offset] = str.split("-").map((x) => x.trim());
+    return new SelectPosition(
+      parseInt(eloff),
+      parseInt(nodeIndex),
+      parseInt(offset),
+    );
   }
 }
 
@@ -167,7 +176,14 @@ class Mark {
   }
 
   toString(): string {
-    return `[${this.start}],[${this.end}]`;
+    return `${this.start},${this.end}`;
+  }
+
+  static fromString(str: string): Mark {
+    const [s, e] = str.split(",");
+    const start = SelectPosition.fromString(s);
+    const end = SelectPosition.fromString(e);
+    return new Mark(start, end);
   }
 }
 
@@ -190,10 +206,6 @@ export const processSelection = (selection: Selection): void => {
     const reStart = selectedPositionToNode(start);
     const reEnd = selectedPositionToNode(end);
     if (reStart && reEnd) {
-      const newRange = document.createRange();
-      newRange.setStart(reStart.node, reStart.offset);
-      newRange.setEnd(reEnd.node, reEnd.offset);
-      hightlightRange(newRange, "rgba(0, 255, 0, 0.2)");
       const mark = new Mark(start, end);
       marksStore.pushMark(mark);
     } else {
@@ -203,20 +215,43 @@ export const processSelection = (selection: Selection): void => {
   }
 };
 
-class MarksStore {
+export class MarksStore {
   markArray: ObservableArray<Mark>;
   constructor() {
     this.markArray = ko.observableArray();
+    this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
 
   init(): void {
-    // TODO; collect marks from url parmater
+    const marksParam = urlParameters.getParameter("mark");
+    marksParam.forEach((m) => {
+      const mark = Mark.fromString(m);
+      this.pushMark(mark, false);
+    });
+    // TODO; wait for page rendered.
   }
 
-  pushMark(mark: Mark): void {
+  pushMark(mark: Mark, addToUrl = true): void {
     this.markArray.push(mark);
-    urlParameters.setParameter("mark", mark.toString());
+    if (addToUrl) {
+      urlParameters.setParameter("mark", mark.toString());
+    }
   }
+
+  markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
+    for (const change of changes) {
+      if (change.status == "added") {
+        const start = selectedPositionToNode(change.value.start);
+        const end = selectedPositionToNode(change.value.end);
+        if (start && end) {
+          const range = document.createRange();
+          range.setStart(start.node, start.offset);
+          range.setEnd(end.node, end.offset);
+          hightlightRange(range, "rgba(0, 255, 0, 0.2)");
+        }
+      }
+    }
+  };
 }
 
 const marksStore = new MarksStore();

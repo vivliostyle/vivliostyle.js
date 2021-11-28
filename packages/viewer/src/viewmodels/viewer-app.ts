@@ -31,6 +31,7 @@ import MessageDialog from "./message-dialog";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
+import marksStore, { MarksStore } from "./marks-store";
 
 class ViewerApp {
   documentOptions: DocumentOptions;
@@ -42,6 +43,7 @@ class ViewerApp {
   settingsPanel: SettingsPanel;
   navigation: Navigation;
   findBox: FindBox;
+  marksStore: MarksStore;
 
   constructor() {
     // Configuration flags
@@ -199,6 +201,9 @@ class ViewerApp {
       // this.findBox.open();
       // this.findBox.findNext();
     }
+
+    this.marksStore = marksStore;
+    marksStore.init();
 
     this.viewer.loadDocument(this.documentOptions);
 

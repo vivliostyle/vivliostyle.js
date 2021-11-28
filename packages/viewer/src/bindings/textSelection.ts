@@ -18,7 +18,7 @@
  */
 
 import ko from "knockout";
-import { processSelection } from "../viewmodels/mark-store";
+import { processSelection } from "../viewmodels/marks-store";
 const supportTouchEvents = "ontouchstart" in window;
 
 ko.bindingHandlers.textSelection = {
