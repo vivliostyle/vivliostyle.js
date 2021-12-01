@@ -16,9 +16,10 @@
 #vivliostyle-text-selection-menu {
   position: absolute;
   z-index: 88888889;
-  background: white;
+  background: #e0e0e0;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
   border-radius: 0 0 4px 4px;
+  padding: 0.2em;
   > .mark-color {
     height: 1.5em;
     width: 1.5em;
@@ -26,6 +27,8 @@
     border-radius: 50%;
     display: inline-block;
     cursor: pointer;
+    vertical-align: middle;
+    border: 1px solid #444;
     &:hover {
       opacity: 0.2;
     }
@@ -36,7 +39,7 @@
   > .green {
     background-color: #0e0;
   }
-  > .blue {
-    background-color: #00e;
+  > .yellow {
+    background-color: #ffd900;
   }
 }

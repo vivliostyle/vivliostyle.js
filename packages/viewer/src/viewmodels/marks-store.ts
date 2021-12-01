@@ -318,8 +318,8 @@ export class MarksStore {
             case "green":
               color = "rgba(0,255,0,0.2)";
               break;
-            case "blue":
-              color = "rgba(0,0,255,0.2)";
+            case "yellow":
+              color = "rgba(255,217,0,0.3)";
               break;
           }
           hightlightRange(range, color);
