@@ -19,20 +19,14 @@
 
 import ko from "knockout";
 import { processSelection } from "../viewmodels/marks-store";
-const supportTouchEvents = "ontouchstart" in window;
 
 ko.bindingHandlers.textSelection = {
   init(element, valueAccessor): void {
     if (ko.unwrap(valueAccessor())) {
-      if (supportTouchEvents) {
-        element.addEventListener("touchend", () => {
-          processSelection(document.getSelection());
-        });
-      } else {
-        element.addEventListener("mouseup", () => {
-          processSelection(document.getSelection());
-        });
-      }
+      element.addEventListener("mouseup", (e: MouseEvent) => {
+        e.stopPropagation();
+        processSelection(document.getSelection(), e);
+      });
     }
   },
 };

@@ -24,6 +24,7 @@ import ViewerApp from "./viewmodels/viewer-app";
 import "./bindings/menuButton";
 import "./bindings/swipePages";
 import "./bindings/textSelection";
+import "./bindings/clickOutside";
 
 export default {
   start(): void {

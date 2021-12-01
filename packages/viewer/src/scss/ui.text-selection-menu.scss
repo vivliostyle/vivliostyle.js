@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+@import "./lib/_mixins";
+@import "./lib/_vars";
+
+@import "~font-awesome/scss/_variables";
+@include at-font-face(
+  "FontAwesome",
+  "../fonts/fontawesome-webfont",
+  "#fontawesomeregular"
+);
+// ================================================================================
+// + Text Selection Menu
+// --------------------------------------------------------------------------------
+
+#vivliostyle-text-selection-menu {
+  position: absolute;
+  z-index: 88888889;
+  background: white;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
+  border-radius: 0 0 4px 4px;
+  > .mark-color {
+    height: 1.5em;
+    width: 1.5em;
+    margin: 0.2em;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    &:hover {
+      opacity: 0.2;
+    }
+  }
+  > .red {
+    background-color: #e00;
+  }
+  > .green {
+    background-color: #0e0;
+  }
+  > .blue {
+    background-color: #00e;
+  }
+}

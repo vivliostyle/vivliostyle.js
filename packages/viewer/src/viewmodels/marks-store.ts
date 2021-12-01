@@ -1,6 +1,25 @@
-import ko, { ObservableArray } from "knockout";
+/*
+ * Copyright 2021 Vivliostyle Foundation
+ *
+ * This file is part of Vivliostyle UI.
+ *
+ * Vivliostyle UI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle UI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import ko, { Observable, ObservableArray } from "knockout";
 import urlParameters from "../stores/url-parameters";
-import applyTransformToRect from "../utils/scale-util";
+import { applyTransformToRect } from "../utils/scale-util";
 
 const hightlightRange = (
   range: Range,
@@ -171,23 +190,30 @@ class SelectPosition {
 }
 
 class Mark {
-  constructor(readonly start: SelectPosition, readonly end: SelectPosition) {
+  constructor(
+    readonly start: SelectPosition,
+    readonly end: SelectPosition,
+    readonly color: string,
+  ) {
     // TODO; generete id ?
   }
 
   toString(): string {
-    return `${this.start},${this.end}`;
+    return `${this.start},${this.end},${this.color}`;
   }
 
   static fromString(str: string): Mark {
-    const [s, e] = str.split(",");
+    const [s, e, c] = str.split(",");
     const start = SelectPosition.fromString(s);
     const end = SelectPosition.fromString(e);
-    return new Mark(start, end);
+    return new Mark(start, end, c);
   }
 }
 
-export const processSelection = (selection: Selection): void => {
+export const processSelection = (
+  selection: Selection,
+  event: MouseEvent,
+): void => {
   if (selection.type == "Range") {
     const range = selection.getRangeAt(0);
     if (
@@ -195,6 +221,7 @@ export const processSelection = (selection: Selection): void => {
       range.endContainer.nodeType !== 3
     ) {
       // do nothing
+      selection.empty();
       return;
     }
     const start = selectedNodeToPosition(
@@ -202,23 +229,22 @@ export const processSelection = (selection: Selection): void => {
       range.startOffset,
     );
     const end = selectedNodeToPosition(range.endContainer, range.endOffset);
-
-    const reStart = selectedPositionToNode(start);
-    const reEnd = selectedPositionToNode(end);
-    if (reStart && reEnd) {
-      const mark = new Mark(start, end);
-      marksStore.pushMark(mark);
-    } else {
-      console.error("something wrong");
-    }
-    selection.empty();
+    // TODO; should apply scale
+    const x = event.clientX;
+    const y = event.clientY;
+    marksStore.openMenu(x, y, start, end, selection); // TODO
   }
 };
 
 export class MarksStore {
   markArray: ObservableArray<Mark>;
+  selectionMenuOpened: Observable<boolean>;
+  currentStart?: SelectPosition;
+  currentEnd?: SelectPosition;
+  currentSelection?: Selection;
   constructor() {
     this.markArray = ko.observableArray();
+    this.selectionMenuOpened = ko.observable(false);
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
 
@@ -231,10 +257,47 @@ export class MarksStore {
     // TODO; wait for page rendered.
   }
 
+  openMenu = (
+    x: number,
+    y: number,
+    start: SelectPosition,
+    end: SelectPosition,
+    selection: Selection,
+  ): void => {
+    this.currentStart = start;
+    this.currentEnd = end;
+    this.currentSelection = selection;
+    const menu = document.getElementById(
+      "vivliostyle-text-selection-menu",
+    ) as HTMLElement;
+    if (menu) {
+      menu.style.top = `${y}px`;
+      menu.style.left = `${x}px`;
+    }
+    this.selectionMenuOpened(true);
+  };
+
+  mark(colorName: string): void {
+    if (this.currentStart && this.currentEnd) {
+      const mark = new Mark(this.currentStart, this.currentEnd, colorName);
+      this.pushMark(mark);
+    }
+    this.currentSelection?.empty();
+    this.closeMenu();
+  }
+
+  closeMenu = (): void => {
+    this.currentStart = undefined;
+    this.currentEnd = undefined;
+    this.currentSelection = undefined;
+    this.selectionMenuOpened(false);
+  };
+
   pushMark(mark: Mark, addToUrl = true): void {
     this.markArray.push(mark);
     if (addToUrl) {
-      urlParameters.setParameter("mark", mark.toString());
+      const count = urlParameters.getParameter("mark").length;
+      urlParameters.setParameter("mark", mark.toString(), count);
     }
   }
 
@@ -247,7 +310,19 @@ export class MarksStore {
           const range = document.createRange();
           range.setStart(start.node, start.offset);
           range.setEnd(end.node, end.offset);
-          hightlightRange(range, "rgba(0, 255, 0, 0.2)");
+          let color = "";
+          switch (change.value.color) {
+            case "red":
+              color = "rgba(255,0, 0,0.2)";
+              break;
+            case "green":
+              color = "rgba(0,255,0,0.2)";
+              break;
+            case "blue":
+              color = "rgba(0,0,255,0.2)";
+              break;
+          }
+          hightlightRange(range, color);
         }
       }
     }

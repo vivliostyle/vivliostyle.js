@@ -17,31 +17,15 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const scale_regexp = /^scale\((?<scale>.+)\)$/;
+import ko from "knockout";
 
-export const applyScale = (p: number, scale: string): number => {
-  const scaleValue = parseFloat(scale.match(scale_regexp)?.groups?.scale);
-  if (scaleValue && !isNaN(scaleValue)) {
-    p /= scaleValue;
-  }
-  return p;
-};
-
-export const applyTransformToRect = (
-  rect: DOMRect,
-  scale: string,
-  parentRect: DOMRect,
-): DOMRect => {
-  let x = rect.x - parentRect.x;
-  let y = rect.y - parentRect.y;
-  let width = rect.width;
-  let height = rect.height;
-  const scaleValue = parseFloat(scale.match(scale_regexp)?.groups?.scale);
-  if (scaleValue && !isNaN(scaleValue)) {
-    x /= scaleValue;
-    y /= scaleValue;
-    width /= scaleValue;
-    height /= scaleValue;
-  }
-  return new DOMRect(x, y, width, height);
+ko.bindingHandlers.clickOutside = {
+  init(element, valueAccessor): void {
+    const callback = ko.utils.unwrapObservable(valueAccessor());
+    document.addEventListener("mousedown", (e: Event) => {
+      if (!(element.contains(e.target) || element === e.target)) {
+        callback();
+      }
+    });
+  },
 };

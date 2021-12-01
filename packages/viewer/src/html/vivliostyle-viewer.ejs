@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="css/ui.menu-bar.css"/>
     <link rel="stylesheet" href="css/ui.message-dialog.css"/>
     <link rel="stylesheet" href="css/ui.loading-overlay.css"/>
+    <link rel="stylesheet" href="css/ui.text-selection-menu.css"/>    
     <style id="vivliostyle-page-rules"></style>
   </head>
   <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
@@ -96,6 +97,11 @@
     </div>
     <div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()?'':false}">
       <div class="vivliostyle-loading-spinner"></div>
+    </div>
+    <div role="dialog" id="vivliostyle-text-selection-menu" data-bind="visible: marksStore.selectionMenuOpened, clickOutside: marksStore.closeMenu">
+      <span class="mark-color red" data-bind="click: marksStore.mark('red')"></span>
+      <span class="mark-color green" data-bind="click: marksStore.mark('green')"></span>
+      <span class="mark-color blue" data-bind="click: marksStore.mark('blue')"></span>            
     </div>
 
     <!-- MENU BAR -->
