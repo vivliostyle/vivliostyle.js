@@ -203,7 +203,10 @@ class ViewerApp {
     }
 
     this.marksStore = marksStore;
-    marksStore.init();
+    this.marksStore.init();
+    this.viewer.rerenderTrigger.subscribe(() => {
+      this.marksStore.retryHighlightMarks();
+    });
 
     this.viewer.loadDocument(this.documentOptions);
 

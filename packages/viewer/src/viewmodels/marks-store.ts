@@ -24,17 +24,22 @@ import { applyTransformToRect } from "../utils/scale-util";
 const hightlightRange = (
   range: Range,
   background = "rgba(255, 0, 0, 0.2)",
+  mark: Mark,
 ): void => {
   // TODO; collect all active page container and check boundary.
   const parent = range.startContainer.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
-  const zoomBox = range.startContainer.parentElement.closest(
+  if (mark.existMarkIn(parent)) {
+    // already exists;
+    return;
+  }
+  const zoomBox = range.startContainer?.parentElement?.closest(
     "[data-vivliostyle-outer-zoom-box]",
-  ).firstElementChild as HTMLElement;
-  const scale = zoomBox.style.transform;
-  const parentRect = parent.getBoundingClientRect();
-  const rects = range.getClientRects();
+  )?.firstElementChild as HTMLElement;
+  const scale = zoomBox?.style?.transform;
+  const parentRect = parent?.getBoundingClientRect();
+  const rects = range?.getClientRects() || [];
   for (const r of rects) {
     const rect = applyTransformToRect(r, scale, parentRect);
     const div = document.createElement("div");
@@ -46,6 +51,7 @@ const hightlightRange = (
     div.style.width = `${rect.width}px`;
     div.style.height = `${rect.height}px`;
     div.style.background = background;
+    div.setAttribute(Mark.idAttr, mark.idString());
     parent.appendChild(div);
   }
 };
@@ -169,6 +175,7 @@ const collectElementsWithEloff = (eloff: number): Element[] => {
 };
 
 class SelectPosition {
+  // TODO ; should include document index
   constructor(
     readonly eloff: number,
     readonly nodeIndex: number,
@@ -189,17 +196,29 @@ class SelectPosition {
   }
 }
 
+let markSeq = 0;
 class Mark {
+  readonly seqNumber: number;
+  static readonly idAttr = "data-viv-marker-id";
   constructor(
     readonly start: SelectPosition,
     readonly end: SelectPosition,
     readonly color: string,
   ) {
-    // TODO; generete id ?
+    this.seqNumber = markSeq++;
   }
 
   toString(): string {
     return `${this.start},${this.end},${this.color}`;
+  }
+
+  idString(): string {
+    // TODO; may change
+    return `${this.seqNumber}`;
+  }
+
+  existMarkIn(e: Element): boolean {
+    return !!e.querySelector(`[${Mark.idAttr}="${this.idString()}"]`);
   }
 
   static fromString(str: string): Mark {
@@ -254,7 +273,6 @@ export class MarksStore {
       const mark = Mark.fromString(m);
       this.pushMark(mark, false);
     });
-    // TODO; wait for page rendered.
   }
 
   openMenu = (
@@ -301,29 +319,39 @@ export class MarksStore {
     }
   }
 
+  retryHighlightMarks(): void {
+    this.markArray().forEach((mark) => {
+      this.highlightMark(mark);
+    });
+  }
+
+  private highlightMark(mark: Mark): void {
+    const start = selectedPositionToNode(mark.start);
+    const end = selectedPositionToNode(mark.end);
+    if (start && end) {
+      const range = document.createRange();
+      range.setStart(start.node, start.offset);
+      range.setEnd(end.node, end.offset);
+      let color = "";
+      switch (mark.color) {
+        case "red":
+          color = "rgba(255,0, 0,0.2)";
+          break;
+        case "green":
+          color = "rgba(0,255,0,0.2)";
+          break;
+        case "yellow":
+          color = "rgba(255,217,0,0.3)";
+          break;
+      }
+      hightlightRange(range, color, mark);
+    }
+  }
+
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
     for (const change of changes) {
       if (change.status == "added") {
-        const start = selectedPositionToNode(change.value.start);
-        const end = selectedPositionToNode(change.value.end);
-        if (start && end) {
-          const range = document.createRange();
-          range.setStart(start.node, start.offset);
-          range.setEnd(end.node, end.offset);
-          let color = "";
-          switch (change.value.color) {
-            case "red":
-              color = "rgba(255,0, 0,0.2)";
-              break;
-            case "green":
-              color = "rgba(0,255,0,0.2)";
-              break;
-            case "yellow":
-              color = "rgba(255,217,0,0.3)";
-              break;
-          }
-          hightlightRange(range, color);
-        }
+        this.highlightMark(change.value);
       }
     }
   };
