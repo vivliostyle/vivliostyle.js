@@ -21,7 +21,7 @@ import ko, { Observable, ObservableArray } from "knockout";
 import urlParameters from "../stores/url-parameters";
 import { applyTransformToRect } from "../utils/scale-util";
 
-const hightlightRange = (
+const highlightRange = (
   range: Range,
   background = "rgba(255, 0, 0, 0.2)",
   mark: Mark,
@@ -344,7 +344,7 @@ export class MarksStore {
           color = "rgba(255,217,0,0.3)";
           break;
       }
-      hightlightRange(range, color, mark);
+      highlightRange(range, color, mark);
     }
   }
 
