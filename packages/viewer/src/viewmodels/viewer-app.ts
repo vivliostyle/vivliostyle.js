@@ -72,6 +72,7 @@ class ViewerApp {
     const disableContextMenu = flags.includes("c");
     const defaultBookMode = flags.includes("b");
     const defaultRenderAllPages = !flags.includes("a");
+    const disableScripts = flags.includes("d");
 
     if (disableSettings) {
       const welcome: HTMLElement = document.getElementById(
@@ -97,6 +98,10 @@ class ViewerApp {
 
     this.documentOptions = new DocumentOptions(defaultBookMode);
     this.viewerOptions = new ViewerOptions(defaultRenderAllPages);
+
+    if (disableScripts) {
+      this.viewerOptions.allowScripts(false);
+    }
 
     this.documentOptions.pageStyle.setViewerFontSizeObservable(
       this.viewerOptions.fontSize,
@@ -135,6 +140,7 @@ class ViewerApp {
     urlParameters.removeParameter("f", true); // only first one is effective
     urlParameters.removeParameter("spread", true);
     urlParameters.removeParameter("bookMode", true);
+    urlParameters.removeParameter("allowScripts", true);
     urlParameters.removeParameter("renderAllPages", true);
     urlParameters.removeParameter("fontSize", true);
     urlParameters.removeParameter("find", true);

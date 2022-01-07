@@ -29,6 +29,7 @@ import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions, { FitToScreen } from "./zoom-options";
 
 interface ViewerOptionsType {
+  allowScripts: boolean;
   renderAllPages: boolean;
   fontSize: number;
   profile: boolean;
@@ -37,6 +38,7 @@ interface ViewerOptionsType {
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
+  const allowScripts = urlParameters.getParameter("allowScripts")[0];
   const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
   const fontSizeStr = urlParameters.getParameter("fontSize")[0];
   const r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
@@ -51,6 +53,8 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
     if (fontSize > 72) fontSize = 72;
   }
   return {
+    allowScripts:
+      allowScripts === "true" ? true : allowScripts === "false" ? false : null,
     renderAllPages:
       renderAllPages === "true"
         ? true
@@ -70,6 +74,7 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
 
 function getDefaultValues(): ViewerOptionsType {
   return {
+    allowScripts: true,
     renderAllPages: true,
     fontSize: 16,
     profile: false,
@@ -79,6 +84,7 @@ function getDefaultValues(): ViewerOptionsType {
 }
 
 class ViewerOptions {
+  allowScripts: Observable<boolean>;
   renderAllPages: Observable<boolean>;
   fontSize: Observable<number | string>;
   profile: Observable<boolean>;
@@ -86,6 +92,7 @@ class ViewerOptions {
   zoom: Observable<ZoomOptions>;
 
   static getDefaultValues: () => {
+    allowScripts: boolean;
     renderAllPages: boolean;
     fontSize: number;
     profile: boolean;
@@ -101,6 +108,7 @@ class ViewerOptions {
       typeof arg === "boolean" ? arg : undefined;
     const options: ViewerOptions = typeof arg === "object" ? arg : undefined;
 
+    this.allowScripts = ko.observable();
     this.renderAllPages = ko.observable();
     this.fontSize = ko.observable();
     this.profile = ko.observable();
@@ -112,6 +120,7 @@ class ViewerOptions {
     } else {
       const defaultValues = getDefaultValues();
       const urlOptions = getViewerOptionsFromURL();
+      this.allowScripts(urlOptions.allowScripts ?? defaultValues.allowScripts);
       this.renderAllPages(urlOptions.renderAllPages ?? defaultRenderAllPages);
       this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
       this.profile(urlOptions.profile || defaultValues.profile);
@@ -160,6 +169,7 @@ class ViewerOptions {
   }
 
   copyFrom(other: ViewerOptions): void {
+    this.allowScripts(other.allowScripts());
     this.renderAllPages(other.renderAllPages());
     this.fontSize(other.fontSize());
     this.profile(other.profile());
@@ -169,6 +179,7 @@ class ViewerOptions {
 
   toObject(): CoreViewerOptions {
     return {
+      allowScripts: this.allowScripts() as boolean,
       renderAllPages: this.renderAllPages() as boolean,
       fontSize: Number(this.fontSize()),
       pageViewMode: this.pageViewMode().toString() as CorePageViewMode,

@@ -170,10 +170,11 @@ class Viewer {
         this.lastPage(last);
       }
       if (metadata || docTitle) {
+        let title = document.title;
         const pubTitle =
           metadata?.["http://purl.org/dc/terms/title"]?.[0]?.["v"];
         if (!pubTitle) {
-          document.title = docTitle ? docTitle : "Vivliostyle Viewer";
+          title = docTitle ? docTitle : "Vivliostyle Viewer";
         } else if (
           !docTitle ||
           docTitle === pubTitle ||
@@ -181,9 +182,12 @@ class Viewer {
           /\.xhtml$/.test(docTitle)
         ) {
           // ignore ugly titles copied from *.xhtml file name
-          document.title = pubTitle;
+          title = pubTitle;
         } else {
-          document.title = `${docTitle} | ${pubTitle}`;
+          title = `${docTitle} | ${pubTitle}`;
+        }
+        if (title !== document.title) {
+          document.title = title;
         }
         const layout =
           metadata?.["http://www.idpf.org/vocab/rendition/#layout"]?.[0]?.["v"];

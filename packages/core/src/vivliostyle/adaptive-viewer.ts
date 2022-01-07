@@ -27,6 +27,7 @@ import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Plugin from "./plugin";
 import * as Profile from "./profile";
+import * as Scripts from "./scripts";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
@@ -420,6 +421,14 @@ export class AdaptiveViewer {
       this.viewport = null;
       this.pref.defaultPaperSize = command["defaultPaperSize"];
       this.needResize = true;
+    }
+    // JavaScript in HTML documents support
+    if (
+      typeof command["allowScripts"] == "boolean" &&
+      command["allowScripts"] !== Scripts.allowScripts
+    ) {
+      Scripts.setAllowScripts(command["allowScripts"]);
+      this.needRefresh = true;
     }
     this.configurePlugins(command);
     return Task.newResult(true);
@@ -918,11 +927,27 @@ export class AdaptiveViewer {
                             this.renderTask = null;
                           }
                           Profile.profiler.registerEndTiming("render (resize)");
-                          if (this.renderAllPages) {
-                            this.setReadyState(Constants.ReadyState.COMPLETE);
+                          // JavaScript in HTML documents support
+                          if (
+                            Scripts.allowScripts &&
+                            Scripts.hasScripts(this.window)
+                          ) {
+                            Scripts.loadScriptsAtEnd(this.window).then(() => {
+                              if (this.renderAllPages) {
+                                this.setReadyState(
+                                  Constants.ReadyState.COMPLETE,
+                                );
+                              }
+                              this.callback({ t: "loaded" });
+                              frame.finish(p);
+                            });
+                          } else {
+                            if (this.renderAllPages) {
+                              this.setReadyState(Constants.ReadyState.COMPLETE);
+                            }
+                            this.callback({ t: "loaded" });
+                            frame.finish(p);
                           }
-                          this.callback({ t: "loaded" });
-                          frame.finish(p);
                         });
                       });
                     });
