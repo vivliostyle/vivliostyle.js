@@ -79,6 +79,7 @@ export type CoreViewerOptions = {
   zoom?: number;
   fitToScreen?: boolean;
   defaultPaperSize?: { width: number; height: number };
+  allowScripts?: boolean;
 };
 
 function getDefaultViewerOptions(): CoreViewerOptions {
@@ -91,6 +92,7 @@ function getDefaultViewerOptions(): CoreViewerOptions {
     zoom: 1,
     fitToScreen: false,
     defaultPaperSize: undefined,
+    allowScripts: true,
   };
 }
 

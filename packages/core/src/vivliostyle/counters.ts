@@ -837,6 +837,7 @@ class LayoutConstraint implements Layout.LayoutConstraint {
       return true;
     }
     const id =
+      (viewNode as Element).getAttribute("data-vivliostyle-id") ||
       (viewNode as Element).getAttribute("id") ||
       (viewNode as Element).getAttribute("name");
     if (!id) {

@@ -35,6 +35,7 @@ import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as PseudoElement from "./pseudo-element";
 import * as RepetitiveElement from "./repetitive-element";
+import * as Scripts from "./scripts";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import * as Urls from "./urls";
@@ -708,6 +709,10 @@ export class ViewFactory
       frame.finish(false);
       return frame.result();
     }
+    if (Scripts.allowScripts && element instanceof HTMLScriptElement) {
+      Scripts.loadScript(element, this.viewport.window).thenFinish(frame);
+      return frame.result();
+    }
     let display = computedStyle["display"];
     if (display === Css.ident.none) {
       // no content
@@ -1127,7 +1132,7 @@ export class ViewFactory
           let attributeName = attribute.localName;
           let attributeValue = attribute.nodeValue;
           if (!attributeNS) {
-            if (attributeName.match(/^on/)) {
+            if (!Scripts.allowScripts && attributeName.match(/^on/)) {
               continue; // don't propagate JavaScript code
             }
             if (attributeName == "style") {
@@ -1137,12 +1142,22 @@ export class ViewFactory
               // Propagate transformed ids and collect them on the page
               // (only first time).
               if (firstTime) {
-                attributeValue = this.documentURLTransformer.transformFragment(
-                  attributeValue,
-                  this.xmldoc.url,
-                );
-                result.setAttribute(attributeName, attributeValue);
-                this.page.registerElementWithId(result, attributeValue);
+                const transformedValue =
+                  this.documentURLTransformer.transformFragment(
+                    attributeValue,
+                    this.xmldoc.url,
+                  );
+                if (
+                  Scripts.allowScripts &&
+                  !result.ownerDocument.getElementById(attributeValue)
+                ) {
+                  // Keep original id value so that JavaScript can manipulate it
+                  result.setAttribute(attributeName, attributeValue);
+                  result.setAttribute("data-vivliostyle-id", transformedValue);
+                } else {
+                  result.setAttribute(attributeName, transformedValue);
+                }
+                this.page.registerElementWithId(result, transformedValue);
                 continue;
               }
             }

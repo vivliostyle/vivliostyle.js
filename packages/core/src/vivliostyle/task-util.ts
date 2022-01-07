@@ -131,15 +131,9 @@ export const waitForFetchers = <T>(
 /**
  * @return holding event type (load/error/abort)
  */
-export function loadElement(elem: Element, src: string): Fetcher<string> {
-  let width: string | null = null;
-  let height: string | null = null;
-  if (elem.localName == "img") {
-    width = elem.getAttribute("width");
-    height = elem.getAttribute("height");
-  }
+export function loadElement(elem: Element, src?: string): Fetcher<string> {
   const fetcher = new Fetcher(() => {
-    const frame: Task.Frame<string> = Task.newFrame("loadImage");
+    const frame: Task.Frame<string> = Task.newFrame("loadElement");
     const continuation = frame.suspend(elem);
     let done = false;
     const handler = (evt: Event) => {
@@ -148,30 +142,22 @@ export function loadElement(elem: Element, src: string): Fetcher<string> {
       } else {
         done = true;
       }
-      if (elem.localName == "img") {
-        // IE puts these bogus attributes, even if they were not present
-        if (!width) {
-          elem.removeAttribute("width");
-        }
-        if (!height) {
-          elem.removeAttribute("height");
-        }
-      }
       continuation.schedule(evt ? evt.type : "timeout");
     };
     elem.addEventListener("load", handler, false);
     elem.addEventListener("error", handler, false);
     elem.addEventListener("abort", handler, false);
     if (elem.namespaceURI == Base.NS.SVG) {
-      elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
-
+      if (src) {
+        elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
+      }
       // SVG handlers are not reliable
       setTimeout(handler, 300);
-    } else {
+    } else if (src) {
       (elem as any).src = src;
     }
     return frame.result();
-  }, `loadElement ${src}`);
+  }, `loadElement ${src || elem.localName}`);
   fetcher.start();
   return fetcher;
 }

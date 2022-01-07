@@ -46,6 +46,7 @@ import * as PageFloats from "./page-floats";
 import * as CssPage from "./css-page";
 import * as Plugin from "./plugin";
 import * as PageMaster from "./page-master";
+import * as Scripts from "./scripts";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
@@ -344,7 +345,14 @@ export class StyleInstance
       const srcFace = new Font.Face(properties);
       srcFaces.push(srcFace);
     }
-    this.fontMapper.findOrLoadFonts(srcFaces, this.faces).thenFinish(frame);
+    this.fontMapper.findOrLoadFonts(srcFaces, this.faces).then(() => {
+      // JavaScript in HTML documents support
+      Scripts.loadScriptsInHead(
+        this.xmldoc.document,
+        this.viewport.window,
+        this.styler,
+      ).thenFinish(frame);
+    });
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = this.style.pageProps;
