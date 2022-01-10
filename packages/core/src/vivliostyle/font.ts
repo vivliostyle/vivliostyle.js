@@ -227,54 +227,11 @@ export class Mapper {
     const fontFamily = this.getViewFontFamily(srcFace, documentFaces);
     props["font-family"] = Css.getName(fontFamily);
     const viewFontFace = new Face(props);
-    const probe = this.body.ownerDocument.createElement("span");
-    probe.textContent = "M";
-    const killTime = new Date().valueOf() + 1000;
     const style = this.head.ownerDocument.createElement("style");
-    const bogusData = bogusFontData + bogusFontCounter++;
-    style.textContent = viewFontFace.makeAtRule("", Net.makeBlob([bogusData]));
-    this.head.appendChild(style);
-    const probeCont = this.body.ownerDocument.createElement("span");
-    probeCont.style.width = "0";
-    probeCont.style.height = "0";
-    probeCont.style.overflow = "hidden";
-    probeCont.appendChild(probe);
-    this.body.appendChild(probeCont);
-    probe.style.visibility = "hidden";
-    probe.style.fontFamily = fontFamily;
-    for (const pname in traitProps) {
-      Base.setCSSProperty(probe, pname, props[pname].toString());
-    }
-    const rect = probe.getBoundingClientRect();
-    const initWidth = rect.right - rect.left;
-    const initHeight = rect.bottom - rect.top;
     style.textContent = viewFontFace.makeAtRule(src, fontBytes);
-    Logging.logger.info("Starting to load font:", src);
-    let loaded = false;
-    frame
-      .loop(() => {
-        const rect = probe.getBoundingClientRect();
-        const currWidth = rect.right - rect.left;
-        const currHeight = rect.bottom - rect.top;
-        if (initWidth != currWidth || initHeight != currHeight) {
-          loaded = true;
-          return Task.newResult(false);
-        }
-        const currTime = new Date().valueOf();
-        if (currTime > killTime) {
-          return Task.newResult(false);
-        }
-        return frame.sleep(10);
-      })
-      .then(() => {
-        if (loaded) {
-          Logging.logger.info("Loaded font:", src);
-        } else {
-          Logging.logger.warn("Failed to load font:", src);
-        }
-        this.body.removeChild(probeCont);
-        frame.finish(viewFontFace);
-      });
+    this.head.appendChild(style);
+    Logging.logger.debug("Load font:", src);
+    frame.finish(viewFontFace);
     return frame.result();
   }
 
@@ -292,7 +249,7 @@ export class Mapper {
           Logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
         } else {
           documentFaces.registerFamily(srcFace, viewFace);
-          Logging.logger.warn("Found already-loaded font:", src);
+          Logging.logger.debug("Found already-loaded font:", src);
         }
       });
     } else {
@@ -336,6 +293,34 @@ export class Mapper {
       }
       fetchers.push(this.loadFont(srcFace, documentFaces));
     }
-    return TaskUtil.waitForFetchers(fetchers);
+    return TaskUtil.waitForFetchers(fetchers).thenAsync(() =>
+      this.waitFontLoading(),
+    );
+  }
+
+  waitFontLoading(): Task.Result<boolean> {
+    const fonts = this.head.ownerDocument["fonts"]; // FontFaceSet
+    let unloadedCount = 0;
+    fonts.forEach((fontFace) => {
+      if (fontFace.status === "unloaded") {
+        unloadedCount++;
+        fontFace.load();
+      }
+    });
+    if (unloadedCount === 0) {
+      return Task.newResult(true);
+    }
+    const frame: Task.Frame<boolean> = Task.newFrame("waitFontLoading");
+    frame
+      .loop(() => {
+        return frame.sleep(20).thenAsync(() => {
+          if (fonts.status === "loading") {
+            return Task.newResult(true); // continue
+          }
+          return Task.newResult(false); // break
+        });
+      })
+      .thenFinish(frame);
+    return frame.result();
   }
 }

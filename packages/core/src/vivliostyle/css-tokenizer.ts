@@ -1718,9 +1718,8 @@ export class Tokenizer {
             (tokenType === TokenType.URANGE && charCode === 63) ||
             (tokenType === TokenType.IDENT &&
               tokenText.toLowerCase() === "u" &&
-              /^\+[?0-9a-fA-F]/.test(input.substr(position, 2)) &&
-              /\bunicode-range\s*:\s*(u\+[-?0-9a-f]+\s*,\s*)*u$/i.test(
-                input.substr(0, position),
+              /^(\bu\+[?0-9a-f]+(-[?0-9a-f]+)?|,|\s+|\/\*([^*]|\*[^/])*\*\/)+[;}]/i.test(
+                input.substring(position - 1),
               ))
           ) {
             tokenType = TokenType.URANGE;
