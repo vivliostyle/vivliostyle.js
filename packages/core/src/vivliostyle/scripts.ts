@@ -122,7 +122,7 @@ export function loadScript(
       scriptElem.setAttribute(attr.name, attr.value);
     }
   }
-  Logging.logger.info("script:", src);
+  Logging.logger.debug("script:", src);
   if (!src) {
     window.document.head.appendChild(scriptElem);
     return Task.newResult(true);
@@ -168,14 +168,6 @@ function prepareTextContentForWebFonts(
   return textContentDiv;
 }
 
-function isWebFontLoading(window: Window): boolean {
-  // Check font-face loading status or the "wf-loading" class set by Typekit Web Font Loader
-  return (
-    (window.document as any).fonts.status === "loading" ||
-    /\bwf-loading\b/.test(window.document.documentElement.className)
-  );
-}
-
 export function loadScriptsInHead(
   srcDocument: Document,
   window: Window,
@@ -201,15 +193,29 @@ export function loadScriptsInHead(
   const textContentDiv = needPrepareForWebFonts
     ? prepareTextContentForWebFonts(srcDocument, window, styler)
     : null;
+  const fonts = window.document["fonts"]; // FontFaceSet
   const savedDollar = window["$"];
   let forceDefer = false;
   const frame: Task.Frame<boolean> = Task.newFrame("loadScripts");
   frame
     .loop(() => {
       if (srcScripts.length === 0) {
-        return frame.sleep(10).thenAsync(() => {
-          if (isWebFontLoading(window)) {
-            return frame.sleep(100).thenReturn(true); // continue
+        if (!needPrepareForWebFonts) {
+          return Task.newResult(false); // break
+        }
+        return frame.sleep(20).thenAsync(() => {
+          if (
+            fonts.status === "loading" ||
+            // for Typekit Web Font Loader (Adobe Fonts)
+            window.document.documentElement.classList.contains("wf-loading") ||
+            // For DynaFont
+            // FIXME: checking the global variable `ret` set in https://dfo.dynacw.co.jp/JSDynaFont/DynaFont.js
+            // would be not very good, because it seems to have been made global by mistake.
+            (window["FontJSON"]?.Font &&
+              window["ret"]?.readyState &&
+              window["ret"].readyState < 4)
+          ) {
+            return Task.newResult(true); // continue
           }
           return Task.newResult(false); // break
         });
@@ -227,6 +233,7 @@ export function loadScriptsInHead(
         if (srcScripts.length === 0) {
           if (needPrepareForWebFonts) {
             // Some web font loaders (DynaFont, FONTPLUS) need DOMContentLoaded event
+            Logging.logger.debug("dispatchEvent: DOMContentLoaded (document)");
             window.document.dispatchEvent(new Event("DOMContentLoaded"));
           }
         }
@@ -257,7 +264,9 @@ export function loadScriptsAtEnd(window: Window): Task.Result<boolean> {
       }).thenReturn(deferredScripts.length > 0);
     })
     .then(() => {
+      Logging.logger.debug("dispatchEvent: DOMContentLoaded (window)");
       window.dispatchEvent(new Event("DOMContentLoaded"));
+      Logging.logger.debug("dispatchEvent: load (window)");
       window.dispatchEvent(new Event("load"));
       frame.finish(true);
     });

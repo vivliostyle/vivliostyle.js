@@ -153,6 +153,8 @@ export function loadElement(elem: Element, src?: string): Fetcher<string> {
       }
       // SVG handlers are not reliable
       setTimeout(handler, 300);
+    } else if (elem.localName === "script") {
+      setTimeout(handler, 3000);
     } else if (src) {
       (elem as any).src = src;
     }
