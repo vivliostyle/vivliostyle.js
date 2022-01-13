@@ -1444,13 +1444,11 @@ export class Tokenizer {
     let newIndex = 0;
     while (oldIndex != this.tail) {
       newBuffer[newIndex] = this.buffer[oldIndex];
-      if (oldIndex == this.curr) {
-        this.curr = newIndex;
-      }
       oldIndex = (oldIndex + 1) & this.indexMask;
       newIndex++;
     }
     this.head = 0;
+    this.curr = newIndex;
     this.tail = newIndex;
     this.indexMask = newIndexMask;
     this.buffer = newBuffer;
