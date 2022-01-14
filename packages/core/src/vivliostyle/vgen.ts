@@ -1149,6 +1149,10 @@ export class ViewFactory
                   );
                 if (
                   Scripts.allowScripts &&
+                  !(
+                    result.namespaceURI === Base.NS.SVG &&
+                    result.localName !== "svg"
+                  ) &&
                   !result.ownerDocument.getElementById(attributeValue)
                 ) {
                   // Keep original id value so that JavaScript can manipulate it
