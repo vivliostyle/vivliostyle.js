@@ -1194,6 +1194,10 @@ export class OPFDoc {
           // Avoid link to external resources
           continue;
         }
+        if (/\.(jpe?g|png|gif|pdf|svg|mml)([#?]|$)/.test(href)) {
+          // Avoid link to non-HTML resources
+          continue;
+        }
         const hrefNoFragment = Base.stripFragment(
           Base.resolveURL(href, this.pubURL),
         );

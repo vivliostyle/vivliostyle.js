@@ -225,6 +225,9 @@ class TextSpacingPolyfill {
   }
 
   preprocessSingleDocument(document: Document): void {
+    if (!document.body) {
+      return;
+    }
     // Split text nodes by punctuations and ideograph/non-ideograph boundary
     const nodeIter = document.createNodeIterator(
       document.body,
