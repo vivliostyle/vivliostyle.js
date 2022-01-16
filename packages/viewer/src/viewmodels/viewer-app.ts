@@ -143,6 +143,7 @@ class ViewerApp {
     urlParameters.removeParameter("allowScripts", true);
     urlParameters.removeParameter("renderAllPages", true);
     urlParameters.removeParameter("fontSize", true);
+    urlParameters.removeParameter("zoom", true);
     urlParameters.removeParameter("find", true);
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
