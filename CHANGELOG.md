@@ -15,7 +15,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- Allow JavaScript in HTML documents ([ccd31da](https://github.com/vivliostyle/vivliostyle.js/commit/ccd31da5ff3eba91432953580483548cecd84859)), closes [#733](https://github.com/vivliostyle/vivliostyle.js/issues/733) [#735](https://github.com/vivliostyle/vivliostyle.js/issues/735) [/github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts#L73](https://github.com//github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts/issues/L73)
+- Allow JavaScript in HTML documents ([ccd31da](https://github.com/vivliostyle/vivliostyle.js/commit/ccd31da5ff3eba91432953580483548cecd84859)), closes [#733](https://github.com/vivliostyle/vivliostyle.js/issues/733) [#735](https://github.com/vivliostyle/vivliostyle.js/issues/735)
 - **viewer:** Add zoom URL parameter to keep zoom value on reloading ([3bdab51](https://github.com/vivliostyle/vivliostyle.js/commit/3bdab51e557ccb358be3c2c69d36448ca08fd890)), closes [#825](https://github.com/vivliostyle/vivliostyle.js/issues/825)
 
 ## [2.12.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.0...v2.12.1) (2021-11-19)
