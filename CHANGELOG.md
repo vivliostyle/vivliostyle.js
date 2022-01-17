@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.13.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.1...v2.13.0) (2022-01-17)
+
+### Bug Fixes
+
+- "The target resource is invalid" error caused by TOC with non-HTML links ([d90e2aa](https://github.com/vivliostyle/vivliostyle.js/commit/d90e2aa2af33a3677005a1fa4e4b93f9ac2cfee3)), closes [#839](https://github.com/vivliostyle/vivliostyle.js/issues/839)
+- CSS parser error, failed to parse stylesheet ([a5a48d2](https://github.com/vivliostyle/vivliostyle.js/commit/a5a48d28a0d6f2862d7e78edc775b6f4c5e20eb7)), closes [#827](https://github.com/vivliostyle/vivliostyle.js/issues/827)
+- Layout problem with Web fonts ([79cf301](https://github.com/vivliostyle/vivliostyle.js/commit/79cf301ffb7803d941e5f2e3aa7616b692d991b7)), closes [#829](https://github.com/vivliostyle/vivliostyle.js/issues/829)
+- Pseudo elements should not be generated when content is none ([342f5a0](https://github.com/vivliostyle/vivliostyle.js/commit/342f5a0356e07882c6e51729f4ec4b7e514f8d65)), closes [#832](https://github.com/vivliostyle/vivliostyle.js/issues/832)
+- Viewer page position should be kept after the heading ID changed ([9c80245](https://github.com/vivliostyle/vivliostyle.js/commit/9c8024542049191173160dad2df0f1a5b39c64af)), closes [#826](https://github.com/vivliostyle/vivliostyle.js/issues/826)
+
+### Features
+
+- Allow JavaScript in HTML documents ([ccd31da](https://github.com/vivliostyle/vivliostyle.js/commit/ccd31da5ff3eba91432953580483548cecd84859)), closes [#733](https://github.com/vivliostyle/vivliostyle.js/issues/733) [#735](https://github.com/vivliostyle/vivliostyle.js/issues/735) [/github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts#L73](https://github.com//github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts/issues/L73)
+- **viewer:** Add zoom URL parameter to keep zoom value on reloading ([3bdab51](https://github.com/vivliostyle/vivliostyle.js/commit/3bdab51e557ccb358be3c2c69d36448ca08fd890)), closes [#825](https://github.com/vivliostyle/vivliostyle.js/issues/825)
+
 ## [2.12.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.0...v2.12.1) (2021-11-19)
 
 ### Bug Fixes
