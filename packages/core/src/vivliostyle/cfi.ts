@@ -19,6 +19,7 @@
  * @fileoverview Cfi - Support for EPUB Canonical Fragment Identifiers.
  */
 import * as Base from "./base";
+import * as Logging from "./logging";
 
 export type Position = {
   node: Node;
@@ -157,7 +158,12 @@ export class ChildStep implements Step {
       pos.node = child;
     }
     if (this.id && (pos.after || this.id != getId(pos.node))) {
-      throw new Error("E_CFI_ID_MISMATCH");
+      const movedNode = elem.ownerDocument.getElementById(this.id);
+      if (movedNode) {
+        pos.node = movedNode;
+      } else {
+        Logging.logger.warn("E_CFI_ID_MISMATCH:", this.id);
+      }
     }
     pos.sideBias = this.sideBias;
     return true;
