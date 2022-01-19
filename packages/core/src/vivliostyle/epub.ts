@@ -2252,7 +2252,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
-      pageCont.setAttribute("aria-hidden", "true");
     }
     viewport.layoutBox.appendChild(pageCont);
     const bleedBox = viewport.document.createElement("div") as HTMLElement;

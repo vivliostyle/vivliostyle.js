@@ -495,7 +495,6 @@ export class AdaptiveViewer {
     this.removePageListeners();
     this.forCurrentPages((page) => {
       Base.setCSSProperty(page.container, "display", "none");
-      page.container.setAttribute("aria-hidden", "true");
     });
     this.currentPage = null;
     this.currentSpread = null;
@@ -506,7 +505,6 @@ export class AdaptiveViewer {
     page.addEventListener("replaced", this.pageReplacedListener, false);
     Base.setCSSProperty(page.container, "visibility", "visible");
     Base.setCSSProperty(page.container, "display", "block");
-    page.container.setAttribute("aria-hidden", "false");
   }
 
   private showPage(page: Vtree.Page): void {
