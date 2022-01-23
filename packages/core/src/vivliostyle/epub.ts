@@ -1169,11 +1169,34 @@ export class OPFDoc {
       this.metadata = {};
     }
     const title =
-      (doc && doc.title) ||
-      manifestObj["name"] ||
-      (manifestObj["metadata"] && manifestObj["metadata"]["title"]);
+      manifestObj["name"] || manifestObj["metadata"]?.["title"] || doc?.title;
     if (title) {
-      this.metadata[metaTerms.title] = [{ v: title }];
+      this.metadata[metaTerms.title] = (
+        Array.isArray(title) ? title : [title]
+      ).map((item) => ({ v: item.value ?? item }));
+    }
+    const author =
+      manifestObj["author"] ||
+      manifestObj["creator"] ||
+      manifestObj["metadata"]?.["author"] ||
+      Array.from(
+        doc?.querySelectorAll("meta[name='author'], meta[name='DC.Creator']") ??
+          [],
+      ).map((meta: HTMLMetaElement) => meta.content);
+    if (author && author.length !== 0) {
+      this.metadata[metaTerms.creator] = (
+        Array.isArray(author) ? author : [author]
+      ).map((item) => ({ v: item.name ?? item }));
+    }
+    const language =
+      manifestObj["inLanguage"] ||
+      manifestObj["metadata"]?.["language"] ||
+      doc?.documentElement.lang ||
+      doc?.documentElement.getAttribute("xml:lang");
+    if (language) {
+      this.metadata[metaTerms.language] = (
+        Array.isArray(language) ? language : [language]
+      ).map((item) => ({ v: item }));
     }
     // TODO: other metadata...
 
