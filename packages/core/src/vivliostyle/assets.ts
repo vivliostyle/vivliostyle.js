@@ -1427,8 +1427,29 @@ ul#toc {
 
 // text-polyfill.css
 export const TextPolyfillCss = `
-viv-ts-open:not(.viv-ts-trim,.viv-ts-space,.viv-hang-first)::before,
-viv-ts-close:not(.viv-ts-trim,.viv-ts-space,.viv-hang-last)::after {
+viv-ts-open.viv-trim-adj > viv-ts-inner,
+viv-ts-open.viv-trim-start > viv-ts-inner {
+  margin-inline-start: -0.5em;
+}
+viv-ts-close.viv-trim-adj > viv-ts-inner {
+  margin-inline-end: -0.5em;
+}
+viv-ts-close.viv-trim-end > viv-ts-inner {
+  display: inline-block;
+  inline-size: 0.5em;
+  text-indent: 0;
+  text-align: start;
+  text-align-last: start;
+}
+viv-ts-close.viv-hang-end > viv-ts-inner {
+  display: inline-block;
+  inline-size: 0;
+  text-indent: 0;
+  text-align: start;
+  text-align-last: start;
+}
+viv-ts-close.viv-trim-end::after,
+viv-ts-close.viv-hang-end::after {
   content: " ";
   font-family: Courier, monospace;
   font-size: 83%;
@@ -1436,20 +1457,8 @@ viv-ts-close:not(.viv-ts-trim,.viv-ts-space,.viv-hang-last)::after {
   text-orientation: mixed;
   visibility: hidden;
 }
-viv-ts-open:not(.viv-ts-space,.viv-hang-first) > viv-ts-inner {
-  margin-inline-start: -0.5em;
-}
-viv-ts-close:not(.viv-ts-space,.viv-hang-last,.viv-hang-end:not(.viv-ts-trim)) > viv-ts-inner {
-  margin-inline-end: -0.5em;
-}
-viv-ts-close.viv-hang-end:not(.viv-ts-trim,.viv-hang-hw)::after {
-  font-size: 166%;
-}
-viv-ts-close.viv-hang-end:not(.viv-ts-trim) > viv-ts-inner {
-  margin-inline-end: -1em;
-}
-viv-ts-close.viv-hang-end.viv-hang-hw > viv-ts-inner {
-  margin-inline-end: -0.5em;
+viv-ts-close.viv-hang-end::after {
+  word-spacing: 0.6em;
 }
 viv-ts-close.viv-hang-last > viv-ts-inner {
   display: inline-block;
