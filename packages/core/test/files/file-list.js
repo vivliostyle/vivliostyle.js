@@ -155,6 +155,10 @@ module.exports = [
         file: "text-spacing/hanging-punctuation.html",
         title: "Hanging Punctuation",
       },
+      {
+        file: "text-spacing/ts-hp-allow-force-end.html",
+        title: "Text-spacing & hanging-punctuation allow/force-end",
+      },
     ],
   },
   {
