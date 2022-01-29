@@ -40,6 +40,11 @@ const highlightRange = (
   const scale = zoomBox?.style?.transform;
   const parentRect = parent?.getBoundingClientRect();
   const rects = range?.getClientRects() || [];
+  const selectId = mark.idString();
+  const invokeMenu = () => {
+    alert(`${selectId}`);
+  };
+
   for (const r of rects) {
     const rect = applyTransformToRect(r, scale, parentRect);
     const div = document.createElement("div");
@@ -51,7 +56,8 @@ const highlightRange = (
     div.style.width = `${rect.width}px`;
     div.style.height = `${rect.height}px`;
     div.style.background = background;
-    div.setAttribute(Mark.idAttr, mark.idString());
+    div.setAttribute(Mark.idAttr, selectId);
+    div.addEventListener("click", invokeMenu);
     parent.appendChild(div);
   }
 };
@@ -256,13 +262,15 @@ export const processSelection = (
 };
 
 export class MarksStore {
-  markArray: ObservableArray<Mark>;
+  private markArray: ObservableArray<Mark>;
+  markKeyToArrayIndex: Map<number, number>;
   selectionMenuOpened: Observable<boolean>;
   currentStart?: SelectPosition;
   currentEnd?: SelectPosition;
   currentSelection?: Selection;
   constructor() {
     this.markArray = ko.observableArray();
+    this.markKeyToArrayIndex = new Map();
     this.selectionMenuOpened = ko.observable(false);
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
@@ -313,6 +321,7 @@ export class MarksStore {
 
   pushMark(mark: Mark, addToUrl = true): void {
     this.markArray.push(mark);
+    this.markKeyToArrayIndex.set(mark.seqNumber, this.markArray.length - 1);
     if (addToUrl) {
       const count = urlParameters.getParameter("mark").length;
       urlParameters.setParameter("mark", mark.toString(), count);
@@ -349,10 +358,15 @@ export class MarksStore {
   }
 
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
+    let removed: boolean = false;
     for (const change of changes) {
       if (change.status == "added") {
         this.highlightMark(change.value);
       }
+      removed = removed || change.status == "deleted";
+    }
+    if (removed) {
+      // TODO; refresh url store
     }
   };
 }
