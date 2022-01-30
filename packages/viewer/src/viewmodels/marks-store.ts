@@ -264,7 +264,7 @@ export const processSelection = (
 
 export class MarksStore {
   private markArray: ObservableArray<Mark>;
-  markKeyToArrayIndex: Map<number, number>;
+  markKeyToArrayIndex: Map<string, number>;
   selectionMenuOpened: Observable<boolean>;
   editMenuOpened: Observable<boolean>;
   currentStart?: SelectPosition;
@@ -305,6 +305,22 @@ export class MarksStore {
     this.editMenuOpened(false);
   };
 
+  deleteCurrentEditing = (): void => {
+    if (confirm("削除しますか？")) {
+      const index = this.markKeyToArrayIndex.get(this.currentEditing);
+      const target = this.markArray()[index];
+      if (target) {
+        this.markArray.remove(target);
+        document
+          .querySelectorAll(`[${Mark.idAttr}="${target.idString()}"]`)
+          .forEach((e) => {
+            e.remove();
+          });
+      }
+    }
+    this.closeEditMenu();
+  };
+
   openSelectionMenu = (
     x: number,
     y: number,
@@ -343,7 +359,7 @@ export class MarksStore {
 
   pushMark(mark: Mark, addToUrl = true): void {
     this.markArray.push(mark);
-    this.markKeyToArrayIndex.set(mark.seqNumber, this.markArray.length - 1);
+    this.markKeyToArrayIndex.set(mark.idString(), this.markArray().length - 1);
     if (addToUrl) {
       const count = urlParameters.getParameter("mark").length;
       urlParameters.setParameter("mark", mark.toString(), count);
@@ -388,7 +404,11 @@ export class MarksStore {
       removed = removed || change.status == "deleted";
     }
     if (removed) {
-      // TODO; refresh url store
+      console.log("remove occured");
+      urlParameters.removeParameter("mark");
+      this.markArray().forEach((m, i) => {
+        urlParameters.setParameter("mark", m.toString(), i);
+      });
     }
   };
 }

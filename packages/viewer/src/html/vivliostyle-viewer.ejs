@@ -104,7 +104,7 @@
       <span class="mark-color green" data-bind="click: marksStore.mark('green')"></span>
     </div>
     <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksStore.editMenuOpened, clickOutside: marksStore.closeEditMenu">
-      <span>under construction</span>
+      <span class="button" id="selection-delete" data-bind="click: marksStore.deleteCurrentEditing"> delete</span>
     </div>
     <!-- MENU BAR -->
     <div role="toolbar" id="vivliostyle-menu-bar">

@@ -43,4 +43,12 @@
   > .yellow {
     background-color: #ffd900;
   }
+
+  > #selection-delete {
+    cursor: pointer;
+    &:before {
+      font-family: "FontAwesome";
+      content: "\f1f8";
+    }
+  }
 }
