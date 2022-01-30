@@ -47,7 +47,7 @@
   > #selection-delete {
     cursor: pointer;
     &:before {
-      font-family: "FontAwesome";
+      @include font-icon("FontAwesome");
       content: "\f1f8";
     }
   }
