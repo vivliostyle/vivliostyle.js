@@ -98,12 +98,14 @@
     <div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()?'':false}">
       <div class="vivliostyle-loading-spinner"></div>
     </div>
-    <div role="dialog" id="vivliostyle-text-selection-menu" data-bind="visible: marksStore.selectionMenuOpened, clickOutside: marksStore.closeMenu">
+    <div role="dialog" id="vivliostyle-text-selection-menu" data-bind="visible: marksStore.selectionMenuOpened, clickOutside: marksStore.closeSelectionMenu">
       <span class="mark-color yellow" data-bind="click: marksStore.mark('yellow')"></span>            
       <span class="mark-color red" data-bind="click: marksStore.mark('red')"></span>
       <span class="mark-color green" data-bind="click: marksStore.mark('green')"></span>
     </div>
-
+    <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksStore.editMenuOpened, clickOutside: marksStore.closeEditMenu">
+      <span>under construction</span>
+    </div>
     <!-- MENU BAR -->
     <div role="toolbar" id="vivliostyle-menu-bar">
       <ul class="vivliostyle-menu" id="vivliostyle-menu_settings">

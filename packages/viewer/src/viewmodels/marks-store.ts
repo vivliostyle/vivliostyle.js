@@ -41,8 +41,10 @@ const highlightRange = (
   const parentRect = parent?.getBoundingClientRect();
   const rects = range?.getClientRects() || [];
   const selectId = mark.idString();
-  const invokeMenu = () => {
-    alert(`${selectId}`);
+  const invokeMenu = (event: MouseEvent): void => {
+    const x = event.clientX;
+    const y = event.clientY;
+    marksStore.openEditMenu(x, y, selectId);
   };
 
   for (const r of rects) {
@@ -254,10 +256,9 @@ export const processSelection = (
       range.startOffset,
     );
     const end = selectedNodeToPosition(range.endContainer, range.endOffset);
-    // TODO; should apply scale
     const x = event.clientX;
     const y = event.clientY;
-    marksStore.openMenu(x, y, start, end, selection); // TODO
+    marksStore.openSelectionMenu(x, y, start, end, selection); // TODO
   }
 };
 
@@ -265,13 +266,16 @@ export class MarksStore {
   private markArray: ObservableArray<Mark>;
   markKeyToArrayIndex: Map<number, number>;
   selectionMenuOpened: Observable<boolean>;
+  editMenuOpened: Observable<boolean>;
   currentStart?: SelectPosition;
   currentEnd?: SelectPosition;
   currentSelection?: Selection;
+  currentEditing?: string;
   constructor() {
     this.markArray = ko.observableArray();
     this.markKeyToArrayIndex = new Map();
     this.selectionMenuOpened = ko.observable(false);
+    this.editMenuOpened = ko.observable(false);
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
 
@@ -283,7 +287,25 @@ export class MarksStore {
     });
   }
 
-  openMenu = (
+  openEditMenu = (x: number, y: number, id: string): void => {
+    this.closeSelectionMenu();
+    const menu = document.getElementById(
+      "vivliostyle-text-selection-edit-menu",
+    ) as HTMLElement;
+    if (menu) {
+      menu.style.top = `${y}px`;
+      menu.style.left = `${x}px`;
+    }
+    this.currentEditing = id;
+    this.editMenuOpened(true);
+  };
+
+  closeEditMenu = (): void => {
+    this.currentEditing = undefined;
+    this.editMenuOpened(false);
+  };
+
+  openSelectionMenu = (
     x: number,
     y: number,
     start: SelectPosition,
@@ -303,21 +325,21 @@ export class MarksStore {
     this.selectionMenuOpened(true);
   };
 
+  closeSelectionMenu = (): void => {
+    this.currentStart = undefined;
+    this.currentEnd = undefined;
+    this.currentSelection = undefined;
+    this.selectionMenuOpened(false);
+  };
+
   mark(colorName: string): void {
     if (this.currentStart && this.currentEnd) {
       const mark = new Mark(this.currentStart, this.currentEnd, colorName);
       this.pushMark(mark);
     }
     this.currentSelection?.empty();
-    this.closeMenu();
+    this.closeSelectionMenu();
   }
-
-  closeMenu = (): void => {
-    this.currentStart = undefined;
-    this.currentEnd = undefined;
-    this.currentSelection = undefined;
-    this.selectionMenuOpened(false);
-  };
 
   pushMark(mark: Mark, addToUrl = true): void {
     this.markArray.push(mark);
@@ -358,7 +380,7 @@ export class MarksStore {
   }
 
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
-    let removed: boolean = false;
+    let removed = false;
     for (const change of changes) {
       if (change.status == "added") {
         this.highlightMark(change.value);
