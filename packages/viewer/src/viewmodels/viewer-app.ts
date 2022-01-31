@@ -31,7 +31,7 @@ import MessageDialog from "./message-dialog";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
-import marksStore, { MarksStore } from "./marks-store";
+import { marksStore, MarksStore, MarksMenuStatus } from "./marks-store";
 
 class ViewerApp {
   documentOptions: DocumentOptions;
@@ -44,6 +44,7 @@ class ViewerApp {
   navigation: Navigation;
   findBox: FindBox;
   marksStore: MarksStore;
+  marksMenuStatus: MarksMenuStatus;
 
   constructor() {
     // Configuration flags
@@ -204,6 +205,7 @@ class ViewerApp {
 
     this.marksStore = marksStore;
     this.marksStore.init();
+    this.marksMenuStatus = marksStore.menuStatus;
     this.viewer.rerenderTrigger.subscribe(() => {
       this.marksStore.retryHighlightMarks();
     });

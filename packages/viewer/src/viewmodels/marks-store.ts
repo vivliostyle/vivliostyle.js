@@ -44,7 +44,7 @@ const highlightRange = (
   const invokeMenu = (event: MouseEvent): void => {
     const x = event.clientX;
     const y = event.clientY;
-    marksStore.openEditMenu(x, y, selectId);
+    marksMenuStatus.openEditMenu(x, y, selectId);
   };
 
   for (const r of rects) {
@@ -258,35 +258,23 @@ export const processSelection = (
     const end = selectedNodeToPosition(range.endContainer, range.endOffset);
     const x = event.clientX;
     const y = event.clientY;
-    marksStore.openSelectionMenu(x, y, start, end, selection); // TODO
+    marksMenuStatus.openSelectionMenu(x, y, start, end, selection); // TODO
   }
 };
 
-export class MarksStore {
-  private markArray: ObservableArray<Mark>;
-  markKeyToArrayIndex: Map<string, number>;
+export class MarksMenuStatus {
   selectionMenuOpened: Observable<boolean>;
   editMenuOpened: Observable<boolean>;
   currentStart?: SelectPosition;
   currentEnd?: SelectPosition;
   currentSelection?: Selection;
-  currentEditing?: string;
-  constructor() {
-    this.markArray = ko.observableArray();
-    this.markKeyToArrayIndex = new Map();
+  currentEditing?: Mark;
+  currentEditingColor: Observable<string>;
+  constructor(private parent: MarksStore) {
     this.selectionMenuOpened = ko.observable(false);
     this.editMenuOpened = ko.observable(false);
-    this.markArray.subscribe(this.markChanged, null, "arrayChange");
+    this.currentEditingColor = ko.observable("");
   }
-
-  init(): void {
-    const marksParam = urlParameters.getParameter("mark");
-    marksParam.forEach((m) => {
-      const mark = Mark.fromString(m);
-      this.pushMark(mark, false);
-    });
-  }
-
   openEditMenu = (x: number, y: number, id: string): void => {
     this.closeSelectionMenu();
     const menu = document.getElementById(
@@ -296,7 +284,8 @@ export class MarksStore {
       menu.style.top = `${y}px`;
       menu.style.left = `${x}px`;
     }
-    this.currentEditing = id;
+    this.currentEditing = this.parent.getMarkWithId(id);
+    this.currentEditingColor(this.currentEditing.color);
     this.editMenuOpened(true);
   };
 
@@ -307,12 +296,12 @@ export class MarksStore {
 
   deleteCurrentEditing = (): void => {
     if (confirm("削除しますか？")) {
-      const index = this.markKeyToArrayIndex.get(this.currentEditing);
-      const target = this.markArray()[index];
-      if (target) {
-        this.markArray.remove(target);
+      if (this.currentEditing) {
+        this.parent.removeMark(this.currentEditing);
         document
-          .querySelectorAll(`[${Mark.idAttr}="${target.idString()}"]`)
+          .querySelectorAll(
+            `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
+          )
           .forEach((e) => {
             e.remove();
           });
@@ -351,10 +340,31 @@ export class MarksStore {
   mark(colorName: string): void {
     if (this.currentStart && this.currentEnd) {
       const mark = new Mark(this.currentStart, this.currentEnd, colorName);
-      this.pushMark(mark);
+      marksStore.pushMark(mark);
     }
     this.currentSelection?.empty();
     this.closeSelectionMenu();
+  }
+}
+
+export class MarksStore {
+  private markArray: ObservableArray<Mark>;
+  markKeyToArrayIndex: Map<string, number>;
+  menuStatus: MarksMenuStatus;
+
+  constructor() {
+    this.markArray = ko.observableArray();
+    this.markKeyToArrayIndex = new Map();
+    this.markArray.subscribe(this.markChanged, null, "arrayChange");
+    this.menuStatus = new MarksMenuStatus(this);
+  }
+
+  init(): void {
+    const marksParam = urlParameters.getParameter("mark");
+    marksParam.forEach((m) => {
+      const mark = Mark.fromString(m);
+      this.pushMark(mark, false);
+    });
   }
 
   pushMark(mark: Mark, addToUrl = true): void {
@@ -394,7 +404,14 @@ export class MarksStore {
       highlightRange(range, color, mark);
     }
   }
+  getMarkWithId(id: string): Mark {
+    const index = this.markKeyToArrayIndex.get(id);
+    return this.markArray()[index];
+  }
 
+  removeMark(mark: Mark): void {
+    this.markArray.remove(mark);
+  }
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
     let removed = false;
     for (const change of changes) {
@@ -413,6 +430,5 @@ export class MarksStore {
   };
 }
 
-const marksStore = new MarksStore();
-
-export default marksStore;
+export const marksStore = new MarksStore();
+export const marksMenuStatus = marksStore.menuStatus;

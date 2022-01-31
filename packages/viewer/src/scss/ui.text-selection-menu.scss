@@ -21,7 +21,8 @@
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
   border-radius: 0 0 4px 4px;
   padding: 0.2em;
-  > .mark-color {
+  text-align: center;
+  .mark-color {
     height: 1.5em;
     width: 1.5em;
     margin: 0.2em;
@@ -30,21 +31,27 @@
     cursor: pointer;
     vertical-align: middle;
     border: 1px solid #444;
+    opacity: 0.5;
     &:hover {
-      opacity: 0.2;
+      filter: drop-shadow(0 0 0.1em);
+      opacity: 1;
     }
   }
-  > .red {
-    background-color: #e00;
-  }
-  > .green {
-    background-color: #0e0;
-  }
-  > .yellow {
-    background-color: #ffd900;
+  .selected-color {
+    opacity: 1;
+    border: 2px solid #222;
   }
 
-  > #selection-delete {
+  .red {
+    background-color: #e00;
+  }
+  .green {
+    background-color: #0e0;
+  }
+  .yellow {
+    background-color: #ffd900;
+  }
+  #selection-delete {
     cursor: pointer;
     &:before {
       @include font-icon("FontAwesome");
