@@ -17,9 +17,10 @@
 #vivliostyle-text-selection-edit-menu {
   position: absolute;
   z-index: 88888889;
-  background: #e0e0e0;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
-  border-radius: 0 0 4px 4px;
+  background: #333;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  border: 1px solid #ddd;
+  border-radius: 0.5em;
   padding: 0.2em;
   text-align: center;
   .mark-color {
@@ -30,7 +31,7 @@
     display: inline-block;
     cursor: pointer;
     vertical-align: middle;
-    border: 1px solid #444;
+    border: 1px solid #bbb;
     opacity: 0.5;
     &:hover {
       filter: drop-shadow(0 0 0.1em);
@@ -39,7 +40,7 @@
   }
   .selected-color {
     opacity: 1;
-    border: 2px solid #222;
+    border: 2px solid #ccc;
   }
 
   .red {
@@ -51,10 +52,37 @@
   .yellow {
     background-color: #ffd900;
   }
+  section {
+    padding: 0.1em 0;
+  }
+  .button {
+    padding: 0.3em;
+    border-radius: 0.3em;
+    color: white;
+    &:before {
+      @include font-icon("FontAwesome");
+      padding-right: 0.5em;
+    }
+    &:hover {
+      color: black;
+      background-color: #a0a0a0;
+    }
+  }
+  #selection-ok {
+    cursor: pointer;
+    &:before {
+      content: "\F00C";
+    }
+  }
+  #selection-cancel {
+    cursor: pointer;
+    &:before {
+      content: "\F00D";
+    }
+  }
   #selection-delete {
     cursor: pointer;
     &:before {
-      @include font-icon("FontAwesome");
       content: "\f1f8";
     }
   }

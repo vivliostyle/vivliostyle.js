@@ -21,6 +21,19 @@ import ko, { Observable, ObservableArray } from "knockout";
 import urlParameters from "../stores/url-parameters";
 import { applyTransformToRect } from "../utils/scale-util";
 
+const colorNameToColor = (name: string): string => {
+  switch (name) {
+    case "red":
+      return "rgba(255,0, 0,0.2)";
+    case "green":
+      return "rgba(0,255,0,0.2)";
+    case "yellow":
+      return "rgba(255,217,0,0.3)";
+    default:
+      return "";
+  }
+};
+
 const highlightRange = (
   range: Range,
   background = "rgba(255, 0, 0, 0.2)",
@@ -270,11 +283,29 @@ export class MarksMenuStatus {
   currentSelection?: Selection;
   currentEditing?: Mark;
   currentEditingColor: Observable<string>;
+
   constructor(private parent: MarksStore) {
     this.selectionMenuOpened = ko.observable(false);
     this.editMenuOpened = ko.observable(false);
     this.currentEditingColor = ko.observable("");
+    this.currentEditingColor.subscribe(this.editingColorChanged);
   }
+
+  editingColorChanged = (colorName: string): void => {
+    if (this.currentEditing) {
+      const color = colorNameToColor(colorName);
+      if (color.length > 0) {
+        document
+          .querySelectorAll(
+            `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
+          )
+          .forEach((e) => {
+            (e as HTMLElement).style.background = color;
+          });
+      }
+    }
+  };
+
   openEditMenu = (x: number, y: number, id: string): void => {
     this.closeSelectionMenu();
     const menu = document.getElementById(
@@ -290,22 +321,52 @@ export class MarksMenuStatus {
   };
 
   closeEditMenu = (): void => {
-    this.currentEditing = undefined;
-    this.editMenuOpened(false);
-  };
-
-  deleteCurrentEditing = (): void => {
-    if (confirm("削除しますか？")) {
-      if (this.currentEditing) {
-        this.parent.removeMark(this.currentEditing);
+    if (this.currentEditing) {
+      const color = colorNameToColor(this.currentEditing.color);
+      if (color.length > 0) {
         document
           .querySelectorAll(
             `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
           )
           .forEach((e) => {
-            e.remove();
+            (e as HTMLElement).style.background = color;
           });
       }
+    }
+    this.currentEditing = undefined;
+    this.editMenuOpened(false);
+  };
+
+  private deleteCurrentEditingInternal = (): void => {
+    if (this.currentEditing) {
+      this.parent.removeMark(this.currentEditing);
+      document
+        .querySelectorAll(
+          `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
+        )
+        .forEach((e) => {
+          e.remove();
+        });
+    }
+  };
+  applyEditing = (): void => {
+    if (this.currentEditing) {
+      if (this.currentEditingColor() != this.currentEditing.color) {
+        const newMark = new Mark(
+          this.currentEditing.start,
+          this.currentEditing.end,
+          this.currentEditingColor(),
+        );
+        this.parent.pushMark(newMark);
+        this.deleteCurrentEditingInternal();
+      }
+    }
+    this.closeEditMenu();
+  };
+
+  deleteCurrentEditing = (): void => {
+    if (confirm("削除しますか？")) {
+      this.deleteCurrentEditingInternal();
     }
     this.closeEditMenu();
   };
@@ -389,18 +450,7 @@ export class MarksStore {
       const range = document.createRange();
       range.setStart(start.node, start.offset);
       range.setEnd(end.node, end.offset);
-      let color = "";
-      switch (mark.color) {
-        case "red":
-          color = "rgba(255,0, 0,0.2)";
-          break;
-        case "green":
-          color = "rgba(0,255,0,0.2)";
-          break;
-        case "yellow":
-          color = "rgba(255,217,0,0.3)";
-          break;
-      }
+      const color = colorNameToColor(mark.color);
       highlightRange(range, color, mark);
     }
   }
@@ -422,9 +472,11 @@ export class MarksStore {
     }
     if (removed) {
       console.log("remove occured");
+      this.markKeyToArrayIndex.clear();
       urlParameters.removeParameter("mark");
       this.markArray().forEach((m, i) => {
         urlParameters.setParameter("mark", m.toString(), i);
+        this.markKeyToArrayIndex.set(m.idString(), i);
       });
     }
   };
