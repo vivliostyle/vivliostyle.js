@@ -660,7 +660,7 @@ export const pageMarginBoxes: { [key: string]: PageMarginBoxInformation } = {
     isInTopRow: true,
     isInBottomRow: false,
     isInLeftColumn: true,
-    isInRightColumn: true,
+    isInRightColumn: false,
     positionAlongVariableDimension: null,
   },
   "top-left": {
@@ -1910,6 +1910,25 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         this.vertical ? "row" : "column",
       );
       Base.setCSSProperty(element, "justify-content", flexAlign);
+      if (this.vertical) {
+        let align = "center";
+        if (this.boxInfo.isInTopRow || this.boxInfo.isInBottomRow) {
+          if (
+            this.boxInfo.isInLeftColumn ||
+            this.boxInfo.positionAlongVariableDimension ===
+              MarginBoxPositionAlongVariableDimension.END
+          ) {
+            align = "start";
+          } else if (
+            this.boxInfo.isInRightColumn ||
+            this.boxInfo.positionAlongVariableDimension ===
+              MarginBoxPositionAlongVariableDimension.START
+          ) {
+            align = "end";
+          }
+        }
+        Base.setCSSProperty(element, "align-items", align);
+      }
     }
   }
 
