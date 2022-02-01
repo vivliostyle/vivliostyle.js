@@ -1620,6 +1620,7 @@ export const passContentProperties = [
   "text-emphasis-color",
   "text-emphasis-position",
   "text-emphasis-style",
+  "text-orientation",
   "text-shadow",
   "text-underline-position",
 ];
