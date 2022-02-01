@@ -646,8 +646,8 @@ class TextSpacingPolyfill {
               if (
                 (allowEnd &&
                   (vertical
-                    ? rect1.left === rect2.left
-                    : rect1.top === rect2.top)) ||
+                    ? rect1?.left === rect2?.left
+                    : rect1?.top === rect2?.top)) ||
                 isAtStartOfLine()
               ) {
                 // Cancel hang/trim if punctuation is not moved or moved to the next line
