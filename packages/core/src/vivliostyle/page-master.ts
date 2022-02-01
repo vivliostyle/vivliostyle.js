@@ -991,6 +991,15 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
 
   getProp(context: Exprs.Context, name: string): Css.Val {
     let val = this.style[name];
+    if (!val && CssCascade.inheritedProps[name]) {
+      // inherit from root style
+      const rootStyle = (
+        context as Exprs.Context & {
+          styler: { rootStyle: { [key: string]: CssCascade.CascadeValue } };
+        }
+      ).styler?.rootStyle;
+      val = rootStyle[name]?.value;
+    }
     if (val) {
       val = CssParser.evaluateCSSToCSS(context, val, name);
     }
@@ -1611,6 +1620,7 @@ export const passContentProperties = [
   "text-emphasis-color",
   "text-emphasis-position",
   "text-emphasis-style",
+  "text-orientation",
   "text-shadow",
   "text-underline-position",
 ];
@@ -1771,7 +1781,6 @@ export class PartitionInstance<
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    Base.setCSSProperty(container.element, "overflow", "hidden"); // default value
     super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
 }

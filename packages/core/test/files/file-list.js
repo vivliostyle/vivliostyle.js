@@ -146,6 +146,14 @@ module.exports = [
         file: "text-spacing/text-spacing-zh-hant.html",
         title: "Text Spacing (Chinese, Traditional)",
       },
+      {
+        file: "text-spacing/ts-generated-content.html",
+        title: "Text-spacing on generated content",
+      },
+      {
+        file: "text-spacing/ts-generated-content-vertical.html",
+        title: "Text-spacing on generated content (vertical writing-mode)",
+      },
     ],
   },
   {

@@ -21,6 +21,7 @@ import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssStyler from "./css-styler";
 import * as Exprs from "./exprs";
+import * as TextPolyfill from "./text-polyfill";
 import * as Vtree from "./vtree";
 import { PseudoElement } from "./types";
 
@@ -115,6 +116,8 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
               this.exprContentListener,
             ),
           );
+          // text-spacing & hanging-punctuation support
+          TextPolyfill.preprocessTextContent(element);
         }
       }
     }

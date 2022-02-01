@@ -228,9 +228,13 @@ class TextSpacingPolyfill {
     if (!document.body) {
       return;
     }
+    this.preprocessTextContent(document.body);
+  }
+
+  preprocessTextContent(element: Element): void {
     // Split text nodes by punctuations and ideograph/non-ideograph boundary
-    const nodeIter = document.createNodeIterator(
-      document.body,
+    const nodeIter = element.ownerDocument.createNodeIterator(
+      element,
       NodeFilter.SHOW_TEXT,
     );
     for (let node = nodeIter.nextNode(); node; node = nodeIter.nextNode()) {
@@ -258,6 +262,66 @@ class TextSpacingPolyfill {
         node.textContent = textArr[lastIndex];
       }
     }
+  }
+
+  processGeneratedContent(
+    elem: HTMLElement,
+    textSpacingVal: Css.Val,
+    hangingPunctuationVal: Css.Val,
+    lang: string,
+    vertical: boolean,
+  ): void {
+    if (
+      textSpacingVal === Css.ident.none &&
+      (!hangingPunctuationVal || hangingPunctuationVal === Css.ident.none)
+    ) {
+      return;
+    }
+
+    this.preprocessTextContent(elem);
+
+    const textSpacing = textSpacingFromPropertyValue(textSpacingVal);
+    const hangingPunctuation = hangingPunctuationFromPropertyValue(
+      hangingPunctuationVal,
+    );
+
+    const whiteSpaceSave = elem.style.whiteSpace;
+    if ((vertical ? elem.offsetHeight : elem.offsetWidth) === 0) {
+      // Prevent wrong line wrapping
+      elem.style.whiteSpace = "pre";
+    }
+
+    const nodeIter = elem.ownerDocument.createNodeIterator(
+      elem,
+      NodeFilter.SHOW_TEXT,
+    );
+    let prevNode: Node = null;
+    let nextNode: Node = null;
+    for (let node = nodeIter.nextNode(); node; node = nextNode) {
+      nextNode = nodeIter.nextNode();
+      const isFirstInBlock = !prevNode;
+      const isFirstAfterForcedLineBreak =
+        !prevNode || /\n$/.test(prevNode.textContent);
+      const isLastBeforeForcedLineBreak =
+        !nextNode || /^\n/.test(nextNode.textContent);
+      const isLastInBlock = !nextNode;
+      this.processTextSpacing(
+        node,
+        isFirstInBlock,
+        isFirstAfterForcedLineBreak,
+        isLastBeforeForcedLineBreak,
+        isLastInBlock,
+        prevNode,
+        nextNode,
+        textSpacing,
+        hangingPunctuation,
+        lang,
+        vertical,
+      );
+      prevNode = node;
+    }
+
+    elem.style.whiteSpace = whiteSpaceSave;
   }
 
   postLayoutBlock(
@@ -430,6 +494,49 @@ class TextSpacingPolyfill {
   ): void {
     const text = textNode.textContent;
     const document = textNode.ownerDocument;
+    const range = document.createRange();
+    range.selectNode(textNode);
+
+    function isAtStartOfLine(): boolean {
+      if (!prevNode) {
+        return false;
+      }
+      const rect = range.getClientRects()[0];
+      const prevRange = document.createRange();
+      prevRange.selectNode(prevNode);
+      const prevRects = prevRange.getClientRects();
+      const prevRect = prevRects[prevRects.length - 1];
+      if (!rect || !prevRect) {
+        return false;
+      }
+      return vertical
+        ? rect.top < prevRect.top + prevRect.height - rect.width ||
+            rect.left + rect.width < prevRect.left + 1 ||
+            rect.left > prevRect.left + prevRect.width - 1
+        : rect.left < prevRect.left + prevRect.width - rect.height ||
+            rect.top > prevRect.top + prevRect.height - 1 ||
+            rect.top + rect.height < prevRect.top + 1;
+    }
+
+    function isAtEndOfLine(): boolean {
+      if (!nextNode) {
+        return false;
+      }
+      const rect = range.getClientRects()[0];
+      const nextRange = document.createRange();
+      nextRange.selectNode(nextNode);
+      const nextRect = nextRange.getClientRects()[0];
+      if (!rect || !nextRect) {
+        return false;
+      }
+      return vertical
+        ? rect.top + rect.height > nextRect.top + rect.width ||
+            rect.left > nextRect.left + nextRect.width - 1 ||
+            rect.left + rect.width < nextRect.left + 1
+        : rect.left + rect.width > nextRect.left + rect.height ||
+            rect.top + rect.height < nextRect.top + 1 ||
+            rect.top > nextRect.top + nextRect.height - 1;
+    }
 
     let punctProcessing = false;
     let hangingFirst = false;
@@ -498,47 +605,6 @@ class TextSpacingPolyfill {
       textNode.textContent = text;
 
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
-        const errMargin = fullWidth / 6;
-        const range = document.createRange();
-        range.selectNode(textNode);
-
-        function isAtStartOfLine(): boolean {
-          if (!prevNode) {
-            return false;
-          }
-          const rect = range.getClientRects()[0];
-          const prevRange = document.createRange();
-          prevRange.selectNode(prevNode);
-          const prevRects = prevRange.getClientRects();
-          const prevRect = prevRects[prevRects.length - 1];
-          if (!rect || !prevRect) {
-            return false;
-          }
-          return vertical
-            ? rect.top < prevRect.top + prevRect.height - errMargin &&
-                rect.left + rect.width < prevRect.left + errMargin
-            : rect.left < prevRect.left + prevRect.width - errMargin &&
-                rect.top > prevRect.top + prevRect.height - errMargin;
-        }
-
-        function isAtEndOfLine(): boolean {
-          if (!nextNode) {
-            return false;
-          }
-          const rect = range.getClientRects()[0];
-          const nextRange = document.createRange();
-          nextRange.selectNode(nextNode);
-          const nextRect = nextRange.getClientRects()[0];
-          if (!rect || !nextRect) {
-            return false;
-          }
-          return vertical
-            ? rect.top + rect.height > nextRect.top + errMargin &&
-                rect.left > nextRect.left + nextRect.width - errMargin
-            : rect.left + rect.width > nextRect.left + errMargin &&
-                rect.top + rect.height < nextRect.top + errMargin;
-        }
-
         if (tagName === "viv-ts-open") {
           if (hangingFirst) {
             outerElem.className = "viv-hang-first";
@@ -566,14 +632,27 @@ class TextSpacingPolyfill {
           if (hangingLast) {
             outerElem.className = "viv-hang-last";
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
-            if (hangingEnd) {
-              outerElem.className = "viv-hang-end";
-            } else if (textSpacing.trimEnd) {
-              outerElem.className = "viv-trim-end";
-            }
-            if (outerElem.className && isAtStartOfLine()) {
-              // cancel hang/trim if the punctuation is moved to the next line
-              outerElem.className = "";
+            if (hangingEnd || textSpacing.trimEnd) {
+              const rect1 = range.getClientRects()[0];
+              const allowEnd = hangingEnd
+                ? hangingPunctuation.allowEnd
+                : textSpacing.allowEnd;
+              if (hangingEnd) {
+                outerElem.className = "viv-hang-end";
+              } else {
+                outerElem.className = "viv-trim-end";
+              }
+              const rect2 = range.getClientRects()[0];
+              if (
+                (allowEnd &&
+                  (vertical
+                    ? rect1.left === rect2.left
+                    : rect1.top === rect2.top)) ||
+                isAtStartOfLine()
+              ) {
+                // Cancel hang/trim if punctuation is not moved or moved to the next line
+                outerElem.className = "";
+              }
             }
           } else if (isAtEndOfLine()) {
             if (hangingEnd && !hangingPunctuation.allowEnd) {
@@ -647,15 +726,15 @@ class TextSpacingPolyfill {
           )) ||
           (textSpacing.ideographNumeric &&
             /(?![\uFF01-\uFF60])\p{Nd}\p{M}*$/u.test(prevNode.textContent))) &&
-        !(vertical && checkUpright(prevNode.parentElement))
+        !(vertical && checkUpright(prevNode.parentElement)) &&
+        !isAtStartOfLine()
       ) {
         textNode.parentNode.insertBefore(
           document.createElement("viv-ts-thin-sp"),
           textNode,
         );
         spaceIdeoAlnumProcessing = true;
-      }
-      if (
+      } else if (
         nextNode &&
         /(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*$/u.test(text) &&
         ((textSpacing.ideographAlpha &&
@@ -664,7 +743,8 @@ class TextSpacingPolyfill {
           )) ||
           (textSpacing.ideographNumeric &&
             /^(?![\uFF01-\uFF60])\p{Nd}/u.test(nextNode.textContent))) &&
-        !(vertical && checkUpright(nextNode.parentElement))
+        !(vertical && checkUpright(nextNode.parentElement)) &&
+        !isAtEndOfLine()
       ) {
         textNode.parentNode.insertBefore(
           document.createElement("viv-ts-thin-sp"),
@@ -706,3 +786,23 @@ class TextSpacingPolyfill {
 
 const textPolyfill = new TextSpacingPolyfill();
 textPolyfill.registerHooks();
+
+export function preprocessTextContent(element: Element): void {
+  textPolyfill.preprocessTextContent(element);
+}
+
+export function processGeneratedContent(
+  element: HTMLElement,
+  textSpacing: Css.Val,
+  hangingPunctuation: Css.Val,
+  lang: string,
+  vertical: boolean,
+): void {
+  textPolyfill.processGeneratedContent(
+    element,
+    textSpacing,
+    hangingPunctuation,
+    lang,
+    vertical,
+  );
+}

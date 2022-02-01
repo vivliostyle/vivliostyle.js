@@ -105,6 +105,7 @@ export const inheritedProps = {
   "text-combine-upright": true,
   "text-indent": true,
   "text-justify": true,
+  "text-orientation": true,
   "text-rendering": true,
   "text-size-adjust": true,
   "text-spacing": true,
