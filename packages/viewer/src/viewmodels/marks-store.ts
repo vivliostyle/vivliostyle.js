@@ -113,8 +113,10 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     }
     count += childrenCount;
   }
-  const children = e.childNodes;
-  const nodeIndex = [...children].indexOf(nodePath[0] as ChildNode);
+  const children = [...e.childNodes].filter(
+    (x) => !(x.nodeType == 1 && (x as Element).hasAttribute("data-adapt-spec")),
+  );
+  const nodeIndex = children.indexOf(nodePath[0] as ChildNode);
   const nodeIndexPath = [];
   if (nodeIndex == 0 && nodePath[0].nodeType == 3 && lastNodeType == 3) {
     offset += lastNodeTextLength;
@@ -127,6 +129,9 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     nodeIndexPath.push(count - 1);
   } else {
     count += nodeIndex + 1;
+    if (lastNodeType == 3 && children[0].nodeType == 3) {
+      count--;
+    }
     nodeIndexPath.push(count - 1);
     // go deeper
     let i = 0;
@@ -158,13 +163,14 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
       (x) =>
         !(x.nodeType == 1 && (x as Element).hasAttribute("data-adapt-spec")),
     );
-    let childrenCount = children.length;
+    const childrenCount = children.length;
     if (childrenCount > 0) {
       if (children[0].nodeType == 3 && lastNodeType == 3) {
-        childrenCount -= 1;
+        count--;
       }
-      if (count + childrenCount >= pos.nodePath[0]) {
-        if (count == pos.nodePath[0] + 1 && children[0].nodeType == 3) {
+      const nextCount = count + childrenCount;
+      if (nextCount >= pos.nodePath[0]) {
+        if (count == pos.nodePath[0] && children[0].nodeType == 3) {
           const targetCandidate = children[0] as Text;
           if (
             lastNodeTextLength <= pos.offset &&
@@ -174,7 +180,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
             break;
           }
         } else if (
-          count + childrenCount == pos.nodePath[0] + 1 &&
+          nextCount == pos.nodePath[0] &&
           children[children.length - 1].nodeType == 3
         ) {
           // maybe the result is the last node
