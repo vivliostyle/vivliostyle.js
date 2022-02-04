@@ -117,7 +117,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
             ),
           );
           // text-spacing & hanging-punctuation support
-          TextPolyfill.preprocessTextContent(element);
+          TextPolyfill.preprocessForTextSpacing(element);
         }
       }
     }

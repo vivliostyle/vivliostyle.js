@@ -1427,34 +1427,35 @@ ul#toc {
 
 // text-polyfill.css
 export const TextPolyfillCss = `
-viv-ts-open.viv-trim-adj > viv-ts-inner,
-viv-ts-open.viv-trim-start > viv-ts-inner {
+viv-ts-open.viv-ts-auto > viv-ts-inner,
+viv-ts-open.viv-ts-trim > viv-ts-inner {
   margin-inline-start: -0.5em;
 }
-viv-ts-close.viv-trim-adj > viv-ts-inner {
-  margin-inline-end: -0.5em;
+viv-ts-close.viv-ts-auto > viv-ts-inner,
+viv-ts-close.viv-ts-trim > viv-ts-inner {
+  margin-inline-start: -0.5em;
+  position: relative;
+  inset-inline-start: 0.5em;
 }
-viv-ts-close.viv-trim-end > viv-ts-inner,
 viv-ts-close.viv-hang-end > viv-ts-inner,
 viv-ts-close.viv-hang-last > viv-ts-inner {
-  display: inline-block;
-  inline-size: 0;
-  text-indent: 0;
-  text-align: start;
-  text-align-last: start;
+  margin-inline-start: -1em;
+  position: relative;
+  inset-inline-start: 1em;
 }
-viv-ts-close.viv-trim-end > viv-ts-inner {
-  inline-size: 0.5em;
-}
-viv-ts-close.viv-trim-end::after,
+viv-ts-open.viv-ts-auto::before,
+viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {
   content: " ";
+  font-family: Courier, monospace;
+  font-size: 83%;
+  word-spacing: normal;
+  line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
-  word-spacing: 0.25em;
 }
 viv-ts-close.viv-hang-end::after {
-  word-spacing: 0.75em;
+  word-spacing: 0.9em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;
@@ -1464,7 +1465,13 @@ viv-ts-open.viv-hang-first > viv-ts-inner {
   text-align-last: end;
   margin-inline-start: -1em;
 }
-viv-ts-thin-sp {
-  margin-inline-end: 0.166em;
+viv-ts-thin-sp::after {
+  content: " ";
+  font-family: Times, serif;
+  font-size: 66.6%;
+  word-spacing: normal;
+  line-height: 0;
+  text-orientation: mixed;
+  visibility: hidden;
 }
 `;
