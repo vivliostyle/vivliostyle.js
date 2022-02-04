@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.14.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.13.0...v2.14.0) (2022-02-04)
+
+### Bug Fixes
+
+- CSS text-orientation property was ignored in page margin boxes ([ff2bb2e](https://github.com/vivliostyle/vivliostyle.js/commit/ff2bb2ec634b9dd071363fa68162498a4f86b51f))
+- do not ignore metadata (language, author) in publication manifest ([e1ec75f](https://github.com/vivliostyle/vivliostyle.js/commit/e1ec75f5a5706cd34c432e1c685c7f4d78ae30e7)), closes [#849](https://github.com/vivliostyle/vivliostyle.js/issues/849)
+- follow-up fix to text-spacing and hanging-punctuation support ([6c19d40](https://github.com/vivliostyle/vivliostyle.js/commit/6c19d40ab9ec0ab9cd97526d09b66740d1502022)), closes [#853](https://github.com/vivliostyle/vivliostyle.js/issues/853) [#820](https://github.com/vivliostyle/vivliostyle.js/issues/820) [#851](https://github.com/vivliostyle/vivliostyle.js/issues/851) [#818](https://github.com/vivliostyle/vivliostyle.js/issues/818) [#814](https://github.com/vivliostyle/vivliostyle.js/issues/814) [#595](https://github.com/vivliostyle/vivliostyle.js/issues/595)
+- overflow:hidden should not be default in page margin boxes ([cf25ad5](https://github.com/vivliostyle/vivliostyle.js/commit/cf25ad5cf8842916d9e64092fcc4962c6eee148c))
+- page margin boxes with vertical writing-mode not properly aligned ([1e0f4d0](https://github.com/vivliostyle/vivliostyle.js/commit/1e0f4d0e75c219beedf634b37e2a06077111219b))
+- TypeError occurred with TOC button when the book url has fragment ([b3b6087](https://github.com/vivliostyle/vivliostyle.js/commit/b3b60875d5f568ea45c09d518451135b064878cb)), closes [#856](https://github.com/vivliostyle/vivliostyle.js/issues/856)
+- Unnecessary aria-hidden attributes caused tagged PDF output broken ([772a821](https://github.com/vivliostyle/vivliostyle.js/commit/772a821acb10c1cecc3ec9054f4e5a9d6729adfe))
+
+### Features
+
+- support CSS text-spacing and hanging-punctuation in generated content ([d905017](https://github.com/vivliostyle/vivliostyle.js/commit/d905017faea30054853f913294a68c3fc5760823)), closes [#820](https://github.com/vivliostyle/vivliostyle.js/issues/820)
+- support the allow-end value of text-spacing and hanging-punctuation ([102aec6](https://github.com/vivliostyle/vivliostyle.js/commit/102aec675cfd80c26d4fcf97cb10f06c191c265f)), closes [#818](https://github.com/vivliostyle/vivliostyle.js/issues/818)
+
 # [2.13.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.1...v2.13.0) (2022-01-17)
 
 ### Bug Fixes
