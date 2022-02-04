@@ -163,34 +163,41 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
       if (children[0].nodeType == 3 && lastNodeType == 3) {
         childrenCount -= 1;
       }
-      if (count + childrenCount > pos.nodePath[0]) {
-        if (count == pos.nodePath[0] + 1) {
-          // maybe the result is the first node
-          if (children[0].nodeType == 3) {
-            const targetCandidate = children[0] as Text;
-            if (
-              lastNodeTextLength <= pos.offset &&
-              pos.offset <= lastNodeTextLength + targetCandidate.data.length
-            ) {
-              targetNode = targetCandidate;
-              break;
-            }
-          } else {
-            console.error("should not reach here.");
+      if (count + childrenCount >= pos.nodePath[0]) {
+        if (count == pos.nodePath[0] + 1 && children[0].nodeType == 3) {
+          const targetCandidate = children[0] as Text;
+          if (
+            lastNodeTextLength <= pos.offset &&
+            pos.offset <= lastNodeTextLength + targetCandidate.data.length
+          ) {
+            targetNode = targetCandidate;
+            break;
           }
-        } else if (count + childrenCount == pos.nodePath[0] + 1) {
+        } else if (
+          count + childrenCount == pos.nodePath[0] + 1 &&
+          children[children.length - 1].nodeType == 3
+        ) {
           // maybe the result is the last node
-          if (children[children.length - 1].nodeType == 3) {
-            const targetCandidate = children[children.length - 1] as Text;
-            if (pos.offset <= targetCandidate.data.length) {
-              targetNode = targetCandidate;
-              lastNodeTextLength = 0;
-              break;
-            }
+          const targetCandidate = children[children.length - 1] as Text;
+          if (pos.offset <= targetCandidate.data.length) {
+            targetNode = targetCandidate;
+            lastNodeTextLength = 0;
+            break;
           }
         } else {
           // the result is the specified node
-          targetNode = children[pos.nodePath[0] - count] as Text;
+          let target = children[pos.nodePath[0] - count];
+          for (let i = 1; i < pos.nodePath.length; i++) {
+            if (
+              target.childNodes &&
+              target.childNodes.length > pos.nodePath[i]
+            ) {
+              target = target.childNodes[pos.nodePath[i]];
+            } else {
+              // should not reach here, this is a workaround.
+            }
+          }
+          targetNode = target as Text;
           lastNodeTextLength = 0;
           break;
         }
