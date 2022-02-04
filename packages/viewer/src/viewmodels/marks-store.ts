@@ -79,6 +79,12 @@ const highlightRange = (
 
 const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
   const e = node.parentElement.closest("[data-adapt-eloff]");
+  const nodePath: Node[] = [];
+  let n = node;
+  while (n && n !== e) {
+    nodePath.unshift(n);
+    n = n.parentElement;
+  }
   const eloff = parseInt(e.getAttribute("data-adapt-eloff"));
   const es = collectElementsWithEloff(eloff);
   let count = 0;
@@ -107,16 +113,33 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     }
     count += childrenCount;
   }
-
   const children = e.childNodes;
-  const nodeIndex = [...children].indexOf(node as ChildNode);
-  if (nodeIndex == 0 && node.nodeType == 3 && lastNodeType == 3) {
+  const nodeIndex = [...children].indexOf(nodePath[0] as ChildNode);
+  const nodeIndexPath = [];
+  if (nodeIndex == 0 && nodePath[0].nodeType == 3 && lastNodeType == 3) {
     offset += lastNodeTextLength;
+    if (nodePath.length > 1) {
+      // should not occur
+      console.warn(
+        "should not reach here; nodePath[0] is text and nodePath is deeper",
+      );
+    }
+    nodeIndexPath.push(count - 1);
   } else {
     count += nodeIndex + 1;
+    nodeIndexPath.push(count - 1);
+    // go deeper
+    let i = 0;
+    while (i < nodePath.length - 1) {
+      const ct = [...nodePath[i].childNodes].indexOf(
+        nodePath[i + 1] as ChildNode,
+      );
+      nodeIndexPath.push(ct);
+      i++;
+    }
   }
 
-  return new SelectPosition(eloff, count - 1, offset);
+  return new SelectPosition(eloff, nodeIndexPath, offset);
 };
 
 interface NodePosition {
@@ -140,8 +163,8 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
       if (children[0].nodeType == 3 && lastNodeType == 3) {
         childrenCount -= 1;
       }
-      if (count + childrenCount > pos.nodeIndex) {
-        if (count == pos.nodeIndex + 1) {
+      if (count + childrenCount > pos.nodePath[0]) {
+        if (count == pos.nodePath[0] + 1) {
           // maybe the result is the first node
           if (children[0].nodeType == 3) {
             const targetCandidate = children[0] as Text;
@@ -155,7 +178,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
           } else {
             console.error("should not reach here.");
           }
-        } else if (count + childrenCount == pos.nodeIndex + 1) {
+        } else if (count + childrenCount == pos.nodePath[0] + 1) {
           // maybe the result is the last node
           if (children[children.length - 1].nodeType == 3) {
             const targetCandidate = children[children.length - 1] as Text;
@@ -167,7 +190,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
           }
         } else {
           // the result is the specified node
-          targetNode = children[pos.nodeIndex - count] as Text;
+          targetNode = children[pos.nodePath[0] - count] as Text;
           lastNodeTextLength = 0;
           break;
         }
@@ -199,21 +222,18 @@ class SelectPosition {
   // TODO ; should include document index
   constructor(
     readonly eloff: number,
-    readonly nodeIndex: number,
+    readonly nodePath: number[],
     readonly offset: number,
   ) {}
 
   toString(): string {
-    return `${this.eloff}-${this.nodeIndex}-${this.offset}`;
+    return `${this.eloff}-${this.nodePath.join("/")}-${this.offset}`;
   }
 
   static fromString(str: string): SelectPosition {
-    const [eloff, nodeIndex, offset] = str.split("-").map((x) => x.trim());
-    return new SelectPosition(
-      parseInt(eloff),
-      parseInt(nodeIndex),
-      parseInt(offset),
-    );
+    const [eloff, nodePathString, offset] = str.split("-").map((x) => x.trim());
+    const nodePath = nodePathString.split("/").map((x) => parseInt(x));
+    return new SelectPosition(parseInt(eloff), nodePath, parseInt(offset));
   }
 }
 
