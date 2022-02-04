@@ -171,6 +171,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
       const nextCount = count + childrenCount;
       if (nextCount >= pos.nodePath[0]) {
         if (count == pos.nodePath[0] && children[0].nodeType == 3) {
+          // maybe the result is in the first node
           const targetCandidate = children[0] as Text;
           if (
             lastNodeTextLength <= pos.offset &&
@@ -180,7 +181,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
             break;
           }
         } else if (
-          nextCount == pos.nodePath[0] &&
+          nextCount == pos.nodePath[0] + 1 &&
           children[children.length - 1].nodeType == 3
         ) {
           // maybe the result is the last node
