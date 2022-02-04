@@ -99,9 +99,11 @@
       <div class="vivliostyle-loading-spinner"></div>
     </div>
     <div role="dialog" id="vivliostyle-text-selection-menu" data-bind="visible: marksMenuStatus.selectionMenuOpened, clickOutside: marksMenuStatus.closeSelectionMenu">
+      <section>
       <span class="mark-color yellow" data-bind="click: () => { marksMenuStatus.mark('yellow') }"></span>            
       <span class="mark-color red" data-bind="click: () => { marksMenuStatus.mark('red') }"></span>
       <span class="mark-color green" data-bind="click: () => { marksMenuStatus.mark('green') }"></span>
+      </section>
     </div>
     <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.editMenuOpened, clickOutside: marksMenuStatus.closeEditMenu">
       <section>

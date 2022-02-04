@@ -321,7 +321,6 @@ export class MarksMenuStatus {
     this.selectionMenuOpened = ko.observable(false);
     this.editMenuOpened = ko.observable(false);
     this.currentEditingColor = ko.observable("");
-    this.currentEditingColor.subscribe(this.editingColorChanged);
   }
 
   editingColorChanged = (colorName: string): void => {
@@ -350,6 +349,27 @@ export class MarksMenuStatus {
     }
     this.currentEditing = this.parent.getMarkWithId(id);
     this.currentEditingColor(this.currentEditing.color);
+    const subscription = this.editMenuOpened.subscribe((v) => {
+      if (v) {
+        const menu = document.getElementById(
+          "vivliostyle-text-selection-edit-menu",
+        ) as HTMLElement;
+        const outer = document.querySelector(
+          "[data-vivliostyle-outer-zoom-box]",
+        ) as HTMLElement;
+        if (menu && outer) {
+          const mb = menu.getBoundingClientRect();
+          const ob = outer.getBoundingClientRect();
+          if (mb.right > ob.right) {
+            menu.style.left = `${ob.right - mb.width - 10}px`;
+          }
+          if (mb.bottom > ob.bottom) {
+            menu.style.top = `${ob.bottom - mb.height - 10}px`;
+          }
+        }
+      }
+      subscription.dispose();
+    });
     this.editMenuOpened(true);
   };
 
@@ -421,6 +441,27 @@ export class MarksMenuStatus {
       menu.style.top = `${y}px`;
       menu.style.left = `${x}px`;
     }
+    const subscription = this.selectionMenuOpened.subscribe((v) => {
+      if (v) {
+        const menu = document.getElementById(
+          "vivliostyle-text-selection-menu",
+        ) as HTMLElement;
+        const outer = document.querySelector(
+          "[data-vivliostyle-outer-zoom-box]",
+        ) as HTMLElement;
+        if (menu && outer) {
+          const mb = menu.getBoundingClientRect();
+          const ob = outer.getBoundingClientRect();
+          if (mb.right > ob.right) {
+            menu.style.left = `${ob.right - mb.width - 10}px`;
+          }
+          if (mb.bottom > ob.bottom) {
+            menu.style.top = `${ob.bottom - mb.height - 10}px`;
+          }
+        }
+      }
+      subscription.dispose();
+    });
     this.selectionMenuOpened(true);
   };
 
