@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.0...v2.14.1) (2022-02-05)
+
+### Bug Fixes
+
+- text-spacing not working depending on fonts ([433821e](https://github.com/vivliostyle/vivliostyle.js/commit/433821efcf9eabb98f98bed18dbee32de0626476)), closes [#858](https://github.com/vivliostyle/vivliostyle.js/issues/858) [#855](https://github.com/vivliostyle/vivliostyle.js/issues/855)
+
 # [2.14.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.13.0...v2.14.0) (2022-02-04)
 
 ### Bug Fixes
