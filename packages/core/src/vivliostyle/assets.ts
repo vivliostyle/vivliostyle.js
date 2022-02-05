@@ -1455,7 +1455,7 @@ viv-ts-close.viv-hang-end::after {
   visibility: hidden;
 }
 viv-ts-close.viv-hang-end::after {
-  word-spacing: 0.9em;
+  word-spacing: 0.6em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;

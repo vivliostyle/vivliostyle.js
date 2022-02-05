@@ -236,10 +236,6 @@ function normalizeLang(lang: string): string | null {
   return null;
 }
 
-function isLangCJK(lang: string): boolean {
-  return /^(zh|ja|ko)\b/.test(lang);
-}
-
 const embeddedContentTags = {
   audio: true,
   canvas: true,
@@ -254,7 +250,7 @@ const embeddedContentTags = {
 };
 
 class TextSpacingPolyfill {
-  textSpacingProcessed = false;
+  isTextPolyfillCssReady = false;
 
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-spacing"];
@@ -265,6 +261,10 @@ class TextSpacingPolyfill {
       return;
     }
     this.preprocessForTextSpacing(document.body);
+
+    this.isTextPolyfillCssReady = !!document.getElementById(
+      "vivliostyle-text-polyfill-css",
+    );
   }
 
   preprocessForTextSpacing(element: Element): void {
@@ -315,7 +315,7 @@ class TextSpacingPolyfill {
 
     if (
       isHangingPunctuationNone(hangingPunctuation) &&
-      (isTextSpacingNone(textSpacing) || (lang && !isLangCJK(lang)))
+      isTextSpacingNone(textSpacing)
     ) {
       return;
     }
@@ -392,7 +392,7 @@ class TextSpacingPolyfill {
 
         if (
           isHangingPunctuationNone(hangingPunctuation) &&
-          (isTextSpacingNone(textSpacing) || (lang && !isLangCJK(lang)))
+          isTextSpacingNone(textSpacing)
         ) {
           continue;
         }
@@ -642,6 +642,10 @@ class TextSpacingPolyfill {
     }
 
     if (punctProcessing) {
+      if (!this.isTextPolyfillCssReady) {
+        this.initTextPolyfillCss(document.head);
+      }
+
       // Wrap the textNode as `<{tagName}><viv-ts-inner>{text}<viv-ts-inner></{tagName}>`
       const outerElem = document.createElement(tagName);
       const innerElem = document.createElement("viv-ts-inner");
@@ -650,9 +654,12 @@ class TextSpacingPolyfill {
       innerElem.appendChild(textNode);
 
       // Check if che punctuation is almost full width
-      const isFullWidth = vertical
-        ? innerElem.offsetHeight > innerElem.offsetWidth * 0.7
-        : innerElem.offsetWidth > innerElem.offsetHeight * 0.7;
+      const fontSize = parseFloat(
+        document.defaultView.getComputedStyle(outerElem).fontSize,
+      );
+      const isFullWidth =
+        (vertical ? innerElem.offsetHeight : innerElem.offsetWidth) >
+        fontSize * 0.7;
 
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
@@ -760,16 +767,13 @@ class TextSpacingPolyfill {
     let spaceIdeoAlnumProcessing = false;
 
     function checkUpright(elem: Element): boolean {
-      if (!elem || !(elem instanceof HTMLElement)) {
-        return false;
-      }
-      if (elem.style.textOrientation === "upright") {
-        return true;
-      }
-      if (elem.style.textCombineUpright === "all") {
-        return true;
-      }
-      return checkUpright(elem.parentElement);
+      const style = elem?.ownerDocument.defaultView?.getComputedStyle(elem);
+      return (
+        !!style &&
+        (style.textOrientation === "upright" ||
+          style.textCombineUpright === "all" ||
+          style["-webkit-text-combine"] === "horizontal")
+      );
     }
 
     if (textSpacing.ideographAlpha || textSpacing.ideographNumeric) {
@@ -807,20 +811,19 @@ class TextSpacingPolyfill {
         );
         spaceIdeoAlnumProcessing = true;
       }
-    }
 
-    if (punctProcessing || spaceIdeoAlnumProcessing) {
-      if (!this.textSpacingProcessed) {
+      if (spaceIdeoAlnumProcessing && !this.isTextPolyfillCssReady) {
         this.initTextPolyfillCss(document.head);
-        this.textSpacingProcessed = true;
       }
     }
   }
 
   private initTextPolyfillCss(head: Element): void {
-    const style = head.ownerDocument.createElement("style");
-    style.textContent = TextPolyfillCss;
-    head.appendChild(style);
+    const styleElem = head.ownerDocument.createElement("style");
+    styleElem.id = "vivliostyle-text-polyfill-css";
+    styleElem.textContent = TextPolyfillCss;
+    head.appendChild(styleElem);
+    this.isTextPolyfillCssReady = true;
   }
 
   registerHooks() {
