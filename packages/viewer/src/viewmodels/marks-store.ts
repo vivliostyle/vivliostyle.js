@@ -186,7 +186,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
         ) {
           // maybe the result is the last node
           const targetCandidate = children[children.length - 1] as Text;
-          if (pos.offset <= targetCandidate.data.length) {
+          if (pos.offset < targetCandidate.data.length) {
             targetNode = targetCandidate;
             lastNodeTextLength = 0;
             break;
@@ -322,6 +322,7 @@ export class MarksMenuStatus {
     this.selectionMenuOpened = ko.observable(false);
     this.editMenuOpened = ko.observable(false);
     this.currentEditingColor = ko.observable("");
+    this.currentEditingColor.subscribe(this.editingColorChanged);
   }
 
   editingColorChanged = (colorName: string): void => {
