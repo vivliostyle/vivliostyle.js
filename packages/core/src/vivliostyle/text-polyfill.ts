@@ -366,6 +366,50 @@ class TextSpacingPolyfill {
     checkPoints: Vtree.NodeContext[],
   ): void {
     const isFirstFragment = !nodeContext || nodeContext.fragmentIndex === 1;
+    const isAfterForcedLineBreak =
+      isFirstFragment || checkIfAfterForcedLineBreak();
+
+    function checkIfAfterForcedLineBreak(): boolean {
+      let p = checkPoints[0];
+      let prevNode: Node;
+      while (p && p.inline) {
+        prevNode = p.sourceNode?.previousSibling;
+        if (prevNode) {
+          if (
+            prevNode instanceof Text &&
+            /^\s*$/.test(prevNode.textContent) &&
+            p.whitespace !== Vtree.Whitespace.PRESERVE
+          ) {
+            prevNode = prevNode.previousSibling;
+          }
+          if (prevNode) {
+            break;
+          }
+        }
+        p = p.parent;
+      }
+
+      while (prevNode) {
+        if (prevNode instanceof Element) {
+          if (prevNode.localName === "br") {
+            return true;
+          }
+        } else if (prevNode instanceof Text) {
+          if (p.whitespace === Vtree.Whitespace.PRESERVE) {
+            if (/\n$/.test(prevNode.textContent)) {
+              return true;
+            }
+          } else if (p.whitespace === Vtree.Whitespace.NEWLINE) {
+            if (/\n\s*$/.test(prevNode.textContent)) {
+              return true;
+            }
+          }
+        }
+        prevNode = prevNode.lastChild;
+      }
+      return false;
+    }
+
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
       if (
@@ -400,7 +444,7 @@ class TextSpacingPolyfill {
         let prevNode: Node = null;
         let nextNode: Node = null;
         let isFirstInBlock = i === 0 && isFirstFragment;
-        let isFirstAfterForcedLineBreak = false;
+        let isFirstAfterForcedLineBreak = i === 0 && isAfterForcedLineBreak;
         let isLastBeforeForcedLineBreak = false;
         let isLastInBlock = false;
 
