@@ -1197,7 +1197,18 @@ export class Container implements Vtree.Container {
 
   setBlockPosition(start: number, extent: number): void {
     if (this.vertical) {
-      this.setHorizontalPosition(start + extent * this.getBoxDir(), extent);
+      const outerExtent =
+        extent +
+        this.marginLeft +
+        this.marginRight +
+        this.paddingLeft +
+        this.paddingRight +
+        this.borderLeft +
+        this.borderRight;
+      this.setHorizontalPosition(
+        start + outerExtent * this.getBoxDir(),
+        extent,
+      );
     } else {
       this.setVerticalPosition(start, extent);
     }
