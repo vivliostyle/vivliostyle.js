@@ -1834,11 +1834,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
             if (!result.nextLayoutPosition) {
               viewItem.complete = true;
             }
-            console.log(
-              `-----------${JSON.stringify(
-                result.pageAndPosition.position,
-              )}-----`,
-            );
             frame.finish(result.pageAndPosition);
           });
         });

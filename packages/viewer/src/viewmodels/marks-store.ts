@@ -78,6 +78,13 @@ const highlightRange = (
 };
 
 const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
+  const pageElement = node.parentElement.closest(
+    "[data-vivliostyle-page-container]",
+  );
+  let pageIndex: number =
+    parseInt(pageElement.getAttribute("data-vivliostyle-page-index")) || -1;
+  let spineIndex: number =
+    parseInt(pageElement.getAttribute("data-vivliostyle-spine-index")) || -1;
   const e = node.parentElement.closest("[data-adapt-eloff]");
   const nodePath: Node[] = [];
   let n = node;
@@ -86,7 +93,7 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     n = n.parentElement;
   }
   const eloff = parseInt(e.getAttribute("data-adapt-eloff"));
-  const es = collectElementsWithEloff(eloff);
+  const es = collectElementsWithEloff(spineIndex, eloff);
   let count = 0;
   let lastNodeType = -1;
   let lastNodeTextLength = 0;
@@ -144,7 +151,13 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     }
   }
 
-  return new SelectPosition(eloff, nodeIndexPath, offset);
+  return new SelectPosition(
+    spineIndex,
+    pageIndex,
+    eloff,
+    nodeIndexPath,
+    offset,
+  );
 };
 
 interface NodePosition {
@@ -153,7 +166,7 @@ interface NodePosition {
 }
 
 const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
-  const es = collectElementsWithEloff(pos.eloff);
+  const es = collectElementsWithEloff(pos.spine, pos.eloff);
   let count = 0;
   let lastNodeType = -1;
   let lastNodeTextLength = 0;
@@ -225,29 +238,40 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
   return null;
 };
 
-const collectElementsWithEloff = (eloff: number): Element[] => {
-  const eloffAttrSelector = `[data-adapt-eloff='${eloff}']`;
+const collectElementsWithEloff = (spine: number, eloff: number): Element[] => {
+  const eloffAttrSelector = `[data-vivliostyle-spine-index='${spine}'] [data-adapt-eloff='${eloff}']`;
   return Array.from(document.querySelectorAll(eloffAttrSelector)).filter(
     (e) => !e.querySelector(eloffAttrSelector),
   );
 };
 
 class SelectPosition {
-  // TODO ; should include document index
   constructor(
+    readonly spine: number,
+    readonly page: number,
     readonly eloff: number,
     readonly nodePath: number[],
     readonly offset: number,
   ) {}
 
   toString(): string {
-    return `${this.eloff}-${this.nodePath.join("/")}-${this.offset}`;
+    return `${this.spine}-${this.page}-${this.eloff}-${this.nodePath.join(
+      "/",
+    )}-${this.offset}`;
   }
 
   static fromString(str: string): SelectPosition {
-    const [eloff, nodePathString, offset] = str.split("-").map((x) => x.trim());
+    const [spine, page, eloff, nodePathString, offset] = str
+      .split("-")
+      .map((x) => x.trim());
     const nodePath = nodePathString.split("/").map((x) => parseInt(x));
-    return new SelectPosition(parseInt(eloff), nodePath, parseInt(offset));
+    return new SelectPosition(
+      parseInt(spine),
+      parseInt(page),
+      parseInt(eloff),
+      nodePath,
+      parseInt(offset),
+    );
   }
 }
 
