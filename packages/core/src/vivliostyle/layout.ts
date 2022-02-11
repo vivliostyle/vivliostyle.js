@@ -1914,7 +1914,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         minNeg = Math.min(minNeg, m);
       }
     }
-    return maxPos - minNeg;
+    return maxPos + minNeg;
   }
 
   /**
