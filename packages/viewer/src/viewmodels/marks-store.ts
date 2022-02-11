@@ -40,10 +40,33 @@ const highlightRange = (
   mark: Mark,
 ): void => {
   // TODO; collect all active page container and check boundary.
-  const parent = range.startContainer.parentElement.closest(
+  const startParent = range.startContainer.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
-  if (mark.existMarkIn(parent)) {
+  const endParent = range.endContainer.parentElement.closest(
+    "[data-vivliostyle-page-container='true']",
+  );
+  let startPage = getPageIndex(startParent);
+  let endPage = getPageIndex(endParent);
+  let spine = getSpineIndex(startParent);
+  if (startPage > endPage) {
+    // does this happen ?
+    [startPage, endPage] = [endPage, startPage];
+  }
+  const pages: Element[] = [];
+  for (let i = startPage; i < endPage; i++) {
+    const p = document.querySelector(
+      `[data-vivliostyle-spine-index='${spine}'][data-vivliostyle-page-index='${i}']`,
+    );
+    if (p) {
+      pages.push(p);
+    } else {
+      // should not happen
+      console.error(`should not happen; no spine ${spine} and page index ${i}`);
+      return;
+    }
+  }
+  if (mark.existMarkIn(startParent) && mark.existMarkIn(endParent)) {
     // already exists;
     return;
   }
@@ -51,7 +74,7 @@ const highlightRange = (
     "[data-vivliostyle-outer-zoom-box]",
   )?.firstElementChild as HTMLElement;
   const scale = zoomBox?.style?.transform;
-  const parentRect = parent?.getBoundingClientRect();
+  const parentRect = startParent?.getBoundingClientRect();
   const rects = range?.getClientRects() || [];
   const selectId = mark.idString();
   const invokeMenu = (event: MouseEvent): void => {
@@ -60,8 +83,17 @@ const highlightRange = (
     marksMenuStatus.openEditMenu(x, y, selectId);
   };
 
-  for (const r of rects) {
+  Array.from(rects).forEach((r, index) => {
     const rect = applyTransformToRect(r, scale, parentRect);
+    const rectNum = index;
+    if (
+      document.querySelector(
+        `[${Mark.idAttr}='${selectId}'][data-mn='${rectNum}']`,
+      )
+    ) {
+      // already exists.
+      return;
+    }
     const div = document.createElement("div");
     div.style.position = "absolute";
     div.style.margin = "0";
@@ -72,19 +104,34 @@ const highlightRange = (
     div.style.height = `${rect.height}px`;
     div.style.background = background;
     div.setAttribute(Mark.idAttr, selectId);
+    div.setAttribute("data-mn", `${rectNum}`);
     div.addEventListener("click", invokeMenu);
-    parent.appendChild(div);
+    startParent.appendChild(div);
+  });
+};
+
+const getPageIndex = (pageElement: Element): number => {
+  const p = parseInt(pageElement.getAttribute("data-vivliostyle-page-index"));
+  if (isNaN(p)) {
+    return -1;
   }
+  return p;
+};
+
+const getSpineIndex = (pageElement: Element): number => {
+  const p =
+    parseInt(pageElement.getAttribute("data-vivliostyle-spine-index")) || -1;
+  if (isNaN(p)) {
+    return -1;
+  }
+  return p;
 };
 
 const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
   const pageElement = node.parentElement.closest(
     "[data-vivliostyle-page-container]",
   );
-  let pageIndex: number =
-    parseInt(pageElement.getAttribute("data-vivliostyle-page-index")) || -1;
-  let spineIndex: number =
-    parseInt(pageElement.getAttribute("data-vivliostyle-spine-index")) || -1;
+  const spineIndex: number = getSpineIndex(pageElement);
   const e = node.parentElement.closest("[data-adapt-eloff]");
   const nodePath: Node[] = [];
   let n = node;
@@ -151,13 +198,7 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     }
   }
 
-  return new SelectPosition(
-    spineIndex,
-    pageIndex,
-    eloff,
-    nodeIndexPath,
-    offset,
-  );
+  return new SelectPosition(spineIndex, eloff, nodeIndexPath, offset);
 };
 
 interface NodePosition {
@@ -248,26 +289,24 @@ const collectElementsWithEloff = (spine: number, eloff: number): Element[] => {
 class SelectPosition {
   constructor(
     readonly spine: number,
-    readonly page: number,
     readonly eloff: number,
     readonly nodePath: number[],
     readonly offset: number,
   ) {}
 
   toString(): string {
-    return `${this.spine}-${this.page}-${this.eloff}-${this.nodePath.join(
-      "/",
-    )}-${this.offset}`;
+    return `${this.spine}-${this.eloff}-${this.nodePath.join("/")}-${
+      this.offset
+    }`;
   }
 
   static fromString(str: string): SelectPosition {
-    const [spine, page, eloff, nodePathString, offset] = str
+    const [spine, eloff, nodePathString, offset] = str
       .split("-")
       .map((x) => x.trim());
     const nodePath = nodePathString.split("/").map((x) => parseInt(x));
     return new SelectPosition(
       parseInt(spine),
-      parseInt(page),
       parseInt(eloff),
       nodePath,
       parseInt(offset),
