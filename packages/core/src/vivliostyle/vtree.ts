@@ -412,7 +412,14 @@ export function isSameNodePositionStep(
     return false;
   }
   return (
-    nps1.node === nps2.node &&
+    (nps1.node === nps2.node ||
+      // Fix for issue #869
+      (!!nps1.shadowContext &&
+        !!nps2.shadowContext &&
+        nps1.shadowType === Vtree.ShadowType.ROOTLESS &&
+        nps2.shadowType === Vtree.ShadowType.ROOTLESS &&
+        (nps1.node as Element)?.outerHTML ===
+          (nps2.node as Element)?.outerHTML)) &&
     nps1.shadowType === nps2.shadowType &&
     isSameShadowContext(nps1.shadowContext, nps2.shadowContext) &&
     isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
