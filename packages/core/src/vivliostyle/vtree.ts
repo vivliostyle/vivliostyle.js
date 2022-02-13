@@ -1314,6 +1314,10 @@ export class ContentPropertyHandler extends Css.Visitor {
 
   private visitStrInner(str: string, node?: Node | null) {
     if (!node) {
+      if (this.elem.lastChild instanceof Text) {
+        this.elem.lastChild.textContent += str;
+        return;
+      }
       node = this.elem.ownerDocument.createTextNode(str);
     }
     this.elem.appendChild(node);
