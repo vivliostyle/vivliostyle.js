@@ -100,14 +100,12 @@ class VivliostylePrint {
         type: "text/html",
       }),
       docURL = URL.createObjectURL(docBlob),
-      Viewer = new CoreViewer(
-        {
-          viewportElement: this.iframeWin.document.body
-            .firstElementChild as HTMLElement,
-          window: this.iframeWin,
-          debug: true,
-        },
-      );
+      Viewer = new CoreViewer({
+        viewportElement: this.iframeWin.document.body
+          .firstElementChild as HTMLElement,
+        window: this.iframeWin,
+        debug: true,
+      });
     return new Promise<void>((resolve) => {
       Viewer.addListener("readystatechange", () => {
         if (Viewer.readyState === "complete") {
