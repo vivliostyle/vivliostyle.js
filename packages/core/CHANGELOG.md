@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.1...v2.14.2) (2022-02-14)
+
+### Bug Fixes
+
+- footnotes not positioned correctly in vertical writing mode ([4a14156](https://github.com/vivliostyle/vivliostyle.js/commit/4a1415628ba4233b91cb3171aa5080c69114c8d6)), closes [#862](https://github.com/vivliostyle/vivliostyle.js/issues/862) [#392](https://github.com/vivliostyle/vivliostyle.js/issues/392)
+- hang-up with footnote/pagefloat and ::after pseudo element ([4840e7d](https://github.com/vivliostyle/vivliostyle.js/commit/4840e7d3d7cab7172924d9f7377325d0d0835d82)), closes [#869](https://github.com/vivliostyle/vivliostyle.js/issues/869)
+- margin-block-end on page floats ignored in vertical writing mode ([42ab1e1](https://github.com/vivliostyle/vivliostyle.js/commit/42ab1e105ea8fbdbe4d1455e39b3efd1c6e1669c)), closes [#866](https://github.com/vivliostyle/vivliostyle.js/issues/866)
+- should generate single text node for pseudo elements if possible ([bed59df](https://github.com/vivliostyle/vivliostyle.js/commit/bed59df9c469b06f8aa017f41ae8bd79c4a07cb2)), closes [#863](https://github.com/vivliostyle/vivliostyle.js/issues/863)
+- use appropriate fallback page size when window size is not available ([5a90204](https://github.com/vivliostyle/vivliostyle.js/commit/5a90204095cda4f4ea8682f3494a64cdca4654ec))
+- wrong indent of fullwidth opening punctuation at first line in second page ([033d63b](https://github.com/vivliostyle/vivliostyle.js/commit/033d63bfb1ece834e775446ebda7d4c438b63e45)), closes [#861](https://github.com/vivliostyle/vivliostyle.js/issues/861)
+
 ## [2.14.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.0...v2.14.1) (2022-02-05)
 
 ### Bug Fixes
