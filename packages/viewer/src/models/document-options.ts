@@ -133,17 +133,12 @@ class DocumentOptions {
         url,
       }));
     }
-    const userStyleSheetArray = convertStyleSheetArray(this.userStyleSheet());
-    if (this.pageStyle.pageSizeMode() == PageStyle.Mode.Default) {
-      // Put default page size auto. This is needed to output auto size PDF.
-      userStyleSheetArray.unshift({ text: "@page{size:auto}" });
-    }
     // Do not include url
     // (url is a required argument to Viewer.loadDocument, separated from other options)
     return {
       fragment: this.fragment(),
       authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
-      userStyleSheet: userStyleSheetArray,
+      userStyleSheet: convertStyleSheetArray(this.userStyleSheet()),
     };
   }
 

@@ -356,6 +356,9 @@ export class StyleInstance
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = this.style.pageProps;
+    if (!pageProps[""]) {
+      pageProps[""] = {};
+    }
     Object.keys(pageProps).forEach((selector) => {
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
         CssPage.resolvePageSizeAndBleed(pageProps[selector] as any),
