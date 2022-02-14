@@ -107,12 +107,6 @@ class VivliostylePrint {
           window: this.iframeWin,
           debug: true,
         },
-        {
-          defaultPaperSize: {
-            width: 794, // These numbers give weird output, but not setting them crashes the browser when there is no CSS.
-            height: 1122,
-          },
-        },
       );
     return new Promise<void>((resolve) => {
       Viewer.addListener("readystatechange", () => {
