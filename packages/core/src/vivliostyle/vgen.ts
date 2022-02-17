@@ -1158,6 +1158,13 @@ export class ViewFactory
                   // Keep original id value so that JavaScript can manipulate it
                   result.setAttribute(attributeName, attributeValue);
                   result.setAttribute("data-vivliostyle-id", transformedValue);
+
+                  // Create an anchor element with transformed id, necessary for internal links in output PDF
+                  // (issue #877)
+                  const anchorElem = result.ownerDocument.createElement("a");
+                  anchorElem.setAttribute(attributeName, transformedValue);
+                  anchorElem.style.position = "absolute";
+                  result.appendChild(anchorElem);
                 } else {
                   result.setAttribute(attributeName, transformedValue);
                 }
