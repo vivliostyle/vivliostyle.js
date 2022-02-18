@@ -1454,8 +1454,17 @@ viv-ts-close.viv-hang-end::after {
   text-orientation: mixed;
   visibility: hidden;
 }
-viv-ts-close.viv-hang-end::after {
+viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
   word-spacing: 0.6em;
+}
+viv-ts-close.viv-hang-hw > viv-ts-inner {
+  display: inline-block;
+  inline-size: 0.5em;
+  text-indent: 0;
+  text-align: start;
+  text-align-last: start;
+  margin-inline-start: -0.5em;
+  inset-inline-start: 0.5em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;
