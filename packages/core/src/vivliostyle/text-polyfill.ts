@@ -730,30 +730,43 @@ class TextSpacingPolyfill {
           }
         } else if (tagName === "viv-ts-close") {
           if (hangingLast) {
-            outerElem.className = "viv-hang-last";
+            outerElem.className = isFullWidth
+              ? "viv-hang-last"
+              : "viv-hang-last viv-hang-hw";
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             if (hangingEnd) {
-              outerElem.className = "viv-hang-end";
+              outerElem.className = isFullWidth
+                ? "viv-hang-end"
+                : "viv-hang-end viv-hang-hw";
             } else if (textSpacing.trimEnd) {
               outerElem.className = "viv-ts-trim";
             } else {
               outerElem.className = "viv-ts-space";
             }
           } else if (
-            isFullWidth &&
-            textSpacing.trimAdjacent &&
             nextNode &&
             /^[\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]/u.test(
               nextNode.textContent,
             )
           ) {
-            outerElem.className = "viv-ts-trim";
+            if (isFullWidth && textSpacing.trimAdjacent) {
+              outerElem.className = "viv-ts-trim";
+            }
           } else if (hangingEnd) {
             const forceAtEnd = !hangingPunctuation.allowEnd && isAtEndOfLine();
-            outerElem.className = "viv-hang-end";
-            if (
+            outerElem.className = isFullWidth
+              ? "viv-hang-end"
+              : "viv-hang-end viv-hang-hw";
+            if (!isFullWidth) {
+              if (!forceAtEnd) {
+                const atEndOfLine = isAtEndOfLine();
+                outerElem.className = "";
+                if (atEndOfLine && !isAtEndOfLine()) {
+                  outerElem.className = "viv-hang-end viv-hang-hw";
+                }
+              }
+            } else if (
               !forceAtEnd &&
-              isFullWidth &&
               hangingPunctuation.allowEnd &&
               isAtEndOfLine()
             ) {
@@ -779,9 +792,6 @@ class TextSpacingPolyfill {
           } else if (textSpacing.trimEnd) {
             if (textSpacing.allowEnd && isAtEndOfLine()) {
               outerElem.className = "viv-ts-space";
-              if (!isAtEndOfLine()) {
-                outerElem.className = "viv-ts-auto";
-              }
             } else {
               outerElem.className = "viv-ts-auto";
             }
@@ -796,6 +806,8 @@ class TextSpacingPolyfill {
             "viv-ts-trim": "0.5em",
             "viv-hang-end": "1em",
             "viv-hang-last": "1em",
+            "viv-hang-end viv-hang-hw": "0.5em",
+            "viv-hang-last viv-hang-hw": "0.5em",
           }[outerElem.className];
           if (insetInlineStart) {
             if (vertical) {
