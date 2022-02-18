@@ -34,6 +34,84 @@ const colorNameToColor = (name: string): string => {
   }
 };
 
+const getNextNode = (node: Node): Node | undefined => {
+  if (node.firstChild) {
+    return node.firstChild;
+  }
+  while (node) {
+    if (node.nextSibling) {
+      return node.nextSibling;
+    }
+    node = node.parentNode;
+  }
+};
+const isNodeInEloff = (node: Node): boolean => {
+  let e: Element;
+  if (node.nodeType == 1) {
+    e = node as Element;
+  } else {
+    e = node.parentElement;
+  }
+  //  return e.hasAttribute('data-adapt-eloff') || e.parentElement?.hasAttribute('data-adapt-eloff');
+  return !!e.closest("[data-adapt-eloff]");
+};
+
+const collectTextNodesWithEloffInRange = (r: Range): Text[] => {
+  const start = r.startContainer;
+  const end = r.endContainer;
+  const nodes = [];
+  for (let node = start; node; node = getNextNode(node)) {
+    if (isNodeInEloff(node) && node.nodeType == 3) {
+      nodes.push(node);
+    }
+    if (node == end) {
+      break;
+    }
+  }
+  return nodes;
+};
+
+const textNodeRects = (
+  t: Text,
+  startOffset?: number,
+  endOffset?: number,
+): DOMRect[] => {
+  const s = startOffset != null ? startOffset : 0;
+  const e = endOffset != null ? endOffset : t.data.length;
+  const r = document.createRange();
+  r.setStart(t, s);
+  r.setEnd(t, e);
+  return [...r.getClientRects()];
+};
+
+const nodeRects = (
+  node: Node,
+  startOffset?: number,
+  endOffset?: number,
+): DOMRect[] | undefined => {
+  if (node.nodeType == 3) {
+    return textNodeRects(node as Text, startOffset, endOffset);
+  } else if (node.nodeType == 1) {
+    return [...(node as Element).getClientRects()];
+  }
+};
+
+const collectRects = (r: Range): DOMRect[] => {
+  const rects = [];
+  const nodes = collectTextNodesWithEloffInRange(r);
+  // first node
+  rects.push(...nodeRects(nodes[0], r.startOffset));
+  for (let index = 1; index < nodes.length - 1; index++) {
+    const r = nodeRects(nodes[index]);
+    if (r) {
+      rects.push(...r);
+    }
+  }
+  // last node
+  rects.push(...nodeRects(nodes[nodes.length - 1], undefined, r.endOffset));
+  return rects;
+};
+
 const highlightRange = (
   range: Range,
   background = "rgba(255, 0, 0, 0.2)",
@@ -46,26 +124,6 @@ const highlightRange = (
   const endParent = range.endContainer.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
-  let startPage = getPageIndex(startParent);
-  let endPage = getPageIndex(endParent);
-  let spine = getSpineIndex(startParent);
-  if (startPage > endPage) {
-    // does this happen ?
-    [startPage, endPage] = [endPage, startPage];
-  }
-  const pages: Element[] = [];
-  for (let i = startPage; i < endPage; i++) {
-    const p = document.querySelector(
-      `[data-vivliostyle-spine-index='${spine}'][data-vivliostyle-page-index='${i}']`,
-    );
-    if (p) {
-      pages.push(p);
-    } else {
-      // should not happen
-      console.error(`should not happen; no spine ${spine} and page index ${i}`);
-      return;
-    }
-  }
   if (mark.existMarkIn(startParent) && mark.existMarkIn(endParent)) {
     // already exists;
     return;
@@ -75,7 +133,7 @@ const highlightRange = (
   )?.firstElementChild as HTMLElement;
   const scale = zoomBox?.style?.transform;
   const parentRect = startParent?.getBoundingClientRect();
-  const rects = range?.getClientRects() || [];
+  const rects = collectRects(range);
   const selectId = mark.idString();
   const invokeMenu = (event: MouseEvent): void => {
     const x = event.clientX;
@@ -110,7 +168,7 @@ const highlightRange = (
   });
 };
 
-const getPageIndex = (pageElement: Element): number => {
+export const getPageIndex = (pageElement: Element): number => {
   const p = parseInt(pageElement.getAttribute("data-vivliostyle-page-index"));
   if (isNaN(p)) {
     return -1;
