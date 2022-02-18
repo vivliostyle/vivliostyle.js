@@ -56,13 +56,22 @@ const isNodeInEloff = (node: Node): boolean => {
   return !!e.closest("[data-adapt-eloff]");
 };
 
-const collectTextNodesWithEloffInRange = (r: Range): Text[] => {
+interface TextInRange {
+  t: Text;
+  startOffset: number;
+  endOffset: number;
+}
+
+const collectTextWithEloffInRange = (r: Range): TextInRange[] => {
   const start = r.startContainer;
   const end = r.endContainer;
-  const nodes = [];
+  const nodes: TextInRange[] = [];
   for (let node = start; node; node = getNextNode(node)) {
-    if (isNodeInEloff(node) && node.nodeType == 3) {
-      nodes.push(node);
+    if (node.nodeType == 3 && isNodeInEloff(node)) {
+      const t = node as Text;
+      const startOffset = node == start ? r.startOffset : 0;
+      const endOffset = node == end ? r.endOffset : t.data.length;
+      nodes.push({ t, startOffset, endOffset });
     }
     if (node == end) {
       break;
@@ -71,45 +80,11 @@ const collectTextNodesWithEloffInRange = (r: Range): Text[] => {
   return nodes;
 };
 
-const textNodeRects = (
-  t: Text,
-  startOffset?: number,
-  endOffset?: number,
-): DOMRect[] => {
-  const s = startOffset != null ? startOffset : 0;
-  const e = endOffset != null ? endOffset : t.data.length;
+const textNodeRects = (tn: TextInRange): DOMRect[] => {
   const r = document.createRange();
-  r.setStart(t, s);
-  r.setEnd(t, e);
+  r.setStart(tn.t, tn.startOffset);
+  r.setEnd(tn.t, tn.endOffset);
   return [...r.getClientRects()];
-};
-
-const nodeRects = (
-  node: Node,
-  startOffset?: number,
-  endOffset?: number,
-): DOMRect[] | undefined => {
-  if (node.nodeType == 3) {
-    return textNodeRects(node as Text, startOffset, endOffset);
-  } else if (node.nodeType == 1) {
-    return [...(node as Element).getClientRects()];
-  }
-};
-
-const collectRects = (r: Range): DOMRect[] => {
-  const rects = [];
-  const nodes = collectTextNodesWithEloffInRange(r);
-  // first node
-  rects.push(...nodeRects(nodes[0], r.startOffset));
-  for (let index = 1; index < nodes.length - 1; index++) {
-    const r = nodeRects(nodes[index]);
-    if (r) {
-      rects.push(...r);
-    }
-  }
-  // last node
-  rects.push(...nodeRects(nodes[nodes.length - 1], undefined, r.endOffset));
-  return rects;
 };
 
 const highlightRange = (
@@ -132,8 +107,7 @@ const highlightRange = (
     "[data-vivliostyle-outer-zoom-box]",
   )?.firstElementChild as HTMLElement;
   const scale = zoomBox?.style?.transform;
-  const parentRect = startParent?.getBoundingClientRect();
-  const rects = collectRects(range);
+  const textNodes = collectTextWithEloffInRange(range);
   const selectId = mark.idString();
   const invokeMenu = (event: MouseEvent): void => {
     const x = event.clientX;
@@ -141,30 +115,37 @@ const highlightRange = (
     marksMenuStatus.openEditMenu(x, y, selectId);
   };
 
-  Array.from(rects).forEach((r, index) => {
-    const rect = applyTransformToRect(r, scale, parentRect);
-    const rectNum = index;
-    if (
-      document.querySelector(
-        `[${Mark.idAttr}='${selectId}'][data-mn='${rectNum}']`,
-      )
-    ) {
-      // already exists.
-      return;
+  let index = 0;
+  Array.from(textNodes).forEach((tn) => {
+    const parent = tn.t.parentElement.closest(
+      "[data-vivliostyle-page-container='true']",
+    );
+    const parentRect = parent?.getBoundingClientRect();
+    for (const r of textNodeRects(tn)) {
+      const rect = applyTransformToRect(r, scale, parentRect);
+      const rectNum = index++;
+      if (
+        document.querySelector(
+          `[${Mark.idAttr}='${selectId}'][data-mn='${rectNum}']`,
+        )
+      ) {
+        // already exists.
+        return;
+      }
+      const div = document.createElement("div");
+      div.style.position = "absolute";
+      div.style.margin = "0";
+      div.style.padding = "0";
+      div.style.top = `${rect.top + window.scrollY}px`;
+      div.style.left = `${rect.left + window.scrollX}px`;
+      div.style.width = `${rect.width}px`;
+      div.style.height = `${rect.height}px`;
+      div.style.background = background;
+      div.setAttribute(Mark.idAttr, selectId);
+      div.setAttribute("data-mn", `${rectNum}`);
+      div.addEventListener("click", invokeMenu);
+      parent.appendChild(div);
     }
-    const div = document.createElement("div");
-    div.style.position = "absolute";
-    div.style.margin = "0";
-    div.style.padding = "0";
-    div.style.top = `${rect.top + window.scrollY}px`;
-    div.style.left = `${rect.left + window.scrollX}px`;
-    div.style.width = `${rect.width}px`;
-    div.style.height = `${rect.height}px`;
-    div.style.background = background;
-    div.setAttribute(Mark.idAttr, selectId);
-    div.setAttribute("data-mn", `${rectNum}`);
-    div.addEventListener("click", invokeMenu);
-    startParent.appendChild(div);
   });
 };
 
