@@ -2284,7 +2284,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     page.spineIndex = viewItem.item.spineIndex;
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);
-    if (page.offset === 0) {
+    if (
+      page.offset === 0 &&
+      !(viewItem.instance.blankPageAtStart && viewItem.pages.length === 0)
+    ) {
       const id = this.opf.documentURLTransformer.transformFragment(
         "",
         viewItem.item.src,
