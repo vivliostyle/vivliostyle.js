@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.3...v2.14.4) (2022-02-21)
+
+### Bug Fixes
+
+- wrong page break with ruby at beginning of a paragraph ([a9c50a3](https://github.com/vivliostyle/vivliostyle.js/commit/a9c50a3a80ebb886d78b94592ffdae763c7fefd3)), closes [#885](https://github.com/vivliostyle/vivliostyle.js/issues/885)
+
 ## [2.14.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.2...v2.14.3) (2022-02-18)
 
 ### Bug Fixes

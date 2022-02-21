@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.3...v2.14.4) (2022-02-21)
+
+### Bug Fixes
+
+- **viewer:** tweak mouse wheel/scroll handling to prevent unexpected page moves ([2ac72a0](https://github.com/vivliostyle/vivliostyle.js/commit/2ac72a09cd79388de54475f55c04854c4bad02d3))
+
 ## [2.14.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.2...v2.14.3) (2022-02-18)
 
 **Note:** Version bump only for package @vivliostyle/viewer
