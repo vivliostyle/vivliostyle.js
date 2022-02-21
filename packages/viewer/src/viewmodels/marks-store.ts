@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko, { Observable, ObservableArray } from "knockout";
+import ko, { Computed, Observable, ObservableArray } from "knockout";
 import urlParameters from "../stores/url-parameters";
 import { applyTransformToRect } from "../utils/scale-util";
 
@@ -418,9 +418,33 @@ interface MarkAction {
   deletable(): boolean;
   cancellable(): boolean;
   applyEditing(): void;
-  colorChanged(colorName: string): void;
+  colorChanged(): void;
   deleteCurrentEditing(): void;
   close(): void;
+}
+
+class EmptyMarkAction implements MarkAction {
+  currentId(): string {
+    return "";
+  }
+  deletable(): boolean {
+    return false;
+  }
+  cancellable(): boolean {
+    return false;
+  }
+  applyEditing(): void {
+    return;
+  }
+  colorChanged(): void {
+    return;
+  }
+  deleteCurrentEditing(): void {
+    return;
+  }
+  close(): void {
+    return;
+  }
 }
 class NewMarkAction implements MarkAction {
   currentStart?: SelectPosition;
@@ -463,7 +487,7 @@ class NewMarkAction implements MarkAction {
     marksMenuStatus.closeMenu();
   };
 
-  colorChanged = (_colorName: string): void => {
+  colorChanged = (): void => {
     if (this.cancellable() == false) {
       this.applyEditing();
     }
@@ -539,9 +563,10 @@ export class MarksMenuStatus {
   menuOpened: Observable<boolean>;
   selectionMenuOpened: Observable<boolean>;
   currentEditingColor: Observable<string>;
-  deletable: Observable<boolean>;
-  cancellable: Observable<boolean>;
-  markAction?: MarkAction;
+  deletable: Computed<boolean>;
+  cancellable: Computed<boolean>;
+  markAction: Observable<MarkAction>;
+  emptyAction: EmptyMarkAction;
   editAction: EditAction;
   newMarkAction: NewMarkAction;
 
@@ -552,12 +577,18 @@ export class MarksMenuStatus {
     this.currentEditingColor.subscribe(this.editingColorChanged);
     this.editAction = new EditAction();
     this.newMarkAction = new NewMarkAction();
-    this.deletable = ko.observable(false);
-    this.cancellable = ko.observable(false);
+    this.emptyAction = new EmptyMarkAction();
+    this.markAction = ko.observable(this.emptyAction);
+    this.deletable = ko
+      .pureComputed(() => this.markAction().deletable())
+      .extend({ notify: "always" });
+    this.cancellable = ko
+      .pureComputed(() => this.markAction().cancellable())
+      .extend({ notify: "always" });
   }
 
   editingColorChanged = (colorName: string): void => {
-    const idString = this.markAction?.currentId();
+    const idString = this.markAction().currentId();
     const color = colorNameToColor(colorName);
     if (color.length > 0) {
       document
@@ -566,7 +597,7 @@ export class MarksMenuStatus {
           (e as HTMLElement).style.background = color;
         });
     }
-    this.markAction?.colorChanged(colorName);
+    this.markAction().colorChanged();
   };
 
   private openMenu = (x: number, y: number): void => {
@@ -598,8 +629,6 @@ export class MarksMenuStatus {
       }
       subscription.dispose();
     });
-    this.deletable(this.markAction.deletable());
-    this.cancellable(this.markAction.cancellable());
     this.menuOpened(true);
   };
 
@@ -607,23 +636,23 @@ export class MarksMenuStatus {
     const currentEditing = this.parent.getMarkWithId(id);
     this.currentEditingColor(currentEditing.color);
     this.editAction.currentEditing = currentEditing;
-    this.markAction = this.editAction;
+    this.markAction(this.editAction);
     this.openMenu(x, y);
   };
 
   closeMenu = (): void => {
-    this.markAction?.close();
-    this.markAction = undefined;
+    this.markAction().close();
+    this.markAction(this.emptyAction);
     this.menuOpened(false);
   };
 
   applyEditing = (): void => {
-    this.markAction?.applyEditing();
+    this.markAction().applyEditing();
   };
 
   deleteCurrentEditing = (): void => {
     if (confirm("削除しますか？")) {
-      this.markAction?.deleteCurrentEditing();
+      this.markAction().deleteCurrentEditing();
     }
     this.closeMenu();
   };
@@ -637,7 +666,7 @@ export class MarksMenuStatus {
   ): void => {
     this.currentEditingColor("yellow");
     this.newMarkAction.start(start, end, selection);
-    this.markAction = this.newMarkAction;
+    this.markAction(this.newMarkAction);
     this.openMenu(x, y);
   };
 
