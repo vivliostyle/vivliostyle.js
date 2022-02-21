@@ -2102,6 +2102,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         position.checkPointIndex,
         force,
       );
+    } else {
+      // Fix for issue #821, #885
+      const p = LayoutHelper.findAncestorSpecialInlineNodeContext(nodeContext);
+      if (p) {
+        nodeContext = p;
+      }
     }
     this.clearOverflownViewNodes(nodeContext, false);
     return nodeContext;
