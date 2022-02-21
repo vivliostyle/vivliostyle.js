@@ -90,7 +90,7 @@ const textNodeRects = (tn: TextInRange): DOMRect[] => {
 const highlightRange = (
   range: Range,
   background = "rgba(255, 0, 0, 0.2)",
-  mark: Mark,
+  mark?: Mark,
 ): void => {
   // TODO; collect all active page container and check boundary.
   const startParent = range.startContainer.parentElement.closest(
@@ -99,7 +99,7 @@ const highlightRange = (
   const endParent = range.endContainer.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
-  if (mark.existMarkIn(startParent) && mark.existMarkIn(endParent)) {
+  if (mark?.existMarkIn(startParent) && mark?.existMarkIn(endParent)) {
     // already exists;
     return;
   }
@@ -108,7 +108,7 @@ const highlightRange = (
   )?.firstElementChild as HTMLElement;
   const scale = zoomBox?.style?.transform;
   const textNodes = collectTextWithEloffInRange(range);
-  const selectId = mark.idString();
+  const selectId = mark?.idString() || Mark.notCreatedId;
   const invokeMenu = (event: MouseEvent): void => {
     const x = event.clientX;
     const y = event.clientY;
@@ -357,6 +357,7 @@ let markSeq = 0;
 class Mark {
   readonly seqNumber: number;
   static readonly idAttr = "data-viv-marker-id";
+  static readonly notCreatedId = "not-created";
   constructor(
     readonly start: SelectPosition,
     readonly end: SelectPosition,
@@ -397,6 +398,7 @@ export const processSelection = (
       range.endContainer.nodeType !== 3
     ) {
       // do nothing
+      // TODO; find text container neareset start/end;
       selection.empty();
       return;
     }
@@ -411,25 +413,114 @@ export const processSelection = (
   }
 };
 
-export class MarksMenuStatus {
-  selectionMenuOpened: Observable<boolean>;
-  editMenuOpened: Observable<boolean>;
+interface MarkAction {
+  currentId(): string;
+  deletable(): boolean;
+  cancellable(): boolean;
+  applyEditing(): void;
+  colorChanged(colorName: string): void;
+  deleteCurrentEditing(): void;
+  close(): void;
+}
+class NewMarkAction implements MarkAction {
   currentStart?: SelectPosition;
   currentEnd?: SelectPosition;
-  currentSelection?: Selection;
+
+  start = (
+    currentStart: SelectPosition,
+    currentEnd: SelectPosition,
+    currentSelection: Selection,
+  ): void => {
+    this.currentStart = currentStart;
+    this.currentEnd = currentEnd;
+    const start = selectedPositionToNode(this.currentStart);
+    const end = selectedPositionToNode(this.currentEnd);
+    if (start && end) {
+      const range = document.createRange();
+      range.setStart(start.node, start.offset);
+      range.setEnd(end.node, end.offset);
+      const color = colorNameToColor(marksMenuStatus.currentEditingColor());
+      highlightRange(range, color);
+      currentSelection.empty();
+    }
+  };
+
+  deletable = (): boolean => false;
+  cancellable = (): boolean => true;
+  deleteCurrentEditing = (): void => {
+    // do nothing
+  };
+  currentId = (): string => Mark.notCreatedId;
+  applyEditing = (): void => {
+    if (this.currentStart && this.currentEnd) {
+      const mark = new Mark(
+        this.currentStart,
+        this.currentEnd,
+        marksMenuStatus.currentEditingColor(),
+      );
+      marksStore.pushMark(mark);
+    }
+    marksMenuStatus.closeMenu();
+  };
+
+  colorChanged = (_colorName: string): void => {
+    if (this.cancellable() == false) {
+      this.applyEditing();
+    }
+  };
+
+  close = (): void => {
+    document
+      .querySelectorAll(`[${Mark.idAttr}="${Mark.notCreatedId}"]`)
+      .forEach((e) => {
+        e.remove();
+      });
+  };
+}
+
+class EditAction implements MarkAction {
   currentEditing?: Mark;
-  currentEditingColor: Observable<string>;
-
-  constructor(private parent: MarksStore) {
-    this.selectionMenuOpened = ko.observable(false);
-    this.editMenuOpened = ko.observable(false);
-    this.currentEditingColor = ko.observable("");
-    this.currentEditingColor.subscribe(this.editingColorChanged);
-  }
-
-  editingColorChanged = (colorName: string): void => {
+  deletable = (): boolean => true;
+  cancellable = (): boolean => true;
+  deleteCurrentEditing = (): void => {
     if (this.currentEditing) {
-      const color = colorNameToColor(colorName);
+      marksStore.removeMark(this.currentEditing);
+      document
+        .querySelectorAll(
+          `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
+        )
+        .forEach((e) => {
+          e.remove();
+        });
+    }
+  };
+
+  currentId = (): string => {
+    return this.currentEditing?.idString();
+  };
+
+  applyEditing = (): void => {
+    if (this.currentEditing) {
+      if (marksMenuStatus.currentEditingColor() != this.currentEditing.color) {
+        const newMark = new Mark(
+          this.currentEditing.start,
+          this.currentEditing.end,
+          marksMenuStatus.currentEditingColor(),
+        );
+        marksStore.pushMark(newMark);
+        this.deleteCurrentEditing();
+      }
+    }
+    marksMenuStatus.closeMenu();
+  };
+  colorChanged = (): void => {
+    // do nothing.
+  };
+
+  close = (): void => {
+    if (this.currentEditing) {
+      // TODO ; should be in method cancel() or the like
+      const color = colorNameToColor(this.currentEditing.color);
       if (color.length > 0) {
         document
           .querySelectorAll(
@@ -439,11 +530,46 @@ export class MarksMenuStatus {
             (e as HTMLElement).style.background = color;
           });
       }
+      this.currentEditing = undefined;
     }
   };
+}
 
-  openEditMenu = (x: number, y: number, id: string): void => {
-    this.closeSelectionMenu();
+export class MarksMenuStatus {
+  menuOpened: Observable<boolean>;
+  selectionMenuOpened: Observable<boolean>;
+  currentEditingColor: Observable<string>;
+  deletable: Observable<boolean>;
+  cancellable: Observable<boolean>;
+  markAction?: MarkAction;
+  editAction: EditAction;
+  newMarkAction: NewMarkAction;
+
+  constructor(private parent: MarksStore) {
+    this.menuOpened = ko.observable(false);
+    this.selectionMenuOpened = ko.observable(false);
+    this.currentEditingColor = ko.observable("");
+    this.currentEditingColor.subscribe(this.editingColorChanged);
+    this.editAction = new EditAction();
+    this.newMarkAction = new NewMarkAction();
+    this.deletable = ko.observable(false);
+    this.cancellable = ko.observable(false);
+  }
+
+  editingColorChanged = (colorName: string): void => {
+    const idString = this.markAction?.currentId();
+    const color = colorNameToColor(colorName);
+    if (color.length > 0) {
+      document
+        .querySelectorAll(`[${Mark.idAttr}="${idString}"]`)
+        .forEach((e) => {
+          (e as HTMLElement).style.background = color;
+        });
+    }
+    this.markAction?.colorChanged(colorName);
+  };
+
+  private openMenu = (x: number, y: number): void => {
     const menu = document.getElementById(
       "vivliostyle-text-selection-edit-menu",
     ) as HTMLElement;
@@ -451,9 +577,7 @@ export class MarksMenuStatus {
       menu.style.top = `${y}px`;
       menu.style.left = `${x}px`;
     }
-    this.currentEditing = this.parent.getMarkWithId(id);
-    this.currentEditingColor(this.currentEditing.color);
-    const subscription = this.editMenuOpened.subscribe((v) => {
+    const subscription = this.menuOpened.subscribe((v) => {
       if (v) {
         const menu = document.getElementById(
           "vivliostyle-text-selection-edit-menu",
@@ -474,58 +598,34 @@ export class MarksMenuStatus {
       }
       subscription.dispose();
     });
-    this.editMenuOpened(true);
+    this.deletable(this.markAction.deletable());
+    this.cancellable(this.markAction.cancellable());
+    this.menuOpened(true);
   };
 
-  closeEditMenu = (): void => {
-    if (this.currentEditing) {
-      const color = colorNameToColor(this.currentEditing.color);
-      if (color.length > 0) {
-        document
-          .querySelectorAll(
-            `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
-          )
-          .forEach((e) => {
-            (e as HTMLElement).style.background = color;
-          });
-      }
-    }
-    this.currentEditing = undefined;
-    this.editMenuOpened(false);
+  openEditMenu = (x: number, y: number, id: string): void => {
+    const currentEditing = this.parent.getMarkWithId(id);
+    this.currentEditingColor(currentEditing.color);
+    this.editAction.currentEditing = currentEditing;
+    this.markAction = this.editAction;
+    this.openMenu(x, y);
   };
 
-  private deleteCurrentEditingInternal = (): void => {
-    if (this.currentEditing) {
-      this.parent.removeMark(this.currentEditing);
-      document
-        .querySelectorAll(
-          `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
-        )
-        .forEach((e) => {
-          e.remove();
-        });
-    }
+  closeMenu = (): void => {
+    this.markAction?.close();
+    this.markAction = undefined;
+    this.menuOpened(false);
   };
+
   applyEditing = (): void => {
-    if (this.currentEditing) {
-      if (this.currentEditingColor() != this.currentEditing.color) {
-        const newMark = new Mark(
-          this.currentEditing.start,
-          this.currentEditing.end,
-          this.currentEditingColor(),
-        );
-        this.parent.pushMark(newMark);
-        this.deleteCurrentEditingInternal();
-      }
-    }
-    this.closeEditMenu();
+    this.markAction?.applyEditing();
   };
 
   deleteCurrentEditing = (): void => {
     if (confirm("削除しますか？")) {
-      this.deleteCurrentEditingInternal();
+      this.markAction?.deleteCurrentEditing();
     }
-    this.closeEditMenu();
+    this.closeMenu();
   };
 
   openSelectionMenu = (
@@ -535,55 +635,18 @@ export class MarksMenuStatus {
     end: SelectPosition,
     selection: Selection,
   ): void => {
-    this.currentStart = start;
-    this.currentEnd = end;
-    this.currentSelection = selection;
-    const menu = document.getElementById(
-      "vivliostyle-text-selection-menu",
-    ) as HTMLElement;
-    if (menu) {
-      menu.style.top = `${y}px`;
-      menu.style.left = `${x}px`;
-    }
-    const subscription = this.selectionMenuOpened.subscribe((v) => {
-      if (v) {
-        const menu = document.getElementById(
-          "vivliostyle-text-selection-menu",
-        ) as HTMLElement;
-        const outer = document.querySelector(
-          "[data-vivliostyle-outer-zoom-box]",
-        ) as HTMLElement;
-        if (menu && outer) {
-          const mb = menu.getBoundingClientRect();
-          const ob = outer.getBoundingClientRect();
-          if (mb.right > ob.right) {
-            menu.style.left = `${ob.right - mb.width - 10}px`;
-          }
-          if (mb.bottom > ob.bottom) {
-            menu.style.top = `${ob.bottom - mb.height - 10}px`;
-          }
-        }
-      }
-      subscription.dispose();
-    });
-    this.selectionMenuOpened(true);
+    this.currentEditingColor("yellow");
+    this.newMarkAction.start(start, end, selection);
+    this.markAction = this.newMarkAction;
+    this.openMenu(x, y);
   };
 
   closeSelectionMenu = (): void => {
-    this.currentStart = undefined;
-    this.currentEnd = undefined;
-    this.currentSelection = undefined;
+    //    this.currentStart = undefined;
+    //    this.currentEnd = undefined;
+    //    this.currentSelection = undefined;
     this.selectionMenuOpened(false);
   };
-
-  mark(colorName: string): void {
-    if (this.currentStart && this.currentEnd) {
-      const mark = new Mark(this.currentStart, this.currentEnd, colorName);
-      marksStore.pushMark(mark);
-    }
-    this.currentSelection?.empty();
-    this.closeSelectionMenu();
-  }
 }
 
 export class MarksStore {

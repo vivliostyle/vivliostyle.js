@@ -98,24 +98,17 @@
     <div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()?'':false}">
       <div class="vivliostyle-loading-spinner"></div>
     </div>
-    <div role="dialog" id="vivliostyle-text-selection-menu" data-bind="visible: marksMenuStatus.selectionMenuOpened, clickOutside: marksMenuStatus.closeSelectionMenu">
-      <section>
-      <span class="mark-color yellow" data-bind="click: () => { marksMenuStatus.mark('yellow') }"></span>            
-      <span class="mark-color red" data-bind="click: () => { marksMenuStatus.mark('red') }"></span>
-      <span class="mark-color green" data-bind="click: () => { marksMenuStatus.mark('green') }"></span>
-      </section>
-    </div>
-    <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.editMenuOpened, clickOutside: marksMenuStatus.closeEditMenu">
+    <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.menuOpened, clickOutside: marksMenuStatus.closeMenu">
       <section>
         <span class="mark-color yellow" data-bind="css: {'selected-color': marksMenuStatus.currentEditingColor() == 'yellow' }, click: () => { marksMenuStatus.currentEditingColor('yellow') }"></span>            
         <span class="mark-color red" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'red' }, click: () => { marksMenuStatus.currentEditingColor('red') }"></span>
         <span class="mark-color green" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'green' }, click: () => { marksMenuStatus.currentEditingColor('green') }"></span>
       </section>
-      <section>
+      <section data-bind="visible: marksMenuStatus.cancellable">
         <span class="button" id="selection-ok" data-bind="click: marksMenuStatus.applyEditing">OK</span>
-        <span class="button" id="selection-cancel" data-bind="click: marksMenuStatus.closeEditMenu">Cancel</span>                
+        <span class="button" id="selection-cancel" data-bind="click: marksMenuStatus.closeMenu">Cancel</span>                
       </section>
-      <section>
+      <section data-bind="visible: marksMenuStatus.deletable">
         <span class="button" id="selection-delete" data-bind="click: marksMenuStatus.deleteCurrentEditing">Delete</span>
       </section>
     </div>

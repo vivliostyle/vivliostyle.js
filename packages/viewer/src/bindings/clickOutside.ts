@@ -23,6 +23,9 @@ ko.bindingHandlers.clickOutside = {
   init(element, valueAccessor): void {
     const callback = ko.utils.unwrapObservable(valueAccessor());
     document.addEventListener("mousedown", (e: Event) => {
+      if (window.getComputedStyle(element).display == "none") {
+        return;
+      }
       if (!(element.contains(e.target) || element === e.target)) {
         callback();
       }
