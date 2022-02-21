@@ -105,7 +105,7 @@ export function isBlock(
   );
 }
 
-export function isInlineLevel(display: Css.Ident): boolean {
+export function isInlineLevel(display: Css.Ident | string): boolean {
   switch (display.toString()) {
     case "inline":
     case "inline-block":
@@ -120,7 +120,7 @@ export function isInlineLevel(display: Css.Ident): boolean {
   }
 }
 
-export function isRubyInternalDisplay(display: Css.Ident): boolean {
+export function isRubyInternalDisplay(display: Css.Ident | string): boolean {
   switch (display.toString()) {
     case "ruby-base":
     case "ruby-text":
