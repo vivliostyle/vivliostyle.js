@@ -31,7 +31,7 @@ import MessageDialog from "./message-dialog";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
-import { marksStore, MarksStore, MarksMenuStatus } from "./marks-store";
+import { marksStore, MarksStoreFacade, MarksMenuStatus } from "./marks-store";
 
 class ViewerApp {
   documentOptions: DocumentOptions;
@@ -43,7 +43,7 @@ class ViewerApp {
   settingsPanel: SettingsPanel;
   navigation: Navigation;
   findBox: FindBox;
-  marksStore: MarksStore;
+  marksStore: MarksStoreFacade;
   marksMenuStatus: MarksMenuStatus;
 
   constructor() {

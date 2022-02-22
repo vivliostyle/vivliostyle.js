@@ -355,15 +355,15 @@ class SelectPosition {
 
 let markSeq = 0;
 class Mark {
-  readonly seqNumber: number;
+  readonly identifier: number;
   static readonly idAttr = "data-viv-marker-id";
   static readonly notCreatedId = "not-created";
   constructor(
-    readonly start: SelectPosition,
-    readonly end: SelectPosition,
-    readonly color: string,
+    public start: SelectPosition,
+    public end: SelectPosition,
+    public color: string,
   ) {
-    this.seqNumber = markSeq++;
+    this.identifier = markSeq++;
   }
 
   toString(): string {
@@ -372,7 +372,7 @@ class Mark {
 
   idString(): string {
     // TODO; may change
-    return `${this.seqNumber}`;
+    return `${this.identifier}`;
   }
 
   existMarkIn(e: Element): boolean {
@@ -509,13 +509,6 @@ class EditAction implements MarkAction {
   deleteCurrentEditing = (): void => {
     if (this.currentEditing) {
       marksStore.removeMark(this.currentEditing);
-      document
-        .querySelectorAll(
-          `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
-        )
-        .forEach((e) => {
-          e.remove();
-        });
     }
   };
 
@@ -526,13 +519,8 @@ class EditAction implements MarkAction {
   applyEditing = (): void => {
     if (this.currentEditing) {
       if (marksMenuStatus.currentEditingColor() != this.currentEditing.color) {
-        const newMark = new Mark(
-          this.currentEditing.start,
-          this.currentEditing.end,
-          marksMenuStatus.currentEditingColor(),
-        );
-        marksStore.pushMark(newMark);
-        this.deleteCurrentEditing();
+        this.currentEditing.color = marksMenuStatus.currentEditingColor();
+        marksStore.updateMark(this.currentEditing);
       }
     }
     marksMenuStatus.closeMenu();
@@ -570,7 +558,7 @@ export class MarksMenuStatus {
   editAction: EditAction;
   newMarkAction: NewMarkAction;
 
-  constructor(private parent: MarksStore) {
+  constructor(private parent: MarksStoreFacade) {
     this.menuOpened = ko.observable(false);
     this.selectionMenuOpened = ko.observable(false);
     this.currentEditingColor = ko.observable("");
@@ -633,7 +621,7 @@ export class MarksMenuStatus {
   };
 
   openEditMenu = (x: number, y: number, id: string): void => {
-    const currentEditing = this.parent.getMarkWithId(id);
+    const currentEditing = this.parent.getMark(id);
     this.currentEditingColor(currentEditing.color);
     this.editAction.currentEditing = currentEditing;
     this.markAction(this.editAction);
@@ -678,16 +666,22 @@ export class MarksMenuStatus {
   };
 }
 
-export class MarksStore {
-  private markArray: ObservableArray<Mark>;
-  markKeyToArrayIndex: Map<string, number>;
-  menuStatus: MarksMenuStatus;
+export interface MarksStoreInterface {
+  init(): void;
+  pushMark(mark: Mark): void;
+  getMark(id: string): Mark;
+  updateMark(mark: Mark): void;
+  removeMark(mark: Mark): void;
+  getAllMarks(): Mark[];
+}
 
+export class URLMarksStore implements MarksStoreInterface {
+  private markArray: ObservableArray<Mark>;
+  private markKeyToArrayIndex: Map<string, number>;
   constructor() {
     this.markArray = ko.observableArray();
     this.markKeyToArrayIndex = new Map();
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
-    this.menuStatus = new MarksMenuStatus(this);
   }
 
   init(): void {
@@ -707,24 +701,12 @@ export class MarksStore {
     }
   }
 
-  retryHighlightMarks(): void {
-    this.markArray().forEach((mark) => {
-      this.highlightMark(mark);
-    });
+  updateMark(mark: Mark): void {
+    this.removeMark(mark);
+    this.pushMark(mark);
   }
 
-  private highlightMark(mark: Mark): void {
-    const start = selectedPositionToNode(mark.start);
-    const end = selectedPositionToNode(mark.end);
-    if (start && end) {
-      const range = document.createRange();
-      range.setStart(start.node, start.offset);
-      range.setEnd(end.node, end.offset);
-      const color = colorNameToColor(mark.color);
-      highlightRange(range, color, mark);
-    }
-  }
-  getMarkWithId(id: string): Mark {
+  getMark(id: string): Mark {
     const index = this.markKeyToArrayIndex.get(id);
     return this.markArray()[index];
   }
@@ -732,12 +714,14 @@ export class MarksStore {
   removeMark(mark: Mark): void {
     this.markArray.remove(mark);
   }
+
+  getAllMarks(): Mark[] {
+    return this.markArray();
+  }
+
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
     let removed = false;
     for (const change of changes) {
-      if (change.status == "added") {
-        this.highlightMark(change.value);
-      }
       removed = removed || change.status == "deleted";
     }
     if (removed) {
@@ -752,5 +736,64 @@ export class MarksStore {
   };
 }
 
-export const marksStore = new MarksStore();
+export class MarksStoreFacade {
+  private actualStore: MarksStoreInterface;
+  menuStatus: MarksMenuStatus;
+
+  constructor() {
+    this.menuStatus = new MarksMenuStatus(this);
+    this.actualStore = new URLMarksStore();
+  }
+
+  init(): void {
+    this.actualStore.init();
+  }
+
+  pushMark(mark: Mark): void {
+    this.highlightMark(mark);
+    this.actualStore.pushMark(mark);
+  }
+
+  updateMark(mark: Mark): void {
+    this.unhighlightMark(mark);
+    this.highlightMark(mark);
+    this.actualStore.updateMark(mark);
+  }
+
+  getMark(id: string): Mark {
+    return this.actualStore.getMark(id);
+  }
+
+  removeMark(mark: Mark): void {
+    this.unhighlightMark(mark);
+    this.actualStore.removeMark(mark);
+  }
+
+  retryHighlightMarks(): void {
+    this.actualStore.getAllMarks().forEach((mark) => {
+      this.highlightMark(mark);
+    });
+  }
+
+  private unhighlightMark(mark: Mark): void {
+    document
+      .querySelectorAll(`[${Mark.idAttr}="${mark.idString()}"]`)
+      .forEach((e) => {
+        e.remove();
+      });
+  }
+  private highlightMark(mark: Mark): void {
+    const start = selectedPositionToNode(mark.start);
+    const end = selectedPositionToNode(mark.end);
+    if (start && end) {
+      const range = document.createRange();
+      range.setStart(start.node, start.offset);
+      range.setEnd(end.node, end.offset);
+      const color = colorNameToColor(mark.color);
+      highlightRange(range, color, mark);
+    }
+  }
+}
+
+export const marksStore = new MarksStoreFacade();
 export const marksMenuStatus = marksStore.menuStatus;
