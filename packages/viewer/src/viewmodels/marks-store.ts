@@ -87,6 +87,10 @@ const textNodeRects = (tn: TextInRange): DOMRect[] => {
   return [...r.getClientRects()];
 };
 
+const existMarkIn = (markId: string, e: Element): boolean => {
+  return !!e.querySelector(`[${Mark.idAttr}="${markId}"]`);
+};
+
 const highlightRange = (
   range: Range,
   background = "rgba(255, 0, 0, 0.2)",
@@ -99,7 +103,11 @@ const highlightRange = (
   const endParent = range.endContainer.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
-  if (mark?.existMarkIn(startParent) && mark?.existMarkIn(endParent)) {
+  if (
+    mark &&
+    existMarkIn(mark.uniqueIdentifier, startParent) &&
+    existMarkIn(mark.uniqueIdentifier, endParent)
+  ) {
     // already exists;
     return;
   }
@@ -108,7 +116,7 @@ const highlightRange = (
   )?.firstElementChild as HTMLElement;
   const scale = zoomBox?.style?.transform;
   const textNodes = collectTextWithEloffInRange(range);
-  const selectId = mark?.idString() || Mark.notCreatedId;
+  const selectId = mark?.uniqueIdentifier || Mark.notCreatedId;
   const invokeMenu = (event: MouseEvent): void => {
     const x = event.clientX;
     const y = event.clientY;
@@ -369,16 +377,12 @@ export class Mark {
     return `${this.start},${this.end},${this.color}`;
   }
 
-  idString(): string {
-    return `${this.uniqueIdentifier}`;
+  toMarkJson(): MarkJson {
+    return { mark: this.toString(), id: this.uniqueIdentifier };
   }
 
   isPersisted(): boolean {
     return this.uniqueIdentifier && this.uniqueIdentifier != Mark.notCreatedId;
-  }
-
-  existMarkIn(e: Element): boolean {
-    return !!e.querySelector(`[${Mark.idAttr}="${this.idString()}"]`);
   }
 
   static fromString(str: string): Mark {
@@ -387,6 +391,12 @@ export class Mark {
     const end = SelectPosition.fromString(e);
     const m = new Mark(start, end, c);
     return m;
+  }
+
+  static fromMarkJson(m: MarkJson): Mark {
+    const mark = Mark.fromString(m.mark);
+    mark.uniqueIdentifier = m.id;
+    return mark;
   }
 }
 
@@ -516,7 +526,7 @@ class EditAction implements MarkAction {
   };
 
   currentId = (): string => {
-    return this.currentEditing?.idString();
+    return this.currentEditing?.uniqueIdentifier;
   };
 
   applyEditing = (): void => {
@@ -539,7 +549,7 @@ class EditAction implements MarkAction {
       if (color.length > 0) {
         document
           .querySelectorAll(
-            `[${Mark.idAttr}="${this.currentEditing.idString()}"]`,
+            `[${Mark.idAttr}="${this.currentEditing.uniqueIdentifier}"]`,
           )
           .forEach((e) => {
             (e as HTMLElement).style.background = color;
@@ -669,18 +679,23 @@ export class MarksMenuStatus {
   };
 }
 
+export interface MarkJson {
+  mark: string;
+  id: string;
+}
+
 export interface MarksStoreInterface {
   init(documentId: string): void;
-  persistMark(mark: Mark): Mark; // should set unique identifier to mark object
-  getMark(id: string): Mark;
-  updateMark(mark: Mark): void;
-  removeMark(mark: Mark): void;
-  getAllMarks(): Mark[];
+  persistMark(mark: MarkJson): string; // persists and return id
+  getMark(id: string): MarkJson;
+  updateMark(mark: MarkJson): void;
+  removeMark(mark: MarkJson): void;
+  getAllMarks(): MarkJson[];
 }
 
 let seqId = 0;
 export class URLMarksStore implements MarksStoreInterface {
-  private markArray: ObservableArray<Mark>;
+  private markArray: ObservableArray<{ mark: string; id: string }>;
   private markKeyToArrayIndex: Map<string, number>;
   public documentId = "";
 
@@ -693,50 +708,50 @@ export class URLMarksStore implements MarksStoreInterface {
   init(documentId: string): void {
     const marksParam = urlParameters.getParameter("mark");
     marksParam.forEach((m) => {
-      const mark = Mark.fromString(m);
-      this.pushMarkInternal(mark, "doNotAddToUrl", "persist");
+      this.pushMarkInternal({ mark: m, id: "" }, "doNotAddToUrl", "persist");
     });
     this.documentId = documentId;
     console.log(documentId);
   }
 
-  persistMark(mark: Mark): Mark {
+  persistMark(mark: MarkJson): string {
     return this.pushMarkInternal(mark, "addToUrl", "persist");
   }
 
-  updateMark(mark: Mark): void {
+  updateMark(mark: MarkJson): void {
     this.removeMark(mark);
     this.pushMarkInternal(mark, "addToUrl", "doNotPersist");
   }
 
-  getMark(id: string): Mark {
+  getMark(id: string): MarkJson {
     const index = this.markKeyToArrayIndex.get(id);
     return this.markArray()[index];
   }
 
-  removeMark(mark: Mark): void {
-    this.markArray.remove(mark);
+  removeMark(mark: MarkJson): void {
+    const m = this.getMark(mark.id);
+    this.markArray.remove(m);
   }
 
-  getAllMarks(): Mark[] {
+  getAllMarks(): MarkJson[] {
     return this.markArray();
   }
 
   private pushMarkInternal(
-    mark: Mark,
+    mark: MarkJson,
     addToUrl: "addToUrl" | "doNotAddToUrl",
     persist: "persist" | "doNotPersist",
-  ): Mark {
+  ): string {
     if (persist == "persist") {
-      mark.uniqueIdentifier = `${seqId++}`;
+      mark.id = `${seqId++}`;
     }
     this.markArray.push(mark);
-    this.markKeyToArrayIndex.set(mark.idString(), this.markArray().length - 1);
+    this.markKeyToArrayIndex.set(mark.id, this.markArray().length - 1);
     if (addToUrl == "addToUrl") {
       const count = urlParameters.getParameter("mark").length;
-      urlParameters.setParameter("mark", mark.toString(), count);
+      urlParameters.setParameter("mark", mark.mark, count);
     }
-    return mark;
+    return mark.id;
   }
 
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
@@ -749,8 +764,8 @@ export class URLMarksStore implements MarksStoreInterface {
       this.markKeyToArrayIndex.clear();
       urlParameters.removeParameter("mark");
       this.markArray().forEach((m, i) => {
-        urlParameters.setParameter("mark", m.toString(), i);
-        this.markKeyToArrayIndex.set(m.idString(), i);
+        urlParameters.setParameter("mark", m.mark, i);
+        this.markKeyToArrayIndex.set(m.id, i);
       });
     }
   };
@@ -774,34 +789,35 @@ export class MarksStoreFacade {
   }
 
   persistMark(mark: Mark): void {
-    mark = this.actualStore.persistMark(mark);
+    const id = this.actualStore.persistMark(mark.toMarkJson());
+    mark.uniqueIdentifier = id;
     this.highlightMark(mark);
   }
 
   updateMark(mark: Mark): void {
     this.unhighlightMark(mark);
     this.highlightMark(mark);
-    this.actualStore.updateMark(mark);
+    this.actualStore.updateMark(mark.toMarkJson());
   }
 
   getMark(id: string): Mark {
-    return this.actualStore.getMark(id);
+    return Mark.fromMarkJson(this.actualStore.getMark(id));
   }
 
   removeMark(mark: Mark): void {
     this.unhighlightMark(mark);
-    this.actualStore.removeMark(mark);
+    this.actualStore.removeMark(mark.toMarkJson());
   }
 
   retryHighlightMarks(): void {
-    this.actualStore.getAllMarks().forEach((mark) => {
-      this.highlightMark(mark);
+    this.actualStore.getAllMarks().forEach((m) => {
+      this.highlightMark(Mark.fromMarkJson(m));
     });
   }
 
   private unhighlightMark(mark: Mark): void {
     document
-      .querySelectorAll(`[${Mark.idAttr}="${mark.idString()}"]`)
+      .querySelectorAll(`[${Mark.idAttr}="${mark.uniqueIdentifier}"]`)
       .forEach((e) => {
         e.remove();
       });
