@@ -712,7 +712,6 @@ export class URLMarksStore implements MarksStoreInterface {
       this.pushMarkInternal({ mark: m, id: "" }, "doNotAddToUrl", "persist");
     });
     this.documentId = documentId;
-    console.log(documentId);
   }
 
   persistMark(mark: MarkJson): string {
@@ -772,7 +771,6 @@ export class URLMarksStore implements MarksStoreInterface {
       removed = removed || change.status == "deleted";
     }
     if (removed) {
-      console.log("remove occured");
       this.markKeyToArrayIndex.clear();
       urlParameters.removeParameter("mark");
       this.markArray().forEach((m, i) => {
