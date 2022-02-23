@@ -325,7 +325,7 @@ const collectElementsWithEloff = (spine: number, eloff: number): Element[] => {
   );
 };
 
-class SelectPosition {
+export class SelectPosition {
   constructor(
     readonly spine: number,
     readonly eloff: number,
@@ -353,9 +353,8 @@ class SelectPosition {
   }
 }
 
-let markSeq = 0;
-class Mark {
-  readonly identifier: number;
+export class Mark {
+  uniqueIdentifier?: string;
   static readonly idAttr = "data-viv-marker-id";
   static readonly notCreatedId = "not-created";
   constructor(
@@ -363,7 +362,7 @@ class Mark {
     public end: SelectPosition,
     public color: string,
   ) {
-    this.identifier = markSeq++;
+    this.uniqueIdentifier = Mark.notCreatedId;
   }
 
   toString(): string {
@@ -371,8 +370,11 @@ class Mark {
   }
 
   idString(): string {
-    // TODO; may change
-    return `${this.identifier}`;
+    return `${this.uniqueIdentifier}`;
+  }
+
+  isPersisted(): boolean {
+    return this.uniqueIdentifier && this.uniqueIdentifier != Mark.notCreatedId;
   }
 
   existMarkIn(e: Element): boolean {
@@ -383,7 +385,8 @@ class Mark {
     const [s, e, c] = str.split(",");
     const start = SelectPosition.fromString(s);
     const end = SelectPosition.fromString(e);
-    return new Mark(start, end, c);
+    const m = new Mark(start, end, c);
+    return m;
   }
 }
 
@@ -482,7 +485,7 @@ class NewMarkAction implements MarkAction {
         this.currentEnd,
         marksMenuStatus.currentEditingColor(),
       );
-      marksStore.pushMark(mark);
+      marksStore.persistMark(mark);
     }
     marksMenuStatus.closeMenu();
   };
@@ -667,43 +670,43 @@ export class MarksMenuStatus {
 }
 
 export interface MarksStoreInterface {
-  init(): void;
-  pushMark(mark: Mark): void;
+  init(documentId: string): void;
+  persistMark(mark: Mark): Mark; // should set unique identifier to mark object
   getMark(id: string): Mark;
   updateMark(mark: Mark): void;
   removeMark(mark: Mark): void;
   getAllMarks(): Mark[];
 }
 
+let seqId = 0;
 export class URLMarksStore implements MarksStoreInterface {
   private markArray: ObservableArray<Mark>;
   private markKeyToArrayIndex: Map<string, number>;
+  public documentId = "";
+
   constructor() {
     this.markArray = ko.observableArray();
     this.markKeyToArrayIndex = new Map();
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
 
-  init(): void {
+  init(documentId: string): void {
     const marksParam = urlParameters.getParameter("mark");
     marksParam.forEach((m) => {
       const mark = Mark.fromString(m);
-      this.pushMark(mark, false);
+      this.pushMarkInternal(mark, "doNotAddToUrl", "persist");
     });
+    this.documentId = documentId;
+    console.log(documentId);
   }
 
-  pushMark(mark: Mark, addToUrl = true): void {
-    this.markArray.push(mark);
-    this.markKeyToArrayIndex.set(mark.idString(), this.markArray().length - 1);
-    if (addToUrl) {
-      const count = urlParameters.getParameter("mark").length;
-      urlParameters.setParameter("mark", mark.toString(), count);
-    }
+  persistMark(mark: Mark): Mark {
+    return this.pushMarkInternal(mark, "addToUrl", "persist");
   }
 
   updateMark(mark: Mark): void {
     this.removeMark(mark);
-    this.pushMark(mark);
+    this.pushMarkInternal(mark, "addToUrl", "doNotPersist");
   }
 
   getMark(id: string): Mark {
@@ -717,6 +720,23 @@ export class URLMarksStore implements MarksStoreInterface {
 
   getAllMarks(): Mark[] {
     return this.markArray();
+  }
+
+  private pushMarkInternal(
+    mark: Mark,
+    addToUrl: "addToUrl" | "doNotAddToUrl",
+    persist: "persist" | "doNotPersist",
+  ): Mark {
+    if (persist == "persist") {
+      mark.uniqueIdentifier = `${seqId++}`;
+    }
+    this.markArray.push(mark);
+    this.markKeyToArrayIndex.set(mark.idString(), this.markArray().length - 1);
+    if (addToUrl == "addToUrl") {
+      const count = urlParameters.getParameter("mark").length;
+      urlParameters.setParameter("mark", mark.toString(), count);
+    }
+    return mark;
   }
 
   markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
@@ -737,21 +757,25 @@ export class URLMarksStore implements MarksStoreInterface {
 }
 
 export class MarksStoreFacade {
-  private actualStore: MarksStoreInterface;
+  private actualStore?: MarksStoreInterface;
   menuStatus: MarksMenuStatus;
 
   constructor() {
     this.menuStatus = new MarksMenuStatus(this);
-    this.actualStore = new URLMarksStore();
   }
 
   init(): void {
-    this.actualStore.init();
+    this.actualStore = new URLMarksStore(); // TODO
+    const src = urlParameters.getParameter("src").join();
+    const bookMode = urlParameters.getParameter("bookMode").join();
+    const userStyle = urlParameters.getParameter("userStyle").join();
+    const documentId = `${src}:${bookMode}:${userStyle}`;
+    this.actualStore.init(documentId);
   }
 
-  pushMark(mark: Mark): void {
+  persistMark(mark: Mark): void {
+    mark = this.actualStore.persistMark(mark);
     this.highlightMark(mark);
-    this.actualStore.pushMark(mark);
   }
 
   updateMark(mark: Mark): void {
@@ -782,7 +806,10 @@ export class MarksStoreFacade {
         e.remove();
       });
   }
-  private highlightMark(mark: Mark): void {
+  private highlightMark(mark: Mark, allowNotPersisted = false): void {
+    if (!mark.isPersisted && !allowNotPersisted) {
+      throw "mark is not persisted.";
+    }
     const start = selectedPositionToNode(mark.start);
     const end = selectedPositionToNode(mark.end);
     if (start && end) {
