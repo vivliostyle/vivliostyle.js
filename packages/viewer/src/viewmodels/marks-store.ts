@@ -790,7 +790,11 @@ export class MarksStoreFacade {
   }
 
   init(): void {
-    this.actualStore = new URLMarksStore(); // TODO
+    if (window["marksStorePlugin"]) {
+      this.actualStore = window["marksStorePlugin"] as MarksStoreInterface;
+    } else {
+      this.actualStore = new URLMarksStore();
+    }
     const src = urlParameters.getParameter("src").join();
     const bookMode = urlParameters.getParameter("bookMode").join();
     const userStyle = urlParameters.getParameter("userStyle").join();
