@@ -738,23 +738,14 @@ export class URLMarksStore implements MarksStoreInterface {
   }
 
   allMarksIterator(): AsyncIterable<MarkJson> {
-    const self = this;
-    return {
-      [Symbol.asyncIterator]() {
-        return {
-          i: 0,
-          next(): Promise<IteratorResult<MarkJson>> {
-            if (this.i < self.markArray().length) {
-              return Promise.resolve({
-                value: self.markArray()[this.i++],
-                done: false,
-              });
-            }
-            return Promise.resolve({ value: null, done: true });
-          },
-        };
-      },
-    };
+    const arr = this.markArray();
+    return (async function* () {
+      let i = 0;
+      while (i < arr.length) {
+        const v = arr[i++];
+        yield v;
+      }
+    })();
   }
 
   private pushMarkInternal(
