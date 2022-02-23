@@ -107,6 +107,10 @@
         <span class="mark-color red" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'red' }, click: () => { marksMenuStatus.currentEditingColor('red') }"></span>
         <span class="mark-color green" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'green' }, click: () => { marksMenuStatus.currentEditingColor('green') }"></span>
       </section>
+      <section>
+        <textarea id="vivliostyle-memo-edit-area" rows="3" type="text" data-bind="textInput: marksMenuStatus.currentEditingMemo">
+        </textarea>
+      </section>
       <section data-bind="visible: marksMenuStatus.cancellable">
         <span class="button" id="selection-ok" data-bind="click: marksMenuStatus.applyEditing">OK</span>
         <span class="button" id="selection-cancel" data-bind="click: marksMenuStatus.closeMenu">Cancel</span>                

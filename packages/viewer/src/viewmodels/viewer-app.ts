@@ -243,6 +243,9 @@ class ViewerApp {
       }
       return true;
     }
+    if (document.activeElement.id === "vivliostyle-memo-edit-area") {
+      return true;
+    }
     if (document.activeElement.id === "vivliostyle-find-box") {
       return this.findBox.handleKey(key, event, true);
     }

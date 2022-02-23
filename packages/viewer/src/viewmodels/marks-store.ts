@@ -96,7 +96,6 @@ const highlightRange = (
   background = "rgba(255, 0, 0, 0.2)",
   mark?: Mark,
 ): void => {
-  // TODO; collect all active page container and check boundary.
   const startParent = range.startContainer.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
@@ -428,7 +427,7 @@ export const processSelection = (
     const end = selectedNodeToPosition(range.endContainer, range.endOffset);
     const x = event.clientX;
     const y = event.clientY;
-    marksMenuStatus.openSelectionMenu(x, y, start, end, selection); // TODO
+    marksMenuStatus.openSelectionMenu(x, y, start, end, selection);
   }
 };
 
@@ -500,7 +499,7 @@ class NewMarkAction implements MarkAction {
         this.currentStart,
         this.currentEnd,
         marksMenuStatus.currentEditingColor(),
-        "", // TODO: memo
+        marksMenuStatus.currentEditingMemo(),
       );
       marksStore.persistMark(mark);
     }
@@ -538,8 +537,12 @@ class EditAction implements MarkAction {
 
   applyEditing = (): void => {
     if (this.currentEditing) {
-      if (marksMenuStatus.currentEditingColor() != this.currentEditing.color) {
+      if (
+        marksMenuStatus.currentEditingColor() != this.currentEditing.color ||
+        marksMenuStatus.currentEditingMemo() != this.currentEditing.memo
+      ) {
         this.currentEditing.color = marksMenuStatus.currentEditingColor();
+        this.currentEditing.memo = marksMenuStatus.currentEditingMemo();
         marksStore.updateMark(this.currentEditing);
       }
     }
@@ -571,6 +574,7 @@ export class MarksMenuStatus {
   menuOpened: Observable<boolean>;
   selectionMenuOpened: Observable<boolean>;
   currentEditingColor: Observable<string>;
+  currentEditingMemo: Observable<string>;
   deletable: Computed<boolean>;
   cancellable: Computed<boolean>;
   markAction: Observable<MarkAction>;
@@ -582,6 +586,7 @@ export class MarksMenuStatus {
     this.menuOpened = ko.observable(false);
     this.selectionMenuOpened = ko.observable(false);
     this.currentEditingColor = ko.observable("");
+    this.currentEditingMemo = ko.observable("");
     this.currentEditingColor.subscribe(this.editingColorChanged);
     this.editAction = new EditAction();
     this.newMarkAction = new NewMarkAction();
@@ -643,6 +648,7 @@ export class MarksMenuStatus {
   openEditMenu = (x: number, y: number, id: string): void => {
     const currentEditing = this.parent.getMark(id);
     this.currentEditingColor(currentEditing.color);
+    this.currentEditingMemo(currentEditing.memo);
     this.editAction.currentEditing = currentEditing;
     this.markAction(this.editAction);
     this.openMenu(x, y);
@@ -673,6 +679,7 @@ export class MarksMenuStatus {
     selection: Selection,
   ): void => {
     this.currentEditingColor("yellow");
+    this.currentEditingMemo("");
     this.newMarkAction.start(start, end, selection);
     this.markAction(this.newMarkAction);
     this.openMenu(x, y);
@@ -759,13 +766,17 @@ export class URLMarksStore implements MarksStoreInterface {
   }
 
   private markToURLString(mark: MarkJson): string {
-    const dm = encodeURIComponent(mark.memo);
-    return `${mark.mark}/mm/${dm}`;
+    const dm = mark.memo ? encodeURIComponent(mark.memo) : "";
+    if (dm) {
+      return `${mark.mark}/mm/${dm}`;
+    } else {
+      return mark.mark;
+    }
   }
 
   private urlStringToMark(s: string): MarkJson {
     const [mark, memo] = s.split("/mm/", 2);
-    return { mark: mark, id: "", memo: decodeURIComponent(memo) };
+    return { mark: mark, id: "", memo: memo ? decodeURIComponent(memo) : "" };
   }
 
   private pushMarkInternal(
@@ -794,7 +805,7 @@ export class URLMarksStore implements MarksStoreInterface {
       this.markKeyToArrayIndex.clear();
       urlParameters.removeParameter("mark");
       this.markArray().forEach((m, i) => {
-        urlParameters.setParameter("mark", m.mark, i);
+        urlParameters.setParameter("mark", this.markToURLString(m), i);
         this.markKeyToArrayIndex.set(m.id, i);
       });
     }
@@ -818,7 +829,8 @@ export class MarksStoreFacade {
     const src = urlParameters.getParameter("src").join();
     const bookMode = urlParameters.getParameter("bookMode").join();
     const userStyle = urlParameters.getParameter("userStyle").join();
-    const documentId = `${src}:${bookMode}:${userStyle}`;
+    const style = urlParameters.getParameter("style").join();
+    const documentId = `${src}:${bookMode}:${style}:${userStyle}`;
     this.actualStore.init(documentId);
   }
 
