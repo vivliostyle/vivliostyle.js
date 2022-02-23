@@ -733,13 +733,14 @@ export class URLMarksStore implements MarksStoreInterface {
     const m = this.getMark(mark.id);
     this.markArray.remove(m);
   }
+
   allMarks(): MarkJson[] {
     return this.markArray();
   }
 
   allMarksIterator(): AsyncIterable<MarkJson> {
     const arr = this.markArray();
-    return (async function* () {
+    return (async function* (): AsyncIterable<MarkJson> {
       let i = 0;
       while (i < arr.length) {
         const v = arr[i++];
