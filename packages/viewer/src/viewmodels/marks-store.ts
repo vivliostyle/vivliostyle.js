@@ -369,33 +369,39 @@ export class Mark {
     public start: SelectPosition,
     public end: SelectPosition,
     public color: string,
+    public memo: string,
   ) {
     this.uniqueIdentifier = Mark.notCreatedId;
   }
 
-  toString(): string {
+  markInfoString(): string {
     return `${this.start},${this.end},${this.color}`;
   }
 
   toMarkJson(): MarkJson {
-    return { mark: this.toString(), id: this.uniqueIdentifier };
+    return {
+      mark: this.markInfoString(),
+      id: this.uniqueIdentifier,
+      memo: this.memo,
+    };
   }
 
   isPersisted(): boolean {
     return this.uniqueIdentifier && this.uniqueIdentifier != Mark.notCreatedId;
   }
 
-  static fromString(str: string): Mark {
+  static fromMarkInfoString(str: string): Mark {
     const [s, e, c] = str.split(",");
     const start = SelectPosition.fromString(s);
     const end = SelectPosition.fromString(e);
-    const m = new Mark(start, end, c);
+    const m = new Mark(start, end, c, "");
     return m;
   }
 
   static fromMarkJson(m: MarkJson): Mark {
-    const mark = Mark.fromString(m.mark);
+    const mark = Mark.fromMarkInfoString(m.mark);
     mark.uniqueIdentifier = m.id;
+    mark.memo = m.memo;
     return mark;
   }
 }
@@ -494,6 +500,7 @@ class NewMarkAction implements MarkAction {
         this.currentStart,
         this.currentEnd,
         marksMenuStatus.currentEditingColor(),
+        "", // TODO: memo
       );
       marksStore.persistMark(mark);
     }
@@ -682,6 +689,7 @@ export class MarksMenuStatus {
 export interface MarkJson {
   mark: string;
   id: string;
+  memo: string;
 }
 
 export interface MarksStoreInterface {
@@ -697,7 +705,7 @@ export interface MarksStoreInterface {
 let seqId = 0;
 
 export class URLMarksStore implements MarksStoreInterface {
-  private markArray: ObservableArray<{ mark: string; id: string }>;
+  private markArray: ObservableArray<MarkJson>;
   private markKeyToArrayIndex: Map<string, number>;
   public documentId = "";
 
@@ -706,10 +714,12 @@ export class URLMarksStore implements MarksStoreInterface {
     this.markKeyToArrayIndex = new Map();
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
+
   init(documentId: string): void {
     const marksParam = urlParameters.getParameter("mark");
     marksParam.forEach((m) => {
-      this.pushMarkInternal({ mark: m, id: "" }, "doNotAddToUrl", "persist");
+      const mark = this.urlStringToMark(m);
+      this.pushMarkInternal(mark, "doNotAddToUrl", "persist");
     });
     this.documentId = documentId;
   }
@@ -748,6 +758,16 @@ export class URLMarksStore implements MarksStoreInterface {
     })();
   }
 
+  private markToURLString(mark: MarkJson): string {
+    const dm = encodeURIComponent(mark.memo);
+    return `${mark.mark}/mm/${dm}`;
+  }
+
+  private urlStringToMark(s: string): MarkJson {
+    const [mark, memo] = s.split("/mm/", 2);
+    return { mark: mark, id: "", memo: decodeURIComponent(memo) };
+  }
+
   private pushMarkInternal(
     mark: MarkJson,
     addToUrl: "addToUrl" | "doNotAddToUrl",
@@ -760,7 +780,7 @@ export class URLMarksStore implements MarksStoreInterface {
     this.markKeyToArrayIndex.set(mark.id, this.markArray().length - 1);
     if (addToUrl == "addToUrl") {
       const count = urlParameters.getParameter("mark").length;
-      urlParameters.setParameter("mark", mark.mark, count);
+      urlParameters.setParameter("mark", this.markToURLString(mark), count);
     }
     return mark.id;
   }
