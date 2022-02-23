@@ -690,10 +690,12 @@ export interface MarksStoreInterface {
   getMark(id: string): MarkJson;
   updateMark(mark: MarkJson): void;
   removeMark(mark: MarkJson): void;
-  getAllMarks(): MarkJson[];
+  allMarks(): MarkJson[];
+  allMarksIterator?(): AsyncIterable<MarkJson>; //
 }
 
 let seqId = 0;
+
 export class URLMarksStore implements MarksStoreInterface {
   private markArray: ObservableArray<{ mark: string; id: string }>;
   private markKeyToArrayIndex: Map<string, number>;
@@ -704,7 +706,6 @@ export class URLMarksStore implements MarksStoreInterface {
     this.markKeyToArrayIndex = new Map();
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
-
   init(documentId: string): void {
     const marksParam = urlParameters.getParameter("mark");
     marksParam.forEach((m) => {
@@ -732,9 +733,28 @@ export class URLMarksStore implements MarksStoreInterface {
     const m = this.getMark(mark.id);
     this.markArray.remove(m);
   }
-
-  getAllMarks(): MarkJson[] {
+  allMarks(): MarkJson[] {
     return this.markArray();
+  }
+
+  allMarksIterator(): AsyncIterable<MarkJson> {
+    const self = this;
+    return {
+      [Symbol.asyncIterator]() {
+        return {
+          i: 0,
+          next(): Promise<IteratorResult<MarkJson>> {
+            if (this.i < self.markArray().length) {
+              return Promise.resolve({
+                value: self.markArray()[this.i++],
+                done: false,
+              });
+            }
+            return Promise.resolve({ value: null, done: true });
+          },
+        };
+      },
+    };
   }
 
   private pushMarkInternal(
@@ -809,10 +829,17 @@ export class MarksStoreFacade {
     this.actualStore.removeMark(mark.toMarkJson());
   }
 
-  retryHighlightMarks(): void {
-    this.actualStore.getAllMarks().forEach((m) => {
-      this.highlightMark(Mark.fromMarkJson(m));
-    });
+  async retryHighlightMarks(): Promise<void> {
+    if (this.actualStore.allMarksIterator) {
+      const it = this.actualStore.allMarksIterator();
+      for await (const m of it) {
+        this.highlightMark(Mark.fromMarkJson(m));
+      }
+    } else {
+      for await (const m of this.actualStore.allMarks()) {
+        this.highlightMark(Mark.fromMarkJson(m));
+      }
+    }
   }
 
   private unhighlightMark(mark: Mark): void {
