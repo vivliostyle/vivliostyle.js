@@ -417,7 +417,6 @@ export const processSelection = (
     ) {
       // do nothing
       // TODO; find text container neareset start/end;
-      selection.empty();
       return;
     }
     const start = selectedNodeToPosition(
@@ -435,10 +434,10 @@ interface MarkAction {
   currentId(): string;
   deletable(): boolean;
   cancellable(): boolean;
-  applyEditing(): void;
-  colorChanged(): void;
-  deleteCurrentEditing(): void;
-  close(): void;
+  applyEditing(): Promise<void>;
+  colorChanged(): Promise<void>;
+  deleteCurrentEditing(): Promise<void>;
+  close(): Promise<void>;
 }
 
 class EmptyMarkAction implements MarkAction {
@@ -451,16 +450,16 @@ class EmptyMarkAction implements MarkAction {
   cancellable(): boolean {
     return false;
   }
-  applyEditing(): void {
+  applyEditing(): Promise<void> {
     return;
   }
-  colorChanged(): void {
+  colorChanged(): Promise<void> {
     return;
   }
-  deleteCurrentEditing(): void {
+  deleteCurrentEditing(): Promise<void> {
     return;
   }
-  close(): void {
+  close(): Promise<void> {
     return;
   }
 }
@@ -489,11 +488,11 @@ class NewMarkAction implements MarkAction {
 
   deletable = (): boolean => false;
   cancellable = (): boolean => true;
-  deleteCurrentEditing = (): void => {
+  deleteCurrentEditing = async (): Promise<void> => {
     // do nothing
   };
   currentId = (): string => Mark.notCreatedId;
-  applyEditing = (): void => {
+  applyEditing = async (): Promise<void> => {
     if (this.currentStart && this.currentEnd) {
       const mark = new Mark(
         this.currentStart,
@@ -501,18 +500,18 @@ class NewMarkAction implements MarkAction {
         marksMenuStatus.currentEditingColor(),
         marksMenuStatus.currentEditingMemo(),
       );
-      marksStore.persistMark(mark);
+      await marksStore.persistMark(mark);
     }
     marksMenuStatus.closeMenu();
   };
 
-  colorChanged = (): void => {
+  colorChanged = async (): Promise<void> => {
     if (this.cancellable() == false) {
       this.applyEditing();
     }
   };
 
-  close = (): void => {
+  close = async (): Promise<void> => {
     document
       .querySelectorAll(`[${Mark.idAttr}="${Mark.notCreatedId}"]`)
       .forEach((e) => {
@@ -525,9 +524,9 @@ class EditAction implements MarkAction {
   currentEditing?: Mark;
   deletable = (): boolean => true;
   cancellable = (): boolean => true;
-  deleteCurrentEditing = (): void => {
+  deleteCurrentEditing = async (): Promise<void> => {
     if (this.currentEditing) {
-      marksStore.removeMark(this.currentEditing);
+      await marksStore.removeMark(this.currentEditing);
     }
   };
 
@@ -535,7 +534,7 @@ class EditAction implements MarkAction {
     return this.currentEditing?.uniqueIdentifier;
   };
 
-  applyEditing = (): void => {
+  applyEditing = async (): Promise<void> => {
     if (this.currentEditing) {
       if (
         marksMenuStatus.currentEditingColor() != this.currentEditing.color ||
@@ -548,11 +547,11 @@ class EditAction implements MarkAction {
     }
     marksMenuStatus.closeMenu();
   };
-  colorChanged = (): void => {
+  colorChanged = async (): Promise<void> => {
     // do nothing.
   };
 
-  close = (): void => {
+  close = async (): Promise<void> => {
     if (this.currentEditing) {
       // TODO ; should be in method cancel() or the like
       const color = colorNameToColor(this.currentEditing.color);
@@ -600,7 +599,7 @@ export class MarksMenuStatus {
       .extend({ notify: "always" });
   }
 
-  editingColorChanged = (colorName: string): void => {
+  editingColorChanged = async (colorName: string): Promise<void> => {
     const idString = this.markAction().currentId();
     const color = colorNameToColor(colorName);
     if (color.length > 0) {
@@ -610,7 +609,7 @@ export class MarksMenuStatus {
           (e as HTMLElement).style.background = color;
         });
     }
-    this.markAction().colorChanged();
+    await this.markAction().colorChanged();
   };
 
   private openMenu = (x: number, y: number): void => {
@@ -645,8 +644,8 @@ export class MarksMenuStatus {
     this.menuOpened(true);
   };
 
-  openEditMenu = (x: number, y: number, id: string): void => {
-    const currentEditing = this.parent.getMark(id);
+  openEditMenu = async (x: number, y: number, id: string): Promise<void> => {
+    const currentEditing = await this.parent.getMark(id);
     this.currentEditingColor(currentEditing.color);
     this.currentEditingMemo(currentEditing.memo);
     this.editAction.currentEditing = currentEditing;
@@ -654,21 +653,21 @@ export class MarksMenuStatus {
     this.openMenu(x, y);
   };
 
-  closeMenu = (): void => {
-    this.markAction().close();
+  closeMenu = async (): Promise<void> => {
+    await this.markAction().close();
     this.markAction(this.emptyAction);
     this.menuOpened(false);
   };
 
-  applyEditing = (): void => {
-    this.markAction().applyEditing();
+  applyEditing = async (): Promise<void> => {
+    await this.markAction().applyEditing();
   };
 
-  deleteCurrentEditing = (): void => {
+  deleteCurrentEditing = async (): Promise<void> => {
     if (confirm("削除しますか？")) {
-      this.markAction().deleteCurrentEditing();
+      await this.markAction().deleteCurrentEditing();
     }
-    this.closeMenu();
+    await this.closeMenu();
   };
 
   openSelectionMenu = (
@@ -700,13 +699,13 @@ export interface MarkJson {
 }
 
 export interface MarksStoreInterface {
-  init(documentId: string): void;
-  persistMark(mark: MarkJson): string; // persists and return id
-  getMark(id: string): MarkJson;
-  updateMark(mark: MarkJson): void;
-  removeMark(mark: MarkJson): void;
-  allMarks(): MarkJson[];
-  allMarksIterator?(): AsyncIterable<MarkJson>; //
+  init(documentId: string): Promise<void>;
+  persistMark(mark: MarkJson): Promise<string>; // persists and return id
+  getMark(id: string): Promise<MarkJson>;
+  updateMark(mark: MarkJson): Promise<void>;
+  removeMark(mark: MarkJson): Promise<void>;
+  allMarks(): Promise<MarkJson[]>;
+  allMarksIterator?(): Promise<AsyncIterable<MarkJson>>; //
 }
 
 let seqId = 0;
@@ -722,7 +721,7 @@ export class URLMarksStore implements MarksStoreInterface {
     this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
 
-  init(documentId: string): void {
+  async init(documentId: string): Promise<void> {
     const marksParam = urlParameters.getParameter("mark");
     marksParam.forEach((m) => {
       const mark = this.urlStringToMark(m);
@@ -731,30 +730,30 @@ export class URLMarksStore implements MarksStoreInterface {
     this.documentId = documentId;
   }
 
-  persistMark(mark: MarkJson): string {
+  async persistMark(mark: MarkJson): Promise<string> {
     return this.pushMarkInternal(mark, "addToUrl", "persist");
   }
 
-  updateMark(mark: MarkJson): void {
-    this.removeMark(mark);
+  async updateMark(mark: MarkJson): Promise<void> {
+    await this.removeMark(mark);
     this.pushMarkInternal(mark, "addToUrl", "doNotPersist");
   }
 
-  getMark(id: string): MarkJson {
+  async getMark(id: string): Promise<MarkJson> {
     const index = this.markKeyToArrayIndex.get(id);
     return this.markArray()[index];
   }
 
-  removeMark(mark: MarkJson): void {
-    const m = this.getMark(mark.id);
+  async removeMark(mark: MarkJson): Promise<void> {
+    const m = await this.getMark(mark.id);
     this.markArray.remove(m);
   }
 
-  allMarks(): MarkJson[] {
+  async allMarks(): Promise<MarkJson[]> {
     return this.markArray();
   }
 
-  allMarksIterator(): AsyncIterable<MarkJson> {
+  async allMarksIterator(): Promise<AsyncIterable<MarkJson>> {
     const arr = this.markArray();
     return (async function* (): AsyncIterable<MarkJson> {
       let i = 0;
@@ -820,7 +819,7 @@ export class MarksStoreFacade {
     this.menuStatus = new MarksMenuStatus(this);
   }
 
-  init(): void {
+  async init(): Promise<void> {
     if (window["marksStorePlugin"]) {
       this.actualStore = window["marksStorePlugin"] as MarksStoreInterface;
     } else {
@@ -831,38 +830,38 @@ export class MarksStoreFacade {
     const userStyle = urlParameters.getParameter("userStyle").join();
     const style = urlParameters.getParameter("style").join();
     const documentId = `${src}:${bookMode}:${style}:${userStyle}`;
-    this.actualStore.init(documentId);
+    await this.actualStore.init(documentId);
   }
 
-  persistMark(mark: Mark): void {
-    const id = this.actualStore.persistMark(mark.toMarkJson());
+  async persistMark(mark: Mark): Promise<void> {
+    const id = await this.actualStore.persistMark(mark.toMarkJson());
     mark.uniqueIdentifier = id;
     this.highlightMark(mark);
   }
 
-  updateMark(mark: Mark): void {
+  async updateMark(mark: Mark): Promise<void> {
     this.unhighlightMark(mark);
     this.highlightMark(mark);
     this.actualStore.updateMark(mark.toMarkJson());
   }
 
-  getMark(id: string): Mark {
-    return Mark.fromMarkJson(this.actualStore.getMark(id));
+  async getMark(id: string): Promise<Mark> {
+    return Mark.fromMarkJson(await this.actualStore.getMark(id));
   }
 
-  removeMark(mark: Mark): void {
+  async removeMark(mark: Mark): Promise<void> {
     this.unhighlightMark(mark);
-    this.actualStore.removeMark(mark.toMarkJson());
+    await this.actualStore.removeMark(mark.toMarkJson());
   }
 
   async retryHighlightMarks(): Promise<void> {
     if (this.actualStore.allMarksIterator) {
-      const it = this.actualStore.allMarksIterator();
+      const it = await this.actualStore.allMarksIterator();
       for await (const m of it) {
         this.highlightMark(Mark.fromMarkJson(m));
       }
     } else {
-      for await (const m of this.actualStore.allMarks()) {
+      for await (const m of await this.actualStore.allMarks()) {
         this.highlightMark(Mark.fromMarkJson(m));
       }
     }
