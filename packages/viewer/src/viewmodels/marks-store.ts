@@ -62,18 +62,22 @@ interface TextInRange {
   endOffset: number;
 }
 
-const collectTextWithEloffInRange = (r: Range): TextInRange[] => {
-  const start = r.startContainer;
-  const end = r.endContainer;
+const collectTextWithEloffInRange = (
+  start: NodePosition,
+  end: NodePosition,
+): TextInRange[] => {
   const nodes: TextInRange[] = [];
-  for (let node = start; node; node = getNextNode(node)) {
+  for (let node = start.node; node; node = getNextNode(node)) {
     if (node.nodeType == 3 && isNodeInEloff(node)) {
+      // TODO: should reject node that is in inconsistent eloff ; (e.g. eloff 13 after eloff 200
       const t = node as Text;
-      const startOffset = node == start ? r.startOffset : 0;
-      const endOffset = node == end ? r.endOffset : t.data.length;
-      nodes.push({ t, startOffset, endOffset });
+      if (t.data.trim().length > 0) {
+        const startOffset = node == start.node ? start.offset : 0;
+        const endOffset = node == end.node ? end.offset : t.data.length;
+        nodes.push({ t, startOffset, endOffset });
+      }
     }
-    if (node == end) {
+    if (node == end.node) {
       break;
     }
   }
@@ -91,15 +95,16 @@ const existMarkIn = (markId: string, e: Element): boolean => {
   return !!e.querySelector(`[${Mark.idAttr}="${markId}"]`);
 };
 
-const highlightRange = (
-  range: Range,
+const highlight = (
+  start: NodePosition,
+  end: NodePosition,
   background = "rgba(255, 0, 0, 0.2)",
   mark?: Mark,
 ): void => {
-  const startParent = range.startContainer.parentElement.closest(
+  const startParent = start.node.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
-  const endParent = range.endContainer.parentElement.closest(
+  const endParent = end.node.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
   if (
@@ -110,11 +115,11 @@ const highlightRange = (
     // already exists;
     return;
   }
-  const zoomBox = range.startContainer?.parentElement?.closest(
+  const zoomBox = start.node.parentElement?.closest(
     "[data-vivliostyle-outer-zoom-box]",
   )?.firstElementChild as HTMLElement;
   const scale = zoomBox?.style?.transform;
-  const textNodes = collectTextWithEloffInRange(range);
+  const textNodes = collectTextWithEloffInRange(start, end);
   const selectId = mark?.uniqueIdentifier || Mark.notCreatedId;
   const invokeMenu = (event: MouseEvent): void => {
     const x = event.clientX;
@@ -411,7 +416,9 @@ export const processSelection = (
 ): void => {
   if (selection.type == "Range") {
     const range = selection.getRangeAt(0);
-    const text = collectTextWithEloffInRange(range);
+    const rs = { node: range.startContainer, offset: range.startOffset };
+    const re = { node: range.endContainer, offset: range.endOffset };
+    const text = collectTextWithEloffInRange(rs, re);
     const start = selectedNodeToPosition(text[0].t, text[0].startOffset);
     const end = selectedNodeToPosition(
       text[text.length - 1].t,
@@ -470,11 +477,8 @@ class NewMarkAction implements MarkAction {
     const start = selectedPositionToNode(this.currentStart);
     const end = selectedPositionToNode(this.currentEnd);
     if (start && end) {
-      const range = document.createRange();
-      range.setStart(start.node, start.offset);
-      range.setEnd(end.node, end.offset);
       const color = colorNameToColor(marksMenuStatus.currentEditingColor());
-      highlightRange(range, color);
+      highlight(start, end, color);
       currentSelection.empty();
     }
   };
@@ -874,11 +878,8 @@ export class MarksStoreFacade {
     const start = selectedPositionToNode(mark.start);
     const end = selectedPositionToNode(mark.end);
     if (start && end) {
-      const range = document.createRange();
-      range.setStart(start.node, start.offset);
-      range.setEnd(end.node, end.offset);
       const color = colorNameToColor(mark.color);
-      highlightRange(range, color, mark);
+      highlight(start, end, color, mark);
     }
   }
 }
