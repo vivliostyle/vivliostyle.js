@@ -411,19 +411,12 @@ export const processSelection = (
 ): void => {
   if (selection.type == "Range") {
     const range = selection.getRangeAt(0);
-    if (
-      range.startContainer.nodeType !== 3 ||
-      range.endContainer.nodeType !== 3
-    ) {
-      // do nothing
-      // TODO; find text container neareset start/end;
-      return;
-    }
-    const start = selectedNodeToPosition(
-      range.startContainer,
-      range.startOffset,
+    const text = collectTextWithEloffInRange(range);
+    const start = selectedNodeToPosition(text[0].t, text[0].startOffset);
+    const end = selectedNodeToPosition(
+      text[text.length - 1].t,
+      text[text.length - 1].endOffset,
     );
-    const end = selectedNodeToPosition(range.endContainer, range.endOffset);
     const x = event.clientX;
     const y = event.clientY;
     marksMenuStatus.openSelectionMenu(x, y, start, end, selection);
