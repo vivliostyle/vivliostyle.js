@@ -25,7 +25,7 @@ ko.bindingHandlers.textSelection = {
     if (ko.unwrap(valueAccessor())) {
       element.addEventListener("mouseup", (e: MouseEvent) => {
         e.stopPropagation();
-        processSelection(document.getSelection(), e);
+        processSelection(document.getSelection());
       });
     }
   },

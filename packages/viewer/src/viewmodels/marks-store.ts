@@ -410,24 +410,8 @@ export class Mark {
   }
 }
 
-export const processSelection = (
-  selection: Selection,
-  event: MouseEvent,
-): void => {
-  if (selection.type == "Range") {
-    const range = selection.getRangeAt(0);
-    const rs = { node: range.startContainer, offset: range.startOffset };
-    const re = { node: range.endContainer, offset: range.endOffset };
-    const text = collectTextWithEloffInRange(rs, re);
-    const start = selectedNodeToPosition(text[0].t, text[0].startOffset);
-    const end = selectedNodeToPosition(
-      text[text.length - 1].t,
-      text[text.length - 1].endOffset,
-    );
-    const x = event.clientX;
-    const y = event.clientY;
-    marksMenuStatus.openSelectionMenu(x, y, start, end, selection);
-  }
+export const processSelection = (selection: Selection): void => {
+  marksMenuStatus.openStartButton(selection);
 };
 
 interface MarkAction {
@@ -568,7 +552,7 @@ class EditAction implements MarkAction {
 
 export class MarksMenuStatus {
   menuOpened: Observable<boolean>;
-  selectionMenuOpened: Observable<boolean>;
+  startButtonOpened: Observable<boolean>;
   currentEditingColor: Observable<string>;
   currentEditingMemo: Observable<string>;
   deletable: Computed<boolean>;
@@ -580,7 +564,7 @@ export class MarksMenuStatus {
 
   constructor(private parent: MarksStoreFacade) {
     this.menuOpened = ko.observable(false);
-    this.selectionMenuOpened = ko.observable(false);
+    this.startButtonOpened = ko.observable(false);
     this.currentEditingColor = ko.observable("");
     this.currentEditingMemo = ko.observable("");
     this.currentEditingColor.subscribe(this.editingColorChanged);
@@ -610,6 +594,9 @@ export class MarksMenuStatus {
   };
 
   private openMenu = (x: number, y: number): void => {
+    if (this.menuOpened()) {
+      return;
+    }
     const menu = document.getElementById(
       "vivliostyle-text-selection-edit-menu",
     ) as HTMLElement;
@@ -638,7 +625,12 @@ export class MarksMenuStatus {
       }
       subscription.dispose();
     });
+    this.startButtonOpened(false);
     this.menuOpened(true);
+  };
+
+  closeStartButton = (): void => {
+    this.startButtonOpened(false);
   };
 
   openEditMenu = async (x: number, y: number, id: string): Promise<void> => {
@@ -681,11 +673,63 @@ export class MarksMenuStatus {
     this.openMenu(x, y);
   };
 
-  closeSelectionMenu = (): void => {
-    //    this.currentStart = undefined;
-    //    this.currentEnd = undefined;
-    //    this.currentSelection = undefined;
-    this.selectionMenuOpened(false);
+  openStartButton = async (selection: Selection): Promise<void> => {
+    if (selection.type == "Range") {
+      const range = selection.getRangeAt(0);
+      const r = range.getBoundingClientRect();
+      let x = r.left;
+      let y = r.bottom;
+      const button = document.getElementById(
+        "vivliostyle-text-selection-start-button",
+      ) as HTMLElement;
+      const rs = { node: range.startContainer, offset: range.startOffset };
+      const re = { node: range.endContainer, offset: range.endOffset };
+      const text = collectTextWithEloffInRange(rs, re);
+      const start = selectedNodeToPosition(text[0].t, text[0].startOffset);
+      const end = selectedNodeToPosition(
+        text[text.length - 1].t,
+        text[text.length - 1].endOffset,
+      );
+      const clickListner = (): void => {
+        if (button) {
+          button.removeEventListener("click", clickListner);
+        }
+        this.openSelectionMenu(x, y, start, end, selection);
+      };
+
+      if (button) {
+        button.style.top = `${y}px`;
+        button.style.left = `${x}px`;
+        button.addEventListener("click", clickListner);
+      }
+
+      const subscription = this.startButtonOpened.subscribe((v) => {
+        const button = document.getElementById(
+          "vivliostyle-text-selection-start-button",
+        ) as HTMLElement;
+        if (v) {
+          const outer = document.querySelector(
+            "[data-vivliostyle-outer-zoom-box]",
+          ) as HTMLElement;
+          if (button && outer) {
+            const mb = button.getBoundingClientRect();
+            const ob = outer.getBoundingClientRect();
+            if (mb.right > ob.right) {
+              y = ob.right - mb.width - 10;
+              button.style.left = `${y}px`;
+            }
+            if (mb.bottom > ob.bottom) {
+              x = ob.bottom - mb.height - 10;
+              button.style.top = `${x}px`;
+            }
+          }
+        } else {
+          button.removeEventListener("click", clickListner);
+          subscription.dispose();
+        }
+      });
+      this.startButtonOpened(true);
+    }
   };
 }
 

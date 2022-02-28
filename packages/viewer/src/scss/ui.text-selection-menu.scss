@@ -13,7 +13,8 @@
 // + Text Selection Menu
 // --------------------------------------------------------------------------------
 
-#vivliostyle-text-selection-edit-menu {
+#vivliostyle-text-selection-edit-menu,
+#vivliostyle-text-selection-start-button {
   position: absolute;
   z-index: 88888889;
   background: #333;
@@ -59,6 +60,7 @@
     font-family: inherit;
   }
   .button {
+    cursor: pointer;
     padding: 0.3em;
     border-radius: 0.3em;
     color: white;
@@ -72,7 +74,6 @@
     }
   }
   #selection-ok {
-    cursor: pointer;
     &:before {
       content: "\F00C";
     }
@@ -87,6 +88,11 @@
     cursor: pointer;
     &:before {
       content: "\f1f8";
+    }
+  }
+  #start-marker {
+    &:before {
+      content: "\f040";
     }
   }
 }

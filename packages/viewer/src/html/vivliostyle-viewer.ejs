@@ -119,6 +119,9 @@
         <span class="button" id="selection-delete" data-bind="click: marksMenuStatus.deleteCurrentEditing">Delete</span>
       </section>
     </div>
+    <div id="vivliostyle-text-selection-start-button" data-bind="visible: marksMenuStatus.startButtonOpened, clickOutside: marksMenuStatus.closeStartButton">
+      <span class="button" id="start-marker">Highlight…</span>
+    </div>
     <!-- MENU BAR -->
     <div role="toolbar" id="vivliostyle-menu-bar">
       <ul class="vivliostyle-menu" id="vivliostyle-menu_settings">
