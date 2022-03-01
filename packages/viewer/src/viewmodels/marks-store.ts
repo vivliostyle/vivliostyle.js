@@ -707,7 +707,8 @@ export class MarksMenuStatus {
       );
       const x = rects[rects.length - 1].left;
       const y = rects[rects.length - 1].bottom;
-      const clickListner = (): void => {
+      const clickListner = (e: MouseEvent): void => {
+        e.stopPropagation();
         if (button) {
           button.removeEventListener("click", clickListner);
         }
