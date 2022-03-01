@@ -18,7 +18,7 @@
  */
 
 import ko from "knockout";
-import { processSelection } from "../viewmodels/marks-store";
+import { marksMenuStatus, processSelection } from "../viewmodels/marks-store";
 
 ko.bindingHandlers.textSelection = {
   init(element, valueAccessor): void {
@@ -26,6 +26,13 @@ ko.bindingHandlers.textSelection = {
       element.addEventListener("mouseup", (e: MouseEvent) => {
         e.stopPropagation();
         processSelection(document.getSelection());
+      });
+      document.addEventListener("selectionchange", () => {
+        if (document.getSelection().type != "Range") {
+          setTimeout(() => {
+            marksMenuStatus.startButtonOpened(false);
+          }, 150);
+        }
       });
     }
   },
