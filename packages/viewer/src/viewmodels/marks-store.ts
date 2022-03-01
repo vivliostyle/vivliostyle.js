@@ -128,20 +128,22 @@ const highlight = (
   };
 
   let index = 0;
-  Array.from(textNodes).forEach((tn) => {
+  textNodes.forEach((tn) => {
     const parent = tn.t.parentElement.closest(
       "[data-vivliostyle-page-container='true']",
     );
     const parentRect = parent?.getBoundingClientRect();
+    const pageIndex = getPageIndex(parent);
+    const spineIndex = getSpineIndex(parent);
     for (const r of textNodeRects(tn)) {
       const rect = applyTransformToRect(r, scale, parentRect);
       const rectNum = index++;
+      const mn = `${spineIndex}-${pageIndex}-${rectNum}`;
       if (
         document.querySelector(
-          `[${Mark.idAttr}='${selectId}'][data-mn='${rectNum}']`,
+          `[${Mark.idAttr}='${selectId}'][data-mn='${mn}']`,
         )
       ) {
-        // already exists.
         return;
       }
       const div = document.createElement("div");
@@ -154,7 +156,7 @@ const highlight = (
       div.style.height = `${rect.height}px`;
       div.style.background = background;
       div.setAttribute(Mark.idAttr, selectId);
-      div.setAttribute("data-mn", `${rectNum}`);
+      div.setAttribute("data-mn", `${mn}`);
       div.addEventListener("click", invokeMenu);
       parent.appendChild(div);
     }
