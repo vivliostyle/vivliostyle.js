@@ -914,11 +914,15 @@ export class MarksStoreFacade {
     if (this.actualStore.allMarksIterator) {
       const it = await this.actualStore.allMarksIterator();
       for await (const m of it) {
-        this.highlightMark(Mark.fromMarkJson(m));
+        if (m) {
+          this.highlightMark(Mark.fromMarkJson(m));
+        }
       }
     } else {
       for await (const m of await this.actualStore.allMarks()) {
-        this.highlightMark(Mark.fromMarkJson(m));
+        if (m) {
+          this.highlightMark(Mark.fromMarkJson(m));
+        }
       }
     }
   }
