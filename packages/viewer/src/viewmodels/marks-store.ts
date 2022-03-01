@@ -615,9 +615,17 @@ export class MarksMenuStatus {
         if (menu && outer) {
           const mb = menu.getBoundingClientRect();
           const ob = outer.getBoundingClientRect();
+          let left = mb.left;
           if (mb.right > ob.right) {
-            menu.style.left = `${ob.right - mb.width - 10}px`;
+            left = ob.right - mb.width - 10;
+          } else {
+            // shift left;
+            left = x - mb.width;
           }
+          if (left < ob.left) {
+            left = ob.left;
+          }
+          menu.style.left = `${left}px`;
           if (mb.bottom > ob.bottom) {
             menu.style.top = `${ob.bottom - mb.height - 10}px`;
           }
@@ -676,20 +684,29 @@ export class MarksMenuStatus {
   openStartButton = async (selection: Selection): Promise<void> => {
     if (selection.type == "Range") {
       const range = selection.getRangeAt(0);
-      const r = range.getBoundingClientRect();
-      let x = r.left;
-      let y = r.bottom;
       const button = document.getElementById(
         "vivliostyle-text-selection-start-button",
       ) as HTMLElement;
       const rs = { node: range.startContainer, offset: range.startOffset };
       const re = { node: range.endContainer, offset: range.endOffset };
       const text = collectTextWithEloffInRange(rs, re);
+      if (text.length == 0) {
+        return;
+      }
+      // should use map and flat, but the compiler option allows only es2018
+      const rects = text.reduce((acc, t) => {
+        return acc.concat(textNodeRects(t));
+      }, []);
+      if (rects.length == 0) {
+        return;
+      }
       const start = selectedNodeToPosition(text[0].t, text[0].startOffset);
       const end = selectedNodeToPosition(
         text[text.length - 1].t,
         text[text.length - 1].endOffset,
       );
+      const x = rects[rects.length - 1].left;
+      const y = rects[rects.length - 1].bottom;
       const clickListner = (): void => {
         if (button) {
           button.removeEventListener("click", clickListner);
@@ -704,9 +721,6 @@ export class MarksMenuStatus {
       }
 
       const subscription = this.startButtonOpened.subscribe((v) => {
-        const button = document.getElementById(
-          "vivliostyle-text-selection-start-button",
-        ) as HTMLElement;
         if (v) {
           const outer = document.querySelector(
             "[data-vivliostyle-outer-zoom-box]",
@@ -714,13 +728,16 @@ export class MarksMenuStatus {
           if (button && outer) {
             const mb = button.getBoundingClientRect();
             const ob = outer.getBoundingClientRect();
+            let left = x - mb.width; // shift to left
             if (mb.right > ob.right) {
-              y = ob.right - mb.width - 10;
-              button.style.left = `${y}px`;
+              left = ob.right - mb.width - 10;
             }
+            if (left < ob.left) {
+              left = ob.left;
+            }
+            button.style.left = `${left}px`;
             if (mb.bottom > ob.bottom) {
-              x = ob.bottom - mb.height - 10;
-              button.style.top = `${x}px`;
+              button.style.top = `${ob.bottom - mb.height - 10}px`;
             }
           }
         } else {
