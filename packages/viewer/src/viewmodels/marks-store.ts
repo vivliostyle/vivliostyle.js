@@ -615,12 +615,9 @@ export class MarksMenuStatus {
         if (menu && outer) {
           const mb = menu.getBoundingClientRect();
           const ob = outer.getBoundingClientRect();
-          let left = mb.left;
-          if (mb.right > ob.right) {
+          let left = x - mb.width;
+          if (left + mb.width > ob.right) {
             left = ob.right - mb.width - 10;
-          } else {
-            // shift left;
-            left = x - mb.width;
           }
           if (left < ob.left) {
             left = ob.left;
@@ -730,7 +727,7 @@ export class MarksMenuStatus {
             const mb = button.getBoundingClientRect();
             const ob = outer.getBoundingClientRect();
             let left = x - mb.width; // shift to left
-            if (mb.right > ob.right) {
+            if (left + mb.width > ob.right) {
               left = ob.right - mb.width - 10;
             }
             if (left < ob.left) {
