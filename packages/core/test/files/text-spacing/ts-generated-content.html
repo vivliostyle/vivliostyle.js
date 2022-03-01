@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Test text-spacing on generated content</title>
+  <style>
+    :root {
+      text-spacing: auto;
+    }
+
+    @page {
+      outline: dotted 1px;
+
+      @top-left {
+        content: "「日本語English（英語）」。";
+        color: navy;
+      }
+
+      @top-right {
+        content: "「日本語English（英語）」。";
+        color: blue;
+        text-spacing: normal;
+      }
+
+      @bottom-left {
+        content: "「日本語English（英語）」。";
+        color: gray;
+        text-spacing: none;
+      }
+
+      @bottom-right {
+        content: "「日本語English（英語）」。";
+        color: teal;
+        hanging-punctuation: force-end;
+      }
+    }
+
+    .test::before {
+      content: "「日本語English（英語）」。";
+      color: purple;
+    }
+
+    .test::after {
+      content: "「日本語English（英語）」。";
+      color: olive;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .ts-none {
+      text-spacing: none;
+    }
+
+    .ts-normal {
+      text-spacing: normal;
+    }
+
+    .ts-auto {
+      /* text-spacing: auto (inherited from :root) */
+    }
+
+    .hp-force-end {
+      hanging-punctuation: force-end;
+    }
+  </style>
+</head>
+
+<body>
+  <section>
+    <h2>Margin boxes</h2>
+    <dl>
+      <dt style="color: navy">@top-left</dt>
+      <dd>text-spacing: auto (inherited from :root)</dd>
+    </dl>
+    <dl>
+      <dt style="color: blue">@top-right</dt>
+      <dd>text-spacing: normal</dd>
+    </dl>
+    <dl>
+      <dt style="color: gray">@bottom-left</dt>
+      <dd>text-spacing: none</dd>
+    </dl>
+    <dl>
+      <dt style="color: teal">@bottom-right</dt>
+      <dd>hanging-punctuation: force-end</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2><span style="color: purple">::before</span>/<span
+        style="color: olive">::after</span> pseudo elements</h2>
+    <section class="ts-auto">
+      <h3>text-spacing: auto (inherited from :root)</h3>
+      <p>「日本語English（英語）」。</p>
+      <p class="test">「日本語English（英語）」。</p>
+      <p class="right">「日本語English（英語）」。</p>
+      <p class="test right">「日本語English（英語）」。</p>
+    </section>
+    <section class="ts-normal">
+      <h3>text-spacing: normal</h3>
+      <p>「日本語English（英語）」。</p>
+      <p class="test">「日本語English（英語）」。</p>
+      <p class="right">「日本語English（英語）」。</p>
+      <p class="test right">「日本語English（英語）」。</p>
+    </section>
+    <section class="ts-none">
+      <h3>text-spacing: none</h3>
+      <p>「日本語English（英語）」。</p>
+      <p class="test">「日本語English（英語）」。</p>
+      <p class="right">「日本語English（英語）」。</p>
+      <p class="test right">「日本語English（英語）」。</p>
+    </section>
+    <section class="hp-force-end">
+      <h3>hanging-punctuation: force-end</h3>
+      <p>「日本語English（英語）」。</p>
+      <p class="test">「日本語English（英語）」。</p>
+      <p class="right">「日本語English（英語）」。</p>
+      <p class="test right">「日本語English（英語）」。</p>
+    </section>
+  </section>
+</body>
+
+</html>

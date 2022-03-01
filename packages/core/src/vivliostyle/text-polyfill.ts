@@ -18,7 +18,6 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as Layout from "./layout";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
 import { TextPolyfillCss } from "./assets";
@@ -27,7 +26,7 @@ type PropertyValue = string | number | Css.Val;
 
 type HangingPunctuation = {
   first: boolean;
-  end: boolean;
+  end: boolean; // force-end or allow-end
   allowEnd: boolean;
   last: boolean;
 };
@@ -79,11 +78,21 @@ function hangingPunctuationFromPropertyValue(
   return hangingPunctuation;
 }
 
+function isHangingPunctuationNone(
+  hangingPunctuation: HangingPunctuation,
+): boolean {
+  return (
+    !hangingPunctuation.first &&
+    !hangingPunctuation.last &&
+    !hangingPunctuation.end
+  );
+}
+
 type TextSpacing = {
-  trimStart: boolean;
-  spaceFirst: boolean;
-  trimEnd: boolean;
-  allowEnd: boolean;
+  trimStart: boolean; // trim-start or space-first (not space-start)
+  spaceFirst: boolean; // space-first (trim-start except at first line)
+  trimEnd: boolean; // trim-end or allow-end (not space-end)
+  allowEnd: boolean; // allow-end (not force-end)
   trimAdjacent: boolean;
   ideographAlpha: boolean;
   ideographNumeric: boolean;
@@ -196,6 +205,16 @@ function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
   return textSpacing;
 }
 
+function isTextSpacingNone(textSpacing: TextSpacing): boolean {
+  return (
+    !textSpacing.trimStart &&
+    !textSpacing.trimEnd &&
+    !textSpacing.trimAdjacent &&
+    !textSpacing.ideographAlpha &&
+    !textSpacing.ideographNumeric
+  );
+}
+
 function normalizeLang(lang: string): string | null {
   if (lang) {
     // Normalize CJK lang
@@ -217,17 +236,41 @@ function normalizeLang(lang: string): string | null {
   return null;
 }
 
+const embeddedContentTags = {
+  audio: true,
+  canvas: true,
+  embed: true,
+  iframe: true,
+  img: true,
+  math: true,
+  object: true,
+  picture: true,
+  svg: true,
+  video: true,
+};
+
 class TextSpacingPolyfill {
-  textSpacingProcessed = false;
+  isTextPolyfillCssReady = false;
 
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-spacing"];
   }
 
   preprocessSingleDocument(document: Document): void {
+    if (!document.body) {
+      return;
+    }
+    this.preprocessForTextSpacing(document.body);
+
+    this.isTextPolyfillCssReady = !!document.getElementById(
+      "vivliostyle-text-polyfill-css",
+    );
+  }
+
+  preprocessForTextSpacing(element: Element): void {
     // Split text nodes by punctuations and ideograph/non-ideograph boundary
-    const nodeIter = document.createNodeIterator(
-      document.body,
+    const nodeIter = element.ownerDocument.createNodeIterator(
+      element,
       NodeFilter.SHOW_TEXT,
     );
     for (let node = nodeIter.nextNode(); node; node = nodeIter.nextNode()) {
@@ -239,7 +282,7 @@ class TextSpacingPolyfill {
       }
       const textArr = node.textContent
         .replace(
-          /[\p{Ps}\p{Pe}\p{Pf}\p{Pi}'"、。，．：；､｡]\p{M}*(?=\P{M})|.(?=[\p{Ps}\p{Pe}\p{Pf}\p{Pi}'"、。，．：；､｡])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
+          /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
           "$&\x00",
         )
         .split("\x00");
@@ -257,12 +300,116 @@ class TextSpacingPolyfill {
     }
   }
 
+  processGeneratedContent(
+    element: HTMLElement,
+    textSpacingVal: Css.Val,
+    hangingPunctuationVal: Css.Val,
+    lang: string,
+    vertical: boolean,
+  ): void {
+    lang = normalizeLang(lang);
+    const textSpacing = textSpacingFromPropertyValue(textSpacingVal);
+    const hangingPunctuation = hangingPunctuationFromPropertyValue(
+      hangingPunctuationVal,
+    );
+
+    if (
+      isHangingPunctuationNone(hangingPunctuation) &&
+      isTextSpacingNone(textSpacing)
+    ) {
+      return;
+    }
+
+    this.preprocessForTextSpacing(element);
+
+    const whiteSpaceSave = element.style.whiteSpace;
+    if ((vertical ? element.offsetHeight : element.offsetWidth) === 0) {
+      // Prevent wrong line wrapping
+      element.style.whiteSpace = "pre";
+    }
+
+    const nodeIter = element.ownerDocument.createNodeIterator(
+      element,
+      NodeFilter.SHOW_TEXT,
+    );
+    let prevNode: Node = null;
+    let nextNode: Node = null;
+    for (let node = nodeIter.nextNode(); node; node = nextNode) {
+      nextNode = nodeIter.nextNode();
+      const isFirstInBlock = !prevNode;
+      const isFirstAfterForcedLineBreak =
+        !prevNode || /\n$/.test(prevNode.textContent);
+      const isLastBeforeForcedLineBreak =
+        !nextNode || /^\n/.test(nextNode.textContent);
+      const isLastInBlock = !nextNode;
+      this.processTextSpacing(
+        node,
+        isFirstInBlock,
+        isFirstAfterForcedLineBreak,
+        isLastBeforeForcedLineBreak,
+        isLastInBlock,
+        prevNode,
+        nextNode,
+        textSpacing,
+        hangingPunctuation,
+        lang,
+        vertical,
+      );
+      prevNode = node;
+    }
+
+    element.style.whiteSpace = whiteSpaceSave;
+  }
+
   postLayoutBlock(
     nodeContext: Vtree.NodeContext,
     checkPoints: Vtree.NodeContext[],
-    column: Layout.Column,
   ): void {
     const isFirstFragment = !nodeContext || nodeContext.fragmentIndex === 1;
+    const isAfterForcedLineBreak =
+      isFirstFragment || checkIfAfterForcedLineBreak();
+
+    function checkIfAfterForcedLineBreak(): boolean {
+      let p = checkPoints[0];
+      let prevNode: Node;
+      while (p && p.inline) {
+        prevNode = p.sourceNode?.previousSibling;
+        if (prevNode) {
+          if (
+            prevNode instanceof Text &&
+            /^\s*$/.test(prevNode.textContent) &&
+            p.whitespace !== Vtree.Whitespace.PRESERVE
+          ) {
+            prevNode = prevNode.previousSibling;
+          }
+          if (prevNode) {
+            break;
+          }
+        }
+        p = p.parent;
+      }
+
+      while (prevNode) {
+        if (prevNode instanceof Element) {
+          if (prevNode.localName === "br") {
+            return true;
+          }
+        } else if (prevNode instanceof Text) {
+          if (p.whitespace === Vtree.Whitespace.PRESERVE) {
+            if (/\n$/.test(prevNode.textContent)) {
+              return true;
+            }
+          } else if (p.whitespace === Vtree.Whitespace.NEWLINE) {
+            if (/\n\s*$/.test(prevNode.textContent)) {
+              return true;
+            }
+          }
+        }
+        prevNode = prevNode.lastChild;
+      }
+      return false;
+    }
+
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
       if (
@@ -287,10 +434,18 @@ class TextSpacingPolyfill {
           p.inheritedProps["hanging-punctuation"],
         );
 
+        if (
+          isHangingPunctuationNone(hangingPunctuation) &&
+          isTextSpacingNone(textSpacing)
+        ) {
+          continue;
+        }
+
         let prevNode: Node = null;
         let nextNode: Node = null;
         let isFirstInBlock = i === 0 && isFirstFragment;
-        let isFirstAfterForcedLineBreak = false;
+        let isFirstAfterForcedLineBreak = i === 0 && isAfterForcedLineBreak;
+        let isLastBeforeForcedLineBreak = false;
         let isLastInBlock = false;
 
         function checkIfFirstAfterForcedLineBreak(
@@ -301,16 +456,39 @@ class TextSpacingPolyfill {
           }
           if (prevP.viewNode instanceof Text) {
             if (prevP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (/\n\s*$/.test(prevP.viewNode.textContent)) {
+              if (/\n$/.test(prevP.viewNode.textContent)) {
                 return true;
               }
             } else if (prevP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/\n$/.test(prevP.viewNode.textContent)) {
+              if (/\n\s*$/.test(prevP.viewNode.textContent)) {
                 return true;
               }
             }
             if (prevP.viewNode.previousElementSibling?.localName === "br") {
               return Vtree.canIgnore(prevP.viewNode, prevP.whitespace);
+            }
+          }
+          return false;
+        }
+
+        function checkIfLastBeforeForcedLineBreak(
+          nextP: Vtree.NodeContext,
+        ): boolean {
+          if (nextP.viewNode instanceof Element) {
+            return nextP.viewNode.localName === "br";
+          }
+          if (nextP.viewNode instanceof Text) {
+            if (nextP.whitespace === Vtree.Whitespace.PRESERVE) {
+              if (/^\n/.test(nextP.viewNode.textContent)) {
+                return true;
+              }
+            } else if (nextP.whitespace === Vtree.Whitespace.NEWLINE) {
+              if (/^\s*\n/.test(nextP.viewNode.textContent)) {
+                return true;
+              }
+            }
+            if (nextP.viewNode.nextElementSibling?.localName === "br") {
+              return Vtree.canIgnore(nextP.viewNode, nextP.whitespace);
             }
           }
           return false;
@@ -334,7 +512,7 @@ class TextSpacingPolyfill {
             (prevP.display && prevP.display !== "inline") ||
             (prevP.viewNode instanceof Element &&
               (prevP.viewNode.localName === "br" ||
-                Layout.mediaTags[prevP.viewNode.localName]))
+                embeddedContentTags[prevP.viewNode.localName]))
           ) {
             break;
           }
@@ -345,6 +523,10 @@ class TextSpacingPolyfill {
         }
         for (let next = i + 1; next < checkPoints.length; next++) {
           const nextP = checkPoints[next];
+          if (checkIfLastBeforeForcedLineBreak(nextP)) {
+            isLastBeforeForcedLineBreak = true;
+            break;
+          }
           if (
             nextP.viewNode !== p.viewNode &&
             !nextP.display &&
@@ -358,18 +540,20 @@ class TextSpacingPolyfill {
             (nextP.display && nextP.display !== "inline") ||
             (nextP.viewNode instanceof Element &&
               (nextP.viewNode.localName === "br" ||
-                Layout.mediaTags[nextP.viewNode.localName]))
+                embeddedContentTags[nextP.viewNode.localName]))
           ) {
             break;
           }
           if (next === checkPoints.length - 1) {
             isLastInBlock = true;
+            isLastBeforeForcedLineBreak = true;
           }
         }
         this.processTextSpacing(
           p.viewNode,
           isFirstInBlock,
           isFirstAfterForcedLineBreak,
+          isLastBeforeForcedLineBreak,
           isLastInBlock,
           prevNode,
           nextNode,
@@ -386,6 +570,7 @@ class TextSpacingPolyfill {
     textNode: Node,
     isFirstInBlock: boolean,
     isFirstAfterForcedLineBreak: boolean,
+    isLastBeforeForcedLineBreak: boolean,
     isLastInBlock: boolean,
     prevNode: Node,
     nextNode: Node,
@@ -396,9 +581,67 @@ class TextSpacingPolyfill {
   ): void {
     const text = textNode.textContent;
     const document = textNode.ownerDocument;
+    let currRange: Range;
+    let prevRange: Range;
+    let nextRange: Range;
+
+    function isAtStartOfLine(): boolean {
+      if (!prevNode) {
+        return false;
+      }
+      if (!currRange) {
+        currRange = document.createRange();
+        currRange.selectNode(textNode);
+      }
+      const rect = currRange.getClientRects()[0];
+      if (!prevRange) {
+        prevRange = document.createRange();
+        prevRange.selectNode(prevNode);
+      }
+      const prevRects = prevRange.getClientRects();
+      const prevRect = prevRects[prevRects.length - 1];
+      if (!rect || !prevRect) {
+        return false;
+      }
+      return vertical
+        ? rect.top < prevRect.top + prevRect.height - rect.width ||
+            rect.left + rect.width < prevRect.left + 1 ||
+            rect.left > prevRect.left + prevRect.width - 1
+        : rect.left < prevRect.left + prevRect.width - rect.height ||
+            rect.top > prevRect.top + prevRect.height - 1 ||
+            rect.top + rect.height < prevRect.top + 1;
+    }
+
+    function isAtEndOfLine(): boolean {
+      if (!nextNode) {
+        return false;
+      }
+      if (!currRange) {
+        currRange = document.createRange();
+        currRange.selectNode(textNode);
+      }
+      const rect = currRange.getClientRects()[0];
+      if (!nextRange) {
+        nextRange = document.createRange();
+        nextRange.selectNode(nextNode);
+      }
+      const nextRect = nextRange.getClientRects()[0];
+      if (!rect || !nextRect) {
+        return false;
+      }
+      return vertical
+        ? rect.top + rect.height > nextRect.top + rect.width ||
+            rect.left > nextRect.left + nextRect.width - 1 ||
+            rect.left + rect.width < nextRect.left + 1
+        : rect.left + rect.width > nextRect.left + rect.height ||
+            rect.top + rect.height < nextRect.top + 1 ||
+            rect.top > nextRect.top + nextRect.height - 1;
+    }
 
     let punctProcessing = false;
-    let hanging = false;
+    let hangingFirst = false;
+    let hangingLast = false;
+    let hangingEnd = false;
     let tagName: "viv-ts-open" | "viv-ts-close";
 
     if (
@@ -409,7 +652,7 @@ class TextSpacingPolyfill {
       // hanging-punctuation: first
       tagName = "viv-ts-open";
       punctProcessing = true;
-      hanging = true;
+      hangingFirst = true;
     } else if (
       isLastInBlock &&
       hangingPunctuation.last &&
@@ -418,12 +661,12 @@ class TextSpacingPolyfill {
       // hanging-punctuation: last
       tagName = "viv-ts-close";
       punctProcessing = true;
-      hanging = true;
+      hangingLast = true;
     } else if (hangingPunctuation.end && /^[、。，．､｡]\p{M}*$/u.test(text)) {
       // hanging-punctuation: force-end | allow-end
       tagName = "viv-ts-close";
       punctProcessing = true;
-      hanging = true;
+      hangingEnd = true;
     } else if (
       (textSpacing.trimStart || textSpacing.trimAdjacent) &&
       /^[‘“〝（［｛｟〈〈《「『【〔〖〘〚]\p{M}*$/u.test(text)
@@ -442,20 +685,11 @@ class TextSpacingPolyfill {
       punctProcessing = true;
     }
 
-    function checkFullWidth(innerElem: HTMLElement): boolean {
-      // Check if the punctuation is really full width
-      const fullWidthElem = document.createElement("viv-ts-inner");
-      fullWidthElem.appendChild(document.createTextNode("水"));
-      const outerElem = innerElem.parentElement;
-      outerElem.appendChild(fullWidthElem);
-      const isFullWidth = vertical
-        ? innerElem.offsetHeight >= fullWidthElem.offsetHeight * 0.9
-        : innerElem.offsetWidth >= fullWidthElem.offsetWidth * 0.9;
-      outerElem.removeChild(fullWidthElem);
-      return isFullWidth;
-    }
-
     if (punctProcessing) {
+      if (!this.isTextPolyfillCssReady) {
+        this.initTextPolyfillCss(document.head);
+      }
+
       // Wrap the textNode as `<{tagName}><viv-ts-inner>{text}<viv-ts-inner></{tagName}>`
       const outerElem = document.createElement(tagName);
       const innerElem = document.createElement("viv-ts-inner");
@@ -463,74 +697,139 @@ class TextSpacingPolyfill {
       textNode.parentNode.insertBefore(outerElem, textNode);
       innerElem.appendChild(textNode);
 
-      if (hanging || checkFullWidth(innerElem)) {
+      // Check if che punctuation is almost full width
+      const fontSize = parseFloat(
+        document.defaultView.getComputedStyle(outerElem).fontSize,
+      );
+      const isFullWidth =
+        (vertical ? innerElem.offsetHeight : innerElem.offsetWidth) >
+        fontSize * 0.7;
+
+      if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
-          if (hanging && hangingPunctuation.first) {
+          if (hangingFirst) {
             outerElem.className = "viv-hang-first";
+          } else if (isFirstInBlock || isFirstAfterForcedLineBreak) {
+            if (textSpacing.trimStart && !textSpacing.spaceFirst) {
+              outerElem.className = "viv-ts-trim";
+            } else {
+              outerElem.className = "viv-ts-space";
+            }
+          } else if (!textSpacing.trimStart && isAtStartOfLine()) {
+            outerElem.className = "viv-ts-space";
           } else if (
+            textSpacing.trimAdjacent &&
             prevNode &&
             /[\p{Ps}\p{Pi}\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]\p{M}*$/u.test(
               prevNode.textContent,
             )
           ) {
-            if (textSpacing.trimAdjacent) {
-              outerElem.className = "viv-ts-trim";
-            }
-          } else if (isFirstInBlock || isFirstAfterForcedLineBreak) {
-            if (textSpacing.spaceFirst || !textSpacing.trimStart) {
-              outerElem.className = "viv-ts-first viv-ts-space";
-            } else {
-              outerElem.className = "viv-ts-first";
-            }
-          } else if (!textSpacing.trimStart) {
-            outerElem.className = "viv-ts-space";
+            outerElem.className = "viv-ts-trim";
+          } else {
+            outerElem.className = "viv-ts-auto";
           }
         } else if (tagName === "viv-ts-close") {
-          if (hanging && hangingPunctuation.last) {
-            outerElem.className = "viv-hang-last";
+          if (hangingLast) {
+            outerElem.className = isFullWidth
+              ? "viv-hang-last"
+              : "viv-hang-last viv-hang-hw";
+          } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
+            if (hangingEnd) {
+              outerElem.className = isFullWidth
+                ? "viv-hang-end"
+                : "viv-hang-end viv-hang-hw";
+            } else if (textSpacing.trimEnd) {
+              outerElem.className = "viv-ts-trim";
+            } else {
+              outerElem.className = "viv-ts-space";
+            }
           } else if (
             nextNode &&
             /^[\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]/u.test(
               nextNode.textContent,
             )
           ) {
-            if (textSpacing.trimAdjacent) {
+            if (isFullWidth && textSpacing.trimAdjacent) {
               outerElem.className = "viv-ts-trim";
             }
-          } else if (hanging && hangingPunctuation.end) {
-            if (checkFullWidth(innerElem)) {
-              outerElem.className = "viv-hang-end";
-            } else {
-              // Halfwidth "､｡" or half width glyph of "、。"
-              outerElem.className = "viv-hang-end viv-hang-hw";
+          } else if (hangingEnd) {
+            const forceAtEnd = !hangingPunctuation.allowEnd && isAtEndOfLine();
+            outerElem.className = isFullWidth
+              ? "viv-hang-end"
+              : "viv-hang-end viv-hang-hw";
+            if (!isFullWidth) {
+              if (!forceAtEnd) {
+                const atEndOfLine = isAtEndOfLine();
+                outerElem.className = "";
+                if (atEndOfLine && !isAtEndOfLine()) {
+                  outerElem.className = "viv-hang-end viv-hang-hw";
+                }
+              }
+            } else if (
+              !forceAtEnd &&
+              hangingPunctuation.allowEnd &&
+              isAtEndOfLine()
+            ) {
+              if (!textSpacing.trimEnd || textSpacing.allowEnd) {
+                outerElem.className = "viv-ts-space";
+                if (!isAtEndOfLine()) {
+                  if (textSpacing.trimEnd) {
+                    outerElem.className = "viv-ts-auto";
+                    if (!isAtEndOfLine()) {
+                      outerElem.className = "viv-hang-end";
+                    }
+                  } else {
+                    outerElem.className = "viv-hang-end";
+                  }
+                }
+              } else {
+                outerElem.className = "viv-ts-auto";
+                if (!isAtEndOfLine()) {
+                  outerElem.className = "viv-hang-end";
+                }
+              }
             }
-          } else if (!textSpacing.trimEnd) {
-            outerElem.className = "viv-ts-space";
+          } else if (textSpacing.trimEnd) {
+            if (textSpacing.allowEnd && isAtEndOfLine()) {
+              outerElem.className = "viv-ts-space";
+            } else {
+              outerElem.className = "viv-ts-auto";
+            }
           }
         }
-      } else {
-        // Undo the processing
-        outerElem.parentNode.insertBefore(textNode, outerElem);
-        outerElem.parentNode.removeChild(outerElem);
-        punctProcessing = false;
+
+        // Support for browsers not supporting inset-inline-start property
+        // https://developer.mozilla.org/en-US/docs/Web/CSS/inset-inline-start#browser_compatibility
+        if (innerElem.style.insetInlineStart === undefined) {
+          let insetInlineStart = {
+            "viv-ts-auto": "0.5em",
+            "viv-ts-trim": "0.5em",
+            "viv-hang-end": "1em",
+            "viv-hang-last": "1em",
+            "viv-hang-end viv-hang-hw": "0.5em",
+            "viv-hang-last viv-hang-hw": "0.5em",
+          }[outerElem.className];
+          if (insetInlineStart) {
+            if (vertical) {
+              innerElem.style.top = insetInlineStart;
+            } else {
+              innerElem.style.left = insetInlineStart;
+            }
+          }
+        }
       }
-    } else {
-      punctProcessing = false;
     }
 
     let spaceIdeoAlnumProcessing = false;
 
     function checkUpright(elem: Element): boolean {
-      if (!elem || !(elem instanceof HTMLElement)) {
-        return false;
-      }
-      if (elem.style.textOrientation === "upright") {
-        return true;
-      }
-      if (elem.style.textCombineUpright === "all") {
-        return true;
-      }
-      return checkUpright(elem.parentElement);
+      const style = elem?.ownerDocument.defaultView?.getComputedStyle(elem);
+      return (
+        !!style &&
+        (style.textOrientation === "upright" ||
+          style.textCombineUpright === "all" ||
+          style["-webkit-text-combine"] === "horizontal")
+      );
     }
 
     if (textSpacing.ideographAlpha || textSpacing.ideographNumeric) {
@@ -568,20 +867,19 @@ class TextSpacingPolyfill {
         );
         spaceIdeoAlnumProcessing = true;
       }
-    }
 
-    if (punctProcessing || spaceIdeoAlnumProcessing) {
-      if (!this.textSpacingProcessed) {
+      if (spaceIdeoAlnumProcessing && !this.isTextPolyfillCssReady) {
         this.initTextPolyfillCss(document.head);
-        this.textSpacingProcessed = true;
       }
     }
   }
 
   private initTextPolyfillCss(head: Element): void {
-    const style = head.ownerDocument.createElement("style");
-    style.textContent = TextPolyfillCss;
-    head.appendChild(style);
+    const styleElem = head.ownerDocument.createElement("style");
+    styleElem.id = "vivliostyle-text-polyfill-css";
+    styleElem.textContent = TextPolyfillCss;
+    head.appendChild(styleElem);
+    this.isTextPolyfillCssReady = true;
   }
 
   registerHooks() {
@@ -602,3 +900,23 @@ class TextSpacingPolyfill {
 
 const textPolyfill = new TextSpacingPolyfill();
 textPolyfill.registerHooks();
+
+export function preprocessForTextSpacing(element: Element): void {
+  textPolyfill.preprocessForTextSpacing(element);
+}
+
+export function processGeneratedContent(
+  element: HTMLElement,
+  textSpacing: Css.Val,
+  hangingPunctuation: Css.Val,
+  lang: string,
+  vertical: boolean,
+): void {
+  textPolyfill.processGeneratedContent(
+    element,
+    textSpacing,
+    hangingPunctuation,
+    lang,
+    vertical,
+  );
+}

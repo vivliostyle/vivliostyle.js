@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.3...v2.14.4) (2022-02-21)
+
+### Bug Fixes
+
+- **viewer:** tweak mouse wheel/scroll handling to prevent unexpected page moves ([2ac72a0](https://github.com/vivliostyle/vivliostyle.js/commit/2ac72a09cd79388de54475f55c04854c4bad02d3))
+
+## [2.14.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.2...v2.14.3) (2022-02-18)
+
+**Note:** Version bump only for package @vivliostyle/viewer
+
+## [2.14.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.1...v2.14.2) (2022-02-14)
+
+### Bug Fixes
+
+- use appropriate fallback page size when window size is not available ([5a90204](https://github.com/vivliostyle/vivliostyle.js/commit/5a90204095cda4f4ea8682f3494a64cdca4654ec))
+
+## [2.14.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.0...v2.14.1) (2022-02-05)
+
+**Note:** Version bump only for package @vivliostyle/viewer
+
+# [2.14.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.13.0...v2.14.0) (2022-02-04)
+
+**Note:** Version bump only for package @vivliostyle/viewer
+
+# [2.13.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.1...v2.13.0) (2022-01-17)
+
+### Features
+
+- Allow JavaScript in HTML documents ([ccd31da](https://github.com/vivliostyle/vivliostyle.js/commit/ccd31da5ff3eba91432953580483548cecd84859)), closes [#733](https://github.com/vivliostyle/vivliostyle.js/issues/733) [#735](https://github.com/vivliostyle/vivliostyle.js/issues/735) [/github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts#L73](https://github.com//github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts/issues/L73)
+- **viewer:** Add zoom URL parameter to keep zoom value on reloading ([3bdab51](https://github.com/vivliostyle/vivliostyle.js/commit/3bdab51e557ccb358be3c2c69d36448ca08fd890)), closes [#825](https://github.com/vivliostyle/vivliostyle.js/issues/825)
+
 ## [2.12.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.12.0...v2.12.1) (2021-11-19)
 
 **Note:** Version bump only for package @vivliostyle/viewer

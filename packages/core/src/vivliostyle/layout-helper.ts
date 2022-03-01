@@ -17,6 +17,7 @@
  * @fileoverview LayoutHelper - Helper functions of Layout.
  */
 import * as Base from "./base";
+import * as Display from "./display";
 import * as Logging from "./logging";
 import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
@@ -192,35 +193,25 @@ export function isSpecial(e: Element): boolean {
   return !!e.getAttribute(VtreeImpl.SPECIAL_ATTR);
 }
 
-const specialInlineDisplayTypes = {
-  ruby: true,
-  "ruby-base": true,
-  "ruby-base-container": true,
-  "ruby-text": true,
-  "ruby-text-container": true,
-  "inline-block": true,
-  "inline-flex": true,
-  "inline-grid": true,
-  "inline-list-item": true,
-  "inline-table": true,
-};
-
-export function isSpecialInlineDisplay(display: string): boolean {
-  return !!specialInlineDisplayTypes[display];
+export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {
+  const viewNode = nodeContext?.viewNode;
+  return viewNode instanceof Element && isSpecial(viewNode);
 }
 
-export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {
-  if (!nodeContext) {
-    return false;
-  }
-  const viewNode = nodeContext.viewNode;
-  if (viewNode && viewNode.nodeType === 1 && isSpecial(viewNode as Element)) {
-    return true;
-  }
+export function isSpecialInlineDisplay(display: string): boolean {
+  return (
+    display !== "inline" &&
+    (Display.isInlineLevel(display) || Display.isRubyInternalDisplay(display))
+  );
+}
+
+export function findAncestorSpecialInlineNodeContext(
+  nodeContext: Vtree.NodeContext,
+): Vtree.NodeContext | null {
   for (let p = nodeContext.parent; p; p = p.parent) {
-    if (isSpecialInlineDisplay(p.display)) {
-      return true;
+    if (p.display !== "inline" && Display.isInlineLevel(p.display)) {
+      return p;
     }
   }
-  return false;
+  return null;
 }

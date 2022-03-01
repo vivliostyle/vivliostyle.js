@@ -26,7 +26,7 @@ import ko, { Observable } from "knockout";
 
 import urlParameters from "../stores/url-parameters";
 import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
-import ZoomOptions, { FitToScreen } from "./zoom-options";
+import ZoomOptions from "./zoom-options";
 
 interface ViewerOptionsType {
   allowScripts: boolean;
@@ -34,7 +34,7 @@ interface ViewerOptionsType {
   fontSize: number;
   profile: boolean;
   pageViewMode: CorePageViewMode;
-  zoom: FitToScreen | undefined;
+  zoom: ZoomOptions;
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
@@ -52,6 +52,9 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
     if (fontSize < 5) fontSize = 5;
     if (fontSize > 72) fontSize = 72;
   }
+  const zoomStr = urlParameters.getParameter("zoom")[0];
+  const zoomFactor = parseFloat(zoomStr);
+
   return {
     allowScripts:
       allowScripts === "true" ? true : allowScripts === "false" ? false : null,
@@ -68,7 +71,10 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
     pageViewMode: PageViewMode.fromSpreadViewString(
       urlParameters.getParameter("spread")[0],
     ),
-    zoom: undefined,
+    zoom:
+      zoomFactor > 0
+        ? ZoomOptions.createFromZoomFactor(zoomFactor)
+        : ZoomOptions.createDefaultOptions(),
   };
 }
 
@@ -81,6 +87,10 @@ function getDefaultValues(): ViewerOptionsType {
     pageViewMode: PageViewMode.defaultMode(),
     zoom: ZoomOptions.createDefaultOptions(),
   };
+}
+
+function numberToString(number: number): string {
+  return number.toPrecision(10).replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
 }
 
 class ViewerOptions {
@@ -97,7 +107,7 @@ class ViewerOptions {
     fontSize: number;
     profile: boolean;
     pageViewMode: CorePageViewMode;
-    zoom: FitToScreen;
+    zoom: ZoomOptions;
   };
 
   constructor(defaultRenderAllPages: boolean);
@@ -125,7 +135,7 @@ class ViewerOptions {
       this.fontSize(urlOptions.fontSize || defaultValues.fontSize);
       this.profile(urlOptions.profile || defaultValues.profile);
       this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
-      this.zoom(defaultValues.zoom);
+      this.zoom(urlOptions.zoom || defaultValues.zoom);
 
       // write spread parameter back to URL when updated
       this.pageViewMode.subscribe((pageViewMode) => {
@@ -152,9 +162,7 @@ class ViewerOptions {
       });
       this.fontSize.subscribe((fontSize) => {
         if (typeof fontSize == "number") {
-          fontSize = fontSize
-            .toPrecision(10)
-            .replace(/(?:\.0*|(\.\d*?)0+)$/, "$1");
+          fontSize = numberToString(fontSize);
         }
         if (Number(fontSize) == defaultValues.fontSize) {
           urlParameters.removeParameter("fontSize");
@@ -162,6 +170,16 @@ class ViewerOptions {
           urlParameters.setParameter(
             "fontSize",
             `${fontSize}/${defaultValues.fontSize}`,
+          );
+        }
+      });
+      this.zoom.subscribe((zoom) => {
+        if (zoom.fitToScreen) {
+          urlParameters.removeParameter("zoom");
+        } else {
+          urlParameters.setParameter(
+            "zoom",
+            numberToString(zoom.getCurrentZoomFactor()),
           );
         }
       });

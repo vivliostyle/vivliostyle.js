@@ -71,6 +71,7 @@ class Navigation {
   hidePrint: boolean;
   hideFind: boolean;
   justClicked: boolean;
+  justPageMovedByWheel: boolean;
 
   constructor(
     private viewerOptions: ViewerOptions,
@@ -79,6 +80,7 @@ class Navigation {
     navigationOptions: NavigationOptions,
   ) {
     this.justClicked = false; // double click check
+    this.justPageMovedByWheel = false;
 
     this.isDisabled = ko.pureComputed(() => {
       return (
@@ -576,9 +578,10 @@ class Navigation {
   onwheelPageSlider(obj: unknown, event: WheelEvent): boolean {
     event.preventDefault();
     if (
-      event.deltaMode === 0 &&
-      Math.abs(event.deltaX) < 2 &&
-      Math.abs(event.deltaY) < 2
+      this.justPageMovedByWheel ||
+      (event.deltaMode === 0 &&
+        Math.abs(event.deltaX) < 4 &&
+        Math.abs(event.deltaY) < 4)
     ) {
       // ignore small move less than 2px
       return true;
@@ -595,6 +598,13 @@ class Navigation {
       } else {
         this.navigateToNext();
       }
+    }
+    if ((event.currentTarget as Element).id !== "vivliostyle-page-slider") {
+      // Prevent repetitive page moving due to momentum scrolling
+      this.justPageMovedByWheel = true;
+      window.setTimeout(() => {
+        this.justPageMovedByWheel = false;
+      }, 166);
     }
     return true;
   }

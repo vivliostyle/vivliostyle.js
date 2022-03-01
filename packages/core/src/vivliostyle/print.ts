@@ -100,20 +100,12 @@ class VivliostylePrint {
         type: "text/html",
       }),
       docURL = URL.createObjectURL(docBlob),
-      Viewer = new CoreViewer(
-        {
-          viewportElement: this.iframeWin.document.body
-            .firstElementChild as HTMLElement,
-          window: this.iframeWin,
-          debug: true,
-        },
-        {
-          defaultPaperSize: {
-            width: 794, // These numbers give weird output, but not setting them crashes the browser when there is no CSS.
-            height: 1122,
-          },
-        },
-      );
+      Viewer = new CoreViewer({
+        viewportElement: this.iframeWin.document.body
+          .firstElementChild as HTMLElement,
+        window: this.iframeWin,
+        debug: true,
+      });
     return new Promise<void>((resolve) => {
       Viewer.addListener("readystatechange", () => {
         if (Viewer.readyState === "complete") {

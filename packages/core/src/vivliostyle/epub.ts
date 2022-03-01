@@ -1169,11 +1169,34 @@ export class OPFDoc {
       this.metadata = {};
     }
     const title =
-      (doc && doc.title) ||
-      manifestObj["name"] ||
-      (manifestObj["metadata"] && manifestObj["metadata"]["title"]);
+      manifestObj["name"] || manifestObj["metadata"]?.["title"] || doc?.title;
     if (title) {
-      this.metadata[metaTerms.title] = [{ v: title }];
+      this.metadata[metaTerms.title] = (
+        Array.isArray(title) ? title : [title]
+      ).map((item) => ({ v: item.value ?? item }));
+    }
+    const author =
+      manifestObj["author"] ||
+      manifestObj["creator"] ||
+      manifestObj["metadata"]?.["author"] ||
+      Array.from(
+        doc?.querySelectorAll("meta[name='author'], meta[name='DC.Creator']") ??
+          [],
+      ).map((meta: HTMLMetaElement) => meta.content);
+    if (author && author.length !== 0) {
+      this.metadata[metaTerms.creator] = (
+        Array.isArray(author) ? author : [author]
+      ).map((item) => ({ v: item.name ?? item }));
+    }
+    const language =
+      manifestObj["inLanguage"] ||
+      manifestObj["metadata"]?.["language"] ||
+      doc?.documentElement.lang ||
+      doc?.documentElement.getAttribute("xml:lang");
+    if (language) {
+      this.metadata[metaTerms.language] = (
+        Array.isArray(language) ? language : [language]
+      ).map((item) => ({ v: item }));
     }
     // TODO: other metadata...
 
@@ -1192,6 +1215,10 @@ export class OPFDoc {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
           // Avoid link to external resources
+          continue;
+        }
+        if (/\.(jpe?g|png|gif|pdf|svg|mml)([#?]|$)/.test(href)) {
+          // Avoid link to non-HTML resources
           continue;
         }
         const hrefNoFragment = Base.stripFragment(
@@ -2256,7 +2283,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
-      pageCont.setAttribute("aria-hidden", "true");
     }
     viewport.layoutBox.appendChild(pageCont);
     const bleedBox = viewport.document.createElement("div") as HTMLElement;
@@ -2266,7 +2292,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     page.spineIndex = viewItem.item.spineIndex;
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);
-    if (page.offset === 0) {
+    if (
+      page.offset === 0 &&
+      !(viewItem.instance.blankPageAtStart && viewItem.pages.length === 0)
+    ) {
       const id = this.opf.documentURLTransformer.transformFragment(
         "",
         viewItem.item.src,

@@ -412,7 +412,14 @@ export function isSameNodePositionStep(
     return false;
   }
   return (
-    nps1.node === nps2.node &&
+    (nps1.node === nps2.node ||
+      // Fix for issue #869
+      (!!nps1.shadowContext &&
+        !!nps2.shadowContext &&
+        nps1.shadowType === Vtree.ShadowType.ROOTLESS &&
+        nps2.shadowType === Vtree.ShadowType.ROOTLESS &&
+        (nps1.node as Element)?.outerHTML ===
+          (nps2.node as Element)?.outerHTML)) &&
     nps1.shadowType === nps2.shadowType &&
     isSameShadowContext(nps1.shadowContext, nps2.shadowContext) &&
     isSameShadowContext(nps1.nodeShadow, nps2.nodeShadow) &&
@@ -1197,7 +1204,18 @@ export class Container implements Vtree.Container {
 
   setBlockPosition(start: number, extent: number): void {
     if (this.vertical) {
-      this.setHorizontalPosition(start + extent * this.getBoxDir(), extent);
+      const outerExtent =
+        extent +
+        this.marginLeft +
+        this.marginRight +
+        this.paddingLeft +
+        this.paddingRight +
+        this.borderLeft +
+        this.borderRight;
+      this.setHorizontalPosition(
+        start + outerExtent * this.getBoxDir(),
+        extent,
+      );
     } else {
       this.setVerticalPosition(start, extent);
     }
@@ -1296,6 +1314,10 @@ export class ContentPropertyHandler extends Css.Visitor {
 
   private visitStrInner(str: string, node?: Node | null) {
     if (!node) {
+      if (this.elem.lastChild instanceof Text) {
+        this.elem.lastChild.textContent += str;
+        return;
+      }
       node = this.elem.ownerDocument.createTextNode(str);
     }
     this.elem.appendChild(node);

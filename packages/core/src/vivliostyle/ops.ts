@@ -21,7 +21,6 @@
  */
 import "./footnotes";
 import "./table";
-import "./text-polyfill";
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
@@ -49,6 +48,7 @@ import * as PageMaster from "./page-master";
 import * as Scripts from "./scripts";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
+import * as TextPolyfill from "./text-polyfill";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
@@ -356,6 +356,9 @@ export class StyleInstance
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = this.style.pageProps;
+    if (!pageProps[""]) {
+      pageProps[""] = {};
+    }
     Object.keys(pageProps).forEach((selector) => {
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
         CssPage.resolvePageSizeAndBleed(pageProps[selector] as any),
@@ -1521,6 +1524,16 @@ export class StyleInstance
           page,
           this.faces,
         );
+        if (innerContainerTag == "span") {
+          // text-spacing & hanging-punctuation on margin boxes
+          TextPolyfill.processGeneratedContent(
+            innerContainer,
+            boxInstance.getProp(this, "text-spacing"),
+            boxInstance.getProp(this, "hanging-punctuation"),
+            this.lang,
+            boxInstance.vertical,
+          );
+        }
       } else if (boxInstance.suppressEmptyBoxGeneration) {
         parentContainer.removeChild(boxContainer);
         removed = true;

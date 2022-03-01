@@ -27,7 +27,7 @@
       text-spacing: auto;
     }
     #test-ts-auto-equiv {
-      text-spacing: trim-start ideograph-alpha ideograph-numeric;
+      text-spacing: trim-start trim-end ideograph-alpha ideograph-numeric;
     }
     #test-ts-space-start {
       text-spacing: space-start;
@@ -37,6 +37,9 @@
     }
     #test-ts-space-end {
       text-spacing: space-end;
+    }
+    #test-ts-allow-end {
+      text-spacing: allow-end;
     }
     #test-ts-ideograph-alpha {
       text-spacing: ideograph-alpha;
@@ -65,7 +68,7 @@
     <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
   </section>
   <section id="test-ts-auto-equiv">
-    <h2>text-spacing: trim-start ideograph-alpha ideograph-numeric</h2>
+    <h2>text-spacing: trim-start trim-end ideograph-alpha ideograph-numeric</h2>
     <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
   </section>
   <section id="test-ts-space-start">
@@ -78,6 +81,10 @@
   </section>
   <section id="test-ts-space-end">
     <h2>text-spacing: space-end</h2>
+    <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
+  </section>
+  <section id="test-ts-allow-end">
+    <h2>text-spacing: allow-end</h2>
     <p>〈約物〉は、〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123とか。」〈約物〉は、<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b>「<i>《英（数）》</i>字<i>ABC-123</i>とか。」</b></p>
   </section>
   <section id="test-ts-ideograph-alpha">

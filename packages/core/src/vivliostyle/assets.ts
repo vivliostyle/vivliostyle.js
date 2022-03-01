@@ -1427,36 +1427,44 @@ ul#toc {
 
 // text-polyfill.css
 export const TextPolyfillCss = `
-viv-ts-open:not(.viv-ts-trim,.viv-ts-space,.viv-hang-first)::before,
-viv-ts-close:not(.viv-ts-trim,.viv-ts-space,.viv-hang-last)::after {
+viv-ts-open.viv-ts-auto > viv-ts-inner,
+viv-ts-open.viv-ts-trim > viv-ts-inner {
+  margin-inline-start: -0.5em;
+}
+viv-ts-close.viv-ts-auto > viv-ts-inner,
+viv-ts-close.viv-ts-trim > viv-ts-inner {
+  margin-inline-start: -0.5em;
+  position: relative;
+  inset-inline-start: 0.5em;
+}
+viv-ts-close.viv-hang-end > viv-ts-inner,
+viv-ts-close.viv-hang-last > viv-ts-inner {
+  margin-inline-start: -1em;
+  position: relative;
+  inset-inline-start: 1em;
+}
+viv-ts-open.viv-ts-auto::before,
+viv-ts-close.viv-ts-auto::after,
+viv-ts-close.viv-hang-end::after {
   content: " ";
   font-family: Courier, monospace;
   font-size: 83%;
+  word-spacing: normal;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
 }
-viv-ts-open:not(.viv-ts-space,.viv-hang-first) > viv-ts-inner {
-  margin-inline-start: -0.5em;
+viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
+  word-spacing: 0.6em;
 }
-viv-ts-close:not(.viv-ts-space,.viv-hang-last,.viv-hang-end:not(.viv-ts-trim)) > viv-ts-inner {
-  margin-inline-end: -0.5em;
-}
-viv-ts-close.viv-hang-end:not(.viv-ts-trim,.viv-hang-hw)::after {
-  font-size: 166%;
-}
-viv-ts-close.viv-hang-end:not(.viv-ts-trim) > viv-ts-inner {
-  margin-inline-end: -1em;
-}
-viv-ts-close.viv-hang-end.viv-hang-hw > viv-ts-inner {
-  margin-inline-end: -0.5em;
-}
-viv-ts-close.viv-hang-last > viv-ts-inner {
+viv-ts-close.viv-hang-hw > viv-ts-inner {
   display: inline-block;
-  inline-size: 0;
+  inline-size: 0.5em;
   text-indent: 0;
   text-align: start;
   text-align-last: start;
+  margin-inline-start: -0.5em;
+  inset-inline-start: 0.5em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;
@@ -1470,6 +1478,7 @@ viv-ts-thin-sp::after {
   content: " ";
   font-family: Times, serif;
   font-size: 66.6%;
+  word-spacing: normal;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;

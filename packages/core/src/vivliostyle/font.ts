@@ -299,7 +299,7 @@ export class Mapper {
   }
 
   waitFontLoading(): Task.Result<boolean> {
-    const fonts = this.head.ownerDocument["fonts"]; // FontFaceSet
+    const fonts = this.head.ownerDocument.fonts; // FontFaceSet
     let unloadedCount = 0;
     fonts.forEach((fontFace) => {
       if (fontFace.status === "unloaded") {

@@ -1149,11 +1149,22 @@ export class ViewFactory
                   );
                 if (
                   Scripts.allowScripts &&
+                  !(
+                    result.namespaceURI === Base.NS.SVG &&
+                    result.localName !== "svg"
+                  ) &&
                   !result.ownerDocument.getElementById(attributeValue)
                 ) {
                   // Keep original id value so that JavaScript can manipulate it
                   result.setAttribute(attributeName, attributeValue);
                   result.setAttribute("data-vivliostyle-id", transformedValue);
+
+                  // Create an anchor element with transformed id, necessary for internal links in output PDF
+                  // (issue #877)
+                  const anchorElem = result.ownerDocument.createElement("a");
+                  anchorElem.setAttribute(attributeName, transformedValue);
+                  anchorElem.style.position = "absolute";
+                  result.appendChild(anchorElem);
                 } else {
                   result.setAttribute(attributeName, transformedValue);
                 }
@@ -2469,6 +2480,20 @@ export class Viewport {
       opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
     this.height =
       opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
+
+    // Use the fallbackPageSize if window size is 0 or browser is in headless mode.
+    const fallbackPageSize = {
+      // compromise between A4 (210mm 297mm) and letter (8.5in 11in)
+      width: 794, // 210mm (8.27in)
+      height: 1056, // 279.4mm (11in)
+    };
+    const isHeadlessBrowser = !window.outerWidth && !window.outerHeight;
+    if (!this.width || (!opt_width && isHeadlessBrowser)) {
+      this.width = fallbackPageSize.width;
+    }
+    if (!this.height || (!opt_height && isHeadlessBrowser)) {
+      this.height = fallbackPageSize.height;
+    }
   }
 
   /**

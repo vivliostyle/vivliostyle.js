@@ -105,6 +105,7 @@ export const inheritedProps = {
   "text-combine-upright": true,
   "text-indent": true,
   "text-justify": true,
+  "text-orientation": true,
   "text-rendering": true,
   "text-size-adjust": true,
   "text-spacing": true,
@@ -3101,7 +3102,12 @@ export class CascadeInstance {
         }
         const pseudoProps = pseudos[pseudoName];
         if (pseudoProps) {
-          if (before) {
+          if (
+            (pseudoName === "before" || pseudoName === "after") &&
+            !Vtree.nonTrivialContent(pseudoProps["content"]?.value)
+          ) {
+            delete pseudos[pseudoName];
+          } else if (before) {
             this.processPseudoelementProps(pseudoProps, element);
           } else {
             this.stack[this.stack.length - 2].push(
@@ -3231,8 +3237,7 @@ export const pseudoNames = [
   "inner",
   "first-letter",
   "first-line",
-  "",
-  /* content */
+  "", // content
   "transclusion-after",
   "after",
 ];

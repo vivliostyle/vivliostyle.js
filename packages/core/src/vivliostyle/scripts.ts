@@ -193,7 +193,7 @@ export function loadScriptsInHead(
   const textContentDiv = needPrepareForWebFonts
     ? prepareTextContentForWebFonts(srcDocument, window, styler)
     : null;
-  const fonts = window.document["fonts"]; // FontFaceSet
+  const fonts = window.document.fonts; // FontFaceSet
   const savedDollar = window["$"];
   let forceDefer = false;
   const frame: Task.Frame<boolean> = Task.newFrame("loadScripts");
