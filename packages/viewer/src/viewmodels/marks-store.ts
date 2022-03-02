@@ -18,6 +18,7 @@
  */
 
 import ko, { Computed, Observable, ObservableArray } from "knockout";
+import ViewerOptions from "../models/viewer-options";
 import urlParameters from "../stores/url-parameters";
 import { applyTransformToRect } from "../utils/scale-util";
 
@@ -904,13 +905,15 @@ export class URLMarksStore implements MarksStoreInterface {
 
 export class MarksStoreFacade {
   private actualStore?: MarksStoreInterface;
+  private viewerOptions?: ViewerOptions;
   menuStatus: MarksMenuStatus;
 
   constructor() {
     this.menuStatus = new MarksMenuStatus(this);
   }
 
-  async init(): Promise<void> {
+  async init(viewerOptions: ViewerOptions): Promise<void> {
+    this.viewerOptions = viewerOptions;
     if (window["marksStorePlugin"]) {
       this.actualStore = window["marksStorePlugin"] as MarksStoreInterface;
     } else {
@@ -975,11 +978,7 @@ export class MarksStoreFacade {
     }
     const start = selectedPositionToNode(mark.start);
     let end = selectedPositionToNode(mark.end);
-    if (
-      start &&
-      !end &&
-      urlParameters.getParameter("renderAllPages").includes("false")
-    ) {
+    if (start && !end && !this.viewerOptions.renderAllPages()) {
       console.log();
       end = estimateLastEndFromStart(start, mark.end);
     }

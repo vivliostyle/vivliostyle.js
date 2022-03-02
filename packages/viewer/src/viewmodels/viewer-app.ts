@@ -205,7 +205,7 @@ class ViewerApp {
     }
 
     this.marksStore = marksStore;
-    this.marksStore.init();
+    this.marksStore.init(this.viewerOptions);
     this.marksMenuStatus = marksStore.menuStatus;
     this.viewer.rerenderTrigger.subscribe(() => {
       this.marksStore.retryHighlightMarks();
