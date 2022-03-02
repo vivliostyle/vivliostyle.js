@@ -134,7 +134,7 @@ const highlight = (
   end: NodePosition,
   background = "rgba(255, 0, 0, 0.2)",
   mark?: Mark,
-): void => {
+): string => {
   const startParent = start.node.parentElement.closest(
     "[data-vivliostyle-page-container='true']",
   );
@@ -147,7 +147,7 @@ const highlight = (
     existMarkIn(mark.uniqueIdentifier, endParent)
   ) {
     // already exists;
-    return;
+    return "";
   }
   const zoomBox = start.node.parentElement?.closest(
     "[data-vivliostyle-outer-zoom-box]",
@@ -162,7 +162,9 @@ const highlight = (
   };
 
   let index = 0;
+  const texts: string[] = [];
   textNodes.forEach((tn) => {
+    texts.push(tn.t.data.slice(tn.startOffset, tn.endOffset));
     const parent = tn.t.parentElement.closest(
       "[data-vivliostyle-page-container='true']",
     );
@@ -195,6 +197,7 @@ const highlight = (
       parent.appendChild(div);
     }
   });
+  return texts.join("");
 };
 
 export const getPageIndex = (pageElement: Element): number => {
@@ -486,7 +489,7 @@ class EmptyMarkAction implements MarkAction {
 class NewMarkAction implements MarkAction {
   currentStart?: SelectPosition;
   currentEnd?: SelectPosition;
-
+  currentText?: string;
   start = (
     currentStart: SelectPosition,
     currentEnd: SelectPosition,
@@ -498,7 +501,7 @@ class NewMarkAction implements MarkAction {
     const end = selectedPositionToNode(this.currentEnd);
     if (start && end) {
       const color = colorNameToColor(marksMenuStatus.currentEditingColor());
-      highlight(start, end, color);
+      this.currentText = highlight(start, end, color);
       currentSelection.empty();
     }
   };
@@ -517,7 +520,7 @@ class NewMarkAction implements MarkAction {
         marksMenuStatus.currentEditingColor(),
         marksMenuStatus.currentEditingMemo(),
       );
-      await marksStore.persistMark(mark);
+      await marksStore.persistMark(mark, this.currentText);
     }
     marksMenuStatus.closeMenu();
   };
@@ -792,7 +795,7 @@ export interface MarkJson {
 
 export interface MarksStoreInterface {
   init(documentId: string): Promise<void>;
-  persistMark(mark: MarkJson): Promise<string>; // persists and return id
+  persistMark(mark: MarkJson, markedText?: string): Promise<string>; // persists and return id
   getMark(id: string): Promise<MarkJson>;
   updateMark(mark: MarkJson): Promise<void>;
   removeMark(mark: MarkJson): Promise<void>;
@@ -822,7 +825,7 @@ export class URLMarksStore implements MarksStoreInterface {
     this.documentId = documentId;
   }
 
-  async persistMark(mark: MarkJson): Promise<string> {
+  async persistMark(mark: MarkJson, _markedText?: string): Promise<string> {
     return this.pushMarkInternal(mark, "addToUrl", "persist");
   }
 
@@ -927,8 +930,11 @@ export class MarksStoreFacade {
     await this.actualStore.init(documentId);
   }
 
-  async persistMark(mark: Mark): Promise<void> {
-    const id = await this.actualStore.persistMark(mark.toMarkJson());
+  async persistMark(mark: Mark, markedText: string): Promise<void> {
+    const id = await this.actualStore.persistMark(
+      mark.toMarkJson(),
+      markedText,
+    );
     mark.uniqueIdentifier = id;
     this.highlightMark(mark);
   }
