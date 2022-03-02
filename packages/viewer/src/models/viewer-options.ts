@@ -35,12 +35,14 @@ interface ViewerOptionsType {
   profile: boolean;
   pageViewMode: CorePageViewMode;
   zoom: ZoomOptions;
+  enableMarker: boolean;
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
   const allowScripts = urlParameters.getParameter("allowScripts")[0];
   const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
   const fontSizeStr = urlParameters.getParameter("fontSize")[0];
+  const enableMarker = urlParameters.getParameter("enableMarker")[0];
   const r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
   let fontSize: null | number = null;
   if (r) {
@@ -75,6 +77,8 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
       zoomFactor > 0
         ? ZoomOptions.createFromZoomFactor(zoomFactor)
         : ZoomOptions.createDefaultOptions(),
+    enableMarker:
+      enableMarker === "true" ? true : enableMarker === "false" ? false : null,
   };
 }
 
@@ -86,6 +90,7 @@ function getDefaultValues(): ViewerOptionsType {
     profile: false,
     pageViewMode: PageViewMode.defaultMode(),
     zoom: ZoomOptions.createDefaultOptions(),
+    enableMarker: false,
   };
 }
 
@@ -100,6 +105,7 @@ class ViewerOptions {
   profile: Observable<boolean>;
   pageViewMode: Observable<CorePageViewMode>;
   zoom: Observable<ZoomOptions>;
+  enableMarker: Observable<boolean>;
 
   static getDefaultValues: () => {
     allowScripts: boolean;
@@ -108,6 +114,7 @@ class ViewerOptions {
     profile: boolean;
     pageViewMode: CorePageViewMode;
     zoom: ZoomOptions;
+    enableMarker: boolean;
   };
 
   constructor(defaultRenderAllPages: boolean);
@@ -124,6 +131,7 @@ class ViewerOptions {
     this.profile = ko.observable();
     this.pageViewMode = ko.observable();
     this.zoom = ko.observable();
+    this.enableMarker = ko.observable();
 
     if (options) {
       this.copyFrom(options);
@@ -136,6 +144,7 @@ class ViewerOptions {
       this.profile(urlOptions.profile || defaultValues.profile);
       this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
       this.zoom(urlOptions.zoom || defaultValues.zoom);
+      this.enableMarker(urlOptions.enableMarker || defaultValues.enableMarker);
 
       // write spread parameter back to URL when updated
       this.pageViewMode.subscribe((pageViewMode) => {
@@ -193,6 +202,7 @@ class ViewerOptions {
     this.profile(other.profile());
     this.pageViewMode(other.pageViewMode());
     this.zoom(other.zoom());
+    this.enableMarker(other.enableMarker());
   }
 
   toObject(): CoreViewerOptions {

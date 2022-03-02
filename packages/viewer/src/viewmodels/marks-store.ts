@@ -200,7 +200,7 @@ const highlight = (
   return texts.join("");
 };
 
-export const getPageIndex = (pageElement: Element): number => {
+const getPageIndex = (pageElement: Element): number => {
   const p = parseInt(pageElement.getAttribute("data-vivliostyle-page-index"));
   if (isNaN(p)) {
     return -1;
@@ -376,7 +376,7 @@ const collectElementsWithEloff = (spine: number, eloff: number): Element[] => {
   );
 };
 
-export class SelectPosition {
+class SelectPosition {
   constructor(
     readonly spine: number,
     readonly eloff: number,
@@ -404,7 +404,7 @@ export class SelectPosition {
   }
 }
 
-export class Mark {
+class Mark {
   uniqueIdentifier?: string;
   static readonly idAttr = "data-viv-marker-id";
   static readonly notCreatedId = "not-created";
@@ -620,6 +620,7 @@ export class MarksMenuStatus {
   }
 
   editingColorChanged = async (colorName: string): Promise<void> => {
+    if (!marksStore.initialized) return;
     const idString = this.markAction().currentId();
     const color = colorNameToColor(colorName);
     if (color.length > 0) {
@@ -674,10 +675,12 @@ export class MarksMenuStatus {
   };
 
   closeStartButton = (): void => {
+    if (!marksStore.initialized) return;
     this.startButtonOpened(false);
   };
 
   openEditMenu = async (x: number, y: number, id: string): Promise<void> => {
+    if (!marksStore.initialized) return;
     const currentEditing = await this.parent.getMark(id);
     this.currentEditingColor(currentEditing.color);
     this.currentEditingMemo(currentEditing.memo);
@@ -687,16 +690,19 @@ export class MarksMenuStatus {
   };
 
   closeMenu = async (): Promise<void> => {
+    if (!marksStore.initialized) return;
     await this.markAction().close();
     this.markAction(this.emptyAction);
     this.menuOpened(false);
   };
 
   applyEditing = async (): Promise<void> => {
+    if (!marksStore.initialized) return;
     await this.markAction().applyEditing();
   };
 
   deleteCurrentEditing = async (): Promise<void> => {
+    if (!marksStore.initialized) return;
     if (confirm("削除しますか？")) {
       await this.markAction().deleteCurrentEditing();
     }
@@ -710,6 +716,7 @@ export class MarksMenuStatus {
     end: SelectPosition,
     selection: Selection,
   ): void => {
+    if (!marksStore.initialized) return;
     this.currentEditingColor("yellow");
     this.currentEditingMemo("");
     this.newMarkAction.start(start, end, selection);
@@ -718,6 +725,7 @@ export class MarksMenuStatus {
   };
 
   openStartButton = async (selection: Selection): Promise<void> => {
+    if (!marksStore.initialized) return;
     if (selection.type == "Range") {
       const range = selection.getRangeAt(0);
       const button = document.getElementById(
@@ -910,12 +918,17 @@ export class MarksStoreFacade {
   private actualStore?: MarksStoreInterface;
   private viewerOptions?: ViewerOptions;
   menuStatus: MarksMenuStatus;
+  initialized: boolean;
 
   constructor() {
     this.menuStatus = new MarksMenuStatus(this);
+    this.initialized = false;
   }
 
   async init(viewerOptions: ViewerOptions): Promise<void> {
+    if (!viewerOptions.enableMarker()) {
+      return;
+    }
     this.viewerOptions = viewerOptions;
     if (window["marksStorePlugin"]) {
       this.actualStore = window["marksStorePlugin"] as MarksStoreInterface;
@@ -928,9 +941,11 @@ export class MarksStoreFacade {
     const style = urlParameters.getParameter("style").join();
     const documentId = `${src}:${bookMode}:${style}:${userStyle}`;
     await this.actualStore.init(documentId);
+    this.initialized = true;
   }
 
   async persistMark(mark: Mark, markedText: string): Promise<void> {
+    if (!this.initialized) return;
     const id = await this.actualStore.persistMark(
       mark.toMarkJson(),
       markedText,
@@ -940,21 +955,25 @@ export class MarksStoreFacade {
   }
 
   async updateMark(mark: Mark): Promise<void> {
+    if (!this.initialized) return;
     this.unhighlightMark(mark);
     this.highlightMark(mark);
     this.actualStore.updateMark(mark.toMarkJson());
   }
 
   async getMark(id: string): Promise<Mark> {
+    if (!this.initialized) return;
     return Mark.fromMarkJson(await this.actualStore.getMark(id));
   }
 
   async removeMark(mark: Mark): Promise<void> {
+    if (!this.initialized) return;
     this.unhighlightMark(mark);
     await this.actualStore.removeMark(mark.toMarkJson());
   }
 
   async retryHighlightMarks(): Promise<void> {
+    if (!this.initialized) return;
     if (this.actualStore.allMarksIterator) {
       const it = await this.actualStore.allMarksIterator();
       for await (const m of it) {
