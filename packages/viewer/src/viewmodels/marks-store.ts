@@ -63,13 +63,20 @@ interface TextInRange {
   endOffset: number;
 }
 
+const isTextInAdaptSpec = (text: Text): boolean => {
+  return !!text.parentElement.closest("[data-adapt-spec]");
+};
 const collectTextWithEloffInRange = (
   start: NodePosition,
   end: NodePosition,
 ): TextInRange[] => {
   const nodes: TextInRange[] = [];
   for (let node = start.node; node; node = getNextNode(node)) {
-    if (node.nodeType == 3 && isNodeInEloff(node)) {
+    if (
+      node.nodeType == 3 &&
+      !isTextInAdaptSpec(node as Text) &&
+      isNodeInEloff(node)
+    ) {
       // TODO: should reject node that is in inconsistent eloff ; (e.g. eloff 13 after eloff 200
       const t = node as Text;
       if (t.data.trim().length > 0) {
