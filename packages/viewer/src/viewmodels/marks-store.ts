@@ -45,6 +45,7 @@ const getNextNode = (node: Node): Node | undefined => {
     node = node.parentNode;
   }
 };
+
 const isNodeInEloff = (node: Node): boolean => {
   let e: Element;
   if (node.nodeType == 1) {
@@ -93,6 +94,31 @@ const textNodeRects = (tn: TextInRange): DOMRect[] => {
 
 const existMarkIn = (markId: string, e: Element): boolean => {
   return !!e.querySelector(`[${Mark.idAttr}="${markId}"]`);
+};
+
+const estimateLastEndFromStart = (
+  start: NodePosition,
+  endPos: SelectPosition,
+): NodePosition => {
+  let end: Text = start.node as Text;
+
+  for (let node = start.node; node; node = getNextNode(node)) {
+    if (node.nodeType == 1) {
+      const e = node as Element;
+      if (e.hasAttribute("data-vivliostyle-outer-zoom-box")) {
+        break;
+      }
+      if (e.hasAttribute("data-vivliostyle-page-container")) {
+        if (getSpineIndex(e) > endPos.spine) {
+          break;
+        }
+      }
+    }
+    if (node.nodeType == 3 && isNodeInEloff(node)) {
+      end = node as Text;
+    }
+  }
+  return { node: end, offset: end.data.length };
 };
 
 const highlight = (
@@ -941,7 +967,15 @@ export class MarksStoreFacade {
       throw "mark is not persisted.";
     }
     const start = selectedPositionToNode(mark.start);
-    const end = selectedPositionToNode(mark.end);
+    let end = selectedPositionToNode(mark.end);
+    if (
+      start &&
+      !end &&
+      urlParameters.getParameter("renderAllPages").includes("false")
+    ) {
+      console.log();
+      end = estimateLastEndFromStart(start, mark.end);
+    }
     if (start && end) {
       const color = colorNameToColor(mark.color);
       highlight(start, end, color, mark);
