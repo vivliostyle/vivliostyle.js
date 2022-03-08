@@ -17,7 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko, { Computed, Observable, ObservableArray } from "knockout";
+import ko, { Computed, Observable } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import urlParameters from "../stores/url-parameters";
 import { applyTransformToRect } from "../utils/scale-util";
@@ -824,14 +824,12 @@ export interface MarksStoreInterface {
 let seqId = 0;
 
 export class URLMarksStore implements MarksStoreInterface {
-  private markArray: ObservableArray<MarkJson>;
+  private markArray: MarkJson[] = [];
   private markKeyToArrayIndex: Map<string, number>;
   public documentId = "";
 
   constructor() {
-    this.markArray = ko.observableArray();
     this.markKeyToArrayIndex = new Map();
-    this.markArray.subscribe(this.markChanged, null, "arrayChange");
   }
 
   async init(documentId: string): Promise<void> {
@@ -854,20 +852,21 @@ export class URLMarksStore implements MarksStoreInterface {
 
   async getMark(id: string): Promise<MarkJson> {
     const index = this.markKeyToArrayIndex.get(id);
-    return this.markArray()[index];
+    return this.markArray[index];
   }
 
   async removeMark(mark: MarkJson): Promise<void> {
-    const m = await this.getMark(mark.id);
-    this.markArray.remove(m);
+    const index = this.markKeyToArrayIndex.get(mark.id);
+    this.markArray.splice(index, 1);
+    this.markRemoved();
   }
 
   async allMarks(): Promise<MarkJson[]> {
-    return this.markArray();
+    return this.markArray;
   }
 
   async allMarksIterator(): Promise<AsyncIterable<MarkJson>> {
-    const arr = this.markArray();
+    const arr = this.markArray;
     return (async function* (): AsyncIterable<MarkJson> {
       let i = 0;
       while (i < arr.length) {
@@ -900,7 +899,7 @@ export class URLMarksStore implements MarksStoreInterface {
       mark.id = `${seqId++}`;
     }
     this.markArray.push(mark);
-    this.markKeyToArrayIndex.set(mark.id, this.markArray().length - 1);
+    this.markKeyToArrayIndex.set(mark.id, this.markArray.length - 1);
     if (addToUrl == "addToUrl") {
       const count = urlParameters.getParameter("mark").length;
       urlParameters.setParameter("mark", this.markToURLString(mark), count);
@@ -908,20 +907,14 @@ export class URLMarksStore implements MarksStoreInterface {
     return mark.id;
   }
 
-  markChanged = (changes: ko.utils.ArrayChange<Mark>[]): void => {
-    let removed = false;
-    for (const change of changes) {
-      removed = removed || change.status == "deleted";
-    }
-    if (removed) {
-      this.markKeyToArrayIndex.clear();
-      urlParameters.removeParameter("mark");
-      this.markArray().forEach((m, i) => {
-        urlParameters.setParameter("mark", this.markToURLString(m), i);
-        this.markKeyToArrayIndex.set(m.id, i);
-      });
-    }
-  };
+  private async markRemoved(): Promise<void> {
+    this.markKeyToArrayIndex.clear();
+    urlParameters.removeParameter("mark");
+    this.markArray.forEach((m, i) => {
+      urlParameters.setParameter("mark", this.markToURLString(m), i);
+      this.markKeyToArrayIndex.set(m.id, i);
+    });
+  }
 }
 
 export class MarksStoreFacade {
