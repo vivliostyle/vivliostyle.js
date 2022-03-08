@@ -54,7 +54,6 @@ const isNodeInEloff = (node: Node): boolean => {
   } else {
     e = node.parentElement;
   }
-  //  return e.hasAttribute('data-adapt-eloff') || e.parentElement?.hasAttribute('data-adapt-eloff');
   return !!e.closest("[data-adapt-eloff]");
 };
 
@@ -67,6 +66,7 @@ interface TextInRange {
 const isTextInAdaptSpec = (text: Text): boolean => {
   return !!text.parentElement.closest("[data-adapt-spec]");
 };
+
 const collectTextWithEloffInRange = (
   start: NodePosition,
   end: NodePosition,
@@ -78,7 +78,6 @@ const collectTextWithEloffInRange = (
       !isTextInAdaptSpec(node as Text) &&
       isNodeInEloff(node)
     ) {
-      // TODO: should reject node that is in inconsistent eloff ; (e.g. eloff 13 after eloff 200
       const t = node as Text;
       if (t.data.trim().length > 0) {
         const startOffset = node == start.node ? start.offset : 0;
@@ -100,13 +99,13 @@ const textNodeRects = (tn: TextInRange): DOMRect[] => {
   return [...r.getClientRects()];
 };
 
-const existMarkIn = (markId: string, e: Element): boolean => {
+const markExistIn = (markId: string, e: Element): boolean => {
   return !!e.querySelector(`[${Mark.idAttr}="${markId}"]`);
 };
 
 const estimateLastEndFromStart = (
   start: NodePosition,
-  endPos: SelectPosition,
+  actualEndPos: SelectPosition,
 ): NodePosition => {
   let end: Text = start.node as Text;
 
@@ -117,7 +116,7 @@ const estimateLastEndFromStart = (
         break;
       }
       if (e.hasAttribute("data-vivliostyle-page-container")) {
-        if (getSpineIndex(e) > endPos.spine) {
+        if (getSpineIndex(e) > actualEndPos.spine) {
           break;
         }
       }
@@ -129,10 +128,20 @@ const estimateLastEndFromStart = (
   return { node: end, offset: end.data.length };
 };
 
+interface HighlightStyle {
+  background?: string;
+}
+
+const applyStyle = (e: HTMLElement, style: HighlightStyle): void => {
+  if (style.background) {
+    e.style.background = style.background;
+  }
+};
+
 const highlight = (
   start: NodePosition,
   end: NodePosition,
-  background = "rgba(255, 0, 0, 0.2)",
+  style: HighlightStyle,
   mark?: Mark,
 ): string => {
   const startParent = start.node.parentElement.closest(
@@ -143,8 +152,8 @@ const highlight = (
   );
   if (
     mark &&
-    existMarkIn(mark.uniqueIdentifier, startParent) &&
-    existMarkIn(mark.uniqueIdentifier, endParent)
+    markExistIn(mark.uniqueIdentifier, startParent) &&
+    markExistIn(mark.uniqueIdentifier, endParent)
   ) {
     // already exists;
     return "";
@@ -190,7 +199,7 @@ const highlight = (
       div.style.left = `${rect.left + window.scrollX}px`;
       div.style.width = `${rect.width}px`;
       div.style.height = `${rect.height}px`;
-      div.style.background = background;
+      applyStyle(div, style);
       div.setAttribute(Mark.idAttr, selectId);
       div.setAttribute("data-mn", `${mn}`);
       div.addEventListener("click", invokeMenu);
@@ -493,17 +502,17 @@ class NewMarkAction implements MarkAction {
   start = (
     currentStart: SelectPosition,
     currentEnd: SelectPosition,
-    currentSelection: Selection,
-  ): void => {
+  ): boolean => {
     this.currentStart = currentStart;
     this.currentEnd = currentEnd;
     const start = selectedPositionToNode(this.currentStart);
     const end = selectedPositionToNode(this.currentEnd);
     if (start && end) {
       const color = colorNameToColor(marksMenuStatus.currentEditingColor());
-      this.currentText = highlight(start, end, color);
-      currentSelection.empty();
+      this.currentText = highlight(start, end, { background: color });
+      return true;
     }
+    return false;
   };
 
   deletable = (): boolean => false;
@@ -573,7 +582,6 @@ class EditAction implements MarkAction {
 
   close = async (): Promise<void> => {
     if (this.currentEditing) {
-      // TODO ; should be in method cancel() or the like
       const color = colorNameToColor(this.currentEditing.color);
       if (color.length > 0) {
         document
@@ -719,9 +727,11 @@ export class MarksMenuStatus {
     if (!marksStore.initialized) return;
     this.currentEditingColor("yellow");
     this.currentEditingMemo("");
-    this.newMarkAction.start(start, end, selection);
-    this.markAction(this.newMarkAction);
-    this.openMenu(x, y);
+    if (this.newMarkAction.start(start, end)) {
+      selection.empty();
+      this.markAction(this.newMarkAction);
+      this.openMenu(x, y);
+    }
   };
 
   openStartButton = async (selection: Selection): Promise<void> => {
@@ -737,7 +747,7 @@ export class MarksMenuStatus {
       if (text.length == 0) {
         return;
       }
-      // should use map and flat, but the compiler option allows only es2018
+      // want to use map and flat, but the compiler option allows only es2018
       const rects = text.reduce((acc, t) => {
         return acc.concat(textNodeRects(t));
       }, []);
@@ -1009,7 +1019,7 @@ export class MarksStoreFacade {
     }
     if (start && end) {
       const color = colorNameToColor(mark.color);
-      highlight(start, end, color, mark);
+      highlight(start, end, { background: color }, mark);
     }
   }
 }
