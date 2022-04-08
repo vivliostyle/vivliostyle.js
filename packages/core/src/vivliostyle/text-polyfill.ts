@@ -689,7 +689,10 @@ class TextSpacingPolyfill {
       if (!this.isTextPolyfillCssReady) {
         this.initTextPolyfillCss(document.head);
       }
-
+      if (textNode.parentElement.localName === "viv-ts-inner") {
+        // Already processed
+        return;
+      }
       // Wrap the textNode as `<{tagName}><viv-ts-inner>{text}<viv-ts-inner></{tagName}>`
       const outerElem = document.createElement(tagName);
       const innerElem = document.createElement("viv-ts-inner");
