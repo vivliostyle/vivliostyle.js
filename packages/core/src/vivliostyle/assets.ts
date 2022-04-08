@@ -1460,6 +1460,7 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
 }
 viv-ts-close.viv-hang-hw > viv-ts-inner {
   display: inline-block;
+  line-height: 1;
   inline-size: 0.5em;
   text-indent: 0;
   text-align: start;
@@ -1469,6 +1470,7 @@ viv-ts-close.viv-hang-hw > viv-ts-inner {
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;
+  line-height: 1;
   inline-size: 1em;
   text-indent: 0;
   text-align: end;
