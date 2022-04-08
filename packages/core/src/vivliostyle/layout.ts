@@ -1939,6 +1939,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           return;
         }
 
+        // Text-spacing etc. must be done before calculating edge. (Issue #898)
+        this.postLayoutBlock(nodeContext, checkPoints);
+
         // Record the height
         // TODO: should this be done after first-line calculation?
         let edge = this.calculateEdge(
@@ -1984,7 +1987,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           lineCont = Task.newResult(resNodeContext);
         }
         lineCont.then((nodeContext) => {
-          this.postLayoutBlock(nodeContext, checkPoints);
+          // Text-spacing etc. must be done before calculating edge. (Issue #898)
+          // this.postLayoutBlock(nodeContext, checkPoints);
+
           if (checkPoints.length > 0) {
             this.saveBoxBreakPosition(checkPoints);
 
