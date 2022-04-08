@@ -1450,12 +1450,13 @@ viv-ts-close.viv-hang-end::after {
   font-family: Courier, monospace;
   font-size: 83%;
   word-spacing: normal;
+  letter-spacing: normal;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
 }
 viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
-  word-spacing: 0.6em;
+  letter-spacing: 0.6em;
 }
 viv-ts-close.viv-hang-hw > viv-ts-inner {
   display: inline-block;
@@ -1479,6 +1480,7 @@ viv-ts-thin-sp::after {
   font-family: Times, serif;
   font-size: 66.6%;
   word-spacing: normal;
+  letter-spacing: normal;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;

@@ -753,23 +753,24 @@ class TextSpacingPolyfill {
               outerElem.className = "viv-ts-trim";
             }
           } else if (hangingEnd) {
-            const forceAtEnd = !hangingPunctuation.allowEnd && isAtEndOfLine();
-            outerElem.className = isFullWidth
-              ? "viv-hang-end"
-              : "viv-hang-end viv-hang-hw";
+            const atEnd = isAtEndOfLine();
+            const atEndNoHang = atEnd && hangingPunctuation.allowEnd;
+            if (!atEndNoHang) {
+              outerElem.className = isFullWidth
+                ? "viv-hang-end"
+                : "viv-hang-end viv-hang-hw";
+            }
             if (!isFullWidth) {
-              if (!forceAtEnd) {
-                const atEndOfLine = isAtEndOfLine();
+              if (!atEnd && !isAtEndOfLine()) {
                 outerElem.className = "";
-                if (atEndOfLine && !isAtEndOfLine()) {
-                  outerElem.className = "viv-hang-end viv-hang-hw";
-                }
               }
             } else if (
-              !forceAtEnd &&
-              hangingPunctuation.allowEnd &&
-              isAtEndOfLine()
+              atEndNoHang
+                ? textSpacing.trimEnd && !textSpacing.allowEnd
+                : !isAtEndOfLine()
             ) {
+              outerElem.className = "viv-ts-auto";
+            } else if (!atEnd && hangingPunctuation.allowEnd) {
               if (!textSpacing.trimEnd || textSpacing.allowEnd) {
                 outerElem.className = "viv-ts-space";
                 if (!isAtEndOfLine()) {
