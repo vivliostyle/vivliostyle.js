@@ -1449,7 +1449,7 @@ viv-ts-close.viv-hang-end::after {
   content: " ";
   font-family: Courier, monospace;
   word-spacing: normal;
-  letter-spacing: -0.1em;
+  letter-spacing: -0.11em;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
