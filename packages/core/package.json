@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/core",
   "description": "Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support",
-  "version": "2.14.4",
+  "version": "2.14.5",
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "microbundle --format cjs --define VIVLIOSTYLE_DEBUG=false",

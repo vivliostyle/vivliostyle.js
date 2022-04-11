@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.4...v2.14.5) (2022-04-11)
+
+### Bug Fixes
+
+- hanging-punctuation caused wrong text hanging on Safari/WebKit ([49e278b](https://github.com/vivliostyle/vivliostyle.js/commit/49e278b70dad7660ef60b5805d704f0225190fa1)), closes [#894](https://github.com/vivliostyle/vivliostyle.js/issues/894)
+- text-spacing caused wrong page break ([a17e775](https://github.com/vivliostyle/vivliostyle.js/commit/a17e775f2cb52ca0a10e0ab7bbd2a0ff2cace9f8)), closes [#898](https://github.com/vivliostyle/vivliostyle.js/issues/898)
+
 ## [2.14.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.3...v2.14.4) (2022-02-21)
 
 ### Bug Fixes
