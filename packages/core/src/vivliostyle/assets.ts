@@ -1448,15 +1448,14 @@ viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {
   content: " ";
   font-family: Courier, monospace;
-  font-size: 83%;
   word-spacing: normal;
-  letter-spacing: normal;
+  letter-spacing: -0.1em;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
 }
 viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
-  letter-spacing: 0.6em;
+  letter-spacing: 0.4em;
 }
 viv-ts-close.viv-hang-hw > viv-ts-inner {
   display: inline-block;
@@ -1466,7 +1465,6 @@ viv-ts-close.viv-hang-hw > viv-ts-inner {
   text-align: start;
   text-align-last: start;
   margin-inline-start: -0.5em;
-  inset-inline-start: 0.5em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;

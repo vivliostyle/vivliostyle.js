@@ -261,10 +261,6 @@ class TextSpacingPolyfill {
       return;
     }
     this.preprocessForTextSpacing(document.body);
-
-    this.isTextPolyfillCssReady = !!document.getElementById(
-      "vivliostyle-text-polyfill-css",
-    );
   }
 
   preprocessForTextSpacing(element: Element): void {
@@ -409,6 +405,11 @@ class TextSpacingPolyfill {
       }
       return false;
     }
+
+    this.isTextPolyfillCssReady =
+      !!nodeContext.viewNode.ownerDocument.getElementById(
+        "vivliostyle-text-polyfill-css",
+      );
 
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
