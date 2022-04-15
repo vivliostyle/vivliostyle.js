@@ -16,6 +16,7 @@
  *
  * @fileoverview Scripts - Supports JavaScript in source document.
  */
+import * as CssCascade from "./css-cascade";
 import * as CssStyler from "./css-styler";
 import * as Task from "./task";
 import * as Logging from "./logging";
@@ -133,18 +134,48 @@ export function loadScript(
   }
 }
 
-function getFontFamilyListFromStyler(styler: CssStyler.Styler): string {
+function getAllFontFamilyList(
+  srcDocument: Document,
+  styler: CssStyler.Styler,
+): string {
   const fontFamilySet = {};
-  for (const style of Object.values(styler.styleMap)) {
-    const family = style["font-family"]?.value;
-    if (family) {
-      if (family.values) {
-        for (const family1 of family.values) {
+  const findFontFamilyInStyle = (style: any): void => {
+    const fontFamily = style["font-family"]?.value;
+    if (fontFamily) {
+      if (fontFamily.values) {
+        for (const family1 of fontFamily.values) {
           fontFamilySet[family1.stringValue()] = true;
         }
       } else {
-        fontFamilySet[family.stringValue()] = true;
+        fontFamilySet[fontFamily.stringValue()] = true;
       }
+    }
+    const marginBoxes = style["_marginBoxes"];
+    if (marginBoxes) {
+      for (const marginBoxStyle of Object.values(marginBoxes)) {
+        findFontFamilyInStyle(marginBoxStyle);
+      }
+    }
+  };
+  const findAllFontFamily = (arg: any): void => {
+    if (arg instanceof CssCascade.ApplyRuleAction) {
+      findFontFamilyInStyle(arg.style);
+    } else if (arg instanceof CssCascade.CascadeAction || Array.isArray(arg)) {
+      for (const v of Object.values(arg)) {
+        findAllFontFamily(v);
+      }
+    }
+  };
+  // Find all font-family values in stylesheets.
+  for (const obj of Object.values(styler.cascade.code)) {
+    for (const arg of Object.values(obj ?? {})) {
+      findAllFontFamily(arg);
+    }
+  }
+  // Find all font-family values in inline style.
+  for (const elem of srcDocument.querySelectorAll("[style]")) {
+    if (elem instanceof HTMLElement && elem.style.fontFamily) {
+      fontFamilySet[elem.style.fontFamily] = true;
     }
   }
   return Object.keys(fontFamilySet).join(",");
@@ -162,7 +193,7 @@ function prepareTextContentForWebFonts(
   textContentDiv.style.fontSize = "0";
   textContentDiv.setAttribute("data-vivliostyle-textcontent", "true");
   textContentDiv.setAttribute("aria-hidden", "true");
-  textContentDiv.style.fontFamily = getFontFamilyListFromStyler(styler);
+  textContentDiv.style.fontFamily = getAllFontFamilyList(srcDocument, styler);
   textContentDiv.textContent = srcDocument.documentElement.textContent;
   window.document.body.appendChild(textContentDiv);
   return textContentDiv;
