@@ -996,8 +996,10 @@ export class LayoutPosition {
     }
     if (
       !other ||
-      this.page !== other.page ||
-      this.highestSeenOffset !== other.highestSeenOffset
+      this.page !== other.page
+      // Removed:
+      //   || this.highestSeenOffset !== other.highestSeenOffset
+      // to prevent unnecessary re-layout (Issue #681-case2)
     ) {
       return false;
     }
