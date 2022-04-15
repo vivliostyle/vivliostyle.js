@@ -762,30 +762,26 @@ export class StyleInstance
     const deferredFloats =
       pageFloatLayoutContext.getDeferredPageFloatContinuations();
 
-    // Fix for issue #681
     // Prevent deferred page floats from appearing in the preceding pages,
     // e.g., during re-layout the TOC page with target-counter() referencing
-    // later sections containing page floats.
-    if (
-      deferredFloats.length &&
-      deferredFloats[0].float.floatReference === "page"
-    ) {
-      const deferredFloatNode =
-        deferredFloats[0].float.nodePosition.steps[0].node;
-      const deferredFloatOffset =
-        deferredFloatNode &&
-        this.xmldoc.getNodeOffset(deferredFloatNode, 0, false);
+    // later sections containing page floats. (Issue #681)
+    const checkPageFloatForLaterPage = (
+      float: PageFloats.PageFloat,
+    ): boolean => {
       const pageStartPos = this.layoutPositionAtPageStart.flowPositions.body;
       const pageStartOffset =
         pageStartPos && this.getConsumedOffset(pageStartPos);
-      if (
+      const deferredFloatOffset = this.xmldoc.getNodeOffset(
+        float.nodePosition.steps[0].node,
+        0,
+        false,
+      );
+      return (
         deferredFloatOffset != null &&
         pageStartOffset != null &&
         deferredFloatOffset > pageStartOffset
-      ) {
-        return Task.newResult(true);
-      }
-    }
+      );
+    };
 
     const frame = Task.newFrame<boolean>("layoutDeferredPageFloats");
     let invalidated = false;
@@ -798,6 +794,14 @@ export class StyleInstance
         }
         const continuation = deferredFloats[i++];
         const float = continuation.float;
+
+        // Prevent deferred page floats from appearing in the preceding pages
+        // (Issue #681)
+        if (checkPageFloatForLaterPage(float)) {
+          loopFrame.breakLoop();
+          return;
+        }
+
         const strategy =
           new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(float);
         const pageFloatFragment = strategy.findPageFloatFragment(
