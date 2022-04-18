@@ -407,7 +407,7 @@ class TextSpacingPolyfill {
     }
 
     this.isTextPolyfillCssReady =
-      !!nodeContext.viewNode.ownerDocument.getElementById(
+      !!checkPoints[0]?.viewNode?.ownerDocument.getElementById(
         "vivliostyle-text-polyfill-css",
       );
 
