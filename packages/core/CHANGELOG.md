@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.14.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.5...v2.14.6) (2022-04-18)
+
+### Bug Fixes
+
+- Fallback page size not applied on HeadlessChrome on Linux or Windows ([c57c5d6](https://github.com/vivliostyle/vivliostyle.js/commit/c57c5d62feeab35fa2b6c1366e21872633fbfdfa)), closes [#905](https://github.com/vivliostyle/vivliostyle.js/issues/905)
+- Page float displayed unexpectedly in earlier page when target-counter is used ([82fde78](https://github.com/vivliostyle/vivliostyle.js/commit/82fde782f8bf5b4d8213cd7d0db2ec509dc690dc)), closes [#681](https://github.com/vivliostyle/vivliostyle.js/issues/681)
+- TypeError: Cannot read properties of null ([7db46f5](https://github.com/vivliostyle/vivliostyle.js/commit/7db46f5a5f0415c516d0586b38203688e99f0611))
+- Web fonts (with JavaScript) not enabled when used in the middle of large HTML file ([3ba4160](https://github.com/vivliostyle/vivliostyle.js/commit/3ba416020bbf5a12cbd1d66472aae8c258d71d9c)), closes [#901](https://github.com/vivliostyle/vivliostyle.js/issues/901)
+
 ## [2.14.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.4...v2.14.5) (2022-04-11)
 
 ### Bug Fixes
