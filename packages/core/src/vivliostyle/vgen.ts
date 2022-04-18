@@ -2487,7 +2487,9 @@ export class Viewport {
       width: 794, // 210mm (8.27in)
       height: 1056, // 279.4mm (11in)
     };
-    const isHeadlessBrowser = !window.outerWidth && !window.outerHeight;
+    const isHeadlessBrowser =
+      (!window.outerWidth && !window.outerHeight) ||
+      /Headless/.test(navigator.userAgent);
     if (!this.width || (!opt_width && isHeadlessBrowser)) {
       this.width = fallbackPageSize.width;
     }
