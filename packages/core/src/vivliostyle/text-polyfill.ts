@@ -802,26 +802,6 @@ class TextSpacingPolyfill {
             }
           }
         }
-
-        // Support for browsers not supporting inset-inline-start property
-        // https://developer.mozilla.org/en-US/docs/Web/CSS/inset-inline-start#browser_compatibility
-        if (innerElem.style.insetInlineStart === undefined) {
-          let insetInlineStart = {
-            "viv-ts-auto": "0.5em",
-            "viv-ts-trim": "0.5em",
-            "viv-hang-end": "1em",
-            "viv-hang-last": "1em",
-            "viv-hang-end viv-hang-hw": "0.5em",
-            "viv-hang-last viv-hang-hw": "0.5em",
-          }[outerElem.className];
-          if (insetInlineStart) {
-            if (vertical) {
-              innerElem.style.top = insetInlineStart;
-            } else {
-              innerElem.style.left = insetInlineStart;
-            }
-          }
-        }
       }
     }
 
