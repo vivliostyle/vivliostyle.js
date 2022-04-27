@@ -1433,15 +1433,11 @@ viv-ts-open.viv-ts-trim > viv-ts-inner {
 }
 viv-ts-close.viv-ts-auto > viv-ts-inner,
 viv-ts-close.viv-ts-trim > viv-ts-inner {
-  margin-inline-start: -0.5em;
-  position: relative;
-  inset-inline-start: 0.5em;
+  letter-spacing: -0.5em;
 }
 viv-ts-close.viv-hang-end > viv-ts-inner,
 viv-ts-close.viv-hang-last > viv-ts-inner {
-  margin-inline-start: -1em;
-  position: relative;
-  inset-inline-start: 1em;
+  letter-spacing: -1em;
 }
 viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
