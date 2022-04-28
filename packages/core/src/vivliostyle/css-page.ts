@@ -357,7 +357,7 @@ export function createPrinterMarkElement(
 ): Element {
   elementType = elementType || "polyline";
   const line = doc.createElementNS(Base.NS.SVG, elementType);
-  line.setAttribute("stroke", "black");
+  line.setAttribute("stroke", "#010101");
   line.setAttribute("stroke-width", lineWidth);
   line.setAttribute("fill", "none");
   return line;
