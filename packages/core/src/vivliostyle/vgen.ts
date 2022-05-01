@@ -2489,7 +2489,11 @@ export class Viewport {
     };
     const isHeadlessBrowser =
       (!window.outerWidth && !window.outerHeight) ||
-      /Headless/.test(navigator.userAgent);
+      /Headless/.test(navigator.userAgent) ||
+      (navigator.webdriver &&
+        window.innerWidth === 800 &&
+        window.innerHeight === 600);
+
     if (!this.width || (!opt_width && isHeadlessBrowser)) {
       this.width = fallbackPageSize.width;
     }
