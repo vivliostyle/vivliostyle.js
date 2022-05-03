@@ -32,6 +32,11 @@ import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
+import {
+  TextPolyfillCss,
+  VivliostyleViewportCss,
+  VivliostyleViewportScreenCss,
+} from "./assets";
 
 export type Action = (p1: Base.JSON) => Task.Result<boolean>;
 
@@ -105,12 +110,37 @@ export class AdaptiveViewer {
     public readonly instanceId: string,
     public readonly callbackFn: (p1: Base.JSON) => void,
   ) {
+    const document = viewportElement.ownerDocument;
+    const findOrCreateStyleElement = (
+      id: string,
+      cssText?: string,
+    ): HTMLElement => {
+      let styleElement = document.getElementById(id);
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = id;
+        if (cssText) {
+          styleElement.textContent = cssText;
+        }
+        document.head.appendChild(styleElement);
+      }
+      return styleElement;
+    };
+    findOrCreateStyleElement(
+      "vivliostyle-viewport-screen-css",
+      VivliostyleViewportScreenCss,
+    );
+    findOrCreateStyleElement(
+      "vivliostyle-viewport-css",
+      VivliostyleViewportCss,
+    );
+    findOrCreateStyleElement("vivliostyle-text-polyfill-css", TextPolyfillCss);
+
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
     if (Constants.isDebug) {
       viewportElement.setAttribute("data-vivliostyle-debug", true);
     }
     viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, "loading");
-    const document = window.document;
     this.fontMapper = new Font.Mapper(document.head, viewportElement);
     this.init();
     this.kick = () => {};
@@ -121,7 +151,7 @@ export class AdaptiveViewer {
     };
     this.pageReplacedListener = this.pageReplacedListener.bind(this);
     this.hyperlinkListener = (evt) => {};
-    this.pageRuleStyleElement = document.getElementById(
+    this.pageRuleStyleElement = findOrCreateStyleElement(
       "vivliostyle-page-rules",
     );
     this.actions = {

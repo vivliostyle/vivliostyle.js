@@ -20,7 +20,6 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { TextPolyfillCss } from "./assets";
 
 type PropertyValue = string | number | Css.Val;
 
@@ -250,8 +249,6 @@ const embeddedContentTags = {
 };
 
 class TextSpacingPolyfill {
-  isTextPolyfillCssReady = false;
-
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-spacing"];
   }
@@ -405,11 +402,6 @@ class TextSpacingPolyfill {
       }
       return false;
     }
-
-    this.isTextPolyfillCssReady =
-      !!checkPoints[0]?.viewNode?.ownerDocument.getElementById(
-        "vivliostyle-text-polyfill-css",
-      );
 
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
@@ -687,9 +679,6 @@ class TextSpacingPolyfill {
     }
 
     if (punctProcessing) {
-      if (!this.isTextPolyfillCssReady) {
-        this.initTextPolyfillCss(document.head);
-      }
       if (textNode.parentElement.localName === "viv-ts-inner") {
         // Already processed
         return;
@@ -852,19 +841,7 @@ class TextSpacingPolyfill {
         );
         spaceIdeoAlnumProcessing = true;
       }
-
-      if (spaceIdeoAlnumProcessing && !this.isTextPolyfillCssReady) {
-        this.initTextPolyfillCss(document.head);
-      }
     }
-  }
-
-  private initTextPolyfillCss(head: Element): void {
-    const styleElem = head.ownerDocument.createElement("style");
-    styleElem.id = "vivliostyle-text-polyfill-css";
-    styleElem.textContent = TextPolyfillCss;
-    head.appendChild(styleElem);
-    this.isTextPolyfillCssReady = true;
   }
 
   registerHooks() {
