@@ -32,6 +32,11 @@ import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
+import {
+  TextPolyfillCss,
+  VivliostyleViewportCss,
+  VivliostyleViewportScreenCss,
+} from "./assets";
 
 export type Action = (p1: Base.JSON) => Task.Result<boolean>;
 
@@ -105,12 +110,37 @@ export class AdaptiveViewer {
     public readonly instanceId: string,
     public readonly callbackFn: (p1: Base.JSON) => void,
   ) {
+    const document = viewportElement.ownerDocument;
+    const findOrCreateStyleElement = (
+      id: string,
+      cssText?: string,
+    ): HTMLElement => {
+      let styleElement = document.getElementById(id);
+      if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = id;
+        if (cssText) {
+          styleElement.textContent = cssText;
+        }
+        document.head.appendChild(styleElement);
+      }
+      return styleElement;
+    };
+    findOrCreateStyleElement(
+      "vivliostyle-viewport-screen-css",
+      VivliostyleViewportScreenCss,
+    );
+    findOrCreateStyleElement(
+      "vivliostyle-viewport-css",
+      VivliostyleViewportCss,
+    );
+    findOrCreateStyleElement("vivliostyle-text-polyfill-css", TextPolyfillCss);
+
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
     if (Constants.isDebug) {
       viewportElement.setAttribute("data-vivliostyle-debug", true);
     }
     viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, "loading");
-    const document = window.document;
     this.fontMapper = new Font.Mapper(document.head, viewportElement);
     this.init();
     this.kick = () => {};
@@ -121,7 +151,7 @@ export class AdaptiveViewer {
     };
     this.pageReplacedListener = this.pageReplacedListener.bind(this);
     this.hyperlinkListener = (evt) => {};
-    this.pageRuleStyleElement = document.getElementById(
+    this.pageRuleStyleElement = findOrCreateStyleElement(
       "vivliostyle-page-rules",
     );
     this.actions = {
@@ -680,13 +710,26 @@ export class AdaptiveViewer {
     spineIndex: number,
     pageIndex: number,
   ) {
-    if (!this.pageSheetSizeAlreadySet && this.pageRuleStyleElement) {
-      let styleText = "";
-      Object.keys(pageSheetSize).forEach((selector) => {
-        styleText += `@page ${selector}{margin:0;size:`;
-        const size = pageSheetSize[selector];
-        styleText += `${size.width}px ${size.height}px;}`;
-      });
+    // In this implementation, it generates one page rule with the largest
+    // page size both in width and height in the multiple page sizes.
+    // (Resolve issue #751)
+    if (
+      this.pageRuleStyleElement &&
+      (!this.pageSheetSizeAlreadySet ||
+        this.pageSizes[pageIndex].width !==
+          this.pageSizes[pageIndex - 1]?.width ||
+        this.pageSizes[pageIndex].height !==
+          this.pageSizes[pageIndex - 1]?.height)
+    ) {
+      const widthMax = Math.max(...this.pageSizes.map((p) => p.width));
+      const heightMax = Math.max(...this.pageSizes.map((p) => p.height));
+
+      // Adjustment to prevent unwanted blank pages due to the rounded
+      // page size problem of Chromium print output.
+      const width = widthMax + 2;
+      const height = heightMax + 2;
+
+      const styleText = `@page {margin:0;size:${width}px ${height}px;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }

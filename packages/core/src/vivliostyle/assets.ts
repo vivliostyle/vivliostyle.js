@@ -31,7 +31,6 @@ export const VivliostyleViewportScreenCss = `
   }
 
   [data-vivliostyle-viewer-viewport] {
-    display: -webkit-flex;
     display: flex;
     overflow: auto;
     position: relative;
@@ -40,37 +39,29 @@ export const VivliostyleViewportScreenCss = `
   [data-vivliostyle-outer-zoom-box] {
     margin: auto;
     overflow: hidden;
-    -webkit-flex: none;
     flex: none;
   }
 
   [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
     display: -webkit-flex;
     display: flex;
-    -webkit-flex: none;
     flex: none;
-    -webkit-justify-content: center;
     justify-content: center;
-    -moz-transform-origin: left top;
-    -webkit-transform-origin: left top;
     transform-origin: left top;
   }
 
   [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression="ltr"]
     [data-vivliostyle-spread-container] {
-    -webkit-flex-direction: row;
     flex-direction: row;
   }
 
   [data-vivliostyle-viewer-viewport][data-vivliostyle-page-progression="rtl"]
     [data-vivliostyle-spread-container] {
-    -webkit-flex-direction: row-reverse;
     flex-direction: row-reverse;
   }
 
   [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
     margin: 0 auto;
-    -webkit-flex: none;
     flex: none;
     transform-origin: center top;
   }
@@ -156,16 +147,12 @@ export const VivliostyleViewportCss = `
 
   [data-vivliostyle-spread-container],
   [data-vivliostyle-page-container] {
-    -moz-transform: none !important;
-    -webkit-transform: none !important;
     transform: none !important;
   }
 
   [data-vivliostyle-page-container] {
     display: block !important;
-    max-width: 100%;
-    height: 100% !important;
-    max-height: 100%;
+    break-after: page;
   }
 
   /* Workaround for Chrome printing problem */
@@ -181,13 +168,17 @@ export const VivliostyleViewportCss = `
   }
 
   /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
-  @-moz-document regexp('.*') {
+  @-moz-document url-prefix()  {
     [data-vivliostyle-page-container]:nth-last-child(n + 2) {
       top: -1px;
       margin-top: 1px;
       margin-bottom: -1px;
     }
-  }
+    /* Workaround Gecko problem on page break */
+    [data-vivliostyle-page-container] {
+      break-after: auto;
+      height: 100% !important;
+    }
 }
 `;
 
