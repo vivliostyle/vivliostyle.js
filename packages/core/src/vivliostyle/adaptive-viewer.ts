@@ -751,6 +751,7 @@ export class AdaptiveViewer {
       this.opfView.hideTOC();
       this.opfView.removeRenderedPages();
     }
+    this.pageSizes = [];
     this.removePageSizePageRules();
     this.viewport = this.createViewport();
     this.viewport.resetZoom();
