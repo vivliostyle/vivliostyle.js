@@ -152,9 +152,7 @@ export const VivliostyleViewportCss = `
 
   [data-vivliostyle-page-container] {
     display: block !important;
-    max-width: 100%;
-    height: 100% !important;
-    max-height: 100%;
+    break-after: page;
   }
 
   /* Workaround for Chrome printing problem */
@@ -170,13 +168,17 @@ export const VivliostyleViewportCss = `
   }
 
   /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
-  @-moz-document regexp('.*') {
+  @-moz-document url-prefix()  {
     [data-vivliostyle-page-container]:nth-last-child(n + 2) {
       top: -1px;
       margin-top: 1px;
       margin-bottom: -1px;
     }
-  }
+    /* Workaround Gecko problem on page break */
+    [data-vivliostyle-page-container] {
+      break-after: auto;
+      height: 100% !important;
+    }
 }
 `;
 
