@@ -194,6 +194,7 @@ export type PageSizeAndBleed = {
   height: Css.Numeric;
   bleed: Css.Numeric;
   bleedOffset: Css.Numeric;
+  cropOffset: Css.Numeric;
 };
 
 export function resolvePageSizeAndBleed(style: {
@@ -205,6 +206,7 @@ export function resolvePageSizeAndBleed(style: {
     height: Css.fullHeight,
     bleed: Css.numericZero,
     bleedOffset: Css.numericZero,
+    cropOffset: Css.numericZero,
   };
   const size: CssCascade.CascadeValue = style["size"];
 
@@ -245,9 +247,6 @@ export function resolvePageSizeAndBleed(style: {
     }
   }
   const marks = style["marks"];
-  if (marks && marks.value !== Css.ident.none) {
-    pageSizeAndBleed.bleedOffset = defaultBleedOffset;
-  }
   const bleed = style["bleed"];
   if (!bleed || bleed.value === Css.ident.auto) {
     // "('auto' value) Computes to 6pt if marks has crop and to zero
@@ -267,6 +266,16 @@ export function resolvePageSizeAndBleed(style: {
     }
   } else if (bleed.value && bleed.value.isNumeric()) {
     pageSizeAndBleed.bleed = bleed.value as Css.Numeric;
+  }
+
+  // crop-offset (Issue #913)
+  const cropOffset = style["crop-offset"];
+  if (!cropOffset || cropOffset.value === Css.ident.auto) {
+    if (marks && marks.value !== Css.ident.none) {
+      pageSizeAndBleed.bleedOffset = defaultBleedOffset;
+    }
+  } else if (cropOffset.value && cropOffset.value.isNumeric()) {
+    pageSizeAndBleed.cropOffset = cropOffset.value as Css.Numeric;
   }
   return pageSizeAndBleed;
 }
@@ -289,11 +298,15 @@ export function evaluatePageSizeAndBleed(
 ): EvaluatedPageSizeAndBleed {
   const evaluated = {} as EvaluatedPageSizeAndBleed;
   const bleed =
-    pageSizeAndBleed.bleed.num *
+    Math.max(0, pageSizeAndBleed.bleed.num) *
     context.queryUnitSize(pageSizeAndBleed.bleed.unit, false);
   const bleedOffset =
-    pageSizeAndBleed.bleedOffset.num *
-    context.queryUnitSize(pageSizeAndBleed.bleedOffset.unit, false);
+    !pageSizeAndBleed.cropOffset.num && pageSizeAndBleed.bleedOffset.num
+      ? pageSizeAndBleed.bleedOffset.num *
+        context.queryUnitSize(pageSizeAndBleed.bleedOffset.unit, false)
+      : pageSizeAndBleed.cropOffset.num *
+          context.queryUnitSize(pageSizeAndBleed.cropOffset.unit, false) -
+        bleed;
   const cropOffset = bleed + bleedOffset;
   const width = pageSizeAndBleed.width;
   if (width === Css.fullWidth) {
@@ -534,23 +547,27 @@ export function addPrinterMarks(
       cross = true;
     }
   }
-  if (!crop && !cross) {
-    return;
-  }
-  const container = page.container;
-  const doc = container.ownerDocument as Document;
-  Asserts.assert(doc);
-  const bleed = evaluatedPageSizeAndBleed.bleed;
-  const lineWidth = Css.toNumber(defaultPrinterMarkLineWidth, context);
-  const printerMarkOffset = Css.toNumber(defaultPrinterMarkOffset, context);
-  const lineLength = Css.toNumber(defaultPrinterMarkLineLength, context);
 
+  const bleed = evaluatedPageSizeAndBleed.bleed;
   if (bleed) {
     const bgcolor = cascadedPageStyle["background-color"];
     if (bgcolor && bgcolor.value) {
       page.bleedBox.style.backgroundColor = bgcolor.value.stringValue();
     }
   }
+  if (!crop && !cross) {
+    return;
+  }
+  const container = page.container;
+  const doc = container.ownerDocument as Document;
+  Asserts.assert(doc);
+  const lineWidth = Css.toNumber(defaultPrinterMarkLineWidth, context);
+  const printerMarkOffset = Math.max(
+    0,
+    evaluatedPageSizeAndBleed.bleedOffset -
+      Css.toNumber(defaultPrinterMarkLineLength, context),
+  );
+  const lineLength = evaluatedPageSizeAndBleed.bleedOffset - printerMarkOffset;
 
   // corner marks
   if (crop) {

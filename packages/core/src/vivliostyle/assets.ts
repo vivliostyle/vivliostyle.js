@@ -114,8 +114,6 @@ export const VivliostyleViewportCss = `
 [data-vivliostyle-bleed-box] {
   position: absolute;
   overflow: hidden;
-  max-width: 100%;
-  max-height: 100%;
   box-sizing: border-box;
 }
 
@@ -507,6 +505,7 @@ PAGE_SIZE = a10 | a9 | a8 | a7 | a6 | a5 | a4 | a3 | a2 | a1 | a0
 bleed = auto | LENGTH;
 marks = none | [ crop || cross ];
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
+crop-offset = auto | LENGTH;
 
 /* CSS Page Floats */
 float-reference = inline | column | region | page;

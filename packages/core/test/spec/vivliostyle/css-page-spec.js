@@ -31,6 +31,7 @@ describe("css-page", function () {
         height: adapt_css.fullHeight,
         bleed: adapt_css.numericZero,
         bleedOffset: adapt_css.numericZero,
+        cropOffset: adapt_css.numericZero,
       };
     });
 
