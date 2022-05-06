@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.0...v2.15.1) (2022-05-06)
+
+### Bug Fixes
+
+- output page size slightly bigger than the specified ([ed7059d](https://github.com/vivliostyle/vivliostyle.js/commit/ed7059d7df78524ed0cade98abc7f245160311bc))
+
 # [2.15.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.14.6...v2.15.0) (2022-05-05)
 
 ### Bug Fixes
