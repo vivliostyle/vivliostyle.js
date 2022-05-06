@@ -724,12 +724,7 @@ export class AdaptiveViewer {
       const widthMax = Math.max(...this.pageSizes.map((p) => p.width));
       const heightMax = Math.max(...this.pageSizes.map((p) => p.height));
 
-      // Adjustment to prevent unwanted blank pages due to the rounded
-      // page size problem of Chromium print output.
-      const width = widthMax + 2;
-      const height = heightMax + 2;
-
-      const styleText = `@page {margin:0;size:${width}px ${height}px;}`;
+      const styleText = `@page {margin:0;size:${widthMax}px ${heightMax}px;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }

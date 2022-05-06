@@ -150,6 +150,7 @@ export const VivliostyleViewportCss = `
 
   [data-vivliostyle-page-container] {
     display: block !important;
+    max-height: 100vh;
     break-after: page;
   }
 
