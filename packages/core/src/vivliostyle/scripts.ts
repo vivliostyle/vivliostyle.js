@@ -39,6 +39,22 @@ function sameScripts(s1: HTMLScriptElement, s2: HTMLScriptElement): boolean {
   );
 }
 
+function getScriptsInOrNearHead(document: Document): HTMLScriptElement[] {
+  // To support Chrome < 88 and Firefox < 84, we cannot use
+  // the selector "body > script:not(:not(script, link, style) ~ *)".
+  // (Issue #919)
+  const scriptsInBodyNotNearHead = Array.from(
+    document.querySelectorAll(
+      "body > :not(script):not(link):not(style) ~ script",
+    ),
+  ) as HTMLScriptElement[];
+  return (
+    Array.from(
+      document.querySelectorAll("head > script, body > script"),
+    ) as HTMLScriptElement[]
+  ).filter((script) => !scriptsInBodyNotNearHead.includes(script));
+}
+
 export function loadScript(
   srcScriptElem: HTMLScriptElement,
   window: Window,
@@ -50,11 +66,7 @@ export function loadScript(
   if (
     !flags?.inHead &&
     !flags?.atEnd &&
-    Array.from(
-      srcScriptElem.ownerDocument.querySelectorAll(
-        "body > script:not(:not(script, link, style) ~ *)",
-      ),
-    ).includes(srcScriptElem)
+    getScriptsInOrNearHead(srcScriptElem.ownerDocument).includes(srcScriptElem)
   ) {
     // The script elements at beginning of body have already been processed.
     return Task.newResult(false);
@@ -208,11 +220,7 @@ export function loadScriptsInHead(
     return Task.newResult(false);
   }
   // Process script elements in head and also beginning of body
-  const srcScripts: HTMLScriptElement[] = Array.from(
-    srcDocument.querySelectorAll(
-      "head > script, body > script:not(:not(script, link, style) ~ *)",
-    ),
-  );
+  const srcScripts: HTMLScriptElement[] = getScriptsInOrNearHead(srcDocument);
   if (srcScripts.length === 0) {
     return Task.newResult(false);
   }
