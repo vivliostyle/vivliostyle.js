@@ -85,6 +85,7 @@
         <li><a href="../docs/#/ja/user-guide">Vivliostyle ユーザーガイド (日本語)</a></li>
       </ul>
       <p><a href="https://vivliostyle.org"><img src="resources/vivliostyle-logo.svg" alt="Vivliostyle"/></a></p>
+      <div data-bind="visible: location.hostname.includes('vercel')"><br/><a href="https://vercel.com/?utm_source=vivliostyle&amp;utm_campaign=oss"><img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" alt="Powered By Vercel"></a></div>
     </section>
     <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true, event: {'wheel': navigation.onwheelViewport}"></div>
     <span role="button" id="vivliostyle-page-navigation-left" title="navigate to left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled}"></span>
