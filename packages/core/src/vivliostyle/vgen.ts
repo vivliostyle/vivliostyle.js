@@ -1091,6 +1091,11 @@ export class ViewFactory
             needToProcessChildren =
               result.getAttribute("data-adapt-process-children") == "true";
           }
+        } else if (computedStyle["display"] === Css.ident.none) {
+          // No element should be created if display:none is set.
+          // (Fix issue #924)
+          frame.finish(false);
+          return;
         } else {
           result = this.createElement(ns, tag);
         }
