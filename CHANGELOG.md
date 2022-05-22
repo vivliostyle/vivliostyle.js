@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.1...v2.15.2) (2022-05-22)
+
+### Bug Fixes
+
+- first-letter pseudo element with float disappears when page break occurs in the parent paragraph ([99e9001](https://github.com/vivliostyle/vivliostyle.js/commit/99e9001bf04006623c0a70b8cfed4864b3bd0daa)), closes [#923](https://github.com/vivliostyle/vivliostyle.js/issues/923)
+- Flexbox layout broken due to text-spacing side-effect ([0c070ca](https://github.com/vivliostyle/vivliostyle.js/commit/0c070caa14c8db0e79cdf28fdc535ddb7e33864f)), closes [#926](https://github.com/vivliostyle/vivliostyle.js/issues/926)
+- hanging-punctuation/text-spacing not working correctly when a ruby element is adjacent ([71a95f9](https://github.com/vivliostyle/vivliostyle.js/commit/71a95f9438f4a739564f950aaddaa2a83f536cf6))
+- showTOC() takes a long time on large HTML document ([ad50fe9](https://github.com/vivliostyle/vivliostyle.js/commit/ad50fe9bcf95ae3fb3353083b8c807711f5fa95c)), closes [#924](https://github.com/vivliostyle/vivliostyle.js/issues/924)
+- SyntaxError ':not(:not(script, link, style) ~ \*)' is not a valid selector in slightly older browsers ([3389ee4](https://github.com/vivliostyle/vivliostyle.js/commit/3389ee45a68847c3ab1da77ab9f27304c3933889)), closes [#919](https://github.com/vivliostyle/vivliostyle.js/issues/919)
+- wrong hanging-punctuation on half-width ideographic comma/fullstop ([8bbe420](https://github.com/vivliostyle/vivliostyle.js/commit/8bbe42051078906ca611ee9f313643caab86f4f2)), closes [#909](https://github.com/vivliostyle/vivliostyle.js/issues/909)
+
 ## [2.15.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.0...v2.15.1) (2022-05-06)
 
 ### Bug Fixes
