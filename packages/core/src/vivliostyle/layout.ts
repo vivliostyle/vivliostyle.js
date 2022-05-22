@@ -1075,7 +1075,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // relative', the absolute positioning of the float gets broken, since
         // the inline parent can be pushed horizontally by exclusion floats
         // after the layout of the float is done.
-        parent.viewNode.appendChild(nodeContext.viewNode);
+        if (!nodeContext.firstPseudo) {
+          // Unless float is specified on ::first-letter (Fix for issue #923)
+          parent.viewNode.appendChild(nodeContext.viewNode);
+        }
       }
 
       // box is rotated for vertical orientation
