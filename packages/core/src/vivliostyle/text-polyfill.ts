@@ -762,13 +762,11 @@ class TextSpacingPolyfill {
                 outerElem.className = "";
               }
             } else if (
-              atEndNoHang &&
-              textSpacing.trimEnd &&
-              !textSpacing.allowEnd
+              atEndNoHang
+                ? textSpacing.trimEnd && !textSpacing.allowEnd
+                : !isAtEndOfLine()
             ) {
               outerElem.className = "viv-ts-auto";
-            } else if (!atEndNoHang && !isAtEndOfLine()) {
-              outerElem.className = "";
             } else if (!atEnd && hangingPunctuation.allowEnd) {
               if (!textSpacing.trimEnd || textSpacing.allowEnd) {
                 outerElem.className = "viv-ts-space";
