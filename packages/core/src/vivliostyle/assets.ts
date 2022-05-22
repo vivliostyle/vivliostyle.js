@@ -1445,13 +1445,7 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
   letter-spacing: 0.4em;
 }
 viv-ts-close.viv-hang-hw > viv-ts-inner {
-  display: inline-block;
-  line-height: 1;
-  inline-size: 0.5em;
-  text-indent: 0;
-  text-align: start;
-  text-align-last: start;
-  margin-inline-start: -0.5em;
+  letter-spacing: -0.5em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;
