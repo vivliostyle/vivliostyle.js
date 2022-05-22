@@ -433,6 +433,10 @@ class TextSpacingPolyfill {
         ) {
           continue;
         }
+        if (/\b(flex|grid)\b/.test(p.parent.display)) {
+          // Cannot process if parent is flex or grid. (Issue #926)
+          continue;
+        }
 
         let prevNode: Node = null;
         let nextNode: Node = null;
@@ -502,7 +506,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            (prevP.display && prevP.display !== "inline") ||
+            (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
             (prevP.viewNode instanceof Element &&
               (prevP.viewNode.localName === "br" ||
                 embeddedContentTags[prevP.viewNode.localName]))
@@ -530,7 +534,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            (nextP.display && nextP.display !== "inline") ||
+            (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
             (nextP.viewNode instanceof Element &&
               (nextP.viewNode.localName === "br" ||
                 embeddedContentTags[nextP.viewNode.localName]))
@@ -758,11 +762,13 @@ class TextSpacingPolyfill {
                 outerElem.className = "";
               }
             } else if (
-              atEndNoHang
-                ? textSpacing.trimEnd && !textSpacing.allowEnd
-                : !isAtEndOfLine()
+              atEndNoHang &&
+              textSpacing.trimEnd &&
+              !textSpacing.allowEnd
             ) {
               outerElem.className = "viv-ts-auto";
+            } else if (!atEndNoHang && !isAtEndOfLine()) {
+              outerElem.className = "";
             } else if (!atEnd && hangingPunctuation.allowEnd) {
               if (!textSpacing.trimEnd || textSpacing.allowEnd) {
                 outerElem.className = "viv-ts-space";
