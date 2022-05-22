@@ -502,7 +502,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            (prevP.display && prevP.display !== "inline") ||
+            (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
             (prevP.viewNode instanceof Element &&
               (prevP.viewNode.localName === "br" ||
                 embeddedContentTags[prevP.viewNode.localName]))
@@ -530,7 +530,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            (nextP.display && nextP.display !== "inline") ||
+            (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
             (nextP.viewNode instanceof Element &&
               (nextP.viewNode.localName === "br" ||
                 embeddedContentTags[nextP.viewNode.localName]))
@@ -758,11 +758,13 @@ class TextSpacingPolyfill {
                 outerElem.className = "";
               }
             } else if (
-              atEndNoHang
-                ? textSpacing.trimEnd && !textSpacing.allowEnd
-                : !isAtEndOfLine()
+              atEndNoHang &&
+              textSpacing.trimEnd &&
+              !textSpacing.allowEnd
             ) {
               outerElem.className = "viv-ts-auto";
+            } else if (!atEndNoHang && !isAtEndOfLine()) {
+              outerElem.className = "";
             } else if (!atEnd && hangingPunctuation.allowEnd) {
               if (!textSpacing.trimEnd || textSpacing.allowEnd) {
                 outerElem.className = "viv-ts-space";
