@@ -433,6 +433,10 @@ class TextSpacingPolyfill {
         ) {
           continue;
         }
+        if (/\b(flex|grid)\b/.test(p.parent.display)) {
+          // Cannot process if parent is flex or grid. (Issue #926)
+          continue;
+        }
 
         let prevNode: Node = null;
         let nextNode: Node = null;
