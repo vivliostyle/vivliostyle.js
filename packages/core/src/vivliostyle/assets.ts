@@ -154,11 +154,6 @@ export const VivliostyleViewportCss = `
     break-after: page;
   }
 
-  /* Workaround for Chrome printing problem */
-  /* [data-vivliostyle-page-box] {
-        padding-bottom: 0 !important;
-        overflow: visible !important;
-    } */
   [data-vivliostyle-bleed-box] > div > div::before {
     display: block;
     content: "";
@@ -178,6 +173,7 @@ export const VivliostyleViewportCss = `
       break-after: auto;
       height: 100% !important;
     }
+  }
 }
 `;
 

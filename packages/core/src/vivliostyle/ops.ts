@@ -1888,15 +1888,6 @@ export class StyleInstance
     page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
-
-    // Shift 1px to workaround Chrome printing bug (Canceled because of another Chrome problem)
-    // page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
-
-    // Shift 0.01px to workaround Firefox printing problem
-    // (This small value (< 1/64 px) has no effect to Chrome)
-    page.bleedBox.style.paddingTop = `${
-      evaluatedPageSizeAndBleed.bleed + 0.01
-    }px`;
   }
 }
 
