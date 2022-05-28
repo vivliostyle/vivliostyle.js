@@ -2855,13 +2855,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             }
             if (!nodeContext.after) {
-              if (
-                nodeContext.floatSide &&
-                Break.isAvoidBreakValue(breakAtTheEdge)
-              ) {
+              if (nodeContext.floatSide) {
                 // Save break-after:avoid* value at before the float
                 // (Fix for issue #904)
-                this.breakAtTheEdgeBeforeFloat = breakAtTheEdge;
+                this.breakAtTheEdgeBeforeFloat = Break.isAvoidBreakValue(
+                  breakAtTheEdge,
+                )
+                  ? breakAtTheEdge
+                  : null;
               }
               if (layoutProcessor) {
                 if (layoutProcessor.startNonInlineElementNode(nodeContext)) {
@@ -2928,14 +2929,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             const style = (nodeContext.viewNode as HTMLElement).style;
             if (nodeContext.after) {
-              if (
-                !breakAtTheEdge &&
-                nodeContext.floatSide &&
-                this.breakAtTheEdgeBeforeFloat
-              ) {
+              if (nodeContext.floatSide) {
                 // Restore break-after:avoid* value at before the float
                 // (Fix for issue #904)
-                breakAtTheEdge = this.breakAtTheEdgeBeforeFloat;
+                breakAtTheEdge =
+                  breakAtTheEdge ?? this.breakAtTheEdgeBeforeFloat;
+                this.breakAtTheEdgeBeforeFloat = null;
               }
               const element = nodeContext.sourceNode as Element;
               // Make breakable after svg and math elements
