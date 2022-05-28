@@ -457,6 +457,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null =
     null;
   blockDistanceToBlockEndFloats: number = NaN;
+  breakAtTheEdgeBeforeFloat: string | null = null;
 
   constructor(
     element: Element,
@@ -2854,6 +2855,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             }
             if (!nodeContext.after) {
+              if (
+                nodeContext.floatSide &&
+                Break.isAvoidBreakValue(breakAtTheEdge)
+              ) {
+                // Save break-after:avoid* value at before the float
+                // (Fix for issue #904)
+                this.breakAtTheEdgeBeforeFloat = breakAtTheEdge;
+              }
               if (layoutProcessor) {
                 if (layoutProcessor.startNonInlineElementNode(nodeContext)) {
                   break;
@@ -2919,6 +2928,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             const style = (nodeContext.viewNode as HTMLElement).style;
             if (nodeContext.after) {
+              if (
+                !breakAtTheEdge &&
+                nodeContext.floatSide &&
+                this.breakAtTheEdgeBeforeFloat
+              ) {
+                // Restore break-after:avoid* value at before the float
+                // (Fix for issue #904)
+                breakAtTheEdge = this.breakAtTheEdgeBeforeFloat;
+              }
               const element = nodeContext.sourceNode as Element;
               // Make breakable after svg and math elements
               // (Fix for issue #750)
