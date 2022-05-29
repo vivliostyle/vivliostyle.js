@@ -2036,14 +2036,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
    *     rendering task)
    */
   getSpread(position: Position, sync: boolean): Task.Result<Vtree.Spread> {
-    const frame: Task.Frame<Vtree.Spread> = Task.newFrame("getCurrentSpread");
     const page = this.getPage(position);
     if (!page) {
-      return Task.newResult(
-        /** @type Vtree.Spread */
-        { left: null, right: null } as Vtree.Spread,
-      );
+      return Task.newResult({ left: null, right: null });
     }
+    const frame: Task.Frame<Vtree.Spread> = Task.newFrame("getSpread");
     const isLeft = page.side === Constants.PageSide.LEFT;
     let other: Task.Result<PageAndPosition>;
     if (this.isRectoPage(page, position)) {

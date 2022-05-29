@@ -775,6 +775,9 @@ export class AdaptiveViewer {
       return this.opfView
         .getSpread(this.pagePosition, sync)
         .thenAsync((spread) => {
+          if (!spread.left && !spread.right) {
+            return Task.newResult(null);
+          }
           this.showSpread(spread);
           this.setSpreadZoom(spread);
           this.currentPage =
@@ -1212,9 +1215,11 @@ export class AdaptiveViewer {
             });
           } else if (viewer.needRefresh) {
             if (viewer.currentPage) {
-              viewer.showCurrent(viewer.currentPage, true).then(() => {
-                loopFrame.continueLoop();
-              });
+              viewer
+                .showCurrent(viewer.currentPage, !this.renderAllPages)
+                .then(() => {
+                  loopFrame.continueLoop();
+                });
             }
           } else if (command) {
             const cmd = command;
