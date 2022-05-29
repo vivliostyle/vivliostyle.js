@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.2...v2.15.3) (2022-05-29)
+
+### Bug Fixes
+
+- break-after:avoid on heading not honored when float exists after the heading ([d1ec6ce](https://github.com/vivliostyle/vivliostyle.js/commit/d1ec6cef82c1f3935216a31ec008e78d7fc8c9b3)), closes [#904](https://github.com/vivliostyle/vivliostyle.js/issues/904)
+- Error F_TASK_NOT_TOP_FRAME occurs when resizing and reformatting pages ([01ea3d3](https://github.com/vivliostyle/vivliostyle.js/commit/01ea3d3ebf42f19ac8bf5ca4447297858eb06c6f)), closes [#742](https://github.com/vivliostyle/vivliostyle.js/issues/742)
+- page content missing in PDF output when bleed is specified without marks ([6fcae7c](https://github.com/vivliostyle/vivliostyle.js/commit/6fcae7c048c54d6001b9bd9ce9089e2dcb80d987)), closes [#929](https://github.com/vivliostyle/vivliostyle.js/issues/929)
+
 ## [2.15.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.1...v2.15.2) (2022-05-22)
 
 ### Bug Fixes
