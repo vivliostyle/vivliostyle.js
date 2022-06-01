@@ -724,7 +724,21 @@ export class AdaptiveViewer {
       const widthMax = Math.max(...this.pageSizes.map((p) => p.width));
       const heightMax = Math.max(...this.pageSizes.map((p) => p.height));
 
-      const styleText = `@page {margin:0;size:${widthMax}px ${heightMax}px;}`;
+      function convertSize(px: number): number {
+        const pt = px * 0.75;
+        const ptFloor = Math.floor(pt);
+        const ptFrac = pt - ptFloor;
+        if (ptFrac > 0 && ptFrac < 0.5) {
+          // Adjustment needed for Chromium's rounded page size problem.
+          // (Fix for issue #934 and #936)
+          return ptFloor + 0.5;
+        }
+        return pt;
+      }
+
+      const widthPt = convertSize(widthMax);
+      const heightPt = convertSize(heightMax);
+      const styleText = `@page {margin:0;size:${widthPt}pt ${heightPt}pt;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }
