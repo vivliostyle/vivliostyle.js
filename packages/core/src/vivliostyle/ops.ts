@@ -229,7 +229,6 @@ export class StyleInstance
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
-  cropOffset: number = 0;
 
   constructor(
     public readonly style: Style,
@@ -1882,7 +1881,6 @@ export class StyleInstance
     this.pageSheetHeight =
       evaluatedPageSizeAndBleed.pageHeight +
       evaluatedPageSizeAndBleed.cropOffset * 2;
-    this.cropOffset = evaluatedPageSizeAndBleed.cropOffset;
     page.container.style.width = `${this.pageSheetWidth}px`;
     page.container.style.height = `${this.pageSheetHeight}px`;
     page.bleedBox.style.left = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
