@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.3...v2.15.4) (2022-06-01)
+
+### Bug Fixes
+
+- White line left on the page bottom in output PDF ([4ed4a47](https://github.com/vivliostyle/vivliostyle.js/commit/4ed4a4756658d9cf4cb796a158b591f314953c28)), closes [#936](https://github.com/vivliostyle/vivliostyle.js/issues/936) [#934](https://github.com/vivliostyle/vivliostyle.js/issues/934)
+
 ## [2.15.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.2...v2.15.3) (2022-05-29)
 
 ### Bug Fixes
