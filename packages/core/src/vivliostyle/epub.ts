@@ -1484,11 +1484,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     public readonly fontMapper: Font.Mapper,
     pref: Exprs.Preferences,
     public readonly pageSheetSizeReporter: (
-      pageSize: { width: number; height: number },
-      pageSheetSize: { [key: string]: { width: number; height: number } },
-      spineIndex: number,
-      pageIndex: number,
-      cropOffset?: number,
+      p1: { width: number; height: number },
+      p2: { [key: string]: { width: number; height: number } },
+      p3: number,
+      p4: number,
     ) => any,
   ) {
     this.pref = Exprs.clonePreferences(pref);
@@ -1589,7 +1588,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
       viewItem.instance.pageSheetSize,
       viewItem.item.spineIndex,
       viewItem.instance.pageNumberOffset + pageIndex,
-      viewItem.instance.cropOffset,
     );
   }
 

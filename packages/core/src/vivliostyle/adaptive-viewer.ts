@@ -700,17 +700,15 @@ export class AdaptiveViewer {
     pageSheetSize: { [key: string]: { width: number; height: number } },
     spineIndex: number,
     pageIndex: number,
-    cropOffset: number,
   ) {
     this.pageSizes[pageIndex] = pageSize;
-    this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex, cropOffset);
+    this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
   }
 
   private setPageSizePageRules(
     pageSheetSize: { [key: string]: { width: number; height: number } },
     spineIndex: number,
     pageIndex: number,
-    cropOffset: number,
   ) {
     // In this implementation, it generates one page rule with the largest
     // page size both in width and height in the multiple page sizes.
@@ -723,15 +721,9 @@ export class AdaptiveViewer {
         this.pageSizes[pageIndex].height !==
           this.pageSizes[pageIndex - 1]?.height)
     ) {
-      let widthMax = Math.max(...this.pageSizes.map((p) => p.width));
-      let heightMax = Math.max(...this.pageSizes.map((p) => p.height));
+      const widthMax = Math.max(...this.pageSizes.map((p) => p.width));
+      const heightMax = Math.max(...this.pageSizes.map((p) => p.height));
 
-      if (cropOffset) {
-        // Workaround for the page size problem of Chromium print output.
-        // (Fix for issue #934)
-        widthMax += 1;
-        heightMax += 1;
-      }
       const styleText = `@page {margin:0;size:${widthMax}px ${heightMax}px;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
