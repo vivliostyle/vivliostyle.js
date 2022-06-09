@@ -6,6 +6,8 @@
 [![GitHub contributors][contributors]][contributors-url]
 [![PR's welcome][pr-welcome]][pr-welcome-url]
 
+Vivliostyle is an open source project for a new typesetting system based on web standard technology.
+
 Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 🌏 [Vivliostyle.org](https://vivliostyle.org)  
