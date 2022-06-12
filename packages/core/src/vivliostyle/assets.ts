@@ -175,6 +175,16 @@ export const VivliostyleViewportCss = `
     }
   }
 }
+/* Workaround for Chromium problem (issue #758, #793, #896). */
+/* Force Chromium legacy layout */
+/* (Remove this when https://crbug.com/1121942 is resolved) */
+[data-vivliostyle-page-container] {
+  column-count: 1;
+  height: 99999999px;
+}
+[data-vivliostyle-bleed-box] {
+  display: table;
+}
 `;
 
 // validation.txt
