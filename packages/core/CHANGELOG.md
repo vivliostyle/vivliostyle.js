@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.4...v2.15.5) (2022-06-12)
+
+### Bug Fixes
+
+- Layout problem with Chrome>=102 ([b9d3d1f](https://github.com/vivliostyle/vivliostyle.js/commit/b9d3d1f16f624581ab6f81c3d52fd0f2e8954851)), closes [#896](https://github.com/vivliostyle/vivliostyle.js/issues/896)
+
 ## [2.15.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.3...v2.15.4) (2022-06-01)
 
 ### Bug Fixes
