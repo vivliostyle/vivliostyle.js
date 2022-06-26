@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **\$51.00 per month**. Please consider helping us.
+The current amount of support is **\$93.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -16,6 +16,8 @@ Tatsuro YOKOTA🌹
 youchan🌹
 <p><a href="https://github.com/azettl"><img src="https://avatars1.githubusercontent.com/u/644570?s=460&amp;v=4" title="azettl" width="60" height="60" style="max-width:100%;"></a>
 azettl🌹
+<p><a href="https://github.com/udon-a"><img src="https://avatars1.githubusercontent.com/u/6390122?s=460&amp;v=4" title="udon-a" width="60" height="60" style="max-width:100%;"></a>
+udon-a🌹
 
 ## Fan Sponsors
 
@@ -43,3 +45,5 @@ omasanori⭐️
 monaka⭐️
 <p><a href="https://twitter.com/liarnose"><img src="https://pbs.twimg.com/profile_images/649617031/rect5153_400x400.png" title="liarnose" width="60" height="60" style="max-width:100%;"></a>
 liarnose⭐️
+<p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
+monami-ya⭐️
