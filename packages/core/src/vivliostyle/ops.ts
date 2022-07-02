@@ -1480,6 +1480,14 @@ export class StyleInstance
       this.faces,
       this.clientLayout,
     );
+
+    if (
+      boxInstance instanceof CssPage.PageRuleMasterInstance &&
+      (layoutContainer.width <= 0 || layoutContainer.height <= 0)
+    ) {
+      throw new Error("Negative or zero page area size");
+    }
+
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
     offsetX +=
@@ -1738,6 +1746,12 @@ export class StyleInstance
       page.bleedBox.setAttribute("lang", this.lang);
     }
     cp = this.currentLayoutPosition;
+
+    // Limit number of pages to prevent endless page generation
+    const LIMIT_PAGES = 10000;
+    if (cp.page > LIMIT_PAGES) {
+      throw new Error(`Too many pages generated (over ${LIMIT_PAGES} pages)`);
+    }
     cp.page++;
 
     const startSide = cp.flowPositions["body"]?.startSide;
