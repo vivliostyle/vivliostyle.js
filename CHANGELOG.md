@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.5...v2.15.6) (2022-07-03)
+
+### Bug Fixes
+
+- Error handling of negative or zero page area size that causes endless page generation loop ([5532449](https://github.com/vivliostyle/vivliostyle.js/commit/55324495ba233aec3be289b88af31aa7cdd0a6b6)), closes [#941](https://github.com/vivliostyle/vivliostyle.js/issues/941)
+- Remove workaround for Chromium legacy layout engine ([0dc02f6](https://github.com/vivliostyle/vivliostyle.js/commit/0dc02f633e42003b63c97e603f672d04ffa3e581)), closes [1121942#c79](https://github.com/1121942/issues/c79)
+
 ## [2.15.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.4...v2.15.5) (2022-06-12)
 
 ### Bug Fixes
