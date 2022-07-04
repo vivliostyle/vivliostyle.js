@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.7](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.6...v2.15.7) (2022-07-04)
+
+### Bug Fixes
+
+- float:left/right positioning broken on printing via Vivliostyle CLI v5.2.1 ([b7cca0d](https://github.com/vivliostyle/vivliostyle.js/commit/b7cca0d65f8b9673de46723e30f0d79738bc7a3e)), closes [#945](https://github.com/vivliostyle/vivliostyle.js/issues/945)
+
 ## [2.15.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.5...v2.15.6) (2022-07-03)
 
 ### Bug Fixes
