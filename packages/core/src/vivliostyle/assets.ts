@@ -113,7 +113,7 @@ export const VivliostyleViewportCss = `
 
 [data-vivliostyle-bleed-box] {
   position: absolute;
-  overflow: hidden;
+  /* overflow: hidden; ** removed to fix issue #945 */
   box-sizing: border-box;
 }
 
