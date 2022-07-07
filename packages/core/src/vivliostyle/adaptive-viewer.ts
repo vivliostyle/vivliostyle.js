@@ -726,18 +726,20 @@ export class AdaptiveViewer {
 
       function convertSize(px: number): number {
         const pt = px * 0.75;
-        const ptFloor = Math.floor(pt);
-        const ptFrac = pt - ptFloor;
-        if (ptFrac > 0 && ptFrac < 0.5) {
-          // Adjustment needed for Chromium's rounded page size problem.
-          // (Fix for issue #934 and #936)
-          return ptFloor + 0.5;
-        }
-        return pt;
+        // Workaround for Chromium's rounded page size problem.
+        // (Fix for issue #934 and #936)
+        return Math.ceil(pt);
       }
-
+      function extraHeightAdj(): number {
+        // Workaround for issue #947,
+        // only necessary if used with Vivliostyle CLI (LayoutNGPrinting enabled)
+        if (navigator.webdriver) {
+          return 1;
+        }
+        return 0;
+      }
       const widthPt = convertSize(widthMax);
-      const heightPt = convertSize(heightMax);
+      const heightPt = convertSize(heightMax) + extraHeightAdj();
       const styleText = `@page {margin:0;size:${widthPt}pt ${heightPt}pt;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
