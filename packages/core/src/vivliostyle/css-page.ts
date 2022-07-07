@@ -304,9 +304,12 @@ export function evaluatePageSizeAndBleed(
     !pageSizeAndBleed.cropOffset.num && pageSizeAndBleed.bleedOffset.num
       ? pageSizeAndBleed.bleedOffset.num *
         context.queryUnitSize(pageSizeAndBleed.bleedOffset.unit, false)
-      : pageSizeAndBleed.cropOffset.num *
-          context.queryUnitSize(pageSizeAndBleed.cropOffset.unit, false) -
-        bleed;
+      : Math.max(
+          0,
+          pageSizeAndBleed.cropOffset.num *
+            context.queryUnitSize(pageSizeAndBleed.cropOffset.unit, false) -
+            bleed,
+        );
   const cropOffset = bleed + bleedOffset;
   const width = pageSizeAndBleed.width;
   if (width === Css.fullWidth) {
