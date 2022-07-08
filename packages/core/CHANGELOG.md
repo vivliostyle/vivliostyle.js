@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.15.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.7...v2.15.8) (2022-07-08)
+
+### Bug Fixes
+
+- Bleed not working when bleed is specified but marks and crop-offset are unspecified ([7af167a](https://github.com/vivliostyle/vivliostyle.js/commit/7af167acb684f64323738767fc4340db9307e301)), closes [#948](https://github.com/vivliostyle/vivliostyle.js/issues/948)
+- Bottom border at page bottom edge disappeared on printing via Vivliostyle CLI v5.2.3 ([e1b17ce](https://github.com/vivliostyle/vivliostyle.js/commit/e1b17ce5735da083cf9255f5d85d6768492d39a2)), closes [#947](https://github.com/vivliostyle/vivliostyle.js/issues/947)
+- Error: Negative or zero page area size ([52292dd](https://github.com/vivliostyle/vivliostyle.js/commit/52292dd2cbf506cbca5c79d30b6da2904d87928c)), closes [#951](https://github.com/vivliostyle/vivliostyle.js/issues/951)
+
 ## [2.15.7](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.6...v2.15.7) (2022-07-04)
 
 ### Bug Fixes
