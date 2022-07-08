@@ -1485,7 +1485,7 @@ export class StyleInstance
       boxInstance instanceof CssPage.PageRuleMasterInstance &&
       (layoutContainer.width <= 0 || layoutContainer.height <= 0)
     ) {
-      throw new Error("Negative or zero page area size");
+      Logging.logger.warn("Negative or zero page area size");
     }
 
     layoutContainer.originX = offsetX;
