@@ -593,7 +593,11 @@ export class ViewFactory
       polyfilledInheritedProps.forEach((name) => {
         const value = computedStyle[name];
         if (value) {
-          if (value instanceof Css.Int) {
+          if (Css.isDefaultingValue(value)) {
+            if (value === Css.ident.initial) {
+              props[name] = undefined;
+            }
+          } else if (value instanceof Css.Int) {
             props[name] = (value as Css.Int).num;
           } else if (value instanceof Css.Ident) {
             props[name] = (value as Css.Ident).name;
@@ -606,6 +610,8 @@ export class ViewFactory
                 props[name] =
                   numericVal.num * Exprs.defaultUnitSizes[numericVal.unit];
                 break;
+              default:
+                props[name] = value;
             }
           } else {
             props[name] = value;

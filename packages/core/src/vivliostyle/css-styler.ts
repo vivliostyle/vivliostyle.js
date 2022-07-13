@@ -573,8 +573,8 @@ export class Styler implements AbstractStyler {
         ? elemStyle["background-image"].evaluate(this.context)
         : (null as Css.Val);
       if (
-        (backgroundColor && backgroundColor !== Css.ident.inherit) ||
-        (backgroundImage && backgroundImage !== Css.ident.inherit)
+        (backgroundColor && !Css.isDefaultingValue(backgroundColor)) ||
+        (backgroundImage && !Css.isDefaultingValue(backgroundImage))
       ) {
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
         this.rootBackgroundAssigned = true;
