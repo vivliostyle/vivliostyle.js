@@ -352,6 +352,8 @@ export const ALLOW_SLASH = 2048;
 
 export const ALLOW_URANGE = 4096;
 
+export const ALLOW_IMAGE = 8192;
+
 export type ValueMap = {
   [key: string]: Css.Val;
 };
@@ -431,6 +433,11 @@ export class PrimitiveValidator extends PropertyValidator {
     if (this.allowed & ALLOW_IDENT) {
       return ident;
     }
+    if (this.allowed & ALLOW_COLOR) {
+      if (CSS.supports("color", ident.name)) {
+        return ident;
+      }
+    }
     return null;
   }
 
@@ -492,9 +499,11 @@ export class PrimitiveValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitColor(color: Css.Color): Css.Val {
+  visitHexColor(color: Css.HexColor): Css.Val {
     if (this.allowed & ALLOW_COLOR) {
-      return color;
+      if (/^([0-9A-F]{3,4}|([0-9A-F]{2}){3,4})$/i.test(color.hex)) {
+        return color;
+      }
     }
     return null;
   }
@@ -537,6 +546,16 @@ export class PrimitiveValidator extends PropertyValidator {
    * @override
    */
   visitFunc(func: Css.Func): Css.Val {
+    if (this.allowed & ALLOW_COLOR) {
+      if (CSS.supports("color", func.toString())) {
+        return func;
+      }
+    }
+    if (this.allowed & ALLOW_IMAGE) {
+      if (CSS.supports("background-image", func.toString())) {
+        return func;
+      }
+    }
     return null;
   }
 
@@ -764,7 +783,7 @@ export class ListValidator extends PropertyValidator {
   /**
    * @override
    */
-  visitColor(color: Css.Color): Css.Val {
+  visitHexColor(color: Css.HexColor): Css.Val {
     return this.validateSingle(color);
   }
 
@@ -1152,7 +1171,7 @@ export class ShorthandValidator extends Css.Visitor {
   /**
    * @override
    */
-  visitColor(color: Css.Color): Css.Val {
+  visitHexColor(color: Css.HexColor): Css.Val {
     return this.validateSingle(color);
   }
 
@@ -1495,7 +1514,7 @@ export class ValidatorSet {
     if (token.type == CssTokenizer.TokenType.NUMERIC) {
       cssval = new Css.Numeric(token.num, token.text);
     } else if (token.type == CssTokenizer.TokenType.HASH) {
-      cssval = CssParser.colorFromHash(token.text);
+      cssval = new Css.HexColor(token.text);
     } else if (token.type == CssTokenizer.TokenType.IDENT) {
       cssval = Css.getName(token.text);
     } else {
@@ -1589,8 +1608,11 @@ export class ValidatorSet {
   }
 
   initBuiltInValidators(): void {
-    this.namedValidators["HASHCOLOR"] = this.primitive(
+    this.namedValidators["COLOR"] = this.primitive(
       new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS),
+    );
+    this.namedValidators["IMAGE_FUNCTION"] = this.primitive(
+      new PrimitiveValidator(ALLOW_IMAGE, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_INT"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS),
@@ -2106,6 +2128,9 @@ export class ValidatorSet {
           : value.visit(validator);
       if (rvalue) {
         receiver.simpleProperty(name, rvalue, important);
+      } else if (!prefix && CSS.supports(name, value.toString())) {
+        receiver.simpleProperty(name, value, important);
+        return;
       } else {
         receiver.invalidPropertyValue(origName, value);
       }

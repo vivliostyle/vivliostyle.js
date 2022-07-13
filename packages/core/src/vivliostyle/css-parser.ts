@@ -70,30 +70,6 @@ export enum StylesheetFlavor {
   AUTHOR = "Author",
 }
 
-/**
- * CSS Color value from hash text (without '#' character).
- */
-export function colorFromHash(text: string): Css.Color {
-  let num = parseInt(text, 16);
-  if (isNaN(num)) {
-    throw new Error("E_CSS_COLOR");
-  }
-  if (text.length == 6) {
-    return new Css.Color(num);
-  }
-  if (text.length == 3) {
-    num =
-      (num & 15) |
-      ((num & 15) << 4) |
-      ((num & 240) << 4) |
-      ((num & 240) << 8) |
-      ((num & 3840) << 8) |
-      ((num & 3840) << 12);
-    return new Css.Color(num);
-  }
-  throw new Error("E_CSS_COLOR");
-}
-
 export class ParserHandler implements CssTokenizer.TokenizerHandler {
   flavor: StylesheetFlavor;
 
@@ -1986,18 +1962,7 @@ export class Parser {
           continue;
         case Action.VAL_HASH:
           num = parseInt(token.text, 16);
-          try {
-            valStack.push(colorFromHash(token.text));
-          } catch (err) {
-            if (this.actions === actionsPropVal && tokenizer.hasMark()) {
-              tokenizer.reset();
-              this.actions = actionsSelectorStart;
-              handler.startSelectorRule();
-              continue;
-            }
-            handler.error("E_CSS_COLOR", token);
-            this.actions = actionsError;
-          }
+          valStack.push(new Css.HexColor(token.text));
           tokenizer.consume();
           continue;
         case Action.VAL_NUM:
