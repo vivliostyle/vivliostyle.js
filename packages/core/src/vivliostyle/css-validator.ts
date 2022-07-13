@@ -1110,9 +1110,13 @@ export class ShorthandValidator extends Css.Visitor {
     return false;
   }
 
-  propagateInherit(important: boolean, receiver: PropertyReceiver): void {
+  propagateDefaultingValue(
+    value: Css.Val,
+    important: boolean,
+    receiver: PropertyReceiver,
+  ): void {
     for (const name of this.propList) {
-      receiver.simpleProperty(name, Css.ident.inherit, important);
+      receiver.simpleProperty(name, value, important);
     }
   }
 
@@ -2123,7 +2127,7 @@ export class ValidatorSet {
     const validator = this.validators[name];
     if (validator) {
       const rvalue =
-        value === Css.ident.inherit || value.isExpr()
+        Css.isDefaultingValue(value) || value.isExpr()
           ? value
           : value.visit(validator);
       if (rvalue) {
@@ -2136,8 +2140,8 @@ export class ValidatorSet {
       }
     } else {
       const shorthand = this.shorthands[name].clone();
-      if (value === Css.ident.inherit) {
-        shorthand.propagateInherit(important, receiver);
+      if (Css.isDefaultingValue(value)) {
+        shorthand.propagateDefaultingValue(value, important, receiver);
       } else {
         value.visit(shorthand);
         if (!shorthand.finish(important, receiver)) {

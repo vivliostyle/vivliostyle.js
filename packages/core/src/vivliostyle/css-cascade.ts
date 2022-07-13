@@ -4119,7 +4119,12 @@ export function isVertical(
   const writingModeCasc = cascaded["writing-mode"];
   if (writingModeCasc) {
     const writingMode = writingModeCasc.evaluate(context, "writing-mode");
-    if (writingMode && writingMode !== Css.ident.inherit) {
+    if (
+      writingMode &&
+      writingMode !== Css.ident.inherit &&
+      writingMode !== Css.ident.revert &&
+      writingMode !== Css.ident.unset
+    ) {
       return writingMode === Css.ident.vertical_rl;
     }
   }
@@ -4134,7 +4139,12 @@ export function isRtl(
   const directionCasc = cascaded["direction"];
   if (directionCasc) {
     const direction = directionCasc.evaluate(context, "direction");
-    if (direction && direction !== Css.ident.inherit) {
+    if (
+      direction &&
+      direction !== Css.ident.inherit &&
+      direction !== Css.ident.revert &&
+      direction !== Css.ident.unset
+    ) {
       return direction === Css.ident.rtl;
     }
   }

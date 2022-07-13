@@ -1377,6 +1377,6 @@ export function nonTrivialContent(val: Css.Val): boolean {
     val !== Css.empty &&
     val !== Css.ident.normal &&
     val !== Css.ident.none &&
-    val !== Css.ident.inherit
+    !Css.isDefaultingValue(val)
   );
 }

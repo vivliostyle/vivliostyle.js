@@ -762,6 +762,7 @@ export const ident: { [key: string]: Ident } = {
   hidden: getName("hidden"),
   horizontal_tb: getName("horizontal-tb"),
   inherit: getName("inherit"),
+  initial: getName("initial"),
   inline: getName("inline"),
   inline_block: getName("inline-block"),
   inline_end: getName("inline-end"),
@@ -778,6 +779,7 @@ export const ident: { [key: string]: Ident } = {
   oeb_page_head: getName("oeb-page-head"),
   page: getName("page"),
   relative: getName("relative"),
+  revert: getName("revert"),
   right: getName("right"),
   same: getName("same"),
   scale: getName("scale"),
@@ -793,6 +795,7 @@ export const ident: { [key: string]: Ident } = {
   table_row: getName("table-row"),
   top: getName("top"),
   transparent: getName("transparent"),
+  unset: getName("unset"),
   vertical_lr: getName("vertical-lr"),
   vertical_rl: getName("vertical-rl"),
   visible: getName("visible"),
@@ -813,6 +816,15 @@ export const processingOrder = {
   "font-size": 1,
   color: 2,
 };
+
+export function isDefaultingValue(value: Val): boolean {
+  return (
+    value === ident.inherit ||
+    value === ident.initial ||
+    value === ident.revert ||
+    value === ident.unset
+  );
+}
 
 /**
  * Function to sort property names in the order they should be processed
