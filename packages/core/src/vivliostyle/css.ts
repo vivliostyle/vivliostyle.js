@@ -59,7 +59,7 @@ export class Visitor {
     return this.visitNum(num);
   }
 
-  visitColor(color: Color): Val {
+  visitHexColor(color: HexColor): Val {
     throw new Error("E_CSS_COLOR_NOT_ALLOWED");
   }
 
@@ -156,7 +156,7 @@ export class FilterVisitor extends Visitor {
   /**
    * @override
    */
-  visitColor(color: Color): Val {
+  visitHexColor(color: HexColor): Val {
     return color;
   }
 
@@ -527,8 +527,8 @@ export class Int extends Num {
   }
 }
 
-export class Color extends Val {
-  constructor(public rgb: number) {
+export class HexColor extends Val {
+  constructor(public hex: string) {
     super();
   }
 
@@ -537,16 +537,14 @@ export class Color extends Val {
    */
   appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append("#");
-    const str = this.rgb.toString(16);
-    buf.append("000000".substr(str.length));
-    buf.append(str);
+    buf.append(this.hex);
   }
 
   /**
    * @override
    */
   visit(visitor: any): any {
-    return visitor.visitColor(this);
+    return visitor.visitHexColor(this);
   }
 }
 

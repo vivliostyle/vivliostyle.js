@@ -288,6 +288,7 @@ export const defaultUnitSizes: { [key: string]: number } = {
 export function needUnitConversion(unit: string): boolean {
   switch (unit) {
     case "q":
+      return !CSS.supports("font-size", "1q");
     case "rem":
       return true;
     default:
