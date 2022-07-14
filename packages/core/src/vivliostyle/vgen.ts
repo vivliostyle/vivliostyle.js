@@ -679,11 +679,12 @@ export class ViewFactory
       elementStyle = inheritedValues.elementStyle;
       this.nodeContext.lang = inheritedValues.lang;
     }
+    const floatReferenceCV: CssCascade.CascadeValue =
+      elementStyle["float-reference"];
     const floatReference =
-      elementStyle["float-reference"] &&
-      PageFloats.floatReferenceOf(
-        elementStyle["float-reference"].value.toString(),
-      );
+      floatReferenceCV &&
+      !Css.isDefaultingValue(floatReferenceCV.value) &&
+      PageFloats.floatReferenceOf(floatReferenceCV.value.toString());
     if (
       this.nodeContext.parent &&
       floatReference &&
@@ -846,8 +847,11 @@ export class ViewFactory
       this.nodeContext.floatSide = floating ? floatSide.toString() : null;
       this.nodeContext.floatReference =
         floatReference || PageFloats.FloatReference.INLINE;
+      const floatMinWrapBlock = computedStyle["float-min-wrap-block"];
       this.nodeContext.floatMinWrapBlock =
-        computedStyle["float-min-wrap-block"] || null;
+        floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
+          ? floatMinWrapBlock
+          : null;
       this.nodeContext.columnSpan = computedStyle["column-span"];
       if (!this.nodeContext.inline) {
         const breakAfter = computedStyle["break-after"];
@@ -859,7 +863,9 @@ export class ViewFactory
           this.nodeContext.breakBefore = breakBefore.toString();
         }
         // Named page type
-        let pageType = computedStyle["page"]?.toString() || null;
+        const pageVal: Css.Val = computedStyle["page"];
+        let pageType =
+          pageVal && !Css.isDefaultingValue(pageVal) && pageVal.toString();
         if (!pageType || pageType.toLowerCase() === "auto") {
           pageType = this.nodeContext.pageType;
         } else {

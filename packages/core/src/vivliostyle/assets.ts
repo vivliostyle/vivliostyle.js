@@ -686,6 +686,7 @@ border-inline-end-width: 3px;
 
 SHORTHANDS
 
+all = ALL;
 background = COMMA background-image [background-position [ / background-size ]] background-repeat
      background-attachment [background-origin background-clip] background-color; /* background-color is a special case, see the code */
 border-top = border-top-width border-top-style border-top-color;

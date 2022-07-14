@@ -246,36 +246,48 @@ export function resolvePageSizeAndBleed(style: {
       }
     }
   }
-  const marks = style["marks"];
-  const bleed = style["bleed"];
-  if (!bleed || bleed.value === Css.ident.auto) {
+  const marksCV = style["marks"];
+  const bleedCV = style["bleed"];
+  const marks =
+    marksCV && !Css.isDefaultingValue(marksCV.value)
+      ? marksCV.value
+      : Css.ident.none;
+  const bleed =
+    bleedCV && !Css.isDefaultingValue(bleedCV.value)
+      ? bleedCV.value
+      : Css.ident.auto;
+  if (bleed === Css.ident.auto) {
     // "('auto' value) Computes to 6pt if marks has crop and to zero
     // otherwise." https://drafts.csswg.org/css-page/#valdef-page-bleed-auto
-    if (marks) {
+    if (marks !== Css.ident.none) {
       let hasCrop = false;
-      if (marks.value.isSpaceList()) {
-        hasCrop = (marks.value as Css.SpaceList).values.some(
+      if (marks.isSpaceList()) {
+        hasCrop = (marks as Css.SpaceList).values.some(
           (v) => v === Css.ident.crop,
         );
       } else {
-        hasCrop = marks.value === Css.ident.crop;
+        hasCrop = marks === Css.ident.crop;
       }
       if (hasCrop) {
         pageSizeAndBleed.bleed = new Css.Numeric(6, "pt");
       }
     }
-  } else if (bleed.value && bleed.value.isNumeric()) {
-    pageSizeAndBleed.bleed = bleed.value as Css.Numeric;
+  } else if (bleed.isNumeric()) {
+    pageSizeAndBleed.bleed = bleed as Css.Numeric;
   }
 
   // crop-offset (Issue #913)
-  const cropOffset = style["crop-offset"];
-  if (!cropOffset || cropOffset.value === Css.ident.auto) {
-    if (marks && marks.value !== Css.ident.none) {
+  const cropOffsetCV = style["crop-offset"];
+  const cropOffset =
+    cropOffsetCV && !Css.isDefaultingValue(cropOffsetCV.value)
+      ? cropOffsetCV.value
+      : Css.ident.auto;
+  if (cropOffset === Css.ident.auto) {
+    if (marks !== Css.ident.none) {
       pageSizeAndBleed.bleedOffset = defaultBleedOffset;
     }
-  } else if (cropOffset.value && cropOffset.value.isNumeric()) {
-    pageSizeAndBleed.cropOffset = cropOffset.value as Css.Numeric;
+  } else if (cropOffset.isNumeric()) {
+    pageSizeAndBleed.cropOffset = cropOffset as Css.Numeric;
   }
   return pageSizeAndBleed;
 }
@@ -2496,8 +2508,8 @@ export class PageManager {
       pseudoName: pageRuleMasterPseudoName,
     });
     const pageMasterStyle = newPageMaster.specified;
-    const size = style["size"];
-    if (size) {
+    const size: CssCascade.CascadeValue = style["size"];
+    if (size && !Css.isDefaultingValue(size.value)) {
       const pageSize = resolvePageSizeAndBleed(style as any);
       const priority = size.priority;
       pageMasterStyle["width"] = CssCascade.cascadeValues(

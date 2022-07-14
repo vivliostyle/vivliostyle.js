@@ -320,7 +320,7 @@ export function toExprIdent(
   val: Css.Val,
   def: string,
 ): Exprs.Val {
-  if (!val) {
+  if (!val || Css.isDefaultingValue(val)) {
     return new Exprs.Const(scope, def);
   }
   return val.toExpr(scope, scope.zero);
@@ -331,7 +331,7 @@ export function toExprAuto(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || val === Css.ident.auto) {
+  if (!val || val === Css.ident.auto || Css.isDefaultingValue(val)) {
     return null;
   }
   return val.toExpr(scope, ref);
@@ -342,7 +342,7 @@ export function toExprNormal(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || val === Css.ident.normal) {
+  if (!val || val === Css.ident.normal || Css.isDefaultingValue(val)) {
     return null;
   }
   return val.toExpr(scope, ref);
@@ -353,7 +353,7 @@ export function toExprZero(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || val === Css.ident.auto) {
+  if (!val || val === Css.ident.auto || Css.isDefaultingValue(val)) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
@@ -369,7 +369,7 @@ export function toExprZeroAuto(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val) {
+  if (!val || Css.isDefaultingValue(val)) {
     return scope.zero;
   } else if (val === Css.ident.auto) {
     return null;
@@ -384,7 +384,7 @@ export function toExprZeroBorder(
   styleVal: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || styleVal === Css.ident.none) {
+  if (!val || styleVal === Css.ident.none || Css.isDefaultingValue(val)) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
@@ -395,7 +395,7 @@ export function toExprBool(
   val: Css.Val,
   def: Exprs.Val,
 ): Exprs.Val {
-  if (!val) {
+  if (!val || Css.isDefaultingValue(val)) {
     return def;
   }
   if (val === Css.ident._true) {

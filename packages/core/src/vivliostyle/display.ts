@@ -84,7 +84,10 @@ export function getComputedDislayValue(
   } else if (isAbsolutelyPositioned(position)) {
     float = Css.ident.none;
     display = blockify(display);
-  } else if ((float && float !== Css.ident.none) || isRoot) {
+  } else if (
+    (float && float !== Css.ident.none && !Css.isDefaultingValue(float)) ||
+    isRoot
+  ) {
     display = blockify(display);
   }
   return { display, position, float };

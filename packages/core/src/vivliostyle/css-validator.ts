@@ -1483,6 +1483,104 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
   }
 }
 
+const propsExcludedFromAll = [
+  "unicode-bidi",
+  "direction",
+
+  // excludes css-logical
+  "margin-block-start",
+  "margin-block-end",
+  "margin-inline-start",
+  "margin-inline-end",
+  "padding-block-start",
+  "padding-block-end",
+  "padding-inline-start",
+  "padding-inline-end",
+  "border-block-start-color",
+  "border-block-end-color",
+  "border-inline-start-color",
+  "border-inline-end-color",
+  "border-block-start-style",
+  "border-block-end-style",
+  "border-inline-start-style",
+  "border-inline-end-style",
+  "border-block-start-width",
+  "border-block-end-width",
+  "border-inline-start-width",
+  "border-inline-end-width",
+  "block-start",
+  "block-end",
+  "inline-start",
+  "inline-end",
+  "block-size",
+  "inline-size",
+  "max-block-size",
+  "max-inline-size",
+  "min-block-size",
+  "min-inline-size",
+
+  // excludes non-standards and special
+  "behavior",
+  "bleed",
+  "conflicting-partitions",
+  "crop-offset",
+  "enabled",
+  "flow-consume",
+  "flow-from",
+  "flow-into",
+  "flow-linger",
+  "flow-options",
+  "flow-priority",
+  "font-display",
+  "font-size-adjust",
+  "font-stretch_css3",
+  "font-variant_css2",
+  "glyph-orientation-vertical",
+  "marks",
+  "min-page-height",
+  "min-page-width",
+  "repeat-on-break",
+  "required",
+  "required-partitions",
+  "ruby-align",
+  "shape-inside",
+  "snap-height",
+  "snap-width",
+  "template",
+  "text-decoration-skip",
+  "text-justify",
+  "text-zoom",
+  "unicode-range",
+  "utilization",
+  "wrap-flow",
+];
+
+export class AllShorthandValidator extends SimpleShorthandValidator {
+  constructor() {
+    super();
+  }
+
+  /**
+   * @override
+   */
+  init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
+    super.init(syntax, propList);
+    for (const name in this.validatorSet.validators) {
+      if (!propsExcludedFromAll.includes(name)) {
+        this.propList.push(name);
+      }
+    }
+  }
+
+  /**
+   * @override
+   */
+  validateList(list: Css.Val[]): number {
+    this.error = true;
+    return 0;
+  }
+}
+
 export const shorthandValidators: {
   [key: string]: typeof ShorthandValidator;
 } = {
@@ -1491,6 +1589,7 @@ export const shorthandValidators: {
   INSETS_SLASH: InsetsSlashShorthandValidator,
   COMMA: CommaShorthandValidator,
   FONT: FontShorthandValidator,
+  ALL: AllShorthandValidator,
 };
 
 //---- validation grammar parser and public property validator

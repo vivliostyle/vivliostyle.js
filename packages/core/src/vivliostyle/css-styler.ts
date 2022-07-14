@@ -231,7 +231,7 @@ export class Box {
 
   styleValue(name: string, defaultValue?: Css.Val): Css.Val | null {
     if (!(name in this.styleValues)) {
-      const cv = this.style[name];
+      const cv: CssCascade.CascadeValue = this.style[name];
       this.styleValues[name] = cv
         ? cv.evaluate(this.context, name)
         : defaultValue || null;
@@ -374,8 +374,7 @@ export class BoxStack {
         .styleValue("white-space", Css.ident.normal)
         .toString();
       const whitespace = Vtree.whitespaceFromPropertyValue(whitespaceValue);
-      Asserts.assert(whitespace !== null);
-      if (!Vtree.canIgnore(node, whitespace)) {
+      if (whitespace && !Vtree.canIgnore(node, whitespace)) {
         this.atBlockStart = false;
         this.atFlowStart = false;
       }
@@ -987,7 +986,11 @@ export class Styler implements AbstractStyler {
 
         if (blockStartOffset === 0) {
           // Named page type at first page
-          const pageType = style["page"]?.value.toString();
+          const pageCV: CssCascade.CascadeValue = style["page"];
+          const pageType =
+            pageCV &&
+            !Css.isDefaultingValue(pageCV.value) &&
+            pageCV.value.toString();
           if (pageType && pageType.toLowerCase() !== "auto") {
             this.cascade.firstPageType = pageType;
           }
