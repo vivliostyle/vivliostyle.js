@@ -121,7 +121,7 @@ export const inheritedProps = {
 
 export const polyfilledInheritedProps = [
   "box-decoration-break",
-  // TODO: box-decoration-block should not be inherited.
+  // TODO: box-decoration-break should not be inherited.
   // https://github.com/vivliostyle/vivliostyle.js/issues/259
   "image-resolution",
   "orphans",
@@ -3323,7 +3323,9 @@ export class CascadeParserHandler
     if (!name && !ns) {
       return;
     }
-    this.specificity += 1;
+    if (name) {
+      this.specificity += 1;
+    }
     if (name && ns) {
       this.chain.push(new CheckNSTagAction(ns, name.toLowerCase()));
     } else if (name) {
