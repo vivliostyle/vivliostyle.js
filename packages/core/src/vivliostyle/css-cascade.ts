@@ -3077,6 +3077,17 @@ export class CascadeInstance {
         itemToPushLast = new QuotesScopeItem(this.quotes);
         if (quotesVal === Css.ident.none) {
           this.quotes = [new Css.Str(""), new Css.Str("")];
+        } else if (
+          quotesVal === Css.ident.auto ||
+          quotesVal === Css.ident.initial
+        ) {
+          this.quotes = [
+            new Css.Str("\u201c"),
+            new Css.Str("\u201d"),
+            new Css.Str("\u2018"),
+            new Css.Str("\u2019"),
+          ];
+          // FIXME: quotes:auto should be based on the content language
         } else if (quotesVal instanceof Css.SpaceList) {
           this.quotes = (quotesVal as Css.SpaceList).values as Css.Str[];
         }
