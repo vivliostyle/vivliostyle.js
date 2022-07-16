@@ -682,9 +682,9 @@ export class ViewFactory
     const floatReferenceCV: CssCascade.CascadeValue =
       elementStyle["float-reference"];
     const floatReference =
-      floatReferenceCV &&
-      !Css.isDefaultingValue(floatReferenceCV.value) &&
-      PageFloats.floatReferenceOf(floatReferenceCV.value.toString());
+      floatReferenceCV && !Css.isDefaultingValue(floatReferenceCV.value)
+        ? PageFloats.floatReferenceOf(floatReferenceCV.value.toString())
+        : null;
     if (
       this.nodeContext.parent &&
       floatReference &&
@@ -721,6 +721,17 @@ export class ViewFactory
       return frame.result();
     }
     let display = computedStyle["display"];
+    if (Css.isDefaultingValue(display)) {
+      if (display === Css.ident.initial || display === Css.ident.unset) {
+        display = Css.ident.inline;
+      } else if (display === Css.ident.inherit) {
+        display =
+          this.nodeContext.parent?.display &&
+          Css.getName(this.nodeContext.parent?.display);
+      } else {
+        display = null;
+      }
+    }
     if (display === Css.ident.none) {
       // no content
       frame.finish(false);
@@ -824,10 +835,12 @@ export class ViewFactory
       }
       const listItem =
         display === Css.ident.list_item && computedStyle["ua-list-item-count"];
+      const breakInside = computedStyle["break-inside"];
       if (
         floating ||
-        (computedStyle["break-inside"] &&
-          computedStyle["break-inside"] !== Css.ident.auto)
+        (breakInside &&
+          !Css.isDefaultingValue(breakInside) &&
+          breakInside !== Css.ident.auto)
       ) {
         this.nodeContext.breakPenalty++;
       }
@@ -852,14 +865,16 @@ export class ViewFactory
         floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
           ? floatMinWrapBlock
           : null;
-      this.nodeContext.columnSpan = computedStyle["column-span"];
+      const columnSpan = computedStyle["column-span"];
+      this.nodeContext.columnSpan =
+        columnSpan && !Css.isDefaultingValue(columnSpan) ? columnSpan : null;
       if (!this.nodeContext.inline) {
         const breakAfter = computedStyle["break-after"];
-        if (breakAfter) {
+        if (breakAfter && !Css.isDefaultingValue(breakAfter)) {
           this.nodeContext.breakAfter = breakAfter.toString();
         }
         const breakBefore = computedStyle["break-before"];
-        if (breakBefore) {
+        if (breakBefore && !Css.isDefaultingValue(breakBefore)) {
           this.nodeContext.breakBefore = breakBefore.toString();
         }
         // Named page type
@@ -914,7 +929,11 @@ export class ViewFactory
           }
         }
       }
-      this.nodeContext.footnotePolicy = computedStyle["footnote-policy"];
+      const footnotePolicy = computedStyle["footnote-policy"];
+      this.nodeContext.footnotePolicy =
+        footnotePolicy && !Css.isDefaultingValue(footnotePolicy)
+          ? footnotePolicy
+          : null;
       const firstPseudo = computedStyle["x-first-pseudo"];
       if (firstPseudo) {
         const outerPseudo = this.nodeContext.parent
@@ -1704,7 +1723,10 @@ export class ViewFactory
   private processRepeatOnBreak(computedStyle: { [key: string]: Css.Val }) {
     let repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== Css.ident.none) {
-      if (repeatOnBreak === Css.ident.auto) {
+      if (
+        repeatOnBreak === Css.ident.auto ||
+        Css.isDefaultingValue(repeatOnBreak)
+      ) {
         if (computedStyle["display"] === Css.ident.table_header_group) {
           repeatOnBreak = Css.ident.header;
         } else if (computedStyle["display"] === Css.ident.table_footer_group) {
