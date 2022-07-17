@@ -1366,7 +1366,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
     const colWidths = dummyCells.map((cell) => {
       const rect = clientLayout.getElementClientRect(cell);
-      return vertical ? rect["height"] : rect["width"];
+      const width = vertical ? rect["height"] : rect["width"];
+      // Workaround for issue #958
+      // Non-integer width causes problem, so return rounded-up value.
+      return Math.ceil(width);
     });
     lastRow.parentNode.removeChild(dummyRow);
     return colWidths;
