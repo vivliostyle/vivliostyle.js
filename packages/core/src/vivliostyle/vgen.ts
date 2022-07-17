@@ -527,9 +527,7 @@ export class ViewFactory
       }
     }
     const isRoot = steps === 0;
-    const fontSize = this.context.isRelativeRootFontSize
-      ? this.context.initialFontSize // Fix for issue #549
-      : this.context.queryUnitSize("em", isRoot);
+    const fontSize = this.context.queryUnitSize("em", isRoot);
     const props = {
       "font-size": new CssCascade.CascadeValue(
         new Css.Numeric(fontSize, "px"),
@@ -552,7 +550,20 @@ export class ViewFactory
       for (const name of propList) {
         inheritanceVisitor.setPropName(name);
         const value = CssCascade.getProp(style, name);
-        if (value.value !== Css.ident.inherit) {
+        if (!Css.isDefaultingValue(value.value)) {
+          if (
+            name === "font-size" &&
+            i === styles.length - 1 &&
+            this.context.isRelativeRootFontSize &&
+            this.context.rootFontSize
+          ) {
+            // Fix for issue #608, #549
+            props[name] = new CssCascade.CascadeValue(
+              new Css.Numeric(this.context.rootFontSize, "px"),
+              value.priority,
+            );
+            continue;
+          }
           props[name] = value.filterValue(inheritanceVisitor);
         }
       }
