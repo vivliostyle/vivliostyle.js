@@ -737,6 +737,7 @@ inset-inline-start = inline-start;
 inset-inline-end = inline-end;
 inset-block = INSETS block-start block-end;
 inset-inline = INSETS inline-start inline-end;
+inset = INSETS top right bottom left;
 
 /* old names  */
 word-wrap = overflow-wrap;
