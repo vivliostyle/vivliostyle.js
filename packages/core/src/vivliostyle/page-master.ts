@@ -993,12 +993,20 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     let val = this.style[name];
     if (!val && CssCascade.inheritedProps[name]) {
       // inherit from root style
-      const rootStyle = (
-        context as Exprs.Context & {
-          styler: { rootStyle: { [key: string]: CssCascade.CascadeValue } };
-        }
-      ).styler?.rootStyle;
-      val = rootStyle[name]?.value;
+      if (
+        name === "font-size" &&
+        context.isRelativeRootFontSize &&
+        context.rootFontSize
+      ) {
+        val = new Css.Numeric(context.rootFontSize, "px");
+      } else {
+        const rootStyle = (
+          context as Exprs.Context & {
+            styler: { rootStyle: { [key: string]: CssCascade.CascadeValue } };
+          }
+        ).styler?.rootStyle;
+        val = rootStyle[name]?.value;
+      }
     }
     if (val) {
       val = CssParser.evaluateCSSToCSS(context, val, name);

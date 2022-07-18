@@ -593,7 +593,7 @@ export class Styler implements AbstractStyler {
     if (!isBody) {
       const fontSize = elemStyle["font-size"];
       let isRelativeFontSize = true;
-      if (fontSize) {
+      if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
         const val = fontSize.evaluate(this.context);
         let px = val.num;
         switch (val.unit) {
