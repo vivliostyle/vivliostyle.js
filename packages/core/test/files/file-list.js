@@ -132,6 +132,10 @@ module.exports = [
         file: "z-index-at-page.html",
         title: "z-index on @page and page-margin boxes",
       },
+      {
+        file: "inset-shorthand.html",
+        title: "inset shorthand property",
+      },
     ],
   },
   {
