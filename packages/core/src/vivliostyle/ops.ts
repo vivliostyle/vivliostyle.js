@@ -768,6 +768,15 @@ export class StyleInstance
     const checkPageFloatForLaterPage = (
       float: PageFloats.PageFloat,
     ): boolean => {
+      // FIXME: This check is incomplete when float-reference is other than "page".
+      // so give up for now to prevent another problem (Issue #962).
+      if (
+        !this.pageAreaWidth &&
+        !this.pageAreaHeight &&
+        float.floatReference !== PageFloats.FloatReference.PAGE
+      ) {
+        return false;
+      }
       const pageStartPos = this.layoutPositionAtPageStart.flowPositions.body;
       const pageStartOffset =
         pageStartPos && this.getConsumedOffset(pageStartPos);
