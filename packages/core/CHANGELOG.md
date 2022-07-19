@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.16.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.8...v2.16.0) (2022-07-19)
+
+### Bug Fixes
+
+- Content overflow caused by line breaks in table cells that are not present in preview and appear in print ([b1d7346](https://github.com/vivliostyle/vivliostyle.js/commit/b1d73461dceefd311c7050f375456a5b3db27c2e)), closes [#958](https://github.com/vivliostyle/vivliostyle.js/issues/958)
+- CSS explicit defaulting (e.g. `all: unset`, `break-inside: inherit`) may not work as expected ([745cbc2](https://github.com/vivliostyle/vivliostyle.js/commit/745cbc2af052c8c323b0bf3d27a42a598d998d7f)), closes [#956](https://github.com/vivliostyle/vivliostyle.js/issues/956)
+- font-size with rem on root element causes wrong 1em size ([3bcb351](https://github.com/vivliostyle/vivliostyle.js/commit/3bcb3518d5f2e11ba1d5a1b466c2fe2cfe1ebb7e)), closes [#608](https://github.com/vivliostyle/vivliostyle.js/issues/608)
+- Footnote may disappear on Adaptive Layout ([ae45017](https://github.com/vivliostyle/vivliostyle.js/commit/ae4501796829891b665be7f8273e0a63e9d41d2a)), closes [#962](https://github.com/vivliostyle/vivliostyle.js/issues/962)
+
+### Features
+
+- Add support for CSS 'inset' shorthand property ([2d2b8de](https://github.com/vivliostyle/vivliostyle.js/commit/2d2b8dee7952b15e43bccbd6ba037b151ad405d4))
+- Add support for CSS property value keywords 'initial', 'unset' and 'revert' ([9f33464](https://github.com/vivliostyle/vivliostyle.js/commit/9f33464ac425e58834dafe476b9f862f4a5dd027))
+- Add support for CSS shorthand property 'all' ([1f809cd](https://github.com/vivliostyle/vivliostyle.js/commit/1f809cd441b162fee75d0ffb1e427cef1e062f57))
+- Improve CSS validator to support new property values supported in browser ([1d5f493](https://github.com/vivliostyle/vivliostyle.js/commit/1d5f4936ac1195206c182b588c0d9e64d97819ca)), closes [#940](https://github.com/vivliostyle/vivliostyle.js/issues/940)
+
 ## [2.15.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.7...v2.15.8) (2022-07-08)
 
 ### Bug Fixes
