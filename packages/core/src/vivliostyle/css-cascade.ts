@@ -30,9 +30,15 @@ import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssCascade } from "./types";
+import { CssCascade, CssStyler } from "./types";
 
-export interface ElementStyle extends CssCascade.ElementStyle {}
+export type ElementStyle = {
+  [key: string]:
+    | CascadeValue
+    | CascadeValue[]
+    | ElementStyleMap
+    | { matcher: Matchers.Matcher; styles: ElementStyle }[];
+};
 
 export const inheritedProps = {
   "border-collapse": true,
@@ -178,7 +184,7 @@ export function buildCouplingMap(
   sideMap: { [key: string]: string },
   extentMap: { [key: string]: string },
 ): { [key: string]: string } {
-  const map = {};
+  const map: { [key: string]: string } = {};
   for (const pattern of coupledPatterns) {
     for (const side in sideMap) {
       const name1 = pattern.replace("%", side);
@@ -263,7 +269,10 @@ export class CascadeValue {
     return new CascadeValue(this.value, this.priority + specificity);
   }
 
-  evaluate(context: Exprs.Context, propName: string): Css.Val {
+  evaluate(context: Exprs.Context, propName?: string): Css.Val {
+    if (propName && Css.isCustomPropName(propName)) {
+      return this.value;
+    }
     return CssParser.evaluateCSSToCSS(context, this.value, propName);
   }
 
@@ -336,7 +345,7 @@ export function cascadeValues(
   tv: CascadeValue,
   av: CascadeValue,
 ): CascadeValue {
-  if ((tv == null || av.priority > tv.priority) && av.isEnabled(context)) {
+  if ((tv == null || av.priority >= tv.priority) && av.isEnabled(context)) {
     return av.getBaseValue();
   }
   return tv;
@@ -364,7 +373,7 @@ export function isPropName(name: string): boolean {
 }
 
 export function isInherited(name: string): boolean {
-  return !!inheritedProps[name];
+  return !!inheritedProps[name] || Css.isCustomPropName(name);
 }
 
 export function getProp(style: ElementStyle, name: string): CascadeValue {
@@ -378,7 +387,7 @@ export function setProp(
   style: ElementStyle,
   name: string,
   value: CascadeValue,
-): any {
+): void {
   if (!value) {
     delete style[name];
   } else {
@@ -407,10 +416,10 @@ export function getMutableStyleMap(
 
 export const getViewConditionalStyleMap = (
   style: ElementStyle,
-): { matcher: Matchers.Matcher; styles: ElementStyleMap }[] => {
+): { matcher: Matchers.Matcher; styles: ElementStyle }[] => {
   let r = style["_viewConditionalStyles"] as {
     matcher: Matchers.Matcher;
-    styles: ElementStyleMap;
+    styles: ElementStyle;
   }[];
   if (!r) {
     r = [];
@@ -462,7 +471,7 @@ export function mergeIn(
     const styleMap = getViewConditionalStyleMap(target);
     target = {} as ElementStyle;
     styleMap.push({
-      styles: target as ElementStyleMap,
+      styles: target,
       matcher: viewConditionMatcher,
     });
   }
@@ -480,6 +489,20 @@ export function mergeIn(
       const av = getProp(style, prop).increaseSpecificity(specificity);
       const tv = getProp(target, prop);
       setProp(target, prop, cascadeValues(context, tv, av));
+
+      // Expand shorthand property (its value contains variables).
+      const propListLH = (
+        context as Exprs.Context & {
+          style: { validatorSet: CssValidator.ValidatorSet };
+        }
+      ).style?.validatorSet.shorthands[prop]?.propList;
+      if (propListLH) {
+        for (const propLH of propListLH) {
+          const avLH = new CascadeValue(Css.empty, av.priority);
+          const tvLH = getProp(target, propLH);
+          setProp(target, propLH, cascadeValues(context, tvLH, avLH));
+        }
+      }
     }
   }
 }
@@ -1768,7 +1791,7 @@ export interface CounterListener {
 }
 
 export interface CounterResolver {
-  setStyler(styler: any): void;
+  setStyler(styler: CssStyler.AbstractStyler): void;
 
   /**
    * Returns an Exprs.Val, whose value is calculated at the layout time by
@@ -2111,7 +2134,8 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "after":
         {
           const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
-          const val: Css.Val = pseudos?.[pseudoName]?.["content"]?.value;
+          const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
+            ?.value;
           stringValue = getStringValueFromCssContentVal(val);
         }
         break;
@@ -2155,8 +2179,8 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         }
         break;
     }
-    Logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
-    return new Css.Str("");
+    // Logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
+    return func;
   }
 }
 
@@ -2572,7 +2596,7 @@ export function chineseCounter(
  *   0x7FFFFFFF != 0x7FFFFFFF + ORDER_INCREMENT
  *
  */
-export const ORDER_INCREMENT = 1 / 1048576;
+export const ORDER_INCREMENT = 1 / 0x100000;
 
 export function copyTable(src: ActionTable, dst: ActionTable): void {
   for (const n in src) {
@@ -2801,34 +2825,34 @@ export class CascadeInstance {
   }
 
   pushCounters(props: ElementStyle): void {
-    let displayVal = Css.ident.inline;
-    const display = props["display"];
+    let displayVal: Css.Val = Css.ident.inline;
+    const display = props["display"] as CascadeValue;
     if (display) {
       displayVal = display.evaluate(this.context);
     }
-    let floatVal = Css.ident.inline;
-    const float = props["float"];
+    let floatVal: Css.Val = Css.ident.inline;
+    const float = props["float"] as CascadeValue;
     if (float) {
       floatVal = float.evaluate(this.context);
     }
     let resetMap: { [key: string]: number } = null;
     let incrementMap: { [key: string]: number } = null;
     let setMap: { [key: string]: number } = null;
-    const reset = props["counter-reset"];
+    const reset = props["counter-reset"] as CascadeValue;
     if (reset) {
       const resetVal = reset.evaluate(this.context);
       if (resetVal) {
         resetMap = CssProp.toCounters(resetVal, true);
       }
     }
-    const set = props["counter-set"];
+    const set = props["counter-set"] as CascadeValue;
     if (set) {
       const setVal = set.evaluate(this.context);
       if (setVal) {
         setMap = CssProp.toCounters(setVal, false);
       }
     }
-    const increment = props["counter-increment"];
+    const increment = props["counter-increment"] as CascadeValue;
     if (increment) {
       const incrementVal = increment.evaluate(this.context);
       if (incrementVal) {
@@ -2876,12 +2900,15 @@ export class CascadeInstance {
       // unless `counter-increment: footnote` is explicitly specified
       // on the element (parent element of the pseudo element).
       if (incrementMap["footnote"] === undefined) {
-        const incrPropValue = this.currentStyle["counter-increment"]?.value;
+        const incrPropValue = (
+          this.currentStyle["counter-increment"] as CascadeValue
+        )?.value;
         if (
           !incrPropValue ||
           !(
             incrPropValue === Css.ident.footnote ||
-            incrPropValue.values?.includes(Css.ident.footnote)
+            (incrPropValue instanceof Css.SpaceList &&
+              incrPropValue.values.includes(Css.ident.footnote))
           )
         ) {
           incrementMap["footnote"] = 1;
@@ -2945,7 +2972,7 @@ export class CascadeInstance {
    * https://drafts.csswg.org/css-gcpm-3/#setting-named-strings-the-string-set-pro
    */
   setNamedStrings(props: ElementStyle): void {
-    let stringSet: CascadeValue = props["string-set"];
+    let stringSet = props["string-set"] as CascadeValue;
     if (!stringSet) {
       return;
     }
@@ -2972,8 +2999,9 @@ export class CascadeInstance {
 
   processPseudoelementProps(pseudoprops: ElementStyle, element: Element): void {
     this.pushCounters(pseudoprops);
-    if (pseudoprops["content"]) {
-      pseudoprops["content"] = pseudoprops["content"].filterValue(
+    const content = pseudoprops["content"] as CascadeValue;
+    if (content) {
+      pseudoprops["content"] = content.filterValue(
         new ContentPropVisitor(this, element, this.counterResolver),
       );
     }
@@ -2981,6 +3009,7 @@ export class CascadeInstance {
   }
 
   pushElement(
+    styler: CssStyler.AbstractStyler,
     element: Element,
     baseStyle: ElementStyle,
     elementOffset: number,
@@ -3068,8 +3097,15 @@ export class CascadeInstance {
     }
     followingSiblingTypeCountsStack.push({});
     this.applyActions();
+
+    // Substitute var()
+    this.applyVarFilter([this.currentStyle], styler, element);
+
+    // Calculate calc()
+    this.applyCalcFilter(this.currentStyle, styler);
+
     this.applyAttrFilter(element);
-    const quotesCasc = baseStyle["quotes"];
+    const quotesCasc = baseStyle["quotes"] as CascadeValue;
     let itemToPushLast: QuotesScopeItem | null = null;
     if (quotesCasc) {
       const quotesVal = quotesCasc.evaluate(this.context);
@@ -3115,7 +3151,9 @@ export class CascadeInstance {
         if (pseudoProps) {
           if (
             (pseudoName === "before" || pseudoName === "after") &&
-            !Vtree.nonTrivialContent(pseudoProps["content"]?.value)
+            !Vtree.nonTrivialContent(
+              (pseudoProps["content"] as CascadeValue)?.value,
+            )
           ) {
             delete pseudos[pseudoName];
           } else if (before) {
@@ -3137,15 +3175,20 @@ export class CascadeInstance {
     }
   }
 
-  private applyAttrFilterInner(visitor, elementStyle): void {
+  private applyAttrFilterInner(
+    visitor: Css.Visitor,
+    elementStyle: ElementStyle,
+  ): void {
     for (const propName in elementStyle) {
-      if (isPropName(propName)) {
-        elementStyle[propName] = elementStyle[propName].filterValue(visitor);
+      if (isPropName(propName) && !Css.isCustomPropName(propName)) {
+        elementStyle[propName] = (
+          elementStyle[propName] as CascadeValue
+        ).filterValue(visitor);
       }
     }
   }
 
-  private applyAttrFilter(element): void {
+  private applyAttrFilter(element: Element): void {
     const visitor = new AttrValueFilterVisitor(element);
     const currentStyle = this.currentStyle;
     const pseudoMap = getStyleMap(currentStyle, "_pseudos");
@@ -3153,6 +3196,119 @@ export class CascadeInstance {
       this.applyAttrFilterInner(visitor, pseudoMap[pseudoName]);
     }
     this.applyAttrFilterInner(visitor, currentStyle);
+  }
+
+  /**
+   * Substitute all variables in property values in elementStyle
+   */
+  applyVarFilter(
+    elementStyles: ElementStyle[],
+    styler: CssStyler.AbstractStyler,
+    element: Element | null,
+  ): void {
+    const elementStyle = elementStyles[0];
+    const visitor = new VarFilterVisitor(elementStyles, styler, element);
+    const LIMIT_LOOP = 32; // prevent cyclic or too deep dependency
+    for (const name in elementStyle) {
+      if (isMapName(name)) {
+        const pseudoMap = getStyleMap(elementStyle, name);
+        for (const pseudoName in pseudoMap) {
+          this.applyVarFilter(
+            [pseudoMap[pseudoName], ...elementStyles],
+            styler,
+            element,
+          );
+        }
+      } else if (isPropName(name) && !Css.isCustomPropName(name)) {
+        const cascVal = getProp(elementStyle, name);
+        let value = cascVal.value;
+
+        for (let i = 0; ; i++) {
+          if (i >= LIMIT_LOOP) {
+            value = Css.empty;
+            break;
+          }
+          const after = value.visit(visitor);
+          if (visitor.error) {
+            // invalid or unresolved variable found
+            value = Css.empty;
+            visitor.error = false;
+            break;
+          }
+          if (after === value) {
+            // no variable, or all variables substituted
+            break;
+          }
+          // variables substituted, but the substituted value may contain variables
+          value = after;
+        }
+        if (value !== cascVal.value) {
+          // all variables substituted
+          const validatorSet = (styler as any)
+            .validatorSet as CssValidator.ValidatorSet;
+          const shorthand = validatorSet.shorthands[name]?.clone();
+          if (shorthand) {
+            if (Css.isDefaultingValue(value)) {
+              for (const nameLH of shorthand.propList) {
+                elementStyle[nameLH] = new CascadeValue(
+                  value,
+                  cascVal.priority,
+                );
+              }
+              delete elementStyle[name];
+            } else {
+              // The var()-substituted value may have complex structure
+              // (e.g. SpaceList in SpaceList) that ShorthandValidator
+              // cannot handle, so use toString and parseValue.
+              const valueSH = CssParser.parseValue(
+                (styler as any).scope,
+                new CssTokenizer.Tokenizer(value.toString(), null),
+                "",
+              );
+              if (valueSH) {
+                valueSH.visit(shorthand);
+                if (!shorthand.error) {
+                  for (const nameLH of shorthand.propList) {
+                    elementStyle[nameLH] = new CascadeValue(
+                      shorthand.values[nameLH] ||
+                        validatorSet.defaultValues[nameLH],
+                      cascVal.priority,
+                    );
+                  }
+                  delete elementStyle[name];
+                }
+              }
+            }
+          } else {
+            elementStyle[name] = new CascadeValue(value, cascVal.priority);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Calculate all calc() in property values in elementStyle
+   */
+  applyCalcFilter(
+    elementStyle: ElementStyle,
+    styler: CssStyler.AbstractStyler,
+  ): void {
+    const visitor = new CalcFilterVisitor(styler);
+    for (const name in elementStyle) {
+      if (isMapName(name)) {
+        const pseudoMap = getStyleMap(elementStyle, name);
+        for (const pseudoName in pseudoMap) {
+          this.applyCalcFilter(pseudoMap[pseudoName], styler);
+        }
+      } else if (isPropName(name) && !Css.isCustomPropName(name)) {
+        const cascVal = getProp(elementStyle, name);
+        const value = cascVal.value.visit(visitor);
+        if (value !== cascVal.value) {
+          elementStyle[name] = new CascadeValue(value, cascVal.priority);
+        }
+      }
+    }
   }
 
   private applyActions(): void {
@@ -3234,7 +3390,7 @@ export class CascadeInstance {
   }
 }
 
-export const EMPTY = [];
+export const EMPTY: string[] = [];
 
 /**
  * Pseudoelement names in the order they should be processed, empty string is
@@ -4273,3 +4429,101 @@ export const convertToPhysical = <T>(
     }
   }
 };
+
+/**
+ * Convert var() to its value
+ */
+export class VarFilterVisitor extends Css.FilterVisitor {
+  constructor(
+    public elementStyles: ElementStyle[],
+    public styler: CssStyler.AbstractStyler,
+    public element: Element | null,
+  ) {
+    super();
+  }
+
+  private getVarValue(name: string): Css.Val {
+    let elem = this.element ?? ((this.styler as any).root as Element);
+    if (this.elementStyles?.length) {
+      for (const style of this.elementStyles) {
+        const val = (style[name] as CascadeValue)?.value;
+        if (val) {
+          return val;
+        }
+      }
+      if (this.element) {
+        elem = this.element.parentElement;
+      }
+    }
+    for (; elem; elem = elem.parentElement) {
+      const val = (this.styler.getStyle(elem, false)?.[name] as CascadeValue)
+        ?.value;
+      if (val) {
+        return val;
+      }
+    }
+    return null;
+  }
+
+  /** @override */
+  visitFunc(func: Css.Func): Css.Val {
+    if (func.name !== "var") {
+      return super.visitFunc(func);
+    }
+    const name = func.values[0] instanceof Css.Ident && func.values[0].name;
+    if (!name || !Css.isCustomPropName(name)) {
+      this.error = true;
+      return Css.empty;
+    }
+    const varVal = this.getVarValue(name);
+    if (varVal) {
+      return varVal;
+    }
+    // fallback value
+    if (func.values.length < 2) {
+      this.error = true;
+      return Css.empty;
+    }
+    if (func.values.length === 2) {
+      return func.values[1];
+    } else {
+      return new Css.CommaList(func.values.slice(1));
+    }
+  }
+}
+
+/**
+ * Convert calc() to its value
+ */
+export class CalcFilterVisitor extends Css.FilterVisitor {
+  constructor(public styler: CssStyler.AbstractStyler) {
+    super();
+  }
+
+  /** @override */
+  visitFunc(func: Css.Func): Css.Val {
+    // convert func args
+    let value = super.visitFunc(func);
+    if (func.name !== "calc") {
+      return value;
+    }
+    const exprText = value.toString().replace(/^calc\b/, "-epubx-expr");
+    const unitInCalc = exprText.replace(/^.*?\d([a-zA-Z]+\b|%).*$|^.*$/, "$1");
+    const exprVal = CssParser.parseValue(
+      (this.styler as any).scope,
+      new CssTokenizer.Tokenizer(exprText, null),
+      "",
+    );
+    if (exprVal instanceof Css.Expr) {
+      const exprResult = exprVal.expr.evaluate((this.styler as any).context);
+      if (typeof exprResult === "number") {
+        if (unitInCalc && unitInCalc !== "%") {
+          value = new Css.Numeric(exprResult, "px");
+        }
+        // TODO: percentage value, etc.
+        // FIXME: font-size-relative or viewport relative unit may be incorrect
+      }
+    }
+    return value;
+  }
+}

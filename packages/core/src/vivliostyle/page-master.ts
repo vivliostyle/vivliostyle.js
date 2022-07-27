@@ -991,7 +991,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
 
   getProp(context: Exprs.Context, name: string): Css.Val {
     let val = this.style[name];
-    if (!val && CssCascade.inheritedProps[name]) {
+    if (!val && CssCascade.isInherited(name)) {
       // inherit from root style
       if (
         name === "font-size" &&
@@ -1508,8 +1508,9 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       }
     }
     cascade.pushRule(this.pageBox.classes, null, style);
-    if (style["content"]) {
-      style["content"] = style["content"].filterValue(
+    const content = style["content"] as CssCascade.CascadeValue;
+    if (content) {
+      style["content"] = content.filterValue(
         new CssCascade.ContentPropVisitor(
           cascade,
           null,

@@ -36,10 +36,8 @@ import * as Vtree from "./vtree";
 export function resolvePageProgression(
   style: CssCascade.ElementStyle,
 ): Constants.PageProgression {
-  let writingMode = style["writing-mode"];
-  writingMode = writingMode && writingMode.value;
-  let direction = style["direction"];
-  direction = direction && direction.value;
+  const writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value;
+  const direction = (style["direction"] as CssCascade.CascadeValue)?.value;
   if (
     writingMode === Css.ident.vertical_lr ||
     (writingMode !== Css.ident.vertical_rl && direction !== Css.ident.rtl)
@@ -545,10 +543,10 @@ export function addPrinterMarks(
 ): void {
   let crop = false;
   let cross = false;
-  const marks = cascadedPageStyle["marks"];
+  const marks = cascadedPageStyle["marks"] as CssCascade.CascadeValue;
   if (marks) {
     const value = marks.value;
-    if (value.isSpaceList()) {
+    if (value instanceof Css.SpaceList) {
       value.values.forEach((v) => {
         if (v === Css.ident.crop) {
           crop = true;
@@ -565,7 +563,9 @@ export function addPrinterMarks(
 
   const bleed = evaluatedPageSizeAndBleed.bleed;
   if (bleed) {
-    const bgcolor = cascadedPageStyle["background-color"];
+    const bgcolor = cascadedPageStyle[
+      "background-color"
+    ] as CssCascade.CascadeValue;
     if (bgcolor && bgcolor.value) {
       page.bleedBox.style.backgroundColor = bgcolor.value.stringValue();
     }
@@ -1001,7 +1001,13 @@ export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPa
     for (const prop in ownStyle) {
       if (Object.prototype.hasOwnProperty.call(ownStyle, prop)) {
         const val = ownStyle[prop] as CssCascade.CascadeValue;
-        if (val && val.value !== Css.ident.inherit) {
+        if (
+          val &&
+          val.value !== Css.empty &&
+          val.value !== Css.ident.inherit &&
+          val.value !== Css.ident.unset &&
+          val.value !== Css.ident.revert
+        ) {
           this.specified[prop] = val;
         }
       }
@@ -2460,7 +2466,7 @@ export class PageManager {
     const props = [] as string[];
     for (const prop in object) {
       if (Object.prototype.hasOwnProperty.call(object, prop)) {
-        const val = object[prop];
+        const val = object[prop] as CssCascade.CascadeValue;
         let str: string;
         if (val instanceof CssCascade.CascadeValue) {
           str = `${val.value}`;
@@ -2508,18 +2514,18 @@ export class PageManager {
       pseudoName: pageRuleMasterPseudoName,
     });
     const pageMasterStyle = newPageMaster.specified;
-    const size: CssCascade.CascadeValue = style["size"];
+    const size = style["size"] as CssCascade.CascadeValue;
     if (size && !Css.isDefaultingValue(size.value)) {
       const pageSize = resolvePageSizeAndBleed(style as any);
       const priority = size.priority;
       pageMasterStyle["width"] = CssCascade.cascadeValues(
         this.context,
-        pageMasterStyle["width"],
+        pageMasterStyle["width"] as CssCascade.CascadeValue,
         new CssCascade.CascadeValue(pageSize.width, priority),
       );
       pageMasterStyle["height"] = CssCascade.cascadeValues(
         this.context,
-        pageMasterStyle["height"],
+        pageMasterStyle["height"] as CssCascade.CascadeValue,
         new CssCascade.CascadeValue(pageSize.height, priority),
       );
     }
@@ -2994,7 +3000,11 @@ export class PageParserHandler
           if (noPageSelectorProps) {
             ["bleed", "marks"].forEach((n) => {
               if (noPageSelectorProps[n]) {
-                CssCascade.setProp(props, n, noPageSelectorProps[n]);
+                CssCascade.setProp(
+                  props,
+                  n,
+                  noPageSelectorProps[n] as CssCascade.CascadeValue,
+                );
               }
             });
           }

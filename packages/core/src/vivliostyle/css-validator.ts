@@ -20,7 +20,6 @@
  * properties and shorthands.
  */
 import * as Css from "./css";
-import * as CssParser from "./css-parser";
 import * as CssTokenizer from "./css-tokenizer";
 import * as Logging from "./logging";
 import { ValidationTxt } from "./assets";
@@ -326,33 +325,33 @@ export class ValidatingGroup {
   }
 }
 
-export const ALLOW_EMPTY = 1;
+export const ALLOW_EMPTY = 0x01;
 
-export const ALLOW_STR = 2;
+export const ALLOW_STR = 0x02;
 
-export const ALLOW_IDENT = 4;
+export const ALLOW_IDENT = 0x04;
 
-export const ALLOW_POS_NUMERIC = 8;
+export const ALLOW_POS_NUMERIC = 0x08;
 
-export const ALLOW_POS_NUM = 16;
+export const ALLOW_POS_NUM = 0x10;
 
-export const ALLOW_POS_INT = 32;
+export const ALLOW_POS_INT = 0x20;
 
-export const ALLOW_COLOR = 64;
+export const ALLOW_COLOR = 0x40;
 
-export const ALLOW_URL = 128;
+export const ALLOW_URL = 0x80;
 
-export const ALLOW_NEGATIVE = 256;
+export const ALLOW_NEGATIVE = 0x100;
 
-export const ALLOW_ZERO = 512;
+export const ALLOW_ZERO = 0x200;
 
-export const ALLOW_ZERO_PERCENT = 1024;
+export const ALLOW_ZERO_PERCENT = 0x400;
 
-export const ALLOW_SLASH = 2048;
+export const ALLOW_SLASH = 0x800;
 
-export const ALLOW_URANGE = 4096;
+export const ALLOW_URANGE = 0x1000;
 
-export const ALLOW_IMAGE = 8192;
+export const ALLOW_IMAGE = 0x2000;
 
 export type ValueMap = {
   [key: string]: Css.Val;
@@ -556,6 +555,18 @@ export class PrimitiveValidator extends PropertyValidator {
         return func;
       }
     }
+    if (
+      func.name === "calc" &&
+      this.allowed &
+        (ALLOW_POS_NUMERIC |
+          ALLOW_POS_NUM |
+          ALLOW_POS_INT |
+          ALLOW_NEGATIVE |
+          ALLOW_ZERO |
+          ALLOW_ZERO_PERCENT)
+    ) {
+      return func;
+    }
     return null;
   }
 
@@ -589,7 +600,7 @@ export class PrimitiveValidator extends PropertyValidator {
   }
 }
 
-const NO_IDENTS = {};
+const NO_IDENTS: ValueMap = {};
 
 export const ALWAYS_FAIL = new PrimitiveValidator(0, NO_IDENTS, NO_IDENTS);
 
@@ -1213,8 +1224,7 @@ export class ShorthandValidator extends Css.Visitor {
    * @override
    */
   visitExpr(expr: Css.Expr): Css.Val {
-    this.error = true;
-    return null;
+    return this.validateSingle(expr);
   }
 }
 
@@ -1914,7 +1924,7 @@ export class ValidatorSet {
               }
               vals.push(builtIn.clone());
             } else {
-              const idents = {};
+              const idents: ValueMap = {};
               idents[token.text.toLowerCase()] = Css.getName(token.text);
               vals.push(
                 this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)),
@@ -1923,7 +1933,7 @@ export class ValidatorSet {
             expectval = false;
             break;
           case CssTokenizer.TokenType.INT: {
-            const idents = {};
+            const idents: ValueMap = {};
             idents[`${token.num}`] = new Css.Int(token.num);
             vals.push(
               this.primitive(new PrimitiveValidator(0, idents, NO_IDENTS)),
@@ -2210,6 +2220,15 @@ export class ValidatorSet {
     important: boolean,
     receiver: PropertyReceiver,
   ): void {
+    if (Css.isCustomPropName(name)) {
+      receiver.simpleProperty(name, value, important);
+      return;
+    }
+    if (containsVar(value)) {
+      // Set the specified property containing `var(…)`
+      receiver.simpleProperty(name, value, important);
+      return;
+    }
     let prefix = "";
     const origName = name;
     name = name.toLowerCase();
@@ -2220,7 +2239,12 @@ export class ValidatorSet {
     }
     const px = this.prefixes[name];
     if (!px || !px[prefix]) {
-      receiver.unknownProperty(origName, value);
+      if (CSS.supports(name, value.toString())) {
+        // Browser supports this property
+        receiver.simpleProperty(origName, value, important);
+      } else {
+        receiver.unknownProperty(origName, value);
+      }
       return;
     }
     const validator = this.validators[name];
@@ -2232,6 +2256,7 @@ export class ValidatorSet {
       if (rvalue) {
         receiver.simpleProperty(name, rvalue, important);
       } else if (!prefix && CSS.supports(name, value.toString())) {
+        // Browser supports this property value
         receiver.simpleProperty(name, value, important);
         return;
       } else {
@@ -2256,4 +2281,23 @@ export function baseValidatorSet(): ValidatorSet {
   validatorSet.initBuiltInValidators();
   validatorSet.parse(ValidationTxt);
   return validatorSet;
+}
+
+class VarCheckVisitor extends Css.Visitor {
+  varFound = false;
+
+  visitFunc(func: Css.Func): Css.Val {
+    if (func.name === "var") {
+      this.varFound = true;
+    } else if (!this.varFound) {
+      this.visitValues(func.values);
+    }
+    return null;
+  }
+}
+
+export function containsVar(val: Css.Val): boolean {
+  const varCheckVisitor = new VarCheckVisitor();
+  val.visit(varCheckVisitor);
+  return varCheckVisitor.varFound;
 }
