@@ -34,32 +34,32 @@ export const SPECIFICITY_USER_AGENT: number = 0;
 /**
  * User stylesheet base specificity.
  */
-export const SPECIFICITY_USER: number = 16777216;
+export const SPECIFICITY_USER: number = 0x1000000;
 
 /**
  * Author stylesheet ("normal" stylesheet) base specificity.
  */
-export const SPECIFICITY_AUTHOR: number = 33554432;
+export const SPECIFICITY_AUTHOR: number = 0x2000000;
 
 /**
  * Style attribute base specificity.
  */
-export const SPECIFICITY_STYLE: number = 50331648;
+export const SPECIFICITY_STYLE: number = 0x3000000;
 
 /**
  * Style attribute base specificity when !important is used.
  */
-export const SPECIFICITY_STYLE_IMPORTANT: number = 67108864;
+export const SPECIFICITY_STYLE_IMPORTANT: number = 0x4000000;
 
 /**
  * Author stylesheet base specificity when !important is used.
  */
-export const SPECIFICITY_AUTHOR_IMPORTANT: number = 83886080;
+export const SPECIFICITY_AUTHOR_IMPORTANT: number = 0x5000000;
 
 /**
  * User stylesheet base specificity when !important is used.
  */
-export const SPECIFICITY_USER_IMPORTANT: number = 100663296;
+export const SPECIFICITY_USER_IMPORTANT: number = 0x6000000;
 
 /**
  * @enum {string}
@@ -964,11 +964,15 @@ export class Parser {
     const valStack = this.valStack;
     while (index < valStack.length) {
       arr.push(valStack[index++] as Css.Val);
-      if (index == valStack.length) {
+      if (index === valStack.length) {
         break;
       }
-      if (valStack[index++] != sep) {
+      if (valStack[index++] !== sep) {
         throw new Error("Unexpected state");
+      }
+      if (index === valStack.length) {
+        // keep last comma in `var(--b , )`
+        arr.push(Css.empty);
       }
     }
     return arr;
@@ -1001,14 +1005,14 @@ export class Parser {
       if (sep != ")") {
         this.handler.error("E_CSS_MISMATCHED_C_PAR", token);
         this.actions = actionsErrorDecl;
-        return null;
+        // return null;
       }
       const func = new Css.Func(
         valStack[index - 1] as string,
         this.extractVals(",", index + 1),
       );
       valStack.splice(index - 1, count + 2, func);
-      return null;
+      return func;
     }
     if (sep != ";" || index >= 0) {
       this.handler.error("E_CSS_UNEXPECTED_VAL_END", token);
@@ -1018,14 +1022,22 @@ export class Parser {
     if (count > 1) {
       return new Css.CommaList(this.extractVals(",", index + 1));
     }
-    return valStack[0] as Css.Val;
+    const val = valStack[0];
+    if (val instanceof Css.Val) {
+      return val;
+    } else if (!val) {
+      return Css.empty;
+    } else {
+      // custom property value can be arbitrary token e.g. ","
+      return new Css.AnyToken(val.toString());
+    }
   }
 
   exprError(mnemonics: string, token: CssTokenizer.Token) {
     this.actions = this.propName ? actionsErrorDecl : actionsError;
     // this.handler.error(mnemonics, token);
     // (should not throw error by expression syntax errors)
-    Logging.logger.warn(mnemonics);
+    Logging.logger.warn(mnemonics, token);
   }
 
   exprStackReduce(op: number, token: CssTokenizer.Token): boolean {
@@ -1514,6 +1526,23 @@ export class Parser {
     }
     parserLoop: for (; count > 0; --count) {
       token = tokenizer.token();
+
+      // Do not stop parsing on invalid property syntax as long as brackets are balanced.
+      if (
+        this.propName &&
+        this.errorBrackets.length > 0 &&
+        (token.type === this.errorBrackets[this.errorBrackets.length - 1] ||
+          token.type === CssTokenizer.TokenType.SEMICOL ||
+          token.type === CssTokenizer.TokenType.BANG)
+      ) {
+        if (token.type === this.errorBrackets[this.errorBrackets.length - 1]) {
+          this.errorBrackets.pop();
+        }
+        valStack.push(new Css.AnyToken(token.toString()));
+        tokenizer.consume();
+        continue;
+      }
+
       switch (this.actions[token.type]) {
         case Action.IDENT:
           // figure out if this is a property assignment or selector
@@ -2009,7 +2038,7 @@ export class Parser {
           continue;
         case Action.VAL_FUNC:
           text = token.text.toLowerCase();
-          if (text == "-epubx-expr" || text == "calc" || text == "env") {
+          if (text == "-epubx-expr" || text == "env") {
             // special case
             this.actions = actionsExprVal;
             this.exprContext = ExprContext.PROP;
@@ -2059,7 +2088,9 @@ export class Parser {
             handler.startSelectorRule();
             continue;
           } else {
-            this.exprError("E_CSS_UNEXPECTED_PLUS", token);
+            // this.exprError("E_CSS_UNEXPECTED_PLUS", token);
+            valStack.push(new Css.AnyToken("+"));
+            tokenizer.consume();
             continue;
           }
         case Action.VAL_END:
@@ -2668,7 +2699,22 @@ export class Parser {
           ) {
             if (token.type == CssTokenizer.TokenType.INVALID) {
               handler.error(token.text, token);
-            } else if (token.type === CssTokenizer.TokenType.O_BRC) {
+            } else if (this.propName) {
+              // Do not stop parsing on invalid property syntax as long as brackets are balanced.
+              switch (token.type) {
+                case CssTokenizer.TokenType.O_PAR:
+                case CssTokenizer.TokenType.O_BRC:
+                case CssTokenizer.TokenType.O_BRK:
+                  this.errorBrackets.push(token.type + 1);
+                  break;
+              }
+              valStack.push(new Css.AnyToken(token.toString()));
+              tokenizer.consume();
+              continue;
+            } else if (
+              token.type === CssTokenizer.TokenType.O_BRC &&
+              valStack.length > 0
+            ) {
               // `@media {...}` and `@supports {...}` should be ok
               handler.startMediaRule(valStack.pop() as Css.Expr);
               this.ruleStack.push("media");
@@ -2708,7 +2754,7 @@ export class ErrorHandler extends ParserHandler {
    * @override
    */
   error(mnemonics: string, token: CssTokenizer.Token): void {
-    throw new Error(mnemonics);
+    throw new Error(mnemonics + " " + token);
   }
 
   /**
@@ -2929,7 +2975,7 @@ export function evaluateExprToCSS(
 export function evaluateCSSToCSS(
   context: Exprs.Context,
   val: Css.Val,
-  propName: string,
+  propName?: string,
 ): Css.Val {
   if (val.isExpr()) {
     try {

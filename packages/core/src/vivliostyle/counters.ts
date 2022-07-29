@@ -552,7 +552,7 @@ export class CounterStore {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
     let resetMap: { [key: string]: number };
-    const reset = cascadedPageStyle["counter-reset"];
+    const reset = cascadedPageStyle["counter-reset"] as CssCascade.CascadeValue;
     if (reset) {
       const resetVal = reset.evaluate(context);
       if (resetVal) {
@@ -565,7 +565,9 @@ export class CounterStore {
       }
     }
     let incrementMap: { [key: string]: number };
-    const increment = cascadedPageStyle["counter-increment"];
+    const increment = cascadedPageStyle[
+      "counter-increment"
+    ] as CssCascade.CascadeValue;
     if (increment) {
       const incrementVal = increment.evaluate(context);
       if (incrementVal) {

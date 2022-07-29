@@ -101,7 +101,11 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   /**
    * @override
    */
-  processContent(element: Element, styles: { [key: string]: Css.Val }) {
+  processContent(
+    element: Element,
+    styles: { [key: string]: Css.Val },
+    viewNode: Node,
+  ) {
     const pseudoName = getPseudoName(element);
     if (!this.contentProcessed[pseudoName]) {
       this.contentProcessed[pseudoName] = true;

@@ -164,9 +164,9 @@ export class Style {
         fontSize,
       );
       const viewportProps = CssCascade.mergeAll(context, this.viewportProps);
-      const width = viewportProps["width"];
-      const height = viewportProps["height"];
-      const textZoom = viewportProps["text-zoom"];
+      const width = viewportProps["width"] as CssCascade.CascadeValue;
+      const height = viewportProps["height"] as CssCascade.CascadeValue;
+      const textZoom = viewportProps["text-zoom"] as CssCascade.CascadeValue;
       let scaleFactor = 1;
       if ((width && height) || textZoom) {
         const defaultFontSize = Exprs.defaultUnitSizes["em"];
@@ -360,8 +360,18 @@ export class StyleInstance
       pageProps[""] = {};
     }
     Object.keys(pageProps).forEach((selector) => {
+      let pageStyle = pageProps[selector] as {
+        [key: string]: CssCascade.CascadeValue;
+      };
+
+      // Substitute var() in @page
+      this.styler.cascade.applyVarFilter([pageStyle], this.styler, null);
+
+      // Calculate calc()
+      this.styler.cascade.applyCalcFilter(pageStyle, this.styler);
+
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
-        CssPage.resolvePageSizeAndBleed(pageProps[selector] as any),
+        CssPage.resolvePageSizeAndBleed(pageStyle),
         this,
       );
       this.pageSheetSize[selector] = {
@@ -1779,6 +1789,13 @@ export class StyleInstance
             ? this.styler.cascade.previousPageType
             : this.styler.cascade.currentPageType) ?? "",
         );
+
+    // Substitute var()
+    this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
+
+    // Calculate calc()
+    this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler);
+
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
@@ -1787,10 +1804,12 @@ export class StyleInstance
     let bleedBoxPaddingEdge = 0;
     if (!isTocBox) {
       page.setAutoPageWidth(
-        pageMaster.pageBox.specified["width"].value === Css.fullWidth,
+        (pageMaster.pageBox.specified["width"] as CssCascade.CascadeValue)
+          .value === Css.fullWidth,
       );
       page.setAutoPageHeight(
-        pageMaster.pageBox.specified["height"].value === Css.fullHeight,
+        (pageMaster.pageBox.specified["height"] as CssCascade.CascadeValue)
+          .value === Css.fullHeight,
       );
       this.counterStore.setCurrentPage(page);
       this.counterStore.updatePageCounters(cascadedPageStyle, this);
@@ -2163,7 +2182,7 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
    * @override
    */
   error(mnemonics: string, token: CssTokenizer.Token): void {
-    Logging.logger.warn("CSS parser:", mnemonics);
+    Logging.logger.warn("CSS parser:", mnemonics, token);
   }
 }
 

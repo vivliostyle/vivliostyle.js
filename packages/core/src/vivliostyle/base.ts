@@ -350,35 +350,15 @@ export class PriorityQueue {
   }
 }
 
-/**
- * @param prefix Prefix (containing leading and trailing hyphens)
- * @param cssPropName CSS property name
- * @return JavaScript property name
- */
-export function cssToJSProp(prefix: string, cssPropName: string): string {
-  if (prefix) {
-    cssPropName = `-${cssPropName}`;
-    prefix = prefix.replace(/-/g, "");
-    if (prefix === "moz") {
-      prefix = "Moz";
-    }
-  }
-  return (
-    prefix +
-    cssPropName.replace(/-[a-z]/g, (txt) => txt.substr(1).toUpperCase())
-  );
-}
-
 export const knownPrefixes = ["", "-webkit-", "-moz-"];
 
-export const propNameMap = {};
+export const propNameMap: { [key: string]: string[] } = {};
 
 export function checkIfPropertySupported(
   prefix: string,
   prop: string,
 ): boolean {
-  const style = document.documentElement.style;
-  return typeof style[cssToJSProp(prefix, prop)] === "string";
+  return CSS.supports(prefix + prop, "unset");
 }
 
 export function getPrefixedPropertyNames(prop: string): string[] | null {
@@ -401,49 +381,12 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
         return ["-webkit-text-combine"];
       }
       break;
-    case "filter":
-      // Special case: prefer '-webkit-filter' to 'filter'
-      if (checkIfPropertySupported("-webkit-", "filter")) {
-        propNameMap[prop] = ["-webkit-filter"];
-        return ["-webkit-filter"];
-      }
-      break;
-    case "clip-path":
-      // Special case for chrome.
-      if (checkIfPropertySupported("-webkit-", "clip-path")) {
-        return (propNameMap[prop] = ["-webkit-clip-path", "clip-path"]);
-      }
-      break;
-    case "margin-inline-start":
-      if (checkIfPropertySupported("-webkit-", "margin-start")) {
-        propNameMap[prop] = ["-webkit-margin-start"];
-        return ["-webkit-margin-start"];
-      }
-      break;
-    case "margin-inline-end":
-      if (checkIfPropertySupported("-webkit-", "margin-end")) {
-        propNameMap[prop] = ["-webkit-margin-end"];
-        return ["-webkit-margin-end"];
-      }
-      break;
-    case "padding-inline-start":
-      if (checkIfPropertySupported("-webkit-", "padding-start")) {
-        propNameMap[prop] = ["-webkit-padding-start"];
-        return ["-webkit-padding-start"];
-      }
-      break;
-    case "padding-inline-end":
-      if (checkIfPropertySupported("-webkit-", "padding-end")) {
-        propNameMap[prop] = ["-webkit-padding-end"];
-        return ["-webkit-padding-end"];
-      }
-      break;
   }
   for (const prefix of knownPrefixes) {
     if (checkIfPropertySupported(prefix, prop)) {
-      prefixed = prefix + prop;
-      propNameMap[prop] = [prefixed];
-      return [prefixed];
+      prefixed = [prefix + prop];
+      propNameMap[prop] = prefixed;
+      return prefixed;
     }
   }
 
@@ -458,37 +401,37 @@ export function setCSSProperty(
   prop: string,
   value: string,
 ): void {
-  try {
-    const prefixedPropertyNames = getPrefixedPropertyNames(prop);
-    if (!prefixedPropertyNames) {
-      return;
+  const elemStyle = (elem as HTMLElement)?.style;
+  if (!elemStyle) {
+    return;
+  }
+  if (prop.startsWith("--")) {
+    elemStyle.setProperty(prop, value || " ");
+    return;
+  }
+  const prefixedPropertyNames = getPrefixedPropertyNames(prop);
+  if (!prefixedPropertyNames) {
+    return;
+  }
+  for (const prefixed of prefixedPropertyNames) {
+    switch (prefixed) {
+      case "-webkit-text-combine": // for Safari
+        switch (value) {
+          case "all":
+            value = "horizontal";
+            break;
+        }
+        break;
+      case "text-combine-upright":
+        switch (value) {
+          case "all":
+            // workaround for Chrome 93 bug https://crbug.com/1242755
+            elemStyle.setProperty("text-indent", "0");
+            break;
+        }
+        break;
     }
-    const elemStyle = (elem as HTMLElement)?.style;
-    if (!elemStyle) {
-      return;
-    }
-    prefixedPropertyNames.forEach((prefixed) => {
-      switch (prefixed) {
-        case "-webkit-text-combine": // for Safari
-          switch (value) {
-            case "all":
-              value = "horizontal";
-              break;
-          }
-          break;
-        case "text-combine-upright":
-          switch (value) {
-            case "all":
-              // workaround for Chrome 93 bug https://crbug.com/1242755
-              elemStyle.setProperty("text-indent", "0");
-              break;
-          }
-          break;
-      }
-      elemStyle.setProperty(prefixed, value);
-    });
-  } catch (err) {
-    Logging.logger.warn(err);
+    elemStyle.setProperty(prefixed, value);
   }
 }
 
@@ -688,7 +631,7 @@ export function indexArray<T>(
  * true.
  */
 export function arrayToSet(arr: string[]): { [key: string]: boolean } {
-  const set = {};
+  const set: { [key: string]: boolean } = {};
   for (let i = 0; i < arr.length; i++) {
     set[arr[i]] = true;
   }

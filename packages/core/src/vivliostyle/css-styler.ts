@@ -231,7 +231,7 @@ export class Box {
 
   styleValue(name: string, defaultValue?: Css.Val): Css.Val | null {
     if (!(name in this.styleValues)) {
-      const cv: CssCascade.CascadeValue = this.style[name];
+      const cv = this.style[name] as CssCascade.CascadeValue;
       this.styleValues[name] = cv
         ? cv.evaluate(this.context, name)
         : defaultValue || null;
@@ -494,7 +494,7 @@ export class Styler implements AbstractStyler {
     this.boxStack = new BoxStack(context);
     this.offsetMap.addStuckRange(rootOffset);
     const style = this.getAttrStyle(this.root);
-    this.cascade.pushElement(this.root, style, rootOffset);
+    this.cascade.pushElement(this, this.root, style, rootOffset);
     this.postprocessTopStyle(style, false);
     switch (this.root.namespaceURI) {
       case Base.NS.XHTML:
@@ -513,7 +513,7 @@ export class Styler implements AbstractStyler {
     map: CssValidator.ValueMap,
     name: string,
   ): boolean {
-    const cascVal = style[name];
+    const cascVal = style[name] as CssCascade.CascadeValue;
     return cascVal && cascVal.evaluate(this.context) !== map[name];
   }
 
@@ -547,13 +547,18 @@ export class Styler implements AbstractStyler {
     elemStyle: CssCascade.ElementStyle,
     isBody: boolean,
   ): void {
-    const rootInheritedProps = isBody
-      ? ["writing-mode", "direction"]
-      : Object.keys(CssCascade.inheritedProps);
-    for (const propName of rootInheritedProps) {
-      if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
-        // Copy it over, but keep it at the root element as well.
-        this.rootStyle[propName] = elemStyle[propName];
+    if (isBody) {
+      for (const propName of ["writing-mode", "direction"]) {
+        if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
+          // Copy it over, but keep it at the root element as well.
+          this.rootStyle[propName] = elemStyle[propName];
+        }
+      }
+    } else {
+      for (const propName in elemStyle) {
+        if (CssCascade.isInherited(propName)) {
+          this.rootStyle[propName] = elemStyle[propName];
+        }
       }
     }
     if (!this.rootBackgroundAssigned) {
@@ -562,14 +567,18 @@ export class Styler implements AbstractStyler {
         this.validatorSet.backgroundProps,
         "background-color",
       )
-        ? elemStyle["background-color"].evaluate(this.context)
+        ? (elemStyle["background-color"] as CssCascade.CascadeValue).evaluate(
+            this.context,
+          )
         : (null as Css.Val);
       const backgroundImage = this.hasProp(
         elemStyle,
         this.validatorSet.backgroundProps,
         "background-image",
       )
-        ? elemStyle["background-image"].evaluate(this.context)
+        ? (elemStyle["background-image"] as CssCascade.CascadeValue).evaluate(
+            this.context,
+          )
         : (null as Css.Val);
       if (
         (backgroundColor && !Css.isDefaultingValue(backgroundColor)) ||
@@ -591,34 +600,36 @@ export class Styler implements AbstractStyler {
       }
     }
     if (!isBody) {
-      const fontSize = elemStyle["font-size"];
+      const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
       let isRelativeFontSize = true;
       if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
         const val = fontSize.evaluate(this.context);
-        let px = val.num;
-        switch (val.unit) {
-          case "em":
-          case "rem":
-            px *= this.context.initialFontSize;
-            break;
-          case "ex":
-            px *=
-              (this.context.initialFontSize * Exprs.defaultUnitSizes["ex"]) /
-              Exprs.defaultUnitSizes["em"];
-            break;
-          case "%":
-            px *= this.context.initialFontSize / 100;
-            break;
-          default: {
-            const unitSize = Exprs.defaultUnitSizes[val.unit];
-            if (unitSize) {
-              px *= unitSize;
+        if (val instanceof Css.Numeric) {
+          let px = val.num;
+          switch (val.unit) {
+            case "em":
+            case "rem":
+              px *= this.context.initialFontSize;
+              break;
+            case "ex":
+              px *=
+                (this.context.initialFontSize * Exprs.defaultUnitSizes["ex"]) /
+                Exprs.defaultUnitSizes["em"];
+              break;
+            case "%":
+              px *= this.context.initialFontSize / 100;
+              break;
+            default: {
+              const unitSize = Exprs.defaultUnitSizes[val.unit];
+              if (unitSize) {
+                px *= unitSize;
+              }
+              isRelativeFontSize = false;
             }
-            isRelativeFontSize = false;
           }
+          this.context.rootFontSize = px;
+          this.context.isRelativeRootFontSize = isRelativeFontSize;
         }
-        this.context.rootFontSize = px;
-        this.context.isRelativeRootFontSize = isRelativeFontSize;
       }
     }
   }
@@ -700,7 +711,7 @@ export class Styler implements AbstractStyler {
           }
         }
         const style = this.getStyle(elem, false);
-        const flowName = style["flow-into"];
+        const flowName = style["flow-into"] as CssCascade.CascadeValue;
         if (flowName) {
           const flowNameStr = flowName
             .evaluate(context, "flow-into")
@@ -782,7 +793,7 @@ export class Styler implements AbstractStyler {
     let exclusive = false;
     let repeated = false;
     let last = false;
-    const optionsCV = style["flow-options"];
+    const optionsCV = style["flow-options"] as CssCascade.CascadeValue;
     if (optionsCV) {
       const options = CssProp.toSet(
         optionsCV.evaluate(this.context, "flow-options"),
@@ -791,14 +802,14 @@ export class Styler implements AbstractStyler {
       repeated = !!options["static"];
       last = !!options["last"];
     }
-    const lingerCV = style["flow-linger"];
+    const lingerCV = style["flow-linger"] as CssCascade.CascadeValue;
     if (lingerCV) {
       linger = CssProp.toInt(
         lingerCV.evaluate(this.context, "flow-linger"),
         Number.POSITIVE_INFINITY,
       );
     }
-    const priorityCV = style["flow-priority"];
+    const priorityCV = style["flow-priority"] as CssCascade.CascadeValue;
     if (priorityCV) {
       priority = CssProp.toInt(
         priorityCV.evaluate(this.context, "flow-priority"),
@@ -938,7 +949,7 @@ export class Styler implements AbstractStyler {
         const elem = this.last as Element;
         const style = this.getAttrStyle(elem);
         this.primaryStack.push(this.primary);
-        this.cascade.pushElement(elem, style, this.lastOffset);
+        this.cascade.pushElement(this, elem, style, this.lastOffset);
         const id =
           elem.getAttribute("id") || elem.getAttributeNS(Base.NS.XML, "id");
         if (id && id === this.idToReach) {
@@ -953,7 +964,7 @@ export class Styler implements AbstractStyler {
           this.bodyReached = true;
         }
         let box: Box;
-        const flowName = style["flow-into"];
+        const flowName = style["flow-into"] as CssCascade.CascadeValue;
         if (flowName) {
           const flowNameStr = flowName
             .evaluate(context, "flow-into")
@@ -986,7 +997,7 @@ export class Styler implements AbstractStyler {
 
         if (blockStartOffset === 0) {
           // Named page type at first page
-          const pageCV: CssCascade.CascadeValue = style["page"];
+          const pageCV = style["page"] as CssCascade.CascadeValue;
           const pageType =
             pageCV &&
             !Css.isDefaultingValue(pageCV.value) &&
@@ -1064,7 +1075,11 @@ export class Styler implements AbstractStyler {
   /**
    * @override
    */
-  processContent(element: Element, styles: { [key: string]: Css.Val }) {}
+  processContent(
+    element: Element,
+    styles: { [key: string]: Css.Val },
+    viewNode: Node,
+  ) {}
 }
 
 export const columnProps = ["column-count", "column-width", "column-fill"];

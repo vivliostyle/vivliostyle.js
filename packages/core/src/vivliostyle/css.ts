@@ -22,37 +22,35 @@ import * as Base from "./base";
 import * as Exprs from "./exprs";
 
 export class Visitor {
-  /**
-   * @return void
-   */
-  visitValues(values: Val[]): any {
+  visitValues(values: Val[]): Val[] {
     for (let i = 0; i < values.length; i++) {
       values[i].visit(this);
     }
+    return null;
   }
 
   visitEmpty(empty: Val): Val {
-    throw new Error("E_CSS_EMPTY_NOT_ALLOWED");
+    return null;
   }
 
   visitSlash(slash: Val): Val {
-    throw new Error("E_CSS_SLASH_NOT_ALLOWED");
+    return null;
   }
 
   visitStr(str: Str): Val {
-    throw new Error("E_CSS_STR_NOT_ALLOWED");
+    return null;
   }
 
   visitIdent(ident: Ident): Val {
-    throw new Error("E_CSS_IDENT_NOT_ALLOWED");
+    return null;
   }
 
   visitNumeric(numeric: Numeric): Val {
-    throw new Error("E_CSS_NUMERIC_NOT_ALLOWED");
+    return null;
   }
 
   visitNum(num: Num): Val {
-    throw new Error("E_CSS_NUM_NOT_ALLOWED");
+    return null;
   }
 
   visitInt(num: Int): Val {
@@ -60,44 +58,55 @@ export class Visitor {
   }
 
   visitHexColor(color: HexColor): Val {
-    throw new Error("E_CSS_COLOR_NOT_ALLOWED");
+    return null;
   }
 
   visitURL(url: URL): Val {
-    throw new Error("E_CSS_URL_NOT_ALLOWED");
+    return null;
   }
 
   visitURange(urange: URange): Val {
-    throw new Error("E_CSS_URANGE_NOT_ALLOWED");
+    return null;
   }
 
   visitSpaceList(list: SpaceList): Val {
-    throw new Error("E_CSS_LIST_NOT_ALLOWED");
+    this.visitValues(list.values);
+    return null;
   }
 
   visitCommaList(list: CommaList): Val {
-    throw new Error("E_CSS_COMMA_NOT_ALLOWED");
+    this.visitValues(list.values);
+    return null;
   }
 
   visitFunc(func: Func): Val {
-    throw new Error("E_CSS_FUNC_NOT_ALLOWED");
+    this.visitValues(func.values);
+    return null;
   }
 
   visitExpr(expr: Expr): Val {
-    throw new Error("E_CSS_EXPR_NOT_ALLOWED");
+    return null;
   }
 }
 
 export class FilterVisitor extends Visitor {
+  error: boolean = false;
+
   constructor() {
     super();
   }
 
+  /**
+   * @override
+   */
   visitValues(values: Val[]): Val[] {
     let arr: Val[] = null;
     for (let i = 0; i < values.length; i++) {
       const before = values[i];
       const after = before.visit(this);
+      if (this.error) {
+        return [];
+      }
       if (arr) {
         arr[i] = after;
       } else if (before !== after) {
@@ -109,6 +118,13 @@ export class FilterVisitor extends Visitor {
       }
     }
     return arr || values;
+  }
+
+  /**
+   * @override
+   */
+  visitEmpty(empty: Val): Val {
+    return empty;
   }
 
   /**
@@ -179,6 +195,9 @@ export class FilterVisitor extends Visitor {
    */
   visitSpaceList(list: SpaceList): Val {
     const values = this.visitValues(list.values);
+    if (this.error) {
+      return empty;
+    }
     if (values === list.values) {
       return list;
     }
@@ -190,6 +209,9 @@ export class FilterVisitor extends Visitor {
    */
   visitCommaList(list: CommaList): Val {
     const values = this.visitValues(list.values);
+    if (this.error) {
+      return empty;
+    }
     if (values === list.values) {
       return list;
     }
@@ -201,6 +223,9 @@ export class FilterVisitor extends Visitor {
    */
   visitFunc(func: Func): Val {
     const values = this.visitValues(func.values);
+    if (this.error) {
+      return empty;
+    }
     if (values === func.values) {
       return func;
     }
@@ -232,7 +257,7 @@ export class Val {
   }
 
   toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
-    throw new Error("F_ABSTRACT");
+    return null;
   }
 
   appendTo(buf: Base.StringBuffer, toString: boolean): void {
@@ -259,8 +284,8 @@ export class Val {
     return false;
   }
 
-  visit(visitor: any): any {
-    throw new Error("F_ABSTRACT");
+  visit(visitor: Visitor): Val {
+    return this;
   }
 }
 
@@ -293,7 +318,7 @@ export class Empty extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitEmpty(this);
   }
 }
@@ -331,7 +356,7 @@ export class Slash extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitSlash(this);
   }
 }
@@ -366,12 +391,12 @@ export class Str extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitStr(this);
   }
 }
 
-const nameTable = {};
+const nameTable: { [key: string]: Ident } = {};
 
 export class Ident extends Val {
   constructor(public name: string) {
@@ -403,7 +428,7 @@ export class Ident extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitIdent(this);
   }
 
@@ -462,7 +487,7 @@ export class Numeric extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitNumeric(this);
   }
 
@@ -502,7 +527,7 @@ export class Num extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitNum(this);
   }
 
@@ -522,7 +547,7 @@ export class Int extends Num {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitInt(this);
   }
 }
@@ -543,7 +568,7 @@ export class HexColor extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitHexColor(this);
   }
 }
@@ -565,7 +590,7 @@ export class URL extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitURL(this);
   }
 }
@@ -585,7 +610,7 @@ export class URange extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitURange(this);
   }
 }
@@ -598,10 +623,10 @@ export function appendList(
 ): void {
   const length = values.length;
   if (length > 0) {
-    values[0].appendTo(buf, toString);
+    values[0]?.appendTo(buf, toString);
     for (let i = 1; i < length; i++) {
       buf.append(separator);
-      values[i].appendTo(buf, toString);
+      values[i]?.appendTo(buf, toString);
     }
   }
 }
@@ -621,7 +646,7 @@ export class SpaceList extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitSpaceList(this);
   }
 
@@ -648,7 +673,7 @@ export class CommaList extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitCommaList(this);
   }
 }
@@ -671,7 +696,7 @@ export class Func extends Val {
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitFunc(this);
   }
 }
@@ -692,15 +717,22 @@ export class Expr extends Val {
    * @override
    */
   appendTo(buf: Base.StringBuffer, toString: boolean): void {
-    buf.append("-epubx-expr(");
-    this.expr.appendTo(buf, 0);
-    buf.append(")");
+    if (
+      this.expr instanceof Exprs.Const ||
+      this.expr instanceof Exprs.Numeric
+    ) {
+      this.expr.appendTo(buf, 0);
+    } else {
+      buf.append("-epubx-expr(");
+      this.expr.appendTo(buf, 0);
+      buf.append(")");
+    }
   }
 
   /**
    * @override
    */
-  visit(visitor: any): any {
+  visit(visitor: Visitor): Val {
     return visitor.visitExpr(this);
   }
 
@@ -709,6 +741,22 @@ export class Expr extends Val {
    */
   isExpr(): boolean {
     return true;
+  }
+}
+
+/**
+ * Custom property value, may be arbitrary token
+ */
+export class AnyToken extends Val {
+  constructor(public text: string) {
+    super();
+  }
+
+  /**
+   * @override
+   */
+  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+    buf.append(this.text || " ");
   }
 }
 
@@ -833,4 +881,8 @@ export function processingOrderFn(name1: string, name2: string): number {
   const n1 = processingOrder[name1] || Number.MAX_VALUE;
   const n2 = processingOrder[name2] || Number.MAX_VALUE;
   return n1 - n2;
+}
+
+export function isCustomPropName(name: string): boolean {
+  return name?.length > 2 && name.startsWith("--");
 }
