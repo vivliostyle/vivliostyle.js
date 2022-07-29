@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.17.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.16.0...v2.17.0) (2022-07-29)
+
+### Features
+
+- Support CSS custom properties (variables) ([cd07654](https://github.com/vivliostyle/vivliostyle.js/commit/cd076546beaf28f9547f777a109ca10074929c8a)), closes [#540](https://github.com/vivliostyle/vivliostyle.js/issues/540)
+
 # [2.16.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.15.8...v2.16.0) (2022-07-19)
 
 ### Bug Fixes
