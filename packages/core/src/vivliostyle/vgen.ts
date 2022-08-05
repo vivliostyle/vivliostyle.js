@@ -165,9 +165,7 @@ export class ViewFactory
     this.exprContentListener = styler.counterListener.getExprContentListener();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   clone(): Vtree.LayoutContext {
     return new ViewFactory(
       this.flowName,
@@ -433,9 +431,7 @@ export class ViewFactory
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   setViewRoot(viewRoot: Element, isFootnote: boolean) {
     this.viewRoot = viewRoot;
     this.isFootnote = isFootnote;
@@ -1829,9 +1825,7 @@ export class ViewFactory
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   setCurrent(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
@@ -1989,9 +1983,7 @@ export class ViewFactory
     return prop.toString() == transclusionType;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   nextInTree(
     position: Vtree.NodeContext,
     atUnforcedBreak?: boolean,
@@ -2142,9 +2134,7 @@ export class ViewFactory
     return true;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   applyPseudoelementStyle(
     nodeContext: Vtree.NodeContext,
     pseudoName: string,
@@ -2188,9 +2178,7 @@ export class ViewFactory
     this.applyComputedStyles(target, computedStyle);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   peelOff(
     nodeContext: Vtree.NodeContext,
     nodeOffset: number,
@@ -2257,9 +2245,7 @@ export class ViewFactory
     return this.document.createElementNS(ns, tag);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   applyFootnoteStyle(
     vertical: boolean,
     rtl: boolean,
@@ -2287,9 +2273,7 @@ export class ViewFactory
     return vertical;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
     if (nodeContext) {
       nodeContext.walkUpBlocks((block) => {
@@ -2313,9 +2297,7 @@ export class ViewFactory
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   convertLengthToPx(
     numeric: Css.Numeric,
     viewNode: Node,
@@ -2377,9 +2359,7 @@ export class ViewFactory
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   isSameNodePosition(
     nodePosition1: Vtree.NodePosition,
     nodePosition2: Vtree.NodePosition,
@@ -2437,9 +2417,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     } as Vtree.ClientRect;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getRangeClientRects(range: Range): Vtree.ClientRect[] {
     const rects = range.getClientRects();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
@@ -2448,9 +2426,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getElementClientRect(element: Element): Vtree.ClientRect {
     const htmlElement = element as HTMLElement;
     const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
@@ -2468,9 +2444,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     return this.subtractOffsets(rect, layoutBoxRect);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getElementComputedStyle(element: Element): CSSStyleDeclaration {
     return this.window.getComputedStyle(element, null);
   }

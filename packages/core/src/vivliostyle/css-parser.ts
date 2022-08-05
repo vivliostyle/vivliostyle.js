@@ -217,20 +217,14 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave = this.stack.pop();
   }
 
-  /**
-   * @override
-   */
-  getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token {
     if (this.tokenizer) {
       return this.tokenizer.token();
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  getScope(): Exprs.LexicalScope {
+  override getScope(): Exprs.LexicalScope {
     return this.slave.getScope();
   }
 
@@ -249,10 +243,7 @@ export class DispatchParserHandler extends ParserHandler {
     Logging.logger.warn(mnemonics);
   }
 
-  /**
-   * @override
-   */
-  startStylesheet(flavor: StylesheetFlavor): void {
+  override startStylesheet(flavor: StylesheetFlavor): void {
     super.startStylesheet(flavor);
     if (this.stack.length > 0) {
       // This can occur as a result of an error
@@ -262,45 +253,33 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startStylesheet(flavor);
   }
 
-  /**
-   * @override
-   */
-  tagSelector(ns: string | null, name: string | null): void {
+  override tagSelector(ns: string | null, name: string | null): void {
     this.slave.tagSelector(ns, name);
   }
 
-  /**
-   * @override
-   */
-  classSelector(name: string): void {
+  override classSelector(name: string): void {
     this.slave.classSelector(name);
   }
 
-  /**
-   * @override
-   */
-  pseudoclassSelector(name: string, params: (number | string)[]): void {
+  override pseudoclassSelector(
+    name: string,
+    params: (number | string)[],
+  ): void {
     this.slave.pseudoclassSelector(name, params);
   }
 
-  /**
-   * @override
-   */
-  pseudoelementSelector(name: string, params: (number | string)[]): void {
+  override pseudoelementSelector(
+    name: string,
+    params: (number | string)[],
+  ): void {
     this.slave.pseudoelementSelector(name, params);
   }
 
-  /**
-   * @override
-   */
-  idSelector(id: string): void {
+  override idSelector(id: string): void {
     this.slave.idSelector(id);
   }
 
-  /**
-   * @override
-   */
-  attributeSelector(
+  override attributeSelector(
     ns: string,
     name: string,
     op: CssTokenizer.TokenType,
@@ -309,122 +288,71 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.attributeSelector(ns, name, op, value);
   }
 
-  /**
-   * @override
-   */
-  descendantSelector(): void {
+  override descendantSelector(): void {
     this.slave.descendantSelector();
   }
 
-  /**
-   * @override
-   */
-  childSelector(): void {
+  override childSelector(): void {
     this.slave.childSelector();
   }
 
-  /**
-   * @override
-   */
-  adjacentSiblingSelector(): void {
+  override adjacentSiblingSelector(): void {
     this.slave.adjacentSiblingSelector();
   }
 
-  /**
-   * @override
-   */
-  followingSiblingSelector(): void {
+  override followingSiblingSelector(): void {
     this.slave.followingSiblingSelector();
   }
 
-  /**
-   * @override
-   */
-  nextSelector(): void {
+  override nextSelector(): void {
     this.slave.nextSelector();
   }
 
-  /**
-   * @override
-   */
-  startSelectorRule(): void {
+  override startSelectorRule(): void {
     this.slave.startSelectorRule();
   }
 
-  /**
-   * @override
-   */
-  startFontFaceRule(): void {
+  override startFontFaceRule(): void {
     this.slave.startFontFaceRule();
   }
 
-  /**
-   * @override
-   */
-  startFootnoteRule(pseudoelem: string | null): void {
+  override startFootnoteRule(pseudoelem: string | null): void {
     this.slave.startFootnoteRule(pseudoelem);
   }
 
-  /**
-   * @override
-   */
-  startViewportRule(): void {
+  override startViewportRule(): void {
     this.slave.startViewportRule();
   }
 
-  /**
-   * @override
-   */
-  startDefineRule(): void {
+  override startDefineRule(): void {
     this.slave.startDefineRule();
   }
 
-  /**
-   * @override
-   */
-  startRegionRule(): void {
+  override startRegionRule(): void {
     this.slave.startRegionRule();
   }
 
-  /**
-   * @override
-   */
-  startPageRule(): void {
+  override startPageRule(): void {
     this.slave.startPageRule();
   }
 
-  /**
-   * @override
-   */
-  startPageMarginBoxRule(name: string): void {
+  override startPageMarginBoxRule(name: string): void {
     this.slave.startPageMarginBoxRule(name);
   }
 
-  /**
-   * @override
-   */
-  startWhenRule(expr: Css.Expr): void {
+  override startWhenRule(expr: Css.Expr): void {
     this.slave.startWhenRule(expr);
   }
 
-  /**
-   * @override
-   */
-  startFlowRule(flowName: string): void {
+  override startFlowRule(flowName: string): void {
     this.slave.startFlowRule(flowName);
   }
 
-  /**
-   * @override
-   */
-  startPageTemplateRule(): void {
+  override startPageTemplateRule(): void {
     this.slave.startPageTemplateRule();
   }
 
-  /**
-   * @override
-   */
-  startPageMasterRule(
+  override startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -432,10 +360,7 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startPageMasterRule(name, pseudoName, classes);
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -443,10 +368,7 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startPartitionRule(name, pseudoName, classes);
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -454,38 +376,23 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startPartitionGroupRule(name, pseudoName, classes);
   }
 
-  /**
-   * @override
-   */
-  startRuleBody(): void {
+  override startRuleBody(): void {
     this.slave.startRuleBody();
   }
 
-  /**
-   * @override
-   */
-  property(name: string, value: Css.Val, important: boolean): void {
+  override property(name: string, value: Css.Val, important: boolean): void {
     this.slave.property(name, value, important);
   }
 
-  /**
-   * @override
-   */
-  endRule(): void {
+  override endRule(): void {
     this.slave.endRule();
   }
 
-  /**
-   * @override
-   */
-  startFuncWithSelector(funcName: string): void {
+  override startFuncWithSelector(funcName: string): void {
     this.slave.startFuncWithSelector(funcName);
   }
 
-  /**
-   * @override
-   */
-  endFuncWithSelector(): void {
+  override endFuncWithSelector(): void {
     this.slave.endFuncWithSelector();
   }
 }
@@ -504,31 +411,19 @@ export class SkippingParserHandler extends ParserHandler {
     }
   }
 
-  /**
-   * @override
-   */
-  getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token {
     return this.owner.getCurrentToken();
   }
 
-  /**
-   * @override
-   */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token): void {
     this.owner.errorMsg(mnemonics, token);
   }
 
-  /**
-   * @override
-   */
-  startRuleBody(): void {
+  override startRuleBody(): void {
     this.depth++;
   }
 
-  /**
-   * @override
-   */
-  endRule(): void {
+  override endRule(): void {
     if (--this.depth == 0 && !this.topLevel) {
       this.owner.popHandler();
     }
@@ -555,80 +450,47 @@ export class SlaveParserHandler extends SkippingParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startSelectorRule(): void {
+  override startSelectorRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR");
   }
 
-  /**
-   * @override
-   */
-  startFontFaceRule(): void {
+  override startFontFaceRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FONT_FACE");
   }
 
-  /**
-   * @override
-   */
-  startFootnoteRule(pseudoelem: string | null): void {
+  override startFootnoteRule(pseudoelem: string | null): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FOOTNOTE");
   }
 
-  /**
-   * @override
-   */
-  startViewportRule(): void {
+  override startViewportRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_VIEWPORT");
   }
 
-  /**
-   * @override
-   */
-  startDefineRule(): void {
+  override startDefineRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_DEFINE");
   }
 
-  /**
-   * @override
-   */
-  startRegionRule(): void {
+  override startRegionRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_REGION");
   }
 
-  /**
-   * @override
-   */
-  startPageRule(): void {
+  override startPageRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE");
   }
 
-  /**
-   * @override
-   */
-  startWhenRule(expr: Css.Expr): void {
+  override startWhenRule(expr: Css.Expr): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_WHEN");
   }
 
-  /**
-   * @override
-   */
-  startFlowRule(flowName: string): void {
+  override startFlowRule(flowName: string): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FLOW");
   }
 
-  /**
-   * @override
-   */
-  startPageTemplateRule(): void {
+  override startPageTemplateRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_TEMPLATE");
   }
 
-  /**
-   * @override
-   */
-  startPageMasterRule(
+  override startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -636,10 +498,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_MASTER");
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -647,10 +506,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION");
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -658,24 +514,15 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION_GROUP");
   }
 
-  /**
-   * @override
-   */
-  startFuncWithSelector(funcName: string): void {
+  override startFuncWithSelector(funcName: string): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR_FUNC");
   }
 
-  /**
-   * @override
-   */
-  endFuncWithSelector(): void {
+  override endFuncWithSelector(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_END_SELECTOR_FUNC");
   }
 
-  /**
-   * @override
-   */
-  property(name: string, value: Css.Val, important: boolean): void {
+  override property(name: string, value: Css.Val, important: boolean): void {
     this.error("E_CSS_UNEXPECTED_PROPERTY", this.getCurrentToken());
   }
 }
@@ -2750,17 +2597,11 @@ export class ErrorHandler extends ParserHandler {
     super(null);
   }
 
-  /**
-   * @override
-   */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token): void {
     throw new Error(mnemonics + " " + token);
   }
 
-  /**
-   * @override
-   */
-  getScope(): Exprs.LexicalScope {
+  override getScope(): Exprs.LexicalScope {
     return this.scope;
   }
 }

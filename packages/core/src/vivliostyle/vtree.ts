@@ -1325,14 +1325,12 @@ export class ContentPropertyHandler extends Css.Visitor {
     this.elem.appendChild(node);
   }
 
-  /** @override */
-  visitStr(str: Css.Str): Css.Val {
+  override visitStr(str: Css.Str): Css.Val {
     this.visitStrInner(str.str);
     return null;
   }
 
-  /** @override */
-  visitURL(url: Css.URL): Css.Val {
+  override visitURL(url: Css.URL): Css.Val {
     if ((this.rootContentValue as any).url) {
       this.elem.setAttribute("src", url.url);
     } else {
@@ -1343,14 +1341,12 @@ export class ContentPropertyHandler extends Css.Visitor {
     return null;
   }
 
-  /** @override */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     this.visitValues(list.values);
     return null;
   }
 
-  /** @override */
-  visitExpr(expr: Css.Expr): Css.Val {
+  override visitExpr(expr: Css.Expr): Css.Val {
     const ex = expr.toExpr();
     let val = ex.evaluate(this.context);
     if (typeof val === "string") {

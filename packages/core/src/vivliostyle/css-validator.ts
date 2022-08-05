@@ -391,40 +391,28 @@ export class PrimitiveValidator extends PropertyValidator {
     super();
   }
 
-  /**
-   * @override
-   */
-  visitEmpty(empty: Css.Val): Css.Val {
+  override visitEmpty(empty: Css.Val): Css.Val {
     if (this.allowed & ALLOW_EMPTY) {
       return empty;
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitSlash(slash: Css.Val): Css.Val {
+  override visitSlash(slash: Css.Val): Css.Val {
     if (this.allowed & ALLOW_SLASH) {
       return slash;
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitStr(str: Css.Str): Css.Val {
+  override visitStr(str: Css.Str): Css.Val {
     if (this.allowed & ALLOW_STR) {
       return str;
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitIdent(ident: Css.Ident): Css.Val {
+  override visitIdent(ident: Css.Ident): Css.Val {
     const val = this.idents[ident.name.toLowerCase()];
     if (val) {
       return val;
@@ -440,10 +428,7 @@ export class PrimitiveValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitNumeric(numeric: Css.Numeric): Css.Val {
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (numeric.num == 0 && !(this.allowed & ALLOW_ZERO)) {
       if (numeric.unit == "%" && this.allowed & ALLOW_ZERO_PERCENT) {
         return numeric;
@@ -459,10 +444,7 @@ export class PrimitiveValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitNum(num: Css.Num): Css.Val {
+  override visitNum(num: Css.Num): Css.Val {
     if (num.num == 0) {
       return this.allowed & ALLOW_ZERO ? num : null;
     }
@@ -475,10 +457,7 @@ export class PrimitiveValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitInt(num: Css.Int): Css.Val {
+  override visitInt(num: Css.Int): Css.Val {
     if (num.num == 0) {
       return this.allowed & ALLOW_ZERO ? num : null;
     }
@@ -495,10 +474,7 @@ export class PrimitiveValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitHexColor(color: Css.HexColor): Css.Val {
+  override visitHexColor(color: Css.HexColor): Css.Val {
     if (this.allowed & ALLOW_COLOR) {
       if (/^([0-9A-F]{3,4}|([0-9A-F]{2}){3,4})$/i.test(color.hex)) {
         return color;
@@ -507,44 +483,29 @@ export class PrimitiveValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitURL(url: Css.URL): Css.Val {
+  override visitURL(url: Css.URL): Css.Val {
     if (this.allowed & ALLOW_URL) {
       return url;
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitURange(urange: Css.URange): Css.Val {
+  override visitURange(urange: Css.URange): Css.Val {
     if (this.allowed & ALLOW_URANGE) {
       return urange;
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitFunc(func: Css.Func): Css.Val {
+  override visitFunc(func: Css.Func): Css.Val {
     if (this.allowed & ALLOW_COLOR) {
       if (CSS.supports("color", func.toString())) {
         return func;
@@ -570,10 +531,7 @@ export class PrimitiveValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitExpr(expr: Css.Expr): Css.Val {
+  override visitExpr(expr: Css.Expr): Css.Val {
     if (this.allowed & 0x7fe) {
       // ALLOW_STR|ALLOW_IDENT|...|ALLOW_ZERO_PERCENT
       return expr;
@@ -742,101 +700,59 @@ export class ListValidator extends PropertyValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitEmpty(empty: Css.Val): Css.Val {
+  override visitEmpty(empty: Css.Val): Css.Val {
     return this.validateSingle(empty);
   }
 
-  /**
-   * @override
-   */
-  visitSlash(slash: Css.Val): Css.Val {
+  override visitSlash(slash: Css.Val): Css.Val {
     return this.validateSingle(slash);
   }
 
-  /**
-   * @override
-   */
-  visitStr(str: Css.Str): Css.Val {
+  override visitStr(str: Css.Str): Css.Val {
     return this.validateSingle(str);
   }
 
-  /**
-   * @override
-   */
-  visitIdent(ident: Css.Ident): Css.Val {
+  override visitIdent(ident: Css.Ident): Css.Val {
     return this.validateSingle(ident);
   }
 
-  /**
-   * @override
-   */
-  visitNumeric(numeric: Css.Numeric): Css.Val {
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
     return this.validateSingle(numeric);
   }
 
-  /**
-   * @override
-   */
-  visitNum(num: Css.Num): Css.Val {
+  override visitNum(num: Css.Num): Css.Val {
     return this.validateSingle(num);
   }
 
-  /**
-   * @override
-   */
-  visitInt(num: Css.Int): Css.Val {
+  override visitInt(num: Css.Int): Css.Val {
     return this.validateSingle(num);
   }
 
-  /**
-   * @override
-   */
-  visitHexColor(color: Css.HexColor): Css.Val {
+  override visitHexColor(color: Css.HexColor): Css.Val {
     return this.validateSingle(color);
   }
 
-  /**
-   * @override
-   */
-  visitURL(url: Css.URL): Css.Val {
+  override visitURL(url: Css.URL): Css.Val {
     return this.validateSingle(url);
   }
 
-  /**
-   * @override
-   */
-  visitURange(urange: Css.URange): Css.Val {
+  override visitURange(urange: Css.URange): Css.Val {
     return this.validateSingle(urange);
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitFunc(func: Css.Func): Css.Val {
+  override visitFunc(func: Css.Func): Css.Val {
     return this.validateSingle(func);
   }
 
-  /**
-   * @override
-   */
-  visitExpr(expr: Css.Expr): Css.Val {
+  override visitExpr(expr: Css.Expr): Css.Val {
     return null;
   }
 }
@@ -846,10 +762,7 @@ export class SpaceListValidator extends ListValidator {
     super(group);
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     const arr = this.validateList(list.values, false, 0);
     if (arr === list.values) {
       return list;
@@ -860,10 +773,7 @@ export class SpaceListValidator extends ListValidator {
     return new Css.SpaceList(arr);
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     // Special Case : Issue #156
     let node = this.first;
     let hasCommaListValidator = false;
@@ -887,10 +797,7 @@ export class SpaceListValidator extends ListValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  validateForShorthand(values: Css.Val[], index: number): Css.Val[] {
+  override validateForShorthand(values: Css.Val[], index: number): Css.Val[] {
     return this.validateList(values, true, index);
   }
 }
@@ -900,17 +807,11 @@ export class CommaListValidator extends ListValidator {
     super(group);
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     return this.validateSingle(list);
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     const arr = this.validateList(list.values, false, 0);
     if (arr === list.values) {
       return list;
@@ -921,10 +822,7 @@ export class CommaListValidator extends ListValidator {
     return new Css.CommaList(arr);
   }
 
-  /**
-   * @override
-   */
-  validateForShorthand(values: Css.Val[], index: number): Css.Val[] {
+  override validateForShorthand(values: Css.Val[], index: number): Css.Val[] {
     let current = this.first;
     let rval: Css.Val[];
     while (current !== this.failureTerminal) {
@@ -943,17 +841,11 @@ export class FuncValidator extends ListValidator {
     super(group);
   }
 
-  /**
-   * @override
-   */
-  validateSingle(inval: Css.Val): Css.Val {
+  override validateSingle(inval: Css.Val): Css.Val {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitFunc(func: Css.Func): Css.Val {
+  override visitFunc(func: Css.Func): Css.Val {
     if (func.name.toLowerCase() != this.name) {
       return null;
     }
@@ -993,10 +885,7 @@ export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
     this.validator = validatorSet.validators[this.name];
   }
 
-  /**
-   * @override
-   */
-  tryParse(
+  override tryParse(
     values: Css.Val[],
     index: number,
     shorthandValidator: ShorthandValidator,
@@ -1014,10 +903,10 @@ export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
     return index;
   }
 
-  /**
-   * @override
-   */
-  success(rval: Css.Val, shorthandValidator: ShorthandValidator): void {
+  override success(
+    rval: Css.Val,
+    shorthandValidator: ShorthandValidator,
+  ): void {
     shorthandValidator.values[this.name] = rval;
   }
 }
@@ -1027,10 +916,10 @@ export class ShorthandSyntaxPropertyN extends ShorthandSyntaxProperty {
     super(validatorSet, names[0]);
   }
 
-  /**
-   * @override
-   */
-  success(rval: Css.Val, shorthandValidator: ShorthandValidator): void {
+  override success(
+    rval: Css.Val,
+    shorthandValidator: ShorthandValidator,
+  ): void {
     for (let i = 0; i < this.names.length; i++) {
       shorthandValidator.values[this.names[i]] = rval;
     }
@@ -1045,10 +934,7 @@ export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
     super();
   }
 
-  /**
-   * @override
-   */
-  tryParse(
+  override tryParse(
     values: Css.Val[],
     index: number,
     shorthandValidator: ShorthandValidator,
@@ -1141,89 +1027,53 @@ export class ShorthandValidator extends Css.Visitor {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitEmpty(empty: Css.Val): Css.Val {
+  override visitEmpty(empty: Css.Val): Css.Val {
     return this.validateSingle(empty);
   }
 
-  /**
-   * @override
-   */
-  visitStr(str: Css.Str): Css.Val {
+  override visitStr(str: Css.Str): Css.Val {
     return this.validateSingle(str);
   }
 
-  /**
-   * @override
-   */
-  visitIdent(ident: Css.Ident): Css.Val {
+  override visitIdent(ident: Css.Ident): Css.Val {
     return this.validateSingle(ident);
   }
 
-  /**
-   * @override
-   */
-  visitNumeric(numeric: Css.Numeric): Css.Val {
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
     return this.validateSingle(numeric);
   }
 
-  /**
-   * @override
-   */
-  visitNum(num: Css.Num): Css.Val {
+  override visitNum(num: Css.Num): Css.Val {
     return this.validateSingle(num);
   }
 
-  /**
-   * @override
-   */
-  visitInt(num: Css.Int): Css.Val {
+  override visitInt(num: Css.Int): Css.Val {
     return this.validateSingle(num);
   }
 
-  /**
-   * @override
-   */
-  visitHexColor(color: Css.HexColor): Css.Val {
+  override visitHexColor(color: Css.HexColor): Css.Val {
     return this.validateSingle(color);
   }
 
-  /**
-   * @override
-   */
-  visitURL(url: Css.URL): Css.Val {
+  override visitURL(url: Css.URL): Css.Val {
     return this.validateSingle(url);
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     this.validateList(list.values);
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     this.error = true;
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitFunc(func: Css.Func): Css.Val {
+  override visitFunc(func: Css.Func): Css.Val {
     return this.validateSingle(func);
   }
 
-  /**
-   * @override
-   */
-  visitExpr(expr: Css.Expr): Css.Val {
+  override visitExpr(expr: Css.Expr): Css.Val {
     return this.validateSingle(expr);
   }
 }
@@ -1233,10 +1083,7 @@ export class SimpleShorthandValidator extends ShorthandValidator {
     super();
   }
 
-  /**
-   * @override
-   */
-  validateList(list: Css.Val[]): number {
+  override validateList(list: Css.Val[]): number {
     let index = 0;
     let i = 0;
     while (index < list.length) {
@@ -1260,10 +1107,7 @@ export class InsetsShorthandValidator extends ShorthandValidator {
     super();
   }
 
-  /**
-   * @override
-   */
-  validateList(list: Css.Val[]): number {
+  override validateList(list: Css.Val[]): number {
     if (list.length > this.syntax.length || list.length == 0) {
       this.error = true;
       return 0;
@@ -1291,10 +1135,7 @@ export class InsetsSlashShorthandValidator extends ShorthandValidator {
     super();
   }
 
-  /**
-   * @override
-   */
-  validateList(list: Css.Val[]): number {
+  override validateList(list: Css.Val[]): number {
     let slashIndex = list.length;
     for (let i = 0; i < list.length; i++) {
       if (list[i] === Css.slash) {
@@ -1347,10 +1188,7 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
     }
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     const acc: { [key: string]: Css.Val[] } = {};
     for (let i = 0; i < list.values.length; i++) {
       this.values = {};
@@ -1384,10 +1222,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     super();
   }
 
-  /**
-   * @override
-   */
-  init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
+  override init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
     super.init(syntax, propList);
     this.propList.push(
       "font-family",
@@ -1401,10 +1236,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     );
   }
 
-  /**
-   * @override
-   */
-  validateList(list: Css.Val[]): number {
+  override validateList(list: Css.Val[]): number {
     let index = super.validateList(list);
 
     const fontVariant = this.values["font-variant_css2"];
@@ -1456,10 +1288,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     return list.length;
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: Css.CommaList): Css.Val {
+  override visitCommaList(list: Css.CommaList): Css.Val {
     list.values[0].visit(this);
     if (this.error) {
       return null;
@@ -1477,10 +1306,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     return null;
   }
 
-  /**
-   * @override
-   */
-  visitIdent(ident: Css.Ident): Css.Val {
+  override visitIdent(ident: Css.Ident): Css.Val {
     const props = this.validatorSet.systemFonts[ident.name];
     if (props) {
       for (const name in props) {
@@ -1570,10 +1396,7 @@ export class AllShorthandValidator extends SimpleShorthandValidator {
     super();
   }
 
-  /**
-   * @override
-   */
-  init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
+  override init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
     super.init(syntax, propList);
     for (const name in this.validatorSet.validators) {
       if (!propsExcludedFromAll.includes(name)) {
@@ -1582,10 +1405,7 @@ export class AllShorthandValidator extends SimpleShorthandValidator {
     }
   }
 
-  /**
-   * @override
-   */
-  validateList(list: Css.Val[]): number {
+  override validateList(list: Css.Val[]): number {
     this.error = true;
     return 0;
   }

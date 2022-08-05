@@ -104,9 +104,7 @@ export class LayoutProcessorResolver {
 }
 
 export class BlockLayoutProcessor implements LayoutProcessor {
-  /**
-   * @override
-   */
+  /** @override */
   layout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
@@ -121,9 +119,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createEdgeBreakPosition(
     position: Vtree.NodeContext,
     breakOnEdge: string | null,
@@ -138,16 +134,12 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean {
     return false;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   afterNonInlineElementNode(
     nodeContext: Vtree.NodeContext,
     stopAtOverflow: boolean,
@@ -155,9 +147,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     return false;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   clearOverflownViewNodes(
     column: Layout.Column,
     parentNodeContext: Vtree.NodeContext,
@@ -222,23 +212,17 @@ export class BlockFormattingContext
 
   constructor(private readonly parent: Vtree.FormattingContext) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   getName(): string {
     return "Block formatting context (BlockFormattingContext)";
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   isFirstTime(nodeContext: Vtree.NodeContext, firstTime: boolean): boolean {
     return firstTime;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getParent(): Vtree.FormattingContext {
     return this.parent;
   }

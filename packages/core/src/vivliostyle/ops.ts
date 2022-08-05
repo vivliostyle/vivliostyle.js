@@ -400,9 +400,7 @@ export class StyleInstance
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getStylerForDoc(xmldoc: XmlDoc.XMLDocHolder): CssStyler.AbstractStyler {
     let styler = this.stylerMap[xmldoc.url];
     if (!styler) {
@@ -439,23 +437,17 @@ export class StyleInstance
     return styler;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   registerInstance(key: string, instance: PageMaster.PageBoxInstance): void {
     this.pageBoxInstances[key] = instance;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   lookupInstance(key: string): PageMaster.PageBoxInstance {
     return this.pageBoxInstances[key];
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): void {
     const cp = this.currentLayoutPosition;
     if (cp) {
@@ -479,10 +471,11 @@ export class StyleInstance
     }
   }
 
-  /**
-   * @override
-   */
-  evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
+  override evalSupportsTest(
+    name: string,
+    value: string,
+    isFunc: boolean,
+  ): boolean {
     if (isFunc) {
       if (name === "selector") {
         // TODO: `@supports selector(...)`
@@ -1953,15 +1946,9 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startPageTemplateRule(): void {}
+  override startPageTemplateRule(): void {}
 
-  /**
-   * @override
-   */
-  startPageMasterRule(
+  override startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1985,10 +1972,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startWhenRule(expr: Css.Expr): void {
+  override startWhenRule(expr: Css.Expr): void {
     let condition = expr.expr;
     if (this.condition != null) {
       condition = Exprs.and(this.scope, this.condition, condition);
@@ -1998,19 +1982,13 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startDefineRule(): void {
+  override startDefineRule(): void {
     this.masterHandler.pushHandler(
       new CssCascade.DefineParserHandler(this.scope, this.owner),
     );
   }
 
-  /**
-   * @override
-   */
-  startFontFaceRule(): void {
+  override startFontFaceRule(): void {
     const properties = {} as CssCascade.ElementStyle;
     this.masterHandler.fontFaces.push({
       properties,
@@ -2027,10 +2005,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startFlowRule(flowName: string): void {
+  override startFlowRule(flowName: string): void {
     let style = this.masterHandler.flowProps[flowName];
     if (!style) {
       style = {} as CssCascade.ElementStyle;
@@ -2047,10 +2022,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startViewportRule(): void {
+  override startViewportRule(): void {
     const viewportProps = {} as CssCascade.ElementStyle;
     this.masterHandler.viewportProps.push(viewportProps);
     this.masterHandler.pushHandler(
@@ -2064,10 +2036,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startFootnoteRule(pseudoelem: string | null): void {
+  override startFootnoteRule(pseudoelem: string | null): void {
     let style = this.masterHandler.footnoteProps;
     if (pseudoelem) {
       const pseudos = CssCascade.getMutableStyleMap(style, "_pseudos");
@@ -2088,18 +2057,12 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startRegionRule(): void {
+  override startRegionRule(): void {
     this.insideRegion = true;
     this.startSelectorRule();
   }
 
-  /**
-   * @override
-   */
-  startPageRule(): void {
+  override startPageRule(): void {
     const pageHandler = new CssPage.PageParserHandler(
       this.masterHandler.pageScope,
       this.masterHandler,
@@ -2111,10 +2074,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     pageHandler.startPageRule();
   }
 
-  /**
-   * @override
-   */
-  startRuleBody(): void {
+  override startRuleBody(): void {
     CssCascade.CascadeParserHandler.prototype.startRuleBody.call(this);
     if (this.insideRegion) {
       this.insideRegion = false;
@@ -2178,10 +2138,7 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
     this.slave = this.cascadeParserHandler;
   }
 
-  /**
-   * @override
-   */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token): void {
     Logging.logger.warn("CSS parser:", mnemonics, token);
   }
 }

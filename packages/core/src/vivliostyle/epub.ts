@@ -387,10 +387,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     }
   }
 
-  /**
-   * @override
-   */
-  load(url: string): Task.Result<XmlDoc.XMLDocHolder> {
+  override load(url: string): Task.Result<XmlDoc.XMLDocHolder> {
     const docURL = Base.stripFragment(url);
     let r = this.documents[docURL];
     if (r) {
@@ -790,17 +787,13 @@ export class OPFDoc {
   createDocumentURLTransformer(): Base.DocumentURLTransformer {
     const self = this;
     class OPFDocumentURLTransformer implements Base.DocumentURLTransformer {
-      /**
-       * @override
-       */
+      /** @override */
       transformFragment(fragment: string, baseURL: string): string {
         const url = baseURL + (fragment ? `#${fragment}` : "");
         return transformedIdPrefix + Base.escapeNameStrToHex(url, ":");
       }
 
-      /**
-       * @override
-       */
+      /** @override */
       transformURL(url: string, baseURL: string): string {
         const r = url.match(/^([^#]*)#?(.*)$/);
         if (r) {
@@ -815,9 +808,7 @@ export class OPFDoc {
         return url;
       }
 
-      /**
-       * @override
-       */
+      /** @override */
       restoreURL(encoded: string): string[] {
         if (encoded.charAt(0) === "#") {
           encoded = encoded.substring(1);
@@ -2428,9 +2419,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): Vgen.CustomRenderer {
     return (
       srcElem: Element,

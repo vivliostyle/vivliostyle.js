@@ -171,16 +171,12 @@ export enum FrameState {
   DEAD, // when callback is complete
 }
 export class TimerImpl implements Timer {
-  /**
-   * @override
-   */
+  /** @override */
   currentTime(): number {
     return new Date().valueOf();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   setTimeout(fn: () => void, delay: number) {
     // HACK: casting to unknown type to prevent TypeScript error
     // [TS2352] Conversion of type 'Timer' to type 'number' may be a mistake because neither type sufficiently overlaps with the other.
@@ -188,9 +184,7 @@ export class TimerImpl implements Timer {
     return timer as number;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   clearTimeout(token: number): void {
     clearTimeout(token);
   }
@@ -350,9 +344,7 @@ export class Continuation<T> implements Base.Comparable {
 
   constructor(public task: Task) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   compare(otherComp: Base.Comparable): number {
     // earlier wins
     const other = otherComp as Continuation<any>;
@@ -536,44 +528,32 @@ export class Task {
 export class SyncResultImpl<T> implements Result<T> {
   constructor(public value: T) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   then(callback: (T: any) => void) {
     callback(this.value);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   thenAsync<T1>(callback: (p1: T) => Result<T1>) {
     return callback(this.value);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   thenReturn<T1>(result: T1) {
     return new SyncResultImpl(result);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   thenFinish(frame: Frame<T>): void {
     frame.finish(this.value);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   isPending(): boolean {
     return false;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   get(): T | null {
     return this.value;
   }
@@ -585,16 +565,12 @@ export class SyncResultImpl<T> implements Result<T> {
 export class ResultImpl<T> implements Result<T> {
   constructor(public readonly frame: Frame<T>) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   then(callback: (p1: T) => void): void {
     this.frame.then(callback);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   thenAsync<T1>(callback: (p1: T) => Result<T1>): Result<T1> {
     if (this.isPending()) {
       // thenAsync is special, do the trick with the context
@@ -616,9 +592,7 @@ export class ResultImpl<T> implements Result<T> {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   thenReturn<T1>(result: T1) {
     if (this.isPending()) {
       return this.thenAsync(() => new SyncResultImpl(result));
@@ -627,9 +601,7 @@ export class ResultImpl<T> implements Result<T> {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   thenFinish(frame: Frame<T>): void {
     if (this.isPending()) {
       this.then((res) => {
@@ -640,16 +612,12 @@ export class ResultImpl<T> implements Result<T> {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   isPending(): boolean {
     return this.frame.state == FrameState.ACTIVE;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   get(): T | null {
     if (this.isPending()) {
       throw new Error("Result is pending");

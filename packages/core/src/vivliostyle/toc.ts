@@ -84,9 +84,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): Vgen.CustomRenderer {
     const renderer = this.rendererFactory.makeCustomRenderer(xmldoc);
     return (

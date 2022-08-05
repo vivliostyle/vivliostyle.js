@@ -466,9 +466,7 @@ export class StringBuffer {
     this.list = [];
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   toString(): string {
     const str = this.list.join("");
     this.list = [str];

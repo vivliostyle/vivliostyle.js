@@ -180,17 +180,11 @@ export class PageMaster<
     // this.specified["top"] = new CssCascade.CascadeValue(new Css.Numeric(-1, "px"), 0);
   }
 
-  /**
-   * @override
-   */
-  createInstance(parentInstance): PageBoxInstance {
+  override createInstance(parentInstance): PageBoxInstance {
     return new PageMasterInstance(parentInstance, this);
   }
 
-  /**
-   * @override
-   */
-  clone(param): PageMaster {
+  override clone(param): PageMaster {
     // The cloned page master shares the same scope object with the original
     // one.
     const cloned = new PageMaster(
@@ -242,17 +236,11 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
     );
   }
 
-  /**
-   * @override
-   */
-  createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
+  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
     return new PartitionGroupInstance(parentInstance, this);
   }
 
-  /**
-   * @override
-   */
-  clone(param): PartitionGroup {
+  override clone(param): PartitionGroup {
     const cloned = new PartitionGroup(
       param.parent.scope,
       this.name,
@@ -286,17 +274,11 @@ export class Partition<
     }
   }
 
-  /**
-   * @override
-   */
-  createInstance(parentInstance): PageBoxInstance {
+  override createInstance(parentInstance): PageBoxInstance {
     return new PartitionInstance(parentInstance, this);
   }
 
-  /**
-   * @override
-   */
-  clone(param): Partition {
+  override clone(param): Partition {
     const cloned = new Partition(
       param.parent.scope,
       this.name,
@@ -1651,10 +1633,7 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
     super(null, pageBox);
   }
 
-  /**
-   * @override
-   */
-  applyCascadeAndInit(
+  override applyCascadeAndInit(
     cascade: CssCascade.CascadeInstance,
     docElementStyle: CssCascade.ElementStyle,
   ): void {
@@ -1678,10 +1657,7 @@ export class PageMasterInstance<
     this.pageMasterInstance = this;
   }
 
-  /**
-   * @override
-   */
-  boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
+  override boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     const pageMaster = this.pageBox.pageMaster;
     if (pageMaster.condition) {
       enabled = Exprs.and(pageMaster.scope, enabled, pageMaster.condition);
@@ -1746,10 +1722,7 @@ export class PartitionInstance<
     return enabled;
   }
 
-  /**
-   * @override
-   */
-  boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
+  override boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     const scope = this.pageBox.scope;
     const style = this.style;
     const required =
@@ -1780,10 +1753,7 @@ export class PartitionInstance<
     return enabled;
   }
 
-  /**
-   * @override
-   */
-  prepareContainer(
+  override prepareContainer(
     context: Exprs.Context,
     container: Vtree.Container,
     page: Vtree.Page,
@@ -1808,10 +1778,7 @@ export class PageBoxParserHandler
     super(scope, owner, false);
   }
 
-  /**
-   * @override
-   */
-  property(name: string, value: Css.Val, important: boolean): void {
+  override property(name: string, value: Css.Val, important: boolean): void {
     this.validatorSet.validatePropertyAndHandleShorthand(
       name,
       value,
@@ -1820,23 +1787,17 @@ export class PageBoxParserHandler
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   unknownProperty(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   invalidPropertyValue(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   simpleProperty(name: string, value: Css.Val, important): void {
     this.target.specified[name] = new CssCascade.CascadeValue(
       value,
@@ -1876,10 +1837,7 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1900,10 +1858,7 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
     this.owner.pushHandler(handler);
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1935,10 +1890,7 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
     super(scope, owner, target, validatorSet);
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1959,10 +1911,7 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
     this.owner.pushHandler(handler);
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],

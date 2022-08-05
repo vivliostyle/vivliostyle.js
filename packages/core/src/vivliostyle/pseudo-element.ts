@@ -71,9 +71,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     public readonly exprContentListener: Vtree.ExprContentListener,
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   getStyle(element: Element, deep: boolean): CssCascade.ElementStyle {
     const pseudoName = getPseudoName(element);
     if (this.styler && pseudoName && pseudoName.match(/after$/)) {
@@ -98,9 +96,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     return style;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   processContent(
     element: Element,
     styles: { [key: string]: Css.Val },
