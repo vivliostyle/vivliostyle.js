@@ -380,9 +380,6 @@ export function getProp(style: ElementStyle, name: string): CascadeValue {
   return style[name] as CascadeValue;
 }
 
-/**
- * @return void
- */
 export function setProp(
   style: ElementStyle,
   name: string,

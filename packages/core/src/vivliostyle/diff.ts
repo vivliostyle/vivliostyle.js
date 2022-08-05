@@ -26,10 +26,7 @@ export function diffChars(originalText: string, newText: string): Change[] {
   return fastdiff(originalText, newText, 0);
 }
 
-/**
- * @returns string
- */
-export function restoreOriginalText(changes: Change[]): any {
+export function restoreOriginalText(changes: Change[]): string {
   return changes.reduce((result, item) => {
     if (item[0] === fastdiff.INSERT) {
       return result;
@@ -38,10 +35,7 @@ export function restoreOriginalText(changes: Change[]): any {
   }, "");
 }
 
-/**
- * @returns string
- */
-export function restoreNewText(changes: Change[]): any {
+export function restoreNewText(changes: Change[]): string {
   return changes.reduce((result, item) => {
     if (item[0] === fastdiff.DELETE) {
       return result;

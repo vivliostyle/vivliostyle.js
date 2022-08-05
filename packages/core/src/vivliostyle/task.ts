@@ -42,7 +42,6 @@ export interface Timer {
   /**
    * Calls function after a given timeout.
    * @param token timeout token.
-   * @return.
    */
   clearTimeout(token: number): void;
 }

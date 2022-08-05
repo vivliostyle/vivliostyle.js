@@ -1523,9 +1523,6 @@ export class ViewFactory
     }
   }
 
-  /**
-   * @return isSVGUrlAttribute
-   */
   isSVGUrlAttribute(attributeName: string): boolean {
     return ViewFactory.SVG_URL_ATTRIBUTES.includes(attributeName.toLowerCase());
   }

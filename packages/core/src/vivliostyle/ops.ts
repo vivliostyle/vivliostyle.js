@@ -456,7 +456,7 @@ export class StyleInstance
   /**
    * @override
    */
-  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): any {
+  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): void {
     const cp = this.currentLayoutPosition;
     if (cp) {
       if (!cp.flows[flowChunk.flowName]) {

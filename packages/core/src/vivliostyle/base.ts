@@ -260,10 +260,7 @@ export function setURLParam(url: string, name: string, value: string): string {
   }
 }
 
-/**
- * @return ?string
- */
-export function asString(v: any): any {
+export function asString(v: any): string | null {
   if (v == null) {
     return v;
   }

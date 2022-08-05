@@ -238,9 +238,6 @@ export class RepetitiveElements
     );
   }
 
-  /**
-   * @return
-   */
   appendElementToFragment(
     nodePosition: Vtree.NodePosition,
     rootNodeContext: Vtree.NodeContext,

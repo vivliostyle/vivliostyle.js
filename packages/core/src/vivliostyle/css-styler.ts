@@ -113,10 +113,7 @@ export class SlipMap {
 }
 
 export interface FlowListener {
-  /**
-   * @return void
-   */
-  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): any;
+  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): void;
 }
 
 export interface AbstractStyler extends CssStyler.AbstractStyler {}
