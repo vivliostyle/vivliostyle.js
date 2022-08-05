@@ -2724,20 +2724,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       spacerBox = this.clientLayout.getElementClientRect(spacer);
       const afterEdge = this.getAfterEdge(spacerBox);
-      if (this.vertical) {
-        let wAdj = afterEdge + margin.right - clearEdge;
-        if (wAdj > 0 == margin.right >= 0) {
-          // In addition to collapsed portion
-          wAdj += margin.right;
+      if (!nodeContext.floatSide) {
+        if (this.vertical) {
+          let wAdj = afterEdge + margin.right - clearEdge;
+          if (wAdj > 0 == margin.right >= 0) {
+            // In addition to collapsed portion
+            wAdj += margin.right;
+          }
+          spacer.style.marginLeft = `${wAdj}px`;
+        } else {
+          let hAdj = clearEdge - (afterEdge + margin.top);
+          if (hAdj > 0 == margin.top >= 0) {
+            // In addition to collapsed portion
+            hAdj += margin.top;
+          }
+          spacer.style.marginBottom = `${hAdj}px`;
         }
-        spacer.style.marginLeft = `${wAdj}px`;
-      } else {
-        let hAdj = clearEdge - (afterEdge + margin.top);
-        if (hAdj > 0 == margin.top >= 0) {
-          // In addition to collapsed portion
-          hAdj += margin.top;
-        }
-        spacer.style.marginBottom = `${hAdj}px`;
       }
       nodeContext.clearSpacer = spacer;
       return true;
