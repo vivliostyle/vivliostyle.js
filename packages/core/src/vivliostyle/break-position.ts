@@ -42,9 +42,7 @@ export abstract class AbstractBreakPosition
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   breakPositionChosen(column: Layout.Column): void {}
 
   getNodeContext(): Vtree.NodeContext {
@@ -91,10 +89,7 @@ export class EdgeBreakPosition
     this.overflowIfRepetitiveElementsDropped = overflows;
   }
 
-  /**
-   * @override
-   */
-  findAcceptableBreak(
+  override findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
   ): Vtree.NodeContext {
@@ -105,10 +100,7 @@ export class EdgeBreakPosition
     return column.findEdgeBreakPosition(this);
   }
 
-  /**
-   * @override
-   */
-  getMinBreakPenalty(): number {
+  override getMinBreakPenalty(): number {
     if (!this.isEdgeUpdated) {
       throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
@@ -150,8 +142,7 @@ export class EdgeBreakPosition
     );
   }
 
-  /** @override */
-  getNodeContext(): Vtree.NodeContext {
+  override getNodeContext(): Vtree.NodeContext {
     return this.position;
   }
 

@@ -113,10 +113,7 @@ export class SlipMap {
 }
 
 export interface FlowListener {
-  /**
-   * @return void
-   */
-  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): any;
+  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): void;
 }
 
 export interface AbstractStyler extends CssStyler.AbstractStyler {}
@@ -1057,9 +1054,7 @@ export class Styler implements AbstractStyler {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getStyle(element: Element, deep: boolean): CssCascade.ElementStyle {
     let offset = this.xmldoc.getElementOffset(element);
     const key = `e${offset}`;
@@ -1072,9 +1067,7 @@ export class Styler implements AbstractStyler {
     return this.styleMap[key];
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   processContent(
     element: Element,
     styles: { [key: string]: Css.Val },

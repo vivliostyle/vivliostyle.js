@@ -338,9 +338,7 @@ export type LayoutConstraint = Layout.LayoutConstraint;
 export class AllLayoutConstraint implements LayoutConstraint {
   constructor(public readonly constraints: LayoutConstraint[]) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
     return this.constraints.every((c) => c.allowLayout(nodeContext));
   }
@@ -371,10 +369,10 @@ export class BoxBreakPosition
     super();
   }
 
-  /**
-   * @override
-   */
-  findAcceptableBreak(column: Column, penalty: number): Vtree.NodeContext {
+  override findAcceptableBreak(
+    column: Column,
+    penalty: number,
+  ): Vtree.NodeContext {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -385,15 +383,11 @@ export class BoxBreakPosition
     return this.breakNodeContext;
   }
 
-  /**
-   * @override
-   */
-  getMinBreakPenalty(): number {
+  override getMinBreakPenalty(): number {
     return this.penalty;
   }
 
-  /** @override */
-  getNodeContext(): Vtree.NodeContext {
+  override getNodeContext(): Vtree.NodeContext {
     return this.alreadyEvaluated
       ? this.breakNodeContext
       : this.checkPoints[this.checkPoints.length - 1];
@@ -4001,10 +3995,9 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     this.breakAfter = breakAfter || null;
   }
 
-  /**
-   * @override
-   */
-  resolveLayoutMode(nodeContext: Vtree.NodeContext): Layout.LayoutMode {
+  override resolveLayoutMode(
+    nodeContext: Vtree.NodeContext,
+  ): Layout.LayoutMode {
     return new DefaultLayoutMode(
       this.leadingEdge,
       this.breakAfter,
@@ -4012,20 +4005,17 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     );
   }
 
-  /**
-   * @override
-   */
-  prepareLayout(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override prepareLayout(
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
       Shared.clearRepetitiveElementsCache();
     }
   }
 
-  /**
-   * @override
-   */
-  clearNodes(initialPosition: Vtree.NodeContext) {
+  override clearNodes(initialPosition: Vtree.NodeContext) {
     super.clearNodes(initialPosition);
     let nodeContext = initialPosition;
     while (nodeContext) {
@@ -4037,20 +4027,14 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     }
   }
 
-  /**
-   * @override
-   */
-  saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     super.saveState(nodeContext, column);
     this.initialPageBreakType = column.pageBreakType;
     this.initialComputedBlockSize = column.computedBlockSize;
     this.initialOverflown = column.overflown;
   }
 
-  /**
-   * @override
-   */
-  restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     super.restoreState(nodeContext, column);
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
@@ -4065,9 +4049,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     public readonly context: { overflownNodeContext: Vtree.NodeContext },
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
@@ -4087,9 +4069,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean {
     if (column.pageFloatLayoutContext.isInvalidated() || column.pageBreakType) {
       return true;
@@ -4106,9 +4086,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   postLayout(
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
@@ -4156,10 +4134,9 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     );
   }
 
-  /**
-   * @override
-   */
-  openAllViews(position: Vtree.NodePosition): Task.Result<Vtree.NodeContext> {
+  override openAllViews(
+    position: Vtree.NodePosition,
+  ): Task.Result<Vtree.NodeContext> {
     return super.openAllViews(position).thenAsync((nodeContext) => {
       if (nodeContext) {
         this.fixFloatSizeAndPosition(nodeContext);

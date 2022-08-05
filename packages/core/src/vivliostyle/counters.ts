@@ -97,9 +97,7 @@ class CounterListener implements CssCascade.CounterListener {
     public readonly baseURL: string,
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   countersOfId(id: string, counters: CssCascade.CounterValues) {
     id = this.counterStore.documentURLTransformer.transformFragment(
       id,
@@ -151,9 +149,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     return transformedId;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getPageCounterVal(
     name: string,
     format: (p1: number | null) => string,
@@ -177,9 +173,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     return expr;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getPageCountersVal(
     name: string,
     format: (p1: number[]) => string,
@@ -240,9 +234,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getTargetCounterVal(
     url: string,
     name: string,
@@ -311,9 +303,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getTargetCountersVal(
     url: string,
     name: string,
@@ -827,9 +817,7 @@ class LayoutConstraint implements Layout.LayoutConstraint {
     public readonly pageIndex: number,
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
     if (!nodeContext || nodeContext.after) {
       return true;

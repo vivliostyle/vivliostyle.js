@@ -149,29 +149,15 @@ export function ajax(
   return frame.result();
 }
 
-/**
- * @return Blob
- */
 export function makeBlob(
   parts: (string | Blob | ArrayBuffer | ArrayBufferView)[],
   opt_type?: string,
-): any {
+): Blob {
   const type = opt_type || "application/octet-stream";
-  const builderCtr = window["WebKitBlobBuilder"] || window["MSBlobBuilder"]; // deprecated
-  if (builderCtr) {
-    const builder = new builderCtr();
-    for (let i = 0; i < parts.length; i++) {
-      builder.append(parts[i]);
-    }
-    return builder.getBlob(type);
-  }
   return new Blob(parts, { type });
 }
 
-/**
- * @return Task.Result.<ArrayBuffer>
- */
-export function readBlob(blob: Blob): any {
+export function readBlob(blob: Blob): Task.Result<ArrayBuffer> {
   const frame: Task.Frame<ArrayBuffer> = Task.newFrame("readBlob");
   const fileReader = new FileReader();
   const continuation = frame.suspend(fileReader);

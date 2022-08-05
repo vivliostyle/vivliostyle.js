@@ -96,10 +96,7 @@ export class FilterVisitor extends Visitor {
     super();
   }
 
-  /**
-   * @override
-   */
-  visitValues(values: Val[]): Val[] {
+  override visitValues(values: Val[]): Val[] {
     let arr: Val[] = null;
     for (let i = 0; i < values.length; i++) {
       const before = values[i];
@@ -120,80 +117,47 @@ export class FilterVisitor extends Visitor {
     return arr || values;
   }
 
-  /**
-   * @override
-   */
-  visitEmpty(empty: Val): Val {
+  override visitEmpty(empty: Val): Val {
     return empty;
   }
 
-  /**
-   * @override
-   */
-  visitStr(str: Str): Val {
+  override visitStr(str: Str): Val {
     return str;
   }
 
-  /**
-   * @override
-   */
-  visitIdent(ident: Ident): Val {
+  override visitIdent(ident: Ident): Val {
     return ident;
   }
 
-  /**
-   * @override
-   */
-  visitSlash(slash: Val): Val {
+  override visitSlash(slash: Val): Val {
     return slash;
   }
 
-  /**
-   * @override
-   */
-  visitNumeric(numeric: Numeric): Val {
+  override visitNumeric(numeric: Numeric): Val {
     return numeric;
   }
 
-  /**
-   * @override
-   */
-  visitNum(num: Num): Val {
+  override visitNum(num: Num): Val {
     return num;
   }
 
-  /**
-   * @override
-   */
-  visitInt(num: Int): Val {
+  override visitInt(num: Int): Val {
     return num;
   }
 
-  /**
-   * @override
-   */
-  visitHexColor(color: HexColor): Val {
+  override visitHexColor(color: HexColor): Val {
     return color;
   }
 
-  /**
-   * @override
-   */
-  visitURL(url: URL): Val {
+  override visitURL(url: URL): Val {
     return url;
   }
 
-  /**
-   * @override
-   */
-  visitURange(urange: URange): Val {
+  override visitURange(urange: URange): Val {
     return urange;
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: SpaceList): Val {
+  override visitSpaceList(list: SpaceList): Val {
     const values = this.visitValues(list.values);
     if (this.error) {
       return empty;
@@ -204,10 +168,7 @@ export class FilterVisitor extends Visitor {
     return new SpaceList(values);
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: CommaList): Val {
+  override visitCommaList(list: CommaList): Val {
     const values = this.visitValues(list.values);
     if (this.error) {
       return empty;
@@ -218,10 +179,7 @@ export class FilterVisitor extends Visitor {
     return new CommaList(values);
   }
 
-  /**
-   * @override
-   */
-  visitFunc(func: Func): Val {
+  override visitFunc(func: Func): Val {
     const values = this.visitValues(func.values);
     if (this.error) {
       return empty;
@@ -232,18 +190,13 @@ export class FilterVisitor extends Visitor {
     return new Func(func.name, values);
   }
 
-  /**
-   * @override
-   */
-  visitExpr(expr: Expr): Val {
+  override visitExpr(expr: Expr): Val {
     return expr;
   }
 }
 
 export class Val {
-  /**
-   * @override
-   */
+  /** @override */
   toString(): string {
     const buf = new Base.StringBuffer();
     this.appendTo(buf, true);
@@ -303,22 +256,13 @@ export class Empty extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, "");
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {}
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {}
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitEmpty(this);
   }
 }
@@ -339,24 +283,15 @@ export class Slash extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, "/");
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append("/");
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitSlash(this);
   }
 }
@@ -368,17 +303,11 @@ export class Str extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, this.str);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     if (toString) {
       buf.append('"');
       buf.append(Base.escapeCSSStr(this.str));
@@ -388,10 +317,7 @@ export class Str extends Val {
     }
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitStr(this);
   }
 }
@@ -407,17 +333,11 @@ export class Ident extends Val {
     nameTable[name] = this;
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, this.name);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     if (toString) {
       buf.append(Base.escapeCSSIdent(this.name));
     } else {
@@ -425,17 +345,11 @@ export class Ident extends Val {
     }
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitIdent(this);
   }
 
-  /**
-   * @override
-   */
-  isIdent(): boolean {
+  override isIdent(): boolean {
     return true;
   }
 }
@@ -456,10 +370,7 @@ export class Numeric extends Val {
     this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -476,25 +387,16 @@ export class Numeric extends Val {
     return new Exprs.Numeric(scope, this.num, this.unit);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.num.toString());
     buf.append(this.unit);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitNumeric(this);
   }
 
-  /**
-   * @override
-   */
-  isNumeric(): boolean {
+  override isNumeric(): boolean {
     return true;
   }
 }
@@ -504,10 +406,7 @@ export class Num extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -517,24 +416,15 @@ export class Num extends Val {
     return new Exprs.Const(scope, this.num);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.num.toString());
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitNum(this);
   }
 
-  /**
-   * @override
-   */
-  isNum(): boolean {
+  override isNum(): boolean {
     return true;
   }
 }
@@ -544,10 +434,7 @@ export class Int extends Num {
     super(num);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitInt(this);
   }
 }
@@ -557,18 +444,12 @@ export class HexColor extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append("#");
     buf.append(this.hex);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitHexColor(this);
   }
 }
@@ -578,19 +459,13 @@ export class URL extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append('url("');
     buf.append(Base.escapeCSSStr(this.url));
     buf.append('")');
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitURL(this);
   }
 }
@@ -600,17 +475,11 @@ export class URange extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.urangeText);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitURange(this);
   }
 }
@@ -636,24 +505,15 @@ export class SpaceList extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     appendList(buf, this.values, " ", toString);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitSpaceList(this);
   }
 
-  /**
-   * @override
-   */
-  isSpaceList(): boolean {
+  override isSpaceList(): boolean {
     return true;
   }
 }
@@ -663,17 +523,11 @@ export class CommaList extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     appendList(buf, this.values, ",", toString);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitCommaList(this);
   }
 }
@@ -683,20 +537,14 @@ export class Func extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(Base.escapeCSSIdent(this.name));
     buf.append("(");
     appendList(buf, this.values, ",", toString);
     buf.append(")");
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitFunc(this);
   }
 }
@@ -706,17 +554,11 @@ export class Expr extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(): Exprs.Val {
+  override toExpr(): Exprs.Val {
     return this.expr;
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     if (
       this.expr instanceof Exprs.Const ||
       this.expr instanceof Exprs.Numeric
@@ -729,17 +571,11 @@ export class Expr extends Val {
     }
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val {
     return visitor.visitExpr(this);
   }
 
-  /**
-   * @override
-   */
-  isExpr(): boolean {
+  override isExpr(): boolean {
     return true;
   }
 }
@@ -752,10 +588,7 @@ export class AnyToken extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.text || " ");
   }
 }
