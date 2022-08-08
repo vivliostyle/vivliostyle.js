@@ -666,7 +666,7 @@ export class ViewFactory
     // Figure out element's styles
     let element = this.sourceNode as Element;
     const styler = this.nodeContext.shadowContext
-      ? (this.nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
+      ? this.nodeContext.shadowContext.styler
       : this.styler;
     let elementStyle = styler.getStyle(element, false);
     if (!this.nodeContext.shadowContext) {

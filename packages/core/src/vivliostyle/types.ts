@@ -1249,7 +1249,7 @@ export namespace Vtree {
     readonly parentShadow: ShadowContext;
     subShadow: ShadowContext;
     readonly type: Vtree.ShadowType;
-    readonly styler: object;
+    readonly styler: CssStyler.AbstractStyler;
 
     equals(other: ShadowContext): boolean;
   }

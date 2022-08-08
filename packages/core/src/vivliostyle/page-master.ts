@@ -991,7 +991,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       }
     }
     if (val) {
-      val = CssParser.evaluateCSSToCSS(context, val, name);
+      val = CssCascade.evaluateCSSToCSS(context, val, name);
     }
     return val;
   }
@@ -999,7 +999,10 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   getPropAsNumber(context: Exprs.Context, name: string): number {
     let val = this.style[name];
     if (val) {
-      val = CssParser.evaluateCSSToCSS(context, val, name);
+      let percentRef = /\b(height|top|bottom)\b/.test(name)
+        ? context.pageAreaHeight ?? context.pageHeight()
+        : context.pageAreaWidth ?? context.pageWidth();
+      val = CssCascade.evaluateCSSToCSS(context, val, name, percentRef);
     }
     return Css.toNumber(val, context);
   }

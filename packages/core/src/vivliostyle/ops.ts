@@ -368,7 +368,7 @@ export class StyleInstance
       this.styler.cascade.applyVarFilter([pageStyle], this.styler, null);
 
       // Calculate calc()
-      this.styler.cascade.applyCalcFilter(pageStyle, this.styler);
+      this.styler.cascade.applyCalcFilter(pageStyle, this.styler.context);
 
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
         CssPage.resolvePageSizeAndBleed(pageStyle),
@@ -1787,7 +1787,7 @@ export class StyleInstance
     this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
 
     // Calculate calc()
-    this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler);
+    this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);
 
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
@@ -1813,6 +1813,7 @@ export class StyleInstance
         this,
       );
       this.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+
       CssPage.addPrinterMarks(
         cascadedPageStyle,
         evaluatedPageSizeAndBleed,

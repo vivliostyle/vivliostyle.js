@@ -531,7 +531,7 @@ export class Context {
   }
 
   queryVal(scope: LexicalScope, key: string): Result | undefined {
-    const s = this.scopes[scope.scopeKey];
+    const s = scope && this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
   }
 
@@ -609,7 +609,9 @@ export class Val {
       return result;
     }
     result = this.evaluateCore(context);
-    context.storeVal(this.scope, this.key, result);
+    if (this.scope) {
+      context.storeVal(this.scope, this.key, result);
+    }
     return result;
   }
 

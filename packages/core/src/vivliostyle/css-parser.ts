@@ -1850,16 +1850,7 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.VAL_NUMERIC:
-          if (Exprs.isViewportRelativeLengthUnit(token.text)) {
-            // Treat numeric value with viewport unit as numeric in expr.
-            valStack.push(
-              new Css.Expr(
-                new Exprs.Numeric(handler.getScope(), token.num, token.text),
-              ),
-            );
-          } else {
-            valStack.push(new Css.Numeric(token.num, token.text));
-          }
+          valStack.push(new Css.Numeric(token.num, token.text));
           tokenizer.consume();
           continue;
         case Action.VAL_STR:
@@ -2808,23 +2799,4 @@ export function evaluateExprToCSS(
       return Css.empty;
   }
   throw new Error("E_UNEXPECTED");
-}
-
-/**
- * @return val
- */
-export function evaluateCSSToCSS(
-  context: Exprs.Context,
-  val: Css.Val,
-  propName?: string,
-): Css.Val {
-  if (val.isExpr()) {
-    try {
-      return evaluateExprToCSS(context, (val as Css.Expr).expr, propName);
-    } catch (err) {
-      Logging.logger.warn(err);
-    }
-    return Css.empty;
-  }
-  return val;
 }
