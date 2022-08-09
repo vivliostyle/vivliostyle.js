@@ -366,6 +366,7 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   }
   switch (prop) {
     case "behavior":
+    case "ua-list-item-count":
       propNameMap[prop] = null;
       return null;
     case "text-combine-upright":
