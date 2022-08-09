@@ -216,6 +216,9 @@ export class ViewFactory
         if (name == "footnote-marker" && !(isRoot && this.isFootnote)) {
           continue;
         }
+        if (name.match(/^first-/) && element.parentElement?.tagName !== "BODY") {
+          continue;
+        }
         if (name.match(/^first-/)) {
           const display = computedStyle["display"];
           if (!display || display === Css.ident.inline) {
