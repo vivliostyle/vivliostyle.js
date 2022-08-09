@@ -1478,11 +1478,9 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
     scope: Exprs.LexicalScope,
     private readonly clientLayout: Vtree.ClientLayout,
   ) {
-    this.hasAutoSize_ = !PageMaster.toExprAuto(
-      scope,
-      style[isHorizontal ? "width" : "height"],
-      new Exprs.Numeric(scope, 0, "px"),
-    );
+    const val = style[isHorizontal ? "width" : "height"];
+    this.hasAutoSize_ =
+      !val || val === Css.ident.auto || Css.isDefaultingValue(val);
   }
 
   /** @override */

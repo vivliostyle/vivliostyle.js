@@ -273,7 +273,7 @@ export class CascadeValue {
     if (propName && Css.isCustomPropName(propName)) {
       return this.value;
     }
-    return CssParser.evaluateCSSToCSS(context, this.value, propName);
+    return evaluateCSSToCSS(context, this.value, propName);
   }
 
   isEnabled(context: Exprs.Context): boolean {
@@ -576,7 +576,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   override visitExpr(expr: Css.Expr): Css.Val {
     if (this.propName == "font-size") {
-      const val = CssParser.evaluateCSSToCSS(this.context, expr, this.propName);
+      const val = evaluateCSSToCSS(this.context, expr, this.propName);
       return val.visit(this);
     }
     return expr;
@@ -2868,7 +2868,7 @@ export class CascadeInstance {
     this.applyVarFilter([this.currentStyle], styler, element);
 
     // Calculate calc()
-    this.applyCalcFilter(this.currentStyle, styler);
+    this.applyCalcFilter(this.currentStyle, this.context);
 
     this.applyAttrFilter(element);
     const quotesCasc = baseStyle["quotes"] as CascadeValue;
@@ -3012,7 +3012,7 @@ export class CascadeInstance {
           // all variables substituted
           const validatorSet = (styler as any)
             .validatorSet as CssValidator.ValidatorSet;
-          const shorthand = validatorSet.shorthands[name]?.clone();
+          const shorthand = validatorSet?.shorthands[name]?.clone();
           if (shorthand) {
             if (Css.isDefaultingValue(value)) {
               for (const nameLH of shorthand.propList) {
@@ -3056,16 +3056,13 @@ export class CascadeInstance {
   /**
    * Calculate all calc() in property values in elementStyle
    */
-  applyCalcFilter(
-    elementStyle: ElementStyle,
-    styler: CssStyler.AbstractStyler,
-  ): void {
-    const visitor = new CalcFilterVisitor(styler);
+  applyCalcFilter(elementStyle: ElementStyle, context: Exprs.Context): void {
+    const visitor = new CalcFilterVisitor(context);
     for (const name in elementStyle) {
       if (isMapName(name)) {
         const pseudoMap = getStyleMap(elementStyle, name);
         for (const pseudoName in pseudoMap) {
-          this.applyCalcFilter(pseudoMap[pseudoName], styler);
+          this.applyCalcFilter(pseudoMap[pseudoName], context);
         }
       } else if (isPropName(name) && !Css.isCustomPropName(name)) {
         const cascVal = getProp(elementStyle, name);
@@ -4168,7 +4165,11 @@ export class VarFilterVisitor extends Css.FilterVisitor {
  * Convert calc() to its value
  */
 export class CalcFilterVisitor extends Css.FilterVisitor {
-  constructor(public styler: CssStyler.AbstractStyler) {
+  constructor(
+    public context: Exprs.Context,
+    public resolveViewportUnit?: boolean,
+    public percentRef?: number,
+  ) {
     super();
   }
 
@@ -4179,22 +4180,56 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       return value;
     }
     const exprText = value.toString().replace(/^calc\b/, "-epubx-expr");
-    const unitInCalc = exprText.replace(/^.*?\d([a-zA-Z]+\b|%).*$|^.*$/, "$1");
+    if (/\d(%|em|ex|cap|ch|ic|lh|p?v[whbi]|p?vmin|p?vmax)\W/i.test(exprText)) {
+      return value;
+    }
     const exprVal = CssParser.parseValue(
-      (this.styler as any).scope,
+      null,
       new CssTokenizer.Tokenizer(exprText, null),
       "",
     );
     if (exprVal instanceof Css.Expr) {
-      const exprResult = exprVal.expr.evaluate((this.styler as any).context);
+      const exprResult = exprVal.expr.evaluate(this.context);
       if (typeof exprResult === "number") {
-        if (unitInCalc && unitInCalc !== "%") {
-          value = new Css.Numeric(exprResult, "px");
-        }
-        // TODO: percentage value, etc.
-        // FIXME: font-size-relative or viewport relative unit may be incorrect
+        value = new Css.Numeric(exprResult, "px");
       }
     }
     return value;
   }
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    if (
+      this.resolveViewportUnit &&
+      Exprs.isViewportRelativeLengthUnit(numeric.unit)
+    ) {
+      return new Css.Numeric(
+        numeric.num * this.context.queryUnitSize(numeric.unit, false),
+        "px",
+      );
+    }
+    if (typeof this.percentRef === "number" && numeric.unit === "%") {
+      return new Css.Numeric((numeric.num * this.percentRef) / 100, "px");
+    }
+    return numeric;
+  }
+}
+
+export function evaluateCSSToCSS(
+  context: Exprs.Context,
+  val: Css.Val,
+  propName?: string,
+  percentRef?: number,
+): Css.Val {
+  try {
+    if (val instanceof Css.Expr) {
+      return CssParser.evaluateExprToCSS(context, val.expr, propName);
+    }
+    if (val instanceof Css.Numeric || val instanceof Css.Func) {
+      return val.visit(new CalcFilterVisitor(context, true, percentRef));
+    }
+  } catch (err) {
+    Logging.logger.warn(err);
+    return Css.empty;
+  }
+  return val;
 }
