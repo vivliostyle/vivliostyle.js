@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.17.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.0...v2.17.1) (2022-08-09)
+
+### Bug Fixes
+
+- float with clear not properly positioned ([54a00b8](https://github.com/vivliostyle/vivliostyle.js/commit/54a00b8be08106fc3d463be058eaaac6d58b810c)), closes [#969](https://github.com/vivliostyle/vivliostyle.js/issues/969)
+- Relative length units such as em and vw used in CSS calc() not working correctly ([5bd7ce3](https://github.com/vivliostyle/vivliostyle.js/commit/5bd7ce3d02d5e9ef9e9a0601071ebeacc9da8b2b)), closes [#968](https://github.com/vivliostyle/vivliostyle.js/issues/968)
+- unnecessary warning "Property not supported by the browser: ua-list-item-count" ([f9419a3](https://github.com/vivliostyle/vivliostyle.js/commit/f9419a3b2930a507bb9dc788cc3102e3fbb881c1))
+
 # [2.17.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.16.0...v2.17.0) (2022-07-29)
 
 ### Features
