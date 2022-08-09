@@ -30,7 +30,7 @@ import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssCascade, CssStyler } from "./types";
+import { CssStyler } from "./types";
 
 export type ElementStyle = {
   [key: string]:
@@ -3330,7 +3330,7 @@ export class CascadeParserHandler
             ),
           );
         } else {
-          this.chain.push(new CheckConditionAction("")); // always fais
+          this.chain.push(new CheckConditionAction("")); // always fails
         }
         break;
       case "nth-child":
@@ -3376,9 +3376,9 @@ export class CascadeParserHandler
       case "first-letter":
         this.pseudoelementSelector(name, params);
         return;
-      default:
+      default: // always fails
         Logging.logger.warn(`unknown pseudo-class selector: ${name}`);
-        this.chain.push(new CheckConditionAction("")); // always fails
+        this.chain.push(new CheckConditionAction(""));
         break;
     }
     this.specificity += 256;
@@ -3430,9 +3430,9 @@ export class CascadeParserHandler
           this.chain.push(new CheckConditionAction("")); // always fails
         }
         break;
-      default:
+      default: // always fails
         Logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
-        this.chain.push(new CheckConditionAction("")); // always fails
+        this.chain.push(new CheckConditionAction(""));
         break;
     }
     this.specificity += 1;
