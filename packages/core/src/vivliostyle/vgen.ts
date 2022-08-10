@@ -221,6 +221,19 @@ export class ViewFactory
           if (!display || display === Css.ident.inline) {
             continue;
           }
+          const child = element.firstElementChild;
+          if (child && !child.previousSibling?.textContent.trim()) {
+            const childStyle = styler.getStyle(child, false);
+            if (childStyle) {
+              const childDisplay = CssCascade.getProp(childStyle, "display");
+              if (
+                childDisplay?.value &&
+                childDisplay.value !== Css.ident.inline
+              ) {
+                continue;
+              }
+            }
+          }
         }
         if (name === "before" || name === "after") {
           const content = pseudoMap[name]["content"] as CssCascade.CascadeValue;
