@@ -22,82 +22,88 @@ import * as Base from "./base";
 import * as Exprs from "./exprs";
 
 export class Visitor {
-  /**
-   * @return void
-   */
-  visitValues(values: Val[]): any {
+  visitValues(values: Val[]): Val[] {
     for (let i = 0; i < values.length; i++) {
       values[i].visit(this);
     }
+    return null;
   }
 
   visitEmpty(empty: Val): Val {
-    throw new Error("E_CSS_EMPTY_NOT_ALLOWED");
+    return null;
   }
 
   visitSlash(slash: Val): Val {
-    throw new Error("E_CSS_SLASH_NOT_ALLOWED");
+    return null;
   }
 
   visitStr(str: Str): Val {
-    throw new Error("E_CSS_STR_NOT_ALLOWED");
+    return null;
   }
 
   visitIdent(ident: Ident): Val {
-    throw new Error("E_CSS_IDENT_NOT_ALLOWED");
+    return null;
   }
 
   visitNumeric(numeric: Numeric): Val {
-    throw new Error("E_CSS_NUMERIC_NOT_ALLOWED");
+    return null;
   }
 
   visitNum(num: Num): Val {
-    throw new Error("E_CSS_NUM_NOT_ALLOWED");
+    return null;
   }
 
   visitInt(num: Int): Val {
     return this.visitNum(num);
   }
 
-  visitColor(color: Color): Val {
-    throw new Error("E_CSS_COLOR_NOT_ALLOWED");
+  visitHexColor(color: HexColor): Val {
+    return null;
   }
 
   visitURL(url: URL): Val {
-    throw new Error("E_CSS_URL_NOT_ALLOWED");
+    return null;
   }
 
   visitURange(urange: URange): Val {
-    throw new Error("E_CSS_URANGE_NOT_ALLOWED");
+    return null;
   }
 
   visitSpaceList(list: SpaceList): Val {
-    throw new Error("E_CSS_LIST_NOT_ALLOWED");
+    this.visitValues(list.values);
+    return null;
   }
 
   visitCommaList(list: CommaList): Val {
-    throw new Error("E_CSS_COMMA_NOT_ALLOWED");
+    this.visitValues(list.values);
+    return null;
   }
 
   visitFunc(func: Func): Val {
-    throw new Error("E_CSS_FUNC_NOT_ALLOWED");
+    this.visitValues(func.values);
+    return null;
   }
 
   visitExpr(expr: Expr): Val {
-    throw new Error("E_CSS_EXPR_NOT_ALLOWED");
+    return null;
   }
 }
 
 export class FilterVisitor extends Visitor {
+  error: boolean = false;
+
   constructor() {
     super();
   }
 
-  visitValues(values: Val[]): Val[] {
+  override visitValues(values: Val[]): Val[] {
     let arr: Val[] = null;
     for (let i = 0; i < values.length; i++) {
       const before = values[i];
       const after = before.visit(this);
+      if (this.error) {
+        return [];
+      }
       if (arr) {
         arr[i] = after;
       } else if (before !== after) {
@@ -111,114 +117,86 @@ export class FilterVisitor extends Visitor {
     return arr || values;
   }
 
-  /**
-   * @override
-   */
-  visitStr(str: Str): Val {
+  override visitEmpty(empty: Val): Val {
+    return empty;
+  }
+
+  override visitStr(str: Str): Val {
     return str;
   }
 
-  /**
-   * @override
-   */
-  visitIdent(ident: Ident): Val {
+  override visitIdent(ident: Ident): Val {
     return ident;
   }
 
-  /**
-   * @override
-   */
-  visitSlash(slash: Val): Val {
+  override visitSlash(slash: Val): Val {
     return slash;
   }
 
-  /**
-   * @override
-   */
-  visitNumeric(numeric: Numeric): Val {
+  override visitNumeric(numeric: Numeric): Val {
     return numeric;
   }
 
-  /**
-   * @override
-   */
-  visitNum(num: Num): Val {
+  override visitNum(num: Num): Val {
     return num;
   }
 
-  /**
-   * @override
-   */
-  visitInt(num: Int): Val {
+  override visitInt(num: Int): Val {
     return num;
   }
 
-  /**
-   * @override
-   */
-  visitColor(color: Color): Val {
+  override visitHexColor(color: HexColor): Val {
     return color;
   }
 
-  /**
-   * @override
-   */
-  visitURL(url: URL): Val {
+  override visitURL(url: URL): Val {
     return url;
   }
 
-  /**
-   * @override
-   */
-  visitURange(urange: URange): Val {
+  override visitURange(urange: URange): Val {
     return urange;
   }
 
-  /**
-   * @override
-   */
-  visitSpaceList(list: SpaceList): Val {
+  override visitSpaceList(list: SpaceList): Val {
     const values = this.visitValues(list.values);
+    if (this.error) {
+      return empty;
+    }
     if (values === list.values) {
       return list;
     }
     return new SpaceList(values);
   }
 
-  /**
-   * @override
-   */
-  visitCommaList(list: CommaList): Val {
+  override visitCommaList(list: CommaList): Val {
     const values = this.visitValues(list.values);
+    if (this.error) {
+      return empty;
+    }
     if (values === list.values) {
       return list;
     }
     return new CommaList(values);
   }
 
-  /**
-   * @override
-   */
-  visitFunc(func: Func): Val {
+  override visitFunc(func: Func): Val {
     const values = this.visitValues(func.values);
+    if (this.error) {
+      return empty;
+    }
     if (values === func.values) {
       return func;
     }
     return new Func(func.name, values);
   }
 
-  /**
-   * @override
-   */
-  visitExpr(expr: Expr): Val {
+  override visitExpr(expr: Expr): Val {
     return expr;
   }
 }
 
 export class Val {
-  /**
-   * @override
-   */
+  /** @override */
   toString(): string {
     const buf = new Base.StringBuffer();
     this.appendTo(buf, true);
@@ -232,7 +210,7 @@ export class Val {
   }
 
   toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
-    throw new Error("F_ABSTRACT");
+    return null;
   }
 
   appendTo(buf: Base.StringBuffer, toString: boolean): void {
@@ -259,8 +237,8 @@ export class Val {
     return false;
   }
 
-  visit(visitor: any): any {
-    throw new Error("F_ABSTRACT");
+  visit(visitor: Visitor): Val {
+    return this;
   }
 }
 
@@ -278,22 +256,13 @@ export class Empty extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, "");
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {}
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {}
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitEmpty(this);
   }
 }
@@ -314,24 +283,15 @@ export class Slash extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, "/");
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append("/");
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitSlash(this);
   }
 }
@@ -343,17 +303,11 @@ export class Str extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, this.str);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     if (toString) {
       buf.append('"');
       buf.append(Base.escapeCSSStr(this.str));
@@ -363,15 +317,12 @@ export class Str extends Val {
     }
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitStr(this);
   }
 }
 
-const nameTable = {};
+const nameTable: { [key: string]: Ident } = {};
 
 export class Ident extends Val {
   constructor(public name: string) {
@@ -382,17 +333,11 @@ export class Ident extends Val {
     nameTable[name] = this;
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     return new Exprs.Const(scope, this.name);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     if (toString) {
       buf.append(Base.escapeCSSIdent(this.name));
     } else {
@@ -400,17 +345,11 @@ export class Ident extends Val {
     }
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitIdent(this);
   }
 
-  /**
-   * @override
-   */
-  isIdent(): boolean {
+  override isIdent(): boolean {
     return true;
   }
 }
@@ -431,10 +370,7 @@ export class Numeric extends Val {
     this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -451,25 +387,16 @@ export class Numeric extends Val {
     return new Exprs.Numeric(scope, this.num, this.unit);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.num.toString());
     buf.append(this.unit);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitNumeric(this);
   }
 
-  /**
-   * @override
-   */
-  isNumeric(): boolean {
+  override isNumeric(): boolean {
     return true;
   }
 }
@@ -479,10 +406,7 @@ export class Num extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -492,24 +416,15 @@ export class Num extends Val {
     return new Exprs.Const(scope, this.num);
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.num.toString());
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitNum(this);
   }
 
-  /**
-   * @override
-   */
-  isNum(): boolean {
+  override isNum(): boolean {
     return true;
   }
 }
@@ -519,34 +434,23 @@ export class Int extends Num {
     super(num);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitInt(this);
   }
 }
 
-export class Color extends Val {
-  constructor(public rgb: number) {
+export class HexColor extends Val {
+  constructor(public hex: string) {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append("#");
-    const str = this.rgb.toString(16);
-    buf.append("000000".substr(str.length));
-    buf.append(str);
+    buf.append(this.hex);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
-    return visitor.visitColor(this);
+  override visit(visitor: Visitor): Val {
+    return visitor.visitHexColor(this);
   }
 }
 
@@ -555,19 +459,13 @@ export class URL extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append('url("');
     buf.append(Base.escapeCSSStr(this.url));
     buf.append('")');
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitURL(this);
   }
 }
@@ -577,17 +475,11 @@ export class URange extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(this.urangeText);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitURange(this);
   }
 }
@@ -600,10 +492,10 @@ export function appendList(
 ): void {
   const length = values.length;
   if (length > 0) {
-    values[0].appendTo(buf, toString);
+    values[0]?.appendTo(buf, toString);
     for (let i = 1; i < length; i++) {
       buf.append(separator);
-      values[i].appendTo(buf, toString);
+      values[i]?.appendTo(buf, toString);
     }
   }
 }
@@ -613,24 +505,15 @@ export class SpaceList extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     appendList(buf, this.values, " ", toString);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitSpaceList(this);
   }
 
-  /**
-   * @override
-   */
-  isSpaceList(): boolean {
+  override isSpaceList(): boolean {
     return true;
   }
 }
@@ -640,17 +523,11 @@ export class CommaList extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     appendList(buf, this.values, ",", toString);
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitCommaList(this);
   }
 }
@@ -660,20 +537,14 @@ export class Func extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
     buf.append(Base.escapeCSSIdent(this.name));
     buf.append("(");
     appendList(buf, this.values, ",", toString);
     buf.append(")");
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitFunc(this);
   }
 }
@@ -683,34 +554,42 @@ export class Expr extends Val {
     super();
   }
 
-  /**
-   * @override
-   */
-  toExpr(): Exprs.Val {
+  override toExpr(): Exprs.Val {
     return this.expr;
   }
 
-  /**
-   * @override
-   */
-  appendTo(buf: Base.StringBuffer, toString: boolean): void {
-    buf.append("-epubx-expr(");
-    this.expr.appendTo(buf, 0);
-    buf.append(")");
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
+    if (
+      this.expr instanceof Exprs.Const ||
+      this.expr instanceof Exprs.Numeric
+    ) {
+      this.expr.appendTo(buf, 0);
+    } else {
+      buf.append("-epubx-expr(");
+      this.expr.appendTo(buf, 0);
+      buf.append(")");
+    }
   }
 
-  /**
-   * @override
-   */
-  visit(visitor: any): any {
+  override visit(visitor: Visitor): Val {
     return visitor.visitExpr(this);
   }
 
-  /**
-   * @override
-   */
-  isExpr(): boolean {
+  override isExpr(): boolean {
     return true;
+  }
+}
+
+/**
+ * Custom property value, may be arbitrary token
+ */
+export class AnyToken extends Val {
+  constructor(public text: string) {
+    super();
+  }
+
+  override appendTo(buf: Base.StringBuffer, toString: boolean): void {
+    buf.append(this.text || " ");
   }
 }
 
@@ -764,6 +643,7 @@ export const ident: { [key: string]: Ident } = {
   hidden: getName("hidden"),
   horizontal_tb: getName("horizontal-tb"),
   inherit: getName("inherit"),
+  initial: getName("initial"),
   inline: getName("inline"),
   inline_block: getName("inline-block"),
   inline_end: getName("inline-end"),
@@ -780,6 +660,7 @@ export const ident: { [key: string]: Ident } = {
   oeb_page_head: getName("oeb-page-head"),
   page: getName("page"),
   relative: getName("relative"),
+  revert: getName("revert"),
   right: getName("right"),
   same: getName("same"),
   scale: getName("scale"),
@@ -795,6 +676,7 @@ export const ident: { [key: string]: Ident } = {
   table_row: getName("table-row"),
   top: getName("top"),
   transparent: getName("transparent"),
+  unset: getName("unset"),
   vertical_lr: getName("vertical-lr"),
   vertical_rl: getName("vertical-rl"),
   visible: getName("visible"),
@@ -816,6 +698,15 @@ export const processingOrder = {
   color: 2,
 };
 
+export function isDefaultingValue(value: Val): boolean {
+  return (
+    value === ident.inherit ||
+    value === ident.initial ||
+    value === ident.revert ||
+    value === ident.unset
+  );
+}
+
 /**
  * Function to sort property names in the order they should be processed
  */
@@ -823,4 +714,8 @@ export function processingOrderFn(name1: string, name2: string): number {
   const n1 = processingOrder[name1] || Number.MAX_VALUE;
   const n2 = processingOrder[name2] || Number.MAX_VALUE;
   return n1 - n2;
+}
+
+export function isCustomPropName(name: string): boolean {
+  return name?.length > 2 && name.startsWith("--");
 }

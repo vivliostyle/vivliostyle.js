@@ -387,10 +387,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     }
   }
 
-  /**
-   * @override
-   */
-  load(url: string): Task.Result<XmlDoc.XMLDocHolder> {
+  override load(url: string): Task.Result<XmlDoc.XMLDocHolder> {
     const docURL = Base.stripFragment(url);
     let r = this.documents[docURL];
     if (r) {
@@ -790,17 +787,13 @@ export class OPFDoc {
   createDocumentURLTransformer(): Base.DocumentURLTransformer {
     const self = this;
     class OPFDocumentURLTransformer implements Base.DocumentURLTransformer {
-      /**
-       * @override
-       */
+      /** @override */
       transformFragment(fragment: string, baseURL: string): string {
         const url = baseURL + (fragment ? `#${fragment}` : "");
         return transformedIdPrefix + Base.escapeNameStrToHex(url, ":");
       }
 
-      /**
-       * @override
-       */
+      /** @override */
       transformURL(url: string, baseURL: string): string {
         const r = url.match(/^([^#]*)#?(.*)$/);
         if (r) {
@@ -815,9 +808,7 @@ export class OPFDoc {
         return url;
       }
 
-      /**
-       * @override
-       */
+      /** @override */
       restoreURL(encoded: string): string[] {
         if (encoded.charAt(0) === "#") {
           encoded = encoded.substring(1);
@@ -2044,14 +2035,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
    *     rendering task)
    */
   getSpread(position: Position, sync: boolean): Task.Result<Vtree.Spread> {
-    const frame: Task.Frame<Vtree.Spread> = Task.newFrame("getCurrentSpread");
     const page = this.getPage(position);
     if (!page) {
-      return Task.newResult(
-        /** @type Vtree.Spread */
-        { left: null, right: null } as Vtree.Spread,
-      );
+      return Task.newResult({ left: null, right: null });
     }
+    const frame: Task.Frame<Vtree.Spread> = Task.newFrame("getSpread");
     const isLeft = page.side === Constants.PageSide.LEFT;
     let other: Task.Result<PageAndPosition>;
     if (this.isRectoPage(page, position)) {
@@ -2272,15 +2260,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
     pageCont.style.top = "0";
     pageCont.style.left = "0";
 
-    // Workaround for Chromium problem (issues #758 and #793).
-    // Chromium currently uses legacy engine for multicol and print
-    // and uses new engine (LayoutNG) for non-multicol screen,
-    // so need to use multicol to match screen and print layouts.
-    // This will be unnecessary when the Chromium issue is resolved:
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=829028
-    pageCont.style.columnCount = "1";
-    pageCont.style.height = "99999999px";
-
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
     }
@@ -2448,9 +2427,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): Vgen.CustomRenderer {
     return (
       srcElem: Element,

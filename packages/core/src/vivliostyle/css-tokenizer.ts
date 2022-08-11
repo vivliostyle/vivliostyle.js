@@ -32,24 +32,15 @@ export function escapeParseSingle(str: string): string {
   if (isNaN(code)) {
     return "";
   }
-  if (code <= 65535) {
-    return String.fromCharCode(code);
+  if (code === 0 || (code >= 0xd800 && code <= 0xdfff) || code > 0x10ffff) {
+    return "\uFFFD";
   }
-  if (code <= 1114111) {
-    // non-BMP characters: convert to a surrogate pair
-    return String.fromCharCode(
-      55296 | ((code >> 10) & 1023),
-      56320 | (code & 1023),
-    );
-  }
-
-  // not a valid Unicode value
-  return "\ufffd";
+  return String.fromCodePoint(code);
 }
 
 export function escapeParse(str: string): string {
   return str.replace(
-    /\\([0-9a-fA-F]{0,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
+    /\\([0-9a-fA-F]{1,6}(\r\n|[ \n\r\t\f])?|[^0-9a-fA-F\n\r])/g,
     escapeParseSingle,
   );
 }
@@ -109,8 +100,11 @@ export enum TokenType {
   LT_EQ,
   EQ_EQ,
   COL_COL,
+  CDO,
+  CDC,
+  UNKNOWN,
   INVALID,
-  LAST = 51,
+  LAST = 54,
 }
 
 export class Token {
@@ -122,6 +116,100 @@ export class Token {
 
   constructor() {
     this.type = TokenType.EOF;
+  }
+
+  toString(): string {
+    switch (this.type) {
+      case TokenType.O_PAR:
+        return "(";
+      case TokenType.C_PAR:
+        return ")";
+      case TokenType.O_BRC:
+        return "{";
+      case TokenType.C_BRC:
+        return "}";
+      case TokenType.O_BRK:
+        return "[";
+      case TokenType.C_BRK:
+        return "]";
+      case TokenType.COMMA:
+        return ",";
+      case TokenType.SEMICOL:
+        return ";";
+      case TokenType.COLON:
+        return ":";
+      case TokenType.SLASH:
+        return "/";
+      case TokenType.AT:
+        return "@";
+      case TokenType.PERCENT:
+        return "%";
+      case TokenType.QMARK:
+        return "Q";
+      case TokenType.PLUS:
+        return "+";
+      case TokenType.MINUS:
+        return "-";
+      case TokenType.BAR_BAR:
+        return "||";
+      case TokenType.AMP_AMP:
+        return "&&";
+      case TokenType.BANG:
+        return "!";
+      case TokenType.DOLLAR:
+        return "$";
+      case TokenType.HAT:
+        return "^";
+      case TokenType.BAR:
+        return "|";
+      case TokenType.TILDE:
+        return "~";
+      case TokenType.STAR:
+        return "*";
+      case TokenType.GT:
+        return ">";
+      case TokenType.LT:
+        return "<";
+      case TokenType.EQ:
+        return "=";
+      case TokenType.BANG_EQ:
+        return "!=";
+      case TokenType.DOLLAR_EQ:
+        return "$=";
+      case TokenType.HAT_EQ:
+        return "^=";
+      case TokenType.BAR_EQ:
+        return "|=";
+      case TokenType.TILDE_EQ:
+        return "~=";
+      case TokenType.STAR_EQ:
+        return "*=";
+      case TokenType.GT_EQ:
+        return ">=";
+      case TokenType.LT_EQ:
+        return "<=";
+      case TokenType.EQ_EQ:
+        return "==";
+      case TokenType.COL_COL:
+        return "::";
+      case TokenType.CDO:
+        return "<!--";
+      case TokenType.CDC:
+        return "-->";
+      case TokenType.NUMERIC:
+        return this.num.toString() + this.text;
+      case TokenType.NUM:
+      case TokenType.INT:
+        return this.num.toString();
+      case TokenType.HASH:
+        return "#" + this.text;
+      case TokenType.FUNC:
+        return this.text + "(";
+      case TokenType.CLASS:
+        return "." + this.text;
+      default:
+        return this.text;
+    }
   }
 }
 
@@ -212,6 +300,8 @@ export enum Action {
   TOCLASS,
   CHKSP,
   EOF,
+  CDO,
+  CDC,
 }
 
 export function makeActions(def: Action, spec: Action[]): Action[] {
@@ -1220,7 +1310,7 @@ export const actionsCommentStar: Action[] = makeActions(Action.COMMENT, [
 
 export const actionsMinusMinus: Action[] = makeActions(Action.KILL1, [
   62 /* > */,
-  Action.ENDNOTK,
+  Action.CDC,
 ]);
 
 export const actionsLt: Action[] = makeActions(Action.END, [
@@ -1237,17 +1327,13 @@ export const actionsLtBang: Action[] = makeActions(Action.KILL1, [
 
 export const actionsLtBangMinus: Action[] = makeActions(Action.KILL2, [
   45 /*-*/,
-  Action.ENDNOTK,
+  Action.CDO,
 ]);
 
 export const actionsIdentEscChr: Action[] = makeActions(Action.IDESCH, [
-  9 /*tab*/,
-  Action.INVALID,
   10 /*LF*/,
   Action.INVALID,
   13 /*CR*/,
-  Action.INVALID,
-  32 /*sp*/,
   Action.INVALID,
 ]);
 
@@ -1709,7 +1795,7 @@ export class Tokenizer {
         case Action.ENDIDNT:
           // don't consume current char
           // tokenType should be set already
-          tokenText = input.substring(tokenPosition, position);
+          tokenText = escapeParse(input.substring(tokenPosition, position));
 
           // unicode-range support
           if (
@@ -1804,7 +1890,22 @@ export class Tokenizer {
         case Action.MINMIN:
           actions = actionsMinusMinus;
           position++;
+          if (input[position] !== ">") {
+            // dashed-ident (custom property name)
+            tokenType = TokenType.IDENT;
+            actions = actionsIdent;
+          }
           continue;
+        case Action.CDO:
+          tokenType = TokenType.CDO;
+          tokenText = input.substring(tokenPosition, ++position);
+          actions = actionsNormal;
+          break;
+        case Action.CDC:
+          tokenType = TokenType.CDC;
+          tokenText = input.substring(tokenPosition, ++position);
+          actions = actionsNormal;
+          break;
         case Action.TOINT:
           tokenType = TokenType.INT;
           actions = actionsInt;
@@ -1913,6 +2014,7 @@ export class Tokenizer {
             ) {
               // valid, keep going
               position++;
+              actions = actionsIdent;
               continue;
             }
           }

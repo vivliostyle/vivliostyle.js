@@ -164,9 +164,9 @@ export class Style {
         fontSize,
       );
       const viewportProps = CssCascade.mergeAll(context, this.viewportProps);
-      const width = viewportProps["width"];
-      const height = viewportProps["height"];
-      const textZoom = viewportProps["text-zoom"];
+      const width = viewportProps["width"] as CssCascade.CascadeValue;
+      const height = viewportProps["height"] as CssCascade.CascadeValue;
+      const textZoom = viewportProps["text-zoom"] as CssCascade.CascadeValue;
       let scaleFactor = 1;
       if ((width && height) || textZoom) {
         const defaultFontSize = Exprs.defaultUnitSizes["em"];
@@ -360,8 +360,18 @@ export class StyleInstance
       pageProps[""] = {};
     }
     Object.keys(pageProps).forEach((selector) => {
+      let pageStyle = pageProps[selector] as {
+        [key: string]: CssCascade.CascadeValue;
+      };
+
+      // Substitute var() in @page
+      this.styler.cascade.applyVarFilter([pageStyle], this.styler, null);
+
+      // Calculate calc()
+      this.styler.cascade.applyCalcFilter(pageStyle, this.styler.context);
+
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
-        CssPage.resolvePageSizeAndBleed(pageProps[selector] as any),
+        CssPage.resolvePageSizeAndBleed(pageStyle),
         this,
       );
       this.pageSheetSize[selector] = {
@@ -390,9 +400,7 @@ export class StyleInstance
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getStylerForDoc(xmldoc: XmlDoc.XMLDocHolder): CssStyler.AbstractStyler {
     let styler = this.stylerMap[xmldoc.url];
     if (!styler) {
@@ -429,24 +437,18 @@ export class StyleInstance
     return styler;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   registerInstance(key: string, instance: PageMaster.PageBoxInstance): void {
     this.pageBoxInstances[key] = instance;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   lookupInstance(key: string): PageMaster.PageBoxInstance {
     return this.pageBoxInstances[key];
   }
 
-  /**
-   * @override
-   */
-  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): any {
+  /** @override */
+  encounteredFlowChunk(flowChunk: Vtree.FlowChunk, flow: Vtree.Flow): void {
     const cp = this.currentLayoutPosition;
     if (cp) {
       if (!cp.flows[flowChunk.flowName]) {
@@ -469,10 +471,11 @@ export class StyleInstance
     }
   }
 
-  /**
-   * @override
-   */
-  evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
+  override evalSupportsTest(
+    name: string,
+    value: string,
+    isFunc: boolean,
+  ): boolean {
     if (isFunc) {
       if (name === "selector") {
         // TODO: `@supports selector(...)`
@@ -762,30 +765,35 @@ export class StyleInstance
     const deferredFloats =
       pageFloatLayoutContext.getDeferredPageFloatContinuations();
 
-    // Fix for issue #681
     // Prevent deferred page floats from appearing in the preceding pages,
     // e.g., during re-layout the TOC page with target-counter() referencing
-    // later sections containing page floats.
-    if (
-      deferredFloats.length &&
-      deferredFloats[0].float.floatReference === "page"
-    ) {
-      const deferredFloatNode =
-        deferredFloats[0].float.nodePosition.steps[0].node;
-      const deferredFloatOffset =
-        deferredFloatNode &&
-        this.xmldoc.getNodeOffset(deferredFloatNode, 0, false);
+    // later sections containing page floats. (Issue #681)
+    const checkPageFloatForLaterPage = (
+      float: PageFloats.PageFloat,
+    ): boolean => {
+      // FIXME: This check is incomplete when float-reference is other than "page".
+      // so give up for now to prevent another problem (Issue #962).
+      if (
+        !this.pageAreaWidth &&
+        !this.pageAreaHeight &&
+        float.floatReference !== PageFloats.FloatReference.PAGE
+      ) {
+        return false;
+      }
       const pageStartPos = this.layoutPositionAtPageStart.flowPositions.body;
       const pageStartOffset =
         pageStartPos && this.getConsumedOffset(pageStartPos);
-      if (
+      const deferredFloatOffset = this.xmldoc.getNodeOffset(
+        float.nodePosition.steps[0].node,
+        0,
+        false,
+      );
+      return (
         deferredFloatOffset != null &&
         pageStartOffset != null &&
         deferredFloatOffset > pageStartOffset
-      ) {
-        return Task.newResult(true);
-      }
-    }
+      );
+    };
 
     const frame = Task.newFrame<boolean>("layoutDeferredPageFloats");
     let invalidated = false;
@@ -798,6 +806,14 @@ export class StyleInstance
         }
         const continuation = deferredFloats[i++];
         const float = continuation.float;
+
+        // Prevent deferred page floats from appearing in the preceding pages
+        // (Issue #681)
+        if (checkPageFloatForLaterPage(float)) {
+          loopFrame.breakLoop();
+          return;
+        }
+
         const strategy =
           new PageFloats.PageFloatLayoutStrategyResolver().findByFloat(float);
         const pageFloatFragment = strategy.findPageFloatFragment(
@@ -1476,6 +1492,14 @@ export class StyleInstance
       this.faces,
       this.clientLayout,
     );
+
+    if (
+      boxInstance instanceof CssPage.PageRuleMasterInstance &&
+      (layoutContainer.width <= 0 || layoutContainer.height <= 0)
+    ) {
+      Logging.logger.warn("Negative or zero page area size");
+    }
+
     layoutContainer.originX = offsetX;
     layoutContainer.originY = offsetY;
     offsetX +=
@@ -1734,6 +1758,12 @@ export class StyleInstance
       page.bleedBox.setAttribute("lang", this.lang);
     }
     cp = this.currentLayoutPosition;
+
+    // Limit number of pages to prevent endless page generation
+    const LIMIT_PAGES = 10000;
+    if (cp.page > LIMIT_PAGES) {
+      throw new Error(`Too many pages generated (over ${LIMIT_PAGES} pages)`);
+    }
     cp.page++;
 
     const startSide = cp.flowPositions["body"]?.startSide;
@@ -1752,6 +1782,13 @@ export class StyleInstance
             ? this.styler.cascade.previousPageType
             : this.styler.cascade.currentPageType) ?? "",
         );
+
+    // Substitute var()
+    this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
+
+    // Calculate calc()
+    this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);
+
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
@@ -1760,10 +1797,12 @@ export class StyleInstance
     let bleedBoxPaddingEdge = 0;
     if (!isTocBox) {
       page.setAutoPageWidth(
-        pageMaster.pageBox.specified["width"].value === Css.fullWidth,
+        (pageMaster.pageBox.specified["width"] as CssCascade.CascadeValue)
+          .value === Css.fullWidth,
       );
       page.setAutoPageHeight(
-        pageMaster.pageBox.specified["height"].value === Css.fullHeight,
+        (pageMaster.pageBox.specified["height"] as CssCascade.CascadeValue)
+          .value === Css.fullHeight,
       );
       this.counterStore.setCurrentPage(page);
       this.counterStore.updatePageCounters(cascadedPageStyle, this);
@@ -1774,6 +1813,7 @@ export class StyleInstance
         this,
       );
       this.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
+
       CssPage.addPrinterMarks(
         cascadedPageStyle,
         evaluatedPageSizeAndBleed,
@@ -1884,15 +1924,6 @@ export class StyleInstance
     page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
-
-    // Shift 1px to workaround Chrome printing bug (Canceled because of another Chrome problem)
-    // page.bleedBox.style.paddingTop = `${evaluatedPageSizeAndBleed.bleed+1}px`;
-
-    // Shift 0.01px to workaround Firefox printing problem
-    // (This small value (< 1/64 px) has no effect to Chrome)
-    page.bleedBox.style.paddingTop = `${
-      evaluatedPageSizeAndBleed.bleed + 0.01
-    }px`;
   }
 }
 
@@ -1916,15 +1947,9 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startPageTemplateRule(): void {}
+  override startPageTemplateRule(): void {}
 
-  /**
-   * @override
-   */
-  startPageMasterRule(
+  override startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1948,10 +1973,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startWhenRule(expr: Css.Expr): void {
+  override startWhenRule(expr: Css.Expr): void {
     let condition = expr.expr;
     if (this.condition != null) {
       condition = Exprs.and(this.scope, this.condition, condition);
@@ -1961,19 +1983,13 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startDefineRule(): void {
+  override startDefineRule(): void {
     this.masterHandler.pushHandler(
       new CssCascade.DefineParserHandler(this.scope, this.owner),
     );
   }
 
-  /**
-   * @override
-   */
-  startFontFaceRule(): void {
+  override startFontFaceRule(): void {
     const properties = {} as CssCascade.ElementStyle;
     this.masterHandler.fontFaces.push({
       properties,
@@ -1990,10 +2006,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startFlowRule(flowName: string): void {
+  override startFlowRule(flowName: string): void {
     let style = this.masterHandler.flowProps[flowName];
     if (!style) {
       style = {} as CssCascade.ElementStyle;
@@ -2010,10 +2023,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startViewportRule(): void {
+  override startViewportRule(): void {
     const viewportProps = {} as CssCascade.ElementStyle;
     this.masterHandler.viewportProps.push(viewportProps);
     this.masterHandler.pushHandler(
@@ -2027,10 +2037,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startFootnoteRule(pseudoelem: string | null): void {
+  override startFootnoteRule(pseudoelem: string | null): void {
     let style = this.masterHandler.footnoteProps;
     if (pseudoelem) {
       const pseudos = CssCascade.getMutableStyleMap(style, "_pseudos");
@@ -2051,18 +2058,12 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startRegionRule(): void {
+  override startRegionRule(): void {
     this.insideRegion = true;
     this.startSelectorRule();
   }
 
-  /**
-   * @override
-   */
-  startPageRule(): void {
+  override startPageRule(): void {
     const pageHandler = new CssPage.PageParserHandler(
       this.masterHandler.pageScope,
       this.masterHandler,
@@ -2074,10 +2075,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     pageHandler.startPageRule();
   }
 
-  /**
-   * @override
-   */
-  startRuleBody(): void {
+  override startRuleBody(): void {
     CssCascade.CascadeParserHandler.prototype.startRuleBody.call(this);
     if (this.insideRegion) {
       this.insideRegion = false;
@@ -2141,11 +2139,8 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
     this.slave = this.cascadeParserHandler;
   }
 
-  /**
-   * @override
-   */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
-    Logging.logger.warn("CSS parser:", mnemonics);
+  override error(mnemonics: string, token: CssTokenizer.Token): void {
+    Logging.logger.warn("CSS parser:", mnemonics, token);
   }
 }
 

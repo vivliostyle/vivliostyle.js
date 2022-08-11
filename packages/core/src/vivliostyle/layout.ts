@@ -338,9 +338,7 @@ export type LayoutConstraint = Layout.LayoutConstraint;
 export class AllLayoutConstraint implements LayoutConstraint {
   constructor(public readonly constraints: LayoutConstraint[]) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
     return this.constraints.every((c) => c.allowLayout(nodeContext));
   }
@@ -371,10 +369,10 @@ export class BoxBreakPosition
     super();
   }
 
-  /**
-   * @override
-   */
-  findAcceptableBreak(column: Column, penalty: number): Vtree.NodeContext {
+  override findAcceptableBreak(
+    column: Column,
+    penalty: number,
+  ): Vtree.NodeContext {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -385,15 +383,11 @@ export class BoxBreakPosition
     return this.breakNodeContext;
   }
 
-  /**
-   * @override
-   */
-  getMinBreakPenalty(): number {
+  override getMinBreakPenalty(): number {
     return this.penalty;
   }
 
-  /** @override */
-  getNodeContext(): Vtree.NodeContext {
+  override getNodeContext(): Vtree.NodeContext {
     return this.alreadyEvaluated
       ? this.breakNodeContext
       : this.checkPoints[this.checkPoints.length - 1];
@@ -457,6 +451,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null =
     null;
   blockDistanceToBlockEndFloats: number = NaN;
+  breakAtTheEdgeBeforeFloat: string | null = null;
 
   constructor(
     element: Element,
@@ -1075,7 +1070,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // relative', the absolute positioning of the float gets broken, since
         // the inline parent can be pushed horizontally by exclusion floats
         // after the layout of the float is done.
-        parent.viewNode.appendChild(nodeContext.viewNode);
+        if (!nodeContext.firstPseudo) {
+          // Unless float is specified on ::first-letter (Fix for issue #923)
+          parent.viewNode.appendChild(nodeContext.viewNode);
+        }
       }
 
       // box is rotated for vertical orientation
@@ -1939,6 +1937,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           return;
         }
 
+        // Text-spacing etc. must be done before calculating edge. (Issue #898)
+        this.postLayoutBlock(nodeContext, checkPoints);
+
         // Record the height
         // TODO: should this be done after first-line calculation?
         let edge = this.calculateEdge(
@@ -1984,7 +1985,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           lineCont = Task.newResult(resNodeContext);
         }
         lineCont.then((nodeContext) => {
-          this.postLayoutBlock(nodeContext, checkPoints);
+          // Text-spacing etc. must be done before calculating edge. (Issue #898)
+          // this.postLayoutBlock(nodeContext, checkPoints);
+
           if (checkPoints.length > 0) {
             this.saveBoxBreakPosition(checkPoints);
 
@@ -2715,20 +2718,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       spacerBox = this.clientLayout.getElementClientRect(spacer);
       const afterEdge = this.getAfterEdge(spacerBox);
-      if (this.vertical) {
-        let wAdj = afterEdge + margin.right - clearEdge;
-        if (wAdj > 0 == margin.right >= 0) {
-          // In addition to collapsed portion
-          wAdj += margin.right;
+      if (!nodeContext.floatSide) {
+        if (this.vertical) {
+          let wAdj = afterEdge + margin.right - clearEdge;
+          if (wAdj > 0 == margin.right >= 0) {
+            // In addition to collapsed portion
+            wAdj += margin.right;
+          }
+          spacer.style.marginLeft = `${wAdj}px`;
+        } else {
+          let hAdj = clearEdge - (afterEdge + margin.top);
+          if (hAdj > 0 == margin.top >= 0) {
+            // In addition to collapsed portion
+            hAdj += margin.top;
+          }
+          spacer.style.marginBottom = `${hAdj}px`;
         }
-        spacer.style.marginLeft = `${wAdj}px`;
-      } else {
-        let hAdj = clearEdge - (afterEdge + margin.top);
-        if (hAdj > 0 == margin.top >= 0) {
-          // In addition to collapsed portion
-          hAdj += margin.top;
-        }
-        spacer.style.marginBottom = `${hAdj}px`;
       }
       nodeContext.clearSpacer = spacer;
       return true;
@@ -2846,6 +2851,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             }
             if (!nodeContext.after) {
+              if (nodeContext.floatSide) {
+                // Save break-after:avoid* value at before the float
+                // (Fix for issue #904)
+                this.breakAtTheEdgeBeforeFloat = Break.isAvoidBreakValue(
+                  breakAtTheEdge,
+                )
+                  ? breakAtTheEdge
+                  : null;
+              }
               if (layoutProcessor) {
                 if (layoutProcessor.startNonInlineElementNode(nodeContext)) {
                   break;
@@ -2911,6 +2925,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             const style = (nodeContext.viewNode as HTMLElement).style;
             if (nodeContext.after) {
+              if (nodeContext.floatSide) {
+                // Restore break-after:avoid* value at before the float
+                // (Fix for issue #904)
+                breakAtTheEdge =
+                  breakAtTheEdge ?? this.breakAtTheEdgeBeforeFloat;
+                this.breakAtTheEdgeBeforeFloat = null;
+              }
               const element = nodeContext.sourceNode as Element;
               // Make breakable after svg and math elements
               // (Fix for issue #750)
@@ -3974,10 +3995,9 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     this.breakAfter = breakAfter || null;
   }
 
-  /**
-   * @override
-   */
-  resolveLayoutMode(nodeContext: Vtree.NodeContext): Layout.LayoutMode {
+  override resolveLayoutMode(
+    nodeContext: Vtree.NodeContext,
+  ): Layout.LayoutMode {
     return new DefaultLayoutMode(
       this.leadingEdge,
       this.breakAfter,
@@ -3985,20 +4005,17 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     );
   }
 
-  /**
-   * @override
-   */
-  prepareLayout(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override prepareLayout(
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ) {
     column.fragmentLayoutConstraints = [];
     if (!column.pseudoParent) {
       Shared.clearRepetitiveElementsCache();
     }
   }
 
-  /**
-   * @override
-   */
-  clearNodes(initialPosition: Vtree.NodeContext) {
+  override clearNodes(initialPosition: Vtree.NodeContext) {
     super.clearNodes(initialPosition);
     let nodeContext = initialPosition;
     while (nodeContext) {
@@ -4010,20 +4027,14 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     }
   }
 
-  /**
-   * @override
-   */
-  saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     super.saveState(nodeContext, column);
     this.initialPageBreakType = column.pageBreakType;
     this.initialComputedBlockSize = column.computedBlockSize;
     this.initialOverflown = column.overflown;
   }
 
-  /**
-   * @override
-   */
-  restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     super.restoreState(nodeContext, column);
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
@@ -4038,9 +4049,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     public readonly context: { overflownNodeContext: Vtree.NodeContext },
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
@@ -4060,9 +4069,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean {
     if (column.pageFloatLayoutContext.isInvalidated() || column.pageBreakType) {
       return true;
@@ -4079,9 +4086,7 @@ export class DefaultLayoutMode implements Layout.LayoutMode {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   postLayout(
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
@@ -4129,10 +4134,9 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     );
   }
 
-  /**
-   * @override
-   */
-  openAllViews(position: Vtree.NodePosition): Task.Result<Vtree.NodeContext> {
+  override openAllViews(
+    position: Vtree.NodePosition,
+  ): Task.Result<Vtree.NodeContext> {
     return super.openAllViews(position).thenAsync((nodeContext) => {
       if (nodeContext) {
         this.fixFloatSizeAndPosition(nodeContext);

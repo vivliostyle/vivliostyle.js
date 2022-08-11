@@ -146,10 +146,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
       position.formattingContext as TableFormattingContext;
   }
 
-  /**
-   * @override
-   */
-  findAcceptableBreak(
+  override findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
   ): Vtree.NodeContext {
@@ -167,10 +164,7 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
     }
   }
 
-  /**
-   * @override
-   */
-  getMinBreakPenalty(): number {
+  override getMinBreakPenalty(): number {
     let penalty = super.getMinBreakPenalty();
     this.getAcceptableCellBreakPositions().forEach((bp) => {
       penalty += bp.breakPosition.getMinBreakPenalty();
@@ -219,10 +213,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     super();
   }
 
-  /**
-   * @override
-   */
-  findAcceptableBreak(
+  override findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
   ): Vtree.NodeContext {
@@ -251,10 +242,7 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     }
   }
 
-  /**
-   * @override
-   */
-  getMinBreakPenalty(): number {
+  override getMinBreakPenalty(): number {
     const formattingContext = this.formattingContext;
     const row = formattingContext.getRowByIndex(this.rowIndex);
     let penalty = 0;
@@ -322,17 +310,14 @@ export class TableFormattingContext
     super(parent, tableSourceNode);
   }
 
-  /**
-   * @override
-   */
-  getName(): string {
+  override getName(): string {
     return "Table formatting context (Table.TableFormattingContext)";
   }
 
-  /**
-   * @override
-   */
-  isFirstTime(nodeContext: Vtree.NodeContext, firstTime: boolean): boolean {
+  override isFirstTime(
+    nodeContext: Vtree.NodeContext,
+    firstTime: boolean,
+  ): boolean {
     if (!firstTime) {
       return firstTime;
     }
@@ -348,10 +333,7 @@ export class TableFormattingContext
     }
   }
 
-  /**
-   * @override
-   */
-  getParent(): Vtree.FormattingContext {
+  override getParent(): Vtree.FormattingContext {
     return this.parent;
   }
 
@@ -582,13 +564,11 @@ export class TableFormattingContext
     });
   }
 
-  /** @override */
-  saveState(): any {
+  override saveState(): any {
     return [].concat(this.cellBreakPositions);
   }
 
-  /** @override */
-  restoreState(state: any) {
+  override restoreState(state: any) {
     this.cellBreakPositions = state as BrokenTableCellPosition[];
   }
 }
@@ -708,10 +688,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     super();
   }
 
-  /**
-   * @override
-   */
-  startNonInlineElementNode(
+  override startNonInlineElementNode(
     state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
@@ -767,10 +744,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     return super.startNonInlineElementNode(state);
   }
 
-  /**
-   * @override
-   */
-  afterNonInlineElementNode(
+  override afterNonInlineElementNode(
     state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
@@ -824,29 +798,25 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     return super.afterNonInlineElementNode(state);
   }
 
-  /** @override */
-  startNonElementNode(
+  override startNonElementNode(
     state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
-  /** @override */
-  afterNonElementNode(
+  override afterNonElementNode(
     state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
-  /** @override */
-  startInlineElementNode(
+  override startInlineElementNode(
     state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
-  /** @override */
-  afterInlineElementNode(
+  override afterInlineElementNode(
     state: LayoutUtil.LayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
@@ -1366,7 +1336,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
     const colWidths = dummyCells.map((cell) => {
       const rect = clientLayout.getElementClientRect(cell);
-      return vertical ? rect["height"] : rect["width"];
+      const width = vertical ? rect["height"] : rect["width"];
+      // Workaround for issue #958
+      // Non-integer width causes problem, so return rounded-up value.
+      return Math.ceil(width);
     });
     lastRow.parentNode.removeChild(dummyRow);
     return colWidths;
@@ -1601,9 +1574,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   layout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
@@ -1629,9 +1600,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createEdgeBreakPosition(
     position: Vtree.NodeContext,
     breakOnEdge: string | null,
@@ -1646,16 +1615,12 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean {
     return false;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   afterNonInlineElementNode(
     nodeContext: Vtree.NodeContext,
     stopAtOverflow: boolean,
@@ -1663,9 +1628,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     return false;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   finishBreak(
     column: Layout.Column,
     nodeContext: Vtree.NodeContext,
@@ -1813,10 +1776,9 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     super();
   }
 
-  /**
-   * @override
-   */
-  resolveLayoutMode(nodeContext: Vtree.NodeContext): LayoutType.LayoutMode {
+  override resolveLayoutMode(
+    nodeContext: Vtree.NodeContext,
+  ): LayoutType.LayoutMode {
     const repetitiveElements =
       this.tableFormattingContext.getRepetitiveElements();
     if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
@@ -1838,20 +1800,14 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     }
   }
 
-  /**
-   * @override
-   */
-  clearNodes(initialPosition: Vtree.NodeContext) {
+  override clearNodes(initialPosition: Vtree.NodeContext) {
     super.clearNodes(initialPosition);
     const rootViewNode =
       this.tableFormattingContext.getRootViewNode(initialPosition);
     this.processor.removeColGroups(this.tableFormattingContext, rootViewNode);
   }
 
-  /**
-   * @override
-   */
-  restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+  override restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     super.restoreState(nodeContext, column);
     this.tableFormattingContext.finishFragment();
   }
@@ -1865,10 +1821,7 @@ export class LayoutEntireTable extends RepetitiveElementImpl.LayoutEntireBlock {
     super(formattingContext);
   }
 
-  /**
-   * @override
-   */
-  doLayout(
+  override doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
@@ -1881,10 +1834,7 @@ export class EntireTableBreakPosition extends BreakPosition.EdgeBreakPosition {
     super(tableNodeContext, null, tableNodeContext.overflow, 0);
   }
 
-  /**
-   * @override
-   */
-  getMinBreakPenalty(): number {
+  override getMinBreakPenalty(): number {
     if (!this.isEdgeUpdated) {
       throw new Error("EdgeBreakPosition.prototype.updateEdge not called");
     }
@@ -1894,10 +1844,7 @@ export class EntireTableBreakPosition extends BreakPosition.EdgeBreakPosition {
     );
   }
 
-  /**
-   * @override
-   */
-  breakPositionChosen(column: Layout.Column): void {
+  override breakPositionChosen(column: Layout.Column): void {
     column.fragmentLayoutConstraints.push(
       new EntireTableLayoutConstraint(this.position.sourceNode),
     );
@@ -1911,9 +1858,7 @@ export class EntireTableLayoutConstraint
 
   constructor(public tableRootNode: Node) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   allowLayout(
     nodeContext: Vtree.NodeContext,
     overflownNodeContext: Vtree.NodeContext,
@@ -1926,16 +1871,12 @@ export class EntireTableLayoutConstraint
     return false;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   nextCandidate(nodeContext: Vtree.NodeContext): boolean {
     return true;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   postLayout(
     allowed: boolean,
     positionAfter: Vtree.NodeContext,
@@ -1951,9 +1892,7 @@ export class EntireTableLayoutConstraint
     });
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   finishBreak(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
@@ -1961,9 +1900,7 @@ export class EntireTableLayoutConstraint
     return Task.newResult(true);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
     return (
       constraint instanceof EntireTableLayoutConstraint &&
@@ -1971,9 +1908,7 @@ export class EntireTableLayoutConstraint
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getPriorityOfFinishBreak(): number {
     return 0;
   }
@@ -1987,10 +1922,7 @@ export class LayoutFragmentedTable extends RepetitiveElementImpl.LayoutFragmente
     super(formattingContext);
   }
 
-  /**
-   * @override
-   */
-  doLayout(
+  override doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
   ): Task.Result<Vtree.NodeContext> {
@@ -2024,8 +1956,7 @@ export class TableRowLayoutConstraint
     super(nodeContext);
   }
 
-  /** @override */
-  allowLayout(
+  override allowLayout(
     nodeContext: Vtree.NodeContext,
     overflownNodeContext: Vtree.NodeContext,
     column: Layout.Column,
@@ -2053,8 +1984,7 @@ export class TableRowLayoutConstraint
     }
   }
 
-  /** @override */
-  nextCandidate(nodeContext: Vtree.NodeContext): boolean {
+  override nextCandidate(nodeContext: Vtree.NodeContext): boolean {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext,
     );
@@ -2074,8 +2004,7 @@ export class TableRowLayoutConstraint
     return super.nextCandidate(nodeContext);
   }
 
-  /** @override */
-  postLayout(
+  override postLayout(
     allowed: boolean,
     positionAfter: Vtree.NodeContext,
     initialPosition: Vtree.NodeContext,
@@ -2110,8 +2039,7 @@ export class TableRowLayoutConstraint
     super.postLayout(allowed, positionAfter, initialPosition, column);
   }
 
-  /** @override */
-  finishBreak(
+  override finishBreak(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
   ): Task.Result<boolean> {
@@ -2225,8 +2153,7 @@ export class TableRowLayoutConstraint
     }
   }
 
-  /** @override */
-  equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
+  override equalsTo(constraint: Layout.FragmentLayoutConstraint): boolean {
     if (!(constraint instanceof TableRowLayoutConstraint)) {
       return false;
     }

@@ -44,10 +44,7 @@ export class Footnote extends PageFloats.PageFloat {
     );
   }
 
-  /**
-   * @override
-   */
-  isAllowedToPrecede(other: PageFloats.PageFloat): boolean {
+  override isAllowedToPrecede(other: PageFloats.PageFloat): boolean {
     return !(other instanceof Footnote);
   }
 }
@@ -65,17 +62,11 @@ export class FootnoteFragment extends PageFloatFragment {
     super(floatReference, "block-end", continuations, area, continues);
   }
 
-  /**
-   * @override
-   */
-  getOrder(): number {
+  override getOrder(): number {
     return Infinity;
   }
 
-  /**
-   * @override
-   */
-  shouldBeStashedBefore(float: PageFloats.PageFloat): boolean {
+  override shouldBeStashedBefore(float: PageFloats.PageFloat): boolean {
     if (float instanceof Footnote) {
       return true;
     } else {
@@ -98,23 +89,17 @@ export class LineFootnotePolicyLayoutConstraint
 export class FootnoteLayoutStrategy
   implements PageFloats.PageFloatLayoutStrategy
 {
-  /**
-   * @override
-   */
+  /** @override */
   appliesToNodeContext(nodeContext: Vtree.NodeContext): boolean {
     return nodeContext.floatSide === "footnote";
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   appliesToFloat(float: PageFloats.PageFloat): boolean {
     return float instanceof Footnote;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createPageFloat(
     nodeContext: Vtree.NodeContext,
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
@@ -145,9 +130,7 @@ export class FootnoteLayoutStrategy
     return Task.newResult(float);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createPageFloatFragment(
     continuations: PageFloats.PageFloatContinuation[],
     floatSide: string,
@@ -163,9 +146,7 @@ export class FootnoteLayoutStrategy
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   findPageFloatFragment(
     float: PageFloats.PageFloat,
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
@@ -180,9 +161,7 @@ export class FootnoteLayoutStrategy
     return fragments[0] || null;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   adjustPageFloatArea(
     floatArea: Layout.PageFloatArea,
     floatContainer: Vtree.Container,
@@ -203,9 +182,7 @@ export class FootnoteLayoutStrategy
     column.setComputedWidthAndHeight(element, floatArea);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   forbid(
     float: PageFloats.PageFloat,
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,

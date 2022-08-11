@@ -97,9 +97,7 @@ class CounterListener implements CssCascade.CounterListener {
     public readonly baseURL: string,
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   countersOfId(id: string, counters: CssCascade.CounterValues) {
     id = this.counterStore.documentURLTransformer.transformFragment(
       id,
@@ -151,9 +149,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     return transformedId;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getPageCounterVal(
     name: string,
     format: (p1: number | null) => string,
@@ -177,9 +173,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     return expr;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getPageCountersVal(
     name: string,
     format: (p1: number[]) => string,
@@ -240,9 +234,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getTargetCounterVal(
     url: string,
     name: string,
@@ -311,9 +303,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getTargetCountersVal(
     url: string,
     name: string,
@@ -552,7 +542,7 @@ export class CounterStore {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
     let resetMap: { [key: string]: number };
-    const reset = cascadedPageStyle["counter-reset"];
+    const reset = cascadedPageStyle["counter-reset"] as CssCascade.CascadeValue;
     if (reset) {
       const resetVal = reset.evaluate(context);
       if (resetVal) {
@@ -565,7 +555,9 @@ export class CounterStore {
       }
     }
     let incrementMap: { [key: string]: number };
-    const increment = cascadedPageStyle["counter-increment"];
+    const increment = cascadedPageStyle[
+      "counter-increment"
+    ] as CssCascade.CascadeValue;
     if (increment) {
       const incrementVal = increment.evaluate(context);
       if (incrementVal) {
@@ -825,9 +817,7 @@ class LayoutConstraint implements Layout.LayoutConstraint {
     public readonly pageIndex: number,
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
     if (!nodeContext || nodeContext.after) {
       return true;

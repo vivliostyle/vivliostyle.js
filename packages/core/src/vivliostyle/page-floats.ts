@@ -1608,23 +1608,17 @@ export class PageFloatLayoutStrategyResolver {
 }
 
 export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
-  /**
-   * @override
-   */
+  /** @override */
   appliesToNodeContext(nodeContext: Vtree.NodeContext): boolean {
     return isPageFloat(nodeContext.floatReference);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   appliesToFloat(float: PageFloat): boolean {
     return true;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createPageFloat(
     nodeContext: Vtree.NodeContext,
     pageFloatLayoutContext: PageFloatLayoutContext,
@@ -1656,9 +1650,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
       });
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   createPageFloatFragment(
     continuations: PageFloatContinuation[],
     floatSide: string,
@@ -1675,9 +1667,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   findPageFloatFragment(
     float: PageFloat,
     pageFloatLayoutContext: PageFloatLayoutContext,
@@ -1685,18 +1675,14 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
     return pageFloatLayoutContext.findPageFloatFragment(float);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   adjustPageFloatArea(
     floatArea: LayoutType.PageFloatArea,
     floatContainer: Vtree.Container,
     column: LayoutType.Column,
   ) {}
 
-  /**
-   * @override
-   */
+  /** @override */
   forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext) {}
 }
 

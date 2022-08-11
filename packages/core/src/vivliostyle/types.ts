@@ -36,13 +36,17 @@ export type FragmentLayoutConstraintType =
   | "TableRow";
 
 export namespace CssCascade {
-  export interface ElementStyle {}
+  export type ElementStyle = { [key: string]: any };
 }
 
 export namespace CssStyler {
   export interface AbstractStyler {
     getStyle(element: Element, deep: boolean): CssCascade.ElementStyle;
-    processContent(element: Element, styles: { [key: string]: Css.Val });
+    processContent(
+      element: Element,
+      styles: { [key: string]: Css.Val },
+      viewNode: Node,
+    );
   }
 }
 
@@ -1245,7 +1249,7 @@ export namespace Vtree {
     readonly parentShadow: ShadowContext;
     subShadow: ShadowContext;
     readonly type: Vtree.ShadowType;
-    readonly styler: object;
+    readonly styler: CssStyler.AbstractStyler;
 
     equals(other: ShadowContext): boolean;
   }

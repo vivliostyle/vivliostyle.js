@@ -180,17 +180,11 @@ export class PageMaster<
     // this.specified["top"] = new CssCascade.CascadeValue(new Css.Numeric(-1, "px"), 0);
   }
 
-  /**
-   * @override
-   */
-  createInstance(parentInstance): PageBoxInstance {
+  override createInstance(parentInstance): PageBoxInstance {
     return new PageMasterInstance(parentInstance, this);
   }
 
-  /**
-   * @override
-   */
-  clone(param): PageMaster {
+  override clone(param): PageMaster {
     // The cloned page master shares the same scope object with the original
     // one.
     const cloned = new PageMaster(
@@ -242,17 +236,11 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
     );
   }
 
-  /**
-   * @override
-   */
-  createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
+  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
     return new PartitionGroupInstance(parentInstance, this);
   }
 
-  /**
-   * @override
-   */
-  clone(param): PartitionGroup {
+  override clone(param): PartitionGroup {
     const cloned = new PartitionGroup(
       param.parent.scope,
       this.name,
@@ -286,17 +274,11 @@ export class Partition<
     }
   }
 
-  /**
-   * @override
-   */
-  createInstance(parentInstance): PageBoxInstance {
+  override createInstance(parentInstance): PageBoxInstance {
     return new PartitionInstance(parentInstance, this);
   }
 
-  /**
-   * @override
-   */
-  clone(param): Partition {
+  override clone(param): Partition {
     const cloned = new Partition(
       param.parent.scope,
       this.name,
@@ -320,7 +302,7 @@ export function toExprIdent(
   val: Css.Val,
   def: string,
 ): Exprs.Val {
-  if (!val) {
+  if (!val || Css.isDefaultingValue(val)) {
     return new Exprs.Const(scope, def);
   }
   return val.toExpr(scope, scope.zero);
@@ -331,7 +313,7 @@ export function toExprAuto(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || val === Css.ident.auto) {
+  if (!val || val === Css.ident.auto || Css.isDefaultingValue(val)) {
     return null;
   }
   return val.toExpr(scope, ref);
@@ -342,7 +324,7 @@ export function toExprNormal(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || val === Css.ident.normal) {
+  if (!val || val === Css.ident.normal || Css.isDefaultingValue(val)) {
     return null;
   }
   return val.toExpr(scope, ref);
@@ -353,7 +335,7 @@ export function toExprZero(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || val === Css.ident.auto) {
+  if (!val || val === Css.ident.auto || Css.isDefaultingValue(val)) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
@@ -369,7 +351,7 @@ export function toExprZeroAuto(
   val: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val) {
+  if (!val || Css.isDefaultingValue(val)) {
     return scope.zero;
   } else if (val === Css.ident.auto) {
     return null;
@@ -384,7 +366,7 @@ export function toExprZeroBorder(
   styleVal: Css.Val,
   ref: Exprs.Val,
 ): Exprs.Val {
-  if (!val || styleVal === Css.ident.none) {
+  if (!val || styleVal === Css.ident.none || Css.isDefaultingValue(val)) {
     return scope.zero;
   }
   return val.toExpr(scope, ref);
@@ -395,7 +377,7 @@ export function toExprBool(
   val: Css.Val,
   def: Exprs.Val,
 ): Exprs.Val {
-  if (!val) {
+  if (!val || Css.isDefaultingValue(val)) {
     return def;
   }
   if (val === Css.ident._true) {
@@ -991,17 +973,25 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
 
   getProp(context: Exprs.Context, name: string): Css.Val {
     let val = this.style[name];
-    if (!val && CssCascade.inheritedProps[name]) {
+    if (!val && CssCascade.isInherited(name)) {
       // inherit from root style
-      const rootStyle = (
-        context as Exprs.Context & {
-          styler: { rootStyle: { [key: string]: CssCascade.CascadeValue } };
-        }
-      ).styler?.rootStyle;
-      val = rootStyle[name]?.value;
+      if (
+        name === "font-size" &&
+        context.isRelativeRootFontSize &&
+        context.rootFontSize
+      ) {
+        val = new Css.Numeric(context.rootFontSize, "px");
+      } else {
+        const rootStyle = (
+          context as Exprs.Context & {
+            styler: { rootStyle: { [key: string]: CssCascade.CascadeValue } };
+          }
+        ).styler?.rootStyle;
+        val = rootStyle[name]?.value;
+      }
     }
     if (val) {
-      val = CssParser.evaluateCSSToCSS(context, val, name);
+      val = CssCascade.evaluateCSSToCSS(context, val, name);
     }
     return val;
   }
@@ -1009,7 +999,10 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   getPropAsNumber(context: Exprs.Context, name: string): number {
     let val = this.style[name];
     if (val) {
-      val = CssParser.evaluateCSSToCSS(context, val, name);
+      let percentRef = /\b(height|top|bottom)\b/.test(name)
+        ? context.pageAreaHeight ?? context.pageHeight()
+        : context.pageAreaWidth ?? context.pageWidth();
+      val = CssCascade.evaluateCSSToCSS(context, val, name, percentRef);
     }
     return Css.toNumber(val, context);
   }
@@ -1500,8 +1493,9 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       }
     }
     cascade.pushRule(this.pageBox.classes, null, style);
-    if (style["content"]) {
-      style["content"] = style["content"].filterValue(
+    const content = style["content"] as CssCascade.CascadeValue;
+    if (content) {
+      style["content"] = content.filterValue(
         new CssCascade.ContentPropVisitor(
           cascade,
           null,
@@ -1642,10 +1636,7 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
     super(null, pageBox);
   }
 
-  /**
-   * @override
-   */
-  applyCascadeAndInit(
+  override applyCascadeAndInit(
     cascade: CssCascade.CascadeInstance,
     docElementStyle: CssCascade.ElementStyle,
   ): void {
@@ -1669,10 +1660,7 @@ export class PageMasterInstance<
     this.pageMasterInstance = this;
   }
 
-  /**
-   * @override
-   */
-  boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
+  override boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     const pageMaster = this.pageBox.pageMaster;
     if (pageMaster.condition) {
       enabled = Exprs.and(pageMaster.scope, enabled, pageMaster.condition);
@@ -1737,10 +1725,7 @@ export class PartitionInstance<
     return enabled;
   }
 
-  /**
-   * @override
-   */
-  boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
+  override boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {
     const scope = this.pageBox.scope;
     const style = this.style;
     const required =
@@ -1771,10 +1756,7 @@ export class PartitionInstance<
     return enabled;
   }
 
-  /**
-   * @override
-   */
-  prepareContainer(
+  override prepareContainer(
     context: Exprs.Context,
     container: Vtree.Container,
     page: Vtree.Page,
@@ -1799,10 +1781,7 @@ export class PageBoxParserHandler
     super(scope, owner, false);
   }
 
-  /**
-   * @override
-   */
-  property(name: string, value: Css.Val, important: boolean): void {
+  override property(name: string, value: Css.Val, important: boolean): void {
     this.validatorSet.validatePropertyAndHandleShorthand(
       name,
       value,
@@ -1811,23 +1790,17 @@ export class PageBoxParserHandler
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   unknownProperty(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   invalidPropertyValue(name: string, value: Css.Val): void {
     this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   simpleProperty(name: string, value: Css.Val, important): void {
     this.target.specified[name] = new CssCascade.CascadeValue(
       value,
@@ -1867,10 +1840,7 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1891,10 +1861,7 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
     this.owner.pushHandler(handler);
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1926,10 +1893,7 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
     super(scope, owner, target, validatorSet);
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -1950,10 +1914,7 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
     this.owner.pushHandler(handler);
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],

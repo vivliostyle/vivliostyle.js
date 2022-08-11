@@ -84,7 +84,10 @@ export function getComputedDislayValue(
   } else if (isAbsolutelyPositioned(position)) {
     float = Css.ident.none;
     display = blockify(display);
-  } else if ((float && float !== Css.ident.none) || isRoot) {
+  } else if (
+    (float && float !== Css.ident.none && !Css.isDefaultingValue(float)) ||
+    isRoot
+  ) {
     display = blockify(display);
   }
   return { display, position, float };
@@ -147,7 +150,7 @@ export function establishesBFC(
   writingMode = writingMode || parentWritingMode || Css.ident.horizontal_tb;
   return (
     !!isFlowRoot ||
-    (!!float && float !== Css.ident.none) ||
+    (!!float && float !== Css.ident.none && !Css.isDefaultingValue(float)) ||
     isAbsolutelyPositioned(position) ||
     display === Css.ident.inline_block ||
     display === Css.ident.table_cell ||
@@ -155,7 +158,8 @@ export function establishesBFC(
     display == Css.ident.flex ||
     ((display === Css.ident.block || display === Css.ident.list_item) &&
       !!overflow &&
-      overflow !== Css.ident.visible) ||
+      overflow !== Css.ident.visible &&
+      !Css.isDefaultingValue(overflow)) ||
     (!!parentWritingMode && writingMode !== parentWritingMode)
   );
 }

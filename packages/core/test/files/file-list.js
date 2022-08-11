@@ -6,8 +6,11 @@ module.exports = [
   {
     category: "General",
     files: [
-      { file: "print_media/", title: "Print media" },
-      { file: "vivliostyle_media/", title: "'vivliostyle' vs 'screen' media" },
+      { file: "print_media/index.html", title: "Print media" },
+      {
+        file: "vivliostyle_media/index.html",
+        title: "'vivliostyle' vs 'screen' media",
+      },
       {
         file: "running_header_adaptive.html",
         title: "Running header emulation with Adaptive Layout",
@@ -128,6 +131,10 @@ module.exports = [
       {
         file: "z-index-at-page.html",
         title: "z-index on @page and page-margin boxes",
+      },
+      {
+        file: "inset-shorthand.html",
+        title: "inset shorthand property",
       },
     ],
   },

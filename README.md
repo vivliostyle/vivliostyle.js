@@ -6,6 +6,8 @@
 [![GitHub contributors][contributors]][contributors-url]
 [![PR's welcome][pr-welcome]][pr-welcome-url]
 
+Vivliostyle is an open source project for a new typesetting system based on web standard technology.
+
 Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support.
 
 🌏 [Vivliostyle.org](https://vivliostyle.org)  
@@ -153,6 +155,8 @@ Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 ## Credits
+
+[![Powered By Vercel](https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg)](https://vercel.com/?utm_source=vivliostyle&utm_campaign=oss)
 
 [![Testing Powered By SauceLabs](https://saucelabs.github.io/images/opensauce/powered-by-saucelabs-badge-white.png?sanitize=true "Testing Powered By SauceLabs")](https://saucelabs.com)
 

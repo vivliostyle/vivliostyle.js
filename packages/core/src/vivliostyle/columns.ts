@@ -216,10 +216,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     super(layoutContainer, columnGenerator, regionPageFloatLayoutContext);
   }
 
-  /**
-   * @override
-   */
-  preBalance(layoutResult: ColumnLayoutResult) {
+  override preBalance(layoutResult: ColumnLayoutResult) {
     const columns = layoutResult.columns;
     const totalBlockSize = columns.reduce(
       (prev, c) => prev + c.computedBlockSize,
@@ -237,10 +234,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     }
   }
 
-  /**
-   * @override
-   */
-  calculatePenalty(layoutResult: ColumnLayoutResult): number {
+  override calculatePenalty(layoutResult: ColumnLayoutResult): number {
     if (!this.checkPosition(layoutResult.position)) {
       return Infinity;
     }
@@ -254,10 +248,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     );
   }
 
-  /**
-   * @override
-   */
-  hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {
+  override hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {
     if (candidates.length === 1) {
       return true;
     } else if (this.foundUpperBound) {
@@ -280,10 +271,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     }
   }
 
-  /**
-   * @override
-   */
-  updateCondition(candidates: ColumnBalancingTrialResult[]): void {
+  override updateCondition(candidates: ColumnBalancingTrialResult[]): void {
     if (this.foundUpperBound) {
       reduceContainerSize(candidates, this.layoutContainer);
     } else {
@@ -317,10 +305,7 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
     super(layoutContainer, columnGenerator, regionPageFloatLayoutContext);
   }
 
-  /**
-   * @override
-   */
-  calculatePenalty(layoutResult: ColumnLayoutResult): number {
+  override calculatePenalty(layoutResult: ColumnLayoutResult): number {
     if (layoutResult.columns.every((c) => c.computedBlockSize === 0)) {
       return Infinity;
     }
@@ -330,17 +315,11 @@ export class BalanceNonLastColumnBalancer extends ColumnBalancer {
     return MathUtil.variance(computedBlockSizes);
   }
 
-  /**
-   * @override
-   */
-  hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {
+  override hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {
     return canReduceContainerSize(candidates);
   }
 
-  /**
-   * @override
-   */
-  updateCondition(candidates: ColumnBalancingTrialResult[]): void {
+  override updateCondition(candidates: ColumnBalancingTrialResult[]): void {
     reduceContainerSize(candidates, this.layoutContainer);
   }
 }

@@ -996,8 +996,10 @@ export class LayoutPosition {
     }
     if (
       !other ||
-      this.page !== other.page ||
-      this.highestSeenOffset !== other.highestSeenOffset
+      this.page !== other.page
+      // Removed:
+      //   || this.highestSeenOffset !== other.highestSeenOffset
+      // to prevent unnecessary re-layout (Issue #681-case2)
     ) {
       return false;
     }
@@ -1323,14 +1325,12 @@ export class ContentPropertyHandler extends Css.Visitor {
     this.elem.appendChild(node);
   }
 
-  /** @override */
-  visitStr(str: Css.Str): Css.Val {
+  override visitStr(str: Css.Str): Css.Val {
     this.visitStrInner(str.str);
     return null;
   }
 
-  /** @override */
-  visitURL(url: Css.URL): Css.Val {
+  override visitURL(url: Css.URL): Css.Val {
     if ((this.rootContentValue as any).url) {
       this.elem.setAttribute("src", url.url);
     } else {
@@ -1341,14 +1341,12 @@ export class ContentPropertyHandler extends Css.Visitor {
     return null;
   }
 
-  /** @override */
-  visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
     this.visitValues(list.values);
     return null;
   }
 
-  /** @override */
-  visitExpr(expr: Css.Expr): Css.Val {
+  override visitExpr(expr: Css.Expr): Css.Val {
     const ex = expr.toExpr();
     let val = ex.evaluate(this.context);
     if (typeof val === "string") {
@@ -1375,6 +1373,6 @@ export function nonTrivialContent(val: Css.Val): boolean {
     val !== Css.empty &&
     val !== Css.ident.normal &&
     val !== Css.ident.none &&
-    val !== Css.ident.inherit
+    !Css.isDefaultingValue(val)
   );
 }

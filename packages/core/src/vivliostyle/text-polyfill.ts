@@ -20,7 +20,6 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { TextPolyfillCss } from "./assets";
 
 type PropertyValue = string | number | Css.Val;
 
@@ -250,8 +249,6 @@ const embeddedContentTags = {
 };
 
 class TextSpacingPolyfill {
-  isTextPolyfillCssReady = false;
-
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-spacing"];
   }
@@ -261,10 +258,6 @@ class TextSpacingPolyfill {
       return;
     }
     this.preprocessForTextSpacing(document.body);
-
-    this.isTextPolyfillCssReady = !!document.getElementById(
-      "vivliostyle-text-polyfill-css",
-    );
   }
 
   preprocessForTextSpacing(element: Element): void {
@@ -440,6 +433,10 @@ class TextSpacingPolyfill {
         ) {
           continue;
         }
+        if (/\b(flex|grid)\b/.test(p.parent.display)) {
+          // Cannot process if parent is flex or grid. (Issue #926)
+          continue;
+        }
 
         let prevNode: Node = null;
         let nextNode: Node = null;
@@ -509,7 +506,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            (prevP.display && prevP.display !== "inline") ||
+            (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
             (prevP.viewNode instanceof Element &&
               (prevP.viewNode.localName === "br" ||
                 embeddedContentTags[prevP.viewNode.localName]))
@@ -537,7 +534,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            (nextP.display && nextP.display !== "inline") ||
+            (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
             (nextP.viewNode instanceof Element &&
               (nextP.viewNode.localName === "br" ||
                 embeddedContentTags[nextP.viewNode.localName]))
@@ -686,10 +683,10 @@ class TextSpacingPolyfill {
     }
 
     if (punctProcessing) {
-      if (!this.isTextPolyfillCssReady) {
-        this.initTextPolyfillCss(document.head);
+      if (textNode.parentElement.localName === "viv-ts-inner") {
+        // Already processed
+        return;
       }
-
       // Wrap the textNode as `<{tagName}><viv-ts-inner>{text}<viv-ts-inner></{tagName}>`
       const outerElem = document.createElement(tagName);
       const innerElem = document.createElement("viv-ts-inner");
@@ -753,23 +750,24 @@ class TextSpacingPolyfill {
               outerElem.className = "viv-ts-trim";
             }
           } else if (hangingEnd) {
-            const forceAtEnd = !hangingPunctuation.allowEnd && isAtEndOfLine();
-            outerElem.className = isFullWidth
-              ? "viv-hang-end"
-              : "viv-hang-end viv-hang-hw";
+            const atEnd = isAtEndOfLine();
+            const atEndNoHang = atEnd && hangingPunctuation.allowEnd;
+            if (!atEndNoHang) {
+              outerElem.className = isFullWidth
+                ? "viv-hang-end"
+                : "viv-hang-end viv-hang-hw";
+            }
             if (!isFullWidth) {
-              if (!forceAtEnd) {
-                const atEndOfLine = isAtEndOfLine();
+              if (!atEnd && !isAtEndOfLine()) {
                 outerElem.className = "";
-                if (atEndOfLine && !isAtEndOfLine()) {
-                  outerElem.className = "viv-hang-end viv-hang-hw";
-                }
               }
             } else if (
-              !forceAtEnd &&
-              hangingPunctuation.allowEnd &&
-              isAtEndOfLine()
+              atEndNoHang
+                ? textSpacing.trimEnd && !textSpacing.allowEnd
+                : !isAtEndOfLine()
             ) {
+              outerElem.className = "viv-ts-auto";
+            } else if (!atEnd && hangingPunctuation.allowEnd) {
               if (!textSpacing.trimEnd || textSpacing.allowEnd) {
                 outerElem.className = "viv-ts-space";
                 if (!isAtEndOfLine()) {
@@ -794,26 +792,6 @@ class TextSpacingPolyfill {
               outerElem.className = "viv-ts-space";
             } else {
               outerElem.className = "viv-ts-auto";
-            }
-          }
-        }
-
-        // Support for browsers not supporting inset-inline-start property
-        // https://developer.mozilla.org/en-US/docs/Web/CSS/inset-inline-start#browser_compatibility
-        if (innerElem.style.insetInlineStart === undefined) {
-          let insetInlineStart = {
-            "viv-ts-auto": "0.5em",
-            "viv-ts-trim": "0.5em",
-            "viv-hang-end": "1em",
-            "viv-hang-last": "1em",
-            "viv-hang-end viv-hang-hw": "0.5em",
-            "viv-hang-last viv-hang-hw": "0.5em",
-          }[outerElem.className];
-          if (insetInlineStart) {
-            if (vertical) {
-              innerElem.style.top = insetInlineStart;
-            } else {
-              innerElem.style.left = insetInlineStart;
             }
           }
         }
@@ -867,19 +845,7 @@ class TextSpacingPolyfill {
         );
         spaceIdeoAlnumProcessing = true;
       }
-
-      if (spaceIdeoAlnumProcessing && !this.isTextPolyfillCssReady) {
-        this.initTextPolyfillCss(document.head);
-      }
     }
-  }
-
-  private initTextPolyfillCss(head: Element): void {
-    const styleElem = head.ownerDocument.createElement("style");
-    styleElem.id = "vivliostyle-text-polyfill-css";
-    styleElem.textContent = TextPolyfillCss;
-    head.appendChild(styleElem);
-    this.isTextPolyfillCssReady = true;
   }
 
   registerHooks() {

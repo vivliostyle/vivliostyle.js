@@ -268,17 +268,13 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     return violateConstraint;
   }
 
-  /**
-   * @override
-   */
-  startNonElementNode(state: LayoutIteratorState): void | Task.Result<boolean> {
+  override startNonElementNode(
+    state: LayoutIteratorState,
+  ): void | Task.Result<boolean> {
     state.onStartEdges = false;
   }
 
-  /**
-   * @override
-   */
-  startNonInlineElementNode(
+  override startNonInlineElementNode(
     state: LayoutIteratorState,
   ): void | Task.Result<boolean> {
     state.leadingEdgeContexts.push(state.nodeContext.copy());
@@ -290,10 +286,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     return this.startNonInlineBox(state);
   }
 
-  /**
-   * @override
-   */
-  afterNonInlineElementNode(
+  override afterNonInlineElementNode(
     state: LayoutIteratorState,
   ): void | Task.Result<boolean> {
     let r: void | Task.Result<boolean>;

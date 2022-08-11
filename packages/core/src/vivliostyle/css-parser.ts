@@ -34,32 +34,32 @@ export const SPECIFICITY_USER_AGENT: number = 0;
 /**
  * User stylesheet base specificity.
  */
-export const SPECIFICITY_USER: number = 16777216;
+export const SPECIFICITY_USER: number = 0x1000000;
 
 /**
  * Author stylesheet ("normal" stylesheet) base specificity.
  */
-export const SPECIFICITY_AUTHOR: number = 33554432;
+export const SPECIFICITY_AUTHOR: number = 0x2000000;
 
 /**
  * Style attribute base specificity.
  */
-export const SPECIFICITY_STYLE: number = 50331648;
+export const SPECIFICITY_STYLE: number = 0x3000000;
 
 /**
  * Style attribute base specificity when !important is used.
  */
-export const SPECIFICITY_STYLE_IMPORTANT: number = 67108864;
+export const SPECIFICITY_STYLE_IMPORTANT: number = 0x4000000;
 
 /**
  * Author stylesheet base specificity when !important is used.
  */
-export const SPECIFICITY_AUTHOR_IMPORTANT: number = 83886080;
+export const SPECIFICITY_AUTHOR_IMPORTANT: number = 0x5000000;
 
 /**
  * User stylesheet base specificity when !important is used.
  */
-export const SPECIFICITY_USER_IMPORTANT: number = 100663296;
+export const SPECIFICITY_USER_IMPORTANT: number = 0x6000000;
 
 /**
  * @enum {string}
@@ -68,30 +68,6 @@ export enum StylesheetFlavor {
   USER_AGENT = "UA",
   USER = "User",
   AUTHOR = "Author",
-}
-
-/**
- * CSS Color value from hash text (without '#' character).
- */
-export function colorFromHash(text: string): Css.Color {
-  let num = parseInt(text, 16);
-  if (isNaN(num)) {
-    throw new Error("E_CSS_COLOR");
-  }
-  if (text.length == 6) {
-    return new Css.Color(num);
-  }
-  if (text.length == 3) {
-    num =
-      (num & 15) |
-      ((num & 15) << 4) |
-      ((num & 240) << 4) |
-      ((num & 240) << 8) |
-      ((num & 3840) << 8) |
-      ((num & 3840) << 12);
-    return new Css.Color(num);
-  }
-  throw new Error("E_CSS_COLOR");
 }
 
 export class ParserHandler implements CssTokenizer.TokenizerHandler {
@@ -241,20 +217,14 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave = this.stack.pop();
   }
 
-  /**
-   * @override
-   */
-  getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token {
     if (this.tokenizer) {
       return this.tokenizer.token();
     }
     return null;
   }
 
-  /**
-   * @override
-   */
-  getScope(): Exprs.LexicalScope {
+  override getScope(): Exprs.LexicalScope {
     return this.slave.getScope();
   }
 
@@ -273,10 +243,7 @@ export class DispatchParserHandler extends ParserHandler {
     Logging.logger.warn(mnemonics);
   }
 
-  /**
-   * @override
-   */
-  startStylesheet(flavor: StylesheetFlavor): void {
+  override startStylesheet(flavor: StylesheetFlavor): void {
     super.startStylesheet(flavor);
     if (this.stack.length > 0) {
       // This can occur as a result of an error
@@ -286,45 +253,33 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startStylesheet(flavor);
   }
 
-  /**
-   * @override
-   */
-  tagSelector(ns: string | null, name: string | null): void {
+  override tagSelector(ns: string | null, name: string | null): void {
     this.slave.tagSelector(ns, name);
   }
 
-  /**
-   * @override
-   */
-  classSelector(name: string): void {
+  override classSelector(name: string): void {
     this.slave.classSelector(name);
   }
 
-  /**
-   * @override
-   */
-  pseudoclassSelector(name: string, params: (number | string)[]): void {
+  override pseudoclassSelector(
+    name: string,
+    params: (number | string)[],
+  ): void {
     this.slave.pseudoclassSelector(name, params);
   }
 
-  /**
-   * @override
-   */
-  pseudoelementSelector(name: string, params: (number | string)[]): void {
+  override pseudoelementSelector(
+    name: string,
+    params: (number | string)[],
+  ): void {
     this.slave.pseudoelementSelector(name, params);
   }
 
-  /**
-   * @override
-   */
-  idSelector(id: string): void {
+  override idSelector(id: string): void {
     this.slave.idSelector(id);
   }
 
-  /**
-   * @override
-   */
-  attributeSelector(
+  override attributeSelector(
     ns: string,
     name: string,
     op: CssTokenizer.TokenType,
@@ -333,122 +288,71 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.attributeSelector(ns, name, op, value);
   }
 
-  /**
-   * @override
-   */
-  descendantSelector(): void {
+  override descendantSelector(): void {
     this.slave.descendantSelector();
   }
 
-  /**
-   * @override
-   */
-  childSelector(): void {
+  override childSelector(): void {
     this.slave.childSelector();
   }
 
-  /**
-   * @override
-   */
-  adjacentSiblingSelector(): void {
+  override adjacentSiblingSelector(): void {
     this.slave.adjacentSiblingSelector();
   }
 
-  /**
-   * @override
-   */
-  followingSiblingSelector(): void {
+  override followingSiblingSelector(): void {
     this.slave.followingSiblingSelector();
   }
 
-  /**
-   * @override
-   */
-  nextSelector(): void {
+  override nextSelector(): void {
     this.slave.nextSelector();
   }
 
-  /**
-   * @override
-   */
-  startSelectorRule(): void {
+  override startSelectorRule(): void {
     this.slave.startSelectorRule();
   }
 
-  /**
-   * @override
-   */
-  startFontFaceRule(): void {
+  override startFontFaceRule(): void {
     this.slave.startFontFaceRule();
   }
 
-  /**
-   * @override
-   */
-  startFootnoteRule(pseudoelem: string | null): void {
+  override startFootnoteRule(pseudoelem: string | null): void {
     this.slave.startFootnoteRule(pseudoelem);
   }
 
-  /**
-   * @override
-   */
-  startViewportRule(): void {
+  override startViewportRule(): void {
     this.slave.startViewportRule();
   }
 
-  /**
-   * @override
-   */
-  startDefineRule(): void {
+  override startDefineRule(): void {
     this.slave.startDefineRule();
   }
 
-  /**
-   * @override
-   */
-  startRegionRule(): void {
+  override startRegionRule(): void {
     this.slave.startRegionRule();
   }
 
-  /**
-   * @override
-   */
-  startPageRule(): void {
+  override startPageRule(): void {
     this.slave.startPageRule();
   }
 
-  /**
-   * @override
-   */
-  startPageMarginBoxRule(name: string): void {
+  override startPageMarginBoxRule(name: string): void {
     this.slave.startPageMarginBoxRule(name);
   }
 
-  /**
-   * @override
-   */
-  startWhenRule(expr: Css.Expr): void {
+  override startWhenRule(expr: Css.Expr): void {
     this.slave.startWhenRule(expr);
   }
 
-  /**
-   * @override
-   */
-  startFlowRule(flowName: string): void {
+  override startFlowRule(flowName: string): void {
     this.slave.startFlowRule(flowName);
   }
 
-  /**
-   * @override
-   */
-  startPageTemplateRule(): void {
+  override startPageTemplateRule(): void {
     this.slave.startPageTemplateRule();
   }
 
-  /**
-   * @override
-   */
-  startPageMasterRule(
+  override startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -456,10 +360,7 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startPageMasterRule(name, pseudoName, classes);
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -467,10 +368,7 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startPartitionRule(name, pseudoName, classes);
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -478,38 +376,23 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startPartitionGroupRule(name, pseudoName, classes);
   }
 
-  /**
-   * @override
-   */
-  startRuleBody(): void {
+  override startRuleBody(): void {
     this.slave.startRuleBody();
   }
 
-  /**
-   * @override
-   */
-  property(name: string, value: Css.Val, important: boolean): void {
+  override property(name: string, value: Css.Val, important: boolean): void {
     this.slave.property(name, value, important);
   }
 
-  /**
-   * @override
-   */
-  endRule(): void {
+  override endRule(): void {
     this.slave.endRule();
   }
 
-  /**
-   * @override
-   */
-  startFuncWithSelector(funcName: string): void {
+  override startFuncWithSelector(funcName: string): void {
     this.slave.startFuncWithSelector(funcName);
   }
 
-  /**
-   * @override
-   */
-  endFuncWithSelector(): void {
+  override endFuncWithSelector(): void {
     this.slave.endFuncWithSelector();
   }
 }
@@ -528,31 +411,19 @@ export class SkippingParserHandler extends ParserHandler {
     }
   }
 
-  /**
-   * @override
-   */
-  getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token {
     return this.owner.getCurrentToken();
   }
 
-  /**
-   * @override
-   */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token): void {
     this.owner.errorMsg(mnemonics, token);
   }
 
-  /**
-   * @override
-   */
-  startRuleBody(): void {
+  override startRuleBody(): void {
     this.depth++;
   }
 
-  /**
-   * @override
-   */
-  endRule(): void {
+  override endRule(): void {
     if (--this.depth == 0 && !this.topLevel) {
       this.owner.popHandler();
     }
@@ -579,80 +450,47 @@ export class SlaveParserHandler extends SkippingParserHandler {
     );
   }
 
-  /**
-   * @override
-   */
-  startSelectorRule(): void {
+  override startSelectorRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR");
   }
 
-  /**
-   * @override
-   */
-  startFontFaceRule(): void {
+  override startFontFaceRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FONT_FACE");
   }
 
-  /**
-   * @override
-   */
-  startFootnoteRule(pseudoelem: string | null): void {
+  override startFootnoteRule(pseudoelem: string | null): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FOOTNOTE");
   }
 
-  /**
-   * @override
-   */
-  startViewportRule(): void {
+  override startViewportRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_VIEWPORT");
   }
 
-  /**
-   * @override
-   */
-  startDefineRule(): void {
+  override startDefineRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_DEFINE");
   }
 
-  /**
-   * @override
-   */
-  startRegionRule(): void {
+  override startRegionRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_REGION");
   }
 
-  /**
-   * @override
-   */
-  startPageRule(): void {
+  override startPageRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE");
   }
 
-  /**
-   * @override
-   */
-  startWhenRule(expr: Css.Expr): void {
+  override startWhenRule(expr: Css.Expr): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_WHEN");
   }
 
-  /**
-   * @override
-   */
-  startFlowRule(flowName: string): void {
+  override startFlowRule(flowName: string): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FLOW");
   }
 
-  /**
-   * @override
-   */
-  startPageTemplateRule(): void {
+  override startPageTemplateRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_TEMPLATE");
   }
 
-  /**
-   * @override
-   */
-  startPageMasterRule(
+  override startPageMasterRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -660,10 +498,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PAGE_MASTER");
   }
 
-  /**
-   * @override
-   */
-  startPartitionRule(
+  override startPartitionRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -671,10 +506,7 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION");
   }
 
-  /**
-   * @override
-   */
-  startPartitionGroupRule(
+  override startPartitionGroupRule(
     name: string | null,
     pseudoName: string | null,
     classes: string[],
@@ -682,24 +514,15 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION_GROUP");
   }
 
-  /**
-   * @override
-   */
-  startFuncWithSelector(funcName: string): void {
+  override startFuncWithSelector(funcName: string): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR_FUNC");
   }
 
-  /**
-   * @override
-   */
-  endFuncWithSelector(): void {
+  override endFuncWithSelector(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_END_SELECTOR_FUNC");
   }
 
-  /**
-   * @override
-   */
-  property(name: string, value: Css.Val, important: boolean): void {
+  override property(name: string, value: Css.Val, important: boolean): void {
     this.error("E_CSS_UNEXPECTED_PROPERTY", this.getCurrentToken());
   }
 }
@@ -988,11 +811,15 @@ export class Parser {
     const valStack = this.valStack;
     while (index < valStack.length) {
       arr.push(valStack[index++] as Css.Val);
-      if (index == valStack.length) {
+      if (index === valStack.length) {
         break;
       }
-      if (valStack[index++] != sep) {
+      if (valStack[index++] !== sep) {
         throw new Error("Unexpected state");
+      }
+      if (index === valStack.length) {
+        // keep last comma in `var(--b , )`
+        arr.push(Css.empty);
       }
     }
     return arr;
@@ -1025,14 +852,14 @@ export class Parser {
       if (sep != ")") {
         this.handler.error("E_CSS_MISMATCHED_C_PAR", token);
         this.actions = actionsErrorDecl;
-        return null;
+        // return null;
       }
       const func = new Css.Func(
         valStack[index - 1] as string,
         this.extractVals(",", index + 1),
       );
       valStack.splice(index - 1, count + 2, func);
-      return null;
+      return func;
     }
     if (sep != ";" || index >= 0) {
       this.handler.error("E_CSS_UNEXPECTED_VAL_END", token);
@@ -1042,14 +869,22 @@ export class Parser {
     if (count > 1) {
       return new Css.CommaList(this.extractVals(",", index + 1));
     }
-    return valStack[0] as Css.Val;
+    const val = valStack[0];
+    if (val instanceof Css.Val) {
+      return val;
+    } else if (!val) {
+      return Css.empty;
+    } else {
+      // custom property value can be arbitrary token e.g. ","
+      return new Css.AnyToken(val.toString());
+    }
   }
 
   exprError(mnemonics: string, token: CssTokenizer.Token) {
     this.actions = this.propName ? actionsErrorDecl : actionsError;
     // this.handler.error(mnemonics, token);
     // (should not throw error by expression syntax errors)
-    Logging.logger.warn(mnemonics);
+    Logging.logger.warn(mnemonics, token);
   }
 
   exprStackReduce(op: number, token: CssTokenizer.Token): boolean {
@@ -1538,6 +1373,23 @@ export class Parser {
     }
     parserLoop: for (; count > 0; --count) {
       token = tokenizer.token();
+
+      // Do not stop parsing on invalid property syntax as long as brackets are balanced.
+      if (
+        this.propName &&
+        this.errorBrackets.length > 0 &&
+        (token.type === this.errorBrackets[this.errorBrackets.length - 1] ||
+          token.type === CssTokenizer.TokenType.SEMICOL ||
+          token.type === CssTokenizer.TokenType.BANG)
+      ) {
+        if (token.type === this.errorBrackets[this.errorBrackets.length - 1]) {
+          this.errorBrackets.pop();
+        }
+        valStack.push(new Css.AnyToken(token.toString()));
+        tokenizer.consume();
+        continue;
+      }
+
       switch (this.actions[token.type]) {
         case Action.IDENT:
           // figure out if this is a property assignment or selector
@@ -1986,18 +1838,7 @@ export class Parser {
           continue;
         case Action.VAL_HASH:
           num = parseInt(token.text, 16);
-          try {
-            valStack.push(colorFromHash(token.text));
-          } catch (err) {
-            if (this.actions === actionsPropVal && tokenizer.hasMark()) {
-              tokenizer.reset();
-              this.actions = actionsSelectorStart;
-              handler.startSelectorRule();
-              continue;
-            }
-            handler.error("E_CSS_COLOR", token);
-            this.actions = actionsError;
-          }
+          valStack.push(new Css.HexColor(token.text));
           tokenizer.consume();
           continue;
         case Action.VAL_NUM:
@@ -2009,16 +1850,7 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.VAL_NUMERIC:
-          if (Exprs.isViewportRelativeLengthUnit(token.text)) {
-            // Treat numeric value with viewport unit as numeric in expr.
-            valStack.push(
-              new Css.Expr(
-                new Exprs.Numeric(handler.getScope(), token.num, token.text),
-              ),
-            );
-          } else {
-            valStack.push(new Css.Numeric(token.num, token.text));
-          }
+          valStack.push(new Css.Numeric(token.num, token.text));
           tokenizer.consume();
           continue;
         case Action.VAL_STR:
@@ -2044,7 +1876,7 @@ export class Parser {
           continue;
         case Action.VAL_FUNC:
           text = token.text.toLowerCase();
-          if (text == "-epubx-expr" || text == "calc" || text == "env") {
+          if (text == "-epubx-expr" || text == "env") {
             // special case
             this.actions = actionsExprVal;
             this.exprContext = ExprContext.PROP;
@@ -2094,7 +1926,9 @@ export class Parser {
             handler.startSelectorRule();
             continue;
           } else {
-            this.exprError("E_CSS_UNEXPECTED_PLUS", token);
+            // this.exprError("E_CSS_UNEXPECTED_PLUS", token);
+            valStack.push(new Css.AnyToken("+"));
+            tokenizer.consume();
             continue;
           }
         case Action.VAL_END:
@@ -2703,7 +2537,22 @@ export class Parser {
           ) {
             if (token.type == CssTokenizer.TokenType.INVALID) {
               handler.error(token.text, token);
-            } else if (token.type === CssTokenizer.TokenType.O_BRC) {
+            } else if (this.propName) {
+              // Do not stop parsing on invalid property syntax as long as brackets are balanced.
+              switch (token.type) {
+                case CssTokenizer.TokenType.O_PAR:
+                case CssTokenizer.TokenType.O_BRC:
+                case CssTokenizer.TokenType.O_BRK:
+                  this.errorBrackets.push(token.type + 1);
+                  break;
+              }
+              valStack.push(new Css.AnyToken(token.toString()));
+              tokenizer.consume();
+              continue;
+            } else if (
+              token.type === CssTokenizer.TokenType.O_BRC &&
+              valStack.length > 0
+            ) {
               // `@media {...}` and `@supports {...}` should be ok
               handler.startMediaRule(valStack.pop() as Css.Expr);
               this.ruleStack.push("media");
@@ -2739,17 +2588,11 @@ export class ErrorHandler extends ParserHandler {
     super(null);
   }
 
-  /**
-   * @override
-   */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
-    throw new Error(mnemonics);
+  override error(mnemonics: string, token: CssTokenizer.Token): void {
+    throw new Error(mnemonics + " " + token);
   }
 
-  /**
-   * @override
-   */
-  getScope(): Exprs.LexicalScope {
+  override getScope(): Exprs.LexicalScope {
     return this.scope;
   }
 }
@@ -2956,23 +2799,4 @@ export function evaluateExprToCSS(
       return Css.empty;
   }
   throw new Error("E_UNEXPECTED");
-}
-
-/**
- * @return val
- */
-export function evaluateCSSToCSS(
-  context: Exprs.Context,
-  val: Css.Val,
-  propName: string,
-): Css.Val {
-  if (val.isExpr()) {
-    try {
-      return evaluateExprToCSS(context, (val as Css.Expr).expr, propName);
-    } catch (err) {
-      Logging.logger.warn(err);
-    }
-    return Css.empty;
-  }
-  return val;
 }

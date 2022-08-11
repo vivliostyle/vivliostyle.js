@@ -43,7 +43,7 @@ import * as Vtree from "./vtree";
 import * as Layout from "./layout";
 import { XmlDoc } from "./types";
 
-const namespacePrefixMap = {};
+const namespacePrefixMap: { [key: string]: string } = {};
 
 export const frontEdgeBlackListHor: { [key: string]: string } = {
   "text-indent": "0px",
@@ -165,9 +165,7 @@ export class ViewFactory
     this.exprContentListener = styler.counterListener.getExprContentListener();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   clone(): Vtree.LayoutContext {
     return new ViewFactory(
       this.flowName,
@@ -225,12 +223,8 @@ export class ViewFactory
           }
         }
         if (name === "before" || name === "after") {
-          const content = pseudoMap[name]["content"];
-          if (
-            !content ||
-            content === Css.ident.normal ||
-            content === Css.ident.none
-          ) {
+          const content = pseudoMap[name]["content"] as CssCascade.CascadeValue;
+          if (!content || !Vtree.nonTrivialContent(content.value)) {
             continue;
           }
         }
@@ -275,14 +269,15 @@ export class ViewFactory
     isFootnote: boolean,
     nodeContext: Vtree.NodeContext,
     context: Exprs.Context,
-  ) {
+  ): CssCascade.ElementStyleMap {
     const pseudoMap = CssCascade.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) {
       return null;
     }
-    const computedPseudoStyleMap = {};
+    const computedPseudoStyleMap: CssCascade.ElementStyleMap = {};
     for (const key in pseudoMap) {
-      const computedPseudoStyle = (computedPseudoStyleMap[key] = {});
+      const computedPseudoStyle: { [key: string]: CssCascade.CascadeValue } =
+        (computedPseudoStyleMap[key] = {});
       CssCascade.mergeStyle(computedPseudoStyle, pseudoMap[key], context);
       CssCascade.mergeViewConditionalStyles(
         computedPseudoStyle,
@@ -436,9 +431,7 @@ export class ViewFactory
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   setViewRoot(viewRoot: Element, isFootnote: boolean) {
     this.viewRoot = viewRoot;
     this.isFootnote = isFootnote;
@@ -527,9 +520,7 @@ export class ViewFactory
       }
     }
     const isRoot = steps === 0;
-    const fontSize = this.context.isRelativeRootFontSize
-      ? this.context.initialFontSize // Fix for issue #549
-      : this.context.queryUnitSize("em", isRoot);
+    const fontSize = this.context.queryUnitSize("em", isRoot);
     const props = {
       "font-size": new CssCascade.CascadeValue(
         new Css.Numeric(fontSize, "px"),
@@ -552,7 +543,20 @@ export class ViewFactory
       for (const name of propList) {
         inheritanceVisitor.setPropName(name);
         const value = CssCascade.getProp(style, name);
-        if (value.value !== Css.ident.inherit) {
+        if (!Css.isDefaultingValue(value.value)) {
+          if (
+            name === "font-size" &&
+            i === styles.length - 1 &&
+            this.context.isRelativeRootFontSize &&
+            this.context.rootFontSize
+          ) {
+            // Fix for issue #608, #549
+            props[name] = new CssCascade.CascadeValue(
+              new Css.Numeric(this.context.rootFontSize, "px"),
+              value.priority,
+            );
+            continue;
+          }
           props[name] = value.filterValue(inheritanceVisitor);
         }
       }
@@ -593,7 +597,11 @@ export class ViewFactory
       polyfilledInheritedProps.forEach((name) => {
         const value = computedStyle[name];
         if (value) {
-          if (value instanceof Css.Int) {
+          if (Css.isDefaultingValue(value)) {
+            if (value === Css.ident.initial) {
+              props[name] = undefined;
+            }
+          } else if (value instanceof Css.Int) {
             props[name] = (value as Css.Int).num;
           } else if (value instanceof Css.Ident) {
             props[name] = (value as Css.Ident).name;
@@ -606,6 +614,8 @@ export class ViewFactory
                 props[name] =
                   numericVal.num * Exprs.defaultUnitSizes[numericVal.unit];
                 break;
+              default:
+                props[name] = value;
             }
           } else {
             props[name] = value;
@@ -656,7 +666,7 @@ export class ViewFactory
     // Figure out element's styles
     let element = this.sourceNode as Element;
     const styler = this.nodeContext.shadowContext
-      ? (this.nodeContext.shadowContext.styler as CssStyler.AbstractStyler)
+      ? this.nodeContext.shadowContext.styler
       : this.styler;
     let elementStyle = styler.getStyle(element, false);
     if (!this.nodeContext.shadowContext) {
@@ -667,17 +677,18 @@ export class ViewFactory
         0,
       );
     }
-    const computedStyle = {};
+    const computedStyle: { [key: string]: Css.Val } = {};
     if (!this.nodeContext.parent) {
       const inheritedValues = this.inheritFromSourceParent(elementStyle);
       elementStyle = inheritedValues.elementStyle;
       this.nodeContext.lang = inheritedValues.lang;
     }
+    const floatReferenceCV: CssCascade.CascadeValue =
+      elementStyle["float-reference"];
     const floatReference =
-      elementStyle["float-reference"] &&
-      PageFloats.floatReferenceOf(
-        elementStyle["float-reference"].value.toString(),
-      );
+      floatReferenceCV && !Css.isDefaultingValue(floatReferenceCV.value)
+        ? PageFloats.floatReferenceOf(floatReferenceCV.value.toString())
+        : null;
     if (
       this.nodeContext.parent &&
       floatReference &&
@@ -695,7 +706,11 @@ export class ViewFactory
       elementStyle,
       computedStyle,
     );
-    styler.processContent(element, computedStyle);
+    styler.processContent(
+      element,
+      computedStyle,
+      this.nodeContext.viewNode ?? this.nodeContext.parent?.viewNode,
+    );
     this.transferPolyfilledInheritedProps(computedStyle);
     this.inheritLangAttribute();
     if (computedStyle["direction"]) {
@@ -713,7 +728,18 @@ export class ViewFactory
       Scripts.loadScript(element, this.viewport.window).thenFinish(frame);
       return frame.result();
     }
-    let display = computedStyle["display"];
+    let display = computedStyle["display"] as Css.Ident;
+    if (Css.isDefaultingValue(display)) {
+      if (display === Css.ident.initial || display === Css.ident.unset) {
+        display = Css.ident.inline;
+      } else if (display === Css.ident.inherit) {
+        display =
+          this.nodeContext.parent?.display &&
+          Css.getName(this.nodeContext.parent?.display);
+      } else {
+        display = null;
+      }
+    }
     if (display === Css.ident.none) {
       // no content
       frame.finish(false);
@@ -731,9 +757,9 @@ export class ViewFactory
       this.nodeContext.shadowContext as Vtree.ShadowContext,
     ).then((shadowParam) => {
       this.nodeContext.nodeShadow = shadowParam;
-      const position = computedStyle["position"];
-      let floatSide = computedStyle["float"];
-      let clearSide = computedStyle["clear"];
+      const position = computedStyle["position"] as Css.Ident;
+      let floatSide = computedStyle["float"] as Css.Ident;
+      let clearSide = computedStyle["clear"] as Css.Ident;
       const writingMode = this.nodeContext.vertical
         ? Css.ident.vertical_rl
         : Css.ident.horizontal_tb;
@@ -747,7 +773,7 @@ export class ViewFactory
         display,
         position,
         floatSide,
-        computedStyle["overflow"],
+        computedStyle["overflow"] as Css.Ident,
         writingMode,
         parentWritingMode,
         isFlowRoot,
@@ -817,10 +843,12 @@ export class ViewFactory
       }
       const listItem =
         display === Css.ident.list_item && computedStyle["ua-list-item-count"];
+      const breakInside = computedStyle["break-inside"];
       if (
         floating ||
-        (computedStyle["break-inside"] &&
-          computedStyle["break-inside"] !== Css.ident.auto)
+        (breakInside &&
+          !Css.isDefaultingValue(breakInside) &&
+          breakInside !== Css.ident.auto)
       ) {
         this.nodeContext.breakPenalty++;
       }
@@ -840,20 +868,27 @@ export class ViewFactory
       this.nodeContext.floatSide = floating ? floatSide.toString() : null;
       this.nodeContext.floatReference =
         floatReference || PageFloats.FloatReference.INLINE;
+      const floatMinWrapBlock = computedStyle["float-min-wrap-block"];
       this.nodeContext.floatMinWrapBlock =
-        computedStyle["float-min-wrap-block"] || null;
-      this.nodeContext.columnSpan = computedStyle["column-span"];
+        floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
+          ? (floatMinWrapBlock as Css.Numeric)
+          : null;
+      const columnSpan = computedStyle["column-span"];
+      this.nodeContext.columnSpan =
+        columnSpan && !Css.isDefaultingValue(columnSpan) ? columnSpan : null;
       if (!this.nodeContext.inline) {
         const breakAfter = computedStyle["break-after"];
-        if (breakAfter) {
+        if (breakAfter && !Css.isDefaultingValue(breakAfter)) {
           this.nodeContext.breakAfter = breakAfter.toString();
         }
         const breakBefore = computedStyle["break-before"];
-        if (breakBefore) {
+        if (breakBefore && !Css.isDefaultingValue(breakBefore)) {
           this.nodeContext.breakBefore = breakBefore.toString();
         }
         // Named page type
-        let pageType = computedStyle["page"]?.toString() || null;
+        const pageVal: Css.Val = computedStyle["page"];
+        let pageType =
+          pageVal && !Css.isDefaultingValue(pageVal) && pageVal.toString();
         if (!pageType || pageType.toLowerCase() === "auto") {
           pageType = this.nodeContext.pageType;
         } else {
@@ -879,10 +914,10 @@ export class ViewFactory
       const borderCollapse = computedStyle["border-collapse"];
       if (!borderCollapse || borderCollapse === Css.getName("separate")) {
         const borderSpacing = computedStyle["border-spacing"];
-        let inlineBorderSpacing;
-        let blockBorderSpacing;
+        let inlineBorderSpacing: Css.Val;
+        let blockBorderSpacing: Css.Val;
         if (borderSpacing) {
-          if (borderSpacing.isSpaceList()) {
+          if (borderSpacing instanceof Css.SpaceList) {
             inlineBorderSpacing = borderSpacing.values[0];
             blockBorderSpacing = borderSpacing.values[1];
           } else {
@@ -902,8 +937,12 @@ export class ViewFactory
           }
         }
       }
-      this.nodeContext.footnotePolicy = computedStyle["footnote-policy"];
-      const firstPseudo = computedStyle["x-first-pseudo"];
+      const footnotePolicy = computedStyle["footnote-policy"] as Css.Ident;
+      this.nodeContext.footnotePolicy =
+        footnotePolicy && !Css.isDefaultingValue(footnotePolicy)
+          ? footnotePolicy
+          : null;
+      const firstPseudo = computedStyle["x-first-pseudo"] as Css.Int;
       if (firstPseudo) {
         const outerPseudo = this.nodeContext.parent
           ? this.nodeContext.parent.firstPseudo
@@ -932,7 +971,7 @@ export class ViewFactory
         }
       }
       const hyphenateCharacter = computedStyle["hyphenate-character"];
-      if (hyphenateCharacter && hyphenateCharacter !== Css.ident.auto) {
+      if (hyphenateCharacter && hyphenateCharacter instanceof Css.Str) {
         this.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
       }
       const wordBreak = computedStyle["word-break"];
@@ -991,11 +1030,7 @@ export class ViewFactory
           custom = !!this.customRenderer;
         }
         if (element.getAttribute(PseudoElement.PSEUDO_ATTR)) {
-          if (
-            elementStyle["content"] &&
-            elementStyle["content"].value &&
-            elementStyle["content"].value.url
-          ) {
+          if (elementStyle["content"]?.value?.url) {
             tag = "img";
           }
         }
@@ -1091,6 +1126,11 @@ export class ViewFactory
             needToProcessChildren =
               result.getAttribute("data-adapt-process-children") == "true";
           }
+        } else if (computedStyle["display"] === Css.ident.none) {
+          // No element should be created if display:none is set.
+          // (Fix issue #924)
+          frame.finish(false);
+          return;
         } else {
           result = this.createElement(ns, tag);
         }
@@ -1479,9 +1519,6 @@ export class ViewFactory
     }
   }
 
-  /**
-   * @return isSVGUrlAttribute
-   */
   isSVGUrlAttribute(attributeName: string): boolean {
     return ViewFactory.SVG_URL_ATTRIBUTES.includes(attributeName.toLowerCase());
   }
@@ -1650,7 +1687,7 @@ export class ViewFactory
       if (child.nodeType !== 1) {
         continue;
       }
-      const computedStyle = {};
+      const computedStyle: { [key: string]: Css.Val } = {};
       const elementStyle = styler.getStyle(child as Element, false);
       this.computeStyle(
         this.nodeContext.vertical,
@@ -1687,7 +1724,10 @@ export class ViewFactory
   private processRepeatOnBreak(computedStyle: { [key: string]: Css.Val }) {
     let repeatOnBreak = computedStyle["repeat-on-break"];
     if (repeatOnBreak !== Css.ident.none) {
-      if (repeatOnBreak === Css.ident.auto) {
+      if (
+        repeatOnBreak === Css.ident.auto ||
+        Css.isDefaultingValue(repeatOnBreak)
+      ) {
         if (computedStyle["display"] === Css.ident.table_header_group) {
           repeatOnBreak = Css.ident.header;
         } else if (computedStyle["display"] === Css.ident.table_footer_group) {
@@ -1785,9 +1825,7 @@ export class ViewFactory
     return frame.result();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   setCurrent(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
@@ -1945,9 +1983,7 @@ export class ViewFactory
     return prop.toString() == transclusionType;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   nextInTree(
     position: Vtree.NodeContext,
     atUnforcedBreak?: boolean,
@@ -2005,7 +2041,7 @@ export class ViewFactory
         continue;
       }
       let value = computedStyle[propName];
-      if (!value || value === Css.empty) {
+      if (!value || (value === Css.empty && !Css.isCustomPropName(propName))) {
         continue;
       }
       value = value.visit(
@@ -2098,9 +2134,7 @@ export class ViewFactory
     return true;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   applyPseudoelementStyle(
     nodeContext: Vtree.NodeContext,
     pseudoName: string,
@@ -2122,7 +2156,7 @@ export class ViewFactory
     if (!elementStyle) {
       return;
     }
-    const computedStyle = {};
+    const computedStyle: { [key: string]: Css.Val } = {};
     nodeContext.vertical = this.computeStyle(
       nodeContext.vertical,
       nodeContext.direction === "rtl",
@@ -2144,9 +2178,7 @@ export class ViewFactory
     this.applyComputedStyles(target, computedStyle);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   peelOff(
     nodeContext: Vtree.NodeContext,
     nodeOffset: number,
@@ -2213,15 +2245,13 @@ export class ViewFactory
     return this.document.createElementNS(ns, tag);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   applyFootnoteStyle(
     vertical: boolean,
     rtl: boolean,
     target: Element,
   ): boolean {
-    const computedStyle = {};
+    const computedStyle: { [key: string]: Css.Val } = {};
     const pseudoMap = CssCascade.getStyleMap(this.footnoteStyle, "_pseudos");
     vertical = this.computeStyle(
       vertical,
@@ -2230,7 +2260,7 @@ export class ViewFactory
       computedStyle,
     );
     if (pseudoMap && pseudoMap["before"]) {
-      const childComputedStyle = {};
+      const childComputedStyle: { [key: string]: Css.Val } = {};
       const span = this.createElement(Base.NS.XHTML, "span");
       PseudoElement.setPseudoName(span, "before");
       target.appendChild(span);
@@ -2243,9 +2273,7 @@ export class ViewFactory
     return vertical;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
     if (nodeContext) {
       nodeContext.walkUpBlocks((block) => {
@@ -2269,9 +2297,7 @@ export class ViewFactory
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   convertLengthToPx(
     numeric: Css.Numeric,
     viewNode: Node,
@@ -2333,9 +2359,7 @@ export class ViewFactory
     }
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   isSameNodePosition(
     nodePosition1: Vtree.NodePosition,
     nodePosition2: Vtree.NodePosition,
@@ -2393,9 +2417,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     } as Vtree.ClientRect;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getRangeClientRects(range: Range): Vtree.ClientRect[] {
     const rects = range.getClientRects();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
@@ -2404,9 +2426,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getElementClientRect(element: Element): Vtree.ClientRect {
     const htmlElement = element as HTMLElement;
     const rect = htmlElement.getBoundingClientRect() as Vtree.ClientRect;
@@ -2424,9 +2444,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     return this.subtractOffsets(rect, layoutBoxRect);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   getElementComputedStyle(element: Element): CSSStyleDeclaration {
     return this.window.getComputedStyle(element, null);
   }
@@ -2487,7 +2505,13 @@ export class Viewport {
       width: 794, // 210mm (8.27in)
       height: 1056, // 279.4mm (11in)
     };
-    const isHeadlessBrowser = !window.outerWidth && !window.outerHeight;
+    const isHeadlessBrowser =
+      (!window.outerWidth && !window.outerHeight) ||
+      /Headless/.test(navigator.userAgent) ||
+      (navigator.webdriver &&
+        window.innerWidth === 800 &&
+        window.innerHeight === 600);
+
     if (!this.width || (!opt_width && isHeadlessBrowser)) {
       this.width = fallbackPageSize.width;
     }
