@@ -4,66 +4,9 @@
 @import "./lib/_mixins";
 @import "./lib/_vars";
 
-@import "~font-awesome/scss/_variables";
-@include at-font-face(
-  "FontAwesome",
-  "../fonts/fontawesome-webfont",
-  "#fontawesomeregular"
-);
-
-// ================================================================================
-// + Setting
-// --------------------------------------------------------------------------------
-
-// - Animation
-// --------------------------------------------------------------------------------
-
-@keyframes GLOW {
-  0% {
-    opacity: 0.5;
-  }
-  25% {
-    opacity: 0.25;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  75% {
-    opacity: 0.75;
-  }
-  100% {
-    opacity: 0.5;
-  }
-}
-$animation-GLOW: GLOW 1s linear 0s infinite normal;
-
-@keyframes FLIP {
-  0.0% {
-    transform: rotateY(0deg);
-    opacity: 1;
-  }
-  12.5% {
-    transform: rotateY(90deg);
-    opacity: 0.75;
-  }
-  25.0%,
-  50.0% {
-    transform: rotateY(180deg);
-    opacity: 1;
-    -webkit-filter: grayscale(100%);
-    filter: grayscale(100%);
-  }
-  62.5% {
-    transform: rotateY(270deg);
-    opacity: 0.75;
-  }
-  75.0%,
-  100.0% {
-    transform: rotateY(360deg);
-    opacity: 1;
-  }
-}
-$animation-FLIP: FLIP 2s ease 0s infinite normal;
+@import "~@fortawesome/fontawesome-free/scss/_functions";
+@import "~@fortawesome/fontawesome-free/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fa-solid-900");
 
 // ================================================================================
 // + Menu-Bar
@@ -195,8 +138,8 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
           height: 1em;
           line-height: 1;
           text-align: center;
-          font-size: $menu-icon-height * 0.35;
-          //font-weight: bold;
+          font-size: $menu-icon-height * 0.333;
+          @include font-icon("FontAwesome");
         }
         &.hover {
           &:before,
@@ -258,63 +201,61 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     > li.vivliostyle-menu-item {
       &#vivliostyle-menu-item_toc-toggle
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-list;
-        top: 0.05em;
+        content: fa-content($fa-var-list);
       }
       &#vivliostyle-menu-item_find-toggle {
         > .vivliostyle-menu-icon-button:before {
-          content: $fa-var-search;
+          content: fa-content($fa-var-search);
         }
         &:not(.on) > #vivliostyle-menu-find-box {
           display: none;
         }
       }
-      //	&#vivliostyle-menu-item_move-left         >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-left; }
       &#vivliostyle-menu-item_move-first
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-chevron-up;
+        content: fa-content($fa-var-chevron-up);
       }
       &#vivliostyle-menu-item_move-previous
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-chevron-up;
+        content: fa-content($fa-var-chevron-up);
       }
-      //	&#vivliostyle-menu-item_move-right        >.vivliostyle-menu-icon-button:before { content: $fa-var-arrow-right; }
       &#vivliostyle-menu-item_move-next > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-chevron-down;
+        content: fa-content($fa-var-chevron-down);
       }
       &#vivliostyle-menu-item_move-last > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-chevron-down;
+        content: fa-content($fa-var-chevron-down);
       }
       &#vivliostyle-menu-item_zoom-out > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-search-minus;
+        content: fa-content($fa-var-magnifying-glass);
+        font-size: $menu-icon-height * 0.5;
       }
-      //	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:before { content: $fa-var-search; }
       &#vivliostyle-menu-item_zoom-fit-to-screen
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-arrows-alt /*$fa-var-search*/;
-        top: 0.05em; /*font-size: $menu-icon-height * 0.36;*/
+        content: fa-content($fa-var-maximize);
       }
       &#vivliostyle-menu-item_zoom-in > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-search-plus;
+        content: fa-content($fa-var-magnifying-glass);
+        font-size: $menu-icon-height * 0.5;
       }
       &#vivliostyle-menu-item_zoom-to-actual-size
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-search;
+        content: fa-content($fa-var-magnifying-glass);
+        font-size: $menu-icon-height * 0.5;
       }
       &#vivliostyle-menu-item_text-size-smaller
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-font;
+        content: fa-content($fa-var-font);
       }
       &#vivliostyle-menu-item_text-size-default
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-font;
+        content: fa-content($fa-var-font);
       }
       &#vivliostyle-menu-item_text-size-larger
         > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-font;
+        content: fa-content($fa-var-font);
       }
       &#vivliostyle-menu-item_print > .vivliostyle-menu-icon-button:before {
-        content: $fa-var-print;
+        content: fa-content($fa-var-print);
       }
       &#vivliostyle-menu-item_move-first > .vivliostyle-menu-icon-button:after {
         content: "";
@@ -326,7 +267,7 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
       &#vivliostyle-menu-item_move-last > .vivliostyle-menu-icon-button:after {
         content: "";
         border-bottom: solid 2px;
-        bottom: 7px;
+        bottom: 8px;
         left: 8px;
         width: 16px;
       }
@@ -355,25 +296,35 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         }
       }
 
-      //	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: "="; left: $menu-icon-width * 0.2625; top: $menu-icon-height * 0.2; }
-      //	&#vivliostyle-menu-item_zoom-default      >.vivliostyle-menu-icon-button:after  { content: ""; border: solid 1px; border-radius: 2px; width: 2.1em; height: 2.1em; left: $menu-icon-width * 0.17; top: $menu-icon-height * 0.18; }
+      &#vivliostyle-menu-item_zoom-out
+        > .vivliostyle-menu-icon-button:after {
+        content: fa-content($fa-var-minus);
+        left: $menu-icon-width * 0.235;
+        top: $menu-icon-height * 0.245;
+      }
+      &#vivliostyle-menu-item_zoom-in
+        > .vivliostyle-menu-icon-button:after {
+        content: fa-content($fa-var-plus);
+        left: $menu-icon-width * 0.235;
+        top: $menu-icon-height * 0.245;
+      }
       &#vivliostyle-menu-item_zoom-to-actual-size
         > .vivliostyle-menu-icon-button:after {
-        content: "1";
-        left: calc(46% - 1em / 2);
+        content: fa-content($fa-var-1);
+        left: $menu-icon-width * 0.245;
         top: $menu-icon-height * 0.28;
       }
       &#vivliostyle-menu-item_text-size-smaller
         > .vivliostyle-menu-icon-button:after {
-        content: "\2212";
+        content: fa-content($fa-var-minus);
       }
       &#vivliostyle-menu-item_text-size-default
         > .vivliostyle-menu-icon-button:after {
-        content: "=";
+        content: fa-content($fa-var-equals);
       }
       &#vivliostyle-menu-item_text-size-larger
         > .vivliostyle-menu-icon-button:after {
-        content: "+";
+        content: fa-content($fa-var-plus);
       }
       &#vivliostyle-menu-item_text-size-smaller
         > .vivliostyle-menu-icon-button:after,
@@ -384,8 +335,6 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
         right: $menu-icon-width * 0.05;
         top: $menu-icon-height * 0.15;
       }
-      //	&#vivliostyle-menu-item_settings-toggle       >.vivliostyle-menu-icon-button:before { content: $fa-var-bars; }
-      //	&#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened >.vivliostyle-menu-icon-button:before { content: $fa-var-times; }
       &#vivliostyle-menu-item_find-toggle.on,
       &#vivliostyle-menu-item_toc-toggle.on,
       &#vivliostyle-menu-item_zoom-fit-to-screen.on {
@@ -411,17 +360,15 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
           background-repeat: no-repeat;
           background-position: center center;
           background-size: contain;
-          -webkit-filter: grayscale(0%);
           filter: grayscale(0%);
           @media (hover: hover), (-moz-touch-enabled: 0) {
             &:hover {
               opacity: 0.75;
-              -webkit-filter: grayscale(50%);
               filter: grayscale(50%);
             }
           }
           &::after {
-            content: $fa-var-ellipsis-h;
+            content: fa-content($fa-var-ellipsis-h);
             font-size: $menu-icon-height * 0.75;
             line-height: 0.5em;
             text-align: right;
@@ -440,45 +387,43 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
       }
       &#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened {
         > .vivliostyle-menu-icon-button {
-          -webkit-filter: grayscale(100%);
           filter: grayscale(100%);
         }
       }
       &#vivliostyle-menu-item_settings-toggle.vivliostyle-menu-item_detail-opened.pinned {
         > .vivliostyle-menu-icon-button {
-          -webkit-filter: grayscale(100%) brightness(150%);
           filter: grayscale(100%) brightness(150%);
         }
       }
       &#vivliostyle-menu-item_print {
-        @media screen and (max-width: $menu-icon-width * 15 - 3px) {
+        @media screen and (max-width: ($menu-icon-width * 15 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-to-actual-size {
-        @media screen and (max-width: $menu-icon-width * 14 - 3px) {
+        @media screen and (max-width: ($menu-icon-width * 14 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_move-previous,
       &#vivliostyle-menu-item_move-next {
-        @media screen and (max-width: $menu-icon-width * 17 - 3px) {
+        @media screen and (max-width: ($menu-icon-width * 17 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-fit-to-screen {
-        @media screen and (max-width: $menu-icon-width * 13 - 3px) {
+        @media screen and (max-width: ($menu-icon-width * 13 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_text-size-default {
-        @media screen and (max-width: $menu-icon-width * 10 - 3px - 2px) {
+        @media screen and (max-width: ($menu-icon-width * 10 - 3px - 2px)) {
           display: none;
         }
       }
     }
     &#vivliostyle-menu_zoom {
-      @media screen and (max-width: $menu-icon-width * 12 - 3px) {
+      @media screen and (max-width: ($menu-icon-width * 12 - 3px)) {
         display: none;
       }
     }
@@ -825,10 +770,10 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
     }
   }
   #vivliostyle-find-previous::before {
-    content: $fa-var-chevron-up;
+    content: fa-content($fa-var-chevron-up);
   }
   #vivliostyle-find-next::before {
-    content: $fa-var-chevron-down;
+    content: fa-content($fa-var-chevron-down);
   }
 }
 

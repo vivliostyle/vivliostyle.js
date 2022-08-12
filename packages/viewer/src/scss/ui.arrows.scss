@@ -2,12 +2,9 @@
 
 @import "./lib/_mixins";
 
-@import "~font-awesome/scss/_variables";
-@include at-font-face(
-  "FontAwesome",
-  "../fonts/fontawesome-webfont",
-  "#fontawesomeregular"
-);
+@import "~@fortawesome/fontawesome-free/scss/_functions";
+@import "~@fortawesome/fontawesome-free/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fa-solid-900");
 
 $button-size: 36px;
 $button-offset: 0;
@@ -83,7 +80,7 @@ $button-offset: 0;
 #vivliostyle-page-navigation-up {
   top: 0;
   &:after {
-    content: $fa-var-arrow-circle-up;
+    content: fa-content($fa-var-arrow-circle-up);
   }
   @media (hover: hover), (-moz-touch-enabled: 0) {
     &:hover {
@@ -95,7 +92,7 @@ $button-offset: 0;
   bottom: 0;
   cursor: s-resize;
   &:after {
-    content: $fa-var-arrow-circle-down;
+    content: fa-content($fa-var-arrow-circle-down);
   }
 }
 
@@ -112,14 +109,14 @@ $button-offset: 0;
   left: 0;
   cursor: w-resize;
   &:after {
-    content: $fa-var-chevron-left;
+    content: fa-content($fa-var-chevron-left);
   }
 }
 #vivliostyle-page-navigation-right {
   right: 0;
   cursor: e-resize;
   &:after {
-    content: $fa-var-chevron-right;
+    content: fa-content($fa-var-chevron-right);
     text-indent: 0.125em;
   }
 }

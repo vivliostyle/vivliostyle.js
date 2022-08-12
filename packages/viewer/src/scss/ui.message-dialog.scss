@@ -3,12 +3,9 @@
 @import "./lib/_mixins";
 @import "./lib/_vars";
 
-@import "~font-awesome/scss/_variables";
-@include at-font-face(
-  "FontAwesome",
-  "../fonts/fontawesome-webfont",
-  "#fontawesomeregular"
-);
+@import "~@fortawesome/fontawesome-free/scss/_functions";
+@import "~@fortawesome/fontawesome-free/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fa-solid-900");
 
 // ================================================================================
 // + Message Dialog
@@ -67,25 +64,25 @@
     &.error {
       color: rgb(216, 32, 0);
       &:before {
-        content: $fa-var-times-circle;
+        content: fa-content($fa-var-times-circle);
       }
     }
     &.warn {
       color: rgb(192, 128, 0);
       &:before {
-        content: $fa-var-exclamation-circle;
+        content: fa-content($fa-var-exclamation-circle);
       }
     }
     &.info {
       color: rgb(0, 96, 192);
       &:before {
-        content: $fa-var-info-circle;
+        content: fa-content($fa-var-info-circle);
       }
     }
     &.debug {
       color: rgb(64, 64, 64);
       &:before {
-        content: $fa-var-stop-circle;
+        content: fa-content($fa-var-stop-circle);
       }
     }
   }
