@@ -711,7 +711,7 @@ export class MarksMenuStatus {
 
   deleteCurrentEditing = async (): Promise<void> => {
     if (!marksStore.enabled()) return;
-    if (confirm("削除しますか？")) {
+    if (confirm("Do you really want to delete it?")) {
       await this.markAction().deleteCurrentEditing();
     }
     await this.closeMenu();
