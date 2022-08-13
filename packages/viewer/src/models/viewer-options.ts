@@ -192,6 +192,13 @@ class ViewerOptions {
           );
         }
       });
+      this.enableMarker.subscribe((enableMarker) => {
+        if (!enableMarker) {
+          urlParameters.removeParameter("enableMarker");
+        } else {
+          urlParameters.setParameter("enableMarker", "true");
+        }
+      });
     }
   }
 

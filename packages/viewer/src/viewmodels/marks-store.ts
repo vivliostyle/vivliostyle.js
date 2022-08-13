@@ -628,7 +628,7 @@ export class MarksMenuStatus {
   }
 
   editingColorChanged = async (colorName: string): Promise<void> => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     const idString = this.markAction().currentId();
     const color = colorNameToColor(colorName);
     if (color.length > 0) {
@@ -683,12 +683,12 @@ export class MarksMenuStatus {
   };
 
   closeStartButton = (): void => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     this.startButtonOpened(false);
   };
 
   openEditMenu = async (x: number, y: number, id: string): Promise<void> => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     const currentEditing = await this.parent.getMark(id);
     this.currentEditingColor(currentEditing.color);
     this.currentEditingMemo(currentEditing.memo);
@@ -698,19 +698,19 @@ export class MarksMenuStatus {
   };
 
   closeMenu = async (): Promise<void> => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     await this.markAction().close();
     this.markAction(this.emptyAction);
     this.menuOpened(false);
   };
 
   applyEditing = async (): Promise<void> => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     await this.markAction().applyEditing();
   };
 
   deleteCurrentEditing = async (): Promise<void> => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     if (confirm("削除しますか？")) {
       await this.markAction().deleteCurrentEditing();
     }
@@ -724,7 +724,7 @@ export class MarksMenuStatus {
     end: SelectPosition,
     selection: Selection,
   ): void => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     this.currentEditingColor("yellow");
     this.currentEditingMemo("");
     if (this.newMarkAction.start(start, end)) {
@@ -735,7 +735,7 @@ export class MarksMenuStatus {
   };
 
   openStartButton = async (selection: Selection): Promise<void> => {
-    if (!marksStore.initialized) return;
+    if (!marksStore.enabled()) return;
     if (selection.type == "Range") {
       const range = selection.getRangeAt(0);
       const button = document.getElementById(
@@ -841,6 +841,7 @@ export class URLMarksStore implements MarksStoreInterface {
     this.documentId = documentId;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async persistMark(mark: MarkJson, _markedText?: string): Promise<string> {
     return this.pushMarkInternal(mark, "addToUrl", "persist");
   }
@@ -928,11 +929,17 @@ export class MarksStoreFacade {
     this.initialized = false;
   }
 
-  async init(viewerOptions: ViewerOptions): Promise<void> {
-    if (!viewerOptions.enableMarker()) {
+  enabled(): boolean {
+    return this.initialized && this.viewerOptions.enableMarker();
+  }
+
+  async init(viewerOptions?: ViewerOptions): Promise<void> {
+    if (viewerOptions) {
+      this.viewerOptions = viewerOptions;
+    }
+    if (!this.viewerOptions || !this.viewerOptions.enableMarker()) {
       return;
     }
-    this.viewerOptions = viewerOptions;
     if (window["marksStorePlugin"]) {
       this.actualStore = window["marksStorePlugin"] as MarksStoreInterface;
     } else {
@@ -945,6 +952,21 @@ export class MarksStoreFacade {
     const documentId = `${src}:${bookMode}:${style}:${userStyle}`;
     await this.actualStore.init(documentId);
     this.initialized = true;
+  }
+
+  async toggleEnableMarker(): Promise<void> {
+    if (!this.enabled()) {
+      this.viewerOptions.enableMarker(true);
+      if (!this.initialized) {
+        await this.init();
+      }
+      await this.retryHighlightMarks();
+    } else {
+      this.viewerOptions.enableMarker(false);
+      document.querySelectorAll(`[${Mark.idAttr}]`).forEach((e) => {
+        e.remove();
+      });
+    }
   }
 
   async persistMark(mark: Mark, markedText: string): Promise<void> {

@@ -48,13 +48,13 @@
     height: $menu-icon-height * 0.5;
     text-align: center;
     transition: linear 0.2s;
-    @media screen and (max-width: 1261px) {
+    @media screen and (max-width: 1333px) {
       right: $menu-icon-width + $menu-icon-offset-x * 4;
       // width: 362px / (80px / ($menu-icon-height * 0.5));
       width: $menu-icon-height * 2.2625;
       text-align: right;
     }
-    @media screen and (max-width: 713px) {
+    @media screen and (max-width: 749px) {
       animation: none !important;
       opacity: 0 !important;
     }
@@ -211,6 +211,10 @@
           display: none;
         }
       }
+      &#vivliostyle-menu-item_marker-toggle
+        > .vivliostyle-menu-icon-button:before {
+        content: fa-content($fa-var-marker);
+      }
       &#vivliostyle-menu-item_move-first
         > .vivliostyle-menu-icon-button:before {
         content: fa-content($fa-var-chevron-up);
@@ -335,6 +339,7 @@
         right: $menu-icon-width * 0.05;
         top: $menu-icon-height * 0.15;
       }
+      &#vivliostyle-menu-item_marker-toggle.on,
       &#vivliostyle-menu-item_find-toggle.on,
       &#vivliostyle-menu-item_toc-toggle.on,
       &#vivliostyle-menu-item_zoom-fit-to-screen.on {
@@ -396,34 +401,34 @@
         }
       }
       &#vivliostyle-menu-item_print {
-        @media screen and (max-width: ($menu-icon-width * 15 - 3px)) {
+        @media screen and (max-width: ($menu-icon-width * 16 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-to-actual-size {
-        @media screen and (max-width: ($menu-icon-width * 14 - 3px)) {
+        @media screen and (max-width: ($menu-icon-width * 15 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_move-previous,
       &#vivliostyle-menu-item_move-next {
-        @media screen and (max-width: ($menu-icon-width * 17 - 3px)) {
+        @media screen and (max-width: ($menu-icon-width * 18 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_zoom-fit-to-screen {
-        @media screen and (max-width: ($menu-icon-width * 13 - 3px)) {
+        @media screen and (max-width: ($menu-icon-width * 14 - 3px)) {
           display: none;
         }
       }
       &#vivliostyle-menu-item_text-size-default {
-        @media screen and (max-width: ($menu-icon-width * 10 - 3px - 2px)) {
+        @media screen and (max-width: ($menu-icon-width * 11 - 3px - 2px)) {
           display: none;
         }
       }
     }
     &#vivliostyle-menu_zoom {
-      @media screen and (max-width: ($menu-icon-width * 12 - 3px)) {
+      @media screen and (max-width: ($menu-icon-width * 13 - 3px)) {
         display: none;
       }
     }

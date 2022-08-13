@@ -66,6 +66,7 @@ class ViewerApp {
     const navigationOptions = {
       disableTOCNavigation: flags.includes("T"),
       disableFind: flags.includes("f"),
+      disableMarker: flags.includes("m"),
       disablePageNavigation: flags.includes("N"),
       disableZoom: flags.includes("Z"),
       disableFontSizeChange: flags.includes("F"),
