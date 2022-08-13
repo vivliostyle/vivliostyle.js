@@ -218,8 +218,7 @@ const getPageIndex = (pageElement: Element): number => {
 };
 
 const getSpineIndex = (pageElement: Element): number => {
-  const p =
-    parseInt(pageElement.getAttribute("data-vivliostyle-spine-index")) || -1;
+  const p = parseInt(pageElement.getAttribute("data-vivliostyle-spine-index"));
   if (isNaN(p)) {
     return -1;
   }
