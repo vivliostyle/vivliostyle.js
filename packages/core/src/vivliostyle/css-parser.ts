@@ -628,6 +628,7 @@ export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
   actionsBase[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_START;
   actionsBase[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_START;
   actionsBase[CssTokenizer.TokenType.COLON] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.COL_COL] = Action.SELECTOR_START;
   actionsBase[CssTokenizer.TokenType.AT] = Action.AT;
   actionsBase[CssTokenizer.TokenType.C_BRC] = Action.RULE_END;
   actionsBase[CssTokenizer.TokenType.EOF] = Action.DONE;
@@ -640,6 +641,8 @@ export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
   actionsSelectorStart[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_ATTR;
   actionsSelectorStart[CssTokenizer.TokenType.COLON] =
     Action.SELECTOR_PSEUDOCLASS;
+  actionsSelectorStart[CssTokenizer.TokenType.COL_COL] =
+    Action.SELECTOR_PSEUDOELEM;
 
   actionsSelector[CssTokenizer.TokenType.GT] = Action.SELECTOR_CHILD;
   actionsSelector[CssTokenizer.TokenType.PLUS] = Action.SELECTOR_SIBLING;
