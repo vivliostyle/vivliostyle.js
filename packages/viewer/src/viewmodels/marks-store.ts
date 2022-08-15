@@ -1003,7 +1003,7 @@ export class MarksStoreFacade {
   }
 
   async retryHighlightMarks(): Promise<void> {
-    if (!this.initialized) return;
+    if (!this.enabled()) return;
     if (this.actualStore.allMarksIterator) {
       const it = await this.actualStore.allMarksIterator();
       for await (const m of it) {
