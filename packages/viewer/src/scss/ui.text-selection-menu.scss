@@ -22,6 +22,8 @@
   padding: 0.2em;
   text-align: center;
   .mark-color {
+    box-sizing: content-box;
+    padding: 2px;
     height: 1.5em;
     width: 1.5em;
     margin: 0.2em;
@@ -30,7 +32,7 @@
     cursor: pointer;
     vertical-align: middle;
     border: 1px solid #bbb;
-    opacity: 0.5;
+    opacity: 0.7;
     &:hover {
       filter: drop-shadow(0 0 0.1em);
       opacity: 1;
@@ -42,10 +44,10 @@
   }
 
   .red {
-    background-color: #e00;
+    background-color: #f55;
   }
   .green {
-    background-color: #0e0;
+    background-color: #5f5;
   }
   .yellow {
     background-color: #ffd900;
@@ -59,6 +61,8 @@
   }
   .button {
     cursor: pointer;
+    background: none;
+    border: none;
     padding: 0.3em;
     border-radius: 0.3em;
     color: white;

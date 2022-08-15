@@ -961,10 +961,16 @@ export class MarksStoreFacade {
       }
       await this.retryHighlightMarks();
     } else {
-      this.viewerOptions.enableMarker(false);
       document.querySelectorAll(`[${Mark.idAttr}]`).forEach((e) => {
         e.remove();
       });
+      if (this.menuStatus.startButtonOpened()) {
+        this.menuStatus.closeStartButton();
+      }
+      if (this.menuStatus.menuOpened()) {
+        this.menuStatus.closeMenu();
+      }
+      this.viewerOptions.enableMarker(false);
     }
   }
 

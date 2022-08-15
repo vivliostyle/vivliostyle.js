@@ -907,6 +907,12 @@ class Navigation {
         if (this.viewer.tocVisible()) {
           return !this.toggleTOC();
         }
+        if (marksStore.menuStatus.startButtonOpened()) {
+          marksStore.menuStatus.closeStartButton();
+        }
+        if (marksStore.menuStatus.menuOpened()) {
+          marksStore.menuStatus.closeMenu();
+        }
         viewportElement.focus();
         return true;
       case Keys.Space:
