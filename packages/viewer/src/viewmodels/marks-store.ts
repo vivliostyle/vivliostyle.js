@@ -116,7 +116,7 @@ const estimateLastEndFromStart = (
         break;
       }
       if (e.hasAttribute("data-vivliostyle-page-container")) {
-        if (getSpineIndex(e) > actualEndPos.spine) {
+        if (getSpineIndex(e) > actualEndPos.spineIndex) {
           break;
         }
       }
@@ -238,6 +238,7 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     n = n.parentElement;
   }
   const eloff = parseInt(e.getAttribute("data-adapt-eloff"));
+  let offsetInItem = eloff + offset;
   const es = collectElementsWithEloff(spineIndex, eloff);
   let count = 0;
   let lastNodeType = -1;
@@ -252,6 +253,10 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     );
     let childrenCount = children.length;
     if (childrenCount > 0) {
+      offsetInItem += children
+        .map((child) => child.textContent.length)
+        .reduce((a, b) => a + b);
+
       if (children[0].nodeType == 3 && lastNodeType == 3) {
         childrenCount -= 1;
       }
@@ -269,6 +274,11 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     (x) => !(x.nodeType == 1 && (x as Element).hasAttribute("data-adapt-spec")),
   );
   const nodeIndex = children.indexOf(nodePath[0] as ChildNode);
+  if (nodeIndex > 0) {
+    offsetInItem += children
+      .map((child, i) => (i < nodeIndex ? child.textContent.length : 0))
+      .reduce((a, b) => a + b);
+  }
   const nodeIndexPath = [];
   if (nodeIndex == 0 && nodePath[0].nodeType == 3 && lastNodeType == 3) {
     offset += lastNodeTextLength;
@@ -296,7 +306,13 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
     }
   }
 
-  return new SelectPosition(spineIndex, eloff, nodeIndexPath, offset);
+  return new SelectPosition(
+    spineIndex,
+    eloff,
+    nodeIndexPath,
+    offset,
+    offsetInItem,
+  );
 };
 
 interface NodePosition {
@@ -305,7 +321,7 @@ interface NodePosition {
 }
 
 const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
-  const es = collectElementsWithEloff(pos.spine, pos.eloff);
+  const es = collectElementsWithEloff(pos.spineIndex, pos.eloff);
   let count = 0;
   let lastNodeType = -1;
   let lastNodeTextLength = 0;
@@ -377,8 +393,11 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
   return null;
 };
 
-const collectElementsWithEloff = (spine: number, eloff: number): Element[] => {
-  const eloffAttrSelector = `[data-vivliostyle-spine-index='${spine}'] [data-adapt-eloff='${eloff}']`;
+const collectElementsWithEloff = (
+  spineIndex: number,
+  eloff: number,
+): Element[] => {
+  const eloffAttrSelector = `[data-vivliostyle-spine-index='${spineIndex}'] [data-adapt-eloff='${eloff}']`;
   return Array.from(document.querySelectorAll(eloffAttrSelector)).filter(
     (e) => !e.querySelector(eloffAttrSelector),
   );
@@ -386,28 +405,30 @@ const collectElementsWithEloff = (spine: number, eloff: number): Element[] => {
 
 class SelectPosition {
   constructor(
-    readonly spine: number,
+    readonly spineIndex: number,
     readonly eloff: number,
     readonly nodePath: number[],
     readonly offset: number,
+    readonly offsetInItem: number,
   ) {}
 
   toString(): string {
-    return `${this.spine}-${this.eloff}-${this.nodePath.join("/")}-${
+    return `${this.spineIndex}-${this.eloff}-${this.nodePath.join("/")}-${
       this.offset
-    }`;
+    }-${this.offsetInItem}`;
   }
 
   static fromString(str: string): SelectPosition {
-    const [spine, eloff, nodePathString, offset] = str
+    const [spineIndex, eloff, nodePathString, offset, offsetInItem] = str
       .split("-")
       .map((x) => x.trim());
     const nodePath = nodePathString.split("/").map((x) => parseInt(x));
     return new SelectPosition(
-      parseInt(spine),
+      parseInt(spineIndex),
       parseInt(eloff),
       nodePath,
       parseInt(offset),
+      parseInt(offsetInItem),
     );
   }
 }
@@ -421,6 +442,7 @@ class Mark {
     public end: SelectPosition,
     public color: string,
     public memo: string,
+    public markedText: string,
   ) {
     this.uniqueIdentifier = Mark.notCreatedId;
   }
@@ -434,6 +456,7 @@ class Mark {
       mark: this.markInfoString(),
       id: this.uniqueIdentifier,
       memo: this.memo,
+      markedText: this.markedText,
     };
   }
 
@@ -445,7 +468,7 @@ class Mark {
     const [s, e, c] = str.split(",");
     const start = SelectPosition.fromString(s);
     const end = SelectPosition.fromString(e);
-    const m = new Mark(start, end, c, "");
+    const m = new Mark(start, end, c, "", "");
     return m;
   }
 
@@ -453,6 +476,7 @@ class Mark {
     const mark = Mark.fromMarkInfoString(m.mark);
     mark.uniqueIdentifier = m.id;
     mark.memo = m.memo;
+    mark.markedText = m.markedText;
     return mark;
   }
 }
@@ -527,8 +551,9 @@ class NewMarkAction implements MarkAction {
         this.currentEnd,
         marksMenuStatus.currentEditingColor(),
         marksMenuStatus.currentEditingMemo(),
+        this.currentText,
       );
-      await marksStore.persistMark(mark, this.currentText);
+      await marksStore.persistMark(mark);
     }
     marksMenuStatus.closeMenu();
   };
@@ -808,11 +833,12 @@ export interface MarkJson {
   mark: string;
   id: string;
   memo: string;
+  markedText: string;
 }
 
 export interface MarksStoreInterface {
   init(documentId: string): Promise<void>;
-  persistMark(mark: MarkJson, markedText?: string): Promise<string>; // persists and return id
+  persistMark(mark: MarkJson): Promise<string>; // persists and return id
   getMark(id: string): Promise<MarkJson>;
   updateMark(mark: MarkJson): Promise<void>;
   removeMark(mark: MarkJson): Promise<void>;
@@ -840,8 +866,7 @@ export class URLMarksStore implements MarksStoreInterface {
     this.documentId = documentId;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async persistMark(mark: MarkJson, _markedText?: string): Promise<string> {
+  async persistMark(mark: MarkJson): Promise<string> {
     return this.pushMarkInternal(mark, "addToUrl", "persist");
   }
 
@@ -877,17 +902,21 @@ export class URLMarksStore implements MarksStoreInterface {
   }
 
   private markToURLString(mark: MarkJson): string {
-    const dm = mark.memo ? encodeURIComponent(mark.memo) : "";
-    if (dm) {
-      return `${mark.mark}/mm/${dm}`;
-    } else {
-      return mark.mark;
-    }
+    const memo = mark.memo ? encodeURIComponent(mark.memo) : "";
+    const markedText = mark.markedText
+      ? encodeURIComponent(mark.markedText)
+      : "";
+    return `${mark.mark}%1F${memo}%1F${markedText}`;
   }
 
   private urlStringToMark(s: string): MarkJson {
-    const [mark, memo] = s.split("/mm/", 2);
-    return { mark: mark, id: "", memo: memo ? decodeURIComponent(memo) : "" };
+    const [mark, memo, markedText] = s.split("%1F", 3);
+    return {
+      mark: mark,
+      id: "",
+      memo: memo ? decodeURIComponent(memo) : "",
+      markedText: markedText ? decodeURIComponent(markedText) : "",
+    };
   }
 
   private pushMarkInternal(
@@ -944,11 +973,7 @@ export class MarksStoreFacade {
     } else {
       this.actualStore = new URLMarksStore();
     }
-    const src = urlParameters.getParameter("src").join();
-    const bookMode = urlParameters.getParameter("bookMode").join();
-    const userStyle = urlParameters.getParameter("userStyle").join();
-    const style = urlParameters.getParameter("style").join();
-    const documentId = `${src}:${bookMode}:${style}:${userStyle}`;
+    const documentId = urlParameters.getParameter("src").join();
     await this.actualStore.init(documentId);
     this.initialized = true;
   }
@@ -974,12 +999,9 @@ export class MarksStoreFacade {
     }
   }
 
-  async persistMark(mark: Mark, markedText: string): Promise<void> {
+  async persistMark(mark: Mark): Promise<void> {
     if (!this.initialized) return;
-    const id = await this.actualStore.persistMark(
-      mark.toMarkJson(),
-      markedText,
-    );
+    const id = await this.actualStore.persistMark(mark.toMarkJson());
     mark.uniqueIdentifier = id;
     this.highlightMark(mark);
   }
