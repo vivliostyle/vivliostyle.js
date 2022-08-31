@@ -379,6 +379,24 @@ export class CoreViewer {
   }
 
   /**
+   * Navigate to the specified position.
+   */
+  navigateToPosition(position: {
+    spineIndex: number;
+    pageIndex?: number;
+    offsetInItem?: number;
+  }) {
+    this.adaptViewer_.sendCommand({
+      a: "moveTo",
+      position: {
+        spineIndex: position.spineIndex,
+        pageIndex: position.pageIndex ?? -1,
+        offsetInItem: position.offsetInItem ?? -1,
+      },
+    });
+  }
+
+  /**
    * @returns True if TOC is visible, false if hidden, null if TOC is unavailable
    */
   isTOCVisible(): boolean | null {

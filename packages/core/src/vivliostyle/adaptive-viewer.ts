@@ -1106,6 +1106,9 @@ export class AdaptiveViewer {
       const url = command["url"] as string;
       method = () =>
         this.opfView.navigateTo(url, this.pagePosition, !this.renderAllPages);
+    } else if (typeof command["position"]?.spineIndex == "number") {
+      const position = command["position"] as Epub.Position;
+      method = () => this.opfView.findPage(position, !this.renderAllPages);
     } else {
       return Task.newResult(true);
     }

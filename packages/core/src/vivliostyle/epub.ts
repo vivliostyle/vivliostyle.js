@@ -1737,7 +1737,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
    * @param sync If true, find the page synchronously (not waiting another
    *     rendering task)
    */
-  private findPage(
+  findPage(
     position: Position,
     sync: boolean,
   ): Task.Result<PageAndPosition | null> {
