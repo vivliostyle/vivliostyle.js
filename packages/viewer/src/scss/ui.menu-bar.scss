@@ -354,6 +354,7 @@
           }
         }
       }
+      &#vivliostyle-menu-item_marker-toggle.on.pinned,
       &#vivliostyle-menu-item_toc-toggle.on.pinned {
         > .vivliostyle-menu-icon-button {
           background: rgba(255, 255, 255, 0.85);
@@ -779,6 +780,119 @@
   }
   #vivliostyle-find-next::before {
     content: fa-content($fa-var-chevron-down);
+  }
+}
+
+// ================================================================================
+// + Marks Box
+// --------------------------------------------------------------------------------
+#vivliostyle-marks-box {
+  position: absolute;
+  top: $menu-icon-height + $menu-icon-offset-y;
+  left: $menu-icon-offset-x;
+  background: $menu-bg-color;
+  box-shadow: $menu-box-shadow;
+  box-sizing: border-box;
+  padding: 4px;
+  color: black;
+  font-family: $sans-serif;
+  font-size: 14px;
+  line-height: 1.2;
+  overflow: auto;
+  max-height: calc(100vh - #{$menu-icon-height + $menu-icon-offset-y * 2 + $page-slider-height});
+  width: $menu-icon-width * 9;
+  @media screen and (max-width: 400px) {
+    width: 80vw;
+  }
+
+  &:not([open]) {
+    width: max-content;
+  }
+
+  summary {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 16px;
+    color: #666;
+    white-space: nowrap;
+    padding-right: 0.5em;
+  }
+
+  .viv-marker-remove-all,
+  .viv-marker-edit {
+    button {
+      box-sizing: border-box;
+      border: none;
+      padding: 0.3em;
+      border-radius: 0.3em;
+      color: #666;
+      background: transparent;
+      font-family: $sans-serif;
+      font-size: 14px;
+
+      &::before {
+        @include font-icon("FontAwesome");
+        content: fa-content($fa-var-trash);
+      }
+      &:hover {
+        color: #444;
+        background: #ddd;
+      }
+      &:active {
+        color: #444;
+        background: #ccc;
+      }
+    }
+  }
+  .viv-marker-remove-all {
+    text-align: right;
+    button::before {
+      padding-right: 0.5em;
+    }
+  }
+  .viv-marker-list > li {
+    @include prefix(user-select, text);
+    clear: both;
+    display: list-item;
+    list-style: disc;
+    border-left: 0.5em solid;
+    margin-top: 0.5em;
+
+    &[data-viv-marker-color="red"] {
+      border-left-color: $menu-marker-color-red;
+    }
+    &[data-viv-marker-color="green"] {
+      border-left-color: $menu-marker-color-green;
+    }
+    &[data-viv-marker-color="yellow"] {
+      border-left-color: $menu-marker-color-yellow;
+    }
+    .viv-marker-text {
+      display: block;
+      padding: 3px;
+      cursor: pointer;
+      text-decoration: none;
+      color: black;
+    }
+    .viv-marker-edit {
+      display: flex;
+      margin-top: 3px;
+
+      button {
+        width: 32px;
+        height: 32px;
+        margin: 2px;
+        flex: none;
+      }
+      textarea {
+        font-family: $sans-serif;
+        font-size: 14px;
+        line-height: 1.2;
+        box-sizing: border-box;
+        padding: 2px 4px;
+        flex: auto;
+      }
+    }
   }
 }
 

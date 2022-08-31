@@ -101,25 +101,25 @@
       <div class="vivliostyle-loading-spinner"></div>
     </div>
     <div id="vivliostyle-text-selection-start-button" data-bind="visible: marksMenuStatus.startButtonOpened, clickOutside: marksMenuStatus.closeStartButton">
-      <button class="button" id="start-marker">Highlight…</button>
+      <button id="viv-marker-start-marker">Highlight…</button>
     </div>
     <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.menuOpened, clickOutside: marksMenuStatus.closeMenu">
-      <section>
-        <button class="mark-color yellow" title="Marker: Yellow" data-bind="css: {'selected-color': marksMenuStatus.currentEditingColor() == 'yellow' }, click: () => { marksMenuStatus.currentEditingColor('yellow') }"></button>
-        <button class="mark-color red" title="Marker: Red" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'red' }, click: () => { marksMenuStatus.currentEditingColor('red') }"></button>
-        <button class="mark-color green" title="Marker: Green" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'green' }, click: () => { marksMenuStatus.currentEditingColor('green') }"></button>
-      </section>
-      <section>
-        <textarea id="vivliostyle-memo-edit-area" rows="3" type="text" data-bind="textInput: marksMenuStatus.currentEditingMemo">
+      <div>
+        <button class="viv-marker-color yellow" title="Marker: Yellow" data-bind="css: {'selected-color': marksMenuStatus.currentEditingColor() == 'yellow' }, click: () => { marksMenuStatus.currentEditingColor('yellow') }"></button>
+        <button class="viv-marker-color red" title="Marker: Red" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'red' }, click: () => { marksMenuStatus.currentEditingColor('red') }"></button>
+        <button class="viv-marker-color green" title="Marker: Green" data-bind="css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'green' }, click: () => { marksMenuStatus.currentEditingColor('green') }"></button>
+      </div>
+      <div>
+        <textarea id="vivliostyle-memo-edit-area" rows="3" data-bind="textInput: marksMenuStatus.currentEditingMemo">
         </textarea>
-      </section>
-      <section data-bind="visible: marksMenuStatus.cancellable">
-        <button class="button" id="selection-ok" data-bind="click: marksMenuStatus.applyEditing">OK</button>
-        <button class="button" id="selection-cancel" data-bind="click: marksMenuStatus.closeMenu">Cancel</button>
-      </section>
-      <section data-bind="visible: marksMenuStatus.deletable">
-        <button class="button" id="selection-delete" data-bind="click: marksMenuStatus.deleteCurrentEditing">Delete</button>
-      </section>
+      </div>
+      <div data-bind="visible: marksMenuStatus.cancellable">
+        <button id="viv-marker-selection-ok" data-bind="click: marksMenuStatus.applyEditing">OK</button>
+        <button id="viv-marker-selection-cancel" data-bind="click: marksMenuStatus.closeMenu">Cancel</button>
+      </div>
+      <div data-bind="visible: marksMenuStatus.deletable">
+        <button id="viv-marker-selection-delete" data-bind="click: marksMenuStatus.deleteCurrentEditing">Delete</button>
+      </div>
     </div>
     <!-- MENU BAR -->
     <div role="toolbar" id="vivliostyle-menu-bar">
@@ -270,7 +270,23 @@
       </ul>
       <ul class="vivliostyle-menu" id="vivliostyle-menu_toc-find" data-bind="visible: !navigation.hideTOCNavigation||!navigation.hideFind">
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_toc-toggle" data-bind="click: navigation.toggleTOC, css: {'vivliostyle-menu-disabled': navigation.isTOCToggleDisabled, 'on': viewer.tocVisible, 'pinned': viewer.tocPinned}, visible: !navigation.hideTOCNavigation"><span role="button" class="vivliostyle-menu-icon-button" title="Table of Contents (T), Double click/type to pin" aria-keyshortcuts="T" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isTOCToggleDisabled, 'aria-pressed': viewer.tocVisible()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span></li>
-        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_marker-toggle" data-bind="click: navigation.toggleMarker, css: {'vivliostyle-menu-disabled': navigation.isMarkerToggleDisabled, 'on': viewerOptions.enableMarker}, visible: !navigation.hideMarker"><span role="button" class="vivliostyle-menu-icon-button" title="Marker (M)" aria-keyshortcuts="M" data-bind="menuButton: true, attr: {'aria-disabled': navigation.isMarkerToggleDisabled, 'aria-pressed': viewerOptions.enableMarker()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span></li>
+        <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_marker-toggle" data-bind="css: {'vivliostyle-menu-disabled': navigation.isMarkerToggleDisabled, 'on': viewerOptions.enableMarker, 'pinned': marksBox.pinned}, visible: !navigation.hideMarker"><span role="button" class="vivliostyle-menu-icon-button" title="Marker (M), Double click/type to pin" aria-keyshortcuts="M" data-bind="click: navigation.toggleMarker, menuButton: true, attr: {'aria-disabled': navigation.isMarkerToggleDisabled, 'aria-pressed': viewerOptions.enableMarker()?'true':'false', 'tabindex': !navigation.isTOCToggleDisabled()?'0':false}"></span>
+          <details role="dialog" id="vivliostyle-marks-box" hidden aria-hidden="true" data-bind="attr: {hidden: !marksBox.hasMarks()?'':false, 'aria-hidden': !marksBox.hasMarks()?'true':'false'}">
+            <summary>Marks and Memos</summary>
+            <div class="viv-marker-remove-all">
+              <button data-bind="click: marksBox.removeAllMarks">Remove All</button>
+            </div>
+            <ol class="viv-marker-list" data-bind="foreach: marksBox.list">
+              <li data-bind="attr: {'data-viv-marker-color': color}">
+                <a href="#" class="viv-marker-text" data-bind="text: markedText, click: $parent.marksBox.navigateToMark"></a>
+                <div class="viv-marker-edit">
+                  <button class="viv-marker-remove" title="Remove" data-bind="click: $parent.marksBox.removeOneMark"></button>
+                  <textarea title="Memo" data-bind="textInput: memo, event: {blur: $parent.marksBox.updateActualMark}"></textarea>
+                </div>
+              </li>
+            </ol>
+          </details>
+        </li>
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_find-toggle" data-bind="css: {'vivliostyle-menu-disabled': navigation.isFindBoxDisabled, 'on': findBox.opened}, visible: !navigation.hideFind"><span role="button" class="vivliostyle-menu-icon-button" title="Find (Ctrl/Cmd+F)" aria-keyshortcuts="Ctrl+F Meta+F" data-bind="click: findBox.toggle, menuButton: true, attr: {'aria-disabled': navigation.isFindBoxDisabled, 'aria-pressed': findBox.opened()?'true':'false', 'tabindex': !navigation.isFindBoxDisabled()?'0':false}"></span>
           <div id="vivliostyle-menu-find-box" aria-hidden="true" data-bind="attr: {'aria-hidden': !findBox.opened()?'true':'false'}">
             <input id="vivliostyle-find-box" data-bind="textInput: findBox.text, attr: {'aria-disabled': navigation.isFindBoxDisabled}" type="text" placeholder="Find"/>

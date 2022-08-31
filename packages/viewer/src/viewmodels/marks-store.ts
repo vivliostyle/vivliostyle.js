@@ -17,8 +17,9 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ko, { Computed, Observable } from "knockout";
+import ko, { Computed, Observable, ObservableArray } from "knockout";
 import ViewerOptions from "../models/viewer-options";
+import Viewer from "./viewer";
 import urlParameters from "../stores/url-parameters";
 import { applyTransformToRect } from "../utils/scale-util";
 
@@ -946,25 +947,111 @@ export class URLMarksStore implements MarksStoreInterface {
   }
 }
 
+export class MarksBox {
+  detailsElement: HTMLDetailsElement;
+  pinned: Observable<boolean>;
+  list: ObservableArray<Mark>;
+
+  constructor(private parent: MarksStoreFacade) {
+    this.pinned = ko.observable(false);
+    this.list = ko.observableArray();
+  }
+
+  init(): void {
+    this.detailsElement = document.getElementById(
+      "vivliostyle-marks-box",
+    ) as HTMLDetailsElement;
+  }
+
+  addMarkToList(mark: Mark): void {
+    let index = -1;
+    const markList = this.list();
+    for (let i = 0; i < markList.length; i++) {
+      const m = markList[i];
+      if (m.uniqueIdentifier === mark.uniqueIdentifier) {
+        this.list.replace(m, mark);
+        return;
+      }
+      if (m.start.spineIndex === mark.start.spineIndex) {
+        if (m.start.offsetInItem > mark.start.offsetInItem) {
+          index = i;
+          break;
+        }
+      } else if (m.start.spineIndex > mark.start.spineIndex) {
+        index = i;
+        break;
+      }
+    }
+    if (index === -1) {
+      index = markList.length;
+    }
+    this.list.splice(index, 0, mark);
+  }
+
+  removeMarkFromList(mark: Mark): void {
+    this.list.remove((m) => m.uniqueIdentifier === mark.uniqueIdentifier);
+  }
+
+  removeAllMarks = async (): Promise<void> => {
+    if (confirm("Do you really want to remove all marks and memos?")) {
+      const markList = this.list.removeAll();
+      for (const mark of markList) {
+        await this.parent.removeMark(mark);
+      }
+    }
+  };
+
+  removeOneMark = async (mark: Mark): Promise<void> => {
+    if (confirm("Do you really want to remove it?")) {
+      await this.parent.removeMark(mark);
+    }
+  };
+
+  updateActualMark = async (mark: Mark): Promise<void> => {
+    this.parent.actualStore.updateMark(mark.toMarkJson());
+  };
+
+  navigateToMark = (mark: Mark): void => {
+    const { spineIndex, offsetInItem } = mark.start;
+    this.parent.viewer.navigateToPosition({ spineIndex, offsetInItem });
+    if (!this.pinned()) {
+      this.detailsElement.open = false;
+    }
+  };
+
+  hasMarks = (): boolean => {
+    return this.list().length > 0 && this.parent.enabled();
+  };
+}
+
 export class MarksStoreFacade {
-  private actualStore?: MarksStoreInterface;
-  private viewerOptions?: ViewerOptions;
+  actualStore?: MarksStoreInterface;
+  viewerOptions?: ViewerOptions;
+  viewer?: Viewer;
   menuStatus: MarksMenuStatus;
+  marksBox: MarksBox;
   initialized: boolean;
+  justClicked: boolean;
 
   constructor() {
     this.menuStatus = new MarksMenuStatus(this);
+    this.marksBox = new MarksBox(this);
     this.initialized = false;
+    this.justClicked = false;
   }
 
   enabled(): boolean {
     return this.initialized && this.viewerOptions.enableMarker();
   }
 
-  async init(viewerOptions?: ViewerOptions): Promise<void> {
+  async init(viewerOptions?: ViewerOptions, viewer?: Viewer): Promise<void> {
     if (viewerOptions) {
       this.viewerOptions = viewerOptions;
     }
+    if (viewer) {
+      this.viewer = viewer;
+    }
+    this.marksBox.init();
     if (!this.viewerOptions || !this.viewerOptions.enableMarker()) {
       return;
     }
@@ -981,10 +1068,30 @@ export class MarksStoreFacade {
   async toggleEnableMarker(): Promise<void> {
     if (!this.enabled()) {
       this.viewerOptions.enableMarker(true);
+
+      if (this.justClicked) {
+        this.justClicked = false;
+        this.marksBox.pinned(true);
+        this.marksBox.detailsElement.open = true;
+      } else {
+        this.marksBox.pinned(false);
+        this.justClicked = true;
+        window.setTimeout(() => {
+          (
+            this.marksBox.detailsElement.firstElementChild as HTMLElement
+          ).focus();
+          this.justClicked = false;
+        }, 300);
+      }
       if (!this.initialized) {
         await this.init();
       }
       await this.retryHighlightMarks();
+    } else if (this.justClicked) {
+      // Double click to keep Marks box visible during Marks navigation
+      this.justClicked = false;
+      this.marksBox.pinned(true);
+      this.marksBox.detailsElement.open = true;
     } else {
       document.querySelectorAll(`[${Mark.idAttr}]`).forEach((e) => {
         e.remove();
@@ -996,6 +1103,11 @@ export class MarksStoreFacade {
         this.menuStatus.closeMenu();
       }
       this.viewerOptions.enableMarker(false);
+
+      this.justClicked = true;
+      window.setTimeout(() => {
+        this.justClicked = false;
+      }, 300);
     }
   }
 
@@ -1048,7 +1160,9 @@ export class MarksStoreFacade {
       .forEach((e) => {
         e.remove();
       });
+    this.marksBox.removeMarkFromList(mark);
   }
+
   private highlightMark(mark: Mark, allowNotPersisted = false): void {
     if (!mark.isPersisted && !allowNotPersisted) {
       throw "mark is not persisted.";
@@ -1063,6 +1177,7 @@ export class MarksStoreFacade {
       const color = colorNameToColor(mark.color);
       highlight(start, end, { background: color }, mark);
     }
+    this.marksBox.addMarkToList(mark);
   }
 }
 

@@ -31,7 +31,12 @@ import MessageDialog from "./message-dialog";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
-import { marksStore, MarksStoreFacade, MarksMenuStatus } from "./marks-store";
+import {
+  marksStore,
+  MarksStoreFacade,
+  MarksMenuStatus,
+  MarksBox,
+} from "./marks-store";
 
 class ViewerApp {
   documentOptions: DocumentOptions;
@@ -45,6 +50,7 @@ class ViewerApp {
   findBox: FindBox;
   marksStore: MarksStoreFacade;
   marksMenuStatus: MarksMenuStatus;
+  marksBox: MarksBox;
 
   constructor() {
     // Configuration flags
@@ -206,8 +212,9 @@ class ViewerApp {
     }
 
     this.marksStore = marksStore;
-    this.marksStore.init(this.viewerOptions);
+    this.marksStore.init(this.viewerOptions, this.viewer);
     this.marksMenuStatus = marksStore.menuStatus;
+    this.marksBox = marksStore.marksBox;
     this.viewer.rerenderTrigger.subscribe(() => {
       this.marksStore.retryHighlightMarks();
     });
@@ -243,9 +250,6 @@ class ViewerApp {
         this.viewer.loadDocument(this.documentOptions);
         return false;
       }
-      return true;
-    }
-    if (document.activeElement.id === "vivliostyle-memo-edit-area") {
       return true;
     }
     if (document.activeElement.id === "vivliostyle-find-box") {

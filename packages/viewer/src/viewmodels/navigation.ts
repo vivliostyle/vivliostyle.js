@@ -651,6 +651,13 @@ class Navigation {
     if (this.settingsPanel.opened() && !this.settingsPanel.pinned()) {
       this.settingsPanel.close();
     }
+    if (
+      marksStore.enabled() &&
+      marksStore.marksBox.detailsElement.open &&
+      !marksStore.marksBox.pinned()
+    ) {
+      marksStore.marksBox.detailsElement.open = false;
+    }
     return true;
   }
 
@@ -818,6 +825,15 @@ class Navigation {
       return true;
     }
 
+    if (
+      key !== Keys.Escape &&
+      document.activeElement.closest(
+        "#vivliostyle-marks-box, #vivliostyle-text-selection-start-button, #vivliostyle-text-selection-edit-menu, [data-vivliostyle-page-box]",
+      )
+    ) {
+      return true;
+    }
+
     const pageNumberElem = document.getElementById("vivliostyle-page-number");
     const viewportElement = document.getElementById(
       "vivliostyle-viewer-viewport",
@@ -904,6 +920,12 @@ class Navigation {
         viewportElement.focus();
         return !this.toggleMarker();
       case Keys.Escape:
+        if (marksStore.enabled()) {
+          if (marksStore.marksBox.detailsElement.open) {
+            marksStore.marksBox.detailsElement.open = false;
+            return true;
+          }
+        }
         if (this.viewer.tocVisible()) {
           return !this.toggleTOC();
         }

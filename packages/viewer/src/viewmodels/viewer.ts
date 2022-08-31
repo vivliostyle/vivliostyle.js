@@ -293,6 +293,14 @@ class Viewer {
     this.coreViewer.navigateToInternalUrl(href);
   }
 
+  navigateToPosition(position: {
+    spineIndex: number;
+    pageIndex?: number;
+    offsetInItem?: number;
+  }): void {
+    this.coreViewer.navigateToPosition(position);
+  }
+
   queryZoomFactor(type: ZoomType): number {
     return this.coreViewer.queryZoomFactor(type);
   }

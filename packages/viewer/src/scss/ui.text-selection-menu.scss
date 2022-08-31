@@ -21,7 +21,17 @@
   border-radius: 0.5em;
   padding: 0.2em;
   text-align: center;
-  .mark-color {
+  font-size: 14px;
+  font-family: $sans-serif;
+  line-height: 1.2;
+  
+  > div {
+    white-space: nowrap;
+  }
+  button, textarea {
+    font: inherit;
+  }
+  .viv-marker-color {
     box-sizing: content-box;
     padding: 2px;
     height: 1.5em;
@@ -40,33 +50,28 @@
   }
   .selected-color {
     opacity: 1;
-    border: 2px solid #ccc;
+    border: 3px solid #ccc;
   }
-
   .red {
-    background-color: #f55;
+    background-color: $menu-marker-color-red;
   }
   .green {
-    background-color: #5f5;
+    background-color: $menu-marker-color-green;
   }
   .yellow {
-    background-color: #ffd900;
-  }
-  section {
-    padding: 0.1em 0;
-    white-space: nowrap;
+    background-color: $menu-marker-color-yellow;
   }
   #vivliostyle-memo-edit-area {
-    font-family: inherit;
+    font-size: 14px;
+    font-family: $sans-serif;
   }
-  .button {
+  button:not(.viv-marker-color) {
     cursor: pointer;
     background: none;
     border: none;
     padding: 0.3em;
     border-radius: 0.3em;
     color: white;
-    font-family: Arial, sans-serif;
     &:before {
       @include font-icon("FontAwesome");
       padding-right: 0.5em;
@@ -76,24 +81,25 @@
       background-color: #a0a0a0;
     }
   }
-  #selection-ok {
+  #viv-marker-selection-ok {
     &:before {
       content: fa-content($fa-var-check);
     }
+    min-width: 6em;
   }
-  #selection-cancel {
+  #viv-marker-selection-cancel {
     cursor: pointer;
     &:before {
       content: fa-content($fa-var-close);
     }
   }
-  #selection-delete {
+  #viv-marker-selection-delete {
     cursor: pointer;
     &:before {
       content: fa-content($fa-var-trash);
     }
   }
-  #start-marker {
+  #viv-marker-start-marker {
     &:before {
       content: fa-content($fa-var-marker);
     }
