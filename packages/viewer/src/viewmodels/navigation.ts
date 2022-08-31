@@ -825,15 +825,6 @@ class Navigation {
       return true;
     }
 
-    if (
-      key !== Keys.Escape &&
-      document.activeElement.closest(
-        "#vivliostyle-marks-box, #vivliostyle-text-selection-start-button, #vivliostyle-text-selection-edit-menu, [data-vivliostyle-page-box]",
-      )
-    ) {
-      return true;
-    }
-
     const pageNumberElem = document.getElementById("vivliostyle-page-number");
     const viewportElement = document.getElementById(
       "vivliostyle-viewer-viewport",

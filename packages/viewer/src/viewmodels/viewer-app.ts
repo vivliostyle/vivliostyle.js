@@ -38,6 +38,8 @@ import {
   MarksBox,
 } from "./marks-store";
 
+const { Keys } = keyUtil;
+
 class ViewerApp {
   documentOptions: DocumentOptions;
   viewerOptions: ViewerOptions;
@@ -258,6 +260,14 @@ class ViewerApp {
     let ret = this.findBox.handleKey(key, event, false);
     if (!ret) {
       return false;
+    }
+    if (
+      key !== Keys.Escape &&
+      document.activeElement.closest(
+        "#vivliostyle-marks-box, #vivliostyle-text-selection-start-button, #vivliostyle-text-selection-edit-menu, [data-vivliostyle-page-box]",
+      )
+    ) {
+      return true;
     }
     if (
       (!(key === "Home" || key === "End" || key === "p" || key === "P") &&
