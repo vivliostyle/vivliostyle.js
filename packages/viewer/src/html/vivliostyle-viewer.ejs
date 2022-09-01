@@ -278,7 +278,7 @@
             </div>
             <ol class="viv-marker-list" data-bind="foreach: marksBox.list">
               <li data-bind="attr: {'data-viv-marker-color': color}">
-                <a href="#" class="viv-marker-text" data-bind="text: markedText, click: $parent.marksBox.navigateToMark"></a>
+                <a href="#" class="viv-marker-text" draggable="false" data-bind="text: markedText, click: $parent.marksBox.navigateToMark"></a>
                 <div class="viv-marker-edit">
                   <button class="viv-marker-remove" title="Remove" data-bind="click: $parent.marksBox.removeOneMark"></button>
                   <textarea title="Memo" data-bind="textInput: memo, event: {blur: $parent.marksBox.updateActualMark}"></textarea>

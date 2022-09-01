@@ -18,15 +18,18 @@
   background: #333;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
   border: 1px solid #ddd;
-  border-radius: 0.5em;
-  padding: 0.2em;
+  border-radius: 8px;
+  padding: 4px;
   text-align: center;
   font-size: 14px;
   font-family: $sans-serif;
-  line-height: 1.2;
+  line-height: 1.25;
   
   > div {
     white-space: nowrap;
+    &:not(:first-child) {
+      margin-top: 4px;
+    }
   }
   button, textarea {
     font: inherit;
@@ -62,8 +65,9 @@
     background-color: $menu-marker-color-yellow;
   }
   #vivliostyle-memo-edit-area {
-    font-size: 14px;
-    font-family: $sans-serif;
+    display: block;
+    min-width: 12em;
+    border: none;
   }
   button:not(.viv-marker-color) {
     cursor: pointer;

@@ -264,7 +264,7 @@ class ViewerApp {
     if (
       key !== Keys.Escape &&
       document.activeElement.closest(
-        "#vivliostyle-marks-box, #vivliostyle-text-selection-start-button, #vivliostyle-text-selection-edit-menu, [data-vivliostyle-page-box]",
+        "#vivliostyle-marks-box, #vivliostyle-text-selection-start-button, #vivliostyle-text-selection-edit-menu, [data-vivliostyle-page-container]",
       )
     ) {
       return true;

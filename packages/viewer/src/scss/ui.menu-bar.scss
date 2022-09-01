@@ -889,8 +889,14 @@
         font-size: 14px;
         line-height: 1.2;
         box-sizing: border-box;
+        border: dotted 1px #888;
         padding: 2px 4px;
         flex: auto;
+        background: transparent;
+
+        &:hover, &:focus {
+          background: white;
+        }
       }
     }
   }
