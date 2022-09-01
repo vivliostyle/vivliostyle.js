@@ -652,6 +652,38 @@ export class MarksMenuStatus {
       .extend({ notify: "always" });
   }
 
+  init(): void {
+    // Make the menu draggable
+    const menu = document.getElementById(
+      "vivliostyle-text-selection-edit-menu",
+    ) as HTMLElement;
+
+    let x = 0;
+    let y = 0;
+
+    const mouseMove = (e: MouseEvent): void => {
+      const dx = e.clientX - x;
+      const dy = e.clientY - y;
+      x = e.clientX;
+      y = e.clientY;
+      menu.style.top = `${menu.offsetTop + dy}px`;
+      menu.style.left = `${menu.offsetLeft + dx}px`;
+    };
+
+    menu.addEventListener("mousedown", (e: MouseEvent): void => {
+      if ((e.target as Element).id === "vivliostyle-memo-edit-area") {
+        // prevent dragging when editing
+        return;
+      }
+      x = e.clientX;
+      y = e.clientY;
+      document.addEventListener("mousemove", mouseMove);
+      document.addEventListener("mouseup", () => {
+        document.removeEventListener("mousemove", mouseMove);
+      });
+    });
+  }
+
   editingColorChanged = async (colorName: string): Promise<void> => {
     if (!marksStore.enabled()) return;
     const idString = this.markAction().currentId();
@@ -1051,10 +1083,13 @@ export class MarksStoreFacade {
     if (viewer) {
       this.viewer = viewer;
     }
-    this.marksBox.init();
     if (!this.viewerOptions || !this.viewerOptions.enableMarker()) {
       return;
     }
+
+    this.menuStatus.init();
+    this.marksBox.init();
+
     if (window["marksStorePlugin"]) {
       this.actualStore = window["marksStorePlugin"] as MarksStoreInterface;
     } else {
