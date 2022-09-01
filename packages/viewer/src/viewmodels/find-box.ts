@@ -202,7 +202,19 @@ class FindBox {
     findBoxElem.style.visibility = "hidden";
     const found = windowF.find(text, false, backwards);
     findBoxElem.style.visibility = "";
-    return found;
+
+    if (found) {
+      if (
+        selection.anchorNode?.parentElement?.closest(
+          "[data-vivliostyle-page-container]",
+        )
+      ) {
+        return true;
+      } else {
+        selection.removeAllRanges();
+      }
+    }
+    return false;
   }
 
   /**
