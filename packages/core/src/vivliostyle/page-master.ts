@@ -1421,13 +1421,18 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           : container.width;
         const border = this.vertical ? "border-top" : "border-left";
         for (let i = 1; i < columnCount; i++) {
-          const pos =
-            ((containerSize + columnGap) * i) / columnCount -
-            columnGap / 2 +
-            container.paddingLeft -
-            ruleWidth / 2;
-          const size =
-            container.height + container.paddingTop + container.paddingBottom;
+          const pos = this.vertical
+            ? ((containerSize + columnGap) * i) / columnCount -
+              columnGap / 2 +
+              container.paddingTop -
+              ruleWidth / 2
+            : ((containerSize + columnGap) * i) / columnCount -
+              columnGap / 2 +
+              container.paddingLeft -
+              ruleWidth / 2;
+          const size = this.vertical
+            ? container.width + container.paddingLeft + container.paddingRight
+            : container.height + container.paddingTop + container.paddingBottom;
           const rule = container.element.ownerDocument.createElement("div");
           Base.setCSSProperty(rule, "position", "absolute");
           Base.setCSSProperty(rule, this.vertical ? "left" : "top", "0px");
