@@ -2138,10 +2138,6 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
     this.cascadeParserHandler = new BaseParserHandler(this, null, null, null);
     this.slave = this.cascadeParserHandler;
   }
-
-  override error(mnemonics: string, token: CssTokenizer.Token): void {
-    Logging.logger.warn("CSS parser:", mnemonics, token);
-  }
 }
 
 export type StyleSource = {
