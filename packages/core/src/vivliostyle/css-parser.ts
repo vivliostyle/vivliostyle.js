@@ -240,7 +240,7 @@ export class DispatchParserHandler extends ParserHandler {
    * Called by a slave.
    */
   errorMsg(mnemonics: string, token: CssTokenizer.Token): void {
-    Logging.logger.warn(mnemonics);
+    Logging.logger.warn(mnemonics, token.toString());
   }
 
   override startStylesheet(flavor: StylesheetFlavor): void {
@@ -887,7 +887,7 @@ export class Parser {
     this.actions = this.propName ? actionsErrorDecl : actionsError;
     // this.handler.error(mnemonics, token);
     // (should not throw error by expression syntax errors)
-    Logging.logger.warn(mnemonics, token);
+    Logging.logger.warn(mnemonics, token.toString());
   }
 
   exprStackReduce(op: number, token: CssTokenizer.Token): boolean {
@@ -1379,7 +1379,7 @@ export class Parser {
 
       // Do not stop parsing on invalid property syntax as long as brackets are balanced.
       if (
-        this.propName &&
+        this.actions === actionsPropVal &&
         this.errorBrackets.length > 0 &&
         (token.type === this.errorBrackets[this.errorBrackets.length - 1] ||
           token.type === CssTokenizer.TokenType.SEMICOL ||
@@ -2592,7 +2592,8 @@ export class ErrorHandler extends ParserHandler {
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
-    throw new Error(mnemonics + " " + token);
+    // throw new Error(mnemonics + " " + token);
+    Logging.logger.warn(mnemonics, token.toString());
   }
 
   override getScope(): Exprs.LexicalScope {
