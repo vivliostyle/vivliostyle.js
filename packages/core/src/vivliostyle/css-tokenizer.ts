@@ -1585,20 +1585,15 @@ export class Tokenizer {
       const charCode = input.charCodeAt(position);
       switch (actions[charCode] || actions[65] /*A*/) {
         case Action.INVALID:
-          tokenType = TokenType.INVALID;
-          if (actions === actionsNumOrClass) {
-            // Fix for issue #597
-            tokenText = input.substring(tokenPosition, position);
-            actions = actionsNormal;
-            break;
-          }
+          tokenText = input.substring(tokenPosition, position);
           if (isNaN(charCode)) {
-            tokenText = "E_CSS_UNEXPECTED_EOF";
+            // unclosed comment `/***[EOF]`, unclosed string `"**[EOF]`
+            tokenType = TokenType.EOF;
           } else {
-            tokenText = "E_CSS_UNEXPECTED_CHAR";
+            // invalid, e.g, `.` in `:nth-child([.])` (Issue #597)
+            tokenType = TokenType.INVALID;
           }
           actions = actionsNormal;
-          position++;
           break;
         case Action.SPACE:
           position++;
