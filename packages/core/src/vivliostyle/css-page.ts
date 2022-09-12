@@ -2440,15 +2440,17 @@ export class PageManager {
     if (size && !Css.isDefaultingValue(size.value)) {
       const pageSize = resolvePageSizeAndBleed(style as any);
       const priority = size.priority;
-      pageMasterStyle["width"] = CssCascade.cascadeValues(
-        this.context,
-        pageMasterStyle["width"] as CssCascade.CascadeValue,
+      CssCascade.setPropCascadeValue(
+        pageMasterStyle,
+        "width",
         new CssCascade.CascadeValue(pageSize.width, priority),
-      );
-      pageMasterStyle["height"] = CssCascade.cascadeValues(
         this.context,
-        pageMasterStyle["height"] as CssCascade.CascadeValue,
+      );
+      CssCascade.setPropCascadeValue(
+        pageMasterStyle,
+        "height",
         new CssCascade.CascadeValue(pageSize.height, priority),
+        this.context,
       );
     }
 
@@ -2839,7 +2841,7 @@ export class PageParserHandler
       const noPageSelectorProps = pageProps[""];
       this.currentPageSelectors.forEach((s) => {
         // update specificity to reflect the specificity of the selector
-        let result = new CssCascade.CascadeValue(
+        const result = new CssCascade.CascadeValue(
           cascVal.value,
           cascVal.priority + s.specificity,
         );
@@ -2865,11 +2867,7 @@ export class PageParserHandler
           // consider specificity when setting 'size' property.
           // we don't have to set 'bleed' and 'marks' since they should have
           // been already updated.
-          const prevCascVal = CssCascade.getProp(props, name);
-          result = prevCascVal
-            ? CssCascade.cascadeValues(null, result, prevCascVal)
-            : result;
-          CssCascade.setProp(props, name, result);
+          CssCascade.setPropCascadeValue(props, name, result);
         }
       });
     }
