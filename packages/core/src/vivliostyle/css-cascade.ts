@@ -3753,7 +3753,7 @@ export class CascadeParserHandler
     const cascval = this.condition
       ? new ConditionalCascadeValue(value, specificity, this.condition)
       : new CascadeValue(value, specificity);
-    setProp(this.elementStyle, name, cascval);
+    setPropCascadeValue(this.elementStyle, name, cascval);
   }
 
   finish(): Cascade {
@@ -3901,7 +3901,7 @@ export class PropSetParserHandler
     const cascval = this.condition
       ? new ConditionalCascadeValue(value, specificity, this.condition)
       : new CascadeValue(value, specificity);
-    setProp(this.elementStyle, name, cascval);
+    setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }
 
@@ -3950,7 +3950,7 @@ export class PropertyParserHandler
     specificity += this.order;
     this.order += ORDER_INCREMENT;
     const cascval = new CascadeValue(value, specificity);
-    setProp(this.elementStyle, name, cascval);
+    setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }
 
