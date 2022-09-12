@@ -81,7 +81,7 @@ export function calculateEdge(
   if (!node) {
     return NaN;
   }
-  const element = node.nodeType == 1 ? (node as Element) : node.parentElement;
+  const element = node instanceof Element ? node : node.parentElement;
   if (element && element instanceof HTMLElement) {
     if (element.localName === "rt" && element.style["zoom"]) {
       // "zoom" is set in fixRubyTextFontSize() to fix the issue #673 for Chrome.
@@ -94,9 +94,20 @@ export function calculateEdge(
       return NaN;
     }
   }
-  if (node.nodeType == 1) {
+  if (node === element) {
     if (nodeContext.after || !nodeContext.inline) {
-      const cbox = clientLayout.getElementClientRect(node as Element);
+      if (
+        nodeContext.after &&
+        !nodeContext.inline &&
+        element.querySelector("ruby")
+      ) {
+        // Workaround for issue #987 (unnecessary break caused by ruby)
+        const parentNode = element.parentNode;
+        const nextSibling = element.nextSibling;
+        parentNode.removeChild(element);
+        parentNode.insertBefore(element, nextSibling);
+      }
+      const cbox = clientLayout.getElementClientRect(element);
       if (
         cbox.left === 0 &&
         cbox.top === 0 &&
