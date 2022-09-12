@@ -2127,7 +2127,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
-   * Read ranges skipping special elments
+   * Read ranges skipping special elements
    */
   getRangeBoxes(start: Node, end: Node): Vtree.ClientRect[] {
     const arr = [];
@@ -2151,7 +2151,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             endNotReached = false;
           }
         }
-        if (node.nodeType != 1) {
+        if (!(node instanceof Element)) {
           if (!haveStart) {
             if (node.parentNode == null) {
               endNotReached = false;
@@ -2163,18 +2163,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           lastGood = node;
         } else if (wentUp) {
           wentUp = false;
-        } else if (LayoutHelper.isSpecial(node as Element)) {
+        } else if (LayoutHelper.isSpecial(node)) {
           // Skip special
           seekRange = !haveStart;
         } else if (
-          /^r(uby|[bt]c?)$/.test((node as Element).localName) ||
+          /^r(uby|[bt]c?)$/.test(node.localName) ||
           LayoutHelper.isSpecialInlineDisplay(
-            this.clientLayout.getElementComputedStyle(node as Element).display,
+            this.clientLayout.getElementComputedStyle(node).display,
           )
         ) {
           // ruby, inline-block, etc.
           seekRange = !haveStart;
           if (seekRange) {
+            if (node.localName === "ruby" && node.firstChild) {
+              // Fix for issue #985
+              node = node.firstChild;
+            }
             range.setStartBefore(node);
             haveStart = true;
             lastGood = node;
