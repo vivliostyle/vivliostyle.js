@@ -248,21 +248,6 @@ export class Page extends Base.SimpleEventTarget {
       }
     }
   }
-
-  /**
-   * Zoom page.
-   * @param scale Factor to which the page will be scaled.
-   */
-  zoom(scale: number) {
-    Base.setCSSProperty(this.container, "transform", `scale(${scale})`);
-  }
-
-  /**
-   * Returns the page area element.
-   */
-  getPageAreaElement(): HTMLElement {
-    return this.pageAreaElement || this.container;
-  }
 }
 
 export type Spread = {
