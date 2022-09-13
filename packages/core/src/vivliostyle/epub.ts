@@ -2354,7 +2354,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       }
     }
     if (!result) {
-      result = this.viewport.document.createElement("span");
+      result = this.viewport.document.createElement("object");
       result.setAttribute("data-adapt-process-children", "true");
     }
 

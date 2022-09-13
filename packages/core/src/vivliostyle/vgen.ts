@@ -2555,7 +2555,11 @@ export class Viewport {
     Base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
     Base.setCSSProperty(this.contentContainer, "width", `${width}px`);
     Base.setCSSProperty(this.contentContainer, "height", `${height}px`);
-    Base.setCSSProperty(this.contentContainer, "transform", `scale(${scale})`);
+    Base.setCSSProperty(
+      this.contentContainer,
+      "transform",
+      scale === 1 ? "none" : `scale(${scale})`,
+    );
   }
 
   /**

@@ -2556,6 +2556,7 @@ export class Parser {
               continue;
             } else if (
               token.type === CssTokenizer.TokenType.O_BRC &&
+              this.actions == actionsExprVal &&
               valStack.length > 0
             ) {
               // `@media {...}` and `@supports {...}` should be ok
@@ -2565,7 +2566,10 @@ export class Parser {
               this.actions = actionsBase;
               tokenizer.consume();
               continue;
-            } else if (token.type === CssTokenizer.TokenType.SEMICOL) {
+            } else if (
+              token.type === CssTokenizer.TokenType.SEMICOL &&
+              this.actions == actionsExprVal
+            ) {
               // `@media;` and `@supports;` should be ok
               this.actions = actionsBase;
               tokenizer.consume();
