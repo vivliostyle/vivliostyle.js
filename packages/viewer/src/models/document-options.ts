@@ -112,7 +112,7 @@ class DocumentOptions {
     });
 
     // read style=data:.<cssText> URL parameter
-    function findDataCustomStyle(style: string, index): boolean {
+    const findDataCustomStyle = (style: string, index): boolean => {
       // Find style parameter that starts with "data:" and contains "/*<viewer>*/".
       if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(style)) {
         this.dataCustomStyleIndex = index;
@@ -126,7 +126,7 @@ class DocumentOptions {
       } else {
         return false;
       }
-    }
+    };
 
     if (!urlOptions.authorStyleSheet.find(findDataCustomStyle)) {
       if (urlOptions.userStyleSheet.find(findDataCustomStyle)) {
