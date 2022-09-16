@@ -326,6 +326,15 @@ class SettingsPanel {
           return false;
         }
         return true;
+      case "o":
+      case "O":
+        if (isHotKeyEnabled) {
+          this.focusToFirstItem(
+            document.getElementById("vivliostyle-settings_crop-marks"),
+          );
+          return false;
+        }
+        return true;
       case "g":
       case "G":
         if (isHotKeyEnabled) {

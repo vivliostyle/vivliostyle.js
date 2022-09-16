@@ -153,6 +153,26 @@
                 </fieldset>
                 <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_custom-style_more" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
                 <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="M"><span>More…</span></summary>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_crop-marks" aria-keyshortcuts="O">
+                  <legend class="vivliostyle-menu-detail-group-heading">Crop Marks</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="checkbox" name="vivliostyle-settings_crop-marks" data-bind="checked: settingsPanel.state.pageStyle.cropMarks" /> <span>Print crop marks</span></label>
+                      <ul class="vivliostyle-menu-detail-group">
+                        <li>
+                          <div>
+                            <label><input type="checkbox" name="vivliostyle-settings_bleed-specified" data-bind="checked: settingsPanel.state.pageStyle.bleedSpecified" /> <span>Bleed:</span></label>
+                            <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.bleedSpecified()}, click: ()=>{settingsPanel.state.pageStyle.bleedSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_bleed" data-bind="value: settingsPanel.state.pageStyle.bleed, attr: {tabindex: settingsPanel.state.pageStyle.bleedSpecified()?0:-1}" /></span>
+                          </div>
+                        </li>
+                        <li>
+                          <div>
+                            <label><input type="checkbox" name="vivliostyle-settings_crop-offset-specified" data-bind="checked: settingsPanel.state.pageStyle.cropOffsetSpecified" /> <span>Crop offset:</span></label>
+                            <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.cropOffsetSpecified()}, click: ()=>{settingsPanel.state.pageStyle.cropOffsetSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_crop-offset" data-bind="value: settingsPanel.state.pageStyle.cropOffset, attr: {tabindex: settingsPanel.state.pageStyle.cropOffsetSpecified()?0:-1}" /></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
                 </fieldset>
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="G">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
