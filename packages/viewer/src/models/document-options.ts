@@ -28,7 +28,7 @@ import stringUtil from "../utils/string-util";
 function getDocumentOptionsFromURL(): DocumentOptionsType {
   const srcUrls = urlParameters.getParameter("src");
   const bUrls = urlParameters.getParameter("b"); // (deprecated) => src & bookMode=true
-  const xUrls = urlParameters.getParameter("x"); // (deprecated) => src
+  const xUrls = urlParameters.getParameter("x"); // (deprecated) => src & bookMode=false
   const bookMode = urlParameters.getParameter("bookMode")[0];
   const fragment = urlParameters.getParameter("f")[0];
   const style = urlParameters.getParameter("style");
@@ -48,6 +48,10 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
         ? false
         : bUrls.length
         ? true
+        : xUrls.length
+        ? false
+        : srcUrls.length > 1
+        ? false // multiple srcUrls cannot be bookMode
         : null,
     fragment: fragment || null,
     authorStyleSheet: style.length ? style : [],
