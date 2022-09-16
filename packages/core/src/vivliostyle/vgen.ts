@@ -1244,6 +1244,14 @@ export class ViewFactory
                 .split(",")
                 .map((value) => this.resolveURL(value.trim()))
                 .join(",");
+            } else if (
+              attributeName === "data" &&
+              custom &&
+              tag === "object" &&
+              result.hasAttribute("data")
+            ) {
+              // the data attribute is already set in OPFView.makeObjectView()
+              continue;
             }
             if (
               attributeName === "poster" &&
