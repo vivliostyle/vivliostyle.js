@@ -27,7 +27,7 @@
   <body data-vivliostyle-viewer-status="loading" data-bind="event: {keydown: handleKey}, attr: {'data-vivliostyle-viewer-status': viewer.state.status, 'aria-busy': viewer.state.status()=='loading'}">
     <section id="vivliostyle-welcome" hidden data-bind="visible: !viewer.state.status(), attr: {hidden: viewer.state.status()?'':false, 'aria-hidden': viewer.state.status()?'true':'false'}, click: navigation.onclickViewport, swipePages: true">
       <h1>Vivliostyle Viewer <small>(version:&nbsp;<%= version %>)</small></h1>
-      <input id="vivliostyle-input-url" type="text" placeholder="Input a document URL" data-bind="textInput: viewer.inputUrl"/>
+      <input id="vivliostyle-input-url" type="text" placeholder="Input a document URL or HTML code" data-bind="textInput: viewer.inputUrl"/>
       <div id="vivliostyle-input-options">
         <label data-bind="hidden: settingsPanel.isBookModeChangeDisabled"><input id="vivliostyle-book-mode" type="checkbox" data-bind="checked: settingsPanel.state.bookMode" />&nbsp;<b>Book Mode</b>&emsp;</label>
         <label data-bind="hidden: settingsPanel.isRenderAllPagesChangeDisabled"><input id="vivliostyle-render-all-pages" type="checkbox" data-bind="checked: settingsPanel.state.renderAllPages" />&nbsp;<b>Render All Pages</b>&emsp;</label>
@@ -54,12 +54,12 @@
         <li><span>#<b>src</b>=&lt;document URL&gt;</span></li>
         <li><span>&amp;<b>bookMode</b>=[<b>true</b> | <b>false</b>]&emsp;(<b>Book Mode</b>)</span>
           <ul>
-            <li><b>true</b>: for Book-like publications, with Table of Contents.
+            <li><b>true</b> (default): for Book-like publications, with Table of Contents.
               <ul>
                 <li>When an HTML document URL is specified, a series of HTML documents linked from the publication manifest or Table of Contents (e.g., marked up with <code>&lt;nav role="doc-toc"&gt;</code>) are automatically loaded.</li>
               </ul>
             </li>
-            <li><b>false</b> (default): for single HTML documents</li>
+            <li><b>false</b>: for single HTML documents</li>
           </ul>
         </li>
         <li><span>&amp;<b>renderAllPages</b>=[<b>true</b> | <b>false</b>]&emsp;(<b>Render All Pages</b>)</span>
@@ -75,8 +75,8 @@
             <li><b>auto</b> (default): Auto spread view</li>
           </ul>
         </li>
-        <li><span>&amp;<b>style</b>=&lt;additional external style sheet URL&gt;</span></li>
-        <li><span>&amp;<b>userStyle</b>=&lt;user style sheet URL&gt;</span></li>
+        <li><span>&amp;<b>style</b>=&lt;additional (custom) stylesheet URL&gt;</span></li>
+        <li><span>&amp;<b>userStyle</b>=&lt;user stylesheet URL&gt;</span></li>
       </ul>
       <p>Options can also be set in the <a href="#" data-bind="click: settingsPanel.toggle"><img src="resources/vivliostyle-icon.png" width="16" height="16" alt="" />&nbsp;Settings</a> panel.</p>
       <p>For more details, see documentation:</p>
@@ -123,8 +123,8 @@
                   </div>
                 </fieldset>
               </details>
-              <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style" open data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
-                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="U"><span>User Style Preferences</span></summary>
+              <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_custom-style" open data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
+                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="C"><span>Custom Style Settings</span></summary>
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-size" aria-keyshortcuts="Z">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Size</legend>
                   <ul class="vivliostyle-menu-detail-group">
@@ -151,12 +151,30 @@
                     </li>
                   </ul>
                 </fieldset>
-                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_override-document-stylesheets">
-                  <div class="vivliostyle-menu-detail-group-heading"><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" aria-keyshortcuts="O" data-bind="checked: settingsPanel.state.pageStyle.allImportant, disable: settingsPanel.isOverrideDocumentStyleSheetDisabled" /> <span>Override Document Style Sheets</span></label></div>
+                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_custom-style_more" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
+                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="M"><span>More…</span></summary>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_crop-marks" aria-keyshortcuts="O">
+                  <legend class="vivliostyle-menu-detail-group-heading">Crop Marks</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="checkbox" name="vivliostyle-settings_crop-marks" data-bind="checked: settingsPanel.state.pageStyle.cropMarks" /> <span>Print crop marks</span></label>
+                      <ul class="vivliostyle-menu-detail-group">
+                        <li>
+                          <div>
+                            <label><input type="checkbox" name="vivliostyle-settings_bleed-specified" data-bind="checked: settingsPanel.state.pageStyle.bleedSpecified" /> <span>Bleed:</span></label>
+                            <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.bleedSpecified()}, click: ()=>{settingsPanel.state.pageStyle.bleedSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_bleed" data-bind="value: settingsPanel.state.pageStyle.bleed, attr: {tabindex: settingsPanel.state.pageStyle.bleedSpecified()?0:-1}" /></span>
+                          </div>
+                        </li>
+                        <li>
+                          <div>
+                            <label><input type="checkbox" name="vivliostyle-settings_crop-offset-specified" data-bind="checked: settingsPanel.state.pageStyle.cropOffsetSpecified" /> <span>Crop offset:</span></label>
+                            <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.cropOffsetSpecified()}, click: ()=>{settingsPanel.state.pageStyle.cropOffsetSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_crop-offset" data-bind="value: settingsPanel.state.pageStyle.cropOffset, attr: {tabindex: settingsPanel.state.pageStyle.cropOffsetSpecified()?0:-1}" /></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
                 </fieldset>
-                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_user-style_advanced" data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">
-                <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="D"><span>Advanced</span></summary>
-                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="M">
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-margin" aria-keyshortcuts="G">
                   <legend class="vivliostyle-menu-detail-group-heading">Page Margins</legend>
                   <ul class="vivliostyle-menu-detail-group">
                     <li><label><input type="radio" name="vivliostyle-settings_page-margin" value="" required data-bind="checked: settingsPanel.state.pageStyle.pageMarginMode" /> <span>Default</span> <small>(=10% unless specified elsewhere)</small></label></li>
@@ -217,24 +235,31 @@
                     </li>
                   </ul>
                 </fieldset>
-                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_css-details">
-                  <summary class="vivliostyle-menu-detail-group-heading"><span>CSS Details</span></summary>
-                  <div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
-                  <textarea name="vivliostyle-settings_css-details" autocomplete="off" aria-keyshortcuts="C" rows="10" data-bind="value: settingsPanel.state.pageStyle.cssText"></textarea>
+                <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_priority" aria-keyshortcuts="Y">
+                  <legend class="vivliostyle-menu-detail-group-heading">Custom Style Priority</legend>
+                  <ul class="vivliostyle-menu-detail-group">
+                    <li><label><input type="checkbox" name="vivliostyle-settings_set-as-custom-style" data-bind="checked: settingsPanel.state.pageStyle.customStyleAsUserStyle" /> <span>Set as user stylesheet</span> <small>(lower priority unless !important)</small></label></li>
+                    <li><label><input type="checkbox" name="vivliostyle-settings_override-document-stylesheets" data-bind="checked: settingsPanel.state.pageStyle.allImportant" /> <span>Force override document style</span> <small>(!important)</small></label></li>
+                  </ul>
+                </fieldset>
                 </details>
-                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_reset-user-style">
-                  <summary class="vivliostyle-menu-detail-group-heading"><span>Reset User Style</span></summary>
+                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_edit-css">
+                  <summary class="vivliostyle-menu-detail-group-heading"><span>Edit CSS</span></summary>
+                  <div><small>Don't edit between /*&lt;viewer&gt;*/ and /*&lt;/viewer&gt;*/.</small></div>
+                  <textarea name="vivliostyle-settings_edit-css" autocomplete="off" aria-keyshortcuts="E" rows="10" data-bind="value: settingsPanel.state.pageStyle.cssText"></textarea>
+                </details>
+                <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_reset-custom-style">
+                  <summary class="vivliostyle-menu-detail-group-heading"><span>Reset Custom Style</span></summary>
                   <ul class="vivliostyle-menu-detail-group">
                     <li>
-                      <label><input type="checkbox" name="vivliostyle-settings_reset-user-style" aria-keyshortcuts="R" data-bind="click: settingsPanel.resetUserStyle" /> <span>Reset all to default</span></label>
+                      <label><input type="checkbox" name="vivliostyle-settings_reset-custom-style" aria-keyshortcuts="R" data-bind="checked: settingsPanel.resetCustomStyle" /> <span>Reset all to default</span></label>
                     </li>
                   </ul>
                 </details>
               </details>
-              </details>
-              <div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline">
+              <div class="vivliostyle-menu-detail-group vivliostyle-menu-detail-group-buttons vivliostyle-menu-detail-group-inline" id="vivliostyle-settings_apply-or-cancel">
                 <div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-positive" id="vivliostyle-menu-button_apply" aria-keyshortcuts="Enter" data-bind="menuButton: true, click: settingsPanel.apply">Apply</button></div>
-                <div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_reset" aria-keyshortcuts="Escape" data-bind="menuButton: true, click: settingsPanel.cancel">Cancel</button></div>
+                <div><button type="button" class="vivliostyle-menu-button vivliostyle-menu-button-negative" id="vivliostyle-menu-button_cancel" aria-keyshortcuts="Escape" data-bind="menuButton: true, click: settingsPanel.cancel">Cancel</button></div>
               </div>
             </div>
             <aside class="vivliostyle-menu-detail-aside">

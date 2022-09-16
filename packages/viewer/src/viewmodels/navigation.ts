@@ -543,8 +543,8 @@ class Navigation {
     );
 
     if (this.viewer.documentOptions.pageStyle.baseFontSizeSpecified()) {
-      // Update userStylesheet when base font-size is specified
-      this.viewer.documentOptions.updateUserStyleSheetFromCSSText();
+      // Update custom style when base font-size is specified
+      this.viewer.documentOptions.updateCustomStyleSheetFromCSSText();
       this.viewer.loadDocument(this.viewer.documentOptions, this.viewerOptions);
     }
   }

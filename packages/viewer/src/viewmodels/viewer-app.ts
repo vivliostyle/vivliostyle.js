@@ -70,7 +70,9 @@ class ViewerApp {
       disablePrint: flags.includes("p"),
     };
     const disableContextMenu = flags.includes("c");
-    const defaultBookMode = flags.includes("b");
+    // const defaultBookMode = flags.includes("b");
+    // Changed to default true (Issue #992)
+    const defaultBookMode = !flags.includes("k");
     const defaultRenderAllPages = !flags.includes("a");
     const disableScripts = flags.includes("d");
 
@@ -120,11 +122,13 @@ class ViewerApp {
     // Replace deprecated "b" and "x" to "src" & "bookMode"
     const srcUrls = urlParameters.getParameter("src");
     const bUrls = urlParameters.getParameter("b"); // (deprecated) => src & bookMode=true & renderAllPages=false
-    const xUrls = urlParameters.getParameter("x"); // (deprecated) => src
+    const xUrls = urlParameters.getParameter("x"); // (deprecated) => src & bookMode=false
     if (!srcUrls.length) {
       if (bUrls.length) {
         urlParameters.setParameter("src", bUrls[0]);
-        urlParameters.setParameter("bookMode", "true");
+        if (!urlParameters.hasParameter("bookMode")) {
+          urlParameters.setParameter("bookMode", "true");
+        }
         if (!urlParameters.hasParameter("renderAllPages")) {
           urlParameters.setParameter("renderAllPages", "false");
         }
@@ -132,6 +136,9 @@ class ViewerApp {
         xUrls.forEach((x, i) => {
           urlParameters.setParameter("src", x, i);
         });
+        if (!urlParameters.hasParameter("bookMode")) {
+          urlParameters.setParameter("bookMode", "false");
+        }
       }
     }
     // Remove redundant or ineffective URL parameters

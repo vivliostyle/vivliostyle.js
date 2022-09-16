@@ -29,6 +29,8 @@ type Constants = {
   baseLineHeight: string;
   baseFontFamily: string;
   viewerFontSize: number;
+  bleed: string;
+  cropOffset: string;
 };
 
 enum Mode {
@@ -97,6 +99,8 @@ const CONSTANTS: Constants = {
   baseLineHeight: "1.2",
   baseFontFamily: "serif",
   viewerFontSize: 16,
+  bleed: "3mm",
+  cropOffset: "9mm",
 };
 
 class PageStyle {
@@ -127,6 +131,15 @@ class PageStyle {
   baseFontFamily: Observable<string>;
   baseFontFamilySpecified: Observable<boolean>;
   baseFontFamilyImportant: Observable<boolean>;
+  cropMarks: Observable<boolean>;
+  cropMarksImportant: Observable<boolean>;
+  bleed: Observable<string>;
+  bleedSpecified: Observable<boolean>;
+  bleedImportant: Observable<boolean>;
+  cropOffset: Observable<string>;
+  cropOffsetSpecified: Observable<boolean>;
+  cropOffsetImportant: Observable<boolean>;
+  customStyleAsUserStyle: Observable<boolean>;
   allImportant: Observable<boolean>;
   pageOtherStyle: Observable<string>;
   firstPageOtherStyle: Observable<string>;
@@ -175,6 +188,15 @@ class PageStyle {
     this.baseFontFamily = ko.observable(CONSTANTS.baseFontFamily);
     this.baseFontFamilySpecified = ko.observable(false);
     this.baseFontFamilyImportant = ko.observable(false);
+    this.cropMarks = ko.observable(false);
+    this.cropMarksImportant = ko.observable(false);
+    this.bleed = ko.observable(CONSTANTS.bleed);
+    this.bleedSpecified = ko.observable(false);
+    this.bleedImportant = ko.observable(false);
+    this.cropOffset = ko.observable(CONSTANTS.cropOffset);
+    this.cropOffsetSpecified = ko.observable(false);
+    this.cropOffsetImportant = ko.observable(false);
+    this.customStyleAsUserStyle = ko.observable(false);
     this.allImportant = ko.observable(false);
     this.pageOtherStyle = ko.observable("");
     this.firstPageOtherStyle = ko.observable("");
@@ -245,6 +267,21 @@ class PageStyle {
       this.baseFontSizeImportant(allImportant);
       this.baseLineHeightImportant(allImportant);
       this.baseFontFamilyImportant(allImportant);
+      this.cropMarksImportant(allImportant);
+      this.bleedImportant(allImportant);
+      this.cropOffsetImportant(allImportant);
+    });
+
+    this.cropMarks.subscribe((cropMarks) => {
+      if (cropMarks) {
+        // when marks is specified, bleed should also be specified
+        // because the CSS default bleed 6pt is not very good.
+        this.bleedSpecified(true);
+      } else {
+        // when marks is turned off, bleed and cropOffset should also be turned off.
+        this.bleedSpecified(false);
+        this.cropOffsetSpecified(false);
+      }
     });
 
     this.pageStyleRegExp = new RegExp(
@@ -254,21 +291,27 @@ class PageStyle {
         "(?:size:\\s*([^\\s!;{}]+)(?:\\s+([^\\s!;{}]+))?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
         // 5. pageMargin, pageMarginImportant,
         "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
-        // 7. pageOtherStyle,
+        // 7. cropMarks, cropMarksImportant
+        "(?:marks:\\s*(crop\\s+cross)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+        // 9. bleed, bleedImportant
+        "(?:bleed:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+        // 11. cropOffset, cropOffsetImportant
+        "(?:crop-offset:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+        // 13. pageOtherStyle,
         "((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
-        // 8. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
+        // 14. firstPageMarginZero, firstPageMarginZeroImportant, firstPageOtherStyle,
         "(?:@page\\s*:first\\s*\\{\\s*(margin:\\s*0(?:\\w+|%)?\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?((?:[^{}]+|\\{[^{}]*\\})*)\\}\\s*)?" +
-        // 11. forceHtmlBodyMarginZero,
+        // 17. forceHtmlBodyMarginZero,
         "((?:html|:root),\\s*body\\s*\\{\\s*margin:\\s*0(?:\\w+|%)?\\s*!important(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
-        // 12. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
+        // 18. baseFontSize, baseFontSizeImportant, baseLineHeight, baseLineHeightImportant, baseFontFamily, baseFontFamilyImportant, rootOtherStyle,
         "(?:(?:html|:root)\\s*\\{\\s*(?:font-size:\\s*(calc\\([^()]+\\)|[^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:line-height:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?(?:font-family:\\s*([^!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?([^{}]*)\\}\\s*)?" +
         // body {font-size: inherit !important;} etc.
         "(?:body\\s*\\{\\s*(?:[-\\w]+:\\s*inherit\\s*!important(?:;|(?=[\\s{}]))\\s*)+\\}\\s*)?" +
-        // 19. widowsOrphans, widowsOrphansImportant,
+        // 25. widowsOrphans, widowsOrphansImportant,
         "(?:\\*\\s*\\{\\s*widows:\\s*(1|999)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*orphans:\\s*\\19\\s*\\20(?:;|(?=[\\s{}]))\\s*\\}\\s*)?" +
-        // 21. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
+        // 27. imageMaxSizeToFitPage, imageMaxSizeToFitPageImportant, imageKeepAspectRatio, imageKeepAspectRatioImportant,
         "(?:img,\\s*svg\\s*\\{\\s*(max-inline-size:\\s*100%\\s*(!important)?(?:;|(?=[\\s{}]))\\s*max-block-size:\\s*100vb\\s*\\22(?:;|(?=[\\s{}]))\\s*)?(object-fit:\\s*contain\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?\\}\\s*)?" +
-        // 25. afterOtherStyle
+        // 31. afterOtherStyle
         "((?:\\n|.)*)$",
     );
 
@@ -328,6 +371,12 @@ class PageStyle {
         sizeImportant,
         pageMargin,
         pageMarginImportant,
+        cropMarks,
+        cropMarksImportant,
+        bleed,
+        bleedImportant,
+        cropOffset,
+        cropOffsetImportant,
         pageOtherStyle_,
         firstPageMarginZero,
         firstPageMarginZeroImportant,
@@ -412,6 +461,32 @@ class PageStyle {
         else countNotImportant++;
       } else {
         this.pageMarginMode(Mode.Default);
+      }
+      if (cropMarks != null) {
+        this.cropMarks(true);
+        this.cropMarksImportant(!!cropMarksImportant);
+        if (cropMarksImportant) countImportant++;
+        else countNotImportant++;
+      } else {
+        this.cropMarks(false);
+      }
+      if (bleed != null) {
+        this.bleedSpecified(true);
+        this.bleed(bleed);
+        this.bleedImportant(!!bleedImportant);
+        if (bleedImportant) countImportant++;
+        else countNotImportant++;
+      } else {
+        this.bleedSpecified(false);
+      }
+      if (cropOffset != null) {
+        this.cropOffsetSpecified(true);
+        this.cropOffset(cropOffset);
+        this.cropOffsetImportant(!!cropOffsetImportant);
+        if (cropOffsetImportant) countImportant++;
+        else countNotImportant++;
+      } else {
+        this.cropOffsetSpecified(false);
       }
       pageOtherStyle = pageOtherStyle || "";
       this.pageOtherStyle(pageOtherStyle);
@@ -519,6 +594,9 @@ class PageStyle {
     if (
       this.pageSizeMode() != Mode.Default ||
       this.pageMarginMode() != Mode.Default ||
+      this.cropMarks() ||
+      this.bleedSpecified() ||
+      this.cropOffsetSpecified() ||
       this.pageOtherStyle()
     ) {
       cssText += "@page { ";
@@ -560,6 +638,17 @@ class PageStyle {
             throw new Error(`Unknown pageMarginMode ${this.pageMarginMode()}`);
         }
         cssText += `${imp(this.pageMarginImportant())}; `;
+      }
+      if (this.cropMarks()) {
+        cssText += `marks: crop cross${imp(this.cropMarksImportant())}; `;
+      }
+      if (this.bleedSpecified()) {
+        cssText += `bleed: ${this.bleed()}${imp(this.bleedImportant())}; `;
+      }
+      if (this.cropOffsetSpecified()) {
+        cssText += `crop-offset: ${this.cropOffset()}${imp(
+          this.cropOffsetImportant(),
+        )}; `;
       }
       cssText += this.pageOtherStyle();
       cssText += "}\n";
@@ -700,6 +789,15 @@ class PageStyle {
     this.baseFontFamily(other.baseFontFamily());
     this.baseFontFamilySpecified(other.baseFontFamilySpecified());
     this.baseFontFamilyImportant(other.baseFontFamilyImportant());
+    this.cropMarks(other.cropMarks());
+    this.cropMarksImportant(other.cropMarksImportant());
+    this.bleed(other.bleed());
+    this.bleedSpecified(other.bleedSpecified());
+    this.bleedImportant(other.bleedImportant());
+    this.cropOffset(other.cropOffset());
+    this.cropOffsetSpecified(other.cropOffsetSpecified());
+    this.cropOffsetImportant(other.cropOffsetImportant());
+    this.customStyleAsUserStyle(other.customStyleAsUserStyle());
     this.allImportant(other.allImportant());
     this.pageOtherStyle(other.pageOtherStyle());
     this.firstPageOtherStyle(other.firstPageOtherStyle());
@@ -801,6 +899,19 @@ class PageStyle {
     if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant())
       return false;
 
+    if (this.cropMarks() !== other.cropMarks()) return false;
+    if (this.cropMarksImportant() !== other.cropMarksImportant()) return false;
+    if (this.bleed() !== other.bleed()) return false;
+    if (this.bleedSpecified() !== other.bleedSpecified()) return false;
+    if (this.bleedImportant() !== other.bleedImportant()) return false;
+    if (this.cropOffset() !== other.cropOffset()) return false;
+    if (this.cropOffsetSpecified() !== other.cropOffsetSpecified())
+      return false;
+    if (this.cropOffsetImportant() !== other.cropOffsetImportant())
+      return false;
+
+    if (this.customStyleAsUserStyle() !== other.customStyleAsUserStyle())
+      return false;
     if (this.allImportant() !== other.allImportant()) return false;
     if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
     if (this.firstPageOtherStyle() !== other.firstPageOtherStyle())
