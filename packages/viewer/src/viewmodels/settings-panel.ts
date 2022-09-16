@@ -125,7 +125,16 @@ class SettingsPanel {
 
     this.resetCustomStyle = ko.pureComputed({
       read() {
-        return this.state.pageStyle.equivalentTo(this.defaultPageStyle);
+        const changed = !this.state.pageStyle.equivalentTo(
+          this.defaultPageStyle,
+        );
+        if (changed) {
+          return false;
+        }
+        const elem = document.getElementsByName(
+          "vivliostyle-settings_reset-custom-style",
+        )[0] as HTMLInputElement;
+        return elem.checked;
       },
       write(resetCustomStyle) {
         if (resetCustomStyle) {
