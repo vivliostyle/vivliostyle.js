@@ -127,6 +127,7 @@ class PageStyle {
   baseFontFamily: Observable<string>;
   baseFontFamilySpecified: Observable<boolean>;
   baseFontFamilyImportant: Observable<boolean>;
+  customStyleAsUserStyle: Observable<boolean>;
   allImportant: Observable<boolean>;
   pageOtherStyle: Observable<string>;
   firstPageOtherStyle: Observable<string>;
@@ -175,6 +176,7 @@ class PageStyle {
     this.baseFontFamily = ko.observable(CONSTANTS.baseFontFamily);
     this.baseFontFamilySpecified = ko.observable(false);
     this.baseFontFamilyImportant = ko.observable(false);
+    this.customStyleAsUserStyle = ko.observable(false);
     this.allImportant = ko.observable(false);
     this.pageOtherStyle = ko.observable("");
     this.firstPageOtherStyle = ko.observable("");
@@ -700,6 +702,7 @@ class PageStyle {
     this.baseFontFamily(other.baseFontFamily());
     this.baseFontFamilySpecified(other.baseFontFamilySpecified());
     this.baseFontFamilyImportant(other.baseFontFamilyImportant());
+    this.customStyleAsUserStyle(other.customStyleAsUserStyle());
     this.allImportant(other.allImportant());
     this.pageOtherStyle(other.pageOtherStyle());
     this.firstPageOtherStyle(other.firstPageOtherStyle());
@@ -801,6 +804,8 @@ class PageStyle {
     if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant())
       return false;
 
+    if (this.customStyleAsUserStyle() !== other.customStyleAsUserStyle())
+      return false;
     if (this.allImportant() !== other.allImportant()) return false;
     if (this.pageOtherStyle() !== other.pageOtherStyle()) return false;
     if (this.firstPageOtherStyle() !== other.firstPageOtherStyle())
