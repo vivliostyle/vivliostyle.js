@@ -108,13 +108,9 @@ class SettingsPanel {
     this.defaultPageStyle = new PageStyle();
     this.defaultPageStyle.setViewerFontSizeObservable(ko.observable(16));
 
-    ["close", "toggle", "apply", "cancel"].forEach(function (methodName) {
-      this[methodName] = this[methodName].bind(this);
-    }, this);
-
-    messageDialog.visible.subscribe(function (visible) {
+    messageDialog.visible.subscribe((visible) => {
       if (visible) this.close();
-    }, this);
+    });
 
     this.state.bookMode.subscribe((bookMode) => {
       documentOptions.bookMode(bookMode);
@@ -148,17 +144,16 @@ class SettingsPanel {
     });
   }
 
-  close(): boolean {
+  close = (): void => {
     this.opened(false);
     this.pinned(false);
     const viewportElement = document.getElementById(
       "vivliostyle-viewer-viewport",
     );
     if (viewportElement) viewportElement.focus();
-    return true;
-  }
+  };
 
-  toggle(): void {
+  toggle = (): void => {
     if (!this.opened()) {
       if (!this.viewer.tocPinned()) {
         this.viewer.showTOC(false); // Hide TOC box
@@ -188,9 +183,9 @@ class SettingsPanel {
         this.justClicked = false;
       }, 300);
     }
-  }
+  };
 
-  apply(): void {
+  apply = (): void => {
     const customStyleAsUserStyleChanged =
       this.documentOptions.pageStyle.customStyleAsUserStyle() !==
       this.state.pageStyle.customStyleAsUserStyle();
@@ -208,13 +203,13 @@ class SettingsPanel {
     } else {
       this.close();
     }
-  }
+  };
 
-  cancel(): void {
+  cancel = (): void => {
     this.state.viewerOptions.copyFrom(this.viewerOptions);
     this.state.pageStyle.copyFrom(this.documentOptions.pageStyle);
     this.close();
-  }
+  };
 
   focusToFirstItem(outerElemParam?: Element): void {
     const outerElem = outerElemParam || this.settingsToggle;

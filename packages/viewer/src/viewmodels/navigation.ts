@@ -358,88 +358,63 @@ class Navigation {
     });
 
     this.pageSliderMax = this.totalPages;
-
-    [
-      "navigateToPrevious",
-      "navigateToNext",
-      "navigateToLeft",
-      "navigateToRight",
-      "navigateToFirst",
-      "navigateToLast",
-      "zoomIn",
-      "zoomOut",
-      "zoomToActualSize",
-      "toggleFitToScreen",
-      "increaseFontSize",
-      "decreaseFontSize",
-      "defaultFontSize",
-      "onfocusPageNumber",
-      "onmouseupPageSlider",
-      "onwheelPageSlider",
-      "onwheelViewport",
-      "onclickViewport",
-      "toggleTOC",
-      "print",
-    ].forEach((methodName) => {
-      this[methodName] = this[methodName].bind(this);
-    });
   }
 
-  navigateToPrevious(): boolean {
+  navigateToPrevious = (): boolean => {
     if (!this.isNavigateToPreviousDisabled()) {
       this.viewer.navigateToPrevious();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  navigateToNext(): boolean {
+  navigateToNext = (): boolean => {
     if (!this.isNavigateToNextDisabled()) {
       this.viewer.navigateToNext();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  navigateToLeft(): boolean {
+  navigateToLeft = (): boolean => {
     if (!this.isNavigateToLeftDisabled()) {
       this.viewer.navigateToLeft();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  navigateToRight(): boolean {
+  navigateToRight = (): boolean => {
     if (!this.isNavigateToRightDisabled()) {
       this.viewer.navigateToRight();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  navigateToFirst(): boolean {
+  navigateToFirst = (): boolean => {
     if (!this.isNavigateToFirstDisabled()) {
       this.viewer.navigateToFirst();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  navigateToLast(): boolean {
+  navigateToLast = (): boolean => {
     if (!this.isNavigateToLastDisabled()) {
       this.viewer.navigateToLast();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  zoomIn(): boolean {
+  zoomIn = (): boolean => {
     if (!this.isZoomInDisabled()) {
       const zoom = this.viewerOptions.zoom();
       this.viewerOptions.zoom(zoom.zoomIn(this.viewer));
@@ -447,9 +422,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  zoomOut(): boolean {
+  zoomOut = (): boolean => {
     if (!this.isZoomOutDisabled()) {
       const zoom = this.viewerOptions.zoom();
       this.viewerOptions.zoom(zoom.zoomOut(this.viewer));
@@ -457,9 +432,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  zoomToActualSize(): boolean {
+  zoomToActualSize = (): boolean => {
     if (!this.isZoomToActualSizeDisabled()) {
       const zoom = this.viewerOptions.zoom();
       this.viewerOptions.zoom(zoom.zoomToActualSize());
@@ -467,9 +442,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  toggleFitToScreen(): boolean {
+  toggleFitToScreen = (): boolean => {
     if (!this.isToggleFitToScreenDisabled()) {
       const zoom = this.viewerOptions.zoom();
       this.viewerOptions.zoom(zoom.toggleFitToScreen());
@@ -477,9 +452,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  increaseFontSize(): boolean {
+  increaseFontSize = (): boolean => {
     if (!this.isIncreaseFontSizeDisabled()) {
       let fontSize = Number(this.viewerOptions.fontSize());
       // fontSize *= 1.25;
@@ -500,9 +475,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  decreaseFontSize(): boolean {
+  decreaseFontSize = (): boolean => {
     if (!this.isDecreaseFontSizeDisabled()) {
       let fontSize = Number(this.viewerOptions.fontSize());
       // fontSize *= 0.8;
@@ -523,9 +498,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  defaultFontSize(): boolean {
+  defaultFontSize = (): boolean => {
     if (!this.isDefaultFontSizeDisabled()) {
       const fontSize = ViewerOptions.getDefaultValues().fontSize;
       this.viewerOptions.fontSize(fontSize);
@@ -534,7 +509,7 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
   updateFontSizeSettings(): void {
     // Update setting panel "Font Size".
@@ -550,16 +525,16 @@ class Navigation {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onfocusPageNumber(obj: unknown, event: Event): boolean {
+  onfocusPageNumber = (obj: unknown, event: Event): boolean => {
     const inputElem = event.currentTarget as HTMLInputElement;
     window.setTimeout(() => {
       inputElem.setSelectionRange(0, inputElem.value.length);
     }, 0);
     return true;
-  }
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onmouseupPageSlider(obj: unknown, event: MouseEvent): boolean {
+  onmouseupPageSlider = (obj: unknown, event: MouseEvent): boolean => {
     if (this.viewerOptions.renderAllPages()) {
       // already moved in `this.pageSlider.write()`
       return true;
@@ -572,10 +547,10 @@ class Navigation {
     this.viewer.navigateToEPage(epageNav);
 
     return true;
-  }
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onwheelPageSlider(obj: unknown, event: WheelEvent): boolean {
+  onwheelPageSlider = (obj: unknown, event: WheelEvent): boolean => {
     event.preventDefault();
     if (
       this.justPageMovedByWheel ||
@@ -607,9 +582,9 @@ class Navigation {
       }, 166);
     }
     return true;
-  }
+  };
 
-  onwheelViewport(obj: unknown, event: WheelEvent): boolean {
+  onwheelViewport = (obj: unknown, event: WheelEvent): boolean => {
     const viewportElement = document.getElementById(
       "vivliostyle-viewer-viewport",
     );
@@ -624,10 +599,10 @@ class Navigation {
       return true;
     }
     return this.onwheelPageSlider(obj, event);
-  }
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onclickViewport(obj: unknown, event: MouseEvent): boolean {
+  onclickViewport = (obj: unknown, event: MouseEvent): boolean => {
     this.pageNumber();
     if (this.settingsPanel.justClicked) {
       return true;
@@ -642,9 +617,9 @@ class Navigation {
       this.settingsPanel.close();
     }
     return true;
-  }
+  };
 
-  toggleTOC(): boolean {
+  toggleTOC = (): boolean => {
     if (!this.isTOCToggleDisabled()) {
       let intervalID = 0;
 
@@ -695,9 +670,9 @@ class Navigation {
     } else {
       return false;
     }
-  }
+  };
 
-  navigateTOC(key: string): boolean {
+  navigateTOC = (key: string): boolean => {
     const selector =
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) [tabindex='0']," +
       "[data-vivliostyle-toc-box]>*>*>*>*>*:not([hidden]) a[href]:not([tabindex='-1'])";
@@ -788,9 +763,9 @@ class Navigation {
     }
 
     return true;
-  }
+  };
 
-  handleKey(key: string): boolean {
+  handleKey = (key: string): boolean => {
     const isSettingsActive =
       this.settingsPanel.opened() &&
       this.settingsPanel.settingsToggle.contains(document.activeElement);
@@ -896,16 +871,16 @@ class Navigation {
       default:
         return true;
     }
-  }
+  };
 
-  print(): boolean {
+  print = (): boolean => {
     if (!this.isPrintDisabled()) {
       window.print();
       return true;
     } else {
       return false;
     }
-  }
+  };
 }
 
 export default Navigation;

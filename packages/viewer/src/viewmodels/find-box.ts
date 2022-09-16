@@ -68,24 +68,17 @@ class FindBox {
         urlParameters.removeParameter("find");
       }
     });
-
-    ["toggle", "open", "close", "findPrevious", "findNext"].forEach(function (
-      methodName,
-    ) {
-      this[methodName] = this[methodName].bind(this);
-    },
-    this);
   }
 
-  toggle(): boolean {
+  toggle = (): boolean => {
     if (this.opened()) {
       return this.close();
     } else {
       return this.open();
     }
-  }
+  };
 
-  open(): boolean {
+  open = (): boolean => {
     if (this.navigation.isFindBoxDisabled()) {
       return false;
     }
@@ -94,9 +87,9 @@ class FindBox {
       document.getElementById("vivliostyle-find-box").focus();
     }, 0);
     return true;
-  }
+  };
 
-  close(): boolean {
+  close = (): boolean => {
     if (this.navigation.isFindBoxDisabled()) {
       return false;
     }
@@ -106,15 +99,15 @@ class FindBox {
     }
     this.status(FindStatus.Default);
     return true;
-  }
+  };
 
-  findPrevious(): boolean {
+  findPrevious = (): boolean => {
     return this.findSub(true);
-  }
+  };
 
-  findNext(): boolean {
+  findNext = (): boolean => {
     return this.findSub(false);
-  }
+  };
 
   private findSub(backwards: boolean): boolean {
     if (
