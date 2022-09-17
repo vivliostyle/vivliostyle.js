@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.18.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.2...v2.18.0) (2022-09-17)
+
+### Bug Fixes
+
+- **viewer:** problem on author/user stylesheet switch ("Set as user stylesheet" checkbox) ([2799a34](https://github.com/vivliostyle/vivliostyle.js/commit/2799a343a0363ac4a2b4a139738e86968c08f4b6))
+- **viewer:** tweak Reset Custom Style checkbox behavior ([9c96ccb](https://github.com/vivliostyle/vivliostyle.js/commit/9c96ccb8031f79f1a87e8c639e6dc86212bcd394))
+- **viewer:** unbound this error "Cannot set properties of undefined" ([2505458](https://github.com/vivliostyle/vivliostyle.js/commit/2505458462692905de63f9b23afda4eb54bfc9c6))
+
+### Features
+
+- **viewer:** add crop marks setting ([1d0834b](https://github.com/vivliostyle/vivliostyle.js/commit/1d0834b778f41fcb65553d043d3de30a424a0aea)), closes [#993](https://github.com/vivliostyle/vivliostyle.js/issues/993)
+- **viewer:** change "User Style" to "Custom Style" and treat it as an author stylesheet by default ([bdb26d4](https://github.com/vivliostyle/vivliostyle.js/commit/bdb26d474f803eb44c9f09e2489dcda668231396)), closes [#991](https://github.com/vivliostyle/vivliostyle.js/issues/991)
+- **viewer:** set bookMode=true as default ([5411264](https://github.com/vivliostyle/vivliostyle.js/commit/5411264648341144997f1d60a44f218a13625b42)), closes [#992](https://github.com/vivliostyle/vivliostyle.js/issues/992)
+
 ## [2.17.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.1...v2.17.2) (2022-08-14)
 
 **Note:** Version bump only for package @vivliostyle/viewer
