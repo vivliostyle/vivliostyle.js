@@ -797,7 +797,6 @@ class PageStyle {
     this.cropOffset(other.cropOffset());
     this.cropOffsetSpecified(other.cropOffsetSpecified());
     this.cropOffsetImportant(other.cropOffsetImportant());
-    this.customStyleAsUserStyle(other.customStyleAsUserStyle());
     this.allImportant(other.allImportant());
     this.pageOtherStyle(other.pageOtherStyle());
     this.firstPageOtherStyle(other.firstPageOtherStyle());
@@ -808,6 +807,9 @@ class PageStyle {
     if (this.viewerFontSize && other.viewerFontSize) {
       this.viewerFontSize(other.viewerFontSize());
     }
+    // This must be last because DocumentOptions.updateCustomStyleSheetFromCSSText()
+    // is invoked by changes of other values and it uses customStyleAsUserStyle value.
+    this.customStyleAsUserStyle(other.customStyleAsUserStyle());
   }
 
   equivalentTo(other: PageStyle): boolean {
