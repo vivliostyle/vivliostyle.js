@@ -186,8 +186,8 @@ function getAllFontFamilyList(
   }
   // Find all font-family values in inline style.
   for (const elem of srcDocument.querySelectorAll("[style]")) {
-    if (elem instanceof HTMLElement && elem.style.fontFamily) {
-      fontFamilySet[elem.style.fontFamily] = true;
+    if ((elem as HTMLElement).style?.fontFamily) {
+      fontFamilySet[(elem as HTMLElement).style.fontFamily] = true;
     }
   }
   return Object.keys(fontFamilySet).join(",");

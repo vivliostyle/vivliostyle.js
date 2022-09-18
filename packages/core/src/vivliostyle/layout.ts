@@ -582,8 +582,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         let firstLetterLength = r ? r[0].length : 0;
         if (
           !r &&
-          position.sourceNode instanceof Text &&
-          position.sourceNode.nextSibling instanceof Text &&
+          position.sourceNode?.nodeType === 3 &&
+          position.sourceNode.nextSibling?.nodeType === 3 &&
           text === position.sourceNode.textContent
         ) {
           // The text '“Foo' may be split to '“' and 'Foo'
@@ -2151,7 +2151,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             endNotReached = false;
           }
         }
-        if (!(node instanceof Element)) {
+        const element = node.nodeType === 1 ? (node as Element) : null;
+        if (!element) {
           if (!haveStart) {
             if (node.parentNode == null) {
               endNotReached = false;
@@ -2163,19 +2164,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           lastGood = node;
         } else if (wentUp) {
           wentUp = false;
-        } else if (LayoutHelper.isSpecial(node)) {
+        } else if (LayoutHelper.isSpecial(element)) {
           // Skip special
           seekRange = !haveStart;
         } else if (
-          /^r(uby|[bt]c?)$/.test(node.localName) ||
+          /^r(uby|[bt]c?)$/.test(element.localName) ||
           LayoutHelper.isSpecialInlineDisplay(
-            this.clientLayout.getElementComputedStyle(node).display,
+            this.clientLayout.getElementComputedStyle(element).display,
           )
         ) {
           // ruby, inline-block, etc.
           seekRange = !haveStart;
           if (seekRange) {
-            if (node.localName === "ruby" && node.firstChild) {
+            if (element.localName === "ruby" && node.firstChild) {
               // Fix for issue #985
               node = node.firstChild;
             }
@@ -2291,7 +2292,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let clonedPaddingBorder = 0;
     nodeContext.walkUpBlocks((block) => {
       if (block.inheritedProps["box-decoration-break"] === "clone") {
-        Asserts.assert(block.viewNode instanceof Element);
+        Asserts.assert(block.viewNode?.nodeType === 1);
         const paddingBorders = this.getComputedPaddingBorder(
           block.viewNode as Element,
         );

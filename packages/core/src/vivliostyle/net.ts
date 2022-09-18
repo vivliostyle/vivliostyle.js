@@ -77,7 +77,7 @@ export function ajax(
           response.contentType = (request.responseXML as any).contentType;
         } else if (
           (!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
-          request.response instanceof HTMLDocument
+          request.response instanceof Document
         ) {
           response.responseXML = request.response;
           response.contentType = (request.response as any).contentType;
