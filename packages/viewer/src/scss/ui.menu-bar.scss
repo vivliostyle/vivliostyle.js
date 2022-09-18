@@ -528,6 +528,9 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
           box-sizing: border-box;
           padding: 0 2px;
           width: 5.5em;
+          &[name="vivliostyle-settings_crop-marks"] {
+            width: 7em;
+          }
           &[name="vivliostyle-settings_page-margin_custom"] {
             width: 9em;
           }

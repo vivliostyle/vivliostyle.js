@@ -29,6 +29,7 @@ type Constants = {
   baseLineHeight: string;
   baseFontFamily: string;
   viewerFontSize: number;
+  cropMarks: string;
   bleed: string;
   cropOffset: string;
 };
@@ -99,6 +100,7 @@ const CONSTANTS: Constants = {
   baseLineHeight: "1.2",
   baseFontFamily: "serif",
   viewerFontSize: 16,
+  cropMarks: "crop cross",
   bleed: "3mm",
   cropOffset: "9mm",
 };
@@ -131,7 +133,8 @@ class PageStyle {
   baseFontFamily: Observable<string>;
   baseFontFamilySpecified: Observable<boolean>;
   baseFontFamilyImportant: Observable<boolean>;
-  cropMarks: Observable<boolean>;
+  cropMarks: Observable<string>;
+  cropMarksSpecified: Observable<boolean>;
   cropMarksImportant: Observable<boolean>;
   bleed: Observable<string>;
   bleedSpecified: Observable<boolean>;
@@ -188,7 +191,8 @@ class PageStyle {
     this.baseFontFamily = ko.observable(CONSTANTS.baseFontFamily);
     this.baseFontFamilySpecified = ko.observable(false);
     this.baseFontFamilyImportant = ko.observable(false);
-    this.cropMarks = ko.observable(false);
+    this.cropMarks = ko.observable(CONSTANTS.cropMarks);
+    this.cropMarksSpecified = ko.observable(false);
     this.cropMarksImportant = ko.observable(false);
     this.bleed = ko.observable(CONSTANTS.bleed);
     this.bleedSpecified = ko.observable(false);
@@ -272,8 +276,8 @@ class PageStyle {
       this.cropOffsetImportant(allImportant);
     });
 
-    this.cropMarks.subscribe((cropMarks) => {
-      if (cropMarks) {
+    this.cropMarksSpecified.subscribe((cropMarksSpecified) => {
+      if (cropMarksSpecified) {
         // when marks is specified, bleed should also be specified
         // because the CSS default bleed 6pt is not very good.
         this.bleedSpecified(true);
@@ -292,7 +296,7 @@ class PageStyle {
         // 5. pageMargin, pageMarginImportant,
         "(?:margin:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
         // 7. cropMarks, cropMarksImportant
-        "(?:marks:\\s*(crop\\s+cross)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
+        "(?:marks:\\s*([^\\s!;{}]+(?:\\s+[^\\s!;{}]+)?)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
         // 9. bleed, bleedImportant
         "(?:bleed:\\s*([^\\s!;{}]+)\\s*(!important)?(?:;|(?=[\\s{}]))\\s*)?" +
         // 11. cropOffset, cropOffsetImportant
@@ -463,12 +467,13 @@ class PageStyle {
         this.pageMarginMode(Mode.Default);
       }
       if (cropMarks != null) {
-        this.cropMarks(true);
+        this.cropMarksSpecified(true);
+        this.cropMarks(cropMarks);
         this.cropMarksImportant(!!cropMarksImportant);
         if (cropMarksImportant) countImportant++;
         else countNotImportant++;
       } else {
-        this.cropMarks(false);
+        this.cropMarksSpecified(false);
       }
       if (bleed != null) {
         this.bleedSpecified(true);
@@ -594,7 +599,7 @@ class PageStyle {
     if (
       this.pageSizeMode() != Mode.Default ||
       this.pageMarginMode() != Mode.Default ||
-      this.cropMarks() ||
+      this.cropMarksSpecified() ||
       this.bleedSpecified() ||
       this.cropOffsetSpecified() ||
       this.pageOtherStyle()
@@ -639,8 +644,10 @@ class PageStyle {
         }
         cssText += `${imp(this.pageMarginImportant())}; `;
       }
-      if (this.cropMarks()) {
-        cssText += `marks: crop cross${imp(this.cropMarksImportant())}; `;
+      if (this.cropMarksSpecified()) {
+        cssText += `marks: ${this.cropMarks()}${imp(
+          this.cropMarksImportant(),
+        )}; `;
       }
       if (this.bleedSpecified()) {
         cssText += `bleed: ${this.bleed()}${imp(this.bleedImportant())}; `;
@@ -790,6 +797,7 @@ class PageStyle {
     this.baseFontFamilySpecified(other.baseFontFamilySpecified());
     this.baseFontFamilyImportant(other.baseFontFamilyImportant());
     this.cropMarks(other.cropMarks());
+    this.cropMarksSpecified(other.cropMarksSpecified());
     this.cropMarksImportant(other.cropMarksImportant());
     this.bleed(other.bleed());
     this.bleedSpecified(other.bleedSpecified());
@@ -901,13 +909,16 @@ class PageStyle {
     if (this.baseFontFamilyImportant() !== other.baseFontFamilyImportant())
       return false;
 
-    if (this.cropMarks() !== other.cropMarks()) return false;
+    if (this.cropMarksSpecified() !== other.cropMarksSpecified()) return false;
+    if (this.cropMarksSpecified() && this.cropMarks() !== other.cropMarks())
+      return false;
     if (this.cropMarksImportant() !== other.cropMarksImportant()) return false;
-    if (this.bleed() !== other.bleed()) return false;
     if (this.bleedSpecified() !== other.bleedSpecified()) return false;
+    if (this.bleedSpecified() && this.bleed() !== other.bleed()) return false;
     if (this.bleedImportant() !== other.bleedImportant()) return false;
-    if (this.cropOffset() !== other.cropOffset()) return false;
     if (this.cropOffsetSpecified() !== other.cropOffsetSpecified())
+      return false;
+    if (this.cropOffsetSpecified() && this.cropOffset() !== other.cropOffset())
       return false;
     if (this.cropOffsetImportant() !== other.cropOffsetImportant())
       return false;
