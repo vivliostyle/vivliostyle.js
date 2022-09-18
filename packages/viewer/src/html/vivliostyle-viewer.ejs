@@ -156,7 +156,11 @@
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_crop-marks" aria-keyshortcuts="O">
                   <legend class="vivliostyle-menu-detail-group-heading">Crop Marks</legend>
                   <ul class="vivliostyle-menu-detail-group">
-                    <li><label><input type="checkbox" name="vivliostyle-settings_crop-marks" data-bind="checked: settingsPanel.state.pageStyle.cropMarks" /> <span>Print crop marks</span></label>
+                    <li>
+                      <div>
+                        <label><input type="checkbox" name="vivliostyle-settings_crop-marks-specified" data-bind="checked: settingsPanel.state.pageStyle.cropMarksSpecified" /> <span>Crop marks:</span></label>
+                        <span class="vivliostyle-menu-disabled" data-bind="css: {'vivliostyle-menu-disabled': !settingsPanel.state.pageStyle.cropMarksSpecified()}, click: ()=>{settingsPanel.state.pageStyle.cropMarksSpecified(true);return true;}"><input type="text" autocomplete="off" name="vivliostyle-settings_crop-marks" data-bind="value: settingsPanel.state.pageStyle.cropMarks, attr: {tabindex: settingsPanel.state.pageStyle.cropMarksSpecified()?0:-1}" /></span>
+                      </div>
                       <ul class="vivliostyle-menu-detail-group">
                         <li>
                           <div>
