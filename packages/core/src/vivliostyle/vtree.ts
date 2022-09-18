@@ -1301,7 +1301,7 @@ export class ContentPropertyHandler extends Css.Visitor {
 
   private visitStrInner(str: string, node?: Node | null) {
     if (!node) {
-      if (this.elem.lastChild instanceof Text) {
+      if (this.elem.lastChild?.nodeType === 3) {
         this.elem.lastChild.textContent += str;
         return;
       }

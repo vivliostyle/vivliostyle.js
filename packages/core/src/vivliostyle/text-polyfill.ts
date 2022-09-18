@@ -369,7 +369,7 @@ class TextSpacingPolyfill {
         prevNode = p.sourceNode?.previousSibling;
         if (prevNode) {
           if (
-            prevNode instanceof Text &&
+            prevNode.nodeType === 3 &&
             /^\s*$/.test(prevNode.textContent) &&
             p.whitespace !== Vtree.Whitespace.PRESERVE
           ) {
@@ -383,11 +383,11 @@ class TextSpacingPolyfill {
       }
 
       while (prevNode) {
-        if (prevNode instanceof Element) {
-          if (prevNode.localName === "br") {
+        if (prevNode.nodeType === 1) {
+          if ((prevNode as Element).localName === "br") {
             return true;
           }
-        } else if (prevNode instanceof Text) {
+        } else if (prevNode.nodeType === 3) {
           if (p.whitespace === Vtree.Whitespace.PRESERVE) {
             if (/\n$/.test(prevNode.textContent)) {
               return true;
@@ -448,10 +448,10 @@ class TextSpacingPolyfill {
         function checkIfFirstAfterForcedLineBreak(
           prevP: Vtree.NodeContext,
         ): boolean {
-          if (prevP.viewNode instanceof Element) {
-            return prevP.viewNode.localName === "br";
+          if (prevP.viewNode?.nodeType === 1) {
+            return (prevP.viewNode as Element).localName === "br";
           }
-          if (prevP.viewNode instanceof Text) {
+          if (prevP.viewNode?.nodeType === 3) {
             if (prevP.whitespace === Vtree.Whitespace.PRESERVE) {
               if (/\n$/.test(prevP.viewNode.textContent)) {
                 return true;
@@ -461,7 +461,10 @@ class TextSpacingPolyfill {
                 return true;
               }
             }
-            if (prevP.viewNode.previousElementSibling?.localName === "br") {
+            if (
+              (prevP.viewNode as Element).previousElementSibling?.localName ===
+              "br"
+            ) {
               return Vtree.canIgnore(prevP.viewNode, prevP.whitespace);
             }
           }
@@ -471,10 +474,10 @@ class TextSpacingPolyfill {
         function checkIfLastBeforeForcedLineBreak(
           nextP: Vtree.NodeContext,
         ): boolean {
-          if (nextP.viewNode instanceof Element) {
-            return nextP.viewNode.localName === "br";
+          if (nextP.viewNode?.nodeType === 1) {
+            return (nextP.viewNode as Element).localName === "br";
           }
-          if (nextP.viewNode instanceof Text) {
+          if (nextP.viewNode?.nodeType === 3) {
             if (nextP.whitespace === Vtree.Whitespace.PRESERVE) {
               if (/^\n/.test(nextP.viewNode.textContent)) {
                 return true;
@@ -484,7 +487,9 @@ class TextSpacingPolyfill {
                 return true;
               }
             }
-            if (nextP.viewNode.nextElementSibling?.localName === "br") {
+            if (
+              (nextP.viewNode as Element).nextElementSibling?.localName === "br"
+            ) {
               return Vtree.canIgnore(nextP.viewNode, nextP.whitespace);
             }
           }
@@ -507,9 +512,9 @@ class TextSpacingPolyfill {
           }
           if (
             (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
-            (prevP.viewNode instanceof Element &&
-              (prevP.viewNode.localName === "br" ||
-                embeddedContentTags[prevP.viewNode.localName]))
+            (prevP.viewNode?.nodeType === 1 &&
+              ((prevP.viewNode as Element).localName === "br" ||
+                embeddedContentTags[(prevP.viewNode as Element).localName]))
           ) {
             break;
           }
@@ -535,9 +540,9 @@ class TextSpacingPolyfill {
           }
           if (
             (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
-            (nextP.viewNode instanceof Element &&
-              (nextP.viewNode.localName === "br" ||
-                embeddedContentTags[nextP.viewNode.localName]))
+            (nextP.viewNode?.nodeType === 1 &&
+              ((nextP.viewNode as Element).localName === "br" ||
+                embeddedContentTags[(nextP.viewNode as Element).localName]))
           ) {
             break;
           }

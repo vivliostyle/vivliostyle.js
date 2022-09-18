@@ -737,8 +737,15 @@ export class ViewFactory
       frame.finish(false);
       return frame.result();
     }
-    if (Scripts.allowScripts && element instanceof HTMLScriptElement) {
-      Scripts.loadScript(element, this.viewport.window).thenFinish(frame);
+    if (
+      Scripts.allowScripts &&
+      element.localName === "script" &&
+      element.namespaceURI === Base.NS.XHTML
+    ) {
+      Scripts.loadScript(
+        element as HTMLScriptElement,
+        this.viewport.window,
+      ).thenFinish(frame);
       return frame.result();
     }
     let display = computedStyle["display"] as Css.Ident;
@@ -2146,7 +2153,7 @@ export class ViewFactory
     if (fontSizeInPx >= minFontSizeInPx) {
       return false;
     }
-    if (!(target instanceof HTMLElement && "zoom" in target.style)) {
+    if ((target as HTMLElement).style?.["zoom"] === undefined) {
       return false;
     }
     const zoom = fontSizeInPx / minFontSizeInPx;
@@ -2301,7 +2308,7 @@ export class ViewFactory
         const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
         if (!boxDecorationBreak || boxDecorationBreak === "slice") {
           const elem = block.viewNode as Element;
-          Asserts.assert(elem instanceof Element);
+          Asserts.assert(elem.nodeType === 1);
           if (block.vertical) {
             Base.setCSSProperty(elem, "padding-left", "0");
             Base.setCSSProperty(elem, "border-left", "none");
