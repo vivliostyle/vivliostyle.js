@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.0...v2.18.1) (2022-09-18)
+
+### Bug Fixes
+
+- **viewer:** crop marks values (e.g., crop cross) should be able to be specified ([233ce43](https://github.com/vivliostyle/vivliostyle.js/commit/233ce430408faeb8a0152fac609fe64243c03433))
+
 # [2.18.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.2...v2.18.0) (2022-09-17)
 
 ### Bug Fixes

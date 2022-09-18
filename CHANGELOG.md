@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.0...v2.18.1) (2022-09-18)
+
+### Bug Fixes
+
+- DOMException error caused by wrong `instanceof Element` usage ([d959b95](https://github.com/vivliostyle/vivliostyle.js/commit/d959b9558dae6b9759fd7d7e654b4f38b600f2d7)), closes [#1000](https://github.com/vivliostyle/vivliostyle.js/issues/1000)
+- **viewer:** crop marks values (e.g., crop cross) should be able to be specified ([233ce43](https://github.com/vivliostyle/vivliostyle.js/commit/233ce430408faeb8a0152fac609fe64243c03433))
+
 # [2.18.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.2...v2.18.0) (2022-09-17)
 
 ### Bug Fixes
