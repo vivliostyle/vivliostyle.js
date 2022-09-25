@@ -703,9 +703,10 @@ class TextSpacingPolyfill {
       const fontSize = parseFloat(
         document.defaultView.getComputedStyle(outerElem).fontSize,
       );
+      const fullWidthThreshold = fontSize * 0.7;
       const isFullWidth =
         (vertical ? innerElem.offsetHeight : innerElem.offsetWidth) >
-        fontSize * 0.7;
+        fullWidthThreshold;
 
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
@@ -724,7 +725,13 @@ class TextSpacingPolyfill {
             prevNode &&
             /[\p{Ps}\p{Pi}\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]\p{M}*$/u.test(
               prevNode.textContent,
-            )
+            ) &&
+            // exclude non-fullwidth closing punctuations (Issue #1003)
+            (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevNode.textContent) ||
+              (prevNode.parentElement.localName === "viv-ts-inner" &&
+                (vertical
+                  ? prevNode.parentElement.offsetHeight
+                  : prevNode.parentElement.offsetWidth) > fullWidthThreshold))
           ) {
             outerElem.className = "viv-ts-trim";
           } else {
