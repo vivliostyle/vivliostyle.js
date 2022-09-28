@@ -788,6 +788,16 @@ class Navigation {
       !isPageNumberInput &&
       viewportElement != document.activeElement;
 
+    if (
+      !isTOCActive &&
+      viewportElement != document.activeElement &&
+      viewportElement.contains(document.activeElement)
+    ) {
+      // Disable shortcut keys when an input box exists in document
+      // and that is activated.
+      return true;
+    }
+
     switch (key) {
       case "+":
         return isPageNumberInput || !this.increaseFontSize();
