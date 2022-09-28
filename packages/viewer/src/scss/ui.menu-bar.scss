@@ -701,12 +701,12 @@ $animation-FLIP: FLIP 2s ease 0s infinite normal;
             > #vivliostyle-settings_reset-custom-style {
               max-height: 2em;
             }
-            > #vivliostyle-settings_apply-or-cancel {
-              position: sticky;
-              bottom: 0;
-              background: $menu-bg-color;
-              padding: 4px;
-            }
+          }
+          > #vivliostyle-settings_apply-or-cancel {
+            position: sticky;
+            bottom: 0;
+            background: $menu-bg-color;
+            padding: 4px;
           }
         }
         > .vivliostyle-menu-detail-aside {
