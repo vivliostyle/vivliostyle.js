@@ -1938,7 +1938,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
 
         // Text-spacing etc. must be done before calculating edge. (Issue #898)
-        this.postLayoutBlock(nodeContext, checkPoints);
+        this.postLayoutBlock(resNodeContext, checkPoints);
 
         // Record the height
         // TODO: should this be done after first-line calculation?
