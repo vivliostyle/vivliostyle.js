@@ -708,6 +708,10 @@ class TextSpacingPolyfill {
         (vertical ? innerElem.offsetHeight : innerElem.offsetWidth) >
         fullWidthThreshold;
 
+      function linePosition(): number {
+        return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
+      }
+
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
           if (hangingFirst) {
@@ -734,8 +738,12 @@ class TextSpacingPolyfill {
                   : prevNode.parentElement.offsetWidth) > fullWidthThreshold))
           ) {
             outerElem.className = "viv-ts-trim";
-          } else {
-            outerElem.className = "viv-ts-auto";
+          } else if (textSpacing.trimStart && isAtStartOfLine()) {
+            const linePos = linePosition();
+            outerElem.className = "viv-ts-trim";
+            if (linePos !== linePosition()) {
+              outerElem.className = "viv-ts-auto";
+            }
           }
         } else if (tagName === "viv-ts-close") {
           if (hangingLast) {
@@ -774,11 +782,13 @@ class TextSpacingPolyfill {
                 outerElem.className = "";
               }
             } else if (
-              atEndNoHang
-                ? textSpacing.trimEnd && !textSpacing.allowEnd
-                : !isAtEndOfLine()
+              atEndNoHang &&
+              textSpacing.trimEnd &&
+              !textSpacing.allowEnd
             ) {
               outerElem.className = "viv-ts-auto";
+            } else if (!atEndNoHang && !isAtEndOfLine()) {
+              outerElem.className = "";
             } else if (!atEnd && hangingPunctuation.allowEnd) {
               if (!textSpacing.trimEnd || textSpacing.allowEnd) {
                 outerElem.className = "viv-ts-space";
@@ -800,10 +810,18 @@ class TextSpacingPolyfill {
               }
             }
           } else if (textSpacing.trimEnd) {
-            if (textSpacing.allowEnd && isAtEndOfLine()) {
-              outerElem.className = "viv-ts-space";
+            if (isAtEndOfLine()) {
+              if (textSpacing.allowEnd) {
+                outerElem.className = "viv-ts-space";
+              } else {
+                outerElem.className = "viv-ts-auto";
+              }
             } else {
+              const linePos = linePosition();
               outerElem.className = "viv-ts-auto";
+              if (linePos === linePosition()) {
+                outerElem.className = "";
+              }
             }
           }
         }
