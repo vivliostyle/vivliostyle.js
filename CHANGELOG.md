@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.1...v2.18.2) (2022-09-30)
+
+### Bug Fixes
+
+- **viewer:** Apply and Cancel buttons in Settings menu should not be scrolled out ([2df1b74](https://github.com/vivliostyle/vivliostyle.js/commit/2df1b7449dd78ae30c0d3a45a1b90035dcda67c7))
+- **viewer:** disable shortcut keys when an input box exists in document and that is activated ([0eedcc0](https://github.com/vivliostyle/vivliostyle.js/commit/0eedcc0510ca862753b0aa6f6474d06a5d4ce8e4))
+- wrong text-spacing when non-fullwidth closing and fullwidth opening brackets are adjacent ([331322b](https://github.com/vivliostyle/vivliostyle.js/commit/331322b63b8105e3e73eb53f5d2028b1a2e3efbe)), closes [#1003](https://github.com/vivliostyle/vivliostyle.js/issues/1003)
+- wrong text-spacing with fullwidth punctuations in some edge cases ([6a79482](https://github.com/vivliostyle/vivliostyle.js/commit/6a794827e3f84b16659bb209d9ada7fe195b4582)), closes [#1005](https://github.com/vivliostyle/vivliostyle.js/issues/1005) [#1006](https://github.com/vivliostyle/vivliostyle.js/issues/1006)
+- wrong text-spacing:space-first and hanging-punctuation:first at page break inside paragraph ([ddd6d6c](https://github.com/vivliostyle/vivliostyle.js/commit/ddd6d6c93afca7662023110d92acbb716dfa94fd)), closes [#1008](https://github.com/vivliostyle/vivliostyle.js/issues/1008)
+
 ## [2.18.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.0...v2.18.1) (2022-09-18)
 
 ### Bug Fixes

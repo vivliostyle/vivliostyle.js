@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.1...v2.18.2) (2022-09-30)
+
+### Bug Fixes
+
+- **viewer:** Apply and Cancel buttons in Settings menu should not be scrolled out ([2df1b74](https://github.com/vivliostyle/vivliostyle.js/commit/2df1b7449dd78ae30c0d3a45a1b90035dcda67c7))
+- **viewer:** disable shortcut keys when an input box exists in document and that is activated ([0eedcc0](https://github.com/vivliostyle/vivliostyle.js/commit/0eedcc0510ca862753b0aa6f6474d06a5d4ce8e4))
+
 ## [2.18.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.0...v2.18.1) (2022-09-18)
 
 ### Bug Fixes
