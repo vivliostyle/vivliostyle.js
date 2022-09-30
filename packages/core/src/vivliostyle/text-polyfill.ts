@@ -740,9 +740,10 @@ class TextSpacingPolyfill {
             outerElem.className = "viv-ts-trim";
           } else if (textSpacing.trimStart && isAtStartOfLine()) {
             const linePos = linePosition();
-            outerElem.className = "viv-ts-trim";
-            if (linePos !== linePosition()) {
-              outerElem.className = "viv-ts-auto";
+            outerElem.className = "viv-ts-auto";
+            if (linePos === linePosition() && !isAtStartOfLine()) {
+              // workaround for issues #1005 and #1010
+              outerElem.className = "viv-ts-trim";
             }
           }
         } else if (tagName === "viv-ts-close") {
