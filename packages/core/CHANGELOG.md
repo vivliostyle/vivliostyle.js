@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.2...v2.18.3) (2022-09-30)
+
+### Bug Fixes
+
+- [Regression] wrong text-spacing with fullwidth opening brackets near end of line ([667b219](https://github.com/vivliostyle/vivliostyle.js/commit/667b2199c59e97aa3962420d0bbab0638cc71695)), closes [#1010](https://github.com/vivliostyle/vivliostyle.js/issues/1010)
+
 ## [2.18.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.1...v2.18.2) (2022-09-30)
 
 ### Bug Fixes
