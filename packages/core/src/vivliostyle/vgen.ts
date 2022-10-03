@@ -568,9 +568,11 @@ export class ViewFactory
               new Css.Numeric(this.context.rootFontSize, "px"),
               value.priority,
             );
-            continue;
+          } else if (Css.isCustomPropName(name)) {
+            props[name] = value;
+          } else {
+            props[name] = value.filterValue(inheritanceVisitor);
           }
-          props[name] = value.filterValue(inheritanceVisitor);
         }
       }
     }

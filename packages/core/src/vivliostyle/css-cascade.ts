@@ -589,12 +589,6 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         this.getFontSize(),
         this.context,
       );
-    } else if (numeric.unit == "%") {
-      if (this.propName === "line-height") {
-        return numeric;
-      }
-      const unit = this.propName.match(/height|^(top|bottom)$/) ? "vh" : "vw";
-      return new Css.Numeric(numeric.num, unit);
     }
     return numeric;
   }
