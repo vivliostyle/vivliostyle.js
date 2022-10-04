@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.2...v2.18.3) (2022-09-30)
+
+### Bug Fixes
+
+- [Regression] wrong text-spacing with fullwidth opening brackets near end of line ([667b219](https://github.com/vivliostyle/vivliostyle.js/commit/667b2199c59e97aa3962420d0bbab0638cc71695)), closes [#1010](https://github.com/vivliostyle/vivliostyle.js/issues/1010)
+
+## [2.18.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.1...v2.18.2) (2022-09-30)
+
+### Bug Fixes
+
+- wrong text-spacing when non-fullwidth closing and fullwidth opening brackets are adjacent ([331322b](https://github.com/vivliostyle/vivliostyle.js/commit/331322b63b8105e3e73eb53f5d2028b1a2e3efbe)), closes [#1003](https://github.com/vivliostyle/vivliostyle.js/issues/1003)
+- wrong text-spacing with fullwidth punctuations in some edge cases ([6a79482](https://github.com/vivliostyle/vivliostyle.js/commit/6a794827e3f84b16659bb209d9ada7fe195b4582)), closes [#1005](https://github.com/vivliostyle/vivliostyle.js/issues/1005) [#1006](https://github.com/vivliostyle/vivliostyle.js/issues/1006)
+- wrong text-spacing:space-first and hanging-punctuation:first at page break inside paragraph ([ddd6d6c](https://github.com/vivliostyle/vivliostyle.js/commit/ddd6d6c93afca7662023110d92acbb716dfa94fd)), closes [#1008](https://github.com/vivliostyle/vivliostyle.js/issues/1008)
+
+## [2.18.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.0...v2.18.1) (2022-09-18)
+
+### Bug Fixes
+
+- DOMException error caused by wrong `instanceof Element` usage ([d959b95](https://github.com/vivliostyle/vivliostyle.js/commit/d959b9558dae6b9759fd7d7e654b4f38b600f2d7)), closes [#1000](https://github.com/vivliostyle/vivliostyle.js/issues/1000)
+
+# [2.18.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.2...v2.18.0) (2022-09-17)
+
+### Bug Fixes
+
+- error with `<object>` tag ([9e9565f](https://github.com/vivliostyle/vivliostyle.js/commit/9e9565f49288e58adcede797029c87cbc0f1236f)), closes [#995](https://github.com/vivliostyle/vivliostyle.js/issues/995)
+- errors on the Acid2 Browser Test ([849a604](https://github.com/vivliostyle/vivliostyle.js/commit/849a6048572f400deacfee09070247b3d8436eac))
+- failed some of the css-variables tests ([5d0f324](https://github.com/vivliostyle/vivliostyle.js/commit/5d0f3246e1c9b91af6f67427a268409848e20ed9))
+- incorrect column-rule positioning in vertical writing mode ([3cc0e01](https://github.com/vivliostyle/vivliostyle.js/commit/3cc0e010eb0c41f9ffb7f3c4d34d214b573d5860)), closes [#978](https://github.com/vivliostyle/vivliostyle.js/issues/978)
+- unnecessary page break caused by ruby elements ([21eb17c](https://github.com/vivliostyle/vivliostyle.js/commit/21eb17c4b1ef5c72f6695c2166c70a76aeb60373)), closes [#987](https://github.com/vivliostyle/vivliostyle.js/issues/987)
+- valid CSS rules ignored after parsing error with invalid or unsupported CSS rule ([5e76ed5](https://github.com/vivliostyle/vivliostyle.js/commit/5e76ed5d49c2f4b4c06c69619df27e83429c6a54)), closes [#597](https://github.com/vivliostyle/vivliostyle.js/issues/597) [#976](https://github.com/vivliostyle/vivliostyle.js/issues/976)
+- wrong cascading on shorthand property with CSS variable ([2ee7927](https://github.com/vivliostyle/vivliostyle.js/commit/2ee792705c7598be7660ac590872329f2fcde17d)), closes [#979](https://github.com/vivliostyle/vivliostyle.js/issues/979)
+- wrong cascading with CSS !important ([fb1dae2](https://github.com/vivliostyle/vivliostyle.js/commit/fb1dae26981827ae099e27967625c9d2abb59da3)), closes [#986](https://github.com/vivliostyle/vivliostyle.js/issues/986)
+- wrong text justification at last line of page caused by consecutive ruby elements ([ad26952](https://github.com/vivliostyle/vivliostyle.js/commit/ad2695206e796617f2712e5bfe4b92057fbaae27)), closes [#985](https://github.com/vivliostyle/vivliostyle.js/issues/985)
+
+## [2.17.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.1...v2.17.2) (2022-08-14)
+
+### Bug Fixes
+
+- Incorrect behavior of ::first-letter and ::first-line selectors ([adca8ef](https://github.com/vivliostyle/vivliostyle.js/commit/adca8efaecb2f05ba055054dfad107253678f256)), closes [#566](https://github.com/vivliostyle/vivliostyle.js/issues/566) [#586](https://github.com/vivliostyle/vivliostyle.js/issues/586)
+
 ## [2.17.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.17.0...v2.17.1) (2022-08-09)
 
 ### Bug Fixes

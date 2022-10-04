@@ -18,6 +18,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DocumentOptions as CoreDocumentOptions } from "@vivliostyle/core";
 import ko, { Observable } from "knockout";
 
 import PageStyle from "./page-style";
@@ -27,7 +28,7 @@ import stringUtil from "../utils/string-util";
 function getDocumentOptionsFromURL(): DocumentOptionsType {
   const srcUrls = urlParameters.getParameter("src");
   const bUrls = urlParameters.getParameter("b"); // (deprecated) => src & bookMode=true
-  const xUrls = urlParameters.getParameter("x"); // (deprecated) => src
+  const xUrls = urlParameters.getParameter("x"); // (deprecated) => src & bookMode=false
   const bookMode = urlParameters.getParameter("bookMode")[0];
   const fragment = urlParameters.getParameter("f")[0];
   const style = urlParameters.getParameter("style");
@@ -47,6 +48,10 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
         ? false
         : bUrls.length
         ? true
+        : xUrls.length
+        ? false
+        : srcUrls.length > 1
+        ? false // multiple srcUrls cannot be bookMode
         : null,
     fragment: fragment || null,
     authorStyleSheet: style.length ? style : [],
@@ -56,32 +61,34 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
 
 interface DocumentOptionsType {
   pageStyle?: PageStyle;
-  dataUserStyleIndex?: number;
+  dataCustomStyleIndex?: number;
   srcUrls?: Array<string>;
   bookMode?: boolean;
   fragment?: string;
-  authorStyleSheet?: Array<unknown>;
-  userStyleSheet?: Array<unknown>;
+  authorStyleSheet?: Array<string>;
+  userStyleSheet?: Array<string>;
 }
 
 class DocumentOptions {
   pageStyle: PageStyle;
-  dataUserStyleIndex: number;
+  dataCustomStyleIndex: number;
   srcUrls?: Observable<Array<string> | null>;
   bookMode: Observable<boolean>;
   fragment?: Observable<string>;
-  authorStyleSheet?: Observable<Array<unknown>>;
-  userStyleSheet?: Observable<Array<unknown>>;
+  authorStyleSheet?: Observable<Array<string>>;
+  userStyleSheet?: Observable<Array<string>>;
 
   constructor(defaultBookMode: boolean) {
     const urlOptions = getDocumentOptionsFromURL();
     this.srcUrls = ko.observable(urlOptions.srcUrls || null);
     this.bookMode = ko.observable(urlOptions.bookMode ?? defaultBookMode);
     this.fragment = ko.observable(urlOptions.fragment || "");
-    this.authorStyleSheet = ko.observable(urlOptions.authorStyleSheet);
-    this.userStyleSheet = ko.observable(urlOptions.userStyleSheet);
+    this.authorStyleSheet = ko.observable(
+      urlOptions.authorStyleSheet as string[],
+    );
+    this.userStyleSheet = ko.observable(urlOptions.userStyleSheet as string[]);
     this.pageStyle = new PageStyle();
-    this.dataUserStyleIndex = -1;
+    this.dataCustomStyleIndex = -1;
 
     this.bookMode.subscribe((bookMode) => {
       if (bookMode === defaultBookMode) {
@@ -104,12 +111,12 @@ class DocumentOptions {
       }
     });
 
-    // read userStyle=data:.<cssText> URL parameter
-    urlOptions.userStyleSheet.find((userStyle: string, index) => {
-      // Find userStyle parameter that starts with "data:" and contains "/*<viewer>*/".
-      if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(userStyle)) {
-        this.dataUserStyleIndex = index;
-        const data = userStyle
+    // read style=data:.<cssText> URL parameter
+    const findDataCustomStyle = (style: string, index): boolean => {
+      // Find style parameter that starts with "data:" and contains "/*<viewer>*/".
+      if (/^data:,.*?\/\*(?:<|%3C)viewer(?:>|%3E)\*\//.test(style)) {
+        this.dataCustomStyleIndex = index;
+        const data = style
           .replace(/^data:,/, "")
           // Escape unescaped "%" that causes error in decodeURIComponent()
           .replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
@@ -119,16 +126,24 @@ class DocumentOptions {
       } else {
         return false;
       }
-    });
+    };
 
-    // write cssText back to URL parameter userStyle= when updated
+    if (!urlOptions.authorStyleSheet.find(findDataCustomStyle)) {
+      if (urlOptions.userStyleSheet.find(findDataCustomStyle)) {
+        this.pageStyle.customStyleAsUserStyle(true);
+      }
+    }
+
+    // write cssText back to URL parameter style= when updated
     this.pageStyle.cssText.subscribe((cssText) => {
-      this.updateUserStyleSheetFromCSSText(cssText);
+      this.updateCustomStyleSheetFromCSSText(cssText);
     });
   }
 
-  toObject(): DocumentOptionsType {
-    function convertStyleSheetArray(arr): { url?: string; text: string }[] {
+  toObject(): CoreDocumentOptions {
+    function convertStyleSheetArray(
+      arr: string[],
+    ): { url?: string; text?: string }[] {
       return arr.map((url) => ({
         url,
       }));
@@ -142,34 +157,73 @@ class DocumentOptions {
     };
   }
 
-  updateUserStyleSheetFromCSSText(cssText?: string): void {
+  updateCustomStyleSheetFromCSSText(cssText?: string): void {
     if (cssText == undefined) {
       cssText = this.pageStyle.toCSSText();
     }
-    const userStyleSheet = this.userStyleSheet();
-    if (!cssText || /^\s*(\/\*.*?\*\/\s*)*$/.test(cssText)) {
-      if (userStyleSheet.length <= (this.dataUserStyleIndex == -1 ? 0 : 1)) {
-        userStyleSheet.pop();
-        this.dataUserStyleIndex = -1;
-        this.userStyleSheet(userStyleSheet);
-        urlParameters.removeParameter("userStyle");
+    const customStyleAsUserStyle = this.pageStyle.customStyleAsUserStyle();
+    const param = customStyleAsUserStyle ? "userStyle" : "style";
+    const userOrAuthorStyleSheets = customStyleAsUserStyle
+      ? this.userStyleSheet
+      : this.authorStyleSheet;
+    const styleSheets = userOrAuthorStyleSheets();
+    if (!cssText || /^\s*(\/\*([^*]|\*(?!\/))*\*\/\s*)*$/.test(cssText)) {
+      if (styleSheets.length <= (this.dataCustomStyleIndex == -1 ? 0 : 1)) {
+        styleSheets.pop();
+        this.dataCustomStyleIndex = -1;
+        userOrAuthorStyleSheets(styleSheets);
+        urlParameters.removeParameter(param);
         return;
       }
     }
-    const dataUserStyle =
+    const dataCustomStyle =
       "data:," + stringUtil.percentEncodeForDataURI(cssText.trim());
-    if (this.dataUserStyleIndex == -1) {
-      userStyleSheet.push(dataUserStyle);
-      this.dataUserStyleIndex = userStyleSheet.length - 1;
+    if (this.dataCustomStyleIndex == -1) {
+      styleSheets.push(dataCustomStyle);
+      this.dataCustomStyleIndex = styleSheets.length - 1;
     } else {
-      userStyleSheet[this.dataUserStyleIndex] = dataUserStyle;
+      styleSheets[this.dataCustomStyleIndex] = dataCustomStyle;
     }
-    this.userStyleSheet(userStyleSheet);
+    userOrAuthorStyleSheets(styleSheets);
     urlParameters.setParameter(
-      "userStyle",
-      dataUserStyle,
-      this.dataUserStyleIndex,
+      param,
+      dataCustomStyle,
+      this.dataCustomStyleIndex,
     );
+  }
+
+  switchCustomStyleUserOrAuthorStyleSheets(): void {
+    const customStyleAsUserStyle = this.pageStyle.customStyleAsUserStyle();
+    if (this.dataCustomStyleIndex !== -1) {
+      const [paramBefore, paramAfter] = customStyleAsUserStyle
+        ? ["style", "userStyle"]
+        : ["userStyle", "style"];
+      const [userOrAuthorStyleSheetsBefore, userOrAuthorStyleSheetsAfter] =
+        customStyleAsUserStyle
+          ? [this.authorStyleSheet, this.userStyleSheet]
+          : [this.userStyleSheet, this.authorStyleSheet];
+      const styleSheetsBefore = userOrAuthorStyleSheetsBefore();
+      const styleSheetsAfter = userOrAuthorStyleSheetsAfter();
+
+      const dataCustomStyle = styleSheetsBefore[this.dataCustomStyleIndex];
+      if (dataCustomStyle) {
+        styleSheetsBefore.splice(this.dataCustomStyleIndex, 1);
+        styleSheetsAfter.push(dataCustomStyle);
+        this.dataCustomStyleIndex = styleSheetsAfter.length - 1;
+
+        userOrAuthorStyleSheetsBefore(styleSheetsBefore);
+        userOrAuthorStyleSheetsAfter(styleSheetsAfter);
+
+        urlParameters.removeParameter(paramBefore);
+        urlParameters.removeParameter(paramAfter);
+        styleSheetsBefore.forEach((value, index) => {
+          urlParameters.setParameter(paramBefore, value, index);
+        });
+        styleSheetsAfter.forEach((value, index) => {
+          urlParameters.setParameter(paramAfter, value, index);
+        });
+      }
+    }
   }
 }
 

@@ -248,21 +248,6 @@ export class Page extends Base.SimpleEventTarget {
       }
     }
   }
-
-  /**
-   * Zoom page.
-   * @param scale Factor to which the page will be scaled.
-   */
-  zoom(scale: number) {
-    Base.setCSSProperty(this.container, "transform", `scale(${scale})`);
-  }
-
-  /**
-   * Returns the page area element.
-   */
-  getPageAreaElement(): HTMLElement {
-    return this.pageAreaElement || this.container;
-  }
 }
 
 export type Spread = {
@@ -1316,7 +1301,7 @@ export class ContentPropertyHandler extends Css.Visitor {
 
   private visitStrInner(str: string, node?: Node | null) {
     if (!node) {
-      if (this.elem.lastChild instanceof Text) {
+      if (this.elem.lastChild?.nodeType === 3) {
         this.elem.lastChild.textContent += str;
         return;
       }

@@ -225,10 +225,10 @@ class Viewer {
   }
 
   setupViewerOptionSubscriptions(): void {
-    ko.computed(function () {
+    ko.computed(() => {
       const viewerOptions = this.viewerOptions.toObject();
       this.coreViewer.setOptions(viewerOptions);
-    }, this).extend({ rateLimit: 0 });
+    }).extend({ rateLimit: 0 });
   }
 
   loadDocument(

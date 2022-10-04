@@ -40,7 +40,6 @@ const { Keys } = keyUtil;
 
 class SettingsPanel {
   isPageStyleChangeDisabled: boolean;
-  isOverrideDocumentStyleSheetDisabled: boolean;
   isPageViewModeChangeDisabled: boolean;
   isBookModeChangeDisabled: boolean;
   isRenderAllPagesChangeDisabled: boolean;
@@ -49,6 +48,7 @@ class SettingsPanel {
   state: State;
   opened: Observable<boolean>;
   pinned: Observable<boolean>;
+  resetCustomStyle: PureComputed<boolean>;
   defaultPageStyle: PageStyle;
 
   constructor(
@@ -65,7 +65,6 @@ class SettingsPanel {
   ) {
     this.isPageStyleChangeDisabled =
       !!settingsPanelOptions.disablePageStyleChange;
-    this.isOverrideDocumentStyleSheetDisabled = this.isPageStyleChangeDisabled;
     this.isPageViewModeChangeDisabled =
       !!settingsPanelOptions.disablePageViewModeChange;
     this.isBookModeChangeDisabled =
@@ -80,7 +79,6 @@ class SettingsPanel {
 
     this.opened = ko.observable(false);
     this.pinned = ko.observable(false);
-
     this.state = {
       viewerOptions: new ViewerOptions(viewerOptions),
       pageStyle: new PageStyle(documentOptions.pageStyle),
@@ -108,17 +106,11 @@ class SettingsPanel {
     );
 
     this.defaultPageStyle = new PageStyle();
+    this.defaultPageStyle.setViewerFontSizeObservable(ko.observable(16));
 
-    ["close", "toggle", "apply", "cancel", "resetUserStyle"].forEach(function (
-      methodName,
-    ) {
-      this[methodName] = this[methodName].bind(this);
-    },
-    this);
-
-    messageDialog.visible.subscribe(function (visible) {
+    messageDialog.visible.subscribe((visible) => {
       if (visible) this.close();
-    }, this);
+    });
 
     this.state.bookMode.subscribe((bookMode) => {
       documentOptions.bookMode(bookMode);
@@ -126,19 +118,42 @@ class SettingsPanel {
     this.state.renderAllPages.subscribe((renderAllPages) => {
       viewerOptions.renderAllPages(renderAllPages);
     });
+
+    this.resetCustomStyle = ko.pureComputed({
+      read() {
+        const changed = !this.state.pageStyle.equivalentTo(
+          this.defaultPageStyle,
+        );
+        if (changed) {
+          return false;
+        }
+        const elem = document.getElementsByName(
+          "vivliostyle-settings_reset-custom-style",
+        )[0] as HTMLInputElement;
+        return elem.checked;
+      },
+      write(resetCustomStyle) {
+        if (resetCustomStyle) {
+          this.state.pageStyle.copyFrom(this.defaultPageStyle);
+          this.state.viewerOptions.fontSize(
+            ViewerOptions.getDefaultValues().fontSize,
+          );
+        }
+      },
+      owner: this,
+    });
   }
 
-  close(): boolean {
+  close = (): void => {
     this.opened(false);
     this.pinned(false);
     const viewportElement = document.getElementById(
       "vivliostyle-viewer-viewport",
     );
     if (viewportElement) viewportElement.focus();
-    return true;
-  }
+  };
 
-  toggle(): void {
+  toggle = (): void => {
     if (!this.opened()) {
       if (!this.viewer.tocPinned()) {
         this.viewer.showTOC(false); // Hide TOC box
@@ -168,13 +183,19 @@ class SettingsPanel {
         this.justClicked = false;
       }, 300);
     }
-  }
+  };
 
-  apply(): void {
+  apply = (): void => {
+    const customStyleAsUserStyleChanged =
+      this.documentOptions.pageStyle.customStyleAsUserStyle() !==
+      this.state.pageStyle.customStyleAsUserStyle();
     this.documentOptions.pageStyle.copyFrom(this.state.pageStyle);
+    if (customStyleAsUserStyleChanged) {
+      this.documentOptions.switchCustomStyleUserOrAuthorStyleSheets();
+    }
     if (this.documentOptions.pageStyle.baseFontSizeSpecified()) {
-      // Update userStylesheet when base font-size is specified
-      this.documentOptions.updateUserStyleSheetFromCSSText();
+      // Update custom style when base font-size is specified
+      this.documentOptions.updateCustomStyleSheetFromCSSText();
     }
     this.viewer.loadDocument(this.documentOptions, this.state.viewerOptions);
     if (this.pinned()) {
@@ -182,27 +203,13 @@ class SettingsPanel {
     } else {
       this.close();
     }
-  }
+  };
 
-  cancel(): void {
+  cancel = (): void => {
     this.state.viewerOptions.copyFrom(this.viewerOptions);
     this.state.pageStyle.copyFrom(this.documentOptions.pageStyle);
     this.close();
-  }
-
-  resetUserStyle(): boolean {
-    this.state.pageStyle.copyFrom(this.defaultPageStyle);
-    this.state.viewerOptions.fontSize(
-      ViewerOptions.getDefaultValues().fontSize,
-    );
-    window.setTimeout(() => {
-      const elem = document.getElementsByName(
-        "vivliostyle-settings_reset-user-style",
-      )[0] as HTMLInputElement;
-      elem.checked = false;
-    }, 200);
-    return true;
-  }
+  };
 
   focusToFirstItem(outerElemParam?: Element): void {
     const outerElem = outerElemParam || this.settingsToggle;
@@ -294,21 +301,21 @@ class SettingsPanel {
           return false;
         }
         return true;
-      case "u":
-      case "U":
+      case "c":
+      case "C":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_user-style")
+            document.getElementById("vivliostyle-settings_custom-style")
               .firstElementChild,
           );
           return false;
         }
         return true;
-      case "d":
-      case "D":
+      case "m":
+      case "M":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementById("vivliostyle-settings_user-style_advanced")
+            document.getElementById("vivliostyle-settings_custom-style_more")
               .firstElementChild,
           );
           return false;
@@ -323,8 +330,17 @@ class SettingsPanel {
           return false;
         }
         return true;
-      case "m":
-      case "M":
+      case "o":
+      case "O":
+        if (isHotKeyEnabled) {
+          this.focusToFirstItem(
+            document.getElementById("vivliostyle-settings_crop-marks"),
+          );
+          return false;
+        }
+        return true;
+      case "g":
+      case "G":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementById("vivliostyle-settings_page-margin"),
@@ -359,22 +375,20 @@ class SettingsPanel {
           return false;
         }
         return true;
-      case "o":
-      case "O":
+      case "y":
+      case "Y":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementsByName(
-              "vivliostyle-settings_override-document-stylesheets",
-            )[0],
+            document.getElementById("vivliostyle-settings_priority"),
           );
           return false;
         }
         return true;
-      case "c":
-      case "C":
+      case "e":
+      case "E":
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
-            document.getElementsByName("vivliostyle-settings_css-details")[0],
+            document.getElementsByName("vivliostyle-settings_edit-css")[0],
           );
           return false;
         }
@@ -384,7 +398,7 @@ class SettingsPanel {
         if (isHotKeyEnabled) {
           this.focusToFirstItem(
             document.getElementsByName(
-              "vivliostyle-settings_reset-user-style",
+              "vivliostyle-settings_reset-custom-style",
             )[0],
           );
           return false;
@@ -395,7 +409,7 @@ class SettingsPanel {
           isInInput ||
           (isHotKeyEnabled &&
             document.activeElement.id !== "vivliostyle-menu-button_apply" &&
-            document.activeElement.id !== "vivliostyle-menu-button_reset")
+            document.activeElement.id !== "vivliostyle-menu-button_cancel")
         ) {
           document.getElementById("vivliostyle-menu-button_apply").focus();
           return false;

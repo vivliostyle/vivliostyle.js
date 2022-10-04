@@ -81,22 +81,41 @@ export function calculateEdge(
   if (!node) {
     return NaN;
   }
-  const element = node.nodeType == 1 ? (node as Element) : node.parentElement;
-  if (element && element instanceof HTMLElement) {
-    if (element.localName === "rt" && element.style["zoom"]) {
+
+  // NOTE: Do not replace `node.nodeType === 1` with `node instanceof Element`,
+  // which does not work when the node is inside iframe. (Issue #1000)
+
+  const element = node.nodeType === 1 ? (node as Element) : node.parentElement;
+  if (element && element.namespaceURI === Base.NS.XHTML) {
+    if (element.localName === "rt" && (element as HTMLElement).style["zoom"]) {
       // "zoom" is set in fixRubyTextFontSize() to fix the issue #673 for Chrome.
       // when zoom is set, it is hard to get the edge value, so return NaN.
       // (Fix for issues #804 and #808)
       return NaN;
     }
-    if (/^([\d\.]|super|(text-)?top)/.test(element.style.verticalAlign)) {
+    if (
+      /^([\d\.]|super|(text-)?top)/.test(
+        (element as HTMLElement).style.verticalAlign,
+      )
+    ) {
       // (Fix for issue #811)
       return NaN;
     }
   }
-  if (node.nodeType == 1) {
+  if (node === element) {
     if (nodeContext.after || !nodeContext.inline) {
-      const cbox = clientLayout.getElementClientRect(node as Element);
+      if (
+        nodeContext.after &&
+        !nodeContext.inline &&
+        element.querySelector("ruby")
+      ) {
+        // Workaround for issue #987 (unnecessary break caused by ruby)
+        const parentNode = element.parentNode;
+        const nextSibling = element.nextSibling;
+        parentNode.removeChild(element);
+        parentNode.insertBefore(element, nextSibling);
+      }
+      const cbox = clientLayout.getElementClientRect(element);
       if (
         cbox.left === 0 &&
         cbox.top === 0 &&
@@ -195,7 +214,7 @@ export function isSpecial(e: Element): boolean {
 
 export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {
   const viewNode = nodeContext?.viewNode;
-  return viewNode instanceof Element && isSpecial(viewNode);
+  return viewNode?.nodeType === 1 && isSpecial(viewNode as Element);
 }
 
 export function isSpecialInlineDisplay(display: string): boolean {

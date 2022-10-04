@@ -2138,10 +2138,6 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
     this.cascadeParserHandler = new BaseParserHandler(this, null, null, null);
     this.slave = this.cascadeParserHandler;
   }
-
-  override error(mnemonics: string, token: CssTokenizer.Token): void {
-    Logging.logger.warn("CSS parser:", mnemonics, token);
-  }
 }
 
 export type StyleSource = {
@@ -2328,12 +2324,12 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   media,
                 });
               } else if (localName == "link") {
-                const rel = elem.getAttribute("rel");
+                const rel = elem.getAttribute("rel")?.split(/\s+/);
                 const classes = elem.getAttribute("class");
                 const media = elem.getAttribute("media");
                 if (
-                  rel == "stylesheet" ||
-                  (rel == "alternate stylesheet" && classes)
+                  rel?.includes("stylesheet") &&
+                  (!rel.includes("alternate") || classes)
                 ) {
                   let src = elem.getAttribute("href");
                   src = Base.resolveURL(src, url);

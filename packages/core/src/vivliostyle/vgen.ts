@@ -221,6 +221,19 @@ export class ViewFactory
           if (!display || display === Css.ident.inline) {
             continue;
           }
+          const child = element.firstElementChild;
+          if (child && !child.previousSibling?.textContent.trim()) {
+            const childStyle = styler.getStyle(child, false);
+            if (childStyle) {
+              const childDisplay = CssCascade.getProp(childStyle, "display");
+              if (
+                childDisplay?.value &&
+                childDisplay.value !== Css.ident.inline
+              ) {
+                continue;
+              }
+            }
+          }
         }
         if (name === "before" || name === "after") {
           const content = pseudoMap[name]["content"] as CssCascade.CascadeValue;
@@ -724,8 +737,15 @@ export class ViewFactory
       frame.finish(false);
       return frame.result();
     }
-    if (Scripts.allowScripts && element instanceof HTMLScriptElement) {
-      Scripts.loadScript(element, this.viewport.window).thenFinish(frame);
+    if (
+      Scripts.allowScripts &&
+      element.localName === "script" &&
+      element.namespaceURI === Base.NS.XHTML
+    ) {
+      Scripts.loadScript(
+        element as HTMLScriptElement,
+        this.viewport.window,
+      ).thenFinish(frame);
       return frame.result();
     }
     let display = computedStyle["display"] as Css.Ident;
@@ -1231,6 +1251,14 @@ export class ViewFactory
                 .split(",")
                 .map((value) => this.resolveURL(value.trim()))
                 .join(",");
+            } else if (
+              attributeName === "data" &&
+              custom &&
+              tag === "object" &&
+              result.hasAttribute("data")
+            ) {
+              // the data attribute is already set in OPFView.makeObjectView()
+              continue;
             }
             if (
               attributeName === "poster" &&
@@ -2125,7 +2153,7 @@ export class ViewFactory
     if (fontSizeInPx >= minFontSizeInPx) {
       return false;
     }
-    if (!(target instanceof HTMLElement && "zoom" in target.style)) {
+    if ((target as HTMLElement).style?.["zoom"] === undefined) {
       return false;
     }
     const zoom = fontSizeInPx / minFontSizeInPx;
@@ -2280,7 +2308,7 @@ export class ViewFactory
         const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
         if (!boxDecorationBreak || boxDecorationBreak === "slice") {
           const elem = block.viewNode as Element;
-          Asserts.assert(elem instanceof Element);
+          Asserts.assert(elem.nodeType === 1);
           if (block.vertical) {
             Base.setCSSProperty(elem, "padding-left", "0");
             Base.setCSSProperty(elem, "border-left", "none");
@@ -2542,7 +2570,11 @@ export class Viewport {
     Base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
     Base.setCSSProperty(this.contentContainer, "width", `${width}px`);
     Base.setCSSProperty(this.contentContainer, "height", `${height}px`);
-    Base.setCSSProperty(this.contentContainer, "transform", `scale(${scale})`);
+    Base.setCSSProperty(
+      this.contentContainer,
+      "transform",
+      scale === 1 ? "none" : `scale(${scale})`,
+    );
   }
 
   /**

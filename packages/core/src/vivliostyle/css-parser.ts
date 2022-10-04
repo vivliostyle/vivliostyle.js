@@ -240,7 +240,7 @@ export class DispatchParserHandler extends ParserHandler {
    * Called by a slave.
    */
   errorMsg(mnemonics: string, token: CssTokenizer.Token): void {
-    Logging.logger.warn(mnemonics);
+    Logging.logger.warn(mnemonics, token?.toString() ?? "");
   }
 
   override startStylesheet(flavor: StylesheetFlavor): void {
@@ -628,6 +628,7 @@ export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
   actionsBase[CssTokenizer.TokenType.CLASS] = Action.SELECTOR_START;
   actionsBase[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_START;
   actionsBase[CssTokenizer.TokenType.COLON] = Action.SELECTOR_START;
+  actionsBase[CssTokenizer.TokenType.COL_COL] = Action.SELECTOR_START;
   actionsBase[CssTokenizer.TokenType.AT] = Action.AT;
   actionsBase[CssTokenizer.TokenType.C_BRC] = Action.RULE_END;
   actionsBase[CssTokenizer.TokenType.EOF] = Action.DONE;
@@ -640,6 +641,8 @@ export const OP_MEDIA_NOT: number = CssTokenizer.TokenType.LAST + 3;
   actionsSelectorStart[CssTokenizer.TokenType.O_BRK] = Action.SELECTOR_ATTR;
   actionsSelectorStart[CssTokenizer.TokenType.COLON] =
     Action.SELECTOR_PSEUDOCLASS;
+  actionsSelectorStart[CssTokenizer.TokenType.COL_COL] =
+    Action.SELECTOR_PSEUDOELEM;
 
   actionsSelector[CssTokenizer.TokenType.GT] = Action.SELECTOR_CHILD;
   actionsSelector[CssTokenizer.TokenType.PLUS] = Action.SELECTOR_SIBLING;
@@ -850,15 +853,25 @@ export class Parser {
     count = valStack.length - (index + 1);
     if (v == "(") {
       if (sep != ")") {
-        this.handler.error("E_CSS_MISMATCHED_C_PAR", token);
-        this.actions = actionsErrorDecl;
-        // return null;
+        if (token.type !== CssTokenizer.TokenType.EOF) {
+          this.handler.error("E_CSS_MISMATCHED_C_PAR", token);
+          this.actions = actionsErrorDecl;
+        }
       }
       const func = new Css.Func(
         valStack[index - 1] as string,
         this.extractVals(",", index + 1),
       );
       valStack.splice(index - 1, count + 2, func);
+
+      // Check invalid var()
+      if (func.name === "var") {
+        const name = func.values[0] instanceof Css.Ident && func.values[0].name;
+        if (!Css.isCustomPropName(name) || name === this.propName) {
+          this.handler.error(`E_CSS_INVALID_VAR ${func.toString()}`, token);
+          this.actions = actionsErrorDecl;
+        }
+      }
       return func;
     }
     if (sep != ";" || index >= 0) {
@@ -884,7 +897,7 @@ export class Parser {
     this.actions = this.propName ? actionsErrorDecl : actionsError;
     // this.handler.error(mnemonics, token);
     // (should not throw error by expression syntax errors)
-    Logging.logger.warn(mnemonics, token);
+    Logging.logger.warn(mnemonics, token.toString());
   }
 
   exprStackReduce(op: number, token: CssTokenizer.Token): boolean {
@@ -1376,7 +1389,7 @@ export class Parser {
 
       // Do not stop parsing on invalid property syntax as long as brackets are balanced.
       if (
-        this.propName &&
+        this.actions === actionsPropVal &&
         this.errorBrackets.length > 0 &&
         (token.type === this.errorBrackets[this.errorBrackets.length - 1] ||
           token.type === CssTokenizer.TokenType.SEMICOL ||
@@ -1946,7 +1959,15 @@ export class Parser {
         case Action.VAL_FINISH:
           tokenizer.consume();
           tokenizer.unmark();
-          val = this.valStackReduce(";", token);
+
+          // for implicit closing parens, e.g. style="color: var(--a, var(--b"
+          while (valStack.length > 0) {
+            const len = valStack.length;
+            val = this.valStackReduce(";", token);
+            if (!val || valStack.length === len) {
+              break;
+            }
+          }
           if (parsingValue) {
             this.result = val;
             return true;
@@ -1954,11 +1975,7 @@ export class Parser {
           if (this.propName && val) {
             handler.property(this.propName as string, val, this.propImportant);
           }
-          if (parsingStyleAttr) {
-            return true;
-          }
-          this.exprError("E_CSS_SYNTAX", token);
-          continue;
+          return true;
         case Action.EXPR_IDENT:
           token1 = tokenizer.nthToken(1);
           if (token1.type == CssTokenizer.TokenType.CLASS) {
@@ -2453,9 +2470,6 @@ export class Parser {
           continue;
         case Action.ERROR_PUSH:
           // Open bracket while skipping error syntax
-          if (parsingValue || parsingStyleAttr) {
-            return true;
-          }
           this.errorBrackets.push(token.type + 1);
 
           // Expected closing bracket
@@ -2463,9 +2477,6 @@ export class Parser {
           continue;
         case Action.ERROR_POP_DECL:
           // Close bracket while skipping error syntax in declaration
-          if (parsingValue || parsingStyleAttr) {
-            return true;
-          }
           if (this.errorBrackets.length == 0) {
             this.actions = actionsBase;
 
@@ -2491,9 +2502,6 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.ERROR_SEMICOL:
-          if (parsingValue || parsingStyleAttr) {
-            return true;
-          }
           if (this.errorBrackets.length == 0) {
             this.actions = actionsBase;
           }
@@ -2506,9 +2514,6 @@ export class Parser {
           }
           return true;
         default:
-          if (parsingValue || parsingStyleAttr) {
-            return true;
-          }
           if (parsingMediaQuery) {
             if (this.exprStackReduce(CssTokenizer.TokenType.C_PAR, token)) {
               this.result = valStack.pop() as Css.Val;
@@ -2537,7 +2542,7 @@ export class Parser {
           ) {
             if (token.type == CssTokenizer.TokenType.INVALID) {
               handler.error(token.text, token);
-            } else if (this.propName) {
+            } else if (this.actions === actionsPropVal) {
               // Do not stop parsing on invalid property syntax as long as brackets are balanced.
               switch (token.type) {
                 case CssTokenizer.TokenType.O_PAR:
@@ -2551,6 +2556,7 @@ export class Parser {
               continue;
             } else if (
               token.type === CssTokenizer.TokenType.O_BRC &&
+              this.actions == actionsExprVal &&
               valStack.length > 0
             ) {
               // `@media {...}` and `@supports {...}` should be ok
@@ -2560,7 +2566,10 @@ export class Parser {
               this.actions = actionsBase;
               tokenizer.consume();
               continue;
-            } else if (token.type === CssTokenizer.TokenType.SEMICOL) {
+            } else if (
+              token.type === CssTokenizer.TokenType.SEMICOL &&
+              this.actions == actionsExprVal
+            ) {
               // `@media;` and `@supports;` should be ok
               this.actions = actionsBase;
               tokenizer.consume();
@@ -2589,7 +2598,8 @@ export class ErrorHandler extends ParserHandler {
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
-    throw new Error(mnemonics + " " + token);
+    // throw new Error(mnemonics + " " + token);
+    Logging.logger.warn(mnemonics, token.toString());
   }
 
   override getScope(): Exprs.LexicalScope {

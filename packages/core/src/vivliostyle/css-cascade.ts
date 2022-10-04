@@ -336,10 +336,37 @@ export function cascadeValues(
   tv: CascadeValue,
   av: CascadeValue,
 ): CascadeValue {
-  if ((tv == null || av.priority >= tv.priority) && av.isEnabled(context)) {
+  if ((!tv || av.priority >= tv.priority) && av.isEnabled(context)) {
     return av.getBaseValue();
   }
   return tv;
+}
+
+/**
+ * setProp with priority checking.
+ * If context is given it is same as
+ * setProp(style, name, cascadeValues(context, getProp(style, name), value))
+ */
+export function setPropCascadeValue(
+  style: ElementStyle,
+  name: string,
+  value: CascadeValue,
+  context?: Exprs.Context,
+): void {
+  if (!value) {
+    delete style[name];
+  } else {
+    const tv = style[name] as CascadeValue;
+    if (!tv || value.priority >= tv.priority) {
+      if (context) {
+        if (value.isEnabled(context)) {
+          style[name] = value.getBaseValue();
+        }
+      } else {
+        style[name] = value;
+      }
+    }
+  }
 }
 
 export type ElementStyleMap = {
@@ -475,8 +502,7 @@ export function mergeIn(
     } else {
       // regular properties: higher priority wins
       const av = getProp(style, prop).increaseSpecificity(specificity);
-      const tv = getProp(target, prop);
-      setProp(target, prop, cascadeValues(context, tv, av));
+      setPropCascadeValue(target, prop, av, context);
 
       // Expand shorthand property (its value contains variables).
       const propListLH = (
@@ -487,8 +513,7 @@ export function mergeIn(
       if (propListLH) {
         for (const propLH of propListLH) {
           const avLH = new CascadeValue(Css.empty, av.priority);
-          const tvLH = getProp(target, propLH);
-          setProp(target, propLH, cascadeValues(context, tvLH, avLH));
+          setPropCascadeValue(target, propLH, avLH, context);
         }
       }
     }
@@ -2975,6 +3000,8 @@ export class CascadeInstance {
     const elementStyle = elementStyles[0];
     const visitor = new VarFilterVisitor(elementStyles, styler, element);
     const LIMIT_LOOP = 32; // prevent cyclic or too deep dependency
+    const propsLH: ElementStyle = {}; // for shorthand -> longhand cascade
+
     for (const name in elementStyle) {
       if (isMapName(name)) {
         const pseudoMap = getStyleMap(elementStyle, name);
@@ -3016,9 +3043,12 @@ export class CascadeInstance {
           if (shorthand) {
             if (Css.isDefaultingValue(value)) {
               for (const nameLH of shorthand.propList) {
-                elementStyle[nameLH] = new CascadeValue(
-                  value,
-                  cascVal.priority,
+                const avLH = new CascadeValue(value, cascVal.priority);
+                const tvLH = getProp(elementStyle, nameLH);
+                setProp(
+                  propsLH,
+                  nameLH,
+                  cascadeValues(this.context, tvLH, avLH),
                 );
               }
               delete elementStyle[name];
@@ -3035,10 +3065,16 @@ export class CascadeInstance {
                 valueSH.visit(shorthand);
                 if (!shorthand.error) {
                   for (const nameLH of shorthand.propList) {
-                    elementStyle[nameLH] = new CascadeValue(
+                    const avLH = new CascadeValue(
                       shorthand.values[nameLH] ||
                         validatorSet.defaultValues[nameLH],
                       cascVal.priority,
+                    );
+                    const tvLH = getProp(elementStyle, nameLH);
+                    setProp(
+                      propsLH,
+                      nameLH,
+                      cascadeValues(this.context, tvLH, avLH),
                     );
                   }
                   delete elementStyle[name];
@@ -3049,7 +3085,17 @@ export class CascadeInstance {
             elementStyle[name] = new CascadeValue(value, cascVal.priority);
           }
         }
+        if (propsLH[name]) {
+          const av = getProp(elementStyle, name);
+          if (av && av.value !== Css.empty) {
+            setPropCascadeValue(propsLH, name, av, this.context);
+          }
+        }
       }
+    }
+    // Update elementStyle with shorthand -> longhand cascade result
+    for (const name in propsLH) {
+      elementStyle[name] = propsLH[name];
     }
   }
 
@@ -3707,7 +3753,7 @@ export class CascadeParserHandler
     const cascval = this.condition
       ? new ConditionalCascadeValue(value, specificity, this.condition)
       : new CascadeValue(value, specificity);
-    setProp(this.elementStyle, name, cascval);
+    setPropCascadeValue(this.elementStyle, name, cascval);
   }
 
   finish(): Cascade {
@@ -3852,10 +3898,10 @@ export class PropSetParserHandler
       : this.getBaseSpecificity();
     specificity += this.order;
     this.order += ORDER_INCREMENT;
-    const av = this.condition
+    const cascval = this.condition
       ? new ConditionalCascadeValue(value, specificity, this.condition)
       : new CascadeValue(value, specificity);
-    setProp(this.elementStyle, name, av);
+    setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }
 
@@ -3904,7 +3950,7 @@ export class PropertyParserHandler
     specificity += this.order;
     this.order += ORDER_INCREMENT;
     const cascval = new CascadeValue(value, specificity);
-    setProp(this.elementStyle, name, cascval);
+    setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }
 

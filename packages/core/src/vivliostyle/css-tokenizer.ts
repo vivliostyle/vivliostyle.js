@@ -140,12 +140,10 @@ export class Token {
         return ":";
       case TokenType.SLASH:
         return "/";
-      case TokenType.AT:
-        return "@";
       case TokenType.PERCENT:
         return "%";
       case TokenType.QMARK:
-        return "Q";
+        return "?";
       case TokenType.PLUS:
         return "+";
       case TokenType.MINUS:
@@ -201,12 +199,16 @@ export class Token {
       case TokenType.NUM:
       case TokenType.INT:
         return this.num.toString();
+      case TokenType.AT:
+        return "@" + this.text;
       case TokenType.HASH:
         return "#" + this.text;
       case TokenType.FUNC:
         return this.text + "(";
       case TokenType.CLASS:
         return "." + this.text;
+      case TokenType.EOF:
+        return "/*EOF*/";
       default:
         return this.text;
     }
@@ -1583,14 +1585,15 @@ export class Tokenizer {
       const charCode = input.charCodeAt(position);
       switch (actions[charCode] || actions[65] /*A*/) {
         case Action.INVALID:
-          tokenType = TokenType.INVALID;
+          tokenText = input.substring(tokenPosition, position);
           if (isNaN(charCode)) {
-            tokenText = "E_CSS_UNEXPECTED_EOF";
+            // unclosed comment `/***[EOF]`, unclosed string `"**[EOF]`
+            tokenType = TokenType.EOF;
           } else {
-            tokenText = "E_CSS_UNEXPECTED_CHAR";
+            // invalid, e.g, `.` in `:nth-child([.])` (Issue #597)
+            tokenType = TokenType.INVALID;
           }
           actions = actionsNormal;
-          position++;
           break;
         case Action.SPACE:
           position++;
