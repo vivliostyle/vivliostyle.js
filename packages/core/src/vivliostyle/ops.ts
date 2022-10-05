@@ -1128,11 +1128,15 @@ export class StyleInstance
           );
           column.forceNonfitting = forceNonFitting;
           column.vertical = layoutContainer.vertical;
+          column.rtl = layoutContainer.rtl;
           column.snapHeight = layoutContainer.snapHeight;
           column.snapWidth = layoutContainer.snapWidth;
           if (layoutContainer.vertical) {
             const columnY =
-              currentColumnIndex * (columnWidth + columnGap) +
+              (layoutContainer.rtl
+                ? columnCount - currentColumnIndex - 1
+                : currentColumnIndex) *
+                (columnWidth + columnGap) +
               layoutContainer.paddingTop;
             const outerWidth = parseFloat(
               (boxContainer as HTMLElement).style.width,
@@ -1144,7 +1148,10 @@ export class StyleInstance
             column.setVerticalPosition(columnY, columnWidth);
           } else {
             const columnX =
-              currentColumnIndex * (columnWidth + columnGap) +
+              (layoutContainer.rtl
+                ? columnCount - currentColumnIndex - 1
+                : currentColumnIndex) *
+                (columnWidth + columnGap) +
               layoutContainer.paddingLeft;
             column.setVerticalPosition(
               layoutContainer.paddingTop,
@@ -1484,6 +1491,7 @@ export class StyleInstance
 
     let layoutContainer = new Vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
+    layoutContainer.rtl = boxInstance.rtl;
     layoutContainer.exclusions = exclusions;
     boxInstance.prepareContainer(
       this,

@@ -467,19 +467,35 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   getTopEdge(): number {
-    return this.vertical ? this.startEdge : this.beforeEdge;
+    return this.vertical
+      ? this.rtl
+        ? this.endEdge
+        : this.startEdge
+      : this.beforeEdge;
   }
 
   getBottomEdge(): number {
-    return this.vertical ? this.endEdge : this.afterEdge;
+    return this.vertical
+      ? this.rtl
+        ? this.startEdge
+        : this.endEdge
+      : this.afterEdge;
   }
 
   getLeftEdge(): number {
-    return this.vertical ? this.afterEdge : this.startEdge;
+    return this.vertical
+      ? this.afterEdge
+      : this.rtl
+      ? this.endEdge
+      : this.startEdge;
   }
 
   getRightEdge(): number {
-    return this.vertical ? this.beforeEdge : this.endEdge;
+    return this.vertical
+      ? this.beforeEdge
+      : this.rtl
+      ? this.startEdge
+      : this.endEdge;
   }
 
   isFloatNodeContext(nodeContext: Vtree.NodeContext): boolean {
@@ -1030,8 +1046,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatBBox.right + margin.right,
         floatBBox.bottom + margin.bottom,
       );
-      let x1 = this.startEdge;
-      let x2 = this.endEdge;
+      let x1 = this.rtl ? this.endEdge : this.startEdge;
+      let x2 = this.rtl ? this.startEdge : this.endEdge;
       let parent = nodeContext.parent;
       while (parent && parent.inline) {
         parent = parent.parent;
@@ -1053,8 +1069,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         parent.viewNode.appendChild(probe);
         const parentBox = this.clientLayout.getElementClientRect(probe);
-        x1 = Math.max(this.getStartEdge(parentBox), x1);
-        x2 = Math.min(this.getEndEdge(parentBox), x2);
+        x1 = Math.max(
+          this.rtl ? this.getEndEdge(parentBox) : this.getStartEdge(parentBox),
+          x1,
+        );
+        x2 = Math.min(
+          this.rtl ? this.getStartEdge(parentBox) : this.getEndEdge(parentBox),
+          x2,
+        );
         parent.viewNode.removeChild(probe);
         const floatBoxMeasure = this.vertical
           ? floatBox.y2 - floatBox.y1
@@ -1217,6 +1239,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     area.originX = floatContainer.originX;
     area.originY = floatContainer.originY;
     area.vertical = floatContainer.vertical;
+    area.rtl = floatContainer.rtl;
     area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
     area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
     area.paddingLeft =
@@ -3355,12 +3378,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
     this.startEdge = columnBBox
       ? this.vertical
-        ? columnBBox.top
+        ? this.rtl
+          ? columnBBox.bottom
+          : columnBBox.top
+        : this.rtl
+        ? columnBBox.right
         : columnBBox.left
       : 0;
     this.endEdge = columnBBox
       ? this.vertical
-        ? columnBBox.bottom
+        ? this.rtl
+          ? columnBBox.top
+          : columnBBox.bottom
+        : this.rtl
+        ? columnBBox.left
         : columnBBox.right
       : 0;
     this.beforeEdge = columnBBox
