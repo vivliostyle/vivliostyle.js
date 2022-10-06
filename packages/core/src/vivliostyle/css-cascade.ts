@@ -3006,7 +3006,7 @@ export class CascadeInstance {
             element,
           );
         }
-      } else if (isPropName(name) && !Css.isCustomPropName(name)) {
+      } else if (isPropName(name)) {
         const cascVal = getProp(elementStyle, name);
         let value = cascVal.value;
 
