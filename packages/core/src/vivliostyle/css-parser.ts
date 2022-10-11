@@ -799,6 +799,7 @@ export class Parser {
   ruleStack: string[] = [];
   regionRule: boolean = false;
   pageRule: boolean = false;
+  inStyleDeclaration: boolean = false;
 
   constructor(
     public actions: Action[],
@@ -1392,6 +1393,10 @@ export class Parser {
     let num: number;
     let val: Css.Val;
     let params: (number | string)[];
+
+    if (parsingStyleAttr) {
+      this.inStyleDeclaration = true;
+    }
     if (parsingMediaQuery) {
       this.exprContext = ExprContext.MEDIA;
       this.valStack.push("{");
@@ -1425,7 +1430,10 @@ export class Parser {
       switch (this.actions[token.type]) {
         case Action.IDENT:
           // figure out if this is a property assignment or selector
-          if (tokenizer.nthToken(1).type != CssTokenizer.TokenType.COLON) {
+          if (
+            !this.inStyleDeclaration ||
+            tokenizer.nthToken(1).type != CssTokenizer.TokenType.COLON
+          ) {
             // cannot be property assignment
             if (this.isInsidePropertyOnlyRule()) {
               handler.error("E_CSS_COLON_EXPECTED", tokenizer.nthToken(1));
@@ -1436,17 +1444,7 @@ export class Parser {
             }
             continue;
           }
-          token1 = tokenizer.nthToken(2);
-          if (
-            token1.precededBySpace ||
-            (token1.type != CssTokenizer.TokenType.IDENT &&
-              token1.type != CssTokenizer.TokenType.FUNC)
-          ) {
-            // cannot be a selector
-          } else {
-            // can be either a selector or a property assignment
-            tokenizer.mark();
-          }
+          // property assignment
           this.propName = token.text;
           this.propImportant = false;
           tokenizer.consume();
@@ -1852,8 +1850,10 @@ export class Parser {
           } else if (this.pageRule) {
             this.ruleStack.push("page");
             this.pageRule = false;
+            this.inStyleDeclaration = true;
           } else {
             this.ruleStack.push("[selector]");
+            this.inStyleDeclaration = true;
           }
           handler.startRuleBody();
           this.actions = actionsBase;
@@ -1956,23 +1956,15 @@ export class Parser {
                 continue;
               }
           }
-          if (this.actions === actionsPropVal && tokenizer.hasMark()) {
-            tokenizer.reset();
-            this.actions = actionsSelectorStart;
-            handler.startSelectorRule();
-            continue;
-          } else {
-            // this.exprError("E_CSS_UNEXPECTED_PLUS", token);
-            valStack.push(new Css.AnyToken("+"));
-            tokenizer.consume();
-            continue;
-          }
+          // this.exprError("E_CSS_UNEXPECTED_PLUS", token);
+          valStack.push(new Css.AnyToken("+"));
+          tokenizer.consume();
+          continue;
         case Action.VAL_END:
           tokenizer.consume();
 
         // fall through
         case Action.VAL_BRC:
-          tokenizer.unmark();
           val = this.valStackReduce(";", token);
           if (val && this.propName) {
             handler.property(this.propName as string, val, this.propImportant);
@@ -1981,7 +1973,6 @@ export class Parser {
           continue;
         case Action.VAL_FINISH:
           tokenizer.consume();
-          tokenizer.unmark();
 
           // for implicit closing parens, e.g. style="color: var(--a, var(--b"
           while (valStack.length > 0) {
@@ -2195,8 +2186,15 @@ export class Parser {
           this.actions = actionsBase;
           tokenizer.consume();
           handler.endRule();
+          this.inStyleDeclaration = false;
           if (this.ruleStack.length) {
             this.ruleStack.pop();
+            switch (this.ruleStack[this.ruleStack.length - 1]) {
+              case "page":
+              case "-epubx-page-master":
+              case "-epubx-partition-group":
+                this.inStyleDeclaration = true;
+            }
           }
           continue;
         case Action.AT:
@@ -2294,15 +2292,18 @@ export class Parser {
                 switch (text) {
                   case "font-face":
                     handler.startFontFaceRule();
+                    this.inStyleDeclaration = true;
                     break;
                   case "-epubx-page-template":
                     handler.startPageTemplateRule();
                     break;
                   case "-epubx-define":
                     handler.startDefineRule();
+                    this.inStyleDeclaration = true;
                     break;
                   case "-epubx-viewport":
                     handler.startViewportRule();
+                    this.inStyleDeclaration = true;
                     break;
                 }
                 this.ruleStack.push(text);
@@ -2319,6 +2320,7 @@ export class Parser {
                   handler.startFootnoteRule(null);
                   this.ruleStack.push(text);
                   handler.startRuleBody();
+                  this.inStyleDeclaration = true;
                   continue;
                 case CssTokenizer.TokenType.COL_COL:
                   tokenizer.consume();
@@ -2333,6 +2335,7 @@ export class Parser {
                     handler.startFootnoteRule(text);
                     this.ruleStack.push("-adapt-footnote-area");
                     handler.startRuleBody();
+                    this.inStyleDeclaration = true;
                     continue;
                   }
                   break;
@@ -2373,6 +2376,7 @@ export class Parser {
                 handler.startPageMarginBoxRule(text);
                 this.ruleStack.push(text);
                 handler.startRuleBody();
+                this.inStyleDeclaration = true;
                 continue;
               }
               break;
@@ -2408,6 +2412,7 @@ export class Parser {
                 tokenizer.consume();
                 this.ruleStack.push(text);
                 handler.startRuleBody();
+                this.inStyleDeclaration = true;
                 continue;
               }
               break;
@@ -2472,6 +2477,7 @@ export class Parser {
                 }
                 this.ruleStack.push(text);
                 handler.startRuleBody();
+                this.inStyleDeclaration = true;
                 continue;
               }
               break;
@@ -2551,12 +2557,6 @@ export class Parser {
               handler.error("E_CSS_SYNTAX", token);
             }
             return false;
-          }
-          if (this.actions === actionsPropVal && tokenizer.hasMark()) {
-            tokenizer.reset();
-            this.actions = actionsSelectorStart;
-            handler.startSelectorRule();
-            continue;
           }
           if (
             this.actions !== actionsError &&
