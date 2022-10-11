@@ -831,9 +831,21 @@ export class Parser {
   valStackReduce(sep: string, token: CssTokenizer.Token): Css.Val {
     const valStack = this.valStack;
     let index = valStack.length;
+    let parLevel = 0;
     let v;
     do {
       v = valStack[--index];
+      if (sep === ")" && v instanceof Css.AnyToken) {
+        // For nested parens in calc() (Issue #1014)
+        if (v.text === ")") {
+          parLevel++;
+        } else if (v.text === "(") {
+          if (parLevel === 0) {
+            return null;
+          }
+          parLevel--;
+        }
+      }
     } while (typeof v != "undefined" && typeof v != "string");
     let count = valStack.length - (index + 1);
     if (count > 1) {
@@ -1397,6 +1409,13 @@ export class Parser {
       ) {
         if (token.type === this.errorBrackets[this.errorBrackets.length - 1]) {
           this.errorBrackets.pop();
+          if (token.type === CssTokenizer.TokenType.C_PAR) {
+            // For nested func in parens (Issue #1014)
+            if (this.valStackReduce(")", token)) {
+              tokenizer.consume();
+              continue;
+            }
+          }
         }
         valStack.push(new Css.AnyToken(token.toString()));
         tokenizer.consume();
@@ -1897,6 +1916,10 @@ export class Parser {
           } else {
             valStack.push(text);
             valStack.push("(");
+            if (this.errorBrackets.length > 0) {
+              // For nested func in parens (Issue #1014)
+              this.errorBrackets.push(CssTokenizer.TokenType.C_PAR);
+            }
           }
           tokenizer.consume();
           continue;
