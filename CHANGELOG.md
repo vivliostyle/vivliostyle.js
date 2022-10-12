@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.18.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.3...v2.18.4) (2022-10-12)
+
+### Bug Fixes
+
+- CSS parser error with calc expression including parens and variables ([88c4ae0](https://github.com/vivliostyle/vivliostyle.js/commit/88c4ae00039dab743945c141fcb5c167580ddf2a)), closes [#1014](https://github.com/vivliostyle/vivliostyle.js/issues/1014)
+- CSS parser error with property:calc(…) misinterpreted as selector with pseudo class ([71c39bf](https://github.com/vivliostyle/vivliostyle.js/commit/71c39bf665d6a2b668f175f8d3623184275ec23a)), closes [#1020](https://github.com/vivliostyle/vivliostyle.js/issues/1020)
+- percentage units in color value changed, resulting in invalid colors ([a45e861](https://github.com/vivliostyle/vivliostyle.js/commit/a45e861903946e3f2499f23d6ef4fe852fae30d5)), closes [#1012](https://github.com/vivliostyle/vivliostyle.js/issues/1012)
+- RTL direction not behaving in multi column ([d6280f1](https://github.com/vivliostyle/vivliostyle.js/commit/d6280f184e9217f05c98b937ae14b1efc2808192)), closes [#1016](https://github.com/vivliostyle/vivliostyle.js/issues/1016)
+- TypeError occurs with ::nth-fragment() and ::after-if-continues() selectors ([7a7c1aa](https://github.com/vivliostyle/vivliostyle.js/commit/7a7c1aa983a5142c05080a080e5e1c08cbc6bb0b)), closes [#1023](https://github.com/vivliostyle/vivliostyle.js/issues/1023)
+- wrong CSS variable scoping ([37e800a](https://github.com/vivliostyle/vivliostyle.js/commit/37e800a7074f3c907214b11630d9728fd652c4df)), closes [#1015](https://github.com/vivliostyle/vivliostyle.js/issues/1015)
+
 ## [2.18.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.2...v2.18.3) (2022-09-30)
 
 ### Bug Fixes
