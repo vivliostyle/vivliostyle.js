@@ -31,6 +31,7 @@ import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
 import { CssStyler } from "./types";
+import { TokenType } from "./css-tokenizer";
 
 export type ElementStyle = {
   [key: string]:
@@ -3486,7 +3487,7 @@ export class CascadeParserHandler
   override attributeSelector(
     ns: string,
     name: string,
-    op: CssTokenizer.TokenType,
+    op: TokenType,
     value: string | null,
   ): void {
     this.specificity += 256;
@@ -3494,13 +3495,13 @@ export class CascadeParserHandler
     value = value || "";
     let action;
     switch (op) {
-      case CssTokenizer.TokenType.EOF:
+      case TokenType.EOF:
         action = new CheckAttributePresentAction(ns, name);
         break;
-      case CssTokenizer.TokenType.EQ:
+      case TokenType.EQ:
         action = new CheckAttributeEqAction(ns, name, value);
         break;
-      case CssTokenizer.TokenType.TILDE_EQ:
+      case TokenType.TILDE_EQ:
         if (!value || value.match(/\s/)) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3511,14 +3512,14 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.BAR_EQ:
+      case TokenType.BAR_EQ:
         action = new CheckAttributeRegExpAction(
           ns,
           name,
           new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`),
         );
         break;
-      case CssTokenizer.TokenType.HAT_EQ:
+      case TokenType.HAT_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3529,7 +3530,7 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.DOLLAR_EQ:
+      case TokenType.DOLLAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3540,7 +3541,7 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.STAR_EQ:
+      case TokenType.STAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3551,7 +3552,7 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.COL_COL:
+      case TokenType.COL_COL:
         if (value == "supported") {
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
