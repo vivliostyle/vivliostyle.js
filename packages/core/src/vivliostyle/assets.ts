@@ -18,7 +18,7 @@
  * @fileoverview Assets - Bundle resources
  */
 
-// vivliostyle-viewport-screen.css
+/** vivliostyle-viewport-screen.css */
 export const VivliostyleViewportScreenCss = `
 @media screen {
   [data-vivliostyle-viewer-viewport] {
@@ -87,7 +87,7 @@ export const VivliostyleViewportScreenCss = `
 }
 `;
 
-// vivliostyle-viewport.css
+/** vivliostyle-viewport.css */
 export const VivliostyleViewportCss = `
 [data-vivliostyle-layout-box] {
   position: absolute;
@@ -177,7 +177,7 @@ export const VivliostyleViewportCss = `
 }
 `;
 
-// validation.txt
+/** validation.txt */
 export const ValidationTxt = `
 /*
  * Copyright 2013 Google, Inc.
@@ -768,7 +768,7 @@ word-wrap = overflow-wrap;
 
 `;
 
-// user-agent.xml
+/** user-agent.xml */
 export const UserAgentXml = `
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:s="http://www.pyroxy.com/ns/shadow">
@@ -794,7 +794,7 @@ export const UserAgentXml = `
 </body>
 </html>`;
 
-// user-agent-page.css
+/** user-agent-page.css */
 export const UserAgentPageCss = `
 @namespace html "http://www.w3.org/1999/xhtml";
 
@@ -924,7 +924,7 @@ export const UserAgentPageCss = `
 }
 `;
 
-// user-agent-base.css
+/** user-agent-base.css */
 export const UserAgentBaseCss = `
 @namespace html "http://www.w3.org/1999/xhtml";
 
@@ -1374,7 +1374,7 @@ ul#toc {
 }
 `;
 
-// text-polyfill.css
+/** text-polyfill.css */
 export const TextPolyfillCss = `
 viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {

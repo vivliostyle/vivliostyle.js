@@ -19,6 +19,7 @@
  * @fileoverview CssTokenizer - CSS Tokenizer.
  */
 
+/** */
 export interface TokenizerHandler {
   error(mnemonics: string, token: Token): void;
 }
