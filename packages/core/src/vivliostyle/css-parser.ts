@@ -1569,6 +1569,11 @@ export class Parser {
 
         // fall through
         case Action.SELECTOR_ID:
+          if (!token.text) {
+            handler.error("E_CSS_SYNTAX", token);
+            tokenizer.consume();
+            continue;
+          }
           handler.idSelector(token.text);
           if (parsingFunctionParam) {
             this.actions = actionsSelectorInFunc;
@@ -1615,9 +1620,11 @@ export class Parser {
               text = token.text;
               tokenizer.consume();
               switch (text) {
+                case "is":
                 case "not":
+                case "where":
                   this.actions = actionsSelectorStart;
-                  handler.startFuncWithSelector("not");
+                  handler.startFuncWithSelector(text);
                   if (
                     this.runParser(
                       Number.POSITIVE_INFINITY,
@@ -1628,6 +1635,9 @@ export class Parser {
                     )
                   ) {
                     this.actions = actionsSelector;
+                    if (parsingFunctionParam) {
+                      continue;
+                    }
                   } else {
                     this.actions = actionsErrorSelector;
                   }
@@ -2503,6 +2513,15 @@ export class Parser {
 
         // fall through
         case Action.ERROR_POP:
+          if (
+            parsingFunctionParam &&
+            this.errorBrackets.length == 0 &&
+            token.type == TokenType.C_PAR
+          ) {
+            tokenizer.consume();
+            handler.endFuncWithSelector();
+            return true;
+          }
           // Close bracket while skipping error syntax
           if (
             this.errorBrackets.length > 0 &&
@@ -2536,12 +2555,30 @@ export class Parser {
             return false;
           }
           if (parsingFunctionParam) {
-            if (token.type == TokenType.INVALID) {
-              handler.error(token.text, token);
-            } else {
-              handler.error("E_CSS_SYNTAX", token);
+            if (token.type === TokenType.C_PAR) {
+              if (this.actions === actionsSelectorStart) {
+                handler.error("E_CSS_SYNTAX", token);
+              }
+              handler.endFuncWithSelector();
+              tokenizer.consume();
+              return true;
             }
-            return false;
+            if (token.type === TokenType.COMMA) {
+              if (this.actions === actionsSelectorStart) {
+                handler.error("E_CSS_SYNTAX", token);
+              }
+              handler.nextSelector();
+              this.actions = actionsSelectorStart;
+              tokenizer.consume();
+              continue;
+            }
+            if (token.type === TokenType.O_PAR) {
+              this.errorBrackets.push(token.type + 1);
+            }
+            handler.error("E_CSS_SYNTAX", token);
+            tokenizer.consume();
+            this.actions = actionsErrorSelector;
+            continue;
           }
           if (
             this.actions !== actionsError &&
@@ -2549,7 +2586,7 @@ export class Parser {
             this.actions !== actionsErrorDecl
           ) {
             if (token.type == TokenType.INVALID) {
-              handler.error(token.text, token);
+              handler.error("E_CSS_SYNTAX", token);
             } else if (this.actions === actionsPropVal) {
               // Do not stop parsing on invalid property syntax as long as brackets are balanced.
               switch (token.type) {

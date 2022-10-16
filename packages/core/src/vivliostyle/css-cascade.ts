@@ -1243,26 +1243,53 @@ export class CheckAppliedAction extends CascadeAction {
   }
 }
 
-export class NegateActionsSet extends ChainedAction {
+/**
+ * Cascade Action for :is() and :where() pseudo classes
+ */
+export class MatchesAction extends ChainedAction {
   checkAppliedAction: CheckAppliedAction;
-  firstAction: CascadeAction;
+  firstActions: CascadeAction[] = [];
 
-  constructor(list: ChainedAction[]) {
+  constructor(chains: ChainedAction[][]) {
     super();
     this.checkAppliedAction = new CheckAppliedAction();
-    this.firstAction = chainActions(list, this.checkAppliedAction);
+    for (const chain of chains) {
+      this.firstActions.push(chainActions(chain, this.checkAppliedAction));
+    }
   }
 
   override apply(cascadeInstance: CascadeInstance): void {
-    this.firstAction.apply(cascadeInstance);
-    if (!this.checkAppliedAction.applied) {
+    for (const firstAction of this.firstActions) {
+      firstAction.apply(cascadeInstance);
+      if (this.checkAppliedAction.applied) {
+        break;
+      }
+    }
+    if (this.checkAppliedAction.applied === this.positive()) {
       this.chained.apply(cascadeInstance);
     }
     this.checkAppliedAction.applied = false;
   }
 
   override getPriority(): number {
-    return (this.firstAction as ChainedAction).getPriority();
+    return Math.max(
+      ...this.firstActions.map((firstAction) =>
+        firstAction instanceof ChainedAction ? firstAction.getPriority() : 0,
+      ),
+    );
+  }
+
+  positive(): boolean {
+    return true;
+  }
+}
+
+/**
+ * Cascade Action for :not() pseudo class
+ */
+export class MatchesNoneAction extends MatchesAction {
+  override positive(): boolean {
+    return false;
   }
 }
 
@@ -3418,7 +3445,7 @@ export class CascadeParserHandler
         this.pseudoelementSelector(name, params);
         return;
       default: // always fails
-        Logging.logger.warn(`unknown pseudo-class selector: ${name}`);
+        Logging.logger.warn(`Unknown pseudo-class: :${name}`);
         this.chain.push(new CheckConditionAction(""));
         break;
     }
@@ -3472,7 +3499,7 @@ export class CascadeParserHandler
         }
         break;
       default: // always fails
-        Logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
+        Logging.logger.warn(`Unknown pseudo-element: ::${name}`);
         this.chain.push(new CheckConditionAction(""));
         break;
     }
@@ -3756,16 +3783,21 @@ export class CascadeParserHandler
   }
 
   override startFuncWithSelector(funcName: string): void {
+    let parameterParserHandler: MatchesParameterParserHandler;
     switch (funcName) {
-      case "not": {
-        const notParserHandler = new NotParameterParserHandler(this);
-        notParserHandler.startSelectorRule();
-        this.owner.pushHandler(notParserHandler);
+      case "is":
+        parameterParserHandler = new MatchesParameterParserHandler(this);
         break;
-      }
-      default:
-        // TODO
+      case "not":
+        parameterParserHandler = new NotParameterParserHandler(this);
         break;
+      case "where":
+        parameterParserHandler = new WhereParameterParserHandler(this);
+        break;
+    }
+    if (parameterParserHandler) {
+      parameterParserHandler.startSelectorRule();
+      this.owner.pushHandler(parameterParserHandler);
     }
   }
 }
@@ -3779,8 +3811,13 @@ export const nthSelectorActionClasses: { [key: string]: typeof IsNthAction } = {
 
 export let conditionCount: number = 0;
 
-export class NotParameterParserHandler extends CascadeParserHandler {
+/**
+ * Cascade Parser Handler for :is() pseudo class parameter
+ */
+export class MatchesParameterParserHandler extends CascadeParserHandler {
   parentChain: ChainedAction[];
+  chains: ChainedAction[][] = [];
+  maxSpecificity: number = 0;
 
   constructor(public readonly parent: CascadeParserHandler) {
     super(
@@ -3795,31 +3832,88 @@ export class NotParameterParserHandler extends CascadeParserHandler {
     this.parentChain = parent.chain;
   }
 
-  override startFuncWithSelector(funcName: string): void {
-    if (funcName == "not") {
-      this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+  override nextSelector(): void {
+    if (this.chain) {
+      this.chains.push(this.chain);
     }
+    this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
+    this.chain = [];
+    this.pseudoelement = null;
+    this.viewConditionId = null;
+    this.footnoteContent = false;
+    this.specificity = 0;
+  }
+
+  override endFuncWithSelector(): void {
+    if (this.chain) {
+      this.chains.push(this.chain);
+    }
+    if (this.chains.length > 0) {
+      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
+      this.parentChain.push(
+        this.positive()
+          ? new MatchesAction(this.chains)
+          : new MatchesNoneAction(this.chains),
+      );
+      if (this.increasingSpecificity()) {
+        this.parent.specificity += this.maxSpecificity;
+      }
+    } else {
+      // func argument is empty or all invalid
+      this.parentChain.push(new CheckConditionAction("")); // always fails
+    }
+
+    this.owner.popHandler();
   }
 
   override startRuleBody(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_RULE_BODY");
   }
 
-  override nextSelector(): void {
-    this.reportAndSkip("E_CSS_UNEXPECTED_NEXT_SELECTOR");
-  }
-
-  override endFuncWithSelector(): void {
-    if (this.chain && this.chain.length > 0) {
-      this.parentChain.push(new NegateActionsSet(this.chain));
-    }
-    this.parent.specificity += this.specificity;
-    this.owner.popHandler();
-  }
-
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
-    this.owner.popHandler();
+    this.chain = null;
+    this.pseudoelement = null;
+    this.viewConditionId = null;
+    this.footnoteContent = false;
+    this.specificity = 0;
+    if (!this.forgiving()) {
+      this.owner.popHandler();
+    }
+  }
+
+  positive(): boolean {
+    return true;
+  }
+
+  increasingSpecificity(): boolean {
+    return true;
+  }
+
+  forgiving(): boolean {
+    return true;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :not() pseudo class parameter
+ */
+export class NotParameterParserHandler extends MatchesParameterParserHandler {
+  override positive(): boolean {
+    return false;
+  }
+
+  forgiving(): boolean {
+    return false;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :where() pseudo class parameter
+ */
+export class WhereParameterParserHandler extends MatchesParameterParserHandler {
+  override increasingSpecificity(): boolean {
+    return false;
   }
 }
 
