@@ -615,6 +615,7 @@ export enum Action {
   SELECTOR_PSEUDOCLASS_1,
   SELECTOR_FOLLOWING_SIBLING,
   VAL_URANGE,
+  SELECTOR_PSEUDOELEM_1,
   DONE = 200,
 }
 
@@ -653,7 +654,7 @@ export const OP_MEDIA_NOT: number = TokenType.LAST + 3;
   actionsSelector[TokenType.O_BRK] = Action.SELECTOR_ATTR_1;
   actionsSelector[TokenType.O_BRC] = Action.SELECTOR_BODY;
   actionsSelector[TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS_1;
-  actionsSelector[TokenType.COL_COL] = Action.SELECTOR_PSEUDOELEM;
+  actionsSelector[TokenType.COL_COL] = Action.SELECTOR_PSEUDOELEM_1;
   actionsSelector[TokenType.COMMA] = Action.SELECTOR_NEXT;
   actionsSelectorInFunc[TokenType.GT] = Action.SELECTOR_CHILD;
   actionsSelectorInFunc[TokenType.PLUS] = Action.SELECTOR_SIBLING;
@@ -1672,6 +1673,12 @@ export class Parser {
           handler.error("E_CSS_PSEUDOCLASS_SYNTAX", token);
           this.actions = actionsError;
           continue;
+        case Action.SELECTOR_PSEUDOELEM_1:
+          if (token.precededBySpace) {
+            handler.descendantSelector();
+          }
+
+        // fall through
         case Action.SELECTOR_PSEUDOELEM:
           tokenizer.consume();
           token = tokenizer.token();
