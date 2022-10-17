@@ -1244,7 +1244,7 @@ export class CheckAppliedAction extends CascadeAction {
 }
 
 /**
- * Cascade Action for :is() and :where() pseudo classes
+ * Cascade Action for :is() and similar pseudo-classes
  */
 export class MatchesAction extends ChainedAction {
   checkAppliedAction: CheckAppliedAction;
@@ -1282,14 +1282,60 @@ export class MatchesAction extends ChainedAction {
   positive(): boolean {
     return true;
   }
+
+  relational(): boolean {
+    return false;
+  }
 }
 
 /**
- * Cascade Action for :not() pseudo class
+ * Cascade Action for :not() pseudo-class
  */
 export class MatchesNoneAction extends MatchesAction {
   override positive(): boolean {
     return false;
+  }
+}
+
+/**
+ * Cascade Action for :has() pseudo-class
+ */
+export class MatchesRelationalAction extends MatchesAction {
+  constructor(public selectorTexts: string[]) {
+    super([]);
+  }
+
+  override apply(cascadeInstance: CascadeInstance): void {
+    for (const selectorText of this.selectorTexts) {
+      let selectorWithScope: string;
+      let scopingRoot: Element;
+      if (/^\s*[+~]/.test(selectorText)) {
+        // :has(+ F) or :has(~ F)
+        scopingRoot = cascadeInstance.currentElement.parentElement;
+        const index = Array.from(scopingRoot.children).indexOf(
+          cascadeInstance.currentElement,
+        );
+        selectorWithScope = `:scope > :nth-child(${index + 1}) ${selectorText}`;
+      } else {
+        // :has(F) or :has(> F)
+        scopingRoot = cascadeInstance.currentElement;
+        selectorWithScope = `:scope ${selectorText}`;
+      }
+      try {
+        if (scopingRoot.querySelector(selectorWithScope)) {
+          this.checkAppliedAction.apply(cascadeInstance);
+          break;
+        }
+      } catch (e) {}
+    }
+    if (this.checkAppliedAction.applied) {
+      this.chained.apply(cascadeInstance);
+    }
+    this.checkAppliedAction.applied = false;
+  }
+
+  override relational(): boolean {
+    return true;
   }
 }
 
@@ -3360,6 +3406,7 @@ export class CascadeParserHandler
         this.chain.push(new IsCheckedAction());
         break;
       case "root":
+      case "scope":
         this.chain.push(new IsRootAction());
         break;
       case "link":
@@ -3447,7 +3494,7 @@ export class CascadeParserHandler
       default: // always fails
         Logging.logger.warn(`Unknown pseudo-class: :${name}`);
         this.chain.push(new CheckConditionAction(""));
-        break;
+        return;
     }
     this.specificity += 256;
   }
@@ -3501,7 +3548,7 @@ export class CascadeParserHandler
       default: // always fails
         Logging.logger.warn(`Unknown pseudo-element: ::${name}`);
         this.chain.push(new CheckConditionAction(""));
-        break;
+        return;
     }
     this.specificity += 1;
   }
@@ -3794,6 +3841,9 @@ export class CascadeParserHandler
       case "where":
         parameterParserHandler = new WhereParameterParserHandler(this);
         break;
+      case "has":
+        parameterParserHandler = new HasParameterParserHandler(this);
+        break;
     }
     if (parameterParserHandler) {
       parameterParserHandler.startSelectorRule();
@@ -3812,12 +3862,13 @@ export const nthSelectorActionClasses: { [key: string]: typeof IsNthAction } = {
 export let conditionCount: number = 0;
 
 /**
- * Cascade Parser Handler for :is() pseudo class parameter
+ * Cascade Parser Handler for :is() and similar pseudo-classes parameter
  */
 export class MatchesParameterParserHandler extends CascadeParserHandler {
   parentChain: ChainedAction[];
   chains: ChainedAction[][] = [];
   maxSpecificity: number = 0;
+  selectorTexts: string[] = [];
 
   constructor(public readonly parent: CascadeParserHandler) {
     super(
@@ -3851,7 +3902,9 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     if (this.chains.length > 0) {
       this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
       this.parentChain.push(
-        this.positive()
+        this.relational()
+          ? new MatchesRelationalAction(this.selectorTexts)
+          : this.positive()
           ? new MatchesAction(this.chains)
           : new MatchesNoneAction(this.chains),
       );
@@ -3882,21 +3935,44 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     }
   }
 
+  override pushSelectorText(selectorText: string): void {
+    // selectorText is used only for relational pseudo-class `:has()`
+    if (this.chain && this.relational()) {
+      this.selectorTexts.push(selectorText);
+    }
+  }
+
+  /**
+   * @returns true unless this is `:not()`
+   */
   positive(): boolean {
     return true;
   }
 
+  /**
+   * @returns true unless this is `:where()`
+   */
   increasingSpecificity(): boolean {
     return true;
   }
 
+  /**
+   * @returns true if this takes a forgiving selector list (:is/where/has)
+   */
   forgiving(): boolean {
     return true;
+  }
+
+  /**
+   * @returns true if this is `:has()`
+   */
+  relational(): boolean {
+    return false;
   }
 }
 
 /**
- * Cascade Parser Handler for :not() pseudo class parameter
+ * Cascade Parser Handler for :not() pseudo-class parameter
  */
 export class NotParameterParserHandler extends MatchesParameterParserHandler {
   override positive(): boolean {
@@ -3909,11 +3985,20 @@ export class NotParameterParserHandler extends MatchesParameterParserHandler {
 }
 
 /**
- * Cascade Parser Handler for :where() pseudo class parameter
+ * Cascade Parser Handler for :where() pseudo-class parameter
  */
 export class WhereParameterParserHandler extends MatchesParameterParserHandler {
   override increasingSpecificity(): boolean {
     return false;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :has() pseudo-class parameter
+ */
+export class HasParameterParserHandler extends MatchesParameterParserHandler {
+  override relational(): boolean {
+    return true;
   }
 }
 

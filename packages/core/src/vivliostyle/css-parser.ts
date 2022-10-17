@@ -170,12 +170,16 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
   endRule(): void {}
 
   /**
-   * @param funcName The name of the function taking a selector list as an
-   *     argument
+   * @param funcName The name of the function taking a selector list as argument
    */
   startFuncWithSelector(funcName: string): void {}
 
   endFuncWithSelector(): void {}
+
+  /**
+   * For relational pseudo-class `:has()` support
+   */
+  pushSelectorText(selectorText: string) {}
 
   getImportantSpecificity(): number {
     switch (this.flavor) {
@@ -395,6 +399,10 @@ export class DispatchParserHandler extends ParserHandler {
 
   override endFuncWithSelector(): void {
     this.slave.endFuncWithSelector();
+  }
+
+  override pushSelectorText(selectorText: string): void {
+    this.slave.pushSelectorText(selectorText);
   }
 }
 
@@ -664,7 +672,6 @@ export const OP_MEDIA_NOT: number = TokenType.LAST + 3;
   actionsSelectorInFunc[TokenType.HASH] = Action.SELECTOR_ID_1;
   actionsSelectorInFunc[TokenType.CLASS] = Action.SELECTOR_CLASS_1;
   actionsSelectorInFunc[TokenType.O_BRK] = Action.SELECTOR_ATTR_1;
-  actionsSelectorInFunc[TokenType.C_PAR] = Action.DONE;
   actionsSelectorInFunc[TokenType.COLON] = Action.SELECTOR_PSEUDOCLASS_1;
   actionsSelectorCont[TokenType.IDENT] = Action.SELECTOR_NAME;
   actionsSelectorCont[TokenType.STAR] = Action.SELECTOR_ANY;
@@ -1372,6 +1379,7 @@ export class Parser {
     parsingStyleAttr: boolean,
     parsingMediaQuery: boolean,
     parsingFunctionParam: boolean,
+    parsingRelationalSelector?: boolean,
   ): boolean {
     const handler = this.handler;
     const tokenizer = this.tokenizer;
@@ -1383,6 +1391,7 @@ export class Parser {
     let num: number;
     let val: Css.Val;
     let params: (number | string)[];
+    let selectorStartPosition: number | null = null;
 
     if (parsingStyleAttr) {
       this.inStyleDeclaration = true;
@@ -1393,6 +1402,15 @@ export class Parser {
     }
     parserLoop: for (; count > 0; --count) {
       token = tokenizer.token();
+
+      // For relational pseudo-class `:has()` support
+      if (parsingFunctionParam && selectorStartPosition === null) {
+        // token.position may be token's start position + 1
+        selectorStartPosition = token.position - 1;
+        if (tokenizer.input[selectorStartPosition] === "(") {
+          selectorStartPosition++;
+        }
+      }
 
       // Do not stop parsing on invalid property syntax as long as brackets are balanced.
       if (
@@ -1623,6 +1641,7 @@ export class Parser {
                 case "is":
                 case "not":
                 case "where":
+                case "has":
                   this.actions = actionsSelectorStart;
                   handler.startFuncWithSelector(text);
                   if (
@@ -1632,6 +1651,7 @@ export class Parser {
                       false,
                       false,
                       true,
+                      text === "has",
                     )
                   ) {
                     this.actions = actionsSelector;
@@ -2541,10 +2561,6 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.DONE:
-          if (parsingFunctionParam) {
-            tokenizer.consume();
-            handler.endFuncWithSelector();
-          }
           return true;
         default:
           if (parsingMediaQuery) {
@@ -2555,25 +2571,43 @@ export class Parser {
             return false;
           }
           if (parsingFunctionParam) {
-            if (token.type === TokenType.C_PAR) {
-              if (this.actions === actionsSelectorStart) {
-                handler.error("E_CSS_SYNTAX", token);
-              }
-              handler.endFuncWithSelector();
-              tokenizer.consume();
-              return true;
-            }
-            if (token.type === TokenType.COMMA) {
-              if (this.actions === actionsSelectorStart) {
-                handler.error("E_CSS_SYNTAX", token);
-              }
-              handler.nextSelector();
-              this.actions = actionsSelectorStart;
-              tokenizer.consume();
-              continue;
-            }
-            if (token.type === TokenType.O_PAR) {
-              this.errorBrackets.push(token.type + 1);
+            switch (token.type) {
+              case TokenType.COMMA:
+              case TokenType.C_PAR:
+                if (this.actions === actionsSelectorStart) {
+                  handler.error("E_CSS_SYNTAX", token);
+                } else {
+                  const selectorText = tokenizer.input.substring(
+                    selectorStartPosition,
+                    token.position,
+                  );
+                  handler.pushSelectorText(selectorText);
+                  selectorStartPosition = token.position + 1;
+                }
+                if (token.type === TokenType.COMMA) {
+                  handler.nextSelector();
+                  this.actions = actionsSelectorStart;
+                  tokenizer.consume();
+                  continue;
+                } else {
+                  handler.endFuncWithSelector();
+                  tokenizer.consume();
+                  return true;
+                }
+              case TokenType.GT:
+              case TokenType.PLUS:
+              case TokenType.TILDE:
+                if (parsingRelationalSelector) {
+                  // :has() takes relational selectors e.g. `:has(> F)`
+                  this.actions = actionsSelector;
+                  continue;
+                }
+                break;
+              case TokenType.O_BRC:
+              case TokenType.O_BRK:
+              case TokenType.O_PAR:
+                this.errorBrackets.push(token.type + 1);
+                break;
             }
             handler.error("E_CSS_SYNTAX", token);
             tokenizer.consume();
