@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.19.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.4...v2.19.0) (2022-10-18)
+
+### Bug Fixes
+
+- Selector `E ::pseudo` is misinterpreted as `E::pseudo` ([e79e5ce](https://github.com/vivliostyle/vivliostyle.js/commit/e79e5ce7292585251fef2043f8690c68d64b7bae)), closes [#1026](https://github.com/vivliostyle/vivliostyle.js/issues/1026)
+
+### Features
+
+- Add support for :has() pseudo-class in Selectors Level 4 ([8ed553f](https://github.com/vivliostyle/vivliostyle.js/commit/8ed553f51e410f7a13465dfdeeadf9d4a6e0239e)), closes [#828](https://github.com/vivliostyle/vivliostyle.js/issues/828)
+- Add support for :is()/:not()/:where() pseudo-classes in Selectors Level 4 ([68baee0](https://github.com/vivliostyle/vivliostyle.js/commit/68baee017e73e54f0823c39095a0dfeeb3de9e7f)), closes [#957](https://github.com/vivliostyle/vivliostyle.js/issues/957)
+
 ## [2.18.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.3...v2.18.4) (2022-10-12)
 
 ### Bug Fixes
