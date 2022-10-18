@@ -23,6 +23,7 @@ import * as Css from "./css";
 import * as CssTokenizer from "./css-tokenizer";
 import * as Logging from "./logging";
 import { ValidationTxt } from "./assets";
+import { TokenType } from "./css-tokenizer";
 
 export interface PropertyReceiver {
   unknownProperty(name: string, value: Css.Val): void;
@@ -1444,11 +1445,11 @@ export class ValidatorSet {
     token: CssTokenizer.Token,
   ): ValidatingGroup {
     let cssval: Css.Val;
-    if (token.type == CssTokenizer.TokenType.NUMERIC) {
+    if (token.type == TokenType.NUMERIC) {
       cssval = new Css.Numeric(token.num, token.text);
-    } else if (token.type == CssTokenizer.TokenType.HASH) {
+    } else if (token.type == TokenType.HASH) {
       cssval = new Css.HexColor(token.text);
-    } else if (token.type == CssTokenizer.TokenType.IDENT) {
+    } else if (token.type == TokenType.IDENT) {
       cssval = Css.getName(token.text);
     } else {
       throw new Error("unexpected replacement");
@@ -1652,29 +1653,29 @@ export class ValidatorSet {
     section: number,
   ): string | null {
     let token = tok.token();
-    if (token.type == CssTokenizer.TokenType.EOF) {
+    if (token.type == TokenType.EOF) {
       // Finished normally
       return null;
     }
     const rulePrefixes: { [key: string]: boolean } = { "": true };
-    if (token.type == CssTokenizer.TokenType.O_BRK) {
+    if (token.type == TokenType.O_BRK) {
       do {
         tok.consume();
         token = tok.token();
-        if (token.type != CssTokenizer.TokenType.IDENT) {
+        if (token.type != TokenType.IDENT) {
           throw new Error("Prefix name expected");
         }
         rulePrefixes[token.text] = true;
         tok.consume();
         token = tok.token();
-      } while (token.type == CssTokenizer.TokenType.COMMA);
-      if (token.type != CssTokenizer.TokenType.C_BRK) {
+      } while (token.type == TokenType.COMMA);
+      if (token.type != TokenType.C_BRK) {
         throw new Error("']' expected");
       }
       tok.consume();
       token = tok.token();
     }
-    if (token.type != CssTokenizer.TokenType.IDENT) {
+    if (token.type != TokenType.IDENT) {
       throw new Error("Property name expected");
     }
     if (section == 2 ? token.text == "SHORTHANDS" : token.text == "DEFAULTS") {
@@ -1684,14 +1685,14 @@ export class ValidatorSet {
     const name = token.text;
     tok.consume();
     if (section != 2) {
-      if (tok.token().type != CssTokenizer.TokenType.EQ) {
+      if (tok.token().type != TokenType.EQ) {
         throw new Error("'=' expected");
       }
       if (!this.isBuiltIn(name)) {
         this.prefixes[name] = rulePrefixes;
       }
     } else {
-      if (tok.token().type != CssTokenizer.TokenType.COLON) {
+      if (tok.token().type != TokenType.COLON) {
         throw new Error("':' expected");
       }
     }
@@ -1733,7 +1734,7 @@ export class ValidatorSet {
         tok.consume();
         let token = tok.token();
         switch (token.type) {
-          case CssTokenizer.TokenType.IDENT:
+          case TokenType.IDENT:
             if (!expectval) {
               setop(" ");
             }
@@ -1752,7 +1753,7 @@ export class ValidatorSet {
             }
             expectval = false;
             break;
-          case CssTokenizer.TokenType.INT: {
+          case TokenType.INT: {
             const idents: ValueMap = {};
             idents[`${token.num}`] = new Css.Int(token.num);
             vals.push(
@@ -1761,13 +1762,13 @@ export class ValidatorSet {
             expectval = false;
             break;
           }
-          case CssTokenizer.TokenType.BAR:
+          case TokenType.BAR:
             setop("|");
             break;
-          case CssTokenizer.TokenType.BAR_BAR:
+          case TokenType.BAR_BAR:
             setop("||");
             break;
-          case CssTokenizer.TokenType.O_BRK:
+          case TokenType.O_BRK:
             if (!expectval) {
               setop(" ");
             }
@@ -1776,7 +1777,7 @@ export class ValidatorSet {
             vals = [];
             expectval = true;
             break;
-          case CssTokenizer.TokenType.FUNC:
+          case TokenType.FUNC:
             if (!expectval) {
               setop(" ");
             }
@@ -1785,7 +1786,7 @@ export class ValidatorSet {
             vals = [];
             expectval = true;
             break;
-          case CssTokenizer.TokenType.C_BRK: {
+          case TokenType.C_BRK: {
             val = reduce();
             const open = stack.pop();
             if (open.b != "[") {
@@ -1797,7 +1798,7 @@ export class ValidatorSet {
             expectval = false;
             break;
           }
-          case CssTokenizer.TokenType.C_PAR: {
+          case TokenType.C_PAR: {
             val = reduce();
             const open = stack.pop();
             if (open.b != "(") {
@@ -1809,58 +1810,58 @@ export class ValidatorSet {
             expectval = false;
             break;
           }
-          case CssTokenizer.TokenType.COLON:
+          case TokenType.COLON:
             if (expectval) {
               throw new Error("':' unexpected");
             }
             tok.consume();
             vals.push(this.addReplacement(vals.pop(), tok.token()));
             break;
-          case CssTokenizer.TokenType.QMARK:
+          case TokenType.QMARK:
             if (expectval) {
               throw new Error("'?' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 0, 1));
             break;
-          case CssTokenizer.TokenType.STAR:
+          case TokenType.STAR:
             if (expectval) {
               throw new Error("'*' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 0, Number.POSITIVE_INFINITY));
             break;
-          case CssTokenizer.TokenType.PLUS:
+          case TokenType.PLUS:
             if (expectval) {
               throw new Error("'+' unexpected");
             }
             vals.push(this.addCounts(vals.pop(), 1, Number.POSITIVE_INFINITY));
             break;
-          case CssTokenizer.TokenType.O_BRC: {
+          case TokenType.O_BRC: {
             tok.consume();
             token = tok.token();
-            if (token.type != CssTokenizer.TokenType.INT) {
+            if (token.type != TokenType.INT) {
               throw new Error("<int> expected");
             }
             const min = token.num;
             let max = min;
             tok.consume();
             token = tok.token();
-            if (token.type == CssTokenizer.TokenType.COMMA) {
+            if (token.type == TokenType.COMMA) {
               tok.consume();
               token = tok.token();
-              if (token.type != CssTokenizer.TokenType.INT) {
+              if (token.type != TokenType.INT) {
                 throw new Error("<int> expected");
               }
               max = token.num;
               tok.consume();
               token = tok.token();
             }
-            if (token.type != CssTokenizer.TokenType.C_BRC) {
+            if (token.type != TokenType.C_BRC) {
               throw new Error("'}' expected");
             }
             vals.push(this.addCounts(vals.pop(), min, max));
             break;
           }
-          case CssTokenizer.TokenType.SEMICOL:
+          case TokenType.SEMICOL:
             result = reduce();
             if (stack.length > 0) {
               throw new Error(`unclosed '${stack.pop().b}'`);
@@ -1893,21 +1894,21 @@ export class ValidatorSet {
       while (true) {
         tok.consume();
         const token = tok.token();
-        if (token.type == CssTokenizer.TokenType.SEMICOL) {
+        if (token.type == TokenType.SEMICOL) {
           tok.consume();
           break;
         }
         switch (token.type) {
-          case CssTokenizer.TokenType.IDENT:
+          case TokenType.IDENT:
             vals.push(Css.getName(token.text));
             break;
-          case CssTokenizer.TokenType.NUM:
+          case TokenType.NUM:
             vals.push(new Css.Num(token.num));
             break;
-          case CssTokenizer.TokenType.INT:
+          case TokenType.INT:
             vals.push(new Css.Int(token.num));
             break;
-          case CssTokenizer.TokenType.NUMERIC:
+          case TokenType.NUMERIC:
             vals.push(new Css.Numeric(token.num, token.text));
             break;
           default:
@@ -1927,10 +1928,7 @@ export class ValidatorSet {
       }
       let token = tok.nthToken(1);
       let shorthandValidator: ShorthandValidator;
-      if (
-        token.type == CssTokenizer.TokenType.IDENT &&
-        shorthandValidators[token.text]
-      ) {
+      if (token.type == TokenType.IDENT && shorthandValidators[token.text]) {
         shorthandValidator = new shorthandValidators[token.text]();
         tok.consume();
       } else {
@@ -1946,7 +1944,7 @@ export class ValidatorSet {
         tok.consume();
         token = tok.token();
         switch (token.type) {
-          case CssTokenizer.TokenType.IDENT:
+          case TokenType.IDENT:
             if (this.validators[token.text]) {
               syntax.push(shorthandValidator.syntaxNodeForProperty(token.text));
               // `font-variant_css2` and `font-stretch_css3` are not real properties
@@ -1967,18 +1965,18 @@ export class ValidatorSet {
               );
             }
             break;
-          case CssTokenizer.TokenType.SLASH:
+          case TokenType.SLASH:
             if (syntax.length > 0 || slash) {
               throw new Error("unexpected slash");
             }
             slash = true;
             break;
-          case CssTokenizer.TokenType.O_BRK:
+          case TokenType.O_BRK:
             stack.push({ slash, syntax });
             syntax = [];
             slash = false;
             break;
-          case CssTokenizer.TokenType.C_BRK: {
+          case TokenType.C_BRK: {
             const compound = new ShorthandSyntaxCompound(syntax, slash);
             const item = stack.pop();
             syntax = item.syntax;
@@ -1986,7 +1984,7 @@ export class ValidatorSet {
             syntax.push(compound);
             break;
           }
-          case CssTokenizer.TokenType.SEMICOL:
+          case TokenType.SEMICOL:
             result = true;
             tok.consume();
             break;

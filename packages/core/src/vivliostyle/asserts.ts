@@ -17,6 +17,7 @@
  * @fileoverview Asserts - Assertion utilities.
  */
 
+/** */
 export function assert(cond: any): void {
   if (VIVLIOSTYLE_DEBUG) {
     if (!cond) {

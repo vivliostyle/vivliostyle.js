@@ -2185,17 +2185,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     userStyleSheets: { url: string | null; text: string | null }[] | null,
   ): Task.Result<boolean> {
     this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
-    const userAgentXML = Base.resolveURL(
-      "user-agent.xml",
-      Base.resourceBaseURL,
-    );
     const frame = Task.newFrame<boolean>("OPSDocStore.init");
     this.validatorSet = CssValidator.baseValidatorSet();
     loadUABase().then(() => {
-      this.load(userAgentXML).then(() => {
-        this.triggerSingleDocumentPreprocessing = true;
-        frame.finish(true);
-      });
+      this.triggerSingleDocumentPreprocessing = true;
+      frame.finish(true);
     });
     return frame.result();
   }

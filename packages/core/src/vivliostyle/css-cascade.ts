@@ -31,6 +31,7 @@ import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
 import { CssStyler } from "./types";
+import { TokenType } from "./css-tokenizer";
 
 export type ElementStyle = {
   [key: string]:
@@ -1242,26 +1243,99 @@ export class CheckAppliedAction extends CascadeAction {
   }
 }
 
-export class NegateActionsSet extends ChainedAction {
+/**
+ * Cascade Action for :is() and similar pseudo-classes
+ */
+export class MatchesAction extends ChainedAction {
   checkAppliedAction: CheckAppliedAction;
-  firstAction: CascadeAction;
+  firstActions: CascadeAction[] = [];
 
-  constructor(list: ChainedAction[]) {
+  constructor(chains: ChainedAction[][]) {
     super();
     this.checkAppliedAction = new CheckAppliedAction();
-    this.firstAction = chainActions(list, this.checkAppliedAction);
+    for (const chain of chains) {
+      this.firstActions.push(chainActions(chain, this.checkAppliedAction));
+    }
   }
 
   override apply(cascadeInstance: CascadeInstance): void {
-    this.firstAction.apply(cascadeInstance);
-    if (!this.checkAppliedAction.applied) {
+    for (const firstAction of this.firstActions) {
+      firstAction.apply(cascadeInstance);
+      if (this.checkAppliedAction.applied) {
+        break;
+      }
+    }
+    if (this.checkAppliedAction.applied === this.positive()) {
       this.chained.apply(cascadeInstance);
     }
     this.checkAppliedAction.applied = false;
   }
 
   override getPriority(): number {
-    return (this.firstAction as ChainedAction).getPriority();
+    return Math.max(
+      ...this.firstActions.map((firstAction) =>
+        firstAction instanceof ChainedAction ? firstAction.getPriority() : 0,
+      ),
+    );
+  }
+
+  positive(): boolean {
+    return true;
+  }
+
+  relational(): boolean {
+    return false;
+  }
+}
+
+/**
+ * Cascade Action for :not() pseudo-class
+ */
+export class MatchesNoneAction extends MatchesAction {
+  override positive(): boolean {
+    return false;
+  }
+}
+
+/**
+ * Cascade Action for :has() pseudo-class
+ */
+export class MatchesRelationalAction extends MatchesAction {
+  constructor(public selectorTexts: string[]) {
+    super([]);
+  }
+
+  override apply(cascadeInstance: CascadeInstance): void {
+    for (const selectorText of this.selectorTexts) {
+      let selectorWithScope: string;
+      let scopingRoot: Element;
+      if (/^\s*[+~]/.test(selectorText)) {
+        // :has(+ F) or :has(~ F)
+        scopingRoot = cascadeInstance.currentElement.parentElement;
+        const index = Array.from(scopingRoot.children).indexOf(
+          cascadeInstance.currentElement,
+        );
+        selectorWithScope = `:scope > :nth-child(${index + 1}) ${selectorText}`;
+      } else {
+        // :has(F) or :has(> F)
+        scopingRoot = cascadeInstance.currentElement;
+        selectorWithScope = `:scope ${selectorText}`;
+      }
+      try {
+        if (scopingRoot.querySelector(selectorWithScope)) {
+          this.checkAppliedAction.apply(cascadeInstance);
+          break;
+        }
+      } catch (e) {}
+    }
+    if (this.checkAppliedAction.applied) {
+      this.chained.apply(cascadeInstance);
+    }
+    this.checkAppliedAction.applied = false;
+  }
+
+  override relational(): boolean {
+    return true;
   }
 }
 
@@ -3332,6 +3406,7 @@ export class CascadeParserHandler
         this.chain.push(new IsCheckedAction());
         break;
       case "root":
+      case "scope":
         this.chain.push(new IsRootAction());
         break;
       case "link":
@@ -3417,9 +3492,9 @@ export class CascadeParserHandler
         this.pseudoelementSelector(name, params);
         return;
       default: // always fails
-        Logging.logger.warn(`unknown pseudo-class selector: ${name}`);
+        Logging.logger.warn(`Unknown pseudo-class: :${name}`);
         this.chain.push(new CheckConditionAction(""));
-        break;
+        return;
     }
     this.specificity += 256;
   }
@@ -3471,9 +3546,9 @@ export class CascadeParserHandler
         }
         break;
       default: // always fails
-        Logging.logger.warn(`Unrecognized pseudoelement: ::${name}`);
+        Logging.logger.warn(`Unknown pseudo-element: ::${name}`);
         this.chain.push(new CheckConditionAction(""));
-        break;
+        return;
     }
     this.specificity += 1;
   }
@@ -3486,7 +3561,7 @@ export class CascadeParserHandler
   override attributeSelector(
     ns: string,
     name: string,
-    op: CssTokenizer.TokenType,
+    op: TokenType,
     value: string | null,
   ): void {
     this.specificity += 256;
@@ -3494,13 +3569,13 @@ export class CascadeParserHandler
     value = value || "";
     let action;
     switch (op) {
-      case CssTokenizer.TokenType.EOF:
+      case TokenType.EOF:
         action = new CheckAttributePresentAction(ns, name);
         break;
-      case CssTokenizer.TokenType.EQ:
+      case TokenType.EQ:
         action = new CheckAttributeEqAction(ns, name, value);
         break;
-      case CssTokenizer.TokenType.TILDE_EQ:
+      case TokenType.TILDE_EQ:
         if (!value || value.match(/\s/)) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3511,14 +3586,14 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.BAR_EQ:
+      case TokenType.BAR_EQ:
         action = new CheckAttributeRegExpAction(
           ns,
           name,
           new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`),
         );
         break;
-      case CssTokenizer.TokenType.HAT_EQ:
+      case TokenType.HAT_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3529,7 +3604,7 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.DOLLAR_EQ:
+      case TokenType.DOLLAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3540,7 +3615,7 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.STAR_EQ:
+      case TokenType.STAR_EQ:
         if (!value) {
           action = new CheckConditionAction(""); // always fails
         } else {
@@ -3551,7 +3626,7 @@ export class CascadeParserHandler
           );
         }
         break;
-      case CssTokenizer.TokenType.COL_COL:
+      case TokenType.COL_COL:
         if (value == "supported") {
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
@@ -3755,16 +3830,24 @@ export class CascadeParserHandler
   }
 
   override startFuncWithSelector(funcName: string): void {
+    let parameterParserHandler: MatchesParameterParserHandler;
     switch (funcName) {
-      case "not": {
-        const notParserHandler = new NotParameterParserHandler(this);
-        notParserHandler.startSelectorRule();
-        this.owner.pushHandler(notParserHandler);
+      case "is":
+        parameterParserHandler = new MatchesParameterParserHandler(this);
         break;
-      }
-      default:
-        // TODO
+      case "not":
+        parameterParserHandler = new NotParameterParserHandler(this);
         break;
+      case "where":
+        parameterParserHandler = new WhereParameterParserHandler(this);
+        break;
+      case "has":
+        parameterParserHandler = new HasParameterParserHandler(this);
+        break;
+    }
+    if (parameterParserHandler) {
+      parameterParserHandler.startSelectorRule();
+      this.owner.pushHandler(parameterParserHandler);
     }
   }
 }
@@ -3778,8 +3861,14 @@ export const nthSelectorActionClasses: { [key: string]: typeof IsNthAction } = {
 
 export let conditionCount: number = 0;
 
-export class NotParameterParserHandler extends CascadeParserHandler {
+/**
+ * Cascade Parser Handler for :is() and similar pseudo-classes parameter
+ */
+export class MatchesParameterParserHandler extends CascadeParserHandler {
   parentChain: ChainedAction[];
+  chains: ChainedAction[][] = [];
+  maxSpecificity: number = 0;
+  selectorTexts: string[] = [];
 
   constructor(public readonly parent: CascadeParserHandler) {
     super(
@@ -3794,31 +3883,122 @@ export class NotParameterParserHandler extends CascadeParserHandler {
     this.parentChain = parent.chain;
   }
 
-  override startFuncWithSelector(funcName: string): void {
-    if (funcName == "not") {
-      this.reportAndSkip("E_CSS_UNEXPECTED_NOT");
+  override nextSelector(): void {
+    if (this.chain) {
+      this.chains.push(this.chain);
     }
+    this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
+    this.chain = [];
+    this.pseudoelement = null;
+    this.viewConditionId = null;
+    this.footnoteContent = false;
+    this.specificity = 0;
+  }
+
+  override endFuncWithSelector(): void {
+    if (this.chain) {
+      this.chains.push(this.chain);
+    }
+    if (this.chains.length > 0) {
+      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
+      this.parentChain.push(
+        this.relational()
+          ? new MatchesRelationalAction(this.selectorTexts)
+          : this.positive()
+          ? new MatchesAction(this.chains)
+          : new MatchesNoneAction(this.chains),
+      );
+      if (this.increasingSpecificity()) {
+        this.parent.specificity += this.maxSpecificity;
+      }
+    } else {
+      // func argument is empty or all invalid
+      this.parentChain.push(new CheckConditionAction("")); // always fails
+    }
+
+    this.owner.popHandler();
   }
 
   override startRuleBody(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_RULE_BODY");
   }
 
-  override nextSelector(): void {
-    this.reportAndSkip("E_CSS_UNEXPECTED_NEXT_SELECTOR");
-  }
-
-  override endFuncWithSelector(): void {
-    if (this.chain && this.chain.length > 0) {
-      this.parentChain.push(new NegateActionsSet(this.chain));
-    }
-    this.parent.specificity += this.specificity;
-    this.owner.popHandler();
-  }
-
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
-    this.owner.popHandler();
+    this.chain = null;
+    this.pseudoelement = null;
+    this.viewConditionId = null;
+    this.footnoteContent = false;
+    this.specificity = 0;
+    if (!this.forgiving()) {
+      this.owner.popHandler();
+    }
+  }
+
+  override pushSelectorText(selectorText: string): void {
+    // selectorText is used only for relational pseudo-class `:has()`
+    if (this.chain && this.relational()) {
+      this.selectorTexts.push(selectorText);
+    }
+  }
+
+  /**
+   * @returns true unless this is `:not()`
+   */
+  positive(): boolean {
+    return true;
+  }
+
+  /**
+   * @returns true unless this is `:where()`
+   */
+  increasingSpecificity(): boolean {
+    return true;
+  }
+
+  /**
+   * @returns true if this takes a forgiving selector list (:is/where/has)
+   */
+  forgiving(): boolean {
+    return true;
+  }
+
+  /**
+   * @returns true if this is `:has()`
+   */
+  relational(): boolean {
+    return false;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :not() pseudo-class parameter
+ */
+export class NotParameterParserHandler extends MatchesParameterParserHandler {
+  override positive(): boolean {
+    return false;
+  }
+
+  forgiving(): boolean {
+    return false;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :where() pseudo-class parameter
+ */
+export class WhereParameterParserHandler extends MatchesParameterParserHandler {
+  override increasingSpecificity(): boolean {
+    return false;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :has() pseudo-class parameter
+ */
+export class HasParameterParserHandler extends MatchesParameterParserHandler {
+  override relational(): boolean {
+    return true;
   }
 }
 

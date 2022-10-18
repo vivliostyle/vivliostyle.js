@@ -366,6 +366,7 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   }
   switch (prop) {
     case "behavior":
+    case "template":
     case "ua-list-item-count":
     case "x-first-pseudo":
       propNameMap[prop] = null;
