@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.19.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.0...v2.19.1) (2022-10-21)
+
+### Bug Fixes
+
+- Error with undefined CSS variables in calc expression in shorthand property ([db948cb](https://github.com/vivliostyle/vivliostyle.js/commit/db948cb49a8467b0bd66411b0704402261fa8520)), closes [#1028](https://github.com/vivliostyle/vivliostyle.js/issues/1028)
+
 # [2.19.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.4...v2.19.0) (2022-10-18)
 
 ### Bug Fixes
