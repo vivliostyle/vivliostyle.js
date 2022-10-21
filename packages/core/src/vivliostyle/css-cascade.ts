@@ -4400,11 +4400,15 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       return value;
     }
     const exprText = value.toString().replace(/^calc\b/, "-epubx-expr");
-    if (/\d(%|em|ex|cap|ch|ic|lh|p?v[whbi]|p?vmin|p?vmax)\W/i.test(exprText)) {
+    if (
+      /\d(%|em|ex|cap|ch|ic|lh|p?v[whbi]|p?vmin|p?vmax)\W|\Wvar\(\s*--/i.test(
+        exprText,
+      )
+    ) {
       return value;
     }
     const exprVal = CssParser.parseValue(
-      null,
+      this.context.rootScope,
       new CssTokenizer.Tokenizer(exprText, null),
       "",
     );
