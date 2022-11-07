@@ -478,7 +478,7 @@ export class StyleInstance
   ): boolean {
     if (isFunc) {
       if (name === "selector") {
-        // TODO: `@supports selector(...)`
+        return this.evalSupportsSelector(value);
       }
       return false;
     }
@@ -516,6 +516,27 @@ export class StyleInstance
       supportsReceiver,
     );
     return supported;
+  }
+
+  /**
+   * @param selectorText
+   * @returns true if selectorText is supported selector
+   */
+  private evalSupportsSelector(selectorText: string): boolean {
+    const sph = new StyleParserHandler(null);
+    const tokenizer = new CssTokenizer.Tokenizer(selectorText + "{}", sph);
+    const parser = new CssParser.Parser(
+      CssParser.actionsBase,
+      tokenizer,
+      sph,
+      "",
+    );
+    if (
+      parser.runParser(Number.POSITIVE_INFINITY, false, false, false, false)
+    ) {
+      return !sph.cascadeParserHandler.invalid;
+    }
+    return false;
   }
 
   getConsumedOffset(flowPosition: Vtree.FlowPosition): number {

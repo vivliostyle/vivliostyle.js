@@ -1127,6 +1127,7 @@ export class Parser {
     }
     let parLevel = 0;
     let tokenN: CssTokenizer.Token;
+    let commaCount = 0;
     while (parLevel >= 0) {
       tokenizer.consume();
       tokenN = tokenizer.token();
@@ -1138,7 +1139,11 @@ export class Parser {
         case TokenType.FUNC:
           parLevel++;
           break;
-        case TokenType.INVALID:
+        case TokenType.COMMA:
+          if (parLevel === 0) {
+            commaCount++;
+          }
+          break;
         case TokenType.EOF:
           this.exprError("E_CSS_UNEXPECTED_EOF", tokenN);
           return null;
@@ -1146,7 +1151,10 @@ export class Parser {
     }
     tokenizer.consume();
     const endPosition = tokenN.position;
-    const value = tokenizer.input.substring(startPosition, endPosition).trim();
+    const value =
+      isFunc && name === "selector" && commaCount > 0
+        ? "" // selector() with multiple selectors doesn't work
+        : tokenizer.input.substring(startPosition, endPosition).trim();
     const supportsTest = new Exprs.SupportsTest(
       this.handler.getScope(),
       name,
@@ -1400,7 +1408,8 @@ export class Parser {
       this.exprContext = ExprContext.MEDIA;
       this.valStack.push("{");
     }
-    parserLoop: for (; count > 0; --count) {
+
+    for (; count > 0; --count) {
       token = tokenizer.token();
 
       // For relational pseudo-class `:has()` support
@@ -1655,13 +1664,10 @@ export class Parser {
                     )
                   ) {
                     this.actions = actionsSelector;
-                    if (parsingFunctionParam) {
-                      continue;
-                    }
                   } else {
                     this.actions = actionsErrorSelector;
                   }
-                  break parserLoop;
+                  continue;
                 case "lang":
                 case "href-epub-type":
                   token = tokenizer.token();

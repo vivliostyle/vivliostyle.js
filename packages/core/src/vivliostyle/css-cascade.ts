@@ -3318,6 +3318,7 @@ export class CascadeParserHandler
   state: ParseState;
   viewConditionId: string | null = null;
   insideSelectorRule: ParseState;
+  invalid: boolean = false; // for `@supports selector()` check
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -3376,10 +3377,26 @@ export class CascadeParserHandler
     }
   }
 
+  invalidSelector(message: string): void {
+    Logging.logger.warn(message);
+    this.chain.push(new CheckConditionAction("")); // always fails
+    this.setInvalid();
+  }
+
+  setInvalid(): void {
+    this.invalid = true;
+    for (
+      let handler: CascadeParserHandler = this;
+      handler instanceof MatchesParameterParserHandler;
+      handler = handler.parent
+    ) {
+      handler.parent.invalid = true;
+    }
+  }
+
   override classSelector(name: string): void {
     if (this.pseudoelement) {
-      Logging.logger.warn(`::${this.pseudoelement}`, `followed by .${name}`);
-      this.chain.push(new CheckConditionAction("")); // always fails
+      this.invalidSelector(`::${this.pseudoelement} followed by .${name}`);
       return;
     }
     this.specificity += 256;
@@ -3391,8 +3408,7 @@ export class CascadeParserHandler
     params: (number | string)[],
   ): void {
     if (this.pseudoelement) {
-      Logging.logger.warn(`::${this.pseudoelement}`, `followed by :${name}`);
-      this.chain.push(new CheckConditionAction("")); // always fails
+      this.invalidSelector(`::${this.pseudoelement} followed by :${name}`);
       return;
     }
     switch (name.toLowerCase()) {
@@ -3492,8 +3508,7 @@ export class CascadeParserHandler
         this.pseudoelementSelector(name, params);
         return;
       default: // always fails
-        Logging.logger.warn(`Unknown pseudo-class: :${name}`);
-        this.chain.push(new CheckConditionAction(""));
+        this.invalidSelector(`Unknown pseudo-class :${name}`);
         return;
     }
     this.specificity += 256;
@@ -3515,10 +3530,10 @@ export class CascadeParserHandler
         if (!this.pseudoelement) {
           this.pseudoelement = name;
         } else {
-          Logging.logger.warn(
-            `Double pseudoelement ::${this.pseudoelement}::${name}`,
+          this.invalidSelector(
+            `Double pseudo-element ::${this.pseudoelement}::${name}`,
           );
-          this.chain.push(new CheckConditionAction("")); // always fails
+          return;
         }
         break;
       case "first-n-lines":
@@ -3528,10 +3543,10 @@ export class CascadeParserHandler
             if (!this.pseudoelement) {
               this.pseudoelement = `first-${n}-lines`;
             } else {
-              Logging.logger.warn(
-                `Double pseudoelement ::${this.pseudoelement}::${name}`,
+              this.invalidSelector(
+                `Double pseudo-element ::${this.pseudoelement}::${name}`,
               );
-              this.chain.push(new CheckConditionAction("")); // always fails
+              return;
             }
             break;
           }
@@ -3546,8 +3561,7 @@ export class CascadeParserHandler
         }
         break;
       default: // always fails
-        Logging.logger.warn(`Unknown pseudo-element: ::${name}`);
-        this.chain.push(new CheckConditionAction(""));
+        this.invalidSelector(`Unknown pseudo-element ::${name}`);
         return;
     }
     this.specificity += 1;
@@ -3630,13 +3644,13 @@ export class CascadeParserHandler
         if (value == "supported") {
           action = new CheckNamespaceSupportedAction(ns, name);
         } else {
-          Logging.logger.warn("Unsupported :: attr selector op:", value);
-          action = new CheckConditionAction(""); // always fails
+          this.invalidSelector(`Unsupported :: attr selector op: ${value}`);
+          return;
         }
         break;
       default:
-        Logging.logger.warn("Unsupported attr selector:", op);
-        action = new CheckConditionAction(""); // always fails
+        this.invalidSelector(`Unsupported attr selector: ${op}`);
+        return;
     }
     this.chain.push(action);
   }
@@ -3707,6 +3721,7 @@ export class CascadeParserHandler
     this.specificity = 0;
     this.footnoteContent = false;
     this.chain = [];
+    this.invalid = false;
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
@@ -3714,6 +3729,7 @@ export class CascadeParserHandler
     if (this.state == ParseState.SELECTOR) {
       this.state = ParseState.TOP;
     }
+    this.setInvalid();
   }
 
   override startStylesheet(flavor: CssParser.StylesheetFlavor): void {
@@ -3930,7 +3946,19 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     this.viewConditionId = null;
     this.footnoteContent = false;
     this.specificity = 0;
-    if (!this.forgiving()) {
+
+    let forgiving = false;
+    for (
+      let handler: CascadeParserHandler = this;
+      handler instanceof MatchesParameterParserHandler;
+      handler = handler.parent
+    ) {
+      if (handler.forgiving()) {
+        forgiving = true;
+        break;
+      }
+    }
+    if (!forgiving) {
       this.owner.popHandler();
     }
   }
