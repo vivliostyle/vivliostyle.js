@@ -23,49 +23,6 @@ import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
 /**
- * Though method used to be used as a workaround for Chrome bug, it seems that
- * the bug has been already fixed:
- *   https://bugs.chromium.org/p/chromium/issues/detail?id=297808
- * We now use this method as a workaround for Firefox bug:
- *   https://bugzilla.mozilla.org/show_bug.cgi?id=1159309
- */
-export function fixBoxesForNode(
-  clientLayout: Vtree.ClientLayout,
-  boxes: Vtree.ClientRect[],
-  node: Node,
-): Vtree.ClientRect[] {
-  const fullRange = node.ownerDocument.createRange();
-  fullRange.setStart(node, 0);
-  fullRange.setEnd(node, node.textContent.length);
-  const fullBoxes = clientLayout.getRangeClientRects(fullRange);
-  const result = [];
-  for (const box of boxes) {
-    let k: number;
-    for (k = 0; k < fullBoxes.length; k++) {
-      const fullBox = fullBoxes[k];
-      if (
-        box.top >= fullBox.top &&
-        box.bottom <= fullBox.bottom &&
-        Math.abs(box.left - fullBox.left) < 1
-      ) {
-        result.push({
-          top: box.top,
-          left: fullBox.left,
-          bottom: box.bottom,
-          right: fullBox.right,
-        });
-        break;
-      }
-    }
-    if (k == fullBoxes.length) {
-      Logging.logger.warn("Could not fix character box");
-      result.push(box);
-    }
-  }
-  return result;
-}
-
-/**
  * Calculate the position of the "after" edge in the block-progression
  * dimension. Return 0 if position was determined successfully and return
  * non-zero if position could not be determined and the node should be
@@ -151,9 +108,6 @@ export function calculateEdge(
     range.setStart(node, extraOffset);
     range.setEnd(node, extraOffset + 1);
     let boxes = clientLayout.getRangeClientRects(range);
-    if (vertical && Base.checkVerticalBBoxBug(document.body)) {
-      boxes = fixBoxesForNode(clientLayout, boxes, node);
-    }
     boxes = boxes.filter((box) => box.right > box.left && box.bottom > box.top);
     if (!boxes.length) {
       return NaN;

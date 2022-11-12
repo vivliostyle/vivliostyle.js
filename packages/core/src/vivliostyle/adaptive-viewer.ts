@@ -33,7 +33,7 @@ import * as TaskUtil from "./task-util";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import {
-  TextPolyfillCss,
+  VivliostylePolyfillCss,
   VivliostyleViewportCss,
   VivliostyleViewportScreenCss,
 } from "./assets";
@@ -134,7 +134,10 @@ export class AdaptiveViewer {
       "vivliostyle-viewport-css",
       VivliostyleViewportCss,
     );
-    findOrCreateStyleElement("vivliostyle-text-polyfill-css", TextPolyfillCss);
+    findOrCreateStyleElement(
+      "vivliostyle-polyfill-css",
+      VivliostylePolyfillCss,
+    );
 
     viewportElement.setAttribute("data-vivliostyle-viewer-viewport", true);
     if (Constants.isDebug) {
