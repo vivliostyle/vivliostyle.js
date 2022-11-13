@@ -328,33 +328,6 @@ export namespace Layout {
     layoutPageFloat(
       nodeContext: Vtree.NodeContext,
     ): Task.Result<Vtree.NodeContext>;
-    createJustificationAdjustmentElement(
-      insertionPoint: Node,
-      doc: Document,
-      parentNode: Node,
-      vertical: boolean,
-    ): HTMLElement;
-    addAndAdjustJustificationElement(
-      nodeContext: Vtree.NodeContext,
-      insertAfter: boolean,
-      node: Node,
-      insertionPoint: Node,
-      doc: Document,
-      parentNode: Node,
-    ): HTMLElement;
-    compensateJustificationLineHeight(
-      span: Element,
-      br: Element,
-      nodeContext: Vtree.NodeContext,
-    ): void;
-    /**
-     * Fix justification of the last line of text broken across pages (if
-     * needed).
-     */
-    fixJustificationIfNeeded(
-      nodeContext: Vtree.NodeContext,
-      endOfColumn: boolean,
-    ): void;
     processLineStyling(
       nodeContext: Vtree.NodeContext,
       resNodeContext: Vtree.NodeContext,
@@ -1333,11 +1306,6 @@ export namespace Vtree {
     toNodePosition(): NodePosition;
     isInsideBFC(): boolean;
     getContainingBlockForAbsolute(): NodeContext;
-    /**
-     * Walk up NodeContext tree (starting from itself) and call the callback for
-     * each block.
-     */
-    walkUpBlocks(callback: (p1: NodeContext) => any): void;
     belongsTo(formattingContext: FormattingContext): boolean;
   }
 

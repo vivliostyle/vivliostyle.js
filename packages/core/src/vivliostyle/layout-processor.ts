@@ -196,10 +196,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
         !nodeContext.after);
     column.clearOverflownViewNodes(nodeContext, removeSelf);
     if (endOfColumn) {
-      column.fixJustificationIfNeeded(nodeContext, true);
-      column.layoutContext.processFragmentedBlockEdge(
-        removeSelf ? nodeContext : nodeContext.parent,
-      );
+      column.layoutContext.processFragmentedBlockEdge(nodeContext);
     }
     return Task.newResult(true);
   }

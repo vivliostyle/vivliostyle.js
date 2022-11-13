@@ -820,20 +820,6 @@ export class NodeContext implements Vtree.NodeContext {
     return null;
   }
 
-  /**
-   * Walk up NodeContext tree (starting from itself) and call the callback for
-   * each block.
-   */
-  walkUpBlocks(callback: (p1: NodeContext) => any) {
-    let nodeContext: NodeContext = this;
-    while (nodeContext) {
-      if (!nodeContext.inline) {
-        callback(nodeContext);
-      }
-      nodeContext = nodeContext.parent;
-    }
-  }
-
   belongsTo(formattingContext: FormattingContext): boolean {
     return (
       this.formattingContext === formattingContext &&

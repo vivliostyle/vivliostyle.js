@@ -1679,14 +1679,6 @@ export class StyleInstance
             outerShapeProp,
             this,
           );
-
-          // Though it seems that LShapeFloatBug still exists in Firefox, it
-          // apparently does not occur on exclusion floats. See the test file:
-          // test/files/column-break-bug.html
-          // if (Base.checkLShapeFloatBug(this.viewport.root)) {
-          // 	// Simplistic bug workaround: add a copy of the shape translated up.
-          //     exclusions.push(outerShape.withOffset(0, -1.25 * this.queryUnitSize("em", false)));
-          // }
           exclusions.push(outerShape);
         }
       } else if (boxInstance.children.length == 0) {

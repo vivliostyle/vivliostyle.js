@@ -127,9 +127,6 @@ export const inheritedProps = {
 };
 
 export const polyfilledInheritedProps = [
-  "box-decoration-break",
-  // TODO: box-decoration-break should not be inherited.
-  // https://github.com/vivliostyle/vivliostyle.js/issues/259
   "image-resolution",
   "orphans",
   "widows",
