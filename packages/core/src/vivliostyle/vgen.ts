@@ -2315,6 +2315,9 @@ export class ViewFactory
     const checkForcedLineBreakElem = (elem1: Element): boolean | null => {
       const { display, position, float } =
         this.viewport.window.getComputedStyle(elem1);
+      if (elem1.localName === "ruby") {
+        return false;
+      }
       if (display === "inline" || display === "contents") {
         if (elem1.localName === "br") {
           return true;
