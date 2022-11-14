@@ -1244,6 +1244,11 @@ html|*[dir="rtl"] {
   unicode-bidi: embed;
 }
 
+/* MathML */
+math[display="block"] {
+  display: block;
+}
+
 /*------------------ epub-specific ---------------------*/
 
 @namespace epub "http://www.idpf.org/2007/ops";
