@@ -2220,16 +2220,19 @@ export class ViewFactory
         ? nodeContext.parent
         : nodeContext;
     // Fix for problem with math (Issue #1038)
-    let isBeforeBlockMath = false;
+    let isBeforeBlock = false;
     if (
       nodeContext.inline &&
       nodeContext.after &&
       nodeContext.sourceNode.nextSibling?.nodeType === 1
     ) {
       const nextElem = nodeContext.sourceNode.nextSibling as Element;
-      isBeforeBlockMath =
-        (nextElem.localName === "math" &&
-          nextElem.getAttribute("display") === "block") ||
+      const display = CssCascade.getProp(
+        this.styler.getStyle(nextElem, false),
+        "display",
+      )?.value.toString();
+      isBeforeBlock =
+        (display && !Display.isInlineLevel(display)) ||
         (nextElem.getAttribute("data-math-typeset") === "true" &&
           /^\s*(\$\$|\\\[)/.test(nextElem.textContent));
     }
@@ -2261,7 +2264,7 @@ export class ViewFactory
         if (!blockNestCount++) {
           if (nc !== nodeContext1) {
             const { textAlign } = this.viewport.window.getComputedStyle(elem);
-            if (textAlign === "justify" && !isBeforeBlockMath) {
+            if (textAlign === "justify" && !isBeforeBlock) {
               // Workaround for the problem that text-align-last:justify is
               // not only effective at the last line of the block but also
               // effective at lines just before child block-level or `<br>`

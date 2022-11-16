@@ -337,6 +337,7 @@ class TextSpacingPolyfill {
       const isLastInBlock = !nextNode;
       this.processTextSpacing(
         node,
+        isFirstInBlock || isFirstAfterForcedLineBreak,
         isFirstInBlock,
         isFirstAfterForcedLineBreak,
         isLastBeforeForcedLineBreak,
@@ -358,9 +359,48 @@ class TextSpacingPolyfill {
     nodeContext: Vtree.NodeContext,
     checkPoints: Vtree.NodeContext[],
   ): void {
-    const isFirstFragment = !nodeContext || nodeContext.fragmentIndex === 1;
+    const isFirstFragment =
+      !nodeContext ||
+      (nodeContext.fragmentIndex === 1 && checkIfFirstInBlock());
     const isAfterForcedLineBreak =
       isFirstFragment || checkIfAfterForcedLineBreak();
+
+    function isOutOfLine(node: Node): boolean {
+      if (node?.nodeType !== 1) {
+        return false;
+      }
+      const elem = node as HTMLElement;
+      if (elem.hasAttribute(Vtree.SPECIAL_ATTR)) {
+        return true;
+      }
+      const { position, float } = elem.style ?? {};
+      return (
+        position === "absolute" ||
+        position === "fixed" ||
+        (float && float !== "none")
+      );
+    }
+
+    function checkIfFirstInBlock(): boolean {
+      let p = checkPoints[0];
+      let viewNode = p.viewNode;
+      while (p && p.inline) {
+        p = p.parent;
+      }
+      if (p?.fragmentIndex !== 1) {
+        return false;
+      }
+      for (
+        let prev = viewNode.previousSibling;
+        prev;
+        prev = prev.previousSibling
+      ) {
+        if (!isOutOfLine(prev)) {
+          return false;
+        }
+      }
+      return true;
+    }
 
     function checkIfAfterForcedLineBreak(): boolean {
       let p = checkPoints[0];
@@ -440,6 +480,7 @@ class TextSpacingPolyfill {
 
         let prevNode: Node = null;
         let nextNode: Node = null;
+        let isFirstAfterBreak = i === 0;
         let isFirstInBlock = i === 0 && isFirstFragment;
         let isFirstAfterForcedLineBreak = i === 0 && isAfterForcedLineBreak;
         let isLastBeforeForcedLineBreak = false;
@@ -518,9 +559,12 @@ class TextSpacingPolyfill {
           ) {
             break;
           }
-          if (prev === 0 && isFirstFragment) {
-            isFirstInBlock = true;
-            isFirstAfterForcedLineBreak = true;
+          if (prev === 0) {
+            isFirstAfterBreak = true;
+            if (isFirstFragment) {
+              isFirstInBlock = true;
+              isFirstAfterForcedLineBreak = true;
+            }
           }
         }
         for (let next = i + 1; next < checkPoints.length; next++) {
@@ -544,15 +588,32 @@ class TextSpacingPolyfill {
               ((nextP.viewNode as Element).localName === "br" ||
                 embeddedContentTags[(nextP.viewNode as Element).localName]))
           ) {
+            if (
+              next === checkPoints.length - 1 &&
+              isOutOfLine(nextP.viewNode)
+            ) {
+              isLastInBlock = true;
+            }
             break;
           }
           if (next === checkPoints.length - 1) {
-            isLastInBlock = true;
             isLastBeforeForcedLineBreak = true;
+            isLastInBlock = true;
+            for (
+              let nextNext = nextP.viewNode.nextSibling;
+              nextNext;
+              nextNext = nextNext.nextSibling
+            ) {
+              if (!isOutOfLine(nextNext)) {
+                isLastInBlock = false;
+                break;
+              }
+            }
           }
         }
         this.processTextSpacing(
           p.viewNode,
+          isFirstAfterBreak,
           isFirstInBlock,
           isFirstAfterForcedLineBreak,
           isLastBeforeForcedLineBreak,
@@ -570,6 +631,7 @@ class TextSpacingPolyfill {
 
   private processTextSpacing(
     textNode: Node,
+    isFirstAfterBreak: boolean,
     isFirstInBlock: boolean,
     isFirstAfterForcedLineBreak: boolean,
     isLastBeforeForcedLineBreak: boolean,
@@ -588,6 +650,9 @@ class TextSpacingPolyfill {
     let nextRange: Range;
 
     function isAtStartOfLine(): boolean {
+      if (isFirstAfterBreak) {
+        return true;
+      }
       if (!prevNode) {
         return false;
       }
