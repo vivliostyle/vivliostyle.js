@@ -2321,10 +2321,13 @@ export class ViewFactory
       if (elem1.localName === "ruby") {
         return false;
       }
-      if (display === "inline" || display === "contents") {
-        if (elem1.localName === "br") {
-          return true;
-        }
+      if (elem1.localName === "br") {
+        return true;
+      }
+      if (
+        (display === "inline" || display === "contents") &&
+        elem1.hasChildNodes()
+      ) {
         const lastChild = elem1.lastElementChild;
         if (
           lastChild &&
@@ -2351,13 +2354,24 @@ export class ViewFactory
         return false;
       }
       if (
-        !display ||
         display === "none" ||
-        Display.isInlineLevel(display) ||
         position === "absolute" ||
         position === "fixed" ||
-        (float && float !== "none")
+        (float && float !== "none") ||
+        elem1.hasAttribute(Vtree.SPECIAL_ATTR)
       ) {
+        const prevElem = elem1.previousElementSibling;
+        if (
+          prevElem &&
+          (prevElem.nextSibling === elem1 ||
+            (prevElem.nextSibling === elem1.previousSibling &&
+              !prevElem.nextSibling.textContent.trim()))
+        ) {
+          return checkForcedLineBreakElem(prevElem);
+        }
+        return false;
+      }
+      if (!display || Display.isInlineLevel(display)) {
         return false;
       }
       return true;
