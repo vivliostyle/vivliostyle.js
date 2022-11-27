@@ -608,14 +608,14 @@ describe("css-parser", function () {
           parse(done, ":not(.) {}", function () {
             expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
             expect(handler.error).toHaveBeenCalled();
-            expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
+            expect(handler.endFuncWithSelector).toHaveBeenCalled();
           });
         });
-        it("error if multiple selectors", function (done) {
+        it("can take multiple selectors", function (done) {
           parse(done, ":not(div, .foo) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
             expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
-            expect(handler.error).toHaveBeenCalled();
-            expect(handler.endFuncWithSelector).not.toHaveBeenCalled();
+            expect(handler.endFuncWithSelector).toHaveBeenCalled();
           });
         });
       });

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.19.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.1...v2.19.2) (2022-11-17)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+## [2.19.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.0...v2.19.1) (2022-10-21)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+# [2.19.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.4...v2.19.0) (2022-10-18)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+## [2.18.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.3...v2.18.4) (2022-10-12)
+
+**Note:** Version bump only for package @vivliostyle/react
+
 ## [2.18.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.2...v2.18.3) (2022-09-30)
 
 **Note:** Version bump only for package @vivliostyle/react

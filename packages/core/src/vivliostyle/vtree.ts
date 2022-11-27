@@ -820,20 +820,6 @@ export class NodeContext implements Vtree.NodeContext {
     return null;
   }
 
-  /**
-   * Walk up NodeContext tree (starting from itself) and call the callback for
-   * each block.
-   */
-  walkUpBlocks(callback: (p1: NodeContext) => any) {
-    let nodeContext: NodeContext = this;
-    while (nodeContext) {
-      if (!nodeContext.inline) {
-        callback(nodeContext);
-      }
-      nodeContext = nodeContext.parent;
-    }
-  }
-
   belongsTo(formattingContext: FormattingContext): boolean {
     return (
       this.formattingContext === formattingContext &&
@@ -1064,6 +1050,7 @@ export class Container implements Vtree.Container {
   snapOffsetX: number = 0;
   snapOffsetY: number = 0;
   vertical: boolean = false; // vertical writing
+  rtl: boolean = false;
 
   constructor(public element: Element) {}
 
@@ -1124,11 +1111,23 @@ export class Container implements Vtree.Container {
   }
 
   getStartEdge(box: ClientRect): number {
-    return this.vertical ? box.top : box.left;
+    return this.vertical
+      ? this.rtl
+        ? box.bottom
+        : box.top
+      : this.rtl
+      ? box.right
+      : box.left;
   }
 
   getEndEdge(box: ClientRect): number {
-    return this.vertical ? box.bottom : box.right;
+    return this.vertical
+      ? this.rtl
+        ? box.top
+        : box.bottom
+      : this.rtl
+      ? box.left
+      : box.right;
   }
 
   getInlineSize(box: ClientRect): number {
@@ -1144,7 +1143,7 @@ export class Container implements Vtree.Container {
   }
 
   getInlineDir(): number {
-    return 1;
+    return this.rtl ? -1 : 1;
   }
 
   copyFrom(other: Container): void {
@@ -1173,6 +1172,7 @@ export class Container implements Vtree.Container {
     this.snapWidth = other.snapWidth;
     this.snapHeight = other.snapHeight;
     this.vertical = other.vertical;
+    this.rtl = other.rtl;
   }
 
   setVerticalPosition(top: number, height: number): void {
@@ -1210,7 +1210,35 @@ export class Container implements Vtree.Container {
 
   setInlinePosition(start: number, extent: number): void {
     if (this.vertical) {
-      this.setVerticalPosition(start, extent);
+      if (this.rtl) {
+        const outerExtent =
+          extent +
+          this.marginTop +
+          this.marginBottom +
+          this.paddingTop +
+          this.paddingBottom +
+          this.borderTop +
+          this.borderBottom;
+        this.setVerticalPosition(
+          start + outerExtent * this.getInlineDir(),
+          extent,
+        );
+      } else {
+        this.setVerticalPosition(start, extent);
+      }
+    } else if (this.rtl) {
+      const outerExtent =
+        extent +
+        this.marginLeft +
+        this.marginRight +
+        this.paddingLeft +
+        this.paddingRight +
+        this.borderLeft +
+        this.borderRight;
+      this.setHorizontalPosition(
+        start + outerExtent * this.getInlineDir(),
+        extent,
+      );
     } else {
       this.setHorizontalPosition(start, extent);
     }

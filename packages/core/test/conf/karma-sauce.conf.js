@@ -24,11 +24,13 @@ module.exports = function (config) {
       browserName: "chrome",
       platform: "Windows 10",
     },
-    sl_firefox: {
-      base: "SauceLabs",
-      browserName: "firefox",
-      platform: "Windows 10",
-    },
+    // cannot test firefox until the following issue is resolved:
+    // https://github.com/karma-runner/karma-sauce-launcher/issues/275
+    // sl_firefox: {
+    //   base: "SauceLabs",
+    //   browserName: "firefox",
+    //   platform: "Windows 10",
+    // },
     sl_safari: {
       base: "SauceLabs",
       browserName: "safari",

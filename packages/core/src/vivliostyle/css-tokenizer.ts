@@ -19,6 +19,7 @@
  * @fileoverview CssTokenizer - CSS Tokenizer.
  */
 
+/** */
 export interface TokenizerHandler {
   error(mnemonics: string, token: Token): void;
 }
@@ -1471,7 +1472,6 @@ export const INITIAL_INDEX_MASK = 15;
 export class Tokenizer {
   indexMask: number;
   buffer: Token[];
-  head: number = -1; // saved, occupied if >= 0
   tail: number = 0; // available, ready to write
   curr: number = 0; // ready to read
   position: number = 0;
@@ -1502,58 +1502,9 @@ export class Tokenizer {
     this.curr = (this.curr + 1) & this.indexMask;
   }
 
-  mark(): void {
-    if (this.head >= 0) {
-      throw new Error("F_CSSTOK_BAD_CALL mark");
-    }
-    this.head = this.curr;
-  }
-
-  reset(): void {
-    if (this.head < 0) {
-      throw new Error("F_CSSTOK_BAD_CALL reset");
-    }
-    this.curr = this.head;
-    this.head = -1;
-  }
-
-  unmark(): void {
-    this.head = -1;
-  }
-
-  hasMark(): boolean {
-    return this.head >= 0;
-  }
-
-  private reallocate(): void {
-    const newIndexMask = 2 * (this.indexMask + 1) - 1;
-    const newBuffer: Token[] = Array(newIndexMask + 1);
-    let oldIndex = this.head;
-    let newIndex = 0;
-    while (oldIndex != this.tail) {
-      newBuffer[newIndex] = this.buffer[oldIndex];
-      oldIndex = (oldIndex + 1) & this.indexMask;
-      newIndex++;
-    }
-    this.head = 0;
-    this.curr = newIndex;
-    this.tail = newIndex;
-    this.indexMask = newIndexMask;
-    this.buffer = newBuffer;
-    while (newIndex <= newIndexMask) {
-      newBuffer[newIndex++] = new Token();
-    }
-  }
-
-  private error(position, token, mnemonics) {
-    if (this.handler) {
-      this.handler.error(mnemonics, token);
-    }
-  }
-
   private fillBuffer(): void {
     let tail = this.tail;
-    let head = this.head >= 0 ? this.head : this.curr;
+    let head = this.curr;
     let indexMask = this.indexMask;
     if (tail >= head) {
       head += indexMask;
@@ -1561,14 +1512,7 @@ export class Tokenizer {
       head--;
     }
     if (head == tail) {
-      // only expect to get here when mark is in effect
-      if (this.head < 0) {
-        throw new Error("F_CSSTOK_INTERNAL");
-      }
-      this.reallocate();
-      tail = this.tail;
-      indexMask = this.indexMask;
-      head = indexMask; // this.head is zero
+      throw new Error("F_CSSTOK_INTERNAL");
     }
     let actions = actionsNormal;
     const input = this.input;

@@ -941,9 +941,21 @@ export class PageFloatLayoutContext
       case "block-end":
         return this.container.vertical ? limits.left : limits.bottom;
       case "inline-start":
-        return this.container.vertical ? limits.top : limits.left;
+        return this.container.vertical
+          ? this.container.rtl
+            ? limits.bottom
+            : limits.top
+          : this.container.rtl
+          ? limits.right
+          : limits.left;
       case "inline-end":
-        return this.container.vertical ? limits.bottom : limits.right;
+        return this.container.vertical
+          ? this.container.rtl
+            ? limits.top
+            : limits.bottom
+          : this.container.rtl
+          ? limits.left
+          : limits.right;
       default:
         throw new Error(`Unknown logical side: ${logicalSide}`);
     }
@@ -1211,7 +1223,7 @@ export class PageFloatLayoutContext
       }
       outerBlockSize = (blockEnd - blockStart) * area.getBoxDir();
       blockSize = outerBlockSize - area.getInsetBefore() - area.getInsetAfter();
-      outerInlineSize = inlineEnd - inlineStart;
+      outerInlineSize = (inlineEnd - inlineStart) * area.getInlineDir();
       inlineSize = outerInlineSize - area.getInsetStart() - area.getInsetEnd();
       if (!force && (blockSize <= 0 || inlineSize <= 0)) {
         return null;
@@ -1265,7 +1277,8 @@ export class PageFloatLayoutContext
         inlineSize = area.vertical ? area.height : area.width;
       }
       outerInlineSize = inlineSize + area.getInsetStart() + area.getInsetEnd();
-      const availableInlineSize = inlineEnd - inlineStart;
+      const availableInlineSize =
+        (inlineEnd - inlineStart) * area.getInlineDir();
       if (!force && availableInlineSize < outerInlineSize) {
         return null;
       }
@@ -1283,7 +1296,10 @@ export class PageFloatLayoutContext
         break;
       case "inline-end":
       case "block-end":
-        area.setInlinePosition(inlineEnd - outerInlineSize, inlineSize);
+        area.setInlinePosition(
+          inlineEnd - outerInlineSize * area.getInlineDir(),
+          inlineSize,
+        );
         area.setBlockPosition(
           blockEnd - outerBlockSize * area.getBoxDir(),
           blockSize,

@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.19.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.1...v2.19.2) (2022-11-17)
+
+### Bug Fixes
+
+- `[@supports](https://github.com/supports) selector(…)` did not work ([49c48a4](https://github.com/vivliostyle/vivliostyle.js/commit/49c48a4c64b4a29fa4c31ec23bd0180f73709b09))
+- improve box edge treatment at page break and box-decoration-break support ([d5ea1a9](https://github.com/vivliostyle/vivliostyle.js/commit/d5ea1a994a6d3467a6dd384dcc9d755b16e5f804)), closes [#603](https://github.com/vivliostyle/vivliostyle.js/issues/603) [#1030](https://github.com/vivliostyle/vivliostyle.js/issues/1030) [#1038](https://github.com/vivliostyle/vivliostyle.js/issues/1038)
+- wrong first line treatment on text-spacing:space-first and hanging-punctuation:first ([0ccdca2](https://github.com/vivliostyle/vivliostyle.js/commit/0ccdca250bcbaafb86b3e727de5fe7fb02b92205)), closes [#1041](https://github.com/vivliostyle/vivliostyle.js/issues/1041)
+- wrong page break prohibition between text and block box ([68b3754](https://github.com/vivliostyle/vivliostyle.js/commit/68b3754b0718b2514bef53d20ffbdd42249e3d17)), closes [#1036](https://github.com/vivliostyle/vivliostyle.js/issues/1036)
+
+## [2.19.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.0...v2.19.1) (2022-10-21)
+
+### Bug Fixes
+
+- Error with undefined CSS variables in calc expression in shorthand property ([db948cb](https://github.com/vivliostyle/vivliostyle.js/commit/db948cb49a8467b0bd66411b0704402261fa8520)), closes [#1028](https://github.com/vivliostyle/vivliostyle.js/issues/1028)
+
+# [2.19.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.4...v2.19.0) (2022-10-18)
+
+### Bug Fixes
+
+- Selector `E ::pseudo` is misinterpreted as `E::pseudo` ([e79e5ce](https://github.com/vivliostyle/vivliostyle.js/commit/e79e5ce7292585251fef2043f8690c68d64b7bae)), closes [#1026](https://github.com/vivliostyle/vivliostyle.js/issues/1026)
+
+### Features
+
+- Add support for :has() pseudo-class in Selectors Level 4 ([8ed553f](https://github.com/vivliostyle/vivliostyle.js/commit/8ed553f51e410f7a13465dfdeeadf9d4a6e0239e)), closes [#828](https://github.com/vivliostyle/vivliostyle.js/issues/828)
+- Add support for :is()/:not()/:where() pseudo-classes in Selectors Level 4 ([68baee0](https://github.com/vivliostyle/vivliostyle.js/commit/68baee017e73e54f0823c39095a0dfeeb3de9e7f)), closes [#957](https://github.com/vivliostyle/vivliostyle.js/issues/957)
+
+## [2.18.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.3...v2.18.4) (2022-10-12)
+
+### Bug Fixes
+
+- CSS parser error with calc expression including parens and variables ([88c4ae0](https://github.com/vivliostyle/vivliostyle.js/commit/88c4ae00039dab743945c141fcb5c167580ddf2a)), closes [#1014](https://github.com/vivliostyle/vivliostyle.js/issues/1014)
+- CSS parser error with property:calc(…) misinterpreted as selector with pseudo class ([71c39bf](https://github.com/vivliostyle/vivliostyle.js/commit/71c39bf665d6a2b668f175f8d3623184275ec23a)), closes [#1020](https://github.com/vivliostyle/vivliostyle.js/issues/1020)
+- percentage units in color value changed, resulting in invalid colors ([a45e861](https://github.com/vivliostyle/vivliostyle.js/commit/a45e861903946e3f2499f23d6ef4fe852fae30d5)), closes [#1012](https://github.com/vivliostyle/vivliostyle.js/issues/1012)
+- RTL direction not behaving in multi column ([d6280f1](https://github.com/vivliostyle/vivliostyle.js/commit/d6280f184e9217f05c98b937ae14b1efc2808192)), closes [#1016](https://github.com/vivliostyle/vivliostyle.js/issues/1016)
+- TypeError occurs with ::nth-fragment() and ::after-if-continues() selectors ([7a7c1aa](https://github.com/vivliostyle/vivliostyle.js/commit/7a7c1aa983a5142c05080a080e5e1c08cbc6bb0b)), closes [#1023](https://github.com/vivliostyle/vivliostyle.js/issues/1023)
+- wrong CSS variable scoping ([37e800a](https://github.com/vivliostyle/vivliostyle.js/commit/37e800a7074f3c907214b11630d9728fd652c4df)), closes [#1015](https://github.com/vivliostyle/vivliostyle.js/issues/1015)
+
 ## [2.18.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.18.2...v2.18.3) (2022-09-30)
 
 ### Bug Fixes

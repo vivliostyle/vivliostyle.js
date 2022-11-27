@@ -45,36 +45,6 @@ import { XmlDoc } from "./types";
 
 const namespacePrefixMap: { [key: string]: string } = {};
 
-export const frontEdgeBlackListHor: { [key: string]: string } = {
-  "text-indent": "0px",
-  "margin-top": "0px",
-  "padding-top": "0px",
-  "border-top-width": "0px",
-  "border-top-style": "none",
-  "border-top-color": "transparent",
-  "border-top-left-radius": "0px",
-  "border-top-right-radius": "0px",
-};
-
-export const frontEdgeBlackListVert: { [key: string]: string } = {
-  "text-indent": "0px",
-  "margin-right": "0px",
-  "padding-right": "0px",
-  "border-right-width": "0px",
-  "border-right-style": "none",
-  "border-right-color": "transparent",
-  "border-top-right-radius": "0px",
-  "border-bottom-right-radius": "0px",
-};
-
-export const frontEdgeUnforcedBreakBlackListHor: { [key: string]: string } = {
-  "margin-top": "0px",
-};
-
-export const frontEdgeUnforcedBreakBlackListVert: { [key: string]: string } = {
-  "margin-right": "0px",
-};
-
 export type CustomRenderer = (
   p1: Element,
   p2: Element,
@@ -568,9 +538,11 @@ export class ViewFactory
               new Css.Numeric(this.context.rootFontSize, "px"),
               value.priority,
             );
-            continue;
+          } else if (Css.isCustomPropName(name)) {
+            props[name] = value;
+          } else {
+            props[name] = value.filterValue(inheritanceVisitor);
           }
-          props[name] = value.filterValue(inheritanceVisitor);
         }
       }
     }
@@ -1367,36 +1339,26 @@ export class ViewFactory
         }
         this.preprocessElementStyle(computedStyle);
         this.applyComputedStyles(result, computedStyle);
-        if (!this.nodeContext.inline) {
-          let blackList: { [key: string]: string } = null;
+
+        if (this.nodeContext.inline) {
           if (!firstTime) {
-            if (
-              this.nodeContext.inheritedProps["box-decoration-break"] !==
-              "clone"
-            ) {
-              blackList = this.nodeContext.vertical
-                ? frontEdgeBlackListVert
-                : frontEdgeBlackListHor;
-            } else {
+            Break.setBoxBreakFlag(result, "inline-start");
+            if (Break.isCloneBoxDecorationBreak(result)) {
+              Break.setBoxBreakFlag(result, "clone");
+            }
+          }
+        } else {
+          if (!firstTime) {
+            Break.setBoxBreakFlag(result, "block-start");
+            if (Break.isCloneBoxDecorationBreak(result)) {
+              Break.setBoxBreakFlag(result, "clone");
+
               // When box-decoration-break: clone, cloned margins are always
               // truncated to zero.
-              blackList = this.nodeContext.vertical
-                ? frontEdgeUnforcedBreakBlackListVert
-                : frontEdgeUnforcedBreakBlackListHor;
+              Break.setMarginDiscardFlag(result, "block-start");
             }
           } else if (atUnforcedBreak && !this.isAtForcedBreak()) {
-            blackList = this.nodeContext.vertical
-              ? frontEdgeUnforcedBreakBlackListVert
-              : frontEdgeUnforcedBreakBlackListHor;
-          }
-          if (blackList) {
-            for (const propName in blackList) {
-              // Fix for issue #737
-              if (propName === "text-indent" && !this.isParagraph(element)) {
-                continue;
-              }
-              Base.setCSSProperty(result, propName, blackList[propName]);
-            }
+            Break.setMarginDiscardFlag(result, "block-start");
           }
         }
         if (listItem) {
@@ -1426,67 +1388,6 @@ export class ViewFactory
       });
     });
     return frame.result();
-  }
-
-  private isParagraph(element: Element): boolean {
-    switch (element.localName) {
-      case "p":
-        return true;
-      case "html":
-      case "body":
-      case "main":
-      case "article":
-      case "section":
-        return false;
-    }
-    const textLevelElements = {
-      a: true,
-      abbr: true,
-      b: true,
-      bdi: true,
-      bdo: true,
-      cite: true,
-      code: true,
-      data: true,
-      del: true,
-      dfn: true,
-      em: true,
-      i: true,
-      ins: true,
-      kbd: true,
-      mark: true,
-      q: true,
-      ruby: true,
-      s: true,
-      samp: true,
-      small: true,
-      span: true,
-      strong: true,
-      sub: true,
-      sup: true,
-      time: true,
-      u: true,
-      var: true,
-    };
-    for (
-      let childNode = element.firstChild;
-      childNode;
-      childNode = childNode.nextSibling
-    ) {
-      switch (childNode.nodeType) {
-        case Node.TEXT_NODE:
-          if (childNode.nodeValue.trim().length > 0) {
-            return true;
-          }
-          break;
-        case Node.ELEMENT_NODE:
-          if (textLevelElements[(childNode as Element).localName]) {
-            return true;
-          }
-          break;
-      }
-    }
-    return false;
   }
 
   /**
@@ -1842,9 +1743,20 @@ export class ViewFactory
       this.nodeContext.viewNode = this.viewNode;
       if (this.viewNode) {
         const parent = this.nodeContext.parent
-          ? this.nodeContext.parent.viewNode
+          ? (this.nodeContext.parent.viewNode as Element)
           : this.viewRoot;
         if (parent) {
+          if (
+            this.nodeContext.inline &&
+            // ignore whitespace text node
+            !(
+              this.viewNode.nodeType === 3 && !this.viewNode.textContent.trim()
+            ) &&
+            !parent.hasChildNodes() &&
+            Break.getBoxBreakFlags(parent).includes("block-start")
+          ) {
+            Break.setBoxBreakFlag(parent, "text-start");
+          }
           parent.appendChild(this.viewNode);
         }
       }
@@ -2303,26 +2215,213 @@ export class ViewFactory
 
   /** @override */
   processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
-    if (nodeContext) {
-      nodeContext.walkUpBlocks((block) => {
-        const boxDecorationBreak = block.inheritedProps["box-decoration-break"];
-        if (!boxDecorationBreak || boxDecorationBreak === "slice") {
-          const elem = block.viewNode as Element;
-          Asserts.assert(elem.nodeType === 1);
-          if (block.vertical) {
-            Base.setCSSProperty(elem, "padding-left", "0");
-            Base.setCSSProperty(elem, "border-left", "none");
-            Base.setCSSProperty(elem, "border-top-left-radius", "0");
-            Base.setCSSProperty(elem, "border-bottom-left-radius", "0");
-          } else {
-            Base.setCSSProperty(elem, "padding-bottom", "0");
-            Base.setCSSProperty(elem, "border-bottom", "none");
-            Base.setCSSProperty(elem, "border-bottom-left-radius", "0");
-            Base.setCSSProperty(elem, "border-bottom-right-radius", "0");
+    const nodeContext1 =
+      !nodeContext.inline && nodeContext.after
+        ? nodeContext.parent
+        : nodeContext;
+    // Fix for problem with math (Issue #1038)
+    let isBeforeBlock = false;
+    if (
+      nodeContext.inline &&
+      nodeContext.after &&
+      nodeContext.sourceNode.nextSibling?.nodeType === 1
+    ) {
+      const nextElem = nodeContext.sourceNode.nextSibling as Element;
+      const display = CssCascade.getProp(
+        this.styler.getStyle(nextElem, false),
+        "display",
+      )?.value.toString();
+      isBeforeBlock =
+        (display && !Display.isInlineLevel(display)) ||
+        (nextElem.getAttribute("data-math-typeset") === "true" &&
+          /^\s*(\$\$|\\\[)/.test(nextElem.textContent));
+    }
+
+    let blockNestCount = 0;
+    for (let nc = nodeContext1; nc; nc = nc.parent) {
+      if (nc.viewNode?.nodeType !== 1) continue;
+
+      const elem = nc.viewNode as HTMLElement;
+      if (!elem.style) continue;
+
+      if (nc.inline) {
+        Break.setBoxBreakFlag(elem, "inline-end");
+        if (Break.isCloneBoxDecorationBreak(elem)) {
+          const extentBefore = nc.vertical
+            ? elem.offsetWidth
+            : elem.offsetHeight;
+          Break.setBoxBreakFlag(elem, "clone");
+          const extentAfter = nc.vertical
+            ? elem.offsetWidth
+            : elem.offsetHeight;
+          if (extentAfter > extentBefore) {
+            // Workaround for Chrome box-decoration-break:clone problem
+            this.fixClonedBoxDecorationOverflow(elem);
           }
         }
-      });
+      } else {
+        Break.setBoxBreakFlag(elem, "block-end");
+        if (!blockNestCount++) {
+          if (nc !== nodeContext1) {
+            const { textAlign } = this.viewport.window.getComputedStyle(elem);
+            if (textAlign === "justify" && !isBeforeBlock) {
+              // Workaround for the problem that text-align-last:justify is
+              // not only effective at the last line of the block but also
+              // effective at lines just before child block-level or `<br>`
+              // elements.
+              const elem2 = this.createChildAnonymousBlockIfNeeded(elem);
+              if (elem2) {
+                if (elem2 !== elem) {
+                  // child anonymous block created
+                  Break.setBoxBreakFlags(elem2, [
+                    "block-start",
+                    "text-start",
+                    "block-end",
+                    "text-end",
+                    "justify",
+                  ]);
+                } else {
+                  Break.setBoxBreakFlag(elem, "text-end");
+                  Break.setBoxBreakFlag(elem, "justify");
+                }
+              } else {
+                // text-align-last:justify is not necessary (`<br>` at very last)
+                // or not appropriate (e.g. the last `<br>` is in middle of nested inline)
+                Break.setBoxBreakFlag(elem, "text-end");
+              }
+            } else {
+              Break.setBoxBreakFlag(elem, "text-end");
+            }
+          }
+        }
+        if (Break.isCloneBoxDecorationBreak(elem)) {
+          Break.setBoxBreakFlag(elem, "clone");
+          Break.setMarginDiscardFlag(elem, "block-end");
+        }
+      }
     }
+  }
+
+  private fixClonedBoxDecorationOverflow(elem: HTMLElement): void {
+    const computedStyle = this.viewport.window.getComputedStyle(elem);
+    const paddingInlineEnd = parseFloat(computedStyle.paddingInlineEnd);
+    const borderInlineEndWidth = parseFloat(computedStyle.borderInlineEndWidth);
+    const adjust = -(paddingInlineEnd + borderInlineEndWidth);
+    if (!isNaN(adjust)) {
+      elem.style.marginInlineEnd = `${adjust}px`;
+    }
+  }
+
+  private createChildAnonymousBlockIfNeeded(
+    elem: HTMLElement,
+  ): HTMLElement | null {
+    const checkForcedLineBreakElem = (elem1: Element): boolean | null => {
+      const { display, position, float } =
+        this.viewport.window.getComputedStyle(elem1);
+      if (elem1.localName === "ruby") {
+        return false;
+      }
+      if (elem1.localName === "br") {
+        return true;
+      }
+      if (
+        (display === "inline" || display === "contents") &&
+        elem1.hasChildNodes()
+      ) {
+        const lastChild = elem1.lastElementChild;
+        if (
+          lastChild &&
+          (!lastChild.nextSibling ||
+            (lastChild.nextSibling === elem1.lastChild &&
+              !lastChild.nextSibling.textContent.trim()))
+        ) {
+          const found = checkForcedLineBreakElem(lastChild);
+          if (found || found === null) {
+            return found;
+          }
+        }
+        for (
+          let child = lastChild?.previousElementSibling;
+          child;
+          child = child.previousElementSibling
+        ) {
+          const found = checkForcedLineBreakElem(child);
+          if (found || found === null) {
+            // forced line break is found at middle of nested inline
+            return null;
+          }
+        }
+        return false;
+      }
+      if (
+        display === "none" ||
+        position === "absolute" ||
+        position === "fixed" ||
+        (float && float !== "none") ||
+        elem1.hasAttribute(Vtree.SPECIAL_ATTR)
+      ) {
+        const prevElem = elem1.previousElementSibling;
+        if (
+          prevElem &&
+          (prevElem.nextSibling === elem1 ||
+            (prevElem.nextSibling === elem1.previousSibling &&
+              !prevElem.nextSibling.textContent.trim()))
+        ) {
+          return checkForcedLineBreakElem(prevElem);
+        }
+        return false;
+      }
+      if (!display || Display.isInlineLevel(display)) {
+        return false;
+      }
+      return true;
+    };
+
+    let forcedBreakElem: Element | null = null;
+    for (
+      let child = elem.lastElementChild;
+      child;
+      child = child.previousElementSibling
+    ) {
+      const found = checkForcedLineBreakElem(child);
+      if (found) {
+        forcedBreakElem = child;
+        break;
+      }
+      if (found === null) {
+        // forced line break is found at middle of nested inline
+        return null;
+      }
+    }
+
+    if (!forcedBreakElem) {
+      // forced line break is not found
+      return elem;
+    }
+
+    if (
+      forcedBreakElem === elem.lastElementChild &&
+      (!forcedBreakElem.nextSibling ||
+        (forcedBreakElem.nextSibling === elem.lastChild &&
+          !forcedBreakElem.nextSibling.textContent.trim()))
+    ) {
+      // forced line break is found at very last
+      return null;
+    }
+
+    const anonymousBlock = elem.ownerDocument.createElement("span");
+    anonymousBlock.className = "viv-anonymous-block";
+
+    for (
+      let node = forcedBreakElem.nextSibling, nextNode = null;
+      node;
+      node = nextNode
+    ) {
+      nextNode = node.nextSibling;
+      anonymousBlock.appendChild(node);
+    }
+    elem.appendChild(anonymousBlock);
+    return anonymousBlock;
   }
 
   /** @override */
@@ -2409,7 +2508,6 @@ export class ViewFactory
 }
 
 export const propertiesNotPassedToDOM = {
-  "box-decoration-break": true,
   "float-min-wrap-block": true,
   "float-reference": true,
   "flow-into": true,

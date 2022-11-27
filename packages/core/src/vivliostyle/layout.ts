@@ -467,19 +467,35 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   getTopEdge(): number {
-    return this.vertical ? this.startEdge : this.beforeEdge;
+    return this.vertical
+      ? this.rtl
+        ? this.endEdge
+        : this.startEdge
+      : this.beforeEdge;
   }
 
   getBottomEdge(): number {
-    return this.vertical ? this.endEdge : this.afterEdge;
+    return this.vertical
+      ? this.rtl
+        ? this.startEdge
+        : this.endEdge
+      : this.afterEdge;
   }
 
   getLeftEdge(): number {
-    return this.vertical ? this.afterEdge : this.startEdge;
+    return this.vertical
+      ? this.afterEdge
+      : this.rtl
+      ? this.endEdge
+      : this.startEdge;
   }
 
   getRightEdge(): number {
-    return this.vertical ? this.beforeEdge : this.endEdge;
+    return this.vertical
+      ? this.beforeEdge
+      : this.rtl
+      ? this.startEdge
+      : this.endEdge;
   }
 
   isFloatNodeContext(nodeContext: Vtree.NodeContext): boolean {
@@ -1030,8 +1046,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatBBox.right + margin.right,
         floatBBox.bottom + margin.bottom,
       );
-      let x1 = this.startEdge;
-      let x2 = this.endEdge;
+      let x1 = this.rtl ? this.endEdge : this.startEdge;
+      let x2 = this.rtl ? this.startEdge : this.endEdge;
       let parent = nodeContext.parent;
       while (parent && parent.inline) {
         parent = parent.parent;
@@ -1053,8 +1069,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         parent.viewNode.appendChild(probe);
         const parentBox = this.clientLayout.getElementClientRect(probe);
-        x1 = Math.max(this.getStartEdge(parentBox), x1);
-        x2 = Math.min(this.getEndEdge(parentBox), x2);
+        x1 = Math.max(
+          this.rtl ? this.getEndEdge(parentBox) : this.getStartEdge(parentBox),
+          x1,
+        );
+        x2 = Math.min(
+          this.rtl ? this.getStartEdge(parentBox) : this.getEndEdge(parentBox),
+          x2,
+        );
         parent.viewNode.removeChild(probe);
         const floatBoxMeasure = this.vertical
           ? floatBox.y2 - floatBox.y1
@@ -1217,6 +1239,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     area.originX = floatContainer.originX;
     area.originY = floatContainer.originY;
     area.vertical = floatContainer.vertical;
+    area.rtl = floatContainer.rtl;
     area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
     area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
     area.paddingLeft =
@@ -1677,141 +1700,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     });
   }
 
-  createJustificationAdjustmentElement(
-    insertionPoint: Node,
-    doc: Document,
-    parentNode: Node,
-    vertical: boolean,
-  ): HTMLElement {
-    const span = doc.createElement("span") as HTMLElement;
-    span.style.visibility = "hidden";
-    span.style.verticalAlign = "top";
-    span.setAttribute(VtreeImpl.SPECIAL_ATTR, "1");
-    const inner = doc.createElement("span") as HTMLElement;
-    inner.style.fontSize = "0";
-    inner.style.lineHeight = "0";
-    inner.textContent = " #";
-    span.appendChild(inner);
-
-    // Measure inline-start and inline-end edge positions of the line box,
-    // taking (exclusion) floats into consideration
-    span.style.display = "block";
-    span.style.textIndent = "0";
-    span.style.textAlign = "left";
-    parentNode.insertBefore(span, insertionPoint);
-    const leftPos = this.clientLayout.getElementClientRect(inner);
-    span.style.textAlign = "right";
-    const rightPos = this.clientLayout.getElementClientRect(inner);
-    span.style.textAlign = "";
-    if (Base.checkInlineBlockJustificationBug(document.body)) {
-      // For Chrome
-      span.style.display = "inline";
-    } else {
-      // For Firefox, Edge and IE
-      span.style.display = "inline-block";
-    }
-    const padding = vertical
-      ? rightPos.top - leftPos.top
-      : rightPos.left - leftPos.left;
-    const paddingStr = padding >= 1 ? `${padding - 1}px` : "100%";
-    if (vertical) {
-      span.style.paddingTop = paddingStr;
-    } else {
-      span.style.paddingLeft = paddingStr;
-    }
-    return span;
-  }
-
-  addAndAdjustJustificationElement(
-    nodeContext: Vtree.NodeContext,
-    insertAfter: boolean,
-    node: Node,
-    insertionPoint: Node,
-    doc: Document,
-    parentNode: Node,
-  ): HTMLElement {
-    fixJustificationOnHyphen(nodeContext, insertAfter, node, insertionPoint);
-    return this.createJustificationAdjustmentElement(
-      insertionPoint,
-      doc,
-      parentNode,
-      nodeContext.vertical,
-    );
-  }
-
-  compensateJustificationLineHeight(
-    span: Element,
-    br: Element,
-    nodeContext: Vtree.NodeContext,
-  ) {
-    const spanRect = this.clientLayout.getElementClientRect(span);
-    const brRect = this.clientLayout.getElementClientRect(br);
-    if (nodeContext.vertical) {
-      (br as HTMLElement).style.marginRight = `${
-        brRect.right - spanRect.right
-      }px`;
-      (br as HTMLElement).style.width = "0px";
-    } else {
-      (br as HTMLElement).style.marginTop = `${spanRect.top - brRect.top}px`;
-      (br as HTMLElement).style.height = "0px";
-    }
-    br.setAttribute(VtreeImpl.SPECIAL_ATTR, "1");
-  }
-
-  /**
-   * Fix justification of the last line of text broken across pages (if
-   * needed).
-   */
-  fixJustificationIfNeeded(
-    nodeContext: Vtree.NodeContext,
-    endOfColumn: boolean,
-  ): void {
-    if (nodeContext.after && !nodeContext.inline) {
-      return;
-    }
-    if (endOfColumn) {
-      const parentElem = nodeContext.parent?.viewNode as Element;
-      const textAlign =
-        parentElem &&
-        this.clientLayout.getElementComputedStyle(parentElem).textAlign;
-      if (textAlign !== "justify") {
-        return;
-      }
-    }
-    let node = nodeContext.viewNode;
-    if (node.parentElement?.localName === "viv-ts-inner") {
-      // special element for text-spacing
-      node = node.parentElement.parentElement;
-    }
-    const doc = node.ownerDocument;
-    const insertAfter =
-      endOfColumn && (nodeContext.after || node.nodeType != 1);
-    let insertionPoint = insertAfter ? node.nextSibling : node;
-    if (insertionPoint && !insertionPoint.parentNode) {
-      // Possible if removeSelf = false in finishBreak()
-      insertionPoint = null;
-    }
-    const parentNode =
-      node.parentNode || (nodeContext.parent && nodeContext.parent.viewNode);
-    if (!parentNode) {
-      // Possible if nothing was added to the column
-      return;
-    }
-    const span = this.addAndAdjustJustificationElement(
-      nodeContext,
-      insertAfter,
-      node,
-      insertionPoint,
-      doc,
-      parentNode,
-    );
-    if (!endOfColumn) {
-      const br = doc.createElement("div") as HTMLElement;
-      parentNode.insertBefore(br, insertionPoint);
-      this.compensateJustificationLineHeight(span, br, nodeContext);
-    }
-  }
-
   processLineStyling(
     nodeContext: Vtree.NodeContext,
     resNodeContext: Vtree.NodeContext,
@@ -1856,7 +1744,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             .peelOff(lineBreak, 0)
             .then((resNodeContextParam) => {
               nodeContext = resNodeContextParam;
-              this.fixJustificationIfNeeded(nodeContext, false);
               firstPseudo = nodeContext.firstPseudo;
               lastCheckPoints = []; // Wipe out line breaks inside pseudoelements
               this.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(
@@ -2290,20 +2177,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   calculateClonedPaddingBorder(nodeContext: Vtree.NodeContext): number {
     let clonedPaddingBorder = 0;
-    nodeContext.walkUpBlocks((block) => {
-      if (block.inheritedProps["box-decoration-break"] === "clone") {
-        Asserts.assert(block.viewNode?.nodeType === 1);
+    for (let nc = nodeContext; nc; nc = nc.parent) {
+      if (
+        !nc.inline &&
+        Break.isCloneBoxDecorationBreak(nc.viewNode as Element)
+      ) {
         const paddingBorders = this.getComputedPaddingBorder(
-          block.viewNode as Element,
+          nc.viewNode as Element,
         );
-        clonedPaddingBorder += block.vertical
+        clonedPaddingBorder += nc.vertical
           ? -paddingBorders.left
           : paddingBorders.bottom;
-        if (block.display === "table") {
-          clonedPaddingBorder += block.blockBorderSpacing;
+        if (nc.display === "table") {
+          clonedPaddingBorder += nc.blockBorderSpacing;
         }
       }
-    });
+    }
     return clonedPaddingBorder;
   }
 
@@ -2390,6 +2279,23 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       lineIndex = Base.binarySearch(linePositions.length, (i) =>
         this.vertical ? linePositions[i] < edge : linePositions[i] > edge,
       );
+    }
+
+    // Workaround for the case of block child after text in parent block
+    // (Issue #1036)
+    let lastNode = checkPoints.at(-1).viewNode;
+    if (lastNode?.parentElement.localName === "viv-ts-inner") {
+      lastNode = lastNode.parentElement.parentElement;
+    }
+    if (
+      (lineIndex === linePositions.length && lastNode.nextSibling) ||
+      (lineIndex >= linePositions.length - 1 &&
+        lastNode.parentElement.querySelector(".MJXc-display")) // for MathJax
+    ) {
+      // Prevent unnecessary page break before the last line
+      // when a block box (may be generated by MathJax) exists
+      // just after the text or inline box.
+      widows = 0;
     }
 
     // First edge after the one that both fits and satisfies widows constraint.
@@ -3355,12 +3261,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
     this.startEdge = columnBBox
       ? this.vertical
-        ? columnBBox.top
+        ? this.rtl
+          ? columnBBox.bottom
+          : columnBBox.top
+        : this.rtl
+        ? columnBBox.right
         : columnBBox.left
       : 0;
     this.endEdge = columnBBox
       ? this.vertical
-        ? columnBBox.bottom
+        ? this.rtl
+          ? columnBBox.top
+          : columnBBox.bottom
+        : this.rtl
+        ? columnBBox.left
         : columnBBox.right
       : 0;
     this.beforeEdge = columnBBox
@@ -3856,30 +3770,6 @@ export class PseudoColumn {
 }
 
 export type SinglePageFloatLayoutResult = Layout.SinglePageFloatLayoutResult;
-
-export function fixJustificationOnHyphen(
-  nodeContext: Vtree.NodeContext,
-  insertAfter: boolean,
-  node: Node,
-  insertionPoint: Node,
-): void {
-  if (Base.checkSoftWrapOpportunityAfterHyphenBug(document.body)) {
-    const hyphenChar = resolveHyphenateCharacter(nodeContext);
-    const prevSibling = insertAfter ? node : node.previousSibling;
-    const prevText = prevSibling ? prevSibling.textContent : "";
-    if (prevText.charAt(prevText.length - 1) === hyphenChar) {
-      const doc = node.ownerDocument;
-      const parent = node.parentNode;
-      if (Base.checkSoftWrapOpportunityByWbrBug(document.body)) {
-        // For IE
-        parent.insertBefore(doc.createTextNode(" "), insertionPoint);
-      } else {
-        // For Edge
-        parent.insertBefore(doc.createElement("wbr"), insertionPoint);
-      }
-    }
-  }
-}
 
 /**
  * breaking point resolver for Text Node.

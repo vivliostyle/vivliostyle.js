@@ -18,7 +18,7 @@
  * @fileoverview Assets - Bundle resources
  */
 
-// vivliostyle-viewport-screen.css
+/** vivliostyle-viewport-screen.css */
 export const VivliostyleViewportScreenCss = `
 @media screen {
   [data-vivliostyle-viewer-viewport] {
@@ -87,7 +87,7 @@ export const VivliostyleViewportScreenCss = `
 }
 `;
 
-// vivliostyle-viewport.css
+/** vivliostyle-viewport.css */
 export const VivliostyleViewportCss = `
 [data-vivliostyle-layout-box] {
   position: absolute;
@@ -177,7 +177,7 @@ export const VivliostyleViewportCss = `
 }
 `;
 
-// validation.txt
+/** validation.txt */
 export const ValidationTxt = `
 /*
  * Copyright 2013 Google, Inc.
@@ -768,7 +768,7 @@ word-wrap = overflow-wrap;
 
 `;
 
-// user-agent.xml
+/** user-agent.xml */
 export const UserAgentXml = `
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:s="http://www.pyroxy.com/ns/shadow">
@@ -794,7 +794,7 @@ export const UserAgentXml = `
 </body>
 </html>`;
 
-// user-agent-page.css
+/** user-agent-page.css */
 export const UserAgentPageCss = `
 @namespace html "http://www.w3.org/1999/xhtml";
 
@@ -924,7 +924,7 @@ export const UserAgentPageCss = `
 }
 `;
 
-// user-agent-base.css
+/** user-agent-base.css */
 export const UserAgentBaseCss = `
 @namespace html "http://www.w3.org/1999/xhtml";
 
@@ -1244,6 +1244,11 @@ html|*[dir="rtl"] {
   unicode-bidi: embed;
 }
 
+/* MathML */
+math[display="block"] {
+  display: block;
+}
+
 /*------------------ epub-specific ---------------------*/
 
 @namespace epub "http://www.idpf.org/2007/ops";
@@ -1374,8 +1379,66 @@ ul#toc {
 }
 `;
 
-// text-polyfill.css
-export const TextPolyfillCss = `
+/** vivliostyle-polyfill.css */
+export const VivliostylePolyfillCss = `
+[data-viv-margin-discard~="block-start"] {
+  margin-block-start: 0 !important;
+}
+[data-viv-margin-discard~="block-end"] {
+  margin-block-end: 0 !important;
+}
+[data-viv-margin-discard~="inline-start"] {
+  margin-inline-start: 0 !important;
+}
+[data-viv-margin-discard~="inline-end"] {
+  margin-inline-end: 0 !important;
+}
+
+[data-viv-box-break~="inline-start"]:not([data-viv-box-break~="clone"]) {
+  margin-inline-start: 0 !important;
+  padding-inline-start: 0 !important;
+  border-inline-start-width: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
+}
+[data-viv-box-break~="inline-end"]:not([data-viv-box-break~="clone"]) {
+  margin-inline-end: 0 !important;
+  padding-inline-end: 0 !important;
+  border-inline-end-width: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+}
+[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]) {
+  margin-block-start: 0 !important;
+  padding-block-start: 0 !important;
+  border-block-start-width: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+}
+[data-viv-box-break~="block-end"]:not([data-viv-box-break~="clone"]) {
+  margin-block-end: 0 !important;
+  padding-block-end: 0 !important;
+  border-block-end-width: 0 !important;
+  border-end-start-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+}
+[data-viv-box-break~="block-start"][data-viv-box-break~="text-start"] {
+  text-indent: 0 !important;
+}
+[data-viv-box-break~="block-end"][data-viv-box-break~="text-end"][data-viv-box-break~="justify"] {
+  text-align-last: justify !important;
+}
+[data-viv-box-break~="block-end"][data-viv-box-break~="text-end"][data-viv-box-break~="justify"] > * {
+  text-align-last: auto;
+}
+[data-viv-box-break~="block-end"][data-viv-box-break~="text-end"]:not([data-viv-box-break~="justify"]) {
+  text-align-last: auto !important;
+}
+
+span.viv-anonymous-block {
+  display: block;
+}
+
 viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {
   margin-inline-start: -0.5em;

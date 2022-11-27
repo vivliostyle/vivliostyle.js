@@ -21,6 +21,101 @@ import * as Css from "./css";
 import * as Plugin from "./plugin";
 
 /**
+ * Check if style="box-decoration-break: clone" is set
+ */
+export function isCloneBoxDecorationBreak(element: Element): boolean {
+  return (
+    (element as HTMLElement)?.style["box-decoration-break"] === "clone" ||
+    (element as HTMLElement)?.style["-webkit-box-decoration-break"] === "clone"
+  );
+}
+
+/**
+ * data-viv-box-break attribute
+ *
+ * Value: [ [inline-start || inline-end] |
+ *          [block-start text-start? || block-end text-end?] justify? ]
+ *        clone?
+ *
+ * inline-start, inline-end, block-start, block-end: the side at which a box break occurs
+ * text-start: the fragment starts with text or inline box
+ * text-end: the fragment ends with text or inline box
+ * justify: the computed value of `text-align` property is `justify`
+ * clone: the computed value of `box-decoration-break` property is `clone`
+ */
+type BoxBreakFlag =
+  | "inline-start"
+  | "inline-end"
+  | "block-start"
+  | "block-end"
+  | "text-start"
+  | "text-end"
+  | "justify"
+  | "clone";
+
+export function getBoxBreakFlags(element: Element): BoxBreakFlag[] {
+  const val = element.getAttribute("data-viv-box-break");
+  return (val ? val.split(" ") : []) as BoxBreakFlag[];
+}
+
+export function setBoxBreakFlags(
+  element: Element,
+  boxBreakFlags: BoxBreakFlag[],
+): void {
+  element.setAttribute("data-viv-box-break", boxBreakFlags.join(" "));
+}
+
+export function setBoxBreakFlag(
+  element: Element,
+  boxBreakFlag: BoxBreakFlag,
+): void {
+  const boxBreakFlags = getBoxBreakFlags(element);
+  if (!boxBreakFlags.includes(boxBreakFlag)) {
+    boxBreakFlags.push(boxBreakFlag);
+    setBoxBreakFlags(element, boxBreakFlags);
+  }
+}
+
+/**
+ * data-viv-margin-discard attribute
+ *
+ * Value: block-start || block-end || inline-start || inline-end
+ *
+ * block-start: the block-start margin is discarded
+ * block-end: the block-end margin is discarded
+ * inline-start: the inline-start margin is discarded
+ * inline-end: the inline-end margin is discarded
+ */
+type MarginDiscardFlag =
+  | "block-start"
+  | "block-end"
+  | "inline-start"
+  | "inline-end";
+
+export function getMarginDiscardFlags(element: Element): MarginDiscardFlag[] {
+  const val = element.getAttribute("data-viv-margin-discard");
+  return (val ? val.split(" ") : []) as MarginDiscardFlag[];
+}
+
+export function setMarginDiscardFlags(
+  element: Element,
+  marginDiscardFlags: MarginDiscardFlag[],
+): void {
+  element.setAttribute("data-viv-margin-discard", marginDiscardFlags.join(" "));
+}
+
+export function setMarginDiscardFlag(
+  element: Element,
+  marginDiscardFlag: MarginDiscardFlag,
+): void {
+  const MarginDiscardFlags = getMarginDiscardFlags(element);
+  if (!MarginDiscardFlags.includes(marginDiscardFlag)) {
+    MarginDiscardFlags.push(marginDiscardFlag);
+    setMarginDiscardFlags(element, MarginDiscardFlags);
+  }
+}
+
+/**
  * Convert old page-break-* properties to break-* properties with appropriate
  * values as specified by CSS Fragmentation module:
  * https://drafts.csswg.org/css-break/#page-break-properties

@@ -17,6 +17,8 @@
  *
  * @fileoverview MathUtil - Math utilities
  */
+
+/** */
 export function mean(array: number[]): number {
   return array.reduce((prev, curr) => prev + curr, 0) / array.length;
 }

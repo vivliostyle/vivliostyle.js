@@ -478,7 +478,7 @@ export class StyleInstance
   ): boolean {
     if (isFunc) {
       if (name === "selector") {
-        // TODO: `@supports selector(...)`
+        return this.evalSupportsSelector(value);
       }
       return false;
     }
@@ -516,6 +516,27 @@ export class StyleInstance
       supportsReceiver,
     );
     return supported;
+  }
+
+  /**
+   * @param selectorText
+   * @returns true if selectorText is supported selector
+   */
+  private evalSupportsSelector(selectorText: string): boolean {
+    const sph = new StyleParserHandler(null);
+    const tokenizer = new CssTokenizer.Tokenizer(selectorText + "{}", sph);
+    const parser = new CssParser.Parser(
+      CssParser.actionsBase,
+      tokenizer,
+      sph,
+      "",
+    );
+    if (
+      parser.runParser(Number.POSITIVE_INFINITY, false, false, false, false)
+    ) {
+      return !sph.cascadeParserHandler.invalid;
+    }
+    return false;
   }
 
   getConsumedOffset(flowPosition: Vtree.FlowPosition): number {
@@ -1128,11 +1149,15 @@ export class StyleInstance
           );
           column.forceNonfitting = forceNonFitting;
           column.vertical = layoutContainer.vertical;
+          column.rtl = layoutContainer.rtl;
           column.snapHeight = layoutContainer.snapHeight;
           column.snapWidth = layoutContainer.snapWidth;
           if (layoutContainer.vertical) {
             const columnY =
-              currentColumnIndex * (columnWidth + columnGap) +
+              (layoutContainer.rtl
+                ? columnCount - currentColumnIndex - 1
+                : currentColumnIndex) *
+                (columnWidth + columnGap) +
               layoutContainer.paddingTop;
             const outerWidth = parseFloat(
               (boxContainer as HTMLElement).style.width,
@@ -1144,7 +1169,10 @@ export class StyleInstance
             column.setVerticalPosition(columnY, columnWidth);
           } else {
             const columnX =
-              currentColumnIndex * (columnWidth + columnGap) +
+              (layoutContainer.rtl
+                ? columnCount - currentColumnIndex - 1
+                : currentColumnIndex) *
+                (columnWidth + columnGap) +
               layoutContainer.paddingLeft;
             column.setVerticalPosition(
               layoutContainer.paddingTop,
@@ -1484,6 +1512,7 @@ export class StyleInstance
 
     let layoutContainer = new Vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
+    layoutContainer.rtl = boxInstance.rtl;
     layoutContainer.exclusions = exclusions;
     boxInstance.prepareContainer(
       this,
@@ -1650,14 +1679,6 @@ export class StyleInstance
             outerShapeProp,
             this,
           );
-
-          // Though it seems that LShapeFloatBug still exists in Firefox, it
-          // apparently does not occur on exclusion floats. See the test file:
-          // test/files/column-break-bug.html
-          // if (Base.checkLShapeFloatBug(this.viewport.root)) {
-          // 	// Simplistic bug workaround: add a copy of the shape translated up.
-          //     exclusions.push(outerShape.withOffset(0, -1.25 * this.queryUnitSize("em", false)));
-          // }
           exclusions.push(outerShape);
         }
       } else if (boxInstance.children.length == 0) {
@@ -2177,17 +2198,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     userStyleSheets: { url: string | null; text: string | null }[] | null,
   ): Task.Result<boolean> {
     this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
-    const userAgentXML = Base.resolveURL(
-      "user-agent.xml",
-      Base.resourceBaseURL,
-    );
     const frame = Task.newFrame<boolean>("OPSDocStore.init");
     this.validatorSet = CssValidator.baseValidatorSet();
     loadUABase().then(() => {
-      this.load(userAgentXML).then(() => {
-        this.triggerSingleDocumentPreprocessing = true;
-        frame.finish(true);
-      });
+      this.triggerSingleDocumentPreprocessing = true;
+      frame.finish(true);
     });
     return frame.result();
   }
