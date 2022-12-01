@@ -25,6 +25,7 @@ import "./bindings/menuButton";
 import "./bindings/swipePages";
 import "./bindings/textSelection";
 import "./bindings/clickOutside";
+import "./bindings/i18n";
 
 export default {
   start(): void {

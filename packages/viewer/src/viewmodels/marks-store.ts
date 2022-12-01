@@ -17,6 +17,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { t } from "i18next";
 import ko, { Computed, Observable, ObservableArray } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";
@@ -768,7 +769,7 @@ export class MarksMenuStatus {
 
   deleteCurrentEditing = async (): Promise<void> => {
     if (!marksStore.enabled()) return;
-    if (confirm("Do you really want to delete it?")) {
+    if (confirm(t("CONFIRM_DELETE"))) {
       await this.markAction().deleteCurrentEditing();
     }
     await this.closeMenu();
@@ -1025,7 +1026,7 @@ export class MarksBox {
   }
 
   removeAllMarks = async (): Promise<void> => {
-    if (confirm("Do you really want to remove all marks and memos?")) {
+    if (confirm(t("CONFIRM_REMOVE_ALL"))) {
       const markList = this.list.removeAll();
       for (const mark of markList) {
         await this.parent.removeMark(mark);
@@ -1034,7 +1035,7 @@ export class MarksBox {
   };
 
   removeOneMark = async (mark: Mark): Promise<void> => {
-    if (confirm("Do you really want to remove it?")) {
+    if (confirm(t("CONFIRM_REMOVE"))) {
       await this.parent.removeMark(mark);
     }
   };

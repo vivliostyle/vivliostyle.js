@@ -18,8 +18,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { t } from "i18next";
 import Vivliostyle from "../vivliostyle";
-
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
@@ -53,6 +53,7 @@ class ViewerApp {
   marksStore: MarksStoreFacade;
   marksMenuStatus: MarksMenuStatus;
   marksBox: MarksBox;
+  t = t;
 
   constructor() {
     // Configuration flags
