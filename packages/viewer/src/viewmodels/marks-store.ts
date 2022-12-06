@@ -65,8 +65,8 @@ interface TextInRange {
   endOffset: number;
 }
 
-const isTextInAdaptSpec = (text: Text): boolean => {
-  return !!text.parentElement.closest("[data-adapt-spec]");
+const isTextIgnorable = (text: Text): boolean => {
+  return !!text.parentElement.closest("rt,[data-adapt-spec]");
 };
 
 const collectTextWithEloffInRange = (
@@ -77,14 +77,16 @@ const collectTextWithEloffInRange = (
   for (let node = start.node; node; node = getNextNode(node)) {
     if (
       node.nodeType == 3 &&
-      !isTextInAdaptSpec(node as Text) &&
+      !isTextIgnorable(node as Text) &&
       isNodeInEloff(node)
     ) {
       const t = node as Text;
       if (t.data.trim().length > 0) {
         const startOffset = node == start.node ? start.offset : 0;
         const endOffset = node == end.node ? end.offset : t.data.length;
-        nodes.push({ t, startOffset, endOffset });
+        if (endOffset > startOffset) {
+          nodes.push({ t, startOffset, endOffset });
+        }
       }
     }
     if (node == end.node) {
