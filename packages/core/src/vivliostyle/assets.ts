@@ -597,6 +597,11 @@ footnote-policy = auto | line;
 /* CSS Repeated Headers and Footers */
 [viv]repeat-on-break = auto | none | header | footer;
 
+/* Compatibility */
+[webkit]text-fill-color = COLOR;
+[webkit]text-stroke-color = COLOR;
+[webkit]text-stroke-width = BORDER_SIDE_WIDTH;
+
 DEFAULTS
 
 background-attachment: scroll;
@@ -666,6 +671,8 @@ padding-right: auto;
 padding-top: auto;
 text-emphasis-color: currentColor;
 text-emphasis-style: none;
+text-stroke-color: currentColor;
+text-stroke-width: 0;
 marker-start: none;
 marker-mid: none;
 marker-end: none;
@@ -713,6 +720,7 @@ font = FONT font-style font-variant_css2 font-weight font-stretch_css3 /* font-s
 font-variant = font-variant-ligatures font-variant-caps font-variant-numeric font-variant-east-asian;
 [epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
 marker = INSETS marker-start marker-mid marker-end;
+[webkit]text-stroke = text-stroke-width text-stroke-color;
 
 /* css-logical */
 margin-block = INSETS margin-block-start margin-block-end;
