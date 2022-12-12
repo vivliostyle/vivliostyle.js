@@ -86,12 +86,10 @@ export const Renderer: React.FC<RendererProps> = ({
     const viewerOptions = {
       fontSize,
       pageViewMode,
-      zoom,
       renderAllPages,
       autoResize,
       defaultPaperSize,
       pageBorderWidth,
-      fitToScreen,
     };
     instanceRef.current!.setOptions(viewerOptions);
   }
@@ -104,9 +102,8 @@ export const Renderer: React.FC<RendererProps> = ({
         ? {
             userStyleSheet: [
               {
-                [userStyleSheet.endsWith(".css")
-                  ? "url"
-                  : "text"]: userStyleSheet,
+                [userStyleSheet.endsWith(".css") ? "url" : "text"]:
+                  userStyleSheet,
               },
             ],
           }
@@ -115,9 +112,8 @@ export const Renderer: React.FC<RendererProps> = ({
         ? {
             authorStyleSheet: [
               {
-                [authorStyleSheet.endsWith(".css")
-                  ? "url"
-                  : "text"]: authorStyleSheet,
+                [authorStyleSheet.endsWith(".css") ? "url" : "text"]:
+                  authorStyleSheet,
               },
             ],
           }
@@ -130,12 +126,12 @@ export const Renderer: React.FC<RendererProps> = ({
       instance.loadDocument({ url: source }, documentOptions, {
         fontSize,
         pageViewMode,
-        zoom: 1,
+        zoom,
         renderAllPages,
         autoResize,
         defaultPaperSize,
         pageBorderWidth,
-        fitToScreen: false,
+        fitToScreen,
       });
     }
   }
@@ -220,19 +216,17 @@ export const Renderer: React.FC<RendererProps> = ({
   useEffect(() => {
     loadSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, authorStyleSheet, userStyleSheet]);
+  }, [source, authorStyleSheet, userStyleSheet, zoom, fitToScreen]);
 
   useEffect(() => {
     setViewerOptions();
   }, [
     fontSize,
     pageViewMode,
-    zoom,
     renderAllPages,
     autoResize,
     defaultPaperSize,
     pageBorderWidth,
-    fitToScreen,
   ]);
 
   // sync location
