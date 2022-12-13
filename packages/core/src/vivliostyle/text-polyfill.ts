@@ -818,9 +818,16 @@ class TextSpacingPolyfill {
               : "viv-hang-last viv-hang-hw";
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             if (hangingEnd) {
+              const { offsetLeft, offsetTop } = outerElem;
               outerElem.className = isFullWidth
                 ? "viv-hang-end"
                 : "viv-hang-end viv-hang-hw";
+              if (
+                outerElem.offsetLeft === offsetLeft &&
+                outerElem.offsetTop === offsetTop
+              ) {
+                outerElem.className = "";
+              }
             } else if (textSpacing.trimEnd) {
               outerElem.className = "viv-ts-trim";
             } else {
