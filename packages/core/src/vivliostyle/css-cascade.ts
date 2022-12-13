@@ -3134,8 +3134,9 @@ export class CascadeInstance {
                 if (!shorthand.error) {
                   for (const nameLH of shorthand.propList) {
                     const avLH = new CascadeValue(
-                      shorthand.values[nameLH] ||
-                        validatorSet.defaultValues[nameLH],
+                      shorthand.values[nameLH] ??
+                        validatorSet.defaultValues[nameLH] ??
+                        Css.ident.initial,
                       cascVal.priority,
                     );
                     const tvLH = getProp(elementStyle, nameLH);

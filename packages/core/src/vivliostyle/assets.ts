@@ -314,7 +314,6 @@ quotes = [STRING STRING]+ | none | auto;
 right = APLENGTH;
 table-layout = auto | fixed;
 text-align = left | right | center | justify | start | end;
-text-decoration = none | [ underline || overline || line-through || blink ];
 text-indent = PLENGTH;
 text-transform = capitalize | uppercase | lowercase | none;
 top = APLENGTH;
@@ -493,6 +492,7 @@ hanging-punctuation = none | [ first || [ force-end | allow-end ] || last ];
 [webkit]text-decoration-line = none | [ underline || overline || line-through || blink ];
 [webkit]text-decoration-skip = none | [ objects || spaces || ink || edges || box-decoration ];
 [webkit]text-decoration-style = solid | double | dotted | dashed | wavy;
+[webkit]text-decoration-thickness = from-font | APLENGTH;
 [epub,webkit]text-emphasis-color = COLOR;
 [webkit]text-emphasis-position = [ over | under ] [ right | left ];
 [epub,webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
@@ -721,6 +721,7 @@ font-variant = font-variant-ligatures font-variant-caps font-variant-numeric fon
 [epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
 marker = INSETS marker-start marker-mid marker-end;
 [webkit]text-stroke = text-stroke-width text-stroke-color;
+text-decoration = text-decoration-line text-decoration-color text-decoration-style text-decoration-thickness;
 
 /* css-logical */
 margin-block = INSETS margin-block-start margin-block-end;
