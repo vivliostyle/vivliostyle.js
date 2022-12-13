@@ -1489,11 +1489,9 @@ viv-ts-open.viv-hang-first > viv-ts-inner {
 viv-ts-thin-sp::after {
   content: " ";
   font-family: Times, serif;
-  font-size: 66.6%;
   word-spacing: normal;
-  letter-spacing: normal;
+  letter-spacing: -0.0833em;
   line-height: 0;
   text-orientation: mixed;
-  visibility: hidden;
 }
 `;
