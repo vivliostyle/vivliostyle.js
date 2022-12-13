@@ -999,7 +999,9 @@ export class ShorthandValidator extends Css.Visitor {
       for (const name of this.propList) {
         receiver.simpleProperty(
           name,
-          this.values[name] || this.validatorSet.defaultValues[name],
+          this.values[name] ??
+            this.validatorSet.defaultValues[name] ??
+            Css.ident.initial,
           important,
         );
       }
@@ -1179,7 +1181,10 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
 
   mergeIn(acc: { [key: string]: Css.Val[] }, values: ValueMap) {
     for (const name of this.propList) {
-      const val = values[name] || this.validatorSet.defaultValues[name];
+      const val =
+        values[name] ??
+        this.validatorSet.defaultValues[name] ??
+        Css.ident.initial;
       let arr = acc[name];
       if (!arr) {
         arr = [];
@@ -2021,12 +2026,7 @@ export class ValidatorSet {
       const shorthand = this.shorthands[prop];
       const list = shorthand ? shorthand.propList : [prop];
       for (const pname of list) {
-        const pval = this.defaultValues[pname];
-        if (!pval) {
-          Logging.logger.warn("Unknown property in makePropSet:", pname);
-        } else {
-          map[pname] = pval;
-        }
+        map[pname] = this.defaultValues[pname] ?? Css.ident.initial;
       }
     }
     return map;
