@@ -523,10 +523,14 @@ export class ViewFactory
         }
       }
       propList.sort(Css.processingOrderFn);
+      let fontSize: Css.Val;
+      let lineHeight: Css.Val;
+
       for (const name of propList) {
         inheritanceVisitor.setPropName(name);
-        const value = CssCascade.getProp(style, name);
-        if (!Css.isDefaultingValue(value.value)) {
+        const prop = CssCascade.getProp(style, name);
+        let prop1 = prop;
+        if (!Css.isDefaultingValue(prop.value)) {
           if (
             name === "font-size" &&
             i === styles.length - 1 &&
@@ -534,15 +538,47 @@ export class ViewFactory
             this.context.rootFontSize
           ) {
             // Fix for issue #608, #549
-            props[name] = new CssCascade.CascadeValue(
+            prop1 = new CssCascade.CascadeValue(
               new Css.Numeric(this.context.rootFontSize, "px"),
-              value.priority,
+              prop.priority,
             );
-          } else if (Css.isCustomPropName(name)) {
-            props[name] = value;
-          } else {
-            props[name] = value.filterValue(inheritanceVisitor);
+          } else if (
+            name === "line-height" &&
+            i === styles.length - 1 &&
+            this.context.rootLineHeight &&
+            prop.value instanceof Css.Numeric &&
+            (prop.value.unit === "lh" || prop.value.unit === "rlh")
+          ) {
+            // line-height with lh or rlh unit on root element
+            prop1 = new CssCascade.CascadeValue(
+              new Css.Numeric(this.context.rootLineHeight, "px"),
+              prop.priority,
+            );
+          } else if (
+            i === 0 &&
+            prop.value instanceof Css.Numeric &&
+            prop.value.unit === "lh"
+          ) {
+            // line-height with lh unit on current element
+            prop1 = new CssCascade.CascadeValue(
+              new Css.Numeric(
+                prop.value.num *
+                  this.getLineHeightUnitSize(name, fontSize, lineHeight),
+                "px",
+              ),
+              prop.priority,
+            );
+          } else if (!Css.isCustomPropName(name)) {
+            prop1 = prop.filterValue(inheritanceVisitor);
           }
+
+          if (name === "font-size") {
+            fontSize = prop1.value;
+          } else if (name === "line-height") {
+            lineHeight = prop1.value;
+          }
+
+          props[name] = prop1;
         }
       }
     }
@@ -668,10 +704,15 @@ export class ViewFactory
       elementStyle = inheritedValues.elementStyle;
       this.nodeContext.lang = inheritedValues.lang;
     }
+    const floatCV: CssCascade.CascadeValue = elementStyle["float"];
     const floatReferenceCV: CssCascade.CascadeValue =
       elementStyle["float-reference"];
     const floatReference =
-      floatReferenceCV && !Css.isDefaultingValue(floatReferenceCV.value)
+      floatCV &&
+      !Css.isDefaultingValue(floatCV.value) &&
+      floatCV.value !== Css.ident.none &&
+      floatReferenceCV &&
+      !Css.isDefaultingValue(floatReferenceCV.value)
         ? PageFloats.floatReferenceOf(floatReferenceCV.value.toString())
         : null;
     if (
@@ -1976,7 +2017,12 @@ export class ViewFactory
       this.sourceNode?.parentElement === null &&
       !!this.viewRoot?.parentElement;
 
-    for (const propName in computedStyle) {
+    const propList = Object.keys(computedStyle);
+    propList.sort(Css.processingOrderFn);
+    let fontSize: Css.Val;
+    let lineHeight: Css.Val;
+
+    for (const propName of propList) {
       if (propertiesNotPassedToDOM[propName]) {
         continue;
       }
@@ -1991,12 +2037,28 @@ export class ViewFactory
         ),
       );
       if (
-        value.isNumeric() &&
-        Exprs.needUnitConversion((value as Css.Numeric).unit)
+        value instanceof Css.Numeric &&
+        Exprs.needUnitConversion(value.unit)
       ) {
-        // font-size for the root element is already converted to px
-        value = Css.convertNumericToPx(value, this.context);
+        if (value.unit === "lh") {
+          // for browsers not supporting "lh" unit
+          value = new Css.Numeric(
+            value.num *
+              this.getLineHeightUnitSize(propName, fontSize, lineHeight),
+            "px",
+          );
+        } else {
+          // font-size for the root element is already converted to px
+          value = Css.convertNumericToPx(value, this.context);
+        }
       }
+
+      if (propName === "font-size") {
+        fontSize = value;
+      } else if (propName === "line-height") {
+        lineHeight = value;
+      }
+
       if (
         Vtree.delayedProps[propName] ||
         (isRelativePositioned &&
@@ -2029,6 +2091,93 @@ export class ViewFactory
         Base.setCSSProperty(target, propName, value.toString());
       }
     }
+  }
+
+  /**
+   * Get "lh" unit size in px
+   */
+  private getLineHeightUnitSize(
+    propName: string,
+    fontSize: Css.Val,
+    lineHeight: Css.Val,
+  ): number {
+    // Note: "lh" unit is inaccurate for line-height:normal, not using font metrics.
+    const defaultLineHeightNum =
+      Exprs.defaultUnitSizes["lh"] / Exprs.defaultUnitSizes["em"];
+
+    const parentStyle =
+      this.nodeContext.parent?.viewNode?.nodeType === 1
+        ? this.viewport.window.getComputedStyle(
+            this.nodeContext.parent.viewNode as Element,
+          )
+        : null;
+
+    const parentFontSize = parentStyle
+      ? parseFloat(parentStyle.fontSize)
+      : this.context.fontSize();
+
+    const parentLineHeight = parentStyle
+      ? parentStyle.lineHeight === "normal"
+        ? parentFontSize * defaultLineHeightNum
+        : parseFloat(parentStyle.lineHeight)
+      : this.context.rootLineHeight;
+
+    if (propName === "line-height" || propName === "font-size") {
+      return parentLineHeight;
+    }
+
+    let lineHeightNum: number | null = null;
+
+    if (lineHeight) {
+      if (
+        lineHeight instanceof Css.Num ||
+        (lineHeight instanceof Css.Numeric &&
+          (lineHeight.unit === "em" || lineHeight.unit === "%"))
+      ) {
+        lineHeightNum =
+          lineHeight instanceof Css.Numeric && lineHeight.unit === "%"
+            ? lineHeight.num / 100
+            : lineHeight.num;
+      } else if (lineHeight instanceof Css.Numeric) {
+        return (
+          lineHeight.num * this.context.queryUnitSize(lineHeight.unit, false)
+        );
+      }
+    } else {
+      for (
+        let viewNode = this.nodeContext.parent?.viewNode;
+        ;
+        viewNode = viewNode.parentNode
+      ) {
+        if (!viewNode || viewNode.nodeType !== 1) {
+          lineHeightNum = defaultLineHeightNum;
+          break;
+        }
+        const ancestorLH = (viewNode as HTMLElement)?.style?.lineHeight;
+        if (ancestorLH) {
+          if (/^[0-9.]+$/.test(ancestorLH)) {
+            lineHeightNum = parseFloat(ancestorLH);
+          }
+          if (ancestorLH === "normal") {
+            lineHeightNum = defaultLineHeightNum;
+          }
+          break;
+        }
+      }
+    }
+
+    if (lineHeightNum !== null) {
+      if (fontSize instanceof Css.Numeric) {
+        return (
+          lineHeightNum *
+          CssCascade.convertFontSizeToPx(fontSize, parentFontSize, this.context)
+            .num
+        );
+      } else {
+        return lineHeightNum * parentFontSize;
+      }
+    }
+    return parentLineHeight;
   }
 
   /**

@@ -1577,6 +1577,8 @@ export class ValidatorSet {
         ex: Css.empty,
         ch: Css.empty,
         rem: Css.empty,
+        lh: Css.empty,
+        rlh: Css.empty,
         vw: Css.empty,
         vh: Css.empty,
         vi: Css.empty,

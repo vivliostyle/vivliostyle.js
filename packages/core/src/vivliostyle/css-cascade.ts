@@ -581,9 +581,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     if (this.propName === "font-size") {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
     } else if (
-      numeric.unit == "em" ||
-      numeric.unit == "ex" ||
-      numeric.unit == "rem"
+      numeric.unit === "em" ||
+      numeric.unit === "ex" ||
+      numeric.unit === "rem" ||
+      numeric.unit === "lh" ||
+      numeric.unit === "rlh"
     ) {
       return convertFontRelativeLengthToPx(
         numeric,
@@ -615,6 +617,8 @@ export function convertFontRelativeLengthToPx(
     return new Css.Numeric(num * ratio * baseFontSize, "px");
   } else if (unit === "rem") {
     return new Css.Numeric(num * context.fontSize(), "px");
+  } else if (unit === "rlh") {
+    return new Css.Numeric(num * context.rootLineHeight, "px");
   } else {
     return numeric;
   }
