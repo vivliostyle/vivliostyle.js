@@ -695,7 +695,8 @@ export const fullURange: URange = new URange("U+0-10FFFF");
 
 export const processingOrder = {
   "font-size": 1,
-  color: 2,
+  "line-height": 2,
+  color: 3,
 };
 
 export function isDefaultingValue(value: Val): boolean {

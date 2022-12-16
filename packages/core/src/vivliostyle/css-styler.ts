@@ -597,6 +597,7 @@ export class Styler implements AbstractStyler {
       }
     }
     if (!isBody) {
+      // root element
       const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
       let isRelativeFontSize = true;
       if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
@@ -616,6 +617,12 @@ export class Styler implements AbstractStyler {
             case "%":
               px *= this.context.initialFontSize / 100;
               break;
+            case "lh":
+            case "rlh":
+              px *=
+                (this.context.initialFontSize * Exprs.defaultUnitSizes["lh"]) /
+                Exprs.defaultUnitSizes["em"];
+              break;
             default: {
               const unitSize = Exprs.defaultUnitSizes[val.unit];
               if (unitSize) {
@@ -627,6 +634,49 @@ export class Styler implements AbstractStyler {
           this.context.rootFontSize = px;
           this.context.isRelativeRootFontSize = isRelativeFontSize;
         }
+      }
+      const rootFontSize =
+        this.context.rootFontSize ?? this.context.initialFontSize;
+      const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;
+      if (lineHeight && !Css.isDefaultingValue(lineHeight.value)) {
+        const val = lineHeight.evaluate(this.context);
+        if (val instanceof Css.Num) {
+          this.context.rootLineHeight = val.num * rootFontSize;
+        } else if (val instanceof Css.Numeric) {
+          let px = val.num;
+          switch (val.unit) {
+            case "em":
+            case "rem":
+              px *= rootFontSize;
+              break;
+            case "ex":
+              px *=
+                (rootFontSize * Exprs.defaultUnitSizes["ex"]) /
+                Exprs.defaultUnitSizes["em"];
+              break;
+            case "%":
+              px *= rootFontSize / 100;
+              break;
+            case "lh":
+            case "rlh":
+              px *=
+                (this.context.initialFontSize * Exprs.defaultUnitSizes["lh"]) /
+                Exprs.defaultUnitSizes["em"];
+              break;
+            default: {
+              const unitSize = Exprs.defaultUnitSizes[val.unit];
+              if (unitSize) {
+                px *= unitSize;
+              }
+            }
+          }
+          this.context.rootLineHeight = px;
+        }
+      } else {
+        // Note: "rlh" unit is inaccurate for line-height:normal, not using font metrics.
+        this.context.rootLineHeight =
+          (this.context.fontSize() * Exprs.defaultUnitSizes["lh"]) /
+          Exprs.defaultUnitSizes["em"];
       }
     }
   }
