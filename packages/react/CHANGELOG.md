@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.20.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.2...v2.20.0) (2022-12-16)
+
+### Bug Fixes
+
+- Question: react renderer size ([9d1fe83](https://github.com/vivliostyle/vivliostyle.js/commit/9d1fe83ed4ad1b17834b17eeb11d070664e33723)), closes [#709](https://github.com/vivliostyle/vivliostyle.js/issues/709)
+
 ## [2.19.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.1...v2.19.2) (2022-11-17)
 
 **Note:** Version bump only for package @vivliostyle/react

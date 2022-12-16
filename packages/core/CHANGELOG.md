@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.20.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.2...v2.20.0) (2022-12-16)
+
+### Bug Fixes
+
+- hanging-punctuation makes text selection difficult for paragraph-last punctuation ([00177d3](https://github.com/vivliostyle/vivliostyle.js/commit/00177d36163d2c5efeba75966684b9352213cbd3)), closes [#1062](https://github.com/vivliostyle/vivliostyle.js/issues/1062)
+- Some text-\* properties are not applied to page margin box content ([c3082f6](https://github.com/vivliostyle/vivliostyle.js/commit/c3082f627e28d38fbd92a66978e6ee198103a62a)), closes [#1059](https://github.com/vivliostyle/vivliostyle.js/issues/1059)
+- Text-decoration-line should not be skipped at ideograph-alpha/numeric text spacing ([e8382ed](https://github.com/vivliostyle/vivliostyle.js/commit/e8382ed81c8d0c5a98e630e0ec63d849180875e8)), closes [#1061](https://github.com/vivliostyle/vivliostyle.js/issues/1061)
+- Wrong cascading with shorthand property text-decoration and its longhand ([7674360](https://github.com/vivliostyle/vivliostyle.js/commit/76743607dd8e737d7b629dd2794fb3d7486bc348)), closes [#1054](https://github.com/vivliostyle/vivliostyle.js/issues/1054)
+
+### Features
+
+- Add support for CSS lh and rlh units ([554d300](https://github.com/vivliostyle/vivliostyle.js/commit/554d300b34af107b68e465e0a14ad9947f06a35a)), closes [#1035](https://github.com/vivliostyle/vivliostyle.js/issues/1035)
+- Add support for CSS margin-break property ([a3086dc](https://github.com/vivliostyle/vivliostyle.js/commit/a3086dce807f1eeff00341826a070b191fd7a980)), closes [#734](https://github.com/vivliostyle/vivliostyle.js/issues/734)
+- Support (-webkit-)text-stroke properties ([73e0560](https://github.com/vivliostyle/vivliostyle.js/commit/73e0560868b34b3ff5cfffae562439c76cb54102)), closes [#1055](https://github.com/vivliostyle/vivliostyle.js/issues/1055)
+
 ## [2.19.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.1...v2.19.2) (2022-11-17)
 
 ### Bug Fixes
