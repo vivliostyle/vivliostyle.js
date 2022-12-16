@@ -1398,8 +1398,16 @@ export class ViewFactory
               // truncated to zero.
               Break.setMarginDiscardFlag(result, "block-start");
             }
-          } else if (atUnforcedBreak && !this.isAtForcedBreak()) {
-            Break.setMarginDiscardFlag(result, "block-start");
+          } else {
+            const marginBreak = computedStyle["margin-break"];
+            if (
+              marginBreak === Css.ident.discard ||
+              (marginBreak !== Css.ident.keep &&
+                atUnforcedBreak &&
+                !this.isAtForcedBreak())
+            ) {
+              Break.setMarginDiscardFlag(result, "block-start");
+            }
           }
         }
         if (listItem) {
@@ -2664,6 +2672,7 @@ export const propertiesNotPassedToDOM = {
   "flow-options": true,
   "flow-priority": true,
   "footnote-policy": true,
+  "margin-break": true,
   page: true,
 };
 
