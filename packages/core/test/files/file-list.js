@@ -136,6 +136,14 @@ module.exports = [
         file: "inset-shorthand.html",
         title: "inset shorthand property",
       },
+      {
+        file: "lh-rlh-units.html",
+        title: "lh and rlh units",
+      },
+      {
+        file: "margin-break.html",
+        title: "margin-break property",
+      }
     ],
   },
   {
