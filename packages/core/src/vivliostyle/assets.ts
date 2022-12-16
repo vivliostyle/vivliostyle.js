@@ -399,6 +399,7 @@ break-after = BREAK;
 break-inside = auto | avoid | avoid-page | avoid-column | avoid-region;
 [webkit]column-span = none | auto | all;
 [moz]column-fill = auto | balance | balance-all;
+margin-break = auto | keep | discard;
 
 src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 
