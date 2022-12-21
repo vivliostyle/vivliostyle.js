@@ -906,17 +906,39 @@ export class ViewFactory
         floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
           ? (floatMinWrapBlock as Css.Numeric)
           : null;
+
+      // Leaves handling of multicol specified on non-root/body elements to the browser
+      const insideNonRootMultiColumn = this.isInsideNonRootMultiColumn();
+
       const columnSpan = computedStyle["column-span"];
       this.nodeContext.columnSpan =
-        columnSpan && !Css.isDefaultingValue(columnSpan) ? columnSpan : null;
+        !insideNonRootMultiColumn &&
+        columnSpan &&
+        !Css.isDefaultingValue(columnSpan)
+          ? columnSpan
+          : null;
       if (!this.nodeContext.inline) {
         const breakAfter = computedStyle["break-after"];
-        if (breakAfter && !Css.isDefaultingValue(breakAfter)) {
+        if (
+          breakAfter &&
+          !Css.isDefaultingValue(breakAfter) &&
+          !(insideNonRootMultiColumn && breakAfter === Css.ident.column)
+        ) {
           this.nodeContext.breakAfter = breakAfter.toString();
+          if (Break.forcedBreakValues[this.nodeContext.breakAfter]) {
+            delete computedStyle["break-before"];
+          }
         }
         const breakBefore = computedStyle["break-before"];
-        if (breakBefore && !Css.isDefaultingValue(breakBefore)) {
+        if (
+          breakBefore &&
+          !Css.isDefaultingValue(breakBefore) &&
+          !(insideNonRootMultiColumn && breakBefore === Css.ident.column)
+        ) {
           this.nodeContext.breakBefore = breakBefore.toString();
+          if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
+            delete computedStyle["break-before"];
+          }
         }
         // Named page type
         const pageVal: Css.Val = computedStyle["page"];
@@ -1437,6 +1459,37 @@ export class ViewFactory
       });
     });
     return frame.result();
+  }
+
+  /**
+   * Check if the current element is inside multi-column element
+   * that is not root or body element in the source tree.
+   *
+   * Note: vivliostyle handles multi-column on the root and body element on its own,
+   * but leaves it to the browser to handle other multi-column.
+   * This check is for such non-root/body multi-column.
+   */
+  private isInsideNonRootMultiColumn(): boolean {
+    for (
+      let node = this.nodeContext.parent?.viewNode;
+      node;
+      node = node.parentNode
+    ) {
+      const style = node.nodeType === 1 ? (node as HTMLElement).style : null;
+      if (!style) {
+        break;
+      }
+      if (
+        !isNaN(parseFloat(style.columnCount)) ||
+        !isNaN(parseFloat(style.columnWidth))
+      ) {
+        return true;
+      }
+      if (style.position === "absolute") {
+        break;
+      }
+    }
+    return false;
   }
 
   /**
