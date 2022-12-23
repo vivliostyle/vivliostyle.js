@@ -2829,12 +2829,8 @@ export class Viewport {
     this.outerZoomBox = outerZoomBox as HTMLElement;
     this.contentContainer = contentContainer as HTMLElement;
     this.layoutBox = layoutBox as HTMLElement;
-    const clientLayout = new DefaultClientLayout(this);
-    const computedStyle = clientLayout.getElementComputedStyle(this.root);
-    this.width =
-      opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
-    this.height =
-      opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
+    this.width = opt_width || this.root.offsetWidth || window.innerWidth;
+    this.height = opt_height || this.root.offsetHeight || window.innerHeight;
 
     // Use the fallbackPageSize if window size is 0 or browser is in headless mode.
     const fallbackPageSize = {

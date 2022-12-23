@@ -86,6 +86,7 @@ export class AdaptiveViewer {
   touchX: number;
   touchY: number;
   needResize: boolean;
+  resized: boolean;
   needRefresh: boolean;
   viewportSize: ViewportSize | null;
   currentPage: Vtree.Page;
@@ -150,6 +151,7 @@ export class AdaptiveViewer {
     this.sendCommand = () => {};
     this.resizeListener = () => {
       this.needResize = true;
+      this.resized = true;
       this.kick();
     };
     this.pageReplacedListener = this.pageReplacedListener.bind(this);
@@ -176,6 +178,7 @@ export class AdaptiveViewer {
     this.touchX = 0;
     this.touchY = 0;
     this.needResize = false;
+    this.resized = false;
     this.needRefresh = false;
     this.viewportSize = null;
     this.currentPage = null;
@@ -461,7 +464,7 @@ export class AdaptiveViewer {
       command["allowScripts"] !== Scripts.allowScripts
     ) {
       Scripts.setAllowScripts(command["allowScripts"]);
-      this.needRefresh = true;
+      this.needResize = true;
     }
     this.configurePlugins(command);
     return Task.newResult(true);
@@ -631,7 +634,10 @@ export class AdaptiveViewer {
     }
   }
 
-  private resolveSpreadView(viewport: Vgen.Viewport): boolean {
+  private resolveSpreadView(
+    viewport: Vgen.Viewport,
+    pageSize: { width: number; height: number } | null,
+  ): boolean {
     switch (this.pageViewMode) {
       case PageViewMode.SINGLE_PAGE:
         return false;
@@ -639,9 +645,11 @@ export class AdaptiveViewer {
         return true;
       case PageViewMode.AUTO_SPREAD:
       default:
-        // wide enough for a pair of pages of A/B paper sizes, but not too
-        // narrow
-        return viewport.width / viewport.height >= 1.45 && viewport.width > 800;
+        return (
+          (viewport.width - this.pref.pageBorder) / viewport.height >=
+            (pageSize ? (pageSize.width * 2) / pageSize.height : 1.45) &&
+          (!!pageSize || viewport.width > 800)
+        );
     }
   }
 
@@ -655,7 +663,13 @@ export class AdaptiveViewer {
 
   private sizeIsGood(): boolean {
     const viewport = this.createViewport();
-    const spreadView = this.resolveSpreadView(viewport);
+    const hasNoAutoSizedPages =
+      this.opfView?.hasPages() && !this.opfView.hasAutoSizedPages();
+    const spreadView = this.resolveSpreadView(
+      viewport,
+      this.resized && hasNoAutoSizedPages ? this.pageSizes[0] : null,
+    );
+    this.resized = false;
     const spreadViewChanged = this.pref.spreadView !== spreadView;
     this.updateSpreadView(spreadView);
     if (
@@ -685,11 +699,7 @@ export class AdaptiveViewer {
       return true;
     }
 
-    if (
-      this.opfView &&
-      this.opfView.hasPages() &&
-      !this.opfView.hasAutoSizedPages()
-    ) {
+    if (hasNoAutoSizedPages) {
       this.viewport.width = viewport.width;
       this.viewport.height = viewport.height;
       this.needRefresh = true;
@@ -706,6 +716,13 @@ export class AdaptiveViewer {
   ) {
     this.pageSizes[pageIndex] = pageSize;
     this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
+    if (
+      pageIndex === 0 &&
+      this.pageViewMode === PageViewMode.AUTO_SPREAD &&
+      !this.opfView.hasAutoSizedPages()
+    ) {
+      this.updateSpreadView(this.resolveSpreadView(this.viewport, pageSize));
+    }
   }
 
   private setPageSizePageRules(
