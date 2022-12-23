@@ -409,6 +409,37 @@ export class EPUBDocStore extends OPS.OPSDocStore {
       return frame.result();
     }
   }
+
+  override processViewportMeta(meta: Element): string {
+    let content = meta.getAttribute("content");
+    if (!content) {
+      return "";
+    }
+    const vals = {};
+    let r: RegExpMatchArray;
+    while (
+      (r = content.match(
+        /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/,
+      )) != null
+    ) {
+      content = content.substr(r[0].length);
+      vals[r[1]] = r[2];
+    }
+    const width = vals["width"] - 0;
+    const height = vals["height"] - 0;
+    if (width && height) {
+      const prePaginated = !!Object.values(this.primaryOPFByEPubURL).find(
+        (opf) => opf.prePaginated,
+      );
+      return (
+        `@-epubx-viewport{width:${width}px;height:${height}px;}` +
+        (prePaginated
+          ? `@page{size:${width}px ${height}px;margin:0;}`
+          : `@page{margin:0;}`)
+      );
+    }
+    return "";
+  }
 }
 
 export type OPFItemParam = {

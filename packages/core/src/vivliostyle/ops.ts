@@ -2115,30 +2115,6 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
   }
 }
 
-// override, so we don't register an error
-export function processViewportMeta(meta: Element): string {
-  let content = meta.getAttribute("content");
-  if (!content) {
-    return "";
-  }
-  const vals = {};
-  let r: RegExpMatchArray;
-  while (
-    (r = content.match(
-      /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/,
-    )) != null
-  ) {
-    content = content.substr(r[0].length);
-    vals[r[1]] = r[2];
-  }
-  const width = vals["width"] - 0;
-  const height = vals["height"] - 0;
-  if (width && height) {
-    return `@-epubx-viewport{width:${width}px;height:${height}px;}`;
-  }
-  return "";
-}
-
 export class StyleParserHandler extends CssParser.DispatchParserHandler {
   rootScope: Exprs.LexicalScope;
   pageScope: Exprs.LexicalScope;
@@ -2363,7 +2339,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
               ) {
                 sources.push({
                   url,
-                  text: processViewportMeta(elem),
+                  text: this.processViewportMeta(elem),
                   flavor: CssParser.StylesheetFlavor.AUTHOR,
                   classes: null,
                   media: null,
@@ -2451,5 +2427,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       },
     );
     return frame.result();
+  }
+
+  processViewportMeta(meta: Element): string {
+    return "";
   }
 }
