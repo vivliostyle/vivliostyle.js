@@ -220,7 +220,7 @@ export class LexicalScope {
 }
 
 export function isAbsoluteLengthUnit(unit: string): boolean {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "px":
     case "in":
     case "pt":
@@ -235,7 +235,7 @@ export function isAbsoluteLengthUnit(unit: string): boolean {
 }
 
 export function isViewportRelativeLengthUnit(unit: string): boolean {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "vw":
     case "vh":
     case "vi":
@@ -255,7 +255,7 @@ export function isViewportRelativeLengthUnit(unit: string): boolean {
 }
 
 export function isFontRelativeLengthUnit(unit: string): boolean {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "em":
     case "ex":
     case "rem":
@@ -1039,7 +1039,7 @@ export class Numeric extends Val {
 
   constructor(scope: LexicalScope, public num: number, unit: string) {
     super(scope);
-    this.unit = unit.toLowerCase();
+    this.unit = unit?.toLowerCase() ?? "";
   }
 
   override appendTo(buf: Base.StringBuffer, priority: number): void {
