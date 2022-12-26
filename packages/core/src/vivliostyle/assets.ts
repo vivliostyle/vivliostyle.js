@@ -274,7 +274,8 @@ direction = ltr | rtl;
 display = inline | block | list-item | inline-block | table | inline-table | table-row-group |
     table-header-group | table-footer-group | table-row | table-column-group | table-column |
     table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex |
-    ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker;
+    ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker |
+    flow-root | grid | inline-grid | contents;
 empty-cells = show | hide;
 FAMILY = SPACE(IDENT+) | STRING;
 FAMILY_LIST = COMMA( FAMILY+ );
@@ -303,7 +304,7 @@ outline-offset = LENGTH;
 outline-color = COLOR | invert;
 outline-style = BORDER_SIDE_STYLE;
 outline-width = BORDER_SIDE_WIDTH;
-overflow = visible | hidden | scroll | auto;
+overflow = visible | hidden | scroll | auto | clip;
 padding-right = PPLENGTH;
 padding-left = PPLENGTH;
 padding-top = PPLENGTH;
