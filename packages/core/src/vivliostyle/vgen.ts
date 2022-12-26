@@ -926,7 +926,7 @@ export class ViewFactory
         ) {
           this.nodeContext.breakAfter = breakAfter.toString();
           if (Break.forcedBreakValues[this.nodeContext.breakAfter]) {
-            delete computedStyle["break-before"];
+            delete computedStyle["break-after"];
           }
         }
         const breakBefore = computedStyle["break-before"];
