@@ -816,7 +816,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (c.nodeType == 1) {
         const e = c as HTMLElement;
         const f = e.style.cssFloat;
-        if (f == "left" || f == "right") {
+        if (f == "left" || f == "right" || f === "none") {
           this.element.removeChild(e);
         } else {
           break;
@@ -834,10 +834,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const bands = this.bands;
     const x1 = this.vertical ? this.getTopEdge() : this.getLeftEdge();
     const x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
+    let foundNonZeroWidthBand = false;
+
     for (const band of bands) {
       const height = band.y2 - band.y1;
       band.left = this.createFloat(ref, "left", band.x1 - x1, height);
       band.right = this.createFloat(ref, "right", x2 - band.x2, height);
+
+      // Hacky workaround for issue #1071
+      // (Top page float should not absorb margin/border/padding of the block below)
+      if (!foundNonZeroWidthBand) {
+        if (band.x1 >= x2 || band.x2 <= x1) {
+          Base.setCSSProperty(band.right, "float", "none");
+        } else {
+          foundNonZeroWidthBand = true;
+        }
+      }
     }
   }
 
