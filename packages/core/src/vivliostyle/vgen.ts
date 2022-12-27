@@ -2824,6 +2824,8 @@ export class Viewport {
     if (!layoutBox) {
       layoutBox = this.document.createElement("div");
       layoutBox.setAttribute("data-vivliostyle-layout-box", "true");
+
+      this.setZoomScale(layoutBox);
       this.root.appendChild(layoutBox);
     }
     this.outerZoomBox = outerZoomBox as HTMLElement;
@@ -2875,11 +2877,27 @@ export class Viewport {
     Base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
     Base.setCSSProperty(this.contentContainer, "width", `${width}px`);
     Base.setCSSProperty(this.contentContainer, "height", `${height}px`);
-    Base.setCSSProperty(
-      this.contentContainer,
-      "transform",
-      scale === 1 ? "none" : `scale(${scale})`,
-    );
+
+    this.setZoomScale(this.contentContainer, scale);
+  }
+
+  private setZoomScale(element: Element, opt_scale?: number) {
+    let scale = opt_scale ?? 1;
+
+    // Workaround for issue #1076
+    // (Layout depends on display device pixel ratio)
+    if (window.devicePixelRatio !== 1 && CSS.supports("zoom", "1")) {
+      Base.setCSSProperty(element, "zoom", `${1 / window.devicePixelRatio}`);
+      scale *= window.devicePixelRatio;
+    }
+
+    if (opt_scale) {
+      Base.setCSSProperty(
+        element,
+        "transform",
+        scale === 1 ? "none" : `scale(${scale})`,
+      );
+    }
   }
 
   /**

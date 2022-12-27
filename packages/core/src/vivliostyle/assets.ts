@@ -146,6 +146,7 @@ export const VivliostyleViewportCss = `
   [data-vivliostyle-spread-container],
   [data-vivliostyle-page-container] {
     transform: none !important;
+    zoom: normal !important;
   }
 
   [data-vivliostyle-page-container] {
