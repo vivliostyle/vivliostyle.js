@@ -100,6 +100,7 @@ export class AdaptiveViewer {
   renderAllPages: boolean;
   pref: Exprs.Preferences;
   pageSizes: { width: number; height: number }[];
+  pixelRatio: number;
 
   // force relayout
   viewport: Vgen.Viewport | null;
@@ -192,6 +193,7 @@ export class AdaptiveViewer {
     this.renderAllPages = true;
     this.pref = Exprs.defaultPreferences();
     this.pageSizes = [];
+    this.pixelRatio = 8;
   }
 
   addLogListeners() {
@@ -466,6 +468,14 @@ export class AdaptiveViewer {
       Scripts.setAllowScripts(command["allowScripts"]);
       this.needResize = true;
     }
+    // output pixel ratio emulation
+    if (
+      typeof command["pixelRatio"] == "number" &&
+      command["pixelRatio"] !== this.pixelRatio
+    ) {
+      this.pixelRatio = command["pixelRatio"];
+      this.needResize = true;
+    }
     this.configurePlugins(command);
     return Task.newResult(true);
   }
@@ -625,12 +635,18 @@ export class AdaptiveViewer {
       return new Vgen.Viewport(
         this.window,
         this.fontSize,
+        this.pixelRatio,
         viewportElement,
         vs.width,
         vs.height,
       );
     } else {
-      return new Vgen.Viewport(this.window, this.fontSize, viewportElement);
+      return new Vgen.Viewport(
+        this.window,
+        this.fontSize,
+        this.pixelRatio,
+        viewportElement,
+      );
     }
   }
 
@@ -750,17 +766,16 @@ export class AdaptiveViewer {
         // (Fix for issue #934 and #936)
         return Math.ceil(pt);
       }
-      function extraHeightAdj(): number {
-        // Workaround for issue #947,
-        // only necessary if used with Vivliostyle CLI (LayoutNGPrinting enabled)
-        if (navigator.webdriver) {
-          return 1;
-        }
-        return 0;
-      }
       const widthPt = convertSize(widthMax);
-      const heightPt = convertSize(heightMax) + extraHeightAdj();
-      const styleText = `@page {margin:0;size:${widthPt}pt ${heightPt}pt;}`;
+      const heightPt = convertSize(heightMax);
+
+      // Negative margin setting is necessary to prevent unexpected page breaking.
+      // Note that the high pixel ratio emulation, the pixelRatio setting, uses the CSS zoom property
+      // that enlarge the page content size, and Chromium splits such large pages unless this
+      // negative margin is specified.
+      const rightPt = widthPt * ((this.pixelRatio || 1) - 1) + 2;
+      const bottomPt = heightPt * ((this.pixelRatio || 1) - 1) + 2; // "+ 2" is for issue #947
+      const styleText = `@page {size: ${widthPt}pt ${heightPt}pt; margin: 0 ${-rightPt}pt ${-bottomPt}pt 0;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }

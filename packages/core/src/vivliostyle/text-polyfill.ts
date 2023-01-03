@@ -672,11 +672,11 @@ class TextSpacingPolyfill {
       }
       return vertical
         ? rect.top < prevRect.top + prevRect.height - rect.width ||
-            rect.left + rect.width < prevRect.left + 1 ||
-            rect.left > prevRect.left + prevRect.width - 1
+            rect.left + rect.width < prevRect.left + rect.width / 10 ||
+            rect.left > prevRect.left + prevRect.width - rect.width / 10
         : rect.left < prevRect.left + prevRect.width - rect.height ||
-            rect.top > prevRect.top + prevRect.height - 1 ||
-            rect.top + rect.height < prevRect.top + 1;
+            rect.top > prevRect.top + prevRect.height - rect.height / 10 ||
+            rect.top + rect.height < prevRect.top + rect.height / 10;
     }
 
     function isAtEndOfLine(): boolean {
@@ -698,11 +698,11 @@ class TextSpacingPolyfill {
       }
       return vertical
         ? rect.top + rect.height > nextRect.top + rect.width ||
-            rect.left > nextRect.left + nextRect.width - 1 ||
-            rect.left + rect.width < nextRect.left + 1
+            rect.left > nextRect.left + nextRect.width - rect.width / 10 ||
+            rect.left + rect.width < nextRect.left + rect.width / 10
         : rect.left + rect.width > nextRect.left + rect.height ||
-            rect.top + rect.height < nextRect.top + 1 ||
-            rect.top > nextRect.top + nextRect.height - 1;
+            rect.top + rect.height < nextRect.top + rect.height / 10 ||
+            rect.top > nextRect.top + nextRect.height - rect.height / 10;
     }
 
     let punctProcessing = false;

@@ -21,6 +21,7 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
+import * as Constants from "./constants";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssProp from "./css-prop";
@@ -2732,10 +2733,25 @@ export const propertiesNotPassedToDOM = {
 export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: Element;
   window: Window;
+  scaleRatio: number = 1;
 
   constructor(viewport: Viewport) {
     this.layoutBox = viewport.layoutBox;
     this.window = viewport.window;
+    if (viewport.pixelRatio > 0 && CSS.supports("zoom", "8")) {
+      this.scaleRatio = viewport.pixelRatio / viewport.window.devicePixelRatio;
+    }
+  }
+
+  private scaleRect(rect: Vtree.ClientRect): Vtree.ClientRect {
+    return {
+      left: rect.left * this.scaleRatio,
+      top: rect.top * this.scaleRatio,
+      right: rect.right * this.scaleRatio,
+      bottom: rect.bottom * this.scaleRatio,
+      width: rect.width * this.scaleRatio,
+      height: rect.height * this.scaleRatio,
+    } as Vtree.ClientRect;
   }
 
   private subtractOffsets(
@@ -2759,7 +2775,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     const rects = range.getClientRects();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map((rect) =>
-      this.subtractOffsets(rect, layoutBoxRect),
+      this.scaleRect(this.subtractOffsets(rect, layoutBoxRect)),
     );
   }
 
@@ -2778,7 +2794,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
       return rect;
     }
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
-    return this.subtractOffsets(rect, layoutBoxRect);
+    return this.scaleRect(this.subtractOffsets(rect, layoutBoxRect));
   }
 
   /** @override */
@@ -2799,12 +2815,31 @@ export class Viewport {
   constructor(
     public readonly window: Window,
     public readonly fontSize: number,
+    public readonly pixelRatio: number,
     opt_root?: HTMLElement,
     opt_width?: number,
     opt_height?: number,
   ) {
     this.document = window.document;
     this.root = opt_root || this.document.body;
+
+    if (pixelRatio > 0 && CSS.supports("zoom", "8")) {
+      // Emulate high pixel ratio using zoom and transform:scale().
+      // Workaround for issue #419 (minimum border width too thick)
+      // and #1076 (layout depends on device pixel ratio).
+      //
+      // CSS variables --viv-outputPixelRatio, --viv-devicePixelRatio,
+      // and --viv-outputScale are used in zoom and transform property values
+      // to emulate high pixel ratio output.
+      // (see VivliostyleViewportCss in assets.ts)
+      Base.setCSSProperty(this.root, "--viv-outputPixelRatio", `${pixelRatio}`);
+      Base.setCSSProperty(
+        this.root,
+        "--viv-devicePixelRatio",
+        `${window.devicePixelRatio}`,
+      );
+    }
+
     let outerZoomBox = this.root.firstElementChild;
     if (!outerZoomBox) {
       outerZoomBox = this.document.createElement("div");
@@ -2824,8 +2859,6 @@ export class Viewport {
     if (!layoutBox) {
       layoutBox = this.document.createElement("div");
       layoutBox.setAttribute("data-vivliostyle-layout-box", "true");
-
-      this.setZoomScale(layoutBox);
       this.root.appendChild(layoutBox);
     }
     this.outerZoomBox = outerZoomBox as HTMLElement;
@@ -2873,31 +2906,11 @@ export class Viewport {
    * @param scale Factor to which the viewport will be scaled.
    */
   zoom(width: number, height: number, scale: number) {
+    Base.setCSSProperty(this.root, "--viv-outputScale", `${scale}`);
     Base.setCSSProperty(this.outerZoomBox, "width", `${width * scale}px`);
     Base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
     Base.setCSSProperty(this.contentContainer, "width", `${width}px`);
     Base.setCSSProperty(this.contentContainer, "height", `${height}px`);
-
-    this.setZoomScale(this.contentContainer, scale);
-  }
-
-  private setZoomScale(element: Element, opt_scale?: number) {
-    let scale = opt_scale ?? 1;
-
-    // Workaround for issue #1076
-    // (Layout depends on display device pixel ratio)
-    if (window.devicePixelRatio !== 1 && CSS.supports("zoom", "1")) {
-      Base.setCSSProperty(element, "zoom", `${1 / window.devicePixelRatio}`);
-      scale *= window.devicePixelRatio;
-    }
-
-    if (opt_scale) {
-      Base.setCSSProperty(
-        element,
-        "transform",
-        scale === 1 ? "none" : `scale(${scale})`,
-      );
-    }
   }
 
   /**
