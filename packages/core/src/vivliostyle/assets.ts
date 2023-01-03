@@ -43,7 +43,6 @@ export const VivliostyleViewportScreenCss = `
   }
 
   [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
-    display: -webkit-flex;
     display: flex;
     flex: none;
     justify-content: center;
@@ -97,6 +96,7 @@ export const VivliostyleViewportCss = `
   bottom: 0;
   overflow: hidden;
   z-index: -1;
+  transform-origin: left top;
 }
 
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
@@ -106,6 +106,43 @@ export const VivliostyleViewportCss = `
   z-index: auto;
 }
 
+[data-vivliostyle-spread-container] {
+  transform: scale(var(--viv-outputScale,1));
+  transform-origin: left top;
+}
+
+/* Emulate high pixel ratio using zoom & transform:scale() */
+@supports (zoom: 8) {
+  [data-vivliostyle-layout-box] {
+    zoom: calc(var(--viv-outputPixelRatio,1) / var(--viv-devicePixelRatio,1));
+    transform: scale(calc(var(--viv-devicePixelRatio,1) / var(--viv-outputPixelRatio,1)));
+  }
+  [data-vivliostyle-spread-container] {
+    zoom: calc(var(--viv-outputPixelRatio,1) / var(--viv-devicePixelRatio,1));
+    transform: scale(calc(var(--viv-outputScale,1) * var(--viv-devicePixelRatio,1) / var(--viv-outputPixelRatio,1)));
+  }
+  /* Workaround for Chromium's default border etc. widths not zoomed but scaled down */
+  [data-vivliostyle-spread-container] :where([style*=border],[style*=outline],[style*=rule]) {
+    border-width: medium;
+    outline-width: medium;
+    column-rule-width: medium;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar-track {
+    background-color: #f4f4f4;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: #c7c7c7;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar-thumb:hover {
+    background: #7d7d7d;
+  }
+}
+
 [data-vivliostyle-page-container] {
   position: relative;
   overflow: hidden;
@@ -113,7 +150,7 @@ export const VivliostyleViewportCss = `
 
 [data-vivliostyle-bleed-box] {
   position: absolute;
-  /* overflow: hidden; ** removed to fix issue #945 */
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -143,10 +180,19 @@ export const VivliostyleViewportCss = `
     height: 100% !important;
   }
 
-  [data-vivliostyle-spread-container],
+  [data-vivliostyle-spread-container] {
+    --viv-outputScale: 1 !important;
+    --viv-devicePixelRatio: 1 !important;
+  }
+
+  /* for Safari */
+  ::-webkit-full-page-media, [data-vivliostyle-spread-container] {
+    zoom: normal !important;
+    transform: none !important;
+  }
+
   [data-vivliostyle-page-container] {
     transform: none !important;
-    zoom: normal !important;
   }
 
   [data-vivliostyle-page-container] {
@@ -174,7 +220,7 @@ export const VivliostyleViewportCss = `
     }
     /* Workaround Gecko problem on page break */
     [data-vivliostyle-page-container] {
-      break-after: auto;
+      break-after: auto !important;
       height: 100% !important;
     }
   }

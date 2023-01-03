@@ -2528,6 +2528,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         viewport = new Vgen.Viewport(
           viewport.window,
           viewportSize.fontSize,
+          viewport.pixelRatio,
           viewport.root,
           viewportSize.width,
           viewportSize.height,

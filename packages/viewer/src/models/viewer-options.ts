@@ -28,6 +28,10 @@ import urlParameters from "../stores/url-parameters";
 import PageViewMode, { PageViewModeInstance } from "./page-view-mode";
 import ZoomOptions from "./zoom-options";
 
+/**
+ * Viewer Options
+ * See CoreViewerOptions in core/src/vivliostyle/core-viewer.ts
+ */
 interface ViewerOptionsType {
   allowScripts: boolean;
   renderAllPages: boolean;
@@ -35,6 +39,7 @@ interface ViewerOptionsType {
   profile: boolean;
   pageViewMode: CorePageViewMode;
   zoom: ZoomOptions;
+  pixelRatio: number;
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
@@ -54,6 +59,9 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
   }
   const zoomStr = urlParameters.getParameter("zoom")[0];
   const zoomFactor = parseFloat(zoomStr);
+
+  const pixelRatioStr = urlParameters.getParameter("pixelRatio")[0];
+  const pixelRatio = pixelRatioStr && parseFloat(pixelRatioStr);
 
   return {
     allowScripts:
@@ -75,6 +83,7 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
       zoomFactor > 0
         ? ZoomOptions.createFromZoomFactor(zoomFactor)
         : ZoomOptions.createDefaultOptions(),
+    pixelRatio,
   };
 }
 
@@ -86,6 +95,7 @@ function getDefaultValues(): ViewerOptionsType {
     profile: false,
     pageViewMode: PageViewMode.defaultMode(),
     zoom: ZoomOptions.createDefaultOptions(),
+    pixelRatio: 8,
   };
 }
 
@@ -100,6 +110,7 @@ class ViewerOptions {
   profile: Observable<boolean>;
   pageViewMode: Observable<CorePageViewMode>;
   zoom: Observable<ZoomOptions>;
+  pixelRatio: Observable<number>;
 
   static getDefaultValues: () => {
     allowScripts: boolean;
@@ -108,6 +119,7 @@ class ViewerOptions {
     profile: boolean;
     pageViewMode: CorePageViewMode;
     zoom: ZoomOptions;
+    pixelRatio: number;
   };
 
   constructor(defaultRenderAllPages: boolean);
@@ -124,6 +136,7 @@ class ViewerOptions {
     this.profile = ko.observable();
     this.pageViewMode = ko.observable();
     this.zoom = ko.observable();
+    this.pixelRatio = ko.observable();
 
     if (options) {
       this.copyFrom(options);
@@ -136,6 +149,7 @@ class ViewerOptions {
       this.profile(urlOptions.profile || defaultValues.profile);
       this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
       this.zoom(urlOptions.zoom || defaultValues.zoom);
+      this.pixelRatio(urlOptions.pixelRatio ?? defaultValues.pixelRatio);
 
       // write spread parameter back to URL when updated
       this.pageViewMode.subscribe((pageViewMode) => {
@@ -193,6 +207,7 @@ class ViewerOptions {
     this.profile(other.profile());
     this.pageViewMode(other.pageViewMode());
     this.zoom(other.zoom());
+    this.pixelRatio(other.pixelRatio());
   }
 
   toObject(): CoreViewerOptions {
@@ -203,6 +218,7 @@ class ViewerOptions {
       pageViewMode: this.pageViewMode().toString() as CorePageViewMode,
       fitToScreen: this.zoom().fitToScreen,
       zoom: this.zoom().zoom,
+      pixelRatio: this.pixelRatio(),
     };
   }
 }
