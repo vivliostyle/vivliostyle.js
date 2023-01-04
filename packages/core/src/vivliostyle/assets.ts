@@ -204,13 +204,6 @@ export const VivliostyleViewportCss = `
     break-after: page;
   }
 
-  [data-vivliostyle-bleed-box] > div > div::before {
-    display: block;
-    content: "";
-    padding-top: 0.015625px;
-    margin-bottom: -0.015625px;
-  }
-
   /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
   @-moz-document url-prefix()  {
     [data-vivliostyle-page-container]:nth-last-child(n + 2) {
