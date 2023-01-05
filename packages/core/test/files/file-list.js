@@ -182,6 +182,10 @@ module.exports = [
         file: "text-spacing/ts-hp-allow-force-end.html",
         title: "Text-spacing & hanging-punctuation allow/force-end",
       },
+      {
+        file: "text-spacing/hanging-punctuation-first-indent-ja.html",
+        title: "hanging-punctuation:first with text-indent (Japanese)",
+      },
     ],
   },
   {

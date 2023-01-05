@@ -1535,7 +1535,7 @@ viv-ts-thin-sp::after {
   content: " ";
   font-family: Times, serif;
   word-spacing: normal;
-  letter-spacing: -0.0833em;
+  letter-spacing: -0.125em;
   line-height: 0;
   text-orientation: mixed;
 }

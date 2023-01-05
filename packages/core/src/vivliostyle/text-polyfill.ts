@@ -113,7 +113,7 @@ const TEXT_SPACING_NONE: TextSpacing = {
 
 /**
  * text-spacing: normal
- * normal = space-first trim-end trim-adjacent
+ * normal = space-first trim-end trim-adjacent ideograph-alpha ideograph-numeric
  */
 const TEXT_SPACING_NORMAL: TextSpacing = {
   trimStart: true,
@@ -121,9 +121,10 @@ const TEXT_SPACING_NORMAL: TextSpacing = {
   trimEnd: true,
   allowEnd: false,
   trimAdjacent: true,
-  ideographAlpha: false,
-  ideographNumeric: false,
+  ideographAlpha: true,
+  ideographNumeric: true,
 };
+
 /**
  * text-spacing: auto
  * auto = trim-start trim-end trim-adjacent ideograph-alpha ideograph-numeric
@@ -136,6 +137,21 @@ const TEXT_SPACING_AUTO: TextSpacing = {
   trimAdjacent: true,
   ideographAlpha: true,
   ideographNumeric: true,
+};
+
+/**
+ * text-spacing base setting
+ * = space-first trim-end trim-adjacent
+ * (= normal except ideograph-alpha and ideograph-numeric)
+ */
+const TEXT_SPACING_BASE: TextSpacing = {
+  trimStart: true,
+  spaceFirst: true,
+  trimEnd: true,
+  allowEnd: false,
+  trimAdjacent: true,
+  ideographAlpha: false,
+  ideographNumeric: false,
 };
 
 function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
@@ -156,7 +172,7 @@ function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
     return TEXT_SPACING_AUTO;
   }
   const values = cssval instanceof Css.SpaceList ? cssval.values : [cssval];
-  const textSpacing: TextSpacing = Object.create(TEXT_SPACING_NORMAL);
+  const textSpacing: TextSpacing = Object.create(TEXT_SPACING_BASE);
 
   for (const val of values) {
     if (val instanceof Css.Ident) {
@@ -275,7 +291,7 @@ class TextSpacingPolyfill {
       }
       const textArr = node.textContent
         .replace(
-          /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
+          /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
           "$&\x00",
         )
         .split("\x00");
@@ -714,7 +730,7 @@ class TextSpacingPolyfill {
     if (
       isFirstInBlock &&
       hangingPunctuation.first &&
-      /^[\p{Ps}\p{Pf}\p{Pi}'"]\p{M}*$/u.test(text)
+      /^[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*$/u.test(text)
     ) {
       // hanging-punctuation: first
       tagName = "viv-ts-open";
@@ -913,6 +929,41 @@ class TextSpacingPolyfill {
       );
     }
 
+    function checkNonZeroMarginBorderPadding(
+      node1: Node,
+      node2: Node,
+    ): boolean {
+      if (node1.nodeType === 1) {
+        const style = document.defaultView.getComputedStyle(node1 as Element);
+        if (
+          parseFloat(style.marginInlineEnd) ||
+          parseFloat(style.borderInlineEndWidth) ||
+          parseFloat(style.paddingInlineEnd)
+        ) {
+          return true;
+        }
+      }
+      const parent1 = node1.parentElement;
+      if (parent1 && !parent1.contains(node2)) {
+        return checkNonZeroMarginBorderPadding(parent1, node2);
+      }
+      if (node2.nodeType === 1) {
+        const style = document.defaultView.getComputedStyle(node2 as Element);
+        if (
+          parseFloat(style.marginInlineStart) ||
+          parseFloat(style.borderInlineStartWidth) ||
+          parseFloat(style.paddingInlineStart)
+        ) {
+          return true;
+        }
+      }
+      const parent2 = node2.parentElement;
+      if (parent2 && !parent2.contains(node1)) {
+        return checkNonZeroMarginBorderPadding(node1, parent2);
+      }
+      return false;
+    }
+
     if (textSpacing.ideographAlpha || textSpacing.ideographNumeric) {
       if (
         prevNode &&
@@ -923,7 +974,8 @@ class TextSpacingPolyfill {
           )) ||
           (textSpacing.ideographNumeric &&
             /(?![\uFF01-\uFF60])\p{Nd}\p{M}*$/u.test(prevNode.textContent))) &&
-        !(vertical && checkUpright(prevNode.parentElement))
+        !(vertical && checkUpright(prevNode.parentElement)) &&
+        !checkNonZeroMarginBorderPadding(prevNode, textNode)
       ) {
         textNode.parentNode.insertBefore(
           document.createElement("viv-ts-thin-sp"),
@@ -940,7 +992,8 @@ class TextSpacingPolyfill {
           )) ||
           (textSpacing.ideographNumeric &&
             /^(?![\uFF01-\uFF60])\p{Nd}/u.test(nextNode.textContent))) &&
-        !(vertical && checkUpright(nextNode.parentElement))
+        !(vertical && checkUpright(nextNode.parentElement)) &&
+        !checkNonZeroMarginBorderPadding(textNode, nextNode)
       ) {
         textNode.parentNode.insertBefore(
           document.createElement("viv-ts-thin-sp"),
