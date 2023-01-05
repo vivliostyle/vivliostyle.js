@@ -410,7 +410,7 @@ class TextSpacingPolyfill {
         if (prevNode) {
           if (
             prevNode.nodeType === 3 &&
-            /^\s*$/.test(prevNode.textContent) &&
+            /^[ \t\r\n\f]*$/.test(prevNode.textContent) &&
             p.whitespace !== Vtree.Whitespace.PRESERVE
           ) {
             prevNode = prevNode.previousSibling;
@@ -433,7 +433,7 @@ class TextSpacingPolyfill {
               return true;
             }
           } else if (p.whitespace === Vtree.Whitespace.NEWLINE) {
-            if (/\n\s*$/.test(prevNode.textContent)) {
+            if (/\n[ \t\r\n\f]*$/.test(prevNode.textContent)) {
               return true;
             }
           }
@@ -452,7 +452,7 @@ class TextSpacingPolyfill {
         p.parent &&
         p.viewNode.parentNode &&
         p.viewNode.nodeType === Node.TEXT_NODE &&
-        p.viewNode.textContent.trimStart().length > 0
+        !Vtree.canIgnore(p.viewNode, p.whitespace)
       ) {
         const lang = normalizeLang(
           p.lang ??
@@ -498,7 +498,7 @@ class TextSpacingPolyfill {
                 return true;
               }
             } else if (prevP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/\n\s*$/.test(prevP.viewNode.textContent)) {
+              if (/\n[ \t\r\n\f]*$/.test(prevP.viewNode.textContent)) {
                 return true;
               }
             }
@@ -524,7 +524,7 @@ class TextSpacingPolyfill {
                 return true;
               }
             } else if (nextP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/^\s*\n/.test(nextP.viewNode.textContent)) {
+              if (/^[ \t\r\n\f]*\n/.test(nextP.viewNode.textContent)) {
                 return true;
               }
             }

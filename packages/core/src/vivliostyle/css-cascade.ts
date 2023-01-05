@@ -1990,7 +1990,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     switch (pseudoName) {
       case "text":
       case "first-letter":
-        stringValue = this.element.textContent.trim().replace(/\s+/g, " ");
+        stringValue = this.element.textContent;
         if (pseudoName === "first-letter") {
           const r = stringValue.match(Base.firstLetterPattern);
           stringValue = r ? r[0] : "";
