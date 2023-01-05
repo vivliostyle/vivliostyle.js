@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>hanging-punctuation:first with text-indent (Japanese)</title>
+  <style>
+    @page {
+      @bottom-center {
+        content: "Page " counter(page);
+      }
+    }
+    p {
+      margin: 0;
+      text-align: justify;
+    }
+    .indent p {
+      text-indent: 1em;
+    }
+    .hang-first p {
+      hanging-punctuation: first;
+    }
+    code {
+      background: lavender;
+      padding-block: 0.125em;
+      padding-inline: 0.25em;
+    }
+  </style>
+</head>
+<body>
+  <h1>日本語組版での段落字下げ</h1>
+  <section class="indent hang-first">
+    <h2>text-indent: 1em; hanging-punctuation: first;</h2>
+    <p>日本語組版では段落先頭を全角1字分字下げするのが標準的である。これはCSSの<code>text-indent: 1em</code>で実現される。この段落の先頭も、そのように字下げされているはず。</p>
+    <p>「開き括弧類」で段落がはじまる場合、全角幅の字下げをしないでそのまま全角幅の開き括弧類で始まる（あるいは半角幅だけ字下げして半角幅の開き括弧類で始まるともいえる）スタイルが書籍などでは一般的である。CSSではこれを<code>text-indent: 1em</code>での段落字下げと<code>hanging-punctuation: first</code>による段落先頭の開き括弧類の突き出しで実現する。</p>
+    <p>　しかし、これまでのCSSでhanging-punctuationプロパティが使えなかったため、日本語のEPUBコンテンツなどでは、段落字下げにtext-indentを使わないで、その代わりに、開き括弧類で開始する場合を除いて段落先頭に〈全角スペース〉（U+3000）を入れて段落字下げの形にしていることが多い。ためしに、この段落の先頭も〈全角スペース〉を入れている。このように〈全角スペース〉が使われているときCSSで<code>text-indent: 1em</code>を指定したら段落字下げの幅が2倍になってしまうのでは問題だ。そこで、<code>hanging-punctuation: first</code>では〈全角スペース〉も突き出しの対象とし、行頭に吸収されて<code>text-indent: 1em</code>での字下げだけが効果を持つようになっている。</p>
+    <p>　「この先頭のカギ括弧の前に〈全角スペース〉（U+3000）が入ってる」というような場合、<code>text-indent: 1em</code>と<code>hanging-punctuation: first</code>の指定があると、text-indentによる字下げのスペースに〈全角スペース〉が収まり、また〈全角スペース〉と全角開き括弧類はtext-spacingのデフォルト（normalの定義に含まれるtrim-adjacentの処理）によって半角幅だけ詰められるので、全角幅の字下げと半角幅の開き括弧類で段落が始まるように見えるはずである。</p>
+  </section>
+  <section class="indent">
+    <h2>text-indent: 1em; (no hanging-punctuation)</h2>
+    <p>日本語組版では段落先頭を全角1字分字下げするのが標準的である。これはCSSの<code>text-indent: 1em</code>で実現される。この段落の先頭も、そのように字下げされているはず。</p>
+    <p>「開き括弧類」で段落がはじまる場合、全角幅の字下げをしないでそのまま全角幅の開き括弧類で始まる（あるいは半角幅だけ字下げして半角幅の開き括弧類で始まるともいえる）スタイルが書籍などでは一般的である。CSSではこれを<code>text-indent: 1em</code>での段落字下げと<code>hanging-punctuation: first</code>による段落先頭の開き括弧類の突き出しで実現する。</p>
+    <p>　しかし、これまでのCSSでhanging-punctuationプロパティが使えなかったため、日本語のEPUBコンテンツなどでは、段落字下げにtext-indentを使わないで、その代わりに、開き括弧類で開始する場合を除いて段落先頭に〈全角スペース〉（U+3000）を入れて段落字下げの形にしていることが多い。ためしに、この段落の先頭も〈全角スペース〉を入れている。このように〈全角スペース〉が使われているときCSSで<code>text-indent: 1em</code>を指定したら段落字下げの幅が2倍になってしまうのでは問題だ。そこで、<code>hanging-punctuation: first</code>では〈全角スペース〉も突き出しの対象とし、行頭に吸収されて<code>text-indent: 1em</code>での字下げだけが効果を持つようになっている。</p>
+    <p>　「この先頭のカギ括弧の前に〈全角スペース〉（U+3000）が入ってる」というような場合、<code>text-indent: 1em</code>と<code>hanging-punctuation: first</code>の指定があると、text-indentによる字下げのスペースに〈全角スペース〉が収まり、また〈全角スペース〉と全角開き括弧類はtext-spacingのデフォルト（normalの定義に含まれるtrim-adjacentの処理）によって半角幅だけ詰められるので、全角幅の字下げと半角幅の開き括弧類で段落が始まるように見えるはずである。</p>
+  </section>
+  <section class="">
+    <h2>(no text-indent; no hanging-punctuation)</h2>
+    <p>日本語組版では段落先頭を全角1字分字下げするのが標準的である。これはCSSの<code>text-indent: 1em</code>で実現される。この段落の先頭も、そのように字下げされているはず。</p>
+    <p>「開き括弧類」で段落がはじまる場合、全角幅の字下げをしないでそのまま全角幅の開き括弧類で始まる（あるいは半角幅だけ字下げして半角幅の開き括弧類で始まるともいえる）スタイルが書籍などでは一般的である。CSSではこれを<code>text-indent: 1em</code>での段落字下げと<code>hanging-punctuation: first</code>による段落先頭の開き括弧類の突き出しで実現する。</p>
+    <p>　しかし、これまでのCSSでhanging-punctuationプロパティが使えなかったため、日本語のEPUBコンテンツなどでは、段落字下げにtext-indentを使わないで、その代わりに、開き括弧類で開始する場合を除いて段落先頭に〈全角スペース〉（U+3000）を入れて段落字下げの形にしていることが多い。ためしに、この段落の先頭も〈全角スペース〉を入れている。このように〈全角スペース〉が使われているときCSSで<code>text-indent: 1em</code>を指定したら段落字下げの幅が2倍になってしまうのでは問題だ。そこで、<code>hanging-punctuation: first</code>では〈全角スペース〉も突き出しの対象とし、行頭に吸収されて<code>text-indent: 1em</code>での字下げだけが効果を持つようになっている。</p>
+    <p>　「この先頭のカギ括弧の前に〈全角スペース〉（U+3000）が入ってる」というような場合、<code>text-indent: 1em</code>と<code>hanging-punctuation: first</code>の指定があると、text-indentによる字下げのスペースに〈全角スペース〉が収まり、また〈全角スペース〉と全角開き括弧類はtext-spacingのデフォルト（normalの定義に含まれるtrim-adjacentの処理）によって半角幅だけ詰められるので、全角幅の字下げと半角幅の開き括弧類で段落が始まるように見えるはずである。</p>
+  </section>
+</body>
+</html>
