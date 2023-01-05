@@ -136,7 +136,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
       if (
         firstChild &&
         firstChild.nodeType !== 1 &&
-        firstChild.textContent.trim() === ""
+        Vtree.canIgnore(firstChild)
       ) {
         // To avoid "Inconsistent offset" error, create a comment node with same white-space text.
         srcElem.replaceChild(

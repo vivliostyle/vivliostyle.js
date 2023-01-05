@@ -193,7 +193,7 @@ export class ViewFactory
             continue;
           }
           const child = element.firstElementChild;
-          if (child && !child.previousSibling?.textContent.trim()) {
+          if (child && Vtree.canIgnore(child.previousSibling)) {
             const childStyle = styler.getStyle(child, false);
             if (childStyle) {
               const childDisplay = CssCascade.getProp(childStyle, "display");
@@ -1852,9 +1852,7 @@ export class ViewFactory
           if (
             this.nodeContext.inline &&
             // ignore whitespace text node
-            !(
-              this.viewNode.nodeType === 3 && !this.viewNode.textContent.trim()
-            ) &&
+            !(this.viewNode.nodeType === 3 && Vtree.canIgnore(this.viewNode)) &&
             !parent.hasChildNodes() &&
             Break.getBoxBreakFlags(parent).includes("block-start")
           ) {
@@ -2544,7 +2542,7 @@ export class ViewFactory
           lastChild &&
           (!lastChild.nextSibling ||
             (lastChild.nextSibling === elem1.lastChild &&
-              !lastChild.nextSibling.textContent.trim()))
+              Vtree.canIgnore(lastChild.nextSibling)))
         ) {
           const found = checkForcedLineBreakElem(lastChild);
           if (found || found === null) {
@@ -2576,7 +2574,7 @@ export class ViewFactory
           prevElem &&
           (prevElem.nextSibling === elem1 ||
             (prevElem.nextSibling === elem1.previousSibling &&
-              !prevElem.nextSibling.textContent.trim()))
+              Vtree.canIgnore(prevElem.nextSibling)))
         ) {
           return checkForcedLineBreakElem(prevElem);
         }
@@ -2614,7 +2612,7 @@ export class ViewFactory
       forcedBreakElem === elem.lastElementChild &&
       (!forcedBreakElem.nextSibling ||
         (forcedBreakElem.nextSibling === elem.lastChild &&
-          !forcedBreakElem.nextSibling.textContent.trim()))
+          Vtree.canIgnore(forcedBreakElem.nextSibling)))
     ) {
       // forced line break is found at very last
       return null;

@@ -285,20 +285,23 @@ export function whitespaceFromPropertyValue(
   }
 }
 
-export function canIgnore(node: Node, whitespace: Whitespace): boolean {
+export function canIgnore(node: Node, whitespace?: Whitespace): boolean {
+  if (!node) {
+    return true;
+  }
   if (node.nodeType == 1) {
     return false;
   }
   const text = node.textContent;
   switch (whitespace) {
-    case Whitespace.IGNORE:
-      return !!text.match(/^\s*$/);
-    case Whitespace.NEWLINE:
-      return !!text.match(/^[ \t\f]*$/);
     case Whitespace.PRESERVE:
       return text.length == 0;
+    case Whitespace.NEWLINE:
+      return !!text.match(/^[ \t]*$/);
+    case Whitespace.IGNORE:
+    default:
+      return !!text.match(/^[ \t\r\n\f]*$/);
   }
-  throw new Error(`Unexpected whitespace: ${whitespace}`);
 }
 
 export class Flow {
