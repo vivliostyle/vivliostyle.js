@@ -198,7 +198,7 @@ export class AdaptiveViewer {
     // Pixel ratio emulation on PDF output (PR #1079) does not work with
     // non-Chromium browsers and has printing problem with Microsoft Edge
     // (negative page margins used in this emulation causes pages disappeared).
-    this.pixelRatioLimit = / Chrome\/(?!.* Edg\/)/.test(navigator.userAgent)
+    this.pixelRatioLimit = /Chrome\/(?!.*Edg\/)/.test(navigator.userAgent)
       ? 16 // max pixelRatio value on Chromium browsers except Edge
       : 0; // disable pixelRatio emulation on non-Chromium browsers and Edge
     this.pixelRatio = Math.min(8, this.pixelRatioLimit);
