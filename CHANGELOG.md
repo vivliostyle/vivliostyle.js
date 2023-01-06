@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.21.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.20.0...v2.21.0) (2023-01-06)
+
+### Bug Fixes
+
+- `float-min-wrap-block: 0` causes "TypeError: Cannot read properties of undefined" ([02c1bc8](https://github.com/vivliostyle/vivliostyle.js/commit/02c1bc85d9aafd3443ca7397093f4ecf4ca3e8d4)), closes [#1072](https://github.com/vivliostyle/vivliostyle.js/issues/1072)
+- break-before:column on single column causes printed page content disappear ([4eb82ed](https://github.com/vivliostyle/vivliostyle.js/commit/4eb82edbd6be9f18aaee24ab95f270a35f7becd3)), closes [#1067](https://github.com/vivliostyle/vivliostyle.js/issues/1067)
+- display and overflow property value definition ([bb34af2](https://github.com/vivliostyle/vivliostyle.js/commit/bb34af2fd302c917d92acc1e785c153bbd5fb08c))
+- Page break position changes depending on display device pixel ratio ([23792ce](https://github.com/vivliostyle/vivliostyle.js/commit/23792cea4337510fe852852a3ade05a601d5f0bd)), closes [#1076](https://github.com/vivliostyle/vivliostyle.js/issues/1076)
+- remove workaround for old Chrome printing problem ([fbad411](https://github.com/vivliostyle/vivliostyle.js/commit/fbad41154c70cd47a6d2d19275f9db005d8401f9)), closes [#600](https://github.com/vivliostyle/vivliostyle.js/issues/600)
+- Top page float should not absorb margin/border/padding of the block below ([9999edd](https://github.com/vivliostyle/vivliostyle.js/commit/9999eddc96858995e11395a8b8446d9b438982b0)), closes [#1071](https://github.com/vivliostyle/vivliostyle.js/issues/1071)
+- wrong white-space processing on non-ASCII spaces such as U+3000 IDEOGRAPHIC SPACE ([7fb7bc0](https://github.com/vivliostyle/vivliostyle.js/commit/7fb7bc0ae1c155f0a3537e0db51ee565b12ace0e)), closes [#1082](https://github.com/vivliostyle/vivliostyle.js/issues/1082)
+
+### Features
+
+- Enable very thin border width on PDF output ([0eadefe](https://github.com/vivliostyle/vivliostyle.js/commit/0eadefef1b9273248e8d162d2c51c875947cb00f)), closes [#419](https://github.com/vivliostyle/vivliostyle.js/issues/419) [#1076](https://github.com/vivliostyle/vivliostyle.js/issues/1076) [/github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts#L73](https://github.com//github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts/issues/L73)
+- Improve page auto spread view mode ([68119e3](https://github.com/vivliostyle/vivliostyle.js/commit/68119e33ed5fa67b22537934a27a155e4d4833cf))
+- Update CSS text-spacing property spec to align to the latest draft ([395b923](https://github.com/vivliostyle/vivliostyle.js/commit/395b92311a9c3ae24c7dfc23ec6614b9eac2f460)), closes [#1080](https://github.com/vivliostyle/vivliostyle.js/issues/1080)
+
 # [2.20.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.2...v2.20.0) (2022-12-16)
 
 ### Bug Fixes
