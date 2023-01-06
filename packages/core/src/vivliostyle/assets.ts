@@ -299,6 +299,7 @@ CONTENT_LIST = [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
     target-counter(ATTR IDENT LIST_STYLE_TYPE?) |
     target-counters([ STRING | URI ] IDENT STRING LIST_STYLE_TYPE?) |
     target-counters(ATTR IDENT STRING LIST_STYLE_TYPE?) |
+    leader([ dotted | solid | space ] | STRING ) |
     open-quote | close-quote | no-open-quote | no-close-quote |
     content([ text | before | after | first-letter ]?) |
     string(IDENT [first | start | last | first-except]?) ]+;

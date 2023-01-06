@@ -2009,6 +2009,102 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     return new Css.Str(stringValue);
   }
 
+  /**
+   * CSS `leader()` function
+   * https://www.w3.org/TR/css-content-3/#leaders
+   */
+  visitFuncLeader(values: Css.Val[]): Css.Val {
+    let leader: string = "";
+    if (values[0] instanceof Css.Ident) {
+      switch (values[0].stringValue()) {
+        case "dotted":
+          leader = ".";
+          break;
+        case "solid":
+          leader = "_";
+          break;
+        case "space":
+          leader = " ";
+          break;
+      }
+    } else if (values[0] instanceof Css.Str) {
+      leader = values[0].stringValue();
+    }
+    if (leader.length == 0) {
+      return new Css.Str("");
+    }
+    if (!this.postLayoutLeaderRegistered) {
+      Plugin.registerHook(
+        Plugin.HOOKS.POST_LAYOUT_BLOCK,
+        this.postLayoutLeader.bind(this),
+      );
+      this.postLayoutLeaderRegistered = true;
+    }
+    return new Css.Expr(
+      new Exprs.Native(
+        null,
+        (): Exprs.Result => {
+          return leader.replace(" ", "\u00A0"); // nbsp
+        },
+        "viv-leader",
+      ),
+    );
+  }
+  postLayoutLeaderRegistered: boolean = false;
+  postLayoutLeader(
+    nodeContext: Vtree.NodeContext,
+    checkPoints: Vtree.NodeContext[],
+    column,
+  ) {
+    if (nodeContext.viewNode.nodeType === 1) {
+      const elem = nodeContext.viewNode as Element;
+      elem.querySelectorAll(`span>span[viv-leader]`).forEach((e) => {
+        const pseudoAfter = e.parentElement;
+        const container = pseudoAfter.parentElement;
+        const cs = container.children;
+        if (cs[cs.length - 1] === pseudoAfter) {
+          // pseudoAfter is the last span
+          const currentSize = () => {
+            const r = column.viewDocument.createRange();
+            r.setStart(container, 0);
+            r.setEnd(container, cs.length);
+            const boxes = column.clientLayout.getRangeClientRects(r);
+            return (
+              Math.max(
+                ...boxes.map((box) =>
+                  column.vertical ? box.bottom : box.right,
+                ),
+              ) -
+              Math.min(
+                ...boxes.map((box) => (column.vertical ? box.top : box.left)),
+              )
+            );
+          };
+          const outer = column.clientLayout.getElementClientRect(container);
+          const outerSize = column.vertical ? outer.height : outer.width;
+          const blankSize =
+            outerSize > currentSize() ? outerSize - currentSize() : outerSize;
+          const leader = e.textContent;
+
+          let longleader = "";
+          for (let i = 0; i < 200; i++) {
+            // XXX: hard limit hardcoded
+            const templeader = longleader + leader;
+            e.textContent = templeader;
+            const u = column.clientLayout.getElementClientRect(pseudoAfter);
+            if (u.width > blankSize) {
+              break;
+            }
+            longleader = templeader;
+          }
+          e.textContent = longleader;
+
+          pseudoAfter.style.float = "right";
+        }
+      });
+    }
+  }
+
   override visitFunc(func: Css.Func): Css.Val {
     switch (func.name) {
       case "counter":
@@ -2039,6 +2135,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "content":
         if (func.values.length <= 1) {
           return this.visitFuncContent(func.values);
+        }
+        break;
+      case "leader":
+        if (func.values.length <= 1) {
+          return this.visitFuncLeader(func.values);
         }
         break;
     }
