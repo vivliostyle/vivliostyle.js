@@ -17,7 +17,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- Enable very thin border width on PDF output ([0eadefe](https://github.com/vivliostyle/vivliostyle.js/commit/0eadefef1b9273248e8d162d2c51c875947cb00f)), closes [#419](https://github.com/vivliostyle/vivliostyle.js/issues/419) [#1076](https://github.com/vivliostyle/vivliostyle.js/issues/1076) [/github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts#L73](https://github.com//github.com/vivliostyle/vivliostyle.js/blob/master/packages/core/src/vivliostyle/core-viewer.ts/issues/L73)
+- Enable very thin border width on PDF output ([0eadefe](https://github.com/vivliostyle/vivliostyle.js/commit/0eadefef1b9273248e8d162d2c51c875947cb00f)), closes [#419](https://github.com/vivliostyle/vivliostyle.js/issues/419) [#1076](https://github.com/vivliostyle/vivliostyle.js/issues/1076)
 - Improve page auto spread view mode ([68119e3](https://github.com/vivliostyle/vivliostyle.js/commit/68119e33ed5fa67b22537934a27a155e4d4833cf))
 - Update CSS text-spacing property spec to align to the latest draft ([395b923](https://github.com/vivliostyle/vivliostyle.js/commit/395b92311a9c3ae24c7dfc23ec6614b9eac2f460)), closes [#1080](https://github.com/vivliostyle/vivliostyle.js/issues/1080)
 
