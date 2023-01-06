@@ -101,6 +101,7 @@ export class AdaptiveViewer {
   pref: Exprs.Preferences;
   pageSizes: { width: number; height: number }[];
   pixelRatio: number;
+  pixelRatioLimit: number;
 
   // force relayout
   viewport: Vgen.Viewport | null;
@@ -193,7 +194,14 @@ export class AdaptiveViewer {
     this.renderAllPages = true;
     this.pref = Exprs.defaultPreferences();
     this.pageSizes = [];
-    this.pixelRatio = 8;
+
+    // Pixel ratio emulation on PDF output (PR #1079) does not work with
+    // non-Chromium browsers and has printing problem with Microsoft Edge
+    // (negative page margins used in this emulation causes pages disappeared).
+    this.pixelRatioLimit = / Chrome\/(?!.* Edg\/)/.test(navigator.userAgent)
+      ? 16 // max pixelRatio value on Chromium browsers except Edge
+      : 0; // disable pixelRatio emulation on non-Chromium browsers and Edge
+    this.pixelRatio = Math.min(8, this.pixelRatioLimit);
   }
 
   addLogListeners() {
@@ -469,12 +477,12 @@ export class AdaptiveViewer {
       this.needResize = true;
     }
     // output pixel ratio emulation
-    if (
-      typeof command["pixelRatio"] == "number" &&
-      command["pixelRatio"] !== this.pixelRatio
-    ) {
-      this.pixelRatio = command["pixelRatio"];
-      this.needResize = true;
+    if (typeof command["pixelRatio"] == "number") {
+      const pixelRatio = Math.min(command["pixelRatio"], this.pixelRatioLimit);
+      if (pixelRatio !== this.pixelRatio) {
+        this.pixelRatio = pixelRatio;
+        this.needResize = true;
+      }
     }
     this.configurePlugins(command);
     return Task.newResult(true);
