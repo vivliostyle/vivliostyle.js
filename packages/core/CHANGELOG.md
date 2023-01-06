@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.21.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.0...v2.21.1) (2023-01-06)
+
+### Bug Fixes
+
+- pixel ratio emulation for thin border width not worked with HeadlessChrome ([530d31e](https://github.com/vivliostyle/vivliostyle.js/commit/530d31e034cfdbd162610a75645bb70e40fa05c5)), closes [#1085](https://github.com/vivliostyle/vivliostyle.js/issues/1085)
+
 # [2.21.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.20.0...v2.21.0) (2023-01-06)
 
 ### Bug Fixes
