@@ -143,7 +143,11 @@ module.exports = [
       {
         file: "margin-break.html",
         title: "margin-break property",
-      }
+      },
+      {
+        file: "border-width-test.html",
+        title: "border-width test",
+      },
     ],
   },
   {
