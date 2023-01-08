@@ -30,7 +30,7 @@ import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssStyler } from "./types";
+import { CssStyler, Layout } from "./types";
 import { TokenType } from "./css-tokenizer";
 
 export type ElementStyle = {
@@ -2051,59 +2051,84 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     );
   }
   postLayoutLeaderRegistered: boolean = false;
-  postLayoutLeader(
+  postLayoutLeader: Plugin.PostLayoutBlockHook = (
     nodeContext: Vtree.NodeContext,
     checkPoints: Vtree.NodeContext[],
-    column,
-  ) {
-    if (nodeContext.viewNode.nodeType === 1) {
-      const elem = nodeContext.viewNode as Element;
-      elem.querySelectorAll(`span>span[viv-leader]`).forEach((e) => {
-        const pseudoAfter = e.parentElement;
-        const container = pseudoAfter.parentElement;
-        const cs = container.children;
-        if (cs[cs.length - 1] === pseudoAfter) {
-          // pseudoAfter is the last span
-          const currentSize = () => {
-            const r = column.viewDocument.createRange();
-            r.setStart(container, 0);
-            r.setEnd(container, cs.length);
-            const boxes = column.clientLayout.getRangeClientRects(r);
-            return (
-              Math.max(
-                ...boxes.map((box) =>
-                  column.vertical ? box.bottom : box.right,
-                ),
-              ) -
-              Math.min(
-                ...boxes.map((box) => (column.vertical ? box.top : box.left)),
-              )
-            );
-          };
-          const outer = column.clientLayout.getElementClientRect(container);
-          const outerSize = column.vertical ? outer.height : outer.width;
-          const blankSize =
-            outerSize > currentSize() ? outerSize - currentSize() : outerSize;
-          const leader = e.textContent;
-
-          let longleader = "";
-          for (let i = 0; i < 200; i++) {
-            // XXX: hard limit hardcoded
-            const templeader = longleader + leader;
-            e.textContent = templeader;
-            const u = column.clientLayout.getElementClientRect(pseudoAfter);
-            if (u.width > blankSize) {
-              break;
-            }
-            longleader = templeader;
-          }
-          e.textContent = longleader;
-
-          pseudoAfter.style.float = "right";
-        }
-      });
+    column: Layout.Column,
+  ) => {
+    // we want to access the bottom block element, which contains single leader().
+    if (nodeContext.viewNode.nodeType !== 1) {
+      return;
     }
-  }
+    const container = nodeContext.viewNode as Element;
+    const leaders = container.querySelectorAll(`span>span[viv-leader]`);
+    if (leaders.length != 1) {
+      return;
+    }
+    const e = leaders[0];
+    const pseudoAfter = e.parentElement;
+    const leader = e.getAttribute("viv-leader-value");
+    const previous = e.textContent;
+
+    // reset the expanded leader
+    e.textContent = leader;
+    pseudoAfter.style.paddingTop = "0";
+    pseudoAfter.style.paddingLeft = "0";
+
+    const outer = column.clientLayout.getElementClientRect(container);
+    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+    // Some leader text ("_" e.g.) creates higher top than container.
+    const box = {
+      left: outer.left < innerInit.left ? outer.left : innerInit.left,
+      right: outer.right < innerInit.right ? innerInit.right : outer.right,
+      top: outer.top < innerInit.top ? outer.top : innerInit.top,
+      bottom: outer.bottom < innerInit.bottom ? innerInit.bottom : outer.bottom,
+    };
+    function overrun() {
+      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      if (
+        box.left > inner.left ||
+        box.right < inner.right ||
+        box.top > inner.top ||
+        box.bottom < inner.bottom
+      ) {
+        return true;
+      }
+      return false;
+    }
+    function getPadding() {
+      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      if (column.vertical) {
+        // Supporting only left-to-right, top-to-bottom here.
+        return outer.bottom - inner.bottom;
+      } else {
+        return outer.right - inner.right;
+      }
+    }
+
+    let longleader = leader;
+    e.textContent = previous;
+    if (!overrun()) {
+      longleader = previous; // reuse
+    }
+    for (let i = 0; i < 200; i++) {
+      // XXX: hard limit hardcoded
+      const templeader = longleader + leader;
+      e.textContent = templeader;
+      if (overrun()) {
+        break;
+      }
+      longleader = templeader;
+    }
+    // set the expanded leader
+    e.textContent = longleader;
+    // we use padding to set the end position
+    if (column.vertical) {
+      pseudoAfter.style.paddingTop = `${getPadding() - 1.0}px`;
+    } else {
+      pseudoAfter.style.paddingLeft = `${getPadding() - 1.0}px`;
+    }
+  };
 
   override visitFunc(func: Css.Func): Css.Val {
     switch (func.name) {

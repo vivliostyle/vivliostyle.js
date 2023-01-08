@@ -792,6 +792,7 @@ export class CounterStore {
         const node = document.createElement("span");
         node.textContent = val;
         node.setAttribute("viv-leader", expr.key);
+        node.setAttribute("viv-leader-value", val);
         return node;
       }
     }
