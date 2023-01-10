@@ -72,6 +72,7 @@ module.exports = [
       { file: "clear-bug-test.html", title: "Float clear bug" },
       { file: "float-text-offset-bug.html", title: "Float text offset bug" },
       { file: "content-attr.html", title: "Content attr()" },
+      { file: "content-leader.html", title: "Content leader()" },
       { file: "relative_floats.html", title: "Floats with position: relative" },
       { file: "target-counter.html", title: "target-counter" },
       {

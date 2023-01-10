@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- https://www.w3.org/TR/css-content-3/#leaders -->
+    <meta charset="UTF-8" />
+    <title>Content leader()</title>
+    <style>
+      .dotted-leader::after {
+        content: leader(dotted) "end";
+      }
+      .solid-leader::after {
+        content: leader(solid) "end";
+      }
+      .space-leader::after {
+        content: leader(space) "end";
+      }
+      .string-leader::after {
+        content: leader("x") "end";
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p class="dotted-leader">dotted</p>
+      <p class="solid-leader">solid</p>
+      <p class="space-leader">space</p>
+      <p class="string-leader">string</p>
+    </section>
+  </body>
+</html>

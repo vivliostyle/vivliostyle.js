@@ -30,7 +30,7 @@ import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssStyler } from "./types";
+import { CssStyler, Layout } from "./types";
 import { TokenType } from "./css-tokenizer";
 
 export type ElementStyle = {
@@ -2009,6 +2009,131 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     return new Css.Str(stringValue);
   }
 
+  /**
+   * CSS `leader()` function
+   * https://www.w3.org/TR/css-content-3/#leaders
+   */
+  visitFuncLeader(values: Css.Val[]): Css.Val {
+    let leader: string = "";
+    if (values[0] instanceof Css.Ident) {
+      switch (values[0].stringValue()) {
+        case "dotted":
+          leader = ".";
+          break;
+        case "solid":
+          leader = "_";
+          break;
+        case "space":
+          leader = " ";
+          break;
+      }
+    } else if (values[0] instanceof Css.Str) {
+      leader = values[0].stringValue();
+    }
+    if (leader.length == 0) {
+      return new Css.Str("");
+    }
+    if (!this.postLayoutLeaderRegistered) {
+      Plugin.registerHook(
+        Plugin.HOOKS.POST_LAYOUT_BLOCK,
+        this.postLayoutLeader.bind(this),
+      );
+      this.postLayoutLeaderRegistered = true;
+    }
+    return new Css.Expr(
+      new Exprs.Native(
+        null,
+        (): Exprs.Result => {
+          return leader.replace(" ", "\u00A0"); // nbsp
+        },
+        "viv-leader",
+      ),
+    );
+  }
+  postLayoutLeaderRegistered: boolean = false;
+  postLayoutLeader: Plugin.PostLayoutBlockHook = (
+    nodeContext: Vtree.NodeContext,
+    checkPoints: Vtree.NodeContext[],
+    column: Layout.Column,
+  ) => {
+    // we want to access the bottom block element, which contains single leader().
+    if (nodeContext.viewNode.nodeType !== 1) {
+      return;
+    }
+    const container = nodeContext.viewNode as Element;
+    const leaders = container.querySelectorAll(`span>span[viv-leader]`);
+    if (leaders.length != 1) {
+      return;
+    }
+    const e = leaders[0];
+    const pseudoAfter = e.parentElement;
+    const leader = e.getAttribute("viv-leader-value");
+    const previous = e.textContent;
+
+    // reset the expanded leader
+    e.textContent = leader;
+    pseudoAfter.style.paddingInlineStart = "0";
+
+    const outer = column.clientLayout.getElementClientRect(container);
+    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+    // Some leader text ("_" e.g.) creates higher top than container.
+    const box = {
+      left: outer.left < innerInit.left ? outer.left : innerInit.left,
+      right: outer.right < innerInit.right ? innerInit.right : outer.right,
+      top: outer.top < innerInit.top ? outer.top : innerInit.top,
+      bottom: outer.bottom < innerInit.bottom ? innerInit.bottom : outer.bottom,
+    };
+    function overrun() {
+      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      if (
+        box.left > inner.left ||
+        box.right < inner.right ||
+        box.top > inner.top ||
+        box.bottom < inner.bottom
+      ) {
+        return true;
+      }
+      return false;
+    }
+    function getPadding() {
+      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      const { writingMode, direction } =
+        column.clientLayout.getElementComputedStyle(pseudoAfter);
+      if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+        if (direction === "rtl") {
+          return inner.top - outer.top;
+        } else {
+          return outer.bottom - inner.bottom;
+        }
+      } else {
+        if (direction === "rtl") {
+          return inner.left - outer.left;
+        } else {
+          return outer.right - inner.right;
+        }
+      }
+    }
+
+    let longleader = leader;
+    e.textContent = previous;
+    if (!overrun()) {
+      longleader = previous; // reuse
+    }
+    for (let i = 0; i < 200; i++) {
+      // XXX: hard limit hardcoded
+      const templeader = longleader + leader;
+      e.textContent = templeader;
+      if (overrun()) {
+        break;
+      }
+      longleader = templeader;
+    }
+    // set the expanded leader
+    e.textContent = longleader;
+    // we use padding to set the end position
+    pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
+  };
+
   override visitFunc(func: Css.Func): Css.Val {
     switch (func.name) {
       case "counter":
@@ -2039,6 +2164,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "content":
         if (func.values.length <= 1) {
           return this.visitFuncContent(func.values);
+        }
+        break;
+      case "leader":
+        if (func.values.length <= 1) {
+          return this.visitFuncLeader(func.values);
         }
         break;
     }
