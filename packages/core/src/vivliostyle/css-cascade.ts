@@ -2098,11 +2098,20 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
     function getPadding() {
       const inner = column.clientLayout.getElementClientRect(pseudoAfter);
-      if (column.vertical) {
-        // Supporting only left-to-right, top-to-bottom here.
-        return outer.bottom - inner.bottom;
+      const { writingMode, direction } =
+        column.clientLayout.getElementComputedStyle(pseudoAfter);
+      if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+        if (direction === "rtl") {
+          return inner.top - outer.top;
+        } else {
+          return outer.bottom - inner.bottom;
+        }
       } else {
-        return outer.right - inner.right;
+        if (direction === "rtl") {
+          return inner.left - outer.left;
+        } else {
+          return outer.right - inner.right;
+        }
       }
     }
 
