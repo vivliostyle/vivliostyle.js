@@ -2132,11 +2132,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     // set the expanded leader
     e.textContent = longleader;
     // we use padding to set the end position
-    if (column.vertical) {
-      pseudoAfter.style.paddingTop = `${getPadding() - 1.0}px`;
-    } else {
-      pseudoAfter.style.paddingLeft = `${getPadding() - 1.0}px`;
-    }
+    pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
   };
 
   override visitFunc(func: Css.Func): Css.Val {
