@@ -2072,8 +2072,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
 
     // reset the expanded leader
     e.textContent = leader;
-    pseudoAfter.style.paddingTop = "0";
-    pseudoAfter.style.paddingLeft = "0";
+    pseudoAfter.style.paddingInlineStart = "0";
 
     const outer = column.clientLayout.getElementClientRect(container);
     const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
