@@ -2061,17 +2061,33 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       return;
     }
     const container = nodeContext.viewNode as Element;
-    const leaders = container.querySelectorAll(`span>span[viv-leader]`);
+    const leaders = container.querySelectorAll(`span>span[data-viv-leader]`);
     if (leaders.length != 1) {
       return;
     }
     const e = leaders[0];
     const pseudoAfter = e.parentElement;
-    const leader = e.getAttribute("viv-leader-value");
+    const leader = e.getAttribute("data-viv-leader-value");
     const previous = e.textContent;
+    const { writingMode, direction } =
+      column.clientLayout.getElementComputedStyle(pseudoAfter);
+
+    function setLeaderTextContent(leaderStr: string): void {
+      if (direction === "rtl") {
+        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
+        // to ensure RTL order around the leader.
+        const RLM = "\u200f";
+        e.textContent =
+          (leaderStr.startsWith(RLM) ? "" : RLM) +
+          leaderStr +
+          (leaderStr.endsWith(RLM) ? "" : RLM);
+      } else {
+        e.textContent = leaderStr;
+      }
+    }
 
     // reset the expanded leader
-    e.textContent = leader;
+    setLeaderTextContent(leader);
     pseudoAfter.style.paddingInlineStart = "0";
 
     const outer = column.clientLayout.getElementClientRect(container);
@@ -2097,8 +2113,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
     function getPadding() {
       const inner = column.clientLayout.getElementClientRect(pseudoAfter);
-      const { writingMode, direction } =
-        column.clientLayout.getElementComputedStyle(pseudoAfter);
       if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
         if (direction === "rtl") {
           return inner.top - outer.top;
@@ -2122,14 +2136,14 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     for (let i = 0; i < 200; i++) {
       // XXX: hard limit hardcoded
       const templeader = longleader + leader;
-      e.textContent = templeader;
+      setLeaderTextContent(templeader);
       if (overrun()) {
         break;
       }
       longleader = templeader;
     }
     // set the expanded leader
-    e.textContent = longleader;
+    setLeaderTextContent(longleader);
     // we use padding to set the end position
     pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
   };
