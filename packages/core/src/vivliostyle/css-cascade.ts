@@ -2060,92 +2060,113 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     if (nodeContext.viewNode.nodeType !== 1) {
       return;
     }
-    const container = nodeContext.viewNode as Element;
-    const leaders = container.querySelectorAll(`span>span[data-viv-leader]`);
-    if (leaders.length != 1) {
-      return;
-    }
-    const e = leaders[0];
-    const pseudoAfter = e.parentElement;
-    const leader = e.getAttribute("data-viv-leader-value");
-    const previous = e.textContent;
-    const { writingMode, direction } =
-      column.clientLayout.getElementComputedStyle(pseudoAfter);
-
-    function setLeaderTextContent(leaderStr: string): void {
-      if (direction === "rtl") {
-        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
-        // to ensure RTL order around the leader.
-        const RLM = "\u200f";
-        e.textContent =
-          (leaderStr.startsWith(RLM) ? "" : RLM) +
-          leaderStr +
-          (leaderStr.endsWith(RLM) ? "" : RLM);
-      } else {
-        e.textContent = leaderStr;
+    function getContainer(elem: Element) {
+      for (const c of checkPoints) {
+        if (c.viewNode === elem) {
+          let container = c.parent;
+          while (container && container.inline) {
+            container = container.parent;
+          }
+          return container;
+        }
       }
+      return null;
     }
 
-    // reset the expanded leader
-    setLeaderTextContent(leader);
-    pseudoAfter.style.paddingInlineStart = "0";
-
-    const outer = column.clientLayout.getElementClientRect(container);
-    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
-    // Some leader text ("_" e.g.) creates higher top than container.
-    const box = {
-      left: outer.left < innerInit.left ? outer.left : innerInit.left,
-      right: outer.right < innerInit.right ? innerInit.right : outer.right,
-      top: outer.top < innerInit.top ? outer.top : innerInit.top,
-      bottom: outer.bottom < innerInit.bottom ? innerInit.bottom : outer.bottom,
-    };
-    function overrun() {
-      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
-      if (
-        box.left > inner.left ||
-        box.right < inner.right ||
-        box.top > inner.top ||
-        box.bottom < inner.bottom
-      ) {
-        return true;
+    const leaders = column.viewDocument.querySelectorAll(
+      `span>span[data-viv-leader]`,
+    );
+    for (const e of leaders) {
+      const container = getContainer(e);
+      if (container == null) {
+        continue; // We can't create outer bounding box this case.
       }
-      return false;
-    }
-    function getPadding() {
-      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      const pseudoAfter = e.parentElement;
+      const leader = e.getAttribute("data-viv-leader-value");
+      const previous = e.textContent;
+      const { writingMode, direction } =
+        column.clientLayout.getElementComputedStyle(pseudoAfter);
+
+      function setLeaderTextContent(leaderStr: string): void {
+        if (direction === "rtl") {
+          // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
+          // to ensure RTL order around the leader.
+          const RLM = "\u200f";
+          e.textContent =
+            (leaderStr.startsWith(RLM) ? "" : RLM) +
+            leaderStr +
+            (leaderStr.endsWith(RLM) ? "" : RLM);
+        } else {
+          e.textContent = leaderStr;
+        }
+      }
+
+      // reset the expanded leader
+      setLeaderTextContent(leader);
+      pseudoAfter.style.paddingInlineStart = "0";
+
+      const box = column.clientLayout.getElementClientRect(
+        container.viewNode as Element,
+      );
+      const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+      // capture the line boundary
+      // Some leader text ("_" e.g.) creates higher top than container.
       if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-        if (direction === "rtl") {
-          return inner.top - outer.top;
-        } else {
-          return outer.bottom - inner.bottom;
-        }
+        box.left = innerInit.left;
+        box.right = innerInit.right;
       } else {
-        if (direction === "rtl") {
-          return inner.left - outer.left;
+        box.top = innerInit.top;
+        box.bottom = innerInit.bottom;
+      }
+
+      function overrun() {
+        const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+        if (
+          box.left > inner.left ||
+          box.right < inner.right ||
+          box.top > inner.top ||
+          box.bottom < inner.bottom
+        ) {
+          return true;
+        }
+        return false;
+      }
+      function getPadding() {
+        const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+        if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+          if (direction === "rtl") {
+            return inner.top - box.top;
+          } else {
+            return box.bottom - inner.bottom;
+          }
         } else {
-          return outer.right - inner.right;
+          if (direction === "rtl") {
+            return inner.left - box.left;
+          } else {
+            return box.right - inner.right;
+          }
         }
       }
-    }
 
-    let longleader = leader;
-    e.textContent = previous;
-    if (!overrun()) {
-      longleader = previous; // reuse
-    }
-    for (let i = 0; i < 200; i++) {
-      // XXX: hard limit hardcoded
-      const templeader = longleader + leader;
-      setLeaderTextContent(templeader);
-      if (overrun()) {
-        break;
+      let longleader = leader;
+      e.textContent = previous;
+      if (!overrun()) {
+        longleader = previous; // reuse
       }
-      longleader = templeader;
+      for (let i = 0; i < 200; i++) {
+        // XXX: hard limit hardcoded
+        const templeader = longleader + leader;
+        setLeaderTextContent(templeader);
+        if (overrun()) {
+          break;
+        }
+        longleader = templeader;
+      }
+      // set the expanded leader
+      setLeaderTextContent(longleader);
+      // we use padding to set the end position
+      pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
     }
-    // set the expanded leader
-    setLeaderTextContent(longleader);
-    // we use padding to set the end position
-    pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
   };
 
   override visitFunc(func: Css.Func): Css.Val {
