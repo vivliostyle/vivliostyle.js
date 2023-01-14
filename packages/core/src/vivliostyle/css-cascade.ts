@@ -2103,7 +2103,13 @@ export class ContentPropVisitor extends Css.FilterVisitor {
 
       // reset the expanded leader
       setLeaderTextContent(leader);
-      pseudoAfter.style.paddingInlineStart = "0";
+      // float will remove the pseudo content from normal text flow
+      // switch to inline-end when browser supports
+      if (direction == "rtl") {
+        pseudoAfter.style.float = "left";
+      } else {
+        pseudoAfter.style.float = "right";
+      }
 
       const box = column.clientLayout.getElementClientRect(
         container.viewNode as Element,
@@ -2131,22 +2137,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         }
         return false;
       }
-      function getPadding() {
-        const inner = column.clientLayout.getElementClientRect(pseudoAfter);
-        if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-          if (direction === "rtl") {
-            return inner.top - box.top;
-          } else {
-            return box.bottom - inner.bottom;
-          }
-        } else {
-          if (direction === "rtl") {
-            return inner.left - box.left;
-          } else {
-            return box.right - inner.right;
-          }
-        }
-      }
 
       let longleader = leader;
       e.textContent = previous;
@@ -2164,8 +2154,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       }
       // set the expanded leader
       setLeaderTextContent(longleader);
-      // we use padding to set the end position
-      pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
     }
   };
 
