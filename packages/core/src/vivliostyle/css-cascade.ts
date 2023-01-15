@@ -2224,18 +2224,30 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       pseudoAfter.style.float = "right";
     }
     const innerAligned = column.clientLayout.getElementClientRect(pseudoAfter);
+    // When float is applied, the content will be removed from the normal
+    // text flow, and box inset will be also removed.
+    // When content comes back to the normal text flow, then inset effects again.
+    function getInset(side: string): number {
+      let inset = 0;
+      let p = pseudoAfter.parentElement;
+      while (p && p !== container.viewNode) {
+        inset += column.getComputedInsets(p)[side];
+        p = p.parentElement;
+      }
+      return inset;
+    }
     let padding = 0;
     if (direction == "rtl") {
       if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
-        padding = innerInline.top - innerAligned.top;
+        padding = innerInline.top - innerAligned.top - getInset("top");
       } else {
-        padding = innerInline.left - innerAligned.left;
+        padding = innerInline.left - innerAligned.left - getInset("left");
       }
     } else {
       if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
-        padding = innerAligned.bottom - innerInline.bottom;
+        padding = innerAligned.bottom - innerInline.bottom - getInset("bottom");
       } else {
-        padding = innerAligned.right - innerInline.right;
+        padding = innerAligned.right - innerInline.right - getInset("right");
       }
     }
     pseudoAfter.style.float = "none";
