@@ -1544,4 +1544,9 @@ viv-ts-thin-sp::after {
 span[data-viv-leader] {
   text-combine-upright: none;
 }
+:has(>[data-adapt-pseudo="after"]>span[data-viv-leader])::after {
+  content: "";
+  display: block;
+  clear: both;
+}
 `;
