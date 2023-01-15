@@ -2136,11 +2136,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // setting inline-block removes the pseudo CONTENT from normal text flow
     pseudoAfter.style.display = "inline-block";
     // switch to inline-end when browser supports
-    if (direction == "rtl") {
-      pseudoAfter.style.float = "left";
-    } else {
-      pseudoAfter.style.float = "right";
-    }
+    pseudoAfter.style.marginInlineStart = "0";
 
     const box = column.clientLayout.getElementClientRect(
       container.viewNode as Element,
@@ -2218,6 +2214,32 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     // set the expanded leader
     setLeader();
+
+    // Without inline-end, we use margin-inline-start to adjust the position.
+    // To get the margin size, set float, calculate then cancel float.
+    const innerInline = column.clientLayout.getElementClientRect(pseudoAfter);
+    if (direction == "rtl") {
+      pseudoAfter.style.float = "left";
+    } else {
+      pseudoAfter.style.float = "right";
+    }
+    const innerAligned = column.clientLayout.getElementClientRect(pseudoAfter);
+    let padding = 0;
+    if (direction == "rtl") {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerInline.top - innerAligned.top;
+      } else {
+        padding = innerInline.left - innerAligned.left;
+      }
+    } else {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerAligned.bottom - innerInline.bottom;
+      } else {
+        padding = innerAligned.right - innerInline.right;
+      }
+    }
+    pseudoAfter.style.float = "none";
+    pseudoAfter.style.marginInlineStart = `${padding}px`;
   }
 };
 
