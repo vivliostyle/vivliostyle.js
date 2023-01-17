@@ -1540,4 +1540,8 @@ viv-ts-thin-sp::after {
   line-height: 0;
   text-orientation: mixed;
 }
+
+span[data-viv-leader] {
+  text-combine-upright: none;
+}
 `;

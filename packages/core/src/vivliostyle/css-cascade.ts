@@ -2033,13 +2033,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     if (leader.length == 0) {
       return new Css.Str("");
     }
-    if (!this.postLayoutLeaderRegistered) {
-      Plugin.registerHook(
-        Plugin.HOOKS.POST_LAYOUT_BLOCK,
-        this.postLayoutLeader.bind(this),
-      );
-      this.postLayoutLeaderRegistered = true;
-    }
     return new Css.Expr(
       new Exprs.Native(
         null,
@@ -2050,89 +2043,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       ),
     );
   }
-  postLayoutLeaderRegistered: boolean = false;
-  postLayoutLeader: Plugin.PostLayoutBlockHook = (
-    nodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
-    column: Layout.Column,
-  ) => {
-    // we want to access the bottom block element, which contains single leader().
-    if (nodeContext.viewNode.nodeType !== 1) {
-      return;
-    }
-    const container = nodeContext.viewNode as Element;
-    const leaders = container.querySelectorAll(`span>span[viv-leader]`);
-    if (leaders.length != 1) {
-      return;
-    }
-    const e = leaders[0];
-    const pseudoAfter = e.parentElement;
-    const leader = e.getAttribute("viv-leader-value");
-    const previous = e.textContent;
-
-    // reset the expanded leader
-    e.textContent = leader;
-    pseudoAfter.style.paddingInlineStart = "0";
-
-    const outer = column.clientLayout.getElementClientRect(container);
-    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
-    // Some leader text ("_" e.g.) creates higher top than container.
-    const box = {
-      left: outer.left < innerInit.left ? outer.left : innerInit.left,
-      right: outer.right < innerInit.right ? innerInit.right : outer.right,
-      top: outer.top < innerInit.top ? outer.top : innerInit.top,
-      bottom: outer.bottom < innerInit.bottom ? innerInit.bottom : outer.bottom,
-    };
-    function overrun() {
-      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
-      if (
-        box.left > inner.left ||
-        box.right < inner.right ||
-        box.top > inner.top ||
-        box.bottom < inner.bottom
-      ) {
-        return true;
-      }
-      return false;
-    }
-    function getPadding() {
-      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
-      const { writingMode, direction } =
-        column.clientLayout.getElementComputedStyle(pseudoAfter);
-      if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-        if (direction === "rtl") {
-          return inner.top - outer.top;
-        } else {
-          return outer.bottom - inner.bottom;
-        }
-      } else {
-        if (direction === "rtl") {
-          return inner.left - outer.left;
-        } else {
-          return outer.right - inner.right;
-        }
-      }
-    }
-
-    let longleader = leader;
-    e.textContent = previous;
-    if (!overrun()) {
-      longleader = previous; // reuse
-    }
-    for (let i = 0; i < 200; i++) {
-      // XXX: hard limit hardcoded
-      const templeader = longleader + leader;
-      e.textContent = templeader;
-      if (overrun()) {
-        break;
-      }
-      longleader = templeader;
-    }
-    // set the expanded leader
-    e.textContent = longleader;
-    // we use padding to set the end position
-    pseudoAfter.style.paddingInlineStart = `${getPadding() - 1.0}px`;
-  };
 
   override visitFunc(func: Css.Func): Css.Val {
     switch (func.name) {
@@ -2176,6 +2086,176 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     return func;
   }
 }
+
+/**
+ * POST_LAYOUT_BLOCK hook function for CSS leader()
+ * @param nodeContext
+ * @param checkPoints
+ * @param column
+ */
+const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
+  nodeContext: Vtree.NodeContext,
+  checkPoints: Vtree.NodeContext[],
+  column: Layout.Column,
+) => {
+  const leaders: Vtree.NodeContext[] = checkPoints.filter(
+    (c) =>
+      c.after &&
+      c.viewNode.nodeType === 1 &&
+      (c.viewNode as Element).getAttribute("data-viv-leader"),
+  );
+  for (const c of leaders) {
+    // we want to access the bottom block element, which contains single leader().
+    let container = c.parent;
+    while (container && container.inline) {
+      container = container.parent;
+    }
+    const e = c.viewNode as Element;
+    const pseudoAfter = e.parentElement;
+    const leader = e.getAttribute("data-viv-leader-value");
+    const previous = e.textContent || leader;
+    const { writingMode, direction } =
+      column.clientLayout.getElementComputedStyle(pseudoAfter);
+
+    function setLeaderTextContent(leaderStr: string): void {
+      if (direction === "rtl") {
+        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
+        // to ensure RTL order around the leader.
+        const RLM = "\u200f";
+        e.textContent =
+          (leaderStr.startsWith(RLM) ? "" : RLM) +
+          leaderStr +
+          (leaderStr.endsWith(RLM) ? "" : RLM);
+      } else {
+        e.textContent = leaderStr;
+      }
+    }
+
+    // reset the expanded leader
+    setLeaderTextContent(leader);
+    // setting inline-block removes the pseudo CONTENT from normal text flow
+    pseudoAfter.style.display = "inline-block";
+    // switch to inline-end when browser supports
+    pseudoAfter.style.marginInlineStart = "0";
+
+    const box = column.clientLayout.getElementClientRect(
+      container.viewNode as Element,
+    );
+    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+    // capture the line boundary
+    // Some leader text ("_" e.g.) creates higher top than container.
+    if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+      box.left = innerInit.left;
+      box.right = innerInit.right;
+      box.top = Math.min(innerInit.top, box.top);
+      box.bottom = Math.max(innerInit.bottom, box.bottom);
+    } else {
+      box.top = innerInit.top;
+      box.bottom = innerInit.bottom;
+      box.left = Math.min(innerInit.left, box.left);
+      box.right = Math.max(innerInit.right, box.right);
+    }
+
+    function overrun() {
+      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      if (
+        box.left > inner.left ||
+        box.right < inner.right ||
+        box.top > inner.top ||
+        box.bottom < inner.bottom
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    function setLeader() {
+      // min-max search
+      let lower: number;
+      let upper: number;
+      setLeaderTextContent(previous);
+      if (overrun()) {
+        lower = 1;
+        upper = previous.length / leader.length;
+      } else {
+        lower = previous.length / leader.length;
+        upper = lower;
+        for (let i = 0; i < 10; i++) {
+          let templeader = previous;
+          for (let j = 0; j < 1 << i; j++) {
+            templeader += leader;
+          }
+          setLeaderTextContent(templeader);
+          if (overrun()) {
+            upper += 1 << i;
+            break;
+          }
+        }
+      }
+      // leader is set to overrun state here
+      for (let i = 0; i < 10; i++) {
+        let templeader = "";
+        const mid = Math.floor((lower + upper) / 2);
+        for (let j = 0; j < mid; j++) {
+          templeader += leader;
+        }
+        setLeaderTextContent(templeader);
+        if (overrun()) {
+          upper = mid;
+        } else {
+          if (lower == mid) {
+            return;
+          }
+          lower = mid;
+        }
+      }
+      setLeaderTextContent(leader);
+    }
+
+    // set the expanded leader
+    setLeader();
+
+    // Without inline-end, we use margin-inline-start to adjust the position.
+    // To get the margin size, set float, calculate then cancel float.
+    const innerInline = column.clientLayout.getElementClientRect(pseudoAfter);
+    if (direction == "rtl") {
+      pseudoAfter.style.float = "left";
+    } else {
+      pseudoAfter.style.float = "right";
+    }
+    const innerAligned = column.clientLayout.getElementClientRect(pseudoAfter);
+    // When float is applied, the content will be removed from the normal
+    // text flow, and box inset will be also removed.
+    // When content comes back to the normal text flow, then inset effects again.
+    function getInset(side: string): number {
+      let inset = 0;
+      let p = pseudoAfter.parentElement;
+      while (p && p !== container.viewNode) {
+        inset += column.getComputedInsets(p)[side];
+        p = p.parentElement;
+      }
+      return inset;
+    }
+    let padding = 0;
+    if (direction == "rtl") {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerInline.top - innerAligned.top - getInset("top");
+      } else {
+        padding = innerInline.left - innerAligned.left - getInset("left");
+      }
+    } else {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerAligned.bottom - innerInline.bottom - getInset("bottom");
+      } else {
+        padding = innerAligned.right - innerInline.right - getInset("right");
+      }
+    }
+    pseudoAfter.style.float = "none";
+    pseudoAfter.style.marginInlineStart = `${padding}px`;
+  }
+};
+
+Plugin.registerHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
 
 export function roman(num: number): string {
   if (num <= 0 || num != Math.round(num) || num > 3999) {
