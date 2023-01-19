@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html dir="rtl">
+  <head>
+    <!-- https://www.w3.org/TR/css-content-3/#leaders -->
+    <meta charset="UTF-8" />
+    <title>Test leader() in RTL direction</title>
+    <style>
+      /* "123" after the leader */
+      .A .leader-dotted::after {
+        content: leader(dotted) "123";
+      }
+      .A .leader-solid::after {
+        content: leader(solid) "123";
+      }
+      .A .leader-space::after {
+        content: leader(space) "123";
+      }
+      .A .leader-string-x::after {
+        content: leader("x") "123";
+      }
+      .A .leader-string-heh::after {
+        content: leader("ه") "123";
+      }
+
+      /* Arabic "123" after the leader */
+      .B .leader-dotted::after {
+        content: leader(dotted) "١٢٣";
+      }
+      .B .leader-solid::after {
+        content: leader(solid) "١٢٣";
+      }
+      .B .leader-space::after {
+        content: leader(space) "١٢٣";
+      }
+      .B .leader-string-x::after {
+        content: leader("x") "١٢٣";
+      }
+      .B .leader-string-heh::after {
+        content: leader("ه") "١٢٣";
+      }
+
+      /* "ABC" after the leader */
+      .C .leader-dotted::after {
+        content: leader(dotted) "ABC";
+      }
+      .C .leader-solid::after {
+        content: leader(solid) "ABC";
+      }
+      .C .leader-space::after {
+        content: leader(space) "ABC";
+      }
+      .C .leader-string::after {
+        content: leader("ب") "ABC";
+      }
+      .C .leader-string-x::after {
+        content: leader("x") "ABC";
+      }
+      .C .leader-string-heh::after {
+        content: leader("ه") "ABC";
+      }
+
+      /* Arabic "ABC" after the leader */
+      .D .leader-dotted::after {
+        content: leader(dotted) "ابت";
+      }
+      .D .leader-solid::after {
+        content: leader(solid) "ابت";
+      }
+      .D .leader-space::after {
+        content: leader(space) "ابت";
+      }
+      .D .leader-string-x::after {
+        content: leader("x") "ابت";
+      }
+      .D .leader-string-heh::after {
+        content: leader("ه") "ابت";
+      }
+
+      h1,
+      h2 {
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 dir="ltr">Test leader() in RTL direction</h1>
+    <section class="A">
+      <h2 dir="ltr">"123" after the leader</h2>
+      <ol>
+        <li class="leader-dotted">dotted</li>
+        <li class="leader-dotted">ابت</li>
+        <li class="leader-solid">solid</li>
+        <li class="leader-solid">ابت</li>
+        <li class="leader-space">space</li>
+        <li class="leader-space">ابت</li>
+        <li class="leader-string-x">string (x)</li>
+        <li class="leader-string-x">ابت</li>
+        <li class="leader-string-heh">string (ه)</li>
+        <li class="leader-string-heh">ابت</li>
+      </ol>
+    </section>
+    <section class="B">
+      <h2 dir="ltr">Arabic "123" (١٢٣) after the leader</h2>
+      <ol>
+        <li class="leader-dotted">dotted</li>
+        <li class="leader-dotted">ابت</li>
+        <li class="leader-solid">solid</li>
+        <li class="leader-solid">ابت</li>
+        <li class="leader-space">space</li>
+        <li class="leader-space">ابت</li>
+        <li class="leader-string-x">string (x)</li>
+        <li class="leader-string-x">ابت</li>
+        <li class="leader-string-heh">string (ه)</li>
+        <li class="leader-string-heh">ابت</li>
+      </ol>
+    </section>
+    <section class="C">
+      <h2 dir="ltr">"ABC" after the leader</h2>
+      <ol>
+        <li class="leader-dotted">dotted</li>
+        <li class="leader-dotted">ابت</li>
+        <li class="leader-solid">solid</li>
+        <li class="leader-solid">ابت</li>
+        <li class="leader-space">space</li>
+        <li class="leader-space">ابت</li>
+        <li class="leader-string-x">string (x)</li>
+        <li class="leader-string-x">ابت</li>
+        <li class="leader-string-heh">string (ه)</li>
+        <li class="leader-string-heh">ابت</li>
+      </ol>
+    </section>
+    <section class="D">
+      <h2 dir="ltr">Arabic "ABC" (ابت) after the leader</h2>
+      <ol>
+        <li class="leader-dotted">dotted</li>
+        <li class="leader-dotted">ابت</li>
+        <li class="leader-solid">solid</li>
+        <li class="leader-solid">ابت</li>
+        <li class="leader-space">space</li>
+        <li class="leader-space">ابت</li>
+        <li class="leader-string-x">string (x)</li>
+        <li class="leader-string-x">ابت</li>
+        <li class="leader-string-heh">string (ه)</li>
+        <li class="leader-string-heh">ابت</li>
+      </ol>
+    </section>
+  </body>
+</html>

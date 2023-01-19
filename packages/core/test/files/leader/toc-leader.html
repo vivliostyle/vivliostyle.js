@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test leader() in Table of Contents</title>
+    <style>
+      @page {
+        @bottom-center {
+          writing-mode: horizontal-tb;
+          content: counter(page);
+        }
+      }
+      nav li a::after {
+        content: leader(dotted) target-counter(attr(href), page);
+      }
+      nav li a {
+        text-decoration: none;
+      }
+      nav > ol {
+        list-style: upper-roman;
+      }
+      section {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <h2>Table of Contents</h2>
+      <!-- TOC items are copied from https://github.com/vivliostyle/vivliostyle_doc/tree/gh-pages/en/events/vivliostyle-css-paged-media-20210410 -->
+      <ol>
+        <li>
+          <a href="#js-core">CSS typesetting engine: Vivliostyle.js Core</a>
+          <ol>
+            <li>
+              <a href="#vivliostyle-idea"
+                >The idea of Vivliostyle.js, since 2014</a
+              >
+            </li>
+            <li>
+              <a href="#css-specs"
+                >Which CSS specifications are required for CSS typesetting?</a
+              >
+            </li>
+            <li>
+              <a href="#dev-css-paged-media"
+                >Redeveloping CSS Paged Media support</a
+              >
+            </li>
+          </ol>
+        </li>
+        <li>
+          <a href="#use-css-paged-media"
+            >Let's get familiar with CSS Paged Media!</a
+          >
+          <ol>
+            <li>
+              <a href="#named-strings">Named strings—for running headers</a>
+            </li>
+            <li><a href="#named-pages">Named pages—page type selector</a></li>
+            <li><a href="#nth-page">Nth page selector: nth()</a></li>
+          </ol>
+        </li>
+        <li>
+          <a href="#specs-supported"
+            >Summary of supported CSS specs for paged media</a
+          >
+          <ol>
+            <li><a href="#css-page">CSS Paged Media Level 3</a></li>
+            <li>
+              <a href="#css-gcpm"
+                >CSS Generated Content for Paged Media (GCPM)</a
+              >
+            </li>
+            <li><a href="#css-break">CSS Fragmentation Level 3</a></li>
+            <li><a href="#css-page-floats">CSS Page Floats</a></li>
+            <li>
+              <a href="#documents"
+                >For more info, visit Vivliostyle Documents→Supported CSS
+                Features</a
+              >
+            </li>
+          </ol>
+        </li>
+      </ol>
+    </nav>
+    <section id="js-core" class="level1">
+      <h1>CSS typesetting engine: Vivliostyle.js Core</h1>
+      <section id="vivliostyle-idea" class="level2">
+        <h2>The idea of Vivliostyle.js, since 2014</h2>
+      </section>
+      <section id="css-specs" class="level2">
+        <h2>Which CSS specs are required for CSS typesetting?</h2>
+      </section>
+      <section id="dev-css-paged-media" class="level2">
+        <h2>Redeveloping CSS Paged Media support</h2>
+      </section>
+    </section>
+    <section id="use-css-paged-media" class="level1">
+      <h1>Let's get familiar with CSS Paged Media!</h1>
+      <section id="named-strings" class="level2">
+        <h2>Named strings—for running headers</h2>
+      </section>
+      <section id="named-pages" class="level2">
+        <h2>Named pages—page type selector</h2>
+      </section>
+      <section id="nth-page" class="level2">
+        <h2>Nth page selector: nth()</h2>
+      </section>
+    </section>
+    <section id="specs-supported" class="level1">
+      <h1>Summary of supported CSS specs for paged media</h1>
+      <section id="css-page" class="level2">
+        <h2>CSS Paged Media Level 3</h2>
+      </section>
+      <section id="css-gcpm" class="level2">
+        <h2>CSS Generated Content for Paged Media (GCPM)</h2>
+      </section>
+      <section id="css-break" class="level2">
+        <h2>CSS Fragmentation Level 3</h2>
+      </section>
+      <section id="css-page-floats" class="level2">
+        <h2>CSS Page Floats</h2>
+      </section>
+      <section id="documents" class="level2">
+        <h2>
+          For more info, visit Vivliostyle Documents→Supported CSS Features
+        </h2>
+      </section>
+    </section>
+  </body>
+</html>
