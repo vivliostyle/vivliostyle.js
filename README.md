@@ -145,6 +145,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=80" width="80px;" alt="Ikko Eltociear Ashimine"/><br /><sub><b>Ikko Eltociear Ashimine</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=eltociear" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://hackwork.jp/"><img src="https://avatars.githubusercontent.com/u/2599195?v=4?s=80" width="80px;" alt="Takai ayumu"/><br /><sub><b>Takai ayumu</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=AyumuTakai" title="Code">💻</a> <a href="#talk-AyumuTakai" title="Talks">📢</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/daisuke-tanabe"><img src="https://avatars.githubusercontent.com/u/15145374?v=4?s=80" width="80px;" alt="daisuke-tanabe"/><br /><sub><b>daisuke-tanabe</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=daisuke-tanabe" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://twitter.com/#!/kwi"><img src="https://avatars.githubusercontent.com/u/1468181?v=4?s=80" width="80px;" alt="Hiroaki KAWAI"/><br /><sub><b>Hiroaki KAWAI</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=hkwi" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

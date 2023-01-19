@@ -237,6 +237,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "hkwi",
+      "name": "Hiroaki KAWAI",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1468181?v=4",
+      "profile": "https://twitter.com/#!/kwi",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
