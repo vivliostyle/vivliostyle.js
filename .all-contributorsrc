@@ -218,6 +218,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "AyumuTakai",
+      "name": "Takai ayumu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2599195?v=4",
+      "profile": "https://hackwork.jp/",
+      "contributions": [
+        "code",
+        "talk"
+      ]
     }
   ],
   "contributorsPerLine": 7

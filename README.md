@@ -143,6 +143,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=80" width="80px;" alt="Ikko Eltociear Ashimine"/><br /><sub><b>Ikko Eltociear Ashimine</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=eltociear" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://hackwork.jp/"><img src="https://avatars.githubusercontent.com/u/2599195?v=4?s=80" width="80px;" alt="Takai ayumu"/><br /><sub><b>Takai ayumu</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=AyumuTakai" title="Code">💻</a> <a href="#talk-AyumuTakai" title="Talks">📢</a></td>
     </tr>
   </tbody>
 </table>
