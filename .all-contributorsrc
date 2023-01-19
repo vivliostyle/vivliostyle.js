@@ -228,6 +228,15 @@
         "code",
         "talk"
       ]
+    },
+    {
+      "login": "daisuke-tanabe",
+      "name": "daisuke-tanabe",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15145374?v=4",
+      "profile": "https://github.com/daisuke-tanabe",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
