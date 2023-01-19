@@ -141,6 +141,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://yuku.dev/"><img src="https://avatars1.githubusercontent.com/u/16265411?v=4?s=80" width="80px;" alt="Yuku Kotani"/><br /><sub><b>Yuku Kotani</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=yukukotani" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Crissov"><img src="https://avatars.githubusercontent.com/u/6200185?v=4?s=80" width="80px;" alt="Christoph Päper"/><br /><sub><b>Christoph Päper</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=Crissov" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=80" width="80px;" alt="Ikko Eltociear Ashimine"/><br /><sub><b>Ikko Eltociear Ashimine</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=eltociear" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
