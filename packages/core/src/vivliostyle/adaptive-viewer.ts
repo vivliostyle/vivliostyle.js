@@ -695,7 +695,16 @@ export class AdaptiveViewer {
     this.resized = false;
     const spreadViewChanged = this.pref.spreadView !== spreadView;
     this.updateSpreadView(spreadView);
+
+    // check if window.devicePixelRatio is changed
+    const scaleRatioChanged =
+      this.pixelRatio &&
+      this.opfView &&
+      this.pixelRatio / this.window.devicePixelRatio !==
+        this.opfView.clientLayout.scaleRatio;
+
     if (
+      scaleRatioChanged ||
       this.viewportSize ||
       !this.viewport ||
       this.viewport.fontSize != this.fontSize
