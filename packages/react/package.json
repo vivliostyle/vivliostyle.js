@@ -21,8 +21,8 @@
     "@vivliostyle/core": "^2.21.1"
   },
   "peerDependencies": {
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.0.21",
@@ -32,13 +32,13 @@
     "@storybook/preset-create-react-app": "^3.1.2",
     "@storybook/react": "^6.0.21",
     "@types/jest": "^26.0.3",
-    "@types/react": "^16.9.41",
+    "@types/react": "^18.0.27",
     "cross-env": "^7.0.2",
     "jest-environment-jsdom-sixteen": "^1.0.3",
     "microbundle-crl": "^0.13.10",
     "npm-run-all": "^4.1.5",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-scripts": "^3.4.1",
     "shx": "^0.3.2"
   },
