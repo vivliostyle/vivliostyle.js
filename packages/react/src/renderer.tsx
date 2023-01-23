@@ -194,7 +194,6 @@ export const Renderer = ({
       instance.removeListener("loaded", handleLoaded);
       instance.removeListener("nav", handleNavigation);
       instance.removeListener("hyperlink", handleHyperlink);
-      containerRef.current!.innerHTML = "";
     };
   }
 
