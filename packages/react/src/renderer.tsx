@@ -55,7 +55,7 @@ interface RendererProps {
   children?: React.ReactNode | ChildrenFunction;
 }
 
-export const Renderer: React.FC<RendererProps> = ({
+export const Renderer = ({
   source,
   page = 1,
   zoom = 1,
@@ -77,7 +77,7 @@ export const Renderer: React.FC<RendererProps> = ({
   onNavigation,
   onHyperlink,
   children,
-}) => {
+}: RendererProps): ReturnType<ChildrenFunction> | JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<CoreViewer>();
   const stateRef = React.useRef<VolatileState>();
