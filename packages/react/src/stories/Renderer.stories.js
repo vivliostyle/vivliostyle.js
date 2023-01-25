@@ -12,6 +12,7 @@ export default {
 const SOURCES = [
   "https://vivliostyle.github.io/vivliostyle_doc/samples/gon/index.html",
   "https://vivliostyle.github.io/vivliostyle_doc/samples/gutenberg/Alice.html",
+  "https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3",
 ];
 
 export const Basic = () => (
@@ -19,6 +20,7 @@ export const Basic = () => (
     source={select("Source", SOURCES, SOURCES[0])}
     page={number("Page", 1)}
     zoom={number("Zoom", 1)}
+    bookMode={boolean("Book Mode", false)}
     fontSize={number("Font Size", 16)}
     background={color("Background", "#ececec")}
     renderAllPages={boolean("Render All Pages", true)}
@@ -65,6 +67,7 @@ export const Narrowed = () => (
         source={select("Source", SOURCES, SOURCES[0])}
         page={number("Page", 1)}
         zoom={number("Zoom", 1)}
+        bookMode={boolean("Book Mode", false)}
         fontSize={number("Font Size", 16)}
         background={color("Background", "#ececec")}
         renderAllPages={boolean("Render All Pages", true)}
