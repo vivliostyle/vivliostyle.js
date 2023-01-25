@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.22.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.1...v2.22.0) (2023-01-25)
+
+### Bug Fixes
+
+- **react:** Fix code that causes null error ([e05998f](https://github.com/vivliostyle/vivliostyle.js/commit/e05998f9d8c56ca3863994573ba328c301a10000))
+
+### Features
+
+- **react:** Modify type definition errors as a result of updating react ([9fb71ba](https://github.com/vivliostyle/vivliostyle.js/commit/9fb71ba449b77a9125651bd2cc6bda42fa2ba89b))
+
 ## [2.21.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.0...v2.21.1) (2023-01-06)
 
 **Note:** Version bump only for package @vivliostyle/react

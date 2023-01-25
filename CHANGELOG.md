@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.22.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.1...v2.22.0) (2023-01-25)
+
+### Bug Fixes
+
+- layout problem when devicePixelRatio is changed during rendering ([58c6202](https://github.com/vivliostyle/vivliostyle.js/commit/58c6202d9cdda4c4f50f5be9a45ef57247df85a2)), closes [#1079](https://github.com/vivliostyle/vivliostyle.js/issues/1079)
+- **react:** Fix code that causes null error ([e05998f](https://github.com/vivliostyle/vivliostyle.js/commit/e05998f9d8c56ca3863994573ba328c301a10000))
+- very thin border on printing with Microsoft Edge ([0137d0e](https://github.com/vivliostyle/vivliostyle.js/commit/0137d0e9edfeae08ec27ee47f7cc82612f7da6e5)), closes [#1079](https://github.com/vivliostyle/vivliostyle.js/issues/1079) [#1085](https://github.com/vivliostyle/vivliostyle.js/issues/1085)
+
+### Features
+
+- **react:** Modify type definition errors as a result of updating react ([9fb71ba](https://github.com/vivliostyle/vivliostyle.js/commit/9fb71ba449b77a9125651bd2cc6bda42fa2ba89b))
+- Support CSS leader() function ([1fdbb15](https://github.com/vivliostyle/vivliostyle.js/commit/1fdbb15921e087947b6ee9eb80a75b14dd6b52b5)), closes [#1027](https://github.com/vivliostyle/vivliostyle.js/issues/1027)
+
 ## [2.21.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.0...v2.21.1) (2023-01-06)
 
 ### Bug Fixes
