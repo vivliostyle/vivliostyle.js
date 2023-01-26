@@ -32,6 +32,7 @@ interface RendererProps {
   source: string;
   page?: number;
   zoom?: number;
+  bookMode?: boolean;
   renderAllPages?: boolean;
   autoResize?: boolean;
   pageViewMode?: PageViewMode;
@@ -59,6 +60,7 @@ export const Renderer = ({
   source,
   page = 1,
   zoom = 1,
+  bookMode = true,
   fontSize = 16,
   background = "#ececec",
   renderAllPages = true,
@@ -96,7 +98,6 @@ export const Renderer = ({
 
   function loadSource() {
     const instance = instanceRef.current!;
-    const isPublication = source.endsWith(".json");
     const documentOptions = {
       ...(userStyleSheet
         ? {
@@ -120,7 +121,7 @@ export const Renderer = ({
         : null),
     };
 
-    if (isPublication) {
+    if (bookMode) {
       instance.loadPublication(source, documentOptions);
     } else {
       instance.loadDocument({ url: source }, documentOptions, {
