@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.22.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.1...v2.22.2) (2023-01-26)
+
+### Bug Fixes
+
+- Leader disappears in very large page ([a75a2e4](https://github.com/vivliostyle/vivliostyle.js/commit/a75a2e43e96d1192fac87e96dc341d24fa468f78)), closes [#1109](https://github.com/vivliostyle/vivliostyle.js/issues/1109)
+- Leader layout problem with text-indent ([c9e6d07](https://github.com/vivliostyle/vivliostyle.js/commit/c9e6d0714005100b7074c34eeb129cc030253d9f)), closes [#1107](https://github.com/vivliostyle/vivliostyle.js/issues/1107)
+
 ## [2.22.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.0...v2.22.1) (2023-01-26)
 
 ### Bug Fixes
