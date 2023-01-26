@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.22.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.0...v2.22.1) (2023-01-26)
+
+### Bug Fixes
+
+- default to BookMode=true and revert to before modification of json determination as it changes the behavior ([d4429d8](https://github.com/vivliostyle/vivliostyle.js/commit/d4429d8ab82ecfebd2c6d7b0a927e867c5f1307f))
+- Enable EPUB and Web publishing only when bookMode=true ([3e17f7e](https://github.com/vivliostyle/vivliostyle.js/commit/3e17f7e4e223b44f80713c2b4d87c27a845941a9))
+- Leader layout broken with text-spacing processing ([78a2e92](https://github.com/vivliostyle/vivliostyle.js/commit/78a2e92f28ae5b2043a95ffc36056756a1e50b86)), closes [#1105](https://github.com/vivliostyle/vivliostyle.js/issues/1105)
+- Modify the conditional expression to determine if it is EPUB ([00ea102](https://github.com/vivliostyle/vivliostyle.js/commit/00ea1023dea651778f2aee4b65088ada6172c05a))
+
 # [2.22.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.1...v2.22.0) (2023-01-25)
 
 ### Bug Fixes

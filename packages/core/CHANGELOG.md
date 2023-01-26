@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.22.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.0...v2.22.1) (2023-01-26)
+
+### Bug Fixes
+
+- Leader layout broken with text-spacing processing ([78a2e92](https://github.com/vivliostyle/vivliostyle.js/commit/78a2e92f28ae5b2043a95ffc36056756a1e50b86)), closes [#1105](https://github.com/vivliostyle/vivliostyle.js/issues/1105)
+
 # [2.22.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.1...v2.22.0) (2023-01-25)
 
 ### Bug Fixes
