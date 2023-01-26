@@ -2135,6 +2135,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     setLeaderTextContent(leader);
     // setting inline-block removes the pseudo CONTENT from normal text flow
     pseudoAfter.style.display = "inline-block";
+    pseudoAfter.style.textIndent = "0"; // cancel inherited text-indent
     // switch to inline-end when browser supports
     pseudoAfter.style.marginInlineStart = "0";
 
@@ -2180,7 +2181,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       } else {
         lower = previous.length / leader.length;
         upper = lower;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 16; i++) {
           let templeader = previous;
           for (let j = 0; j < 1 << i; j++) {
             templeader += leader;
@@ -2193,7 +2194,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         }
       }
       // leader is set to overrun state here
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 16; i++) {
         let templeader = "";
         const mid = Math.floor((lower + upper) / 2);
         for (let j = 0; j < mid; j++) {
