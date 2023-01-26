@@ -191,8 +191,13 @@ const hooks = {};
  * they are registered.
  * @param name Name of the hook.
  * @param fn Function to be registered to the hook.
+ * @param atFirst If true, the function is registered at the first of the hook array.
  */
-export function registerHook(name: string, fn: (...p1) => any): void {
+export function registerHook(
+  name: string,
+  fn: (...p1) => any,
+  atFirst?: boolean,
+): void {
   if (!HOOKS[name]) {
     Logging.logger.warn(new Error(`Skipping unknown plugin hook '${name}'.`));
   } else {
@@ -200,7 +205,11 @@ export function registerHook(name: string, fn: (...p1) => any): void {
     if (!hooksForName) {
       hooksForName = hooks[name] = [];
     }
-    hooksForName.push(fn);
+    if (atFirst) {
+      hooksForName.unshift(fn);
+    } else {
+      hooksForName.push(fn);
+    }
   }
 }
 
