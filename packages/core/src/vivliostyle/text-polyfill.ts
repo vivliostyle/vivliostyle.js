@@ -1016,6 +1016,7 @@ class TextSpacingPolyfill {
     Plugin.registerHook(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
       this.postLayoutBlock.bind(this),
+      true, // text-spacing must be processed before others (Issue #1105)
     );
   }
 }
