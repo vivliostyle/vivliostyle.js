@@ -98,8 +98,6 @@ export const Renderer = ({
 
   function loadSource() {
     const instance = instanceRef.current!;
-    const isPublication = source.endsWith(".json");
-
     const documentOptions = {
       ...(userStyleSheet
         ? {
@@ -123,7 +121,7 @@ export const Renderer = ({
         : null),
     };
 
-    if (isPublication || bookMode) {
+    if (bookMode) {
       instance.loadPublication(source, documentOptions);
     } else {
       instance.loadDocument({ url: source }, documentOptions, {
