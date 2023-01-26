@@ -2135,6 +2135,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     setLeaderTextContent(leader);
     // setting inline-block removes the pseudo CONTENT from normal text flow
     pseudoAfter.style.display = "inline-block";
+    pseudoAfter.style.textIndent = "0"; // cancel inherited text-indent
     // switch to inline-end when browser supports
     pseudoAfter.style.marginInlineStart = "0";
 
