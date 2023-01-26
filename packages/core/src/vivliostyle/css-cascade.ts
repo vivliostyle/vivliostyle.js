@@ -2181,7 +2181,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       } else {
         lower = previous.length / leader.length;
         upper = lower;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 16; i++) {
           let templeader = previous;
           for (let j = 0; j < 1 << i; j++) {
             templeader += leader;
@@ -2194,7 +2194,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         }
       }
       // leader is set to overrun state here
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 16; i++) {
         let templeader = "";
         const mid = Math.floor((lower + upper) / 2);
         for (let j = 0; j < mid; j++) {
