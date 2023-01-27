@@ -181,18 +181,16 @@ export const VivliostyleViewportCss = `
   }
 
   [data-vivliostyle-spread-container] {
-    --viv-outputScale: 1 !important;
-    --viv-devicePixelRatio: 1 !important;
-  }
-
-  /* for Safari */
-  ::-webkit-full-page-media, [data-vivliostyle-spread-container] {
     zoom: normal !important;
     transform: none !important;
   }
 
-  [data-vivliostyle-page-container] {
-    transform: none !important;
+  @supports (zoom: 8) {
+    [data-vivliostyle-page-container] {
+      zoom: var(--viv-outputPixelRatio,1);
+      transform: scale(calc(1 / var(--viv-outputPixelRatio,1)));
+      transform-origin: left top;
+    }
   }
 
   [data-vivliostyle-page-container] {
