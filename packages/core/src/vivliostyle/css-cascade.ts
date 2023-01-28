@@ -2251,6 +2251,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         padding = innerAligned.right - innerInline.right - getInset("right");
       }
     }
+    padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
     pseudoAfter.style.float = "none";
     pseudoAfter.style.marginInlineStart = `${padding}px`;
   }

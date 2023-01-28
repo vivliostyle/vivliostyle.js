@@ -1541,5 +1541,6 @@ viv-ts-thin-sp::after {
 
 span[data-viv-leader] {
   text-combine-upright: none;
+  text-orientation: mixed;
 }
 `;
