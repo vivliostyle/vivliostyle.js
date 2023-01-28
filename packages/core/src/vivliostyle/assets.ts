@@ -181,36 +181,38 @@ export const VivliostyleViewportCss = `
   }
 
   [data-vivliostyle-spread-container] {
+    --viv-outputScale: 1 !important;
+    --viv-devicePixelRatio: 1 !important;
     zoom: normal !important;
     transform: none !important;
   }
 
   @supports (zoom: 8) {
-    [data-vivliostyle-page-container] {
+    [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
       zoom: var(--viv-outputPixelRatio,1);
       transform: scale(calc(1 / var(--viv-outputPixelRatio,1)));
       transform-origin: left top;
     }
   }
 
-  [data-vivliostyle-page-container] {
+  [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
     display: block !important;
     max-height: 100vh;
   }
 
-  [data-vivliostyle-page-container]:not(:last-child) {
+  [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:not(:last-child) {
     break-after: page;
   }
 
   /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
   @-moz-document url-prefix()  {
-    [data-vivliostyle-page-container]:nth-last-child(n + 2) {
+    [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:nth-last-child(n + 2) {
       top: -1px;
       margin-top: 1px;
       margin-bottom: -1px;
     }
     /* Workaround Gecko problem on page break */
-    [data-vivliostyle-page-container] {
+    [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
       break-after: auto !important;
       height: 100% !important;
     }
