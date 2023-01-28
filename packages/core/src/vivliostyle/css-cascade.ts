@@ -2033,15 +2033,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     if (leader.length == 0) {
       return new Css.Str("");
     }
-    return new Css.Expr(
-      new Exprs.Native(
-        null,
-        (): Exprs.Result => {
-          return leader.replace(" ", "\u00A0"); // nbsp
-        },
-        "viv-leader",
-      ),
-    );
+    return new Css.Expr(new Exprs.Native(null, () => leader, "viv-leader"));
   }
 
   override visitFunc(func: Css.Func): Css.Val {
@@ -2110,11 +2102,11 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     while (container && container.inline) {
       container = container.parent;
     }
-    const e = c.viewNode as Element;
-    const pseudoAfter = e.parentElement;
-    const leader = e.getAttribute("data-viv-leader-value");
-    const previous = e.textContent || leader;
-    const { writingMode, direction } =
+    const leaderElem = c.viewNode as HTMLElement;
+    const pseudoAfter = leaderElem.parentElement;
+    const leader = leaderElem.getAttribute("data-viv-leader-value");
+    const previous = leaderElem.textContent || leader;
+    const { writingMode, direction, marginInlineEnd } =
       column.clientLayout.getElementComputedStyle(pseudoAfter);
 
     function setLeaderTextContent(leaderStr: string): void {
@@ -2122,12 +2114,12 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
         // to ensure RTL order around the leader.
         const RLM = "\u200f";
-        e.textContent =
+        leaderElem.textContent =
           (leaderStr.startsWith(RLM) ? "" : RLM) +
           leaderStr +
           (leaderStr.endsWith(RLM) ? "" : RLM);
       } else {
-        e.textContent = leaderStr;
+        leaderElem.textContent = leaderStr;
       }
     }
 
@@ -2136,21 +2128,30 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // setting inline-block removes the pseudo CONTENT from normal text flow
     pseudoAfter.style.display = "inline-block";
     pseudoAfter.style.textIndent = "0"; // cancel inherited text-indent
-    // switch to inline-end when browser supports
-    pseudoAfter.style.marginInlineStart = "0";
 
     const box = column.clientLayout.getElementClientRect(
       container.viewNode as Element,
     );
     const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+    const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
     // capture the line boundary
     // Some leader text ("_" e.g.) creates higher top than container.
     if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+      if (direction === "rtl") {
+        box.top += innerMarginInlineEnd;
+      } else {
+        box.bottom -= innerMarginInlineEnd;
+      }
       box.left = innerInit.left;
       box.right = innerInit.right;
       box.top = Math.min(innerInit.top, box.top);
       box.bottom = Math.max(innerInit.bottom, box.bottom);
     } else {
+      if (direction === "rtl") {
+        box.left += innerMarginInlineEnd;
+      } else {
+        box.right -= innerMarginInlineEnd;
+      }
       box.top = innerInit.top;
       box.bottom = innerInit.bottom;
       box.left = Math.min(innerInit.left, box.left);
@@ -2252,8 +2253,8 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       }
     }
     padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
-    pseudoAfter.style.float = "none";
-    pseudoAfter.style.marginInlineStart = `${padding}px`;
+    pseudoAfter.style.float = "";
+    leaderElem.style.marginInlineStart = `${padding}px`;
   }
 };
 
