@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.22.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.2...v2.22.3) (2023-01-29)
+
+### Bug Fixes
+
+- Inline margins on leader not working properly ([abb74e6](https://github.com/vivliostyle/vivliostyle.js/commit/abb74e6b398ec538ac70e1ec0a638d78ec2fd9c3)), closes [#1114](https://github.com/vivliostyle/vivliostyle.js/issues/1114)
+- Leader layout problem on Safari ([afac702](https://github.com/vivliostyle/vivliostyle.js/commit/afac702f8e17fbc59d58a9dc38c34bdb1f23c0f1)), closes [#1112](https://github.com/vivliostyle/vivliostyle.js/issues/1112)
+- PDF internal links not working properly ([50d4891](https://github.com/vivliostyle/vivliostyle.js/commit/50d489116661c7eef018b6f9bd74690377699bec)), closes [#1110](https://github.com/vivliostyle/vivliostyle.js/issues/1110)
+
 ## [2.22.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.1...v2.22.2) (2023-01-26)
 
 ### Bug Fixes
