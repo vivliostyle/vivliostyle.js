@@ -2315,15 +2315,16 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   media,
                 });
               } else if (localName == "link") {
+                const href = elem.getAttribute("href");
                 const rel = elem.getAttribute("rel")?.split(/\s+/);
                 const classes = elem.getAttribute("class");
                 const media = elem.getAttribute("media");
                 if (
+                  href &&
                   rel?.includes("stylesheet") &&
                   (!rel.includes("alternate") || classes)
                 ) {
-                  let src = elem.getAttribute("href");
-                  src = Base.resolveURL(src, url);
+                  const src = Base.resolveURL(href, url);
                   const title = elem.getAttribute("title");
                   sources.push({
                     url: src,
