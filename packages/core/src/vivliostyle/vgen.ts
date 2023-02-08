@@ -1424,7 +1424,8 @@ export class ViewFactory
           } else {
             const marginBreak = computedStyle["margin-break"];
             if (
-              marginBreak === Css.ident.discard ||
+              (marginBreak === Css.ident.discard &&
+                (atUnforcedBreak || this.isAtForcedBreak())) ||
               (marginBreak !== Css.ident.keep &&
                 atUnforcedBreak &&
                 !this.isAtForcedBreak())
@@ -1503,7 +1504,12 @@ export class ViewFactory
       nodeContext && !nodeContext.after;
       nodeContext = nodeContext.parent
     ) {
-      if (Break.isForcedBreakValue(nodeContext.breakBefore)) {
+      if (
+        Break.isForcedBreakValue(nodeContext.breakBefore) ||
+        nodeContext.sourceNode === nodeContext.sourceNode.ownerDocument.body ||
+        nodeContext.sourceNode ===
+          nodeContext.sourceNode.ownerDocument.documentElement
+      ) {
         return true;
       }
       if (
