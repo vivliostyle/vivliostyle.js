@@ -615,7 +615,7 @@ export class StyleInstance
     }
   }
 
-  matchPageSide(side: string): boolean {
+  matchPageSide(side: string | null): boolean {
     switch (side) {
       case "left":
       case "right":
@@ -637,10 +637,8 @@ export class StyleInstance
         if (this.getConsumedOffset(flowPos) === flowChunk.startOffset) {
           const flowChunkBreakBefore =
             flowPos.positions[0].flowChunk.breakBefore;
-          const flowBreakAfter = Break.startSideValueToBreakValue(
-            flowPos.startSide,
-          );
-          flowPos.startSide = Break.breakValueToStartSideValue(
+          const flowBreakAfter = flowPos.startBreakType;
+          flowPos.startBreakType = Break.breakValueToStartBreakType(
             Break.resolveEffectiveBreakValue(
               flowBreakAfter,
               flowChunkBreakBefore,
@@ -768,7 +766,7 @@ export class StyleInstance
       // Special case: parentStartOffset === breakOffsetBeforeStart
       // In this case, the flowChunk can be used if the start side of the parent
       // flow matches the current page side.
-      return !this.matchPageSide(parentFlowPosition.startSide);
+      return !this.matchPageSide(parentFlowPosition.startBreakType);
     }
     return false;
   }
@@ -918,10 +916,10 @@ export class StyleInstance
     flowName: string,
   ): Task.Result<boolean> {
     const flowPosition = this.currentLayoutPosition.flowPositions[flowName];
-    if (!flowPosition || !this.matchPageSide(flowPosition.startSide)) {
+    if (!flowPosition || !this.matchPageSide(flowPosition.startBreakType)) {
       return Task.newResult(true);
     }
-    flowPosition.startSide = "any";
+
     this.setFormattingContextToColumn(column, flowName);
     column.init();
     if (this.primaryFlows[flowName] && column.bands.length > 0) {
@@ -1030,12 +1028,9 @@ export class StyleInstance
                       selected.chunkPosition = newPosition || lastAfterPosition;
                       repeatedIndices.push(index);
                     }
-                    if (column.pageBreakType) {
-                      // forced break
-                      flowPosition.startSide = Break.breakValueToStartSideValue(
-                        column.pageBreakType,
-                      );
-                    }
+                    // forced break or "auto"
+                    flowPosition.startBreakType =
+                      Break.breakValueToStartBreakType(column.pageBreakType);
                   }
                   if (endOfColumn) {
                     loopFrame.breakLoop();
@@ -1787,9 +1782,9 @@ export class StyleInstance
     }
     cp.page++;
 
-    const startSide = cp.flowPositions["body"]?.startSide;
+    const startSide = cp.startSideOfFlow("body");
     cp.isBlankPage =
-      startSide && startSide !== "any" && this.matchPageSide(startSide);
+      Break.isSpreadBreakValue(startSide) && this.matchPageSide(startSide);
     page.isBlankPage = cp.isBlankPage;
 
     this.clearScope(this.style.pageScope);

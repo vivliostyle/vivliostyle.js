@@ -21,7 +21,6 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
-import * as Constants from "./constants";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssProp from "./css-prop";
@@ -30,6 +29,7 @@ import * as Diff from "./diff";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import * as LayoutHelper from "./layout-helper";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as PageFloats from "./page-floats";
@@ -951,7 +951,7 @@ export class ViewFactory
           this.nodeContext.pageType = pageType;
         }
         if (this.styler.cascade.currentPageType !== pageType) {
-          if (!this.isAtForcedBreak()) {
+          if (!Break.isSpreadBreakValue(this.nodeContext.breakBefore)) {
             this.nodeContext.breakBefore = "page";
           }
           this.styler.cascade.previousPageType =
@@ -1259,6 +1259,7 @@ export class ViewFactory
                   // (issue #877)
                   const anchorElem = result.ownerDocument.createElement("a");
                   anchorElem.setAttribute(attributeName, transformedValue);
+                  anchorElem.setAttribute(Vtree.SPECIAL_ATTR, "1");
                   anchorElem.style.position = "absolute";
                   result.appendChild(anchorElem);
                 } else {
@@ -1423,12 +1424,16 @@ export class ViewFactory
             }
           } else {
             const marginBreak = computedStyle["margin-break"];
+
+            // Detect forced or unforced break at this point
+            // to handle margin-break properly.
+            // Note: Do not use `atUnforcedBreak` which may be inaccurate.
+            const breakType = this.getBreakTypeAt(this.nodeContext);
+            const anyBreak = breakType !== null;
+            const unforcedBreak = breakType === "auto";
             if (
-              (marginBreak === Css.ident.discard &&
-                (atUnforcedBreak || this.isAtForcedBreak())) ||
-              (marginBreak !== Css.ident.keep &&
-                atUnforcedBreak &&
-                !this.isAtForcedBreak())
+              (marginBreak === Css.ident.discard && anyBreak) ||
+              (marginBreak !== Css.ident.keep && unforcedBreak)
             ) {
               Break.setMarginDiscardFlag(result, "block-start");
             }
@@ -1495,32 +1500,62 @@ export class ViewFactory
   }
 
   /**
-   * Check if the current position is at a forced break
+   * Check if the current position is at a forced or unforced break
    * (Fix for Issue #690)
+   *
+   * @param nodeContext
+   * @returns forced break type, or "auto" for unforced break, or null for not break
    */
-  private isAtForcedBreak(): boolean {
-    for (
-      let nodeContext = this.nodeContext;
-      nodeContext && !nodeContext.after;
-      nodeContext = nodeContext.parent
-    ) {
-      if (
-        Break.isForcedBreakValue(nodeContext.breakBefore) ||
-        nodeContext.sourceNode === nodeContext.sourceNode.ownerDocument.body ||
-        nodeContext.sourceNode ===
-          nodeContext.sourceNode.ownerDocument.documentElement
-      ) {
-        return true;
+  private getBreakTypeAt(nodeContext: Vtree.NodeContext): string | null {
+    for (let nc = nodeContext; nc && !nc.after; nc = nc.parent) {
+      if (Break.isForcedBreakValue(nc.breakBefore)) {
+        return nc.breakBefore; // forced break
       }
-      if (
-        nodeContext.parent &&
-        (nodeContext.parent.sourceNode as Element).firstElementChild !==
-          nodeContext.sourceNode
-      ) {
-        break;
+      if (nc.fragmentIndex === 1 && !nc.parent) {
+        if (nc.sourceNode === nc.sourceNode.ownerDocument.documentElement) {
+          // beginning of document
+          return "page";
+        } else {
+          // page floats, etc.
+          return null;
+        }
+      }
+      const parentViewNode = nc.parent?.viewNode as Element;
+      if (parentViewNode) {
+        const style = this.viewport.window.getComputedStyle(parentViewNode);
+        const paddingBlockStart = parseFloat(style.paddingBlockStart);
+        const borderBlockStartWidth = parseFloat(style.borderBlockStartWidth);
+        if (paddingBlockStart || borderBlockStartWidth) {
+          // parent's viewNode has block-start padding or border
+          return null;
+        }
+        let node = parentViewNode?.firstChild;
+        while (
+          node &&
+          (node.nodeType === 1
+            ? LayoutHelper.isSpecial(node as Element)
+            : Vtree.canIgnore(node, nc.parent.whitespace))
+        ) {
+          node = node.nextSibling;
+        }
+        if (node && node !== nc.viewNode) {
+          // parent's viewNode already has other content
+          return null;
+        }
       }
     }
-    return false;
+
+    const startBreakType = (
+      this.context as Exprs.Context & {
+        currentLayoutPosition: Vtree.LayoutPosition;
+      }
+    )?.currentLayoutPosition?.flowPositions[this.flowName]?.startBreakType;
+
+    if (Break.isForcedBreakValue(startBreakType)) {
+      return startBreakType; // forced break
+    } else {
+      return "auto"; // unforced break
+    }
   }
 
   private processAfterIfcontinues(
