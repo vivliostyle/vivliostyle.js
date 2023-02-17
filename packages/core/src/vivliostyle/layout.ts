@@ -662,7 +662,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               position = position.modify();
               position.overflow = true;
             }
-            if (this.isFloatNodeContext(position) && !this.vertical) {
+            if (
+              this.isFloatNodeContext(position) &&
+              // Exclude normal floats (fix for issue #611)
+              (PageFloats.isPageFloat(position.floatReference) ||
+                position.floatSide === "footnote")
+            ) {
               this.layoutFloatOrFootnote(position).then((positionParam) => {
                 position = positionParam as Vtree.NodeContext;
                 if (this.pageFloatLayoutContext.isInvalidated()) {
@@ -2008,6 +2013,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // Fix for issue #821, #885
       const p = LayoutHelper.findAncestorSpecialInlineNodeContext(nodeContext);
       if (p) {
+        if (
+          this.breakPositions?.[0] instanceof BoxBreakPosition &&
+          p?.viewNode.contains(this.breakPositions[0].checkPoints[0].viewNode)
+        ) {
+          // Prevent breaks at beginning of the column
+          return null;
+        }
+        // Prevent breaks inside inline-blocks
         nodeContext = p;
       }
     }
@@ -2802,16 +2815,39 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   );
                 }
               }
+              // Check break opportunity between anonymous block box and block-level box
+              // (Issue #611)
+              if (
+                !nodeContext.inline &&
+                (lastAfterNodeContext
+                  ? LayoutHelper.findAncestorSpecialInlineNodeContext(
+                      lastAfterNodeContext,
+                    )
+                  : this.breakPositions.at(-1) instanceof BoxBreakPosition)
+              ) {
+                this.saveEdgeBreakPosition(
+                  nodeContext.copy(),
+                  breakAtTheEdge,
+                  false,
+                );
+              }
               if (
                 !this.isBFC(nodeContext.formattingContext) ||
                 RepetitiveElement.isInstanceOfRepetitiveElementsOwnerFormattingContext(
                   nodeContext.formattingContext,
                 ) ||
                 this.isFloatNodeContext(nodeContext) ||
-                nodeContext.flexContainer
+                nodeContext.flexContainer ||
+                // Check empty block box (Issue #749)
+                (!nodeContext.nodeShadow &&
+                  !(nodeContext.sourceNode as Element).firstElementChild &&
+                  VtreeImpl.canIgnore(
+                    nodeContext.sourceNode.firstChild,
+                    nodeContext.whitespace,
+                  ))
               ) {
-                // new formatting context, or float or flex container
-                // (unbreakable)
+                // new formatting context, or float or flex container,
+                // or empty block box (unbreakable)
                 leadingEdgeContexts.push(nodeContext.copy());
                 breakAtTheEdge = Break.resolveEffectiveBreakValue(
                   breakAtTheEdge,

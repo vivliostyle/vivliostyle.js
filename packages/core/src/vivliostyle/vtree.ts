@@ -19,6 +19,7 @@
  * @fileoverview Vtree - Basic view tree data structures and support utilities.
  */
 import * as Base from "./base";
+import * as Break from "./break";
 import * as Constants from "./constants";
 import * as Css from "./css";
 import * as CssParser from "./css-parser";
@@ -894,7 +895,7 @@ export class FlowChunkPosition {
 
 export class FlowPosition {
   positions: FlowChunkPosition[] = [];
-  startSide: string = "any";
+  startBreakType: string | null = null;
   breakAfter: string | null = null;
 
   clone(): FlowPosition {
@@ -904,7 +905,7 @@ export class FlowPosition {
     for (let i = 0; i < arr.length; i++) {
       newarr[i] = arr[i].clone();
     }
-    newfp.startSide = this.startSide;
+    newfp.startBreakType = this.startBreakType;
     newfp.breakAfter = this.breakAfter;
     return newfp;
   }
@@ -1006,11 +1007,10 @@ export class LayoutPosition {
   }
 
   startSideOfFlow(name: string): string {
-    const flowPos = this.flowPositions[name];
-    if (!flowPos) {
-      return "any";
-    }
-    return flowPos.startSide;
+    const startBreakType = this.flowPositions[name]?.startBreakType;
+    return startBreakType && Break.isSpreadBreakValue(startBreakType)
+      ? startBreakType
+      : "any";
   }
 
   firstFlowChunkOfFlow(name: string): FlowChunk | null {

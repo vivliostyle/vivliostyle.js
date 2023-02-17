@@ -247,30 +247,8 @@ export function resolveEffectiveBreakValue(
   }
 }
 
-export function breakValueToStartSideValue(breakValue: string | null): string {
-  switch (breakValue) {
-    case "left":
-    case "right":
-    case "recto":
-    case "verso":
-      return breakValue;
-    default:
-      return "any";
-  }
-}
-
-export function startSideValueToBreakValue(
-  startSideValue: string,
-): string | null {
-  switch (startSideValue) {
-    case "left":
-    case "right":
-    case "recto":
-    case "verso":
-      return startSideValue;
-    default:
-      return null;
-  }
+export function breakValueToStartBreakType(breakValue: string | null): string {
+  return isForcedBreakValue(breakValue) ? breakValue : "auto";
 }
 
 Plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);
