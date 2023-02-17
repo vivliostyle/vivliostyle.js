@@ -2808,10 +2808,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   nodeContext.formattingContext,
                 ) ||
                 this.isFloatNodeContext(nodeContext) ||
-                nodeContext.flexContainer
+                nodeContext.flexContainer ||
+                // Check empty block box (Issue #749)
+                (!nodeContext.nodeShadow &&
+                  !(nodeContext.sourceNode as Element).firstElementChild &&
+                  VtreeImpl.canIgnore(
+                    nodeContext.sourceNode.firstChild,
+                    nodeContext.whitespace,
+                  ))
               ) {
-                // new formatting context, or float or flex container
-                // (unbreakable)
+                // new formatting context, or float or flex container,
+                // or empty block box (unbreakable)
                 leadingEdgeContexts.push(nodeContext.copy());
                 breakAtTheEdge = Break.resolveEffectiveBreakValue(
                   breakAtTheEdge,
