@@ -3970,8 +3970,7 @@ export class CascadeParserHandler
 
   finishChain(): void {
     if (this.chain) {
-      const specificity: number = this.specificity + this.cascade.nextOrder();
-      this.processChain(this.makeApplyRuleAction(specificity));
+      this.processChain(this.makeApplyRuleAction(this.specificity));
       this.chain = null;
       this.pseudoelement = null;
       this.viewConditionId = null;
@@ -4053,9 +4052,10 @@ export class CascadeParserHandler
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
+    const priority = specificity + this.cascade.nextOrder();
     const cascval = this.condition
-      ? new ConditionalCascadeValue(value, specificity, this.condition)
-      : new CascadeValue(value, specificity);
+      ? new ConditionalCascadeValue(value, priority, this.condition)
+      : new CascadeValue(value, priority);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 
