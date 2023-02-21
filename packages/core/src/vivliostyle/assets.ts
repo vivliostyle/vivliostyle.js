@@ -1202,7 +1202,10 @@ html|hr {
 html|ol,
 html|ul,
 html|dir,
-html|menu,
+html|menu {
+  margin: 0px;
+  padding-inline-start: 40px;
+}
 html|dd {
   margin: 0px;
   margin-inline-start: 40px;
