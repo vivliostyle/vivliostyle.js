@@ -2214,7 +2214,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           ? -paddingBorders.left
           : paddingBorders.bottom;
         if (nc.display === "table") {
-          clonedPaddingBorder += nc.blockBorderSpacing;
+          clonedPaddingBorder += (nc.vertical ? -1 : 1) * nc.blockBorderSpacing;
         }
       }
     }
