@@ -220,7 +220,7 @@ export class LexicalScope {
 }
 
 export function isAbsoluteLengthUnit(unit: string): boolean {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "px":
     case "in":
     case "pt":
@@ -235,7 +235,7 @@ export function isAbsoluteLengthUnit(unit: string): boolean {
 }
 
 export function isViewportRelativeLengthUnit(unit: string): boolean {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "vw":
     case "vh":
     case "vi":
@@ -255,10 +255,12 @@ export function isViewportRelativeLengthUnit(unit: string): boolean {
 }
 
 export function isFontRelativeLengthUnit(unit: string): boolean {
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case "em":
     case "ex":
     case "rem":
+    case "lh":
+    case "rlh":
       return true;
     default:
       return false;
@@ -276,6 +278,8 @@ export const defaultUnitSizes: { [key: string]: number } = {
   em: 16,
   rem: 16,
   ex: 8,
+  lh: 20,
+  rlh: 20,
   // <resolution>
   dppx: 1,
   dpi: 1 / 96,
@@ -289,7 +293,10 @@ export function needUnitConversion(unit: string): boolean {
   switch (unit) {
     case "q":
       return !CSS.supports("font-size", "1q");
+    case "lh":
+      return !CSS.supports("line-height", "1lh");
     case "rem":
+    case "rlh":
       return true;
     default:
       return false;
@@ -312,6 +319,7 @@ export class Context {
   rootFontSize: number | null = null;
   isRelativeRootFontSize: boolean | null = null;
   fontSize: () => number;
+  rootLineHeight: number | null = null;
   pref: Preferences;
   scopes: { [key: string]: ScopeContext } = {};
   pageAreaWidth: number | null = null;
@@ -413,6 +421,11 @@ export class Context {
         defaultUnitSizes["em"]
       );
     }
+    if (unit == "lh" || unit == "rlh") {
+      // FIXME: "lh" unit is incorrect, treated same as "rlh"
+      return this.rootLineHeight;
+    }
+
     return defaultUnitSizes[unit];
   }
 
@@ -1026,7 +1039,7 @@ export class Numeric extends Val {
 
   constructor(scope: LexicalScope, public num: number, unit: string) {
     super(scope);
-    this.unit = unit.toLowerCase();
+    this.unit = unit?.toLowerCase() ?? "";
   }
 
   override appendTo(buf: Base.StringBuffer, priority: number): void {

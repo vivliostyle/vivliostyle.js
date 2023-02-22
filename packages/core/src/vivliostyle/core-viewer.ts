@@ -69,6 +69,10 @@ export type CoreViewerSettings = {
  * - defaultPaperSize: Default paper size in px. Effective when `@page` size
  *   is set to auto. default: undefined (means the windows size is used as
  *   paper size).
+ * - allowScripts: Allow JavaScript in documents. default: true
+ * - pixelRatio: Set output pixel ratio. Enables very thin border width and
+ *   improves layout precision, emulating high pixel ratio.
+ *   default: 8. Set 0 to disable pixel ratio emulation.
  */
 export type CoreViewerOptions = {
   autoResize?: boolean;
@@ -80,6 +84,7 @@ export type CoreViewerOptions = {
   fitToScreen?: boolean;
   defaultPaperSize?: { width: number; height: number };
   allowScripts?: boolean;
+  pixelRatio?: number;
 };
 
 function getDefaultViewerOptions(): CoreViewerOptions {
@@ -93,6 +98,7 @@ function getDefaultViewerOptions(): CoreViewerOptions {
     fitToScreen: false,
     defaultPaperSize: undefined,
     allowScripts: true,
+    pixelRatio: 8,
   };
 }
 

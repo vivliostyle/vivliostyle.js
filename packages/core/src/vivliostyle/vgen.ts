@@ -29,6 +29,7 @@ import * as Diff from "./diff";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import * as LayoutHelper from "./layout-helper";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as PageFloats from "./page-floats";
@@ -192,7 +193,7 @@ export class ViewFactory
             continue;
           }
           const child = element.firstElementChild;
-          if (child && !child.previousSibling?.textContent.trim()) {
+          if (child && Vtree.canIgnore(child.previousSibling)) {
             const childStyle = styler.getStyle(child, false);
             if (childStyle) {
               const childDisplay = CssCascade.getProp(childStyle, "display");
@@ -523,10 +524,14 @@ export class ViewFactory
         }
       }
       propList.sort(Css.processingOrderFn);
+      let fontSize: Css.Val;
+      let lineHeight: Css.Val;
+
       for (const name of propList) {
         inheritanceVisitor.setPropName(name);
-        const value = CssCascade.getProp(style, name);
-        if (!Css.isDefaultingValue(value.value)) {
+        const prop = CssCascade.getProp(style, name);
+        let prop1 = prop;
+        if (!Css.isDefaultingValue(prop.value)) {
           if (
             name === "font-size" &&
             i === styles.length - 1 &&
@@ -534,15 +539,47 @@ export class ViewFactory
             this.context.rootFontSize
           ) {
             // Fix for issue #608, #549
-            props[name] = new CssCascade.CascadeValue(
+            prop1 = new CssCascade.CascadeValue(
               new Css.Numeric(this.context.rootFontSize, "px"),
-              value.priority,
+              prop.priority,
             );
-          } else if (Css.isCustomPropName(name)) {
-            props[name] = value;
-          } else {
-            props[name] = value.filterValue(inheritanceVisitor);
+          } else if (
+            name === "line-height" &&
+            i === styles.length - 1 &&
+            this.context.rootLineHeight &&
+            prop.value instanceof Css.Numeric &&
+            (prop.value.unit === "lh" || prop.value.unit === "rlh")
+          ) {
+            // line-height with lh or rlh unit on root element
+            prop1 = new CssCascade.CascadeValue(
+              new Css.Numeric(this.context.rootLineHeight, "px"),
+              prop.priority,
+            );
+          } else if (
+            i === 0 &&
+            prop.value instanceof Css.Numeric &&
+            prop.value.unit === "lh"
+          ) {
+            // line-height with lh unit on current element
+            prop1 = new CssCascade.CascadeValue(
+              new Css.Numeric(
+                prop.value.num *
+                  this.getLineHeightUnitSize(name, fontSize, lineHeight),
+                "px",
+              ),
+              prop.priority,
+            );
+          } else if (!Css.isCustomPropName(name)) {
+            prop1 = prop.filterValue(inheritanceVisitor);
           }
+
+          if (name === "font-size") {
+            fontSize = prop1.value;
+          } else if (name === "line-height") {
+            lineHeight = prop1.value;
+          }
+
+          props[name] = prop1;
         }
       }
     }
@@ -668,10 +705,15 @@ export class ViewFactory
       elementStyle = inheritedValues.elementStyle;
       this.nodeContext.lang = inheritedValues.lang;
     }
+    const floatCV: CssCascade.CascadeValue = elementStyle["float"];
     const floatReferenceCV: CssCascade.CascadeValue =
       elementStyle["float-reference"];
     const floatReference =
-      floatReferenceCV && !Css.isDefaultingValue(floatReferenceCV.value)
+      floatCV &&
+      !Css.isDefaultingValue(floatCV.value) &&
+      floatCV.value !== Css.ident.none &&
+      floatReferenceCV &&
+      !Css.isDefaultingValue(floatReferenceCV.value)
         ? PageFloats.floatReferenceOf(floatReferenceCV.value.toString())
         : null;
     if (
@@ -865,17 +907,39 @@ export class ViewFactory
         floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
           ? (floatMinWrapBlock as Css.Numeric)
           : null;
+
+      // Leaves handling of multicol specified on non-root/body elements to the browser
+      const insideNonRootMultiColumn = this.isInsideNonRootMultiColumn();
+
       const columnSpan = computedStyle["column-span"];
       this.nodeContext.columnSpan =
-        columnSpan && !Css.isDefaultingValue(columnSpan) ? columnSpan : null;
+        !insideNonRootMultiColumn &&
+        columnSpan &&
+        !Css.isDefaultingValue(columnSpan)
+          ? columnSpan
+          : null;
       if (!this.nodeContext.inline) {
         const breakAfter = computedStyle["break-after"];
-        if (breakAfter && !Css.isDefaultingValue(breakAfter)) {
+        if (
+          breakAfter &&
+          !Css.isDefaultingValue(breakAfter) &&
+          !(insideNonRootMultiColumn && breakAfter === Css.ident.column)
+        ) {
           this.nodeContext.breakAfter = breakAfter.toString();
+          if (Break.forcedBreakValues[this.nodeContext.breakAfter]) {
+            delete computedStyle["break-after"];
+          }
         }
         const breakBefore = computedStyle["break-before"];
-        if (breakBefore && !Css.isDefaultingValue(breakBefore)) {
+        if (
+          breakBefore &&
+          !Css.isDefaultingValue(breakBefore) &&
+          !(insideNonRootMultiColumn && breakBefore === Css.ident.column)
+        ) {
           this.nodeContext.breakBefore = breakBefore.toString();
+          if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
+            delete computedStyle["break-before"];
+          }
         }
         // Named page type
         const pageVal: Css.Val = computedStyle["page"];
@@ -887,7 +951,7 @@ export class ViewFactory
           this.nodeContext.pageType = pageType;
         }
         if (this.styler.cascade.currentPageType !== pageType) {
-          if (!this.isAtForcedBreak()) {
+          if (!Break.isSpreadBreakValue(this.nodeContext.breakBefore)) {
             this.nodeContext.breakBefore = "page";
           }
           this.styler.cascade.previousPageType =
@@ -1195,6 +1259,7 @@ export class ViewFactory
                   // (issue #877)
                   const anchorElem = result.ownerDocument.createElement("a");
                   anchorElem.setAttribute(attributeName, transformedValue);
+                  anchorElem.setAttribute(Vtree.SPECIAL_ATTR, "1");
                   anchorElem.style.position = "absolute";
                   result.appendChild(anchorElem);
                 } else {
@@ -1357,8 +1422,21 @@ export class ViewFactory
               // truncated to zero.
               Break.setMarginDiscardFlag(result, "block-start");
             }
-          } else if (atUnforcedBreak && !this.isAtForcedBreak()) {
-            Break.setMarginDiscardFlag(result, "block-start");
+          } else {
+            const marginBreak = computedStyle["margin-break"];
+
+            // Detect forced or unforced break at this point
+            // to handle margin-break properly.
+            // Note: Do not use `atUnforcedBreak` which may be inaccurate.
+            const breakType = this.getBreakTypeAt(this.nodeContext);
+            const anyBreak = breakType !== null;
+            const unforcedBreak = breakType === "auto";
+            if (
+              (marginBreak === Css.ident.discard && anyBreak) ||
+              (marginBreak !== Css.ident.keep && unforcedBreak)
+            ) {
+              Break.setMarginDiscardFlag(result, "block-start");
+            }
           }
         }
         if (listItem) {
@@ -1391,27 +1469,93 @@ export class ViewFactory
   }
 
   /**
-   * Check if the current position is at a forced break
-   * (Fix for Issue #690)
+   * Check if the current element is inside multi-column element
+   * that is not root or body element in the source tree.
+   *
+   * Note: vivliostyle handles multi-column on the root and body element on its own,
+   * but leaves it to the browser to handle other multi-column.
+   * This check is for such non-root/body multi-column.
    */
-  private isAtForcedBreak(): boolean {
+  private isInsideNonRootMultiColumn(): boolean {
     for (
-      let nodeContext = this.nodeContext;
-      nodeContext && !nodeContext.after;
-      nodeContext = nodeContext.parent
+      let node = this.nodeContext.parent?.viewNode;
+      node;
+      node = node.parentNode
     ) {
-      if (Break.isForcedBreakValue(nodeContext.breakBefore)) {
-        return true;
+      const style = node.nodeType === 1 ? (node as HTMLElement).style : null;
+      if (!style) {
+        break;
       }
       if (
-        nodeContext.parent &&
-        (nodeContext.parent.sourceNode as Element).firstElementChild !==
-          nodeContext.sourceNode
+        !isNaN(parseFloat(style.columnCount)) ||
+        !isNaN(parseFloat(style.columnWidth))
       ) {
+        return true;
+      }
+      if (style.position === "absolute") {
         break;
       }
     }
     return false;
+  }
+
+  /**
+   * Check if the current position is at a forced or unforced break
+   * (Fix for Issue #690)
+   *
+   * @param nodeContext
+   * @returns forced break type, or "auto" for unforced break, or null for not break
+   */
+  private getBreakTypeAt(nodeContext: Vtree.NodeContext): string | null {
+    for (let nc = nodeContext; nc && !nc.after; nc = nc.parent) {
+      if (Break.isForcedBreakValue(nc.breakBefore)) {
+        return nc.breakBefore; // forced break
+      }
+      if (nc.fragmentIndex === 1 && !nc.parent) {
+        if (nc.sourceNode === nc.sourceNode.ownerDocument.documentElement) {
+          // beginning of document
+          return "page";
+        } else {
+          // page floats, etc.
+          return null;
+        }
+      }
+      const parentViewNode = nc.parent?.viewNode as Element;
+      if (parentViewNode) {
+        const style = this.viewport.window.getComputedStyle(parentViewNode);
+        const paddingBlockStart = parseFloat(style.paddingBlockStart);
+        const borderBlockStartWidth = parseFloat(style.borderBlockStartWidth);
+        if (paddingBlockStart || borderBlockStartWidth) {
+          // parent's viewNode has block-start padding or border
+          return null;
+        }
+        let node = parentViewNode?.firstChild;
+        while (
+          node &&
+          (node.nodeType === 1
+            ? LayoutHelper.isSpecial(node as Element)
+            : Vtree.canIgnore(node, nc.parent.whitespace))
+        ) {
+          node = node.nextSibling;
+        }
+        if (node && node !== nc.viewNode) {
+          // parent's viewNode already has other content
+          return null;
+        }
+      }
+    }
+
+    const startBreakType = (
+      this.context as Exprs.Context & {
+        currentLayoutPosition: Vtree.LayoutPosition;
+      }
+    )?.currentLayoutPosition?.flowPositions[this.flowName]?.startBreakType;
+
+    if (Break.isForcedBreakValue(startBreakType)) {
+      return startBreakType; // forced break
+    } else {
+      return "auto"; // unforced break
+    }
   }
 
   private processAfterIfcontinues(
@@ -1749,9 +1893,7 @@ export class ViewFactory
           if (
             this.nodeContext.inline &&
             // ignore whitespace text node
-            !(
-              this.viewNode.nodeType === 3 && !this.viewNode.textContent.trim()
-            ) &&
+            !(this.viewNode.nodeType === 3 && Vtree.canIgnore(this.viewNode)) &&
             !parent.hasChildNodes() &&
             Break.getBoxBreakFlags(parent).includes("block-start")
           ) {
@@ -1976,7 +2118,12 @@ export class ViewFactory
       this.sourceNode?.parentElement === null &&
       !!this.viewRoot?.parentElement;
 
-    for (const propName in computedStyle) {
+    const propList = Object.keys(computedStyle);
+    propList.sort(Css.processingOrderFn);
+    let fontSize: Css.Val;
+    let lineHeight: Css.Val;
+
+    for (const propName of propList) {
       if (propertiesNotPassedToDOM[propName]) {
         continue;
       }
@@ -1991,12 +2138,28 @@ export class ViewFactory
         ),
       );
       if (
-        value.isNumeric() &&
-        Exprs.needUnitConversion((value as Css.Numeric).unit)
+        value instanceof Css.Numeric &&
+        Exprs.needUnitConversion(value.unit)
       ) {
-        // font-size for the root element is already converted to px
-        value = Css.convertNumericToPx(value, this.context);
+        if (value.unit === "lh") {
+          // for browsers not supporting "lh" unit
+          value = new Css.Numeric(
+            value.num *
+              this.getLineHeightUnitSize(propName, fontSize, lineHeight),
+            "px",
+          );
+        } else {
+          // font-size for the root element is already converted to px
+          value = Css.convertNumericToPx(value, this.context);
+        }
       }
+
+      if (propName === "font-size") {
+        fontSize = value;
+      } else if (propName === "line-height") {
+        lineHeight = value;
+      }
+
       if (
         Vtree.delayedProps[propName] ||
         (isRelativePositioned &&
@@ -2029,6 +2192,93 @@ export class ViewFactory
         Base.setCSSProperty(target, propName, value.toString());
       }
     }
+  }
+
+  /**
+   * Get "lh" unit size in px
+   */
+  private getLineHeightUnitSize(
+    propName: string,
+    fontSize: Css.Val,
+    lineHeight: Css.Val,
+  ): number {
+    // Note: "lh" unit is inaccurate for line-height:normal, not using font metrics.
+    const defaultLineHeightNum =
+      Exprs.defaultUnitSizes["lh"] / Exprs.defaultUnitSizes["em"];
+
+    const parentStyle =
+      this.nodeContext.parent?.viewNode?.nodeType === 1
+        ? this.viewport.window.getComputedStyle(
+            this.nodeContext.parent.viewNode as Element,
+          )
+        : null;
+
+    const parentFontSize = parentStyle
+      ? parseFloat(parentStyle.fontSize)
+      : this.context.fontSize();
+
+    const parentLineHeight = parentStyle
+      ? parentStyle.lineHeight === "normal"
+        ? parentFontSize * defaultLineHeightNum
+        : parseFloat(parentStyle.lineHeight)
+      : this.context.rootLineHeight;
+
+    if (propName === "line-height" || propName === "font-size") {
+      return parentLineHeight;
+    }
+
+    let lineHeightNum: number | null = null;
+
+    if (lineHeight) {
+      if (
+        lineHeight instanceof Css.Num ||
+        (lineHeight instanceof Css.Numeric &&
+          (lineHeight.unit === "em" || lineHeight.unit === "%"))
+      ) {
+        lineHeightNum =
+          lineHeight instanceof Css.Numeric && lineHeight.unit === "%"
+            ? lineHeight.num / 100
+            : lineHeight.num;
+      } else if (lineHeight instanceof Css.Numeric) {
+        return (
+          lineHeight.num * this.context.queryUnitSize(lineHeight.unit, false)
+        );
+      }
+    } else {
+      for (
+        let viewNode = this.nodeContext.parent?.viewNode;
+        ;
+        viewNode = viewNode.parentNode
+      ) {
+        if (!viewNode || viewNode.nodeType !== 1) {
+          lineHeightNum = defaultLineHeightNum;
+          break;
+        }
+        const ancestorLH = (viewNode as HTMLElement)?.style?.lineHeight;
+        if (ancestorLH) {
+          if (/^[0-9.]+$/.test(ancestorLH)) {
+            lineHeightNum = parseFloat(ancestorLH);
+          }
+          if (ancestorLH === "normal") {
+            lineHeightNum = defaultLineHeightNum;
+          }
+          break;
+        }
+      }
+    }
+
+    if (lineHeightNum !== null) {
+      if (fontSize instanceof Css.Numeric) {
+        return (
+          lineHeightNum *
+          CssCascade.convertFontSizeToPx(fontSize, parentFontSize, this.context)
+            .num
+        );
+      } else {
+        return lineHeightNum * parentFontSize;
+      }
+    }
+    return parentLineHeight;
   }
 
   /**
@@ -2333,7 +2583,7 @@ export class ViewFactory
           lastChild &&
           (!lastChild.nextSibling ||
             (lastChild.nextSibling === elem1.lastChild &&
-              !lastChild.nextSibling.textContent.trim()))
+              Vtree.canIgnore(lastChild.nextSibling)))
         ) {
           const found = checkForcedLineBreakElem(lastChild);
           if (found || found === null) {
@@ -2365,7 +2615,7 @@ export class ViewFactory
           prevElem &&
           (prevElem.nextSibling === elem1 ||
             (prevElem.nextSibling === elem1.previousSibling &&
-              !prevElem.nextSibling.textContent.trim()))
+              Vtree.canIgnore(prevElem.nextSibling)))
         ) {
           return checkForcedLineBreakElem(prevElem);
         }
@@ -2403,7 +2653,7 @@ export class ViewFactory
       forcedBreakElem === elem.lastElementChild &&
       (!forcedBreakElem.nextSibling ||
         (forcedBreakElem.nextSibling === elem.lastChild &&
-          !forcedBreakElem.nextSibling.textContent.trim()))
+          Vtree.canIgnore(forcedBreakElem.nextSibling)))
     ) {
       // forced line break is found at very last
       return null;
@@ -2515,16 +2765,32 @@ export const propertiesNotPassedToDOM = {
   "flow-options": true,
   "flow-priority": true,
   "footnote-policy": true,
+  "margin-break": true,
   page: true,
 };
 
 export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: Element;
   window: Window;
+  scaleRatio: number = 1;
 
   constructor(viewport: Viewport) {
     this.layoutBox = viewport.layoutBox;
     this.window = viewport.window;
+    if (viewport.pixelRatio > 0 && CSS.supports("zoom", "8")) {
+      this.scaleRatio = viewport.pixelRatio / viewport.window.devicePixelRatio;
+    }
+  }
+
+  private scaleRect(rect: Vtree.ClientRect): Vtree.ClientRect {
+    return {
+      left: rect.left * this.scaleRatio,
+      top: rect.top * this.scaleRatio,
+      right: rect.right * this.scaleRatio,
+      bottom: rect.bottom * this.scaleRatio,
+      width: rect.width * this.scaleRatio,
+      height: rect.height * this.scaleRatio,
+    } as Vtree.ClientRect;
   }
 
   private subtractOffsets(
@@ -2548,7 +2814,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     const rects = range.getClientRects();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map((rect) =>
-      this.subtractOffsets(rect, layoutBoxRect),
+      this.scaleRect(this.subtractOffsets(rect, layoutBoxRect)),
     );
   }
 
@@ -2567,7 +2833,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
       return rect;
     }
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
-    return this.subtractOffsets(rect, layoutBoxRect);
+    return this.scaleRect(this.subtractOffsets(rect, layoutBoxRect));
   }
 
   /** @override */
@@ -2588,12 +2854,31 @@ export class Viewport {
   constructor(
     public readonly window: Window,
     public readonly fontSize: number,
+    public readonly pixelRatio: number,
     opt_root?: HTMLElement,
     opt_width?: number,
     opt_height?: number,
   ) {
     this.document = window.document;
     this.root = opt_root || this.document.body;
+
+    if (pixelRatio > 0 && CSS.supports("zoom", "8")) {
+      // Emulate high pixel ratio using zoom and transform:scale().
+      // Workaround for issue #419 (minimum border width too thick)
+      // and #1076 (layout depends on device pixel ratio).
+      //
+      // CSS variables --viv-outputPixelRatio, --viv-devicePixelRatio,
+      // and --viv-outputScale are used in zoom and transform property values
+      // to emulate high pixel ratio output.
+      // (see VivliostyleViewportCss in assets.ts)
+      Base.setCSSProperty(this.root, "--viv-outputPixelRatio", `${pixelRatio}`);
+      Base.setCSSProperty(
+        this.root,
+        "--viv-devicePixelRatio",
+        `${window.devicePixelRatio}`,
+      );
+    }
+
     let outerZoomBox = this.root.firstElementChild;
     if (!outerZoomBox) {
       outerZoomBox = this.document.createElement("div");
@@ -2618,12 +2903,8 @@ export class Viewport {
     this.outerZoomBox = outerZoomBox as HTMLElement;
     this.contentContainer = contentContainer as HTMLElement;
     this.layoutBox = layoutBox as HTMLElement;
-    const clientLayout = new DefaultClientLayout(this);
-    const computedStyle = clientLayout.getElementComputedStyle(this.root);
-    this.width =
-      opt_width || parseFloat(computedStyle["width"]) || window.innerWidth;
-    this.height =
-      opt_height || parseFloat(computedStyle["height"]) || window.innerHeight;
+    this.width = opt_width || this.root.offsetWidth || window.innerWidth;
+    this.height = opt_height || this.root.offsetHeight || window.innerHeight;
 
     // Use the fallbackPageSize if window size is 0 or browser is in headless mode.
     const fallbackPageSize = {
@@ -2664,15 +2945,11 @@ export class Viewport {
    * @param scale Factor to which the viewport will be scaled.
    */
   zoom(width: number, height: number, scale: number) {
+    Base.setCSSProperty(this.root, "--viv-outputScale", `${scale}`);
     Base.setCSSProperty(this.outerZoomBox, "width", `${width * scale}px`);
     Base.setCSSProperty(this.outerZoomBox, "height", `${height * scale}px`);
     Base.setCSSProperty(this.contentContainer, "width", `${width}px`);
     Base.setCSSProperty(this.contentContainer, "height", `${height}px`);
-    Base.setCSSProperty(
-      this.contentContainer,
-      "transform",
-      scale === 1 ? "none" : `scale(${scale})`,
-    );
   }
 
   /**

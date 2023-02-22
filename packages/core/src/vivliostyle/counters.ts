@@ -781,10 +781,25 @@ export class CounterStore {
     return this.exprContentListener.bind(this);
   }
 
-  private exprContentListener(expr, val, document) {
+  private exprContentListener(
+    expr: Exprs.Val,
+    val: string,
+    document: Document,
+  ) {
+    if (expr instanceof Exprs.Native) {
+      const ex = expr as Exprs.Native;
+      if (ex.str == "viv-leader") {
+        const node = document.createElementNS(Base.NS.XHTML, "span");
+        node.textContent = val;
+        node.setAttribute("data-viv-leader", expr.key);
+        node.setAttribute("data-viv-leader-value", val);
+        return node;
+      }
+    }
+
     const found = this.pagesCounterExprs.findIndex((o) => o.expr === expr) >= 0;
     if (found) {
-      const node = document.createElement("span");
+      const node = document.createElementNS(Base.NS.XHTML, "span");
       node.textContent = val;
       node.setAttribute(PAGES_COUNTER_ATTR, expr.key);
       return node;

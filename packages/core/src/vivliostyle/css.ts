@@ -367,7 +367,7 @@ export class Numeric extends Val {
 
   constructor(public num: number, unit: string) {
     super();
-    this.unit = unit.toLowerCase(); // units are case-insensitive in CSS
+    this.unit = unit?.toLowerCase() ?? ""; // units are case-insensitive in CSS
   }
 
   override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
@@ -630,15 +630,19 @@ export const ident: { [key: string]: Ident } = {
   border_box: getName("border-box"),
   break_all: getName("break-all"),
   break_word: getName("break-word"),
+  clip: getName("clip"),
   crop: getName("crop"),
   cross: getName("cross"),
   column: getName("column"),
+  discard: getName("discard"),
   exclusive: getName("exclusive"),
   _false: getName("false"),
   fixed: getName("fixed"),
   flex: getName("flex"),
+  flow_root: getName("flow-root"),
   footnote: getName("footnote"),
   footer: getName("footer"),
+  grid: getName("grid"),
   header: getName("header"),
   hidden: getName("hidden"),
   horizontal_tb: getName("horizontal-tb"),
@@ -648,6 +652,7 @@ export const ident: { [key: string]: Ident } = {
   inline_block: getName("inline-block"),
   inline_end: getName("inline-end"),
   inline_start: getName("inline-start"),
+  keep: getName("keep"),
   landscape: getName("landscape"),
   left: getName("left"),
   line: getName("line"),
@@ -695,7 +700,8 @@ export const fullURange: URange = new URange("U+0-10FFFF");
 
 export const processingOrder = {
   "font-size": 1,
-  color: 2,
+  "line-height": 2,
+  color: 3,
 };
 
 export function isDefaultingValue(value: Val): boolean {

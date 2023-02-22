@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-A">
-  <title>inset shorthand property</title>
-  <style>
-    @page {
-      size: a4;
-    }
-    main {
-      position: absolute;
-      width: 600px;
-      height: 700px;
-      border: 5px solid black;
-    }
-    div {
-      position: absolute;
-      border: 3px solid;
-      padding: 2px;
-    }
-    div:nth-child(1) {
-      color: #00A;
-    }
-    div:nth-child(2) {
-      color: #0AA;
-    }
-    div:nth-child(3) {
-      color: #0A0;
-    }
-    div:nth-child(4) {
-      color: #AA0;
-    }
-    div:nth-child(5) {
-      color: #A00;
-    }
-    div:nth-child(6) {
-      color: #A0A;
-    }
-    div:nth-child(7) {
-      color: #00F;
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <div style="inset-block: 10px; inset-inline: 20px;">inset-block: 10px; inset-inline: 20px;</div>
-    <div style="inset: 10px 20px 40px 300px;">inset: 10px 20px 40px 300px;</div>
-    <div style="inset: 50px 100px 150px;">inset: 50px 100px 150px;</div>
-    <div style="inset: 100px 150px;">inset: 100px 150px;</div>
-    <div style="inset: auto 200px 100px;">inset: auto 200px 100px;</div>
-    <div style="inset: 200px auto;">inset: 200px auto;</div>
-    <div style="inset: 250px;">inset: 250px;</div>
-  </main>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>inset shorthand property</title>
+    <style>
+      @page {
+        size: a4;
+      }
+      main {
+        position: absolute;
+        width: 600px;
+        height: 700px;
+        border: 5px solid black;
+      }
+      div {
+        position: absolute;
+        border: 3px solid;
+        padding: 2px;
+      }
+      div:nth-child(1) {
+        color: #00a;
+      }
+      div:nth-child(2) {
+        color: #0aa;
+      }
+      div:nth-child(3) {
+        color: #0a0;
+      }
+      div:nth-child(4) {
+        color: #aa0;
+      }
+      div:nth-child(5) {
+        color: #a00;
+      }
+      div:nth-child(6) {
+        color: #a0a;
+      }
+      div:nth-child(7) {
+        color: #00f;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div style="inset-block: 10px; inset-inline: 20px">
+        inset-block: 10px; inset-inline: 20px;
+      </div>
+      <div style="inset: 10px 20px 40px 300px">
+        inset: 10px 20px 40px 300px;
+      </div>
+      <div style="inset: 50px 100px 150px">inset: 50px 100px 150px;</div>
+      <div style="inset: 100px 150px">inset: 100px 150px;</div>
+      <div style="inset: auto 200px 100px">inset: auto 200px 100px;</div>
+      <div style="inset: 200px auto">inset: 200px auto;</div>
+      <div style="inset: 250px">inset: 250px;</div>
+    </main>
+  </body>
 </html>

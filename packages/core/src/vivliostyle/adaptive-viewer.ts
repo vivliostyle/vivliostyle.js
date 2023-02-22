@@ -86,6 +86,7 @@ export class AdaptiveViewer {
   touchX: number;
   touchY: number;
   needResize: boolean;
+  resized: boolean;
   needRefresh: boolean;
   viewportSize: ViewportSize | null;
   currentPage: Vtree.Page;
@@ -99,6 +100,8 @@ export class AdaptiveViewer {
   renderAllPages: boolean;
   pref: Exprs.Preferences;
   pageSizes: { width: number; height: number }[];
+  pixelRatio: number;
+  pixelRatioLimit: number;
 
   // force relayout
   viewport: Vgen.Viewport | null;
@@ -150,6 +153,7 @@ export class AdaptiveViewer {
     this.sendCommand = () => {};
     this.resizeListener = () => {
       this.needResize = true;
+      this.resized = true;
       this.kick();
     };
     this.pageReplacedListener = this.pageReplacedListener.bind(this);
@@ -176,6 +180,7 @@ export class AdaptiveViewer {
     this.touchX = 0;
     this.touchY = 0;
     this.needResize = false;
+    this.resized = false;
     this.needRefresh = false;
     this.viewportSize = null;
     this.currentPage = null;
@@ -189,6 +194,13 @@ export class AdaptiveViewer {
     this.renderAllPages = true;
     this.pref = Exprs.defaultPreferences();
     this.pageSizes = [];
+
+    // Pixel ratio emulation on PDF output (PR #1079) does not work with
+    // non-Chromium browsers.
+    this.pixelRatioLimit = /Chrome/.test(navigator.userAgent)
+      ? 16 // max pixelRatio value on Chromium browsers
+      : 0; // disable pixelRatio emulation on non-Chromium browsers
+    this.pixelRatio = Math.min(8, this.pixelRatioLimit);
   }
 
   addLogListeners() {
@@ -461,7 +473,15 @@ export class AdaptiveViewer {
       command["allowScripts"] !== Scripts.allowScripts
     ) {
       Scripts.setAllowScripts(command["allowScripts"]);
-      this.needRefresh = true;
+      this.needResize = true;
+    }
+    // output pixel ratio emulation
+    if (typeof command["pixelRatio"] == "number") {
+      const pixelRatio = Math.min(command["pixelRatio"], this.pixelRatioLimit);
+      if (pixelRatio !== this.pixelRatio) {
+        this.pixelRatio = pixelRatio;
+        this.needResize = true;
+      }
     }
     this.configurePlugins(command);
     return Task.newResult(true);
@@ -622,16 +642,25 @@ export class AdaptiveViewer {
       return new Vgen.Viewport(
         this.window,
         this.fontSize,
+        this.pixelRatio,
         viewportElement,
         vs.width,
         vs.height,
       );
     } else {
-      return new Vgen.Viewport(this.window, this.fontSize, viewportElement);
+      return new Vgen.Viewport(
+        this.window,
+        this.fontSize,
+        this.pixelRatio,
+        viewportElement,
+      );
     }
   }
 
-  private resolveSpreadView(viewport: Vgen.Viewport): boolean {
+  private resolveSpreadView(
+    viewport: Vgen.Viewport,
+    pageSize: { width: number; height: number } | null,
+  ): boolean {
     switch (this.pageViewMode) {
       case PageViewMode.SINGLE_PAGE:
         return false;
@@ -639,9 +668,11 @@ export class AdaptiveViewer {
         return true;
       case PageViewMode.AUTO_SPREAD:
       default:
-        // wide enough for a pair of pages of A/B paper sizes, but not too
-        // narrow
-        return viewport.width / viewport.height >= 1.45 && viewport.width > 800;
+        return (
+          (viewport.width - this.pref.pageBorder) / viewport.height >=
+            (pageSize ? (pageSize.width * 2) / pageSize.height : 1.45) &&
+          (!!pageSize || viewport.width > 800)
+        );
     }
   }
 
@@ -655,10 +686,25 @@ export class AdaptiveViewer {
 
   private sizeIsGood(): boolean {
     const viewport = this.createViewport();
-    const spreadView = this.resolveSpreadView(viewport);
+    const hasNoAutoSizedPages =
+      this.opfView?.hasPages() && !this.opfView.hasAutoSizedPages();
+    const spreadView = this.resolveSpreadView(
+      viewport,
+      this.resized && hasNoAutoSizedPages ? this.pageSizes[0] : null,
+    );
+    this.resized = false;
     const spreadViewChanged = this.pref.spreadView !== spreadView;
     this.updateSpreadView(spreadView);
+
+    // check if window.devicePixelRatio is changed
+    const scaleRatioChanged =
+      this.pixelRatio &&
+      this.opfView &&
+      this.pixelRatio / this.window.devicePixelRatio !==
+        this.opfView.clientLayout.scaleRatio;
+
     if (
+      scaleRatioChanged ||
       this.viewportSize ||
       !this.viewport ||
       this.viewport.fontSize != this.fontSize
@@ -685,11 +731,7 @@ export class AdaptiveViewer {
       return true;
     }
 
-    if (
-      this.opfView &&
-      this.opfView.hasPages() &&
-      !this.opfView.hasAutoSizedPages()
-    ) {
+    if (hasNoAutoSizedPages) {
       this.viewport.width = viewport.width;
       this.viewport.height = viewport.height;
       this.needRefresh = true;
@@ -706,6 +748,13 @@ export class AdaptiveViewer {
   ) {
     this.pageSizes[pageIndex] = pageSize;
     this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
+    if (
+      pageIndex === 0 &&
+      this.pageViewMode === PageViewMode.AUTO_SPREAD &&
+      !this.opfView.hasAutoSizedPages()
+    ) {
+      this.updateSpreadView(this.resolveSpreadView(this.viewport, pageSize));
+    }
   }
 
   private setPageSizePageRules(
@@ -733,17 +782,16 @@ export class AdaptiveViewer {
         // (Fix for issue #934 and #936)
         return Math.ceil(pt);
       }
-      function extraHeightAdj(): number {
-        // Workaround for issue #947,
-        // only necessary if used with Vivliostyle CLI (LayoutNGPrinting enabled)
-        if (navigator.webdriver) {
-          return 1;
-        }
-        return 0;
-      }
       const widthPt = convertSize(widthMax);
-      const heightPt = convertSize(heightMax) + extraHeightAdj();
-      const styleText = `@page {margin:0;size:${widthPt}pt ${heightPt}pt;}`;
+      const heightPt = convertSize(heightMax);
+
+      // Negative margin setting is necessary to prevent unexpected page breaking.
+      // Note that the high pixel ratio emulation, the pixelRatio setting, uses the CSS zoom property
+      // that enlarge the page content size, and Chromium splits such large pages unless this
+      // negative margin is specified.
+      const rightPt = widthPt * ((this.pixelRatio || 1) - 1) + 2;
+      const bottomPt = heightPt * ((this.pixelRatio || 1) - 1) + 2; // "+ 2" is for issue #947
+      const styleText = `@page {size: ${widthPt}pt ${heightPt}pt; margin: 0 ${-rightPt}pt ${-bottomPt}pt 0;}`;
       this.pageRuleStyleElement.textContent = styleText;
       this.pageSheetSizeAlreadySet = true;
     }

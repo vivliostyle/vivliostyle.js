@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.22.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.3...v2.22.4) (2023-02-22)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+## [2.22.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.2...v2.22.3) (2023-01-29)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+## [2.22.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.1...v2.22.2) (2023-01-26)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+## [2.22.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.0...v2.22.1) (2023-01-26)
+
+### Bug Fixes
+
+- **react:** default to BookMode=true and revert to before modification of json determination as it changes the behavior ([d4429d8](https://github.com/vivliostyle/vivliostyle.js/commit/d4429d8ab82ecfebd2c6d7b0a927e867c5f1307f))
+- **react:** Enable EPUB and Web publishing only when bookMode=true ([3e17f7e](https://github.com/vivliostyle/vivliostyle.js/commit/3e17f7e4e223b44f80713c2b4d87c27a845941a9))
+- **react:** Modify the conditional expression to determine if it is EPUB ([00ea102](https://github.com/vivliostyle/vivliostyle.js/commit/00ea1023dea651778f2aee4b65088ada6172c05a))
+
+# [2.22.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.1...v2.22.0) (2023-01-25)
+
+### Bug Fixes
+
+- **react:** Fix code that causes null error ([e05998f](https://github.com/vivliostyle/vivliostyle.js/commit/e05998f9d8c56ca3863994573ba328c301a10000))
+
+### Features
+
+- **react:** Modify type definition errors as a result of updating react ([9fb71ba](https://github.com/vivliostyle/vivliostyle.js/commit/9fb71ba449b77a9125651bd2cc6bda42fa2ba89b))
+
+## [2.21.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.21.0...v2.21.1) (2023-01-06)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+# [2.21.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.20.0...v2.21.0) (2023-01-06)
+
+**Note:** Version bump only for package @vivliostyle/react
+
+# [2.20.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.2...v2.20.0) (2022-12-16)
+
+### Bug Fixes
+
+- Question: react renderer size ([9d1fe83](https://github.com/vivliostyle/vivliostyle.js/commit/9d1fe83ed4ad1b17834b17eeb11d070664e33723)), closes [#709](https://github.com/vivliostyle/vivliostyle.js/issues/709)
+
 ## [2.19.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.19.1...v2.19.2) (2022-11-17)
 
 **Note:** Version bump only for package @vivliostyle/react

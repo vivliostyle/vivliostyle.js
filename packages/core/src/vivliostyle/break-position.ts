@@ -125,6 +125,17 @@ export class EdgeBreakPosition
         0,
         column.vertical,
       ) + clonedPaddingBorder;
+
+    if (!this.position.after && !this.position.inline) {
+      // Subtract marginBlockStart from the edge (Issue #611)
+      const marginBlockStart = column.parseComputedLength(
+        column.clientLayout.getElementComputedStyle(
+          this.position.viewNode as Element,
+        ).marginBlockStart,
+      );
+      this.edge -= (column.vertical ? -1 : 1) * marginBlockStart;
+    }
+
     this.isEdgeUpdated = true;
   }
 

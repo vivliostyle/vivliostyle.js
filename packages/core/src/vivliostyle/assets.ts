@@ -43,7 +43,6 @@ export const VivliostyleViewportScreenCss = `
   }
 
   [data-vivliostyle-viewer-viewport] [data-vivliostyle-spread-container] {
-    display: -webkit-flex;
     display: flex;
     flex: none;
     justify-content: center;
@@ -97,6 +96,7 @@ export const VivliostyleViewportCss = `
   bottom: 0;
   overflow: hidden;
   z-index: -1;
+  transform-origin: left top;
 }
 
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
@@ -106,6 +106,43 @@ export const VivliostyleViewportCss = `
   z-index: auto;
 }
 
+[data-vivliostyle-spread-container] {
+  transform: scale(var(--viv-outputScale,1));
+  transform-origin: left top;
+}
+
+/* Emulate high pixel ratio using zoom & transform:scale() */
+@supports (zoom: 8) {
+  [data-vivliostyle-layout-box] {
+    zoom: calc(var(--viv-outputPixelRatio,1) / var(--viv-devicePixelRatio,1));
+    transform: scale(calc(var(--viv-devicePixelRatio,1) / var(--viv-outputPixelRatio,1)));
+  }
+  [data-vivliostyle-spread-container] {
+    zoom: calc(var(--viv-outputPixelRatio,1) / var(--viv-devicePixelRatio,1));
+    transform: scale(calc(var(--viv-outputScale,1) * var(--viv-devicePixelRatio,1) / var(--viv-outputPixelRatio,1)));
+  }
+  /* Workaround for Chromium's default border etc. widths not zoomed but scaled down */
+  [data-vivliostyle-spread-container] :where([style*=border],[style*=outline],[style*=rule]) {
+    border-width: medium;
+    outline-width: medium;
+    column-rule-width: medium;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar-track {
+    background-color: #f4f4f4;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: #c7c7c7;
+  }
+  [data-vivliostyle-spread-container] ::-webkit-scrollbar-thumb:hover {
+    background: #7d7d7d;
+  }
+}
+
 [data-vivliostyle-page-container] {
   position: relative;
   overflow: hidden;
@@ -113,7 +150,7 @@ export const VivliostyleViewportCss = `
 
 [data-vivliostyle-bleed-box] {
   position: absolute;
-  /* overflow: hidden; ** removed to fix issue #945 */
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -143,34 +180,40 @@ export const VivliostyleViewportCss = `
     height: 100% !important;
   }
 
-  [data-vivliostyle-spread-container],
-  [data-vivliostyle-page-container] {
+  [data-vivliostyle-spread-container] {
+    --viv-outputScale: 1 !important;
+    --viv-devicePixelRatio: 1 !important;
+    zoom: normal !important;
     transform: none !important;
   }
 
-  [data-vivliostyle-page-container] {
-    display: block !important;
-    max-height: 100vh;
-    break-after: page;
+  @supports (zoom: 8) {
+    [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
+      zoom: var(--viv-outputPixelRatio,1);
+      transform: scale(calc(1 / var(--viv-outputPixelRatio,1)));
+      transform-origin: left top;
+    }
   }
 
-  [data-vivliostyle-bleed-box] > div > div::before {
-    display: block;
-    content: "";
-    padding-top: 0.015625px;
-    margin-bottom: -0.015625px;
+  [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
+    display: block !important;
+    max-height: 100vh;
+  }
+
+  [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:not(:last-child) {
+    break-after: page;
   }
 
   /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
   @-moz-document url-prefix()  {
-    [data-vivliostyle-page-container]:nth-last-child(n + 2) {
+    [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:nth-last-child(n + 2) {
       top: -1px;
       margin-top: 1px;
       margin-bottom: -1px;
     }
     /* Workaround Gecko problem on page break */
-    [data-vivliostyle-page-container] {
-      break-after: auto;
+    [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
+      break-after: auto !important;
       height: 100% !important;
     }
   }
@@ -256,6 +299,7 @@ CONTENT_LIST = [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
     target-counter(ATTR IDENT LIST_STYLE_TYPE?) |
     target-counters([ STRING | URI ] IDENT STRING LIST_STYLE_TYPE?) |
     target-counters(ATTR IDENT STRING LIST_STYLE_TYPE?) |
+    leader([ dotted | solid | space ] | STRING ) |
     open-quote | close-quote | no-open-quote | no-close-quote |
     content([ text | before | after | first-letter ]?) |
     string(IDENT [first | start | last | first-except]?) ]+;
@@ -271,7 +315,8 @@ direction = ltr | rtl;
 display = inline | block | list-item | inline-block | table | inline-table | table-row-group |
     table-header-group | table-footer-group | table-row | table-column-group | table-column |
     table-cell | table-caption | none | oeb-page-head | oeb-page-foot | flex | inline-flex |
-    ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker;
+    ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | run-in | compact | marker |
+    flow-root | grid | inline-grid | contents;
 empty-cells = show | hide;
 FAMILY = SPACE(IDENT+) | STRING;
 FAMILY_LIST = COMMA( FAMILY+ );
@@ -300,7 +345,7 @@ outline-offset = LENGTH;
 outline-color = COLOR | invert;
 outline-style = BORDER_SIDE_STYLE;
 outline-width = BORDER_SIDE_WIDTH;
-overflow = visible | hidden | scroll | auto;
+overflow = visible | hidden | scroll | auto | clip;
 padding-right = PPLENGTH;
 padding-left = PPLENGTH;
 padding-top = PPLENGTH;
@@ -314,7 +359,6 @@ quotes = [STRING STRING]+ | none | auto;
 right = APLENGTH;
 table-layout = auto | fixed;
 text-align = left | right | center | justify | start | end;
-text-decoration = none | [ underline || overline || line-through || blink ];
 text-indent = PLENGTH;
 text-transform = capitalize | uppercase | lowercase | none;
 top = APLENGTH;
@@ -400,6 +444,7 @@ break-after = BREAK;
 break-inside = auto | avoid | avoid-page | avoid-column | avoid-region;
 [webkit]column-span = none | auto | all;
 [moz]column-fill = auto | balance | balance-all;
+margin-break = auto | keep | discard;
 
 src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 
@@ -493,6 +538,7 @@ hanging-punctuation = none | [ first || [ force-end | allow-end ] || last ];
 [webkit]text-decoration-line = none | [ underline || overline || line-through || blink ];
 [webkit]text-decoration-skip = none | [ objects || spaces || ink || edges || box-decoration ];
 [webkit]text-decoration-style = solid | double | dotted | dashed | wavy;
+[webkit]text-decoration-thickness = from-font | APLENGTH;
 [epub,webkit]text-emphasis-color = COLOR;
 [webkit]text-emphasis-position = [ over | under ] [ right | left ];
 [epub,webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
@@ -597,6 +643,11 @@ footnote-policy = auto | line;
 /* CSS Repeated Headers and Footers */
 [viv]repeat-on-break = auto | none | header | footer;
 
+/* Compatibility */
+[webkit]text-fill-color = COLOR;
+[webkit]text-stroke-color = COLOR;
+[webkit]text-stroke-width = BORDER_SIDE_WIDTH;
+
 DEFAULTS
 
 background-attachment: scroll;
@@ -666,6 +717,8 @@ padding-right: auto;
 padding-top: auto;
 text-emphasis-color: currentColor;
 text-emphasis-style: none;
+text-stroke-color: currentColor;
+text-stroke-width: 0;
 marker-start: none;
 marker-mid: none;
 marker-end: none;
@@ -713,6 +766,8 @@ font = FONT font-style font-variant_css2 font-weight font-stretch_css3 /* font-s
 font-variant = font-variant-ligatures font-variant-caps font-variant-numeric font-variant-east-asian;
 [epub,webkit]text-emphasis = text-emphasis-style text-emphasis-color;
 marker = INSETS marker-start marker-mid marker-end;
+[webkit]text-stroke = text-stroke-width text-stroke-color;
+text-decoration = text-decoration-line text-decoration-color text-decoration-style text-decoration-thickness;
 
 /* css-logical */
 margin-block = INSETS margin-block-start margin-block-end;
@@ -1147,7 +1202,10 @@ html|hr {
 html|ol,
 html|ul,
 html|dir,
-html|menu,
+html|menu {
+  margin: 0px;
+  padding-inline-start: 40px;
+}
 html|dd {
   margin: 0px;
   margin-inline-start: 40px;
@@ -1480,11 +1538,15 @@ viv-ts-open.viv-hang-first > viv-ts-inner {
 viv-ts-thin-sp::after {
   content: " ";
   font-family: Times, serif;
-  font-size: 66.6%;
   word-spacing: normal;
-  letter-spacing: normal;
+  letter-spacing: -0.125em;
   line-height: 0;
   text-orientation: mixed;
-  visibility: hidden;
+}
+
+span[data-viv-leader] {
+  text-combine-upright: none;
+  text-orientation: mixed;
+  white-space: pre;
 }
 `;

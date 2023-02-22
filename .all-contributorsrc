@@ -20,7 +20,7 @@
       ]
     },
     {
-      "login": "kwkbtr@vivliostyle.com",
+      "login": "kwkbtr",
       "name": "KAWAKUBO Toru",
       "avatar_url": "https://avatars3.githubusercontent.com/u/3595560?v=4",
       "profile": "http://kwkbtr.info",
@@ -86,7 +86,7 @@
       "login": "MurakamiShinyu",
       "name": "Shinyu Murakami",
       "avatar_url": "https://avatars1.githubusercontent.com/u/3324737?v=4",
-      "profile": "https://vivliostyle.org",
+      "profile": "https://github.com/MurakamiShinyu",
       "contributions": [
         "code",
         "doc",
@@ -156,7 +156,7 @@
       "login": "yamasy1549",
       "name": "yamasy1549",
       "avatar_url": "https://avatars0.githubusercontent.com/u/7820884?v=4",
-      "profile": "http://yamasy.info/",
+      "profile": "https://yamasy.info/",
       "contributions": [
         "code",
         "design"
@@ -186,17 +186,63 @@
       "login": "youchan",
       "name": "youchan",
       "avatar_url": "https://avatars0.githubusercontent.com/u/222183?v=4",
-      "profile": "http://youchan.org/",
+      "profile": "https://github.com/youchan",
       "contributions": [
         "code",
         "talk"
       ]
     },
     {
-      "login": "Monchi",
+      "login": "yukukotani",
       "name": "Yuku Kotani",
       "avatar_url": "https://avatars1.githubusercontent.com/u/16265411?v=4",
       "profile": "https://yuku.dev/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Crissov",
+      "name": "Christoph Päper",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6200185?v=4",
+      "profile": "https://github.com/Crissov",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "eltociear",
+      "name": "Ikko Eltociear Ashimine",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22633385?v=4",
+      "profile": "https://bandism.net/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "AyumuTakai",
+      "name": "Takai ayumu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2599195?v=4",
+      "profile": "https://hackwork.jp/",
+      "contributions": [
+        "code",
+        "talk"
+      ]
+    },
+    {
+      "login": "daisuke-tanabe",
+      "name": "daisuke-tanabe",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15145374?v=4",
+      "profile": "https://github.com/daisuke-tanabe",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "hkwi",
+      "name": "Hiroaki KAWAI",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1468181?v=4",
+      "profile": "https://twitter.com/#!/kwi",
       "contributions": [
         "code"
       ]

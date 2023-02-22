@@ -125,7 +125,7 @@ if [[ $IS_VALID_TAG = true ]]; then
     echo "===> CHANGELOG=${CHANGELOG}"
     TAGGED_ARCHIVE="vivliostyle-viewer-${VERSION}.zip"
     cp ${ARCHIVE_PATH} ${TAGGED_ARCHIVE}
-    [[ $DEBUG_HOOK = false ]] && $(npm bin)/github-release upload \
+    [[ $DEBUG_HOOK = false ]] && $(yarn bin)/github-release upload \
         "${TAGGED_ARCHIVE}" \
         --token "${GITHUB_TOKEN}" \
         --owner vivliostyle \

@@ -136,6 +136,36 @@ module.exports = [
         file: "inset-shorthand.html",
         title: "inset shorthand property",
       },
+      {
+        file: "lh-rlh-units.html",
+        title: "lh and rlh units",
+      },
+      {
+        file: "margin-break.html",
+        title: "margin-break property",
+      },
+      {
+        file: "border-width-test.html",
+        title: "border-width test",
+      },
+    ],
+  },
+  {
+    category: "Leader",
+    files: [
+      { file: "leader/content-leader.html", title: "content: leader()" },
+      {
+        file: "leader/content-leader-rtl.html",
+        title: "content: leader() in RTL direction",
+      },
+      {
+        file: "leader/toc-leader.html",
+        title: "Table of Contents with leader()",
+      },
+      {
+        file: "leader/toc-leader-vertical.html",
+        title: "Table of Contents with leader() in vertical writing-mode",
+      },
     ],
   },
   {
@@ -173,6 +203,10 @@ module.exports = [
       {
         file: "text-spacing/ts-hp-allow-force-end.html",
         title: "Text-spacing & hanging-punctuation allow/force-end",
+      },
+      {
+        file: "text-spacing/hanging-punctuation-first-indent-ja.html",
+        title: "hanging-punctuation:first with text-indent (Japanese)",
       },
     ],
   },

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test leader() in Table of Contents, vertical writing-mode</title>
+    <style>
+      @page {
+        @bottom-center {
+          writing-mode: horizontal-tb;
+          content: counter(page);
+        }
+      }
+      @page :first {
+        counter-reset: page 100;
+      }
+      :root {
+        writing-mode: vertical-rl;
+      }
+      nav > ol > li {
+        --leader-char: "・";
+        --target-counter-orientation: unset;
+        --target-counter-combine-upright: unset;
+      }
+      nav > ol > li > ol > li {
+        --leader-char: "…";
+      }
+      nav > ol > li:nth-child(2) {
+        --target-counter-orientation: upright;
+      }
+      nav > ol > li:nth-child(3) {
+        --target-counter-combine-upright: all;
+      }
+      nav > ol > li:nth-child(4) {
+        --target-counter-orientation: upright;
+        --target-counter-combine-upright: all;
+      }
+      nav li a::after {
+        content: leader(var(--leader-char)) target-counter(attr(href), page);
+        text-orientation: var(--target-counter-orientation);
+        text-combine-upright: var(--target-counter-combine-upright);
+      }
+
+      nav li a {
+        text-decoration: none;
+      }
+      nav ol {
+        list-style: none;
+        padding-inline-start: 2em;
+      }
+      section {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <h2>目次</h2>
+      <ol>
+        <li>
+          <a href="#ほげ">ほげほげほげほげ</a>
+          <ol>
+            <li><a href="#ふが">ふがふがふがふがふがふがふがふが</a></li>
+          </ol>
+        </li>
+        <li>
+          <a href="#ほげ">ほげほげほげほげ</a>
+          <ol>
+            <li><a href="#ふが">ふがふがふがふがふがふがふがふが</a></li>
+          </ol>
+        </li>
+        <li>
+          <a href="#ほげ">ほげほげほげほげ</a>
+          <ol>
+            <li><a href="#ふが">ふがふがふがふがふがふがふがふが</a></li>
+          </ol>
+        </li>
+        <li>
+          <a href="#ほげ">ほげほげほげほげ</a>
+          <ol>
+            <li><a href="#ふが">ふがふがふがふがふがふがふがふが</a></li>
+          </ol>
+        </li>
+      </ol>
+    </nav>
+    <section>
+      <h2 id="ほげ">ほげほげほげほげ</h2>
+      <section>
+        <h3 id="ふが">ふがふがふがふがふがふがふがふが</h3>
+      </section>
+    </section>
+  </body>
+</html>

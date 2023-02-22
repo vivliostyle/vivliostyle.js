@@ -167,6 +167,7 @@ class ViewerApp {
     urlParameters.removeParameter("find", true);
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
+    urlParameters.removeParameter("pixelRatio", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 

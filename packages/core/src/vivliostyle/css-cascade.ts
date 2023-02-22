@@ -30,7 +30,7 @@ import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
-import { CssStyler } from "./types";
+import { CssStyler, Layout } from "./types";
 import { TokenType } from "./css-tokenizer";
 
 export type ElementStyle = {
@@ -109,6 +109,7 @@ export const inheritedProps = {
   "text-emphasis-color": true,
   "text-emphasis-position": true,
   "text-emphasis-style": true,
+  "text-fill-color": true,
   "text-combine-upright": true,
   "text-indent": true,
   "text-justify": true,
@@ -116,6 +117,8 @@ export const inheritedProps = {
   "text-rendering": true,
   "text-size-adjust": true,
   "text-spacing": true,
+  "text-stroke-color": true,
+  "text-stroke-width": true,
   "text-transform": true,
   "text-underline-position": true,
   visibility: true,
@@ -578,9 +581,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     if (this.propName === "font-size") {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
     } else if (
-      numeric.unit == "em" ||
-      numeric.unit == "ex" ||
-      numeric.unit == "rem"
+      numeric.unit === "em" ||
+      numeric.unit === "ex" ||
+      numeric.unit === "rem" ||
+      numeric.unit === "lh" ||
+      numeric.unit === "rlh"
     ) {
       return convertFontRelativeLengthToPx(
         numeric,
@@ -612,6 +617,8 @@ export function convertFontRelativeLengthToPx(
     return new Css.Numeric(num * ratio * baseFontSize, "px");
   } else if (unit === "rem") {
     return new Css.Numeric(num * context.fontSize(), "px");
+  } else if (unit === "rlh") {
+    return new Css.Numeric(num * context.rootLineHeight, "px");
   } else {
     return numeric;
   }
@@ -1983,7 +1990,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     switch (pseudoName) {
       case "text":
       case "first-letter":
-        stringValue = this.element.textContent.trim().replace(/\s+/g, " ");
+        stringValue = this.element.textContent;
         if (pseudoName === "first-letter") {
           const r = stringValue.match(Base.firstLetterPattern);
           stringValue = r ? r[0] : "";
@@ -2000,6 +2007,33 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         break;
     }
     return new Css.Str(stringValue);
+  }
+
+  /**
+   * CSS `leader()` function
+   * https://www.w3.org/TR/css-content-3/#leaders
+   */
+  visitFuncLeader(values: Css.Val[]): Css.Val {
+    let leader: string = "";
+    if (values[0] instanceof Css.Ident) {
+      switch (values[0].stringValue()) {
+        case "dotted":
+          leader = ".";
+          break;
+        case "solid":
+          leader = "_";
+          break;
+        case "space":
+          leader = " ";
+          break;
+      }
+    } else if (values[0] instanceof Css.Str) {
+      leader = values[0].stringValue();
+    }
+    if (leader.length == 0) {
+      return new Css.Str("");
+    }
+    return new Css.Expr(new Exprs.Native(null, () => leader, "viv-leader"));
   }
 
   override visitFunc(func: Css.Func): Css.Val {
@@ -2034,11 +2068,197 @@ export class ContentPropVisitor extends Css.FilterVisitor {
           return this.visitFuncContent(func.values);
         }
         break;
+      case "leader":
+        if (func.values.length <= 1) {
+          return this.visitFuncLeader(func.values);
+        }
+        break;
     }
     // Logging.logger.warn("E_CSS_CONTENT_PROP:", func.toString());
     return func;
   }
 }
+
+/**
+ * POST_LAYOUT_BLOCK hook function for CSS leader()
+ * @param nodeContext
+ * @param checkPoints
+ * @param column
+ */
+const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
+  nodeContext: Vtree.NodeContext,
+  checkPoints: Vtree.NodeContext[],
+  column: Layout.Column,
+) => {
+  const leaders: Vtree.NodeContext[] = checkPoints.filter(
+    (c) =>
+      c.after &&
+      c.viewNode.nodeType === 1 &&
+      (c.viewNode as Element).getAttribute("data-viv-leader"),
+  );
+  for (const c of leaders) {
+    // we want to access the bottom block element, which contains single leader().
+    let container = c.parent;
+    while (container && container.inline) {
+      container = container.parent;
+    }
+    const leaderElem = c.viewNode as HTMLElement;
+    const pseudoAfter = leaderElem.parentElement;
+    const leader = leaderElem.getAttribute("data-viv-leader-value");
+    const previous = leaderElem.textContent || leader;
+    const { writingMode, direction, marginInlineEnd } =
+      column.clientLayout.getElementComputedStyle(pseudoAfter);
+
+    function setLeaderTextContent(leaderStr: string): void {
+      if (direction === "rtl") {
+        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
+        // to ensure RTL order around the leader.
+        const RLM = "\u200f";
+        leaderElem.textContent =
+          (leaderStr.startsWith(RLM) ? "" : RLM) +
+          leaderStr +
+          (leaderStr.endsWith(RLM) ? "" : RLM);
+      } else {
+        leaderElem.textContent = leaderStr;
+      }
+    }
+
+    // reset the expanded leader
+    setLeaderTextContent(leader);
+    // setting inline-block removes the pseudo CONTENT from normal text flow
+    pseudoAfter.style.display = "inline-block";
+    pseudoAfter.style.textIndent = "0"; // cancel inherited text-indent
+
+    const box = column.clientLayout.getElementClientRect(
+      container.viewNode as Element,
+    );
+    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+    const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
+    // capture the line boundary
+    // Some leader text ("_" e.g.) creates higher top than container.
+    if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+      if (direction === "rtl") {
+        box.top += innerMarginInlineEnd;
+      } else {
+        box.bottom -= innerMarginInlineEnd;
+      }
+      box.left = innerInit.left;
+      box.right = innerInit.right;
+      box.top = Math.min(innerInit.top, box.top);
+      box.bottom = Math.max(innerInit.bottom, box.bottom);
+    } else {
+      if (direction === "rtl") {
+        box.left += innerMarginInlineEnd;
+      } else {
+        box.right -= innerMarginInlineEnd;
+      }
+      box.top = innerInit.top;
+      box.bottom = innerInit.bottom;
+      box.left = Math.min(innerInit.left, box.left);
+      box.right = Math.max(innerInit.right, box.right);
+    }
+
+    function overrun() {
+      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      if (
+        box.left > inner.left ||
+        box.right < inner.right ||
+        box.top > inner.top ||
+        box.bottom < inner.bottom
+      ) {
+        return true;
+      }
+      return false;
+    }
+
+    function setLeader() {
+      // min-max search
+      let lower: number;
+      let upper: number;
+      setLeaderTextContent(previous);
+      if (overrun()) {
+        lower = 1;
+        upper = previous.length / leader.length;
+      } else {
+        lower = previous.length / leader.length;
+        upper = lower;
+        for (let i = 0; i < 16; i++) {
+          let templeader = previous;
+          for (let j = 0; j < 1 << i; j++) {
+            templeader += leader;
+          }
+          setLeaderTextContent(templeader);
+          if (overrun()) {
+            upper += 1 << i;
+            break;
+          }
+        }
+      }
+      // leader is set to overrun state here
+      for (let i = 0; i < 16; i++) {
+        let templeader = "";
+        const mid = Math.floor((lower + upper) / 2);
+        for (let j = 0; j < mid; j++) {
+          templeader += leader;
+        }
+        setLeaderTextContent(templeader);
+        if (overrun()) {
+          upper = mid;
+        } else {
+          if (lower == mid) {
+            return;
+          }
+          lower = mid;
+        }
+      }
+      setLeaderTextContent(leader);
+    }
+
+    // set the expanded leader
+    setLeader();
+
+    // Without inline-end, we use margin-inline-start to adjust the position.
+    // To get the margin size, set float, calculate then cancel float.
+    const innerInline = column.clientLayout.getElementClientRect(pseudoAfter);
+    if (direction == "rtl") {
+      pseudoAfter.style.float = "left";
+    } else {
+      pseudoAfter.style.float = "right";
+    }
+    const innerAligned = column.clientLayout.getElementClientRect(pseudoAfter);
+    // When float is applied, the content will be removed from the normal
+    // text flow, and box inset will be also removed.
+    // When content comes back to the normal text flow, then inset effects again.
+    function getInset(side: string): number {
+      let inset = 0;
+      let p = pseudoAfter.parentElement;
+      while (p && p !== container.viewNode) {
+        inset += column.getComputedInsets(p)[side];
+        p = p.parentElement;
+      }
+      return inset;
+    }
+    let padding = 0;
+    if (direction == "rtl") {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerInline.top - innerAligned.top - getInset("top");
+      } else {
+        padding = innerInline.left - innerAligned.left - getInset("left");
+      }
+    } else {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerAligned.bottom - innerInline.bottom - getInset("bottom");
+      } else {
+        padding = innerAligned.right - innerInline.right - getInset("right");
+      }
+    }
+    padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
+    pseudoAfter.style.float = "";
+    leaderElem.style.marginInlineStart = `${padding}px`;
+  }
+};
+
+Plugin.registerHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
 
 export function roman(num: number): string {
   if (num <= 0 || num != Math.round(num) || num > 3999) {
@@ -3131,8 +3351,9 @@ export class CascadeInstance {
                 if (!shorthand.error) {
                   for (const nameLH of shorthand.propList) {
                     const avLH = new CascadeValue(
-                      shorthand.values[nameLH] ||
-                        validatorSet.defaultValues[nameLH],
+                      shorthand.values[nameLH] ??
+                        validatorSet.defaultValues[nameLH] ??
+                        Css.ident.initial,
                       cascVal.priority,
                     );
                     const tvLH = getProp(elementStyle, nameLH);
@@ -3749,8 +3970,7 @@ export class CascadeParserHandler
 
   finishChain(): void {
     if (this.chain) {
-      const specificity: number = this.specificity + this.cascade.nextOrder();
-      this.processChain(this.makeApplyRuleAction(specificity));
+      this.processChain(this.makeApplyRuleAction(this.specificity));
       this.chain = null;
       this.pseudoelement = null;
       this.viewConditionId = null;
@@ -3832,9 +4052,10 @@ export class CascadeParserHandler
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
+    const priority = specificity + this.cascade.nextOrder();
     const cascval = this.condition
-      ? new ConditionalCascadeValue(value, specificity, this.condition)
-      : new CascadeValue(value, specificity);
+      ? new ConditionalCascadeValue(value, priority, this.condition)
+      : new CascadeValue(value, priority);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 
