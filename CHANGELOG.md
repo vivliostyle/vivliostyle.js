@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.22.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.3...v2.22.4) (2023-02-22)
+
+### Bug Fixes
+
+- HTML `<link rel="stylesheet">` tag without `href` causes TypeError ([c8a18c0](https://github.com/vivliostyle/vivliostyle.js/commit/c8a18c0442bb561e15ec46fc527c2d6c7abca257)), closes [#1120](https://github.com/vivliostyle/vivliostyle.js/issues/1120)
+- improve margin-break handling ([5327f69](https://github.com/vivliostyle/vivliostyle.js/commit/5327f6931beee85a1009ef526165f15788c80eb1)), closes [#611](https://github.com/vivliostyle/vivliostyle.js/issues/611) [#1124](https://github.com/vivliostyle/vivliostyle.js/issues/1124)
+- margin-break:discard not working properly ([660eefd](https://github.com/vivliostyle/vivliostyle.js/commit/660eefd2cef5afd18edb03f1bf63bf4dcb044150)), closes [#1123](https://github.com/vivliostyle/vivliostyle.js/issues/1123)
+- no break opportunity at empty block box ([a2b4537](https://github.com/vivliostyle/vivliostyle.js/commit/a2b4537f7fa03c8dab0e2870f0f65b79c9d231e6)), closes [#749](https://github.com/vivliostyle/vivliostyle.js/issues/749)
+- no break opportunity between anonymous block box and block-level box ([73df5bc](https://github.com/vivliostyle/vivliostyle.js/commit/73df5bcbbc9e50e57e50c36efa624f83c99f5dd4)), closes [#611](https://github.com/vivliostyle/vivliostyle.js/issues/611)
+- wrong cascading with CSS logical properties ([2f7fd7b](https://github.com/vivliostyle/vivliostyle.js/commit/2f7fd7b355138b7568a98d1a27a2a4b0da3b7682)), closes [#1126](https://github.com/vivliostyle/vivliostyle.js/issues/1126)
+- wrong page break inside table in vertical writing mode ([2dae5fc](https://github.com/vivliostyle/vivliostyle.js/commit/2dae5fc3934f4638cc0e7b1fe4a6ebcf7cdaf062)), closes [#1129](https://github.com/vivliostyle/vivliostyle.js/issues/1129)
+
 ## [2.22.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.2...v2.22.3) (2023-01-29)
 
 ### Bug Fixes
