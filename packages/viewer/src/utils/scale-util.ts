@@ -17,26 +17,35 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const scale_regexp = /^scale\((?<scale>.+)\)$/;
-
-export const applyScale = (p: number, scale: string): number => {
-  const scaleValue = parseFloat(scale.match(scale_regexp)?.groups?.scale);
-  if (scaleValue && !isNaN(scaleValue)) {
-    p /= scaleValue;
-  }
-  return p;
+export const scaleRect = (rect: DOMRect): DOMRect => {
+  const style = document.getElementById("vivliostyle-viewer-viewport").style;
+  const outputPixelRatio = parseFloat(
+    style.getPropertyValue("--viv-outputPixelRatio") || "1",
+  );
+  const devicePixelRatio = parseFloat(
+    style.getPropertyValue("--viv-devicePixelRatio") || "1",
+  );
+  const scaleRatio = outputPixelRatio / devicePixelRatio;
+  return new DOMRect(
+    rect.x * scaleRatio,
+    rect.y * scaleRatio,
+    rect.width * scaleRatio,
+    rect.height * scaleRatio,
+  );
 };
 
 export const applyTransformToRect = (
   rect: DOMRect,
-  scale: string,
   parentRect: DOMRect,
 ): DOMRect => {
   let x = rect.x - parentRect.x;
   let y = rect.y - parentRect.y;
   let width = rect.width;
   let height = rect.height;
-  const scaleValue = parseFloat(scale.match(scale_regexp)?.groups?.scale);
+  const style = document.getElementById("vivliostyle-viewer-viewport").style;
+  const scaleValue = parseFloat(
+    style.getPropertyValue("--viv-outputScale") || "1",
+  );
   if (scaleValue && !isNaN(scaleValue)) {
     x /= scaleValue;
     y /= scaleValue;

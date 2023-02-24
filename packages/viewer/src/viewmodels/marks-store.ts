@@ -22,7 +22,7 @@ import ko, { Computed, Observable, ObservableArray } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";
 import urlParameters from "../stores/url-parameters";
-import { applyTransformToRect } from "../utils/scale-util";
+import { scaleRect, applyTransformToRect } from "../utils/scale-util";
 
 const colorNameToColor = (name: string): string => {
   switch (name) {
@@ -100,7 +100,7 @@ const textNodeRects = (tn: TextInRange): DOMRect[] => {
   const r = document.createRange();
   r.setStart(tn.t, tn.startOffset);
   r.setEnd(tn.t, tn.endOffset);
-  return [...r.getClientRects()];
+  return [...r.getClientRects()].map((rect) => scaleRect(rect));
 };
 
 const markExistIn = (markId: string, e: Element): boolean => {
@@ -162,10 +162,6 @@ const highlight = (
     // already exists;
     return "";
   }
-  const zoomBox = start.node.parentElement?.closest(
-    "[data-vivliostyle-outer-zoom-box]",
-  )?.firstElementChild as HTMLElement;
-  const scale = zoomBox?.style?.transform;
   const textNodes = collectTextWithEloffInRange(start, end);
   const selectId = mark?.uniqueIdentifier || Mark.notCreatedId;
   const invokeMenu = (event: MouseEvent): void => {
@@ -181,11 +177,11 @@ const highlight = (
     const parent = tn.t.parentElement.closest(
       "[data-vivliostyle-page-container='true']",
     );
-    const parentRect = parent?.getBoundingClientRect();
+    const parentRect = scaleRect(parent.getBoundingClientRect());
     const pageIndex = getPageIndex(parent);
     const spineIndex = getSpineIndex(parent);
     for (const r of textNodeRects(tn)) {
-      const rect = applyTransformToRect(r, scale, parentRect);
+      const rect = applyTransformToRect(r, parentRect);
       const rectNum = index++;
       const mn = `${spineIndex}-${pageIndex}-${rectNum}`;
       if (
