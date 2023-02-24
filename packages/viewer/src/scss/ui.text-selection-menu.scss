@@ -3,7 +3,6 @@
 @import "./lib/_mixins";
 @import "./lib/_vars";
 
-@import "~@fortawesome/fontawesome-free/scss/_functions";
 @import "~@fortawesome/fontawesome-free/scss/_variables";
 @include at-font-face("FontAwesome", "../fonts/fa-solid-900");
 
@@ -94,7 +93,7 @@
   #viv-marker-selection-cancel {
     cursor: pointer;
     &:before {
-      content: fa-content($fa-var-close);
+      content: fa-content($fa-var-times);
     }
   }
   #viv-marker-selection-delete {

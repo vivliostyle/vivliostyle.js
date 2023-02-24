@@ -4,7 +4,6 @@
 @import "./lib/_mixins";
 @import "./lib/_vars";
 
-@import "~@fortawesome/fontawesome-free/scss/_functions";
 @import "~@fortawesome/fontawesome-free/scss/_variables";
 @include at-font-face("FontAwesome", "../fonts/fa-solid-900");
 
@@ -138,8 +137,7 @@
           height: 1em;
           line-height: 1;
           text-align: center;
-          font-size: $menu-icon-height * 0.333;
-          @include font-icon("FontAwesome");
+          font-size: $menu-icon-height * 0.35;
         }
         &.hover {
           &:before,
@@ -230,33 +228,29 @@
         content: fa-content($fa-var-chevron-down);
       }
       &#vivliostyle-menu-item_zoom-out > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-magnifying-glass);
-        font-size: $menu-icon-height * 0.5;
+        content: fa-content($fa-var-search-minus);
       }
       &#vivliostyle-menu-item_zoom-fit-to-screen
         > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-maximize);
+        content: fa-content($fa-var-expand-arrows-alt);
       }
       &#vivliostyle-menu-item_zoom-in > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-magnifying-glass);
-        font-size: $menu-icon-height * 0.5;
+        content: fa-content($fa-var-search-plus);
       }
       &#vivliostyle-menu-item_zoom-to-actual-size
         > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-magnifying-glass);
-        font-size: $menu-icon-height * 0.5;
+        content: fa-content($fa-var-search);
       }
       &#vivliostyle-menu-item_text-size-smaller
-        > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-font);
-      }
+        > .vivliostyle-menu-icon-button:before,
       &#vivliostyle-menu-item_text-size-default
-        > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-font);
-      }
+        > .vivliostyle-menu-icon-button:before,
       &#vivliostyle-menu-item_text-size-larger
         > .vivliostyle-menu-icon-button:before {
-        content: fa-content($fa-var-font);
+        content: "A";
+        font-family: Times, serif;
+        font-weight: bold;
+        font-size: $menu-icon-height * 0.58;
       }
       &#vivliostyle-menu-item_print > .vivliostyle-menu-icon-button:before {
         content: fa-content($fa-var-print);
@@ -264,14 +258,14 @@
       &#vivliostyle-menu-item_move-first > .vivliostyle-menu-icon-button:after {
         content: "";
         border-top: solid 2px;
-        top: 8px;
+        top: 9px;
         left: 8px;
         width: 16px;
       }
       &#vivliostyle-menu-item_move-last > .vivliostyle-menu-icon-button:after {
         content: "";
         border-bottom: solid 2px;
-        bottom: 8px;
+        bottom: 9px;
         left: 8px;
         width: 16px;
       }
@@ -300,35 +294,23 @@
         }
       }
 
-      &#vivliostyle-menu-item_zoom-out
-        > .vivliostyle-menu-icon-button:after {
-        content: fa-content($fa-var-minus);
-        left: $menu-icon-width * 0.235;
-        top: $menu-icon-height * 0.245;
-      }
-      &#vivliostyle-menu-item_zoom-in
-        > .vivliostyle-menu-icon-button:after {
-        content: fa-content($fa-var-plus);
-        left: $menu-icon-width * 0.235;
-        top: $menu-icon-height * 0.245;
-      }
       &#vivliostyle-menu-item_zoom-to-actual-size
         > .vivliostyle-menu-icon-button:after {
-        content: fa-content($fa-var-1);
-        left: $menu-icon-width * 0.245;
-        top: $menu-icon-height * 0.28;
+        content: "1";
+        left: $menu-icon-width * 0.225;
+        top: $menu-icon-height * 0.24;
       }
       &#vivliostyle-menu-item_text-size-smaller
         > .vivliostyle-menu-icon-button:after {
-        content: fa-content($fa-var-minus);
+        content: "\2212";
       }
       &#vivliostyle-menu-item_text-size-default
         > .vivliostyle-menu-icon-button:after {
-        content: fa-content($fa-var-equals);
+        content: "=";
       }
       &#vivliostyle-menu-item_text-size-larger
         > .vivliostyle-menu-icon-button:after {
-        content: fa-content($fa-var-plus);
+        content: "+";
       }
       &#vivliostyle-menu-item_text-size-smaller
         > .vivliostyle-menu-icon-button:after,
@@ -337,7 +319,7 @@
       &#vivliostyle-menu-item_text-size-larger
         > .vivliostyle-menu-icon-button:after {
         right: $menu-icon-width * 0.05;
-        top: $menu-icon-height * 0.15;
+        top: $menu-icon-height * 0.1;
       }
       &#vivliostyle-menu-item_marker-toggle.on,
       &#vivliostyle-menu-item_find-toggle.on,
