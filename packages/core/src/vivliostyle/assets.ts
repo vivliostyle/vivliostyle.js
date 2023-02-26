@@ -1360,9 +1360,10 @@ epub|case[required-namespace::supported] ~ epub|case {
 epub|case[required-namespace::supported] ~ epub|default {
   display: none;
 }
+`;
 
-/*--------------- ncx and toc ----------------------*/
-
+/** user-agent-toc.css */
+export const UserAgentTocCss = `
 @namespace ncx "http://www.daisy.org/z3986/2005/ncx/";
 
 ncx|ncx {
@@ -1384,6 +1385,7 @@ body > * {
 nav,
 .toc,
 #toc,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)),
 #table-of-contents,
 #contents {
   -adapt-behavior: toc-root;
@@ -1394,6 +1396,7 @@ nav,
 nav a,
 .toc a,
 #toc a,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a,
 ncx|navLabel {
   -adapt-behavior: toc-node-anchor;
 }
@@ -1403,6 +1406,7 @@ ncx|navLabel {
 nav li,
 .toc li,
 #toc li,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) li,
 ncx|navPoint {
   -adapt-behavior: toc-node;
 }
@@ -1411,7 +1415,8 @@ ncx|navPoint {
 [role="directory"] li > *:first-child,
 nav li > *:first-child,
 .toc li > *:first-child,
-#toc li > *:first-child {
+#toc li > *:first-child,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) li > *:first-child {
   -adapt-behavior: toc-node-first-child;
 }
 
@@ -1432,7 +1437,8 @@ ol#toc,
 ul[role="doc-toc"],
 ul[role="directory"],
 ul.toc,
-ul#toc {
+ul#toc/*,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) :is(ol,ul)*/ {
   -adapt-behavior: toc-container;
 }
 `;
