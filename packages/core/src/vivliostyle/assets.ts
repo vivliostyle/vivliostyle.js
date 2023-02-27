@@ -1437,8 +1437,8 @@ ol#toc,
 ul[role="doc-toc"],
 ul[role="directory"],
 ul.toc,
-ul#toc/*,
-section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) :is(ol,ul)*/ {
+ul#toc,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) :is(ol,ul) {
   -adapt-behavior: toc-container;
 }
 `;
