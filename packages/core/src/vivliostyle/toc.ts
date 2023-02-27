@@ -122,6 +122,9 @@ export class TOCView implements Vgen.CustomRendererFactory {
             computedStyle["color"] = Css.ident.inherit;
             computedStyle["text-decoration"] = Css.ident.none;
             break;
+          case "toc-container":
+            computedStyle["padding"] = Css.numericZero;
+            break;
         }
       }
       if (
