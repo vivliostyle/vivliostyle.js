@@ -53,7 +53,7 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
 import { Layout as LayoutType } from "./types";
-import { UserAgentBaseCss, UserAgentPageCss } from "./assets";
+import { UserAgentBaseCss, UserAgentPageCss, UserAgentTocCss } from "./assets";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> =
   new TaskUtil.Fetcher(() => {
@@ -2280,18 +2280,22 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         }
         this.triggersByDocURL[url] = triggers;
         const sources = [] as StyleSource[];
-        const userAgentURL = Base.resolveURL(
-          "user-agent-page.css",
-          Base.resourceBaseURL,
-        );
         sources.push({
-          url: userAgentURL,
+          url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
           text: UserAgentPageCss,
           flavor: CssParser.StylesheetFlavor.USER_AGENT,
           classes: null,
           media: null,
         });
-        if (!isTocBox) {
+        if (isTocBox) {
+          sources.push({
+            url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
+            text: UserAgentTocCss,
+            flavor: CssParser.StylesheetFlavor.USER_AGENT,
+            classes: null,
+            media: null,
+          });
+        } else {
           const elemList =
             xmldoc.document.querySelectorAll("style, link, meta");
           for (const elem of elemList) {
