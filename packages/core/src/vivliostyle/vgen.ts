@@ -1317,7 +1317,10 @@ export class ViewFactory
             continue; // namespace declaration (in Firefox)
           } else if (attributeNS == Base.NS.XLINK) {
             if (attributeName == "href") {
-              attributeValue = this.resolveURL(attributeValue);
+              attributeValue = this.documentURLTransformer.transformURL(
+                this.resolveURL(attributeValue),
+                this.xmldoc.url,
+              );
             }
           }
           if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
