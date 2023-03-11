@@ -1787,17 +1787,20 @@ export class StyleInstance
       Break.isSpreadBreakValue(startSide) && this.matchPageSide(startSide);
     page.isBlankPage = cp.isBlankPage;
 
+    if (page.pageType == null) {
+      page.pageType =
+        (page.isBlankPage
+          ? this.styler.cascade.previousPageType
+          : this.styler.cascade.currentPageType) ?? "";
+    }
+
     this.clearScope(this.style.pageScope);
     this.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
     const cascadedPageStyle = isTocBox
       ? ({} as CssCascade.ElementStyle)
-      : this.pageManager.getCascadedPageStyle(
-          (page.isBlankPage
-            ? this.styler.cascade.previousPageType
-            : this.styler.cascade.currentPageType) ?? "",
-        );
+      : this.pageManager.getCascadedPageStyle(page.pageType);
 
     // Substitute var()
     this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
