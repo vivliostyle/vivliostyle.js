@@ -267,6 +267,16 @@ export function isFontRelativeLengthUnit(unit: string): boolean {
   }
 }
 
+export function isRootFontRelativeLengthUnit(unit: string): boolean {
+  switch (unit?.toLowerCase()) {
+    case "rem":
+    case "rlh":
+      return true;
+    default:
+      return false;
+  }
+}
+
 export const defaultUnitSizes: { [key: string]: number } = {
   px: 1,
   in: 96,
