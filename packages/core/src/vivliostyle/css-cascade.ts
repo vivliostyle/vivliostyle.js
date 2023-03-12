@@ -4670,7 +4670,8 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (
       this.resolveViewportUnit &&
-      Exprs.isViewportRelativeLengthUnit(numeric.unit)
+      (Exprs.isViewportRelativeLengthUnit(numeric.unit) ||
+        Exprs.isRootFontRelativeLengthUnit(numeric.unit))
     ) {
       return new Css.Numeric(
         numeric.num * this.context.queryUnitSize(numeric.unit, false),
@@ -4694,7 +4695,12 @@ export function evaluateCSSToCSS(
     if (val instanceof Css.Expr) {
       return CssParser.evaluateExprToCSS(context, val.expr, propName);
     }
-    if (val instanceof Css.Numeric || val instanceof Css.Func) {
+    if (
+      val instanceof Css.Numeric ||
+      val instanceof Css.Func ||
+      val instanceof Css.SpaceList ||
+      val instanceof Css.CommaList
+    ) {
       return val.visit(new CalcFilterVisitor(context, true, percentRef));
     }
   } catch (err) {
