@@ -142,6 +142,7 @@ export class Page extends Base.SimpleEventTarget {
     left: { [key: string]: Container };
     right: { [key: string]: Container };
   } = { top: {}, bottom: {}, left: {}, right: {} };
+  pageType: string | null = null;
 
   constructor(
     public readonly container: HTMLElement,

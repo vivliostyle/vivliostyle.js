@@ -1625,7 +1625,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
   ): Task.Result<RenderSinglePageResult> {
     const frame: Task.Frame<RenderSinglePageResult> =
       Task.newFrame("renderSinglePage");
+
+    const oldPage = viewItem.pages[pos ? pos.page : 0];
     let page = this.makePage(viewItem, pos);
+    if (oldPage) {
+      // If the old page exists, keep the pageType (named page).
+      // This is necessary for named page with target-counter() to work.
+      // (fix for issue #1136)
+      page.pageType = oldPage.pageType;
+    }
+
     viewItem.instance.layoutNextPage(page, pos).then((posParam) => {
       pos = posParam as Vtree.LayoutPosition;
       const pageIndex = pos
