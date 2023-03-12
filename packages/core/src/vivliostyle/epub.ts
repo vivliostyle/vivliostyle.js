@@ -1232,8 +1232,10 @@ export class OPFDoc {
         "[role=directory] a[href]," +
         "nav li a[href]," +
         ".toc a[href]," +
-        "#toc a[href]," +
-        "section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a[href]";
+        "#toc a[href]" +
+        (CSS.supports("selector(:has(*))")
+          ? ",section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a[href]"
+          : "");
       for (const anchorElem of doc.querySelectorAll(selector)) {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
