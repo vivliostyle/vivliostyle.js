@@ -4,6 +4,6 @@
   ],
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "version": "2.22.4",
+  "version": "2.23.0",
   "includeMergedTags": true
 }

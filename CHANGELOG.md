@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.23.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.4...v2.23.0) (2023-03-13)
+
+### Bug Fixes
+
+- CSS rem unit not evaluated correctly in min/max/clamp functions ([0694528](https://github.com/vivliostyle/vivliostyle.js/commit/0694528637f468e3291b3ee0130ec122790ec7f3)), closes [#1137](https://github.com/vivliostyle/vivliostyle.js/issues/1137)
+- SVG rendering error with `<use xlink:href=… />` ([e36aba9](https://github.com/vivliostyle/vivliostyle.js/commit/e36aba9c695457636c8b2c1e21409807babcdd57)), closes [#1135](https://github.com/vivliostyle/vivliostyle.js/issues/1135)
+- tweak TOC detection for VFM v2 change ([4304f27](https://github.com/vivliostyle/vivliostyle.js/commit/4304f27b112e2d392a522f82219224eb0b1b1c77))
+- Using a CSS target-counter breaks named-pages styling ([f88013e](https://github.com/vivliostyle/vivliostyle.js/commit/f88013eb72b1357386002b905c2e617141342500)), closes [#1136](https://github.com/vivliostyle/vivliostyle.js/issues/1136)
+- **viewer:** [Regression v2.22.4] Viewer TOC item indent too large ([8f8067e](https://github.com/vivliostyle/vivliostyle.js/commit/8f8067e514f8d98561f0126af2e68e98d1a329f2)), closes [#1133](https://github.com/vivliostyle/vivliostyle.js/issues/1133)
+
+### Features
+
+- Add support for new syntax of CSS text-spacing properties ([da819c5](https://github.com/vivliostyle/vivliostyle.js/commit/da819c5db1ea62fa845f2693578aad2629146245)), closes [#1118](https://github.com/vivliostyle/vivliostyle.js/issues/1118)
+
 ## [2.22.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.3...v2.22.4) (2023-02-22)
 
 ### Bug Fixes
