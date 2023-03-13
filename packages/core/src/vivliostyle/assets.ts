@@ -528,9 +528,12 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-text-spacing = normal | none | auto | [[ trim-start | space-start | space-first ] ||
-    [ trim-end | space-end | allow-end ] || [ trim-adjacent | space-adjacent ] ||
-    no-compress || ideograph-alpha || ideograph-numeric || punctuation];
+text-spacing-trim = auto | space-all | trim-auto |
+    [[ trim-start | space-start | space-first ] ||
+     [ trim-end | space-end | allow-end ] ||
+     [ trim-adjacent | space-adjacent ]];
+text-autospace = normal | auto | no-autospace |
+    [[ ideograph-alpha || ideograph-numeric || punctuation ] || [ insert | replace ]];
 hanging-punctuation = none | [ first || [ force-end | allow-end ] || last ];
 
 /* CSS Text Decoration */
@@ -715,8 +718,10 @@ padding-bottom: auto;
 padding-left: auto;
 padding-right: auto;
 padding-top: auto;
+text-autospace: normal;
 text-emphasis-color: currentColor;
 text-emphasis-style: none;
+text-spacing-trim: space-first;
 text-stroke-color: currentColor;
 text-stroke-width: 0;
 marker-start: none;
@@ -768,6 +773,7 @@ font-variant = font-variant-ligatures font-variant-caps font-variant-numeric fon
 marker = INSETS marker-start marker-mid marker-end;
 [webkit]text-stroke = text-stroke-width text-stroke-color;
 text-decoration = text-decoration-line text-decoration-color text-decoration-style text-decoration-thickness;
+text-spacing = TEXT_SPACING text-autospace text-spacing-trim;
 
 /* css-logical */
 margin-block = INSETS margin-block-start margin-block-end;

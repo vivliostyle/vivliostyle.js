@@ -1576,7 +1576,8 @@ export class StyleInstance
           // text-spacing & hanging-punctuation on margin boxes
           TextPolyfill.processGeneratedContent(
             innerContainer,
-            boxInstance.getProp(this, "text-spacing"),
+            boxInstance.getProp(this, "text-autospace"),
+            boxInstance.getProp(this, "text-spacing-trim"),
             boxInstance.getProp(this, "hanging-punctuation"),
             this.lang,
             boxInstance.vertical,
