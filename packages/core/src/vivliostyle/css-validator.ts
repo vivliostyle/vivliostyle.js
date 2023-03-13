@@ -1325,6 +1325,28 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
   }
 }
 
+export class TextSpacingShorthandValidator extends SimpleShorthandValidator {
+  override validateList(list: Css.Val[]): number {
+    if (list.length === 1 && list[0] instanceof Css.Ident) {
+      switch (list[0].name.toLowerCase()) {
+        case "normal":
+          list = [
+            this.validatorSet.defaultValues["text-autospace"],
+            this.validatorSet.defaultValues["text-spacing-trim"],
+          ];
+          break;
+        case "auto":
+          list = [Css.ident.auto, Css.ident.auto];
+          break;
+        case "none":
+          list = [Css.getName("no-autospace"), Css.getName("space-all")];
+          break;
+      }
+    }
+    return super.validateList(list);
+  }
+}
+
 const propsExcludedFromAll = [
   "unicode-bidi",
   "direction",
@@ -1425,6 +1447,7 @@ export const shorthandValidators: {
   INSETS_SLASH: InsetsSlashShorthandValidator,
   COMMA: CommaShorthandValidator,
   FONT: FontShorthandValidator,
+  TEXT_SPACING: TextSpacingShorthandValidator,
   ALL: AllShorthandValidator,
 };
 

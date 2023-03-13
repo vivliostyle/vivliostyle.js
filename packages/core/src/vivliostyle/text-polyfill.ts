@@ -87,74 +87,53 @@ function isHangingPunctuationNone(
   );
 }
 
-type TextSpacing = {
+type SpacingTrim = {
   trimStart: boolean; // trim-start or space-first (not space-start)
   spaceFirst: boolean; // space-first (trim-start except at first line)
   trimEnd: boolean; // trim-end or allow-end (not space-end)
   allowEnd: boolean; // allow-end (not force-end)
   trimAdjacent: boolean;
-  ideographAlpha: boolean;
-  ideographNumeric: boolean;
+  // TODO: add support for:
+  //   trimAll: boolean; // trim-all
 };
 
 /**
- * text-spacing: none
- * none = space-start space-end space-adjacent
+ * text-spacing-trim: space-all (none)
+ * space-all (none) = space-start space-end space-adjacent
  */
-const TEXT_SPACING_NONE: TextSpacing = {
+const SPACING_TRIM_NONE: SpacingTrim = {
   trimStart: false,
   spaceFirst: false,
   trimEnd: false,
   allowEnd: false,
   trimAdjacent: false,
-  ideographAlpha: false,
-  ideographNumeric: false,
 };
 
 /**
- * text-spacing: normal
- * normal = space-first trim-end trim-adjacent ideograph-alpha ideograph-numeric
+ * text-spacing-trim: space-first (normal)
+ * space-first (normal) = space-first trim-end trim-adjacent
  */
-const TEXT_SPACING_NORMAL: TextSpacing = {
+const SPACING_TRIM_NORMAL: SpacingTrim = {
   trimStart: true,
   spaceFirst: true,
   trimEnd: true,
   allowEnd: false,
   trimAdjacent: true,
-  ideographAlpha: true,
-  ideographNumeric: true,
 };
 
 /**
- * text-spacing: auto
- * auto = trim-start trim-end trim-adjacent ideograph-alpha ideograph-numeric
+ * text-spacing-trim: trim-auto (auto)
+ * trim-auto (auto) = trim-start trim-end trim-adjacent
  */
-const TEXT_SPACING_AUTO: TextSpacing = {
+const SPACING_TRIM_AUTO: SpacingTrim = {
   trimStart: true,
   spaceFirst: false,
   trimEnd: true,
   allowEnd: false,
   trimAdjacent: true,
-  ideographAlpha: true,
-  ideographNumeric: true,
 };
 
-/**
- * text-spacing base setting
- * = space-first trim-end trim-adjacent
- * (= normal except ideograph-alpha and ideograph-numeric)
- */
-const TEXT_SPACING_BASE: TextSpacing = {
-  trimStart: true,
-  spaceFirst: true,
-  trimEnd: true,
-  allowEnd: false,
-  trimAdjacent: true,
-  ideographAlpha: false,
-  ideographNumeric: false,
-};
-
-function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
+function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
   const cssval =
     value instanceof Css.Val
       ? value
@@ -163,20 +142,24 @@ function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
       : Css.ident.normal;
 
   if (cssval === Css.ident.normal) {
-    return TEXT_SPACING_NORMAL;
+    return SPACING_TRIM_NORMAL;
   }
   if (cssval === Css.ident.none) {
-    return TEXT_SPACING_NONE;
+    return SPACING_TRIM_NONE;
   }
   if (cssval === Css.ident.auto) {
-    return TEXT_SPACING_AUTO;
+    return SPACING_TRIM_AUTO;
   }
   const values = cssval instanceof Css.SpaceList ? cssval.values : [cssval];
-  const textSpacing: TextSpacing = Object.create(TEXT_SPACING_BASE);
+  const textSpacing: SpacingTrim = Object.create(SPACING_TRIM_AUTO);
 
   for (const val of values) {
     if (val instanceof Css.Ident) {
       switch (val.name) {
+        case "trim-auto":
+          return SPACING_TRIM_AUTO;
+        case "space-all":
+          return SPACING_TRIM_NONE;
         case "trim-start":
           textSpacing.trimStart = true;
           textSpacing.spaceFirst = false;
@@ -207,12 +190,6 @@ function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
         case "space-adjacent":
           textSpacing.trimAdjacent = false;
           break;
-        case "ideograph-alpha":
-          textSpacing.ideographAlpha = true;
-          break;
-        case "ideograph-numeric":
-          textSpacing.ideographNumeric = true;
-          break;
       }
     }
   }
@@ -220,13 +197,76 @@ function textSpacingFromPropertyValue(value: PropertyValue): TextSpacing {
   return textSpacing;
 }
 
-function isTextSpacingNone(textSpacing: TextSpacing): boolean {
+type Autospace = {
+  ideographAlpha: boolean;
+  ideographNumeric: boolean;
+  // TODO: add support for:
+  //   punctuation: boolean;
+  //   replace: boolean;
+};
+
+/**
+ * text-autospace: no-autospace (none)
+ */
+const AUTOSPACE_NONE: Autospace = {
+  ideographAlpha: false,
+  ideographNumeric: false,
+};
+
+/**
+ * text-autospace: normal
+ */
+const AUTOSPACE_NORMAL: Autospace = {
+  ideographAlpha: true,
+  ideographNumeric: true,
+};
+
+function autospaceFromPropertyValue(value: PropertyValue): Autospace {
+  const cssval =
+    value instanceof Css.Val
+      ? value
+      : typeof value === "string"
+      ? Css.getName(value)
+      : Css.ident.normal;
+
+  if (cssval === Css.ident.normal || cssval === Css.ident.auto) {
+    return AUTOSPACE_NORMAL;
+  }
+  if (cssval === Css.ident.none) {
+    return AUTOSPACE_NONE;
+  }
+
+  const values = cssval instanceof Css.SpaceList ? cssval.values : [cssval];
+  const autospace: Autospace = Object.create(AUTOSPACE_NONE);
+
+  for (const val of values) {
+    if (val instanceof Css.Ident) {
+      switch (val.name) {
+        case "no-autospace":
+          return AUTOSPACE_NONE;
+        case "ideograph-alpha":
+          autospace.ideographAlpha = true;
+          break;
+        case "ideograph-numeric":
+          autospace.ideographNumeric = true;
+          break;
+      }
+    }
+  }
+
+  return autospace;
+}
+
+function isTextSpacingNone(
+  autospace: Autospace,
+  spacingTrim: SpacingTrim,
+): boolean {
   return (
-    !textSpacing.trimStart &&
-    !textSpacing.trimEnd &&
-    !textSpacing.trimAdjacent &&
-    !textSpacing.ideographAlpha &&
-    !textSpacing.ideographNumeric
+    !autospace.ideographAlpha &&
+    !autospace.ideographNumeric &&
+    !spacingTrim.trimStart &&
+    !spacingTrim.trimEnd &&
+    !spacingTrim.trimAdjacent
   );
 }
 
@@ -266,7 +306,7 @@ const embeddedContentTags = {
 
 class TextSpacingPolyfill {
   getPolyfilledInheritedProps() {
-    return ["hanging-punctuation", "text-spacing"];
+    return ["hanging-punctuation", "text-autospace", "text-spacing-trim"];
   }
 
   preprocessSingleDocument(document: Document): void {
@@ -311,20 +351,22 @@ class TextSpacingPolyfill {
 
   processGeneratedContent(
     element: HTMLElement,
-    textSpacingVal: Css.Val,
+    autospaceVal: Css.Val,
+    spacingTrimVal: Css.Val,
     hangingPunctuationVal: Css.Val,
     lang: string,
     vertical: boolean,
   ): void {
     lang = normalizeLang(lang);
-    const textSpacing = textSpacingFromPropertyValue(textSpacingVal);
+    const autospace = autospaceFromPropertyValue(autospaceVal);
+    const spacingTrim = spacingTrimFromPropertyValue(spacingTrimVal);
     const hangingPunctuation = hangingPunctuationFromPropertyValue(
       hangingPunctuationVal,
     );
 
     if (
       isHangingPunctuationNone(hangingPunctuation) &&
-      isTextSpacingNone(textSpacing)
+      isTextSpacingNone(autospace, spacingTrim)
     ) {
       return;
     }
@@ -360,7 +402,8 @@ class TextSpacingPolyfill {
         isLastInBlock,
         prevNode,
         nextNode,
-        textSpacing,
+        autospace,
+        spacingTrim,
         hangingPunctuation,
         lang,
         vertical,
@@ -476,8 +519,11 @@ class TextSpacingPolyfill {
             nodeContext?.lang ??
             nodeContext?.parent?.lang,
         );
-        const textSpacing = textSpacingFromPropertyValue(
-          p.inheritedProps["text-spacing"],
+        const autospace = autospaceFromPropertyValue(
+          p.inheritedProps["text-autospace"],
+        );
+        const spacingTrim = spacingTrimFromPropertyValue(
+          p.inheritedProps["text-spacing-trim"],
         );
         const hangingPunctuation = hangingPunctuationFromPropertyValue(
           p.inheritedProps["hanging-punctuation"],
@@ -485,7 +531,7 @@ class TextSpacingPolyfill {
 
         if (
           isHangingPunctuationNone(hangingPunctuation) &&
-          isTextSpacingNone(textSpacing)
+          isTextSpacingNone(autospace, spacingTrim)
         ) {
           continue;
         }
@@ -636,7 +682,8 @@ class TextSpacingPolyfill {
           isLastInBlock,
           prevNode,
           nextNode,
-          textSpacing,
+          autospace,
+          spacingTrim,
           hangingPunctuation,
           lang,
           p.vertical,
@@ -654,7 +701,8 @@ class TextSpacingPolyfill {
     isLastInBlock: boolean,
     prevNode: Node,
     nextNode: Node,
-    textSpacing: TextSpacing,
+    autospace: Autospace,
+    spacingTrim: SpacingTrim,
     hangingPunctuation: HangingPunctuation,
     lang: string,
     vertical: boolean,
@@ -751,14 +799,14 @@ class TextSpacingPolyfill {
       punctProcessing = true;
       hangingEnd = true;
     } else if (
-      (textSpacing.trimStart || textSpacing.trimAdjacent) &&
+      (spacingTrim.trimStart || spacingTrim.trimAdjacent) &&
       /^[‘“〝（［｛｟〈〈《「『【〔〖〘〚]\p{M}*$/u.test(text)
     ) {
       // fullwidth opening punctuation
       tagName = "viv-ts-open";
       punctProcessing = true;
     } else if (
-      (textSpacing.trimEnd || textSpacing.trimAdjacent) &&
+      (spacingTrim.trimEnd || spacingTrim.trimAdjacent) &&
       (/^[’”〞〟）］｝｠〉〉》」』】〕〗〙〛]\p{M}*$/u.test(text) ||
         (lang === "zh-hans" && /^[：；]\p{M}*$/u.test(text)) ||
         (lang !== "zh-hant" && /^[、。，．]\p{M}*$/u.test(text)))
@@ -798,15 +846,15 @@ class TextSpacingPolyfill {
           if (hangingFirst) {
             outerElem.className = "viv-hang-first";
           } else if (isFirstInBlock || isFirstAfterForcedLineBreak) {
-            if (textSpacing.trimStart && !textSpacing.spaceFirst) {
+            if (spacingTrim.trimStart && !spacingTrim.spaceFirst) {
               outerElem.className = "viv-ts-trim";
             } else {
               outerElem.className = "viv-ts-space";
             }
-          } else if (!textSpacing.trimStart && isAtStartOfLine()) {
+          } else if (!spacingTrim.trimStart && isAtStartOfLine()) {
             outerElem.className = "viv-ts-space";
           } else if (
-            textSpacing.trimAdjacent &&
+            spacingTrim.trimAdjacent &&
             prevNode &&
             /[\p{Ps}\p{Pi}\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]\p{M}*$/u.test(
               prevNode.textContent,
@@ -819,7 +867,7 @@ class TextSpacingPolyfill {
                   : prevNode.parentElement.offsetWidth) > fullWidthThreshold))
           ) {
             outerElem.className = "viv-ts-trim";
-          } else if (textSpacing.trimStart && isAtStartOfLine()) {
+          } else if (spacingTrim.trimStart && isAtStartOfLine()) {
             const linePos = linePosition();
             outerElem.className = "viv-ts-auto";
             if (linePos === linePosition() && !isAtStartOfLine()) {
@@ -844,7 +892,7 @@ class TextSpacingPolyfill {
               ) {
                 outerElem.className = "";
               }
-            } else if (textSpacing.trimEnd) {
+            } else if (spacingTrim.trimEnd) {
               outerElem.className = "viv-ts-trim";
             } else {
               outerElem.className = "viv-ts-space";
@@ -855,7 +903,7 @@ class TextSpacingPolyfill {
               nextNode.textContent,
             )
           ) {
-            if (isFullWidth && textSpacing.trimAdjacent) {
+            if (isFullWidth && spacingTrim.trimAdjacent) {
               outerElem.className = "viv-ts-trim";
             }
           } else if (hangingEnd) {
@@ -872,17 +920,17 @@ class TextSpacingPolyfill {
               }
             } else if (
               atEndNoHang &&
-              textSpacing.trimEnd &&
-              !textSpacing.allowEnd
+              spacingTrim.trimEnd &&
+              !spacingTrim.allowEnd
             ) {
               outerElem.className = "viv-ts-auto";
             } else if (!atEndNoHang && !isAtEndOfLine()) {
               outerElem.className = "";
             } else if (!atEnd && hangingPunctuation.allowEnd) {
-              if (!textSpacing.trimEnd || textSpacing.allowEnd) {
+              if (!spacingTrim.trimEnd || spacingTrim.allowEnd) {
                 outerElem.className = "viv-ts-space";
                 if (!isAtEndOfLine()) {
-                  if (textSpacing.trimEnd) {
+                  if (spacingTrim.trimEnd) {
                     outerElem.className = "viv-ts-auto";
                     if (!isAtEndOfLine()) {
                       outerElem.className = "viv-hang-end";
@@ -898,9 +946,9 @@ class TextSpacingPolyfill {
                 }
               }
             }
-          } else if (textSpacing.trimEnd) {
+          } else if (spacingTrim.trimEnd) {
             if (isAtEndOfLine()) {
-              if (textSpacing.allowEnd) {
+              if (spacingTrim.allowEnd) {
                 outerElem.className = "viv-ts-space";
               } else {
                 outerElem.className = "viv-ts-auto";
@@ -964,15 +1012,15 @@ class TextSpacingPolyfill {
       return false;
     }
 
-    if (textSpacing.ideographAlpha || textSpacing.ideographNumeric) {
+    if (autospace.ideographAlpha || autospace.ideographNumeric) {
       if (
         prevNode &&
         /^(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]/u.test(text) &&
-        ((textSpacing.ideographAlpha &&
+        ((autospace.ideographAlpha &&
           /(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])\p{L}\p{M}*$/u.test(
             prevNode.textContent,
           )) ||
-          (textSpacing.ideographNumeric &&
+          (autospace.ideographNumeric &&
             /(?![\uFF01-\uFF60])\p{Nd}\p{M}*$/u.test(prevNode.textContent))) &&
         !(vertical && checkUpright(prevNode.parentElement)) &&
         !checkNonZeroMarginBorderPadding(prevNode, textNode)
@@ -986,11 +1034,11 @@ class TextSpacingPolyfill {
       if (
         nextNode &&
         /(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*$/u.test(text) &&
-        ((textSpacing.ideographAlpha &&
+        ((autospace.ideographAlpha &&
           /^(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])\p{L}/u.test(
             nextNode.textContent,
           )) ||
-          (textSpacing.ideographNumeric &&
+          (autospace.ideographNumeric &&
             /^(?![\uFF01-\uFF60])\p{Nd}/u.test(nextNode.textContent))) &&
         !(vertical && checkUpright(nextNode.parentElement)) &&
         !checkNonZeroMarginBorderPadding(textNode, nextNode)
@@ -1030,14 +1078,16 @@ export function preprocessForTextSpacing(element: Element): void {
 
 export function processGeneratedContent(
   element: HTMLElement,
-  textSpacing: Css.Val,
+  textAutospace: Css.Val,
+  textSpacingTrim: Css.Val,
   hangingPunctuation: Css.Val,
   lang: string,
   vertical: boolean,
 ): void {
   textPolyfill.processGeneratedContent(
     element,
-    textSpacing,
+    textAutospace,
+    textSpacingTrim,
     hangingPunctuation,
     lang,
     vertical,
