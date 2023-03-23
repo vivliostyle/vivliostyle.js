@@ -1943,7 +1943,9 @@ export class StyleInstance
     page.bleedBox.style.right = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
-    page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
+    // Use transparent border (not padding) for bleed area to position page background image correctly.
+    // (Fix for issue #644)
+    page.bleedBox.style.border = `${evaluatedPageSizeAndBleed.bleed}px solid transparent`;
   }
 }
 

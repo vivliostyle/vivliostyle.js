@@ -1062,6 +1062,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       if (name === "font-family") {
         val = docFaces.filterFontFamily(val);
       }
+      if (
+        name.startsWith("background") &&
+        element.parentElement.hasAttribute("data-vivliostyle-bleed-box")
+      ) {
+        // Move background properties to the parent bleed-box element.
+        // (Fix for issue #644)
+        element = element.parentElement;
+      }
       Base.setCSSProperty(element, name, val.toString());
     }
   }

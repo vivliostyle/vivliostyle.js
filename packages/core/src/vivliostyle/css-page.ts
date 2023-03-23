@@ -562,14 +562,6 @@ export function addPrinterMarks(
   }
 
   const bleed = evaluatedPageSizeAndBleed.bleed;
-  if (bleed) {
-    const bgcolor = cascadedPageStyle[
-      "background-color"
-    ] as CssCascade.CascadeValue;
-    if (bgcolor && bgcolor.value) {
-      page.bleedBox.style.backgroundColor = bgcolor.value.stringValue();
-    }
-  }
   if (!crop && !cross) {
     return;
   }
