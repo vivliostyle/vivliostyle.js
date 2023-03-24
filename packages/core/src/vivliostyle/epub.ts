@@ -1232,7 +1232,10 @@ export class OPFDoc {
         "[role=directory] a[href]," +
         "nav li a[href]," +
         ".toc a[href]," +
-        "#toc a[href]";
+        "#toc a[href]" +
+        (CSS.supports("selector(:has(*))")
+          ? ",section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a[href]"
+          : "");
       for (const anchorElem of doc.querySelectorAll(selector)) {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
@@ -1624,7 +1627,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
   ): Task.Result<RenderSinglePageResult> {
     const frame: Task.Frame<RenderSinglePageResult> =
       Task.newFrame("renderSinglePage");
+
+    const oldPage = viewItem.pages[pos ? pos.page : 0];
     let page = this.makePage(viewItem, pos);
+    if (oldPage) {
+      // If the old page exists, keep the pageType (named page).
+      // This is necessary for named page with target-counter() to work.
+      // (fix for issue #1136)
+      page.pageType = oldPage.pageType;
+    }
+
     viewItem.instance.layoutNextPage(page, pos).then((posParam) => {
       pos = posParam as Vtree.LayoutPosition;
       const pageIndex = pos

@@ -53,7 +53,7 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
 import { Layout as LayoutType } from "./types";
-import { UserAgentBaseCss, UserAgentPageCss } from "./assets";
+import { UserAgentBaseCss, UserAgentPageCss, UserAgentTocCss } from "./assets";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> =
   new TaskUtil.Fetcher(() => {
@@ -1576,7 +1576,8 @@ export class StyleInstance
           // text-spacing & hanging-punctuation on margin boxes
           TextPolyfill.processGeneratedContent(
             innerContainer,
-            boxInstance.getProp(this, "text-spacing"),
+            boxInstance.getProp(this, "text-autospace"),
+            boxInstance.getProp(this, "text-spacing-trim"),
             boxInstance.getProp(this, "hanging-punctuation"),
             this.lang,
             boxInstance.vertical,
@@ -1787,17 +1788,20 @@ export class StyleInstance
       Break.isSpreadBreakValue(startSide) && this.matchPageSide(startSide);
     page.isBlankPage = cp.isBlankPage;
 
+    if (page.pageType == null) {
+      page.pageType =
+        (page.isBlankPage
+          ? this.styler.cascade.previousPageType
+          : this.styler.cascade.currentPageType) ?? "";
+    }
+
     this.clearScope(this.style.pageScope);
     this.layoutPositionAtPageStart = cp.clone();
 
     // Resolve page size before page master selection.
     const cascadedPageStyle = isTocBox
       ? ({} as CssCascade.ElementStyle)
-      : this.pageManager.getCascadedPageStyle(
-          (page.isBlankPage
-            ? this.styler.cascade.previousPageType
-            : this.styler.cascade.currentPageType) ?? "",
-        );
+      : this.pageManager.getCascadedPageStyle(page.pageType);
 
     // Substitute var()
     this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
@@ -1939,7 +1943,9 @@ export class StyleInstance
     page.bleedBox.style.right = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
-    page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
+    // Use transparent border (not padding) for bleed area to position page background image correctly.
+    // (Fix for issue #644)
+    page.bleedBox.style.border = `${evaluatedPageSizeAndBleed.bleed}px solid transparent`;
   }
 }
 
@@ -2280,18 +2286,22 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         }
         this.triggersByDocURL[url] = triggers;
         const sources = [] as StyleSource[];
-        const userAgentURL = Base.resolveURL(
-          "user-agent-page.css",
-          Base.resourceBaseURL,
-        );
         sources.push({
-          url: userAgentURL,
+          url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
           text: UserAgentPageCss,
           flavor: CssParser.StylesheetFlavor.USER_AGENT,
           classes: null,
           media: null,
         });
-        if (!isTocBox) {
+        if (isTocBox) {
+          sources.push({
+            url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
+            text: UserAgentTocCss,
+            flavor: CssParser.StylesheetFlavor.USER_AGENT,
+            classes: null,
+            media: null,
+          });
+        } else {
           const elemList =
             xmldoc.document.querySelectorAll("style, link, meta");
           for (const elem of elemList) {

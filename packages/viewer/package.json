@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/viewer",
   "description": "Vivliostyle Viewer - HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
-  "version": "2.22.4",
+  "version": "2.23.1",
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "gulp build && NODE_ENV=production rollup -c",
@@ -19,7 +19,7 @@
     "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
   },
   "dependencies": {
-    "@vivliostyle/core": "^2.22.4",
+    "@vivliostyle/core": "^2.23.1",
     "i18next": "^22.0.6",
     "i18next-browser-languagedetector": "^7.0.1",
     "knockout": "^3.5.0"

@@ -2308,7 +2308,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // Workaround for the case of block child after text in parent block
     // (Issue #1036)
-    let lastNode = checkPoints.at(-1).viewNode;
+    let lastNode = checkPoints[checkPoints.length - 1].viewNode;
     if (lastNode?.parentElement.localName === "viv-ts-inner") {
       lastNode = lastNode.parentElement.parentElement;
     }
@@ -2823,7 +2823,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   ? LayoutHelper.findAncestorSpecialInlineNodeContext(
                       lastAfterNodeContext,
                     )
-                  : this.breakPositions.at(-1) instanceof BoxBreakPosition)
+                  : this.breakPositions[
+                      this.breakPositions.length - 1
+                    ] instanceof BoxBreakPosition)
               ) {
                 this.saveEdgeBreakPosition(
                   nodeContext.copy(),

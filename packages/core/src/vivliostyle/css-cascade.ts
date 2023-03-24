@@ -105,6 +105,7 @@ export const inheritedProps = {
   "text-align": true,
   "text-align-last": true,
   "text-anchor": true,
+  "text-autospace": true,
   "text-decoration-skip": true,
   "text-emphasis-color": true,
   "text-emphasis-position": true,
@@ -116,7 +117,7 @@ export const inheritedProps = {
   "text-orientation": true,
   "text-rendering": true,
   "text-size-adjust": true,
-  "text-spacing": true,
+  "text-spacing-trim": true,
   "text-stroke-color": true,
   "text-stroke-width": true,
   "text-transform": true,
@@ -2122,6 +2123,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         leaderElem.textContent = leaderStr;
       }
     }
+
+    // prevent leader layout problem (Issue #1117)
+    leaderElem.style.marginInlineStart = "1px";
 
     // reset the expanded leader
     setLeaderTextContent(leader);
@@ -4670,7 +4674,8 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (
       this.resolveViewportUnit &&
-      Exprs.isViewportRelativeLengthUnit(numeric.unit)
+      (Exprs.isViewportRelativeLengthUnit(numeric.unit) ||
+        Exprs.isRootFontRelativeLengthUnit(numeric.unit))
     ) {
       return new Css.Numeric(
         numeric.num * this.context.queryUnitSize(numeric.unit, false),
@@ -4694,7 +4699,12 @@ export function evaluateCSSToCSS(
     if (val instanceof Css.Expr) {
       return CssParser.evaluateExprToCSS(context, val.expr, propName);
     }
-    if (val instanceof Css.Numeric || val instanceof Css.Func) {
+    if (
+      val instanceof Css.Numeric ||
+      val instanceof Css.Func ||
+      val instanceof Css.SpaceList ||
+      val instanceof Css.CommaList
+    ) {
       return val.visit(new CalcFilterVisitor(context, true, percentRef));
     }
   } catch (err) {

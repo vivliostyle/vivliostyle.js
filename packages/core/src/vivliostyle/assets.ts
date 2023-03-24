@@ -528,9 +528,12 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-text-spacing = normal | none | auto | [[ trim-start | space-start | space-first ] ||
-    [ trim-end | space-end | allow-end ] || [ trim-adjacent | space-adjacent ] ||
-    no-compress || ideograph-alpha || ideograph-numeric || punctuation];
+text-spacing-trim = auto | space-all | trim-auto |
+    [[ trim-start | space-start | space-first ] ||
+     [ trim-end | space-end | allow-end ] ||
+     [ trim-adjacent | space-adjacent ]];
+text-autospace = normal | auto | no-autospace |
+    [[ ideograph-alpha || ideograph-numeric || punctuation ] || [ insert | replace ]];
 hanging-punctuation = none | [ first || [ force-end | allow-end ] || last ];
 
 /* CSS Text Decoration */
@@ -715,8 +718,10 @@ padding-bottom: auto;
 padding-left: auto;
 padding-right: auto;
 padding-top: auto;
+text-autospace: normal;
 text-emphasis-color: currentColor;
 text-emphasis-style: none;
+text-spacing-trim: space-first;
 text-stroke-color: currentColor;
 text-stroke-width: 0;
 marker-start: none;
@@ -768,6 +773,7 @@ font-variant = font-variant-ligatures font-variant-caps font-variant-numeric fon
 marker = INSETS marker-start marker-mid marker-end;
 [webkit]text-stroke = text-stroke-width text-stroke-color;
 text-decoration = text-decoration-line text-decoration-color text-decoration-style text-decoration-thickness;
+text-spacing = TEXT_SPACING text-autospace text-spacing-trim;
 
 /* css-logical */
 margin-block = INSETS margin-block-start margin-block-end;
@@ -1360,9 +1366,10 @@ epub|case[required-namespace::supported] ~ epub|case {
 epub|case[required-namespace::supported] ~ epub|default {
   display: none;
 }
+`;
 
-/*--------------- ncx and toc ----------------------*/
-
+/** user-agent-toc.css */
+export const UserAgentTocCss = `
 @namespace ncx "http://www.daisy.org/z3986/2005/ncx/";
 
 ncx|ncx {
@@ -1384,6 +1391,7 @@ body > * {
 nav,
 .toc,
 #toc,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)),
 #table-of-contents,
 #contents {
   -adapt-behavior: toc-root;
@@ -1394,6 +1402,7 @@ nav,
 nav a,
 .toc a,
 #toc a,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a,
 ncx|navLabel {
   -adapt-behavior: toc-node-anchor;
 }
@@ -1403,6 +1412,7 @@ ncx|navLabel {
 nav li,
 .toc li,
 #toc li,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) li,
 ncx|navPoint {
   -adapt-behavior: toc-node;
 }
@@ -1411,7 +1421,8 @@ ncx|navPoint {
 [role="directory"] li > *:first-child,
 nav li > *:first-child,
 .toc li > *:first-child,
-#toc li > *:first-child {
+#toc li > *:first-child,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) li > *:first-child {
   -adapt-behavior: toc-node-first-child;
 }
 
@@ -1432,7 +1443,8 @@ ol#toc,
 ul[role="doc-toc"],
 ul[role="directory"],
 ul.toc,
-ul#toc {
+ul#toc,
+section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) :is(ol,ul) {
   -adapt-behavior: toc-container;
 }
 `;
