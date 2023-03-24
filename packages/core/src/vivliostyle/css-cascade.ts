@@ -2124,6 +2124,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       }
     }
 
+    // prevent leader layout problem (Issue #1117)
+    leaderElem.style.marginInlineStart = "1px";
+
     // reset the expanded leader
     setLeaderTextContent(leader);
     // setting inline-block removes the pseudo CONTENT from normal text flow
