@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.23.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.0...v2.23.1) (2023-03-24)
+
+### Bug Fixes
+
+- Leader layout problem dependent on font and language ([bf351a9](https://github.com/vivliostyle/vivliostyle.js/commit/bf351a904465ba0bc54c6e56e402885a4261995a)), closes [#1117](https://github.com/vivliostyle/vivliostyle.js/issues/1117)
+- Page background image is not painted in the bleed area ([fb14e6c](https://github.com/vivliostyle/vivliostyle.js/commit/fb14e6cd0273cf1db1dde4054273752b70421403)), closes [#644](https://github.com/vivliostyle/vivliostyle.js/issues/644)
+
 # [2.23.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.22.4...v2.23.0) (2023-03-13)
 
 ### Bug Fixes
