@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.23.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.1...v2.23.2) (2023-03-25)
+
+### Bug Fixes
+
+- Page content is not painted in the bleed area (Regression in v2.23.1) ([05c4828](https://github.com/vivliostyle/vivliostyle.js/commit/05c4828c24f02d63bb27bf47c669e75a6d8e1739)), closes [#1145](https://github.com/vivliostyle/vivliostyle.js/issues/1145) [#644](https://github.com/vivliostyle/vivliostyle.js/issues/644)
+
 ## [2.23.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.0...v2.23.1) (2023-03-24)
 
 ### Bug Fixes
