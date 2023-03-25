@@ -151,6 +151,7 @@ export const VivliostyleViewportCss = `
 [data-vivliostyle-bleed-box] {
   position: absolute;
   overflow: hidden;
+  background-origin: content-box !important;
   box-sizing: border-box;
 }
 
