@@ -723,7 +723,9 @@ export class SimpleEventTarget {
     }
     const list = this.listeners[type];
     if (list) {
-      list.push(listener);
+      if (!list.includes(listener)) {
+        list.push(listener);
+      }
     } else {
       this.listeners[type] = [listener];
     }
