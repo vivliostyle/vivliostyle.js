@@ -207,6 +207,9 @@ class Viewer {
     });
     this.coreViewer.addListener("hyperlink", (payload) => {
       if (payload.internal) {
+        // Ensure that the browser Back button works as expected.
+        window.history.pushState(null, null);
+
         this.navigateToInternalUrl(payload.href);
 
         // When navigate from TOC, TOC box may or may not become hidden by autohide.
