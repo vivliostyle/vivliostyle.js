@@ -25,6 +25,7 @@ import PageStyle from "../models/page-style";
 import PageViewMode from "../models/page-view-mode";
 import ViewerOptions from "../models/viewer-options";
 import DocumentOptions from "../models/document-options";
+import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import MessageDialog from "./message-dialog";
 
@@ -34,6 +35,7 @@ type State = {
   pageViewMode: PureComputed<string>;
   bookMode: Observable<boolean>;
   renderAllPages: PureComputed<boolean>;
+  restoreView: Observable<boolean>;
 };
 
 const { Keys } = keyUtil;
@@ -43,6 +45,7 @@ class SettingsPanel {
   isPageViewModeChangeDisabled: boolean;
   isBookModeChangeDisabled: boolean;
   isRenderAllPagesChangeDisabled: boolean;
+  isRestoreViewChangeDisabled: boolean;
   justClicked: boolean; // double click check
   settingsToggle: HTMLElement;
   state: State;
@@ -61,6 +64,7 @@ class SettingsPanel {
       disablePageViewModeChange: boolean;
       disableBookModeChange: boolean;
       disableRenderAllPagesChange: boolean;
+      disableRestoreViewChange: boolean;
     },
   ) {
     this.isPageStyleChangeDisabled =
@@ -71,6 +75,8 @@ class SettingsPanel {
       !!settingsPanelOptions.disableBookModeChange;
     this.isRenderAllPagesChangeDisabled =
       !!settingsPanelOptions.disableRenderAllPagesChange;
+    this.isRestoreViewChangeDisabled =
+      !!settingsPanelOptions.disableRestoreViewChange;
 
     this.justClicked = false;
     this.settingsToggle = document.getElementById(
@@ -99,6 +105,7 @@ class SettingsPanel {
           this.state.viewerOptions.renderAllPages(value);
         },
       }),
+      restoreView: ko.observable(urlParameters.isEnabledRestoreView()),
     };
 
     this.state.pageStyle.setViewerFontSizeObservable(
@@ -117,6 +124,14 @@ class SettingsPanel {
     });
     this.state.renderAllPages.subscribe((renderAllPages) => {
       viewerOptions.renderAllPages(renderAllPages);
+    });
+    this.state.restoreView.subscribe((restoreView) => {
+      urlParameters.enableRestoreView(restoreView);
+      if (restoreView) {
+        urlParameters.setParameter("restoreView", "true");
+      } else {
+        urlParameters.removeParameter("restoreView");
+      }
     });
 
     this.resetCustomStyle = ko.pureComputed({

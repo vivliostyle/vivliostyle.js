@@ -26,12 +26,13 @@ function getRegExpForParameter(name: string): RegExp {
 
 class URLParameterStore {
   history: History | null;
-  location: Location | { href: "" };
+  location: Location;
   storedUrl: string;
+  localStorageKey: string | null = null;
 
   constructor() {
-    this.history = window ? window.history : null;
-    this.location = window ? window.location : { href: "" };
+    this.history = window.history;
+    this.location = window.location;
     this.storedUrl = this.location.href;
   }
 
@@ -65,7 +66,7 @@ class URLParameterStore {
    */
   setParameter(name: string, value: string, index?: number): void {
     const url = this.location.href;
-    let updated;
+    let updated = url;
     const regexp = getRegExpForParameter(name);
     let r = regexp.exec(url);
     if (r && index) {
@@ -86,12 +87,15 @@ class URLParameterStore {
         updated = updated.replace(/#(?!src)(.*?)&(src=[^&]*)/, "#$2&$1");
       }
     }
-    if (this.history !== null && this.history.replaceState) {
-      this.history.replaceState(null, "", updated);
-    } else {
-      this.location.href = updated;
+    if (updated !== url) {
+      if (this.history?.replaceState) {
+        this.history.replaceState(null, "", updated);
+      } else {
+        this.location.href = updated;
+      }
+      this.storedUrl = updated;
+      this.saveViewSettings();
     }
-    this.storedUrl = updated;
   }
 
   /**
@@ -100,14 +104,13 @@ class URLParameterStore {
    */
   removeParameter(name: string, keepFirst?: boolean): void {
     const url = this.location.href;
-    let updated;
+    let updated = url;
     const regexp = getRegExpForParameter(name);
     let r = regexp.exec(url);
     if (r && keepFirst) {
       r = regexp.exec(url);
     }
     if (r) {
-      updated = url;
       for (; r; r = regexp.exec(updated)) {
         const end = r.index + r[0].length;
         if (r[0].charAt(0) == "#") {
@@ -119,13 +122,91 @@ class URLParameterStore {
         regexp.lastIndex -= r[0].length;
       }
       updated = updated.replace(/^(.*?)[#&]$/, "$1");
-      if (this.history !== null && this.history.replaceState) {
+    }
+    if (updated !== url) {
+      if (this.history?.replaceState) {
         this.history.replaceState(null, "", updated);
       } else {
         this.location.href = updated;
       }
+      this.storedUrl = updated;
+      this.saveViewSettings();
     }
-    this.storedUrl = updated;
+  }
+
+  /**
+   * Enable or disable restoring view settings to the LocalStorage.
+   * @param enable true to enable, false to disable
+   */
+  enableRestoreView(enable: boolean): void {
+    const localStorageKey = this.generateLocalStorageKey();
+    if (enable) {
+      this.localStorageKey = localStorageKey;
+    } else {
+      this.localStorageKey = null;
+      try {
+        window.localStorage.removeItem(localStorageKey);
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+
+  /**
+   * @returns true if restoring view settings to the LocalStorage is enabled.
+   */
+  isEnabledRestoreView(): boolean {
+    return !!this.localStorageKey;
+  }
+
+  /**
+   * Save view settings to the LocalStorage.
+   */
+  saveViewSettings(): void {
+    if (this.localStorageKey) {
+      if (!this.hasParameter("f")) {
+        // This is necessary to restore viewing location
+        this.setParameter("f", "epubcfi()");
+      }
+      try {
+        window.localStorage.setItem(this.localStorageKey, this.location.hash);
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+
+  /**
+   * Generate LocalStorage key for restoring view settings.
+   * @returns the key, or null if not available
+   */
+  generateLocalStorageKey(): string | null {
+    const src = this.getParameter("src").join();
+    if (src) {
+      return "view@" + src;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Restore view settings from the LocalStorage.
+   * @returns true if restored
+   */
+  restoreViewSettings(): boolean {
+    const key = this.generateLocalStorageKey();
+    if (key) {
+      try {
+        const saved = window.localStorage.getItem(key);
+        if (saved) {
+          this.location.hash = saved;
+          return true;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    return false;
   }
 }
 

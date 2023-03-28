@@ -71,6 +71,7 @@ class ViewerApp {
       disablePageViewModeChange: disableSettings || flags.includes("V"),
       disableBookModeChange: disableSettings || flags.includes("B"),
       disableRenderAllPagesChange: disableSettings || flags.includes("A"),
+      disableRestoreViewChange: disableSettings || flags.includes("R"),
     };
     const navigationOptions = {
       disableTOCNavigation: flags.includes("T"),
@@ -154,6 +155,26 @@ class ViewerApp {
         }
       }
     }
+
+    // "restoreView" parameter:
+    //  "true" - enable restore view settings
+    //  "false" - disable restore view settings
+    //  not specified - enable restore view settings if saved view settings exist
+    let restoreView = urlParameters.getParameter("restoreView")[0];
+    if (restoreView !== "false") {
+      // The viewing location specified by "f=epubcfi(…)" takes precedence over the saved one
+      if (!urlParameters.hasParameter("f")) {
+        if (urlParameters.restoreViewSettings()) {
+          // If saved view settings exist and restored to the URL parameters,
+          // the "restoreView" value is also restored and it must be "true".
+          restoreView = urlParameters.getParameter("restoreView")[0];
+        }
+      }
+      if (restoreView === "true") {
+        urlParameters.enableRestoreView(true);
+      }
+    }
+
     // Remove redundant or ineffective URL parameters
     urlParameters.removeParameter("b");
     urlParameters.removeParameter("x");
@@ -168,6 +189,7 @@ class ViewerApp {
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
     urlParameters.removeParameter("pixelRatio", true);
+    urlParameters.removeParameter("restoreView", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 

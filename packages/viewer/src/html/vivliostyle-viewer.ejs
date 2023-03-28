@@ -144,6 +144,9 @@
                   <div class="vivliostyle-menu-detail-group-heading" data-bind="hidden: settingsPanel.isRenderAllPagesChangeDisabled">
                     <label><input type="checkbox" name="vivliostyle-settings_render-all-pages" aria-keyshortcuts="A" data-bind="checked: settingsPanel.state.renderAllPages, disable: settingsPanel.isRenderAllPagesChangeDisabled" /> <span data-bind="text: t('Render_All_Pages'), attr: {title: t('TIP_Render_All_Pages')}"></span></label>
                   </div>
+                  <div class="vivliostyle-menu-detail-group-heading" data-bind="hidden: settingsPanel.isRestoreViewChangeDisabled">
+                    <label><input type="checkbox" name="vivliostyle-settings_restore-view" data-bind="checked: settingsPanel.state.restoreView, disable: settingsPanel.isRestoreViewChangeDisabled" /> <span data-bind="text: t('Restore_View'), attr: {title: t('TIP_Restore_View')}"></span></label>
+                  </div>
                 </fieldset>
               </details>
               <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_custom-style" open data-bind="hidden: settingsPanel.isPageStyleChangeDisabled">

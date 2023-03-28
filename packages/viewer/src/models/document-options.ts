@@ -100,7 +100,10 @@ class DocumentOptions {
 
     // write fragment back to URL when updated
     this.fragment.subscribe((fragment) => {
-      if (/^epubcfi\(\/([246]\/)?2!\)/.test(fragment)) {
+      if (
+        /^epubcfi\(\/([246]\/)?2!\)/.test(fragment) &&
+        !urlParameters.isEnabledRestoreView()
+      ) {
         urlParameters.removeParameter("f");
       } else {
         const encoded = fragment.replace(

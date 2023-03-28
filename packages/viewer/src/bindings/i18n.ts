@@ -84,6 +84,8 @@ const translations = {
         "On: for Book-like publications, with Table of Contents\nOff: for single HTML documents",
       TIP_Render_All_Pages:
         "On: for Print (all pages printable, page count works)\nOff: for Read (quick loading with rough page count)",
+      Restore_View: "Restore View",
+      TIP_Restore_View: "Restore view settings when reopening documents",
       Custom_Style_Settings: "Custom Style Settings",
       Page_Size: "Page Size",
       Default: "Default",
@@ -218,6 +220,8 @@ const translations = {
         "ON: 本のような出版物（目次付き）用\nOFF: 単体のHTML文書用",
       TIP_Render_All_Pages:
         "ON: 印刷用（すべてのページが印刷可能で、ページ番号は期待されるとおりに機能します）\nOFF: 閲覧用（おおまかなページ番号を使って、クイックロード）",
+      Restore_View: "閲覧状態を復元",
+      TIP_Restore_View: "文書を開き直すとき閲覧状態を復元",
       Custom_Style_Settings: "カスタムスタイル設定 (C)",
       Page_Size: "ページサイズ",
       Default: "デフォルト",
