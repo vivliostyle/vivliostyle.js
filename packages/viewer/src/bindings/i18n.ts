@@ -266,7 +266,7 @@ const translations = {
       Reset_Custom_Style: "カスタムスタイルをリセット (R)",
       Reset_all_to_default: "すべてをデフォルトにリセット",
       TIP_ToC: "目次 (T), ダブルクリックで固定",
-      TIP_Marker: "Marker (M), ダブルクリックで固定",
+      TIP_Marker: "マーカー (M), ダブルクリックで固定",
       Marks_and_Memos: "マーカーとメモ",
       Remove_All: "すべて削除",
       Remove: "削除",
