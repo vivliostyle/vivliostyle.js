@@ -831,7 +831,7 @@ export class OPFDoc {
           const path = r[1] || baseURL;
           const fragment = decodeURIComponent(r[2]);
           if (path) {
-            if (self.items.some((item) => item.src === path)) {
+            if (self.spine.some((item) => item.src === path)) {
               return `#${this.transformFragment(fragment, path)}`;
             }
           }

@@ -22,7 +22,7 @@ describe("epub", function () {
   describe("OPFDoc", function () {
     describe("OPFDocumentURLTransformer", function () {
       var opfDoc = new adapt_epub.OPFDoc(null, null);
-      opfDoc.items = [
+      opfDoc.spine = opfDoc.items = [
         { src: "http://example.com:8000/foo/bar1.html" },
         { src: "http://example.com:8000/foo/bar2.html" },
       ];

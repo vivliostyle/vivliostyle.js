@@ -278,18 +278,24 @@ class Viewer {
   }
 
   navigateToFirst(): void {
+    window.history.pushState(null, null);
     this.coreViewer.navigateToPage(Navigation.FIRST);
   }
 
   navigateToLast(): void {
+    window.history.pushState(null, null);
     this.coreViewer.navigateToPage(Navigation.LAST);
   }
 
   navigateToEPage(epage: number): void {
+    if (Math.abs(epage - this.epage()) > 1) {
+      window.history.pushState(null, null);
+    }
     this.coreViewer.navigateToPage(Navigation.EPAGE, epage);
   }
 
   navigateToInternalUrl(href: string): void {
+    window.history.pushState(null, null);
     this.coreViewer.navigateToInternalUrl(href);
   }
 
