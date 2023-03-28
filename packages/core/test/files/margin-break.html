@@ -1,220 +1,221 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>margin-break property</title>
-    <style>
-      @page {
-        outline: 1px dotted;
 
-        @bottom-center {
-          content: "Page " counter(page);
-        }
+<head>
+  <meta charset="UTF-8">
+  <title>margin-break property</title>
+  <style>
+    @page {
+      outline: 1px dotted;
+
+      @bottom-center {
+        content: "Page " counter(page);
       }
+    }
 
-      h1 {
-        margin-break: discard;
-      }
+    h1 {
+      margin-break: discard;
+    }
 
-      h2 {
-        margin-break: keep;
-      }
+    h2 {
+      margin-break: keep;
+    }
 
-      h3 {
-        margin-break: auto;
-      }
+    h3 {
+      margin-break: auto;
+    }
 
-      .break {
-        break-before: page;
-      }
+    .break {
+      break-before: page;
+    }
 
-      .break::before {
-        content: "(Forced break) ";
-        color: purple;
-      }
-    </style>
-  </head>
+    .break::before {
+      content: "(Forced break) ";
+      color: purple;
+    }
+  </style>
+</head>
 
-  <body>
-    <h1>H1 {margin-break: dicard}</h1>
-    <h2>H2 {margin-break: keep}</h2>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet
-      lacinia elit. Sed ornare at erat ac dictum. Vestibulum sit amet placerat
-      turpis, at viverra enim. Praesent dignissim quis arcu quis cursus. Quisque
-      nunc augue, rutrum sed iaculis eget, ultricies nec massa. Sed suscipit eu
-      diam posuere convallis. Ut vitae eleifend nibh. Morbi mollis leo metus.
-      Nunc varius vestibulum nulla sed tristique. Vivamus semper risus at sem
-      vestibulum aliquet. Morbi viverra, justo finibus ultrices dignissim,
-      tellus ipsum pharetra justo, vel sodales purus turpis ut mauris. Nam vitae
-      commodo nisl, in bibendum arcu. Phasellus sed congue metus.
-    </p>
-    <h1 class="break">H1 {margin-break: dicard}</h1>
-    <p>
-      Donec mattis, diam eget ornare posuere, neque augue ultrices erat, eu
-      pulvinar sem sem sit amet nibh. Ut facilisis congue dolor at ultrices.
-      Duis et nisi augue. Vivamus suscipit sem sed mi varius volutpat. Praesent
-      varius sapien facilisis, sollicitudin nisi non, bibendum odio. Curabitur
-      pellentesque dictum libero eget gravida. Nulla vitae nisl non urna
-      scelerisque mattis ut sed risus.
-    </p>
-    <h2 class="break">H2 {margin-break: keep}</h2>
-    <p>
-      Nam scelerisque sem eu ex condimentum auctor. Sed bibendum euismod sapien,
-      et blandit turpis tempus pellentesque. Phasellus vel elit semper, egestas
-      ligula sit amet, luctus ante. Vestibulum ante ipsum primis in faucibus
-      orci luctus et ultrices posuere cubilia curae; Fusce sed accumsan risus.
-      Ut a nunc pulvinar, interdum mauris sit amet, dignissim dui. Nam sit amet
-      est sollicitudin, pellentesque risus ac, mollis elit. Integer sed aliquet
-      leo. Duis tincidunt, ipsum eget semper sodales, neque dui consequat
-      tortor, pellentesque sollicitudin sem neque a turpis. Aliquam lobortis
-      euismod nunc eu interdum. Vestibulum condimentum et ipsum ut cursus.
-    </p>
-    <h3 class="break">H3 {margin-break: auto}</h3>
-    <p>
-      Quisque et elit ut neque consequat hendrerit. In semper nisl eget velit
-      ornare laoreet. Nulla gravida, nunc in iaculis malesuada, justo justo
-      accumsan ante, in volutpat nunc erat vitae ante. Ut diam justo, cursus nec
-      turpis in, congue molestie tellus. Praesent consectetur nunc ut arcu
-      bibendum imperdiet. In maximus, sem nec ullamcorper sodales, diam leo
-      porttitor nisi, id ullamcorper magna purus eget augue. Cras posuere,
-      mauris vulputate consequat lobortis, magna dui elementum elit, eget
-      consectetur justo tortor a ipsum.
-    </p>
-    <p>
-      In eget ligula ac dui vulputate pretium quis vel arcu. Nam vel magna ac
-      erat sollicitudin suscipit. Sed quam elit, varius quis neque nec,
-      vestibulum eleifend massa. Cras dolor nibh, sodales in rhoncus tincidunt,
-      semper sed tortor. Etiam lobortis, magna ac vehicula tempor, libero ligula
-      dignissim libero, vel ullamcorper turpis diam ac neque. Sed gravida
-      sodales leo ac cursus. Aliquam ipsum tellus, varius at ultricies at,
-      dignissim sit amet est. Ut euismod ex dapibus nisi dignissim rhoncus.
-    </p>
-    <h1>H1 {margin-break: dicard}</h1>
-    <p>
-      Nam tellus tellus, finibus sit amet lectus non, facilisis luctus diam.
-      Donec vel tortor ante. Donec non vehicula ligula. Pellentesque fringilla
-      molestie nisi et auctor.
-    </p>
-    <h2>H2 {margin-break: keep}</h2>
-    <p>
-      Vivamus facilisis tempus ullamcorper. Orci varius natoque penatibus et
-      magnis dis parturient montes, nascetur ridiculus mus. Cras scelerisque
-      consectetur arcu, a laoreet elit consequat ut.
-    </p>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Aenean congue consectetur ligula, eget pulvinar sem ultrices eget. Etiam
-      ut imperdiet turpis. Nulla facilisi. Nam viverra risus vitae tellus
-      maximus volutpat. Quisque ut metus vitae augue semper convallis et id
-      quam.
-    </p>
-    <p>
-      Morbi vulputate lectus quis augue porttitor, dignissim lobortis justo
-      varius. Sed imperdiet laoreet dictum. Mauris blandit, odio non congue
-      dapibus, massa tellus convallis ligula, quis egestas felis nibh eget sem.
-      Pellentesque lacinia id est ut maximus.
-    </p>
-    <h1>H1 {margin-break: dicard}</h1>
-    <p>
-      Ut id ex dictum sem pharetra molestie. Pellentesque a tellus arcu. Donec
-      sed sapien sit amet metus ornare faucibus. Phasellus aliquet interdum
-      lorem, vel rhoncus urna luctus at. Ut non fringilla nunc. Morbi laoreet
-      rutrum pretium. Donec dictum justo pharetra laoreet laoreet. Pellentesque
-      quis felis et orci vulputate cursus.
-    </p>
-    <h2>H2 {margin-break: keep}</h2>
-    <p>
-      In ac faucibus risus. Quisque eget fringilla urna. Donec auctor placerat
-      sem, in pretium risus dignissim quis. Maecenas velit dolor, faucibus sit
-      amet purus vestibulum, tempus ullamcorper nulla.
-    </p>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Donec id vehicula erat. Cras sed tellus at nunc porta luctus et quis
-      purus. Suspendisse potenti. Nulla varius commodo urna quis venenatis.
-      Vestibulum ut neque id urna rutrum condimentum.
-    </p>
-    <h1>H1 {margin-break: dicard}</h1>
-    <p>
-      Nam tellus tellus, finibus sit amet lectus non, facilisis luctus diam.
-      Donec vel tortor ante. Donec non vehicula ligula. Pellentesque fringilla
-      molestie nisi et auctor.
-    </p>
-    <h2>H2 {margin-break: keep}</h2>
-    <p>
-      Vivamus facilisis tempus ullamcorper. Orci varius natoque penatibus et
-      magnis dis parturient montes, nascetur ridiculus mus. Cras scelerisque
-      consectetur arcu, a laoreet elit consequat ut.
-    </p>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Aenean congue consectetur ligula, eget pulvinar sem ultrices eget. Etiam
-      ut imperdiet turpis. Nulla facilisi. Nam viverra risus vitae tellus
-      maximus volutpat. Quisque ut metus vitae augue semper convallis et id
-      quam. Sed mattis magna nec dui mattis varius.
-    </p>
-    <p>
-      Morbi vulputate lectus quis augue porttitor, dignissim lobortis justo
-      varius. Sed imperdiet laoreet dictum. Mauris blandit, odio non congue
-      dapibus, massa tellus convallis ligula, quis egestas felis nibh eget sem.
-      Pellentesque lacinia id est ut maximus.
-    </p>
-    <h1>H1 {margin-break: dicard}</h1>
-    <p>
-      Ut id ex dictum sem pharetra molestie. Pellentesque a tellus arcu. Donec
-      sed sapien sit amet metus ornare faucibus.
-    </p>
-    <h2>H2 {margin-break: keep}</h2>
-    <p>
-      In ac faucibus risus. Quisque eget fringilla urna. Donec auctor placerat
-      sem, in pretium risus dignissim quis. Maecenas velit dolor, faucibus sit
-      amet purus vestibulum, tempus ullamcorper nulla.
-    </p>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Donec id vehicula erat. Cras sed tellus at nunc porta luctus et quis
-      purus. Suspendisse potenti. Nulla varius commodo urna quis venenatis.
-    </p>
-    <h1>H1 {margin-break: dicard}</h1>
-    <p>
-      Nam tellus tellus, finibus sit amet lectus non, facilisis luctus diam.
-      Donec vel tortor ante. Donec non vehicula ligula. Pellentesque fringilla
-      molestie nisi et auctor. Suspendisse sollicitudin erat ut porta mattis.
-    </p>
-    <h2>H2 {margin-break: keep}</h2>
-    <p>
-      Vivamus facilisis tempus ullamcorper. Orci varius natoque penatibus et
-      magnis dis parturient montes, nascetur ridiculus mus.
-    </p>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Aenean congue consectetur ligula, eget pulvinar sem ultrices eget. Etiam
-      ut imperdiet turpis. Nulla facilisi. Nam viverra risus vitae tellus
-      maximus volutpat.
-    </p>
-    <p>
-      Morbi vulputate lectus quis augue porttitor, dignissim lobortis justo
-      varius. Sed imperdiet laoreet dictum. Mauris blandit, odio non congue
-      dapibus, massa tellus convallis ligula, quis egestas felis nibh eget sem.
-    </p>
-    <h1>H1 {margin-break: dicard}</h1>
-    <p>
-      Ut id ex dictum sem pharetra molestie. Pellentesque a tellus arcu. Donec
-      sed sapien sit amet metus ornare faucibus.
-    </p>
-    <h2>H2 {margin-break: keep}</h2>
-    <p>
-      In ac faucibus risus. Quisque eget fringilla urna. Donec auctor placerat
-      sem, in pretium risus dignissim quis. Maecenas velit dolor, faucibus sit
-      amet purus vestibulum, tempus ullamcorper nulla.
-    </p>
-    <h3>H3 {margin-break: auto}</h3>
-    <p>
-      Donec id vehicula erat. Cras sed tellus at nunc porta luctus et quis
-      purus. Suspendisse potenti. Nulla varius commodo urna quis venenatis.
-      Vestibulum ut neque id urna rutrum condimentum. Aliquam erat volutpat.
-    </p>
-  </body>
+<body>
+  <h1>H1 {margin-break: dicard}</h1>
+  <h2>H2 {margin-break: keep}</h2>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet
+    lacinia elit. Sed ornare at erat ac dictum. Vestibulum sit amet placerat
+    turpis, at viverra enim. Praesent dignissim quis arcu quis cursus. Quisque
+    nunc augue, rutrum sed iaculis eget, ultricies nec massa. Sed suscipit eu
+    diam posuere convallis. Ut vitae eleifend nibh. Morbi mollis leo metus. Nunc
+    varius vestibulum nulla sed tristique. Vivamus semper risus at sem
+    vestibulum aliquet. Morbi viverra, justo finibus ultrices dignissim, tellus
+    ipsum pharetra justo, vel sodales purus turpis ut mauris. Nam vitae commodo
+    nisl, in bibendum arcu. Phasellus sed congue metus.
+  </p>
+  <h1 class="break">H1 {margin-break: dicard}</h1>
+  <p>
+    Donec mattis, diam eget ornare posuere, neque augue ultrices erat, eu
+    pulvinar sem sem sit amet nibh. Ut facilisis congue dolor at ultrices. Duis
+    et nisi augue. Vivamus suscipit sem sed mi varius volutpat. Praesent varius
+    sapien facilisis, sollicitudin nisi non, bibendum odio. Curabitur
+    pellentesque dictum libero eget gravida. Nulla vitae nisl non urna
+    scelerisque mattis ut sed risus.
+  </p>
+  <h2 class="break">H2 {margin-break: keep}</h2>
+  <p>
+    Nam scelerisque sem eu ex condimentum auctor. Sed bibendum euismod sapien,
+    et blandit turpis tempus pellentesque. Phasellus vel elit semper, egestas
+    ligula sit amet, luctus ante. Vestibulum ante ipsum primis in faucibus orci
+    luctus et ultrices posuere cubilia curae; Fusce sed accumsan risus. Ut a
+    nunc pulvinar, interdum mauris sit amet, dignissim dui. Nam sit amet est
+    sollicitudin, pellentesque risus ac, mollis elit. Integer sed aliquet leo.
+    Duis tincidunt, ipsum eget semper sodales, neque dui consequat tortor,
+    pellentesque sollicitudin sem neque a turpis. Aliquam lobortis euismod nunc
+    eu interdum. Vestibulum condimentum et ipsum ut cursus.
+  </p>
+  <h3 class="break">H3 {margin-break: auto}</h3>
+  <p>
+    Quisque et elit ut neque consequat hendrerit. In semper nisl eget velit
+    ornare laoreet. Nulla gravida, nunc in iaculis malesuada, justo justo
+    accumsan ante, in volutpat nunc erat vitae ante. Ut diam justo, cursus nec
+    turpis in, congue molestie tellus. Praesent consectetur nunc ut arcu
+    bibendum imperdiet. In maximus, sem nec ullamcorper sodales, diam leo
+    porttitor nisi, id ullamcorper magna purus eget augue. Cras posuere, mauris
+    vulputate consequat lobortis, magna dui elementum elit, eget consectetur
+    justo tortor a ipsum.
+  </p>
+  <p>
+    In eget ligula ac dui vulputate pretium quis vel arcu. Nam vel magna ac erat
+    sollicitudin suscipit. Sed quam elit, varius quis neque nec, vestibulum
+    eleifend massa. Cras dolor nibh, sodales in rhoncus tincidunt, semper sed
+    tortor. Etiam lobortis, magna ac vehicula tempor, libero ligula dignissim
+    libero, vel ullamcorper turpis diam ac neque. Sed gravida sodales leo ac
+    cursus. Aliquam ipsum tellus, varius at ultricies at, dignissim sit amet
+    est. Ut euismod ex dapibus nisi dignissim rhoncus.
+  </p>
+  <h1>H1 {margin-break: dicard}</h1>
+  <p>
+    Nam tellus tellus, finibus sit amet lectus non, facilisis luctus diam. Donec
+    vel tortor ante. Donec non vehicula ligula. Pellentesque fringilla molestie
+    nisi et auctor.
+  </p>
+  <h2>H2 {margin-break: keep}</h2>
+  <p>
+    Vivamus facilisis tempus ullamcorper. Orci varius natoque penatibus et
+    magnis dis parturient montes, nascetur ridiculus mus. Cras scelerisque
+    consectetur arcu, a laoreet elit consequat ut.
+  </p>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Aenean congue consectetur ligula, eget pulvinar sem ultrices eget. Etiam ut
+    imperdiet turpis. Nulla facilisi. Nam viverra risus vitae tellus maximus
+    volutpat. Quisque ut metus vitae augue semper convallis et id quam.
+  </p>
+  <p>
+    Morbi vulputate lectus quis augue porttitor, dignissim lobortis justo
+    varius. Sed imperdiet laoreet dictum. Mauris blandit, odio non congue
+    dapibus, massa tellus convallis ligula, quis egestas felis nibh eget sem.
+    Pellentesque lacinia id est ut maximus.
+  </p>
+  <h1>H1 {margin-break: dicard}</h1>
+  <p>
+    Ut id ex dictum sem pharetra molestie. Pellentesque a tellus arcu. Donec sed
+    sapien sit amet metus ornare faucibus. Phasellus aliquet interdum lorem, vel
+    rhoncus urna luctus at. Ut non fringilla nunc. Morbi laoreet rutrum pretium.
+    Donec dictum justo pharetra laoreet laoreet. Pellentesque quis felis et orci
+    vulputate cursus.
+  </p>
+  <h2>H2 {margin-break: keep}</h2>
+  <p>
+    In ac faucibus risus. Quisque eget fringilla urna. Donec auctor placerat
+    sem, in pretium risus dignissim quis. Maecenas velit dolor, faucibus sit
+    amet purus vestibulum, tempus ullamcorper nulla.
+  </p>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Donec id vehicula erat. Cras sed tellus at nunc porta luctus et quis purus.
+    Suspendisse potenti. Nulla varius commodo urna quis venenatis. Vestibulum ut
+    neque id urna rutrum condimentum.
+  </p>
+  <h1>H1 {margin-break: dicard}</h1>
+  <p>
+    Nam tellus tellus, finibus sit amet lectus non, facilisis luctus diam. Donec
+    vel tortor ante. Donec non vehicula ligula. Pellentesque fringilla molestie
+    nisi et auctor.
+  </p>
+  <h2>H2 {margin-break: keep}</h2>
+  <p>
+    Vivamus facilisis tempus ullamcorper. Orci varius natoque penatibus et
+    magnis dis parturient montes, nascetur ridiculus mus. Cras scelerisque
+    consectetur arcu, a laoreet elit consequat ut.
+  </p>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Aenean congue consectetur ligula, eget pulvinar sem ultrices eget. Etiam ut
+    imperdiet turpis. Nulla facilisi. Nam viverra risus vitae tellus maximus
+    volutpat. Quisque ut metus vitae augue semper convallis et id quam. Sed
+    mattis magna nec dui mattis varius.
+  </p>
+  <p>
+    Morbi vulputate lectus quis augue porttitor, dignissim lobortis justo
+    varius. Sed imperdiet laoreet dictum. Mauris blandit, odio non congue
+    dapibus, massa tellus convallis ligula, quis egestas felis nibh eget sem.
+    Pellentesque lacinia id est ut maximus.
+  </p>
+  <h1>H1 {margin-break: dicard}</h1>
+  <p>
+    Ut id ex dictum sem pharetra molestie. Pellentesque a tellus arcu. Donec sed
+    sapien sit amet metus ornare faucibus.
+  </p>
+  <h2>H2 {margin-break: keep}</h2>
+  <p>
+    In ac faucibus risus. Quisque eget fringilla urna. Donec auctor placerat
+    sem, in pretium risus dignissim quis. Maecenas velit dolor, faucibus sit
+    amet purus vestibulum, tempus ullamcorper nulla.
+  </p>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Donec id vehicula erat. Cras sed tellus at nunc porta luctus et quis purus.
+    Suspendisse potenti. Nulla varius commodo urna quis venenatis.
+  </p>
+  <h1>H1 {margin-break: dicard}</h1>
+  <p>
+    Nam tellus tellus, finibus sit amet lectus non, facilisis luctus diam. Donec
+    vel tortor ante. Donec non vehicula ligula. Pellentesque fringilla molestie
+    nisi et auctor. Suspendisse sollicitudin erat ut porta mattis.
+  </p>
+  <h2>H2 {margin-break: keep}</h2>
+  <p>
+    Vivamus facilisis tempus ullamcorper. Orci varius natoque penatibus et
+    magnis dis parturient montes, nascetur ridiculus mus.
+  </p>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Aenean congue consectetur ligula, eget pulvinar sem ultrices eget. Etiam ut
+    imperdiet turpis. Nulla facilisi. Nam viverra risus vitae tellus maximus
+    volutpat.
+  </p>
+  <p>
+    Morbi vulputate lectus quis augue porttitor, dignissim lobortis justo
+    varius. Sed imperdiet laoreet dictum. Mauris blandit, odio non congue
+    dapibus, massa tellus convallis ligula, quis egestas felis nibh eget sem.
+  </p>
+  <h1>H1 {margin-break: dicard}</h1>
+  <p>
+    Ut id ex dictum sem pharetra molestie. Pellentesque a tellus arcu. Donec sed
+    sapien sit amet metus ornare faucibus.
+  </p>
+  <h2>H2 {margin-break: keep}</h2>
+  <p>
+    In ac faucibus risus. Quisque eget fringilla urna. Donec auctor placerat
+    sem, in pretium risus dignissim quis. Maecenas velit dolor, faucibus sit
+    amet purus vestibulum, tempus ullamcorper nulla.
+  </p>
+  <h3>H3 {margin-break: auto}</h3>
+  <p>
+    Donec id vehicula erat. Cras sed tellus at nunc porta luctus et quis purus.
+    Suspendisse potenti. Nulla varius commodo urna quis venenatis. Vestibulum ut
+    neque id urna rutrum condimentum. Aliquam erat volutpat.
+  </p>
+</body>
+
 </html>

@@ -1,157 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>lh and rlh units</title>
-    <style>
-      @page {
-        size: 36rlh;
-        margin: 3rlh;
-        outline: 1px dotted;
-        @bottom-center {
-          content: "Page " counter(page);
-        }
-      }
-
-      :root {
-        font-size: 20px;
-        line-height: 1.5;
-        background-image: linear-gradient(
-          to bottom,
-          #ccc 0,
-          #ccc 1px,
-          #fff 1px
-        );
-        background-size: auto 30px;
-      }
-      * {
-        margin-block: 0;
-      }
-      hgroup:has(h1) {
-        display: grid;
-        align-content: center;
-        text-align: center;
-        line-height: 1.2;
-        block-size: 4rlh;
-      }
-      h2,
-      h3 {
-        display: grid;
-        align-content: center;
-        text-align: center;
-        line-height: 1.2;
-        block-size: 3rlh;
-      }
-      p + p {
-        margin-block-start: 1lh;
-      }
-    </style>
-  </head>
-  <body>
-    <hgroup>
-      <h1>H1: Title</h1>
-      <p>with Subtitle</p>
-    </hgroup>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui consequatur
-      quod natus molestiae eaque cupiditate placeat eius deserunt fugiat
-      repudiandae, ea, dolor praesentium accusantium nesciunt voluptates porro.
-      Qui, non, hic!
-    </p>
-    <p>
-      Possimus ullam recusandae, iure quae, similique illo, a quasi nam
-      excepturi dolore veritatis vero! Iure doloremque libero consequatur sequi
-      pariatur officia ab!
-    </p>
-    <h2>H2: Heading Level 2</h2>
-    <p>
-      Harum ducimus placeat quia reiciendis nulla voluptatum repellat mollitia
-      expedita nemo voluptatem. Laudantium, deserunt facilis maxime dolorum
-      enim, sit! Nulla quod, repellat!
-    </p>
-    <h3>
-      H3: Heading Level 3 Lorem ipsum dolor sit amet, consectetur adipisicing
-      elit. Optio, accusantium.
-    </h3>
-    <p>
-      Dicta quae voluptatibus beatae. Molestiae animi repudiandae quia, et
-      ratione ducimus esse expedita nisi deleniti illum laborum doloribus
-      incidunt quisquam cum, magni?
-    </p>
-    <p>
-      Quod praesentium obcaecati eos ea expedita quia, minus ducimus, officiis
-      error illum laboriosam nam deleniti cum. Rem amet obcaecati odio illum
-      animi!
-    </p>
-    <hgroup>
-      <h1>H1: Title</h1>
-      <p>with Subtitle</p>
-    </hgroup>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui consequatur
-      quod natus molestiae eaque cupiditate placeat eius deserunt fugiat
-      repudiandae, ea, dolor praesentium accusantium nesciunt voluptates porro.
-      Qui, non, hic!
-    </p>
-    <p>
-      Possimus ullam recusandae, iure quae, similique illo, a quasi nam
-      excepturi dolore veritatis vero! Iure doloremque libero consequatur sequi
-      pariatur officia ab!
-    </p>
-    <h2>H2: Heading Level 2</h2>
-    <p>
-      Harum ducimus placeat quia reiciendis nulla voluptatum repellat mollitia
-      expedita nemo voluptatem. Laudantium, deserunt facilis maxime dolorum
-      enim, sit! Nulla quod, repellat!
-    </p>
-    <h3>
-      H3: Heading Level 3 Lorem ipsum dolor sit amet, consectetur adipisicing
-      elit. Optio, accusantium.
-    </h3>
-    <p>
-      Dicta quae voluptatibus beatae. Molestiae animi repudiandae quia, et
-      ratione ducimus esse expedita nisi deleniti illum laborum doloribus
-      incidunt quisquam cum, magni?
-    </p>
-    <p>
-      Quod praesentium obcaecati eos ea expedita quia, minus ducimus, officiis
-      error illum laboriosam nam deleniti cum. Rem amet obcaecati odio illum
-      animi!
-    </p>
-    <hgroup>
-      <h1>H1: Title</h1>
-      <p>with Subtitle</p>
-    </hgroup>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui consequatur
-      quod natus molestiae eaque cupiditate placeat eius deserunt fugiat
-      repudiandae, ea, dolor praesentium accusantium nesciunt voluptates porro.
-      Qui, non, hic!
-    </p>
-    <p>
-      Possimus ullam recusandae, iure quae, similique illo, a quasi nam
-      excepturi dolore veritatis vero! Iure doloremque libero consequatur sequi
-      pariatur officia ab!
-    </p>
-    <h2>H2: Heading Level 2</h2>
-    <p>
-      Harum ducimus placeat quia reiciendis nulla voluptatum repellat mollitia
-      expedita nemo voluptatem. Laudantium, deserunt facilis maxime dolorum
-      enim, sit! Nulla quod, repellat!
-    </p>
-    <h3>
-      H3: Heading Level 3 Lorem ipsum dolor sit amet, consectetur adipisicing
-      elit. Optio, accusantium.
-    </h3>
-    <p>
-      Dicta quae voluptatibus beatae. Molestiae animi repudiandae quia, et
-      ratione ducimus esse expedita nisi deleniti illum laborum doloribus
-      incidunt quisquam cum, magni?
-    </p>
-    <p>
-      Quod praesentium obcaecati eos ea expedita quia, minus ducimus, officiis
-      error illum laboriosam nam deleniti cum. Rem amet obcaecati odio illum
-      animi!
-    </p>
-  </body>
+<head>
+<meta charset="UTF-8">
+<title>lh and rlh units</title>
+<style>
+@page {
+  size: 36rlh;
+  margin: 3rlh;
+  outline: 1px dotted;
+  @bottom-center {
+    content: "Page " counter(page);
+  }
+}
+  
+:root {
+  font-size: 20px;
+  line-height: 1.5;
+  background-image: linear-gradient(to bottom, #ccc 0, #ccc 1px, #fff 1px);
+  background-size: auto 30px;
+}
+* {
+  margin-block: 0;
+}
+hgroup:has(h1) {
+  display: grid;
+  align-content: center;
+  text-align: center;
+  line-height: 1.2;
+  block-size: 4rlh;
+}
+h2, h3 {
+  display: grid;
+  align-content: center;
+  text-align: center;
+  line-height: 1.2;
+  block-size: 3rlh;
+}
+p + p {
+  margin-block-start: 1lh;
+}
+</style>
+</head>
+<body>
+  <hgroup>
+    <h1>H1: Title</h1>
+    <p>with Subtitle</p>
+  </hgroup>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui consequatur quod natus molestiae eaque cupiditate placeat eius deserunt fugiat repudiandae, ea, dolor praesentium accusantium nesciunt voluptates porro. Qui, non, hic!</p>
+  <p>Possimus ullam recusandae, iure quae, similique illo, a quasi nam excepturi dolore veritatis vero! Iure doloremque libero consequatur sequi pariatur officia ab!</p>
+  <h2>H2: Heading Level 2</h2>
+  <p>Harum ducimus placeat quia reiciendis nulla voluptatum repellat mollitia expedita nemo voluptatem. Laudantium, deserunt facilis maxime dolorum enim, sit! Nulla quod, repellat!</p>
+  <h3>H3: Heading Level 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio, accusantium.</h3>
+  <p>Dicta quae voluptatibus beatae. Molestiae animi repudiandae quia, et ratione ducimus esse expedita nisi deleniti illum laborum doloribus incidunt quisquam cum, magni?</p>
+  <p>Quod praesentium obcaecati eos ea expedita quia, minus ducimus, officiis error illum laboriosam nam deleniti cum. Rem amet obcaecati odio illum animi!</p>
+  <hgroup>
+    <h1>H1: Title</h1>
+    <p>with Subtitle</p>
+  </hgroup>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui consequatur quod natus molestiae eaque cupiditate placeat eius deserunt fugiat repudiandae, ea, dolor praesentium accusantium nesciunt voluptates porro. Qui, non, hic!</p>
+  <p>Possimus ullam recusandae, iure quae, similique illo, a quasi nam excepturi dolore veritatis vero! Iure doloremque libero consequatur sequi pariatur officia ab!</p>
+  <h2>H2: Heading Level 2</h2>
+  <p>Harum ducimus placeat quia reiciendis nulla voluptatum repellat mollitia expedita nemo voluptatem. Laudantium, deserunt facilis maxime dolorum enim, sit! Nulla quod, repellat!</p>
+  <h3>H3: Heading Level 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio, accusantium.</h3>
+  <p>Dicta quae voluptatibus beatae. Molestiae animi repudiandae quia, et ratione ducimus esse expedita nisi deleniti illum laborum doloribus incidunt quisquam cum, magni?</p>
+  <p>Quod praesentium obcaecati eos ea expedita quia, minus ducimus, officiis error illum laboriosam nam deleniti cum. Rem amet obcaecati odio illum animi!</p>
+  <hgroup>
+    <h1>H1: Title</h1>
+    <p>with Subtitle</p>
+  </hgroup>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui consequatur quod natus molestiae eaque cupiditate placeat eius deserunt fugiat repudiandae, ea, dolor praesentium accusantium nesciunt voluptates porro. Qui, non, hic!</p>
+  <p>Possimus ullam recusandae, iure quae, similique illo, a quasi nam excepturi dolore veritatis vero! Iure doloremque libero consequatur sequi pariatur officia ab!</p>
+  <h2>H2: Heading Level 2</h2>
+  <p>Harum ducimus placeat quia reiciendis nulla voluptatum repellat mollitia expedita nemo voluptatem. Laudantium, deserunt facilis maxime dolorum enim, sit! Nulla quod, repellat!</p>
+  <h3>H3: Heading Level 3 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio, accusantium.</h3>
+  <p>Dicta quae voluptatibus beatae. Molestiae animi repudiandae quia, et ratione ducimus esse expedita nisi deleniti illum laborum doloribus incidunt quisquam cum, magni?</p>
+  <p>Quod praesentium obcaecati eos ea expedita quia, minus ducimus, officiis error illum laboriosam nam deleniti cum. Rem amet obcaecati odio illum animi!</p>
+</body>
 </html>
