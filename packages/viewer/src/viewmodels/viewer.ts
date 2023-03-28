@@ -304,6 +304,7 @@ class Viewer {
     pageIndex?: number;
     offsetInItem?: number;
   }): void {
+    window.history.pushState(null, null);
     this.coreViewer.navigateToPosition(position);
   }
 
