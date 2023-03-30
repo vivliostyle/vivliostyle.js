@@ -18,8 +18,8 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { t } from "i18next";
 import Vivliostyle from "../vivliostyle";
-
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
 import messageQueue from "../models/message-queue";
@@ -31,6 +31,14 @@ import MessageDialog from "./message-dialog";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
+import {
+  marksStore,
+  MarksStoreFacade,
+  MarksMenuStatus,
+  MarksBox,
+} from "./marks-store";
+
+const { Keys } = keyUtil;
 
 class ViewerApp {
   documentOptions: DocumentOptions;
@@ -42,6 +50,10 @@ class ViewerApp {
   settingsPanel: SettingsPanel;
   navigation: Navigation;
   findBox: FindBox;
+  marksStore: MarksStoreFacade;
+  marksMenuStatus: MarksMenuStatus;
+  marksBox: MarksBox;
+  t = t;
 
   constructor() {
     // Configuration flags
@@ -59,10 +71,12 @@ class ViewerApp {
       disablePageViewModeChange: disableSettings || flags.includes("V"),
       disableBookModeChange: disableSettings || flags.includes("B"),
       disableRenderAllPagesChange: disableSettings || flags.includes("A"),
+      disableRestoreViewChange: disableSettings || flags.includes("R"),
     };
     const navigationOptions = {
       disableTOCNavigation: flags.includes("T"),
       disableFind: flags.includes("f"),
+      disableMarker: flags.includes("m"),
       disablePageNavigation: flags.includes("N"),
       disableZoom: flags.includes("Z"),
       disableFontSizeChange: flags.includes("F"),
@@ -141,6 +155,26 @@ class ViewerApp {
         }
       }
     }
+
+    // "restoreView" parameter:
+    //  "true" - enable restore view settings
+    //  "false" - disable restore view settings
+    //  not specified - enable restore view settings if saved view settings exist
+    let restoreView = urlParameters.getParameter("restoreView")[0];
+    if (restoreView !== "false") {
+      // The viewing location specified by "f=epubcfi(…)" takes precedence over the saved one
+      if (!urlParameters.hasParameter("f")) {
+        if (urlParameters.restoreViewSettings()) {
+          // If saved view settings exist and restored to the URL parameters,
+          // the "restoreView" value is also restored and it must be "true".
+          restoreView = urlParameters.getParameter("restoreView")[0];
+        }
+      }
+      if (restoreView === "true") {
+        urlParameters.enableRestoreView(true);
+      }
+    }
+
     // Remove redundant or ineffective URL parameters
     urlParameters.removeParameter("b");
     urlParameters.removeParameter("x");
@@ -155,6 +189,7 @@ class ViewerApp {
     urlParameters.removeParameter("profile", true);
     urlParameters.removeParameter("debug", true);
     urlParameters.removeParameter("pixelRatio", true);
+    urlParameters.removeParameter("restoreView", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 
@@ -209,6 +244,14 @@ class ViewerApp {
       // this.findBox.findNext();
     }
 
+    this.marksStore = marksStore;
+    this.marksStore.init(this.viewerOptions, this.viewer);
+    this.marksMenuStatus = marksStore.menuStatus;
+    this.marksBox = marksStore.marksBox;
+    this.viewer.rerenderTrigger.subscribe(() => {
+      this.marksStore.retryHighlightMarks();
+    });
+
     this.viewer.loadDocument(this.documentOptions);
 
     window.onhashchange = (): void => {
@@ -248,6 +291,14 @@ class ViewerApp {
     let ret = this.findBox.handleKey(key, event, false);
     if (!ret) {
       return false;
+    }
+    if (
+      key !== Keys.Escape &&
+      document.activeElement.closest(
+        "#vivliostyle-marks-box, #vivliostyle-text-selection-start-button, #vivliostyle-text-selection-edit-menu, [data-vivliostyle-page-container]",
+      )
+    ) {
+      return true;
     }
     if (
       (!(key === "Home" || key === "End" || key === "p" || key === "P") &&

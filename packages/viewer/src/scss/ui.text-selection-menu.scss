@@ -1,0 +1,110 @@
+@charset "utf-8";
+
+@import "./lib/_mixins";
+@import "./lib/_vars";
+
+@import "~@fortawesome/fontawesome-free/scss/_variables";
+@include at-font-face("FontAwesome", "../fonts/fa-solid-900");
+
+// ================================================================================
+// + Text Selection Menu
+// --------------------------------------------------------------------------------
+
+#vivliostyle-text-selection-edit-menu,
+#vivliostyle-text-selection-start-button {
+  position: absolute;
+  z-index: 88888889;
+  background: #333;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 4px;
+  text-align: center;
+  font-size: 14px;
+  font-family: $sans-serif;
+  line-height: 1.25;
+  
+  > div {
+    white-space: nowrap;
+    &:not(:first-child) {
+      margin-top: 4px;
+    }
+  }
+  button, textarea {
+    font: inherit;
+  }
+  .viv-marker-color {
+    box-sizing: content-box;
+    padding: 2px;
+    height: 1.5em;
+    width: 1.5em;
+    margin: 0.2em;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    vertical-align: middle;
+    border: 1px solid #bbb;
+    opacity: 0.7;
+    &:hover {
+      filter: drop-shadow(0 0 0.1em);
+      opacity: 1;
+    }
+  }
+  .selected-color {
+    opacity: 1;
+    border: 3px solid #ccc;
+  }
+  .red {
+    background-color: $menu-marker-color-red;
+  }
+  .green {
+    background-color: $menu-marker-color-green;
+  }
+  .yellow {
+    background-color: $menu-marker-color-yellow;
+  }
+  #vivliostyle-memo-edit-area {
+    display: block;
+    min-width: 12em;
+    border: none;
+  }
+  button:not(.viv-marker-color) {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0.3em;
+    border-radius: 0.3em;
+    color: white;
+    &:before {
+      @include font-icon("FontAwesome");
+      padding-right: 0.5em;
+    }
+    &:hover {
+      color: black;
+      background-color: #a0a0a0;
+    }
+  }
+  #viv-marker-selection-ok {
+    &:before {
+      content: fa-content($fa-var-check);
+    }
+    min-width: 6em;
+  }
+  #viv-marker-selection-cancel {
+    cursor: pointer;
+    &:before {
+      content: fa-content($fa-var-times);
+    }
+  }
+  #viv-marker-selection-delete {
+    cursor: pointer;
+    &:before {
+      content: fa-content($fa-var-trash);
+    }
+  }
+  #viv-marker-start-marker {
+    &:before {
+      content: fa-content($fa-var-marker);
+    }
+  }
+}

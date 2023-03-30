@@ -40,12 +40,14 @@ interface ViewerOptionsType {
   pageViewMode: CorePageViewMode;
   zoom: ZoomOptions;
   pixelRatio: number;
+  enableMarker: boolean;
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
   const allowScripts = urlParameters.getParameter("allowScripts")[0];
   const renderAllPages = urlParameters.getParameter("renderAllPages")[0];
   const fontSizeStr = urlParameters.getParameter("fontSize")[0];
+  const enableMarker = urlParameters.getParameter("enableMarker")[0];
   const r = /^([\d.]+)(?:(%25|%)|\/([\d.]+))?$/.exec(fontSizeStr);
   let fontSize: null | number = null;
   if (r) {
@@ -84,6 +86,8 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
         ? ZoomOptions.createFromZoomFactor(zoomFactor)
         : ZoomOptions.createDefaultOptions(),
     pixelRatio,
+    enableMarker:
+      enableMarker === "true" ? true : enableMarker === "false" ? false : null,
   };
 }
 
@@ -96,6 +100,7 @@ function getDefaultValues(): ViewerOptionsType {
     pageViewMode: PageViewMode.defaultMode(),
     zoom: ZoomOptions.createDefaultOptions(),
     pixelRatio: 8,
+    enableMarker: false,
   };
 }
 
@@ -111,6 +116,7 @@ class ViewerOptions {
   pageViewMode: Observable<CorePageViewMode>;
   zoom: Observable<ZoomOptions>;
   pixelRatio: Observable<number>;
+  enableMarker: Observable<boolean>;
 
   static getDefaultValues: () => {
     allowScripts: boolean;
@@ -120,6 +126,7 @@ class ViewerOptions {
     pageViewMode: CorePageViewMode;
     zoom: ZoomOptions;
     pixelRatio: number;
+    enableMarker: boolean;
   };
 
   constructor(defaultRenderAllPages: boolean);
@@ -137,6 +144,7 @@ class ViewerOptions {
     this.pageViewMode = ko.observable();
     this.zoom = ko.observable();
     this.pixelRatio = ko.observable();
+    this.enableMarker = ko.observable();
 
     if (options) {
       this.copyFrom(options);
@@ -150,6 +158,7 @@ class ViewerOptions {
       this.pageViewMode(urlOptions.pageViewMode || defaultValues.pageViewMode);
       this.zoom(urlOptions.zoom || defaultValues.zoom);
       this.pixelRatio(urlOptions.pixelRatio ?? defaultValues.pixelRatio);
+      this.enableMarker(urlOptions.enableMarker || defaultValues.enableMarker);
 
       // write spread parameter back to URL when updated
       this.pageViewMode.subscribe((pageViewMode) => {
@@ -197,6 +206,13 @@ class ViewerOptions {
           );
         }
       });
+      this.enableMarker.subscribe((enableMarker) => {
+        if (!enableMarker) {
+          urlParameters.removeParameter("enableMarker");
+        } else {
+          urlParameters.setParameter("enableMarker", "true");
+        }
+      });
     }
   }
 
@@ -208,6 +224,7 @@ class ViewerOptions {
     this.pageViewMode(other.pageViewMode());
     this.zoom(other.zoom());
     this.pixelRatio(other.pixelRatio());
+    this.enableMarker(other.enableMarker());
   }
 
   toObject(): CoreViewerOptions {

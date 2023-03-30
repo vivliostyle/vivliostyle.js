@@ -61,6 +61,7 @@ class Viewer {
   epageCount: Observable<number>;
   firstPage: Observable<boolean>;
   inputUrl: Observable<string>;
+  rerenderTrigger: Observable<boolean>; // just flips valye.
   state: State;
   lastPage: Observable<boolean>;
   tocVisible: Observable<boolean>;
@@ -96,7 +97,7 @@ class Viewer {
     this.tocPinned = ko.observable();
 
     this.inputUrl = ko.observable("");
-
+    this.rerenderTrigger = ko.observable(false);
     this.setupViewerEventHandler();
     this.setupViewerOptionSubscriptions();
 
@@ -134,12 +135,13 @@ class Viewer {
       if (this.viewerOptions.profile()) {
         profiler.printTimings();
       }
+      this.rerenderTrigger(!this.rerenderTrigger());
     });
     let timeoutID = 0;
     this.coreViewer.addListener("nav", (payload) => {
       const { cfi, first, last, epage, epageCount, metadata, docTitle } =
         payload;
-
+      this.rerenderTrigger(!this.rerenderTrigger());
       if (cfi) {
         if (timeoutID) {
           // Prevent SecurityError,
@@ -295,6 +297,15 @@ class Viewer {
   navigateToInternalUrl(href: string): void {
     window.history.pushState(null, null);
     this.coreViewer.navigateToInternalUrl(href);
+  }
+
+  navigateToPosition(position: {
+    spineIndex: number;
+    pageIndex?: number;
+    offsetInItem?: number;
+  }): void {
+    window.history.pushState(null, null);
+    this.coreViewer.navigateToPosition(position);
   }
 
   queryZoomFactor(type: ZoomType): number {

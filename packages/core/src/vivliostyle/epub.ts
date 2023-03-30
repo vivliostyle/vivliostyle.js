@@ -1709,6 +1709,14 @@ export class OPFView implements Vgen.CustomRendererFactory {
               Asserts.assert(this.viewport);
               this.counterStore.finishLastPage(this.viewport);
             }
+            page.container.setAttribute(
+              "data-vivliostyle-page-index",
+              pageIndex,
+            );
+            page.container.setAttribute(
+              "data-vivliostyle-spine-index",
+              page.spineIndex,
+            );
             frame.finish({
               pageAndPosition: makePageAndPosition(page, pageIndex),
               nextLayoutPosition: pos,
@@ -1772,7 +1780,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
    * @param sync If true, find the page synchronously (not waiting another
    *     rendering task)
    */
-  private findPage(
+  findPage(
     position: Position,
     sync: boolean,
   ): Task.Result<PageAndPosition | null> {

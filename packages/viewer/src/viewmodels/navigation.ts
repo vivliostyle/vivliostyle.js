@@ -25,12 +25,14 @@ import ViewerOptions from "../models/viewer-options";
 import keyUtil from "../utils/key-util";
 import SettingsPanel from "./settings-panel";
 import Viewer from "./viewer";
+import { marksStore } from "./marks-store";
 
 const { Keys } = keyUtil;
 
 export type NavigationOptions = {
   disableTOCNavigation: boolean;
   disableFind: boolean;
+  disableMarker: boolean;
   disablePageNavigation: boolean;
   disableZoom: boolean;
   disableFontSizeChange: boolean;
@@ -59,6 +61,7 @@ class Navigation {
   isZoomToActualSizeDisabled: PureComputed<boolean>;
   isPrintDisabled: PureComputed<boolean>;
   isFindBoxDisabled: PureComputed<boolean>;
+  isMarkerToggleDisabled: PureComputed<boolean>;
   pageNumber: PureComputed<number | string>;
   totalPages: PureComputed<number | string>;
   pageSlider: PureComputed<number | string>;
@@ -70,6 +73,7 @@ class Navigation {
   hideZoom: boolean;
   hidePrint: boolean;
   hideFind: boolean;
+  hideMarker: boolean;
   justClicked: boolean;
   justPageMovedByWheel: boolean;
 
@@ -247,6 +251,11 @@ class Navigation {
       );
     });
     this.hideFind = !!navigationOptions.disableFind;
+
+    this.isMarkerToggleDisabled = ko.pureComputed(() => {
+      return navigationOptions.disableMarker || this.isDisabled();
+    });
+    this.hideMarker = !!navigationOptions.disableMarker;
 
     this.isPrintDisabled = ko.pureComputed(() => {
       if (
@@ -616,6 +625,13 @@ class Navigation {
     if (this.settingsPanel.opened() && !this.settingsPanel.pinned()) {
       this.settingsPanel.close();
     }
+    if (
+      marksStore.enabled() &&
+      marksStore.marksBox.detailsElement.open &&
+      !marksStore.marksBox.pinned()
+    ) {
+      marksStore.marksBox.detailsElement.open = false;
+    }
     return true;
   };
 
@@ -765,6 +781,15 @@ class Navigation {
     return true;
   };
 
+  toggleMarker = (): boolean => {
+    if (!this.isMarkerToggleDisabled()) {
+      marksStore.toggleEnableMarker();
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   handleKey = (key: string): boolean => {
     const isSettingsActive =
       this.settingsPanel.opened() &&
@@ -865,9 +890,25 @@ class Navigation {
       case "T":
         viewportElement.focus();
         return !this.toggleTOC();
+      case "m":
+      case "M":
+        viewportElement.focus();
+        return !this.toggleMarker();
       case Keys.Escape:
+        if (marksStore.enabled()) {
+          if (marksStore.marksBox.detailsElement.open) {
+            marksStore.marksBox.detailsElement.open = false;
+            return true;
+          }
+        }
         if (this.viewer.tocVisible()) {
           return !this.toggleTOC();
+        }
+        if (marksStore.menuStatus.startButtonOpened()) {
+          marksStore.menuStatus.closeStartButton();
+        }
+        if (marksStore.menuStatus.menuOpened()) {
+          marksStore.menuStatus.closeMenu();
         }
         viewportElement.focus();
         return true;
