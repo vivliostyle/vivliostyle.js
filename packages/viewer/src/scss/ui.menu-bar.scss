@@ -436,6 +436,7 @@
         max-width: -moz-min-content;
         max-width: min-content; // make it resizable with CSS Details textarea
         height: calc(100% - #{$menu-icon-height});
+        min-height: 54px;
         line-height: 1;
         color: $menu-fg-color;
         .vivliostyle-menu-disabled {
@@ -520,12 +521,31 @@
           font-size: 0.9em;
         }
         > .vivliostyle-menu-detail-main {
+          position: relative;
           overflow-y: auto;
           height: calc(100% - 56px);
           font-size: 14px;
           -webkit-overflow-scrolling: touch;
           @media screen and (min-width: 320px) {
             min-width: 316px; // make it resizable with CSS Details textarea
+          }
+          #vivliostyle-settings_ui-language {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            z-index: 1;
+            font-size: 14px;
+            &::before {
+              @include font-icon("FontAwesome");
+              content: fa-content($fa-var-globe);
+              color: #555;
+            }
+            select {
+              font-size: inherit;
+            }
+          }
+          summary {
+            width: fit-content;
           }
           .vivliostyle-menu-detail-group {
             position: relative;

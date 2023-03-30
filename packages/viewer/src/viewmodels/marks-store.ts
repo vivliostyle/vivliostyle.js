@@ -15,7 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { t } from "i18next";
+import { t } from "i18next-ko";
 import ko, { Computed, Observable, ObservableArray } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";

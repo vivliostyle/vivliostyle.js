@@ -15,13 +15,14 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { use } from "i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import i18nextko from "i18next-ko";
+import ko from "knockout";
 
 const translations = {
   en: {
     translation: {
       UI_LNG: "en",
+      TIP_UI_Language: "Language of UI",
       CONFIRM_DELETE: "Do you really want to delete it?",
       CONFIRM_REMOVE: "Do you really want to remove it?",
       CONFIRM_REMOVE_ALL: "Do you really want to remove all?",
@@ -158,6 +159,7 @@ const translations = {
   ja: {
     translation: {
       UI_LNG: "ja",
+      TIP_UI_Language: "UI表示言語 (L)",
       CONFIRM_DELETE: "本当に削除しますか？",
       CONFIRM_REMOVE: "本当に削除しますか？",
       CONFIRM_REMOVE_ALL: "本当にすべて削除しますか？",
@@ -293,7 +295,35 @@ const translations = {
   },
 };
 
-use(LanguageDetector).init({
-  fallbackLng: "en",
-  resources: translations,
-});
+/**
+ * simple language detector alternative to i18next-browser-languageDetector
+ * @returns {string} language code
+ */
+function detectLanguage(): string {
+  try {
+    // Detect from URL parameter: "?lng=xx", "&lng=xx" or "#lng=xx"
+    let lng = /[?&#]lng=([^?&#]+)/.exec(window.location.href)?.[1];
+    if (!lng) {
+      // Detect from localStorage
+      lng = window.localStorage.getItem("i18nextLng");
+      if (!lng) {
+        // Detect from browser
+        lng = navigator.language;
+      }
+    }
+    if (lng) {
+      // "en-US" -> "en"
+      // FIXME: need fix for "zh-CN", "zh-TW", or "zh-Hant-HK" etc. when we support them
+      lng = lng.toLowerCase().replace(/-.*/, "");
+      if (lng in translations) {
+        return lng;
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  // fallback
+  return "en";
+}
+
+i18nextko.init(translations, detectLanguage(), ko);

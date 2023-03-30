@@ -19,7 +19,7 @@
  */
 
 import ko, { Observable, PureComputed } from "knockout";
-
+import i18nextko from "i18next-ko";
 import Viewer from "./viewer";
 import PageStyle from "../models/page-style";
 import PageViewMode from "../models/page-view-mode";
@@ -46,6 +46,7 @@ class SettingsPanel {
   isBookModeChangeDisabled: boolean;
   isRenderAllPagesChangeDisabled: boolean;
   isRestoreViewChangeDisabled: boolean;
+  isUILanguageChangeDisabled: boolean;
   justClicked: boolean; // double click check
   settingsToggle: HTMLElement;
   state: State;
@@ -53,6 +54,7 @@ class SettingsPanel {
   pinned: Observable<boolean>;
   resetCustomStyle: PureComputed<boolean>;
   defaultPageStyle: PageStyle;
+  uiLanguage: PureComputed<string>;
 
   constructor(
     private viewerOptions: ViewerOptions,
@@ -65,8 +67,26 @@ class SettingsPanel {
       disableBookModeChange: boolean;
       disableRenderAllPagesChange: boolean;
       disableRestoreViewChange: boolean;
+      disableUILanguageChange: boolean;
     },
   ) {
+    this.uiLanguage = ko.pureComputed({
+      read: () => {
+        return i18nextko.i18n.language;
+      },
+      write: (value) => {
+        i18nextko.setLanguage(value);
+        if (urlParameters.hasParameter("lng")) {
+          urlParameters.setParameter("lng", value);
+        }
+        try {
+          window.localStorage.setItem("i18nextLng", value);
+        } catch (e) {
+          // ignore
+        }
+      },
+    });
+
     this.isPageStyleChangeDisabled =
       !!settingsPanelOptions.disablePageStyleChange;
     this.isPageViewModeChangeDisabled =
@@ -77,6 +97,8 @@ class SettingsPanel {
       !!settingsPanelOptions.disableRenderAllPagesChange;
     this.isRestoreViewChangeDisabled =
       !!settingsPanelOptions.disableRestoreViewChange;
+    this.isUILanguageChangeDisabled =
+      !!settingsPanelOptions.disableUILanguageChange;
 
     this.justClicked = false;
     this.settingsToggle = document.getElementById(
@@ -228,7 +250,7 @@ class SettingsPanel {
 
   focusToFirstItem(outerElemParam?: Element): void {
     const outerElem = outerElemParam || this.settingsToggle;
-    const inputElem = ["input", "textarea", "summary"].includes(
+    const inputElem = ["input", "textarea", "summary", "select"].includes(
       outerElem.localName,
     )
       ? outerElem
@@ -273,6 +295,15 @@ class SettingsPanel {
       case "S":
         if (!this.opened() || isHotKeyEnabled || !isSettingsActive) {
           this.toggle();
+          return false;
+        }
+        return true;
+      case "l":
+      case "L":
+        if (isHotKeyEnabled) {
+          this.focusToFirstItem(
+            document.getElementsByName("vivliostyle-settings_ui-language")[0],
+          );
           return false;
         }
         return true;
