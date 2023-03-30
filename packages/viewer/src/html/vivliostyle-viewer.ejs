@@ -127,6 +127,11 @@
           <!-- MENU DETAIL -->
           <div role="dialog" aria-label="Settings Panel" class="vivliostyle-menu-detail" tabindex="0" aria-hidden="true" data-bind="attr: {'aria-hidden': !settingsPanel.opened()?'true':'false'}">
             <div class="vivliostyle-menu-detail-main">
+              <div class="vivliostyle-menu-detail-group" id="vivliostyle-settings_ui-language" data-bind="hidden: settingsPanel.isUILanguageChangeDisabled, attr: {title: t('TIP_UI_Language')}">
+                <select name="vivliostyle-settings_ui-language" aria-keyshortcuts="L" data-bind="foreach: Object.keys(i18n.options.resources), value: settingsPanel.uiLanguage">
+                  <option data-bind="value: $data, text: $parent.t('UI_LNG', {lng: $data})">&nbsp;</option>
+                </select>
+              </div>
               <details class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-and-rendering" open data-bind="hidden: settingsPanel.isPageViewModeChangeDisabled">
                 <summary class="vivliostyle-menu-detail-group-heading" aria-keyshortcuts="P"><span data-bind="text: t('Page_View_Mode')"></span></summary>
                 <fieldset class="vivliostyle-menu-detail-group" id="vivliostyle-settings_page-view-mode" aria-keyshortcuts="V">

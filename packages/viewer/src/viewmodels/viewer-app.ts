@@ -18,7 +18,7 @@
  * along with Vivliostyle UI.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { t } from "i18next";
+import i18nextko from "i18next-ko";
 import Vivliostyle from "../vivliostyle";
 import DocumentOptions from "../models/document-options";
 import ViewerOptions from "../models/viewer-options";
@@ -53,7 +53,8 @@ class ViewerApp {
   marksStore: MarksStoreFacade;
   marksMenuStatus: MarksMenuStatus;
   marksBox: MarksBox;
-  t = t;
+  t = i18nextko.t;
+  i18n = i18nextko.i18n;
 
   constructor() {
     // Configuration flags
@@ -72,6 +73,7 @@ class ViewerApp {
       disableBookModeChange: disableSettings || flags.includes("B"),
       disableRenderAllPagesChange: disableSettings || flags.includes("A"),
       disableRestoreViewChange: disableSettings || flags.includes("R"),
+      disableUILanguageChange: disableSettings || flags.includes("L"),
     };
     const navigationOptions = {
       disableTOCNavigation: flags.includes("T"),
@@ -190,6 +192,7 @@ class ViewerApp {
     urlParameters.removeParameter("debug", true);
     urlParameters.removeParameter("pixelRatio", true);
     urlParameters.removeParameter("restoreView", true);
+    urlParameters.removeParameter("lng", true);
 
     this.viewer = new Viewer(this.viewerSettings, this.viewerOptions);
 
