@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.24.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.2...v2.24.0) (2023-04-01)
+
+### Bug Fixes
+
+- Browser "Back" button should work with internal link or TOC navigation ([5b6795c](https://github.com/vivliostyle/vivliostyle.js/commit/5b6795c4c1e9d1058ece10b774cbb919f9f22756))
+- Rendering error with SVG images in EPUB (Regression in v2.23.0) ([bff1c63](https://github.com/vivliostyle/vivliostyle.js/commit/bff1c63d6d2623fd5a214742384bfeba1059fdeb)), closes [#1139](https://github.com/vivliostyle/vivliostyle.js/issues/1139) [#1135](https://github.com/vivliostyle/vivliostyle.js/issues/1135)
+
 ## [2.23.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.1...v2.23.2) (2023-03-25)
 
 ### Bug Fixes

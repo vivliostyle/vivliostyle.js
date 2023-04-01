@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.24.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.2...v2.24.0) (2023-04-01)
+
+### Bug Fixes
+
+- Browser "Back" button should work with internal link or TOC navigation ([5b6795c](https://github.com/vivliostyle/vivliostyle.js/commit/5b6795c4c1e9d1058ece10b774cbb919f9f22756))
+
+### Features
+
+- **viewer:** Add Restore View setting ([550c019](https://github.com/vivliostyle/vivliostyle.js/commit/550c01979786f7f8f9306608cc2e333d72068242))
+- **viewer:** Add UI Language in settings panel ([7e4ee0c](https://github.com/vivliostyle/vivliostyle.js/commit/7e4ee0caae4c8c9b4c3749c6d8252b063fe305df))
+- **viewer:** Marker annotation ([7202a57](https://github.com/vivliostyle/vivliostyle.js/commit/7202a570cb766372dd21af8f5d9fccc9e1361db3))
+- **viewer:** Multilingual user interface (en/ja) ([aa2f27b](https://github.com/vivliostyle/vivliostyle.js/commit/aa2f27bf561267e3eca47da3edb8df9f6139526e))
+
 ## [2.23.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.1...v2.23.2) (2023-03-25)
 
 **Note:** Version bump only for package @vivliostyle/viewer
