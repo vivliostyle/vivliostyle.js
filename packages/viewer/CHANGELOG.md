@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.24.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.0...v2.24.1) (2023-04-01)
+
+### Bug Fixes
+
+- wrong message "[object Object]" instead of delete confirmation ([451f737](https://github.com/vivliostyle/vivliostyle.js/commit/451f737488d278c7b475311de8c5670022ec557c))
+
 # [2.24.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.2...v2.24.0) (2023-04-01)
 
 ### Bug Fixes
