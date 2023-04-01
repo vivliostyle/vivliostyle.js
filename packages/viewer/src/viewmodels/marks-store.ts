@@ -15,12 +15,14 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { t } from "i18next-ko";
+import { i18n } from "i18next-ko";
 import ko, { Computed, Observable, ObservableArray } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";
 import urlParameters from "../stores/url-parameters";
 import { scaleRect, applyTransformToRect } from "../utils/scale-util";
+
+const t = i18n.t.bind(i18n);
 
 const colorNameToColor = (name: string): string => {
   switch (name) {
