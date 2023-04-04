@@ -16,20 +16,42 @@
  */
 
 import ko from "knockout";
-import { marksMenuStatus, processSelection } from "../viewmodels/marks-store";
+import {
+  marksMenuStatus,
+  marksStore,
+  processSelection,
+} from "../viewmodels/marks-store";
 
 ko.bindingHandlers.textSelection = {
   init(element, valueAccessor): void {
+    let mousedown = false;
     if (ko.unwrap(valueAccessor())) {
-      element.addEventListener("mouseup", (e: MouseEvent) => {
-        e.stopPropagation();
-        processSelection(document.getSelection());
+      element.addEventListener("mousedown", () => {
+        if (!mousedown && document.getSelection().type !== "Range") {
+          mousedown = true;
+        }
+      });
+      element.addEventListener("mouseup", () => {
+        if (mousedown) {
+          if (marksStore.enabled()) {
+            processSelection(document.getSelection());
+          }
+          mousedown = false;
+        }
       });
       document.addEventListener("selectionchange", () => {
-        if (document.getSelection().type != "Range") {
-          setTimeout(() => {
+        if (!marksStore.enabled()) return;
+        if (document.activeElement.id !== "vivliostyle-viewer-viewport") return;
+
+        if (!mousedown && document.getSelection().type === "Range") {
+          // For touch devices
+          if (marksMenuStatus.menuOpened()) {
+            marksMenuStatus.applyEditing();
+          }
+          if (marksMenuStatus.startButtonOpened()) {
             marksMenuStatus.startButtonOpened(false);
-          }, 150);
+          }
+          processSelection(document.getSelection());
         }
       });
     }
