@@ -23,14 +23,15 @@
   font-size: 14px;
   font-family: $sans-serif;
   line-height: 1.25;
-  
+
   > div {
     white-space: nowrap;
     &:not(:first-child) {
       margin-top: 4px;
     }
   }
-  button, textarea {
+  button,
+  textarea {
     font: inherit;
   }
   .viv-marker-color {
@@ -103,6 +104,8 @@
     }
   }
   #viv-marker-start-marker {
+    -webkit-user-select: none;
+    user-select: none;
     &:before {
       content: fa-content($fa-var-marker);
     }

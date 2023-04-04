@@ -896,19 +896,24 @@ class Navigation {
         return !this.toggleMarker();
       case Keys.Escape:
         if (marksStore.enabled()) {
+          if (marksStore.menuStatus.startButtonOpened()) {
+            marksStore.menuStatus.closeStartButton();
+            return false;
+          }
+          if (marksStore.menuStatus.menuOpened()) {
+            if (document.activeElement.id !== "vivliostyle-memo-edit-area") {
+              marksStore.menuStatus.closeMenu();
+              return false;
+            }
+            return true;
+          }
           if (marksStore.marksBox.detailsElement.open) {
             marksStore.marksBox.detailsElement.open = false;
-            return true;
+            return false;
           }
         }
         if (this.viewer.tocVisible()) {
           return !this.toggleTOC();
-        }
-        if (marksStore.menuStatus.startButtonOpened()) {
-          marksStore.menuStatus.closeStartButton();
-        }
-        if (marksStore.menuStatus.menuOpened()) {
-          marksStore.menuStatus.closeMenu();
         }
         viewportElement.focus();
         return true;

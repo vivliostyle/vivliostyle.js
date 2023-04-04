@@ -102,7 +102,7 @@
     <div id="vivliostyle-text-selection-start-button" data-bind="visible: marksMenuStatus.startButtonOpened, clickOutside: marksMenuStatus.closeStartButton">
       <button id="viv-marker-start-marker" data-bind="text: t('Highlight_')"></button>
     </div>
-    <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.menuOpened, clickOutside: marksMenuStatus.closeMenu">
+    <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.menuOpened, clickOutside: marksMenuStatus.applyEditing">
       <div>
         <button class="viv-marker-color yellow" data-bind="attr: {title: t('Marker_Yellow')}, css: {'selected-color': marksMenuStatus.currentEditingColor() == 'yellow' }, click: () => { marksMenuStatus.currentEditingColor('yellow') }"></button>
         <button class="viv-marker-color red" data-bind="attr: {title: t('Marker_Red')}, css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'red' }, click: () => { marksMenuStatus.currentEditingColor('red') }"></button>
