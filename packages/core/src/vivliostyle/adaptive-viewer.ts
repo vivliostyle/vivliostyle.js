@@ -935,6 +935,9 @@ export class AdaptiveViewer {
     width: number;
     height: number;
   }): number {
+    if (!this.viewport) {
+      return this.zoom;
+    }
     const widthZoom = this.viewport.width / pageDimension.width;
     const heightZoom = this.viewport.height / pageDimension.height;
     return Math.min(widthZoom, heightZoom);
@@ -1161,6 +1164,9 @@ export class AdaptiveViewer {
       const position = command["position"] as Epub.Position;
       method = () => this.opfView.findPage(position, !this.renderAllPages);
     } else {
+      return Task.newResult(true);
+    }
+    if (!this.opfView) {
       return Task.newResult(true);
     }
     const frame: Task.Frame<boolean> = Task.newFrame("moveTo");
