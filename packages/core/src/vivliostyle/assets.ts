@@ -31,6 +31,7 @@ export const VivliostyleViewportScreenCss = `
   }
 
   [data-vivliostyle-viewer-viewport] {
+    box-sizing: border-box;
     display: flex;
     overflow: auto;
     position: relative;
