@@ -715,6 +715,8 @@
     margin-top: $menu-icon-height;
     margin-bottom: $page-slider-height;
     height: calc(100vh - #{$menu-icon-height + $page-slider-height});
+    /* stylelint-disable-next-line */
+    height: calc(100dvh - #{$menu-icon-height + $page-slider-height});
     width: 100vw;
   }
 }
@@ -821,7 +823,9 @@
   font-size: 14px;
   line-height: 1.2;
   overflow: auto;
-  max-height: calc(100vh - #{$menu-icon-height + $menu-icon-offset-y * 2 + $page-slider-height});
+  max-height: calc(
+    100vh - #{$menu-icon-height + $menu-icon-offset-y * 2 + $page-slider-height}
+  );
   width: $menu-icon-width * 9;
   @media screen and (max-width: 400px) {
     width: 80vw;
@@ -916,7 +920,8 @@
         flex: auto;
         background: transparent;
 
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           background: white;
         }
       }
