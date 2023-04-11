@@ -1033,11 +1033,14 @@ export class ViewFactory
       const wordBreak = computedStyle["word-break"];
       const lineBreak = computedStyle["line-break"];
       const overflowWrap = computedStyle["overflow-wrap"];
-      this.nodeContext.breakWord =
+      if (
         wordBreak === Css.ident.break_all ||
         lineBreak === Css.ident.anywhere ||
         overflowWrap === Css.ident.break_word ||
-        overflowWrap === Css.ident.anywhere;
+        overflowWrap === Css.ident.anywhere
+      ) {
+        this.nodeContext.breakWord = true;
+      }
 
       // Resolve formatting context
       this.resolveFormattingContext(
