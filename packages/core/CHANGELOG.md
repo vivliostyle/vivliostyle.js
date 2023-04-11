@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.24.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.1...v2.24.2) (2023-04-11)
+
+### Bug Fixes
+
+- prevent "TypeError: can't access property" ([3d9850d](https://github.com/vivliostyle/vivliostyle.js/commit/3d9850df9e6cc88de55dd290194ddc673f75b97e)), closes [#1160](https://github.com/vivliostyle/vivliostyle.js/issues/1160)
+- unnecessary scrollbars when zoom is fit-to-screen ([bb504a6](https://github.com/vivliostyle/vivliostyle.js/commit/bb504a6babd1e7d1b57a83fca333ac1ee44a9e62)), closes [#1158](https://github.com/vivliostyle/vivliostyle.js/issues/1158)
+- wrong hyphen appears at page break with line-break:anywhere ([a5e1356](https://github.com/vivliostyle/vivliostyle.js/commit/a5e1356c6c8c84371b4d3cf6ae43262d5817fd09)), closes [#1162](https://github.com/vivliostyle/vivliostyle.js/issues/1162)
+
 # [2.24.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.23.2...v2.24.0) (2023-04-01)
 
 ### Bug Fixes
