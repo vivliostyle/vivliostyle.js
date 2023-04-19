@@ -1790,14 +1790,31 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     // "if the values are over-constrained, instead of ignoring any margins, the
     // containing block is resized to coincide with the margin edges of the page
     // box." (CSS Paged Media http://dev.w3.org/csswg/css-page/#page-model)
-    style[startSide] = new Css.Expr(marginStart);
-    style[endSide] = new Css.Expr(marginEnd);
-    style[`margin-${startSide}`] = Css.numericZero;
-    style[`margin-${endSide}`] = Css.numericZero;
+
+    if (this.hasBorderOrOutline()) {
+      style[startSide] = new Css.Expr(marginStart);
+      style[endSide] = new Css.Expr(marginEnd);
+      style[`margin-${startSide}`] = Css.numericZero;
+      style[`margin-${endSide}`] = Css.numericZero;
+      style[`border-${startSide}-width`] = new Css.Expr(borderStartWidth);
+      style[`border-${endSide}-width`] = new Css.Expr(borderEndWidth);
+    } else {
+      // If the page box has no border or outline, use transparent borders for
+      // page margins. This is to improve text selection behavior.
+      style[startSide] = Css.numericZero;
+      style[endSide] = Css.numericZero;
+      style[`margin-${startSide}`] = Css.numericZero;
+      style[`margin-${endSide}`] = Css.numericZero;
+      style[`border-${startSide}-width`] = new Css.Expr(marginStart);
+      style[`border-${endSide}-width`] = new Css.Expr(marginEnd);
+      style[`border-${startSide}-style`] = Css.ident.solid;
+      style[`border-${endSide}-style`] = Css.ident.solid;
+      style[`border-${startSide}-color`] = Css.ident.transparent;
+      style[`border-${endSide}-color`] = Css.ident.transparent;
+      style["background-clip"] = Css.ident.padding_box;
+    }
     style[`padding-${startSide}`] = new Css.Expr(paddingStart);
     style[`padding-${endSide}`] = new Css.Expr(paddingEnd);
-    style[`border-${startSide}-width`] = new Css.Expr(borderStartWidth);
-    style[`border-${endSide}-width`] = new Css.Expr(borderEndWidth);
     style[extentName] = new Css.Expr(extent);
     style[`max-${extentName}`] = new Css.Expr(extent);
     return {
@@ -1809,6 +1826,24 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       marginStart,
       marginEnd,
     };
+  }
+
+  private hasBorderOrOutline(): boolean {
+    const hasBorder1 = (propName: string): boolean => {
+      const propValue = CssCascade.getProp(this.cascaded, propName)?.value;
+      return !!propValue && propValue !== Css.ident.none;
+    };
+    return (
+      hasBorder1("border-top-style") ||
+      hasBorder1("border-bottom-style") ||
+      hasBorder1("border-left-style") ||
+      hasBorder1("border-right-style") ||
+      hasBorder1("border-block-start-style") ||
+      hasBorder1("border-block-end-style") ||
+      hasBorder1("border-inline-start-style") ||
+      hasBorder1("border-inline-end-style") ||
+      hasBorder1("outline-style")
+    );
   }
 
   override prepareContainer(

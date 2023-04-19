@@ -44,6 +44,9 @@ ko.bindingHandlers.swipePages = {
         ) {
           return; // disable page swipe when horizontal scrollable
         }
+        if (document.getSelection().type === "Range") {
+          return; // disable page swipe during text selection
+        }
         xStart = event.touches[0].clientX;
         yStart = event.touches[0].clientY;
       });

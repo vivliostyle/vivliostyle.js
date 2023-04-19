@@ -104,8 +104,7 @@
     }
   }
   #viv-marker-start-marker {
-    -webkit-user-select: none;
-    user-select: none;
+    @include prefix(user-select, none); // prevent unwanted text selection
     &:before {
       content: fa-content($fa-var-marker);
     }

@@ -31,7 +31,7 @@ ko.bindingHandlers.textSelection = {
           mousedown = true;
         }
       });
-      element.addEventListener("mouseup", () => {
+      document.addEventListener("mouseup", () => {
         if (mousedown) {
           if (marksStore.enabled()) {
             processSelection(document.getSelection());
@@ -39,11 +39,51 @@ ko.bindingHandlers.textSelection = {
           mousedown = false;
         }
       });
-      document.addEventListener("selectionchange", () => {
-        if (!marksStore.enabled()) return;
-        if (document.activeElement.id !== "vivliostyle-viewer-viewport") return;
 
-        if (!mousedown && document.getSelection().type === "Range") {
+      const pageNavLeft = document.getElementById(
+        "vivliostyle-page-navigation-left",
+      );
+      const pageNavRight = document.getElementById(
+        "vivliostyle-page-navigation-right",
+      );
+      let timeoutID = 0;
+
+      document.addEventListener("selectionchange", () => {
+        const selection = document.getSelection();
+        if (selection.type !== "Range") {
+          return;
+        }
+        const range = selection.getRangeAt(0);
+        const pageArea = range.commonAncestorContainer.parentElement.closest(
+          "[data-vivliostyle-page-box] > div",
+        ) as HTMLElement;
+        const zIndex = pageArea?.style.zIndex;
+
+        // To prevent wrong text selection
+        // - minimize page-left/right navigation buttons
+        // - increase z-index of pageArea
+        if (!timeoutID) {
+          if (pageNavLeft && pageNavRight) {
+            pageNavLeft.style.height = "min-content";
+            pageNavRight.style.height = "min-content";
+          }
+          if (pageArea && zIndex === "0") {
+            pageArea.style.zIndex = "1";
+          }
+          timeoutID = window.setTimeout(() => {
+            // Restore changed styles after 1 second
+            if (pageNavLeft && pageNavRight) {
+              pageNavLeft.style.height = "";
+              pageNavRight.style.height = "";
+            }
+            if (pageArea) {
+              pageArea.style.zIndex = zIndex;
+            }
+            timeoutID = 0;
+          }, 1000);
+        }
+
+        if (!mousedown && marksStore.enabled()) {
           // For touch devices
           if (marksMenuStatus.menuOpened()) {
             marksMenuStatus.applyEditing();
@@ -51,7 +91,7 @@ ko.bindingHandlers.textSelection = {
           if (marksMenuStatus.startButtonOpened()) {
             marksMenuStatus.startButtonOpened(false);
           }
-          processSelection(document.getSelection());
+          processSelection(selection);
         }
       });
     }
