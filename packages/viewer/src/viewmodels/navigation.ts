@@ -114,7 +114,7 @@ class Navigation {
       if (navigationOptions.disablePageSlider || navigationDisabled()) {
         return true;
       }
-      return this.totalPages() <= 1;
+      return Number(this.totalPages()) <= 1;
     });
 
     this.isNavigateToPreviousDisabled = ko.pureComputed(() => {
@@ -216,7 +216,7 @@ class Navigation {
       if (fontSizeChangeDisabled()) {
         return true;
       }
-      if (this.viewerOptions.fontSize() >= 72) {
+      if (Number(this.viewerOptions.fontSize()) >= 72) {
         return true;
       }
       return false;
@@ -225,7 +225,7 @@ class Navigation {
       if (fontSizeChangeDisabled()) {
         return true;
       }
-      if (this.viewerOptions.fontSize() <= 5) {
+      if (Number(this.viewerOptions.fontSize()) <= 5) {
         return true;
       }
       return false;

@@ -307,7 +307,7 @@ export enum Action {
   CDC,
 }
 
-export function makeActions(def: Action, spec: Action[]): Action[] {
+export function makeActions(def: Action, spec: number[]): Action[] {
   const a: number[] = Array(128);
   let i: number;
   for (i = 0; i < 128; i++) {

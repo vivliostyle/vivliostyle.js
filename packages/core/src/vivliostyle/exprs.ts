@@ -537,9 +537,9 @@ export class Context {
     if (actual != null && req != null) {
       switch (prefix) {
         case "min":
-          return actual >= req;
+          return actual >= Number(req);
         case "max":
-          return actual <= req;
+          return actual <= Number(req);
         default:
           return actual == req;
       }

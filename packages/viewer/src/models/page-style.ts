@@ -241,7 +241,7 @@ class PageStyle {
         }
         const percent = parseFloat(String(viewerFontSizePercent));
         let fontSize = percent && this.fontSizePercentToPx(percent);
-        if (!fontSize || fontSize < 5 || fontSize > 72) {
+        if (!fontSize || Number(fontSize) < 5 || Number(fontSize) > 72) {
           const elem = document.getElementsByName(
             "vivliostyle-settings_viewer-font-size",
           )[0] as HTMLInputElement;
