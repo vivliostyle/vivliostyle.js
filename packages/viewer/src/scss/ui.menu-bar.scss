@@ -949,6 +949,7 @@
   justify-content: center;
   align-items: center;
   display: flex;
+  @include prefix(user-select, none); // prevent unwanted text selection
   @media print {
     display: none;
   }

@@ -794,6 +794,17 @@ export class MarksMenuStatus {
     if (!marksStore.enabled()) return;
     if (selection.type == "Range") {
       const range = selection.getRangeAt(0);
+      const rangeAncestor = range.commonAncestorContainer;
+      if (rangeAncestor.nodeType == 1) {
+        const e = rangeAncestor as HTMLElement;
+        if (
+          !e.hasAttribute("data-adapt-eloff") &&
+          !e.hasAttribute("data-vivliostyle-spread-container")
+        ) {
+          // Selection is not good for creating a mark
+          return;
+        }
+      }
       const button = document.getElementById(
         "vivliostyle-text-selection-start-button",
       ) as HTMLElement;
