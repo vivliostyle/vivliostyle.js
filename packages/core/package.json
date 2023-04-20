@@ -25,9 +25,9 @@
     "eslint-formatter-codeframe": "^7.32.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "^4.0.0",
-    "microbundle": "^0.14.2",
+    "microbundle": "^0.15.1",
     "shx": "^0.3.2",
-    "typescript": "^4.0.3"
+    "typescript": "^5.0.4"
   },
   "source": "src/vivliostyle.ts",
   "types": "lib/vivliostyle.d.ts",
@@ -53,6 +53,6 @@
   ],
   "license": "AGPL-3.0",
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   }
 }
