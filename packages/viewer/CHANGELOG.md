@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.24.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.2...v2.24.3) (2023-04-20)
+
+### Bug Fixes
+
+- **viewer:** marker text selection problem ([11a6584](https://github.com/vivliostyle/vivliostyle.js/commit/11a6584f668f07a0210f5e9551f76090243167a9))
+
 ## [2.24.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.1...v2.24.2) (2023-04-11)
 
 ### Bug Fixes
