@@ -24,6 +24,7 @@ import {
 
 ko.bindingHandlers.textSelection = {
   init(element, valueAccessor): void {
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     let mousedown = false;
     if (ko.unwrap(valueAccessor())) {
       element.addEventListener("mousedown", () => {
@@ -46,6 +47,13 @@ ko.bindingHandlers.textSelection = {
       const pageNavRight = document.getElementById(
         "vivliostyle-page-navigation-right",
       );
+      if (pageNavLeft && pageNavRight) {
+        // Prevent wrong text selection touching page-left/right navigation buttons
+        pageNavLeft.onpointermove = pageNavRight.onpointermove = (): boolean =>
+          false;
+        pageNavLeft.ontouchmove = pageNavRight.ontouchmove = (): boolean =>
+          false;
+      }
       let timeoutID = 0;
 
       document.addEventListener("selectionchange", () => {
@@ -64,8 +72,15 @@ ko.bindingHandlers.textSelection = {
         // - increase z-index of pageArea
         if (!timeoutID) {
           if (pageNavLeft && pageNavRight) {
-            pageNavLeft.style.height = "min-content";
-            pageNavRight.style.height = "min-content";
+            if (iOS) {
+              // On iOS, `.ontouchmove = () => false` does not work to prevent
+              // wrong text selection, so we need to hide navigation buttons.
+              pageNavLeft.style.display = "none";
+              pageNavRight.style.display = "none";
+            } else {
+              pageNavLeft.style.height = "min-content";
+              pageNavRight.style.height = "min-content";
+            }
           }
           if (pageArea && zIndex === "0") {
             pageArea.style.zIndex = "1";
@@ -73,6 +88,8 @@ ko.bindingHandlers.textSelection = {
           timeoutID = window.setTimeout(() => {
             // Restore changed styles after 1 second
             if (pageNavLeft && pageNavRight) {
+              pageNavLeft.style.display = "";
+              pageNavRight.style.display = "";
               pageNavLeft.style.height = "";
               pageNavRight.style.height = "";
             }
