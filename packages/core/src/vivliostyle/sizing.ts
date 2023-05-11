@@ -193,6 +193,16 @@ export function getSize(
         r = isVertical ? getFitContentInline() : getIdealBlock();
         break;
     }
+    // Workaround for the case that the element has an image that is
+    // not loaded yet. Use 1px instead of 0px to avoid wrong layout.
+    if (
+      r === "0px" &&
+      element.childNodes.length === 1 &&
+      element.firstElementChild?.localName === "img" &&
+      !(element.firstElementChild as HTMLImageElement).complete
+    ) {
+      r = "1px";
+    }
     result[size] = parseFloat(r);
     Base.setCSSProperty(element, "position", original.position);
     Base.setCSSProperty(element, "display", original.display);

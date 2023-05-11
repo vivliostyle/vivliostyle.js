@@ -304,7 +304,8 @@ CONTENT_LIST = [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
     leader([ dotted | solid | space ] | STRING ) |
     open-quote | close-quote | no-open-quote | no-close-quote |
     content([ text | before | after | first-letter ]?) |
-    string(IDENT [first | start | last | first-except]?) ]+;
+    string(IDENT [first | start | last | first-except]?) |
+    element(IDENT [first | start | last | first-except]?) ]+;
 CONTENT = normal | none | CONTENT_LIST;
 content = CONTENT;
 COUNTER = [ IDENT INT? ]+ | none;
@@ -356,7 +357,7 @@ PAGE_BREAK = auto | always | avoid | left | right | recto | verso;
 page-break-after = PAGE_BREAK;
 page-break-before = PAGE_BREAK;
 page-break-inside = avoid | auto;
-position = static | relative | absolute | fixed;
+position = static | relative | absolute | fixed | running(IDENT);
 quotes = [STRING STRING]+ | none | auto;
 right = APLENGTH;
 table-layout = auto | fixed;

@@ -272,6 +272,19 @@ module.exports = [
     ],
   },
   {
+    category: "Running Elements",
+    files: [
+      {
+        file: "running-elements/running-elements.html",
+        title: "Running Elements - running() and element() functions",
+      },
+      {
+        file: "running-elements/page-margin-boxes.html",
+        title: "Page Margin Boxes",
+      },
+    ],
+  },
+  {
     category: "Page breaks",
     files: [
       {
