@@ -2016,12 +2016,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     let stringValue = "";
     switch (pseudoName) {
       case "text":
-      case "first-letter":
         stringValue = this.element.textContent;
-        if (pseudoName === "first-letter") {
-          const r = stringValue.match(Base.firstLetterPattern);
-          stringValue = r ? r[0] : "";
-        }
         break;
       case "before":
       case "after":
@@ -2030,6 +2025,22 @@ export class ContentPropVisitor extends Css.FilterVisitor {
           const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
             ?.value;
           stringValue = getStringValueFromCssContentVal(val);
+        }
+        break;
+      case "first-letter":
+        {
+          // Respect ::before/after pseudo-elements (Issue #1174)
+          const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
+          const r = (
+            getStringValueFromCssContentVal(
+              (pseudos?.["before"]?.["content"] as CascadeValue)?.value,
+            ) ||
+            this.element.textContent ||
+            getStringValueFromCssContentVal(
+              (pseudos?.["after"]?.["content"] as CascadeValue)?.value,
+            )
+          ).match(Base.firstLetterPattern);
+          stringValue = r ? r[0] : "";
         }
         break;
     }
