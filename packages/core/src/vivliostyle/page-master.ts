@@ -1327,18 +1327,45 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
   }
 
-  transferSinglUriContentProps(
+  transferSingleUriContentProps(
     context: Exprs.Context,
     element: Element,
     docFaces: Font.DocumentFaces,
   ): void {
-    for (let i = 0; i < passSingleUriContentProperties.length; i++) {
-      this.propagatePropertyToElement(
-        context,
-        element,
-        passSingleUriContentProperties[i],
-        docFaces,
+    const hasWidth = (): boolean => {
+      const width = (
+        (this.cascaded["width"] ??
+          this.cascaded[
+            this.vertical ? "block-size" : "inline-size"
+          ]) as CssCascade.CascadeValue
+      )?.value;
+      return (
+        !!width && width !== Css.ident.auto && !Css.isDefaultingValue(width)
       );
+    };
+    const hasHeight = (): boolean => {
+      const height = (
+        (this.cascaded["height"] ??
+          this.cascaded[
+            this.vertical ? "inline-size" : "block-size"
+          ]) as CssCascade.CascadeValue
+      )?.value;
+      return (
+        !!height && height !== Css.ident.auto && !Css.isDefaultingValue(height)
+      );
+    };
+
+    for (let i = 0; i < passSingleUriContentProperties.length; i++) {
+      const name = passSingleUriContentProperties[i];
+      if (
+        (name === "width" && !hasWidth()) ||
+        (name === "height" && !hasHeight())
+      ) {
+        // Don't propagate width/height to the img element if it's not specified.
+        // (Issue #1177)
+        continue;
+      }
+      this.propagatePropertyToElement(context, element, name, docFaces);
     }
   }
 

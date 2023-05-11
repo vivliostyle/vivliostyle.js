@@ -1574,7 +1574,7 @@ export class StyleInstance
         );
         boxContainer.appendChild(innerContainer);
         if (innerContainerTag == "img") {
-          boxInstance.transferSinglUriContentProps(
+          boxInstance.transferSingleUriContentProps(
             this,
             innerContainer,
             this.faces,
