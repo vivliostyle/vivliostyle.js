@@ -1396,7 +1396,24 @@ export class ViewFactory
           if (image !== result) {
             (result as HTMLImageElement).src = delayedSrc;
           }
-          if (!hasAutoWidth && !hasAutoHeight) {
+          const isInsideRunningElement = (): boolean => {
+            // Check if the image is inside a position:fixed or running element
+            // which is converted to position:fixed.
+            if (computedStyle["position"] === Css.ident.fixed) {
+              return true;
+            }
+            for (
+              let p = this.nodeContext.parent?.viewNode as HTMLElement;
+              p && p !== this.viewRoot;
+              p = p.parentElement
+            ) {
+              if (p.style?.["position"] === "fixed") {
+                return true;
+              }
+            }
+            return false;
+          };
+          if (!hasAutoWidth && !hasAutoHeight && !isInsideRunningElement()) {
             // No need to wait for the image, does not affect layout
             this.page.fetchers.push(imageFetcher);
           } else {
