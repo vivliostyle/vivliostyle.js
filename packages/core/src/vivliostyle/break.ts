@@ -25,8 +25,9 @@ import * as Plugin from "./plugin";
  */
 export function isCloneBoxDecorationBreak(element: Element): boolean {
   return (
-    (element as HTMLElement)?.style["box-decoration-break"] === "clone" ||
-    (element as HTMLElement)?.style["-webkit-box-decoration-break"] === "clone"
+    (element as HTMLElement)?.style?.["box-decoration-break"] === "clone" ||
+    (element as HTMLElement)?.style?.["-webkit-box-decoration-break"] ===
+      "clone"
   );
 }
 
