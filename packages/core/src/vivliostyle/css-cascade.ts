@@ -1714,8 +1714,20 @@ export interface CounterResolver {
   setNamedString(
     name: string,
     stringValue: string,
-    cascadeInstance: CascadeInstance,
+    elementOffset: number,
   ): void;
+
+  /**
+   * Get value of the CSS element() function
+   * https://drafts.csswg.org/css-gcpm-3/#running-elements
+   */
+  getRunningElementVal(name: string, retrievePosition: string): Exprs.Val;
+
+  /**
+   * Set running element
+   * https://drafts.csswg.org/css-gcpm-3/#running-elements
+   */
+  setRunningElement(name: string, elementOffset: number): void;
 }
 
 export class AttrValueFilterVisitor extends Css.FilterVisitor {
@@ -1975,10 +1987,24 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     const name = values.length > 0 ? values[0].stringValue() : "";
     const retrievePosition =
       values.length > 1 ? values[1].stringValue() : "first";
-    const c = new Css.Expr(
+
+    return new Css.Expr(
       this.counterResolver.getNamedStringVal(name, retrievePosition),
     );
-    return new Css.SpaceList([c]);
+  }
+
+  /**
+   * CSS `element()` function
+   * https://drafts.csswg.org/css-gcpm-3/#running-elements
+   */
+  visitFuncElement(values: Css.Val[]): Css.Val {
+    const name = values.length > 0 ? values[0].stringValue() : "";
+    const retrievePosition =
+      values.length > 1 ? values[1].stringValue() : "first";
+
+    return new Css.Expr(
+      this.counterResolver.getRunningElementVal(name, retrievePosition),
+    );
   }
 
   /**
@@ -1990,12 +2016,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     let stringValue = "";
     switch (pseudoName) {
       case "text":
-      case "first-letter":
         stringValue = this.element.textContent;
-        if (pseudoName === "first-letter") {
-          const r = stringValue.match(Base.firstLetterPattern);
-          stringValue = r ? r[0] : "";
-        }
         break;
       case "before":
       case "after":
@@ -2004,6 +2025,22 @@ export class ContentPropVisitor extends Css.FilterVisitor {
           const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
             ?.value;
           stringValue = getStringValueFromCssContentVal(val);
+        }
+        break;
+      case "first-letter":
+        {
+          // Respect ::before/after pseudo-elements (Issue #1174)
+          const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
+          const r = (
+            getStringValueFromCssContentVal(
+              (pseudos?.["before"]?.["content"] as CascadeValue)?.value,
+            ) ||
+            this.element.textContent ||
+            getStringValueFromCssContentVal(
+              (pseudos?.["after"]?.["content"] as CascadeValue)?.value,
+            )
+          ).match(Base.firstLetterPattern);
+          stringValue = r ? r[0] : "";
         }
         break;
     }
@@ -2062,6 +2099,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "string":
         if (func.values.length <= 2) {
           return this.visitFuncString(func.values);
+        }
+        break;
+      case "element":
+        if (func.values.length <= 2) {
+          return this.visitFuncElement(func.values);
         }
         break;
       case "content":
@@ -3071,10 +3113,29 @@ export class CascadeInstance {
           .slice(1)
           .map((v) => getStringValueFromCssContentVal(v))
           .join("");
-        this.counterResolver.setNamedString(name, stringValue, this);
+        this.counterResolver.setNamedString(
+          name,
+          stringValue,
+          this.currentElementOffset,
+        );
       }
     }
     delete props["string-set"];
+  }
+
+  /**
+   * Process CSS running elements
+   * https://drafts.csswg.org/css-gcpm-3/#running-elements
+   */
+  setRunningElement(props: ElementStyle): void {
+    const position = props["position"] as CascadeValue;
+    if (
+      position?.value instanceof Css.Func &&
+      position.value.name === "running"
+    ) {
+      const name = position.value.values[0].stringValue();
+      this.counterResolver.setRunningElement(name, this.currentElementOffset);
+    }
   }
 
   processPseudoelementProps(pseudoprops: ElementStyle, element: Element): void {
@@ -3249,6 +3310,9 @@ export class CascadeInstance {
 
     // process CSS string-set property
     this.setNamedStrings(this.currentStyle);
+
+    // process CSS running elements
+    this.setRunningElement(this.currentStyle);
 
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);
@@ -4697,6 +4761,13 @@ export function evaluateCSSToCSS(
 ): Css.Val {
   try {
     if (val instanceof Css.Expr) {
+      if (
+        val.expr instanceof Exprs.Native &&
+        (val.expr.str.startsWith("named-string-") ||
+          val.expr.str.startsWith("running-element-"))
+      ) {
+        return val;
+      }
       return CssParser.evaluateExprToCSS(context, val.expr, propName);
     }
     if (

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Running elements - running() and element() functions</title>
+    <style>
+      @page {
+        size: 15cm 10cm;
+        margin: 1.5cm;
+        font-size: 80%;
+
+        @top-left {
+          content: "first: " element(heading, first);
+        }
+        @top-center {
+          content: "start: " element(heading, start);
+        }
+        @top-right {
+          content: "last: " element(heading, last);
+        }
+        @bottom-left {
+          content: "first-except: " element(heading, first-except);
+        }
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+        @bottom-right {
+          content: element(heading);
+        }
+      }
+
+      body {
+        margin: 0;
+      }
+
+      h2 {
+        color: navy;
+      }
+      em {
+        color: maroon;
+      }
+      h2.RE {
+        font-size: 1.2em;
+        display: inline;
+        position: running(heading);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Using Running Elements</h1>
+    <h2 class="RE">Heading <em>A</em></h2><h2>Heading <em>A</em></h2>
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias in,
+      provident quasi doloremque blanditiis itaque esse placeat maiores eveniet
+      ipsa dolores, harum alias expedita distinctio neque asperiores
+      accusantium, pariatur laboriosam. Deserunt accusamus corporis esse ex,
+      sunt sint voluptatibus asperiores iusto voluptas repellat molestiae quis
+      obcaecati?
+    </p>
+    <h2 class="RE">Heading <em>B</em></h2><h2>Heading <em>B</em></h2>
+    <p>
+      Quod distinctio iste dignissimos ullam perspiciatis numquam neque
+      recusandae corrupti, similique voluptatem dolore nulla itaque eveniet?
+      Delectus optio aliquam necessitatibus officiis eius!
+    </p>
+    <h2 class="RE">Heading <em>C</em></h2><h2>Heading <em>C</em></h2>
+    <p>
+      Autem perferendis voluptatibus, explicabo corporis doloremque ducimus
+      illum cupiditate quibusdam voluptatem totam optio debitis ipsam quaerat
+      consectetur dolores cum odio repellendus expedita! Quia et quo voluptate
+      obcaecati necessitatibus inventore aspernatur nesciunt minima.
+      Consectetur, voluptatem? Quam, doloribus animi porro veniam laudantium
+      numquam accusantium quos enim. Rerum aliquid aliquam perferendis
+      architecto autem laborum?
+    </p>
+    <h2 class="RE">Heading <em>D</em></h2><h2>Heading <em>D</em></h2>
+    <p>
+      A dignissimos asperiores fugiat, fugit dolore, harum dolorem deleniti
+      nulla nam, molestias dolorum error quos sapiente corrupti quidem! Nostrum
+      voluptatum sed blanditiis? Delectus, totam? Maxime qui perspiciatis
+      explicabo vel error distinctio sed doloremque rem vero dolorum, iure
+      itaque quia, dolor dignissimos.
+    </p>
+    <p>
+      Dolores, deleniti impedit! Atque autem omnis doloremque exercitationem.
+      Facilis nobis dolorum quia aut doloremque voluptate excepturi fuga hic
+      eius. Recusandae voluptates laboriosam exercitationem rem voluptatum?
+      Obcaecati distinctio doloribus impedit dignissimos porro quia, reiciendis
+      voluptatum ad eos. Id voluptatum soluta illo saepe repudiandae accusantium
+      voluptatibus ratione veniam molestiae?
+    </p>
+    <p>
+      Magnam perferendis tempora fuga molestiae quas, numquam cumque id porro
+      iure fugiat ipsum in enim facilis? Nobis, repellat. Facilis, consequatur
+      consectetur. Suscipit!
+    </p>
+    <p>
+      Autem porro maxime quod facilis numquam ducimus repellendus officiis
+      expedita dolore! Ipsam temporibus molestiae dolore assumenda beatae illo
+      dolorem quidem praesentium doloribus.
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Amet accusamus
+      dolore libero, voluptas ullam ratione doloremque eius sunt iusto nam
+      perferendis ut? Ducimus facilis magnam hic ut cupiditate numquam ea.
+      Lorem, ipsum dolor sit amet consectetur adipisicing elit. Rerum expedita
+      magnam, id vitae exercitationem enim voluptatibus quam quis aperiam
+      delectus non nobis fugiat quod earum ea. Fugit vero nulla magni?
+    </p>
+    <h2 class="RE">Heading <em>E</em></h2><h2>Heading <em>E</em></h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <h2 class="RE">Heading <em>F</em></h2><h2>Heading <em>F</em></h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <h2 class="RE">Heading <em>G</em></h2><h2>Heading <em>G</em></h2>
+    <h2 class="RE">Heading <em>H</em></h2><h2>Heading <em>H</em></h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <h2 class="RE">Heading <em>I</em></h2><h2>Heading <em>I</em></h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+    <h2 class="RE">Heading <em>J</em></h2><h2>Heading <em>J</em></h2>
+    <p>
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veniam
+      repellendus eum recusandae, nostrum, distinctio voluptates atque commodi
+      laboriosam fugiat, iure nobis laudantium ad iusto eveniet impedit. Iure
+      repellat voluptatem itaque!
+    </p>
+  </body>
+</html>

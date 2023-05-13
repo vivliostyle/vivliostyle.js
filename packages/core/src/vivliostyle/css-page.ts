@@ -1890,6 +1890,11 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
 
   private applyVerticalAlign(context: Exprs.Context, element: Element) {
     Base.setCSSProperty(element, "display", "flex");
+    Base.setCSSProperty(
+      element,
+      "flex-flow",
+      this.vertical ? (this.rtl ? "row-reverse" : "row") : "column",
+    );
     const verticalAlign: Css.Val = this.getProp(context, "vertical-align");
     let flexAlign: string | null = null;
     if (verticalAlign === Css.getName("middle")) {
@@ -1900,31 +1905,33 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
       flexAlign = "flex-end";
     }
     if (flexAlign) {
-      Base.setCSSProperty(
-        element,
-        "flex-flow",
-        this.vertical ? "row" : "column",
-      );
       Base.setCSSProperty(element, "justify-content", flexAlign);
-      if (this.vertical) {
-        let align = "center";
-        if (this.boxInfo.isInTopRow || this.boxInfo.isInBottomRow) {
-          if (
-            this.boxInfo.isInLeftColumn ||
-            this.boxInfo.positionAlongVariableDimension ===
-              MarginBoxPositionAlongVariableDimension.END
-          ) {
-            align = "start";
-          } else if (
-            this.boxInfo.isInRightColumn ||
-            this.boxInfo.positionAlongVariableDimension ===
-              MarginBoxPositionAlongVariableDimension.START
-          ) {
-            align = "end";
-          }
+    }
+    const content: Css.Val = this.getProp(context, "content");
+    if (
+      this.vertical ||
+      content instanceof Css.URL ||
+      (content instanceof Css.Expr &&
+        content.expr instanceof Exprs.Native &&
+        content.expr.str.startsWith("running-element-"))
+    ) {
+      let align = "center";
+      if (this.boxInfo.isInTopRow || this.boxInfo.isInBottomRow) {
+        if (
+          this.boxInfo.isInLeftColumn ||
+          this.boxInfo.positionAlongVariableDimension ===
+            MarginBoxPositionAlongVariableDimension.END
+        ) {
+          align = this.vertical || this.rtl ? "start" : "end";
+        } else if (
+          this.boxInfo.isInRightColumn ||
+          this.boxInfo.positionAlongVariableDimension ===
+            MarginBoxPositionAlongVariableDimension.START
+        ) {
+          align = this.vertical || this.rtl ? "end" : "start";
         }
-        Base.setCSSProperty(element, "align-items", align);
       }
+      Base.setCSSProperty(element, "align-items", align);
     }
   }
 

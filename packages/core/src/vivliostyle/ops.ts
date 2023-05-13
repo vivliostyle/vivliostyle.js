@@ -1543,7 +1543,21 @@ export class StyleInstance
     let removed = false;
     if (!flowName || !flowName.isIdent()) {
       const contentVal = boxInstance.getProp(this, "content");
-      if (contentVal && Vtree.nonTrivialContent(contentVal)) {
+      if (
+        contentVal instanceof Css.Expr &&
+        contentVal.expr instanceof Exprs.Native &&
+        contentVal.expr.str.startsWith("running-element-")
+      ) {
+        // Single running element
+        contentVal.visit(
+          new Vtree.ContentPropertyHandler(
+            boxContainer,
+            this,
+            contentVal,
+            this.counterStore.getExprContentListener(),
+          ),
+        );
+      } else if (contentVal && Vtree.nonTrivialContent(contentVal)) {
         let innerContainerTag = "span";
         if ((contentVal as any).url) {
           innerContainerTag = "img";
@@ -1560,7 +1574,7 @@ export class StyleInstance
         );
         boxContainer.appendChild(innerContainer);
         if (innerContainerTag == "img") {
-          boxInstance.transferSinglUriContentProps(
+          boxInstance.transferSingleUriContentProps(
             this,
             innerContainer,
             this.faces,

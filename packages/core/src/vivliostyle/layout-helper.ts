@@ -166,6 +166,14 @@ export function isSpecial(e: Element): boolean {
   return !!e.getAttribute(VtreeImpl.SPECIAL_ATTR);
 }
 
+export function isOutOfFlow(node: Node): boolean {
+  if (!(node?.nodeType === 1)) return false;
+  const e = node as HTMLElement;
+  if (isSpecial(e)) return true;
+  const position = e.style?.position;
+  return position === "absolute" || position === "fixed";
+}
+
 export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {
   const viewNode = nodeContext?.viewNode;
   return viewNode?.nodeType === 1 && isSpecial(viewNode as Element);

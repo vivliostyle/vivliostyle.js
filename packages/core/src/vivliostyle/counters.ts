@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @fileoverview Counters and named strings
+ * @fileoverview Counters, named strings, and running elements
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
@@ -114,13 +114,14 @@ class CounterListener implements CssCascade.CounterListener {
 /**
  * Map for named string name, element offset, and the string value
  */
-type NamedStringValues = {
+type NamedRunningValues = {
   [name: string]: { [elementOffset: number]: string };
 };
 
 class CounterResolver implements CssCascade.CounterResolver {
   styler: CssStyler.Styler | null = null;
-  namedStringValues: NamedStringValues = {};
+  namedStringValues: NamedRunningValues = {};
+  runningElements: NamedRunningValues = {};
 
   constructor(
     public readonly counterStore: CounterStore,
@@ -343,114 +344,130 @@ class CounterResolver implements CssCascade.CounterResolver {
   getNamedStringVal(name: string, retrievePosition: string): Exprs.Val {
     return new Exprs.Native(
       this.pageScope,
-      () => {
-        const stringValues = this.namedStringValues[name];
-        if (!stringValues) {
-          return "";
+      () =>
+        this.getRunningValue(this.namedStringValues, name, retrievePosition),
+      `named-string-${retrievePosition}-${name}`,
+    );
+  }
+
+  /**
+   * Get value of the CSS element() function
+   * https://drafts.csswg.org/css-gcpm-3/#running-elements
+   */
+  getRunningElementVal(name: string, retrievePosition: string): Exprs.Val {
+    return new Exprs.Native(
+      this.pageScope,
+      () => this.getRunningValue(this.runningElements, name, retrievePosition),
+      `running-element-${retrievePosition}-${name}`,
+    );
+  }
+
+  private getRunningValue(
+    namedRunningValues: NamedRunningValues,
+    name: string,
+    retrievePosition: string,
+  ): string {
+    const runningValues = namedRunningValues[name];
+    if (!runningValues) {
+      return "";
+    }
+    const offsets = Object.keys(runningValues)
+      .map((a) => parseInt(a, 10))
+      .sort(Base.numberCompare);
+
+    const currentPage = this.counterStore.currentPage;
+    const pageStartOffset = currentPage.isBlankPage
+      ? currentPage.offset - 1
+      : currentPage.offset;
+    const pageLastOffset = currentPage.isBlankPage
+      ? pageStartOffset
+      : Math.max(
+          pageStartOffset,
+          ...Array.from(
+            currentPage.container.querySelectorAll(
+              `[${Base.ELEMENT_OFFSET_ATTR}]`,
+            ),
+          ).map((e) => parseInt(e.getAttribute(Base.ELEMENT_OFFSET_ATTR), 10)),
+        );
+
+    let firstOffset = -1;
+    let startOffset = -1;
+    let lastOffset = -1;
+    let firstExceptOffset = -1;
+
+    for (let i = 0; i < offsets.length; i++) {
+      const offset = offsets[i];
+      const offsetPrev = i > 0 ? offsets[i - 1] : -1;
+      const offsetNext = i < offsets.length - 1 ? offsets[i + 1] : -1;
+      if (offset > pageLastOffset) {
+        break;
+      }
+      if (offset >= pageStartOffset) {
+        if (firstOffset < 0) {
+          firstOffset = offset;
+          firstExceptOffset = -1;
         }
-        const offsets = Object.keys(stringValues)
-          .map((a) => parseInt(a, 10))
-          .sort(Base.numberCompare);
-
-        const currentPage = this.counterStore.currentPage;
-        const pageStartOffset = currentPage.isBlankPage
-          ? currentPage.offset - 1
-          : currentPage.offset;
-        const pageLastOffset = currentPage.isBlankPage
-          ? pageStartOffset
-          : Math.max(
-              pageStartOffset,
-              ...Array.from(
-                currentPage.container.querySelectorAll(
-                  `[${Base.ELEMENT_OFFSET_ATTR}]`,
-                ),
-              ).map((e) =>
-                parseInt(e.getAttribute(Base.ELEMENT_OFFSET_ATTR), 10),
-              ),
-            );
-
-        let firstOffset = -1;
-        let startOffset = -1;
-        let lastOffset = -1;
-        let firstExceptOffset = -1;
-
-        for (let i = 0; i < offsets.length; i++) {
-          const offset = offsets[i];
-          const offsetPrev = i > 0 ? offsets[i - 1] : -1;
-          const offsetNext = i < offsets.length - 1 ? offsets[i + 1] : -1;
-          if (offset > pageLastOffset) {
-            break;
-          }
-          if (offset >= pageStartOffset) {
-            if (firstOffset < 0) {
-              firstOffset = offset;
-              firstExceptOffset = -1;
+        if (startOffset < 0) {
+          if (offset === pageStartOffset) {
+            startOffset = offset;
+          } else {
+            if (offsetPrev < firstOffset) {
+              startOffset = offsetPrev;
             }
-            if (startOffset < 0) {
-              if (offset === pageStartOffset) {
+            // Check if the element at the offset is at beginning of the page
+            const elementAtOffset = currentPage.container.querySelector(
+              `[${Base.ELEMENT_OFFSET_ATTR}="${offset}"]`,
+            );
+            if (!elementAtOffset) {
+              // title or meta elements are not output, but should be treated as start
+              if (startOffset < 0) {
                 startOffset = offset;
-              } else {
-                if (offsetPrev < firstOffset) {
-                  startOffset = offsetPrev;
-                }
-                // Check if the element at the offset is at beginning of the page
-                const elementAtOffset = currentPage.container.querySelector(
-                  `[${Base.ELEMENT_OFFSET_ATTR}="${offset}"]`,
+              }
+            } else {
+              let elementAtPageStartOffset =
+                currentPage.container.querySelector(
+                  `[${Base.ELEMENT_OFFSET_ATTR}="${pageStartOffset}"]`,
                 );
-                if (!elementAtOffset) {
-                  // title or meta elements are not output, but should be treated as start
-                  if (startOffset < 0) {
+              if (!elementAtPageStartOffset) {
+                // The element at pageStartOffset is not found when page break occured
+                // within an element, so use the ancestor element with offset 0 instead.
+                elementAtPageStartOffset = currentPage.container.querySelector(
+                  `[${Base.ELEMENT_OFFSET_ATTR}="0"]`,
+                );
+              }
+              if (elementAtPageStartOffset) {
+                // Find if the element at the offset is (the first child of)* the element at page start
+                for (
+                  let element = elementAtPageStartOffset;
+                  element;
+                  element = element.firstElementChild
+                ) {
+                  if (element === elementAtOffset) {
                     startOffset = offset;
-                  }
-                } else {
-                  let elementAtPageStartOffset =
-                    currentPage.container.querySelector(
-                      `[${Base.ELEMENT_OFFSET_ATTR}="${pageStartOffset}"]`,
-                    );
-                  if (!elementAtPageStartOffset) {
-                    // The element at pageStartOffset is not found when page break occured
-                    // within an element, so use the ancestor element with offset 0 instead.
-                    elementAtPageStartOffset =
-                      currentPage.container.querySelector(
-                        `[${Base.ELEMENT_OFFSET_ATTR}="0"]`,
-                      );
-                  }
-                  if (elementAtPageStartOffset) {
-                    // Find if the element at the offset is (the first child of)* the element at page start
-                    for (
-                      let element = elementAtPageStartOffset;
-                      element;
-                      element = element.firstElementChild
-                    ) {
-                      if (element === elementAtOffset) {
-                        startOffset = offset;
-                        break;
-                      }
-                    }
+                    break;
                   }
                 }
               }
             }
-            lastOffset = offset;
-          } else if (offsetNext > pageLastOffset || offsetNext < 0) {
-            firstOffset = startOffset = lastOffset = firstExceptOffset = offset;
           }
         }
+        lastOffset = offset;
+      } else if (offsetNext > pageLastOffset || offsetNext < 0) {
+        firstOffset = startOffset = lastOffset = firstExceptOffset = offset;
+      }
+    }
 
-        const stringValue =
-          stringValues[
-            {
-              first: firstOffset,
-              start: startOffset,
-              last: lastOffset,
-              "first-except": firstExceptOffset,
-            }[retrievePosition]
-          ] || "";
+    const runningValue =
+      runningValues[
+        {
+          first: firstOffset,
+          start: startOffset,
+          last: lastOffset,
+          "first-except": firstExceptOffset,
+        }[retrievePosition]
+      ] || "";
 
-        return stringValue;
-      },
-      `named-string-${retrievePosition}-${name}`,
-    );
+    return runningValue;
   }
 
   /**
@@ -460,11 +477,21 @@ class CounterResolver implements CssCascade.CounterResolver {
   setNamedString(
     name: string,
     stringValue: string,
-    cascadeInstance: CssCascade.CascadeInstance,
+    elementOffset: number,
   ): void {
     const values =
       this.namedStringValues[name] || (this.namedStringValues[name] = {});
-    values[cascadeInstance.currentElementOffset] = stringValue;
+    values[elementOffset] = stringValue;
+  }
+
+  /**
+   * Set running element
+   * https://drafts.csswg.org/css-gcpm-3/#running-elements
+   */
+  setRunningElement(name: string, elementOffset: number): void {
+    const values =
+      this.runningElements[name] || (this.runningElements[name] = {});
+    values[elementOffset] = String(elementOffset);
   }
 }
 
@@ -794,6 +821,18 @@ export class CounterStore {
         node.setAttribute("data-viv-leader", expr.key);
         node.setAttribute("data-viv-leader-value", val);
         return node;
+      } else if (ex.str.startsWith("running-element-")) {
+        const elemList =
+          val &&
+          document.querySelectorAll(`[${Base.ELEMENT_OFFSET_ATTR}="${val}"]`);
+        if (!elemList || elemList.length === 0) {
+          return null;
+        }
+        const lastElem = elemList[elemList.length - 1];
+        const clonedElem = lastElem.cloneNode(true) as HTMLElement;
+        clonedElem.style.position = "";
+        clonedElem.style.visibility = "";
+        return clonedElem;
       }
     }
 

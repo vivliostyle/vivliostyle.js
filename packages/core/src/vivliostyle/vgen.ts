@@ -454,10 +454,17 @@ export class ViewFactory
       },
     );
 
+    if (Display.isRunning(computedStyle["position"])) {
+      // Running elements
+      computedStyle["position"] = Css.ident.fixed;
+      computedStyle["visibility"] = Css.ident.hidden;
+      return vertical;
+    }
+
     // Compute values of display, position and float
     const position = computedStyle["position"] as Css.Ident;
     const float = computedStyle["float"] as Css.Ident;
-    const displayValues = Display.getComputedDislayValue(
+    const displayValues = Display.getComputedDisplayValue(
       (computedStyle["display"] as Css.Ident) || Css.ident.inline,
       position,
       float,
@@ -705,6 +712,7 @@ export class ViewFactory
       elementStyle = inheritedValues.elementStyle;
       this.nodeContext.lang = inheritedValues.lang;
     }
+    const positionCV: CssCascade.CascadeValue = elementStyle["position"];
     const floatCV: CssCascade.CascadeValue = elementStyle["float"];
     const floatReferenceCV: CssCascade.CascadeValue =
       elementStyle["float-reference"];
@@ -718,8 +726,8 @@ export class ViewFactory
         : null;
     if (
       this.nodeContext.parent &&
-      floatReference &&
-      PageFloats.isPageFloat(floatReference)
+      (Display.isRunning(positionCV?.value) ||
+        (floatReference && PageFloats.isPageFloat(floatReference)))
     ) {
       // Since a page float will be detached from a view node of its parent,
       // inherited properties need to be inherited from its source parent.
@@ -950,7 +958,12 @@ export class ViewFactory
         } else {
           this.nodeContext.pageType = pageType;
         }
-        if (this.styler.cascade.currentPageType !== pageType) {
+        if (
+          this.styler.cascade.currentPageType !== pageType &&
+          // Fixed positioned or running elements should not affect page type
+          // unless page type is explicitly set
+          !(!pageType && computedStyle["position"] === Css.ident.fixed)
+        ) {
           if (!Break.isSpreadBreakValue(this.nodeContext.breakBefore)) {
             this.nodeContext.breakBefore = "page";
           }
@@ -1383,7 +1396,24 @@ export class ViewFactory
           if (image !== result) {
             (result as HTMLImageElement).src = delayedSrc;
           }
-          if (!hasAutoWidth && !hasAutoHeight) {
+          const isInsideRunningElement = (): boolean => {
+            // Check if the image is inside a position:fixed or running element
+            // which is converted to position:fixed.
+            if (computedStyle["position"] === Css.ident.fixed) {
+              return true;
+            }
+            for (
+              let p = this.nodeContext.parent?.viewNode as HTMLElement;
+              p && p !== this.viewRoot;
+              p = p.parentElement
+            ) {
+              if (p.style?.["position"] === "fixed") {
+                return true;
+              }
+            }
+            return false;
+          };
+          if (!hasAutoWidth && !hasAutoHeight && !isInsideRunningElement()) {
             // No need to wait for the image, does not affect layout
             this.page.fetchers.push(imageFetcher);
           } else {
@@ -1428,7 +1458,9 @@ export class ViewFactory
               // truncated to zero.
               Break.setMarginDiscardFlag(result, "block-start");
             }
-          } else {
+          } else if (
+            !Display.isAbsolutelyPositioned(computedStyle["position"])
+          ) {
             const marginBreak = computedStyle["margin-break"];
 
             // Detect forced or unforced break at this point
@@ -1538,9 +1570,8 @@ export class ViewFactory
         let node = parentViewNode?.firstChild;
         while (
           node &&
-          (node.nodeType === 1
-            ? LayoutHelper.isSpecial(node as Element)
-            : Vtree.canIgnore(node, nc.parent.whitespace))
+          (Vtree.canIgnore(node, nc.parent.whitespace) ||
+            LayoutHelper.isOutOfFlow(node))
         ) {
           node = node.nextSibling;
         }

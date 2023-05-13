@@ -2718,13 +2718,38 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let trailingEdgeContexts: Vtree.NodeContext[] = [];
     let onStartEdges = false;
 
-    function needForcedBreak() {
+    function needForcedBreak(): boolean {
       // leadingEdge=true means that we are at the beginning of the new column
       // and hence must avoid a break (Otherwise leading to an infinite loop)
       return (
         !!forcedBreakValue ||
-        (!leadingEdge && Break.isForcedBreakValue(breakAtTheEdge))
+        (!leadingEdge &&
+          Break.isForcedBreakValue(breakAtTheEdge) &&
+          // prevent unnecessary breaks at the beginning of the column/page
+          // after out-of-flow elements, e.g. position:absolute or running().
+          // (Issue #1176)
+          !atLeadingEdgeIgnoringOutOfFlow())
       );
+    }
+
+    function atLeadingEdgeIgnoringOutOfFlow(): boolean {
+      if (!lastAfterNodeContext) {
+        return false;
+      }
+      for (let nc = lastAfterNodeContext; nc?.parent; nc = nc.parent) {
+        let node = nc.after ? nc.viewNode : nc.viewNode?.previousSibling;
+        while (
+          node &&
+          (VtreeImpl.canIgnore(node, nc.parent.whitespace) ||
+            LayoutHelper.isOutOfFlow(node))
+        ) {
+          node = node.previousSibling;
+        }
+        if (node) {
+          return false;
+        }
+      }
+      return true;
     }
 
     const processForcedBreak = () => {

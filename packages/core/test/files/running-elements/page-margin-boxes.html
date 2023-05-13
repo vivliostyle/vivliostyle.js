@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page Margin Boxes</title>
+    <style>
+
+@page {
+  size: A4;
+  margin: 60mm 42mm;
+  @top-left-corner {
+    border: 1px solid silver;
+  }
+  @top-left {
+    border: 1px solid silver;
+  }
+  @top-center {
+    border: 1px solid silver;
+  }
+  @top-right {
+    border: 1px solid silver;
+  }
+  @top-right-corner {
+    border: 1px solid silver;
+  }
+  @left-top {
+    border: 1px solid silver;
+  }
+  @left-middle {
+    border: 1px solid silver;
+  }
+  @left-bottom {
+    border: 1px solid silver;
+  }
+  @right-top {
+    border: 1px solid silver;
+  }
+  @right-middle {
+    border: 1px solid silver;
+  }
+  @right-bottom {
+    border: 1px solid silver;
+  }
+  @bottom-left-corner {
+    border: 1px solid silver;
+  }
+  @bottom-left {
+    border: 1px solid silver;
+  }
+  @bottom-center {
+    border: 1px solid silver;
+  }
+  @bottom-right {
+    border: 1px solid silver;
+  }
+  @bottom-right-corner {
+    border: 1px solid silver;
+  }
+}
+
+@page :first {
+  @top-left-corner {
+    content: "top-left-corner";
+  }
+  @top-left {
+    content: "top-left";
+  }
+  @top-center {
+    content: "top-center";
+  }
+  @top-right {
+    content: "top-right";
+  }
+  @top-right-corner {
+    content: "top-right-corner";
+  }
+  @left-top {
+    content: "left-top";
+  }
+  @left-middle {
+    content: "left-middle";
+  }
+  @left-bottom {
+    content: "left-bottom";
+  }
+  @right-top {
+    content: "right-top";
+  }
+  @right-middle {
+    content: "right-middle";
+  }
+  @right-bottom {
+    content: "right-bottom";
+  }
+  @bottom-left-corner {
+    content: "bottom-left-corner";
+  }
+  @bottom-left {
+    content: "bottom-left";
+  }
+  @bottom-center {
+    content: "bottom-center";
+  }
+  @bottom-right {
+    content: "bottom-right";
+  }
+  @bottom-right-corner {
+    content: "bottom-right-corner";
+  }
+}
+
+@page single-image {
+  @top-left-corner {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-left {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-center {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-right {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-right-corner {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @left-top {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @left-middle {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @left-bottom {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @right-top {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @right-middle {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @right-bottom {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-left-corner {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-left {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-center {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-right {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-right-corner {
+    content: url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+}
+
+@page text-and-image {
+  @top-left-corner {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-left {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-center {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-right {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @top-right-corner {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @left-top {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @left-middle {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @left-bottom {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @right-top {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @right-middle {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @right-bottom {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-left-corner {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-left {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-center {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-right {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+  @bottom-right-corner {
+    content: "Text and " url(https://vivliostyle.org/assets/vivliostyle-icon.png);
+  }
+}
+
+@page single-running-element {
+  @top-left-corner {
+    content: element(RunningImage);
+  }
+  @top-left {
+    content: element(RunningImage);
+  }
+  @top-center {
+    content: element(RunningImage);
+  }
+  @top-right {
+    content: element(RunningImage);
+  }
+  @top-right-corner {
+    content: element(RunningImage);
+  }
+  @left-top {
+    content: element(RunningImage);
+  }
+  @left-middle {
+    content: element(RunningImage);
+  }
+  @left-bottom {
+    content: element(RunningImage);
+  }
+  @right-top {
+    content: element(RunningImage);
+  }
+  @right-middle {
+    content: element(RunningImage);
+  }
+  @right-bottom {
+    content: element(RunningImage);
+  }
+  @bottom-left-corner {
+    content: element(RunningImage);
+  }
+  @bottom-left {
+    content: element(RunningImage);
+  }
+  @bottom-center {
+    content: element(RunningImage);
+  }
+  @bottom-right {
+    content: element(RunningImage);
+  }
+  @bottom-right-corner {
+    content: element(RunningImage);
+  }
+}
+
+@page text-and-running-element {
+  @top-left-corner {
+    content: "Text and " element(RunningImage);
+  }
+  @top-left {
+    content: "Text and " element(RunningImage);
+  }
+  @top-center {
+    content: "Text and " element(RunningImage);
+  }
+  @top-right {
+    content: "Text and " element(RunningImage);
+  }
+  @top-right-corner {
+    content: "Text and " element(RunningImage);
+  }
+  @left-top {
+    content: "Text and " element(RunningImage);
+  }
+  @left-middle {
+    content: "Text and " element(RunningImage);
+  }
+  @left-bottom {
+    content: "Text and " element(RunningImage);
+  }
+  @right-top {
+    content: "Text and " element(RunningImage);
+  }
+  @right-middle {
+    content: "Text and " element(RunningImage);
+  }
+  @right-bottom {
+    content: "Text and " element(RunningImage);
+  }
+  @bottom-left-corner {
+    content: "Text and " element(RunningImage);
+  }
+  @bottom-left {
+    content: "Text and " element(RunningImage);
+  }
+  @bottom-center {
+    content: "Text and " element(RunningImage);
+  }
+  @bottom-right {
+    content: "Text and " element(RunningImage);
+  }
+  @bottom-right-corner {
+    content: "Text and " element(RunningImage);
+  }
+}
+
+.single-image {
+  page: single-image;
+}
+
+.text-and-image {
+  page: text-and-image;
+}
+
+img.running {
+  position: running(RunningImage);
+  background: cyan;
+}
+
+img.block {
+  display: block;
+  background: orange;
+}
+
+.single-running-element {
+  page: single-running-element;
+}
+
+.text-and-running-element {
+  page: text-and-running-element;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+    </style>
+  </head>
+  <body>
+    <h1>Page Margin Boxes</h1>
+    <section class="single-image">
+      <h2>Single Image</h2>
+      <pre>content: url(Image.png);</pre>
+    </section>
+    <section class="text-and-image">
+      <h2>Text and Image</h2>
+      <pre>content: "Text and " url(Image.png);</pre>
+    </section>
+    <section class="single-running-element">
+      <img class="running" src="https://vivliostyle.org/assets/vivliostyle-icon.png" alt="Image"/>
+      <h2>Single Running Element (image)</h2>
+      <pre>content: element(RunningImage);</pre>
+    </section>
+    <section class="text-and-running-element">
+      <h2>Text and Running Element (image)</h2>
+      <pre>content: "Text and " element(RunningImage);</pre>
+    </section>
+    <section class="single-running-element">
+      <img class="running block" src="https://vivliostyle.org/assets/vivliostyle-icon.png" alt="Image"/>
+      <h2>Single Running Element (block-level image)</h2>
+      <pre>content: element(RunningImage);</pre>
+    </section>
+    <section class="text-and-running-element">
+      <h2>Text and Running Element (block-level image)</h2>
+      <pre>content: "Text and " element(RunningImage);</pre>
+    </section>
+  </body>
+</html>
