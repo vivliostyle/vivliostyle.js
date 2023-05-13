@@ -54,6 +54,9 @@ ko.bindingHandlers.swipePages = {
         if (event.touches.length > 1) {
           return;
         }
+        if (document.getSelection().type === "Range") {
+          return; // disable page swipe during text selection
+        }
         if (xStart !== null && yStart !== null) {
           const xDiff = event.touches[0].clientX - xStart;
           const yDiff = event.touches[0].clientY - yStart;
