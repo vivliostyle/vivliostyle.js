@@ -2511,6 +2511,7 @@ export class ViewFactory
     if (
       nodeContext.inline &&
       nodeContext.after &&
+      !nodeContext.shadowContext &&
       nodeContext.sourceNode.nextSibling?.nodeType === 1
     ) {
       const nextElem = nodeContext.sourceNode.nextSibling as Element;
