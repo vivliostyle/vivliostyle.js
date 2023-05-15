@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.25.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.3...v2.25.0) (2023-05-15)
+
+### Bug Fixes
+
+- **viewer:** prevent wrong text selection touching page navigation buttons ([8ba017f](https://github.com/vivliostyle/vivliostyle.js/commit/8ba017fc0a8c4aa84dde6ee2e09e9eaa41b8096e))
+
 ## [2.24.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.2...v2.24.3) (2023-04-20)
 
 ### Bug Fixes

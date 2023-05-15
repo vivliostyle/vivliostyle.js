@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.25.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.3...v2.25.0) (2023-05-15)
+
+### Bug Fixes
+
+- content(first-letter) in string-set property should respect ::before/after pseudo-elements ([2a142e3](https://github.com/vivliostyle/vivliostyle.js/commit/2a142e388d67f6f08593005d2f8c16ca209ee881)), closes [#1174](https://github.com/vivliostyle/vivliostyle.js/issues/1174)
+- image size in page margin boxes ([2f08632](https://github.com/vivliostyle/vivliostyle.js/commit/2f086327f8f42053fd056339f6bd2ea3de45a560)), closes [#1177](https://github.com/vivliostyle/vivliostyle.js/issues/1177)
+- some list style types are unavailable in list-style shorthand property ([52c3afd](https://github.com/vivliostyle/vivliostyle.js/commit/52c3afd5f1c22420b64949ff3d14265f0134340b)), closes [#1184](https://github.com/vivliostyle/vivliostyle.js/issues/1184)
+- text-spacing:none for pre/code/kbd/samp/tt elements should be default ([a69b921](https://github.com/vivliostyle/vivliostyle.js/commit/a69b921b21c3ed2207b2be63beaa5e4cb4b51f6e))
+- unnecessary forced page breaks at the beginning of page after out-of-flow elements ([a867344](https://github.com/vivliostyle/vivliostyle.js/commit/a8673443a4c70a1c714c1edbe2bbc8504b45e41c)), closes [#1176](https://github.com/vivliostyle/vivliostyle.js/issues/1176)
+- Vivliostyle crashes when using CSS namespaces ([2f54e24](https://github.com/vivliostyle/vivliostyle.js/commit/2f54e24f699b27b1b98a9a06840299c27236dd7d)), closes [#1172](https://github.com/vivliostyle/vivliostyle.js/issues/1172)
+- Vivliostyle crashes with "Error: Function xxx is undefined" ([619803d](https://github.com/vivliostyle/vivliostyle.js/commit/619803d5616c4191796d4b9d4d41618957624449))
+- Vivliostyle crashes with "Error: Internal error" ([26284e0](https://github.com/vivliostyle/vivliostyle.js/commit/26284e0893622757aca8c4820a25ca74e77705db)), closes [#1178](https://github.com/vivliostyle/vivliostyle.js/issues/1178)
+- widows and orphans properties are ignored inside multi-column box ([f61931e](https://github.com/vivliostyle/vivliostyle.js/commit/f61931e53f64dae2107f0b036d46fbee219a0d05)), closes [#1182](https://github.com/vivliostyle/vivliostyle.js/issues/1182)
+- wrong layout with ::first-letter and ::after pseudo-elements ([f59e6bd](https://github.com/vivliostyle/vivliostyle.js/commit/f59e6bd08a17dc131cf56ec8e4e6ec2c7991ab7e)), closes [#1175](https://github.com/vivliostyle/vivliostyle.js/issues/1175)
+
+### Features
+
+- Add support for CSS running elements ([68adafe](https://github.com/vivliostyle/vivliostyle.js/commit/68adafe9bb26c708b6585979cb65b7810836fdff)), closes [#424](https://github.com/vivliostyle/vivliostyle.js/issues/424)
+
 ## [2.24.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.2...v2.24.3) (2023-04-20)
 
 ### Bug Fixes
