@@ -1157,6 +1157,7 @@ html|code,
 html|kbd,
 html|samp {
   font-family: monospace;
+  text-spacing: none;
 }
 html|pre {
   white-space: pre;
