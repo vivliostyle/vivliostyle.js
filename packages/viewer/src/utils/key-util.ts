@@ -36,7 +36,7 @@ const Keys = {
 // CAUTION: This function covers only part of common keys on a keyboard. Keys not covered by the implementation are identified as KeyboardEvent.key, KeyboardEvent.keyIdentifier, or "Unidentified".
 function identifyKeyFromEvent(
   event: KeyboardEvent,
-): typeof Keys[keyof typeof Keys] {
+): (typeof Keys)[keyof typeof Keys] {
   const key = event.key;
   const keyIdentifier = (event as KeyboardEvent & { keyIdentifier: string })
     .keyIdentifier;
