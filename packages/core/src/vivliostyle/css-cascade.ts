@@ -4727,9 +4727,13 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       "",
     );
     if (exprVal instanceof Css.Expr) {
-      const exprResult = exprVal.expr.evaluate(this.context);
-      if (typeof exprResult === "number") {
-        value = new Css.Numeric(exprResult, "px");
+      try {
+        const exprResult = exprVal.expr.evaluate(this.context);
+        if (typeof exprResult === "number") {
+          value = new Css.Numeric(exprResult, "px");
+        }
+      } catch (err) {
+        Logging.logger.warn(err);
       }
     }
     return value;
