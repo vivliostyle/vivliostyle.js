@@ -649,7 +649,12 @@ export class ViewFactory
           } else {
             props[name] = value;
           }
-          delete computedStyle[name];
+          if (!["widows", "orphans"].includes(name)) {
+            // Note: widows and orphans are polyfilled for page and
+            // root multi-column, but they should be left to the browser
+            // for multi-column boxes inside body. (Issue #1182)
+            delete computedStyle[name];
+          }
         }
       });
     }
