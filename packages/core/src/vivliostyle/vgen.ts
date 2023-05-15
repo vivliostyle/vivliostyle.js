@@ -1923,8 +1923,16 @@ export class ViewFactory
       needToProcessChildren = processChildren;
       this.nodeContext.viewNode = this.viewNode;
       if (this.viewNode) {
-        const parent = this.nodeContext.parent
-          ? (this.nodeContext.parent.viewNode as Element)
+        const isPseudo = (node: Node, name: string): boolean =>
+          node?.nodeType === 1 &&
+          PseudoElement.getPseudoName(node as Element) === name;
+        const p = this.nodeContext.parent;
+        const parent = p
+          ? isPseudo(this.viewNode, "after") &&
+            isPseudo(p.viewNode, "first-letter") &&
+            p.viewNode?.hasChildNodes()
+            ? (p.parent.viewNode as Element) // Fix for issue #1175
+            : (p.viewNode as Element)
           : this.viewRoot;
         if (parent) {
           if (
