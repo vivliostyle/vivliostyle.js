@@ -289,10 +289,7 @@ caption-side = top | bottom;
 clear = none | left | right | top | bottom | both | all | same;
 clip = rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 color = COLOR;
-LIST_STYLE_TYPE = disc | circle | square | decimal | decimal-leading-zero | lower-roman |
-    upper-roman | lower-greek | lower-latin | upper-latin | armenian | georgian | lower-alpha |
-    upper-alpha | russian | upper-russian | lower-russian | cjk-ideographic | trad-chinese-informal |
-    hebrew | none;
+LIST_STYLE_TYPE = IDENT;
 TYPE_OR_UNIT_IN_ATTR = string | color | url | integer | number | length | angle | time | frequency;
 ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [ STRING | IDENT | COLOR | INT | NUM | PLENGTH | ANGLE | POS_TIME | FREQUENCY]?);
 CONTENT_LIST = [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
@@ -767,7 +764,7 @@ border-radius = INSETS_SLASH border-top-left-radius border-top-right-radius
 flex-flow = flex-direction flex-wrap;
 oeb-column-number = column-count;
 outline = outline-width outline-style outline-color;
-list-style = list-style-type list-style-position list-style-image;
+list-style = list-style-position list-style-type list-style-image;
 margin = INSETS margin-top margin-right margin-bottom margin-left;
 padding = INSETS padding-top padding-right padding-bottom padding-left;
 font = FONT font-style font-variant_css2 font-weight font-stretch_css3 /* font-size line-height font-family are special-cased */;
