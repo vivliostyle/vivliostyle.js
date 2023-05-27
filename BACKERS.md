@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **\$77.00 per month**. Please consider helping us.
+The current amount of support is **\$78.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -37,3 +37,5 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
+<p><a href="https://github.com/okuzawats"><img src="https://avatars3.githubusercontent.com/u/12797442?s=460&amp;v=4" title="okuzawats" width="60" height="60" style="max-width:100%;"></a>
+okuzawats⭐️
