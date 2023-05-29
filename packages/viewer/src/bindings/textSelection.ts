@@ -62,6 +62,13 @@ ko.bindingHandlers.textSelection = {
           return;
         }
         const range = selection.getRangeAt(0);
+        if (
+          !range.commonAncestorContainer.parentElement.closest(
+            "[data-vivliostyle-spread-container]",
+          )
+        ) {
+          return;
+        }
         const pageArea = range.commonAncestorContainer.parentElement.closest(
           "[data-vivliostyle-page-box] > div",
         ) as HTMLElement;
