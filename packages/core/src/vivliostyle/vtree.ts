@@ -1378,6 +1378,15 @@ export class ContentPropertyHandler extends Css.Visitor {
       }
       assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
+      if (
+        !node &&
+        val &&
+        ex instanceof Exprs.Native &&
+        ex.str.startsWith("running-element-")
+      ) {
+        // Prevent wrong running element output when the element is not found (Issue #1196)
+        val = "";
+      }
       this.visitStrInner(val, node);
     }
     return null;
