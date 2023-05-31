@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.0...v2.25.1) (2023-05-31)
+
+### Bug Fixes
+
+- **viewer:** marker edit menu closes unexpectedly when editing memo ([110b8e9](https://github.com/vivliostyle/vivliostyle.js/commit/110b8e98db7dc9e401359bf3171816dcd8100b8f))
+
 # [2.25.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.3...v2.25.0) (2023-05-15)
 
 ### Bug Fixes

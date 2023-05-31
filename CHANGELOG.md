@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.0...v2.25.1) (2023-05-31)
+
+### Bug Fixes
+
+- page counter in running element not incremented properly ([7bf1b6d](https://github.com/vivliostyle/vivliostyle.js/commit/7bf1b6dbcc6033f4d65655eb7aa76c26d86de9d4)), closes [#1194](https://github.com/vivliostyle/vivliostyle.js/issues/1194)
+- **viewer:** marker edit menu closes unexpectedly when editing memo ([110b8e9](https://github.com/vivliostyle/vivliostyle.js/commit/110b8e98db7dc9e401359bf3171816dcd8100b8f))
+- wrong running element output with position:running() on display:none element ([c944a09](https://github.com/vivliostyle/vivliostyle.js/commit/c944a090990a0d378b519c0c099b4f5504d1f10b)), closes [#1196](https://github.com/vivliostyle/vivliostyle.js/issues/1196)
+
 # [2.25.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.24.3...v2.25.0) (2023-05-15)
 
 ### Bug Fixes
