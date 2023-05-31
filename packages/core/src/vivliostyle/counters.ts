@@ -514,6 +514,10 @@ export class CounterStore {
     expr: Exprs.Val;
     format: (p1: number[]) => string;
   }[] = [];
+  private pageCounterExprs: {
+    expr: Exprs.Val;
+    format: (p1: number[]) => string;
+  }[] = [];
 
   constructor(
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
@@ -801,6 +805,8 @@ export class CounterStore {
   ) {
     if (name === "pages") {
       this.pagesCounterExprs.push({ expr, format });
+    } else {
+      this.pageCounterExprs.push({ expr, format });
     }
   }
 
@@ -814,14 +820,13 @@ export class CounterStore {
     document: Document,
   ) {
     if (expr instanceof Exprs.Native) {
-      const ex = expr as Exprs.Native;
-      if (ex.str == "viv-leader") {
+      if (expr.str == "viv-leader") {
         const node = document.createElementNS(Base.NS.XHTML, "span");
         node.textContent = val;
         node.setAttribute("data-viv-leader", expr.key);
         node.setAttribute("data-viv-leader-value", val);
         return node;
-      } else if (ex.str.startsWith("running-element-")) {
+      } else if (expr.str.startsWith("running-element-")) {
         const elemList =
           val &&
           document.querySelectorAll(`[${Base.ELEMENT_OFFSET_ATTR}="${val}"]`);
@@ -830,20 +835,42 @@ export class CounterStore {
         }
         const lastElem = elemList[elemList.length - 1];
         const clonedElem = lastElem.cloneNode(true) as HTMLElement;
+        this.fixPageCounterInRunningElement(clonedElem);
         clonedElem.style.position = "";
         clonedElem.style.visibility = "";
         return clonedElem;
       }
     }
 
-    const found = this.pagesCounterExprs.findIndex((o) => o.expr === expr) >= 0;
-    if (found) {
+    const foundPagesCounter =
+      this.pagesCounterExprs.findIndex((o) => o.expr === expr) >= 0;
+    const foundPageCounter =
+      !foundPagesCounter &&
+      this.pageCounterExprs.findIndex((o) => o.expr === expr) >= 0;
+    if (foundPagesCounter || foundPageCounter) {
       const node = document.createElementNS(Base.NS.XHTML, "span");
       node.textContent = val;
-      node.setAttribute(PAGES_COUNTER_ATTR, expr.key);
+      node.setAttribute(
+        foundPagesCounter ? PAGES_COUNTER_ATTR : PAGE_COUNTER_ATTR,
+        expr.key,
+      );
       return node;
     } else {
       return null;
+    }
+  }
+
+  private fixPageCounterInRunningElement(runningElem: Element): void {
+    const nodes = runningElem.querySelectorAll(`[${PAGE_COUNTER_ATTR}]`);
+    for (const node of nodes) {
+      const key = node.getAttribute(PAGE_COUNTER_ATTR);
+      const counterExpr = this.pageCounterExprs.find((o) => o.expr.key === key);
+      const str = (counterExpr?.expr as Exprs.Native).str;
+      const counterName = str?.replace(/^page-counters?-/, "");
+      const counterValues = this.currentPageCounters[counterName];
+      if (counterValues) {
+        node.textContent = counterExpr.format(counterValues);
+      }
     }
   }
 
@@ -864,6 +891,7 @@ export class CounterStore {
 }
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
+export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
 
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(
