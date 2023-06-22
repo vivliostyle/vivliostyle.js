@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.1...v2.25.2) (2023-06-22)
+
+### Bug Fixes
+
+- Variable fonts not working properly ([cf19623](https://github.com/vivliostyle/vivliostyle.js/commit/cf196235201f0369901a9963afa570d90bac58b4)), closes [#1198](https://github.com/vivliostyle/vivliostyle.js/issues/1198)
+
 ## [2.25.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.0...v2.25.1) (2023-05-31)
 
 ### Bug Fixes
