@@ -255,11 +255,13 @@ export class Mapper {
     } else {
       fetcher = new TaskUtil.Fetcher(() => {
         const frame: Task.Frame<Face> = Task.newFrame("loadFont");
+        // Get URL from `@font-face` src value.
+        const url = src.replace(/^url\("([^"]+)"\).*$/, "$1");
         const deobfuscator = documentFaces.deobfuscator
-          ? documentFaces.deobfuscator(src)
+          ? documentFaces.deobfuscator(url)
           : null;
         if (deobfuscator) {
-          Net.ajax(src, Net.XMLHttpRequestResponseType.BLOB).then((xhr) => {
+          Net.ajax(url, Net.XMLHttpRequestResponseType.BLOB).then((xhr) => {
             if (!xhr.responseBlob) {
               frame.finish(null);
               return;
