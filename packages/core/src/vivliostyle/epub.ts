@@ -496,15 +496,8 @@ export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
   const sha1Sum = SHA1.bytesToSHA1Int8(uid);
   return (blob) => {
     const frame = Task.newFrame("deobfuscator") as Task.Frame<Blob>;
-    let head: Blob;
-    let tail: Blob;
-    if (blob.slice) {
-      head = blob.slice(0, 1040);
-      tail = blob.slice(1040, blob.size);
-    } else {
-      head = blob["webkitSlice"](0, 1040);
-      tail = blob["webkitSlice"](1040, blob.size - 1040);
-    }
+    const head = blob.slice(0, 1040);
+    const tail = blob.slice(1040, blob.size);
     Net.readBlob(head).then((buf) => {
       const dataView = new DataView(buf);
       for (let k = 0; k < dataView.byteLength; k++) {

@@ -173,14 +173,14 @@ export function readBlob(blob: Blob): Task.Result<ArrayBuffer> {
 }
 
 export function revokeObjectURL(url: string): void {
-  (window["URL"] || window["webkitURL"]).revokeObjectURL(url);
+  URL.revokeObjectURL(url);
 }
 
 /**
  * @return url
  */
 export function createObjectURL(blob: Blob): string {
-  return (window["URL"] || window["webkitURL"]).createObjectURL(blob);
+  return URL.createObjectURL(blob);
 }
 
 /**
