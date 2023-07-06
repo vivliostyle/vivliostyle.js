@@ -81,7 +81,6 @@ export class AdaptiveViewer {
   readyState: Constants.ReadyState;
   packageURL: string[];
   opf: Epub.OPFDoc;
-  haveZipMetadata: boolean;
   touchActive: boolean;
   touchX: number;
   touchY: number;
@@ -175,7 +174,6 @@ export class AdaptiveViewer {
     this.readyState = Constants.ReadyState.LOADING;
     this.packageURL = [];
     this.opf = null;
-    this.haveZipMetadata = false;
     this.touchActive = false;
     this.touchX = 0;
     this.touchY = 0;
@@ -240,7 +238,6 @@ export class AdaptiveViewer {
     this.setReadyState(Constants.ReadyState.LOADING);
     const url = command["url"] as string;
     const fragment = command["fragment"] as string | null;
-    const haveZipMetadata = !!command["zipmeta"];
     const authorStyleSheet = command["authorStyleSheet"] as {
       url: string | null;
       text: string | null;
@@ -259,7 +256,7 @@ export class AdaptiveViewer {
           this.window.location.href,
         );
         this.packageURL = [pubURL];
-        store.loadPubDoc(pubURL, haveZipMetadata).then((opf) => {
+        store.loadPubDoc(pubURL).then((opf) => {
           if (opf) {
             this.opf = opf;
             this.render(fragment).then(() => {

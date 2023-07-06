@@ -92,17 +92,13 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return this.jsonStore.load(url, opt_required, opt_message);
   }
 
-  startLoadingAsJSON(url: string): void {
-    this.jsonStore.fetch(url);
-  }
-
-  loadPubDoc(url: string, haveZipMetadata: boolean): Task.Result<OPFDoc> {
+  loadPubDoc(url: string): Task.Result<OPFDoc> {
     const frame: Task.Frame<OPFDoc> = Task.newFrame("loadPubDoc");
 
     Net.ajax(url, null, "HEAD").then((response) => {
       if (response.status >= 400) {
         // This url can be the root of an unzipped EPUB.
-        this.loadEPUBDoc(url, haveZipMetadata).then((opf) => {
+        this.loadEPUBDoc(url).then((opf) => {
           if (opf) {
             frame.finish(opf);
             return;
@@ -136,7 +132,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         ) {
           // EPUB OPF
           const [, pubURL, root] = url.match(/^((?:.*\/)?)([^/]*)$/);
-          this.loadOPF(pubURL, root, haveZipMetadata).thenFinish(frame);
+          this.loadOPF(pubURL, root).thenFinish(frame);
         } else if (
           response.contentType == "application/ld+json" ||
           response.contentType == "application/webpub+json" ||
@@ -164,7 +160,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
               return;
             }
             // This url can be the root of an unzipped EPUB.
-            this.loadEPUBDoc(url, haveZipMetadata).then((opf) => {
+            this.loadEPUBDoc(url).then((opf) => {
               if (opf) {
                 frame.finish(opf);
                 return;
@@ -179,13 +175,10 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return frame.result();
   }
 
-  loadEPUBDoc(url: string, haveZipMetadata: boolean): Task.Result<OPFDoc> {
+  loadEPUBDoc(url: string): Task.Result<OPFDoc> {
     const frame: Task.Frame<OPFDoc> = Task.newFrame("loadEPUBDoc");
     if (!url.endsWith("/")) {
       url = url + "/";
-    }
-    if (haveZipMetadata) {
-      this.startLoadingAsJSON(url + "?r=list");
     }
     this.startLoadingAsPlainXML(url + "META-INF/encryption.xml");
     const containerURL = url + "META-INF/container.xml";
@@ -199,7 +192,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
           .attribute("full-path");
         for (const root of roots) {
           if (root) {
-            this.loadOPF(url, root, haveZipMetadata).thenFinish(frame);
+            this.loadOPF(url, root).thenFinish(frame);
             return;
           }
         }
@@ -209,11 +202,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return frame.result();
   }
 
-  loadOPF(
-    pubURL: string,
-    root: string,
-    haveZipMetadata: boolean,
-  ): Task.Result<OPFDoc> {
+  loadOPF(pubURL: string, root: string): Task.Result<OPFDoc> {
     const url = pubURL + root;
     let opf = this.opfByURL[url];
     if (opf) {
@@ -227,23 +216,11 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         } else {
           this.loadAsPlainXML(`${pubURL}META-INF/encryption.xml`).then(
             (encXML) => {
-              const zipMetadataResult = haveZipMetadata
-                ? this.loadAsJSON(`${pubURL}?r=list`)
-                : Task.newResult(null);
-              zipMetadataResult.then((zipMetadata) => {
-                opf = new OPFDoc(this, pubURL);
-                opf
-                  .initWithXMLDoc(
-                    opfXML,
-                    encXML,
-                    zipMetadata,
-                    `${pubURL}?r=manifest`,
-                  )
-                  .then(() => {
-                    this.opfByURL[url] = opf;
-                    this.primaryOPFByEPubURL[pubURL] = opf;
-                    frame.finish(opf);
-                  });
+              opf = new OPFDoc(this, pubURL);
+              opf.initWithXMLDoc(opfXML, encXML).then(() => {
+                this.opfByURL[url] = opf;
+                this.primaryOPFByEPubURL[pubURL] = opf;
+                frame.finish(opf);
               });
             },
           );
@@ -886,8 +863,6 @@ export class OPFDoc {
   initWithXMLDoc(
     opfXML: XmlDoc.XMLDocHolder,
     encXML: XmlDoc.XMLDocHolder,
-    zipMetadata: Base.JSON,
-    manifestURL: string,
   ): Task.Result<any> {
     this.opfXML = opfXML;
     this.encXML = encXML;
@@ -1006,63 +981,17 @@ export class OPFDoc {
         this.metadata[metaTerms.layout][0]["v"] === "pre-paginated";
     }
 
-    if (!zipMetadata) {
-      if (idpfObfURLs.length > 0 && this.uid) {
-        // Have to deobfuscate in JavaScript
-        const deobfuscator = makeDeobfuscator(this.uid);
-        for (let i = 0; i < idpfObfURLs.length; i++) {
-          this.store.deobfuscators[this.pubURL + idpfObfURLs[i]] = deobfuscator;
-        }
-      }
-      if (this.prePaginated) {
-        this.assignAutoPages();
-      }
-      return Task.newResult(true);
-    }
-    const manifestText = new Base.StringBuffer();
-    const obfuscations = {};
     if (idpfObfURLs.length > 0 && this.uid) {
-      // Deobfuscate in the server.
-      const obfuscationKey = makeObfuscationKey(this.uid);
+      // Have to deobfuscate in JavaScript
+      const deobfuscator = makeDeobfuscator(this.uid);
       for (let i = 0; i < idpfObfURLs.length; i++) {
-        obfuscations[idpfObfURLs[i]] = obfuscationKey;
+        this.store.deobfuscators[this.pubURL + idpfObfURLs[i]] = deobfuscator;
       }
     }
-    for (let i = 0; i < zipMetadata.length; i++) {
-      const entry = zipMetadata[i];
-      const encodedPath = entry["n"];
-      if (encodedPath) {
-        const path = decodeURIComponent(encodedPath);
-        const item = this.itemMapByPath[path];
-        let mediaType: string | null = null;
-        if (item) {
-          item.compressed = entry["m"] != 0;
-          item.compressedSize = entry["c"];
-          if (item.mediaType) {
-            mediaType = item.mediaType.replace(/\s+/g, "");
-          }
-        }
-        const obfuscation = obfuscations[path];
-        if (mediaType || obfuscation) {
-          manifestText.append(encodedPath);
-          manifestText.append(" ");
-          manifestText.append(mediaType || "application/octet-stream");
-          if (obfuscation) {
-            manifestText.append(" ");
-            manifestText.append(obfuscation);
-          }
-          manifestText.append("\n");
-        }
-      }
+    if (this.prePaginated) {
+      this.assignAutoPages();
     }
-    this.assignAutoPages();
-    return Net.ajax(
-      manifestURL,
-      Net.XMLHttpRequestResponseType.DEFAULT,
-      "POST",
-      manifestText.toString(),
-      "text/plain",
-    );
+    return Task.newResult(true);
   }
 
   assignAutoPages(): void {
