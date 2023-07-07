@@ -18,6 +18,7 @@
  */
 import * as CssCascade from "./css-cascade";
 import * as CssStyler from "./css-styler";
+import * as Net from "./net";
 import * as Task from "./task";
 import * as Logging from "./logging";
 import * as TaskUtil from "./task-util";
@@ -140,7 +141,7 @@ export function loadScript(
     window.document.head.appendChild(scriptElem);
     return Task.newResult(true);
   } else {
-    const fetcher = TaskUtil.loadElement(scriptElem);
+    const fetcher = Net.loadElement(scriptElem);
     window.document.head.appendChild(scriptElem);
     return TaskUtil.waitForFetchers([fetcher]);
   }

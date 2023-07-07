@@ -32,6 +32,7 @@ import * as Font from "./font";
 import * as LayoutHelper from "./layout-helper";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
+import * as Net from "./net";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as PseudoElement from "./pseudo-element";
@@ -1326,7 +1327,7 @@ export class ViewFactory
               hasAutoHeight
             ) {
               const image = new Image();
-              const fetcher = TaskUtil.loadElement(image, attributeValue);
+              const fetcher = Net.loadElement(image, attributeValue);
               fetchers.push(fetcher);
               images.push({
                 image,
@@ -1378,9 +1379,7 @@ export class ViewFactory
             ns == Base.NS.SVG &&
             attributeNS == Base.NS.XLINK
           ) {
-            this.page.fetchers.push(
-              TaskUtil.loadElement(result, attributeValue),
-            );
+            this.page.fetchers.push(Net.loadElement(result, attributeValue));
           } else {
             // When the document is not XML document (e.g. non-XML HTML)
             // attributeNS can be null
@@ -1397,7 +1396,7 @@ export class ViewFactory
         }
         if (delayedSrc) {
           const image = tag === "input" ? new Image() : result;
-          const imageFetcher = TaskUtil.loadElement(image, delayedSrc);
+          const imageFetcher = Net.loadElement(image, delayedSrc);
           if (image !== result) {
             (result as HTMLImageElement).src = delayedSrc;
           }
@@ -1441,7 +1440,7 @@ export class ViewFactory
         const listStyleImage = computedStyle["list-style-image"];
         if (listStyleImage && listStyleImage instanceof Css.URL) {
           const listStyleURL = (listStyleImage as Css.URL).url;
-          fetchers.push(TaskUtil.loadElement(new Image(), listStyleURL));
+          fetchers.push(Net.loadElement(new Image(), listStyleURL));
         }
         this.preprocessElementStyle(computedStyle);
         this.applyComputedStyles(result, computedStyle);
@@ -2149,7 +2148,7 @@ export class ViewFactory
       }
     } else if (bg instanceof Css.URL) {
       const url = (bg as Css.URL).url;
-      this.page.fetchers.push(TaskUtil.loadElement(new Image(), url));
+      this.page.fetchers.push(Net.loadElement(new Image(), url));
     }
   }
 

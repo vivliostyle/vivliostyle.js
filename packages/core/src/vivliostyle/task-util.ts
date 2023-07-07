@@ -19,7 +19,6 @@
  * @fileoverview TaskUtil - Utilities asynchronous execution and cooperative
  * multitasking.
  */
-import * as Base from "./base";
 import * as Logging from "./logging";
 import * as Task from "./task";
 
@@ -127,39 +126,3 @@ export const waitForFetchers = <T>(
     });
   return frame.result();
 };
-
-/**
- * @return holding event type (load/error/abort)
- */
-export function loadElement(elem: Element, src?: string): Fetcher<string> {
-  const fetcher = new Fetcher(() => {
-    const frame: Task.Frame<string> = Task.newFrame("loadElement");
-    const continuation = frame.suspend(elem);
-    let done = false;
-    const handler = (evt: Event) => {
-      if (done) {
-        return;
-      } else {
-        done = true;
-      }
-      continuation.schedule(evt ? evt.type : "timeout");
-    };
-    elem.addEventListener("load", handler, false);
-    elem.addEventListener("error", handler, false);
-    elem.addEventListener("abort", handler, false);
-    if (elem.namespaceURI == Base.NS.SVG) {
-      if (src) {
-        elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
-      }
-      // SVG handlers are not reliable
-      setTimeout(handler, 300);
-    } else if (elem.localName === "script") {
-      setTimeout(handler, 3000);
-    } else if (src) {
-      (elem as any).src = src;
-    }
-    return frame.result();
-  }, `loadElement ${src || elem.localName}`);
-  fetcher.start();
-  return fetcher;
-}
