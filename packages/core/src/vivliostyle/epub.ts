@@ -488,10 +488,6 @@ export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
   };
 }
 
-export function makeObfuscationKey(uid: string): string {
-  return `1040:${SHA1.bytesToSHA1Hex(uid)}`;
-}
-
 type RawMeta = {
   [key: string]: RawMetaItem[];
 };
