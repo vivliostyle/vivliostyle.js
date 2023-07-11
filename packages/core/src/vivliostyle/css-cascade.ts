@@ -3291,10 +3291,13 @@ export class CascadeInstance {
         const pseudoProps = pseudos[pseudoName];
         if (pseudoProps) {
           if (
-            (pseudoName === "before" || pseudoName === "after") &&
-            !Vtree.nonTrivialContent(
-              (pseudoProps["content"] as CascadeValue)?.value,
-            )
+            ((pseudoName === "before" || pseudoName === "after") &&
+              !Vtree.nonTrivialContent(
+                (pseudoProps["content"] as CascadeValue)?.value,
+              )) ||
+            ((pseudoName === "footnote-call" ||
+              pseudoName === "footnote-marker") &&
+              getProp(this.currentStyle, "float")?.value !== Css.ident.footnote)
           ) {
             delete pseudos[pseudoName];
           } else if (before) {
