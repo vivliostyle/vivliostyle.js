@@ -32,7 +32,6 @@ import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Net from "./net";
 import * as OPS from "./ops";
-import * as SHA1 from "./sha1";
 import * as Task from "./task";
 import * as Toc from "./toc";
 import * as Vgen from "./vgen";
@@ -469,23 +468,34 @@ export function getOPFItemId(item: OPFItem): string | null {
 }
 
 export function makeDeobfuscator(uid: string): (p1: Blob) => Task.Result<Blob> {
-  // TODO: use UTF8 of uid
-  const sha1Sum = SHA1.bytesToSHA1Int8(uid);
   return (blob) => {
     const frame = Task.newFrame("deobfuscator") as Task.Frame<Blob>;
-    const head = blob.slice(0, 1040);
-    const tail = blob.slice(1040, blob.size);
-    Net.readBlob(head).then((buf) => {
-      const dataView = new DataView(buf);
-      for (let k = 0; k < dataView.byteLength; k++) {
-        let b = dataView.getUint8(k);
-        b ^= sha1Sum[k % 20];
-        dataView.setUint8(k, b);
-      }
-      frame.finish(Net.makeBlob([dataView, tail]));
+    makeDigest("SHA-1", uid).then((hash) => {
+      const head = blob.slice(0, 1040);
+      const tail = blob.slice(1040, blob.size);
+      Net.readBlob(head).then((buf) => {
+        const dataView = new DataView(buf);
+        for (let k = 0; k < dataView.byteLength; k++) {
+          let b = dataView.getUint8(k);
+          b ^= hash[k % 20];
+          dataView.setUint8(k, b);
+        }
+        frame.finish(Net.makeBlob([dataView, tail]));
+      });
     });
     return frame.result();
   };
+}
+
+function makeDigest(algorithm: string, str: string): Task.Result<Uint8Array> {
+  const frame = Task.newFrame("makeDigest") as Task.Frame<Uint8Array>;
+  const continuation = frame.suspend();
+  window.crypto.subtle
+    .digest(algorithm, new TextEncoder().encode(str))
+    .then((buf) => {
+      continuation.schedule(new Uint8Array(buf));
+    });
+  return frame.result();
 }
 
 type RawMeta = {
