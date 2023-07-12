@@ -571,41 +571,6 @@ export function numberCompare(a: number, b: number): number {
   return a - b;
 }
 
-export const base64Chars =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-export function appendBase64(sb: StringBuffer, data: string): void {
-  const length = data.length;
-  const length3 = Math.floor(length / 3) * 3;
-  for (let i = 0; i < length3; i += 3) {
-    const c1 = data.charCodeAt(i) & 255;
-    const c2 = data.charCodeAt(i + 1) & 255;
-    const c3 = data.charCodeAt(i + 2) & 255;
-    sb.append(base64Chars.charAt(c1 >> 2));
-    sb.append(base64Chars.charAt(((c1 << 4) | (c2 >> 4)) & 63));
-    sb.append(base64Chars.charAt(((c2 << 2) | (c3 >> 6)) & 63));
-    sb.append(base64Chars.charAt(c3 & 63));
-  }
-  switch (length - length3) {
-    case 1: {
-      const p1 = data.charCodeAt(length3) & 255;
-      sb.append(base64Chars.charAt(p1 >> 2));
-      sb.append(base64Chars.charAt((p1 << 4) & 63));
-      sb.append("==");
-      break;
-    }
-    case 2: {
-      const q1 = data.charCodeAt(length3) & 255;
-      const q2 = data.charCodeAt(length3 + 1) & 255;
-      sb.append(base64Chars.charAt(q1 >> 2));
-      sb.append(base64Chars.charAt(((q1 << 4) | (q2 >> 4)) & 63));
-      sb.append(base64Chars.charAt((q2 << 2) & 63));
-      sb.append("=");
-      break;
-    }
-  }
-}
-
 /**
  * Index array using key function. First encountered item wins on collision.
  * Elements with empty and null keys are dropped.
