@@ -99,10 +99,10 @@
     <div id="vivliostyle-loading-overlay" hidden data-bind="visible: !isDebug, attr: {hidden: !viewer.state.status()?'':false}">
       <div class="vivliostyle-loading-spinner"></div>
     </div>
-    <div id="vivliostyle-text-selection-start-button" data-bind="visible: marksMenuStatus.startButtonOpened, clickOutside: marksMenuStatus.closeStartButton">
+    <div id="vivliostyle-text-selection-start-button" hidden data-bind="visible: marksMenuStatus.startButtonOpened, clickOutside: marksMenuStatus.closeStartButton, attr: {hidden: !marksMenuStatus.startButtonOpened()?'':false}">
       <button id="viv-marker-start-marker" data-bind="text: t('Highlight_')"></button>
     </div>
-    <div role="dialog" id="vivliostyle-text-selection-edit-menu" data-bind="visible: marksMenuStatus.menuOpened, clickOutside: marksMenuStatus.applyEditing">
+    <div role="dialog" id="vivliostyle-text-selection-edit-menu" hidden data-bind="visible: marksMenuStatus.menuOpened, clickOutside: marksMenuStatus.applyEditing, attr: {hidden: !marksMenuStatus.menuOpened()?'':false}">
       <div>
         <button class="viv-marker-color yellow" data-bind="attr: {title: t('Marker_Yellow')}, css: {'selected-color': marksMenuStatus.currentEditingColor() == 'yellow' }, click: () => { marksMenuStatus.currentEditingColor('yellow') }"></button>
         <button class="viv-marker-color red" data-bind="attr: {title: t('Marker_Red')}, css: { 'selected-color': marksMenuStatus.currentEditingColor() == 'red' }, click: () => { marksMenuStatus.currentEditingColor('red') }"></button>

@@ -718,6 +718,11 @@
     /* stylelint-disable-next-line */
     height: calc(100dvh - #{$menu-icon-height + $page-slider-height});
     width: 100vw;
+
+    #vivliostyle-welcome[hidden] + & {
+      position: absolute;
+      inset: 0;
+    }
   }
 }
 
