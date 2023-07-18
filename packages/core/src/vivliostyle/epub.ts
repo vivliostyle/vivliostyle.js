@@ -1208,7 +1208,9 @@ export class OPFDoc {
               isInReadingOrder ||
               encodingFormat === "text/html" ||
               encodingFormat === "application/xhtml+xml" ||
-              /(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/.test(url)
+              (!encodingFormat &&
+                itemObj.rel !== "stylesheet" &&
+                /(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/.test(url))
             ) {
               const baseUrl = manifestUrl
                 ? manifestUrl.replace(/\/[^/]+$/, "/")
