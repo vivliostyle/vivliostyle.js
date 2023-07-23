@@ -124,17 +124,6 @@ export function resolveURL(relURL: string, baseURL: string): string {
   if (i < 0) {
     return relURL;
   }
-  if (i < baseURL.length - 1) {
-    const j = baseURL.lastIndexOf(".");
-    if (j < i) {
-      // Assume the last part without '.' to be a directory name.
-      if (relURL == "") {
-        return baseURL;
-      }
-      baseURL += "/";
-      i = baseURL.length - 1;
-    }
-  }
   let url = baseURL.substr(0, i + 1) + relURL;
   let urlOption = "";
   r = url.match(/^([^?#]*)([?#].*)$/);
