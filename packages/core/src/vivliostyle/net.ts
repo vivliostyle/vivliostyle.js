@@ -65,6 +65,7 @@ export function ajax(
   request.onreadystatechange = () => {
     if (request.readyState === 4) {
       response.status = request.status;
+      response.url = request.responseURL;
       response.statusText =
         request.statusText || (request.status == 404 && "Not Found") || "";
       if (response.status == 200 || response.status == 0) {
