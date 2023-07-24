@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.2...v2.25.3) (2023-07-24)
+
+### Bug Fixes
+
+- EPUB font deobfuscation not working ([2bbd58b](https://github.com/vivliostyle/vivliostyle.js/commit/2bbd58b84bbfca48dcb482aaa4174c0734ed8a48))
+- Failed to load when publication manifest has stylesheet URL without extension ([5e092c4](https://github.com/vivliostyle/vivliostyle.js/commit/5e092c4a531730092bc36875b4553a1436601c28)), closes [#1207](https://github.com/vivliostyle/vivliostyle.js/issues/1207)
+- Numbered list counts go wrong when footnote-related pseudo-elements exist ([871bef7](https://github.com/vivliostyle/vivliostyle.js/commit/871bef7724006236488bbf2af5edfd68bbdefcf5)), closes [#1200](https://github.com/vivliostyle/vivliostyle.js/issues/1200)
+- **viewer:** Unexpected scrollbar appears when loading W3C documents ([e96f6f0](https://github.com/vivliostyle/vivliostyle.js/commit/e96f6f00e549471f89caf75d5cf4ff73068b3376))
+- wrong URL resolution when baseURL has no file name extension ([776791f](https://github.com/vivliostyle/vivliostyle.js/commit/776791ff509cadcd76de491157e8bed59cda364e)), closes [#1211](https://github.com/vivliostyle/vivliostyle.js/issues/1211)
+
 ## [2.25.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.1...v2.25.2) (2023-06-22)
 
 ### Bug Fixes
