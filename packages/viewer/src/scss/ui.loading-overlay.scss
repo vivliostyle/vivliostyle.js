@@ -53,12 +53,10 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   margin-top: $menu-icon-height;
   margin-bottom: $page-slider-height;
-  height: calc(100vh - #{$menu-icon-height + $page-slider-height});
-  /* stylelint-disable-next-line */
-  height: calc(100dvh - #{$menu-icon-height + $page-slider-height});
-  width: 100vw;
   background-color: rgba(black, 0.2);
   @include on-loading() {
     opacity: 1;
