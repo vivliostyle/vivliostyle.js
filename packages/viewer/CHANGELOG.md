@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.3...v2.25.4) (2023-07-28)
+
+### Bug Fixes
+
+- **viewer:** Page navigation left/right buttons disappeared in v2.25.3 ([294e085](https://github.com/vivliostyle/vivliostyle.js/commit/294e08555dfbf67b5e37ab559595f534eb746e3e)), closes [#1214](https://github.com/vivliostyle/vivliostyle.js/issues/1214)
+
 ## [2.25.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.2...v2.25.3) (2023-07-24)
 
 ### Bug Fixes
