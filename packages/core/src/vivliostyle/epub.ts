@@ -1431,6 +1431,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   clientLayout: Vgen.DefaultClientLayout;
   counterStore: Counters.CounterStore;
   tocAutohide: boolean = false;
+  tocVisible: boolean = false;
   tocView?: Toc.TOCView;
 
   constructor(
@@ -2610,6 +2611,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     if (!toc) {
       return Task.newResult(null as Vtree.Page);
     }
+    this.tocVisible = true;
     if (this.tocView && this.tocView.page) {
       this.tocView.page.container.style.visibility = "visible";
       this.tocView.page.container.setAttribute("aria-hidden", "false");
@@ -2661,13 +2663,14 @@ export class OPFView implements Vgen.CustomRendererFactory {
   }
 
   hideTOC(): void {
+    this.tocVisible = false;
     if (this.tocView) {
       this.tocView.hideTOC();
     }
   }
 
   isTOCVisible(): boolean {
-    return !!this.tocView && this.tocView.isTOCVisible();
+    return this.tocVisible && !!this.tocView && this.tocView.isTOCVisible();
   }
 }
 

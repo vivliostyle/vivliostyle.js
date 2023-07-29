@@ -805,9 +805,8 @@ export class AdaptiveViewer {
     let tocVisible = false;
     let tocAutohide = false;
     if (this.opfView) {
-      tocVisible = this.opfView.isTOCVisible();
+      tocVisible = this.opfView.tocVisible;
       tocAutohide = this.opfView.tocAutohide;
-      this.opfView.hideTOC();
       this.opfView.removeRenderedPages();
     }
     this.pageSizes = [];
