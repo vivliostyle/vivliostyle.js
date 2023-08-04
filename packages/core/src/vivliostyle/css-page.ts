@@ -1791,7 +1791,11 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     // containing block is resized to coincide with the margin edges of the page
     // box." (CSS Paged Media http://dev.w3.org/csswg/css-page/#page-model)
 
-    if (this.hasBorderOrOutline()) {
+    if (
+      this.hasBorderOrOutline() ||
+      (marginStart instanceof Exprs.Numeric && marginStart.num < 0) ||
+      (marginEnd instanceof Exprs.Numeric && marginEnd.num < 0)
+    ) {
       style[startSide] = new Css.Expr(marginStart);
       style[endSide] = new Css.Expr(marginEnd);
       style[`margin-${startSide}`] = Css.numericZero;
@@ -1799,8 +1803,8 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       style[`border-${startSide}-width`] = new Css.Expr(borderStartWidth);
       style[`border-${endSide}-width`] = new Css.Expr(borderEndWidth);
     } else {
-      // If the page box has no border or outline, use transparent borders for
-      // page margins. This is to improve text selection behavior.
+      // If the page box has no border or outline and margins are not negative,
+      // use transparent borders for page margins. This is to improve text selection behavior.
       style[startSide] = Css.numericZero;
       style[endSide] = Css.numericZero;
       style[`margin-${startSide}`] = Css.numericZero;
