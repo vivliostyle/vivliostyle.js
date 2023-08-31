@@ -353,7 +353,7 @@ class Navigation {
         if (this.viewerOptions.renderAllPages()) {
           const pageNumber = Number(pageNumberText);
           const epageNav = this.viewer.epageFromPageNumber(pageNumber);
-          this.viewer.navigateToEPage(epageNav);
+          this.viewer.navigateToEPage(epageNav, false);
         } else {
           const pageNumberElem = document.getElementById(
             "vivliostyle-page-number",
@@ -553,7 +553,7 @@ class Navigation {
     ) as HTMLInputElement;
     const pageNumber = Number(pageNumberElem.value);
     const epageNav = this.viewer.epageFromPageNumber(pageNumber);
-    this.viewer.navigateToEPage(epageNav);
+    this.viewer.navigateToEPage(epageNav, false);
 
     return true;
   };

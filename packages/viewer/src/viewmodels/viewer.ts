@@ -287,8 +287,8 @@ class Viewer {
     this.coreViewer.navigateToPage(Navigation.LAST);
   }
 
-  navigateToEPage(epage: number): void {
-    if (Math.abs(epage - this.epage()) > 1) {
+  navigateToEPage(epage: number, pushHistory?: boolean): void {
+    if (pushHistory === undefined || pushHistory) {
       window.history.pushState(null, null);
     }
     this.coreViewer.navigateToPage(Navigation.EPAGE, epage);
