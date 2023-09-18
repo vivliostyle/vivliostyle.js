@@ -195,8 +195,8 @@ const highlight = (
       div.style.position = "absolute";
       div.style.margin = "0";
       div.style.padding = "0";
-      div.style.top = `${rect.top + window.scrollY}px`;
-      div.style.left = `${rect.left + window.scrollX}px`;
+      div.style.top = `${rect.top}px`;
+      div.style.left = `${rect.left}px`;
       div.style.width = `${rect.width}px`;
       div.style.height = `${rect.height}px`;
       applyStyle(div, style);

@@ -22,6 +22,7 @@ import Navigation from "./navigation";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
+import { scaleRect, applyTransformToRect } from "../utils/scale-util";
 
 const { Keys } = keyUtil;
 
@@ -52,6 +53,7 @@ class FindBox {
   status: Observable<string>;
   cancel = false;
   intervalID = 0;
+  foundRange: Range | null = null;
 
   constructor(public viewer: Viewer, public navigation: Navigation) {
     this.opened = ko.observable();
@@ -98,6 +100,8 @@ class FindBox {
       this.cancel = true;
     }
     this.status(FindStatus.Default);
+    this.foundRange = null;
+    this.fixHighlight();
     return true;
   };
 
@@ -193,6 +197,13 @@ class FindBox {
     const windowF = window as WindowWithFind;
     const findBoxElem = document.getElementById("vivliostyle-menu-find-box");
     findBoxElem.style.visibility = "hidden";
+    if (this.foundRange && selection.rangeCount === 0) {
+      // Restore selection. This is needed because on iOS the selection is
+      // cleared by touching the Find Next/Previous button in the Find box.
+      selection.addRange(this.foundRange);
+      this.foundRange = null;
+      this.fixHighlight();
+    }
     const found = windowF.find(text, false, backwards);
     findBoxElem.style.visibility = "";
 
@@ -202,12 +213,51 @@ class FindBox {
           "[data-vivliostyle-page-container]",
         )
       ) {
+        this.foundRange = selection.getRangeAt(0);
+        this.fixHighlight();
         return true;
       } else {
         selection.removeAllRanges();
       }
     }
     return false;
+  }
+
+  private fixHighlight(): void {
+    // Workaround for the WebKit bug on iOS:
+    // Selection highlight not shown on programmatic focus after initial load
+    // https://bugs.webkit.org/show_bug.cgi?id=199211
+
+    if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      // No problem on non-iOS.
+      return;
+    }
+
+    const oldHighlightElements = document.querySelectorAll(
+      "[data-viv-found-highlight='true']",
+    );
+    for (const oldHighlightElement of oldHighlightElements) {
+      oldHighlightElement.remove();
+    }
+    if (!this.foundRange) {
+      return;
+    }
+    const parent = this.foundRange.startContainer.parentElement.closest(
+      "[data-vivliostyle-page-container='true']",
+    );
+    const parentRect = scaleRect(parent.getBoundingClientRect());
+    for (const clientRect of this.foundRange.getClientRects()) {
+      const rect = applyTransformToRect(scaleRect(clientRect), parentRect);
+      const highlightElement = document.createElement("div");
+      highlightElement.setAttribute("data-viv-found-highlight", "true");
+      highlightElement.style.position = "absolute";
+      highlightElement.style.left = `${rect.left}px`;
+      highlightElement.style.top = `${rect.top}px`;
+      highlightElement.style.width = `${rect.width}px`;
+      highlightElement.style.height = `${rect.height}px`;
+      highlightElement.style.backgroundColor = "#0080ff33";
+      parent.appendChild(highlightElement);
+    }
   }
 
   /**
