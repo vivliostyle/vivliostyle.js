@@ -339,7 +339,9 @@ class Navigation {
       const pageNumber = Number(this.pageNumber());
       if (this.viewer.lastPage()) {
         totalPages = pageNumber;
-      } else if (pageNumber >= totalPages) {
+      } else if (pageNumber > totalPages) {
+        totalPages = pageNumber;
+      } else if (pageNumber == totalPages) {
         totalPages++;
       }
       return totalPages;
@@ -347,7 +349,14 @@ class Navigation {
 
     this.pageSlider = ko.pureComputed({
       read() {
-        return this.pageNumber();
+        const pageNumber = Number(this.pageNumber());
+        const pageSliderElem = document.getElementById(
+          "vivliostyle-page-slider",
+        ) as HTMLInputElement;
+        if (Number(pageSliderElem.max) < pageNumber) {
+          pageSliderElem.max = String(pageNumber);
+        }
+        return pageNumber;
       },
       write(pageNumberText: number | string) {
         if (this.viewerOptions.renderAllPages()) {
