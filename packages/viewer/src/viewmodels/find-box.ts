@@ -217,6 +217,7 @@ class FindBox {
         selection.removeAllRanges();
       }
     }
+    this.foundRange = null;
     return false;
   }
 
