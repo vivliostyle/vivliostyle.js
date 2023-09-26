@@ -325,7 +325,7 @@
         </li>
         <li class="vivliostyle-menu-item vivliostyle-menu-disabled" id="vivliostyle-menu-item_find-toggle" data-bind="css: {'vivliostyle-menu-disabled': navigation.isFindBoxDisabled, 'on': findBox.opened}, visible: !navigation.hideFind"><span role="button" class="vivliostyle-menu-icon-button" aria-keyshortcuts="Ctrl+F Meta+F" data-bind="click: findBox.toggle, menuButton: true, attr: {'aria-disabled': navigation.isFindBoxDisabled, 'aria-pressed': findBox.opened()?'true':'false', 'tabindex': !navigation.isFindBoxDisabled()?'0':false, title: t('TIP_Find')}"></span>
           <div id="vivliostyle-menu-find-box" aria-hidden="true" data-bind="attr: {'aria-hidden': !findBox.opened()?'true':'false'}">
-            <input id="vivliostyle-find-box" data-bind="textInput: findBox.text, attr: {'aria-disabled': navigation.isFindBoxDisabled, placeholder: t('Find')}" type="text"/>
+            <input id="vivliostyle-find-box" data-bind="textInput: findBox.text, attr: {'aria-disabled': navigation.isFindBoxDisabled, placeholder: t('Find')}" type="text" size="6"/>
             <span id="vivliostyle-find-status" data-bind="text: findBox.status"></span>
             <span id="vivliostyle-find-previous" role="button" aria-keyshortcuts="Shift+Enter" data-bind="menuButton: true, click: findBox.findPrevious, attr: {title: t('TIP_Find_Previous')}"></span>
             <span id="vivliostyle-find-next" role="button" aria-keyshortcuts="Enter" data-bind="menuButton: true, click: findBox.findNext, attr: {title: t('TIP_Find_Next')}"></span>

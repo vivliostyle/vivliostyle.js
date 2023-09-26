@@ -208,11 +208,8 @@ class FindBox {
     findBoxElem.style.visibility = "";
 
     if (found) {
-      if (
-        selection.anchorNode?.parentElement?.closest(
-          "[data-vivliostyle-page-container]",
-        )
-      ) {
+      // Check if the found range is in the page content excluding generated page margin box content.
+      if (selection.anchorNode?.parentElement?.closest("[data-adapt-eloff]")) {
         this.foundRange = selection.getRangeAt(0);
         this.fixHighlight();
         return true;

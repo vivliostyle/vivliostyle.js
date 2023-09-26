@@ -91,6 +91,10 @@
       float: right;
       margin-left: -7px;
       padding-right: 0;
+      z-index: 11;
+    }
+    &#vivliostyle-menu_toc-find {
+      z-index: 12;
     }
     > li.vivliostyle-menu-item {
       display: table-cell;
@@ -404,7 +408,7 @@
         }
       }
       &#vivliostyle-menu-item_text-size-default {
-        @media screen and (max-width: ($menu-icon-width * 11 - 3px - 2px)) {
+        @media screen and (max-width: ($menu-icon-width * 11 - 3px)) {
           display: none;
         }
       }
@@ -761,6 +765,9 @@
   width: $menu-icon-width * 10;
   @media screen and (max-width: 450px) {
     width: 80vw;
+  }
+  @media screen and (max-width: 376px) {
+    width: calc(100vw - $menu-icon-offset-x - 2 * $menu-icon-width);
   }
 
   #vivliostyle-find-box {
