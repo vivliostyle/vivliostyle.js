@@ -214,10 +214,9 @@ class FindBox {
         this.fixHighlight();
         return true;
       } else {
-        selection.removeAllRanges();
+        return this.findText(text, backwards);
       }
     }
-    this.foundRange = null;
     return false;
   }
 
