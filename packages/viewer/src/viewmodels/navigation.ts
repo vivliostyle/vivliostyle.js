@@ -316,6 +316,7 @@ class Navigation {
           "vivliostyle-page-number",
         ) as HTMLInputElement;
         pageNumberElem.value = pageNumber.toString();
+        window.history.pushState(null, null);
         this.viewer.navigateToEPage(epageNav);
 
         window.setTimeout(() => {
@@ -362,7 +363,7 @@ class Navigation {
         if (this.viewerOptions.renderAllPages()) {
           const pageNumber = Number(pageNumberText);
           const epageNav = this.viewer.epageFromPageNumber(pageNumber);
-          this.viewer.navigateToEPage(epageNav, false);
+          this.viewer.navigateToEPage(epageNav);
         } else {
           const pageNumberElem = document.getElementById(
             "vivliostyle-page-number",
@@ -416,6 +417,7 @@ class Navigation {
 
   navigateToFirst = (): boolean => {
     if (!this.isNavigateToFirstDisabled()) {
+      window.history.pushState(null, null);
       this.viewer.navigateToFirst();
       return true;
     } else {
@@ -425,6 +427,7 @@ class Navigation {
 
   navigateToLast = (): boolean => {
     if (!this.isNavigateToLastDisabled()) {
+      window.history.pushState(null, null);
       this.viewer.navigateToLast();
       return true;
     } else {
@@ -562,7 +565,7 @@ class Navigation {
     ) as HTMLInputElement;
     const pageNumber = Number(pageNumberElem.value);
     const epageNav = this.viewer.epageFromPageNumber(pageNumber);
-    this.viewer.navigateToEPage(epageNav, false);
+    this.viewer.navigateToEPage(epageNav);
 
     return true;
   };
