@@ -182,7 +182,9 @@ class FindBox {
         this.status(FindStatus.NotFound);
         window.clearInterval(this.intervalID);
         this.intervalID = 0;
-        return;
+        if (epage !== currentEPage) {
+          this.viewer.navigateToEPage(currentEPage);
+        }
       }
     }, 4);
 

@@ -209,6 +209,7 @@ class Viewer {
     });
     this.coreViewer.addListener("hyperlink", (payload) => {
       if (payload.internal) {
+        window.history.pushState(null, null);
         this.navigateToInternalUrl(payload.href);
 
         // When navigate from TOC, TOC box may or may not become hidden by autohide.
@@ -278,24 +279,18 @@ class Viewer {
   }
 
   navigateToFirst(): void {
-    window.history.pushState(null, null);
     this.coreViewer.navigateToPage(Navigation.FIRST);
   }
 
   navigateToLast(): void {
-    window.history.pushState(null, null);
     this.coreViewer.navigateToPage(Navigation.LAST);
   }
 
-  navigateToEPage(epage: number, pushHistory?: boolean): void {
-    if (pushHistory === undefined || pushHistory) {
-      window.history.pushState(null, null);
-    }
+  navigateToEPage(epage: number): void {
     this.coreViewer.navigateToPage(Navigation.EPAGE, epage);
   }
 
   navigateToInternalUrl(href: string): void {
-    window.history.pushState(null, null);
     this.coreViewer.navigateToInternalUrl(href);
   }
 
@@ -304,7 +299,6 @@ class Viewer {
     pageIndex?: number;
     offsetInItem?: number;
   }): void {
-    window.history.pushState(null, null);
     this.coreViewer.navigateToPosition(position);
   }
 

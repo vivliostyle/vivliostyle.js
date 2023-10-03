@@ -1052,6 +1052,7 @@ export class MarksBox {
 
   navigateToMark = (mark: Mark): void => {
     const { spineIndex, offsetInItem } = mark.start;
+    window.history.pushState(null, null);
     this.parent.viewer.navigateToPosition({ spineIndex, offsetInItem });
     if (!this.pinned()) {
       this.detailsElement.open = false;
