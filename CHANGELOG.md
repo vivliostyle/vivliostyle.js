@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.5...v2.25.6) (2023-10-03)
+
+### Bug Fixes
+
+- **viewer:** Current page should be kept after Find results in "Not Found" ([fb28b64](https://github.com/vivliostyle/vivliostyle.js/commit/fb28b647ecd881b06052895e49b1383d288012d8))
+- **viewer:** Exclude generated page margin box content from text search ([ea8a447](https://github.com/vivliostyle/vivliostyle.js/commit/ea8a447f2ce6733c61fab3f072ab3f24179f371c))
+- **viewer:** Navigation with page slider should not affect browser history stack ([7b3f117](https://github.com/vivliostyle/vivliostyle.js/commit/7b3f1178d7d241395b53ba5cb8730d66dcbebdce)), closes [#1219](https://github.com/vivliostyle/vivliostyle.js/issues/1219)
+- **viewer:** selection highlighting problems on iOS ([abb3ee2](https://github.com/vivliostyle/vivliostyle.js/commit/abb3ee276652886847d9a8f657e7820c6c948de7))
+- **viewer:** tweak viewer UI for mobile devices ([167adee](https://github.com/vivliostyle/vivliostyle.js/commit/167adee3b2afef41776c17bcc542f17498739bab))
+- **viewer:** tweak viewer UI style for mobile devices ([f6ef23b](https://github.com/vivliostyle/vivliostyle.js/commit/f6ef23b31cd45ec911d3ff9d7f680e69090650eb))
+
 ## [2.25.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.4...v2.25.5) (2023-08-09)
 
 ### Bug Fixes
