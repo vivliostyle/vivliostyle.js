@@ -679,6 +679,17 @@ export class StyleInstance
         continue;
       }
       let coeff = 1;
+      if (
+        pageMaster.pageBox.pseudoName ===
+          PageMaster.userAgentPageMasterPseudo &&
+        !(this.actualPageWidth && this.actualPageHeight)
+      ) {
+        // If page master is UA page master and page size is not determined,
+        // set lookup position to infinity.
+        // This is to prevent pagination problem depending on viewport size.
+        // (Fix for Issue #1228)
+        coeff = Infinity;
+      }
 
       // A. Calculate lookup position using current position and utilization
       // (see -epubx-utilization property)
