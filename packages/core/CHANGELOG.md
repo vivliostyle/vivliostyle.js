@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.7](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.6...v2.25.7) (2023-10-24)
+
+### Bug Fixes
+
+- Pagination result depends on viewer window width ([7980721](https://github.com/vivliostyle/vivliostyle.js/commit/79807214799d2e08a20ac057b8d83a5886a535bf)), closes [#1228](https://github.com/vivliostyle/vivliostyle.js/issues/1228)
+
 ## [2.25.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.4...v2.25.5) (2023-08-09)
 
 ### Bug Fixes
