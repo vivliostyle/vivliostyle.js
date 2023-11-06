@@ -959,6 +959,14 @@ export class ViewFactory
         const pageVal: Css.Val = computedStyle["page"];
         let pageType =
           pageVal && !Css.isDefaultingValue(pageVal) && pageVal.toString();
+        if (
+          !pageType &&
+          !this.nodeContext.parent &&
+          this.nodeContext.shadowContext
+        ) {
+          // Keep currentPageType for shadowContext (Fix for issue #1233)
+          pageType = this.styler.cascade.currentPageType;
+        }
         if (!pageType || pageType.toLowerCase() === "auto") {
           pageType = this.nodeContext.pageType;
         } else {
