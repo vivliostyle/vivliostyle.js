@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.7...v2.25.8) (2023-11-06)
+
+### Bug Fixes
+
+- page breaking inside table may cause unexpected page type reset ([59929ea](https://github.com/vivliostyle/vivliostyle.js/commit/59929eaab71c9c560696c41ed5f09dcdd4254893)), closes [#1233](https://github.com/vivliostyle/vivliostyle.js/issues/1233)
+
 ## [2.25.7](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.6...v2.25.7) (2023-10-24)
 
 ### Bug Fixes
