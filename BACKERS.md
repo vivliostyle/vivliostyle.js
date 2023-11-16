@@ -1,13 +1,14 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **\$84.00 per month**. Please consider helping us.
+The current amount of support is **\$83.00 per month**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
 ## Basic Sponsors
 
-
+<p><a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="60" height="60" style="max-width:100%;"></a>
+hatena🥉
 <p><a href="https://github.com/libroworks"><img src="https://avatars2.githubusercontent.com/u/63239043?s=460&amp;v=4" title="libroworks" width="60" height="60" style="max-width:100%;"></a>
 libroworks💐
 <p><a href="https://github.com/hidaruma"><img src="https://avatars3.githubusercontent.com/u/12541582?s=460&amp;v=4" title="Tatsuro YOKOTA" width="60" height="60" style="max-width:100%;"></a>
@@ -29,8 +30,8 @@ NoBooking🌟
 vvakame🌟
 <p><a href="https://github.com/y-mikou"><img src="https://avatars3.githubusercontent.com/u/11554223?s=460&amp;v=4" title="y-mikou" width="60" height="60" style="max-width:100%;"></a>
 y-mikou🌟
-<p><a href="https://github.com/u1F992"><img src="https://avatars3.githubusercontent.com/u/57749636?s=460&amp;v=4" title="u1F992" width="60" height="60" style="max-width:100%;"></a>
-u1F992🌟
+<p><a href="https://github.com/U-1F992"><img src="https://avatars3.githubusercontent.com/u/57749636?s=460&amp;v=4" title="U-1F992" width="60" height="60" style="max-width:100%;"></a>
+U-1F992🌟
 <p><a href="https://github.com/munepi"><img src="https://avatars3.githubusercontent.com/u/583148?s=460&amp;v=4" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
 Munehiro Yamamoto⭐️
 <p><a href="https://github.com/nishinos"><img src="https://avatars2.githubusercontent.com/u/1988266?s=460&amp;v=4" title="nishinos" width="60" height="60" style="max-width:100%;"></a>
@@ -41,5 +42,3 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
-<p><a href="https://github.com/okuzawats"><img src="https://avatars3.githubusercontent.com/u/12797442?s=460&amp;v=4" title="okuzawats" width="60" height="60" style="max-width:100%;"></a>
-okuzawats⭐️
