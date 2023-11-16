@@ -157,6 +157,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
+## Bronze Sponsor
+
+- <a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="80px" height="80px"></a>[Hatena Co., Ltd. ](https://github.com/hatena)
+
 ## License
 
 Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
