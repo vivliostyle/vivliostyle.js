@@ -146,7 +146,6 @@ export const VivliostyleViewportCss = `
 
 [data-vivliostyle-page-container] {
   position: relative;
-  overflow: hidden;
 }
 
 [data-vivliostyle-bleed-box] {
