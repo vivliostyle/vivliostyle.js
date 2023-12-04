@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.25.9](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.8...v2.25.9) (2023-12-04)
+
+### Bug Fixes
+
+- page breaking inside table with table-header may cause unexpected page type reset ([7865dea](https://github.com/vivliostyle/vivliostyle.js/commit/7865deae5bcd751d9d2f65e8847ae8f0eef46fcb)), closes [#1233](https://github.com/vivliostyle/vivliostyle.js/issues/1233)
+- page-area content may disappear on print ([2f2f85a](https://github.com/vivliostyle/vivliostyle.js/commit/2f2f85af8c9c983468a50a9ec67a39052bb23f6a)), closes [#1240](https://github.com/vivliostyle/vivliostyle.js/issues/1240)
+
 ## [2.25.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.7...v2.25.8) (2023-11-06)
 
 ### Bug Fixes
