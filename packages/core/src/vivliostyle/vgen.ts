@@ -962,7 +962,9 @@ export class ViewFactory
         if (
           !pageType &&
           !this.nodeContext.parent &&
-          this.nodeContext.shadowContext
+          (this.nodeContext.shadowContext ||
+            display === Css.ident.table_header_group ||
+            display === Css.ident.table_footer_group)
         ) {
           // Keep currentPageType for shadowContext (Fix for issue #1233)
           pageType = this.styler.cascade.currentPageType;
