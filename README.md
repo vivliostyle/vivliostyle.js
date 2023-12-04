@@ -33,6 +33,7 @@ Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web 
 - [Contribution](#contribution)
   - [Bug Reports & Feature Requests](#bug-reports--feature-requests)
   - [Contributors ✨](#contributors-)
+  - [Bronze Sponsor](#bronze-sponsor)
 - [License](#license)
 - [Credits](#credits)
 
