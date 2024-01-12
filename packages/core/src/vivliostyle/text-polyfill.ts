@@ -110,14 +110,14 @@ const SPACING_TRIM_NONE: SpacingTrim = {
 };
 
 /**
- * text-spacing-trim: space-first (normal)
- * space-first (normal) = space-first trim-end trim-adjacent
+ * text-spacing-trim: normal
+ * normal = space-start allow-end trim-adjacent
  */
 const SPACING_TRIM_NORMAL: SpacingTrim = {
-  trimStart: true,
-  spaceFirst: true,
+  trimStart: false,
+  spaceFirst: false,
   trimEnd: true,
-  allowEnd: false,
+  allowEnd: true,
   trimAdjacent: true,
 };
 
@@ -151,7 +151,7 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
     return SPACING_TRIM_AUTO;
   }
   const values = cssval instanceof Css.SpaceList ? cssval.values : [cssval];
-  const textSpacing: SpacingTrim = Object.create(SPACING_TRIM_AUTO);
+  const textSpacing: SpacingTrim = Object.create(SPACING_TRIM_NORMAL);
 
   for (const val of values) {
     if (val instanceof Css.Ident) {
