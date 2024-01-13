@@ -25,14 +25,14 @@ type PropertyValue = string | number | Css.Val;
 
 type HangingPunctuation = {
   first: boolean;
-  end: boolean; // force-end or allow-end
-  allowEnd: boolean;
+  forceEnd: boolean; // force-end
+  allowEnd: boolean; // allow-end
   last: boolean;
 };
 
 const HANGING_PUNCTUATION_NONE: HangingPunctuation = {
   first: false,
-  end: false,
+  forceEnd: false,
   allowEnd: false,
   last: false,
 };
@@ -62,10 +62,11 @@ function hangingPunctuationFromPropertyValue(
           hangingPunctuation.first = true;
           break;
         case "force-end":
-          hangingPunctuation.end = true;
+          hangingPunctuation.forceEnd = true;
+          hangingPunctuation.allowEnd = false;
           break;
         case "allow-end":
-          hangingPunctuation.end = true;
+          hangingPunctuation.forceEnd = false;
           hangingPunctuation.allowEnd = true;
           break;
         case "last":
@@ -83,16 +84,17 @@ function isHangingPunctuationNone(
   return (
     !hangingPunctuation.first &&
     !hangingPunctuation.last &&
-    !hangingPunctuation.end
+    !hangingPunctuation.forceEnd &&
+    !hangingPunctuation.allowEnd
   );
 }
 
 type SpacingTrim = {
-  trimStart: boolean; // trim-start or space-first (not space-start)
-  spaceFirst: boolean; // space-first (trim-start except at first line)
-  trimEnd: boolean; // trim-end or allow-end (not space-end)
-  allowEnd: boolean; // allow-end (not force-end)
-  trimAdjacent: boolean;
+  trimStart: boolean; // trim-start
+  spaceFirst: boolean; // space-first
+  trimEnd: boolean; // trim-end
+  allowEnd: boolean; // allow-end
+  trimAdjacent: boolean; // trim-adjacent
   // TODO: add support for:
   //   trimAll: boolean; // trim-all
 };
@@ -116,7 +118,7 @@ const SPACING_TRIM_NONE: SpacingTrim = {
 const SPACING_TRIM_NORMAL: SpacingTrim = {
   trimStart: false,
   spaceFirst: false,
-  trimEnd: true,
+  trimEnd: false,
   allowEnd: true,
   trimAdjacent: true,
 };
@@ -169,7 +171,7 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
           textSpacing.spaceFirst = false;
           break;
         case "space-first":
-          textSpacing.trimStart = true;
+          textSpacing.trimStart = false;
           textSpacing.spaceFirst = true;
           break;
         case "trim-end":
@@ -181,7 +183,7 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
           textSpacing.allowEnd = false;
           break;
         case "allow-end":
-          textSpacing.trimEnd = true;
+          textSpacing.trimEnd = false;
           textSpacing.allowEnd = true;
           break;
         case "trim-adjacent":
@@ -265,7 +267,9 @@ function isTextSpacingNone(
     !autospace.ideographAlpha &&
     !autospace.ideographNumeric &&
     !spacingTrim.trimStart &&
+    !spacingTrim.spaceFirst &&
     !spacingTrim.trimEnd &&
+    !spacingTrim.allowEnd &&
     !spacingTrim.trimAdjacent
   );
 }
@@ -793,20 +797,27 @@ class TextSpacingPolyfill {
       tagName = "viv-ts-close";
       punctProcessing = true;
       hangingLast = true;
-    } else if (hangingPunctuation.end && /^[、。，．､｡]\p{M}*$/u.test(text)) {
+    } else if (
+      (hangingPunctuation.forceEnd || hangingPunctuation.allowEnd) &&
+      /^[、。，．､｡]\p{M}*$/u.test(text)
+    ) {
       // hanging-punctuation: force-end | allow-end
       tagName = "viv-ts-close";
       punctProcessing = true;
       hangingEnd = true;
     } else if (
-      (spacingTrim.trimStart || spacingTrim.trimAdjacent) &&
+      (spacingTrim.trimStart ||
+        spacingTrim.spaceFirst ||
+        spacingTrim.trimAdjacent) &&
       /^[‘“〝（［｛｟〈〈《「『【〔〖〘〚]\p{M}*$/u.test(text)
     ) {
       // fullwidth opening punctuation
       tagName = "viv-ts-open";
       punctProcessing = true;
     } else if (
-      (spacingTrim.trimEnd || spacingTrim.trimAdjacent) &&
+      (spacingTrim.trimEnd ||
+        spacingTrim.allowEnd ||
+        spacingTrim.trimAdjacent) &&
       (/^[’”〞〟）］｝｠〉〉》」』】〕〗〙〛]\p{M}*$/u.test(text) ||
         (lang === "zh-hans" && /^[：；]\p{M}*$/u.test(text)) ||
         (lang !== "zh-hant" && /^[、。，．]\p{M}*$/u.test(text)))
@@ -846,12 +857,15 @@ class TextSpacingPolyfill {
           if (hangingFirst) {
             outerElem.className = "viv-hang-first";
           } else if (isFirstInBlock || isFirstAfterForcedLineBreak) {
-            if (spacingTrim.trimStart && !spacingTrim.spaceFirst) {
+            if (spacingTrim.trimStart) {
               outerElem.className = "viv-ts-trim";
             } else {
               outerElem.className = "viv-ts-space";
             }
-          } else if (!spacingTrim.trimStart && isAtStartOfLine()) {
+          } else if (
+            !(spacingTrim.trimStart || spacingTrim.spaceFirst) &&
+            isAtStartOfLine()
+          ) {
             outerElem.className = "viv-ts-space";
           } else if (
             spacingTrim.trimAdjacent &&
@@ -867,7 +881,10 @@ class TextSpacingPolyfill {
                   : prevNode.parentElement.offsetWidth) > fullWidthThreshold))
           ) {
             outerElem.className = "viv-ts-trim";
-          } else if (spacingTrim.trimStart && isAtStartOfLine()) {
+          } else if (
+            (spacingTrim.trimStart || spacingTrim.spaceFirst) &&
+            isAtStartOfLine()
+          ) {
             const linePos = linePosition();
             outerElem.className = "viv-ts-auto";
             if (linePos === linePosition() && !isAtStartOfLine()) {
@@ -892,7 +909,7 @@ class TextSpacingPolyfill {
               ) {
                 outerElem.className = "";
               }
-            } else if (spacingTrim.trimEnd) {
+            } else if (spacingTrim.trimEnd || spacingTrim.allowEnd) {
               outerElem.className = "viv-ts-trim";
             } else {
               outerElem.className = "viv-ts-space";
@@ -918,19 +935,15 @@ class TextSpacingPolyfill {
               if (!atEnd && !isAtEndOfLine()) {
                 outerElem.className = "";
               }
-            } else if (
-              atEndNoHang &&
-              spacingTrim.trimEnd &&
-              !spacingTrim.allowEnd
-            ) {
+            } else if (atEndNoHang && spacingTrim.trimEnd) {
               outerElem.className = "viv-ts-auto";
             } else if (!atEndNoHang && !isAtEndOfLine()) {
               outerElem.className = "";
             } else if (!atEnd && hangingPunctuation.allowEnd) {
-              if (!spacingTrim.trimEnd || spacingTrim.allowEnd) {
+              if (!spacingTrim.trimEnd) {
                 outerElem.className = "viv-ts-space";
                 if (!isAtEndOfLine()) {
-                  if (spacingTrim.trimEnd) {
+                  if (spacingTrim.allowEnd) {
                     outerElem.className = "viv-ts-auto";
                     if (!isAtEndOfLine()) {
                       outerElem.className = "viv-hang-end";
@@ -946,7 +959,7 @@ class TextSpacingPolyfill {
                 }
               }
             }
-          } else if (spacingTrim.trimEnd) {
+          } else if (spacingTrim.trimEnd || spacingTrim.allowEnd) {
             if (isAtEndOfLine()) {
               if (spacingTrim.allowEnd) {
                 outerElem.className = "viv-ts-space";
