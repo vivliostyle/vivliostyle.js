@@ -1,76 +1,93 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>Text-spacing &amp; hanging-punctuation allow/force-end test</title>
-  <style>
-    h2 {
-      margin: 0;
-    }
-    p {
-      border: 1px solid silver;
-      text-align: justify;
-      inline-size: 20em;
-      margin-inline-start: 1em;
-      margin-inline-end: 1em;
-    }
-    .ts-none {
-      text-spacing: none;
-    }
-    .ts-allow-end {
-      text-spacing: allow-end;
-    }
-    .ts-trim-end {
-      text-spacing: trim-end;
-    }
-    .hp-none {
-      hanging-punctuation: none;
-    }
-    .hp-allow-end {
-      hanging-punctuation: allow-end;
-    }
-    .hp-force-end {
-      hanging-punctuation: force-end;
-    }
-  </style>
-</head>
-<body>
-  <section class="ts-none hp-none">
-    <h2>text-spacing: none; hanging-punctuation: none</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-none hp-allow-end">
-    <h2>text-spacing: none; hanging-punctuation: allow-end</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-none hp-force-end">
-    <h2>text-spacing: none; hanging-punctuation: force-end</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-allow-end hp-none">
-    <h2>text-spacing: allow-end; hanging-punctuation: none</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-allow-end hp-allow-end">
-    <h2>text-spacing: allow-end; hanging-punctuation: allow-end</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-allow-end hp-force-end">
-    <h2>text-spacing: allow-end; hanging-punctuation: force-end</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-trim-end hp-none">
-    <h2>text-spacing: trim-end; hanging-punctuation: none</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-trim-end hp-allow-end">
-    <h2>text-spacing: trim-end; hanging-punctuation: allow-end</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-  <section class="ts-trim-end hp-force-end">
-    <h2>text-spacing: trim-end; hanging-punctuation: force-end</h2>
-    <p>一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br>一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。</p>
-  </section>
-
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Text-spacing &amp; hanging-punctuation allow/force-end test</title>
+    <style>
+      h2 {
+        margin: 0;
+      }
+      p {
+        border: 1px solid silver;
+        text-align: justify;
+        inline-size: 20em;
+        margin-inline-start: 1em;
+        margin-inline-end: 1em;
+      }
+      .ts-none {
+        text-spacing: none;
+      }
+      .ts-allow-end {
+        text-spacing: normal;
+      }
+      .ts-trim-end {
+        text-spacing: trim-auto;
+      }
+      .hp-none {
+        hanging-punctuation: none;
+      }
+      .hp-allow-end {
+        hanging-punctuation: allow-end;
+      }
+      .hp-force-end {
+        hanging-punctuation: force-end;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="ts-none hp-none">
+      <h2>text-spacing: none; hanging-punctuation: none</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-none hp-allow-end">
+      <h2>text-spacing: none; hanging-punctuation: allow-end</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-none hp-force-end">
+      <h2>text-spacing: none; hanging-punctuation: force-end</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-allow-end hp-none">
+      <h2>text-spacing: normal; hanging-punctuation: none</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-allow-end hp-allow-end">
+      <h2>text-spacing: normal; hanging-punctuation: allow-end</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-allow-end hp-force-end">
+      <h2>text-spacing: normal; hanging-punctuation: force-end</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-trim-end hp-none">
+      <h2>text-spacing: trim-auto; hanging-punctuation: none</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-trim-end hp-allow-end">
+      <h2>text-spacing: trim-auto; hanging-punctuation: allow-end</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+    <section class="ts-trim-end hp-force-end">
+      <h2>text-spacing: trim-auto; hanging-punctuation: force-end</h2>
+      <p>
+        一二三四五六七八九十一二三四五六七八九、一二三四五六七八九十一二三四五六七八九十。<br />一二三四五六七八九十一二三四五六七八九!、一二三四五六七八九十。
+      </p>
+    </section>
+  </body>
 </html>

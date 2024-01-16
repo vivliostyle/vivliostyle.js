@@ -527,7 +527,7 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-text-spacing-trim = auto | space-all | trim-auto |
+text-spacing-trim = auto | normal | space-all | trim-auto |
     [[ trim-start | space-start | space-first ] ||
      [ trim-end | space-end | allow-end ] ||
      [ trim-adjacent | space-adjacent ]];
@@ -720,7 +720,7 @@ padding-top: auto;
 text-autospace: normal;
 text-emphasis-color: currentColor;
 text-emphasis-style: none;
-text-spacing-trim: space-first;
+text-spacing-trim: normal;
 text-stroke-color: currentColor;
 text-stroke-width: 0;
 marker-start: none;
@@ -1157,6 +1157,7 @@ html|kbd,
 html|samp {
   font-family: monospace;
   text-spacing: none;
+  hanging-punctuation: none;
 }
 html|pre {
   white-space: pre;
