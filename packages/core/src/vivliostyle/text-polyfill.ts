@@ -445,12 +445,13 @@ class TextSpacingPolyfill {
     }
 
     function checkIfFirstInBlock(): boolean {
-      let p = checkPoints[0];
+      const p = checkPoints[0];
       let viewNode = p.viewNode;
-      while (p && p.inline) {
-        p = p.parent;
+      let parent = p.parent;
+      while (parent && parent.inline) {
+        parent = parent.parent;
       }
-      if (p?.fragmentIndex !== 1) {
+      if (parent?.fragmentIndex !== 1) {
         return false;
       }
       for (
@@ -458,6 +459,9 @@ class TextSpacingPolyfill {
         prev;
         prev = prev.previousSibling
       ) {
+        if (Vtree.canIgnore(prev, p.whitespace)) {
+          continue;
+        }
         if (!isOutOfLine(prev)) {
           return false;
         }
@@ -469,7 +473,7 @@ class TextSpacingPolyfill {
       let p = checkPoints[0];
       let prevNode: Node;
       while (p && p.inline) {
-        prevNode = p.sourceNode?.previousSibling;
+        prevNode = p.viewNode?.previousSibling;
         if (prevNode) {
           if (
             prevNode.nodeType === 3 &&
@@ -490,6 +494,10 @@ class TextSpacingPolyfill {
           if ((prevNode as Element).localName === "br") {
             return true;
           }
+          const display = (prevNode as HTMLElement).style?.display;
+          if (display && display !== "inline") {
+            return !/^(inline|ruby)\b/.test(display);
+          }
         } else if (prevNode.nodeType === 3) {
           if (p.whitespace === Vtree.Whitespace.PRESERVE) {
             if (/\n$/.test(prevNode.textContent)) {
@@ -506,6 +514,7 @@ class TextSpacingPolyfill {
       return false;
     }
 
+    let iFirst = -1;
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
       if (
@@ -544,11 +553,15 @@ class TextSpacingPolyfill {
           continue;
         }
 
+        if (iFirst < 0) {
+          iFirst = i;
+        }
         let prevNode: Node = null;
         let nextNode: Node = null;
-        let isFirstAfterBreak = i === 0;
-        let isFirstInBlock = i === 0 && isFirstFragment;
-        let isFirstAfterForcedLineBreak = i === 0 && isAfterForcedLineBreak;
+        let isFirstAfterBreak = i === iFirst;
+        let isFirstInBlock = i === iFirst && isFirstFragment;
+        let isFirstAfterForcedLineBreak =
+          i === iFirst && isAfterForcedLineBreak;
         let isLastBeforeForcedLineBreak = false;
         let isLastInBlock = false;
 
@@ -674,6 +687,26 @@ class TextSpacingPolyfill {
                 isLastInBlock = false;
                 break;
               }
+            }
+          }
+        }
+        if (p.parent?.display === "inline-block") {
+          if (!isFirstInBlock) {
+            let firstInInlineBlock = p.parent.viewNode.firstChild;
+            while (Vtree.canIgnore(firstInInlineBlock, p.whitespace)) {
+              firstInInlineBlock = firstInInlineBlock.nextSibling;
+            }
+            if (p.viewNode === firstInInlineBlock) {
+              isFirstInBlock = true;
+            }
+          }
+          if (!isLastInBlock) {
+            let lastInInlineBlock = p.parent.viewNode.lastChild;
+            while (Vtree.canIgnore(lastInInlineBlock, p.whitespace)) {
+              lastInInlineBlock = lastInInlineBlock.previousSibling;
+            }
+            if (p.viewNode === lastInInlineBlock) {
+              isLastInBlock = true;
             }
           }
         }
@@ -898,19 +931,32 @@ class TextSpacingPolyfill {
               ? "viv-hang-last"
               : "viv-hang-last viv-hang-hw";
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
+            const linePos = linePosition();
             if (hangingEnd) {
-              const { offsetLeft, offsetTop } = outerElem;
               outerElem.className = isFullWidth
-                ? "viv-hang-end"
+                ? hangingPunctuation.allowEnd && spacingTrim.allowEnd
+                  ? "viv-ts-auto"
+                  : "viv-hang-end"
                 : "viv-hang-end viv-hang-hw";
-              if (
-                outerElem.offsetLeft === offsetLeft &&
-                outerElem.offsetTop === offsetTop
-              ) {
+              if (hangingPunctuation.allowEnd && linePos === linePosition()) {
+                if (spacingTrim.trimEnd) {
+                  outerElem.className = "viv-ts-trim";
+                } else if (spacingTrim.allowEnd) {
+                  outerElem.className = "viv-hang-end";
+                  if (linePos === linePosition()) {
+                    outerElem.className = "";
+                  }
+                } else {
+                  outerElem.className = "viv-ts-space";
+                }
+              }
+            } else if (spacingTrim.trimEnd) {
+              outerElem.className = "viv-ts-trim";
+            } else if (spacingTrim.allowEnd) {
+              outerElem.className = "viv-ts-auto";
+              if (linePos === linePosition()) {
                 outerElem.className = "";
               }
-            } else if (spacingTrim.trimEnd || spacingTrim.allowEnd) {
-              outerElem.className = "viv-ts-trim";
             } else {
               outerElem.className = "viv-ts-space";
             }
