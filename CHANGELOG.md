@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.26.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.9...v2.26.0) (2024-01-20)
+
+### Bug Fixes
+
+- set hanging-punctuation:none for pre-formatted text default style ([52d50c9](https://github.com/vivliostyle/vivliostyle.js/commit/52d50c95c05611c296839a7939204034b4ef8d52))
+- text-spacing-trim not working properly in some cases ([99b3af3](https://github.com/vivliostyle/vivliostyle.js/commit/99b3af3d78aba1491bc87d40ef6a8343aa901af9)), closes [#1251](https://github.com/vivliostyle/vivliostyle.js/issues/1251)
+
+### Features
+
+- Update CSS text-spacing-trim property to support the latest spec change ([114fd6d](https://github.com/vivliostyle/vivliostyle.js/commit/114fd6ded949e029ff3802ad758df88b29efd693)), closes [#1244](https://github.com/vivliostyle/vivliostyle.js/issues/1244)
+
 ## [2.25.9](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.8...v2.25.9) (2023-12-04)
 
 ### Bug Fixes
