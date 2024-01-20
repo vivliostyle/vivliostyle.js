@@ -856,7 +856,7 @@ export const UserAgentXml = `
 
 /** user-agent-page.css */
 export const UserAgentPageCss = `
-@namespace html "http://www.w3.org/1999/xhtml";
+@namespace "http://www.w3.org/1999/xhtml";
 
 :root {
   hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
@@ -986,354 +986,354 @@ export const UserAgentPageCss = `
 
 /** user-agent-base.css */
 export const UserAgentBaseCss = `
-@namespace html "http://www.w3.org/1999/xhtml";
+@namespace "http://www.w3.org/1999/xhtml";
+@namespace m "http://www.w3.org/1998/Math/MathML";
+@namespace epub "http://www.idpf.org/2007/ops";
 
-html|html,
-html|address,
-html|blockquote,
-html|body,
-html|dd,
-html|div,
-html|dl,
-html|dt,
-html|fieldset,
-html|form,
-html|frame,
-html|frameset,
-html|h1,
-html|h2,
-html|h3,
-html|h4,
-html|h5,
-html|h6,
-html|noframes,
-html|ol,
-html|p,
-html|ul,
-html|center,
-html|dir,
-html|hr,
-html|menu,
-html|pre,
-html|article,
-html|section,
-html|nav,
-html|aside,
-html|hgroup,
-html|footer,
-html|header,
-html|figure,
-html|figcaption,
-html|main {
+html,
+address,
+blockquote,
+body,
+dd,
+div,
+dl,
+dt,
+fieldset,
+form,
+frame,
+frameset,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+noframes,
+ol,
+p,
+ul,
+center,
+dir,
+hr,
+menu,
+pre,
+article,
+section,
+nav,
+aside,
+hgroup,
+footer,
+header,
+figure,
+figcaption,
+main {
   display: block;
   unicode-bidi: normal;
 }
-html|li {
+li {
   display: list-item;
 }
-html|head {
+head {
   display: none !important;
 }
-html|table {
+table {
   display: table;
 }
-html|tr {
+tr {
   display: table-row;
 }
-html|thead {
+thead {
   display: table-header-group;
   break-after: avoid;
 }
-html|tbody {
+tbody {
   display: table-row-group;
 }
-html|tfoot {
+tfoot {
   display: table-footer-group;
   break-before: avoid;
 }
-html|col {
+col {
   display: table-column;
 }
-html|colgroup {
+colgroup {
   display: table-column-group;
 }
-html|td,
-html|th {
+td,
+th {
   display: table-cell;
 }
-html|caption {
+caption {
   display: table-caption;
   text-align: center;
 }
-html|th {
+th {
   font-weight: bolder;
   text-align: center;
 }
-html|*[hidden],
-html|link,
-html|style,
-html|script {
+*[hidden],
+link,
+style,
+script {
   display: none;
 }
-html|h1 {
+h1 {
   font-size: 2em;
   margin-block-start: 0.67em;
   margin-block-end: 0.67em;
   margin-inline-start: 0em;
   margin-inline-end: 0em;
 }
-html|h2 {
+h2 {
   font-size: 1.5em;
   margin-block-start: 0.75em;
   margin-block-end: 0.75em;
   margin-inline-start: 0em;
   margin-inline-end: 0em;
 }
-html|h3 {
+h3 {
   font-size: 1.17em;
   margin-block-start: 0.83em;
   margin-block-end: 0.83em;
   margin-inline-start: 0em;
   margin-inline-end: 0em;
 }
-html|h4,
-html|p,
-html|blockquote,
-html|ul,
-html|fieldset,
-html|form,
-html|ol,
-html|dl,
-html|dir,
-html|menu,
-html|h5,
-html|h6 {
+h4,
+p,
+blockquote,
+ul,
+fieldset,
+form,
+ol,
+dl,
+dir,
+menu,
+h5,
+h6 {
   margin-block-start: 1em;
   margin-block-end: 1em;
   margin-inline-start: 0em;
   margin-inline-end: 0em;
 }
-html|h5 {
+h5 {
   font-size: 0.83em;
 }
-html|h6 {
+h6 {
   font-size: 0.75em;
 }
-html|h1,
-html|h2,
-html|h3,
-html|h4,
-html|h5,
-html|h6,
-html|b,
-html|strong {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+strong {
   font-weight: bolder;
 }
-html|h1,
-html|h2,
-html|h3,
-html|h4,
-html|h5,
-html|h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   break-after: avoid;
 }
-html|blockquote {
+blockquote {
   margin-block-start: 0px;
   margin-block-end: 0px;
   margin-inline-start: 40px;
   margin-inline-end: 40px;
 }
-html|i,
-html|cite,
-html|em,
-html|var,
-html|address {
+i,
+cite,
+em,
+var,
+address {
   font-style: italic;
 }
-html|pre,
-html|tt,
-html|code,
-html|kbd,
-html|samp {
+pre,
+tt,
+code,
+kbd,
+samp {
   font-family: monospace;
   text-spacing: none;
   hanging-punctuation: none;
 }
-html|pre {
+pre {
   white-space: pre;
 }
-html|button,
-html|textarea,
-html|input,
-html|select {
+button,
+textarea,
+input,
+select {
   display: inline-block;
 }
-html|big {
+big {
   font-size: 1.17em;
 }
-html|small,
-html|sub,
-html|sup {
+small,
+sub,
+sup {
   font-size: 0.83em;
 }
-html|sub {
+sub {
   vertical-align: sub;
 }
-html|sup {
+sup {
   vertical-align: super;
 }
-html|table {
+table {
   border-spacing: 2px;
 }
-html|thead,
-html|tbody,
-html|tfoot {
+thead,
+tbody,
+tfoot {
   vertical-align: middle;
 }
 /* for XHTML tables without tbody */
-html|table > html|tr {
+table > tr {
   vertical-align: middle;
 }
-html|td,
-html|th {
+td,
+th {
   vertical-align: inherit;
 }
-html|s,
-html|strike,
-html|del {
+s,
+strike,
+del {
   text-decoration: line-through;
 }
-html|hr {
+hr {
   border: 1px inset;
 }
-html|ol,
-html|ul,
-html|dir,
-html|menu {
+ol,
+ul,
+dir,
+menu {
   margin: 0px;
   padding-inline-start: 40px;
 }
-html|dd {
+dd {
   margin: 0px;
   margin-inline-start: 40px;
 }
-html|ol html|ul,
-html|ul html|ol,
-html|ul html|ul,
-html|ol html|ol {
+ol ul,
+ul ol,
+ul ul,
+ol ol {
   margin-block-start: 0;
   margin-block-end: 0;
 }
-html|u,
-html|ins {
+u,
+ins {
   text-decoration: underline;
 }
-html|center {
+center {
   text-align: center;
 }
-html|q:before {
+q:before {
   content: open-quote;
 }
-html|q:after {
+q:after {
   content: close-quote;
 }
 
-html|audio,
-html|video {
+audio,
+video {
   break-inside: avoid;
 }
 
-html|ruby {
+ruby {
   display: ruby;
 }
-html|rp {
+rp {
   display: none;
 }
-html|rbc {
+rbc {
   display: ruby-base-container;
 }
-html|rtc {
+rtc {
   display: ruby-text-container;
 }
-html|rb {
+rb {
   display: ruby-base;
   white-space: nowrap;
 }
-html|rt {
+rt {
   display: ruby-text;
 }
 
-html|rtc,
-html|rt {
+rtc,
+rt {
   font-variant-east-asian: ruby;
   text-emphasis: none;
   white-space: nowrap;
   line-height: 1;
 }
 
-html|rtc:lang(zh),
-html|rt:lang(zh) {
+rtc:lang(zh),
+rt:lang(zh) {
   ruby-align: center;
 }
 
-html|rtc,
-html|rt {
+rtc,
+rt {
   font-size: 50%;
 }
 
-html|rtc:lang(zh-TW),
-html|rt:lang(zh-TW) {
+rtc:lang(zh-TW),
+rt:lang(zh-TW) {
   font-size: 30%;
 }
 
-html|rtc > html|rt,
-html|rtc > html|rt:lang(zh-TW) {
+rtc > rt,
+rtc > rt:lang(zh-TW) {
   font-size: 100%;
 }
 
 /* Bidi settings */
-html|bdo[dir="ltr"] {
+bdo[dir="ltr"] {
   direction: ltr;
   unicode-bidi: bidi-override;
 }
-html|bdo[dir="rtl"] {
+bdo[dir="rtl"] {
   direction: rtl;
   unicode-bidi: bidi-override;
 }
-html|*[dir="ltr"] {
+*[dir="ltr"] {
   direction: ltr;
   unicode-bidi: embed;
 }
-html|*[dir="rtl"] {
+*[dir="rtl"] {
   direction: rtl;
   unicode-bidi: embed;
 }
 
 /* MathML */
-math[display="block"] {
+m|math[display="block"] {
   display: block;
 }
 
 /*------------------ epub-specific ---------------------*/
 
-@namespace epub "http://www.idpf.org/2007/ops";
-
-html|a[epub|type="noteref"] {
+a[epub|type="noteref"] {
   font-size: 0.75em;
   vertical-align: super;
   line-height: 0.01;
 }
 
-html|a[epub|type="noteref"]:href-epub-type(footnote) {
+a[epub|type="noteref"]:href-epub-type(footnote) {
   -adapt-template: url(user-agent.xml#footnote);
   text-decoration: none;
 }
 
-html|aside[epub|type="footnote"] {
+aside[epub|type="footnote"] {
   display: none;
 }
 
-html|aside[epub|type="footnote"]:footnote-content {
+aside[epub|type="footnote"]:footnote-content {
   display: block;
   margin: 0.25em;
   font-size: 1.2em;
@@ -1371,6 +1371,7 @@ epub|case[required-namespace::supported] ~ epub|default {
 
 /** user-agent-toc.css */
 export const UserAgentTocCss = `
+@namespace "http://www.w3.org/1999/xhtml";
 @namespace ncx "http://www.daisy.org/z3986/2005/ncx/";
 
 ncx|ncx {
