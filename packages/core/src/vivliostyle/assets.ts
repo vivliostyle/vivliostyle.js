@@ -1510,6 +1510,10 @@ span.viv-anonymous-block {
   display: block;
 }
 
+[data-vivliostyle-page-container] {
+  text-spacing-trim: space-all;
+  text-autospace: no-autospace;
+}
 viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {
   margin-inline-start: -0.5em;
