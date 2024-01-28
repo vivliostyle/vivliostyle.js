@@ -2230,12 +2230,6 @@ export class ViewFactory
         );
         continue;
       }
-      if (target.localName === "rt" && propName === "font-size") {
-        // Fix for Issue #673
-        if (this.fixRubyTextFontSize(target, value)) {
-          continue;
-        }
-      }
       if (
         isRoot &&
         this.page.pageAreaElement &&
@@ -2338,49 +2332,6 @@ export class ViewFactory
       }
     }
     return parentLineHeight;
-  }
-
-  /**
-   * Fix ruby text font size.
-   * Issue #673: Minimum font size setting in Chrome causes ruby font size problem
-   * @param target the rt element
-   * @param value the font-size value
-   * @returns true if the font-size fix is done
-   */
-  fixRubyTextFontSize(target: Element, value: Css.Val): boolean {
-    if (!/Chrome/.test(navigator.userAgent)) {
-      // Do nothing if the browser engine is not "Chrome"
-      return false;
-    }
-    if (!value.isNumeric()) {
-      return false;
-    }
-    const numeric = value as Css.Numeric;
-    let fontSizeInPx: number;
-    if (numeric.unit === "%" || numeric.unit === "em") {
-      const parentElem = this.nodeContext?.parent?.viewNode as Element;
-      const parentFontSize =
-        parentElem &&
-        parseFloat(this.viewport.window.getComputedStyle(parentElem).fontSize);
-      fontSizeInPx =
-        (parentFontSize * numeric.num) / (numeric.unit === "%" ? 100 : 1);
-    } else {
-      fontSizeInPx = Css.convertNumericToPx(numeric, this.context).num;
-    }
-    if (!fontSizeInPx) {
-      return false;
-    }
-    const minFontSizeInPx = 10; // Default minimum font size setting in Chrome
-    if (fontSizeInPx >= minFontSizeInPx) {
-      return false;
-    }
-    if ((target as HTMLElement).style?.["zoom"] === undefined) {
-      return false;
-    }
-    const zoom = fontSizeInPx / minFontSizeInPx;
-    Base.setCSSProperty(target, "font-size", `${minFontSizeInPx}px`);
-    Base.setCSSProperty(target, "zoom", `${zoom}`);
-    return true;
   }
 
   /** @override */
