@@ -44,12 +44,6 @@ export function calculateEdge(
 
   const element = node.nodeType === 1 ? (node as Element) : node.parentElement;
   if (element && element.namespaceURI === Base.NS.XHTML) {
-    if (element.localName === "rt" && (element as HTMLElement).style["zoom"]) {
-      // "zoom" is set in fixRubyTextFontSize() to fix the issue #673 for Chrome.
-      // when zoom is set, it is hard to get the edge value, so return NaN.
-      // (Fix for issues #804 and #808)
-      return NaN;
-    }
     if (
       /^([\d\.]|super|(text-)?top)/.test(
         (element as HTMLElement).style.verticalAlign,
