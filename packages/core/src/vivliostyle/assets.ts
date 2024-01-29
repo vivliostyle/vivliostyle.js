@@ -1017,6 +1017,15 @@ dir,
 hr,
 menu,
 pre,
+details,
+dialog,
+legend,
+listing,
+optgroup,
+option,
+plaintext,
+search,
+xmp,
 article,
 section,
 nav,
@@ -1028,7 +1037,6 @@ figure,
 figcaption,
 main {
   display: block;
-  unicode-bidi: normal;
 }
 li {
   display: list-item;
@@ -1079,74 +1087,58 @@ script {
 }
 h1 {
   font-size: 2em;
-  margin-block-start: 0.67em;
-  margin-block-end: 0.67em;
-  margin-inline-start: 0em;
-  margin-inline-end: 0em;
+  margin-block: 0.67em;
 }
 h2 {
   font-size: 1.5em;
-  margin-block-start: 0.75em;
-  margin-block-end: 0.75em;
-  margin-inline-start: 0em;
-  margin-inline-end: 0em;
+  margin-block: 0.83em;
 }
 h3 {
   font-size: 1.17em;
-  margin-block-start: 0.83em;
-  margin-block-end: 0.83em;
-  margin-inline-start: 0em;
-  margin-inline-end: 0em;
+  margin-block: 1em;
 }
-h4,
-p,
-blockquote,
-ul,
-fieldset,
-form,
-ol,
-dl,
-dir,
-menu,
-h5,
-h6 {
-  margin-block-start: 1em;
-  margin-block-end: 1em;
-  margin-inline-start: 0em;
-  margin-inline-end: 0em;
+h4 {
+  font-size: 1em;
+  margin-block: 1.33em;
 }
 h5 {
   font-size: 0.83em;
+  margin-block: 1.67em;
 }
 h6 {
-  font-size: 0.75em;
+  font-size: 0.67em;
+  margin-block: 2.33em;
 }
 h1,
 h2,
 h3,
 h4,
 h5,
-h6,
+h6 {
+  font-weight: bold;
+  break-after: avoid;
+}
+p,
+blockquote,
+figure,
+ul,
+ol,
+dl,
+dir,
+menu {
+  margin-block: 1em;
+}
 b,
 strong {
   font-weight: bolder;
 }
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  break-after: avoid;
-}
-blockquote {
-  margin-block-start: 0px;
-  margin-block-end: 0px;
-  margin-inline-start: 40px;
-  margin-inline-end: 40px;
+blockquote,
+figure {
+  margin-inline: 40px;
 }
 i,
 cite,
+dfn,
 em,
 var,
 address {
@@ -1161,8 +1153,14 @@ samp {
   text-spacing: none;
   hanging-punctuation: none;
 }
+listing,
+plaintext,
+xmp,
 pre {
   white-space: pre;
+}
+pre[wrap] {
+  white-space: pre-wrap;
 }
 button,
 textarea,
@@ -1185,17 +1183,18 @@ sup {
   vertical-align: super;
 }
 table {
+  box-sizing: border-box;
   border-spacing: 2px;
+  border-collapse: separate;
+  text-indent: initial;
 }
 thead,
 tbody,
-tfoot {
-  vertical-align: middle;
-}
-/* for XHTML tables without tbody */
+tfoot,
 table > tr {
   vertical-align: middle;
 }
+tr,
 td,
 th {
   vertical-align: inherit;
@@ -1206,25 +1205,28 @@ del {
   text-decoration: line-through;
 }
 hr {
-  border: 1px inset;
+  border-style: inset;
+  border-width: 1px;
+  margin-block: 0.5em;
+}
+hr[color],
+hr[noshade] {
+  border-style: solid;
 }
 ol,
 ul,
 dir,
 menu {
-  margin: 0px;
   padding-inline-start: 40px;
 }
 dd {
-  margin: 0px;
   margin-inline-start: 40px;
 }
 ol ul,
 ul ol,
 ul ul,
 ol ol {
-  margin-block-start: 0;
-  margin-block-end: 0;
+  margin-block: 0;
 }
 u,
 ins {
@@ -1233,16 +1235,11 @@ ins {
 center {
   text-align: center;
 }
-q:before {
+q::before {
   content: open-quote;
 }
-q:after {
+q::after {
   content: close-quote;
-}
-
-audio,
-video {
-  break-inside: avoid;
 }
 
 ruby {
@@ -1264,30 +1261,20 @@ rb {
 rt {
   display: ruby-text;
 }
-
 rtc,
 rt {
-  font-variant-east-asian: ruby;
   text-emphasis: none;
   white-space: nowrap;
   line-height: 1;
 }
-
-rtc:lang(zh),
-rt:lang(zh) {
-  ruby-align: center;
-}
-
 rtc,
 rt {
   font-size: 50%;
 }
-
 rtc:lang(zh-TW),
 rt:lang(zh-TW) {
   font-size: 30%;
 }
-
 rtc > rt,
 rtc > rt:lang(zh-TW) {
   font-size: 100%;
@@ -1304,11 +1291,11 @@ bdo[dir="rtl"] {
 }
 *[dir="ltr"] {
   direction: ltr;
-  unicode-bidi: embed;
+  unicode-bidi: isolate;
 }
 *[dir="rtl"] {
   direction: rtl;
-  unicode-bidi: embed;
+  unicode-bidi: isolate;
 }
 
 /* MathML */
