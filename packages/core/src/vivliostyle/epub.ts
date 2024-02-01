@@ -1193,7 +1193,7 @@ export class OPFDoc {
         if (readingOrderOrResources instanceof Array) {
           readingOrderOrResources.forEach((itemObj) => {
             const isInReadingOrder =
-              manifestObj["readingOrder"].includes(itemObj);
+              readingOrderOrResources === manifestObj["readingOrder"];
             const url =
               typeof itemObj === "string"
                 ? itemObj
@@ -1225,8 +1225,6 @@ export class OPFDoc {
                 tocFound = param.index;
               }
               params.push(param);
-
-              //TODO: items not in readingOrder should be excluded from linear reading but available with internal link navigation.
             }
           });
         }
@@ -1242,6 +1240,12 @@ export class OPFDoc {
         this.xhtmlToc = manifestUrl
           ? this.items?.[0]
           : this.itemMapByPath[primaryEntryPath];
+      }
+
+      // remove items not in readingOrder (Issue #1257)
+      const readingOrderCount = manifestObj["readingOrder"]?.length;
+      if (readingOrderCount && readingOrderCount < this.items.length) {
+        this.items.splice(readingOrderCount);
       }
 
       frame.finish(true);
