@@ -247,9 +247,6 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         const doc = xmldoc.document;
         const opf = new OPFDoc(this, url);
 
-        if (doc.body) {
-          doc.body.setAttribute("data-vivliostyle-primary-entry", true);
-        }
         // Find manifest, W3C WebPublication or Readium Web Publication Manifest
         const manifestLink = doc.querySelector(
           "link[rel='publication'],link[rel='manifest'][type='application/webpub+json']",
@@ -284,13 +281,9 @@ export class EPUBDocStore extends OPS.OPSDocStore {
           // No manifest
           opf.initWithWebPubManifest({}, doc).then(() => {
             if (opf.xhtmlToc && opf.xhtmlToc.src === xmldoc.url) {
-              // xhtmlToc is the primari entry (X)HTML
-              if (
-                !doc.querySelector(
-                  "[role=doc-toc], [role=directory], nav, .toc, #toc",
-                )
-              ) {
-                // TOC is not found in the primari entry (X)HTML
+              // xhtmlToc is the primary entry (X)HTML
+              if (Toc.findTocElements(doc).length === 0) {
+                // TOC is not found in the primary entry (X)HTML
                 opf.xhtmlToc = null;
               }
             }
@@ -1155,16 +1148,7 @@ export class OPFDoc {
       manifestObj["readingOrder"] = [encodeURI(primaryEntryPath)];
 
       // Find TOC in the primary entry (X)HTML
-      const selector =
-        "[role=doc-toc] a[href]," +
-        "[role=directory] a[href]," +
-        "nav li a[href]," +
-        ".toc a[href]," +
-        "#toc a[href]" +
-        (CSS.supports("selector(:has(*))")
-          ? ",section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a[href]"
-          : "");
-      for (const anchorElem of doc.querySelectorAll(selector)) {
+      for (const anchorElem of Toc.findTocAnchorElements(doc)) {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
           // Avoid link to external resources
@@ -2642,7 +2626,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     viewport.root.appendChild(pageCont);
     // pageCont.style.position = "absolute";
-    pageCont.style.visibility = "hidden";
+    if (!Constants.isDebug) {
+      pageCont.style.visibility = "hidden";
+    }
     // pageCont.style.left = "3px";
     // pageCont.style.top = "3px";
     pageCont.style.width = `${tocWidth + 10}px`;

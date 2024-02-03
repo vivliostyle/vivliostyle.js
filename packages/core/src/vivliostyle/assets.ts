@@ -1371,69 +1371,29 @@ ncx|content {
   display: none;
 }
 
-body > * {
-  -adapt-behavior: body-child;
+*:not([role=doc-toc],
+  [role=doc-toc] *,
+  :has([role=doc-toc]),
+  :is(h1,h2,h3,h4,h5,h6):has(+:not(nav)[role=doc-toc])) {
+  display: none;
 }
 
-[role="doc-toc"],
-[role="directory"],
-nav,
-.toc,
-#toc,
-section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)),
-#table-of-contents,
-#contents {
-  -adapt-behavior: toc-root;
-}
-
-[role="doc-toc"] a,
-[role="directory"] a,
-nav a,
-.toc a,
-#toc a,
-section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) a,
+[role=doc-toc] li a,
 ncx|navLabel {
   -adapt-behavior: toc-node-anchor;
 }
 
-[role="doc-toc"] li,
-[role="directory"] li,
-nav li,
-.toc li,
-#toc li,
-section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) li,
+[role=doc-toc] li,
 ncx|navPoint {
   -adapt-behavior: toc-node;
 }
 
-[role="doc-toc"] li > *:first-child,
-[role="directory"] li > *:first-child,
-nav li > *:first-child,
-.toc li > *:first-child,
-#toc li > *:first-child,
-section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) li > *:first-child {
+[role=doc-toc] li > :not(ul,ol):first-child {
   -adapt-behavior: toc-node-first-child;
 }
 
-[role="doc-toc"] ol,
-[role="directory"] ol,
-nav ol,
-.toc ol,
-#toc ol,
-[role="doc-toc"] ul,
-[role="directory"] ul,
-nav ul,
-.toc ul,
-#toc ul,
-ol[role="doc-toc"],
-ol[role="directory"],
-ol.toc,
-ol#toc,
-ul[role="doc-toc"],
-ul[role="directory"],
-ul.toc,
-ul#toc,
-section:has(>:first-child:is(h1,h2,h3,h4,h5,h6):is(.toc,#toc)) :is(ol,ul) {
+[role=doc-toc] :is(ol,ul),
+[role=doc-toc]:is(ol,ul) {
   -adapt-behavior: toc-container;
 }
 `;
