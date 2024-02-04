@@ -44,6 +44,52 @@ export type TOCItem = {
   children: TOCItem[];
 };
 
+export function findTocElements(doc: Document): Array<Element> {
+  // Find `role="doc-toc"` for webpub or `<nav epub:type="toc">` etc. for EPUB.
+  const tocElems = Array.from(
+    doc.querySelectorAll(
+      "[role=doc-toc],nav[*|type=toc],nav[*|type=landmarks],nav[*|type=page-list]",
+    ),
+  );
+  if (tocElems.length > 0) {
+    return tocElems;
+  }
+  // If not found, find TOC elements with the following selector.
+  const navs = "nav,.toc,#toc,#table-of-contents,#contents,[role=directory]";
+  for (const elem of doc.querySelectorAll(navs)) {
+    if (tocElems.find((e) => e.contains(elem))) {
+      continue; // Skip nested TOC elements.
+    }
+    let tocElem = elem;
+    if (/^h[1-6]$/.test(tocElem.localName)) {
+      // If the element is a heading, use its parent or next sibling as TOC element.
+      if (!tocElem.previousElementSibling) {
+        // If the heading is the first element, use its parent.
+        tocElem = tocElem.parentElement;
+      } else {
+        // Otherwise, use its next sibling.
+        tocElem = tocElem.nextElementSibling;
+      }
+    }
+    // TOC element must have at least one list item with an anchor element.
+    if (tocElem && tocElem.querySelector("li a[href]")) {
+      tocElems.push(tocElem);
+    }
+  }
+  return tocElems;
+}
+
+export function findTocAnchorElements(doc: Document): Array<Element> {
+  const tocElems = findTocElements(doc);
+  const anchors = [] as Array<Element>;
+  for (const tocElem of tocElems) {
+    for (const anchor of tocElem.querySelectorAll("li a[href]")) {
+      anchors.push(anchor);
+    }
+  }
+  return anchors;
+}
+
 export class TOCView implements Vgen.CustomRendererFactory {
   pref: Exprs.Preferences;
   page: Vtree.Page = null;
@@ -95,16 +141,6 @@ export class TOCView implements Vgen.CustomRendererFactory {
       const behavior = computedStyle["behavior"];
       if (behavior) {
         switch (behavior.toString()) {
-          case "body-child":
-            if (
-              !srcElem.querySelector(
-                "[role=doc-toc], [role=directory], nav li a, .toc, #toc",
-              )
-            ) {
-              // hide elements not containing TOC.
-              computedStyle["display"] = Css.ident.none;
-            }
-            break;
           case "toc-node-anchor":
             computedStyle["color"] = Css.ident.inherit;
             computedStyle["text-decoration"] = Css.ident.none;
@@ -230,16 +266,11 @@ export class TOCView implements Vgen.CustomRendererFactory {
     const tocBoxUrl = Base.stripFragment(this.url) + "?viv-toc-box";
 
     this.store.load(tocBoxUrl).then((xmldoc) => {
-      // Mark if this doc is the primary entry page.
-      const nonTocBoxDoc = this.store.resources[this.url];
-
-      // Make hidden TOC visible in TOC box
-      for (const elem of xmldoc.document.querySelectorAll(
-        "[role=doc-toc], [role=directory], nav, .toc, #toc",
-      )) {
-        if (elem.hasAttribute("hidden")) {
-          elem.removeAttribute("hidden");
-        }
+      for (const tocElem of findTocElements(xmldoc.document)) {
+        // Set `role="doc-toc"`
+        tocElem.setAttribute("role", "doc-toc");
+        // Make hidden TOC visible in TOC box
+        tocElem.removeAttribute("hidden");
       }
 
       const style = this.store.getStyleForDoc(xmldoc);
