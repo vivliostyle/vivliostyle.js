@@ -446,16 +446,21 @@ class TextSpacingPolyfill {
 
     function checkIfFirstInBlock(): boolean {
       const p = checkPoints[0];
-      let viewNode = p.viewNode;
-      let parent = p.parent;
-      while (parent && parent.inline) {
-        parent = parent.parent;
+      for (let pp = p; ; pp = pp.parent) {
+        if (!pp || !pp.inline) {
+          if (pp?.fragmentIndex !== 1) {
+            // This block is not the first fragment
+            return false;
+          }
+          break;
+        }
       }
-      if (parent?.fragmentIndex !== 1) {
-        return false;
+      if (!p.inline) {
+        // This is at the start of the block
+        return true;
       }
       for (
-        let prev = viewNode.previousSibling;
+        let prev = p.viewNode.previousSibling;
         prev;
         prev = prev.previousSibling
       ) {
