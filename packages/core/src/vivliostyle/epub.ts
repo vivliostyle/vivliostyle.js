@@ -2542,6 +2542,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
       instance.docTitle = item.title || "";
 
       instance.init().then(() => {
+        if (!this.opf.pageProgression && instance.pageProgression) {
+          // Use the first instance's page progression as the global page progression.
+          // (Fix for issue #1260)
+          this.opf.pageProgression = instance.pageProgression;
+        }
         viewItem = {
           item,
           xmldoc,
