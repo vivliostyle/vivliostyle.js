@@ -439,21 +439,68 @@ export class ViewFactory
       this.isFootnote,
       this.nodeContext,
     );
+    const isRoot = this.nodeContext.parent == null;
+    if (isRoot) {
+      // Ensure that writing-mode and direction are set on the root element.
+      if (!cascMap["writing-mode"] && this.styler.rootStyle["writing-mode"]) {
+        cascMap["writing-mode"] = this.styler.rootStyle[
+          "writing-mode"
+        ] as CssCascade.CascadeValue;
+      }
+      if (!cascMap["direction"] && this.styler.rootStyle["direction"]) {
+        cascMap["direction"] = this.styler.rootStyle[
+          "direction"
+        ] as CssCascade.CascadeValue;
+      }
+    }
+    const verticalParent = vertical;
     vertical = CssCascade.isVertical(cascMap, context, vertical);
+    const verticalChanged = !isRoot && vertical !== verticalParent;
     rtl = CssCascade.isRtl(cascMap, context, rtl);
+
+    const transform = (
+      name: string,
+      cascVal: CssCascade.CascadeValue,
+    ): Css.Val => {
+      // The percent value of inline-size on vertical-in-horizontal or
+      // horizontal-in-vertical block needs to be resolved against the
+      // page area height or width. (Fix for issue #1264)
+      let percentRef: number;
+      if (verticalChanged) {
+        if (vertical) {
+          if (/^(min-|max-)?(height|inline-size)$/.test(name)) {
+            percentRef = context.pageAreaHeight;
+          }
+        } else {
+          if (/^(min-|max-)?(width|inline-size)$/.test(name)) {
+            percentRef = context.pageAreaWidth;
+          }
+        }
+      }
+      let value = cascVal.evaluate(context, name, percentRef, vertical);
+      if (name == "font-family") {
+        value = this.docFaces.filterFontFamily(value);
+      }
+      return value;
+    };
+
     CssCascade.convertToPhysical(
       cascMap,
       computedStyle,
       vertical,
       rtl,
-      (name, cascVal) => {
-        let value = cascVal.evaluate(context, name, undefined, vertical);
-        if (name == "font-family") {
-          value = this.docFaces.filterFontFamily(value);
-        }
-        return value;
-      },
+      transform,
     );
+
+    if (verticalChanged) {
+      // The auto value of inline-size on vertical-in-horizontal or
+      // horizontal-in-vertical block is changed to max-content.
+      // (Fix for issue #1264)
+      const inlineSize = computedStyle[vertical ? "height" : "width"];
+      if (!inlineSize || inlineSize === Css.ident.auto) {
+        computedStyle[vertical ? "height" : "width"] = Css.ident.max_content;
+      }
+    }
 
     if (Display.isRunning(computedStyle["position"])) {
       // Running elements
