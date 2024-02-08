@@ -659,6 +659,8 @@ export const ident: { [key: string]: Ident } = {
   list_item: getName("list-item"),
   ltr: getName("ltr"),
   manual: getName("manual"),
+  max_content: getName("max-content"),
+  min_content: getName("min-content"),
   none: getName("none"),
   normal: getName("normal"),
   oeb_page_foot: getName("oeb-page-foot"),
