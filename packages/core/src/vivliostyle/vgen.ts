@@ -447,7 +447,7 @@ export class ViewFactory
       vertical,
       rtl,
       (name, cascVal) => {
-        let value = cascVal.evaluate(context, name);
+        let value = cascVal.evaluate(context, name, undefined, vertical);
         if (name == "font-family") {
           value = this.docFaces.filterFontFamily(value);
         }
