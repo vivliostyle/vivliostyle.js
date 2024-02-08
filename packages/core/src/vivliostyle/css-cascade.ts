@@ -271,11 +271,22 @@ export class CascadeValue {
     return new CascadeValue(this.value, this.priority + specificity);
   }
 
-  evaluate(context: Exprs.Context, propName?: string): Css.Val {
+  evaluate(
+    context: Exprs.Context,
+    propName?: string,
+    percentRef?: number,
+    vertical?: boolean,
+  ): Css.Val {
     if (propName && Css.isCustomPropName(propName)) {
       return this.value;
     }
-    return evaluateCSSToCSS(context, this.value, propName);
+    return evaluateCSSToCSS(
+      context,
+      this.value,
+      propName,
+      percentRef,
+      vertical,
+    );
   }
 
   isEnabled(context: Exprs.Context): boolean {
@@ -4706,6 +4717,7 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
     public context: Exprs.Context,
     public resolveViewportUnit?: boolean,
     public percentRef?: number,
+    public vertical?: boolean,
   ) {
     super();
   }
@@ -4749,7 +4761,8 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
         Exprs.isRootFontRelativeLengthUnit(numeric.unit))
     ) {
       return new Css.Numeric(
-        numeric.num * this.context.queryUnitSize(numeric.unit, false),
+        numeric.num *
+          this.context.queryUnitSize(numeric.unit, false, this.vertical),
         "px",
       );
     }
@@ -4765,6 +4778,7 @@ export function evaluateCSSToCSS(
   val: Css.Val,
   propName?: string,
   percentRef?: number,
+  vertical?: boolean,
 ): Css.Val {
   try {
     if (val instanceof Css.Expr) {
@@ -4783,7 +4797,9 @@ export function evaluateCSSToCSS(
       val instanceof Css.SpaceList ||
       val instanceof Css.CommaList
     ) {
-      return val.visit(new CalcFilterVisitor(context, true, percentRef));
+      return val.visit(
+        new CalcFilterVisitor(context, true, percentRef, vertical),
+      );
     }
   } catch (err) {
     Logging.logger.warn(err);

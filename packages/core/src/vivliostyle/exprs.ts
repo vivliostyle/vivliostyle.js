@@ -387,12 +387,13 @@ export class Context {
     }
   }
 
-  queryUnitSize(unit: string, isRoot: boolean): number {
+  queryUnitSize(unit: string, isRoot: boolean, vertical?: boolean): number {
     if (isViewportRelativeLengthUnit(unit)) {
       const pvw = this.pageWidth() / 100;
       const pvh = this.pageHeight() / 100;
       const vw = this.pageAreaWidth != null ? this.pageAreaWidth / 100 : pvw;
       const vh = this.pageAreaHeight != null ? this.pageAreaHeight / 100 : pvh;
+      const isVertical = vertical ?? this.pageVertical;
 
       switch (unit) {
         case "vw":
@@ -400,9 +401,9 @@ export class Context {
         case "vh":
           return vh;
         case "vi":
-          return this.pageVertical ? vh : vw;
+          return isVertical ? vh : vw;
         case "vb":
-          return this.pageVertical ? vw : vh;
+          return isVertical ? vw : vh;
         case "vmin":
           return vw < vh ? vw : vh;
         case "vmax":
@@ -412,9 +413,9 @@ export class Context {
         case "pvh":
           return pvh;
         case "pvi":
-          return this.pageVertical ? pvh : pvw;
+          return isVertical ? pvh : pvw;
         case "pvb":
-          return this.pageVertical ? pvw : pvh;
+          return isVertical ? pvw : pvh;
         case "pvmin":
           return pvw < pvh ? pvw : pvh;
         case "pvmax":
