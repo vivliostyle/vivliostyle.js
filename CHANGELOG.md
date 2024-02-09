@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.27.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.26.0...v2.27.0) (2024-02-09)
+
+### Bug Fixes
+
+- HTML documents listed in "resources" in pub-manifest should not be rendered as if in "readingOrder" ([0bbbd48](https://github.com/vivliostyle/vivliostyle.js/commit/0bbbd48337afe8d415cd70e106577b5a005dc210)), closes [#1257](https://github.com/vivliostyle/vivliostyle.js/issues/1257)
+- remove ruby font-size workaround no longer necessary ([3138fda](https://github.com/vivliostyle/vivliostyle.js/commit/3138fdaefc8407f30dce3ab260fad816509d39de))
+- text-spacing not working properly with text-spacing natively enabled browser ([42e16f4](https://github.com/vivliostyle/vivliostyle.js/commit/42e16f4ce65a8a2d9f518dbcd65078fecc85ddd8)), closes [#1252](https://github.com/vivliostyle/vivliostyle.js/issues/1252)
+- text-spacing-trim:space-first not working properly in some case ([398b53e](https://github.com/vivliostyle/vivliostyle.js/commit/398b53eed8b7bc1f59fc14c0dab14c67e82b7f4a)), closes [#1261](https://github.com/vivliostyle/vivliostyle.js/issues/1261)
+- TOC box should contain only the TOC element content ([754a70c](https://github.com/vivliostyle/vivliostyle.js/commit/754a70cb9d5da9b746d69e6129a19dd0b4cc880f)), closes [#1258](https://github.com/vivliostyle/vivliostyle.js/issues/1258)
+- Units vi and vb are mishandled when writing-mode is different from the root element ([286cc1e](https://github.com/vivliostyle/vivliostyle.js/commit/286cc1e8e654b3752979fba64976ab8634856577)), closes [#1265](https://github.com/vivliostyle/vivliostyle.js/issues/1265)
+- vertical-in-horizontal block height and horizontal-in-vertical block width not computed properly ([0f7d45e](https://github.com/vivliostyle/vivliostyle.js/commit/0f7d45e1a62be4c144d7b5cff9878fe0d7316ec3)), closes [#1264](https://github.com/vivliostyle/vivliostyle.js/issues/1264)
+- Viewer page navigation hangs with EPUB/webpub with undetermined page-progression-direction ([a7f5572](https://github.com/vivliostyle/vivliostyle.js/commit/a7f557239a871484cef29fe7dbf1355ee14d75eb)), closes [#1260](https://github.com/vivliostyle/vivliostyle.js/issues/1260)
+
+### Features
+
+- Update CSS user agent default style sheet ([b0993a0](https://github.com/vivliostyle/vivliostyle.js/commit/b0993a053aff91fc8220b3b8a4079ad9f8ee3383)), closes [#1128](https://github.com/vivliostyle/vivliostyle.js/issues/1128)
+
 # [2.26.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.25.9...v2.26.0) (2024-01-20)
 
 ### Bug Fixes
