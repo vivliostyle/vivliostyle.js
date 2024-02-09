@@ -1378,6 +1378,10 @@ ncx|content {
   display: none;
 }
 
+[hidden] {
+  display: revert;
+}
+
 [role=doc-toc] li a,
 ncx|navLabel {
   -adapt-behavior: toc-node-anchor;
