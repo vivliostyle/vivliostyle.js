@@ -269,8 +269,6 @@ export class TOCView implements Vgen.CustomRendererFactory {
       for (const tocElem of findTocElements(xmldoc.document)) {
         // Set `role="doc-toc"`
         tocElem.setAttribute("role", "doc-toc");
-        // Make hidden TOC visible in TOC box
-        tocElem.removeAttribute("hidden");
       }
 
       const style = this.store.getStyleForDoc(xmldoc);
@@ -301,14 +299,6 @@ export class TOCView implements Vgen.CustomRendererFactory {
       instance.pref = this.pref;
       instance.init().then(() => {
         instance.layoutNextPage(page, null).then(() => {
-          Array.from(
-            page.container.querySelectorAll(
-              "[data-vivliostyle-toc-box]>*>*>*>*>*[style*='display: none']",
-            ),
-          ).forEach((bodyChildElem) => {
-            bodyChildElem.setAttribute("aria-hidden", "true");
-            bodyChildElem.setAttribute("hidden", "hidden");
-          });
           this.setAutoHeight(elem, 2);
           frame.finish(page);
         });

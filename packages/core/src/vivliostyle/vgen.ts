@@ -439,7 +439,7 @@ export class ViewFactory
       this.isFootnote,
       this.nodeContext,
     );
-    const isRoot = this.nodeContext.parent == null;
+    const isRoot = !this.nodeContext?.parent;
     if (isRoot) {
       // Ensure that writing-mode and direction are set on the root element.
       if (!cascMap["writing-mode"] && this.styler.rootStyle["writing-mode"]) {
