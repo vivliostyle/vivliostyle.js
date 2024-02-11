@@ -45,16 +45,19 @@ export type TOCItem = {
 };
 
 export function findTocElements(doc: Document): Array<Element> {
-  // Find `role="doc-toc"` for webpub or `<nav epub:type="toc">` etc. for EPUB.
-  const tocElems = Array.from(
-    doc.querySelectorAll(
-      "[role=doc-toc],nav[*|type=toc],nav[*|type=landmarks],nav[*|type=page-list]",
-    ),
+  // Find `<nav epub:type="toc">` etc. for EPUB.
+  let tocElems = Array.from(
+    doc.querySelectorAll("nav[*|type],nav[epub\\:type]"),
   );
   if (tocElems.length > 0) {
     return tocElems;
   }
-  // If not found, find TOC elements with the following selector.
+  // Find `role="doc-toc"` for webpub.
+  tocElems = Array.from(doc.querySelectorAll("[role=doc-toc]"));
+  if (tocElems.length > 0) {
+    return tocElems;
+  }
+  // If neither found, find TOC elements with the following selector.
   const navs = "nav,.toc,#toc,#table-of-contents,#contents,[role=directory]";
   for (const elem of doc.querySelectorAll(navs)) {
     if (tocElems.find((e) => e.contains(elem))) {
@@ -267,8 +270,8 @@ export class TOCView implements Vgen.CustomRendererFactory {
 
     this.store.load(tocBoxUrl).then((xmldoc) => {
       for (const tocElem of findTocElements(xmldoc.document)) {
-        // Set `role="doc-toc"`
-        tocElem.setAttribute("role", "doc-toc");
+        // Set `data-vivliostyle-role="doc-toc"`
+        tocElem.setAttribute("data-vivliostyle-role", "doc-toc");
       }
 
       const style = this.store.getStyleForDoc(xmldoc);
