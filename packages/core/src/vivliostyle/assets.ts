@@ -1371,10 +1371,10 @@ ncx|content {
   display: none;
 }
 
-*:not([role=doc-toc],
-  [role=doc-toc] *,
-  :has([role=doc-toc]),
-  :is(h1,h2,h3,h4,h5,h6):has(+:not(nav)[role=doc-toc])) {
+*:not([data-vivliostyle-role=doc-toc],
+  [data-vivliostyle-role=doc-toc] *,
+  :has([data-vivliostyle-role=doc-toc]),
+  :is(h1,h2,h3,h4,h5,h6):has(+:not(nav)[data-vivliostyle-role=doc-toc])) {
   display: none;
 }
 
@@ -1382,22 +1382,22 @@ ncx|content {
   display: revert;
 }
 
-[role=doc-toc] li a,
+[data-vivliostyle-role=doc-toc] li a,
 ncx|navLabel {
   -adapt-behavior: toc-node-anchor;
 }
 
-[role=doc-toc] li,
+[data-vivliostyle-role=doc-toc] li,
 ncx|navPoint {
   -adapt-behavior: toc-node;
 }
 
-[role=doc-toc] li > :not(ul,ol):first-child {
+[data-vivliostyle-role=doc-toc] li > :not(ul,ol):first-child {
   -adapt-behavior: toc-node-first-child;
 }
 
-[role=doc-toc] :is(ol,ul),
-[role=doc-toc]:is(ol,ul) {
+[data-vivliostyle-role=doc-toc] :is(ol,ul),
+[data-vivliostyle-role=doc-toc]:is(ol,ul) {
   -adapt-behavior: toc-container;
 }
 `;
