@@ -2635,7 +2635,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       );
     }
     const viewport = this.viewport;
-    const tocWidth = Math.min(350, Math.round(0.67 * viewport.width) - 16);
+    const tocWidth = Math.min(344, Math.round(0.67 * viewport.width) - 16);
     const tocHeight = viewport.height - 6;
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     viewport.root.appendChild(pageCont);
@@ -2645,7 +2645,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
     // pageCont.style.left = "3px";
     // pageCont.style.top = "3px";
-    pageCont.style.width = `${tocWidth + 10}px`;
+    pageCont.style.width = `${tocWidth + 16}px`;
     pageCont.style.maxHeight = `${tocHeight}px`;
     // pageCont.style.overflow = "scroll";
     // pageCont.style.overflowX = "hidden";
