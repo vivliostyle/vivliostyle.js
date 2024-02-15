@@ -1600,10 +1600,19 @@ export class OPFView implements Vgen.CustomRendererFactory {
                 loopFrame.continueLoop();
                 return;
               }
+              // Save the page type and restore it after re-rendering page.
+              // This is necessary for named page with target-counter() to work.
+              // (fix for issue #1272)
+              const { currentPageType, previousPageType } =
+                viewItem.instance.styler.cascade;
               this.counterStore.pushPageCounters(refs.pageCounters);
               this.counterStore.pushReferencesToSolve(refs.refs);
               const pos = viewItem.layoutPositions[refs.pageIndex];
               this.renderSinglePage(viewItem, pos).then((result) => {
+                viewItem.instance.styler.cascade.currentPageType =
+                  currentPageType;
+                viewItem.instance.styler.cascade.previousPageType =
+                  previousPageType;
                 this.counterStore.popPageCounters();
                 this.counterStore.popReferencesToSolve();
                 const resultPosition = result.pageAndPosition.position;
