@@ -2844,6 +2844,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               // (Issue #611)
               if (
                 !nodeContext.inline &&
+                !nodeContext.repeatOnBreak &&
                 (lastAfterNodeContext
                   ? LayoutHelper.findAncestorSpecialInlineNodeContext(
                       lastAfterNodeContext,
