@@ -997,7 +997,9 @@ export class ViewFactory
           !Css.isDefaultingValue(breakBefore) &&
           !(insideNonRootMultiColumn && breakBefore === Css.ident.column)
         ) {
-          this.nodeContext.breakBefore = breakBefore.toString();
+          if (this.nodeContext.fragmentIndex === 1) {
+            this.nodeContext.breakBefore = breakBefore.toString();
+          }
           if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
             delete computedStyle["break-before"];
           }
@@ -1027,7 +1029,10 @@ export class ViewFactory
           // unless page type is explicitly set
           !(!pageType && computedStyle["position"] === Css.ident.fixed)
         ) {
-          if (!Break.isSpreadBreakValue(this.nodeContext.breakBefore)) {
+          if (
+            this.nodeContext.fragmentIndex === 1 &&
+            !Break.isSpreadBreakValue(this.nodeContext.breakBefore)
+          ) {
             this.nodeContext.breakBefore = "page";
           }
           this.styler.cascade.previousPageType =
