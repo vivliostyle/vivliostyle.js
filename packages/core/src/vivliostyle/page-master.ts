@@ -1808,6 +1808,10 @@ export class PartitionInstance<
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
+    if (!page.pageAreaElement) {
+      // The overflow property of a `@-epubx-partition` is set by default to hidden.
+      Base.setCSSProperty(container.element, "overflow", "hidden");
+    }
     super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
 }

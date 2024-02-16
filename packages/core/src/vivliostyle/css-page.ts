@@ -1857,8 +1857,8 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    super.prepareContainer(context, container, page, docFaces, clientLayout);
     page.pageAreaElement = container.element as HTMLElement;
+    super.prepareContainer(context, container, page, docFaces, clientLayout);
 
     // Set page area size for vw/vh unit calculation
     context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
