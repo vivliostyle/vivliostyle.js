@@ -794,6 +794,10 @@ export class ViewFactory
       elementStyle,
       computedStyle,
     );
+    if (floatReference && PageFloats.isPageFloat(floatReference)) {
+      // Fix page float margin collapsing issue (Issue #1282)
+      computedStyle["display"] = Css.ident.flow_root;
+    }
     styler.processContent(
       element,
       computedStyle,
@@ -1624,6 +1628,10 @@ export class ViewFactory
           return null;
         }
       }
+      if (nc.parent?.floatSide) {
+        // inside float, not break (Issue #1282)
+        return null;
+      }
       const parentViewNode = nc.parent?.viewNode as Element;
       if (parentViewNode) {
         const style = this.viewport.window.getComputedStyle(parentViewNode);
@@ -1637,7 +1645,7 @@ export class ViewFactory
         while (
           node &&
           (Vtree.canIgnore(node, nc.parent.whitespace) ||
-            LayoutHelper.isOutOfFlow(node))
+            (!nc.floatSide && LayoutHelper.isOutOfFlow(node)))
         ) {
           node = node.nextSibling;
         }
