@@ -1359,17 +1359,6 @@ epub|case[required-namespace::supported] ~ epub|default {
 /** user-agent-toc.css */
 export const UserAgentTocCss = `
 @namespace "http://www.w3.org/1999/xhtml";
-@namespace ncx "http://www.daisy.org/z3986/2005/ncx/";
-
-ncx|ncx {
-  display: block;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-ncx|content {
-  display: none;
-}
 
 *:not([data-vivliostyle-role=doc-toc],
   [data-vivliostyle-role=doc-toc] *,
@@ -1382,13 +1371,11 @@ ncx|content {
   display: revert;
 }
 
-[data-vivliostyle-role=doc-toc] li a,
-ncx|navLabel {
+[data-vivliostyle-role=doc-toc] li a {
   -adapt-behavior: toc-node-anchor;
 }
 
-[data-vivliostyle-role=doc-toc] li,
-ncx|navPoint {
+[data-vivliostyle-role=doc-toc] li {
   -adapt-behavior: toc-node;
 }
 

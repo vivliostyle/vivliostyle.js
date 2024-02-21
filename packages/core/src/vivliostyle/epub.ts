@@ -280,11 +280,11 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         } else {
           // No manifest
           opf.initWithWebPubManifest({}, doc).then(() => {
-            if (opf.xhtmlToc && opf.xhtmlToc.src === xmldoc.url) {
-              // xhtmlToc is the primary entry (X)HTML
+            if (opf.toc && opf.toc.src === xmldoc.url) {
+              // toc is the primary entry (X)HTML
               if (Toc.findTocElements(doc).length === 0) {
                 // TOC is not found in the primary entry (X)HTML
-                opf.xhtmlToc = null;
+                opf.toc = null;
               }
             }
             frame.finish(opf);
@@ -768,8 +768,7 @@ export class OPFDoc {
   epageIsRenderedPage: boolean = true;
   epageCountCallback: (p1: number) => void | null = null;
   metadata: Meta = {};
-  ncxToc: OPFItem = null;
-  xhtmlToc: OPFItem = null;
+  toc: OPFItem = null;
   cover: OPFItem = null;
   fallbackMap: { [key: string]: string } = {};
   pageProgression: Constants.PageProgression | null = null;
@@ -886,8 +885,8 @@ export class OPFDoc {
         if (fallback && !supportedMediaTypes[item.mediaType]) {
           srcToFallbackId[item.src] = fallback;
         }
-        if (!this.xhtmlToc && item.itemProperties["nav"]) {
-          this.xhtmlToc = item;
+        if (!this.toc && item.itemProperties["nav"]) {
+          this.toc = item;
         }
         if (!this.cover && item.itemProperties["cover-image"]) {
           this.cover = item;
@@ -929,10 +928,6 @@ export class OPFDoc {
         }
         return item;
       });
-    const tocAttr = pkg.child("spine").attribute("toc")[0];
-    if (tocAttr) {
-      this.ncxToc = this.itemMap[tocAttr];
-    }
     const pageProgressionAttr = pkg
       .child("spine")
       .attribute("page-progression-direction")[0];
@@ -1217,11 +1212,11 @@ export class OPFDoc {
     const frame: Task.Frame<boolean> = Task.newFrame("initWithWebPubManifest");
     this.initWithChapters(params).then(() => {
       if (tocFound !== -1) {
-        this.xhtmlToc = this.items[tocFound];
+        this.toc = this.items[tocFound];
       }
 
-      if (!this.xhtmlToc) {
-        this.xhtmlToc = manifestUrl
+      if (!this.toc) {
+        this.toc = manifestUrl
           ? this.items?.[0]
           : this.itemMapByPath[primaryEntryPath];
       }
@@ -2616,7 +2611,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
   showTOC(autohide: boolean): Task.Result<Vtree.Page> {
     const opf = this.opf;
-    const toc = opf.xhtmlToc || opf.ncxToc;
+    const toc = opf.toc;
     this.tocAutohide = autohide;
     if (!toc) {
       return Task.newResult(null as Vtree.Page);

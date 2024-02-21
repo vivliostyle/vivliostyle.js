@@ -1181,40 +1181,6 @@ export class ViewFactory
       } else if (ns == Base.NS.epub) {
         tag = "span";
         ns = Base.NS.XHTML;
-      } else if (ns == Base.NS.NCX) {
-        ns = Base.NS.XHTML;
-        if (tag == "ncx" || tag == "navPoint") {
-          tag = "div";
-        } else if (tag == "navLabel") {
-          // Cheat here. Translate source to HTML, so it will plug
-          // in into the rest of the pipeline.
-          tag = "span";
-          const navParent = element.parentNode;
-          if (navParent) {
-            // find the content element
-            let href: string | null = null;
-            for (let c: Node = navParent.firstChild; c; c = c.nextSibling) {
-              if (c.nodeType != 1) {
-                continue;
-              }
-              const childElement = c as Element;
-              if (
-                childElement.namespaceURI == Base.NS.NCX &&
-                childElement.localName == "content"
-              ) {
-                href = childElement.getAttribute("src");
-                break;
-              }
-            }
-            if (href) {
-              tag = "a";
-              element = element.ownerDocument.createElementNS(ns, "a");
-              element.setAttribute("href", href);
-            }
-          }
-        } else {
-          tag = "span";
-        }
       } else if (ns == Base.NS.SHADOW) {
         ns = Base.NS.XHTML;
         tag = this.nodeContext.inline ? "span" : "div";
