@@ -409,8 +409,7 @@ export class CoreViewer {
     if (
       this.adaptViewer_.opfView &&
       this.adaptViewer_.opfView.opf &&
-      (this.adaptViewer_.opfView.opf.xhtmlToc ||
-        this.adaptViewer_.opfView.opf.ncxToc)
+      this.adaptViewer_.opfView.opf.toc
     ) {
       return !!this.adaptViewer_.opfView.isTOCVisible();
     } else {
