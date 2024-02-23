@@ -10,6 +10,7 @@ interface IFrameWindowForPrint {
 export interface PrintConfig {
   title: string;
   printCallback: (iframeWin: Window) => void;
+  errorCallback: (message: string) => void | null;
   hideIframe: boolean;
   removeIframe: boolean;
 }
@@ -18,6 +19,7 @@ class VivliostylePrint {
   htmlDoc: string;
   title: string;
   printCallback: (iframeWin: Window) => void;
+  errorCallback: (message: string) => void;
   hideIframe: boolean;
   removeIframe: boolean;
   iframe: HTMLIFrameElement;
@@ -29,6 +31,7 @@ class VivliostylePrint {
     {
       title = "",
       printCallback = (iframeWin: Window) => iframeWin.print(),
+      errorCallback = null,
       hideIframe = true,
       removeIframe = true,
     }: PrintConfig,
@@ -36,6 +39,7 @@ class VivliostylePrint {
     this.htmlDoc = htmlDoc;
     this.title = title;
     this.printCallback = printCallback;
+    this.errorCallback = errorCallback;
     this.hideIframe = hideIframe;
     this.removeIframe = removeIframe;
   }
@@ -109,6 +113,15 @@ class VivliostylePrint {
           resolve();
         }
       });
+
+      if (this.errorCallback) {
+        Viewer.addListener("error", (payload) => {
+          const message =
+            payload.content.error?.toString() ??
+            payload.content.messages.join("\n");
+          this.errorCallback(message);
+        });
+      }
 
       Viewer.loadDocument({
         url: docURL,

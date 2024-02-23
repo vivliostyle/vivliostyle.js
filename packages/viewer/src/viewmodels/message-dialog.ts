@@ -39,15 +39,7 @@ class MessageDialog {
   }
 
   getDisplayMessage(errorInfo: ErrorInfo): string {
-    const e = errorInfo.error;
-    let msg = e && (e.toString() || e.frameTrace || e.stack);
-    if (msg) {
-      msg = msg.split("\n", 1)[0];
-    }
-    if (!msg) {
-      msg = errorInfo.messages.join("\n");
-    }
-    return msg;
+    return errorInfo.error?.toString() ?? errorInfo.messages.join("\n");
   }
 }
 

@@ -39,7 +39,7 @@ export const Basic = () => (
     onLoad={action("loaded")}
     onError={action("error")}
     onNavigation={action("navigation")}
-    onMessage={(msg, type) => action("message")(type, msg.messages[0])}
+    onMessage={(msg, type) => action("message")(type, msg)}
     onReadyStateChange={action("readyStateChange")}
     onHyperlink={action("hyperlink")}
   />

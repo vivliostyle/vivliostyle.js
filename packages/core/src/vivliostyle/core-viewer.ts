@@ -23,12 +23,13 @@ import * as Constants from "./constants";
 import * as Epub from "./epub";
 import * as Profile from "./profile";
 import * as Toc from "./toc";
+import { ErrorInfo } from "./logging";
 
 export interface Payload {
   type: string;
   internal: boolean;
   href: string;
-  content: string;
+  content: ErrorInfo;
   cfi: string;
   first: boolean;
   last: boolean;
@@ -251,11 +252,20 @@ export class CoreViewer {
     opt_documentOptions?: DocumentOptions,
     opt_viewerOptions?: CoreViewerOptions,
   ) {
-    if (!singleDocumentOptions) {
+    if (
+      !singleDocumentOptions ||
+      (Array.isArray(singleDocumentOptions)
+        ? !singleDocumentOptions[0] ||
+          (typeof singleDocumentOptions[0] !== "string" &&
+            !singleDocumentOptions[0].url)
+        : typeof singleDocumentOptions !== "string" &&
+          !singleDocumentOptions.url)
+    ) {
       this.eventTarget.dispatchEvent({
         type: "error",
-        content: "No URL specified",
+        content: { error: new Error("No URL specified") },
       });
+      return;
     }
     this.loadDocumentOrPublication(
       singleDocumentOptions,
@@ -276,8 +286,9 @@ export class CoreViewer {
     if (!pubUrl) {
       this.eventTarget.dispatchEvent({
         type: "error",
-        content: "No URL specified",
+        content: { error: new Error("No URL specified") },
       });
+      return;
     }
     this.loadDocumentOrPublication(
       null,

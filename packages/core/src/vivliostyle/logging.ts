@@ -38,7 +38,7 @@ export type ErrorInfo = {
  * Class logging error, warning, information or debug messages.
  */
 export class Logger {
-  private listeners: { [key in LogLevel]?: ((p1: ErrorInfo) => void)[] } = {};
+  private listeners: { [key in LogLevel]?: (p1: ErrorInfo) => void } = {};
 
   constructor(private opt_console?: Console) {}
 
@@ -91,11 +91,9 @@ export class Logger {
   }
 
   private triggerListeners(level: LogLevel, args: ErrorInfo) {
-    const listeners = this.listeners[level];
-    if (listeners) {
-      listeners.forEach((listener) => {
-        listener(args);
-      });
+    const listener = this.listeners[level];
+    if (listener) {
+      listener(args);
     }
   }
 
@@ -104,11 +102,7 @@ export class Logger {
    * occurs.
    */
   addListener(level: LogLevel, listener: (p1: ErrorInfo) => void) {
-    let listeners = this.listeners[level];
-    if (!listeners) {
-      listeners = this.listeners[level] = [];
-    }
-    listeners.push(listener);
+    this.listeners[level] = listener;
   }
 
   debug(...var_args: any[]) {
