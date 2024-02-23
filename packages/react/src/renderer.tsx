@@ -138,8 +138,11 @@ export const Renderer = ({
   }
 
   function registerEventHandlers() {
+    const getMessage = (payload: Payload) =>
+      payload.content.error?.toString() ?? payload.content.messages.join("\n");
+
     function handleMessage(payload: Payload, type: MessageType) {
-      onMessage && onMessage(payload.content, type);
+      onMessage && onMessage(getMessage(payload), type);
     }
 
     const handleDebug = (payload: Payload) => handleMessage(payload, "debug");
@@ -147,7 +150,7 @@ export const Renderer = ({
     const handleWarn = (payload: Payload) => handleMessage(payload, "warn");
 
     function handleError(payload: Payload) {
-      onError && onError(payload.content);
+      onError && onError(getMessage(payload));
     }
 
     function handleReadyStateChange() {
