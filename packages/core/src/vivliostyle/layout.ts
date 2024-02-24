@@ -2736,6 +2736,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (!lastAfterNodeContext) {
         return false;
       }
+      // Exclude if itself is a float (Issue #1288)
+      if (nodeContext.floatSide) {
+        return false;
+      }
       for (let nc = lastAfterNodeContext; nc?.parent; nc = nc.parent) {
         let node = nc.after ? nc.viewNode : nc.viewNode?.previousSibling;
         while (
