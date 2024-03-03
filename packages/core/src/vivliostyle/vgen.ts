@@ -1507,7 +1507,9 @@ export class ViewFactory
             const unforcedBreak = breakType === "auto";
             if (
               (marginBreak === Css.ident.discard && anyBreak) ||
-              (marginBreak !== Css.ident.keep && unforcedBreak)
+              (marginBreak !== Css.ident.keep &&
+                unforcedBreak &&
+                !this.nodeContext.floatSide)
             ) {
               Break.setMarginDiscardFlag(result, "block-start");
             }
