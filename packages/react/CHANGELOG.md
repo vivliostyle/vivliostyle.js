@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.28.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.27.0...v2.28.0) (2024-03-03)
+
+### Features
+
+- Add errorCallback config option to VivliostylePrint/printHTML() ([9602d61](https://github.com/vivliostyle/vivliostyle.js/commit/9602d61240060c846cf45818c26dea748b2b654c))
+
 # [2.27.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.26.0...v2.27.0) (2024-02-09)
 
 **Note:** Version bump only for package @vivliostyle/react

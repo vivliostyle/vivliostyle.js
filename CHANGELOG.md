@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.28.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.27.0...v2.28.0) (2024-03-03)
+
+### Bug Fixes
+
+- adjust TOC box width to account for scrollbar width ([47e5d5b](https://github.com/vivliostyle/vivliostyle.js/commit/47e5d5b8832f1c2b8aea8f7ae60e69cef31a94d6))
+- All `<nav epub:type="…">` elements in EPUB navigation doc should be shown in TOC box ([d31010f](https://github.com/vivliostyle/vivliostyle.js/commit/d31010f28f775bd5415b78300fb68f835c7c06f8)), closes [#1270](https://github.com/vivliostyle/vivliostyle.js/issues/1270)
+- blank page selector misapplied when target-counter is used ([40a760b](https://github.com/vivliostyle/vivliostyle.js/commit/40a760bb1ce90a71afc7d47481ac8cc7c4f6ff43)), closes [#1131](https://github.com/vivliostyle/vivliostyle.js/issues/1131)
+- break-before specified on floats may not work ([06890fe](https://github.com/vivliostyle/vivliostyle.js/commit/06890fef89aa00fd39333d7f4d26ee794dfbac75)), closes [#1288](https://github.com/vivliostyle/vivliostyle.js/issues/1288)
+- Column floats disappear ([52ede7d](https://github.com/vivliostyle/vivliostyle.js/commit/52ede7d85e270e899e8aa137686a3c3a90ba57ea)), closes [#1273](https://github.com/vivliostyle/vivliostyle.js/issues/1273)
+- Float box pushed out of the page area ([7e86951](https://github.com/vivliostyle/vivliostyle.js/commit/7e869519da420a44098bd7295708937ca6e6dbe7)), closes [#1295](https://github.com/vivliostyle/vivliostyle.js/issues/1295)
+- float margins collapsed wrongly ([03121f2](https://github.com/vivliostyle/vivliostyle.js/commit/03121f2275f258336031dfb56b49127c2639fa4f)), closes [#1282](https://github.com/vivliostyle/vivliostyle.js/issues/1282)
+- remove old EPUB NCX handling ([56ca0ed](https://github.com/vivliostyle/vivliostyle.js/commit/56ca0edc09cace813b40ce8bee3b968fb3907758))
+- set overflow property of `@-epubx-partition` to hidden by default ([c196685](https://github.com/vivliostyle/vivliostyle.js/commit/c196685b04615bf4e92a8d924e388325457fa510)), closes [/idpf.org/epub/pgt/#s3](https://github.com//idpf.org/epub/pgt//issues/s3)
+- target-counter leads to pagination to wrong named page ([980632d](https://github.com/vivliostyle/vivliostyle.js/commit/980632d0fedc89a2ffb1c265c371bb576a6435c0)), closes [#1272](https://github.com/vivliostyle/vivliostyle.js/issues/1272)
+- Top margin at unforced page break not truncated correctly ([97779f3](https://github.com/vivliostyle/vivliostyle.js/commit/97779f3d43149a4b31c1b189da0c60a0aec19084)), closes [#1279](https://github.com/vivliostyle/vivliostyle.js/issues/1279)
+- Top margin of floats at page start should be kept ([6c1fb7f](https://github.com/vivliostyle/vivliostyle.js/commit/6c1fb7f65320dfca76cf19d867e3b2083784ac9b)), closes [#1292](https://github.com/vivliostyle/vivliostyle.js/issues/1292)
+- TypeError occurs on repeating_elements/nesting test ([819e1fd](https://github.com/vivliostyle/vivliostyle.js/commit/819e1fd84ad4d1c4fde151606e09db74027bdea0))
+
+### Features
+
+- Add errorCallback config option to VivliostylePrint/printHTML() ([9602d61](https://github.com/vivliostyle/vivliostyle.js/commit/9602d61240060c846cf45818c26dea748b2b654c))
+
 # [2.27.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.26.0...v2.27.0) (2024-02-09)
 
 ### Bug Fixes
