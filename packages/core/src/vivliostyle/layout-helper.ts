@@ -44,10 +44,11 @@ export function calculateEdge(
 
   const element = node.nodeType === 1 ? (node as Element) : node.parentElement;
   if (element && element.namespaceURI === Base.NS.XHTML) {
+    const style = (element as HTMLElement).style;
     if (
-      /^([\d\.]|super|(text-)?top)/.test(
-        (element as HTMLElement).style.verticalAlign,
-      )
+      style &&
+      Display.isInlineLevel(style.display) &&
+      /^([\d\.]|super|(text-)?top)/.test(style.verticalAlign)
     ) {
       // (Fix for issue #811)
       return NaN;
