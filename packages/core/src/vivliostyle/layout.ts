@@ -839,7 +839,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const bands = this.bands;
     const x1 = this.vertical ? this.getTopEdge() : this.getLeftEdge();
     const x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
-    let foundNonZeroWidthBand = false;
+    let foundNonZeroWidthBand: GeometryUtil.Band = null;
 
     for (const band of bands) {
       const height = band.y2 - band.y1;
@@ -848,12 +848,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
       // Hacky workaround for issue #1071
       // (Top page float should not absorb margin/border/padding of the block below)
-      if (!foundNonZeroWidthBand) {
-        if (band.x1 >= x2 || band.x2 <= x1) {
-          Base.setCSSProperty(band.right, "float", "none");
-        } else {
-          foundNonZeroWidthBand = true;
-        }
+      if (band.x1 < x2 && band.x2 > x1) {
+        foundNonZeroWidthBand = band;
+      } else if (!foundNonZeroWidthBand) {
+        Base.setCSSProperty(band.right, "float", "none");
+      }
+    }
+
+    if (foundNonZeroWidthBand) {
+      // Update footnoteEdge (Fix for issue #1298)
+      const lastBand = bands[bands.length - 1];
+      const y2 = this.vertical ? -this.getLeftEdge() : this.getBottomEdge();
+      if (foundNonZeroWidthBand !== lastBand && lastBand.y2 >= y2) {
+        this.footnoteEdge = this.vertical
+          ? -foundNonZeroWidthBand.y2
+          : foundNonZeroWidthBand.y2;
       }
     }
   }
