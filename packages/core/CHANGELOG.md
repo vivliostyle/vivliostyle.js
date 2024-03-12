@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.28.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.28.0...v2.28.1) (2024-03-12)
+
+### Bug Fixes
+
+- Footnote causes layout problem on page breaking ([aa22bbd](https://github.com/vivliostyle/vivliostyle.js/commit/aa22bbdc321b5b1903c0d4748de7df3ab00bd790)), closes [#1298](https://github.com/vivliostyle/vivliostyle.js/issues/1298)
+
 # [2.28.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.27.0...v2.28.0) (2024-03-03)
 
 ### Bug Fixes
