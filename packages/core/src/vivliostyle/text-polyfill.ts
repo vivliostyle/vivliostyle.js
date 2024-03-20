@@ -877,14 +877,17 @@ class TextSpacingPolyfill {
       textNode.parentNode.insertBefore(outerElem, textNode);
       innerElem.appendChild(textNode);
 
-      // Check if che punctuation is almost full width
-      const fontSize = parseFloat(
-        document.defaultView.getComputedStyle(outerElem).fontSize,
-      );
-      const fullWidthThreshold = fontSize * 0.7;
-      const isFullWidth =
-        (vertical ? innerElem.offsetHeight : innerElem.offsetWidth) >
-        fullWidthThreshold;
+      // Check if the punctuation is almost full width
+      function checkFullWidth(elem: HTMLElement): boolean {
+        const fontSize = parseFloat(
+          document.defaultView.getComputedStyle(elem).fontSize,
+        );
+        const fullWidthThreshold = fontSize * 0.7;
+        return (
+          (vertical ? elem.offsetHeight : elem.offsetWidth) > fullWidthThreshold
+        );
+      }
+      const isFullWidth = checkFullWidth(innerElem);
 
       function linePosition(): number {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
@@ -914,9 +917,7 @@ class TextSpacingPolyfill {
             // exclude non-fullwidth closing punctuations (Issue #1003)
             (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevNode.textContent) ||
               (prevNode.parentElement.localName === "viv-ts-inner" &&
-                (vertical
-                  ? prevNode.parentElement.offsetHeight
-                  : prevNode.parentElement.offsetWidth) > fullWidthThreshold))
+                checkFullWidth(prevNode.parentElement)))
           ) {
             outerElem.className = "viv-ts-trim";
           } else if (
