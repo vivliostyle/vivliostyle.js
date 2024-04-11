@@ -527,7 +527,7 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-text-spacing-trim = auto | normal | space-all | trim-auto |
+text-spacing-trim = auto | normal | space-all | trim-both | trim-auto |
     [[ trim-start | space-start | space-first ] ||
      [ trim-end | space-end | allow-end ] ||
      [ trim-adjacent | space-adjacent ]];

@@ -100,8 +100,8 @@ type SpacingTrim = {
 };
 
 /**
- * text-spacing-trim: space-all (none)
- * space-all (none) = space-start space-end space-adjacent
+ * text-spacing-trim: space-all
+ * space-all = space-start space-end space-adjacent
  */
 const SPACING_TRIM_NONE: SpacingTrim = {
   trimStart: false,
@@ -124,10 +124,12 @@ const SPACING_TRIM_NORMAL: SpacingTrim = {
 };
 
 /**
- * text-spacing-trim: trim-auto (auto)
- * trim-auto (auto) = trim-start trim-end trim-adjacent
+ * text-spacing-trim: trim-both
+ * trim-both = trim-start trim-end trim-adjacent
+ *
+ * NOTE: Values `trim-auto` (deprecated) and `auto` are treated as `trim-both`.
  */
-const SPACING_TRIM_AUTO: SpacingTrim = {
+const SPACING_TRIM_BOTH: SpacingTrim = {
   trimStart: true,
   spaceFirst: false,
   trimEnd: true,
@@ -146,11 +148,8 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
   if (cssval === Css.ident.normal) {
     return SPACING_TRIM_NORMAL;
   }
-  if (cssval === Css.ident.none) {
-    return SPACING_TRIM_NONE;
-  }
   if (cssval === Css.ident.auto) {
-    return SPACING_TRIM_AUTO;
+    return SPACING_TRIM_BOTH;
   }
   const values = cssval instanceof Css.SpaceList ? cssval.values : [cssval];
   const textSpacing: SpacingTrim = Object.create(SPACING_TRIM_NORMAL);
@@ -158,8 +157,9 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
   for (const val of values) {
     if (val instanceof Css.Ident) {
       switch (val.name) {
+        case "trim-both":
         case "trim-auto":
-          return SPACING_TRIM_AUTO;
+          return SPACING_TRIM_BOTH;
         case "space-all":
           return SPACING_TRIM_NONE;
         case "trim-start":
