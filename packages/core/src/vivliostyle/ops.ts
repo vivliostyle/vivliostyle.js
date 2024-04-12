@@ -2043,6 +2043,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
         null,
         properties,
         this.masterHandler.validatorSet,
+        "font-face",
       ),
     );
   }

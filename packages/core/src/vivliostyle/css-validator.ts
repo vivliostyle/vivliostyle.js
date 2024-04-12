@@ -2063,12 +2063,14 @@ export class ValidatorSet {
     important: boolean,
     receiver: PropertyReceiver,
   ): void {
-    if (Css.isCustomPropName(name)) {
-      receiver.simpleProperty(name, value, important);
-      return;
-    }
-    if (containsVar(value)) {
-      // Set the specified property containing `var(…)`
+    if (
+      Css.isCustomPropName(name) ||
+      // Check if it is a `@font-face` descriptor (Issue #1307)
+      (receiver as PropertyReceiver & { ruleType?: string }).ruleType ===
+        "font-face" ||
+      // Check if the property value containing `var(…)`
+      containsVar(value)
+    ) {
       receiver.simpleProperty(name, value, important);
       return;
     }
@@ -2101,7 +2103,6 @@ export class ValidatorSet {
       } else if (!prefix && CSS.supports(name, value.toString())) {
         // Browser supports this property value
         receiver.simpleProperty(name, value, important);
-        return;
       } else {
         receiver.invalidPropertyValue(origName, value);
       }
