@@ -4361,6 +4361,7 @@ export class PropSetParserHandler
     public readonly condition: Exprs.Val,
     public readonly elementStyle: ElementStyle,
     public readonly validatorSet: CssValidator.ValidatorSet,
+    public readonly ruleType?: string,
   ) {
     super(scope, owner, false);
     this.order = 0;
