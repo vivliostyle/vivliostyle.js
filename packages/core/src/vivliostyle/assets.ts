@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Trim-marks Inc.
+ * Copyright 2015 Daishinsha Inc.
  * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
@@ -225,7 +225,7 @@ export const VivliostyleViewportCss = `
 export const ValidationTxt = `
 /*
  * Copyright 2013 Google, Inc.
- * Copyright 2015 Trim-marks Inc.
+ * Copyright 2015 Daishinsha Inc.
  * Copyright 2019 Vivliostyle Foundation
  *
  * CSS property validation.

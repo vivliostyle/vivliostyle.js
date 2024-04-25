@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Trim-marks Inc.
+ * Copyright 2015 Daishinsha Inc.
  * Copyright 2019 Vivliostyle Foundation
  *
  * This file is part of Vivliostyle UI.

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /*
- * Copyright 2015 Trim-marks Inc.
+ * Copyright 2015 Daishinsha Inc.
  *
  * This file is part of Vivliostyle UI.
  *

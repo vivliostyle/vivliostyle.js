@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Trim-marks Inc.
+ * Copyright 2017 Daishinsha Inc.
  * Copyright 2019 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
