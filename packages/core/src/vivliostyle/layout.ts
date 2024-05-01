@@ -793,11 +793,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (height >= this.height) {
         height -= 0.1;
       }
+      if (height < 1) {
+        height = 0;
+      }
       Base.setCSSProperty(div, "height", `${width}px`);
       Base.setCSSProperty(div, "width", `${height}px`);
     } else {
       if (width >= this.width) {
         width -= 0.1;
+      }
+      if (width < 1) {
+        width = 0;
       }
       Base.setCSSProperty(div, "width", `${width}px`);
       Base.setCSSProperty(div, "height", `${height}px`);
