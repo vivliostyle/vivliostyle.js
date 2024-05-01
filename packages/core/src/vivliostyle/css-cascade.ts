@@ -514,7 +514,11 @@ export function mergeIn(
       Array.prototype.push.apply(ts, as);
     } else {
       // regular properties: higher priority wins
-      const av = getProp(style, prop).increaseSpecificity(specificity);
+      const cascval = getProp(style, prop);
+      if (!cascval.isEnabled(context)) {
+        continue;
+      }
+      const av = cascval.increaseSpecificity(specificity);
       setPropCascadeValue(target, prop, av, context);
 
       // Expand shorthand property (its value contains variables).
