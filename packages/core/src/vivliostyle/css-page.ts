@@ -1792,6 +1792,8 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     // box." (CSS Paged Media http://dev.w3.org/csswg/css-page/#page-model)
 
     if (
+      pageSize.width !== Css.fullWidth ||
+      pageSize.height !== Css.fullHeight ||
       this.hasBorderOrOutline() ||
       (marginStart instanceof Exprs.Numeric && marginStart.num < 0) ||
       (marginEnd instanceof Exprs.Numeric && marginEnd.num < 0)
@@ -1803,7 +1805,7 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       style[`border-${startSide}-width`] = new Css.Expr(borderStartWidth);
       style[`border-${endSide}-width`] = new Css.Expr(borderEndWidth);
     } else {
-      // If the page box has no border or outline and margins are not negative,
+      // If page size is auto and page box has no border or outline and margins are not negative,
       // use transparent borders for page margins. This is to improve text selection behavior.
       style[startSide] = Css.numericZero;
       style[endSide] = Css.numericZero;

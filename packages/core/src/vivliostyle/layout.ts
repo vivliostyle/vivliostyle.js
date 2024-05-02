@@ -929,16 +929,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   /**
    * Parse CSS computed length (in pixels)
-   * @param val CSS length in "px" units or a number.
-   * @return value in pixels or 0 if not parsable
+   * @param val CSS length in "px"
+   * @return parsed and adjusted length value in pixels or 0 if not parsable
    */
-  parseComputedLength(val: string | number): number {
-    if (typeof val == "number") {
-      return val;
-    }
+  parseComputedLength(val: string): number {
     const r = val.match(/^(-?[0-9]*(\.[0-9]*)?)px$/);
     if (r) {
-      return parseFloat(r[0]);
+      return this.clientLayout.adjustLengthValue(parseFloat(r[0]));
     }
     return 0;
   }

@@ -2879,6 +2879,17 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   getElementComputedStyle(element: Element): CSSStyleDeclaration {
     return this.window.getComputedStyle(element, null);
   }
+
+  /**
+   * Adjust length value with rendering precision.
+   * @param value Length value to adjust
+   * @return Adjusted length value
+   * @override
+   */
+  adjustLengthValue(value: number): number {
+    const precision = 64 * (this.scaleRatio || 1);
+    return Math.floor(value * precision) / precision;
+  }
 }
 
 export class Viewport {
