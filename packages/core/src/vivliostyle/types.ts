@@ -253,10 +253,10 @@ export namespace Layout {
     ): number;
     /**
      * Parse CSS computed length (in pixels)
-     * @param val CSS length in "px" units or a number.
-     * @return value in pixels or 0 if not parsable
+     * @param val CSS length in "px"
+     * @return parsed and adjusted length value in pixels or 0 if not parsable
      */
-    parseComputedLength(val: string | number): number;
+    parseComputedLength(val: string): number;
     /**
      * Reads element's computed CSS margin.
      */
@@ -1001,6 +1001,12 @@ export namespace Vtree {
      * @return element's computed style
      */
     getElementComputedStyle(element: Element): CSSStyleDeclaration;
+    /**
+     * Adjust length value with rendering precision.
+     * @param value Length value to adjust
+     * @return Adjusted length value
+     */
+    adjustLengthValue(value: number): number;
   }
 
   /**
