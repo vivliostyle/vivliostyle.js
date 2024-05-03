@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.29.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.28.1...v2.29.0) (2024-05-03)
+
+### Bug Fixes
+
+- CSS font descriptors wrongly validated as font properties ([44f63fa](https://github.com/vivliostyle/vivliostyle.js/commit/44f63fa68aa3feec7afaa9cc44cf5c7dcc09d1a2)), closes [#1307](https://github.com/vivliostyle/vivliostyle.js/issues/1307)
+- layout precision problem on float boxes ([a561a32](https://github.com/vivliostyle/vivliostyle.js/commit/a561a320a191b135e8868bc063f2ebd2ca4f7092)), closes [#1312](https://github.com/vivliostyle/vivliostyle.js/issues/1312)
+- Named page wrongly applied to blank pages ([07b6a24](https://github.com/vivliostyle/vivliostyle.js/commit/07b6a24d6be084314511cea8c065eca0cca4be5a)), closes [#1309](https://github.com/vivliostyle/vivliostyle.js/issues/1309)
+- text-spacing-trim may not work properly between different font sizes ([2fd345d](https://github.com/vivliostyle/vivliostyle.js/commit/2fd345d05634352074241ff79db7ad78161ca8f6)), closes [#1302](https://github.com/vivliostyle/vivliostyle.js/issues/1302)
+- Unnecessary page break at footnote or page bottom float ([6e4e367](https://github.com/vivliostyle/vivliostyle.js/commit/6e4e3673077ed4f8d4d881387193e70d8d006fe3)), closes [#1311](https://github.com/vivliostyle/vivliostyle.js/issues/1311)
+- Wrong handling of shorthand properties with variables in conditional rules ([a26d179](https://github.com/vivliostyle/vivliostyle.js/commit/a26d179b27de4a954f72b07530d18e3e409c8e26)), closes [#1313](https://github.com/vivliostyle/vivliostyle.js/issues/1313)
+
+### Features
+
+- Update CSS text-spacing-trim support: Rename trim-auto to trim-both ([83ca0c7](https://github.com/vivliostyle/vivliostyle.js/commit/83ca0c76a25a139e37829748923b3f589e8a9a25)), closes [#1305](https://github.com/vivliostyle/vivliostyle.js/issues/1305)
+
 ## [2.28.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.28.0...v2.28.1) (2024-03-12)
 
 ### Bug Fixes
