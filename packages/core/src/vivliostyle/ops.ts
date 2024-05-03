@@ -1814,6 +1814,9 @@ export class StyleInstance
         (page.isBlankPage
           ? this.styler.cascade.previousPageType
           : this.styler.cascade.currentPageType) ?? "";
+      // Fix for issue #1309
+      this.styler.cascade.previousPageType =
+        this.styler.cascade.currentPageType;
     }
 
     this.clearScope(this.style.pageScope);

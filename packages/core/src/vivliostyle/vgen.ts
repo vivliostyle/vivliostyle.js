@@ -1039,8 +1039,11 @@ export class ViewFactory
           ) {
             this.nodeContext.breakBefore = "page";
           }
-          this.styler.cascade.previousPageType =
-            this.styler.cascade.currentPageType;
+          // Fix for issue #1309
+          if (pageType !== this.styler.cascade.previousPageType) {
+            this.styler.cascade.previousPageType =
+              this.styler.cascade.currentPageType;
+          }
           this.styler.cascade.currentPageType = pageType;
         }
       }
