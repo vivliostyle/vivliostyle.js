@@ -166,8 +166,12 @@ class CounterResolver implements CssCascade.CounterResolver {
       `page-counter-${name}`,
     );
 
-    const arrayFormat = (arr) => {
-      return format(arr[0]);
+    const arrayFormat = (arr: number[]) => {
+      let value = arr[0];
+      if (arr[1]) {
+        value = arr[1];
+      }
+      return format(value);
     };
 
     this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
