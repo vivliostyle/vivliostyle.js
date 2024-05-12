@@ -156,9 +156,9 @@ const translations = {
       TIP_Print: "Print (P)",
     },
   },
-  "zh-CN": {
+  "zh-Hans": {
     translation: {
-      UI_LNG: "zh-CN",
+      UI_LNG: "zh-Hans",
       TIP_UI_Language: "语言",
       CONFIRM_DELETE: "你确定要删除它吗?",
       CONFIRM_REMOVE: "你确定要移除它吗?",
@@ -288,6 +288,141 @@ const translations = {
       TIP_Zoom_In: "放大 (I)",
       TIP_Zoom_Actual_Size: "缩放: 实际大小 (1)",
       TIP_Zoom_Fit_to_Screen: "缩放: 适应屏幕 (F)",
+      TIP_Print: "打印 (P)",
+    },
+  },
+  "zh-Hant": {
+    translation: {
+      UI_LNG: "zh-Hant",
+      TIP_UI_Language: "語言",
+      CONFIRM_DELETE: "你確定要刪除它嗎?",
+      CONFIRM_REMOVE: "你確定要移除它嗎?",
+      CONFIRM_REMOVE_ALL: "你確定要全部移除嗎?",
+      Input_: "請輸入文檔URL或HTML代碼",
+      Book_Mode: "圖書模式",
+      Render_All_Pages: "渲染所有頁面",
+      Apply: "應用",
+      Supported_document_types_: "支持的文檔類型:",
+      HTML_documents_: "帶有分頁媒體的css HTML 文檔",
+      Book_like_publications_: "類似書籍的出版物,帶有目錄",
+      Web_publications_:
+        "Web出版物(一組HTML文檔集合): 指定第一個HTML或聲明文件的URL。",
+      Unzipped_EPUB_:
+        "解壓縮EPUB:指定OPF文件的URL或解壓縮後EPUB文件的頂級目錄。",
+      Notes_: "注意:",
+      GitHub_:
+        "可以直接指定GitHub和Gist網址。當指定了此類網址時,Vivliostyle會加載原始GitHub/Gist的內容。",
+      WARN_Mixed_Content_:
+        "⚠️混合內容(如果“http:”的URL被指定爲“https:”的Vivliostyle Viewer)通常會被瀏覽器屏蔽。",
+      WARN_Cross_Origin_:
+        "⚠️除非服務器設置爲允許跨域請求(CORS)，否則對不同域的請求通常會被瀏覽器阻止。",
+      URL_parameter_options_: "URL 參數選項:",
+      document_URL: "文檔 URL",
+      default_: "(默認)",
+      for_Book_like_: "用於類似圖書出版物",
+      DESC_Book_Mode_:
+        "當指定一個HTML文檔URL, 來自出版物清單或者目錄(例如, 帶有 '<nav role=\"doc-toc\">'標記)一系列的html文檔鏈接會自動被加載。",
+      for_single_HTML_: "用戶單個 HTML 文檔",
+      for_Print_: "爲了打印（所有頁面均可被打印，頁數計算也是正常的）",
+      for_Read_: "爲了閱讀（快速加載粗略頁數計算）",
+      Page_Spread_View: "頁面視圖對頁",
+      Spread_view: "對頁視圖",
+      Single_page_view: "單頁視圖",
+      Auto_spread_view: "自動對頁",
+      additional_stylesheet_URL: "附加 (自定義) 樣式表 URL",
+      user_stylesheet_URL: "用戶樣式表 URL",
+      Settings: "設置",
+      DESC_Options_also_1: "選項也可在",
+      DESC_Options_also_2: "面板設置。",
+      See_documentation_: "有關更多詳細信息，請參閱文檔:",
+      HREF_User_Guide: "../docs/#/user-guide",
+      Vivliostyle_User_Guide: "Vivliostyle 用戶指南",
+      HREF_Vivlistyle_Home: "https://vivliostyle.org/",
+      navigate_to_left: "向左導航",
+      navigate_to_right: "向右導航",
+      Highlight_: "高亮…",
+      Marker_Yellow: "標記: 黃",
+      Marker_Red: "標記: 紅",
+      Marker_Green: "標記: 綠",
+      OK: "確認",
+      Cancel: "取消",
+      Delete: "刪除",
+      TIP_Settings: "設置 (S),雙擊/雙敲擊鍵以固定",
+      Page_View_Mode: "界面視圖模式",
+      Auto: "自動",
+      Single_page: "單頁",
+      Spread: "對頁",
+      TIP_Book_Mode: "On: 爲了類似圖書出版物帶有目錄\nOff: 爲了單 HTML 文檔",
+      TIP_Render_All_Pages:
+        "On: 爲了打印(所有頁面可打印, 頁面計數正常工作)\nOff: 爲了閱讀 (快速加載粗略計數)",
+      Restore_View: "恢復閱覽狀態",
+      TIP_Restore_View: "重新打開文檔時恢復視圖設置",
+      Custom_Style_Settings: "自定義樣式設置",
+      Page_Size: "頁面大小",
+      Default: "默認",
+      DESC_page_size_default: "(=自動 除非另外設置)",
+      DESC_page_size_auto: "(使用整個窗口面積)",
+      Preset: "預設",
+      Landscape: "橫向",
+      Custom_size: "自定義尺寸",
+      Width: "寬度",
+      Height: "高度",
+      More_: "詳細...",
+      Crop_Marks: "裁剪標記",
+      Crop_marks: "裁剪標記",
+      Bleed: "出血",
+      Crop_offset: "裁剪偏移",
+      Page_Margins: "頁面邊距",
+      DESC_page_margin_default: "(=10% 除非另外設置)",
+      Set_page_margin_to_0: "設置頁面邊距爲 0",
+      Custom_margin: "自定義邊距",
+      Top_Right_Bottom_Left: "頂部/右側/底部/左側",
+      Set_first_page_margin_to_0: "設置第一頁的邊距爲 0",
+      Force_html_body_margin_to_0: "強制 html/body 邊距爲 0",
+      Page_Breaks: "分頁",
+      Default_widows_orphans_control: "默認 widows/orphans 控制",
+      Allow_widows_and_orphans: "允許產生widows 和 orphans",
+      Avoid_page_break_inside_paragraph: "避免段落內出現分頁",
+      Images: "圖片",
+      Set_image_max_size_to_fit_page: "圖像最大尺寸設置爲適合頁面",
+      Keep_aspect_ratio: "保持長寬比",
+      Text: "文本",
+      Font_size: "字體大小",
+      Base_font_size: "基礎 字號",
+      Base_line_height: "基礎 行高",
+      Base_font_family: "基礎 字體",
+      Custom_Style_Priority: "自定義 Style 屬性",
+      Set_as_user_stylesheet: "設置爲用戶樣式表",
+      DESC_user_stylesheet: "(低優先級除非 !important)",
+      Force_override_document_style: "強制覆蓋document的樣式",
+      important_: "(!important)",
+      Edit_CSS: "編輯 CSS",
+      Dont_edit_: "不要在 /*<viewer>*/ 和 /*</viewer>*/之間進行編輯",
+      Reset_Custom_Style: "重置自定義樣式",
+      Reset_all_to_default: "重置所有",
+      TIP_ToC: "目錄 (T), 雙擊/雙敲擊鍵以固定",
+      TIP_Marker: "標記 (M), 雙擊/雙敲擊鍵以固定",
+      Marks_and_Memos: "標記和備忘錄",
+      Remove_All: "移除所有",
+      Remove: "移除",
+      Memo: "備忘錄",
+      TIP_Find: "查找 (Ctrl/Cmd+F)",
+      TIP_Find_Previous: "查找上一個 (Shift+Enter)",
+      TIP_Find_Next: "查找下一個 (Enter)",
+      Find: "查找",
+      TIP_First_Page: "首頁 (Home)",
+      TIP_Previous_Page: "上一頁 (↑)",
+      TIP_Next_Page: "下一頁 (↓)",
+      TIP_Last_Page: "最後一頁(End)",
+      TIP_Go_to_Page: "跳轉到… (G)",
+      Total_pages: "總頁數",
+      TIP_Text_Smaller: "文本: 小 (-)",
+      TIP_Text_Larger: "文本: 大 (+)",
+      TIP_Text_Default_Size: "文本: 默認尺寸 (0)",
+      TIP_Zoom_Out: "縮小 (O)",
+      TIP_Zoom_In: "放大 (I)",
+      TIP_Zoom_Actual_Size: "縮放: 實際大小 (1)",
+      TIP_Zoom_Fit_to_Screen: "縮放: 適應屏幕 (F)",
       TIP_Print: "打印 (P)",
     },
   },
@@ -448,9 +583,16 @@ function detectLanguage(): string {
     }
 
     if (lng) {
-      // "en-US" -> "en"
-      // FIXME: need fix for "zh-CN", "zh-TW", or "zh-Hant-HK" etc. when we support them
-      lng = lng.toLowerCase().replace(/-.*/, "");
+      if (/^(zh(-cmn)?|cmn)-(TW|HK|Hant)\b/i.test(lng)) {
+        // "zh-TW", "zh-HK", "zh-Hant", "cmn-Hant" etc. -> "zh-Hant"
+        lng = "zh-Hant";
+      } else if (/^(zh|cmn)\b/i.test(lng)) {
+        // "zh", "zh-CN", "zh-Hans", "cmn-Hans" etc. -> "zh-Hans"
+        lng = "zh-Hans";
+      } else {
+        // "en-US" -> "en"
+        lng = lng.toLowerCase().replace(/-.*/, "");
+      }
       if (lng in translations) {
         return lng;
       }
