@@ -5,10 +5,10 @@ The current amount of support is **\$86.00 per month**. Please consider helping 
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
-## Basic Sponsors
+## Monthly Sponsors
 
-<p><a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="60" height="60" style="max-width:100%;"></a>
-hatena🥉
+### Basic Sponsors
+
 <p><a href="https://github.com/libroworks"><img src="https://avatars2.githubusercontent.com/u/63239043?s=460&amp;v=4" title="libroworks" width="60" height="60" style="max-width:100%;"></a>
 libroworks💐
 <p><a href="https://github.com/hidaruma"><img src="https://avatars3.githubusercontent.com/u/12541582?s=460&amp;v=4" title="Tatsuro YOKOTA" width="60" height="60" style="max-width:100%;"></a>
@@ -17,10 +17,8 @@ Tatsuro YOKOTA🌹
 udon-a🌹
 <p><a href="https://github.com/ryoutakano"><img src="https://avatars1.githubusercontent.com/u/22651308?s=460&amp;v=4" title="Ryou Takano" width="60" height="60" style="max-width:100%;"></a>
 Ryou Takano🌹
-<p><a href="https://github.com/EnochGao"><img src="https://avatars1.githubusercontent.com/u/41459067?s=460&amp;v=4" title="Enoch Gao" width="60" height="60" style="max-width:100%;"></a>
-Enoch Gao🌹
 
-## Fan Sponsors
+### Fan Sponsors
 
 <p><a href="https://github.com/skoji"><img src="https://avatars2.githubusercontent.com/u/119629?s=460&amp;v=4" title="Satoshi KOJIMA" width="60" height="60" style="max-width:100%;"></a>
 Satoshi KOJIMA🌟
@@ -46,3 +44,8 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
+
+## One-time Sponsors
+
+<p><a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="60" height="60" style="max-width:100%;"></a>
+hatena🥉
