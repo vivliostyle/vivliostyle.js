@@ -44,8 +44,18 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
+<p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
+monami-ya⭐️
+
 
 ## One-time Sponsors
+
+### Basic Sponsor
+
+<p><a href="https://github.com/EnochGao"><img src="https://avatars1.githubusercontent.com/u/41459067?s=460&amp;v=4" title="Enoch Gao" width="60" height="60" style="max-width:100%;"></a>
+Enoch Gao🌹
+
+### Bronze Sponsor
 
 <p><a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="60" height="60" style="max-width:100%;"></a>
 hatena🥉
