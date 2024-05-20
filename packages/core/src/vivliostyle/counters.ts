@@ -167,11 +167,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     );
 
     const arrayFormat = (arr: number[]) => {
-      let value = arr[0];
-      if (arr[1]) {
-        value = arr[1];
-      }
-      return format(value);
+      return format(arr[arr.length - 1]);
     };
 
     this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
@@ -880,7 +876,7 @@ export class CounterStore {
 
   finishLastPage(viewport: Vgen.Viewport) {
     const nodes = viewport.root.querySelectorAll(`[${PAGES_COUNTER_ATTR}]`);
-    const pages = this.currentPageCounters["page"][0];
+    const pages = viewport.contentContainer.childElementCount;
     for (const node of nodes) {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
       const i = this.pagesCounterExprs.findIndex((o) => o.expr.key === key);
