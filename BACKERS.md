@@ -50,7 +50,7 @@ monami-ya⭐️
 
 ## One-time Sponsors
 
-### Basic Sponsor
+### Fan Sponsor
 
 <p><a href="https://github.com/EnochGao"><img src="https://avatars1.githubusercontent.com/u/41459067?s=460&amp;v=4" title="Enoch Gao" width="60" height="60" style="max-width:100%;"></a>
 Enoch Gao🌹
