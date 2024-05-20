@@ -43,9 +43,9 @@ USAMI Kenta⭐️
 <p><a href="https://github.com/omasanori"><img src="https://avatars2.githubusercontent.com/u/167209?s=460&amp;v=4" title="Masanori Ogino" width="60" height="60" style="max-width:100%;"></a>
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
-monami-ya⭐️
+yamahige⭐️
 <p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
-monami-ya⭐️
+yamahige⭐️
 
 
 ## One-time Sponsors
