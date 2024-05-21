@@ -256,7 +256,7 @@ class CounterResolver implements CssCascade.CounterResolver {
         format(countersOfName[countersOfName.length - 1] || null),
       );
     }
-    return new Exprs.Native(
+    const expr = new Exprs.Native(
       this.pageScope,
       () => {
         // Since This block is evaluated during layout, lookForElement
@@ -276,9 +276,10 @@ class CounterResolver implements CssCascade.CounterResolver {
               this.counterStore.resolveReference(transformedId);
               if (pageCounters[name]) {
                 const pageCountersOfName = pageCounters[name];
-                return format(
+                this.counterStore.targetPageCounter = format(
                   pageCountersOfName[pageCountersOfName.length - 1] || null,
                 );
+                return this.counterStore.targetPageCounter;
               } else {
                 // No corresponding counter with the name.
                 return format(0);
@@ -289,7 +290,7 @@ class CounterResolver implements CssCascade.CounterResolver {
                 transformedId,
                 false,
               );
-              return "??"; // TODO more reasonable placeholder?
+              return this.counterStore.targetPageCounter; // TODO more reasonable placeholder?
             }
           }
         } else {
@@ -302,6 +303,9 @@ class CounterResolver implements CssCascade.CounterResolver {
       },
       `target-counter-${name}-of-${url}`,
     );
+
+    this.counterStore.registerTargetPageCounterExpr(name, format, expr);
+    return expr;
   }
 
   /** @override */
@@ -518,6 +522,16 @@ export class CounterStore {
     expr: Exprs.Val;
     format: (p1: number[]) => string;
   }[] = [];
+  private targetPagesCounterExprs: {
+    expr: Exprs.Val;
+    format: (p1: number) => string;
+  }[] = [];
+  private targetPageCounterExprs: {
+    expr: Exprs.Val;
+    format: (p1: number) => string;
+  }[] = [];
+
+  targetPageCounter = "??";
 
   constructor(
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
@@ -809,6 +823,17 @@ export class CounterStore {
       this.pageCounterExprs.push({ expr, format });
     }
   }
+  registerTargetPageCounterExpr(
+    name: string,
+    format: (p1: number) => string,
+    expr: Exprs.Val,
+  ) {
+    if (name === "pages") {
+      this.targetPagesCounterExprs.push({ expr, format });
+    } else {
+      this.targetPageCounterExprs.push({ expr, format });
+    }
+  }
 
   getExprContentListener(): Vtree.ExprContentListener {
     return this.exprContentListener.bind(this);
@@ -847,11 +872,28 @@ export class CounterStore {
     const foundPageCounter =
       !foundPagesCounter &&
       this.pageCounterExprs.findIndex((o) => o.expr === expr) >= 0;
+
+    const foundTargetPagesCounter =
+      this.targetPagesCounterExprs.findIndex((o) => o.expr === expr) >= 0;
+    const foundTargetPageCounter =
+      !foundTargetPagesCounter &&
+      this.targetPageCounterExprs.findIndex((o) => o.expr === expr) >= 0;
+
     if (foundPagesCounter || foundPageCounter) {
       const node = document.createElementNS(Base.NS.XHTML, "span");
       node.textContent = val;
       node.setAttribute(
         foundPagesCounter ? PAGES_COUNTER_ATTR : PAGE_COUNTER_ATTR,
+        expr.key,
+      );
+      return node;
+    } else if (foundTargetPagesCounter || foundTargetPageCounter) {
+      const node = document.createElementNS(Base.NS.XHTML, "span");
+      node.textContent = val;
+      node.setAttribute(
+        foundTargetPagesCounter
+          ? TARGET_PAGES_COUNTER_ATTR
+          : TARGET_PAGE_COUNTER_ATTR,
         expr.key,
       );
       return node;
@@ -871,6 +913,12 @@ export class CounterStore {
       if (counterValues) {
         node.textContent = counterExpr.format(counterValues);
       }
+    }
+    const nodesTemp = runningElem.querySelectorAll(
+      `[${TARGET_PAGE_COUNTER_ATTR}]`,
+    );
+    for (const node of nodesTemp) {
+      node.textContent = this.targetPageCounter;
     }
   }
 
@@ -892,6 +940,9 @@ export class CounterStore {
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
+export const TARGET_PAGES_COUNTER_ATTR =
+  "data-vivliostyle-target-pages-counter";
+export const TARGET_PAGE_COUNTER_ATTR = "data-vivliostyle-target-page-counter";
 
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(
