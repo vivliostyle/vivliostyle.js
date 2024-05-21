@@ -47,7 +47,7 @@ monami-ya⭐️
 <p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
 yamahige⭐️
 
-### Post Sponsors
+### Past Sponsors
 
 <p><a href="https://github.com/monaka"><img src="https://avatars.githubusercontent.com/u/101795?v=4" title="monaka" width="60" height="60" style="max-width:100%;"></a>
 monaka
@@ -63,9 +63,6 @@ niszet
 yuji-1980
 <p><a href="https://github.com/MarianoCh"><img src="https://avatars.githubusercontent.com/u/48592134?v=4" title="MarianoCh" width="60" height="60" style="max-width:100%;"></a>
 MarianoCh
-
-
-
 
 ## One-time Sponsors
 
