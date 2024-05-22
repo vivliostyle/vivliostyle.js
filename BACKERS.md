@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-Current support amounts **total $86 for Monthly Sponsors and $110 for One-time Sponsors**.The current amount of support is **\$86.00 per month**. Please consider helping us.
+Current support amounts are **$86 for Monthly Sponsors and $110 for One-time Sponsors**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
