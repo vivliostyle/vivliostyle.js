@@ -295,19 +295,6 @@ function normalizeLang(lang: string): string | null {
   return null;
 }
 
-const embeddedContentTags = {
-  audio: true,
-  canvas: true,
-  embed: true,
-  iframe: true,
-  img: true,
-  math: true,
-  object: true,
-  picture: true,
-  svg: true,
-  video: true,
-};
-
 class TextSpacingPolyfill {
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-autospace", "text-spacing-trim"];
@@ -639,7 +626,7 @@ class TextSpacingPolyfill {
             (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
             (prevP.viewNode?.nodeType === 1 &&
               ((prevP.viewNode as Element).localName === "br" ||
-                embeddedContentTags[(prevP.viewNode as Element).localName]))
+                Base.mediaTags[(prevP.viewNode as Element).localName]))
           ) {
             break;
           }
@@ -670,7 +657,7 @@ class TextSpacingPolyfill {
             (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
             (nextP.viewNode?.nodeType === 1 &&
               ((nextP.viewNode as Element).localName === "br" ||
-                embeddedContentTags[(nextP.viewNode as Element).localName]))
+                Base.mediaTags[(nextP.viewNode as Element).localName]))
           ) {
             if (
               next === checkPoints.length - 1 &&

@@ -702,3 +702,16 @@ export class SimpleEventTarget {
   }
 }
 export type EventTarget = SimpleEventTarget;
+
+export const mediaTags = {
+  audio: true,
+  canvas: true,
+  embed: true,
+  iframe: true,
+  img: true,
+  math: true,
+  object: true,
+  picture: true,
+  svg: true,
+  video: true,
+};
