@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-The current amount of support is **\$86.00 per month**. Please consider helping us.
+Current support amounts are **$86 for Monthly Sponsors and $110 for One-time Sponsors**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -44,8 +44,34 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
+<p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
+yamahige⭐️
+
+### Past Sponsors
+
+<p><a href="https://github.com/monaka"><img src="https://avatars.githubusercontent.com/u/101795?v=4" title="monaka" width="60" height="60" style="max-width:100%;"></a>
+monaka
+<p><a href="https://github.com/youchan"><img src="https://avatars.githubusercontent.com/u/222183?v=4" title="youchan" width="60" height="60" style="max-width:100%;"></a>
+youchan
+<p><a href="https://github.com/azettl"><img src="https://avatars.githubusercontent.com/u/644570?v=4" title="azettl" width="60" height="60" style="max-width:100%;"></a>
+azettl
+<p><a href="https://github.com/okuzawats"><img src="https://avatars.githubusercontent.com/u/12797442?v=4" title="okuzawats" width="60" height="60" style="max-width:100%;"></a>
+okuzawats
+<p><a href="https://github.com/niszet"><img src="https://avatars.githubusercontent.com/u/28832585?v=4" title="niszet" width="60" height="60" style="max-width:100%;"></a>
+niszet
+<p><a href="https://github.com/yuji-1980"><img src="https://avatars.githubusercontent.com/u/67959695?v=4" title="yuji-1980" width="60" height="60" style="max-width:100%;"></a>
+yuji-1980
+<p><a href="https://github.com/MarianoCh"><img src="https://avatars.githubusercontent.com/u/48592134?v=4" title="MarianoCh" width="60" height="60" style="max-width:100%;"></a>
+MarianoCh
 
 ## One-time Sponsors
 
+### Bronze Sponsor
+
 <p><a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="60" height="60" style="max-width:100%;"></a>
 hatena🥉
+
+### Fan Sponsor
+
+<p><a href="https://github.com/EnochGao"><img src="https://avatars1.githubusercontent.com/u/41459067?s=460&amp;v=4" title="Enoch Gao" width="60" height="60" style="max-width:100%;"></a>
+Enoch Gao⭐️
