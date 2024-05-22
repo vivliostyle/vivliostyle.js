@@ -319,13 +319,6 @@ export function calculatePseudoElementHeight(
   return height;
 }
 
-export const mediaTags = {
-  img: true,
-  svg: true,
-  audio: true,
-  video: true,
-};
-
 /**
  * Represents a constraint on layout
  */
@@ -378,7 +371,7 @@ export class BoxBreakPosition
     }
     if (!this.alreadyEvaluated) {
       this.breakNodeContext = column.findBoxBreakPosition(this, penalty > 0);
-      this.alreadyEvaluated = true;
+      this.alreadyEvaluated = !!this.breakNodeContext || penalty > 0;
     }
     return this.breakNodeContext;
   }
@@ -1800,7 +1793,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     return (
       checkPoints[0].sourceNode == checkPoints[1].sourceNode &&
-      mediaTags[(checkPoints[0].sourceNode as Element).localName]
+      Base.mediaTags[(checkPoints[0].sourceNode as Element).localName]
     );
   }
 
@@ -2092,12 +2085,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // Skip special
           seekRange = !haveStart;
         } else if (
+          !element.firstChild ||
+          Base.mediaTags[element.localName] ||
           /^r(uby|[bt]c?)$/.test(element.localName) ||
           LayoutHelper.isSpecialInlineDisplay(
             this.clientLayout.getElementComputedStyle(element).display,
           )
         ) {
-          // ruby, inline-block, etc.
+          // img, ruby, inline-block, etc.
           seekRange = !haveStart;
           if (seekRange) {
             if (element.localName === "ruby" && node.firstChild) {
@@ -2106,8 +2101,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             range.setStartBefore(node);
             haveStart = true;
-            lastGood = node;
           }
+          lastGood = node;
           if (node.contains(end)) {
             endNotReached = false;
           }
@@ -3037,7 +3032,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 }
               }
               const viewTag = (nodeContext.viewNode as Element).localName;
-              if (mediaTags[viewTag]) {
+              if (Base.mediaTags[viewTag]) {
                 // elements that have inherent content
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
@@ -3208,7 +3203,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 nodeContext.breakBefore,
               );
               const viewTag = (nodeContext.viewNode as Element).localName;
-              if (mediaTags[viewTag]) {
+              if (Base.mediaTags[viewTag]) {
                 // elements that have inherent content
                 // check if a forced break must occur before the block.
                 if (Break.isForcedBreakValue(breakAtTheEdge)) {
