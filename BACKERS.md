@@ -49,18 +49,18 @@ yamahige⭐️
 
 ### Past Sponsors
 
-<p><a href="https://github.com/monaka"><img src="https://avatars.githubusercontent.com/u/101795?v=4" title="monaka" width="60" height="60" style="max-width:100%;"></a>
-monaka
 <p><a href="https://github.com/youchan"><img src="https://avatars.githubusercontent.com/u/222183?v=4" title="youchan" width="60" height="60" style="max-width:100%;"></a>
-youchan
+youchan🌹
 <p><a href="https://github.com/azettl"><img src="https://avatars.githubusercontent.com/u/644570?v=4" title="azettl" width="60" height="60" style="max-width:100%;"></a>
-azettl
+azettl🌹
+<p><a href="https://github.com/monaka"><img src="https://avatars.githubusercontent.com/u/101795?v=4" title="monaka" width="60" height="60" style="max-width:100%;"></a>
+monaka⭐️
 <p><a href="https://github.com/okuzawats"><img src="https://avatars.githubusercontent.com/u/12797442?v=4" title="okuzawats" width="60" height="60" style="max-width:100%;"></a>
-okuzawats
+okuzawats⭐️
 <p><a href="https://github.com/niszet"><img src="https://avatars.githubusercontent.com/u/28832585?v=4" title="niszet" width="60" height="60" style="max-width:100%;"></a>
-niszet
+niszet⭐️
 <p><a href="https://github.com/yuji-1980"><img src="https://avatars.githubusercontent.com/u/67959695?v=4" title="yuji-1980" width="60" height="60" style="max-width:100%;"></a>
-yuji-1980
+yuji-1980⭐️
 
 ## One-time Sponsors
 
