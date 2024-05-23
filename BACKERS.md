@@ -61,13 +61,13 @@ okuzawats
 niszet
 <p><a href="https://github.com/yuji-1980"><img src="https://avatars.githubusercontent.com/u/67959695?v=4" title="yuji-1980" width="60" height="60" style="max-width:100%;"></a>
 yuji-1980
-<p><a href="https://github.com/MarianoCh"><img src="https://avatars.githubusercontent.com/u/48592134?v=4" title="MarianoCh" width="60" height="60" style="max-width:100%;"></a>
-MarianoCh
 
 ## One-time Sponsors
 
 ### Bronze Sponsor
 
+<p><a href="https://github.com/MarianoCh"><img src="https://avatars.githubusercontent.com/u/48592134?v=4" title="MarianoCh" width="60" height="60" style="max-width:100%;"></a>
+MarianoCh🥉
 <p><a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="60" height="60" style="max-width:100%;"></a>
 hatena🥉
 
