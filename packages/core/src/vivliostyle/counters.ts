@@ -274,12 +274,12 @@ class CounterResolver implements CssCascade.CounterResolver {
             if (pageCounters) {
               // The target element has already been laid out.
               this.counterStore.resolveReference(transformedId);
+
               if (pageCounters[name]) {
                 const pageCountersOfName = pageCounters[name];
-                this.counterStore.targetPageCounter = format(
+                return format(
                   pageCountersOfName[pageCountersOfName.length - 1] || null,
                 );
-                return this.counterStore.targetPageCounter;
               } else {
                 // No corresponding counter with the name.
                 return format(0);
@@ -290,7 +290,7 @@ class CounterResolver implements CssCascade.CounterResolver {
                 transformedId,
                 false,
               );
-              return this.counterStore.targetPageCounter; // TODO more reasonable placeholder?
+              return "??"; // TODO more reasonable placeholder?
             }
           }
         } else {
@@ -304,7 +304,12 @@ class CounterResolver implements CssCascade.CounterResolver {
       `target-counter-${name}-of-${url}`,
     );
 
-    this.counterStore.registerTargetPageCounterExpr(name, format, expr);
+    this.counterStore.registerTargetPageCounterExpr(
+      name,
+      format,
+      expr,
+      transformedId,
+    );
     return expr;
   }
 
@@ -522,16 +527,13 @@ export class CounterStore {
     expr: Exprs.Val;
     format: (p1: number[]) => string;
   }[] = [];
-  private targetPagesCounterExprs: {
-    expr: Exprs.Val;
-    format: (p1: number) => string;
-  }[] = [];
-  private targetPageCounterExprs: {
-    expr: Exprs.Val;
-    format: (p1: number) => string;
-  }[] = [];
 
-  targetPageCounter = "??";
+  private targetPageCounterExprs: {
+    name: string;
+    expr: Exprs.Val;
+    format: (p1: number) => string;
+    transformedId: string;
+  }[] = [];
 
   constructor(
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
@@ -827,11 +829,10 @@ export class CounterStore {
     name: string,
     format: (p1: number) => string,
     expr: Exprs.Val,
+    transformedId: string,
   ) {
-    if (name === "pages") {
-      this.targetPagesCounterExprs.push({ expr, format });
-    } else {
-      this.targetPageCounterExprs.push({ expr, format });
+    if (name === "page") {
+      this.targetPageCounterExprs.push({ name, expr, format, transformedId });
     }
   }
 
@@ -864,6 +865,21 @@ export class CounterStore {
         clonedElem.style.position = "";
         clonedElem.style.visibility = "";
         return clonedElem;
+      } else if (expr.str.startsWith("target-counter-page-")) {
+        const node = document.createElementNS(Base.NS.XHTML, "span");
+        node.textContent = val;
+        const targetExpr = this.targetPageCounterExprs.find(
+          (o) => o.expr.key === expr.key,
+        );
+        if (targetExpr) {
+          node.setAttribute(
+            TARGET_PAGE_COUNTER_ID_ATTR,
+            targetExpr.transformedId,
+          );
+        }
+
+        node.setAttribute(TARGET_PAGE_COUNTER_ATTR, expr.key);
+        return node;
       }
     }
 
@@ -873,27 +889,11 @@ export class CounterStore {
       !foundPagesCounter &&
       this.pageCounterExprs.findIndex((o) => o.expr === expr) >= 0;
 
-    const foundTargetPagesCounter =
-      this.targetPagesCounterExprs.findIndex((o) => o.expr === expr) >= 0;
-    const foundTargetPageCounter =
-      !foundTargetPagesCounter &&
-      this.targetPageCounterExprs.findIndex((o) => o.expr === expr) >= 0;
-
     if (foundPagesCounter || foundPageCounter) {
       const node = document.createElementNS(Base.NS.XHTML, "span");
       node.textContent = val;
       node.setAttribute(
         foundPagesCounter ? PAGES_COUNTER_ATTR : PAGE_COUNTER_ATTR,
-        expr.key,
-      );
-      return node;
-    } else if (foundTargetPagesCounter || foundTargetPageCounter) {
-      const node = document.createElementNS(Base.NS.XHTML, "span");
-      node.textContent = val;
-      node.setAttribute(
-        foundTargetPagesCounter
-          ? TARGET_PAGES_COUNTER_ATTR
-          : TARGET_PAGE_COUNTER_ATTR,
         expr.key,
       );
       return node;
@@ -917,8 +917,9 @@ export class CounterStore {
     const nodesTemp = runningElem.querySelectorAll(
       `[${TARGET_PAGE_COUNTER_ATTR}]`,
     );
+
     for (const node of nodesTemp) {
-      node.textContent = this.targetPageCounter;
+      node.setAttribute(TARGET_PAGE_COUNTER_IN_RUNNING_ATTR, true);
     }
   }
 
@@ -931,6 +932,26 @@ export class CounterStore {
       Asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
     }
+
+    const runningNodes = viewport.root.querySelectorAll(
+      `[${TARGET_PAGE_COUNTER_IN_RUNNING_ATTR}]`,
+    );
+
+    for (const node of runningNodes) {
+      const transformedId = node.getAttribute(TARGET_PAGE_COUNTER_ID_ATTR);
+      const expr = this.targetPageCounterExprs.find(
+        (o) => o.transformedId === transformedId,
+      );
+      const counterById = this.pageCountersById[expr.transformedId];
+      if (counterById) {
+        const counterValues = counterById[expr.name];
+        if (counterValues) {
+          node.textContent = expr.format(
+            counterValues[counterValues.length - 1],
+          );
+        }
+      }
+    }
   }
 
   createLayoutConstraint(pageIndex: number): Layout.LayoutConstraint {
@@ -940,9 +961,11 @@ export class CounterStore {
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
-export const TARGET_PAGES_COUNTER_ATTR =
-  "data-vivliostyle-target-pages-counter";
 export const TARGET_PAGE_COUNTER_ATTR = "data-vivliostyle-target-page-counter";
+export const TARGET_PAGE_COUNTER_ID_ATTR =
+  "data-vivliostyle-target-page-counter-id";
+export const TARGET_PAGE_COUNTER_IN_RUNNING_ATTR =
+  "data-vivliostyle-target-page-counter-in-running";
 
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(
