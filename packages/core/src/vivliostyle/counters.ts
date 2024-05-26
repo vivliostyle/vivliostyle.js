@@ -304,7 +304,7 @@ class CounterResolver implements CssCascade.CounterResolver {
       `target-counter-${name}-of-${url}`,
     );
 
-    this.counterStore.registerTargetPageCounterExpr(
+    this.counterStore.registerTargetCounterExpr(
       name,
       format,
       expr,
@@ -528,7 +528,7 @@ export class CounterStore {
     format: (p1: number[]) => string;
   }[] = [];
 
-  private targetPageCounterExprs: {
+  private targetCounterExprs: {
     name: string;
     expr: Exprs.Val;
     format: (p1: number) => string;
@@ -825,13 +825,13 @@ export class CounterStore {
       this.pageCounterExprs.push({ expr, format });
     }
   }
-  registerTargetPageCounterExpr(
+  registerTargetCounterExpr(
     name: string,
     format: (p1: number) => string,
     expr: Exprs.Val,
     transformedId: string,
   ) {
-    this.targetPageCounterExprs.push({ name, expr, format, transformedId });
+    this.targetCounterExprs.push({ name, expr, format, transformedId });
   }
 
   getExprContentListener(): Vtree.ExprContentListener {
@@ -866,17 +866,7 @@ export class CounterStore {
       } else if (expr.str.startsWith("target-counter-")) {
         const node = document.createElementNS(Base.NS.XHTML, "span");
         node.textContent = val;
-        const targetExpr = this.targetPageCounterExprs.find(
-          (o) => o.expr.key === expr.key,
-        );
-        if (targetExpr) {
-          node.setAttribute(
-            TARGET_PAGE_COUNTER_ID_ATTR,
-            targetExpr.transformedId,
-          );
-        }
-
-        node.setAttribute(TARGET_PAGE_COUNTER_ATTR, expr.key);
+        node.setAttribute(TARGET_COUNTER_ATTR, expr.key);
         return node;
       }
     }
@@ -912,12 +902,12 @@ export class CounterStore {
         node.textContent = counterExpr.format(counterValues);
       }
     }
-    const nodesTemp = runningElem.querySelectorAll(
-      `[${TARGET_PAGE_COUNTER_ATTR}]`,
+    const targetNodes = runningElem.querySelectorAll(
+      `[${TARGET_COUNTER_ATTR}]`,
     );
 
-    for (const node of nodesTemp) {
-      node.setAttribute(TARGET_PAGE_COUNTER_IN_RUNNING_ATTR, true);
+    for (const node of targetNodes) {
+      node.setAttribute(TARGET_COUNTER_IN_RUNNING_ATTR, true);
     }
   }
 
@@ -932,21 +922,19 @@ export class CounterStore {
     }
 
     const runningNodes = viewport.root.querySelectorAll(
-      `[${TARGET_PAGE_COUNTER_IN_RUNNING_ATTR}]`,
+      `[${TARGET_COUNTER_IN_RUNNING_ATTR}]`,
     );
 
     for (const node of runningNodes) {
-      const transformedId = node.getAttribute(TARGET_PAGE_COUNTER_ID_ATTR);
-      const expr = this.targetPageCounterExprs.find(
-        (o) => o.transformedId === transformedId,
-      );
-      const counterById = this.pageCountersById[expr.transformedId];
-      if (counterById) {
-        const counterValues = counterById[expr.name];
-        if (counterValues) {
-          node.textContent = expr.format(
-            counterValues[counterValues.length - 1],
-          );
+      const key = node.getAttribute(TARGET_COUNTER_ATTR);
+      const expr = this.targetCounterExprs.find((o) => o.expr.key === key);
+      if (expr && expr.transformedId) {
+        const counterValue = this.pageCountersById[expr.transformedId];
+        if (counterValue) {
+          const arr: number[] = counterValue[expr.name];
+          if (arr) {
+            node.textContent = expr.format(arr[arr.length - 1]);
+          }
         }
       }
     }
@@ -959,11 +947,10 @@ export class CounterStore {
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
-export const TARGET_PAGE_COUNTER_ATTR = "data-vivliostyle-target-page-counter";
-export const TARGET_PAGE_COUNTER_ID_ATTR =
-  "data-vivliostyle-target-page-counter-id";
-export const TARGET_PAGE_COUNTER_IN_RUNNING_ATTR =
-  "data-vivliostyle-target-page-counter-in-running";
+export const TARGET_COUNTER_ATTR = "data-vivliostyle-target-counter";
+
+export const TARGET_COUNTER_IN_RUNNING_ATTR =
+  "data-vivliostyle-target-counter-in-running";
 
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(
