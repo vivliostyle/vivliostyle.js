@@ -831,9 +831,7 @@ export class CounterStore {
     expr: Exprs.Val,
     transformedId: string,
   ) {
-    if (name === "page") {
-      this.targetPageCounterExprs.push({ name, expr, format, transformedId });
-    }
+    this.targetPageCounterExprs.push({ name, expr, format, transformedId });
   }
 
   getExprContentListener(): Vtree.ExprContentListener {
@@ -865,7 +863,7 @@ export class CounterStore {
         clonedElem.style.position = "";
         clonedElem.style.visibility = "";
         return clonedElem;
-      } else if (expr.str.startsWith("target-counter-page-")) {
+      } else if (expr.str.startsWith("target-counter-")) {
         const node = document.createElementNS(Base.NS.XHTML, "span");
         node.textContent = val;
         const targetExpr = this.targetPageCounterExprs.find(
