@@ -3,9 +3,7 @@
   "projectOwner": "vivliostyle",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "files": [
-    "README.md"
-  ],
+  "files": ["README.md"],
   "imageSize": 80,
   "commit": true,
   "commitConvention": "angular",
@@ -15,238 +13,184 @@
       "name": "sorotokin",
       "avatar_url": "https://avatars3.githubusercontent.com/u/11699780?v=4",
       "profile": "https://github.com/sorotokin",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "kwkbtr",
       "name": "KAWAKUBO Toru",
       "avatar_url": "https://avatars3.githubusercontent.com/u/3595560?v=4",
       "profile": "http://kwkbtr.info",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "satorumurmur",
       "name": "Satoru MATSUSHIMA (℠)",
       "avatar_url": "https://avatars0.githubusercontent.com/u/3631499?v=4",
       "profile": "https://bibi.epub.link",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "nulltask",
       "name": "Seiya Konno",
       "avatar_url": "https://avatars2.githubusercontent.com/u/291185?v=4",
       "profile": "http://null.ly",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "johanneswilm",
       "name": "Johannes Wilm",
       "avatar_url": "https://avatars2.githubusercontent.com/u/595512?v=4",
       "profile": "http://www.johanneswilm.org",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "frivoal",
       "name": "Florian Rivoal",
       "avatar_url": "https://avatars0.githubusercontent.com/u/113268?v=4",
       "profile": "https://florian.rivoal.net",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "skoji",
       "name": "Satoshi KOJIMA",
       "avatar_url": "https://avatars1.githubusercontent.com/u/119629?v=4",
       "profile": "https://skoji.jp",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "unageanu",
       "name": "Masaya Yamauchi",
       "avatar_url": "https://avatars2.githubusercontent.com/u/11205?v=4",
       "profile": "http://unageanu.hatenablog.com/",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "MurakamiShinyu",
       "name": "Shinyu Murakami",
       "avatar_url": "https://avatars1.githubusercontent.com/u/3324737?v=4",
       "profile": "https://github.com/MurakamiShinyu",
-      "contributions": [
-        "code",
-        "doc",
-        "talk"
-      ]
+      "contributions": ["code", "doc", "talk"]
     },
     {
       "login": "kubosho",
       "name": "Shota Kubota",
       "avatar_url": "https://avatars0.githubusercontent.com/u/430267?v=4",
       "profile": "https://blog.kubosho.com",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "spring-raining",
       "name": "spring-raining",
       "avatar_url": "https://avatars1.githubusercontent.com/u/1771005?v=4",
       "profile": "https://harusamex.com",
-      "contributions": [
-        "code",
-        "doc",
-        "talk"
-      ]
+      "contributions": ["code", "doc", "talk"]
     },
     {
       "login": "cosmo0920",
       "name": "Hiroshi Hatake",
       "avatar_url": "https://avatars1.githubusercontent.com/u/700876?v=4",
       "profile": "http://cosmo0920.wordpress.com/",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "takanakahiko",
       "name": "takanakahiko",
       "avatar_url": "https://avatars3.githubusercontent.com/u/10114717?v=4",
       "profile": "https://twitter.com/takanakahiko",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "uetchy",
       "name": "Yasuaki Uechi",
       "avatar_url": "https://avatars0.githubusercontent.com/u/431808?v=4",
       "profile": "https://uechi.io",
-      "contributions": [
-        "code",
-        "doc",
-        "design",
-        "talk"
-      ]
+      "contributions": ["code", "doc", "design", "talk"]
     },
     {
       "login": "zwaldowski",
       "name": "Zachary Waldowski",
       "avatar_url": "https://avatars2.githubusercontent.com/u/170812?v=4",
       "profile": "https://waldowski.me/",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "yamasy1549",
       "name": "yamasy1549",
       "avatar_url": "https://avatars0.githubusercontent.com/u/7820884?v=4",
       "profile": "https://yamasy.info/",
-      "contributions": [
-        "code",
-        "design"
-      ]
+      "contributions": ["code", "design"]
     },
     {
       "login": "ogwata",
       "name": "OGATA Katsuhiro",
       "avatar_url": "https://avatars1.githubusercontent.com/u/31482860?v=4",
       "profile": "https://twitter.com/ogwata",
-      "contributions": [
-        "blog",
-        "eventOrganizing"
-      ]
+      "contributions": ["blog", "eventOrganizing"]
     },
     {
       "login": "akabekobeko",
       "name": "akabeko",
       "avatar_url": "https://avatars0.githubusercontent.com/u/1257526?v=4",
       "profile": "https://akabeko.me/",
-      "contributions": [
-        "content",
-        "ideas"
-      ]
+      "contributions": ["content", "ideas"]
     },
     {
       "login": "youchan",
       "name": "youchan",
       "avatar_url": "https://avatars0.githubusercontent.com/u/222183?v=4",
       "profile": "https://github.com/youchan",
-      "contributions": [
-        "code",
-        "talk"
-      ]
+      "contributions": ["code", "talk"]
     },
     {
       "login": "yukukotani",
       "name": "Yuku Kotani",
       "avatar_url": "https://avatars1.githubusercontent.com/u/16265411?v=4",
       "profile": "https://yuku.dev/",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "Crissov",
       "name": "Christoph Päper",
       "avatar_url": "https://avatars.githubusercontent.com/u/6200185?v=4",
       "profile": "https://github.com/Crissov",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "eltociear",
       "name": "Ikko Eltociear Ashimine",
       "avatar_url": "https://avatars.githubusercontent.com/u/22633385?v=4",
       "profile": "https://bandism.net/",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "AyumuTakai",
       "name": "Takai ayumu",
       "avatar_url": "https://avatars.githubusercontent.com/u/2599195?v=4",
       "profile": "https://hackwork.jp/",
-      "contributions": [
-        "code",
-        "talk"
-      ]
+      "contributions": ["code", "talk"]
     },
     {
       "login": "daisuke-tanabe",
       "name": "daisuke-tanabe",
       "avatar_url": "https://avatars.githubusercontent.com/u/15145374?v=4",
       "profile": "https://github.com/daisuke-tanabe",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "hkwi",
       "name": "Hiroaki KAWAI",
       "avatar_url": "https://avatars.githubusercontent.com/u/1468181?v=4",
       "profile": "https://twitter.com/#!/kwi",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
+    },
+    {
+      "login": "EnochGao",
+      "name": "Enoch Gao",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41459067?v=4",
+      "profile": "https://enochgao.github.io/",
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7
 }
+
