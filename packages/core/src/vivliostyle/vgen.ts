@@ -1452,7 +1452,18 @@ export class ViewFactory
             }
             return false;
           };
-          if (!hasAutoWidth && !hasAutoHeight && !isInsideRunningElement()) {
+          const hasPercentBlockSize = (): boolean => {
+            // Check if the image has percentage block size, which is usually same as auto,
+            // which means the size is not determined until the image is loaded.
+            const blockSize = this.nodeContext.vertical ? cssWidth : cssHeight;
+            return blockSize instanceof Css.Numeric && blockSize.unit === "%";
+          };
+          if (
+            !hasAutoWidth &&
+            !hasAutoHeight &&
+            !hasPercentBlockSize() &&
+            !isInsideRunningElement()
+          ) {
             // No need to wait for the image, does not affect layout
             this.page.fetchers.push(imageFetcher);
           } else {
