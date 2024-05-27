@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>counter in running element</title>
+    <style>
+      @page {
+        size: A4;
+        @top-center {
+          content: element(HeaderRunning);
+        }
+        @bottom-center {
+          content: "footer target in page::" target-counter("#target", page);
+        }
+      }
+
+      @page :nth(3) {
+        counter-reset: page 10;
+      }
+
+      header {
+        position: running(HeaderRunning);
+      }
+
+      .target-page::after {
+        content: target-counter("#target", page);
+      }
+
+      .counter::after {
+        content: "current::" counter(page) "/" counter(pages);
+      }
+
+      a::after {
+        content: leader(".") target-counter(attr(href url), page);
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <header>
+        <span class="target-page"> target in page::</span>
+        <span class="counter"></span>
+      </header>
+      <div>
+        <h1>Target-counter test</h1>
+        <nav role="doc-toc">
+          <ul>
+            <li>
+              <a href="#sect01">Section One</a>
+            </li>
+            <li>
+              <a href="#sect02">Section Two</a>
+            </li>
+          </ul>
+        </nav>
+
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+
+        <section id="sect01">sect01</section>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+
+        <div id="target" style="color: brown">
+          target target target target target target target
+        </div>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+
+        <section id="sect02">sect02</section>
+
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+        <p>
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+          placeholder placeholder placeholder placeholder placeholder
+        </p>
+      </div>
+    </section>
+  </body>
+</html>

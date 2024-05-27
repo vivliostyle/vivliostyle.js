@@ -166,8 +166,8 @@ class CounterResolver implements CssCascade.CounterResolver {
       `page-counter-${name}`,
     );
 
-    const arrayFormat = (arr) => {
-      return format(arr[0]);
+    const arrayFormat = (arr: number[]) => {
+      return format(arr[arr.length - 1]);
     };
 
     this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
@@ -256,7 +256,7 @@ class CounterResolver implements CssCascade.CounterResolver {
         format(countersOfName[countersOfName.length - 1] || null),
       );
     }
-    return new Exprs.Native(
+    const expr = new Exprs.Native(
       this.pageScope,
       () => {
         // Since This block is evaluated during layout, lookForElement
@@ -274,6 +274,7 @@ class CounterResolver implements CssCascade.CounterResolver {
             if (pageCounters) {
               // The target element has already been laid out.
               this.counterStore.resolveReference(transformedId);
+
               if (pageCounters[name]) {
                 const pageCountersOfName = pageCounters[name];
                 return format(
@@ -302,6 +303,14 @@ class CounterResolver implements CssCascade.CounterResolver {
       },
       `target-counter-${name}-of-${url}`,
     );
+
+    this.counterStore.registerTargetCounterExpr(
+      name,
+      format,
+      expr,
+      transformedId,
+    );
+    return expr;
   }
 
   /** @override */
@@ -517,6 +526,13 @@ export class CounterStore {
   private pageCounterExprs: {
     expr: Exprs.Val;
     format: (p1: number[]) => string;
+  }[] = [];
+
+  private targetCounterExprs: {
+    name: string;
+    expr: Exprs.Val;
+    format: (p1: number) => string;
+    transformedId: string;
   }[] = [];
 
   constructor(
@@ -809,6 +825,14 @@ export class CounterStore {
       this.pageCounterExprs.push({ expr, format });
     }
   }
+  registerTargetCounterExpr(
+    name: string,
+    format: (p1: number) => string,
+    expr: Exprs.Val,
+    transformedId: string,
+  ) {
+    this.targetCounterExprs.push({ name, expr, format, transformedId });
+  }
 
   getExprContentListener(): Vtree.ExprContentListener {
     return this.exprContentListener.bind(this);
@@ -839,6 +863,11 @@ export class CounterStore {
         clonedElem.style.position = "";
         clonedElem.style.visibility = "";
         return clonedElem;
+      } else if (expr.str.startsWith("target-counter-")) {
+        const node = document.createElementNS(Base.NS.XHTML, "span");
+        node.textContent = val;
+        node.setAttribute(TARGET_COUNTER_ATTR, expr.key);
+        return node;
       }
     }
 
@@ -847,6 +876,7 @@ export class CounterStore {
     const foundPageCounter =
       !foundPagesCounter &&
       this.pageCounterExprs.findIndex((o) => o.expr === expr) >= 0;
+
     if (foundPagesCounter || foundPageCounter) {
       const node = document.createElementNS(Base.NS.XHTML, "span");
       node.textContent = val;
@@ -872,16 +902,41 @@ export class CounterStore {
         node.textContent = counterExpr.format(counterValues);
       }
     }
+    const targetNodes = runningElem.querySelectorAll(
+      `[${TARGET_COUNTER_ATTR}]`,
+    );
+
+    for (const node of targetNodes) {
+      node.setAttribute(TARGET_COUNTER_IN_RUNNING_ATTR, true);
+    }
   }
 
   finishLastPage(viewport: Vgen.Viewport) {
     const nodes = viewport.root.querySelectorAll(`[${PAGES_COUNTER_ATTR}]`);
-    const pages = this.currentPageCounters["page"][0];
+    const pages = viewport.contentContainer.childElementCount;
     for (const node of nodes) {
       const key = node.getAttribute(PAGES_COUNTER_ATTR);
       const i = this.pagesCounterExprs.findIndex((o) => o.expr.key === key);
       Asserts.assert(i >= 0);
       node.textContent = this.pagesCounterExprs[i].format([pages]);
+    }
+
+    const runningNodes = viewport.root.querySelectorAll(
+      `[${TARGET_COUNTER_IN_RUNNING_ATTR}]`,
+    );
+
+    for (const node of runningNodes) {
+      const key = node.getAttribute(TARGET_COUNTER_ATTR);
+      const expr = this.targetCounterExprs.find((o) => o.expr.key === key);
+      if (expr && expr.transformedId) {
+        const counterValue = this.pageCountersById[expr.transformedId];
+        if (counterValue) {
+          const arr: number[] = counterValue[expr.name];
+          if (arr) {
+            node.textContent = expr.format(arr[arr.length - 1]);
+          }
+        }
+      }
     }
   }
 
@@ -892,6 +947,10 @@ export class CounterStore {
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
+export const TARGET_COUNTER_ATTR = "data-vivliostyle-target-counter";
+
+export const TARGET_COUNTER_IN_RUNNING_ATTR =
+  "data-vivliostyle-target-counter-in-running";
 
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(
