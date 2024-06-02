@@ -835,11 +835,11 @@ export const UserAgentXml = `
 <head>
 <style><![CDATA[
 
-.footnote-content {
+.-vivliostyle-footnote-content {
   float: footnote;
 }
 
-.table-cell-container {
+.-vivliostyle-table-cell-container {
   display: block;
 }
 
@@ -847,9 +847,9 @@ export const UserAgentXml = `
 </head>
 <body>
 
-<s:template id="footnote"><s:content/><s:include class="footnote-content"/></s:template>
+<s:template id="footnote"><s:content/><s:include class="-vivliostyle-footnote-content"/></s:template>
 
-<s:template id="table-cell"><div data-vivliostyle-flow-root="true" class="table-cell-container"><s:content/></div></s:template>
+<s:template id="table-cell"><div data-vivliostyle-flow-root="true" class="-vivliostyle-table-cell-container"><s:content/></div></s:template>
 
 </body>
 </html>`;

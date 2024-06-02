@@ -134,6 +134,41 @@ export class EdgeBreakPosition
         ).marginBlockStart,
       );
       this.edge -= (column.vertical ? -1 : 1) * marginBlockStart;
+    } else if (
+      this.position.after &&
+      this.position.shadowContext?.root.id === "table-cell"
+    ) {
+      // Add table's borderBlockEnd etc. to the edge
+      const cell = column.element.parentElement;
+      const table = cell?.closest(
+        "table, [style*='display: table;']",
+      ) as HTMLElement;
+      if (table) {
+        const collapse = table.style.borderCollapse === "collapse";
+        let padding = 0;
+        let border = 0;
+        for (let elem = cell; elem; elem = elem.parentElement) {
+          const style = column.clientLayout.getElementComputedStyle(elem);
+          if (elem === cell || (elem === table && !collapse)) {
+            padding += column.parseComputedLength(style.paddingBlockEnd);
+          }
+          if (elem === table && !collapse) {
+            padding += column.parseComputedLength(
+              style.borderSpacing.replace(/^\S+ (\S+)$/, "$1"),
+            );
+          }
+          if (collapse) {
+            border = Math.max(
+              border,
+              column.parseComputedLength(style.borderBlockEndWidth),
+            );
+          } else if (elem === cell || elem === table) {
+            border += column.parseComputedLength(style.borderBlockEndWidth);
+          }
+          if (elem === table) break;
+        }
+        this.edge += (column.vertical ? -1 : 1) * (padding + border);
+      }
     }
 
     this.isEdgeUpdated = true;
