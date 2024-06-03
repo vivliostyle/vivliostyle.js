@@ -1328,10 +1328,10 @@ export class MatchesRelationalAction extends MatchesAction {
   override apply(cascadeInstance: CascadeInstance): void {
     for (const selectorText of this.selectorTexts) {
       let selectorWithScope: string;
-      let scopingRoot: Element;
+      let scopingRoot: ParentNode;
       if (/^\s*[+~]/.test(selectorText)) {
         // :has(+ F) or :has(~ F)
-        scopingRoot = cascadeInstance.currentElement.parentElement;
+        scopingRoot = cascadeInstance.currentElement.parentNode;
         const index = Array.from(scopingRoot.children).indexOf(
           cascadeInstance.currentElement,
         );
