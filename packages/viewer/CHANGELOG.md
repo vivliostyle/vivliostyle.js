@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.30.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.29.0...v2.30.0) (2024-06-04)
+
+### Bug Fixes
+
+- The windows environment failed to yarn dev ([#1337](https://github.com/vivliostyle/vivliostyle.js/issues/1337)) ([20fee03](https://github.com/vivliostyle/vivliostyle.js/commit/20fee03dd00c1be0898671c9fef94eb7260751ee))
+
+### Features
+
+- add i18n zh_cn ([79b4d06](https://github.com/vivliostyle/vivliostyle.js/commit/79b4d06ab8c1a25a4e8a097ed3b618bf23dee46c))
+- **i18n:zh_CN:** add Chinese translation ([b20e712](https://github.com/vivliostyle/vivliostyle.js/commit/b20e712f99498871b0c7380f2579fd6089e7fe49))
+- **viewer:** UI Chinese language support (zh-Hans, zh-Hant) ([29dc959](https://github.com/vivliostyle/vivliostyle.js/commit/29dc959e8db34816a46dacd6e2e81c1b07e6b645))
+
 # [2.29.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.28.1...v2.29.0) (2024-05-03)
 
 **Note:** Version bump only for package @vivliostyle/viewer

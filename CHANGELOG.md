@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.30.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.29.0...v2.30.0) (2024-06-04)
+
+### Bug Fixes
+
+- Images with percentage height cause page overflow ([f5192f7](https://github.com/vivliostyle/vivliostyle.js/commit/f5192f7fbb7cbaa3f7efe9d6891cd222c5a5955f)), closes [#1335](https://github.com/vivliostyle/vivliostyle.js/issues/1335)
+- Images with width and height specified causes page overflow ([abb8f78](https://github.com/vivliostyle/vivliostyle.js/commit/abb8f78b8ea703119a9edbf70ed5f926fa3d744d)), closes [#1343](https://github.com/vivliostyle/vivliostyle.js/issues/1343)
+- Images with width and height specified may dissapear in print ([985095f](https://github.com/vivliostyle/vivliostyle.js/commit/985095f4ca84fadf8d5f484685f0f78af3f3fdd0)), closes [#1321](https://github.com/vivliostyle/vivliostyle.js/issues/1321)
+- internal use of `class="table-cell-container"` may conflict with author/user's use ([83c443e](https://github.com/vivliostyle/vivliostyle.js/commit/83c443e1085076652e5d22c5184f32823097bb70))
+- Page breaks not made between some inline elements such as images ([4380055](https://github.com/vivliostyle/vivliostyle.js/commit/438005535c2778d0116666335bbeb15dafbdbbd4)), closes [#1319](https://github.com/vivliostyle/vivliostyle.js/issues/1319) [#1051](https://github.com/vivliostyle/vivliostyle.js/issues/1051)
+- running element page counter incorrect ([#1327](https://github.com/vivliostyle/vivliostyle.js/issues/1327)) ([8c390b8](https://github.com/vivliostyle/vivliostyle.js/commit/8c390b8b1690d1ecbe4d72cb775085c96929b7d6)), closes [#1325](https://github.com/vivliostyle/vivliostyle.js/issues/1325)
+- table pagination problem ([09e472d](https://github.com/vivliostyle/vivliostyle.js/commit/09e472dc7768e10c798ac0c6db8e8d9b25b0c426)), closes [#1326](https://github.com/vivliostyle/vivliostyle.js/issues/1326)
+- The windows environment failed to yarn dev ([#1337](https://github.com/vivliostyle/vivliostyle.js/issues/1337)) ([20fee03](https://github.com/vivliostyle/vivliostyle.js/commit/20fee03dd00c1be0898671c9fef94eb7260751ee))
+- TypeError occurs when `:has(+ …)` is used with universal or root selector ([d124d62](https://github.com/vivliostyle/vivliostyle.js/commit/d124d62d2117b16d831eba97abc92707f7b07d7e)), closes [#1341](https://github.com/vivliostyle/vivliostyle.js/issues/1341)
+
+### Features
+
+- add i18n zh_cn ([79b4d06](https://github.com/vivliostyle/vivliostyle.js/commit/79b4d06ab8c1a25a4e8a097ed3b618bf23dee46c))
+- **i18n:zh_CN:** add Chinese translation ([b20e712](https://github.com/vivliostyle/vivliostyle.js/commit/b20e712f99498871b0c7380f2579fd6089e7fe49))
+- **viewer:** UI Chinese language support (zh-Hans, zh-Hant) ([29dc959](https://github.com/vivliostyle/vivliostyle.js/commit/29dc959e8db34816a46dacd6e2e81c1b07e6b645))
+
 # [2.29.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.28.1...v2.29.0) (2024-05-03)
 
 ### Bug Fixes
