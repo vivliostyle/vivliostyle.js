@@ -1279,6 +1279,7 @@ export class ViewFactory
         const attributes = element.attributes;
         const attributeCount = attributes.length;
         let delayedSrc: string | null = null;
+        let delayedAlt: string | null = null;
         for (let i = 0; i < attributeCount; i++) {
           const attribute = attributes[i];
           const attributeNS = attribute.namespaceURI;
@@ -1409,6 +1410,16 @@ export class ViewFactory
             // attributes are assigned.
             delayedSrc = attributeValue;
           } else if (
+            attributeName == "alt" &&
+            !attributeNS &&
+            tag == "img" &&
+            ns == Base.NS.XHTML
+          ) {
+            // The alt attribute should be assigned after the src attribute
+            // to avoid the image box size being determined by the alt text.
+            // (Issue #1343)
+            delayedAlt = attributeValue;
+          } else if (
             attributeName == "href" &&
             tag == "image" &&
             ns == Base.NS.SVG &&
@@ -1431,7 +1442,7 @@ export class ViewFactory
         }
         if (delayedSrc) {
           const image = tag === "input" ? new Image() : result;
-          const imageFetcher = Net.loadElement(image, delayedSrc);
+          const imageFetcher = Net.loadElement(image, delayedSrc, delayedAlt);
           if (image !== result) {
             (result as HTMLImageElement).src = delayedSrc;
           }

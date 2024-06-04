@@ -320,6 +320,7 @@ export function newJSONStore(): JSONStore {
 export function loadElement(
   elem: Element,
   src?: string,
+  alt?: string,
 ): TaskUtil.Fetcher<string> {
   const fetcher = new TaskUtil.Fetcher(() => {
     const frame: Task.Frame<string> = Task.newFrame("loadElement");
@@ -346,6 +347,9 @@ export function loadElement(
       setTimeout(handler, 3000);
     } else if (src) {
       (elem as any).src = src;
+      if (alt) {
+        (elem as any).alt = alt;
+      }
     }
     return frame.result();
   }, `loadElement ${src || elem.localName}`);
