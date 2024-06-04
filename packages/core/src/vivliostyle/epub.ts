@@ -1834,14 +1834,38 @@ export class OPFView implements Vgen.CustomRendererFactory {
   }
 
   renderAllPages(): Task.Result<PageAndPosition | null> {
-    return this.renderPagesUpto(
+    const frame: Task.Frame<PageAndPosition | null> =
+      Task.newFrame("renderAllPages");
+    this.renderPagesUpto(
       {
         spineIndex: this.opf.spine.length - 1,
         pageIndex: Number.POSITIVE_INFINITY,
         offsetInItem: -1,
       },
       false,
-    );
+    ).then((result) => {
+      // Wait until all images are loaded (Issue #1321)
+      frame
+        .loopWithFrame((loopFrame) => {
+          if (
+            this.spineItems.some((viewItem) =>
+              viewItem?.pages.some((page) =>
+                page?.fetchers.some((fetcher) => !fetcher.arrived),
+              ),
+            )
+          ) {
+            frame.sleep(100).then(() => {
+              loopFrame.continueLoop();
+            });
+          } else {
+            loopFrame.breakLoop();
+          }
+        })
+        .then(() => {
+          frame.finish(result);
+        });
+    });
+    return frame.result();
   }
 
   /**
