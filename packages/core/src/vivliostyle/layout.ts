@@ -371,7 +371,7 @@ export class BoxBreakPosition
     }
     if (!this.alreadyEvaluated) {
       this.breakNodeContext = column.findBoxBreakPosition(this, penalty > 0);
-      this.alreadyEvaluated = !!this.breakNodeContext || penalty > 0;
+      this.alreadyEvaluated = true;
     }
     return this.breakNodeContext;
   }
