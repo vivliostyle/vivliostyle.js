@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.0...v2.30.1) (2024-06-14)
+
+### Bug Fixes
+
+- InvalidNodeTypeError may happen during table pagination (Regression in v2.30.0) ([9c1db41](https://github.com/vivliostyle/vivliostyle.js/commit/9c1db4118be43b8c0b6b26bce26e1482049dea8b)), closes [#1345](https://github.com/vivliostyle/vivliostyle.js/issues/1345)
+
 # [2.30.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.29.0...v2.30.0) (2024-06-04)
 
 ### Bug Fixes
