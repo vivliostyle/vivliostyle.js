@@ -85,7 +85,7 @@
         <li><a data-bind="attr: {href: t('HREF_User_Guide')}, text: t('Vivliostyle_User_Guide')"></a></li>
       </ul>
       <p><a href="https://vivliostyle.org" data-bind="attr: {href: t('HREF_Vivlistyle_Home')}"><img src="resources/vivliostyle-logo.svg" alt="Vivliostyle"/></a></p>
-      <div data-bind="visible: location.hostname.includes('vercel')"><br/><a href="https://vercel.com/?utm_source=vivliostyle&amp;utm_campaign=oss"><img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" alt="Powered By Vercel"></a></div>
+      <div data-bind="visible: location.hostname.includes('vercel')"><br/><a href="https://vercel.com/?utm_source=vivliostyle&amp;utm_campaign=oss" style="color: black; text-decoration: none; font-size: 18px;">▲ Powered by <b>Vercel</b></a></div>
     </section>
     <div id="vivliostyle-viewer-viewport" data-vivliostyle-viewer-viewport="true" role="main" tabindex="0" data-bind="attr: {'data-vivliostyle-page-progression': viewer.state.pageProgression}, click: navigation.onclickViewport, swipePages: true, textSelection: true, event: {'wheel': navigation.onwheelViewport}"></div>
     <span role="button" id="vivliostyle-page-navigation-left" aria-keyshortcuts="ArrowLeft" data-bind="click: navigation.navigateToLeft, css: {'vivliostyle-menu-enabled': !navigation.isNavigateToLeftDisabled()}, attr: {'aria-disabled': navigation.isNavigateToLeftDisabled, title: t('navigate_to_left')}"></span>
