@@ -794,7 +794,11 @@ export class ViewFactory
       elementStyle,
       computedStyle,
     );
-    if (floatReference && PageFloats.isPageFloat(floatReference)) {
+    if (
+      floatReference &&
+      PageFloats.isPageFloat(floatReference) &&
+      computedStyle["display"] === Css.ident.block
+    ) {
       // Fix page float margin collapsing issue (Issue #1282)
       computedStyle["display"] = Css.ident.flow_root;
     }
