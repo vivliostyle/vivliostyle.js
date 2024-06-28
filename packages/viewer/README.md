@@ -75,7 +75,7 @@ Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 [build-status-url]: https://travis-ci.com/vivliostyle/vivliostyle.js
 [deps]: https://img.shields.io/david/vivliostyle/vivliostyle.js?path=packages/viewer
 [deps-url]: https://david-dm.org/vivliostyle/vivliostyle.js/?path=packages/viewer
-[size]: https://packagephobia.now.sh/badge?p=@vivliostyle/viewer
-[size-url]: https://packagephobia.now.sh/result?p=@vivliostyle/viewer
+[size]: https://packagephobia.vercel.app/badge?p=@vivliostyle/viewer
+[size-url]: https://packagephobia.vercel.app/result?p=@vivliostyle/viewer
 [downloads]: https://img.shields.io/npm/dw/@vivliostyle/viewer.svg
 [downloads-url]: https://www.npmjs.com/package/@vivliostyle/viewer
