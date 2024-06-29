@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-Current support amounts are **$86 for Monthly Sponsors and $110 for One-time Sponsors**. Please consider helping us.
+Current support amounts are **$90 for Monthly Sponsors and $110 for One-time Sponsors**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -34,6 +34,8 @@ y-mikou🌟
 U-1F992🌟
 <p><a href="https://github.com/sarashino"><img src="https://avatars3.githubusercontent.com/u/52805712?s=460&amp;v=4" title="sarashino" width="60" height="60" style="max-width:100%;"></a>
 sarashino🌟
+<p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
+yamahige🌟
 <p><a href="https://github.com/munepi"><img src="https://avatars3.githubusercontent.com/u/583148?s=460&amp;v=4" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
 Munehiro Yamamoto⭐️
 <p><a href="https://github.com/nishinos"><img src="https://avatars2.githubusercontent.com/u/1988266?s=460&amp;v=4" title="nishinos" width="60" height="60" style="max-width:100%;"></a>
@@ -44,8 +46,8 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
-<p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
-yamahige⭐️
+<p><a href="https://github.com/Atelier-Mirai"><img src="https://avatars3.githubusercontent.com/u/6257661?s=460&amp;v=4" title="Atelier Mirai" width="60" height="60" style="max-width:100%;"></a>
+Atelier Mirai⭐️
 
 ### Past Sponsors
 
