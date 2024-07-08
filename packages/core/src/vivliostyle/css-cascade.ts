@@ -366,6 +366,9 @@ export function setPropCascadeValue(
   value: CascadeValue,
   context?: Exprs.Context,
 ): void {
+  if (!style) {
+    return;
+  }
   if (!value) {
     delete style[name];
   } else {
