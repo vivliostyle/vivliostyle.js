@@ -1301,6 +1301,7 @@ bdo[dir="rtl"] {
 /* MathML */
 m|math[display="block"] {
   display: block;
+  display: block math;
 }
 
 /*------------------ epub-specific ---------------------*/

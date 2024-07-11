@@ -512,8 +512,13 @@ export class ViewFactory
     // Compute values of display, position and float
     const position = computedStyle["position"] as Css.Ident;
     const float = computedStyle["float"] as Css.Ident;
+    const display =
+      (computedStyle["display"] as Css.Ident) ||
+      ((this.sourceNode as Element).namespaceURI === Base.NS.XHTML
+        ? Css.ident.inline
+        : undefined); // leave it to the browser for MathML and SVG
     const displayValues = Display.getComputedDisplayValue(
-      (computedStyle["display"] as Css.Ident) || Css.ident.inline,
+      display,
       position,
       float,
       this.sourceNode === this.xmldoc.root,
