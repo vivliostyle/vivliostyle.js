@@ -465,7 +465,7 @@ src = COMMA([SPACE(URI format(STRING+)?) | local(FAMILY)]+); /* for font-face */
 [epubx]utilization = NUM;
 [epubx]text-zoom = font-size | scale;
 
-[adapt]template = URI_OR_NONE;
+[adapt]template = URI_OR_NONE | footnote;
 [adapt]behavior = IDENT;
 
 /* CSS Fonts */
@@ -1313,7 +1313,7 @@ a[epub|type="noteref"] {
 }
 
 a[epub|type="noteref"]:href-epub-type(footnote, aside) {
-  -adapt-template: url(user-agent.xml#footnote);
+  -adapt-template: footnote;
   text-decoration: none;
 }
 

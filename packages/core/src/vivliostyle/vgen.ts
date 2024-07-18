@@ -336,8 +336,14 @@ export class ViewFactory
     const shadow: Vtree.ShadowContext = null;
     const templateURLVal = computedStyle["template"];
     let cont: Task.Result<Vtree.ShadowContext>;
-    if (templateURLVal instanceof Css.URL) {
-      const url = (templateURLVal as Css.URL).url;
+    if (
+      templateURLVal instanceof Css.URL ||
+      templateURLVal === Css.ident.footnote
+    ) {
+      const url =
+        templateURLVal instanceof Css.URL
+          ? templateURLVal.url
+          : Base.resolveURL("user-agent.xml#footnote", Base.resourceBaseURL);
       cont = this.createRefShadow(
         url,
         Vtree.ShadowType.ROOTLESS,
