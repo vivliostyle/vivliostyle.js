@@ -31,7 +31,7 @@ export function isFlowRoot(element: Element): boolean {
  *     https://drafts.csswg.org/css2/visuren.html#dis-pos-flo
  */
 export function blockify(display: Css.Ident): Css.Ident {
-  const displayStr = display.toString();
+  const displayStr = display?.toString() || "block";
   let blockifiedStr: string;
   switch (displayStr) {
     case "inline-flex":

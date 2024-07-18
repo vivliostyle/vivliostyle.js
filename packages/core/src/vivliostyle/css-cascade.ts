@@ -150,6 +150,7 @@ export const supportedNamespaces = {
   "http://www.idpf.org/2007/ops": true,
   "http://www.w3.org/1999/xhtml": true,
   "http://www.w3.org/2000/svg": true,
+  "http://www.w3.org/1998/Math/MathML": true,
 };
 
 export const coupledPatterns = [
@@ -898,6 +899,35 @@ export class CheckNamespaceAction extends ChainedAction {
   }
 }
 
+function checkAttribute(
+  element: Element,
+  ns: string | null,
+  name: string,
+  pred: (element: Element, ns: string, name: string) => boolean,
+): boolean {
+  if (!element) {
+    return false;
+  }
+  if (ns !== null) {
+    return pred(element, ns, name);
+  }
+  // For wildcard namespace
+  for (const qname of element.getAttributeNames()) {
+    if (qname === name || qname.endsWith(`:${name}`)) {
+      if (
+        pred(
+          element,
+          qname === name ? "" : element.lookupNamespaceURI(qname.split(":")[0]),
+          name,
+        )
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export class CheckAttributePresentAction extends ChainedAction {
   constructor(public readonly ns: string, public readonly name: string) {
     super();
@@ -905,8 +935,12 @@ export class CheckAttributePresentAction extends ChainedAction {
 
   override apply(cascadeInstance: CascadeInstance): void {
     if (
-      cascadeInstance.currentElement &&
-      cascadeInstance.currentElement.hasAttributeNS(this.ns, this.name)
+      checkAttribute(
+        cascadeInstance.currentElement,
+        this.ns,
+        this.name,
+        (element, ns, name) => element.hasAttributeNS(ns, name),
+      )
     ) {
       this.chained.apply(cascadeInstance);
     }
@@ -924,9 +958,12 @@ export class CheckAttributeEqAction extends ChainedAction {
 
   override apply(cascadeInstance: CascadeInstance): void {
     if (
-      cascadeInstance.currentElement &&
-      cascadeInstance.currentElement.getAttributeNS(this.ns, this.name) ==
-        this.value
+      checkAttribute(
+        cascadeInstance.currentElement,
+        this.ns,
+        this.name,
+        (element, ns, name) => element.getAttributeNS(ns, name) == this.value,
+      )
     ) {
       this.chained.apply(cascadeInstance);
     }
@@ -956,14 +993,16 @@ export class CheckNamespaceSupportedAction extends ChainedAction {
   }
 
   override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.currentElement) {
-      const ns = cascadeInstance.currentElement.getAttributeNS(
+    if (
+      checkAttribute(
+        cascadeInstance.currentElement,
         this.ns,
         this.name,
-      );
-      if (ns && supportedNamespaces[ns]) {
-        this.chained.apply(cascadeInstance);
-      }
+        (element, ns, name) =>
+          !!supportedNamespaces[element.getAttributeNS(ns, name)],
+      )
+    ) {
+      this.chained.apply(cascadeInstance);
     }
   }
 
@@ -986,14 +1025,16 @@ export class CheckAttributeRegExpAction extends ChainedAction {
   }
 
   override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.currentElement) {
-      const attr = cascadeInstance.currentElement.getAttributeNS(
+    if (
+      checkAttribute(
+        cascadeInstance.currentElement,
         this.ns,
         this.name,
-      );
-      if (attr && attr.match(this.regexp)) {
-        this.chained.apply(cascadeInstance);
-      }
+        (element, ns, name) =>
+          !!element.getAttributeNS(ns, name)?.match(this.regexp),
+      )
+    ) {
+      this.chained.apply(cascadeInstance);
     }
   }
 }

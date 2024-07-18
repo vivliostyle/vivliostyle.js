@@ -736,12 +736,6 @@ export function getMathJaxHub(): object {
   return null;
 }
 
-export function checkMathJax(): void {
-  if (getMathJaxHub()) {
-    CssCascade.supportedNamespaces[Base.NS.MATHML] = true;
-  }
-}
-
 export const supportedMediaTypes = {
   "application/xhtml+xml": true,
   "image/jpeg": true,
@@ -779,7 +773,6 @@ export class OPFDoc {
     public readonly pubURL: string,
   ) {
     this.documentURLTransformer = this.createDocumentURLTransformer();
-    checkMathJax();
   }
 
   // FIXME: TS4055
