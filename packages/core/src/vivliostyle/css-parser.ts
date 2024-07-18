@@ -1780,8 +1780,9 @@ export class Parser {
           }
           token = tokenizer.token();
           if (token.type == TokenType.BAR) {
-            ns = text ? this.namespacePrefixToURI[text] : text;
-            if (ns == null) {
+            ns = text && this.namespacePrefixToURI[text];
+            // if ns === null, it's wildcard namespace
+            if (ns === undefined) {
               this.actions = actionsErrorSelector;
               handler.error("E_CSS_UNDECLARED_PREFIX", token);
               tokenizer.consume();
