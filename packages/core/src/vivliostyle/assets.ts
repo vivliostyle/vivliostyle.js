@@ -1312,7 +1312,7 @@ a[epub|type="noteref"] {
   line-height: 0.01;
 }
 
-a[epub|type="noteref"]:href-epub-type(footnote) {
+a[epub|type="noteref"]:href-epub-type(footnote, aside) {
   -adapt-template: url(user-agent.xml#footnote);
   text-decoration: none;
 }
