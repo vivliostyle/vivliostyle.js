@@ -865,7 +865,10 @@ export class CheckNSTagAction extends ChainedAction {
 }
 
 export class CheckTargetEpubTypeAction extends ChainedAction {
-  constructor(public readonly epubTypePatt: RegExp) {
+  constructor(
+    public readonly epubTypePatt: RegExp,
+    public readonly targetLocalName?: string,
+  ) {
     super();
   }
 
@@ -876,7 +879,10 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
       if (href && href.match(/^#/)) {
         const id = href.substring(1);
         const target = elem.ownerDocument.getElementById(id);
-        if (target) {
+        if (
+          target &&
+          (!this.targetLocalName || target.localName == this.targetLocalName)
+        ) {
           const epubType = target.getAttributeNS(Base.NS.epub, "type");
           if (epubType && epubType.match(this.epubTypePatt)) {
             this.chained.apply(cascadeInstance);
@@ -3779,10 +3785,11 @@ export class CascadeParserHandler
         break;
       case "-adapt-href-epub-type":
       case "href-epub-type":
-        if (params && params.length == 1 && typeof params[0] == "string") {
+        if (params && params.length >= 1 && typeof params[0] == "string") {
           const value = params[0] as string;
-          const patt = new RegExp(`(^|s)${Base.escapeRegExp(value)}(\$|s)`);
-          this.chain.push(new CheckTargetEpubTypeAction(patt));
+          const patt = new RegExp(`(^|\\s)${Base.escapeRegExp(value)}(\$|\\s)`);
+          const targetLocalName = params[1] as string;
+          this.chain.push(new CheckTargetEpubTypeAction(patt, targetLocalName));
         } else {
           this.chain.push(new CheckConditionAction("")); // always fails
         }

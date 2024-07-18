@@ -1674,6 +1674,17 @@ export class Parser {
                   if (token.type === TokenType.IDENT) {
                     params = [token.text];
                     tokenizer.consume();
+                    if (
+                      text === "href-epub-type" &&
+                      tokenizer.token().type === TokenType.COMMA
+                    ) {
+                      tokenizer.consume();
+                      token = tokenizer.token();
+                      if (token.type === TokenType.IDENT) {
+                        params.push(token.text);
+                        tokenizer.consume();
+                      }
+                    }
                     break;
                   } else {
                     break pseudoclassType;
