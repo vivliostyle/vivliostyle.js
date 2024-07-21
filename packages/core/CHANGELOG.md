@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.1...v2.30.2) (2024-07-21)
+
+### Bug Fixes
+
+- `-adapt-template: footnote` should work for "user-agent.xml#footnote" ([2b2aa83](https://github.com/vivliostyle/vivliostyle.js/commit/2b2aa835ea6ac49bf3c7e327f6edb92f132213a1))
+- `epub:type="footnote"` on non-`aside` element should not cause footnote layout ([1f21f56](https://github.com/vivliostyle/vivliostyle.js/commit/1f21f56eea9fcf3f498444cc866d639496e6c35a)), closes [#1363](https://github.com/vivliostyle/vivliostyle.js/issues/1363)
+- Attribute selectors with wildcard namespace not worked ([b7c45f7](https://github.com/vivliostyle/vivliostyle.js/commit/b7c45f7e39010a1f1dc1895de8787b5f7de4a90d))
+- Browser-native MathML should be enabled when MathJax is not loaded ([c1a760e](https://github.com/vivliostyle/vivliostyle.js/commit/c1a760e30db8d0e54bdb49923bd3e99367e985ab))
+- Flexbox not working on page floats (Regression in v2.28.0) ([eb4b6e1](https://github.com/vivliostyle/vivliostyle.js/commit/eb4b6e12bad0c76fbdba0e5c7e82df040e24052b)), closes [#1354](https://github.com/vivliostyle/vivliostyle.js/issues/1354)
+- unsupported nested media rule causes subsequent rules to fail ([6098105](https://github.com/vivliostyle/vivliostyle.js/commit/6098105b2b386ad0dc70b533bc2bbada9f783016)), closes [#1360](https://github.com/vivliostyle/vivliostyle.js/issues/1360)
+
 ## [2.30.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.0...v2.30.1) (2024-06-14)
 
 ### Bug Fixes
