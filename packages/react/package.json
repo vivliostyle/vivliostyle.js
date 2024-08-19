@@ -9,7 +9,7 @@
     "build-storybook": "build-storybook",
     "clean": "shx rm -rf dist",
     "dev": "yarn storybook",
-    "storybook": "start-storybook -p 9009",
+    "storybook": "cross-env NODE_OPTIONS=--openssl-legacy-provider start-storybook -p 9009",
     "test": "run-s test:build",
     "test:build": "yarn build",
     "test:unit": "cross-env CI=1 react-scripts test --env=jest-environment-jsdom-sixteen",
