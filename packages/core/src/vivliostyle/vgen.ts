@@ -2848,28 +2848,34 @@ export const propertiesNotPassedToDOM = {
   page: true,
 };
 
+/**
+ * Need to scale `getBoundingClientRect()` result for high pixel ratio output?
+ * Note: This is only needed for Chromium older than 128. (Issue #1370)
+ */
+let needScaleRect: boolean | null = null;
+
 export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: Element;
   window: Window;
-  scaleRatio: number = 1;
+  scaleRatio: number;
 
   constructor(viewport: Viewport) {
     this.layoutBox = viewport.layoutBox;
     this.window = viewport.window;
-    if (viewport.pixelRatio > 0 && CSS.supports("zoom", "8")) {
-      this.scaleRatio = viewport.pixelRatio / viewport.window.devicePixelRatio;
-    }
+    this.scaleRatio = viewport.scaleRatio;
   }
 
   private scaleRect(rect: Vtree.ClientRect): Vtree.ClientRect {
-    return {
-      left: rect.left * this.scaleRatio,
-      top: rect.top * this.scaleRatio,
-      right: rect.right * this.scaleRatio,
-      bottom: rect.bottom * this.scaleRatio,
-      width: rect.width * this.scaleRatio,
-      height: rect.height * this.scaleRatio,
-    } as Vtree.ClientRect;
+    return needScaleRect
+      ? ({
+          left: rect.left * this.scaleRatio,
+          top: rect.top * this.scaleRatio,
+          right: rect.right * this.scaleRatio,
+          bottom: rect.bottom * this.scaleRatio,
+          width: rect.width * this.scaleRatio,
+          height: rect.height * this.scaleRatio,
+        } as Vtree.ClientRect)
+      : rect;
   }
 
   private subtractOffsets(
@@ -2937,9 +2943,10 @@ export class Viewport {
   root: HTMLElement;
   private outerZoomBox: HTMLElement;
   contentContainer: HTMLElement;
-  layoutBox: Element;
+  layoutBox: HTMLElement;
   width: number;
   height: number;
+  scaleRatio: number = 1;
 
   constructor(
     public readonly window: Window,
@@ -2951,6 +2958,22 @@ export class Viewport {
   ) {
     this.document = window.document;
     this.root = opt_root || this.document.body;
+
+    let outerZoomBox = this.root.firstElementChild as HTMLElement;
+    if (!outerZoomBox) {
+      outerZoomBox = this.document.createElement("div");
+      outerZoomBox.setAttribute("data-vivliostyle-outer-zoom-box", "true");
+      this.root.appendChild(outerZoomBox);
+    }
+    let contentContainer = outerZoomBox.firstElementChild as HTMLElement;
+    if (!contentContainer) {
+      contentContainer = this.document.createElement("div");
+      contentContainer.setAttribute(
+        "data-vivliostyle-spread-container",
+        "true",
+      );
+      outerZoomBox.appendChild(contentContainer);
+    }
 
     if (pixelRatio > 0 && CSS.supports("zoom", "8")) {
       // Emulate high pixel ratio using zoom and transform:scale().
@@ -2967,32 +2990,36 @@ export class Viewport {
         "--viv-devicePixelRatio",
         `${window.devicePixelRatio}`,
       );
+
+      this.scaleRatio = pixelRatio / window.devicePixelRatio;
+      if (needScaleRect === null) {
+        // Check if getBoundingClientRect() result needs to be scaled.
+        // Note: This is only needed for Chromium older than 128. (Issue #1370)
+        const savedWidth = contentContainer.style.width;
+        contentContainer.style.width = "16px";
+        needScaleRect =
+          contentContainer.clientWidth ===
+          contentContainer.getBoundingClientRect().width * this.scaleRatio;
+        contentContainer.style.width = savedWidth;
+      }
+      if (needScaleRect) {
+        Base.setCSSProperty(
+          this.root,
+          "--viv-scaleRectRatio",
+          `${this.scaleRatio}`,
+        );
+      }
     }
 
-    let outerZoomBox = this.root.firstElementChild;
-    if (!outerZoomBox) {
-      outerZoomBox = this.document.createElement("div");
-      outerZoomBox.setAttribute("data-vivliostyle-outer-zoom-box", "true");
-      this.root.appendChild(outerZoomBox);
-    }
-    let contentContainer = outerZoomBox.firstElementChild;
-    if (!contentContainer) {
-      contentContainer = this.document.createElement("div");
-      contentContainer.setAttribute(
-        "data-vivliostyle-spread-container",
-        "true",
-      );
-      outerZoomBox.appendChild(contentContainer);
-    }
-    let layoutBox = outerZoomBox.nextElementSibling;
+    let layoutBox = outerZoomBox.nextElementSibling as HTMLElement;
     if (!layoutBox) {
       layoutBox = this.document.createElement("div");
       layoutBox.setAttribute("data-vivliostyle-layout-box", "true");
       this.root.appendChild(layoutBox);
     }
-    this.outerZoomBox = outerZoomBox as HTMLElement;
-    this.contentContainer = contentContainer as HTMLElement;
-    this.layoutBox = layoutBox as HTMLElement;
+    this.outerZoomBox = outerZoomBox;
+    this.contentContainer = contentContainer;
+    this.layoutBox = layoutBox;
     this.width =
       opt_width ||
       parseFloat(window.getComputedStyle(this.root).width) ||

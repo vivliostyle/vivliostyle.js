@@ -17,18 +17,14 @@
 
 export const scaleRect = (rect: DOMRect): DOMRect => {
   const style = document.getElementById("vivliostyle-viewer-viewport").style;
-  const outputPixelRatio = parseFloat(
-    style.getPropertyValue("--viv-outputPixelRatio") || "1",
+  const scaleRectRatio = parseFloat(
+    style.getPropertyValue("--viv-scaleRectRatio") || "1",
   );
-  const devicePixelRatio = parseFloat(
-    style.getPropertyValue("--viv-devicePixelRatio") || "1",
-  );
-  const scaleRatio = outputPixelRatio / devicePixelRatio;
   return new DOMRect(
-    rect.x * scaleRatio,
-    rect.y * scaleRatio,
-    rect.width * scaleRatio,
-    rect.height * scaleRatio,
+    rect.x * scaleRectRatio,
+    rect.y * scaleRectRatio,
+    rect.width * scaleRectRatio,
+    rect.height * scaleRectRatio,
   );
 };
 
