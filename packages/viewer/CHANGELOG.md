@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.2...v2.30.3) (2024-08-19)
+
+### Bug Fixes
+
+- Viewer page display size is abnormally reduced and layout is broken with Chrome 128 ([cd4f25e](https://github.com/vivliostyle/vivliostyle.js/commit/cd4f25e8e70446f3bfb588f5b679d12600ef763b)), closes [#1370](https://github.com/vivliostyle/vivliostyle.js/issues/1370)
+
 ## [2.30.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.1...v2.30.2) (2024-07-21)
 
 ### Bug Fixes
