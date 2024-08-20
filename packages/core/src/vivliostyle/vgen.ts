@@ -2995,12 +2995,7 @@ export class Viewport {
       if (needScaleRect === null) {
         // Check if getBoundingClientRect() result needs to be scaled.
         // Note: This is only needed for Chromium older than 128. (Issue #1370)
-        const savedWidth = contentContainer.style.width;
-        contentContainer.style.width = "16px";
-        needScaleRect =
-          contentContainer.clientWidth ===
-          contentContainer.getBoundingClientRect().width * this.scaleRatio;
-        contentContainer.style.width = savedWidth;
+        needScaleRect = !("currentCSSZoom" in contentContainer);
       }
       if (needScaleRect) {
         Base.setCSSProperty(
