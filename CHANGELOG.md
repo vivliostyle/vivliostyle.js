@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.3...v2.30.4) (2024-08-20)
+
+### Bug Fixes
+
+- Chromium's standard CSS zoom support check ([469c2e8](https://github.com/vivliostyle/vivliostyle.js/commit/469c2e8052e8c680be554429a44d276ece3a6fe1))
+
 ## [2.30.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.2...v2.30.3) (2024-08-19)
 
 ### Bug Fixes
