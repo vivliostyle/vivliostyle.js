@@ -58,7 +58,7 @@
     "node-sass-package-importer": "^5.3.2",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.25",
-    "rollup": "^2.41.1",
+    "rollup": "^3.29.5",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-string": "^3.0.0",
     "rollup-plugin-terser": "^7.0.2",
