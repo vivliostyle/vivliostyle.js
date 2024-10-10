@@ -151,8 +151,19 @@ export function removeFollowingSiblings(
   if (!parentNode) {
     return;
   }
-  let lastChild: Node;
-  while ((lastChild = parentNode.lastChild) != viewNode) {
+  for (
+    let lastChild = parentNode.lastChild, prevSibling = lastChild;
+    lastChild !== viewNode;
+    lastChild = prevSibling
+  ) {
+    prevSibling = lastChild.previousSibling;
+    if (
+      lastChild.nodeType === 1 &&
+      (lastChild as Element).hasAttribute("data-vivliostyle-float-box")
+    ) {
+      // Do not remove float box (Issue #1383)
+      continue;
+    }
     parentNode.removeChild(lastChild);
   }
 }
