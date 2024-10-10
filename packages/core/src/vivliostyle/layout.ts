@@ -1057,6 +1057,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext.vertical,
       nodeContext.direction,
     );
+    element.setAttribute("data-vivliostyle-float-box", "true");
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
     Base.setCSSProperty(element, "vertical-align", "top");
