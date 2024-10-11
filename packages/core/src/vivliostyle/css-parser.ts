@@ -421,11 +421,11 @@ export class SkippingParserHandler extends ParserHandler {
   }
 
   override getCurrentToken(): CssTokenizer.Token {
-    return this.owner.getCurrentToken();
+    return this.owner?.getCurrentToken();
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
-    this.owner.errorMsg(mnemonics, token);
+    this.owner?.errorMsg(mnemonics, token);
   }
 
   override startRuleBody(): void {
