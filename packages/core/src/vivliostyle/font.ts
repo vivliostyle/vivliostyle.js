@@ -306,7 +306,9 @@ export class Mapper {
     fonts.forEach((fontFace) => {
       if (fontFace.status === "unloaded") {
         unloadedCount++;
-        fontFace.load();
+        fontFace.load().catch((e) => {
+          // Prevent "A network error occurred." errors in console
+        });
       }
     });
     if (unloadedCount === 0) {
