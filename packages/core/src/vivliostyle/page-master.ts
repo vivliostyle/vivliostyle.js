@@ -1514,6 +1514,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     const style = this.cascaded;
     const specified = this.pageBox.specified;
     for (const name in specified) {
+      if (
+        this.pageBox.pseudoName == "vivliostyle-page-rule-master" &&
+        (name === "writing-mode" || name === "direction")
+      ) {
+        // Prevent writing-mode and direction specified on `@page` not working.
+        // (Fix for issue #1392)
+        continue;
+      }
       if (CssCascade.isPropName(name)) {
         CssCascade.setProp(style, name, CssCascade.getProp(specified, name));
       }
