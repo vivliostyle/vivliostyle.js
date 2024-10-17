@@ -3062,20 +3062,20 @@ export class CascadeInstance {
       if (!resetMap) {
         resetMap = {};
       }
-      resetMap["ua-list-item"] = ((this.currentElement as any)?.start ?? 1) - 1;
+      resetMap["list-item"] = ((this.currentElement as any)?.start ?? 1) - 1;
     }
     if (displayVal === Css.ident.list_item) {
       if (!incrementMap) {
         incrementMap = {};
       }
-      incrementMap["ua-list-item"] = 1;
+      incrementMap["list-item"] = incrementMap["list-item"] ?? 1;
       if (
         /^\s*[-+]?\d/.test(this.currentElement?.getAttribute("value") ?? "")
       ) {
-        if (!resetMap) {
-          resetMap = {};
+        if (!setMap) {
+          setMap = {};
         }
-        resetMap["ua-list-item"] = (this.currentElement as any).value - 1;
+        setMap["list-item"] = (this.currentElement as any).value;
       }
     }
     if (this.currentElement?.parentNode.nodeType === Node.DOCUMENT_NODE) {
@@ -3137,7 +3137,7 @@ export class CascadeInstance {
       }
     }
     if (displayVal === Css.ident.list_item) {
-      const listItemCounts = this.counters["ua-list-item"];
+      const listItemCounts = this.counters["list-item"];
       const listItemCount = listItemCounts[listItemCounts.length - 1];
       props["ua-list-item-count"] = new CascadeValue(
         new Css.Num(listItemCount),
