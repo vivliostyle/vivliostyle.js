@@ -3116,16 +3116,6 @@ export class CascadeInstance {
         this.defineCounter(resetCounterName, resetMap[resetCounterName]);
       }
     }
-    if (setMap) {
-      for (const setCounterName in setMap) {
-        if (!this.counters[setCounterName]) {
-          this.defineCounter(setCounterName, setMap[setCounterName]);
-        } else {
-          const counterValues = this.counters[setCounterName];
-          counterValues[counterValues.length - 1] = setMap[setCounterName];
-        }
-      }
-    }
     if (incrementMap) {
       for (const incrementCounterName in incrementMap) {
         if (!this.counters[incrementCounterName]) {
@@ -3134,6 +3124,16 @@ export class CascadeInstance {
         const counterValues = this.counters[incrementCounterName];
         counterValues[counterValues.length - 1] +=
           incrementMap[incrementCounterName];
+      }
+    }
+    if (setMap) {
+      for (const setCounterName in setMap) {
+        if (!this.counters[setCounterName]) {
+          this.defineCounter(setCounterName, setMap[setCounterName]);
+        } else {
+          const counterValues = this.counters[setCounterName];
+          counterValues[counterValues.length - 1] = setMap[setCounterName];
+        }
       }
     }
     if (displayVal === Css.ident.list_item) {
