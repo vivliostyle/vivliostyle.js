@@ -1282,6 +1282,13 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         this.vertical ? "vertical-rl" : "horizontal-tb",
       );
     }
+    if (!this.parentInstance || this.rtl != this.parentInstance.rtl) {
+      Base.setCSSProperty(
+        container.element,
+        "direction",
+        this.rtl ? "rtl" : "ltr",
+      );
+    }
     if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
       if (this.vertical) {
         this.sizeWithMaxWidth(context, container);
