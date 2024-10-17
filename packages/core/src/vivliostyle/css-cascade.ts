@@ -3017,6 +3017,15 @@ export class CascadeInstance {
     if (display) {
       displayVal = display.evaluate(this.context);
     }
+    // Ignore counter-* on 'display: none' elements and their descendants
+    if (displayVal === Css.ident.none) {
+      this.currentElement.setAttribute("data-viv-display-none", "true");
+      this.counterScoping.push(null);
+      return;
+    } else if (this.currentElement.closest("[data-viv-display-none]")) {
+      this.counterScoping.push(null);
+      return;
+    }
     let floatVal: Css.Val = Css.ident.inline;
     const float = props["float"] as CascadeValue;
     if (float) {
