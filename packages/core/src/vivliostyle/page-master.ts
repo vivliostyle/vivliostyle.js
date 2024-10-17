@@ -1282,6 +1282,13 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         this.vertical ? "vertical-rl" : "horizontal-tb",
       );
     }
+    if (!this.parentInstance || this.rtl != this.parentInstance.rtl) {
+      Base.setCSSProperty(
+        container.element,
+        "direction",
+        this.rtl ? "rtl" : "ltr",
+      );
+    }
     if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
       if (this.vertical) {
         this.sizeWithMaxWidth(context, container);
@@ -1514,6 +1521,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     const style = this.cascaded;
     const specified = this.pageBox.specified;
     for (const name in specified) {
+      if (
+        this.pageBox.pseudoName == "vivliostyle-page-rule-master" &&
+        (name === "writing-mode" || name === "direction")
+      ) {
+        // Prevent writing-mode and direction specified on `@page` not working.
+        // (Fix for issue #1392)
+        continue;
+      }
       if (CssCascade.isPropName(name)) {
         CssCascade.setProp(style, name, CssCascade.getProp(specified, name));
       }
