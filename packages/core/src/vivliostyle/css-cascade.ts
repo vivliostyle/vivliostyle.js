@@ -2998,15 +2998,18 @@ export class CascadeInstance {
   }
 
   defineCounter(counterName: string, value: number) {
-    if (this.counters[counterName]) {
-      this.counters[counterName].push(value);
-    } else {
-      this.counters[counterName] = [value];
-    }
     let scoping = this.counterScoping[this.counterScoping.length - 1];
     if (!scoping) {
       scoping = {};
       this.counterScoping[this.counterScoping.length - 1] = scoping;
+    }
+    if (this.counters[counterName]) {
+      if (scoping[counterName]) {
+        this.counters[counterName].pop();
+      }
+      this.counters[counterName].push(value);
+    } else {
+      this.counters[counterName] = [value];
     }
     scoping[counterName] = true;
   }
