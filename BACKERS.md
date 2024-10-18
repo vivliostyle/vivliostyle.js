@@ -1,7 +1,7 @@
 # Backers
 
 Vivliostyle is an independent, open source project. Our project would not be able to continue its development without the support of backers.
-Current support amounts are **$90 for Monthly Sponsors and $110 for One-time Sponsors**. Please consider helping us.
+Current support amounts are **$97 for Monthly Sponsors and $110 for One-time Sponsors**. Please consider helping us.
 
 - [Become a sponsor to vivliostyle](https://github.com/sponsors/vivliostyle)
 
@@ -17,6 +17,8 @@ Tatsuro YOKOTA🌹
 udon-a🌹
 <p><a href="https://github.com/ryoutakano"><img src="https://avatars1.githubusercontent.com/u/22651308?s=460&amp;v=4" title="Ryou Takano" width="60" height="60" style="max-width:100%;"></a>
 Ryou Takano🌹
+<p><a href="https://github.com/lostandfound"><img src="https://avatars1.githubusercontent.com/u/596183?s=460&amp;v=4" title="Hiroshi Takase" width="60" height="60" style="max-width:100%;"></a>
+Hiroshi Takase🌹
 
 ### Fan Sponsors
 
@@ -32,8 +34,6 @@ vvakame🌟
 y-mikou🌟
 <p><a href="https://github.com/U-1F992"><img src="https://avatars3.githubusercontent.com/u/57749636?s=460&amp;v=4" title="U-1F992" width="60" height="60" style="max-width:100%;"></a>
 U-1F992🌟
-<p><a href="https://github.com/sarashino"><img src="https://avatars3.githubusercontent.com/u/52805712?s=460&amp;v=4" title="sarashino" width="60" height="60" style="max-width:100%;"></a>
-sarashino🌟
 <p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
 yamahige🌟
 <p><a href="https://github.com/munepi"><img src="https://avatars3.githubusercontent.com/u/583148?s=460&amp;v=4" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
@@ -55,6 +55,8 @@ Atelier Mirai⭐️
 youchan🌹
 <p><a href="https://github.com/azettl"><img src="https://avatars.githubusercontent.com/u/644570?v=4" title="azettl" width="60" height="60" style="max-width:100%;"></a>
 azettl🌹
+<p><a href="https://github.com/sarashino"><img src="https://avatars3.githubusercontent.com/u/52805712?s=460&amp;v=4" title="sarashino" width="60" height="60" style="max-width:100%;"></a>
+sarashino🌟
 <p><a href="https://github.com/monaka"><img src="https://avatars.githubusercontent.com/u/101795?v=4" title="monaka" width="60" height="60" style="max-width:100%;"></a>
 monaka⭐️
 <p><a href="https://github.com/okuzawats"><img src="https://avatars.githubusercontent.com/u/12797442?v=4" title="okuzawats" width="60" height="60" style="max-width:100%;"></a>
