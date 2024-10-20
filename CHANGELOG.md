@@ -15,7 +15,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - Float box inside inline element disappeared at page break ([6805ff9](https://github.com/vivliostyle/vivliostyle.js/commit/6805ff992c128f0beadbb1c4f11fcc2d8a3a0660)), closes [#1383](https://github.com/vivliostyle/vivliostyle.js/issues/1383)
 - Prevent "A network error occurred." in console when using web fonts ([5cd0afc](https://github.com/vivliostyle/vivliostyle.js/commit/5cd0afca5d09257a9ab6cb613dfd85ecd38b66c9))
 - **viewer:** Deprecated meta tag "apple-mobile-web-app-capable" ([d1a23a4](https://github.com/vivliostyle/vivliostyle.js/commit/d1a23a4262b6235be44b0ebf49313deedc1402b4))
-- writing-mode on `[@page](https://github.com/page)` not inherited properly to margin boxes ([c5f8eb9](https://github.com/vivliostyle/vivliostyle.js/commit/c5f8eb90cd6dc741c540b9703658da42e4a47969)), closes [#1392](https://github.com/vivliostyle/vivliostyle.js/issues/1392)
+- writing-mode on `@page` not inherited properly to margin boxes ([c5f8eb9](https://github.com/vivliostyle/vivliostyle.js/commit/c5f8eb90cd6dc741c540b9703658da42e4a47969)), closes [#1392](https://github.com/vivliostyle/vivliostyle.js/issues/1392)
 - Wrong processing order of counter-set and counter-increment ([d1ca8cd](https://github.com/vivliostyle/vivliostyle.js/commit/d1ca8cd9645ac3c6a958c278bbb3d05fdf2662fe)), closes [#1390](https://github.com/vivliostyle/vivliostyle.js/issues/1390)
 
 ## [2.30.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.3...v2.30.4) (2024-08-20)
