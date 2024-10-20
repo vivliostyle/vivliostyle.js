@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.4...v2.30.5) (2024-10-20)
+
+### Bug Fixes
+
+- "Failed to parse stylesheet" warning (Firefox and Safari) ([0b57769](https://github.com/vivliostyle/vivliostyle.js/commit/0b57769eba89705611b1cf0a5463fb366cc75a73))
+- CSS counter-increment and counter-reset should be ignored for elements with `display: none` ([5ed23e8](https://github.com/vivliostyle/vivliostyle.js/commit/5ed23e869f98417aafe1593bb34ad6a0afca3520)), closes [#1385](https://github.com/vivliostyle/vivliostyle.js/issues/1385)
+- CSS counter-reset scoping problem ([100c101](https://github.com/vivliostyle/vivliostyle.js/commit/100c101e1a62728e62202aff1a797e2adc9ab729)), closes [#1389](https://github.com/vivliostyle/vivliostyle.js/issues/1389)
+- CSS direction property ignored on margin boxes ([61719eb](https://github.com/vivliostyle/vivliostyle.js/commit/61719eb4b540362ddc80469f32f88a2379752c4f)), closes [#1393](https://github.com/vivliostyle/vivliostyle.js/issues/1393)
+- CSS implicit list-item counter ([56941e5](https://github.com/vivliostyle/vivliostyle.js/commit/56941e5f7706ec68639c711e55a961b168a00115)), closes [#1391](https://github.com/vivliostyle/vivliostyle.js/issues/1391)
+- Float box inside inline element disappeared at page break ([6805ff9](https://github.com/vivliostyle/vivliostyle.js/commit/6805ff992c128f0beadbb1c4f11fcc2d8a3a0660)), closes [#1383](https://github.com/vivliostyle/vivliostyle.js/issues/1383)
+- Prevent "A network error occurred." in console when using web fonts ([5cd0afc](https://github.com/vivliostyle/vivliostyle.js/commit/5cd0afca5d09257a9ab6cb613dfd85ecd38b66c9))
+- writing-mode on `[@page](https://github.com/page)` not inherited properly to margin boxes ([c5f8eb9](https://github.com/vivliostyle/vivliostyle.js/commit/c5f8eb90cd6dc741c540b9703658da42e4a47969)), closes [#1392](https://github.com/vivliostyle/vivliostyle.js/issues/1392)
+- Wrong processing order of counter-set and counter-increment ([d1ca8cd](https://github.com/vivliostyle/vivliostyle.js/commit/d1ca8cd9645ac3c6a958c278bbb3d05fdf2662fe)), closes [#1390](https://github.com/vivliostyle/vivliostyle.js/issues/1390)
+
 ## [2.30.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.3...v2.30.4) (2024-08-20)
 
 ### Bug Fixes

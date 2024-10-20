@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.4...v2.30.5) (2024-10-20)
+
+### Bug Fixes
+
+- **viewer:** Deprecated meta tag "apple-mobile-web-app-capable" ([d1a23a4](https://github.com/vivliostyle/vivliostyle.js/commit/d1a23a4262b6235be44b0ebf49313deedc1402b4))
+
 ## [2.30.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.3...v2.30.4) (2024-08-20)
 
 **Note:** Version bump only for package @vivliostyle/viewer
