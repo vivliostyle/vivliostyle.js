@@ -874,16 +874,17 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
 
   override apply(cascadeInstance: CascadeInstance): void {
     const elem = cascadeInstance.currentElement;
-    if (elem && cascadeInstance.currentLocalName == "a") {
-      const href = elem.getAttribute("href");
-      if (href && href.match(/^#/)) {
-        const id = href.substring(1);
+    if (elem instanceof HTMLAnchorElement) {
+      if (elem.hash && elem.href == elem.baseURI + elem.hash) {
+        const id = elem.hash.substring(1);
         const target = elem.ownerDocument.getElementById(id);
         if (
           target &&
           (!this.targetLocalName || target.localName == this.targetLocalName)
         ) {
-          const epubType = target.getAttributeNS(Base.NS.epub, "type");
+          const epubType =
+            target.getAttributeNS(Base.NS.epub, "type") ||
+            target.getAttribute("epub:type");
           if (epubType && epubType.match(this.epubTypePatt)) {
             this.chained.apply(cascadeInstance);
           }
