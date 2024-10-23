@@ -404,19 +404,19 @@ export class ViewFactory
         } else {
           cont2 = Task.newResult(shadow);
         }
-      });
-      cont2.then((shadow) => {
-        shadow = this.createPseudoelementShadow(
-          element,
-          isRoot,
-          cascStyle,
-          computedStyle,
-          styler,
-          context,
-          shadowContext,
-          shadow,
-        );
-        frame.finish(shadow);
+        cont2.then((shadow) => {
+          shadow = this.createPseudoelementShadow(
+            element,
+            isRoot,
+            cascStyle,
+            computedStyle,
+            styler,
+            context,
+            shadowContext,
+            shadow,
+          );
+          frame.finish(shadow);
+        });
       });
     });
     return frame.result();

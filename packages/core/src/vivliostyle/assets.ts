@@ -1306,22 +1306,26 @@ m|math[display="block"] {
 
 /*------------------ epub-specific ---------------------*/
 
-a[epub|type="noteref"] {
+a[epub|type="noteref"],
+a[epub\\:type="noteref"] {
   font-size: 0.75em;
   vertical-align: super;
   line-height: 0.01;
 }
 
-a[epub|type="noteref"]:href-epub-type(footnote, aside) {
+a[epub|type="noteref"]:href-epub-type(footnote, aside),
+a[epub\\:type="noteref"]:href-epub-type(footnote, aside) {
   -adapt-template: footnote;
   text-decoration: none;
 }
 
-aside[epub|type="footnote"] {
+aside[epub|type="footnote"],
+aside[epub\\:type="footnote"] {
   display: none;
 }
 
-aside[epub|type="footnote"]:footnote-content {
+aside[epub|type="footnote"]:footnote-content,
+aside[epub\\:type="footnote"]:footnote-content {
   display: block;
   margin: 0.25em;
   font-size: 1.2em;
