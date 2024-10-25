@@ -2103,8 +2103,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             range.setStartBefore(node);
             haveStart = true;
+            lastGood = node;
+          } else if (element.localName !== "ruby") {
+            // Fix for issue #1319 and #1401
+            lastGood = node;
           }
-          lastGood = node;
           if (node.contains(end)) {
             endNotReached = false;
           }
