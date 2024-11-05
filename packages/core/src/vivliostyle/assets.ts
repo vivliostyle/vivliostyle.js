@@ -1503,6 +1503,7 @@ viv-ts-thin-sp::after {
   letter-spacing: -0.125em;
   line-height: 0;
   text-orientation: mixed;
+  visibility: hidden;
 }
 
 span[data-viv-leader] {
