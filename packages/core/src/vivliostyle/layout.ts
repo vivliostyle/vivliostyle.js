@@ -3915,6 +3915,8 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
       text.length - viewIndex,
       !nodeContext.breakWord ? resolveHyphenateCharacter(nodeContext) : "",
     );
+    let p = nodeContext.preprocessedTextContent[0][1];
+    nodeContext.preprocessedTextContent[0][1] = p.slice(0, viewIndex + 1) + "\u200d" + p.slice(viewIndex + 1); // insert zero-width joiner
     return viewIndex + 1;
   }
 
