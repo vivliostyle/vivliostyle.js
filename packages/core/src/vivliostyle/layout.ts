@@ -3912,6 +3912,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     // convert trailing soft hyphen to a real hyphen
     const checkJoiningType =
       // /[\p{Joining_Type=D}\p{Joining_Type=C}]\p{Mn}*$/
+      // eslint-disable-next-line no-misleading-character-class
       /[\u0620\u0626\u0628\u062A-\u062E\u0633-\u0647\u0649\u064A\u066E\u066F\u0678-\u0687\u069A-\u06BF\u06C1\u06C2\u06CC\u06CE\u06D0\u06D1\u06FA-\u06FC\u06FF\u0712-\u0714\u071A-\u071D\u071F-\u0727\u0729\u072B\u072D\u072E\u074E-\u0758\u075C-\u076A\u076D-\u0770\u0772\u0775-\u0777\u077A-\u077F\u07CA-\u07EA\u07FA\u0841-\u0845\u0848\u084A-\u0853\u0855\u0860\u0862-\u0865\u0868\u0883-\u0886\u0889-\u088D\u08A0-\u08A9\u08AF\u08B0\u08B3-\u08B8\u08BA-\u08C8\u1807\u180A\u1820-\u1878\u1887-\u18A8\u18AA\u200D\uA840-\uA871\u{10AC0}-\u{10AC4}\u{10AD3}-\u{10AD6}\u{10AD8}-\u{10ADC}\u{10ADE}-\u{10AE0}\u{10AEB}-\u{10AEE}\u{10B80}\u{10B82}\u{10B86}-\u{10B88}\u{10B8A}\u{10B8B}\u{10B8D}\u{10B90}\u{10BAD}\u{10BAE}\u{10D01}-\u{10D21}\u{10D23}\u{10EC3}\u{10EC4}\u{10F30}-\u{10F32}\u{10F34}-\u{10F44}\u{10F51}-\u{10F53}\u{10F70}-\u{10F73}\u{10F76}-\u{10F81}\u{10FB0}\u{10FB2}\u{10FB3}\u{10FB8}\u{10FBB}\u{10FBC}\u{10FBE}\u{10FBF}\u{10FC1}\u{10FC4}\u{10FCA}\u{1E900}-\u{1E943}]\p{Mn}*$/u;
     const zwj = checkJoiningType.test(text.slice(0, viewIndex)) ? "\u200D" : "";
     textNode.replaceData(
