@@ -109,6 +109,12 @@ function buildCss(isDevelopment) {
     )
     .pipe(
       sass({
+        silenceDeprecations: [
+          "global-builtin",
+          "import",
+          "legacy-js-api",
+          "slash-div",
+        ],
         importer: packageImporter({
           extensions: [".scss", ".css"],
         }),
