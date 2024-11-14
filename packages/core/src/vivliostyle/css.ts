@@ -365,7 +365,10 @@ export function getName(name: string): Ident {
 export class Numeric extends Val {
   unit: string;
 
-  constructor(public num: number, unit: string) {
+  constructor(
+    public num: number,
+    unit: string,
+  ) {
     super();
     this.unit = unit?.toLowerCase() ?? ""; // units are case-insensitive in CSS
   }
@@ -533,7 +536,10 @@ export class CommaList extends Val {
 }
 
 export class Func extends Val {
-  constructor(public name: string, public values: Val[]) {
+  constructor(
+    public name: string,
+    public values: Val[],
+  ) {
     super();
   }
 

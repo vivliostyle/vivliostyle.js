@@ -37,7 +37,10 @@ export class Fetcher<T> {
   task: Task.Task = null;
   piggybacks: ((p1: any) => void)[] | null = [];
 
-  constructor(public readonly fetch: () => Task.Result<T>, opt_name?: string) {
+  constructor(
+    public readonly fetch: () => Task.Result<T>,
+    opt_name?: string,
+  ) {
     this.name = opt_name;
   }
 

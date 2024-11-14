@@ -44,8 +44,8 @@ function hangingPunctuationFromPropertyValue(
     value instanceof Css.Val
       ? value
       : typeof value === "string"
-      ? Css.getName(value)
-      : Css.ident.none;
+        ? Css.getName(value)
+        : Css.ident.none;
 
   if (cssval === Css.ident.none) {
     return HANGING_PUNCTUATION_NONE;
@@ -142,8 +142,8 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
     value instanceof Css.Val
       ? value
       : typeof value === "string"
-      ? Css.getName(value)
-      : Css.ident.normal;
+        ? Css.getName(value)
+        : Css.ident.normal;
 
   if (cssval === Css.ident.normal) {
     return SPACING_TRIM_NORMAL;
@@ -228,8 +228,8 @@ function autospaceFromPropertyValue(value: PropertyValue): Autospace {
     value instanceof Css.Val
       ? value
       : typeof value === "string"
-      ? Css.getName(value)
-      : Css.ident.normal;
+        ? Css.getName(value)
+        : Css.ident.normal;
 
   if (cssval === Css.ident.normal || cssval === Css.ident.auto) {
     return AUTOSPACE_NORMAL;

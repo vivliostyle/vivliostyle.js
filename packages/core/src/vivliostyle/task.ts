@@ -401,7 +401,10 @@ export class Task {
   top: Frame<any> | null = null;
   continuation: Continuation<any> | null = null;
 
-  constructor(public scheduler: Scheduler, public name: string) {}
+  constructor(
+    public scheduler: Scheduler,
+    public name: string,
+  ) {}
 
   /**
    * @return task name.
@@ -637,7 +640,11 @@ export class Frame<T> {
   callback: ((p1: any) => void) | null = null;
   handler: ((p1: Frame<any>, p2: Error) => void) | null = null;
 
-  constructor(public task: Task, public parent: Frame<T>, public name: string) {
+  constructor(
+    public task: Task,
+    public parent: Frame<T>,
+    public name: string,
+  ) {
     this.state = FrameState.INIT;
   }
 

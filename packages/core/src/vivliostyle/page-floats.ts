@@ -946,16 +946,16 @@ export class PageFloatLayoutContext
             ? limits.bottom
             : limits.top
           : this.container.rtl
-          ? limits.right
-          : limits.left;
+            ? limits.right
+            : limits.left;
       case "inline-end":
         return this.container.vertical
           ? this.container.rtl
             ? limits.top
             : limits.bottom
           : this.container.rtl
-          ? limits.left
-          : limits.right;
+            ? limits.left
+            : limits.right;
       default:
         throw new Error(`Unknown logical side: ${logicalSide}`);
     }

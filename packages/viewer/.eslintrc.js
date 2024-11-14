@@ -19,7 +19,10 @@ module.exports = {
     "prettier",
   ],
   plugins: ["@typescript-eslint", "import", "prettier"],
-  rules: { "@typescript-eslint/explicit-function-return-type": "off" },
+  rules: {
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+  },
   overrides: [
     {
       files: ["*.ts", "*.tsx"],

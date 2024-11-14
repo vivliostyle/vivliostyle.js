@@ -1120,8 +1120,8 @@ export class Container implements Vtree.Container {
         ? box.bottom
         : box.top
       : this.rtl
-      ? box.right
-      : box.left;
+        ? box.right
+        : box.left;
   }
 
   getEndEdge(box: ClientRect): number {
@@ -1130,8 +1130,8 @@ export class Container implements Vtree.Container {
         ? box.top
         : box.bottom
       : this.rtl
-      ? box.left
-      : box.right;
+        ? box.left
+        : box.right;
   }
 
   getInlineSize(box: ClientRect): number {

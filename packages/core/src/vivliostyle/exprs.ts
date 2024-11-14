@@ -645,7 +645,10 @@ export class Val {
 }
 
 export class Prefix extends Val {
-  constructor(scope: LexicalScope, public val: Val) {
+  constructor(
+    scope: LexicalScope,
+    public val: Val,
+  ) {
     super(scope);
   }
 
@@ -694,7 +697,11 @@ export class Prefix extends Val {
 }
 
 export class Infix extends Val {
-  constructor(scope: LexicalScope, public lhs: Val, public rhs: Val) {
+  constructor(
+    scope: LexicalScope,
+    public lhs: Val,
+    public rhs: Val,
+  ) {
     super(scope);
   }
 
@@ -1048,7 +1055,11 @@ export class Modulo extends Multiplicative {
 export class Numeric extends Val {
   unit: string;
 
-  constructor(scope: LexicalScope, public num: number, unit: string) {
+  constructor(
+    scope: LexicalScope,
+    public num: number,
+    unit: string,
+  ) {
     super(scope);
     this.unit = unit?.toLowerCase() ?? "";
   }
@@ -1068,7 +1079,10 @@ export class Numeric extends Val {
  * @param qualifiedName CSS-escaped name sequence separated by dots.
  */
 export class Named extends Val {
-  constructor(scope: LexicalScope, public qualifiedName: string) {
+  constructor(
+    scope: LexicalScope,
+    public qualifiedName: string,
+  ) {
     super(scope);
   }
 
@@ -1098,7 +1112,11 @@ export class Named extends Val {
  * Named value.
  */
 export class MediaName extends Val {
-  constructor(scope: LexicalScope, public not: boolean, public name: string) {
+  constructor(
+    scope: LexicalScope,
+    public not: boolean,
+    public name: string,
+  ) {
     super(scope);
   }
 
@@ -1302,7 +1320,10 @@ export class Cond extends Val {
 }
 
 export class Const extends Val {
-  constructor(scope: LexicalScope, public val: Result) {
+  constructor(
+    scope: LexicalScope,
+    public val: Result,
+  ) {
     super(scope);
   }
 
@@ -1328,7 +1349,11 @@ export class Const extends Val {
 }
 
 export class MediaTest extends Val {
-  constructor(scope: LexicalScope, public name: MediaName, public value: Val) {
+  constructor(
+    scope: LexicalScope,
+    public name: MediaName,
+    public value: Val,
+  ) {
     super(scope);
   }
 
@@ -1393,7 +1418,10 @@ export class SupportsTest extends Val {
 }
 
 export class Param extends Val {
-  constructor(scope: LexicalScope, public index: number) {
+  constructor(
+    scope: LexicalScope,
+    public index: number,
+  ) {
     super(scope);
   }
 

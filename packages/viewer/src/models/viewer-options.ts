@@ -72,10 +72,10 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
       renderAllPages === "true"
         ? true
         : renderAllPages === "false"
-        ? false
-        : urlParameters.hasParameter("b")
-        ? false
-        : null,
+          ? false
+          : urlParameters.hasParameter("b")
+            ? false
+            : null,
     fontSize,
     profile: urlParameters.getParameter("profile")[0] === "true",
     pageViewMode: PageViewMode.fromSpreadViewString(

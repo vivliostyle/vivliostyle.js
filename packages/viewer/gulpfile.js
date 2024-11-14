@@ -196,8 +196,8 @@ function serve(isDevelopment) {
       process.platform === "darwin"
         ? "google chrome"
         : process.platform === "win32"
-        ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-        : "chromium-browser",
+          ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+          : "chromium-browser",
     server: {
       baseDir: "../",
     },

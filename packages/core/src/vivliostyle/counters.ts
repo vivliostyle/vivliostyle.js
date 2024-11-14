@@ -52,7 +52,10 @@ export class TargetCounterReference {
   spineIndex: number = -1;
   pageIndex: number = -1;
 
-  constructor(public readonly targetId: string, public resolved: boolean) {}
+  constructor(
+    public readonly targetId: string,
+    public resolved: boolean,
+  ) {}
 
   equals(other: TargetCounterReference): boolean {
     if (this === other) {

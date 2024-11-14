@@ -55,7 +55,10 @@ class FindBox {
   intervalID = 0;
   foundRange: Range | null = null;
 
-  constructor(public viewer: Viewer, public navigation: Navigation) {
+  constructor(
+    public viewer: Viewer,
+    public navigation: Navigation,
+  ) {
     this.opened = ko.observable();
     this.text = ko.observable("");
     this.status = ko.observable(FindStatus.Default);
