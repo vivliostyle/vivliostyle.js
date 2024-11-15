@@ -10,7 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: yarn install
-      - run: yarn bootstrap
       - run: yarn build
       - run: yarn lint
       - run: yarn test-sauce

@@ -1476,7 +1476,10 @@ export class Tokenizer {
   curr: number = 0; // ready to read
   position: number = 0;
 
-  constructor(public input: string, public readonly handler: TokenizerHandler) {
+  constructor(
+    public input: string,
+    public readonly handler: TokenizerHandler,
+  ) {
     this.indexMask = INITIAL_INDEX_MASK;
     this.buffer = Array(this.indexMask + 1);
     for (let i = 0; i <= this.indexMask; i++) {

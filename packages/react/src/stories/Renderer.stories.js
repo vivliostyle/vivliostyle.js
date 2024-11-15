@@ -1,11 +1,12 @@
 import React from "react";
 import { action } from "@storybook/addon-actions";
-import { text, boolean, number, color, select } from "@storybook/addon-knobs";
+import { withKnobs, text, boolean, number, color, select } from "@storybook/addon-knobs";
 
 import { Renderer } from "../renderer";
 
 export default {
   title: "Renderer",
+  decorators: [withKnobs],
   component: Renderer,
 };
 

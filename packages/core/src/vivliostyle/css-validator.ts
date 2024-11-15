@@ -84,7 +84,10 @@ export class Node {
 export class Connection {
   what: number = -1;
 
-  constructor(public where: number, public success: boolean) {}
+  constructor(
+    public where: number,
+    public success: boolean,
+  ) {}
 }
 
 /**
@@ -838,7 +841,10 @@ export class CommaListValidator extends ListValidator {
 }
 
 export class FuncValidator extends ListValidator {
-  constructor(public readonly name: string, group: ValidatingGroup) {
+  constructor(
+    public readonly name: string,
+    group: ValidatingGroup,
+  ) {
     super(group);
   }
 
@@ -881,7 +887,10 @@ export class ShorthandSyntaxNode {
 export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
   validator: PropertyValidator;
 
-  constructor(validatorSet: ValidatorSet, public readonly name: string) {
+  constructor(
+    validatorSet: ValidatorSet,
+    public readonly name: string,
+  ) {
     super();
     this.validator = validatorSet.validators[this.name];
   }
@@ -913,7 +922,10 @@ export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
 }
 
 export class ShorthandSyntaxPropertyN extends ShorthandSyntaxProperty {
-  constructor(validatorSet: ValidatorSet, public readonly names: string[]) {
+  constructor(
+    validatorSet: ValidatorSet,
+    public readonly names: string[],
+  ) {
     super(validatorSet, names[0]);
   }
 

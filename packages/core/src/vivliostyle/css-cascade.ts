@@ -832,7 +832,10 @@ export class CheckLocalNameAction extends ChainedAction {
 }
 
 export class CheckNSTagAction extends ChainedAction {
-  constructor(public readonly ns: string, public readonly localName: string) {
+  constructor(
+    public readonly ns: string,
+    public readonly localName: string,
+  ) {
     super();
   }
 
@@ -936,7 +939,10 @@ function checkAttribute(
 }
 
 export class CheckAttributePresentAction extends ChainedAction {
-  constructor(public readonly ns: string, public readonly name: string) {
+  constructor(
+    public readonly ns: string,
+    public readonly name: string,
+  ) {
     super();
   }
 
@@ -995,7 +1001,10 @@ export class CheckAttributeEqAction extends ChainedAction {
 }
 
 export class CheckNamespaceSupportedAction extends ChainedAction {
-  constructor(public readonly ns: string, public readonly name: string) {
+  constructor(
+    public readonly ns: string,
+    public readonly name: string,
+  ) {
     super();
   }
 
@@ -1091,7 +1100,10 @@ export class IsRootAction extends ChainedAction {
 }
 
 export class IsNthAction extends ChainedAction {
-  constructor(public readonly a: number, public readonly b: number) {
+  constructor(
+    public readonly a: number,
+    public readonly b: number,
+  ) {
     super();
   }
 
@@ -3700,8 +3712,8 @@ export class CascadeParserHandler
     this.cascade = parent
       ? parent.cascade
       : uaBaseCascade
-      ? uaBaseCascade.clone()
-      : new Cascade();
+        ? uaBaseCascade.clone()
+        : new Cascade();
     this.state = ParseState.TOP;
   }
 
@@ -4289,8 +4301,8 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
         this.relational()
           ? new MatchesRelationalAction(this.selectorTexts)
           : this.positive()
-          ? new MatchesAction(this.chains)
-          : new MatchesNoneAction(this.chains),
+            ? new MatchesAction(this.chains)
+            : new MatchesNoneAction(this.chains),
       );
       if (this.increasingSpecificity()) {
         this.parent.specificity += this.maxSpecificity;
@@ -4693,8 +4705,8 @@ export const convertToPhysical = <T>(
       ? couplingMapVertRtl
       : couplingMapVert
     : rtl
-    ? couplingMapHorRtl
-    : couplingMapHor;
+      ? couplingMapHorRtl
+      : couplingMapHor;
   for (const propName in src) {
     if (src.hasOwnProperty(propName)) {
       const cascVal = src[propName];

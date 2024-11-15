@@ -37,22 +37,22 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
     srcUrls: srcUrls.length
       ? srcUrls
       : bUrls.length
-      ? bUrls
-      : xUrls.length
-      ? xUrls
-      : null,
+        ? bUrls
+        : xUrls.length
+          ? xUrls
+          : null,
     bookMode:
       bookMode === "true"
         ? true
         : bookMode === "false"
-        ? false
-        : bUrls.length
-        ? true
-        : xUrls.length
-        ? false
-        : srcUrls.length > 1
-        ? false // multiple srcUrls cannot be bookMode
-        : null,
+          ? false
+          : bUrls.length
+            ? true
+            : xUrls.length
+              ? false
+              : srcUrls.length > 1
+                ? false // multiple srcUrls cannot be bookMode
+                : null,
     fragment: fragment || null,
     authorStyleSheet: style.length ? style : [],
     userStyleSheet: userStyle.length ? userStyle : [],

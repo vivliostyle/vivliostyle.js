@@ -31,7 +31,6 @@
 git clone https://github.com/vivliostyle/vivliostyle.js.git
 cd vivliostyle.js
 yarn install
-yarn bootstrap
 ```
 
 ### Build

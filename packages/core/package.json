@@ -9,7 +9,7 @@
     "clean": "shx rm -rf lib/* .cache",
     "dev": "yarn build-dev --watch=forever",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js}}\"",
-    "lint": "eslint src --fix --ext .ts -f codeframe",
+    "lint": "eslint src --fix -f codeframe",
     "test": "yarn --cwd test install && yarn --cwd test test",
     "test-sauce": "yarn --cwd test install && yarn --cwd test test-sauce"
   },
@@ -17,16 +17,21 @@
     "fast-diff": "^1.2.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.9.1",
-    "@typescript-eslint/parser": "^5.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "@typescript-eslint/parser": "^8.14.0",
+    "@eslint/compat": "^1.2.3",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.14.0",
     "esbuild": "^0.24.0",
-    "eslint": "^8.7.0",
-    "eslint-config-prettier": "^8.1.0",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-formatter-codeframe": "^7.32.1",
     "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.12.0",
     "shx": "^0.3.2",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "typescript-eslint": "^8.14.0"
   },
   "source": "src/vivliostyle.ts",
   "types": "lib/vivliostyle.d.ts",

@@ -203,7 +203,10 @@ export class AfterIfContinuesLayoutConstraint
 export class AfterIfContinuesElementsOffset
   implements Selectors.AfterIfContinuesElementsOffset
 {
-  constructor(public nodeContext, public pseudoElementHeight) {}
+  constructor(
+    public nodeContext,
+    public pseudoElementHeight,
+  ) {}
 
   /** @override */
   calculateOffset(nodeContext: Vtree.NodeContext): number {
@@ -480,16 +483,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return this.vertical
       ? this.afterEdge
       : this.rtl
-      ? this.endEdge
-      : this.startEdge;
+        ? this.endEdge
+        : this.startEdge;
   }
 
   getRightEdge(): number {
     return this.vertical
       ? this.beforeEdge
       : this.rtl
-      ? this.startEdge
-      : this.endEdge;
+        ? this.startEdge
+        : this.endEdge;
   }
 
   isFloatNodeContext(nodeContext: Vtree.NodeContext): boolean {
@@ -3357,8 +3360,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           ? columnBBox.bottom
           : columnBBox.top
         : this.rtl
-        ? columnBBox.right
-        : columnBBox.left
+          ? columnBBox.right
+          : columnBBox.left
       : 0;
     this.endEdge = columnBBox
       ? this.vertical
@@ -3366,8 +3369,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           ? columnBBox.top
           : columnBBox.bottom
         : this.rtl
-        ? columnBBox.left
-        : columnBBox.right
+          ? columnBBox.left
+          : columnBBox.right
       : 0;
     this.beforeEdge = columnBBox
       ? this.vertical

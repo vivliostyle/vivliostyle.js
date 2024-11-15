@@ -3,7 +3,6 @@
     "packages/*"
   ],
   "npmClient": "yarn",
-  "useWorkspaces": true,
   "version": "2.30.5",
   "includeMergedTags": true
 }

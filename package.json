@@ -3,7 +3,6 @@
   "description": "Library for HTML+CSS typesetting and rich paged viewing with EPUB/Web publications support",
   "author": "Vivliostyle Foundation",
   "scripts": {
-    "bootstrap": "lerna bootstrap && lerna link",
     "build": "lerna run build",
     "build-dev": "lerna run build-dev",
     "clean": "lerna run clean",
@@ -11,7 +10,7 @@
     "dev:react": "lerna run dev --parallel --ignore @vivliostyle/viewer",
     "format": "lerna run format",
     "lint": "lerna run lint",
-    "now-build": "yarn bootstrap && VIVLIOSTYLE_VERSION=canary yarn build && ./scripts/create-archive.js vivliostyle-canary vivliostyle-viewer-canary.zip",
+    "now-build": "VIVLIOSTYLE_VERSION=canary yarn build && ./scripts/create-archive.js vivliostyle-canary vivliostyle-viewer-canary.zip",
     "ship": "lerna publish from-package",
     "ship:canary": "lerna publish --canary",
     "ship:prerelease": "yarn ship --dist-tag next",
@@ -23,14 +22,14 @@
     "version:prerelease": "lerna version --conventional-commits --conventional-prerelease --preid pre"
   },
   "devDependencies": {
-    "archiver": "^5.0.2",
+    "archiver": "^7.0.1",
     "doctoc": "^2.0.0",
     "github-release-cli": "^2.0.0",
     "husky": "^4.2.3",
-    "lerna": "^4.0.0",
+    "lerna": "^8.1.9",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.0.2",
-    "pretty-quick": "^3.0.2",
+    "prettier": "^3.3.3",
+    "pretty-quick": "^4.0.0",
     "shelljs": "^0.8.4",
     "shx": "^0.3.2"
   },

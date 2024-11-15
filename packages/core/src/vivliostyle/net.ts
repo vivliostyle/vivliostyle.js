@@ -322,37 +322,40 @@ export function loadElement(
   src?: string,
   alt?: string,
 ): TaskUtil.Fetcher<string> {
-  const fetcher = new TaskUtil.Fetcher(() => {
-    const frame: Task.Frame<string> = Task.newFrame("loadElement");
-    const continuation = frame.suspend(elem);
-    let done = false;
-    const handler = (evt: Event) => {
-      if (done) {
-        return;
-      } else {
-        done = true;
+  const fetcher = new TaskUtil.Fetcher(
+    () => {
+      const frame: Task.Frame<string> = Task.newFrame("loadElement");
+      const continuation = frame.suspend(elem);
+      let done = false;
+      const handler = (evt: Event) => {
+        if (done) {
+          return;
+        } else {
+          done = true;
+        }
+        continuation.schedule(evt ? evt.type : "timeout");
+      };
+      elem.addEventListener("load", handler, false);
+      elem.addEventListener("error", handler, false);
+      elem.addEventListener("abort", handler, false);
+      if (elem.namespaceURI == Base.NS.SVG) {
+        if (src) {
+          elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
+        }
+        // SVG handlers are not reliable
+        setTimeout(handler, 300);
+      } else if (elem.localName === "script") {
+        setTimeout(handler, 3000);
+      } else if (src) {
+        (elem as any).src = src;
+        if (alt) {
+          (elem as any).alt = alt;
+        }
       }
-      continuation.schedule(evt ? evt.type : "timeout");
-    };
-    elem.addEventListener("load", handler, false);
-    elem.addEventListener("error", handler, false);
-    elem.addEventListener("abort", handler, false);
-    if (elem.namespaceURI == Base.NS.SVG) {
-      if (src) {
-        elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
-      }
-      // SVG handlers are not reliable
-      setTimeout(handler, 300);
-    } else if (elem.localName === "script") {
-      setTimeout(handler, 3000);
-    } else if (src) {
-      (elem as any).src = src;
-      if (alt) {
-        (elem as any).alt = alt;
-      }
-    }
-    return frame.result();
-  }, `loadElement ${src || elem.localName}`);
+      return frame.result();
+    },
+    `loadElement ${src || elem.localName}`,
+  );
   fetcher.start();
   return fetcher;
 }

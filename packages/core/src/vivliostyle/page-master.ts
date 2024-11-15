@@ -114,7 +114,10 @@ export class RootPageBox extends PageBox<RootPageBoxInstance> {
 }
 
 export class PageMasterScope extends Exprs.LexicalScope {
-  constructor(scope: Exprs.LexicalScope, public pageMaster: PageMaster) {
+  constructor(
+    scope: Exprs.LexicalScope,
+    public pageMaster: PageMaster,
+  ) {
     super(scope, resolver);
     const self = this;
     function resolver(qualifiedName, isFunc) {
@@ -1000,8 +1003,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     let val = this.style[name];
     if (val) {
       let percentRef = /\b(height|top|bottom)\b/.test(name)
-        ? context.pageAreaHeight ?? context.pageHeight()
-        : context.pageAreaWidth ?? context.pageWidth();
+        ? (context.pageAreaHeight ?? context.pageHeight())
+        : (context.pageAreaWidth ?? context.pageWidth());
       val = CssCascade.evaluateCSSToCSS(context, val, name, percentRef);
     }
     return Css.toNumber(val, context);
