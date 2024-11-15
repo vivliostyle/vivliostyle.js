@@ -81,7 +81,7 @@ class SettingsPanel {
         }
         try {
           window.localStorage.setItem("i18nextLng", value);
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
       },

@@ -545,8 +545,7 @@ class Navigation {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onfocusPageNumber = (obj: unknown, event: Event): boolean => {
+  onfocusPageNumber = (_obj: unknown, event: Event): boolean => {
     const inputElem = event.currentTarget as HTMLInputElement;
     window.setTimeout(() => {
       inputElem.setSelectionRange(0, inputElem.value.length);
@@ -554,8 +553,7 @@ class Navigation {
     return true;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onmouseupPageSlider = (obj: unknown, event: MouseEvent): boolean => {
+  onmouseupPageSlider = (_obj: unknown, _event: MouseEvent): boolean => {
     if (this.viewerOptions.renderAllPages()) {
       // already moved in `this.pageSlider.write()`
       return true;
@@ -570,8 +568,7 @@ class Navigation {
     return true;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onwheelPageSlider = (obj: unknown, event: WheelEvent): boolean => {
+  onwheelPageSlider = (_obj: unknown, event: WheelEvent): boolean => {
     event.preventDefault();
     if (
       this.justPageMovedByWheel ||
@@ -622,8 +619,7 @@ class Navigation {
     return this.onwheelPageSlider(obj, event);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onclickViewport = (obj: unknown, event: MouseEvent): boolean => {
+  onclickViewport = (_obj: unknown, _event: MouseEvent): boolean => {
     this.pageNumber();
     if (this.settingsPanel.justClicked) {
       return true;
