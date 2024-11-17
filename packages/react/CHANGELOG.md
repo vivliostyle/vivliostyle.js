@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.5...v2.30.6) (2024-11-17)
+
+### Bug Fixes
+
+- error in react/storybook ([7e947f9](https://github.com/vivliostyle/vivliostyle.js/commit/7e947f9b00a554c1d2b209ddd5077f047e2d2523)), closes [#1419](https://github.com/vivliostyle/vivliostyle.js/issues/1419)
+
 ## [2.30.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.4...v2.30.5) (2024-10-20)
 
 **Note:** Version bump only for package @vivliostyle/react

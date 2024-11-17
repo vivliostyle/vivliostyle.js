@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.5...v2.30.6) (2024-11-17)
+
+### Bug Fixes
+
+- Broken text layout at page break when ruby-text font size is larger than usual ([2bb4d0e](https://github.com/vivliostyle/vivliostyle.js/commit/2bb4d0e2343734421f5082849e692d17846b4eee)), closes [#1401](https://github.com/vivliostyle/vivliostyle.js/issues/1401)
+- Broken text layout at page/column break caused by inline SVG ([ecb01ef](https://github.com/vivliostyle/vivliostyle.js/commit/ecb01efed0e75499b3c6dd2e6abae6be46e96ab6)), closes [#1406](https://github.com/vivliostyle/vivliostyle.js/issues/1406)
+- error in react/storybook ([7e947f9](https://github.com/vivliostyle/vivliostyle.js/commit/7e947f9b00a554c1d2b209ddd5077f047e2d2523)), closes [#1419](https://github.com/vivliostyle/vivliostyle.js/issues/1419)
+- Improve epub:noteref/footnote support ([6c894e7](https://github.com/vivliostyle/vivliostyle.js/commit/6c894e75b27c19578e0ccd03d591ba93c0629fe9)), closes [sample.xhtml#fn1](https://github.com/sample.xhtml/issues/fn1)
+- Make Arabic letters look connected before and after break at soft hyphen ([03bc5ea](https://github.com/vivliostyle/vivliostyle.js/commit/03bc5ea3c5467b27de7ca0a76721ae845415e308)), closes [#1414](https://github.com/vivliostyle/vivliostyle.js/issues/1414)
+- text-autospace should not put space glyph in PDF ([bc3346f](https://github.com/vivliostyle/vivliostyle.js/commit/bc3346fd49f9b73ff760aa096c8bd88f04e78477)), closes [#1411](https://github.com/vivliostyle/vivliostyle.js/issues/1411)
+
 ## [2.30.5](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.4...v2.30.5) (2024-10-20)
 
 ### Bug Fixes
