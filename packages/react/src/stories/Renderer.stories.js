@@ -1,6 +1,13 @@
 import React from "react";
 import { action } from "@storybook/addon-actions";
-import { withKnobs, text, boolean, number, color, select } from "@storybook/addon-knobs";
+import {
+  withKnobs,
+  text,
+  boolean,
+  number,
+  color,
+  select,
+} from "@storybook/addon-knobs";
 
 import { Renderer } from "../renderer";
 
@@ -87,7 +94,7 @@ export const Narrowed = () => (
         onLoad={action("loaded")}
         onError={action("error")}
         onNavigation={action("navigation")}
-        onMessage={(msg, type) => action("message")(type, msg.messages[0])}
+        onMessage={(msg, type) => action("message")(type, msg)}
         onReadyStateChange={action("readyStateChange")}
         onHyperlink={action("hyperlink")}
       />

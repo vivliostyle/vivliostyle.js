@@ -6,7 +6,7 @@ module.exports = {
     "@storybook/addon-actions",
     "@storybook/addon-links",
     "@storybook/addon-knobs",
-    "@storybook/addon-docs",
+    // "@storybook/addon-docs",
   ],
 
   framework: {
@@ -14,7 +14,7 @@ module.exports = {
     options: {},
   },
 
-  docs: {
-    autodocs: true,
-  },
+  // docs: {
+  //   autodocs: true,
+  // },
 };

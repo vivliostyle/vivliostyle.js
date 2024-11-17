@@ -5,7 +5,7 @@
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "tsc --emitDeclarationOnly && esbuild src/vivliostyle.ts --bundle --outfile=lib/vivliostyle.js --format=cjs --define:VIVLIOSTYLE_DEBUG=false --minify --sourcemap --target=es2018",
-    "build-dev": "esbuild src/vivliostyle.ts --bundle --outfile=lib/vivliostyle.js --format=cjs --define:VIVLIOSTYLE_DEBUG=true --sourcemap --target=es2018",
+    "build-dev": "tsc --emitDeclarationOnly && esbuild src/vivliostyle.ts --bundle --outfile=lib/vivliostyle.js --format=cjs --define:VIVLIOSTYLE_DEBUG=true --sourcemap --target=es2018",
     "clean": "shx rm -rf lib/* .cache",
     "dev": "yarn build-dev --watch=forever",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js}}\"",
