@@ -159,9 +159,10 @@ export function removeFollowingSiblings(
     prevSibling = lastChild.previousSibling;
     if (
       lastChild.nodeType === 1 &&
-      (lastChild as Element).hasAttribute("data-vivliostyle-float-box")
+      (lastChild as Element).hasAttribute("data-vivliostyle-float-box-moved") &&
+      (viewNode as HTMLElement).style?.display === "inline"
     ) {
-      // Do not remove float box (Issue #1383)
+      // Do not remove float box moved after parent inline (Issue #1383, #1422)
       continue;
     }
     parentNode.removeChild(lastChild);
