@@ -1060,7 +1060,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext.vertical,
       nodeContext.direction,
     );
-    element.setAttribute("data-vivliostyle-float-box", "true");
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
     Base.setCSSProperty(element, "vertical-align", "top");
@@ -1119,9 +1118,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // relative', the absolute positioning of the float gets broken, since
         // the inline parent can be pushed horizontally by exclusion floats
         // after the layout of the float is done.
-        if (!nodeContext.firstPseudo) {
+        if (parent !== nodeContext.parent && !nodeContext.firstPseudo) {
           // Unless float is specified on ::first-letter (Fix for issue #923)
-          parent.viewNode.appendChild(nodeContext.viewNode);
+          parent.viewNode.appendChild(element);
+
+          // Mark the moved float box so that it is not removed wrongly
+          // when page breaking occurs inside the inline parent.
+          // (Issue #1383, #1422)
+          element.setAttribute("data-vivliostyle-float-box-moved", "true");
         }
       }
 
