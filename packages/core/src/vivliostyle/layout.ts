@@ -2008,6 +2008,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ): Vtree.NodeContext {
     const position = this.findEndOfLine(edgePosition, checkPoints, true);
     let nodeContext = position.nodeContext;
+
+    if (position.checkPointIndex === 0 && position.index === nodeContext.boxOffset) {
+      // Prevent wrong break at beginning of paragraph (Issue #1401, #1406)
+      return null;
+    }
+
     const viewNode = nodeContext.viewNode;
     if (
       viewNode.nodeType != 1 &&
