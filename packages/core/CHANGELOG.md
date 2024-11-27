@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.7](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.6...v2.30.7) (2024-11-27)
+
+### Bug Fixes
+
+- Float box may appear twice at page break (Regression in v2.30.5) ([4d7caa5](https://github.com/vivliostyle/vivliostyle.js/commit/4d7caa5b6fe783e7fe58a391b7d5df9d81344e96)), closes [#1422](https://github.com/vivliostyle/vivliostyle.js/issues/1422)
+- prevent breaking inside SVG ([f58e457](https://github.com/vivliostyle/vivliostyle.js/commit/f58e4570d666300e03c6627408b327ed1929e5d8)), closes [#1406](https://github.com/vivliostyle/vivliostyle.js/issues/1406)
+- prevent wrong break at beginning of paragraph ([3cfca03](https://github.com/vivliostyle/vivliostyle.js/commit/3cfca030b428d74f984621942b9177ad4c8ee1cc)), closes [#1401](https://github.com/vivliostyle/vivliostyle.js/issues/1401)
+
 ## [2.30.6](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.5...v2.30.6) (2024-11-17)
 
 ### Bug Fixes
