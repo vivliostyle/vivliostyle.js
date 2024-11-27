@@ -633,7 +633,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
     frame
       .loopWithFrame((bodyFrame) => {
-        if (position.viewNode && !LayoutHelper.isSpecialNodeContext(position)) {
+        if (
+          position.viewNode &&
+          !LayoutHelper.isSpecialNodeContext(position) &&
+          // Prevent breaking inside SVG etc. (Issue #1406)
+          position.viewNode.parentElement?.namespaceURI === Base.NS.XHTML
+        ) {
           checkPoints.push(position.copy());
         }
         this.maybePeelOff(position, 0).then((position1Param) => {
@@ -2009,7 +2014,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const position = this.findEndOfLine(edgePosition, checkPoints, true);
     let nodeContext = position.nodeContext;
 
-    if (position.checkPointIndex === 0 && position.index === nodeContext.boxOffset) {
+    if (
+      position.checkPointIndex === 0 &&
+      position.index === nodeContext.boxOffset
+    ) {
       // Prevent wrong break at beginning of paragraph (Issue #1401, #1406)
       return null;
     }
