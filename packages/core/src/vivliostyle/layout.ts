@@ -2125,7 +2125,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             range.setStartBefore(node);
             haveStart = true;
             lastGood = node;
-          } else if (element.localName !== "ruby") {
+          } else if (!/^r(uby|tc?)$/.test(element.localName)) {
             // Fix for issue #1319 and #1401
             lastGood = node;
           }
