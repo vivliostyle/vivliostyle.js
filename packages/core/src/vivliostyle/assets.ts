@@ -518,7 +518,7 @@ ruby-align = start | center | space-between | space-around;
 ruby-position = over | under | inter-character;
 
 /* CSS Size Adjust */
-[moz]text-size-adjust = auto | none | POS_PERCENTAGE;
+[moz,webkit]text-size-adjust = auto | none | POS_PERCENTAGE;
 
 /* CSS Text */
 [webkit]line-break = auto | loose | normal | strict | anywhere;
@@ -550,7 +550,7 @@ hanging-punctuation = none | [ first || [ force-end | allow-end ] || last ];
 [webkit]backface-visibility = visible | hidden;
 
 /* CSS UI */
-box-sizing = content-box | padding-box | border-box;
+[moz,webkit]box-sizing = content-box | padding-box | border-box;
 text-overflow = [clip | ellipsis | STRING]{1,2};
 
 /* CSS Writing Modes */
