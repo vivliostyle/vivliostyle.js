@@ -384,17 +384,28 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   return null;
 }
 
+/**
+ * Using `elem.style.setProperty("prop", ...)` / `elem.style["prop"] = ...` / `elem.style.prop = ...`
+ * causes fractional precision issues in `rgb()` values (Issue #1432)
+ */
+function appendStyleString(elem: Element, prop: string, value: string) {
+  const existingStyle = (elem.getAttribute("style") || "").replace(/;\s*$/, "");
+  elem.setAttribute(
+    "style",
+    `${existingStyle === "" ? "" : `${existingStyle}; `}${prop}: ${value};`,
+  );
+}
+
 export function setCSSProperty(
   elem: Element,
   prop: string,
   value: string,
 ): void {
-  const elemStyle = (elem as HTMLElement)?.style;
-  if (!elemStyle) {
+  if (!elem) {
     return;
   }
   if (prop.startsWith("--")) {
-    elemStyle.setProperty(prop, value || " ");
+    appendStyleString(elem, prop, value || " ");
     return;
   }
   const prefixedPropertyNames = getPrefixedPropertyNames(prop);
@@ -414,12 +425,12 @@ export function setCSSProperty(
         switch (value) {
           case "all":
             // workaround for Chrome 93 bug https://crbug.com/1242755
-            elemStyle.setProperty("text-indent", "0");
+            appendStyleString(elem, "text-indent", "0");
             break;
         }
         break;
     }
-    elemStyle.setProperty(prefixed, value);
+    appendStyleString(elem, prefixed, value);
   }
 }
 
