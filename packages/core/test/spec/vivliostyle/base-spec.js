@@ -71,4 +71,22 @@ describe("base", function () {
       ).toBe("abc-_:%/\\");
     });
   });
+
+  describe("setCSSProperty", function () {
+    it("sets a simple CSS property with integer values", function () {
+      const elem = document.createElement("p");
+      module.setCSSProperty(elem, "color", "rgb(0 1 2)");
+      expect(elem.getAttribute("style")).toMatch(
+        /^[\s;]*color\s*:\s*rgb\s*\(\s*0\s*,?\s*1\s*,?\s*2\s*\)[\s;]*$/,
+      );
+    });
+
+    it("sets a CSS property with fractional values while maintaining precision", function () {
+      const elem = document.createElement("p");
+      module.setCSSProperty(elem, "color", "rgb(0 0.1 0.2)");
+      expect(elem.getAttribute("style")).toMatch(
+        /^[\s;]*color\s*:\s*rgb\s*\(\s*0\s*,?\s*0.1\s*,?\s*0.2\s*\)[\s;]*$/,
+      );
+    });
+  });
 });
