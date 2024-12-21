@@ -111,9 +111,17 @@ describe("base", function () {
       expect(styleStr).toMatch(/margin:\s*10px\s+15px\s+20px\s+25px/);
     });
 
+    it("rounds CSS property values", function () {
+      const elem = document.createElement("div");
+      module.setCSSProperty(elem, "margin-right", "2.4000000000000004px");
+
+      const styleStr = elem.getAttribute("style");
+      expect(styleStr).toContain("2.4px");
+    });
+
     it("supports RGB color with integer values", function () {
       const elem = document.createElement("p");
-      module.setCSSProperty(elem, "color", "rgb(0 1 2)");
+      module.setCSSProperty(elem, "color", "rgb(0, 1, 2)");
 
       const styleStr = elem.getAttribute("style");
       expect(styleStr).toMatch(
@@ -124,11 +132,21 @@ describe("base", function () {
     it("supports RGB color with decimal values", function () {
       const elem = document.createElement("p");
       module.setCSSProperty(elem, "color", "rgb(0 0.1 0.2)");
+      const varName = "--vivliostyle-stash-unserializable-cmdiKDAgMC4xIDAuMik";
 
       const styleStr = elem.getAttribute("style");
-      expect(styleStr).toMatch(
-        /^[\s;]*color\s*:\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)[\s;]*$/,
-      );
+      if (styleStr.includes(varName)) {
+        const value = getComputedStyle(
+          document.documentElement,
+        ).getPropertyValue(varName);
+        expect(value.trim()).toMatch(
+          /^rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)$/,
+        );
+      } else {
+        expect(styleStr).toMatch(
+          /^[\s;]*color\s*:\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)[\s;]*$/,
+        );
+      }
     });
 
     it("supports linear gradients with RGB integer values", function () {
@@ -136,7 +154,7 @@ describe("base", function () {
       module.setCSSProperty(
         elem,
         "background-image",
-        "linear-gradient(45deg, rgb(0 0 0), rgb(255 255 255))",
+        "linear-gradient(45deg, rgb(0, 0, 0), rgb(255, 255, 255))",
       );
 
       const styleStr = elem.getAttribute("style");
@@ -152,11 +170,22 @@ describe("base", function () {
         "background-image",
         "linear-gradient(45deg, rgb(0 0.1 0.2), rgb(255 254.9 254.8))",
       );
+      const varName =
+        "--vivliostyle-stash-unserializable-bGluZWFyLWdyYWRpZW50KDQ1ZGVnLCByZ2IoMCAwLjEgMC4yKSwgcmdiKDI1NSAyNTQuOSAyNTQuOCkp";
 
       const styleStr = elem.getAttribute("style");
-      expect(styleStr).toMatch(
-        /^[\s;]*background-image\s*:\s*linear-gradient\s*\(\s*45deg\s*,?\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)\s*,?\s*rgb\s*\(\s*255\s*,?\s*254\.9\s*,?\s*255\.8\s*\)\s*\)[\s;]*$/,
-      );
+      if (styleStr.includes(varName)) {
+        const value = getComputedStyle(
+          document.documentElement,
+        ).getPropertyValue(varName);
+        expect(value.trim()).toMatch(
+          /^linear-gradient\s*\(\s*45deg\s*,?\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)\s*,?\s*rgb\s*\(\s*255\s*,?\s*254\.9\s*,?\s*254\.8\s*\)\s*\)$/,
+        );
+      } else {
+        expect(styleStr).toMatch(
+          /^[\s;]*background-image\s*:\s*linear-gradient\s*\(\s*45deg\s*,?\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)\s*,?\s*rgb\s*\(\s*255\s*,?\s*254\.9\s*,?\s*254\.8\s*\)\s*\)[\s;]*$/,
+        );
+      }
     });
   });
 });

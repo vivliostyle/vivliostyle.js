@@ -384,17 +384,152 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   return null;
 }
 
+function removeMatchingSuffix(a: string, b: string) {
+  let i = 0;
+  while (
+    i < a.length &&
+    i < b.length &&
+    a[a.length - 1 - i] === b[b.length - 1 - i] &&
+    Number.isNaN(parseInt(a[a.length - 1 - i]))
+  ) {
+    i++;
+  }
+  return [a.slice(0, a.length - i), b.slice(0, b.length - i)];
+}
+
+function getDecimalPlace(num: number) {
+  const numStr = num.toString().toLowerCase();
+  if (numStr.includes("e")) {
+    const [base, exponent] = numStr.split("e").map(parseFloat);
+    const decimalPartLength = (base.toString().split(".")[1] || "").length;
+    return Math.max(0, decimalPartLength - exponent);
+  } else {
+    const decimalPart = numStr.split(".")[1] || "";
+    return decimalPart.length;
+  }
+}
+
+function areRoundedEqual(a: string, b: string) {
+  const [aTrimmed, bTrimmed] = removeMatchingSuffix(a, b);
+  let aNum = NaN;
+  let bNum = NaN;
+  try {
+    aNum = parseFloat(aTrimmed);
+    bNum = parseFloat(bTrimmed);
+  } catch {
+    return false;
+  }
+  if (Number.isNaN(aNum) || Number.isNaN(bNum)) {
+    return false;
+  }
+  const decimalPlace = Math.min(getDecimalPlace(aNum), getDecimalPlace(bNum));
+  const multiplier = Math.pow(10, decimalPlace);
+  return Math.round(aNum * multiplier) === Math.round(bNum * multiplier);
+}
+
+function checkSerializationSafeness(
+  elem: HTMLElement,
+  prop: string,
+  value: string,
+) {
+  const temp = elem.ownerDocument.createElement(elem.tagName);
+  temp.style.setProperty(prop, value);
+  const actual = temp.style.getPropertyValue(prop);
+  return actual === value || areRoundedEqual(actual, value);
+}
+
+const UNSERIALIZABLE = "vivliostyle-stash-unserializable";
+
+function parseUnserializableValuesStore(content: string) {
+  const lines = content.split("\n");
+  const ret: Record<string, string> = {};
+  for (let i = 1; i < lines.length - 1; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      continue;
+    }
+    const match = line.match(new RegExp(`^--${UNSERIALIZABLE}-(.+?):(.*);$`));
+    if (match) {
+      const [_, id, value] = match;
+      ret[id] = value.trim();
+    }
+  }
+  return ret;
+}
+
+function readUnserializableValuesStore(ownerDocument: Document) {
+  const elem = ownerDocument.getElementById(UNSERIALIZABLE);
+  return elem ? parseUnserializableValuesStore(elem.textContent) : {};
+}
+
+function writeUnserializableValuesStore(
+  ownerDocument: Document,
+  store: Record<string, string>,
+) {
+  const lines: string[] = [":root {"];
+  for (const [id, value] of Object.entries(store)) {
+    lines.push(`--${UNSERIALIZABLE}-${id}:${value};`);
+  }
+  lines.push("}");
+  const content = lines.join("\n");
+
+  let elem = ownerDocument.getElementById(UNSERIALIZABLE);
+  if (!elem) {
+    elem = ownerDocument.createElement("style");
+    elem.id = UNSERIALIZABLE;
+    ownerDocument.head.appendChild(elem);
+  }
+  elem.textContent = content;
+}
+
+function toSafeBase64(str: string) {
+  const bytes = new TextEncoder().encode(str);
+  const bytesStr = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join(
+    "",
+  );
+  return btoa(bytesStr)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
+
+/**
+ * Wrapper function for `elem.style.setProperty( ... )`
+ *
+ * In certain cases, calling `elem.style.setProperty(prop, value); elem.style.getPropertyValue(prop) === value`
+ * may not work as expected. This is especially true for `rgb()` with floating-point numbers (Issue #1432).
+ */
+function setProperty(elem: HTMLElement, prop: string, value: string) {
+  const safeness = checkSerializationSafeness(elem, prop, value);
+  if (safeness) {
+    elem.style.setProperty(prop, value);
+  } else {
+    const store = readUnserializableValuesStore(elem.ownerDocument);
+    const id = toSafeBase64(value);
+    if (!store.hasOwnProperty(id)) {
+      store[id] = value;
+    }
+    elem.style.setProperty(prop, `var(--${UNSERIALIZABLE}-${id})`);
+    writeUnserializableValuesStore(elem.ownerDocument, store);
+
+    Logging.logger.debug(
+      `"${prop}: ${value}" is unserializable. Switched to "var(--${UNSERIALIZABLE}-${id})".`,
+    );
+  }
+}
+
 export function setCSSProperty(
   elem: Element,
   prop: string,
   value: string,
 ): void {
-  const elemStyle = (elem as HTMLElement)?.style;
+  const htmlElem = elem as HTMLElement;
+  const elemStyle = htmlElem?.style;
   if (!elemStyle) {
     return;
   }
   if (prop.startsWith("--")) {
-    elemStyle.setProperty(prop, value || " ");
+    setProperty(htmlElem, prop, value || " ");
     return;
   }
   const prefixedPropertyNames = getPrefixedPropertyNames(prop);
@@ -414,12 +549,12 @@ export function setCSSProperty(
         switch (value) {
           case "all":
             // workaround for Chrome 93 bug https://crbug.com/1242755
-            elemStyle.setProperty("text-indent", "0");
+            setProperty(htmlElem, "text-indent", "0");
             break;
         }
         break;
     }
-    elemStyle.setProperty(prefixed, value);
+    setProperty(htmlElem, prefixed, value);
   }
 }
 
