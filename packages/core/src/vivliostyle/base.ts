@@ -494,14 +494,17 @@ function checkSerializationSafeness(
   return [
     serialized,
     serialized === value ||
+      // `currentColor` keyword is normalized to `currentcolor`
+      (serialized === "currentcolor" && value === "currentColor") ||
       // For reasonable rounding, leave it to be done
       areRoundedEqual(serialized, value) ||
       // For RGB representations that show the same color, allow conversions
-      areSameRGBColor(serialized, value),
+      areSameRGBColor(serialized, value) ||
+      // Allow whitespaces to be added after a comma as a result of normalization
+      JSON.stringify(serialized.split(/,\s*/)) ===
+        JSON.stringify(value.split(/,\s*/)),
   ];
 }
-
-const UNSERIALIZABLE = "vivliostyle-stash-unserializable";
 
 function toSafeBase64(str: string) {
   const bytes = new TextEncoder().encode(str);
@@ -513,6 +516,8 @@ function toSafeBase64(str: string) {
     .replace(/\//g, "_")
     .replace(/=/g, "");
 }
+
+const UNSERIALIZABLE = "vivliostyle-stash-unserializable";
 
 /**
  * Wrapper function for `elem.style.setProperty( ... )`
