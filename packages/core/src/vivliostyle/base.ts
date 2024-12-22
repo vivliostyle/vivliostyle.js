@@ -390,7 +390,7 @@ function removeMatchingSuffix(a: string, b: string) {
     i < a.length &&
     i < b.length &&
     a[a.length - 1 - i] === b[b.length - 1 - i] &&
-    Number.isNaN(parseInt(a[a.length - 1 - i]))
+    Number.isNaN(parseInt(a[a.length - 1 - i], 10))
   ) {
     i++;
   }
