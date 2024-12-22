@@ -119,7 +119,17 @@ describe("base", function () {
       expect(styleStr).toContain("2.4px");
     });
 
-    it("supports RGB color with integer values", function () {
+    it("serializes hex to rgb() format", function () {
+      const elem = document.createElement("p");
+      module.setCSSProperty(elem, "color", "#ff0000");
+
+      const styleStr = elem.getAttribute("style");
+      expect(styleStr).toMatch(
+        /^[\s;]*color\s*:\s*rgb\s*\(\s*255\s*,?\s*0\s*,?\s*0\s*\)[\s;]*$/,
+      );
+    });
+
+    it("supports rgb() with integer values", function () {
       const elem = document.createElement("p");
       module.setCSSProperty(elem, "color", "rgb(0, 1, 2)");
 
@@ -129,7 +139,7 @@ describe("base", function () {
       );
     });
 
-    it("supports RGB color with decimal values", function () {
+    it("supports rgb() with decimal values", function () {
       const elem = document.createElement("p");
       module.setCSSProperty(elem, "color", "rgb(0 0.1 0.2)");
       const varName = "--vivliostyle-stash-unserializable-cmdiKDAgMC4xIDAuMik";
@@ -149,7 +159,7 @@ describe("base", function () {
       }
     });
 
-    it("supports linear gradients with RGB integer values", function () {
+    it("supports linear gradients with rgb() integer values", function () {
       const elem = document.createElement("div");
       module.setCSSProperty(
         elem,
@@ -163,7 +173,7 @@ describe("base", function () {
       );
     });
 
-    it("supports linear gradients with RGB decimal values", function () {
+    it("supports linear gradients with rgb() decimal values", function () {
       const elem = document.createElement("div");
       module.setCSSProperty(
         elem,

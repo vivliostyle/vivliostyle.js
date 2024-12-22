@@ -384,32 +384,32 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   return null;
 }
 
-function removeMatchingSuffix(a: string, b: string) {
-  let i = 0;
-  while (
-    i < a.length &&
-    i < b.length &&
-    a[a.length - 1 - i] === b[b.length - 1 - i] &&
-    Number.isNaN(parseInt(a[a.length - 1 - i], 10))
-  ) {
-    i++;
-  }
-  return [a.slice(0, a.length - i), b.slice(0, b.length - i)];
-}
-
-function getDecimalPlace(num: number) {
-  const numStr = num.toString().toLowerCase();
-  if (numStr.includes("e")) {
-    const [base, exponent] = numStr.split("e").map(parseFloat);
-    const decimalPartLength = (base.toString().split(".")[1] || "").length;
-    return Math.max(0, decimalPartLength - exponent);
-  } else {
-    const decimalPart = numStr.split(".")[1] || "";
-    return decimalPart.length;
-  }
-}
-
 function areRoundedEqual(a: string, b: string) {
+  const removeMatchingSuffix = (a: string, b: string) => {
+    let i = 0;
+    while (
+      i < a.length &&
+      i < b.length &&
+      a[a.length - 1 - i] === b[b.length - 1 - i] &&
+      Number.isNaN(parseInt(a[a.length - 1 - i], 10))
+    ) {
+      i++;
+    }
+    return [a.slice(0, a.length - i), b.slice(0, b.length - i)];
+  };
+
+  const getDecimalPlace = (num: number) => {
+    const numStr = num.toString().toLowerCase();
+    if (numStr.includes("e")) {
+      const [base, exponent] = numStr.split("e").map(parseFloat);
+      const decimalPartLength = (base.toString().split(".")[1] || "").length;
+      return Math.max(0, decimalPartLength - exponent);
+    } else {
+      const decimalPart = numStr.split(".")[1] || "";
+      return decimalPart.length;
+    }
+  };
+
   const [aTrimmed, bTrimmed] = removeMatchingSuffix(a, b);
   let aNum = NaN;
   let bNum = NaN;
@@ -427,6 +427,62 @@ function areRoundedEqual(a: string, b: string) {
   return Math.round(aNum * multiplier) === Math.round(bNum * multiplier);
 }
 
+function areSameRGBColor(a: string, b: string): boolean {
+  const parseHex = (input: string): [number, number, number] => {
+    if (input[0] !== "#" || (input.length !== 4 && input.length !== 7)) {
+      throw new Error("Invalid hex format.");
+    }
+    if (input.length === 4) {
+      input =
+        "#" + input[1] + input[1] + input[2] + input[2] + input[3] + input[3];
+    }
+    return [
+      parseInt(input.slice(1, 3), 16),
+      parseInt(input.slice(3, 5), 16),
+      parseInt(input.slice(5, 7), 16),
+    ];
+  };
+
+  const parseRGBFunc = (input: string): [number, number, number] => {
+    const matches = input.match(
+      /rgb\s*\(\s*(\d+)\s*(?:,\s*|\s+)(\d+)\s*(?:,\s*|\s+)(\d+)\s*\)/,
+    );
+    if (!matches) {
+      throw new Error("Invalid rgb() format.");
+    }
+    return [
+      parseInt(matches[1], 10),
+      parseInt(matches[2], 10),
+      parseInt(matches[3], 10),
+    ];
+  };
+
+  const getRGB = (input: string): [number, number, number] => {
+    try {
+      return parseHex(input);
+    } catch {
+      try {
+        return parseRGBFunc(input);
+      } catch {
+        throw new Error("Input is neither valid hex nor rgb() format.");
+      }
+    }
+  };
+
+  try {
+    const rgb1 = getRGB(a);
+    const rgb2 = getRGB(b);
+    return (
+      ![rgb1, rgb2].some((rgb) => rgb.some((c) => Number.isNaN(c))) &&
+      rgb1[0] === rgb2[0] &&
+      rgb1[1] === rgb2[1] &&
+      rgb1[2] === rgb2[2]
+    );
+  } catch {
+    return false;
+  }
+}
+
 function checkSerializationSafeness(
   elem: HTMLElement,
   prop: string,
@@ -434,8 +490,15 @@ function checkSerializationSafeness(
 ) {
   const temp = elem.ownerDocument.createElement(elem.tagName);
   temp.style.setProperty(prop, value);
-  const actual = temp.style.getPropertyValue(prop);
-  return actual === value || areRoundedEqual(actual, value);
+  const serialized = temp.style.getPropertyValue(prop);
+  return [
+    serialized,
+    serialized === value ||
+      // For reasonable rounding, leave it to be done
+      areRoundedEqual(serialized, value) ||
+      // For RGB representations that show the same color, allow conversions
+      areSameRGBColor(serialized, value),
+  ];
 }
 
 const UNSERIALIZABLE = "vivliostyle-stash-unserializable";
@@ -500,7 +563,7 @@ function toSafeBase64(str: string) {
  * may not work as expected. This is especially true for `rgb()` with floating-point numbers (Issue #1432).
  */
 function setProperty(elem: HTMLElement, prop: string, value: string) {
-  const safeness = checkSerializationSafeness(elem, prop, value);
+  const [serialized, safeness] = checkSerializationSafeness(elem, prop, value);
   if (safeness) {
     elem.style.setProperty(prop, value);
   } else {
@@ -513,7 +576,7 @@ function setProperty(elem: HTMLElement, prop: string, value: string) {
     writeUnserializableValuesStore(elem.ownerDocument, store);
 
     Logging.logger.debug(
-      `"${prop}: ${value}" is unserializable. Switched to "var(--${UNSERIALIZABLE}-${id})".`,
+      `"${prop}: ${value}" is unserializable ("${serialized}"). Switched to "var(--${UNSERIALIZABLE}-${id})".`,
     );
   }
 }
