@@ -503,48 +503,6 @@ function checkSerializationSafeness(
 
 const UNSERIALIZABLE = "vivliostyle-stash-unserializable";
 
-function parseUnserializableValuesStore(content: string) {
-  const lines = content.split("\n");
-  const ret: Record<string, string> = {};
-  for (let i = 1; i < lines.length - 1; i++) {
-    const line = lines[i].trim();
-    if (!line) {
-      continue;
-    }
-    const match = line.match(new RegExp(`^--${UNSERIALIZABLE}-(.+?):(.*);$`));
-    if (match) {
-      const [_, id, value] = match;
-      ret[id] = value.trim();
-    }
-  }
-  return ret;
-}
-
-function readUnserializableValuesStore(ownerDocument: Document) {
-  const elem = ownerDocument.getElementById(UNSERIALIZABLE);
-  return elem ? parseUnserializableValuesStore(elem.textContent) : {};
-}
-
-function writeUnserializableValuesStore(
-  ownerDocument: Document,
-  store: Record<string, string>,
-) {
-  const lines: string[] = [":root {"];
-  for (const [id, value] of Object.entries(store)) {
-    lines.push(`--${UNSERIALIZABLE}-${id}:${value};`);
-  }
-  lines.push("}");
-  const content = lines.join("\n");
-
-  let elem = ownerDocument.getElementById(UNSERIALIZABLE);
-  if (!elem) {
-    elem = ownerDocument.createElement("style");
-    elem.id = UNSERIALIZABLE;
-    ownerDocument.head.appendChild(elem);
-  }
-  elem.textContent = content;
-}
-
 function toSafeBase64(str: string) {
   const bytes = new TextEncoder().encode(str);
   const bytesStr = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join(
@@ -567,13 +525,9 @@ function setProperty(elem: HTMLElement, prop: string, value: string) {
   if (safeness) {
     elem.style.setProperty(prop, value);
   } else {
-    const store = readUnserializableValuesStore(elem.ownerDocument);
     const id = toSafeBase64(value);
-    if (!store.hasOwnProperty(id)) {
-      store[id] = value;
-    }
+    elem.style.setProperty(`--${UNSERIALIZABLE}-${id}`, value);
     elem.style.setProperty(prop, `var(--${UNSERIALIZABLE}-${id})`);
-    writeUnserializableValuesStore(elem.ownerDocument, store);
 
     Logging.logger.debug(
       `"${prop}: ${value}" is unserializable ("${serialized}"). Switched to "var(--${UNSERIALIZABLE}-${id})".`,

@@ -142,21 +142,9 @@ describe("base", function () {
     it("supports rgb() with decimal values", function () {
       const elem = document.createElement("p");
       module.setCSSProperty(elem, "color", "rgb(0 0.1 0.2)");
-      const varName = "--vivliostyle-stash-unserializable-cmdiKDAgMC4xIDAuMik";
 
       const styleStr = elem.getAttribute("style");
-      if (styleStr.includes(varName)) {
-        const value = getComputedStyle(
-          document.documentElement,
-        ).getPropertyValue(varName);
-        expect(value.trim()).toMatch(
-          /^rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)$/,
-        );
-      } else {
-        expect(styleStr).toMatch(
-          /^[\s;]*color\s*:\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)[\s;]*$/,
-        );
-      }
+      expect(styleStr).toMatch(/rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)/);
     });
 
     it("supports linear gradients with rgb() integer values", function () {
@@ -180,22 +168,11 @@ describe("base", function () {
         "background-image",
         "linear-gradient(45deg, rgb(0 0.1 0.2), rgb(255 254.9 254.8))",
       );
-      const varName =
-        "--vivliostyle-stash-unserializable-bGluZWFyLWdyYWRpZW50KDQ1ZGVnLCByZ2IoMCAwLjEgMC4yKSwgcmdiKDI1NSAyNTQuOSAyNTQuOCkp";
 
       const styleStr = elem.getAttribute("style");
-      if (styleStr.includes(varName)) {
-        const value = getComputedStyle(
-          document.documentElement,
-        ).getPropertyValue(varName);
-        expect(value.trim()).toMatch(
-          /^linear-gradient\s*\(\s*45deg\s*,?\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)\s*,?\s*rgb\s*\(\s*255\s*,?\s*254\.9\s*,?\s*254\.8\s*\)\s*\)$/,
-        );
-      } else {
-        expect(styleStr).toMatch(
-          /^[\s;]*background-image\s*:\s*linear-gradient\s*\(\s*45deg\s*,?\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)\s*,?\s*rgb\s*\(\s*255\s*,?\s*254\.9\s*,?\s*254\.8\s*\)\s*\)[\s;]*$/,
-        );
-      }
+      expect(styleStr).toMatch(
+        /linear-gradient\s*\(\s*45deg\s*,?\s*rgb\s*\(\s*0\s*,?\s*0\.1\s*,?\s*0\.2\s*\)\s*,?\s*rgb\s*\(\s*255\s*,?\s*254\.9\s*,?\s*254\.8\s*\)\s*\)/,
+      );
     });
   });
 });
