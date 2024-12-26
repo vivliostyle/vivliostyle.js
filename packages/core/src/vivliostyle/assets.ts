@@ -1505,6 +1505,9 @@ viv-ts-thin-sp::after {
   text-orientation: mixed;
   visibility: hidden;
 }
+[style*=text-decoration] :is(viv-ts-thin-sp, viv-ts-close.viv-ts-auto)::after {
+  visibility: visible;
+}
 
 span[data-viv-leader] {
   text-combine-upright: none;
