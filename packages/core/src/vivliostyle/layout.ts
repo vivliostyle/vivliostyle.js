@@ -2532,6 +2532,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Determines if a page break is acceptable at this position
    */
   isBreakable(flowPosition: Vtree.NodeContext): boolean {
+    for (let nc = flowPosition; nc; nc = nc.parent) {
+      if (LayoutHelper.isOutOfFlow(nc.viewNode)) {
+        return false;
+      }
+    }
     if (flowPosition.after) {
       return true; // may be an empty block
     }
@@ -2559,6 +2564,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ): boolean {
     if (!nodeContext) {
       return false;
+    }
+    for (let nc = nodeContext; nc; nc = nc.parent) {
+      if (LayoutHelper.isOutOfFlow(nc.viewNode)) {
+        return false;
+      }
     }
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
       return false;
