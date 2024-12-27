@@ -258,7 +258,9 @@ export class Box {
   hasBox(): boolean {
     if (this.hasBoxValue === null) {
       this.hasBoxValue =
-        this.isParentBoxDisplayed && this.displayValue() !== Css.ident.none;
+        this.isParentBoxDisplayed &&
+        this.displayValue() !== Css.ident.none &&
+        !Display.isRunning(this.styleValue("position"));
     }
     return this.hasBoxValue;
   }
