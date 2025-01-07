@@ -1318,6 +1318,7 @@ export class ViewFactory
                   );
                 if (
                   Scripts.allowScripts &&
+                  result.localName !== "tr" && // issue #1439
                   !(
                     result.namespaceURI === Base.NS.SVG &&
                     result.localName !== "svg"
