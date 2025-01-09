@@ -301,7 +301,11 @@ export class RepetitiveElements
     if (nodeContext && !this.affectTo(nodeContext)) {
       return offset;
     }
-    if (nodeContext && this.isAfterLastContent(nodeContext)) {
+    if (
+      !this.enableSkippingFooter &&
+      nodeContext &&
+      this.isAfterLastContent(nodeContext)
+    ) {
       offset += this.footerHeight;
     }
     if (!this.enableSkippingHeader) {

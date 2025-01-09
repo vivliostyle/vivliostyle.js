@@ -252,11 +252,48 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     const formattingContext = this.formattingContext;
     const row = formattingContext.getRowByIndex(this.rowIndex);
     let penalty = 0;
-    if (!formattingContext.isFreelyFragmentableRow(row)) {
+
+    const breakPositions = this.getAcceptableCellBreakPositions();
+    const cellFragments = this.getCellFragments();
+
+    // If there is a box break in a row-spanning cell, do not add penalty.
+    // This is to prevent the cell content from disappearing due to the situation
+    // that a box break occurs in a row-spanning cell but the row break fails.
+    // (Issue #1403)
+    const foundBoxBreakInRowSpanningCell = breakPositions.some(
+      (bp, i) =>
+        bp.breakPosition instanceof Layout.BoxBreakPosition &&
+        (cellFragments[i].cellNodeContext.sourceNode as HTMLTableCellElement)
+          .rowSpan > 1,
+    );
+    if (
+      !foundBoxBreakInRowSpanningCell &&
+      !formattingContext.isFreelyFragmentableRow(row)
+    ) {
       penalty += 10;
     }
-    this.getAcceptableCellBreakPositions().forEach((bp) => {
-      penalty += bp.breakPosition.getMinBreakPenalty();
+
+    breakPositions.forEach((bp, i) => {
+      let penalty1 = bp.breakPosition.getMinBreakPenalty();
+      if (
+        foundBoxBreakInRowSpanningCell &&
+        bp.breakPosition instanceof BreakPosition.EdgeBreakPosition &&
+        bp.breakPosition.overflows &&
+        penalty1 >= 3
+      ) {
+        // When a box break occurs in a row-spanning cell, the height of the row group decreases,
+        // and the overflows flag that was set before the box break may be no longer valid.
+        // So,check the overflow again, and if the cell does not overflow, reduce the penalty.
+        // (Issue #1403)
+        const overflows = cellFragments[i].column.checkOverflowAndSaveEdge(
+          bp.nodeContext,
+          null,
+        );
+        if (!overflows) {
+          penalty1 -= 3;
+        }
+      }
+      penalty += penalty1;
     });
     return penalty;
   }
