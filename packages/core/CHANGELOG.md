@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.30.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.7...v2.30.8) (2025-01-10)
+
+### Bug Fixes
+
+- fix broken table layout when table row has id attribute ([63b91aa](https://github.com/vivliostyle/vivliostyle.js/commit/63b91aa6c889bca1658f571f81f75960932f292f)), closes [#1439](https://github.com/vivliostyle/vivliostyle.js/issues/1439)
+- fix calc() not working for unitless values ([91bbadc](https://github.com/vivliostyle/vivliostyle.js/commit/91bbadcf4e07c3615a05b4d8e99f99f905de44db)), closes [#1442](https://github.com/vivliostyle/vivliostyle.js/issues/1442)
+- fix named page not applied at first page with running element ([7102c4b](https://github.com/vivliostyle/vivliostyle.js/commit/7102c4b0a5c2773f3d5c5f2fe86317dc2e2b325d)), closes [#1405](https://github.com/vivliostyle/vivliostyle.js/issues/1405)
+- fix wrong cascading with -webkit-box-sizing and box-sizing ([5c9b401](https://github.com/vivliostyle/vivliostyle.js/commit/5c9b401c8992b222fa7768f17af3d3d33fe48b92)), closes [#1427](https://github.com/vivliostyle/vivliostyle.js/issues/1427)
+- prevent running elements and absolutely positioned elements from being broken ([651065e](https://github.com/vivliostyle/vivliostyle.js/commit/651065ef4950d294a1ab769bdd51f0c41216a0ee)), closes [#1430](https://github.com/vivliostyle/vivliostyle.js/issues/1430)
+- prevent wrong page/column break at ruby ([25ab417](https://github.com/vivliostyle/vivliostyle.js/commit/25ab417af055ccb744e07ebaf74d7f68bd66ef29)), closes [#1401](https://github.com/vivliostyle/vivliostyle.js/issues/1401)
+- Table cell with rowspan may disappear after page break ([690b3de](https://github.com/vivliostyle/vivliostyle.js/commit/690b3deb08c3302adf17ff2843ddae83b798dff3)), closes [#1403](https://github.com/vivliostyle/vivliostyle.js/issues/1403)
+- Text-decoration-line should not be skipped at space inserted by text-spacing ([ea465b6](https://github.com/vivliostyle/vivliostyle.js/commit/ea465b615be748d3a671fc85058b558f6afd114e)), closes [#1061](https://github.com/vivliostyle/vivliostyle.js/issues/1061)
+
 ## [2.30.7](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.6...v2.30.7) (2024-11-27)
 
 ### Bug Fixes
