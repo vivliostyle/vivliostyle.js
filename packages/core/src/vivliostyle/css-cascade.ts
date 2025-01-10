@@ -4825,8 +4825,15 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
     if (exprVal instanceof Css.Expr) {
       try {
         const exprResult = exprVal.expr.evaluate(this.context);
-        if (typeof exprResult === "number") {
-          value = new Css.Numeric(exprResult, "px");
+        if (typeof exprResult === "number" && !isNaN(exprResult)) {
+          if (/\d(px|in|pt|pc|cm|mm|q|rem|rlh)\W/i.test(exprText)) {
+            // length value
+            value = new Css.Numeric(exprResult, "px");
+          } else if (!/\d[a-z]/i.test(exprText)) {
+            // unitless number
+            value = new Css.Num(exprResult);
+          }
+          // otherwise, keep the original calc() expression
         }
       } catch (err) {
         Logging.logger.warn(err);
