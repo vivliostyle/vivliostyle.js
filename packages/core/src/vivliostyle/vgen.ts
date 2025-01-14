@@ -942,6 +942,10 @@ export class ViewFactory
           clearSide === Css.ident.right ||
           clearSide === Css.ident.top ||
           clearSide === Css.ident.bottom ||
+          clearSide === Css.ident.inline_start ||
+          clearSide === Css.ident.inline_end ||
+          clearSide === Css.ident.block_start ||
+          clearSide === Css.ident.block_end ||
           clearSide === Css.ident.both ||
           clearSide === Css.ident.all ||
           clearSide === Css.ident.same
