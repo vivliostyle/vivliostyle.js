@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.31.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.8...v2.31.0) (2025-01-17)
+
+### Features
+
+- Support extended CSS Page float values such as `float: top right` ([8f8b0cc](https://github.com/vivliostyle/vivliostyle.js/commit/8f8b0cc56cd787bc13e5f014839480c7b95512ce)), closes [#543](https://github.com/vivliostyle/vivliostyle.js/issues/543)
+- support logical values for CSS clear property ([f9751ba](https://github.com/vivliostyle/vivliostyle.js/commit/f9751ba980ef8945102b1f26c4cc90fbd6e331ab))
+
 ## [2.30.8](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.7...v2.30.8) (2025-01-10)
 
 ### Bug Fixes
