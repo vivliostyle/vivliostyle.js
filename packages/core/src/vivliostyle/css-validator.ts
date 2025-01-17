@@ -21,7 +21,7 @@
  */
 import * as Css from "./css";
 import * as CssTokenizer from "./css-tokenizer";
-import * as Logging from "./logging";
+import * as Base from "./base";
 import { ValidationTxt } from "./assets";
 import { TokenType } from "./css-tokenizer";
 
@@ -2099,6 +2099,8 @@ export class ValidatorSet {
       if (CSS.supports(name, value.toString())) {
         // Browser supports this property
         receiver.simpleProperty(origName, value, important);
+      } else if (prefix && !Base.knownPrefixes.includes(`-${prefix}-`)) {
+        // Ignore properties with unknown prefix to avoid unnecessary warnings
       } else {
         receiver.unknownProperty(origName, value);
       }

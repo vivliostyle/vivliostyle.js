@@ -60,6 +60,10 @@ export function getSize(
     height: (element as any).style.height as string,
     maxHeight: (element as any).style.maxHeight as string,
     minHeight: (element as any).style.minHeight as string,
+    top: (element as any).style.top as string,
+    right: (element as any).style.right as string,
+    bottom: (element as any).style.bottom as string,
+    left: (element as any).style.left as string,
   };
   const doc = element.ownerDocument;
   const parent = element.parentNode;
@@ -92,9 +96,27 @@ export function getSize(
   const blockSizeName = isVertical ? "width" : "height";
 
   function getFillAvailableInline(): string {
+    if (original.position === "absolute" || original.position === "fixed") {
+      // For absolutely positioned elements, use the element's original size
+      // and position to calculate the fill-available inline size.
+      // This is needed to get correct available inline size for page floats.
+      Base.setCSSProperty(container, "width", original.width);
+      Base.setCSSProperty(container, "height", original.height);
+      Base.setCSSProperty(container, "top", original.top);
+      Base.setCSSProperty(container, "right", original.right);
+      Base.setCSSProperty(container, "bottom", original.bottom);
+      Base.setCSSProperty(container, "left", original.left);
+    }
     Base.setCSSProperty(element, "display", "block");
     Base.setCSSProperty(element, "position", "static");
-    return getComputedValue(inlineSizeName);
+    const r = getComputedValue(inlineSizeName);
+    Base.setCSSProperty(container, "width", "");
+    Base.setCSSProperty(container, "height", "");
+    Base.setCSSProperty(container, "top", "");
+    Base.setCSSProperty(container, "right", "");
+    Base.setCSSProperty(container, "bottom", "");
+    Base.setCSSProperty(container, "left", "");
+    return r;
   }
 
   // Inline size of an inline-block element is the fit-content
