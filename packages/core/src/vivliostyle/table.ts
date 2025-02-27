@@ -175,6 +175,11 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
     this.getAcceptableCellBreakPositions().forEach((bp) => {
       penalty += bp.breakPosition.getMinBreakPenalty();
     });
+    const cellFragments = this.getCellFragments();
+    penalty += Math.max(
+      0,
+      ...cellFragments.map((cf) => cf.cellNodeContext.breakPenalty),
+    );
     return penalty;
   }
 
@@ -251,10 +256,14 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
   override getMinBreakPenalty(): number {
     const formattingContext = this.formattingContext;
     const row = formattingContext.getRowByIndex(this.rowIndex);
-    let penalty = 0;
+    let penalty = this.beforeNodeContext.breakPenalty;
 
     const breakPositions = this.getAcceptableCellBreakPositions();
     const cellFragments = this.getCellFragments();
+    penalty += Math.max(
+      0,
+      ...cellFragments.map((cf) => cf.cellNodeContext.breakPenalty),
+    );
 
     // If there is a box break in a row-spanning cell, do not add penalty.
     // This is to prevent the cell content from disappearing due to the situation
