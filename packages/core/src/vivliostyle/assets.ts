@@ -1423,14 +1423,14 @@ export const VivliostylePolyfillCss = `
   border-start-end-radius: 0 !important;
   border-end-end-radius: 0 !important;
 }
-[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]) {
+[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]):not(table[style*="border-collapse: collapse"]:has(>thead)) {
   margin-block-start: 0 !important;
   padding-block-start: 0 !important;
   border-block-start-width: 0 !important;
   border-start-start-radius: 0 !important;
   border-start-end-radius: 0 !important;
 }
-[data-viv-box-break~="block-end"]:not([data-viv-box-break~="clone"]) {
+[data-viv-box-break~="block-end"]:not([data-viv-box-break~="clone"]):not(table[style*="border-collapse: collapse"]:has(>tfoot)) {
   margin-block-end: 0 !important;
   padding-block-end: 0 !important;
   border-block-end-width: 0 !important;
