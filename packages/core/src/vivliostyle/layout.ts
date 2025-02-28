@@ -2374,7 +2374,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // can be larger than the edge of the block container containing the text.
       // We update the edge by measuring the block edge.
       const blockEdge = this.getAfterEdgeOfBlockContainer(nodeContext);
-      if (!isNaN(blockEdge) && blockEdge < edge) {
+      if (!isNaN(blockEdge) && dir * (edge - blockEdge) > 0) {
         edge = blockEdge;
       }
       this.computedBlockSize =
