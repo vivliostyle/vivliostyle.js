@@ -1536,11 +1536,8 @@ export class ViewFactory
             Break.setBoxBreakFlag(result, "block-start");
             if (Break.isCloneBoxDecorationBreak(result)) {
               Break.setBoxBreakFlag(result, "clone");
-
-              // When box-decoration-break: clone, cloned margins are always
-              // truncated to zero.
-              Break.setMarginDiscardFlag(result, "block-start");
             }
+            Break.setMarginDiscardFlag(result, "block-start");
           } else if (
             !Display.isAbsolutelyPositioned(computedStyle["position"])
           ) {
@@ -2632,8 +2629,8 @@ export class ViewFactory
         }
         if (Break.isCloneBoxDecorationBreak(elem)) {
           Break.setBoxBreakFlag(elem, "clone");
-          Break.setMarginDiscardFlag(elem, "block-end");
         }
+        Break.setMarginDiscardFlag(elem, "block-end");
       }
     }
   }
