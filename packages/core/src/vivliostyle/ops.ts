@@ -705,7 +705,9 @@ export class StyleInstance
       // eligible if it is is not marked as fully consumed and it comes in the
       // document before the lookup position. Feed lookupOffset and flow
       // availability into the context
+      const savedPageType = this.styler.cascade.currentPageType;
       this.lookupOffset = this.styler.styleUntil(currentPosition, lookup);
+      this.styler.cascade.currentPageType = savedPageType; // Fix for Issue #1450
       Asserts.assert(cp);
       this.updateStartSide(cp);
 
