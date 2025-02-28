@@ -834,11 +834,31 @@ export class AdaptiveViewer {
   private showCurrent(page: Vtree.Page, sync?: boolean): Task.Result<null> {
     this.needRefresh = false;
     this.removePageListeners();
-    if (this.pref.spreadView) {
+
+    const spreadView = this.resolveSpreadView(this.viewport, page.dimensions);
+    if (spreadView !== this.pref.spreadView) {
+      this.updateSpreadView(spreadView);
+    }
+
+    if (spreadView) {
       return this.opfView
         .getSpread(this.pagePosition, sync)
         .thenAsync((spread) => {
           if (!spread.left && !spread.right) {
+            return Task.newResult(null);
+          }
+          if (
+            spread.left &&
+            spread.right &&
+            (!this.resolveSpreadView(this.viewport, spread.left.dimensions) ||
+              !this.resolveSpreadView(this.viewport, spread.right.dimensions))
+          ) {
+            // Turn off spread view mode if either left or right page is not
+            // suitable for spread view.
+            this.updateSpreadView(false);
+            this.showPage(page);
+            this.setPageZoom(page);
+            this.currentPage = page;
             return Task.newResult(null);
           }
           this.showSpread(spread);
