@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.31.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.0...v2.31.1) (2025-03-01)
+
+### Bug Fixes
+
+- Do not remove table top border with thead and bottom border with tfoot at page break ([02507b9](https://github.com/vivliostyle/vivliostyle.js/commit/02507b9dafacda7b7e62beee11c496c72597c5e9))
+- Fix `break-inside: avoid` ignored in table cells ([cf3d911](https://github.com/vivliostyle/vivliostyle.js/commit/cf3d91189c2f0dcca24c35506bd3a6d920fb2bb1)), closes [#1452](https://github.com/vivliostyle/vivliostyle.js/issues/1452)
+- Fix auto spread view behavior when page size changes ([0fef05e](https://github.com/vivliostyle/vivliostyle.js/commit/0fef05e7a18ed94650f987c999a26b646b077707))
+- Fix incorrect column balancing in vertical writing mode ([520d8df](https://github.com/vivliostyle/vivliostyle.js/commit/520d8df2c9f2035f62b0e51f10a8dd02f4152baa)), closes [#1451](https://github.com/vivliostyle/vivliostyle.js/issues/1451)
+- Fix named page not applied after a spread break ([a71699a](https://github.com/vivliostyle/vivliostyle.js/commit/a71699a2e09226c05f9720f3c75b802cca6d0663)), closes [#1450](https://github.com/vivliostyle/vivliostyle.js/issues/1450)
+
 # [2.31.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.30.8...v2.31.0) (2025-01-17)
 
 ### Features
