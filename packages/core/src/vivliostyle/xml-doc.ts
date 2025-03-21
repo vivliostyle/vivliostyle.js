@@ -316,7 +316,7 @@ export function parseAndReturnNullIfError(
  * @returns null if contentType cannot be inferred from HTTP header and file
  *     extension
  */
-export function resolveContentType(response: Net.Response): string | null {
+export function resolveContentType(response: Net.FetchResponse): string | null {
   const contentType = response.contentType;
   if (contentType) {
     const supportedKeys = Object.keys(DOMParserSupportedType);
@@ -351,7 +351,7 @@ export function resolveContentType(response: Net.Response): string | null {
 }
 
 export function parseXMLResource(
-  response: Net.Response,
+  response: Net.FetchResponse,
   store: XMLDocStore,
 ): Task.Result<XmlDoc.XMLDocHolder> {
   let doc = response.responseXML;
@@ -406,7 +406,7 @@ export function parseXMLResource(
 export function newXMLDocStore(): XMLDocStore {
   return new Net.ResourceStore(
     parseXMLResource,
-    Net.XMLHttpRequestResponseType.DOCUMENT,
+    Net.FetchResponseType.DOCUMENT,
   );
 }
 

@@ -261,12 +261,12 @@ export class Mapper {
           ? documentFaces.deobfuscator(url)
           : null;
         if (deobfuscator) {
-          Net.ajax(url, Net.XMLHttpRequestResponseType.BLOB).then((xhr) => {
-            if (!xhr.responseBlob) {
+          Net.fetchFromURL(url, Net.FetchResponseType.BLOB).then((response) => {
+            if (!response.responseBlob) {
               frame.finish(null);
               return;
             }
-            deobfuscator(xhr.responseBlob).then((fontBytes) => {
+            deobfuscator(response.responseBlob).then((fontBytes) => {
               this.initFont(srcFace, fontBytes, documentFaces).thenFinish(
                 frame,
               );

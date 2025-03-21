@@ -2797,12 +2797,12 @@ export function parseStylesheetFromURL(
   return Task.handle(
     "parseStylesheetFromURL",
     (frame) => {
-      Net.ajax(url).then((xhr) => {
-        if (!xhr.responseText) {
+      Net.fetchFromURL(url).then((response) => {
+        if (!response.responseText) {
           frame.finish(true);
         } else {
           parseStylesheetFromText(
-            xhr.responseText,
+            response.responseText,
             handler,
             url,
             classes,
