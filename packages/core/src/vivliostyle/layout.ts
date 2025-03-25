@@ -2038,7 +2038,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         force,
       );
     } else {
-      // Fix for issue #821, #885
+      // Fix for issue #821, #885, #1459
       const p = LayoutHelper.findAncestorSpecialInlineNodeContext(nodeContext);
       if (p) {
         if (
@@ -2050,6 +2050,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         // Prevent breaks inside inline-blocks
         nodeContext = p;
+
+        // Prevent breaks at beginning of paragraph content (Issue #1459)
+        while (!nodeContext.after && nodeContext.inline && nodeContext.parent) {
+          let node = nodeContext.viewNode?.previousSibling;
+          while (
+            node &&
+            (VtreeImpl.canIgnore(node, nodeContext.parent.whitespace) ||
+              LayoutHelper.isOutOfFlow(node))
+          ) {
+            node = node.previousSibling;
+          }
+          if (node) {
+            break;
+          }
+          nodeContext = nodeContext.parent;
+        }
       }
     }
     this.clearOverflownViewNodes(nodeContext, false);

@@ -197,7 +197,10 @@ export function findAncestorSpecialInlineNodeContext(
   nodeContext: Vtree.NodeContext,
 ): Vtree.NodeContext | null {
   for (let p = nodeContext.parent; p; p = p.parent) {
-    if (p.display !== "inline" && Display.isInlineLevel(p.display)) {
+    if (
+      (p.display !== "inline" || p.vertical !== p.parent?.vertical) &&
+      Display.isInlineLevel(p.display)
+    ) {
       return p;
     }
   }
