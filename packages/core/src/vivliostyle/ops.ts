@@ -2172,7 +2172,7 @@ export type StyleSource = {
 };
 
 export function parseOPSResource(
-  response: Net.Response,
+  response: Net.FetchResponse,
   store: XmlDoc.XMLDocStore,
 ): Task.Result<XmlDoc.XMLDocHolder> {
   return (store as OPSDocStore).parseOPSResource(response);
@@ -2192,7 +2192,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
       | null,
   ) {
-    super(parseOPSResource, Net.XMLHttpRequestResponseType.DOCUMENT);
+    super(parseOPSResource, Net.FetchResponseType.DOCUMENT);
   }
 
   init(
@@ -2266,7 +2266,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     });
   }
 
-  parseOPSResource(response: Net.Response): Task.Result<XmlDoc.XMLDocHolder> {
+  parseOPSResource(
+    response: Net.FetchResponse,
+  ): Task.Result<XmlDoc.XMLDocHolder> {
     const frame: Task.Frame<XmlDoc.XMLDocHolder> =
       Task.newFrame("OPSDocStore.load");
     const url = response.url;

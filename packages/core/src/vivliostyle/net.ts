@@ -28,7 +28,7 @@ import { UserAgentXml } from "./assets";
 /**
  * @enum {string}
  */
-export enum XMLHttpRequestResponseType {
+export enum FetchResponseType {
   DEFAULT = "",
   ARRAYBUFFER = "arraybuffer",
   BLOB = "blob",
@@ -37,19 +37,21 @@ export enum XMLHttpRequestResponseType {
   TEXT = "text",
 }
 
-export type Response = Net.Response;
+export type FetchResponse = Net.FetchResponse;
 
-export function ajax(
+export function fetchFromURL(
   url: string,
-  opt_type?: XMLHttpRequestResponseType,
+  opt_type?: FetchResponseType,
   opt_method?: string,
-  opt_data?: string,
-  opt_contentType?: string,
-): Task.Result<Response> {
-  const frame: Task.Frame<Response> = Task.newFrame("ajax");
-  const request = new XMLHttpRequest();
-  const continuation = frame.suspend(request);
-  const response: Response = {
+): Task.Result<FetchResponse> {
+  const frame: Task.Frame<FetchResponse> = Task.newFrame("fetchFromURL");
+  const requestInit: RequestInit = {
+    method: opt_method || "GET",
+    mode: "cors",
+  };
+
+  const continuation = frame.suspend();
+  const response: FetchResponse = {
     status: 0,
     statusText: "",
     url,
@@ -58,95 +60,71 @@ export function ajax(
     responseXML: null,
     responseBlob: null,
   };
-  request.open(opt_method || "GET", url, true);
-  if (opt_type) {
-    request.responseType = opt_type;
-  }
-  request.onreadystatechange = () => {
-    if (request.readyState === 4) {
-      response.status = request.status;
-      response.url = request.responseURL;
-      response.statusText =
-        request.statusText || (request.status == 404 && "Not Found") || "";
-      if (response.status == 200 || response.status == 0) {
-        if (
-          (!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
-          request.responseXML &&
-          request.responseXML.documentElement.localName != "parsererror"
-        ) {
-          response.responseXML = request.responseXML;
-          response.contentType = (request.responseXML as any).contentType;
-        } else if (
-          (!opt_type || opt_type === XMLHttpRequestResponseType.DOCUMENT) &&
-          request.response instanceof Document
-        ) {
-          response.responseXML = request.response;
-          response.contentType = (request.response as any).contentType;
-        } else {
-          const text = request.response;
-          if (
-            (!opt_type || opt_type === XMLHttpRequestResponseType.TEXT) &&
-            typeof text == "string"
-          ) {
-            response.responseText = text;
-          } else if (!text) {
-            Logging.logger.warn("Unexpected empty success response for", url);
-          } else {
-            if (typeof text == "string") {
-              response.responseBlob = makeBlob([text]);
-            } else {
-              response.responseBlob = text as Blob;
-            }
-          }
-          const contentTypeHeader = request.getResponseHeader("Content-Type");
-          if (contentTypeHeader) {
-            response.contentType = contentTypeHeader.replace(/(.*);.*$/, "$1");
-          }
-        }
+
+  fetch(url, requestInit)
+    .then((res) => {
+      response.status = res.status;
+      response.url = res.url;
+      response.statusText = res.statusText;
+      response.contentType = res.headers
+        .get("Content-Type")
+        ?.replace(/;.*$/, "")
+        .toLowerCase();
+
+      if (!res.ok) {
+        // TODO: Handle error response
+        return res.text();
+      }
+      if (opt_type === FetchResponseType.BLOB) {
+        return res.blob();
+      }
+      if (opt_type === FetchResponseType.ARRAYBUFFER) {
+        return res.arrayBuffer();
+      }
+      if (opt_type === FetchResponseType.JSON) {
+        return res.json();
+      }
+
+      // Aozorabunko's (X)HTML support
+      if (
+        /\/aozorabunko\/[^/]+\/cards\/[^/]+\/files\/[^/.]+\.html$/.test(url)
+      ) {
+        response.contentType = "text/html";
+        return res.arrayBuffer().then((buffer) => {
+          const decoder = new TextDecoder("Shift_JIS");
+          const text = decoder.decode(buffer);
+          return text;
+        });
+      }
+      // Treat `data:,<h1>Hello</h1>` as text/html
+      if (/^data:,(<|%3c)/i.test(url)) {
+        response.contentType = "text/html";
+      }
+
+      return res.text();
+    })
+    .then((fetchedContent) => {
+      if (
+        opt_type === FetchResponseType.BLOB &&
+        fetchedContent instanceof Blob
+      ) {
+        response.responseBlob = fetchedContent;
+      } else if (
+        opt_type === FetchResponseType.ARRAYBUFFER &&
+        fetchedContent instanceof ArrayBuffer
+      ) {
+        response.responseBlob = makeBlob([fetchedContent]);
+      } else if (opt_type === FetchResponseType.JSON) {
+        response.responseText = JSON.stringify(fetchedContent);
+      } else if (typeof fetchedContent === "string") {
+        response.responseText = fetchedContent;
       }
       continuation.schedule(response);
-    }
-  };
-  try {
-    if (opt_data) {
-      request.setRequestHeader(
-        "Content-Type",
-        opt_contentType || "text/plain; charset=UTF-8",
-      );
-      request.send(opt_data);
-    } else {
-      if (
-        /^file:|^https?:\/\/[^/]+\.githubusercontent\.com|\.(xhtml|xht|opf)$/i.test(
-          url,
-        )
-      ) {
-        // File or GitHub raw URL or .xht(ml) or .opf
-        if (
-          /\/aozorabunko\/[^/]+\/cards\/[^/]+\/files\/[^/.]+\.html$/.test(url)
-        ) {
-          // Aozorabunko's (X)HTML support
-          request.overrideMimeType("text/html; charset=Shift_JIS");
-        } else if (/\.(html|htm)$/i.test(url)) {
-          request.overrideMimeType("text/html; charset=UTF-8");
-        } else if (/\.(xhtml|xht|xml|opf)$/i.test(url)) {
-          request.overrideMimeType("application/xml; charset=UTF-8");
-        } else if (/\.(txt|css)$/i.test(url)) {
-          request.overrideMimeType("text/plain; charset=UTF-8");
-        } else {
-          // fallback to HTML
-          request.overrideMimeType("text/html; charset=UTF-8");
-        }
-      } else if (/^data:,(<|%3c)/i.test(url)) {
-        request.overrideMimeType("text/html; charset=UTF-8");
-      } else if (/^data:,/i.test(url)) {
-        request.overrideMimeType("text/plain; charset=UTF-8");
-      }
-      request.send(null);
-    }
-  } catch (e) {
-    Logging.logger.warn(e, `Error fetching ${url}`);
-    continuation.schedule(response);
-  }
+    })
+    .catch((e) => {
+      Logging.logger.warn(e, `Error fetching ${url}`);
+      continuation.schedule(response);
+    });
   return frame.result();
 }
 
@@ -193,10 +171,10 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
 
   constructor(
     public readonly parser: (
-      p1: Response,
+      p1: FetchResponse,
       p2: ResourceStore<Resource>,
     ) => Task.Result<Resource>,
-    public readonly type: XMLHttpRequestResponseType,
+    public readonly type: FetchResponseType,
   ) {}
 
   /**
@@ -237,7 +215,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
       url = `data:application/xml,${encodeURIComponent(UserAgentXml)}`;
     }
 
-    ajax(url, this.type).then((response) => {
+    fetchFromURL(url, this.type).then((response) => {
       if (response.status >= 400) {
         if (opt_required) {
           throw new Error(
@@ -303,7 +281,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
 export type JSONStore = ResourceStore<Base.JSON>;
 
 export function parseJSONResource(
-  response: Response,
+  response: FetchResponse,
   store: JSONStore,
 ): Task.Result<Base.JSON> {
   const text = response.responseText;
@@ -311,7 +289,7 @@ export function parseJSONResource(
 }
 
 export function newJSONStore(): JSONStore {
-  return new ResourceStore(parseJSONResource, XMLHttpRequestResponseType.TEXT);
+  return new ResourceStore(parseJSONResource, FetchResponseType.TEXT);
 }
 
 /**

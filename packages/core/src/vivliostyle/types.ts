@@ -585,7 +585,7 @@ export namespace LayoutProcessor {
 }
 
 export namespace Net {
-  export type Response = {
+  export type FetchResponse = {
     status: number;
     statusText: string | null;
     url: string;
@@ -599,7 +599,7 @@ export namespace Net {
     resources: { [key: string]: Resource };
     fetchers: { [key: string]: TaskUtil.Fetcher<Resource> };
     readonly parser: (
-      p1: Response,
+      p1: FetchResponse,
       p2: ResourceStore<Resource>,
     ) => Task.Result<Resource>;
     readonly type: XMLHttpRequestResponseType;

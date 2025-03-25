@@ -94,7 +94,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
   loadPubDoc(url: string): Task.Result<OPFDoc> {
     const frame: Task.Frame<OPFDoc> = Task.newFrame("loadPubDoc");
 
-    Net.ajax(url, null, "HEAD").then((response) => {
+    Net.fetchFromURL(url, null, "HEAD").then((response) => {
       if (response.status >= 400) {
         // This url can be the root of an unzipped EPUB.
         this.loadEPUBDoc(url).then((opf) => {
@@ -326,6 +326,10 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         urls.find((url) => this.resources[url] && removePath(url) === domain)
       ) {
         // if there is an already loaded resource with the same domain, no CORS problem
+        return false;
+      }
+      if (!/^https?:?\/\/[^/]/.test(docURL)) {
+        // not a valid URL
         return false;
       }
       if (/\.(xhtml|xht|xml|opf)$/i.test(docURL)) {
