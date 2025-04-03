@@ -278,12 +278,6 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
         (cellFragments[i].cellNodeContext.sourceNode as HTMLTableCellElement)
           .rowSpan > 1,
     );
-    if (
-      !foundBoxBreakInRowSpanningCell &&
-      !formattingContext.isFreelyFragmentableRow(row)
-    ) {
-      penalty += 10;
-    }
 
     breakPositions.forEach((bp, i) => {
       let penalty1 = bp.breakPosition.getMinBreakPenalty();
@@ -477,10 +471,6 @@ export class TableFormattingContext
       this.cellFragments[cell.rowIndex] &&
       this.cellFragments[cell.rowIndex][cell.columnIndex]
     );
-  }
-
-  isFreelyFragmentableRow(row: TableRow): boolean {
-    return row.getMinimumHeight() > this.tableWidth / 2;
   }
 
   getColumnCount(): number {
@@ -1767,6 +1757,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         return frame.result();
       }
     }
+    adjustRowHeight(nodeContext);
     formattingContext.finishFragment();
     return LayoutProcessor.blockLayoutProcessor.finishBreak(
       column,
@@ -1851,7 +1842,7 @@ function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
   }
   // Find row elements that only have rowspanning cells and empty cells.
   const spanStartRows = tbodyElement.querySelectorAll(
-    ":scope>tr:not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
+    ":scope>tr:has(>:empty):not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
   );
   if (spanStartRows.length === 0) {
     return;
