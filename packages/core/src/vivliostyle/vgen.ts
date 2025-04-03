@@ -1533,6 +1533,20 @@ export class ViewFactory
           }
         } else {
           if (!firstTime) {
+            const blockSizeP = this.nodeContext.vertical ? "width" : "height";
+            if (Base.getCSSProperty(result, blockSizeP)) {
+              // When a box with a specified block size is fragmented,
+              // the fragmented box should not have the block size.
+              // If the box is table-row, set a very small block size
+              // (0 does not work in Firefox, so use 0.01px instead)
+              // to prevent the row block size from expanding due to
+              // large rowspanning cells.
+              Base.setCSSProperty(
+                result,
+                blockSizeP,
+                this.nodeContext.display === "table-row" ? "0.01px" : "",
+              );
+            }
             Break.setBoxBreakFlag(result, "block-start");
             if (Break.isCloneBoxDecorationBreak(result)) {
               Break.setBoxBreakFlag(result, "clone");
@@ -2593,6 +2607,12 @@ export class ViewFactory
           }
         }
       } else {
+        const blockSizeP = this.nodeContext.vertical ? "width" : "height";
+        if (Base.getCSSProperty(elem, blockSizeP)) {
+          // When a box with a specified block size is fragmented,
+          // the fragmented box should not have the block size.
+          Base.setCSSProperty(elem, blockSizeP, "");
+        }
         Break.setBoxBreakFlag(elem, "block-end");
         if (!blockNestCount++) {
           if (nc !== nodeContext1) {
