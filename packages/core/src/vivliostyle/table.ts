@@ -228,7 +228,10 @@ export class InsideTableRowBreakPosition extends BreakPosition.AbstractBreakPosi
     column: Layout.Column,
     penalty: number,
   ): Vtree.NodeContext {
-    if (penalty < this.getMinBreakPenalty()) {
+    if (
+      this !== column.breakPositions[0] && // Fix for issue #1458, case 2
+      penalty < this.getMinBreakPenalty()
+    ) {
       return null;
     }
     const cellFragments = this.getCellFragments();
@@ -1677,6 +1680,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     nodeContext: Vtree.NodeContext,
     stopAtOverflow: boolean,
   ): boolean {
+    adjustRowHeight(nodeContext);
     return false;
   }
 
@@ -1756,6 +1760,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
           .then(() => {
             column.clearOverflownViewNodes(nodeContext, false);
             column.layoutContext.processFragmentedBlockEdge(nodeContext);
+            adjustRowHeight(nodeContext);
             formattingContext.finishFragment();
             frame.finish(true);
           });
@@ -1793,7 +1798,13 @@ function adjustCellHeight(
   breakNodeContext: Vtree.NodeContext,
 ): void {
   const repetitiveElements = formattingContext.getRepetitiveElements();
-  if (!repetitiveElements) {
+  if (
+    !repetitiveElements ||
+    !(
+      repetitiveElements.isHeaderRegistered() ||
+      repetitiveElements.isFooterRegistered()
+    ) // Fix for issue #1458, case 1
+  ) {
     return;
   }
   const vertical = formattingContext.vertical;
@@ -1817,7 +1828,80 @@ function adjustCellHeight(
       padding.top;
     Base.setCSSProperty(cellContentElement, "max-height", `${height}px`);
   }
-  Base.setCSSProperty(cellContentElement, "overflow", "hidden");
+}
+
+/**
+ * Adjusts the height of a table row to prevent another preceding row
+ * containing fragmented rowspanning cells and dummy empty cells which
+ * should have zero height from having non-zero height due to
+ * Chromium's behavior when rowspanning cells exist.
+ * (Fix for issue #1458, case 3)
+ *
+ * @param nodeContext - node context of table or table-row
+ */
+function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
+  const tbodyElement =
+    nodeContext.display === "table-row"
+      ? nodeContext.viewNode.parentElement
+      : nodeContext.display === "table"
+        ? (nodeContext.viewNode as Element).querySelector("tbody")
+        : null;
+  if (!tbodyElement) {
+    return;
+  }
+  // Find row elements that only have rowspanning cells and empty cells.
+  const spanStartRows = tbodyElement.querySelectorAll(
+    ":scope>tr:not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
+  );
+  if (spanStartRows.length === 0) {
+    return;
+  }
+  const spanStartRowHeight = Array.from(spanStartRows).reduce(
+    (totalHeight, rowElement) => {
+      const rect = rowElement.getBoundingClientRect();
+      const height = nodeContext.vertical ? rect.width : rect.height;
+      return totalHeight + height;
+    },
+    0,
+  );
+  const spanStartLastRow = spanStartRows[spanStartRows.length - 1];
+  const spanStartLastRowIndex = Array.from(tbodyElement.children).indexOf(
+    spanStartLastRow,
+  );
+  const rowSpan = Array.from(spanStartLastRow.children).reduce((r, cell) => {
+    const span = (cell as HTMLTableCellElement).rowSpan;
+    return span > 1 &&
+      spanStartLastRowIndex + span < tbodyElement.childElementCount
+      ? Math.max(r, span)
+      : r;
+  }, 0);
+  // Find the row element that needs to be adjusted.
+  let rowToBeAdjusted = rowSpan
+    ? tbodyElement.children[spanStartLastRowIndex + rowSpan - 1]
+    : tbodyElement.lastElementChild;
+  if (
+    rowToBeAdjusted != tbodyElement.lastElementChild &&
+    rowToBeAdjusted.querySelector(":scope>*>div>div")
+  ) {
+    for (
+      let row = rowToBeAdjusted;
+      row && row !== tbodyElement.lastElementChild;
+      row = row.nextElementSibling
+    ) {
+      if (row.querySelector(":scope>[rowspan]:not([rowspan='1'])")) {
+        rowToBeAdjusted = row;
+        break;
+      }
+    }
+  }
+  const rowRect = rowToBeAdjusted.getBoundingClientRect();
+  const rowHeight = nodeContext.vertical ? rowRect.width : rowRect.height;
+  const newRowHeight = spanStartRowHeight + rowHeight;
+  Base.setCSSProperty(
+    rowToBeAdjusted,
+    nodeContext.vertical ? "width" : "height",
+    `${newRowHeight}px`,
+  );
 }
 
 export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
