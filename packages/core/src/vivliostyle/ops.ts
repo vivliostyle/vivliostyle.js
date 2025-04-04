@@ -1199,7 +1199,7 @@ export class StyleInstance
         column.exclusions = dontApplyExclusions ? [] : exclusions.concat();
         column.innerShape = innerShape;
         columnPageFloatLayoutContext.setContainer(column);
-        if (column.width >= 0) {
+        if ((column.vertical ? column.height : column.width) >= 0) {
           // column.element.style.outline = "1px dotted green";
           this.layoutColumn(column, flowNameStr).then(() => {
             if (!columnPageFloatLayoutContext.isInvalidated()) {
@@ -1373,7 +1373,9 @@ export class StyleInstance
     const columnWidth =
       columnCount > 1
         ? boxInstance.getPropAsNumber(this, "column-width")
-        : layoutContainer.width;
+        : layoutContainer.vertical
+          ? layoutContainer.height
+          : layoutContainer.width;
     const regionIds = boxInstance.getActiveRegions(this);
     const innerShapeVal = boxInstance.getProp(this, "shape-inside");
     const innerShape = CssProp.toShape(
