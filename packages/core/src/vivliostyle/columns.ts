@@ -201,6 +201,12 @@ export function reduceContainerSize(
   } else {
     setBlockSize(container, getBlockSize(container) - 1);
   }
+  if (container.vertical) {
+    const outerWidth = parseFloat(
+      (container.element as HTMLElement).style?.width,
+    );
+    container.originX = outerWidth - container.width;
+  }
 }
 
 export class BalanceLastColumnBalancer extends ColumnBalancer {
@@ -293,7 +299,16 @@ function isLastColumnLongerThanAnyOtherColumn(
   }
   const lastColumnBlockSize = columns[columns.length - 1].computedBlockSize;
   const otherColumns = columns.slice(0, columns.length - 1);
-  return otherColumns.every((c) => lastColumnBlockSize > c.computedBlockSize);
+
+  // The computedBlockSize of the last column may be a little larger than
+  // the others even though columns are balanced, because of the issue
+  // that only the last column's computedBlockSize includes the last
+  // half-leading space.
+  // To work around this, we add an error margin to the other columns.
+  const errorMargin = 6;
+  return otherColumns.every(
+    (c) => lastColumnBlockSize > c.computedBlockSize + errorMargin,
+  );
 }
 
 export class BalanceNonLastColumnBalancer extends ColumnBalancer {
