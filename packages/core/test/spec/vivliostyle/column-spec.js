@@ -219,7 +219,7 @@ describe("column", function () {
         var balancer = createBalancer(3, false);
         spyOn(balancer, "checkPosition").and.returnValue(true);
         var layoutResult = {
-          columns: [800, 680, 801].map(createDummyColumn),
+          columns: [800, 680, 807].map(createDummyColumn),
           position: {},
         };
 
