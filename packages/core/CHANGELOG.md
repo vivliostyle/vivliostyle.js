@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.31.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.1...v2.31.2) (2025-04-07)
+
+### Bug Fixes
+
+- Error with `@-epubx-page-master { writing-mode: vertical-rl; … }` ([64d8180](https://github.com/vivliostyle/vivliostyle.js/commit/64d818004de50f14789040b9e10ad10c4bf59c71)), closes [#1470](https://github.com/vivliostyle/vivliostyle.js/issues/1470)
+- Fix multi-column balancing ([b947545](https://github.com/vivliostyle/vivliostyle.js/commit/b947545efa3b2b7ffde7ceef7a67405b23b6486e)), closes [#1451](https://github.com/vivliostyle/vivliostyle.js/issues/1451)
+- Fix table layout bugs on page/column break inside rowspanning cells ([d7dc893](https://github.com/vivliostyle/vivliostyle.js/commit/d7dc893bd9a49bad99e3172f5b2dad99b1cf85f4)), closes [#1458](https://github.com/vivliostyle/vivliostyle.js/issues/1458)
+- Fix table layout problem with table-cells across pages ([ec4ad5a](https://github.com/vivliostyle/vivliostyle.js/commit/ec4ad5aacbc08a77ba8411b9f798e538b44e310d)), closes [#980](https://github.com/vivliostyle/vivliostyle.js/issues/980)
+- Prevent wrong break at span with horizontal writing mode in vertical writing mode ([9e9123d](https://github.com/vivliostyle/vivliostyle.js/commit/9e9123ddb72d4919c3c34475d52462e2c46cf0f1)), closes [#1459](https://github.com/vivliostyle/vivliostyle.js/issues/1459)
+- Replace XMLHttpRequest with fetch API ([7fb4a3d](https://github.com/vivliostyle/vivliostyle.js/commit/7fb4a3d8350a07c5e94c40a807a86b21a3987c2e))
+
 ## [2.31.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.0...v2.31.1) (2025-03-01)
 
 ### Bug Fixes
