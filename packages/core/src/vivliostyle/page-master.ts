@@ -21,6 +21,7 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
+import { PageRuleMasterInstance } from "./css-page";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
@@ -1525,6 +1526,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     const specified = this.pageBox.specified;
     for (const name in specified) {
       if (
+        this instanceof PageRuleMasterInstance &&
         this.pageBox.pseudoName == "vivliostyle-page-rule-master" &&
         (name === "writing-mode" || name === "direction")
       ) {
