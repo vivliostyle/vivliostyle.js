@@ -1577,6 +1577,14 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         formattingContext.colGroups.cloneNode(true),
         firstChild,
       );
+      // Set table-layout to fixed so that the widths of the columns
+      // are respected. (Fix for issue #1475)
+      Base.setCSSProperty(rootViewNode, "table-layout", "fixed");
+      Base.setCSSProperty(
+        rootViewNode,
+        formattingContext.vertical ? "height" : "width",
+        `${formattingContext.tableWidth}px`,
+      );
     }
   }
 
