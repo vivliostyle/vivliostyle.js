@@ -4,7 +4,6 @@ import replace from "@rollup/plugin-replace";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import commonJS from "@rollup/plugin-commonjs";
-import strip from "@rollup/plugin-strip";
 import { terser } from "rollup-plugin-terser";
 import pkg from "./package.json";
 import corePkg from "../core/package.json";
@@ -44,19 +43,6 @@ const plugins = [
   commonJS({
     sourceMap: true,
   }),
-  // Remove clutter
-  !isDevelopment
-    ? strip({
-        debugger: false,
-        functions: [
-          "console.*",
-          "console.warn.apply",
-          "console.info.apply",
-          "console.debug.apply",
-          "console.error.apply",
-        ],
-      })
-    : {},
   // Minimize module size
   !isDevelopment ? terser() : {},
 ];

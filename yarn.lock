@@ -3014,15 +3014,6 @@
     "@rollup/pluginutils" "^5.0.1"
     magic-string "^0.30.3"
 
-"@rollup/plugin-strip@^3.0.2":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-strip/-/plugin-strip-3.0.4.tgz#ad623cc18cf305b484f8bf38fde4ae855c1229e4"
-  integrity sha512-LDRV49ZaavxUo2YoKKMQjCxzCxugu1rCPQa0lDYBOWLj6vtzBMr8DcoJjsmg+s450RbKbe3qI9ZLaSO+O1oNbg==
-  dependencies:
-    "@rollup/pluginutils" "^5.0.1"
-    estree-walker "^2.0.2"
-    magic-string "^0.30.3"
-
 "@rollup/plugin-typescript@^12.1.1":
   version "12.1.1"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-12.1.1.tgz#008d16b8283a422650c463f99ae0c610cf6c9727"
