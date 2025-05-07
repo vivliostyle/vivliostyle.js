@@ -2096,7 +2096,7 @@ export class ValidatorSet {
     }
     const px = this.prefixes[name];
     if (!px || !px[prefix]) {
-      if (CSS.supports(name, value.toString())) {
+      if (CSS.supports(origName, value.toString())) {
         // Browser supports this property
         receiver.simpleProperty(origName, value, important);
       } else if (prefix && !Base.knownPrefixes.includes(`-${prefix}-`)) {
