@@ -27,34 +27,24 @@ import * as Net from "./net";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 
-export const traitProps: { [key: string]: Css.Val } = {
-  "font-style": Css.ident.auto,
-  "font-stretch": Css.ident.auto,
-  "font-weight": Css.ident.auto,
-  "unicode-range": Css.fullURange,
-};
-
 export const bogusFontData = `OTTO${new Date().valueOf()}`;
 
 export let bogusFontCounter: number = 1;
+
+function getFontTraitNames(properties: { [key: string]: Css.Val }): string[] {
+  return Object.keys(properties)
+    .filter((prop) => !["src", "font-family", "font-display"].includes(prop))
+    .sort();
+}
 
 export function makeFontTraitKey(properties: {
   [key: string]: Css.Val;
 }): string {
   const sb = new Base.StringBuffer();
-  for (const prop in traitProps) {
-    sb.append(" ");
-    sb.append(properties[prop].toString());
+  for (const prop of getFontTraitNames(properties)) {
+    sb.append(`${prop}:${properties[prop].toString()};`);
   }
   return sb.toString();
-}
-
-export function fillDefaults(properties: { [key: string]: Css.Val }): void {
-  for (const prop in traitProps) {
-    if (!properties[prop]) {
-      properties[prop] = traitProps[prop];
-    }
-  }
 }
 
 export function prepareProperties(
@@ -65,7 +55,6 @@ export function prepareProperties(
   for (const prop in properties) {
     result[prop] = CssCascade.getProp(properties, prop).evaluate(context, prop);
   }
-  fillDefaults(result);
   return result;
 }
 
@@ -103,7 +92,7 @@ export class Face {
     sb.append("@font-face {\n  font-family: ");
     sb.append(this.family as string);
     sb.append(";\n  ");
-    for (const prop in traitProps) {
+    for (const prop of getFontTraitNames(this.properties)) {
       sb.append(prop);
       sb.append(": ");
       this.properties[prop].appendTo(sb, true);
@@ -221,7 +210,7 @@ export class Mapper {
     const frame: Task.Frame<Face> = Task.newFrame("initFont");
     const src = srcFace.src as string;
     const props = {} as { [key: string]: Css.Val };
-    for (const prop in traitProps) {
+    for (const prop of getFontTraitNames(srcFace.properties)) {
       props[prop] = srcFace.properties[prop];
     }
     const fontFamily = this.getViewFontFamily(srcFace, documentFaces);
