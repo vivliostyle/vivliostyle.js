@@ -507,6 +507,7 @@ bleed = auto | LENGTH;
 marks = none | [ crop || cross ];
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
 crop-offset = auto | LENGTH;
+crop-marks-line-color = auto | COLOR;
 
 /* CSS Page Floats */
 float-reference = inline | column | region | page;

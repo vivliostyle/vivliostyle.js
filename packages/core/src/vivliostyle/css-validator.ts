@@ -1400,6 +1400,7 @@ const propsExcludedFromAll = [
   "bleed",
   "conflicting-partitions",
   "crop-offset",
+  "crop-marks-line-color",
   "enabled",
   "flow-consume",
   "flow-from",
