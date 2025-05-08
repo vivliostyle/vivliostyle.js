@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.32.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.2...v2.32.0) (2025-05-08)
+
+### Bug Fixes
+
+- Do not ignore prefixed CSS properties such as -webkit-line-clamp ([fdf4290](https://github.com/vivliostyle/vivliostyle.js/commit/fdf4290f0d84aa130302e3421d34ed07eb78b924)), closes [#1489](https://github.com/vivliostyle/vivliostyle.js/issues/1489)
+- Fix table fragmentation problem overflowing page area ([79b8689](https://github.com/vivliostyle/vivliostyle.js/commit/79b8689a7e229d3421dba256e3703b859077aaa6)), closes [#1475](https://github.com/vivliostyle/vivliostyle.js/issues/1475)
+- **viewer:** Do not remove console output in vivliostyle-viewer.js ([216181a](https://github.com/vivliostyle/vivliostyle.js/commit/216181acb4f85b18d565306fcbd36549ab5589ae))
+
+### Features
+
+- Add crop-marks-line-color property for at-page rule ([ced404a](https://github.com/vivliostyle/vivliostyle.js/commit/ced404a99a7f1e4766e7e740b1f3327083d71dd1)), closes [#1502](https://github.com/vivliostyle/vivliostyle.js/issues/1502)
+- Support CSS font descriptors: size-adjust, ascent-override, etc. ([2b024e8](https://github.com/vivliostyle/vivliostyle.js/commit/2b024e80dd5649e1e0aaaade8d0eacf802aa2dc2)), closes [#1478](https://github.com/vivliostyle/vivliostyle.js/issues/1478) [#1484](https://github.com/vivliostyle/vivliostyle.js/issues/1484)
+
 ## [2.31.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.1...v2.31.2) (2025-04-07)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.32.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.2...v2.32.0) (2025-05-08)
+
+### Bug Fixes
+
+- **viewer:** Do not remove console output in vivliostyle-viewer.js ([216181a](https://github.com/vivliostyle/vivliostyle.js/commit/216181acb4f85b18d565306fcbd36549ab5589ae))
+
 ## [2.31.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.1...v2.31.2) (2025-04-07)
 
 **Note:** Version bump only for package @vivliostyle/viewer
