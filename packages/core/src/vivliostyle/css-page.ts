@@ -379,11 +379,15 @@ export function createPrinterMarkSvg(
 export function createPrinterMarkElement(
   doc: Document,
   lineWidth: number,
+  lineColor: Css.Val,
   elementType?: string,
 ): Element {
   elementType = elementType || "polyline";
   const line = doc.createElementNS(Base.NS.SVG, elementType);
-  line.setAttribute("stroke", "#010101");
+  line.setAttribute(
+    "stroke",
+    lineColor === Css.ident.auto ? "#010101" : lineColor.toString(),
+  );
   line.setAttribute("stroke-width", lineWidth);
   line.setAttribute("fill", "none");
   return line;
@@ -407,6 +411,7 @@ export function createCornerMark(
   doc: Document,
   position: CornerMarkPosition,
   lineWidth: number,
+  lineColor: Css.Val,
   cropMarkLineLength: number,
   bleed: number,
   offset: number,
@@ -444,10 +449,10 @@ export function createCornerMark(
     points1 = points1.map((p) => [p[0], bleed + maxLineLength - p[1]]);
     points2 = points2.map((p) => [p[0], bleed + maxLineLength - p[1]]);
   }
-  const line1 = createPrinterMarkElement(doc, lineWidth);
+  const line1 = createPrinterMarkElement(doc, lineWidth, lineColor);
   line1.setAttribute("points", points1.map((p) => p.join(",")).join(" "));
   mark.appendChild(line1);
-  const line2 = createPrinterMarkElement(doc, lineWidth);
+  const line2 = createPrinterMarkElement(doc, lineWidth, lineColor);
   line2.setAttribute("points", points2.map((p) => p.join(",")).join(" "));
   mark.appendChild(line2);
   position.split(" ").forEach((side) => {
@@ -474,6 +479,7 @@ export function createCrossMark(
   doc: Document,
   position: CrossMarkPosition,
   lineWidth: number,
+  lineColor: Css.Val,
   lineLength: number,
   offset: number,
 ): Element {
@@ -491,16 +497,16 @@ export function createCrossMark(
     height = longLineLength;
   }
   const mark = createPrinterMarkSvg(doc, width, height);
-  const horizontalLine = createPrinterMarkElement(doc, lineWidth);
+  const horizontalLine = createPrinterMarkElement(doc, lineWidth, lineColor);
   horizontalLine.setAttribute(
     "points",
     `0,${height / 2} ${width},${height / 2}`,
   );
   mark.appendChild(horizontalLine);
-  const verticalLine = createPrinterMarkElement(doc, lineWidth);
+  const verticalLine = createPrinterMarkElement(doc, lineWidth, lineColor);
   verticalLine.setAttribute("points", `${width / 2},0 ${width / 2},${height}`);
   mark.appendChild(verticalLine);
-  const circle = createPrinterMarkElement(doc, lineWidth, "circle");
+  const circle = createPrinterMarkElement(doc, lineWidth, lineColor, "circle");
   circle.setAttribute("cx", width / 2);
   circle.setAttribute("cy", height / 2);
   circle.setAttribute("r", lineLength / 4);
@@ -576,6 +582,14 @@ export function addPrinterMarks(
   );
   const lineLength = evaluatedPageSizeAndBleed.bleedOffset - printerMarkOffset;
 
+  const lineColorCV = cascadedPageStyle[
+    "crop-marks-line-color"
+  ] as CssCascade.CascadeValue;
+  const lineColor =
+    lineColorCV && !Css.isDefaultingValue(lineColorCV.value)
+      ? lineColorCV.value
+      : Css.ident.auto;
+
   // corner marks
   if (crop) {
     Object.keys(CornerMarkPosition).forEach((key) => {
@@ -584,6 +598,7 @@ export function addPrinterMarks(
         doc,
         position,
         lineWidth,
+        lineColor,
         lineLength,
         bleed,
         printerMarkOffset,
@@ -600,6 +615,7 @@ export function addPrinterMarks(
         doc,
         position,
         lineWidth,
+        lineColor,
         lineLength,
         printerMarkOffset,
       );
