@@ -1849,9 +1849,16 @@ function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
     return;
   }
   // Find row elements that only have rowspanning cells and empty cells.
-  const spanStartRows = tbodyElement.querySelectorAll(
-    ":scope>tr:has(>:empty):not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
-  );
+  let spanStartRows: NodeListOf<HTMLTableRowElement>;
+  try {
+    spanStartRows = tbodyElement.querySelectorAll(
+      ":scope>tr:has(>:empty):not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
+    );
+  } catch (e) {
+    // Do nothing if the browser does not support `:has()` to avoid error.
+    // (Workaround for issue #1509)
+    return;
+  }
   if (spanStartRows.length === 0) {
     return;
   }
