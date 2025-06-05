@@ -1641,6 +1641,10 @@ export class ViewFactory
    * @returns forced break type, or "auto" for unforced break, or null for not break
    */
   private getBreakTypeAt(nodeContext: Vtree.NodeContext): string | null {
+    // Skip break detection for tables; fragmentation is handled by table.ts
+    if (this.isInsideTable(nodeContext)) {
+      return null;
+    }
     for (let nc = nodeContext; nc && !nc.after; nc = nc.parent) {
       if (Break.isForcedBreakValue(nc.breakBefore)) {
         return nc.breakBefore; // forced break
@@ -1693,6 +1697,15 @@ export class ViewFactory
     } else {
       return "auto"; // unforced break
     }
+  }
+
+  private isInsideTable(nodeContext: Vtree.NodeContext): boolean {
+    for (let nc = nodeContext; nc && !nc.after; nc = nc.parent) {
+      if (nc.display && nc.display.startsWith("table")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private processAfterIfcontinues(
