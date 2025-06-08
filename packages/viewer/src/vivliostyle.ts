@@ -18,13 +18,4 @@
  */
 
 import * as Vivliostyle from "@vivliostyle/core";
-
-declare global {
-  interface Window {
-    Vivliostyle: typeof Vivliostyle;
-  }
-}
-
-export default process.env.NODE_ENV === "production"
-  ? Vivliostyle
-  : window.Vivliostyle;
+export default Vivliostyle;
