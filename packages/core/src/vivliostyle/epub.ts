@@ -1600,8 +1600,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
               // Save the scopes and restore them after re-rendering page.
               // This is necessary for :blank page selector to work.
-              // (fix for issue #1131)
-              const scopes = Object.entries(viewItem.instance.scopes);
+              // (fix for issues #1131 and #1513)
+              const scopes = viewItem.instance.scopes;
+              viewItem.instance.scopes = {};
 
               this.counterStore.pushPageCounters(refs.pageCounters);
               this.counterStore.pushReferencesToSolve(refs.refs);
@@ -1612,7 +1613,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
                   currentPageType;
                 viewItem.instance.styler.cascade.previousPageType =
                   previousPageType;
-                viewItem.instance.scopes = Object.fromEntries(scopes);
+                viewItem.instance.scopes = scopes;
                 this.counterStore.popPageCounters();
                 this.counterStore.popReferencesToSolve();
                 const resultPosition = result.pageAndPosition.position;

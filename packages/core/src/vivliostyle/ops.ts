@@ -1806,12 +1806,12 @@ export class StyleInstance
     if (cp.page > LIMIT_PAGES) {
       throw new Error(`Too many pages generated (over ${LIMIT_PAGES} pages)`);
     }
-    cp.page++;
 
     const startSide = cp.startSideOfFlow("body");
     cp.isBlankPage =
       Break.isSpreadBreakValue(startSide) && this.matchPageSide(startSide);
     page.isBlankPage = cp.isBlankPage;
+    cp.page++;
 
     if (page.pageType == null) {
       page.pageType =
