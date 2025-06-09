@@ -186,6 +186,7 @@ export const VivliostyleViewportCss = `
     --viv-devicePixelRatio: 1 !important;
     zoom: normal !important;
     transform: none !important;
+    print-color-adjust: exact;
   }
 
   @supports (zoom: 8) {
