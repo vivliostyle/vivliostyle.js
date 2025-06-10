@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.32.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.32.0...v2.32.1) (2025-06-10)
+
+### Bug Fixes
+
+- Avoid error in older browsers not supporting `:has()` selector ([b7f88fc](https://github.com/vivliostyle/vivliostyle.js/commit/b7f88fc6a820217562d732ae5ffd444382cf8e3e)), closes [#1509](https://github.com/vivliostyle/vivliostyle.js/issues/1509)
+- Fix :blank page selector misapplied to next page using target-counter() ([325cfba](https://github.com/vivliostyle/vivliostyle.js/commit/325cfbae9c473595185ac49f46acbeb433b2c3ef)), closes [#1513](https://github.com/vivliostyle/vivliostyle.js/issues/1513)
+- Set print-color-adjust:exact to avoid background graphics from being removed ([3d736a3](https://github.com/vivliostyle/vivliostyle.js/commit/3d736a395e4e2a344091a51e91fde2fccb6532d7))
+
 # [2.32.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.31.2...v2.32.0) (2025-05-08)
 
 ### Bug Fixes
