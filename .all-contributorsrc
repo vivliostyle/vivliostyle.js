@@ -196,6 +196,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/68331166?v=4",
       "profile": "https://github.com/MoamenAbdelsattar",
       "contributions": ["code"]
+    },
+    {
+      "login": "wtszaikin",
+      "name": "Sergey Zaikin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/165770291?v=4",
+      "profile": "https://github.com/wtszaikin",
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7
