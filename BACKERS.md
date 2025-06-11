@@ -13,8 +13,6 @@ Current support amounts are **$97 for Monthly Sponsors and $210 for One-time Spo
 libroworks💐
 <p><a href="https://github.com/hidaruma"><img src="https://avatars3.githubusercontent.com/u/12541582?s=460&amp;v=4" title="Tatsuro YOKOTA" width="60" height="60" style="max-width:100%;"></a>
 Tatsuro YOKOTA🌹
-<p><a href="https://github.com/udon-a"><img src="https://avatars1.githubusercontent.com/u/6390122?s=460&amp;v=4" title="udon-a" width="60" height="60" style="max-width:100%;"></a>
-udon-a🌹
 <p><a href="https://github.com/ryoutakano"><img src="https://avatars1.githubusercontent.com/u/22651308?s=460&amp;v=4" title="Ryou Takano" width="60" height="60" style="max-width:100%;"></a>
 Ryou Takano🌹
 <p><a href="https://github.com/lostandfound"><img src="https://avatars1.githubusercontent.com/u/596183?s=460&amp;v=4" title="Hiroshi Takase" width="60" height="60" style="max-width:100%;"></a>
@@ -46,8 +44,6 @@ USAMI Kenta⭐️
 omasanori⭐️
 <p><a href="https://github.com/monami-ya"><img src="https://avatars3.githubusercontent.com/u/4535778?s=460&amp;v=4" title="monami-ya" width="60" height="60" style="max-width:100%;"></a>
 monami-ya⭐️
-<p><a href="https://github.com/Atelier-Mirai"><img src="https://avatars3.githubusercontent.com/u/6257661?s=460&amp;v=4" title="Atelier Mirai" width="60" height="60" style="max-width:100%;"></a>
-Atelier Mirai⭐️
 
 ### Past Sponsors
 
@@ -55,6 +51,8 @@ Atelier Mirai⭐️
 youchan🌹
 <p><a href="https://github.com/azettl"><img src="https://avatars.githubusercontent.com/u/644570?v=4" title="azettl" width="60" height="60" style="max-width:100%;"></a>
 azettl🌹
+<p><a href="https://github.com/udon-a"><img src="https://avatars1.githubusercontent.com/u/6390122?s=460&amp;v=4" title="udon-a" width="60" height="60" style="max-width:100%;"></a>
+udon-a🌹
 <p><a href="https://github.com/sarashino"><img src="https://avatars3.githubusercontent.com/u/52805712?s=460&amp;v=4" title="sarashino" width="60" height="60" style="max-width:100%;"></a>
 sarashino🌟
 <p><a href="https://github.com/monaka"><img src="https://avatars.githubusercontent.com/u/101795?v=4" title="monaka" width="60" height="60" style="max-width:100%;"></a>
@@ -65,6 +63,8 @@ okuzawats⭐️
 niszet⭐️
 <p><a href="https://github.com/yuji-1980"><img src="https://avatars.githubusercontent.com/u/67959695?v=4" title="yuji-1980" width="60" height="60" style="max-width:100%;"></a>
 yuji-1980⭐️
+<p><a href="https://github.com/Atelier-Mirai"><img src="https://avatars3.githubusercontent.com/u/6257661?s=460&amp;v=4" title="Atelier Mirai" width="60" height="60" style="max-width:100%;"></a>
+Atelier Mirai⭐️
 
 ## One-time Sponsors
 
