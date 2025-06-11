@@ -148,6 +148,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/daisuke-tanabe"><img src="https://avatars.githubusercontent.com/u/15145374?v=4?s=80" width="80px;" alt="daisuke-tanabe"/><br /><sub><b>daisuke-tanabe</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=daisuke-tanabe" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://twitter.com/#!/kwi"><img src="https://avatars.githubusercontent.com/u/1468181?v=4?s=80" width="80px;" alt="Hiroaki KAWAI"/><br /><sub><b>Hiroaki KAWAI</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=hkwi" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://enochgao.github.io/"><img src="https://avatars.githubusercontent.com/u/41459067?v=4?s=80" width="80px;" alt="Enoch Gao"/><br /><sub><b>Enoch Gao</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=EnochGao" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/MoamenAbdelsattar"><img src="https://avatars.githubusercontent.com/u/68331166?v=4?s=80" width="80px;" alt="Moamen Abdelsattar"/><br /><sub><b>Moamen Abdelsattar</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=MoamenAbdelsattar" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
