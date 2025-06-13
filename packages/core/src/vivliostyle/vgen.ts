@@ -917,6 +917,8 @@ export class ViewFactory
         floatSide === Css.ident.block_end ||
         floatSide === Css.ident.snap_block ||
         floatSide === Css.ident.snap_inline ||
+        floatSide === Css.ident.inside ||
+        floatSide === Css.ident.outside ||
         floatSide === Css.ident.footnote;
       if (floatSide) {
         // Don't want to set it in view DOM CSS.
@@ -948,6 +950,8 @@ export class ViewFactory
           clearSide === Css.ident.inline_end ||
           clearSide === Css.ident.block_start ||
           clearSide === Css.ident.block_end ||
+          clearSide === Css.ident.inside ||
+          clearSide === Css.ident.outside ||
           clearSide === Css.ident.both ||
           clearSide === Css.ident.all ||
           clearSide === Css.ident.same
@@ -2276,6 +2280,8 @@ export class ViewFactory
       this.sourceNode?.parentElement === null &&
       !!this.viewRoot?.parentElement;
 
+    this.resolveMarginInsideOutside(computedStyle);
+
     const propList = Object.keys(computedStyle);
     propList.sort(Css.processingOrderFn);
     let fontSize: Css.Val;
@@ -2343,6 +2349,35 @@ export class ViewFactory
       } else {
         Base.setCSSProperty(target, propName, value.toString());
       }
+    }
+  }
+
+  private resolveMarginInsideOutside(computedStyle: {
+    [key: string]: Css.Val;
+  }): void {
+    const marginInside = computedStyle["margin-inside"];
+    const marginOutside = computedStyle["margin-outside"];
+    if (marginInside) {
+      if (
+        marginInside !== Css.ident.none &&
+        !Css.isDefaultingValue(marginInside)
+      ) {
+        computedStyle[
+          this.page.side === "left" ? "margin-right" : "margin-left"
+        ] = marginInside;
+      }
+      delete computedStyle["margin-inside"];
+    }
+    if (marginOutside) {
+      if (
+        marginOutside !== Css.ident.none &&
+        !Css.isDefaultingValue(marginOutside)
+      ) {
+        computedStyle[
+          this.page.side === "left" ? "margin-left" : "margin-right"
+        ] = marginOutside;
+      }
+      delete computedStyle["margin-outside"];
     }
   }
 

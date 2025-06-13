@@ -286,7 +286,7 @@ border-image-outset = [NUM | LENGTH]{1,4};
 border-image-repeat = [ stretch | repeat | round | space ]{1,2};
 bottom = APLENGTH;
 caption-side = top | bottom;
-clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | both | all | same;
+clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | inside | outside | both | all | same;
 clip = rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 color = COLOR;
 LIST_STYLE_TYPE = IDENT;
@@ -405,6 +405,9 @@ max-inline-size = NPLENGTH | MIN_MAX_FIT_CONTENT;
 min-block-size = APLENGTH | MIN_MAX_FIT_CONTENT;
 min-inline-size = APLENGTH | MIN_MAX_FIT_CONTENT;
 
+margin-inside = none | auto | APLENGTH;
+margin-outside = none | auto | APLENGTH;
+
 SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) |
     polygon( SPACE(PLENGTH+)+ );
 [epubx]shape-inside = SHAPE;
@@ -512,7 +515,7 @@ crop-marks-line-color = auto | COLOR;
 
 /* CSS Page Floats */
 float-reference = inline | column | region | page;
-float = none | footnote | [ block-start || block-end || inline-start || inline-end || snap-block || snap-inline || left || right || top || bottom ];
+float = none | footnote | [ block-start || block-end || inline-start || inline-end || snap-block || snap-inline || left || right || top || bottom || inside || outside ];
 float-min-wrap-block = PPLENGTH;
 
 /* CSS Ruby */

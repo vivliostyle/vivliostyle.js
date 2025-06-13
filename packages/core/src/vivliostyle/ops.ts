@@ -1837,6 +1837,20 @@ export class StyleInstance
     // Calculate calc()
     this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);
 
+    if (!isTocBox) {
+      const isLeftPage = new Exprs.Named(this.style.pageScope, "left-page");
+      page.side = isLeftPage.evaluate(this)
+        ? Constants.PageSide.LEFT
+        : Constants.PageSide.RIGHT;
+
+      page.container.setAttribute(
+        "data-vivliostyle-page-side",
+        page.side as string,
+      );
+
+      this.resolvePageMarginInsideOutside(cascadedPageStyle, page.side);
+    }
+
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
@@ -1917,13 +1931,6 @@ export class StyleInstance
       .then(() => {
         pageMaster.adjustPageLayout(this, page, this.clientLayout);
         if (!isTocBox) {
-          const isLeftPage = new Exprs.Named(
-            pageMaster.pageBox.scope,
-            "left-page",
-          );
-          page.side = isLeftPage.evaluate(this)
-            ? Constants.PageSide.LEFT
-            : Constants.PageSide.RIGHT;
           this.processLinger();
           cp = this.currentLayoutPosition;
           Object.keys(cp.flowPositions).forEach((flowName) => {
@@ -1947,6 +1954,34 @@ export class StyleInstance
         frame.finish(cp);
       });
     return frame.result();
+  }
+
+  private resolvePageMarginInsideOutside(
+    elementStyle: CssCascade.ElementStyle,
+    pageSide: Constants.PageSide,
+  ): void {
+    for (const name in elementStyle) {
+      if (name === "margin-inside" || name === "margin-outside") {
+        const marginX = elementStyle[name] as CssCascade.CascadeValue;
+        if (marginX) {
+          if (
+            marginX.value !== Css.ident.none &&
+            !Css.isDefaultingValue(marginX.value)
+          ) {
+            elementStyle[
+              (pageSide === "left") === (name === "margin-inside")
+                ? "margin-right"
+                : "margin-left"
+            ] = marginX;
+          }
+        }
+      } else if (CssCascade.isMapName(name)) {
+        const pseudoMap = CssCascade.getStyleMap(elementStyle, name);
+        for (const pseudoName in pseudoMap) {
+          this.resolvePageMarginInsideOutside(pseudoMap[pseudoName], pageSide);
+        }
+      }
+    }
   }
 
   /**
