@@ -662,6 +662,8 @@ export const propertiesAppliedToPartition = (() => {
     props[`border-${side}-style`] = true;
     props[`border-${side}-color`] = true;
   });
+  props["margin-inside"] = true;
+  props["margin-outside"] = true;
   return props;
 })();
 

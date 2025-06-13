@@ -1064,6 +1064,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext.floatSide,
       nodeContext.vertical,
       nodeContext.direction,
+      (this.layoutContext as Vgen.ViewFactory).page.side,
     );
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
@@ -2684,6 +2685,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           clear,
           nodeContext.vertical,
           nodeContext.direction,
+          (this.layoutContext as Vgen.ViewFactory).page.side,
         )
       : clear;
     switch (clearLR) {

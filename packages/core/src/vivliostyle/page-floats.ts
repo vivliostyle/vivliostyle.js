@@ -19,6 +19,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Css from "./css";
+import * as Constants from "./constants";
 import * as GeometryUtil from "./geometry-util";
 import * as Logging from "./logging";
 import * as CssLogicalUtil from "./css-logical-util";
@@ -68,6 +69,7 @@ export function resolveInlineFloatDirection(
   floatSide: string,
   vertical: boolean,
   direction: string,
+  pageSide: Constants.PageSide,
 ): string {
   const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {
@@ -94,6 +96,10 @@ export function resolveInlineFloatDirection(
     } else if (lineRelativeValue === "line-right") {
       floatSide = "right";
     }
+  } else if (floatSide === "inside") {
+    floatSide = pageSide === "left" ? "right" : "left";
+  } else if (floatSide === "outside") {
+    floatSide = pageSide === "left" ? "left" : "right";
   }
   if (floatSide !== "left" && floatSide !== "right") {
     Logging.logger.warn(`Invalid float value: ${floatSide}. Fallback to left.`);
@@ -796,6 +802,20 @@ export class PageFloatLayoutContext
   private toLogical(side: string): string {
     const writingMode = this.writingMode.toString();
     const direction = this.direction.toString();
+
+    if (side === "inside" || side === "outside") {
+      const isLeftPage = !!this.container.element.closest(
+        "[data-vivliostyle-page-side='left']",
+      );
+      side =
+        side === "inside"
+          ? isLeftPage
+            ? "right"
+            : "left"
+          : isLeftPage
+            ? "left"
+            : "right";
+    }
     return CssLogicalUtil.toLogical(side, writingMode, direction);
   }
 
