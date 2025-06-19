@@ -26,6 +26,7 @@ import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import { StyleInstance } from "./ops";
 import * as Vtree from "./vtree";
 
 export let keyCount: number = 1;
@@ -952,11 +953,17 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       context,
       this.parentInstance ? this.parentInstance.rtl : false,
     );
+    const isLeftPage = !!(
+      context instanceof StyleInstance &&
+      context.currentLayoutPosition &&
+      new Exprs.Named(scope, "left-page").evaluate(context)
+    );
     CssCascade.convertToPhysical(
       cascMap,
       style,
       this.vertical,
       this.rtl,
+      isLeftPage,
       (name, cascVal) => cascVal.value,
     );
     this.autoWidth = new Exprs.Native(
@@ -1653,6 +1660,7 @@ export const passContentProperties = [
   "line-height",
   "letter-spacing",
   "text-align",
+  "text-align-last",
   "text-decoration",
   "text-indent",
   "text-transform",

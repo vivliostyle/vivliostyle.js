@@ -490,11 +490,17 @@ export class ViewFactory
       return value;
     };
 
+    const isLeftPage = !!new Exprs.Named(
+      (context as any).style.pageScope,
+      "left-page",
+    ).evaluate(context);
+
     CssCascade.convertToPhysical(
       cascMap,
       computedStyle,
       vertical,
       rtl,
+      isLeftPage,
       transform,
     );
 
@@ -917,6 +923,8 @@ export class ViewFactory
         floatSide === Css.ident.block_end ||
         floatSide === Css.ident.snap_block ||
         floatSide === Css.ident.snap_inline ||
+        floatSide === Css.ident.inside ||
+        floatSide === Css.ident.outside ||
         floatSide === Css.ident.footnote;
       if (floatSide) {
         // Don't want to set it in view DOM CSS.
@@ -948,6 +956,8 @@ export class ViewFactory
           clearSide === Css.ident.inline_end ||
           clearSide === Css.ident.block_start ||
           clearSide === Css.ident.block_end ||
+          clearSide === Css.ident.inside ||
+          clearSide === Css.ident.outside ||
           clearSide === Css.ident.both ||
           clearSide === Css.ident.all ||
           clearSide === Css.ident.same
