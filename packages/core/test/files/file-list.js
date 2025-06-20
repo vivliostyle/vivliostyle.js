@@ -152,6 +152,23 @@ module.exports = [
     ],
   },
   {
+    category: "Spread inside/outside properties",
+    files: [
+      {
+        file: "spread-inside-outside/spread-inside-outside.html",
+        title: "Spread inside/outside properties",
+      },
+      {
+        file: "spread-inside-outside/float-inside-outside.html",
+        title: "Float inside/outside values",
+      },
+      {
+        file: "spread-inside-outside/page-float-inside-outside.html",
+        title: "Page float inside/outside values",
+      },
+    ],
+  },
+  {
     category: "Leader",
     files: [
       { file: "leader/content-leader.html", title: "content: leader()" },

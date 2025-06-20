@@ -1064,6 +1064,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext.floatSide,
       nodeContext.vertical,
       nodeContext.direction,
+      (this.layoutContext as Vgen.ViewFactory).page.side,
     );
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
@@ -2679,13 +2680,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this,
       );
     }
-    const clearLR = /^(top|bottom|(block|inline)-(start|end))$/.test(clear)
-      ? PageFloats.resolveInlineFloatDirection(
-          clear,
-          nodeContext.vertical,
-          nodeContext.direction,
-        )
-      : clear;
+    const clearLR =
+      /^(top|bottom|inside|outside|(block|inline)-(start|end))$/.test(clear)
+        ? PageFloats.resolveInlineFloatDirection(
+            clear,
+            nodeContext.vertical,
+            nodeContext.direction,
+            (this.layoutContext as Vgen.ViewFactory).page.side,
+          )
+        : clear;
     switch (clearLR) {
       case "left":
         clearEdge = dir * Math.max(clearEdge * dir, this.leftFloatEdge * dir);

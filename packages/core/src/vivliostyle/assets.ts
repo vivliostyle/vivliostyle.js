@@ -286,7 +286,7 @@ border-image-outset = [NUM | LENGTH]{1,4};
 border-image-repeat = [ stretch | repeat | round | space ]{1,2};
 bottom = APLENGTH;
 caption-side = top | bottom;
-clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | both | all | same;
+clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | inside | outside | both | all | same;
 clip = rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 color = COLOR;
 LIST_STYLE_TYPE = IDENT;
@@ -358,7 +358,7 @@ position = static | relative | absolute | fixed | running(IDENT);
 quotes = [STRING STRING]+ | none | auto;
 right = APLENGTH;
 table-layout = auto | fixed;
-text-align = left | right | center | justify | start | end;
+text-align = left | right | center | justify | start | end | match-parent | inside | outside;
 text-indent = PLENGTH;
 text-transform = capitalize | uppercase | lowercase | none;
 top = APLENGTH;
@@ -404,6 +404,19 @@ max-block-size = NPLENGTH | MIN_MAX_FIT_CONTENT;
 max-inline-size = NPLENGTH | MIN_MAX_FIT_CONTENT;
 min-block-size = APLENGTH | MIN_MAX_FIT_CONTENT;
 min-inline-size = APLENGTH | MIN_MAX_FIT_CONTENT;
+
+margin-inside = auto | APLENGTH;
+margin-outside = auto | APLENGTH;
+padding-inside = PPLENGTH;
+padding-outside = PPLENGTH;
+border-inside-color = BORDER_SIDE_COLOR;
+border-outside-color = BORDER_SIDE_COLOR;
+border-inside-style = BORDER_SIDE_STYLE;
+border-outside-style = BORDER_SIDE_STYLE;
+border-inside-width = BORDER_SIDE_WIDTH;
+border-outside-width = BORDER_SIDE_WIDTH;
+inside = APLENGTH;
+outside = APLENGTH;
 
 SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) |
     polygon( SPACE(PLENGTH+)+ );
@@ -512,7 +525,7 @@ crop-marks-line-color = auto | COLOR;
 
 /* CSS Page Floats */
 float-reference = inline | column | region | page;
-float = none | footnote | [ block-start || block-end || inline-start || inline-end || snap-block || snap-inline || left || right || top || bottom ];
+float = none | footnote | [ block-start || block-end || inline-start || inline-end || snap-block || snap-inline || left || right || top || bottom || inside || outside ];
 float-min-wrap-block = PPLENGTH;
 
 /* CSS Ruby */
@@ -526,7 +539,7 @@ ruby-position = over | under | inter-character;
 [webkit]line-break = auto | loose | normal | strict | anywhere;
 overflow-wrap = normal | break-word | anywhere;
 [moz]tab-size = NNEG_INT | NNEG_LENGTH;
-[moz]text-align-last = auto | start | end | left | right | center | justify;
+[moz]text-align-last = auto | start | end | left | right | center | justify | inside | outside;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
 text-spacing-trim = auto | normal | space-all | trim-both | trim-auto |
@@ -734,14 +747,20 @@ border-block-start-color: currentColor;
 border-block-end-color: currentColor;
 border-inline-start-color: currentColor;
 border-inline-end-color: currentColor;
+border-inside-color: currentColor;
+border-outside-color: currentColor;
 border-block-start-style: none;
 border-block-end-style: none;
 border-inline-start-style: none;
 border-inline-end-style: none;
+border-inside-style: none;
+border-outside-style: none;
 border-block-start-width: 3px;
 border-block-end-width: 3px;
 border-inline-start-width: 3px;
 border-inline-end-width: 3px;
+border-inside-width: 3px;
+border-outside-width: 3px;
 
 SHORTHANDS
 
@@ -752,6 +771,8 @@ border-top = border-top-width border-top-style border-top-color;
 border-right = border-right-width border-right-style border-right-color;
 border-bottom = border-bottom-width border-bottom-style border-bottom-color;
 border-left = border-left-width border-left-style border-left-color;
+border-inside = border-inside-width border-inside-style border-inside-color;
+border-outside = border-outside-width border-outside-style border-outside-color;
 border-width = INSETS border-top-width border-right-width border-bottom-width border-left-width;
 border-style = INSETS border-top-style border-right-style border-bottom-style border-left-style;
 border-color = INSETS border-top-color border-right-color border-bottom-color border-left-color;
@@ -797,6 +818,8 @@ inset-block-start = block-start;
 inset-block-end = block-end;
 inset-inline-start = inline-start;
 inset-inline-end = inline-end;
+inset-inside = inside;
+inset-outside = outside;
 inset-block = INSETS block-start block-end;
 inset-inline = INSETS inline-start inline-end;
 inset = INSETS top right bottom left;

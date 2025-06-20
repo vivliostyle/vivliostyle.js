@@ -247,6 +247,16 @@ export const couplingMapHorRtl = buildCouplingMap(
   { "block-size": "height", "inline-size": "width" },
 );
 
+const couplingMapLeftPage = buildCouplingMap(
+  { inside: "right", outside: "left" },
+  {},
+);
+
+const couplingMapRightPage = buildCouplingMap(
+  { inside: "left", outside: "right" },
+  {},
+);
+
 export class CascadeValue {
   constructor(
     public readonly value: Css.Val,
@@ -4698,34 +4708,61 @@ export const convertToPhysical = <T>(
   dest: { [key: string]: T },
   vertical: boolean,
   rtl: boolean,
+  leftPageSide: boolean,
   transform: (p1: string, p2: CascadeValue) => T,
 ) => {
-  const couplingMap = vertical
+  // for logical properties
+  const couplingMap1 = vertical
     ? rtl
       ? couplingMapVertRtl
       : couplingMapVert
     : rtl
       ? couplingMapHorRtl
       : couplingMapHor;
+
+  // for margin-inside/outside properties
+  const couplingMap2 = leftPageSide
+    ? couplingMapLeftPage
+    : couplingMapRightPage;
+
   for (const propName in src) {
-    if (src.hasOwnProperty(propName)) {
-      const cascVal = src[propName];
-      if (!cascVal) {
+    let cascVal = src[propName];
+    if (!cascVal) {
+      continue;
+    }
+    const coupledName1 = couplingMap1[propName];
+    const coupledName2 = couplingMap2[propName];
+    let coupledName = coupledName1 ?? coupledName2;
+    let targetName: string;
+    if (coupledName) {
+      let coupledCascVal = src[coupledName];
+      if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
         continue;
       }
-      const coupledName = couplingMap[propName];
-      let targetName: string;
-      if (coupledName) {
-        const coupledCascVal = src[coupledName];
+      if (coupledName1 && coupledName2 && coupledName1 !== coupledName2) {
+        coupledName = coupledName2;
+        coupledCascVal = src[coupledName];
         if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
           continue;
         }
-        targetName = geomNames[coupledName] ? coupledName : propName;
-      } else {
-        targetName = propName;
       }
-      dest[targetName] = transform(propName, cascVal);
+      targetName = geomNames[coupledName] ? coupledName : propName;
+    } else {
+      targetName = propName;
+      if (
+        propName.startsWith("text-align") &&
+        (cascVal.value === Css.ident.inside ||
+          cascVal.value === Css.ident.outside)
+      ) {
+        cascVal = new CascadeValue(
+          leftPageSide === (cascVal.value === Css.ident.inside)
+            ? Css.ident.right
+            : Css.ident.left,
+          cascVal.priority,
+        );
+      }
     }
+    dest[targetName] = transform(propName, cascVal);
   }
 };
 

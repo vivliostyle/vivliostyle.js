@@ -1837,6 +1837,18 @@ export class StyleInstance
     // Calculate calc()
     this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);
 
+    if (!isTocBox) {
+      const isLeftPage = new Exprs.Named(this.style.pageScope, "left-page");
+      page.side = isLeftPage.evaluate(this)
+        ? Constants.PageSide.LEFT
+        : Constants.PageSide.RIGHT;
+
+      page.container.setAttribute(
+        "data-vivliostyle-page-side",
+        page.side as string,
+      );
+    }
+
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
@@ -1917,13 +1929,6 @@ export class StyleInstance
       .then(() => {
         pageMaster.adjustPageLayout(this, page, this.clientLayout);
         if (!isTocBox) {
-          const isLeftPage = new Exprs.Named(
-            pageMaster.pageBox.scope,
-            "left-page",
-          );
-          page.side = isLeftPage.evaluate(this)
-            ? Constants.PageSide.LEFT
-            : Constants.PageSide.RIGHT;
           this.processLinger();
           cp = this.currentLayoutPosition;
           Object.keys(cp.flowPositions).forEach((flowName) => {

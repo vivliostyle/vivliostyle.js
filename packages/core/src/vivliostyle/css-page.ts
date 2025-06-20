@@ -641,6 +641,8 @@ export const propertiesAppliedToPartition = (() => {
     "block-end",
     "inline-start",
     "inline-end",
+    "inside",
+    "outside",
   ];
   const props = {
     width: true,
@@ -1864,6 +1866,8 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       hasBorder1("border-block-end-style") ||
       hasBorder1("border-inline-start-style") ||
       hasBorder1("border-inline-end-style") ||
+      hasBorder1("border-inside-style") ||
+      hasBorder1("border-outside-style") ||
       hasBorder1("outline-style")
     );
   }
@@ -2437,7 +2441,8 @@ export class PageManager {
     pageMaster: PageMaster.PageMaster,
   ): string {
     const propsStr = this.makeCascadeValueObjectKey(style);
-    return `${pageMaster.key}^${propsStr}`;
+    const pageMod2 = (this.context as any).currentLayoutPosition?.page % 2;
+    return `${pageMaster.key}^${propsStr}^${pageMod2}`;
   }
 
   private makeCascadeValueObjectKey(object: CssCascade.ElementStyle): string {
