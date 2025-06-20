@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Spread inside/outside properties test</title>
+    <style>
+      :root {
+        font-family: Times, serif;
+        line-height: 1.25;
+      }
+
+      @page {
+        size: a5;
+        margin-top: 15mm;
+        margin-bottom: 15mm;
+        margin-inside: 12mm;
+        margin-outside: 8mm;
+        border-inside: 1mm dotted silver;
+        border-outside: 2mm dashed gray;
+        padding-inside: 12mm;
+        padding-outside: 8mm;
+
+        @top-center {
+          content: "Spread inside/outside properties test";
+          text-align: outside;
+          margin-outside: -8mm;
+          border-outside: 18mm solid gray;
+          padding-outside: 2mm;
+          background: silver;
+        }
+        @bottom-center {
+          content: "Page " counter(page);
+          text-align: outside;
+          margin-outside: -8mm;
+          border-outside: 18mm solid gray;
+          padding-outside: 2mm;
+          background: silver;
+        }
+      }
+
+      code {
+        font-size: 0.8em;
+        background: lightyellow;
+      }
+
+      section {
+        margin-inside: 10mm;
+        border-inside: 1mm dotted orange;
+        padding-inside: 13mm;
+        text-align: inside;
+        text-align-last: outside;
+        background: beige;
+      }
+
+      section > p:nth-child(even) {
+        position: relative;
+        inset-outside: 10mm;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Spread inside/outside properties test</h1>
+    <p>
+      The <code>@page</code> rule has <code>margin-inside: 12mm</code>,
+      <code>margin-outside: 8mm</code>,
+      <code>border-inside: 1mm dotted silver</code>,
+      <code>border-outside: 2mm dashed gray</code>,
+      <code>padding-inside: 12mm</code>, and <code>padding-outside: 8mm</code>.
+    </p>
+    <p>
+      The <code>@top-center</code> and <code>@bottom-center</code> margin boxes
+      have <code>text-align: outside</code>, <code>margin-outside: -8mm</code>,
+      <code>border-outside: 18mm solid gray</code>,
+      <code>padding-outside: 2mm</code>, and <code>background: silver</code>.
+    </p>
+    <p>
+      The following section has <code>margin-inside: 10mm</code>,
+      <code>border-inside: 1mm dotted orange</code>,
+      <code>padding-inside: 13mm</code>, <code>text-align: inside</code>, and
+      <code>text-align-last: outside</code>, and <code>background: beige</code>.
+      The even-numbered paragraphs in the section have
+      <code>position: relative</code>, <code>inset-outside: 10mm</code>, and
+      <code>font-style: italic</code>.
+    </p>
+    <section>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea sapiente
+        corporis ducimus, voluptatem alias eveniet numquam tenetur vel,
+        perspiciatis cupiditate cumque tempora. Incidunt ipsum doloribus,
+        commodi tempore placeat vero quos!
+      </p>
+    </section>
+  </body>
+</html>

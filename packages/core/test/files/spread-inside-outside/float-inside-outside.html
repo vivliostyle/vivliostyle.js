@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Float inside/outside test</title>
+    <style>
+      @page {
+        size: a5;
+        margin: 10mm;
+        @bottom-center {
+          content: "Page " counter(page);
+          font-size: 0.75em;
+        }
+      }
+
+      :root {
+        font-family: Times, serif;
+        line-height: 1.5;
+        text-align: justify;
+      }
+
+      img {
+        border: solid 1px;
+      }
+
+      img.inside {
+        float: inside;
+        clear: inside;
+        margin-outside: 1em;
+      }
+
+      img.outside {
+        float: outside;
+        clear: outside;
+        margin-inside: 1em;
+      }
+
+      pre {
+        font-size: 0.75em;
+        background: lightyellow;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Float inside/outside test</h1>
+    <pre>
+.inside {float: inside; clear: inside; margin-outside: 1em;}
+.outside {float: outside; clear: outside; margin-inside: 1em;}
+</pre
+    >
+    <img
+      src="https://placehold.jp/200x200.png?text=inside"
+      class="inside"
+      alt="inside" />
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore eligendi
+      adipisci, consequatur voluptates cumque voluptas quae! Accusantium quas
+      pariatur natus ea. Porro enim sit laborum, maxime itaque perspiciatis ipsa
+      temporibus. Lorem ipsum dolor sit amet consectetur adipisicing elit.
+      Labore eligendi adipisci, consequatur voluptates cumque voluptas quae!
+      Accusantium quas pariatur natus ea. Porro enim sit laborum, maxime itaque
+      perspiciatis ipsa temporibus.
+    </p>
+    <img
+      src="https://placehold.jp/200x200.png?text=outside"
+      class="outside"
+      alt="outside" />
+    <p>
+      Lorem ipsum dolor sit, amet consectetur adipisicing elit. Praesentium
+      inventore eveniet iste nostrum saepe harum voluptates expedita aliquid,
+      accusantium repellendus tempora facilis laudantium illum fuga tempore
+      pariatur ducimus atque est. Lorem ipsum dolor sit, amet consectetur
+      adipisicing elit. Praesentium inventore eveniet iste nostrum saepe harum
+      voluptates expedita aliquid, accusantium repellendus tempora facilis
+      laudantium illum fuga tempore pariatur ducimus atque est.
+    </p>
+    <img
+      src="https://placehold.jp/200x200.png?text=inside"
+      class="inside"
+      alt="inside" />
+    <img
+      src="https://placehold.jp/200x200.png?text=inside"
+      class="inside"
+      alt="inside" />
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis mollitia
+      aliquam sapiente soluta sunt sint explicabo reiciendis dignissimos
+      doloribus perferendis. Laboriosam perferendis modi eaque sit odit
+      similique, voluptate dolorum libero! Lorem ipsum dolor sit amet
+      consectetur adipisicing elit. Debitis mollitia aliquam sapiente soluta
+      sunt sint explicabo reiciendis dignissimos doloribus perferendis.
+      Laboriosam perferendis modi eaque sit odit similique, voluptate dolorum
+      libero!
+    </p>
+    <img
+      src="https://placehold.jp/200x200.png?text=outside"
+      class="outside"
+      alt="outside" />
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit
+      voluptatibus blanditiis quibusdam at ad repudiandae et, sint eius! Aliquam
+      doloribus id, quod aut quibusdam facilis labore eos tenetur assumenda
+      earum. Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit
+      voluptatibus blanditiis quibusdam at ad repudiandae et, sint eius! Aliquam
+      doloribus id, quod aut quibusdam facilis labore eos tenetur assumenda
+      earum.
+    </p>
+    <img
+      src="https://placehold.jp/200x200.png?text=inside"
+      class="inside"
+      alt="inside" />
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus,
+      cumque. Quisquam, voluptatum. Quasi, cumque. Doloribus, cumque. Quisquam,
+      voluptatum. Quasi, cumque. Doloribus, cumque. Quisquam, voluptatum. Quasi,
+      cumque. Lorem ipsum dolor sit amet consectetur adipisicing elit.
+      Doloribus, cumque. Quisquam, voluptatum. Quasi, cumque. Doloribus, cumque.
+      Quisquam, voluptatum. Quasi, cumque. Doloribus, cumque. Quisquam,
+      voluptatum. Quasi, cumque.
+    </p>
+    <img
+      src="https://placehold.jp/200x200.png?text=outside"
+      class="outside"
+      alt="outside" />
+    <img
+      src="https://placehold.jp/200x200.png?text=inside"
+      class="inside"
+      alt="inside" />
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem impedit
+      temporibus sunt cupiditate, dolore consequuntur accusantium, dicta
+      corrupti repellendus, odit adipisci atque vitae autem modi enim delectus
+      libero molestias ullam. Lorem ipsum dolor sit amet consectetur adipisicing
+      elit. Rem impedit temporibus sunt cupiditate, dolore consequuntur
+      accusantium, dicta corrupti repellendus, odit adipisci atque vitae autem
+      modi enim delectus libero molestias ullam.
+    </p>
+  </body>
+</html>
