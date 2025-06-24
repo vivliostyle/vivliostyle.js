@@ -793,7 +793,7 @@ export class OPFDoc {
       transformURL(url: string, baseURL: string): string {
         const r = url.match(/^([^#]*)#?(.*)$/);
         if (r) {
-          const path = r[1] || baseURL;
+          const path = r[1] || baseURL.replace(/\?viv-toc-box$/, "");
           const fragment = decodeURIComponent(r[2]);
           if (path) {
             if (self.spine.some((item) => item.src === path)) {
