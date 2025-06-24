@@ -888,7 +888,10 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
   override apply(cascadeInstance: CascadeInstance): void {
     const elem = cascadeInstance.currentElement;
     if (elem instanceof HTMLAnchorElement) {
-      if (elem.hash && elem.href == elem.baseURI + elem.hash) {
+      if (
+        elem.hash &&
+        elem.href == elem.baseURI.replace(/#.*$/, "") + elem.hash
+      ) {
         const id = elem.hash.substring(1);
         const target = elem.ownerDocument.getElementById(id);
         if (
