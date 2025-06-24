@@ -213,16 +213,24 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         if (!opfXML) {
           this.reportLoadError(url);
         } else {
-          this.loadAsPlainXML(`${pubURL}META-INF/encryption.xml`).then(
-            (encXML) => {
-              opf = new OPFDoc(this, pubURL);
-              opf.initWithXMLDoc(opfXML, encXML).then(() => {
-                this.opfByURL[url] = opf;
-                this.primaryOPFByEPubURL[pubURL] = opf;
-                frame.finish(opf);
-              });
-            },
-          );
+          opf = new OPFDoc(this, pubURL);
+          this.opfByURL[url] = opf;
+          this.primaryOPFByEPubURL[pubURL] = opf;
+          if (this.plainXMLStore.resources[pubURL + "META-INF/container.xml"]) {
+            this.loadAsPlainXML(pubURL + "META-INF/encryption.xml").then(
+              (encXML) => {
+                opf.initWithXMLDoc(opfXML, encXML).then(() => {
+                  frame.finish(opf);
+                });
+              },
+            );
+          } else {
+            // OPF file is directly specified, not via container.xml.
+            // In this case, encryption.xml is not available.
+            opf.initWithXMLDoc(opfXML, null).then(() => {
+              frame.finish(opf);
+            });
+          }
         }
       },
     );
