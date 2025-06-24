@@ -34,6 +34,9 @@ export default {
     return str.replace(/%26/g, "&").replace(/%25/g, "%");
   },
   percentEncodeForDataURI(str: string): string {
-    return encodeURI(str).replace(/#/g, "%23").replace(/&/g, "%26");
+    return encodeURI(str)
+      .replace(/\?/g, "%3F")
+      .replace(/#/g, "%23")
+      .replace(/&/g, "%26");
   },
 };
