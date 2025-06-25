@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.33.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.32.1...v2.33.0) (2025-06-25)
+
+### Bug Fixes
+
+- Fix EPUB footnote (epub:type="footnote") not working (Regression in v2.31.2) ([3190e39](https://github.com/vivliostyle/vivliostyle.js/commit/3190e391cd82a2e5950722beb5ad076b37c37db1)), closes [#1461](https://github.com/vivliostyle/vivliostyle.js/issues/1461) [#1521](https://github.com/vivliostyle/vivliostyle.js/issues/1521)
+- Fix Vivliostyle Viewer TOC links not working with data URL HTML ([8cb927f](https://github.com/vivliostyle/vivliostyle.js/commit/8cb927fffa3718be2cf869aae094a3aef6e8014c)), closes [#1496](https://github.com/vivliostyle/vivliostyle.js/issues/1496)
+- Prevent 404 error for META-INF/encryption.xml when EPUB OPF file is directly specified ([b56a03f](https://github.com/vivliostyle/vivliostyle.js/commit/b56a03ff207b8d16365ba76252ad7f75d6a0c34f)), closes [#1523](https://github.com/vivliostyle/vivliostyle.js/issues/1523)
+
+### Features
+
+- Add page spread inside/outside support for CSS margin, float, etc. properties ([3e7eb1c](https://github.com/vivliostyle/vivliostyle.js/commit/3e7eb1c1112c53fee60e33d1a6dac8dc08113e45)), closes [#1508](https://github.com/vivliostyle/vivliostyle.js/issues/1508)
+
 ## [2.32.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.32.0...v2.32.1) (2025-06-10)
 
 ### Bug Fixes
