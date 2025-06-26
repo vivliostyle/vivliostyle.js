@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.33.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.33.0...v2.33.1) (2025-06-26)
+
+### Bug Fixes
+
+- Fix cascading between _-inside/outside and _-inline-start/end properties ([7fd5cfc](https://github.com/vivliostyle/vivliostyle.js/commit/7fd5cfc35bc3a52abdad9ef18f972b450b56b303)), closes [#1529](https://github.com/vivliostyle/vivliostyle.js/issues/1529)
+
 # [2.33.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.32.1...v2.33.0) (2025-06-25)
 
 ### Bug Fixes
