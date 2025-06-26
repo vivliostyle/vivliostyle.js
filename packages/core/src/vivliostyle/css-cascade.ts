@@ -4733,8 +4733,10 @@ export const convertToPhysical = <T>(
     if (!cascVal) {
       continue;
     }
-    const coupledName1 = couplingMap1[propName];
-    const coupledName2 = couplingMap2[propName];
+    const coupledName1 =
+      couplingMap1[propName] ?? couplingMap1[couplingMap2[propName]];
+    const coupledName2 =
+      couplingMap2[propName] ?? couplingMap2[couplingMap1[propName]];
     let coupledName = coupledName1 ?? coupledName2;
     let targetName: string;
     if (coupledName) {
