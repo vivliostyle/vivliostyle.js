@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.33.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.33.1...v2.33.2) (2025-06-30)
+
+### Bug Fixes
+
+- Fix margin-inline-start/end on at-page not working (Regression in v2.33.1) ([e868812](https://github.com/vivliostyle/vivliostyle.js/commit/e868812d0a644005ec44b4cbc21abb48a6e90c88)), closes [#1531](https://github.com/vivliostyle/vivliostyle.js/issues/1531) [#1530](https://github.com/vivliostyle/vivliostyle.js/issues/1530)
+
 ## [2.33.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.33.0...v2.33.1) (2025-06-26)
 
 ### Bug Fixes
