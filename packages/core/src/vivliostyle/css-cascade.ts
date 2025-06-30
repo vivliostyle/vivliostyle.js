@@ -4751,7 +4751,11 @@ export const convertToPhysical = <T>(
           continue;
         }
       }
-      targetName = geomNames[coupledName] ? coupledName : propName;
+      targetName = geomNames[coupledName1]
+        ? coupledName1
+        : geomNames[coupledName2]
+          ? coupledName2
+          : propName;
     } else {
       targetName = propName;
       if (
