@@ -29,8 +29,8 @@ NoBooking🌟
 vvakame🌟
 <p><a href="https://github.com/y-mikou"><img src="https://avatars3.githubusercontent.com/u/11554223?s=460&amp;v=4" title="y-mikou" width="60" height="60" style="max-width:100%;"></a>
 y-mikou🌟
-<p><a href="https://github.com/U-1F992"><img src="https://avatars3.githubusercontent.com/u/57749636?s=460&amp;v=4" title="U-1F992" width="60" height="60" style="max-width:100%;"></a>
-U-1F992🌟
+<p><a href="https://github.com/u1f992"><img src="https://avatars.githubusercontent.com/u/57749636?v=4" title="u1f992" width="60" height="60" style="max-width:100%;"></a>
+u1f992🌟
 <p><a href="https://github.com/yamahige"><img src="https://avatars.githubusercontent.com/u/28525542?v=4" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
 yamahige🌟
 <p><a href="https://github.com/munepi"><img src="https://avatars3.githubusercontent.com/u/583148?s=460&amp;v=4" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
@@ -78,6 +78,8 @@ hatena🥉
 MarianoCh🌹
 <p><a href="https://github.com/Songmu"><img src="https://avatars.githubusercontent.com/u/177122?v=4" title="Songmu" width="60" height="60" style="max-width:100%;"></a>
 Masayuki Matsuki🌹
+<p><a href="https://github.com/u1f992"><img src="https://avatars.githubusercontent.com/u/57749636?v=4" title="u1f992" width="60" height="60" style="max-width:100%;"></a>
+u1f992🌹
 
 ### Fan Sponsor
 
