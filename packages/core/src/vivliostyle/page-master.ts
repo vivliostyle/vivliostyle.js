@@ -21,7 +21,7 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
-import { PageRuleMasterInstance } from "./css-page";
+import { PageRuleMaster, PageRuleMasterInstance } from "./css-page";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
@@ -1836,9 +1836,13 @@ export class PartitionInstance<
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    if (!page.pageAreaElement) {
+    if (!(this.pageBox.pageMaster instanceof PageRuleMaster)) {
       // The overflow property of a `@-epubx-partition` is set by default to hidden.
       Base.setCSSProperty(container.element, "overflow", "hidden");
+      container.element.setAttribute(
+        "data-vivliostyle-page-partition",
+        this.pageBox.name ?? "",
+      );
     }
     super.prepareContainer(context, container, page, docFaces, clientLayout);
   }

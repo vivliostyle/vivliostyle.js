@@ -1236,7 +1236,7 @@ export class StyleInstance
     layoutContainer: Vtree.Container,
   ) {
     if (
-      boxInstance instanceof CssPage.PageRulePartitionInstance ||
+      boxInstance instanceof CssPage.PageAreaPartitionInstance ||
       (boxInstance instanceof PageMaster.PageMasterInstance &&
         !(boxInstance instanceof CssPage.PageRuleMasterInstance))
     ) {

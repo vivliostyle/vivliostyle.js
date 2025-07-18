@@ -2346,7 +2346,7 @@ export class ViewFactory
       ) {
         // Fix for Issue #568
         Base.setCSSProperty(
-          this.page.pageAreaElement.parentElement,
+          this.page.pageAreaElement.parentElement.parentElement,
           propName,
           value.toString(),
         );
