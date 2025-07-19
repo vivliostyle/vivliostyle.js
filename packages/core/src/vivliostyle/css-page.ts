@@ -625,7 +625,7 @@ export function addPrinterMarks(
 }
 
 /**
- * Properties transfered from the PageRuleMaster to the PageRulePartition
+ * Properties transferred from the PageRuleMaster to the PageRulePartition
  */
 export const propertiesAppliedToPartition = (() => {
   const sides = [
@@ -860,7 +860,6 @@ export const marginBoxesKey: string = "_marginBoxes";
  * @param style Cascaded style for `@page` rules
  */
 export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance> {
-  private bodyPartitionKey: string;
   private pageMarginBoxes = {} as {
     [key: string]: PageMarginBoxPartition;
   };
@@ -873,7 +872,6 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
     super(scope, null, pageRuleMasterPseudoName, [], parent, null, 0);
     const pageSize = resolvePageSizeAndBleed(style as any);
     const partition = new PageRulePartition(this.scope, this, style, pageSize);
-    this.bodyPartitionKey = partition.key;
     this.createPageMarginBoxes(style);
     this.applySpecified(style, pageSize);
   }
@@ -915,7 +913,9 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
     }
   }
 
-  override createInstance(parentInstance): PageRuleMasterInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageRuleMasterInstance {
     return new PageRuleMasterInstance(parentInstance, this);
   }
 }
@@ -932,7 +932,7 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
     public readonly pageSize: PageSize,
   ) {
     super(scope, null, null, [], parent);
-    this.specified["z-index"] = new CssCascade.CascadeValue(new Css.Int(0), 0);
+    const partition = new PageAreaPartition(this.scope, this);
     this.applySpecified(style);
   }
 
@@ -941,13 +941,11 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
    * PageBox
    */
   private applySpecified(style: CssCascade.ElementStyle) {
-    this.specified["flow-from"] = new CssCascade.CascadeValue(
-      Css.getName("body"),
+    this.specified["wrap-flow"] = new CssCascade.CascadeValue(
+      Css.ident.auto,
       0,
     );
-
-    // Use absolute positioning so that this partition's margins don't collapse
-    // with its parent's margins
+    this.specified["z-index"] = new CssCascade.CascadeValue(new Css.Int(0), 0);
     this.specified["position"] = new CssCascade.CascadeValue(
       Css.ident.absolute,
       0,
@@ -963,8 +961,26 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
     }
   }
 
-  override createInstance(parentInstance): PageMaster.PageBoxInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageRulePartitionInstance {
     return new PageRulePartitionInstance(parentInstance, this);
+  }
+}
+
+export class PageAreaPartition extends PageMaster.Partition<PageAreaPartitionInstance> {
+  constructor(scope: Exprs.LexicalScope, parent: PageRulePartition) {
+    super(scope, null, null, [], parent);
+    this.specified["flow-from"] = new CssCascade.CascadeValue(
+      Css.getName("body"),
+      0,
+    );
+  }
+
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageMaster.PageBoxInstance {
+    return new PageAreaPartitionInstance(parentInstance, this);
   }
 }
 
@@ -1018,7 +1034,9 @@ export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPa
     }
   }
 
-  override createInstance(parentInstance): PageMaster.PageBoxInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageMaster.PageBoxInstance {
     return new PageMarginBoxPartitionInstance(parentInstance, this);
   }
 }
@@ -1453,7 +1471,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
   ): void {
     super.prepareContainer(context, container, page, docFaces, clientLayout);
 
-    // Add an attribute to the element so that it can be refered from external
+    // Add an attribute to the element so that it can be referred from external
     // style sheets.
     container.element.setAttribute("data-vivliostyle-page-box", true);
   }
@@ -1669,12 +1687,9 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     cascade: CssCascade.CascadeInstance,
     docElementStyle: CssCascade.ElementStyle,
   ): void {
-    const style = this.cascaded;
     for (const name in docElementStyle) {
-      if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
-        if (name.match(/^column.*$/) || name.match(/^background-/)) {
-          style[name] = docElementStyle[name];
-        }
+      if (name.match(/^background-/)) {
+        this.cascaded[name] = docElementStyle[name];
       }
     }
     super.applyCascadeAndInit(cascade, docElementStyle);
@@ -1809,34 +1824,12 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     // containing block is resized to coincide with the margin edges of the page
     // box." (CSS Paged Media http://dev.w3.org/csswg/css-page/#page-model)
 
-    if (
-      pageSize.width !== Css.fullWidth ||
-      pageSize.height !== Css.fullHeight ||
-      this.hasBorderOrOutline() ||
-      (marginStart instanceof Exprs.Numeric && marginStart.num < 0) ||
-      (marginEnd instanceof Exprs.Numeric && marginEnd.num < 0)
-    ) {
-      style[startSide] = new Css.Expr(marginStart);
-      style[endSide] = new Css.Expr(marginEnd);
-      style[`margin-${startSide}`] = Css.numericZero;
-      style[`margin-${endSide}`] = Css.numericZero;
-      style[`border-${startSide}-width`] = new Css.Expr(borderStartWidth);
-      style[`border-${endSide}-width`] = new Css.Expr(borderEndWidth);
-    } else {
-      // If page size is auto and page box has no border or outline and margins are not negative,
-      // use transparent borders for page margins. This is to improve text selection behavior.
-      style[startSide] = Css.numericZero;
-      style[endSide] = Css.numericZero;
-      style[`margin-${startSide}`] = Css.numericZero;
-      style[`margin-${endSide}`] = Css.numericZero;
-      style[`border-${startSide}-width`] = new Css.Expr(marginStart);
-      style[`border-${endSide}-width`] = new Css.Expr(marginEnd);
-      style[`border-${startSide}-style`] = Css.ident.solid;
-      style[`border-${endSide}-style`] = Css.ident.solid;
-      style[`border-${startSide}-color`] = Css.ident.transparent;
-      style[`border-${endSide}-color`] = Css.ident.transparent;
-      style["background-clip"] = Css.ident.padding_box;
-    }
+    style[startSide] = new Css.Expr(marginStart);
+    style[endSide] = new Css.Expr(marginEnd);
+    style[`margin-${startSide}`] = Css.numericZero;
+    style[`margin-${endSide}`] = Css.numericZero;
+    style[`border-${startSide}-width`] = new Css.Expr(borderStartWidth);
+    style[`border-${endSide}-width`] = new Css.Expr(borderEndWidth);
     style[`padding-${startSide}`] = new Css.Expr(paddingStart);
     style[`padding-${endSide}`] = new Css.Expr(paddingEnd);
     style[extentName] = new Css.Expr(extent);
@@ -1852,24 +1845,83 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     };
   }
 
-  private hasBorderOrOutline(): boolean {
-    const hasBorder1 = (propName: string): boolean => {
-      const propValue = CssCascade.getProp(this.cascaded, propName)?.value;
-      return !!propValue && propValue !== Css.ident.none;
-    };
-    return (
-      hasBorder1("border-top-style") ||
-      hasBorder1("border-bottom-style") ||
-      hasBorder1("border-left-style") ||
-      hasBorder1("border-right-style") ||
-      hasBorder1("border-block-start-style") ||
-      hasBorder1("border-block-end-style") ||
-      hasBorder1("border-inline-start-style") ||
-      hasBorder1("border-inline-end-style") ||
-      hasBorder1("border-inside-style") ||
-      hasBorder1("border-outside-style") ||
-      hasBorder1("outline-style")
+  override prepareContainer(
+    context: Exprs.Context,
+    container: Vtree.Container,
+    page: Vtree.Page,
+    docFaces: Font.DocumentFaces,
+    clientLayout: Vtree.ClientLayout,
+  ): void {
+    super.prepareContainer(context, container, page, docFaces, clientLayout);
+    container.element.setAttribute(
+      "data-vivliostyle-page-area-container",
+      true,
     );
+  }
+}
+
+export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<PageAreaPartition> {
+  constructor(
+    parentInstance: PageMaster.PageBoxInstance,
+    pageAreaPartition: PageAreaPartition,
+  ) {
+    super(parentInstance, pageAreaPartition);
+  }
+
+  override applyCascadeAndInit(
+    cascade: CssCascade.CascadeInstance,
+    docElementStyle: CssCascade.ElementStyle,
+  ): void {
+    for (const name in docElementStyle) {
+      if (name.match(/^column.*$/)) {
+        this.cascaded[name] = docElementStyle[name];
+      }
+    }
+    super.applyCascadeAndInit(cascade, {});
+  }
+
+  override initHorizontal(): void {
+    const style = this.style;
+    const parentStyle = this.parentInstance.style;
+    const scope = this.pageBox.scope;
+    style["left"] = parentStyle["padding-left"];
+    style["width"] = parentStyle["width"];
+
+    // Use negative margins and transparent borders to improve text selection behavior.
+    style["margin-left"] = new Css.Expr(
+      new Exprs.Negate(scope, parentStyle["left"].toExpr(scope, null)),
+    );
+    style["margin-right"] = new Css.Expr(
+      new Exprs.Negate(scope, parentStyle["right"].toExpr(scope, null)),
+    );
+    style["border-left-width"] = parentStyle["left"];
+    style["border-right-width"] = parentStyle["right"];
+    style["border-left-style"] = Css.ident.solid;
+    style["border-right-style"] = Css.ident.solid;
+    style["border-left-color"] = Css.ident.transparent;
+    style["border-right-color"] = Css.ident.transparent;
+  }
+
+  override initVertical(): void {
+    const style = this.style;
+    const parentStyle = this.parentInstance.style;
+    const scope = this.pageBox.scope;
+    style["top"] = parentStyle["padding-top"];
+    style["height"] = parentStyle["height"];
+
+    // Use negative margins and transparent borders to improve text selection behavior.
+    style["margin-top"] = new Css.Expr(
+      new Exprs.Negate(scope, parentStyle["top"].toExpr(scope, null)),
+    );
+    style["margin-bottom"] = new Css.Expr(
+      new Exprs.Negate(scope, parentStyle["bottom"].toExpr(scope, null)),
+    );
+    style["border-top-width"] = parentStyle["top"];
+    style["border-bottom-width"] = parentStyle["bottom"];
+    style["border-top-style"] = Css.ident.solid;
+    style["border-bottom-style"] = Css.ident.solid;
+    style["border-top-color"] = Css.ident.transparent;
+    style["border-bottom-color"] = Css.ident.transparent;
   }
 
   override prepareContainer(
@@ -1881,6 +1933,7 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
   ): void {
     page.pageAreaElement = container.element as HTMLElement;
     super.prepareContainer(context, container, page, docFaces, clientLayout);
+    container.element.setAttribute("data-vivliostyle-page-area", true);
 
     // Set page area size for vw/vh unit calculation
     context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
@@ -1912,6 +1965,10 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
   ): void {
     this.applyVerticalAlign(context, container.element);
     super.prepareContainer(context, container, page, docFaces, clientLayout);
+    container.element.setAttribute(
+      "data-vivliostyle-page-margin-box",
+      this.pageBox.marginBoxName,
+    );
   }
 
   private applyVerticalAlign(context: Exprs.Context, element: Element) {
@@ -1965,7 +2022,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
    * Calculate page-margin boxes positions along the variable dimension of the
    * page. For CENTER and END margin boxes, the position is calculated only if
    * the dimension (width or height) is non-auto, so that it can be resolved at
-   * this point. If the dimension is auto, the calculation is deffered.
+   * this point. If the dimension is auto, the calculation is deferred.
    */
   private positionAlongVariableDimension(
     names: { start: string; end: string; extent: string },
@@ -2405,7 +2462,7 @@ export class PageManager {
   ): PageMaster.PageMasterInstance {
     const pageMaster = pageMasterInstance.pageBox as PageMaster.PageMaster;
 
-    // If no properies are specified in @page rules, use the original page
+    // If no properties are specified in @page rules, use the original page
     // master.
     if (Object.keys(cascadedPageStyle).length === 0) {
       pageMaster.resetScope();
