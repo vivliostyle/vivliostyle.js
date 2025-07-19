@@ -913,7 +913,9 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
     }
   }
 
-  override createInstance(parentInstance): PageRuleMasterInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageRuleMasterInstance {
     return new PageRuleMasterInstance(parentInstance, this);
   }
 }
@@ -959,7 +961,9 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
     }
   }
 
-  override createInstance(parentInstance): PageMaster.PageBoxInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageRulePartitionInstance {
     return new PageRulePartitionInstance(parentInstance, this);
   }
 }
@@ -973,7 +977,9 @@ export class PageAreaPartition extends PageMaster.Partition<PageAreaPartitionIns
     );
   }
 
-  override createInstance(parentInstance): PageMaster.PageBoxInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageMaster.PageBoxInstance {
     return new PageAreaPartitionInstance(parentInstance, this);
   }
 }
@@ -1028,7 +1034,9 @@ export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPa
     }
   }
 
-  override createInstance(parentInstance): PageMaster.PageBoxInstance {
+  override createInstance(
+    parentInstance: PageMaster.PageBoxInstance,
+  ): PageMaster.PageBoxInstance {
     return new PageMarginBoxPartitionInstance(parentInstance, this);
   }
 }

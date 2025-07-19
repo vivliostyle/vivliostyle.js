@@ -185,7 +185,7 @@ export class PageMaster<
     // this.specified["top"] = new CssCascade.CascadeValue(new Css.Numeric(-1, "px"), 0);
   }
 
-  override createInstance(parentInstance): PageBoxInstance {
+  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
     return new PageMasterInstance(parentInstance, this);
   }
 
@@ -279,7 +279,7 @@ export class Partition<
     }
   }
 
-  override createInstance(parentInstance): PageBoxInstance {
+  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
     return new PartitionInstance(parentInstance, this);
   }
 
