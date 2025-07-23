@@ -1176,6 +1176,7 @@ export namespace Vtree {
     vertical: boolean; // vertical writing
     rtl: boolean;
     element: Element;
+    borderBoxSizing: boolean;
 
     getInsetTop(): number;
     getInsetBottom(): number;

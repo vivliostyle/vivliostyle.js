@@ -424,6 +424,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   vertical: boolean = false;
   rtl: boolean = false;
   suppressEmptyBoxGeneration: boolean = false;
+  borderBoxSizing: boolean = false;
 
   constructor(
     public readonly parentInstance: PageBoxInstance,
@@ -953,6 +954,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       context,
       this.parentInstance ? this.parentInstance.rtl : false,
     );
+    this.borderBoxSizing =
+      cascMap["box-sizing"]?.value === Css.ident.border_box;
     const isLeftPage = !!(
       context instanceof StyleInstance &&
       context.currentLayoutPosition &&
@@ -1343,6 +1346,16 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         docFaces,
       );
     }
+
+    if (this.style["text-overflow"]) {
+      // To ensure that text-overflow works, we need to set text-overflow and
+      // overflow on the child element, because the container element is a
+      // flex container and the text-overflow does not work on it.
+      // (Issue #1473)
+      const child = container.element.firstElementChild;
+      Base.setCSSProperty(child, "text-overflow", "inherit");
+      Base.setCSSProperty(child, "overflow", "inherit");
+    }
   }
 
   transferSingleUriContentProps(
@@ -1612,6 +1625,7 @@ export const passPreProperties = [
   "border-right-color",
   "border-top-color",
   "border-bottom-color",
+  "box-sizing",
   "outline-style",
   "outline-color",
   "outline-width",
@@ -1627,6 +1641,10 @@ export const passPostProperties = [
   "border-top-right-radius",
   "border-bottom-right-radius",
   "border-bottom-left-radius",
+  "border-start-start-radius",
+  "border-start-end-radius",
+  "border-end-start-radius",
+  "border-end-end-radius",
   "border-image-source",
   "border-image-slice",
   "border-image-width",
@@ -1640,6 +1658,7 @@ export const passPostProperties = [
   "background-clip",
   "background-origin",
   "background-size",
+  "box-shadow",
   "opacity",
   "z-index",
   "background-blend-mode",
@@ -1665,6 +1684,9 @@ export const passContentProperties = [
   "text-indent",
   "text-transform",
   "white-space",
+  "text-wrap",
+  "text-wrap-mode",
+  "text-wrap-style",
   "word-spacing",
   "font-feature-settings",
   "font-kerning",
@@ -1678,6 +1700,7 @@ export const passContentProperties = [
   "text-decoration-color",
   "text-decoration-line",
   "text-decoration-skip",
+  "text-decoration-skip-ink",
   "text-decoration-style",
   "text-decoration-thickness",
   "text-emphasis",
@@ -1689,7 +1712,9 @@ export const passContentProperties = [
   "text-shadow",
   "text-stroke-color",
   "text-stroke-width",
+  "text-underline-offset",
   "text-underline-position",
+  "text-overflow",
 ];
 
 export const passSingleUriContentProperties = [

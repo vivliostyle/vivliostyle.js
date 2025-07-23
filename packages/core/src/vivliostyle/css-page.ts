@@ -656,6 +656,17 @@ export const propertiesAppliedToPartition = (() => {
     "outline-width": true,
     "outline-style": true,
     "outline-color": true,
+    "border-radius": true,
+    "border-top-left-radius": true,
+    "border-top-right-radius": true,
+    "border-bottom-right-radius": true,
+    "border-bottom-left-radius": true,
+    "border-start-start-radius": true,
+    "border-start-end-radius": true,
+    "border-end-start-radius": true,
+    "border-end-end-radius": true,
+    "box-shadow": true,
+    "box-sizing": true,
   };
   sides.forEach((side) => {
     props[`margin-${side}`] = true;
@@ -1469,11 +1480,10 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    super.prepareContainer(context, container, page, docFaces, clientLayout);
-
     // Add an attribute to the element so that it can be referred from external
     // style sheets.
     container.element.setAttribute("data-vivliostyle-page-box", true);
+    super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
 }
 
@@ -1671,6 +1681,8 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
 export class PageRulePartitionInstance extends PageMaster.PartitionInstance<PageRulePartition> {
   borderBoxWidth: Exprs.Val = null;
   borderBoxHeight: Exprs.Val = null;
+  contentBoxWidth: Exprs.Val = null;
+  contentBoxHeight: Exprs.Val = null;
   marginTop: Exprs.Val = null;
   marginRight: Exprs.Val = null;
   marginBottom: Exprs.Val = null;
@@ -1712,6 +1724,7 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       extent: "width",
     });
     this.borderBoxWidth = dim.borderBoxExtent;
+    this.contentBoxWidth = dim.contentBoxExtent;
     this.marginLeft = dim.marginStart;
     this.marginRight = dim.marginEnd;
   }
@@ -1723,6 +1736,7 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       extent: "height",
     });
     this.borderBoxHeight = dim.borderBoxExtent;
+    this.contentBoxHeight = dim.contentBoxExtent;
     this.marginTop = dim.marginStart;
     this.marginBottom = dim.marginEnd;
   }
@@ -1735,11 +1749,12 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
    * dimension specified in the page at-rules.
    */
   private resolvePageBoxDimensions(names: {
-    start: string;
-    end: string;
-    extent: string;
+    start: "top" | "left";
+    end: "bottom" | "right";
+    extent: "width" | "height";
   }): {
     borderBoxExtent: Exprs.Val;
+    contentBoxExtent: Exprs.Val;
     marginStart: Exprs.Val;
     marginEnd: Exprs.Val;
   } {
@@ -1783,18 +1798,17 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       style[`border-${endSide}-style`],
       pageExtent,
     );
-    let remains = Exprs.sub(
+    const borderPaddingSum = Exprs.add(
       scope,
-      pageExtent,
-      Exprs.add(
-        scope,
-        Exprs.add(scope, borderStartWidth, paddingStart),
-        Exprs.add(scope, borderEndWidth, paddingEnd),
-      ),
+      Exprs.add(scope, borderStartWidth, paddingStart),
+      Exprs.add(scope, borderEndWidth, paddingEnd),
     );
 
     // The dimensions are calculated as for a non-replaced block element in
     // normal flow (http://www.w3.org/TR/CSS21/visudet.html#blockwidth)
+    let marginSum: Exprs.Val;
+    let borderBoxExtent: Exprs.Val;
+    let contentBoxExtent: Exprs.Val;
     if (!extent) {
       if (!marginStart) {
         marginStart = scope.zero;
@@ -1802,20 +1816,26 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       if (!marginEnd) {
         marginEnd = scope.zero;
       }
-      extent = Exprs.sub(
-        scope,
-        remains,
-        Exprs.add(scope, marginStart, marginEnd),
-      );
+      marginSum = Exprs.add(scope, marginStart, marginEnd);
+      borderBoxExtent = Exprs.sub(scope, pageExtent, marginSum);
+      contentBoxExtent = Exprs.sub(scope, borderBoxExtent, borderPaddingSum);
+      extent = this.borderBoxSizing ? borderBoxExtent : contentBoxExtent;
     } else {
-      remains = Exprs.sub(scope, remains, extent);
+      if (this.borderBoxSizing) {
+        borderBoxExtent = extent;
+        contentBoxExtent = Exprs.sub(scope, borderBoxExtent, borderPaddingSum);
+      } else {
+        contentBoxExtent = extent;
+        borderBoxExtent = Exprs.add(scope, contentBoxExtent, borderPaddingSum);
+      }
+      marginSum = Exprs.sub(scope, pageExtent, borderBoxExtent);
       if (!marginStart && !marginEnd) {
-        marginStart = Exprs.mul(scope, remains, new Exprs.Const(scope, 0.5));
+        marginStart = Exprs.mul(scope, marginSum, new Exprs.Const(scope, 0.5));
         marginEnd = marginStart;
       } else if (marginStart) {
-        marginEnd = Exprs.sub(scope, remains, marginStart);
+        marginEnd = Exprs.sub(scope, marginSum, marginStart);
       } else {
-        marginStart = Exprs.sub(scope, remains, marginEnd);
+        marginStart = Exprs.sub(scope, marginSum, marginEnd);
       }
     }
 
@@ -1835,11 +1855,8 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     style[extentName] = new Css.Expr(extent);
     style[`max-${extentName}`] = new Css.Expr(extent);
     return {
-      borderBoxExtent: Exprs.sub(
-        scope,
-        pageExtent,
-        Exprs.add(scope, marginStart, marginEnd),
-      ),
+      borderBoxExtent,
+      contentBoxExtent,
       marginStart,
       marginEnd,
     };
@@ -1852,11 +1869,11 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    super.prepareContainer(context, container, page, docFaces, clientLayout);
     container.element.setAttribute(
       "data-vivliostyle-page-area-container",
       true,
     );
+    super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
 }
 
@@ -1885,7 +1902,9 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     const parentStyle = this.parentInstance.style;
     const scope = this.pageBox.scope;
     style["left"] = parentStyle["padding-left"];
-    style["width"] = parentStyle["width"];
+    style["width"] = new Css.Expr(
+      (this.parentInstance as PageRulePartitionInstance).contentBoxWidth,
+    );
 
     // Use negative margins and transparent borders to improve text selection behavior.
     style["margin-left"] = new Css.Expr(
@@ -1907,7 +1926,9 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     const parentStyle = this.parentInstance.style;
     const scope = this.pageBox.scope;
     style["top"] = parentStyle["padding-top"];
-    style["height"] = parentStyle["height"];
+    style["height"] = new Css.Expr(
+      (this.parentInstance as PageRulePartitionInstance).contentBoxHeight,
+    );
 
     // Use negative margins and transparent borders to improve text selection behavior.
     style["margin-top"] = new Css.Expr(
@@ -1931,9 +1952,9 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
+    container.element.setAttribute("data-vivliostyle-page-area", true);
     page.pageAreaElement = container.element as HTMLElement;
     super.prepareContainer(context, container, page, docFaces, clientLayout);
-    container.element.setAttribute("data-vivliostyle-page-area", true);
 
     // Set page area size for vw/vh unit calculation
     context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
@@ -1963,12 +1984,12 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    this.applyVerticalAlign(context, container.element);
-    super.prepareContainer(context, container, page, docFaces, clientLayout);
     container.element.setAttribute(
       "data-vivliostyle-page-margin-box",
       this.pageBox.marginBoxName,
     );
+    this.applyVerticalAlign(context, container.element);
+    super.prepareContainer(context, container, page, docFaces, clientLayout);
   }
 
   private applyVerticalAlign(context: Exprs.Context, element: Element) {
@@ -2086,12 +2107,14 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         extent,
         Exprs.add(
           scope,
-          Exprs.add(scope, paddingStart, paddingEnd),
-          Exprs.add(
-            scope,
-            Exprs.add(scope, borderStartWidth, borderEndWidth),
-            Exprs.add(scope, marginStart, marginEnd),
-          ),
+          this.borderBoxSizing
+            ? scope.zero
+            : Exprs.add(
+                scope,
+                Exprs.add(scope, paddingStart, paddingEnd),
+                Exprs.add(scope, borderStartWidth, borderEndWidth),
+              ),
+          Exprs.add(scope, marginStart, marginEnd),
         ),
       );
       switch (this.boxInfo.positionAlongVariableDimension) {
@@ -2131,6 +2154,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
   ): void {
     const style = this.style;
     const scope = this.pageBox.scope;
+    const borderBoxSizing = this.borderBoxSizing;
     const insideName = names.inside;
     const outsideName = names.outside;
     const extentName = names.extent;
@@ -2194,16 +2218,18 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
       };
       const pageMarginValue = pageMargin.evaluate(context);
       let borderAndPadding = 0;
-      [
-        borderInsideWidth,
-        paddingInside,
-        paddingOutside,
-        borderOutsideWidth,
-      ].forEach((x) => {
-        if (x) {
-          borderAndPadding += x.evaluate(context) as number;
-        }
-      });
+      if (!borderBoxSizing) {
+        [
+          borderInsideWidth,
+          paddingInside,
+          paddingOutside,
+          borderOutsideWidth,
+        ].forEach((x) => {
+          if (x) {
+            borderAndPadding += x.evaluate(context) as number;
+          }
+        });
+      }
       if (result.marginInside === null || result.marginOutside === null) {
         const total =
           borderAndPadding +

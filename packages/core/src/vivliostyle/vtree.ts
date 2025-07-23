@@ -1055,23 +1055,36 @@ export class Container implements Vtree.Container {
   snapOffsetY: number = 0;
   vertical: boolean = false; // vertical writing
   rtl: boolean = false;
+  borderBoxSizing: boolean = false;
 
   constructor(public element: Element) {}
 
   getInsetTop() {
-    return this.marginTop + this.borderTop + this.paddingTop;
+    return (
+      this.marginTop +
+      (this.borderBoxSizing ? 0 : this.borderTop + this.paddingTop)
+    );
   }
 
   getInsetBottom() {
-    return this.marginBottom + this.borderBottom + this.paddingBottom;
+    return (
+      this.marginBottom +
+      (this.borderBoxSizing ? 0 : this.borderBottom + this.paddingBottom)
+    );
   }
 
   getInsetLeft() {
-    return this.marginLeft + this.borderLeft + this.paddingLeft;
+    return (
+      this.marginLeft +
+      (this.borderBoxSizing ? 0 : this.borderLeft + this.paddingLeft)
+    );
   }
 
   getInsetRight() {
-    return this.marginRight + this.borderRight + this.paddingRight;
+    return (
+      this.marginRight +
+      (this.borderBoxSizing ? 0 : this.borderRight + this.paddingRight)
+    );
   }
 
   getInsetBefore() {
@@ -1177,6 +1190,7 @@ export class Container implements Vtree.Container {
     this.snapHeight = other.snapHeight;
     this.vertical = other.vertical;
     this.rtl = other.rtl;
+    this.borderBoxSizing = other.borderBoxSizing;
   }
 
   setVerticalPosition(top: number, height: number): void {
@@ -1199,10 +1213,12 @@ export class Container implements Vtree.Container {
         extent +
         this.marginLeft +
         this.marginRight +
-        this.paddingLeft +
-        this.paddingRight +
-        this.borderLeft +
-        this.borderRight;
+        (this.borderBoxSizing
+          ? 0
+          : this.paddingLeft +
+            this.paddingRight +
+            this.borderLeft +
+            this.borderRight);
       this.setHorizontalPosition(
         start + outerExtent * this.getBoxDir(),
         extent,
@@ -1219,10 +1235,12 @@ export class Container implements Vtree.Container {
           extent +
           this.marginTop +
           this.marginBottom +
-          this.paddingTop +
-          this.paddingBottom +
-          this.borderTop +
-          this.borderBottom;
+          (this.borderBoxSizing
+            ? 0
+            : this.paddingTop +
+              this.paddingBottom +
+              this.borderTop +
+              this.borderBottom);
         this.setVerticalPosition(
           start + outerExtent * this.getInlineDir(),
           extent,
@@ -1235,10 +1253,12 @@ export class Container implements Vtree.Container {
         extent +
         this.marginLeft +
         this.marginRight +
-        this.paddingLeft +
-        this.paddingRight +
-        this.borderLeft +
-        this.borderRight;
+        (this.borderBoxSizing
+          ? 0
+          : this.paddingLeft +
+            this.paddingRight +
+            this.borderLeft +
+            this.borderRight);
       this.setHorizontalPosition(
         start + outerExtent * this.getInlineDir(),
         extent,
