@@ -1519,6 +1519,7 @@ export class StyleInstance
     let layoutContainer = new Vtree.Container(boxContainer);
     layoutContainer.vertical = boxInstance.vertical;
     layoutContainer.rtl = boxInstance.rtl;
+    layoutContainer.borderBoxSizing = boxInstance.borderBoxSizing;
     layoutContainer.exclusions = exclusions;
     boxInstance.prepareContainer(
       this,
