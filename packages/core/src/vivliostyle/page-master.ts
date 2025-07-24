@@ -1388,12 +1388,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
 
     for (let i = 0; i < passSingleUriContentProperties.length; i++) {
       const name = passSingleUriContentProperties[i];
-      if (
-        (name === "width" && !hasWidth()) ||
-        (name === "height" && !hasHeight())
-      ) {
-        // Don't propagate width/height to the img element if it's not specified.
-        // (Issue #1177)
+      if (name === "width" || name === "height") {
+        if (
+          (name === "width" && !hasWidth()) ||
+          (name === "height" && !hasHeight())
+        ) {
+          // Don't propagate width/height to the img element if it's not specified.
+          // (Issue #1177)
+          continue;
+        }
+        // Since the width/height is already set on the container element,
+        // we set it to 100% on the img element so that it fills the container.
+        // This is needed for the `box-sizing: border-box` to work correctly.
+        Base.setCSSProperty(element, name, "100%");
         continue;
       }
       this.propagatePropertyToElement(context, element, name, docFaces);
