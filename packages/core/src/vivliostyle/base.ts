@@ -147,6 +147,11 @@ export function resolveURL(relURL: string, baseURL: string): string {
 }
 
 /**
+ * Convert special URLs (e.g. GitHub, Gist) to their raw equivalents.
+ * This is useful for fetching content from these services in a format
+ * that can be easily processed by Vivliostyle.js.
+ *
+ * @param url URL to convert
  * @return converted URL
  */
 export function convertSpecialURL(url: string): string {
@@ -177,6 +182,13 @@ export function convertSpecialURL(url: string): string {
   ) {
     // Convert Gist URL to Gist raw URL
     url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
+  } else if (
+    (r = /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)#file-(.*)-(\w+)$/.exec(
+      url,
+    ))
+  ) {
+    // Convert Gist URL with fragment to Gist raw URL
+    url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[3]}.${r[4]}`;
   } else if (
     (r =
       /^(https?:)\/\/(?:[^/.]+\.)?jsbin\.com\/(?!(?:blog|help)\b)(\w+)((\/\d+)?).*$/.exec(
