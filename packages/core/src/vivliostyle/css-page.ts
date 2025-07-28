@@ -1378,10 +1378,8 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
           startEndSizes.ySize;
       }
     } else {
-      const params = [startBoxParam, endBoxParam].filter((p) => p);
-      const startEndBoxParam = params.length
-        ? new MultipleBoxesMarginBoxSizingParam(params)
-        : null;
+      const params = [startBoxParam, endBoxParam];
+      const startEndBoxParam = new MultipleBoxesMarginBoxSizingParam(params);
       const centerSizes = this.distributeAutoMarginBoxSizes(
         centerBoxParam,
         startEndBoxParam,
@@ -1598,31 +1596,34 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
  * MarginBoxSizingParam with which multiple margin boxes are treated as one
  * margin box. Each method querying a dimension returns the maximum of the boxes
  * multiplied by the number of the boxes.
- * @param params MarginBoxSizingParam's of the target margin boxes.
+ * @param params MarginBoxSizingParam's of the target margin boxes. It allows empty
+ *     parameters, which are treated as zero-sized boxes.
  */
 class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
-  constructor(private readonly params: MarginBoxSizingParam[]) {}
+  constructor(
+    private readonly params: (MarginBoxSizingParam | null | undefined)[],
+  ) {}
 
   /** @override */
   hasAutoSize(): boolean {
-    return this.params.some((p) => p.hasAutoSize());
+    return this.params.some((p) => p?.hasAutoSize() ?? false);
   }
 
   /** @override */
   getOuterMaxContentSize(): number {
-    const sizes = this.params.map((p) => p.getOuterMaxContentSize());
+    const sizes = this.params.map((p) => p?.getOuterMaxContentSize() ?? 0);
     return Math.max.apply(null, sizes) * sizes.length;
   }
 
   /** @override */
   getOuterMinContentSize(): number {
-    const sizes = this.params.map((p) => p.getOuterMinContentSize());
+    const sizes = this.params.map((p) => p?.getOuterMinContentSize() ?? 0);
     return Math.max.apply(null, sizes) * sizes.length;
   }
 
   /** @override */
   getOuterSize(): number {
-    const sizes = this.params.map((p) => p.getOuterSize());
+    const sizes = this.params.map((p) => p?.getOuterSize() ?? 0);
     return Math.max.apply(null, sizes) * sizes.length;
   }
 }
