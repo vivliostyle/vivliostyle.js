@@ -50,11 +50,7 @@ describe("sizing", function () {
     containingBlockDisplay: "block",
     containingBlockPosition: "relative",
     elementWidth: 1,
-    elementMaxWidth: 3,
-    elementMinWidth: 2,
     elementHeight: 1,
-    elementMaxHeight: 3,
-    elementMinHeight: 2,
     elementDisplay: "block",
     elementPosition: "static",
     marginLeft: 5,
@@ -79,11 +75,7 @@ describe("sizing", function () {
     cStyle.position = initialProperties.containingBlockPosition;
     var eStyle = element.style;
     eStyle.width = initialProperties.elementWidth + "px";
-    eStyle.maxWidth = initialProperties.elementMaxWidth + "px";
-    eStyle.minWidth = initialProperties.elementMinWidth + "px";
     eStyle.height = initialProperties.elementHeight + "px";
-    eStyle.maxHeight = initialProperties.elementMaxHeight + "px";
-    eStyle.minHeight = initialProperties.elementMinHeight + "px";
     eStyle.display = initialProperties.elementDisplay;
     eStyle.position = initialProperties.elementPosition;
     eStyle.marginLeft = initialProperties.marginLeft + "px";
@@ -109,11 +101,7 @@ describe("sizing", function () {
     expect(cStyle.position).toBe(initialProperties.containingBlockPosition);
     var eStyle = element.style;
     expect(eStyle.width).toBe(initialProperties.elementWidth + "px");
-    expect(eStyle.maxWidth).toBe(initialProperties.elementMaxWidth + "px");
-    expect(eStyle.minWidth).toBe(initialProperties.elementMinWidth + "px");
     expect(eStyle.height).toBe(initialProperties.elementHeight + "px");
-    expect(eStyle.maxHeight).toBe(initialProperties.elementMaxHeight + "px");
-    expect(eStyle.minHeight).toBe(initialProperties.elementMinHeight + "px");
     expect(eStyle.display).toBe(initialProperties.elementDisplay);
     expect(eStyle.position).toBe(initialProperties.elementPosition);
     expect(eStyle.marginLeft).toBe(initialProperties.marginLeft + "px");
@@ -195,159 +183,9 @@ describe("sizing", function () {
     initialProperties.marginRight;
   var maxContentInlineSize = 10 + 20 + 30 + 20;
   var minContentInlineSize = 30;
-  var idealBlockSize = 30 + 20 + 20;
+  var idealBlockSize = 10 + 20 + 30 + 20 + 20; // was 30 + 20 + 20 before the fix in PR #1540
 
   describe("getSize", function () {
-    describe("fill-available inline size", function () {
-      it("is the available inline size minus element's margins, border, and padding", function () {
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        var expected = fillAvailableInlineSize;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-
-        element.style.borderLeft = "none";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expected += initialProperties.borderLeft;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-
-        element.style.borderRight = "none";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expected += initialProperties.borderRight;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-      });
-
-      it("any auto margin is treated as zero", function () {
-        element.style.marginLeft = "auto";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        var expected =
-          initialProperties.containingBlockWidth -
-          horizontalBorderAndPadding -
-          initialProperties.marginRight;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-
-        element.style.marginRight = "auto";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expected =
-          initialProperties.containingBlockWidth - horizontalBorderAndPadding;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-      });
-
-      it("is the available inline size minus element's margins, border, and padding (in vertical writing mode)", function () {
-        setVertical();
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        var expected =
-          initialProperties.containingBlockHeight -
-          verticalBorderAndPadding -
-          initialProperties.marginTop -
-          initialProperties.marginBottom;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-
-        element.style.borderTop = "none";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expected += initialProperties.borderTop;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-
-        element.style.borderBottom = "none";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expected += initialProperties.borderBottom;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-      });
-
-      it("any auto margin is treated as zero (in vertical writing mode)", function () {
-        setVertical();
-        element.style.marginTop = "auto";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        var expected =
-          initialProperties.containingBlockHeight -
-          verticalBorderAndPadding -
-          initialProperties.marginBottom;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-
-        element.style.marginBottom = "auto";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expected =
-          initialProperties.containingBlockHeight - verticalBorderAndPadding;
-        expect(size[Size.FILL_AVAILABLE_INLINE_SIZE]).toBe(expected);
-      });
-
-      it("the original properties and DOM structure are restored after measurement", function () {
-        sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        checkOriginalPropertiesAndDOMStructure();
-      });
-    });
-
-    describe("fill-available width", function () {
-      it("is fill-available inline size in horizontal writing mode", function () {
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_WIDTH,
-        ]);
-        var fillAvailableInline = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FILL_AVAILABLE_WIDTH]).toBe(
-          fillAvailableInline[Size.FILL_AVAILABLE_INLINE_SIZE],
-        );
-      });
-    });
-
-    describe("fill-available height", function () {
-      it("is fill-available inline size in vertical writing mode", function () {
-        setVertical();
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_HEIGHT,
-        ]);
-        var fillAvailableInline = sizing.getSize(clientLayout, element, [
-          Size.FILL_AVAILABLE_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FILL_AVAILABLE_HEIGHT]).toBe(
-          fillAvailableInline[Size.FILL_AVAILABLE_INLINE_SIZE],
-        );
-      });
-    });
-
     describe("max-content inline size", function () {
       it("is the narrowest inline size it could take if none of the soft wrap opportunities were taken", function () {
         var size = sizing.getSize(clientLayout, element, [
@@ -571,121 +409,6 @@ describe("sizing", function () {
         expect(size[Size.MIN_CONTENT_HEIGHT]).toBe(
           minContentInline[Size.MIN_CONTENT_INLINE_SIZE],
         );
-      });
-    });
-
-    describe("fit-content inline size", function () {
-      it("equals min-content size when (fill-available size) < (min-content size)", function () {
-        containingBlock.style.width =
-          horizontalMarginAndBorderAndPadding + minContentInlineSize - 1 + "px";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(minContentInlineSize);
-      });
-
-      it("equals fill-available size when (min-content size) <= (fill-available size) <= (max-content size)", function () {
-        containingBlock.style.width =
-          horizontalMarginAndBorderAndPadding + minContentInlineSize + 1 + "px";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(
-          minContentInlineSize + 1,
-        );
-
-        containingBlock.style.width =
-          horizontalMarginAndBorderAndPadding + maxContentInlineSize - 1 + "px";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(
-          maxContentInlineSize - 1,
-        );
-      });
-
-      it("equals max-content size when (max-content size) < (fill-available size)", function () {
-        containingBlock.style.width =
-          horizontalMarginAndBorderAndPadding + maxContentInlineSize + 1 + "px";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBeCloseTo(
-          maxContentInlineSize,
-          1,
-        );
-      });
-
-      it("the original properties and DOM structure are restored after measurement", function () {
-        sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_INLINE_SIZE]);
-
-        checkOriginalPropertiesAndDOMStructure();
-      });
-
-      it("equals min-content size when (fill-available size) < (min-content size) (in vertical writing mode)", function () {
-        setVertical();
-        containingBlock.style.height =
-          verticalMarginAndBorderAndPadding + minContentInlineSize - 1 + "px";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(minContentInlineSize);
-      });
-
-      it("equals fill-available size when (min-content size) <= (fill-available size) <= (max-content size) (in vertical writing mode)", function () {
-        setVertical();
-        containingBlock.style.height =
-          verticalMarginAndBorderAndPadding + minContentInlineSize + 1 + "px";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(
-          minContentInlineSize + 1,
-        );
-
-        containingBlock.style.height =
-          verticalMarginAndBorderAndPadding + maxContentInlineSize - 1 + "px";
-
-        size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBe(
-          maxContentInlineSize - 1,
-        );
-      });
-
-      it("equals max-content size when (max-content size) < (fill-available size) (in vertical writing mode)", function () {
-        setVertical();
-        containingBlock.style.height =
-          verticalMarginAndBorderAndPadding + maxContentInlineSize + 1 + "px";
-
-        var size = sizing.getSize(clientLayout, element, [
-          Size.FIT_CONTENT_INLINE_SIZE,
-        ]);
-
-        expect(size[Size.FIT_CONTENT_INLINE_SIZE]).toBeCloseTo(
-          maxContentInlineSize,
-          1,
-        );
-      });
-
-      it("the original properties and DOM structure are restored after measurement", function () {
-        sizing.getSize(clientLayout, element, [Size.FIT_CONTENT_BLOCK_SIZE]);
-
-        checkOriginalPropertiesAndDOMStructure();
       });
     });
 

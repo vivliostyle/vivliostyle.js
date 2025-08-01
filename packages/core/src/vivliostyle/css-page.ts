@@ -1216,7 +1216,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
         const boxInstance = this.pageMarginBoxInstances[name];
         const boxParam = new SingleBoxMarginBoxSizingParam(
           container,
-          (boxInstance as any).style,
+          boxInstance.style,
           isHorizontal,
           scope,
           clientLayout,
@@ -1273,7 +1273,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       );
       needRecalculate = false;
       [START, CENTER, END].forEach((name) => {
-        sizes[name] = maxOuterSizes[name] || sizes[name];
+        sizes[name] = maxOuterSizes[name] ?? sizes[name];
       });
     }
 
@@ -1320,7 +1320,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       evaluatedDim.start + (evaluatedDim.start + evaluatedDim.extent);
     [START, CENTER, END].forEach((name) => {
       const outerSize = sizes[name];
-      if (outerSize) {
+      if (outerSize != null) {
         const container = containers[name];
         let offset = 0;
         switch (name) {
@@ -1369,11 +1369,11 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
         endBoxParam,
         availableSize,
       );
-      if (startEndSizes.xSize) {
+      if (startEndSizes.xSize != null) {
         sizes[MarginBoxPositionAlongVariableDimension.START] =
           startEndSizes.xSize;
       }
-      if (startEndSizes.ySize) {
+      if (startEndSizes.ySize != null) {
         sizes[MarginBoxPositionAlongVariableDimension.END] =
           startEndSizes.ySize;
       }
@@ -1385,17 +1385,24 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
         startEndBoxParam,
         availableSize,
       );
-      if (centerSizes.xSize) {
+      if (centerSizes.xSize != null) {
         sizes[MarginBoxPositionAlongVariableDimension.CENTER] =
           centerSizes.xSize;
       }
-      const centerSize = centerSizes.xSize || centerBoxParam.getOuterSize();
-      const startEndAutoSize = (availableSize - centerSize) / 2;
-      if (startBoxParam && startBoxParam.hasAutoSize()) {
-        sizes[MarginBoxPositionAlongVariableDimension.START] = startEndAutoSize;
+      const centerSize = centerSizes.xSize ?? centerBoxParam.getOuterSize();
+      // Ensure the calculated size is not negative, which can happen if the center content exceeds the available space.
+      const startEndAutoSize = Math.max((availableSize - centerSize) / 2, 0);
+      if (startBoxParam) {
+        sizes[MarginBoxPositionAlongVariableDimension.START] =
+          startBoxParam.hasAutoSize()
+            ? startEndAutoSize
+            : startBoxParam.getOuterSize();
       }
-      if (endBoxParam && endBoxParam.hasAutoSize()) {
-        sizes[MarginBoxPositionAlongVariableDimension.END] = startEndAutoSize;
+      if (endBoxParam) {
+        sizes[MarginBoxPositionAlongVariableDimension.END] =
+          endBoxParam.hasAutoSize()
+            ? startEndAutoSize
+            : endBoxParam.getOuterSize();
       }
     }
     return sizes;
@@ -1421,6 +1428,15 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       xSize: null,
       ySize: null,
     };
+
+    // Sizing with min-content/max-content/fit-content support
+    if (x instanceof SingleBoxMarginBoxSizingParam && x.minMaxFitContent) {
+      result.xSize = x.getOuterSize();
+    }
+    if (y instanceof SingleBoxMarginBoxSizingParam && y.minMaxFitContent) {
+      result.ySize = y.getOuterSize();
+    }
+
     if (x && y) {
       if (x.hasAutoSize() && y.hasAutoSize()) {
         const xOuterMaxContentSize = x.getOuterMaxContentSize();
@@ -1506,6 +1522,11 @@ interface MarginBoxSizingParam {
 class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   private hasAutoSize_: boolean;
   private size: { [key in Sizing.Size]: number } | null = null;
+  public readonly minMaxFitContent:
+    | "min-content"
+    | "max-content"
+    | "fit-content"
+    | null = null;
 
   constructor(
     protected readonly container: Vtree.Container,
@@ -1517,6 +1538,39 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
     const val = style[isHorizontal ? "width" : "height"];
     this.hasAutoSize_ =
       !val || val === Css.ident.auto || Css.isDefaultingValue(val);
+
+    this.minMaxFitContent =
+      val instanceof Css.Ident &&
+      (val.name === "min-content" ||
+        val.name === "max-content" ||
+        val.name === "fit-content")
+        ? val.name
+        : null;
+
+    if (this.minMaxFitContent) {
+      const size = this.getSize();
+      if (this.isHorizontal) {
+        const width =
+          size[
+            this.minMaxFitContent === "min-content"
+              ? Sizing.Size.MIN_CONTENT_WIDTH
+              : this.minMaxFitContent === "max-content"
+                ? Sizing.Size.MAX_CONTENT_WIDTH
+                : Sizing.Size.FIT_CONTENT_WIDTH
+          ];
+        this.container.setHorizontalPosition(this.container.left, width);
+      } else {
+        const height =
+          size[
+            this.minMaxFitContent === "min-content"
+              ? Sizing.Size.MIN_CONTENT_HEIGHT
+              : this.minMaxFitContent === "max-content"
+                ? Sizing.Size.MAX_CONTENT_HEIGHT
+                : Sizing.Size.FIT_CONTENT_HEIGHT
+          ];
+        this.container.setVerticalPosition(this.container.top, height);
+      }
+    }
   }
 
   /** @override */
@@ -1527,8 +1581,16 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   private getSize(): { [key in Sizing.Size]: number } {
     if (!this.size) {
       const sizes = this.isHorizontal
-        ? [Sizing.Size.MAX_CONTENT_WIDTH, Sizing.Size.MIN_CONTENT_WIDTH]
-        : [Sizing.Size.MAX_CONTENT_HEIGHT, Sizing.Size.MIN_CONTENT_HEIGHT];
+        ? [
+            Sizing.Size.MAX_CONTENT_WIDTH,
+            Sizing.Size.MIN_CONTENT_WIDTH,
+            Sizing.Size.FIT_CONTENT_WIDTH,
+          ]
+        : [
+            Sizing.Size.MAX_CONTENT_HEIGHT,
+            Sizing.Size.MIN_CONTENT_HEIGHT,
+            Sizing.Size.FIT_CONTENT_HEIGHT,
+          ];
       this.size = Sizing.getSize(
         this.clientLayout,
         this.container.element,
@@ -2047,7 +2109,11 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
    * this point. If the dimension is auto, the calculation is deferred.
    */
   private positionAlongVariableDimension(
-    names: { start: string; end: string; extent: string },
+    names: {
+      start: "top" | "left";
+      end: "bottom" | "right";
+      extent: "width" | "height";
+    },
     dim: PageAreaDimension | null,
   ): void {
     const style = this.style;
@@ -2150,7 +2216,11 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
    * page.
    */
   private positionAndSizeAlongFixedDimension(
-    names: { inside: string; outside: string; extent: string },
+    names: {
+      inside: "left" | "right" | "top" | "bottom";
+      outside: "left" | "right" | "top" | "bottom";
+      extent: "width" | "height";
+    },
     dim: PageAreaDimension | null,
   ): void {
     const style = this.style;
@@ -2254,42 +2324,41 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         // over-constrained
         result.marginOutside = null;
       }
-      if (
-        result.extent === null &&
-        result.marginInside !== null &&
-        result.marginOutside !== null
-      ) {
+      if (result.extent === null) {
         result.extent =
           pageMarginValue -
           borderAndPadding -
           (result.marginInside as number) -
           (result.marginOutside as number);
-      } else if (
-        result.extent !== null &&
-        (result.marginInside as number) === null &&
-        (result.marginOutside as number) !== null
-      ) {
-        result.marginInside =
-          pageMarginValue -
-          borderAndPadding -
-          (result.extent as number) -
-          (result.marginOutside as number);
-      } else if (
-        result.extent !== null &&
-        result.marginInside !== null &&
-        result.marginOutside === null
-      ) {
-        result.marginOutside =
-          pageMarginValue -
-          borderAndPadding -
-          (result.extent as number) -
-          (result.marginInside as number);
-      } else if (result.extent === null) {
-        result.marginInside = result.marginOutside = 0;
-        result.extent = pageMarginValue - borderAndPadding;
-      } else {
-        result.marginInside = result.marginOutside =
-          (pageMarginValue - borderAndPadding - (result.extent as number)) / 2;
+        if (result.marginInside === null) {
+          result.marginInside = 0;
+        }
+        if (result.marginOutside === null) {
+          result.marginOutside = 0;
+        }
+      } else if (typeof result.extent === "number") {
+        if (
+          result.marginInside === null &&
+          typeof result.marginOutside === "number"
+        ) {
+          result.marginInside =
+            pageMarginValue -
+            borderAndPadding -
+            result.extent -
+            result.marginOutside;
+        } else if (
+          typeof result.marginInside === "number" &&
+          result.marginOutside === null
+        ) {
+          result.marginOutside =
+            pageMarginValue -
+            borderAndPadding -
+            result.extent -
+            result.marginInside;
+        } else {
+          result.marginInside = result.marginOutside =
+            (pageMarginValue - borderAndPadding - result.extent) / 2;
+        }
       }
       return result;
     }
@@ -2298,7 +2367,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         scope,
         function () {
           const value = getComputedValues(this).extent;
-          return value === null ? 0 : value;
+          return value === null ? "auto" : value;
         },
         extentName,
       ),
@@ -2308,7 +2377,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         scope,
         function () {
           const value = getComputedValues(this).marginInside;
-          return value === null ? 0 : value;
+          return value === null ? "auto" : value;
         },
         `margin-${insideName}`,
       ),
@@ -2318,7 +2387,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         scope,
         function () {
           const value = getComputedValues(this).marginOutside;
-          return value === null ? 0 : value;
+          return value === null ? "auto" : value;
         },
         `margin-${outsideName}`,
       ),
@@ -2402,7 +2471,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     // page object. (except when it is a corner margin box, because size of a
     // corner margin box does not need to be adjusted after the layout)
     const marginBoxes = page.marginBoxes;
-    const name = (this.pageBox as any).marginBoxName;
+    const name = this.pageBox.marginBoxName;
     const boxInfo = this.boxInfo;
     if (!boxInfo.isInLeftColumn && !boxInfo.isInRightColumn) {
       if (boxInfo.isInTopRow) {
@@ -2415,6 +2484,108 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
         marginBoxes.left[name] = container;
       } else if (boxInfo.isInRightColumn) {
         marginBoxes.right[name] = container;
+      }
+    }
+
+    // Margin box sizing with min-content/max-content/fit-content support
+    const pageAreaDimension = (this.parentInstance as PageRuleMasterInstance)
+      .pageAreaDimension;
+    const widthVal = this.getProp(context, "width");
+    const widthMinMaxFitContent =
+      widthVal instanceof Css.Ident &&
+      (widthVal.name === "min-content" ||
+        widthVal.name === "max-content" ||
+        widthVal.name === "fit-content")
+        ? widthVal.name
+        : null;
+    const minWidthVal = this.getPropAsNumber(context, "min-width");
+    const maxWidthVal = this.getPropAsNumber(context, "max-width");
+    if (widthMinMaxFitContent || minWidthVal || maxWidthVal) {
+      if (widthMinMaxFitContent) {
+        Base.setCSSProperty(container.element, "width", widthMinMaxFitContent);
+      }
+      if (minWidthVal) {
+        Base.setCSSProperty(container.element, "min-width", `${minWidthVal}px`);
+      }
+      if (maxWidthVal) {
+        Base.setCSSProperty(container.element, "max-width", `${maxWidthVal}px`);
+      }
+      const marginLeft = this.getProp(context, "margin-left");
+      const marginRight = this.getProp(context, "margin-right");
+      if (boxInfo.isInLeftColumn) {
+        const right =
+          (pageAreaDimension.borderBoxWidth.evaluate(context) as number) +
+          (pageAreaDimension.marginRight.evaluate(context) as number);
+        Base.setCSSProperty(container.element, "right", `${right}px`);
+        if (marginLeft === Css.ident.auto || marginRight !== Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-left", "auto");
+        }
+        if (marginRight === Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-right", "auto");
+        }
+      } else if (boxInfo.isInRightColumn) {
+        Base.setCSSProperty(container.element, "right", "0");
+        if (marginRight === Css.ident.auto || marginLeft !== Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-right", "auto");
+        }
+        if (marginLeft === Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-left", "auto");
+        }
+      }
+    }
+    const heightVal = this.getProp(context, "height");
+    const heightMinMaxFitContent =
+      heightVal instanceof Css.Ident &&
+      (heightVal.name === "min-content" ||
+        heightVal.name === "max-content" ||
+        heightVal.name === "fit-content")
+        ? heightVal.name
+        : null;
+    const minHeightVal = this.getPropAsNumber(context, "min-height");
+    const maxHeightVal = this.getPropAsNumber(context, "max-height");
+    if (heightMinMaxFitContent || minHeightVal || maxHeightVal) {
+      if (heightMinMaxFitContent) {
+        Base.setCSSProperty(
+          container.element,
+          "height",
+          heightMinMaxFitContent,
+        );
+      }
+      if (minHeightVal) {
+        Base.setCSSProperty(
+          container.element,
+          "min-height",
+          `${minHeightVal}px`,
+        );
+      }
+      if (maxHeightVal) {
+        Base.setCSSProperty(
+          container.element,
+          "max-height",
+          `${maxHeightVal}px`,
+        );
+      }
+      const marginTop = this.getProp(context, "margin-top");
+      const marginBottom = this.getProp(context, "margin-bottom");
+      if (boxInfo.isInTopRow) {
+        const bottom =
+          (pageAreaDimension.borderBoxHeight.evaluate(context) as number) +
+          (pageAreaDimension.marginBottom.evaluate(context) as number);
+        Base.setCSSProperty(container.element, "bottom", `${bottom}px`);
+        if (marginTop === Css.ident.auto || marginBottom !== Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-top", "auto");
+        }
+        if (marginBottom === Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-bottom", "auto");
+        }
+      } else if (boxInfo.isInBottomRow) {
+        Base.setCSSProperty(container.element, "bottom", "0");
+        if (marginBottom === Css.ident.auto || marginTop !== Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-bottom", "auto");
+        }
+        if (marginTop === Css.ident.auto) {
+          Base.setCSSProperty(container.element, "margin-top", "auto");
+        }
       }
     }
   }
