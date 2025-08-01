@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.34.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.33.2...v2.34.0) (2025-08-01)
+
+### Bug Fixes
+
+- Fix incorrect positioning in page area with page padding ([ee4f59b](https://github.com/vivliostyle/vivliostyle.js/commit/ee4f59bfcf1cb6b1d538fe18bcf1c30f8e800331)), closes [#1447](https://github.com/vivliostyle/vivliostyle.js/issues/1447)
+- Fix page-margin box image size with `box-sizing: border-box` ([df65d6d](https://github.com/vivliostyle/vivliostyle.js/commit/df65d6db8c5fc1c4c7c763aa5761dd424e1e4ce1)), closes [#1535](https://github.com/vivliostyle/vivliostyle.js/issues/1535)
+- Fix page-margin boxes overlapping issue when center width is auto and left or right one is fixed ([2145a89](https://github.com/vivliostyle/vivliostyle.js/commit/2145a89f144da3ce6bcdff9a81ba5ef8fc0e41d2)), closes [#1538](https://github.com/vivliostyle/vivliostyle.js/issues/1538)
+
+### Features
+
+- Improve CSS properties support for page context and page-margin boxes ([341571a](https://github.com/vivliostyle/vivliostyle.js/commit/341571af37380da37e4e4e728983f666d5bdd7fd)), closes [#1473](https://github.com/vivliostyle/vivliostyle.js/issues/1473)
+- Support `fit-content` / `min-content` / `max-content` sizing values on page-margin boxes ([9633a1f](https://github.com/vivliostyle/vivliostyle.js/commit/9633a1f15d08260b20f0c64437ccee48e9c9bf96)), closes [#1520](https://github.com/vivliostyle/vivliostyle.js/issues/1520)
+- Support GitHub Gist URL with fragment as source file ([854f361](https://github.com/vivliostyle/vivliostyle.js/commit/854f36108f3de8f6365615482a9fbc565f90fda5))
+
 ## [2.33.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.33.1...v2.33.2) (2025-06-30)
 
 ### Bug Fixes
