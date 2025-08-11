@@ -1332,29 +1332,21 @@ export class ViewFactory
                     attributeValue,
                     this.xmldoc.url,
                   );
-                if (
-                  Scripts.allowScripts &&
-                  result.localName !== "tr" && // issue #1439
-                  !(
-                    result.namespaceURI === Base.NS.SVG &&
-                    result.localName !== "svg"
-                  ) &&
-                  !result.ownerDocument.getElementById(attributeValue)
-                ) {
-                  // Keep original id value so that JavaScript can manipulate it
-                  result.setAttribute(attributeName, attributeValue);
-                  result.setAttribute("data-vivliostyle-id", transformedValue);
 
-                  // Create an anchor element with transformed id, necessary for internal links in output PDF
-                  // (issue #877)
-                  const anchorElem = result.ownerDocument.createElement("a");
-                  anchorElem.setAttribute(attributeName, transformedValue);
-                  anchorElem.setAttribute(Vtree.SPECIAL_ATTR, "1");
-                  anchorElem.style.position = "absolute";
-                  result.appendChild(anchorElem);
-                } else {
-                  result.setAttribute(attributeName, transformedValue);
-                }
+                // Keep original id value so that JavaScript can manipulate it
+                result.setAttribute(attributeName, attributeValue);
+                result.setAttribute("data-vivliostyle-id", transformedValue);
+
+                // Create an anchor element with transformed id, necessary for internal links in output PDF
+                // (issue #877)
+                const anchorElem = result.ownerDocument.createElement("a");
+                anchorElem.setAttribute(attributeName, transformedValue);
+                anchorElem.setAttribute(Vtree.SPECIAL_ATTR, "1");
+
+                // Avoid using `position: absolute` for link target to work around Chromium 138- PDF link bug. (Issue #1541)
+                // anchorElem.style.position = "absolute";
+                result.appendChild(anchorElem);
+
                 this.page.registerElementWithId(result, transformedValue);
                 continue;
               }
@@ -2068,6 +2060,38 @@ export class ViewFactory
             Break.setBoxBreakFlag(parent, "text-start");
           }
           parent.appendChild(this.viewNode);
+
+          // Avoid using `position: absolute` for link target to work around Chromium 138- PDF link bug. (Issue #1541)
+          if (
+            this.viewNode.nodeType === 1 &&
+            (this.viewNode as Element).hasAttribute("data-vivliostyle-id")
+          ) {
+            const elementWithId = this.viewNode as HTMLElement;
+            const anchorWithTransformedId = elementWithId.querySelector(
+              ":scope > a:empty[id^='viv-id-']", // must be empty anchor with transformed id
+            );
+            // anchorWithTransformedId, that has been inserted as a child of elementWithId,
+            // should be moved to the beginning of page-container if it is inside
+            // an absolute-positioned element (workaround for issue #1541)
+            // or inside a table (workaround for issue #1439), flex, grid or ruby element.
+            if (
+              anchorWithTransformedId &&
+              (elementWithId.closest("[style*='position: absolute']") ||
+                /(table|flex|grid|ruby)/.test(elementWithId.style.display))
+            ) {
+              const id = anchorWithTransformedId.getAttribute("id");
+              anchorWithTransformedId.ownerDocument
+                .querySelectorAll(`a[id="${id}"]`)
+                .forEach((elem) => {
+                  elem.parentElement?.removeChild(elem);
+                });
+              const bleedBox = parent.closest("[data-vivliostyle-bleed-box]");
+              bleedBox?.parentElement?.insertBefore(
+                anchorWithTransformedId,
+                bleedBox,
+              );
+            }
+          }
         }
       }
       frame.finish(needToProcessChildren);
