@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.34.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.34.0...v2.34.1) (2025-08-11)
+
+### Bug Fixes
+
+- Fix broken internal links in output PDF (workaround for Chromium>=138 bug) ([526179c](https://github.com/vivliostyle/vivliostyle.js/commit/526179c203702b58000d871a317c7d47bafd0bf8)), closes [#1541](https://github.com/vivliostyle/vivliostyle.js/issues/1541)
+
 # [2.34.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.33.2...v2.34.0) (2025-08-01)
 
 ### Bug Fixes
