@@ -1937,6 +1937,11 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
       true,
     );
     super.prepareContainer(context, container, page, docFaces, clientLayout);
+
+    // Avoid using `position: absolute` to work around Chromium 138- PDF link bug. (Issue #1541)
+    Base.setCSSProperty(container.element, "position", "relative");
+    Base.setCSSProperty(container.element, "inset", "");
+    Base.setCSSProperty(container.element, "display", "flow-root");
   }
 }
 
@@ -2022,6 +2027,11 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     // Set page area size for vw/vh unit calculation
     context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
     context.pageAreaHeight = parseFloat(page.pageAreaElement.style.height);
+
+    // Avoid using `position: absolute` to work around Chromium 138- PDF link bug. (Issue #1541)
+    Base.setCSSProperty(container.element, "position", "relative");
+    Base.setCSSProperty(container.element, "inset", "");
+    Base.setCSSProperty(container.element, "display", "flow-root");
   }
 }
 

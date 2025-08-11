@@ -149,10 +149,9 @@ export const VivliostyleViewportCss = `
 }
 
 [data-vivliostyle-bleed-box] {
-  position: absolute;
+  position: relative;
   overflow: hidden;
   background-origin: content-box !important;
-  box-sizing: border-box;
 }
 
 [data-vivliostyle-page-box] ~ [data-vivliostyle-page-box] {

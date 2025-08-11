@@ -2260,9 +2260,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     pageCont.setAttribute("data-vivliostyle-page-container", "true");
     pageCont.setAttribute("role", "region");
-    pageCont.style.position = "absolute";
-    pageCont.style.top = "0";
-    pageCont.style.left = "0";
 
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
