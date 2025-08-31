@@ -67,18 +67,21 @@ export const VivliostyleViewportScreenCss = `
   }
 
   [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view="true"]
+    [data-vivliostyle-spread-container]
     [data-vivliostyle-page-container][data-vivliostyle-page-side="left"] {
     margin-right: 1px;
     transform-origin: right top;
   }
 
   [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view="true"]
+    [data-vivliostyle-spread-container]
     [data-vivliostyle-page-container][data-vivliostyle-page-side="right"] {
     margin-left: 1px;
     transform-origin: left top;
   }
 
   [data-vivliostyle-viewer-viewport][data-vivliostyle-spread-view="true"]
+    [data-vivliostyle-spread-container]
     [data-vivliostyle-page-container][data-vivliostyle-unpaired-page="true"] {
     margin-left: auto;
     margin-right: auto;
