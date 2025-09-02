@@ -183,9 +183,10 @@ export function convertSpecialURL(url: string): string {
     // Convert Gist URL to Gist raw URL
     url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[6]}`;
   } else if (
-    (r = /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)#file-(.*)-(\w+)$/.exec(
-      url,
-    ))
+    (r =
+      /^(https?:)\/\/gist\.github\.com\/([^/]+\/\w+)(?:#|%23)file-(.*)-(\w+)$/.exec(
+        url,
+      ))
   ) {
     // Convert Gist URL with fragment to Gist raw URL
     url = `${r[1]}//gist.githubusercontent.com/${r[2]}/raw/${r[3]}.${r[4]}`;
