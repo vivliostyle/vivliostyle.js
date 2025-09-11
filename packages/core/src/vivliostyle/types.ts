@@ -657,6 +657,7 @@ export namespace PageFloats {
   export interface PageFloatFragment {
     readonly floatReference: FloatReference;
     readonly floatSide: string;
+    readonly clearSide: string | null;
     readonly continuations: PageFloatContinuation[];
     readonly area: Vtree.Container;
     readonly continues: boolean;
@@ -789,6 +790,7 @@ export namespace PageFloats {
     createPageFloatFragment(
       continuations: PageFloatContinuation[],
       floatSide: string,
+      clearSide: string | null,
       floatArea: Layout.PageFloatArea,
       continues: boolean,
     ): PageFloatFragment;

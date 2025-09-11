@@ -706,6 +706,7 @@ describe("page-floats", function () {
         var fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -730,6 +731,7 @@ describe("page-floats", function () {
         var fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -762,6 +764,7 @@ describe("page-floats", function () {
         fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -803,6 +806,7 @@ describe("page-floats", function () {
         var fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -824,6 +828,7 @@ describe("page-floats", function () {
         fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -852,6 +857,7 @@ describe("page-floats", function () {
         fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -903,6 +909,7 @@ describe("page-floats", function () {
         fragment = new PageFloatFragment(
           float.floatReference,
           float.floatSide,
+          null,
           [new PageFloatContinuation(float, {})],
           area,
           false,
@@ -1329,6 +1336,7 @@ describe("page-floats", function () {
         fragment1 = new PageFloatFragment(
           float1.floatReference,
           float1.floatSide,
+          null,
           [new PageFloatContinuation(float1, {})],
           {},
           false,
@@ -1346,6 +1354,7 @@ describe("page-floats", function () {
         fragment2 = new PageFloatFragment(
           float2.floatReference,
           float2.floatSide,
+          null,
           [new PageFloatContinuation(float2, {})],
           {},
           false,
@@ -1608,6 +1617,7 @@ describe("page-floats", function () {
         var fragment1 = new PageFloatFragment(
           float1.floatReference,
           float1.floatSide,
+          null,
           [new PageFloatContinuation(float1, {})],
           area1,
           false,
@@ -1631,6 +1641,7 @@ describe("page-floats", function () {
         var fragment2 = new PageFloatFragment(
           float2.floatReference,
           float2.floatSide,
+          null,
           [new PageFloatContinuation(float2, {})],
           area2,
           false,
@@ -1677,6 +1688,7 @@ describe("page-floats", function () {
         var fragment1 = new PageFloatFragment(
           float1.floatReference,
           float1.floatSide,
+          null,
           [new PageFloatContinuation(float1, {})],
           area1,
           false,
@@ -1700,6 +1712,7 @@ describe("page-floats", function () {
         var fragment2 = new PageFloatFragment(
           float2.floatReference,
           float2.floatSide,
+          null,
           [new PageFloatContinuation(float2, {})],
           area2,
           false,

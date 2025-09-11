@@ -1448,6 +1448,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             const newFragment = strategy.createPageFloatFragment(
               continuations,
               logicalFloatSide,
+              clearSide,
               floatArea,
               !!result.newPosition,
             );
@@ -1557,10 +1558,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // Value of 'clear' is irrelevant when laying out stashed floats
         // since whether the 'clear' value allows placing the float
         // here is already resolved.
+
+        // NOTE: added clearSide for issue #1550
         this.layoutSinglePageFloatFragment(
           stashedFragment.continuations,
           stashedFragment.floatSide,
-          null,
+          stashedFragment.clearSide,
           false,
           strategy,
           null,
@@ -2652,7 +2655,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   applyClearance(nodeContext: Vtree.NodeContext): boolean {
     if (!nodeContext.viewNode.parentNode) {
-      // Cannot do ceralance for nodes without parents
+      // Cannot do clearance for nodes without parents
+      return false;
+    }
+    if (nodeContext.floatReference !== PageFloats.FloatReference.INLINE) {
+      // For page floats, clearance is handled differently
       return false;
     }
 
@@ -2672,14 +2679,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let spacerBox = this.clientLayout.getElementClientRect(spacer);
     const edge = this.getBeforeEdge(spacerBox);
     const dir = this.getBoxDir();
-    const clear = nodeContext.clearSide;
-    let clearEdge = -this.getBoxDir() * Infinity;
-    if (clear === "all") {
-      clearEdge = this.pageFloatLayoutContext.getPageFloatClearEdge(
-        clear,
-        this,
-      );
-    }
+    const clear =
+      nodeContext.clearSide === "same"
+        ? nodeContext.floatSide
+        : nodeContext.clearSide;
     const clearLR =
       /^(top|bottom|inside|outside|(block|inline)-(start|end))$/.test(clear)
         ? PageFloats.resolveInlineFloatDirection(
@@ -2689,6 +2692,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             (this.layoutContext as Vgen.ViewFactory).page.side,
           )
         : clear;
+
+    const clearLogical =
+      clearLR === "left" || clearLR === "right"
+        ? (nodeContext.direction === "rtl") === (clearLR === "left")
+          ? "inline-end"
+          : "inline-start"
+        : clearLR;
+
+    let clearEdge = this.pageFloatLayoutContext.getPageFloatClearEdge(
+      clearLogical,
+      this,
+    );
+
     switch (clearLR) {
       case "left":
         clearEdge = dir * Math.max(clearEdge * dir, this.leftFloatEdge * dir);
