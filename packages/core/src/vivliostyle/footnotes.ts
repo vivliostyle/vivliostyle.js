@@ -59,7 +59,7 @@ export class FootnoteFragment extends PageFloatFragment {
     area: Vtree.Container,
     continues: boolean,
   ) {
-    super(floatReference, "block-end", continuations, area, continues);
+    super(floatReference, "block-end", null, continuations, area, continues);
   }
 
   override getOrder(): number {
@@ -134,6 +134,7 @@ export class FootnoteLayoutStrategy
   createPageFloatFragment(
     continuations: PageFloats.PageFloatContinuation[],
     floatSide: string,
+    clearSide: string | null,
     floatArea: Layout.PageFloatArea,
     continues: boolean,
   ): PageFloats.PageFloatFragment {

@@ -194,6 +194,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
   constructor(
     public readonly floatReference: FloatReference,
     public readonly floatSide: string,
+    public readonly clearSide: string | null,
     public readonly continuations: PageFloatContinuation[],
     public readonly area: Vtree.Container,
     public readonly continues: boolean,
@@ -963,6 +964,7 @@ export class PageFloatLayoutContext
 
   private getLimitValue(
     side: string,
+    side2: string | null,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
@@ -970,8 +972,11 @@ export class PageFloatLayoutContext
     Asserts.assert(this.container);
     const logicalSide = this.toLogical(side);
     const physicalSide = this.toPhysical(side);
+    const logicalSide2 = side2 && this.toLogical(side2);
+    const physicalSide2 = side2 && this.toPhysical(side2);
     const limit = this.getLimitValueInner(
       logicalSide,
+      logicalSide2,
       layoutContext,
       clientLayout,
       condition,
@@ -979,6 +984,7 @@ export class PageFloatLayoutContext
     if (this.parent && this.parent.container) {
       const parentLimit = this.parent.getLimitValue(
         physicalSide,
+        physicalSide2,
         layoutContext,
         clientLayout,
         condition,
@@ -1001,6 +1007,7 @@ export class PageFloatLayoutContext
 
   private getLimitValueInner(
     logicalSide: string,
+    logicalSide2: string | null,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
@@ -1010,6 +1017,8 @@ export class PageFloatLayoutContext
       layoutContext,
       clientLayout,
       condition,
+      logicalSide,
+      logicalSide2,
     );
     switch (logicalSide) {
       case "block-start":
@@ -1041,6 +1050,8 @@ export class PageFloatLayoutContext
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
+    logicalSide?: string,
+    logicalSide2?: string,
   ): {
     top: number;
     left: number;
@@ -1075,7 +1086,24 @@ export class PageFloatLayoutContext
         if (condition && !condition(f, this)) {
           return l;
         }
-        const logicalFloatSide = this.toLogicalFloatSides(f.floatSide)[0];
+        const [logicalFloatSide, logicalFloatSide2] = this.toLogicalFloatSides(
+          f.floatSide,
+        );
+        if (
+          logicalFloatSide2 &&
+          ((logicalSide &&
+            logicalFloatSide2.includes("block") ===
+              logicalSide.includes("block") &&
+            logicalFloatSide2 !== logicalSide) ||
+            (logicalSide2 &&
+              logicalFloatSide2.includes("block") ===
+                logicalSide2.includes("block") &&
+              logicalFloatSide2 !== logicalSide2))
+        ) {
+          // Preceding page floats on the opposite side should not affect
+          // the positioning limit. (Issue #1549)
+          return l;
+        }
         const area = f.area;
         const floatMinWrapBlock = f.continuations[0].float.floatMinWrapBlock;
         let top = l.top;
@@ -1193,33 +1221,46 @@ export class PageFloatLayoutContext
       if (!condition["block-start"] && !condition["block-end"]) {
         return null;
       }
-    } else if (logicalFloatSides[0] === "snap-inline") {
-      if (!condition["inline-start"] && !condition["inline-end"]) {
-        return null;
-      }
-    } else {
+    } else if (logicalFloatSides[0].includes("block")) {
       if (!condition[logicalFloatSides[0]]) {
         return null;
       }
     }
     Asserts.assert(area.clientLayout);
+
+    // Preceding page floats on the opposite side should not affect
+    // the positioning limit unless clear:inline-start/end is specified.
+    // (Issue #1549, #1550)
+    const inlineSideForBlockLimit = logicalFloatSides.find(
+      (s) =>
+        s.includes("inline") &&
+        condition[s === "inline-start" ? "inline-end" : "inline-start"],
+    );
+    const blockSideForInlineLimit = logicalFloatSides.find((s) =>
+      s.includes("block"),
+    );
+
     let blockStart = this.getLimitValue(
       "block-start",
+      inlineSideForBlockLimit,
       area.layoutContext,
       area.clientLayout,
     );
     let blockEnd = this.getLimitValue(
       "block-end",
+      inlineSideForBlockLimit,
       area.layoutContext,
       area.clientLayout,
     );
     let inlineStart = this.getLimitValue(
       "inline-start",
+      blockSideForInlineLimit,
       area.layoutContext,
       area.clientLayout,
     );
     let inlineEnd = this.getLimitValue(
       "inline-end",
+      blockSideForInlineLimit,
       area.layoutContext,
       area.clientLayout,
     );
@@ -1486,6 +1527,18 @@ export class PageFloatLayoutContext
     }
 
     function isFragmentWithAlreadyAppearedFloat(fragment, context) {
+      if (
+        (clear === "inline-start" &&
+          (fragment.floatSide.includes("inline-end") ||
+            fragment.floatSide === "block-end")) ||
+        (clear === "inline-end" &&
+          (fragment.floatSide.includes("inline-start") ||
+            fragment.floatSide === "block-start"))
+      ) {
+        // Clear page-floats by clear:inline-start/end on non-page-float elements.
+        // (Issue #1550)
+        return false;
+      }
       return fragment.continuations.some(
         isContinuationOfAlreadyAppearedFloat(context),
       );
@@ -1506,12 +1559,14 @@ export class PageFloatLayoutContext
     Asserts.assert(column.clientLayout);
     const blockStartLimit = this.getLimitValue(
       "block-start",
+      null,
       column.layoutContext,
       column.clientLayout,
       isFragmentWithAlreadyAppearedFloat,
     );
     const blockEndLimit = this.getLimitValue(
       "block-end",
+      null,
       column.layoutContext,
       column.clientLayout,
       isFragmentWithAlreadyAppearedFloat,
@@ -1566,7 +1621,7 @@ export class PageFloatLayoutContext
       side: string,
     ): (p1: PageFloatFragment) => boolean {
       return (fragment) =>
-        fragment.floatSide === side && fragment.getOrder() < floatOrder;
+        fragment.floatSide.includes(side) && fragment.getOrder() < floatOrder;
     }
 
     function hasPrecedingFragmentInChildren(
@@ -1591,15 +1646,19 @@ export class PageFloatLayoutContext
           hasPrecedingFragmentInParents(parent, side))
       );
     }
+
     logicalSides.forEach((side) => {
       switch (side) {
         case "block-start":
-        case "inline-start":
           result[side] = !hasPrecedingFragmentInChildren(this, side);
           break;
         case "block-end":
-        case "inline-end":
           result[side] = !hasPrecedingFragmentInParents(this, side);
+          break;
+        case "inline-start":
+        case "inline-end":
+          // Support clear:inline-start/end for page floats. (Issue #1550)
+          result[side] = !this.floatFragments.some(isPrecedingFragment(side));
           break;
         default:
           throw new Error(`Unexpected side: ${side}`);
@@ -1786,6 +1845,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   createPageFloatFragment(
     continuations: PageFloatContinuation[],
     floatSide: string,
+    clearSide: string | null,
     floatArea: LayoutType.PageFloatArea,
     continues: boolean,
   ): PageFloatFragment {
@@ -1793,6 +1853,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
     return new PageFloatFragment(
       f.floatReference,
       floatSide,
+      clearSide,
       continuations,
       floatArea,
       continues,
