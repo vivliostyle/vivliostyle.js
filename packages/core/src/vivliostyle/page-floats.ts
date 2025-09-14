@@ -1521,12 +1521,17 @@ export class PageFloatLayoutContext
   }
 
   getPageFloatClearEdge(clear: string, column: LayoutType.Column): number {
-    function isContinuationOfAlreadyAppearedFloat(context) {
-      return (continuation) =>
+    function isContinuationOfAlreadyAppearedFloat(
+      context: PageFloatLayoutContext,
+    ) {
+      return (continuation: PageFloatContinuation) =>
         context.isAnchorAlreadyAppeared(continuation.float.getId());
     }
 
-    function isFragmentWithAlreadyAppearedFloat(fragment, context) {
+    function isFragmentWithAlreadyAppearedFloat(
+      fragment: PageFloatFragment,
+      context: PageFloatLayoutContext,
+    ) {
       if (
         (clear === "inline-start" &&
           (fragment.floatSide.includes("inline-end") ||
@@ -1556,6 +1561,32 @@ export class PageFloatLayoutContext
       }
       context = context.parent;
     }
+
+    function hasFragmentWithAlreadyAppearedFloat(
+      context: PageFloatLayoutContext,
+    ) {
+      return (
+        context.floatFragments.some((fragment) =>
+          isFragmentWithAlreadyAppearedFloat(fragment, context),
+        ) ||
+        context.children.some((child) =>
+          hasFragmentWithAlreadyAppearedFloat(child),
+        )
+      );
+    }
+
+    // Support clear:column/region/page for page floats. (Issue #1551)
+    if (clear === "column" || clear === "region" || clear === "page") {
+      for (context = this; context; context = context.parent) {
+        if (context.floatReference === clear) {
+          if (hasFragmentWithAlreadyAppearedFloat(context)) {
+            return columnBlockEnd;
+          }
+          break;
+        }
+      }
+    }
+
     Asserts.assert(column.clientLayout);
     const blockStartLimit = this.getLimitValue(
       "block-start",
@@ -1618,15 +1649,16 @@ export class PageFloatLayoutContext
     const floatOrder = float.getOrder();
 
     function isPrecedingFragment(
-      side: string,
+      side: string | null,
     ): (p1: PageFloatFragment) => boolean {
       return (fragment) =>
-        fragment.floatSide.includes(side) && fragment.getOrder() < floatOrder;
+        (!side || fragment.floatSide.includes(side)) &&
+        fragment.getOrder() < floatOrder;
     }
 
     function hasPrecedingFragmentInChildren(
       context: PageFloatLayoutContext,
-      side: string,
+      side: string | null,
     ): boolean {
       return context.children.some(
         (child) =>
@@ -1637,7 +1669,7 @@ export class PageFloatLayoutContext
 
     function hasPrecedingFragmentInParents(
       context: PageFloatLayoutContext,
-      side: string,
+      side: string | null,
     ): boolean {
       const parent = context.parent;
       return (
@@ -1645,6 +1677,33 @@ export class PageFloatLayoutContext
         (parent.floatFragments.some(isPrecedingFragment(side)) ||
           hasPrecedingFragmentInParents(parent, side))
       );
+    }
+
+    // Support clear:column/region/page for page floats. (Issue #1551)
+    if (
+      clearSide === "column" ||
+      clearSide === "region" ||
+      clearSide === "page"
+    ) {
+      for (
+        let context: PageFloatLayoutContext = this;
+        context;
+        context = context.parent
+      ) {
+        if (context.floatReference === clearSide) {
+          if (
+            context.floatFragments.some(isPrecedingFragment(null)) ||
+            hasPrecedingFragmentInChildren(context, null)
+          ) {
+            result["block-start"] = false;
+            result["block-end"] = false;
+            result["inline-start"] = false;
+            result["inline-end"] = false;
+          }
+          break;
+        }
+      }
+      return result;
     }
 
     logicalSides.forEach((side) => {
