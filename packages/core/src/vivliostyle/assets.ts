@@ -288,7 +288,6 @@ border-image-outset = [NUM | LENGTH]{1,4};
 border-image-repeat = [ stretch | repeat | round | space ]{1,2};
 bottom = APLENGTH;
 caption-side = top | bottom;
-clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | inside | outside | both | all | same;
 clip = rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 color = COLOR;
 LIST_STYLE_TYPE = IDENT;
@@ -526,6 +525,7 @@ crop-offset = auto | LENGTH;
 crop-marks-line-color = auto | COLOR;
 
 /* CSS Page Floats */
+clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | inside | outside | both | all | same | column | region | page;
 float-reference = inline | column | region | page;
 float = none | footnote | [ block-start || block-end || inline-start || inline-end || snap-block || snap-inline || left || right || top || bottom || inside || outside ];
 float-min-wrap-block = PPLENGTH;

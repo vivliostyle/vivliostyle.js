@@ -960,7 +960,10 @@ export class ViewFactory
           clearSide === Css.ident.outside ||
           clearSide === Css.ident.both ||
           clearSide === Css.ident.all ||
-          clearSide === Css.ident.same
+          clearSide === Css.ident.same ||
+          clearSide === Css.ident.column ||
+          clearSide === Css.ident.region ||
+          clearSide === Css.ident.page
         ) {
           delete computedStyle["clear"];
           if (
