@@ -757,7 +757,11 @@ export class NodeContext implements Vtree.NodeContext {
         ? this.shadowSibling.toNodePositionStep()
         : null,
       formattingContext: this.formattingContext,
-      fragmentIndex: this.fragmentIndex,
+
+      // fragmentIndex needs to be reset to 0 if this viewNode has been removed
+      // from the view tree by forced break processing. (Issue #1557)
+      fragmentIndex:
+        this.viewNode?.parentNode === null ? 0 : this.fragmentIndex,
     };
   }
 
