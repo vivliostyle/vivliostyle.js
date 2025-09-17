@@ -1494,6 +1494,10 @@ export class StyleInstance
     const dontExclude = wrapFlow === Css.ident.auto;
     const flowName = boxInstance.getProp(this, "flow-from");
     const boxContainer = this.viewport.document.createElement("div");
+    boxContainer.role =
+      boxInstance instanceof CssPage.PageMarginBoxPartitionInstance
+        ? "complementary"
+        : "presentation";
     const position = boxInstance.getProp(this, "position");
     Base.setCSSProperty(
       boxContainer,

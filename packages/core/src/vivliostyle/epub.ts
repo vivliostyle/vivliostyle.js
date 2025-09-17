@@ -2259,7 +2259,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const viewport = viewItem.instance.viewport;
     const pageCont = viewport.document.createElement("div") as HTMLElement;
     pageCont.setAttribute("data-vivliostyle-page-container", "true");
-    pageCont.setAttribute("role", "region");
+    pageCont.role = "presentation";
 
     if (!Constants.isDebug) {
       pageCont.style.visibility = "hidden";
@@ -2267,6 +2267,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     viewport.layoutBox.appendChild(pageCont);
     const bleedBox = viewport.document.createElement("div") as HTMLElement;
     bleedBox.setAttribute("data-vivliostyle-bleed-box", "true");
+    bleedBox.role = "presentation";
     pageCont.appendChild(bleedBox);
     const page = new Vtree.Page(pageCont, bleedBox);
     page.spineIndex = viewItem.item.spineIndex;

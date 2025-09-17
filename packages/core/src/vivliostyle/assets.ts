@@ -194,7 +194,9 @@ export const VivliostyleViewportCss = `
   @supports (zoom: 8) {
     [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
       zoom: var(--viv-outputPixelRatio,1);
-      transform: scale(calc(1 / var(--viv-outputPixelRatio,1)));
+      /* transform: scale(calc(1 / var(--viv-outputPixelRatio,1))); */
+      /* Use matrix instead of scale (Workaround for issue #1555) */
+      transform: matrix(calc(1 / var(--viv-outputPixelRatio,1)), 0, 5e-324, calc(1 / var(--viv-outputPixelRatio,1)), 0, 0);
       transform-origin: left top;
     }
   }

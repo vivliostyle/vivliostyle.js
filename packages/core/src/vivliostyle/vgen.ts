@@ -1194,6 +1194,7 @@ export class ViewFactory
       const fetchers = [];
       let ns = element.namespaceURI;
       let tag = element.localName;
+      let originalTag = tag;
       if (ns == Base.NS.XHTML) {
         if (
           tag == "html" ||
@@ -1280,6 +1281,12 @@ export class ViewFactory
           return;
         } else {
           result = this.createElement(ns, tag);
+        }
+        if (tag != originalTag) {
+          result.setAttribute("data-vivliostyle-original-tag", originalTag);
+          if (originalTag === "html" || originalTag === "body") {
+            result.role = "presentation";
+          }
         }
         if (tag == "a") {
           result.addEventListener("click", this.page.hrefHandler, false);
@@ -3037,6 +3044,7 @@ export class Viewport {
     if (!outerZoomBox) {
       outerZoomBox = this.document.createElement("div");
       outerZoomBox.setAttribute("data-vivliostyle-outer-zoom-box", "true");
+      outerZoomBox.role = "presentation";
       this.root.appendChild(outerZoomBox);
     }
     let contentContainer = outerZoomBox.firstElementChild as HTMLElement;
@@ -3046,6 +3054,7 @@ export class Viewport {
         "data-vivliostyle-spread-container",
         "true",
       );
+      contentContainer.role = "presentation";
       outerZoomBox.appendChild(contentContainer);
     }
 
@@ -3084,6 +3093,7 @@ export class Viewport {
     if (!layoutBox) {
       layoutBox = this.document.createElement("div");
       layoutBox.setAttribute("data-vivliostyle-layout-box", "true");
+      layoutBox.role = "presentation";
       this.root.appendChild(layoutBox);
     }
     this.outerZoomBox = outerZoomBox;
