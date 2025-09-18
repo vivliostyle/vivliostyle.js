@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.35.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.34.1...v2.35.0) (2025-09-18)
+
+### Bug Fixes
+
+- Fix accessibility problem in output PDF (failed to read aloud) ([b5a04a7](https://github.com/vivliostyle/vivliostyle.js/commit/b5a04a7a1e8756b5c94f725f1e784e51e8c9f8ec)), closes [#1555](https://github.com/vivliostyle/vivliostyle.js/issues/1555)
+- Fix margin-block-start ignored on block with forced page break after clearing a page float ([656891a](https://github.com/vivliostyle/vivliostyle.js/commit/656891a1d6e7d457b974d1931b63955f67b37633)), closes [#1557](https://github.com/vivliostyle/vivliostyle.js/issues/1557)
+- Top page float should not absorb margin/border/padding of the block below (Regression in v2.33.0) ([ba6f670](https://github.com/vivliostyle/vivliostyle.js/commit/ba6f6701aa88c9ad46b1a259c0ab48f981c5ba39)), closes [#1071](https://github.com/vivliostyle/vivliostyle.js/issues/1071) [#1075](https://github.com/vivliostyle/vivliostyle.js/issues/1075) [#1519](https://github.com/vivliostyle/vivliostyle.js/issues/1519)
+
+### Features
+
+- Support clear:left/right/inline-start/inline-end/both for page floats ([6b69026](https://github.com/vivliostyle/vivliostyle.js/commit/6b69026e1c908052442465c9804785e4d867e5b3)), closes [#1550](https://github.com/vivliostyle/vivliostyle.js/issues/1550) [#1549](https://github.com/vivliostyle/vivliostyle.js/issues/1549)
+- Support clear:page/column/region for clearing page floats ([9fa3341](https://github.com/vivliostyle/vivliostyle.js/commit/9fa3341e530a3eb65791f8d2d446ac12b2b9cce0)), closes [#1551](https://github.com/vivliostyle/vivliostyle.js/issues/1551)
+
 ## [2.34.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.34.0...v2.34.1) (2025-08-11)
 
 ### Bug Fixes
