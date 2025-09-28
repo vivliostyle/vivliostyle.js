@@ -987,7 +987,13 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
 
   getProp(context: Exprs.Context, name: string): Css.Val {
     let val = this.style[name];
-    if (!val && CssCascade.isInherited(name)) {
+    if (
+      !val &&
+      CssCascade.isInherited(name) &&
+      // root style is inherited to `@page` but not to `@-epubx-page-master`
+      // (Issue #1565)
+      this.pageMasterInstance instanceof PageRuleMasterInstance
+    ) {
       // inherit from root style
       if (
         name === "font-size" &&
