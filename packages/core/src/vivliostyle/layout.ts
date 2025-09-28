@@ -2741,7 +2741,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const afterEdge = this.getAfterEdge(spacerBox);
       if (!nodeContext.floatSide) {
         if (this.vertical) {
-          let wAdj = afterEdge + margin.right - clearEdge;
+          let wAdj = afterEdge - margin.right - clearEdge;
           if (wAdj > 0 == margin.right >= 0) {
             // In addition to collapsed portion
             wAdj += margin.right;
