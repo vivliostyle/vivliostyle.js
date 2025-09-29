@@ -24,7 +24,7 @@ type ChildrenFunction = ({
   container,
   reload,
 }: {
-  container: JSX.Element;
+  container: React.ReactElement;
   reload: () => void;
 }) => React.ReactNode;
 
@@ -79,10 +79,10 @@ export const Renderer = ({
   onNavigation,
   onHyperlink,
   children,
-}: RendererProps): ReturnType<ChildrenFunction> | JSX.Element => {
+}: RendererProps): ReturnType<ChildrenFunction> | React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const instanceRef = useRef<CoreViewer>();
-  const stateRef = React.useRef<VolatileState>();
+  const instanceRef = useRef<CoreViewer | undefined>(undefined);
+  const stateRef = React.useRef<VolatileState | undefined>(undefined);
 
   function setViewerOptions() {
     const viewerOptions = {

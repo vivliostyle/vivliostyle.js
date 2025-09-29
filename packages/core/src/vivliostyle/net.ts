@@ -128,10 +128,7 @@ export function fetchFromURL(
   return frame.result();
 }
 
-export function makeBlob(
-  parts: (string | Blob | ArrayBuffer | ArrayBufferView)[],
-  opt_type?: string,
-): Blob {
+export function makeBlob(parts: BlobPart[], opt_type?: string): Blob {
   const type = opt_type || "application/octet-stream";
   return new Blob(parts, { type });
 }
