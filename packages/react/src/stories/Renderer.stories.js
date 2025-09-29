@@ -1,21 +1,7 @@
 import React from "react";
-import { action } from "@storybook/addon-actions";
-import {
-  withKnobs,
-  text,
-  boolean,
-  number,
-  color,
-  select,
-} from "@storybook/addon-knobs";
+import { fn } from "storybook/test";
 
 import { Renderer } from "../renderer";
-
-export default {
-  title: "Renderer",
-  decorators: [withKnobs],
-  component: Renderer,
-};
 
 const SOURCES = [
   "https://vivliostyle.github.io/vivliostyle_doc/samples/gon/index.html",
@@ -24,36 +10,79 @@ const SOURCES = [
   "https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3",
 ];
 
-export const Basic = () => (
-  <Renderer
-    source={select("Source", SOURCES, SOURCES[0])}
-    page={number("Page", 1)}
-    zoom={number("Zoom", 1)}
-    bookMode={boolean("Book Mode", true)}
-    fontSize={number("Font Size", 16)}
-    background={color("Background", "#ececec")}
-    renderAllPages={boolean("Render All Pages", true)}
-    autoResize={boolean("Auto Resize", true)}
-    pageViewMode={select(
-      "Page View Mode",
-      ["singlePage", "spread", "autoSpread"],
-      "singlePage",
-    )}
-    defaultPaperSize={text("Default Paper Size", undefined)}
-    fitToScreen={boolean("Fit to Screen", false)}
-    pageBorderWidth={number("Page Border Width", 1)}
-    authorStyleSheet={text("Author Stylesheet", undefined)}
-    userStyleSheet={text("User Stylesheet", undefined)}
-    onLoad={action("loaded")}
-    onError={action("error")}
-    onNavigation={action("navigation")}
-    onMessage={(msg, type) => action("message")(type, msg)}
-    onReadyStateChange={action("readyStateChange")}
-    onHyperlink={action("hyperlink")}
-  />
-);
+export default {
+  title: "Renderer",
+  component: Renderer,
+  argTypes: {
+    source: {
+      control: { type: "select" },
+      options: SOURCES,
+    },
+    page: {
+      control: { type: "number" },
+    },
+    zoom: {
+      control: { type: "number" },
+    },
+    bookMode: {
+      control: { type: "boolean" },
+    },
+    fontSize: {
+      control: { type: "number" },
+    },
+    background: {
+      control: { type: "color" },
+    },
+    renderAllPages: {
+      control: { type: "boolean" },
+    },
+    autoResize: {
+      control: { type: "boolean" },
+    },
+    pageViewMode: {
+      control: { type: "select" },
+      options: ["singlePage", "spread", "autoSpread"],
+    },
+    defaultPaperSize: {
+      control: { type: "text" },
+    },
+    fitToScreen: {
+      control: { type: "boolean" },
+    },
+    pageBorderWidth: {
+      control: { type: "number" },
+    },
+    authorStyleSheet: {
+      control: { type: "text" },
+    },
+    userStyleSheet: {
+      control: { type: "text" },
+    },
+  },
+  args: {
+    source: SOURCES[0],
+    page: 1,
+    zoom: 1,
+    bookMode: true,
+    fontSize: 16,
+    background: "#ececec",
+    renderAllPages: true,
+    autoResize: true,
+    pageViewMode: "singlePage",
+    fitToScreen: false,
+    pageBorderWidth: 1,
+    onLoad: fn(),
+    onError: fn(),
+    onNavigation: fn(),
+    onMessage: fn(),
+    onReadyStateChange: fn(),
+    onHyperlink: fn(),
+  },
+};
 
-export const Narrowed = () => (
+export const Basic = (args) => <Renderer {...args} />;
+
+export const Narrowed = (args) => (
   <div
     style={{
       background: "black",
@@ -72,32 +101,7 @@ export const Narrowed = () => (
         justifyContent: "center",
         alignItems: "center",
       }}>
-      <Renderer
-        source={select("Source", SOURCES, SOURCES[0])}
-        page={number("Page", 1)}
-        zoom={number("Zoom", 1)}
-        bookMode={boolean("Book Mode", true)}
-        fontSize={number("Font Size", 16)}
-        background={color("Background", "#ececec")}
-        renderAllPages={boolean("Render All Pages", true)}
-        autoResize={boolean("Auto Resize", true)}
-        pageViewMode={select(
-          "Page View Mode",
-          ["singlePage", "spread", "autoSpread"],
-          "singlePage",
-        )}
-        defaultPaperSize={text("Default Paper Size", undefined)}
-        fitToScreen={boolean("Fit to Screen", true)}
-        pageBorderWidth={number("Page Border Width", 1)}
-        authorStyleSheet={text("Author Stylesheet", undefined)}
-        userStyleSheet={text("User Stylesheet", undefined)}
-        onLoad={action("loaded")}
-        onError={action("error")}
-        onNavigation={action("navigation")}
-        onMessage={(msg, type) => action("message")(type, msg)}
-        onReadyStateChange={action("readyStateChange")}
-        onHyperlink={action("hyperlink")}
-      />
+      <Renderer {...args} fitToScreen={true} />
     </div>
   </div>
 );
