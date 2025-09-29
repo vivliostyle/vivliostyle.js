@@ -2562,8 +2562,8 @@ export class ViewFactory
             nodeContext.after = after;
           }
           nodeContext.shadowType = pn.shadowType;
-          (nodeContext.shadowContext = pn.shadowContext),
-            (nodeContext.nodeShadow = pn.nodeShadow);
+          nodeContext.shadowContext = pn.shadowContext;
+          nodeContext.nodeShadow = pn.nodeShadow;
           nodeContext.shadowSibling = pn.shadowSibling
             ? pn.shadowSibling
             : shadowSibling;
