@@ -1,8 +1,6 @@
 # Vivliostyle Viewer
 
 [![npm][npm]][npm-url]
-[![Build Status][build-status]][build-status-url]
-[![deps][deps]][deps-url]
 [![Install Size][size]][size-url]
 [![Downloads][downloads]][downloads-url]
 
@@ -71,10 +69,6 @@ Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 [npm]: https://img.shields.io/npm/v/@vivliostyle/viewer/latest
 [npm-next]: https://img.shields.io/npm/v/@vivliostyle/viewer/next
 [npm-url]: https://www.npmjs.com/package/@vivliostyle/viewer
-[build-status]: https://travis-ci.com/vivliostyle/vivliostyle.js.svg?branch=master
-[build-status-url]: https://travis-ci.com/vivliostyle/vivliostyle.js
-[deps]: https://img.shields.io/david/vivliostyle/vivliostyle.js?path=packages/viewer
-[deps-url]: https://david-dm.org/vivliostyle/vivliostyle.js/?path=packages/viewer
 [size]: https://packagephobia.vercel.app/badge?p=@vivliostyle/viewer
 [size-url]: https://packagephobia.vercel.app/result?p=@vivliostyle/viewer
 [downloads]: https://img.shields.io/npm/dw/@vivliostyle/viewer.svg
