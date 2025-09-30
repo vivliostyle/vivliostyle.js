@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-const KarmaServer = require("karma").Server;
+// const KarmaServer = require("karma").Server;
 const browserSync = require("browser-sync").create();
 const gulp = require("gulp");
 const ejs = require("gulp-ejs");
@@ -142,29 +142,31 @@ gulp.task(
 );
 
 // Test
-gulp.task("test-local", function (done) {
-  const server = new KarmaServer(
-    {
-      configFile: process.cwd() + "/test/conf/karma-local.conf",
-    },
-    function (exitStatus) {
-      done(exitStatus ? "Some tests failed" : undefined);
-    },
-  );
-  server.start();
-});
-
-gulp.task("test-sauce", function (done) {
-  const server = new KarmaServer(
-    {
-      configFile: process.cwd() + "/test/conf/karma-sauce.conf",
-    },
-    function (exitStatus) {
-      done(exitStatus ? "Some tests failed" : undefined);
-    },
-  );
-  server.start();
-});
+// These tests have been disabled. See issue #618.
+//
+// gulp.task("test-local", function (done) {
+//   const server = new KarmaServer(
+//     {
+//       configFile: process.cwd() + "/test/conf/karma-local.conf",
+//     },
+//     function (exitStatus) {
+//       done(exitStatus ? "Some tests failed" : undefined);
+//     },
+//   );
+//   server.start();
+// });
+//
+// gulp.task("test-sauce", function (done) {
+//   const server = new KarmaServer(
+//     {
+//       configFile: process.cwd() + "/test/conf/karma-sauce.conf",
+//     },
+//     function (exitStatus) {
+//       done(exitStatus ? "Some tests failed" : undefined);
+//     },
+//   );
+//   server.start();
+// });
 
 // watch
 gulp.task("start-watching", (done) => done());
