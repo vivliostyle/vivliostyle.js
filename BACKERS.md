@@ -35,8 +35,6 @@ u1f992🌟
 yamahige🌟
 <p><a href="https://github.com/munepi"><img src="https://avatars3.githubusercontent.com/u/583148?s=460&amp;v=4" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
 Munehiro Yamamoto⭐️
-<p><a href="https://github.com/nishinos"><img src="https://avatars2.githubusercontent.com/u/1988266?s=460&amp;v=4" title="nishinos" width="60" height="60" style="max-width:100%;"></a>
-nishinos⭐️
 <p><a href="https://github.com/zonuexe"><img src="https://avatars3.githubusercontent.com/u/822086?s=460&amp;v=4" title="USAMI Kenta" width="60" height="60" style="max-width:100%;"></a>
 USAMI Kenta⭐️
 <p><a href="https://github.com/omasanori"><img src="https://avatars2.githubusercontent.com/u/167209?s=460&amp;v=4" title="Masanori Ogino" width="60" height="60" style="max-width:100%;"></a>
