@@ -1637,8 +1637,16 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       nodeContext.formattingContext,
     );
     const rootViewNode = formattingContext.getRootViewNode(nodeContext);
+
+    // Disable browser's column breaking to avoid interference with our layout
+    LayoutHelper.unsetBrowserColumnBreaking(column);
+
+    const frame = Task.newFrame<Vtree.NodeContext>(
+      "TableFormattingContext.layout",
+    );
+    let cont: Task.Result<Vtree.NodeContext>;
     if (!rootViewNode) {
-      return column.buildDeepElementView(nodeContext);
+      cont = column.buildDeepElementView(nodeContext);
     } else {
       if (leadingEdge) {
         RepetitiveElementImpl.appendHeaderToAncestors(
@@ -1646,11 +1654,18 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
           column,
         );
       }
-      return new LayoutRetryer(formattingContext, this).layout(
+      cont = new LayoutRetryer(formattingContext, this).layout(
         nodeContext,
         column,
       );
     }
+    cont.then((result) => {
+      // Re-enable browser's column breaking
+      LayoutHelper.setBrowserColumnBreaking(column);
+
+      frame.finish(result);
+    });
+    return frame.result();
   }
 
   /** @override */

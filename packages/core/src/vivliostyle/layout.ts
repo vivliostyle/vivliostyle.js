@@ -2167,6 +2167,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (haveStart) {
         range.setEndAfter(lastGood);
         const boxList = this.clientLayout.getRangeClientRects(range);
+
+        // Adjust boxes' positions for column breaking
+        LayoutHelper.adjustRectsForColumnBreaking(boxList, this.vertical);
+
         for (let i = 0; i < boxList.length; i++) {
           arr.push(boxList[i]);
         }
@@ -3554,6 +3558,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         return Task.newResult(chunkPosition as Vtree.ChunkPosition);
       }
     }
+
+    // Enable page/column breaking using the browser's multi-column feature.
+    LayoutHelper.setBrowserColumnBreaking(this);
+
     const frame: Task.Frame<Vtree.ChunkPosition> = Task.newFrame("layout");
 
     // ------ start the column -----------
@@ -3575,6 +3583,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
       retryer.layout(nodeContext, this).then((nodeContextParam) => {
+        // Unset the browser's multi-column setting.
+        LayoutHelper.unsetBrowserColumnBreaking(this);
+
         this.doFinishBreak(
           nodeContextParam,
           retryer.context.overflownNodeContext,

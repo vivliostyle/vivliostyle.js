@@ -1010,6 +1010,11 @@ export class ViewFactory
       // Leaves handling of multicol specified on non-root/body elements to the browser
       const insideNonRootMultiColumn = this.isInsideNonRootMultiColumn();
 
+      // column-fill:auto does not work for non-root multicol boxes yet.
+      if (computedStyle["column-fill"]) {
+        delete computedStyle["column-fill"];
+      }
+
       const columnSpan = computedStyle["column-span"];
       this.nodeContext.columnSpan =
         !insideNonRootMultiColumn &&
