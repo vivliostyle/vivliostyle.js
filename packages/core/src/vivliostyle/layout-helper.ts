@@ -23,10 +23,87 @@ import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
 /**
- * Calculate the position of the "after" edge in the block-progression
- * dimension. Return 0 if position was determined successfully and return
- * non-zero if position could not be determined and the node should be
- * considered zero-height.
+ * A large gap value used to separate columns when using the browser's
+ * multi-column feature for page/column breaking.
+ * This value should be significantly larger than any objects in the layout
+ * to prevent overlapping content between columns, but not too large to cause
+ * problems with browser rendering limits.
+ */
+const BIG_GAP = 100000;
+
+/**
+ * Enable page/column breaking using the browser's multi-column feature.
+ * This function sets CSS properties on the column element to create a
+ * single-column (column-count: 1) that splits into multiple columns
+ * when content overflows the column's size. The large column gap
+ * (column-gap) ensures that the browser creates new columns
+ * apart from the original column position, and it helps determine
+ * page/column breaking positions in our layout processing.
+ */
+export function setBrowserColumnBreaking(column: Layout.Column): void {
+  Base.setCSSProperty(column.element, "column-count", "1");
+  Base.setCSSProperty(
+    column.element,
+    "column-gap",
+    `${BIG_GAP - (column.vertical ? column.height : column.width)}px`,
+  );
+}
+
+/**
+ * Disable the browser's multi-column feature for page/column breaking.
+ * This function resets the CSS properties set by `setBrowserColumnBreaking`.
+ */
+export function unsetBrowserColumnBreaking(column: Layout.Column): void {
+  Base.setCSSProperty(column.element, "column-count", "");
+  Base.setCSSProperty(column.element, "column-gap", "");
+}
+
+/**
+ * Adjust the client rectangle of an element or range to account for
+ * the browser's column breaking.
+ * This function modifies the rectangle's coordinates to ensure that
+ * if the rectangle is located in a column beyond the current one,
+ * its position in the block-progression direction is moved accordingly
+ * so that overflow checks can be performed based solely on the
+ * block-progression position.
+ */
+export function adjustRectForColumnBreaking(
+  rect: Vtree.ClientRect,
+  vertical: boolean,
+): void {
+  const distance = vertical
+    ? rect.bottom
+    : Math.max(Math.abs(rect.left), Math.abs(rect.right));
+  const nthColumn = Math.round(distance / BIG_GAP);
+  if (nthColumn > 0) {
+    const shift = nthColumn * BIG_GAP;
+    if (vertical) {
+      rect.left -= shift;
+      rect.right -= shift;
+    } else {
+      rect.top += shift;
+      rect.bottom += shift;
+    }
+  }
+}
+
+/**
+ * Adjust multiple client rectangles for column breaking.
+ */
+export function adjustRectsForColumnBreaking(
+  rects: Vtree.ClientRect[],
+  vertical: boolean,
+): void {
+  for (let i = 0; i < rects.length; i++) {
+    adjustRectForColumnBreaking(rects[i], vertical);
+  }
+}
+
+/**
+ * Calculate the position of the "after" edge in the block-progression.
+ * Returns the edge position in pixels if it was determined successfully,
+ * and returns NaN if the position could not be determined and the node
+ * should be considered zero-height.
  */
 export function calculateEdge(
   nodeContext: Vtree.NodeContext,
@@ -46,11 +123,14 @@ export function calculateEdge(
   if (element && element.namespaceURI === Base.NS.XHTML) {
     const style = (element as HTMLElement).style;
     if (
-      style &&
-      Display.isInlineLevel(style.display) &&
-      /^([\d\.]|super|(text-)?top)/.test(style.verticalAlign)
+      element.localName === "br" ||
+      element.localName === "wbr" ||
+      (style &&
+        Display.isInlineLevel(style.display) &&
+        /^([\d\.]|super|(text-)?top)/.test(style.verticalAlign))
     ) {
-      // (Fix for issue #811)
+      // Avoid incorrect edge calculation at BR or WBR element,
+      // or inline element with positive vertical-align (issue #811).
       return NaN;
     }
   }
@@ -78,6 +158,10 @@ export function calculateEdge(
         // (Fix for issue #802)
         return NaN;
       }
+
+      // Adjust box position for column breaking
+      adjustRectForColumnBreaking(cbox, vertical);
+
       if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
         if (nodeContext.after) {
           return vertical ? cbox.left : cbox.bottom;
@@ -103,6 +187,10 @@ export function calculateEdge(
     range.setStart(node, extraOffset);
     range.setEnd(node, extraOffset + 1);
     let boxes = clientLayout.getRangeClientRects(range);
+
+    // Adjust boxes' positions for column breaking
+    adjustRectsForColumnBreaking(boxes, vertical);
+
     boxes = boxes.filter((box) => box.right > box.left && box.bottom > box.top);
     if (!boxes.length) {
       return NaN;
