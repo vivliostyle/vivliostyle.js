@@ -42,6 +42,12 @@ const BIG_GAP = 100000;
  */
 export function setBrowserColumnBreaking(column: Layout.Column): void {
   Base.setCSSProperty(column.element, "column-count", "1");
+  // So far, `column-width` is needed with `column-count: 1` in WebKit.
+  Base.setCSSProperty(
+    column.element,
+    "column-width",
+    `${column.vertical ? column.height : column.width}px`,
+  );
   Base.setCSSProperty(
     column.element,
     "column-gap",
@@ -55,7 +61,26 @@ export function setBrowserColumnBreaking(column: Layout.Column): void {
  */
 export function unsetBrowserColumnBreaking(column: Layout.Column): void {
   Base.setCSSProperty(column.element, "column-count", "");
+  Base.setCSSProperty(column.element, "column-width", "");
   Base.setCSSProperty(column.element, "column-gap", "");
+}
+
+/**
+ * Check if the client rectangle of an element or range is located
+ * in a column beyond the current one due to the browser's column breaking.
+ *
+ * @param rect - The client rectangle to check.
+ * @param vertical - Whether the layout is vertical.
+ * @return the number of columns the rectangle is after the current column.
+ */
+export function checkIfBeyondColumnBreaks(
+  rect: Vtree.ClientRect,
+  vertical: boolean,
+): number {
+  const distance = vertical
+    ? rect.bottom
+    : Math.max(Math.abs(rect.left), Math.abs(rect.right));
+  return Math.round(distance / BIG_GAP);
 }
 
 /**
@@ -66,17 +91,18 @@ export function unsetBrowserColumnBreaking(column: Layout.Column): void {
  * its position in the block-progression direction is moved accordingly
  * so that overflow checks can be performed based solely on the
  * block-progression position.
+ *
+ * @param rect - The client rectangle to check.
+ * @param vertical - Whether the layout is vertical.
+ * @return the number of columns the rectangle is after the current column.
  */
 export function adjustRectForColumnBreaking(
   rect: Vtree.ClientRect,
   vertical: boolean,
-): void {
-  const distance = vertical
-    ? rect.bottom
-    : Math.max(Math.abs(rect.left), Math.abs(rect.right));
-  const nthColumn = Math.round(distance / BIG_GAP);
-  if (nthColumn > 0) {
-    const shift = nthColumn * BIG_GAP;
+): number {
+  const columnOver = checkIfBeyondColumnBreaks(rect, vertical);
+  if (columnOver > 0) {
+    const shift = columnOver * BIG_GAP;
     if (vertical) {
       rect.left -= shift;
       rect.right -= shift;
@@ -85,6 +111,7 @@ export function adjustRectForColumnBreaking(
       rect.bottom += shift;
     }
   }
+  return columnOver;
 }
 
 /**

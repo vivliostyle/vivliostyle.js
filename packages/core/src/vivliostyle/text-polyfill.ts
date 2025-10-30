@@ -18,6 +18,7 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
+import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
 
@@ -702,7 +703,7 @@ class TextSpacingPolyfill {
             }
           }
         }
-        this.processTextSpacing(
+        const columnOver = this.processTextSpacing(
           p.viewNode,
           isFirstAfterBreak,
           isFirstInBlock,
@@ -717,6 +718,12 @@ class TextSpacingPolyfill {
           lang,
           p.vertical,
         );
+        if (columnOver > 0) {
+          // Stop processing if the node is moved to next column
+          // because it will be processed again in the next column.
+          // (Issue #1256)
+          break;
+        }
       }
     }
   }
@@ -735,9 +742,10 @@ class TextSpacingPolyfill {
     hangingPunctuation: HangingPunctuation,
     lang: string,
     vertical: boolean,
-  ): void {
+  ): number {
     const text = textNode.textContent;
     const document = textNode.ownerDocument;
+    let columnOver = 0;
     let currRange: Range;
     let prevRange: Range;
     let nextRange: Range;
@@ -763,6 +771,7 @@ class TextSpacingPolyfill {
       if (!rect || !prevRect) {
         return false;
       }
+      columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(prevRect, vertical);
       return vertical
         ? rect.top < prevRect.top + prevRect.height - rect.width ||
             rect.left + rect.width < prevRect.left + rect.width / 10 ||
@@ -781,6 +790,7 @@ class TextSpacingPolyfill {
         currRange.selectNode(textNode);
       }
       const rect = currRange.getClientRects()[0];
+      columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(rect, vertical);
       if (!nextRange) {
         nextRange = document.createRange();
         nextRange.selectNode(nextNode);
@@ -855,7 +865,7 @@ class TextSpacingPolyfill {
     if (punctProcessing) {
       if (textNode.parentElement.localName === "viv-ts-inner") {
         // Already processed
-        return;
+        return 0;
       }
       // Wrap the textNode as `<{tagName}><viv-ts-inner>{text}<viv-ts-inner></{tagName}>`
       const outerElem = document.createElement(tagName);
@@ -1102,6 +1112,7 @@ class TextSpacingPolyfill {
         spaceIdeoAlnumProcessing = true;
       }
     }
+    return columnOver;
   }
 
   registerHooks() {

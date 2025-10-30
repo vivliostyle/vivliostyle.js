@@ -640,6 +640,32 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           position.viewNode.parentElement?.namespaceURI === Base.NS.XHTML
         ) {
           checkPoints.push(position.copy());
+
+          // Prevent performance degradation when the text block is very large.
+          // (Issue #1256)
+          const CHECKPOINTS_THRESHOLD = 1000;
+          if (checkPoints.length > CHECKPOINTS_THRESHOLD) {
+            const element =
+              position.viewNode.nodeType === 1
+                ? (position.viewNode as Element)
+                : position.viewNode.parentElement;
+            const rect = this.clientLayout.getElementClientRect(element);
+
+            // Check if the box position is beyond column breaks with
+            // the browser's column breaking.
+            const columnOver = LayoutHelper.checkIfBeyondColumnBreaks(
+              rect,
+              this.vertical,
+            );
+            if (columnOver >= 2) {
+              // When the box position is beyond two or more column breaks,
+              // it should not be necessary to continue processing further
+              // because it will be processed again in the next column.
+              // Exit the loop
+              bodyFrame.breakLoop();
+              return;
+            }
+          }
         }
         this.maybePeelOff(position, 0).then((position1Param) => {
           const position1 = position1Param as Vtree.NodeContext;
