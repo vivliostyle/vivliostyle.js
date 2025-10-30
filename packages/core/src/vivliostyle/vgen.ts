@@ -1040,11 +1040,12 @@ export class ViewFactory
           !Css.isDefaultingValue(breakBefore) &&
           !(insideNonRootMultiColumn && breakBefore === Css.ident.column)
         ) {
-          if (this.nodeContext.fragmentIndex === 1) {
-            this.nodeContext.breakBefore = breakBefore.toString();
-          }
+          this.nodeContext.breakBefore = breakBefore.toString();
           if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
             delete computedStyle["break-before"];
+          }
+          if (this.nodeContext.fragmentIndex !== 1) {
+            this.nodeContext.breakBefore = null;
           }
         }
         // Named page type
