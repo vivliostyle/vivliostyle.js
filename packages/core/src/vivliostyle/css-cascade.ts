@@ -1799,6 +1799,14 @@ export interface CounterResolver {
   ): Exprs.Val;
 
   /**
+   * Get value of the CSS target-text() function
+   * https://drafts.csswg.org/css-content-3/#target-text
+   * @param url Target URL (with fragment identifier)
+   * @param pseudoElement Pseudo-element selector ('content', 'before', 'after', 'first-letter')
+   */
+  getTargetTextVal(url: string, pseudoElement: string): Exprs.Val;
+
+  /**
    * Get value of the CSS string() function
    * https://drafts.csswg.org/css-gcpm-3/#using-named-strings
    */
@@ -2077,6 +2085,34 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   }
 
   /**
+   * CSS `target-text()` function
+   * https://drafts.csswg.org/css-content-3/#target-text
+   */
+  visitFuncTargetText(values: Css.Val[]): Css.Val {
+    const targetUrl = values[0];
+
+    // target-text() does not support function values like string() as the first argument
+    // Only URL, string literals, and attr() are supported
+    if (targetUrl instanceof Css.Func) {
+      // Return empty string constant to avoid infinite loop
+      return new Css.SpaceList([new Css.Str("")]);
+    }
+
+    let targetUrlStr: string;
+    if (targetUrl instanceof Css.URL) {
+      targetUrlStr = targetUrl.url;
+    } else {
+      targetUrlStr = targetUrl.stringValue();
+    }
+    const pseudoElement =
+      values.length > 1 ? values[1].stringValue() : "content";
+    const c = new Css.Expr(
+      this.counterResolver.getTargetTextVal(targetUrlStr, pseudoElement),
+    );
+    return new Css.SpaceList([c]);
+  }
+
+  /**
    * CSS `string()` function
    * https://drafts.csswg.org/css-gcpm-3/#using-named-strings
    */
@@ -2191,6 +2227,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "target-counters":
         if (func.values.length <= 4) {
           return this.visitFuncTargetCounters(func.values);
+        }
+        break;
+      case "target-text":
+        if (func.values.length <= 2) {
+          return this.visitFuncTargetText(func.values);
         }
         break;
       case "string":

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>target-text() in Running Elements Test</title>
+    <style>
+      @page {
+        size: 640px 480px;
+        margin: 30px;
+        font-size: 10px;
+        @top-right {
+          content: element(top-right);
+        }
+        @bottom-center {
+          content: counter(page);
+        }
+        @bottom-left {
+          content: target-text(url(#page-margin-target));
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+      }
+
+      section {
+        page-break-before: always;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      [id] {
+        background-color: #ffffcc;
+        margin: 8px;
+        padding: 4px;
+      }
+
+      .running-header {
+        position: running(top-right);
+        font-size: 10px;
+      }
+      .running-reference::before {
+        content: target-text(attr(href url));
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Page Margin Box</h2>
+
+      <p id="page-margin-target">This text should appear in the bottom-left</p>
+    </section>
+
+    <section>
+      <h2>Running Element</h2>
+
+      <div class="running-header">
+        <span href="#running-target" class="running-reference"></span>
+      </div>
+
+      <p id="running-target">This text should appear in the top-right</p>
+    </section>
+  </body>
+</html>

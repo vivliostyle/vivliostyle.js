@@ -79,6 +79,19 @@ module.exports = [
         file: "target-counter-and-margin-bug.html",
         title: "target-counter and margin bug",
       },
+      { file: "target-text.html", title: "target-text() - Basic Tests" },
+      {
+        file: "target-text-running-element.html",
+        title: "target-text() in Running Elements",
+      },
+      {
+        file: [
+          "target-text-multiple/first.html",
+          "target-text-multiple/second.html",
+          "target-text-multiple/third.html",
+        ],
+        title: "target-text() - Cross-Document References",
+      },
       {
         file: "exclusion_with_printer_marks.html",
         title: "Exclusion with printer marks",
