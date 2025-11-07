@@ -1031,7 +1031,10 @@ export class ViewFactory
         ) {
           this.nodeContext.breakAfter = breakAfter.toString();
           if (Break.forcedBreakValues[this.nodeContext.breakAfter]) {
-            delete computedStyle["break-after"];
+            // delete computedStyle["break-after"];
+
+            // Instead of deleting, set to "column" so that the browser can handle it.
+            computedStyle["break-after"] = Css.ident.column;
           }
         }
         const breakBefore = computedStyle["break-before"];
@@ -1042,7 +1045,10 @@ export class ViewFactory
         ) {
           this.nodeContext.breakBefore = breakBefore.toString();
           if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
-            delete computedStyle["break-before"];
+            // delete computedStyle["break-before"];
+
+            // Instead of deleting, set to "column" so that the browser can handle it.
+            computedStyle["break-before"] = Css.ident.column;
           }
           if (this.nodeContext.fragmentIndex !== 1) {
             this.nodeContext.breakBefore = null;

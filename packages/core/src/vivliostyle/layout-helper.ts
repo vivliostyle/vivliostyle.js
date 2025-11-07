@@ -102,14 +102,31 @@ export function adjustRectForColumnBreaking(
 ): number {
   const columnOver = checkIfBeyondColumnBreaks(rect, vertical);
   if (columnOver > 0) {
-    const shift = columnOver * BIG_GAP;
+    const shift2 = columnOver * BIG_GAP;
     if (vertical) {
-      rect.left -= shift;
-      rect.right -= shift;
+      // vertical writing mode, columns are top to bottom
+      const shift1 = Math.round(rect.top / BIG_GAP) * BIG_GAP;
+      rect.top -= shift1;
+      rect.bottom -= shift2;
+      rect.right -= shift1;
+      rect.left -= shift2;
+    } else if (rect.left < -BIG_GAP / 2) {
+      // columns are right to left
+      const shift1 = Math.round(Math.abs(rect.right) / BIG_GAP) * BIG_GAP;
+      rect.right += shift1;
+      rect.left += shift2;
+      rect.top += shift1;
+      rect.bottom += shift2;
     } else {
-      rect.top += shift;
-      rect.bottom += shift;
+      // columns are left to right
+      const shift1 = Math.round(rect.left / BIG_GAP) * BIG_GAP;
+      rect.left -= shift1;
+      rect.right -= shift2;
+      rect.top += shift1;
+      rect.bottom += shift2;
     }
+    rect.width = rect.right - rect.left;
+    rect.height = rect.bottom - rect.top;
   }
   return columnOver;
 }
@@ -124,6 +141,19 @@ export function adjustRectsForColumnBreaking(
   for (let i = 0; i < rects.length; i++) {
     adjustRectForColumnBreaking(rects[i], vertical);
   }
+}
+
+/**
+ * Get the client rectangle of an element, adjusted for column breaking.
+ */
+export function getElementClientRectAdjusted(
+  clientLayout: Vtree.ClientLayout,
+  element: Element,
+  vertical: boolean,
+): Vtree.ClientRect {
+  const rect = clientLayout.getElementClientRect(element);
+  adjustRectForColumnBreaking(rect, vertical);
+  return rect;
 }
 
 /**
@@ -174,7 +204,11 @@ export function calculateEdge(
         parentNode.removeChild(element);
         parentNode.insertBefore(element, nextSibling);
       }
-      const cbox = clientLayout.getElementClientRect(element);
+      const cbox = getElementClientRectAdjusted(
+        clientLayout,
+        element,
+        vertical,
+      );
       if (
         cbox.left === 0 &&
         cbox.top === 0 &&
@@ -185,10 +219,6 @@ export function calculateEdge(
         // (Fix for issue #802)
         return NaN;
       }
-
-      // Adjust box position for column breaking
-      adjustRectForColumnBreaking(cbox, vertical);
-
       if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
         if (nodeContext.after) {
           return vertical ? cbox.left : cbox.bottom;
