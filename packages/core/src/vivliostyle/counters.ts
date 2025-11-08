@@ -269,8 +269,11 @@ class CounterResolver implements CssCascade.CounterResolver {
           );
           return pseudoElem ? (pseudoElem.textContent || "").trim() : "";
         }
-        // For other pseudo-elements, fall back to full content
-        return (element.textContent || "").trim();
+        // For other pseudo-elements, fall back to content (excluding ::before and ::after)
+        const clone = element.cloneNode(true) as Element;
+        const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
+        pseudos.forEach((pseudo) => pseudo.remove());
+        return (clone.textContent || "").trim();
       }
       return "";
     } else {
