@@ -2230,7 +2230,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         }
         break;
       case "target-text":
-        if (func.values.length <= 2) {
+        if (func.values.length >= 1 && func.values.length <= 2) {
           return this.visitFuncTargetText(func.values);
         }
         break;
