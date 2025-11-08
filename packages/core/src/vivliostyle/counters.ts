@@ -41,6 +41,31 @@ function cloneCounterValues(
 }
 
 /**
+ * Extract text content from an element for a specific pseudo-element.
+ * @param element The DOM element to extract text from
+ * @param pseudoElement The pseudo-element type: "content", "before", or "after"
+ * @returns The extracted text, or empty string if not found
+ */
+function extractPseudoElementText(
+  element: Element,
+  pseudoElement: "content" | "before" | "after",
+): string {
+  if (pseudoElement === "content") {
+    // Get main content (excluding ::before and ::after)
+    const clone = element.cloneNode(true) as Element;
+    const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
+    pseudos.forEach((pseudo) => pseudo.remove());
+    return (clone.textContent || "").trim();
+  } else {
+    // Extract ::before or ::after content
+    const pseudoElem = element.querySelector(
+      `[data-adapt-pseudo="${pseudoElement}"]`,
+    );
+    return pseudoElem ? (pseudoElem.textContent || "").trim() : "";
+  }
+}
+
+/**
  * Class representing a reference by target-counter(s).
  * @param targetId ID of the referenced element (transformed by
  *     DocumentURLTransformer to handle a reference across multiple source
@@ -256,24 +281,11 @@ class CounterResolver implements CssCascade.CounterResolver {
       if (elements && elements.length > 0) {
         const element = elements[0];
 
-        if (pseudoElement === "content") {
-          // Get main content (excluding ::before and ::after)
-          const clone = element.cloneNode(true) as Element;
-          const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
-          pseudos.forEach((pseudo) => pseudo.remove());
-          return (clone.textContent || "").trim();
-        } else if (pseudoElement === "before" || pseudoElement === "after") {
-          // Extract ::before or ::after content
-          const pseudoElem = element.querySelector(
-            `[data-adapt-pseudo="${pseudoElement}"]`,
-          );
-          return pseudoElem ? (pseudoElem.textContent || "").trim() : "";
+        if (pseudoElement === "before" || pseudoElement === "after") {
+          return extractPseudoElementText(element, pseudoElement);
         }
-        // For other pseudo-elements, fall back to content (excluding ::before and ::after)
-        const clone = element.cloneNode(true) as Element;
-        const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
-        pseudos.forEach((pseudo) => pseudo.remove());
-        return (clone.textContent || "").trim();
+        // For content and other pseudo-elements, fall back to content (excluding ::before and ::after)
+        return extractPseudoElementText(element, "content");
       }
       return "";
     } else {
@@ -812,29 +824,11 @@ export class CounterStore {
         const elements = this.currentPage.elementsById[id];
         if (elements && elements.length > 0) {
           const element = elements[0];
-          this.pageTextById[id] = {};
-
-          // Extract "content" (main text, excluding ::before and ::after)
-          const clone = element.cloneNode(true) as Element;
-          const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
-          pseudos.forEach((pseudo) => pseudo.remove());
-          this.pageTextById[id]["content"] = (clone.textContent || "").trim();
-
-          // Extract "before" pseudo-element
-          const beforeElem = element.querySelector(
-            '[data-adapt-pseudo="before"]',
-          );
-          this.pageTextById[id]["before"] = beforeElem
-            ? (beforeElem.textContent || "").trim()
-            : "";
-
-          // Extract "after" pseudo-element
-          const afterElem = element.querySelector(
-            '[data-adapt-pseudo="after"]',
-          );
-          this.pageTextById[id]["after"] = afterElem
-            ? (afterElem.textContent || "").trim()
-            : "";
+          this.pageTextById[id] = {
+            content: extractPseudoElementText(element, "content"),
+            before: extractPseudoElementText(element, "before"),
+            after: extractPseudoElementText(element, "after"),
+          };
         }
 
         const oldPageIndex = this.pageIndicesById[id];
