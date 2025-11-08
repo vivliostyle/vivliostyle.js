@@ -2090,14 +2090,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
    */
   visitFuncTargetText(values: Css.Val[]): Css.Val {
     const targetUrl = values[0];
-
-    // target-text() does not support function values like string() as the first argument
-    // Only URL, string literals, and attr() are supported
-    if (targetUrl instanceof Css.Func) {
-      // Return empty string constant to avoid infinite loop
-      return new Css.SpaceList([new Css.Str("")]);
-    }
-
     let targetUrlStr: string;
     if (targetUrl instanceof Css.URL) {
       targetUrlStr = targetUrl.url;

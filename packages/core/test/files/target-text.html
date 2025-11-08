@@ -93,6 +93,12 @@
       .section-5::after {
         content: target-text(attr(href url), content);
       }
+      .section-5-string-set {
+        string-set: some-string "#invalid-target";
+      }
+      .section-5-invalid-func::after {
+        content: target-text(string(some-string));
+      }
 
       .section-6 {
         counter-reset: section-6-chapter 0;
@@ -210,9 +216,13 @@
       <p>Expected: <a href="#">??</a></p>
       <p>Actual: <a href="#does-not-exist" class="section-5"></a></p>
 
-      <div style="break-after: page"></div>
+      <h3 class="section-5-string-set">
+        Test 5.4: Invalid function (string())
+      </h3>
+      <p>Expected: <a href="#"></a> (E_INVALID_PROPERTY_VALUE in console)</p>
+      <p>Actual: <a href="#" class="section-5-invalid-func"></a></p>
 
-      <h3>Test 5.4: Long Text Content</h3>
+      <h3>Test 5.5: Long Text Content</h3>
       <p>
         Expected:
         <a href="#"
