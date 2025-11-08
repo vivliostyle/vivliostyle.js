@@ -1098,7 +1098,7 @@ export class CounterStore {
       if (expr && expr.transformedId) {
         const text = this.pageTextById[expr.transformedId];
         if (text) {
-          node.textContent = text[expr.pseudoElement];
+          node.textContent = text[expr.pseudoElement] ?? "";
         }
       }
     }
