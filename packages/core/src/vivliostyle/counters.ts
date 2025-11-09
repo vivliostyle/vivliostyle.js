@@ -55,13 +55,13 @@ function extractPseudoElementText(
     const clone = element.cloneNode(true) as Element;
     const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
     pseudos.forEach((pseudo) => pseudo.remove());
-    return (clone.textContent || "").trim();
+    return clone.textContent || "";
   } else {
     // Extract ::before or ::after content
     const pseudoElem = element.querySelector(
       `[data-adapt-pseudo="${pseudoElement}"]`,
     );
-    return pseudoElem ? (pseudoElem.textContent || "").trim() : "";
+    return pseudoElem ? pseudoElem.textContent || "" : "";
   }
 }
 
@@ -421,15 +421,26 @@ class CounterResolver implements CssCascade.CounterResolver {
       () => {
         // Handle first-letter separately
         if (pseudoElement === "first-letter") {
-          // Get content text and return first character
-          let pageText = this.getTargetPageText(transformedId, "content");
-          if (pageText !== null) {
-            this.counterStore.resolveReference(transformedId);
-            return pageText.length > 0 ? pageText.charAt(0) : "";
-          } else {
+          // Respect pseudo-elements
+          const beforeText = this.getTargetPageText(transformedId, "before");
+          const contentText = this.getTargetPageText(transformedId, "content");
+          const afterText = this.getTargetPageText(transformedId, "after");
+
+          // Check if target element has been laid out
+          if (
+            beforeText === null &&
+            contentText === null &&
+            afterText === null
+          ) {
             this.counterStore.saveReferenceOfCurrentPage(transformedId, false);
             return "??";
           }
+
+          const text = beforeText ?? contentText ?? afterText ?? "";
+          this.counterStore.resolveReference(transformedId);
+
+          const match = text.match(Base.firstLetterPattern);
+          return match ? match[0] : "";
         }
 
         // For other pseudo-elements, get specific text

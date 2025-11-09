@@ -93,6 +93,14 @@ module.exports = [
         title: "target-text() - Cross-Document References",
       },
       {
+        file: "target-text-vs-named-strings.html",
+        title: "target-text() vs Named Strings",
+      },
+      {
+        file: "target-text-vs-named-strings-2.html",
+        title: "target-text() vs Named Strings - first-letter with punctuation",
+      },
+      {
         file: "exclusion_with_printer_marks.html",
         title: "Exclusion with printer marks",
       },

@@ -169,7 +169,7 @@
       <p>Actual: <a href="#pseudo-target" class="section-3-after"></a></p>
 
       <h3>Test 3.4: <code>target-text(attr(href url), first-letter)</code></h3>
-      <p>Expected: <a href="#">M</a></p>
+      <p>Expected: <a href="#">[B</a></p>
       <p>
         Actual: <a href="#pseudo-target" class="section-3-first-letter"></a>
       </p>
@@ -186,11 +186,11 @@
       </p>
       <p>Actual: <a href="#nested-target" class="section-4"></a></p>
 
-      <div id="nested-target">
+      <p id="nested-target">
         Outer text
         <span class="inner">inner text <strong>bold inner</strong></span>
         more outer
-      </div>
+      </p>
     </section>
 
     <section>
@@ -203,13 +203,13 @@
       <p id="empty-target"></p>
 
       <h3>Test 5.2: Whitespace-only</h3>
-      <p>Expected: {<a href="#"></a>}</p>
+      <p>Expected: {<a href="#">(whitespace character)</a>}</p>
       <p>Actual: {<a href="#whitespace-target" class="section-5"></a>}</p>
 
       <!-- prettier-ignore -->
       <p id="whitespace-target">
         
-
+        
       </p>
 
       <h3>Test 5.3: Non-existent target</h3>
