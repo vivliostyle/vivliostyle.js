@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>leader() with inline sibling elements (Vertical Writing Mode)</title>
+    <style>
+      @page {
+        size: 640px 480px;
+        margin: 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      ol {
+        margin: 0;
+        padding: 0;
+        display: inline;
+      }
+
+      li {
+        list-style: none;
+        display: inline;
+      }
+
+      ol > li:not(:last-child)::after {
+        content: "、";
+      }
+
+      a::before {
+        content: target-counter(attr(href url), page_);
+      }
+
+      .has-leader-dotted::after {
+        content: leader(dotted) "";
+      }
+
+      .has-leader-custom::after {
+        content: leader("・") "";
+      }
+
+      .has-leader-alone::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>leader() 単独 (空文字列なし)</h3>
+      <p><span class="has-leader-alone">縦書き</span></p>
+    </section>
+
+    <section>
+      <h3>単一のインライン兄弟要素</h3>
+      <p><span class="has-leader-dotted">縦書き</span><span>兄弟</span></p>
+    </section>
+
+    <section>
+      <h3>複数のインライン兄弟要素</h3>
+      <p>
+        <span class="has-leader-dotted">縦書き</span>
+        <strong>太字</strong>
+        <em>斜体</em>
+        <code>コード</code>
+      </p>
+    </section>
+
+    <section>
+      <h3>ネストされたインライン兄弟要素</h3>
+      <div id="page-11" style="counter-set: page_ 11"></div>
+      <div id="page-42" style="counter-set: page_ 42"></div>
+      <div>
+        <span class="has-leader-dotted">縦書き</span>
+        <ol>
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3>カスタム文字列リーダー</h3>
+      <p><span class="has-leader-custom">縦書き</span><span>兄弟</span></p>
+    </section>
+  </body>
+</html>

@@ -188,6 +188,10 @@ module.exports = [
         file: "leader/inline-siblings.html",
         title: "leader() with inline sibling elements",
       },
+      {
+        file: "leader/inline-siblings-vertical.html",
+        title: "leader() with inline sibling elements (Vertical)",
+      },
     ],
   },
   {
