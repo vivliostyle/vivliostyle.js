@@ -63,10 +63,19 @@
       .has-leader-custom::after {
         content: leader("·") "";
       }
+
+      .has-leader-alone::after {
+        content: leader(dotted);
+      }
     </style>
   </head>
 
   <body>
+    <section>
+      <h3>leader() alone (without trailing empty string)</h3>
+      <p><span class="has-leader-alone">text</span></p>
+    </section>
+
     <section>
       <h3>Single inline sibling</h3>
       <p><span class="has-leader-dotted">text</span><span>sibling</span></p>
