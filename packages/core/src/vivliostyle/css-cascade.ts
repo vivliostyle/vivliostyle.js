@@ -2310,6 +2310,73 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     );
     const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
+
+    // Calculate width of following inline siblings (Issue #1563)
+    let followingInlineSiblingsWidth = 0;
+    const inlineElements: Element[] = [];
+    let lastInlineElement: Element | null = null;
+    let sibling = pseudoAfter.parentElement.nextSibling;
+
+    // Collect all following inline siblings
+    while (sibling) {
+      if (sibling.nodeType !== 1) {
+        // Node.ELEMENT_NODE
+        sibling = sibling.nextSibling;
+        continue;
+      }
+
+      const elem = sibling as Element;
+      const computedStyle = column.clientLayout.getElementComputedStyle(elem);
+      const display = computedStyle.display;
+      const float = computedStyle.float;
+      const position = computedStyle.position;
+
+      // Skip out-of-flow elements
+      if (float !== "none" || position === "absolute" || position === "fixed") {
+        sibling = sibling.nextSibling;
+        continue;
+      }
+
+      // Collect inline-level elements
+      if (
+        display === "inline" ||
+        display === "inline-block" ||
+        display === "inline-flex" ||
+        display === "inline-grid" ||
+        display === "inline-table"
+      ) {
+        inlineElements.push(elem);
+        lastInlineElement = elem;
+      } else if (
+        display === "block" ||
+        display === "flex" ||
+        display === "grid" ||
+        display === "table" ||
+        display === "list-item"
+      ) {
+        break;
+      }
+      sibling = sibling.nextSibling;
+    }
+
+    // Measure the entire range of following siblings including spaces between them
+    if (inlineElements.length > 0 && pseudoAfter.parentElement) {
+      // Measure from the parent element's right edge to the last sibling's right edge
+      // This includes the space between the leader's parent and the first sibling
+      const parentRect = column.clientLayout.getElementClientRect(
+        pseudoAfter.parentElement,
+      );
+      const lastRect = column.clientLayout.getElementClientRect(
+        lastInlineElement!,
+      );
+
+      if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+        followingInlineSiblingsWidth = lastRect.bottom - parentRect.bottom;
+      } else {
+        followingInlineSiblingsWidth = lastRect.right - parentRect.right;
+      }
+    }
+
     // capture the line boundary
     // Some leader text ("_" e.g.) creates higher top than container.
     if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
@@ -2322,6 +2389,14 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       box.right = innerInit.right;
       box.top = Math.min(innerInit.top, box.top);
       box.bottom = Math.max(innerInit.bottom, box.bottom);
+      // Reserve space for following inline siblings (Issue #1563)
+      if (followingInlineSiblingsWidth > 0) {
+        if (direction === "rtl") {
+          box.top += followingInlineSiblingsWidth;
+        } else {
+          box.bottom -= followingInlineSiblingsWidth;
+        }
+      }
     } else {
       if (direction === "rtl") {
         box.left += innerMarginInlineEnd;
@@ -2332,6 +2407,14 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       box.bottom = innerInit.bottom;
       box.left = Math.min(innerInit.left, box.left);
       box.right = Math.max(innerInit.right, box.right);
+      // Reserve space for following inline siblings (Issue #1563)
+      if (followingInlineSiblingsWidth > 0) {
+        if (direction === "rtl") {
+          box.left += followingInlineSiblingsWidth;
+        } else {
+          box.right -= followingInlineSiblingsWidth;
+        }
+      }
     }
 
     function overrun() {
@@ -2428,6 +2511,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         padding = innerAligned.right - innerInline.right - getInset("right");
       }
     }
+    padding -= followingInlineSiblingsWidth;
     padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
     pseudoAfter.style.float = "";
     leaderElem.style.marginInlineStart = `${padding}px`;

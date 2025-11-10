@@ -213,6 +213,14 @@ module.exports = [
         file: "leader/toc-leader-vertical.html",
         title: "Table of Contents with leader() in vertical writing-mode",
       },
+      {
+        file: "leader/inline-siblings.html",
+        title: "leader() with inline sibling elements",
+      },
+      {
+        file: "leader/inline-siblings-vertical.html",
+        title: "leader() with inline sibling elements (Vertical)",
+      },
     ],
   },
   {

@@ -2879,6 +2879,11 @@ export function evaluateExprToCSS(
   val: Exprs.Val,
   propName: string,
 ): Css.Val {
+  // Preserve viv-leader expressions as Css.Expr (Issue #1563)
+  // leader() must be processed by ContentPropertyHandler, not evaluated here
+  if (val instanceof Exprs.Native && val.str === "viv-leader") {
+    return new Css.Expr(val);
+  }
   const result = val.evaluate(context);
   switch (typeof result) {
     case "number":

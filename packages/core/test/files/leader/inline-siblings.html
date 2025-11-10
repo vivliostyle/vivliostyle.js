@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>leader() with inline sibling elements</title>
+    <style>
+      @page {
+        size: 640px 480px;
+        margin: 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+      }
+
+      section {
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      ol {
+        margin: 0;
+        padding: 0;
+        display: inline;
+      }
+
+      li {
+        list-style: none;
+        display: inline;
+      }
+
+      ol > li:not(:last-child)::after {
+        content: ", ";
+      }
+
+      a::before {
+        content: target-counter(attr(href url), page_);
+      }
+
+      .has-leader-dotted::after {
+        content: leader(dotted);
+      }
+
+      .has-leader-custom::after {
+        content: leader("·");
+      }
+
+      .has-leader-alone::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>Without siblings</h3>
+      <p><span class="has-leader-alone">text</span></p>
+    </section>
+
+    <section>
+      <h3>Single inline sibling</h3>
+      <p><span class="has-leader-dotted">text</span><span>sibling</span></p>
+    </section>
+
+    <section>
+      <h3>Multiple inline siblings</h3>
+      <p>
+        <span class="has-leader-dotted">text</span>
+        <strong>Bold</strong>
+        <em>Italic</em>
+        <code>Code</code>
+      </p>
+    </section>
+
+    <section>
+      <h3>Nested inline siblings</h3>
+      <div id="page-11" style="counter-set: page_ 11"></div>
+      <div id="page-42" style="counter-set: page_ 42"></div>
+      <div>
+        <span class="has-leader-dotted">text</span>
+        <ol>
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3>With custom string leader</h3>
+      <p><span class="has-leader-custom">text</span><span>sibling</span></p>
+    </section>
+  </body>
+</html>
