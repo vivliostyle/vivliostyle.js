@@ -2465,25 +2465,20 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       return inset;
     }
     let padding = 0;
-    // When following siblings exist, the leader has already been constrained to the
-    // correct length by box.right adjustment. Additional margin-inline-start would
-    // push the following siblings to the next line. Therefore, padding remains 0.
-    if (followingInlineSiblingsWidth <= 0) {
-      if (direction == "rtl") {
-        if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
-          padding = innerInline.top - innerAligned.top - getInset("top");
-        } else {
-          padding = innerInline.left - innerAligned.left - getInset("left");
-        }
+    if (direction == "rtl") {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerInline.top - innerAligned.top - getInset("top");
       } else {
-        if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
-          padding =
-            innerAligned.bottom - innerInline.bottom - getInset("bottom");
-        } else {
-          padding = innerAligned.right - innerInline.right - getInset("right");
-        }
+        padding = innerInline.left - innerAligned.left - getInset("left");
+      }
+    } else {
+      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
+        padding = innerAligned.bottom - innerInline.bottom - getInset("bottom");
+      } else {
+        padding = innerAligned.right - innerInline.right - getInset("right");
       }
     }
+    padding -= followingInlineSiblingsWidth;
     padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
     pseudoAfter.style.float = "";
     leaderElem.style.marginInlineStart = `${padding}px`;

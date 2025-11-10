@@ -58,11 +58,11 @@
       }
 
       .has-leader-dotted::after {
-        content: leader(dotted) "";
+        content: leader(dotted);
       }
 
       .has-leader-custom::after {
-        content: leader("・") "";
+        content: leader("・");
       }
 
       .has-leader-alone::after {
@@ -73,7 +73,7 @@
 
   <body>
     <section>
-      <h3>leader() 単独 (空文字列なし)</h3>
+      <h3>兄弟要素なし</h3>
       <p><span class="has-leader-alone">縦書き</span></p>
     </section>
 

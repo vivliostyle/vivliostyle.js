@@ -57,11 +57,11 @@
       }
 
       .has-leader-dotted::after {
-        content: leader(dotted) "";
+        content: leader(dotted);
       }
 
       .has-leader-custom::after {
-        content: leader("·") "";
+        content: leader("·");
       }
 
       .has-leader-alone::after {
@@ -72,7 +72,7 @@
 
   <body>
     <section>
-      <h3>leader() alone (without trailing empty string)</h3>
+      <h3>Without siblings</h3>
       <p><span class="has-leader-alone">text</span></p>
     </section>
 
