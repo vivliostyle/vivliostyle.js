@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>First Document - target-text() Cross-Document Test</title>
+    <style>
+      @page {
+        size: 640px 480px;
+        margin: 30px;
+        @bottom-center {
+          font-size: 10px;
+          content: counter(page);
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+      }
+
+      section {
+        page-break-before: always;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      [id] {
+        background-color: #ffffcc;
+        margin: 8px;
+        padding: 4px;
+      }
+
+      .xref::after {
+        content: target-text(attr(href url));
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Document 1: Cross-Document target-text()</h2>
+
+      <p id="target">Target on Document 1</p>
+
+      <h3>Test 1.1:</h3>
+      <p>Expected: <a href="#">Target on Document 2</a></p>
+      <p>Actual: <a href="second.html#target" class="xref"></a></p>
+
+      <h3>Test 1.2:</h3>
+      <p>Expected: <a href="#">Target on Document 3</a></p>
+      <p>Actual: <a href="third.html#target" class="xref"></a></p>
+    </section>
+  </body>
+</html>

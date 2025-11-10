@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>target-text() and named strings</title>
+    <style>
+      h1 {
+        string-set:
+          before content(before),
+          text content(text),
+          after content(after),
+          first-letter content(first-letter);
+      }
+
+      h1::before {
+        content: "“‘";
+      }
+
+      h1::after {
+        content: "After”’";
+      }
+
+      .target-text h3::after {
+        content: target-text("#t", before) target-text("#t", content)
+          target-text("#t", after);
+      }
+
+      .target-text pre::after {
+        content: 'text: "' target-text("#t", content) '";\A' 'before: "'
+          target-text("#t", before) '";\A' 'after: "' target-text("#t", after)
+          '";\A' 'first-letter: "' target-text("#t", first-letter) '";';
+      }
+
+      .named-strings h3::after {
+        content: string(before) string(text) string(after);
+      }
+
+      .named-strings pre::after {
+        content: 'text: "' string(text) '";\A' 'before: "' string(before) '";\A'
+          'after: "' string(after) '";\A' 'first-letter: "' string(first-letter)
+          '";';
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 id="t"></h1>
+
+    <section class="target-text">
+      <h2>Using target-text()</h2>
+      <h3></h3>
+      <pre></pre>
+    </section>
+
+    <section class="named-strings">
+      <h2>Using Named Strings</h2>
+      <h3></h3>
+      <pre></pre>
+    </section>
+  </body>
+</html>

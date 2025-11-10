@@ -79,6 +79,35 @@ module.exports = [
         file: "target-counter-and-margin-bug.html",
         title: "target-counter and margin bug",
       },
+      { file: "target-text.html", title: "target-text() - Basic Tests" },
+      {
+        file: "target-text-running-element.html",
+        title: "target-text() in Running Elements",
+      },
+      {
+        file: [
+          "target-text-multiple/first.html",
+          "target-text-multiple/second.html",
+          "target-text-multiple/third.html",
+        ],
+        title: "target-text() - Cross-Document References",
+      },
+      {
+        file: "target-text-vs-named-strings.html",
+        title: "target-text() vs Named Strings",
+      },
+      {
+        file: "target-text-vs-named-strings-2.html",
+        title: "target-text() vs Named Strings - first-letter with punctuation",
+      },
+      {
+        file: "target-text-vs-named-strings-3.html",
+        title: "target-text() vs Named Strings - with ::before",
+      },
+      {
+        file: "target-text-vs-named-strings-4.html",
+        title: "target-text() vs Named Strings - with ::before and ::after",
+      },
       {
         file: "exclusion_with_printer_marks.html",
         title: "Exclusion with printer marks",

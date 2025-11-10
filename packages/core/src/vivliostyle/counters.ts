@@ -41,6 +41,31 @@ function cloneCounterValues(
 }
 
 /**
+ * Extract text content from an element for a specific pseudo-element.
+ * @param element The DOM element to extract text from
+ * @param pseudoElement The pseudo-element type: "content", "before", or "after"
+ * @returns The extracted text, or empty string if not found
+ */
+function extractPseudoElementText(
+  element: Element,
+  pseudoElement: "content" | "before" | "after",
+): string {
+  if (pseudoElement === "content") {
+    // Get main content (excluding ::before and ::after)
+    const clone = element.cloneNode(true) as Element;
+    const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
+    pseudos.forEach((pseudo) => pseudo.remove());
+    return clone.textContent || "";
+  } else {
+    // Extract ::before or ::after content
+    const pseudoElem = element.querySelector(
+      `[data-adapt-pseudo="${pseudoElement}"]`,
+    );
+    return pseudoElem ? pseudoElem.textContent || "" : "";
+  }
+}
+
+/**
  * Class representing a reference by target-counter(s).
  * @param targetId ID of the referenced element (transformed by
  *     DocumentURLTransformer to handle a reference across multiple source
@@ -238,6 +263,44 @@ class CounterResolver implements CssCascade.CounterResolver {
     }
   }
 
+  /**
+   * Returns page-based text content for an element with the specified ID.
+   * Returns null if the element has not been laid out yet.
+   * @param transformedId ID transformed by DocumentURLTransformer to handle a
+   *     reference across multiple source documents
+   * @param pseudoElement Pseudo-element to extract text from (content, before, after, first-letter)
+   */
+  private getTargetPageText(
+    transformedId: string,
+    pseudoElement: string,
+  ): string | null {
+    if (this.counterStore.currentPage.elementsById[transformedId]) {
+      // Element is on current page - extract text for specific pseudo-element
+      const elements =
+        this.counterStore.currentPage.elementsById[transformedId];
+      if (elements && elements.length > 0) {
+        const element = elements[0];
+
+        if (pseudoElement === "before" || pseudoElement === "after") {
+          return extractPseudoElementText(element, pseudoElement);
+        }
+        // For content and other pseudo-elements, fall back to content (excluding ::before and ::after)
+        return extractPseudoElementText(element, "content");
+      }
+      return "";
+    } else {
+      // Check if the ID exists in pageTextById
+      // Need to distinguish between "not yet laid out" (undefined) and "empty text" ("")
+      if (transformedId in this.counterStore.pageTextById) {
+        const textMap = this.counterStore.pageTextById[transformedId];
+        return textMap[pseudoElement] !== undefined
+          ? textMap[pseudoElement]
+          : textMap["content"] || "";
+      }
+      return null;
+    }
+  }
+
   /** @override */
   getTargetCounterVal(
     url: string,
@@ -347,6 +410,61 @@ class CounterResolver implements CssCascade.CounterResolver {
       },
       `target-counters-${name}-of-${url}`,
     );
+  }
+
+  /** @override */
+  getTargetTextVal(url: string, pseudoElement: string): Exprs.Val {
+    const transformedId = this.getTransformedId(url);
+
+    const expr = new Exprs.Native(
+      this.pageScope,
+      () => {
+        // Handle first-letter separately
+        if (pseudoElement === "first-letter") {
+          // Respect pseudo-elements
+          const beforeText = this.getTargetPageText(transformedId, "before");
+          const contentText = this.getTargetPageText(transformedId, "content");
+          const afterText = this.getTargetPageText(transformedId, "after");
+
+          // Check if target element has been laid out
+          if (
+            beforeText === null &&
+            contentText === null &&
+            afterText === null
+          ) {
+            this.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+            return "??";
+          }
+
+          const text =
+            (beforeText ?? "") + (contentText ?? "") + (afterText ?? "");
+          this.counterStore.resolveReference(transformedId);
+
+          const match = text.match(Base.firstLetterPattern);
+          return match ? match[0] : "";
+        }
+
+        // For other pseudo-elements, get specific text
+        let pageText = this.getTargetPageText(transformedId, pseudoElement);
+        if (pageText !== null) {
+          // The target element has already been laid out.
+          this.counterStore.resolveReference(transformedId);
+          return pageText;
+        } else {
+          // The target element has not been laid out yet.
+          this.counterStore.saveReferenceOfCurrentPage(transformedId, false);
+          return "??"; // TODO more reasonable placeholder?
+        }
+      },
+      `target-text-${pseudoElement}-of-${url}`,
+    );
+
+    this.counterStore.registerTargetTextExpr(
+      pseudoElement,
+      expr,
+      transformedId,
+    );
+    return expr;
   }
 
   /**
@@ -510,6 +628,7 @@ class CounterResolver implements CssCascade.CounterResolver {
 export class CounterStore {
   countersById: { [key: string]: CssCascade.CounterValues } = {};
   pageCountersById: { [key: string]: CssCascade.CounterValues } = {};
+  pageTextById: { [key: string]: { [pseudoElement: string]: string } } = {};
   currentPageCounters: CssCascade.CounterValues = {};
   previousPageCounters: CssCascade.CounterValues = {};
   currentPageCountersStack: CssCascade.CounterValues[] = [];
@@ -535,6 +654,12 @@ export class CounterStore {
     name: string;
     expr: Exprs.Val;
     format: (p1: number) => string;
+    transformedId: string;
+  }[] = [];
+
+  private targetTextExprs: {
+    pseudoElement: string;
+    expr: Exprs.Val;
     transformedId: string;
   }[] = [];
 
@@ -706,6 +831,18 @@ export class CounterStore {
       const currentPageCounters = cloneCounterValues(this.currentPageCounters);
       ids.forEach((id) => {
         this.pageCountersById[id] = currentPageCounters;
+
+        // Capture text content for target-text()
+        const elements = this.currentPage.elementsById[id];
+        if (elements && elements.length > 0) {
+          const element = elements[0];
+          this.pageTextById[id] = {
+            content: extractPseudoElementText(element, "content"),
+            before: extractPseudoElementText(element, "before"),
+            after: extractPseudoElementText(element, "after"),
+          };
+        }
+
         const oldPageIndex = this.pageIndicesById[id];
         if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
           const resolvedRefs = this.resolvedReferences[id];
@@ -837,6 +974,14 @@ export class CounterStore {
     this.targetCounterExprs.push({ name, expr, format, transformedId });
   }
 
+  registerTargetTextExpr(
+    pseudoElement: string,
+    expr: Exprs.Val,
+    transformedId: string,
+  ) {
+    this.targetTextExprs.push({ pseudoElement, expr, transformedId });
+  }
+
   getExprContentListener(): Vtree.ExprContentListener {
     return this.exprContentListener.bind(this);
   }
@@ -870,6 +1015,11 @@ export class CounterStore {
         const node = document.createElementNS(Base.NS.XHTML, "span");
         node.textContent = val;
         node.setAttribute(TARGET_COUNTER_ATTR, expr.key);
+        return node;
+      } else if (expr.str.startsWith("target-text-")) {
+        const node = document.createElementNS(Base.NS.XHTML, "span");
+        node.textContent = val;
+        node.setAttribute(TARGET_TEXT_ATTR, expr.key);
         return node;
       }
     }
@@ -912,6 +1062,14 @@ export class CounterStore {
     for (const node of targetNodes) {
       node.setAttribute(TARGET_COUNTER_IN_RUNNING_ATTR, true);
     }
+
+    const targetTextNodes = runningElem.querySelectorAll(
+      `[${TARGET_TEXT_ATTR}]`,
+    );
+
+    for (const node of targetTextNodes) {
+      node.setAttribute(TARGET_TEXT_IN_RUNNING_ATTR, true);
+    }
   }
 
   finishLastPage(viewport: Vgen.Viewport) {
@@ -941,6 +1099,21 @@ export class CounterStore {
         }
       }
     }
+
+    const runningTextNodes = viewport.root.querySelectorAll(
+      `[${TARGET_TEXT_IN_RUNNING_ATTR}]`,
+    );
+
+    for (const node of runningTextNodes) {
+      const key = node.getAttribute(TARGET_TEXT_ATTR);
+      const expr = this.targetTextExprs.find((o) => o.expr.key === key);
+      if (expr && expr.transformedId) {
+        const text = this.pageTextById[expr.transformedId];
+        if (text) {
+          node.textContent = text[expr.pseudoElement] ?? "";
+        }
+      }
+    }
   }
 
   createLayoutConstraint(pageIndex: number): Layout.LayoutConstraint {
@@ -951,9 +1124,12 @@ export class CounterStore {
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
 export const TARGET_COUNTER_ATTR = "data-vivliostyle-target-counter";
+export const TARGET_TEXT_ATTR = "data-vivliostyle-target-text";
 
 export const TARGET_COUNTER_IN_RUNNING_ATTR =
   "data-vivliostyle-target-counter-in-running";
+export const TARGET_TEXT_IN_RUNNING_ATTR =
+  "data-vivliostyle-target-text-in-running";
 
 class LayoutConstraint implements Layout.LayoutConstraint {
   constructor(

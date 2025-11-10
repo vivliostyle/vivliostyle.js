@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>target-text() CSS Function Test</title>
+    <style>
+      @page {
+        size: 640px 480px;
+        margin: 30px;
+        @bottom-center {
+          font-size: 10px;
+          content: counter(page);
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+      }
+
+      section {
+        page-break-before: always;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      [id] {
+        background-color: #ffffcc;
+        margin: 8px;
+        padding: 4px;
+      }
+
+      .section-1-basic::after {
+        content: target-text(attr(href url));
+      }
+      .section-1-url::after {
+        content: target-text(url(#target1));
+      }
+      .section-1-string::after {
+        content: target-text("#target2");
+      }
+
+      .section-2::after {
+        content: target-text(attr(href url));
+      }
+
+      #pseudo-target::before {
+        content: "[Before]";
+      }
+      #pseudo-target::after {
+        content: "[After]";
+      }
+      .section-3-content::after {
+        content: target-text(attr(href url), content);
+      }
+      .section-3-before::after {
+        content: target-text(attr(href url), before);
+      }
+      .section-3-after::after {
+        content: target-text(attr(href url), after);
+      }
+      .section-3-first-letter::after {
+        content: target-text(attr(href url), first-letter);
+      }
+
+      #nested-target .inner {
+        font-style: italic;
+      }
+      #nested-target .inner strong {
+        color: red;
+      }
+      .section-4::after {
+        content: target-text(attr(href url), content);
+      }
+
+      .section-5::after {
+        content: target-text(attr(href url), content);
+      }
+      .section-5-string-set {
+        string-set: some-string "#invalid-target";
+      }
+      .section-5-invalid-func::after {
+        content: target-text(string(some-string));
+      }
+
+      .section-6 {
+        counter-reset: section-6-chapter 0;
+      }
+      .section-6-toc-entry::after {
+        content: target-text(attr(href url), before) "　"
+          target-text(attr(href url), content) leader(dotted)
+          target-counter(attr(href url), page);
+      }
+      .section-6-chapter {
+        counter-increment: section-6-chapter;
+      }
+      .section-6-chapter::before {
+        content: "Chapter " counter(section-6-chapter);
+        margin-right: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Section 1: Basic</h2>
+
+      <h3>Test 1.1: <code>target-text(attr(href url))</code></h3>
+      <p>Expected: <a href="#">Target 1</a></p>
+      <p>Actual: <a href="#target1" class="section-1-basic"></a></p>
+
+      <h3>Test 1.2: <code>target-text(url(#target1))</code></h3>
+      <p>Expected: <a href="#">Target 1</a></p>
+      <p>Actual: <a href="#" class="section-1-url"></a></p>
+
+      <h3>Test 1.3: <code>target-text("#target2")</code></h3>
+      <p>Expected: <a href="#">Target 2</a></p>
+      <p>Actual: <a href="#" class="section-1-string"></a></p>
+
+      <p id="target1">Target 1</p>
+      <p id="target2">Target 2</p>
+    </section>
+
+    <section>
+      <h2>Section 2: Forward and Backward References</h2>
+
+      <p id="target-backward">Target for backward reference</p>
+
+      <h3>Test 2.1: Backward reference (target is above)</h3>
+      <p>Expected: <a href="#">Target for backward reference</a></p>
+      <p>Actual: <a href="#target-backward" class="section-2"></a></p>
+
+      <h3>Test 2.2: Forward reference (target is below)</h3>
+      <p>Expected: <a href="#">Target for forward reference</a></p>
+      <p>Actual: <a href="#target-forward" class="section-2"></a></p>
+
+      <p id="target-forward">Target for forward reference</p>
+    </section>
+
+    <section>
+      <h2>Section 3: Pseudo-element Content</h2>
+
+      <h3>Test 3.1: <code>target-text(attr(href url), content)</code></h3>
+      <p>Expected: <a href="#">Main content</a></p>
+      <p>Actual: <a href="#pseudo-target" class="section-3-content"></a></p>
+
+      <h3>Test 3.2: <code>target-text(attr(href url), before)</code></h3>
+      <p>Expected: <a href="#">[Before]</a></p>
+      <p>Actual: <a href="#pseudo-target" class="section-3-before"></a></p>
+
+      <h3>Test 3.3: <code>target-text(attr(href url), after)</code></h3>
+      <p>Expected: <a href="#">[After]</a></p>
+      <p>Actual: <a href="#pseudo-target" class="section-3-after"></a></p>
+
+      <h3>Test 3.4: <code>target-text(attr(href url), first-letter)</code></h3>
+      <p>Expected: <a href="#">[B</a></p>
+      <p>
+        Actual: <a href="#pseudo-target" class="section-3-first-letter"></a>
+      </p>
+
+      <p id="pseudo-target">Main content</p>
+    </section>
+
+    <section>
+      <h2>Section 4: Nested Elements</h2>
+
+      <h3>Test 4.1:</h3>
+      <p>
+        Expected: <a href="#">Outer text inner text bold inner more outer</a>
+      </p>
+      <p>Actual: <a href="#nested-target" class="section-4"></a></p>
+
+      <p id="nested-target">
+        Outer text
+        <span class="inner">inner text <strong>bold inner</strong></span>
+        more outer
+      </p>
+    </section>
+
+    <section>
+      <h2>Section 5: Edge cases</h2>
+
+      <h3>Test 5.1: Empty</h3>
+      <p>Expected: {<a href="#"></a>}</p>
+      <p>Actual: {<a href="#empty-target" class="section-5"></a>}</p>
+
+      <p id="empty-target"></p>
+
+      <h3>Test 5.2: Whitespace-only</h3>
+      <p>Expected: {<a href="#">(whitespace character)</a>}</p>
+      <p>Actual: {<a href="#whitespace-target" class="section-5"></a>}</p>
+
+      <!-- prettier-ignore -->
+      <p id="whitespace-target">
+        
+        
+      </p>
+
+      <h3>Test 5.3: Non-existent target</h3>
+      <p>Expected: <a href="#">??</a></p>
+      <p>Actual: <a href="#does-not-exist" class="section-5"></a></p>
+
+      <h3 class="section-5-string-set">
+        Test 5.4: Invalid function (string())
+      </h3>
+      <p>Expected: <a href="#"></a> (E_INVALID_PROPERTY_VALUE in console)</p>
+      <p>Actual: <a href="#" class="section-5-invalid-func"></a></p>
+
+      <h3>Test 5.5: Long Text Content</h3>
+      <p>
+        Expected:
+        <a href="#"
+          >This is a very long text content that spans multiple lines and
+          contains various words and punctuation marks to test how target-text()
+          handles longer text content with spaces and formatting.</a
+        >
+      </p>
+      <p>Actual: <a href="#long-target" class="section-5"></a></p>
+      <p id="long-target">
+        This is a very long text content that spans multiple lines and contains
+        various words and punctuation marks to test how target-text() handles
+        longer text content with spaces and formatting.
+      </p>
+    </section>
+
+    <section class="section-6">
+      <h2>Section 6: Table of Contents Style</h2>
+
+      <nav style="break-after: page">
+        <a href="#section-6-1" class="section-6-toc-entry"></a>
+        <a href="#section-6-2" class="section-6-toc-entry"></a>
+        <a href="#section-6-3" class="section-6-toc-entry"></a>
+      </nav>
+
+      <h2 id="section-6-1" class="section-6-chapter" style="break-after: page">
+        Introduction
+      </h2>
+
+      <h2 id="section-6-2" class="section-6-chapter" style="break-after: page">
+        Methodology
+      </h2>
+
+      <h2 id="section-6-3" class="section-6-chapter" style="break-after: page">
+        Conclusion
+      </h2>
+    </section>
+  </body>
+</html>
