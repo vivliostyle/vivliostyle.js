@@ -101,6 +101,14 @@ module.exports = [
         title: "target-text() vs Named Strings - first-letter with punctuation",
       },
       {
+        file: "target-text-vs-named-strings-3.html",
+        title: "target-text() vs Named Strings - with ::before",
+      },
+      {
+        file: "target-text-vs-named-strings-4.html",
+        title: "target-text() vs Named Strings - with ::before and ::after",
+      },
+      {
         file: "exclusion_with_printer_marks.html",
         title: "Exclusion with printer marks",
       },

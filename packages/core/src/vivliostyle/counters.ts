@@ -436,7 +436,8 @@ class CounterResolver implements CssCascade.CounterResolver {
             return "??";
           }
 
-          const text = beforeText || contentText || afterText || "";
+          const text =
+            (beforeText ?? "") + (contentText ?? "") + (afterText ?? "");
           this.counterStore.resolveReference(transformedId);
 
           const match = text.match(Base.firstLetterPattern);
