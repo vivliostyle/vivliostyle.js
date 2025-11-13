@@ -1667,6 +1667,17 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     }
     cont.then((result) => {
       frame.finish(result);
+
+      // Restore column box size if it was modified in `LayoutHelper.getElementClientRectAdjusted()`.
+      if (
+        column.element.hasAttribute("data-vivliostyle-column-height-adjusted")
+      ) {
+        Base.setCSSProperty(column.element, "width", `${column.width}px`);
+        Base.setCSSProperty(column.element, "height", `${column.height}px`);
+        column.element.removeAttribute(
+          "data-vivliostyle-column-height-adjusted",
+        );
+      }
     });
     return frame.result();
   }

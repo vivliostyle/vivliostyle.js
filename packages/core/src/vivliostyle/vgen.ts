@@ -1644,6 +1644,13 @@ export class ViewFactory
       if (!style) {
         break;
       }
+      if ((node as Element).hasAttribute("data-vivliostyle-column")) {
+        // This is a root column element.
+        // Note: Since PR #1571 (Improve page/column breaking using browser multi-column feature),
+        // `column-count` and `column-width` are set on the root column element.
+        // See `LayoutHelper.setBrowserColumnBreaking()`.
+        break;
+      }
       if (
         !isNaN(parseFloat(style.columnCount)) ||
         !isNaN(parseFloat(style.columnWidth))

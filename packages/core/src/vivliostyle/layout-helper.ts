@@ -71,7 +71,7 @@ export function unsetBrowserColumnBreaking(column: Layout.Column): void {
  *
  * @param rect - The client rectangle to check.
  * @param vertical - Whether the layout is vertical.
- * @return the number of columns the rectangle is after the current column.
+ * @return the number of columns the end edge of the rectangle is after the current column.
  */
 export function checkIfBeyondColumnBreaks(
   rect: Vtree.ClientRect,
@@ -94,41 +94,45 @@ export function checkIfBeyondColumnBreaks(
  *
  * @param rect - The client rectangle to check.
  * @param vertical - Whether the layout is vertical.
- * @return the number of columns the rectangle is after the current column.
+ * @return the number of columns the start edge of the rectangle is after the current column.
  */
 export function adjustRectForColumnBreaking(
   rect: Vtree.ClientRect,
   vertical: boolean,
 ): number {
-  const columnOver = checkIfBeyondColumnBreaks(rect, vertical);
-  if (columnOver > 0) {
-    const shift2 = columnOver * BIG_GAP;
-    if (vertical) {
-      // vertical writing mode, columns are top to bottom
-      const shift1 = Math.round(rect.top / BIG_GAP) * BIG_GAP;
-      rect.top -= shift1;
-      rect.bottom -= shift2;
-      rect.right -= shift1;
-      rect.left -= shift2;
-    } else if (rect.left < -BIG_GAP / 2) {
-      // columns are right to left
-      const shift1 = Math.round(Math.abs(rect.right) / BIG_GAP) * BIG_GAP;
-      rect.right += shift1;
-      rect.left += shift2;
-      rect.top += shift1;
-      rect.bottom += shift2;
-    } else {
-      // columns are left to right
-      const shift1 = Math.round(rect.left / BIG_GAP) * BIG_GAP;
-      rect.left -= shift1;
-      rect.right -= shift2;
-      rect.top += shift1;
-      rect.bottom += shift2;
-    }
-    rect.width = rect.right - rect.left;
-    rect.height = rect.bottom - rect.top;
+  const columnOverEnd = checkIfBeyondColumnBreaks(rect, vertical);
+  if (columnOverEnd === 0) {
+    return 0;
   }
-  return columnOver;
+  const distanceStart = vertical
+    ? rect.top
+    : Math.min(Math.abs(rect.left), Math.abs(rect.right));
+  const columnOverStart = Math.round(distanceStart / BIG_GAP);
+  const shiftEnd = columnOverEnd * BIG_GAP;
+  const shiftStart = columnOverStart * BIG_GAP;
+  if (vertical) {
+    // vertical writing mode, columns are top to bottom
+    rect.top -= shiftStart;
+    rect.bottom -= shiftEnd;
+    rect.right -= shiftStart;
+    rect.left -= shiftEnd;
+  } else if (rect.left < -BIG_GAP / 2) {
+    // columns are right to left
+    rect.right += shiftStart;
+    rect.left += shiftEnd;
+    rect.top += shiftStart;
+    rect.bottom += shiftEnd;
+  } else {
+    // columns are left to right
+    rect.left -= shiftStart;
+    rect.right -= shiftEnd;
+    rect.top += shiftStart;
+    rect.bottom += shiftEnd;
+  }
+  rect.width = rect.right - rect.left;
+  rect.height = rect.bottom - rect.top;
+
+  return columnOverStart;
 }
 
 /**
@@ -152,8 +156,76 @@ export function getElementClientRectAdjusted(
   vertical: boolean,
 ): Vtree.ClientRect {
   const rect = clientLayout.getElementClientRect(element);
-  adjustRectForColumnBreaking(rect, vertical);
+  const columnOver = adjustRectForColumnBreaking(rect, vertical);
+
+  // Workaround for Chromium bug on table fragmentation:
+  //   https://issues.chromium.org/issues/458852795
+  // To prevent the table cell from moving to the next column not breaking
+  // inside the cell due to the bug, we try to reduce the column height
+  // so that a column break inside the cell can occur.
+  if (columnOver === 1) {
+    let style = element.ownerDocument.defaultView.getComputedStyle(element);
+    if (
+      style.display === "table-cell" ||
+      (element.className === "-vivliostyle-table-cell-container" &&
+        (style = element.ownerDocument.defaultView.getComputedStyle(
+          element.parentElement?.parentElement ?? element,
+        )).display === "table-cell")
+    ) {
+      const column = element.closest("[data-vivliostyle-column]");
+      const blockSizeP = vertical ? "width" : "height";
+      const columnHeight =
+        column && parseFloat(Base.getCSSProperty(column, blockSizeP));
+      if (columnHeight) {
+        let columnHeight2 = columnHeight;
+        let columnOver2 = columnOver;
+        const paddingBlockEnd = parseFloat(style.paddingBlockEnd);
+        const borderBlockEndWidth = parseFloat(style.borderBlockEndWidth);
+        let count = Math.ceil(paddingBlockEnd + borderBlockEndWidth);
+        while (
+          count-- > 0 &&
+          columnOver2 === columnOver &&
+          --columnHeight2 > 0
+        ) {
+          Base.setCSSProperty(column, blockSizeP, `${columnHeight2}px`);
+          const rect2 = clientLayout.getElementClientRect(element);
+          columnOver2 = adjustRectForColumnBreaking(rect2, vertical);
+          if (
+            columnOver2 < columnOver ||
+            (columnOver2 === columnOver &&
+              (vertical ? rect2.right > rect.right : rect2.top < rect.top))
+          ) {
+            column.setAttribute(
+              "data-vivliostyle-column-height-adjusted",
+              "true",
+            );
+            return rect2;
+          }
+        }
+        Base.setCSSProperty(column, blockSizeP, `${columnHeight}px`);
+      }
+    }
+  }
   return rect;
+}
+
+/**
+ * Clear forced column breaks between two nodes.
+ * This is used to prevent unnecessary blank pages.
+ */
+export function clearForcedColumnBreaks(prevNode: Node, currNode: Node): void {
+  if (prevNode.nodeType === 1) {
+    const elem = prevNode as HTMLElement;
+    if (elem.style?.breakAfter === "column") {
+      elem.style.breakAfter = "";
+    }
+  }
+  if (currNode.nodeType === 1) {
+    const elem = currNode as HTMLElement;
+    if (elem.style?.breakBefore === "column") {
+      elem.style.breakBefore = "";
+    }
+  }
 }
 
 /**

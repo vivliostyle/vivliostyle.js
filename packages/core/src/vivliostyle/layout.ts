@@ -458,6 +458,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     super(element);
+    element.setAttribute("data-vivliostyle-column", "true");
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
     pageFloatLayoutContext.setContainer(this);
@@ -3121,6 +3122,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 breakAtTheEdge,
                 nodeContext.breakBefore,
               );
+
+              // Prevent unnecessary blank pages by removing unnecessary forced column breaks
+              if (
+                lastAfterNodeContext &&
+                Break.isForcedBreakValue(breakAtTheEdge)
+              ) {
+                LayoutHelper.clearForcedColumnBreaks(
+                  lastAfterNodeContext.viewNode,
+                  nodeContext.viewNode,
+                );
+              }
+
               if (
                 (nodeContext.pageType != nodeContext.parent?.pageType || // Fix for issue #771
                   !Break.isForcedBreakValue(breakAtTheEdge)) && // Fix for issue #722
@@ -3585,8 +3598,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     }
 
-    // Enable page/column breaking using the browser's multi-column feature.
-    LayoutHelper.setBrowserColumnBreaking(this);
+    if (this.element.hasAttribute("data-vivliostyle-column")) {
+      // Enable page/column breaking using the browser's multi-column feature.
+      LayoutHelper.setBrowserColumnBreaking(this);
+    }
 
     const frame: Task.Frame<Vtree.ChunkPosition> = Task.newFrame("layout");
 
@@ -3609,8 +3624,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
       retryer.layout(nodeContext, this).then((nodeContextParam) => {
-        // Unset the browser's multi-column setting.
-        LayoutHelper.unsetBrowserColumnBreaking(this);
+        if (this.element.hasAttribute("data-vivliostyle-column")) {
+          // Unset the browser's multi-column setting.
+          LayoutHelper.unsetBrowserColumnBreaking(this);
+        }
 
         this.doFinishBreak(
           nodeContextParam,
