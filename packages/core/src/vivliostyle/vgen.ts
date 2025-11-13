@@ -1635,33 +1635,8 @@ export class ViewFactory
    * This check is for such non-root/body multi-column.
    */
   private isInsideNonRootMultiColumn(): boolean {
-    for (
-      let node = this.nodeContext.parent?.viewNode;
-      node;
-      node = node.parentNode
-    ) {
-      const style = node.nodeType === 1 ? (node as HTMLElement).style : null;
-      if (!style) {
-        break;
-      }
-      if ((node as Element).hasAttribute("data-vivliostyle-column")) {
-        // This is a root column element.
-        // Note: Since PR #1571 (Improve page/column breaking using browser multi-column feature),
-        // `column-count` and `column-width` are set on the root column element.
-        // See `LayoutHelper.setBrowserColumnBreaking()`.
-        break;
-      }
-      if (
-        !isNaN(parseFloat(style.columnCount)) ||
-        !isNaN(parseFloat(style.columnWidth))
-      ) {
-        return true;
-      }
-      if (style.position === "absolute") {
-        break;
-      }
-    }
-    return false;
+    const element = this.nodeContext.parent?.viewNode as Element;
+    return !!(element && LayoutHelper.findAncestorNonRootMultiColumn(element));
   }
 
   /**
@@ -2089,6 +2064,9 @@ export class ViewFactory
             Break.setBoxBreakFlag(parent, "text-start");
           }
           parent.appendChild(this.viewNode);
+
+          // Fix overflow caused by forced column breaks
+          LayoutHelper.fixOverflowAtForcedColumnBreak(this.viewNode as Element);
 
           // Avoid using `position: absolute` for link target to work around Chromium 138- PDF link bug. (Issue #1541)
           if (

@@ -160,9 +160,8 @@ export function getElementClientRectAdjusted(
 
   // Workaround for Chromium bug on table fragmentation:
   //   https://issues.chromium.org/issues/458852795
-  // To prevent the table cell from moving to the next column not breaking
-  // inside the cell due to the bug, we try to reduce the column height
-  // so that a column break inside the cell can occur.
+  // To prevent the table cell from moving to the next column without breaking inside the cell due to the bug,
+  // we try to reduce the column height so that a column break inside the cell can occur.
   if (columnOver === 1) {
     let style = element.ownerDocument.defaultView.getComputedStyle(element);
     if (
@@ -225,6 +224,87 @@ export function clearForcedColumnBreaks(prevNode: Node, currNode: Node): void {
     if (elem.style?.breakBefore === "column") {
       elem.style.breakBefore = "";
     }
+  }
+}
+
+/**
+ * Find the nearest ancestor element that establishes a multi-column
+ * layout but is not the root column element.
+ */
+export function findAncestorNonRootMultiColumn(node: Node): Element | null {
+  for (
+    let elem = node.nodeType === 1 ? (node as Element) : node.parentElement;
+    elem;
+    elem = elem.parentElement
+  ) {
+    const style = (elem as HTMLElement).style;
+    if (!style) {
+      break;
+    }
+    if (elem.hasAttribute("data-vivliostyle-column")) {
+      // This is the root column element.
+      break;
+    }
+    if (
+      !isNaN(parseFloat(style.columnCount)) ||
+      !isNaN(parseFloat(style.columnWidth))
+    ) {
+      return elem;
+    }
+    if (style.position === "absolute") {
+      break;
+    }
+  }
+  return null;
+}
+
+/**
+ * Fix overflow caused by forced column breaks in non-root multi-column elements.
+ */
+export function fixOverflowAtForcedColumnBreak(node: Node): void {
+  if (node.nodeType !== 1) {
+    return;
+  }
+  const element = node as HTMLElement;
+  const elementStyle = element.style;
+  const breakBeforeColumn = elementStyle?.breakBefore === "column";
+  const prevElem = element.previousElementSibling as HTMLElement;
+  const breakAfterColumn = prevElem && prevElem.style?.breakAfter === "column";
+  if (!breakBeforeColumn && !breakAfterColumn) {
+    return;
+  }
+  const nonRootMultiColumn = findAncestorNonRootMultiColumn(element);
+  if (!nonRootMultiColumn) {
+    return;
+  }
+  const multiColumnStyle =
+    nonRootMultiColumn.ownerDocument.defaultView.getComputedStyle(
+      nonRootMultiColumn,
+    );
+  const { writingMode, direction, columnGap, fontSize } = multiColumnStyle;
+  const vertical =
+    writingMode === "vertical-rl" || writingMode === "vertical-lr";
+  const isRtl = direction === "rtl";
+  const halfGap = (parseFloat(columnGap) || parseFloat(fontSize) || 16) / 2;
+
+  // Check if the element is overflowing the multi-column box
+  const multiColumnRect = nonRootMultiColumn.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  const columnOverflow = vertical
+    ? elementRect.top > multiColumnRect.bottom + halfGap
+    : isRtl
+      ? elementRect.right < multiColumnRect.left - halfGap
+      : elementRect.left > multiColumnRect.right + halfGap;
+  if (columnOverflow) {
+    // Fix overflow by removing the forced breaks and adding a large margin.
+    // This large margin will cause a page break in our layout processing.
+    if (breakBeforeColumn) {
+      elementStyle.breakBefore = "";
+    }
+    if (breakAfterColumn && prevElem) {
+      prevElem.style.breakAfter = "";
+    }
+    elementStyle.marginBlockStart = `${BIG_GAP}px`;
   }
 }
 

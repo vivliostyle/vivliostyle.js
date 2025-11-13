@@ -2043,7 +2043,7 @@ export class EntireTableLayoutConstraint
     // be registered in the first place. See
     // TableLayoutProcessor.prototype.doInitialLayout.
 
-    // Asserts.assert(!nodeContext.overflow);
+    Asserts.assert(!nodeContext.overflow);
     return false;
   }
 
