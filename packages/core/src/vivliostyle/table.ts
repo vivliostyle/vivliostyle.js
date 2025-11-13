@@ -488,8 +488,10 @@ export class TableFormattingContext
   updateCellSizes(clientLayout: Vtree.ClientLayout) {
     this.rows.forEach((row) => {
       row.cells.forEach((cell) => {
-        const rect = clientLayout.getElementClientRect(
+        const rect = LayoutHelper.getElementClientRectAdjusted(
+          clientLayout,
           cell.viewElement as Element,
+          this.vertical,
         );
         cell.viewElement = null;
         cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
@@ -1380,7 +1382,11 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     }
     lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
     const colWidths = dummyCells.map((cell) => {
-      const rect = clientLayout.getElementClientRect(cell);
+      const rect = LayoutHelper.getElementClientRectAdjusted(
+        clientLayout,
+        cell,
+        vertical,
+      );
       const width = vertical ? rect["height"] : rect["width"];
       // Workaround for issue #958
       // Non-integer width causes problem, so return rounded-up value.
@@ -1523,7 +1529,11 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const initialNodeContext = nodeContext.copy();
     this.layoutEntireTable(nodeContext, column).then((nodeContextAfter) => {
       const tableElement = nodeContextAfter.viewNode as Element;
-      const tableBBox = column.clientLayout.getElementClientRect(tableElement);
+      const tableBBox = LayoutHelper.getElementClientRectAdjusted(
+        column.clientLayout,
+        tableElement,
+        column.vertical,
+      );
       let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
       edge +=
         (column.vertical ? -1 : 1) *
@@ -1637,10 +1647,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       nodeContext.formattingContext,
     );
     const rootViewNode = formattingContext.getRootViewNode(nodeContext);
-
-    // Disable browser's column breaking to avoid interference with our layout
-    LayoutHelper.unsetBrowserColumnBreaking(column);
-
     const frame = Task.newFrame<Vtree.NodeContext>(
       "TableFormattingContext.layout",
     );
@@ -1660,10 +1666,18 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       );
     }
     cont.then((result) => {
-      // Re-enable browser's column breaking
-      LayoutHelper.setBrowserColumnBreaking(column);
-
       frame.finish(result);
+
+      // Restore column box size if it was modified in `LayoutHelper.getElementClientRectAdjusted()`.
+      if (
+        column.element.hasAttribute("data-vivliostyle-column-height-adjusted")
+      ) {
+        Base.setCSSProperty(column.element, "width", `${column.width}px`);
+        Base.setCSSProperty(column.element, "height", `${column.height}px`);
+        column.element.removeAttribute(
+          "data-vivliostyle-column-height-adjusted",
+        );
+      }
     });
     return frame.result();
   }
@@ -1825,7 +1839,11 @@ function adjustCellHeight(
   const column = cellFragment.column;
   const cellContentElement = cellFragment.pseudoColumn.getColumnElement();
   const cellElement = cellFragment.cellNodeContext.viewNode as Element;
-  const cellElementRect = column.clientLayout.getElementClientRect(cellElement);
+  const cellElementRect = LayoutHelper.getElementClientRectAdjusted(
+    column.clientLayout,
+    cellElement,
+    vertical,
+  );
   const padding = column.getComputedPaddingBorder(cellElement);
   if (vertical) {
     const width =
@@ -2024,6 +2042,7 @@ export class EntireTableLayoutConstraint
     // If the nodeContext overflows, any EntireTableLayoutConstraint should not
     // be registered in the first place. See
     // TableLayoutProcessor.prototype.doInitialLayout.
+
     Asserts.assert(!nodeContext.overflow);
     return false;
   }

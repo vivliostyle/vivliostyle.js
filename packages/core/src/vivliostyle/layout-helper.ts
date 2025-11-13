@@ -71,7 +71,7 @@ export function unsetBrowserColumnBreaking(column: Layout.Column): void {
  *
  * @param rect - The client rectangle to check.
  * @param vertical - Whether the layout is vertical.
- * @return the number of columns the rectangle is after the current column.
+ * @return the number of columns the end edge of the rectangle is after the current column.
  */
 export function checkIfBeyondColumnBreaks(
   rect: Vtree.ClientRect,
@@ -94,24 +94,45 @@ export function checkIfBeyondColumnBreaks(
  *
  * @param rect - The client rectangle to check.
  * @param vertical - Whether the layout is vertical.
- * @return the number of columns the rectangle is after the current column.
+ * @return the number of columns the start edge of the rectangle is after the current column.
  */
 export function adjustRectForColumnBreaking(
   rect: Vtree.ClientRect,
   vertical: boolean,
 ): number {
-  const columnOver = checkIfBeyondColumnBreaks(rect, vertical);
-  if (columnOver > 0) {
-    const shift = columnOver * BIG_GAP;
-    if (vertical) {
-      rect.left -= shift;
-      rect.right -= shift;
-    } else {
-      rect.top += shift;
-      rect.bottom += shift;
-    }
+  const columnOverEnd = checkIfBeyondColumnBreaks(rect, vertical);
+  if (columnOverEnd === 0) {
+    return 0;
   }
-  return columnOver;
+  const distanceStart = vertical
+    ? rect.top
+    : Math.min(Math.abs(rect.left), Math.abs(rect.right));
+  const columnOverStart = Math.round(distanceStart / BIG_GAP);
+  const shiftEnd = columnOverEnd * BIG_GAP;
+  const shiftStart = columnOverStart * BIG_GAP;
+  if (vertical) {
+    // vertical writing mode, columns are top to bottom
+    rect.top -= shiftStart;
+    rect.bottom -= shiftEnd;
+    rect.right -= shiftStart;
+    rect.left -= shiftEnd;
+  } else if (rect.left < -BIG_GAP / 2) {
+    // columns are right to left
+    rect.right += shiftStart;
+    rect.left += shiftEnd;
+    rect.top += shiftStart;
+    rect.bottom += shiftEnd;
+  } else {
+    // columns are left to right
+    rect.left -= shiftStart;
+    rect.right -= shiftEnd;
+    rect.top += shiftStart;
+    rect.bottom += shiftEnd;
+  }
+  rect.width = rect.right - rect.left;
+  rect.height = rect.bottom - rect.top;
+
+  return columnOverStart;
 }
 
 /**
@@ -123,6 +144,167 @@ export function adjustRectsForColumnBreaking(
 ): void {
   for (let i = 0; i < rects.length; i++) {
     adjustRectForColumnBreaking(rects[i], vertical);
+  }
+}
+
+/**
+ * Get the client rectangle of an element, adjusted for column breaking.
+ */
+export function getElementClientRectAdjusted(
+  clientLayout: Vtree.ClientLayout,
+  element: Element,
+  vertical: boolean,
+): Vtree.ClientRect {
+  const rect = clientLayout.getElementClientRect(element);
+  const columnOver = adjustRectForColumnBreaking(rect, vertical);
+
+  // Workaround for Chromium bug on table fragmentation:
+  //   https://issues.chromium.org/issues/458852795
+  // To prevent the table cell from moving to the next column without breaking inside the cell due to the bug,
+  // we try to reduce the column height so that a column break inside the cell can occur.
+  if (columnOver === 1) {
+    let style = element.ownerDocument.defaultView.getComputedStyle(element);
+    if (
+      style.display === "table-cell" ||
+      (element.className === "-vivliostyle-table-cell-container" &&
+        (style = element.ownerDocument.defaultView.getComputedStyle(
+          element.parentElement?.parentElement ?? element,
+        )).display === "table-cell")
+    ) {
+      const column = element.closest("[data-vivliostyle-column]");
+      const blockSizeP = vertical ? "width" : "height";
+      const columnHeight =
+        column && parseFloat(Base.getCSSProperty(column, blockSizeP));
+      if (columnHeight) {
+        let columnHeight2 = columnHeight;
+        let columnOver2 = columnOver;
+        const paddingBlockEnd = parseFloat(style.paddingBlockEnd);
+        const borderBlockEndWidth = parseFloat(style.borderBlockEndWidth);
+        let count = Math.ceil(paddingBlockEnd + borderBlockEndWidth);
+        while (
+          count-- > 0 &&
+          columnOver2 === columnOver &&
+          --columnHeight2 > 0
+        ) {
+          Base.setCSSProperty(column, blockSizeP, `${columnHeight2}px`);
+          const rect2 = clientLayout.getElementClientRect(element);
+          columnOver2 = adjustRectForColumnBreaking(rect2, vertical);
+          if (
+            columnOver2 < columnOver ||
+            (columnOver2 === columnOver &&
+              (vertical ? rect2.right > rect.right : rect2.top < rect.top))
+          ) {
+            column.setAttribute(
+              "data-vivliostyle-column-height-adjusted",
+              "true",
+            );
+            return rect2;
+          }
+        }
+        Base.setCSSProperty(column, blockSizeP, `${columnHeight}px`);
+      }
+    }
+  }
+  return rect;
+}
+
+/**
+ * Clear forced column breaks between two nodes.
+ * This is used to prevent unnecessary blank pages.
+ */
+export function clearForcedColumnBreaks(prevNode: Node, currNode: Node): void {
+  if (prevNode.nodeType === 1) {
+    const elem = prevNode as HTMLElement;
+    if (elem.style?.breakAfter === "column") {
+      elem.style.breakAfter = "";
+    }
+  }
+  if (currNode.nodeType === 1) {
+    const elem = currNode as HTMLElement;
+    if (elem.style?.breakBefore === "column") {
+      elem.style.breakBefore = "";
+    }
+  }
+}
+
+/**
+ * Find the nearest ancestor element that establishes a multi-column
+ * layout but is not the root column element.
+ */
+export function findAncestorNonRootMultiColumn(node: Node): Element | null {
+  for (
+    let elem = node.nodeType === 1 ? (node as Element) : node.parentElement;
+    elem;
+    elem = elem.parentElement
+  ) {
+    const style = (elem as HTMLElement).style;
+    if (!style) {
+      break;
+    }
+    if (elem.hasAttribute("data-vivliostyle-column")) {
+      // This is the root column element.
+      break;
+    }
+    if (
+      !isNaN(parseFloat(style.columnCount)) ||
+      !isNaN(parseFloat(style.columnWidth))
+    ) {
+      return elem;
+    }
+    if (style.position === "absolute") {
+      break;
+    }
+  }
+  return null;
+}
+
+/**
+ * Fix overflow caused by forced column breaks in non-root multi-column elements.
+ */
+export function fixOverflowAtForcedColumnBreak(node: Node): void {
+  if (node.nodeType !== 1) {
+    return;
+  }
+  const element = node as HTMLElement;
+  const elementStyle = element.style;
+  const breakBeforeColumn = elementStyle?.breakBefore === "column";
+  const prevElem = element.previousElementSibling as HTMLElement;
+  const breakAfterColumn = prevElem && prevElem.style?.breakAfter === "column";
+  if (!breakBeforeColumn && !breakAfterColumn) {
+    return;
+  }
+  const nonRootMultiColumn = findAncestorNonRootMultiColumn(element);
+  if (!nonRootMultiColumn) {
+    return;
+  }
+  const multiColumnStyle =
+    nonRootMultiColumn.ownerDocument.defaultView.getComputedStyle(
+      nonRootMultiColumn,
+    );
+  const { writingMode, direction, columnGap, fontSize } = multiColumnStyle;
+  const vertical =
+    writingMode === "vertical-rl" || writingMode === "vertical-lr";
+  const isRtl = direction === "rtl";
+  const halfGap = (parseFloat(columnGap) || parseFloat(fontSize) || 16) / 2;
+
+  // Check if the element is overflowing the multi-column box
+  const multiColumnRect = nonRootMultiColumn.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  const columnOverflow = vertical
+    ? elementRect.top > multiColumnRect.bottom + halfGap
+    : isRtl
+      ? elementRect.right < multiColumnRect.left - halfGap
+      : elementRect.left > multiColumnRect.right + halfGap;
+  if (columnOverflow) {
+    // Fix overflow by removing the forced breaks and adding a large margin.
+    // This large margin will cause a page break in our layout processing.
+    if (breakBeforeColumn) {
+      elementStyle.breakBefore = "";
+    }
+    if (breakAfterColumn && prevElem) {
+      prevElem.style.breakAfter = "";
+    }
+    elementStyle.marginBlockStart = `${BIG_GAP}px`;
   }
 }
 
@@ -174,7 +356,11 @@ export function calculateEdge(
         parentNode.removeChild(element);
         parentNode.insertBefore(element, nextSibling);
       }
-      const cbox = clientLayout.getElementClientRect(element);
+      const cbox = getElementClientRectAdjusted(
+        clientLayout,
+        element,
+        vertical,
+      );
       if (
         cbox.left === 0 &&
         cbox.top === 0 &&
@@ -185,10 +371,6 @@ export function calculateEdge(
         // (Fix for issue #802)
         return NaN;
       }
-
-      // Adjust box position for column breaking
-      adjustRectForColumnBreaking(cbox, vertical);
-
       if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
         if (nodeContext.after) {
           return vertical ? cbox.left : cbox.bottom;
