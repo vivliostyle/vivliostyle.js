@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.36.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.35.0...v2.36.0) (2025-11-14)
+
+### Bug Fixes
+
+- CSS break-before may cause wrong layout in print (Regression in v2.34.1) ([30765e1](https://github.com/vivliostyle/vivliostyle.js/commit/30765e1736fdca87b7580ddf5695ee3cd28433c1)), closes [#1572](https://github.com/vivliostyle/vivliostyle.js/issues/1572)
+- Enable column-fill: auto in non-root multi-column elements ([7dc9d25](https://github.com/vivliostyle/vivliostyle.js/commit/7dc9d25653b2f9b81a7ae95c673304e45e61b1e6))
+- Fix float behavior in non-root multi-column elements ([ca6d021](https://github.com/vivliostyle/vivliostyle.js/commit/ca6d021ec37b2fa7819324865133cafff5c1f71b))
+- Fix float clear bug in vertical writing mode ([1dbee96](https://github.com/vivliostyle/vivliostyle.js/commit/1dbee96340df32a12bb4c4c30bc919d4776328c5)), closes [#1565](https://github.com/vivliostyle/vivliostyle.js/issues/1565)
+- Fix forced page breaks specified on table rows or cells not working ([ff04a75](https://github.com/vivliostyle/vivliostyle.js/commit/ff04a7537385efa99f2e727d0bcacb73268c3aeb)), closes [#1492](https://github.com/vivliostyle/vivliostyle.js/issues/1492)
+- fix: Workaround for overflow caused by forced column breaks in non-root multi-column elements ([252ef0d](https://github.com/vivliostyle/vivliostyle.js/commit/252ef0d08ab081f95d6837c59a5b2754bd6f2fb7))
+- Improve page/column breaking in tables ([e11920a](https://github.com/vivliostyle/vivliostyle.js/commit/e11920ac59fbc5be3c56729b1e8ba202f8e39594))
+- Improve page/column breaking using browser multi-column feature ([4dc400c](https://github.com/vivliostyle/vivliostyle.js/commit/4dc400cd7f07ee1adfb9578162a3919ca8e1d9e3))
+- Improve performance for very long text block across pages ([9a18a25](https://github.com/vivliostyle/vivliostyle.js/commit/9a18a2597afdcf73b26a014b593e2be8ce59ca8d)), closes [#1256](https://github.com/vivliostyle/vivliostyle.js/issues/1256)
+- Respect inline elements in leader ([#1577](https://github.com/vivliostyle/vivliostyle.js/issues/1577)) ([cda61d4](https://github.com/vivliostyle/vivliostyle.js/commit/cda61d4aa316bbd4ac8b3e08b95a1e4021526a5b))
+
+### Features
+
+- Implement target-text() ([#1575](https://github.com/vivliostyle/vivliostyle.js/issues/1575)) ([f397b44](https://github.com/vivliostyle/vivliostyle.js/commit/f397b44a1c6c0e7c17050bce8233406688e7e2ec)), closes [#1544](https://github.com/vivliostyle/vivliostyle.js/issues/1544)
+- **react:** Upgrade React to 19 and Storybook to 9 ([169dbc0](https://github.com/vivliostyle/vivliostyle.js/commit/169dbc07522e8ead0fb848c0c93f1dd5a92fd9a2)), closes [#1568](https://github.com/vivliostyle/vivliostyle.js/issues/1568)
+
 # [2.35.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.34.1...v2.35.0) (2025-09-18)
 
 ### Bug Fixes

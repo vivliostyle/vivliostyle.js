@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.36.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.35.0...v2.36.0) (2025-11-14)
+
+### Features
+
+- **react:** Upgrade React to 19 and Storybook to 9 ([169dbc0](https://github.com/vivliostyle/vivliostyle.js/commit/169dbc07522e8ead0fb848c0c93f1dd5a92fd9a2)), closes [#1568](https://github.com/vivliostyle/vivliostyle.js/issues/1568)
+
 # [2.35.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.34.1...v2.35.0) (2025-09-18)
 
 **Note:** Version bump only for package @vivliostyle/react
