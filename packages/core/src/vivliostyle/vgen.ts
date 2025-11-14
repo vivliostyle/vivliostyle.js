@@ -889,6 +889,15 @@ export class ViewFactory
           : Css.ident.horizontal_tb
         : writingMode;
       const isFlowRoot = Display.isFlowRoot(element);
+      const columnCount = computedStyle["column-count"];
+      const columnWidth = computedStyle["column-width"];
+      const isMultiColumn =
+        (columnCount &&
+          columnCount !== Css.ident.auto &&
+          !Css.isDefaultingValue(columnCount)) ||
+        (columnWidth &&
+          columnWidth !== Css.ident.auto &&
+          !Css.isDefaultingValue(columnWidth));
       this.nodeContext.establishesBFC = Display.establishesBFC(
         display,
         position,
@@ -896,7 +905,7 @@ export class ViewFactory
         computedStyle["overflow"] as Css.Ident,
         writingMode,
         parentWritingMode,
-        isFlowRoot,
+        isMultiColumn || isFlowRoot,
       );
       this.nodeContext.containingBlockForAbsolute =
         Display.establishesCBForAbsolute(position);
