@@ -53,16 +53,7 @@ export function setBrowserColumnBreaking(column: Layout.Column): void {
     "column-gap",
     `${BIG_GAP - (column.vertical ? column.height : column.width)}px`,
   );
-}
-
-/**
- * Disable the browser's multi-column feature for page/column breaking.
- * This function resets the CSS properties set by `setBrowserColumnBreaking`.
- */
-export function unsetBrowserColumnBreaking(column: Layout.Column): void {
-  Base.setCSSProperty(column.element, "column-count", "");
-  Base.setCSSProperty(column.element, "column-width", "");
-  Base.setCSSProperty(column.element, "column-gap", "");
+  Base.setCSSProperty(column.element, "column-fill", "auto");
 }
 
 /**

@@ -3032,6 +3032,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             }
             const style = (nodeContext.viewNode as HTMLElement).style;
             if (nodeContext.after) {
+              if (
+                style.columnFill === "balance" &&
+                style.getPropertyValue("--viv--saved-column-fill") === "auto"
+              ) {
+                // Restore `column-fill: auto` after layout
+                style.columnFill = "auto";
+                style.removeProperty("--viv--saved-column-fill");
+              }
               if (nodeContext.floatSide) {
                 // Restore break-after:avoid* value at before the float
                 // (Fix for issue #904)
@@ -3624,11 +3632,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
       retryer.layout(nodeContext, this).then((nodeContextParam) => {
-        if (this.element.hasAttribute("data-vivliostyle-column")) {
-          // Unset the browser's multi-column setting.
-          LayoutHelper.unsetBrowserColumnBreaking(this);
-        }
-
         this.doFinishBreak(
           nodeContextParam,
           retryer.context.overflownNodeContext,
