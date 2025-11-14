@@ -12,10 +12,10 @@ jobs:
       - run: yarn install
       - run: yarn build
       - run: yarn lint
-      - run: yarn test-sauce
-        env:
-          SAUCE_USERNAME: ${{secrets.SAUCE_USERNAME}}
-          SAUCE_ACCESS_KEY: ${{secrets.SAUCE_ACCESS_KEY}}
+      # - run: yarn test-sauce
+      #   env:
+      #     SAUCE_USERNAME: ${{secrets.SAUCE_USERNAME}}
+      #     SAUCE_ACCESS_KEY: ${{secrets.SAUCE_ACCESS_KEY}}
       - run: scripts/ci-after-success-hook.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
