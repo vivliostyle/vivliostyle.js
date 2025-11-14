@@ -154,12 +154,13 @@ export function getElementClientRectAdjusted(
   // To prevent the table cell from moving to the next column without breaking inside the cell due to the bug,
   // we try to reduce the column height so that a column break inside the cell can occur.
   if (columnOver === 1) {
-    let style = element.ownerDocument.defaultView.getComputedStyle(element);
+    let style = clientLayout.getElementComputedStyle(element);
     if (
       style.display === "table-cell" ||
       (element.className === "-vivliostyle-table-cell-container" &&
-        (style = element.ownerDocument.defaultView.getComputedStyle(
-          element.parentElement?.parentElement ?? element,
+        element.parentElement?.parentElement &&
+        (style = clientLayout.getElementComputedStyle(
+          element.parentElement.parentElement,
         )).display === "table-cell")
     ) {
       const column = element.closest("[data-vivliostyle-column]");
