@@ -2360,20 +2360,21 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     }
 
     // Measure the entire range of following siblings including spaces between them
-    if (inlineElements.length > 0 && pseudoAfter.parentElement) {
-      // Measure from the parent element's right edge to the last sibling's right edge
-      // This includes the space between the leader's parent and the first sibling
-      const parentRect = column.clientLayout.getElementClientRect(
-        pseudoAfter.parentElement,
-      );
-      const lastRect = column.clientLayout.getElementClientRect(
+    if (inlineElements.length > 0) {
+      // Measure from the end of pseudoAfter to the end of the last sibling
+      // This includes all text nodes (spaces) between elements
+      const pseudoAfterRect =
+        column.clientLayout.getElementClientRect(pseudoAfter);
+      const lastSiblingRect = column.clientLayout.getElementClientRect(
         lastInlineElement!,
       );
 
       if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-        followingInlineSiblingsWidth = lastRect.bottom - parentRect.bottom;
+        followingInlineSiblingsWidth =
+          lastSiblingRect.bottom - pseudoAfterRect.bottom;
       } else {
-        followingInlineSiblingsWidth = lastRect.right - parentRect.right;
+        followingInlineSiblingsWidth =
+          lastSiblingRect.right - pseudoAfterRect.right;
       }
     }
 
