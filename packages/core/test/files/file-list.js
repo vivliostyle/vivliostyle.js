@@ -221,6 +221,14 @@ module.exports = [
         file: "leader/inline-siblings-vertical.html",
         title: "leader() with inline sibling elements (Vertical)",
       },
+      {
+        file: "leader/inline-siblings-before-after.html",
+        title: "leader() with ::before and ::after pseudo-elements",
+      },
+      {
+        file: "leader/inline-siblings-before-after-vertical.html",
+        title: "leader() with ::before and ::after pseudo-elements (Vertical)",
+      },
     ],
   },
   {

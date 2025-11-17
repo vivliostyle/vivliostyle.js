@@ -2253,6 +2253,78 @@ export class ContentPropVisitor extends Css.FilterVisitor {
 }
 
 /**
+ * Check if a display value represents a block-level element.
+ */
+function isBlockLevelDisplay(display: string): boolean {
+  return (
+    display === "block" ||
+    display === "flex" ||
+    display === "grid" ||
+    display === "table" ||
+    display === "list-item" ||
+    display === "flow-root"
+  );
+}
+
+/**
+ * Check if a display value represents an inline-level element.
+ */
+function isInlineLevelDisplay(display: string): boolean {
+  return (
+    display === "inline" ||
+    display === "inline-block" ||
+    display === "inline-flex" ||
+    display === "inline-grid" ||
+    display === "inline-table"
+  );
+}
+
+/**
+ * Get the visual end position of content within an element using a zero-width range.
+ * This provides accurate cursor position regardless of whether the content is in
+ * ::before, ::after, or the element itself.
+ * @param element The element containing the content
+ * @param clientLayout The client layout interface for accessing DOM
+ * @returns The bounding client rect at the end of the content
+ */
+function getContentEndPosition(
+  element: Element,
+  clientLayout: Vtree.ClientLayout,
+): Vtree.ClientRect {
+  // Find the last text node within the element
+  let lastTextNode: Text | null = null;
+
+  function findLastTextNode(node: Node): void {
+    if (node.nodeType === 3) {
+      // Node.TEXT_NODE
+      lastTextNode = node as Text;
+    }
+    // Traverse children in order to find the last text node
+    for (let i = 0; i < node.childNodes.length; i++) {
+      findLastTextNode(node.childNodes[i]);
+    }
+  }
+
+  findLastTextNode(element);
+
+  if (lastTextNode && lastTextNode.length > 0) {
+    // Create a zero-width range at the end of the text content
+    const range = element.ownerDocument.createRange();
+    range.setStart(lastTextNode, lastTextNode.length);
+    range.setEnd(lastTextNode, lastTextNode.length);
+
+    // Get the rect from clientLayout
+    const rects = clientLayout.getRangeClientRects(range);
+    if (rects.length > 0) {
+      return rects[0];
+    }
+  }
+
+  // Fallback: use element's own rect if no text node found
+  return clientLayout.getElementClientRect(element);
+}
+
+/**
  * POST_LAYOUT_BLOCK hook function for CSS leader()
  * @param nodeContext
  * @param checkPoints
@@ -2276,11 +2348,12 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       container = container.parent;
     }
     const leaderElem = c.viewNode as HTMLElement;
-    const pseudoAfter = leaderElem.parentElement;
+    const pseudoElem = leaderElem.parentElement;
+    const pseudoName = pseudoElem.getAttribute("data-adapt-pseudo");
     const leader = leaderElem.getAttribute("data-viv-leader-value");
     const previous = leaderElem.textContent || leader;
     const { writingMode, direction, marginInlineEnd } =
-      column.clientLayout.getElementComputedStyle(pseudoAfter);
+      column.clientLayout.getElementComputedStyle(pseudoElem);
 
     function setLeaderTextContent(leaderStr: string): void {
       if (direction === "rtl") {
@@ -2302,20 +2375,31 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // reset the expanded leader
     setLeaderTextContent(leader);
     // setting inline-block removes the pseudo CONTENT from normal text flow
-    pseudoAfter.style.display = "inline-block";
-    pseudoAfter.style.textIndent = "0"; // cancel inherited text-indent
+    pseudoElem.style.display = "inline-block";
+    pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
 
     const box = column.clientLayout.getElementClientRect(
       container.viewNode as Element,
     );
-    const innerInit = column.clientLayout.getElementClientRect(pseudoAfter);
+    const innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
     // Calculate width of following inline siblings (Issue #1563)
     let followingInlineSiblingsWidth = 0;
     const inlineElements: Element[] = [];
     let lastInlineElement: Element | null = null;
-    let sibling = pseudoAfter.parentElement.nextSibling;
+
+    // Find the topmost inline ancestor (child of block ancestor) that contains pseudoElement
+    let topmostInlineAncestor: Element = pseudoElem.parentElement;
+    while (
+      topmostInlineAncestor.parentElement &&
+      topmostInlineAncestor.parentElement !== (container.viewNode as Element)
+    ) {
+      topmostInlineAncestor = topmostInlineAncestor.parentElement;
+    }
+
+    // Start collecting siblings from the next sibling of the topmost inline ancestor
+    let sibling = topmostInlineAncestor.nextSibling;
 
     // Collect all following inline siblings
     while (sibling) {
@@ -2338,22 +2422,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       }
 
       // Collect inline-level elements
-      if (
-        display === "inline" ||
-        display === "inline-block" ||
-        display === "inline-flex" ||
-        display === "inline-grid" ||
-        display === "inline-table"
-      ) {
+      if (isInlineLevelDisplay(display)) {
         inlineElements.push(elem);
         lastInlineElement = elem;
-      } else if (
-        display === "block" ||
-        display === "flex" ||
-        display === "grid" ||
-        display === "table" ||
-        display === "list-item"
-      ) {
+      } else if (isBlockLevelDisplay(display)) {
         break;
       }
       sibling = sibling.nextSibling;
@@ -2361,20 +2433,34 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     // Measure the entire range of following siblings including spaces between them
     if (inlineElements.length > 0) {
-      // Measure from the end of pseudoAfter to the end of the last sibling
-      // This includes all text nodes (spaces) between elements
-      const pseudoAfterRect =
-        column.clientLayout.getElementClientRect(pseudoAfter);
-      const lastSiblingRect = column.clientLayout.getElementClientRect(
+      // Measure from the actual end position of leader content to the end of the last sibling
+      // Using zero-width range ensures accurate measurement regardless of element structure
+      const leaderEnd = getContentEndPosition(pseudoElem, column.clientLayout);
+      const lastSiblingEnd = getContentEndPosition(
         lastInlineElement!,
+        column.clientLayout,
       );
 
       if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-        followingInlineSiblingsWidth =
-          lastSiblingRect.bottom - pseudoAfterRect.bottom;
+        followingInlineSiblingsWidth = lastSiblingEnd.bottom - leaderEnd.bottom;
       } else {
-        followingInlineSiblingsWidth =
-          lastSiblingRect.right - pseudoAfterRect.right;
+        followingInlineSiblingsWidth = lastSiblingEnd.right - leaderEnd.right;
+      }
+    }
+
+    // For ::before or content (non-::after), add parent element's remaining width
+    // (content + ::after for ::before, ::after for content)
+    if (pseudoName !== "after") {
+      const parentEnd = getContentEndPosition(
+        topmostInlineAncestor,
+        column.clientLayout,
+      );
+      const pseudoEnd = getContentEndPosition(pseudoElem, column.clientLayout);
+
+      if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+        followingInlineSiblingsWidth += parentEnd.bottom - pseudoEnd.bottom;
+      } else {
+        followingInlineSiblingsWidth += parentEnd.right - pseudoEnd.right;
       }
     }
 
@@ -2419,7 +2505,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     }
 
     function overrun() {
-      const inner = column.clientLayout.getElementClientRect(pseudoAfter);
+      const inner = column.clientLayout.getElementClientRect(pseudoElem);
       if (
         box.left > inner.left ||
         box.right < inner.right ||
@@ -2479,19 +2565,19 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     // Without inline-end, we use margin-inline-start to adjust the position.
     // To get the margin size, set float, calculate then cancel float.
-    const innerInline = column.clientLayout.getElementClientRect(pseudoAfter);
+    const innerInline = column.clientLayout.getElementClientRect(pseudoElem);
     if (direction == "rtl") {
-      pseudoAfter.style.float = "left";
+      pseudoElem.style.float = "left";
     } else {
-      pseudoAfter.style.float = "right";
+      pseudoElem.style.float = "right";
     }
-    const innerAligned = column.clientLayout.getElementClientRect(pseudoAfter);
+    const innerAligned = column.clientLayout.getElementClientRect(pseudoElem);
     // When float is applied, the content will be removed from the normal
     // text flow, and box inset will be also removed.
     // When content comes back to the normal text flow, then inset effects again.
     function getInset(side: string): number {
       let inset = 0;
-      let p = pseudoAfter.parentElement;
+      let p = pseudoElem.parentElement;
       while (p && p !== container.viewNode) {
         inset += column.getComputedInsets(p)[side];
         p = p.parentElement;
@@ -2514,7 +2600,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     }
     padding -= followingInlineSiblingsWidth;
     padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
-    pseudoAfter.style.float = "";
+    pseudoElem.style.float = "";
     leaderElem.style.marginInlineStart = `${padding}px`;
   }
 };
