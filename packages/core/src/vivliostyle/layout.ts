@@ -1097,7 +1097,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     Base.setCSSProperty(element, "display", "inline-block");
     Base.setCSSProperty(element, "vertical-align", "top");
     this.buildDeepElementView(nodeContext).then((nodeContextAfter) => {
-      const floatBBox = this.clientLayout.getElementClientRect(element);
+      const floatBBox = LayoutHelper.getElementClientRectAdjusted(
+        this.clientLayout,
+        element,
+        this.vertical,
+      );
       const margin = this.getComputedMargin(element);
       let floatBox = new GeometryUtil.Rect(
         floatBBox.left - margin.left,
@@ -1127,7 +1131,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           probe.style.height = "1px";
         }
         parent.viewNode.appendChild(probe);
-        const parentBox = this.clientLayout.getElementClientRect(probe);
+        const parentBox = LayoutHelper.getElementClientRectAdjusted(
+          this.clientLayout,
+          probe,
+          this.vertical,
+        );
         x1 = Math.max(
           this.rtl ? this.getEndEdge(parentBox) : this.getStartEdge(parentBox),
           x1,
@@ -1219,7 +1227,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         probe.style.top = "0";
         containingBlockForAbsolute.viewNode.appendChild(probe);
-        offsets = this.clientLayout.getElementClientRect(probe);
+        offsets = LayoutHelper.getElementClientRectAdjusted(
+          this.clientLayout,
+          probe,
+          this.vertical,
+        );
         containingBlockForAbsolute.viewNode.removeChild(probe);
       } else {
         offsets = {
@@ -2707,7 +2719,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       spacer.style.marginTop = `${margin.top}px`;
     }
     nodeContext.viewNode.parentNode.insertBefore(spacer, nodeContext.viewNode);
-    let spacerBox = this.clientLayout.getElementClientRect(spacer);
+    let spacerBox = LayoutHelper.getElementClientRectAdjusted(
+      this.clientLayout,
+      spacer,
+      this.vertical,
+    );
     const edge = this.getBeforeEdge(spacerBox);
     const dir = this.getBoxDir();
     const clear =
@@ -2768,7 +2784,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       } else {
         spacer.style.height = `${height}px`;
       }
-      spacerBox = this.clientLayout.getElementClientRect(spacer);
+      spacerBox = LayoutHelper.getElementClientRectAdjusted(
+        this.clientLayout,
+        spacer,
+        this.vertical,
+      );
       const afterEdge = this.getAfterEdge(spacerBox);
       if (!nodeContext.floatSide) {
         if (this.vertical) {
@@ -3030,15 +3050,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               // not an element
               break;
             }
-            const style = (nodeContext.viewNode as HTMLElement).style;
+            const viewElement = nodeContext.viewNode as HTMLElement;
+            const style = viewElement.style;
             if (nodeContext.after) {
               if (
                 style.columnFill === "balance" &&
-                style.getPropertyValue("--viv--saved-column-fill") === "auto"
+                viewElement.getAttribute("data-vivliostyle-column-fill") ===
+                  "auto"
               ) {
                 // Restore `column-fill: auto` after layout
                 style.columnFill = "auto";
-                style.removeProperty("--viv--saved-column-fill");
               }
               if (nodeContext.floatSide) {
                 // Restore break-after:avoid* value at before the float
@@ -4350,7 +4371,11 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     return Math.max.apply(
       null,
       this.rootViewNodes.map((r, i) => {
-        const box = this.clientLayout.getElementClientRect(r);
+        const box = LayoutHelper.getElementClientRectAdjusted(
+          this.clientLayout,
+          r,
+          this.vertical,
+        );
         const margin = this.floatMargins[i];
         return this.vertical
           ? margin.top + box.height + margin.bottom
