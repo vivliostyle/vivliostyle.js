@@ -233,6 +233,10 @@ module.exports = [
         file: "leader/long-content.html",
         title: "leader() with long content",
       },
+      {
+        file: "leader/long-content-vertical.html",
+        title: "leader() with long content (Vertical)",
+      },
     ],
   },
   {
