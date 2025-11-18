@@ -120,11 +120,24 @@ export function isInlineLevel(display: Css.Ident | string): boolean {
   switch (display.toString()) {
     case "inline":
     case "inline-block":
-    case "inline-list-item":
     case "inline-flex":
     case "inline-grid":
     case "ruby":
     case "inline-table":
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function isBlockLevel(display: Css.Ident | string): boolean {
+  switch (display.toString()) {
+    case "block":
+    case "flex":
+    case "grid":
+    case "table":
+    case "list-item":
+    case "flow-root":
       return true;
     default:
       return false;

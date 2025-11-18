@@ -25,6 +25,7 @@ import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
 import * as CssTokenizer from "./css-tokenizer";
 import * as CssValidator from "./css-validator";
+import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
@@ -2253,33 +2254,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
 }
 
 /**
- * Check if a display value represents a block-level element.
- */
-function isBlockLevelDisplay(display: string): boolean {
-  return (
-    display === "block" ||
-    display === "flex" ||
-    display === "grid" ||
-    display === "table" ||
-    display === "list-item" ||
-    display === "flow-root"
-  );
-}
-
-/**
- * Check if a display value represents an inline-level element.
- */
-function isInlineLevelDisplay(display: string): boolean {
-  return (
-    display === "inline" ||
-    display === "inline-block" ||
-    display === "inline-flex" ||
-    display === "inline-grid" ||
-    display === "inline-table"
-  );
-}
-
-/**
  * Get the total width of a node's content
  * @param node The node to measure (Element or Text)
  * @param clientLayout The client layout interface for accessing DOM
@@ -2406,9 +2380,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         }
 
         // Collect inline-level elements
-        if (isInlineLevelDisplay(display)) {
+        if (Display.isInlineLevel(display)) {
           inlineNodes.push(elem);
-        } else if (isBlockLevelDisplay(display)) {
+        } else if (Display.isBlockLevel(display)) {
           break;
         }
       } else if (sibling.nodeType === 3) {
