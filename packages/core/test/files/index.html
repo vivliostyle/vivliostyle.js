@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -111,6 +111,12 @@
             ),
           ).className = "stable";
           tr.appendChild(makeTd(entry.file, entry.title)).className = "title";
+          tr.appendChild(
+            makeTd(
+              "https://vivliostyle.github.io/viewer/v2.35.0/" + parameterOnline,
+              "v2.35.0",
+            ),
+          ).className = "old";
           tr.appendChild(
             makeTd(
               "https://vivliostyle.github.io/viewer/2019.11.100/vivliostyle-viewer.html" +
