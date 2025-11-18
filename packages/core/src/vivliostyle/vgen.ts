@@ -1019,17 +1019,6 @@ export class ViewFactory
       // Leaves handling of multicol specified on non-root/body elements to the browser
       const insideNonRootMultiColumn = this.isInsideNonRootMultiColumn();
 
-      // To make `column-fill: auto` work on non-root multi-column,
-      // we change it to `balance` here, and after layout, we change it back.
-      if (
-        !isRoot &&
-        isMultiColumn &&
-        computedStyle["column-fill"] === Css.ident.auto
-      ) {
-        computedStyle["--viv--saved-column-fill"] = Css.ident.auto;
-        computedStyle["column-fill"] = Css.ident.balance;
-      }
-
       const columnSpan = computedStyle["column-span"];
       this.nodeContext.columnSpan =
         !insideNonRootMultiColumn &&
@@ -1309,6 +1298,18 @@ export class ViewFactory
         } else {
           result = this.createElement(ns, tag);
         }
+
+        if (
+          !isRoot &&
+          isMultiColumn &&
+          computedStyle["column-fill"] === Css.ident.auto
+        ) {
+          // To make `column-fill: auto` work on non-root multi-column,
+          // we change it to `balance` here, and after layout, we change it back.
+          result.setAttribute("data-vivliostyle-column-fill", "auto");
+          computedStyle["column-fill"] = Css.ident.balance;
+        }
+
         if (tag != originalTag) {
           result.setAttribute("data-vivliostyle-original-tag", originalTag);
           if (originalTag === "html" || originalTag === "body") {

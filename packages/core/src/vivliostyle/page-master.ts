@@ -26,6 +26,7 @@ import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import * as LayoutHelper from "./layout-helper";
 import { StyleInstance } from "./ops";
 import * as Vtree from "./vtree";
 
@@ -1442,9 +1443,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       if (readHeight) {
         Base.setCSSProperty(container.element, "height", "auto");
       }
+      const usingBrowserColumnBreaking =
+        LayoutHelper.isUsingBrowserColumnBreaking(column);
+      if (usingBrowserColumnBreaking) {
+        // To get correct bounding box, temporarily disable multi-column style.
+        LayoutHelper.unsetBrowserColumnBreaking(column);
+      }
       bbox = clientLayout.getElementClientRect(
         column ? column.element : container.element,
       );
+      if (usingBrowserColumnBreaking) {
+        // Restore multi-column style.
+        LayoutHelper.setBrowserColumnBreaking(column);
+      }
       if (readWidth) {
         this.calculatedWidth = Math.ceil(
           bbox.right -

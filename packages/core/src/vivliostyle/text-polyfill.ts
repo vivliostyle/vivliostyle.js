@@ -762,13 +762,16 @@ class TextSpacingPolyfill {
         currRange.selectNode(textNode);
       }
       const rect = currRange.getClientRects()[0];
+      if (!rect) {
+        return false;
+      }
       if (!prevRange) {
         prevRange = document.createRange();
         prevRange.selectNode(prevNode);
       }
       const prevRects = prevRange.getClientRects();
       const prevRect = prevRects[prevRects.length - 1];
-      if (!rect || !prevRect) {
+      if (!prevRect) {
         return false;
       }
       columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(prevRect, vertical);
@@ -790,13 +793,16 @@ class TextSpacingPolyfill {
         currRange.selectNode(textNode);
       }
       const rect = currRange.getClientRects()[0];
+      if (!rect) {
+        return false;
+      }
       columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(rect, vertical);
       if (!nextRange) {
         nextRange = document.createRange();
         nextRange.selectNode(nextNode);
       }
       const nextRect = nextRange.getClientRects()[0];
-      if (!rect || !nextRect) {
+      if (!nextRect) {
         return false;
       }
       return vertical

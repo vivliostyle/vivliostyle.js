@@ -40,20 +40,26 @@ const BIG_GAP = 100000;
  * apart from the original column position, and it helps determine
  * page/column breaking positions in our layout processing.
  */
-export function setBrowserColumnBreaking(column: Layout.Column): void {
-  Base.setCSSProperty(column.element, "column-count", "1");
-  // So far, `column-width` is needed with `column-count: 1` in WebKit.
-  Base.setCSSProperty(
-    column.element,
-    "column-width",
-    `${column.vertical ? column.height : column.width}px`,
-  );
-  Base.setCSSProperty(
-    column.element,
-    "column-gap",
-    `${BIG_GAP - (column.vertical ? column.height : column.width)}px`,
-  );
-  Base.setCSSProperty(column.element, "column-fill", "auto");
+export function setBrowserColumnBreaking(column: Vtree.Container): void {
+  const columnElem = column.element as HTMLElement;
+  columnElem.style.columnCount = "1";
+  columnElem.style.columnGap = `${BIG_GAP - (column.vertical ? column.height : column.width)}px`;
+  columnElem.style.columnFill = "auto";
+}
+
+/**
+ * Disable the browser's multi-column feature for page/column breaking.
+ * This function resets the CSS properties set by `setBrowserColumnBreaking`.
+ */
+export function unsetBrowserColumnBreaking(column: Vtree.Container): void {
+  const columnElem = column.element as HTMLElement;
+  columnElem.style.columnCount = "";
+  columnElem.style.columnGap = "";
+  columnElem.style.columnFill = "";
+}
+
+export function isUsingBrowserColumnBreaking(column: Vtree.Container): boolean {
+  return (column.element as HTMLElement).style.columnCount === "1";
 }
 
 /**
@@ -99,24 +105,36 @@ export function adjustRectForColumnBreaking(
     ? rect.top
     : Math.min(Math.abs(rect.left), Math.abs(rect.right));
   const columnOverStart = Math.round(distanceStart / BIG_GAP);
-  const shiftEnd = columnOverEnd * BIG_GAP;
   const shiftStart = columnOverStart * BIG_GAP;
+  let shiftEnd = columnOverEnd * BIG_GAP;
   if (vertical) {
     // vertical writing mode, columns are top to bottom
     rect.top -= shiftStart;
     rect.bottom -= shiftEnd;
+    if (rect.bottom < rect.top) {
+      rect.bottom += BIG_GAP;
+      shiftEnd -= BIG_GAP;
+    }
     rect.right -= shiftStart;
     rect.left -= shiftEnd;
   } else if (rect.left < -BIG_GAP / 2) {
     // columns are right to left
     rect.right += shiftStart;
     rect.left += shiftEnd;
+    if (rect.left > rect.right) {
+      rect.left -= BIG_GAP;
+      shiftEnd += BIG_GAP;
+    }
     rect.top += shiftStart;
     rect.bottom += shiftEnd;
   } else {
     // columns are left to right
     rect.left -= shiftStart;
     rect.right -= shiftEnd;
+    if (rect.right < rect.left) {
+      rect.right += BIG_GAP;
+      shiftEnd -= BIG_GAP;
+    }
     rect.top += shiftStart;
     rect.bottom += shiftEnd;
   }
@@ -163,10 +181,12 @@ export function getElementClientRectAdjusted(
           element.parentElement.parentElement,
         )).display === "table-cell")
     ) {
-      const column = element.closest("[data-vivliostyle-column]");
+      const columnElem = element.closest(
+        "[data-vivliostyle-column]",
+      ) as HTMLElement;
+      const columnStyle = columnElem?.style;
       const blockSizeP = vertical ? "width" : "height";
-      const columnHeight =
-        column && parseFloat(Base.getCSSProperty(column, blockSizeP));
+      const columnHeight = columnStyle && parseFloat(columnStyle[blockSizeP]);
       if (columnHeight) {
         let columnHeight2 = columnHeight;
         let columnOver2 = columnOver;
@@ -178,7 +198,7 @@ export function getElementClientRectAdjusted(
           columnOver2 === columnOver &&
           --columnHeight2 > 0
         ) {
-          Base.setCSSProperty(column, blockSizeP, `${columnHeight2}px`);
+          columnStyle[blockSizeP] = `${columnHeight2}px`;
           const rect2 = clientLayout.getElementClientRect(element);
           columnOver2 = adjustRectForColumnBreaking(rect2, vertical);
           if (
@@ -186,14 +206,14 @@ export function getElementClientRectAdjusted(
             (columnOver2 === columnOver &&
               (vertical ? rect2.right > rect.right : rect2.top < rect.top))
           ) {
-            column.setAttribute(
+            columnElem.setAttribute(
               "data-vivliostyle-column-height-adjusted",
               "true",
             );
             return rect2;
           }
         }
-        Base.setCSSProperty(column, blockSizeP, `${columnHeight}px`);
+        columnStyle[blockSizeP] = `${columnHeight}px`;
       }
     }
   }
@@ -416,7 +436,14 @@ export function getElementHeight(
   column: Layout.Column,
   vertical: boolean,
 ): number {
+  const usingBrowserColumnBreaking = isUsingBrowserColumnBreaking(column);
+  if (usingBrowserColumnBreaking) {
+    unsetBrowserColumnBreaking(column);
+  }
   const rect = column.clientLayout.getElementClientRect(element);
+  if (usingBrowserColumnBreaking) {
+    setBrowserColumnBreaking(column);
+  }
   const margin = column.getComputedMargin(element);
   return vertical
     ? rect["width"] + margin["left"] + margin["right"]
