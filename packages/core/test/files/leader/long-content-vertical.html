@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>leader() with long content (Vertical Writing Mode)</title>
+    <style>
+      @page {
+        size: 1100px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 6px;
+      }
+
+      .has-leader-and-content::after {
+        content: leader(dotted) "内容";
+      }
+
+      .has-after-leader::after {
+        content: leader(dotted);
+      }
+
+      .has-before-leader::before {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <section>
+      <h2>疑似要素にleader()+内容を含む</h2>
+      <h3>1行に収まる</h3>
+      <p class="has-leader-and-content">ながいテキスト</p>
+      <p class="has-leader-and-content">ながああああああああああああああああああああああああああいテキスト</p>
+      <h3>内容が次の行に押し出される</h3>
+      <p class="has-leader-and-content">ながあああああああああああああああああああああああああああいテキスト</p>
+      <p class="has-leader-and-content">ながあああああああああああああああああああああああああああああいテキスト</p>
+      <h3>「テキスト」も次の行に押し出される</h3>
+      <p class="has-leader-and-content">ながあああああああああああああああああああああああああああああああああいテキスト</p>
+    </section>
+
+    <section>
+      <h2>::after疑似要素にleader()のみ含む</h2>
+      <h3>1行に収まる</h3>
+      <p><span class="has-after-leader">ながいテキスト</span><span>内容</span></p>
+      <p><span class="has-after-leader">ながああああああああああああああああああああああああああいテキスト</span><span>内容</span></p>
+      <h3>内容が次の行に押し出される</h3>
+      <p><span class="has-after-leader">ながあああああああああああああああああああああああああああいテキスト</span><span>内容</span></p>
+      <p><span class="has-after-leader">ながあああああああああああああああああああああああああああああいテキスト</span><span>内容</span></p>
+      <h3>「テキスト」も次の行に押し出される</h3>
+      <p><span class="has-after-leader">ながあああああああああああああああああああああああああああああああああいテキスト</span><span>内容</span></p>
+    </section>
+
+    <section>
+      <h2>::before疑似要素にleader()のみ含む</h2>
+      <h3>1行に収まる</h3>
+      <p><span>ながいテキスト</span><span class="has-before-leader">内容</span></p>
+      <p><span>ながああああああああああああああああああああああああああいテキスト</span><span class="has-before-leader">内容</span></p>
+      <h3>内容が次の行に押し出される</h3>
+      <p><span>ながあああああああああああああああああああああああああああいテキスト</span><span class="has-before-leader">内容</span></p>
+      <p><span>ながあああああああああああああああああああああああああああああいテキスト</span><span class="has-before-leader">内容</span></p>
+      <h3>「テキスト」も次の行に押し出される</h3>
+      <p><span>ながあああああああああああああああああああああああああああああああああいテキスト</span><span class="has-before-leader">内容</span></p>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() with ::before and ::after pseudo-elements (Vertical Writing Mode)
+    </title>
+    <style>
+      @page {
+        size: 640px 480px;
+        margin: 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      ol {
+        margin: 0;
+        padding: 0;
+        display: inline;
+      }
+
+      li {
+        list-style: none;
+        display: inline;
+      }
+
+      ol > li:not(:last-child)::after {
+        content: "、";
+      }
+
+      a::before {
+        content: target-counter(attr(href url), page_);
+      }
+
+      .has-leader-dotted-after::after {
+        content: leader(dotted);
+      }
+
+      .has-leader-dotted-before::before {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page-11" style="counter-set: page_ 11"></div>
+    <div id="page-42" style="counter-set: page_ 42"></div>
+
+    <section>
+      <h3><code>span</code>の<code>::after</code></h3>
+      <div>
+        <span class="has-leader-dotted-after">縦書き</span>
+        <ol>
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3>ネストされた<code>span</code>の<code>::after</code></h3>
+      <div>
+        <span><span class="has-leader-dotted-after">縦書き</span></span>
+        <ol>
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3><code>ol</code>の<code>::before</code></h3>
+      <div>
+        <span>縦書き</span>
+        <ol class="has-leader-dotted-before">
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3>最初の<code>li</code>の<code>::before</code></h3>
+      <div>
+        <span>縦書き</span>
+        <ol>
+          <li class="has-leader-dotted-before"><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+  </body>
+</html>

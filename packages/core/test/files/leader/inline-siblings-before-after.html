@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>leader() with inline sibling elements</title>
+    <title>leader() with ::before and ::after pseudo-elements</title>
     <style>
       @page {
         size: 640px 480px;
-        margin: 20px 30px;
+        margin: 30px;
       }
 
       * {
@@ -34,7 +34,7 @@
 
       h3 {
         font-size: 16px;
-        margin-top: 6px;
+        margin-top: 10px;
       }
 
       ol {
@@ -56,47 +56,24 @@
         content: target-counter(attr(href url), page_);
       }
 
-      .has-leader-dotted::after {
+      .has-leader-dotted-after::after {
         content: leader(dotted);
       }
 
-      .has-leader-custom::after {
-        content: leader("·");
-      }
-
-      .has-leader-alone::after {
+      .has-leader-dotted-before::before {
         content: leader(dotted);
       }
     </style>
   </head>
 
   <body>
-    <section>
-      <h3>Without siblings</h3>
-      <p><span class="has-leader-alone">text</span></p>
-    </section>
+    <div id="page-11" style="counter-set: page_ 11"></div>
+    <div id="page-42" style="counter-set: page_ 42"></div>
 
     <section>
-      <h3>Single inline sibling</h3>
-      <p><span class="has-leader-dotted">text</span><span>sibling</span></p>
-    </section>
-
-    <section>
-      <h3>Multiple inline siblings</h3>
-      <p>
-        <span class="has-leader-dotted">text</span>
-        <strong>Bold</strong>
-        <em>Italic</em>
-        <code>Code</code>
-      </p>
-    </section>
-
-    <section>
-      <h3>Nested inline siblings</h3>
-      <div id="page-11" style="counter-set: page_ 11"></div>
-      <div id="page-42" style="counter-set: page_ 42"></div>
+      <h3><code>::after</code> of <code>span</code></h3>
       <div>
-        <span class="has-leader-dotted">text</span>
+        <span class="has-leader-dotted-after">text</span>
         <ol>
           <li><a href="#page-11"></a></li>
           <li><a href="#page-42"></a></li>
@@ -105,17 +82,36 @@
     </section>
 
     <section>
-      <h3>With custom string leader</h3>
-      <p><span class="has-leader-custom">text</span><span>sibling</span></p>
+      <h3><code>::after</code> of nested <code>span</code></h3>
+      <div>
+        <span><span class="has-leader-dotted-after">text</span></span>
+        <ol>
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
     </section>
 
     <section>
-      <h3>Long heading</h3>
-      <p>
-        <span class="has-leader-dotted"
-          >looooooooooooooooooooooooooooooooooooooooooooooooooooooong text</span
-        ><span>sibling</span>
-      </p>
+      <h3><code>::before</code> of <code>ol</code></h3>
+      <div>
+        <span>text</span>
+        <ol class="has-leader-dotted-before">
+          <li><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3><code>::before</code> of first <code>li</code></h3>
+      <div>
+        <span>text</span>
+        <ol>
+          <li class="has-leader-dotted-before"><a href="#page-11"></a></li>
+          <li><a href="#page-42"></a></li>
+        </ol>
+      </div>
     </section>
   </body>
 </html>
