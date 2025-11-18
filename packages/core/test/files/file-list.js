@@ -229,6 +229,10 @@ module.exports = [
         file: "leader/inline-siblings-before-after-vertical.html",
         title: "leader() with ::before and ::after pseudo-elements (Vertical)",
       },
+      {
+        file: "leader/long-content.html",
+        title: "leader() with long content",
+      },
     ],
   },
   {

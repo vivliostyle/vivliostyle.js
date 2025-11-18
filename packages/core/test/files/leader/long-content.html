@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>leader() with long content</title>
+    <style>
+      @page {
+        size: 640px 1100px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: serif;
+        widows: 1;
+        orphans: 1;
+      }
+
+      section {
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 6px;
+      }
+
+      .has-leader-and-content::after {
+        content: leader(dotted) "content";
+      }
+
+      .has-after-leader::after {
+        content: leader(dotted);
+      }
+
+      .has-before-leader::before {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <section>
+      <h2>Pseudo-element contains leader()+content</h2>
+      <h3>should fits on one line</h3>
+      <p class="has-leader-and-content">long text</p>
+      <p class="has-leader-and-content">looooooooooooooooooooooooooooooooooooooooooooooong text</p>
+      <h3>content is pushed to the next line</h3>
+      <p class="has-leader-and-content">loooooooooooooooooooooooooooooooooooooooooooooooong text</p>
+      <p class="has-leader-and-content">loooooooooooooooooooooooooooooooooooooooooooooooooooooong text</p>
+      <h3>"text" is also pushed to the next line</h3>
+      <p class="has-leader-and-content">looooooooooooooooooooooooooooooooooooooooooooooooooooooong text</p>
+    </section>
+
+    <section>
+      <h2>::after pseudo-element contains only leader()</h2>
+      <h3>should fits on one line</h3>
+      <p><span class="has-after-leader">long text</span><span>content</span></p>
+      <p><span class="has-after-leader">looooooooooooooooooooooooooooooooooooooooooooooong text</span><span>content</span></p>
+      <h3>content is pushed to the next line</h3>
+      <p><span class="has-after-leader">loooooooooooooooooooooooooooooooooooooooooooooooong text</span><span>content</span></p>
+      <p><span class="has-after-leader">loooooooooooooooooooooooooooooooooooooooooooooooooooooong text</span><span>content</span></p>
+      <h3>"text" is also pushed to the next line</h3>
+      <p><span class="has-after-leader">looooooooooooooooooooooooooooooooooooooooooooooooooooooong text</span><span>content</span></p>
+    </section>
+
+    <section>
+      <h2>::before pseudo-element contains only leader()</h2>
+      <h3>should fits on one line</h3>
+      <p><span>long text</span><span class="has-before-leader">content</span></p>
+      <p><span>looooooooooooooooooooooooooooooooooooooooooooooong text</span><span class="has-before-leader">content</span></p>
+      <h3>content is pushed to the next line</h3>
+      <p><span>loooooooooooooooooooooooooooooooooooooooooooooooong text</span><span class="has-before-leader">content</span></p>
+      <p><span>loooooooooooooooooooooooooooooooooooooooooooooooooooooong text</span><span class="has-before-leader">content</span></p>
+      <h3>"text" is also pushed to the next line</h3>
+      <p><span>looooooooooooooooooooooooooooooooooooooooooooooooooooooong text</span><span class="has-before-leader">content</span></p>
+    </section>
+  </body>
+</html>
