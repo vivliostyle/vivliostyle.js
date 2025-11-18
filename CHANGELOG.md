@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.36.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.0...v2.36.1) (2025-11-18)
+
+### Bug Fixes
+
+- Fix float layout problem (Regression in v2.36.0) ([3d05aa5](https://github.com/vivliostyle/vivliostyle.js/commit/3d05aa5f9536d2e106b39d4e4997a3916cc7b5b5)), closes [#1584](https://github.com/vivliostyle/vivliostyle.js/issues/1584)
+- Fix leader() width calculation when base text spans multiple lines ([6816d61](https://github.com/vivliostyle/vivliostyle.js/commit/6816d61b434841f623d0761e139e23b4fca1f521))
+- Support leader() in ::before pseudo-elements ([815087e](https://github.com/vivliostyle/vivliostyle.js/commit/815087ee1d39c830a370d9dad5989c70a434a696))
+
 # [2.36.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.35.0...v2.36.0) (2025-11-14)
 
 ### Bug Fixes
