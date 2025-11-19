@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.36.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.1...v2.36.2) (2025-11-19)
+
+### Bug Fixes
+
+- Fix isUsingBrowserColumnBreaking called with null ([7804f58](https://github.com/vivliostyle/vivliostyle.js/commit/7804f587a6bb35d5e6463ceb00fcf6a09cbcb9a5)), closes [#1586](https://github.com/vivliostyle/vivliostyle.js/issues/1586)
+
 ## [2.36.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.0...v2.36.1) (2025-11-18)
 
 ### Bug Fixes
