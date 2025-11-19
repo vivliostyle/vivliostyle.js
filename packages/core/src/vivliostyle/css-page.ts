@@ -2461,7 +2461,7 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     context: Exprs.Context,
     container: Vtree.Container,
     page: Vtree.Page,
-    column: Vtree.Container,
+    column: Vtree.Container | null,
     columnCount: number,
     clientLayout: Vtree.ClientLayout,
     docFaces: Font.DocumentFaces,

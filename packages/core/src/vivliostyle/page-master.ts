@@ -1421,7 +1421,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     context: Exprs.Context,
     container: Vtree.Container,
     page: Vtree.Page,
-    column: Vtree.Container,
+    column: Vtree.Container | null,
     columnCount: number,
     clientLayout: Vtree.ClientLayout,
     docFaces: Font.DocumentFaces,
@@ -1444,7 +1444,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         Base.setCSSProperty(container.element, "height", "auto");
       }
       const usingBrowserColumnBreaking =
-        LayoutHelper.isUsingBrowserColumnBreaking(column);
+        column && LayoutHelper.isUsingBrowserColumnBreaking(column);
       if (usingBrowserColumnBreaking) {
         // To get correct bounding box, temporarily disable multi-column style.
         LayoutHelper.unsetBrowserColumnBreaking(column);
