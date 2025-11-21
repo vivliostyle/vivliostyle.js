@@ -329,7 +329,7 @@ export function resolveContentType(response: Net.FetchResponse): string | null {
       return DOMParserSupportedType.APPLICATION_XML;
     }
   }
-  const match = response.url.match(/\.([^./]+)$/);
+  const match = response.url.match(/\.([^./#?]+)([#?]|$)/);
   if (match) {
     const extension = match[1];
     switch (extension) {
