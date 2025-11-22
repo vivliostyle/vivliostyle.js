@@ -302,11 +302,17 @@ export function loadElement(
       const frame: Task.Frame<string> = Task.newFrame("loadElement");
       const continuation = frame.suspend(elem);
       let done = false;
+      let timeoutId: number | null = null;
       const handler = (evt: Event) => {
         if (done) {
           return;
         } else {
           done = true;
+        }
+        // Clear timeout to prevent unnecessary callback execution
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
         }
         continuation.schedule(evt ? evt.type : "timeout");
       };
@@ -318,13 +324,34 @@ export function loadElement(
           elem.setAttributeNS(Base.NS.XLINK, "xlink:href", src);
         }
         // SVG handlers are not reliable
-        setTimeout(handler, 300);
+        timeoutId = setTimeout(handler, 300);
       } else if (elem.localName === "script") {
-        setTimeout(handler, 3000);
+        timeoutId = setTimeout(handler, 3000);
       } else if (src) {
-        (elem as any).src = src;
-        if (alt) {
-          (elem as any).alt = alt;
+        if (elem.localName === "img") {
+          const imgElem = elem as HTMLImageElement;
+          // Remove loading="lazy" attribute to ensure images load immediately
+          // for proper pagination (Vivliostyle needs image dimensions for layout)
+          if (imgElem.loading === "lazy") {
+            imgElem.loading = "eager";
+          }
+          imgElem.src = src;
+          if (alt) {
+            imgElem.alt = alt;
+          }
+          // Handle already cached images
+          if (imgElem.complete) {
+            // Image already loaded (from cache)
+            setTimeout(() => handler(new Event("load")), 0);
+          } else {
+            // Set a longer timeout to handle slow networks and large images
+            timeoutId = setTimeout(handler, 30000);
+          }
+        } else {
+          (elem as any).src = src;
+          if (alt) {
+            (elem as any).alt = alt;
+          }
         }
       }
       return frame.result();
