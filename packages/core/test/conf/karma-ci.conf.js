@@ -33,11 +33,13 @@ module.exports = function (config) {
     browsers = ["Safari"];
   } else if (browser === "Firefox") {
     browsers = ["FirefoxHeadless"];
-    // Set MOZ_HEADLESS environment variable for Firefox headless mode
-    process.env.MOZ_HEADLESS = "1";
     customLaunchers.FirefoxHeadless = {
       base: "Firefox",
-      displayName: "FirefoxHeadless",
+      flags: ["-headless"],
+      prefs: {
+        "media.navigator.streams.fake": true,
+        "media.navigator.permission.disabled": true,
+      },
     };
   } else {
     // Default to Chrome

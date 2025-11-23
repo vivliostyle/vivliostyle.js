@@ -59,7 +59,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: |
           sudo apt-get update
-          sudo apt-get install -y firefox
+          sudo apt-get install -y firefox xvfb
 
       - name: Install Chrome (Windows)
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
@@ -76,10 +76,19 @@ jobs:
         run: |
           brew install --cask firefox
 
+      - name: Enable Safari WebDriver (macOS)
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari'
+        run: |
+          sudo safaridriver --enable
+
       - name: Run tests
         run: |
           cd packages/core/test
           yarn install
-          yarn test-ci
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ] && [ "${{ matrix.browser }}" = "Firefox" ]; then
+            xvfb-run -a yarn test-ci
+          else
+            yarn test-ci
+          fi
         env:
           TEST_BROWSER: ${{ matrix.browser }}
