@@ -68,15 +68,6 @@ module.exports = function (config) {
     browserNoActivityTimeout: 180000,
     browserDisconnectTimeout: 180000,
     browserDisconnectTolerance: 3,
-    plugins: [
-      "karma-chrome-launcher",
-      "karma-firefox-launcher",
-      "karma-safari-launcher",
-      "karma-webkit-launcher",
-      "karma-jasmine",
-      "karma-verbose-reporter",
-      "karma-webpack",
-    ],
   };
 
   for (var key in commonConfig) {
@@ -84,6 +75,17 @@ module.exports = function (config) {
       options[key] = commonConfig[key];
     }
   }
+
+  // Add browser launchers to plugins
+  if (!options.plugins) {
+    options.plugins = [];
+  }
+  options.plugins.push(
+    "karma-chrome-launcher",
+    "karma-firefox-launcher",
+    "karma-safari-launcher",
+    "karma-webkit-launcher",
+  );
 
   config.set(options);
 };
