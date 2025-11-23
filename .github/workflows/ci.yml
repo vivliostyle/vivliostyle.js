@@ -87,3 +87,4 @@ jobs:
           yarn test-ci
         env:
           TEST_BROWSER: ${{ matrix.browser }}
+          SAFARI_BIN: /Applications/Safari.app/Contents/MacOS/Safari
