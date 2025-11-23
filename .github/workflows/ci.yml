@@ -26,10 +26,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         browser: [Chrome, Firefox]
-        include:
-          # Safari is only available on macOS
-          - os: macos-latest
-            browser: Safari
         exclude:
           # Reduce CI time by excluding some combinations
           - os: windows-latest
@@ -72,12 +68,6 @@ jobs:
         if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
         run: |
           brew install --cask firefox
-
-      - name: Enable Safari WebDriver (macOS)
-        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari'
-        run: |
-          # WebKit launcher doesn't need safaridriver
-          echo "Using WebKit headless mode for Safari testing"
 
       - name: Run tests
         run: |

@@ -76,16 +76,5 @@ module.exports = function (config) {
     }
   }
 
-  // Add browser launchers to plugins
-  if (!options.plugins) {
-    options.plugins = [];
-  }
-  options.plugins.push(
-    "karma-chrome-launcher",
-    "karma-firefox-launcher",
-    "karma-safari-launcher",
-    "karma-webkit-launcher",
-  );
-
   config.set(options);
 };
