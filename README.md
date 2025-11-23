@@ -2,7 +2,6 @@
 
 [![GitHub tag][github-tag]][github-tag-url]
 [![Build Status][build-status]][build-status-url]
-[![Sauce Test Status][sauce-test-status]][sauce-test-status-url]
 [![GitHub contributors][contributors]][contributors-url]
 [![PR's welcome][pr-welcome]][pr-welcome-url]
 
@@ -35,7 +34,6 @@ Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web 
   - [Contributors ✨](#contributors-)
 - [Bronze Sponsor](#bronze-sponsor)
 - [License](#license)
-- [Credits](#credits)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -174,16 +172,10 @@ Licensed under [AGPL Version 3](https://www.gnu.org/licenses/agpl-3.0.html).
 
 Vivliostyle Core is implemented based on [Peter Sorotokin's EPUB Adaptive Layout implementation](https://github.com/sorotokin/adaptive-layout), which is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-## Credits
-
-[![Testing Powered By SauceLabs](https://saucelabs.github.io/images/opensauce/powered-by-saucelabs-badge-white.png?sanitize=true "Testing Powered By SauceLabs")](https://saucelabs.com)
-
 [github-tag]: https://img.shields.io/github/v/tag/vivliostyle/vivliostyle.js
 [github-tag-url]: https://github.com/vivliostyle/vivliostyle.js/releases
 [build-status]: https://github.com/vivliostyle/vivliostyle.js/workflows/CI/badge.svg?branch=master
 [build-status-url]: https://github.com/vivliostyle/vivliostyle.js/actions?query=CI
-[sauce-test-status]: https://saucelabs.com/buildstatus/vivliostyle-test
-[sauce-test-status-url]: https://app.saucelabs.com/u/vivliostyle-test
 [contributors]: https://img.shields.io/github/contributors/vivliostyle/vivliostyle.js.svg
 [contributors-url]: https://github.com/vivliostyle/vivliostyle.js/graphs/contributors
 [pr-welcome]: https://img.shields.io/badge/PRs%20-welcome-brightgreen.svg

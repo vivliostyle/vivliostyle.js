@@ -15,8 +15,7 @@
     "lint:css": "stylelint src/scss/{*.*,**/*.*}",
     "lint:ts": "eslint src --fix -f codeframe",
     "serve": "yarn build && gulp serve",
-    "test": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'",
-    "test-sauce": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
+    "test": "echo 'Tests for Vivliostyle Viewer has been disabled. See #618.'"
   },
   "dependencies": {
     "@vivliostyle/core": "^2.36.2",

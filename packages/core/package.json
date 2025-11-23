@@ -10,8 +10,7 @@
     "dev": "yarn build-dev --watch=forever",
     "format": "prettier --write \"{*.{js,md,json},{src,types,test,resources}/**/*.{ts,js}}\"",
     "lint": "eslint src --fix -f codeframe",
-    "test": "yarn --cwd test install && yarn --cwd test test",
-    "test-sauce": "yarn --cwd test install && yarn --cwd test test-sauce"
+    "test": "yarn --cwd test install && yarn --cwd test test"
   },
   "dependencies": {
     "fast-diff": "^1.2.0"

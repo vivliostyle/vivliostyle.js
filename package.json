@@ -15,7 +15,6 @@
     "ship:canary": "lerna publish --canary",
     "ship:prerelease": "yarn ship --dist-tag next",
     "test": "lerna run test --parallel --stream",
-    "test-sauce": "lerna run test-sauce",
     "version:amend": "git tag --points-at HEAD | xargs -I{} git tag --delete {} && git reset --hard HEAD^",
     "version:bump": "lerna version --conventional-commits --preid pre",
     "version:graduate": "lerna version --conventional-commits --conventional-graduate",

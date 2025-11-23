@@ -2,8 +2,7 @@
   "name": "core-test",
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-local.conf.js",
-    "test-ci": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-ci.conf.js",
-    "test-sauce": "test -z \"$SAUCE_USERNAME\" || cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-sauce.conf.js"
+    "test-ci": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-ci.conf.js"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
@@ -14,7 +13,6 @@
     "karma-firefox-launcher": "^2.1.3",
     "karma-jasmine": "^5.1.0",
     "karma-safari-launcher": "^1.0.0",
-    "karma-sauce-launcher": "^4.1.2",
     "karma-sourcemap-loader": "^0.4.0",
     "karma-typescript-preprocessor": "^0.4.0",
     "karma-verbose-reporter": "0.0.6",
