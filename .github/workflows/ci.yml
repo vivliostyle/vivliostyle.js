@@ -48,30 +48,10 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Install Chrome (Ubuntu)
-        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Chrome'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-
-      - name: Install Chrome (Windows)
-        if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
-        run: |
-          choco install googlechrome -y
-
-      - name: Install Chrome (macOS)
-        if: matrix.os == 'macos-latest' && matrix.browser == 'Chrome'
-        run: |
-          brew install --cask google-chrome
-
-      - name: Install Firefox (macOS)
-        if: matrix.os == 'macos-latest' && matrix.browser == 'Firefox'
-        run: |
-          brew install --cask firefox
-
       - name: Run tests
         run: |
           cd packages/core/test
+          # packages/core/test has its own package.json with test-specific dependencies
           yarn install
           yarn test-ci
         env:

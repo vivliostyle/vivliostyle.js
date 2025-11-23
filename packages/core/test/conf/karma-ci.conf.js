@@ -28,14 +28,7 @@ module.exports = function (config) {
   var browsers;
   var customLaunchers = {};
 
-  if (browser === "Safari") {
-    // Use WebKit headless on CI instead of Safari (which can't run headless)
-    browsers = ["WebKitHeadless"];
-    customLaunchers.WebKitHeadless = {
-      base: "WebKit",
-      flags: ["--headless"],
-    };
-  } else if (browser === "Firefox") {
+  if (browser === "Firefox") {
     browsers = ["FirefoxHeadless"];
     customLaunchers.FirefoxHeadless = {
       base: "Firefox",
