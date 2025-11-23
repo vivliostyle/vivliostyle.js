@@ -76,9 +76,8 @@ jobs:
       - name: Enable Safari WebDriver (macOS)
         if: matrix.os == 'macos-latest' && matrix.browser == 'Safari'
         run: |
-          sudo safaridriver --enable
-          defaults write com.apple.Safari WebKitJavaScriptEnabled -bool true
-          defaults write com.apple.Safari IncludeDevelopMenu -bool true
+          # WebKit launcher doesn't need safaridriver
+          echo "Using WebKit headless mode for Safari testing"
 
       - name: Run tests
         run: |
@@ -87,4 +86,3 @@ jobs:
           yarn test-ci
         env:
           TEST_BROWSER: ${{ matrix.browser }}
-          SAFARI_BIN: /Applications/Safari.app/Contents/MacOS/Safari
