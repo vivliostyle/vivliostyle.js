@@ -31,14 +31,19 @@ module.exports = function (config) {
   if (browser === "Safari") {
     // Safari doesn't have a headless mode
     browsers = ["Safari"];
+    customLaunchers.Safari = {
+      base: "Safari",
+    };
   } else if (browser === "Firefox") {
     browsers = ["FirefoxHeadless"];
     customLaunchers.FirefoxHeadless = {
       base: "Firefox",
-      flags: ["-headless"],
+      flags: ["-headless", "-safe-mode"],
       prefs: {
         "media.navigator.streams.fake": true,
         "media.navigator.permission.disabled": true,
+        "devtools.console.stdout.chrome": true,
+        "browser.dom.window.dump.enabled": true,
       },
     };
   } else {
@@ -60,8 +65,10 @@ module.exports = function (config) {
     browsers: browsers,
     customLaunchers: customLaunchers,
     singleRun: true,
-    captureTimeout: 120000,
-    browserNoActivityTimeout: 120000,
+    captureTimeout: 180000,
+    browserNoActivityTimeout: 180000,
+    browserDisconnectTimeout: 180000,
+    browserDisconnectTolerance: 3,
   };
 
   for (var key in commonConfig) {

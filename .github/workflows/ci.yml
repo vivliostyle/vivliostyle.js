@@ -59,7 +59,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: |
           sudo apt-get update
-          sudo apt-get install -y firefox xvfb
+          sudo apt-get install -y firefox xvfb dbus-x11
+          # Start a virtual display
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+          sleep 3
 
       - name: Install Chrome (Windows)
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
@@ -81,14 +85,21 @@ jobs:
         run: |
           sudo safaridriver --enable
 
-      - name: Run tests
+      - name: Run tests (Ubuntu Firefox with xvfb)
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: |
           cd packages/core/test
           yarn install
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ] && [ "${{ matrix.browser }}" = "Firefox" ]; then
-            xvfb-run -a yarn test-ci
-          else
-            yarn test-ci
-          fi
+          export DISPLAY=:99
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24" yarn test-ci
+        env:
+          TEST_BROWSER: ${{ matrix.browser }}
+
+      - name: Run tests (other platforms)
+        if: ${{ !(matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox') }}
+        run: |
+          cd packages/core/test
+          yarn install
+          yarn test-ci
         env:
           TEST_BROWSER: ${{ matrix.browser }}
