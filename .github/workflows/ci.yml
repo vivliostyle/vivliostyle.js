@@ -77,6 +77,8 @@ jobs:
         if: matrix.os == 'macos-latest' && matrix.browser == 'Safari'
         run: |
           sudo safaridriver --enable
+          defaults write com.apple.Safari WebKitJavaScriptEnabled -bool true
+          defaults write com.apple.Safari IncludeDevelopMenu -bool true
 
       - name: Run tests
         run: |

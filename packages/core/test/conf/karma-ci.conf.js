@@ -29,12 +29,8 @@ module.exports = function (config) {
   var customLaunchers = {};
 
   if (browser === "Safari") {
-    // Safari doesn't have a headless mode
+    // Safari doesn't have a headless mode, use default Safari launcher
     browsers = ["Safari"];
-    // Set Safari binary path for macOS
-    customLaunchers.Safari = {
-      base: "SafariPrivate",
-    };
   } else if (browser === "Firefox") {
     browsers = ["FirefoxHeadless"];
     customLaunchers.FirefoxHeadless = {
