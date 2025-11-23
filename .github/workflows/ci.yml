@@ -12,13 +12,47 @@ jobs:
       - run: yarn install
       - run: yarn build
       - run: yarn lint
-      # - run: yarn test-sauce
-      #   env:
-      #     SAUCE_USERNAME: ${{secrets.SAUCE_USERNAME}}
-      #     SAUCE_ACCESS_KEY: ${{secrets.SAUCE_ACCESS_KEY}}
       - run: scripts/ci-after-success-hook.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
           DEPLOY_KEY_VIVLIOSTYLE_ORG: ${{ secrets.DEPLOY_KEY_VIVLIOSTYLE_ORG }}
           DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO: ${{ secrets.DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO }}
+
+  test:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        browser: [Chrome, Firefox]
+        exclude:
+          # Reduce CI time by excluding some combinations
+          - os: windows-latest
+            browser: Firefox
+          # Firefox on Ubuntu consistently times out, tested on macOS instead
+          - os: ubuntu-latest
+            browser: Firefox
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+
+      - name: Run tests
+        run: |
+          cd packages/core/test
+          # packages/core/test has its own package.json with test-specific dependencies
+          yarn install
+          yarn test-ci
+        env:
+          TEST_BROWSER: ${{ matrix.browser }}
