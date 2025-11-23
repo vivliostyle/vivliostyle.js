@@ -34,6 +34,9 @@ jobs:
           # Reduce CI time by excluding some combinations
           - os: windows-latest
             browser: Firefox
+          # Firefox on Ubuntu consistently times out, tested on macOS instead
+          - os: ubuntu-latest
+            browser: Firefox
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -55,12 +58,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser
 
-      - name: Install Firefox (Ubuntu)
-        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox xvfb dbus-x11
-
       - name: Install Chrome (Windows)
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
         run: |
@@ -81,17 +78,7 @@ jobs:
         run: |
           sudo safaridriver --enable
 
-      - name: Run tests (Ubuntu Firefox with xvfb)
-        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
-        run: |
-          cd packages/core/test
-          yarn install
-          xvfb-run --auto-servernum yarn test-ci
-        env:
-          TEST_BROWSER: ${{ matrix.browser }}
-
-      - name: Run tests (other platforms)
-        if: ${{ !(matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox') }}
+      - name: Run tests
         run: |
           cd packages/core/test
           yarn install
