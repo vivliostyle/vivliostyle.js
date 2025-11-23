@@ -60,10 +60,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y firefox xvfb dbus-x11
-          # Start a virtual display
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-          sleep 3
 
       - name: Install Chrome (Windows)
         if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
@@ -90,8 +86,7 @@ jobs:
         run: |
           cd packages/core/test
           yarn install
-          export DISPLAY=:99
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24" yarn test-ci
+          xvfb-run --auto-servernum yarn test-ci
         env:
           TEST_BROWSER: ${{ matrix.browser }}
 

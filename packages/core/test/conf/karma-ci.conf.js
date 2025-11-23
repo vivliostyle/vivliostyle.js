@@ -31,19 +31,14 @@ module.exports = function (config) {
   if (browser === "Safari") {
     // Safari doesn't have a headless mode
     browsers = ["Safari"];
-    customLaunchers.Safari = {
-      base: "Safari",
-    };
   } else if (browser === "Firefox") {
     browsers = ["FirefoxHeadless"];
     customLaunchers.FirefoxHeadless = {
       base: "Firefox",
-      flags: ["-headless", "-safe-mode"],
+      flags: ["-headless", "-no-remote"],
       prefs: {
         "media.navigator.streams.fake": true,
         "media.navigator.permission.disabled": true,
-        "devtools.console.stdout.chrome": true,
-        "browser.dom.window.dump.enabled": true,
       },
     };
   } else {
