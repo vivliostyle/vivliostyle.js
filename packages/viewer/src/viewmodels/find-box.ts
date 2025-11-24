@@ -22,7 +22,7 @@ import Navigation from "./navigation";
 import urlParameters from "../stores/url-parameters";
 import keyUtil from "../utils/key-util";
 import stringUtil from "../utils/string-util";
-import { scaleRect, applyTransformToRect } from "../utils/scale-util";
+import { applyTransformToRect } from "../utils/scale-util";
 
 const { Keys } = keyUtil;
 
@@ -247,9 +247,9 @@ class FindBox {
     const parent = this.foundRange.startContainer.parentElement.closest(
       "[data-vivliostyle-page-container='true']",
     );
-    const parentRect = scaleRect(parent.getBoundingClientRect());
+    const parentRect = parent.getBoundingClientRect();
     for (const clientRect of this.foundRange.getClientRects()) {
-      const rect = applyTransformToRect(scaleRect(clientRect), parentRect);
+      const rect = applyTransformToRect(clientRect, parentRect);
       const highlightElement = document.createElement("div");
       highlightElement.setAttribute("data-viv-found-highlight", "true");
       highlightElement.style.position = "absolute";

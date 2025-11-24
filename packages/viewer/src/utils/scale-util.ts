@@ -15,19 +15,6 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const scaleRect = (rect: DOMRect): DOMRect => {
-  const style = document.getElementById("vivliostyle-viewer-viewport").style;
-  const scaleRectRatio = parseFloat(
-    style.getPropertyValue("--viv-scaleRectRatio") || "1",
-  );
-  return new DOMRect(
-    rect.x * scaleRectRatio,
-    rect.y * scaleRectRatio,
-    rect.width * scaleRectRatio,
-    rect.height * scaleRectRatio,
-  );
-};
-
 export const applyTransformToRect = (
   rect: DOMRect,
   parentRect: DOMRect,
