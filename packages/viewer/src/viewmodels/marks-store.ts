@@ -20,7 +20,7 @@ import ko, { Computed, Observable, ObservableArray } from "knockout";
 import ViewerOptions from "../models/viewer-options";
 import Viewer from "./viewer";
 import urlParameters from "../stores/url-parameters";
-import { scaleRect, applyTransformToRect } from "../utils/scale-util";
+import { applyTransformToRect } from "../utils/scale-util";
 
 const t = i18n.t.bind(i18n);
 
@@ -100,7 +100,7 @@ const textNodeRects = (tn: TextInRange): DOMRect[] => {
   const r = document.createRange();
   r.setStart(tn.t, tn.startOffset);
   r.setEnd(tn.t, tn.endOffset);
-  return [...r.getClientRects()].map((rect) => scaleRect(rect));
+  return [...r.getClientRects()];
 };
 
 const markExistIn = (markId: string, e: Element): boolean => {
@@ -177,7 +177,7 @@ const highlight = (
     const parent = tn.t.parentElement.closest(
       "[data-vivliostyle-page-container='true']",
     );
-    const parentRect = scaleRect(parent.getBoundingClientRect());
+    const parentRect = parent.getBoundingClientRect();
     const pageIndex = getPageIndex(parent);
     const spineIndex = getSpineIndex(parent);
     for (const r of textNodeRects(tn)) {

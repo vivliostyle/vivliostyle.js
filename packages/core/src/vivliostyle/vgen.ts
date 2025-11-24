@@ -2942,12 +2942,6 @@ export const propertiesNotPassedToDOM = {
   page: true,
 };
 
-/**
- * Need to scale `getBoundingClientRect()` result for high pixel ratio output?
- * Note: This is only needed for Chromium older than 128. (Issue #1370)
- */
-let needScaleRect: boolean | null = null;
-
 export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: Element;
   window: Window;
@@ -2957,19 +2951,6 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     this.layoutBox = viewport.layoutBox;
     this.window = viewport.window;
     this.scaleRatio = viewport.scaleRatio;
-  }
-
-  private scaleRect(rect: Vtree.ClientRect): Vtree.ClientRect {
-    return needScaleRect
-      ? ({
-          left: rect.left * this.scaleRatio,
-          top: rect.top * this.scaleRatio,
-          right: rect.right * this.scaleRatio,
-          bottom: rect.bottom * this.scaleRatio,
-          width: rect.width * this.scaleRatio,
-          height: rect.height * this.scaleRatio,
-        } as Vtree.ClientRect)
-      : rect;
   }
 
   private subtractOffsets(
@@ -2993,7 +2974,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     const rects = range.getClientRects();
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
     return Array.from(rects).map((rect) =>
-      this.scaleRect(this.subtractOffsets(rect, layoutBoxRect)),
+      this.subtractOffsets(rect, layoutBoxRect),
     );
   }
 
@@ -3012,7 +2993,7 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
       return rect;
     }
     const layoutBoxRect = this.layoutBox.getBoundingClientRect();
-    return this.scaleRect(this.subtractOffsets(rect, layoutBoxRect));
+    return this.subtractOffsets(rect, layoutBoxRect);
   }
 
   /** @override */
@@ -3088,18 +3069,6 @@ export class Viewport {
       );
 
       this.scaleRatio = pixelRatio / window.devicePixelRatio;
-      if (needScaleRect === null) {
-        // Check if getBoundingClientRect() result needs to be scaled.
-        // Note: This is only needed for Chromium older than 128. (Issue #1370)
-        needScaleRect = !("currentCSSZoom" in contentContainer);
-      }
-      if (needScaleRect) {
-        Base.setCSSProperty(
-          this.root,
-          "--viv-scaleRectRatio",
-          `${this.scaleRatio}`,
-        );
-      }
     }
 
     let layoutBox = outerZoomBox.nextElementSibling as HTMLElement;
