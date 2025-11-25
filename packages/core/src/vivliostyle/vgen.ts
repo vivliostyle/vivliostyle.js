@@ -1349,6 +1349,20 @@ export class ViewFactory
         const attributeCount = attributes.length;
         let delayedSrc: string | null = null;
         let delayedAlt: string | null = null;
+
+        // Workaround for issue #1439
+        // `<tr><a id="…"></a><td>…` causes table layout issue, so change to
+        // `<tr><td><a id="…"></a>…`
+        if (
+          display === Css.ident.table_cell &&
+          (this.nodeContext.parent?.viewNode as Element)?.lastElementChild
+            ?.localName === "a"
+        ) {
+          result.appendChild(
+            (this.nodeContext.parent.viewNode as Element).lastElementChild,
+          );
+        }
+
         for (let i = 0; i < attributeCount; i++) {
           const attribute = attributes[i];
           const attributeNS = attribute.namespaceURI;
@@ -1380,9 +1394,7 @@ export class ViewFactory
                 const anchorElem = result.ownerDocument.createElement("a");
                 anchorElem.setAttribute(attributeName, transformedValue);
                 anchorElem.setAttribute(Vtree.SPECIAL_ATTR, "1");
-
-                // Avoid using `position: absolute` for link target to work around Chromium 138- PDF link bug. (Issue #1541)
-                // anchorElem.style.position = "absolute";
+                anchorElem.style.position = "absolute";
                 result.appendChild(anchorElem);
 
                 this.page.registerElementWithId(result, transformedValue);
@@ -2082,39 +2094,7 @@ export class ViewFactory
           parent.appendChild(this.viewNode);
 
           // Fix overflow caused by forced column breaks
-          LayoutHelper.fixOverflowAtForcedColumnBreak(this.viewNode as Element);
-
-          // Avoid using `position: absolute` for link target to work around Chromium 138- PDF link bug. (Issue #1541)
-          if (
-            this.viewNode.nodeType === 1 &&
-            (this.viewNode as Element).hasAttribute("data-vivliostyle-id")
-          ) {
-            const elementWithId = this.viewNode as HTMLElement;
-            const anchorWithTransformedId = elementWithId.querySelector(
-              ":scope > a:empty[id^='viv-id-']", // must be empty anchor with transformed id
-            );
-            // anchorWithTransformedId, that has been inserted as a child of elementWithId,
-            // should be moved to the beginning of page-container if it is inside
-            // an absolute-positioned element (workaround for issue #1541)
-            // or inside a table (workaround for issue #1439), flex, grid or ruby element.
-            if (
-              anchorWithTransformedId &&
-              (elementWithId.closest("[style*='position: absolute']") ||
-                /(table|flex|grid|ruby)/.test(elementWithId.style.display))
-            ) {
-              const id = anchorWithTransformedId.getAttribute("id");
-              anchorWithTransformedId.ownerDocument
-                .querySelectorAll(`a[id="${id}"]`)
-                .forEach((elem) => {
-                  elem.parentElement?.removeChild(elem);
-                });
-              const bleedBox = parent.closest("[data-vivliostyle-bleed-box]");
-              bleedBox?.parentElement?.insertBefore(
-                anchorWithTransformedId,
-                bleedBox,
-              );
-            }
-          }
+          LayoutHelper.fixOverflowAtForcedColumnBreak(this.viewNode);
         }
       }
       frame.finish(needToProcessChildren);
