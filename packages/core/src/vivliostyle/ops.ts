@@ -1978,9 +1978,9 @@ export class StyleInstance
     page.container.style.width = `${this.pageSheetWidth}px`;
     page.container.style.height = `${this.pageSheetHeight}px`;
     page.bleedBox.style.left = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
-    page.bleedBox.style.width = `${evaluatedPageSizeAndBleed.pageWidth}px`;
+    page.bleedBox.style.right = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.top = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
-    page.bleedBox.style.height = `${evaluatedPageSizeAndBleed.pageHeight}px`;
+    page.bleedBox.style.bottom = `${evaluatedPageSizeAndBleed.bleedOffset}px`;
     page.bleedBox.style.padding = `${evaluatedPageSizeAndBleed.bleed}px`;
   }
 }

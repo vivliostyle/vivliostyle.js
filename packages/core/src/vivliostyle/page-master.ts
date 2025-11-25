@@ -181,9 +181,6 @@ export class PageMaster<
       Css.ident.visible,
       0,
     );
-
-    // Shift 1px to workaround Chrome printing bug
-    // this.specified["top"] = new CssCascade.CascadeValue(new Css.Numeric(-1, "px"), 0);
   }
 
   override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
