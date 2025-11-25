@@ -257,11 +257,6 @@ export type Spread = {
   right: Page;
 };
 
-/**
- * Marks an element as "special". It should not be used in bbox calculations.
- */
-export const SPECIAL_ATTR = "data-adapt-spec";
-
 export const Whitespace = Vtree.Whitespace;
 export type Whitespace = Vtree.Whitespace; // eslint-disable-line no-redeclare
 
@@ -1061,7 +1056,7 @@ export class Container implements Vtree.Container {
   rtl: boolean = false;
   borderBoxSizing: boolean = false;
 
-  constructor(public element: Element) {}
+  constructor(public element: HTMLElement) {}
 
   getInsetTop() {
     return (

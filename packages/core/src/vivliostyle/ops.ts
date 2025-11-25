@@ -1163,9 +1163,7 @@ export class StyleInstance
                 : currentColumnIndex) *
                 (columnWidth + columnGap) +
               layoutContainer.paddingTop;
-            const outerWidth = parseFloat(
-              (boxContainer as HTMLElement).style.width,
-            );
+            const outerWidth = parseFloat(boxContainer.style.width);
             column.setHorizontalPosition(
               layoutContainer.paddingLeft + outerWidth - layoutContainer.width,
               layoutContainer.width,
@@ -1721,7 +1719,7 @@ export class StyleInstance
             const r = this.layoutContainer(
               page,
               child,
-              boxContainer as HTMLElement,
+              boxContainer,
               offsetX,
               offsetY,
               exclusions,

@@ -100,7 +100,7 @@ export class TableCellFragment {
 
   constructor(
     public readonly column: Layout.Column,
-    pseudoColumnContainer: Element,
+    pseudoColumnContainer: HTMLElement,
     public readonly cellNodeContext: Vtree.NodeContext,
   ) {
     this.pseudoColumn = new Layout.PseudoColumn(

@@ -1393,7 +1393,7 @@ export class ViewFactory
                 // (issue #877)
                 const anchorElem = result.ownerDocument.createElement("a");
                 anchorElem.setAttribute(attributeName, transformedValue);
-                anchorElem.setAttribute(Vtree.SPECIAL_ATTR, "1");
+                anchorElem.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
                 anchorElem.style.position = "absolute";
                 result.appendChild(anchorElem);
 
@@ -2761,7 +2761,7 @@ export class ViewFactory
         position === "absolute" ||
         position === "fixed" ||
         (float && float !== "none") ||
-        elem1.hasAttribute(Vtree.SPECIAL_ATTR)
+        elem1.hasAttribute(LayoutHelper.SPECIAL_ATTR)
       ) {
         const prevElem = elem1.previousElementSibling;
         if (

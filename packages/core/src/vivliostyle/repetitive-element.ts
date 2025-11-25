@@ -268,7 +268,7 @@ export class RepetitiveElements
     while (from.firstChild) {
       const child = from.firstChild;
       from.removeChild(child);
-      (child as Element).setAttribute(VtreeImpl.SPECIAL_ATTR, "1");
+      (child as Element).setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
       if (firstChild) {
         to.insertBefore(child, firstChild);
       } else {
