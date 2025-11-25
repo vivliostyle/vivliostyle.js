@@ -43,6 +43,9 @@ export function setBrowserColumnBreaking(column: Vtree.Container): void {
   style.columnGap = `${BIG_GAP - (column.vertical ? column.height : column.width)}px`;
   style.columnFill = "auto";
   style.columnCount = "1";
+  // Workaround for Safari/WebKit(< 26.2) bug (column-count: 1 should create a multi-column container)
+  // https://bugs.webkit.org/show_bug.cgi?id=299836
+  style.columnWidth = "0";
 }
 
 /**
@@ -51,6 +54,7 @@ export function setBrowserColumnBreaking(column: Vtree.Container): void {
  */
 export function unsetBrowserColumnBreaking(column: Vtree.Container): void {
   const style = column.element.style;
+  style.columnWidth = "";
   style.columnCount = "";
   style.columnGap = "";
   style.columnFill = "";
