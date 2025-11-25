@@ -458,7 +458,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     super(element);
-    LayoutHelper.setAsRootColumn(this);
+    if (new.target === Column) {
+      // Mark the column as a root column only when instantiated directly
+      // (excluding PageFloatArea).
+      LayoutHelper.setAsRootColumn(this);
+    }
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
     pageFloatLayoutContext.setContainer(this);
