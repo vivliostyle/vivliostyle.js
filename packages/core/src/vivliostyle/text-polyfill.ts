@@ -421,7 +421,7 @@ class TextSpacingPolyfill {
         return false;
       }
       const elem = node as HTMLElement;
-      if (elem.hasAttribute(Vtree.SPECIAL_ATTR)) {
+      if (elem.hasAttribute(LayoutHelper.SPECIAL_ATTR)) {
         return true;
       }
       const { position, float } = elem.style ?? {};

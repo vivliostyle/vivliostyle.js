@@ -18,8 +18,6 @@
  */
 import * as Base from "./base";
 import * as Display from "./display";
-import * as Logging from "./logging";
-import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
 /**
@@ -41,10 +39,13 @@ const BIG_GAP = 100000;
  * page/column breaking positions in our layout processing.
  */
 export function setBrowserColumnBreaking(column: Vtree.Container): void {
-  const columnElem = column.element as HTMLElement;
-  columnElem.style.columnCount = "1";
-  columnElem.style.columnGap = `${BIG_GAP - (column.vertical ? column.height : column.width)}px`;
-  columnElem.style.columnFill = "auto";
+  const style = column.element.style;
+  style.columnGap = `${BIG_GAP - (column.vertical ? column.height : column.width)}px`;
+  style.columnFill = "auto";
+  style.columnCount = "1";
+  // Workaround for Safari/WebKit(< 26.2) bug (column-count: 1 should create a multi-column container)
+  // https://bugs.webkit.org/show_bug.cgi?id=299836
+  style.columnWidth = "0";
 }
 
 /**
@@ -52,14 +53,32 @@ export function setBrowserColumnBreaking(column: Vtree.Container): void {
  * This function resets the CSS properties set by `setBrowserColumnBreaking`.
  */
 export function unsetBrowserColumnBreaking(column: Vtree.Container): void {
-  const columnElem = column.element as HTMLElement;
-  columnElem.style.columnCount = "";
-  columnElem.style.columnGap = "";
-  columnElem.style.columnFill = "";
+  const style = column.element.style;
+  style.columnWidth = "";
+  style.columnCount = "";
+  style.columnGap = "";
+  style.columnFill = "";
 }
 
+/**
+ * Check if the browser's multi-column feature is being used for page/column breaking.
+ */
 export function isUsingBrowserColumnBreaking(column: Vtree.Container): boolean {
-  return (column.element as HTMLElement).style.columnCount === "1";
+  return column.element.style.columnCount === "1";
+}
+
+/**
+ * Mark the column as a root column for Vivliostyle layout processing.
+ */
+export function setAsRootColumn(column: Vtree.Container): void {
+  column.element.setAttribute("data-vivliostyle-column", "true");
+}
+
+/**
+ * Check if the column is marked as a root column for Vivliostyle layout processing.
+ */
+export function isRootColumn(column: Vtree.Container): boolean {
+  return column.element.hasAttribute("data-vivliostyle-column");
 }
 
 /**
@@ -485,8 +504,13 @@ export function removeFollowingSiblings(
   }
 }
 
+/**
+ * Marks an element as "special". It should not be used in bbox calculations.
+ */
+export const SPECIAL_ATTR = "data-adapt-spec";
+
 export function isSpecial(e: Element): boolean {
-  return !!e.getAttribute(VtreeImpl.SPECIAL_ATTR);
+  return !!e.getAttribute(SPECIAL_ATTR);
 }
 
 export function isOutOfFlow(node: Node): boolean {

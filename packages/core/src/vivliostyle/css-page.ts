@@ -2014,12 +2014,12 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     clientLayout: Vtree.ClientLayout,
   ): void {
     container.element.setAttribute("data-vivliostyle-page-area", true);
-    page.pageAreaElement = container.element as HTMLElement;
+    page.pageAreaElement = container.element;
     super.prepareContainer(context, container, page, docFaces, clientLayout);
 
     // Set page area size for vw/vh unit calculation
-    context.pageAreaWidth = parseFloat(page.pageAreaElement.style.width);
-    context.pageAreaHeight = parseFloat(page.pageAreaElement.style.height);
+    context.pageAreaWidth = container.width;
+    context.pageAreaHeight = container.height;
   }
 }
 

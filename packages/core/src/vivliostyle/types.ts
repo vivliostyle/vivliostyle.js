@@ -1177,7 +1177,7 @@ export namespace Vtree {
     snapOffsetY: number;
     vertical: boolean; // vertical writing
     rtl: boolean;
-    element: Element;
+    element: HTMLElement;
     borderBoxSizing: boolean;
 
     getInsetTop(): number;

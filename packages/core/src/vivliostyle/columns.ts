@@ -202,9 +202,7 @@ export function reduceContainerSize(
     setBlockSize(container, getBlockSize(container) - 1);
   }
   if (container.vertical) {
-    const outerWidth = parseFloat(
-      (container.element as HTMLElement).style?.width,
-    );
+    const outerWidth = parseFloat(container.element.style?.width);
     container.originX = outerWidth - container.width;
   }
 }

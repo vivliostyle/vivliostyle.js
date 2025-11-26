@@ -451,14 +451,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   breakAtTheEdgeBeforeFloat: string | null = null;
 
   constructor(
-    element: Element,
+    element: HTMLElement,
     public layoutContext: Vtree.LayoutContext,
     public clientLayout: Vtree.ClientLayout,
     public readonly layoutConstraint: LayoutConstraint,
     public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     super(element);
-    element.setAttribute("data-vivliostyle-column", "true");
+    if (new.target === Column) {
+      // Mark the column as a root column only when instantiated directly
+      // (excluding PageFloatArea).
+      LayoutHelper.setAsRootColumn(this);
+    }
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
     pageFloatLayoutContext.setContainer(this);
@@ -1649,7 +1653,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   setFloatAnchorViewNode(nodeContext: Vtree.NodeContext): Vtree.NodeContext {
     const parent = nodeContext.viewNode.parentNode;
     const anchor = parent.ownerDocument.createElement("span");
-    anchor.setAttribute(VtreeImpl.SPECIAL_ATTR, "1");
+    anchor.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
     if (nodeContext.floatSide === "footnote") {
       // Defaults for footnote-call, can be overriden by the stylesheet.
       this.layoutContext.applyPseudoelementStyle(
@@ -3477,9 +3481,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // point. Create an element that fills the content area and query its size.
     // Calling getElementClientRect on the container element includes element
     // padding which is wrong for our purposes.
-    const probe = this.element.ownerDocument.createElement(
-      "div",
-    ) as HTMLElement;
+    const probe = this.element.ownerDocument.createElement("div");
     probe.style.position = "absolute";
     probe.style.top = `${this.paddingTop}px`;
     probe.style.right = `${this.paddingRight}px`;
@@ -3627,7 +3629,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     }
 
-    if (this.element.hasAttribute("data-vivliostyle-column")) {
+    if (LayoutHelper.isRootColumn(this)) {
       // Enable page/column breaking using the browser's multi-column feature.
       LayoutHelper.setBrowserColumnBreaking(this);
     }
@@ -3925,7 +3927,7 @@ export class PseudoColumn {
   private column: Layout.Column;
   constructor(
     column: Layout.Column,
-    viewRoot: Element,
+    viewRoot: HTMLElement,
     parentNodeContext: Vtree.NodeContext,
   ) {
     this.column = Object.create(column) as Layout.Column;
@@ -4268,7 +4270,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
 
   constructor(
     public readonly floatSide: string,
-    element: Element,
+    element: HTMLElement,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     layoutConstraint: LayoutConstraint,
