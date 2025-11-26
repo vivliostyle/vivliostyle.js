@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>@counter-style rule</title>
+    <style>
+      @counter-style emoji {
+        system: symbolic;
+        symbols: "1️⃣" "2️⃣" "3️⃣";
+      }
+      ol {
+        /* not working yet */
+        /* list-style-type: emoji; */
+        list-style: none;
+        counter-reset: li 0;
+      }
+      li {
+        counter-increment: li;
+      }
+      li::before {
+        content: counter(li, emoji) ". ";
+      }
+      a.target-counter::before {
+        content: target-counter(attr(href url), li, emoji);
+      }
+      a.target-text::before {
+        content: target-text(attr(href url), before) target-text(attr(href url));
+      }
+
+      #cjk-earthly-branch li::before {
+        content: counter(li, cjk-earthly-branch) ". ";
+      }
+    </style>
+  </head>
+  <body>
+    <h1>@counter-style rule</h1>
+    <ol>
+      <li id="one">One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <h2>with target-counter()</h2>
+    <p>Expected: <a href="#">1️⃣</a></p>
+    <p>Actual: <a href="#one" class="target-counter"></a></p>
+    <h2>with target-text()</h2>
+    <p>Expected: <a href="#">1️⃣. One</a></p>
+    <p>Actual: <a href="#one" class="target-text"></a></p>
+    <h2>Predefined counter style: cjk-earthly-branch</h2>
+    <ol id="cjk-earthly-branch">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+  </body>
+</html>

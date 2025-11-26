@@ -20,6 +20,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
+import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
 import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
@@ -1947,42 +1948,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   }
 
   private format(num: number, type: string): string {
-    let upper = false; // type == "armenian";
-    // content-counter-10.xht assumes armenian is uppercase, enable if desired
-
-    let lower = false;
-    let r: RegExpMatchArray;
-    if ((r = type.match(/^upper-(.*)/)) != null) {
-      upper = true;
-      type = r[1];
-    } else if ((r = type.match(/^lower-(.*)/)) != null) {
-      lower = true;
-      type = r[1];
-    }
-    let result = "";
-    if (additiveNumbering[type]) {
-      result = additiveFormat(additiveNumbering[type], num);
-    } else if (alphabeticNumbering[type]) {
-      result = alphabeticFormat(alphabeticNumbering[type], num);
-    } else if (fixed[type] != null) {
-      result = fixed[type];
-    } else if (type == "decimal-leading-zero") {
-      result = `${num}`;
-      if (result.length == 1) {
-        result = `0${result}`;
-      }
-    } else if (type == "cjk-ideographic" || type == "trad-chinese-informal") {
-      result = chineseCounter(num, chineseTradInformal);
-    } else {
-      result = `${num}`;
-    }
-    if (upper) {
-      return result.toUpperCase();
-    }
-    if (lower) {
-      return result.toLowerCase();
-    }
-    return result;
+    return this.cascade.counterStyleStore.format(type, num);
   }
 
   visitFuncCounter(values: Css.Val[]): Css.Val {
@@ -2601,380 +2567,6 @@ export function roman(num: number): string {
   return acc;
 }
 
-export const additiveNumbering = {
-  roman: [
-    4999,
-    1000,
-    "M",
-    900,
-    "CM",
-    500,
-    "D",
-    400,
-    "CD",
-    100,
-    "C",
-    90,
-    "XC",
-    50,
-    "L",
-    40,
-    "XL",
-    10,
-    "X",
-    9,
-    "IX",
-    5,
-    "V",
-    4,
-    "IV",
-    1,
-    "I",
-  ],
-  armenian: [
-    9999,
-    9000,
-    "\u0584",
-    8000,
-    "\u0583",
-    7000,
-    "\u0582",
-    6000,
-    "\u0581",
-    5000,
-    "\u0580",
-    4000,
-    "\u057f",
-    3000,
-    "\u057e",
-    2000,
-    "\u057d",
-    1000,
-    "\u057c",
-    900,
-    "\u057b",
-    800,
-    "\u057a",
-    700,
-    "\u0579",
-    600,
-    "\u0578",
-    500,
-    "\u0577",
-    400,
-    "\u0576",
-    300,
-    "\u0575",
-    200,
-    "\u0574",
-    100,
-    "\u0573",
-    90,
-    "\u0572",
-    80,
-    "\u0571",
-    70,
-    "\u0570",
-    60,
-    "\u056f",
-    50,
-    "\u056e",
-    40,
-    "\u056d",
-    30,
-    "\u056c",
-    20,
-    "\u056b",
-    10,
-    "\u056a",
-    9,
-    "\u0569",
-    8,
-    "\u0568",
-    7,
-    "\u0567",
-    6,
-    "\u0566",
-    5,
-    "\u0565",
-    4,
-    "\u0564",
-    3,
-    "\u0563",
-    2,
-    "\u0562",
-    1,
-    "\u0561",
-  ],
-  georgian: [
-    19999,
-    10000,
-    "\u10f5",
-    9000,
-    "\u10f0",
-    8000,
-    "\u10ef",
-    7000,
-    "\u10f4",
-    6000,
-    "\u10ee",
-    5000,
-    "\u10ed",
-    4000,
-    "\u10ec",
-    3000,
-    "\u10eb",
-    2000,
-    "\u10ea",
-    1000,
-    "\u10e9",
-    900,
-    "\u10e8",
-    800,
-    "\u10e7",
-    700,
-    "\u10e6",
-    600,
-    "\u10e5",
-    500,
-    "\u10e4",
-    400,
-    "\u10f3",
-    300,
-    "\u10e2",
-    200,
-    "\u10e1",
-    100,
-    "\u10e0",
-    90,
-    "\u10df",
-    80,
-    "\u10de",
-    70,
-    "\u10dd",
-    60,
-    "\u10f2",
-    50,
-    "\u10dc",
-    40,
-    "\u10db",
-    30,
-    "\u10da",
-    20,
-    "\u10d9",
-    10,
-    "\u10d8",
-    9,
-    "\u10d7",
-    8,
-    "\u10f1",
-    7,
-    "\u10d6",
-    6,
-    "\u10d5",
-    5,
-    "\u10d4",
-    4,
-    "\u10d3",
-    3,
-    "\u10d2",
-    2,
-    "\u10d1",
-    1,
-    "\u10d0",
-  ],
-  hebrew: [
-    999,
-    400,
-    "\u05ea",
-    300,
-    "\u05e9",
-    200,
-    "\u05e8",
-    100,
-    "\u05e7",
-    90,
-    "\u05e6",
-    80,
-    "\u05e4",
-    70,
-    "\u05e2",
-    60,
-    "\u05e1",
-    50,
-    "\u05e0",
-    40,
-    "\u05de",
-    30,
-    "\u05dc",
-    20,
-    "\u05db",
-    19,
-    "\u05d9\u05d8",
-    18,
-    "\u05d9\u05d7",
-    17,
-    "\u05d9\u05d6",
-    16,
-    "\u05d8\u05d6",
-    15,
-    "\u05d8\u05d5",
-    10,
-    "\u05d9",
-    9,
-    "\u05d8",
-    8,
-    "\u05d7",
-    7,
-    "\u05d6",
-    6,
-    "\u05d5",
-    5,
-    "\u05d4",
-    4,
-    "\u05d3",
-    3,
-    "\u05d2",
-    2,
-    "\u05d1",
-    1,
-    "\u05d0",
-  ],
-};
-
-export const alphabeticNumbering = {
-  latin: "a-z",
-  alpha: "a-z",
-  greek: "\u03b1-\u03c1\u03c3-\u03c9",
-  russian: "\u0430-\u0438\u043a-\u0449\u044d-\u044f",
-};
-
-export const fixed = {
-  square: "\u25a0",
-  disc: "\u2022",
-  circle: "\u25e6",
-  none: "",
-};
-
-export function additiveFormat(entries: any[], num: number): string {
-  const max = entries[0] as number;
-  if (num > max || num <= 0 || num != Math.round(num)) {
-    return "";
-  }
-  let result = "";
-  for (let i = 1; i < entries.length; i += 2) {
-    const value = entries[i] as number;
-    let count = Math.floor(num / value);
-    if (count > 20) {
-      return "";
-    }
-    num -= count * value;
-    while (count > 0) {
-      result += entries[i + 1];
-      count--;
-    }
-  }
-  return result;
-}
-
-export function expandAlphabet(str: string): string[] | null {
-  const arr = [];
-  let i = 0;
-  while (i < str.length) {
-    if (str.substr(i + 1, 1) == "-") {
-      const first = str.charCodeAt(i);
-      const last = str.charCodeAt(i + 2);
-      i += 3;
-      for (let k = first; k <= last; k++) {
-        arr.push(String.fromCharCode(k));
-      }
-    } else {
-      arr.push(str.substr(i++, 1));
-    }
-  }
-  return arr;
-}
-
-export function alphabeticFormat(alphabetStr: string, num: number): string {
-  if (num <= 0 || num != Math.round(num)) {
-    return "";
-  }
-  const alphabet = expandAlphabet(alphabetStr);
-  let result = "";
-  do {
-    num--;
-    const digit = num % alphabet.length;
-    result = alphabet[digit] + result;
-    num = (num - digit) / alphabet.length;
-  } while (num > 0);
-  return result;
-}
-
-export type ChineseNumbering = {
-  digits: string;
-  markers: string;
-  negative: string;
-  formal: boolean;
-};
-
-/**
- * From http://www.w3.org/TR/css3-lists/
- */
-export const chineseTradInformal: ChineseNumbering = {
-  formal: false,
-  digits: "\u96f6\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d",
-  markers: "\u5341\u767e\u5343",
-  negative: "\u8ca0",
-};
-
-export function chineseCounter(
-  num: number,
-  numbering: ChineseNumbering,
-): string {
-  if (num > 9999 || num < -9999) {
-    return `${num}`; // TODO: should be cjk-decimal
-  }
-  if (num == 0) {
-    return numbering.digits.charAt(0);
-  }
-  const res = new Base.StringBuffer();
-  if (num < 0) {
-    res.append(numbering.negative);
-    num = -num;
-  }
-  if (num < 10) {
-    res.append(numbering.digits.charAt(num));
-  } else if (!numbering.formal && num <= 19) {
-    res.append(numbering.markers.charAt(0));
-    if (num != 0) {
-      res.append(numbering.digits.charAt(num - 10));
-    }
-  } else {
-    const thousands = Math.floor(num / 1000);
-    if (thousands) {
-      res.append(numbering.digits.charAt(thousands));
-      res.append(numbering.markers.charAt(2));
-    }
-    const hundreds = Math.floor(num / 100) % 10;
-    if (hundreds) {
-      res.append(numbering.digits.charAt(hundreds));
-      res.append(numbering.markers.charAt(1));
-    }
-    const tens = Math.floor(num / 10) % 10;
-    if (tens) {
-      res.append(numbering.digits.charAt(tens));
-      res.append(numbering.markers.charAt(0));
-    }
-    const ones = num % 10;
-    if (ones) {
-      res.append(numbering.digits.charAt(ones));
-    }
-  }
-
-  // res.append("\u3001");
-  return res.toString();
-}
-
 /**
  * Fitting order and specificity in the same number. Order is recorded in the
  * fractional part. Select value so that
@@ -3030,6 +2622,7 @@ export class Cascade {
     counterListener: CounterListener,
     counterResolver: CounterResolver,
     lang,
+    counterStyleStore: CounterStyle.CounterStyleStore,
   ): CascadeInstance {
     return new CascadeInstance(
       this,
@@ -3037,6 +2630,7 @@ export class Cascade {
       counterListener,
       counterResolver,
       lang,
+      counterStyleStore,
     );
   }
 
@@ -3091,6 +2685,7 @@ export class CascadeInstance {
     public readonly counterListener: CounterListener,
     public readonly counterResolver: CounterResolver,
     lang: string,
+    public readonly counterStyleStore: CounterStyle.CounterStyleStore,
   ) {
     this.code = cascade;
     this.quotes = [

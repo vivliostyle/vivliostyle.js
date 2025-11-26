@@ -22,6 +22,7 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
+import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssParser from "./css-parser";
@@ -477,6 +478,7 @@ export class Styler implements AbstractStyler {
     public readonly validatorSet: CssValidator.ValidatorSet,
     public readonly counterListener: CssCascade.CounterListener,
     counterResolver: CssCascade.CounterResolver,
+    counterStyleStore: CounterStyle.CounterStyleStore,
   ) {
     this.root = xmldoc.root;
     this.cascadeHolder = cascade;
@@ -486,6 +488,7 @@ export class Styler implements AbstractStyler {
       counterListener,
       counterResolver,
       xmldoc.lang,
+      counterStyleStore,
     );
     this.offsetMap = new SlipMap();
     const rootOffset = xmldoc.getElementOffset(this.root);
