@@ -669,6 +669,7 @@ export class AdaptiveViewer {
       case PageViewMode.AUTO_SPREAD:
       default:
         return (
+          viewport != null &&
           (viewport.width - this.pref.pageBorder) / viewport.height >=
             (pageSize ? (pageSize.width * 2) / pageSize.height : 1.45) &&
           (!!pageSize || viewport.width > 800)
@@ -880,12 +881,12 @@ export class AdaptiveViewer {
 
   setPageZoom(page: Vtree.Page) {
     const zoom = this.getAdjustedZoomFactor(page.dimensions);
-    this.viewport.zoom(page.dimensions.width, page.dimensions.height, zoom);
+    this.viewport?.zoom(page.dimensions.width, page.dimensions.height, zoom);
   }
 
   setSpreadZoom(spread: Vtree.Spread) {
     const dim = this.getSpreadDimensions(spread);
-    this.viewport.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
+    this.viewport?.zoom(dim.width, dim.height, this.getAdjustedZoomFactor(dim));
   }
 
   /**
