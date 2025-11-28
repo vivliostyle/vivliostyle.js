@@ -2346,6 +2346,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // triggers column rebalancing, making the initially measured `box` unreliable.
     // Temporarily switch column-fill to auto to prevent rebalancing during
     // leader calculation.
+    // Note: findAncestorNonRootMultiColumn is correct here. Root-level multi-column
+    // is handled by Vivliostyle's own column balancing (ColumnBalancer), not the
+    // browser's column-fill: balance, so this issue only affects non-root multi-column.
     const columnContainer = LayoutHelper.findAncestorNonRootMultiColumn(
       container.viewNode,
     ) as HTMLElement | null;
