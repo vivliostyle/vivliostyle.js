@@ -237,6 +237,10 @@ module.exports = [
         file: "leader/long-content-vertical.html",
         title: "leader() with long content (Vertical)",
       },
+      {
+        file: "leader/multi-column-balance.html",
+        title: "leader() in multi-column with column-fill: balance",
+      },
     ],
   },
   {
