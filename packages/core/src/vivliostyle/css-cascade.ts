@@ -27,6 +27,7 @@ import * as CssTokenizer from "./css-tokenizer";
 import * as CssValidator from "./css-validator";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
+import * as LayoutHelper from "./layout-helper";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
@@ -2340,6 +2341,22 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     pseudoElem.style.display = "inline-block";
     pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
 
+    // Workaround for Issue #1598:
+    // In multi-column layout with column-fill: balance, changing leader length
+    // triggers column rebalancing, making the initially measured `box` unreliable.
+    // Temporarily switch column-fill to auto to prevent rebalancing during
+    // leader calculation.
+    // Note: findAncestorNonRootMultiColumn is correct here. Root-level multi-column
+    // is handled by Vivliostyle's own column balancing (ColumnBalancer), not the
+    // browser's column-fill: balance, so this issue only affects non-root multi-column.
+    const columnContainer = LayoutHelper.findAncestorNonRootMultiColumn(
+      container.viewNode,
+    ) as HTMLElement | null;
+    const originalColumnFill = columnContainer?.style.columnFill || null;
+    if (columnContainer) {
+      columnContainer.style.columnFill = "auto";
+    }
+
     const box = column.clientLayout.getElementClientRect(
       container.viewNode as Element,
     );
@@ -2539,6 +2556,15 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
     pseudoElem.style.float = "";
     leaderElem.style.marginInlineStart = `${padding}px`;
+
+    // Restore column-fill
+    if (columnContainer) {
+      if (originalColumnFill) {
+        columnContainer.style.columnFill = originalColumnFill;
+      } else {
+        columnContainer.style.removeProperty("column-fill");
+      }
+    }
   }
 };
 

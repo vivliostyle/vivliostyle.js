@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      Test leader() in multi-column on body with column-fill: balance
+    </title>
+    <style>
+      @page {
+        size: 400px 300px;
+        margin: 20px;
+      }
+      body {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.4;
+        column-count: 2;
+        column-gap: 20px;
+        /* column-fill: balance is the default */
+      }
+      .entry {
+        margin: 0;
+      }
+      .entry::after {
+        content: leader(dotted) attr(data-page);
+      }
+    </style>
+  </head>
+  <body>
+    <p class="entry" data-page="150">Lorem ipsum dolor sit amet consectetur</p>
+    <p class="entry" data-page="96">
+      Sed do eiusmod tempor incididunt ut labore
+    </p>
+    <p class="entry" data-page="170">Ut enim ad minim veniam</p>
+    <p class="entry" data-page="98">
+      Duis aute irure dolor in reprehenderit voluptate
+    </p>
+    <p class="entry" data-page="120">Excepteur sint occaecat cupidatat</p>
+    <p class="entry" data-page="85">Sunt in culpa qui officia deserunt</p>
+    <p class="entry" data-page="200">Mollit anim id est laborum consectetur</p>
+    <p class="entry" data-page="45">Quis nostrud exercitation ullamco</p>
+  </body>
+</html>
