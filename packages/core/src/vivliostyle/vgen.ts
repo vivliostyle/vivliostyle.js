@@ -633,14 +633,17 @@ export class ViewFactory
             prop.value.unit === "lh"
           ) {
             // line-height with lh unit on current element
-            prop1 = new CssCascade.CascadeValue(
-              new Css.Numeric(
-                prop.value.num *
-                  this.getLineHeightUnitSize(name, fontSize, lineHeight),
-                "px",
-              ),
-              prop.priority,
+            const lhUnitSize = this.getLineHeightUnitSize(
+              name,
+              fontSize,
+              lineHeight,
             );
+            if (lhUnitSize != null) {
+              prop1 = new CssCascade.CascadeValue(
+                new Css.Numeric(prop.value.num * lhUnitSize, "px"),
+                prop.priority,
+              );
+            }
           } else if (!Css.isCustomPropName(name)) {
             prop1 = prop.filterValue(inheritanceVisitor);
           }
@@ -2332,27 +2335,54 @@ export class ViewFactory
           this.documentURLTransformer,
         ),
       );
-      if (
-        value instanceof Css.Numeric &&
-        Exprs.needUnitConversion(value.unit)
-      ) {
-        if (value.unit === "lh") {
-          // for browsers not supporting "lh" unit
-          value = new Css.Numeric(
-            value.num *
-              this.getLineHeightUnitSize(propName, fontSize, lineHeight),
-            "px",
+      if (value instanceof Css.Numeric) {
+        if (value.unit === "em") {
+          const emUnitSize = this.getEmUnitSize(propName, fontSize);
+          if (emUnitSize != null) {
+            value = new Css.Numeric(value.num * emUnitSize, "px");
+          }
+        } else if (value.unit === "lh") {
+          const lhUnitSize = this.getLineHeightUnitSize(
+            propName,
+            fontSize,
+            lineHeight,
           );
-        } else {
+          if (lhUnitSize != null) {
+            value = new Css.Numeric(value.num * lhUnitSize, "px");
+          }
+        } else if (Exprs.needUnitConversion(value.unit)) {
           // font-size for the root element is already converted to px
           value = Css.convertNumericToPx(value, this.context);
         }
       }
 
-      if (propName === "font-size") {
-        fontSize = value;
-      } else if (propName === "line-height") {
-        lineHeight = value;
+      if (propName === "font-size" || propName === "line-height") {
+        if (propName === "font-size") {
+          fontSize = value;
+        } else {
+          lineHeight = value;
+        }
+
+        // Adjust font-size and line-height to prevent rounding issues
+        // when calculating the size of text and line boxes. (Issue #1590)
+        //
+        // Chromium and Firefox round to the nearest multiple of LayoutUnit
+        // (the smallest unit of length in the browser) when positioning boxes,
+        // which may cause the box size to be slightly larger than specified,
+        // resulting in text not fitting in the specified number of characters/lines.
+        // To prevent this, we adjust the font size and line height to be
+        // 1 LayoutUnit less.
+        if (
+          this.viewport.layoutUnitAdj &&
+          value instanceof Css.Numeric &&
+          value.unit !== "%" &&
+          value.unit !== "em" &&
+          value.unit !== "lh"
+        ) {
+          value = new Css.AnyToken(
+            `calc(${value.toString()} - var(--viv-layoutUnitAdj))`,
+          );
+        }
       }
 
       if (
@@ -2384,17 +2414,36 @@ export class ViewFactory
   }
 
   /**
+   * Parse a CSS value with "px" unit plus layoutUnitAdj.
+   * This is to get accurate font-size and line-height values from computed style
+   * that have been set with minus layoutUnitAdj.
+   * @param val CSS value string
+   * @returns parsed and adjusted value in px, or null if cannot parse as "px" unit, e.g. "normal"
+   */
+  private parsePlusLayoutUnitAdj(val: string): number | null {
+    if (val.endsWith("px")) {
+      const parsedVal = parseFloat(val);
+      if (!isNaN(parsedVal)) {
+        return (
+          Math.round(
+            (parsedVal + this.viewport.layoutUnitAdj) *
+              this.viewport.layoutUnitPerPixel,
+          ) / this.viewport.layoutUnitPerPixel
+        );
+      }
+    }
+    return null;
+  }
+
+  /**
    * Get "lh" unit size in px
+   * @return line-height in px, or null if cannot be determined
    */
   private getLineHeightUnitSize(
     propName: string,
     fontSize: Css.Val,
     lineHeight: Css.Val,
-  ): number {
-    // Note: "lh" unit is inaccurate for line-height:normal, not using font metrics.
-    const defaultLineHeightNum =
-      Exprs.defaultUnitSizes["lh"] / Exprs.defaultUnitSizes["em"];
-
+  ): number | null {
     const parentStyle =
       this.nodeContext.parent?.viewNode?.nodeType === 1
         ? this.viewport.window.getComputedStyle(
@@ -2402,20 +2451,17 @@ export class ViewFactory
           )
         : null;
 
-    const parentFontSize = parentStyle
-      ? parseFloat(parentStyle.fontSize)
-      : this.context.fontSize();
-
     const parentLineHeight = parentStyle
-      ? parentStyle.lineHeight === "normal"
-        ? parentFontSize * defaultLineHeightNum
-        : parseFloat(parentStyle.lineHeight)
+      ? this.parsePlusLayoutUnitAdj(parentStyle.lineHeight)
       : this.context.rootLineHeight;
 
     if (propName === "line-height" || propName === "font-size") {
+      // For line-height property or for font-size property, return parent line-height.
+      // Note: parentLineHeight may be null (cannot determine).
       return parentLineHeight;
     }
 
+    // Font-size relative line-height value
     let lineHeightNum: number | null = null;
 
     if (lineHeight) {
@@ -2424,50 +2470,105 @@ export class ViewFactory
         (lineHeight instanceof Css.Numeric &&
           (lineHeight.unit === "em" || lineHeight.unit === "%"))
       ) {
+        // The line-height is relative to the font-size
         lineHeightNum =
           lineHeight instanceof Css.Numeric && lineHeight.unit === "%"
             ? lineHeight.num / 100
             : lineHeight.num;
-      } else if (lineHeight instanceof Css.Numeric) {
-        return (
-          lineHeight.num * this.context.queryUnitSize(lineHeight.unit, false)
-        );
+      } else {
+        if (lineHeight instanceof Css.Numeric && lineHeight.unit !== "lh") {
+          const unitSize = this.context.queryUnitSize(lineHeight.unit, false);
+          if (unitSize != null) {
+            // Return line-height in px
+            return lineHeight.num * unitSize;
+          }
+        }
+        return null; // cannot determine
       }
-    } else {
+    }
+
+    if (lineHeightNum == null) {
+      // Try to get font-size relative line-height value from ancestor elements
       for (
         let viewNode = this.nodeContext.parent?.viewNode;
-        ;
+        viewNode && viewNode.nodeType === 1;
         viewNode = viewNode.parentNode
       ) {
-        if (!viewNode || viewNode.nodeType !== 1) {
-          lineHeightNum = defaultLineHeightNum;
-          break;
-        }
         const ancestorLH = (viewNode as HTMLElement)?.style?.lineHeight;
         if (ancestorLH) {
+          // Found line-height style in ancestor
           if (/^[0-9.]+$/.test(ancestorLH)) {
+            // If it's a number without unit, it's relative to font-size
             lineHeightNum = parseFloat(ancestorLH);
-          }
-          if (ancestorLH === "normal") {
-            lineHeightNum = defaultLineHeightNum;
           }
           break;
         }
       }
     }
 
-    if (lineHeightNum !== null) {
+    if (lineHeightNum != null) {
+      // The line-height is relative to the font-size
+      if (fontSize && !(fontSize instanceof Css.Numeric)) {
+        return null; // cannot determine
+      }
+      const parentFontSize = parentStyle
+        ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize)
+        : this.context.rootFontSize;
       if (fontSize instanceof Css.Numeric) {
-        return (
-          lineHeightNum *
-          CssCascade.convertFontSizeToPx(fontSize, parentFontSize, this.context)
-            .num
-        );
+        const fontSizePx = CssCascade.convertFontSizeToPx(
+          fontSize,
+          parentFontSize,
+          this.context,
+        ).num;
+        // parentFontSize may be null and the fontSizePx may be NaN
+        if (typeof fontSizePx !== "number" || isNaN(fontSizePx)) {
+          return null; // cannot determine
+        }
+        return lineHeightNum * fontSizePx;
       } else {
+        if (parentFontSize == null) {
+          return null;
+        }
         return lineHeightNum * parentFontSize;
       }
     }
+    // parentLineHeight may be null (cannot determine)
     return parentLineHeight;
+  }
+
+  /**
+   * Get "em" unit size in px
+   * @return font-size in px, or null if cannot be determined
+   */
+  private getEmUnitSize(propName: string, fontSize: Css.Val): number | null {
+    const parentStyle =
+      this.nodeContext.parent?.viewNode?.nodeType === 1
+        ? this.viewport.window.getComputedStyle(
+            this.nodeContext.parent.viewNode as Element,
+          )
+        : null;
+
+    const parentFontSize = parentStyle
+      ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize)
+      : this.context.rootFontSize;
+
+    if (propName === "font-size" || fontSize == null) {
+      // For font-size property or when font-size is not specified, return parent font-size.
+      // Note: parentFontSize may be null (cannot determine).
+      return parentFontSize;
+    }
+    if (fontSize instanceof Css.Numeric) {
+      // When font-size is specified, convert it to px
+      const fontSizePx = CssCascade.convertFontSizeToPx(
+        fontSize,
+        parentFontSize,
+        this.context,
+      ).num;
+      if (typeof fontSizePx === "number" && !isNaN(fontSizePx)) {
+        return fontSizePx;
+      }
+    }
+    return null; // cannot determine
   }
 
   /** @override */
@@ -2926,11 +3027,13 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: Element;
   window: Window;
   scaleRatio: number;
+  layoutUnitPerPixel: number;
 
   constructor(viewport: Viewport) {
     this.layoutBox = viewport.layoutBox;
     this.window = viewport.window;
     this.scaleRatio = viewport.scaleRatio;
+    this.layoutUnitPerPixel = viewport.layoutUnitPerPixel;
   }
 
   private subtractOffsets(
@@ -2988,8 +3091,9 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
    * @override
    */
   adjustLengthValue(value: number): number {
-    const precision = 64 * (this.scaleRatio || 1);
-    return Math.floor(value * precision) / precision;
+    return this.layoutUnitPerPixel
+      ? Math.floor(value * this.layoutUnitPerPixel) / this.layoutUnitPerPixel
+      : value;
   }
 }
 
@@ -3002,6 +3106,8 @@ export class Viewport {
   width: number;
   height: number;
   scaleRatio: number = 1;
+  layoutUnitPerPixel: number;
+  layoutUnitAdj: number = 0;
 
   constructor(
     public readonly window: Window,
@@ -3049,6 +3155,35 @@ export class Viewport {
       );
 
       this.scaleRatio = pixelRatio / window.devicePixelRatio;
+    }
+
+    // Determine layout unit per CSS pixel and adjustment value needed for
+    // accurate layout of text and line boxes to avoid rounding issues
+    // based on browser type. (Issue #1590)
+    switch (Base.browserType) {
+      case "chromium":
+        this.layoutUnitPerPixel =
+          64 * (this.pixelRatio || window.devicePixelRatio);
+        this.layoutUnitAdj = 1 / this.layoutUnitPerPixel;
+        break;
+      case "firefox":
+        this.layoutUnitPerPixel = 60;
+        this.layoutUnitAdj = 1 / this.layoutUnitPerPixel;
+        break;
+      case "webkit":
+      default:
+        // WebKit uses 1/64 px layout unit, but it seems to floor
+        // the position values instead of rounding them,
+        // so text overflow does not occur without adjustment.
+        this.layoutUnitPerPixel = 64;
+        this.layoutUnitAdj = 0;
+    }
+    if (this.layoutUnitAdj) {
+      Base.setCSSProperty(
+        this.root,
+        "--viv-layoutUnitAdj",
+        `${this.layoutUnitAdj}px`,
+      );
     }
 
     let layoutBox = outerZoomBox.nextElementSibling as HTMLElement;

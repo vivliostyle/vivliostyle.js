@@ -22,6 +22,18 @@ import * as Logging from "./logging";
 import * as Asserts from "./asserts";
 
 /**
+ * Browser type detection
+ */
+export const browserType: "chromium" | "firefox" | "webkit" | "unknown" =
+  navigator.userAgent.includes("Chrome")
+    ? "chromium"
+    : navigator.userAgent.includes("Firefox")
+      ? "firefox"
+      : navigator.userAgent.includes("AppleWebKit")
+        ? "webkit"
+        : "unknown";
+
+/**
  * RegExp pattern for ::first-letter pseudo element:
  * https://drafts.csswg.org/css-pseudo-4/#first-letter-pseudo
  */
