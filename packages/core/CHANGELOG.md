@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.36.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.2...v2.36.3) (2025-12-01)
+
+### Bug Fixes
+
+- Adjust font-size and line-height to prevent text overflow due to sub-pixel rounding errors ([93b5fbe](https://github.com/vivliostyle/vivliostyle.js/commit/93b5fbef88e8916e7f0208ed49663080f34a2209)), closes [#1590](https://github.com/vivliostyle/vivliostyle.js/issues/1590)
+- Disable column-fill balance during leader calculation ([#1598](https://github.com/vivliostyle/vivliostyle.js/issues/1598)) ([9fd9883](https://github.com/vivliostyle/vivliostyle.js/commit/9fd988375df8c13070288c5846ac5d5fe89d103e))
+- Images with loading="lazy" attribute cause Vivliostyle.js to freeze ([fd15212](https://github.com/vivliostyle/vivliostyle.js/commit/fd152125a802c878ab15105f2069309b50d63c1c)), closes [#1589](https://github.com/vivliostyle/vivliostyle.js/issues/1589)
+- ToC menu may not work ([fbec5d0](https://github.com/vivliostyle/vivliostyle.js/commit/fbec5d0c9b36fe3aaf0fd58b6d5abe54115935a7)), closes [#1591](https://github.com/vivliostyle/vivliostyle.js/issues/1591)
+- workaround for Safari/WebKit(< 26.2) bug on column-count:1 ([3dc323f](https://github.com/vivliostyle/vivliostyle.js/commit/3dc323f39ff0d86dda28ca12014417a2f6191968))
+
 ## [2.36.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.1...v2.36.2) (2025-11-19)
 
 ### Bug Fixes
