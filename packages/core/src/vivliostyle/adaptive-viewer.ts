@@ -196,7 +196,7 @@ export class AdaptiveViewer {
     // Pixel ratio emulation on PDF output (PR #1079) does not work with
     // non-Chromium browsers.
     this.pixelRatioLimit =
-      /Chrome/.test(navigator.userAgent) &&
+      Base.browserType === "chromium" &&
       // Check non-legacy CSS zoom support (Chromium>=128)
       "currentCSSZoom" in Element.prototype
         ? 16 // max pixelRatio value on Chromium browsers
