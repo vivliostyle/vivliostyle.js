@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.36.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.3...v2.36.4) (2025-12-02)
+
+### Bug Fixes
+
+- Footnotes caused "TypeError: Cannot read properties of null" (Regression in v2.36.3) ([7d02415](https://github.com/vivliostyle/vivliostyle.js/commit/7d024157c6295d3fbaf69a856cfb7d8dc02c487f))
+
 ## [2.36.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.2...v2.36.3) (2025-12-01)
 
 ### Bug Fixes
