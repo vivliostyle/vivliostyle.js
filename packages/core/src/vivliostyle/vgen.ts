@@ -2445,7 +2445,7 @@ export class ViewFactory
     lineHeight: Css.Val,
   ): number | null {
     const parentStyle =
-      this.nodeContext.parent?.viewNode?.nodeType === 1
+      this.nodeContext?.parent?.viewNode?.nodeType === 1
         ? this.viewport.window.getComputedStyle(
             this.nodeContext.parent.viewNode as Element,
           )
@@ -2490,7 +2490,7 @@ export class ViewFactory
     if (lineHeightNum == null) {
       // Try to get font-size relative line-height value from ancestor elements
       for (
-        let viewNode = this.nodeContext.parent?.viewNode;
+        let viewNode = this.nodeContext?.parent?.viewNode;
         viewNode && viewNode.nodeType === 1;
         viewNode = viewNode.parentNode
       ) {
@@ -2542,7 +2542,7 @@ export class ViewFactory
    */
   private getEmUnitSize(propName: string, fontSize: Css.Val): number | null {
     const parentStyle =
-      this.nodeContext.parent?.viewNode?.nodeType === 1
+      this.nodeContext?.parent?.viewNode?.nodeType === 1
         ? this.viewport.window.getComputedStyle(
             this.nodeContext.parent.viewNode as Element,
           )
