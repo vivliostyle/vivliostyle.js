@@ -907,7 +907,8 @@ abstract class CounterStyle {
   #format(value: number, visited: Set<CounterStyle>): string {
     // Detect fallback loop
     if (visited.has(this)) {
-      return getDecimal(this._store).#format(value, visited);
+      // Clear the visited set when falling back to decimal to avoid infinite recursion
+      return getDecimal(this._store).#format(value, new Set());
     }
     visited.add(this);
 
