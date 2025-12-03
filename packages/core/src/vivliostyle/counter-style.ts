@@ -1303,158 +1303,8 @@ class Extends extends CounterStyle {
   }
 }
 
-/**
- * @see https://drafts.csswg.org/css-counter-styles-3/#limited-chinese
- */
-class ChineseLonghand extends CounterStyle {
-  static readonly #DESCRIPTORS = {
-    "simp-chinese-informal": {
-      chars: {
-        digits: [
-          "\u96F6",
-          "\u4E00",
-          "\u4E8C",
-          "\u4E09",
-          "\u56DB",
-          "\u4E94",
-          "\u516D",
-          "\u4E03",
-          "\u516B",
-          "\u4E5D",
-        ],
-        markers: ["", "\u5341", "\u767E", "\u5343"],
-        informal: true,
-      },
-      descriptors: {
-        suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-        fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-        range: new CssCascade.CascadeValue(
-          new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-          0,
-        ),
-        negative: new CssCascade.CascadeValue(new Css.Str("\u8D1F"), 0),
-      },
-    },
-    "simp-chinese-formal": {
-      chars: {
-        digits: [
-          "\u96F6",
-          "\u58F9",
-          "\u8D30",
-          "\u53C1",
-          "\u8086",
-          "\u4F0D",
-          "\u9646",
-          "\u67D2",
-          "\u634C",
-          "\u7396",
-        ],
-        markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
-        informal: false,
-      },
-      descriptors: {
-        suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-        fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-        range: new CssCascade.CascadeValue(
-          new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-          0,
-        ),
-        negative: new CssCascade.CascadeValue(new Css.Str("\u8D1F"), 0),
-      },
-    },
-    "trad-chinese-informal": {
-      chars: {
-        digits: [
-          "\u96F6",
-          "\u4E00",
-          "\u4E8C",
-          "\u4E09",
-          "\u56DB",
-          "\u4E94",
-          "\u516D",
-          "\u4E03",
-          "\u516B",
-          "\u4E5D",
-        ],
-        markers: ["", "\u5341", "\u767E", "\u5343"],
-        informal: true,
-      },
-      descriptors: {
-        suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-        fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-        range: new CssCascade.CascadeValue(
-          new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-          0,
-        ),
-        negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
-      },
-    },
-    "trad-chinese-formal": {
-      chars: {
-        digits: [
-          "\u96F6",
-          "\u58F9",
-          "\u8CB3",
-          "\u53C3",
-          "\u8086",
-          "\u4F0D",
-          "\u9678",
-          "\u67D2",
-          "\u634C",
-          "\u7396",
-        ],
-        markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
-        informal: false,
-      },
-      descriptors: {
-        suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-        fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-        range: new CssCascade.CascadeValue(
-          new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-          0,
-        ),
-        negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
-      },
-    },
-    // > This counter style is identical to trad-chinese-informal. (It exists for legacy reasons.)
-    "cjk-ideographic": {
-      chars: {
-        digits: [
-          "\u96F6",
-          "\u4E00",
-          "\u4E8C",
-          "\u4E09",
-          "\u56DB",
-          "\u4E94",
-          "\u516D",
-          "\u4E03",
-          "\u516B",
-          "\u4E5D",
-        ],
-        markers: ["", "\u5341", "\u767E", "\u5343"],
-        informal: true,
-      },
-      descriptors: {
-        suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-        fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-        range: new CssCascade.CascadeValue(
-          new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-          0,
-        ),
-        negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
-      },
-    },
-  } as const;
-  // @ts-expect-error Object.keys
-  static readonly NAMES: ReadonlySet<
-    | "simp-chinese-informal"
-    | "simp-chinese-formal"
-    | "trad-chinese-informal"
-    | "trad-chinese-formal"
-    | "cjk-ideographic"
-  > = new Set(Object.keys(ChineseLonghand.#DESCRIPTORS));
-
-  #chars: Readonly<{
+type ChineseLonghandSetting = Readonly<{
+  chars: Readonly<{
     digits: readonly [
       string,
       string,
@@ -1470,14 +1320,152 @@ class ChineseLonghand extends CounterStyle {
     markers: readonly [string, string, string, string];
     informal: boolean;
   }>;
+  descriptors: CssCascade.ElementStyle;
+}>;
+
+const chineseLonghandNameList = [
+  "simp-chinese-informal",
+  "simp-chinese-formal",
+  "trad-chinese-informal",
+  "trad-chinese-formal",
+  "cjk-ideographic",
+] as const;
+
+/**
+ * @see https://drafts.csswg.org/css-counter-styles-3/#limited-chinese
+ */
+class ChineseLonghand extends CounterStyle {
+  static readonly #SIMP_CHINESE_INFORMAL: ChineseLonghandSetting = {
+    chars: {
+      digits: [
+        "\u96F6",
+        "\u4E00",
+        "\u4E8C",
+        "\u4E09",
+        "\u56DB",
+        "\u4E94",
+        "\u516D",
+        "\u4E03",
+        "\u516B",
+        "\u4E5D",
+      ],
+      markers: ["", "\u5341", "\u767E", "\u5343"],
+      informal: true,
+    },
+    descriptors: {
+      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
+      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
+      range: new CssCascade.CascadeValue(
+        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
+        0,
+      ),
+      negative: new CssCascade.CascadeValue(new Css.Str("\u8D1F"), 0),
+    },
+  };
+  static readonly #SIMP_CHINESE_FORMAL: ChineseLonghandSetting = {
+    chars: {
+      digits: [
+        "\u96F6",
+        "\u58F9",
+        "\u8D30",
+        "\u53C1",
+        "\u8086",
+        "\u4F0D",
+        "\u9646",
+        "\u67D2",
+        "\u634C",
+        "\u7396",
+      ],
+      markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
+      informal: false,
+    },
+    descriptors: {
+      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
+      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
+      range: new CssCascade.CascadeValue(
+        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
+        0,
+      ),
+      negative: new CssCascade.CascadeValue(new Css.Str("\u8D1F"), 0),
+    },
+  };
+  static readonly #TRAD_CHINESE_INFORMAL: ChineseLonghandSetting = {
+    chars: {
+      digits: [
+        "\u96F6",
+        "\u4E00",
+        "\u4E8C",
+        "\u4E09",
+        "\u56DB",
+        "\u4E94",
+        "\u516D",
+        "\u4E03",
+        "\u516B",
+        "\u4E5D",
+      ],
+      markers: ["", "\u5341", "\u767E", "\u5343"],
+      informal: true,
+    },
+    descriptors: {
+      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
+      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
+      range: new CssCascade.CascadeValue(
+        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
+        0,
+      ),
+      negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
+    },
+  };
+  static readonly #TRAD_CHINESE_FORMAL: ChineseLonghandSetting = {
+    chars: {
+      digits: [
+        "\u96F6",
+        "\u58F9",
+        "\u8CB3",
+        "\u53C3",
+        "\u8086",
+        "\u4F0D",
+        "\u9678",
+        "\u67D2",
+        "\u634C",
+        "\u7396",
+      ],
+      markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
+      informal: false,
+    },
+    descriptors: {
+      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
+      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
+      range: new CssCascade.CascadeValue(
+        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
+        0,
+      ),
+      negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
+    },
+  };
+  static readonly NAMES: ReadonlySet<(typeof chineseLonghandNameList)[number]> =
+    new Set(chineseLonghandNameList);
+  static readonly #SETTINGS: ReadonlyMap<
+    SetElement<typeof ChineseLonghand.NAMES>,
+    ChineseLonghandSetting
+  > = new Map([
+    ["simp-chinese-informal", ChineseLonghand.#SIMP_CHINESE_INFORMAL],
+    ["simp-chinese-formal", ChineseLonghand.#SIMP_CHINESE_FORMAL],
+    ["trad-chinese-informal", ChineseLonghand.#TRAD_CHINESE_INFORMAL],
+    ["trad-chinese-formal", ChineseLonghand.#TRAD_CHINESE_FORMAL],
+    // > This counter style is identical to trad-chinese-informal. (It exists for legacy reasons.)
+    ["cjk-ideographic", ChineseLonghand.#TRAD_CHINESE_INFORMAL],
+  ]);
+
+  #chars: ChineseLonghandSetting["chars"];
 
   constructor(
     store: CounterStyleStoreMap,
     name: SetElement<typeof ChineseLonghand.NAMES>,
   ) {
-    const resolved = ChineseLonghand.#DESCRIPTORS[name]!;
-    super(store, resolved.descriptors);
-    this.#chars = resolved.chars;
+    const { chars, descriptors } = ChineseLonghand.#SETTINGS.get(name)!;
+    super(store, descriptors);
+    this.#chars = chars;
   }
 
   protected override _getAutoRange(): Range {
