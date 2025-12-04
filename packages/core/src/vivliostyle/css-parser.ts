@@ -123,6 +123,8 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
 
   startFontFaceRule(): void {}
 
+  startCounterStyleRule(name: string): void {}
+
   startFootnoteRule(pseudoelem: string | null): void {}
 
   startViewportRule(): void {}
@@ -321,6 +323,10 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.startFontFaceRule();
   }
 
+  override startCounterStyleRule(name: string): void {
+    this.slave.startCounterStyleRule(name);
+  }
+
   override startFootnoteRule(pseudoelem: string | null): void {
     this.slave.startFootnoteRule(pseudoelem);
   }
@@ -465,6 +471,10 @@ export class SlaveParserHandler extends SkippingParserHandler {
 
   override startFontFaceRule(): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_FONT_FACE");
+  }
+
+  override startCounterStyleRule(name: string): void {
+    this.reportAndSkip("E_CSS_UNEXPECTED_COUNTER_STYLE");
   }
 
   override startFootnoteRule(pseudoelem: string | null): void {
@@ -1372,6 +1382,7 @@ export class Parser {
     switch (this.ruleStack[this.ruleStack.length - 1]) {
       case "[selector]":
       case "font-face":
+      case "counter-style":
       case "-epubx-flow":
       case "-epubx-viewport":
       case "-epubx-define":
@@ -2443,6 +2454,21 @@ export class Parser {
                 tokenizer.nthToken(2).type == TokenType.O_BRC
               ) {
                 handler.startFlowRule(tokenizer.nthToken(1).text);
+                tokenizer.consume();
+                tokenizer.consume();
+                tokenizer.consume();
+                this.ruleStack.push(text);
+                handler.startRuleBody();
+                this.inStyleDeclaration = true;
+                continue;
+              }
+              break;
+            case "counter-style":
+              if (
+                tokenizer.nthToken(1).type == TokenType.IDENT &&
+                tokenizer.nthToken(2).type == TokenType.O_BRC
+              ) {
+                handler.startCounterStyleRule(tokenizer.nthToken(1).text);
                 tokenizer.consume();
                 tokenizer.consume();
                 tokenizer.consume();

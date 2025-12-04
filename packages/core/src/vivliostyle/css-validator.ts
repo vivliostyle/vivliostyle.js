@@ -19,6 +19,7 @@
  * @fileoverview CssValidator - Parse validation rules (validation.txt), validate
  * properties and shorthands.
  */
+import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
 import * as CssTokenizer from "./css-tokenizer";
 import * as Base from "./base";
@@ -2076,15 +2077,24 @@ export class ValidatorSet {
     important: boolean,
     receiver: PropertyReceiver,
   ): void {
+    const ruleType = (receiver as PropertyReceiver & { ruleType?: string })
+      .ruleType;
     if (
       Css.isCustomPropName(name) ||
       // Check if it is a `@font-face` descriptor (Issue #1307)
-      (receiver as PropertyReceiver & { ruleType?: string }).ruleType ===
-        "font-face" ||
+      ruleType === "font-face" ||
       // Check if the property value containing `var(…)`
       containsVar(value)
     ) {
       receiver.simpleProperty(name, value, important);
+      return;
+    }
+    if (ruleType === "counter-style") {
+      if (CounterStyle.validateDescriptorValue(name, value)) {
+        receiver.simpleProperty(name, value, important);
+      } else {
+        receiver.invalidPropertyValue(name, value);
+      }
       return;
     }
     let prefix = "";

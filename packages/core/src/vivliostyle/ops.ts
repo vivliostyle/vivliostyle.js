@@ -27,6 +27,7 @@ import * as Break from "./break";
 import * as Columns from "./columns";
 import * as Constants from "./constants";
 import * as Counters from "./counters";
+import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssParser from "./css-parser";
@@ -53,7 +54,12 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
 import { Layout as LayoutType } from "./types";
-import { UserAgentBaseCss, UserAgentPageCss, UserAgentTocCss } from "./assets";
+import {
+  UserAgentBaseCss,
+  UserAgentCounterStylesCss,
+  UserAgentPageCss,
+  UserAgentTocCss,
+} from "./assets";
 
 export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> =
   new TaskUtil.Fetcher(() => {
@@ -90,6 +96,28 @@ export type FontFace = {
   condition: Exprs.Val;
 };
 
+class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
+  constructor(
+    scope: Exprs.LexicalScope,
+    owner: CssParser.DispatchParserHandler,
+    elementStyle: CssCascade.ElementStyle,
+    validatorSet: CssValidator.ValidatorSet,
+    private readonly counterStyleName: string,
+    private readonly counterStyles: CounterStyle.CounterStyleStore,
+  ) {
+    super(scope, owner, null, elementStyle, validatorSet, "counter-style");
+  }
+
+  override endRule(): void {
+    super.endRule();
+    if (!this.counterStyles.define(this.counterStyleName, this.elementStyle)) {
+      Logging.logger.warn(
+        `E_CSS_COUNTER_STYLE_INVALID: @counter-style ${this.counterStyleName}`,
+      );
+    }
+  }
+}
+
 export class Style {
   fontDeobfuscator:
     | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
@@ -107,6 +135,7 @@ export class Style {
     public readonly flowProps: { [key: string]: CssCascade.ElementStyle },
     public readonly viewportProps: CssCascade.ElementStyle[],
     public readonly pageProps: { [key: string]: CssCascade.ElementStyle },
+    public readonly counterStyleStore: CounterStyle.CounterStyleStore,
   ) {
     this.fontDeobfuscator = store.fontDeobfuscator;
     this.validatorSet = store.validatorSet;
@@ -292,6 +321,7 @@ export class StyleInstance
       this.style.validatorSet,
       counterListener,
       counterResolver,
+      this.style.counterStyleStore,
     );
     counterResolver.setStyler(this.styler);
     this.styler.resetFlowChunkStream(this);
@@ -319,6 +349,7 @@ export class StyleInstance
       counterListener,
       counterResolver,
       this.lang,
+      this.style.counterStyleStore,
     );
 
     // Named page type at first page
@@ -431,6 +462,7 @@ export class StyleInstance
         style.validatorSet,
         counterListener,
         counterResolver,
+        style.counterStyleStore,
       );
       this.stylerMap[xmldoc.url] = styler;
     }
@@ -2063,6 +2095,19 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
+  override startCounterStyleRule(name: string): void {
+    this.masterHandler.pushHandler(
+      new CounterStyleParserHandler(
+        this.scope,
+        this.owner,
+        {} as CssCascade.ElementStyle,
+        this.masterHandler.validatorSet,
+        name,
+        this.masterHandler.counterStyles,
+      ),
+    );
+  }
+
   override startFlowRule(flowName: string): void {
     let style = this.masterHandler.flowProps[flowName];
     if (!style) {
@@ -2158,6 +2203,7 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
   cascadeParserHandler: BaseParserHandler;
   regionCount: number = 0;
   fontFaces = [] as FontFace[];
+  counterStyles = new CounterStyle.CounterStyleStore();
   footnoteProps = {} as CssCascade.ElementStyle;
   flowProps = {} as { [key: string]: CssCascade.ElementStyle };
   viewportProps = [] as CssCascade.ElementStyle[];
@@ -2330,6 +2376,16 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           classes: null,
           media: null,
         });
+        sources.push({
+          url: Base.resolveURL(
+            "user-agent-counter-styles.css",
+            Base.resourceBaseURL,
+          ),
+          text: UserAgentCounterStylesCss,
+          flavor: CssParser.StylesheetFlavor.USER_AGENT,
+          classes: null,
+          media: null,
+        });
         if (isTocBox) {
           sources.push({
             url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
@@ -2453,6 +2509,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   sph.flowProps,
                   sph.viewportProps,
                   sph.pageProps,
+                  sph.counterStyles,
                 );
                 this.styleByKey[key] = style;
                 delete this.styleFetcherByKey[key];
