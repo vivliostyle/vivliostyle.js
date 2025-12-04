@@ -1778,40 +1778,4 @@ export const UserAgentCounterStylesCss =
 @counter-style upper-russian {
   system: alphabetic;
   symbols: А Б В Г Д Е Ж З И К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Э Ю Я;
-}` +
-  // Legacy compatibility aliases
-  // These names were supported in older versions but are not standard CSS.
-  `
-@counter-style roman {
-  system: extends lower-roman;
-}
-@counter-style latin {
-  system: extends lower-latin;
-}
-@counter-style alpha {
-  system: extends lower-alpha;
-}
-@counter-style greek {
-  system: extends lower-greek;
-}
-@counter-style upper-greek {
-  system: alphabetic;
-  symbols: Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω;
-}
-@counter-style russian {
-  system: extends lower-russian;
-}
-@counter-style upper-hebrew {
-  system: extends hebrew;
-}
-@counter-style lower-hebrew {
-  system: extends hebrew;
-}
-@counter-style upper-georgian {
-  system: additive;
-  range: 1 19999;
-  additive-symbols: 10000 Ჵ, 9000 Ჰ, 8000 Ჯ, 7000 Ჴ, 6000 Ხ, 5000 Ჭ, 4000 Წ, 3000 Ძ, 2000 Ც, 1000 Ჩ, 900 Შ, 800 Ყ, 700 Ღ, 600 Ქ, 500 Ფ, 400 Ჳ, 300 Ტ, 200 Ს, 100 Რ, 90 Ჟ, 80 Პ, 70 Ო, 60 Ჲ, 50 Ნ, 40 Მ, 30 Ლ, 20 Კ, 10 Ი, 9 Თ, 8 Ჱ, 7 Ზ, 6 Ვ, 5 Ე, 4 Დ, 3 Გ, 2 Ბ, 1 Ა;
-}
-@counter-style lower-georgian {
-  system: extends georgian;
 }`;
