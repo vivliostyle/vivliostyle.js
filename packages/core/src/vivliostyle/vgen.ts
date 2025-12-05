@@ -2667,9 +2667,12 @@ export class ViewFactory
       // text-spacing support (Issue #868)
       TextPolyfill.processGeneratedContent(
         target as HTMLElement,
-        computedStyle["text-autospace"],
-        computedStyle["text-spacing-trim"],
-        computedStyle["hanging-punctuation"],
+        computedStyle["text-autospace"] ??
+          nodeContext.inheritedProps["text-autospace"],
+        computedStyle["text-spacing-trim"] ??
+          nodeContext.inheritedProps["text-spacing-trim"],
+        computedStyle["hanging-punctuation"] ??
+          nodeContext.inheritedProps["hanging-punctuation"],
         nodeContext.lang,
         nodeContext.vertical,
       );
