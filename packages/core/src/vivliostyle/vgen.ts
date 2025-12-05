@@ -40,6 +40,7 @@ import * as RepetitiveElement from "./repetitive-element";
 import * as Scripts from "./scripts";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
+import * as TextPolyfill from "./text-polyfill";
 import * as Urls from "./urls";
 import * as Vtree from "./vtree";
 import * as Layout from "./layout";
@@ -2662,6 +2663,15 @@ export class ViewFactory
           content,
           this.exprContentListener,
         ),
+      );
+      // text-spacing support (Issue #868)
+      TextPolyfill.processGeneratedContent(
+        target as HTMLElement,
+        computedStyle["text-autospace"],
+        computedStyle["text-spacing-trim"],
+        computedStyle["hanging-punctuation"],
+        nodeContext.lang,
+        nodeContext.vertical,
       );
       delete computedStyle["content"];
     }
