@@ -343,9 +343,9 @@ class TextSpacingPolyfill {
 
   processGeneratedContent(
     element: HTMLElement,
-    autospaceVal: PropertyValue,
-    spacingTrimVal: PropertyValue,
-    hangingPunctuationVal: PropertyValue,
+    autospaceVal: Css.Val,
+    spacingTrimVal: Css.Val,
+    hangingPunctuationVal: Css.Val,
     lang: string,
     vertical: boolean,
   ): void {
@@ -1147,9 +1147,9 @@ export function preprocessForTextSpacing(element: Element): void {
 
 export function processGeneratedContent(
   element: HTMLElement,
-  textAutospace: PropertyValue,
-  textSpacingTrim: PropertyValue,
-  hangingPunctuation: PropertyValue,
+  textAutospace: Css.Val,
+  textSpacingTrim: Css.Val,
+  hangingPunctuation: Css.Val,
   lang: string,
   vertical: boolean,
 ): void {

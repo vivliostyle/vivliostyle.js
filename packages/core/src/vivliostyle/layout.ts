@@ -1654,7 +1654,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const parent = nodeContext.viewNode.parentNode;
     const anchor = parent.ownerDocument.createElement("span");
     anchor.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
-    parent.appendChild(anchor);
     if (nodeContext.floatSide === "footnote") {
       // Defaults for footnote-call, can be overriden by the stylesheet.
       this.layoutContext.applyPseudoelementStyle(
@@ -1663,6 +1662,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         anchor,
       );
     }
+    parent.appendChild(anchor);
     parent.removeChild(nodeContext.viewNode);
     const nodeContextAfter = nodeContext.modify();
     nodeContextAfter.after = true;
