@@ -546,3 +546,24 @@ export function findAncestorSpecialInlineNodeContext(
   }
   return null;
 }
+
+export function findLastTextNodeInElement(element: Node): Node | null {
+  let node: Node | null = element;
+  while (node) {
+    if (node.nodeType === Node.TEXT_NODE && node.textContent.length > 0) {
+      return node;
+    }
+    if (node.lastChild) {
+      node = node.lastChild;
+    } else {
+      while (node && !node.previousSibling) {
+        node = node.parentNode;
+        if (node === element || !node) {
+          return null;
+        }
+      }
+      node = node?.previousSibling || null;
+    }
+  }
+  return null;
+}

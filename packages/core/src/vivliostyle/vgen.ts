@@ -2316,6 +2316,93 @@ export class ViewFactory
     return prop.toString() == transclusionType;
   }
 
+  /**
+   * Insert a footnote-call NodeContext before the footnote element.
+   * The footnote-call will be processed as a normal inline element,
+   * then shadowSibling will lead to the footnote element.
+   * (Issue #868)
+   */
+  private insertFootnoteCall(
+    footnoteNodeContext: Vtree.NodeContext,
+  ): Task.Result<Vtree.NodeContext> {
+    const frame: Task.Frame<Vtree.NodeContext> =
+      Task.newFrame("insertFootnoteCall");
+
+    // Create a pseudo source node for footnote-call
+    const footnoteCallSourceNode = PseudoElement.document.createElementNS(
+      Base.NS.XHTML,
+      "span",
+    );
+    PseudoElement.setPseudoName(footnoteCallSourceNode, "footnote-call");
+
+    // Create NodeContext for footnote-call with the same parent as footnote
+    const footnoteCallContext = new Vtree.NodeContext(
+      footnoteCallSourceNode,
+      footnoteNodeContext.parent as Vtree.NodeContext,
+      footnoteNodeContext.boxOffset,
+    );
+
+    // Set up properties for inline element
+    footnoteCallContext.inline = true;
+
+    // Create shadow context for footnote-call styling
+    // Use the footnote element's styler to get ::footnote-call styles
+    const shadowStyler = new PseudoElement.PseudoelementStyler(
+      footnoteNodeContext.sourceNode as Element,
+      this.styler.getStyle(footnoteNodeContext.sourceNode as Element, false),
+      this.styler,
+      this.context,
+      this.exprContentListener,
+    );
+    footnoteCallContext.shadowContext = new Vtree.ShadowContext(
+      footnoteNodeContext.sourceNode as Element,
+      footnoteCallSourceNode, // Use the span directly as root, not a shadow:root
+      null,
+      footnoteNodeContext.parent?.shadowContext || null,
+      null,
+      Vtree.ShadowType.ROOTLESS,
+      shadowStyler,
+    );
+
+    // Set up shadow sibling to return to footnote after footnote-call is done
+    footnoteCallContext.shadowSibling =
+      footnoteNodeContext as Vtree.NodeContext;
+
+    // Increment footnote's boxOffset since footnote-call takes one position
+    (footnoteNodeContext as Vtree.NodeContext).boxOffset++;
+
+    // Remove the footnote element's viewNode from DOM if it was already created
+    // (setCurrent was called before we detected this is a footnote)
+    if (footnoteNodeContext.viewNode?.parentNode) {
+      footnoteNodeContext.viewNode.parentNode.removeChild(
+        footnoteNodeContext.viewNode,
+      );
+    }
+
+    // Now create the view for footnote-call
+    this.setCurrent(footnoteCallContext, true, false).then(
+      (processChildren) => {
+        // If processChildren is true and the source node has children (generated content),
+        // let the normal layout flow process them by NOT setting after=true.
+        // This ensures text-spacing polyfill is applied via postLayoutBlock.
+        if (processChildren && footnoteCallSourceNode.hasChildNodes()) {
+          // Return the footnote-call context as-is to process children
+          frame.finish(footnoteCallContext);
+        } else {
+          // No children to process, mark as done
+          const modified = footnoteCallContext.modify();
+          modified.after = true;
+          if (!footnoteCallContext.viewNode) {
+            modified.inline = true;
+          }
+          frame.finish(modified);
+        }
+      },
+    );
+
+    return frame.result();
+  }
+
   /** @override */
   nextInTree(
     position: Vtree.NodeContext,
@@ -2335,6 +2422,28 @@ export class ViewFactory
             nodeContext.inline = true;
           }
         }
+
+        // Issue #868: Insert footnote-call before footnote element
+        // Only insert if footnote-call hasn't been processed yet for this footnote
+        if (
+          nodeContext.floatSide === "footnote" &&
+          !this.isFootnote &&
+          !nodeContext.after &&
+          !nodeContext.pluginProps["footnoteCallProcessed"]
+        ) {
+          // Mark as processed to avoid infinite loop when returning via shadowSibling
+          nodeContext.pluginProps["footnoteCallProcessed"] = 1;
+          // Return footnote-call first, footnote will be processed via shadowSibling
+          this.insertFootnoteCall(nodeContext).then((footnoteCallContext) => {
+            this.dispatchEvent({
+              type: "nextInTree",
+              nodeContext: footnoteCallContext,
+            } as any);
+            frame.finish(footnoteCallContext);
+          });
+          return;
+        }
+
         this.dispatchEvent({ type: "nextInTree", nodeContext } as any);
         frame.finish(nodeContext);
       },

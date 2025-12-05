@@ -1650,23 +1650,45 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return frame.result();
   }
 
+  private findFootnoteCallElement(footnoteViewNode: Node): Element | null {
+    let prev = footnoteViewNode.previousSibling;
+    while (prev) {
+      if (
+        prev.nodeType === Node.ELEMENT_NODE &&
+        PseudoElement.getPseudoName(prev as Element) === "footnote-call"
+      ) {
+        return prev as Element;
+      }
+      prev = prev.previousSibling;
+    }
+    return null;
+  }
+
   setFloatAnchorViewNode(nodeContext: Vtree.NodeContext): Vtree.NodeContext {
     const parent = nodeContext.viewNode.parentNode;
-    const anchor = parent.ownerDocument.createElement("span");
+    let anchor: Element = parent.ownerDocument.createElement("span");
     anchor.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
     if (nodeContext.floatSide === "footnote") {
-      // Defaults for footnote-call, can be overriden by the stylesheet.
-      this.layoutContext.applyPseudoelementStyle(
-        nodeContext,
-        "footnote-call",
-        anchor,
-      );
+      // Issue #868: Find footnote-call already generated as a sibling
+      const footnoteCall = this.findFootnoteCallElement(nodeContext.viewNode);
+      if (footnoteCall) {
+        anchor = footnoteCall;
+      } else {
+        parent.insertBefore(anchor, nodeContext.viewNode);
+      }
+    } else {
+      parent.appendChild(anchor);
     }
-    parent.appendChild(anchor);
+
     parent.removeChild(nodeContext.viewNode);
     const nodeContextAfter = nodeContext.modify();
     nodeContextAfter.after = true;
     nodeContextAfter.viewNode = anchor;
+    // Issue #868: For footnote-call anchors, set display to inline so that
+    // text-spacing can look through this element to find adjacent text nodes
+    if (nodeContext.floatSide === "footnote") {
+      nodeContextAfter.display = "inline";
+    }
     return nodeContextAfter;
   }
 
@@ -1773,10 +1795,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             Asserts.assert(float);
             if (!success) {
               context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
-              return Task.newResult(nodeContextAfter);
-            } else {
-              return Task.newResult(null);
             }
+            // Issue #868: Always return nodeContextAfter so the layout loop
+            // continues to process following elements (like text after footnote-call).
+            // This ensures footnote-call and following content are processed
+            // in the same postLayoutBlock, allowing correct text-spacing.
+            return Task.newResult(nodeContextAfter);
           });
         }
       }
