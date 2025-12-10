@@ -1367,7 +1367,7 @@ export class ContentPropertyHandler extends Css.Visitor {
   }
 
   override visitURL(url: Css.URL): Css.Val {
-    if ((this.rootContentValue as any).url) {
+    if (this.rootContentValue instanceof Css.URL) {
       this.elem.setAttribute("src", url.url);
     } else {
       const img = this.elem.ownerDocument.createElementNS(Base.NS.XHTML, "img");
@@ -1412,7 +1412,7 @@ export class ContentPropertyHandler extends Css.Visitor {
   }
 }
 
-export function nonTrivialContent(val: Css.Val): boolean {
+export function nonTrivialContent(val: Css.Val | null | undefined): boolean {
   return (
     val != null &&
     val !== Css.empty &&

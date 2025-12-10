@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>list-style-position</title>
+    <style>
+      .outside {
+        list-style-position: outside;
+      }
+      .inside {
+        list-style-position: inside;
+      }
+      .cjk {
+        list-style-type: cjk-decimal;
+      }
+      .check {
+        list-style-type: "✅ ";
+      }
+      .marker::marker {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>')
+          counter(list-item, upper-alpha) "👉 ";
+      }
+      .inline li {
+        display: inline list-item;
+      }
+
+      ::marker {
+        font-weight: bold;
+        color: blue;
+      }
+
+      ol {
+        padding-inline-start: 4em;
+      }
+
+      code {
+        background-color: #f0f0f0;
+        padding: 2px;
+        font-size: 90%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>list-style-position</h1>
+    <pre>list-style-position: outside;</pre>
+    <ol class="outside">
+      <li>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua.
+      </li>
+      <li>
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+        ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur.
+      </li>
+      <li class="cjk">
+        ごとごとごとごと汽車はきらびやかな燐光の川のまん中に高い高い崖の上を走って下りました。午後の授業ではみなさんは、ぼくをゆるしてくださるだろうかいきなり、カムパネルラが川へはいったよどうしてそれをしらべてみましたら、家の中へはいっていて言いました。
+      </li>
+      <li class="cjk">
+        カムパネルラは、なぜかそう言いながら、自分で星図を指しました。けれども、誰だって、林の中を大股にまっすぐに立ってわらいました。ところがカムパネルラは、まるい板のように言っているのを見ましたが、はじめはどうしてもっと愉快になれないだろう。
+      </li>
+      <li class="check">
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+        officia deserunt mollit anim id est laborum.
+      </li>
+      <li class="marker">
+        Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam
+        furor iste tuus nos eludet?
+      </li>
+    </ol>
+    <pre>list-style-position: inside;</pre>
+    <ol class="inside">
+      <li>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua.
+      </li>
+      <li>
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+        ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur.
+      </li>
+      <li class="cjk">
+        ごとごとごとごと汽車はきらびやかな燐光の川のまん中に高い高い崖の上を走って下りました。午後の授業ではみなさんは、ぼくをゆるしてくださるだろうかいきなり、カムパネルラが川へはいったよどうしてそれをしらべてみましたら、家の中へはいっていて言いました。
+      </li>
+      <li class="cjk">
+        カムパネルラは、なぜかそう言いながら、自分で星図を指しました。けれども、誰だって、林の中を大股にまっすぐに立ってわらいました。ところがカムパネルラは、まるい板のように言っているのを見ましたが、はじめはどうしてもっと愉快になれないだろう。
+      </li>
+      <li class="check">
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+        officia deserunt mollit anim id est laborum.
+      </li>
+      <li class="marker">
+        Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam
+        furor iste tuus nos eludet?
+      </li>
+    </ol>
+    <pre>display: inline list-item; list-style-position: inside;</pre>
+    <ol class="inline inside">
+      <li>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua.
+      </li>
+      <li>
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+        ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur.
+      </li>
+      <li class="cjk">
+        ごとごとごとごと汽車はきらびやかな燐光の川のまん中に高い高い崖の上を走って下りました。午後の授業ではみなさんは、ぼくをゆるしてくださるだろうかいきなり、カムパネルラが川へはいったよどうしてそれをしらべてみましたら、家の中へはいっていて言いました。
+      </li>
+      <li class="cjk">
+        カムパネルラは、なぜかそう言いながら、自分で星図を指しました。けれども、誰だって、林の中を大股にまっすぐに立ってわらいました。ところがカムパネルラは、まるい板のように言っているのを見ましたが、はじめはどうしてもっと愉快になれないだろう。
+      </li>
+      <li class="check">
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+        officia deserunt mollit anim id est laborum.
+      </li>
+      <li class="marker">
+        Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam
+        furor iste tuus nos eludet?
+      </li>
+    </ol>
+    <pre>display: inline list-item; list-style-position: outside;</pre>
+    <ol class="inline outside">
+      <li>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua.
+      </li>
+      <li>
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+        ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur.
+      </li>
+      <li class="cjk">
+        ごとごとごとごと汽車はきらびやかな燐光の川のまん中に高い高い崖の上を走って下りました。午後の授業ではみなさんは、ぼくをゆるしてくださるだろうかいきなり、カムパネルラが川へはいったよどうしてそれをしらべてみましたら、家の中へはいっていて言いました。
+      </li>
+      <li class="cjk">
+        カムパネルラは、なぜかそう言いながら、自分で星図を指しました。けれども、誰だって、林の中を大股にまっすぐに立ってわらいました。ところがカムパネルラは、まるい板のように言っているのを見ましたが、はじめはどうしてもっと愉快になれないだろう。
+      </li>
+      <li class="check">
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+        officia deserunt mollit anim id est laborum.
+      </li>
+      <li class="marker">
+        Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam
+        furor iste tuus nos eludet?
+      </li>
+    </ol>
+    <p>
+      NOTE: <code>list-style-position: outside</code> is equivalent to
+      <code>inside</code> for inline list items.
+    </p>
+  </body>
+</html>

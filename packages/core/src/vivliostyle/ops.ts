@@ -1603,9 +1603,9 @@ export class StyleInstance
             this.counterStore.getExprContentListener(),
           ),
         );
-      } else if (contentVal && Vtree.nonTrivialContent(contentVal)) {
+      } else if (Vtree.nonTrivialContent(contentVal)) {
         let innerContainerTag = "span";
-        if ((contentVal as any).url) {
+        if (contentVal instanceof Css.URL) {
           innerContainerTag = "img";
         }
         const innerContainer =

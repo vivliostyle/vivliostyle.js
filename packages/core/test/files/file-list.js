@@ -750,11 +750,31 @@ module.exports = [
     ],
   },
   {
-    category: "Counter Styles",
+    category: "Counter style, ::marker, and list-style",
     files: [
       {
         file: "counter-style/test.html",
         title: "@counter-style rule",
+      },
+      {
+        file: "counter-style/list-style-type-counter-style.html",
+        title: "list-style-type with @counter-style",
+      },
+      {
+        file: "counter-style/marker.html",
+        title: "::marker pseudo-element",
+      },
+      {
+        file: "counter-style/list-style-position.html",
+        title: "list-style-position",
+      },
+      {
+        file: "counter-style/list-style-type-bullet.html",
+        title: "list-style-type bullet marker",
+      },
+      {
+        file: "counter-style/list-style-type-bullet-vertical.html",
+        title: "list-style-type bullet marker (vertical writing-mode)",
       },
     ],
   },

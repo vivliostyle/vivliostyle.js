@@ -35,6 +35,7 @@ import * as Plugin from "./plugin";
 import * as Vtree from "./vtree";
 import { CssStyler, Layout } from "./types";
 import { TokenType } from "./css-tokenizer";
+import { AbstractStyler } from "./css-styler";
 
 export type ElementStyle = {
   [key: string]:
@@ -1805,7 +1806,7 @@ export interface CounterResolver {
    * Get value of the CSS target-text() function
    * https://drafts.csswg.org/css-content-3/#target-text
    * @param url Target URL (with fragment identifier)
-   * @param pseudoElement Pseudo-element selector ('content', 'before', 'after', 'first-letter')
+   * @param pseudoElement Pseudo-element selector ('content', 'before', 'after', 'first-letter', 'marker')
    */
   getTargetTextVal(url: string, pseudoElement: string): Exprs.Val;
 
@@ -2113,6 +2114,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         break;
       case "before":
       case "after":
+      case "marker":
         {
           const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
           const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
@@ -2861,7 +2863,7 @@ export class CascadeInstance {
       }
       resetMap["list-item"] = ((this.currentElement as any)?.start ?? 1) - 1;
     }
-    if (displayVal === Css.ident.list_item) {
+    if (Display.isListItem(displayVal)) {
       if (!incrementMap) {
         incrementMap = {};
       }
@@ -2933,13 +2935,18 @@ export class CascadeInstance {
         }
       }
     }
-    if (displayVal === Css.ident.list_item) {
+    if (Display.isListItem(displayVal)) {
       const listItemCounts = this.counters["list-item"];
       const listItemCount = listItemCounts[listItemCounts.length - 1];
       props["ua-list-item-count"] = new CascadeValue(
         new Css.Num(listItemCount),
         0,
       );
+      // Ensure that ::marker pseudo-element exists for the list item
+      const pseudos = getMutableStyleMap(props, "_pseudos");
+      if (!pseudos["marker"]) {
+        pseudos["marker"] = {};
+      }
     }
     this.counterScoping.push(null);
   }
@@ -3166,6 +3173,10 @@ export class CascadeInstance {
               !Vtree.nonTrivialContent(
                 (pseudoProps["content"] as CascadeValue)?.value,
               )) ||
+            (pseudoName === "marker" &&
+              !Display.isListItem(
+                getProp(this.currentStyle, "display")?.value,
+              )) ||
             ((pseudoName === "footnote-call" ||
               pseudoName === "footnote-marker") &&
               getProp(this.currentStyle, "float")?.value !== Css.ident.footnote)
@@ -3173,6 +3184,15 @@ export class CascadeInstance {
             delete pseudos[pseudoName];
           } else if (before) {
             this.processPseudoelementProps(pseudoProps, element);
+
+            if (pseudoName === "marker") {
+              // Make marker content from list-style-* properties
+              this.processMarkerPseudoelementProps(
+                pseudoProps,
+                element,
+                styler,
+              );
+            }
           } else {
             this.stack[this.stack.length - 2].push(
               new AfterPseudoelementItem(pseudoProps, element),
@@ -3191,6 +3211,121 @@ export class CascadeInstance {
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);
     }
+  }
+
+  processMarkerPseudoelementProps(
+    pseudoProps: ElementStyle,
+    element: Element,
+    styler: CssStyler.AbstractStyler,
+  ): void {
+    if (
+      !Vtree.nonTrivialContent(
+        (pseudoProps["content"] as CascadeValue)?.value,
+      ) &&
+      Display.isListItem((this.currentStyle["display"] as CascadeValue)?.value)
+    ) {
+      // If no ::marker content is specified and the element is a list-item,
+      // make content from list-style-type or list-style-image.
+      const listStyleType = this.getInheritedPropertyValue(
+        "list-style-type",
+        styler,
+        element,
+      );
+      const listStyleImage = this.getInheritedPropertyValue(
+        "list-style-image",
+        styler,
+        element,
+      );
+      if (listStyleImage instanceof Css.URL) {
+        // list-style-image: <URL>
+        // -> content: <URL> " "
+        pseudoProps["content"] = new CascadeValue(
+          new Css.SpaceList([listStyleImage, new Css.Str(" ")]),
+          0,
+        );
+      } else if (listStyleType instanceof Css.Str) {
+        // list-style-type: <string>
+        pseudoProps["content"] = new CascadeValue(listStyleType, 0);
+      } else if (
+        listStyleType instanceof Css.Ident &&
+        listStyleType !== Css.ident.none
+      ) {
+        // list-style-type: <counter-style>
+        const listItemCount = (
+          (this.currentStyle["ua-list-item-count"] as CascadeValue)
+            ?.value as Css.Num
+        )?.num;
+        if (listItemCount != null) {
+          pseudoProps["content"] = new CascadeValue(
+            new Css.Str(
+              this.counterStyleStore.formatMarker(
+                listStyleType.name,
+                listItemCount,
+              ),
+            ),
+            0,
+          );
+        }
+        // This is used in the marker layout processing in
+        // `PseudoelementStyler.processMarker()` in pseudo-element.ts.
+        pseudoProps["list-style-type"] = new CascadeValue(listStyleType, 0);
+      }
+    }
+
+    // list-style-position
+    if (!Display.isInlineLevel(getProp(this.currentStyle, "display")?.value)) {
+      const listStylePosition = this.getInheritedPropertyValue(
+        "list-style-position",
+        styler,
+        element,
+      );
+      if (listStylePosition) {
+        // This is used in the marker layout processing in
+        // `PseudoelementStyler.processMarker()` in pseudo-element.ts.
+        pseudoProps["list-style-position"] = new CascadeValue(
+          listStylePosition,
+          0,
+        );
+      }
+    }
+  }
+
+  /**
+   * Get inherited property value
+   * @param propName
+   * @param styler
+   * @param element
+   * @returns the inherited property value, or the initial value (or null) if not found
+   */
+  getInheritedPropertyValue(
+    propName: string,
+    styler: CssStyler.AbstractStyler,
+    element: Element,
+  ): Css.Val | null {
+    for (let e = element; e; e = e.parentElement) {
+      const style =
+        e === this.currentElement
+          ? this.currentStyle
+          : styler.getStyle(e, false);
+      const prop = style[propName] as CascadeValue;
+      if (prop) {
+        const val = prop.evaluate(this.context, propName);
+        if (
+          val === Css.ident.inherit ||
+          val === Css.ident.unset ||
+          val === Css.ident.revert
+        ) {
+          continue;
+        } else if (val === Css.ident.initial) {
+          break;
+        }
+        return val;
+      }
+    }
+    const validatorSet = (
+      styler as AbstractStyler & { validatorSet: CssValidator.ValidatorSet }
+    ).validatorSet;
+    return validatorSet?.defaultValues[propName] ?? null;
   }
 
   private applyAttrFilterInner(
@@ -3438,6 +3573,7 @@ export const pseudoNames = [
   "transclusion-before",
   "footnote-call",
   "footnote-marker",
+  "marker",
   "inner",
   "first-letter",
   "first-line",
@@ -3686,6 +3822,7 @@ export class CascadeParserHandler
       case "first-letter":
       case "footnote-call":
       case "footnote-marker":
+      case "marker":
       case "inner":
       case "after-if-continues":
         if (!this.pseudoelement) {
