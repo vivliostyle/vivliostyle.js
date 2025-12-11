@@ -194,16 +194,11 @@ gulp.task(
 // serve
 function serve(isDevelopment) {
   browserSync.init({
-    browser:
-      process.platform === "darwin"
-        ? "google chrome"
-        : process.platform === "win32"
-          ? "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-          : "chromium-browser",
     server: {
       baseDir: "../",
     },
     startPath: "/core/test/files/",
+    ghostMode: false, // do not mirror clicks, scrolls etc. between multiple browsers
   });
   const target = [DEST_DIR + "/**/*"];
   gulp.watch(target).on("change", browserSync.reload);
