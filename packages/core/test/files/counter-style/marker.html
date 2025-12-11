@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>::marker pseudo-element</title>
+    <style>
+      ol.marker-counter li::marker {
+        content: counter(list-item, cjk-decimal) "、";
+      }
+      ol.list-style-counter {
+        list-style-type: cjk-decimal;
+      }
+
+      ol.marker-string li::marker {
+        content: "✅ ";
+      }
+      ol.list-style-string {
+        list-style-type: "✅ ";
+      }
+
+      ol.marker-image li::marker {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>');
+      }
+      ol.marker-image-spaced li::marker {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>')
+          " ";
+      }
+      ol.list-style-image {
+        list-style-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>');
+      }
+    </style>
+  </head>
+  <body>
+    <h1>::marker pseudo-element</h1>
+    <h2>with counter()</h2>
+    <pre>li::marker { content: counter(list-item, cjk-decimal) "、"; }</pre>
+    <ol class="marker-counter">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <pre>ol { list-style-type: cjk-decimal; }</pre>
+    <ol class="list-style-counter">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <p>These two lists above should look the same.</p>
+
+    <h2>with string</h2>
+    <pre>li::marker { content: "✅ "; }</pre>
+    <ol class="marker-string">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <pre>ol { list-style-type: "✅ "; }</pre>
+    <ol class="list-style-string">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <p>These two lists above should look the same.</p>
+
+    <h2>with image</h2>
+    <pre>li::marker { content: url(…); }</pre>
+    <ol class="marker-image">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <pre>li::marker { content: url(…) " "; }</pre>
+    <ol class="marker-image-spaced">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <pre>ol { list-style-image: url(…); }</pre>
+    <ol class="list-style-image">
+      <li>One</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <p>
+      These three lists above should look the same except the first one has no
+      space between the image and the text.
+    </p>
+  </body>
+</html>

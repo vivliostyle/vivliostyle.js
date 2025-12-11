@@ -116,8 +116,22 @@ export function isBlock(
   );
 }
 
-export function isInlineLevel(display: Css.Ident | string): boolean {
-  switch (display.toString()) {
+function isDisplayType(
+  display: Css.Val | string | undefined,
+): display is Css.Ident | Css.SpaceList | string {
+  return (
+    display instanceof Css.Ident ||
+    display instanceof Css.SpaceList ||
+    typeof display === "string"
+  );
+}
+
+export function isInlineLevel(display: Css.Val | string | undefined): boolean {
+  if (!isDisplayType(display)) {
+    return false;
+  }
+  const displayStr = display.toString();
+  switch (displayStr) {
     case "inline":
     case "inline-block":
     case "inline-flex":
@@ -126,11 +140,26 @@ export function isInlineLevel(display: Css.Ident | string): boolean {
     case "inline-table":
       return true;
     default:
-      return false;
+      // For display values like "inline list-item"
+      return displayStr.includes("inline");
   }
 }
 
-export function isBlockLevel(display: Css.Ident | string): boolean {
+/**
+ * Check if the display value includes "list-item", like "inline list-item".
+ */
+export function isListItem(display: Css.Val | string | undefined): boolean {
+  if (!isDisplayType(display)) {
+    return false;
+  }
+  const displayStr = display.toString();
+  return displayStr.includes("list-item");
+}
+
+export function isBlockLevel(display: Css.Val | string | undefined): boolean {
+  if (!isDisplayType(display)) {
+    return false;
+  }
   switch (display.toString()) {
     case "block":
     case "flex":
@@ -144,7 +173,12 @@ export function isBlockLevel(display: Css.Ident | string): boolean {
   }
 }
 
-export function isRubyInternalDisplay(display: Css.Ident | string): boolean {
+export function isRubyInternalDisplay(
+  display: Css.Val | string | undefined,
+): boolean {
+  if (!isDisplayType(display)) {
+    return false;
+  }
   switch (display.toString()) {
     case "ruby-base":
     case "ruby-text":
@@ -160,7 +194,7 @@ export function isRubyInternalDisplay(display: Css.Ident | string): boolean {
  * Judges if the generated box establishes a new block formatting context.
  */
 export function establishesBFC(
-  display: Css.Ident,
+  display: Css.Val,
   position: Css.Ident,
   float: Css.Val,
   overflow: Css.Ident,

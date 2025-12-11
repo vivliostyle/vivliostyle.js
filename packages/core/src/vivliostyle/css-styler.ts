@@ -1126,7 +1126,7 @@ export class Styler implements AbstractStyler {
   processContent(
     element: Element,
     styles: { [key: string]: Css.Val },
-    viewNode: Node,
+    nodeContext: Vtree.NodeContext,
   ) {}
 }
 

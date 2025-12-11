@@ -33,11 +33,6 @@
  * - Implement symbols() for defining anonymous counter styles
  *     https://drafts.csswg.org/css-counter-styles/#symbols-function
  *   Extending CounterStyle.defineAnonymous( ... ) should work.
- *
- * - Extend list-style-type to support <counter-style-name> | <symbols()>
- *     https://drafts.csswg.org/css-counter-styles/#extending-css2
- *   Currently, marker generation is delegated to the browser, so extending list-style-type would
- *   likely require injecting the mangled @counter-style into the browser.
  */
 
 import * as Css from "./css";

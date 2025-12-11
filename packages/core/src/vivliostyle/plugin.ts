@@ -165,7 +165,7 @@ export type ResolveTextNodeBreakerHook = (
 export type ResolveFormattingContextHook = (
   p1: Vtree.NodeContext,
   p2: boolean,
-  p3: Css.Ident,
+  p3: Css.Val,
   p4: Css.Ident,
   p5: Css.Val,
   p6: boolean,

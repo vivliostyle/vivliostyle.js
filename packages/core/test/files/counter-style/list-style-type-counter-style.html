@@ -2,36 +2,37 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>@counter-style rule</title>
+    <title>list-style-type with @counter-style</title>
     <style>
       @counter-style emoji {
         system: symbolic;
         symbols: "1️⃣" "2️⃣" "3️⃣";
+        suffix: " ";
       }
       ol {
-        list-style: none;
-        counter-reset: li 0;
-      }
-      li {
-        counter-increment: li;
-      }
-      li::before {
-        content: counter(li, emoji) ". ";
+        list-style-type: emoji;
       }
       a.target-counter::before {
-        content: target-counter(attr(href url), li, emoji);
+        content: target-counter(attr(href url), list-item, emoji);
       }
       a.target-text::before {
-        content: target-text(attr(href url), before) target-text(attr(href url));
+        content: target-text(attr(href url), marker) target-text(attr(href url));
       }
 
-      #cjk-earthly-branch li::before {
-        content: counter(li, cjk-earthly-branch) ". ";
+      #one {
+        string-set: mark content(marker);
+      }
+      a.named-string::before {
+        content: string(mark);
+      }
+
+      #cjk-earthly-branch {
+        list-style-type: cjk-earthly-branch;
       }
     </style>
   </head>
   <body>
-    <h1>@counter-style rule</h1>
+    <h1>list-style-type with @counter-style</h1>
     <ol>
       <li id="one">One</li>
       <li>Two</li>
@@ -41,8 +42,11 @@
     <p>Expected: <a href="#">1️⃣</a></p>
     <p>Actual: <a href="#one" class="target-counter"></a></p>
     <h2>with target-text()</h2>
-    <p>Expected: <a href="#">1️⃣. One</a></p>
+    <p>Expected: <a href="#">1️⃣ One</a></p>
     <p>Actual: <a href="#one" class="target-text"></a></p>
+    <h2>with content(marker) in string-set</h2>
+    <p>Expected: <a href="#one">1️⃣</a></p>
+    <p>Actual: <a href="#one" class="named-string"></a></p>
     <h2>Predefined counter style: cjk-earthly-branch</h2>
     <ol id="cjk-earthly-branch">
       <li>One</li>

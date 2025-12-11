@@ -55,7 +55,7 @@
       fileList.forEach(function (group) {
         var heading = document.createElement("h2");
         heading.textContent = group.category;
-        heading.id = group.category.replace(/ /g, "_");
+        heading.id = group.category.replace(/\W+/g, "_");
         document.body.appendChild(heading);
         var table = document.createElement("table");
         document.body.appendChild(table);

@@ -36,6 +36,7 @@ export const document = new DOMParser().parseFromString(
  */
 export const pseudoNames = [
   "footnote-marker",
+  "marker",
   "first-5-lines",
   "first-4-lines",
   "first-3-lines",
@@ -79,7 +80,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
       this.styler = null;
     }
     const pseudoMap = CssCascade.getStyleMap(this.style, "_pseudos");
-    const style = pseudoMap[pseudoName] || ({} as CssCascade.ElementStyle);
+    const style = pseudoMap?.[pseudoName] || ({} as CssCascade.ElementStyle);
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
       let nest = 1;
       let r: RegExpMatchArray;
@@ -100,26 +101,99 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   processContent(
     element: Element,
     styles: { [key: string]: Css.Val },
-    viewNode: Node,
+    nodeContext: Vtree.NodeContext,
   ) {
     const pseudoName = getPseudoName(element);
     if (!this.contentProcessed[pseudoName]) {
       this.contentProcessed[pseudoName] = true;
+      if (pseudoName === "marker") {
+        this.processMarker(element, styles, nodeContext);
+      }
       const contentVal = styles["content"];
-      if (contentVal) {
-        if (Vtree.nonTrivialContent(contentVal)) {
-          contentVal.visit(
-            new Vtree.ContentPropertyHandler(
-              element,
-              this.context,
-              contentVal,
-              this.exprContentListener,
-            ),
-          );
-          // text-spacing & hanging-punctuation support
-          TextPolyfill.preprocessForTextSpacing(element);
+      if (Vtree.nonTrivialContent(contentVal)) {
+        contentVal.visit(
+          new Vtree.ContentPropertyHandler(
+            element,
+            this.context,
+            contentVal,
+            this.exprContentListener,
+          ),
+        );
+        // text-spacing & hanging-punctuation support
+        TextPolyfill.preprocessForTextSpacing(element);
+      }
+    }
+  }
+
+  /**
+   * ::marker support
+   */
+  private processMarker(
+    element: Element,
+    styles: { [key: string]: Css.Val },
+    nodeContext: Vtree.NodeContext,
+  ): void {
+    const content = styles["content"];
+    const listStylePosition = styles["list-style-position"];
+    const listStyleType = styles["list-style-type"];
+
+    if (Vtree.nonTrivialContent(content)) {
+      if (content instanceof Css.URL) {
+        // content: <URL>
+        //
+        // Wrap URL in a SpaceList to ensure that img element is generated as
+        // a child of the marker pseudo-element.
+        styles["content"] = new Css.SpaceList([content]);
+      } else if (content instanceof Css.Str) {
+        // content: <string>
+        //
+        // The content string may have been made from list-style-type in
+        // `CascadeInstance.processMarkerPseudoelementProps()` in css-cascade.ts.
+        if (listStyleType instanceof Css.Ident) {
+          const lowerName = listStyleType.name.toLowerCase();
+          if (
+            lowerName === "disc" ||
+            lowerName === "circle" ||
+            lowerName === "square" ||
+            lowerName === "disclosure-open" ||
+            lowerName === "disclosure-closed"
+          ) {
+            // Use special font for bullet symbols.
+            element.classList.add("_viv-marker-bullet");
+            if (
+              nodeContext.vertical &&
+              (lowerName === "disclosure-open" ||
+                lowerName === "disclosure-closed")
+            ) {
+              // Rotate disclosure triangles in vertical text.
+              styles["writing-mode"] = Css.getName("sideways-rl");
+            }
+          }
         }
       }
     }
+
+    if (listStylePosition === Css.ident.outside) {
+      // Use special styling to simulate outside markers.
+      element.classList.add("_viv-marker-outside");
+      styles["display"] = Css.ident.inline_block;
+
+      // Prevent text-spacing-trim and hanging-punctuation from trimming or
+      // hanging the suffix "、" of counter styles such as "cjk-decimal".
+      const textSpacingTrim = nodeContext.inheritedProps["text-spacing-trim"];
+      if (textSpacingTrim && textSpacingTrim !== "space-all") {
+        styles["text-spacing-trim"] = Css.ident.normal;
+      }
+      const hangingPunctuation =
+        nodeContext.inheritedProps["hanging-punctuation"];
+      if (hangingPunctuation) {
+        styles["hanging-punctuation"] = Css.ident.none;
+      }
+    }
+
+    // These are used only temporarily to generate content from list-style-*,
+    // so remove them after processing.
+    delete styles["list-style-position"];
+    delete styles["list-style-type"];
   }
 }

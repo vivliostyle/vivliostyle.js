@@ -43,12 +43,12 @@ function cloneCounterValues(
 /**
  * Extract text content from an element for a specific pseudo-element.
  * @param element The DOM element to extract text from
- * @param pseudoElement The pseudo-element type: "content", "before", or "after"
+ * @param pseudoElement The pseudo-element type: "content", "before", "after" or "marker"
  * @returns The extracted text, or empty string if not found
  */
 function extractPseudoElementText(
   element: Element,
-  pseudoElement: "content" | "before" | "after",
+  pseudoElement: "content" | "before" | "after" | "marker",
 ): string {
   if (pseudoElement === "content") {
     // Get main content (excluding ::before and ::after)
@@ -268,7 +268,7 @@ class CounterResolver implements CssCascade.CounterResolver {
    * Returns null if the element has not been laid out yet.
    * @param transformedId ID transformed by DocumentURLTransformer to handle a
    *     reference across multiple source documents
-   * @param pseudoElement Pseudo-element to extract text from (content, before, after, first-letter)
+   * @param pseudoElement Pseudo-element to extract text from (content, before, after, first-letter, marker)
    */
   private getTargetPageText(
     transformedId: string,
@@ -281,7 +281,11 @@ class CounterResolver implements CssCascade.CounterResolver {
       if (elements && elements.length > 0) {
         const element = elements[0];
 
-        if (pseudoElement === "before" || pseudoElement === "after") {
+        if (
+          pseudoElement === "before" ||
+          pseudoElement === "after" ||
+          pseudoElement === "marker"
+        ) {
           return extractPseudoElementText(element, pseudoElement);
         }
         // For content and other pseudo-elements, fall back to content (excluding ::before and ::after)
@@ -840,6 +844,7 @@ export class CounterStore {
             content: extractPseudoElementText(element, "content"),
             before: extractPseudoElementText(element, "before"),
             after: extractPseudoElementText(element, "after"),
+            marker: extractPseudoElementText(element, "marker"),
           };
         }
 

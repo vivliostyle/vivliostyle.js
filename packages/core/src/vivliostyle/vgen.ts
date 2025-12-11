@@ -176,7 +176,7 @@ export class ViewFactory
     if (!pseudoMap) {
       return subShadow;
     }
-    const addedNames = [];
+    const addedNames: string[] = [];
     const root = PseudoElement.document.createElementNS(Base.NS.SHADOW, "root");
     let att = root;
     for (const name of PseudoElement.pseudoNames) {
@@ -212,6 +212,15 @@ export class ViewFactory
           if (!content || !Vtree.nonTrivialContent(content.value)) {
             continue;
           }
+        }
+        if (
+          name === "marker" &&
+          (!Display.isListItem(computedStyle["display"]) ||
+            // Disable ::marker for "toc-node" in the TOC box
+            CssCascade.getProp(cascStyle, "behavior")?.value ===
+              Css.getName("toc-node"))
+        ) {
+          continue;
         }
         addedNames.push(name);
         elem = PseudoElement.document.createElementNS(Base.NS.XHTML, "span");
@@ -731,7 +740,7 @@ export class ViewFactory
   resolveFormattingContext(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
-    display: Css.Ident,
+    display: Css.Val,
     position: Css.Ident,
     float: Css.Val,
     isRoot: boolean,
@@ -822,11 +831,7 @@ export class ViewFactory
       // Fix page float margin collapsing issue (Issue #1282)
       computedStyle["display"] = Css.ident.flow_root;
     }
-    styler.processContent(
-      element,
-      computedStyle,
-      this.nodeContext.viewNode ?? this.nodeContext.parent?.viewNode,
-    );
+    styler.processContent(element, computedStyle, this.nodeContext);
     this.transferPolyfilledInheritedProps(computedStyle);
     this.inheritLangAttribute();
     if (computedStyle["direction"]) {
@@ -851,7 +856,9 @@ export class ViewFactory
       ).thenFinish(frame);
       return frame.result();
     }
-    let display = computedStyle["display"] as Css.Ident;
+
+    let display = computedStyle["display"];
+
     if (Css.isDefaultingValue(display)) {
       if (display === Css.ident.initial || display === Css.ident.unset) {
         display = Css.ident.inline;
@@ -987,7 +994,7 @@ export class ViewFactory
         }
       }
       const listItem =
-        display === Css.ident.list_item && computedStyle["ua-list-item-count"];
+        Display.isListItem(display) && computedStyle["ua-list-item-count"];
       const breakInside = computedStyle["break-inside"];
       if (
         floating ||
@@ -1230,10 +1237,12 @@ export class ViewFactory
         } else if (tag == "object") {
           custom = !!this.customRenderer;
         }
-        if (element.getAttribute(PseudoElement.PSEUDO_ATTR)) {
-          if (elementStyle["content"]?.value?.url) {
-            tag = "img";
-          }
+        if (
+          element.hasAttribute(PseudoElement.PSEUDO_ATTR) &&
+          element.hasAttribute("src") &&
+          computedStyle["content"] instanceof Css.URL
+        ) {
+          tag = "img";
         }
       } else if (ns == Base.NS.epub) {
         tag = "span";
@@ -1245,12 +1254,17 @@ export class ViewFactory
         custom = !!this.customRenderer;
       }
       if (listItem) {
+        // We don't use browser's list item rendering, so we change
+        // `display: list-item` to `display: block` and
+        // `display: inline list-item` to `display: inline`.
+        display = Display.isInlineLevel(display)
+          ? Css.ident.inline
+          : Css.ident.block;
+        computedStyle["display"] = display;
         if (firstTime) {
           tag = "li";
         } else {
           tag = "div";
-          display = Css.ident.block;
-          computedStyle["display"] = display;
         }
       } else if (tag == "body" || tag == "li") {
         tag = "div";
