@@ -76,8 +76,42 @@ export function loadScript(
   const scriptContent = srcScriptElem.textContent;
   const src = srcScriptElem.src;
   const isModule = srcScriptElem.type === "module";
-  const async = (isModule || src) && srcScriptElem.async;
-  const defer = (isModule && !async) || (src && srcScriptElem.defer);
+
+  // Special handling for MathJax
+  // NOTE: We support MathJax 2 only for now.
+  const isMathJax = src && src.includes("/MathJax.js");
+  if (isMathJax) {
+    if (window.document.head.querySelector("script[src*='/MathJax.js']")) {
+      // Ignore if MathJax is already loaded
+      return Task.newResult(true);
+    }
+    if (!window["MathJax"]) {
+      // mathjax-config.js
+      window["MathJax"] = {
+        MathML: {
+          extensions: ["content-mathml.js"],
+        },
+        showProcessingMessages: false,
+        messageStyle: "none",
+        skipStartupTypeset: true,
+        CommonHTML: {
+          linebreaks: {
+            automatic: true,
+          },
+        },
+        "fast-preview": {
+          disabled: true,
+        },
+        AuthorInit: function () {
+          window["MathJax"].Hub.processSectionDelay = 0;
+        },
+      };
+    }
+  }
+
+  const async = (isModule || src) && srcScriptElem.async && !isMathJax;
+  const defer =
+    ((isModule && !async) || (src && srcScriptElem.defer)) && !isMathJax;
   const needDefer = !flags?.atEnd && (flags?.forceDefer || defer || async);
 
   if (!hasScripts(window)) {
@@ -92,24 +126,6 @@ export function loadScript(
       deferredScripts.push(srcScriptElem);
     }
     return Task.newResult(true);
-  }
-
-  if (src.includes("/mathjax")) {
-    const builtinMathJax2 = window.document.head.querySelector(
-      "script[src*='MathJax.js']:not([data-vivliostyle-scripting])",
-    );
-    if (builtinMathJax2) {
-      if (src.includes("/mathjax@3")) {
-        // Remove the builtin MathJax 2 when MathJax 3 is specified
-        window.document.head.removeChild(builtinMathJax2);
-        if (window["MathJax"]?.version?.startsWith("2.")) {
-          delete window["MathJax"];
-        }
-      } else if (src.includes("/MathJax.js")) {
-        // Ignore the specified MathJax 2, and use the builtin MathJax 2
-        return Task.newResult(true);
-      }
-    }
   }
 
   for (const s of window.document.head.getElementsByTagName("script")) {
