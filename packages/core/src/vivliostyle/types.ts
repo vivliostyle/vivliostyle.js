@@ -997,6 +997,11 @@ export namespace Vtree {
    * browser.
    */
   export interface ClientLayout {
+    layoutBox: Element;
+    window: Window;
+    pixelRatio: number;
+    scaleRatio: number;
+    layoutUnitPerPixel: number;
     getRangeClientRects(range: Range): ClientRect[];
     getElementClientRect(element: Element): ClientRect;
     /**

@@ -2774,7 +2774,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // edge holds the position where element border "before" edge will be
     // without clearance. clearEdge is the "after" edge of the float to clear.
-    if (edge * dir >= clearEdge * dir) {
+
+    // tolerance to avoid unnecessary clearance due to the pixel rounding errors
+    // (Issue #1608)
+    const tolerance = 1 / (this.clientLayout.pixelRatio || 1);
+    if (edge * dir + tolerance > clearEdge * dir) {
       // No need for clearance
       nodeContext.viewNode.parentNode.removeChild(spacer);
       return false;
