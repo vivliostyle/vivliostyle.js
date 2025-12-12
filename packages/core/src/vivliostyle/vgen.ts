@@ -1059,10 +1059,12 @@ export class ViewFactory
         ) {
           this.nodeContext.breakBefore = breakBefore.toString();
           if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
-            // delete computedStyle["break-before"];
-
-            // Instead of deleting, set to "column" so that the browser can handle it.
-            computedStyle["break-before"] = Css.ident.column;
+            if (this.isAtStartOfPage()) {
+              delete computedStyle["break-before"];
+            } else {
+              // Set to "column" so that the browser can handle it.
+              computedStyle["break-before"] = Css.ident.column;
+            }
           }
           if (this.nodeContext.fragmentIndex !== 1) {
             this.nodeContext.breakBefore = null;
@@ -1669,6 +1671,31 @@ export class ViewFactory
       });
     });
     return frame.result();
+  }
+
+  /**
+   * Check if the current position is at the start of a page.
+   * This is used to determine whether a forced break should be ignored.
+   * (Issue #1608)
+   */
+  private isAtStartOfPage(): boolean {
+    for (let nc = this.nodeContext; nc?.parent && !nc.after; nc = nc.parent) {
+      let node =
+        nc === this.nodeContext && !nc.viewNode
+          ? nc.parent.viewNode?.lastChild
+          : nc.viewNode?.previousSibling;
+      while (
+        node &&
+        (Vtree.canIgnore(node, nc.parent.whitespace) ||
+          LayoutHelper.isOutOfFlow(node))
+      ) {
+        node = node.previousSibling;
+      }
+      if (node) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -3040,12 +3067,14 @@ export const propertiesNotPassedToDOM = {
 export class DefaultClientLayout implements Vtree.ClientLayout {
   layoutBox: Element;
   window: Window;
+  pixelRatio: number;
   scaleRatio: number;
   layoutUnitPerPixel: number;
 
   constructor(viewport: Viewport) {
     this.layoutBox = viewport.layoutBox;
     this.window = viewport.window;
+    this.pixelRatio = viewport.pixelRatio;
     this.scaleRatio = viewport.scaleRatio;
     this.layoutUnitPerPixel = viewport.layoutUnitPerPixel;
   }
