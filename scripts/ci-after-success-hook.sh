@@ -108,9 +108,9 @@ if [[ $IS_VALID_TAG = true ]]; then
     echo "===> Publishing packages in npm"
     [[ $DEBUG_HOOK = false ]] && echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
     if [[ $STABLE_RELEASE = true ]]; then
-        [[ $DEBUG_HOOK = false ]] && yarn ship --yes
+        [[ $DEBUG_HOOK = false ]] && lerna publish from-package --yes
     else
-        [[ $DEBUG_HOOK = false ]] && yarn ship:prerelease --yes
+        [[ $DEBUG_HOOK = false ]] && lerna publish from-package --dist-tag next --yes
     fi
     
     # GitHub releases
