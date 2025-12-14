@@ -1585,17 +1585,14 @@ span[data-viv-leader] {
   font-family: "-viv-moz-bullet";
   font-style: normal;
   font-weight: normal;
-  line-height: 0;
 }
 [data-adapt-pseudo="marker"]._viv-marker-outside {
-  display: inline-block;
-  position: relative;
-  text-align: end;
-  text-align-last: end;
+  position: absolute;
   text-indent: 0;
-  inline-size: 1000px;
-  margin-inline-start: -1000px;
-  z-index: -1;
+}
+[data-adapt-pseudo="marker"]._viv-marker-outside > span {
+  position: absolute;
+  inset-inline-end: 0;
 }
 `;
 

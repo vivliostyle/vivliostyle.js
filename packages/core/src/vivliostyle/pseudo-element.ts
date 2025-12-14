@@ -113,7 +113,9 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
       if (Vtree.nonTrivialContent(contentVal)) {
         contentVal.visit(
           new Vtree.ContentPropertyHandler(
-            element,
+            (element.classList.contains("_viv-marker-outside") &&
+              element.firstElementChild) ||
+              element,
             this.context,
             contentVal,
             this.exprContentListener,
@@ -161,12 +163,25 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
             // Use special font for bullet symbols.
             element.classList.add("_viv-marker-bullet");
             if (
-              nodeContext.vertical &&
-              (lowerName === "disclosure-open" ||
-                lowerName === "disclosure-closed")
+              lowerName === "disclosure-open" ||
+              lowerName === "disclosure-closed"
             ) {
-              // Rotate disclosure triangles in vertical text.
-              styles["writing-mode"] = Css.getName("sideways-rl");
+              const rtl = nodeContext.direction === "rtl";
+              const vertical = nodeContext.vertical;
+              // Change disclosure triangles for rtl or vertical text.
+              styles["content"] = new Css.Str(
+                lowerName === "disclosure-open"
+                  ? vertical
+                    ? "◂ "
+                    : "▾ "
+                  : vertical
+                    ? rtl
+                      ? "▴ "
+                      : "▾ "
+                    : rtl
+                      ? "◂ "
+                      : "▸ ",
+              );
             }
           }
         }
@@ -176,7 +191,8 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     if (listStylePosition === Css.ident.outside) {
       // Use special styling to simulate outside markers.
       element.classList.add("_viv-marker-outside");
-      styles["display"] = Css.ident.inline_block;
+      // Create a span to hold the marker content.
+      element.appendChild(element.ownerDocument.createElement("span"));
 
       // Prevent text-spacing-trim and hanging-punctuation from trimming or
       // hanging the suffix "、" of counter styles such as "cjk-decimal".
