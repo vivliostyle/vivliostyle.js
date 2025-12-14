@@ -207,20 +207,20 @@ export class ViewFactory
             }
           }
         }
-        if (name === "before" || name === "after") {
+        if (name === "before" || name === "after" || name === "marker") {
           const content = pseudoMap[name]["content"] as CssCascade.CascadeValue;
           if (!content || !Vtree.nonTrivialContent(content.value)) {
             continue;
           }
-        }
-        if (
-          name === "marker" &&
-          (!Display.isListItem(computedStyle["display"]) ||
-            // Disable ::marker for "toc-node" in the TOC box
-            CssCascade.getProp(cascStyle, "behavior")?.value ===
-              Css.getName("toc-node"))
-        ) {
-          continue;
+          if (
+            name === "marker" &&
+            (!Display.isListItem(computedStyle["display"]) ||
+              // Disable ::marker for "toc-node" in the TOC box
+              CssCascade.getProp(cascStyle, "behavior")?.value ===
+                Css.getName("toc-node"))
+          ) {
+            continue;
+          }
         }
         addedNames.push(name);
         elem = PseudoElement.document.createElementNS(Base.NS.XHTML, "span");
