@@ -654,9 +654,7 @@ export class Styler implements AbstractStyler {
               break;
             case "lh":
             case "rlh":
-              px *=
-                (this.context.initialFontSize * Exprs.defaultUnitSizes["lh"]) /
-                Exprs.defaultUnitSizes["em"];
+              px *= this.context.initialFontSize * this.context.pref.lineHeight;
               break;
             default: {
               const unitSize = Exprs.defaultUnitSizes[val.unit];
@@ -668,10 +666,8 @@ export class Styler implements AbstractStyler {
           this.context.rootLineHeight = px;
         }
       } else {
-        // Note: "rlh" unit is inaccurate for line-height:normal, not using font metrics.
         this.context.rootLineHeight =
-          (this.context.fontSize() * Exprs.defaultUnitSizes["lh"]) /
-          Exprs.defaultUnitSizes["em"];
+          this.context.fontSize() * this.context.pref.lineHeight;
       }
     }
   }

@@ -592,6 +592,12 @@ export class ViewFactory
         0,
       ),
     } as CssCascade.ElementStyle;
+    if (isRoot) {
+      props["line-height"] = new CssCascade.CascadeValue(
+        new Css.Num(this.context.pref.lineHeight),
+        0,
+      );
+    }
     const inheritanceVisitor = new CssCascade.InheritanceVisitor(
       props,
       this.context,
