@@ -192,7 +192,9 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
       // Use special styling to simulate outside markers.
       element.classList.add("_viv-marker-outside");
       // Create a span to hold the marker content.
-      element.appendChild(element.ownerDocument.createElement("span"));
+      const span = element.ownerDocument.createElementNS(Base.NS.XHTML, "span");
+      span.classList.add("_viv-marker-outside-content");
+      element.appendChild(span);
 
       // Prevent text-spacing-trim and hanging-punctuation from trimming or
       // hanging the suffix "、" of counter styles such as "cjk-decimal".

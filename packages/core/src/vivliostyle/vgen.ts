@@ -999,8 +999,8 @@ export class ViewFactory
           }
         }
       }
-      const listItem =
-        Display.isListItem(display) && computedStyle["ua-list-item-count"];
+      const isListItem =
+        Display.isListItem(display) && !!computedStyle["ua-list-item-count"];
       const breakInside = computedStyle["break-inside"];
       if (
         floating ||
@@ -1261,7 +1261,7 @@ export class ViewFactory
       } else {
         custom = !!this.customRenderer;
       }
-      if (listItem) {
+      if (isListItem) {
         // We don't use browser's list item rendering, so we change
         // `display: list-item` to `display: block` and
         // `display: inline list-item` to `display: inline`.
@@ -1650,12 +1650,29 @@ export class ViewFactory
             }
           }
         }
-        if (listItem) {
+        if (isListItem) {
           result.setAttribute(
             "value",
             computedStyle["ua-list-item-count"].stringValue(),
           );
         }
+        if (result.classList.contains("_viv-marker-outside-content")) {
+          // Adjust marker position for outside markers
+          if (Display.isListItem(this.nodeContext.parent?.parent?.display)) {
+            const style = this.viewport.window.getComputedStyle(
+              this.nodeContext.parent.parent.viewNode as Element,
+            );
+            const markerOffset =
+              parseFloat(style.borderInlineStartWidth) +
+              parseFloat(style.paddingInlineStart) +
+              parseFloat(style.textIndent);
+            if (markerOffset) {
+              (result as HTMLElement).style.insetInlineEnd =
+                `${markerOffset}px`;
+            }
+          }
+        }
+
         this.viewNode = result;
         if (fetchers.length) {
           TaskUtil.waitForFetchers(fetchers).then(() => {
