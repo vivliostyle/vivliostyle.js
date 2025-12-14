@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.37.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.4...v2.37.0) (2025-12-14)
+
+### Bug Fixes
+
+- Avoid infinite page break loop caused by clear + break-before ([89a537b](https://github.com/vivliostyle/vivliostyle.js/commit/89a537bad617b930af6f2945ddc9a73ec9bf06cd)), closes [#1608](https://github.com/vivliostyle/vivliostyle.js/issues/1608)
+- Respect default line-height preference setting ([75fad37](https://github.com/vivliostyle/vivliostyle.js/commit/75fad37aee6ef60f4285ea349f8fffbd7fa4f3fb))
+- Stop treating CSS "ex" unit as 1/2 em ([09f7fdd](https://github.com/vivliostyle/vivliostyle.js/commit/09f7fdd895a65470fb88e8d8ed4ee3085f32ab14))
+
+### Features
+
+- Do not load MathJax unless specified in the document ([4e6a06d](https://github.com/vivliostyle/vivliostyle.js/commit/4e6a06d74790fc37b3708cc437ae73c8029e7f81)), closes [#1501](https://github.com/vivliostyle/vivliostyle.js/issues/1501)
+- Implement @ counter-style ([#1600](https://github.com/vivliostyle/vivliostyle.js/issues/1600)) ([3e5ab8c](https://github.com/vivliostyle/vivliostyle.js/commit/3e5ab8cd5af6842f77c7e5112d98c926c89f729f)), closes [#731](https://github.com/vivliostyle/vivliostyle.js/issues/731)
+- Support CSS ::marker pseudo-element and improve list-style properties ([eac16de](https://github.com/vivliostyle/vivliostyle.js/commit/eac16de9f8acc0f94e1806b737c61742dd01c56c)), closes [#732](https://github.com/vivliostyle/vivliostyle.js/issues/732)
+
 ## [2.36.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.3...v2.36.4) (2025-12-02)
 
 ### Bug Fixes

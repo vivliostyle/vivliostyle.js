@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.37.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.4...v2.37.0) (2025-12-14)
+
+### Features
+
+- Do not load MathJax unless specified in the document ([4e6a06d](https://github.com/vivliostyle/vivliostyle.js/commit/4e6a06d74790fc37b3708cc437ae73c8029e7f81)), closes [#1501](https://github.com/vivliostyle/vivliostyle.js/issues/1501)
+
 ## [2.36.4](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.3...v2.36.4) (2025-12-02)
 
 **Note:** Version bump only for package @vivliostyle/viewer

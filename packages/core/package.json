@@ -1,7 +1,7 @@
 {
   "name": "@vivliostyle/core",
   "description": "Vivliostyle Core library for HTML+CSS typesetting with EPUB/Web publications support",
-  "version": "2.36.4",
+  "version": "2.37.0",
   "author": "Vivliostyle Foundation",
   "scripts": {
     "build": "tsc --emitDeclarationOnly && esbuild src/vivliostyle.ts --bundle --outfile=lib/vivliostyle.js --format=cjs --define:VIVLIOSTYLE_DEBUG=false --minify --sourcemap --target=es2018",
