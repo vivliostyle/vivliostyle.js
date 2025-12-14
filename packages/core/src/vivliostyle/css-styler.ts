@@ -614,11 +614,6 @@ export class Styler implements AbstractStyler {
             case "rem":
               px *= this.context.initialFontSize;
               break;
-            case "ex":
-              px *=
-                (this.context.initialFontSize * Exprs.defaultUnitSizes["ex"]) /
-                Exprs.defaultUnitSizes["em"];
-              break;
             case "%":
               px *= this.context.initialFontSize / 100;
               break;
@@ -653,11 +648,6 @@ export class Styler implements AbstractStyler {
             case "em":
             case "rem":
               px *= rootFontSize;
-              break;
-            case "ex":
-              px *=
-                (rootFontSize * Exprs.defaultUnitSizes["ex"]) /
-                Exprs.defaultUnitSizes["em"];
               break;
             case "%":
               px *= rootFontSize / 100;

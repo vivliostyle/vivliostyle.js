@@ -622,7 +622,6 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
     } else if (
       numeric.unit === "em" ||
-      numeric.unit === "ex" ||
       numeric.unit === "rem" ||
       numeric.unit === "lh" ||
       numeric.unit === "rlh"
@@ -652,9 +651,8 @@ export function convertFontRelativeLengthToPx(
 ): Css.Numeric {
   const unit = numeric.unit;
   const num = numeric.num;
-  if (unit === "em" || unit === "ex") {
-    const ratio = Exprs.defaultUnitSizes[unit] / Exprs.defaultUnitSizes["em"];
-    return new Css.Numeric(num * ratio * baseFontSize, "px");
+  if (unit === "em") {
+    return new Css.Numeric(num * baseFontSize, "px");
   } else if (unit === "rem") {
     return new Css.Numeric(num * context.fontSize(), "px");
   } else if (unit === "rlh") {
