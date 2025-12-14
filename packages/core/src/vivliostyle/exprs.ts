@@ -257,7 +257,6 @@ export function isViewportRelativeLengthUnit(unit: string): boolean {
 export function isFontRelativeLengthUnit(unit: string): boolean {
   switch (unit?.toLowerCase()) {
     case "em":
-    case "ex":
     case "rem":
     case "lh":
     case "rlh":
@@ -287,7 +286,6 @@ export const defaultUnitSizes: { [key: string]: number } = {
   q: 96 / 2.54 / 40,
   em: 16,
   rem: 16,
-  ex: 8,
   lh: 20,
   rlh: 20,
   // <resolution>
@@ -424,13 +422,6 @@ export class Context {
     }
     if (unit == "em" || unit == "rem") {
       return isRoot ? this.initialFontSize : this.fontSize();
-    }
-    if (unit == "ex") {
-      return (
-        (defaultUnitSizes["ex"] *
-          (isRoot ? this.initialFontSize : this.fontSize())) /
-        defaultUnitSizes["em"]
-      );
     }
     if (unit == "lh" || unit == "rlh") {
       // FIXME: "lh" unit is incorrect, treated same as "rlh"

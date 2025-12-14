@@ -345,12 +345,6 @@ export class AdaptiveViewer {
       if (unit === "em" || unit === "rem") {
         return value * this.fontSize;
       }
-      if (unit === "ex") {
-        return (
-          (value * Exprs.defaultUnitSizes["ex"] * this.fontSize) /
-          Exprs.defaultUnitSizes["em"]
-        );
-      }
       const unitSize = Exprs.defaultUnitSizes[unit];
       if (unitSize) {
         return value * unitSize;
