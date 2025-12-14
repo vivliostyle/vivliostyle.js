@@ -1590,7 +1590,7 @@ span[data-viv-leader] {
   position: absolute;
   text-indent: 0;
 }
-[data-adapt-pseudo="marker"]._viv-marker-outside > span {
+[data-adapt-pseudo="marker"] > ._viv-marker-outside-content {
   position: absolute;
   inset-inline-end: 0;
 }
