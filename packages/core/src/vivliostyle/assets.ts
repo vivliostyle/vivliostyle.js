@@ -567,6 +567,8 @@ hanging-punctuation = none | [ first || [ force-end | allow-end ] || last ];
 [epub,webkit]text-emphasis-style = none | [[ filled | open ] || [ dot | circle | double-circle | triangle | sesame ]] | STRING;
 [webkit]text-underline-position = auto | [ under || [ left | right ]];
 
+[webkit]initial-letter = normal | [ POS_NUM POS_INT? ];
+
 /* CSS Transforms */
 [webkit]backface-visibility = visible | hidden;
 
@@ -1593,6 +1595,12 @@ span[data-viv-leader] {
 [data-adapt-pseudo="marker"] > ._viv-marker-outside-content {
   position: absolute;
   inset-inline-end: 0;
+}
+
+/* initial-letter */
+[style*="--viv-initialLetter"]:has(>[data-adapt-pseudo="first-letter"])::first-letter {
+  -webkit-initial-letter: var(--viv-initialLetter);
+  initial-letter: var(--viv-initialLetter);
 }
 `;
 

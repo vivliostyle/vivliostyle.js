@@ -3190,6 +3190,25 @@ export class CascadeInstance {
                 element,
                 styler,
               );
+            } else if (
+              pseudoName === "first-letter" &&
+              pseudoProps["initial-letter"]
+            ) {
+              // initial-letter on ::first-letter
+              const initialLetter = pseudoProps[
+                "initial-letter"
+              ] as CascadeValue;
+              const initialLetterVal = initialLetter.evaluate(this.context);
+              if (
+                initialLetterVal !== Css.ident.normal &&
+                !Css.isDefaultingValue(initialLetterVal)
+              ) {
+                this.currentStyle["--viv-initialLetter"] = new CascadeValue(
+                  initialLetterVal,
+                  0,
+                );
+              }
+              delete pseudoProps["initial-letter"];
             }
           } else {
             this.stack[this.stack.length - 2].push(

@@ -1468,6 +1468,8 @@ export const shorthandValidators: {
 //---- validation grammar parser and public property validator
 //------------------------
 
+const propsBrowserDependent = ["initial-letter"];
+
 /**
  * Object that validates simple and shorthand properties, breaking up shorthand
  * properties into corresponding simple ones, also stripping property prefixes.
@@ -2116,6 +2118,16 @@ export class ValidatorSet {
         receiver.unknownProperty(origName, value);
       }
       return;
+    } else if (propsBrowserDependent.includes(name)) {
+      // For properties whose support depends on browser, check via CSS.supports
+      if (
+        !Object.keys(px).some((p) =>
+          Base.checkIfPropertySupported(p ? `-${p}-` : "", name),
+        )
+      ) {
+        receiver.unknownProperty(origName, value);
+        return;
+      }
     }
     const validator = this.validators[name];
     if (validator) {
