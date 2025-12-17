@@ -178,6 +178,10 @@ module.exports = [
         file: "border-width-test.html",
         title: "border-width test",
       },
+      {
+        file: "initial-letter.html",
+        title: "initial-letter property",
+      },
     ],
   },
   {
