@@ -1324,17 +1324,6 @@ export class ViewFactory
           result = this.createElement(ns, tag);
         }
 
-        if (
-          !isRoot &&
-          isMultiColumn &&
-          computedStyle["column-fill"] === Css.ident.auto
-        ) {
-          // To make `column-fill: auto` work on non-root multi-column,
-          // we change it to `balance` here, and after layout, we change it back.
-          result.setAttribute("data-vivliostyle-column-fill", "auto");
-          computedStyle["column-fill"] = Css.ident.balance;
-        }
-
         if (tag != originalTag) {
           result.setAttribute("data-vivliostyle-original-tag", originalTag);
           if (originalTag === "html" || originalTag === "body") {

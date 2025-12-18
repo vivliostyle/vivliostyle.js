@@ -3061,14 +3061,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             const viewElement = nodeContext.viewNode as HTMLElement;
             const style = viewElement.style;
             if (nodeContext.after) {
-              if (
-                style.columnFill === "balance" &&
-                viewElement.getAttribute("data-vivliostyle-column-fill") ===
-                  "auto"
-              ) {
-                // Restore `column-fill: auto` after layout
-                style.columnFill = "auto";
-              }
               if (nodeContext.floatSide) {
                 // Restore break-after:avoid* value at before the float
                 // (Fix for issue #904)
