@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.38.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.37.0...v2.38.0) (2025-12-18)
+
+### Bug Fixes
+
+- Fix `column-fill: auto` handling in multi-column elements ([0e2673f](https://github.com/vivliostyle/vivliostyle.js/commit/0e2673f5ae414e2ffddab5764e0d329f52acf57c)), closes [#1618](https://github.com/vivliostyle/vivliostyle.js/issues/1618) [#1580](https://github.com/vivliostyle/vivliostyle.js/issues/1580)
+
+### Features
+
+- Support CSS initial-letter property ([d520994](https://github.com/vivliostyle/vivliostyle.js/commit/d520994aab0c56c22babfba80b660eead9f4be35)), closes [#1491](https://github.com/vivliostyle/vivliostyle.js/issues/1491)
+
 # [2.37.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.36.4...v2.37.0) (2025-12-14)
 
 ### Bug Fixes
