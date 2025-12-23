@@ -1848,6 +1848,9 @@ export class StyleInstance
     page.isBlankPage = cp.isBlankPage;
     cp.page++;
 
+    // Save previous page type before it gets updated
+    const prevPageType = this.styler.cascade.previousPageType;
+
     if (page.pageType == null) {
       page.pageType =
         (page.isBlankPage
@@ -1856,6 +1859,18 @@ export class StyleInstance
       // Fix for issue #1309
       this.styler.cascade.previousPageType =
         this.styler.cascade.currentPageType;
+    }
+
+    // Update page type page counts for :nth(An+B of <page-type>) selector
+    // Use pageCascadeInstance which is used for page rule evaluation
+    const pageCascade = this.pageManager.pageCascadeInstance;
+    if (page.pageType) {
+      // If page type changed from the previous page, reset count for the new page type (new page group)
+      if (prevPageType !== page.pageType) {
+        pageCascade.pageTypePageCounts[page.pageType] = 0;
+      }
+      pageCascade.pageTypePageCounts[page.pageType] =
+        (pageCascade.pageTypePageCounts[page.pageType] || 0) + 1;
     }
 
     this.clearScope(this.style.pageScope);

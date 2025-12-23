@@ -2596,14 +2596,17 @@ export class PageManager {
   private pageMasterCache: any = {} as {
     [key: string]: PageMaster.PageMasterInstance;
   };
+  /** The cascade instance used for page rule evaluation */
+  readonly pageCascadeInstance: CssCascade.CascadeInstance;
 
   constructor(
-    private readonly cascadeInstance: CssCascade.CascadeInstance,
+    cascadeInstance: CssCascade.CascadeInstance,
     private readonly pageScope: Exprs.LexicalScope,
     private readonly rootPageBoxInstance: PageMaster.RootPageBoxInstance,
     private readonly context: Exprs.Context,
     private readonly docElementStyle: CssCascade.ElementStyle,
   ) {
+    this.pageCascadeInstance = cascadeInstance;
     this.definePageProgression();
   }
 
@@ -2641,8 +2644,8 @@ export class PageManager {
    */
   getCascadedPageStyle(pageType: string): CssCascade.ElementStyle {
     const style = {} as CssCascade.ElementStyle;
-    this.cascadeInstance.pushRule([], pageType, style);
-    this.cascadeInstance.popRule();
+    this.pageCascadeInstance.pushRule([], pageType, style);
+    this.pageCascadeInstance.popRule();
     return style;
   }
 
@@ -2729,7 +2732,7 @@ export class PageManager {
 
     // Do the same initialization as in Ops.StyleInstance.prototype.init
     pageMasterInstance.applyCascadeAndInit(
-      this.cascadeInstance,
+      this.pageCascadeInstance,
       this.docElementStyle,
     );
     pageMasterInstance.resolveAutoSizing(this.context);
@@ -2782,7 +2785,7 @@ export class PageManager {
 
     // Do the same initialization as in Ops.StyleInstance.prototype.init
     pageMasterInstance.applyCascadeAndInit(
-      this.cascadeInstance,
+      this.pageCascadeInstance,
       this.docElementStyle,
     );
     pageMasterInstance.resolveAutoSizing(this.context);
@@ -2940,6 +2943,35 @@ export class IsNthPageAction extends CssCascade.IsNthAction {
   }
 }
 
+export class IsNthOfPageTypeAction extends CssCascade.IsNthAction {
+  constructor(
+    public readonly scope: Exprs.LexicalScope,
+    public readonly a: number,
+    public readonly b: number,
+    public readonly pageType: string,
+  ) {
+    super(a, b);
+  }
+
+  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+    if (cascadeInstance.currentPageType !== this.pageType) {
+      return;
+    }
+    // Get page count for this page type within the current page group
+    const pageTypeCount =
+      cascadeInstance.pageTypePageCounts[this.pageType] || 0;
+    if (this.matchANPlusB(pageTypeCount)) {
+      this.chained.apply(cascadeInstance);
+    }
+  }
+
+  override getPriority(): number {
+    // Same priority as CheckPageTypeAction since it includes page type check,
+    // and higher than nth-only or page-position-only actions.
+    return 3;
+  }
+}
+
 /**
  * Action applying an at-page rule
  */
@@ -3047,12 +3079,26 @@ export class PageParserHandler
       switch (name) {
         case "nth":
           {
-            const [a, b] = params as number[];
-            this.currentPseudoPageClassSelectors.push(
-              `:${name}(${a}n${b < 0 ? b : "+" + b})`,
-            );
-            this.chain.push(new IsNthPageAction(this.scope, a, b));
-            this.specificity += 256;
+            const a = params[0] as number;
+            const b = params[1] as number;
+            if (params.length === 3 && typeof params[2] === "string") {
+              // :nth(An+B of <page-type>) syntax
+              const pageType = params[2];
+              this.currentPseudoPageClassSelectors.push(
+                `:${name}(${a}n${b < 0 ? b : "+" + b} of ${pageType})`,
+              );
+              this.chain.push(
+                new IsNthOfPageTypeAction(this.scope, a, b, pageType),
+              );
+              this.specificity += 256;
+            } else {
+              // :nth(An+B) syntax - applies to document page number
+              this.currentPseudoPageClassSelectors.push(
+                `:${name}(${a}n${b < 0 ? b : "+" + b})`,
+              );
+              this.chain.push(new IsNthPageAction(this.scope, a, b));
+              this.specificity += 256;
+            }
           }
           break;
         default:
