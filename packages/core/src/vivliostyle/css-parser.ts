@@ -173,8 +173,9 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
 
   /**
    * @param funcName The name of the function taking a selector list as argument
+   * @param params Optional parameters (e.g., [a, b] for nth-child(An+B of S))
    */
-  startFuncWithSelector(funcName: string): void {}
+  startFuncWithSelector(funcName: string, params?: (number | string)[]): void {}
 
   endFuncWithSelector(): void {}
 
@@ -399,8 +400,11 @@ export class DispatchParserHandler extends ParserHandler {
     this.slave.endRule();
   }
 
-  override startFuncWithSelector(funcName: string): void {
-    this.slave.startFuncWithSelector(funcName);
+  override startFuncWithSelector(
+    funcName: string,
+    params?: (number | string)[],
+  ): void {
+    this.slave.startFuncWithSelector(funcName, params);
   }
 
   override endFuncWithSelector(): void {
@@ -533,7 +537,10 @@ export class SlaveParserHandler extends SkippingParserHandler {
     this.reportAndSkip("E_CSS_UNEXPECTED_PARTITION_GROUP");
   }
 
-  override startFuncWithSelector(funcName: string): void {
+  override startFuncWithSelector(
+    funcName: string,
+    params?: (number | string)[],
+  ): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_SELECTOR_FUNC");
   }
 
@@ -1708,6 +1715,42 @@ export class Parser {
                   params = this.readNthPseudoParams();
                   if (!params) {
                     break pseudoclassType;
+                  } else if (
+                    text === "nth-child" ||
+                    text === "nth-last-child"
+                  ) {
+                    // check for optional "of S" syntax
+                    token1 = tokenizer.nthToken(0);
+                    if (
+                      token1.type === TokenType.IDENT &&
+                      token1.text === "of"
+                    ) {
+                      tokenizer.consume();
+
+                      // parse selector list like :is()
+                      this.actions = actionsSelectorStart;
+                      handler.startFuncWithSelector(text as string, params);
+                      if (
+                        this.runParser(
+                          Number.POSITIVE_INFINITY,
+                          false,
+                          false,
+                          false,
+                          true,
+                          false,
+                        )
+                      ) {
+                        if (parsingFunctionParam) {
+                          this.actions = actionsSelectorInFunc;
+                        } else {
+                          this.actions = actionsSelector;
+                        }
+                      } else {
+                        this.actions = actionsErrorSelector;
+                      }
+                      continue;
+                    }
+                    break;
                   } else {
                     break;
                   }
