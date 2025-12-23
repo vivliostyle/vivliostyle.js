@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>:nth-child(An+B of S) selector</title>
+    <style>
+      .yellow {
+        background-color: yellow;
+      }
+      .cyan {
+        background-color: cyan;
+      }
+      .gray {
+        color: gray;
+      }
+
+      .b :nth-child(0 of .yellow, .cyan) {
+        color: red;
+      }
+      .b :nth-child(3 of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .b :nth-child(-2 of .yellow, .cyan) {
+        color: red;
+      }
+
+      .a_1 :nth-child(n of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_1 :nth-child(n + 3 of .yellow, .cyan) {
+        font-style: italic;
+      }
+      .a_1 :nth-child(n-3 of .yellow, .cyan) {
+        text-decoration: underline;
+      }
+
+      .a_3 :nth-child(3n of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_3 :nth-child(3n + 1 of .yellow, .cyan) {
+        font-style: italic;
+      }
+      .a_3 :nth-child(3n-1 of .yellow, .cyan) {
+        text-decoration: underline;
+      }
+
+      .a_-1 :nth-child(-n of .yellow, .cyan) {
+        color: red;
+      }
+      .a_-1 :nth-child(-n + 1 of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_-1 :nth-child(-n-1 of .yellow, .cyan) {
+        color: red;
+      }
+
+      .a_-3 :nth-child(-3n of .yellow, .cyan) {
+        color: red;
+      }
+      .a_-3 :nth-child(-3n + 5 of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_-3 :nth-child(-3n-1 of .yellow, .cyan) {
+        color: red;
+      }
+
+      .b_last :nth-last-child(0 of .yellow, .cyan) {
+        color: red;
+      }
+      .b_last :nth-last-child(3 of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .b_last :nth-last-child(-2 of .yellow, .cyan) {
+        color: red;
+      }
+
+      .a_1_last :nth-last-child(n of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_1_last :nth-last-child(n + 3 of .yellow, .cyan) {
+        font-style: italic;
+      }
+      .a_1_last :nth-last-child(n-3 of .yellow, .cyan) {
+        text-decoration: underline;
+      }
+
+      .a_3_last :nth-last-child(3n of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_3_last :nth-last-child(3n + 1 of .yellow, .cyan) {
+        font-style: italic;
+      }
+      .a_3_last :nth-last-child(3n-1 of .yellow, .cyan) {
+        text-decoration: underline;
+      }
+
+      .a_-1_last :nth-last-child(-n of .yellow, .cyan) {
+        color: red;
+      }
+      .a_-1_last :nth-last-child(-n + 1 of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_-1_last :nth-last-child(-n-1 of .yellow, .cyan) {
+        color: red;
+      }
+
+      .a_-3_last :nth-last-child(-3n of .yellow, .cyan) {
+        color: red;
+      }
+      .a_-3_last :nth-last-child(-3n + 5 of .yellow, .cyan) {
+        font-weight: bold;
+      }
+      .a_-3_last :nth-last-child(-3n-1 of .yellow, .cyan) {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="b">
+      (:nth-child(<i>b</i> of .yellow, .cyan)) Only 3 should be bold:
+      <span class="gray">0</span> <span class="yellow">1</span>
+      <span class="yellow">2</span> <span class="yellow">3</span>
+      <span class="yellow">4</span> <span class="gray">5</span>
+      <span class="gray">6</span> <span class="cyan">7</span>
+      <span class="cyan">8</span>
+    </div>
+    <div class="a_3">
+      (:nth-child(3n+<i>b</i> of .yellow, .cyan)) 3 and 8 bold, 1 and 4 italic,
+      2 and 7 underlined: <span class="gray">0</span>
+      <span class="yellow">1</span> <span class="yellow">2</span>
+      <span class="yellow">3</span> <span class="yellow">4</span>
+      <span class="gray">5</span> <span class="gray">6</span>
+      <span class="cyan">7</span> <span class="cyan">8</span>
+    </div>
+    <div class="a_-1">
+      (:nth-child(-n+<i>b</i> of .yellow, .cyan)) Only 1 should be bold:
+      <span class="gray">0</span> <span class="yellow">1</span>
+      <span class="yellow">2</span> <span class="yellow">3</span>
+      <span class="yellow">4</span> <span class="gray">5</span>
+      <span class="gray">6</span> <span class="cyan">7</span>
+      <span class="cyan">8</span>
+    </div>
+    <div class="a_-3">
+      (:nth-child(-3n+<i>b</i> of .yellow, .cyan)) 2 and 7 bold:
+      <span class="gray">0</span> <span class="yellow">1</span>
+      <span class="yellow">2</span> <span class="yellow">3</span>
+      <span class="yellow">4</span> <span class="gray">5</span>
+      <span class="gray">6</span> <span class="cyan">7</span>
+      <span class="cyan">8</span>
+    </div>
+
+    <div class="b_last">
+      (:nth-last-child(<i>b</i> of .yellow, .cyan)) Only 4 should be bold:
+      <span class="gray">0</span> <span class="yellow">1</span>
+      <span class="yellow">2</span> <span class="yellow">3</span>
+      <span class="yellow">4</span> <span class="gray">5</span>
+      <span class="gray">6</span> <span class="cyan">7</span>
+      <span class="cyan">8</span>
+    </div>
+    <div class="a_3_last">
+      (:nth-last-child(3n+<i>b</i> of .yellow, .cyan)) 1 and 4 bold, 3 and 8
+      italic, 2 and 7 underlined: <span class="gray">0</span>
+      <span class="yellow">1</span> <span class="yellow">2</span>
+      <span class="yellow">3</span> <span class="yellow">4</span>
+      <span class="gray">5</span> <span class="gray">6</span>
+      <span class="cyan">7</span> <span class="cyan">8</span>
+    </div>
+    <div class="a_-1_last">
+      (:nth-last-child(-n+<i>b</i> of .yellow, .cyan)) Only 8 should be bold:
+      <span class="gray">0</span> <span class="yellow">1</span>
+      <span class="yellow">2</span> <span class="yellow">3</span>
+      <span class="yellow">4</span> <span class="gray">5</span>
+      <span class="gray">6</span> <span class="cyan">7</span>
+      <span class="cyan">8</span>
+    </div>
+    <div class="a_-3_last">
+      (:nth-last-child(-3n+<i>b</i> of .yellow, .cyan)) 2 and 7 bold:
+      <span class="gray">0</span> <span class="yellow">1</span>
+      <span class="yellow">2</span> <span class="yellow">3</span>
+      <span class="yellow">4</span> <span class="gray">5</span>
+      <span class="gray">6</span> <span class="cyan">7</span>
+      <span class="cyan">8</span>
+    </div>
+  </body>
+</html>

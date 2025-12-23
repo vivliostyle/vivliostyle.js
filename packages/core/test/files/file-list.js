@@ -182,6 +182,7 @@ module.exports = [
         file: "initial-letter.html",
         title: "initial-letter property",
       },
+      { file: "nth-child-of.html", title: ":nth-child(An+B of S) selector" },
     ],
   },
   {

@@ -1444,6 +1444,146 @@ export class MatchesRelationalAction extends MatchesAction {
 }
 
 /**
+ * Cascade Action for :nth-child(An+B of S) pseudo-class
+ */
+export class IsNthSiblingOfSelectorAction extends IsNthAction {
+  checkAppliedAction: CheckAppliedAction;
+  firstActions: CascadeAction[] = [];
+
+  constructor(a: number, b: number, chains: ChainedAction[][]) {
+    super(a, b);
+    this.checkAppliedAction = new CheckAppliedAction();
+    for (const chain of chains) {
+      this.firstActions.push(chainActions(chain, this.checkAppliedAction));
+    }
+  }
+
+  override apply(cascadeInstance: CascadeInstance): void {
+    // Check if current element matches the selector
+    for (const firstAction of this.firstActions) {
+      firstAction.apply(cascadeInstance);
+      if (this.checkAppliedAction.applied) {
+        break;
+      }
+    }
+    if (!this.checkAppliedAction.applied) {
+      return; // Element doesn't match selector, so :nth-child(of S) doesn't match
+    }
+    this.checkAppliedAction.applied = false;
+
+    // Count siblings that match the selector
+    const elem = cascadeInstance.currentElement;
+    let order = 1;
+    let sibling = elem.previousElementSibling;
+    while (sibling) {
+      if (this.matchesSelector(sibling, cascadeInstance)) {
+        order++;
+      }
+      sibling = sibling.previousElementSibling;
+    }
+
+    if (this.matchANPlusB(order)) {
+      this.chained.apply(cascadeInstance);
+    }
+  }
+
+  protected matchesSelector(
+    element: Element,
+    cascadeInstance: CascadeInstance,
+  ): boolean {
+    // Temporarily save and restore cascade state to test against sibling
+    const savedElement = cascadeInstance.currentElement;
+    const savedNS = cascadeInstance.currentNamespace;
+    const savedLocalName = cascadeInstance.currentLocalName;
+    const savedId = cascadeInstance.currentId;
+    const savedClassNames = cascadeInstance.currentClassNames;
+    const savedSiblingOrder = cascadeInstance.currentSiblingOrder;
+
+    cascadeInstance.currentElement = element;
+    cascadeInstance.currentNamespace = element.namespaceURI || "";
+    cascadeInstance.currentLocalName = element.localName;
+    cascadeInstance.currentId = element.id;
+    cascadeInstance.currentClassNames = element.classList
+      ? Array.from(element.classList)
+      : [];
+
+    // Calculate sibling order for the element
+    let siblingOrder = 1;
+    let sib = element.previousElementSibling;
+    while (sib) {
+      siblingOrder++;
+      sib = sib.previousElementSibling;
+    }
+    cascadeInstance.currentSiblingOrder = siblingOrder;
+
+    for (const firstAction of this.firstActions) {
+      firstAction.apply(cascadeInstance);
+      if (this.checkAppliedAction.applied) {
+        break;
+      }
+    }
+    const matched = this.checkAppliedAction.applied;
+    this.checkAppliedAction.applied = false;
+
+    // Restore cascade state
+    cascadeInstance.currentElement = savedElement;
+    cascadeInstance.currentNamespace = savedNS;
+    cascadeInstance.currentLocalName = savedLocalName;
+    cascadeInstance.currentId = savedId;
+    cascadeInstance.currentClassNames = savedClassNames;
+    cascadeInstance.currentSiblingOrder = savedSiblingOrder;
+
+    return matched;
+  }
+
+  override getPriority(): number {
+    return 5;
+  }
+}
+
+/**
+ * Cascade Action for :nth-last-child(An+B of S) pseudo-class
+ */
+export class IsNthLastSiblingOfSelectorAction extends IsNthSiblingOfSelectorAction {
+  constructor(a: number, b: number, chains: ChainedAction[][]) {
+    super(a, b, chains);
+  }
+
+  override apply(cascadeInstance: CascadeInstance): void {
+    // Check if current element matches the selector
+    for (const firstAction of this.firstActions) {
+      firstAction.apply(cascadeInstance);
+      if (this.checkAppliedAction.applied) {
+        break;
+      }
+    }
+    if (!this.checkAppliedAction.applied) {
+      return; // Element doesn't match selector, so :nth-last-child(of S) doesn't match
+    }
+    this.checkAppliedAction.applied = false;
+
+    // Count siblings (from end) that match the selector
+    const elem = cascadeInstance.currentElement;
+    let order = 1;
+    let sibling = elem.nextElementSibling;
+    while (sibling) {
+      if (this.matchesSelector(sibling, cascadeInstance)) {
+        order++;
+      }
+      sibling = sibling.nextElementSibling;
+    }
+
+    if (this.matchANPlusB(order)) {
+      this.chained.apply(cascadeInstance);
+    }
+  }
+
+  override getPriority(): number {
+    return 4;
+  }
+}
+
+/**
  * An object that is notified as elements are pushed and popped and typically
  * controls a "named condition" (which is a count associated with a name).
  */
@@ -4160,7 +4300,10 @@ export class CascadeParserHandler
     return this.cascade;
   }
 
-  override startFuncWithSelector(funcName: string): void {
+  override startFuncWithSelector(
+    funcName: string,
+    params?: (number | string)[],
+  ): void {
     let parameterParserHandler: MatchesParameterParserHandler;
     switch (funcName) {
       case "is":
@@ -4174,6 +4317,25 @@ export class CascadeParserHandler
         break;
       case "has":
         parameterParserHandler = new HasParameterParserHandler(this);
+        break;
+      case "nth-child":
+        if (params && params.length >= 2) {
+          parameterParserHandler = new NthChildOfSelectorParameterParserHandler(
+            this,
+            params[0] as number,
+            params[1] as number,
+          );
+        }
+        break;
+      case "nth-last-child":
+        if (params && params.length >= 2) {
+          parameterParserHandler =
+            new NthLastChildOfSelectorParameterParserHandler(
+              this,
+              params[0] as number,
+              params[1] as number,
+            );
+        }
         break;
     }
     if (parameterParserHandler) {
@@ -4342,6 +4504,66 @@ export class WhereParameterParserHandler extends MatchesParameterParserHandler {
 export class HasParameterParserHandler extends MatchesParameterParserHandler {
   override relational(): boolean {
     return true;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :nth-child(An+B of S) pseudo-class parameter
+ */
+export class NthChildOfSelectorParameterParserHandler extends MatchesParameterParserHandler {
+  constructor(
+    parent: CascadeParserHandler,
+    public readonly a: number,
+    public readonly b: number,
+  ) {
+    super(parent);
+  }
+
+  override endFuncWithSelector(): void {
+    if (this.chain) {
+      this.chains.push(this.chain);
+    }
+    if (this.chains.length > 0) {
+      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
+      this.parentChain.push(
+        new IsNthSiblingOfSelectorAction(this.a, this.b, this.chains),
+      );
+      // :nth-child(An+B of S) specificity: pseudo-class + most specific selector in S
+      this.parent.specificity += 256 + this.maxSpecificity;
+    } else {
+      // func argument is empty or all invalid
+      this.parentChain.push(new CheckConditionAction("")); // always fails
+    }
+
+    this.owner.popHandler();
+  }
+
+  override forgiving(): boolean {
+    return true;
+  }
+}
+
+/**
+ * Cascade Parser Handler for :nth-last-child(An+B of S) pseudo-class parameter
+ */
+export class NthLastChildOfSelectorParameterParserHandler extends NthChildOfSelectorParameterParserHandler {
+  override endFuncWithSelector(): void {
+    if (this.chain) {
+      this.chains.push(this.chain);
+    }
+    if (this.chains.length > 0) {
+      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
+      this.parentChain.push(
+        new IsNthLastSiblingOfSelectorAction(this.a, this.b, this.chains),
+      );
+      // :nth-last-child(An+B of S) specificity: pseudo-class + most specific selector in S
+      this.parent.specificity += 256 + this.maxSpecificity;
+    } else {
+      // func argument is empty or all invalid
+      this.parentChain.push(new CheckConditionAction("")); // always fails
+    }
+
+    this.owner.popHandler();
   }
 }
 
