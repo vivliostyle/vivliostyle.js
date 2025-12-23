@@ -2796,6 +2796,7 @@ export class CascadeInstance {
   currentPageType: string | null = null;
   previousPageType: string | null = null;
   firstPageType: string | null = null;
+  pageTypePageCounts: { [pageType: string]: number } = {};
   isFirst: boolean = true;
   isRoot: boolean = true;
   counters: CounterValues = {};

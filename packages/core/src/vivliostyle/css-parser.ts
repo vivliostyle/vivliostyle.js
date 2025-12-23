@@ -1751,6 +1751,24 @@ export class Parser {
                       continue;
                     }
                     break;
+                  } else if (text === "nth") {
+                    // check for optional "of <page-type>" syntax for :nth() page selector
+                    token1 = tokenizer.nthToken(0);
+                    if (
+                      token1.type === TokenType.IDENT &&
+                      token1.text === "of"
+                    ) {
+                      tokenizer.consume();
+                      token1 = tokenizer.token();
+                      if (token1.type === TokenType.IDENT) {
+                        params.push(token1.text); // add page type name to params
+                        tokenizer.consume();
+                      } else {
+                        // Invalid ":nth(... of ...)" syntax: "of" must be followed by an identifier
+                        break pseudoclassType;
+                      }
+                    }
+                    break;
                   } else {
                     break;
                   }

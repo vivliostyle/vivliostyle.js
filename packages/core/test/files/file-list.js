@@ -322,6 +322,10 @@ module.exports = [
         ],
         title: "nth() page selector & page counter reset in multiple documents",
       },
+      {
+        file: "nth-page/nth-of-page.html",
+        title: ":nth(An+B of C) page selector",
+      },
     ],
   },
   {

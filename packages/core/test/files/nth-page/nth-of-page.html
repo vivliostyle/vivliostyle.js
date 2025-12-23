@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nth(An+B of C) Page Selector</title>
+    <style>
+      @page {
+        size: 16cm 12cm;
+        margin: 1.5cm;
+
+        @top-right {
+          content: "Page " counter(page);
+        }
+      }
+      @page A {
+        @top-left {
+          content: "A";
+        }
+      }
+      @page B {
+        @top-center {
+          content: "B";
+        }
+      }
+      @page :nth(odd of A) {
+        /* will select odd pages of page type A */
+        @bottom-left {
+          content: ":nth(odd of A)";
+        }
+      }
+      @page :nth(1 of B) {
+        /* will select first page of page type B page group */
+        @bottom-center {
+          content: ":nth(1 of B)";
+        }
+      }
+      @page :nth(5) {
+        /* will select 5th page of document */
+        @bottom-right {
+          content: ":nth(5)";
+        }
+      }
+      div.chapter-a {
+        page: A;
+        break-before: page;
+      }
+      div.chapter-b {
+        page: B;
+        break-before: page;
+      }
+      .break-before-page {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Nth(An+B of C) Page Selector Test</h1>
+    <p>Page 1</p>
+    <p>This page should have no footer</p>
+    <div class="chapter-a">
+      <p>Page 2 - Chapter A Start (A page 1)</p>
+      <p>This page should have footer: ":nth(odd of A)"</p>
+      <p class="break-before-page">Page 3 - Chapter A (A page 2)</p>
+      <p>This page should have no footer</p>
+      <p class="break-before-page">Page 4 - Chapter A (A page 3)</p>
+      <p>This page should have footer: ":nth(odd of A)"</p>
+      <p class="break-before-page">Page 5 - Chapter A End (A page 4)</p>
+      <p>This page should have footer: ":nth(5)"</p>
+    </div>
+    <div class="chapter-b">
+      <p>Page 6 - Chapter B Start (B page 1)</p>
+      <p>This page should have footer: ":nth(1 of B)"</p>
+      <p class="break-before-page">Page 7 - Chapter B End (B page 2)</p>
+      <p>This page should have no footer</p>
+    </div>
+    <div class="chapter-a">
+      <p>Page 8 - Chapter A Start (A page 1, new group)</p>
+      <p>This page should have footer: ":nth(odd of A)"</p>
+      <p class="break-before-page">Page 9 - Chapter A End (A page 2)</p>
+      <p>This page should have no footer</p>
+    </div>
+    <div class="chapter-b">
+      <p>Page 10 - Chapter B Start (B page 1, new group)</p>
+      <p>This page should have footer: ":nth(1 of B)"</p>
+    </div>
+  </body>
+</html>
