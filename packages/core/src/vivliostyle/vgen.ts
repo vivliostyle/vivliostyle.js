@@ -2425,11 +2425,14 @@ export class ViewFactory
 
         // Issue #868: Insert footnote-call before footnote element
         // Only insert if footnote-call hasn't been processed yet for this footnote
+        // Skip for template-based footnotes (where styler.getStyle returns undefined)
+        // as they define their own call content in HTML, not via ::footnote-call
         if (
           nodeContext.floatSide === "footnote" &&
           !this.isFootnote &&
           !nodeContext.after &&
-          !nodeContext.pluginProps["footnoteCallProcessed"]
+          !nodeContext.pluginProps["footnoteCallProcessed"] &&
+          this.styler.getStyle(nodeContext.sourceNode as Element, false)
         ) {
           // Mark as processed to avoid infinite loop when returning via shadowSibling
           nodeContext.pluginProps["footnoteCallProcessed"] = 1;
