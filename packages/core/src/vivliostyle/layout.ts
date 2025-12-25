@@ -1795,12 +1795,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             Asserts.assert(float);
             if (!success) {
               context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+              return Task.newResult(nodeContextAfter);
             }
-            // Issue #868: Always return nodeContextAfter so the layout loop
+            // Issue #868: For footnotes, return nodeContextAfter so the layout loop
             // continues to process following elements (like text after footnote-call).
             // This ensures footnote-call and following content are processed
             // in the same postLayoutBlock, allowing correct text-spacing.
-            return Task.newResult(nodeContextAfter);
+            if (nodeContext.floatSide === "footnote") {
+              return Task.newResult(nodeContextAfter);
+            }
+            return Task.newResult(null as Vtree.NodeContext);
           });
         }
       }
