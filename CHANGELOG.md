@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.39.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.38.0...v2.39.0) (2025-12-25)
+
+### Features
+
+- Support CSS :nth-child(An+B of S) selectors ([820ce29](https://github.com/vivliostyle/vivliostyle.js/commit/820ce290de1905595ff296b24093b8e2f3e8514b)), closes [#1488](https://github.com/vivliostyle/vivliostyle.js/issues/1488)
+- Support CSS :nth(An+B of C) page selector ([fa2b365](https://github.com/vivliostyle/vivliostyle.js/commit/fa2b365cf9840815c4a4268d5b3e8746293800b8)), closes [#1621](https://github.com/vivliostyle/vivliostyle.js/issues/1621)
+
 # [2.38.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.37.0...v2.38.0) (2025-12-18)
 
 ### Bug Fixes
