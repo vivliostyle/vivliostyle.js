@@ -24,6 +24,7 @@ import "./table";
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
+import * as CmykStore from "./cmyk-store";
 import * as Columns from "./columns";
 import * as Constants from "./constants";
 import * as Counters from "./counters";
@@ -271,6 +272,7 @@ export class StyleInstance
     public readonly pageNumberOffset: number,
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly counterStore: Counters.CounterStore,
+    public readonly cmykStore: CmykStore.CmykStore,
     pageProgression?: Constants.PageProgression,
     isVersoFirstPage?: boolean,
   ) {
@@ -322,6 +324,7 @@ export class StyleInstance
       counterListener,
       counterResolver,
       this.style.counterStyleStore,
+      this.cmykStore,
     );
     counterResolver.setStyler(this.styler);
     this.styler.resetFlowChunkStream(this);
@@ -350,6 +353,7 @@ export class StyleInstance
       counterResolver,
       this.lang,
       this.style.counterStyleStore,
+      this.cmykStore,
     );
 
     // Named page type at first page
@@ -400,6 +404,9 @@ export class StyleInstance
 
       // Calculate calc()
       this.styler.cascade.applyCalcFilter(pageStyle, this.styler.context);
+
+      // Convert device-cmyk() to color(srgb ...)
+      this.styler.cascade.applyCmykFilter(pageStyle);
 
       const pageSizeAndBleed = CssPage.evaluatePageSizeAndBleed(
         CssPage.resolvePageSizeAndBleed(pageStyle),
@@ -463,6 +470,7 @@ export class StyleInstance
         counterListener,
         counterResolver,
         style.counterStyleStore,
+        this.cmykStore,
       );
       this.stylerMap[xmldoc.url] = styler;
     }
@@ -1886,6 +1894,9 @@ export class StyleInstance
 
     // Calculate calc()
     this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);
+
+    // Convert device-cmyk() to color(srgb ...)
+    this.styler.cascade.applyCmykFilter(cascadedPageStyle);
 
     if (!isTocBox) {
       const isLeftPage = new Exprs.Named(this.style.pageScope, "left-page");
