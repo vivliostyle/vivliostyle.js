@@ -21,6 +21,7 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as CFI from "./cfi";
+import * as CmykStore from "./cmyk-store";
 import * as Constants from "./constants";
 import * as Counters from "./counters";
 import * as Css from "./css";
@@ -1418,6 +1419,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   pref: Exprs.Preferences;
   clientLayout: Vgen.DefaultClientLayout;
   counterStore: Counters.CounterStore;
+  cmykStore: CmykStore.CmykStore;
   tocAutohide: boolean = false;
   tocVisible: boolean = false;
   tocView?: Toc.TOCView;
@@ -1437,6 +1439,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.pref = Exprs.clonePreferences(pref);
     this.clientLayout = new Vgen.DefaultClientLayout(viewport);
     this.counterStore = new Counters.CounterStore(opf.documentURLTransformer);
+    this.cmykStore = new CmykStore.CmykStore();
   }
 
   private getPage(position: Position): Vtree.Page {
@@ -2570,6 +2573,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         pageNumberOffset,
         this.opf.documentURLTransformer,
         this.counterStore,
+        this.cmykStore,
         this.opf.pageProgression,
         isVersoFirstPage,
       );
@@ -2663,6 +2667,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         opf.fallbackMap,
         opf.documentURLTransformer,
         this.counterStore,
+        this.cmykStore,
       );
     }
     const viewport = this.viewport;

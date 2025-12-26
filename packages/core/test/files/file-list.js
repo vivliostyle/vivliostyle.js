@@ -759,6 +759,15 @@ module.exports = [
     ],
   },
   {
+    category: "device-cmyk() function",
+    files: [
+      {
+        file: "device-cmyk/test.html",
+        title: "device-cmyk() function",
+      },
+    ],
+  },
+  {
     category: "Counter style, ::marker, and list-style",
     files: [
       {

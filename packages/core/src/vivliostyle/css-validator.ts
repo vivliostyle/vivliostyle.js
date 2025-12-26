@@ -22,6 +22,7 @@
 import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
 import * as CssTokenizer from "./css-tokenizer";
+import * as CmykStore from "./cmyk-store";
 import * as Base from "./base";
 import { ValidationTxt } from "./assets";
 import { TokenType } from "./css-tokenizer";
@@ -512,12 +513,24 @@ export class PrimitiveValidator extends PropertyValidator {
 
   override visitFunc(func: Css.Func): Css.Val {
     if (this.allowed & ALLOW_COLOR) {
+      if (func.name === "device-cmyk") {
+        if (
+          CSS.supports("color", "color(srgb 0 0 0)") &&
+          CmykStore.parseDeviceCmyk(func) !== null
+        ) {
+          return func;
+        }
+        return null;
+      }
       if (CSS.supports("color", func.toString())) {
         return func;
       }
     }
     if (this.allowed & ALLOW_IMAGE) {
-      if (CSS.supports("background-image", func.toString())) {
+      // CSS.supports() doesn't understand device-cmyk(), so we need to
+      // substitute it with a valid color for structure validation.
+      const tempFunc = func.visit(new CmykStore.CmykFilterVisitor());
+      if (CSS.supports("background-image", tempFunc.toString())) {
         return func;
       }
     }

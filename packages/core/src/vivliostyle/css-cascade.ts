@@ -20,6 +20,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
+import * as CmykStore from "./cmyk-store";
 import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
 import * as CssParser from "./css-parser";
@@ -2763,6 +2764,7 @@ export class Cascade {
     counterResolver: CounterResolver,
     lang,
     counterStyleStore: CounterStyle.CounterStyleStore,
+    cmykStore: CmykStore.CmykStore,
   ): CascadeInstance {
     return new CascadeInstance(
       this,
@@ -2771,6 +2773,7 @@ export class Cascade {
       counterResolver,
       lang,
       counterStyleStore,
+      cmykStore,
     );
   }
 
@@ -2827,6 +2830,7 @@ export class CascadeInstance {
     public readonly counterResolver: CounterResolver,
     lang: string,
     public readonly counterStyleStore: CounterStyle.CounterStyleStore,
+    public readonly cmykStore: CmykStore.CmykStore,
   ) {
     this.code = cascade;
     this.quotes = [
@@ -3262,6 +3266,9 @@ export class CascadeInstance {
     // Calculate calc()
     this.applyCalcFilter(this.currentStyle, this.context);
 
+    // Convert device-cmyk() to color(srgb ...)
+    this.applyCmykFilter(this.currentStyle, this.currentElement);
+
     this.applyAttrFilter(element);
     const quotesCasc = baseStyle["quotes"] as CascadeValue;
     let itemToPushLast: QuotesScopeItem | null = null;
@@ -3635,6 +3642,50 @@ export class CascadeInstance {
         const cascVal = getProp(elementStyle, name);
         const value = cascVal.value.visit(visitor);
         if (value !== cascVal.value) {
+          elementStyle[name] = new CascadeValue(value, cascVal.priority);
+        }
+      }
+    }
+  }
+
+  applyCmykFilter(elementStyle: ElementStyle, element?: Element): void {
+    const visitor = new CmykStore.CmykFilterVisitor(this.cmykStore);
+    this.applyCmykFilterInternal(elementStyle, visitor, "");
+    if (element) {
+      const conversions = visitor.getConversions();
+      if (conversions) {
+        element.setAttribute(
+          "data-viv-device-cmyk",
+          JSON.stringify(conversions),
+        );
+      }
+    }
+  }
+
+  private applyCmykFilterInternal(
+    elementStyle: ElementStyle,
+    visitor: CmykStore.CmykFilterVisitor,
+    pseudoPrefix: string,
+  ): void {
+    for (const name in elementStyle) {
+      if (isMapName(name)) {
+        const pseudoMap = getStyleMap(elementStyle, name);
+        for (const pseudoName in pseudoMap) {
+          this.applyCmykFilterInternal(
+            pseudoMap[pseudoName],
+            visitor,
+            `::${pseudoName}:`,
+          );
+        }
+      } else if (isPropName(name) && !Css.isCustomPropName(name)) {
+        const cascVal = getProp(elementStyle, name);
+        const originalValue = cascVal.value.toString();
+        visitor.reset();
+        const value = cascVal.value.visit(visitor);
+        if (value !== cascVal.value) {
+          if (visitor.hadDeviceCmyk()) {
+            visitor.recordConversion(pseudoPrefix + name, originalValue);
+          }
           elementStyle[name] = new CascadeValue(value, cascVal.priority);
         }
       }

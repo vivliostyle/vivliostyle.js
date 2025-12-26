@@ -19,6 +19,7 @@
  */
 import * as AdaptiveViewer from "./adaptive-viewer";
 import * as Base from "./base";
+import * as CmykStore from "./cmyk-store";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
 import * as Profile from "./profile";
@@ -477,6 +478,17 @@ export class CoreViewer {
    */
   getCover(): Epub.OPFItem | null {
     return this.adaptViewer_.opf.cover;
+  }
+
+  /**
+   * Get the CMYK mapping for device-cmyk() colors used in the document.
+   */
+  getCmykMap(): Record<string, CmykStore.CMYKValueJSON> {
+    const opfView = this.adaptViewer_?.opfView;
+    if (!opfView?.cmykStore) {
+      return {};
+    }
+    return opfView.cmykStore.toJSON();
   }
 }
 

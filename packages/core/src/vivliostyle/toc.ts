@@ -19,6 +19,7 @@
  * @fileoverview Toc - Table of Contents view.
  */
 import * as Base from "./base";
+import * as CmykStore from "./cmyk-store";
 import * as Counters from "./counters";
 import * as Css from "./css";
 import * as Exprs from "./exprs";
@@ -109,6 +110,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     public readonly fallbackMap: { [key: string]: string },
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly counterStore: Counters.CounterStore,
+    public readonly cmykStore: CmykStore.CmykStore,
   ) {
     this.pref = Exprs.clonePreferences(pref);
     this.pref.spreadView = false; // No spred view for TOC box
@@ -297,6 +299,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         0,
         this.documentURLTransformer,
         this.counterStore,
+        this.cmykStore,
       );
       this.instance = instance;
       instance.pref = this.pref;
