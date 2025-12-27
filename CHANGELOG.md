@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.39.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.39.0...v2.39.1) (2025-12-27)
+
+### Bug Fixes
+
+- Fix text disappearance when multi-column box is broken across pages ([a23d2f8](https://github.com/vivliostyle/vivliostyle.js/commit/a23d2f8ecd44e263681458496264b6f6bb12388d)), closes [#1625](https://github.com/vivliostyle/vivliostyle.js/issues/1625)
+
 # [2.39.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.38.0...v2.39.0) (2025-12-25)
 
 ### Features
