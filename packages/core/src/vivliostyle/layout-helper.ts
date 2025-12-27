@@ -132,7 +132,6 @@ export function adjustRectForColumnBreaking(
     rect.bottom -= shiftEnd;
     if (rect.bottom < rect.top) {
       rect.bottom += BIG_GAP;
-      shiftEnd -= BIG_GAP;
     }
     rect.right -= shiftStart;
     rect.left -= shiftEnd;
@@ -142,7 +141,6 @@ export function adjustRectForColumnBreaking(
     rect.left += shiftEnd;
     if (rect.left > rect.right) {
       rect.left -= BIG_GAP;
-      shiftEnd += BIG_GAP;
     }
     rect.top += shiftStart;
     rect.bottom += shiftEnd;
@@ -152,7 +150,6 @@ export function adjustRectForColumnBreaking(
     rect.right -= shiftEnd;
     if (rect.right < rect.left) {
       rect.right += BIG_GAP;
-      shiftEnd -= BIG_GAP;
     }
     rect.top += shiftStart;
     rect.bottom += shiftEnd;
