@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>device-cmyk() function</title>
+    <style>
+      /* @page rule with device-cmyk() */
+      @page {
+        background-color: device-cmyk(0.05 0.05 0.05 0);
+        border: 1px solid device-cmyk(0 0 0 1);
+      }
+
+      body {
+        font-family: sans-serif;
+        line-height: 1.5;
+      }
+
+      h1 {
+        color: device-cmyk(0 0 0 0.9);
+      }
+
+      /* Basic CMYK colors */
+      .cyan {
+        color: device-cmyk(1 0 0 0);
+      }
+      .magenta {
+        color: device-cmyk(0 1 0 0);
+      }
+      .yellow {
+        color: device-cmyk(0 0 1 0);
+      }
+      .black {
+        color: device-cmyk(0 0 0 1);
+      }
+
+      /* With alpha */
+      .with-alpha {
+        color: device-cmyk(0.5 0.5 0.5 0.5 / 0.5);
+      }
+
+      /* Percentage notation */
+      .percent {
+        color: device-cmyk(100% 0% 0% 0%);
+      }
+
+      /* Legacy syntax (comma-separated) */
+      .legacy-cyan {
+        color: device-cmyk(1, 0, 0, 0);
+      }
+      .legacy-mixed {
+        color: device-cmyk(0.3, 0.5, 0.7, 0.2);
+      }
+
+      /* Mixed values */
+      .mixed {
+        color: device-cmyk(0.2 0.4 0.6 0.1);
+      }
+
+      /* Background color */
+      .bg-cmyk {
+        background-color: device-cmyk(0.1 0.1 0.1 0);
+        padding: 0.5em;
+      }
+
+      /* Border color */
+      .border-cmyk {
+        border: 3px solid device-cmyk(0 0.8 0.8 0);
+        padding: 0.5em;
+      }
+
+      /* Gradient with device-cmyk() */
+      .gradient {
+        background: linear-gradient(
+          to right,
+          device-cmyk(1 0 0 0),
+          device-cmyk(0 1 0 0)
+        );
+        padding: 1em;
+        color: white;
+        text-shadow: 1px 1px 2px device-cmyk(0 0 0 0.8);
+      }
+
+      /* Rich black */
+      .rich-black {
+        color: device-cmyk(0.4 0.4 0.4 1);
+      }
+
+      /* Process colors for print */
+      .process-red {
+        color: device-cmyk(0 1 1 0);
+      }
+      .process-green {
+        color: device-cmyk(1 0 1 0);
+      }
+      .process-blue {
+        color: device-cmyk(1 1 0 0);
+      }
+
+      /* Table for color comparison */
+      table {
+        border-collapse: collapse;
+        margin: 1em 0;
+      }
+      th,
+      td {
+        border: 1px solid device-cmyk(0 0 0 0.3);
+        padding: 0.5em;
+      }
+      th {
+        background-color: device-cmyk(0 0 0 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>device-cmyk() function test</h1>
+
+    <h2>Basic CMYK Colors</h2>
+    <p class="cyan">Cyan text: device-cmyk(1 0 0 0)</p>
+    <p class="magenta">Magenta text: device-cmyk(0 1 0 0)</p>
+    <p class="yellow">Yellow text: device-cmyk(0 0 1 0)</p>
+    <p class="black">Black text: device-cmyk(0 0 0 1)</p>
+
+    <h2>With Alpha</h2>
+    <p class="with-alpha">
+      Semi-transparent: device-cmyk(0.5 0.5 0.5 0.5 / 0.5)
+    </p>
+
+    <h2>Percentage Notation</h2>
+    <p class="percent">Cyan with percent: device-cmyk(100% 0% 0% 0%)</p>
+
+    <h2>Legacy Syntax (comma-separated)</h2>
+    <p class="legacy-cyan">Legacy cyan: device-cmyk(1, 0, 0, 0)</p>
+    <p class="legacy-mixed">Legacy mixed: device-cmyk(0.3, 0.5, 0.7, 0.2)</p>
+
+    <h2>Mixed Values</h2>
+    <p class="mixed">Mixed: device-cmyk(0.2 0.4 0.6 0.1)</p>
+
+    <h2>Background Color</h2>
+    <p class="bg-cmyk">Background with device-cmyk()</p>
+
+    <h2>Border Color</h2>
+    <p class="border-cmyk">Border with device-cmyk()</p>
+
+    <h2>Gradient</h2>
+    <p class="gradient">Gradient from cyan to magenta</p>
+
+    <h2>Process Colors</h2>
+    <p class="process-red">Process Red (M+Y): device-cmyk(0 1 1 0)</p>
+    <p class="process-green">Process Green (C+Y): device-cmyk(1 0 1 0)</p>
+    <p class="process-blue">Process Blue (C+M): device-cmyk(1 1 0 0)</p>
+
+    <h2>Rich Black</h2>
+    <p class="rich-black">Rich Black: device-cmyk(0.4 0.4 0.4 1)</p>
+
+    <h2>Color Table</h2>
+    <table>
+      <tr>
+        <th>Color Name</th>
+        <th>CMYK Values</th>
+        <th>Sample</th>
+      </tr>
+      <tr>
+        <td>Cyan</td>
+        <td>1, 0, 0, 0</td>
+        <td class="cyan">Sample</td>
+      </tr>
+      <tr>
+        <td>Magenta</td>
+        <td>0, 1, 0, 0</td>
+        <td class="magenta">Sample</td>
+      </tr>
+      <tr>
+        <td>Yellow</td>
+        <td>0, 0, 1, 0</td>
+        <td class="yellow">Sample</td>
+      </tr>
+      <tr>
+        <td>Black</td>
+        <td>0, 0, 0, 1</td>
+        <td class="black">Sample</td>
+      </tr>
+    </table>
+  </body>
+</html>
