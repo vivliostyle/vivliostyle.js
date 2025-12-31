@@ -235,6 +235,7 @@ export const Renderer = ({
     userStyleSheet,
     zoom,
     fitToScreen,
+    bookMode,
   ]);
 
   useEffect(() => {
