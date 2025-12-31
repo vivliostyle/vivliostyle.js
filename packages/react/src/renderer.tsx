@@ -83,6 +83,8 @@ export const Renderer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<CoreViewer | undefined>(undefined);
   const stateRef = React.useRef<VolatileState | undefined>(undefined);
+  // Use a key to force re-creation of the container element on re-mount (e.g., in StrictMode)
+  const [containerKey, setContainerKey] = React.useState(0);
 
   function setViewerOptions() {
     const viewerOptions = {
@@ -209,17 +211,32 @@ export const Renderer = ({
 
   // initialize document and event handlers
   useEffect(() => {
+    // Increment key to force new container element, ensuring previous CoreViewer's
+    // async rendering won't affect the new container (handles StrictMode double-mount)
+    setContainerKey((k) => k + 1);
+  }, []);
+
+  useEffect(() => {
     initInstance();
     setViewerOptions();
 
     const cleanup = registerEventHandlers();
     return cleanup;
-  }, []);
+  }, [containerKey]);
 
   useEffect(() => {
+    if (containerKey === 0) return; // Skip initial render before key is set
     loadSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source, authorStyleSheet, userStyleSheet, zoom, fitToScreen]);
+  }, [
+    containerKey,
+    source,
+    authorStyleSheet,
+    userStyleSheet,
+    zoom,
+    fitToScreen,
+    bookMode,
+  ]);
 
   useEffect(() => {
     setViewerOptions();
@@ -239,7 +256,12 @@ export const Renderer = ({
   }, [page]);
 
   const container = (
-    <Container ref={containerRef} style={style} background={background} />
+    <Container
+      key={containerKey}
+      ref={containerRef}
+      style={style}
+      background={background}
+    />
   );
 
   if (typeof children === "function" && children instanceof Function) {
