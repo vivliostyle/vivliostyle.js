@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <style>
+      :root {
+        text-spacing: auto;
+      }
+      .footnote {
+        float: footnote;
+      }
+      .footnote::footnote-call {
+        content: "『「" counter(footnote) "」』";
+        color: maroon;
+      }
+      .footnote::footnote-marker {
+        content: "『「" counter(footnote) "」』";
+        color: maroon;
+      }
+      .expected {
+        color: maroon;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Issue #868: ::footnote-call に text-spacing を適用</h2>
+
+    <p>Expected: テスト。<span class="expected">『「1」』</span>（後続）</p>
+    <p>Actual: テスト。<span class="footnote">脚注1</span>（後続）</p>
+
+    <p>Expected: テスト。<span class="expected">『「2」』</span>（後続）</p>
+    <p>Actual: テスト。<span class="footnote">脚注2</span>（後続）</p>
+
+    <p>テスト。</p>
+    <p>テスト。</p>
+    <p>テスト。</p>
+  </body>
+</html>
