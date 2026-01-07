@@ -699,27 +699,12 @@ export class CounterStore {
 
   /**
    * Forcefully set the `page` page-based counter to the specified value.
-   * However, if the counter would decrease and we're not in a pushed state
-   * (i.e., during target-counter resolution), skip the update to avoid
-   * corrupting the counter during background rendering.
-   * (Fix for issue #1616)
    */
   forceSetPageCounter(pageNumber: number) {
     const counters = this.currentPageCounters["page"];
     if (!counters || !counters.length) {
       this.currentPageCounters["page"] = [pageNumber];
     } else {
-      const currentValue = counters[counters.length - 1];
-      // Don't decrease the counter unless we're in a pushed state
-      // (during target-counter resolution). This prevents the counter
-      // from being corrupted when navigating to a later spine item
-      // while background rendering is in progress.
-      if (
-        this.currentPageCountersStack.length === 0 &&
-        pageNumber < currentValue
-      ) {
-        return;
-      }
       counters[counters.length - 1] = pageNumber;
     }
   }
@@ -793,20 +778,6 @@ export class CounterStore {
    */
   popPageCounters() {
     this.currentPageCounters = this.currentPageCountersStack.pop();
-  }
-
-  /**
-   * Get the base (non-pushed) page counters. This returns the original
-   * currentPageCounters before any pushPageCounters calls, which is needed
-   * when calculating page counter offset for a new spine item during
-   * target-counter resolution.
-   * (Fix for issue #1616)
-   */
-  getBasePageCounters(): CssCascade.CounterValues {
-    if (this.currentPageCountersStack.length > 0) {
-      return this.currentPageCountersStack[0];
-    }
-    return this.currentPageCounters;
   }
 
   /**
