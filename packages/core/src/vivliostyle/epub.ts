@@ -1447,6 +1447,48 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return viewItem ? viewItem.pages[position.pageIndex] : null;
   }
 
+  /**
+   * Wait until all previous spine items are loaded before accessing the target
+   * spine item. This prevents corrupting the page counter state when navigating
+   * to a later spine item while rendering is in progress.
+   * (Fix for issue #1616)
+   * @param spineIndex The target spine index to navigate to
+   * @param sync If true, skip waiting (synchronous mode)
+   */
+  private waitForPreviousSpines(
+    spineIndex: number,
+    sync: boolean,
+  ): Task.Result<boolean> {
+    if (sync || spineIndex === 0) {
+      return Task.newResult(true);
+    }
+    const frame: Task.Frame<boolean> = Task.newFrame("waitForPreviousSpines");
+    frame
+      .loopWithFrame((loopFrame) => {
+        // Check if any previous spine item is not yet complete
+        let allPreviousComplete = true;
+        for (let i = 0; i < spineIndex; i++) {
+          const prevItem = this.spineItems[i];
+          if (!prevItem || !prevItem.complete) {
+            allPreviousComplete = false;
+            break;
+          }
+        }
+        if (allPreviousComplete) {
+          loopFrame.breakLoop();
+        } else {
+          // Wait and retry
+          frame.sleep(100).then(() => {
+            loopFrame.continueLoop();
+          });
+        }
+      })
+      .then(() => {
+        frame.finish(true);
+      });
+    return frame.result();
+  }
+
   getCurrentPageProgression(
     position: Position,
   ): Constants.PageProgression | null {
@@ -1725,46 +1767,49 @@ export class OPFView implements Vgen.CustomRendererFactory {
     sync: boolean,
   ): Task.Result<PageAndPosition | null> {
     const frame: Task.Frame<PageAndPosition | null> = Task.newFrame("findPage");
-    this.getPageViewItem(position.spineIndex).then((viewItem) => {
-      if (!viewItem) {
-        frame.finish(null);
-        return;
-      }
-      let resultPage: Vtree.Page = null;
-      let pageIndex: number;
-      frame
-        .loopWithFrame((loopFrame) => {
-          const normalizedPosition = this.normalizeSeekPosition(
-            position,
-            viewItem,
-          );
-          pageIndex = normalizedPosition.pageIndex;
-          resultPage = viewItem.pages[pageIndex];
-          if (resultPage) {
-            loopFrame.breakLoop();
-          } else if (viewItem.complete) {
-            pageIndex = viewItem.layoutPositions.length - 1;
+
+    this.waitForPreviousSpines(position.spineIndex, sync).then(() => {
+      this.getPageViewItem(position.spineIndex).then((viewItem) => {
+        if (!viewItem) {
+          frame.finish(null);
+          return;
+        }
+        let resultPage: Vtree.Page = null;
+        let pageIndex: number;
+        frame
+          .loopWithFrame((loopFrame) => {
+            const normalizedPosition = this.normalizeSeekPosition(
+              position,
+              viewItem,
+            );
+            pageIndex = normalizedPosition.pageIndex;
             resultPage = viewItem.pages[pageIndex];
-            loopFrame.breakLoop();
-          } else if (sync) {
-            this.renderPage(normalizedPosition).then((result) => {
-              if (result) {
-                resultPage = result.page;
-                pageIndex = result.position.pageIndex;
-              }
+            if (resultPage) {
               loopFrame.breakLoop();
-            });
-          } else {
-            // Wait for the layout task and retry
-            frame.sleep(100).then(() => {
-              loopFrame.continueLoop();
-            });
-          }
-        })
-        .then(() => {
-          Asserts.assert(resultPage);
-          frame.finish(makePageAndPosition(resultPage, pageIndex));
-        });
+            } else if (viewItem.complete) {
+              pageIndex = viewItem.layoutPositions.length - 1;
+              resultPage = viewItem.pages[pageIndex];
+              loopFrame.breakLoop();
+            } else if (sync) {
+              this.renderPage(normalizedPosition).then((result) => {
+                if (result) {
+                  resultPage = result.page;
+                  pageIndex = result.position.pageIndex;
+                }
+                loopFrame.breakLoop();
+              });
+            } else {
+              // Wait for the layout task and retry
+              frame.sleep(100).then(() => {
+                loopFrame.continueLoop();
+              });
+            }
+          })
+          .then(() => {
+            Asserts.assert(resultPage);
+            frame.finish(makePageAndPosition(resultPage, pageIndex));
+          });
+      });
     });
     return frame.result();
   }
@@ -2240,20 +2285,23 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
     const frame: Task.Frame<PageAndPosition | null> =
       Task.newFrame("navigateTo");
-    this.getPageViewItem(item.spineIndex).then((viewItem) => {
-      if (!viewItem) {
-        frame.finish(null);
-        return;
-      }
-      const target = viewItem.xmldoc.getElement(href);
-      this.findPage(
-        {
-          spineIndex: item.spineIndex,
-          pageIndex: -1,
-          offsetInItem: target ? viewItem.xmldoc.getElementOffset(target) : 0,
-        },
-        sync,
-      ).thenFinish(frame);
+
+    this.waitForPreviousSpines(item.spineIndex, sync).then(() => {
+      this.getPageViewItem(item.spineIndex).then((viewItem) => {
+        if (!viewItem) {
+          frame.finish(null);
+          return;
+        }
+        const target = viewItem.xmldoc.getElement(href);
+        this.findPage(
+          {
+            spineIndex: item.spineIndex,
+            pageIndex: -1,
+            offsetInItem: target ? viewItem.xmldoc.getElementOffset(target) : 0,
+          },
+          sync,
+        ).thenFinish(frame);
+      });
     });
     return frame.result();
   }
@@ -2545,7 +2593,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
             ? previousViewItem.instance.pageNumberOffset +
               previousViewItem.pages.length
             : 0;
-          const counters = this.counterStore.currentPageCounters["page"];
+          // Use getBasePageCounters() to get the original page counter value
+          // that is not affected by pushPageCounters() during target-counter
+          // resolution. This fixes the issue where page numbers become incorrect
+          // when navigating to a later spine item while target-counter resolution
+          // is in progress. (Fix for issue #1616)
+          const counters = this.counterStore.getBasePageCounters()["page"];
           pageCounterOffset =
             !counters || !counters.length
               ? pageNumberOffset
