@@ -2593,12 +2593,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             ? previousViewItem.instance.pageNumberOffset +
               previousViewItem.pages.length
             : 0;
-          // Use getBasePageCounters() to get the original page counter value
-          // that is not affected by pushPageCounters() during target-counter
-          // resolution. This fixes the issue where page numbers become incorrect
-          // when navigating to a later spine item while target-counter resolution
-          // is in progress. (Fix for issue #1616)
-          const counters = this.counterStore.getBasePageCounters()["page"];
+          const counters = this.counterStore.currentPageCounters["page"];
           pageCounterOffset =
             !counters || !counters.length
               ? pageNumberOffset
