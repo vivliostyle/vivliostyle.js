@@ -282,7 +282,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         viewport.window,
         viewportSize.fontSize,
         0,
-        viewport.root,
+        elem,
         viewportSize.width,
         viewportSize.height,
       );

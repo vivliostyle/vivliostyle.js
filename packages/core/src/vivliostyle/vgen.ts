@@ -3161,7 +3161,7 @@ export class Viewport {
   width: number;
   height: number;
   scaleRatio: number = 1;
-  layoutUnitPerPixel: number;
+  layoutUnitPerPixel: number = 64;
   layoutUnitAdj: number = 0;
 
   constructor(
@@ -3174,6 +3174,14 @@ export class Viewport {
   ) {
     this.document = window.document;
     this.root = opt_root || this.document.body;
+
+    if (this.root.hasAttribute("data-vivliostyle-toc-box")) {
+      // TOC viewport does not need zoom box and layout box.
+      this.outerZoomBox = this.contentContainer = this.layoutBox = this.root;
+      this.width = opt_width || this.root.clientWidth;
+      this.height = opt_height || this.root.clientHeight;
+      return;
+    }
 
     let outerZoomBox = this.root.firstElementChild as HTMLElement;
     if (!outerZoomBox) {
