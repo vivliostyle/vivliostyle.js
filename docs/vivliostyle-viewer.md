@@ -1,30 +1,5 @@
 # Vivliostyle Viewer
 
-```js {mixin: true}
-Vue.component("Link", {
-  props: { path: String },
-  template: `<a v-bind:href="url" target="_blank"><slot>{{url}}</slot></a>`,
-  computed: {
-    url() {
-      const iLocalDocs = location.href.indexOf("/docs/#/");
-      const isLocal = iLocalDocs !== -1;
-      let path = this.path;
-      if (!isLocal) {
-        path = path.replace("../samples/", "https://vivliostyle.github.io/vivliostyle_doc/samples/");
-      }
-      let prefix = "";
-      if (path.startsWith("/viewer/")) {
-        if (isLocal) {
-          prefix = location.href.slice(0, iLocalDocs);
-        } else {
-          prefix = "https://vivliostyle.org";
-        }
-      }
-      return prefix + path;
-    }
-  }
-});
-```
 
 Vivliostyle Viewer is a web application displaying and typesetting HTML+CSS documents.
 
@@ -51,9 +26,9 @@ To use it in a Node.js application, use the npm package [@vivliostyle/viewer](ht
 
 ### The start page of Vivliostyle Viewer
 
-When you open <Link path="/viewer/">Vivliostyle Viewer</Link> without specifying parameters, an “Input a document URL” box, **Book Mode** and **Render All Pages** check boxes, and usage help is displayed.
+When you open <a href="https://vivliostyle.org/viewer/">Vivliostyle Viewer</a> without specifying parameters, an “Input a document URL” box, **Book Mode** and **Render All Pages** check boxes, and usage help is displayed.
 
-Access to <Link path="/viewer/" />.
+Access to <a href="https://vivliostyle.org/viewer/">https://vivliostyle.org/viewer/</a>.
 
 ## Supported document types
 
@@ -114,9 +89,9 @@ Note: Since Vivliostyle Viewer uses an online JavaScript library
 mathematics (supports MathML and TeX formats), the internet
 connection is required when the document contains mathematics.
 
-Example: If you want to display a HTML file <Link path="../samples/wood/index.html" />:
+Example: If you want to display a HTML file <a href="https://vivliostyle.github.io/vivliostyle_doc/samples/wood/index.html">https://vivliostyle.github.io/vivliostyle_doc/samples/wood/index.html</a>:
 
-<Link path="/viewer/#src=../samples/wood/index.html" />
+<a href="https://vivliostyle.org/viewer/#src=../samples/wood/index.html">https://vivliostyle.org/viewer/#src=../samples/wood/index.html</a>
 
 ## EPUB
 
@@ -132,7 +107,7 @@ An example of displaying unzipped EPUB on GitHub:
 
 - [Accessible EPUB 3](https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/) on [IDPF/epub3-samples](https://github.com/IDPF/epub3-samples/)
 
-  <Link path="/viewer/#src=https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/&bookMode=true" />
+  <a href="https://vivliostyle.org/viewer/#src=https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/&bookMode=true">https://vivliostyle.org/viewer/#src=https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/&bookMode=true</a>
 
 ## Web publications (multi-HTML documents)
 
@@ -160,7 +135,7 @@ documents published on the Web:
 
 - [Cascading Style Sheets Level 2 Revision 1 (CSS 2.1) Specification](https://www.w3.org/TR/CSS2/)
 
-  <Link path="/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true" />
+  <a href="https://vivliostyle.org/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true">https://vivliostyle.org/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true</a>
 
 ## TOC panel
 
@@ -231,9 +206,9 @@ the document on the Web:
 
 - [Cascading Style Sheets Level 2 Revision 1 (CSS 2.1) Specification](https://www.w3.org/TR/CSS2/)
 
-  <Link path="/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true&style=data:,/*%3Cviewer%3E*/%0A@page%20%7B%20size:%20A4;%20%7D%0A/*%3C/viewer%3E*/%0A%0A@page%20:first%20%7B%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%7D%0A%0A@page%20:left%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20env(pub-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D%0A%0A@page%20:right%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20env(doc-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D">
+  <a href="https://vivliostyle.org/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true&style=data:,/*%3Cviewer%3E*/%0A@page%20%7B%20size:%20A4;%20%7D%0A/*%3C/viewer%3E*/%0A%0A@page%20:first%20%7B%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%7D%0A%0A@page%20:left%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20env(pub-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D%0A%0A@page%20:right%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20env(doc-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D">
     …#src=https://www.w3.org/TR/CSS2/&bookMode=true&style=data:,…
-  </Link>
+  </a>
 
 ```css
 /*<viewer>*/
