@@ -1,0 +1,303 @@
+# Vivliostyle Viewer
+
+```js {mixin: true}
+Vue.component("Link", {
+  props: { path: String },
+  template: `<a v-bind:href="url" target="_blank"><slot>{{url}}</slot></a>`,
+  computed: {
+    url() {
+      const iLocalDocs = location.href.indexOf("/docs/#/");
+      const isLocal = iLocalDocs !== -1;
+      let path = this.path;
+      if (!isLocal) {
+        path = path.replace("../samples/", "https://vivliostyle.github.io/vivliostyle_doc/samples/");
+      }
+      let prefix = "";
+      if (path.startsWith("/viewer/")) {
+        if (isLocal) {
+          prefix = location.href.slice(0, iLocalDocs);
+        } else {
+          prefix = "https://vivliostyle.org";
+        }
+      }
+      return prefix + path;
+    }
+  }
+});
+```
+
+Vivliostyle Viewer is a web application displaying and typesetting HTML+CSS documents.
+
+## How to use
+
+### To use Vivliostyle Viewer in a local environment
+
+To use Vivliostyle Viewer in a local environment, it is convenient to use the preview command of the Vivliostyle CLI. For information on how to install and use the Vivliostyle CLI, see [Vivliostyle CLI User Guide](./vivliostyle-cli.md), and [Preview the typesetting results](./vivliostyle-cli#preview-the-typesetting-results).
+
+If you want to use Vivliostyle Viewer in a local environment by other means, start a web
+server by following the instructions described in the
+[README](https://github.com/vivliostyle/vivliostyle.js/blob/master/packages/viewer/README.md)
+attached to the distribution package.
+
+### Public online Vivliostyle Viewer
+
+You can also use the public online Vivliostyle Viewer ([vivliostyle.org/viewer/](https://vivliostyle.org/viewer/)) that has always been updated to the latest release version. For early bird users, there is also canary version available [vivliostyle.vercel.app](https://vivliostyle.vercel.app).
+
+### Placing Vivliostyle Viewer on your site
+
+You can place the unzipped copy of the Vivliostyle Viewer distribution package (download from https://vivliostyle.org/download/) in your site, and then you can publish your publications to be viewed with Vivliostyle Viewer on your site.
+
+To use it in a Node.js application, use the npm package [@vivliostyle/viewer](https://www.npmjs.com/package/@vivliostyle/viewer).
+
+### The start page of Vivliostyle Viewer
+
+When you open <Link path="/viewer/">Vivliostyle Viewer</Link> without specifying parameters, an “Input a document URL” box, **Book Mode** and **Render All Pages** check boxes, and usage help is displayed.
+
+Access to <Link path="/viewer/" />.
+
+## Supported document types
+
+- HTML documents, with CSS for paged media
+- Book-like publications, with Table of Contents (**Book Mode**: On)
+  - Web publications (a collection of HTML documents): specify URL of the first HTML or the manifest file.
+  - Unzipped EPUB: specify URL of OPF file or top directory of the unzipped EPUB files.
+
+### Notes
+
+- GitHub and Gist URLs can be directly specified. Vivliostyle loads raw
+  github/gist content when such URL is specified.
+- ⚠️Mixed Content (“http:” URL is specified to “https:” Vivliostyle Viewer) is usually blocked by browser.
+- ⚠️Cross-Origin (request to different domain) is usually blocked by browser unless the server is configured to allow Cross-Origin Resource Sharing (CORS).
+
+## URL parameter options
+
+- #**src**=&lt;document URL>
+- &amp;**bookMode**=[**true** | **false**] (**Book Mode**)
+  - **true** (default): for Book-like publications, with Table of Contents.
+    - When an HTML document URL is specified, a series of HTML documents linked from the publication manifest or Table of Contents (e.g., marked up with `<nav role="doc-toc">`) are automatically loaded.
+  - **false**: for single HTML documents
+- &amp;**renderAllPages**=[**true** | **false**] (**Render All Pages**)
+  - **true** (default): for Print (all pages printable, page count works as expected)
+  - **false**: for Read (quick loading with rough page count)
+- &amp;**spread**=[**true** | **false** | **auto**] (**Page Spread View**)
+  - **true**: Spread view
+  - **false**: Single page view
+  - **auto** (default): Auto spread view
+- &amp;**style**=&lt;additional (custom) stylesheet URL>
+- &amp;**userStyle**=&lt;user stylesheet URL>
+
+Options can also be set in the <img src="../assets/vivliostyle-icon.png" width="16" height="16" alt="[Vivliostyle]" />**Settings** panel.
+
+**NOTE:** The default for Book Mode was previously off, but has been changed to on in v2.18.0. The parameter `&bookMode=true` can be omitted since it is enabled by default. To view only the first HTML file without concatenating the HTML documents linked to the table of contents in the first HTML file, specify `&bookMode=false`.
+
+## How to specify HTML document to display
+
+To display an HTML file in the Vivliostyle Viewer, place the file
+(and CSS or image files read from the file) somewhere which the
+web server can read (if you start the web server following the
+above instructions in case of local environment, it is the folder
+generated by unzipping the distribution package), then open the
+following URL in your browser:
+
+```
+⟨Vivliostyle Viewer URL⟩#src=⟨URL of the file (relative to the Viewer)⟩
+```
+
+Note: If you want to display a document from a domain which is
+different from the domain of the Vivliostyle Viewer itself, it is
+possible that it cannot be displayed, depending on the web server
+that serves the document file. You need to configure CORS
+(Cross-Origin Resource Sharing) on the server.
+
+Note: Since Vivliostyle Viewer uses an online JavaScript library
+([MathJax](https://www.mathjax.org)) to display
+mathematics (supports MathML and TeX formats), the internet
+connection is required when the document contains mathematics.
+
+Example: If you want to display a HTML file <Link path="../samples/wood/index.html" />:
+
+<Link path="/viewer/#src=../samples/wood/index.html" />
+
+## EPUB
+
+You can display unzipped EPUB files with the Vivliostyle Viewer.
+
+In this case, use the following parameter:
+
+```
+#src=⟨URL of the unzipped EPUB folder⟩&bookMode=true
+```
+
+An example of displaying unzipped EPUB on GitHub:
+
+- [Accessible EPUB 3](https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/) on [IDPF/epub3-samples](https://github.com/IDPF/epub3-samples/)
+
+  <Link path="/viewer/#src=https://github.com/IDPF/epub3-samples/tree/master/30/accessible_epub_3/&bookMode=true" />
+
+## Web publications (multi-HTML documents)
+
+You can display Web publications (a collection of HTML documents)
+with the Vivliostyle Viewer. In this case, use the following
+parameter:
+
+```
+#src=⟨URL of the first HTML document or manifest file⟩&bookMode=true
+```
+
+For the format of Web publication manifest, W3C draft [Publication Manifest](https://www.w3.org/TR/pub-manifest/) and [Readium Web Publication Manifest](https://github.com/readium/webpub-manifest/) are supported.
+
+### Table of Contents in HTML
+
+When Web publication manifest does not exist, and there are links
+to other HTML documents in the table of contents in the specified
+HTML document, those documents are loaded automatically.
+Vivliostyle treats HTML elements that match the following CSS
+selector as a table of contents element:
+`[role=doc-toc], [role=directory], nav li, .toc, #toc`
+
+An example of displaying publications composed of multiple HTML
+documents published on the Web:
+
+- [Cascading Style Sheets Level 2 Revision 1 (CSS 2.1) Specification](https://www.w3.org/TR/CSS2/)
+
+  <Link path="/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true" />
+
+## TOC panel
+
+Specifying `&bookMode=true` (or **Book Mode** check box On) enables the TOC panel (open by clicking the <img src="../assets/toc-icon.png" width="16" height="16" alt="[TOC]" /> icon in the upper left corner of the viewer) if there is a TOC element in the HTML, even for a single HTML file, as well as [Web publications](#web-publications-multi-html-documents).
+
+## Page spread view mode
+
+Vivliostyle Viewer displays pages automatically with spread view
+mode when the width of the view area is wide (1.45 times the
+height or more). To change the spread view mode, append one of the
+following to the URL:
+
+```
+&spread=true (always spread view)
+```
+
+```
+&spread=false (always single page view)
+```
+
+```
+&spread=auto (auto spread view = default)
+```
+
+You can also change the page view mode in the Vivliostyle Viewer's
+setting panel (open by clicking the <img src="../assets/vivliostyle-icon.png" width="16" height="16" alt="[Settings]" /> icon in the upper right corner of the viewer).
+
+## Additional stylesheets (custom stylesheets)
+
+Additional stylesheets (CSS files) can be specified in addition to the stylesheets specified in the HTML file.
+This allows you to specify a custom stylesheet to customize the style of the document.
+To use an additional stylesheet (custom stylesheet), add the following to the URL:
+
+```
+&style=⟨stylesheet URL (relative to the Vivliostyle Viewer)⟩
+```
+
+The stylesheets specified in this way are treated as author stylesheets,
+as if they are specified in the HTML file at very last,
+and can override styles of other stylesheets according to the CSS cascading rules.
+
+### User stylesheets
+
+On the other hand, you can also specify user stylesheets (cannot 
+override styles of author stylesheets unless specifying
+`!important`) as follows:
+
+```
+&userStyle=⟨user stylesheet URL (relative to the Vivliostyle Viewer)⟩
+```
+
+Using multiple `&amp;style=` and/or
+`&amp;userStyle=` you can specify as many stylesheets as needed.
+
+You can also use data URL. For example:
+
+```
+&style=data:,html{writing-mode:vertical-rl}
+```
+
+### Custom Style Settings in Settings panel
+
+Custom style can also be set in the **Custom Style Settings** in the settings panel.
+You can check the CSS in the **Edit CSS** box (you can also add CSS code).
+
+An example in which custom style settings are added from the settings panel to
+the document on the Web:
+
+- [Cascading Style Sheets Level 2 Revision 1 (CSS 2.1) Specification](https://www.w3.org/TR/CSS2/)
+
+  <Link path="/viewer/#src=https://www.w3.org/TR/CSS2/&bookMode=true&style=data:,/*%3Cviewer%3E*/%0A@page%20%7B%20size:%20A4;%20%7D%0A/*%3C/viewer%3E*/%0A%0A@page%20:first%20%7B%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20none;%0A%20%20%7D%0A%7D%0A%0A@page%20:left%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-left%20%7B%0A%20%20%20%20content:%20env(pub-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D%0A%0A@page%20:right%20%7B%0A%20%20font-size:%200.8rem;%0A%20%20@top-right%20%7B%0A%20%20%20%20content:%20env(doc-title);%0A%20%20%7D%0A%20%20@bottom-center%20%7B%0A%20%20%20%20content:%20counter(page);%0A%20%20%7D%0A%7D">
+    …#src=https://www.w3.org/TR/CSS2/&bookMode=true&style=data:,…
+  </Link>
+
+```css
+/*<viewer>*/
+@page { size: A4; }
+/*</viewer>*/
+
+@page :first {
+  @top-left {
+    content: none;
+  }
+  @top-right {
+    content: none;
+  }
+  @bottom-center {
+    content: none;
+  }
+}
+
+@page :left {
+  font-size: 0.8rem;
+  @top-left {
+    content: env(pub-title);
+  }
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+@page :right {
+  font-size: 0.8rem;
+  @top-right {
+    content: env(doc-title);
+  }
+  @bottom-center {
+    content: counter(page);
+  }
+}
+```
+
+When setting styles from the settings panel like this example, the CSS code of
+the styles set from option items in the settings panel is generated between
+the comments
+`/*<viewer>*/` and
+`/*</viewer>*/` in the custom style CSS that are displayed in
+the **Edit CSS** box. You can add your own CSS code to it. In
+this example, page header and footer are added.
+
+## Print / Save as PDF
+
+Utilizing your browser’s print / save as PDF functionality, you can convert rendered document into PDF.
+
+For example, to save as PDF with
+Google Chrome, select Print from menu, set Destination to “Save as PDF”, check
+“Background graphics”, and “Save” to PDF.
+
+> **Note:** When you print all pages of a document, check that
+> **Render All Pages** is On in the setting panel. When this is
+> Off, only the pages that have already been displayed can be printed, and the
+> page number will not be output correctly.
+
+### Vivliostyle CLI
+
+Use [Vivliostyle CLI](https://github.com/vivliostyle/vivliostyle-cli) to output to PDF from the command line. Conversion to PDF/X-1a format suitable for printing is also possible.
+
+## Supported CSS Features
+
+Supported CSS Features are described in [Supported CSS Features](./supported-css-features.md).
