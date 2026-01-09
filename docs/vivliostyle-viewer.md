@@ -91,7 +91,7 @@ connection is required when the document contains mathematics.
 
 Example: If you want to display a HTML file <https://vivliostyle.github.io/vivliostyle_doc/samples/wood/index.html>:
 
-<https://vivliostyle.org/viewer/#src=../samples/wood/index.html>
+<https://vivliostyle.org/viewer/#src=https://vivliostyle.github.io/vivliostyle_doc/samples/wood/index.html>
 
 ## EPUB
 

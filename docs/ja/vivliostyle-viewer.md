@@ -137,7 +137,7 @@ HTMLファイルを Vivliostyle Viewer で表示するには、Webサーバー�
 
 例: HTMLファイル <https://vivliostyle.github.io/vivliostyle_doc/samples/gon/index.html> を表示する場合:
 
-<https://vivliostyle.org/viewer/#src=../samples/gon/index.html>
+<https://vivliostyle.org/viewer/#src=https://vivliostyle.github.io/vivliostyle_doc/samples/gon/index.html>
 
 ## EPUB
 
