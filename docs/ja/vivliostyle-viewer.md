@@ -30,7 +30,7 @@ Node.js のアプリケーションで利用するには、npmパッケージ版
 
 ## 設定パネル
 
-Vivliostyle Viewer の画面右上の設定ボタン<img alt="Settings (S)" src="../assets/vivliostyle-icon.png" style="width: 1.5em;"> をクリック（またはキーボードのSを押下）すると、設定パネルが表示されます。
+Vivliostyle Viewer の画面右上の設定ボタン<img alt="Settings (S)" src="../../assets/vivliostyle-icon.png" style="width: 1.5em;"> をクリック（またはキーボードのSを押下）すると、設定パネルが表示されます。
 
 この設定パネルから各種パラメーターを設定し、“Apply” ボタンを押すことで、組版表示を変更することができます（通常は “Apply” の押下後パネルは閉じますが、設定ボタンを2度押しして開いた場合、押下後もパネルを開いたままにできます）。
 
@@ -38,7 +38,7 @@ Vivliostyle Viewer の画面右上の設定ボタン<img alt="Settings (S)" src=
 
 - 凡例：◉ラジオボタン、■チェックボックス、▶折りたたまれた設定項目
 
-<img src="../assets/viewer-settings-panel.png" alt="設定パネル" style="float: right; margin-left: 3rem">
+<img src="../../assets/viewer-settings-panel.png" alt="設定パネル" style="float: right; margin-left: 3rem">
 
 - **▶Page View Mode**
     - **❶Page Spread View**：ページ表示
@@ -119,7 +119,7 @@ Vivliostyle Viewer の画面右上の設定ボタン<img alt="Settings (S)" src=
 - &amp;**style**=&lt;追加の（カスタム）スタイルシートのURL>
 - &amp;**userStyle**=&lt;ユーザー・スタイルシートのURL>
 
-オプションは設定パネル（<img src="../assets/vivliostyle-icon.png" width="16" height="16" alt="[Vivliostyle]" />**Settings**）でも設定できます。
+オプションは設定パネル（<img src="../../assets/vivliostyle-icon.png" width="16" height="16" alt="[Vivliostyle]" />**Settings**）でも設定できます。
 
 **NOTE:** Book Modeのデフォルトは以前はオフでしたが、Vivliostyle Viewer v2.18.0 からオンに変更されました。デフォルトで有効なのでパラメータ `&bookMode=true` の指定は省略することができます。HTMLファイル内の目次のリンク先のHTML文書を連結しないで最初のHTMLファイルだけを表示するには、`&bookMode=false` を指定してください。
 
@@ -176,7 +176,7 @@ Web上に公開されている複数のHTML文書からなる出版物を表示�
 
 ## 目次パネル
 
-`&bookMode=true`（あるいは **Book Mode** チェックボックス On）を指定すると、単一のHTMLファイルでも[Web出版物](#Web出版物（複数HTML文書）)と同様に、HTML内に目次要素があれば目次パネル（画面左上の目次アイコン <img src="../assets/toc-icon.png" width="16" height="16" alt="[Table of Contents]" /> をクリックして開く）が有効になります。
+`&bookMode=true`（あるいは **Book Mode** チェックボックス On）を指定すると、単一のHTMLファイルでも[Web出版物](#Web出版物（複数HTML文書）)と同様に、HTML内に目次要素があれば目次パネル（画面左上の目次アイコン <img src="../../assets/toc-icon.png" width="16" height="16" alt="[Table of Contents]" /> をクリックして開く）が有効になります。
 
 ## 見開きビューモード
 
@@ -194,7 +194,7 @@ Vivliostyle Viewer は、表示領域の横幅が大きいとき（高さの1.45
 &spread=auto（自動切り替え＝デフォルト）
 ```
 
-Vivliostyle Viewer の設定パネル（画面右上のアイコン <img src="../assets/vivliostyle-icon.png" width="16" height="16" alt="[Settings]" /> をクリックして開く）でも、ページ表示モードの変更ができます。
+Vivliostyle Viewer の設定パネル（画面右上のアイコン <img src="../../assets/vivliostyle-icon.png" width="16" height="16" alt="[Settings]" /> をクリックして開く）でも、ページ表示モードの変更ができます。
 
 ## スタイルシートの追加（カスタム・スタイルシート）
 
