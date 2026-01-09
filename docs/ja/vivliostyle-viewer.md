@@ -103,7 +103,7 @@ Vivliostyle Viewer の画面右上の設定ボタン<img alt="Settings (S)" src=
       - ■Base font-family：ルート要素における`font-family`プロパティの値を設定します
     - **❽Custom Style Priority**
         - ■Set as user stylesheet (lower priority unless !important)：設定パネルでの設定内容を、ユーザースタイルシートとして設定します。デフォルトは作成者スタイルシートです。これらの違いは[CSS カスケード入門](https://developer.mozilla.org/ja/docs/Web/CSS/Cascade#%E3%82%AA%E3%83%AA%E3%82%B8%E3%83%B3%E3%81%AE%E7%A8%AE%E9%A1%9E)をご参照ください
-        - ■Force override document style (!important)：設定パネルでの設定内容により、スタイルシートを強制的に上書きします（スタイルシートに`!important`tが付く）
+        - ■Force override document style (!important)：設定パネルでの設定内容により、スタイルシートを強制的に上書きします（スタイルシートに`!important`が付く）
 - **❾▶Edit CSS**：クリックすると入力フィールドがあらわれ、それまでの設定した内容がCSSコードで確認できます。また、ここからユーザーがCSSコードを直接書くことができます。その場合、自動生成されたコメント`/*<viewer>*/`と`/*</viewer>*/`で囲まれた部分はそのままにして、その前か後にコードを追加するようにしてください
 - **❿▶Reset Custom Style**
   - ■Reset all to default：それまでの設定内容を初期化し、デフォルトに戻します
