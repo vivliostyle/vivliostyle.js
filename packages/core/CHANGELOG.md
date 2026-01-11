@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.40.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.39.1...v2.40.0) (2026-01-11)
+
+### Bug Fixes
+
+- Fix image disapearance when it does not fit in the page (Regression in v2.36.0) ([d410874](https://github.com/vivliostyle/vivliostyle.js/commit/d410874f610d645b26c95d151f8625dfbf709457)), closes [#1637](https://github.com/vivliostyle/vivliostyle.js/issues/1637)
+- Fix incorrect page layout depending on Viewer window size ([8948100](https://github.com/vivliostyle/vivliostyle.js/commit/8948100765ed18c45e53c97a41e3b27d9a92506c)), closes [#1638](https://github.com/vivliostyle/vivliostyle.js/issues/1638)
+- Fix incorrect page numbers during link navigation ([d4bbc40](https://github.com/vivliostyle/vivliostyle.js/commit/d4bbc408eb173ee83d35d282f92852fb6e1a70fc)), closes [#1616](https://github.com/vivliostyle/vivliostyle.js/issues/1616)
+- Prevent TOC box from interfering with main content rendering ([a8454ec](https://github.com/vivliostyle/vivliostyle.js/commit/a8454ec8be4ab2d3fe0374c38290e0cf1a72d5f3)), closes [#1616](https://github.com/vivliostyle/vivliostyle.js/issues/1616)
+
+### Features
+
+- Add device-cmyk() CSS color function support ([30db80a](https://github.com/vivliostyle/vivliostyle.js/commit/30db80a865538edc5e4ae263adfbcb2a59c030e0))
+
 ## [2.39.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.39.0...v2.39.1) (2025-12-27)
 
 ### Bug Fixes

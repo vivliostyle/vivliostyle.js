@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.40.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.39.1...v2.40.0) (2026-01-11)
+
+### Bug Fixes
+
+- **react:** handle React StrictMode double-mount issue ([94dfcf9](https://github.com/vivliostyle/vivliostyle.js/commit/94dfcf9ae3967b8d58277d82422950dfbea3f1fc)), closes [#1629](https://github.com/vivliostyle/vivliostyle.js/issues/1629)
+
 ## [2.39.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.39.0...v2.39.1) (2025-12-27)
 
 **Note:** Version bump only for package @vivliostyle/react
