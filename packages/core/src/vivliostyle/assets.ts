@@ -60,7 +60,7 @@ export const VivliostyleViewportScreenCss = `
     flex-direction: row-reverse;
   }
 
-  [data-vivliostyle-viewer-viewport] [data-vivliostyle-page-container] {
+  [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
     margin: 0 auto;
     flex: none;
     transform-origin: center top;
@@ -104,10 +104,11 @@ export const VivliostyleViewportCss = `
 }
 
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
-  right: auto;
-  bottom: auto;
-  overflow: visible;
   z-index: auto;
+}
+
+[data-vivliostyle-layout-box] [data-vivliostyle-page-container] {
+  margin: 0 auto 0 0;
 }
 
 [data-vivliostyle-spread-container] {
