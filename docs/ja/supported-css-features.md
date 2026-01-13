@@ -155,6 +155,7 @@ See also: [Properties in CSS Paged Media 3](#css-paged-media-3-2)
   - Note: In multi-document publications, the `:nth(1)` matches the first page of each document, but the `:first` matches only the first page of the first document. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
 
 See also:
+
 - [Properties in CSS Generated Content for Paged Media (GCPM) 3](#css-generated-content-for-paged-media-gcpm-3-2)
 - [Values - Cross references, content(), and string() functions](#values)
 
@@ -185,7 +186,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 
 ## Properties
 
-## [CSS 2](https://www.w3.org/TR/CSS2/)
+### [CSS 2](https://www.w3.org/TR/CSS2/)
 
 - [background](https://www.w3.org/TR/CSS2/colors.html#propdef-background)
   - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background)
@@ -297,7 +298,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [word-spacing](https://www.w3.org/TR/CSS2/text.html#propdef-word-spacing)
 - [z-index](https://www.w3.org/TR/CSS2/visuren.html#propdef-z-index)
 
-## [CSS Paged Media 3](https://www.w3.org/TR/css-page-3/)
+### [CSS Paged Media 3](https://www.w3.org/TR/css-page-3/)
 
 - [bleed](https://www.w3.org/TR/css-page-3/#bleed)
   - Only effective when specified within an `@page` rule without page selectors
@@ -315,7 +316,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 
 See also: [At-rules in CSS Paged Media 3](#css-paged-media-3)
 
-## [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
+### [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
 
 - [string-set (Named Strings)](https://www.w3.org/TR/css-gcpm-3/#setting-named-strings-the-string-set-pro)
 - [position: running() (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#running-elements)
@@ -323,10 +324,11 @@ See also: [At-rules in CSS Paged Media 3](#css-paged-media-3)
   - Supports [`auto`, `line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) values.
 
 See also:
+
 - [At-rules in CSS Generated Content for Paged Media (GCPM) 3](#css-generated-content-for-paged-media-gcpm-3)
 - [Values - Cross references, string(), content(), running(), element(), and leader() functions](#values)
 
-## [CSS Fragmentation 3](https://www.w3.org/TR/css-break-3/)
+### [CSS Fragmentation 3](https://www.w3.org/TR/css-break-3/)
 
 - [break-after](https://www.w3.org/TR/css-break-3/#propdef-break-after)
 - [break-before](https://www.w3.org/TR/css-break-3/#propdef-break-before)
@@ -337,11 +339,11 @@ See also:
 - [box-decoration-break](https://www.w3.org/TR/css-break-3/#propdef-box-decoration-break)
   - Note: Background, box-shadow and border images on inline-start/end borders are always rendered as if `box-decoration-break: clone` is specified.
 
-## [CSS Fragmentation 4](https://www.w3.org/TR/css-break-4/)
+### [CSS Fragmentation 4](https://www.w3.org/TR/css-break-4/)
 
 - [margin-break](https://www.w3.org/TR/css-break-4/#break-margins)
 
-## [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
+### [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
 
 - [clear](https://drafts.csswg.org/css-page-floats/#propdef-clear)
   - Supports [`none`, `inline-start`, `inline-end`, `block-start`, `block-end`, `left`, `right`, `top`, `bottom`, `both`, `all`, `same`](https://drafts.csswg.org/css-page-floats/#propdef-clear) values.
@@ -369,14 +371,14 @@ See also:
   - When set to a positive length, in-flow contents are not allowed to be flown into a space next to the page float if the block extent of the space is less than the specified length. In that case, the space is kept empty and the in-flow contents are deferred to the next column.
   - This property is not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/382)
 
-## [CSS Color 3](https://www.w3.org/TR/css3-color/)
+### [CSS Color 3](https://www.w3.org/TR/css3-color/)
 
 - [color](https://www.w3.org/TR/css-color-3/#foreground)
 - [opacity](https://www.w3.org/TR/css-color-3/#transparency)
 
 See also: [Values - Supported color values](#values)
 
-## [CSS Backgrounds and Borders 3](https://www.w3.org/TR/css3-background/)
+### [CSS Backgrounds and Borders 3](https://www.w3.org/TR/css3-background/)
 
 - [background](https://www.w3.org/TR/css3-background/#propdef-background)
 - [background-attachment](https://www.w3.org/TR/css3-background/#propdef-background-attachment)
@@ -420,7 +422,7 @@ See also: [Values - Supported color values](#values)
 - [border-width](https://www.w3.org/TR/css3-background/#propdef-border-width)
 - [box-shadow](https://www.w3.org/TR/css3-background/#propdef-box-shadow)
 
-## [CSS Images 3](https://www.w3.org/TR/css-images-3/)
+### [CSS Images 3](https://www.w3.org/TR/css-images-3/)
 
 - [object-fit](https://www.w3.org/TR/css-images-3/#the-object-fit)
 - [object-position](https://www.w3.org/TR/css-images-3/#the-object-position)
@@ -429,7 +431,7 @@ See also: [Values - Supported color values](#values)
   - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
   - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
 
-## [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
+### [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 
 - [font-family](https://www.w3.org/TR/css-fonts-3/#propdef-font-family)
 - [font-feature-settings](https://www.w3.org/TR/css-fonts-3/#propdef-font-feature-settings)
@@ -446,7 +448,7 @@ See also: [Values - Supported color values](#values)
 
 See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 
-## [CSS Text 3](https://www.w3.org/TR/css-text-3/)
+### [CSS Text 3](https://www.w3.org/TR/css-text-3/)
 
 - [hanging-punctuation](hanging-punctuation)
   - Supports all required values, `none | [ first || [ force-end | allow-end ] || last ]`. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/814)
@@ -460,7 +462,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [white-space](https://www.w3.org/TR/css-text-3/#white-space-property)
 - [word-break](https://www.w3.org/TR/css-text-3/#word-break-property)
 
-## [CSS Text 4](https://www.w3.org/TR/css-text-4/)
+### [CSS Text 4](https://www.w3.org/TR/css-text-4/)
 
 - [text-autospace](https://www.w3.org/TR/css-text-4/#text-autospace-property)
   - Supported values: `normal | no-autospace | [ ideograph-alpha || ideograph-numeric ] | auto`
@@ -468,9 +470,9 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
   - Values: `space-all | normal | space-first | trim-start | trim-both | auto`
 - [text-spacing](https://www.w3.org/TR/css-text-4/#text-spacing-property)
   - Values: `normal | none | auto | [<autospace> || <spacing-trim>]`
-  - Note: This is a shorthand property that sets the `text-autospace` and `text-spacing-trim` properties. See [[Pull Request ]](https://github.com/vivliostyle/vivliostyle.js/pull/1142)
+  - Note: This is a shorthand property that sets the `text-autospace` and `text-spacing-trim` properties. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1142)
 
-## [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
+### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
 - [text-decoration-color](https://www.w3.org/TR/css-text-decor-3/#text-decoration-color-property)
 - [text-decoration-line](https://www.w3.org/TR/css-text-decor-3/#text-decoration-line-property)
@@ -482,11 +484,11 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [text-shadow](https://www.w3.org/TR/css-text-decor-3/#text-shadow-property)
 - [text-underline-position](https://www.w3.org/TR/css-text-decor-3/#text-underline-position-property)
 
-## [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/)
+### [CSS Inline Layout 3](https://www.w3.org/TR/css-inline-3/)
 
 - [initial-letter](https://www.w3.org/TR/css-inline-3/#sizing-drop-initials)
 
-## [CSS Multi-column 1](https://www.w3.org/TR/css3-multicol/)
+### [CSS Multi-column 1](https://www.w3.org/TR/css3-multicol/)
 
 **Note:** Currently the multi-column layout works well only when specified on the root or body element. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/579)
 
@@ -502,7 +504,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
   - Note: Currently `column-span` is effective only when specified on a page float. When `auto` value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.
 
-## [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
+### [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
 
 - [box-sizing](https://www.w3.org/TR/css3-ui/#propdef-box-sizing)
 - [outline](https://www.w3.org/TR/css3-ui/#propdef-outline)
@@ -511,7 +513,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [outline-width](https://www.w3.org/TR/css3-ui/#propdef-outline-width)
 - [text-overflow](https://www.w3.org/TR/css3-ui/#propdef-text-overflow)
 
-## [CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/)
+### [CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/)
 
 - [direction](https://www.w3.org/TR/css-writing-modes-3/#propdef-direction)
 - [text-combine-upright](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
@@ -519,7 +521,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
 - [writing-mode](https://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
 
-## [CSS Flexible Box 1](https://www.w3.org/TR/css-flexbox-1/)
+### [CSS Flexible Box 1](https://www.w3.org/TR/css-flexbox-1/)
 
 - [align-content](https://www.w3.org/TR/css-flexbox-1/#propdef-align-content)
 - [align-items](https://www.w3.org/TR/css-flexbox-1/#propdef-align-items)
@@ -535,14 +537,14 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [justify-content](https://www.w3.org/TR/css-flexbox-1/#propdef-justify-content)
 - [order](https://www.w3.org/TR/css-flexbox-1/#propdef-order)
 
-## [CSS Transforms 1](https://www.w3.org/TR/css-transforms-1/)
+### [CSS Transforms 1](https://www.w3.org/TR/css-transforms-1/)
 
 - [transform](https://www.w3.org/TR/css-transforms-1/#propdef-transform)
 - [transform-origin](https://www.w3.org/TR/css-transforms-1/#propdef-transform-origin)
 - [backface-visibility](https://www.w3.org/TR/css-transforms-2/#propdef-backface-visibility)
 
 <!--
-## [CSS Ruby Layout 1](https://www.w3.org/TR/css-ruby-1/)
+### [CSS Ruby Layout 1](https://www.w3.org/TR/css-ruby-1/)
 
 - [display](https://www.w3.org/TR/css-ruby-1/#propdef-display)
   - Values: `ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container`
@@ -551,18 +553,18 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 -->
 
 <!--
-## [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
+### [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)
 
 - [text-size-adjust](https://drafts.csswg.org/css-size-adjust-1/#text-size-adjust)
 -->
 
-## [Compositing and Blending 1](https://www.w3.org/TR/compositing-1/)
+### [Compositing and Blending 1](https://www.w3.org/TR/compositing-1/)
 
 - [background-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-background-blend-mode)
 - [isolation](https://www.w3.org/TR/compositing-1/#propdef-isolation)
 - [mix-blend-mode](https://www.w3.org/TR/compositing-1/#propdef-mix-blend-mode)
 
-## [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/)
+### [Scalable Vector Graphics (SVG) 2](https://www.w3.org/TR/SVG2/)
 
 - [color-interpolation](https://www.w3.org/TR/SVG2/painting.html#ColorInterpolationProperty)
 - [color-rendering](https://www.w3.org/TR/SVG2/painting.html#ColorRenderingProperty)
@@ -592,30 +594,30 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [text-rendering](https://www.w3.org/TR/SVG2/painting.html#TextRenderingProperty)
 - [vector-effect](https://www.w3.org/TR/SVG2/coords.html#VectorEffectProperty)
 
-## [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/)
+### [Scalable Vector Graphics (SVG) 1.1](https://www.w3.org/TR/SVG11/)
 
 - [alignment-baseline](https://www.w3.org/TR/SVG11/text.html#AlignmentBaselineProperty)
 - [baseline-shift](https://www.w3.org/TR/SVG11/text.html#BaselineShiftProperty)
 - [dominant-baseline](https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty)
 - [mask](https://www.w3.org/TR/SVG11/masking.html#MaskProperty)
 
-## [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/)
+### [CSS Masking 1](https://drafts.fxtf.org/css-masking-1/)
 
 - [clip-path](https://drafts.fxtf.org/css-masking-1/#the-clip-path)
 - [clip-rule](https://drafts.fxtf.org/css-masking-1/#the-clip-rule)
 
-## [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
+### [Filter Effects 1](https://www.w3.org/TR/filter-effects-1/)
 
 - [filter](https://www.w3.org/TR/filter-effects-1/#propdef-filter)
 - [flood-color](https://www.w3.org/TR/filter-effects-1/#FloodColorProperty)
 - [flood-opacity](https://www.w3.org/TR/filter-effects-1/#propdef-flood-opacity)
 - [lighting-color](https://www.w3.org/TR/filter-effects-1/#propdef-lighting-color)
 
-## [Pointer Events](https://www.w3.org/TR/pointerevents/)
+### [Pointer Events](https://www.w3.org/TR/pointerevents/)
 
 - [touch-action](https://www.w3.org/TR/pointerevents/#the-touch-action-css-property)
 
-## [CSS Logical Properties and Values 1](https://www.w3.org/TR/css-logical-1/)
+### [CSS Logical Properties and Values 1](https://www.w3.org/TR/css-logical-1/)
 
 - [block-size, inline-size, min-block-size, min-inline-size, max-block-size, max-inline-size](https://www.w3.org/TR/css-logical-1/#dimension-properties)
 - [margin-block-start, margin-block-end, margin-inline-start, margin-inline-end, margin-block, margin-inline](https://www.w3.org/TR/css-logical-1/#margin-properties)
@@ -623,11 +625,11 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [padding-block-start, padding-block-end, padding-inline-start, padding-inline-end, padding-block, padding-inline](https://www.w3.org/TR/css-logical-1/#padding-properties)
 - [border-block-start-width, border-block-end-width, border-inline-start-width, border-inline-end-width, border-block-width, border-inline-width, border-block-start-style, border-block-end-style, border-inline-start-style, border-inline-end-style, border-block-style, border-inline-style, border-block-start-color, border-block-end-color, border-inline-start-color, border-inline-end-color, border-block-color, border-inline-color, border-block-start, border-block-end, border-inline-start, border-inline-end, border-block, border-inline](https://www.w3.org/TR/css-logical-1/#border-properties)
 
-## Page spread inside/outside properties and values
+### Page spread inside/outside properties and values
 
 In these properties and values, the `inside` and `outside` keywords resolve to `left` and `right` depending on whether the page is left or right page.
 
-Note: These CSS properties and values are not standardized yet.  See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1519)
+Note: These CSS properties and values are not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1519)
 
 Added \*-inside/outside properties:
 
@@ -643,6 +645,12 @@ Extended properties with `inside` and `outside` values:
 
 - float, clear
 - text-align, text-align-last
+
+### [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
+
+Note: This spec proposal is not submitted to CSS Working Group yet.
+
+- [repeat-on-break](https://specs.rivoal.net/css-repeat/#propdef-repeat-on-break)
 
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
@@ -687,9 +695,3 @@ Note: This spec is not on a W3C standards track. Future version of Vivliostyle m
 - [-epubx-utilization](http://www.idpf.org/epub/pgt/#prop-utilization)
 - [-epubx-wrap-flow](http://www.idpf.org/epub/pgt/#prop-wrap-flow)
   - Only effective when specified to EPUB Adaptive Layout partitions.
-
-## [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
-
-Note: This spec proposal is not submitted to CSS Working Group yet.
-
-- [repeat-on-break](https://specs.rivoal.net/css-repeat/#propdef-repeat-on-break)
