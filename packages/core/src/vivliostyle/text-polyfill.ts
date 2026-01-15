@@ -20,6 +20,7 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
+import * as PseudoElement from "./pseudo-element";
 import * as Vtree from "./vtree";
 
 type PropertyValue = string | number | Css.Val;
@@ -622,6 +623,24 @@ class TextSpacingPolyfill {
           ) {
             prevNode = prevP.viewNode;
             break;
+          }
+          // Issue #868: Look inside footnote-call for the last text node.
+          // BUT skip and look further back if we're inside that same footnote-call.
+          if (
+            prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
+            PseudoElement.getPseudoName(prevP.viewNode as Element) ===
+              "footnote-call"
+          ) {
+            if (prevP.viewNode.contains(p.viewNode)) {
+              continue;
+            }
+            const lastText = LayoutHelper.findLastTextNodeInElement(
+              prevP.viewNode,
+            );
+            if (lastText) {
+              prevNode = lastText;
+              break;
+            }
           }
           if (
             (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
