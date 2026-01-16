@@ -247,6 +247,7 @@ export class StyleInstance
   stylerMap: { [key: string]: CssStyler.Styler } = null;
   currentLayoutPosition: Vtree.LayoutPosition = null;
   layoutPositionAtPageStart: Vtree.LayoutPosition = null;
+  currentCascadedPageStyle: CssCascade.ElementStyle = null;
   lookupOffset: number = 0;
   faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: PageMaster.PageBoxInstance } = {};
@@ -1438,6 +1439,8 @@ export class StyleInstance
       this.customRenderer,
       this.fallbackMap,
       this.documentURLTransformer,
+      this.style.pageProps,
+      this.currentCascadedPageStyle,
     );
     let columnIndex = 0;
     let column: LayoutType.Column = null;
@@ -1889,6 +1892,9 @@ export class StyleInstance
       ? ({} as CssCascade.ElementStyle)
       : this.pageManager.getCascadedPageStyle(page.pageType);
 
+    // Store cascadedPageStyle for use in ViewFactory
+    this.currentCascadedPageStyle = cascadedPageStyle;
+
     // Substitute var()
     this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
 
@@ -2176,12 +2182,11 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       }
     }
     this.masterHandler.pushHandler(
-      new CssCascade.PropSetParserHandler(
+      new CssPage.PageFootnoteAreaParserHandler(
         this.scope,
         this.owner,
-        null,
-        style,
         this.masterHandler.validatorSet,
+        style,
       ),
     );
   }
@@ -2198,6 +2203,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       this,
       this.validatorSet,
       this.masterHandler.pageProps,
+      this.masterHandler.footnoteProps,
     );
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();

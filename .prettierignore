@@ -1,3 +1,4 @@
 lerna.json
 package.json
 /scripts/package-artifacts/samples/
+/packages/core/test/files/**/*.html

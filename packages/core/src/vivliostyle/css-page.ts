@@ -867,6 +867,11 @@ export const pageRuleMasterPseudoName = "vivliostyle-page-rule-master";
 export const marginBoxesKey: string = "_marginBoxes";
 
 /**
+ * Key for a footnote area style map in a page style object.
+ */
+export const footnoteAreaKey: string = "_footnoteArea";
+
+/**
  * Represent a page master generated for `@page` rules
  * @param style Cascaded style for `@page` rules
  */
@@ -3026,6 +3031,60 @@ export function mergeInPageRule(
       }
     }
   }
+  const footnoteArea = style[footnoteAreaKey];
+  if (footnoteArea) {
+    const targetFootnoteArea = CssCascade.getMutableStyleMap(
+      target,
+      footnoteAreaKey,
+    );
+    for (const key in footnoteArea) {
+      if (footnoteArea.hasOwnProperty(key)) {
+        let targetArea = targetFootnoteArea[key];
+        if (!targetArea) {
+          targetArea = {} as CssCascade.ElementStyle;
+          targetFootnoteArea[key] = targetArea;
+        }
+        const sourceArea = footnoteArea[key];
+
+        // Merge regular properties (excluding _pseudos)
+        for (const prop in sourceArea) {
+          if (sourceArea.hasOwnProperty(prop) && prop !== "_pseudos") {
+            const val = sourceArea[prop];
+            if (val instanceof CssCascade.CascadeValue) {
+              CssCascade.setPropCascadeValue(targetArea, prop, val);
+            }
+          }
+        }
+
+        // Merge _pseudos separately
+        const sourcePseudos = CssCascade.getStyleMap(sourceArea, "_pseudos");
+        if (sourcePseudos) {
+          const targetPseudos = CssCascade.getMutableStyleMap(
+            targetArea,
+            "_pseudos",
+          );
+          for (const pseudoName in sourcePseudos) {
+            if (sourcePseudos.hasOwnProperty(pseudoName)) {
+              let targetPseudo = targetPseudos[pseudoName];
+              if (!targetPseudo) {
+                targetPseudo = {} as CssCascade.ElementStyle;
+                targetPseudos[pseudoName] = targetPseudo;
+              }
+              const sourcePseudo = sourcePseudos[pseudoName];
+              for (const prop in sourcePseudo) {
+                if (sourcePseudo.hasOwnProperty(prop)) {
+                  const val = sourcePseudo[prop];
+                  if (val instanceof CssCascade.CascadeValue) {
+                    CssCascade.setPropCascadeValue(targetPseudo, prop, val);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -3053,6 +3112,7 @@ export class PageParserHandler
     parent: CssCascade.CascadeParserHandler,
     validatorSet: CssValidator.ValidatorSet,
     private readonly pageProps: { [key: string]: CssCascade.ElementStyle },
+    private readonly footnoteProps?: CssCascade.ElementStyle,
   ) {
     super(scope, owner, parent?.condition, parent, null, validatorSet, false);
   }
@@ -3245,6 +3305,50 @@ export class PageParserHandler
     return new ApplyPageRuleAction(this.elementStyle, specificity);
   }
 
+  override startFootnoteRule(pseudoelem: string | null): void {
+    // Check if we're inside a page rule with selectors
+    const hasPageSelectors =
+      this.currentPageSelectors.length > 0 &&
+      this.currentPageSelectors[0].selectors !== null;
+
+    // Determine target style based on whether we have page selectors
+    let style: CssCascade.ElementStyle;
+    if (hasPageSelectors || !this.footnoteProps) {
+      // Store in page-specific elementStyle for page selector support
+      const footnoteAreaMap = CssCascade.getMutableStyleMap(
+        this.elementStyle,
+        footnoteAreaKey,
+      );
+      style = footnoteAreaMap["area"];
+      if (!style) {
+        style = {} as CssCascade.ElementStyle;
+        footnoteAreaMap["area"] = style;
+      }
+    } else {
+      // No page selectors - add directly to global footnoteProps for backward compatibility
+      style = this.footnoteProps;
+    }
+
+    // Handle pseudoelement if specified
+    if (pseudoelem) {
+      const pseudos = CssCascade.getMutableStyleMap(style, "_pseudos");
+      let pseudoStyle = pseudos[pseudoelem];
+      if (!pseudoStyle) {
+        pseudoStyle = {} as CssCascade.ElementStyle;
+        pseudos[pseudoelem] = pseudoStyle;
+      }
+      style = pseudoStyle;
+    }
+
+    const handler = new PageFootnoteAreaParserHandler(
+      this.scope,
+      this.owner,
+      this.validatorSet,
+      style,
+    );
+    this.owner.pushHandler(handler);
+  }
+
   override startPageMarginBoxRule(name: string): void {
     const marginBoxMap = CssCascade.getMutableStyleMap(
       this.elementStyle,
@@ -3307,5 +3411,50 @@ export class PageMarginBoxParserHandler
       : this.getBaseSpecificity();
     const cascval = new CssCascade.CascadeValue(value, specificity);
     CssCascade.setProp(this.boxStyle, name, cascval);
+  }
+}
+
+/**
+ * Parser handler for a footnote area rule.
+ */
+export class PageFootnoteAreaParserHandler
+  extends CssParser.SlaveParserHandler
+  implements CssValidator.PropertyReceiver
+{
+  constructor(
+    scope: Exprs.LexicalScope,
+    owner: CssParser.DispatchParserHandler,
+    public readonly validatorSet: CssValidator.ValidatorSet,
+    public readonly areaStyle: CssCascade.ElementStyle,
+  ) {
+    super(scope, owner, false);
+  }
+
+  override property(name: string, value: Css.Val, important: boolean): void {
+    this.validatorSet.validatePropertyAndHandleShorthand(
+      name,
+      value,
+      important,
+      this,
+    );
+  }
+
+  /** @override */
+  invalidPropertyValue(name: string, value: Css.Val): void {
+    this.report(`E_INVALID_PROPERTY_VALUE ${name}: ${value.toString()}`);
+  }
+
+  /** @override */
+  unknownProperty(name: string, value: Css.Val): void {
+    this.report(`E_INVALID_PROPERTY ${name}: ${value.toString()}`);
+  }
+
+  /** @override */
+  simpleProperty(name: string, value: Css.Val, important): void {
+    const specificity = important
+      ? this.getImportantSpecificity()
+      : this.getBaseSpecificity();
+    const cascval = new CssCascade.CascadeValue(value, specificity);
+    CssCascade.setProp(this.areaStyle, name, cascval);
   }
 }

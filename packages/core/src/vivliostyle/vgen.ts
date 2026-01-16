@@ -23,6 +23,7 @@ import * as Base from "./base";
 import * as Break from "./break";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
+import * as CssPage from "./css-page";
 import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
 import * as Diff from "./diff";
@@ -131,6 +132,8 @@ export class ViewFactory
     public readonly customRenderer: CustomRenderer,
     public readonly fallbackMap: { [key: string]: string },
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
+    public readonly pageProps?: { [key: string]: CssCascade.ElementStyle },
+    public readonly cascadedPageStyle?: CssCascade.ElementStyle,
   ) {
     super();
     this.document = viewport.document;
@@ -153,6 +156,8 @@ export class ViewFactory
       this.customRenderer,
       this.fallbackMap,
       this.documentURLTransformer,
+      this.pageProps,
+      this.cascadedPageStyle,
     );
   }
 
@@ -535,7 +540,8 @@ export class ViewFactory
     const float = computedStyle["float"];
     const display =
       (computedStyle["display"] as Css.Ident) ||
-      ((this.sourceNode as Element).namespaceURI === Base.NS.XHTML
+      (this.sourceNode &&
+      (this.sourceNode as Element).namespaceURI === Base.NS.XHTML
         ? Css.ident.inline
         : undefined); // leave it to the browser for MathML and SVG
     const displayValues = Display.getComputedDisplayValue(
@@ -2854,13 +2860,98 @@ export class ViewFactory
     target: Element,
   ): boolean {
     const computedStyle: { [key: string]: Css.Val } = {};
-    const pseudoMap = CssCascade.getStyleMap(this.footnoteStyle, "_pseudos");
-    vertical = this.computeStyle(
-      vertical,
-      rtl,
-      this.footnoteStyle,
-      computedStyle,
-    );
+
+    // Get footnote area style from cascadedPageStyle if available
+    let footnoteStyle = this.footnoteStyle;
+    if (this.cascadedPageStyle) {
+      const footnoteAreaMap = CssCascade.getStyleMap(
+        this.cascadedPageStyle,
+        CssPage.footnoteAreaKey,
+      );
+      if (footnoteAreaMap && footnoteAreaMap["area"]) {
+        const cascadedFootnoteArea = footnoteAreaMap["area"];
+        // Create a merged style, manually copying properties to avoid issues with nested structures
+        footnoteStyle = {} as CssCascade.ElementStyle;
+
+        // First copy global footnote style (excluding _pseudos)
+        for (const prop in this.footnoteStyle) {
+          if (this.footnoteStyle.hasOwnProperty(prop) && prop !== "_pseudos") {
+            footnoteStyle[prop] = this.footnoteStyle[prop];
+          }
+        }
+
+        // Copy global _pseudos separately to avoid reference sharing
+        const globalPseudos = CssCascade.getStyleMap(
+          this.footnoteStyle,
+          "_pseudos",
+        );
+        if (globalPseudos) {
+          const targetPseudos = CssCascade.getMutableStyleMap(
+            footnoteStyle,
+            "_pseudos",
+          );
+          for (const pseudoName in globalPseudos) {
+            if (globalPseudos.hasOwnProperty(pseudoName)) {
+              const globalPseudo = globalPseudos[pseudoName];
+              const targetPseudo = {} as CssCascade.ElementStyle;
+              targetPseudos[pseudoName] = targetPseudo;
+              for (const prop in globalPseudo) {
+                if (globalPseudo.hasOwnProperty(prop)) {
+                  targetPseudo[prop] = globalPseudo[prop];
+                }
+              }
+            }
+          }
+        }
+
+        // Then merge cascaded page-specific footnote properties
+        // Merge regular properties (excluding _pseudos)
+        for (const prop in cascadedFootnoteArea) {
+          if (
+            cascadedFootnoteArea.hasOwnProperty(prop) &&
+            prop !== "_pseudos"
+          ) {
+            const val = cascadedFootnoteArea[prop];
+            if (val instanceof CssCascade.CascadeValue) {
+              CssCascade.setPropCascadeValue(footnoteStyle, prop, val);
+            }
+          }
+        }
+
+        // Merge cascaded _pseudos
+        const cascadedPseudos = CssCascade.getStyleMap(
+          cascadedFootnoteArea,
+          "_pseudos",
+        );
+        if (cascadedPseudos) {
+          const targetPseudos = CssCascade.getMutableStyleMap(
+            footnoteStyle,
+            "_pseudos",
+          );
+          for (const pseudoName in cascadedPseudos) {
+            if (cascadedPseudos.hasOwnProperty(pseudoName)) {
+              let targetPseudo = targetPseudos[pseudoName];
+              if (!targetPseudo) {
+                targetPseudo = {} as CssCascade.ElementStyle;
+                targetPseudos[pseudoName] = targetPseudo;
+              }
+              const sourcePseudo = cascadedPseudos[pseudoName];
+              for (const prop in sourcePseudo) {
+                if (sourcePseudo.hasOwnProperty(prop)) {
+                  const val = sourcePseudo[prop];
+                  if (val instanceof CssCascade.CascadeValue) {
+                    CssCascade.setPropCascadeValue(targetPseudo, prop, val);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const pseudoMap = CssCascade.getStyleMap(footnoteStyle, "_pseudos");
+    vertical = this.computeStyle(vertical, rtl, footnoteStyle, computedStyle);
     if (pseudoMap && pseudoMap["before"]) {
       const childComputedStyle: { [key: string]: Css.Val } = {};
       const span = this.createElement(Base.NS.XHTML, "span");

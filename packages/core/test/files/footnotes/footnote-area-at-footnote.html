@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>@footnote test</title>
+    <style>
+      @page {
+        size: 400px 300px;
+        margin: 20px;
+
+        @footnote {
+          margin-block-start: 1em;
+          padding: 10px;
+          border: 2px solid green;
+          /* Using shorthand property */
+          background: lightgreen;
+          border-radius: 5px;
+        }
+
+        @footnote ::before {
+          display: block;
+          margin-block-end: 0.5em;
+          margin-inline-end: 50%;
+          /* Using logical property */
+          border-block-start: 2px dashed red;
+        }
+      }
+
+      @page :right {
+        @footnote {
+          /* Testing cascading: longhand property overrides shorthand */
+          background-color: lightyellow;
+        }
+
+        @footnote ::before {
+          /* Testing cascading: logical property */
+          border-block-start-color: maroon;
+        }
+      }
+
+      @page :left {
+        @footnote {
+          /* Testing cascading: longhand property overrides shorthand */
+          background-color: lightblue;
+        }
+
+        @footnote ::before {
+          /* Testing cascading: physical property overrides logical property */
+          border-top-color: blue;
+        }
+      }
+
+      :root {
+        line-height: 1.5;
+      }
+
+      body,
+      p {
+        margin: 0;
+      }
+
+      section {
+        page-break-after: always;
+      }
+
+      .footnote {
+        float: footnote;
+        counter-increment: footnote;
+      }
+
+      .footnote::footnote-marker,
+      .footnote::footnote-call {
+        content: "[" counter(footnote) "]";
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>
+        Page 1 (right page): This page has a footnote<span class="footnote">First footnote</span>.
+      </p>
+      <p>
+        The footnote area should have a green border, light yellow background,
+        and a maroon dashed line before the footnote content.
+      </p>
+    </section>
+    <section>
+      <p>
+        Page 2 (left page): This page also has a footnote<span class="footnote">Second footnote</span>.
+      </p>
+      <p>
+        The footnote area should have a green border, light blue background, and
+        a blue dashed line before the footnote content.
+      </p>
+    </section>
+    <section>
+      <p>
+        Page 3 (right page): Another page with a footnote<span class="footnote">Third footnote</span>.
+      </p>
+      <p>
+        The footnote area should have a green border, light yellow background,
+        and a maroon dashed line before the footnote content.
+      </p>
+    </section>
+  </body>
+</html>
