@@ -137,6 +137,15 @@ export enum HOOKS {
    *  {Layout.Column} column
    */
   POST_LAYOUT_BLOCK = "POST_LAYOUT_BLOCK",
+
+  /**
+   * Called when pagination progresses during document load.
+   *
+   * The hook is called with an object with the following properties:
+   *  {number} fraction: Fraction of the HTML content already paginated (0-1)
+   *  {number} pages: Number of pages created so far
+   */
+  PAGINATION_PROGRESS = "PAGINATION_PROGRESS",
 }
 
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
@@ -180,6 +189,11 @@ export type PostLayoutBlockHook = (
   p2: Vtree.NodeContext[],
   p3: Layout.Column,
 ) => void;
+
+export type PaginationProgressHook = (p1: {
+  fraction: number;
+  pages: number;
+}) => void;
 
 const hooks = {};
 

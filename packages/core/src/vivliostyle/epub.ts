@@ -33,6 +33,7 @@ import * as Font from "./font";
 import * as Logging from "./logging";
 import * as Net from "./net";
 import * as OPS from "./ops";
+import * as Plugin from "./plugin";
 import * as Task from "./task";
 import * as Toc from "./toc";
 import * as Vgen from "./vgen";
@@ -1423,6 +1424,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
   tocAutohide: boolean = false;
   tocVisible: boolean = false;
   tocView?: Toc.TOCView;
+  private paginationProgress = {
+    totalOffsetsBySpine: [] as number[],
+    renderedOffsetsBySpine: [] as number[],
+    lastReportedPages: 0,
+    lastReportedFraction: 0,
+  };
 
   constructor(
     public readonly opf: OPFDoc,
@@ -1580,6 +1587,107 @@ export class OPFView implements Vgen.CustomRendererFactory {
     );
   }
 
+  private getRenderedPageCount(): number {
+    let count = 0;
+    for (const item of this.spineItems) {
+      if (item) {
+        count += item.pages.length;
+      }
+    }
+    return count;
+  }
+
+  private getTotalOffsetForViewItem(viewItem: OPFViewItem): number {
+    const spineIndex = viewItem.item.spineIndex;
+    let totalOffset = this.paginationProgress.totalOffsetsBySpine[spineIndex];
+    if (totalOffset == null) {
+      totalOffset = viewItem.xmldoc.getTotalOffset();
+      this.paginationProgress.totalOffsetsBySpine[spineIndex] = totalOffset;
+    }
+    return totalOffset;
+  }
+
+  private getTotalOffsetAll(): number {
+    let total = 0;
+    for (const item of this.spineItems) {
+      if (item) {
+        total += this.getTotalOffsetForViewItem(item);
+      }
+    }
+    return total;
+  }
+
+  private getRenderedOffsetAll(): number {
+    let total = 0;
+    const totals = this.paginationProgress.totalOffsetsBySpine;
+    const rendered = this.paginationProgress.renderedOffsetsBySpine;
+    for (let i = 0; i < totals.length; i++) {
+      const totalOffset = totals[i];
+      if (!totalOffset) {
+        continue;
+      }
+      const renderedOffset = rendered[i] ?? 0;
+      total += Math.min(totalOffset, renderedOffset);
+    }
+    return total;
+  }
+
+  private reportPaginationProgress(
+    viewItem: OPFViewItem,
+    nextLayoutPosition: Vtree.LayoutPosition | null,
+  ) {
+    const hooks: Plugin.PaginationProgressHook[] = Plugin.getHooksForName(
+      Plugin.HOOKS.PAGINATION_PROGRESS,
+    );
+    if (!hooks.length) {
+      return;
+    }
+    const spineIndex = viewItem.item.spineIndex;
+    const totalOffset = this.getTotalOffsetForViewItem(viewItem);
+    let renderedOffset = totalOffset;
+    if (nextLayoutPosition) {
+      renderedOffset = viewItem.instance.getPosition(nextLayoutPosition, true);
+    }
+    if (renderedOffset < 0) {
+      renderedOffset = 0;
+    }
+    if (renderedOffset > totalOffset) {
+      renderedOffset = totalOffset;
+    }
+    const prevOffset = this.paginationProgress.renderedOffsetsBySpine[
+      spineIndex
+    ];
+    if (prevOffset != null && renderedOffset < prevOffset) {
+      renderedOffset = prevOffset;
+    }
+    this.paginationProgress.renderedOffsetsBySpine[spineIndex] = renderedOffset;
+
+    const pages = this.getRenderedPageCount();
+    const totalOffsetAll = this.getTotalOffsetAll();
+    const renderedOffsetAll = this.getRenderedOffsetAll();
+    let fraction = totalOffsetAll > 0 ? renderedOffsetAll / totalOffsetAll : 0;
+    if (fraction < this.paginationProgress.lastReportedFraction) {
+      fraction = this.paginationProgress.lastReportedFraction;
+    } else {
+      this.paginationProgress.lastReportedFraction = fraction;
+    }
+    if (pages > this.paginationProgress.lastReportedPages) {
+      this.paginationProgress.lastReportedPages = pages;
+    }
+
+    const payload = {
+      fraction,
+      pages: this.paginationProgress.lastReportedPages,
+    };
+    for (const hook of hooks) {
+      try {
+        hook(payload);
+      } catch (err) {
+        Logging.logger.warn(err as Error);
+      }
+    }
+  }
+
   /**
    * Render a single page. If the new page contains elements with ids that are
    * referenced from other pages by 'target-counter()', those pages are rendered
@@ -1608,6 +1716,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         : viewItem.layoutPositions.length - 1;
       this.finishPageContainer(viewItem, page, pageIndex);
       this.counterStore.finishPage(page.spineIndex, pageIndex);
+      this.reportPaginationProgress(viewItem, pos);
 
       // If the position of the page break change, we should re-layout the next
       // page too.
