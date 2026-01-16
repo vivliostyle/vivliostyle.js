@@ -1394,6 +1394,7 @@ export class Parser {
       case "-epubx-viewport":
       case "-epubx-define":
       case "-adapt-footnote-area":
+      case "footnote":
         return true;
     }
     return false;
@@ -2419,7 +2420,21 @@ export class Parser {
                 continue;
               }
               break;
+            case "-epubx-region":
+              tokenizer.consume();
+              handler.startRegionRule();
+              this.regionRule = true;
+              this.actions = actionsSelectorStart;
+              continue;
+            case "page":
+              tokenizer.consume();
+              handler.startPageRule();
+              this.pageRule = true;
+              this.actions = actionsSelectorCont;
+              continue;
             case "-adapt-footnote-area":
+            case "footnote":
+              // @footnote can be used both inside and outside @page
               tokenizer.consume();
               token = tokenizer.token();
               switch (token.type) {
@@ -2437,11 +2452,13 @@ export class Parser {
                     token.type == TokenType.IDENT &&
                     tokenizer.nthToken(1).type == TokenType.O_BRC
                   ) {
-                    text = token.text;
+                    const pseudoName = token.text;
                     tokenizer.consume();
                     tokenizer.consume();
-                    handler.startFootnoteRule(text);
-                    this.ruleStack.push("-adapt-footnote-area");
+                    handler.startFootnoteRule(pseudoName);
+                    this.ruleStack.push(
+                      text === "footnote" ? "footnote" : "-adapt-footnote-area",
+                    );
                     handler.startRuleBody();
                     this.inStyleDeclaration = true;
                     continue;
@@ -2449,18 +2466,6 @@ export class Parser {
                   break;
               }
               break;
-            case "-epubx-region":
-              tokenizer.consume();
-              handler.startRegionRule();
-              this.regionRule = true;
-              this.actions = actionsSelectorStart;
-              continue;
-            case "page":
-              tokenizer.consume();
-              handler.startPageRule();
-              this.pageRule = true;
-              this.actions = actionsSelectorCont;
-              continue;
             case "top-left-corner":
             case "top-left":
             case "top-center":

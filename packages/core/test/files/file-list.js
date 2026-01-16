@@ -665,6 +665,10 @@ module.exports = [
       },
       { file: "footnotes/footnote-policy.html", title: "footnote-policy" },
       {
+        file: "footnotes/footnote-area-at-footnote.html",
+        title: "Footnote area with @footnote",
+      },
+      {
         file: "footnote-text-spacing.html",
         title: "Footnote text-spacing (Issue #868)",
       },

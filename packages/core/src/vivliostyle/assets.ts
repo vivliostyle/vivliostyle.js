@@ -902,20 +902,19 @@ export const UserAgentPageCss = `
   break-before: right;
 }
 
-@-adapt-footnote-area {
-  display: block;
-  margin-block-start: 0.5em;
-  margin-block-end: 0.5em;
-}
-
-@-adapt-footnote-area ::before {
-  display: block;
-  border-block-start-width: 1px;
-  border-block-start-style: solid;
-  border-block-start-color: black;
-  margin-block-end: 0.4em;
-  margin-inline-start: 0;
-  margin-inline-end: 60%;
+@page {
+  @footnote {
+    margin-block-start: 0.5em;
+  }
+  @footnote ::before {
+    display: block;
+    border-block-start-width: 1px;
+    border-block-start-style: solid;
+    border-block-start-color: black;
+    margin-block-end: 0.4em;
+    margin-inline-start: 0;
+    margin-inline-end: 60%;
+  }
 }
 
 /* default page master */
