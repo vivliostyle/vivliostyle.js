@@ -1724,10 +1724,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
       if (pos) {
         const prevPos = viewItem.layoutPositions[pos.page];
         viewItem.layoutPositions[pos.page] = pos;
-        if (prevPos && viewItem.pages[pos.page]) {
-          if (!pos.isSamePosition(prevPos)) {
-            cont = this.renderSinglePage(viewItem, pos);
-          }
+        const nextPage = viewItem.pages[pos.page];
+        const offsetChanged = oldPage && page.offset !== oldPage.offset;
+        const positionChanged =
+          !prevPos ||
+          !pos.isSamePosition(prevPos) ||
+          pos.highestSeenOffset !== prevPos.highestSeenOffset ||
+          offsetChanged;
+        if (!nextPage || positionChanged) {
+          viewItem.complete = false;
+          cont = this.renderSinglePage(viewItem, pos);
         }
       }
       if (!cont) {
@@ -1843,7 +1849,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       );
       if (seekOffsetPageIndex === viewItem.layoutPositions.length) {
         if (viewItem.complete) {
-          pageIndex = viewItem.layoutPositions.length - 1;
+          pageIndex = viewItem.pages.length - 1;
         } else {
           // need to search through pages that are not yet produced
           pageIndex = Number.POSITIVE_INFINITY;
@@ -1896,7 +1902,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             if (resultPage) {
               loopFrame.breakLoop();
             } else if (viewItem.complete) {
-              pageIndex = viewItem.layoutPositions.length - 1;
+              pageIndex = viewItem.pages.length - 1;
               resultPage = viewItem.pages[pageIndex];
               loopFrame.breakLoop();
             } else if (sync) {
@@ -1949,7 +1955,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             return;
           }
           if (viewItem.complete) {
-            pageIndex = viewItem.layoutPositions.length - 1;
+            pageIndex = viewItem.pages.length - 1;
             loopFrame.breakLoop();
             return;
           }
@@ -2124,10 +2130,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         frame.finish(null);
         return;
       }
-      if (
-        viewItem.complete &&
-        pageIndex == viewItem.layoutPositions.length - 1
-      ) {
+      if (viewItem.complete && pageIndex == viewItem.pages.length - 1) {
         if (spineIndex >= this.opf.spine.length - 1) {
           frame.finish(null);
           return;
