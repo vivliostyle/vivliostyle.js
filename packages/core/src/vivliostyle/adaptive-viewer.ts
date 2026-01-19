@@ -1026,7 +1026,7 @@ export class AdaptiveViewer {
                         t: "nav",
                         epageCount: epageCount,
                         first: this.currentPage.isFirstPage,
-                        last: this.currentPage.isLastPage,
+                        last: this.isLastPageForNotification(this.currentPage),
                         metadata: this.opf.metadata,
                         docTitle:
                           this.opf.spine[this.pagePosition.spineIndex].title,
@@ -1101,7 +1101,7 @@ export class AdaptiveViewer {
     const notification = {
       t: "nav",
       first: page.isFirstPage,
-      last: page.isLastPage,
+      last: this.isLastPageForNotification(page),
       metadata: this.opf.metadata,
       docTitle: this.opf.spine[page.spineIndex].title,
     };
@@ -1117,6 +1117,20 @@ export class AdaptiveViewer {
         frame.finish(true);
       });
     return frame.result();
+  }
+
+  private isLastPageForNotification(page: Vtree.Page): boolean {
+    if (!this.opfView || !this.pagePosition) {
+      return page.isLastPage;
+    }
+    const viewItem = this.opfView.spineItems[this.pagePosition.spineIndex];
+    if (!viewItem || !viewItem.complete) {
+      return false;
+    }
+    const isLastSpine = viewItem.item.spineIndex === this.opf.spine.length - 1;
+    const isLastPage =
+      this.pagePosition.pageIndex === viewItem.pages.length - 1;
+    return isLastSpine && isLastPage;
   }
 
   getCurrentPageProgression(): Constants.PageProgression | null {
