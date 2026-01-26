@@ -1665,9 +1665,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
     if (renderedOffset > totalOffset) {
       renderedOffset = totalOffset;
     }
-    const prevOffset = this.paginationProgress.renderedOffsetsBySpine[
-      spineIndex
-    ];
+    const prevOffset =
+      this.paginationProgress.renderedOffsetsBySpine[spineIndex];
     if (prevOffset != null && renderedOffset < prevOffset) {
       renderedOffset = prevOffset;
     }
@@ -1756,7 +1755,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           !pos.isSamePosition(prevPos) ||
           pos.highestSeenOffset !== prevPos.highestSeenOffset ||
           offsetChanged;
-        if (!nextPage || positionChanged) {
+        if (oldPage && (!nextPage || positionChanged)) {
           viewItem.complete = false;
           cont = this.renderSinglePage(viewItem, pos);
         }
