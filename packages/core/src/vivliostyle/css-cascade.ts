@@ -416,6 +416,43 @@ export const SPECIALS = {
   "fragment-selector-id": true,
 };
 
+// Persist footnote-call counter values on the call element so footnote-marker
+// can render the same value even if page-based counters reset on the footnote
+// page or during re-layout.
+const FOOTNOTE_COUNTER_ATTR = "data-viv-footnote-counter";
+function getFootnoteCounterMap(element: Element): Record<string, string> {
+  const stored = element.getAttribute(FOOTNOTE_COUNTER_ATTR);
+  if (!stored) {
+    return {};
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(stored);
+  } catch (err) {
+    return {};
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return {};
+  }
+  const map: Record<string, string> = Object.create(null);
+  Object.entries(parsed as Record<string, unknown>).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      map[key] = value;
+    }
+  });
+  return map;
+}
+
+function setFootnoteCounterValue(
+  element: Element,
+  counterName: string,
+  value: string,
+): void {
+  const map = getFootnoteCounterMap(element);
+  map[counterName] = value;
+  element.setAttribute(FOOTNOTE_COUNTER_ATTR, JSON.stringify(map));
+}
+
 export function isSpecialName(name: string): boolean {
   return !!SPECIALS[name];
 }
@@ -2056,8 +2093,40 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     public cascade: CascadeInstance,
     public element: Element,
     public readonly counterResolver: CounterResolver,
+    private readonly pseudoName?: string,
   ) {
     super();
+  }
+
+  private getCounterStore(): {
+    currentPageCounters?: CounterValues;
+    currentPageDocCounters?: CounterValues | null;
+    isPageControlledCounter?: (name: string) => boolean;
+    registerPageCounterExpr?: (
+      name: string,
+      format: (p1: number[]) => string,
+      expr: Exprs.Val,
+    ) => void;
+  } | null {
+    return ((this.cascade.context as { counterStore?: unknown })
+      ?.counterStore ?? null) as {
+      currentPageCounters?: CounterValues;
+      currentPageDocCounters?: CounterValues | null;
+      isPageControlledCounter?: (name: string) => boolean;
+      registerPageCounterExpr?: (
+        name: string,
+        format: (p1: number[]) => string,
+        expr: Exprs.Val,
+      ) => void;
+    } | null;
+  }
+
+  private getPageScope(): Exprs.LexicalScope | null {
+    return (
+      this.cascade.context as {
+        style?: { pageScope?: Exprs.LexicalScope | null };
+      }
+    )?.style?.pageScope;
   }
 
   override visitIdent(ident: Css.Ident): Css.Val {
@@ -2091,9 +2160,158 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     return this.cascade.counterStyleStore.format(type, num);
   }
 
+  private formatCounterList(
+    values: number[],
+    separator: string,
+    type: string,
+  ): string {
+    if (!values.length) {
+      return this.format(0, type);
+    }
+    const sb = new Base.StringBuffer();
+    for (let i = 0; i < values.length; i++) {
+      if (i > 0) {
+        sb.append(separator);
+      }
+      sb.append(this.format(values[i], type));
+    }
+    return sb.toString();
+  }
+
+  private formatLastValue(values: number[], type: string): string {
+    const last = values.length ? values[values.length - 1] : 0;
+    return this.format(last, type);
+  }
+
+  private buildCounterText(
+    store: {
+      currentPageCounters?: CounterValues;
+      currentPageDocCounters?: CounterValues | null;
+      isPageControlledCounter?: (name: string) => boolean;
+    },
+    counterName: string,
+    type: string,
+    cascadeDocCounters: number[],
+    separator?: string,
+  ): string {
+    const storeFootnoteCounterValueIfNeeded = (value: string): string => {
+      if (this.pseudoName === "footnote-call" && this.element) {
+        setFootnoteCounterValue(this.element, counterName, value);
+      }
+      return value;
+    };
+    const isList = typeof separator === "string";
+    if (this.pseudoName === "footnote-marker" && this.element) {
+      const map = getFootnoteCounterMap(this.element);
+      const stored = map[counterName];
+      if (stored) {
+        return stored;
+      }
+    }
+    let result: string;
+    if (counterName === "pages") {
+      result = isList
+        ? this.formatCounterList([], separator as string, type)
+        : this.format(0, type);
+      return result;
+    }
+
+    if (!this.element) {
+      const pageCounters = store.currentPageCounters?.[counterName] || [];
+      if (pageCounters.length) {
+        result = isList
+          ? this.formatCounterList(pageCounters, separator as string, type)
+          : this.formatLastValue(pageCounters, type);
+        return storeFootnoteCounterValueIfNeeded(result);
+      }
+    }
+
+    const docCounters = this.element
+      ? cascadeDocCounters
+      : store.currentPageDocCounters?.[counterName] || cascadeDocCounters;
+
+    if (store.isPageControlledCounter?.(counterName)) {
+      const docStartCounters =
+        store.currentPageDocCounters?.[counterName] || [];
+      const pageStartCounters = store.currentPageCounters?.[counterName] || [];
+      const docStartVal = docStartCounters.length
+        ? docStartCounters[docStartCounters.length - 1]
+        : 0;
+      const pageStartVal = pageStartCounters.length
+        ? pageStartCounters[pageStartCounters.length - 1]
+        : 0;
+      const docVal = docCounters.length
+        ? docCounters[docCounters.length - 1]
+        : 0;
+      const adjusted = pageStartVal + (docVal - docStartVal);
+      if (!isList) {
+        result = this.format(adjusted, type);
+        return storeFootnoteCounterValueIfNeeded(result);
+      }
+      const adjustedCounters = docCounters.length
+        ? docCounters.slice(0, -1).concat([adjusted])
+        : pageStartCounters.length
+          ? pageStartCounters
+          : [0];
+      result = this.formatCounterList(
+        adjustedCounters,
+        separator as string,
+        type,
+      );
+      return storeFootnoteCounterValueIfNeeded(result);
+    }
+
+    if (docCounters.length) {
+      result = isList
+        ? this.formatCounterList(docCounters, separator as string, type)
+        : this.formatLastValue(docCounters, type);
+      return storeFootnoteCounterValueIfNeeded(result);
+    }
+
+    const pageCounters = store.currentPageCounters?.[counterName] || [];
+    result = isList
+      ? this.formatCounterList(pageCounters, separator as string, type)
+      : this.formatLastValue(pageCounters, type);
+    return storeFootnoteCounterValueIfNeeded(result);
+  }
+
   visitFuncCounter(values: Css.Val[]): Css.Val {
     const counterName = values[0].toString();
     const type = values.length > 1 ? values[1].stringValue() : "decimal";
+    const cascadeDocCounters = (
+      this.cascade.counters[counterName] || []
+    ).slice();
+    // When a counter store is available, return a native expression so
+    // page/document counters resolve at layout time.
+    const counterStore = this.getCounterStore();
+    if (counterStore) {
+      const isPageCounter =
+        counterName === "pages" ||
+        counterStore?.isPageControlledCounter?.(counterName);
+      const pageScope = this.getPageScope();
+      const nativeExpr = new Exprs.Native(
+        pageScope,
+        () =>
+          this.buildCounterText(
+            counterStore,
+            counterName,
+            type,
+            cascadeDocCounters,
+          ),
+        isPageCounter
+          ? `page-counter-${counterName}`
+          : `counter-${counterName}`,
+      );
+      if (isPageCounter && counterStore?.registerPageCounterExpr) {
+        const arrayFormat = (arr: number[]) => this.formatLastValue(arr, type);
+        counterStore.registerPageCounterExpr(
+          counterName,
+          arrayFormat,
+          nativeExpr,
+        );
+      }
+      return new Css.Expr(nativeExpr);
+    }
     const arr = this.cascade.counters[counterName];
     if (arr && arr.length) {
       const numval = (arr && arr.length && arr[arr.length - 1]) || 0;
@@ -2112,6 +2330,40 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     const counterName = values[0].toString();
     const separator = values[1].stringValue();
     const type = values.length > 2 ? values[2].stringValue() : "decimal";
+    const cascadeDocCounters = (
+      this.cascade.counters[counterName] || []
+    ).slice();
+    const counterStore = this.getCounterStore();
+    if (counterStore) {
+      const isPageCounter =
+        counterName === "pages" ||
+        counterStore?.isPageControlledCounter?.(counterName);
+      const pageScope = this.getPageScope();
+      const nativeExpr = new Exprs.Native(
+        pageScope,
+        () =>
+          this.buildCounterText(
+            counterStore,
+            counterName,
+            type,
+            cascadeDocCounters,
+            separator,
+          ),
+        isPageCounter
+          ? `page-counters-${counterName}`
+          : `counters-${counterName}`,
+      );
+      if (isPageCounter && counterStore?.registerPageCounterExpr) {
+        counterStore.registerPageCounterExpr(
+          counterName,
+          (arr: number[]) => {
+            return this.formatCounterList(arr, separator, type);
+          },
+          nativeExpr,
+        );
+      }
+      return new Css.Expr(nativeExpr);
+    }
     const arr = this.cascade.counters[counterName];
     const sb = new Base.StringBuffer();
     if (arr && arr.length) {
@@ -2803,6 +3055,8 @@ export class CascadeInstance {
   isFirst: boolean = true;
   isRoot: boolean = true;
   counters: CounterValues = {};
+  lastCounterChanges: string[] = [];
+  lastCounterChangeTypes: { [key: string]: "reset" | "set" | "increment" } = {};
   counterScoping: { [key: string]: boolean }[] = [{}];
   quotes: Css.Str[];
   quoteDepth: number = 0;
@@ -2954,6 +3208,10 @@ export class CascadeInstance {
   }
 
   pushCounters(props: ElementStyle): void {
+    const counterChanges = new Set<string>();
+    const counterChangeTypes: {
+      [key: string]: "reset" | "set" | "increment";
+    } = {};
     let displayVal: Css.Val = Css.ident.inline;
     const display = props["display"] as CascadeValue;
     if (display) {
@@ -2962,9 +3220,13 @@ export class CascadeInstance {
     // Ignore counter-* on 'display: none' elements and their descendants
     if (displayVal === Css.ident.none) {
       this.currentElement.setAttribute("data-viv-display-none", "true");
+      this.lastCounterChanges = [];
+      this.lastCounterChangeTypes = {};
       this.counterScoping.push(null);
       return;
     } else if (this.currentElement.closest("[data-viv-display-none]")) {
+      this.lastCounterChanges = [];
+      this.lastCounterChangeTypes = {};
       this.counterScoping.push(null);
       return;
     }
@@ -2980,21 +3242,21 @@ export class CascadeInstance {
     if (reset) {
       const resetVal = reset.evaluate(this.context);
       if (resetVal) {
-        resetMap = CssProp.toCounters(resetVal, true);
+        resetMap = CssProp.toCounters(resetVal, { reset: true });
       }
     }
     const set = props["counter-set"] as CascadeValue;
     if (set) {
       const setVal = set.evaluate(this.context);
       if (setVal) {
-        setMap = CssProp.toCounters(setVal, false);
+        setMap = CssProp.toCounters(setVal, { defaultValue: 0 });
       }
     }
     const increment = props["counter-increment"] as CascadeValue;
     if (increment) {
       const incrementVal = increment.evaluate(this.context);
       if (incrementVal) {
-        incrementMap = CssProp.toCounters(incrementVal, false);
+        incrementMap = CssProp.toCounters(incrementVal);
       }
     }
     if (
@@ -3053,6 +3315,28 @@ export class CascadeInstance {
         }
       }
     }
+    if (resetMap) {
+      for (const resetCounterName in resetMap) {
+        counterChanges.add(resetCounterName);
+        counterChangeTypes[resetCounterName] = "reset";
+      }
+    }
+    if (incrementMap) {
+      for (const incrementCounterName in incrementMap) {
+        counterChanges.add(incrementCounterName);
+        if (!counterChangeTypes[incrementCounterName]) {
+          counterChangeTypes[incrementCounterName] = "increment";
+        }
+      }
+    }
+    if (setMap) {
+      for (const setCounterName in setMap) {
+        counterChanges.add(setCounterName);
+        counterChangeTypes[setCounterName] = "set";
+      }
+    }
+    this.lastCounterChanges = Array.from(counterChanges);
+    this.lastCounterChangeTypes = counterChangeTypes;
     if (resetMap) {
       for (const resetCounterName in resetMap) {
         this.defineCounter(resetCounterName, resetMap[resetCounterName]);
@@ -3159,12 +3443,16 @@ export class CascadeInstance {
     }
   }
 
-  processPseudoelementProps(pseudoprops: ElementStyle, element: Element): void {
+  processPseudoelementProps(
+    pseudoprops: ElementStyle,
+    element: Element,
+    pseudoName?: string,
+  ): void {
     this.pushCounters(pseudoprops);
     const content = pseudoprops["content"] as CascadeValue;
     if (content) {
       pseudoprops["content"] = content.filterValue(
-        new ContentPropVisitor(this, element, this.counterResolver),
+        new ContentPropVisitor(this, element, this.counterResolver, pseudoName),
       );
     }
     this.popCounters();
@@ -3329,7 +3617,7 @@ export class CascadeInstance {
           ) {
             delete pseudos[pseudoName];
           } else if (before) {
-            this.processPseudoelementProps(pseudoProps, element);
+            this.processPseudoelementProps(pseudoProps, element, pseudoName);
 
             if (pseudoName === "marker") {
               // Make marker content from list-style-* properties

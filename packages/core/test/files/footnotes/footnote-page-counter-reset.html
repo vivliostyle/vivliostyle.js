@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Footnote and page counter-reset</title>
+<style>
+@page {
+  size: 600px 600px;
+  margin: 50px;
+  counter-reset: footnote;
+  @bottom-center {
+    content: "Section " counter(section) ", Page " counter(page);
+  }
+}
+
+:root {
+  font: 16px/1.25 Arial, sans-serif;
+  counter-reset: section;
+}
+
+.footnote {
+  float: footnote;
+}
+.footnote::footnote-call {
+  content: "[" counter(footnote) "]";
+}
+.footnote::footnote-marker {
+  content: "[" counter(footnote) "] ";
+}
+
+section {
+  counter-increment: section;
+  break-before: page;
+}
+section > h2::before {
+  content: "Section " counter(section) ": ";
+}
+section:nth-of-type(3) {
+  counter-set: page 10;
+}
+section:nth-of-type(6) {
+  counter-reset: page 20;
+}
+</style>
+</head>
+<body>
+  <h1>Footnote and page counter-reset</h1>
+  <p>This page should have a footer showing "Section 0, Page 1".</p>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and a footer showing "Section 1, Page 2".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and footer showing "Section 2, Page 3".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and footer showing "Section 3, Page 10".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and footer showing "Section 4, Page 11".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and footer showing "Section 5, Page 12".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and footer showing "Section 6, Page 20".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+  <section>
+    <h2>Lorem Ipsum</h2>
+    <p>This page should have footnotes "[1]", "[2]", "[3]", and footer showing "Section 7, Page 21".</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      <span class="footnote">This is a footnote.</span>
+      Sed lobortis nisl a ultrices porttitor. Duis pellentesque porta tellus, 
+      porta suscipit sem iaculis quis. Sed efficitur massa et ligula lacinia, 
+      ut facilisis nibh consequat. Nullam sed tristique lorem. 
+      <span class="footnote">This is another footnote.</span>
+      Duis ac nisi vestibulum, vestibulum lacus quis, mattis odio. 
+      <span class="footnote">This is one more footnote.</span>
+      Pellentesque aliquam at arcu hendrerit placerat. Nulla facilisi. 
+      Proin pharetra arcu vitae elit condimentum vestibulum.</p>
+  </section>
+</body>
+</html>

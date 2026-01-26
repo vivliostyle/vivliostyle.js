@@ -211,7 +211,10 @@ export class CountersVisitor extends Css.Visitor {
   counters: { [key: string]: number } = {};
   name: string | null = null;
 
-  constructor(public readonly reset: boolean) {
+  constructor(
+    public readonly reset: boolean,
+    public readonly defaultValue: number,
+  ) {
     super();
   }
 
@@ -220,14 +223,16 @@ export class CountersVisitor extends Css.Visitor {
     if (this.reset) {
       this.counters[this.name] = 0;
     } else {
-      this.counters[this.name] = (this.counters[this.name] || 0) + 1;
+      this.counters[this.name] =
+        (this.counters[this.name] || 0) + this.defaultValue;
     }
     return ident;
   }
 
   override visitInt(num: Css.Int): Css.Val {
     if (this.name) {
-      this.counters[this.name] += num.num - (this.reset ? 0 : 1);
+      this.counters[this.name] +=
+        num.num - (this.reset ? 0 : this.defaultValue);
     }
     return num;
   }
@@ -240,9 +245,11 @@ export class CountersVisitor extends Css.Visitor {
 
 export function toCounters(
   val: Css.Val,
-  reset: boolean,
+  options?: { reset?: boolean; defaultValue?: number },
 ): { [key: string]: number } {
-  const visitor = new CountersVisitor(reset);
+  const reset = options?.reset ?? false;
+  const defaultValue = options?.defaultValue ?? (reset ? 0 : 1);
+  const visitor = new CountersVisitor(reset, defaultValue);
   try {
     val.visit(visitor);
   } catch (err) {
