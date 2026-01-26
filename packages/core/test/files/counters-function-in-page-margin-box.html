@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>counters() in page margin boxes</title>
+<style>
+@page {
+  size: 600px 600px;
+  margin: 50px;
+  @bottom-center {
+    content: "Section " counters(section, ".");
+  }
+}
+
+:root {
+  font: 16px/1.25 Arial, sans-serif;
+  counter-reset: section;
+}
+
+.section {
+  counter-increment: section;
+  break-before: page;
+}
+
+.subsection {
+  counter-increment: section;
+  break-before: page;
+}
+
+.subsection-wrapper {
+  counter-reset: section;
+}
+
+.section > h2::before,
+.subsection > h3::before {
+  content: "Section " counters(section, ".") ": ";
+}
+</style>
+</head>
+<body>
+<section class="section">
+  <h2>Section One</h2>
+  <p>This page should show "Section 1" in the footer.</p>
+  <div class="subsection-wrapper">
+    <section class="subsection">
+      <h3>Subsection One</h3>
+      <p>This page should show "Section 1.1" in the footer.</p>
+    </section>
+    <section class="subsection">
+      <h3>Subsection Two</h3>
+      <p>This page should show "Section 1.2" in the footer.</p>
+    </section>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Section Two</h2>
+  <p>This page should show "Section 2" in the footer.</p>
+  <div class="subsection-wrapper">
+    <section class="subsection">
+      <h3>Subsection One</h3>
+      <p>This page should show "Section 2.1" in the footer.</p>
+    </section>
+  </div>
+</section>
+</body>
+</html>

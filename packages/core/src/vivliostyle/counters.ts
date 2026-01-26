@@ -633,6 +633,12 @@ export class CounterStore {
   countersById: { [key: string]: CssCascade.CounterValues } = {};
   pageCountersById: { [key: string]: CssCascade.CounterValues } = {};
   pageTextById: { [key: string]: { [pseudoElement: string]: string } } = {};
+  currentPageDocCounters: CssCascade.CounterValues | null = null;
+  previousPageDocCounters: CssCascade.CounterValues | null = null;
+  currentPageDocCounterChanges: { [key: string]: boolean } = {};
+  currentPageDocCounterChangeTypes: {
+    [key: string]: "reset" | "set" | "increment";
+  } = {};
   currentPageCounters: CssCascade.CounterValues = {};
   previousPageCounters: CssCascade.CounterValues = {};
   currentPageCountersStack: CssCascade.CounterValues[] = [];
@@ -645,6 +651,7 @@ export class CounterStore {
   referencesToSolveStack: TargetCounterReference[][] = [];
   unresolvedReferences: { [key: string]: TargetCounterReference[] } = {};
   resolvedReferences: { [key: string]: TargetCounterReference[] } = {};
+  pageControlledCounterNames: { [key: string]: boolean } = { page: true };
   private pagesCounterExprs: {
     expr: Exprs.Val;
     format: (p1: number[]) => string;
@@ -689,6 +696,40 @@ export class CounterStore {
     this.currentPage = page;
   }
 
+  setCurrentPageDocCounters(
+    counters: CssCascade.CounterValues | null,
+    changes: string[] | null,
+    changeTypes?: { [key: string]: "reset" | "set" | "increment" },
+  ) {
+    this.previousPageDocCounters = this.currentPageDocCounters
+      ? cloneCounterValues(this.currentPageDocCounters)
+      : null;
+    this.currentPageDocCounters = counters
+      ? cloneCounterValues(counters)
+      : null;
+    this.currentPageDocCounterChanges = {};
+    this.currentPageDocCounterChangeTypes = changeTypes
+      ? { ...changeTypes }
+      : {};
+    if (changes) {
+      changes.forEach((name) => {
+        this.currentPageDocCounterChanges[name] = true;
+      });
+    }
+  }
+
+  setPageControlledCounterNames(names: string[]) {
+    const map: { [key: string]: boolean } = { page: true };
+    names.forEach((name) => {
+      map[name] = true;
+    });
+    this.pageControlledCounterNames = map;
+  }
+
+  isPageControlledCounter(name: string): boolean {
+    return !!this.pageControlledCounterNames[name];
+  }
+
   private definePageCounter(counterName: string, value: number) {
     if (this.currentPageCounters[counterName]) {
       this.currentPageCounters[counterName].push(value);
@@ -720,17 +761,69 @@ export class CounterStore {
   ) {
     // Save page counters to previousPageCounters before updating
     this.previousPageCounters = cloneCounterValues(this.currentPageCounters);
+    // Track document counter changes so page-controlled counters can be
+    // advanced from the page-start snapshot without double counting.
+    const docChanges = this.currentPageDocCounterChanges || {};
+    const docChangeTypes = this.currentPageDocCounterChangeTypes || {};
+    const docCounterInfo: {
+      [key: string]: { delta: number; reset: boolean; value: number };
+    } = {};
+    if (this.currentPageDocCounters) {
+      const prevDocCounters = this.previousPageDocCounters || {};
+      for (const counterName in this.currentPageDocCounters) {
+        if (!docChanges[counterName]) {
+          continue;
+        }
+        const docCounters = this.currentPageDocCounters[counterName];
+        const docVal = docCounters.length
+          ? docCounters[docCounters.length - 1]
+          : 0;
+        const prevDocCountersOfName = prevDocCounters[counterName] || [];
+        const prevDocVal = prevDocCountersOfName.length
+          ? prevDocCountersOfName[prevDocCountersOfName.length - 1]
+          : 0;
+        const delta = docVal - prevDocVal;
+        const changeType = docChangeTypes[counterName];
+        const isResetOrSet = changeType === "reset" || changeType === "set";
+        docCounterInfo[counterName] = {
+          delta,
+          reset: isResetOrSet,
+          value: docVal,
+        };
+      }
+    }
+    const skipIncrement: { [key: string]: boolean } = {};
     let resetMap: { [key: string]: number };
     const reset = cascadedPageStyle["counter-reset"] as CssCascade.CascadeValue;
     if (reset) {
       const resetVal = reset.evaluate(context);
       if (resetVal) {
-        resetMap = CssProp.toCounters(resetVal, true);
+        resetMap = CssProp.toCounters(resetVal, { reset: true });
       }
     }
+    if (resetMap && "pages" in resetMap) {
+      delete resetMap["pages"];
+    }
+    let setMap: { [key: string]: number };
+    const set = cascadedPageStyle["counter-set"] as CssCascade.CascadeValue;
+    if (set) {
+      const setVal = set.evaluate(context);
+      if (setVal) {
+        setMap = CssProp.toCounters(setVal, { defaultValue: 0 });
+      }
+    }
+    if (setMap && "pages" in setMap) {
+      delete setMap["pages"];
+    }
+    const pageControlledNames: string[] = [];
     if (resetMap) {
       for (const resetCounterName in resetMap) {
-        this.definePageCounter(resetCounterName, resetMap[resetCounterName]);
+        pageControlledNames.push(resetCounterName);
+      }
+    }
+    if (setMap) {
+      for (const setCounterName in setMap) {
+        pageControlledNames.push(setCounterName);
       }
     }
     let incrementMap: { [key: string]: number };
@@ -740,21 +833,80 @@ export class CounterStore {
     if (increment) {
       const incrementVal = increment.evaluate(context);
       if (incrementVal) {
-        incrementMap = CssProp.toCounters(incrementVal, false);
+        incrementMap = CssProp.toCounters(incrementVal);
       }
+    }
+    if (incrementMap && "pages" in incrementMap) {
+      delete incrementMap["pages"];
     }
 
     // If 'counter-increment' for the builtin 'page' counter is absent, add it
     // with value 1.
     if (incrementMap) {
-      if (!("page" in incrementMap)) {
+      if (
+        !("page" in incrementMap) &&
+        !(docCounterInfo["page"] && docCounterInfo["page"].reset)
+      ) {
         incrementMap["page"] = 1;
       }
     } else {
       incrementMap = {};
-      incrementMap["page"] = 1;
+      if (!(docCounterInfo["page"] && docCounterInfo["page"].reset)) {
+        incrementMap["page"] = 1;
+      }
     }
     for (const incrementCounterName in incrementMap) {
+      pageControlledNames.push(incrementCounterName);
+    }
+    this.setPageControlledCounterNames(pageControlledNames);
+    // Start from previous page counters, then reconcile with document counters
+    // so page-scoped and document-scoped counters stay consistent.
+    const baseCounters = cloneCounterValues(this.previousPageCounters);
+    if (this.currentPageDocCounters) {
+      for (const counterName in this.currentPageDocCounters) {
+        if (this.isPageControlledCounter(counterName)) {
+          const info = docCounterInfo[counterName];
+          if (info) {
+            if (info.reset) {
+              baseCounters[counterName] = [info.value];
+              skipIncrement[counterName] = true;
+            } else if (info.delta !== 0) {
+              if (!baseCounters[counterName]) {
+                baseCounters[counterName] = [0];
+              }
+              const counterValues = baseCounters[counterName];
+              counterValues[counterValues.length - 1] += info.delta;
+            }
+          }
+          continue;
+        }
+        baseCounters[counterName] = Array.from(
+          this.currentPageDocCounters[counterName],
+        );
+      }
+    }
+    this.currentPageCounters = baseCounters;
+    if (resetMap) {
+      for (const resetCounterName in resetMap) {
+        this.definePageCounter(resetCounterName, resetMap[resetCounterName]);
+      }
+    }
+    if (setMap) {
+      // Apply counter-set after reset to match counter update order
+      // (reset -> set -> increment).
+      for (const setCounterName in setMap) {
+        if (!this.currentPageCounters[setCounterName]) {
+          this.definePageCounter(setCounterName, setMap[setCounterName]);
+        } else {
+          const counterValues = this.currentPageCounters[setCounterName];
+          counterValues[counterValues.length - 1] = setMap[setCounterName];
+        }
+      }
+    }
+    for (const incrementCounterName in incrementMap) {
+      if (skipIncrement[incrementCounterName]) {
+        continue;
+      }
       if (!this.currentPageCounters[incrementCounterName]) {
         this.definePageCounter(incrementCounterName, 0);
       }

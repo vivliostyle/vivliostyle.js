@@ -36,6 +36,7 @@ import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
 import * as CssTokenizer from "./css-tokenizer";
 import * as CssValidator from "./css-validator";
+import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as GeometryUtil from "./geometry-util";
@@ -600,6 +601,209 @@ export class StyleInstance
       }
     }
     return offset;
+  }
+
+  private getNodePositionOffset(position: Vtree.NodePosition): number {
+    let node = position.steps[0].node;
+    let offsetInNode = position.offsetInNode;
+    let after = position.after;
+    let k = 0;
+    while (node.ownerDocument != this.xmldoc.document) {
+      k++;
+      node = position.steps[k].node;
+      after = false;
+      offsetInNode = 0;
+    }
+    return this.xmldoc.getNodeOffset(node, offsetInNode, after);
+  }
+
+  private getPageStartOffset(
+    layoutPosition?: Vtree.LayoutPosition,
+    noLookAhead?: boolean,
+  ): number {
+    if (!layoutPosition) {
+      return 0;
+    }
+    let currentOffset = Number.POSITIVE_INFINITY;
+    for (const flowName in this.primaryFlows) {
+      let flowPosition = layoutPosition.flowPositions[flowName];
+      if (
+        !noLookAhead &&
+        (!flowPosition || flowPosition.positions.length == 0) &&
+        this.currentLayoutPosition
+      ) {
+        this.styler.styleUntilFlowIsReached(flowName);
+        flowPosition = this.currentLayoutPosition.flowPositions[flowName];
+        if (layoutPosition != this.currentLayoutPosition) {
+          if (flowPosition) {
+            flowPosition = flowPosition.clone();
+            layoutPosition.flowPositions[flowName] = flowPosition;
+          }
+        }
+      }
+      if (flowPosition) {
+        for (let i = 0; i < flowPosition.positions.length; i++) {
+          const pos = flowPosition.positions[i].chunkPosition.primary;
+          const offset = this.getNodePositionOffset(pos);
+          if (offset < currentOffset) {
+            currentOffset = offset;
+          }
+        }
+      }
+    }
+    return currentOffset;
+  }
+
+  private getPageStartCounterOffsets(layoutPosition: Vtree.LayoutPosition): {
+    counterOffset: number;
+    changeOffset: number;
+  } {
+    const pageStartOffset = this.getPageStartOffset(layoutPosition);
+    if (!isFinite(pageStartOffset)) {
+      return { counterOffset: pageStartOffset, changeOffset: pageStartOffset };
+    }
+    const searchRoot = this.xmldoc.body || this.xmldoc.root;
+    const startElement = searchRoot
+      ? this.getFirstInFlowElementAtOrAfter(searchRoot, pageStartOffset)
+      : null;
+    const searchRootOffset = searchRoot
+      ? this.xmldoc.getElementOffset(searchRoot)
+      : pageStartOffset;
+    // Document start: page starts at or before the body/root element offset.
+    const isDocumentStart = pageStartOffset <= searchRootOffset;
+    const resolvedStartElement =
+      startElement === searchRoot && isDocumentStart
+        ? this.getFirstInFlowChildElement(searchRoot)
+        : startElement;
+    if (!resolvedStartElement) {
+      return { counterOffset: pageStartOffset, changeOffset: pageStartOffset };
+    }
+    const changeOffset = this.xmldoc.getElementOffset(resolvedStartElement);
+    let counterOffset = pageStartOffset;
+    if (isDocumentStart && changeOffset !== pageStartOffset) {
+      counterOffset = changeOffset;
+    }
+    // When the page starts exactly at an element boundary, adjust for inline
+    // starts so margin-box counters reflect the pre-consumed state.
+    if (changeOffset === pageStartOffset) {
+      if (this.isInlineLevelElement(resolvedStartElement)) {
+        counterOffset = Math.max(0, pageStartOffset - 1);
+      } else {
+        counterOffset =
+          this.getDeepestFirstInFlowChildOffset(resolvedStartElement);
+      }
+    }
+    return { counterOffset, changeOffset };
+  }
+
+  private getFirstInFlowElementAtOrAfter(
+    root: Element,
+    offset: number,
+  ): Element | null {
+    if (
+      this.isNormalFlowElement(root) &&
+      this.xmldoc.getElementOffset(root) >= offset
+    ) {
+      return root;
+    }
+    const walker = root.ownerDocument.createTreeWalker(
+      root,
+      NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode: (node) => {
+          const element = node as Element;
+          if (!this.isNormalFlowElement(element)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          const nodeOffset = this.xmldoc.getElementOffset(element);
+          if (nodeOffset < offset) {
+            return NodeFilter.FILTER_SKIP;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        },
+      },
+    );
+    const node = walker.firstChild() as Element | null;
+    return node ?? null;
+  }
+
+  private getDeepestFirstInFlowChildOffset(root: Element): number {
+    let current = root;
+    while (true) {
+      const child = this.getFirstInFlowChildElement(current);
+      if (!child) {
+        return this.xmldoc.getElementOffset(current);
+      }
+      current = child;
+    }
+  }
+
+  private getFirstInFlowChildElement(root: Element): Element | null {
+    let child = root.firstChild;
+    while (child) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (!Vtree.canIgnore(child)) {
+          return null;
+        }
+        child = child.nextSibling;
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) {
+        child = child.nextSibling;
+        continue;
+      }
+      const element = child as Element;
+      if (this.isNormalFlowElement(element)) {
+        return element;
+      }
+      child = child.nextSibling;
+    }
+    return null;
+  }
+
+  private isNormalFlowElement(element: Element): boolean {
+    const style = this.styler.getStyle(element, false);
+    const display = this.getDisplayValue(element);
+    if (display === Css.ident.none) {
+      return false;
+    }
+    const positionVal = (
+      style?.["position"] as CssCascade.CascadeValue
+    )?.evaluate(this.styler.context, "position");
+    const position =
+      positionVal && !Css.isDefaultingValue(positionVal)
+        ? positionVal
+        : Css.ident.static;
+    if (
+      Display.isRunning(position) ||
+      Display.isAbsolutelyPositioned(position)
+    ) {
+      return false;
+    }
+    const floatVal = (style?.["float"] as CssCascade.CascadeValue)?.evaluate(
+      this.styler.context,
+      "float",
+    );
+    const float =
+      floatVal && !Css.isDefaultingValue(floatVal) ? floatVal : Css.ident.none;
+    if (float !== Css.ident.none) {
+      return false;
+    }
+    return true;
+  }
+
+  private isInlineLevelElement(element: Element): boolean {
+    return Display.isInlineLevel(this.getDisplayValue(element));
+  }
+
+  private getDisplayValue(element: Element): Css.Ident {
+    const style = this.styler.getStyle(element, false);
+    const displayVal = (
+      style?.["display"] as CssCascade.CascadeValue
+    )?.evaluate(this.styler.context, "display");
+    return displayVal && !Css.isDefaultingValue(displayVal)
+      ? (displayVal as Css.Ident)
+      : Css.ident.inline;
   }
 
   /**
@@ -1930,6 +2134,33 @@ export class StyleInstance
       page.setAutoPageHeight(
         (pageMaster.pageBox.specified["height"] as CssCascade.CascadeValue)
           .value === Css.fullHeight,
+      );
+      // Use counters recorded at the start layout position for this page.
+      let { counterOffset: pageStartOffset, changeOffset: pageChangeOffset } =
+        this.getPageStartCounterOffsets(this.layoutPositionAtPageStart);
+      if (!isFinite(pageStartOffset)) {
+        pageStartOffset = this.lookupOffset;
+        pageChangeOffset = this.lookupOffset;
+      }
+      if (isFinite(pageStartOffset)) {
+        this.styler.styleUntil(pageStartOffset, 0);
+      }
+      let pageStartSnapshot =
+        this.styler.getCounterSnapshotAtOffset(pageStartOffset);
+      let pageChangeSnapshot =
+        pageChangeOffset === pageStartOffset
+          ? pageStartSnapshot
+          : this.styler.getCounterSnapshotAtOffset(pageChangeOffset);
+      if (!pageStartSnapshot) {
+        pageStartSnapshot = this.styler.getLastCounterSnapshot();
+      }
+      if (!pageChangeSnapshot) {
+        pageChangeSnapshot = pageStartSnapshot;
+      }
+      this.counterStore.setCurrentPageDocCounters(
+        pageStartSnapshot?.counters ?? null,
+        pageChangeSnapshot?.changes ?? null,
+        pageChangeSnapshot?.changeTypes,
       );
       this.counterStore.setCurrentPage(page);
       this.counterStore.updatePageCounters(cascadedPageStyle, this);

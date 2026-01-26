@@ -132,6 +132,10 @@ module.exports = [
         file: "content-in-page-margin-box.html",
         title: "Content in page margin box",
       },
+      {
+        file: "counters-function-in-page-margin-box.html",
+        title: "counters() in page margin boxes",
+      },
       { file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug" },
       { file: "pages_counter.html", title: "pages counter" },
       {
@@ -671,6 +675,10 @@ module.exports = [
       {
         file: "footnote-text-spacing.html",
         title: "Footnote text-spacing (Issue #868)",
+      },
+      {
+        file: "footnotes/footnote-page-counter-reset.html",
+        title: "Footnote and page counter-reset (Issue #421)",
       },
     ],
   },

@@ -39,6 +39,16 @@ import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
 
+function cloneCounterValues(
+  counters: CssCascade.CounterValues,
+): CssCascade.CounterValues {
+  const result = {} as CssCascade.CounterValues;
+  Object.keys(counters).forEach((name) => {
+    result[name] = Array.from(counters[name]);
+  });
+  return result;
+}
+
 export type Position = {
   spineIndex: number;
   pageIndex: number;
@@ -1411,6 +1421,7 @@ export type OPFViewItem = {
   layoutPositions: Vtree.LayoutPosition[];
   pages: Vtree.Page[];
   complete: boolean;
+  pageCounterStarts: CssCascade.CounterValues[];
 };
 
 export class OPFView implements Vgen.CustomRendererFactory {
@@ -1592,7 +1603,21 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const frame: Task.Frame<RenderSinglePageResult> =
       Task.newFrame("renderSinglePage");
 
-    const oldPage = viewItem.pages[pos ? pos.page : 0];
+    const pageIndexToRender = pos ? Math.max(pos.page, 0) : 0;
+    const oldPage = viewItem.pages[pageIndexToRender];
+    // Restore page counter starts when re-rendering a page so target-counter()
+    // and page-based counters stay stable across relayouts.
+    const storedCounters = viewItem.pageCounterStarts[pageIndexToRender];
+    if (oldPage && storedCounters) {
+      this.counterStore.currentPageCounters =
+        cloneCounterValues(storedCounters);
+    }
+    const startCounters = cloneCounterValues(
+      this.counterStore.currentPageCounters,
+    );
+    if (!storedCounters || !oldPage) {
+      viewItem.pageCounterStarts[pageIndexToRender] = startCounters;
+    }
     let page = this.makePage(viewItem, pos);
     if (oldPage) {
       // If the old page exists, keep the pageType (named page).
@@ -2649,6 +2674,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           layoutPositions: [null],
           pages: [],
           complete: false,
+          pageCounterStarts: [],
         };
         this.spineItems[spineIndex] = viewItem;
         frame.finish(viewItem);
