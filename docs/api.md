@@ -85,15 +85,6 @@ Note that even if the same function are registered multiple times, this method r
 - `name` (string) — Name of the hook.
 - `fn` (function) — Function to be removed from the hook.
 
-### `plugin.HOOKS.PAGINATION_PROGRESS`
-
-Called when pagination progresses during document load.
-
-The hook receives a payload object:
-
-- `fraction` (number) — Fraction of the HTML content already paginated (0-1).
-- `pages` (number) — Number of pages created so far.
-
 ## profile
 
 ### `profile.profiler.registerStartTiming(name, timestamp)`

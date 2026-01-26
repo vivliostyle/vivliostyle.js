@@ -85,15 +85,6 @@ Note that even if the same function are registered multiple times, this method r
 - `name` (string) — Name of the hook.
 - `fn` (function) — Function to be removed from the hook.
 
-### `plugin.HOOKS.PAGINATION_PROGRESS`
-
-ドキュメント読み込み中のページ分割の進捗時に呼び出されます。
-
-フックには次のペイロードオブジェクトが渡されます:
-
-- `fraction` (number) — 既にページ分割されたHTML内容の割合 (0-1)。
-- `pages` (number) — 作成済みページ数。
-
 ## profile
 
 ### `profile.profiler.registerStartTiming(name, timestamp)`
