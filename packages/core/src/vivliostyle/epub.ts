@@ -2104,67 +2104,111 @@ export class OPFView implements Vgen.CustomRendererFactory {
    * Process all unresolved references in batch after all pages are rendered.
    * This re-renders pages that contain target-counter() or target-text()
    * references to elements that have now been laid out.
+   *
+   * The processing iterates until convergence (no more unresolved references),
+   * because re-rendering a page may cause elements to shift to different pages,
+   * which can invalidate previously resolved references.
    */
   private processAllUnresolvedReferences(): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame(
       "processAllUnresolvedReferences",
     );
 
-    // Get all pages with unresolved references
-    const pagesToRerender = this.counterStore.getAllPagesWithUnresolvedRefs();
+    // TODO: Make this configurable via query parameter or option.
+    // The default of 5 is based on latexmk's default iteration limit.
+    const maxIterations = 5;
+    let iteration = 0;
 
-    // Sort by spine index and page index for deterministic ordering
-    pagesToRerender.sort(
-      (a, b) => a.spineIndex - b.spineIndex || a.pageIndex - b.pageIndex,
-    );
-
-    let index = 0;
+    // Outer loop: iterate until no more unresolved references or max iterations
     frame
-      .loopWithFrame((loopFrame) => {
-        if (index >= pagesToRerender.length) {
-          loopFrame.breakLoop();
+      .loopWithFrame((outerLoopFrame) => {
+        // Get fresh list of unresolved references at each iteration
+        const pagesToRerender =
+          this.counterStore.getAllPagesWithUnresolvedRefs();
+
+        // Filter to pages that actually have unresolved refs
+        const unresolvedPages = pagesToRerender.filter((p) =>
+          p.refs.some((ref) => !ref.isResolved()),
+        );
+
+        if (unresolvedPages.length === 0) {
+          // Convergence reached: no more unresolved references
+          outerLoopFrame.breakLoop();
           return;
         }
 
-        const { spineIndex, pageIndex, pageCounters, refs } =
-          pagesToRerender[index++];
-
-        // Filter to only unresolved refs
-        const unresolvedRefs = refs.filter((ref) => !ref.isResolved());
-        if (unresolvedRefs.length === 0) {
-          loopFrame.continueLoop();
+        if (iteration >= maxIterations) {
+          // Max iterations reached without convergence
+          Logging.logger.warn(
+            `target-counter/target-text resolution did not converge after ${maxIterations} iterations. ` +
+              `${unresolvedPages.length} page(s) still have unresolved references.`,
+          );
+          outerLoopFrame.breakLoop();
           return;
         }
 
-        this.getPageViewItem(spineIndex).then((viewItem) => {
-          if (!viewItem) {
-            loopFrame.continueLoop();
-            return;
-          }
+        iteration++;
 
-          // Save and restore page type (fix for issue #1272)
-          const { currentPageType, previousPageType } =
-            viewItem.instance.styler.cascade;
+        // Sort by spine index and page index for deterministic ordering
+        unresolvedPages.sort(
+          (a, b) => a.spineIndex - b.spineIndex || a.pageIndex - b.pageIndex,
+        );
 
-          // Save and restore scopes (fix for issues #1131 and #1513)
-          const scopes = viewItem.instance.scopes;
-          viewItem.instance.scopes = {};
+        // Inner loop: process all pages in this iteration
+        let index = 0;
+        outerLoopFrame
+          .loopWithFrame((innerLoopFrame) => {
+            if (index >= unresolvedPages.length) {
+              innerLoopFrame.breakLoop();
+              return;
+            }
 
-          this.counterStore.pushPageCounters(pageCounters);
-          this.counterStore.pushReferencesToSolve(unresolvedRefs);
+            const { spineIndex, pageIndex, pageCounters, refs } =
+              unresolvedPages[index++];
 
-          const pos = viewItem.layoutPositions[pageIndex];
+            // Filter to only unresolved refs (may have been resolved by cascade)
+            const unresolvedRefs = refs.filter((ref) => !ref.isResolved());
+            if (unresolvedRefs.length === 0) {
+              innerLoopFrame.continueLoop();
+              return;
+            }
 
-          this.renderSinglePage(viewItem, pos).then(() => {
-            viewItem.instance.styler.cascade.currentPageType = currentPageType;
-            viewItem.instance.styler.cascade.previousPageType =
-              previousPageType;
-            viewItem.instance.scopes = scopes;
-            this.counterStore.popPageCounters();
-            this.counterStore.popReferencesToSolve();
-            loopFrame.continueLoop();
+            this.getPageViewItem(spineIndex).then((viewItem) => {
+              if (!viewItem) {
+                innerLoopFrame.continueLoop();
+                return;
+              }
+
+              // Save and restore page type (fix for issue #1272)
+              const { currentPageType, previousPageType } =
+                viewItem.instance.styler.cascade;
+
+              // Save and restore scopes (fix for issues #1131 and #1513)
+              const scopes = viewItem.instance.scopes;
+              viewItem.instance.scopes = {};
+
+              this.counterStore.pushPageCounters(pageCounters);
+              this.counterStore.pushReferencesToSolve(unresolvedRefs);
+
+              const pos = viewItem.layoutPositions[pageIndex];
+
+              this.renderSinglePage(viewItem, pos).then(() => {
+                viewItem.instance.styler.cascade.currentPageType =
+                  currentPageType;
+                viewItem.instance.styler.cascade.previousPageType =
+                  previousPageType;
+                viewItem.instance.scopes = scopes;
+                this.counterStore.popPageCounters();
+                this.counterStore.popReferencesToSolve();
+                innerLoopFrame.continueLoop();
+              });
+            });
+          })
+          .then(() => {
+            // After processing all pages in this iteration,
+            // continue outer loop to check for new unresolved references
+            outerLoopFrame.continueLoop();
           });
-        });
       })
       .then(() => {
         frame.finish(true);
