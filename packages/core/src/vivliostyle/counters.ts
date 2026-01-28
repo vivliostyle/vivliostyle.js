@@ -1276,6 +1276,46 @@ export class CounterStore {
   createLayoutConstraint(pageIndex: number): Layout.LayoutConstraint {
     return new LayoutConstraint(this, pageIndex);
   }
+
+  /**
+   * Get all pages that have unresolved references, grouped by page.
+   * Used for batch processing of target-counter() and target-text() references.
+   */
+  getAllPagesWithUnresolvedRefs(): {
+    spineIndex: number;
+    pageIndex: number;
+    pageCounters: CssCascade.CounterValues;
+    refs: TargetCounterReference[];
+  }[] {
+    const pageMap = new Map<
+      string,
+      {
+        spineIndex: number;
+        pageIndex: number;
+        pageCounters: CssCascade.CounterValues;
+        refs: TargetCounterReference[];
+      }
+    >();
+
+    for (const refs of Object.values(this.unresolvedReferences)) {
+      for (const ref of refs) {
+        const key = `${ref.spineIndex}:${ref.pageIndex}`;
+        let pageInfo = pageMap.get(key);
+        if (!pageInfo) {
+          pageInfo = {
+            spineIndex: ref.spineIndex,
+            pageIndex: ref.pageIndex,
+            pageCounters: ref.pageCounters,
+            refs: [],
+          };
+          pageMap.set(key, pageInfo);
+        }
+        pageInfo.refs.push(ref);
+      }
+    }
+
+    return Array.from(pageMap.values());
+  }
 }
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
