@@ -25,6 +25,7 @@ import * as LayoutHelper from "./layout-helper";
 import * as LayoutProcessor from "./layout-processor";
 import * as LayoutRetryers from "./layout-retryers";
 import * as LayoutUtil from "./layout-util";
+import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as RepetitiveElementImpl from "./repetitive-element";
 import * as Task from "./task";
@@ -721,6 +722,30 @@ function skipNestedTable(
   }
 }
 
+function layoutFloatOrFootnoteIfNeeded(
+  column: Layout.Column,
+  state: LayoutUtil.LayoutIteratorState,
+): Task.Result<boolean> | null {
+  const nodeContext = state.nodeContext;
+  if (
+    !nodeContext?.floatSide ||
+    !(
+      PageFloats.isPageFloat(nodeContext.floatReference) ||
+      nodeContext.floatSide === "footnote"
+    )
+  ) {
+    return null;
+  }
+  return column
+    .layoutFloatOrFootnote(nodeContext)
+    .thenAsync((nextNodeContext) => {
+      if (nextNodeContext) {
+        state.nodeContext = nextNodeContext;
+      }
+      return Task.newResult(true);
+    });
+}
+
 export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   rowIndex: number = -1;
   columnIndex: number = 0;
@@ -744,6 +769,10 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       return r;
     }
     this.postLayoutBlockContents(state);
+    const floatResult = layoutFloatOrFootnoteIfNeeded(this.column, state);
+    if (floatResult) {
+      return floatResult;
+    }
     const nodeContext = state.nodeContext;
     const display = nodeContext.display;
     const repetitiveElements = formattingContext.getRepetitiveElements();
@@ -908,6 +937,16 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     super(true);
     this.originalStopAtOverflow = column.stopAtOverflow;
     column.stopAtOverflow = false;
+  }
+
+  override startNonInlineElementNode(
+    state: LayoutUtil.LayoutIteratorState,
+  ): void | Task.Result<boolean> {
+    const floatResult = layoutFloatOrFootnoteIfNeeded(this.column, state);
+    if (floatResult) {
+      return floatResult;
+    }
+    return super.startNonInlineElementNode(state);
   }
 
   resetColumn() {

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Footnotes in table</title>
+    <style>
+      :root {
+        counter-reset: footnote 0;
+        font: 1rem/1.5 sans-serif;
+      }
+
+      td {
+        border: solid 1px;
+        padding: 4px;
+      }
+
+      .footnote {
+        float: footnote;
+        color: red;
+        counter-increment: footnote;
+        font: 0.7rem/1.25 sans-serif;
+        text-align: left;
+      }
+
+      .footnote::footnote-call {
+        content: "*" counter(footnote, decimal);
+        font-size: 0.7em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.5em;
+        white-space: nowrap;
+      }
+
+      .footnote::footnote-marker {
+        content: "*" counter(footnote, decimal) " ";
+        font-size: 0.8em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.25em;
+      }
+    </style>
+  </head>
+  <body>
+    <p>STR<span class="footnote" id="fn1">FOOTNOTE1</span></p>
+    <p>STR2<span class="footnote" id="fn2">FOOTNOTE2</span></p>
+    <table>
+      <tr>
+        <td>A<span class="footnote" id="fn3">FOOTNOTE3</span></td>
+        <td>B</td>
+      </tr>
+      <tr>
+        <td>C</td>
+        <td>D<span class="footnote" id="fn4">FOOTNOTE4</span></td>
+      </tr>
+    </table>
+    <p>STR3<span class="footnote" id="fn5">FOOTNOTE5</span></p>
+  </body>
+</html>

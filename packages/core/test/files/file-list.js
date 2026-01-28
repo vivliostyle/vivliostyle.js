@@ -680,6 +680,10 @@ module.exports = [
         file: "footnotes/footnote-page-counter-reset.html",
         title: "Footnote and page counter-reset (Issue #421)",
       },
+      {
+        file: "footnotes/footnotes-in-table.html",
+        title: "Footnotes in table (Issue #438)",
+      },
     ],
   },
   {
