@@ -1698,6 +1698,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
+  // Flag to defer processing of unresolved references until all pages are rendered
+  private deferUnresolvedRefsProcessing = false;
+
   /**
    * Render a single page. If the new page contains elements with ids that are
    * referenced from other pages by 'target-counter()', those pages are rendered
@@ -1764,6 +1767,27 @@ export class OPFView implements Vgen.CustomRendererFactory {
         cont = Task.newResult(true);
       }
       cont.then(() => {
+        // Skip immediate re-rendering if deferring to batch processing
+        if (this.deferUnresolvedRefsProcessing) {
+          // References are tracked in counterStore.unresolvedReferences
+          // They will be processed later in processAllUnresolvedReferences()
+          if (!page.container.parentElement) {
+            page = viewItem.pages[pageIndex];
+          }
+          page.isLastPage =
+            !pos && viewItem.item.spineIndex === this.opf.spine.length - 1;
+          page.container.setAttribute("data-vivliostyle-page-index", pageIndex);
+          page.container.setAttribute(
+            "data-vivliostyle-spine-index",
+            page.spineIndex,
+          );
+          frame.finish({
+            pageAndPosition: makePageAndPosition(page, pageIndex),
+            nextLayoutPosition: pos,
+          });
+          return;
+        }
+
         const unresolvedRefs = this.counterStore.getUnresolvedRefsToPage(page);
         let index = 0;
         frame
@@ -2029,6 +2053,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
   renderAllPages(): Task.Result<PageAndPosition | null> {
     const frame: Task.Frame<PageAndPosition | null> =
       Task.newFrame("renderAllPages");
+
+    // Enable deferred processing of unresolved references
+    this.deferUnresolvedRefsProcessing = true;
+
     this.renderPagesUpto(
       {
         spineIndex: this.opf.spine.length - 1,
@@ -2037,27 +2065,111 @@ export class OPFView implements Vgen.CustomRendererFactory {
       },
       false,
     ).then((result) => {
-      // Wait until all images are loaded (Issue #1321)
-      frame
-        .loopWithFrame((loopFrame) => {
-          if (
-            this.spineItems.some((viewItem) =>
-              viewItem?.pages.some((page) =>
-                page?.fetchers.some((fetcher) => !fetcher.arrived),
-              ),
-            )
-          ) {
-            frame.sleep(100).then(() => {
-              loopFrame.continueLoop();
-            });
-          } else {
-            loopFrame.breakLoop();
-          }
-        })
-        .then(() => {
-          frame.finish(result);
-        });
+      // Disable deferred processing for batch re-rendering
+      this.deferUnresolvedRefsProcessing = false;
+
+      // Process all deferred unresolved references in batch
+      this.processAllUnresolvedReferences().then(() => {
+        // Call finishLastPage after batch processing
+        if (this.viewport) {
+          this.counterStore.finishLastPage(this.viewport);
+        }
+
+        // Wait until all images are loaded (Issue #1321)
+        frame
+          .loopWithFrame((loopFrame) => {
+            if (
+              this.spineItems.some((viewItem) =>
+                viewItem?.pages.some((page) =>
+                  page?.fetchers.some((fetcher) => !fetcher.arrived),
+                ),
+              )
+            ) {
+              frame.sleep(100).then(() => {
+                loopFrame.continueLoop();
+              });
+            } else {
+              loopFrame.breakLoop();
+            }
+          })
+          .then(() => {
+            frame.finish(result);
+          });
+      });
     });
+    return frame.result();
+  }
+
+  /**
+   * Process all unresolved references in batch after all pages are rendered.
+   * This re-renders pages that contain target-counter() or target-text()
+   * references to elements that have now been laid out.
+   */
+  private processAllUnresolvedReferences(): Task.Result<boolean> {
+    const frame: Task.Frame<boolean> = Task.newFrame(
+      "processAllUnresolvedReferences",
+    );
+
+    // Get all pages with unresolved references
+    const pagesToRerender = this.counterStore.getAllPagesWithUnresolvedRefs();
+
+    // Sort by spine index and page index for deterministic ordering
+    pagesToRerender.sort(
+      (a, b) => a.spineIndex - b.spineIndex || a.pageIndex - b.pageIndex,
+    );
+
+    let index = 0;
+    frame
+      .loopWithFrame((loopFrame) => {
+        if (index >= pagesToRerender.length) {
+          loopFrame.breakLoop();
+          return;
+        }
+
+        const { spineIndex, pageIndex, pageCounters, refs } =
+          pagesToRerender[index++];
+
+        // Filter to only unresolved refs
+        const unresolvedRefs = refs.filter((ref) => !ref.isResolved());
+        if (unresolvedRefs.length === 0) {
+          loopFrame.continueLoop();
+          return;
+        }
+
+        this.getPageViewItem(spineIndex).then((viewItem) => {
+          if (!viewItem) {
+            loopFrame.continueLoop();
+            return;
+          }
+
+          // Save and restore page type (fix for issue #1272)
+          const { currentPageType, previousPageType } =
+            viewItem.instance.styler.cascade;
+
+          // Save and restore scopes (fix for issues #1131 and #1513)
+          const scopes = viewItem.instance.scopes;
+          viewItem.instance.scopes = {};
+
+          this.counterStore.pushPageCounters(pageCounters);
+          this.counterStore.pushReferencesToSolve(unresolvedRefs);
+
+          const pos = viewItem.layoutPositions[pageIndex];
+
+          this.renderSinglePage(viewItem, pos).then(() => {
+            viewItem.instance.styler.cascade.currentPageType = currentPageType;
+            viewItem.instance.styler.cascade.previousPageType =
+              previousPageType;
+            viewItem.instance.scopes = scopes;
+            this.counterStore.popPageCounters();
+            this.counterStore.popReferencesToSolve();
+            loopFrame.continueLoop();
+          });
+        });
+      })
+      .then(() => {
+        frame.finish(true);
+      });
+
     return frame.result();
   }
 
