@@ -53,6 +53,6 @@ jobs:
           cd packages/core/test
           # packages/core/test has its own package.json with test-specific dependencies
           yarn install
-          yarn test-ci
+          yarn test
         env:
           TEST_BROWSER: ${{ matrix.browser }}

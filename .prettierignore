@@ -1,4 +1,15 @@
+# Build artifacts and configs
 lerna.json
 package.json
+
+# Test files and samples
 /scripts/package-artifacts/samples/
 /packages/core/test/files/**/*.html
+
+# Generated/vendor files
+/packages/viewer/src/fonts/
+/packages/viewer/src/html/
+
+# Documentation (prevent unintended formatting)
+/docs/**/*.md
+!/docs/**/README.md

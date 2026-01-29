@@ -15,6 +15,8 @@
     "ship:canary": "lerna publish --canary",
     "ship:prerelease": "yarn ship --dist-tag next",
     "test": "lerna run test --parallel --stream",
+    "test:core": "yarn workspace @vivliostyle/core test",
+    "test:core-local": "yarn workspace @vivliostyle/core test-local",
     "version:amend": "git tag --points-at HEAD | xargs -I{} git tag --delete {} && git reset --hard HEAD^",
     "version:bump": "lerna version --conventional-commits --preid pre",
     "version:graduate": "lerna version --conventional-commits --conventional-graduate",

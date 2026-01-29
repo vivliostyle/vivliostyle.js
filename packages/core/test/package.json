@@ -1,8 +1,8 @@
 {
   "name": "core-test",
   "scripts": {
-    "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-local.conf.js",
-    "test-ci": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-ci.conf.js"
+    "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-ci.conf.js",
+    "test-local": "cross-env NODE_OPTIONS=--openssl-legacy-provider karma start conf/karma-local.conf.js"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",

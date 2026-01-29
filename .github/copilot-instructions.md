@@ -22,20 +22,53 @@ yarn test           # Test
 
 ## Development Workflows
 
-### Testing
+### Core Unit Testing
 
-- `cd packages/core/test && yarn test` (Karma + Jasmine)
-- Tests live in `spec/vivliostyle/*-spec.js`
+- `yarn test:core` or `cd packages/core/test && yarn test` (Karma + Jasmine, headless browser)
+- `yarn test:core-local` or `cd packages/core/test && yarn test-local` (Karma + Jasmine, manual browser for debugging)
+- Tests live in `packages/core/test/spec/vivliostyle/*-spec.js`
 
 ### Interactive Development Workflow
 
-- **Viewer dev**: `yarn dev` at root → http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html
-- **Debug build**: `yarn build-dev` (sets `VIVLIOSTYLE_DEBUG=true`)
-- **CSS tests**: Add HTML to `packages/core/test/files/` + entry in `file-list.js`
+- **Core+Viewer dev**: `yarn dev` at root → auto-opens http://localhost:3000/core/test/files/ (Test cases)
+- **Test files**: Add HTML to `packages/core/test/files/` + entry in `file-list.js` (appears in Test cases)
 
-### Lerna
+### Visual Testing with Chrome DevTools MCP
 
-- Use `lerna add <pkg> --scope=@vivliostyle/<target>` or `lerna link` for symlinks
+Use Chrome DevTools MCP to automatically verify rendering results:
+
+**Single Page Test**:
+
+1. Start dev server: `yarn dev` (background)
+2. Open test in browser: Navigate to viewer URL with test file
+3. Wait for rendering: Use `wait_for` to ensure page is loaded
+4. Capture results: Take screenshot to verify rendering
+5. Check structure: Use `take_snapshot` for text-based page structure
+
+**Multi-Page Test**:
+
+1. Navigate to test URL
+2. Take screenshot of first page
+3. Navigate pages: Use `press_key("ArrowDown")` for next page, `press_key("ArrowUp")` for previous
+4. Capture each page to verify pagination
+5. Use `press_key("Home")` / `press_key("End")` to jump to first/last page
+
+**Bug Fix Workflow**:
+
+1. Record current state with screenshots (all pages if multi-page)
+2. Modify core source code (`packages/core/src/`)
+3. `yarn dev` auto-rebuilds → viewer auto-reloads
+4. Reload browser page if needed
+5. Take new screenshots and compare with pre-fix state
+6. Iterate until bug is resolved
+
+**Test URLs**:
+
+- Test cases: http://localhost:3000/core/test/files/
+- Local test:
+  - With test file: `http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/<test>.html`
+  - With any URL: `http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=<URL>`
+- Note: Omit `&debug=true` for visual testing to avoid flickering during render process
 
 ## Naming Conventions
 
@@ -53,9 +86,29 @@ yarn test           # Test
 
 ## Release Process
 
-1. `yarn lint && yarn test && yarn clean && yarn build`
-2. Version: `yarn version:prerelease` / `yarn version:graduate` / `yarn version:bump`
-3. `git push` (CI publishes)
+1. `yarn lint && yarn test && yarn build`
+2. Version: `yarn version:prerelease` / `yarn version:graduate` / `yarn version:bump` (auto-pushes to GitHub)
+3. CI publishes to npm
+
+## Commit Message Guidelines
+
+Follow [Conventional Commits](https://conventionalcommits.org):
+
+- **Format**: `<type>[optional scope]: <description>`
+- **Types**:
+  - `feat:` New feature
+  - `fix:` Bug fix
+  - `chore:` Maintenance (deps, config, etc.)
+  - `docs:` Documentation only
+  - `refactor:` Code restructuring
+  - `test:` Test updates
+- **Scope**: Package name for react/viewer (`fix(react):`, `feat(viewer):`). Core package changes omit scope.
+- **Description**: Imperative mood, lowercase, no period
+- **Issue**: Reference with `closes #1234` or `fixes #1234`
+- **Examples**:
+  - `fix: Fix footnotes in tables being ignored`
+  - `feat(viewer): Add dark mode support`
+  - `chore(deps): bump lodash from 4.17.21 to 4.17.23`
 
 ## Common Pitfalls
 
