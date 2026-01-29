@@ -102,19 +102,13 @@ yarn version:bump
 1. 一貫性を保つために、クラス名とそのファイル名を一致させます。
 2. モジュールのインポート名にはPascalCaseを、ファイル名にはkebab-caseを使用して、違いを視覚的に区別しやすくします。
 3. 分かりやすさのために、ファイル名とクラス名に省略語を使わないようにします。ただし以下を除きます:
-    1. イニシャリズム（EPUB、PDFなど）。
-    2. 長い名前（conditional-properties よりも conditional-props が好ましい）。
+   1. イニシャリズム（EPUB、PDFなど）。
+   2. 長い名前（conditional-properties よりも conditional-props が好ましい）。
 
 ## コミットメッセージのガイドライン
 
 このプロジェクトへの重要な変更は `CHANGELOG.md` に記録されます。
 そのためのコミットメッセージのガイドラインは [Conventional Commits](https://conventionalcommits.org) を参照。
-
-## トラブルシューティング
-
-### Cannot find `node_modules/@vivliostyle/core`
-
-これは `yarn add` の後に発生します。 インストール後にシンボリックリンクを再作成するには、 `lerna link` を実行します。それ以外の場合は、`yarn add` の代わりに `lerna add` を使用します。
 
 ## ドキュメントのメンテナンス
 

@@ -108,12 +108,6 @@ yarn version:bump
 All notable changes to this project will be documented in `CHANGELOG.md`.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## Troubleshooting
-
-### Cannot find `node_modules/@vivliostyle/core`
-
-This occurs after `yarn add`. Run `lerna link` to recreate symlinks after the installation, otherwise use `lerna add` instead of `yarn add`.
-
 ## Maintaining documents
 
 Please update the following documents as developing.
