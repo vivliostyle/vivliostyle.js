@@ -18,8 +18,6 @@
     - [3. Publish](#3-publish)
 - [Consistent Naming Guideline](#consistent-naming-guideline)
 - [Commit Message Guideline](#commit-message-guideline)
-- [Troubleshooting](#troubleshooting)
-  - [Cannot find `node_modules/@vivliostyle/core`](#cannot-find-node_modulesvivliostylecore)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -97,9 +95,3 @@ After running `yarn version:*` command above, just `git push` and CI will do the
 
 All notable changes to this project will be documented in `CHANGELOG.md`.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
-## Troubleshooting
-
-### Cannot find `node_modules/@vivliostyle/core`
-
-This occurs after `yarn add`. Run `lerna link` to recreate symlinks after the installation, otherwise use `lerna add` instead of `yarn add`.
