@@ -3679,20 +3679,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
       retryer.layout(nodeContext, this).then((nodeContextParam) => {
-        if (LayoutHelper.isRootColumn(this)) {
-          // Unset browser's multi-column if it caused column overflow.
-          // (Fix for issue #1637)
-          const rect =
-            this.element.lastElementChild &&
-            this.clientLayout.getElementClientRect(
-              this.element.lastElementChild,
-            );
-          const columnOver =
-            rect && LayoutHelper.checkIfBeyondColumnBreaks(rect, this.vertical);
-          if (columnOver) {
-            LayoutHelper.unsetBrowserColumnBreaking(this);
-          }
-        }
         this.doFinishBreak(
           nodeContextParam,
           retryer.context.overflownNodeContext,
@@ -3706,6 +3692,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             cont = Task.newResult(null);
           }
           cont.then(() => {
+            if (LayoutHelper.isRootColumn(this)) {
+              // Unset browser's multi-column if it caused column overflow.
+              // (Fix for issue #1637)
+              const rect =
+                this.element.lastElementChild &&
+                this.clientLayout.getElementClientRect(
+                  this.element.lastElementChild,
+                );
+              const columnOver =
+                rect &&
+                LayoutHelper.checkIfBeyondColumnBreaks(rect, this.vertical);
+              if (columnOver) {
+                LayoutHelper.unsetBrowserColumnBreaking(this);
+              }
+            }
             if (this.pageFloatLayoutContext.isInvalidated()) {
               frame.finish(null);
               return;
