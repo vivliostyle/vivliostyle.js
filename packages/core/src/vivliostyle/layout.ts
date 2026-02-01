@@ -902,8 +902,64 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this.footnoteEdge = this.vertical
           ? -foundNonZeroWidthBand.y2
           : foundNonZeroWidthBand.y2;
+
+        // Remove unnecessary floats that may cause layout issues
+        // (Fix for issue #1662; Partial fix for issue #1490)
+        if (
+          foundNonZeroWidthBand.x1 === x1 &&
+          foundNonZeroWidthBand.x2 === x2
+        ) {
+          for (
+            let i = bands.indexOf(foundNonZeroWidthBand);
+            i < bands.length;
+            i++
+          ) {
+            const band = bands[i];
+            this.element.removeChild(band.left);
+            this.element.removeChild(band.right);
+            band.left = null;
+            band.right = null;
+          }
+        }
       }
     }
+    // Fix for footnotes/block-end-page-floats and table issue (#1662)
+    this.adjustColumnBlockSizeForBlockEndFloats();
+  }
+
+  private adjustColumnBlockSizeForBlockEndFloats(): void {
+    if (!LayoutHelper.isRootColumn(this)) {
+      return;
+    }
+    const initialBlockSize = this.vertical ? this.width : this.height;
+    const blockSize = this.getBoxDir() * (this.footnoteEdge - this.beforeEdge);
+    if (blockSize > 0 && blockSize < initialBlockSize) {
+      const sizeProp = this.vertical ? "width" : "height";
+      Base.setCSSProperty(this.element, sizeProp, `${blockSize}px`);
+      if (this.vertical) {
+        const left = this.left + (initialBlockSize - blockSize);
+        Base.setCSSProperty(this.element, "left", `${left}px`);
+      }
+      this.element.setAttribute(
+        "data-vivliostyle-column-block-size-adjusted",
+        "true",
+      );
+    }
+  }
+
+  private restoreColumnBlockSizeIfAdjusted(): void {
+    if (
+      !this.element.hasAttribute("data-vivliostyle-column-block-size-adjusted")
+    ) {
+      return;
+    }
+    const initialBlockSize = this.vertical ? this.width : this.height;
+    const sizeProp = this.vertical ? "width" : "height";
+    Base.setCSSProperty(this.element, sizeProp, `${initialBlockSize}px`);
+    if (this.vertical) {
+      Base.setCSSProperty(this.element, "left", `${this.left}px`);
+    }
+    this.element.removeAttribute("data-vivliostyle-column-block-size-adjusted");
   }
 
   /**
@@ -3706,6 +3762,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (columnOver) {
                 LayoutHelper.unsetBrowserColumnBreaking(this);
               }
+
+              // Restore column block size if it was adjusted
+              this.restoreColumnBlockSizeIfAdjusted();
             }
             if (this.pageFloatLayoutContext.isInvalidated()) {
               frame.finish(null);

@@ -223,7 +223,7 @@ export function getElementClientRectAdjusted(
               (vertical ? rect2.right > rect.right : rect2.top < rect.top))
           ) {
             columnElem.setAttribute(
-              "data-vivliostyle-column-height-adjusted",
+              "data-vivliostyle-column-block-size-adjusted",
               "true",
             );
             return rect2;

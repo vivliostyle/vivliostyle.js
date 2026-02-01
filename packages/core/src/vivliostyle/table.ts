@@ -1686,12 +1686,8 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       nodeContext.formattingContext,
     );
     const rootViewNode = formattingContext.getRootViewNode(nodeContext);
-    const frame = Task.newFrame<Vtree.NodeContext>(
-      "TableFormattingContext.layout",
-    );
-    let cont: Task.Result<Vtree.NodeContext>;
     if (!rootViewNode) {
-      cont = column.buildDeepElementView(nodeContext);
+      return column.buildDeepElementView(nodeContext);
     } else {
       if (leadingEdge) {
         RepetitiveElementImpl.appendHeaderToAncestors(
@@ -1699,26 +1695,11 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
           column,
         );
       }
-      cont = new LayoutRetryer(formattingContext, this).layout(
+      return new LayoutRetryer(formattingContext, this).layout(
         nodeContext,
         column,
       );
     }
-    cont.then((result) => {
-      frame.finish(result);
-
-      // Restore column box size if it was modified in `LayoutHelper.getElementClientRectAdjusted()`.
-      if (
-        column.element.hasAttribute("data-vivliostyle-column-height-adjusted")
-      ) {
-        Base.setCSSProperty(column.element, "width", `${column.width}px`);
-        Base.setCSSProperty(column.element, "height", `${column.height}px`);
-        column.element.removeAttribute(
-          "data-vivliostyle-column-height-adjusted",
-        );
-      }
-    });
-    return frame.result();
   }
 
   /** @override */
