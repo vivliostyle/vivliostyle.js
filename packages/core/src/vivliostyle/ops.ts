@@ -2218,6 +2218,10 @@ export class StyleInstance
           if (pageFloatLayoutContext.isInvalidated()) {
             this.currentLayoutPosition = this.layoutPositionAtPageStart.clone();
             pageFloatLayoutContext.validate();
+            // Clear bleedBox children before retry to avoid duplicate page-box elements
+            while (page.bleedBox.lastChild) {
+              page.bleedBox.removeChild(page.bleedBox.lastChild);
+            }
             loopFrame.continueLoop();
           } else {
             loopFrame.breakLoop();
