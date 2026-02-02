@@ -373,11 +373,24 @@ export class TableFormattingContext
     }
     switch (nodeContext.display) {
       case "table-row":
-        return this.cellBreakPositions.length === 0;
-      case "table-cell":
+        // Check both cellBreakPositions and fragmentIndex to determine if this
+        // is the first time laying out this row (issue #1663).
+        return (
+          this.cellBreakPositions.length === 0 && nodeContext.fragmentIndex <= 1
+        );
+      case "table-cell": {
+        // For cells, check if this cell's source node is in cellBreakPositions
+        // or if fragmentIndex indicates this is a continuation (issue #1663).
+        const parentFragmentIndex =
+          nodeContext.parent?.fragmentIndex ?? nodeContext.fragmentIndex;
+        if (nodeContext.fragmentIndex > 1 || parentFragmentIndex > 1) {
+          return false;
+        }
+        // Check if this cell's sourceNode is in cellBreakPositions
         return !this.cellBreakPositions.some(
           (p) => p.cellNodePosition.steps[0].node === nodeContext.sourceNode,
         );
+      }
       default:
         return firstTime;
     }
@@ -1003,12 +1016,26 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       .thenReturn(true);
   }
 
-  hasBrokenCellAtSlot(slotIndex): boolean {
-    const cellBreakPosition = this.formattingContext.cellBreakPositions[0];
-    if (cellBreakPosition) {
-      return cellBreakPosition.cell.anchorSlot.columnIndex === slotIndex;
+  /**
+   * Find the break position for the cell at the given slot index.
+   * Returns the break position and its index in cellBreakPositions, or null if not found.
+   * Uses sourceNode matching instead of sequential index to support layout retry (issue #1663).
+   */
+  findBrokenCellAtSlot(
+    slotIndex: number,
+    sourceNode: Node,
+  ): { position: BrokenTableCellPosition; index: number } | null {
+    const cellBreakPositions = this.formattingContext.cellBreakPositions;
+    for (let i = 0; i < cellBreakPositions.length; i++) {
+      const p = cellBreakPositions[i];
+      if (
+        p.cell.anchorSlot.columnIndex === slotIndex &&
+        p.cellNodePosition.steps[0].node === sourceNode
+      ) {
+        return { position: p, index: i };
+      }
     }
-    return false;
+    return null;
   }
 
   private extractRowSpanningCellBreakPositions(): BrokenTableCellPosition[][] {
@@ -1020,8 +1047,15 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     let i = 0;
     do {
       const p = cellBreakPositions[i];
-      const rowIndex = p.cell.rowIndex;
-      if (rowIndex < this.currentRowIndex) {
+      const cell = p.cell;
+      const rowIndex = cell.rowIndex;
+      // Only extract cells that actually span into the current row
+      // (i.e., rowIndex < currentRowIndex AND rowIndex + rowSpan > currentRowIndex)
+      // Fix for issue #1663: Don't extract cells that are entirely in previous rows
+      if (
+        rowIndex < this.currentRowIndex &&
+        rowIndex + cell.rowSpan > this.currentRowIndex
+      ) {
         let arr = rowSpanningCellBreakPositions[rowIndex];
         if (!arr) {
           arr = rowSpanningCellBreakPositions[rowIndex] = [];
@@ -1053,7 +1087,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     );
     let cont = Task.newResult(true);
     let spanningCellRowIndex = 0;
-    const occupiedSlotIndices = [];
+    const occupiedSlotIndices: number[] = [];
     rowSpanningCellBreakPositions.forEach((rowCellBreakPositions) => {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
@@ -1220,9 +1254,13 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     state.nodeContext = afterNodeContext;
     const frame = Task.newFrame<boolean>("startTableCell");
     let cont: Task.Result<Vtree.ChunkPosition>;
-    if (this.hasBrokenCellAtSlot(cell.anchorSlot.columnIndex)) {
-      const cellBreakPosition =
-        this.formattingContext.cellBreakPositions.shift();
+    // Use sourceNode matching instead of sequential index to support layout retry (issue #1663)
+    const brokenCell = this.findBrokenCellAtSlot(
+      cell.anchorSlot.columnIndex,
+      nodeContext.sourceNode,
+    );
+    if (brokenCell) {
+      const cellBreakPosition = brokenCell.position;
       nodeContext.fragmentIndex =
         cellBreakPosition.cellNodePosition.steps[0].fragmentIndex + 1;
       cont = Task.newResult(cellBreakPosition.breakChunkPosition);

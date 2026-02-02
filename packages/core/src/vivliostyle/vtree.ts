@@ -467,7 +467,7 @@ export function newNodePositionFromNodeContext(
     shadowContext: nodeContext.shadowContext,
     nodeShadow: null,
     shadowSibling: null,
-    formattingContext: null,
+    formattingContext: nodeContext.formattingContext,
     fragmentIndex:
       initialFragmentIndex != null
         ? initialFragmentIndex
