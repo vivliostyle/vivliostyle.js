@@ -174,10 +174,30 @@ export class PageFloatStore {
   findPageFloatByNodePosition(
     nodePosition: Vtree.NodePosition,
   ): PageFloat | null {
+    // First try exact match using isSameNodePosition
     const index = this.floats.findIndex((f) =>
       VtreeImpl.isSameNodePosition(f.nodePosition, nodePosition),
     );
-    return index >= 0 ? this.floats[index] : null;
+    if (index >= 0) {
+      return this.floats[index];
+    }
+    // For table cells (PseudoColumn), the steps array may differ in length
+    // but the sourceNode (steps[0].node) should be the same.
+    // This ensures footnotes inside table cells are identified correctly
+    // even when processed within PseudoColumn context.
+    const sourceNode = nodePosition?.steps?.[0]?.node;
+    if (sourceNode) {
+      const fallbackIndex = this.floats.findIndex(
+        (f) =>
+          f.nodePosition.steps?.[0]?.node === sourceNode &&
+          f.nodePosition.offsetInNode === nodePosition.offsetInNode &&
+          f.nodePosition.after === nodePosition.after,
+      );
+      if (fallbackIndex >= 0) {
+        return this.floats[fallbackIndex];
+      }
+    }
+    return null;
   }
 
   findPageFloatById(id: PageFloatID) {

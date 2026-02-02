@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Footnotes in table</title>
+    <style>
+      @page {
+        size: 800px 600px;
+        margin: 50px;
+        @bottom-center {
+          content: "Page " counter(page);
+          font-size: 0.8rem;
+        }
+      }
+      :root {
+        counter-reset: footnote 0;
+        font: 1rem/1.5 Arial, sans-serif;
+      }
+
+      td,
+      th {
+        border: solid 1px;
+        padding: 4px;
+      }
+
+      .footnote {
+        float: footnote;
+        color: red;
+        counter-increment: footnote;
+        font: 0.7rem/1.25 Arial, sans-serif;
+        text-align: left;
+      }
+
+      .footnote::footnote-call {
+        content: "*" counter(footnote, decimal);
+        font-size: 0.7em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.5em;
+        white-space: nowrap;
+      }
+
+      .footnote::footnote-marker {
+        content: "*" counter(footnote, decimal) " ";
+        font-size: 0.8em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.25em;
+      }
+    </style>
+  </head>
+  <body>
+    <p>STR<span class="footnote" id="fn1">FOOTNOTE1</span></p>
+    <p>STR2<span class="footnote" id="fn2">FOOTNOTE2</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Col1</th>
+          <th>Col2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A. Lorem ipsum dolor<span class="footnote" id="fn3">FOOTNOTE3</span> sit amet consectetur adipisicing elit. Accusantium asperiores dignissimos facilis nihil placeat voluptas qui? Nesciunt, vero, asperiores minima eos atque delectus rerum fugiat explicabo incidunt pariatur voluptatem provident?</td>
+          <td>B. Ut scelerisque sapien eu auctor finibus. Suspendisse potenti. Nam id justo a tellus pretium iaculis.</td>
+        </tr>
+        <tr>
+          <td>C. Nunc suscipit nisl in enim mattis tempus. Praesent bibendum turpis eu massa tristique, imperdiet vehicula libero lobortis. Fusce sed cursus urna. Fusce eros justo, sodales maximus arcu id, facilisis placerat arcu. Sed arcu diam, elementum ut ex quis, semper dignissim purus. Fusce augue est, condimentum quis congue sit amet, fermentum eu dui. Nunc vulputate sagittis nisl, non rutrum magna finibus a. Mauris consectetur eleifend turpis in rhoncus. Proin id sagittis est, a tincidunt tellus.</td>
+          <td>D. Sed rhoncus faucibus libero, ac ullamcorper augue efficitur vitae. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vivamus id dolor ligula. Duis dapibus interdum accumsan. Morbi odio leo, faucibus eu facilisis et, euismod eget elit. Curabitur accumsan efficitur ipsum, quis rutrum mi. Aliquam sed massa quis nisl sodales gravida in eget sem.<span class="footnote" id="fn4">FOOTNOTE4</span> Quisque vel urna id lorem sagittis commodo eu id purus. Etiam non ornare magna, id semper nisi. Vivamus sollicitudin elit odio, sit amet accumsan metus posuere quis. Nam condimentum tortor id ultricies porttitor. Sed commodo eros nunc.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>STR3<span class="footnote" id="fn5">FOOTNOTE5</span></p>
+  </body>
+</html>

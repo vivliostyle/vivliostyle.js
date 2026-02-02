@@ -684,6 +684,10 @@ module.exports = [
         file: "footnotes/footnotes-in-table.html",
         title: "Footnotes in table (Issue #438)",
       },
+      {
+        file: "footnotes/footnotes-in-table-2.html",
+        title: "Footnotes in table 2 (Issue #1657)",
+      },
     ],
   },
   {
