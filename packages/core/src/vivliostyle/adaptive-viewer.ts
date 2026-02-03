@@ -97,6 +97,7 @@ export class AdaptiveViewer {
   pageViewMode: PageViewMode;
   waitForLoading: boolean;
   renderAllPages: boolean;
+  targetCounterMaxIterations: number;
   pref: Exprs.Preferences;
   pageSizes: { width: number; height: number }[];
   pixelRatio: number;
@@ -190,6 +191,7 @@ export class AdaptiveViewer {
     this.pageViewMode = PageViewMode.SINGLE_PAGE;
     this.waitForLoading = false;
     this.renderAllPages = true;
+    this.targetCounterMaxIterations = 5;
     this.pref = Exprs.defaultPreferences();
     this.pageSizes = [];
 
@@ -415,6 +417,12 @@ export class AdaptiveViewer {
     }
     if (typeof command["renderAllPages"] == "boolean") {
       this.renderAllPages = command["renderAllPages"];
+    }
+    if (typeof command["targetCounterMaxIterations"] == "number") {
+      const iterations = command["targetCounterMaxIterations"] as number;
+      if (iterations >= 0) {
+        this.targetCounterMaxIterations = iterations;
+      }
     }
     // for backward compatibility
     if (typeof command["userAgentRootURL"] == "string") {
@@ -818,6 +826,7 @@ export class AdaptiveViewer {
       this.pref,
       this.setPageSize.bind(this),
     );
+    this.opfView.targetCounterMaxIterations = this.targetCounterMaxIterations;
     if (tocVisible) {
       this.sendCommand({ a: "toc", v: "show", autohide: tocAutohide });
     }

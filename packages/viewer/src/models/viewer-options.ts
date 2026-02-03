@@ -41,6 +41,7 @@ interface ViewerOptionsType {
   zoom: ZoomOptions;
   pixelRatio: number;
   enableMarker: boolean;
+  targetCounterMaxIterations: number;
 }
 
 function getViewerOptionsFromURL(): ViewerOptionsType {
@@ -65,6 +66,13 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
   const pixelRatioStr = urlParameters.getParameter("pixelRatio")[0];
   const pixelRatio = pixelRatioStr && parseFloat(pixelRatioStr);
 
+  const targetCounterMaxIterationsStr = urlParameters.getParameter(
+    "targetCounterMaxIterations",
+  )[0];
+  const targetCounterMaxIterations =
+    targetCounterMaxIterationsStr &&
+    parseInt(targetCounterMaxIterationsStr, 10);
+
   return {
     allowScripts:
       allowScripts === "true" ? true : allowScripts === "false" ? false : null,
@@ -88,6 +96,8 @@ function getViewerOptionsFromURL(): ViewerOptionsType {
     pixelRatio,
     enableMarker:
       enableMarker === "true" ? true : enableMarker === "false" ? false : null,
+    targetCounterMaxIterations:
+      targetCounterMaxIterations >= 0 ? targetCounterMaxIterations : null,
   };
 }
 
@@ -101,6 +111,7 @@ function getDefaultValues(): ViewerOptionsType {
     zoom: ZoomOptions.createDefaultOptions(),
     pixelRatio: 8,
     enableMarker: false,
+    targetCounterMaxIterations: 5,
   };
 }
 
@@ -117,6 +128,7 @@ class ViewerOptions {
   zoom: Observable<ZoomOptions>;
   pixelRatio: Observable<number>;
   enableMarker: Observable<boolean>;
+  targetCounterMaxIterations: Observable<number>;
 
   static getDefaultValues: () => {
     allowScripts: boolean;
@@ -127,6 +139,7 @@ class ViewerOptions {
     zoom: ZoomOptions;
     pixelRatio: number;
     enableMarker: boolean;
+    targetCounterMaxIterations: number;
   };
 
   constructor(defaultRenderAllPages: boolean);
@@ -145,6 +158,7 @@ class ViewerOptions {
     this.zoom = ko.observable();
     this.pixelRatio = ko.observable();
     this.enableMarker = ko.observable();
+    this.targetCounterMaxIterations = ko.observable();
 
     if (options) {
       this.copyFrom(options);
@@ -159,6 +173,10 @@ class ViewerOptions {
       this.zoom(urlOptions.zoom || defaultValues.zoom);
       this.pixelRatio(urlOptions.pixelRatio ?? defaultValues.pixelRatio);
       this.enableMarker(urlOptions.enableMarker || defaultValues.enableMarker);
+      this.targetCounterMaxIterations(
+        urlOptions.targetCounterMaxIterations ??
+          defaultValues.targetCounterMaxIterations,
+      );
 
       // write spread parameter back to URL when updated
       this.pageViewMode.subscribe((pageViewMode) => {
@@ -225,6 +243,7 @@ class ViewerOptions {
     this.zoom(other.zoom());
     this.pixelRatio(other.pixelRatio());
     this.enableMarker(other.enableMarker());
+    this.targetCounterMaxIterations(other.targetCounterMaxIterations());
   }
 
   toObject(): CoreViewerOptions {
@@ -236,6 +255,7 @@ class ViewerOptions {
       fitToScreen: this.zoom().fitToScreen,
       zoom: this.zoom().zoom,
       pixelRatio: this.pixelRatio(),
+      targetCounterMaxIterations: this.targetCounterMaxIterations(),
     };
   }
 }

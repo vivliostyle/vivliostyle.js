@@ -1435,6 +1435,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   tocAutohide: boolean = false;
   tocVisible: boolean = false;
   tocView?: Toc.TOCView;
+  targetCounterMaxIterations: number = 5;
   private paginationProgress = {
     totalOffsetsBySpine: [] as number[],
     renderedOffsetsBySpine: [] as number[],
@@ -2114,9 +2115,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       "processAllUnresolvedReferences",
     );
 
-    // TODO: Make this configurable via query parameter or option.
-    // The default of 5 is based on latexmk's default iteration limit.
-    const maxIterations = 5;
+    const maxIterations = this.targetCounterMaxIterations;
     let iteration = 0;
 
     // Outer loop: iterate until no more unresolved references or max iterations

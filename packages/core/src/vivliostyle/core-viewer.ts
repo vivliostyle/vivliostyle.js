@@ -75,6 +75,9 @@ export type CoreViewerSettings = {
  * - pixelRatio: Set output pixel ratio. Enables very thin border width and
  *   improves layout precision, emulating high pixel ratio.
  *   default: 8. Set 0 to disable pixel ratio emulation.
+ * - targetCounterMaxIterations: Maximum number of iterations for resolving
+ *   target-counter() and target-text() references. The default of 5 is based
+ *   on latexmk's default iteration limit. default: 5
  */
 export type CoreViewerOptions = {
   autoResize?: boolean;
@@ -87,6 +90,7 @@ export type CoreViewerOptions = {
   defaultPaperSize?: { width: number; height: number };
   allowScripts?: boolean;
   pixelRatio?: number;
+  targetCounterMaxIterations?: number;
 };
 
 function getDefaultViewerOptions(): CoreViewerOptions {
@@ -101,6 +105,7 @@ function getDefaultViewerOptions(): CoreViewerOptions {
     defaultPaperSize: undefined,
     allowScripts: true,
     pixelRatio: 8,
+    targetCounterMaxIterations: 5,
   };
 }
 
