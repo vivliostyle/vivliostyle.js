@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Footnotes in footnote</title>
+    <style>
+      @page {
+        size: 500px 500px;
+        margin: 50px;
+      }
+
+      :root {
+        font: 1rem/1.5 Arial, sans-serif;
+      }
+
+      .footnote {
+        float: footnote;
+        color: red;
+        font: 0.7rem/1.25 Arial, sans-serif;
+        text-align: start;
+      }
+
+      .footnote::footnote-call {
+        content: counter(footnote, decimal);
+        font-size: 0.7em;
+        vertical-align: baseline;
+        position: relative;
+        inset-block-start: -0.5em;
+      }
+
+      .footnote::footnote-marker {
+        content: counter(footnote, decimal) " ";
+        font-size: 0.8em;
+        vertical-align: baseline;
+        position: relative;
+        inset-block-start: -0.25em;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Lorem ipsum dolor sit amet
+      <span class="footnote">This is a FOOTNOTE
+        <span class="footnote">This is a FOOTNOTE in footnote
+          <span class="footnote">This is a FOOTNOTE in footnote in footnote.</span>.
+        </span>.</span>
+      consectetur adipisicing elit. Culpa perferendis ducimus distinctio odit
+      voluptas unde et libero eaque expedita, accusamus esse ipsa ad iure
+      obcaecati.<span class="footnote">This is another FOOTNOTE.</span> Cum ex
+      quisquam molestiae neque? Lorem ipsum dolor sit amet consectetur
+      adipisicing elit. Molestiae nostrum adipisci, accusantium corrupti
+      voluptates, minus iusto porro dolores perferendis inventore ipsum facilis
+      minima veritatis repellat odit atque dolorum, repellendus iste?
+    </p>
+  </body>
+</html>
