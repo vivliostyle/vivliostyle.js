@@ -190,7 +190,11 @@ export class ViewFactory
         if (!pseudoMap[name]) {
           continue;
         }
-        if (name == "footnote-marker" && !(isRoot && this.isFootnote)) {
+        if (
+          name == "footnote-marker" &&
+          !(isRoot && this.isFootnote) &&
+          !this.nodeContext?.pluginProps["nestedFootnoteDetached"] // (Issue #1352)
+        ) {
           continue;
         }
         if (name.match(/^first-/)) {
@@ -961,10 +965,14 @@ export class ViewFactory
         // Don't want to set it in view DOM CSS.
         delete computedStyle["float"];
         if (floatSide === Css.ident.footnote) {
-          if (this.isFootnote) {
-            // No footnotes inside footnotes. this is most likely the root
-            // of the footnote body being rendered in footnote area. Treat
-            // as block.
+          if (
+            this.isFootnote &&
+            (!this.nodeContext?.parent ||
+              this.nodeContext.pluginProps["nestedFootnoteDetached"])
+          ) {
+            // Root of the footnote body being rendered in footnote area.
+            // Nested footnote inside a footnote area: render as a detached block
+            // entry, with call marker handled separately. (Issue #1352)
             floating = false;
             computedStyle["display"] = Css.ident.block;
           } else {
@@ -2136,13 +2144,17 @@ export class ViewFactory
           node?.nodeType === 1 &&
           PseudoElement.getPseudoName(node as Element) === name;
         const p = this.nodeContext.parent;
-        const parent = p
+        let parent = p
           ? isPseudo(this.viewNode, "after") &&
             isPseudo(p.viewNode, "first-letter") &&
             p.viewNode?.hasChildNodes()
             ? (p.parent.viewNode as Element) // Fix for issue #1175
             : (p.viewNode as Element)
           : this.viewRoot;
+        if (this.nodeContext.pluginProps["nestedFootnoteDetached"]) {
+          // Nested footnote, attach to the root (Issue #1352)
+          parent = this.viewRoot;
+        }
         if (parent) {
           if (
             this.nodeContext.inline &&
@@ -2437,12 +2449,17 @@ export class ViewFactory
         // source document tree (PR #1607 follow-up fix)
         if (
           nodeContext.floatSide === "footnote" &&
-          !this.isFootnote &&
+          !(this.isFootnote && !nodeContext.parent) &&
           !nodeContext.after &&
           !nodeContext.pluginProps["footnoteCallProcessed"] &&
           !nodeContext.shadowContext &&
           this.styler.getStyle(nodeContext.sourceNode as Element, false)
         ) {
+          if (this.isFootnote && nodeContext.parent) {
+            // Detach nested footnote content into footnote area while keeping
+            // the call marker in the parent footnote text. (Issue #1352)
+            nodeContext.pluginProps["nestedFootnoteDetached"] = 1;
+          }
           // Mark as processed to avoid infinite loop when returning via shadowSibling
           nodeContext.pluginProps["footnoteCallProcessed"] = 1;
           // Return footnote-call first, footnote will be processed via shadowSibling

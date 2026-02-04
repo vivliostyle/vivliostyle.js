@@ -660,6 +660,10 @@ module.exports = [
         title: "Footnotes widows bug",
       },
       {
+        file: "footnotes/footnote-in-footnote.html",
+        title: "Footnote in footnote (Issue #1352)",
+      },
+      {
         file: "footnotes/footnotes_and_page_floats.html",
         title: "Footnotes and page floats",
       },
