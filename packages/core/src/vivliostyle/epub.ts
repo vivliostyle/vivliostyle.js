@@ -2055,9 +2055,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const frame: Task.Frame<PageAndPosition | null> =
       Task.newFrame("renderAllPages");
 
-    // Enable deferred processing of unresolved references
-    this.deferUnresolvedRefsProcessing = true;
-
     this.renderPagesUpto(
       {
         spineIndex: this.opf.spine.length - 1,
@@ -2066,10 +2063,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       },
       false,
     ).then((result) => {
-      // Disable deferred processing for batch re-rendering
-      this.deferUnresolvedRefsProcessing = false;
-
-      // Process all deferred unresolved references in batch
+      // Run additional convergence loop to handle any remaining unresolved references
       this.processAllUnresolvedReferences().then(() => {
         // Call finishLastPage after batch processing
         if (this.viewport) {
@@ -2191,7 +2185,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
               const pos = viewItem.layoutPositions[pageIndex];
 
+              // Prevent cascading re-renders during batch processing
+              this.deferUnresolvedRefsProcessing = true;
               this.renderSinglePage(viewItem, pos).then(() => {
+                this.deferUnresolvedRefsProcessing = false;
                 viewItem.instance.styler.cascade.currentPageType =
                   currentPageType;
                 viewItem.instance.styler.cascade.previousPageType =
