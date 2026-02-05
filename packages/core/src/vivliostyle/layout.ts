@@ -3488,6 +3488,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       PageFloats.isPageFloat(nodeContext.floatReference) ||
       nodeContext.floatSide === "footnote"
     ) {
+      // Check if we're inside a page float area (has generatingNodePosition).
+      // If so, footnotes and page floats cannot be properly placed, so layout
+      // them as regular blocks instead of letting them disappear.
+      // (Issue #1668, #1669)
+      if (this.pageFloatLayoutContext.generatingNodePosition) {
+        // Clear float-related properties and layout as a regular block
+        const nodeContextMod = nodeContext.modify();
+        nodeContextMod.floatSide = null;
+        nodeContextMod.floatReference = null;
+        nodeContextMod.clearSide = null;
+        if (this.isBreakable(nodeContextMod)) {
+          return this.layoutBreakableBlock(nodeContextMod);
+        } else {
+          return this.layoutUnbreakable(nodeContextMod);
+        }
+      }
       return this.layoutPageFloat(nodeContext);
     } else {
       return this.layoutFloat(nodeContext);
