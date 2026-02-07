@@ -20,6 +20,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
+import * as CmykStore from "./cmyk-store";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
 import * as Exprs from "./exprs";
@@ -105,6 +106,7 @@ export class AdaptiveViewer {
   // force relayout
   viewport: Vgen.Viewport | null;
   opfView: Epub.OPFView;
+  cmykReserveMap: CmykStore.CmykReserveMapEntry[] | undefined;
 
   constructor(
     public readonly window: Window,
@@ -249,6 +251,9 @@ export class AdaptiveViewer {
       url: string | null;
       text: string | null;
     }[];
+    this.cmykReserveMap = command["cmykReserveMap"] as
+      | CmykStore.CmykReserveMapEntry[]
+      | undefined;
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadPublication");
     this.configure(command).then(() => {
@@ -288,6 +293,9 @@ export class AdaptiveViewer {
       url: string | null;
       text: string | null;
     }[];
+    this.cmykReserveMap = command["cmykReserveMap"] as
+      | CmykStore.CmykReserveMapEntry[]
+      | undefined;
 
     // force relayout
     this.viewport = null;
@@ -817,6 +825,7 @@ export class AdaptiveViewer {
       this.fontMapper,
       this.pref,
       this.setPageSize.bind(this),
+      this.cmykReserveMap,
     );
     if (tocVisible) {
       this.sendCommand({ a: "toc", v: "show", autohide: tocAutohide });

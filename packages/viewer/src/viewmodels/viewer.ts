@@ -25,6 +25,8 @@ import {
   PageProgression,
   profiler,
   ZoomType,
+  isValidCmykReserveMap,
+  type DocumentOptions as CoreDocumentOptions,
 } from "@vivliostyle/core";
 import ko, { Observable, PureComputed } from "knockout";
 
@@ -242,23 +244,48 @@ class Viewer {
     }
     this.documentOptions = documentOptions;
 
-    if (documentOptions.srcUrls()) {
+    if (!documentOptions.srcUrls()) {
+      // No document specified, show welcome page
+      this.privState.status.value(undefined);
+      return;
+    }
+
+    const loadCore = (
+      cmykReserveMap?: CoreDocumentOptions["cmykReserveMap"],
+    ): void => {
+      const docOpts = documentOptions.toObject();
+      if (cmykReserveMap) {
+        docOpts.cmykReserveMap = cmykReserveMap;
+      }
       if (!documentOptions.bookMode()) {
         this.coreViewer.loadDocument(
           documentOptions.srcUrls(),
-          documentOptions.toObject(),
+          docOpts,
           this.viewerOptions.toObject(),
         );
       } else {
         this.coreViewer.loadPublication(
           documentOptions.srcUrls()[0],
-          documentOptions.toObject(),
+          docOpts,
           this.viewerOptions.toObject(),
         );
       }
+    };
+
+    if (documentOptions.cmykReserveMapUrl) {
+      fetch(documentOptions.cmykReserveMapUrl)
+        .then((r) => r.json())
+        .then((data) => {
+          if (isValidCmykReserveMap(data)) {
+            loadCore(data);
+          } else {
+            Logger.getLogger().warn("Invalid cmykReserveMap data, ignoring");
+            loadCore(undefined);
+          }
+        })
+        .catch(() => loadCore(undefined));
     } else {
-      // No document specified, show welcome page
-      this.privState.status.value(undefined);
+      loadCore(undefined);
     }
   }
 

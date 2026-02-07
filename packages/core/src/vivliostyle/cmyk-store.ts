@@ -99,6 +99,35 @@ export interface CMYKValueJSON {
   y: number;
   k: number;
 }
+
+export interface RGBValueJSON {
+  r: number;
+  g: number;
+  b: number;
+}
+
+export type CmykReserveMapEntry = [RGBValueJSON, CMYKValueJSON];
+
+export function isValidCmykReserveMap(
+  data: unknown,
+): data is CmykReserveMapEntry[] {
+  if (!Array.isArray(data)) {
+    return false;
+  }
+  return data.every(
+    (entry) =>
+      Array.isArray(entry) &&
+      entry.length === 2 &&
+      typeof entry[0]?.r === "number" &&
+      typeof entry[0]?.g === "number" &&
+      typeof entry[0]?.b === "number" &&
+      typeof entry[1]?.c === "number" &&
+      typeof entry[1]?.m === "number" &&
+      typeof entry[1]?.y === "number" &&
+      typeof entry[1]?.k === "number",
+  );
+}
+
 class CMYKValue {
   static readonly MAX = 10000;
 
@@ -255,6 +284,14 @@ export class CmykStore {
     }
     this.#map.set(key, cmyk);
     return srgb;
+  }
+
+  registerCmykReserveMap(entries: CmykReserveMapEntry[]): void {
+    for (const [rgb, cmyk] of entries) {
+      const srgb = SRGBValue.fromInt(rgb.r, rgb.g, rgb.b);
+      const cmykVal = CMYKValue.fromInt(cmyk.c, cmyk.m, cmyk.y, cmyk.k);
+      this.#map.set(srgb.toKey(), cmykVal);
+    }
   }
 
   toJSON(): Record<string, CMYKValueJSON> {
