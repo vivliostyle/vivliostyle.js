@@ -789,17 +789,36 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             position = positionParam as Vtree.NodeContext;
             if (!position || position.sourceNode == sourceNode) {
               bodyFrame.breakLoop();
-            } else if (!this.layoutConstraint.allowLayout(position)) {
+              return;
+            }
+            if (!this.layoutConstraint.allowLayout(position)) {
               position = position.modify();
               position.overflow = true;
               if (this.stopAtOverflow) {
                 bodyFrame.breakLoop();
-              } else {
-                bodyFrame.continueLoop();
+                return;
               }
-            } else {
-              bodyFrame.continueLoop();
             }
+            if (
+              this.isFloatNodeContext(position) &&
+              // Exclude normal floats (fix for issue #611)
+              (PageFloats.isPageFloat(position.floatReference) ||
+                position.floatSide === "footnote")
+            ) {
+              this.layoutFloatOrFootnote(position).then((positionParam) => {
+                position = positionParam as Vtree.NodeContext;
+                if (this.pageFloatLayoutContext.isInvalidated()) {
+                  position = null;
+                }
+                if (!position) {
+                  bodyFrame.breakLoop();
+                  return;
+                }
+                bodyFrame.continueLoop();
+              });
+              return;
+            }
+            bodyFrame.continueLoop();
           });
         });
       })

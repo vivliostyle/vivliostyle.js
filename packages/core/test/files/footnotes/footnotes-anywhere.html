@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Footnotes anywhere</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 50px;
+      }
+
+      :root {
+        font: 1rem/1.5 Arial, sans-serif;
+      }
+
+      .footnote {
+        float: footnote;
+        color: red;
+        font: 0.7rem/1.25 Arial, sans-serif;
+        text-align: start;
+      }
+
+      .footnote::footnote-call {
+        content: counter(footnote, decimal);
+        font-size: 0.7em;
+        vertical-align: baseline;
+        position: relative;
+        inset-block-start: -0.5em;
+      }
+
+      .footnote::footnote-marker {
+        content: counter(footnote, decimal) " ";
+        font-size: 0.8em;
+        vertical-align: baseline;
+        position: relative;
+        inset-block-start: -0.25em;
+      }
+
+      .inline-block {
+        display: inline-block;
+        border: 1px solid;
+        padding: 2px;
+      }
+
+      table {
+        inline-size: 100%;
+        border: 1px solid;
+      }
+
+      caption {
+        font-weight: bold;
+      }
+
+      td,
+      th {
+        border: 1px solid;
+        padding: 2px;
+      }
+
+      .flex-container {
+        display: flex;
+        border: 1px solid;
+        margin-block: 1em;
+      }
+
+      .flex-item {
+        flex: 1;
+        border: 1px solid;
+        padding: 2px;
+      }
+
+      .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border: 1px solid;
+        margin-block: 1em;
+      }
+
+      .grid-item {
+        border: 1px solid;
+        padding: 2px;
+      }
+
+      .float-box {
+        float: right;
+        width: 200px;
+        height: 100px;
+        border: 1px solid;
+        padding: 2px;
+      }
+
+      .absolute-box {
+        position: absolute;
+        top: 350px;
+        left: 150px;
+        width: 200px;
+        height: 100px;
+        border: 1px solid;
+        padding: 2px;
+        background: #eee;
+      }
+
+      .relative-box {
+        position: relative;
+        left: 200px;
+        width: 200px;
+        height: 100px;
+        border: 1px solid;
+        padding: 2px;
+        background: #eee;
+      }
+
+      .multi-column {
+        column-count: 2;
+        column-gap: 1em;
+        border: 1px solid;
+        padding: 2px;
+        margin-block: 1em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Footnotes anywhere<span class="footnote">FOOTNOTE in h1 element</span></h1>
+    <p>
+      This is a normal paragraph<span class="footnote">FOOTNOTE in p element</span>.
+      <em>Here is an emphasized text<span class="footnote">FOOTNOTE in em element</span>.</em>
+      <span class="inline-block">
+        Here is an inline-block span<span class="footnote">FOOTNOTE in inline-block span</span>.
+      </span>
+    </p>
+    <table>
+      <caption>
+        Here is a table caption<span class="footnote">FOOTNOTE in table caption</span>.
+      </caption>
+      <tr>
+        <td>
+          Here is a table cell<span class="footnote">FOOTNOTE in table cell</span>.
+        </td>
+        <td>
+          Here is another table cell.
+        </td>
+      </tr>
+    </table>
+
+    <div class="flex-container">
+      <div class="flex-item">
+        Here is a flex item<span class="footnote">FOOTNOTE in flex item</span>.
+      </div>
+      <div class="flex-item">
+        Here is another flex item.
+      </div>
+    </div>
+
+    <div class="grid-container">
+      <div class="grid-item">
+        Here is a grid item<span class="footnote">FOOTNOTE in grid item</span>.
+      </div>
+      <div class="grid-item">
+        Here is another grid item.
+      </div>
+    </div>
+
+    <div class="float-box">
+      Here is a float box<span class="footnote">FOOTNOTE in float box</span>.
+    </div>
+
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa perferendis ducimus distinctio odit voluptas unde et libero eaque expedita, accusamus esse ipsa ad iure obcaecati. Cum ex quisquam molestiae neque? Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae nostrum adipisci, accusantium corrupti voluptates, minus iusto porro dolores perferendis inventore ipsum facilis minima veritatis repellat odit atque dolorum, repellendus iste?
+    </p>
+
+    <div class="absolute-box">
+      Here is an absolute positioned box<span class="footnote">FOOTNOTE in absolute positioned box</span>.
+    </div>
+
+    <div class="relative-box">
+      Here is a relative positioned box<span class="footnote">FOOTNOTE in relative positioned box</span>.
+    </div>
+
+    <div class="multi-column">
+      Here is a multi-column box<span class="footnote">FOOTNOTE in multi-column box</span>. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
+    </div>
+
+  </body>
+
+</html>
