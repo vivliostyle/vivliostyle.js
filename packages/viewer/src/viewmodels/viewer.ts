@@ -57,6 +57,7 @@ class Viewer {
   private viewerOptions: ViewerOptions;
   private coreViewer: CoreViewer;
   private privState: PrivateState;
+  private cmykReserveMapAbort: AbortController | null = null;
 
   documentOptions: null | DocumentOptions;
   epage: Observable<number>;
@@ -273,7 +274,10 @@ class Viewer {
     };
 
     if (documentOptions.cmykReserveMapUrl) {
-      fetch(documentOptions.cmykReserveMapUrl)
+      this.cmykReserveMapAbort?.abort();
+      const abort = new AbortController();
+      this.cmykReserveMapAbort = abort;
+      fetch(documentOptions.cmykReserveMapUrl, { signal: abort.signal })
         .then((r) => r.json())
         .then((data) => {
           if (isValidCmykReserveMap(data)) {
@@ -283,8 +287,15 @@ class Viewer {
             loadCore(undefined);
           }
         })
-        .catch(() => loadCore(undefined));
+        .catch((e) => {
+          if (e instanceof DOMException && e.name === "AbortError") {
+            return;
+          }
+          loadCore(undefined);
+        });
     } else {
+      this.cmykReserveMapAbort?.abort();
+      this.cmykReserveMapAbort = null;
       loadCore(undefined);
     }
   }
