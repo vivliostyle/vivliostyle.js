@@ -102,6 +102,72 @@ describe("cmyk-store", function () {
       });
     });
 
+    describe("registerCmykReserveMap", function () {
+      it("registers entries that appear in toJSON", function () {
+        var store = new CmykStore.CmykStore();
+        store.registerCmykReserveMap([
+          [
+            { r: 5000, g: 5000, b: 5000 },
+            { c: 1000, m: 2000, y: 3000, k: 4000 },
+          ],
+        ]);
+        var json = store.toJSON();
+        expect(Object.keys(json).length).toBe(1);
+        var key = "[5000,5000,5000]";
+        expect(json[key]).toBeDefined();
+        expect(json[key].c).toBe(1000);
+        expect(json[key].m).toBe(2000);
+        expect(json[key].y).toBe(3000);
+        expect(json[key].k).toBe(4000);
+      });
+
+      it("last entry wins for duplicate RGB keys", function () {
+        var store = new CmykStore.CmykStore();
+        store.registerCmykReserveMap([
+          [
+            { r: 5000, g: 5000, b: 5000 },
+            { c: 1000, m: 0, y: 0, k: 0 },
+          ],
+          [
+            { r: 5000, g: 5000, b: 5000 },
+            { c: 0, m: 2000, y: 0, k: 0 },
+          ],
+        ]);
+        var json = store.toJSON();
+        expect(Object.keys(json).length).toBe(1);
+        var key = "[5000,5000,5000]";
+        expect(json[key].c).toBe(0);
+        expect(json[key].m).toBe(2000);
+      });
+
+      it("CSS device-cmyk avoids reserved slots", function () {
+        var store = new CmykStore.CmykStore();
+        // Reserve the slot that pure cyan would normally occupy: [0,10000,10000]
+        store.registerCmykReserveMap([
+          [
+            { r: 0, g: 10000, b: 10000 },
+            { c: 5000, m: 5000, y: 5000, k: 5000 },
+          ],
+        ]);
+        // Now register pure cyan via device-cmyk(1 0 0 0) which also maps to [0,10000,10000]
+        store.registerDeviceCmyk(deviceCmyk(1, 0, 0, 0));
+
+        var json = store.toJSON();
+        // Should have 2 entries: reserved + offset
+        expect(Object.keys(json).length).toBe(2);
+        // Reserved entry should be preserved
+        var reservedKey = "[0,10000,10000]";
+        expect(json[reservedKey].c).toBe(5000);
+        expect(json[reservedKey].m).toBe(5000);
+      });
+
+      it("handles empty array safely", function () {
+        var store = new CmykStore.CmykStore();
+        store.registerCmykReserveMap([]);
+        expect(Object.keys(store.toJSON()).length).toBe(0);
+      });
+    });
+
     describe("collision handling", function () {
       it("handles multiple similar CMYK values", function () {
         var store = new CmykStore.CmykStore();

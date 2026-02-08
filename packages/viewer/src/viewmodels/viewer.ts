@@ -55,7 +55,6 @@ class Viewer {
   private viewerOptions: ViewerOptions;
   private coreViewer: CoreViewer;
   private privState: PrivateState;
-
   documentOptions: null | DocumentOptions;
   epage: Observable<number>;
   epageCount: Observable<number>;
