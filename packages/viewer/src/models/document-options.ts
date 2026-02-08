@@ -162,6 +162,7 @@ class DocumentOptions {
       fragment: this.fragment(),
       authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
       userStyleSheet: convertStyleSheetArray(this.userStyleSheet()),
+      cmykReserveMapUrl: this.cmykReserveMapUrl,
     };
   }
 

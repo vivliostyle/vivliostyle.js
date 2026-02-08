@@ -25,8 +25,6 @@ import {
   PageProgression,
   profiler,
   ZoomType,
-  isValidCmykReserveMap,
-  type DocumentOptions as CoreDocumentOptions,
 } from "@vivliostyle/core";
 import ko, { Observable, PureComputed } from "knockout";
 
@@ -57,8 +55,6 @@ class Viewer {
   private viewerOptions: ViewerOptions;
   private coreViewer: CoreViewer;
   private privState: PrivateState;
-  private cmykReserveMapAbort: AbortController | null = null;
-
   documentOptions: null | DocumentOptions;
   epage: Observable<number>;
   epageCount: Observable<number>;
@@ -245,58 +241,23 @@ class Viewer {
     }
     this.documentOptions = documentOptions;
 
-    if (!documentOptions.srcUrls()) {
-      // No document specified, show welcome page
-      this.privState.status.value(undefined);
-      return;
-    }
-
-    const loadCore = (
-      cmykReserveMap?: CoreDocumentOptions["cmykReserveMap"],
-    ): void => {
-      const docOpts = documentOptions.toObject();
-      if (cmykReserveMap) {
-        docOpts.cmykReserveMap = cmykReserveMap;
-      }
+    if (documentOptions.srcUrls()) {
       if (!documentOptions.bookMode()) {
         this.coreViewer.loadDocument(
           documentOptions.srcUrls(),
-          docOpts,
+          documentOptions.toObject(),
           this.viewerOptions.toObject(),
         );
       } else {
         this.coreViewer.loadPublication(
           documentOptions.srcUrls()[0],
-          docOpts,
+          documentOptions.toObject(),
           this.viewerOptions.toObject(),
         );
       }
-    };
-
-    if (documentOptions.cmykReserveMapUrl) {
-      this.cmykReserveMapAbort?.abort();
-      const abort = new AbortController();
-      this.cmykReserveMapAbort = abort;
-      fetch(documentOptions.cmykReserveMapUrl, { signal: abort.signal })
-        .then((r) => r.json())
-        .then((data) => {
-          if (isValidCmykReserveMap(data)) {
-            loadCore(data);
-          } else {
-            Logger.getLogger().warn("Invalid cmykReserveMap data, ignoring");
-            loadCore(undefined);
-          }
-        })
-        .catch((e) => {
-          if (e instanceof DOMException && e.name === "AbortError") {
-            return;
-          }
-          loadCore(undefined);
-        });
     } else {
-      this.cmykReserveMapAbort?.abort();
-      this.cmykReserveMapAbort = null;
-      loadCore(undefined);
+      // No document specified, show welcome page
+      this.privState.status.value(undefined);
     }
   }
 

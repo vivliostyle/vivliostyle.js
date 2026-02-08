@@ -20,7 +20,6 @@
 import * as AdaptiveViewer from "./adaptive-viewer";
 import * as Base from "./base";
 import * as CmykStore from "./cmyk-store";
-export { isValidCmykReserveMap } from "./cmyk-store";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
 import * as Profile from "./profile";
@@ -141,7 +140,7 @@ export type DocumentOptions = {
   fragment?: string;
   authorStyleSheet?: { url?: string; text?: string }[];
   userStyleSheet?: { url?: string; text?: string }[];
-  cmykReserveMap?: CmykStore.CmykReserveMapEntry[];
+  cmykReserveMapUrl?: string;
 };
 
 /**
@@ -340,7 +339,7 @@ export class CoreViewer {
         fragment: documentOptions["fragment"],
         authorStyleSheet: authorStyleSheet,
         userStyleSheet: userStyleSheet,
-        cmykReserveMap: documentOptions["cmykReserveMap"],
+        cmykReserveMapUrl: documentOptions["cmykReserveMapUrl"],
       },
       convertViewerOptions(this.options),
     );
