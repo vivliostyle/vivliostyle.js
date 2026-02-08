@@ -114,18 +114,33 @@ export function isValidCmykReserveMap(
   if (!Array.isArray(data)) {
     return false;
   }
-  return data.every(
-    (entry) =>
-      Array.isArray(entry) &&
-      entry.length === 2 &&
-      typeof entry[0]?.r === "number" &&
-      typeof entry[0]?.g === "number" &&
-      typeof entry[0]?.b === "number" &&
-      typeof entry[1]?.c === "number" &&
-      typeof entry[1]?.m === "number" &&
-      typeof entry[1]?.y === "number" &&
-      typeof entry[1]?.k === "number",
-  );
+  return data.every((entry) => {
+    if (!Array.isArray(entry) || entry.length !== 2) {
+      return false;
+    }
+    const [rgb, cmyk] = entry;
+    if (
+      !rgb ||
+      typeof rgb !== "object" ||
+      Array.isArray(rgb) ||
+      !cmyk ||
+      typeof cmyk !== "object" ||
+      Array.isArray(cmyk)
+    ) {
+      return false;
+    }
+    const rgbObj = rgb as { r: unknown; g: unknown; b: unknown };
+    const cmykObj = cmyk as { c: unknown; m: unknown; y: unknown; k: unknown };
+    return (
+      Number.isFinite(rgbObj.r as number) &&
+      Number.isFinite(rgbObj.g as number) &&
+      Number.isFinite(rgbObj.b as number) &&
+      Number.isFinite(cmykObj.c as number) &&
+      Number.isFinite(cmykObj.m as number) &&
+      Number.isFinite(cmykObj.y as number) &&
+      Number.isFinite(cmykObj.k as number)
+    );
+  });
 }
 
 class CMYKValue {
