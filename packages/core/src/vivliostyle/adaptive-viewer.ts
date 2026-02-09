@@ -266,7 +266,7 @@ export class AdaptiveViewer {
         store.loadPubDoc(pubURL).then((opf) => {
           if (opf) {
             this.opf = opf;
-            this.loadCmykReserveMap(store, pubURL).then(() => {
+            this.loadCmykReserveMap(store).then(() => {
               this.render(fragment).then(() => {
                 frame.finish(true);
               });
@@ -314,7 +314,7 @@ export class AdaptiveViewer {
         this.packageURL = resolvedParams.map((p) => p.url);
         this.opf = new Epub.OPFDoc(store, "");
         this.opf.initWithChapters(resolvedParams, doc).then(() => {
-          this.loadCmykReserveMap(store, resolvedParams[0].url).then(() => {
+          this.loadCmykReserveMap(store).then(() => {
             this.render(fragment).then(() => {
               frame.finish(true);
             });
@@ -808,15 +808,15 @@ export class AdaptiveViewer {
     }
   }
 
-  private loadCmykReserveMap(
-    store: Epub.EPUBDocStore,
-    baseURL: string,
-  ): Task.Result<boolean> {
+  private loadCmykReserveMap(store: Epub.EPUBDocStore): Task.Result<boolean> {
     if (!this.cmykReserveMapUrl) {
       this.cmykReserveMap = undefined;
       return Task.newResult(true);
     }
-    const resolvedUrl = Base.resolveURL(this.cmykReserveMapUrl, baseURL);
+    const resolvedUrl = Base.resolveURL(
+      Base.convertSpecialURL(this.cmykReserveMapUrl),
+      Base.baseURL,
+    );
     const frame: Task.Frame<boolean> = Task.newFrame("loadCmykReserveMap");
     store.loadAsJSON(resolvedUrl).then((data) => {
       if (CmykStore.isValidCmykReserveMap(data)) {
