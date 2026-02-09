@@ -211,20 +211,6 @@ export const VivliostyleViewportCss = `
   [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:not(:last-child) {
     break-after: page;
   }
-
-  /* Gecko-only hack, see https://bugzilla.mozilla.org/show_bug.cgi?id=267029#c17 */
-  @-moz-document url-prefix()  {
-    [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:nth-last-child(n + 2) {
-      top: -1px;
-      margin-top: 1px;
-      margin-bottom: -1px;
-    }
-    /* Workaround Gecko problem on page break */
-    [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
-      break-after: auto !important;
-      height: 100% !important;
-    }
-  }
 }
 `;
 
