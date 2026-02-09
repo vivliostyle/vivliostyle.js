@@ -33,6 +33,7 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
   const fragment = urlParameters.getParameter("f")[0];
   const style = urlParameters.getParameter("style");
   const userStyle = urlParameters.getParameter("userStyle");
+  const cmykReserveMapUrl = urlParameters.getParameter("cmykReserveMap")[0];
   return {
     srcUrls: srcUrls.length
       ? srcUrls
@@ -56,6 +57,7 @@ function getDocumentOptionsFromURL(): DocumentOptionsType {
     fragment: fragment || null,
     authorStyleSheet: style.length ? style : [],
     userStyleSheet: userStyle.length ? userStyle : [],
+    cmykReserveMapUrl: cmykReserveMapUrl || null,
   };
 }
 
@@ -67,6 +69,7 @@ interface DocumentOptionsType {
   fragment?: string;
   authorStyleSheet?: Array<string>;
   userStyleSheet?: Array<string>;
+  cmykReserveMapUrl?: string;
 }
 
 class DocumentOptions {
@@ -77,6 +80,7 @@ class DocumentOptions {
   fragment?: Observable<string>;
   authorStyleSheet?: Observable<Array<string>>;
   userStyleSheet?: Observable<Array<string>>;
+  cmykReserveMapUrl?: string;
 
   constructor(defaultBookMode: boolean) {
     const urlOptions = getDocumentOptionsFromURL();
@@ -89,6 +93,7 @@ class DocumentOptions {
     this.userStyleSheet = ko.observable(urlOptions.userStyleSheet as string[]);
     this.pageStyle = new PageStyle();
     this.dataCustomStyleIndex = -1;
+    this.cmykReserveMapUrl = urlOptions.cmykReserveMapUrl;
 
     this.bookMode.subscribe((bookMode) => {
       if (bookMode === defaultBookMode) {
@@ -157,6 +162,7 @@ class DocumentOptions {
       fragment: this.fragment(),
       authorStyleSheet: convertStyleSheetArray(this.authorStyleSheet()),
       userStyleSheet: convertStyleSheetArray(this.userStyleSheet()),
+      cmykReserveMapUrl: this.cmykReserveMapUrl,
     };
   }
 

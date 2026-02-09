@@ -140,6 +140,7 @@ export type DocumentOptions = {
   fragment?: string;
   authorStyleSheet?: { url?: string; text?: string }[];
   userStyleSheet?: { url?: string; text?: string }[];
+  cmykReserveMapUrl?: string;
 };
 
 /**
@@ -338,6 +339,7 @@ export class CoreViewer {
         fragment: documentOptions["fragment"],
         authorStyleSheet: authorStyleSheet,
         userStyleSheet: userStyleSheet,
+        cmykReserveMapUrl: documentOptions["cmykReserveMapUrl"],
       },
       convertViewerOptions(this.options),
     );

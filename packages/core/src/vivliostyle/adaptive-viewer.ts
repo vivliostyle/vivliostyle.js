@@ -20,6 +20,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
+import * as CmykStore from "./cmyk-store";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
 import * as Exprs from "./exprs";
@@ -105,6 +106,8 @@ export class AdaptiveViewer {
   // force relayout
   viewport: Vgen.Viewport | null;
   opfView: Epub.OPFView;
+  cmykReserveMap: CmykStore.CmykReserveMapEntry[] | undefined;
+  cmykReserveMapUrl: string | undefined;
 
   constructor(
     public readonly window: Window,
@@ -249,6 +252,7 @@ export class AdaptiveViewer {
       url: string | null;
       text: string | null;
     }[];
+    this.cmykReserveMapUrl = command["cmykReserveMapUrl"] as string | undefined;
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadPublication");
     this.configure(command).then(() => {
@@ -262,8 +266,10 @@ export class AdaptiveViewer {
         store.loadPubDoc(pubURL).then((opf) => {
           if (opf) {
             this.opf = opf;
-            this.render(fragment).then(() => {
-              frame.finish(true);
+            this.loadCmykReserveMap(store).then(() => {
+              this.render(fragment).then(() => {
+                frame.finish(true);
+              });
             });
           } else {
             frame.finish(false);
@@ -288,6 +294,7 @@ export class AdaptiveViewer {
       url: string | null;
       text: string | null;
     }[];
+    this.cmykReserveMapUrl = command["cmykReserveMapUrl"] as string | undefined;
 
     // force relayout
     this.viewport = null;
@@ -307,8 +314,10 @@ export class AdaptiveViewer {
         this.packageURL = resolvedParams.map((p) => p.url);
         this.opf = new Epub.OPFDoc(store, "");
         this.opf.initWithChapters(resolvedParams, doc).then(() => {
-          this.render(fragment).then(() => {
-            frame.finish(true);
+          this.loadCmykReserveMap(store).then(() => {
+            this.render(fragment).then(() => {
+              frame.finish(true);
+            });
           });
         });
       });
@@ -799,6 +808,28 @@ export class AdaptiveViewer {
     }
   }
 
+  private loadCmykReserveMap(store: Epub.EPUBDocStore): Task.Result<boolean> {
+    if (!this.cmykReserveMapUrl) {
+      this.cmykReserveMap = undefined;
+      return Task.newResult(true);
+    }
+    const resolvedUrl = Base.resolveURL(
+      Base.convertSpecialURL(this.cmykReserveMapUrl),
+      Base.baseURL,
+    );
+    const frame: Task.Frame<boolean> = Task.newFrame("loadCmykReserveMap");
+    store.loadAsJSON(resolvedUrl).then((data) => {
+      if (CmykStore.isValidCmykReserveMap(data)) {
+        this.cmykReserveMap = data;
+      } else {
+        Logging.logger.warn("Invalid cmykReserveMap data, ignoring");
+        this.cmykReserveMap = undefined;
+      }
+      frame.finish(true);
+    });
+    return frame.result();
+  }
+
   private reset(): void {
     let tocVisible = false;
     let tocAutohide = false;
@@ -817,6 +848,7 @@ export class AdaptiveViewer {
       this.fontMapper,
       this.pref,
       this.setPageSize.bind(this),
+      this.cmykReserveMap,
     );
     if (tocVisible) {
       this.sendCommand({ a: "toc", v: "show", autohide: tocAutohide });

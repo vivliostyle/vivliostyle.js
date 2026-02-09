@@ -1453,11 +1453,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
       p3: number,
       p4: number,
     ) => any,
+    cmykReserveMap?: CmykStore.CmykReserveMapEntry[],
   ) {
     this.pref = Exprs.clonePreferences(pref);
     this.clientLayout = new Vgen.DefaultClientLayout(viewport);
     this.counterStore = new Counters.CounterStore(opf.documentURLTransformer);
     this.cmykStore = new CmykStore.CmykStore();
+    if (cmykReserveMap?.length) {
+      this.cmykStore.registerCmykReserveMap(cmykReserveMap);
+    }
   }
 
   private getPage(position: Position): Vtree.Page {
