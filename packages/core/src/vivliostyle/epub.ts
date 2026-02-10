@@ -1761,7 +1761,18 @@ export class OPFView implements Vgen.CustomRendererFactory {
           offsetChanged;
         if (oldPage && (!nextPage || positionChanged)) {
           viewItem.complete = false;
-          cont = this.renderSinglePage(viewItem, pos);
+          // When inside a target-counter/target-text resolution scope
+          // (pushPageCounters/popPageCounters), do not cascade to render
+          // pages that have not been rendered yet. Creating new pages
+          // inside the push/pop scope causes currentPageCounters to
+          // advance, but popPageCounters then restores stale values,
+          // leading to wrong page counter numbers on subsequently
+          // rendered pages.
+          const inCounterResolveScope =
+            this.counterStore.currentPageCountersStack.length > 0;
+          if (nextPage || !inCounterResolveScope) {
+            cont = this.renderSinglePage(viewItem, pos);
+          }
         }
       }
       if (!cont) {
