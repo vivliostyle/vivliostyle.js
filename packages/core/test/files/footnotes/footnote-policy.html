@@ -5,7 +5,7 @@
     <title>footnote-policy</title>
     <style>
       @page {
-        size: 850px 220px;
+        size: 640px 220px;
       }
       @-epubx-page-template {
         .region {
@@ -15,10 +15,6 @@
           outline: rgba(255, 0, 0, 0.5) solid 2px;
         }
         @-epubx-page-master {
-          @-epubx-partition class(region) {
-            -epubx-flow-from: body;
-            left: 640px;
-          }
           @-epubx-partition class(region) {
             -epubx-flow-from: body;
             left: 430px;
@@ -32,6 +28,9 @@
             left: 10px;
           }
         }
+      }
+      @-adapt-footnote-area {
+        margin-block: 0.5em;
       }
       :root {
         font-size: 16px;
@@ -57,9 +56,6 @@
       .policy-line {
         footnote-policy: line;
       }
-      .policy-block {
-        footnote-policy: block;
-      }
     </style>
   </head>
   <body>
@@ -81,11 +77,6 @@
       Line 1<span class="footnote policy-line">footnote 2</span> in region 3<br />
       Line 2 in region 3<br />
       Line 3 in region 3
-    </p>
-    <p>
-      Line 1 in region 4<br />
-      Line 2 in region 4<br />
-      Line 3<span class="footnote policy-block">footnote 3</span> in region 4
     </p>
   </body>
 </html>
