@@ -2071,18 +2071,35 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
 }
 
 /**
- * Get concatenated string value from CSS `string-set` and `content` property
+ * Get concatenated string value from CSS `string-set` and `content` property.
+ * When context is provided, evaluates Css.Expr objects (e.g., counter() functions)
+ * to their string values. Non-string results (except numbers) are ignored.
  */
-function getStringValueFromCssContentVal(val: Css.Val): string {
-  // When this function is called, CSS `content()`, `attr()`, `counter()`
-  // values are already resolved to strings values. Remaining non-string values
-  // are ignored.
+function getStringValueFromCssContentVal(
+  val: Css.Val,
+  context?: Exprs.Context,
+): string {
   if (Vtree.nonTrivialContent(val)) {
     if (val instanceof Css.Str) {
       return val.stringValue();
     }
+    if (val instanceof Css.Expr && context) {
+      // Evaluate expressions like counter() to get their string value.
+      // Non-string results are ignored (except numbers, which are explicitly
+      // stringified if desired).
+      const result = val.expr.evaluate(context);
+      if (typeof result === "string") {
+        return result;
+      }
+      if (typeof result === "number") {
+        return String(result);
+      }
+      return "";
+    }
     if (val instanceof Css.SpaceList) {
-      return val.values.map((v) => getStringValueFromCssContentVal(v)).join("");
+      return val.values
+        .map((v) => getStringValueFromCssContentVal(v, context))
+        .join("");
     }
   }
   return "";
@@ -2127,6 +2144,29 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         style?: { pageScope?: Exprs.LexicalScope | null };
       }
     )?.style?.pageScope;
+  }
+
+  /**
+   * Helper method to evaluate CSS values containing counter() and other functions,
+   * then convert to string.
+   */
+  private evaluateAndGetString(val: Css.Val | null | undefined): string {
+    if (!val) {
+      return "";
+    }
+    // Snapshot quoteDepth to avoid leaking state changes from this evaluation.
+    const originalQuoteDepth = this.cascade.quoteDepth;
+    // Visit the value to resolve counter() and other functions
+    const resolvedVal = val.visit(this);
+    // Convert to string, evaluating any Css.Expr objects
+    const result = getStringValueFromCssContentVal(
+      resolvedVal,
+      this.cascade.context,
+    );
+    // Restore quoteDepth so that later processing (e.g., ::before/::after)
+    // is not affected by this helper.
+    this.cascade.quoteDepth = originalQuoteDepth;
+    return result;
   }
 
   override visitIdent(ident: Css.Ident): Css.Val {
@@ -2507,24 +2547,45 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "after":
       case "marker":
         {
-          const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
-          const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
-            ?.value;
-          stringValue = getStringValueFromCssContentVal(val);
+          // Get the actual rendered text from the pseudo-element in the DOM.
+          // Use querySelectorAll and check parentElement to avoid matching
+          // nested pseudo-elements or user markup with data-adapt-pseudo.
+          const pseudoElems = this.element?.querySelectorAll(
+            `[data-adapt-pseudo="${pseudoName}"]`,
+          );
+          let pseudoElem: Element | null = null;
+          if (pseudoElems && this.element) {
+            for (let i = 0; i < pseudoElems.length; i++) {
+              const candidate = pseudoElems[i] as Element;
+              if (candidate.parentElement === this.element) {
+                pseudoElem = candidate;
+                break;
+              }
+            }
+          }
+          if (pseudoElem) {
+            stringValue = pseudoElem.textContent || "";
+          } else {
+            // Fallback: get from stored styles and evaluate counter() functions
+            const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
+            const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
+              ?.value;
+            stringValue = this.evaluateAndGetString(val);
+          }
         }
         break;
       case "first-letter":
         {
           // Respect ::before/after pseudo-elements (Issue #1174)
           const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
+          const beforeVal = (pseudos?.["before"]?.["content"] as CascadeValue)
+            ?.value;
+          const afterVal = (pseudos?.["after"]?.["content"] as CascadeValue)
+            ?.value;
           const r = (
-            getStringValueFromCssContentVal(
-              (pseudos?.["before"]?.["content"] as CascadeValue)?.value,
-            ) ||
+            this.evaluateAndGetString(beforeVal) ||
             this.element.textContent ||
-            getStringValueFromCssContentVal(
-              (pseudos?.["after"]?.["content"] as CascadeValue)?.value,
-            )
+            this.evaluateAndGetString(afterVal)
           ).match(Base.firstLetterPattern);
           stringValue = r ? r[0] : "";
         }
@@ -3416,7 +3477,7 @@ export class CascadeInstance {
         const name = set.values[0].stringValue();
         const stringValue = set.values
           .slice(1)
-          .map((v) => getStringValueFromCssContentVal(v))
+          .map((v) => getStringValueFromCssContentVal(v, this.context))
           .join("");
         this.counterResolver.setNamedString(
           name,
