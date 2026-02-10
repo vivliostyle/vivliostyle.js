@@ -104,6 +104,7 @@ export class ViewFactory
     "stroke",
     "mask",
   ];
+  private static FOOTNOTE_CALL_OWNER_ATTR = "data-viv-footnote-call-owner";
   document: Document;
   exprContentListener: Vtree.ExprContentListener;
 
@@ -2335,6 +2336,41 @@ export class ViewFactory
   }
 
   /**
+   * Find a footnote-call element immediately before the given view node.
+   */
+  private findImmediateFootnoteCallSibling(
+    footnoteNodeContext: Vtree.NodeContext,
+  ): Element | null {
+    const ownerOffset = this.xmldoc.getElementOffset(
+      footnoteNodeContext.sourceNode as Element,
+    );
+    const viewNode = footnoteNodeContext.viewNode;
+    if (!viewNode) {
+      return null;
+    }
+    let prev: Node | null = viewNode.previousSibling;
+    while (prev) {
+      if (prev.nodeType === Node.TEXT_NODE) {
+        if (prev.textContent.trim().length === 0) {
+          prev = prev.previousSibling;
+          continue;
+        }
+        return null;
+      }
+      if (prev.nodeType === Node.ELEMENT_NODE) {
+        const prevElem = prev as Element;
+        return PseudoElement.getPseudoName(prevElem) === "footnote-call" &&
+          prevElem.getAttribute(ViewFactory.FOOTNOTE_CALL_OWNER_ATTR) ===
+            ownerOffset.toString()
+          ? prevElem
+          : null;
+      }
+      return null;
+    }
+    return null;
+  }
+
+  /**
    * Insert a footnote-call NodeContext before the footnote element.
    * The footnote-call will be processed as a normal inline element,
    * then shadowSibling will lead to the footnote element.
@@ -2352,6 +2388,13 @@ export class ViewFactory
       "span",
     );
     PseudoElement.setPseudoName(footnoteCallSourceNode, "footnote-call");
+    const footnoteOffset = this.xmldoc.getElementOffset(
+      footnoteNodeContext.sourceNode as Element,
+    );
+    footnoteCallSourceNode.setAttribute(
+      ViewFactory.FOOTNOTE_CALL_OWNER_ATTR,
+      footnoteOffset.toString(),
+    );
 
     // Create NodeContext for footnote-call with the same parent as footnote
     const footnoteCallContext = new Vtree.NodeContext(
@@ -2455,6 +2498,11 @@ export class ViewFactory
           !nodeContext.shadowContext &&
           this.styler.getStyle(nodeContext.sourceNode as Element, false)
         ) {
+          const existingFootnoteCall =
+            this.findImmediateFootnoteCallSibling(nodeContext);
+          if (existingFootnoteCall?.parentNode) {
+            existingFootnoteCall.parentNode.removeChild(existingFootnoteCall);
+          }
           if (this.isFootnote && nodeContext.parent) {
             // Detach nested footnote content into footnote area while keeping
             // the call marker in the parent footnote text. (Issue #1352)
