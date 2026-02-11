@@ -235,6 +235,14 @@ export class AdaptiveViewer {
     if (this.readyState !== readyState) {
       this.readyState = readyState;
       this.viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, readyState);
+      // Set page-progression attribute (Issue #1681)
+      const pageProgression = this.getCurrentPageProgression();
+      if (pageProgression) {
+        this.viewportElement.setAttribute(
+          "data-vivliostyle-page-progression",
+          pageProgression,
+        );
+      }
       this.callback({ t: "readystatechange" });
     }
   }
