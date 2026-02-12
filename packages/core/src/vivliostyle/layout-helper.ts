@@ -360,18 +360,42 @@ export function calculateEdge(
   if (element && element.namespaceURI === Base.NS.XHTML) {
     const style = (element as HTMLElement).style;
     if (
-      element.localName === "br" ||
       element.localName === "wbr" ||
       (style &&
         Display.isInlineLevel(style.display) &&
         /^([\d\.]|super|(text-)?top)/.test(style.verticalAlign))
     ) {
-      // Avoid incorrect edge calculation at BR or WBR element,
+      // Avoid incorrect edge calculation at WBR element,
       // or inline element with positive vertical-align (issue #811).
       return NaN;
     }
   }
   if (node === element) {
+    // For BR elements, measure the line position by inserting a temporary
+    // marker element BEFORE the BR. This is necessary because
+    // getBoundingClientRect() on consecutive BRs reports the same rect
+    // (the line they're ON), so the binary search can't distinguish them.
+    // By measuring before each BR, we get the after-edge of the line
+    // the BR is on, which correctly differentiates consecutive BRs:
+    // the first BR's line fits while the second BR's blank line overflows.
+    // (issue #1685)
+    if (element.localName === "br") {
+      const doc = element.ownerDocument;
+      const marker = doc.createElement("span");
+      element.parentNode.insertBefore(marker, element);
+      const markerRect = clientLayout.getElementClientRect(marker);
+      marker.remove();
+      if (markerRect) {
+        const rects = [markerRect];
+        adjustRectsForColumnBreaking(rects, vertical);
+        const adjustedRect = rects[0];
+        const edge = vertical ? adjustedRect.left : adjustedRect.bottom;
+        if (!isNaN(edge) && edge !== 0) {
+          return edge;
+        }
+      }
+      return NaN;
+    }
     if (nodeContext.after || !nodeContext.inline) {
       if (
         nodeContext.after &&
@@ -428,7 +452,11 @@ export function calculateEdge(
     // Adjust boxes' positions for column breaking
     adjustRectsForColumnBreaking(boxes, vertical);
 
-    boxes = boxes.filter((box) => box.right > box.left && box.bottom > box.top);
+    // Accept zero-width rects (e.g., blank lines in <pre>) that have
+    // a valid block-direction dimension (issue #1685).
+    boxes = boxes.filter((box) =>
+      vertical ? box.right > box.left : box.bottom > box.top,
+    );
     if (!boxes.length) {
       return NaN;
     }
