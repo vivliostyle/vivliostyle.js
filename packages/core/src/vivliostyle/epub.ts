@@ -1779,7 +1779,17 @@ export class OPFView implements Vgen.CustomRendererFactory {
         cont = Task.newResult(true);
       }
       cont.then(() => {
-        const unresolvedRefs = this.counterStore.getUnresolvedRefsToPage(page);
+        // When inside a target-counter/target-text resolution scope
+        // (pushPageCounters/popPageCounters), skip processing unresolved
+        // references on cascaded pages to prevent infinite re-layout loops.
+        // References that remain unresolved will be resolved when their
+        // target pages are rendered in the normal (non-cascade) flow.
+        // (fix for issue #1686)
+        const inCounterResolveScope =
+          this.counterStore.currentPageCountersStack.length > 0;
+        const unresolvedRefs = inCounterResolveScope
+          ? []
+          : this.counterStore.getUnresolvedRefsToPage(page);
         let index = 0;
         frame
           .loopWithFrame((loopFrame) => {
