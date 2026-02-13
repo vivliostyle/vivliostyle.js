@@ -76,6 +76,10 @@ module.exports = [
       { file: "relative_floats.html", title: "Floats with position: relative" },
       { file: "target-counter.html", title: "target-counter" },
       {
+        file: "cross-scope-counters.html",
+        title: "Cross-scope counters (#Issue 1692)",
+      },
+      {
         file: "target-counter-and-margin-bug.html",
         title: "target-counter and margin bug",
       },
