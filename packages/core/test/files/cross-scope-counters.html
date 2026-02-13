@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cross-scope counters</title>
+    <style>
+      @page {
+        counter-increment: foo bar;
+        size: 500px;
+        margin: 50px;
+        @top-center {
+          content: "Page " counter(page);
+        }
+      }
+      section {
+        break-before: page;
+      }
+      .foo {
+        counter-increment: foo;
+      }
+      .foo::after {
+        content: counter(foo);
+      }
+      .foofoo:first-child {
+        counter-reset: foo;
+      }
+      .foofoo {
+        counter-increment: foo;
+      }
+      .foofoo::after {
+        content: counters(foo, "-");
+      }
+      .ref-foo::before {
+        content: target-counter(url(#foo-target), foo);
+      }
+      .ref-foofoo::before {
+        content: target-counters(url("#foofoo-target"), foo, "-");
+      }
+      .bar {
+        counter-increment: bar;
+      }
+      .bar::after {
+        content: counter(bar);
+      }
+      .barbar:first-child {
+        counter-reset: bar;
+      }
+      .barbar {
+        counter-increment: bar;
+      }
+      .barbar::after {
+        content: counters(bar, "-");
+      }
+      [data-ref-bar]::before {
+        content: target-counter(attr(data-ref-bar url), bar);
+      }
+      [data-ref-barbar]::before {
+        content: target-counters(attr(data-ref-barbar url), bar, "-");
+      }
+      .foo,
+      .bar {
+        border: solid maroon;
+        padding: 0.25em;
+      }
+      .foofoo,
+      .barbar {
+        border: solid orange;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>'foo' value of #foo-target = <span class="ref-foo"></span></p>
+      <p>'foo' values of #foofoo-target = <span class="ref-foofoo"></span></p>
+      <p class="foo">foo=</p>
+      <p class="foo">foo=</p>
+      <p class="foo" id="foo-target">(#foo-target) foo=</p>
+      <p class="foo">
+        <span class="foofoo">foos=</span>,
+        <span class="foofoo" id="foofoo-target">(#foofoo-target) foos=</span>,
+        foo=
+      </p>
+      <p class="foo">foo=</p>
+    </section>
+    <section>
+      <p>'bar' value of #bar-target = <span data-ref-bar="#bar-target"></span></p>
+      <p>'bar' values of #barbar-target = <span data-ref-barbar="#barbar-target"></span></p>
+      <p class="bar">bar=</p>
+      <p class="bar">bar=</p>
+      <p class="bar" id="bar-target">(#bar-target) bar=</p>
+      <p class="bar">
+        <span class="barbar">bars=</span>,
+        <span class="barbar" id="barbar-target">(#barbar-target) bars=</span>,
+        bar=
+      </p>
+      <p class="bar">bar=</p>
+    </section>
+  </body>
+</html>

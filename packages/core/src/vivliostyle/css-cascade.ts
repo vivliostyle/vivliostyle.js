@@ -2274,25 +2274,25 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const docStartCounters =
         store.currentPageDocCounters?.[counterName] || [];
       const pageStartCounters = store.currentPageCounters?.[counterName] || [];
-      const docStartVal = docStartCounters.length
-        ? docStartCounters[docStartCounters.length - 1]
-        : 0;
       const pageStartVal = pageStartCounters.length
         ? pageStartCounters[pageStartCounters.length - 1]
         : 0;
-      const docVal = docCounters.length
-        ? docCounters[docCounters.length - 1]
-        : 0;
-      const adjusted = pageStartVal + (docVal - docStartVal);
-      if (!isList) {
-        result = this.format(adjusted, type);
-        return storeFootnoteCounterValueIfNeeded(result);
-      }
+      // Adjust the outermost (first) counter value with the page contribution.
+      // The page counter operates at the outermost scope, so only the first
+      // level gets the cross-scope adjustment. Nested scopes created by
+      // counter-reset in the document are not affected.
+      const docStartVal = docStartCounters.length ? docStartCounters[0] : 0;
+      const docVal0 = docCounters.length ? docCounters[0] : 0;
+      const adjustedFirst = pageStartVal + (docVal0 - docStartVal);
       const adjustedCounters = docCounters.length
-        ? docCounters.slice(0, -1).concat([adjusted])
+        ? [adjustedFirst, ...docCounters.slice(1)]
         : pageStartCounters.length
           ? pageStartCounters
           : [0];
+      if (!isList) {
+        result = this.formatLastValue(adjustedCounters, type);
+        return storeFootnoteCounterValueIfNeeded(result);
+      }
       result = this.formatCounterList(
         adjustedCounters,
         separator as string,
