@@ -185,14 +185,29 @@ export class PageFloatStore {
     // but the sourceNode (steps[0].node) should be the same.
     // This ensures footnotes inside table cells are identified correctly
     // even when processed within PseudoColumn context.
-    const sourceNode = nodePosition?.steps?.[0]?.node;
-    if (sourceNode) {
-      const fallbackIndex = this.floats.findIndex(
-        (f) =>
-          f.nodePosition.steps?.[0]?.node === sourceNode &&
-          f.nodePosition.offsetInNode === nodePosition.offsetInNode &&
-          f.nodePosition.after === nodePosition.after,
-      );
+    // Only apply this fallback when steps lengths differ, and compare step
+    // nodes up to the shorter length to avoid false matches with EPUB
+    // footnotes that share the same shadow template element as steps[0].node.
+    const nSteps = nodePosition?.steps;
+    if (nSteps?.length) {
+      const fallbackIndex = this.floats.findIndex((f) => {
+        const fSteps = f.nodePosition.steps;
+        if (
+          !fSteps?.length ||
+          fSteps.length === nSteps.length ||
+          f.nodePosition.offsetInNode !== nodePosition.offsetInNode ||
+          f.nodePosition.after !== nodePosition.after
+        ) {
+          return false;
+        }
+        const minLen = Math.min(fSteps.length, nSteps.length);
+        for (let i = 0; i < minLen; i++) {
+          if (fSteps[i].node !== nSteps[i].node) {
+            return false;
+          }
+        }
+        return true;
+      });
       if (fallbackIndex >= 0) {
         return this.floats[fallbackIndex];
       }
