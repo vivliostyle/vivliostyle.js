@@ -229,17 +229,12 @@ export class Mapper {
     documentFaces: DocumentFaces,
   ): TaskUtil.Fetcher<Face> {
     const src = srcFace.src as string;
-    const srcFamilySrc = srcFace.family + ";" + src;
-    let fetcher = this.srcURLMap[srcFamilySrc];
+    const faceKey = srcFace.family + ";" + src + ";" + srcFace.fontTraitKey;
+    let fetcher = this.srcURLMap[faceKey];
     if (fetcher) {
       fetcher.piggyback((viewFaceParam) => {
-        const viewFace = viewFaceParam as Face;
-        if (!viewFace.traitsEqual(srcFace)) {
-          Logging.logger.warn("E_FONT_FACE_INCOMPATIBLE", srcFace.src);
-        } else {
-          documentFaces.registerFamily(srcFace, viewFace);
-          Logging.logger.debug("Found already-loaded font:", src);
-        }
+        documentFaces.registerFamily(srcFace, viewFaceParam as Face);
+        Logging.logger.debug("Found already-loaded font:", src);
       });
     } else {
       fetcher = new TaskUtil.Fetcher(() => {
@@ -266,7 +261,7 @@ export class Mapper {
         }
         return frame.result();
       }, `loadFont ${src}`);
-      this.srcURLMap[srcFamilySrc] = fetcher;
+      this.srcURLMap[faceKey] = fetcher;
       fetcher.start();
     }
     return fetcher;

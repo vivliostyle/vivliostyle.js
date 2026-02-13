@@ -51,6 +51,10 @@ module.exports = [
       { file: "selector_bug.html", title: "Selector bug" },
       { file: "outline.html", title: "Outline" },
       { file: "font-feature-settings.html", title: "Font feature settings" },
+      {
+        file: "font-variation-settings.html",
+        title: "font-variation-settings in @font-face",
+      },
       { file: "background-gradient.html", title: "Background gradient" },
       {
         file: "incorrect_layout_with_empty_partition.html",

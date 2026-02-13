@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>font-variation-settings in @font-face</title>
+    <style>
+      @font-face {
+        font-family: "T";
+        src: url("https://cdn.jsdelivr.net/gh/github/mona-sans@main/fonts/variable/MonaSansMonoVF%5Bwght%5D.ttf");
+        font-variation-settings: "wght" 100;
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "T";
+        src: url("https://cdn.jsdelivr.net/gh/github/mona-sans@main/fonts/variable/MonaSansMonoVF%5Bwght%5D.ttf");
+        font-variation-settings: "wght" 900;
+        font-weight: 700;
+      }
+      * {
+        font-family: "T";
+      }
+    </style>
+  </head>
+  <body>
+    <p>Test (normal weight, should be thin)</p>
+    <p><strong>Test (bold weight, should be heavy)</strong></p>
+  </body>
+</html>
