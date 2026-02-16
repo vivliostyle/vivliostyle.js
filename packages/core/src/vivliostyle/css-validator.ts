@@ -1437,6 +1437,7 @@ const propsExcludedFromAll = [
   "shape-inside",
   "snap-height",
   "snap-width",
+  "src", // @font-face descriptor
   "template",
   "text-decoration-skip",
   "text-justify",

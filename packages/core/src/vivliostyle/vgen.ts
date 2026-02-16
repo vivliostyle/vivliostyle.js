@@ -629,7 +629,12 @@ export class ViewFactory
         inheritanceVisitor.setPropName(name);
         const prop = CssCascade.getProp(style, name);
         let prop1 = prop;
-        if (!Css.isDefaultingValue(prop.value)) {
+        if (prop.value === Css.ident.initial) {
+          // `initial` means use the CSS initial value, not inherit from
+          // ancestor. This is needed for `all: initial` to work on elements
+          // detached from their source parent (e.g. footnotes). (Issue #1696)
+          delete props[name];
+        } else if (!Css.isDefaultingValue(prop.value)) {
           if (
             name === "font-size" &&
             i === styles.length - 1 &&

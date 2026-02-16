@@ -43,6 +43,8 @@ export function blockify(display: Css.Ident): Css.Ident {
     case "inline-table":
       blockifiedStr = "table";
       break;
+    case "initial":
+    case "unset":
     case "inline":
     case "table-row-group":
     case "table-column":
