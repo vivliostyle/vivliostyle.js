@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>all shorthand property</title>
+<style>
+@page {
+  size: 600px 800px;
+  margin: 50px;
+}
+body {
+  font-family: serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: purple;
+  font-style: italic;
+  text-align: center;
+}
+h2 {
+  all: initial;
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+/* 1. all: initial with float */
+.float-right {
+  all: initial;
+  float: right;
+  width: 120px;
+  height: 40px;
+  background: lightblue;
+  margin: 0 0 4px 8px;
+  padding: 4px;
+  font-size: 14px;
+}
+
+/* 2. all: initial with float: footnote */
+.footnote {
+  all: initial;
+  float: footnote;
+  font-size: 14px;
+}
+
+/* 3. all: initial with position: absolute */
+.abs-box {
+  all: initial;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 30px;
+  background: lightyellow;
+  border: 1px solid orange;
+  font-size: 12px;
+}
+
+/* 4. all: unset (inherited props -> inherit, non-inherited -> initial) */
+.unset-box {
+  all: unset;
+  display: block;
+  background: lavender;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+/* 5. all: inherit */
+.inherit-box {
+  all: inherit;
+  display: block;
+  background: #efe;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+/* 6. all: revert */
+.revert-box {
+  all: revert;
+  background: #ffe;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+/* 7. all: initial in a nested context */
+.outer {
+  color: green;
+  font-weight: bold;
+  border: 2px solid green;
+  padding: 8px;
+  margin: 8px 0;
+  text-align: left;
+}
+.outer .reset-child {
+  all: initial;
+  display: block;
+  background: #f0f0f0;
+  padding: 4px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<h2>1. all: initial + float: right</h2>
+<p>
+  Paragraph with a right float<span class="float-right">Float box</span>.
+  The float should appear as a light blue box on the right with proper dimensions.
+</p>
+
+<h2>2. all: initial + float: footnote</h2>
+<p>
+  Paragraph with a footnote<span class="footnote">This footnote text should appear at the bottom of the page, not styled with the body's italic/purple.</span>.
+  The footnote should appear at the page bottom.
+</p>
+
+<h2>3. all: initial + position: absolute</h2>
+<div style="position: relative; min-height: 50px; text-align: left;">
+  <p>This container has position: relative. The absolute box should be at top-right.</p>
+  <span class="abs-box">Absolute</span>
+</div>
+
+<h2>4. all: unset</h2>
+<p>
+  <span class="unset-box">all: unset — inherited properties (color, font-style, text-align) should be inherited from parent, non-inherited properties (background, etc.) should be initial.</span>
+</p>
+
+<h2>5. all: inherit</h2>
+<p>
+  <span class="inherit-box">all: inherit — all properties should be inherited from parent.</span>
+</p>
+
+<h2>6. all: revert</h2>
+<p>
+  <span class="revert-box">all: revert — should revert to UA stylesheet defaults.</span>
+</p>
+
+<h2>7. all: initial in nested context</h2>
+<div class="outer">
+  Outer div: green, bold, left-aligned.
+  <div class="reset-child">
+    Reset child: should NOT be green/bold. Should have initial (black, normal weight) text.
+  </div>
+</div>
+
+</body>
+</html>
