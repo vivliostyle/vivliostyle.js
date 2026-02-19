@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Default footnote pseudo styles</title>
+    <style>
+      @page {
+        size: 500px 350px;
+      }
+
+      body {
+        font-family: serif;
+        line-height: 1.5;
+      }
+
+      .footnote {
+        float: footnote;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Footnote call should be rendered by default as a superscript counter<span class="footnote"
+        >Footnote marker should be rendered by default with the footnote counter and a trailing period.</span
+      >.
+    </p>
+    <p>
+      Another footnote should increment the counter automatically<span class="footnote"
+        >This is the second footnote for default marker/call style verification.</span
+      >.
+    </p>
+  </body>
+</html>

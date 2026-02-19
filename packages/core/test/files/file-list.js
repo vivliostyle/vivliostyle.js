@@ -713,6 +713,10 @@ module.exports = [
         file: "footnotes/epub-footnotes-static-number.html",
         title: "EPUB footnotes (static numbering)",
       },
+      {
+        file: "footnotes/default-footnote-pseudo-styles.html",
+        title: "Default ::footnote-call/::footnote-marker styles (Issue #1701)",
+      },
     ],
   },
   {
