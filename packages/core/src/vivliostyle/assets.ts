@@ -1351,6 +1351,18 @@ m|math[display="block"] {
   display: block math;
 }
 
+/* CSS GCPM footnotes */
+::footnote-marker {
+  content: counter(footnote) ". ";
+  list-style-position: inside;
+}
+::footnote-call {
+  content: counter(footnote);
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
 /* EPUB/DPUB footnotes */
 
 a[epub|type="noteref"],
