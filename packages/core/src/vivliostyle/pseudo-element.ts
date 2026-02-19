@@ -106,7 +106,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     const pseudoName = getPseudoName(element);
     if (!this.contentProcessed[pseudoName]) {
       this.contentProcessed[pseudoName] = true;
-      if (pseudoName === "marker") {
+      if (pseudoName === "marker" || pseudoName === "footnote-marker") {
         this.processMarker(element, styles, nodeContext);
       }
       const contentVal = styles["content"];
@@ -128,7 +128,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   }
 
   /**
-   * ::marker support
+   * ::marker and ::footnote-marker support
    */
   private processMarker(
     element: Element,

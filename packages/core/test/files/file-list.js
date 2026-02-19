@@ -717,6 +717,11 @@ module.exports = [
         file: "footnotes/default-footnote-pseudo-styles.html",
         title: "Default ::footnote-call/::footnote-marker styles (Issue #1701)",
       },
+      {
+        file: "footnotes/footnote-marker-outside-style.html",
+        title:
+          "::footnote-marker with list-style-position: outside (Issue #1702)",
+      },
     ],
   },
   {
