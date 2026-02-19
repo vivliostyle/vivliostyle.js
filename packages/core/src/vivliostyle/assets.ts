@@ -1202,6 +1202,10 @@ sub {
 sup {
   vertical-align: super;
 }
+sub,
+sup {
+  line-height: 1;
+}
 table {
   box-sizing: border-box;
   border-spacing: 2px;
