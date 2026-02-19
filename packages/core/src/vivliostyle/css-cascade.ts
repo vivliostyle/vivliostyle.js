@@ -927,6 +927,7 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
   constructor(
     public readonly epubTypePatt: RegExp,
     public readonly targetLocalName?: string,
+    public readonly useRoleAttr = false,
   ) {
     super();
   }
@@ -944,9 +945,10 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
           target &&
           (!this.targetLocalName || target.localName == this.targetLocalName)
         ) {
-          const epubType =
-            target.getAttributeNS(Base.NS.epub, "type") ||
-            target.getAttribute("epub:type");
+          const epubType = this.useRoleAttr
+            ? target.getAttribute("role")
+            : target.getAttributeNS(Base.NS.epub, "type") ||
+              target.getAttribute("epub:type");
           if (epubType && epubType.match(this.epubTypePatt)) {
             this.chained.apply(cascadeInstance);
           }
@@ -4283,18 +4285,23 @@ export class CascadeParserHandler
         this.chain.push(new CheckLocalNameAction("a"));
         this.chain.push(new CheckAttributePresentAction("", "href"));
         break;
-      case "-adapt-href-epub-type":
       case "href-epub-type":
+      case "href-role-type":
         if (params && params.length >= 1 && typeof params[0] == "string") {
           const value = params[0] as string;
           const patt = new RegExp(`(^|\\s)${Base.escapeRegExp(value)}(\$|\\s)`);
           const targetLocalName = params[1] as string;
-          this.chain.push(new CheckTargetEpubTypeAction(patt, targetLocalName));
+          this.chain.push(
+            new CheckTargetEpubTypeAction(
+              patt,
+              targetLocalName,
+              name === "href-role-type",
+            ),
+          );
         } else {
           this.chain.push(new CheckConditionAction("")); // always fails
         }
         break;
-      case "-adapt-footnote-content":
       case "footnote-content":
         // content inside the footnote
         this.footnoteContent = true;

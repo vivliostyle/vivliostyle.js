@@ -256,7 +256,7 @@ export class ViewFactory
       context,
       this.exprContentListener,
     );
-    return new Vtree.ShadowContext(
+    const pseudoShadow = new Vtree.ShadowContext(
       element,
       root,
       null,
@@ -265,6 +265,7 @@ export class ViewFactory
       Vtree.ShadowType.ROOTLESS,
       shadowStyler,
     );
+    return subShadow || pseudoShadow;
   }
 
   getPseudoMap(
@@ -2220,8 +2221,10 @@ export class ViewFactory
     let contentShadowType: Vtree.ShadowType;
     const contentShadow = shadow.subShadow || shadow.parentShadow;
     if (shadow.subShadow) {
-      contentNode = shadow.root;
-      contentShadowType = shadow.type;
+      // If there is a nested shadow, insert that nested shadow's content
+      // at this <shadow:content> slot.
+      contentNode = shadow.subShadow.root;
+      contentShadowType = shadow.subShadow.type;
       if (contentShadowType == Vtree.ShadowType.ROOTLESS) {
         contentNode = contentNode.firstChild;
       }
@@ -2246,7 +2249,7 @@ export class ViewFactory
       r.shadowContext = contentShadow;
       r.shadowType = contentShadowType;
       r.shadowSibling = pos;
-      return r;
+      return this.processShadowContent(r);
     }
     pos.boxOffset = boxOffset;
     return pos;
@@ -2376,6 +2379,25 @@ export class ViewFactory
   }
 
   /**
+   * True for semantic footnotes that already provide a noteref call in source
+   * (EPUB or DPUB-ARIA pattern), so an extra ::footnote-call must not be inserted.
+   */
+  private isSemanticFootnoteElement(footnoteNodeContext: Vtree.NodeContext) {
+    const sourceNode = footnoteNodeContext.sourceNode;
+    if (!(sourceNode instanceof Element) || sourceNode.localName !== "aside") {
+      return false;
+    }
+    const role = sourceNode.getAttribute("role");
+    if (role && role.match(/(^|\s)doc-footnote($|\s)/)) {
+      return true;
+    }
+    const epubType =
+      sourceNode.getAttributeNS(Base.NS.epub, "type") ||
+      sourceNode.getAttribute("epub:type");
+    return !!(epubType && epubType.match(/(^|\s)footnote($|\s)/));
+  }
+
+  /**
    * Insert a footnote-call NodeContext before the footnote element.
    * The footnote-call will be processed as a normal inline element,
    * then shadowSibling will lead to the footnote element.
@@ -2490,18 +2512,18 @@ export class ViewFactory
         }
 
         // Issue #868: Insert footnote-call before footnote element
-        // Only insert if footnote-call hasn't been processed yet for this footnote
-        // Skip for template-based footnotes (where styler.getStyle returns undefined)
-        // as they define their own call content in HTML, not via ::footnote-call
-        // Also skip for pseudo-elements (shadowContext exists) as they are not in the
-        // source document tree (PR #1607 follow-up fix)
+        // Only insert if footnote-call hasn't been processed yet for this footnote.
+        // Skip semantic EPUB/DPUB footnotes because the call already exists in
+        // source HTML as a noteref link (no extra ::footnote-call is needed).
+        // Also skip pseudo-elements (shadowContext exists) because they are not in the
+        // source document tree (PR #1607 follow-up fix).
         if (
           nodeContext.floatSide === "footnote" &&
           !(this.isFootnote && !nodeContext.parent) &&
           !nodeContext.after &&
           !nodeContext.pluginProps["footnoteCallProcessed"] &&
           !nodeContext.shadowContext &&
-          this.styler.getStyle(nodeContext.sourceNode as Element, false)
+          !this.isSemanticFootnoteElement(nodeContext)
         ) {
           const existingFootnoteCall =
             this.findImmediateFootnoteCallSibling(nodeContext);

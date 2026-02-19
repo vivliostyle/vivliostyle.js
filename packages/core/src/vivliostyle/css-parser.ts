@@ -1690,12 +1690,14 @@ export class Parser {
                   continue;
                 case "lang":
                 case "href-epub-type":
+                case "href-role-type":
                   token = tokenizer.token();
                   if (token.type === TokenType.IDENT) {
                     params = [token.text];
                     tokenizer.consume();
                     if (
-                      text === "href-epub-type" &&
+                      (text === "href-epub-type" ||
+                        text === "href-role-type") &&
                       tokenizer.token().type === TokenType.COMMA
                     ) {
                       tokenizer.consume();
