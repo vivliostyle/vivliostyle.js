@@ -1005,7 +1005,7 @@ export const UserAgentPageCss = `
 `;
 
 /** user-agent-base.css */
-export const UserAgentBaseCss = `
+export const UserAgentBaseCss = String.raw`
 @namespace "http://www.w3.org/1999/xhtml";
 @namespace m "http://www.w3.org/1998/Math/MathML";
 @namespace epub "http://www.idpf.org/2007/ops";
@@ -1347,34 +1347,54 @@ m|math[display="block"] {
   display: block math;
 }
 
-/*------------------ epub-specific ---------------------*/
+/* EPUB/DPUB footnotes */
 
 a[epub|type="noteref"],
-a[epub\\:type="noteref"] {
+a[epub\:type="noteref"],
+a[role="doc-noteref"] {
   font-size: 0.75em;
   vertical-align: super;
-  line-height: 0.01;
+  line-height: 0;
+}
+
+sup > a[epub|type="noteref"],
+a[epub|type="noteref"] > sup,
+sup > a[epub\:type="noteref"],
+a[epub\:type="noteref"] > sup,
+sup > a[role="doc-noteref"],
+a[role="doc-noteref"] > sup {
+  font-size: unset;
+  vertical-align: unset;
+  line-height: unset;
 }
 
 a[epub|type="noteref"]:href-epub-type(footnote, aside),
-a[epub\\:type="noteref"]:href-epub-type(footnote, aside) {
+a[epub\:type="noteref"]:href-epub-type(footnote, aside),
+a[role="doc-noteref"]:href-role-type(doc-footnote, aside) {
   -adapt-template: footnote;
   text-decoration: none;
 }
 
 aside[epub|type="footnote"],
-aside[epub\\:type="footnote"] {
+aside[epub\:type="footnote"],
+aside[role="doc-footnote"] {
   display: none;
 }
 
 aside[epub|type="footnote"]:footnote-content,
-aside[epub\\:type="footnote"]:footnote-content {
+aside[epub\:type="footnote"]:footnote-content,
+aside[role="doc-footnote"]:footnote-content {
   display: block;
-  margin: 0.25em;
-  font-size: 1.2em;
+  color: initial;
+  text-align: initial;
+  text-align-last: initial;
+  text-indent: initial;
+  font: initial;
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 
+/* EPUB-specific */
 epub|trigger {
   display: none;
 }

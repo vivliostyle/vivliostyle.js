@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DPUB Footnotes with target-counter()</title>
+  <style>
+    :root {
+      counter-reset: footnote;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    a[role="doc-noteref"] {
+      counter-increment: footnote;
+    }
+
+    a[role="doc-noteref"]::after {
+      content: counter(footnote);
+    }
+
+    a[role="doc-backlink"] {
+      font-size: 0.75em;
+      vertical-align: super;
+      line-height: 0;
+    }
+
+    a[role="doc-backlink"]::after {
+      content: target-counter(attr(href), footnote);
+    }
+  </style>
+</head>
+<body>
+  <h1>DPUB Footnote Sample</h1>
+
+  <p>
+    This specification note uses semantic footnotes<a id="fnref1" href="#fn1" role="doc-noteref">*</a>
+    and demonstrates generated numbering.
+  </p>
+
+  <p>
+    A second reference appears later in the document<a id="fnref2" href="#fn2" role="doc-noteref">*</a>
+    to verify independent numbering.
+  </p>
+
+  <aside id="fn1" role="doc-footnote">
+    <a href="#fnref1" role="doc-backlink">*</a>
+    This is the first footnote body. Its marker is resolved by
+    target-counter() from the corresponding reference.
+  </aside>
+
+  <aside id="fn2" role="doc-footnote">
+    <a href="#fnref2" role="doc-backlink">*</a>
+    This is the second footnote body. The numbering follows the
+    reference counter value.
+  </aside>
+</body>
+</html>

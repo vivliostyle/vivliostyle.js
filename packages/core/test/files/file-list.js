@@ -705,6 +705,14 @@ module.exports = [
         file: "footnotes/footnotes-anywhere.html",
         title: "Footnotes anywhere (Issue #1669)",
       },
+      {
+        file: "footnotes/dpub-footnotes-target-counter.html",
+        title: "DPUB footnotes with target-counter() (Issue #1700)",
+      },
+      {
+        file: "footnotes/epub-footnotes-static-number.html",
+        title: "EPUB footnotes (static numbering)",
+      },
     ],
   },
   {

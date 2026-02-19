@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EPUB Footnotes (Static Numbering)</title>
+  <style>
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>EPUB Footnote Sample</h1>
+
+  <p>
+    This paragraph uses EPUB footnote semantics with explicit numbering<a id="fnref1" href="#fn1" epub:type="noteref">[1]</a>
+    in the document source.
+  </p>
+
+  <p>
+    Another annotated statement appears here<a id="fnref2" href="#fn2" epub:type="noteref">[2]</a>
+    to confirm stable static markers.
+  </p>
+
+  <aside id="fn1" epub:type="footnote">
+    <a href="#fnref1" epub:type="backlink">[1]</a>
+    This is the first EPUB footnote body with static numbering.
+  </aside>
+
+  <aside id="fn2" epub:type="footnote">
+    <a href="#fnref2" epub:type="backlink">[2]</a>
+    This is the second EPUB footnote body with static numbering.
+  </aside>
+</body>
+</html>
