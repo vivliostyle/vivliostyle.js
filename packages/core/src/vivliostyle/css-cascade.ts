@@ -423,18 +423,18 @@ const FOOTNOTE_COUNTER_ATTR = "data-viv-footnote-counter";
 function getFootnoteCounterMap(element: Element): Record<string, number[]> {
   const stored = element.getAttribute(FOOTNOTE_COUNTER_ATTR);
   if (!stored) {
-    return {};
+    return Object.create(null);
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(stored);
   } catch {
-    return {};
+    return Object.create(null);
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return {};
+    return Object.create(null);
   }
-  const map: Record<string, number[]> = {};
+  const map: Record<string, number[]> = Object.create(null);
   Object.entries(parsed as Record<string, unknown>).forEach(([key, value]) => {
     if (Array.isArray(value)) {
       const nums = value.filter(
@@ -3095,7 +3095,7 @@ export class Cascade {
 export class CascadeInstance {
   code: Cascade;
   stack = [[], []] as ConditionItem[][];
-  conditions = {} as { [key: string]: number };
+  conditions = Object.create(null) as { [key: string]: number };
   currentElement: Element | null = null;
   currentElementOffset: number | null = null;
   currentStyle: ElementStyle | null = null;
@@ -3109,13 +3109,15 @@ export class CascadeInstance {
   currentPageType: string | null = null;
   previousPageType: string | null = null;
   firstPageType: string | null = null;
-  pageTypePageCounts: { [pageType: string]: number } = {};
+  pageTypePageCounts: { [pageType: string]: number } = Object.create(null);
   isFirst: boolean = true;
   isRoot: boolean = true;
-  counters: CounterValues = {};
+  counters: CounterValues = Object.create(null);
   lastCounterChanges: string[] = [];
-  lastCounterChangeTypes: { [key: string]: "reset" | "set" | "increment" } = {};
-  counterScoping: { [key: string]: boolean }[] = [{}];
+  lastCounterChangeTypes: {
+    [key: string]: "reset" | "set" | "increment";
+  } = Object.create(null);
+  counterScoping: { [key: string]: boolean }[] = [Object.create(null)];
   quotes: Css.Str[];
   quoteDepth: number = 0;
   lang: string = "";
@@ -3131,7 +3133,7 @@ export class CascadeInstance {
   currentFollowingSiblingTypeCounts: {
     [key: string]: { [key: string]: number };
   };
-  viewConditions: { [key: string]: Matchers.Matcher[] } = {};
+  viewConditions: { [key: string]: Matchers.Matcher[] } = Object.create(null);
   dependentConditions: string[] = [];
   elementStack: Element[];
 
@@ -3251,7 +3253,7 @@ export class CascadeInstance {
   defineCounter(counterName: string, value: number) {
     let scoping = this.counterScoping[this.counterScoping.length - 1];
     if (!scoping) {
-      scoping = {};
+      scoping = Object.create(null);
       this.counterScoping[this.counterScoping.length - 1] = scoping;
     }
     if (this.counters[counterName]) {
@@ -3269,7 +3271,7 @@ export class CascadeInstance {
     const counterChanges = new Set<string>();
     const counterChangeTypes: {
       [key: string]: "reset" | "set" | "increment";
-    } = {};
+    } = Object.create(null);
     let displayVal: Css.Val = Css.ident.inline;
     const display = props["display"] as CascadeValue;
     if (display) {
@@ -3279,12 +3281,12 @@ export class CascadeInstance {
     if (displayVal === Css.ident.none) {
       this.currentElement.setAttribute("data-viv-display-none", "true");
       this.lastCounterChanges = [];
-      this.lastCounterChangeTypes = {};
+      this.lastCounterChangeTypes = Object.create(null);
       this.counterScoping.push(null);
       return;
     } else if (this.currentElement.closest("[data-viv-display-none]")) {
       this.lastCounterChanges = [];
-      this.lastCounterChangeTypes = {};
+      this.lastCounterChangeTypes = Object.create(null);
       this.counterScoping.push(null);
       return;
     }
@@ -3322,27 +3324,27 @@ export class CascadeInstance {
       this.currentNamespace == Base.NS.XHTML
     ) {
       if (!resetMap) {
-        resetMap = {};
+        resetMap = Object.create(null);
       }
       resetMap["list-item"] = ((this.currentElement as any)?.start ?? 1) - 1;
     }
     if (Display.isListItem(displayVal)) {
       if (!incrementMap) {
-        incrementMap = {};
+        incrementMap = Object.create(null);
       }
       incrementMap["list-item"] = incrementMap["list-item"] ?? 1;
       if (
         /^\s*[-+]?\d/.test(this.currentElement?.getAttribute("value") ?? "")
       ) {
         if (!setMap) {
-          setMap = {};
+          setMap = Object.create(null);
         }
         setMap["list-item"] = (this.currentElement as any).value;
       }
     }
     if (this.currentElement?.parentNode.nodeType === Node.DOCUMENT_NODE) {
       if (!resetMap) {
-        resetMap = {};
+        resetMap = Object.create(null);
       }
       // `counter-reset: footnote 0` is implicitly applied on the root element
       if (resetMap["footnote"] === undefined) {
@@ -3351,7 +3353,7 @@ export class CascadeInstance {
     }
     if (floatVal === Css.ident.footnote) {
       if (!incrementMap) {
-        incrementMap = {};
+        incrementMap = Object.create(null);
       }
       // `counter-increment: footnote 1` is implicitly applied on the
       // element (or pseudo element) with `float: footnote`,
@@ -3644,7 +3646,7 @@ export class CascadeInstance {
     const id =
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";
     if (isRoot || id) {
-      const counters: CounterValues = {};
+      const counters: CounterValues = Object.create(null);
       Object.keys(this.counters).forEach((name) => {
         counters[name] = Array.from(this.counters[name]);
       });

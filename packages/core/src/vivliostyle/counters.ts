@@ -33,7 +33,7 @@ import { Layout } from "./types";
 function cloneCounterValues(
   counters: CssCascade.CounterValues,
 ): CssCascade.CounterValues {
-  const result = {};
+  const result = Object.create(null) as CssCascade.CounterValues;
   Object.keys(counters).forEach((name) => {
     result[name] = Array.from(counters[name]);
   });
@@ -148,8 +148,8 @@ type NamedRunningValues = {
 
 class CounterResolver implements CssCascade.CounterResolver {
   styler: CssStyler.Styler | null = null;
-  namedStringValues: NamedRunningValues = {};
-  runningElements: NamedRunningValues = {};
+  namedStringValues: NamedRunningValues = Object.create(null);
+  runningElements: NamedRunningValues = Object.create(null);
 
   constructor(
     public readonly counterStore: CounterStore,
@@ -668,7 +668,8 @@ class CounterResolver implements CssCascade.CounterResolver {
     elementOffset: number,
   ): void {
     const values =
-      this.namedStringValues[name] || (this.namedStringValues[name] = {});
+      this.namedStringValues[name] ||
+      (this.namedStringValues[name] = Object.create(null));
     values[elementOffset] = stringValue;
   }
 
@@ -678,35 +679,46 @@ class CounterResolver implements CssCascade.CounterResolver {
    */
   setRunningElement(name: string, elementOffset: number): void {
     const values =
-      this.runningElements[name] || (this.runningElements[name] = {});
+      this.runningElements[name] ||
+      (this.runningElements[name] = Object.create(null));
     values[elementOffset] = String(elementOffset);
   }
 }
 
 export class CounterStore {
-  countersById: { [key: string]: CssCascade.CounterValues } = {};
-  pageCountersById: { [key: string]: CssCascade.CounterValues } = {};
-  pageDocCountersById: { [key: string]: CssCascade.CounterValues } = {};
-  pageTextById: { [key: string]: { [pseudoElement: string]: string } } = {};
+  countersById: { [key: string]: CssCascade.CounterValues } =
+    Object.create(null);
+  pageCountersById: { [key: string]: CssCascade.CounterValues } =
+    Object.create(null);
+  pageDocCountersById: { [key: string]: CssCascade.CounterValues } =
+    Object.create(null);
+  pageTextById: { [key: string]: { [pseudoElement: string]: string } } =
+    Object.create(null);
   currentPageDocCounters: CssCascade.CounterValues | null = null;
   previousPageDocCounters: CssCascade.CounterValues | null = null;
-  currentPageDocCounterChanges: { [key: string]: boolean } = {};
+  currentPageDocCounterChanges: { [key: string]: boolean } =
+    Object.create(null);
   currentPageDocCounterChangeTypes: {
     [key: string]: "reset" | "set" | "increment";
-  } = {};
-  currentPageCounters: CssCascade.CounterValues = {};
-  previousPageCounters: CssCascade.CounterValues = {};
+  } = Object.create(null);
+  currentPageCounters: CssCascade.CounterValues = Object.create(null);
+  previousPageCounters: CssCascade.CounterValues = Object.create(null);
   currentPageCountersStack: CssCascade.CounterValues[] = [];
   pageIndicesById: {
     [key: string]: { spineIndex: number; pageIndex: number };
-  } = {};
+  } = Object.create(null);
   currentPage: Vtree.Page = null;
   newReferencesOfCurrentPage: TargetCounterReference[] = [];
   referencesToSolve: TargetCounterReference[] = [];
   referencesToSolveStack: TargetCounterReference[][] = [];
-  unresolvedReferences: { [key: string]: TargetCounterReference[] } = {};
-  resolvedReferences: { [key: string]: TargetCounterReference[] } = {};
-  pageControlledCounterNames: { [key: string]: boolean } = { page: true };
+  unresolvedReferences: { [key: string]: TargetCounterReference[] } =
+    Object.create(null);
+  resolvedReferences: { [key: string]: TargetCounterReference[] } =
+    Object.create(null);
+  pageControlledCounterNames: { [key: string]: boolean } = Object.assign(
+    Object.create(null),
+    { page: true },
+  );
   private pagesCounterExprs: {
     expr: Exprs.Val;
     format: (p1: number[]) => string;
@@ -762,10 +774,10 @@ export class CounterStore {
     this.currentPageDocCounters = counters
       ? cloneCounterValues(counters)
       : null;
-    this.currentPageDocCounterChanges = {};
+    this.currentPageDocCounterChanges = Object.create(null);
     this.currentPageDocCounterChangeTypes = changeTypes
       ? { ...changeTypes }
-      : {};
+      : Object.create(null);
     if (changes) {
       changes.forEach((name) => {
         this.currentPageDocCounterChanges[name] = true;
@@ -774,7 +786,9 @@ export class CounterStore {
   }
 
   setPageControlledCounterNames(names: string[]) {
-    const map: { [key: string]: boolean } = { page: true };
+    const map: { [key: string]: boolean } = Object.assign(Object.create(null), {
+      page: true,
+    });
     names.forEach((name) => {
       map[name] = true;
     });
@@ -822,7 +836,7 @@ export class CounterStore {
     const docChangeTypes = this.currentPageDocCounterChangeTypes || {};
     const docCounterInfo: {
       [key: string]: { delta: number; reset: boolean; value: number };
-    } = {};
+    } = Object.create(null);
     if (this.currentPageDocCounters) {
       const prevDocCounters = this.previousPageDocCounters || {};
       for (const counterName in this.currentPageDocCounters) {
@@ -847,7 +861,7 @@ export class CounterStore {
         };
       }
     }
-    const skipIncrement: { [key: string]: boolean } = {};
+    const skipIncrement: { [key: string]: boolean } = Object.create(null);
     let resetMap: { [key: string]: number };
     const reset = cascadedPageStyle["counter-reset"] as CssCascade.CascadeValue;
     if (reset) {
@@ -905,7 +919,7 @@ export class CounterStore {
         incrementMap["page"] = 1;
       }
     } else {
-      incrementMap = {};
+      incrementMap = Object.create(null);
       if (!(docCounterInfo["page"] && docCounterInfo["page"].reset)) {
         incrementMap["page"] = 1;
       }

@@ -208,7 +208,7 @@ export function toShape(
 }
 
 export class CountersVisitor extends Css.Visitor {
-  counters: { [key: string]: number } = {};
+  counters: { [key: string]: number } = Object.create(null);
   name: string | null = null;
 
   constructor(
