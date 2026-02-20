@@ -420,7 +420,7 @@ export const SPECIALS = {
 // can render the same value even if page-based counters reset on the footnote
 // page or during re-layout.
 const FOOTNOTE_COUNTER_ATTR = "data-viv-footnote-counter";
-function getFootnoteCounterMap(element: Element): Record<string, string> {
+function getFootnoteCounterMap(element: Element): Record<string, number[]> {
   const stored = element.getAttribute(FOOTNOTE_COUNTER_ATTR);
   if (!stored) {
     return {};
@@ -428,28 +428,33 @@ function getFootnoteCounterMap(element: Element): Record<string, string> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(stored);
-  } catch (err) {
+  } catch {
     return {};
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return {};
   }
-  const map: Record<string, string> = Object.create(null);
+  const map: Record<string, number[]> = {};
   Object.entries(parsed as Record<string, unknown>).forEach(([key, value]) => {
-    if (typeof value === "string") {
-      map[key] = value;
+    if (Array.isArray(value)) {
+      const nums = value.filter(
+        (item): item is number => typeof item === "number" && isFinite(item),
+      );
+      map[key] = nums;
+    } else if (typeof value === "number" && isFinite(value)) {
+      map[key] = [value];
     }
   });
   return map;
 }
 
-function setFootnoteCounterValue(
+function setFootnoteCounterValues(
   element: Element,
   counterName: string,
-  value: string,
+  values: number[],
 ): void {
   const map = getFootnoteCounterMap(element);
-  map[counterName] = value;
+  map[counterName] = values;
   element.setAttribute(FOOTNOTE_COUNTER_ATTR, JSON.stringify(map));
 }
 
@@ -2236,35 +2241,35 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     cascadeDocCounters: number[],
     separator?: string,
   ): string {
-    const storeFootnoteCounterValueIfNeeded = (value: string): string => {
-      if (this.pseudoName === "footnote-call" && this.element) {
-        setFootnoteCounterValue(this.element, counterName, value);
-      }
-      return value;
-    };
     const isList = typeof separator === "string";
+    const formatCounterValues = (values: number[]): string => {
+      return isList
+        ? this.formatCounterList(values, separator as string, type)
+        : this.formatLastValue(values, type);
+    };
+    const storeFootnoteCounterValuesIfNeeded = (values: number[]): void => {
+      if (this.pseudoName === "footnote-call" && this.element) {
+        setFootnoteCounterValues(this.element, counterName, values);
+      }
+    };
     if (this.pseudoName === "footnote-marker" && this.element) {
       const map = getFootnoteCounterMap(this.element);
       const stored = map[counterName];
       if (stored) {
-        return stored;
+        return formatCounterValues(stored);
       }
     }
-    let result: string;
+    let counterValues: number[];
     if (counterName === "pages") {
-      result = isList
-        ? this.formatCounterList([], separator as string, type)
-        : this.format(0, type);
-      return result;
+      return formatCounterValues([]);
     }
 
     if (!this.element) {
       const pageCounters = store.currentPageCounters?.[counterName] || [];
       if (pageCounters.length) {
-        result = isList
-          ? this.formatCounterList(pageCounters, separator as string, type)
-          : this.formatLastValue(pageCounters, type);
-        return storeFootnoteCounterValueIfNeeded(result);
+        counterValues = pageCounters;
+        storeFootnoteCounterValuesIfNeeded(counterValues);
+        return formatCounterValues(counterValues);
       }
     }
 
@@ -2286,35 +2291,25 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const docStartVal = docStartCounters.length ? docStartCounters[0] : 0;
       const docVal0 = docCounters.length ? docCounters[0] : 0;
       const adjustedFirst = pageStartVal + (docVal0 - docStartVal);
-      const adjustedCounters = docCounters.length
+      counterValues = docCounters.length
         ? [adjustedFirst, ...docCounters.slice(1)]
         : pageStartCounters.length
           ? pageStartCounters
           : [0];
-      if (!isList) {
-        result = this.formatLastValue(adjustedCounters, type);
-        return storeFootnoteCounterValueIfNeeded(result);
-      }
-      result = this.formatCounterList(
-        adjustedCounters,
-        separator as string,
-        type,
-      );
-      return storeFootnoteCounterValueIfNeeded(result);
+      storeFootnoteCounterValuesIfNeeded(counterValues);
+      return formatCounterValues(counterValues);
     }
 
     if (docCounters.length) {
-      result = isList
-        ? this.formatCounterList(docCounters, separator as string, type)
-        : this.formatLastValue(docCounters, type);
-      return storeFootnoteCounterValueIfNeeded(result);
+      counterValues = docCounters;
+      storeFootnoteCounterValuesIfNeeded(counterValues);
+      return formatCounterValues(counterValues);
     }
 
     const pageCounters = store.currentPageCounters?.[counterName] || [];
-    result = isList
-      ? this.formatCounterList(pageCounters, separator as string, type)
-      : this.formatLastValue(pageCounters, type);
-    return storeFootnoteCounterValueIfNeeded(result);
+    counterValues = pageCounters;
+    storeFootnoteCounterValuesIfNeeded(counterValues);
+    return formatCounterValues(counterValues);
   }
 
   visitFuncCounter(values: Css.Val[]): Css.Val {
