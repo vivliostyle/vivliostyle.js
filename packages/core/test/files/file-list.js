@@ -694,6 +694,10 @@ module.exports = [
         title: "Footnote and page counter-reset (Issue #421)",
       },
       {
+        file: "footnotes/footnote-call-marker-counter-style.html",
+        title: "Footnote call/marker counter styles",
+      },
+      {
         file: "footnotes/footnotes-in-table.html",
         title: "Footnotes in table (Issue #438)",
       },
