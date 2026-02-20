@@ -576,7 +576,7 @@ export class PrimitiveValidator extends PropertyValidator {
   }
 }
 
-const NO_IDENTS: ValueMap = {};
+const NO_IDENTS: ValueMap = Object.create(null);
 
 export const ALWAYS_FAIL = new PrimitiveValidator(0, NO_IDENTS, NO_IDENTS);
 

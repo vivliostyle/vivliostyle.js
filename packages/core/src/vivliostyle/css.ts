@@ -322,7 +322,7 @@ export class Str extends Val {
   }
 }
 
-const nameTable: { [key: string]: Ident } = {};
+const nameTable: { [key: string]: Ident } = Object.create(null);
 
 export class Ident extends Val {
   constructor(public name: string) {
