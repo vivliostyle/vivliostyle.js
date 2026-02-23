@@ -91,6 +91,10 @@ module.exports = [
         file: "target-counter-named-pages-left-right.html",
         title: "target-counter() named pages with :left/:right (Issue #1497)",
       },
+      {
+        file: "target-counter-missing-page.html",
+        title: "target-counter() missing page (Issue #1498)",
+      },
       { file: "target-text.html", title: "target-text() - Basic Tests" },
       {
         file: "target-text-running-element.html",
