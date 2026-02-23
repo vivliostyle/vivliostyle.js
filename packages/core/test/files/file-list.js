@@ -81,7 +81,7 @@ module.exports = [
       { file: "target-counter.html", title: "target-counter" },
       {
         file: "cross-scope-counters.html",
-        title: "Cross-scope counters (#Issue 1692)",
+        title: "Cross-scope counters (Issue #1692)",
       },
       {
         file: "target-counter-and-margin-bug.html",
