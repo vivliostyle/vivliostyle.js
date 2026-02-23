@@ -1991,6 +1991,21 @@ export class OPFView implements Vgen.CustomRendererFactory {
             if (shouldSyncStylerCurrentPageType) {
               stylerCascade.currentPageType = currentPage.pageType;
             }
+            // Issue #1498: target-counter() resolution can leave one pending
+            // layout slot (layoutPositions has next page) without an actual
+            // rendered page in pages[]. Materialize that pending page here so
+            // later navigation/render loops do not stop one page early.
+            const firstPendingPageIndex = targetViewItem.pages.length;
+            const pendingLayoutPosition =
+              targetViewItem.layoutPositions[firstPendingPageIndex];
+            if (pendingLayoutPosition) {
+              this.renderSinglePage(targetViewItem, pendingLayoutPosition).then(
+                () => {
+                  loopFrame.continueLoop();
+                },
+              );
+              return;
+            }
             loopFrame.continueLoop();
           });
         });
@@ -2236,7 +2251,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
             } else {
               resultPage = page;
               pageIndex = result.pageAndPosition.position.pageIndex;
-              viewItem.complete = true;
+              // Issue #1498: do not mark complete if layoutPositions and pages
+              // are out of sync. A pending layout position means additional
+              // page rendering is still required.
+              viewItem.complete =
+                viewItem.layoutPositions.length === viewItem.pages.length;
               loopFrame.breakLoop();
             }
           });
@@ -2250,7 +2269,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
           }
           this.renderSinglePage(viewItem, pos).then((result) => {
             if (!result.nextLayoutPosition) {
-              viewItem.complete = true;
+              // Issue #1498: keep complete=false while there are pending
+              // layout positions without corresponding rendered pages.
+              viewItem.complete =
+                viewItem.layoutPositions.length === viewItem.pages.length;
             }
             frame.finish(result.pageAndPosition);
           });

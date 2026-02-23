@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      font-family: 'Times New Roman', Times, serif;
+      line-height: 2;
+      widows: 1;
+      orphans: 1;
+    }
+
+    * {
+      margin: 0;
+    }
+
+    @page {
+      size: 300px;
+      margin: 50px;
+      outline: 1px dotted;
+    }
+
+    @page :first {
+      counter-reset: page 10000;
+    }
+
+    nav a::after {
+      content: " " target-counter(attr(href), page);
+    }
+
+    section {
+      break-before: page;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li>
+        <a href="#two">Two WWWWWWW WWWWWWWWW WWWWWWWWW WWWWWWWWW WWWWWWWWW WWWWWWWWW</a>
+      </li>
+    </ul>
+  </nav>
+  <section>
+    <h2 id="one">One</h2>
+  </section>
+  <section>
+    <h2 id="two">Two</h2>
+  </section>
+</body>
+
+</html>
