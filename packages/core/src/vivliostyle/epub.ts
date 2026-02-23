@@ -1702,19 +1702,138 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
-  /**
-   * Render a single page. If the new page contains elements with ids that are
-   * referenced from other pages by 'target-counter()', those pages are rendered
-   * too (calling `renderSinglePage` recursively).
-   */
-  private renderSinglePage(
-    viewItem: OPFViewItem,
-    pos: Vtree.LayoutPosition,
-  ): Task.Result<RenderSinglePageResult> {
-    const frame: Task.Frame<RenderSinglePageResult> =
-      Task.newFrame("renderSinglePage");
+  private isInCounterResolveScope(): boolean {
+    return this.counterStore.currentPageCountersStack.length > 0;
+  }
 
-    const pageIndexToRender = pos ? Math.max(pos.page, 0) : 0;
+  private hasNonEmptyPageType(page: Vtree.Page | null | undefined): boolean {
+    return !!page?.pageType && page.pageType !== "";
+  }
+
+  private hasPageTypeBoundaryBetween(
+    previousPage: Vtree.Page | null,
+    currentPage: Vtree.Page | null,
+  ): boolean {
+    return (
+      previousPage?.pageType != null &&
+      currentPage?.pageType != null &&
+      previousPage.pageType !== currentPage.pageType
+    );
+  }
+
+  private resolvePageTypeForRenderSlot(
+    viewItem: OPFViewItem,
+    page: Vtree.Page,
+    pageIndexToRender: number,
+    oldPage: Vtree.Page | null,
+    prevPage: Vtree.Page | null,
+    nextExistingPage: Vtree.Page | null,
+    inCounterResolveScopeAtStart: boolean,
+  ): void {
+    let shouldKeepOldPageType = false;
+    if (oldPage) {
+      const hasBoundaryBetweenPrevAndOld = this.hasPageTypeBoundaryBetween(
+        prevPage,
+        oldPage,
+      );
+      const nextPageContinuesOldPageType =
+        nextExistingPage?.pageType === oldPage.pageType;
+      const isOldPageOffsetStale = oldPage.offset !== page.offset;
+
+      // If the old page exists, keep the pageType (named page).
+      // This is necessary for named page with target-counter() to work.
+      // (fix for issue #1136)
+      const shouldKeepOldPageTypeInCounterResolveScope =
+        // In target-counter resolution rerender, preserve an existing boundary
+        // pageType only when the old page is still layout-consistent.
+        inCounterResolveScopeAtStart &&
+        !isOldPageOffsetStale &&
+        pageIndexToRender > 0 &&
+        hasBoundaryBetweenPrevAndOld &&
+        nextPageContinuesOldPageType;
+      shouldKeepOldPageType =
+        oldPage.pageType != null &&
+        (shouldKeepOldPageTypeInCounterResolveScope ||
+          pageIndexToRender === 0 ||
+          oldPage.pageType === prevPage?.pageType);
+      page.pageType = shouldKeepOldPageType ? oldPage.pageType : null;
+
+      if (!inCounterResolveScopeAtStart && !shouldKeepOldPageType) {
+        const shouldUsePrevPageTypeToFixEarlyBoundary =
+          pageIndexToRender > 1 &&
+          hasBoundaryBetweenPrevAndOld &&
+          nextPageContinuesOldPageType;
+        // For a suspected one-page-early boundary, start from previous pageType
+        // so the continuation page remains in the expected named-page run.
+        const currentPageType = shouldUsePrevPageTypeToFixEarlyBoundary
+          ? prevPage.pageType
+          : null;
+        viewItem.instance.styler.cascade.currentPageType = currentPageType;
+        viewItem.instance.pageManager.pageCascadeInstance.currentPageType =
+          currentPageType;
+      }
+    }
+
+    const shouldSeedFromPrevPageType =
+      !inCounterResolveScopeAtStart &&
+      this.hasNonEmptyPageType(prevPage) &&
+      this.hasNonEmptyPageType(nextExistingPage) &&
+      prevPage.pageType !== nextExistingPage.pageType &&
+      (!oldPage || oldPage.pageType == null);
+    if (shouldSeedFromPrevPageType) {
+      // If this slot has no reliable pageType yet, tentatively continue from
+      // the previous named page to avoid early boundary drift during rerender.
+      page.pageType = prevPage.pageType;
+    }
+  }
+
+  private evaluateNextPageRelayout(
+    oldPage: Vtree.Page | null,
+    nextPage: Vtree.Page | null,
+    positionChanged: boolean,
+    offsetChanged: boolean,
+    inCounterResolveScope: boolean,
+  ): { needsRelayout: boolean; shouldCascade: boolean } {
+    if (!oldPage || (!!nextPage && !positionChanged)) {
+      return { needsRelayout: false, shouldCascade: false };
+    }
+
+    const shouldCascadeInCounterResolveScope =
+      !!nextPage &&
+      (oldPage.pageType === nextPage.pageType || !nextPage.pageType);
+    const shouldResetNextPageTypeFromPositionChange =
+      !!nextPage &&
+      offsetChanged &&
+      (!inCounterResolveScope || shouldCascadeInCounterResolveScope) &&
+      (nextPage.pageType == null ||
+        oldPage.pageType == null ||
+        oldPage.pageType !== nextPage.pageType);
+    if (shouldResetNextPageTypeFromPositionChange) {
+      // If the previous page break position changed, the existing next
+      // page may now start in a different named-page context.
+      // Reset pageType so layoutNextPage() recalculates it.
+      // (fix for issue #1497)
+      nextPage.pageType = null;
+    }
+
+    // When inside a target-counter/target-text resolution scope
+    // (pushPageCounters/popPageCounters), do not cascade to render
+    // pages that have not been rendered yet. Creating new pages
+    // inside the push/pop scope causes currentPageCounters to
+    // advance, but popPageCounters then restores stale values,
+    // leading to wrong page counter numbers on subsequently
+    // rendered pages.
+    const shouldCascadeToNextPage = !!nextPage || !inCounterResolveScope;
+    return {
+      needsRelayout: true,
+      shouldCascade: shouldCascadeToNextPage,
+    };
+  }
+
+  private preparePageCountersForRender(
+    viewItem: OPFViewItem,
+    pageIndexToRender: number,
+  ): Vtree.Page | null {
     const oldPage = viewItem.pages[pageIndexToRender];
     // Restore page counter starts when re-rendering a page so target-counter()
     // and page-based counters stay stable across relayouts.
@@ -1729,13 +1848,209 @@ export class OPFView implements Vgen.CustomRendererFactory {
     if (!storedCounters || !oldPage) {
       viewItem.pageCounterStarts[pageIndexToRender] = startCounters;
     }
-    let page = this.makePage(viewItem, pos);
-    if (oldPage) {
-      // If the old page exists, keep the pageType (named page).
-      // This is necessary for named page with target-counter() to work.
-      // (fix for issue #1136)
-      page.pageType = oldPage.pageType;
+    return oldPage;
+  }
+
+  private maybeRelayoutFollowingPage(
+    viewItem: OPFViewItem,
+    nextLayoutPosition: Vtree.LayoutPosition | null,
+    oldPage: Vtree.Page | null,
+    renderedPage: Vtree.Page,
+  ): Task.Result<any> {
+    if (!nextLayoutPosition) {
+      return Task.newResult(true);
     }
+
+    const previousLayoutPosition =
+      viewItem.layoutPositions[nextLayoutPosition.page];
+    viewItem.layoutPositions[nextLayoutPosition.page] = nextLayoutPosition;
+    const nextPage = viewItem.pages[nextLayoutPosition.page];
+    const offsetChanged = !!oldPage && renderedPage.offset !== oldPage.offset;
+    const positionChanged =
+      !previousLayoutPosition ||
+      !nextLayoutPosition.isSamePosition(previousLayoutPosition) ||
+      nextLayoutPosition.highestSeenOffset !==
+        previousLayoutPosition.highestSeenOffset ||
+      offsetChanged;
+    const inCounterResolveScope = this.isInCounterResolveScope();
+    const relayoutDecision = this.evaluateNextPageRelayout(
+      oldPage,
+      nextPage,
+      positionChanged,
+      offsetChanged,
+      inCounterResolveScope,
+    );
+    if (!relayoutDecision.needsRelayout) {
+      return Task.newResult(true);
+    }
+
+    viewItem.complete = false;
+    if (!relayoutDecision.shouldCascade) {
+      return Task.newResult(true);
+    }
+    return this.renderSinglePage(viewItem, nextLayoutPosition);
+  }
+
+  private resolveUnresolvedReferencesForPage(
+    viewItem: OPFViewItem,
+    page: Vtree.Page,
+    pageIndex: number,
+    nextLayoutPosition: Vtree.LayoutPosition | null,
+  ): Task.Result<Vtree.Page> {
+    const frame: Task.Frame<Vtree.Page> = Task.newFrame(
+      "resolveUnresolvedReferencesForPage",
+    );
+    // When inside a target-counter/target-text resolution scope
+    // (pushPageCounters/popPageCounters), skip processing unresolved
+    // references on cascaded pages to prevent infinite re-layout loops.
+    // References that remain unresolved will be resolved when their
+    // target pages are rendered in the normal (non-cascade) flow.
+    // (fix for issue #1686)
+    const inCounterResolveScope = this.isInCounterResolveScope();
+    const unresolvedRefs = inCounterResolveScope
+      ? []
+      : this.counterStore.getUnresolvedRefsToPage(page);
+    let unresolvedRefIndex = 0;
+    let currentPage = page;
+
+    frame
+      .loopWithFrame((loopFrame) => {
+        unresolvedRefIndex++;
+        if (unresolvedRefIndex > unresolvedRefs.length) {
+          loopFrame.breakLoop();
+          return;
+        }
+        const refs = unresolvedRefs[unresolvedRefIndex - 1];
+        refs.refs = refs.refs.filter((ref) => !ref.isResolved());
+        if (refs.refs.length === 0) {
+          loopFrame.continueLoop();
+          return;
+        }
+        this.getPageViewItem(refs.spineIndex).then((targetViewItem) => {
+          if (!targetViewItem) {
+            loopFrame.continueLoop();
+            return;
+          }
+          // Save page type states and restore them after re-rendering page.
+          // This is necessary for named page with target-counter() to work.
+          // (fix for issues #1272 and #1497)
+          const stylerCascade = targetViewItem.instance.styler.cascade;
+          const pageCascade =
+            targetViewItem.instance.pageManager.pageCascadeInstance;
+          const savedStylerPageTypeState = {
+            currentPageType: stylerCascade.currentPageType,
+            previousPageType: stylerCascade.previousPageType,
+          };
+          const savedPageCascadePageTypeState = {
+            currentPageType: pageCascade.currentPageType,
+            previousPageType: pageCascade.previousPageType,
+          };
+
+          // Save the scopes and restore them after re-rendering page.
+          // This is necessary for :blank page selector to work.
+          // (fix for issues #1131 and #1513)
+          const scopes = targetViewItem.instance.scopes;
+          targetViewItem.instance.scopes = {};
+
+          this.counterStore.pushPageCounters(refs.pageCounters);
+          this.counterStore.pushReferencesToSolve(refs.refs);
+          const pos = targetViewItem.layoutPositions[refs.pageIndex];
+
+          this.renderSinglePage(targetViewItem, pos).then((result) => {
+            const beforeRestoreStylerCurrentPageType =
+              stylerCascade.currentPageType;
+            stylerCascade.currentPageType =
+              savedStylerPageTypeState.currentPageType;
+            stylerCascade.previousPageType =
+              savedStylerPageTypeState.previousPageType;
+
+            pageCascade.currentPageType =
+              savedPageCascadePageTypeState.currentPageType;
+            pageCascade.previousPageType =
+              savedPageCascadePageTypeState.previousPageType;
+            targetViewItem.instance.scopes = scopes;
+            this.counterStore.popPageCounters();
+            this.counterStore.popReferencesToSolve();
+            if (
+              result.pageAndPosition.position.spineIndex ===
+                currentPage.spineIndex &&
+              result.pageAndPosition.position.pageIndex === pageIndex
+            ) {
+              currentPage = result.pageAndPosition.page;
+            }
+            // Keep the current pageType aligned when recursive rerender of
+            // target-counter() shifts this page's named-page context.
+            // Guard with previous value checks to avoid leaking unrelated
+            // pageType updates from other rerender targets.
+            const shouldSyncStylerCurrentPageType =
+              !!currentPage.pageType &&
+              currentPage.pageType !==
+                savedStylerPageTypeState.currentPageType &&
+              beforeRestoreStylerCurrentPageType !==
+                result.pageAndPosition.page.pageType;
+            if (shouldSyncStylerCurrentPageType) {
+              stylerCascade.currentPageType = currentPage.pageType;
+            }
+            loopFrame.continueLoop();
+          });
+        });
+      })
+      .then(() => {
+        if (!currentPage.container.parentElement) {
+          // page is replaced
+          currentPage = viewItem.pages[pageIndex];
+        }
+        currentPage.isLastPage =
+          !nextLayoutPosition &&
+          viewItem.item.spineIndex === this.opf.spine.length - 1;
+        if (currentPage.isLastPage) {
+          Asserts.assert(this.viewport);
+          this.counterStore.finishLastPage(this.viewport);
+        }
+        currentPage.container.setAttribute(
+          "data-vivliostyle-page-index",
+          pageIndex,
+        );
+        currentPage.container.setAttribute(
+          "data-vivliostyle-spine-index",
+          currentPage.spineIndex,
+        );
+        frame.finish(currentPage);
+      });
+    return frame.result();
+  }
+
+  /**
+   * Render a single page. If the new page contains elements with ids that are
+   * referenced from other pages by 'target-counter()', those pages are rendered
+   * too (calling `renderSinglePage` recursively).
+   */
+  private renderSinglePage(
+    viewItem: OPFViewItem,
+    pos: Vtree.LayoutPosition,
+  ): Task.Result<RenderSinglePageResult> {
+    const frame: Task.Frame<RenderSinglePageResult> =
+      Task.newFrame("renderSinglePage");
+
+    const pageIndexToRender = pos ? Math.max(pos.page, 0) : 0;
+    const inCounterResolveScopeAtStart = this.isInCounterResolveScope();
+    const oldPage = this.preparePageCountersForRender(
+      viewItem,
+      pageIndexToRender,
+    );
+    const prevPage =
+      pageIndexToRender > 0 ? viewItem.pages[pageIndexToRender - 1] : null;
+    const nextExistingPage = viewItem.pages[pageIndexToRender + 1];
+    let page = this.makePage(viewItem, pos);
+    this.resolvePageTypeForRenderSlot(
+      viewItem,
+      page,
+      pageIndexToRender,
+      oldPage,
+      prevPage,
+      nextExistingPage,
+      inCounterResolveScopeAtStart,
+    );
 
     viewItem.instance.layoutNextPage(page, pos).then((posParam) => {
       pos = posParam as Vtree.LayoutPosition;
@@ -1746,129 +2061,23 @@ export class OPFView implements Vgen.CustomRendererFactory {
       this.counterStore.finishPage(page.spineIndex, pageIndex);
       this.reportPaginationProgress(viewItem, pos);
 
-      // If the position of the page break change, we should re-layout the next
-      // page too.
-      let cont: Task.Result<any> = null;
-      if (pos) {
-        const prevPos = viewItem.layoutPositions[pos.page];
-        viewItem.layoutPositions[pos.page] = pos;
-        const nextPage = viewItem.pages[pos.page];
-        const offsetChanged = oldPage && page.offset !== oldPage.offset;
-        const positionChanged =
-          !prevPos ||
-          !pos.isSamePosition(prevPos) ||
-          pos.highestSeenOffset !== prevPos.highestSeenOffset ||
-          offsetChanged;
-        if (oldPage && (!nextPage || positionChanged)) {
-          viewItem.complete = false;
-          // When inside a target-counter/target-text resolution scope
-          // (pushPageCounters/popPageCounters), do not cascade to render
-          // pages that have not been rendered yet. Creating new pages
-          // inside the push/pop scope causes currentPageCounters to
-          // advance, but popPageCounters then restores stale values,
-          // leading to wrong page counter numbers on subsequently
-          // rendered pages.
-          const inCounterResolveScope =
-            this.counterStore.currentPageCountersStack.length > 0;
-          if (nextPage || !inCounterResolveScope) {
-            cont = this.renderSinglePage(viewItem, pos);
-          }
-        }
-      }
-      if (!cont) {
-        cont = Task.newResult(true);
-      }
-      cont.then(() => {
-        // When inside a target-counter/target-text resolution scope
-        // (pushPageCounters/popPageCounters), skip processing unresolved
-        // references on cascaded pages to prevent infinite re-layout loops.
-        // References that remain unresolved will be resolved when their
-        // target pages are rendered in the normal (non-cascade) flow.
-        // (fix for issue #1686)
-        const inCounterResolveScope =
-          this.counterStore.currentPageCountersStack.length > 0;
-        const unresolvedRefs = inCounterResolveScope
-          ? []
-          : this.counterStore.getUnresolvedRefsToPage(page);
-        let index = 0;
-        frame
-          .loopWithFrame((loopFrame) => {
-            index++;
-            if (index > unresolvedRefs.length) {
-              loopFrame.breakLoop();
-              return;
-            }
-            const refs = unresolvedRefs[index - 1];
-            refs.refs = refs.refs.filter((ref) => !ref.isResolved());
-            if (refs.refs.length === 0) {
-              loopFrame.continueLoop();
-              return;
-            }
-            this.getPageViewItem(refs.spineIndex).then((viewItem) => {
-              if (!viewItem) {
-                loopFrame.continueLoop();
-                return;
-              }
-              // Save the page type and restore it after re-rendering page.
-              // This is necessary for named page with target-counter() to work.
-              // (fix for issue #1272)
-              const { currentPageType, previousPageType } =
-                viewItem.instance.styler.cascade;
-
-              // Save the scopes and restore them after re-rendering page.
-              // This is necessary for :blank page selector to work.
-              // (fix for issues #1131 and #1513)
-              const scopes = viewItem.instance.scopes;
-              viewItem.instance.scopes = {};
-
-              this.counterStore.pushPageCounters(refs.pageCounters);
-              this.counterStore.pushReferencesToSolve(refs.refs);
-              const pos = viewItem.layoutPositions[refs.pageIndex];
-
-              this.renderSinglePage(viewItem, pos).then((result) => {
-                viewItem.instance.styler.cascade.currentPageType =
-                  currentPageType;
-                viewItem.instance.styler.cascade.previousPageType =
-                  previousPageType;
-                viewItem.instance.scopes = scopes;
-                this.counterStore.popPageCounters();
-                this.counterStore.popReferencesToSolve();
-                const resultPosition = result.pageAndPosition.position;
-                if (
-                  resultPosition.spineIndex === page.spineIndex &&
-                  resultPosition.pageIndex === pageIndex
-                ) {
-                  page = result.pageAndPosition.page;
-                }
-                loopFrame.continueLoop();
-              });
-            });
-          })
-          .then(() => {
-            if (!page.container.parentElement) {
-              // page is replaced
-              page = viewItem.pages[pageIndex];
-            }
-            page.isLastPage =
-              !pos && viewItem.item.spineIndex === this.opf.spine.length - 1;
-            if (page.isLastPage) {
-              Asserts.assert(this.viewport);
-              this.counterStore.finishLastPage(this.viewport);
-            }
-            page.container.setAttribute(
-              "data-vivliostyle-page-index",
-              pageIndex,
-            );
-            page.container.setAttribute(
-              "data-vivliostyle-spine-index",
-              page.spineIndex,
-            );
-            frame.finish({
-              pageAndPosition: makePageAndPosition(page, pageIndex),
-              nextLayoutPosition: pos,
-            });
+      // If the position of the page break changed, re-layout the following
+      // page when needed.
+      this.maybeRelayoutFollowingPage(viewItem, pos, oldPage, page)
+        .thenAsync(() =>
+          this.resolveUnresolvedReferencesForPage(
+            viewItem,
+            page,
+            pageIndex,
+            pos,
+          ),
+        )
+        .then((resolvedPage) => {
+          frame.finish({
+            pageAndPosition: makePageAndPosition(resolvedPage, pageIndex),
+            nextLayoutPosition: pos,
           });
-      });
+        });
     });
     return frame.result();
   }
@@ -1882,7 +2091,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
     if (pageIndex < 0) {
       seekOffset = position.offsetInItem;
 
-      // page with offset higher than seekOffset
       const seekOffsetPageIndex = Base.binarySearch(
         viewItem.layoutPositions.length,
         (pageIndex) => {
