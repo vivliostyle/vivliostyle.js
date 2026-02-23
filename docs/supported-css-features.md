@@ -130,7 +130,7 @@ In addition, essentially all CSS properties and values supported by the browser 
 - [@media](https://www.w3.org/TR/css-conditional-3/#at-media)
 - [@supports](https://www.w3.org/TR/css-conditional-3/#at-supports)
 
-### [CSS Conditional Rules 4](https://www.w3.org/TR/css4-conditional/)
+### [CSS Conditional Rules 4](https://www.w3.org/TR/css-conditional-4/)
 
 - [@supports selector()](https://www.w3.org/TR/css-conditional-4/#at-supports-ext)
 
