@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>target-counter named pages with left/right</title>
+    <style>
+      :root {
+        font-family: "Times New Roman", Times, serif;
+        line-height: 1.8;
+        widows: 1;
+        orphans: 1;
+      }
+
+      * {
+        margin: 0;
+      }
+
+      @page {
+        size: 300px;
+        margin: 36px;
+        outline: 1px dotted;
+        @bottom-center {
+          content: counter(page);
+          font-size: 0.8em;
+        }
+      }
+
+      @page :first {
+        counter-reset: page 10000;
+      }
+
+      @page Cover {
+        background-color: lightgray;
+      }
+
+      @page TOC {
+        background-color: yellow;
+      }
+
+      @page A:left {
+        background-color: orange;
+      }
+
+      @page A:right {
+        background-color: cyan;
+      }
+
+      @page B:left {
+        background-color: blueviolet;
+      }
+
+      @page B:right {
+        background-color: lavender;
+      }
+
+      @page C:left {
+        background-color: pink;
+      }
+
+      @page C:right {
+        background-color: lime;
+      }
+
+      .cover {
+        page: Cover;
+        text-align: center;
+      }
+
+      nav {
+        page: TOC;
+      }
+
+      nav a::after {
+        content: " " target-counter(attr(href), page);
+      }
+
+      hr,
+      section {
+        break-before: page;
+      }
+
+      section.a {
+        page: A;
+      }
+
+      section.b {
+        page: B;
+      }
+
+      section.c {
+        page: C;
+      }
+
+      ul {
+        padding-left: 1.2em;
+      }
+
+      p,
+      li {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="cover">
+      <h1>Named pages + target-counter() test</h1>
+      <p>This page should be Cover (lightgray).</p>
+    </div>
+
+    <nav>
+      <ul>
+        <li>
+          <a href="#target"
+            >Target WWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW WWWWWWWWWWWWWW</a
+          >
+        </li>
+      </ul>
+      <hr />
+      <p>
+        TOC pages should remain yellow. target-counter() resolution may increase
+        TOC page count and flip left/right for following named pages.
+      </p>
+    </nav>
+
+    <section class="a">
+      <h2>A-1</h2>
+      <p>Expected page type and side: A:right (cyan).</p>
+    </section>
+
+    <section class="a">
+      <h2>A-2</h2>
+      <p>Expected page type and side: A:left (orange).</p>
+    </section>
+
+    <section class="a">
+      <h2>A-3</h2>
+      <p>Expected page type and side: A:right (cyan).</p>
+    </section>
+
+    <section class="b" id="target">
+      <h2>B target</h2>
+      <p>Expected page type and side: B:left (blueviolet).</p>
+      <p>This page is referenced from TOC by target-counter().</p>
+    </section>
+
+    <section class="c">
+      <h2>C-1</h2>
+      <p>Expected page type and side: C:right (lime).</p>
+    </section>
+
+    <section class="c">
+      <h2>C-2</h2>
+      <p>Expected page type and side: C:left (pink).</p>
+    </section>
+  </body>
+</html>

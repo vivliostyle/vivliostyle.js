@@ -87,6 +87,10 @@ module.exports = [
         file: "target-counter-and-margin-bug.html",
         title: "target-counter and margin bug",
       },
+      {
+        file: "target-counter-named-pages-left-right.html",
+        title: "target-counter() named pages with :left/:right (Issue #1497)",
+      },
       { file: "target-text.html", title: "target-text() - Basic Tests" },
       {
         file: "target-text-running-element.html",
