@@ -72,8 +72,9 @@ export function fetchFromURL(
         .toLowerCase();
 
       if (!res.ok) {
-        // TODO: Handle error response
-        return res.text();
+        throw new Error(
+          `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ""}`,
+        );
       }
       if (opt_type === FetchResponseType.BLOB) {
         return res.blob();
@@ -122,7 +123,15 @@ export function fetchFromURL(
       continuation.schedule(response);
     })
     .catch((e) => {
-      Logging.logger.warn(e, `Error fetching ${url}`);
+      if (response.status >= 400) {
+        Logging.logger.warn(
+          `Error fetching ${url} (${response.status}${
+            response.statusText ? " " + response.statusText : ""
+          })`,
+        );
+      } else {
+        Logging.logger.warn(e, `Error fetching ${url}`);
+      }
       continuation.schedule(response);
     });
   return frame.result();
