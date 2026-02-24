@@ -1037,10 +1037,43 @@ export class StyleInstance
     column.flowRootFormattingContext = flow.formattingContext;
   }
 
+  beginIsolatedRootPageFloatLayoutContext(): PageFloats.PageFloatLayoutContext {
+    const originalRootPageFloatLayoutContext = this.rootPageFloatLayoutContext;
+    this.rootPageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    );
+    return originalRootPageFloatLayoutContext;
+  }
+
+  endIsolatedRootPageFloatLayoutContext(
+    originalRootPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+  ): void {
+    this.rootPageFloatLayoutContext = originalRootPageFloatLayoutContext;
+  }
+
+  hasActiveRootPageFloatLayoutContext(): boolean {
+    return (
+      this.rootPageFloatLayoutContext.getDeferredPageFloatContinuations()
+        .length > 0 ||
+      this.rootPageFloatLayoutContext.getPageFloatContinuationsDeferredToNext()
+        .length > 0 ||
+      this.rootPageFloatLayoutContext.getFloatsDeferredToNextInChildContexts()
+        .length > 0
+    );
+  }
+
   layoutDeferredPageFloats(column: LayoutType.Column): Task.Result<boolean> {
     const pageFloatLayoutContext = column.pageFloatLayoutContext;
     const deferredFloats =
       pageFloatLayoutContext.getDeferredPageFloatContinuations();
+    const inCounterResolveScope =
+      this.counterStore.currentPageCountersStack.length > 0;
 
     // Prevent deferred page floats from appearing in the preceding pages,
     // e.g., during re-layout the TOC page with target-counter() referencing
@@ -1048,14 +1081,22 @@ export class StyleInstance
     const checkPageFloatForLaterPage = (
       float: PageFloats.PageFloat,
     ): boolean => {
+      if (!inCounterResolveScope) {
+        return false;
+      }
       // FIXME: This check is incomplete when float-reference is other than "page".
       // so give up for now to prevent another problem (Issue #962, #1273).
       if (float.floatReference !== PageFloats.FloatReference.PAGE) {
         return false;
       }
-      const pageStartPos = this.layoutPositionAtPageStart.flowPositions.body;
-      const pageStartOffset =
-        pageStartPos && this.getConsumedOffset(pageStartPos);
+      const pageStartPos =
+        this.layoutPositionAtPageStart?.flowPositions?.body || null;
+      const pageStartOffsetFromBody = pageStartPos
+        ? this.getConsumedOffset(pageStartPos)
+        : Number.NaN;
+      const pageStartOffset = isFinite(pageStartOffsetFromBody)
+        ? pageStartOffsetFromBody
+        : this.getPageStartOffset(this.layoutPositionAtPageStart, true);
       const deferredFloatOffset = this.xmldoc.getNodeOffset(
         float.nodePosition.steps[0].node,
         0,
@@ -1063,7 +1104,7 @@ export class StyleInstance
       );
       return (
         deferredFloatOffset != null &&
-        pageStartOffset != null &&
+        isFinite(pageStartOffset) &&
         deferredFloatOffset > pageStartOffset
       );
     };
