@@ -1952,11 +1952,31 @@ export class OPFView implements Vgen.CustomRendererFactory {
           const scopes = targetViewItem.instance.scopes;
           targetViewItem.instance.scopes = {};
 
+          // Isolate root page-float layout context only when re-rendering an
+          // already rendered target page. For first-time rendering of the
+          // target page, keep the normal context so deferred page-floats can
+          // continue to subsequent pages.
+          // (fix for issue #1094 and regression in
+          // target-counter-and-page-floats.html)
+          const hasRenderedFollowingPage =
+            refs.pageIndex < targetViewItem.pages.length - 1;
+          const shouldIsolateRootPageFloatLayoutContext =
+            !!targetViewItem.pages[refs.pageIndex] && hasRenderedFollowingPage;
+          const originalRootPageFloatLayoutContext =
+            shouldIsolateRootPageFloatLayoutContext
+              ? targetViewItem.instance.beginIsolatedRootPageFloatLayoutContext()
+              : null;
+
           this.counterStore.pushPageCounters(refs.pageCounters);
           this.counterStore.pushReferencesToSolve(refs.refs);
           const pos = targetViewItem.layoutPositions[refs.pageIndex];
 
           this.renderSinglePage(targetViewItem, pos).then((result) => {
+            if (shouldIsolateRootPageFloatLayoutContext) {
+              targetViewItem.instance.endIsolatedRootPageFloatLayoutContext(
+                originalRootPageFloatLayoutContext,
+              );
+            }
             const beforeRestoreStylerCurrentPageType =
               stylerCascade.currentPageType;
             stylerCascade.currentPageType =
@@ -1998,7 +2018,14 @@ export class OPFView implements Vgen.CustomRendererFactory {
             const firstPendingPageIndex = targetViewItem.pages.length;
             const pendingLayoutPosition =
               targetViewItem.layoutPositions[firstPendingPageIndex];
-            if (pendingLayoutPosition) {
+            // Recompute root page-float layout context state after rerender and
+            // context restoration to avoid using stale pre-rerender state.
+            const hasActiveRootPageFloatLayoutContextAfterRerender =
+              targetViewItem.instance.hasActiveRootPageFloatLayoutContext();
+            if (
+              pendingLayoutPosition &&
+              !hasActiveRootPageFloatLayoutContextAfterRerender
+            ) {
               this.renderSinglePage(targetViewItem, pendingLayoutPosition).then(
                 () => {
                   loopFrame.continueLoop();
