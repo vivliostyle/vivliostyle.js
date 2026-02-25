@@ -5439,8 +5439,9 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (
-      this.resolveViewportUnit &&
-      (Exprs.isViewportRelativeLengthUnit(numeric.unit) ||
+      (this.resolveViewportUnit &&
+        Exprs.isViewportRelativeLengthUnit(numeric.unit)) ||
+      (this.context.rootFontSize != null &&
         Exprs.isRootFontRelativeLengthUnit(numeric.unit))
     ) {
       return new Css.Numeric(
