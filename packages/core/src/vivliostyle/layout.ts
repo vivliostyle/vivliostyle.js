@@ -981,6 +981,83 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.element.removeAttribute("data-vivliostyle-column-block-size-adjusted");
   }
 
+  private setMaxBlockSizeForNonRootMultiColumn(element: HTMLElement): void {
+    if (element.hasAttribute("data-vivliostyle-column")) {
+      // Root column element.
+      return;
+    }
+
+    const style = this.clientLayout.getElementComputedStyle(element);
+    if (style.columnFill !== "auto") {
+      return;
+    }
+    const authorSpecifiedMaxBlockSize = this.vertical
+      ? element.style.maxWidth
+      : element.style.maxHeight;
+    if (authorSpecifiedMaxBlockSize && authorSpecifiedMaxBlockSize !== "none") {
+      // Respect author-specified max-block-size.
+      return;
+    }
+
+    const isMultiColumn =
+      !isNaN(parseFloat(style.columnCount)) ||
+      !isNaN(parseFloat(style.columnWidth));
+    if (!isMultiColumn) {
+      return;
+    }
+
+    const rect = this.clientLayout.getElementClientRect(element);
+    if (!rect) {
+      return;
+    }
+
+    let maxBlockSize =
+      this.getBoxDir() * (this.footnoteEdge - this.getBeforeEdge(rect));
+
+    if (style.boxSizing !== "border-box") {
+      const blockInsets = this.vertical
+        ? this.parseComputedLength(style.borderRightWidth) +
+          this.parseComputedLength(style.paddingRight) +
+          this.parseComputedLength(style.borderLeftWidth) +
+          this.parseComputedLength(style.paddingLeft)
+        : this.parseComputedLength(style.borderTopWidth) +
+          this.parseComputedLength(style.paddingTop) +
+          this.parseComputedLength(style.borderBottomWidth) +
+          this.parseComputedLength(style.paddingBottom);
+      maxBlockSize -= blockInsets;
+    }
+
+    if (maxBlockSize > 0 && isFinite(maxBlockSize)) {
+      Base.setCSSProperty(element, "max-block-size", `${maxBlockSize}px`);
+    }
+  }
+
+  private adjustMaxBlockSizeForAncestorNonRootMultiColumn(
+    nodeContext: Vtree.NodeContext,
+  ): void {
+    if (nodeContext.after || !nodeContext.viewNode) {
+      return;
+    }
+
+    const node =
+      nodeContext.viewNode.nodeType === 1
+        ? (nodeContext.viewNode as Element)
+        : nodeContext.viewNode.parentElement;
+    if (!node) {
+      return;
+    }
+
+    const nonRootMultiColumn =
+      LayoutHelper.findAncestorNonRootMultiColumn(node);
+    if (!nonRootMultiColumn) {
+      return;
+    }
+
+    this.setMaxBlockSizeForNonRootMultiColumn(
+      nonRootMultiColumn as HTMLElement,
+    );
+  }
+
   /**
    * @param nodeContext position after the block
    * @param checkPoints array of possible breaking points.
@@ -3016,6 +3093,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     frame
       .loopWithFrame((loopFrame) => {
         while (nodeContext) {
+          this.adjustMaxBlockSizeForAncestorNonRootMultiColumn(nodeContext);
+
           Asserts.assert(nodeContext.formattingContext);
           const layoutProcessor =
             new LayoutProcessor.LayoutProcessorResolver().find(
@@ -3253,6 +3332,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             } else {
               // Leading edge
+              this.setMaxBlockSizeForNonRootMultiColumn(
+                nodeContext.viewNode as HTMLElement,
+              );
+
               leadingEdgeContexts.push(nodeContext.copy());
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
