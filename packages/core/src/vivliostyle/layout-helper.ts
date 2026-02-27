@@ -452,11 +452,29 @@ export function calculateEdge(
     // Adjust boxes' positions for column breaking
     adjustRectsForColumnBreaking(boxes, vertical);
 
-    // Accept zero-width rects (e.g., blank lines in <pre>) that have
-    // a valid block-direction dimension (issue #1685).
-    boxes = boxes.filter((box) =>
-      vertical ? box.right > box.left : box.bottom > box.top,
+    // Prefer non-zero-area rects for stable edge calculation.
+    // Fallback to block-direction-only rects only in preformatted contexts
+    // for blank lines (issue #1685).
+    const boxesWithArea = boxes.filter(
+      (box) => box.right > box.left && box.bottom > box.top,
     );
+    if (boxesWithArea.length > 0) {
+      boxes = boxesWithArea;
+    } else {
+      const whiteSpace = element
+        ? clientLayout.getElementComputedStyle(element).whiteSpace
+        : "";
+      const canUseZeroInlineSizeRect =
+        whiteSpace === "pre" ||
+        whiteSpace === "pre-wrap" ||
+        whiteSpace === "pre-line" ||
+        whiteSpace === "break-spaces";
+      boxes = canUseZeroInlineSizeRect
+        ? boxes.filter((box) =>
+            vertical ? box.right > box.left : box.bottom > box.top,
+          )
+        : [];
+    }
     if (!boxes.length) {
       return NaN;
     }
