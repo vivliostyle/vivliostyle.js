@@ -2479,7 +2479,6 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       this,
       this.validatorSet,
       this.masterHandler.pageProps,
-      this.masterHandler.footnoteProps,
     );
     this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();

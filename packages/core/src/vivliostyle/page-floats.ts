@@ -1967,7 +1967,9 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
     floatArea: LayoutType.PageFloatArea,
     floatContainer: Vtree.Container,
     column: LayoutType.Column,
-  ) {}
+  ): Task.Result<void> {
+    return Task.newResult(undefined);
+  }
 
   /** @override */
   forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext) {}

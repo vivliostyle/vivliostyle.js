@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>@page @footnote overrides top-level @footnote</title>
+    <style>
+      @page {
+        size: 420px 320px;
+        margin: 24px;
+
+        @footnote {
+          margin-block-start: 0.8em;
+          border-block-start: 3px solid green;
+          padding-block-start: 0.4em;
+        }
+      }
+
+      @footnote {
+        margin-block-start: 0.8em;
+      }
+
+      @footnote ::before {
+        display: block;
+        border-block-start: 2px solid red;
+        margin-block-end: 0.4em;
+        margin-inline-end: 60%;
+      }
+
+      body,
+      p {
+        margin: 0;
+      }
+
+      .footnote {
+        float: footnote;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      If @page @footnote overrides top-level @footnote correctly, only one green
+      separator line appears above the footnote and no red line is shown<span
+        class="footnote"
+        >This is a footnote used to verify override precedence.</span
+      >.
+    </p>
+  </body>
+</html>

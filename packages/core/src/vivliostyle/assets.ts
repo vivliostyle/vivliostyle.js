@@ -889,19 +889,16 @@ export const UserAgentPageCss = `
   break-before: right;
 }
 
-@page {
-  @footnote {
-    margin-block-start: 0.5em;
-  }
-  @footnote ::before {
-    display: block;
-    border-block-start-width: 1px;
-    border-block-start-style: solid;
-    border-block-start-color: black;
-    margin-block-end: 0.4em;
-    margin-inline-start: 0;
-    margin-inline-end: 60%;
-  }
+@footnote {
+  margin-block-start: 0.5em;
+}
+@footnote ::before {
+  border-block-start-width: 1px;
+  border-block-start-style: solid;
+  border-block-start-color: black;
+  margin-block-end: 0.4em;
+  margin-inline-start: 0;
+  margin-inline-end: 60%;
 }
 
 /* default page master */

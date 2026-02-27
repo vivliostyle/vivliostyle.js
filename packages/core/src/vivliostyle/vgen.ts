@@ -2953,10 +2953,10 @@ export class ViewFactory
     vertical: boolean,
     rtl: boolean,
     target: Element,
-  ): boolean {
+  ): Task.Result<boolean> {
     const computedStyle: { [key: string]: Css.Val } = {};
+    const fetchers: TaskUtil.Fetcher<string>[] = [];
 
-    // Get footnote area style from cascadedPageStyle if available
     let footnoteStyle = this.footnoteStyle;
     if (this.cascadedPageStyle) {
       const footnoteAreaMap = CssCascade.getStyleMap(
@@ -2964,101 +2964,88 @@ export class ViewFactory
         CssPage.footnoteAreaKey,
       );
       if (footnoteAreaMap && footnoteAreaMap["area"]) {
-        const cascadedFootnoteArea = footnoteAreaMap["area"];
-        // Create a merged style, manually copying properties to avoid issues with nested structures
-        footnoteStyle = {} as CssCascade.ElementStyle;
-
-        // First copy global footnote style (excluding _pseudos)
-        for (const prop in this.footnoteStyle) {
-          if (this.footnoteStyle.hasOwnProperty(prop) && prop !== "_pseudos") {
-            footnoteStyle[prop] = this.footnoteStyle[prop];
-          }
-        }
-
-        // Copy global _pseudos separately to avoid reference sharing
-        const globalPseudos = CssCascade.getStyleMap(
-          this.footnoteStyle,
-          "_pseudos",
-        );
-        if (globalPseudos) {
-          const targetPseudos = CssCascade.getMutableStyleMap(
-            footnoteStyle,
-            "_pseudos",
-          );
-          for (const pseudoName in globalPseudos) {
-            if (globalPseudos.hasOwnProperty(pseudoName)) {
-              const globalPseudo = globalPseudos[pseudoName];
-              const targetPseudo = {} as CssCascade.ElementStyle;
-              targetPseudos[pseudoName] = targetPseudo;
-              for (const prop in globalPseudo) {
-                if (globalPseudo.hasOwnProperty(prop)) {
-                  targetPseudo[prop] = globalPseudo[prop];
-                }
-              }
-            }
-          }
-        }
-
-        // Then merge cascaded page-specific footnote properties
-        // Merge regular properties (excluding _pseudos)
-        for (const prop in cascadedFootnoteArea) {
-          if (
-            cascadedFootnoteArea.hasOwnProperty(prop) &&
-            prop !== "_pseudos"
-          ) {
-            const val = cascadedFootnoteArea[prop];
-            if (val instanceof CssCascade.CascadeValue) {
-              CssCascade.setPropCascadeValue(footnoteStyle, prop, val);
-            }
-          }
-        }
-
-        // Merge cascaded _pseudos
-        const cascadedPseudos = CssCascade.getStyleMap(
-          cascadedFootnoteArea,
-          "_pseudos",
-        );
-        if (cascadedPseudos) {
-          const targetPseudos = CssCascade.getMutableStyleMap(
-            footnoteStyle,
-            "_pseudos",
-          );
-          for (const pseudoName in cascadedPseudos) {
-            if (cascadedPseudos.hasOwnProperty(pseudoName)) {
-              let targetPseudo = targetPseudos[pseudoName];
-              if (!targetPseudo) {
-                targetPseudo = {} as CssCascade.ElementStyle;
-                targetPseudos[pseudoName] = targetPseudo;
-              }
-              const sourcePseudo = cascadedPseudos[pseudoName];
-              for (const prop in sourcePseudo) {
-                if (sourcePseudo.hasOwnProperty(prop)) {
-                  const val = sourcePseudo[prop];
-                  if (val instanceof CssCascade.CascadeValue) {
-                    CssCascade.setPropCascadeValue(targetPseudo, prop, val);
-                  }
-                }
-              }
-            }
-          }
-        }
+        // Styles defined in @page @footnote override any top-level @footnote.
+        footnoteStyle = footnoteAreaMap["area"];
       }
     }
 
     const pseudoMap = CssCascade.getStyleMap(footnoteStyle, "_pseudos");
     vertical = this.computeStyle(vertical, rtl, footnoteStyle, computedStyle);
     if (pseudoMap && pseudoMap["before"]) {
+      const pseudoStyle = pseudoMap["before"];
+      const hasSpecifiedDisplay = !!CssCascade.getProp(pseudoStyle, "display");
       const childComputedStyle: { [key: string]: Css.Val } = {};
       const span = this.createElement(Base.NS.XHTML, "span");
       PseudoElement.setPseudoName(span, "before");
       target.appendChild(span);
-      this.computeStyle(vertical, rtl, pseudoMap["before"], childComputedStyle);
+      this.computeStyle(vertical, rtl, pseudoStyle, childComputedStyle);
+      if (!hasSpecifiedDisplay) {
+        childComputedStyle["display"] = Css.ident.block;
+      }
+
+      const contentCascadeValue = CssCascade.getProp(pseudoStyle, "content");
+      if (contentCascadeValue) {
+        const contentElement =
+          this.sourceNode?.nodeType === 1
+            ? (this.sourceNode as Element)
+            : this.xmldoc.root;
+        childComputedStyle["content"] = contentCascadeValue
+          .filterValue(
+            new CssCascade.ContentPropVisitor(
+              this.styler.cascade,
+              contentElement,
+              this.styler.cascade.counterResolver,
+              "before",
+            ),
+          )
+          .evaluate(this.context, "content");
+      }
+
+      const content = childComputedStyle["content"];
+      if (Vtree.nonTrivialContent(content)) {
+        content.visit(
+          new Vtree.ContentPropertyHandler(
+            span,
+            this.context,
+            content,
+            this.exprContentListener,
+          ),
+        );
+
+        const images = span.querySelectorAll("img[src]");
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i] as HTMLImageElement;
+          const src = image.getAttribute("src");
+          if (!src) {
+            continue;
+          }
+          const fetcher = Net.loadElement(image, src);
+          fetchers.push(fetcher);
+          this.page.fetchers.push(fetcher);
+        }
+
+        const rootSrc = span.getAttribute("src");
+        if (rootSrc) {
+          let image = span.querySelector("img") as HTMLImageElement | null;
+          if (!image) {
+            image = this.document.createElement("img");
+            image.setAttribute("src", rootSrc);
+            span.appendChild(image);
+          }
+          const fetcher = Net.loadElement(image, rootSrc);
+          fetchers.push(fetcher);
+          this.page.fetchers.push(fetcher);
+        }
+      }
       delete childComputedStyle["content"];
       this.applyComputedStyles(span, childComputedStyle);
     }
     delete computedStyle["content"];
     this.applyComputedStyles(target, computedStyle);
-    return vertical;
+    if (fetchers.length) {
+      return TaskUtil.waitForFetchers(fetchers).thenReturn(vertical);
+    }
+    return Task.newResult(vertical);
   }
 
   /** @override */

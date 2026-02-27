@@ -694,6 +694,14 @@ module.exports = [
         title: "Footnote area with @footnote",
       },
       {
+        file: "footnotes/footnote-area-page-overrides-top-level.html",
+        title: "@page @footnote overrides top-level @footnote (Issue #1723)",
+      },
+      {
+        file: "footnotes/footnote-before-content.html",
+        title: "@footnote ::before content (Issue #1723)",
+      },
+      {
         file: "footnote-text-spacing.html",
         title: "Footnote text-spacing (Issue #868)",
       },
