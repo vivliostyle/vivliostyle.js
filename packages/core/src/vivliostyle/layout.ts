@@ -982,6 +982,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   private setMaxBlockSizeForNonRootMultiColumn(element: HTMLElement): void {
+    if (Base.browserType !== "chromium") {
+      // On Firefox/Safari, overflow columns in nested multicol are handled
+      // inside the same multicol container, so this Chromium-specific
+      // workaround causes horizontal overflow.
+      return;
+    }
+
     if (element.hasAttribute("data-vivliostyle-column")) {
       // Root column element.
       return;
