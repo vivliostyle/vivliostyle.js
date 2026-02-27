@@ -167,20 +167,25 @@ export class FootnoteLayoutStrategy
     floatArea: Layout.PageFloatArea,
     floatContainer: Vtree.Container,
     column: Layout.Column,
-  ) {
+  ): Task.Result<void> {
     floatArea.isFootnote = true;
     floatArea.adjustContentRelativeSize = false;
     const element = floatArea.element;
     Asserts.assert(element);
-    floatArea.vertical = column.layoutContext.applyFootnoteStyle(
-      floatContainer.vertical,
-      (column.layoutContext as any).nodeContext &&
-        (column.layoutContext as any).nodeContext.direction === "rtl",
-      element,
-    );
-    floatArea.convertPercentageSizesToPx(element);
-    column.setComputedInsets(element, floatArea);
-    column.setComputedWidthAndHeight(element, floatArea);
+    return column.layoutContext
+      .applyFootnoteStyle(
+        floatContainer.vertical,
+        (column.layoutContext as any).nodeContext &&
+          (column.layoutContext as any).nodeContext.direction === "rtl",
+        element,
+      )
+      .thenAsync((vertical) => {
+        floatArea.vertical = vertical;
+        floatArea.convertPercentageSizesToPx(element);
+        column.setComputedInsets(element, floatArea);
+        column.setComputedWidthAndHeight(element, floatArea);
+        return Task.newResult(undefined);
+      });
   }
 
   /** @override */

@@ -296,14 +296,14 @@ export namespace Layout {
       anchorEdge: number | null,
       strategy: PageFloats.PageFloatLayoutStrategy,
       condition: PageFloats.PageFloatPlacementCondition,
-    ): boolean;
+    ): Task.Result<boolean>;
     createPageFloatArea(
       float: PageFloats.PageFloat | null,
       floatSide: string,
       anchorEdge: number | null,
       strategy: PageFloats.PageFloatLayoutStrategy,
       condition: PageFloats.PageFloatPlacementCondition,
-    ): PageFloatArea | null;
+    ): Task.Result<PageFloatArea | null>;
     layoutSinglePageFloatFragment(
       continuations: PageFloats.PageFloatContinuation[],
       floatSide: string,
@@ -802,7 +802,7 @@ export namespace PageFloats {
       floatArea: Layout.PageFloatArea,
       floatContainer: Vtree.Container,
       column: Layout.Column,
-    );
+    ): Task.Result<void>;
     forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext);
   }
 }
@@ -1068,7 +1068,7 @@ export namespace Vtree {
       vertical: boolean,
       rtl: boolean,
       target: Element,
-    ): boolean;
+    ): Task.Result<boolean>;
     /**
      * Peel off innermost first-XXX pseudoelement, create and create view nodes
      * after the end of that pseudoelement.

@@ -3112,7 +3112,6 @@ export class PageParserHandler
     parent: CssCascade.CascadeParserHandler,
     validatorSet: CssValidator.ValidatorSet,
     private readonly pageProps: { [key: string]: CssCascade.ElementStyle },
-    private readonly footnoteProps?: CssCascade.ElementStyle,
   ) {
     super(scope, owner, parent?.condition, parent, null, validatorSet, false);
   }
@@ -3306,27 +3305,14 @@ export class PageParserHandler
   }
 
   override startFootnoteRule(pseudoelem: string | null): void {
-    // Check if we're inside a page rule with selectors
-    const hasPageSelectors =
-      this.currentPageSelectors.length > 0 &&
-      this.currentPageSelectors[0].selectors !== null;
-
-    // Determine target style based on whether we have page selectors
-    let style: CssCascade.ElementStyle;
-    if (hasPageSelectors || !this.footnoteProps) {
-      // Store in page-specific elementStyle for page selector support
-      const footnoteAreaMap = CssCascade.getMutableStyleMap(
-        this.elementStyle,
-        footnoteAreaKey,
-      );
-      style = footnoteAreaMap["area"];
-      if (!style) {
-        style = {} as CssCascade.ElementStyle;
-        footnoteAreaMap["area"] = style;
-      }
-    } else {
-      // No page selectors - add directly to global footnoteProps for backward compatibility
-      style = this.footnoteProps;
+    const footnoteAreaMap = CssCascade.getMutableStyleMap(
+      this.elementStyle,
+      footnoteAreaKey,
+    );
+    let style = footnoteAreaMap["area"];
+    if (!style) {
+      style = {} as CssCascade.ElementStyle;
+      footnoteAreaMap["area"] = style;
     }
 
     // Handle pseudoelement if specified

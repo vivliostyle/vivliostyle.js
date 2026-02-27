@@ -1462,7 +1462,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     anchorEdge: number | null,
     strategy: PageFloats.PageFloatLayoutStrategy,
     condition: PageFloats.PageFloatPlacementCondition,
-  ): boolean {
+  ): Task.Result<boolean> {
     const floatLayoutContext = this.pageFloatLayoutContext;
     const floatContainer = floatLayoutContext.getContainer(floatReference);
     const element = area.element;
@@ -1491,27 +1491,29 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       containingBlockRect.y1 - floatContainer.originY,
       containingBlockRect.y2 - containingBlockRect.y1,
     );
-    strategy.adjustPageFloatArea(area, floatContainer, this);
-
-    // Calculate bands from the exclusions before setting float area dimensions
-    area.init();
-    const fitWithinContainer = !!floatLayoutContext.setFloatAreaDimensions(
-      area,
-      floatReference,
-      floatSide,
-      anchorEdge,
-      true,
-      !floatLayoutContext.hasFloatFragments(),
-      condition,
-    );
-    if (fitWithinContainer) {
-      // New dimensions have been set, remove exclusion floats and re-init
-      area.killFloats();
-      area.init();
-    } else {
-      floatContainer.element.parentNode.removeChild(element);
-    }
-    return fitWithinContainer;
+    return strategy
+      .adjustPageFloatArea(area, floatContainer, this)
+      .thenAsync(() => {
+        // Calculate bands from the exclusions before setting float area dimensions
+        area.init();
+        const fitWithinContainer = !!floatLayoutContext.setFloatAreaDimensions(
+          area,
+          floatReference,
+          floatSide,
+          anchorEdge,
+          true,
+          !floatLayoutContext.hasFloatFragments(),
+          condition,
+        );
+        if (fitWithinContainer) {
+          // New dimensions have been set, remove exclusion floats and re-init
+          area.killFloats();
+          area.init();
+        } else {
+          floatContainer.element.parentNode.removeChild(element);
+        }
+        return Task.newResult(fitWithinContainer);
+      });
   }
 
   createPageFloatArea(
@@ -1520,7 +1522,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     anchorEdge: number | null,
     strategy: PageFloats.PageFloatLayoutStrategy,
     condition: PageFloats.PageFloatPlacementCondition,
-  ): PageFloatArea | null {
+  ): Task.Result<PageFloatArea | null> {
     const floatAreaElement = this.element.ownerDocument.createElement("div");
     Base.setCSSProperty(floatAreaElement, "position", "absolute");
     const parentPageFloatLayoutContext =
@@ -1550,20 +1552,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       parentContainer,
     );
     pageFloatLayoutContext.setContainer(floatArea);
-    if (
-      this.setupFloatArea(
-        floatArea,
-        float.floatReference,
-        floatSide,
-        anchorEdge,
-        strategy,
-        condition,
-      )
-    ) {
-      return floatArea;
-    } else {
-      return null;
-    }
+    return this.setupFloatArea(
+      floatArea,
+      float.floatReference,
+      floatSide,
+      anchorEdge,
+      strategy,
+      condition,
+    ).thenAsync((fitWithinContainer) => {
+      if (fitWithinContainer) {
+        return Task.newResult(floatArea);
+      } else {
+        return Task.newResult(null);
+      }
+    });
   }
 
   layoutSinglePageFloatFragment(
@@ -1586,73 +1588,78 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       floatSide,
       clearSide,
     );
-    const floatArea = this.createPageFloatArea(
+    const result: SinglePageFloatLayoutResult = {
+      floatArea: null,
+      pageFloatFragment: null,
+      newPosition: null,
+    };
+    const frame = Task.newFrame<SinglePageFloatLayoutResult>(
+      "layoutSinglePageFloatFragment",
+    );
+    this.createPageFloatArea(
       firstFloat,
       floatSide,
       anchorEdge,
       strategy,
       condition,
-    );
-    const result: SinglePageFloatLayoutResult = {
-      floatArea,
-      pageFloatFragment: null,
-      newPosition: null,
-    };
-    if (!floatArea) {
-      return Task.newResult(result);
-    }
-    const frame = Task.newFrame<SinglePageFloatLayoutResult>(
-      "layoutSinglePageFloatFragment",
-    );
-    let failed = false;
-    let i = 0;
-    frame
-      .loopWithFrame((loopFrame) => {
-        if (i >= continuations.length) {
-          loopFrame.breakLoop();
-          return;
-        }
-        const c = continuations[i];
-        const floatChunkPosition = new VtreeImpl.ChunkPosition(c.nodePosition);
-        floatArea.layout(floatChunkPosition, true).then((newPosition) => {
-          result.newPosition = newPosition;
-          if (!newPosition || allowFragmented) {
-            i++;
-            loopFrame.continueLoop();
-          } else {
-            failed = true;
-            loopFrame.breakLoop();
-          }
-        });
-      })
-      .then(() => {
-        if (!failed) {
-          Asserts.assert(floatArea);
-          const logicalFloatSide = context.setFloatAreaDimensions(
-            floatArea,
-            firstFloat.floatReference,
-            floatSide,
-            anchorEdge,
-            false,
-            allowFragmented,
-            condition,
-          );
-          if (!logicalFloatSide) {
-            failed = true;
-          } else {
-            const newFragment = strategy.createPageFloatFragment(
-              continuations,
-              logicalFloatSide,
-              clearSide,
-              floatArea,
-              !!result.newPosition,
-            );
-            context.addPageFloatFragment(newFragment, true);
-            result.pageFloatFragment = newFragment;
-          }
-        }
+    ).then((floatArea) => {
+      result.floatArea = floatArea;
+      if (!floatArea) {
         frame.finish(result);
-      });
+        return;
+      }
+      let failed = false;
+      let i = 0;
+      frame
+        .loopWithFrame((loopFrame) => {
+          if (i >= continuations.length) {
+            loopFrame.breakLoop();
+            return;
+          }
+          const c = continuations[i];
+          const floatChunkPosition = new VtreeImpl.ChunkPosition(
+            c.nodePosition,
+          );
+          floatArea.layout(floatChunkPosition, true).then((newPosition) => {
+            result.newPosition = newPosition;
+            if (!newPosition || allowFragmented) {
+              i++;
+              loopFrame.continueLoop();
+            } else {
+              failed = true;
+              loopFrame.breakLoop();
+            }
+          });
+        })
+        .then(() => {
+          if (!failed) {
+            Asserts.assert(floatArea);
+            const logicalFloatSide = context.setFloatAreaDimensions(
+              floatArea,
+              firstFloat.floatReference,
+              floatSide,
+              anchorEdge,
+              false,
+              allowFragmented,
+              condition,
+            );
+            if (!logicalFloatSide) {
+              failed = true;
+            } else {
+              const newFragment = strategy.createPageFloatFragment(
+                continuations,
+                logicalFloatSide,
+                clearSide,
+                floatArea,
+                !!result.newPosition,
+              );
+              context.addPageFloatFragment(newFragment, true);
+              result.pageFloatFragment = newFragment;
+            }
+          }
+          frame.finish(result);
+        });
+    });
     return frame.result();
   }
 

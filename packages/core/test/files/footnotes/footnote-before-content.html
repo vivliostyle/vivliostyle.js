@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>@footnote ::before content</title>
+    <style>
+      @page composed {
+        size: 420px 320px;
+        margin: 24px;
+
+        @footnote {
+          margin-block-start: 0.8em;
+          border-block-start: 2px solid green;
+          padding-block-start: 0.4em;
+        }
+
+        @footnote ::before {
+          content: url("../img/50x50.png") " Footnotes " counter(page) ":";
+          margin-block-end: 0.3em;
+          color: maroon;
+        }
+      }
+
+      @page urlonly {
+        size: 420px 320px;
+        margin: 24px;
+
+        @footnote {
+          margin-block-start: 0.8em;
+          border-block-start: 2px solid green;
+          padding-block-start: 0.4em;
+        }
+
+        @footnote ::before {
+          content: url("../img/50x50.png");
+          margin-block-end: 0.3em;
+        }
+      }
+
+      body,
+      p {
+        margin: 0;
+      }
+
+      .composed {
+        page: composed;
+      }
+
+      .url-only {
+        page: urlonly;
+        break-before: page;
+      }
+
+      .footnote {
+        float: footnote;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="composed">
+      <p>
+        The footnote area should show an image and a composed label like
+        "Footnotes 1:" before the notes<span
+          class="footnote"
+          >This is a footnote for content property verification.</span
+        >.
+      </p>
+    </div>
+
+    <div class="url-only">
+      <p>
+        The footnote area should show an image before this note<span
+          class="footnote"
+          >This is a footnote for url-only content verification.</span
+        >.
+      </p>
+    </div>
+  </body>
+</html>
