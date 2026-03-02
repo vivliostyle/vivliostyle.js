@@ -1068,6 +1068,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       maxBlockSize -= blockInsets;
     }
 
+    // Subtract 1 pixel to prevent overflow due to precision issue.
+    // (Issue #1720 case 3)
+    maxBlockSize -= 1 / (this.clientLayout.pixelRatio || 1);
+
     if (maxBlockSize > 0 && isFinite(maxBlockSize)) {
       Base.setCSSProperty(element, "max-block-size", `${maxBlockSize}px`);
     }
