@@ -508,7 +508,32 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return this.stopAtOverflow && !!nodeContext && nodeContext.overflow;
   }
 
+  private almostEquals(
+    a: number,
+    b: number,
+    precision = 1 / this.clientLayout.layoutUnitPerPixel,
+  ): boolean {
+    return Math.abs(a - b) < precision;
+  }
+
   isOverflown(edge: number): boolean {
+    // Prevent incorrect overflow detection due to precision issues,
+    // especially when the footnote edge is touching the edge of a
+    // multi-column box, getBoundingClientRect() of its child element
+    // spanning multiple columns may return a value that is slightly
+    // (about 1.2/pixelRatio) beyond the parent multi-column box edge,
+    // which may cause incorrect overflow detection and thus layout failure.
+    // (Issue #1460)
+    if (
+      this.almostEquals(
+        edge,
+        this.footnoteEdge,
+        1.5 / (this.clientLayout.pixelRatio || 1),
+      )
+    ) {
+      return false;
+    }
+
     if (this.vertical) {
       return edge < this.footnoteEdge;
     } else {
@@ -897,9 +922,34 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const bands = this.bands;
     const x1 = this.vertical ? this.getTopEdge() : this.getLeftEdge();
     const x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
+    const y1 = this.vertical ? -this.getRightEdge() : this.getTopEdge();
+    const y2 = this.vertical ? -this.getLeftEdge() : this.getBottomEdge();
     let foundNonZeroWidthBand: GeometryUtil.Band = null;
 
     for (const band of bands) {
+      // Adjust band edges to column edges if they are almost equal to avoid
+      // creating unnecessary floats that may cause layout issues. (Issue #1460)
+      if (this.almostEquals(band.x1, x1)) {
+        band.x1 = x1;
+      } else if (this.almostEquals(band.x1, x2)) {
+        band.x1 = x2;
+      }
+      if (this.almostEquals(band.x2, x2)) {
+        band.x2 = x2;
+      } else if (this.almostEquals(band.x2, x1)) {
+        band.x2 = x1;
+      }
+      if (this.almostEquals(band.y1, y1)) {
+        band.y1 = y1;
+      } else if (this.almostEquals(band.y1, y2)) {
+        band.y1 = y2;
+      }
+      if (this.almostEquals(band.y2, y2)) {
+        band.y2 = y2;
+      } else if (this.almostEquals(band.y2, y1)) {
+        band.y2 = y1;
+      }
+
       const height = band.y2 - band.y1;
       band.left = this.createFloat(ref, "left", band.x1 - x1, height);
       band.right = this.createFloat(ref, "right", x2 - band.x2, height);
@@ -916,7 +966,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (foundNonZeroWidthBand) {
       // Update footnoteEdge (Fix for issue #1298)
       const lastBand = bands[bands.length - 1];
-      const y2 = this.vertical ? -this.getLeftEdge() : this.getBottomEdge();
       if (foundNonZeroWidthBand !== lastBand && lastBand.y2 >= y2) {
         this.footnoteEdge = this.vertical
           ? -foundNonZeroWidthBand.y2
@@ -942,7 +991,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       }
     }
-    // Fix for footnotes/block-end-page-floats and table issue (#1662)
+    // Fix for footnotes/block-end-page-floats and table/multicol issue (#1662, #1460)
     this.adjustColumnBlockSizeForBlockEndFloats();
   }
 
@@ -952,33 +1001,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     const initialBlockSize = this.vertical ? this.width : this.height;
     const blockSize = this.getBoxDir() * (this.footnoteEdge - this.beforeEdge);
-    if (blockSize > 0 && blockSize < initialBlockSize) {
+    if (
+      blockSize > 0 &&
+      blockSize < initialBlockSize &&
+      !this.almostEquals(blockSize, initialBlockSize)
+    ) {
       const sizeProp = this.vertical ? "width" : "height";
       Base.setCSSProperty(this.element, sizeProp, `${blockSize}px`);
       if (this.vertical) {
         const left = this.left + (initialBlockSize - blockSize);
         Base.setCSSProperty(this.element, "left", `${left}px`);
       }
-      this.element.setAttribute(
-        "data-vivliostyle-column-block-size-adjusted",
-        "true",
-      );
     }
-  }
-
-  private restoreColumnBlockSizeIfAdjusted(): void {
-    if (
-      !this.element.hasAttribute("data-vivliostyle-column-block-size-adjusted")
-    ) {
-      return;
-    }
-    const initialBlockSize = this.vertical ? this.width : this.height;
-    const sizeProp = this.vertical ? "width" : "height";
-    Base.setCSSProperty(this.element, sizeProp, `${initialBlockSize}px`);
-    if (this.vertical) {
-      Base.setCSSProperty(this.element, "left", `${this.left}px`);
-    }
-    this.element.removeAttribute("data-vivliostyle-column-block-size-adjusted");
   }
 
   private setMaxBlockSizeForNonRootMultiColumn(element: HTMLElement): void {
@@ -3693,55 +3727,23 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   initGeom(): void {
-    // TODO: we should be able to avoid querying the layout engine at this
-    // point. Create an element that fills the content area and query its size.
-    // Calling getElementClientRect on the container element includes element
-    // padding which is wrong for our purposes.
-    const probe = this.element.ownerDocument.createElement("div");
-    probe.style.position = "absolute";
-    probe.style.top = `${this.paddingTop}px`;
-    probe.style.right = `${this.paddingRight}px`;
-    probe.style.bottom = `${this.paddingBottom}px`;
-    probe.style.left = `${this.paddingLeft}px`;
-    this.element.appendChild(probe);
-    const columnBBox = this.clientLayout.getElementClientRect(probe);
-    this.element.removeChild(probe);
-    const offsetX = this.originX + this.left + this.getInsetLeft();
-    const offsetY = this.originY + this.top + this.getInsetTop();
-    this.box = new GeometryUtil.Rect(
-      offsetX,
-      offsetY,
-      offsetX + this.width,
-      offsetY + this.height,
-    );
-    this.startEdge = columnBBox
-      ? this.vertical
-        ? this.rtl
-          ? columnBBox.bottom
-          : columnBBox.top
-        : this.rtl
-          ? columnBBox.right
-          : columnBBox.left
-      : 0;
-    this.endEdge = columnBBox
-      ? this.vertical
-        ? this.rtl
-          ? columnBBox.top
-          : columnBBox.bottom
-        : this.rtl
-          ? columnBBox.left
-          : columnBBox.right
-      : 0;
-    this.beforeEdge = columnBBox
-      ? this.vertical
-        ? columnBBox.right
-        : columnBBox.top
-      : 0;
-    this.afterEdge = columnBBox
-      ? this.vertical
-        ? columnBBox.left
-        : columnBBox.bottom
-      : 0;
+    this.box = this.getInnerRect();
+    this.startEdge = this.vertical
+      ? this.rtl
+        ? this.box.y2
+        : this.box.y1
+      : this.rtl
+        ? this.box.x2
+        : this.box.x1;
+    this.endEdge = this.vertical
+      ? this.rtl
+        ? this.box.y1
+        : this.box.y2
+      : this.rtl
+        ? this.box.x1
+        : this.box.x2;
+    this.beforeEdge = this.vertical ? this.box.x2 : this.box.y1;
+    this.afterEdge = this.vertical ? this.box.x1 : this.box.y2;
     this.leftFloatEdge = this.beforeEdge;
     this.rightFloatEdge = this.beforeEdge;
     this.bottommostFloatTop = this.beforeEdge;
@@ -3898,9 +3900,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (columnOver) {
                 LayoutHelper.unsetBrowserColumnBreaking(this);
               }
-
-              // Restore column block size if it was adjusted
-              this.restoreColumnBlockSizeIfAdjusted();
             }
             if (this.pageFloatLayoutContext.isInvalidated()) {
               frame.finish(null);
