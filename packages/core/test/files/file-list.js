@@ -722,6 +722,15 @@ module.exports = [
         title: "Footnotes in table 2 (Issue #1657)",
       },
       {
+        file: "footnotes/footnotes-in-multicol.html",
+        title: "Footnotes in multi-column (Issue #1460)",
+      },
+      {
+        file: "footnotes/footnotes-in-multicol-vertical.html",
+        title:
+          "Footnotes in multi-column (vertical writing-mode) (Issue #1460)",
+      },
+      {
         file: "footnotes/footnotes-anywhere.html",
         title: "Footnotes anywhere (Issue #1669)",
       },
