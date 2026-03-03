@@ -52,8 +52,12 @@ export function setBrowserColumnBreaking(column: Vtree.Container): void {
  * Disable the browser's multi-column feature for page/column breaking.
  * This function resets the CSS properties set by `setBrowserColumnBreaking`.
  */
-export function unsetBrowserColumnBreaking(column: Vtree.Container): void {
-  const style = column.element.style;
+export function unsetBrowserColumnBreaking(
+  columnOrElement: Vtree.Container | HTMLElement,
+): void {
+  const columnElement =
+    "element" in columnOrElement ? columnOrElement.element : columnOrElement;
+  const style = columnElement.style;
   style.columnWidth = "";
   style.columnCount = "";
   style.columnGap = "";
@@ -183,20 +187,35 @@ export function getElementClientRectAdjusted(
   const rect = clientLayout.getElementClientRect(element);
   const columnOver = adjustRectForColumnBreaking(rect, vertical);
 
-  // Workaround for Chromium bug on table fragmentation:
-  //   https://issues.chromium.org/issues/458852795
-  // To prevent the table cell from moving to the next column without breaking inside the cell due to the bug,
-  // we try to reduce the column height so that a column break inside the cell can occur.
-  if (columnOver === 1) {
+  if (columnOver > 0) {
     let style = clientLayout.getElementComputedStyle(element);
-    if (
-      style.display === "table-cell" ||
-      (element.className === "-vivliostyle-table-cell-container" &&
-        element.parentElement?.parentElement &&
-        (style = clientLayout.getElementComputedStyle(
-          element.parentElement.parentElement,
-        )).display === "table-cell")
+    if (Base.browserType === "firefox" && style.display === "table") {
+      // Workaround for Firefox bug: Tables do not break (fragment) in CSS Multi-column Layout
+      //   https://bugzilla.mozilla.org/show_bug.cgi?id=888257
+      // We cannot use the browser's column breaking for tables in Firefox,
+      // so we disable it and use our own fragmentation logic.
+      const columnElem = element.closest(
+        "[data-vivliostyle-column]",
+      ) as HTMLElement;
+      if (columnElem) {
+        unsetBrowserColumnBreaking(columnElem);
+
+        const rect2 = clientLayout.getElementClientRect(element);
+        return rect2;
+      }
+    } else if (
+      Base.browserType === "chromium" &&
+      (style.display === "table-cell" ||
+        (element.className === "-vivliostyle-table-cell-container" &&
+          element.parentElement?.parentElement &&
+          (style = clientLayout.getElementComputedStyle(
+            element.parentElement.parentElement,
+          )).display === "table-cell"))
     ) {
+      // Workaround for Chromium bug on table fragmentation:
+      //   https://issues.chromium.org/issues/458852795
+      // To prevent the table cell from moving to the next column without breaking inside the cell due to the bug,
+      // we try to reduce the column height so that a column break inside the cell can occur.
       const columnElem = element.closest(
         "[data-vivliostyle-column]",
       ) as HTMLElement;
