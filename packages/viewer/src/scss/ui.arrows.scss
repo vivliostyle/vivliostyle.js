@@ -34,7 +34,7 @@ $button-offset: 0;
     background: rgba(0, 0, 0, 0.125);
     transition: 0.25s ease-in;
   }
-  @media (hover: hover), (-moz-touch-enabled: 0) {
+  @media (hover: hover) {
     &:hover {
       color: rgba(255, 255, 255, 0.75);
       background: rgba(0, 0, 0, 0.125);
@@ -81,7 +81,7 @@ $button-offset: 0;
   &:after {
     content: fa-content($fa-var-arrow-circle-up);
   }
-  @media (hover: hover), (-moz-touch-enabled: 0) {
+  @media (hover: hover) {
     &:hover {
       cursor: n-resize;
     }
