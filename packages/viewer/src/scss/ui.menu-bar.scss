@@ -26,7 +26,7 @@
   background: black;
   box-shadow: $menu-box-shadow;
   -webkit-font-smoothing: subpixel-antialiased;
-  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   @include prefix(user-select, none); // prevent unwanted text selection
   * {
     margin: 0;
@@ -352,7 +352,7 @@
           background-position: center center;
           background-size: contain;
           filter: grayscale(0%);
-          @media (hover: hover), (-moz-touch-enabled: 0) {
+          @media (hover: hover) {
             &:hover {
               opacity: 0.75;
               filter: grayscale(50%);
@@ -516,7 +516,7 @@
           }
           &.active {
             background: rgb(128, 128, 128) !important;
-            transition: 0 linear;
+            transition: 0s linear;
           }
           transition: 0.15s linear;
         }
@@ -687,7 +687,7 @@
             text-decoration: none;
             border-bottom: solid 1px rgb(192, 192, 192);
             transition: linear 0.1s;
-            @media (hover: hover), (-moz-touch-enabled: 0) {
+            @media (hover: hover) {
               &:hover {
                 color: black;
                 border-bottom-color: black;
@@ -741,7 +741,9 @@
     outline: none;
   }
   [role="button"]:focus {
-    text-shadow: 1px 0 5px #4d90fe, -1px 0 5px #4d90fe;
+    text-shadow:
+      1px 0 5px #4d90fe,
+      -1px 0 5px #4d90fe;
     box-shadow: none;
     outline: none;
   }

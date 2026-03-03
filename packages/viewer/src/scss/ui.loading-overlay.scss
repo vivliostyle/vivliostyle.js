@@ -61,7 +61,7 @@ $animation-ROTATE: ROTATE 1.5s linear infinite normal;
   @include on-loading() {
     opacity: 1;
     visibility: visible;
-    transition: 0.1s liner;
+    transition: 0.1s linear;
     .vivliostyle-loading-spinner {
       @include spinner($spinner-width);
     }
