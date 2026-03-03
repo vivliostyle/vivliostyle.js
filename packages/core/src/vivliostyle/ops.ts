@@ -237,34 +237,33 @@ export class Style {
  * Collect all unique formatting context states from a LayoutPosition.
  * Formatting contexts (e.g., TableFormattingContext) are stored in
  * NodePositionStep.formattingContext within flow chunk positions.
- * This walks the position tree to find them all and save their states.
- * (Issue #1663)
+ * This walks the position tree to find them all and save their states,
+ * including those reachable through shadowSibling chains (e.g.,
+ * footnote-call → footnote element transitions). (Issue #1663)
  */
 function collectFormattingContextStates(
   layoutPosition: Vtree.LayoutPosition,
 ): Map<Vtree.FormattingContext, any> {
   const states = new Map<Vtree.FormattingContext, any>();
+  const collectFromStep = (step: Vtree.NodePositionStep): void => {
+    if (step.formattingContext && !states.has(step.formattingContext)) {
+      states.set(step.formattingContext, step.formattingContext.saveState());
+    }
+    if (step.shadowSibling) {
+      collectFromStep(step.shadowSibling);
+    }
+  };
   for (const name in layoutPosition.flowPositions) {
     const flowPos = layoutPosition.flowPositions[name];
     for (const fcp of flowPos.positions) {
       const primary = fcp.chunkPosition.primary;
       for (const step of primary.steps) {
-        if (step.formattingContext && !states.has(step.formattingContext)) {
-          states.set(
-            step.formattingContext,
-            step.formattingContext.saveState(),
-          );
-        }
+        collectFromStep(step);
       }
       if (fcp.chunkPosition.floats) {
         for (const floatPos of fcp.chunkPosition.floats) {
           for (const step of floatPos.steps) {
-            if (step.formattingContext && !states.has(step.formattingContext)) {
-              states.set(
-                step.formattingContext,
-                step.formattingContext.saveState(),
-              );
-            }
+            collectFromStep(step);
           }
         }
       }
