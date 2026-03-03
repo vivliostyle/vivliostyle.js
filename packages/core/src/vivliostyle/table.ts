@@ -1300,6 +1300,10 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     );
     if (brokenCell) {
       const cellBreakPosition = brokenCell.position;
+      // Remove the consumed entry from cellBreakPositions so that
+      // subsequent rows are not affected by stale entries.
+      // (Old code used cellBreakPositions.shift() which consumed entries.)
+      this.formattingContext.cellBreakPositions.splice(brokenCell.index, 1);
       nodeContext.fragmentIndex =
         cellBreakPosition.cellNodePosition.steps[0].fragmentIndex + 1;
       cont = Task.newResult(cellBreakPosition.breakChunkPosition);
