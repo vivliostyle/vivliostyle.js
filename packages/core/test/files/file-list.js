@@ -667,6 +667,10 @@ module.exports = [
         file: "page_floats/target-counter-and-page-floats.html",
         title: "Target-counter and Page Floats",
       },
+      {
+        file: "page_floats/page-float-in-page-float.html",
+        title: "Page float in page float (Issue #1675)",
+      },
     ],
   },
   {
@@ -733,6 +737,10 @@ module.exports = [
         file: "footnotes/footnotes-in-multicol-vertical.html",
         title:
           "Footnotes in multi-column (vertical writing-mode) (Issue #1460)",
+      },
+      {
+        file: "footnotes/footnote-in-page-float.html",
+        title: "Footnotes in page float (Issue #1675)",
       },
       {
         file: "footnotes/footnotes-anywhere.html",

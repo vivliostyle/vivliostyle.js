@@ -112,6 +112,21 @@ export class PageFloat implements PageFloats.PageFloat {
   order: number | null = null;
   id: PageFloatID | null = null;
 
+  /**
+   * Set to true when this float is created inside a page float area.
+   * Used to bypass the normal anchor check in isAllowedOnContext because
+   * the anchor node is lost after page-level invalidation. (Issue #1675)
+   */
+  insidePageFloatArea: boolean = false;
+
+  /**
+   * Reference to the parent page float that contains this float.
+   * Set when this float is created inside a page float area, allowing
+   * isAllowedOnContext to check whether the parent is still present.
+   * (Issue #1675)
+   */
+  parentPageFloat: PageFloat | null = null;
+
   constructor(
     public readonly nodePosition: Vtree.NodePosition,
     public readonly floatReference: FloatReference,
@@ -136,7 +151,21 @@ export class PageFloat implements PageFloats.PageFloat {
   }
 
   isAllowedOnContext(pageFloatLayoutContext: PageFloatLayoutContext): boolean {
-    return pageFloatLayoutContext.isAnchorAlreadyAppeared(this.getId());
+    if (pageFloatLayoutContext.isAnchorAlreadyAppeared(this.getId())) {
+      return true;
+    }
+    // When the float was created inside a page float area, its anchor node
+    // is lost after page-level invalidation (the page float area context is
+    // detached during re-layout). Check whether the parent page float still
+    // has a fragment on this context: if the parent was removed (e.g. by
+    // checkAndForbidNotAllowedFloat), this float should also be removed
+    // to avoid orphaned fragments on the page. (Issue #1675)
+    if (this.insidePageFloatArea && this.parentPageFloat) {
+      return !!pageFloatLayoutContext.findPageFloatFragment(
+        this.parentPageFloat,
+      );
+    }
+    return false;
   }
 
   isAllowedToPrecede(other: PageFloat): boolean {
@@ -329,6 +358,15 @@ export class PageFloatLayoutContext
   private layoutConstraints: LayoutType.LayoutConstraint[] = [];
   private locked: boolean = false;
 
+  /**
+   * Reference to the outer column's context for page float area contexts.
+   * Used only for getParent() navigation to propagate nested page floats
+   * and footnotes to region/page level. Unlike `parent`, this does NOT
+   * affect children registration, isInvalidated() propagation, or
+   * getFloatFragmentExclusions(). (Issue #1675)
+   */
+  private outerContext: PageFloatLayoutContext | null = null;
+
   constructor(
     public readonly parent: PageFloatLayoutContext,
     private readonly floatReference: FloatReference | null,
@@ -351,11 +389,37 @@ export class PageFloatLayoutContext
       : [];
   }
 
+  /**
+   * Returns the effective parent context for hierarchy traversal.
+   * For normal contexts, returns `parent`. For page float area contexts
+   * (where `parent` is null), falls back to `outerContext`. (Issue #1675)
+   */
+  get effectiveParent(): PageFloatLayoutContext | null {
+    return this.parent ?? this.outerContext;
+  }
+
   private getParent(floatReference: FloatReference): PageFloatLayoutContext {
-    if (!this.parent) {
-      throw new Error(`No PageFloatLayoutContext for ${floatReference}`);
+    if (this.parent) {
+      return this.parent;
     }
-    return this.parent;
+    // Fall back to the outer context for page float area contexts.
+    // This allows nested page floats and footnotes inside page float areas
+    // to propagate to the region/page level without the side effects of
+    // a full parent connection. (Issue #1675)
+    if (this.outerContext) {
+      return this.outerContext;
+    }
+    throw new Error(`No PageFloatLayoutContext for ${floatReference}`);
+  }
+
+  /**
+   * Set the outer context for a page float area context.
+   * This shares the float store so that page floats/footnotes created inside
+   * a page float area are visible at all levels. (Issue #1675)
+   */
+  setOuterContext(outerContext: PageFloatLayoutContext) {
+    this.outerContext = outerContext;
+    this.floatStore = outerContext.floatStore;
   }
 
   private getPreviousSiblingOf(
@@ -1913,6 +1977,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
     Asserts.assert(nodeContext.floatSide);
     const floatSide: string = nodeContext.floatSide;
     const nodePosition = nodeContext.toNodePosition();
+    const insidePageFloat = !!pageFloatLayoutContext.generatingNodePosition;
     return column
       .resolveFloatReferenceFromColumnSpan(
         floatReference,
@@ -1930,6 +1995,14 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
           pageFloatLayoutContext.flowName,
           nodeContext.floatMinWrapBlock,
         );
+        float.insidePageFloatArea = insidePageFloat;
+        if (insidePageFloat) {
+          const parentNodePos = pageFloatLayoutContext.generatingNodePosition;
+          if (parentNodePos) {
+            float.parentPageFloat =
+              pageFloatLayoutContext.findPageFloatByNodePosition(parentNodePos);
+          }
+        }
         pageFloatLayoutContext.addPageFloat(float);
         return Task.newResult(float);
       });

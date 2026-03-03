@@ -117,6 +117,15 @@ export class FootnoteLayoutStrategy
     if (pageContext.hasSameContainerAs(regionContext)) {
       floatReference = PageFloats.FloatReference.PAGE;
     }
+
+    // When inside a page float area, use PAGE level so the footnote fragment
+    // survives page-level layout retries triggered by the outer page float.
+    // (Issue #1675)
+    const insidePageFloat = !!pageFloatLayoutContext.generatingNodePosition;
+    if (insidePageFloat && floatReference !== PageFloats.FloatReference.PAGE) {
+      floatReference = PageFloats.FloatReference.PAGE;
+    }
+
     const nodePosition = nodeContext.toNodePosition();
     Asserts.assert(pageFloatLayoutContext.flowName);
     const float: PageFloats.PageFloat = new Footnote(
@@ -126,6 +135,14 @@ export class FootnoteLayoutStrategy
       nodeContext.footnotePolicy,
       nodeContext.floatMinWrapBlock,
     );
+    float.insidePageFloatArea = insidePageFloat;
+    if (insidePageFloat) {
+      const parentNodePos = pageFloatLayoutContext.generatingNodePosition;
+      if (parentNodePos) {
+        float.parentPageFloat =
+          pageFloatLayoutContext.findPageFloatByNodePosition(parentNodePos);
+      }
+    }
     pageFloatLayoutContext.addPageFloat(float);
     return Task.newResult(float);
   }
