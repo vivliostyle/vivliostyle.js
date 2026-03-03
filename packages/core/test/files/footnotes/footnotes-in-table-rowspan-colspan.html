@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Footnotes in table with rowspan/colspan</title>
+    <style>
+      @page {
+        size: 800px 600px;
+        margin: 50px;
+        @bottom-center {
+          content: "Page " counter(page);
+          font-size: 0.8rem;
+        }
+      }
+      :root {
+        counter-reset: footnote 0;
+        font: 24px/1.5 Arial, sans-serif;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      td,
+      th {
+        border: solid 1px;
+        padding: 4px;
+        vertical-align: top;
+      }
+
+      .footnote {
+        float: footnote;
+        color: red;
+        counter-increment: footnote;
+        font: 0.7rem/1.25 Arial, sans-serif;
+        text-align: left;
+      }
+
+      .footnote::footnote-call {
+        content: "*" counter(footnote, decimal);
+        font-size: 0.7em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.5em;
+        white-space: nowrap;
+      }
+
+      .footnote::footnote-marker {
+        content: "*" counter(footnote, decimal) " ";
+        font-size: 0.8em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.25em;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Test: Footnotes in table with rowspan and colspan<span class="footnote" id="fn1">FOOTNOTE1 - before table</span></p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Col1</th>
+          <th>Col2</th>
+          <th>Col3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Row 1: Cell A spans 2 rows -->
+        <tr>
+          <td rowspan="2">A. Cell with rowspan=2<span class="footnote" id="fn2">FOOTNOTE2 - in rowspan cell A</span>. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium asperiores dignissimos facilis nihil placeat voluptas qui?</td>
+          <td>B. Short cell<span class="footnote" id="fn3">FOOTNOTE3 - in cell B</span></td>
+          <td>C. Another short cell</td>
+        </tr>
+        <!-- Row 2: Cell A continues from row 1 -->
+        <tr>
+          <td colspan="2">D. Cell with colspan=2<span class="footnote" id="fn4">FOOTNOTE4 - in colspan cell D</span>. Ut scelerisque sapien eu auctor finibus. Suspendisse potenti. Nam id justo a tellus pretium iaculis. Nunc suscipit nisl in enim mattis tempus.</td>
+        </tr>
+        <!-- Row 3: Cell E spans 2 columns and 2 rows -->
+        <tr>
+          <td rowspan="2" colspan="2">E. Cell with rowspan=2 and colspan=2<span class="footnote" id="fn5">FOOTNOTE5 - in rowspan+colspan cell E</span>. Praesent bibendum turpis eu massa tristique, imperdiet vehicula libero lobortis. Fusce sed cursus urna. Fusce eros justo, sodales maximus arcu id, facilisis placerat arcu. Sed arcu diam, elementum ut ex quis, semper dignissim purus.</td>
+          <td>F. Right column cell<span class="footnote" id="fn6">FOOTNOTE6 - in cell F</span></td>
+        </tr>
+        <!-- Row 4: Cell E continues -->
+        <tr>
+          <td>G. Bottom right cell<span class="footnote" id="fn7">FOOTNOTE7 - in cell G</span>. Short content here.</td>
+        </tr>
+        <!-- Row 5: Normal row -->
+        <tr>
+          <td>H. Normal cell<span class="footnote" id="fn8">FOOTNOTE8 - in cell H</span></td>
+          <td>I. Normal cell<span class="footnote" id="fn9">FOOTNOTE9 - in cell I</span></td>
+          <td>J. Normal cell<span class="footnote" id="fn10">FOOTNOTE10 - in cell J</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>After table<span class="footnote" id="fn11">FOOTNOTE11 - after table</span></p>
+  </body>
+</html>

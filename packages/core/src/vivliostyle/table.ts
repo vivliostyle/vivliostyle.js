@@ -165,10 +165,46 @@ export class BetweenTableRowBreakPosition extends BreakPosition.EdgeBreakPositio
       (bp) => !!bp.nodeContext,
     );
     if (allCellsBreakable) {
+      // Also verify that all non-spanning cells in the row have fully rendered.
+      // If any cell has remaining content, this between-row break would lose it
+      // because finishBreak for between-row breaks only saves break positions
+      // for row-spanning cells. An InsideTableRowBreakPosition should be used
+      // instead. (Issue #1663)
+      if (this.hasUnfinishedCells()) {
+        return null;
+      }
       return breakNodeContext;
     } else {
       return null;
     }
+  }
+
+  /**
+   * Check if any non-spanning cell in the row has content that wasn't fully
+   * rendered. This happens when page floats (footnotes) reduce available space
+   * during a retry, causing cell content to overflow within the row even though
+   * the row boundary appears acceptable. (Issue #1663)
+   */
+  private hasUnfinishedCells(): boolean {
+    const rowIndex = this.getRowIndex();
+    const allCells = this.formattingContext.getCellsFallingOnRow(rowIndex);
+    for (const cell of allCells) {
+      // Skip row-spanning cells (handled by getAcceptableCellBreakPositions)
+      if (cell.rowIndex + cell.rowSpan - 1 > rowIndex) {
+        continue;
+      }
+      const cellFragment = this.formattingContext.getCellFragmentOfCell(cell);
+      if (cellFragment) {
+        const bp = cellFragment.findAcceptableBreakPosition();
+        if (
+          bp.nodeContext &&
+          !cellFragment.pseudoColumn.isLastAfterNodeContext(bp.nodeContext)
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   override getMinBreakPenalty(): number {
@@ -630,7 +666,10 @@ export class TableFormattingContext
   }
 
   override restoreState(state: any) {
-    this.cellBreakPositions = state as BrokenTableCellPosition[];
+    // Create a fresh copy to prevent the saved state from being mutated
+    // when extractRowSpanningCellBreakPositions splices entries from
+    // this.cellBreakPositions during subsequent layout attempts (issue #1667).
+    this.cellBreakPositions = [].concat(state as BrokenTableCellPosition[]);
   }
 }
 
@@ -1212,13 +1251,13 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       this.currentRowIndex,
     ).cells;
     cells.forEach((cell) => {
-      const cellBreakPosition =
-        this.formattingContext.cellBreakPositions[cell.columnIndex];
-      if (
-        cellBreakPosition &&
-        cellBreakPosition.cell.anchorSlot.columnIndex ==
-          cell.anchorSlot.columnIndex
-      ) {
+      // Use proper lookup by cell reference instead of array index,
+      // since cellBreakPositions may contain entries from multiple rows
+      // after the fix for issue #1663.
+      const cellBreakPosition = this.formattingContext.cellBreakPositions.find(
+        (p) => p.cell === cell,
+      );
+      if (cellBreakPosition) {
         const tdNodeStep = cellBreakPosition.cellNodePosition.steps[0];
         const offset = (
           this.column.layoutContext as Vgen.ViewFactory
@@ -1784,7 +1823,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       const rowIndex = formattingContext.findRowIndexBySourceNode(
         nodeContext.sourceNode,
       );
-      formattingContext.cellBreakPositions = [];
       let cells: TableCell[];
       if (!nodeContext.after) {
         cells = formattingContext.getCellsFallingOnRow(rowIndex);
@@ -1792,6 +1830,14 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         cells =
           formattingContext.getRowSpanningCellsOverflowingTheRow(rowIndex);
       }
+      // Only remove entries for cells that are about to be re-broken,
+      // preserving break positions from other rows (e.g., from previous pages).
+      // Fix for issue #1663: unconditional reset lost previous-page break info
+      // during layout retry.
+      formattingContext.cellBreakPositions =
+        formattingContext.cellBreakPositions.filter(
+          (p) => !cells.includes(p.cell),
+        );
       if (cells.length) {
         const frame = Task.newFrame<boolean>(
           "TableLayoutProcessor.finishBreak",

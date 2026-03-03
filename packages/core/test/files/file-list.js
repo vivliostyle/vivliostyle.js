@@ -722,6 +722,10 @@ module.exports = [
         title: "Footnotes in table 2 (Issue #1657)",
       },
       {
+        file: "footnotes/footnotes-in-table-rowspan-colspan.html",
+        title: "Footnotes in table with rowspan/colspan (Issue #1667)",
+      },
+      {
         file: "footnotes/footnotes-in-multicol.html",
         title: "Footnotes in multi-column (Issue #1460)",
       },

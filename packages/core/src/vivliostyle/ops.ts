@@ -233,6 +233,59 @@ export class Style {
   }
 }
 
+/**
+ * Collect all unique formatting context states from a LayoutPosition.
+ * Formatting contexts (e.g., TableFormattingContext) are stored in
+ * NodePositionStep.formattingContext within flow chunk positions.
+ * This walks the position tree to find them all and save their states,
+ * including those reachable through shadowSibling chains (e.g.,
+ * footnote-call → footnote element transitions). (Issue #1663)
+ */
+function collectFormattingContextStates(
+  layoutPosition: Vtree.LayoutPosition,
+): Map<Vtree.FormattingContext, any> {
+  const states = new Map<Vtree.FormattingContext, any>();
+  const collectFromStep = (step: Vtree.NodePositionStep): void => {
+    if (step.formattingContext && !states.has(step.formattingContext)) {
+      states.set(step.formattingContext, step.formattingContext.saveState());
+    }
+    if (step.shadowSibling) {
+      collectFromStep(step.shadowSibling);
+    }
+  };
+  for (const name in layoutPosition.flowPositions) {
+    const flowPos = layoutPosition.flowPositions[name];
+    for (const fcp of flowPos.positions) {
+      const primary = fcp.chunkPosition.primary;
+      for (const step of primary.steps) {
+        collectFromStep(step);
+      }
+      if (fcp.chunkPosition.floats) {
+        for (const floatPos of fcp.chunkPosition.floats) {
+          for (const step of floatPos.steps) {
+            collectFromStep(step);
+          }
+        }
+      }
+    }
+  }
+  return states;
+}
+
+/**
+ * Restore all formatting context states previously saved by
+ * collectFormattingContextStates(). (Issue #1663)
+ */
+function restoreFormattingContextStates(
+  states: Map<Vtree.FormattingContext, any>,
+): void {
+  for (const [fc, state] of states) {
+    if (state !== undefined) {
+      fc.restoreState(state);
+    }
+  }
+}
+
 //-------------------------------------------------------------------------------
 export class StyleInstance
   extends Exprs.Context
@@ -1650,6 +1703,15 @@ export class StyleInstance
     const frame: Task.Frame<LayoutType.Column[] | null> =
       Task.newFrame("layoutFlowColumns");
     const positionAtContainerStart = this.currentLayoutPosition.clone();
+    // Save formatting context states so they can be restored on region-level
+    // retry (e.g., when footnotes invalidate the page float context).
+    // LayoutPosition.clone() shares formatting context objects by reference
+    // (via NodePositionStep.formattingContext), so modifications like
+    // cellBreakPositions in TableFormattingContext persist across retries
+    // unless explicitly restored. (Issue #1663)
+    const savedRegionFCStates = collectFormattingContextStates(
+      this.currentLayoutPosition,
+    );
     const columnGap = boxInstance.getPropAsNumber(this, "column-gap");
 
     // Don't query columnWidth when it's not needed, so that width calculation
@@ -1724,6 +1786,9 @@ export class StyleInstance
           if (regionPageFloatLayoutContext.isInvalidated()) {
             columnIndex = 0;
             this.currentLayoutPosition = positionAtContainerStart.clone();
+            // Restore formatting context states on region-level retry
+            // (Issue #1663)
+            restoreFormattingContextStates(savedRegionFCStates);
             regionPageFloatLayoutContext.validate();
             if (regionPageFloatLayoutContext.isLocked()) {
               columns = null;
@@ -2131,6 +2196,13 @@ export class StyleInstance
 
     this.clearScope(this.style.pageScope);
     this.layoutPositionAtPageStart = cp.clone();
+    // Save formatting context states at the beginning of page layout for
+    // restoration when page-level retry occurs (Issue #1663).
+    // Formatting contexts (e.g., TableFormattingContext with cellBreakPositions)
+    // are stored in NodePositionStep.formattingContext and shared by reference
+    // across LayoutPosition.clone(). Modifications during layout persist unless
+    // explicitly restored.
+    const savedPageFCStates = collectFormattingContextStates(cp);
 
     // Resolve page size before page master selection.
     const cascadedPageStyle = isTocBox
@@ -2258,6 +2330,9 @@ export class StyleInstance
           }
           if (pageFloatLayoutContext.isInvalidated()) {
             this.currentLayoutPosition = this.layoutPositionAtPageStart.clone();
+            // Restore formatting context states on page-level retry
+            // (Issue #1663)
+            restoreFormattingContextStates(savedPageFCStates);
             pageFloatLayoutContext.validate();
             // Clear bleedBox children before retry to avoid duplicate page-box elements
             while (page.bleedBox.lastChild) {
