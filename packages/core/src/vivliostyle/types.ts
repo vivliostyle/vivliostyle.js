@@ -641,6 +641,8 @@ export namespace PageFloats {
   export interface PageFloat {
     order: number | null;
     id: PageFloatID | null;
+    insidePageFloatArea: boolean;
+    parentPageFloat: PageFloat | null;
     readonly nodePosition: Vtree.NodePosition;
     readonly floatReference: FloatReference;
     readonly floatSide: string;
@@ -688,11 +690,13 @@ export namespace PageFloats {
     direction: Css.Val;
     floatFragments: PageFloatFragment[];
     readonly parent: PageFloatLayoutContext;
+    readonly effectiveParent: PageFloatLayoutContext | null;
     readonly flowName: string | null;
     readonly generatingNodePosition: Vtree.NodePosition | null;
 
     getContainer(floatReference?: FloatReference): Vtree.Container;
     setContainer(container: Vtree.Container);
+    setOuterContext(outerContext: PageFloatLayoutContext): void;
     addPageFloat(float: PageFloat): void;
     getPageFloatLayoutContext(
       floatReference: FloatReference,

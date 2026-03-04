@@ -1575,8 +1575,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         float.floatReference,
       );
 
-    // TODO: establish how to specify an appropriate generating element for the
-    // new page float layout context
+    // Create the page float area context without a parent to avoid side
+    // effects (children registration, invalidation propagation, etc.).
+    // Instead, set outerContext for getParent() navigation so nested page
+    // floats and footnotes can propagate to the region/page level.
+    // (Issue #1675)
     const pageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
       null,
       PageFloats.FloatReference.COLUMN,
@@ -1586,6 +1589,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       null,
       null,
     );
+    pageFloatLayoutContext.setOuterContext(this.pageFloatLayoutContext);
     const parentContainer = parentPageFloatLayoutContext.getContainer();
     const floatArea = new PageFloatArea(
       floatSide,
@@ -1716,6 +1720,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ): Task.Result<boolean> {
     const context = this.pageFloatLayoutContext;
     const float = continuation.float;
+
+    // Snapshot insidePageFloatArea fragments before the layout attempt.
+    // If this float's layout is cancelled, any NEW insidePageFloatArea
+    // fragments (from nested page floats or footnotes inside the page float
+    // area) need to be cleaned up from ancestor contexts. (Issue #1675)
+    const savedInsideFragments = new Set<PageFloats.PageFloatFragment>();
+    for (
+      let ctx = context as PageFloats.PageFloatLayoutContext;
+      ctx;
+      ctx = ctx.effectiveParent
+    ) {
+      for (const frag of ctx.floatFragments) {
+        if (frag.continuations.some((c) => c.float.insidePageFloatArea)) {
+          savedInsideFragments.add(frag);
+        }
+      }
+    }
+
     context.stashEndFloatFragments(float);
 
     function cancelLayout(floatArea, pageFloatFragment) {
@@ -1724,6 +1746,30 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       } else if (floatArea) {
         floatArea.element.parentNode.removeChild(floatArea.element);
       }
+
+      // Remove insidePageFloatArea fragments created during the cancelled
+      // page float area's content layout. These fragments were added to
+      // ancestor contexts (e.g. PAGE level) but the parent page float that
+      // contains them was cancelled, so they are orphaned. (Issue #1675)
+      const fragmentsToRemove: PageFloats.PageFloatFragment[] = [];
+      for (
+        let ctx = context as PageFloats.PageFloatLayoutContext;
+        ctx;
+        ctx = ctx.effectiveParent
+      ) {
+        for (const frag of ctx.floatFragments) {
+          if (
+            !savedInsideFragments.has(frag) &&
+            frag.continuations.some((c) => c.float.insidePageFloatArea)
+          ) {
+            fragmentsToRemove.push(frag);
+          }
+        }
+      }
+      for (const frag of fragmentsToRemove) {
+        context.removePageFloatFragment(frag, true);
+      }
+
       context.restoreStashedFragments(float.floatReference);
       context.deferPageFloat(continuation);
     }
@@ -1745,9 +1791,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           pageFloatFragment,
         ]).then((success) => {
           if (success) {
-            // Add again to invalidate the context
+            // Add again to invalidate the context.
+            // When inside a page float area (generatingNodePosition is set),
+            // suppress invalidation to avoid interrupting the outer page float
+            // layout. The region will be invalidated later when the outer page
+            // float fragment is added. (Issue #1675)
             Asserts.assert(newFragment);
-            context.addPageFloatFragment(newFragment);
+            const isInsidePageFloat = !!context.generatingNodePosition;
+            context.addPageFloatFragment(newFragment, isInsidePageFloat);
             context.discardStashedFragments(float.floatReference);
             if (newPosition) {
               const continuation = new PageFloats.PageFloatContinuation(
@@ -2006,6 +2057,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             // This ensures footnote-call and following content are processed
             // in the same postLayoutBlock, allowing correct text-spacing.
             if (nodeContext.floatSide === "footnote") {
+              return Task.newResult(nodeContextAfter);
+            }
+            // When inside a page float area, return nodeContextAfter to continue
+            // processing the remaining content. Without this, the layout terminates
+            // early and computedBlockSize doesn't reflect the full CSS box size,
+            // resulting in incorrect exclusion float sizing. (Issue #1675)
+            if (context.generatingNodePosition) {
               return Task.newResult(nodeContextAfter);
             }
             return Task.newResult(null as Vtree.NodeContext);
@@ -3646,22 +3704,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       PageFloats.isPageFloat(nodeContext.floatReference) ||
       nodeContext.floatSide === "footnote"
     ) {
-      // Check if we're inside a page float area (has generatingNodePosition).
-      // If so, footnotes and page floats cannot be properly placed, so layout
-      // them as regular blocks instead of letting them disappear.
-      // (Issue #1668, #1669)
-      if (this.pageFloatLayoutContext.generatingNodePosition) {
-        // Clear float-related properties and layout as a regular block
-        const nodeContextMod = nodeContext.modify();
-        nodeContextMod.floatSide = null;
-        nodeContextMod.floatReference = null;
-        nodeContextMod.clearSide = null;
-        if (this.isBreakable(nodeContextMod)) {
-          return this.layoutBreakableBlock(nodeContextMod);
-        } else {
-          return this.layoutUnbreakable(nodeContextMod);
-        }
-      }
       return this.layoutPageFloat(nodeContext);
     } else {
       return this.layoutFloat(nodeContext);
