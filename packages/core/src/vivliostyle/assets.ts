@@ -104,6 +104,8 @@ export const VivliostyleViewportCss = `
 }
 
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
+  right: auto;
+  bottom: auto;
   z-index: auto;
   overflow: visible;
 }
