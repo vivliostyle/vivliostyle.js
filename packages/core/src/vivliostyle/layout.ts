@@ -511,7 +511,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   private almostEquals(
     a: number,
     b: number,
-    precision = 1 / this.clientLayout.layoutUnitPerPixel,
+    precision = 1.5 / (this.clientLayout.pixelRatio || 1),
   ): boolean {
     return Math.abs(a - b) < precision;
   }
@@ -524,13 +524,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // (about 1.2/pixelRatio) beyond the parent multi-column box edge,
     // which may cause incorrect overflow detection and thus layout failure.
     // (Issue #1460)
-    if (
-      this.almostEquals(
-        edge,
-        this.footnoteEdge,
-        1.5 / (this.clientLayout.pixelRatio || 1),
-      )
-    ) {
+    if (this.almostEquals(edge, this.footnoteEdge)) {
       return false;
     }
 
@@ -926,9 +920,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const y2 = this.vertical ? -this.getLeftEdge() : this.getBottomEdge();
     let foundNonZeroWidthBand: GeometryUtil.Band = null;
 
+    // First pass: adjust band edges to column edges if they are almost equal
+    // to avoid creating unnecessary floats that may cause layout issues.
+    // (Issue #1460)
     for (const band of bands) {
-      // Adjust band edges to column edges if they are almost equal to avoid
-      // creating unnecessary floats that may cause layout issues. (Issue #1460)
       if (this.almostEquals(band.x1, x1)) {
         band.x1 = x1;
       } else if (this.almostEquals(band.x1, x2)) {
@@ -949,10 +944,85 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       } else if (this.almostEquals(band.y2, y1)) {
         band.y2 = y1;
       }
+    }
 
-      const height = band.y2 - band.y1;
-      band.left = this.createFloat(ref, "left", band.x1 - x1, height);
-      band.right = this.createFloat(ref, "right", x2 - band.x2, height);
+    // Compute float heights rounded to renderable precision and adjust at
+    // boundaries between bands with different float widths to prevent text
+    // from wrapping incorrectly due to sub-pixel float height rounding.
+    // WebKit only supports 1px precision for float heights and truncates
+    // (floors) non-integer values, so we use Math.floor for WebKit and
+    // Math.round for other browsers. (Issue #1738)
+    // This also fixes incorrect wrapping when float heights specified with
+    // lh/rlh units slightly exceed actual line heights. (Issue #1494)
+    const floatUnit = 1 / (this.clientLayout.pixelRatio || 1);
+    const roundToUnit = Base.browserType === "webkit" ? Math.floor : Math.round;
+    const floatHeights = bands.map(
+      (band) =>
+        (roundToUnit(band.y2 / floatUnit) - roundToUnit(band.y1 / floatUnit)) *
+        floatUnit,
+    );
+    // Adjust float heights at boundaries between bands with different float
+    // widths. When the next band has a wider float (more exclusion), extend
+    // the current band's float height by one unit and shrink the next by one
+    // unit. When the current band has a wider float, do the reverse.
+    // This shifts the boundary so that the narrower-float band absorbs
+    // sub-pixel rounding error, preventing text from appearing at an
+    // unexpected position.
+    // The loop includes one extra iteration (i === bands.length - 1) to
+    // handle the boundary between the last band and the implicit area below
+    // it where text flows at full width (no float exclusion).
+    const widthDiffThreshold = 0.01;
+    for (let i = 0; i < bands.length; i++) {
+      // For the last band, compare against the column edges (x1, x2)
+      // representing the implicit full-width area below all floats.
+      const nextX1 = i < bands.length - 1 ? bands[i + 1].x1 : x1;
+      const nextX2 = i < bands.length - 1 ? bands[i + 1].x2 : x2;
+      const leftWidthDiff = nextX1 - bands[i].x1;
+      const rightWidthDiff = bands[i].x2 - nextX2;
+
+      let leftDir = 0;
+      let rightDir = 0;
+      if (leftWidthDiff > widthDiffThreshold) {
+        leftDir = 1;
+      } else if (leftWidthDiff < -widthDiffThreshold) {
+        leftDir = -1;
+      }
+      if (rightWidthDiff > widthDiffThreshold) {
+        rightDir = 1;
+      } else if (rightWidthDiff < -widthDiffThreshold) {
+        rightDir = -1;
+      }
+      const adjustDir =
+        leftDir !== 0 && rightDir !== 0
+          ? leftDir === rightDir
+            ? leftDir
+            : 0
+          : leftDir || rightDir;
+
+      if (adjustDir !== 0) {
+        const delta = adjustDir * floatUnit;
+        if (
+          floatHeights[i] + delta >= 0 &&
+          (i >= bands.length - 1 || floatHeights[i + 1] - delta >= 0)
+        ) {
+          floatHeights[i] += delta;
+          if (i < bands.length - 1) {
+            floatHeights[i + 1] -= delta;
+          }
+        }
+      }
+    }
+
+    // Second pass: create float elements with adjusted heights
+    for (let i = 0; i < bands.length; i++) {
+      const band = bands[i];
+      band.left = this.createFloat(ref, "left", band.x1 - x1, floatHeights[i]);
+      band.right = this.createFloat(
+        ref,
+        "right",
+        x2 - band.x2,
+        floatHeights[i],
+      );
 
       // Hacky workaround for issue #1071
       // (Top page float should not absorb margin/border/padding of the block below)
@@ -3773,23 +3843,60 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   initGeom(): void {
-    this.box = this.getInnerRect();
-    this.startEdge = this.vertical
-      ? this.rtl
-        ? this.box.y2
-        : this.box.y1
-      : this.rtl
-        ? this.box.x2
-        : this.box.x1;
-    this.endEdge = this.vertical
-      ? this.rtl
-        ? this.box.y1
-        : this.box.y2
-      : this.rtl
-        ? this.box.x1
-        : this.box.x2;
-    this.beforeEdge = this.vertical ? this.box.x2 : this.box.y1;
-    this.afterEdge = this.vertical ? this.box.x1 : this.box.y2;
+    // Use a probe element to measure the content area via
+    // getBoundingClientRect(). We cannot query the container element directly
+    // because that would include padding (border-box), and we need content-box
+    // coordinates. We also cannot simply compute these from stored CSS property
+    // values (e.g. getInnerRect()) because layout calculations throughout the
+    // engine compare against getBoundingClientRect() values from content
+    // elements, and there can be sub-pixel differences between computed values
+    // and actual browser-rendered positions, which would break float
+    // positioning and overflow detection.
+    const probe = this.element.ownerDocument.createElement("div");
+    probe.style.position = "absolute";
+    probe.style.top = `${this.paddingTop}px`;
+    probe.style.right = `${this.paddingRight}px`;
+    probe.style.bottom = `${this.paddingBottom}px`;
+    probe.style.left = `${this.paddingLeft}px`;
+    this.element.appendChild(probe);
+    const columnBBox = this.clientLayout.getElementClientRect(probe);
+    this.element.removeChild(probe);
+    const offsetX = this.originX + this.left + this.getInsetLeft();
+    const offsetY = this.originY + this.top + this.getInsetTop();
+    this.box = new GeometryUtil.Rect(
+      offsetX,
+      offsetY,
+      offsetX + this.width,
+      offsetY + this.height,
+    );
+    this.startEdge = columnBBox
+      ? this.vertical
+        ? this.rtl
+          ? columnBBox.bottom
+          : columnBBox.top
+        : this.rtl
+          ? columnBBox.right
+          : columnBBox.left
+      : 0;
+    this.endEdge = columnBBox
+      ? this.vertical
+        ? this.rtl
+          ? columnBBox.top
+          : columnBBox.bottom
+        : this.rtl
+          ? columnBBox.left
+          : columnBBox.right
+      : 0;
+    this.beforeEdge = columnBBox
+      ? this.vertical
+        ? columnBBox.right
+        : columnBBox.top
+      : 0;
+    this.afterEdge = columnBBox
+      ? this.vertical
+        ? columnBBox.left
+        : columnBBox.bottom
+      : 0;
     this.leftFloatEdge = this.beforeEdge;
     this.rightFloatEdge = this.beforeEdge;
     this.bottommostFloatTop = this.beforeEdge;
