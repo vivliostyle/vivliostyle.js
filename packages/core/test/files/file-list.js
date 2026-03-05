@@ -76,6 +76,10 @@ module.exports = [
       },
       { file: "clear-bug-test.html", title: "Float clear bug" },
       { file: "float-text-offset-bug.html", title: "Float text offset bug" },
+      {
+        file: "float-lh-rlh.html",
+        title: "Float with lh/rlh height (Issue #1494, #1738)",
+      },
       { file: "content-attr.html", title: "Content attr()" },
       { file: "relative_floats.html", title: "Floats with position: relative" },
       { file: "target-counter.html", title: "target-counter" },
