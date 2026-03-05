@@ -380,8 +380,13 @@ export class PageFloatLayoutContext
       parent.children.push(this);
     }
     this.writingMode =
-      writingMode || (parent && parent.writingMode) || Css.ident.horizontal_tb;
-    this.direction = direction || (parent && parent.direction) || Css.ident.ltr;
+      (!Css.isDefaultingValue(writingMode) && writingMode) ||
+      (parent && parent.writingMode) ||
+      Css.ident.horizontal_tb;
+    this.direction =
+      (!Css.isDefaultingValue(direction) && direction) ||
+      (parent && parent.direction) ||
+      Css.ident.ltr;
     this.floatStore = parent ? parent.floatStore : new PageFloatStore();
     const previousSibling = this.getPreviousSibling();
     this.floatsDeferredFromPrevious = previousSibling
