@@ -185,6 +185,62 @@ describe("page-floats", function () {
         expect(context.direction).toBe(adapt_css.ident.rtl);
       });
 
+      it("falls back to parent values when CSS defaulting values (inherit, initial, revert, unset) are passed", function () {
+        var parentContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          adapt_css.ident.vertical_rl,
+          adapt_css.ident.rtl,
+        );
+
+        var defaultingValues = [
+          adapt_css.ident.inherit,
+          adapt_css.ident.initial,
+          adapt_css.ident.revert,
+          adapt_css.ident.unset,
+        ];
+
+        defaultingValues.forEach(function (defaultingValue) {
+          var context = new PageFloatLayoutContext(
+            parentContext,
+            FloatReference.REGION,
+            null,
+            null,
+            null,
+            defaultingValue,
+            defaultingValue,
+          );
+          expect(context.writingMode).toBe(adapt_css.ident.vertical_rl);
+          expect(context.direction).toBe(adapt_css.ident.rtl);
+        });
+      });
+
+      it("uses default values when CSS defaulting values are passed and there is no parent", function () {
+        var defaultingValues = [
+          adapt_css.ident.inherit,
+          adapt_css.ident.initial,
+          adapt_css.ident.revert,
+          adapt_css.ident.unset,
+        ];
+
+        defaultingValues.forEach(function (defaultingValue) {
+          var context = new PageFloatLayoutContext(
+            null,
+            null,
+            null,
+            null,
+            null,
+            defaultingValue,
+            defaultingValue,
+          );
+          expect(context.writingMode).toBe(adapt_css.ident.horizontal_tb);
+          expect(context.direction).toBe(adapt_css.ident.ltr);
+        });
+      });
+
       it("registers itself to the parent as a child", function () {
         var pageContext = new PageFloatLayoutContext(
           rootContext,
