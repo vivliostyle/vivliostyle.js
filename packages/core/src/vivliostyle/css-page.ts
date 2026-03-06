@@ -2959,14 +2959,15 @@ export class IsNthOfPageTypeAction extends CssCascade.IsNthAction {
   }
 
   override apply(cascadeInstance: CssCascade.CascadeInstance): void {
-    if (cascadeInstance.currentPageType !== this.pageType) {
+    const pageTypeIndices = cascadeInstance.pageTypePageIndices[this.pageType];
+    if (!pageTypeIndices) {
       return;
     }
-    // Get page count for this page type within the current page group
-    const pageTypeCount =
-      cascadeInstance.pageTypePageCounts[this.pageType] || 0;
-    if (this.matchANPlusB(pageTypeCount)) {
-      this.chained.apply(cascadeInstance);
+    for (const pageTypeIndex of pageTypeIndices) {
+      if (this.matchANPlusB(pageTypeIndex)) {
+        this.chained.apply(cascadeInstance);
+        return;
+      }
     }
   }
 

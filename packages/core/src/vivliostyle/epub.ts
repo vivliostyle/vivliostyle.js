@@ -50,6 +50,27 @@ function cloneCounterValues(
   return result;
 }
 
+function clonePageGroupPageCounts(source: {
+  [pageType: string]: { [elementOffset: number]: number };
+}): {
+  [pageType: string]: { [elementOffset: number]: number };
+} {
+  const cloned = Object.create(null) as {
+    [pageType: string]: { [elementOffset: number]: number };
+  };
+  Object.keys(source).forEach((pageType) => {
+    const counts = source[pageType];
+    const clonedCounts = Object.create(null) as {
+      [elementOffset: number]: number;
+    };
+    Object.keys(counts).forEach((offset) => {
+      clonedCounts[offset as unknown as number] = counts[offset];
+    });
+    cloned[pageType] = clonedCounts;
+  });
+  return cloned;
+}
+
 export type Position = {
   spineIndex: number;
   pageIndex: number;
@@ -1945,6 +1966,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
             currentPageType: pageCascade.currentPageType,
             previousPageType: pageCascade.previousPageType,
           };
+          const savedPageGroupPageCounts = clonePageGroupPageCounts(
+            targetViewItem.instance.pageGroupPageCounts,
+          );
 
           // Save the scopes and restore them after re-rendering page.
           // This is necessary for :blank page selector to work.
@@ -1988,6 +2012,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
               savedPageCascadePageTypeState.currentPageType;
             pageCascade.previousPageType =
               savedPageCascadePageTypeState.previousPageType;
+            targetViewItem.instance.pageGroupPageCounts =
+              savedPageGroupPageCounts;
             targetViewItem.instance.scopes = scopes;
             this.counterStore.popPageCounters();
             this.counterStore.popReferencesToSolve();

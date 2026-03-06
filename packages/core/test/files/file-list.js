@@ -360,11 +360,10 @@ module.exports = [
         file: "named-pages/named-pages.html",
         title: "Named Pages",
       },
-      // Not yet supported:
-      // {
-      //   file: "named-pages/page-groups.html",
-      //   title: "Page Groups",
-      // },
+      {
+        file: "named-pages/page-groups.html",
+        title: "Page Groups",
+      },
     ],
   },
   {

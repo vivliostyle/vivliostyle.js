@@ -314,6 +314,9 @@ export class StyleInstance
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
+  pageGroupPageCounts: {
+    [pageType: string]: { [elementOffset: number]: number };
+  } = Object.create(null);
 
   constructor(
     public readonly style: Style,
@@ -747,6 +750,175 @@ export class StyleInstance
       }
     }
     return { counterOffset, changeOffset };
+  }
+
+  private getPageStartElement(
+    layoutPosition: Vtree.LayoutPosition,
+    pageStartOffset: number = this.getPageStartOffset(layoutPosition),
+  ): Element | null {
+    if (!isFinite(pageStartOffset)) {
+      return null;
+    }
+    const searchRoot = this.xmldoc.body || this.xmldoc.root;
+    if (!searchRoot) {
+      return null;
+    }
+    const startElement = this.getFirstInFlowElementAtOrAfter(
+      searchRoot,
+      pageStartOffset,
+    );
+    const searchRootOffset = this.xmldoc.getElementOffset(searchRoot);
+    const isDocumentStart = pageStartOffset <= searchRootOffset;
+    return startElement === searchRoot && isDocumentStart
+      ? this.getFirstInFlowChildElement(searchRoot)
+      : startElement;
+  }
+
+  private isForcedPageBreakValue(value: string | null): boolean {
+    return (
+      Break.isForcedBreakValue(value) &&
+      value !== "column" &&
+      value !== "region"
+    );
+  }
+
+  private hasForcedPageBreakBefore(style: CssCascade.ElementStyle): boolean {
+    const breakValue = CssCascade.getProp(style, "break-before");
+    if (!breakValue) {
+      return false;
+    }
+    const resolvedBreakValue = breakValue
+      .evaluate(this, "break-before")
+      .toString();
+    return this.isForcedPageBreakValue(resolvedBreakValue);
+  }
+
+  private getExplicitPageType(style: CssCascade.ElementStyle): string | null {
+    const pageValue = CssCascade.getProp(style, "page");
+    if (!pageValue) {
+      return null;
+    }
+    const pageType = pageValue.evaluate(this, "page").toString();
+    if (!pageType || pageType.toLowerCase() === "auto") {
+      return null;
+    }
+    return pageType;
+  }
+
+  private getPageGroupPageType(element: Element): string | null {
+    const style = this.styler.getStyle(element, false);
+    if (!style) {
+      return null;
+    }
+    return this.getExplicitPageType(style);
+  }
+
+  private getPreviousInFlowSibling(element: Element): Element | null {
+    let sibling = element.previousElementSibling;
+    while (sibling) {
+      if (this.isNormalFlowElement(sibling)) {
+        return sibling;
+      }
+      sibling = sibling.previousElementSibling;
+    }
+    return null;
+  }
+
+  private getFirstDocumentFlowElement(): Element | null {
+    const searchRoot = this.xmldoc.body || this.xmldoc.root;
+    if (!searchRoot) {
+      return null;
+    }
+    const searchRootOffset = this.xmldoc.getElementOffset(searchRoot);
+    const startElement = this.getFirstInFlowElementAtOrAfter(
+      searchRoot,
+      searchRootOffset,
+    );
+    return startElement === searchRoot
+      ? this.getFirstInFlowChildElement(searchRoot)
+      : startElement;
+  }
+
+  private shouldStartPageGroup(
+    element: Element,
+    pageType: string,
+    pageStartOffset: number,
+  ): boolean {
+    const style = this.styler.getStyle(element, false);
+    if (!style) {
+      return false;
+    }
+
+    if (this.getFirstDocumentFlowElement() === element) {
+      return true;
+    }
+
+    const elementOffset = this.xmldoc.getElementOffset(element);
+    if (elementOffset !== pageStartOffset) {
+      return false;
+    }
+
+    if (this.hasForcedPageBreakBefore(style)) {
+      return true;
+    }
+
+    const previousSibling = this.getPreviousInFlowSibling(element);
+    if (!previousSibling) {
+      return false;
+    }
+    const previousStyle = this.styler.getStyle(previousSibling, false);
+    if (!previousStyle) {
+      return false;
+    }
+
+    const previousPageType = this.getExplicitPageType(previousStyle);
+    return previousPageType !== pageType;
+  }
+
+  private updatePageGroupPageIndices(
+    layoutPosition: Vtree.LayoutPosition,
+  ): void {
+    const pageCascade = this.pageManager.pageCascadeInstance;
+    pageCascade.pageTypePageIndices = Object.create(null);
+
+    const pageStartOffset = this.getPageStartOffset(layoutPosition);
+    const startElement = this.getPageStartElement(
+      layoutPosition,
+      pageStartOffset,
+    );
+
+    if (!startElement) {
+      return;
+    }
+
+    let currentElement: Element | null = startElement;
+    while (currentElement) {
+      const pageType = this.getPageGroupPageType(currentElement);
+      if (pageType) {
+        const elementOffset = this.xmldoc.getElementOffset(currentElement);
+        const countsByElement =
+          this.pageGroupPageCounts[pageType] ||
+          (this.pageGroupPageCounts[pageType] = Object.create(null));
+        let pageIndex = countsByElement[elementOffset] || 0;
+        if (
+          pageIndex > 0 ||
+          this.shouldStartPageGroup(currentElement, pageType, pageStartOffset)
+        ) {
+          pageIndex += 1;
+          countsByElement[elementOffset] = pageIndex;
+
+          const pageTypeIndices =
+            pageCascade.pageTypePageIndices[pageType] ||
+            (pageCascade.pageTypePageIndices[pageType] = []);
+          pageTypeIndices.push(pageIndex);
+        }
+      }
+
+      if (currentElement === this.xmldoc.root) {
+        break;
+      }
+      currentElement = currentElement.parentElement;
+    }
   }
 
   private getFirstInFlowElementAtOrAfter(
@@ -2169,9 +2341,6 @@ export class StyleInstance
     page.isBlankPage = cp.isBlankPage;
     cp.page++;
 
-    // Save previous page type before it gets updated
-    const prevPageType = this.styler.cascade.previousPageType;
-
     if (page.pageType == null) {
       page.pageType =
         (page.isBlankPage
@@ -2182,17 +2351,8 @@ export class StyleInstance
         this.styler.cascade.currentPageType;
     }
 
-    // Update page type page counts for :nth(An+B of <page-type>) selector
-    // Use pageCascadeInstance which is used for page rule evaluation
-    const pageCascade = this.pageManager.pageCascadeInstance;
-    if (page.pageType) {
-      // If page type changed from the previous page, reset count for the new page type (new page group)
-      if (prevPageType !== page.pageType) {
-        pageCascade.pageTypePageCounts[page.pageType] = 0;
-      }
-      pageCascade.pageTypePageCounts[page.pageType] =
-        (pageCascade.pageTypePageCounts[page.pageType] || 0) + 1;
-    }
+    // Update page group page indices for :nth(An+B of <page-type>) selector
+    this.updatePageGroupPageIndices(cp);
 
     this.clearScope(this.style.pageScope);
     this.layoutPositionAtPageStart = cp.clone();
