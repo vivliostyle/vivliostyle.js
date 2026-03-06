@@ -3149,7 +3149,8 @@ export class PageParserHandler
               this.chain.push(
                 new IsNthOfPageTypeAction(this.scope, a, b, pageType),
               );
-              this.specificity += 256;
+              // specificity of :nth(An+B) pseudo-class + page type selector
+              this.specificity += 65536 + 256;
             } else {
               // :nth(An+B) syntax - applies to document page number
               this.currentPseudoPageClassSelectors.push(
