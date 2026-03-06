@@ -364,6 +364,10 @@ module.exports = [
         file: "named-pages/page-groups.html",
         title: "Page Groups",
       },
+      {
+        file: "named-pages/page-groups-spread-breaks.html",
+        title: "Page Groups with spread breaks",
+      },
     ],
   },
   {

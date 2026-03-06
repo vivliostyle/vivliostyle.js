@@ -880,6 +880,7 @@ export class StyleInstance
   ): void {
     const pageCascade = this.pageManager.pageCascadeInstance;
     pageCascade.pageTypePageIndices = Object.create(null);
+    const canStartNewPageGroup = !layoutPosition.isBlankPage;
 
     const pageStartOffset = this.getPageStartOffset(layoutPosition);
     const startElement = this.getPageStartElement(
@@ -902,7 +903,12 @@ export class StyleInstance
         let pageIndex = countsByElement[elementOffset] || 0;
         if (
           pageIndex > 0 ||
-          this.shouldStartPageGroup(currentElement, pageType, pageStartOffset)
+          (canStartNewPageGroup &&
+            this.shouldStartPageGroup(
+              currentElement,
+              pageType,
+              pageStartOffset,
+            ))
         ) {
           pageIndex += 1;
           countsByElement[elementOffset] = pageIndex;
