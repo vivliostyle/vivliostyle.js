@@ -48,6 +48,16 @@
           content: ":nth(1 of B)";
         }
       }
+      @page :nth(1 of A) {
+        @bottom-right-corner {
+          content: ":nth(1 of A)";
+          text-align: center;
+        }
+      }
+      /* Page group start interpretation used in this test:
+         starts at document first element, page-type boundary, or break-before with forced page value (page|left|right|recto|verso).
+         break-after and forced column/region breaks are not treated as page-group starts. */
+      /* Expected on Page 5: :nth(5 of A), :nth(1 of B), and :nth(5) all match */
       @page :nth(5) {
         @bottom-right {
           content: ":nth(5)";
@@ -142,6 +152,7 @@
       </p>
     </div>
     <div class="A">
+      <!-- Expected: this second Page Group A starts on Page 8 and matches :nth(1 of A). -->
       <p>
         Page Group A (second) start.<br /><br />
         Nunc vulputate enim vitae quam imperdiet, iaculis lobortis turpis
@@ -154,6 +165,18 @@
         luctus. Proin placerat, ante et cursus elementum, est nisl posuere mi,
         at varius sem ante ac nibh. Interdum et malesuada fames ac ante ipsum
         primis in faucibus.<br /><br />
+        Page Group A (second) continue.
+      </p>
+      <!-- Expected: this paragraph is on Page 9, and the second Page Group A ends on Page 9. -->
+      <p>
+        Page Group A (second) second page.<br /><br />
+        Sed imperdiet nisi ac orci bibendum, at porta velit facilisis. Mauris
+        vitae turpis arcu. Duis pharetra sem quis malesuada sodales. Nullam
+        convallis imperdiet nisl, vitae ullamcorper nunc pretium sit amet.
+        Suspendisse potenti. Pellentesque habitant morbi tristique senectus et
+        netus et malesuada fames ac turpis egestas. Nulla facilisi. Etiam et
+        lectus et ipsum porta malesuada quis vel lorem. Donec feugiat ante sed
+        est mollis, nec iaculis neque hendrerit.<br /><br />
         Page Group A (second) end.
       </p>
     </div>

@@ -3109,7 +3109,7 @@ export class CascadeInstance {
   currentPageType: string | null = null;
   previousPageType: string | null = null;
   firstPageType: string | null = null;
-  pageTypePageCounts: { [pageType: string]: number } = Object.create(null);
+  pageTypePageIndices: { [pageType: string]: number[] } = Object.create(null);
   isFirst: boolean = true;
   isRoot: boolean = true;
   counters: CounterValues = Object.create(null);
