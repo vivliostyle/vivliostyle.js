@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" class="A">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page Groups across concatenated docs - second</title>
+    <style>
+      @page {
+        size: 16cm 16cm;
+        margin: 2cm;
+        @top-left {
+          content: "Page " counter(page);
+        }
+      }
+      @page A {
+        @top-center {
+          content: "Named Page A";
+        }
+      }
+      @page :nth(n of A) {
+        @top-right {
+          content: "Page Group A";
+        }
+      }
+      @page :nth(1 of A) {
+        @bottom-left {
+          content: ":nth(1 of A)";
+        }
+      }
+      @page :nth(2 of A) {
+        @bottom-left {
+          content: ":nth(2 of A)";
+        }
+      }
+
+      .A {
+        page: A;
+        break-before: right;
+      }
+
+      .probe {
+        border: 1px solid #333;
+        padding: 8mm;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="probe">
+      <h1>Doc 2 / Page Group A restart</h1>
+      <p>
+        This second source starts with break-before:right and creates a blank
+        page at document boundary in concatenated rendering.
+      </p>
+      <p>
+        Expected on this page: Named Page A, Page Group A, and :nth(1 of A).
+        It must not show :nth(2 of A).
+      </p>
+    </section>
+  </body>
+</html>
