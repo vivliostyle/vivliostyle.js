@@ -787,6 +787,16 @@ export class Styler implements AbstractStyler {
     if (offset < rootOffset) {
       const rootStyle = this.getStyle(this.root, false);
       Asserts.assert(rootStyle);
+      if (!this.cascade.firstPageType) {
+        const rootPageCV = rootStyle["page"] as CssCascade.CascadeValue;
+        const rootPageType =
+          rootPageCV &&
+          !Css.isDefaultingValue(rootPageCV.value) &&
+          rootPageCV.value.toString();
+        if (rootPageType && rootPageType.toLowerCase() !== "auto") {
+          this.cascade.firstPageType = rootPageType;
+        }
+      }
       const flowName = CssCascade.getProp(rootStyle, "flow-into");
       const flowNameStr = flowName
         ? flowName.evaluate(context, "flow-into").toString()
@@ -1109,14 +1119,18 @@ export class Styler implements AbstractStyler {
         }
         const blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
 
-        if (blockStartOffset === 0) {
+        if (blockStartOffset === 0 || elem === this.xmldoc.body) {
           // Named page type at first page
           const pageCV = style["page"] as CssCascade.CascadeValue;
           const pageType =
             pageCV &&
             !Css.isDefaultingValue(pageCV.value) &&
             pageCV.value.toString();
-          if (pageType && pageType.toLowerCase() !== "auto") {
+          if (
+            !this.cascade.firstPageType &&
+            pageType &&
+            pageType.toLowerCase() !== "auto"
+          ) {
             this.cascade.firstPageType = pageType;
           }
         }

@@ -315,8 +315,9 @@ export class StyleInstance
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
   pageGroupPageCounts: {
-    [pageType: string]: { [elementOffset: number]: number };
+    [pageType: string]: Map<Element, number>;
   } = Object.create(null);
+  currentPageGroupDocument: Document | null = null;
 
   constructor(
     public readonly style: Style,
@@ -854,6 +855,23 @@ export class StyleInstance
     }
 
     const elementOffset = this.xmldoc.getElementOffset(element);
+    const searchRoot = this.xmldoc.body || this.xmldoc.root;
+    const searchRootOffset = this.xmldoc.getElementOffset(searchRoot);
+    const isDocumentStart = pageStartOffset <= searchRootOffset;
+
+    // Root/body page groups can start at document start even when the first
+    // in-flow element is a descendant.
+    if (isDocumentStart && element === searchRoot) {
+      return true;
+    }
+
+    if (
+      !this.getPreviousInFlowSibling(element) &&
+      pageStartOffset === elementOffset
+    ) {
+      return true;
+    }
+
     if (elementOffset !== pageStartOffset) {
       return false;
     }
@@ -880,7 +898,24 @@ export class StyleInstance
   ): void {
     const pageCascade = this.pageManager.pageCascadeInstance;
     pageCascade.pageTypePageIndices = Object.create(null);
-    const canStartNewPageGroup = !layoutPosition.isBlankPage;
+    const startSide = layoutPosition.startSideOfFlow("body");
+    const bodyFlowPosition = layoutPosition.flowPositions["body"];
+    const hasBodyFlowContent = !!(
+      bodyFlowPosition && bodyFlowPosition.positions.length
+    );
+    const isSpreadDeferredBlankPage =
+      Break.isSpreadBreakValue(startSide) &&
+      !this.matchPageSide(startSide) &&
+      !hasBodyFlowContent;
+    // A synthetic blank first page can be inserted between concatenated
+    // documents for spread alignment (issue #666). It must not consume
+    // :nth(An+B of <page-type>) page-group indices.
+    const isBlankPageAtDocumentStart =
+      this.blankPageAtStart && layoutPosition.page === 1;
+    const canStartNewPageGroup =
+      !isBlankPageAtDocumentStart &&
+      !layoutPosition.isBlankPage &&
+      !isSpreadDeferredBlankPage;
 
     const pageStartOffset = this.getPageStartOffset(layoutPosition);
     const startElement = this.getPageStartElement(
@@ -892,26 +927,38 @@ export class StyleInstance
       return;
     }
 
+    const startDocument = startElement.ownerDocument;
+    const isNewPageGroupDocument =
+      this.currentPageGroupDocument !== startDocument;
+    // Do not consume new-document boundary on synthetic blank pages at start;
+    // keep it for the first real content page.
+    const shouldActivateNewPageGroupDocument =
+      isNewPageGroupDocument && canStartNewPageGroup;
+    if (shouldActivateNewPageGroupDocument) {
+      this.pageGroupPageCounts = Object.create(null);
+      this.currentPageGroupDocument = startDocument;
+    }
+
     let currentElement: Element | null = startElement;
     while (currentElement) {
       const pageType = this.getPageGroupPageType(currentElement);
       if (pageType) {
-        const elementOffset = this.xmldoc.getElementOffset(currentElement);
         const countsByElement =
           this.pageGroupPageCounts[pageType] ||
-          (this.pageGroupPageCounts[pageType] = Object.create(null));
-        let pageIndex = countsByElement[elementOffset] || 0;
+          (this.pageGroupPageCounts[pageType] = new Map());
+        let pageIndex = countsByElement.get(currentElement) || 0;
         if (
           pageIndex > 0 ||
           (canStartNewPageGroup &&
-            this.shouldStartPageGroup(
-              currentElement,
-              pageType,
-              pageStartOffset,
-            ))
+            (shouldActivateNewPageGroupDocument ||
+              this.shouldStartPageGroup(
+                currentElement,
+                pageType,
+                pageStartOffset,
+              )))
         ) {
           pageIndex += 1;
-          countsByElement[elementOffset] = pageIndex;
+          countsByElement.set(currentElement, pageIndex);
 
           const pageTypeIndices =
             pageCascade.pageTypePageIndices[pageType] ||

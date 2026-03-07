@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page Groups across concatenated docs - first</title>
+    <style>
+      @page {
+        size: 16cm 16cm;
+        margin: 2cm;
+        @top-left {
+          content: "Page " counter(page);
+        }
+      }
+      @page A {
+        @top-center {
+          content: "Named Page A";
+        }
+      }
+      @page :nth(n of A) {
+        @top-right {
+          content: "Page Group A";
+        }
+      }
+      @page :nth(1 of A) {
+        @bottom-left {
+          content: ":nth(1 of A)";
+        }
+      }
+      @page :nth(2 of A) {
+        @bottom-left {
+          content: ":nth(2 of A)";
+        }
+      }
+
+      .A {
+        page: A;
+        break-before: right;
+      }
+
+      .probe {
+        border: 1px solid #333;
+        padding: 8mm;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="A probe">
+      <h1>Doc 1 / Page Group A</h1>
+      <p>
+        This file is the first source in a concatenated test.
+        Expected on this page: Named Page A, Page Group A, and :nth(1 of A).
+      </p>
+    </section>
+  </body>
+</html>

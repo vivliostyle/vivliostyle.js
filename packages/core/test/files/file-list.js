@@ -368,6 +368,13 @@ module.exports = [
         file: "named-pages/page-groups-spread-breaks.html",
         title: "Page Groups with spread breaks",
       },
+      {
+        file: [
+          "named-pages/page-groups-concat-blank-first.html",
+          "named-pages/page-groups-concat-blank-second.html",
+        ],
+        title: "Page Groups across concatenated docs with boundary blank page",
+      },
     ],
   },
   {
