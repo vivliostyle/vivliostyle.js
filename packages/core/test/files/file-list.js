@@ -459,23 +459,35 @@ module.exports = [
     ],
   },
   {
-    category: "Column",
+    category: "Multi-column",
     files: [
       {
-        file: "column/column-fill_balance.html",
+        file: "multi-column/column-fill_balance.html",
         title: "column-fill: balance",
       },
       {
-        file: "column/column-fill_balance_vertical.html",
+        file: "multi-column/column-fill_balance_vertical.html",
         title: "column-fill: balance (vertical writing-mode)",
       },
       {
-        file: "column/column-fill_balance-all.html",
+        file: "multi-column/column-fill_balance-all.html",
         title: "column-fill: balance-all",
       },
       {
-        file: "column/column-fill_balance-all_vertical.html",
+        file: "multi-column/column-fill_balance-all_vertical.html",
         title: "column-fill: balance-all (vertical writing-mode)",
+      },
+      {
+        file: "multi-column/mixed-multicol.html",
+        title: "Mixed multi-column layout test",
+      },
+      {
+        file: "multi-column/mixed-multicol-with-floats.html",
+        title: "Mixed multi-column layout with floats",
+      },
+      {
+        file: "multi-column/multicol-in-page-float.html",
+        title: "Multi-column in page float",
       },
     ],
   },

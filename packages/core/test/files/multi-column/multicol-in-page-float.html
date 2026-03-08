@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Multi-column in page float</title>
+    <style>
+      @page {
+        size: 500px;
+
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+
+      .pfloat {
+        float-reference: page;
+        float: block-start;
+        background: lightgreen;
+        padding: 10px;
+      }
+
+      .multicol {
+        column-count: 2;
+        column-gap: 20px;
+        column-rule: 3px solid blue;
+        background: lightyellow;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Multi-column in page float</h1>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque congue dolor eget risus auctor, eu feugiat metus gravida. Integer non sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit pellentesque. Proin sollicitudin erat feugiat, tristique dolor euismod, viverra eros. Nulla nec augue in eros faucibus suscipit in vel est. Quisque vitae sem vel urna vulputate rhoncus. Aliquam dapibus pharetra ipsum, quis imperdiet nisl aliquam a. Fusce malesuada ante at facilisis vehicula.
+    </p>
+    Page float anchor→
+    <aside class="pfloat">
+      <h2>Page Float</h2>
+      <p>This is a page float box.</p>
+      <section class="multicol">
+        <h3>Multi-column inside page float</h3>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus, aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue a. Suspendisse quis interdum turpis. Nam pretium id tortor eget ullamcorper.
+        </p>
+        <p>
+          Nulla non ullamcorper orci, et euismod ante. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eleifend fermentum mattis. Donec quis quam diam. Cras porta vestibulum condimentum. Curabitur et rutrum arcu. Proin eu dolor imperdiet, lobortis elit eget, gravida urna. Ut maximus lorem interdum gravida fermentum. In leo nunc, auctor non vehicula sed, tincidunt in mi. In sit amet aliquet turpis. Nullam urna ex, sodales non malesuada sed, ultricies a massa. Proin orci massa, iaculis et sodales vel, gravida vel elit. Vestibulum ut lorem suscipit, consequat leo sollicitudin, sagittis libero. Curabitur nec enim gravida, aliquam leo et, tincidunt arcu. Fusce vestibulum volutpat lectus sit amet cursus. Donec massa neque, cursus sit amet sapien id, vehicula ullamcorper diam.
+        </p>
+      </section>
+    </aside>
+    ←Page float anchor
+    <p>
+      Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis efficitur quis eget eros. Integer bibendum ante eu nunc iaculis dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris leo risus, consectetur vel viverra eget, faucibus eu massa. Nullam dapibus elementum nunc, quis blandit justo. Donec vestibulum turpis id risus rutrum, id pharetra justo finibus. Phasellus sagittis libero in nisl congue, ut vehicula magna sagittis. Morbi arcu ex, porttitor sit amet justo id, consectetur feugiat sapien. Proin ut libero id risus ultrices pretium. In ac tincidunt odio.
+    </p>
+  </body>
+</html>
