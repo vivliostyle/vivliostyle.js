@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mixed Multi-column layout Test</title>
+    <style>
+      @page {
+        size: 700px 900px;
+        margin: 50px;
+        outline: 1px solid cyan;
+
+        @bottom-center {
+          font-size: 0.8rem;
+          content: "Page " counter(page);
+        }
+      }
+
+      :root {
+        font-family: "Times", serif;
+        line-height: 1.25;
+        margin: 0;
+      }
+
+      section {
+        margin-block: 1rlh;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      p+p {
+        text-indent: 2em;
+      }
+
+      h1,
+      h2,
+      h3 {
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        line-height: 2rlh;
+        margin-block: 1rlh;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        line-height: 1.5rlh;
+        margin-block: 0.25rlh;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+        line-height: 1rlh;
+        margin-block: 0.5rlh;
+      }
+
+      .multicol-2 {
+        column-count: 2;
+        column-gap: 20px;
+        column-rule: 3px dotted #080;
+        background-color: #efe;
+      }
+
+      .multicol-3 {
+        column-count: 3;
+        column-gap: 20px;
+        column-rule: 3px dotted #800;
+        background-color: #fee;
+      }
+
+      .spanner {
+        column-span: all;
+        background-color: #eef;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mixed Multi-column layout Test</h1>
+
+    <p>Here is not multi-column.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent dictum dignissim metus in vulputate. Sed pulvinar justo sit amet ornare aliquet. Cras massa elit, commodo nec interdum a, ultricies ac neque. Ut eleifend pulvinar risus sit amet ultricies. Cras volutpat eros id nibh malesuada finibus. In ac nisi a lacus hendrerit venenatis. Ut lectus mi, laoreet id sagittis eu, egestas non sapien. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    </p>
+    <section class="multicol-2">
+      <h2>Two-column section</h2>
+      <p>
+        Donec vel convallis orci. Pellentesque tincidunt mollis arcu ac condimentum. Nam lacinia sollicitudin est, in venenatis eros accumsan sit amet. Curabitur fringilla consectetur tincidunt. Sed iaculis quam at ullamcorper convallis. Mauris tempus eget purus sed rutrum. Donec porttitor dui vel vulputate euismod.
+      </p>
+      <p>
+        Donec finibus magna sem, eget blandit ligula tristique nec. Ut auctor molestie turpis, nec pellentesque dui egestas a. Nullam suscipit nibh non purus convallis, eget iaculis tortor laoreet. Nullam dignissim lorem ac euismod aliquet. In mattis vitae ante vel sollicitudin. Vestibulum in massa a dolor blandit finibus ut vitae sapien. Mauris dictum elit ut eros malesuada ullamcorper at eu ipsum. Curabitur molestie maximus erat et fringilla. Maecenas efficitur mauris vulputate sapien pharetra malesuada.
+      </p>
+      <p>
+        Sed ullamcorper nisi sit amet purus rutrum, vitae molestie elit cursus. Donec consectetur, velit et scelerisque malesuada, sem velit congue lectus, eget venenatis erat sapien a ante. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vehicula mattis tempus. Ut sagittis aliquet nulla ac imperdiet. Donec sit amet justo odio. Integer ullamcorper elementum dolor.
+      </p>
+    </section>
+    <section class="multicol-3">
+      <h2>Three-column section</h2>
+      <p>
+        In lacus ipsum, sollicitudin a varius non, fermentum vel massa. Praesent eget maximus nulla. Aliquam vitae ullamcorper odio. Vivamus bibendum bibendum eleifend. Cras tempus ex eu sem condimentum, quis fermentum urna elementum. Duis vel quam justo. Mauris luctus tortor quis libero pulvinar tempor. Fusce feugiat dignissim ipsum vitae ullamcorper. Praesent elementum efficitur quam id hendrerit.
+      </p>
+      <p>
+        In euismod enim vel justo vehicula finibus. Curabitur sit amet lacus et ante congue commodo. Proin consectetur egestas arcu, eu varius nisl tincidunt in. Nullam ligula nisl, congue commodo metus ut, malesuada congue nibh.
+      </p>
+      <p>
+        Etiam id arcu neque. Etiam egestas, neque quis commodo condimentum, enim metus pharetra mauris, ut placerat lacus enim eget est. Nullam gravida, ipsum non accumsan commodo, enim dui efficitur mauris, a suscipit felis urna convallis est. Duis et arcu odio. Nulla facilisi. Nam ac sem ultricies, interdum ipsum id, consectetur risus. Aliquam erat volutpat. Nunc varius vestibulum sapien. Donec hendrerit sem vitae arcu laoreet tempus. Donec non iaculis nulla, quis ultricies nunc. Aenean egestas non dolor volutpat luctus.
+      </p>
+      <section class="spanner">
+        <h3>Spanner section</h3>
+        <p>
+          This section is a spanner that spans all columns.
+          Aliquam ultricies nisi eget enim mollis efficitur. Vivamus ex ante, lobortis non libero eget, sodales hendrerit massa. Cras iaculis mattis sapien eu viverra. Phasellus auctor ante mattis metus lobortis sollicitudin.
+        </p>
+        <p>
+          Integer eu ultricies lectus. Quisque a sapien odio. Suspendisse id suscipit tortor, non ornare sapien. Nullam libero nisi, placerat egestas porttitor tincidunt, vestibulum eget urna. Fusce porttitor suscipit libero semper tempor.
+        </p>
+      </section>
+      <p>
+        Aliquam sit amet nisi pretium, condimentum leo ornare, sodales tortor. Aliquam accumsan dui magna, vel sagittis neque semper ac. Nullam augue ante, tempus nec posuere a, consequat quis lectus. Phasellus imperdiet, turpis ac ornare lacinia, libero dolor bibendum libero, at auctor sapien libero et enim.
+      </p>
+      <p>
+        Donec vestibulum porta ligula, vel sagittis erat consectetur scelerisque. Morbi lobortis enim non velit bibendum, eget rutrum massa sodales. Ut congue massa in euismod pellentesque. Cras in orci sed quam eleifend venenatis. Fusce et mi neque. Nulla justo mi, laoreet sed nulla quis, sodales fermentum turpis. Fusce posuere aliquam turpis quis bibendum. Vestibulum ac semper arcu. Phasellus vel vehicula tortor. Aliquam condimentum elit at urna ornare rutrum sit amet ut nunc.
+      </p>
+      <p>
+        Vestibulum vulputate diam non odio blandit tempor sed et nunc. Integer lobortis, nisl vitae convallis rutrum, purus mi facilisis quam, sed vestibulum ante ante et nisi. Duis pellentesque semper urna, non eleifend sapien iaculis id. Vivamus at nisi sed tortor pretium porttitor id id metus. Nam et tempus turpis, nec efficitur nisl. Cras suscipit scelerisque dui, et mollis eros imperdiet nec. Etiam vitae molestie mauris. Nam id magna at ipsum fermentum maximus. Duis dapibus lacus ut tortor dignissim porttitor. Quisque sed venenatis orci, vitae condimentum sem.
+      </p>
+      <section class="multicol-2">
+        <h2 class="spanner">Two-column in three-column section</h2>
+        <p>
+          Phasellus eu nunc a quam elementum hendrerit non vitae nunc. Morbi quis tellus vel dui accumsan rutrum sed in purus. Sed scelerisque sapien ac neque egestas facilisis. Praesent elit dolor, sollicitudin a nibh eget, porttitor dapibus enim. Mauris odio felis, facilisis sed pharetra et, feugiat nec enim. Cras sed pulvinar felis. Nullam mattis risus luctus sem euismod euismod. Etiam sagittis quis enim nec accumsan. Nunc vitae finibus risus. Integer ac mi quis lorem lobortis iaculis eu eget neque. Nunc id pellentesque nisi, et tincidunt magna.
+        </p>
+      </section>
+      <p>
+        Nulla nec sapien felis. Integer lobortis cursus sollicitudin. Donec mattis ex lacus, et tempus nisl interdum at. Nulla efficitur mi et nulla rutrum fermentum. Nunc eget est sit amet nisi egestas pretium sed nec mauris.
+      </p>
+      <h3 style="break-before: column">break-before: column</h3>
+      <p>
+        Aenean dolor orci, mattis non facilisis eu, iaculis eget massa. Nunc ut ornare nisl. Sed blandit arcu fringilla, vestibulum elit at, venenatis sem. Nulla porttitor massa nec maximus viverra. Ut aliquet facilisis nunc, at egestas mauris congue ac. Sed vehicula nulla et ipsum viverra, id posuere dolor lobortis.
+      </p>
+      <h3 style="break-after: column">break-after: column</h3>
+      <p>
+        Suspendisse luctus vitae leo ut volutpat. Morbi sit amet risus eu mauris eleifend elementum eget a ipsum. Nunc et accumsan nibh, in tempor quam. Curabitur laoreet eget nisi id pharetra. Ut facilisis quam orci. Duis tempor, dolor eget facilisis ultricies, sapien massa ultrices neque, ut malesuada nulla nisi non ex. Vestibulum sodales nulla ac orci dictum finibus. Pellentesque ut nisi fermentum, interdum libero sit amet, fringilla nulla. Curabitur tempus, justo sit amet iaculis pulvinar, arcu nibh ornare felis, sed gravida sem elit et dolor. Vestibulum a mollis enim, eget fringilla nisl. Suspendisse potenti.
+      </p>
+      <h3 style="break-before: page">break-before: page</h3>
+      <p>
+        Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam ornare egestas ex eget vehicula. Ut porta pulvinar felis sed molestie. Mauris luctus tortor id iaculis ullamcorper. Nunc ut massa non libero tincidunt venenatis sed vel odio. Maecenas aliquam velit sit amet suscipit molestie. Phasellus pulvinar quam eu mi pellentesque, vel elementum lectus viverra. Vivamus orci enim, ornare efficitur enim blandit, hendrerit mollis ex. Etiam et fermentum mauris. Nulla venenatis porttitor nibh, id pretium dui porttitor at. Aenean volutpat, elit ut pellentesque vulputate, nisl neque porta erat, eget blandit diam magna in mi.
+      </p>
+    </section>
+    <section>
+      <h2>Back to Single Column</h2>
+      <p>
+        Aliquam sit amet tincidunt nisi, vel vestibulum ex. Quisque a finibus felis. Donec suscipit venenatis elit quis lacinia. In euismod lobortis diam, non sodales libero varius eu. Quisque sit amet cursus neque, aliquet faucibus velit. Cras ullamcorper magna quis convallis viverra. Suspendisse potenti. Cras convallis erat id feugiat molestie. Donec et lectus elementum, dapibus leo eu, bibendum felis. Duis sed metus sed erat commodo tristique sit amet a diam. Vestibulum ultricies, mauris eget cursus gravida, erat lorem maximus velit, nec gravida diam ligula eget urna. Etiam consectetur dapibus hendrerit. Nulla porta ultricies elit et luctus. Nam rhoncus auctor tortor vel vulputate. Aliquam maximus blandit mi, id sodales purus varius quis. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+      </p>
+    </section>
+  </body>
+</html>
