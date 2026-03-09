@@ -1456,7 +1456,15 @@ export class PageFloatLayoutContext
         return null;
       }
     } else {
-      blockSize = area.computedBlockSize;
+      // computedBlockSize already includes the border-box size (padding +
+      // border) of the root float elements and any positive trailing margin.
+      // However, negative trailing margin is not reflected, so only add the
+      // negative part of margin-after here. (Issue #1752)
+      const marginAfter = area.getContentBlockMarginAfter();
+      blockSize = Math.max(
+        0,
+        area.computedBlockSize + Math.min(0, marginAfter),
+      );
       outerBlockSize = blockSize + area.getInsetBefore() + area.getInsetAfter();
       const availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
       if (logicalFloatSides[0] === "snap-block") {

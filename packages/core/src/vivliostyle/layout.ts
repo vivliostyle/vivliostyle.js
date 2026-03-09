@@ -4771,4 +4771,17 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
       }),
     );
   }
+
+  getContentBlockMarginAfter(): number {
+    if (this.rootViewNodes.length === 0) {
+      return 0;
+    }
+    return Math.max.apply(
+      null,
+      this.rootViewNodes.map((r, i) => {
+        const margin = this.floatMargins[i];
+        return this.vertical ? margin.left : margin.bottom;
+      }),
+    );
+  }
 }

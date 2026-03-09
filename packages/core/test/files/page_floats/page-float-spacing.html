@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page float spacing cases</title>
+    <style>
+      @page {
+        size: 500px;
+        outline: 1px solid aqua;
+
+        @bottom-center {
+          writing-mode: horizontal-tb;
+          content: "Page " counter(page);
+        }
+      }
+
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      section {
+        break-before: page;
+      }
+
+      h1 {
+        margin-block: 0 0.25em;
+      }
+
+      h2 {
+        margin-block-end: 0.4em;
+      }
+
+      .expectation {
+        font-style: italic;
+        margin-block: 0 0.6em;
+      }
+
+      .pfloat {
+        float-reference: page;
+        padding: 10px;
+        border: 5px dashed green;
+      }
+
+      .top {
+        float: block-start;
+      }
+
+      .bottom {
+        float: block-end;
+      }
+
+      .margin-positive {
+        margin-block-end: 10px;
+      }
+
+      .margin-negative {
+        margin-block-end: -10px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>Page top float with padding and border</h1>
+      <p class="expectation">
+        Expected result: the page float appears at the top of the next page,
+        and the following paragraph starts immediately below the float's
+        painted bottom edge without overlap or extra trailing gap.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non
+        sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis
+        non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit
+        pellentesque.
+      </p>
+      Page float anchor ->
+      <aside class="pfloat top">
+        <h2>Page Float</h2>
+        <p>This is a page float box.</p>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus,
+          aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu
+          mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis
+          ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue
+          a. Suspendisse quis interdum turpis. Nam pretium id tortor eget.
+        </p>
+      </aside>
+      <- Page float anchor
+      <p>
+        Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed
+        volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis
+        efficitur quis eget eros. Integer bibendum ante eu nunc iaculis
+        dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in
+        pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac
+        ante ipsum primis in faucibus.
+      </p>
+    </section>
+
+    <section>
+      <h1>Page bottom float with padding and border</h1>
+      <p class="expectation">
+        Expected result: the page float appears at the bottom of the next page,
+        stays within the page area, and its border and padding are not clipped
+        or pushed outside the page.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non
+        sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis
+        non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit
+        pellentesque.
+      </p>
+      Page float anchor ->
+      <aside class="pfloat bottom">
+        <h2>Page Float</h2>
+        <p>This is a page float box.</p>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus,
+          aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu
+          mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis
+          ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue
+          a. Suspendisse quis interdum turpis. Nam pretium id tortor eget.
+        </p>
+      </aside>
+      <- Page float anchor
+      <p>
+        Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed
+        volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis
+        efficitur quis eget eros. Integer bibendum ante eu nunc iaculis
+        dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in
+        pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac
+        ante ipsum primis in faucibus.
+      </p>
+    </section>
+
+    <section>
+      <h1>Page top float with positive margin-bottom</h1>
+      <p class="expectation">
+        Expected result: the page float appears at the top of the next page,
+        and the following paragraph starts lower than in the baseline top-float
+        case by the additional positive bottom margin, without doubling that
+        spacing.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non
+        sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis
+        non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit
+        pellentesque.
+      </p>
+      Page float anchor ->
+      <aside class="pfloat top margin-positive">
+        <h2>Page Float</h2>
+        <p>This is a page float box.</p>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus,
+          aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu
+          mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis
+          ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue
+          a. Suspendisse quis interdum turpis. Nam pretium id tortor eget.
+        </p>
+      </aside>
+      <- Page float anchor
+      <p>
+        Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed
+        volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis
+        efficitur quis eget eros. Integer bibendum ante eu nunc iaculis
+        dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in
+        pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac
+        ante ipsum primis in faucibus.
+      </p>
+    </section>
+
+    <section>
+      <h1>Page bottom float with positive margin-bottom</h1>
+      <p class="expectation">
+        Expected result: the page float remains inside the page area while the
+        positive bottom margin moves the float upward relative to the baseline
+        bottom-float case.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non
+        sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis
+        non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit
+        pellentesque.
+      </p>
+      Page float anchor ->
+      <aside class="pfloat bottom margin-positive">
+        <h2>Page Float</h2>
+        <p>This is a page float box.</p>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus,
+          aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu
+          mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis
+          ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue
+          a. Suspendisse quis interdum turpis. Nam pretium id tortor eget.
+        </p>
+      </aside>
+      <- Page float anchor
+      <p>
+        Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed
+        volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis
+        efficitur quis eget eros. Integer bibendum ante eu nunc iaculis
+        dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in
+        pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac
+        ante ipsum primis in faucibus.
+      </p>
+    </section>
+
+    <section>
+      <h1>Page top float with negative margin-bottom</h1>
+      <p class="expectation">
+        Expected result: the page float appears at the top of the next page,
+        and the following paragraph moves upward relative to the baseline
+        top-float case because the negative bottom margin reduces the trailing
+        gap.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non
+        sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis
+        non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit
+        pellentesque.
+      </p>
+      Page float anchor ->
+      <aside class="pfloat top margin-negative">
+        <h2>Page Float</h2>
+        <p>This is a page float box.</p>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus,
+          aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu
+          mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis
+          ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue
+          a. Suspendisse quis interdum turpis. Nam pretium id tortor eget.
+        </p>
+      </aside>
+      <- Page float anchor
+      <p>
+        Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed
+        volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis
+        efficitur quis eget eros. Integer bibendum ante eu nunc iaculis
+        dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in
+        pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac
+        ante ipsum primis in faucibus.
+      </p>
+    </section>
+
+    <section>
+      <h1>Page bottom float with negative margin-bottom</h1>
+      <p class="expectation">
+        Expected result: the page float moves downward relative to the baseline
+        bottom-float case, but the visible float fragment still stays within a
+        reasonable page-bound position rather than jumping far past the page
+        bottom.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non
+        sollicitudin lectus. In tempus porta lacus, ac bibendum ante sagittis
+        non. Proin vitae auctor nibh. Praesent id orci id nibh suscipit
+        pellentesque.
+      </p>
+      Page float anchor ->
+      <aside class="pfloat bottom margin-negative">
+        <h2>Page Float</h2>
+        <p>This is a page float box.</p>
+        <p>
+          Ut vitae tempor metus. Aliquam vitae neque dui. In ipsum risus,
+          aliquam a orci in, molestie tempor lectus. Duis fringilla tortor eu
+          mi rhoncus, et vehicula orci luctus. Duis cursus urna ac convallis
+          ornare. Vivamus finibus condimentum elit, ac vestibulum massa congue
+          a. Suspendisse quis interdum turpis. Nam pretium id tortor eget.
+        </p>
+      </aside>
+      <- Page float anchor
+      <p>
+        Phasellus malesuada non nunc ut imperdiet. Sed non ex quam. Proin sed
+        volutpat velit, ut dictum dolor. Sed interdum justo et tellus venenatis
+        efficitur quis eget eros. Integer bibendum ante eu nunc iaculis
+        dapibus. Ut id nibh nisl. Aenean hendrerit feugiat laoreet. Nam in
+        pharetra mauris, quis dapibus purus. Interdum et malesuada fames ac
+        ante ipsum primis in faucibus.
+      </p>
+    </section>
+  </body>
+</html>

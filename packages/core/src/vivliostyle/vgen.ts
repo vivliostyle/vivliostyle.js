@@ -2673,6 +2673,14 @@ export class ViewFactory
           propName,
           value.toString(),
         );
+        // Also propagate to the layout box so that page float areas laid out
+        // there (e.g. during stash re-layout before the root element is
+        // processed on the new page) inherit the correct values. (Issue #1752)
+        Base.setCSSProperty(
+          this.viewport.layoutBox,
+          propName,
+          value.toString(),
+        );
       } else {
         Base.setCSSProperty(target, propName, value.toString());
       }

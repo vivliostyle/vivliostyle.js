@@ -697,6 +697,17 @@ module.exports = [
         file: "page_floats/page-float-in-page-float.html",
         title: "Page float in page float (Issue #1675)",
       },
+      {
+        file: "page_floats/page-float-spacing.html",
+        title:
+          "Page float padding, border, and margin-bottom cases (Issue #1752)",
+      },
+      {
+        file: "page_floats/page-float-spacing.html",
+        title:
+          "Page float padding, border, and margin-bottom cases with fontSize=18 (Issue #1752)",
+        options: "&fontSize=18",
+      },
     ],
   },
   {

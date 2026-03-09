@@ -570,6 +570,7 @@ export namespace Layout {
 
     convertPercentageSizesToPx(target: Element): void;
     fixFloatSizeAndPosition(nodeContext: Vtree.NodeContext): void;
+    getContentBlockMarginAfter(): number;
     getContentInlineSize(): number;
   }
 }

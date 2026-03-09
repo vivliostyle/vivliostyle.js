@@ -1626,6 +1626,21 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return count;
   }
 
+  /**
+   * Mark a spine item as complete if all layout positions have corresponding
+   * rendered pages (Issue #1498).  When the item becomes complete, clean up
+   * inherited CSS properties that were propagated to the layout box during
+   * page float rendering so they don't leak into the next spine item or
+   * remain in the DOM after layout (Issue #1752).
+   */
+  private markSpineItemCompleteIfReady(viewItem: OPFViewItem): void {
+    viewItem.complete =
+      viewItem.layoutPositions.length === viewItem.pages.length;
+    if (viewItem.complete) {
+      viewItem.instance.viewport.layoutBox.removeAttribute("style");
+    }
+  }
+
   private getTotalOffsetForViewItem(viewItem: OPFViewItem): number {
     const spineIndex = viewItem.item.spineIndex;
     let totalOffset = this.paginationProgress.totalOffsetsBySpine[spineIndex];
@@ -2304,8 +2319,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
               // Issue #1498: do not mark complete if layoutPositions and pages
               // are out of sync. A pending layout position means additional
               // page rendering is still required.
-              viewItem.complete =
-                viewItem.layoutPositions.length === viewItem.pages.length;
+              this.markSpineItemCompleteIfReady(viewItem);
               loopFrame.breakLoop();
             }
           });
@@ -2321,8 +2335,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             if (!result.nextLayoutPosition) {
               // Issue #1498: keep complete=false while there are pending
               // layout positions without corresponding rendered pages.
-              viewItem.complete =
-                viewItem.layoutPositions.length === viewItem.pages.length;
+              this.markSpineItemCompleteIfReady(viewItem);
             }
             frame.finish(result.pageAndPosition);
           });
@@ -3090,6 +3103,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           pageCounterStarts: [],
         };
         this.spineItems[spineIndex] = viewItem;
+
         frame.finish(viewItem);
         loadingContinuations.forEach((c) => {
           c.schedule(viewItem);
