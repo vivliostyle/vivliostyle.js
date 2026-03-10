@@ -458,11 +458,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
   ) {
     super(element);
-    if (new.target === Column) {
-      // Mark the column as a root column only when instantiated directly
-      // (excluding PageFloatArea).
-      LayoutHelper.setAsRootColumn(this);
-    }
+
+    // Mark this column (including subclasses such as PageFloatArea) as a root column for layout processing
+    LayoutHelper.setAsRootColumn(this);
+
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
     pageFloatLayoutContext.setContainer(this);
@@ -1066,9 +1065,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   private adjustColumnBlockSizeForBlockEndFloats(): void {
-    if (!LayoutHelper.isRootColumn(this)) {
-      return;
-    }
     const initialBlockSize = this.vertical ? this.width : this.height;
     const blockSize = this.getBoxDir() * (this.footnoteEdge - this.beforeEdge);
     if (
@@ -4000,10 +3996,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     }
 
-    if (LayoutHelper.isRootColumn(this)) {
-      // Enable page/column breaking using the browser's multi-column feature.
-      LayoutHelper.setBrowserColumnBreaking(this);
-    }
+    // Enable page/column breaking using the browser's multi-column feature.
+    LayoutHelper.setBrowserColumnBreaking(this);
 
     const frame: Task.Frame<Vtree.ChunkPosition> = Task.newFrame("layout");
 
@@ -4039,20 +4033,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             cont = Task.newResult(null);
           }
           cont.then(() => {
-            if (LayoutHelper.isRootColumn(this)) {
-              // Unset browser's multi-column if it caused column overflow.
-              // (Fix for issue #1637)
-              const rect =
-                this.element.lastElementChild &&
-                this.clientLayout.getElementClientRect(
-                  this.element.lastElementChild,
-                );
-              const columnOver =
-                rect &&
-                LayoutHelper.checkIfBeyondColumnBreaks(rect, this.vertical);
-              if (columnOver) {
-                LayoutHelper.unsetBrowserColumnBreaking(this);
-              }
+            // Unset browser's multi-column if it caused column overflow.
+            // (Fix for issue #1637)
+            const rect =
+              this.element.lastElementChild &&
+              this.clientLayout.getElementClientRect(
+                this.element.lastElementChild,
+              );
+            const columnOver =
+              rect &&
+              LayoutHelper.checkIfBeyondColumnBreaks(rect, this.vertical);
+            if (columnOver) {
+              LayoutHelper.unsetBrowserColumnBreaking(this);
             }
             if (this.pageFloatLayoutContext.isInvalidated()) {
               frame.finish(null);

@@ -79,13 +79,6 @@ export function setAsRootColumn(column: Vtree.Container): void {
 }
 
 /**
- * Check if the column is marked as a root column for Vivliostyle layout processing.
- */
-export function isRootColumn(column: Vtree.Container): boolean {
-  return column.element.hasAttribute("data-vivliostyle-column");
-}
-
-/**
  * Check if the client rectangle of an element or range is located
  * in a column beyond the current one due to the browser's column breaking.
  *

@@ -487,7 +487,7 @@ module.exports = [
       },
       {
         file: "multi-column/multicol-in-page-float.html",
-        title: "Multi-column in page float",
+        title: "Multi-column in page float (Issue #1751)",
       },
     ],
   },
