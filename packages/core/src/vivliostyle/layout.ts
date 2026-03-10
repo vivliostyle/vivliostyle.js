@@ -459,7 +459,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ) {
     super(element);
 
-    // Mark the column as root column
+    // Mark this column (including subclasses such as PageFloatArea) as a root column for layout processing
     LayoutHelper.setAsRootColumn(this);
 
     this.last = element.lastChild;
