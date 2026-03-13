@@ -349,6 +349,93 @@ export function fixOverflowAtForcedColumnBreak(node: Node): void {
 }
 
 /**
+ * Check if the root column's content overflows.
+ *
+ * Note: This check is based on the root column's trailing content
+ * (lastElementChild), not only on a specific target element.
+ */
+export function checkRootColumnOverflow(column: Layout.Column): number {
+  const element = column.element.lastElementChild;
+  const rect = element && column.clientLayout.getElementClientRect(element);
+  if (!rect) {
+    return 0;
+  }
+  const columnOver = checkIfBeyondColumnBreaks(rect, column.vertical);
+  return columnOver;
+}
+
+/**
+ * Fix multi-column box with `column-fill: auto` that was changed to `column-fill: balance`
+ * for layout processing, by restoring `column-fill: auto` and setting block-size to prevent overflow.
+ */
+export function fixAutoFillMultiColumnBox(
+  element: HTMLElement,
+  column: Layout.Column,
+): void {
+  if (element.getAttribute("data-viv-saved-column-fill") !== "auto") {
+    return;
+  }
+  if (checkRootColumnOverflow(column)) {
+    // Do not restore `column-fill: auto` if root-column overflow already exists
+    // even with `column-fill: balance`.
+    return;
+  }
+  const computedStyle = column.clientLayout.getElementComputedStyle(element);
+  const blockSize1 = parseFloat(computedStyle.blockSize);
+
+  // Restore `column-fill: auto` and check if it overflows.
+  // If it overflows, find a non-overflow block-size by binary search.
+  element.style.columnFill = "auto";
+  const blockSize2 = parseFloat(computedStyle.blockSize);
+  const delta = 1 / (column.clientLayout.pixelRatio || 1);
+  let blockSize = NaN;
+  element.style.blockSize = `${blockSize2}px`;
+  if (!checkRootColumnOverflow(column)) {
+    blockSize = blockSize2;
+  } else {
+    element.style.blockSize = `${blockSize1}px`;
+    if (!checkRootColumnOverflow(column)) {
+      // `blockSize1` is non-overflow and `blockSize2` is overflow.
+      // Search the largest non-overflow value in [blockSize1, blockSize2].
+      let ok = blockSize1;
+      let ng = blockSize2;
+      while (ng - ok > delta) {
+        const mid = (ok + ng) / 2;
+        element.style.blockSize = `${mid}px`;
+        if (checkRootColumnOverflow(column)) {
+          ng = mid;
+        } else {
+          ok = mid;
+        }
+      }
+      blockSize = ok;
+      element.style.blockSize = `${blockSize}px`;
+    }
+  }
+  if (isNaN(blockSize)) {
+    // Fallback for unexpected cases where overflow is not resolved while reducing
+    // block-size down to the original balanced size.
+    // Restore the stable `balance` state and keep data-viv-saved-column-fill="auto"
+    // for diagnostics and possible later retry.
+    element.style.blockSize = "";
+    element.style.columnFill = "balance";
+    return;
+  }
+  // Successfully restored `column-fill: auto`.
+  element.removeAttribute("data-viv-saved-column-fill");
+}
+
+export function fixAutoFillMultiColumnBoxes(column: Layout.Column): void {
+  // Restore `column-fill: auto` and set block-size for elements with data-viv-saved-column-fill="auto"
+  const elements = column.element.querySelectorAll(
+    '[data-viv-saved-column-fill="auto"]',
+  );
+  for (const element of elements) {
+    fixAutoFillMultiColumnBox(element as HTMLElement, column);
+  }
+}
+
+/**
  * Calculate the position of the "after" edge in the block-progression.
  * Returns the edge position in pixels if it was determined successfully,
  * and returns NaN if the position could not be determined and the node

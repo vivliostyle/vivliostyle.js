@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Multi-column with column-fill: auto</title>
+    <style>
+      @page {
+        size: 800px 600px;
+        margin: 50px;
+        outline: 1px solid aqua;
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+      :root {
+        font-family: "Times New Roman", serif;
+      }
+      p {
+        margin: 0;
+      }
+      p + p {
+        text-indent: 1em;
+      }
+      section {
+        background-color: beige;
+        margin: 5mm;
+        border: 1mm solid maroon;
+        padding: 2mm;
+        break-after: page;
+      }
+
+      .multicol {
+        columns: 3;
+        column-fill: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test column-fill: auto</h1>
+    <p>
+      The next section is a multi-column container with column-fill: auto. No
+      forced page break after this paragraph, so the next section should start
+      just after this one, on the same page.
+    </p>
+    <section class="multicol">
+      <h2>Multi-column section with column-fill:auto</h2>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras in neque
+        vel mi aliquam auctor eu sit amet orci. Ut scelerisque pulvinar lacinia.
+        Ut eget facilisis augue. Ut vitae arcu sed ipsum varius sagittis nec a
+        tortor. Cras condimentum quam enim, nec posuere nisi imperdiet et.
+        Suspendisse lectus sem, congue vel purus at, efficitur semper tellus.
+        Nulla scelerisque aliquam massa, vel ornare elit bibendum in.
+      </p>
+      <p>
+        Sed sed quam congue, condimentum neque eu, pellentesque ex. Praesent ac
+        purus mollis, egestas erat eu, porttitor augue. Aliquam lectus quam,
+        vehicula sit amet consectetur non, iaculis ut justo. Phasellus congue
+        porta lorem, quis faucibus enim iaculis sit amet. Fusce auctor feugiat
+        quam, id posuere elit fringilla eu. Integer justo elit, varius ut elit
+        vitae, mollis auctor neque. Curabitur feugiat ut eros eu fermentum.
+        Vivamus iaculis, massa sit amet facilisis bibendum, ipsum odio rhoncus
+        orci, at consectetur dolor purus et felis. Cras commodo nulla ex, vel
+        maximus nulla finibus vel. Nunc condimentum purus dui, ut dapibus augue
+        sagittis sit amet. Nullam ac tellus malesuada, ultrices odio vitae,
+        dignissim nunc. Mauris elementum diam imperdiet ex porta, ac ultrices
+        justo ultrices. Nam hendrerit blandit pretium. Suspendisse aliquet, enim
+        at tempor rhoncus, sem mauris sollicitudin nisl, vitae pharetra neque
+        ipsum ac felis. In hac habitasse platea dictumst. Morbi mollis orci
+        rutrum ligula viverra, a aliquam nibh porta.
+      </p>
+      <p>
+        Morbi justo magna, viverra a porta quis, facilisis sit amet dolor. Morbi
+        ullamcorper massa eget est dignissim, id lacinia nisl luctus. Quisque
+        pulvinar tempor mi, non iaculis erat. Nulla bibendum, elit at pharetra
+        porta, lectus lorem faucibus ex, a maximus neque ex in sapien. Nulla
+        commodo maximus ligula, tincidunt euismod nulla congue ac. Nam quam
+        felis, mollis id luctus quis, vulputate nec enim. Integer dolor risus,
+        facilisis ac metus sit amet, suscipit finibus lectus.
+      </p>
+      <p>
+        Morbi porta diam nec tincidunt porttitor. Quisque efficitur tortor
+        libero, tincidunt eleifend tortor sodales in. In hac habitasse platea
+        dictumst. Nullam sapien sapien, scelerisque ac volutpat sit amet,
+        vestibulum interdum est. Nunc massa turpis, fermentum ac est feugiat,
+        hendrerit varius nibh. Etiam malesuada cursus molestie. Praesent
+        blandit, erat sed faucibus tristique, est nunc viverra orci, eu molestie
+        orci ligula ac risus. Donec massa est, cursus quis ante vulputate,
+        suscipit pellentesque nisl. Praesent pharetra imperdiet elit a iaculis.
+        Sed eu tempor justo. Quisque suscipit venenatis volutpat.
+      </p>
+      <p>
+        Maecenas scelerisque non lectus hendrerit elementum. Mauris id aliquet
+        dui. Phasellus pharetra, massa faucibus porta lobortis, risus leo cursus
+        elit, congue placerat neque nunc eget elit. Donec vel tempus velit. In
+        hac habitasse platea dictumst. Aenean efficitur mollis finibus. In
+        vestibulum tempus dui. Integer fermentum, libero ut tincidunt
+        pellentesque, mi augue lacinia lorem, id lacinia massa sapien a quam.
+        Etiam molestie porta diam, quis pellentesque ipsum efficitur id.
+      </p>
+    </section>
+
+    <section class="multicol">
+      This is another multi-column section with column-fill:auto. This
+      multi-column section contains only one long text node. Lorem ipsum dolor
+      sit amet, consectetur adipiscing elit. Cras in neque vel mi aliquam auctor
+      eu sit amet orci. Ut scelerisque pulvinar lacinia. Ut eget facilisis
+      augue. Ut vitae arcu sed ipsum varius sagittis nec a tortor. Cras
+      condimentum quam enim, nec posuere nisi imperdiet et. Suspendisse lectus
+      sem, congue vel purus at, efficitur semper tellus. Nulla scelerisque
+      aliquam massa, vel ornare elit bibendum in. Sed sed quam congue,
+      condimentum neque eu, pellentesque ex. Praesent ac purus mollis, egestas
+      erat eu, porttitor augue. Aliquam lectus quam, vehicula sit amet
+      consectetur non, iaculis ut justo. Phasellus congue porta lorem, quis
+      faucibus enim iaculis sit amet. Fusce auctor feugiat quam, id posuere elit
+      fringilla eu. Integer justo elit, varius ut elit vitae, mollis auctor
+      neque. Curabitur feugiat ut eros eu fermentum. Vivamus iaculis, massa sit
+      amet facilisis bibendum, ipsum odio rhoncus orci, at consectetur dolor
+      purus et felis. Cras commodo nulla ex, vel maximus nulla finibus vel. Nunc
+      condimentum purus dui, ut dapibus augue sagittis sit amet. Nullam ac
+      tellus malesuada, ultrices odio vitae, dignissim nunc. Mauris elementum
+      diam imperdiet ex porta, ac ultrices justo ultrices. Nam hendrerit blandit
+      pretium. Suspendisse aliquet, enim at tempor rhoncus, sem mauris
+      sollicitudin nisl, vitae pharetra neque ipsum ac felis. In hac habitasse
+      platea dictumst. Morbi mollis orci rutrum ligula viverra, a aliquam nibh
+      porta. Morbi justo magna, viverra a porta quis, facilisis sit amet dolor.
+      Morbi ullamcorper massa eget est dignissim, id lacinia nisl luctus.
+      Quisque pulvinar tempor mi, non iaculis erat. Nulla bibendum, elit at
+      pharetra porta, lectus lorem faucibus ex, a maximus neque ex in sapien.
+      Nulla commodo maximus ligula, tincidunt euismod nulla congue ac. Nam quam
+      felis, mollis id luctus quis, vulputate nec enim. Integer dolor risus,
+      facilisis ac metus sit amet, suscipit finibus lectus. Morbi porta diam nec
+      tincidunt porttitor. Quisque efficitur tortor libero, tincidunt eleifend
+      tortor sodales in. In hac habitasse platea dictumst. Nullam sapien sapien,
+      scelerisque ac volutpat sit amet, vestibulum interdum est. Nunc massa
+      turpis, fermentum ac est feugiat, hendrerit varius nibh. Etiam malesuada
+      cursus molestie. Praesent blandit, erat sed faucibus tristique, est nunc
+      viverra orci, eu molestie orci ligula ac risus. Donec massa est, cursus
+      quis ante vulputate, suscipit pellentesque nisl. Praesent pharetra
+      imperdiet elit a iaculis. Sed eu tempor justo. Quisque suscipit venenatis
+      volutpat. Maecenas scelerisque non lectus hendrerit elementum. Mauris id
+      aliquet dui. Phasellus pharetra, massa faucibus porta lobortis, risus leo
+      cursus elit, congue placerat neque nunc eget elit. Donec vel tempus velit.
+      In hac habitasse platea dictumst. Aenean efficitur mollis finibus. In
+      vestibulum tempus dui. Integer fermentum, libero ut tincidunt
+      pellentesque, mi augue lacinia lorem, id lacinia massa sapien a quam.
+      Etiam molestie porta diam, quis pellentesque ipsum efficitur id.
+    </section>
+  </body>
+</html>
