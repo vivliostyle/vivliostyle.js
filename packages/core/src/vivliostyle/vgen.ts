@@ -1345,6 +1345,27 @@ export class ViewFactory
           result = this.createElement(ns, tag);
         }
 
+        if (
+          !isRoot &&
+          isMultiColumn &&
+          computedStyle["column-fill"] === Css.ident.auto
+        ) {
+          const blockSize = this.nodeContext.vertical
+            ? computedStyle["width"]
+            : computedStyle["height"];
+          if (
+            !blockSize ||
+            blockSize === Css.ident.auto ||
+            Css.isDefaultingValue(blockSize)
+          ) {
+            // To make `column-fill: auto` with auto block size work on non-root multi-column,
+            // we change it to `balance` here, and after layout, we change it back.
+            // (Issue #1720, #1758)
+            result.setAttribute("data-viv-saved-column-fill", "auto");
+            computedStyle["column-fill"] = Css.ident.balance;
+          }
+        }
+
         if (tag != originalTag) {
           result.setAttribute("data-vivliostyle-original-tag", originalTag);
           if (originalTag === "html" || originalTag === "body") {

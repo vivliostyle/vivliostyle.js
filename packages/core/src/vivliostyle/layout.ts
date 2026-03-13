@@ -1081,94 +1081,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
   }
 
-  private setMaxBlockSizeForNonRootMultiColumn(element: HTMLElement): void {
-    if (Base.browserType !== "chromium") {
-      // On Firefox/Safari, overflow columns in nested multicol are handled
-      // inside the same multicol container, so this Chromium-specific
-      // workaround causes horizontal overflow.
-      return;
-    }
-
-    if (element.hasAttribute("data-vivliostyle-column")) {
-      // Root column element.
-      return;
-    }
-
-    const style = this.clientLayout.getElementComputedStyle(element);
-    if (style.columnFill !== "auto") {
-      return;
-    }
-    const authorSpecifiedMaxBlockSize = this.vertical
-      ? element.style.maxWidth
-      : element.style.maxHeight;
-    if (authorSpecifiedMaxBlockSize && authorSpecifiedMaxBlockSize !== "none") {
-      // Respect author-specified max-block-size.
-      return;
-    }
-
-    const isMultiColumn =
-      !isNaN(parseFloat(style.columnCount)) ||
-      !isNaN(parseFloat(style.columnWidth));
-    if (!isMultiColumn) {
-      return;
-    }
-
-    const rect = this.clientLayout.getElementClientRect(element);
-    if (!rect) {
-      return;
-    }
-
-    let maxBlockSize =
-      this.getBoxDir() * (this.footnoteEdge - this.getBeforeEdge(rect));
-
-    if (style.boxSizing !== "border-box") {
-      const blockInsets = this.vertical
-        ? this.parseComputedLength(style.borderRightWidth) +
-          this.parseComputedLength(style.paddingRight) +
-          this.parseComputedLength(style.borderLeftWidth) +
-          this.parseComputedLength(style.paddingLeft)
-        : this.parseComputedLength(style.borderTopWidth) +
-          this.parseComputedLength(style.paddingTop) +
-          this.parseComputedLength(style.borderBottomWidth) +
-          this.parseComputedLength(style.paddingBottom);
-      maxBlockSize -= blockInsets;
-    }
-
-    // Subtract 1 pixel to prevent overflow due to precision issue.
-    // (Issue #1720 case 3)
-    maxBlockSize -= 1 / (this.clientLayout.pixelRatio || 1);
-
-    if (maxBlockSize > 0 && isFinite(maxBlockSize)) {
-      Base.setCSSProperty(element, "max-block-size", `${maxBlockSize}px`);
-    }
-  }
-
-  private adjustMaxBlockSizeForAncestorNonRootMultiColumn(
-    nodeContext: Vtree.NodeContext,
-  ): void {
-    if (nodeContext.after || !nodeContext.viewNode) {
-      return;
-    }
-
-    const node =
-      nodeContext.viewNode.nodeType === 1
-        ? (nodeContext.viewNode as Element)
-        : nodeContext.viewNode.parentElement;
-    if (!node) {
-      return;
-    }
-
-    const nonRootMultiColumn =
-      LayoutHelper.findAncestorNonRootMultiColumn(node);
-    if (!nonRootMultiColumn) {
-      return;
-    }
-
-    this.setMaxBlockSizeForNonRootMultiColumn(
-      nonRootMultiColumn as HTMLElement,
-    );
-  }
-
   /**
    * @param nodeContext position after the block
    * @param checkPoints array of possible breaking points.
@@ -3269,8 +3181,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     frame
       .loopWithFrame((loopFrame) => {
         while (nodeContext) {
-          this.adjustMaxBlockSizeForAncestorNonRootMultiColumn(nodeContext);
-
           Asserts.assert(nodeContext.formattingContext);
           const layoutProcessor =
             new LayoutProcessor.LayoutProcessorResolver().find(
@@ -3423,6 +3333,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             const viewElement = nodeContext.viewNode as HTMLElement;
             const style = viewElement.style;
             if (nodeContext.after) {
+              // Fix multi-column box with `column-fill: auto` (Issue #1720, #1758)
+              LayoutHelper.fixAutoFillMultiColumnBox(viewElement, this);
+
               if (nodeContext.floatSide) {
                 // Restore break-after:avoid* value at before the float
                 // (Fix for issue #904)
@@ -3508,10 +3421,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             } else {
               // Leading edge
-              this.setMaxBlockSizeForNonRootMultiColumn(
-                nodeContext.viewNode as HTMLElement,
-              );
-
               leadingEdgeContexts.push(nodeContext.copy());
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
@@ -4033,17 +3942,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             cont = Task.newResult(null);
           }
           cont.then(() => {
-            // Unset browser's multi-column if it caused column overflow.
-            // (Fix for issue #1637)
-            const rect =
-              this.element.lastElementChild &&
-              this.clientLayout.getElementClientRect(
-                this.element.lastElementChild,
-              );
-            const columnOver =
-              rect &&
-              LayoutHelper.checkIfBeyondColumnBreaks(rect, this.vertical);
-            if (columnOver) {
+            if (LayoutHelper.isUsingBrowserColumnBreaking(this)) {
+              // Fix multi-column boxes with `column-fill: auto` (Issue #1720, #1758)
+              LayoutHelper.fixAutoFillMultiColumnBoxes(this);
+
+              // Unset browser's multi-column (Issue #1637, #1747)
               LayoutHelper.unsetBrowserColumnBreaking(this);
             }
             if (this.pageFloatLayoutContext.isInvalidated()) {

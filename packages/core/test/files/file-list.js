@@ -489,6 +489,10 @@ module.exports = [
         file: "multi-column/multicol-in-page-float.html",
         title: "Multi-column in page float (Issue #1751)",
       },
+      {
+        file: "multi-column/multicol-column-fill-auto.html",
+        title: "column-fill: auto in non-root multicol (Issue #1720, #1758)",
+      },
     ],
   },
   {
