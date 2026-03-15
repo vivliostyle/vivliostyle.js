@@ -22,6 +22,14 @@
   </head>
 
   <body>
+    <h1>List items with text-spacing trim-start</h1>
+    <p>
+      This page tests that opening parentheses at the start of list items do not have extra leading spacing
+      when <code>text-spacing-trim: trim-start</code> is applied and markers are outside. For each list below,
+      items beginning with <code>（</code> (or with an opening quote followed by <code>（</code>) should appear
+      directly after the marker, with no additional space between the marker and the opening parenthesis.
+    </p>
+
     <ul>
       <li>ああああ</li>
       <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
