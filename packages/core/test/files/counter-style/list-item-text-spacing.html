@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>List-item with text-spacing</title>
+    <style>
+      :root {
+        text-spacing-trim: trim-start;
+        text-autospace: normal;
+      }
+      ul,
+      ol {
+        list-style-position: outside;
+      }
+      .cjk-decimal {
+        list-style: cjk-decimal;
+      }
+      .custom-marker {
+        list-style: "マーカー";
+      }
+      code {
+        background-color: #eee;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>List items with text-spacing trim-start</h1>
+    <p>
+      This page tests that opening parentheses at the start of list items do not have extra leading spacing
+      when <code>text-spacing-trim: trim-start</code> is applied and markers are outside.
+      For each list below, items beginning with <code>「</code> or <code>（</code> should appear
+      directly after the marker, with no additional space between the marker and the opening parenthesis.
+    </p>
+
+    <ul>
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ul>
+
+    <ol>
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ol>
+
+    <ol class="cjk-decimal">
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ol>
+
+    <ul class="custom-marker">
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ul>
+  </body>
+
+</html>
