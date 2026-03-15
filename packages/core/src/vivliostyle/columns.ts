@@ -203,7 +203,9 @@ export function reduceContainerSize(
   }
   if (container.vertical) {
     const outerWidth = parseFloat(container.element.style?.width);
-    container.originX = outerWidth - container.width;
+    if (isFinite(outerWidth)) {
+      container.originX = outerWidth - container.width;
+    }
   }
 }
 
