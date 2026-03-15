@@ -2697,11 +2697,16 @@ export class ViewFactory
         // Also propagate to the layout box so that page float areas laid out
         // there (e.g. during stash re-layout before the root element is
         // processed on the new page) inherit the correct values. (Issue #1752)
-        Base.setCSSProperty(
-          this.viewport.layoutBox,
-          propName,
-          value.toString(),
-        );
+        // Exclude writing-mode and direction: these affect page box positioning
+        // inside the layout box (e.g. vertical-rl right-aligns children) and
+        // are already set on the page box when needed.
+        if (propName !== "writing-mode" && propName !== "direction") {
+          Base.setCSSProperty(
+            this.viewport.layoutBox,
+            propName,
+            value.toString(),
+          );
+        }
       } else {
         Base.setCSSProperty(target, propName, value.toString());
       }
