@@ -493,6 +493,15 @@ module.exports = [
         file: "multi-column/multicol-column-fill-auto.html",
         title: "column-fill: auto in non-root multicol (Issue #1720, #1758)",
       },
+      {
+        file: "multi-column/column-rule-page-floats-footnotes.html",
+        title: "Column rule with page floats and footnotes (Issue #1493)",
+      },
+      {
+        file: "multi-column/column-rule-page-floats-footnotes-vertical.html",
+        title:
+          "Column rule with page floats and footnotes (vertical writing-mode) (Issue #1493)",
+      },
     ],
   },
   {

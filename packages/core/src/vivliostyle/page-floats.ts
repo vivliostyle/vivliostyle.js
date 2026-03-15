@@ -1615,6 +1615,39 @@ export class PageFloatLayoutContext
     );
   }
 
+  getBlockEndEdgeOfBlockStartFloats(): number {
+    let context: PageFloatLayoutContext = this;
+    let container: Vtree.Container | null = null;
+    while (context && !container) {
+      container = context.container;
+      context = context.parent;
+    }
+    const isVertical = !!container?.vertical;
+    let edge = NaN;
+    this.floatFragments
+      .filter((fragment) => fragment.floatSide.includes("block-start"))
+      .forEach((fragment) => {
+        const rect = fragment.getOuterRect();
+        const fragmentEdge = isVertical ? rect.x1 : rect.y2;
+        edge = isFinite(edge)
+          ? isVertical
+            ? Math.min(edge, fragmentEdge)
+            : Math.max(edge, fragmentEdge)
+          : fragmentEdge;
+      });
+    if (this.parent) {
+      const parentEdge = this.parent.getBlockEndEdgeOfBlockStartFloats();
+      if (isFinite(parentEdge)) {
+        edge = isFinite(edge)
+          ? isVertical
+            ? Math.min(edge, parentEdge)
+            : Math.max(edge, parentEdge)
+          : parentEdge;
+      }
+    }
+    return edge;
+  }
+
   getBlockStartEdgeOfBlockEndFloats(): number {
     const isVertical = this.getContainer().vertical;
     return this.floatFragments

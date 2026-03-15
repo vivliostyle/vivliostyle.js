@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Column rule with page floats and footnotes</title>
+<style>
+@page {
+  size: A5;
+  margin: 20mm;
+}
+:root {
+  font: 1rem/1.25 "Times New Roman", serif;
+  column-count: 3;
+  column-gap: 20px;
+  column-rule: 2px solid maroon;
+}
+p {
+  text-indent: 1em;
+  widows: 1;
+  orphans: 1;
+  margin-block: 0;
+}
+.footnote {
+  float: footnote;
+  font: 0.85rem/1.25 "Times New Roman", serif;
+  text-indent: 0;
+}
+.float-page-top {
+  float-reference: page;
+  float: block-start;
+  text-align: center;
+  padding: 5px;
+  border: solid 3px olive;
+  margin-block-end: 3px;
+}
+.float-page-bottom {
+  float-reference: page;
+  float: block-end;
+  text-align: center;
+  padding: 5px;
+  border: solid 3px olive;
+  margin-block-start: 3px;
+}
+.float-column-top {
+  float-reference: column;
+  float: block-start;
+  text-align: center;
+  padding: 5px;
+  border: solid 3px orange;
+  margin-block-end: 3px;
+}
+</style>
+</head>
+
+<body>
+<p>The quick, brown fox jumps over a lazy dog<span class="footnote">Fox nymphs grab quick-jived waltz. Brick quiz whangs jumpy veldt fox. Bright vixens jump; dozy fowl quack.</span>. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs. Waltz, bad nymph, for quick jigs vex!</p>
+
+<div class="float-page-top">Float on page top</div>
+
+<p>Flummoxed by job, kvetching W. zaps Iraq. Cozy sphinx waves quart jug of bad milk.<span class="footnote">A very bad quack might jinx zippy fowls. Few quips galvanized the mock jury box. Quick brown dogs jump over the lazy fox.</span> DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs. Waltz, bad nymph, for quick jigs vex! Fox nymphs grab quick-jived waltz. Brick quiz whangs jumpy veldt fox. Bright vixens jump; dozy fowl quack. Quick wafting zephyrs vex bold Jim.</p>
+
+<div class="float-page-bottom">Float on page bottom</div>
+
+<p>How quickly daft jumping zebras vex. Two driven jocks help fax my big quiz. Quick, Baz, get my woven flax jodhpurs! "Now fax quiz Jack! " my brave ghost pled. Five quacking zephyrs jolt my wax bed.</p>
+
+<div class="float-column-top">Float on column top</div>
+
+<p>The jay, pig, fox, zebra, and my wolves quack! Blowzy red vixens fight for a quick jump. A wizard's job is to vex chumps quickly in fog. Watch "Jeopardy!"<span class="footnote">Joaquin Phoenix was gazed by MTV for luck.</span>, Alex Trebek's fun TV quiz game. Woven silk pyjamas exchanged for olive quartz. Brawny gods just flocked up to quiz and vex him. Adjusting quiver and bow, Zompyc killed the fox. My faxed joke won a pager in the cable TV quiz show.<span class="footnote">My girl wove six dozen plaid jackets before she quit. Six big devils from Japan quickly forgot how to waltz. Big July earthquakes confound zany experimental vow.</span></p>
+
+<div class="float-column-top">Another float on column top</div>
+
+<p>Amazingly few discotheques provide jukeboxes. Six big devils from Japan quickly forgot how to waltz. Big July earthquakes confound zany experimental vow.</p>
+
+<div class="float-page-top">Another float on page top</div>
+
+<p>Foxy parsons quiz and cajole the lovably dim wiki-girl. Have a pick<span class="footnote">Sixty zippers were quickly picked from the woven jute bag.</span>: twenty six letters - no forcing a jumbled quiz! Crazy<span class="footnote">All questions asked by five watch experts amazed the judge. Jack quietly moved up front and seized the big ball of wax. The quick, brown fox jumps over a lazy dog.</span> Fredericka bought many very exquisite opal jewels.</p>
+
+<p>A quick movement of the enemy will jeopardize six gunboats. My girl wove six dozen plaid jackets before she quit. Six big devils from Japan quickly forgot how to waltz. Big July earthquakes confound zany experimental vow.</p>
+</body>
+</html>

@@ -766,6 +766,7 @@ export namespace PageFloats {
     ): string | null;
     getFloatFragmentExclusions(): GeometryUtil.Shape[];
     getMaxReachedAfterEdge(): number;
+    getBlockEndEdgeOfBlockStartFloats(): number;
     getBlockStartEdgeOfBlockEndFloats(): number;
     getPageFloatClearEdge(clear: string, column: Layout.Column): number;
     getPageFloatPlacementCondition(
