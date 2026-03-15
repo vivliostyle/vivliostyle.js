@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>List-item with text-spacing</title>
+    <style>
+      :root {
+        text-spacing-trim: trim-start;
+        text-autospace: normal;
+      }
+      .cjk-decimal {
+        list-style: cjk-decimal;
+      }
+      .custom-marker {
+        list-style: "マーカー";
+      }
+    </style>
+  </head>
+
+  <body>
+    <ul>
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ul>
+
+    <ol>
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ol>
+
+    <ol class="cjk-decimal">
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ol>
+
+    <ul class="custom-marker">
+      <li>ああああ</li>
+      <li>「あああああああああああああああ。」「（あああああああああああ。）」</li>
+      <li>（ああ）ああ</li>
+      <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit tempora enim ratione consectetur totam.</li>
+    </ul>
+  </body>
+
+</html>

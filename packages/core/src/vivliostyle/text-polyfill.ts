@@ -470,7 +470,7 @@ class TextSpacingPolyfill {
         prevNode = p.viewNode?.previousSibling;
         if (prevNode) {
           if (
-            prevNode.nodeType === 3 &&
+            prevNode.nodeType === Node.TEXT_NODE &&
             /^[ \t\r\n\f]*$/.test(prevNode.textContent) &&
             p.whitespace !== Vtree.Whitespace.PRESERVE
           ) {
@@ -484,7 +484,7 @@ class TextSpacingPolyfill {
       }
 
       while (prevNode) {
-        if (prevNode.nodeType === 1) {
+        if (prevNode.nodeType === Node.ELEMENT_NODE) {
           if ((prevNode as Element).localName === "br") {
             return true;
           }
@@ -492,7 +492,7 @@ class TextSpacingPolyfill {
           if (display && display !== "inline") {
             return !/^(inline|ruby)\b/.test(display);
           }
-        } else if (prevNode.nodeType === 3) {
+        } else if (prevNode.nodeType === Node.TEXT_NODE) {
           if (p.whitespace === Vtree.Whitespace.PRESERVE) {
             if (/\n$/.test(prevNode.textContent)) {
               return true;
@@ -559,27 +559,32 @@ class TextSpacingPolyfill {
         let isLastBeforeForcedLineBreak = false;
         let isLastInBlock = false;
 
+        // Check list marker with `list-style-position: outside` which should
+        // be treated like a forced line break. (Issue #1763)
+        function isOutsideListMarker(element: Element): boolean {
+          return element.classList.contains("_viv-marker-outside");
+        }
+
         function checkIfFirstAfterForcedLineBreak(
           prevP: Vtree.NodeContext,
         ): boolean {
-          if (prevP.viewNode?.nodeType === 1) {
-            return (prevP.viewNode as Element).localName === "br";
+          if (prevP.viewNode?.nodeType === Node.ELEMENT_NODE) {
+            const prevElem = prevP.viewNode as Element;
+            return prevElem.localName === "br" || isOutsideListMarker(prevElem);
           }
-          if (prevP.viewNode?.nodeType === 3) {
+          if (prevP.viewNode?.nodeType === Node.TEXT_NODE) {
+            const prevTextNode = prevP.viewNode as Text;
             if (prevP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (/\n$/.test(prevP.viewNode.textContent)) {
+              if (/\n$/.test(prevTextNode.textContent)) {
                 return true;
               }
             } else if (prevP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/\n[ \t\r\n\f]*$/.test(prevP.viewNode.textContent)) {
+              if (/\n[ \t\r\n\f]*$/.test(prevTextNode.textContent)) {
                 return true;
               }
             }
-            if (
-              (prevP.viewNode as Element).previousElementSibling?.localName ===
-              "br"
-            ) {
-              return Vtree.canIgnore(prevP.viewNode, prevP.whitespace);
+            if (prevTextNode.previousElementSibling?.localName === "br") {
+              return Vtree.canIgnore(prevTextNode, prevP.whitespace);
             }
           }
           return false;
@@ -588,23 +593,23 @@ class TextSpacingPolyfill {
         function checkIfLastBeforeForcedLineBreak(
           nextP: Vtree.NodeContext,
         ): boolean {
-          if (nextP.viewNode?.nodeType === 1) {
-            return (nextP.viewNode as Element).localName === "br";
+          if (nextP.viewNode?.nodeType === Node.ELEMENT_NODE) {
+            const nextElem = nextP.viewNode as Element;
+            return nextElem.localName === "br" || isOutsideListMarker(nextElem);
           }
-          if (nextP.viewNode?.nodeType === 3) {
+          if (nextP.viewNode?.nodeType === Node.TEXT_NODE) {
+            const nextTextNode = nextP.viewNode as Text;
             if (nextP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (/^\n/.test(nextP.viewNode.textContent)) {
+              if (/^\n/.test(nextTextNode.textContent)) {
                 return true;
               }
             } else if (nextP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/^[ \t\r\n\f]*\n/.test(nextP.viewNode.textContent)) {
+              if (/^[ \t\r\n\f]*\n/.test(nextTextNode.textContent)) {
                 return true;
               }
             }
-            if (
-              (nextP.viewNode as Element).nextElementSibling?.localName === "br"
-            ) {
-              return Vtree.canIgnore(nextP.viewNode, nextP.whitespace);
+            if (nextTextNode.nextElementSibling?.localName === "br") {
+              return Vtree.canIgnore(nextTextNode, nextP.whitespace);
             }
           }
           return false;
@@ -644,7 +649,7 @@ class TextSpacingPolyfill {
           }
           if (
             (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
-            (prevP.viewNode?.nodeType === 1 &&
+            (prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
               ((prevP.viewNode as Element).localName === "br" ||
                 Base.mediaTags[(prevP.viewNode as Element).localName]))
           ) {
@@ -675,7 +680,7 @@ class TextSpacingPolyfill {
           }
           if (
             (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
-            (nextP.viewNode?.nodeType === 1 &&
+            (nextP.viewNode?.nodeType === Node.ELEMENT_NODE &&
               ((nextP.viewNode as Element).localName === "br" ||
                 Base.mediaTags[(nextP.viewNode as Element).localName]))
           ) {
@@ -1068,7 +1073,7 @@ class TextSpacingPolyfill {
       node1: Node,
       node2: Node,
     ): boolean {
-      if (node1.nodeType === 1) {
+      if (node1.nodeType === Node.ELEMENT_NODE) {
         const style = document.defaultView.getComputedStyle(node1 as Element);
         if (
           parseFloat(style.marginInlineEnd) ||
@@ -1082,7 +1087,7 @@ class TextSpacingPolyfill {
       if (parent1 && !parent1.contains(node2)) {
         return checkNonZeroMarginBorderPadding(parent1, node2);
       }
-      if (node2.nodeType === 1) {
+      if (node2.nodeType === Node.ELEMENT_NODE) {
         const style = document.defaultView.getComputedStyle(node2 as Element);
         if (
           parseFloat(style.marginInlineStart) ||

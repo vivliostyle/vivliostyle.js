@@ -943,6 +943,10 @@ module.exports = [
         file: "counter-style/list-style-type-bullet-vertical.html",
         title: "list-style-type bullet marker (vertical writing-mode)",
       },
+      {
+        file: "counter-style/list-item-text-spacing.html",
+        title: "List-item with text-spacing (Issue #1763)",
+      },
     ],
   },
 ];
