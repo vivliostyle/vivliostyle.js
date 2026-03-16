@@ -39,6 +39,7 @@ import * as Plugin from "./plugin";
 import * as PseudoElement from "./pseudo-element";
 import * as RepetitiveElement from "./repetitive-element";
 import * as Scripts from "./scripts";
+import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import * as Urls from "./urls";
@@ -171,17 +172,6 @@ export class ViewFactory
     );
   }
 
-  private isSemanticFootnoteNoteref(element: Element): boolean {
-    const role = element.getAttribute("role");
-    if (role && role.match(/(^|\s)doc-noteref($|\s)/)) {
-      return true;
-    }
-    const epubType =
-      element.getAttributeNS(Base.NS.epub, "type") ||
-      element.getAttribute("epub:type");
-    return !!(epubType && epubType.match(/(^|\s)noteref($|\s)/));
-  }
-
   private initializeSemanticFootnoteFirstRefOffsets(ownerDocument: Document) {
     if (this.semanticFootnoteFirstRefOffsetsInitialized.value) {
       return;
@@ -189,7 +179,7 @@ export class ViewFactory
     const anchorElements = ownerDocument.getElementsByTagName("a");
     for (let i = 0; i < anchorElements.length; i++) {
       const anchor = anchorElements.item(i);
-      if (!this.isSemanticFootnoteNoteref(anchor)) {
+      if (!SemanticFootnote.isSemanticFootnoteNoterefElement(anchor)) {
         continue;
       }
       const anchorHref =
@@ -217,7 +207,10 @@ export class ViewFactory
    * True only for the first semantic footnote reference to the same target.
    */
   private shouldGenerateSemanticFootnote(element: Element): boolean {
-    if (element.localName !== "a" || !this.isSemanticFootnoteNoteref(element)) {
+    if (
+      element.localName !== "a" ||
+      !SemanticFootnote.isSemanticFootnoteNoterefElement(element)
+    ) {
       return true;
     }
     const href =
@@ -2488,17 +2481,10 @@ export class ViewFactory
    */
   private isSemanticFootnoteElement(footnoteNodeContext: Vtree.NodeContext) {
     const sourceNode = footnoteNodeContext.sourceNode;
-    if (!(sourceNode instanceof Element) || sourceNode.localName !== "aside") {
-      return false;
-    }
-    const role = sourceNode.getAttribute("role");
-    if (role && role.match(/(^|\s)doc-footnote($|\s)/)) {
-      return true;
-    }
-    const epubType =
-      sourceNode.getAttributeNS(Base.NS.epub, "type") ||
-      sourceNode.getAttribute("epub:type");
-    return !!(epubType && epubType.match(/(^|\s)footnote($|\s)/));
+    return (
+      sourceNode instanceof Element &&
+      SemanticFootnote.isSemanticFootnoteElement(sourceNode)
+    );
   }
 
   /**
