@@ -201,12 +201,6 @@ export function reduceContainerSize(
   } else {
     setBlockSize(container, getBlockSize(container) - 1);
   }
-  if (container.vertical) {
-    const outerWidth = parseFloat(container.element.style?.width);
-    if (isFinite(outerWidth)) {
-      container.originX = outerWidth - container.width;
-    }
-  }
 }
 
 export class BalanceLastColumnBalancer extends ColumnBalancer {
