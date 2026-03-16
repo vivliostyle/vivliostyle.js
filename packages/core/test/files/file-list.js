@@ -801,8 +801,18 @@ module.exports = [
         title: "DPUB footnotes with target-counter() (Issue #1700)",
       },
       {
+        file: "footnotes/dpub-footnote-duplicate-reference.html",
+        title:
+          "DPUB noteref duplicate reference should not duplicate footnote body (Issue #1767)",
+      },
+      {
         file: "footnotes/epub-footnotes-static-number.html",
         title: "EPUB footnotes (static numbering)",
+      },
+      {
+        file: "footnotes/epub-footnote-duplicate-reference.xhtml",
+        title:
+          "EPUB noteref duplicate reference should not duplicate footnote body (Issue #1767)",
       },
       {
         file: "footnotes/default-footnote-pseudo-styles.html",

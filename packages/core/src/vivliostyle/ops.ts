@@ -314,6 +314,9 @@ export class StyleInstance
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
+  private semanticFootnoteFirstRefOffsets: Map<string, number | null> =
+    new Map();
+  private semanticFootnoteFirstRefOffsetsInitialized = { value: false };
   pageGroupPageCounts: {
     [pageType: string]: Map<Element, number>;
   } = Object.create(null);
@@ -1973,6 +1976,8 @@ export class StyleInstance
       this.documentURLTransformer,
       this.style.pageProps,
       this.currentCascadedPageStyle,
+      this.semanticFootnoteFirstRefOffsets,
+      this.semanticFootnoteFirstRefOffsetsInitialized,
     );
     let columnIndex = 0;
     let column: LayoutType.Column = null;

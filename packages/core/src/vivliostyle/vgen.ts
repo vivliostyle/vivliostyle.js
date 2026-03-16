@@ -135,6 +135,13 @@ export class ViewFactory
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly pageProps?: { [key: string]: CssCascade.ElementStyle },
     public readonly cascadedPageStyle?: CssCascade.ElementStyle,
+    private readonly semanticFootnoteFirstRefOffsets: Map<
+      string,
+      number | null
+    > = new Map(),
+    private readonly semanticFootnoteFirstRefOffsetsInitialized: {
+      value: boolean;
+    } = { value: false },
   ) {
     super();
     this.document = viewport.document;
@@ -159,7 +166,76 @@ export class ViewFactory
       this.documentURLTransformer,
       this.pageProps,
       this.cascadedPageStyle,
+      this.semanticFootnoteFirstRefOffsets,
+      this.semanticFootnoteFirstRefOffsetsInitialized,
     );
+  }
+
+  private isSemanticFootnoteNoteref(element: Element): boolean {
+    const role = element.getAttribute("role");
+    if (role && role.match(/(^|\s)doc-noteref($|\s)/)) {
+      return true;
+    }
+    const epubType =
+      element.getAttributeNS(Base.NS.epub, "type") ||
+      element.getAttribute("epub:type");
+    return !!(epubType && epubType.match(/(^|\s)noteref($|\s)/));
+  }
+
+  private initializeSemanticFootnoteFirstRefOffsets(ownerDocument: Document) {
+    if (this.semanticFootnoteFirstRefOffsetsInitialized.value) {
+      return;
+    }
+    const anchorElements = ownerDocument.getElementsByTagName("a");
+    for (let i = 0; i < anchorElements.length; i++) {
+      const anchor = anchorElements.item(i);
+      if (!this.isSemanticFootnoteNoteref(anchor)) {
+        continue;
+      }
+      const anchorHref =
+        anchor.getAttribute("href") ||
+        anchor.getAttributeNS(Base.NS.XLINK, "href");
+      if (!anchorHref) {
+        continue;
+      }
+      const resolvedHref = Base.resolveURL(anchorHref, this.xmldoc.url);
+      if (resolvedHref === "#") {
+        continue;
+      }
+      if (this.semanticFootnoteFirstRefOffsets.has(resolvedHref)) {
+        continue;
+      }
+      this.semanticFootnoteFirstRefOffsets.set(
+        resolvedHref,
+        this.xmldoc.getElementOffset(anchor),
+      );
+    }
+    this.semanticFootnoteFirstRefOffsetsInitialized.value = true;
+  }
+
+  /**
+   * True only for the first semantic footnote reference to the same target.
+   */
+  private shouldGenerateSemanticFootnote(element: Element): boolean {
+    if (element.localName !== "a" || !this.isSemanticFootnoteNoteref(element)) {
+      return true;
+    }
+    const href =
+      element.getAttribute("href") ||
+      element.getAttributeNS(Base.NS.XLINK, "href");
+    if (!href) {
+      return true;
+    }
+    const resolvedHref = Base.resolveURL(href, this.xmldoc.url);
+    if (resolvedHref === "#") {
+      return true;
+    }
+    this.initializeSemanticFootnoteFirstRefOffsets(element.ownerDocument);
+    const firstOffset = this.semanticFootnoteFirstRefOffsets.get(resolvedHref);
+    if (firstOffset == null) {
+      return true;
+    }
+    return this.xmldoc.getElementOffset(element) === firstOffset;
   }
 
   createPseudoelementShadow(
@@ -360,17 +436,24 @@ export class ViewFactory
       templateURLVal instanceof Css.URL ||
       templateURLVal === Css.ident.footnote
     ) {
-      const url =
-        templateURLVal instanceof Css.URL
-          ? templateURLVal.url
-          : Base.resolveURL("user-agent.xml#footnote", Base.resourceBaseURL);
-      cont = this.createRefShadow(
-        url,
-        Vtree.ShadowType.ROOTLESS,
-        element,
-        shadowContext,
-        shadow,
-      );
+      if (
+        templateURLVal !== Css.ident.footnote ||
+        this.shouldGenerateSemanticFootnote(element)
+      ) {
+        const url =
+          templateURLVal instanceof Css.URL
+            ? templateURLVal.url
+            : Base.resolveURL("user-agent.xml#footnote", Base.resourceBaseURL);
+        cont = this.createRefShadow(
+          url,
+          Vtree.ShadowType.ROOTLESS,
+          element,
+          shadowContext,
+          shadow,
+        );
+      } else {
+        cont = Task.newResult(shadow);
+      }
     } else {
       cont = Task.newResult(shadow);
     }
