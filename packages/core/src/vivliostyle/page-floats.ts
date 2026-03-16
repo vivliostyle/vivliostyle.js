@@ -1072,6 +1072,7 @@ export class PageFloatLayoutContext
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     condition?: (p1: PageFloatFragment, p2: PageFloatLayoutContext) => boolean,
+    includeParent: boolean = true,
   ): number {
     Asserts.assert(this.container);
     const logicalSide = this.toLogical(side);
@@ -1085,13 +1086,14 @@ export class PageFloatLayoutContext
       clientLayout,
       condition,
     );
-    if (this.parent && this.parent.container) {
+    if (includeParent && this.parent && this.parent.container) {
       const parentLimit = this.parent.getLimitValue(
         physicalSide,
         physicalSide2,
         layoutContext,
         clientLayout,
         condition,
+        includeParent,
       );
       switch (physicalSide) {
         case "top":
@@ -1176,6 +1178,24 @@ export class PageFloatLayoutContext
       floatMinWrapBlockStart: 0,
       floatMinWrapBlockEnd: 0,
     };
+    // During column balancing, the container's JS block-size (width for
+    // vertical, height for horizontal) may be reduced while the CSS element
+    // dimensions stay at the original value. Use the original CSS dimensions
+    // for float limit calculations to keep consistency with float fragment
+    // positions, which are based on the real DOM layout. (Issue #1764)
+    // Only apply when CSS > JS (balancing reduced JS), not when CSS < JS
+    // (footnotes reduced CSS via adjustColumnBlockSizeForBlockEndFloats).
+    if (this.container.vertical) {
+      const cssWidth = parseFloat(this.container.element?.style?.width);
+      if (isFinite(cssWidth) && cssWidth > this.container.width) {
+        limits.right += cssWidth - this.container.width;
+      }
+    } else {
+      const cssHeight = parseFloat(this.container.element?.style?.height);
+      if (isFinite(cssHeight) && cssHeight > this.container.height) {
+        limits.bottom += cssHeight - this.container.height;
+      }
+    }
 
     function resolveLengthPercentage(numeric, viewNode, containerLength) {
       if (numeric.unit === "%") {
@@ -1210,6 +1230,12 @@ export class PageFloatLayoutContext
         }
         const area = f.area;
         const floatMinWrapBlock = f.continuations[0].float.floatMinWrapBlock;
+        const outerBlockEnd = area.vertical
+          ? area.left + area.getInsetLeft() + area.width + area.getInsetRight()
+          : area.top + area.getInsetTop() + area.height + area.getInsetBottom();
+        const outerInlineEnd = area.vertical
+          ? area.top + area.getInsetTop() + area.height + area.getInsetBottom()
+          : area.left + area.getInsetLeft() + area.width + area.getInsetRight();
         let top = l.top;
         let left = l.left;
         let bottom = l.bottom;
@@ -1219,9 +1245,9 @@ export class PageFloatLayoutContext
         switch (logicalFloatSide) {
           case "inline-start":
             if (area.vertical) {
-              top = Math.max(top, area.top + area.height);
+              top = Math.max(top, outerInlineEnd);
             } else {
-              left = Math.max(left, area.left + area.width);
+              left = Math.max(left, outerInlineEnd);
             }
             break;
           case "block-start":
@@ -1235,14 +1261,14 @@ export class PageFloatLayoutContext
               }
               right = Math.min(right, area.left);
             } else {
-              if (floatMinWrapBlock && area.top + area.height > top) {
+              if (floatMinWrapBlock && outerBlockEnd > top) {
                 floatMinWrapBlockStart = resolveLengthPercentage(
                   floatMinWrapBlock,
                   (area as any).rootViewNodes[0],
                   paddingRect.y2 - paddingRect.y1,
                 ) as number;
               }
-              top = Math.max(top, area.top + area.height);
+              top = Math.max(top, outerBlockEnd);
             }
             break;
           case "inline-end":
@@ -1254,14 +1280,14 @@ export class PageFloatLayoutContext
             break;
           case "block-end":
             if (area.vertical) {
-              if (floatMinWrapBlock && area.left + area.width > left) {
+              if (floatMinWrapBlock && outerBlockEnd > left) {
                 floatMinWrapBlockEnd = resolveLengthPercentage(
                   floatMinWrapBlock,
                   (area as any).rootViewNodes[0],
                   paddingRect.x2 - paddingRect.x1,
                 ) as number;
               }
-              left = Math.max(left, area.left + area.width);
+              left = Math.max(left, outerBlockEnd);
             } else {
               if (floatMinWrapBlock && area.top < bottom) {
                 floatMinWrapBlockEnd = resolveLengthPercentage(
@@ -1343,30 +1369,39 @@ export class PageFloatLayoutContext
     const blockSideForInlineLimit = logicalFloatSides.find((s) =>
       s.includes("block"),
     );
+    const includeParentLimits = anchorEdge !== null;
 
     let blockStart = this.getLimitValue(
       "block-start",
       inlineSideForBlockLimit,
       area.layoutContext,
       area.clientLayout,
+      undefined,
+      includeParentLimits,
     );
     let blockEnd = this.getLimitValue(
       "block-end",
       inlineSideForBlockLimit,
       area.layoutContext,
       area.clientLayout,
+      undefined,
+      includeParentLimits,
     );
     let inlineStart = this.getLimitValue(
       "inline-start",
       blockSideForInlineLimit,
       area.layoutContext,
       area.clientLayout,
+      undefined,
+      includeParentLimits,
     );
     let inlineEnd = this.getLimitValue(
       "inline-end",
       blockSideForInlineLimit,
       area.layoutContext,
       area.clientLayout,
+      undefined,
+      includeParentLimits,
     );
     const blockOffset = area.vertical ? area.originX : area.originY;
     const inlineOffset = area.vertical ? area.originY : area.originX;

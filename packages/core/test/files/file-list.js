@@ -500,7 +500,7 @@ module.exports = [
       {
         file: "multi-column/column-rule-page-floats-footnotes-vertical.html",
         title:
-          "Column rule with page floats and footnotes (vertical writing-mode) (Issue #1493)",
+          "Column rule with page floats and footnotes (vertical writing-mode) (Issue #1493, #1764)",
       },
     ],
   },
