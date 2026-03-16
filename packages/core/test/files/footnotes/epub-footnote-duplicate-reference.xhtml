@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:epub="http://www.idpf.org/2007/ops"
+  xmlns:ops="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EPUB footnote duplicate reference</title>
+    <style>
+      @page {
+        size: 500px 300px;
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+      body {
+        font-family: serif;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Expected result: the footnote bodies "1 Aaaaaa" and "2 Bbbbbb" should
+      appear once. If "1 Aaaaaa" appears twice, this test fails.
+    </p>
+
+    <p>
+      Aaa<a id="fnref1" href="#fn1" epub:type="noteref"><sup>1</sup></a> bbb<a
+        id="fnref2"
+        href="#fn2"
+        epub:type="noteref"
+        ><sup>2</sup></a
+      >.
+    </p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>Dummy text.</p>
+    <p>
+      Ccc aaa<a id="fnref1-1" href="#fn1" epub:type="noteref"><sup>1</sup></a
+      >. This second reference must not create another footnote body.
+    </p>
+
+    <aside id="fn1" epub:type="footnote">
+      <a href="#fnref1" epub:type="backlink"><sup>1</sup></a
+      >Aaaaaa
+    </aside>
+    <aside id="fn2" epub:type="footnote">
+      <a href="#fnref2" epub:type="backlink"><sup>2</sup></a
+      >Bbbbbb
+    </aside>
+  </body>
+</html>
