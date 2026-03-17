@@ -34,6 +34,7 @@ import * as Logging from "./logging";
 import * as Net from "./net";
 import * as OPS from "./ops";
 import * as Plugin from "./plugin";
+import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
 import * as Toc from "./toc";
 import * as Vgen from "./vgen";
@@ -2689,6 +2690,38 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return frame.result();
   }
 
+  private resolveSemanticFootnoteNavigationOffset(
+    viewItem: OPFViewItem,
+    target: Element,
+  ): number | null {
+    if (!SemanticFootnote.isSemanticFootnoteElement(target)) {
+      return null;
+    }
+    const targetId = target.getAttribute("id");
+    if (!targetId) {
+      return null;
+    }
+    const targetURL = Base.resolveURL(`#${targetId}`, viewItem.xmldoc.url);
+    const anchors = viewItem.xmldoc.document.getElementsByTagName("a");
+    for (let i = 0; i < anchors.length; i++) {
+      const anchor = anchors.item(i);
+      if (!SemanticFootnote.isSemanticFootnoteNoterefElement(anchor)) {
+        continue;
+      }
+      const anchorHref =
+        anchor.getAttribute("href") ||
+        anchor.getAttributeNS(Base.NS.XLINK, "href");
+      if (!anchorHref) {
+        continue;
+      }
+      if (Base.resolveURL(anchorHref, viewItem.xmldoc.url) !== targetURL) {
+        continue;
+      }
+      return viewItem.xmldoc.getElementOffset(anchor);
+    }
+    return null;
+  }
+
   /**
    * Move to the page specified by the given URL and render it.
    */
@@ -2747,11 +2780,20 @@ export class OPFView implements Vgen.CustomRendererFactory {
           return;
         }
         const target = viewItem.xmldoc.getElement(href);
+        const semanticFootnoteOffset =
+          target &&
+          this.resolveSemanticFootnoteNavigationOffset(viewItem, target);
+        const targetOffset =
+          semanticFootnoteOffset != null
+            ? semanticFootnoteOffset
+            : target
+              ? viewItem.xmldoc.getElementOffset(target)
+              : 0;
         this.findPage(
           {
             spineIndex: item.spineIndex,
             pageIndex: -1,
-            offsetInItem: target ? viewItem.xmldoc.getElementOffset(target) : 0,
+            offsetInItem: targetOffset,
           },
           sync,
         ).thenFinish(frame);

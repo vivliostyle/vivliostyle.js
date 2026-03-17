@@ -1409,6 +1409,12 @@ aside[role="doc-footnote"]:footnote-content {
   line-height: 1.2;
 }
 
+aside[epub|type="footnote"]:footnote-content a[epub|type="backlink"],
+aside[epub\:type="footnote"]:footnote-content a[epub\:type="backlink"],
+aside[role="doc-footnote"]:footnote-content a[role="doc-backlink"] {
+  text-decoration: none;
+}
+
 /* EPUB-specific */
 epub|trigger {
   display: none;
