@@ -653,10 +653,52 @@ export class ViewFactory
     // This code handles coming out of the shadow trees, but does not go back in
     // (through shadow:content element).
     let shadowContext = this.nodeContext.shadowContext;
+
+    // For semantic footnotes, the wrapper generated from
+    // <s:include class="-vivliostyle-footnote-content"> should inherit from
+    // the referenced footnote's source parent, not from the noteref owner.
+    // (Issue #1770)
+    if (
+      node instanceof Element &&
+      node.namespaceURI === Base.NS.SHADOW &&
+      node.localName === "include" &&
+      node.classList.contains("-vivliostyle-footnote-content")
+    ) {
+      const owner = shadowContext?.owner;
+      if (
+        owner instanceof Element &&
+        SemanticFootnote.isSemanticFootnoteNoterefElement(owner)
+      ) {
+        const href =
+          owner.getAttribute("href") ||
+          owner.getAttributeNS(Base.NS.XLINK, "href");
+        if (href) {
+          const resolvedHref = Base.resolveURL(href, this.xmldoc.url);
+          const target = this.xmldoc.getElement(resolvedHref);
+          if (
+            target &&
+            SemanticFootnote.isSemanticFootnoteElement(target) &&
+            target.parentNode?.nodeType === 1
+          ) {
+            node = target.parentNode;
+            shadowContext = null;
+          }
+        }
+      }
+    }
+
     let steps = -1;
     while (node && node.nodeType == 1) {
       const shadowRoot = shadowContext && shadowContext.root == node;
-      if (!shadowRoot || shadowContext.type == Vtree.ShadowType.ROOTLESS) {
+      const semanticFootnoteRootInRootedShadow =
+        !!shadowRoot &&
+        shadowContext.type == Vtree.ShadowType.ROOTED &&
+        SemanticFootnote.isSemanticFootnoteElement(node as Element);
+      if (
+        !shadowRoot ||
+        shadowContext.type == Vtree.ShadowType.ROOTLESS ||
+        semanticFootnoteRootInRootedShadow
+      ) {
         const styler = shadowContext
           ? (shadowContext.styler as CssStyler.AbstractStyler)
           : this.styler;
@@ -664,7 +706,7 @@ export class ViewFactory
         styles.push(nodeStyle);
         lang = lang || Base.getLangAttribute(node as Element);
       }
-      if (shadowRoot) {
+      if (shadowRoot && !semanticFootnoteRootInRootedShadow) {
         node = shadowContext.owner;
         shadowContext = shadowContext.parentShadow;
       } else {
@@ -672,6 +714,38 @@ export class ViewFactory
         steps++;
       }
     }
+
+    // When reconstructing inherited values for detached/transcluded nodes,
+    // keep declarations on the current element (including region-specific
+    // rules such as :footnote-content) authoritative over ancestor-derived
+    // inherited values.
+    const blockedInheritedByCurrent = new Set<string>();
+    if (styles.length > 0) {
+      const currentStyle = styles[0];
+      const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
+        currentStyle,
+        this.context,
+        this.regionIds,
+        this.isFootnote,
+        this.nodeContext,
+      );
+      for (const name in flattenedCurrentStyle) {
+        if (!CssCascade.isInherited(name)) {
+          continue;
+        }
+        const value = flattenedCurrentStyle[name].evaluate(this.context, name);
+        if (
+          value &&
+          value !== Css.ident.inherit &&
+          value !== Css.ident.unset &&
+          value !== Css.ident.revert &&
+          value !== Css.empty
+        ) {
+          blockedInheritedByCurrent.add(name);
+        }
+      }
+    }
+
     const isRoot = steps === 0;
     const fontSize = this.context.queryUnitSize("em", isRoot);
     const props = {
@@ -703,6 +777,9 @@ export class ViewFactory
       let lineHeight: Css.Val;
 
       for (const name of propList) {
+        if (i > 0 && blockedInheritedByCurrent.has(name)) {
+          continue;
+        }
         inheritanceVisitor.setPropName(name);
         const prop = CssCascade.getProp(style, name);
         let prop1 = prop;
@@ -905,13 +982,18 @@ export class ViewFactory
       !Css.isDefaultingValue(floatReferenceCV.value)
         ? PageFloats.floatReferenceOf(floatReferenceCV.value.toString())
         : null;
+    const isSemanticFootnoteInRootedShadow =
+      !!this.nodeContext.shadowContext &&
+      this.nodeContext.shadowContext.type === Vtree.ShadowType.ROOTED &&
+      SemanticFootnote.isSemanticFootnoteElement(element);
     if (
       this.nodeContext.parent &&
       (Display.isRunning(positionCV?.value) ||
-        (floatReference && PageFloats.isPageFloat(floatReference)))
+        (floatReference && PageFloats.isPageFloat(floatReference)) ||
+        isSemanticFootnoteInRootedShadow)
     ) {
-      // Since a page float will be detached from a view node of its parent,
-      // inherited properties need to be inherited from its source parent.
+      // Detached or transcluded content should inherit from the source tree,
+      // not from the synthetic view parent.
       const inheritedValues = this.inheritFromSourceParent(elementStyle);
       elementStyle = inheritedValues.elementStyle;
       this.nodeContext.lang = inheritedValues.lang;

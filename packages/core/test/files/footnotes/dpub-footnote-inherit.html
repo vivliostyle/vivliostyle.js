@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <title>DPUB footnote inherit from source parent</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    @page {
+      size: 540px 360px;
+    }
+
+    body {
+      margin: 1.5em;
+      font-family: sans-serif;
+      line-height: 1.4;
+    }
+
+    .source-parent {
+      color: rgb(0, 128, 0);
+      font-size: 26px;
+      line-height: 1.5;
+    }
+
+    a[role="doc-noteref"] {
+      color: rgb(180, 0, 0);
+      font-size: 11px;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    aside[role="doc-footnote"] {
+      color: inherit;
+      font-size: inherit;
+      line-height: inherit;
+    }
+  </style>
+</head>
+<body>
+  <p>
+    Expected: the footnote body text is green and large (inherited from
+    .source-parent), not red and tiny (from noteref).
+  </p>
+
+  <section class="source-parent">
+    Parent styled text with footnote<a id="fnref1" href="#fn1" role="doc-noteref">1</a>.
+    <aside id="fn1" role="doc-footnote">
+      This footnote should inherit from the section, not from the noteref anchor.
+    </aside>
+  </section>
+</body>
+</html>

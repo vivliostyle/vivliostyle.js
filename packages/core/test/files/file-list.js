@@ -806,6 +806,11 @@ module.exports = [
           "DPUB noteref duplicate reference should not duplicate footnote body (Issue #1767)",
       },
       {
+        file: "footnotes/dpub-footnote-inherit.html",
+        title:
+          "DPUB footnote should inherit from source parent, not noteref (Issue #1770)",
+      },
+      {
         file: "footnotes/epub-footnotes-static-number.html",
         title: "EPUB footnotes (static numbering)",
       },
