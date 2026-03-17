@@ -1400,13 +1400,7 @@ aside[epub|type="footnote"]:footnote-content,
 aside[epub\:type="footnote"]:footnote-content,
 aside[role="doc-footnote"]:footnote-content {
   display: block;
-  color: initial;
-  text-align: initial;
-  text-align-last: initial;
-  text-indent: initial;
-  font: initial;
-  font-size: 0.9rem;
-  line-height: 1.2;
+  font-size: 0.9em;
 }
 
 aside[epub|type="footnote"]:footnote-content a[epub|type="backlink"],
