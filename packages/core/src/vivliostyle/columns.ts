@@ -18,6 +18,7 @@
  * @fileoverview Columns - Control column layout.
  */
 import * as Asserts from "./asserts";
+import * as Base from "./base";
 import * as Css from "./css";
 import * as MathUtil from "./math-util";
 import * as PageFloats from "./page-floats";
@@ -101,6 +102,7 @@ export abstract class ColumnBalancer {
           candidates[0],
         );
         this.restoreContents(result.layoutResult);
+        this.tightenColumnBlockSizes(result.layoutResult.columns);
         this.postBalance();
         frame.finish(result.layoutResult);
       });
@@ -128,6 +130,63 @@ export abstract class ColumnBalancer {
 
   protected postBalance() {
     setBlockSize(this.layoutContainer, this.originalContainerBlockSize);
+  }
+
+  /**
+   * After column balancing, the column elements' CSS block-size may be larger
+   * than the actual content (computedBlockSize) due to browser multi-column
+   * layout constraints. Tighten them to match the content so that column rules
+   * rendered in finishContainer use the correct, content-matching height.
+   */
+  private tightenColumnBlockSizes(columns: Layout.Column[]): void {
+    if (columns.length <= 1) {
+      return;
+    }
+    const maxComputedBlockSize = Math.max.apply(
+      null,
+      columns.map((c) => c.computedBlockSize),
+    );
+    if (maxComputedBlockSize <= 0) {
+      return;
+    }
+    for (const column of columns) {
+      if (column.vertical) {
+        // In vertical-rl, block-size = width, block-start = right edge.
+        // adjustColumnBlockSizeForBlockEndFloats may have already reduced
+        // CSS width without updating JS properties, so read CSS values.
+        const cssWidth = parseFloat(column.element.style.width);
+        const cssLeft = parseFloat(column.element.style.left);
+        if (
+          isFinite(cssWidth) &&
+          isFinite(cssLeft) &&
+          cssWidth > maxComputedBlockSize
+        ) {
+          // Preserve the right edge (block-start) while reducing width
+          const rightEdge = cssLeft + cssWidth;
+          const newLeft = rightEdge - maxComputedBlockSize;
+          Base.setCSSProperty(
+            column.element,
+            "width",
+            `${maxComputedBlockSize}px`,
+          );
+          Base.setCSSProperty(column.element, "left", `${newLeft}px`);
+          column.width = maxComputedBlockSize;
+          column.left = newLeft;
+        }
+      } else {
+        // In horizontal, block-size = height. Read CSS value because
+        // adjustColumnBlockSizeForBlockEndFloats may have reduced it.
+        const cssHeight = parseFloat(column.element.style.height);
+        if (isFinite(cssHeight) && cssHeight > maxComputedBlockSize) {
+          Base.setCSSProperty(
+            column.element,
+            "height",
+            `${maxComputedBlockSize}px`,
+          );
+          column.height = maxComputedBlockSize;
+        }
+      }
+    }
   }
 
   savePageFloatLayoutContexts(layoutResult: ColumnLayoutResult | null) {

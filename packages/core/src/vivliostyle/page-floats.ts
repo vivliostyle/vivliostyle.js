@@ -1369,39 +1369,30 @@ export class PageFloatLayoutContext
     const blockSideForInlineLimit = logicalFloatSides.find((s) =>
       s.includes("block"),
     );
-    const includeParentLimits = anchorEdge !== null;
 
     let blockStart = this.getLimitValue(
       "block-start",
       inlineSideForBlockLimit,
       area.layoutContext,
       area.clientLayout,
-      undefined,
-      includeParentLimits,
     );
     let blockEnd = this.getLimitValue(
       "block-end",
       inlineSideForBlockLimit,
       area.layoutContext,
       area.clientLayout,
-      undefined,
-      includeParentLimits,
     );
     let inlineStart = this.getLimitValue(
       "inline-start",
       blockSideForInlineLimit,
       area.layoutContext,
       area.clientLayout,
-      undefined,
-      includeParentLimits,
     );
     let inlineEnd = this.getLimitValue(
       "inline-end",
       blockSideForInlineLimit,
       area.layoutContext,
       area.clientLayout,
-      undefined,
-      includeParentLimits,
     );
     const blockOffset = area.vertical ? area.originX : area.originY;
     const inlineOffset = area.vertical ? area.originY : area.originX;
