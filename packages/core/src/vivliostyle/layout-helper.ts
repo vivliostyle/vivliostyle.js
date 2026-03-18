@@ -387,16 +387,24 @@ export function fixAutoFillMultiColumnBox(
   // If it overflows, find a non-overflow block-size by binary search.
   element.style.columnFill = "auto";
   const blockSize2 = parseFloat(computedStyle.blockSize);
-  const delta = 1 / (column.clientLayout.pixelRatio || 1);
   let blockSize = NaN;
   element.style.blockSize = `${blockSize2}px`;
   if (!checkRootColumnOverflow(column)) {
-    blockSize = blockSize2;
+    blockSize = parseFloat(computedStyle.blockSize);
+    if (blockSize < blockSize2) {
+      // `computedStyle.blockSize` may return a smaller value than the set `blockSize2` due to rounding,
+      // which can cause unexpected column breaking in the multi-column box. So we need to adjust it.
+      // (Issue #1773)
+      const layoutUnitAdj = 1 / column.clientLayout.layoutUnitPerPixel;
+      blockSize = blockSize2 + layoutUnitAdj;
+      element.style.blockSize = `${blockSize}px`;
+    }
   } else {
     element.style.blockSize = `${blockSize1}px`;
     if (!checkRootColumnOverflow(column)) {
       // `blockSize1` is non-overflow and `blockSize2` is overflow.
       // Search the largest non-overflow value in [blockSize1, blockSize2].
+      const delta = 1 / (column.clientLayout.pixelRatio || 1);
       let ok = blockSize1;
       let ng = blockSize2;
       while (ng - ok > delta) {
