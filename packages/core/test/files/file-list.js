@@ -491,7 +491,8 @@ module.exports = [
       },
       {
         file: "multi-column/multicol-column-fill-auto.html",
-        title: "column-fill: auto in non-root multicol (Issue #1720, #1758)",
+        title:
+          "column-fill: auto in non-root multicol (Issue #1720, #1758, #1773)",
       },
       {
         file: "multi-column/column-rule-page-floats-footnotes.html",
