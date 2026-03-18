@@ -2135,6 +2135,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let minNeg = 0;
     for (let i = trailingEdgeContexts.length - 1; i >= 0; i--) {
       const nodeContext = trailingEdgeContexts[i];
+      if (!nodeContext) {
+        break;
+      }
       if (
         !nodeContext.after ||
         !nodeContext.viewNode ||
@@ -3401,8 +3404,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 breakAtTheEdge = null;
               }
               onStartEdges = false; // we are now on end edges.
-              lastAfterNodeContext = nodeContext.copy();
-              trailingEdgeContexts.push(lastAfterNodeContext);
+              // Do not use out-of-flow (absolute/fixed) elements as
+              // lastAfterNodeContext, since their edge positions are not
+              // in the block flow and would prevent correct overflow
+              // detection. (Issue #1775)
+              if (!LayoutHelper.isOutOfFlow(nodeContext.viewNode)) {
+                lastAfterNodeContext = nodeContext.copy();
+                trailingEdgeContexts.push(lastAfterNodeContext);
+              }
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
                 nodeContext.breakAfter,
@@ -3417,7 +3426,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // Non-zero trailing inset.
                 // Margins don't collapse across non-zero borders and
                 // paddings.
-                trailingEdgeContexts = [lastAfterNodeContext];
+                trailingEdgeContexts = lastAfterNodeContext
+                  ? [lastAfterNodeContext]
+                  : [];
               }
             } else {
               // Leading edge
