@@ -1284,7 +1284,6 @@ export namespace Vtree {
     clearSide: string | null;
     floatMinWrapBlock: Css.Numeric | null;
     columnSpan: Css.Val | null;
-    verticalAlign: string;
     captionSide: string;
     inlineBorderSpacing: number;
     blockBorderSpacing: number;

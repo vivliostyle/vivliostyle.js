@@ -1025,7 +1025,6 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     const columnIndex = cell.columnIndex;
     const colSpan = cell.colSpan;
     const cellViewNode = cellNodeContext.viewNode as Element;
-    const verticalAlign = cellNodeContext.verticalAlign;
     if (colSpan > 1) {
       Base.setCSSProperty(cellViewNode, "box-sizing", "border-box");
       Base.setCSSProperty(
