@@ -582,7 +582,6 @@ export class NodeContext implements Vtree.NodeContext {
   clearSide: string | null = null;
   floatMinWrapBlock: Css.Numeric | null = null;
   columnSpan: Css.Val | null = null;
-  verticalAlign: string = "baseline";
   captionSide: string = "top";
   inlineBorderSpacing: number = 0;
   blockBorderSpacing: number = 0;
@@ -645,7 +644,6 @@ export class NodeContext implements Vtree.NodeContext {
     this.clearSide = null;
     this.floatMinWrapBlock = null;
     this.columnSpan = null;
-    this.verticalAlign = "baseline";
     this.flexContainer = false;
     this.whitespace = this.parent ? this.parent.whitespace : Whitespace.IGNORE;
     this.hyphenateCharacter = this.parent
@@ -684,7 +682,6 @@ export class NodeContext implements Vtree.NodeContext {
     np.clearSide = this.clearSide;
     np.floatMinWrapBlock = this.floatMinWrapBlock;
     np.columnSpan = this.columnSpan;
-    np.verticalAlign = this.verticalAlign;
     np.captionSide = this.captionSide;
     np.inlineBorderSpacing = this.inlineBorderSpacing;
     np.blockBorderSpacing = this.blockBorderSpacing;

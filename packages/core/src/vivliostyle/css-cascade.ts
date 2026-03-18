@@ -4127,7 +4127,6 @@ export const EMPTY: string[] = [];
  */
 export const pseudoNames = [
   "before",
-  "transclusion-before",
   "footnote-call",
   "footnote-marker",
   "marker",
@@ -4135,7 +4134,6 @@ export const pseudoNames = [
   "first-letter",
   "first-line",
   "", // content
-  "transclusion-after",
   "after",
 ];
 

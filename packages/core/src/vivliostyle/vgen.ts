@@ -1294,10 +1294,6 @@ export class ViewFactory
           this.styler.cascade.currentPageType = pageType;
         }
       }
-      this.nodeContext.verticalAlign =
-        (computedStyle["vertical-align"] &&
-          computedStyle["vertical-align"].toString()) ||
-        "baseline";
       this.nodeContext.captionSide =
         (computedStyle["caption-side"] &&
           computedStyle["caption-side"].toString()) ||
@@ -1457,11 +1453,6 @@ export class ViewFactory
         tag = "div";
       } else if (tag == "q") {
         tag = "span";
-      } else if (tag == "a") {
-        const hp = computedStyle["hyperlink-processing"];
-        if (hp && hp.toString() != "normal") {
-          tag = "span";
-        }
       }
       if (computedStyle["behavior"]) {
         const behavior = computedStyle["behavior"].toString();
@@ -2504,22 +2495,6 @@ export class ViewFactory
       pos.after = true;
       return pos;
     }
-  }
-
-  isTransclusion(
-    element: Element,
-    elementStyle: CssCascade.ElementStyle,
-    transclusionType: string | null,
-  ) {
-    const proc = CssCascade.getProp(elementStyle, "hyperlink-processing");
-    if (!proc) {
-      return false;
-    }
-    const prop = proc.evaluate(this.context, "hyperlink-processing");
-    if (!prop) {
-      return false;
-    }
-    return prop.toString() == transclusionType;
   }
 
   /**
