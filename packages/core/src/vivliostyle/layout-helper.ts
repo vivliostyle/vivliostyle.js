@@ -668,7 +668,16 @@ export function isOutOfFlow(node: Node): boolean {
   const e = node as HTMLElement;
   if (isSpecial(e)) return true;
   const position = e.style?.position;
-  return position === "absolute" || position === "fixed";
+  if (position === "absolute" || position === "fixed") {
+    return true;
+  }
+  const float = e.style?.float;
+  return (
+    float === "left" ||
+    float === "right" ||
+    float === "inline-start" ||
+    float === "inline-end"
+  );
 }
 
 export function isSpecialNodeContext(nodeContext: Vtree.NodeContext): boolean {

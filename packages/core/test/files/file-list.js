@@ -447,6 +447,10 @@ module.exports = [
         file: "page_breaks/class_C_break_point.html",
         title: "Class C break point",
       },
+      {
+        file: "page_breaks/block-start-out-of-flow-break.html",
+        title: "Block-start out-of-flow break (Issue #1775)",
+      },
     ],
   },
   {

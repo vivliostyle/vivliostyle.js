@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Block-start out-of-flow break (Issue #1775)</title>
+  <style>
+    @page {
+      size: a7 landscape;
+      margin: 8mm;
+    }
+
+    body {
+      font: 12px/1.4 sans-serif;
+    }
+
+    h2 {
+      font-size: 12px;
+      margin: 0 0 4px;
+      break-after: avoid;
+    }
+
+    .list p {
+      margin: 0 0 2px 1em;
+      orphans: 2;
+      widows: 2;
+    }
+
+    .abs p > span {
+      position: absolute;
+      left: 0;
+    }
+
+    .flt p > span {
+      float: left;
+      margin-left: -1em;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>position: absolute</h2>
+  <section class="list abs">
+    <p><span>•</span>Item 1<br />Item 1</p>
+    <p><span>•</span>Item 2<br />Item 2</p>
+    <p><span>•</span>Item 3<br />Item 3</p>
+    <p><span>•</span>Item 4<br />Item 4</p>
+    <p><span>•</span>Item 5<br />Item 5</p>
+    <p><span>•</span>Item 6<br />Item 6</p>
+    <p><span>•</span>Item 7<br />Item 7</p>
+    <p><span>•</span>Item 8<br />Item 8</p>
+  </section>
+
+  <h2>float: left</h2>
+  <section class="list flt">
+    <p><span>•</span>Item 1<br />Item 1</p>
+    <p><span>•</span>Item 2<br />Item 2</p>
+    <p><span>•</span>Item 3<br />Item 3</p>
+    <p><span>•</span>Item 4<br />Item 4</p>
+    <p><span>•</span>Item 5<br />Item 5</p>
+    <p><span>•</span>Item 6<br />Item 6</p>
+    <p><span>•</span>Item 7<br />Item 7</p>
+    <p><span>•</span>Item 8<br />Item 8</p>
+  </section>
+</body>
+
+</html>
