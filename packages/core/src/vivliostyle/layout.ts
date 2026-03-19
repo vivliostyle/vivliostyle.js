@@ -2890,11 +2890,47 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
-   * Determines if an indent value is zero
+   * Determines if a CSS length value is empty or zero.
    */
-  zeroIndent(val: string | number): boolean {
-    const s = val.toString();
-    return s == "" || s == "auto" || !!s.match(/^0+(.0*)?[^0-9]/);
+  isZeroLength(val: string): boolean {
+    const s = val.trim();
+    return s === "" || /^0+(?:\.0+)?(?:[a-z%]*)$/i.test(s);
+  }
+
+  /**
+   * Check if element has non-zero block-start inset (padding + border).
+   * Handles both horizontal and vertical writing modes.
+   */
+  hasNonZeroBlockStartInset(style: CSSStyleDeclaration): boolean {
+    if (this.vertical) {
+      return !(
+        this.isZeroLength(style.paddingRight) &&
+        this.isZeroLength(style.borderRightWidth)
+      );
+    } else {
+      return !(
+        this.isZeroLength(style.paddingTop) &&
+        this.isZeroLength(style.borderTopWidth)
+      );
+    }
+  }
+
+  /**
+   * Check if element has non-zero block-end inset (padding + border).
+   * Handles both horizontal and vertical writing modes.
+   */
+  hasNonZeroBlockEndInset(style: CSSStyleDeclaration): boolean {
+    if (this.vertical) {
+      return !(
+        this.isZeroLength(style.paddingLeft) &&
+        this.isZeroLength(style.borderLeftWidth)
+      );
+    } else {
+      return !(
+        this.isZeroLength(style.paddingBottom) &&
+        this.isZeroLength(style.borderBottomWidth)
+      );
+    }
   }
 
   /**
@@ -3404,10 +3440,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 breakAtTheEdge = null;
               }
               onStartEdges = false; // we are now on end edges.
-              // Do not use out-of-flow (absolute/fixed) elements as
-              // lastAfterNodeContext, since their edge positions are not
-              // in the block flow and would prevent correct overflow
-              // detection. (Issue #1775)
+              // Do not use out-of-flow elements (including absolute/fixed
+              // positioned and floated elements) as lastAfterNodeContext,
+              // since their edge positions are not in the block flow and
+              // would prevent correct overflow detection. (Issue #1775)
               if (!LayoutHelper.isOutOfFlow(nodeContext.viewNode)) {
                 lastAfterNodeContext = nodeContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
@@ -3418,10 +3454,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               );
               if (
                 style &&
-                !(
-                  this.zeroIndent(style.paddingBottom) &&
-                  this.zeroIndent(style.borderBottomWidth)
-                )
+                !LayoutHelper.isOutOfFlow(nodeContext.viewNode) &&
+                this.hasNonZeroBlockEndInset(style)
               ) {
                 // Non-zero trailing inset.
                 // Margins don't collapse across non-zero borders and
@@ -3492,13 +3526,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 loopFrame.breakLoop();
                 return;
               }
-              if (
-                style &&
-                !(
-                  this.zeroIndent(style.paddingTop) &&
-                  this.zeroIndent(style.borderTopWidth)
-                )
-              ) {
+              if (style && this.hasNonZeroBlockStartInset(style)) {
                 // Non-zero leading inset
                 atUnforcedBreak = false;
                 trailingEdgeContexts = [];
@@ -3648,13 +3676,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 loopFrame.breakLoop();
                 return;
               }
-              if (
-                style &&
-                !(
-                  this.zeroIndent(style.paddingTop) &&
-                  this.zeroIndent(style.borderTopWidth)
-                )
-              ) {
+              if (style && this.hasNonZeroBlockStartInset(style)) {
                 // Non-zero leading inset
                 loopFrame.breakLoop();
                 return;
