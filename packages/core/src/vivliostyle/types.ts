@@ -404,10 +404,6 @@ export namespace Layout {
      */
     isBreakable(flowPosition: Vtree.NodeContext): boolean;
     /**
-     * Determines if an indent value is zero
-     */
-    zeroIndent(val: string | number): boolean;
-    /**
      * @return true if overflows
      */
     checkOverflowAndSaveEdge(

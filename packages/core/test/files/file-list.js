@@ -451,6 +451,11 @@ module.exports = [
         file: "page_breaks/block-start-out-of-flow-break.html",
         title: "Block-start out-of-flow break (Issue #1775)",
       },
+      {
+        file: "page_breaks/block-start-out-of-flow-break-vertical.html",
+        title:
+          "Block-start out-of-flow break (vertical writing-mode) (Issue #1775)",
+      },
     ],
   },
   {
