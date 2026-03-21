@@ -24,13 +24,13 @@ const defaults = {
   viewportWidth: 900,
   viewportHeight: 900,
   skipScreenshots: false,
-  baselineViewer: "https://vivliostyle.org/viewer/",
   actualViewer: "https://vivliostyle.vercel.app/",
-  baselineLabel: "stable",
+  baselineViewer: "https://vivliostyle.org/viewer/",
   actualLabel: "canary",
+  baselineLabel: "stable",
   extraViewerParams: "",
-  baselineViewerParams: "",
   actualViewerParams: "",
+  baselineViewerParams: "",
   testUrls: [],
 };
 
@@ -695,7 +695,7 @@ function writeReports(outDir, result) {
 
   const lines = [];
   lines.push(
-    `# ${result.labels.baseline} vs ${result.labels.actual} comparison report`,
+    `# ${result.labels.actual} vs ${result.labels.baseline} comparison report`,
   );
   lines.push("");
   lines.push(`- Compared entries: ${result.summary.totalEntries}`);
@@ -717,7 +717,7 @@ function writeReports(outDir, result) {
       lines.push(`- [${diff.id}] [${diff.category}] ${diff.title}`);
       if (diff.pageCountMismatch) {
         lines.push(
-          `  page count: ${result.labels.baseline}=${diff.baseline.totalPages}, ${result.labels.actual}=${diff.actual.totalPages}`,
+          `  page count: ${result.labels.actual}=${diff.actual.totalPages}, ${result.labels.baseline}=${diff.baseline.totalPages}`,
         );
       }
       for (const p of diff.pages) {
@@ -727,8 +727,8 @@ function writeReports(outDir, result) {
           }`,
         );
       }
-      lines.push(`  ${result.labels.baseline}: ${diff.baseline.url}`);
       lines.push(`  ${result.labels.actual}: ${diff.actual.url}`);
+      lines.push(`  ${result.labels.baseline}: ${diff.baseline.url}`);
       lines.push("");
     }
   }
@@ -741,8 +741,8 @@ function writeReports(outDir, result) {
       lines.push(`  side: ${item.side}`);
       lines.push(`  timeout: ${item.error.timeout}`);
       lines.push(`  error: ${item.error.name}: ${item.error.message}`);
-      lines.push(`  ${result.labels.baseline}: ${item.baselineUrl}`);
       lines.push(`  ${result.labels.actual}: ${item.actualUrl}`);
+      lines.push(`  ${result.labels.baseline}: ${item.baselineUrl}`);
       lines.push("");
     }
   }
@@ -1048,8 +1048,8 @@ async function main() {
           file: toArray(target.file),
           side: opts.actualLabel,
           error: actual.error,
-          baselineUrl: target.baselineUrl,
           actualUrl: target.actualUrl,
+          baselineUrl: target.baselineUrl,
         });
         if (actual.error.timeout) {
           timeoutEntries += 1;
@@ -1065,8 +1065,8 @@ async function main() {
       title: target.title,
       file: toArray(target.file),
       pageCountMismatch: baseline.totalPages !== actual.totalPages,
-      baseline: { totalPages: baseline.totalPages, url: target.baselineUrl },
       actual: { totalPages: actual.totalPages, url: target.actualUrl },
+      baseline: { totalPages: baseline.totalPages, url: target.baselineUrl },
       pages: [],
     };
 
@@ -1122,8 +1122,8 @@ async function main() {
   const result = {
     generatedAt: new Date().toISOString(),
     labels: {
-      baseline: opts.baselineLabel,
       actual: opts.actualLabel,
+      baseline: opts.baselineLabel,
     },
     options: opts,
     summary: {
