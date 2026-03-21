@@ -942,7 +942,7 @@ module.exports = [
     ],
   },
   {
-    category: "Counter style, ::marker, and list-style",
+    category: "Counter style and list-style",
     files: [
       {
         file: "counter-style/test.html",

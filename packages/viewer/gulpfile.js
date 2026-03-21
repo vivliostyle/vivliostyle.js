@@ -199,6 +199,7 @@ function serve(isDevelopment) {
     },
     startPath: "/core/test/files/",
     ghostMode: false, // do not mirror clicks, scrolls etc. between multiple browsers
+    notify: false, // do not show any notifications in the browser
   });
   const target = [DEST_DIR + "/**/*"];
   gulp.watch(target).on("change", browserSync.reload);

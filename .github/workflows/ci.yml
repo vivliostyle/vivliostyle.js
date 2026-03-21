@@ -12,6 +12,8 @@ jobs:
       - run: yarn install
       - run: yarn build
       - run: yarn lint
+      - name: Check regression triage (no pending/regression allowed)
+        run: yarn test:layout-regression:triage:check
       - run: scripts/ci-after-success-hook.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
