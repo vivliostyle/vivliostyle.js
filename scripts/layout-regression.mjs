@@ -911,7 +911,7 @@ function writeTriageTemplate(outDir, result) {
     /^(  decision: .*)$/gm,
     "$1  # regression / expected / skip",
   );
-  // Add hint comment after non-empty approvedViewer; remove the line when empty
+  // Add hint comment after every approvedViewer line (including empty placeholder)
   yamlStr = yamlStr.replace(
     /^(  approvedViewer: .*)$/gm,
     "$1  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...",

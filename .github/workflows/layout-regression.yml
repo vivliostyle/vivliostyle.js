@@ -28,13 +28,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: write # needed to commit triage baseline on workflow_dispatch
-  pull-requests: write # needed to post/update PR comments
-
 jobs:
   compare:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # needed to post/update PR comments
     # For pull_request events, only run on internal PRs (same repo).
     # Fork PRs don't have a Vercel preview until a maintainer authorizes it.
     # In that case, a maintainer can manually trigger via workflow_dispatch
@@ -103,39 +102,34 @@ jobs:
           done
           echo "Warning: Vercel preview did not become ready in time. Proceeding anyway."
 
-      # ── Build compare command arguments ───────────────────────────────────
-      - name: Build compare args
-        id: args
-        run: |
-          ARGS=""
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            ACTUAL="${{ inputs.actual_viewer }}"
-            BASELINE="${{ inputs.baseline_viewer }}"
-            ARGS="--actual-viewer ${ACTUAL:-canary} --baseline-viewer ${BASELINE:-stable}"
-            # Handle comma-separated categories
-            if [ -n "${{ inputs.category }}" ]; then
-              IFS=',' read -ra CATS <<< "${{ inputs.category }}"
-              for CAT in "${CATS[@]}"; do
-                ARGS="$ARGS --category \"$(echo "$CAT" | xargs)\""
-              done
-            fi
-            if [ -n "${{ inputs.limit }}" ]; then
-              ARGS="$ARGS --limit ${{ inputs.limit }}"
-            fi
-            if [ "${{ inputs.skip_screenshots }}" = "true" ]; then
-              ARGS="$ARGS --skip-screenshots"
-            fi
-          else
-            # PR run: actual = PR preview, baseline = stable (default)
-            ARGS="--actual-viewer ${{ steps.pr_viewer.outputs.spec }}"
-          fi
-          echo "args=$ARGS" >> "$GITHUB_OUTPUT"
-          echo "Compare args: $ARGS"
-
       # ── Run the comparison ─────────────────────────────────────────────────
       - name: Run regression compare
         id: compare
-        run: eval yarn test:layout-regression ${{ steps.args.outputs.args }}
+        env:
+          ACTUAL_VIEWER: ${{ github.event_name == 'pull_request' && steps.pr_viewer.outputs.spec || inputs.actual_viewer }}
+          BASELINE_VIEWER: ${{ inputs.baseline_viewer }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_LIMIT: ${{ inputs.limit }}
+          INPUT_SKIP_SCREENSHOTS: ${{ inputs.skip_screenshots }}
+        run: |
+          args=()
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            args+=(--actual-viewer "${ACTUAL_VIEWER:-canary}")
+            args+=(--baseline-viewer "${BASELINE_VIEWER:-stable}")
+            if [ -n "$INPUT_CATEGORY" ]; then
+              IFS=',' read -ra CATS <<< "$INPUT_CATEGORY"
+              for CAT in "${CATS[@]}"; do
+                CAT="$(echo "$CAT" | xargs)"
+                args+=(--category "$CAT")
+              done
+            fi
+            [ -n "$INPUT_LIMIT" ] && args+=(--limit "$INPUT_LIMIT")
+            [ "$INPUT_SKIP_SCREENSHOTS" = "true" ] && args+=(--skip-screenshots)
+          else
+            # PR run: actual = PR preview, baseline = stable (default)
+            args+=(--actual-viewer "$ACTUAL_VIEWER")
+          fi
+          yarn test:layout-regression "${args[@]}"
         continue-on-error: true
 
       # ── Upload artifacts ──────────────────────────────────────────────────
@@ -146,25 +140,6 @@ jobs:
           name: layout-regression-${{ github.run_number }}
           path: artifacts/layout-regression/
           retention-days: 30
-
-      # ── On manual run: commit updated triage decisions back to the repo ───
-      - name: Save triage baseline
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          if [ -f artifacts/layout-regression/triage.yaml ]; then
-            cp artifacts/layout-regression/triage.yaml scripts/layout-regression-triage.yaml
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add scripts/layout-regression-triage.yaml
-            if git diff --staged --quiet; then
-              echo "No triage changes to commit."
-            else
-              COUNT=$(git diff --staged --name-only | wc -l | xargs)
-              git commit -m "chore: update layout regression triage baseline [skip ci]"
-              git push
-              echo "Committed updated layout-regression-triage.yaml."
-            fi
-          fi
 
       # ── On PR: post or update a comment with the report ──────────────────
       - name: Post PR comment
@@ -193,8 +168,7 @@ jobs:
 
               // Append triage summary if available
               if (fs.existsSync(triagePath)) {
-                const yaml = require('./node_modules/js-yaml/dist/js-yaml.cjs.js') ||
-                             require('./node_modules/js-yaml');
+                const yaml = require('js-yaml');
                 try {
                   const entries = yaml.load(fs.readFileSync(triagePath, 'utf8')) || [];
                   const pending = entries.filter(e => !String(e.decision || '').trim()).length;
@@ -228,3 +202,35 @@ jobs:
                 body,
               });
             }
+
+  # ── On manual run: commit updated triage decisions back to the repo ─────
+  save-triage:
+    needs: compare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to commit triage baseline
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download regression artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: layout-regression-${{ github.run_number }}
+          path: artifacts/layout-regression/
+
+      - name: Save triage baseline
+        run: |
+          if [ -f artifacts/layout-regression/triage.yaml ]; then
+            cp artifacts/layout-regression/triage.yaml scripts/layout-regression-triage.yaml
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add scripts/layout-regression-triage.yaml
+            if git diff --staged --quiet; then
+              echo "No triage changes to commit."
+            else
+              git commit -m "chore: update layout regression triage baseline [skip ci]"
+              git push
+              echo "Committed updated layout-regression-triage.yaml."
+            fi
+          fi

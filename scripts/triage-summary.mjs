@@ -34,7 +34,13 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--triage") {
-      opts.triagePath = path.resolve(argv[++i]);
+      const next = argv[i + 1];
+      if (!next || next.startsWith("-")) {
+        console.error("Error: --triage requires a path argument");
+        printHelpAndExit(1);
+      }
+      i += 1;
+      opts.triagePath = path.resolve(next);
     } else if (a === "--show-pending") {
       opts.showPending = true;
     } else if (a === "--show-expected") {
