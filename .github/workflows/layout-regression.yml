@@ -211,10 +211,19 @@ jobs:
     needs: compare
     runs-on: ubuntu-latest
     permissions:
-      contents: write # needed to commit triage baseline
+      contents: read
     if: github.event_name == 'workflow_dispatch'
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.TRIAGE_BOT_APP_ID }}
+          private-key: ${{ secrets.TRIAGE_BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Download regression artifacts
         uses: actions/download-artifact@v4
