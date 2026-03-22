@@ -1,0 +1,21 @@
+# Regression triage decisions — committed to the repository.
+#
+# This file is the persistent store for triage decisions made after running:
+#   yarn test:layout-regression
+#
+# Each entry records the decision for a detected difference or error:
+#   decision: regression   — a real bug introduced in canary
+#   decision: expected     — an intentional/known change
+#   decision: skip         — known issue, deferring
+#
+# If an entry has approvedViewer set, the next compare run uses that viewer
+# as the baseline for that entry (instead of the global --baseline-viewer).
+# If canary then matches the approvedViewer, the entry is kept here (preserved).
+# If canary has diverged from approvedViewer, decision is reset to "" for re-triage.
+#
+# Workflow:
+#   1. yarn test:layout-regression        (generates artifacts/layout-regression/triage.yaml)
+#   2. Edit triage.yaml: fill in decision / notes / approvedViewer
+#   3. yarn test:layout-regression:triage         (review summary)
+#   4. yarn test:layout-regression:triage:save    (copy decisions back to this file, then git commit)
+[]

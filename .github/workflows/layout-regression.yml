@@ -1,0 +1,239 @@
+name: Layout Regression Test
+
+on:
+  # Manual trigger — run against any viewer spec, optionally filtered
+  workflow_dispatch:
+    inputs:
+      actual_viewer:
+        description: "Actual viewer spec: canary, stable, git-<branch>, v2.x.y, URL (default: canary)"
+        required: false
+        default: "canary"
+      baseline_viewer:
+        description: "Baseline viewer spec (default: stable)"
+        required: false
+        default: "stable"
+      category:
+        description: "Category filter — comma-separated (empty = all). Note: category names must not contain commas."
+        required: false
+      limit:
+        description: "Limit number of entries (empty = all)"
+        required: false
+      skip_screenshots:
+        description: "Skip screenshots, check page counts only"
+        type: boolean
+        required: false
+        default: false
+
+  # PR trigger — compares the PR's Vercel preview against stable
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # needed to post/update PR comments
+    # For pull_request events, only run on internal PRs (same repo).
+    # Fork PRs don't have a Vercel preview until a maintainer authorizes it.
+    # In that case, a maintainer can manually trigger via workflow_dispatch
+    # with actual_viewer=git-<branch> after authorizing the Vercel deployment.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.actor != 'dependabot[bot]')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      # ── Restore triage decisions from the committed baseline ──────────────
+      - name: Restore triage baseline
+        run: |
+          mkdir -p artifacts/layout-regression
+          if [ -f scripts/layout-regression-triage.yaml ]; then
+            # Only restore if the file has actual entries (not just the header comment)
+            if grep -q '^- ' scripts/layout-regression-triage.yaml; then
+              cp scripts/layout-regression-triage.yaml artifacts/layout-regression/triage.yaml
+              echo "Restored $(grep -c '^- ' scripts/layout-regression-triage.yaml) triage entries."
+            fi
+          fi
+
+      # ── For PR runs: derive the Vercel preview URL from the branch name ───
+      - name: Derive PR Vercel preview spec
+        if: github.event_name == 'pull_request'
+        id: pr_viewer
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          # Replicate Vercel's branch name sanitization
+          SANITIZED=$(echo "$BRANCH" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed 's/[^a-z0-9]\+/-/g' \
+            | sed 's/^-\|-$//g')
+          echo "spec=git-${SANITIZED}" >> "$GITHUB_OUTPUT"
+          echo "label=git-${SANITIZED}" >> "$GITHUB_OUTPUT"
+          echo "url=https://vivliostyle-git-${SANITIZED}-vivliostyle.vercel.app/" >> "$GITHUB_OUTPUT"
+
+      # ── Wait for Vercel preview to become ready (PR runs only) ────────────
+      - name: Wait for Vercel preview
+        if: github.event_name == 'pull_request'
+        run: |
+          URL="${{ steps.pr_viewer.outputs.url }}"
+          echo "Waiting for Vercel preview: $URL"
+          for i in $(seq 1 20); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Preview is ready (attempt $i)."
+              exit 0
+            fi
+            echo "  attempt $i: HTTP $STATUS — waiting 15s..."
+            sleep 15
+          done
+          echo "Warning: Vercel preview did not become ready in time. Proceeding anyway."
+
+      # ── Run the comparison ─────────────────────────────────────────────────
+      - name: Run regression compare
+        id: compare
+        env:
+          ACTUAL_VIEWER: ${{ github.event_name == 'pull_request' && steps.pr_viewer.outputs.spec || inputs.actual_viewer }}
+          BASELINE_VIEWER: ${{ inputs.baseline_viewer }}
+          INPUT_CATEGORY: ${{ inputs.category }}
+          INPUT_LIMIT: ${{ inputs.limit }}
+          INPUT_SKIP_SCREENSHOTS: ${{ inputs.skip_screenshots }}
+        run: |
+          args=()
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            args+=(--actual-viewer "${ACTUAL_VIEWER:-canary}")
+            args+=(--baseline-viewer "${BASELINE_VIEWER:-stable}")
+            if [ -n "$INPUT_CATEGORY" ]; then
+              IFS=',' read -ra CATS <<< "$INPUT_CATEGORY"
+              for CAT in "${CATS[@]}"; do
+                CAT="$(echo "$CAT" | xargs)"
+                args+=(--category "$CAT")
+              done
+            fi
+            [ -n "$INPUT_LIMIT" ] && args+=(--limit "$INPUT_LIMIT")
+            [ "$INPUT_SKIP_SCREENSHOTS" = "true" ] && args+=(--skip-screenshots)
+          else
+            # PR run: actual = PR preview, baseline = stable (default)
+            args+=(--actual-viewer "$ACTUAL_VIEWER")
+          fi
+          yarn test:layout-regression "${args[@]}"
+        continue-on-error: true
+
+      # ── Upload artifacts ──────────────────────────────────────────────────
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layout-regression-${{ github.run_number }}
+          path: artifacts/layout-regression/
+          retention-days: 30
+
+      # ── On PR: post or update a comment with the report ──────────────────
+      - name: Post PR comment
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const marker = '<!-- vivliostyle-layout-regression -->';
+            let body = marker + '\n';
+
+            const mdPath = 'artifacts/layout-regression/report.md';
+            const triagePath = 'artifacts/layout-regression/triage.yaml';
+
+            if (!fs.existsSync(mdPath)) {
+              body += '## Regression compare\n\nComparison did not produce a report (script may have failed).';
+            } else {
+              let md = fs.readFileSync(mdPath, 'utf8');
+              // Truncate if too long for a GitHub comment (65536 char limit)
+              if (md.length > 60000) {
+                md = md.slice(0, 60000) + '\n\n…(truncated — see uploaded artifact for full report)';
+              }
+              body += md;
+
+              // Append triage summary if available
+              if (fs.existsSync(triagePath)) {
+                const yaml = require('js-yaml');
+                try {
+                  const entries = yaml.load(fs.readFileSync(triagePath, 'utf8')) || [];
+                  const pending = entries.filter(e => !String(e.decision || '').trim()).length;
+                  if (pending > 0) {
+                    body += `\n\n> **${pending} entry/entries need triage** (decision is empty)\n`;
+                    body += '> Download the artifact to review `triage.yaml`.';
+                  }
+                } catch {}
+              }
+            }
+
+            const prNumber = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+  # ── On manual run: commit updated triage decisions back to the repo ─────
+  save-triage:
+    needs: compare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to commit triage baseline
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download regression artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: layout-regression-${{ github.run_number }}
+          path: artifacts/layout-regression/
+
+      - name: Save triage baseline
+        run: |
+          if [ -f artifacts/layout-regression/triage.yaml ]; then
+            cp artifacts/layout-regression/triage.yaml scripts/layout-regression-triage.yaml
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add scripts/layout-regression-triage.yaml
+            if git diff --staged --quiet; then
+              echo "No triage changes to commit."
+            else
+              git commit -m "chore: update layout regression triage baseline [skip ci]"
+              git push
+              echo "Committed updated layout-regression-triage.yaml."
+            fi
+          fi
