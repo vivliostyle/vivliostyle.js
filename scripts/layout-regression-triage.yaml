@@ -3,9 +3,9 @@
   title: "Float with lh/rlh height (Issue #1494, #1738)"
   file: float-lh-rlh.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/pr1729bug" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-lh-rlh.html
@@ -19,9 +19,9 @@
   title: "Cross-scope counters (Issue #1692)"
   file: cross-scope-counters.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/cross-scope-counter" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/cross-scope-counters.html
@@ -36,9 +36,9 @@
   title: "target-counter() missing page (Issue #1498)"
   file: target-counter-missing-page.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1498" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-missing-page.html
@@ -52,9 +52,9 @@
   title: box-decoration-break
   file: box-decoration-break.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/box-decoration-break.html
@@ -62,15 +62,16 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/box-decoration-break.html
   diffPages:
+    - 2
     - 4
 - id: "0060"
   category: General
   title: Justification
   file: justification.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/justification.html
@@ -84,9 +85,9 @@
   title: z-index on @page and page-margin boxes
   file: z-index-at-page.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "Text 'Lorem ipsum…' disappears in page 2"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/z-index-at-page.html
@@ -100,9 +101,9 @@
   title: all shorthand property
   file: all-shorthand.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/all-shorthand.html
@@ -116,9 +117,9 @@
   title: Page float inside/outside values
   file: spread-inside-outside/page-float-inside-outside.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "Two 'top inside' floats should be on page 1 but one of them is moved to page 2 in canary"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/spread-inside-outside/page-float-inside-outside.html
@@ -134,9 +135,9 @@
   title: Page Groups
   file: named-pages/page-groups.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/page-groups" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named-pages/page-groups.html
@@ -152,9 +153,9 @@
     - named-pages/page-groups-concat-blank-first.html
     - named-pages/page-groups-concat-blank-second.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/page-groups" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named-pages/page-groups-concat-blank-first.html&src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named-pages/page-groups-concat-blank-second.html
@@ -168,9 +169,9 @@
   title: "column-fill: balance (vertical writing-mode)"
   file: multi-column/column-fill_balance_vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance_vertical.html
@@ -187,9 +188,9 @@
   title: "column-fill: balance-all"
   file: multi-column/column-fill_balance-all.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "maybe"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance-all.html
@@ -203,9 +204,9 @@
   title: "column-fill: balance-all (vertical writing-mode)"
   file: multi-column/column-fill_balance-all_vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance-all_vertical.html
@@ -219,20 +220,14 @@
     - 15
     - 20
     - 21
-    - 22
-    - 23
-    - 26
-    - 27
-    - 30
-    - 31
 - id: "0140"
   category: Multi-column
   title: "Multi-column in page float (Issue #1751)"
   file: multi-column/multicol-in-page-float.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1751" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/multicol-in-page-float.html
@@ -248,9 +243,9 @@
   title: "column-fill: auto in non-root multicol (Issue #1720, #1758, #1773)"
   file: multi-column/multicol-column-fill-auto.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/follow-up-pr1759" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/multicol-column-fill-auto.html
@@ -269,9 +264,9 @@
   title: "Column rule with page floats and footnotes (Issue #1493)"
   file: multi-column/column-rule-page-floats-footnotes.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1493" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-rule-page-floats-footnotes.html
@@ -286,9 +281,9 @@
   title: "Column rule with page floats and footnotes (vertical writing-mode) (Issue #1493, #1764)"
   file: multi-column/column-rule-page-floats-footnotes-vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1764" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-rule-page-floats-footnotes-vertical.html
@@ -298,14 +293,30 @@
   diffPages:
     - 1
     - 2
+- id: "0148"
+  category: Table
+  title: Table rowspan (vertical writing-mode)
+  file: table/table_rowspan_vertical.html
+  type: difference
+  decision: "expected" # regression / expected / skip
+  notes: ""
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_rowspan_vertical.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_rowspan_vertical.html
+  diffPages:
+    - 1
 - id: "0156"
   category: Page floats
   title: "'Page' page floats"
   file: page_floats/page_page_floats.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page_page_floats.html
@@ -319,9 +330,9 @@
   title: "'Column' page floats"
   file: page_floats/column_page_floats.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats.html
@@ -335,9 +346,9 @@
   title: "'Column' page floats (vertical writing-mode, 2 values)"
   file: page_floats/column_page_floats_vertical_2.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_vertical_2.html
@@ -351,9 +362,9 @@
   title: "'Region' page floats with exclusions"
   file: page_floats/region_page_floats_with_exclusions.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "regression" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions.html
@@ -368,9 +379,9 @@
   title: "'Region' page floats with exclusions (vertical writing-mode)"
   file: page_floats/region_page_floats_with_exclusions_vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "regression" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html
@@ -385,9 +396,9 @@
   title: "'Column' page floats with exclusions"
   file: page_floats/column_page_floats_with_exclusions.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_with_exclusions.html
@@ -401,9 +412,9 @@
   title: Multiple kind of page floats
   file: page_floats/multiple_kind_of_page_floats.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/multiple_kind_of_page_floats.html
@@ -417,9 +428,9 @@
   title: Multiple kind of page floats (vertical writing-mode)
   file: page_floats/multiple_kind_of_page_floats_vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "maybe"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/multiple_kind_of_page_floats_vertical.html
@@ -433,9 +444,9 @@
   title: Forced break and page floats
   file: page_floats/forced_break_and_page_floats.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/forced_break_and_page_floats.html
@@ -445,7 +456,10 @@
   diffPages:
     - 1
     - 2
+    - 3
+    - 4
     - 7
+    - 9
     - 10
     - 12
     - 16
@@ -454,9 +468,9 @@
   title: column-span on page floats
   file: page_floats/column-span_on_page_floats.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "maybe"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column-span_on_page_floats.html
@@ -471,9 +485,9 @@
   title: "Page float padding, border, and margin-bottom cases (Issue #1752)"
   file: page_floats/page-float-spacing.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1752" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page-float-spacing.html
@@ -492,9 +506,9 @@
   title: "Page float padding, border, and margin-bottom cases with fontSize=18 (Issue #1752)"
   file: page_floats/page-float-spacing.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1752" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page-float-spacing.html&fontSize=18
@@ -522,9 +536,9 @@
   title: Footnotes widows bug
   file: footnotes/footnotes_widows_bug.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes_widows_bug.html
@@ -539,9 +553,9 @@
   title: "Footnote in footnote (Issue #1352)"
   file: footnotes/footnote-in-footnote.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1352" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-in-footnote.html
@@ -555,9 +569,9 @@
   title: Footnotes and page floats
   file: footnotes/footnotes_and_page_floats.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes_and_page_floats.html
@@ -570,14 +584,30 @@
     - 4
     - 6
     - 9
+- id: "0204"
+  category: Footnotes
+  title: footnote-policy
+  file: footnotes/footnote-policy.html
+  type: difference
+  decision: "regression" # regression / expected / skip
+  notes: "maybe"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-policy.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-policy.html
+  diffPages:
+    - 1
 - id: "0205"
   category: Footnotes
   title: Footnote area with @footnote
   file: footnotes/footnote-area-at-footnote.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-area-at-footnote.html
@@ -593,9 +623,9 @@
   title: "@page @footnote overrides top-level @footnote (Issue #1723)"
   file: footnotes/footnote-area-page-overrides-top-level.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-area-page-overrides-top-level.html
@@ -609,9 +639,9 @@
   title: "@footnote ::before content (Issue #1723)"
   file: footnotes/footnote-before-content.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-before-content.html
@@ -626,9 +656,9 @@
   title: "Footnote and page counter-reset (Issue #421)"
   file: footnotes/footnote-page-counter-reset.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-page-counter-reset.html
@@ -648,9 +678,9 @@
   title: Footnote call/marker counter styles
   file: footnotes/footnote-call-marker-counter-style.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-call-marker-counter-style.html
@@ -664,9 +694,9 @@
   title: "Footnotes in table 2 (Issue #1657)"
   file: footnotes/footnotes-in-table-2.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes-in-table-2.html
@@ -683,9 +713,9 @@
   title: "Footnotes in table with rowspan/colspan (Issue #1667)"
   file: footnotes/footnotes-in-table-rowspan-colspan.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1663a" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes-in-table-rowspan-colspan.html
@@ -703,9 +733,9 @@
   title: "Footnotes in multi-column (Issue #1460)"
   file: footnotes/footnotes-in-multicol.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes-in-multicol.html
@@ -724,9 +754,9 @@
   title: "Footnotes in multi-column (vertical writing-mode) (Issue #1460)"
   file: footnotes/footnotes-in-multicol-vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes-in-multicol-vertical.html
@@ -745,9 +775,9 @@
   title: "Footnotes anywhere (Issue #1669)"
   file: footnotes/footnotes-anywhere.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes-anywhere.html
@@ -761,9 +791,9 @@
   title: "DPUB footnotes with target-counter() (Issue #1700)"
   file: footnotes/dpub-footnotes-target-counter.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/dpub-footnotes-target-counter.html
@@ -777,9 +807,9 @@
   title: "DPUB noteref duplicate reference should not duplicate footnote body (Issue #1767)"
   file: footnotes/dpub-footnote-duplicate-reference.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/dpub-footnote-duplicate-reference.html
@@ -795,9 +825,9 @@
   title: "EPUB noteref duplicate reference should not duplicate footnote body (Issue #1767)"
   file: footnotes/epub-footnote-duplicate-reference.xhtml
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/epub-footnote-duplicate-reference.xhtml
@@ -812,9 +842,9 @@
   title: "Default ::footnote-call/::footnote-marker styles (Issue #1701)"
   file: footnotes/default-footnote-pseudo-styles.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/default-footnote-pseudo-styles.html
@@ -828,9 +858,9 @@
   title: "::footnote-marker with list-style-position: outside (Issue #1702)"
   file: footnotes/footnote-marker-outside-style.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-marker-outside-style.html
@@ -847,9 +877,9 @@
   title: nesting table
   file: repeating_elements/nesting_table.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "maybe"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting_table.html
@@ -867,9 +897,9 @@
   title: nesting table (vertical writing-mode)
   file: repeating_elements/nesting_table_vertical.html
   type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "maybe"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting_table_vertical.html
@@ -886,9 +916,9 @@
   title: "List-item with text-spacing (Issue #1763)"
   file: counter-style/list-item-text-spacing.html
   type: difference
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git:fix/issue1763" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-item-text-spacing.html
@@ -902,9 +932,9 @@
   title: Clear page floats
   file: page_floats/clear_page_floats.html
   type: error
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "infinite loop"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats.html
@@ -919,9 +949,9 @@
   title: Clear page floats (vertical writing-mode)
   file: page_floats/clear_page_floats_vertical.html
   type: error
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "infinite loop"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
@@ -936,9 +966,9 @@
   title: "Page float in page float (Issue #1675)"
   file: page_floats/page-float-in-page-float.html
   type: error
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page-float-in-page-float.html
@@ -953,9 +983,9 @@
   title: "Footnotes in page float (Issue #1675)"
   file: footnotes/footnote-in-page-float.html
   type: error
-  decision: ""  # regression / expected / skip
+  decision: "expected" # regression / expected / skip
   notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: "git-fix-issue1775" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-in-page-float.html
@@ -970,9 +1000,9 @@
   title: Page floats with repeating elements
   file: repeating_elements/repeating_page_floats.html
   type: error
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "infinite loop"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats.html
@@ -987,9 +1017,9 @@
   title: Page floats with repeating elements (vertical writing-mode)
   file: repeating_elements/repeating_page_floats_vertical.html
   type: error
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  decision: "regression" # regression / expected / skip
+  notes: "infinite loop"
+  approvedViewer: "" # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats_vertical.html
