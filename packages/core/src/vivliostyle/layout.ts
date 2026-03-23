@@ -3712,6 +3712,27 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       PageFloats.isPageFloat(nodeContext.floatReference) ||
       nodeContext.floatSide === "footnote"
     ) {
+      // When inside a page float area, the float element that generated
+      // this area is laid out as content. Its float/footnote CSS properties
+      // must not trigger another page float layout (which would create
+      // infinite recursion). Only skip processing for the generating element
+      // itself; genuinely nested floats/footnotes are allowed. (Issue #1784)
+      const generatingNodePosition =
+        this.pageFloatLayoutContext.generatingNodePosition;
+      if (
+        generatingNodePosition &&
+        nodeContext.sourceNode === generatingNodePosition.steps[0].node
+      ) {
+        const nodeContextMod = nodeContext.modify();
+        nodeContextMod.floatSide = null;
+        nodeContextMod.floatReference = PageFloats.FloatReference.INLINE;
+        nodeContextMod.clearSide = null;
+        if (this.isBreakable(nodeContextMod)) {
+          return this.layoutBreakableBlock(nodeContextMod);
+        } else {
+          return this.layoutUnbreakable(nodeContextMod);
+        }
+      }
       return this.layoutPageFloat(nodeContext);
     } else {
       return this.layoutFloat(nodeContext);
