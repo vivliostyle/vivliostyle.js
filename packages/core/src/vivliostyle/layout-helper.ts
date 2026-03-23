@@ -667,6 +667,16 @@ export function isOutOfFlow(node: Node): boolean {
   if (!(node?.nodeType === 1)) return false;
   const e = node as HTMLElement;
   if (isSpecial(e)) return true;
+  return isCssOutOfFlow(node);
+}
+
+/**
+ * Check if element is out-of-flow due to CSS positioning or float.
+ * Unlike isOutOfFlow(), this does not check for special marker elements.
+ */
+export function isCssOutOfFlow(node: Node): boolean {
+  if (!(node?.nodeType === 1)) return false;
+  const e = node as HTMLElement;
   const position = e.style?.position;
   if (position === "absolute" || position === "fixed") {
     return true;
