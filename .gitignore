@@ -3,9 +3,7 @@
 .vercel
 .now
 
-docs/anchors.json
-docs/supported-features.html
-artifacts/layout-regression/
+artifacts
 
 # Created by https://www.gitignore.io/api/node
 # Edit at https://www.gitignore.io/?templates=node
