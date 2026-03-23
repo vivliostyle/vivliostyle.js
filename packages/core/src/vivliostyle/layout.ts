@@ -3440,11 +3440,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 breakAtTheEdge = null;
               }
               onStartEdges = false; // we are now on end edges.
-              // Do not use out-of-flow elements (including absolute/fixed
-              // positioned and floated elements) as lastAfterNodeContext,
-              // since their edge positions are not in the block flow and
-              // would prevent correct overflow detection. (Issue #1775)
-              if (!LayoutHelper.isOutOfFlow(nodeContext.viewNode)) {
+              // Do not use CSS-positioned out-of-flow elements
+              // (absolute/fixed positioned and CSS floated elements) as
+              // lastAfterNodeContext, since their edge positions are not
+              // in the block flow and would prevent correct overflow
+              // detection. (Issue #1775)
+              // Note: Use isCssOutOfFlow() instead of isOutOfFlow() to
+              // allow special marker elements (e.g. page float anchors)
+              // which are positioned in normal flow and are needed for
+              // break position tracking. (Issue #1790)
+              if (!LayoutHelper.isCssOutOfFlow(nodeContext.viewNode)) {
                 lastAfterNodeContext = nodeContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
               }
