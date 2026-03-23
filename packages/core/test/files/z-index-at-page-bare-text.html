@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>z-index on @page and page-margin boxes (bare text)</title>
+    <style>
+@page {
+  size: 14cm 14cm;
+  margin: 2cm;
+  z-index: -2;
+  background: yellow;
+  @top-center {
+    content: "Page Header, displayed on all pages";
+  }
+  @bottom-center {
+    content: "Page Footer, displayed on the second and subsequent pages";
+    z-index: -1;
+  }
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  float: left;
+  margin: -2cm;
+  padding: 2cm;
+  width: 100vw;
+  height: 100vh;
+  background: lime;
+}
+    </style>
+  </head>
+  <body>
+    <header>
+      <p>This is the first page, background color is lime, with Page Header, and hidden Page Footer.</p>
+      <p>The rest pages will be yellow, and with both Page Header and Page Footer.</p>
+    </header>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi eligendi ad nulla? Laboriosam natus in et ipsum molestias id explicabo ad corporis alias eum voluptatum obcaecati, ullam nobis minima, voluptates.
+    <p>Voluptatem quasi sunt dignissimos!</p>
+  </body>
+</html>
