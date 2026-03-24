@@ -3331,7 +3331,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     )
                   : this.breakPositions[
                       this.breakPositions.length - 1
-                    ] instanceof BoxBreakPosition)
+                    ] instanceof BoxBreakPosition ||
+                    // When lastAfterNodeContext is null (no in-flow
+                    // trailing edge, e.g. after CSS floats converted to
+                    // position:absolute) and no block-level leading edges
+                    // were encountered, save a break position at the
+                    // block-level element. This parallels the inline text
+                    // break opportunity above. (Issue #1786)
+                    (!leadingEdge && leadingEdgeContexts.length === 0))
               ) {
                 this.saveEdgeBreakPosition(
                   nodeContext.copy(),
