@@ -3263,6 +3263,27 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   ).modify();
                   nodeContext.overflow = true;
                 } else {
+                  // When lastAfterNodeContext is null (no in-flow trailing
+                  // edge before this content, e.g. after CSS floats
+                  // converted to position:absolute) and no block-level
+                  // leading edges were encountered (bare inline text
+                  // directly after the float), save a break position at
+                  // the content start. This parallels the block-level
+                  // break opportunity saved for Issue #611 below.
+                  // The leadingEdge guard prevents break positions at the
+                  // very start of a column (first layoutNext call).
+                  // (Issue #1786)
+                  if (
+                    !lastAfterNodeContext &&
+                    !leadingEdge &&
+                    leadingEdgeContexts.length === 0
+                  ) {
+                    this.saveEdgeBreakPosition(
+                      nodeContext,
+                      breakAtTheEdge,
+                      false,
+                    );
+                  }
                   nodeContext = nodeContext.modify();
                   nodeContext.breakBefore = breakAtTheEdge;
                 }

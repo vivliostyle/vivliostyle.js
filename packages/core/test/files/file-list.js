@@ -187,6 +187,11 @@ module.exports = [
         title: "z-index on @page and page-margin boxes",
       },
       {
+        file: "z-index-at-page-bare-text.html",
+        title:
+          "z-index on @page and page-margin boxes (bare text after float, Issue #1786)",
+      },
+      {
         file: "inset-shorthand.html",
         title: "inset shorthand property",
       },
