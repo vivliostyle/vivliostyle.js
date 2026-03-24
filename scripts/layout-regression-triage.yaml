@@ -14,25 +14,7 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/z-index-at-page.html
   diffPages:
     - 2
-- id: "0086"
-  category: Spread inside/outside properties
-  title: Page float inside/outside values
-  file: spread-inside-outside/page-float-inside-outside.html
-  type: difference
-  decision: regression  # regression / expected / skip
-  notes: Two 'top inside' floats should be on page 1 but one of them is moved to page 2 in canary
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/spread-inside-outside/page-float-inside-outside.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/spread-inside-outside/page-float-inside-outside.html
-  diffPages:
-    - 1
-    - 2
-    - 3
-- id: "0136"
+- id: "0137"
   category: Multi-column
   title: "column-fill: balance-all"
   file: multi-column/column-fill_balance-all.html
@@ -48,41 +30,7 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance-all.html
   diffPages:
     - 17
-- id: "0166"
-  category: Page floats
-  title: "'Region' page floats with exclusions"
-  file: page_floats/region_page_floats_with_exclusions.html
-  type: difference
-  decision: regression  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions.html
-  diffPages:
-    - 1
-    - 2
-- id: "0167"
-  category: Page floats
-  title: "'Region' page floats with exclusions (vertical writing-mode)"
-  file: page_floats/region_page_floats_with_exclusions_vertical.html
-  type: difference
-  decision: regression  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html
-  diffPages:
-    - 1
-    - 2
-- id: "0171"
+- id: "0172"
   category: Page floats
   title: Multiple kind of page floats (vertical writing-mode)
   file: page_floats/multiple_kind_of_page_floats_vertical.html
@@ -98,7 +46,7 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/multiple_kind_of_page_floats_vertical.html
   diffPages:
     - 2
-- id: "0186"
+- id: "0187"
   category: Page floats
   title: column-span on page floats
   file: page_floats/column-span_on_page_floats.html
@@ -114,8 +62,23 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column-span_on_page_floats.html
   diffPages:
     - 2
-    - 3
-- id: "0229"
+- id: "0191"
+  category: Page floats
+  title: Clear page floats (vertical writing-mode)
+  file: page_floats/clear_page_floats_vertical.html
+  type: difference
+  decision: regression  # regression / expected / skip
+  notes: infinite loop
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
+  diffPages:
+    - 4
+- id: "0230"
   category: Repeating Elements
   title: nesting table
   file: repeating_elements/nesting_table.html
@@ -135,7 +98,7 @@
     - 4
     - 5
     - 6
-- id: "0230"
+- id: "0231"
   category: Repeating Elements
   title: nesting table (vertical writing-mode)
   file: repeating_elements/nesting_table_vertical.html
@@ -154,74 +117,6 @@
     - 3
     - 4
     - 5
-- id: "0189"
-  category: Page floats
-  title: Clear page floats
-  file: page_floats/clear_page_floats.html
-  type: error
-  decision: regression  # regression / expected / skip
-  notes: infinite loop
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats.html
-  errorSide: canary
-  errorName: TimeoutError
-  errorMessage: "page.waitForFunction: Timeout 30000ms exceeded."
-- id: "0190"
-  category: Page floats
-  title: Clear page floats (vertical writing-mode)
-  file: page_floats/clear_page_floats_vertical.html
-  type: error
-  decision: regression  # regression / expected / skip
-  notes: infinite loop
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
-  errorSide: canary
-  errorName: TimeoutError
-  errorMessage: "page.waitForFunction: Timeout 30000ms exceeded."
-- id: "0234"
-  category: Repeating Elements
-  title: Page floats with repeating elements
-  file: repeating_elements/repeating_page_floats.html
-  type: error
-  decision: regression  # regression / expected / skip
-  notes: infinite loop
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats.html
-  errorSide: canary
-  errorName: TimeoutError
-  errorMessage: "page.waitForFunction: Timeout 30000ms exceeded."
-- id: "0235"
-  category: Repeating Elements
-  title: Page floats with repeating elements (vertical writing-mode)
-  file: repeating_elements/repeating_page_floats_vertical.html
-  type: error
-  decision: regression  # regression / expected / skip
-  notes: infinite loop
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats_vertical.html
-  errorSide: canary
-  errorName: TimeoutError
-  errorMessage: "page.waitForFunction: Timeout 30000ms exceeded."
 - category: General
   title: "Float with lh/rlh height (Issue #1494, #1738)"
   file: float-lh-rlh.html
