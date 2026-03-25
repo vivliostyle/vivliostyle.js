@@ -1065,6 +1065,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   private adjustColumnBlockSizeForBlockEndFloats(): void {
+    if (!this.element.hasAttribute("data-vivliostyle-page-area")) {
+      // This adjustment is only for the page area. (Issue #1787, #1789)
+      return;
+    }
     const initialBlockSize = this.vertical ? this.width : this.height;
     const blockSize = this.getBoxDir() * (this.footnoteEdge - this.beforeEdge);
     if (
