@@ -1675,20 +1675,36 @@ export class PageFloatLayoutContext
   }
 
   getBlockStartEdgeOfBlockEndFloats(): number {
-    const isVertical = this.getContainer().vertical;
-    return this.floatFragments
+    let context: PageFloatLayoutContext = this;
+    let container: Vtree.Container | null = null;
+    while (context && !container) {
+      container = context.container;
+      context = context.parent;
+    }
+    const isVertical = !!container?.vertical;
+    let edge = NaN;
+    this.floatFragments
       .filter((fragment) => fragment.floatSide === "block-end")
-      .reduce(
-        (edge, fragment) => {
-          const rect = fragment.getOuterRect();
-          if (isVertical) {
-            return Math.max(edge, rect.x2);
-          } else {
-            return Math.min(edge, rect.y1);
-          }
-        },
-        isVertical ? 0 : Infinity,
-      );
+      .forEach((fragment) => {
+        const rect = fragment.getOuterRect();
+        const fragmentEdge = isVertical ? rect.x2 : rect.y1;
+        edge = isFinite(edge)
+          ? isVertical
+            ? Math.max(edge, fragmentEdge)
+            : Math.min(edge, fragmentEdge)
+          : fragmentEdge;
+      });
+    if (this.parent) {
+      const parentEdge = this.parent.getBlockStartEdgeOfBlockEndFloats();
+      if (isFinite(parentEdge)) {
+        edge = isFinite(edge)
+          ? isVertical
+            ? Math.max(edge, parentEdge)
+            : Math.min(edge, parentEdge)
+          : parentEdge;
+      }
+    }
+    return edge;
   }
 
   getPageFloatClearEdge(clear: string, column: LayoutType.Column): number {
