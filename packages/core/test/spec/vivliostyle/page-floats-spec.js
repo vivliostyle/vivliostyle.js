@@ -1781,5 +1781,128 @@ describe("page-floats", function () {
         ]);
       });
     });
+
+    describe("float edge helpers", function () {
+      function container(vertical) {
+        return {
+          vertical: vertical,
+          clear: jasmine.createSpy("clear"),
+        };
+      }
+
+      function addFragment(context, floatReference, floatSide, rect) {
+        var float = new PageFloat(
+          dummyNodePosition(),
+          floatReference,
+          floatSide,
+          null,
+          "body",
+        );
+        context.addPageFloat(float);
+        var fragment = new PageFloatFragment(
+          float.floatReference,
+          float.floatSide,
+          null,
+          [new PageFloatContinuation(float, {})],
+          {
+            getOuterRect: jasmine
+              .createSpy("getOuterRect")
+              .and.returnValue(rect),
+          },
+          false,
+        );
+        context.addPageFloatFragment(fragment);
+      }
+
+      it("includes ancestor block-end floats when getting block-start edge of block-end floats", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container(false),
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.REGION,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          regionContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        addFragment(pageContext, FloatReference.PAGE, "block-end", {
+          x1: 0,
+          x2: 0,
+          y1: 520,
+          y2: 600,
+        });
+        addFragment(regionContext, FloatReference.REGION, "block-end", {
+          x1: 0,
+          x2: 0,
+          y1: 480,
+          y2: 500,
+        });
+
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(480);
+      });
+
+      it("includes ancestor block-end floats in vertical contexts", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container(true),
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.REGION,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          regionContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        addFragment(pageContext, FloatReference.PAGE, "block-end", {
+          x1: 100,
+          x2: 180,
+          y1: 0,
+          y2: 0,
+        });
+        addFragment(regionContext, FloatReference.REGION, "block-end", {
+          x1: 200,
+          x2: 260,
+          y1: 0,
+          y2: 0,
+        });
+
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(260);
+      });
+    });
   });
 });

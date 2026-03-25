@@ -1511,26 +1511,29 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
             ? (column?.element.style.left ?? "")
             : (column?.element.style.top ?? ""),
         );
-        const basePaddingRect = column?.getPaddingRect
-          ? column.getPaddingRect()
-          : container.getPaddingRect();
+        const basePaddingRect = container.getPaddingRect();
         const columnLike = column as Vtree.Container & {
           pageFloatLayoutContext?: {
             parent?: {
               getBlockEndEdgeOfBlockStartFloats?: () => number;
+              getBlockStartEdgeOfBlockEndFloats?: () => number;
             };
           };
         };
         const blockStartFloatEndEdge =
           columnLike.pageFloatLayoutContext?.parent?.getBlockEndEdgeOfBlockStartFloats?.();
-        const blockStartReduction = isFinite(blockStartFloatEndEdge)
-          ? Math.max(
-              0,
-              this.vertical
-                ? basePaddingRect.x2 - blockStartFloatEndEdge
-                : blockStartFloatEndEdge - basePaddingRect.y1,
-            )
-          : 0;
+        const blockEndFloatStartEdge =
+          columnLike.pageFloatLayoutContext?.parent?.getBlockStartEdgeOfBlockEndFloats?.();
+        const blockStartLimit = isFinite(blockStartFloatEndEdge)
+          ? this.vertical
+            ? blockStartFloatEndEdge - basePaddingRect.x1
+            : blockStartFloatEndEdge - basePaddingRect.y1
+          : NaN;
+        const blockEndLimit = isFinite(blockEndFloatStartEdge)
+          ? this.vertical
+            ? blockEndFloatStartEdge - basePaddingRect.x1
+            : blockEndFloatStartEdge - basePaddingRect.y1
+          : NaN;
         const border = this.vertical ? "border-top" : "border-left";
         for (let i = 1; i < columnCount; i++) {
           const pos = this.vertical
@@ -1558,12 +1561,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
             0,
           );
           const renderedEnd = renderedStart + size;
-          const adjustedStart = this.vertical
-            ? renderedStart
-            : Math.max(renderedStart, blockStartReduction);
-          const adjustedSize = this.vertical
-            ? Math.max(0, size - blockStartReduction)
-            : Math.max(0, renderedEnd - adjustedStart);
+          const adjustedStart = Math.max(
+            renderedStart,
+            isFinite(this.vertical ? blockEndLimit : blockStartLimit)
+              ? Math.max(0, this.vertical ? blockEndLimit : blockStartLimit)
+              : 0,
+          );
+          const adjustedEnd = Math.min(
+            renderedEnd,
+            isFinite(this.vertical ? blockStartLimit : blockEndLimit)
+              ? Math.max(0, this.vertical ? blockStartLimit : blockEndLimit)
+              : renderedEnd,
+          );
+          const adjustedSize = Math.max(0, adjustedEnd - adjustedStart);
           const rule = container.element.ownerDocument.createElement("div");
           Base.setCSSProperty(rule, "position", "absolute");
           Base.setCSSProperty(
