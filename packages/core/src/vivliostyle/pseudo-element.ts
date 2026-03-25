@@ -114,7 +114,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
         contentVal.visit(
           new Vtree.ContentPropertyHandler(
             (element.classList.contains("_viv-marker-outside") &&
-              element.firstElementChild) ||
+              element.firstElementChild?.firstElementChild) ||
               element,
             this.context,
             contentVal,
@@ -191,10 +191,20 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     if (listStylePosition === Css.ident.outside) {
       // Use special styling to simulate outside markers.
       element.classList.add("_viv-marker-outside");
-      // Create a span to hold the marker content.
-      const span = element.ownerDocument.createElementNS(Base.NS.XHTML, "span");
-      span.classList.add("_viv-marker-outside-content");
-      element.appendChild(span);
+      // Create a flex container for centering and an inner span to keep
+      // marker content as a single flex item even when it mixes images/text.
+      const contentContainer = element.ownerDocument.createElementNS(
+        Base.NS.XHTML,
+        "span",
+      );
+      contentContainer.classList.add("_viv-marker-outside-content");
+      const contentInner = element.ownerDocument.createElementNS(
+        Base.NS.XHTML,
+        "span",
+      );
+      contentInner.classList.add("_viv-marker-outside-content-inner");
+      contentContainer.appendChild(contentInner);
+      element.appendChild(contentContainer);
 
       // Prevent text-spacing-trim and hanging-punctuation from trimming or
       // hanging the suffix "、" of counter styles such as "cjk-decimal".
