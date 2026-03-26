@@ -188,7 +188,10 @@ export class ViewFactory
       if (!anchorHref) {
         continue;
       }
-      const resolvedHref = Base.resolveURL(anchorHref, this.xmldoc.url);
+      const resolvedHref = Base.resolveReferenceURL(
+        anchorHref,
+        this.xmldoc.url,
+      );
       if (resolvedHref === "#") {
         continue;
       }
@@ -219,7 +222,7 @@ export class ViewFactory
     if (!href) {
       return true;
     }
-    const resolvedHref = Base.resolveURL(href, this.xmldoc.url);
+    const resolvedHref = Base.resolveReferenceURL(href, this.xmldoc.url);
     if (resolvedHref === "#") {
       return true;
     }
@@ -469,7 +472,7 @@ export class ViewFactory
               : this.xmldoc;
           }
           if (href) {
-            href = Base.resolveURL(href, xmldoc.url);
+            href = Base.resolveReferenceURL(href, xmldoc.url);
             cont1 = this.createRefShadow(
               href,
               Vtree.ShadowType.ROOTED,
@@ -673,7 +676,7 @@ export class ViewFactory
           owner.getAttribute("href") ||
           owner.getAttributeNS(Base.NS.XLINK, "href");
         if (href) {
-          const resolvedHref = Base.resolveURL(href, this.xmldoc.url);
+          const resolvedHref = Base.resolveReferenceURL(href, this.xmldoc.url);
           const target = this.xmldoc.getElement(resolvedHref);
           if (
             target &&
