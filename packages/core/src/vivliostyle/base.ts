@@ -159,6 +159,18 @@ export function resolveURL(relURL: string, baseURL: string): string {
 }
 
 /**
+ * Resolve a URL while preserving the document URL for fragment-only
+ * references. This is needed when the base URL is a data URL because
+ * resolveURL("#id", data:...) intentionally returns just "#id".
+ */
+export function resolveReferenceURL(relURL: string, baseURL: string): string {
+  if (relURL.match(/^#/) && baseURL) {
+    return stripFragment(baseURL) + relURL;
+  }
+  return resolveURL(relURL, baseURL);
+}
+
+/**
  * Convert special URLs (e.g. GitHub, Gist) to their raw equivalents.
  * This is useful for fetching content from these services in a format
  * that can be easily processed by Vivliostyle.js.
@@ -168,6 +180,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
  */
 export function convertSpecialURL(url: string): string {
   let r: RegExpMatchArray;
+
   if (
     (r =
       /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(

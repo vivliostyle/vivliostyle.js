@@ -20,6 +20,26 @@ import * as adapt_base from "../../../src/vivliostyle/base";
 describe("base", function () {
   var module = adapt_base;
 
+  describe("resolveReferenceURL", function () {
+    it("preserves the base document URL for fragment references on data URLs", function () {
+      expect(
+        module.resolveReferenceURL(
+          "#fn1",
+          "data:,%3Cp%3Edpub%20test%3C%2Fp%3E",
+        ),
+      ).toBe("data:,%3Cp%3Edpub%20test%3C%2Fp%3E#fn1");
+    });
+
+    it("matches resolveURL for non-fragment references", function () {
+      expect(
+        module.resolveReferenceURL(
+          "chapter-2.html#fn1",
+          "https://example.com/book/chapter-1.html",
+        ),
+      ).toBe("https://example.com/book/chapter-2.html#fn1");
+    });
+  });
+
   describe("escapeCharToHex", function () {
     it("escape the first character to a 4-digit hex code and add the specified prefix", function () {
       expect(module.escapeCharToHex("a", ":")).toBe(":0061");
