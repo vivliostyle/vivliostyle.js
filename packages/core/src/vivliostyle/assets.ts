@@ -1613,13 +1613,18 @@ span[data-viv-leader] {
 }
 [data-adapt-pseudo="marker"]._viv-marker-outside,
 [data-adapt-pseudo="footnote-marker"]._viv-marker-outside {
-  position: absolute;
+  position: relative;
   text-indent: 0;
+  line-height: 1;
 }
 [data-adapt-pseudo="marker"] > ._viv-marker-outside-content,
 [data-adapt-pseudo="footnote-marker"] > ._viv-marker-outside-content {
   position: absolute;
   inset-inline-end: 0;
+  inset-block-start: 0;
+  inset-block-end: 0;
+  display: flex !important;
+  align-items: center;
 }
 
 /* initial-letter */

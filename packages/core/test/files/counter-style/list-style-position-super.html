@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>outside marker alignment with superscript content</title>
+    <style>
+      @page {
+        size: A5;
+        margin: 12mm;
+      }
+
+      :root {
+        line-height: 1.8;
+      }
+
+      body {
+        font-size: 16px;
+      }
+
+      section {
+        break-inside: avoid;
+        margin-block: 1em;
+      }
+
+      h1 {
+        font-size: 1.25em;
+        margin-block: 0 0.5em;
+      }
+
+      h2 {
+        font-size: 1em;
+        margin-block: 0 0.25em;
+      }
+
+      ul,
+      ol {
+        list-style-position: outside;
+        margin: 0;
+        padding-inline-start: 2.5em;
+      }
+
+      li + li {
+        margin-block-start: 0.2em;
+      }
+
+      .wrap {
+        max-inline-size: 22em;
+      }
+
+      .super {
+        vertical-align: super;
+      }
+
+      .big {
+        font-size: 200%;
+      }
+
+      .marker-string li::marker {
+        content: "※ ";
+      }
+
+      .marker-alpha li::marker {
+        content: counter(list-item, upper-alpha) ") ";
+      }
+
+      .marker-image-text li::marker {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>')
+          counter(list-item, upper-alpha) "👉 ";
+      }
+
+      .cjk {
+        list-style-type: cjk-decimal;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>outside marker alignment with superscript content</h1>
+
+    <section>
+      <h2>disc</h2>
+      <ul class="wrap">
+        <li>ORCID</li>
+        <li>ORCID<sup>M</sup></li>
+        <li>ORCID<span class="super"><sup>M</sup></span></li>
+        <li>ORCID<span class="super">M</span></li>
+        <li>
+          ORCID<span class="super big">M</span> with wrapped text to check a
+          taller superscripted inline box over multiple lines in the same list
+          item.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>decimal</h2>
+      <ol class="wrap">
+        <li>ORCID</li>
+        <li>ORCID<sup>M</sup></li>
+        <li>ORCID<span class="super"><sup>M</sup></span></li>
+        <li>ORCID<span class="super">M</span></li>
+        <li>
+          ORCID<span class="super big">M</span> with wrapped text to check a
+          taller superscripted inline box over multiple lines in the same list
+          item.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>custom ::marker string</h2>
+      <ul class="marker-string wrap">
+        <li>Marker string</li>
+        <li>Marker string<sup>M</sup></li>
+        <li>Marker string<span class="super"><sup>M</sup></span></li>
+        <li>Marker string<span class="super">M</span></li>
+        <li>
+          Marker string<span class="super big">M</span> with wrapped text to
+          check a taller superscripted inline box over multiple lines in the
+          same list item.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>custom counter and counter-style suffix</h2>
+      <ol class="marker-alpha wrap">
+        <li>Alpha marker</li>
+        <li>Alpha marker<sup>M</sup></li>
+        <li>Alpha marker<span class="super"><sup>M</sup></span></li>
+        <li>Alpha marker<span class="super">M</span></li>
+      </ol>
+      <ol class="cjk wrap">
+        <li>CJK decimal marker</li>
+        <li>CJK decimal marker<sup>M</sup></li>
+        <li>CJK decimal marker<span class="super"><sup>M</sup></span></li>
+        <li>
+          CJK decimal marker<span class="super big">M</span> with wrapped text
+          to check a taller superscripted inline box over multiple lines.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>mixed image and text ::marker content</h2>
+      <ol class="marker-image-text wrap">
+        <li>Image marker</li>
+        <li>Image marker<sup>M</sup></li>
+        <li>Image marker<span class="super"><sup>M</sup></span></li>
+        <li>
+          Image marker<span class="super big">M</span> with wrapped text to
+          check centering when the marker contains an image and text.
+        </li>
+      </ol>
+    </section>
+  </body>
+</html>

@@ -966,6 +966,11 @@ module.exports = [
         title: "list-style-position",
       },
       {
+        file: "counter-style/list-style-position-super.html",
+        title:
+          "Outside marker alignment with superscript content (Issue #1780)",
+      },
+      {
         file: "counter-style/list-style-type-bullet.html",
         title: "list-style-type bullet marker",
       },
