@@ -44,32 +44,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats.html
-  pageCountActual: 3
-  pageCountBaseline: 4
   diffPages:
     - 1
-    - 2
-    - 3
-- id: "0193"
-  category: Page floats
-  title: Clear page floats (vertical writing-mode)
-  file: page_floats/clear_page_floats_vertical.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1786a  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle-git-fix-issue1786a-vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
-  pageCountActual: 3
-  pageCountBaseline: 4
-  diffPages:
-    - 1
-    - 2
-    - 3
 - id: "0255"
   category: Counter style and list-style
   title: "Outside marker alignment with superscript content (Issue #1780)"
@@ -88,6 +64,26 @@
     - 1
     - 2
     - 3
+- id: "0184"
+  category: Page floats
+  title: Fragmented page floats
+  file: page_floats/fragmented_page_floats.html
+  type: error
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/fragmented_page_floats.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/fragmented_page_floats.html
+  errorSide: canary
+  errorName: TimeoutError
+  errorMessage: |
+    page.goto: Timeout 30000ms exceeded.
+    Call log:
+      - navigating to "https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/fragmented_page_floats.html", waiting until "domcontentloaded"
 - category: Multi-column
   title: "column-fill: balance (vertical writing-mode)"
   file: multi-column/column-fill_balance_vertical.html
