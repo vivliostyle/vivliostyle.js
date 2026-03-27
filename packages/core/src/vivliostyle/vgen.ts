@@ -1174,8 +1174,9 @@ export class ViewFactory
         ) {
           delete computedStyle["clear"];
           if (
-            computedStyle["display"] &&
-            computedStyle["display"] != Css.ident.inline
+            floating ||
+            (computedStyle["display"] &&
+              computedStyle["display"] != Css.ident.inline)
           ) {
             this.nodeContext.clearSide = clearSide.toString();
           }

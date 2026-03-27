@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Float with clear, vertical-rl (Issue #1803)</title>
+<style>
+@page {
+  size: 514px 600px;
+}
+:root {
+  writing-mode: vertical-rl;
+}
+
+h3 {
+  clear: both;
+  background: #eee;
+  margin: 0.5em 0;
+  padding: 0.2em;
+}
+
+/* Test 1: clear on block after floats with larger font-size */
+.test1 p {
+  clear: both;
+}
+.test1 .FL {
+  float: left;
+  clear: left;
+  background: cyan;
+}
+.test1 .FR {
+  float: right;
+  clear: right;
+  background: magenta;
+}
+.test1 .FL, .test1 .FR {
+  font-size: 1.25em;
+}
+
+/* Test 2: clear on inline floats with same font-size as line */
+.test2 p {
+  clear: both;
+}
+.test2 .FL {
+  float: left;
+  clear: left;
+  background: cyan;
+}
+.test2 .FR {
+  float: right;
+  clear: right;
+  background: magenta;
+}
+</style>
+</head>
+<body>
+<h3>Test 1: clear:both on block after floats (with larger font-size floats)</h3>
+<div class="test1">
+<p>Aaaa<span class="FL">FloatLeft1</span> bbbb<span class="FL">FloatLeft2</span> cccc<span class="FL">FloatLeft3</span>.</p>
+<p>Dddd<span class="FR">FloatRight1</span> eeee<span class="FR">FloatRight2</span> ffff<span class="FR">FloatRight3</span>.</p>
+</div>
+
+<h3>Test 2: clear:left/right on inline floats (with same font-size as line)</h3>
+<div class="test2">
+<p>Aaaa<span class="FL">FloatLeft1</span> bbbb<span class="FL">FloatLeft2</span> cccc<span class="FL">FloatLeft3</span>.</p>
+<p>Dddd<span class="FR">FloatRight1</span> eeee<span class="FR">FloatRight2</span> ffff<span class="FR">FloatRight3</span>.</p>
+</div>
+</body>
+</html>
