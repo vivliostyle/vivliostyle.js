@@ -16,13 +16,19 @@ const fileListPath = path.join(
   "packages/core/test/files/file-list.js",
 );
 
+// These params are appended last so that values explicitly specified earlier
+// via --extra-viewer-params take precedence: the viewer always uses the first
+// occurrence of a repeated parameter, so a user-supplied zoom or spread value
+// will win and these fallbacks will be ignored for that parameter.
+const fallbackViewerParams = "&zoom=1&spread=false";
+
 const defaults = {
   outDir: path.join(repoRoot, "artifacts", "layout-regression"),
   timeoutSec: 30,
-  maxDiffRatio: 0.0008,
+  maxDiffRatio: 0.0002,
   pixelThreshold: 0.75,
-  viewportWidth: 900,
-  viewportHeight: 900,
+  viewportWidth: 1800,
+  viewportHeight: 1800,
   skipScreenshots: false,
   actualViewer: "https://vivliostyle.vercel.app/",
   baselineViewer: "https://vivliostyle.org/viewer/",
@@ -144,7 +150,7 @@ Options:
   --limit <number>           Stop after N entries
   --out-dir <path>           Output directory
   --timeout <seconds>        Timeout in seconds for page load/waits (default 30)
-  --max-diff-ratio <number>  Allowed ratio of diff pixels (default 0.0008)
+  --max-diff-ratio <number>  Allowed ratio of diff pixels (default 0.0002)
   --pixel-threshold <0..1>   Pixel diff sensitivity (default 0.75)
   --viewport-width <number>  Browser viewport width
   --viewport-height <number> Browser viewport height
@@ -323,7 +329,7 @@ function buildViewerParams(entry, extraParams) {
     new RegExp(dirLocal, "g"),
     urlOnline,
   );
-  const parameterOnline = `${parameterOnlineBase}${extraParams}`;
+  const parameterOnline = `${parameterOnlineBase}${extraParams}${fallbackViewerParams}`;
   const parameterOld = parameterOnline.replace(
     /\bsrc=/g,
     /\bbookMode=true\b/.test(entry.options) ? "b=" : "x=",
@@ -342,8 +348,8 @@ function buildViewerParamsForTestUrl(testUrl, extraParams) {
   }
 
   // Do NOT percent-encode the URL - the viewer's hash parser expects it as-is.
-  const parameterOnline = `#src=${normalizedUrl}${extraParams}`;
-  const parameterOld = `#x=${normalizedUrl}${extraParams}`;
+  const parameterOnline = `#src=${normalizedUrl}${extraParams}${fallbackViewerParams}`;
+  const parameterOld = `#x=${normalizedUrl}${extraParams}${fallbackViewerParams}`;
 
   return {
     parameterOnline,
@@ -513,7 +519,7 @@ async function getTotalPages(page) {
   return page.evaluate(() => {
     const totalPages =
       document.querySelector(
-        "#vivliostyle-viewer-viewport > * > [data-vivliostyle-spread-container]",
+        "#vivliostyle-viewer-viewport [data-vivliostyle-spread-container]",
       )?.children.length ?? 0;
     if (totalPages > 0) {
       return totalPages;
@@ -576,7 +582,9 @@ async function capturePages({
   const totalPages = await getTotalPages(page);
 
   if (!skipScreenshots) {
-    const viewport = page.locator("#vivliostyle-viewer-viewport");
+    const spreadContainer = page.locator(
+      "#vivliostyle-viewer-viewport [data-vivliostyle-spread-container]",
+    );
     // Detect navigation capability once: prefer input-based jump, fall back to
     // sequential Move-Next clicks for old viewers without the page-number field.
     const useInputNav =
@@ -593,7 +601,7 @@ async function capturePages({
         dir,
         `${key}-p${String(p).padStart(4, "0")}.png`,
       );
-      await viewport.screenshot({ path: imagePath });
+      await spreadContainer.screenshot({ path: imagePath });
     }
   }
 

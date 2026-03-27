@@ -221,10 +221,10 @@ category filter, and limit.
 --limit <number>             Stop after N entries
 --out-dir <path>             Output directory (default: artifacts/layout-regression)
 --timeout <seconds>          Timeout per page (default: 30)
---max-diff-ratio <number>    Allowed ratio of diff pixels (default: 0.0008)
+--max-diff-ratio <number>    Allowed ratio of diff pixels (default: 0.0002)
 --pixel-threshold <0..1>     Per-pixel color diff sensitivity (default: 0.75)
---viewport-width <number>    Browser viewport width (default: 900)
---viewport-height <number>   Browser viewport height (default: 900)
+--viewport-width <number>    Browser viewport width (default: 1800)
+--viewport-height <number>   Browser viewport height (default: 1800)
 --skip-screenshots           Skip image capture/compare, check page counts only
 --actual-viewer <spec>       Actual viewer spec (default: canary)
 --baseline-viewer <spec>     Baseline viewer spec (default: stable)
@@ -251,7 +251,7 @@ Results are written to `artifacts/layout-regression/` (by default):
 A difference is reported when either:
 
 - page count differs between the two sides
-- per-page pixel diff ratio exceeds `--max-diff-ratio` (default `0.0008`)
+- per-page pixel diff ratio exceeds `--max-diff-ratio` (default `0.0002`)
 
 An error is reported when either side fails to complete rendering.
 
