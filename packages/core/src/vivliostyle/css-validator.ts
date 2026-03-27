@@ -513,7 +513,7 @@ export class PrimitiveValidator extends PropertyValidator {
 
   override visitFunc(func: Css.Func): Css.Val {
     if (this.allowed & ALLOW_COLOR) {
-      if (func.name === "device-cmyk") {
+      if (func.name === "device-cmyk" || func.name === "cmyk") {
         if (
           CSS.supports("color", "color(srgb 0 0 0)") &&
           CmykStore.parseDeviceCmyk(func) !== null

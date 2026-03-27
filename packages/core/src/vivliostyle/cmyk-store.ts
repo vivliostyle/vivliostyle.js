@@ -221,7 +221,8 @@ function getNumValue(v: Css.Val): number | null {
 export function parseDeviceCmyk(
   func: Css.Func,
 ): { cmyk: CMYKValue; alpha: number | null } | null {
-  if (func.name !== "device-cmyk") {
+  // Also accept legacy cmyk() as an alias for device-cmyk()
+  if (func.name !== "device-cmyk" && func.name !== "cmyk") {
     return null;
   }
 
