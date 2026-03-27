@@ -1370,6 +1370,38 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatHorBox.y1 = this.bottommostFloatTop * dir;
         floatHorBox.y2 = floatHorBox.y1 + boxExtent;
       }
+
+      // Handle clear property on inline floats (Issue #1803)
+      if (nodeContext.clearSide) {
+        const clearLR =
+          /^(top|bottom|inside|outside|(block|inline)-(start|end))$/.test(
+            nodeContext.clearSide,
+          )
+            ? PageFloats.resolveInlineFloatDirection(
+                nodeContext.clearSide,
+                nodeContext.vertical,
+                nodeContext.direction,
+                (this.layoutContext as Vgen.ViewFactory).page.side,
+              )
+            : nodeContext.clearSide === "same"
+              ? floatSide
+              : nodeContext.clearSide;
+        let clearEdge = this.beforeEdge;
+        if (clearLR !== "right") {
+          clearEdge = dir * Math.max(clearEdge * dir, this.leftFloatEdge * dir);
+        }
+        if (clearLR !== "left") {
+          clearEdge =
+            dir * Math.max(clearEdge * dir, this.rightFloatEdge * dir);
+        }
+        const clearY = clearEdge * dir;
+        if (floatHorBox.y1 < clearY) {
+          const boxExtent = floatHorBox.y2 - floatHorBox.y1;
+          floatHorBox.y1 = clearY;
+          floatHorBox.y2 = floatHorBox.y1 + boxExtent;
+        }
+      }
+
       GeometryUtil.positionFloat(box, this.bands, floatHorBox, floatSide);
       if (this.vertical) {
         floatBox = GeometryUtil.unrotateBox(floatHorBox);
@@ -3024,6 +3056,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // For page floats, clearance is handled differently
       return false;
     }
+    if (nodeContext.floatSide) {
+      // Clear on inline floats is handled in layoutFloat()
+      return false;
+    }
 
     // measure where the edge of the element would be without clearance
     const margin = this.getComputedMargin(nodeContext.viewNode as Element);
@@ -3090,9 +3126,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // edge holds the position where element border "before" edge will be
     // without clearance. clearEdge is the "after" edge of the float to clear.
 
+    // Round clearEdge to the next float unit boundary (+ 1 unit margin) to
+    // account for exclusion float height rounding in createFloats() and
+    // sub-pixel rendering differences. (Issue #1803)
+    const floatUnit = 1 / (this.clientLayout.pixelRatio || 1);
+    clearEdge =
+      dir * (Math.ceil((clearEdge * dir) / floatUnit) + 1) * floatUnit;
+
     // tolerance to avoid unnecessary clearance due to the pixel rounding errors
     // (Issue #1608)
-    const tolerance = 1 / (this.clientLayout.pixelRatio || 1);
+    const tolerance = floatUnit;
     if (edge * dir + tolerance > clearEdge * dir) {
       // No need for clearance
       nodeContext.viewNode.parentNode.removeChild(spacer);

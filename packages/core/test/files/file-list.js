@@ -77,6 +77,14 @@ module.exports = [
       { file: "clear-bug-test.html", title: "Float clear bug" },
       { file: "float-text-offset-bug.html", title: "Float text offset bug" },
       {
+        file: "float-clear.html",
+        title: "Float with clear (Issue #1803)",
+      },
+      {
+        file: "float-clear-vertical.html",
+        title: "Float with clear, vertical-rl (Issue #1803)",
+      },
+      {
         file: "float-lh-rlh.html",
         title: "Float with lh/rlh height (Issue #1494, #1738)",
       },
