@@ -1,4 +1,76 @@
-- id: "0253"
+- id: "0038"
+  category: General
+  title: "Float with clear (Issue #1803)"
+  file: float-clear.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear.html
+  diffPages:
+    - 1
+- id: "0039"
+  category: General
+  title: "Float with clear, vertical-rl (Issue #1803)"
+  file: float-clear-vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear-vertical.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear-vertical.html
+  diffPages:
+    - 1
+- id: "0192"
+  category: Page floats
+  title: Clear page floats
+  file: page_floats/clear_page_floats.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats.html
+  pageCountActual: 3
+  pageCountBaseline: 4
+  diffPages:
+    - 1
+    - 2
+    - 3
+- id: "0193"
+  category: Page floats
+  title: Clear page floats (vertical writing-mode)
+  file: page_floats/clear_page_floats_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1786a  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1786a-vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
+  pageCountActual: 3
+  pageCountBaseline: 4
+  diffPages:
+    - 1
+    - 2
+    - 3
+- id: "0255"
   category: Counter style and list-style
   title: "Outside marker alignment with superscript content (Issue #1780)"
   file: counter-style/list-style-position-super.html
@@ -188,21 +260,6 @@
     - 1
     - 2
     - 3
-    - 4
-- category: Page floats
-  title: Clear page floats (vertical writing-mode)
-  file: page_floats/clear_page_floats_vertical.html
-  type: difference
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1786a  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_page_floats_vertical.html
-  diffPages:
     - 4
 - category: Page floats
   title: column-span on page floats
