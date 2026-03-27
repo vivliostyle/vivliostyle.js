@@ -3106,6 +3106,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       clearLogical,
       this,
     );
+    const pageFloatClearEdge = clearEdge;
 
     switch (clearLR) {
       case "left":
@@ -3126,12 +3127,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // edge holds the position where element border "before" edge will be
     // without clearance. clearEdge is the "after" edge of the float to clear.
 
-    // Round clearEdge to the next float unit boundary (+ 1 unit margin) to
-    // account for exclusion float height rounding in createFloats() and
-    // sub-pixel rendering differences. (Issue #1803)
+    // Round clearEdge to the next float unit boundary to account for
+    // exclusion float height rounding in createFloats(). Add an extra unit
+    // margin only when the clear edge comes from inline float edges
+    // (leftFloatEdge/rightFloatEdge), which are subject to sub-pixel
+    // rendering differences with exclusion floats. Page/column float clear
+    // edges from getPageFloatClearEdge() are accurate DOM measurements and
+    // don't need the extra margin. (Issue #1803)
     const floatUnit = 1 / (this.clientLayout.pixelRatio || 1);
+    const inlineFloatEdgeDominates = clearEdge * dir > pageFloatClearEdge * dir;
     clearEdge =
-      dir * (Math.ceil((clearEdge * dir) / floatUnit) + 1) * floatUnit;
+      dir *
+      (Math.ceil((clearEdge * dir) / floatUnit) +
+        (inlineFloatEdgeDominates ? 1 : 0)) *
+      floatUnit;
 
     // tolerance to avoid unnecessary clearance due to the pixel rounding errors
     // (Issue #1608)
