@@ -14,6 +14,40 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-variation-settings.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0046"
+  category: General
+  title: "target-counter() named pages with :left/:right (Issue #1497)"
+  file: target-counter-named-pages-left-right.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-named-pages-left-right.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-named-pages-left-right.html&zoom=1&spread=false
+  diffPages:
+    - 4
+    - 7
+    - 8
+- id: "0057"
+  category: General
+  title: image-resolution
+  file: image-resolution.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/image-resolution.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/image-resolution.html&zoom=1&spread=false
+  diffPages:
+    - 4
 - id: "0067"
   category: General
   title: counters() in page margin boxes
@@ -29,8 +63,10 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counters-function-in-page-margin-box.html&zoom=1&spread=false
   diffPages:
+    - 1
     - 2
     - 3
+    - 4
     - 5
 - id: "0117"
   category: Named Pages
@@ -67,6 +103,39 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_col_width.html&zoom=1&spread=false
   diffPages:
     - 6
+- id: "0150"
+  category: Table
+  title: Table rowspan
+  file: table/table_rowspan.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_rowspan.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_rowspan.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0152"
+  category: Table
+  title: Table colspan
+  file: table/table_colspan.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_colspan.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_colspan.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 3
 - id: "0153"
   category: Table
   title: Table colspan (vertical writing-mode)
@@ -85,6 +154,22 @@
     - 1
     - 2
     - 3
+- id: "0154"
+  category: Table
+  title: Table vertical-align
+  file: table/table_vertical_align.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align.html&zoom=1&spread=false
+  diffPages:
+    - 1
 - id: "0155"
   category: Table
   title: Table vertical-align (vertical writing-mode)
@@ -116,6 +201,25 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_repeating_header_footer.html&zoom=1&spread=false
   diffPages:
+    - 1
+    - 2
+    - 3
+- id: "0157"
+  category: Table
+  title: Table repeating header/footer (vertical writing-mode)
+  file: table/table_repeating_header_footer_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_repeating_header_footer_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_repeating_header_footer_vertical.html&zoom=1&spread=false
+  diffPages:
+    - 2
     - 3
 - id: "0160"
   category: Page floats
@@ -135,6 +239,7 @@
     - 1
     - 2
     - 3
+    - 4
 - id: "0163"
   category: Page floats
   title: "'Region' page floats"
@@ -188,6 +293,22 @@
   diffPages:
     - 1
     - 2
+- id: "0172"
+  category: Page floats
+  title: "'Column' page floats with exclusions (vertical writing-mode)"
+  file: page_floats/column_page_floats_with_exclusions_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_with_exclusions_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_with_exclusions_vertical.html&zoom=1&spread=false
+  diffPages:
+    - 2
 - id: "0175"
   category: Page floats
   title: "'Column' and 'region' page floats in single column"
@@ -204,6 +325,62 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_region_page_floats.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0177"
+  category: Page floats
+  title: Inline page floats (2 values)
+  file: page_floats/inline_page_floats_2.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/inline_page_floats_2.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/inline_page_floats_2.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+- id: "0179"
+  category: Page floats
+  title: Inline page floats (vertical writing-mode, 2 values)
+  file: page_floats/inline_page_floats_vertical_2.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/inline_page_floats_vertical_2.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/inline_page_floats_vertical_2.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+- id: "0194"
+  category: Page floats
+  title: clear on page floats
+  file: page_floats/clear_on_page_floats.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_on_page_floats.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/clear_on_page_floats.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+    - 4
+    - 5
+    - 6
+    - 8
+    - 9
 - id: "0206"
   category: Footnotes
   title: Footnote with pseudoelement
@@ -268,6 +445,22 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnotes-in-table.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0223"
+  category: Footnotes
+  title: "DPUB footnote should inherit from source parent, not noteref (Issue #1770)"
+  file: footnotes/dpub-footnote-inherit.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/dpub-footnote-inherit.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/dpub-footnote-inherit.html&zoom=1&spread=false
+  diffPages:
+    - 1
 - id: "0224"
   category: Footnotes
   title: EPUB footnotes (static numbering)
@@ -284,6 +477,54 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/epub-footnotes-static-number.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0230"
+  category: Repeating Elements
+  title: nesting repeating elements
+  file: repeating_elements/nesting.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting.html&zoom=1&spread=false
+  diffPages:
+    - 3
+- id: "0231"
+  category: Repeating Elements
+  title: nesting repeating elements (vertical writing-mode)
+  file: repeating_elements/nesting_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting_vertical.html&zoom=1&spread=false
+  diffPages:
+    - 3
+- id: "0236"
+  category: Repeating Elements
+  title: priority of dropping
+  file: repeating_elements/priority_of_dropping.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/priority_of_dropping.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/priority_of_dropping.html&zoom=1&spread=false
+  diffPages:
+    - 3
 - id: "0237"
   category: Repeating Elements
   title: Page floats with repeating elements
@@ -316,6 +557,103 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/repeating_page_floats_vertical.html&zoom=1&spread=false
   diffPages:
     - 2
+- id: "0245"
+  category: nth-fragment selectors
+  title: table
+  file: nth-fragment/table.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-fragment/table.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-fragment/table.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0247"
+  category: after-if-continues pseudo elements
+  title: create and insert an after-if-continues pseudo element
+  file: after_if_continues/after-if-continues.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/after_if_continues/after-if-continues.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/after_if_continues/after-if-continues.html&zoom=1&spread=false
+  diffPages:
+    - 3
+- id: "0248"
+  category: after-if-continues pseudo elements
+  title: create and insert an after-if-continues pseudo element (vertical writing-mode)
+  file: after_if_continues/after-if-continues_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/after_if_continues/after-if-continues_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/after_if_continues/after-if-continues_vertical.html&zoom=1&spread=false
+  diffPages:
+    - 3
+    - 5
+- id: "0249"
+  category: after-if-continues pseudo elements
+  title: after-if-continues on page_float
+  file: after_if_continues/after-if-continues_page_float.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/after_if_continues/after-if-continues_page_float.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/after_if_continues/after-if-continues_page_float.html&zoom=1&spread=false
+  diffPages:
+    - 3
+- id: "0253"
+  category: Counter style and list-style
+  title: "::marker pseudo-element"
+  file: counter-style/marker.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker.html&zoom=1&spread=false
+  diffPages:
+    - 2
+- id: "0254"
+  category: Counter style and list-style
+  title: list-style-position
+  file: counter-style/list-style-position.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-position.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-position.html&zoom=1&spread=false
+  diffPages:
+    - 1
 - category: Page floats
   title: Clear page floats (vertical writing-mode)
   file: page_floats/clear_page_floats_vertical.html
