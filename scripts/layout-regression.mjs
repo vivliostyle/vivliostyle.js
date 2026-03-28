@@ -25,8 +25,8 @@ const fallbackViewerParams = "&zoom=1&spread=false";
 const defaults = {
   outDir: path.join(repoRoot, "artifacts", "layout-regression"),
   timeoutSec: 30,
-  maxDiffRatio: 0.0002,
-  pixelThreshold: 0.75,
+  maxDiffRatio: 0.0001,
+  pixelThreshold: 0.1,
   viewportWidth: 1800,
   viewportHeight: 1800,
   skipScreenshots: false,
@@ -150,8 +150,8 @@ Options:
   --limit <number>           Stop after N entries
   --out-dir <path>           Output directory
   --timeout <seconds>        Timeout in seconds for page load/waits (default 30)
-  --max-diff-ratio <number>  Allowed ratio of diff pixels (default 0.0002)
-  --pixel-threshold <0..1>   Pixel diff sensitivity (default 0.75)
+  --max-diff-ratio <number>  Allowed ratio of diff pixels (default 0.0001)
+  --pixel-threshold <0..1>   Pixel diff sensitivity (default 0.1)
   --viewport-width <number>  Browser viewport width
   --viewport-height <number> Browser viewport height
   --skip-screenshots         Skip image capture/compare, check page counts only

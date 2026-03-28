@@ -207,8 +207,8 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 --limit <number>             N エントリで停止
 --out-dir <path>             出力ディレクトリ（デフォルト: artifacts/layout-regression）
 --timeout <seconds>          ページあたりのタイムアウト秒数（デフォルト: 30）
---max-diff-ratio <number>    許容する差分ピクセル比率（デフォルト: 0.0002）
---pixel-threshold <0..1>     ピクセルごとの色差感度（デフォルト: 0.75）
+--max-diff-ratio <number>    許容する差分ピクセル比率（デフォルト: 0.0001）
+--pixel-threshold <0..1>     ピクセルごとの色差感度（デフォルト: 0.1）
 --viewport-width <number>    ブラウザのビューポート幅（デフォルト: 1800）
 --viewport-height <number>   ブラウザのビューポート高さ（デフォルト: 1800）
 --skip-screenshots           スクリーンショットをスキップしてページ数のみ確認
@@ -237,7 +237,7 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 差分ありと判定される条件:
 
 - 両サイドのページ数が異なる
-- ページごとのピクセル差分比率が `--max-diff-ratio`（デフォルト `0.0002`）を超える
+- ページごとのピクセル差分比率が `--max-diff-ratio`（デフォルト `0.0001`）を超える
 
 エラーとして記録される条件:
 
