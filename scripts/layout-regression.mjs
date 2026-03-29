@@ -601,7 +601,7 @@ async function capturePages({
         dir,
         `${key}-p${String(p).padStart(4, "0")}.png`,
       );
-      await spreadContainer.screenshot({ path: imagePath });
+      await spreadContainer.screenshot({ path: imagePath, scale: "css" });
     }
   }
 
@@ -631,9 +631,12 @@ async function captureOneSide({
   viewportWidth,
   viewportHeight,
 }) {
-  const page = await browser.newPage({
+  const context = await browser.newContext({
     viewport: { width: viewportWidth, height: viewportHeight },
+    // Use device scale factor 2 to get more accurate pixel diffs.
+    deviceScaleFactor: 2,
   });
+  const page = await context.newPage();
 
   try {
     const captured = await capturePages({
