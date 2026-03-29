@@ -4091,6 +4091,27 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
               // Unset browser's multi-column (Issue #1637, #1747)
               LayoutHelper.unsetBrowserColumnBreaking(this);
+
+              // Restore root column block-size if it was reduced by Chromium
+              // table fragmentation workaround. (Issue #1812)
+              if (
+                this.element.hasAttribute(
+                  "data-vivliostyle-column-block-size-adjusted",
+                )
+              ) {
+                if (this.vertical) {
+                  Base.setCSSProperty(this.element, "width", `${this.width}px`);
+                } else {
+                  Base.setCSSProperty(
+                    this.element,
+                    "height",
+                    `${this.height}px`,
+                  );
+                }
+                this.element.removeAttribute(
+                  "data-vivliostyle-column-block-size-adjusted",
+                );
+              }
             }
             if (this.pageFloatLayoutContext.isInvalidated()) {
               frame.finish(null);
