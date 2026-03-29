@@ -1641,7 +1641,7 @@ export class PageFloatLayoutContext
     );
   }
 
-  getBlockEndEdgeOfBlockStartFloats(): number {
+  getBlockEndEdgeOfBlockStartFloats(inlinePos?: number): number {
     let context: PageFloatLayoutContext = this;
     let container: Vtree.Container | null = null;
     while (context && !container) {
@@ -1652,6 +1652,15 @@ export class PageFloatLayoutContext
     let edge = NaN;
     this.floatFragments
       .filter((fragment) => fragment.floatSide.includes("block-start"))
+      .filter((fragment) => {
+        if (!isFinite(inlinePos)) {
+          return true;
+        }
+        const rect = fragment.getOuterRect();
+        return isVertical
+          ? rect.y1 <= inlinePos && inlinePos <= rect.y2
+          : rect.x1 <= inlinePos && inlinePos <= rect.x2;
+      })
       .forEach((fragment) => {
         const rect = fragment.getOuterRect();
         const fragmentEdge = isVertical ? rect.x1 : rect.y2;
@@ -1662,7 +1671,8 @@ export class PageFloatLayoutContext
           : fragmentEdge;
       });
     if (this.parent) {
-      const parentEdge = this.parent.getBlockEndEdgeOfBlockStartFloats();
+      const parentEdge =
+        this.parent.getBlockEndEdgeOfBlockStartFloats(inlinePos);
       if (isFinite(parentEdge)) {
         edge = isFinite(edge)
           ? isVertical
@@ -1674,7 +1684,7 @@ export class PageFloatLayoutContext
     return edge;
   }
 
-  getBlockStartEdgeOfBlockEndFloats(): number {
+  getBlockStartEdgeOfBlockEndFloats(inlinePos?: number): number {
     let context: PageFloatLayoutContext = this;
     let container: Vtree.Container | null = null;
     while (context && !container) {
@@ -1684,7 +1694,16 @@ export class PageFloatLayoutContext
     const isVertical = !!container?.vertical;
     let edge = NaN;
     this.floatFragments
-      .filter((fragment) => fragment.floatSide === "block-end")
+      .filter((fragment) => fragment.floatSide.includes("block-end"))
+      .filter((fragment) => {
+        if (!isFinite(inlinePos)) {
+          return true;
+        }
+        const rect = fragment.getOuterRect();
+        return isVertical
+          ? rect.y1 <= inlinePos && inlinePos <= rect.y2
+          : rect.x1 <= inlinePos && inlinePos <= rect.x2;
+      })
       .forEach((fragment) => {
         const rect = fragment.getOuterRect();
         const fragmentEdge = isVertical ? rect.x2 : rect.y1;
@@ -1695,7 +1714,8 @@ export class PageFloatLayoutContext
           : fragmentEdge;
       });
     if (this.parent) {
-      const parentEdge = this.parent.getBlockStartEdgeOfBlockEndFloats();
+      const parentEdge =
+        this.parent.getBlockStartEdgeOfBlockEndFloats(inlinePos);
       if (isFinite(parentEdge)) {
         edge = isFinite(edge)
           ? isVertical

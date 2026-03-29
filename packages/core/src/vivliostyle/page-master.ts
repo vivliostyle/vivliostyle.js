@@ -1515,25 +1515,15 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         const columnLike = column as Vtree.Container & {
           pageFloatLayoutContext?: {
             parent?: {
-              getBlockEndEdgeOfBlockStartFloats?: () => number;
-              getBlockStartEdgeOfBlockEndFloats?: () => number;
+              getBlockEndEdgeOfBlockStartFloats?: (
+                inlinePos?: number,
+              ) => number;
+              getBlockStartEdgeOfBlockEndFloats?: (
+                inlinePos?: number,
+              ) => number;
             };
           };
         };
-        const blockStartFloatEndEdge =
-          columnLike.pageFloatLayoutContext?.parent?.getBlockEndEdgeOfBlockStartFloats?.();
-        const blockEndFloatStartEdge =
-          columnLike.pageFloatLayoutContext?.parent?.getBlockStartEdgeOfBlockEndFloats?.();
-        const blockStartLimit = isFinite(blockStartFloatEndEdge)
-          ? this.vertical
-            ? blockStartFloatEndEdge - basePaddingRect.x1
-            : blockStartFloatEndEdge - basePaddingRect.y1
-          : NaN;
-        const blockEndLimit = isFinite(blockEndFloatStartEdge)
-          ? this.vertical
-            ? blockEndFloatStartEdge - basePaddingRect.x1
-            : blockEndFloatStartEdge - basePaddingRect.y1
-          : NaN;
         const border = this.vertical ? "border-top" : "border-left";
         for (let i = 1; i < columnCount; i++) {
           const pos = this.vertical
@@ -1545,6 +1535,29 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
               columnGap / 2 +
               container.paddingLeft -
               ruleWidth / 2;
+          // pos is the rule box start; overlap filtering should use
+          // the rendered rule stroke center.
+          const physicalInlinePos = this.vertical
+            ? basePaddingRect.y1 + pos + ruleWidth / 2
+            : basePaddingRect.x1 + pos + ruleWidth / 2;
+          const blockStartFloatEndEdge =
+            columnLike.pageFloatLayoutContext?.parent?.getBlockEndEdgeOfBlockStartFloats?.(
+              physicalInlinePos,
+            );
+          const blockEndFloatStartEdge =
+            columnLike.pageFloatLayoutContext?.parent?.getBlockStartEdgeOfBlockEndFloats?.(
+              physicalInlinePos,
+            );
+          const blockStartLimit = isFinite(blockStartFloatEndEdge)
+            ? this.vertical
+              ? blockStartFloatEndEdge - basePaddingRect.x1
+              : blockStartFloatEndEdge - basePaddingRect.y1
+            : NaN;
+          const blockEndLimit = isFinite(blockEndFloatStartEdge)
+            ? this.vertical
+              ? blockEndFloatStartEdge - basePaddingRect.x1
+              : blockEndFloatStartEdge - basePaddingRect.y1
+            : NaN;
           const renderedBlockSize = parseFloat(
             this.vertical
               ? (column?.element.style.width ?? "")

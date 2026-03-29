@@ -1859,6 +1859,156 @@ describe("page-floats", function () {
         expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(480);
       });
 
+      it("filters block-end floats by inlinePos when getting block-start edge", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container(false),
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.REGION,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          regionContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        // Overlaps inlinePos=50 only
+        addFragment(pageContext, FloatReference.PAGE, "block-end", {
+          x1: 0,
+          x2: 100,
+          y1: 520,
+          y2: 600,
+        });
+        // Overlaps inlinePos=250 only
+        addFragment(regionContext, FloatReference.REGION, "block-end", {
+          x1: 200,
+          x2: 300,
+          y1: 480,
+          y2: 500,
+        });
+
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(480);
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats(50)).toBe(520);
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats(250)).toBe(480);
+      });
+
+      it("treats block-end inline-* floats as block-end floats", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container(false),
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.REGION,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          regionContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        addFragment(pageContext, FloatReference.PAGE, "block-end inline-end", {
+          x1: 0,
+          x2: 150,
+          y1: 540,
+          y2: 600,
+        });
+        addFragment(
+          regionContext,
+          FloatReference.REGION,
+          "block-end inline-start",
+          {
+            x1: 200,
+            x2: 350,
+            y1: 500,
+            y2: 560,
+          },
+        );
+
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(500);
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats(50)).toBe(540);
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats(250)).toBe(500);
+      });
+
+      it("filters block-start floats by inlinePos when getting block-end edge", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container(false),
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.REGION,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          regionContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        // Overlaps inlinePos=50 only
+        addFragment(pageContext, FloatReference.PAGE, "block-start", {
+          x1: 0,
+          x2: 100,
+          y1: 0,
+          y2: 80,
+        });
+        // Overlaps inlinePos=250 only
+        addFragment(regionContext, FloatReference.REGION, "block-start", {
+          x1: 200,
+          x2: 300,
+          y1: 0,
+          y2: 120,
+        });
+
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats()).toBe(120);
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats(50)).toBe(80);
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats(250)).toBe(120);
+      });
+
       it("includes ancestor block-end floats in vertical contexts", function () {
         var pageContext = new PageFloatLayoutContext(
           rootContext,
@@ -1902,6 +2052,54 @@ describe("page-floats", function () {
         });
 
         expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(260);
+      });
+
+      it("filters block-start floats by inlinePos in vertical contexts", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container(true),
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.REGION,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          regionContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        // In vertical writing, inline axis is Y.
+        addFragment(pageContext, FloatReference.PAGE, "block-start", {
+          x1: 300,
+          x2: 360,
+          y1: 0,
+          y2: 120,
+        });
+        addFragment(regionContext, FloatReference.REGION, "block-start", {
+          x1: 260,
+          x2: 320,
+          y1: 200,
+          y2: 300,
+        });
+
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats()).toBe(260);
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats(50)).toBe(300);
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats(250)).toBe(260);
       });
     });
   });
