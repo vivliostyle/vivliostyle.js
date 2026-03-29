@@ -1,3 +1,19 @@
+- id: "0019"
+  category: General
+  title: Selector bug
+  file: selector_bug.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/selector_bug.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/selector_bug.html&zoom=1&spread=false
+  diffPages:
+    - 1
 - id: "0022"
   category: General
   title: font-variation-settings in @font-face
@@ -47,6 +63,9 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/image-resolution.html&zoom=1&spread=false
   diffPages:
+    - 1
+    - 2
+    - 3
     - 4
 - id: "0067"
   category: General
@@ -68,6 +87,22 @@
     - 3
     - 4
     - 5
+- id: "0091"
+  category: Leader
+  title: "content: leader() in RTL direction"
+  file: leader/content-leader-rtl.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/content-leader-rtl.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/content-leader-rtl.html&zoom=1&spread=false
+  diffPages:
+    - 1
 - id: "0117"
   category: Named Pages
   title: Page Groups with spread breaks
@@ -87,6 +122,42 @@
     - 7
     - 10
     - 11
+- id: "0134"
+  category: Page breaks
+  title: "Block-start out-of-flow break (Issue #1775)"
+  file: page_breaks/block-start-out-of-flow-break.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/block-start-out-of-flow-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/block-start-out-of-flow-break.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+    - 3
+- id: "0135"
+  category: Page breaks
+  title: "Block-start out-of-flow break (vertical writing-mode) (Issue #1775)"
+  file: page_breaks/block-start-out-of-flow-break-vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/block-start-out-of-flow-break-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/block-start-out-of-flow-break-vertical.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+    - 3
 - id: "0148"
   category: Table
   title: Table column width
@@ -135,6 +206,7 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_colspan.html&zoom=1&spread=false
   diffPages:
     - 1
+    - 2
     - 3
 - id: "0153"
   category: Table
@@ -152,7 +224,6 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_colspan_vertical.html&zoom=1&spread=false
   diffPages:
     - 1
-    - 2
     - 3
 - id: "0154"
   category: Table
@@ -221,110 +292,6 @@
   diffPages:
     - 2
     - 3
-- id: "0160"
-  category: Page floats
-  title: "'Page' page floats (2 values)"
-  file: page_floats/page_page_floats_2.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page_page_floats_2.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page_page_floats_2.html&zoom=1&spread=false
-  diffPages:
-    - 1
-    - 2
-    - 3
-    - 4
-- id: "0163"
-  category: Page floats
-  title: "'Region' page floats"
-  file: page_floats/region_page_floats.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats.html&zoom=1&spread=false
-  diffPages:
-    - 1
-    - 2
-- id: "0166"
-  category: Page floats
-  title: "'Column' page floats (2 values)"
-  file: page_floats/column_page_floats_2.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_2.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_2.html&zoom=1&spread=false
-  diffPages:
-    - 1
-    - 2
-    - 3
-    - 4
-- id: "0169"
-  category: Page floats
-  title: "'Region' page floats with exclusions"
-  file: page_floats/region_page_floats_with_exclusions.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions.html&zoom=1&spread=false
-  diffPages:
-    - 1
-    - 2
-- id: "0172"
-  category: Page floats
-  title: "'Column' page floats with exclusions (vertical writing-mode)"
-  file: page_floats/column_page_floats_with_exclusions_vertical.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_with_exclusions_vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_with_exclusions_vertical.html&zoom=1&spread=false
-  diffPages:
-    - 2
-- id: "0175"
-  category: Page floats
-  title: "'Column' and 'region' page floats in single column"
-  file: page_floats/column_region_page_floats.html
-  type: difference
-  decision: ""  # regression / expected / skip
-  notes: ""
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_region_page_floats.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_region_page_floats.html&zoom=1&spread=false
-  diffPages:
-    - 1
 - id: "0177"
   category: Page floats
   title: Inline page floats (2 values)
@@ -359,6 +326,29 @@
   diffPages:
     - 1
     - 2
+- id: "0180"
+  category: Page floats
+  title: Forced break and page floats
+  file: page_floats/forced_break_and_page_floats.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1775  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/forced_break_and_page_floats.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1775-vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/forced_break_and_page_floats.html&zoom=1&spread=false
+  diffPages:
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 16
+    - 19
+    - 20
 - id: "0194"
   category: Page floats
   title: clear on page floats
@@ -637,6 +627,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker.html&zoom=1&spread=false
   diffPages:
+    - 1
     - 2
 - id: "0254"
   category: Counter style and list-style
@@ -652,6 +643,22 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-position.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0256"
+  category: Counter style and list-style
+  title: list-style-type bullet marker
+  file: counter-style/list-style-type-bullet.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-type-bullet.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-type-bullet.html&zoom=1&spread=false
   diffPages:
     - 1
 - category: Page floats
@@ -1182,29 +1189,6 @@
     https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_vertical_2.html
   diffPages:
     - 5
-- category: Page floats
-  title: Forced break and page floats
-  file: page_floats/forced_break_and_page_floats.html
-  type: difference
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1775  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/forced_break_and_page_floats.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/forced_break_and_page_floats.html
-  diffPages:
-    - 1
-    - 2
-    - 3
-    - 4
-    - 7
-    - 9
-    - 10
-    - 12
-    - 16
 - category: Page floats
   title: "Page float padding, border, and margin-bottom cases (Issue #1752)"
   file: page_floats/page-float-spacing.html
