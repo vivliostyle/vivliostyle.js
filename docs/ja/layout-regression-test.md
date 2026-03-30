@@ -45,17 +45,29 @@ yarn test:layout-regression --skip-screenshots
 
 ## フィルター
 
-カテゴリーで絞り込み（繰り返し指定可）:
+カテゴリーで絞り込み（繰り返し指定可・大文字小文字を区別しない）:
 
 ```bash
 yarn test:layout-regression --category "Footnotes" --category "Page floats"
 ```
 
-タイトルの部分文字列で絞り込み:
+タイトルの部分文字列で絞り込み（繰り返し指定可・大文字小文字を区別しない）:
 
 ```bash
-yarn test:layout-regression --title-includes "Issue #1767"
+yarn test:layout-regression --title-includes "Issue #1767" --title-includes "footnote"
 ```
+
+`packages/core/test/files/` からの相対パスでファイル指定して絞り込み
+（繰り返し指定可・大文字小文字を区別しない）:
+
+```bash
+yarn test:layout-regression \
+  --file footnotes/footnote-marker-outside-style.html \
+  --file table/table_colspan.html
+```
+
+同じオプションを複数指定した場合は OR 条件、
+異なる種類のフィルターを併用した場合は AND 条件で評価されます。
 
 ## カスタムテスト URL
 
@@ -118,6 +130,25 @@ yarn test:layout-regression \
   --actual-viewer-params "&style=https://example.com/preview.css" \
   --baseline-viewer-params "&style=https://example.com/baseline.css"
 ```
+
+## テストファイルの参照URL
+
+`file-list.js` 由来のエントリ（`--test-url` を除く）では、テストHTMLの参照URLは
+`--actual-viewer` をもとに決定され、actual/baseline の両方で同じ参照URLを使います。
+
+- `--actual-viewer` がローカル（`localhost`/`127.0.0.1`）の場合:
+  - `http://localhost:3000/core/test/files/`
+- `--actual-viewer` がレガシーURL（`vivliostyle-viewer.html`）の場合:
+  - `https://raw.githack.com/vivliostyle/vivliostyle.js/<ref>/packages/core/test/files/`
+- それ以外の場合:
+  - `https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/<ref>/packages/core/test/files/`
+
+`<ref>` は次の優先順で決定されます:
+
+1. `LAYOUT_REGRESSION_TEST_REF`
+2. `GITHUB_HEAD_REF`（PR ワークフロー）
+3. `GITHUB_REF_NAME`
+4. `master`
 
 ## タイムアウト・エラーの扱い
 
@@ -202,8 +233,10 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 ## オプション
 
 ```
---category <name>            カテゴリーで絞り込み（繰り返し指定可）
---title-includes <text>      タイトルの部分文字列で絞り込み
+--category <name>            カテゴリーで絞り込み（繰り返し指定可・大文字小文字を区別しない）
+--title-includes <text>      タイトルの部分文字列で絞り込み（繰り返し指定可・大文字小文字を区別しない）
+--file <path>                packages/core/test/files/ からの相対パスで絞り込み
+                             （繰り返し指定可・大文字小文字を区別しない）
 --limit <number>             N エントリで停止
 --out-dir <path>             出力ディレクトリ（デフォルト: artifacts/layout-regression）
 --timeout <seconds>          ページあたりのタイムアウト秒数（デフォルト: 30）
@@ -227,7 +260,7 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 
 デフォルトでは `artifacts/layout-regression/` に出力されます:
 
-- `report.json` — JSON 形式のフル結果
+- `report.json` — JSON 形式のフル結果（各項目の triage 情報と triage 集計を含む）
 - `report.md` — 人が読みやすいサマリー
 - `baseline/*.png` — baseline スクリーンショット
 - `actual/*.png` — actual スクリーンショット
@@ -242,6 +275,18 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 エラーとして記録される条件:
 
 - どちらかのサイドがレンダリングを完了できない
+
+実行中ログには、検出した差分・エラーの triage 状態も表示されます（例）:
+
+```text
+-> difference found (pageCountMismatch=false, pageDiffs=4, triage=triaged/regression)
+```
+
+実行の最後には、未トリアージ件数も表示されます:
+
+```text
+N entry/entries need triage (decision is empty)
+```
 
 ## 終了コード
 
