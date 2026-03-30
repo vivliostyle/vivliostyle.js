@@ -69,7 +69,9 @@ function getTestFilesGitRef() {
   }
 
   const branchRef = String(process.env.GITHUB_REF_NAME || "").trim();
-  if (branchRef && !branchRef.includes("/")) {
+  // Allow normal branch names that contain "/" (e.g. feature/foo),
+  // but avoid PR merge refs like "123/merge".
+  if (branchRef && !/^\d+\/merge$/.test(branchRef)) {
     return branchRef;
   }
 
@@ -84,7 +86,13 @@ function isLocalViewerUrl(viewerUrl) {
 
 function testFilesBaseUrlForViewer(viewerUrl, gitRef) {
   if (isLocalViewerUrl(viewerUrl)) {
-    return "http://localhost:3000/core/test/files/";
+    try {
+      const origin = new URL(String(viewerUrl)).origin;
+      return `${origin}/core/test/files/`;
+    } catch {
+      // Fallback for malformed local viewer URL values.
+      return "http://localhost:3000/core/test/files/";
+    }
   }
 
   if (isLegacyViewerUrl(viewerUrl)) {
@@ -1065,11 +1073,16 @@ function writeTriageTemplate(outDir, result) {
     }
     if (Array.isArray(prev)) {
       const prevMap = new Map(
-        prev.map((e) => [`${e.category}\x00${e.title}`, e]),
+        prev.map((e) => [
+          `${e.category}\x00${e.title}\x00${e.type || "difference"}`,
+          e,
+        ]),
       );
       let carried = 0;
       for (const entry of entries) {
-        const old = prevMap.get(`${entry.category}\x00${entry.title}`);
+        const old = prevMap.get(
+          `${entry.category}\x00${entry.title}\x00${entry.type || "difference"}`,
+        );
         if (old) {
           if (old.approvedViewer) {
             // approvedViewer was set: this entry was compared against an approved snapshot.
@@ -1098,14 +1111,18 @@ function writeTriageTemplate(outDir, result) {
       // diff results (they matched approvedViewer = no diff this run).
       // Keep them so approvedViewer is remembered on the next run.
       const currentKeys = new Set(
-        entries.map((e) => `${e.category}\x00${e.title}`),
+        entries.map(
+          (e) => `${e.category}\x00${e.title}\x00${e.type || "difference"}`,
+        ),
       );
       let reappended = 0;
       for (const old of prev) {
         if (
           old.approvedViewer &&
           old.decision &&
-          !currentKeys.has(`${old.category}\x00${old.title}`)
+          !currentKeys.has(
+            `${old.category}\x00${old.title}\x00${old.type || "difference"}`,
+          )
         ) {
           // Re-append with normalized field order (user-editable fields first).
           const {
