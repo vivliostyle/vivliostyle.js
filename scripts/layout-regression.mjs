@@ -15,6 +15,7 @@ const fileListPath = path.join(
   repoRoot,
   "packages/core/test/files/file-list.js",
 );
+const testFilesRootPrefix = "packages/core/test/files/";
 
 // These params are appended last so that values explicitly specified earlier
 // via --extra-viewer-params take precedence: the viewer always uses the first
@@ -40,10 +41,72 @@ const defaults = {
   testUrls: [],
 };
 
+function normalizeCase(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function normalizeTestFilePath(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "")
+    .replace(new RegExp(`^${testFilesRootPrefix}`), "");
+}
+
+function getTestFilesGitRef() {
+  const explicitRef = String(
+    process.env.LAYOUT_REGRESSION_TEST_REF || "",
+  ).trim();
+  if (explicitRef) {
+    return explicitRef;
+  }
+
+  const prHeadRef = String(process.env.GITHUB_HEAD_REF || "").trim();
+  if (prHeadRef) {
+    return prHeadRef;
+  }
+
+  const branchRef = String(process.env.GITHUB_REF_NAME || "").trim();
+  // Allow normal branch names that contain "/" (e.g. feature/foo),
+  // but avoid PR merge refs like "123/merge".
+  if (branchRef && !/^\d+\/merge$/.test(branchRef)) {
+    return branchRef;
+  }
+
+  return "master";
+}
+
+function isLocalViewerUrl(viewerUrl) {
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?\//.test(
+    String(viewerUrl || ""),
+  );
+}
+
+function testFilesBaseUrlForViewer(viewerUrl, gitRef) {
+  if (isLocalViewerUrl(viewerUrl)) {
+    try {
+      const origin = new URL(String(viewerUrl)).origin;
+      return `${origin}/core/test/files/`;
+    } catch {
+      // Fallback for malformed local viewer URL values.
+      return "http://localhost:3000/core/test/files/";
+    }
+  }
+
+  if (isLegacyViewerUrl(viewerUrl)) {
+    return `https://raw.githack.com/vivliostyle/vivliostyle.js/${gitRef}/${testFilesRootPrefix}`;
+  }
+
+  return `https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/${gitRef}/${testFilesRootPrefix}`;
+}
+
 function parseArgs(argv) {
   const opts = {
     categories: [],
-    titleIncludes: null,
+    titleIncludes: [],
+    files: [],
     limit: null,
     ...defaults,
   };
@@ -58,7 +121,9 @@ function parseArgs(argv) {
     if (a === "--category") {
       opts.categories.push(argv[++i]);
     } else if (a === "--title-includes") {
-      opts.titleIncludes = argv[++i] ?? null;
+      opts.titleIncludes.push(argv[++i]);
+    } else if (a === "--file") {
+      opts.files.push(argv[++i]);
     } else if (a === "--limit") {
       opts.limit = Number(argv[++i]);
     } else if (a === "--out-dir") {
@@ -145,8 +210,10 @@ Usage:
   yarn test:layout-regression [options]
 
 Options:
-  --category <name>          Run only this category (repeatable)
-  --title-includes <text>    Run entries whose title includes text
+  --category <name>          Run only this category (repeatable, case-insensitive)
+  --title-includes <text>    Run entries whose title includes text (repeatable, case-insensitive)
+  --file <path>              Run entries by file path relative to packages/core/test/files/
+                             (repeatable, case-insensitive), e.g. footnotes/footnotes-anywhere.html
   --limit <number>           Stop after N entries
   --out-dir <path>           Output directory
   --timeout <seconds>        Timeout in seconds for page load/waits (default 30)
@@ -308,28 +375,25 @@ function resolveViewerSpec(spec) {
   return { url: s, label: null };
 }
 
-function buildViewerParams(entry, extraParams) {
-  const dirLocal = "../../core/test/files/";
-  const urlOnline =
-    "https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/";
+function buildViewerParams(entry, testFileBaseUrl, extraParams) {
+  const baseUrl = testFileBaseUrl;
 
   let pathPart = "";
   if (Array.isArray(entry.file)) {
-    pathPart = entry.file.map((f) => `${dirLocal}${f}`).join("&src=");
+    pathPart = entry.file
+      .map((f) => `${baseUrl}${normalizeTestFilePath(f)}`)
+      .join("&src=");
   } else if (entry.file) {
-    pathPart = `${dirLocal}${entry.file}`;
+    pathPart = `${baseUrl}${normalizeTestFilePath(entry.file)}`;
   }
 
   if (!pathPart) {
     return null;
   }
 
-  const parameterProd = `#src=${pathPart}${entry.options || ""}`;
-  const parameterOnlineBase = parameterProd.replace(
-    new RegExp(dirLocal, "g"),
-    urlOnline,
-  );
-  const parameterOnline = `${parameterOnlineBase}${extraParams}${fallbackViewerParams}`;
+  const parameterOnline =
+    `#src=${pathPart}${entry.options || ""}` +
+    `${extraParams}${fallbackViewerParams}`;
   const parameterOld = parameterOnline.replace(
     /\bsrc=/g,
     /\bbookMode=true\b/.test(entry.options) ? "b=" : "x=",
@@ -357,8 +421,8 @@ function buildViewerParamsForTestUrl(testUrl, extraParams) {
   };
 }
 
-function buildViewerUrl(viewerUrl, entry, extraParams) {
-  const params = buildViewerParams(entry, extraParams);
+function buildViewerUrl(viewerUrl, entry, extraParams, testFileBaseUrl) {
+  const params = buildViewerParams(entry, testFileBaseUrl, extraParams);
   if (!params) {
     return null;
   }
@@ -386,9 +450,21 @@ function buildViewerUrlForTestUrl(viewerUrl, testUrl, extraParams) {
 }
 
 function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
+  const gitRef = getTestFilesGitRef();
+  // Test HTML source must be common to both sides and follows actualViewer.
+  const testFileBaseUrl = testFilesBaseUrlForViewer(opts.actualViewer, gitRef);
   const sharedExtra = normalizeExtraParams(opts.extraViewerParams);
   const baselineExtra = `${sharedExtra}${normalizeExtraParams(opts.baselineViewerParams)}`;
   const actualExtra = `${sharedExtra}${normalizeExtraParams(opts.actualViewerParams)}`;
+  const categoryFilters = opts.categories
+    .map((v) => normalizeCase(v))
+    .filter(Boolean);
+  const titleFilters = opts.titleIncludes
+    .map((v) => normalizeCase(v))
+    .filter(Boolean);
+  const fileFilters = opts.files
+    .map((v) => normalizeCase(normalizeTestFilePath(v)))
+    .filter(Boolean);
 
   const rows = [];
 
@@ -400,7 +476,16 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
       if (!testUrl) {
         continue;
       }
-      if (opts.titleIncludes && !testUrl.includes(opts.titleIncludes)) {
+      if (
+        categoryFilters.length > 0 &&
+        !categoryFilters.includes(normalizeCase(customCategory))
+      ) {
+        continue;
+      }
+      if (
+        titleFilters.length > 0 &&
+        !titleFilters.some((needle) => normalizeCase(testUrl).includes(needle))
+      ) {
         continue;
       }
       const approvedViewerSpec = approvedViewerMap.get(
@@ -442,8 +527,8 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
 
   for (const group of fileList) {
     if (
-      opts.categories.length > 0 &&
-      !opts.categories.some((cat) => cat === group.category)
+      categoryFilters.length > 0 &&
+      !categoryFilters.includes(normalizeCase(group.category))
     ) {
       continue;
     }
@@ -452,9 +537,23 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
       if (!entry?.file) {
         continue;
       }
+
+      const entryFiles = toArray(entry.file).map((f) =>
+        normalizeTestFilePath(f),
+      );
+
       if (
-        opts.titleIncludes &&
-        !String(entry.title || "").includes(opts.titleIncludes)
+        titleFilters.length > 0 &&
+        !titleFilters.some((needle) =>
+          normalizeCase(String(entry.title || "")).includes(needle),
+        )
+      ) {
+        continue;
+      }
+
+      if (
+        fileFilters.length > 0 &&
+        !entryFiles.some((f) => fileFilters.includes(normalizeCase(f)))
       ) {
         continue;
       }
@@ -467,9 +566,24 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
         : null;
       const baselineUrl =
         (approvedViewerUrl &&
-          buildViewerUrl(approvedViewerUrl, entry, baselineExtra)) ||
-        buildViewerUrl(opts.baselineViewer, entry, baselineExtra);
-      const actualUrl = buildViewerUrl(opts.actualViewer, entry, actualExtra);
+          buildViewerUrl(
+            approvedViewerUrl,
+            entry,
+            baselineExtra,
+            testFileBaseUrl,
+          )) ||
+        buildViewerUrl(
+          opts.baselineViewer,
+          entry,
+          baselineExtra,
+          testFileBaseUrl,
+        );
+      const actualUrl = buildViewerUrl(
+        opts.actualViewer,
+        entry,
+        actualExtra,
+        testFileBaseUrl,
+      );
       if (!baselineUrl || !actualUrl) {
         continue;
       }
@@ -700,9 +814,126 @@ function comparePngPair(
   };
 }
 
-function writeReports(outDir, result) {
+function getTriageSourcePath(outDir) {
+  const yamlPath = path.join(outDir, "triage.yaml");
+  const baselinePath = path.join(
+    repoRoot,
+    "scripts",
+    "layout-regression-triage.yaml",
+  );
+  if (fs.existsSync(yamlPath)) return yamlPath;
+  if (fs.existsSync(baselinePath)) return baselinePath;
+  return null;
+}
+
+function loadTriageStatusMap(outDir) {
+  const sourcePath = getTriageSourcePath(outDir);
+  if (!sourcePath) return new Map();
+
+  try {
+    const entries = yaml.load(fs.readFileSync(sourcePath, "utf8"));
+    if (!Array.isArray(entries)) return new Map();
+
+    return new Map(
+      entries.map((e) => {
+        const key = `${e.category}\x00${e.title}\x00${e.type || "difference"}`;
+        const decision = String(e.decision || "").trim();
+        return [
+          key,
+          {
+            status: decision ? "triaged" : "pending",
+            decision,
+          },
+        ];
+      }),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
+function getTriageStatus(triageStatusMap, category, title, type) {
+  return (
+    triageStatusMap.get(`${category}\x00${title}\x00${type}`) || {
+      status: "pending",
+      decision: "",
+    }
+  );
+}
+
+function summarizeTriage(items, type, triageStatusMap) {
+  let pending = 0;
+  let triaged = 0;
+  for (const item of items) {
+    const status = getTriageStatus(
+      triageStatusMap,
+      item.category,
+      item.title,
+      type,
+    );
+    if (status.status === "triaged") {
+      triaged += 1;
+    } else {
+      pending += 1;
+    }
+  }
+  return { pending, triaged };
+}
+
+function withTriageInfo(items, type, triageStatusMap) {
+  return items.map((item) => {
+    const triage = getTriageStatus(
+      triageStatusMap,
+      item.category,
+      item.title,
+      type,
+    );
+    return {
+      ...item,
+      triage,
+    };
+  });
+}
+
+function writeReports(outDir, result, triageStatusMap) {
+  const differencesWithTriage = withTriageInfo(
+    result.differences,
+    "difference",
+    triageStatusMap,
+  );
+  const errorsWithTriage = withTriageInfo(
+    result.errors,
+    "error",
+    triageStatusMap,
+  );
+  const differencesTriage = summarizeTriage(
+    differencesWithTriage,
+    "difference",
+    triageStatusMap,
+  );
+  const errorsTriage = summarizeTriage(
+    errorsWithTriage,
+    "error",
+    triageStatusMap,
+  );
+
+  const resultWithTriage = {
+    ...result,
+    summary: {
+      ...result.summary,
+      triage: {
+        differences: differencesTriage,
+        errors: errorsTriage,
+        pendingEntries: differencesTriage.pending + errorsTriage.pending,
+        triagedEntries: differencesTriage.triaged + errorsTriage.triaged,
+      },
+    },
+    differences: differencesWithTriage,
+    errors: errorsWithTriage,
+  };
+
   const jsonPath = path.join(outDir, "report.json");
-  fs.writeFileSync(jsonPath, JSON.stringify(result, null, 2), "utf8");
+  fs.writeFileSync(jsonPath, JSON.stringify(resultWithTriage, null, 2), "utf8");
 
   const lines = [];
   lines.push(
@@ -711,21 +942,27 @@ function writeReports(outDir, result) {
   lines.push("");
   lines.push(`- Compared entries: ${result.summary.totalEntries}`);
   lines.push(
-    `- Entries with differences: ${result.summary.entriesWithDifferences}`,
+    `- Entries with differences: ${result.summary.entriesWithDifferences} (pending: ${differencesTriage.pending}, triaged: ${differencesTriage.triaged})`,
   );
-  lines.push(`- Entries with errors: ${result.summary.entriesWithErrors}`);
+  lines.push(
+    `- Entries with errors: ${result.summary.entriesWithErrors} (pending: ${errorsTriage.pending}, triaged: ${errorsTriage.triaged})`,
+  );
   lines.push(`- Timeout entries: ${result.summary.timeoutEntries}`);
   lines.push(`- Page-count mismatches: ${result.summary.pageCountMismatches}`);
   lines.push(`- Screenshot mismatches: ${result.summary.screenshotMismatches}`);
   lines.push("");
 
-  if (result.differences.length === 0) {
+  if (resultWithTriage.differences.length === 0) {
     lines.push("No differences found.");
   } else {
     lines.push("## Differences");
     lines.push("");
-    for (const diff of result.differences) {
+    for (const diff of resultWithTriage.differences) {
+      const triage = diff.triage;
       lines.push(`- [${diff.id}] [${diff.category}] ${diff.title}`);
+      lines.push(
+        `  triage: ${triage.status}${triage.decision ? ` (${triage.decision})` : ""}`,
+      );
       if (diff.pageCountMismatch) {
         lines.push(
           `  page count: ${result.labels.actual}=${diff.actual.totalPages}, ${result.labels.baseline}=${diff.baseline.totalPages}`,
@@ -744,11 +981,15 @@ function writeReports(outDir, result) {
     }
   }
 
-  if (result.errors.length > 0) {
+  if (resultWithTriage.errors.length > 0) {
     lines.push("## Errors");
     lines.push("");
-    for (const item of result.errors) {
+    for (const item of resultWithTriage.errors) {
+      const triage = item.triage;
       lines.push(`- [${item.id}] [${item.category}] ${item.title}`);
+      lines.push(
+        `  triage: ${triage.status}${triage.decision ? ` (${triage.decision})` : ""}`,
+      );
       lines.push(`  side: ${item.side}`);
       lines.push(`  timeout: ${item.error.timeout}`);
       lines.push(`  error: ${item.error.name}: ${item.error.message}`);
@@ -813,17 +1054,13 @@ function writeTriageTemplate(outDir, result) {
   }
 
   const yamlPath = path.join(outDir, "triage.yaml");
-  // The committed baseline file serves as carry-over source when no local triage.yaml exists yet.
   const baselinePath = path.join(
     repoRoot,
     "scripts",
     "layout-regression-triage.yaml",
   );
-  const carrySourcePath = fs.existsSync(yamlPath)
-    ? yamlPath
-    : fs.existsSync(baselinePath)
-      ? baselinePath
-      : null;
+  // The committed baseline file serves as carry-over source when no local triage.yaml exists yet.
+  const carrySourcePath = getTriageSourcePath(outDir);
 
   // Carry over decision/notes from a previous triage.yaml so that re-runs
   // don't wipe out already-triaged entries.
@@ -836,11 +1073,16 @@ function writeTriageTemplate(outDir, result) {
     }
     if (Array.isArray(prev)) {
       const prevMap = new Map(
-        prev.map((e) => [`${e.category}\x00${e.title}`, e]),
+        prev.map((e) => [
+          `${e.category}\x00${e.title}\x00${e.type || "difference"}`,
+          e,
+        ]),
       );
       let carried = 0;
       for (const entry of entries) {
-        const old = prevMap.get(`${entry.category}\x00${entry.title}`);
+        const old = prevMap.get(
+          `${entry.category}\x00${entry.title}\x00${entry.type || "difference"}`,
+        );
         if (old) {
           if (old.approvedViewer) {
             // approvedViewer was set: this entry was compared against an approved snapshot.
@@ -869,14 +1111,18 @@ function writeTriageTemplate(outDir, result) {
       // diff results (they matched approvedViewer = no diff this run).
       // Keep them so approvedViewer is remembered on the next run.
       const currentKeys = new Set(
-        entries.map((e) => `${e.category}\x00${e.title}`),
+        entries.map(
+          (e) => `${e.category}\x00${e.title}\x00${e.type || "difference"}`,
+        ),
       );
       let reappended = 0;
       for (const old of prev) {
         if (
           old.approvedViewer &&
           old.decision &&
-          !currentKeys.has(`${old.category}\x00${old.title}`)
+          !currentKeys.has(
+            `${old.category}\x00${old.title}\x00${old.type || "difference"}`,
+          )
         ) {
           // Re-append with normalized field order (user-editable fields first).
           const {
@@ -937,17 +1183,7 @@ function writeTriageTemplate(outDir, result) {
  * Used to substitute the baseline viewer on a per-entry basis.
  */
 function loadApprovedViewerMap(outDir) {
-  const yamlPath = path.join(outDir, "triage.yaml");
-  const baselinePath = path.join(
-    repoRoot,
-    "scripts",
-    "layout-regression-triage.yaml",
-  );
-  const sourcePath = fs.existsSync(yamlPath)
-    ? yamlPath
-    : fs.existsSync(baselinePath)
-      ? baselinePath
-      : null;
+  const sourcePath = getTriageSourcePath(outDir);
   if (!sourcePath) return new Map();
   try {
     const entries = yaml.load(fs.readFileSync(sourcePath, "utf8"));
@@ -965,17 +1201,28 @@ function loadApprovedViewerMap(outDir) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const fileList = loadFileList();
+  const testFilesGitRef = getTestFilesGitRef();
+  const testFilesBaseUrl = testFilesBaseUrlForViewer(
+    opts.actualViewer,
+    testFilesGitRef,
+  );
+  if (isLocalViewerUrl(opts.actualViewer)) {
+    console.log(`Using local test files: ${testFilesBaseUrl}`);
+  } else {
+    console.log(`Using test files ref: ${testFilesGitRef}`);
+  }
   const approvedViewerMap = loadApprovedViewerMap(opts.outDir);
   if (approvedViewerMap.size > 0) {
     console.log(
       `Using approvedViewer override for ${approvedViewerMap.size} entry/entries.`,
     );
   }
+  const triageStatusMap = loadTriageStatusMap(opts.outDir);
   const targets = collectTargets(fileList, opts, approvedViewerMap);
 
   if (targets.length === 0) {
     throw new Error(
-      "No matching test entries found. Check category/title filters.",
+      "No matching test entries found. Check category/title/file filters.",
     );
   }
 
@@ -1034,6 +1281,12 @@ async function main() {
 
     if (!baseline.ok || !actual.ok) {
       if (!baseline.ok) {
+        const triage = getTriageStatus(
+          triageStatusMap,
+          target.category,
+          target.title,
+          "error",
+        );
         errors.push({
           id,
           category: target.category,
@@ -1043,15 +1296,22 @@ async function main() {
           error: baseline.error,
           baselineUrl: target.baselineUrl,
           actualUrl: target.actualUrl,
+          triage,
         });
         if (baseline.error.timeout) {
           timeoutEntries += 1;
         }
         console.log(
-          `  -> ${opts.baselineLabel} error: ${baseline.error.message}`,
+          `  -> ${opts.baselineLabel} error: ${baseline.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
         );
       }
       if (!actual.ok) {
+        const triage = getTriageStatus(
+          triageStatusMap,
+          target.category,
+          target.title,
+          "error",
+        );
         errors.push({
           id,
           category: target.category,
@@ -1061,11 +1321,14 @@ async function main() {
           error: actual.error,
           actualUrl: target.actualUrl,
           baselineUrl: target.baselineUrl,
+          triage,
         });
         if (actual.error.timeout) {
           timeoutEntries += 1;
         }
-        console.log(`  -> ${opts.actualLabel} error: ${actual.error.message}`);
+        console.log(
+          `  -> ${opts.actualLabel} error: ${actual.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+        );
       }
       continue;
     }
@@ -1121,9 +1384,16 @@ async function main() {
     }
 
     if (diffEntry.pageCountMismatch || diffEntry.pages.length > 0) {
+      const triage = getTriageStatus(
+        triageStatusMap,
+        diffEntry.category,
+        diffEntry.title,
+        "difference",
+      );
+      diffEntry.triage = triage;
       differences.push(diffEntry);
       console.log(
-        `  -> difference found (pageCountMismatch=${diffEntry.pageCountMismatch}, pageDiffs=${diffEntry.pages.length})`,
+        `  -> difference found (pageCountMismatch=${diffEntry.pageCountMismatch}, pageDiffs=${diffEntry.pages.length}, triage=${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
       );
     }
   }
@@ -1150,13 +1420,22 @@ async function main() {
     errors,
   };
 
-  const { jsonPath, mdPath } = writeReports(opts.outDir, result);
+  const { jsonPath, mdPath } = writeReports(
+    opts.outDir,
+    result,
+    triageStatusMap,
+  );
   const triagePath = writeTriageTemplate(opts.outDir, result);
 
   console.log("\nDone.");
   console.log(`Report JSON: ${jsonPath}`);
   console.log(`Report MD:   ${mdPath}`);
   console.log(`Triage YAML: ${triagePath}`);
+
+  const pendingTriage =
+    summarizeTriage(differences, "difference", triageStatusMap).pending +
+    summarizeTriage(errors, "error", triageStatusMap).pending;
+  console.log(`${pendingTriage} entry/entries need triage (decision is empty)`);
 
   if (differences.length > 0 || errors.length > 0) {
     process.exitCode = 2;

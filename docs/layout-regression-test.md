@@ -45,17 +45,29 @@ yarn test:layout-regression --skip-screenshots
 
 ## Useful filters
 
-Filter by category (repeatable):
+Filter by category (repeatable, case-insensitive):
 
 ```bash
 yarn test:layout-regression --category "Footnotes" --category "Page floats"
 ```
 
-Filter by title substring:
+Filter by title substring (repeatable, case-insensitive):
 
 ```bash
-yarn test:layout-regression --title-includes "Issue #1767"
+yarn test:layout-regression --title-includes "Issue #1767" --title-includes "footnote"
 ```
+
+Filter by test file path relative to `packages/core/test/files/`
+(repeatable, case-insensitive):
+
+```bash
+yarn test:layout-regression \
+  --file footnotes/footnote-marker-outside-style.html \
+  --file table/table_colspan.html
+```
+
+When multiple values are passed for the same option, they are OR conditions.
+When different filter options are combined, they are AND conditions.
 
 ## Custom test URLs
 
@@ -118,6 +130,26 @@ yarn test:layout-regression \
   --actual-viewer-params "&style=https://example.com/preview.css" \
   --baseline-viewer-params "&style=https://example.com/baseline.css"
 ```
+
+## Test file source URL
+
+For entries from `file-list.js` (excluding `--test-url`), the test HTML source URL
+is chosen from `--actual-viewer`, and the same source URL is used for both
+actual and baseline.
+
+- If `--actual-viewer` is local (`localhost`/`127.0.0.1`):
+  - `http://localhost:3000/core/test/files/`
+- If `--actual-viewer` is a legacy viewer URL (`vivliostyle-viewer.html`):
+  - `https://raw.githack.com/vivliostyle/vivliostyle.js/<ref>/packages/core/test/files/`
+- Otherwise:
+  - `https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/<ref>/packages/core/test/files/`
+
+`<ref>` is determined in this order:
+
+1. `LAYOUT_REGRESSION_TEST_REF`
+2. `GITHUB_HEAD_REF` (PR workflows)
+3. `GITHUB_REF_NAME`
+4. `master`
 
 ## Timeout/Error behavior
 
@@ -216,8 +248,10 @@ category filter, and limit.
 ## Options
 
 ```
---category <name>            Run only this category (repeatable)
---title-includes <text>      Run entries whose title includes text
+--category <name>            Run only this category (repeatable, case-insensitive)
+--title-includes <text>      Run entries whose title includes text (repeatable, case-insensitive)
+--file <path>                Run entries by file path relative to packages/core/test/files/
+                             (repeatable, case-insensitive)
 --limit <number>             Stop after N entries
 --out-dir <path>             Output directory (default: artifacts/layout-regression)
 --timeout <seconds>          Timeout per page (default: 30)
@@ -241,7 +275,7 @@ category filter, and limit.
 
 Results are written to `artifacts/layout-regression/` (by default):
 
-- `report.json` — full results in JSON
+- `report.json` — full results in JSON (includes triage info per item and triage summary counts)
 - `report.md` — human-readable summary
 - `baseline/*.png` — baseline screenshots
 - `actual/*.png` — actual screenshots
@@ -254,6 +288,18 @@ A difference is reported when either:
 - per-page pixel diff ratio exceeds `--max-diff-ratio` (default `0.00002`)
 
 An error is reported when either side fails to complete rendering.
+
+Execution logs include triage status for detected differences/errors, e.g.:
+
+```text
+-> difference found (pageCountMismatch=false, pageDiffs=4, triage=triaged/regression)
+```
+
+At the end, pending triage count is printed:
+
+```text
+N entry/entries need triage (decision is empty)
+```
 
 ## Exit code
 
