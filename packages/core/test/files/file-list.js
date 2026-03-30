@@ -779,7 +779,7 @@ module.exports = [
         title: "@footnote ::before content (Issue #1723)",
       },
       {
-        file: "footnote-text-spacing.html",
+        file: "footnotes/footnote-text-spacing.html",
         title: "Footnote text-spacing (Issue #868)",
       },
       {
