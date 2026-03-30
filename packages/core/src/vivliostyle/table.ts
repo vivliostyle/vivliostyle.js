@@ -417,9 +417,16 @@ export class TableFormattingContext
       case "table-cell": {
         // For cells, check if this cell's source node is in cellBreakPositions
         // or if fragmentIndex indicates this is a continuation (issue #1663).
-        const parentFragmentIndex =
-          nodeContext.parent?.fragmentIndex ?? nodeContext.fragmentIndex;
-        if (nodeContext.fragmentIndex > 1 || parentFragmentIndex > 1) {
+        // A table-cell directly under the table participates in an anonymous
+        // row, so a continued table fragment must not make a fresh cell look
+        // like a continuation fragment.
+        if (nodeContext.fragmentIndex > 1) {
+          return false;
+        }
+        if (
+          nodeContext.parent?.display === "table-row" &&
+          nodeContext.parent.fragmentIndex > 1
+        ) {
           return false;
         }
         // Check if this cell's sourceNode is in cellBreakPositions
