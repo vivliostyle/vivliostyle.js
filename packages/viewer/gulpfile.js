@@ -339,13 +339,22 @@ function serve(isDevelopment) {
   gulp.watch(target).on("change", browserSync.reload);
   return true;
 }
-gulp.task(
-  "serve",
-  gulp.series("watch", function (done) {
-    serve(false);
+gulp.task("serve", function (done) {
+  const runningDevServer = findRunningDevServer();
+  if (runningDevServer) {
+    console.log(
+      `[dev] Vivliostyle dev server is already running at ${runningDevServer.url}.`,
+    );
+    console.log("[dev] Skipping a new dev server start.");
     done();
-  }),
-);
+    return;
+  }
+
+  return gulp.series("watch", function (next) {
+    serve(false);
+    next();
+  })(done);
+});
 gulp.task("serve-dev", function (done) {
   const runningDevServer = findRunningDevServer();
   if (runningDevServer) {
