@@ -6,7 +6,7 @@
     "build": "lerna run build",
     "build-dev": "lerna run build-dev",
     "clean": "lerna run clean",
-    "dev": "lerna run dev --parallel --ignore @vivliostyle/react",
+    "dev": "node scripts/dev.mjs",
     "dev:react": "lerna run dev --parallel --ignore @vivliostyle/viewer",
     "format": "lerna run format",
     "lint": "lerna run lint",
