@@ -1390,9 +1390,9 @@ a[role="doc-noteref"]:href-role-type(doc-footnote, aside) {
   text-decoration: none;
 }
 
-aside[epub|type="footnote"],
-aside[epub\:type="footnote"],
-aside[role="doc-footnote"] {
+aside[epub|type="footnote"][data-vivliostyle-footnote-referenced],
+aside[epub\:type="footnote"][data-vivliostyle-footnote-referenced],
+aside[role="doc-footnote"][data-vivliostyle-footnote-referenced] {
   display: none;
 }
 
