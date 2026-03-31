@@ -17,6 +17,8 @@ In addition, essentially all CSS properties and values supported by the browser 
   - [RGB Hexadecimal Notations: #RRGGBB, #RRGGBBAA](https://www.w3.org/TR/css-color/#hex-notation)
   - [HSL Colors: `hsl()`, `hsla()`](https://www.w3.org/TR/css-color/#the-hsl-notation)
   - [HWB Colors: `hwb()`](https://www.w3.org/TR/css-color/#the-hwb-notation)
+  - [CMYK Colors: `device-cmyk()`](https://www.w3.org/TR/css-color-5/#the-device-cmyk-notation)
+    - Converted to `color(srgb ...)` internally for browser rendering. Enables CMYK output via post-processing with Vivliostyle CLI. See [PR #1627](https://github.com/vivliostyle/vivliostyle.js/pull/1627)
 - [Attribute references: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
   - Only supported in values of `content` property.
   - Only 'string' and 'url' types are supported.
@@ -51,9 +53,7 @@ In addition, essentially all CSS properties and values supported by the browser 
 - [Link pseudo-class `E:link`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
 - [Language pseudo-class `E:lang(c)`](https://www.w3.org/TR/CSS2/selector.html#lang)
 - [`:first-line` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-line-pseudo)
-  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
 - [`:first-letter` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-letter)
-  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
 - [`:before` and `:after` pseudo-elements](https://www.w3.org/TR/CSS2/selector.html#before-and-after)
 
 #### Not supported selectors
@@ -83,9 +83,7 @@ In addition, essentially all CSS properties and values supported by the browser 
 - [`:empty` pseudo-class](https://www.w3.org/TR/selectors-3/#empty-pseudo)
 - [`:not()` pseudo-class](https://www.w3.org/TR/selectors-3/#negation)
 - [`::first-line` pseudo-element](https://www.w3.org/TR/selectors-3/#first-line)
-  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
 - [`::first-letter` pseudo-element](https://www.w3.org/TR/selectors-3/#first-letter)
-  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
 - [`::before` and `::after` pseudo-elements](https://www.w3.org/TR/selectors-3/#gen-content)
 - [General sibling combinator `E ~ F`](https://www.w3.org/TR/selectors-3/#general-sibling-combinators)
 
@@ -105,6 +103,12 @@ In addition, essentially all CSS properties and values supported by the browser 
 ### [CSS Pseudo-Elements 4](https://www.w3.org/TR/css-pseudo-4/)
 
 - [`::marker` pseudo-element](https://www.w3.org/TR/css-pseudo-4/#marker-pseudo)
+
+### [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
+
+- [`::footnote-call` pseudo-element](https://www.w3.org/TR/css-gcpm-3/#the-footnote-call)
+- [`::footnote-marker` pseudo-element](https://www.w3.org/TR/css-gcpm-3/#the-footnote-marker)
+  - Supports [`list-style-position: outside`](https://www.w3.org/TR/css-gcpm-3/#footnote-marker-property) for placing the marker outside the footnote body. See [PR #1706](https://github.com/vivliostyle/vivliostyle.js/pull/1706)
 
 #### Not supported selectors
 
@@ -137,12 +141,12 @@ In addition, essentially all CSS properties and values supported by the browser 
 ### [CSS Paged Media 3](https://www.w3.org/TR/css-page-3/)
 
 - [@page](https://www.w3.org/TR/css-page-3/#at-page-rule)
-- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://www.w3.org/TR/css-page-3/#margin-at-rules)
+- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-corner)](https://www.w3.org/TR/css-page-3/#margin-at-rules)
 - [Page selectors](https://www.w3.org/TR/css-page-3/#page-selectors)
   - [:left, :right](https://www.w3.org/TR/css-page-3/#spread-pseudos)
   - [:recto, :verso](https://www.w3.org/TR/css-logical-1/#page)
   - [:first](https://www.w3.org/TR/css-page-3/#first-pseudo)
-    - Note: In multi-document publications, the `:first` matches only the first page of the first document, and the `:nth(1)` matches the first page of each document. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
+    - Note: In multi-document publications, the `:first` matches only the first page of the first document, and the `:nth(1)` matches the first page of each document. [Issue #667](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
   - [:blank](https://www.w3.org/TR/css-page-3/#blank-pseudo)
 - [Named pages (page type selector)](https://www.w3.org/TR/css-page-3/#page-type-selector)
 - [Page-based counters (page, pages)](https://www.w3.org/TR/css-page-3/#page-based-counters)
@@ -151,8 +155,15 @@ See also: [Properties in CSS Paged Media 3](#css-paged-media-3-2)
 
 ### [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
 
+- [`@footnote` rule (Footnote area)](https://www.w3.org/TR/css-gcpm-3/#footnotes)
+  - Styles footnote areas with `@page { @footnote { … } }`
+  - Supports page-selector variants: e.g., `@page :left { @footnote { … } }`
+  - `@footnote ::before` supports the `content` property and other styles for the footnote separator
+  - `@page @footnote` takes precedence over top-level `@footnote`
+  - See [PR #1644](https://github.com/vivliostyle/vivliostyle.js/pull/1644) and [PR #1724](https://github.com/vivliostyle/vivliostyle.js/pull/1724)
 - [Nth page selector `:nth(An+B [of <custom-ident>])`](https://www.w3.org/TR/css-gcpm-3/#document-page-selectors)
-  - Note: In multi-document publications, the `:nth(1)` matches the first page of each document, but the `:first` matches only the first page of the first document. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
+  - `:nth(An+B of <page-type>)` is page-group-aware, matching against all active page groups on the current page. See [PR #1745](https://github.com/vivliostyle/vivliostyle.js/pull/1745)
+  - Note: In multi-document publications, the `:nth(1)` matches the first page of each document, but the `:first` matches only the first page of the first document. [Issue #667](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
 
 See also:
 
@@ -280,7 +291,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [page-break-inside](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
 - [position](https://www.w3.org/TR/CSS2/visuren.html#propdef-position)
 - [quotes](https://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
-  - Note: not supported within `@page` rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/43)
+  - Note: not supported within `@page` rules. [Issue #43](https://github.com/vivliostyle/vivliostyle.js/issues/43)
 - [right](https://www.w3.org/TR/CSS2/visuren.html#propdef-right)
 - [table-layout](https://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
 - [text-align](https://www.w3.org/TR/CSS2/text.html#propdef-text-align)
@@ -305,13 +316,13 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [marks](https://www.w3.org/TR/css-page-3/#marks)
   - Only effective when specified within an `@page` rule without page selectors
 - [size](https://www.w3.org/TR/css-page-3/#page-size-prop)
-  - Supports all required values and proposed values `A0`-`A10`, `B0`-`B10`, `C0`-`C10` and `JIS-B0`-`JIS-B10`. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/713)
+  - Supports all required values and proposed values `A0`-`A10`, `B0`-`B10`, `C0`-`C10` and `JIS-B0`-`JIS-B10`. See [PR #713](https://github.com/vivliostyle/vivliostyle.js/pull/713)
 - crop-offset
   - Specifies distance between the edge of the trim size and the edge of the output page media size
-  - This property is not standardized yet. See [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/913)
+  - This property is not standardized yet. See [Issue #913](https://github.com/vivliostyle/vivliostyle.js/issues/913)
 - crop-marks-line-color
   - Specifies color of the crop marks
-  - This property is not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1505)
+  - This property is not standardized yet. See [PR #1505](https://github.com/vivliostyle/vivliostyle.js/pull/1505)
 - [page (Named Pages)](https://www.w3.org/TR/css-page-3/#using-named-pages)
 
 See also: [At-rules in CSS Paged Media 3](#css-paged-media-3)
@@ -333,7 +344,7 @@ See also:
 - [break-after](https://www.w3.org/TR/css-break-3/#propdef-break-after)
 - [break-before](https://www.w3.org/TR/css-break-3/#propdef-break-before)
 - [break-inside](https://www.w3.org/TR/css-break-3/#propdef-break-inside)
-  - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/128)
+  - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [Issue #128](https://github.com/vivliostyle/vivliostyle.js/issues/128)
 - [orphans](https://www.w3.org/TR/css-break-3/#propdef-orphans)
 - [widows](https://www.w3.org/TR/css-break-3/#propdef-widows)
 - [box-decoration-break](https://www.w3.org/TR/css-break-3/#propdef-box-decoration-break)
@@ -362,14 +373,14 @@ See also:
     - `float: top bottom left right;` float to top left, top right, bottom left, or bottom right corner
     - `float: block-start inline-start;` float to block-start and inline-start corner
     - `float: block-start block-end;` float to block-start or block-end edge (same as 'snap-block')
-    - See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1444)
+    - See [PR #1444](https://github.com/vivliostyle/vivliostyle.js/pull/1444)
 - [float-reference](https://drafts.csswg.org/css-page-floats/#propdef-float-reference)
   - Specify `float-reference: page` (or `column`/`region`) to enable page (or column/region) float.
 - float-min-wrap-block
   - Applies to a page float
   - A percentage value is respect to the block dimension of the float reference of the page float
   - When set to a positive length, in-flow contents are not allowed to be flown into a space next to the page float if the block extent of the space is less than the specified length. In that case, the space is kept empty and the in-flow contents are deferred to the next column.
-  - This property is not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/382)
+  - This property is not standardized yet. See [PR #382](https://github.com/vivliostyle/vivliostyle.js/pull/382)
 
 ### [CSS Color 3](https://www.w3.org/TR/css3-color/)
 
@@ -451,7 +462,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 ### [CSS Text 3](https://www.w3.org/TR/css-text-3/)
 
 - [hanging-punctuation](hanging-punctuation)
-  - Supports all required values, `none | [ first || [ force-end | allow-end ] || last ]`. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/814)
+  - Supports all required values, `none | [ first || [ force-end | allow-end ] || last ]`. See [PR #814](https://github.com/vivliostyle/vivliostyle.js/pull/814)
 - [hyphens](https://www.w3.org/TR/css-text-3/#hyphenation)
 - [letter-spacing](https://www.w3.org/TR/css-text-3/#letter-spacing-property)
 - [line-break](https://www.w3.org/TR/css-text-3/#line-break-property)
@@ -470,7 +481,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
   - Values: `space-all | normal | space-first | trim-start | trim-both | auto`
 - [text-spacing](https://www.w3.org/TR/css-text-4/#text-spacing-property)
   - Values: `normal | none | auto | [<autospace> || <spacing-trim>]`
-  - Note: This is a shorthand property that sets the `text-autospace` and `text-spacing-trim` properties. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1142)
+  - Note: This is a shorthand property that sets the `text-autospace` and `text-spacing-trim` properties. See [PR #1142](https://github.com/vivliostyle/vivliostyle.js/pull/1142)
 
 ### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
@@ -490,7 +501,18 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 
 ### [CSS Multi-column 1](https://www.w3.org/TR/css3-multicol/)
 
-**Note:** Currently the multi-column layout works well only when specified on the root or body element. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/579)
+Vivliostyle supports CSS multi-column layout, but the behavior differs depending on whether it is specified on the root/body element or on other elements:
+
+- **Root multicol** (specified on the root or body element):
+  - If both the root element and the body element have multi-column specified, only the root element's multi-column is treated as root multicol.
+  - The page area becomes the multi-column container.
+  - Implemented independently by Vivliostyle, not dependent on the browser's multi-column implementation.
+  - `float-reference: column` in the CSS Page Floats feature is only supported for root multicol.
+  - Limitation: `column-span: all` is only supported for page floats in root multicol.
+- **Non-root multicol** (specified on elements other than root/body):
+  - Multi-column processing depends on the browser's multi-column implementation.
+  - Allows mixing multiple multi-column containers with different column counts on the same page, nesting multi-column layouts inside each other, and spanning elements across all columns with `column-span: all`.
+  - Note: Since this relies on the browser's multi-column implementation, when using Vivliostyle.js with Safari/WebKit, nested multi-column layouts may be broken or page breaking inside non-root multi-column boxes may not work well due to known WebKit bugs. See [Issue #1821](https://github.com/vivliostyle/vivliostyle.js/issues/1821)
 
 - [column-count](https://www.w3.org/TR/css3-multicol/#propdef-column-count)
 - [column-gap](https://www.w3.org/TR/css-multicol-1/#cg)
@@ -502,7 +524,8 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [columns](https://www.w3.org/TR/css3-multicol/#propdef-columns)
 - [column-fill](https://www.w3.org/TR/css3-multicol/#propdef-column-fill)
 - [column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
-  - Note: Currently `column-span` is effective only when specified on a page float. When `auto` value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.
+  - Note: In root multicol, `column-span` is effective only when specified on a page float. When `auto` value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.
+  - In non-root multicol, `column-span: all` can be used without restrictions.
 
 ### [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
 
@@ -629,7 +652,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 
 In these properties and values, the `inside` and `outside` keywords resolve to `left` and `right` depending on whether the page is left or right page.
 
-Note: These CSS properties and values are not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1519)
+Note: These CSS properties and values are not standardized yet. See [PR #1519](https://github.com/vivliostyle/vivliostyle.js/pull/1519)
 
 Added \*-inside/outside properties:
 
@@ -651,6 +674,15 @@ Extended properties with `inside` and `outside` values:
 Note: This spec proposal is not submitted to CSS Working Group yet.
 
 - [repeat-on-break](https://specs.rivoal.net/css-repeat/#propdef-repeat-on-break)
+
+## Semantic Footnotes (role / epub:type attributes)
+
+Vivliostyle supports footnotes using semantic attributes on HTML elements, in addition to CSS GCPM `float: footnote` property. Footnote references and footnote content are identified by `role` attributes ([DPUB-ARIA](https://www.w3.org/TR/dpub-aria-1.1/)) or `epub:type` attributes ([EPUB 3 Structural Semantics Vocabulary](https://www.w3.org/TR/epub-ssv-11/)).
+
+- Footnote reference: `<a role="doc-noteref" href="#fn1">1</a>` or `<a epub:type="noteref" href="#fn1">1</a>`
+- Footnote content: `<aside role="doc-footnote" id="fn1">Footnote text</aside>` or `<aside epub:type="footnote" id="fn1">Footnote text</aside>`
+
+See [Issue #1700](https://github.com/vivliostyle/vivliostyle.js/issues/1700)
 
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 

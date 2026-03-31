@@ -1,125 +1,129 @@
 # サポートする CSS 機能
 
-Vivliostyle は現在、以下の各 CSS 機能（[Values](#values)、[Selectors](#selectors)、[At-rules](#at-rules)、[Media queries](#media-queries)、[Properties](#properties)）をサポートしています。
+Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#セレクタ)、[アットルール](#アットルール)、[メディアクエリ](#メディアクエリ)、[プロパティ](#プロパティ)）をサポートしています。
 
 このほかにも、ブラウザでサポートされる CSS プロパティと値は基本的にすべて利用可能です。Vivliostyle.js は独自の処理をしない CSS プロパティについてはブラウザに処理を任せるためです。
 
-## Values
+## 値
 
-- [CSS-wide keywords](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`
-- [Length units](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `lh`, `rlh`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
-- Sizing keywords: [min-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-min-content), [max-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-max-content), [fit-content](https://www.w3.org/TR/css-sizing-4/#valdef-width-fit-content)
-- Color values
-  - [Named Colors](https://www.w3.org/TR/css-color/#named-colors)
-  - [`transparent` color keyword](https://www.w3.org/TR/css-color/#transparent-color)
-  - [`currentColor` color keyword](https://www.w3.org/TR/css-color/#currentcolor-color)
-  - [RGB functions: `rgb()`, `rgba()`](https://www.w3.org/TR/css-color/#rgb-functions)
-  - [RGB Hexadecimal Notations: #RRGGBB, #RRGGBBAA](https://www.w3.org/TR/css-color/#hex-notation)
-  - [HSL Colors: `hsl()`, `hsla()`](https://www.w3.org/TR/css-color/#the-hsl-notation)
-  - [HWB Colors: `hwb()`](https://www.w3.org/TR/css-color/#the-hwb-notation)
-- [Attribute references: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
-  - Only supported in values of `content` property.
-  - Only 'string' and 'url' types are supported.
-- [Cross references: `target-counter()`, `target-counters()` and `target-text()`](https://www.w3.org/TR/css-content-3/#cross-references)
-  - Only supported in values of `content` property.
-- [`string()` function (Named Strings)](https://www.w3.org/TR/css-content-3/#string-function)
-- [`content()` function](https://www.w3.org/TR/css-content-3/#content-function)
-- [`running()` function (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#running-syntax)
-- [`element()` function (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#element-syntax)
-- [`leader()` function](https://www.w3.org/TR/css-content-3/#leaders)
-- [`calc()` function](https://www.w3.org/TR/css-values/#funcdef-calc)
-- [`env()` function](https://drafts.csswg.org/css-env/)
-  - Implemented only `env(pub-title)` and `env(doc-title)` that are not yet defined in the css-env draft spec but useful for making page header.
-    - `env(pub-title)`: publication title = EPUB, Web publication, or primary entry page HTML title.
-    - `env(doc-title)`: document title = HTML title, which may be chapter or section title in a publication composed of multiple HTML documents
-- [`var()` function](https://www.w3.org/TR/css-variables/#using-variables)
-  - Supports [CSS Custom Properties for Cascading Variables](https://www.w3.org/TR/css-variables/)
+- [CSS 全体キーワード](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`
+- [長さの単位](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `lh`, `rlh`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
+- サイジングキーワード: [min-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-min-content), [max-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-max-content), [fit-content](https://www.w3.org/TR/css-sizing-4/#valdef-width-fit-content)
+- カラー値
+  - [色名](https://www.w3.org/TR/css-color/#named-colors)
+  - [`transparent` カラーキーワード](https://www.w3.org/TR/css-color/#transparent-color)
+  - [`currentColor` カラーキーワード](https://www.w3.org/TR/css-color/#currentcolor-color)
+  - [RGB 関数: `rgb()`, `rgba()`](https://www.w3.org/TR/css-color/#rgb-functions)
+  - [RGB 16進数表記: #RRGGBB, #RRGGBBAA](https://www.w3.org/TR/css-color/#hex-notation)
+  - [HSL カラー: `hsl()`, `hsla()`](https://www.w3.org/TR/css-color/#the-hsl-notation)
+  - [HWB カラー: `hwb()`](https://www.w3.org/TR/css-color/#the-hwb-notation)
+  - [CMYK カラー: `device-cmyk()`](https://www.w3.org/TR/css-color-5/#the-device-cmyk-notation)
+    - ブラウザレンダリング用に内部的に `color(srgb ...)` に変換されます。Vivliostyle CLI との後処理によるCMYK出力を可能にします。[PR #1627](https://github.com/vivliostyle/vivliostyle.js/pull/1627) を参照
+- [属性参照: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
+  - `content` プロパティの値としてのみサポートします。
+  - 'string' 型と 'url' 型のみサポートします。
+- [相互参照: `target-counter()`, `target-counters()` and `target-text()`](https://www.w3.org/TR/css-content-3/#cross-references)
+  - `content` プロパティの値としてのみサポートします。
+- [`string()` 関数（名前付き文字列）](https://www.w3.org/TR/css-content-3/#string-function)
+- [`content()` 関数](https://www.w3.org/TR/css-content-3/#content-function)
+- [`running()` 関数（ランニング要素）](https://www.w3.org/TR/css-gcpm-3/#running-syntax)
+- [`element()` 関数（ランニング要素）](https://www.w3.org/TR/css-gcpm-3/#element-syntax)
+- [`leader()` 関数](https://www.w3.org/TR/css-content-3/#leaders)
+- [`calc()` 関数](https://www.w3.org/TR/css-values/#funcdef-calc)
+- [`env()` 関数](https://drafts.csswg.org/css-env/)
+  - css-env ドラフト仕様にはまだ定義されていませんが、ページヘッダー作成に便利な `env(pub-title)` と `env(doc-title)` のみ実装しています。
+    - `env(pub-title)`: 出版物タイトル = EPUB、ウェブ出版物、またはプライマリエントリーページの HTML タイトル。
+    - `env(doc-title)`: ドキュメントタイトル = HTML タイトル。複数の HTML ドキュメントで構成される出版物では、章や節のタイトルになることがあります。
+- [`var()` 関数](https://www.w3.org/TR/css-variables/#using-variables)
+  - [CSS Custom Properties for Cascading Variables](https://www.w3.org/TR/css-variables/) をサポートします。
 
-## Selectors
+## セレクタ
 
 ### [CSS 2](https://www.w3.org/TR/CSS2/)
 
-- [Universal selector `*`](https://www.w3.org/TR/CSS2/selector.html#universal-selector)
-- [Type selectors `E`](https://www.w3.org/TR/CSS2/selector.html#type-selectors)
-- [Descendant selectors `E F`](https://www.w3.org/TR/CSS2/selector.html#descendant-selectors)
-- [Child selectors `E > F`](https://www.w3.org/TR/CSS2/selector.html#child-selectors)
-- [Adjacent sibling selectors `E + F`](https://www.w3.org/TR/CSS2/selector.html#adjacent-selectors)
-- [Attribute selectors `E[foo]`, `E[foo="bar"]`, `E[foo~="bar"]`, `E[foo|="bar"]`](https://www.w3.org/TR/CSS2/selector.html#attribute-selectors)
-- [Class selectors `E.foo`](https://www.w3.org/TR/CSS2/selector.html#class-html)
-- [ID selectors `E#foo`](https://www.w3.org/TR/CSS2/selector.html#id-selectors)
-- [`:first-child` pseudo-class](https://www.w3.org/TR/CSS2/selector.html#first-child)
-- [Link pseudo-class `E:link`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
-- [Language pseudo-class `E:lang(c)`](https://www.w3.org/TR/CSS2/selector.html#lang)
-- [`:first-line` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-line-pseudo)
-  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
-- [`:first-letter` pseudo-element](https://www.w3.org/TR/CSS2/selector.html#first-letter)
-  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
-- [`:before` and `:after` pseudo-elements](https://www.w3.org/TR/CSS2/selector.html#before-and-after)
+- [ユニバーサルセレクタ `*`](https://www.w3.org/TR/CSS2/selector.html#universal-selector)
+- [型セレクタ `E`](https://www.w3.org/TR/CSS2/selector.html#type-selectors)
+- [子孫セレクタ `E F`](https://www.w3.org/TR/CSS2/selector.html#descendant-selectors)
+- [子セレクタ `E > F`](https://www.w3.org/TR/CSS2/selector.html#child-selectors)
+- [隣接兄弟セレクタ `E + F`](https://www.w3.org/TR/CSS2/selector.html#adjacent-selectors)
+- [属性セレクタ `E[foo]`, `E[foo="bar"]`, `E[foo~="bar"]`, `E[foo|="bar"]`](https://www.w3.org/TR/CSS2/selector.html#attribute-selectors)
+- [クラスセレクタ `E.foo`](https://www.w3.org/TR/CSS2/selector.html#class-html)
+- [ID セレクタ `E#foo`](https://www.w3.org/TR/CSS2/selector.html#id-selectors)
+- [`:first-child` 擬似クラス](https://www.w3.org/TR/CSS2/selector.html#first-child)
+- [リンク擬似クラス `E:link`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
+- [言語擬似クラス `E:lang(c)`](https://www.w3.org/TR/CSS2/selector.html#lang)
+- [`:first-line` 擬似要素](https://www.w3.org/TR/CSS2/selector.html#first-line-pseudo)
+- [`:first-letter` 擬似要素](https://www.w3.org/TR/CSS2/selector.html#first-letter)
+- [`:before`・`:after` 擬似要素](https://www.w3.org/TR/CSS2/selector.html#before-and-after)
 
-#### Not supported selectors
+#### サポートされていないセレクタ
 
-- [Link pseudo-class `E:visited`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
-- [Dynamic pseudo-classes `E:active`, `E:hover`, `E:focus`](https://www.w3.org/TR/CSS2/selector.html#dynamic-pseudo-classes)
+- [リンク擬似クラス `E:visited`](https://www.w3.org/TR/CSS2/selector.html#link-pseudo-classes)
+- [動的擬似クラス `E:active`, `E:hover`, `E:focus`](https://www.w3.org/TR/CSS2/selector.html#dynamic-pseudo-classes)
 
 ### [Selectors 3](https://www.w3.org/TR/selectors-3/)
 
-- [Type selectors with namespaces `ns|E`, `*|E`](https://www.w3.org/TR/selectors-3/#typenmsp)
-- [Universal selector with namespaces `ns|*`, `*|*`](https://www.w3.org/TR/selectors-3/#univnmsp)
-- [Substring matching attribute selectors `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/selectors-3/#attribute-substrings)
-- [Attribute selectors with namespaces `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`, `[ns|att^=val]`, `[|att^=val]`, `[ns|att$=val]`, `[|att$=val]`, `[ns|att*=val]`, `[|att*=val]`](https://www.w3.org/TR/selectors-3/#attrnmsp)
-- [The UI element states pseudo-classes `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/selectors-3/#UIstates)
-  - Note that the current implementation can use only initial states of those UI elements. Even if the actual state of the element is toggled by user interaction, the style does not change.
-- [`:root` pseudo-class](https://www.w3.org/TR/selectors-3/#root-pseudo)
-- [`:nth-child()` pseudo-class](https://www.w3.org/TR/selectors-3/#nth-child-pseudo)
-- [`:nth-last-child()` pseudo-class](https://www.w3.org/TR/selectors-3/#nth-last-child-pseudo)
-- [`:nth-of-type()` pseudo-class](https://www.w3.org/TR/selectors-3/#nth-of-type-pseudo)
-- [`:nth-last-of-type()` pseudo-class](https://www.w3.org/TR/selectors-3/#nth-last-of-type-pseudo)
-- [`:first-child` pseudo-class](https://www.w3.org/TR/selectors-3/#first-child-pseudo)
-- [`:last-child` pseudo-class](https://www.w3.org/TR/selectors-3/#last-child-pseudo)
-- [`:first-of-type` pseudo-class](https://www.w3.org/TR/selectors-3/#first-of-type-pseudo)
-- [`:last-of-type` pseudo-class](https://www.w3.org/TR/selectors-3/#last-of-type-pseudo)
-- [`:only-child` pseudo-class](https://www.w3.org/TR/selectors-3/#only-child-pseudo)
-- [`:only-of-type` pseudo-class](https://www.w3.org/TR/selectors-3/#only-of-type-pseudo)
-- [`:empty` pseudo-class](https://www.w3.org/TR/selectors-3/#empty-pseudo)
-- [`:not()` pseudo-class](https://www.w3.org/TR/selectors-3/#negation)
-- [`::first-line` pseudo-element](https://www.w3.org/TR/selectors-3/#first-line)
-  - Note: there is a bug when used alone or with the universal selector(`*`). [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/133)
-- [`::first-letter` pseudo-element](https://www.w3.org/TR/selectors-3/#first-letter)
-  - Note: there is a bug when used alone, with the universal selector(`*`), or with non-ascii characters. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/34)
-- [`::before` and `::after` pseudo-elements](https://www.w3.org/TR/selectors-3/#gen-content)
-- [General sibling combinator `E ~ F`](https://www.w3.org/TR/selectors-3/#general-sibling-combinators)
+- [名前空間付き型セレクタ `ns|E`, `*|E`](https://www.w3.org/TR/selectors-3/#typenmsp)
+- [名前空間付きユニバーサルセレクタ `ns|*`, `*|*`](https://www.w3.org/TR/selectors-3/#univnmsp)
+- [部分一致属性セレクタ `[att^=val]`, `[att$=val]`, `[att*=val]`](https://www.w3.org/TR/selectors-3/#attribute-substrings)
+- [名前空間付き属性セレクタ `[ns|att]`, `[|att]`, `[ns|att=val]`, `[|att=val]`, `[ns|att~=val]`, `[|att~=val]`, `[ns|att|=val]`, `[|att|=val]`, `[ns|att^=val]`, `[|att^=val]`, `[ns|att$=val]`, `[|att$=val]`, `[ns|att*=val]`, `[|att*=val]`](https://www.w3.org/TR/selectors-3/#attrnmsp)
+- [UI 要素状態擬似クラス `:enabled`, `:disabled`, `:checked`, `:indeterminate`](https://www.w3.org/TR/selectors-3/#UIstates)
+  - 注: 現在の実装では、これらの UI 要素の初期状態のみ使用できます。ユーザーの操作で実際の状態が切り替わっても、スタイルは変わりません。
+- [`:root` 擬似クラス](https://www.w3.org/TR/selectors-3/#root-pseudo)
+- [`:nth-child()` 擬似クラス](https://www.w3.org/TR/selectors-3/#nth-child-pseudo)
+- [`:nth-last-child()` 擬似クラス](https://www.w3.org/TR/selectors-3/#nth-last-child-pseudo)
+- [`:nth-of-type()` 擬似クラス](https://www.w3.org/TR/selectors-3/#nth-of-type-pseudo)
+- [`:nth-last-of-type()` 擬似クラス](https://www.w3.org/TR/selectors-3/#nth-last-of-type-pseudo)
+- [`:first-child` 擬似クラス](https://www.w3.org/TR/selectors-3/#first-child-pseudo)
+- [`:last-child` 擬似クラス](https://www.w3.org/TR/selectors-3/#last-child-pseudo)
+- [`:first-of-type` 擬似クラス](https://www.w3.org/TR/selectors-3/#first-of-type-pseudo)
+- [`:last-of-type` 擬似クラス](https://www.w3.org/TR/selectors-3/#last-of-type-pseudo)
+- [`:only-child` 擬似クラス](https://www.w3.org/TR/selectors-3/#only-child-pseudo)
+- [`:only-of-type` 擬似クラス](https://www.w3.org/TR/selectors-3/#only-of-type-pseudo)
+- [`:empty` 擬似クラス](https://www.w3.org/TR/selectors-3/#empty-pseudo)
+- [`:not()` 擬似クラス](https://www.w3.org/TR/selectors-3/#negation)
+- [`::first-line` 擬似要素](https://www.w3.org/TR/selectors-3/#first-line)
+- [`::first-letter` 擬似要素](https://www.w3.org/TR/selectors-3/#first-letter)
+- [`::before`・`::after` 擬似要素](https://www.w3.org/TR/selectors-3/#gen-content)
+- [一般兄弟結合子 `E ~ F`](https://www.w3.org/TR/selectors-3/#general-sibling-combinators)
 
 ### [Selectors 4](https://www.w3.org/TR/selectors-4/)
 
-- [`:is()` pseudo-class](https://www.w3.org/TR/selectors-4/#matches)
-- [`:not()` pseudo-class](https://www.w3.org/TR/selectors-4/#negation)
-- [`:where()` pseudo-class](https://www.w3.org/TR/selectors-4/#zero-matches)
-- [`:has()` pseudo-class](https://www.w3.org/TR/selectors-4/#relational)
-- [`:nth-child(An+B of S)` pseudo-class](https://www.w3.org/TR/selectors-4/#nth-child-pseudo)
-- [`:nth-last-child(An+B of S)` pseudo-class](https://www.w3.org/TR/selectors-4/#nth-last-child-pseudo)
+- [`:is()` 擬似クラス](https://www.w3.org/TR/selectors-4/#matches)
+- [`:not()` 擬似クラス](https://www.w3.org/TR/selectors-4/#negation)
+- [`:where()` 擬似クラス](https://www.w3.org/TR/selectors-4/#zero-matches)
+- [`:has()` 擬似クラス](https://www.w3.org/TR/selectors-4/#relational)
+- [`:nth-child(An+B of S)` 擬似クラス](https://www.w3.org/TR/selectors-4/#nth-child-pseudo)
+- [`:nth-last-child(An+B of S)` 擬似クラス](https://www.w3.org/TR/selectors-4/#nth-last-child-pseudo)
 
 ### [CSS Overflow 4](https://www.w3.org/TR/css-overflow-4/)
 
-- [`:nth-fragment()` pseudo-element](https://www.w3.org/TR/css-overflow-4/#fragment-pseudo-element)
+- [`:nth-fragment()` 擬似要素](https://www.w3.org/TR/css-overflow-4/#fragment-pseudo-element)
 
 ### [CSS Pseudo-Elements 4](https://www.w3.org/TR/css-pseudo-4/)
 
-- [`::marker` pseudo-element](https://www.w3.org/TR/css-pseudo-4/#marker-pseudo)
+- [`::marker` 擬似要素](https://www.w3.org/TR/css-pseudo-4/#marker-pseudo)
 
-#### Not supported selectors
+### [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
 
-- [Type selectors without namespaces `|E`](https://www.w3.org/TR/selectors-3/#typenmsp)
-- [Universal selector without namespaces `|*`](https://www.w3.org/TR/selectors-3/#univnmsp)
-- [Attribute selectors with universal namespace `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/selectors-3/#attrnmsp)
-- [Target pseudo-class `:target`](https://www.w3.org/TR/selectors-3/#target-pseudo)
+- [`::footnote-call` 擬似要素](https://www.w3.org/TR/css-gcpm-3/#the-footnote-call)
+- [`::footnote-marker` 擬似要素](https://www.w3.org/TR/css-gcpm-3/#the-footnote-marker)
+  - [`list-style-position: outside`](https://www.w3.org/TR/css-gcpm-3/#footnote-marker-property) をサポートし、リストマーカーのようにマーカーを脚注本文の外側に配置できます。[PR #1706](https://github.com/vivliostyle/vivliostyle.js/pull/1706) を参照
 
-## At-rules
+#### サポートされていないセレクタ
+
+- [名前空間なしの型セレクタ `|E`](https://www.w3.org/TR/selectors-3/#typenmsp)
+- [名前空間なしのユニバーサルセレクタ `|*`](https://www.w3.org/TR/selectors-3/#univnmsp)
+- [ユニバーサル名前空間付き属性セレクタ `[*|att]`, `[*|att=val]`, `[*|att~=val]`, `[*|att|=val]`](https://www.w3.org/TR/selectors-3/#attrnmsp)
+- [ターゲット擬似クラス `:target`](https://www.w3.org/TR/selectors-3/#target-pseudo)
+
+## アットルール
 
 ### [CSS 2](https://www.w3.org/TR/CSS2/)
 
 - [@charset](https://www.w3.org/TR/CSS2/syndata.html#charset)
 - [@import](https://www.w3.org/TR/CSS2/cascade.html#at-import)
-  - [Also in CSS Cascading and Inheritance 3](https://www.w3.org/TR/css-cascade-3/#at-import)
+  - [CSS Cascading and Inheritance 3 にも含まれます](https://www.w3.org/TR/css-cascade-3/#at-import)
 
 ### [CSS Namespaces 3](https://www.w3.org/TR/css3-namespace/)
 
@@ -137,69 +141,76 @@ Vivliostyle は現在、以下の各 CSS 機能（[Values](#values)、[Selectors
 ### [CSS Paged Media 3](https://www.w3.org/TR/css-page-3/)
 
 - [@page](https://www.w3.org/TR/css-page-3/#at-page-rule)
-- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://www.w3.org/TR/css-page-3/#margin-at-rules)
-- [Page selectors](https://www.w3.org/TR/css-page-3/#page-selectors)
+- [ページマージンボックス (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-corner)](https://www.w3.org/TR/css-page-3/#margin-at-rules)
+- [ページセレクタ](https://www.w3.org/TR/css-page-3/#page-selectors)
   - [:left, :right](https://www.w3.org/TR/css-page-3/#spread-pseudos)
   - [:recto, :verso](https://www.w3.org/TR/css-logical-1/#page)
   - [:first](https://www.w3.org/TR/css-page-3/#first-pseudo)
-    - Note: In multi-document publications, the `:first` matches only the first page of the first document, and the `:nth(1)` matches the first page of each document. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
+    - 注: 複数ドキュメントの出版物では、`:first` は最初のドキュメントの最初のページにのみ一致し、`:nth(1)` は各ドキュメントの最初のページに一致します。[Issue #667](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
   - [:blank](https://www.w3.org/TR/css-page-3/#blank-pseudo)
-- [Named pages (page type selector)](https://www.w3.org/TR/css-page-3/#page-type-selector)
-- [Page-based counters (page, pages)](https://www.w3.org/TR/css-page-3/#page-based-counters)
+- [名前付きページ（ページタイプセレクタ）](https://www.w3.org/TR/css-page-3/#page-type-selector)
+- [ページベースカウンタ（page、pages）](https://www.w3.org/TR/css-page-3/#page-based-counters)
 
-See also: [Properties in CSS Paged Media 3](#css-paged-media-3-2)
+参照: [CSS Paged Media 3 のプロパティ](#css-paged-media-3-2)
 
 ### [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
 
-- [Nth page selector `:nth(An+B [of <custom-ident>])`](https://www.w3.org/TR/css-gcpm-3/#document-page-selectors)
-  - Note: In multi-document publications, the `:nth(1)` matches the first page of each document, but the `:first` matches only the first page of the first document. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
+- [`@footnote` ルール（脚注エリア）](https://www.w3.org/TR/css-gcpm-3/#footnotes)
+  - `@page { @footnote { … } }` の形式で脚注エリアのスタイルを指定します
+  - ページセレクタの組み合わせをサポート: 例 `@page :left { @footnote { … } }`
+  - `@footnote ::before` で `content` プロパティなどによる脚注セパレータのスタイル指定をサポート
+  - `@page @footnote` はトップレベルの `@footnote` より優先されます
+  - [PR #1644](https://github.com/vivliostyle/vivliostyle.js/pull/1644) を参照
+- [N番目ページセレクタ `:nth(An+B [of <custom-ident>])`](https://www.w3.org/TR/css-gcpm-3/#document-page-selectors)
+  - `:nth(An+B of <page-type>)` はページグループを考慮したマッチングを行い、現在のページ上のすべてのアクティブなページグループに対して評価されます。[PR #1745](https://github.com/vivliostyle/vivliostyle.js/pull/1745) を参照
+  - 注: 複数ドキュメントの出版物では、`:nth(1)` は各ドキュメントの最初のページに一致しますが、`:first` は最初のドキュメントの最初のページにのみ一致します。[Issue #667](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
 
-See also:
+参照:
 
-- [Properties in CSS Generated Content for Paged Media (GCPM) 3](#css-generated-content-for-paged-media-gcpm-3-2)
-- [Values - Cross references, content(), and string() functions](#values)
+- [CSS Generated Content for Paged Media (GCPM) 3 のプロパティ](#css-generated-content-for-paged-media-gcpm-3-2)
+- [値 - 相互参照・content()・string() 関数](#値)
 
 ### [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 
 - [@font-face](https://www.w3.org/TR/css-fonts-3/#font-face-rule)
-  - [font-style, font-weight, font-stretch descriptors](https://www.w3.org/TR/css-fonts-3/#font-prop-desc)
-  - [unicode-range descriptor](https://www.w3.org/TR/css-fonts-3/#unicode-range-desc)
+  - [font-style、font-weight、font-stretch ディスクリプタ](https://www.w3.org/TR/css-fonts-3/#font-prop-desc)
+  - [unicode-range ディスクリプタ](https://www.w3.org/TR/css-fonts-3/#unicode-range-desc)
 
-See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
+参照: [CSS Fonts 3 のプロパティ](#css-fonts-3-2)
 
 ### [CSS Counter Styles 3](https://www.w3.org/TR/css-counter-styles-3/)
 
 - [@counter-style](https://www.w3.org/TR/css-counter-styles-3/#the-counter-style-rule)
-- [Extending `list-style-type`, `counter()`, and `counters()`](https://www.w3.org/TR/css-counter-styles-3/#extending-css2)
-- [Predefined Counter Styles](https://www.w3.org/TR/css-counter-styles-3/#predefined-counters)
+- [`list-style-type`・`counter()`・`counters()` の拡張](https://www.w3.org/TR/css-counter-styles-3/#extending-css2)
+- [定義済みカウンタスタイル](https://www.w3.org/TR/css-counter-styles-3/#predefined-counters)
 
-## Media queries
+## メディアクエリ
 
-- Vivliostyle uses styles specified for [`print` media](https://www.w3.org/TR/CSS2/media.html#media-types) (as well as `all`).
-  - Vivliostyle specific media type `vivliostyle` is enabled in addition to `print` media.
-- Supported media features
+- Vivliostyle は [`print` メディア](https://www.w3.org/TR/CSS2/media.html#media-types)（および `all`）向けに指定されたスタイルを使用します。
+  - `print` メディアに加えて、Vivliostyle 固有のメディアタイプ `vivliostyle` が有効化されます。
+- サポートされるメディア機能
   - [`(min-|max-)width`](https://www.w3.org/TR/css3-mediaqueries/#width)
   - [`(min-|max-)height`](https://www.w3.org/TR/css3-mediaqueries/#height)
   - [`(min-|max-)device-width`](https://www.w3.org/TR/css3-mediaqueries/#device-width)
   - [`(min-|max-)device-height`](https://www.w3.org/TR/css3-mediaqueries/#device-height)
   - [`(min-|max-)color`](https://www.w3.org/TR/css3-mediaqueries/#color)
 
-## Properties
+## プロパティ
 
 ### [CSS 2](https://www.w3.org/TR/CSS2/)
 
 - [background](https://www.w3.org/TR/CSS2/colors.html#propdef-background)
-  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background)
+  - [CSS Backgrounds 3 の構文](https://www.w3.org/TR/css3-background/#propdef-background)をサポートします
 - [background-attachment](https://www.w3.org/TR/CSS2/colors.html#propdef-background-attachment)
-  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background-attachment)
+  - [CSS Backgrounds 3 の構文](https://www.w3.org/TR/css3-background/#propdef-background-attachment)をサポートします
 - [background-color](https://www.w3.org/TR/CSS2/colors.html#propdef-background-color)
-  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background-color)
+  - [CSS Backgrounds 3 の構文](https://www.w3.org/TR/css3-background/#propdef-background-color)をサポートします
 - [background-image](https://www.w3.org/TR/CSS2/colors.html#propdef-background-image)
-  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background-image)
+  - [CSS Backgrounds 3 の構文](https://www.w3.org/TR/css3-background/#propdef-background-image)をサポートします
 - [background-position](https://www.w3.org/TR/CSS2/colors.html#propdef-background-position)
-  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background-position)
+  - [CSS Backgrounds 3 の構文](https://www.w3.org/TR/css3-background/#propdef-background-position)をサポートします
 - [background-repeat](https://www.w3.org/TR/CSS2/colors.html#propdef-background-repeat)
-  - Supports [CSS Backgrounds 3 syntax](https://www.w3.org/TR/css3-background/#propdef-background-repeat)
+  - [CSS Backgrounds 3 の構文](https://www.w3.org/TR/css3-background/#propdef-background-repeat)をサポートします
 - [border](https://www.w3.org/TR/CSS2/box.html#propdef-border)
 - [border-bottom](https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom)
 - [border-bottom-color](https://www.w3.org/TR/CSS2/box.html#propdef-border-bottom-color)
@@ -225,7 +236,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [bottom](https://www.w3.org/TR/CSS2/visuren.html#propdef-bottom)
 - [caption-side](https://www.w3.org/TR/CSS2/tables.html#propdef-caption-side)
 - [clear](https://www.w3.org/TR/CSS2/visuren.html#propdef-clear)
-  - See also [CSS Page Floats](#css-page-floats)
+  - 参照: [CSS Page Floats](#css-page-floats)
 - [clip](https://www.w3.org/TR/CSS2/visufx.html#propdef-clip)
 - [color](https://www.w3.org/TR/CSS2/colors.html#propdef-color)
 - [content](https://www.w3.org/TR/CSS2/generate.html#propdef-content)
@@ -235,16 +246,16 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [cursor](https://www.w3.org/TR/CSS2/ui.html#propdef-cursor)
 - [direction](https://www.w3.org/TR/CSS2/visuren.html#propdef-direction)
 - [display](https://www.w3.org/TR/CSS2/visuren.html#propdef-display)
-  - Supports [`flex`, `inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers), [`ruby`, `ruby-base`, `ruby-text`, `ruby-base-container` and `ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) values.
+  - [`flex`、`inline-flex`](https://www.w3.org/TR/css-flexbox-1/#flex-containers)、[`ruby`、`ruby-base`、`ruby-text`、`ruby-base-container`、`ruby-text-container`](https://www.w3.org/TR/css-ruby-1/#propdef-display) 値をサポートします。
 - [empty-cells](https://www.w3.org/TR/CSS2/tables.html#propdef-empty-cells)
 - [float](https://www.w3.org/TR/CSS2/visuren.html#propdef-float)
-  - See also [CSS Page Floats](#css-page-floats)
+  - 参照: [CSS Page Floats](#css-page-floats)
 - [font](https://www.w3.org/TR/CSS2/fonts.html#propdef-font)
 - [font-family](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-family)
 - [font-size](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-size)
 - [font-style](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-style)
 - [font-variant](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-variant)
-  - Supports [CSS Fonts 3 font-variant](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant)
+  - [CSS Fonts 3 の font-variant](https://www.w3.org/TR/css-fonts-3/#propdef-font-variant) をサポートします
 - [font-weight](https://www.w3.org/TR/CSS2/fonts.html#propdef-font-weight)
 - [height](https://www.w3.org/TR/CSS2/visudet.html#propdef-height)
 - [left](https://www.w3.org/TR/CSS2/visuren.html#propdef-left)
@@ -280,7 +291,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [page-break-inside](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
 - [position](https://www.w3.org/TR/CSS2/visuren.html#propdef-position)
 - [quotes](https://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
-  - Note: not supported within `@page` rules. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/43)
+  - 注: `@page` ルール内ではサポートされません。[Issue #43](https://github.com/vivliostyle/vivliostyle.js/issues/43)
 - [right](https://www.w3.org/TR/CSS2/visuren.html#propdef-right)
 - [table-layout](https://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
 - [text-align](https://www.w3.org/TR/CSS2/text.html#propdef-text-align)
@@ -289,7 +300,7 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [text-transform](https://www.w3.org/TR/CSS2/text.html#propdef-text-transform)
 - [top](https://www.w3.org/TR/CSS2/visuren.html#propdef-top)
 - [unicode-bidi](https://www.w3.org/TR/CSS2/visuren.html#propdef-unicode-bidi)
-  - Supports [new values (`isolate`, `isolate-override`, `plaintext`) in CSS Writing Modes 3](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
+  - [CSS Writing Modes 3 の新しい値（`isolate`、`isolate-override`、`plaintext`）](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)をサポートします
 - [vertical-align](https://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align)
 - [visibility](https://www.w3.org/TR/CSS2/visufx.html#propdef-visibility)
 - [white-space](https://www.w3.org/TR/CSS2/text.html#propdef-white-space)
@@ -301,43 +312,43 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 ### [CSS Paged Media 3](https://www.w3.org/TR/css-page-3/)
 
 - [bleed](https://www.w3.org/TR/css-page-3/#bleed)
-  - Only effective when specified within an `@page` rule without page selectors
+  - ページセレクタのない `@page` ルール内で指定した場合にのみ有効
 - [marks](https://www.w3.org/TR/css-page-3/#marks)
-  - Only effective when specified within an `@page` rule without page selectors
+  - ページセレクタのない `@page` ルール内で指定した場合にのみ有効
 - [size](https://www.w3.org/TR/css-page-3/#page-size-prop)
-  - Supports all required values and proposed values `A0`-`A10`, `B0`-`B10`, `C0`-`C10` and `JIS-B0`-`JIS-B10`. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/713)
+  - 必須値すべてと、提案値 `A0`–`A10`、`B0`–`B10`、`C0`–`C10`、`JIS-B0`–`JIS-B10` をサポートします。[PR #713](https://github.com/vivliostyle/vivliostyle.js/pull/713) を参照
 - crop-offset
-  - Specifies distance between the edge of the trim size and the edge of the output page media size
-  - This property is not standardized yet. See [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/913)
+  - トリムサイズの端から出力ページメディアサイズの端までの距離を指定します
+  - このプロパティはまだ標準化されていません。[Issue #913](https://github.com/vivliostyle/vivliostyle.js/issues/913) を参照
 - crop-marks-line-color
-  - Specifies color of the crop marks
-  - This property is not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1505)
-- [page (Named Pages)](https://www.w3.org/TR/css-page-3/#using-named-pages)
+  - トンボマークの色を指定します
+  - このプロパティはまだ標準化されていません。[PR #1505](https://github.com/vivliostyle/vivliostyle.js/pull/1505) を参照
+- [page (名前付きページ)](https://www.w3.org/TR/css-page-3/#using-named-pages)
 
-See also: [At-rules in CSS Paged Media 3](#css-paged-media-3)
+参照: [CSS Paged Media 3 のアットルール](#css-paged-media-3)
 
 ### [CSS Generated Content for Paged Media (GCPM) 3](https://www.w3.org/TR/css-gcpm-3/)
 
-- [string-set (Named Strings)](https://www.w3.org/TR/css-gcpm-3/#setting-named-strings-the-string-set-pro)
-- [position: running() (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#running-elements)
+- [string-set（名前付き文字列）](https://www.w3.org/TR/css-gcpm-3/#setting-named-strings-the-string-set-pro)
+- [position: running()（ランニング要素）](https://www.w3.org/TR/css-gcpm-3/#running-elements)
 - [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
-  - Supports [`auto`, `line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) values.
+  - [`auto`、`line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) 値をサポートします。
 
-See also:
+参照:
 
-- [At-rules in CSS Generated Content for Paged Media (GCPM) 3](#css-generated-content-for-paged-media-gcpm-3)
-- [Values - Cross references, string(), content(), running(), element(), and leader() functions](#values)
+- [CSS Generated Content for Paged Media (GCPM) 3 のアットルール](#css-generated-content-for-paged-media-gcpm-3)
+- [値 - 相互参照・string()・content()・running()・element()・leader() 関数](#値)
 
 ### [CSS Fragmentation 3](https://www.w3.org/TR/css-break-3/)
 
 - [break-after](https://www.w3.org/TR/css-break-3/#propdef-break-after)
 - [break-before](https://www.w3.org/TR/css-break-3/#propdef-break-before)
 - [break-inside](https://www.w3.org/TR/css-break-3/#propdef-break-inside)
-  - Note: All of `avoid-page`, `avoid-column` and `avoid-region` values are treated as if they were `avoid`. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/128)
+  - 注: `avoid-page`、`avoid-column`、`avoid-region` 値はいずれも `avoid` として扱われます。[Issue #128](https://github.com/vivliostyle/vivliostyle.js/issues/128)
 - [orphans](https://www.w3.org/TR/css-break-3/#propdef-orphans)
 - [widows](https://www.w3.org/TR/css-break-3/#propdef-widows)
 - [box-decoration-break](https://www.w3.org/TR/css-break-3/#propdef-box-decoration-break)
-  - Note: Background, box-shadow and border images on inline-start/end borders are always rendered as if `box-decoration-break: clone` is specified.
+  - 注: インラインの始端/終端における背景、box-shadow、ボーダー画像は常に `box-decoration-break: clone` が指定されたかのようにレンダリングされます。
 
 ### [CSS Fragmentation 4](https://www.w3.org/TR/css-break-4/)
 
@@ -346,37 +357,37 @@ See also:
 ### [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
 
 - [clear](https://drafts.csswg.org/css-page-floats/#propdef-clear)
-  - Supports [`none`, `inline-start`, `inline-end`, `block-start`, `block-end`, `left`, `right`, `top`, `bottom`, `both`, `all`, `same`](https://drafts.csswg.org/css-page-floats/#propdef-clear) values.
-  - When `all` is specified on a block-level box (not a page float), the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
-  - When a `clear` value is specified on a page float, it is placed so that it comes after any of preceding page floats.
-  - `same` value means the same direction as one which the page float is floated to.
-  - If a page float with `float: snap-block` would be placed at the block-start end but a `clear` value on it forbidden such placement, the float is instead placed at the block-end side (unless the `clear` value also forbidden such placement).
-  - The `page`, `column`, and `region` values ensure that preceding page floats are placed before the page/column/region containing the element that has the `clear` property, which can be a page float, a normal float, or a block-level box.
+  - [`none`、`inline-start`、`inline-end`、`block-start`、`block-end`、`left`、`right`、`top`、`bottom`、`both`、`all`、`same`](https://drafts.csswg.org/css-page-floats/#propdef-clear) 値をサポートします。
+  - ブロックレベルボックス（ページフロート以外）に `all` を指定すると、ドキュメント順序でこのボックスより前にアンカーがある block-start / block-end ページフロートの後にボックスの block-start 辺が来るように下げられます。
+  - ページフロートに `clear` 値を指定すると、先行のページフロートの後に配置されます。
+  - `same` 値は、そのページフロートがフロートしている方向と同じ方向を意味します。
+  - `float: snap-block` のページフロートが block-start 端に配置されるところが、`clear` 値によりその配置が禁止される場合、フロートは代わりに block-end 側に配置されます（`clear` 値がその配置も禁止しない場合）。
+  - `page`、`column`、`region` 値は、先行のページフロートが `clear` プロパティを持つ要素（ページフロート、通常フロート、またはブロックレベルボックス）を含むページ/カラム/リージョンの前に配置されることを保証します。
 - [float](https://drafts.csswg.org/css-page-floats/#propdef-float)
-  - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `snap-block`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
-  - Supports values combining keywords. For example,
-    - `float: top right;` float to top right corner
-    - `float: bottom left;` float to bottom left corner
-    - `float: top bottom;` float to top or bottom edge
-    - `float: top bottom left;` float to top left or bottom left corner
-    - `float: top bottom left right;` float to top left, top right, bottom left, or bottom right corner
-    - `float: block-start inline-start;` float to block-start and inline-start corner
-    - `float: block-start block-end;` float to block-start or block-end edge (same as 'snap-block')
-    - See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1444)
+  - [`block-start`、`block-end`、`inline-start`、`inline-end`、`snap-block`、`left`、`right`、`top`、`bottom`、`none`](https://drafts.csswg.org/css-page-floats/#propdef-float) 値をサポートします。
+  - 複数のキーワードを組み合わせた値をサポートします。例:
+    - `float: top right;` → 右上隅にフロート
+    - `float: bottom left;` → 左下隅にフロート
+    - `float: top bottom;` → 上端または下端にフロート
+    - `float: top bottom left;` → 左上隅または左下隅にフロート
+    - `float: top bottom left right;` → 左上、右上、左下、または右下隅にフロート
+    - `float: block-start inline-start;` → block-start かつ inline-start の隅にフロート
+    - `float: block-start block-end;` → block-start または block-end 端にフロート（'snap-block' と同じ）
+    - [PR #1444](https://github.com/vivliostyle/vivliostyle.js/pull/1444) を参照
 - [float-reference](https://drafts.csswg.org/css-page-floats/#propdef-float-reference)
-  - Specify `float-reference: page` (or `column`/`region`) to enable page (or column/region) float.
+  - `float-reference: page`（または `column` / `region`）を指定してページ（またはカラム/リージョン）フロートを有効化します。
 - float-min-wrap-block
-  - Applies to a page float
-  - A percentage value is respect to the block dimension of the float reference of the page float
-  - When set to a positive length, in-flow contents are not allowed to be flown into a space next to the page float if the block extent of the space is less than the specified length. In that case, the space is kept empty and the in-flow contents are deferred to the next column.
-  - This property is not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/382)
+  - ページフロートに対して適用されます
+  - パーセンテージ値は、ページフロートのフロート参照のブロック寸法に対して解釈されます
+  - 正の長さを指定すると、ページフロートの横の空間のブロック方向の長さが指定した長さ未満の場合、インフローコンテンツはその空間に流れ込めなくなり、その空間は空白のままになってコンテンツは次のカラムへ送られます
+  - このプロパティはまだ標準化されていません。[PR #382](https://github.com/vivliostyle/vivliostyle.js/pull/382) を参照
 
 ### [CSS Color 3](https://www.w3.org/TR/css3-color/)
 
 - [color](https://www.w3.org/TR/css-color-3/#foreground)
 - [opacity](https://www.w3.org/TR/css-color-3/#transparency)
 
-See also: [Values - Supported color values](#values)
+参照: [値 - サポートしているカラー値](#値)
 
 ### [CSS Backgrounds and Borders 3](https://www.w3.org/TR/css3-background/)
 
@@ -427,9 +438,9 @@ See also: [Values - Supported color values](#values)
 - [object-fit](https://www.w3.org/TR/css-images-3/#the-object-fit)
 - [object-position](https://www.w3.org/TR/css-images-3/#the-object-position)
 - [image-resolution](https://www.w3.org/TR/css-images-4/#the-image-resolution)
-  - Only `<resolution>` value is supported.
-  - Only supported for content of `img`, `input[type=image]` and `video` (applied to poster images) elements and before/after pseudoelements. Other images such as background images, list images or border images are not supported.
-  - The property is applied to vector images such as SVG, as well as raster images. This behavior is different from what the spec specifies.
+  - `<resolution>` 値のみサポートします。
+  - `img`、`input[type=image]`、`video`（ポスター画像に適用）要素と before/after 擬似要素のコンテンツのみサポートします。背景画像、リスト画像、ボーダー画像などはサポートしません。
+  - ベクター画像（SVG など）にもラスター画像と同様に適用されます。この挙動は仕様記載と異なります。
 
 ### [CSS Fonts 3](https://www.w3.org/TR/css-fonts-3/)
 
@@ -446,31 +457,31 @@ See also: [Values - Supported color values](#values)
 - [font-weight](https://www.w3.org/TR/css-fonts-3/#propdef-font-weight)
 - [font-stretch](https://www.w3.org/TR/css-fonts-4/#propdef-font-stretch)
 
-See also: [At-rules in CSS Fonts 3](#css-fonts-3)
+参照: [CSS Fonts 3 のアットルール](#css-fonts-3)
 
 ### [CSS Text 3](https://www.w3.org/TR/css-text-3/)
 
 - [hanging-punctuation](hanging-punctuation)
-  - Supports all required values, `none | [ first || [ force-end | allow-end ] || last ]`. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/814)
+  - 必須値すべて「`none | [ first || [ force-end | allow-end ] || last ]`」をサポートします。[PR #814](https://github.com/vivliostyle/vivliostyle.js/pull/814) を参照
 - [hyphens](https://www.w3.org/TR/css-text-3/#hyphenation)
 - [letter-spacing](https://www.w3.org/TR/css-text-3/#letter-spacing-property)
 - [line-break](https://www.w3.org/TR/css-text-3/#line-break-property)
 - [overflow-wrap, word-wrap](https://www.w3.org/TR/css-text-3/#overflow-wrap-property)
 - [tab-size](https://www.w3.org/TR/css-text-3/#tab-size-property)
 - [text-align-last](https://www.w3.org/TR/css-text-3/#text-align-last-property)
-  - Note: While `text-align` property is a shorthand in CSS Text 3, Vivliostyle treats `text-align` for now as an independent property (defined in CSS 2.1) rather than a shorthand.
+  - 注: CSS Text 3 では `text-align` プロパティはショートハンドですが、Vivliostyle では引き続き CSS 2.1 で定義されたスタンドアロンのプロパティとして扱っています。
 - [white-space](https://www.w3.org/TR/css-text-3/#white-space-property)
 - [word-break](https://www.w3.org/TR/css-text-3/#word-break-property)
 
 ### [CSS Text 4](https://www.w3.org/TR/css-text-4/)
 
 - [text-autospace](https://www.w3.org/TR/css-text-4/#text-autospace-property)
-  - Supported values: `normal | no-autospace | [ ideograph-alpha || ideograph-numeric ] | auto`
+  - サポート値: `normal | no-autospace | [ ideograph-alpha || ideograph-numeric ] | auto`
 - [text-spacing-trim](https://www.w3.org/TR/css-text-4/#text-spacing-trim-property)
-  - Values: `space-all | normal | space-first | trim-start | trim-both | auto`
+  - 値: `space-all | normal | space-first | trim-start | trim-both | auto`
 - [text-spacing](https://www.w3.org/TR/css-text-4/#text-spacing-property)
-  - Values: `normal | none | auto | [<autospace> || <spacing-trim>]`
-  - Note: This is a shorthand property that sets the `text-autospace` and `text-spacing-trim` properties. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1142)
+  - 値: `normal | none | auto | [<autospace> || <spacing-trim>]`
+  - 注: `text-autospace` と `text-spacing-trim` プロパティをまとめて設定するショートハンドプロパティです。[PR #1142](https://github.com/vivliostyle/vivliostyle.js/pull/1142) を参照
 
 ### [CSS Text Decoration 3](https://www.w3.org/TR/css-text-decor-3/)
 
@@ -490,7 +501,18 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 
 ### [CSS Multi-column 1](https://www.w3.org/TR/css3-multicol/)
 
-**Note:** Currently the multi-column layout works well only when specified on the root or body element. [[Issue]](https://github.com/vivliostyle/vivliostyle.js/issues/579)
+Vivliostyle は CSS マルチカラムレイアウトをサポートしていますが、ルート・body 要素に指定された場合と、ルート・body 以外の要素に指定された場合とで扱いが異なり、それぞれに制限があります：
+
+- **ルート段組**（ルート要素または body 要素に指定）:
+  - ルート要素と body 要素の両方に段組が指定された場合は、ルート要素に指定された段組のみがルート段組として扱われます。
+  - ページエリアがマルチカラムコンテナになります。
+  - Vivliostyle が独自に実装しているため、ブラウザの段組実装に依存しません。
+  - CSS Page Floats の `float-reference: column` はルート段組にのみ対応しています。
+  - 制限: `column-span: all` はルート段組の場合にはページフロートに対してのみ対応しています。
+- **非ルート段組**（ルート・body 要素以外に指定）:
+  - 段組の処理はブラウザの段組実装に依存します。
+  - 同一ページ内に段数の異なる複数の段組を混在させたり、段組の中に段組をネストしたり、`column-span: all` で段抜きのレイアウトもできます。
+  - 注: この機能はブラウザの段組機能を利用しているため、Safari/WebKit で Vivliostyle.js を使用する場合には、WebKit の既知のバグによりネストした段組レイアウトが崩れることがある、または非ルート段組でのページ分割がうまくいかないことがあります。[Issue #1821](https://github.com/vivliostyle/vivliostyle.js/issues/1821) を参照
 
 - [column-count](https://www.w3.org/TR/css3-multicol/#propdef-column-count)
 - [column-gap](https://www.w3.org/TR/css-multicol-1/#cg)
@@ -502,7 +524,8 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [columns](https://www.w3.org/TR/css3-multicol/#propdef-columns)
 - [column-fill](https://www.w3.org/TR/css3-multicol/#propdef-column-fill)
 - [column-span](https://drafts.csswg.org/css-multicol-2/#propdef-column-span)
-  - Note: Currently `column-span` is effective only when specified on a page float. When `auto` value is specified, either a single column or all columns are spanned depending on the min-content inline size of the page float.
+  - 注: ルート段組では、`column-span` はページフロートに指定した場合にのみ有効です。`auto` 値を指定すると、ページフロートの min-content インラインサイズに応じて 1 カラムまたは全カラムにスパンします。
+  - 非ルート段組では、`column-span: all` を制限なく使えます。
 
 ### [CSS Basic User Interface 3](https://www.w3.org/TR/css3-ui/)
 
@@ -625,13 +648,13 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [padding-block-start, padding-block-end, padding-inline-start, padding-inline-end, padding-block, padding-inline](https://www.w3.org/TR/css-logical-1/#padding-properties)
 - [border-block-start-width, border-block-end-width, border-inline-start-width, border-inline-end-width, border-block-width, border-inline-width, border-block-start-style, border-block-end-style, border-inline-start-style, border-inline-end-style, border-block-style, border-inline-style, border-block-start-color, border-block-end-color, border-inline-start-color, border-inline-end-color, border-block-color, border-inline-color, border-block-start, border-block-end, border-inline-start, border-inline-end, border-block, border-inline](https://www.w3.org/TR/css-logical-1/#border-properties)
 
-### Page spread inside/outside properties and values
+### ページ方向 inside/outside プロパティと値
 
-In these properties and values, the `inside` and `outside` keywords resolve to `left` and `right` depending on whether the page is left or right page.
+これらのプロパティと値では、`inside` および `outside` キーワードは、ページが左ページか右ページかに応じて `left` または `right` に解決されます。
 
-Note: These CSS properties and values are not standardized yet. See [[Pull Request]](https://github.com/vivliostyle/vivliostyle.js/pull/1519)
+注: これらの CSS プロパティと値はまだ標準化されていません。[PR #1519](https://github.com/vivliostyle/vivliostyle.js/pull/1519) を参照
 
-Added \*-inside/outside properties:
+追加された *-inside/outside プロパティ:
 
 - margin-inside, margin-outside
 - padding-inside, padding-outside
@@ -641,22 +664,31 @@ Added \*-inside/outside properties:
 - border-inside-width, border-outside-width
 - inset-inside, inset-outside
 
-Extended properties with `inside` and `outside` values:
+`inside` および `outside` 値が拡張されたプロパティ:
 
 - float, clear
 - text-align, text-align-last
 
 ### [CSS Repeated Headers and Footers](https://specs.rivoal.net/css-repeat/)
 
-Note: This spec proposal is not submitted to CSS Working Group yet.
+注: この仕様提案はまだ CSS Working Group に提出されていません。
 
 - [repeat-on-break](https://specs.rivoal.net/css-repeat/#propdef-repeat-on-break)
 
+## セマンティック脚注（role 属性 / epub:type 属性）
+
+Vivliostyle は、CSS GCPM の `float: footnote` プロパティによる脚注に加えて、HTML 要素のセマンティック属性を使った脚注をサポートしています。`role` 属性（[DPUB-ARIA](https://www.w3.org/TR/dpub-aria-1.1/)）または `epub:type` 属性（[EPUB 3 Structural Semantics Vocabulary](https://www.w3.org/TR/epub-ssv-11/)）によって、脚注参照と脚注本文を識別します。
+
+- 脚注参照: `<a role="doc-noteref" href="#fn">1</a>` または `<a epub:type="noteref" href="#fn">1</a>`
+- 脚注本文: `<aside role="doc-footnote" id="fn"><p>1. 脚注の本文</p></aside>` または `<aside epub:type="footnote" id="fn"><p>1. 脚注の本文</p></aside>`
+
+[Issue #1700](https://github.com/vivliostyle/vivliostyle.js/issues/1700) を参照
+
 ## [EPUB Adaptive Layout](http://www.idpf.org/epub/pgt/)
 
-Note: This spec is not on a W3C standards track. Future version of Vivliostyle may drop support for this spec.
+注: この仕様は W3C 標準化トラックにはありません。将来の Vivliostyle バージョンではこの仕様のサポートを廃止する可能性があります。
 
-### At-rules
+### アットルール
 
 - [@-epubx-define](http://www.idpf.org/epub/pgt/#rule-define)
 - [@-epubx-flow](http://www.idpf.org/epub/pgt/#rule-flow)
@@ -668,13 +700,13 @@ Note: This spec is not on a W3C standards track. Future version of Vivliostyle m
 - [@-epubx-viewport](http://www.idpf.org/epub/pgt/#rule-viewport)
 - [@-epubx-when](http://www.idpf.org/epub/pgt/#rule-when)
 
-### Properties
+### プロパティ
 
 - [-epubx-conflicting-partitions](http://www.idpf.org/epub/pgt/#prop-conflicting-partitions)
 - [-epubx-enabled](http://www.idpf.org/epub/pgt/#prop-enabled)
 - [-epubx-flow-consume](http://www.idpf.org/epub/pgt/#prop-flow-consume)
 - [-epubx-flow-from](http://www.idpf.org/epub/pgt/#prop-flow-from)
-  - Only effective when specified to EPUB Adaptive Layout partitions.
+  - EPUB Adaptive Layout パーティションに指定した場合にのみ有効。
 - [-epubx-flow-into](http://www.idpf.org/epub/pgt/#prop-flow-into)
 - [-epubx-flow-linger](http://www.idpf.org/epub/pgt/#prop-flow-linger)
 - [-epubx-flow-options](http://www.idpf.org/epub/pgt/#prop-flow-options)
@@ -684,14 +716,14 @@ Note: This spec is not on a W3C standards track. Future version of Vivliostyle m
 - [-epubx-required](http://www.idpf.org/epub/pgt/#prop-required)
 - [-epubx-required-partitions](http://www.idpf.org/epub/pgt/#prop-required-partitions)
 - [-epubx-shape-outside](http://www.idpf.org/epub/pgt/#prop-shape-outside)
-  - Only effective when specified to EPUB Adaptive Layout partitions.
-  - Note: only [old syntaxes from 3 May 2012 Working Draft](https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
-- [-epubx-shape-inside](http://www.idpf.org/epub/pgt/#prop-shape-inside)
-  - Only effective when specified to EPUB Adaptive Layout partitions.
-  - Note: only [old syntaxes from 3 May 2012 Working Draft](https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes) are supported.
+  - EPUB Adaptive Layout パーティションに指定した場合にのみ有効。
+  - 注: [2012年5月3日 Working Draft の古い構文](https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes)のみサポートします。
+ - [-epubx-shape-inside](http://www.idpf.org/epub/pgt/#prop-shape-inside)
+  - EPUB Adaptive Layout パーティションに指定した場合にのみ有効。
+  - 注: [2012年5月3日 Working Draft の古い構文](https://www.w3.org/TR/2012/WD-css3-exclusions-20120503/#supported-svg-shapes)のみサポートします。
 - [-epubx-snap-height](http://www.idpf.org/epub/pgt/#prop-snap-height)
 - [-epubx-snap-width](http://www.idpf.org/epub/pgt/#prop-snap-width)
 - [-epubx-text-zoom](http://www.idpf.org/epub/pgt/#prop-text-zoom)
 - [-epubx-utilization](http://www.idpf.org/epub/pgt/#prop-utilization)
 - [-epubx-wrap-flow](http://www.idpf.org/epub/pgt/#prop-wrap-flow)
-  - Only effective when specified to EPUB Adaptive Layout partitions.
+  - EPUB Adaptive Layout パーティションに指定した場合にのみ有効。
