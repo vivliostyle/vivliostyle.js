@@ -525,6 +525,10 @@ module.exports = [
         title:
           "Column rule with page floats and footnotes (vertical writing-mode) (Issue #1493, #1764)",
       },
+      {
+        file: "multi-column/multicol-page-block-end-float.html",
+        title: "Multi-column text and page block-end float (Issue #1826)",
+      },
     ],
   },
   {

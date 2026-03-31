@@ -74,6 +74,13 @@ export abstract class ColumnBalancer {
     const frame: Task.Frame<ColumnLayoutResult> = Task.newFrame(
       "ColumnBalancer#balanceColumns",
     );
+    // Suppress block-size adjustment during column balancing trials so trial
+    // break positions are not affected by block-end floats. (Issue #1787,
+    // #1826)
+    this.layoutContainer.element.setAttribute(
+      "data-vivliostyle-in-column-balancing",
+      "true",
+    );
     this.preBalance(layoutResult);
     this.savePageFloatLayoutContexts(layoutResult);
     this.layoutContainer.clear();
@@ -100,6 +107,9 @@ export abstract class ColumnBalancer {
         const result = candidates.reduce(
           (prev, curr) => (curr.penalty < prev.penalty ? curr : prev),
           candidates[0],
+        );
+        this.layoutContainer.element.removeAttribute(
+          "data-vivliostyle-in-column-balancing",
         );
         this.restoreContents(result.layoutResult);
         this.tightenColumnBlockSizes(result.layoutResult.columns);

@@ -1065,8 +1065,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   private adjustColumnBlockSizeForBlockEndFloats(): void {
-    if (!this.element.hasAttribute("data-vivliostyle-page-area")) {
-      // This adjustment is only for the page area. (Issue #1787, #1789)
+    // During column balancing, this column is a child of the page-area
+    // container re-laid out by ColumnBalancer. Skip CSS block-size adjustment
+    // for those trial columns so balancing is based on the original fragmentainer
+    // size, while keeping the adjustment for the final layout pass to avoid the
+    // half-leading overlap regression. (Issue #1787, #1826)
+    if (
+      this.element.hasAttribute("data-vivliostyle-in-column-balancing") ||
+      this.element.parentElement?.hasAttribute(
+        "data-vivliostyle-in-column-balancing",
+      )
+    ) {
       return;
     }
     const initialBlockSize = this.vertical ? this.width : this.height;
@@ -1082,6 +1091,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         const left = this.left + (initialBlockSize - blockSize);
         Base.setCSSProperty(this.element, "left", `${left}px`);
       }
+      this.element.setAttribute(
+        "data-vivliostyle-column-block-size-adjusted",
+        "true",
+      );
     }
   }
 
@@ -4093,7 +4106,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               LayoutHelper.unsetBrowserColumnBreaking(this);
 
               // Restore root column block-size if it was reduced by Chromium
-              // table fragmentation workaround. (Issue #1812)
+              // table fragmentation workaround (Issue #1812),
+              // or by footnotes/block-end-page-floats and table/multicol issue
+              // workaround (Issue #1662, #1460).
               if (
                 this.element.hasAttribute(
                   "data-vivliostyle-column-block-size-adjusted",
@@ -4101,6 +4116,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               ) {
                 if (this.vertical) {
                   Base.setCSSProperty(this.element, "width", `${this.width}px`);
+                  Base.setCSSProperty(this.element, "left", `${this.left}px`);
                 } else {
                   Base.setCSSProperty(
                     this.element,
