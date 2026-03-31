@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Multi-column text and page block-end float</title>
+    <style>
+      @page {
+        size: 500px;
+        margin: 50px;
+        outline: 1px solid cyan;
+
+        @bottom-center {
+          font-size: 12px;
+          line-height: 1;
+          content: "Page " counter(page);
+        }
+      }
+
+      :root {
+        font-size: 16px;
+        line-height: 50px;
+        column-count: 2;
+        column-rule: 4px solid orange;
+        widows: 1;
+        orphans: 1;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      p {
+        margin: 0;
+        background: orange;
+      }
+
+      .page-float {
+        float: block-end;
+        float-reference: page;
+        block-size: 64px;
+        text-align: center;
+        background: #f0f8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-float">Page Float</div>
+
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris tortor
+      lorem, rhoncus a ex et, aliquam vulputate ex. Maecenas fermentum nunc quis
+      ligula eleifend venenatis. Nullam egestas mi eget turpis iaculis, at
+      varius ex ultrices. Proin consectetur, nisi id aliquet elementum, felis
+      massa auctor ex, ac rhoncus mi turpis vel nulla. Mauris sed ornare ligula.
+      Quisque lectus ante, pretium hendrerit magna tincidunt, dignissim pretium
+      metus. Aenean gravida fermentum sapien quis sagittis.
+    </p>
+  </body>
+</html>
