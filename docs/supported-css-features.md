@@ -141,7 +141,7 @@ In addition, essentially all CSS properties and values supported by the browser 
 ### [CSS Paged Media 3](https://www.w3.org/TR/css-page-3/)
 
 - [@page](https://www.w3.org/TR/css-page-3/#at-page-rule)
-- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-coner)](https://www.w3.org/TR/css-page-3/#margin-at-rules)
+- [Page-margin boxes (@top-left-corner, @top-left, @top-center, @top-right, @top-right-corner, @left-top, @left-middle, @left-bottom, @right-top, @right-middle, @right-bottom, @bottom-left-corner, @bottom-left, @bottom-center, @bottom-right, @bottom-right-corner)](https://www.w3.org/TR/css-page-3/#margin-at-rules)
 - [Page selectors](https://www.w3.org/TR/css-page-3/#page-selectors)
   - [:left, :right](https://www.w3.org/TR/css-page-3/#spread-pseudos)
   - [:recto, :verso](https://www.w3.org/TR/css-logical-1/#page)
@@ -160,7 +160,7 @@ See also: [Properties in CSS Paged Media 3](#css-paged-media-3-2)
   - Supports page-selector variants: e.g., `@page :left { @footnote { … } }`
   - `@footnote ::before` supports the `content` property and other styles for the footnote separator
   - `@page @footnote` takes precedence over top-level `@footnote`
-  - See [PR #1644](https://github.com/vivliostyle/vivliostyle.js/pull/1644)
+  - See [PR #1644](https://github.com/vivliostyle/vivliostyle.js/pull/1644) and [PR #1724](https://github.com/vivliostyle/vivliostyle.js/pull/1724)
 - [Nth page selector `:nth(An+B [of <custom-ident>])`](https://www.w3.org/TR/css-gcpm-3/#document-page-selectors)
   - `:nth(An+B of <page-type>)` is page-group-aware, matching against all active page groups on the current page. See [PR #1745](https://github.com/vivliostyle/vivliostyle.js/pull/1745)
   - Note: In multi-document publications, the `:nth(1)` matches the first page of each document, but the `:first` matches only the first page of the first document. [Issue #667](https://github.com/vivliostyle/vivliostyle.js/issues/667#issuecomment-738020563)
@@ -679,8 +679,8 @@ Note: This spec proposal is not submitted to CSS Working Group yet.
 
 Vivliostyle supports footnotes using semantic attributes on HTML elements, in addition to CSS GCPM `float: footnote` property. Footnote references and footnote content are identified by `role` attributes ([DPUB-ARIA](https://www.w3.org/TR/dpub-aria-1.1/)) or `epub:type` attributes ([EPUB 3 Structural Semantics Vocabulary](https://www.w3.org/TR/epub-ssv-11/)).
 
-- Footnote reference: `<a role="doc-noteref" href="#fn">` or `<a epub:type="noteref" href="#fn">`
-- Footnote content: `<aside role="doc-footnote" id="fn">` or `<aside epub:type="footnote" id="fn">`
+- Footnote reference: `<a role="doc-noteref" href="#fn1">1</a>` or `<a epub:type="noteref" href="#fn1">1</a>`
+- Footnote content: `<aside role="doc-footnote" id="fn1">Footnote text</aside>` or `<aside epub:type="footnote" id="fn1">Footnote text</aside>`
 
 See [Issue #1700](https://github.com/vivliostyle/vivliostyle.js/issues/1700)
 
