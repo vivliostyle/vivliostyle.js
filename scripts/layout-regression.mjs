@@ -517,6 +517,7 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
         baselineUrl,
         actualUrl,
         sourceType: "custom-url",
+        usedApprovedViewer: !!approvedViewerUrl,
       });
       if (opts.limit && rows.length >= opts.limit) {
         return rows;
@@ -594,6 +595,7 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
         file: entry.file,
         baselineUrl,
         actualUrl,
+        usedApprovedViewer: !!approvedViewerUrl,
       });
 
       if (opts.limit && rows.length >= opts.limit) {
@@ -865,12 +867,10 @@ function summarizeTriage(items, type, triageStatusMap) {
   let pending = 0;
   let triaged = 0;
   for (const item of items) {
-    const status = getTriageStatus(
-      triageStatusMap,
-      item.category,
-      item.title,
-      type,
-    );
+    // Prefer already-computed triage (may include approvedViewer drift override)
+    const status =
+      item.triage ??
+      getTriageStatus(triageStatusMap, item.category, item.title, type);
     if (status.status === "triaged") {
       triaged += 1;
     } else {
@@ -882,12 +882,10 @@ function summarizeTriage(items, type, triageStatusMap) {
 
 function withTriageInfo(items, type, triageStatusMap) {
   return items.map((item) => {
-    const triage = getTriageStatus(
-      triageStatusMap,
-      item.category,
-      item.title,
-      type,
-    );
+    // Prefer already-computed triage (may include approvedViewer drift override)
+    const triage =
+      item.triage ??
+      getTriageStatus(triageStatusMap, item.category, item.title, type);
     return {
       ...item,
       triage,
@@ -1384,12 +1382,17 @@ async function main() {
     }
 
     if (diffEntry.pageCountMismatch || diffEntry.pages.length > 0) {
-      const triage = getTriageStatus(
+      const rawTriage = getTriageStatus(
         triageStatusMap,
         diffEntry.category,
         diffEntry.title,
         "difference",
       );
+      // If compared against approvedViewer and a difference was found, canary has
+      // drifted from the approved snapshot → needs re-triage regardless of prior decision.
+      const triage = target.usedApprovedViewer
+        ? { status: "pending", decision: "" }
+        : rawTriage;
       diffEntry.triage = triage;
       differences.push(diffEntry);
       console.log(
@@ -1433,8 +1436,8 @@ async function main() {
   console.log(`Triage YAML: ${triagePath}`);
 
   const pendingTriage =
-    summarizeTriage(differences, "difference", triageStatusMap).pending +
-    summarizeTriage(errors, "error", triageStatusMap).pending;
+    differences.filter((d) => d.triage?.status === "pending").length +
+    errors.filter((e) => e.triage?.status === "pending").length;
   console.log(`${pendingTriage} entry/entries need triage (decision is empty)`);
 
   if (differences.length > 0 || errors.length > 0) {
