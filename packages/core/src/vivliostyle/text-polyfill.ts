@@ -559,18 +559,11 @@ class TextSpacingPolyfill {
         let isLastBeforeForcedLineBreak = false;
         let isLastInBlock = false;
 
-        // Check list marker with `list-style-position: outside` which should
-        // be treated like a forced line break. (Issue #1763)
-        function isOutsideListMarker(element: Element): boolean {
-          return element.classList.contains("_viv-marker-outside");
-        }
-
         function checkIfFirstAfterForcedLineBreak(
           prevP: Vtree.NodeContext,
         ): boolean {
           if (prevP.viewNode?.nodeType === Node.ELEMENT_NODE) {
-            const prevElem = prevP.viewNode as Element;
-            return prevElem.localName === "br" || isOutsideListMarker(prevElem);
+            return (prevP.viewNode as Element).localName === "br";
           }
           if (prevP.viewNode?.nodeType === Node.TEXT_NODE) {
             const prevTextNode = prevP.viewNode as Text;
@@ -594,8 +587,7 @@ class TextSpacingPolyfill {
           nextP: Vtree.NodeContext,
         ): boolean {
           if (nextP.viewNode?.nodeType === Node.ELEMENT_NODE) {
-            const nextElem = nextP.viewNode as Element;
-            return nextElem.localName === "br" || isOutsideListMarker(nextElem);
+            return (nextP.viewNode as Element).localName === "br";
           }
           if (nextP.viewNode?.nodeType === Node.TEXT_NODE) {
             const nextTextNode = nextP.viewNode as Text;

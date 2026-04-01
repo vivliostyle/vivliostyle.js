@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>::marker - block child in list item</title>
+    <style>
+      body { font-size: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>li with block child — marker should align with first line of text</h1>
+
+    <h2>disc (default)</h2>
+    <ul>
+      <li><p>Text inside p element. Marker should align with this line.</p></li>
+      <li><p>Second item.</p></li>
+      <li><p>Third item.</p></li>
+    </ul>
+
+    <h2>decimal</h2>
+    <ol>
+      <li><p>Text inside p element. Marker should align with this line.</p></li>
+      <li><p>Second item.</p></li>
+      <li><p>Third item.</p></li>
+    </ol>
+
+    <h2>inline text (reference)</h2>
+    <ul>
+      <li>Text without p element. Marker should align with this line.</li>
+      <li>Second item.</li>
+      <li>Third item.</li>
+    </ul>
+    <ol>
+      <li>Text without p element. Marker should align with this line.</li>
+      <li>Second item.</li>
+      <li>Third item.</li>
+    </ol>
+  </body>
+</html>

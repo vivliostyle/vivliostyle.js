@@ -974,6 +974,14 @@ module.exports = [
         title: "::marker pseudo-element",
       },
       {
+        file: "counter-style/marker-block-child.html",
+        title: "::marker with block child in list item (Issue #1831)",
+      },
+      {
+        file: "counter-style/marker-empty-li.html",
+        title: "::marker on empty list items",
+      },
+      {
         file: "counter-style/list-style-position.html",
         title: "list-style-position",
       },
