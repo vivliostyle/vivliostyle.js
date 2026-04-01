@@ -41,6 +41,19 @@ function cloneCounterValues(
 }
 
 /**
+ * Decode CSS string escape sequences.
+ * e.g., `\22` → `"`, `\A` → newline, `\\` → `\`
+ */
+function decodeCssString(s: string): string {
+  return s.replace(/\\([0-9a-fA-F]{1,6})\s?|\\(.)/g, (_, hex, ch) => {
+    if (hex) {
+      return String.fromCodePoint(parseInt(hex, 16));
+    }
+    return ch;
+  });
+}
+
+/**
  * Extract text content from an element for a specific pseudo-element.
  * @param element The DOM element to extract text from
  * @param pseudoElement The pseudo-element type: "content", "before", "after" or "marker"
@@ -56,6 +69,33 @@ function extractPseudoElementText(
     const pseudos = clone.querySelectorAll("[data-adapt-pseudo]");
     pseudos.forEach((pseudo) => pseudo.remove());
     return clone.textContent || "";
+  } else if (pseudoElement === "marker") {
+    // First check for traditional marker span (e.g., footnote-marker inside)
+    const pseudoElem = element.querySelector(
+      `[data-adapt-pseudo="marker"], [data-adapt-pseudo="footnote-marker"]`,
+    );
+    if (pseudoElem) {
+      return pseudoElem.textContent || "";
+    }
+    // Native ::marker: read from --viv-marker-content CSS custom property.
+    // Use getComputedStyle to capture inherited values (e.g., footnote-content
+    // inheriting from the footnote wrapper).
+    const markerContent = element.ownerDocument.defaultView
+      ?.getComputedStyle(element)
+      ?.getPropertyValue("--viv-marker-content");
+    if (markerContent) {
+      // Extract only string components from the CSS content value.
+      // e.g., url(icon.png) "1. " → "1. " (url() tokens are ignored)
+      const stringMatches = markerContent.match(
+        /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
+      );
+      if (stringMatches && stringMatches.length > 0) {
+        return stringMatches
+          .map((s) => decodeCssString(s.substring(1, s.length - 1)))
+          .join("");
+      }
+    }
+    return "";
   } else {
     // Extract ::before or ::after content
     const pseudoElem = element.querySelector(

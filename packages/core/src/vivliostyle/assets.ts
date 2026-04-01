@@ -1353,7 +1353,6 @@ m|math[display="block"] {
 /* CSS GCPM footnotes */
 ::footnote-marker {
   content: counter(footnote) ". ";
-  list-style-position: inside;
 }
 ::footnote-call {
   content: counter(footnote);
@@ -1594,37 +1593,53 @@ span[data-viv-leader] {
 }
 
 /* ::marker */
-/* Mozilla Bullet font (https://github.com/mozilla/gecko-dev/blob/master/layout/style/res/Mozilla_Bullet.woff2) */
-@font-face {
-  font-family: "-viv-moz-bullet";
-  src: url("data:font/woff2;base64,d09GMgABAAAAAAScAAsAAAAACfAAAARNAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAAhBIRCAqGMIRJATYCJAMsCxgABCAFhF4HaBsuCMgehXEsLOlXaXd7sgbPQ172fjLwdhYFM92mABaiTuRVdO5/mx9I5UJiJom3phLRQw/TSF2M/vo25+pNyWkNws81NrUDAAf0QOdfcf7nmPEyBPZtCbbZEDuosskKZG922ZhBenh05qcSXktf6s3Oy9dAkWsyDzMoM5QTKcwKNjFayUPSREGFhUMrdE8MJsH052qGcYNO3pbEaYIBoDTItIKGAqhDdKHRD0kkKg6QGSCWEfueTNr3P6OvYaIbDH/8ULEAbjQtUt+hT/qmX/SH/twwMLDqN4jxzXjy4PHtltSA6lINqkpRd7N7onVBP20y7YBWyDIHFEBjqKBFMmECfQcTZtD3MmEB/SATVtCPM2ED/TQTdtCfS0/pEsN4ySin3r8q8xHE+0D0XMg8gJi4YrNpNv3qetXuDyeo6OBNZrq5gi7ouC1zcmB2Fd+FewIhcUIfszpF1hzXhrmMCwxaznRyZjig6Y2W7+bBn2DL8fJu/2oHbWc6X80+LUTXcVzv8O3IOy4qKVyFw/DHaMtfzNQEi5gbFT/EDpiofbpkYq2dQui6WcpfxrVBEJ/KxbLA4ZroZoVx+iE+QeTIiI7oKuoUIk/a1ekEOoNFjozm0suYYUelq13/88K1c3PTH9O9Q0d5LZbu7+J2aT7XP23KyQs+34WTU7r8d/k0l6dLl98Dn+/BSUZc7U0mm7FqhSMO9EHV/j5FB4qYX4aXNaKwz/4RRfAWsW8xGW+hvr8PTAf6IP9mRpkDwwv7QFz9HRuOeGWfd8rkyYsWTVy4vpG/pgVNWzBx0aTeIgeq58XFVfZXVduwuOq51a77aT0XLVw4v1PBFjRsQzO+tVeVp3KIwqfKbd6sdjzGvFSuPMquGpMT29lkrhwbE5uz6cGHhIETB06oUk+6tHLJgfnu/3nVnJzYxiXNjQNjYqsu+vCgYKDla5uUOzTNDZg46eCBd3d3gSk9Kz/bFiv8hvOzCT5eqyjBGerT+EiG/JGqwbC+UQ6Bv9bmKGWMj8Yn+fPVRJxKBGqTFXQyM9DhHSlvEHmLVxyYjY/Fdd3hACfLyP3VVZLvVR7B0pxSsGIBqHhwT5sSMOMkRG0BJhpsWMkEO24KwE0pqp3tIYTWCIjJjuBiGNTKTj8JoBLKAn4TmPFnj9oywZwFGx4egp1g3oObeLHdwUO2pFcYTITZCa2c1GQbNg6RCsu9bpikThhAWnLaBi3LM8+5VbMU6rUn30owOC83ULcfBlClb5BBre46BinaWRal85SUvlCbUx1Nbyj2HWCxBTkEgWScQKzsTioJW0IanAYRZqET4mZLSKU2JABII9np01lQ7lOt3srtM1KAeqgQPhYJSMCZJRuAukRZB1CF35gB1MJBr4ilIPZchNyIlDkpRt+3s96cz9K8XKQvCdZfcqWxgtLoXZ2AoKAyVSRRxSRmsYjVOriP089q3z6gdMjE5KI7kzumWzpnAwAAAA==") format("woff2");
-}
-[data-adapt-pseudo="marker"],
-[data-adapt-pseudo="footnote-marker"] {
+[style*="--viv-marker-content"]::marker {
+  content: var(--viv-marker-content);
   unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
   white-space: pre;
   text-transform: none;
 }
-[data-adapt-pseudo="marker"]._viv-marker-bullet {
-  font-family: "-viv-moz-bullet";
-  font-style: normal;
-  font-weight: normal;
+/* ::footnote-marker inherits --viv-marker-content from the footnote element */
+.-vivliostyle-footnote-content::marker {
+  content: var(--viv-marker-content);
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+  text-transform: none;
 }
-[data-adapt-pseudo="marker"]._viv-marker-outside,
-[data-adapt-pseudo="footnote-marker"]._viv-marker-outside {
-  position: relative;
-  text-indent: 0;
-  line-height: 1;
+[style*="--viv-marker-color"]::marker {
+  color: var(--viv-marker-color);
 }
-[data-adapt-pseudo="marker"] > ._viv-marker-outside-content,
-[data-adapt-pseudo="footnote-marker"] > ._viv-marker-outside-content {
-  position: absolute;
-  inset-inline-end: 0;
-  inset-block-start: 0;
-  inset-block-end: 0;
-  display: flex !important;
-  align-items: center;
+[style*="--viv-marker-font-size"]::marker {
+  font-size: var(--viv-marker-font-size);
+}
+[style*="--viv-marker-font-family"]::marker {
+  font-family: var(--viv-marker-font-family);
+}
+[style*="--viv-marker-font-style"]::marker {
+  font-style: var(--viv-marker-font-style);
+}
+[style*="--viv-marker-font-weight"]::marker {
+  font-weight: var(--viv-marker-font-weight);
+}
+[style*="--viv-marker-font-variant"]::marker {
+  font-variant: var(--viv-marker-font-variant);
+}
+[style*="--viv-marker-unicode-bidi"]::marker {
+  unicode-bidi: var(--viv-marker-unicode-bidi);
+}
+[style*="--viv-marker-direction"]::marker {
+  direction: var(--viv-marker-direction);
+}
+[style*="--viv-marker-white-space"]::marker {
+  white-space: var(--viv-marker-white-space);
+}
+[style*="--viv-marker-text-transform"]::marker {
+  text-transform: var(--viv-marker-text-transform);
+}
+[style*="--viv-marker-text-combine-upright"]::marker {
+  text-combine-upright: var(--viv-marker-text-combine-upright);
 }
 
 /* initial-letter */

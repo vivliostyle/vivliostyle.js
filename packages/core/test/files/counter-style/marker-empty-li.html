@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>::marker - empty list items</title>
+    <style>
+      body {
+        font-size: 16px;
+      }
+      ol.large-image li::marker {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>')
+          " ";
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Empty list items — markers should not overlap</h1>
+
+    <h2>disc (default bullet)</h2>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+
+    <h2>decimal</h2>
+    <ol>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ol>
+
+    <h2>large image (48px)</h2>
+    <ol class="large-image">
+      <li></li>
+      <li></li>
+      <li></li>
+    </ol>
+
+    <p>In all lists above, markers of each item should appear on separate lines and not overlap each other.</p>
+  </body>
+</html>

@@ -2567,7 +2567,20 @@ export class ContentPropVisitor extends Css.FilterVisitor {
             const pseudos = getStyleMap(this.cascade.currentStyle, "_pseudos");
             const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
               ?.value;
-            stringValue = this.evaluateAndGetString(val);
+            if (val) {
+              stringValue = this.evaluateAndGetString(val);
+            } else if (pseudoName === "marker") {
+              // Native ::marker: content was extracted to --viv-marker-content
+              const markerVal = (
+                this.cascade.currentStyle[
+                  "--viv-marker-content"
+                ] as CascadeValue
+              )?.value;
+              stringValue = getStringValueFromCssContentVal(
+                markerVal,
+                this.cascade.context,
+              );
+            }
           }
         }
         break;
@@ -3680,12 +3693,52 @@ export class CascadeInstance {
             this.processPseudoelementProps(pseudoProps, element, pseudoName);
 
             if (pseudoName === "marker") {
-              // Make marker content from list-style-* properties
+              // Extract ::marker properties into CSS custom properties on the
+              // parent element, then remove the pseudo-element so the browser's
+              // native ::marker is used instead.
               this.processMarkerPseudoelementProps(
                 pseudoProps,
                 element,
                 styler,
               );
+              // Delete the pseudo to prevent fake element generation
+              delete pseudos[pseudoName];
+            } else if (pseudoName === "footnote-marker") {
+              // For ::footnote-marker, use native ::marker only when
+              // list-style-position: outside. When inside (default), use
+              // traditional marker span to support properties like
+              // vertical-align that ::marker doesn't support.
+              const fnMarkerListStylePos = (
+                pseudoProps["list-style-position"] as CascadeValue
+              )?.value;
+              if (fnMarkerListStylePos === Css.ident.outside) {
+                // Use native ::marker with CSS custom properties
+                this.processMarkerPseudoelementProps(
+                  pseudoProps,
+                  element,
+                  styler,
+                );
+                // Set display: list-item for native ::marker to work
+                this.currentStyle["display"] = new CascadeValue(
+                  Css.getName("list-item"),
+                  0,
+                );
+                this.currentStyle["list-style-position"] = new CascadeValue(
+                  Css.ident.outside,
+                  0,
+                );
+                this.currentStyle["list-style-type"] = new CascadeValue(
+                  Css.ident.none,
+                  0,
+                );
+                this.currentStyle["list-style-image"] = new CascadeValue(
+                  Css.ident.none,
+                  0,
+                );
+                // Delete the pseudo to prevent fake element generation
+                delete pseudos[pseudoName];
+              }
+              // else: keep the pseudo for traditional span-based rendering
             } else if (
               pseudoName === "first-letter" &&
               pseudoProps["initial-letter"]
@@ -3726,19 +3779,49 @@ export class CascadeInstance {
     }
   }
 
+  /**
+   * Properties that are valid on ::marker and should be extracted
+   * to CSS custom properties on the parent element.
+   */
+  static readonly markerAllowedProps: string[] = [
+    "color",
+    "font-family",
+    "font-size",
+    "font-style",
+    "font-weight",
+    "font-variant",
+    "unicode-bidi",
+    "direction",
+    "white-space",
+    "text-transform",
+    "text-combine-upright",
+  ];
+
+  /**
+   * Extract ::marker or ::footnote-marker properties into CSS custom
+   * properties (--viv-marker-*) on the parent element's currentStyle,
+   * so that the browser's native ::marker can be controlled via polyfill CSS.
+   *
+   * For ::marker: the content is resolved from list-style-type/list-style-image
+   * if not explicitly set.  For ::footnote-marker: the content comes from
+   * ::footnote-marker { content: ... } declarations.
+   */
   processMarkerPseudoelementProps(
     pseudoProps: ElementStyle,
     element: Element,
     styler: CssStyler.AbstractStyler,
   ): void {
+    const isListItem = Display.isListItem(
+      (this.currentStyle["display"] as CascadeValue)?.value,
+    );
+
+    // Resolve marker content from list-style-* if no explicit content
     if (
       !Vtree.nonTrivialContent(
         (pseudoProps["content"] as CascadeValue)?.value,
       ) &&
-      Display.isListItem((this.currentStyle["display"] as CascadeValue)?.value)
+      isListItem
     ) {
-      // If no ::marker content is specified and the element is a list-item,
-      // make content from list-style-type or list-style-image.
       const listStyleType = this.getInheritedPropertyValue(
         "list-style-type",
         styler,
@@ -3750,8 +3833,7 @@ export class CascadeInstance {
         element,
       );
       if (listStyleImage instanceof Css.URL) {
-        // list-style-image: <URL>
-        // -> content: <URL> " "
+        // list-style-image: <URL> -> content: <URL> " "
         pseudoProps["content"] = new CascadeValue(
           new Css.SpaceList([listStyleImage, new Css.Str(" ")]),
           0,
@@ -3769,19 +3851,56 @@ export class CascadeInstance {
             ?.value as Css.Num
         )?.num;
         if (listItemCount != null) {
-          pseudoProps["content"] = new CascadeValue(
-            new Css.Str(
-              this.counterStyleStore.formatMarker(
-                listStyleType.name,
-                listItemCount,
+          const lowerName = listStyleType.name.toLowerCase();
+          if (
+            lowerName === "disc" ||
+            lowerName === "circle" ||
+            lowerName === "square" ||
+            lowerName === "disclosure-open" ||
+            lowerName === "disclosure-closed"
+          ) {
+            // Bullet types: let the browser handle natively via
+            // list-style-type. Don't set --viv-marker-content.
+          } else {
+            pseudoProps["content"] = new CascadeValue(
+              new Css.Str(
+                this.counterStyleStore.formatMarker(
+                  listStyleType.name,
+                  listItemCount,
+                ),
               ),
-            ),
+              0,
+            );
+          }
+        }
+      }
+    }
+
+    // Now extract the resolved content to CSS custom property
+    const contentCasc = pseudoProps["content"] as CascadeValue;
+    if (contentCasc) {
+      const contentVal = contentCasc.value;
+      if (Vtree.nonTrivialContent(contentVal)) {
+        // Resolve any Css.Expr nodes (e.g., from counter()) to strings
+        const resolvedContent = this.resolveMarkerContentVal(contentVal);
+        this.currentStyle["--viv-marker-content"] = new CascadeValue(
+          resolvedContent,
+          0,
+        );
+      }
+    }
+
+    // Extract allowed ::marker properties to CSS custom properties
+    for (const propName of CascadeInstance.markerAllowedProps) {
+      const prop = pseudoProps[propName] as CascadeValue;
+      if (prop) {
+        const val = prop.evaluate(this.context, propName);
+        if (val && !Css.isDefaultingValue(val)) {
+          this.currentStyle[`--viv-marker-${propName}`] = new CascadeValue(
+            val,
             0,
           );
         }
-        // This is used in the marker layout processing in
-        // `PseudoelementStyler.processMarker()` in pseudo-element.ts.
-        pseudoProps["list-style-type"] = new CascadeValue(listStyleType, 0);
       }
     }
 
@@ -3792,15 +3911,39 @@ export class CascadeInstance {
         styler,
         element,
       );
-      if (listStylePosition) {
-        // This is used in the marker layout processing in
-        // `PseudoelementStyler.processMarker()` in pseudo-element.ts.
-        pseudoProps["list-style-position"] = new CascadeValue(
+      if (
+        listStylePosition &&
+        listStylePosition !== Css.ident.outside &&
+        !Css.isDefaultingValue(listStylePosition)
+      ) {
+        this.currentStyle["list-style-position"] = new CascadeValue(
           listStylePosition,
           0,
         );
       }
     }
+  }
+
+  /**
+   * Resolve Css.Expr nodes in marker content to static values.
+   * counter() functions are evaluated to strings; URLs are kept as-is.
+   */
+  private resolveMarkerContentVal(val: Css.Val): Css.Val {
+    if (val instanceof Css.Expr) {
+      const result = val.expr.evaluate(this.context);
+      if (typeof result === "string") {
+        return new Css.Str(result);
+      }
+      if (typeof result === "number") {
+        return new Css.Str(String(result));
+      }
+      return val;
+    }
+    if (val instanceof Css.SpaceList) {
+      const resolved = val.values.map((v) => this.resolveMarkerContentVal(v));
+      return new Css.SpaceList(resolved);
+    }
+    return val;
   }
 
   /**

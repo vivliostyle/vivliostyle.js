@@ -289,18 +289,13 @@ export class ViewFactory
             }
           }
         }
-        if (name === "before" || name === "after" || name === "marker") {
+        if (
+          name === "before" ||
+          name === "after" ||
+          name === "footnote-marker"
+        ) {
           const content = pseudoMap[name]["content"] as CssCascade.CascadeValue;
           if (!content || !Vtree.nonTrivialContent(content.value)) {
-            continue;
-          }
-          if (
-            name === "marker" &&
-            (!Display.isListItem(computedStyle["display"]) ||
-              // Disable ::marker for "toc-node" in the TOC box
-              CssCascade.getProp(cascStyle, "behavior")?.value ===
-                Css.getName("toc-node"))
-          ) {
             continue;
           }
         }
@@ -1142,8 +1137,15 @@ export class ViewFactory
             // Nested footnote inside a footnote area: render as a detached block
             // entry, with call marker handled separately. (Issue #1352)
             floating = false;
-            computedStyle["display"] = Css.ident.block;
+            display = computedStyle["--viv-marker-content"]
+              ? Css.getName("list-item")
+              : Css.ident.block;
+            computedStyle["display"] = display;
           } else {
+            // Footnote body in main flow (not yet in footnote area):
+            // render inline (only the call marker is visible), but keep
+            // the blockified display variable so nodeContext.inline stays
+            // false — layout needs this to collect the float properly.
             computedStyle["display"] = Css.ident.inline;
           }
         }
@@ -1183,7 +1185,11 @@ export class ViewFactory
         }
       }
       const isListItem =
-        Display.isListItem(display) && !!computedStyle["ua-list-item-count"];
+        Display.isListItem(display) &&
+        !!(
+          computedStyle["ua-list-item-count"] ||
+          computedStyle["--viv-marker-content"]
+        );
       const breakInside = computedStyle["break-inside"];
       if (
         floating ||
@@ -1441,16 +1447,21 @@ export class ViewFactory
         custom = !!this.customRenderer;
       }
       if (isListItem) {
-        // We don't use browser's list item rendering, so we change
-        // `display: list-item` to `display: block` and
-        // `display: inline list-item` to `display: inline`.
-        display = Display.isInlineLevel(display)
-          ? Css.ident.inline
-          : Css.ident.block;
-        computedStyle["display"] = display;
+        // Keep display: list-item so the browser's native ::marker is used.
         if (firstTime) {
           tag = "li";
+          if (computedStyle["--viv-marker-content"]) {
+            // We control marker content via --viv-marker-content CSS custom
+            // property, so suppress the browser's default marker.
+            computedStyle["list-style-type"] = Css.ident.none;
+            computedStyle["list-style-image"] = Css.ident.none;
+          }
         } else {
+          // Subsequent fragments: no marker
+          display = Display.isInlineLevel(display)
+            ? Css.ident.inline
+            : Css.ident.block;
+          computedStyle["display"] = display;
           tag = "div";
         }
       } else if (tag == "body" || tag == "li") {
@@ -1777,11 +1788,22 @@ export class ViewFactory
           }
         }
         delete computedStyle["content"];
-        const listStyleImage = computedStyle["list-style-image"];
-        if (listStyleImage && listStyleImage instanceof Css.URL) {
-          const listStyleURL = (listStyleImage as Css.URL).url;
-          fetchers.push(Net.loadElement(new Image(), listStyleURL));
+
+        // Preload marker images referenced via --viv-marker-content so that
+        // pagination waits for them, avoiding late reflow.
+        const markerContent = computedStyle["--viv-marker-content"];
+        if (markerContent) {
+          const markerValues =
+            markerContent instanceof Css.SpaceList
+              ? markerContent.values
+              : [markerContent];
+          for (const v of markerValues) {
+            if (v instanceof Css.URL && v.url) {
+              fetchers.push(Net.loadElement(new Image(), v.url));
+            }
+          }
         }
+
         this.preprocessElementStyle(computedStyle);
         this.applyComputedStyles(result, computedStyle);
 
@@ -1835,25 +1857,11 @@ export class ViewFactory
           }
         }
         if (isListItem) {
-          result.setAttribute(
-            "value",
-            computedStyle["ua-list-item-count"].stringValue(),
-          );
-        }
-        if (result.classList.contains("_viv-marker-outside-content")) {
-          // Adjust marker position for outside markers
-          if (Display.isListItem(this.nodeContext.parent?.parent?.display)) {
-            const style = this.viewport.window.getComputedStyle(
-              this.nodeContext.parent.parent.viewNode as Element,
+          if (computedStyle["ua-list-item-count"]) {
+            result.setAttribute(
+              "value",
+              computedStyle["ua-list-item-count"].stringValue(),
             );
-            const markerOffset =
-              parseFloat(style.borderInlineStartWidth) +
-              parseFloat(style.paddingInlineStart) +
-              parseFloat(style.textIndent);
-            if (markerOffset) {
-              (result as HTMLElement).style.insetInlineEnd =
-                `${markerOffset}px`;
-            }
           }
         }
 
