@@ -28,6 +28,18 @@
       ol.list-style-image {
         list-style-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>');
       }
+
+      ol.marker-large-font li::marker {
+        font-size: 2em;
+      }
+
+      ol.marker-large-image li::marker {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>')
+          " ";
+      }
+      ol.list-style-large-image {
+        list-style-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48"><path d="M50,3l12,36h38l-30,22l11,36l-31-21l-31,21l11-36l-30-22h38z" fill="%23FF0" stroke="%2300F" stroke-width="10"/></svg>');
+      }
     </style>
   </head>
   <body>
@@ -84,6 +96,37 @@
     <p>
       These three lists above should look the same except the first one has no
       space between the image and the text.
+    </p>
+
+    <h2>with large font-size</h2>
+    <pre>li::marker { font-size: 2em; }</pre>
+    <ol class="marker-large-font">
+      <li>One — markerのfont-sizeが2emでも行間が適切に広がること</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <p>
+      Each list item above should have enough line height to accommodate the
+      enlarged marker. The marker and the list item text should not overlap.
+    </p>
+
+    <h2>with large image</h2>
+    <pre>li::marker { content: url(… width="48") " "; }</pre>
+    <ol class="marker-large-image">
+      <li>One — markerの画像が大きくても前の行と重ならないこと</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <pre>ol { list-style-image: url(… width="48"); }</pre>
+    <ol class="list-style-large-image">
+      <li>One — markerの画像が大きくても前の行と重ならないこと</li>
+      <li>Two</li>
+      <li>Three</li>
+    </ol>
+    <p>
+      In the lists above, the large (48px) star image marker should not overlap
+      with the preceding line. Each item's line box should be tall enough to
+      contain the image.
     </p>
   </body>
 </html>
