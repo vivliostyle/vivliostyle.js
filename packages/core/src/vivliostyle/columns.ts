@@ -363,12 +363,15 @@ function isLastColumnLongerThanAnyOtherColumn(
   const lastColumnBlockSize = columns[columns.length - 1].computedBlockSize;
   const otherColumns = columns.slice(0, columns.length - 1);
 
-  // The computedBlockSize of the last column may be a little larger than
-  // the others even though columns are balanced, because of the issue
-  // that only the last column's computedBlockSize includes the last
-  // half-leading space.
-  // To work around this, we add an error margin to the other columns.
-  const errorMargin = 6;
+  // When a column is broken mid-paragraph, its computedBlockSize is measured
+  // from line content-area edges (excluding trailing half-leading). But the
+  // last column, where a paragraph ends naturally, includes the trailing
+  // half-leading. This causes a discrepancy of up to half the line-height
+  // between columns with the same number of lines.
+  // Use the line stride (≈ line-height) from broken columns to compute a
+  // proper error margin. (Issue #1828)
+  const maxLineStride = Math.max(...columns.map((c) => c.lastLineStride || 0));
+  const errorMargin = maxLineStride > 0 ? maxLineStride / 2 : 6;
   return otherColumns.every(
     (c) => lastColumnBlockSize > c.computedBlockSize + errorMargin,
   );

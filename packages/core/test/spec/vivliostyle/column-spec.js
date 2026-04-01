@@ -60,6 +60,7 @@ describe("column", function () {
     return {
       element: { parentNode: parentNode },
       computedBlockSize: computedBlockSize || 1000,
+      lastLineStride: 0,
       getMaxBlockSizeOfPageFloats: jasmine
         .createSpy("getMaxBlockSizeOfPageFloats")
         .and.returnValue(pageFloatBlockSize || 0),
@@ -235,6 +236,35 @@ describe("column", function () {
         };
 
         expect(balancer.calculatePenalty(layoutResult)).toBe(800);
+      });
+
+      it("does not return Infinity when last column exceeds others by half-leading within line stride margin", function () {
+        var balancer = createBalancer(2, false);
+        spyOn(balancer, "checkPosition").and.returnValue(true);
+        // Simulate: col0 broken mid-paragraph (384px, excludes trailing
+        // half-leading), col1 ends naturally (400px, includes half-leading).
+        // With line-height=50, the half-leading is 17px, so 400-384=16 < 25.
+        var layoutResult = {
+          columns: [384, 400].map(createDummyColumn),
+          position: {},
+        };
+        // Set lastLineStride (≈ line-height) on the broken column
+        layoutResult.columns[0].lastLineStride = 50;
+
+        expect(balancer.calculatePenalty(layoutResult)).toBe(400);
+      });
+
+      it("returns Infinity when last column genuinely exceeds others beyond half line stride", function () {
+        var balancer = createBalancer(2, false);
+        spyOn(balancer, "checkPosition").and.returnValue(true);
+        // col0=350, col1=400 → diff=50 > 50/2=25 → last column is genuinely longer
+        var layoutResult = {
+          columns: [350, 400].map(createDummyColumn),
+          position: {},
+        };
+        layoutResult.columns[0].lastLineStride = 50;
+
+        expect(balancer.calculatePenalty(layoutResult)).toBe(Infinity);
       });
     });
 
