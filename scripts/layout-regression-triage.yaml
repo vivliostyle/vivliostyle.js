@@ -1,3 +1,106 @@
+- id: "0016"
+  category: General
+  title: Relative positioning columns
+  file: relative_positioning_columns.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/relative_positioning_columns.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/relative_positioning_columns.html&zoom=1&spread=false
+  diffPages:
+    - 2
+- id: "0147"
+  category: Multi-column
+  title: "Multi-column text and page block-end float (Issue #1826)"
+  file: multi-column/multicol-page-block-end-float.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/multicol-page-block-end-float.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/multicol-page-block-end-float.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+- id: "0166"
+  category: Page floats
+  title: "'Column' page floats"
+  file: page_floats/column_page_floats.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1797-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+- id: "0168"
+  category: Page floats
+  title: "'Column' page floats (vertical writing-mode)"
+  file: page_floats/column_page_floats_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1797-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_vertical.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+- id: "0171"
+  category: Page floats
+  title: "'Region' page floats with exclusions (vertical writing-mode)"
+  file: page_floats/region_page_floats_with_exclusions_vertical.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1797-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+- id: "0188"
+  category: Page floats
+  title: Floats deferred by larger floats
+  file: page_floats/floats_deferred_by_larger_floats.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/floats_deferred_by_larger_floats.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1797-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/floats_deferred_by_larger_floats.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+    - 3
+    - 4
 - category: General
   title: image-resolution
   file: image-resolution.html
@@ -773,54 +876,6 @@
   diffPages:
     - 2
 - category: Page floats
-  title: "'Column' page floats"
-  file: page_floats/column_page_floats.html
-  type: difference
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle-git-fix-issue1775-vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats.html
-  diffPages:
-    - 1
-    - 2
-- category: Page floats
-  title: "'Column' page floats (vertical writing-mode)"
-  file: page_floats/column_page_floats_vertical.html
-  type: difference
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column_page_floats_vertical.html
-  diffPages:
-    - 1
-    - 2
-- category: Page floats
-  title: "'Region' page floats with exclusions (vertical writing-mode)"
-  file: page_floats/region_page_floats_with_exclusions_vertical.html
-  type: difference
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/region_page_floats_with_exclusions_vertical.html
-  diffPages:
-    - 1
-    - 2
-- category: Page floats
   title: "'Column' page floats with exclusions"
   file: page_floats/column_page_floats_with_exclusions.html
   type: difference
@@ -865,24 +920,6 @@
     https://vivliostyle-git-fix-issue1786a-vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/multiple_kind_of_page_floats_vertical.html
   diffPages:
     - 2
-- category: Page floats
-  title: Floats deferred by larger floats
-  file: page_floats/floats_deferred_by_larger_floats.html
-  type: difference
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1797  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/floats_deferred_by_larger_floats.html
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/floats_deferred_by_larger_floats.html
-  diffPages:
-    - 1
-    - 2
-    - 3
-    - 4
 - category: Page floats
   title: column-span on page floats
   file: page_floats/column-span_on_page_floats.html
