@@ -169,6 +169,7 @@ export namespace Layout {
     pseudoParent: Column;
     nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null;
     blockDistanceToBlockEndFloats: number;
+    lastLineStride: number;
     computedBlockSize: number;
 
     layoutContext: Vtree.LayoutContext;

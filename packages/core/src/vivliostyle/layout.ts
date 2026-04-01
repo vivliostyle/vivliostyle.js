@@ -448,6 +448,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null =
     null;
   blockDistanceToBlockEndFloats: number = NaN;
+  lastLineStride: number = 0;
   breakAtTheEdgeBeforeFloat: string | null = null;
 
   constructor(
@@ -2770,6 +2771,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       this.computedBlockSize =
         dir * (edge - this.beforeEdge) + repetitiveElementsOffset;
+      // Store line stride for column balancing half-leading correction.
+      // Use the stride around the actual break line instead of always
+      // assuming the first two lines have the representative stride.
+      if (linePositions.length >= 2) {
+        const strideIndex = Math.max(
+          1,
+          Math.min(lineIndex - 1, linePositions.length - 1),
+        );
+        this.lastLineStride = Math.abs(
+          linePositions[strideIndex] - linePositions[strideIndex - 1],
+        );
+      }
     }
     return nodeContext;
   }
@@ -3982,6 +3995,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.overflown = false;
     this.pageBreakType = null;
     this.lastAfterPosition = null;
+    this.lastLineStride = 0;
   }
 
   /**
@@ -4596,6 +4610,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   private initialPageBreakType: string | null = null;
   initialComputedBlockSize: number = 0;
   private initialOverflown: boolean = false;
+  private initialLastLineStride: number = 0;
   context: { overflownNodeContext: Vtree.NodeContext } = {
     overflownNodeContext: null,
   };
@@ -4645,6 +4660,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     this.initialPageBreakType = column.pageBreakType;
     this.initialComputedBlockSize = column.computedBlockSize;
     this.initialOverflown = column.overflown;
+    this.initialLastLineStride = column.lastLineStride;
   }
 
   override restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
@@ -4652,6 +4668,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     column.pageBreakType = this.initialPageBreakType;
     column.computedBlockSize = this.initialComputedBlockSize;
     column.overflown = this.initialOverflown;
+    column.lastLineStride = this.initialLastLineStride;
   }
 }
 
