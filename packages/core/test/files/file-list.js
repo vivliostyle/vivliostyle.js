@@ -388,6 +388,10 @@ module.exports = [
         ],
         title: "Page Groups across concatenated docs with boundary blank page",
       },
+      {
+        file: "named-pages/page-child-element.html",
+        title: "Named Page on Child Element with Running Element (Issue #1833)",
+      },
     ],
   },
   {

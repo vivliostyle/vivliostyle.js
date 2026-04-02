@@ -3329,6 +3329,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // Ignorable text content, skip
                 break;
               }
+              // Text inside out-of-flow elements (e.g. position:running()
+              // rendered as position:fixed) should not be treated as
+              // in-flow content for break detection. (Issue #1833)
+              let hasOutOfFlowAncestor = false;
+              for (let nc = nodeContext; nc; nc = nc.parent) {
+                if (nc.viewNode && LayoutHelper.isOutOfFlow(nc.viewNode)) {
+                  hasOutOfFlowAncestor = true;
+                  break;
+                }
+              }
+              if (hasOutOfFlowAncestor) {
+                break;
+              }
               if (!nodeContext.after) {
                 // Leading edge of non-empty block -> finished going through
                 // all starting edges of the box
@@ -3538,6 +3551,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
               // Trailing edge
               if (onStartEdges) {
+                // Out-of-flow elements (e.g. position:running() rendered as
+                // position:fixed) should not end the leading edge sequence.
+                // Their trailing edges must not reset leadingEdge, otherwise
+                // the next in-flow element's forced break would be incorrectly
+                // treated as a mid-page break. (Issue #1833)
+                if (LayoutHelper.isCssOutOfFlow(nodeContext.viewNode)) {
+                  break;
+                }
                 // finished going through all starting edges of the box.
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
