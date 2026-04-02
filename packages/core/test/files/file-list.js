@@ -795,6 +795,10 @@ module.exports = [
         title: "Footnote call/marker counter styles",
       },
       {
+        file: "footnotes/footnote-display.html",
+        title: "footnote-display (Issue #1825)",
+      },
+      {
         file: "footnotes/footnotes-in-table.html",
         title: "Footnotes in table (Issue #438)",
       },

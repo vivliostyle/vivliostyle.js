@@ -30,6 +30,7 @@ import * as Logging from "./logging";
 import * as Diff from "./diff";
 import * as Base from "./base";
 import * as BreakPosition from "./break-position";
+import * as CssCascade from "./css-cascade";
 import * as Css from "./css";
 import * as GeometryUtil from "./geometry-util";
 import * as LayoutHelper from "./layout-helper";
@@ -1711,6 +1712,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         .then(() => {
           if (!failed) {
             Asserts.assert(floatArea);
+            if (floatArea.isFootnote) {
+              floatArea.applyCompactFootnoteDisplay();
+            }
             const logicalFloatSide = context.setFloatAreaDimensions(
               floatArea,
               firstFloat.floatReference,
@@ -4875,5 +4879,115 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         return this.vertical ? margin.left : margin.bottom;
       }),
     );
+  }
+
+  applyCompactFootnoteDisplay(): void {
+    const viewFactory = this.layoutContext as Vgen.ViewFactory | undefined;
+    const styler = viewFactory?.styler;
+    const xmldoc = viewFactory?.xmldoc;
+    const compactFootnotes = this.rootViewNodes.filter((node) => {
+      const offset = node.getAttribute(Base.ELEMENT_OFFSET_ATTR);
+      if (!offset || !styler || !xmldoc) {
+        return false;
+      }
+      const sourceNode = xmldoc.getNodeByOffset(parseInt(offset, 10));
+      if (!sourceNode || sourceNode.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+      }
+      const style = styler.getStyle(sourceNode as Element, false);
+      const footnoteDisplay = CssCascade.getProp(
+        style,
+        "footnote-display",
+      )?.value?.toString();
+      const usesOutsideFootnoteMarker = !!CssCascade.getProp(
+        style,
+        "--viv-marker-content",
+      )?.value;
+      return footnoteDisplay === "compact" && !usesOutsideFootnoteMarker;
+    }) as HTMLElement[];
+    if (compactFootnotes.length === 0) {
+      this.updateInlineFootnoteSeparators();
+      this.updateComputedBlockSizeForFootnoteArea();
+      return;
+    }
+
+    const areaRect = this.element.getBoundingClientRect();
+    const availableMeasure = this.vertical ? areaRect.height : areaRect.width;
+    compactFootnotes.forEach((footnote) => {
+      Base.setCSSProperty(footnote, "display", "inline");
+      footnote.style.setProperty("--viv-footnote-white-space", "nowrap");
+    });
+
+    const tolerance = 1.5 / (this.clientLayout.pixelRatio || 1);
+    const measureCompactInlineSize = (element: HTMLElement): number => {
+      const clone = element.cloneNode(true) as HTMLElement;
+      clone.style.removeProperty("--viv-footnote-inline-separator");
+      Base.setCSSProperty(clone, "display", "inline-block");
+      Base.setCSSProperty(clone, "position", "absolute");
+      Base.setCSSProperty(clone, "visibility", "hidden");
+      Base.setCSSProperty(clone, "white-space", "nowrap");
+      Base.setCSSProperty(clone, "max-width", "none");
+      Base.setCSSProperty(clone, "left", "0");
+      Base.setCSSProperty(clone, "top", "0");
+      this.element.appendChild(clone);
+      const rect = clone.getBoundingClientRect();
+      this.element.removeChild(clone);
+      return this.vertical ? rect.height : rect.width;
+    };
+
+    compactFootnotes.forEach((footnote) => {
+      if (measureCompactInlineSize(footnote) > availableMeasure + tolerance) {
+        Base.setCSSProperty(footnote, "display", "block");
+        footnote.style.removeProperty("--viv-footnote-white-space");
+      }
+    });
+
+    this.updateInlineFootnoteSeparators();
+    this.updateComputedBlockSizeForFootnoteArea();
+  }
+
+  private updateComputedBlockSizeForFootnoteArea(): void {
+    if (this.rootViewNodes.length === 0) {
+      this.computedBlockSize = 0;
+      return;
+    }
+
+    const dir = this.getBoxDir();
+    this.computedBlockSize = Math.max(
+      0,
+      ...this.rootViewNodes.map((node) => {
+        const box = LayoutHelper.getElementClientRectAdjusted(
+          this.clientLayout,
+          node,
+          this.vertical,
+        );
+        const margin = this.getComputedMargin(node);
+        const marginAfter = this.vertical ? margin.left : margin.bottom;
+        return (
+          dir * (this.getAfterEdge(box) - this.beforeEdge) +
+          Math.max(0, marginAfter)
+        );
+      }),
+    );
+  }
+
+  private updateInlineFootnoteSeparators(): void {
+    this.rootViewNodes.forEach((node, index) => {
+      const element = node as HTMLElement;
+      const display =
+        element.ownerDocument.defaultView?.getComputedStyle(element).display;
+      const nextElement = this.rootViewNodes[index + 1] as
+        | HTMLElement
+        | undefined;
+      const nextDisplay =
+        nextElement?.ownerDocument.defaultView?.getComputedStyle(
+          nextElement,
+        ).display;
+      if (display === "inline" && nextDisplay === "inline") {
+        element.style.setProperty("--viv-footnote-inline-separator", '" "');
+      } else {
+        element.style.removeProperty("--viv-footnote-inline-separator");
+      }
+    });
   }
 }

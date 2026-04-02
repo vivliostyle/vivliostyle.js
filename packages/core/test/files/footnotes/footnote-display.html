@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>footnote-display</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 16mm;
+
+        @bottom-center {
+          font-size: 0.85rem;
+          content: "Page " counter(page);
+        }
+      }
+
+      body {
+        font-family: serif;
+        line-height: 1.4;
+      }
+
+      section {
+        margin-block: 0 1.4rem;
+      }
+
+      h1 {
+        margin-bottom: 0.5rem;
+      }
+
+      h2 {
+        margin-bottom: 0.3rem;
+      }
+
+      p {
+        margin: 0.35rem 0;
+      }
+
+      .keep-together {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .expected {
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+
+      .footnote {
+        float: footnote;
+        font-size: 0.85rem;
+      }
+
+      .footnote-display-block {
+        color: #800;
+      }
+
+      .footnote-display-block .footnote {
+        footnote-display: block;
+      }
+
+      .footnote-display-inline {
+        color: #080;
+      }
+
+      .footnote-display-inline .footnote {
+        footnote-display: inline;
+      }
+
+      .footnote-display-compact {
+        color: #008;
+      }
+
+      .footnote-display-compact .footnote {
+        footnote-display: compact;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>footnote-display test</h1>
+    <section class="footnote-display-block">
+      <h2>footnote-display: block</h2>
+      <p class="expected">
+        Each footnote body should start on its own line in the footnote area.
+      </p>
+      <p>
+        Block footnotes remain separated<span class="footnote">First block note.</span>
+        even when the note text is short<span class="footnote">Second block note.</span>
+        and could otherwise fit beside another note<span class="footnote">Third block note with a little more text.</span>.
+      </p>
+    </section>
+    <section class="footnote-display-inline">
+      <h2>footnote-display: inline</h2>
+      <p class="expected">
+        Inline footnotes should stay in one inline run even when a longer note wraps, with a normal space between note bodies.
+      </p>
+      <p>
+        Inline footnotes should begin as a loose run of notes<span class="footnote">Short inline note.</span>
+        and then continue through a longer inline note that wraps to the next line in the footnote area<span class="footnote">A longer inline note that should wrap to another line so the example shows that inline footnotes still remain part of one inline sequence after wrapping.</span>
+        before a trailing short note carries on inline rather than becoming a separate block<span class="footnote">Trailing inline note.</span>.
+      </p>
+    </section>
+    <section class="footnote-display-compact">
+      <h2>footnote-display: compact</h2>
+      <p class="expected">
+        Compact footnotes should behave like unbreakable inline notes by default, and only fall back to block when a single note cannot fit on one rendered line.
+      </p>
+      <p class="keep-together">
+        Four short compact notes should wrap as inline nowrap units<span class="footnote">Short compact note.</span>
+        with the next short compact note still on that first line<span class="footnote">Another short compact note.</span>
+        and then continue on the next line with another short compact note<span class="footnote">Another short compact note.</span>
+        plus one more short compact note on that same following line<span class="footnote">Short compact note.</span>.
+      </p>
+      <p>
+        A compact note that is too long to fit as a single unbroken inline note should fall back to block<span class="footnote">A medium-length compact note that is long enough that keeping it as a single unbroken inline note would overflow the footnote measure, so it should become a block footnote.</span>
+        while the following short compact notes can still share a later line inline<span class="footnote">Short compact note.</span>
+        and continue with another short compact note on that same line<span class="footnote">Another short note.</span>
+        before a final longer compact note falls back to block again<span class="footnote">A longer trailing compact note that no longer fits as a single unbroken inline note.</span>.
+      </p>
+    </section>
+  </body>
+</html>

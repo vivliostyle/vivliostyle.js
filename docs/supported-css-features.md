@@ -331,6 +331,8 @@ See also: [At-rules in CSS Paged Media 3](#css-paged-media-3)
 
 - [string-set (Named Strings)](https://www.w3.org/TR/css-gcpm-3/#setting-named-strings-the-string-set-pro)
 - [position: running() (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#running-elements)
+- [footnote-display](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display)
+  - Supports [`block`, `inline`, `compact`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display) values.
 - [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
   - Supports [`auto`, `line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) values.
 
