@@ -653,6 +653,7 @@ background-blend-mode = COMMA( BLEND_MODE+ );
 
 /* CSS GCPM */
 string-set = COMMA( SPACE( IDENT CONTENT_LIST )+ | none );
+footnote-display = block | inline | compact;
 footnote-policy = auto | line;
 
 /* CSS Repeated Headers and Footers */
@@ -1607,6 +1608,13 @@ span[data-viv-leader] {
   font-variant-numeric: tabular-nums;
   white-space: pre;
   text-transform: none;
+}
+[style*="--viv-footnote-inline-separator"]::after {
+  content: var(--viv-footnote-inline-separator);
+  white-space: normal;
+}
+[style*="--viv-footnote-white-space"] {
+  white-space: var(--viv-footnote-white-space);
 }
 [style*="--viv-marker-color"]::marker {
   color: var(--viv-marker-color);

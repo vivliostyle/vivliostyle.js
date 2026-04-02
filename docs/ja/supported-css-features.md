@@ -331,6 +331,8 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 
 - [string-set（名前付き文字列）](https://www.w3.org/TR/css-gcpm-3/#setting-named-strings-the-string-set-pro)
 - [position: running()（ランニング要素）](https://www.w3.org/TR/css-gcpm-3/#running-elements)
+- [footnote-display](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display)
+  - [`block`、`inline`、`compact`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display) 値をサポートします。
 - [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
   - [`auto`、`line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) 値をサポートします。
 

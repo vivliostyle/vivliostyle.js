@@ -1109,6 +1109,13 @@ export class ViewFactory
         floatSide = null;
         clearSide = null;
       }
+      let footnoteDisplay: Css.Val | null = null;
+      let usesOutsideFootnoteMarker = false;
+      const isFootnoteBodyInFootnoteArea =
+        this.isFootnote &&
+        (!this.nodeContext?.parent ||
+          this.nodeContext.pluginProps["nestedFootnoteDetached"]);
+
       let floating =
         floatSide instanceof Css.SpaceList ||
         floatSide === Css.ident.left ||
@@ -1128,18 +1135,19 @@ export class ViewFactory
         // Don't want to set it in view DOM CSS.
         delete computedStyle["float"];
         if (floatSide === Css.ident.footnote) {
-          if (
-            this.isFootnote &&
-            (!this.nodeContext?.parent ||
-              this.nodeContext.pluginProps["nestedFootnoteDetached"])
-          ) {
+          footnoteDisplay = computedStyle["footnote-display"];
+          usesOutsideFootnoteMarker = !!computedStyle["--viv-marker-content"];
+          if (isFootnoteBodyInFootnoteArea) {
             // Root of the footnote body being rendered in footnote area.
             // Nested footnote inside a footnote area: render as a detached block
             // entry, with call marker handled separately. (Issue #1352)
             floating = false;
-            display = computedStyle["--viv-marker-content"]
+            const footnoteDisplayName = footnoteDisplay?.toString();
+            display = usesOutsideFootnoteMarker
               ? Css.getName("list-item")
-              : Css.ident.block;
+              : footnoteDisplayName === "inline"
+                ? Css.ident.inline
+                : Css.ident.block;
             computedStyle["display"] = display;
           } else {
             // Footnote body in main flow (not yet in footnote area):
@@ -3528,6 +3536,7 @@ export const propertiesNotPassedToDOM = {
   "flow-linger": true,
   "flow-options": true,
   "flow-priority": true,
+  "footnote-display": true,
   "footnote-policy": true,
   "margin-break": true,
   page: true,
