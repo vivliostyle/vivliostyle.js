@@ -843,6 +843,24 @@ export class StyleInstance
       : startElement;
   }
 
+  /**
+   * Resolve the page type for the first page by examining the first in-flow
+   * element's CSS `page` property. This is needed because `currentPageType`
+   * is only set during layout (in ViewFactory), but the first page's type
+   * must be known before layout begins for correct @page rule matching.
+   */
+  private resolveFirstPageType(): string | null {
+    const firstElement = this.getFirstDocumentFlowElement();
+    if (!firstElement) {
+      return null;
+    }
+    const pageType = this.getPageGroupPageType(firstElement);
+    if (pageType) {
+      this.styler.cascade.currentPageType = pageType;
+    }
+    return pageType;
+  }
+
   private shouldStartPageGroup(
     element: Element,
     pageType: string,
@@ -2403,7 +2421,9 @@ export class StyleInstance
       page.pageType =
         (page.isBlankPage
           ? this.styler.cascade.previousPageType
-          : this.styler.cascade.currentPageType) ?? "";
+          : this.styler.cascade.currentPageType) ??
+        (cp.page === 1 ? this.resolveFirstPageType() : null) ??
+        "";
       // Fix for issue #1309
       this.styler.cascade.previousPageType =
         this.styler.cascade.currentPageType;

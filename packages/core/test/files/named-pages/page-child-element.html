@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Named Page on Child Element with Running Element</title>
+    <style>
+      @page {
+        size: 18cm 18cm;
+        margin: 2cm;
+        border: 2px dotted;
+        @top-center {
+          content: "default page";
+        }
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      @page content {
+        margin: 3cm 2cm;
+        border-style: dashed;
+        @top-center {
+          content: element(runHeader);
+        }
+        @bottom-center {
+          content: "content page " counter(page);
+        }
+      }
+      .running {
+        position: running(runHeader);
+      }
+      .content {
+        page: content;
+      }
+      body {
+        margin: 0;
+      }
+      .test {
+        border: 4px outset gray;
+        padding: 4px;
+        margin: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="running"><strong>Running Header</strong></div>
+    <div class="test content">
+      <p>This text is rendered on a 'content' page.</p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit,
+        esse facilis. Ut, illum, totam voluptatum dolorum neque commodi eum amet
+        eligendi sequi ad facilis quasi. Ipsam illo neque sunt corporis.
+      </p>
+      <p>
+        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure
+        cupiditate numquam enim hic sequi commodi, maxime quia nam illum ullam
+        perspiciatis maiores laudantium voluptas minima officiis error, quas qui
+        tenetur!
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Possimus quod
+        quisquam, recusandae porro dolorem eaque laborum nam quam provident quos
+        corrupti voluptatem ducimus quasi odit nihil autem officia sequi.
+        Molestias.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque tenetur
+        eum necessitatibus provident, voluptatem ullam sequi iste aut ipsam
+        nostrum esse ad enim porro, inventore placeat maiores numquam corporis
+        animi.
+      </p>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Error quas eos
+        dicta quidem modi dolores aperiam numquam omnis laborum voluptas
+        corporis tempore porro, illum tempora illo facilis odit! Harum, labore.
+      </p>
+    </div>
+  </body>
+</html>
