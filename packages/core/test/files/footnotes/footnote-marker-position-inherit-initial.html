@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>::footnote-marker with list-style-position inherit and initial</title>
+<style>
+@page {
+  size: A5;
+  margin: 20mm;
+
+  @bottom-center {
+    content: "Page " counter(page);
+  }
+}
+
+.footnote {
+  float: footnote;
+}
+
+.inherit .footnote::footnote-marker {
+  list-style-position: inherit;
+}
+
+.initial .footnote::footnote-marker {
+  list-style-position: initial;
+}
+
+.list-style-outside {
+  list-style-position: outside;
+  color: #800;
+}
+
+.list-style-inside {
+  list-style-position: inside;
+  color: #080;
+}
+</style>
+</head>
+<body>
+<h1>::footnote-marker with list-style-position inherit and initial</h1>
+
+<section class="list-style-outside inherit">
+  <h2>inherit from outside list</h2>
+  <p>Paragraph one.<span class="footnote">Footnote for paragraph one.</span></p>
+  <ol>
+    <li>List item one<span class="footnote">Footnote for list item one.</span></li>
+    <li>List item two<span class="footnote">Footnote for list item two. This marker should be outside.</span></li>
+  </ol>
+</section>
+
+<section class="list-style-inside inherit">
+  <h2>inherit from inside list</h2>
+  <p>Paragraph one.<span class="footnote">Footnote for paragraph one.</span></p>
+  <ol>
+    <li>List item one<span class="footnote">Footnote for list item one.</span></li>
+    <li>List item two<span class="footnote">Footnote for list item two. This marker should stay inside.</span></li>
+  </ol>
+</section>
+
+<section class="list-style-outside initial">
+  <h2>initial should be outside</h2>
+  <p>Paragraph one.<span class="footnote">Footnote for paragraph one.</span></p>
+  <ol>
+    <li>List item one<span class="footnote">Footnote for list item one.</span></li>
+    <li>List item two<span class="footnote">Footnote for list item two. This marker should be outside because initial value is outside.</span></li>
+  </ol>
+</section>
+</body>
+</html>

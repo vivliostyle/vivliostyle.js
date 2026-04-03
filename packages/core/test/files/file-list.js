@@ -863,6 +863,16 @@ module.exports = [
         title:
           "::footnote-marker with list-style-position: outside (Issue #1702)",
       },
+      {
+        file: "footnotes/footnote-in-list-item.html",
+        title:
+          "Footnote in list item should not inherit list marker (Issue #1838)",
+      },
+      {
+        file: "footnotes/footnote-marker-position-inherit-initial.html",
+        title:
+          "::footnote-marker list-style-position inherit/initial (Issue #1838)",
+      },
     ],
   },
   {

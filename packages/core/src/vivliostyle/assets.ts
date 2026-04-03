@@ -1354,6 +1354,7 @@ m|math[display="block"] {
 /* CSS GCPM footnotes */
 ::footnote-marker {
   content: counter(footnote) ". ";
+  list-style-position: inside;
 }
 ::footnote-call {
   content: counter(footnote);

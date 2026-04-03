@@ -3708,9 +3708,13 @@ export class CascadeInstance {
               // list-style-position: outside. When inside (default), use
               // traditional marker span to support properties like
               // vertical-align that ::marker doesn't support.
-              const fnMarkerListStylePos = (
-                pseudoProps["list-style-position"] as CascadeValue
-              )?.value;
+              const fnMarkerListStylePos =
+                this.resolvePseudoelementInheritedPropertyValue(
+                  pseudoProps,
+                  "list-style-position",
+                  styler,
+                  element,
+                );
               if (fnMarkerListStylePos === Css.ident.outside) {
                 // Use native ::marker with CSS custom properties
                 this.processMarkerPseudoelementProps(
@@ -3982,6 +3986,34 @@ export class CascadeInstance {
       styler as AbstractStyler & { validatorSet: CssValidator.ValidatorSet }
     ).validatorSet;
     return validatorSet?.defaultValues[propName] ?? null;
+  }
+
+  resolvePseudoelementInheritedPropertyValue(
+    pseudoProps: ElementStyle,
+    propName: string,
+    styler: CssStyler.AbstractStyler,
+    element: Element,
+  ): Css.Val | null {
+    const prop = pseudoProps[propName] as CascadeValue;
+    if (prop) {
+      const val = prop.evaluate(this.context, propName);
+      if (
+        val !== Css.ident.inherit &&
+        val !== Css.ident.unset &&
+        val !== Css.ident.revert
+      ) {
+        if (val === Css.ident.initial) {
+          const validatorSet = (
+            styler as AbstractStyler & {
+              validatorSet: CssValidator.ValidatorSet;
+            }
+          ).validatorSet;
+          return validatorSet?.defaultValues[propName] ?? null;
+        }
+        return val;
+      }
+    }
+    return this.getInheritedPropertyValue(propName, styler, element);
   }
 
   private applyAttrFilterInner(

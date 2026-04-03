@@ -645,6 +645,14 @@ export class ViewFactory
     let node = this.nodeContext.sourceNode;
     const styles = [];
     let lang: string | null = null;
+    const isFootnoteContentInclude =
+      node instanceof Element &&
+      node.namespaceURI === Base.NS.SHADOW &&
+      node.localName === "include" &&
+      node.classList.contains("-vivliostyle-footnote-content");
+    const shouldSkipAncestorMarkerProps =
+      this.isFootnote &&
+      (!this.nodeContext?.parent || isFootnoteContentInclude);
 
     // TODO: this is hacky. We need to recover the path through the shadow
     // trees, but we do not have the full shadow tree structure at this point.
@@ -775,6 +783,13 @@ export class ViewFactory
       let lineHeight: Css.Val;
 
       for (const name of propList) {
+        if (
+          i > 0 &&
+          shouldSkipAncestorMarkerProps &&
+          name.startsWith("--viv-marker-")
+        ) {
+          continue;
+        }
         if (i > 0 && blockedInheritedByCurrent.has(name)) {
           continue;
         }
