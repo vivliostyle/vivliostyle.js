@@ -1156,7 +1156,7 @@
   type: difference
   decision: expected # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue1803a # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-issue1803b # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear-vertical.html
