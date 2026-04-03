@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Footnote in list item</title>
+<style>
+@page {
+  size: A5;
+  margin: 20mm;
+
+  @bottom-center {
+    content: "Page " counter(page);
+  }
+}
+
+body {
+  font: 16px/1.4 serif;
+}
+
+section {
+  break-after: page;
+}
+
+section:last-of-type {
+  break-after: auto;
+}
+
+ol {
+  padding-inline-start: 2em;
+}
+
+li {
+  margin-block: 0.6em;
+}
+
+.footnote {
+  float: footnote;
+  color: initial;
+  text-align: initial;
+  text-align-last: initial;
+  text-indent: initial;
+  font: initial;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  margin-inline-start: 1em;
+}
+
+.outside .footnote::footnote-marker {
+  list-style-position: outside;
+}
+</style>
+</head>
+<body>
+<section class="inside">
+  <h1>Footnote in list item: inside marker</h1>
+  <p>
+    Paragraph one.<span class="footnote">Footnote for paragraph one.</span>
+  </p>
+  <ol>
+    <li>
+      List item one<span class="footnote">Footnote for list item one. It should start with only "2. ".</span>
+    </li>
+    <li>
+      List item two<span class="footnote">Footnote for list item two. It should start with only "3. ", without an inherited list marker prefix.</span>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+    </li>
+  </ol>
+</section>
+
+<section class="outside">
+  <h1>Footnote in list item: outside marker</h1>
+  <p>
+    Paragraph one.<span class="footnote">Footnote for paragraph one.</span>
+  </p>
+  <ol>
+    <li>
+      List item one<span class="footnote">Footnote for list item one. It should have only marker "2. " in the footnote area.</span>
+    </li>
+    <li>
+      List item two<span class="footnote">Footnote for list item two. It should have only marker "3. " in the footnote area, without an extra inherited list marker.</span>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+    </li>
+  </ol>
+</section>
+</body>
+</html>
