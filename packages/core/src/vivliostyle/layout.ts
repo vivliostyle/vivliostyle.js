@@ -1417,6 +1417,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       }
 
+      // Extend box after-edge slightly so positionFloat() does not reject a
+      // float that barely overflows due to sub-pixel rounding when clear
+      // pushes it near the column boundary. (Issue #1803)
+      box.y2 += 1 / (this.clientLayout.pixelRatio || 1);
+
       GeometryUtil.positionFloat(box, this.bands, floatHorBox, floatSide);
       if (this.vertical) {
         floatBox = GeometryUtil.unrotateBox(floatHorBox);
