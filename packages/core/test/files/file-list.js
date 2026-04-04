@@ -221,6 +221,7 @@ module.exports = [
       },
       { file: "nth-child-of.html", title: ":nth-child(An+B of S) selector" },
       { file: "all-shorthand.html", title: "all shorthand property" },
+      { file: "env-doc-title.html", title: "env(doc-title) function" },
     ],
   },
   {

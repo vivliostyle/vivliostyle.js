@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The "Test" Document's Title</title>
+  <style>
+    @page {
+      size: 500px 400px;
+      margin: 50px;
+      @top-center {
+        content: env(doc-title);
+      }
+      @bottom-center {
+        content: env(doc-title) " (Page: " counter(page) ")" ;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>env(doc-title) test</h1>
+  <p>Page header should be: The "Test" Document's Title</p>
+  <p>Page footer should be: The "Test" Document's Title (Page: 1)</p>
+</body>
+</html>
