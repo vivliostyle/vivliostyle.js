@@ -194,10 +194,10 @@ export class LexicalScope {
 
       // For env(pub-title) and env(doc-title)
       this.defineBuiltInName("pub-title", function () {
-        return cssString(this.pubTitle ? this.pubTitle : "");
+        return this.pubTitle ? this.pubTitle : "";
       });
       this.defineBuiltInName("doc-title", function () {
-        return cssString(this.docTitle ? this.docTitle : "");
+        return this.docTitle ? this.docTitle : "";
       });
     }
   }

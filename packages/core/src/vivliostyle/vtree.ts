@@ -22,9 +22,7 @@ import * as Base from "./base";
 import * as Break from "./break";
 import * as Constants from "./constants";
 import * as Css from "./css";
-import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
-import * as CssTokenizer from "./css-tokenizer";
 import * as Diff from "./diff";
 import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
@@ -1383,15 +1381,6 @@ export class ContentPropertyHandler extends Css.Visitor {
     const ex = expr.toExpr();
     let val = ex.evaluate(this.context);
     if (typeof val === "string") {
-      if (ex instanceof Exprs.Named) {
-        // For env(pub-title) and env(doc-title)
-        // Need to unquote the result. To be consistent with cssparse.evaluateExprToCSS()
-        val = CssParser.parseValue(
-          ex.scope,
-          new CssTokenizer.Tokenizer(val, null),
-          "",
-        ).stringValue();
-      }
       assert(this.elem.ownerDocument);
       const node = this.exprContentListener(ex, val, this.elem.ownerDocument);
       if (
