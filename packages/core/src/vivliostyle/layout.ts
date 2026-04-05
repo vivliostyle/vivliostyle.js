@@ -425,6 +425,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   last: Node;
   viewDocument: Document;
   flowRootFormattingContext: Vtree.FormattingContext = null;
+  // Issue #1842: true only for columns reached after automatic column overflow.
+  isNonFirstColumn: boolean = false;
   isFloat: boolean = false;
   isFootnote: boolean = false;
   startEdge: number = 0;
@@ -3253,6 +3255,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return Task.newResult(nodeContext);
     }
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("skipEdges");
+    const column = this;
 
     // If a forced break occurred at the end of the previous column,
     // nodeContext.after should be false.
@@ -3264,17 +3267,108 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let trailingEdgeContexts: Vtree.NodeContext[] = [];
     let onStartEdges = false;
 
+    // Issue #1842: if a stronger page/spread break wins at the page's first
+    // column, drop weaker ancestor column breaks so they do not fire again
+    // later.
+    function suppressWeakerLeadingColumnBreaks(
+      currentNodeContext: Vtree.NodeContext,
+    ): void {
+      if (
+        !leadingEdge ||
+        column.isNonFirstColumn ||
+        forcedBreakValue ||
+        !Break.isPageLevelForcedBreak(breakAtTheEdge)
+      ) {
+        return;
+      }
+      for (let nc = currentNodeContext; nc; nc = nc.parent) {
+        if (nc.breakBefore === "column") {
+          nc.breakBefore = null;
+        }
+        if (nc.viewNode?.nodeType === 1) {
+          const elem = nc.viewNode as HTMLElement;
+          if (elem.style?.breakBefore === "column") {
+            elem.style.breakBefore = "";
+          }
+        }
+      }
+    }
+
+    // Issue #1842: a column break at the start of a follow-up column is already
+    // satisfied by the overflow that moved us into this column.
+    function consumeSatisfiedLeadingColumnBreak(
+      currentNodeContext: Vtree.NodeContext,
+    ): void {
+      if (
+        !leadingEdge ||
+        !column.isNonFirstColumn ||
+        forcedBreakValue ||
+        breakAtTheEdge !== "column"
+      ) {
+        return;
+      }
+      for (let nc = currentNodeContext; nc; nc = nc.parent) {
+        if (nc.breakBefore === "column") {
+          nc.breakBefore = null;
+        }
+        if (nc.viewNode?.nodeType === 1) {
+          const elem = nc.viewNode as HTMLElement;
+          if (elem.style?.breakBefore === "column") {
+            elem.style.breakBefore = "";
+          }
+        }
+      }
+      breakAtTheEdge = null;
+    }
+
+    function suppressWeakerTrailingColumnBreaks(
+      currentNodeContext: Vtree.NodeContext,
+    ): void {
+      if (forcedBreakValue || !Break.isPageLevelForcedBreak(breakAtTheEdge)) {
+        return;
+      }
+      for (let nc = currentNodeContext; nc; nc = nc.parent) {
+        if (nc.breakAfter === "column") {
+          nc.breakAfter = null;
+        }
+        if (nc.viewNode?.nodeType === 1) {
+          const elem = nc.viewNode as HTMLElement;
+          if (elem.style?.breakAfter === "column") {
+            elem.style.breakAfter = "";
+          }
+        }
+      }
+    }
+
+    function setBreakAtTheEdge(nextBreakValue: string | null): void {
+      breakAtTheEdge = Break.resolveEffectiveBreakValue(
+        breakAtTheEdge,
+        nextBreakValue,
+      );
+    }
+
     function needForcedBreak(): boolean {
-      // leadingEdge=true means that we are at the beginning of the new column
-      // and hence must avoid a break (Otherwise leading to an infinite loop)
+      if (forcedBreakValue) {
+        return true;
+      }
+      if (!Break.isForcedBreakValue(breakAtTheEdge)) {
+        return false;
+      }
+      if (leadingEdge) {
+        // Issue #1842: allow page/spread breaks at the start of overflowed
+        // columns, but still suppress column/region breaks already satisfied by
+        // entering that column.
+        return (
+          column.isNonFirstColumn &&
+          breakAtTheEdge !== "column" &&
+          breakAtTheEdge !== "region"
+        );
+      }
       return (
-        !!forcedBreakValue ||
-        (!leadingEdge &&
-          Break.isForcedBreakValue(breakAtTheEdge) &&
-          // prevent unnecessary breaks at the beginning of the column/page
-          // after out-of-flow elements, e.g. position:absolute or running().
-          // (Issue #1176)
-          !atLeadingEdgeIgnoringOutOfFlow())
+        // prevent unnecessary breaks at the beginning of the column/page
+        // after out-of-flow elements, e.g. position:absolute or running().
+        // (Issue #1176)
+        !atLeadingEdgeIgnoringOutOfFlow()
       );
     }
 
@@ -3283,7 +3377,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         return false;
       }
       // Exclude if itself is a float (Issue #1288)
-      if (nodeContext.floatSide) {
+      if (!nodeContext || nodeContext.floatSide) {
         return false;
       }
       for (let nc = lastAfterNodeContext; nc?.parent; nc = nc.parent) {
@@ -3468,10 +3562,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // new formatting context, or float or flex container,
                 // or empty block box (unbreakable)
                 leadingEdgeContexts.push(nodeContext.copy());
-                breakAtTheEdge = Break.resolveEffectiveBreakValue(
-                  breakAtTheEdge,
-                  nodeContext.breakBefore,
-                );
+                setBreakAtTheEdge(nodeContext.breakBefore);
+                suppressWeakerLeadingColumnBreaks(nodeContext);
+                consumeSatisfiedLeadingColumnBreak(nodeContext);
 
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
@@ -3525,10 +3618,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 onStartEdges = false;
                 lastAfterNodeContext = nodeContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
-                breakAtTheEdge = Break.resolveEffectiveBreakValue(
-                  null,
-                  nodeContext.breakAfter,
-                );
+                breakAtTheEdge = null;
+                setBreakAtTheEdge(nodeContext.breakAfter);
+                suppressWeakerTrailingColumnBreaks(nodeContext);
                 this.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext,
                   null,
@@ -3593,10 +3685,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 lastAfterNodeContext = nodeContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
               }
-              breakAtTheEdge = Break.resolveEffectiveBreakValue(
-                breakAtTheEdge,
-                nodeContext.breakAfter,
-              );
+              setBreakAtTheEdge(nodeContext.breakAfter);
+              suppressWeakerTrailingColumnBreaks(nodeContext);
               if (
                 style &&
                 !LayoutHelper.isOutOfFlow(nodeContext.viewNode) &&
@@ -3612,10 +3702,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             } else {
               // Leading edge
               leadingEdgeContexts.push(nodeContext.copy());
-              breakAtTheEdge = Break.resolveEffectiveBreakValue(
-                breakAtTheEdge,
-                nodeContext.breakBefore,
-              );
+              setBreakAtTheEdge(nodeContext.breakBefore);
+              suppressWeakerLeadingColumnBreaks(nodeContext);
+              consumeSatisfiedLeadingColumnBreak(nodeContext);
 
               // Prevent unnecessary blank pages by removing unnecessary forced column breaks
               if (
