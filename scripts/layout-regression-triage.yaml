@@ -1,3 +1,68 @@
+- id: "0093"
+  category: Leader
+  title: Table of Contents with leader()
+  file: leader/toc-leader.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/toc-leader.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/toc-leader.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0129"
+  category: Page breaks
+  title: Combine forced break values
+  file: page_breaks/combine_breaks.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/combine_breaks.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/combine_breaks.html&zoom=1&spread=false
+  pageCountActual: 17
+  pageCountBaseline: 16
+  diffPages:
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+- id: "0130"
+  category: Page breaks
+  title: "Combine break value regressions (Issue #1842)"
+  file: page_breaks/combine_breaks_2.html
+  type: difference
+  decision: ""  # regression / expected / skip
+  notes: ""
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/combine_breaks_2.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/combine_breaks_2.html&zoom=1&spread=false
+  pageCountActual: 10
+  pageCountBaseline: 13
+  diffPages:
+    - 2
+    - 4
+    - 6
+    - 8
+    - 9
+    - 10
 - category: Footnotes
   title: "Footnote in list item should not inherit list marker (Issue #1838)"
   file: footnotes/footnote-in-list-item.html
