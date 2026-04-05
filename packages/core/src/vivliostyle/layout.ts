@@ -3041,6 +3041,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (Break.isCloneBoxDecorationBreak(element)) {
         continue;
       }
+      const style = this.clientLayout.getElementComputedStyle(element);
+      if (style && !this.hasNonZeroBlockEndInset(style)) {
+        continue;
+      }
       const original = element.getAttribute("data-viv-box-break");
       Break.setBoxBreakFlag(element, "block-end");
       saved.push({ element, original });
