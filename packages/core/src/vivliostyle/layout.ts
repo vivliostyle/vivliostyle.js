@@ -2244,12 +2244,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
         // Record the height
         // TODO: should this be done after first-line calculation?
+        // Suppress ancestor block-end padding/border during edge
+        // calculation to prevent false overflow from browser column
+        // breaking. (Issue #1846)
+        const restoreInset = this.suppressOpenAncestorBlockEndInset(
+          resNodeContext ?? nodeContext,
+        );
         let edge = this.calculateEdge(
           resNodeContext,
           checkPoints,
           checkPointIndex,
           checkPoints[checkPointIndex].boxOffset,
         );
+        restoreInset();
         let overflown = false;
         if (
           !resNodeContext ||
@@ -3007,6 +3014,49 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
+   * Temporarily suppress block-end padding/border on ancestor containers
+   * that are still being laid out (not yet complete) when using browser
+   * column breaking for overflow detection. This prevents the browser's
+   * column-breaking layout from incorrectly accounting for padding that
+   * will be removed at actual break points due to box-decoration-break:
+   * slice (the default). (Issue #1846)
+   *
+   * Returns a cleanup function that restores the original state.
+   */
+  private suppressOpenAncestorBlockEndInset(
+    nodeContext: Vtree.NodeContext,
+  ): () => void {
+    if (!LayoutHelper.isUsingBrowserColumnBreaking(this)) {
+      return () => {};
+    }
+    const saved: { element: Element; original: string | null }[] = [];
+    for (let nc = nodeContext?.parent; nc; nc = nc.parent) {
+      if (nc.after || nc.inline) {
+        continue;
+      }
+      const element = nc.viewNode as Element;
+      if (!element || element.nodeType !== 1) {
+        continue;
+      }
+      if (Break.isCloneBoxDecorationBreak(element)) {
+        continue;
+      }
+      const original = element.getAttribute("data-viv-box-break");
+      Break.setBoxBreakFlag(element, "block-end");
+      saved.push({ element, original });
+    }
+    return () => {
+      for (const { element, original } of saved) {
+        if (original === null) {
+          element.removeAttribute("data-viv-box-break");
+        } else {
+          element.setAttribute("data-viv-box-break", original);
+        }
+      }
+    };
+  }
+
+  /**
    * @return true if overflows
    */
   checkOverflowAndSaveEdge(
@@ -3024,12 +3074,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
       return false;
     }
+    const restoreInset = this.suppressOpenAncestorBlockEndInset(nodeContext);
     let edge = LayoutHelper.calculateEdge(
       nodeContext,
       this.clientLayout,
       0,
       this.vertical,
     );
+    restoreInset();
     const offsets = BreakPosition.calculateOffset(
       nodeContext,
       this.collectElementsOffset(),

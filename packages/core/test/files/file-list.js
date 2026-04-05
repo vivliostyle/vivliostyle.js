@@ -478,6 +478,10 @@ module.exports = [
         title:
           "Block-start out-of-flow break (vertical writing-mode) (Issue #1775)",
       },
+      {
+        file: "page_breaks/page-breaking-with-container-padding-border.html",
+        title: "Page breaking with container padding/border (Issue #1846)",
+      },
     ],
   },
   {

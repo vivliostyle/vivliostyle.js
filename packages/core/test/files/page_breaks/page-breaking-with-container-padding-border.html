@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page breaking with container padding/border</title>
+    <!--
+      Test: When a container with padding/border is fragmented across pages,
+      the block-end padding/border (removed by box-decoration-break: slice)
+      should not cause incorrect overflow detection.
+
+      Page content area: 200px (= 300px page height - 50px*2 margins)
+      Each .content item: 60px (= 40px height + 10px*2 padding)
+
+      Expected page layout (3 pages):
+        Page 1: 1-1, 1-2, 1-3  (container1: 5+5 inset + 3*60 = 190px)
+        Page 2: 1-4, 1-5, 2-1  (60*2 + 5pad + 5+5margin + 5inset + 60 = 200px)
+        Page 3: 2-2, 2-3, 2-4  (60*3 + 5pad = 185px)
+
+      Bug (before fix): content 2-1 falsely overflows because container2's
+      block-end border+padding (5px) is included in the browser's column
+      layout, making the total 205px > 200px. This pushes content 2-1 to
+      page 3, wasting space on page 2 and creating a 4th page.
+    -->
+    <style>
+      @page {
+        size: 500px 300px;
+        margin: 50px;
+        border: rgba(0, 0, 255, 0.2) solid 1px;
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+      :root {
+        font-size: 14px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 0 10px;
+      }
+      .content {
+        height: 40px;
+        padding: 10px;
+      }
+      /* Container with padding only */
+      .container1 {
+        margin: 5px;
+        padding: 5px;
+        background-color: #eee;
+      }
+      /* Container with border + padding (same total inset as container1) */
+      .container2 {
+        margin: 5px;
+        padding: 3px;
+        border: 2px solid gray;
+        background-color: #dde;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="container1">
+        <div class="content">content 1-1</div>
+        <div class="content">content 1-2</div>
+        <div class="content">content 1-3</div>
+        <div class="content">content 1-4</div>
+        <div class="content">content 1-5</div>
+      </div>
+      <div class="container2">
+        <div class="content">content 2-1</div>
+        <div class="content">content 2-2</div>
+        <div class="content">content 2-3</div>
+        <div class="content">content 2-4</div>
+      </div>
+    </section>
+  </body>
+</html>
