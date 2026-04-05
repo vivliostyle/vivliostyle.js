@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>combine break regressions</title>
+    <style>
+      @page {
+        size: 900px 300px;
+        margin: 20px;
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      html {
+        column-count: 3;
+        orphans: 1;
+        widows: 1;
+      }
+      body {
+        margin: 0;
+      }
+      .column-break-before {
+        break-before: column;
+      }
+      .page-break-before {
+        break-before: page;
+      }
+      .page-break-after {
+        break-after: page;
+      }
+      .empty {
+        height: 100px;
+        background: #dfd;
+      }
+      svg {
+        width: 100px;
+        height: 100px;
+        background: #fdd;
+      }
+      .high-empty {
+        height: 261px;
+        background: #dfd;
+      }
+      .scenario-start {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      This should be on the 1st page.
+      <div class="high-empty"></div>
+    </div>
+    <div>
+      <div class="page-break-before empty"></div>
+    </div>
+    <div>
+      This should be on the 2nd page.
+    </div>
+
+    <div class="scenario-start">
+      This should be on the 3rd page.
+      <div class="high-empty"></div>
+    </div>
+    <div class="page-break-before">
+      <div class="page-break-before empty"></div>
+    </div>
+    <div>
+      This should be on the 4th page.
+    </div>
+
+    <div class="scenario-start">
+      This should be on the 5th page.
+      <div class="high-empty"></div>
+    </div>
+    <div class="page-break-before">
+      <div class="column-break-before empty"></div>
+    </div>
+    <div>
+      This should be on the 6th page.
+    </div>
+
+    <div class="scenario-start">This should be on the 7th page.</div>
+    <div class="page-break-after">
+      This should be on the 7th page too.<svg style="height:300px"></svg>
+    </div>
+    This should be on the 8th page.
+    <div>
+      This should be on the 8th page too.<svg style="height:300px"></svg>
+    </div>
+    <div>
+      This should be in the 3rd column of the 8th page.
+    </div>
+
+    <div class="scenario-start">
+      This should be on the 9th page.
+      <div class="high-empty"></div>
+    </div>
+    <div>
+      <div class="column-break-before empty"></div>
+    </div>
+    <div>
+      This should be in the 3rd column of the 9th page.
+    </div>
+
+    <div class="scenario-start">
+      This should be on the 10th page.
+      <div class="high-empty"></div>
+    </div>
+    <div class="column-break-before">
+      <div class="column-break-before empty"></div>
+    </div>
+    <div>
+      This should be in the 3rd column of the 10th page.
+    </div>
+  </body>
+</html>

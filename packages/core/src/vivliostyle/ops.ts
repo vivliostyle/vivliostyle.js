@@ -1736,6 +1736,9 @@ export class StyleInstance
             layoutConstraint,
             columnPageFloatLayoutContext,
           );
+          // Issue #1842: mark columns created after the first one so layout can
+          // treat already-satisfied leading column breaks differently.
+          column.isNonFirstColumn = currentColumnIndex > 0;
           column.forceNonfitting = forceNonFitting;
           column.vertical = layoutContainer.vertical;
           column.rtl = layoutContainer.rtl;
@@ -1777,6 +1780,8 @@ export class StyleInstance
             layoutConstraint,
             columnPageFloatLayoutContext,
           );
+          // Single-column layout always behaves like the first column on a page.
+          column.isNonFirstColumn = false;
           column.copyFrom(layoutContainer);
         }
         column.exclusions = dontApplyExclusions ? [] : exclusions.concat();

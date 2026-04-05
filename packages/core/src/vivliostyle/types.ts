@@ -137,6 +137,9 @@ export namespace Layout {
     last: Node;
     viewDocument: Document;
     flowRootFormattingContext: Vtree.FormattingContext;
+    // Issue #1842: distinguishes auto-advanced follow-up columns from the first
+    // column on a page so leading-edge forced breaks can be handled differently.
+    isNonFirstColumn: boolean;
     isFloat: boolean;
     isFootnote: boolean;
     startEdge: number;

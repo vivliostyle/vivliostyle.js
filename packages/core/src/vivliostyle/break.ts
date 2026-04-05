@@ -175,6 +175,15 @@ export function isSpreadBreakValue(value: string | null): boolean {
   return !!spreadBreakValues[value];
 }
 
+/**
+ * Returns if the value is a page-level forced break value.
+ * That is, one of page/left/right/recto/verso, excluding column/region.
+ * @param value The break value to be judged. Treats null as 'auto'.
+ */
+export function isPageLevelForcedBreak(value: string | null): boolean {
+  return isForcedBreakValue(value) && value !== "column" && value !== "region";
+}
+
 export const avoidBreakValues: { [key: string]: boolean | null } = {
   avoid: true,
   "avoid-page": true,

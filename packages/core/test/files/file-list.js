@@ -442,6 +442,10 @@ module.exports = [
         title: "Combine forced break values",
       },
       {
+        file: "page_breaks/combine_breaks_2.html",
+        title: "Combine break value regressions (Issue #1842)",
+      },
+      {
         file: "page_breaks/break_left_right.html",
         title: "break-before/after: left/right",
       },
