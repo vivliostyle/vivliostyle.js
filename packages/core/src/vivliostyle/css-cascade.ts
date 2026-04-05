@@ -3677,8 +3677,10 @@ export class CascadeInstance {
         if (pseudoProps) {
           if (
             ((pseudoName === "before" || pseudoName === "after") &&
-              !Vtree.nonTrivialContent(
-                (pseudoProps["content"] as CascadeValue)?.value,
+              !(
+                Vtree.nonTrivialContent(
+                  (pseudoProps["content"] as CascadeValue)?.value,
+                ) || this.hasNonTrivialViewConditionalPseudoContent(pseudoProps)
               )) ||
             (pseudoName === "marker" &&
               !Display.isListItem(
@@ -3781,6 +3783,20 @@ export class CascadeInstance {
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);
     }
+  }
+
+  private hasNonTrivialViewConditionalPseudoContent(
+    pseudoProps: ElementStyle,
+  ): boolean {
+    const viewConditionalStyles = pseudoProps["_viewConditionalStyles"] as
+      | { matcher: Matchers.Matcher; styles: ElementStyle }[]
+      | undefined;
+    if (!viewConditionalStyles || viewConditionalStyles.length <= 0) {
+      return false;
+    }
+    return viewConditionalStyles.some((entry) =>
+      Vtree.nonTrivialContent((entry.styles["content"] as CascadeValue)?.value),
+    );
   }
 
   /**
