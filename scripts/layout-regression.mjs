@@ -232,7 +232,7 @@ Options:
   --viewport-height <number> Browser viewport height
   --skip-screenshots         Skip image capture/compare, check page counts only
   --export-html              Export rendered HTML snapshot for each entry
-  --export-html-diff         Compare rendered HTML as HAST and write diff
+  --export-html-diff         Compare prettified rendered HTML and write diff
   --actual-viewer <spec>     Actual viewer: URL, version (v2.35.0 or 2019.11.100),
                              or keyword: canary, stable, dev, prod, git-<branch> (default: canary)
   --baseline-viewer <spec>   Baseline viewer: same format as --actual-viewer (default: stable)
