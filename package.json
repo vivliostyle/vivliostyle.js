@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "archiver": "^7.0.1",
+    "diff": "^8.0.4",
     "doctoc": "^2.0.0",
     "github-release-cli": "^2.0.0",
     "husky": "^4.2.3",

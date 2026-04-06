@@ -7,6 +7,8 @@ import { chromium } from "playwright";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import yaml from "js-yaml";
+import { createTwoFilesPatch } from "diff";
+import prettier from "prettier";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +34,7 @@ const defaults = {
   viewportHeight: 1800,
   skipScreenshots: false,
   exportHtml: false,
+  exportHtmlDiff: false,
   actualViewer: "https://vivliostyle.vercel.app/",
   baselineViewer: "https://vivliostyle.org/viewer/",
   actualLabel: "canary",
@@ -143,6 +146,9 @@ function parseArgs(argv) {
       opts.skipScreenshots = true;
     } else if (a === "--export-html") {
       opts.exportHtml = true;
+    } else if (a === "--export-html-diff") {
+      opts.exportHtmlDiff = true;
+      opts.exportHtml = true;
     } else if (a === "--baseline-viewer") {
       baselineViewerSpec = argv[++i];
     } else if (a === "--actual-viewer") {
@@ -226,6 +232,7 @@ Options:
   --viewport-height <number> Browser viewport height
   --skip-screenshots         Skip image capture/compare, check page counts only
   --export-html              Export rendered HTML snapshot for each entry
+  --export-html-diff         Compare rendered HTML as HAST and write diff
   --actual-viewer <spec>     Actual viewer: URL, version (v2.35.0 or 2019.11.100),
                              or keyword: canary, stable, dev, prod, git-<branch> (default: canary)
   --baseline-viewer <spec>   Baseline viewer: same format as --actual-viewer (default: stable)
@@ -1394,6 +1401,34 @@ async function main() {
 
     if (diffEntry.pages.length > 0) {
       screenshotMismatches += 1;
+
+      if (opts.exportHtmlDiff) {
+        const baselineHtml = fs.readFileSync(
+          path.join(baselineDir, `${slug}.html`),
+          "utf8",
+        );
+        const actualHtml = fs.readFileSync(
+          path.join(actualDir, `${slug}.html`),
+          "utf8",
+        );
+        const formatOpts = { parser: "html", printWidth: 120 };
+        const baselineFormatted = await prettier.format(
+          baselineHtml,
+          formatOpts,
+        );
+        const actualFormatted = await prettier.format(actualHtml, formatOpts);
+        const patch = createTwoFilesPatch(
+          `baseline/${slug}.html`,
+          `actual/${slug}.html`,
+          baselineFormatted,
+          actualFormatted,
+        );
+        // createTwoFilesPatch always returns a header even if identical;
+        // only write when there are actual changes (lines starting with + or -)
+        if (/^[+-][^+-]/m.test(patch)) {
+          fs.writeFileSync(path.join(diffDir, `${slug}.diff`), patch, "utf8");
+        }
+      }
     }
 
     if (diffEntry.pageCountMismatch || diffEntry.pages.length > 0) {
