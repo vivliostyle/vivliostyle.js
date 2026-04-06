@@ -31,6 +31,7 @@ const defaults = {
   viewportWidth: 1800,
   viewportHeight: 1800,
   skipScreenshots: false,
+  exportHtml: false,
   actualViewer: "https://vivliostyle.vercel.app/",
   baselineViewer: "https://vivliostyle.org/viewer/",
   actualLabel: "canary",
@@ -140,6 +141,8 @@ function parseArgs(argv) {
       opts.viewportHeight = Number(argv[++i]);
     } else if (a === "--skip-screenshots") {
       opts.skipScreenshots = true;
+    } else if (a === "--export-html") {
+      opts.exportHtml = true;
     } else if (a === "--baseline-viewer") {
       baselineViewerSpec = argv[++i];
     } else if (a === "--actual-viewer") {
@@ -222,6 +225,7 @@ Options:
   --viewport-width <number>  Browser viewport width
   --viewport-height <number> Browser viewport height
   --skip-screenshots         Skip image capture/compare, check page counts only
+  --export-html              Export rendered HTML snapshot for each entry
   --actual-viewer <spec>     Actual viewer: URL, version (v2.35.0 or 2019.11.100),
                              or keyword: canary, stable, dev, prod, git-<branch> (default: canary)
   --baseline-viewer <spec>   Baseline viewer: same format as --actual-viewer (default: stable)
@@ -686,6 +690,7 @@ async function capturePages({
   dir,
   timeoutMs,
   skipScreenshots,
+  exportHtml,
 }) {
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
   await waitForViewerReady(page, timeoutMs);
@@ -696,6 +701,12 @@ async function capturePages({
   }
 
   const totalPages = await getTotalPages(page);
+
+  if (exportHtml) {
+    const html = await page.content();
+    const snapshotPath = path.join(dir, `${key}.html`);
+    fs.writeFileSync(snapshotPath, html, "utf8");
+  }
 
   if (!skipScreenshots) {
     const spreadContainer = page.locator(
@@ -744,6 +755,7 @@ async function captureOneSide({
   dir,
   timeoutMs,
   skipScreenshots,
+  exportHtml,
   viewportWidth,
   viewportHeight,
 }) {
@@ -762,6 +774,7 @@ async function captureOneSide({
       dir,
       timeoutMs,
       skipScreenshots,
+      exportHtml,
     });
     return { ok: true, ...captured };
   } catch (err) {
@@ -1262,6 +1275,7 @@ async function main() {
       dir: baselineDir,
       timeoutMs: opts.timeoutMs,
       skipScreenshots: opts.skipScreenshots,
+      exportHtml: opts.exportHtml,
       viewportWidth: opts.viewportWidth,
       viewportHeight: opts.viewportHeight,
     });
@@ -1273,6 +1287,7 @@ async function main() {
       dir: actualDir,
       timeoutMs: opts.timeoutMs,
       skipScreenshots: opts.skipScreenshots,
+      exportHtml: opts.exportHtml,
       viewportWidth: opts.viewportWidth,
       viewportHeight: opts.viewportHeight,
     });
