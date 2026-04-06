@@ -1403,30 +1403,36 @@ async function main() {
       screenshotMismatches += 1;
 
       if (opts.exportHtmlDiff) {
-        const baselineHtml = fs.readFileSync(
-          path.join(baselineDir, `${slug}.html`),
-          "utf8",
-        );
-        const actualHtml = fs.readFileSync(
-          path.join(actualDir, `${slug}.html`),
-          "utf8",
-        );
-        const formatOpts = { parser: "html", printWidth: 120 };
-        const baselineFormatted = await prettier.format(
-          baselineHtml,
-          formatOpts,
-        );
-        const actualFormatted = await prettier.format(actualHtml, formatOpts);
-        const patch = createTwoFilesPatch(
-          `baseline/${slug}.html`,
-          `actual/${slug}.html`,
-          baselineFormatted,
-          actualFormatted,
-        );
-        // createTwoFilesPatch always returns a header even if identical;
-        // only write when there are actual changes (lines starting with + or -)
-        if (/^[+-][^+-]/m.test(patch)) {
-          fs.writeFileSync(path.join(diffDir, `${slug}.diff`), patch, "utf8");
+        try {
+          const baselineHtml = fs.readFileSync(
+            path.join(baselineDir, `${slug}.html`),
+            "utf8",
+          );
+          const actualHtml = fs.readFileSync(
+            path.join(actualDir, `${slug}.html`),
+            "utf8",
+          );
+          const formatOpts = { parser: "html", printWidth: 120 };
+          const baselineFormatted = await prettier.format(
+            baselineHtml,
+            formatOpts,
+          );
+          const actualFormatted = await prettier.format(actualHtml, formatOpts);
+          const patch = createTwoFilesPatch(
+            `baseline/${slug}.html`,
+            `actual/${slug}.html`,
+            baselineFormatted,
+            actualFormatted,
+          );
+          // createTwoFilesPatch always returns a header even if identical;
+          // only write when there are actual changes (lines starting with + or -)
+          if (/^[+-][^+-]/m.test(patch)) {
+            fs.writeFileSync(path.join(diffDir, `${slug}.diff`), patch, "utf8");
+          }
+        } catch (error) {
+          console.warn(
+            `  -> skipped HTML diff export for ${slug}: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       }
     }
