@@ -1,13 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": false,
-    "outDir": ".microbundle",
     "declaration": true,
-    "declarationDir": "dist",
-    "emitDeclarationOnly": false,
-    "sourceMap": true
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": "dist"
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "example", "src/stories"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "example",
+    "src/stories",
+    "src/**/*.stories.*"
+  ]
 }
