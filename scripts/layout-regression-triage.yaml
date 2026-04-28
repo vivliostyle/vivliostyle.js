@@ -1,3 +1,15 @@
+- category: Table
+  title: "Table rowspan in anchor target (Issue #1905)"
+  file: table/table-rowspan-anchor-target.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1905  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table-rowspan-anchor-target.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table-rowspan-anchor-target.html&zoom=1&spread=false
 - category: General
   title: box-decoration-break
   file: box-decoration-break.html
