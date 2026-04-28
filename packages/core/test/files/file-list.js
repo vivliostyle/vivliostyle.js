@@ -628,6 +628,11 @@ module.exports = [
         title: "Table column break in non-root multicol (Issue #1854)",
       },
       {
+        file: "table/overflow-into-margin-after-multipage-table.html",
+        title:
+          "Page content overflows into margin after multi-page table (Issue #1902)",
+      },
+      {
         file: "table/table-header-repeat.html",
         title:
           "Table header repeat with complex multipage tables (Issue #1873)",

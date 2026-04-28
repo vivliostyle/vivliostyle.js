@@ -1,0 +1,562 @@
+<!-- Test case for Issue #1902: page content overflows into margin after multi-page table -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Overflow into Margin After Multi-page Table</title>
+    <style>
+      :root {
+        --color-1: rgb(203 203 203);
+        --color-grey: grey;
+        --color-2: rgb(240, 245, 231);
+      }
+
+      @page {
+        size: A4 portrait;
+        margin-left: 25mm;
+        margin-right: 20mm;
+        margin-top: 40mm;
+        margin-bottom: 30mm;
+
+        @bottom-left {
+          content: element(bottomMargin);
+        }
+      }
+
+      @media print {
+        :root {
+          font-size: 10pt;
+        }
+
+        #bottomMargin {
+          display: flex;
+        }
+      }
+
+      html {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .align-right {
+        margin-inline-start: auto;
+      }
+
+      .align-bottom {
+        margin-block-start: auto;
+      }
+
+      #pages:after {
+        content: "Page " counter(page) " / " counter(pages);
+      }
+
+      #bottomMargin {
+        width: 100%;
+        position: running(bottomMargin);
+        gap: 3rem;
+        list-style: none;
+        color: var(--color-margin-grey, var(--color-grey));
+        font-size: var(--font-size-script, 10pt);
+        line-height: 2.45;
+        padding: unset;
+      }
+
+      #bottomMargin > li {
+        align-self: flex-end;
+      }
+
+      #bottomMarginWide > li {
+        align-self: flex-start;
+      }
+
+      h4,
+      h5,
+      h6 {
+        font-size: 1rem;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      td > p {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      td,
+      th {
+        vertical-align: top;
+        padding: 0.5em;
+      }
+
+      caption,
+      figcaption {
+        padding: 1em;
+      }
+
+      caption {
+        font-weight: bold;
+      }
+
+      .table-cell-grey {
+        background-color: var(--color-grey);
+      }
+
+      .small-font {
+        font-size: 0.6rem;
+      }
+
+      .simple-list {
+        margin-top: 0;
+        margin-bottom: 0;
+        list-style: none;
+        padding: 0;
+      }
+
+      .table-2 {
+        width: 100%;
+      }
+
+      .table-2 > thead > tr > th {
+        text-align: left;
+        background-color: var(--color-1);
+      }
+
+      .table-2 > tbody > tr > td:first-of-type {
+        width: 33%;
+      }
+
+      table.table-3 {
+        width: 100%;
+      }
+
+      table.table-3 > tbody > tr > td {
+        font-size: 0.8rem;
+      }
+
+      .table-3 > thead > tr > th {
+        text-align: left;
+        background-color: var(--color-1);
+      }
+
+      .table-3 > thead > tr > th,
+      .table-3 > tbody > tr > td {
+        border: 1px solid black;
+      }
+
+      .table-3 > thead > tr:nth-of-type(2) > th:nth-of-type(1) {
+        width: 4%;
+      }
+
+      .table-3 > thead > tr:nth-of-type(2) > th:nth-of-type(2) {
+        width: 16%;
+      }
+
+      .table-inner {
+        border: 0 none;
+        text-align: left;
+      }
+
+      table.table-inner {
+        width: 100%;
+      }
+
+      table.table-1 {
+        width: 100%;
+      }
+
+      .table-1 > thead > tr > th {
+        text-align: left;
+        background-color: var(--color-1);
+      }
+
+      .table-1 > thead > tr > th,
+      .table-1 > tbody > tr > td {
+        border: 1px solid black;
+      }
+
+      .table-1 > tbody > tr > td:nth-of-type(1),
+      .table-1 > tbody > tr > td:nth-of-type(4) {
+        width: 10%;
+        text-align: center;
+        background-color: var(--color-2);
+      }
+
+      .table-1 > tbody > tr > td:nth-of-type(2),
+      .table-1 > tbody > tr > td:nth-of-type(5) {
+        width: 25%;
+      }
+
+      .table-1 > tbody > tr > td:nth-of-type(3),
+      .table-1 > tbody > tr > td:nth-of-type(6) {
+        width: 15%;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="bottomMargin">
+      <li>Margin Text</li>
+      <li class="align-right" id="pages"></li>
+    </ul>
+    <section>
+      <table class="table-3">
+        <thead>
+          <tr>
+            <th colspan="3">Header row 1 (colspan 3)</th>
+          </tr>
+          <tr>
+            <th rowspan="2">1</th>
+            <th rowspan="2">
+              <ul class="simple-list">
+                <li>Col2</li>
+                <li>(rowspan 2)</li>
+              </ul>
+            </th>
+            <th>
+              <ul class="simple-list">
+                <li>Header row 2 col 3</li>
+                <li>cont.</li>
+              </ul>
+            </th>
+          </tr>
+          <tr>
+            <th>Header row 3 col 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+              </ul>
+            </td>
+            <td>Content row 2 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4 LONG TEXT</li>
+              </ul>
+            </td>
+            <td>Content row 2 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4 LONG TEXT</li>
+              </ul>
+            </td>
+            <td>Content row 3 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 4 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 5 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 6 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 7 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4 LONG TEXT</li>
+              </ul>
+            </td>
+            <td>Content row 8 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4 LONG TEXT</li>
+              </ul>
+            </td>
+            <td>Content row 9 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 10 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 11 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 12 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 13 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 14 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 15 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey"></td>
+            <td>
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 16 col 3</td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey" rowspan="2"></td>
+            <td rowspan="2">
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 17 col 3</td>
+          </tr>
+          <tr>
+            <td>
+              <table class="table-inner">
+                <tbody>
+                  <tr>
+                    <td>Inner table row<br />cont. <small>small text</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey" rowspan="2"></td>
+            <td rowspan="2">
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 19 col 3</td>
+          </tr>
+          <tr>
+            <td>
+              <table class="table-inner">
+                <tbody>
+                  <tr>
+                    <td>Inner r1c1</td>
+                    <td>Inner r1c2<br />cont. <small>small text</small></td>
+                  </tr>
+                  <tr>
+                    <td>Inner r2c1</td>
+                    <td>Inner r2c2<br />cont. <small>small text</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey" rowspan="2"></td>
+            <td rowspan="2">
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 21 col 3</td>
+          </tr>
+          <tr>
+            <td>
+              <table class="table-inner">
+                <tbody>
+                  <tr>
+                    <td>Inner table row<br />cont. <small>small text</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-cell-grey" rowspan="2"></td>
+            <td rowspan="2">
+              <ul class="simple-list">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+                <li>Item 4</li>
+              </ul>
+            </td>
+            <td>Content row 23 col 3</td>
+          </tr>
+          <tr>
+            <td>
+              <table class="table-inner">
+                <tbody>
+                  <tr>
+                    <td>r1c1</td>
+                    <td>r1c2</td>
+                    <td>r1c3<br />cont. <small>small text</small></td>
+                  </tr>
+                  <tr>
+                    <td>r2c1</td>
+                    <td>r2c2</td>
+                    <td>r2c3<br />cont. <small>small text</small></td>
+                  </tr>
+                  <tr>
+                    <td>r3c1</td>
+                    <td>r3c2</td>
+                    <td>r3c3<br />cont. <small>small text</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="table-1">
+        <caption>Table Caption</caption>
+        <thead>
+          <tr>
+            <th>Col1</th>
+            <th>Col2</th>
+            <th>Col3</th>
+            <th>Col4</th>
+            <th>Col4</th>
+            <th>Col5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>R1C1</td>
+            <td>Row1 Col2</td>
+            <td>Row1 Col3</td>
+            <td>R1C4</td>
+            <td>Row1 Col5</td>
+            <td>Row1 Col6</td>
+          </tr>
+          <tr>
+            <td>R2C1</td>
+            <td>Row2 Col2</td>
+            <td>Row2 Col3</td>
+            <td>R2C4</td>
+            <td>Row2 Col5</td>
+            <td>Row2 Col6</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>
