@@ -1522,6 +1522,46 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       );
       this.resetColumn();
       state.break = true;
+    } else if (display === "table-row" && !this.inHeader && !this.inFooter) {
+      const cont = super.afterNonInlineElementNode(state);
+      const pending = cont && cont.isPending() ? cont : Task.newResult(true);
+      return pending.thenAsync(() => {
+        if (!state.break) {
+          const overflown = this.column.checkOverflowAndSaveEdge(
+            nodeContext,
+            null,
+          );
+          const repetitiveElements =
+            this.formattingContext.getRepetitiveElements();
+          const overflownDueToRepetitiveElements =
+            this.column.nodeContextOverflowingDueToRepetitiveElements ===
+            nodeContext;
+          // Keep this guard broad. During repetitive-element retry passes the
+          // footer may already be marked skipped in the current state even
+          // though footer dropping is still the mechanism that resolves the
+          // overflow for this table fragment.
+          const canResolveByDroppingFooter =
+            !overflown &&
+            overflownDueToRepetitiveElements &&
+            !!repetitiveElements?.isFooterRegistered();
+          if (overflown || overflownDueToRepetitiveElements) {
+            // Catch row overflow as soon as the row finishes; otherwise the
+            // next row start detects it one row too late and content can drift
+            // into the page margin before the break is taken. (Issue #1902)
+            if (
+              !canResolveByDroppingFooter &&
+              this.formattingContext.getRowSpanningCellsOverflowingTheRow(
+                this.currentRowIndex,
+              ).length === 0
+            ) {
+              this.resetColumn();
+              nodeContext.overflow = true;
+              state.break = true;
+            }
+          }
+        }
+        return Task.newResult(true);
+      });
     } else {
       return super.afterNonInlineElementNode(state);
     }
