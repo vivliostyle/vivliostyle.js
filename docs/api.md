@@ -13,7 +13,7 @@
     - [`removeHook(name, fn)`](#pluginremovehookname-fn)
   - [profile](#profile)
     - [`profiler.registerStartTiming(name, timestamp)`](#profileprofilerregisterstarttimingname-timestamp)
-    - [`profiler.registerEndTiming(name, timestamp)`](##profileprofilerregisterendtimingname-timestamp)
+    - [`profiler.registerEndTiming(name, timestamp)`](#profileprofilerregisterendtimingname-timestamp)
     - [`profiler.printTimings()`](#profileprofilerprinttimings)
     - [`profiler.disable()`](#profileprofilerdisable)
     - [`profiler.enable()`](#profileprofilerenable)
