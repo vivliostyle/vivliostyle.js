@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1905: rowspan table in an anchor-target section. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Table rowspan in anchor target</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 40mm 20mm 30mm 25mm;
+      }
+
+      :root {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+      }
+
+      body > section,
+      nav {
+        break-before: page;
+      }
+
+      nav ul {
+        list-style: none;
+        padding-left: 0;
+        line-height: 1.45;
+      }
+
+      nav a {
+        color: currentColor;
+        text-decoration: none;
+      }
+
+      nav a::after {
+        content: leader(dotted) target-counter(attr(href url), page);
+      }
+
+      .toc-number {
+        display: inline-block;
+        width: 5em;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      td,
+      th {
+        border: 1px solid black;
+        padding: 0.5em;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: rgb(203 203 203);
+      }
+
+      td {
+        font-size: 0.8rem;
+      }
+
+      th:nth-of-type(1) {
+        width: 24%;
+      }
+
+      th:nth-of-type(2) {
+        width: 37%;
+      }
+
+      th:nth-of-type(3) {
+        width: 30%;
+      }
+
+      th:nth-of-type(4) {
+        width: 9%;
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="toc">
+      <h2>Table of Contents</h2>
+      <ul>
+        <li>
+          <a href="#chapter"><span class="toc-number">1</span>Chapter</a>
+        </li>
+        <li>
+          <a href="#subchapter"><span class="toc-number">1.1</span>Subchapter</a>
+        </li>
+      </ul>
+    </nav>
+    <section id="chapter">
+      <h2>1 Chapter</h2>
+      <section id="subchapter">
+        <h3>1.1 Subchapter</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Col1</th>
+              <th>Col2</th>
+              <th>Col3<br />cont.<br />cont.</th>
+              <th>Col4<br />cont.<br />cont.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="2">Row 1 Col 1</td>
+              <td>Row 1 Col 2</td>
+              <td>Row 1 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 2 Col 2</td>
+              <td>Row 2 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 3 Col 1</td>
+              <td>Row 3 Col 2</td>
+              <td>Row 3 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td rowspan="3">Row 4 Col 1</td>
+              <td>Row 4 Col 2</td>
+              <td>Row 4 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 5 Col 2</td>
+              <td>Row 5 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 6 Col 2</td>
+              <td>Row 6 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td rowspan="11">Row 7 Col 1</td>
+              <td>Row 7 Col 2</td>
+              <td>Row 7 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 8 Col 2</td>
+              <td>Row 8 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 9 Col 2</td>
+              <td>Row 9 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 10 Col 2</td>
+              <td>Row 10 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 11 Col 2</td>
+              <td>Row 11 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 12 Col 2</td>
+              <td>Row 12 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 13 Col 2</td>
+              <td>Row 13 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 14 Col 2</td>
+              <td>Row 14 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 15 Col 2</td>
+              <td>Row 15 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 16 Col 2</td>
+              <td>Row 16 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 17 Col 2</td>
+              <td>Row 17 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 18 Col 1</td>
+              <td>Row 18 Col 2</td>
+              <td>Row 18 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+            <tr>
+              <td>Row 19 Col 1</td>
+              <td>Row 19 Col 2</td>
+              <td>Row 19 Col 3<br />cont</td>
+              <td>1<br />2<br />3</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+  </body>
+</html>

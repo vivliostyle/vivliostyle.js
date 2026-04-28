@@ -415,12 +415,18 @@ export class TableFormattingContext
       return firstTime;
     }
     switch (nodeContext.display) {
-      case "table-row":
+      case "table-row": {
         // Check both cellBreakPositions and fragmentIndex to determine if this
         // is the first time laying out this row (issue #1663).
+        // Previous-fragment row-spanning cells are laid out separately before
+        // the current row; they should not make the row itself a continuation.
+        const rowIndex = this.findRowIndexBySourceNode(nodeContext.sourceNode);
         return (
-          this.cellBreakPositions.length === 0 && nodeContext.fragmentIndex <= 1
+          this.cellBreakPositions.every((p) =>
+            this.isPreviousFragmentRowSpanningCellBreakPosition(p, rowIndex),
+          ) && nodeContext.fragmentIndex <= 1
         );
+      }
       case "table-cell": {
         // For cells, check if this cell's source node is in cellBreakPositions
         // or if fragmentIndex indicates this is a continuation (issue #1663).
@@ -499,6 +505,18 @@ export class TableFormattingContext
 
   findRowIndexBySourceNode(sourceNode: Node): number {
     return this.rows.findIndex((row) => sourceNode === row.sourceNode);
+  }
+
+  private isPreviousFragmentRowSpanningCellBreakPosition(
+    cellBreakPosition: BrokenTableCellPosition,
+    rowIndex: number,
+  ): boolean {
+    const cell = cellBreakPosition.cell;
+    return (
+      rowIndex >= 0 &&
+      cell.rowIndex < rowIndex &&
+      cell.rowIndex + cell.rowSpan > rowIndex
+    );
   }
 
   addCellFragment(
@@ -681,8 +699,7 @@ export class TableFormattingContext
 
   override restoreState(state: any) {
     // Create a fresh copy to prevent the saved state from being mutated
-    // when extractRowSpanningCellBreakPositions splices entries from
-    // this.cellBreakPositions during subsequent layout attempts (issue #1667).
+    // during subsequent layout attempts (issue #1667).
     this.cellBreakPositions = [].concat(state as BrokenTableCellPosition[]);
   }
 }
@@ -1024,6 +1041,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   originalStopAtOverflow: boolean;
   inHeader: boolean;
   inFooter: boolean;
+  private didExtractRowSpanningCellBreakPositions: boolean = false;
 
   constructor(
     public readonly formattingContext: TableFormattingContext,
@@ -1120,14 +1138,15 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   private extractRowSpanningCellBreakPositions(): BrokenTableCellPosition[][] {
+    if (this.didExtractRowSpanningCellBreakPositions) {
+      return [];
+    }
     const cellBreakPositions = this.formattingContext.cellBreakPositions;
     if (cellBreakPositions.length === 0) {
       return [];
     }
     const rowSpanningCellBreakPositions = [];
-    let i = 0;
-    do {
-      const p = cellBreakPositions[i];
+    cellBreakPositions.forEach((p) => {
       const cell = p.cell;
       const rowIndex = cell.rowIndex;
       // Only extract cells that actually span into the current row
@@ -1142,11 +1161,10 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           arr = rowSpanningCellBreakPositions[rowIndex] = [];
         }
         arr.push(p);
-        cellBreakPositions.splice(i, 1);
-      } else {
-        i++;
       }
-    } while (i < cellBreakPositions.length);
+    });
+    this.didExtractRowSpanningCellBreakPositions =
+      rowSpanningCellBreakPositions.length > 0;
     return rowSpanningCellBreakPositions;
   }
 

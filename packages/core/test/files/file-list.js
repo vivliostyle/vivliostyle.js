@@ -628,6 +628,10 @@ module.exports = [
         title: "Table column break in non-root multicol (Issue #1854)",
       },
       {
+        file: "table/table-rowspan-anchor-target.html",
+        title: "Table rowspan in anchor target (Issue #1905)",
+      },
+      {
         file: "table/overflow-into-margin-after-multipage-table.html",
         title:
           "Page content overflows into margin after multi-page table (Issue #1902)",
