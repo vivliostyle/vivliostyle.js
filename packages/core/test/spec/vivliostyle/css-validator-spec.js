@@ -16,6 +16,7 @@
  */
 
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
+import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_task from "../../../src/vivliostyle/task";
@@ -160,6 +161,31 @@ describe("css-validator", function () {
         return adapt_task.newResult(true);
       });
     });
+
+    it("rejects invalid single values for text-autospace-like nested alternates", function () {
+      var validatorSet = new adapt_cssvalid.ValidatorSet();
+      validatorSet.initBuiltInValidators();
+      validatorSet.parse(
+        "foo = normal | auto | no-autospace | [[ ideograph-alpha || ideograph-numeric || punctuation ] || [ insert | replace ]];",
+      );
+
+      expect(adapt_css.getName("x").visit(validatorSet.validators.foo)).toBe(
+        null,
+      );
+    });
+
+    it("accepts valid single values for text-autospace-like nested alternates", function () {
+      var validatorSet = new adapt_cssvalid.ValidatorSet();
+      validatorSet.initBuiltInValidators();
+      validatorSet.parse(
+        "foo = normal | auto | no-autospace | [[ ideograph-alpha || ideograph-numeric || punctuation ] || [ insert | replace ]];",
+      );
+
+      expect(
+        adapt_css.getName("punctuation").visit(validatorSet.validators.foo),
+      ).not.toBe(null);
+    });
+
     it("should parse simple validator that compare values case-insensitively.", function (done) {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();

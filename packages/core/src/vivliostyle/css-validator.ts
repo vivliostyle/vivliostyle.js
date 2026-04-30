@@ -689,33 +689,8 @@ export class ListValidator extends PropertyValidator {
   }
 
   validateSingle(inval: Css.Val): Css.Val {
-    // no need to worry about "specials"
-    let outval: Css.Val = null;
-    let current = this.first;
-    while (
-      current !== this.successTerminal &&
-      current !== this.failureTerminal
-    ) {
-      if (!inval) {
-        current = current.failure;
-        continue;
-      }
-      if (current.isSpecial()) {
-        current = current.success;
-        continue;
-      }
-      outval = inval.visit(current.validator);
-      if (!outval) {
-        current = current.failure;
-        continue;
-      }
-      inval = null;
-      current = current.success;
-    }
-    if (current === this.successTerminal) {
-      return outval;
-    }
-    return null;
+    const out = this.validateList([inval], false, 0);
+    return out ? out[0] : null;
   }
 
   override visitEmpty(empty: Css.Val): Css.Val {

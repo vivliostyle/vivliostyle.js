@@ -26,6 +26,7 @@ describe("css-parser", function () {
 
     beforeEach(function () {
       spyOn(handler, "error");
+      spyOn(handler, "idSelector");
       spyOn(handler, "pseudoclassSelector");
       spyOn(handler, "startFuncWithSelector");
       spyOn(handler, "endFuncWithSelector");
@@ -46,6 +47,23 @@ describe("css-parser", function () {
           });
         return adapt_task.newResult(true);
       });
+    }
+
+    function tokenize(text) {
+      var tokenizer = new adapt_csstok.Tokenizer(text, handler);
+      var tokens = [];
+      while (true) {
+        var token = tokenizer.token();
+        tokens.push({
+          type: token.type,
+          text: token.text,
+          position: token.position,
+        });
+        if (token.type === adapt_csstok.TokenType.EOF) {
+          return tokens;
+        }
+        tokenizer.consume();
+      }
     }
 
     describe("css nesting", function () {
@@ -206,6 +224,67 @@ describe("css-parser", function () {
           expect(handler.error).not.toHaveBeenCalled();
           expect(handler.property).toHaveBeenCalled();
           expect(handler.property.calls.mostRecent().args[0]).toBe("color");
+        });
+      });
+    });
+
+    describe("tokenizer recovery", function () {
+      it("advances past standalone invalid delimiter characters after previous tokens", function () {
+        var tokens = tokenize("a `");
+
+        expect(
+          tokens.map(function (token) {
+            return token.type;
+          }),
+        ).toEqual([
+          adapt_csstok.TokenType.IDENT,
+          adapt_csstok.TokenType.INVALID,
+          adapt_csstok.TokenType.EOF,
+        ]);
+        expect(tokens[0].text).toBe("a");
+        expect(tokens[1].text).toBe("`");
+        expect(tokens[2].position).toBe(3);
+      });
+
+      it("advances past repeated NUL bytes in misdecoded stylesheets", function () {
+        var tokens = tokenize("@\u0000c\u0000h");
+
+        expect(
+          tokens
+            .filter(function (token) {
+              return token.type === adapt_csstok.TokenType.INVALID;
+            })
+            .map(function (token) {
+              return token.text;
+            }),
+        ).toEqual(["\u0000", "\u0000"]);
+        expect(
+          tokens
+            .filter(function (token) {
+              return token.type === adapt_csstok.TokenType.IDENT;
+            })
+            .map(function (token) {
+              return token.text;
+            }),
+        ).toEqual(["c", "h"]);
+        expect(
+          tokens.map(function (token) {
+            return token.type;
+          }),
+        ).toEqual([
+          adapt_csstok.TokenType.AT,
+          adapt_csstok.TokenType.INVALID,
+          adapt_csstok.TokenType.IDENT,
+          adapt_csstok.TokenType.INVALID,
+          adapt_csstok.TokenType.IDENT,
+          adapt_csstok.TokenType.EOF,
+        ]);
+        expect(tokens[tokens.length - 1].position).toBe(5);
+      });
+
+      it("lets parser recovery reach the next selector after an invalid at-rule delimiter", function (done) {
+        parse(done, "@foo `; #pass { color: green; }", function () {
+          expect(handler.idSelector).toHaveBeenCalledWith("pass");
         });
       });
     });
