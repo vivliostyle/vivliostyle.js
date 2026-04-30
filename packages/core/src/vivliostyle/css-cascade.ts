@@ -3416,7 +3416,7 @@ export class CascadeInstance {
         setMap["list-item"] = (this.currentElement as any).value;
       }
     }
-    if (this.currentElement?.parentNode.nodeType === Node.DOCUMENT_NODE) {
+    if (this.currentElement?.parentNode?.nodeType === Node.DOCUMENT_NODE) {
       if (!resetMap) {
         resetMap = Object.create(null);
       }

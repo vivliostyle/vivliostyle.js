@@ -3251,7 +3251,7 @@ export class ViewFactory
     }
     const boxOffset = nodeContext.boxOffset + nodeOffset;
     const arr = [];
-    while (nodeContext.firstPseudo === firstPseudo) {
+    while (nodeContext && nodeContext.firstPseudo === firstPseudo) {
       arr.push(nodeContext);
       nodeContext = nodeContext.parent;
     }
