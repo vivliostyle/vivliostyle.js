@@ -48,6 +48,17 @@ import * as Layout from "./layout";
 import { XmlDoc } from "./types";
 
 const namespacePrefixMap: { [key: string]: string } = {};
+const xhtmlElementsRenderedAsDiv = new Set([
+  "base",
+  "body",
+  "head",
+  "html",
+  "link",
+  "meta",
+  "script",
+  "style",
+  "title",
+]);
 
 export type CustomRenderer = (
   p1: Element,
@@ -1542,13 +1553,7 @@ export class ViewFactory
       let tag = element.localName;
       let originalTag = tag;
       if (ns == Base.NS.XHTML) {
-        if (
-          tag == "html" ||
-          tag == "body" ||
-          tag == "script" ||
-          tag == "link" ||
-          tag == "meta"
-        ) {
+        if (xhtmlElementsRenderedAsDiv.has(tag)) {
           tag = "div";
         } else if (tag == "vide_") {
           tag = "video";

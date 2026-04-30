@@ -1532,11 +1532,17 @@ export class Tokenizer {
       const charCode = input.charCodeAt(position);
       switch (actions[charCode] || actions[65] /*A*/) {
         case Action.INVALID:
-          tokenText = input.substring(tokenPosition, position);
           if (isNaN(charCode)) {
+            tokenText = input.substring(tokenPosition, position);
             // unclosed comment `/***[EOF]`, unclosed string `"**[EOF]`
             tokenType = TokenType.EOF;
+          } else if (actions === actionsNormal && tokenType === TokenType.EOF) {
+            tokenType = TokenType.INVALID;
+            tokenPosition = position;
+            tokenText = input.substring(position, position + 1);
+            position++;
           } else {
+            tokenText = input.substring(tokenPosition, position);
             // invalid, e.g, `.` in `:nth-child([.])` (Issue #597)
             tokenType = TokenType.INVALID;
           }
@@ -2002,6 +2008,10 @@ export class Tokenizer {
       }
       actions = actionsNormal;
       seenSpace = false;
+      tokenType = TokenType.EOF;
+      tokenPosition = position;
+      tokenText = "";
+      tokenNum = 0;
       token = buffer[tail & indexMask];
     }
     this.position = position;
