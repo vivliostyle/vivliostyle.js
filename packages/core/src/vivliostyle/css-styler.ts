@@ -1183,6 +1183,7 @@ export class Styler implements AbstractStyler {
         }
       }
     }
+    return Number.POSITIVE_INFINITY;
   }
 
   /** @override */
