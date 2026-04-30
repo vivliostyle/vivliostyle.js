@@ -1000,10 +1000,10 @@ export class Styler implements AbstractStyler {
       return Number.POSITIVE_INFINITY;
     }
     const context = this.context;
-    while (true) {
+    while (this.last) {
       let next: Node = this.last.firstChild;
       if (next == null) {
-        while (true) {
+        while (this.last) {
           if (this.last.nodeType == 1) {
             this.cascade.popElement(this.last as Element);
             this.primary = this.primaryStack.pop();
@@ -1036,7 +1036,7 @@ export class Styler implements AbstractStyler {
             break;
           }
           this.last = this.last.parentNode;
-          if (this.last === this.root) {
+          if (!this.last || this.last === this.root) {
             this.last = null;
             if (startOffset < this.lastOffset) {
               if (targetSlippedOffset < 0) {

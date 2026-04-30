@@ -2244,7 +2244,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     checkPoints.splice(0, checkPoints.length); // make empty
     let totalLineCount = 0;
     let firstPseudo = nodeContext.firstPseudo; // :first-letter is not processed here
-    if (firstPseudo.count == 0) {
+    if (firstPseudo?.count === 0) {
       firstPseudo = firstPseudo.outer; // move to line pseudoelement (if any)
     }
     frame
