@@ -53,7 +53,8 @@ module.exports = function (config) {
   }
 
   var options = {
-    reporters: ["progress"],
+    reporters: ["dots"],
+    client: { captureConsole: false },
     browsers: browsers,
     customLaunchers: customLaunchers,
     singleRun: true,
