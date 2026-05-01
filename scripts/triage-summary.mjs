@@ -172,7 +172,14 @@ function printEntry(e) {
       `         page count: ${e.actualLabel ?? "actual"}=${e.pageCountActual}, ${e.baselineLabel ?? "baseline"}=${e.pageCountBaseline}`,
     );
   }
-  if (e.errorMessage) {
+  if (e.sideErrors) {
+    for (const se of e.sideErrors) {
+      const ref = se.referenceFile ? ` (${se.referenceFile})` : "";
+      console.log(
+        `         error [${se.side}${ref}]: ${se.errorName}: ${se.errorMessage}`,
+      );
+    }
+  } else if (e.errorMessage) {
     console.log(`         error: ${e.errorName}: ${e.errorMessage}`);
   }
   if (notes) {
