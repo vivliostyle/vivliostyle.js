@@ -14,7 +14,7 @@
     "ship": "lerna publish from-package",
     "ship:canary": "lerna publish --canary",
     "ship:prerelease": "yarn ship --dist-tag next",
-    "test": "lerna run test --parallel --stream",
+    "test": "cross-env NODE_OPTIONS=--disable-warning=DEP0169 lerna run test --parallel --stream",
     "test:layout-regression": "node scripts/layout-regression.mjs",
     "test:reftest": "node scripts/layout-regression.mjs --mode reftest",
     "test:reftest-diff": "node scripts/layout-regression.mjs --mode reftest-diff",

@@ -53,7 +53,7 @@ module.exports = function (config) {
   }
 
   var options = {
-    reporters: ["verbose"],
+    reporters: ["progress"],
     browsers: browsers,
     customLaunchers: customLaunchers,
     singleRun: true,

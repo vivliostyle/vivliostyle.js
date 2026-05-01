@@ -42,6 +42,7 @@ module.exports = function (config) {
         process.env.NODE_ENV === "production" ? "production" : "development",
       entry: "../src/vivliostyle.ts",
       devtool: "inline-source-map",
+      stats: "errors-warnings",
       resolve: {
         extensions: [".ts", ".js"],
       },
@@ -68,5 +69,8 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
+    webpackMiddleware: {
+      stats: "errors-warnings",
+    },
   };
 };
