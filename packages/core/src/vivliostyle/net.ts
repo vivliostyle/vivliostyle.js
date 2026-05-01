@@ -39,11 +39,49 @@ export enum FetchResponseType {
 
 export type FetchResponse = Net.FetchResponse;
 
+function createSyntheticFetchResponse(
+  url: string,
+  opt_type?: FetchResponseType,
+): FetchResponse | null {
+  const strippedUrl = Base.stripFragment(url);
+  if (Base.stripFragmentAndQuery(strippedUrl).toLowerCase() !== "about:blank") {
+    return null;
+  }
+
+  const response: FetchResponse = {
+    status: 200,
+    statusText: "OK",
+    url: strippedUrl,
+    contentType: "text/html",
+    responseText: null,
+    responseXML: null,
+    responseBlob: null,
+  };
+
+  if (opt_type === FetchResponseType.BLOB) {
+    response.responseBlob = makeBlob([""], response.contentType);
+  } else if (opt_type === FetchResponseType.ARRAYBUFFER) {
+    response.responseBlob = makeBlob(
+      [new Uint8Array(0).buffer],
+      response.contentType,
+    );
+  } else {
+    response.responseText = "";
+  }
+
+  return response;
+}
+
 export function fetchFromURL(
   url: string,
   opt_type?: FetchResponseType,
   opt_method?: string,
 ): Task.Result<FetchResponse> {
+  const syntheticResponse = createSyntheticFetchResponse(url, opt_type);
+  if (syntheticResponse) {
+    return Task.newResult(syntheticResponse);
+  }
+
   const frame: Task.Frame<FetchResponse> = Task.newFrame("fetchFromURL");
   const requestInit: RequestInit = {
     method: opt_method || "GET",

@@ -1,5 +1,6 @@
 /**
  * Copyright 2017 Daishinsha Inc.
+ * Copyright 2026 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,10 +17,91 @@
  */
 
 import * as adapt_epub from "../../../src/vivliostyle/epub";
+import * as adapt_task from "../../../src/vivliostyle/task";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 
 describe("epub", function () {
+  describe("EPUBDocStore", function () {
+    describe("loadPubDoc", function () {
+      it("skips HEAD and treats about:blank as a Web Publication primary entry", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        var opf = {};
+        spyOn(store, "loadWebPub").and.callFake(function () {
+          return adapt_task.newResult(opf);
+        });
+
+        adapt_task.start(function () {
+          store.loadPubDoc("about:blank").then(function (result) {
+            expect(store.loadWebPub).toHaveBeenCalledWith("about:blank");
+            expect(result).toBe(opf);
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+
+      it("skips HEAD and treats blob: URLs as a Web Publication primary entry", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        var url =
+          "blob:http://localhost:3000/12345678-1234-1234-1234-123456789abc";
+        var opf = {};
+        spyOn(store, "loadWebPub").and.callFake(function () {
+          return adapt_task.newResult(opf);
+        });
+
+        adapt_task.start(function () {
+          store.loadPubDoc(url).then(function (result) {
+            expect(store.loadWebPub).toHaveBeenCalledWith(url);
+            expect(result).toBe(opf);
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+    });
+  });
+
   describe("OPFDoc", function () {
+    describe("initWithWebPubManifest", function () {
+      it("creates a primary entry for about:blank documents", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        var opf = new adapt_epub.OPFDoc(store, "about:blank");
+        var doc = new DOMParser().parseFromString(
+          "<html xmlns='http://www.w3.org/1999/xhtml'><head><title>Blank</title></head><body></body></html>",
+          "text/html",
+        );
+
+        adapt_task.start(function () {
+          opf.initWithWebPubManifest({}, doc).then(function () {
+            expect(opf.items.length).toBe(1);
+            expect(opf.spine.length).toBe(1);
+            expect(opf.items[0].src).toBe("about:blank");
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+
+      it("creates a primary entry when the publication URL is the root document", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        var opf = new adapt_epub.OPFDoc(store, "https://example.com/webpub/");
+        var doc = new DOMParser().parseFromString(
+          "<html xmlns='http://www.w3.org/1999/xhtml'><head><title>Root</title></head><body></body></html>",
+          "text/html",
+        );
+
+        adapt_task.start(function () {
+          opf.initWithWebPubManifest({}, doc).then(function () {
+            expect(opf.items.length).toBe(1);
+            expect(opf.spine.length).toBe(1);
+            expect(opf.items[0].src).toBe("https://example.com/webpub/");
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+    });
+
     describe("OPFDocumentURLTransformer", function () {
       var opfDoc = new adapt_epub.OPFDoc(null, null);
       opfDoc.spine = opfDoc.items = [
