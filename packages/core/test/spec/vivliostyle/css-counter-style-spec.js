@@ -15,8 +15,6 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// @ts-check
-
 import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_ops from "../../../src/vivliostyle/ops";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
