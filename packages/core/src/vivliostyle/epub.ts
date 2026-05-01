@@ -65,6 +65,13 @@ function clonePageGroupPageCounts(source: {
   return cloned;
 }
 
+function shouldSkipHeadForWebPub(url: string): boolean {
+  return (
+    /\.(x?html?|xht)(?:[#?]|$)/i.test(url) ||
+    /^(?:about:|blob:)/i.test(Base.stripFragment(url))
+  );
+}
+
 export type Position = {
   spineIndex: number;
   pageIndex: number;
@@ -142,15 +149,16 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     } else if (/\.json(?:ld)?(?:[#?]|$)/i.test(url)) {
       // Web Publication Manifest
       this.loadWebPubManifest(url, frame);
-    } else if (/\.(x?html?|xht)(?:[#?]|$)/i.test(url)) {
+    } else if (shouldSkipHeadForWebPub(url)) {
       // Web Publication primary entry (X)HTML
-      // Skip HEAD request to avoid potential CORS errors on cross-origin servers
+      // Skip HEAD request for known document URLs and special schemes.
+      // Browsers reject HEAD on blob: URLs, and about:blank is a synthetic blank document.
       this.loadWebPub(url).then((opf) => {
         if (opf) {
           frame.finish(opf);
           return;
         }
-        // A URL with a known HTML extension cannot be the root of an unzipped EPUB.
+        // These URLs cannot be the root of an unzipped EPUB container.
         this.reportLoadError(url);
         frame.finish(null);
       });
@@ -1199,9 +1207,20 @@ export class OPFDoc {
     }
     // TODO: other metadata...
 
-    const primaryEntryPath = this.getPathFromURL(this.pubURL);
-    if (!manifestObj["readingOrder"] && doc && primaryEntryPath !== null) {
-      manifestObj["readingOrder"] = [encodeURI(primaryEntryPath)];
+    const primaryEntryURL = Base.stripFragment(this.pubURL);
+    const primaryEntryPath = this.getPathFromURL(primaryEntryURL);
+    const primaryEntryReadingOrderURL =
+      primaryEntryPath !== null
+        ? encodeURI(primaryEntryPath)
+        : /^(?:about:|blob:)/i.test(primaryEntryURL)
+          ? primaryEntryURL
+          : null;
+    if (
+      !manifestObj["readingOrder"] &&
+      doc &&
+      primaryEntryReadingOrderURL !== null
+    ) {
+      manifestObj["readingOrder"] = [primaryEntryReadingOrderURL];
 
       // Find TOC in the primary entry (X)HTML
       for (const anchorElem of Toc.findTocAnchorElements(doc)) {
