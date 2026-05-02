@@ -450,7 +450,7 @@ const translations = {
       GitHub_:
         "可以直接指定GitHub和Gist網址。當指定此類網址時，Vivliostyle會載入原始GitHub/Gist的內容。",
       WARN_Mixed_Content_:
-        "⚠️混合內容(例如Vivliostyle Viewer中輸入的網址應為“http:”，卻使用“https:”)通常會被瀏覽器阻擋。",
+        "⚠️混合內容（例如在使用“https:”的Vivliostyle Viewer中輸入“http:”網址）通常會被瀏覽器阻擋。",
       WARN_Cross_Origin_:
         "⚠️除非伺服器設定上允許跨來源資源共享(CORS)，否則對不同網域的請求通常會被瀏覽器阻擋。",
       URL_parameter_options_: "網址參數選項:",
