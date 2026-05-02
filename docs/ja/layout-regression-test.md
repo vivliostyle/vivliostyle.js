@@ -346,6 +346,13 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 - `version-diff` は「差分がある」ことだけを示すモードなので、actual/baseline の badge は
   `FAIL` ではなく `view` 表示になります。
 - `reftest` と `reftest-diff` では、意味のある場合に PASS / FAIL / ERROR badge を表示します。
+- `reftest-diff` モードでは、サマリーパネルに汎用の Differences 件数ではなく
+  **PASS** / **FAIL** / **Errors** の件数が表示されます。PASS カードには
+  improvement がある場合に `improvement: N` の内訳が表示され、FAIL カードには
+  `regression: N` が非ゼロの場合に内訳が表示されます。リファレンスファイルなしの
+  MANUAL テストでビューワーの変化がある場合は、**Changed (manual)** カードが
+  独立して表示されます。page count changed は非ゼロの場合に独立したカードとして
+  表示されます。
 - Change badge をクリックすると、その change type の行だけに絞り込めます。
 - スクリーンショット差分がある場合は、Change 列に `p1` や `r1-p1` のようなページ単位の
   diff 画像リンクが表示されます。
@@ -429,6 +436,10 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 エラーとして記録される条件:
 
 - どちらかのサイドがレンダリングを完了できない
+
+`reftest-diff` モードでは、両サイドともに失敗（outcome `error`）のエントリは
+Errors セクションのみに出力され、Differences セクションには含まれません。
+`Entries with differences` サマリー行では、improvement がある場合に件数が表示されます（例: `(improvement: 20, pending: 14, triaged: 0)`）。
 
 実行中ログには、検出した差分・エラーの triage 状態も表示されます（例）:
 

@@ -364,6 +364,12 @@ All three modes write `report.html` alongside `report.json` and `report.md`.
   reports that a difference exists, not whether the new rendering is better or worse.
 - In `reftest` and `reftest-diff`, PASS / FAIL / ERROR style badges are shown when
   the mode has that semantic information.
+- In `reftest-diff` mode, the summary panel shows **PASS** / **FAIL** / **Errors** counts
+  instead of a generic Differences count. The PASS card includes an `improvement: N`
+  breakdown when improvements are present; the FAIL card shows a `regression: N`
+  breakdown when non-zero. When manual tests (no reference file) have viewer changes, a
+  separate **Changed (manual)** card appears. Page count changed appears as a separate
+  card when non-zero.
 - Change badges can be clicked to filter the table by change type.
 - When screenshot diffs exist, the Change column also shows page-level diff links
   such as `p1` or `r1-p1`.
@@ -445,6 +451,10 @@ A difference is reported when either:
 - per-page pixel diff ratio exceeds `--max-diff-ratio` (default `0.00002`)
 
 An error is reported when either side fails to complete rendering.
+In `reftest-diff` mode, entries where both sides fail (outcome `error`) appear
+only in the Errors section and are excluded from the Differences section.
+The `Entries with differences` summary line also shows the improvement count
+when improvements are present, e.g. `(improvement: 20, pending: 14, triaged: 0)`.
 
 Execution logs include triage status for detected differences/errors, e.g.:
 

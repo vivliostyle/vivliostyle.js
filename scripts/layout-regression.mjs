@@ -1486,9 +1486,7 @@ async function getTotalPages(page) {
 }
 
 function createWallClockTimeoutError(timeoutMs, action) {
-  const error = new Error(
-    `Wall-clock timeout after ${timeoutMs}ms while ${action}`,
-  );
+  const error = new Error(`Timeout (${timeoutMs}ms): ${action}`);
   error.name = "TimeoutError";
   return error;
 }
@@ -1578,12 +1576,12 @@ async function capturePages({
   await withWallClockTimeout(
     () => page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs }),
     timeoutMs,
-    `loading ${url}`,
+    "loading page",
   );
   await withWallClockTimeout(
     () => waitForViewerReady(page, timeoutMs),
     timeoutMs,
-    `waiting for viewer ready for ${url}`,
+    "waiting for viewer ready",
   );
 
   // Hide Vercel's live-feedback widget that gets injected into Vercel preview
@@ -1594,13 +1592,13 @@ async function capturePages({
         content: "vercel-live-feedback { display: none !important; }",
       }),
     timeoutMs,
-    `injecting viewer styles for ${url}`,
+    "injecting viewer styles",
   );
 
   const errorMsg = await withWallClockTimeout(
     () => checkViewerError(page),
     timeoutMs,
-    `checking viewer errors for ${url}`,
+    "checking viewer errors",
   );
   if (errorMsg) {
     throw new Error(`Viewer error: ${errorMsg}`);
@@ -1609,14 +1607,14 @@ async function capturePages({
   const totalPages = await withWallClockTimeout(
     () => getTotalPages(page),
     timeoutMs,
-    `reading total pages for ${url}`,
+    "reading total pages",
   );
 
   if (exportHtml) {
     const html = await withWallClockTimeout(
       () => page.content(),
       timeoutMs,
-      `reading rendered HTML for ${url}`,
+      "reading rendered HTML",
     );
     const snapshotPath = path.join(dir, `${key}.html`);
     fs.writeFileSync(snapshotPath, html, "utf8");
@@ -1632,7 +1630,7 @@ async function capturePages({
       (await withWallClockTimeout(
         () => page.locator("#vivliostyle-page-number").count(),
         timeoutMs,
-        `checking page navigation input for ${url}`,
+        "checking page navigation input",
       )) > 0;
 
     for (let p = 1; p <= totalPages; p++) {
@@ -1640,14 +1638,14 @@ async function capturePages({
         await withWallClockTimeout(
           () => navigateToPageByInput(page, p, timeoutMs),
           timeoutMs,
-          `navigating to page ${p} for ${url}`,
+          `navigating to page ${p}`,
         );
       } else if (p > 1) {
         // Already on page 1 after initial load; only click for subsequent pages.
         await withWallClockTimeout(
           () => navigateToNextPage(page, timeoutMs),
           timeoutMs,
-          `navigating to next page ${p} for ${url}`,
+          `navigating to next page ${p}`,
         );
       }
       const imagePath = path.join(
@@ -1657,7 +1655,7 @@ async function capturePages({
       await withWallClockTimeout(
         () => spreadContainer.screenshot({ path: imagePath, scale: "css" }),
         timeoutMs,
-        `capturing page ${p} for ${url}`,
+        `capturing page ${p}`,
       );
     }
   }
@@ -2134,7 +2132,17 @@ function getCombinedChangeType({
   viewerChanged,
 }) {
   if (actualStatus === "ERROR" || baselineStatus === "ERROR") {
-    return "error";
+    // baseline=ERROR with actual=PASS is an improvement, just like FAIL→PASS.
+    if (baselineStatus === "ERROR" && actualStatus === "PASS") {
+      return "improvement";
+    }
+    // actual=ERROR → always an error regardless of baseline.
+    if (actualStatus === "ERROR") {
+      return "error";
+    }
+    // baseline=ERROR with actual=FAIL → treat as known-fail; we cannot
+    // determine whether this is a regression since the baseline errored.
+    return viewerChanged ? "changed-fail" : "known-fail";
   }
   if (actualStatus === "FAIL" && baselineStatus === "PASS") {
     return "regression";
@@ -2316,14 +2324,22 @@ function writeReports(outDir, result, triageStatusMap) {
   );
   lines.push("");
   lines.push(`- Compared entries: ${result.summary.totalEntries}`);
-  lines.push(
-    `- Entries with differences: ${result.summary.entriesWithDifferences} (pending: ${differencesTriage.pending}, triaged: ${differencesTriage.triaged})`,
-  );
+  {
+    const improvementCount =
+      result.summary.outcomes?.changeTypes?.improvement ?? 0;
+    const diffSuffix =
+      improvementCount > 0
+        ? ` (improvement: ${improvementCount}, pending: ${differencesTriage.pending}, triaged: ${differencesTriage.triaged})`
+        : ` (pending: ${differencesTriage.pending}, triaged: ${differencesTriage.triaged})`;
+    lines.push(
+      `- Entries with differences: ${result.summary.entriesWithDifferences}${diffSuffix}`,
+    );
+  }
   lines.push(
     `- Entries with errors: ${result.summary.entriesWithErrors} (pending: ${errorsTriage.pending}, triaged: ${errorsTriage.triaged})`,
   );
   lines.push(`- Timeout entries: ${result.summary.timeoutEntries}`);
-  lines.push(`- Page-count mismatches: ${result.summary.pageCountMismatches}`);
+  lines.push(`- Page count changed: ${result.summary.pageCountMismatches}`);
   lines.push(`- Screenshot mismatches: ${result.summary.screenshotMismatches}`);
   if (result.summary.outcomes) {
     lines.push(
@@ -2489,21 +2505,33 @@ function writeReports(outDir, result, triageStatusMap) {
       lines.push(`- [${item.id}] [${item.category}] ${item.title}`);
       lines.push(`  triage: ${formatTriageLabel(triage)}`);
       lines.push(`  side: ${item.side}`);
-      if (item.referenceFile) {
-        lines.push(`  reference: ${item.referenceFile}`);
+      if (item.sideErrors) {
+        for (const se of item.sideErrors) {
+          if (se.referenceFile) {
+            lines.push(`  ${se.side} reference: ${se.referenceFile}`);
+          }
+          lines.push(`  ${se.side} timeout: ${se.error.timeout}`);
+          lines.push(
+            `  ${se.side} error: ${se.error.name}: ${se.error.message}`,
+          );
+        }
+      } else {
+        if (item.referenceFile) {
+          lines.push(`  reference: ${item.referenceFile}`);
+        }
+        lines.push(`  timeout: ${item.error.timeout}`);
+        lines.push(`  error: ${item.error.name}: ${item.error.message}`);
       }
-      lines.push(`  timeout: ${item.error.timeout}`);
-      lines.push(`  error: ${item.error.name}: ${item.error.message}`);
       lines.push(`  ${result.labels.actual}: ${item.actualUrl}`);
       lines.push(`  ${result.labels.baseline}: ${item.baselineUrl}`);
       lines.push("");
     }
   }
 
+  const htmlPath = path.join(outDir, "report.html");
   const mdPath = path.join(outDir, "report.md");
   fs.writeFileSync(mdPath, `${lines.join("\n")}\n`, "utf8");
 
-  const htmlPath = path.join(outDir, "report.html");
   const escapeHtml = (value) =>
     String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -2644,7 +2672,19 @@ function writeReports(outDir, result, triageStatusMap) {
             notes.push(`${diff.pages.length} viewer diff page(s)`);
           }
           if (entryErrors.length > 0) {
-            notes.push(entryErrors.map((item) => item.side).join(", "));
+            for (const err of entryErrors) {
+              const noteText = err.sideErrors
+                ? err.sideErrors
+                    .map((se) => {
+                      const sideLabel = se.referenceFile
+                        ? `${se.side} (${se.referenceFile})`
+                        : se.side;
+                      return `${sideLabel}: ${se.error.message}`;
+                    })
+                    .join(" | ")
+                : `${err.referenceFile ? `${err.side} (${err.referenceFile})` : err.side}: ${err.error.message}`;
+              notes.push(noteText);
+            }
           }
           const titleHtml = renderAnchor(
             entry.sourceUrl,
@@ -2672,15 +2712,38 @@ function writeReports(outDir, result, triageStatusMap) {
         )
         .concat(
           resultWithTriage.errors.map((item) => {
-            const isBaselineSide =
-              item.side === result.labels.baseline ||
-              item.side.startsWith(result.labels.baseline + "-");
+            const isBaselineError = item.sideErrors
+              ? item.sideErrors.some(
+                  (se) =>
+                    se.side === result.labels.baseline ||
+                    se.side.startsWith(result.labels.baseline + "-"),
+                )
+              : item.side === result.labels.baseline ||
+                item.side.startsWith(result.labels.baseline + "-");
+            const isActualError = item.sideErrors
+              ? item.sideErrors.some(
+                  (se) =>
+                    se.side === result.labels.actual ||
+                    se.side.startsWith(result.labels.actual + "-"),
+                )
+              : item.side === result.labels.actual ||
+                item.side.startsWith(result.labels.actual + "-");
+            const noteText = item.sideErrors
+              ? item.sideErrors
+                  .map((se) => {
+                    const sideLabel = se.referenceFile
+                      ? `${se.side} (${se.referenceFile})`
+                      : se.side;
+                    return `${sideLabel}: ${se.error.message}`;
+                  })
+                  .join(" | ")
+              : `${item.referenceFile ? `${item.side} (${item.referenceFile})` : item.side}: ${item.error.message}`;
             return `<tr>
   <td class="test-path">${renderAnchor(item.sourceUrl, escapeHtml(item.title), "test-link")}</td>
-  <td>${isBaselineSide ? renderBadge("ERROR", "error", item.baselineUrl) : renderFallbackViewerBadge(item.baselineUrl)}</td>
-  <td>${isBaselineSide ? renderFallbackViewerBadge(item.actualUrl) : renderBadge("ERROR", "error", item.actualUrl)}</td>
+  <td>${isBaselineError ? renderBadge("ERROR", "error", item.baselineUrl) : renderFallbackViewerBadge(item.baselineUrl)}</td>
+  <td>${isActualError ? renderBadge("ERROR", "error", item.actualUrl) : renderFallbackViewerBadge(item.actualUrl)}</td>
   <td data-change-type="error">${renderChangeCell("error")}</td>
-  <td>${escapeHtml(`${item.side}: ${item.error.message}`)}</td>
+  <td>${escapeHtml(noteText)}</td>
 </tr>`;
           }),
         )
@@ -2724,6 +2787,7 @@ function writeReports(outDir, result, triageStatusMap) {
     .filter-reset { border:1px solid var(--line); background:var(--panel); border-radius:999px; padding:4px 10px; cursor:pointer; }
     .is-hidden { display:none; }
     .test-path { font-family:ui-monospace, SFMono-Regular, monospace; }
+    .breakdown { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.6; }
   </style>
 </head>
 <body>
@@ -2732,9 +2796,54 @@ function writeReports(outDir, result, triageStatusMap) {
     <p>${escapeHtml(result.options.mode)} mode report generated at ${escapeHtml(result.generatedAt)}</p>
     <section class="summary">
       <div class="card"><div class="label">Compared</div><div class="value">${escapeHtml(result.summary.totalEntries)}</div></div>
-      <div class="card"><div class="label">Differences</div><div class="value">${escapeHtml(result.summary.entriesWithDifferences)}</div></div>
+      ${(() => {
+        const ct = result.summary.outcomes?.changeTypes;
+        if (ct) {
+          // reftest-diff mode: show PASS / FAIL cards derived from per-entry outcomes
+          const passTypes = [
+            "pass",
+            "improvement",
+            "expected-change",
+            "unchanged",
+          ];
+          const failTypes = ["regression", "known-fail", "changed-fail"];
+          const passCount = passTypes.reduce((s, t) => s + (ct[t] || 0), 0);
+          const failCount = failTypes.reduce((s, t) => s + (ct[t] || 0), 0);
+          const improvementCount = ct.improvement || 0;
+          const regressionCount = ct.regression || 0;
+          const changedCount = ct.changed || 0;
+          const pageCountMismatches = result.summary.pageCountMismatches || 0;
+          const passBreakdownParts = [];
+          if (improvementCount > 0)
+            passBreakdownParts.push(`improvement: ${improvementCount}`);
+          const failBreakdownParts = [];
+          if (regressionCount > 0)
+            failBreakdownParts.push(`regression: ${regressionCount}`);
+          const passBreakdown =
+            passBreakdownParts.length > 0
+              ? `<div class="breakdown">${passBreakdownParts.join("<br>")}</div>`
+              : "";
+          const failBreakdown =
+            failBreakdownParts.length > 0
+              ? `<div class="breakdown">${failBreakdownParts.join("<br>")}</div>`
+              : "";
+          const changedCard =
+            changedCount > 0
+              ? `\n      <div class="card"><div class="label">Changed (manual)</div><div class="value">${changedCount}</div></div>`
+              : "";
+          const pageCountCard =
+            pageCountMismatches > 0
+              ? `\n      <div class="card"><div class="label">Page count changed</div><div class="value">${pageCountMismatches}</div></div>`
+              : "";
+          return `<div class="card"><div class="label">PASS</div><div class="value">${passCount}</div>${passBreakdown}</div>
+      <div class="card"><div class="label">FAIL</div><div class="value">${failCount}</div>${failBreakdown}</div>${changedCard}${pageCountCard}`;
+        } else {
+          // version-diff mode: show simple Differences / Page count changed cards
+          return `<div class="card"><div class="label">Differences</div><div class="value">${escapeHtml(result.summary.entriesWithDifferences)}</div></div>
+      <div class="card"><div class="label">Page count changed</div><div class="value">${escapeHtml(result.summary.pageCountMismatches)}</div></div>`;
+        }
+      })()}
       <div class="card"><div class="label">Errors</div><div class="value">${escapeHtml(result.summary.entriesWithErrors)}</div></div>
-      <div class="card"><div class="label">Page Count</div><div class="value">${escapeHtml(result.summary.pageCountMismatches)}</div></div>
     </section>
     <div class="toolbar" id="filter-toolbar" hidden>
       <span>Filtered by change: <strong id="filter-value"></strong></span>
@@ -2893,7 +3002,17 @@ function writeTriageTemplate(outDir, result) {
     entries.push(entry);
   }
 
+  // Track ids already covered by a difference entry so that error entries for
+  // the same test (e.g. baseline timeout when actual=FAIL) are not emitted
+  // separately and don't produce duplicate ids in the triage YAML.
+  const differenceIds = new Set(entries.map((e) => e.id));
+
   for (const err of result.errors) {
+    if (differenceIds.has(err.id)) {
+      // A difference entry with this id was already emitted; skip the
+      // redundant error entry to avoid duplicate ids in the YAML.
+      continue;
+    }
     entries.push({
       id: err.id,
       category: err.category,
@@ -2908,9 +3027,40 @@ function writeTriageTemplate(outDir, result) {
       baselineLabel: result.labels.baseline,
       baselineUrl: err.baselineUrl,
       errorSide: err.side,
-      ...(err.referenceFile ? { referenceFile: err.referenceFile } : {}),
-      errorName: err.error.name,
-      errorMessage: err.error.message,
+      ...(err.sideErrors
+        ? (() => {
+            // Emit common fields when all sides have the same error AND none
+            // has per-side context (referenceFile, timeout) that would be lost
+            // by collapsing; emit sideErrors otherwise.
+            const allSame =
+              err.sideErrors.every(
+                (se) =>
+                  se.error.name === err.sideErrors[0].error.name &&
+                  se.error.message === err.sideErrors[0].error.message,
+              ) && !err.sideErrors.some((se) => se.referenceFile);
+            if (allSame) {
+              return {
+                errorName: err.sideErrors[0].error.name,
+                errorMessage: err.sideErrors[0].error.message,
+              };
+            }
+            return {
+              sideErrors: err.sideErrors.map((se) => ({
+                side: se.side,
+                ...(se.referenceFile
+                  ? { referenceFile: se.referenceFile }
+                  : {}),
+                errorName: se.error.name,
+                errorMessage: se.error.message,
+                timeout: se.error.timeout,
+              })),
+            };
+          })()
+        : {
+            ...(err.referenceFile ? { referenceFile: err.referenceFile } : {}),
+            errorName: err.error.name,
+            errorMessage: err.error.message,
+          }),
     });
   }
 
@@ -3005,6 +3155,7 @@ function writeTriageTemplate(outDir, result) {
             errorSide: _es,
             errorName: _en,
             errorMessage: _em,
+            sideErrors: _se,
             category,
             title,
             file,
@@ -3348,16 +3499,22 @@ async function main() {
       const hasReferences =
         actualReferences.length > 0 && baselineReferences.length > 0;
 
-      const sideErrors = [];
+      // Separate actual-side errors from baseline-side errors so that
+      // baseline-side errors can be suppressed when actual=PASS (improvement).
+      const actualSideErrors = [];
+      const baselineSideErrors = [];
       if (!actual.ok) {
-        sideErrors.push({ side: opts.actualLabel, error: actual.error });
+        actualSideErrors.push({ side: opts.actualLabel, error: actual.error });
       }
       if (!baseline.ok) {
-        sideErrors.push({ side: opts.baselineLabel, error: baseline.error });
+        baselineSideErrors.push({
+          side: opts.baselineLabel,
+          error: baseline.error,
+        });
       }
       for (const item of actualReferences) {
         if (!item.result.ok) {
-          sideErrors.push({
+          actualSideErrors.push({
             side: `${opts.actualLabel}-reference`,
             error: item.result.error,
             referenceFile: item.reference.referenceFile,
@@ -3367,7 +3524,7 @@ async function main() {
       }
       for (const item of baselineReferences) {
         if (!item.result.ok) {
-          sideErrors.push({
+          baselineSideErrors.push({
             side: `${opts.baselineLabel}-reference`,
             error: item.result.error,
             referenceFile: item.reference.referenceFile,
@@ -3376,30 +3533,10 @@ async function main() {
         }
       }
 
-      for (const item of sideErrors) {
-        const triage = getTriageStatus(
-          triageStatusMap,
-          target.category,
-          target.title,
-          "error",
-        );
-        errors.push({
-          id,
-          category: target.category,
-          title: target.title,
-          file: toArray(target.file),
-          side: item.side,
-          error: item.error,
-          actualUrl: target.actualUrl,
-          baselineUrl: item.baselineUrl || target.baselineUrl,
-          ...(item.referenceFile ? { referenceFile: item.referenceFile } : {}),
-          triage,
-        });
-        if (item.error.timeout) {
-          timeoutEntries += 1;
-        }
-      }
-
+      // Combine actual-side errors (always reported) with baseline-side errors
+      // into a single entry per test so that only one triage decision is needed
+      // for the pair. Suppress baseline-side errors only for the improvement
+      // case where baseline=ERROR and actual=PASS.
       const actualOutcome =
         hasReferences &&
         actual.ok &&
@@ -3455,6 +3592,53 @@ async function main() {
             ? "PASS"
             : "FAIL"
           : "MANUAL";
+
+      {
+        const shouldSuppressBaselineSideErrors =
+          actualStatus === "PASS" && baselineStatus === "ERROR";
+        const allSideErrors = [
+          ...actualSideErrors,
+          ...(shouldSuppressBaselineSideErrors ? [] : baselineSideErrors),
+        ];
+        if (allSideErrors.length > 0) {
+          const triage = getTriageStatus(
+            triageStatusMap,
+            target.category,
+            target.title,
+            "error",
+          );
+          errors.push({
+            id,
+            category: target.category,
+            title: target.title,
+            file: toArray(target.file),
+            side: allSideErrors.map((e) => e.side).join(", "),
+            error: allSideErrors[0].error,
+            ...(allSideErrors.length > 1
+              ? {
+                  sideErrors: allSideErrors.map((e) => ({
+                    side: e.side,
+                    error: e.error,
+                    ...(e.referenceFile
+                      ? { referenceFile: e.referenceFile }
+                      : {}),
+                  })),
+                }
+              : {
+                  ...(allSideErrors[0].referenceFile
+                    ? { referenceFile: allSideErrors[0].referenceFile }
+                    : {}),
+                }),
+            actualUrl: target.actualUrl,
+            baselineUrl: allSideErrors[0].baselineUrl || target.baselineUrl,
+            triage,
+          });
+          if (allSideErrors.some((item) => item.error.timeout)) {
+            timeoutEntries += 1;
+          }
+        }
+      }
+
       const viewerDiff =
         actual.ok && baseline.ok
           ? compareCapturedViewerPair({
@@ -3480,7 +3664,9 @@ async function main() {
       });
       const combinedChangeType = hasReferences
         ? changeType
-        : getManualCombinedChangeType(viewerChanged);
+        : actualStatus === "ERROR" || baselineStatus === "ERROR"
+          ? changeType // respect error-aware result for MANUAL tests with errors
+          : getManualCombinedChangeType(viewerChanged);
 
       entries.push({
         id,
@@ -3503,9 +3689,13 @@ async function main() {
         screenshotMismatches += 1;
       }
 
-      const shouldRecordDifference = hasReferences
-        ? actualStatus !== "PASS" || baselineStatus !== "PASS" || viewerChanged
-        : viewerChanged;
+      const shouldRecordDifference =
+        combinedChangeType !== "error" &&
+        (hasReferences
+          ? actualStatus !== "PASS" ||
+            baselineStatus !== "PASS" ||
+            viewerChanged
+          : viewerChanged);
 
       if (shouldRecordDifference) {
         const triageRequired = combinedChangeType !== "improvement";
@@ -3550,10 +3740,10 @@ async function main() {
           ],
           triage,
         });
-        console.log(
-          `  -> outcome=${combinedChangeType} (baseline=${baselineStatus}, actual=${actualStatus}, viewerChanged=${viewerChanged})`,
-        );
       }
+      console.log(
+        `  -> outcome=${combinedChangeType} (baseline=${baselineStatus}, actual=${actualStatus}, viewerChanged=${viewerChanged})`,
+      );
 
       continue;
     }
@@ -3569,69 +3759,119 @@ async function main() {
     );
 
     if (!actual.ok || baselines.some((item) => !item.result.ok)) {
-      if (!actual.ok) {
-        const rawTriage = getTriageStatus(
-          triageStatusMap,
-          target.category,
-          target.title,
-          "error",
-        );
-        const triage =
-          target.usedApprovedViewer && rawTriage.decision === "expected"
-            ? { status: "pending", decision: "" }
-            : rawTriage;
-        errors.push({
-          id,
-          category: target.category,
-          title: target.title,
-          file: toArray(target.file),
-          sourceUrl: target.sourceUrl,
-          side: opts.actualLabel,
-          error: actual.error,
-          baselineUrl: baselines[0]?.reference?.baselineUrl,
-          actualUrl: target.actualUrl,
-          triage,
-        });
-        if (actual.error.timeout) {
-          timeoutEntries += 1;
-        }
-        console.log(
-          `  -> ${opts.actualLabel} error: ${actual.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
-        );
-      }
-      for (const item of baselines) {
-        if (item.result.ok) {
-          continue;
-        }
-        const rawTriage = getTriageStatus(
-          triageStatusMap,
-          target.category,
-          target.title,
-          "error",
-        );
-        const triage =
-          target.usedApprovedViewer && rawTriage.decision === "expected"
-            ? { status: "pending", decision: "" }
-            : rawTriage;
-        errors.push({
-          id,
-          category: target.category,
-          title: target.title,
-          file: toArray(target.file),
-          sourceUrl: target.sourceUrl,
-          side: opts.baselineLabel,
+      const actualSideErr = !actual.ok ? actual.error : null;
+      const baselineSideErrs = baselines
+        .filter((item) => !item.result.ok)
+        .map((item) => ({
           error: item.result.error,
-          actualUrl: target.actualUrl,
-          baselineUrl: item.reference.baselineUrl,
           referenceFile: item.reference.referenceFile,
+          baselineUrl: item.reference.baselineUrl,
+        }));
+
+      // Combine actual + baseline errors into one entry per test.
+      const allSideErrors = [
+        ...(actualSideErr
+          ? [
+              {
+                side: opts.actualLabel,
+                error: actualSideErr,
+                baselineUrl: baselines[0]?.reference?.baselineUrl,
+              },
+            ]
+          : []),
+        ...(actualSideErr
+          ? baselineSideErrs.map((e) => ({
+              side: opts.baselineLabel,
+              error: e.error,
+              referenceFile: e.referenceFile,
+              baselineUrl: e.baselineUrl,
+            }))
+          : []),
+      ];
+
+      if (allSideErrors.length > 0) {
+        const rawTriage = getTriageStatus(
+          triageStatusMap,
+          target.category,
+          target.title,
+          "error",
+        );
+        const triage =
+          target.usedApprovedViewer && rawTriage.decision === "expected"
+            ? { status: "pending", decision: "" }
+            : rawTriage;
+        errors.push({
+          id,
+          category: target.category,
+          title: target.title,
+          file: toArray(target.file),
+          sourceUrl: target.sourceUrl,
+          side: allSideErrors.map((e) => e.side).join(", "),
+          error: allSideErrors[0].error,
+          ...(allSideErrors.length > 1
+            ? {
+                sideErrors: allSideErrors.map((e) => ({
+                  side: e.side,
+                  error: e.error,
+                  ...(e.referenceFile
+                    ? { referenceFile: e.referenceFile }
+                    : {}),
+                })),
+              }
+            : {
+                ...(allSideErrors[0].referenceFile
+                  ? { referenceFile: allSideErrors[0].referenceFile }
+                  : {}),
+              }),
+          actualUrl: target.actualUrl,
+          baselineUrl: allSideErrors[0].baselineUrl,
           triage,
         });
-        if (item.result.error.timeout) {
+        if (allSideErrors.some((item) => item.error.timeout)) {
           timeoutEntries += 1;
         }
-        console.log(
-          `  -> ${opts.baselineLabel} error (${item.reference.referenceFile}): ${item.result.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
-        );
+        for (const item of allSideErrors) {
+          console.log(
+            `  -> ${item.side} error${item.referenceFile ? ` (${item.referenceFile})` : ""}: ${item.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+          );
+        }
+      }
+
+      // Baseline-only errors (actual was ok): one entry each.
+      if (!actualSideErr) {
+        for (const item of baselineSideErrs) {
+          const rawTriage = getTriageStatus(
+            triageStatusMap,
+            target.category,
+            target.title,
+            "error",
+          );
+          const triage =
+            target.usedApprovedViewer && rawTriage.decision === "expected"
+              ? { status: "pending", decision: "" }
+              : rawTriage;
+          errors.push({
+            id,
+            category: target.category,
+            title: target.title,
+            file: toArray(target.file),
+            sourceUrl: target.sourceUrl,
+            side: opts.baselineLabel,
+            error: item.error,
+            actualUrl: target.actualUrl,
+            baselineUrl: item.baselineUrl,
+            ...(item.referenceFile
+              ? { referenceFile: item.referenceFile }
+              : {}),
+            triage,
+          });
+          if (item.error.timeout) {
+            timeoutEntries += 1;
+          }
+          console.log(
+            `  -> ${opts.baselineLabel} error${item.referenceFile ? ` (${item.referenceFile})` : ""}: ${item.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+          );
+        }
       }
       continue;
     }
