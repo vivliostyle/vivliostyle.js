@@ -1645,6 +1645,9 @@ span[data-viv-leader] {
 [style*="--viv-marker-text-combine-upright"]::marker {
   text-combine-upright: var(--viv-marker-text-combine-upright);
 }
+[style*="--viv-marker-text-orientation"]::marker {
+  text-orientation: var(--viv-marker-text-orientation);
+}
 
 /* initial-letter */
 [style*="--viv-initialLetter"]:has(>[data-adapt-pseudo="first-letter"])::first-letter {

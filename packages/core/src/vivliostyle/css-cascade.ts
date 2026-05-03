@@ -3926,6 +3926,7 @@ export class CascadeInstance {
     "white-space",
     "text-transform",
     "text-combine-upright",
+    "text-orientation",
   ];
 
   /**
