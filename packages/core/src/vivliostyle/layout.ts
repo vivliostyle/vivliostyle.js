@@ -521,6 +521,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return Math.abs(a - b) < precision;
   }
 
+  private getFloatLayoutUnit(): number {
+    // Disable artificial float/clear compensation when pixelRatio=0 so
+    // rendering follows native browser float precision without artificial
+    // offsets. This is used for WPT reftests and also applies to environments
+    // where pixelRatio emulation is unavailable. (Issue #1913)
+    if (this.clientLayout.pixelRatio === 0) {
+      return 0;
+    }
+    return 1 / (this.clientLayout.pixelRatio || 1);
+  }
+
+  private getFloatLayoutTolerance(floatUnit: number): number {
+    // Even when compensation is disabled by pixelRatio=0, keep a 1px
+    // tolerance so tiny DOM measurement deltas do not create a clearance
+    // spacer via Math.max(1, ...). (Issue #1913)
+    return floatUnit || 1;
+  }
+
   isOverflown(edge: number): boolean {
     // Prevent incorrect overflow detection due to precision issues,
     // especially when the footnote edge is touching the edge of a
@@ -955,16 +973,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // boundaries between bands with different float widths to prevent text
     // from wrapping incorrectly due to sub-pixel float height rounding.
     // WebKit only supports 1px precision for float heights and truncates
-    // (floors) non-integer values, so we use Math.floor for WebKit and
-    // Math.round for other browsers. (Issue #1738)
+    // (floors) non-integer values, so when compensation is enabled we use
+    // Math.floor for WebKit and Math.round for other browsers. (Issue #1738)
     // This also fixes incorrect wrapping when float heights specified with
     // lh/rlh units slightly exceed actual line heights. (Issue #1494)
-    const floatUnit = 1 / (this.clientLayout.pixelRatio || 1);
+    // When pixelRatio=0, skip rounding/adjustment and keep native float
+    // measurements as-is. (Issue #1913)
+    const floatUnit = this.getFloatLayoutUnit();
     const roundToUnit = Base.browserType === "webkit" ? Math.floor : Math.round;
-    const floatHeights = bands.map(
-      (band) =>
-        (roundToUnit(band.y2 / floatUnit) - roundToUnit(band.y1 / floatUnit)) *
-        floatUnit,
+    const floatHeights = bands.map((band) =>
+      floatUnit > 0
+        ? (roundToUnit(band.y2 / floatUnit) -
+            roundToUnit(band.y1 / floatUnit)) *
+          floatUnit
+        : band.y2 - band.y1,
     );
     // Adjust float heights at boundaries between bands with different float
     // widths. When the next band has a wider float (more exclusion), extend
@@ -1004,7 +1026,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             : 0
           : leftDir || rightDir;
 
-      if (adjustDir !== 0) {
+      if (floatUnit > 0 && adjustDir !== 0) {
         const delta = adjustDir * floatUnit;
         if (
           floatHeights[i] + delta >= 0 &&
@@ -1421,10 +1443,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       }
 
-      // Extend box after-edge slightly so positionFloat() does not reject a
-      // float that barely overflows due to sub-pixel rounding when clear
-      // pushes it near the column boundary. (Issue #1803)
-      box.y2 += 1 / (this.clientLayout.pixelRatio || 1);
+      // When compensation is enabled, extend box after-edge slightly so
+      // positionFloat() does not reject a float that barely overflows due to
+      // sub-pixel rounding when clear pushes it near the column boundary.
+      // With pixelRatio=0 this stays unchanged (no extra extension).
+      // (Issue #1803, #1913)
+      box.y2 += this.getFloatLayoutUnit();
 
       GeometryUtil.positionFloat(box, this.bands, floatHorBox, floatSide);
       if (this.vertical) {
@@ -3347,17 +3371,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // rendering differences with exclusion floats. Page/column float clear
     // edges from getPageFloatClearEdge() are accurate DOM measurements and
     // don't need the extra margin. (Issue #1803)
-    const floatUnit = 1 / (this.clientLayout.pixelRatio || 1);
+    const floatUnit = this.getFloatLayoutUnit();
     const inlineFloatEdgeDominates = clearEdge * dir > pageFloatClearEdge * dir;
-    clearEdge =
-      dir *
-      (Math.ceil((clearEdge * dir) / floatUnit) +
-        (inlineFloatEdgeDominates ? 1 : 0)) *
-      floatUnit;
+    if (floatUnit > 0) {
+      clearEdge =
+        dir *
+        (Math.ceil((clearEdge * dir) / floatUnit) +
+          (inlineFloatEdgeDominates ? 1 : 0)) *
+        floatUnit;
+    }
 
     // tolerance to avoid unnecessary clearance due to the pixel rounding errors
     // (Issue #1608)
-    const tolerance = floatUnit;
+    const tolerance = this.getFloatLayoutTolerance(floatUnit);
     if (edge * dir + tolerance > clearEdge * dir) {
       // No need for clearance
       nodeContext.viewNode.parentNode.removeChild(spacer);
