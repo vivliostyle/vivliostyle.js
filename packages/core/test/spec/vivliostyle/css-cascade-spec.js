@@ -1107,4 +1107,36 @@ describe("css-cascade", function () {
       });
     });
   });
+
+  describe("CascadeInstance", function () {
+    describe("markerAllowedProps", function () {
+      it("includes text-orientation for vertical writing mode support", function () {
+        expect(adapt_csscasc.CascadeInstance.markerAllowedProps).toContain(
+          "text-orientation",
+        );
+      });
+
+      it("includes all required marker properties", function () {
+        const expectedProps = [
+          "color",
+          "font-family",
+          "font-size",
+          "font-style",
+          "font-weight",
+          "font-variant",
+          "unicode-bidi",
+          "direction",
+          "white-space",
+          "text-transform",
+          "text-combine-upright",
+          "text-orientation",
+        ];
+        expectedProps.forEach((prop) => {
+          expect(adapt_csscasc.CascadeInstance.markerAllowedProps).toContain(
+            prop,
+          );
+        });
+      });
+    });
+  });
 });
