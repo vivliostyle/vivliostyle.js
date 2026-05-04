@@ -91,7 +91,7 @@ export function setResourceBaseURL(value: string): void {
 
 function getWptRawRepoRootURL(url: string): string | null {
   const matched = stripFragmentAndQuery(url).match(
-    /^(https?:\/\/raw\.githubusercontent\.com\/web-platform-tests\/wpt\/master)(?:\/|$)/,
+    /^(https?:\/\/raw\.githack\.com\/web-platform-tests\/wpt\/[^/]+)(?:\/|$)/,
   );
   return matched ? matched[1] : null;
 }
@@ -194,6 +194,14 @@ export function convertSpecialURL(url: string): string {
 
   if (
     (r =
+      /^(https?:)\/\/github\.com\/web-platform-tests\/wpt\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
+        url,
+      ))
+  ) {
+    // Convert GitHub WPT URL to raw.githack.com URL (correct MIME types)
+    url = `${r[1]}//raw.githack.com/web-platform-tests/wpt/${r[2] ? "" : "master/"}${r[3]}`;
+  } else if (
+    (r =
       /^(https?:)\/\/github\.com\/([^/]+\/[^/]+)\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
         url,
       ))
@@ -203,8 +211,10 @@ export function convertSpecialURL(url: string): string {
       r[4]
     }`;
   } else if ((r = /^(https?:)\/\/wpt\.live\/(.*)$/.exec(url))) {
-    // Convert WPT live URL to raw GitHub URL so it can be fetched without CORS issues.
-    url = `${r[1]}//raw.githubusercontent.com/web-platform-tests/wpt/master/${r[2]}`;
+    // Convert WPT live URL to raw.githack.com URL so it can be fetched without
+    // CORS issues and with correct MIME types for embedded resources (e.g.,
+    // <object data="..."> with type="text/html").
+    url = `${r[1]}//raw.githack.com/web-platform-tests/wpt/master/${r[2]}`;
   } else if (
     (r =
       /^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/.exec(
