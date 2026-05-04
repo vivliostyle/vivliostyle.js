@@ -1936,6 +1936,34 @@ export class ViewFactory
           }
         }
 
+        // Wait for object element content to load (e.g., embedded HTML via
+        // <object data="...">). This ensures proper pagination by waiting for
+        // the embedded document to fully render before proceeding.
+        // Use result.localName instead of tag because custom renderer may
+        // convert <object> to <iframe> (e.g., for bound content).
+        if (
+          result.localName === "object" &&
+          result.namespaceURI === Base.NS.XHTML &&
+          result.hasAttribute("data")
+        ) {
+          this.page.fetchers.push(Net.loadElement(result));
+        }
+
+        // Wait for iframe content to load. This ensures embedded documents
+        // (including their images and resources) are fully rendered.
+        // Handle loading="lazy" by forcing eager loading to prevent blocking.
+        if (
+          result.localName === "iframe" &&
+          result.namespaceURI === Base.NS.XHTML &&
+          result.hasAttribute("src")
+        ) {
+          const iframeElem = result as HTMLIFrameElement;
+          if (iframeElem.loading === "lazy") {
+            iframeElem.loading = "eager";
+          }
+          this.page.fetchers.push(Net.loadElement(result));
+        }
+
         this.preprocessElementStyle(computedStyle);
         this.applyComputedStyles(result, computedStyle);
 

@@ -42,26 +42,57 @@ describe("base", function () {
   });
 
   describe("convertSpecialURL", function () {
-    it("converts wpt.live URLs to raw GitHub URLs", function () {
+    it("converts wpt.live URLs to raw.githack.com URLs", function () {
       expect(
         module.convertSpecialURL(
           "https://wpt.live/css/css-fonts/font-face-src-list.html",
         ),
       ).toBe(
-        "https://raw.githubusercontent.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
+        "https://raw.githack.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
+      );
+    });
+
+    it("converts GitHub WPT URLs to raw.githack.com URLs", function () {
+      expect(
+        module.convertSpecialURL(
+          "https://github.com/web-platform-tests/wpt/blob/master/css/css-fonts/font-face-src-list.html",
+        ),
+      ).toBe(
+        "https://raw.githack.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
+      );
+    });
+
+    it("converts GitHub WPT URLs with non-master branch to raw.githack.com URLs", function () {
+      expect(
+        module.convertSpecialURL(
+          "https://github.com/web-platform-tests/wpt/blob/merge_pr_123456/css/CSS2/fonts/font-family-008.xht",
+        ),
+      ).toBe(
+        "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/css/CSS2/fonts/font-family-008.xht",
       );
     });
   });
 
   describe("resolveURL", function () {
-    it("keeps repo-root absolute paths within the WPT raw GitHub mirror", function () {
+    it("keeps repo-root absolute paths within the WPT raw.githack.com mirror", function () {
       expect(
         module.resolveURL(
           "/fonts/Lato-Medium.ttf",
-          "https://raw.githubusercontent.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
+          "https://raw.githack.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
         ),
       ).toBe(
-        "https://raw.githubusercontent.com/web-platform-tests/wpt/master/fonts/Lato-Medium.ttf",
+        "https://raw.githack.com/web-platform-tests/wpt/master/fonts/Lato-Medium.ttf",
+      );
+    });
+
+    it("keeps repo-root absolute paths within the WPT mirror for non-master branches", function () {
+      expect(
+        module.resolveURL(
+          "/fonts/ahem.css",
+          "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/css/CSS2/fonts/font-family-008.xht",
+        ),
+      ).toBe(
+        "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/fonts/ahem.css",
       );
     });
   });
