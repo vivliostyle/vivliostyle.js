@@ -181,7 +181,7 @@ yarn test:reftest-diff \
 このモードでも `report.html` が `report.json` と `report.md` と一緒に出力されます。
 HTML レポートでは viewer ごとの PASS / FAIL と change classification を色付きで
 表示します。テスト名は元文書へのリンク、viewer badge は各 viewer URL へのリンク、
-Change badge は行フィルターとして機能し、スクリーンショット差分がある場合は
+サマリーカードは行フィルターとして機能し、スクリーンショット差分がある場合は
 ページごとの diff 画像リンクも Change 列に表示されます。
 
 WPT manual test のみを対象にした例:
@@ -335,25 +335,25 @@ git commit -m "chore: update layout regression triage"
 
 PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され、Vercel プレビューデプロイメントが actual ビューワーとして使用されます。
 
-結果は PR コメントとして投稿され（新しいプッシュごとに更新）、Actions タブから手動でカスタムビューワー指定、カテゴリーフィルター、制限数を指定して実行することもできます。
+結果は PR コメントとして投稿され（新しいプッシュごとに更新）、Actions タブから手動でカスタムビューワー指定、カテゴリーフィルター、制限数を指定して実行することもできます。PR 実行がキャンセルされた場合や、コメント投稿ステップに到達する前に PR が close / merge された場合は、PR コメントの投稿・更新はスキップされます。
 
 ## HTML レポート
 
 3 つのモードすべてで `report.html` が `report.json` と `report.md` と一緒に出力されます。
 
+- テーブルの先頭列にはレポートのエントリ ID（`report.json` と同じもの）が表示されます。
+- 結果件数が多い場合でも、スクロール中にテーブルヘッダーが表示されたままになります。
+- 全モードで、差分ありの行だけでなく unchanged / 差分なしの行も HTML テーブルに表示されます。
 - Test 名から元の test 文書を開けます。
 - viewer badge からその side の実際の viewer URL を開けます。
 - `version-diff` は「差分がある」ことだけを示すモードなので、actual/baseline の badge は
   `FAIL` ではなく `view` 表示になります。
 - `reftest` と `reftest-diff` では、意味のある場合に PASS / FAIL / ERROR badge を表示します。
-- `reftest-diff` モードでは、サマリーパネルに汎用の Differences 件数ではなく
-  **PASS** / **FAIL** / **Errors** の件数が表示されます。PASS カードには
-  improvement がある場合に `improvement: N` の内訳が表示され、FAIL カードには
-  `regression: N` が非ゼロの場合に内訳が表示されます。リファレンスファイルなしの
-  MANUAL テストでビューワーの変化がある場合は、**Changed (manual)** カードが
-  独立して表示されます。page count changed は非ゼロの場合に独立したカードとして
-  表示されます。
-- Change badge をクリックすると、その change type の行だけに絞り込めます。
+- サマリーカードは色分けされており、すべてのカードをクリックしてその条件で表を絞り込めます。
+  `Compared` はフィルター解除として動作し、change type の各カードに加えて、
+  `ERROR`、`Page count changed`、`Screenshot mismatches`、`Timeout entries`
+  でも対応する行だけを表示できます。エントリ単位のエラー件数が `ERROR`
+  change type の件数と異なる場合は、追加で `Entry errors` カードも表示されます。
 - スクリーンショット差分がある場合は、Change 列に `p1` や `r1-p1` のようなページ単位の
   diff 画像リンクが表示されます。
 
@@ -441,10 +441,10 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 Errors セクションのみに出力され、Differences セクションには含まれません。
 `Entries with differences` サマリー行では、improvement がある場合に件数が表示されます（例: `(improvement: 20, pending: 14, triaged: 0)`）。
 
-実行中ログには、検出した差分・エラーの triage 状態も表示されます（例）:
+実行中ログには、色付きで検出した差分・エラーの triage 状態も表示されます（例）:
 
 ```text
--> difference found (pageCountMismatch=false, pageDiffs=4, triage=triaged/regression)
+-> outcome=changed (pageCountMismatch=false, pageDiffs=4, triage=triaged/regression)
 ```
 
 実行の最後には、未トリアージ件数も表示されます:
