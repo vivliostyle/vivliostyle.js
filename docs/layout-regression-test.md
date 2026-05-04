@@ -183,7 +183,7 @@ Default output directory in this mode:
 The script now also writes `report.html` alongside `report.json` and `report.md`.
 The HTML report shows a color-coded table of PASS / FAIL per viewer and the overall
 change classification. Test names link to the original document, viewer badges link
-to the corresponding viewer page, Change badges can filter rows in place, and page-
+to the corresponding viewer page, summary cards can filter rows in place, and page-
 level diff image links appear in the Change column when screenshot diffs exist.
 
 Example limited to WPT manual tests:
@@ -352,25 +352,28 @@ Vercel preview deployment is used as the actual viewer.
 
 Results are posted as a PR comment (updated on every new push). The workflow
 can also be triggered manually from the Actions tab with custom viewer specs,
-category filter, and limit.
+category filter, and limit. If a PR run is cancelled, or if the PR is closed or
+merged before the workflow reaches the comment step, the workflow skips posting
+or updating the PR comment.
 
 ## HTML report
 
 All three modes write `report.html` alongside `report.json` and `report.md`.
 
+- The first table column includes the report entry id (same as `report.json`).
+- The table header stays visible while scrolling long result tables.
+- All modes list every entry in the HTML table, including unchanged / no-difference rows.
 - Test names link to the original test document.
 - Viewer badges link to the exact viewer URL used for that side.
 - In `version-diff`, viewer badges are shown as `view` because the mode only
   reports that a difference exists, not whether the new rendering is better or worse.
 - In `reftest` and `reftest-diff`, PASS / FAIL / ERROR style badges are shown when
   the mode has that semantic information.
-- In `reftest-diff` mode, the summary panel shows **PASS** / **FAIL** / **Errors** counts
-  instead of a generic Differences count. The PASS card includes an `improvement: N`
-  breakdown when improvements are present; the FAIL card shows a `regression: N`
-  breakdown when non-zero. When manual tests (no reference file) have viewer changes, a
-  separate **Changed (manual)** card appears. Page count changed appears as a separate
-  card when non-zero.
-- Change badges can be clicked to filter the table by change type.
+- The summary panel is color-coded, and every summary card can be clicked to filter the
+  table in place. `Compared` clears the filter, and cards such as change types,
+  `ERROR`, `Page count changed`, `Screenshot mismatches`, and `Timeout entries`
+  filter to the corresponding subset. When entry-level error counts differ from the
+  `ERROR` change-type count, an additional `Entry errors` card is shown.
 - When screenshot diffs exist, the Change column also shows page-level diff links
   such as `p1` or `r1-p1`.
 
@@ -456,10 +459,10 @@ only in the Errors section and are excluded from the Differences section.
 The `Entries with differences` summary line also shows the improvement count
 when improvements are present, e.g. `(improvement: 20, pending: 14, triaged: 0)`.
 
-Execution logs include triage status for detected differences/errors, e.g.:
+Execution logs are colorized and include triage status for detected differences/errors, e.g.:
 
 ```text
--> difference found (pageCountMismatch=false, pageDiffs=4, triage=triaged/regression)
+-> outcome=changed (pageCountMismatch=false, pageDiffs=4, triage=triaged/regression)
 ```
 
 At the end, pending triage count is printed:

@@ -2176,6 +2176,105 @@ function summarizeCombinedEntries(entries) {
   };
 }
 
+const summaryCardOrder = [
+  "pass",
+  "improvement",
+  "regression",
+  "known-fail",
+  "changed-fail",
+  "expected-change",
+  "changed",
+  "unchanged",
+  "fail",
+  "error",
+];
+
+function formatChangeLabel(value) {
+  if (value === "pass") return "PASS";
+  if (value === "fail") return "FAIL";
+  if (value === "error") return "ERROR";
+  return String(value || "");
+}
+
+function statusClass(value) {
+  if (value === "PASS") return "pass";
+  if (value === "FAIL") return "fail";
+  if (value === "ERROR") return "error";
+  if (value === "MANUAL") return "neutral";
+  return "neutral";
+}
+
+function changeClass(value) {
+  if (value === "regression") return "regression";
+  if (value === "improvement") return "improvement";
+  if (value === "fail") return "fail";
+  if (value === "changed") return "fail";
+  if (value === "changed-fail") return "fail";
+  if (value === "known-fail") return "known-fail";
+  if (value === "unchanged") return "pass";
+  if (value === "pass" || value === "expected-change") return "pass";
+  if (value === "error") return "error";
+  return "neutral";
+}
+
+function getOrderedChangeTypes(changeTypes) {
+  const keys = Object.keys(changeTypes || {});
+  const seen = new Set();
+  const ordered = [];
+
+  for (const key of summaryCardOrder) {
+    if (keys.includes(key)) {
+      ordered.push(key);
+      seen.add(key);
+    }
+  }
+
+  return ordered.concat(keys.filter((key) => !seen.has(key)).sort());
+}
+
+const ansiEnabled =
+  !process.env.NO_COLOR &&
+  (Boolean(process.stdout?.isTTY) ||
+    process.env.GITHUB_ACTIONS === "true" ||
+    process.env.CI === "true" ||
+    ["1", "2", "3", "true"].includes(
+      String(process.env.FORCE_COLOR || "").toLowerCase(),
+    ));
+const ansiByTone = {
+  pass: "\u001b[32m",
+  improvement: "\u001b[32m",
+  fail: "\u001b[31m",
+  regression: "\u001b[31m",
+  error: "\u001b[31m",
+  "known-fail": "\u001b[33m",
+  neutral: "\u001b[90m",
+  info: "\u001b[36m",
+  warning: "\u001b[33m",
+  bold: "\u001b[1m",
+};
+
+function colorize(text, tone = "neutral") {
+  const value = String(text ?? "");
+  if (!ansiEnabled) {
+    return value;
+  }
+  const color = ansiByTone[tone] || "";
+  return color ? `${color}${value}\u001b[0m` : value;
+}
+
+function formatStatusForCli(status) {
+  return colorize(status, statusClass(status));
+}
+
+function formatChangeForCli(changeType) {
+  const tone = changeClass(changeType);
+  return colorize(formatChangeLabel(changeType), tone);
+}
+
+function formatPathForCli(filePath) {
+  return colorize(filePath, "info");
+}
+
 function formatPageList(pageNumbers) {
   if (!Array.isArray(pageNumbers) || pageNumbers.length === 0) {
     return "none";
@@ -2548,8 +2647,6 @@ function writeReports(outDir, result, triageStatusMap) {
       `<span class="badge ${className}">${escapeHtml(label)}</span>`,
       "badge-link",
     );
-  const renderFilterBadge = (label, className) =>
-    `<button type="button" class="badge filter-badge ${className}" data-filter="${escapeHtml(label)}">${escapeHtml(label)}</button>`;
   const toReportRelativePath = (filePath) =>
     escapeHtml(path.relative(outDir, filePath).split(path.sep).join("/"));
   const collectDiffImageLinks = (diff) => {
@@ -2611,7 +2708,10 @@ function writeReports(outDir, result, triageStatusMap) {
     return links;
   };
   const renderChangeCell = (changeType, diff) => {
-    const badge = renderFilterBadge(changeType, changeClass(changeType));
+    const badge = renderBadge(
+      formatChangeLabel(changeType),
+      changeClass(changeType),
+    );
     const diffLinks = collectDiffImageLinks(diff);
     if (diffLinks.length === 0) {
       return badge;
@@ -2623,22 +2723,6 @@ function writeReports(outDir, result, triageStatusMap) {
       )
       .join("");
     return `<div class="change-cell">${badge}<span class="diff-links">${linksHtml}</span></div>`;
-  };
-  const statusClass = (value) => {
-    if (value === "PASS") return "pass";
-    if (value === "FAIL") return "fail";
-    if (value === "ERROR") return "error";
-    if (value === "MANUAL") return "neutral";
-    return "neutral";
-  };
-  const changeClass = (value) => {
-    if (value === "regression") return "fail";
-    if (value === "improvement") return "improvement";
-    if (value === "changed") return "fail";
-    if (value === "unchanged") return "pass";
-    if (value === "pass" || value === "expected-change") return "pass";
-    if (value === "error") return "error";
-    return "neutral";
   };
   const renderFallbackViewerBadge = (url) =>
     renderBadge(
@@ -2659,11 +2743,144 @@ function writeReports(outDir, result, triageStatusMap) {
     items.push(item);
     errorById.set(item.id, items);
   }
+  const getEntryFilterMeta = (entryId) => {
+    const diff = diffById.get(entryId);
+    const entryErrors = errorById.get(entryId) || [];
+    const hasError = entryErrors.length > 0;
+    const hasTimeout = entryErrors.some((err) =>
+      err.sideErrors
+        ? err.sideErrors.some((sideError) => sideError.error.timeout)
+        : err.error.timeout,
+    );
+    const hasPageCountMismatch = Boolean(diff?.pageCountMismatch);
+    const hasScreenshotMismatch = Boolean(
+      (diff?.pages?.length || 0) > 0 ||
+      diff?.comparisons?.some((comparison) => comparison.pages.length > 0),
+    );
+    return {
+      hasError,
+      hasTimeout,
+      hasPageCountMismatch,
+      hasScreenshotMismatch,
+    };
+  };
+  const entryFilterMetaList = Array.isArray(resultWithTriage.entries)
+    ? resultWithTriage.entries.map((entry) => ({
+        entry,
+        meta: getEntryFilterMeta(entry.id),
+      }))
+    : [];
+  const entryFilterMetaById = new Map(
+    Array.isArray(resultWithTriage.entries)
+      ? entryFilterMetaList.map(({ entry, meta }) => [entry.id, meta])
+      : [],
+  );
+  const countEntriesBy = (predicate, fallback) => {
+    if (entryFilterMetaList.length === 0) {
+      return fallback;
+    }
+    let count = 0;
+    for (const { entry, meta } of entryFilterMetaList) {
+      if (predicate(entry, meta)) {
+        count += 1;
+      }
+    }
+    return count;
+  };
+  const changeCounts = result.summary.outcomes?.changeTypes || {};
+  const errorChangeCount = changeCounts.error ?? 0;
+  const errorCount = countEntriesBy(
+    (_, meta) => meta.hasError,
+    result.summary.entriesWithErrors,
+  );
+  const pageCountMismatchCount = countEntriesBy(
+    (_, meta) => meta.hasPageCountMismatch,
+    result.summary.pageCountMismatches,
+  );
+  const screenshotMismatchCount = countEntriesBy(
+    (_, meta) => meta.hasScreenshotMismatch,
+    result.summary.screenshotMismatches,
+  );
+  const timeoutCount = countEntriesBy(
+    (_, meta) => meta.hasTimeout,
+    result.summary.timeoutEntries,
+  );
+  const showEntryErrorsCard = errorCount > 0 && errorCount !== errorChangeCount;
+  const renderRowFilterAttributes = ({
+    changeType,
+    hasError = false,
+    hasTimeout = false,
+    hasPageCountMismatch = false,
+    hasScreenshotMismatch = false,
+  }) =>
+    `data-filter-change-type="${escapeHtml(changeType)}" data-filter-error="${hasError ? "1" : "0"}" data-filter-timeout="${hasTimeout ? "1" : "0"}" data-filter-page-count-mismatch="${hasPageCountMismatch ? "1" : "0"}" data-filter-screenshot-mismatch="${hasScreenshotMismatch ? "1" : "0"}"`;
+  const summaryCards = [
+    {
+      label: "Compared",
+      value: Array.isArray(resultWithTriage.entries)
+        ? resultWithTriage.entries.length
+        : result.summary.totalEntries,
+      className: "neutral",
+      filter: { kind: "clear", value: "", label: "Compared" },
+    },
+    ...getOrderedChangeTypes(changeCounts).map((changeType) => ({
+      label: formatChangeLabel(changeType),
+      value: changeCounts[changeType],
+      className: changeClass(changeType),
+      filter: {
+        kind: "change-type",
+        value: changeType,
+        label: formatChangeLabel(changeType),
+      },
+    })),
+    ...(showEntryErrorsCard
+      ? [
+          {
+            label: "Entry errors",
+            value: errorCount,
+            className: "error",
+            filter: { kind: "error", value: "1", label: "Entry errors" },
+          },
+        ]
+      : []),
+    {
+      label: "Page count changed",
+      value: pageCountMismatchCount,
+      className: pageCountMismatchCount > 0 ? "fail" : "neutral",
+      filter: {
+        kind: "page-count-mismatch",
+        value: "1",
+        label: "Page count changed",
+      },
+    },
+    {
+      label: "Screenshot mismatches",
+      value: screenshotMismatchCount,
+      className: screenshotMismatchCount > 0 ? "fail" : "neutral",
+      filter: {
+        kind: "screenshot-mismatch",
+        value: "1",
+        label: "Screenshot mismatches",
+      },
+    },
+    {
+      label: "Timeout entries",
+      value: timeoutCount,
+      className: timeoutCount > 0 ? "error" : "neutral",
+      filter: { kind: "timeout", value: "1", label: "Timeout entries" },
+    },
+  ];
   const rows = Array.isArray(resultWithTriage.entries)
     ? resultWithTriage.entries
         .map((entry) => {
           const diff = diffById.get(entry.id);
           const entryErrors = errorById.get(entry.id) || [];
+          const entryMeta = entryFilterMetaById.get(entry.id) || {
+            hasError: false,
+            hasTimeout: false,
+            hasPageCountMismatch: false,
+            hasScreenshotMismatch: false,
+          };
           const notes = [];
           if (diff?.pageCountMismatch) {
             notes.push("page count changed");
@@ -2691,22 +2908,38 @@ function writeReports(outDir, result, triageStatusMap) {
             escapeHtml(entry.title),
             "test-link",
           );
-          return `<tr>
-  <td class="test-path">${titleHtml}</td>
+          const notesText = notes.length > 0 ? notes.join(" | ") : "-";
+          return `<tr ${renderRowFilterAttributes({
+            changeType: entry.changeType,
+            hasError: entryMeta.hasError,
+            hasTimeout: entryMeta.hasTimeout,
+            hasPageCountMismatch: entryMeta.hasPageCountMismatch,
+            hasScreenshotMismatch: entryMeta.hasScreenshotMismatch,
+          })}>
+          <td class="test-path"><span class="entry-id">${escapeHtml(entry.id)}</span>${titleHtml}</td>
   <td>${renderBadge(entry.baselineStatus, statusClass(entry.baselineStatus), entry.baselineUrl)}</td>
   <td>${renderBadge(entry.actualStatus, statusClass(entry.actualStatus), entry.actualUrl)}</td>
-  <td data-change-type="${escapeHtml(entry.changeType)}">${renderChangeCell(entry.changeType, diff)}</td>
-  <td>${escapeHtml(notes.join(" | "))}</td>
+          <td>${renderChangeCell(entry.changeType, diff)}</td>
+          <td>${escapeHtml(notesText)}</td>
 </tr>`;
         })
         .join("\n")
     : resultWithTriage.differences
         .map(
-          (diff) => `<tr>
-  <td class="test-path">${renderAnchor(diff.sourceUrl, escapeHtml(diff.title), "test-link")}</td>
+          (diff) => `<tr ${renderRowFilterAttributes({
+            changeType: "difference",
+            hasPageCountMismatch: Boolean(diff.pageCountMismatch),
+            hasScreenshotMismatch: Boolean(
+              (diff.pages?.length || 0) > 0 ||
+              diff.comparisons?.some(
+                (comparison) => comparison.pages.length > 0,
+              ),
+            ),
+          })}>
+          <td class="test-path"><span class="entry-id">${escapeHtml(diff.id)}</span>${renderAnchor(diff.sourceUrl, escapeHtml(diff.title), "test-link")}</td>
   <td>${renderFallbackViewerBadge(diff.baseline?.url)}</td>
   <td>${renderFallbackActualDifferenceBadge(diff.actual?.url)}</td>
-  <td data-change-type="difference">${renderChangeCell("difference", diff)}</td>
+          <td>${renderChangeCell("difference", diff)}</td>
   <td>${escapeHtml(diff.pageCountMismatch ? "page count changed" : `${diff.pages.length} page diff(s)`)}</td>
 </tr>`,
         )
@@ -2738,11 +2971,17 @@ function writeReports(outDir, result, triageStatusMap) {
                   })
                   .join(" | ")
               : `${item.referenceFile ? `${item.side} (${item.referenceFile})` : item.side}: ${item.error.message}`;
-            return `<tr>
-  <td class="test-path">${renderAnchor(item.sourceUrl, escapeHtml(item.title), "test-link")}</td>
+            return `<tr ${renderRowFilterAttributes({
+              changeType: "error",
+              hasError: true,
+              hasTimeout: item.sideErrors
+                ? item.sideErrors.some((sideError) => sideError.error.timeout)
+                : item.error.timeout,
+            })}>
+  <td class="test-path"><span class="entry-id">${escapeHtml(item.id)}</span>${renderAnchor(item.sourceUrl, escapeHtml(item.title), "test-link")}</td>
   <td>${isBaselineError ? renderBadge("ERROR", "error", item.baselineUrl) : renderFallbackViewerBadge(item.baselineUrl)}</td>
   <td>${isActualError ? renderBadge("ERROR", "error", item.actualUrl) : renderFallbackViewerBadge(item.actualUrl)}</td>
-  <td data-change-type="error">${renderChangeCell("error")}</td>
+  <td>${renderChangeCell("error")}</td>
   <td>${escapeHtml(noteText)}</td>
 </tr>`;
           }),
@@ -2755,26 +2994,40 @@ function writeReports(outDir, result, triageStatusMap) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(result.labels.actual)} vs ${escapeHtml(result.labels.baseline)} report</title>
   <style>
-    :root { color-scheme: light; --bg:#f6f4ef; --panel:#fffdf8; --ink:#222; --muted:#6b665c; --line:#ddd4c4; --pass:#1f7a4d; --fail:#b42318; --error:#9c2a2a; --improvement:#0f766e; --neutral:#7a6f5a; }
-    body { margin:0; font:14px/1.4 ui-sans-serif, system-ui, sans-serif; color:var(--ink); background:linear-gradient(180deg,#f3efe6 0%,#f8f6f1 100%); }
-    main { max-width:1200px; margin:0 auto; padding:32px 24px 64px; }
+    :root { color-scheme: light; --bg:#f6f4ef; --panel:#fffdf8; --ink:#222; --muted:#6b665c; --line:#ddd4c4; --pass:#1f7a4d; --fail:#b65f4f; --known-fail:#c07a6c; --regression:#8f1d14; --error:#8a2323; --improvement:#0b5d3b; --neutral:#7a6f5a; }
+    html, body { height:100%; }
+    body { margin:0; overflow:hidden; font:14px/1.4 ui-sans-serif, system-ui, sans-serif; color:var(--ink); background:linear-gradient(180deg,#f3efe6 0%,#f8f6f1 100%); }
+    main { box-sizing:border-box; max-width:1200px; height:100vh; margin:0 auto; padding:32px 24px 24px; display:flex; flex-direction:column; }
     h1 { margin:0 0 8px; font-size:28px; }
     p { margin:0; color:var(--muted); }
-    .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:24px 0; }
-    .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,.04); }
-    .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
-    .value { font-size:28px; font-weight:700; margin-top:6px; }
-    table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
-    th, td { padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; }
-    th { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); background:#f5f0e6; }
+    .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin:20px 0; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:13px 14px; box-shadow:0 8px 24px rgba(0,0,0,.04); }
+    .summary-card { appearance:none; width:100%; text-align:left; font:inherit; color:inherit; }
+    .summary-card.is-filterable { cursor:pointer; transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+    .summary-card.is-filterable:hover { transform:translateY(-1px); }
+    .summary-card.is-filterable.is-active { box-shadow:0 0 0 2px rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.08); }
+    .summary-card.pass { border-color:color-mix(in srgb, var(--pass) 30%, var(--line)); background:color-mix(in srgb, var(--pass) 10%, var(--panel)); }
+    .summary-card.improvement { border-color:color-mix(in srgb, var(--improvement) 44%, var(--line)); background:color-mix(in srgb, var(--improvement) 18%, var(--panel)); }
+    .summary-card.fail { border-color:color-mix(in srgb, var(--fail) 30%, var(--line)); background:color-mix(in srgb, var(--fail) 10%, var(--panel)); }
+    .summary-card.known-fail { border-color:color-mix(in srgb, var(--known-fail) 30%, var(--line)); background:color-mix(in srgb, var(--known-fail) 10%, var(--panel)); }
+    .summary-card.regression { border-color:color-mix(in srgb, var(--regression) 46%, var(--line)); background:color-mix(in srgb, var(--regression) 18%, var(--panel)); }
+    .summary-card.error { border-color:color-mix(in srgb, var(--error) 46%, var(--line)); background:color-mix(in srgb, var(--error) 18%, var(--panel)); }
+    .summary-card.neutral { border-color:color-mix(in srgb, var(--neutral) 20%, var(--line)); background:var(--panel); }
+    .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.07em; }
+    .value { font-size:24px; font-weight:700; margin-top:4px; }
+    .table-wrap { flex:1; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.04); }
+    table { width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); }
+    th, td { padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; background:var(--panel); }
+    th { position:sticky; top:0; z-index:2; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); background:#f5f0e6; }
     tr:last-child td { border-bottom:none; }
     .badge { display:inline-block; padding:3px 9px; border-radius:999px; font-size:12px; font-weight:700; color:#fff; }
     .badge.pass { background:var(--pass); }
     .badge.fail { background:var(--fail); }
+    .badge.known-fail { background:var(--known-fail); }
+    .badge.regression { background:var(--regression); }
     .badge.error { background:var(--error); }
     .badge.improvement { background:var(--improvement); }
     .badge.neutral { background:var(--neutral); }
-    .filter-badge { border:none; cursor:pointer; }
     .badge-link, .test-link { color:inherit; text-decoration:none; }
     .badge-link:hover .badge { filter:brightness(.94); }
     .test-link:hover { text-decoration:underline; }
@@ -2782,12 +3035,24 @@ function writeReports(outDir, result, triageStatusMap) {
     .diff-links { display:flex; gap:6px; flex-wrap:wrap; }
     .diff-link { color:var(--muted); text-decoration:none; font-size:12px; border:1px solid var(--line); border-radius:999px; padding:2px 8px; background:#f5f0e6; }
     .diff-link:hover { text-decoration:underline; }
-    .toolbar { display:flex; align-items:center; gap:10px; margin:0 0 18px; color:var(--muted); }
+    .toolbar { display:flex; align-items:center; gap:10px; margin:0 0 14px; color:var(--muted); }
     .toolbar[hidden] { display:none; }
     .filter-reset { border:1px solid var(--line); background:var(--panel); border-radius:999px; padding:4px 10px; cursor:pointer; }
     .is-hidden { display:none; }
     .test-path { font-family:ui-monospace, SFMono-Regular, monospace; }
+    .entry-id { display:inline-flex; min-width:52px; margin-right:10px; color:var(--muted); font-weight:700; }
     .breakdown { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.6; }
+    @media (max-height: 760px), (max-width: 760px) {
+      body { overflow:auto; }
+      main { height:auto; min-height:100vh; padding:20px 16px 24px; }
+      h1 { font-size:24px; }
+      .summary { grid-template-columns:repeat(auto-fit,minmax(136px,1fr)); gap:8px; margin:16px 0; }
+      .card { border-radius:12px; padding:11px 12px; }
+      .label { font-size:10px; }
+      .value { font-size:20px; }
+      .toolbar { margin:0 0 12px; }
+      .table-wrap { flex:none; min-height:auto; overflow-x:auto; overflow-y:visible; }
+    }
   </style>
 </head>
 <body>
@@ -2795,107 +3060,98 @@ function writeReports(outDir, result, triageStatusMap) {
     <h1>${escapeHtml(result.labels.actual)} vs ${escapeHtml(result.labels.baseline)}</h1>
     <p>${escapeHtml(result.options.mode)} mode report generated at ${escapeHtml(result.generatedAt)}</p>
     <section class="summary">
-      <div class="card"><div class="label">Compared</div><div class="value">${escapeHtml(result.summary.totalEntries)}</div></div>
-      ${(() => {
-        const ct = result.summary.outcomes?.changeTypes;
-        if (ct) {
-          // reftest-diff mode: show PASS / FAIL cards derived from per-entry outcomes
-          const passTypes = [
-            "pass",
-            "improvement",
-            "expected-change",
-            "unchanged",
-          ];
-          const failTypes = ["regression", "known-fail", "changed-fail"];
-          const passCount = passTypes.reduce((s, t) => s + (ct[t] || 0), 0);
-          const failCount = failTypes.reduce((s, t) => s + (ct[t] || 0), 0);
-          const improvementCount = ct.improvement || 0;
-          const regressionCount = ct.regression || 0;
-          const changedCount = ct.changed || 0;
-          const pageCountMismatches = result.summary.pageCountMismatches || 0;
-          const passBreakdownParts = [];
-          if (improvementCount > 0)
-            passBreakdownParts.push(`improvement: ${improvementCount}`);
-          const failBreakdownParts = [];
-          if (regressionCount > 0)
-            failBreakdownParts.push(`regression: ${regressionCount}`);
-          const passBreakdown =
-            passBreakdownParts.length > 0
-              ? `<div class="breakdown">${passBreakdownParts.join("<br>")}</div>`
-              : "";
-          const failBreakdown =
-            failBreakdownParts.length > 0
-              ? `<div class="breakdown">${failBreakdownParts.join("<br>")}</div>`
-              : "";
-          const changedCard =
-            changedCount > 0
-              ? `\n      <div class="card"><div class="label">Changed (manual)</div><div class="value">${changedCount}</div></div>`
-              : "";
-          const pageCountCard =
-            pageCountMismatches > 0
-              ? `\n      <div class="card"><div class="label">Page count changed</div><div class="value">${pageCountMismatches}</div></div>`
-              : "";
-          return `<div class="card"><div class="label">PASS</div><div class="value">${passCount}</div>${passBreakdown}</div>
-      <div class="card"><div class="label">FAIL</div><div class="value">${failCount}</div>${failBreakdown}</div>${changedCard}${pageCountCard}`;
-        } else {
-          // version-diff mode: show simple Differences / Page count changed cards
-          return `<div class="card"><div class="label">Differences</div><div class="value">${escapeHtml(result.summary.entriesWithDifferences)}</div></div>
-      <div class="card"><div class="label">Page count changed</div><div class="value">${escapeHtml(result.summary.pageCountMismatches)}</div></div>`;
-        }
-      })()}
-      <div class="card"><div class="label">Errors</div><div class="value">${escapeHtml(result.summary.entriesWithErrors)}</div></div>
+      ${summaryCards
+        .map((card) => {
+          const attrs = card.filter
+            ? ` data-filter-kind="${escapeHtml(card.filter.kind)}" data-filter-value="${escapeHtml(card.filter.value)}" data-filter-label="${escapeHtml(card.filter.label)}"`
+            : "";
+          const filterableClass = card.filter ? " is-filterable" : "";
+          return `<button type="button" class="card summary-card ${card.className}${filterableClass}"${attrs}>
+        <div class="label">${escapeHtml(card.label)}</div>
+        <div class="value">${escapeHtml(card.value)}</div>
+      </button>`;
+        })
+        .join("\n")}
     </section>
     <div class="toolbar" id="filter-toolbar" hidden>
-      <span>Filtered by change: <strong id="filter-value"></strong></span>
+      <span>Filtered by: <strong id="filter-value"></strong></span>
       <button type="button" class="filter-reset" id="filter-reset">Clear</button>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Test</th>
-          <th>${escapeHtml(result.labels.baseline)}</th>
-          <th>${escapeHtml(result.labels.actual)}</th>
-          <th>Change</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>${escapeHtml(result.labels.baseline)}</th>
+            <th>${escapeHtml(result.labels.actual)}</th>
+            <th>Change</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
 ${rows}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   </main>
   <script>
     (() => {
       const rows = Array.from(document.querySelectorAll("tbody tr"));
+      const summaryCards = Array.from(
+        document.querySelectorAll(".summary-card[data-filter-kind]"),
+      );
       const toolbar = document.getElementById("filter-toolbar");
-      const filterValue = document.getElementById("filter-value");
+      const filterValueEl = document.getElementById("filter-value");
       const resetButton = document.getElementById("filter-reset");
-      let currentFilter = "";
+      let currentFilterKind = "clear";
+      let currentFilterValue = "";
 
-      const applyFilter = (nextFilter) => {
-        currentFilter = nextFilter;
+      const matchesFilter = (row, filterKind, expectedValue) => {
+        if (!filterKind || filterKind === "clear") {
+          return true;
+        }
+        return row.getAttribute("data-filter-" + filterKind) === expectedValue;
+      };
+
+      const applyFilter = (filterKind, filterValue, nextLabel) => {
+        currentFilterKind = filterKind || "clear";
+        currentFilterValue = filterValue || "";
         rows.forEach((row) => {
-          const cell = row.querySelector("td[data-change-type]");
-          const changeType = cell?.dataset.changeType || "";
           row.classList.toggle(
             "is-hidden",
-            Boolean(currentFilter) && changeType !== currentFilter,
+            !matchesFilter(row, currentFilterKind, currentFilterValue),
           );
         });
-        toolbar.hidden = !currentFilter;
-        if (filterValue) {
-          filterValue.textContent = currentFilter;
+        summaryCards.forEach((card) => {
+          card.classList.toggle(
+            "is-active",
+            (card.dataset.filterKind || "clear") === currentFilterKind &&
+              (card.dataset.filterValue || "") === currentFilterValue,
+          );
+        });
+        toolbar.hidden = currentFilterKind === "clear";
+        if (filterValueEl) {
+          filterValueEl.textContent = nextLabel || "Compared";
         }
       };
 
-      document.querySelectorAll(".filter-badge").forEach((button) => {
+      summaryCards.forEach((button) => {
         button.addEventListener("click", () => {
-          applyFilter(
-            currentFilter === button.dataset.filter ? "" : button.dataset.filter,
-          );
+          const nextKind = button.dataset.filterKind || "clear";
+          const nextValue = button.dataset.filterValue || "";
+          const isSameFilter =
+            nextKind === currentFilterKind && nextValue === currentFilterValue;
+          if (nextKind === "clear" || isSameFilter) {
+            applyFilter("clear", "", "Compared");
+            return;
+          }
+          applyFilter(nextKind, nextValue, button.dataset.filterLabel || "Compared");
         });
       });
-      resetButton?.addEventListener("click", () => applyFilter(""));
+      resetButton?.addEventListener("click", () =>
+        applyFilter("clear", "", "Compared"),
+      );
+      applyFilter("clear", "", "Compared");
     })();
   </script>
 </body>
@@ -3004,11 +3260,18 @@ function writeTriageTemplate(outDir, result) {
 
   // Track ids already covered by a difference entry so that error entries for
   // the same test (e.g. baseline timeout when actual=FAIL) are not emitted
-  // separately and don't produce duplicate ids in the triage YAML.
+  // separately and don't produce duplicate ids in the triage YAML. Also skip
+  // error entries when the corresponding difference is already marked
+  // triage-not-needed, such as improvement cases with actual=PASS.
   const differenceIds = new Set(entries.map((e) => e.id));
+  const nonTriageDifferenceIds = new Set(
+    result.differences
+      .filter((diff) => diff.triageRequired === false)
+      .map((diff) => diff.id),
+  );
 
   for (const err of result.errors) {
-    if (differenceIds.has(err.id)) {
+    if (differenceIds.has(err.id) || nonTriageDifferenceIds.has(err.id)) {
       // A difference entry with this id was already emitted; skip the
       // redundant error entry to avoid duplicate ids in the YAML.
       continue;
@@ -3243,18 +3506,22 @@ async function main() {
       testFilesGitRef,
     );
     if (isLocalViewerUrl(opts.actualViewer)) {
-      console.log(`Using local test files: ${testFilesBaseUrl}`);
+      console.log(
+        `Using local test files: ${formatPathForCli(testFilesBaseUrl)}`,
+      );
     } else {
-      console.log(`Using test files ref: ${testFilesGitRef}`);
+      console.log(`Using test files ref: ${colorize(testFilesGitRef, "info")}`);
     }
   } else {
     if (opts.testUrls.length > 0 || opts.refUrls.length > 0) {
       console.log(
-        `Using ${opts.testUrls.length} manual test/reference pair(s).`,
+        `Using ${colorize(opts.testUrls.length, "info")} manual test/reference pair(s).`,
       );
     } else {
-      console.log(`Using WPT manifest: ${opts.wptManifestPath}`);
-      console.log(`Using WPT base URL: ${opts.wptBaseUrl}`);
+      console.log(
+        `Using WPT manifest: ${formatPathForCli(opts.wptManifestPath)}`,
+      );
+      console.log(`Using WPT base URL: ${formatPathForCli(opts.wptBaseUrl)}`);
     }
   }
   const approvedViewerMap =
@@ -3263,7 +3530,7 @@ async function main() {
       : new Map();
   if (approvedViewerMap.size > 0) {
     console.log(
-      `Using approvedViewer override for ${approvedViewerMap.size} entry/entries.`,
+      `Using approvedViewer override for ${colorize(approvedViewerMap.size, "info")} entry/entries.`,
     );
   }
   const triageStatusMap = loadTriageStatusMap(
@@ -3343,7 +3610,7 @@ async function main() {
   // Handle Ctrl+C: exit immediately so pending async tasks can't keep logging.
   // The browser subprocess will be cleaned up by the OS when this process exits.
   process.once("SIGINT", () => {
-    process.stdout.write("\nInterrupted.\n");
+    process.stdout.write(`\n${colorize("Interrupted.", "warning")}\n`);
     process.exit(130);
   });
 
@@ -3478,7 +3745,7 @@ async function main() {
     const entryPlan = entryPromises[i];
     const { id, slug, target } = entryPlan;
     console.log(
-      `[${i + 1}/${targets.length}] ${target.category} :: ${target.title}`,
+      `${colorize(`[${i + 1}/${targets.length}]`, "info")} ${colorize(target.category, "bold")} :: ${target.title}`,
     );
 
     if (opts.mode === "reftest-diff") {
@@ -3742,7 +4009,7 @@ async function main() {
         });
       }
       console.log(
-        `  -> outcome=${combinedChangeType} (baseline=${baselineStatus}, actual=${actualStatus}, viewerChanged=${viewerChanged})`,
+        `  -> outcome=${formatChangeForCli(combinedChangeType)} (baseline=${formatStatusForCli(baselineStatus)}, actual=${formatStatusForCli(actualStatus)}, viewerChanged=${viewerChanged})`,
       );
 
       continue;
@@ -3767,6 +4034,32 @@ async function main() {
           referenceFile: item.reference.referenceFile,
           baselineUrl: item.reference.baselineUrl,
         }));
+      const errorBaselineUrl =
+        baselineSideErrs[0]?.baselineUrl ||
+        baselines[0]?.reference?.baselineUrl ||
+        target.baselineUrl;
+      entries.push({
+        id,
+        category: target.category,
+        title: target.title,
+        file: toArray(target.file),
+        sourceUrl: target.sourceUrl,
+        actualStatus: actualSideErr
+          ? "ERROR"
+          : opts.mode === "reftest"
+            ? "PASS"
+            : "OK",
+        baselineStatus:
+          baselineSideErrs.length > 0
+            ? "ERROR"
+            : opts.mode === "reftest"
+              ? "REFERENCE"
+              : "OK",
+        changeType: "error",
+        viewerChanged: false,
+        actualUrl: target.actualUrl,
+        baselineUrl: errorBaselineUrl,
+      });
 
       // Combine actual + baseline errors into one entry per test.
       const allSideErrors = [
@@ -3824,7 +4117,7 @@ async function main() {
                   : {}),
               }),
           actualUrl: target.actualUrl,
-          baselineUrl: allSideErrors[0].baselineUrl,
+          baselineUrl: allSideErrors[0].baselineUrl || errorBaselineUrl,
           triage,
         });
         if (allSideErrors.some((item) => item.error.timeout)) {
@@ -3832,7 +4125,7 @@ async function main() {
         }
         for (const item of allSideErrors) {
           console.log(
-            `  -> ${item.side} error${item.referenceFile ? ` (${item.referenceFile})` : ""}: ${item.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+            `  -> ${colorize(item.side, "error")} error${item.referenceFile ? ` (${item.referenceFile})` : ""}: ${colorize(item.error.message, "error")} (triage: ${colorize(`${triage.status}${triage.decision ? `/${triage.decision}` : ""}`, triage.status === "pending" ? "warning" : "neutral")})`,
           );
         }
       }
@@ -3869,7 +4162,7 @@ async function main() {
             timeoutEntries += 1;
           }
           console.log(
-            `  -> ${opts.baselineLabel} error${item.referenceFile ? ` (${item.referenceFile})` : ""}: ${item.error.message} (triage: ${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+            `  -> ${colorize(opts.baselineLabel, "error")} error${item.referenceFile ? ` (${item.referenceFile})` : ""}: ${colorize(item.error.message, "error")} (triage: ${colorize(`${triage.status}${triage.decision ? `/${triage.decision}` : ""}`, triage.status === "pending" ? "warning" : "neutral")})`,
           );
         }
       }
@@ -3914,6 +4207,20 @@ async function main() {
       const overallPass =
         failedMismatchs.length === 0 &&
         (matchResults.length === 0 || matchResults.some((item) => item.pass));
+
+      entries.push({
+        id,
+        category: target.category,
+        title: target.title,
+        file: toArray(target.file),
+        sourceUrl: target.sourceUrl,
+        actualStatus: overallPass ? "PASS" : "FAIL",
+        baselineStatus: "REFERENCE",
+        changeType: overallPass ? "pass" : "fail",
+        viewerChanged: !overallPass,
+        actualUrl: target.actualUrl,
+        baselineUrl: baselines[0]?.reference?.baselineUrl || target.baselineUrl,
+      });
 
       if (!overallPass) {
         const failingReferenceIndexes = new Set(
@@ -4058,8 +4365,10 @@ async function main() {
         diffEntry.triage = triage;
         differences.push(diffEntry);
         console.log(
-          `  -> difference found (failedRefs=${failingComparisons.length}, pageCountMismatch=${diffEntry.pageCountMismatch}, triage=${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+          `  -> outcome=${formatChangeForCli("fail")} (failedRefs=${failingComparisons.length}, pageCountMismatch=${colorize(diffEntry.pageCountMismatch, diffEntry.pageCountMismatch ? "fail" : "neutral")}, triage=${colorize(`${triage.status}${triage.decision ? `/${triage.decision}` : ""}`, triage.status === "pending" ? "warning" : "neutral")})`,
         );
+      } else {
+        console.log(`  -> outcome=${formatChangeForCli("pass")}`);
       }
 
       continue;
@@ -4151,7 +4460,23 @@ async function main() {
       }
     }
 
-    if (diffEntry.pageCountMismatch || diffEntry.pages.length > 0) {
+    const viewerChanged =
+      diffEntry.pageCountMismatch || diffEntry.pages.length > 0;
+    entries.push({
+      id,
+      category: target.category,
+      title: target.title,
+      file: toArray(target.file),
+      sourceUrl: target.sourceUrl,
+      actualStatus: "OK",
+      baselineStatus: "OK",
+      changeType: viewerChanged ? "changed" : "unchanged",
+      viewerChanged,
+      actualUrl: target.actualUrl,
+      baselineUrl: target.baselineUrl,
+    });
+
+    if (viewerChanged) {
       const rawTriage = getTriageStatus(
         triageStatusMap,
         diffEntry.category,
@@ -4169,8 +4494,10 @@ async function main() {
       diffEntry.triage = triage;
       differences.push(diffEntry);
       console.log(
-        `  -> difference found (pageCountMismatch=${diffEntry.pageCountMismatch}, pageDiffs=${diffEntry.pages.length}, triage=${triage.status}${triage.decision ? `/${triage.decision}` : ""})`,
+        `  -> outcome=${formatChangeForCli("changed")} (pageCountMismatch=${colorize(diffEntry.pageCountMismatch, diffEntry.pageCountMismatch ? "fail" : "neutral")}, pageDiffs=${colorize(diffEntry.pages.length, diffEntry.pages.length > 0 ? "fail" : "neutral")}, triage=${colorize(`${triage.status}${triage.decision ? `/${triage.decision}` : ""}`, triage.status === "pending" ? "warning" : "neutral")})`,
       );
+    } else {
+      console.log(`  -> outcome=${formatChangeForCli("unchanged")}`);
     }
   }
 
@@ -4191,11 +4518,9 @@ async function main() {
       timeoutEntries,
       pageCountMismatches,
       screenshotMismatches,
-      ...(entries.length > 0
-        ? { outcomes: summarizeCombinedEntries(entries) }
-        : {}),
+      outcomes: summarizeCombinedEntries(entries),
     },
-    ...(entries.length > 0 ? { entries } : {}),
+    entries,
     differences,
     errors,
   };
@@ -4207,16 +4532,18 @@ async function main() {
   );
   const triagePath = writeTriageTemplate(opts.outDir, result);
 
-  console.log("\nDone.");
-  console.log(`Report JSON: ${jsonPath}`);
-  console.log(`Report MD:   ${mdPath}`);
-  console.log(`Report HTML: ${htmlPath}`);
-  console.log(`Triage YAML: ${triagePath}`);
+  console.log(`\n${colorize("Done.", "pass")}`);
+  console.log(`Report JSON: ${formatPathForCli(jsonPath)}`);
+  console.log(`Report MD:   ${formatPathForCli(mdPath)}`);
+  console.log(`Report HTML: ${formatPathForCli(htmlPath)}`);
+  console.log(`Triage YAML: ${formatPathForCli(triagePath)}`);
 
   const pendingTriage =
     differences.filter((d) => d.triage?.status === "pending").length +
     errors.filter((e) => e.triage?.status === "pending").length;
-  console.log(`${pendingTriage} entry/entries need triage (decision is empty)`);
+  console.log(
+    `${colorize(pendingTriage, pendingTriage > 0 ? "warning" : "pass")} entry/entries need triage (decision is empty)`,
+  );
 
   const actionableDifferences = differences.filter(
     (difference) => difference.triageRequired !== false,

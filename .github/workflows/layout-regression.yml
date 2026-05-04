@@ -143,12 +143,25 @@ jobs:
 
       # ── On PR: post or update a comment with the report ──────────────────
       - name: Post PR comment
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request' && always() && !cancelled()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
+
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            if (pullRequest.state !== 'open' || pullRequest.merged_at) {
+              console.log(
+                `Skip layout regression comment: PR is ${pullRequest.merged_at ? 'merged' : pullRequest.state}.`,
+              );
+              return;
+            }
 
             const marker = '<!-- vivliostyle-layout-regression -->';
             let body = marker + '\n';
