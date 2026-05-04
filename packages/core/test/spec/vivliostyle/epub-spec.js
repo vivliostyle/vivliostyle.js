@@ -40,6 +40,25 @@ describe("epub", function () {
         });
       });
 
+      it("skips HEAD and treats .svg URLs as a Web Publication primary entry", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        var url =
+          "https://raw.githack.com/web-platform-tests/wpt/master/svg/styling/css-var-on-length-attributes-02.svg";
+        var opf = {};
+        spyOn(store, "loadWebPub").and.callFake(function () {
+          return adapt_task.newResult(opf);
+        });
+
+        adapt_task.start(function () {
+          store.loadPubDoc(url).then(function (result) {
+            expect(store.loadWebPub).toHaveBeenCalledWith(url);
+            expect(result).toBe(opf);
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+
       it("skips HEAD and treats blob: URLs as a Web Publication primary entry", function (done) {
         var store = new adapt_epub.EPUBDocStore();
         var url =

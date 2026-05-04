@@ -67,7 +67,7 @@ function clonePageGroupPageCounts(source: {
 
 function shouldSkipHeadForWebPub(url: string): boolean {
   return (
-    /\.(x?html?|xht)(?:[#?]|$)/i.test(url) ||
+    /\.(x?html?|xht|svg)(?:[#?]|$)/i.test(url) ||
     /^(?:about:|blob:)/i.test(Base.stripFragment(url))
   );
 }
