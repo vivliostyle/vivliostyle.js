@@ -202,8 +202,8 @@ yarn test:reftest-diff \
 |------|-----|------|
 | キーワード | `canary` | https://vivliostyle.vercel.app/ |
 | キーワード | `stable` | https://vivliostyle.org/viewer/ |
-| キーワード | `dev` | http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html |
-| キーワード | `prod` | http://localhost:3000/viewer/lib/ |
+| キーワード | `dev` | http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html |
+| キーワード | `prod` | http://localhost:3300/viewer/lib/ |
 | `git-<branch>` | `git-fix-issue1775` | Vercel PR プレビュー（ブランチ: `fix-issue1775`） |
 | `git:<branch>` | `git:fix/issue-1775` | 同形式; `/` は `-` にサニタイズ（ブランチ: `fix-issue-1775`） |
 | バージョン | `v2.35.0` | https://vivliostyle.github.io/viewer/v2.35.0/ |
@@ -251,7 +251,7 @@ yarn test:layout-regression \
 `--actual-viewer` をもとに決定され、actual/baseline の両方で同じ参照URLを使います。
 
 - `--actual-viewer` がローカル（`localhost`/`127.0.0.1`）の場合:
-  - `http://localhost:3000/core/test/files/`
+  - `http://localhost:3300/core/test/files/`
 - `--actual-viewer` がレガシーURL（`vivliostyle-viewer.html`）の場合:
   - `https://raw.githack.com/vivliostyle/vivliostyle.js/<ref>/packages/core/test/files/`
 - それ以外の場合:

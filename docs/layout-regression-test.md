@@ -204,8 +204,8 @@ yarn test:reftest-diff \
 |--------|---------|-------------|
 | keyword | `canary` | https://vivliostyle.vercel.app/ |
 | keyword | `stable` | https://vivliostyle.org/viewer/ |
-| keyword | `dev` | http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html |
-| keyword | `prod` | http://localhost:3000/viewer/lib/ |
+| keyword | `dev` | http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html |
+| keyword | `prod` | http://localhost:3300/viewer/lib/ |
 | `git-<branch>` | `git-fix-issue1775` | Vercel PR preview (branch: `fix-issue1775`) |
 | `git:<branch>` | `git:fix/issue-1775` | Same format; `/` is sanitized to `-` (branch: `fix-issue-1775`) |
 | version | `v2.35.0` | https://vivliostyle.github.io/viewer/v2.35.0/ |
@@ -254,7 +254,7 @@ is chosen from `--actual-viewer`, and the same source URL is used for both
 actual and baseline.
 
 - If `--actual-viewer` is local (`localhost`/`127.0.0.1`):
-  - `http://localhost:3000/core/test/files/`
+  - `http://localhost:3300/core/test/files/`
 - If `--actual-viewer` is a legacy viewer URL (`vivliostyle-viewer.html`):
   - `https://raw.githack.com/vivliostyle/vivliostyle.js/<ref>/packages/core/test/files/`
 - Otherwise:

@@ -49,7 +49,7 @@ Fetch a GitHub issue, create a minimal test case, visually confirm the bug, fix 
 Use the VS Code integrated browser to confirm the issue:
 
 1. **Navigate to the test file**:
-   - URL: `http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/<filename>.html`
+   - URL: `http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/<filename>.html`
    - Do NOT add `&debug=true` (causes flickering during rendering).
 
 2. **Wait for rendering to complete**:
@@ -115,7 +115,7 @@ Summarize:
 ### 10. Check for Regressions
 
 - Look at related test files in `packages/core/test/files/` to ensure similar features still work.
-- If the fix touches layout/pagination logic, navigate through a few other test cases via the Test Cases page (`http://localhost:3000/core/test/files/`).
+- If the fix touches layout/pagination logic, navigate through a few other test cases via the Test Cases page (`http://localhost:3300/core/test/files/`).
 
 ### 11. Run Tests
 
@@ -150,6 +150,6 @@ yarn test:layout-regression --actual-viewer dev --baseline-viewer canary
 ## Notes
 
 - The dev server (`yarn dev`) auto-rebuilds on source changes and auto-reloads the viewer. Once it's running, any code fix will be reflected by reloading the page.
-- Test files in `packages/core/test/files/` appear in the test case list at `http://localhost:3000/core/test/files/`.
-- If the issue references an EPUB or external URL, you can also test directly via `http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=<URL>` without creating a local file.
+- Test files in `packages/core/test/files/` appear in the test case list at `http://localhost:3300/core/test/files/`.
+- If the issue references an EPUB or external URL, you can also test directly via `http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=<URL>` without creating a local file.
 - Prefer the integrated browser for normal reproduction and verification loops. Use Chrome DevTools MCP when you need capabilities closer to DevTools itself, such as console, network, performance, Lighthouse, memory, or advanced emulation.
