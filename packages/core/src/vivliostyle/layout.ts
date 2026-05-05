@@ -3584,7 +3584,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // prevent unnecessary breaks at the beginning of the column/page
         // after out-of-flow elements, e.g. position:absolute or running().
         // (Issue #1176)
-        !atLeadingEdgeIgnoringOutOfFlow()
+        !atLeadingEdgeIgnoringOutOfFlow() &&
+        !atLeadingEdgeAfterOnlyOutOfFlowSiblings()
       );
     }
 
@@ -3620,6 +3621,44 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       }
       return true;
+    }
+
+    // Issue #1915: if a normal-flow element is preceded only by out-of-flow
+    // siblings, treat it like the leading edge and suppress an extra forced
+    // break. Keep pseudo/shadow-generated content out of this special case.
+    function atLeadingEdgeAfterOnlyOutOfFlowSiblings(): boolean {
+      if (
+        lastAfterNodeContext ||
+        !nodeContext?.viewNode ||
+        nodeContext.shadowContext ||
+        nodeContext.after ||
+        nodeContext.floatSide ||
+        !nodeContext.parent?.viewNode ||
+        LayoutHelper.isOutOfFlow(nodeContext.parent.viewNode)
+      ) {
+        return false;
+      }
+      let sawOutOfFlowSibling = false;
+      for (let nc = nodeContext; nc?.parent && !nc.after; nc = nc.parent) {
+        if (nc !== nodeContext && LayoutHelper.isOutOfFlow(nc.viewNode)) {
+          return false;
+        }
+        let node = nc.viewNode?.previousSibling;
+        while (
+          node &&
+          (VtreeImpl.canIgnore(node, nc.parent.whitespace) ||
+            LayoutHelper.isOutOfFlow(node))
+        ) {
+          if (LayoutHelper.isOutOfFlow(node)) {
+            sawOutOfFlowSibling = true;
+          }
+          node = node.previousSibling;
+        }
+        if (node) {
+          return false;
+        }
+      }
+      return sawOutOfFlowSibling;
     }
 
     const processForcedBreak = () => {
