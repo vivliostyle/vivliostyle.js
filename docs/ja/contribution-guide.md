@@ -38,11 +38,11 @@ yarn build-dev  # build a development version of both Core and Viewer.
 yarn dev        # start watching source files and open browser.
 ```
 
-`yarn dev` を使用すると、（[Browsersync](https://browsersync.io/) によりライブリロードが有効な）Webサーバーが起動し、Google Chromeが自動的に開きます。 ブラウザーが開かない場合は、<http://localhost:3000/core/test/files/>を開きます。 ソースファイルを保存すると、ブラウザは自動的にリロードされます。
+`yarn dev` を使用すると、（[Browsersync](https://browsersync.io/) によりライブリロードが有効な）Webサーバーが起動し、Google Chromeが自動的に開きます。 ブラウザーが開かない場合は、<http://localhost:3300/core/test/files/>を開きます。 ソースファイルを保存すると、ブラウザは自動的にリロードされます。
 
 ### ビューワーとテストファイル
 
-開発モード中のビューワーHTMLファイルは `packages/viewer/lib/vivliostyle-viewer-dev.html` にあります。`#src=` ハッシュパラメータを指定して、ビューワーHTMLファイルから相対の(X)HTMLファイルをURLで指定できます。例えば、<http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/print_media/index.html> は `packages/core/test/files/print_media/index.html` にあるprint mediaのテストファイルを開きます。
+開発モード中のビューワーHTMLファイルは `packages/viewer/lib/vivliostyle-viewer-dev.html` にあります。`#src=` ハッシュパラメータを指定して、ビューワーHTMLファイルから相対の(X)HTMLファイルをURLで指定できます。例えば、<http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/print_media/index.html> は `packages/core/test/files/print_media/index.html` にあるprint mediaのテストファイルを開きます。
 
 開発中に使用することを目的としたテストHTMLファイルは、 `packages/core/test/files/` にあります。 機能の実装と検証に役立つテストファイルを追加することをお勧めします。
 

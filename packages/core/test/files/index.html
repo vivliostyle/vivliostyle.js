@@ -50,6 +50,9 @@
       var dirLocal = "../../core/test/files/";
       var urlOnline =
         "https://raw.githack.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/";
+      var urlTestFiles = isLocal
+        ? new URL("./", location.href).href
+        : urlOnline;
 
       var fileList = module.exports;
       fileList.forEach(function (group) {
@@ -77,10 +80,7 @@
           var parameterProd = path && "#src=" + path + (entry.options || "");
           var parameterDev =
             (parameterProd ? parameterProd + "&" : "#") + "debug=true";
-          var parameterOnline = parameterProd.replace(
-            new RegExp(dirLocal, "g"),
-            urlOnline,
-          );
+          var parameterOnline = parameterProd.replaceAll(dirLocal, urlTestFiles);
           var parameterOld = parameterOnline.replace(
             /\bsrc=/g,
             /\bbookMode=true\b/.test(entry.options) ? "b=" : "x=",

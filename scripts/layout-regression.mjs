@@ -32,13 +32,15 @@ const fileListPath = path.join(
   "packages/core/test/files/file-list.js",
 );
 const testFilesRootPrefix = "packages/core/test/files/";
+const localDevServerOrigin = "http://localhost:3300";
+const localDevServerTestFilesUrl = `${localDevServerOrigin}/core/test/files/`;
 
 // These params are appended last so that values explicitly specified earlier
 // via --extra-viewer-params take precedence: the viewer always uses the first
 // occurrence of a repeated parameter, so a user-supplied zoom or spread value
 // will win and these fallbacks will be ignored for that parameter.
 const fallbackViewerParams = "&zoom=1&spread=false";
-const wptReftestViewerParams = "&pixelRatio=0";
+const wptReftestViewerParams = "&pixelRatio=0&bookMode=false";
 
 const defaults = {
   mode: "version-diff",
@@ -268,7 +270,7 @@ function testFilesBaseUrlForViewer(viewerUrl, gitRef) {
       return `${origin}/core/test/files/`;
     } catch {
       // Fallback for malformed local viewer URL values.
-      return "http://localhost:3000/core/test/files/";
+      return localDevServerTestFilesUrl;
     }
   }
 
@@ -619,11 +621,11 @@ function resolveViewerSpec(spec) {
     return { url: "https://vivliostyle.org/viewer/", label: "stable" };
   if (s === "dev")
     return {
-      url: "http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html",
+      url: `${localDevServerOrigin}/viewer/lib/vivliostyle-viewer-dev.html`,
       label: "dev",
     };
   if (s === "prod")
-    return { url: "http://localhost:3000/viewer/lib/", label: "prod" };
+    return { url: `${localDevServerOrigin}/viewer/lib/`, label: "prod" };
 
   // git-<branch> or git:<branch> → Vercel PR preview URL (e.g. git-fix-issue1775)
   if (/^git[-:]/.test(s)) {

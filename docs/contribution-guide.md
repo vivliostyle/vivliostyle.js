@@ -38,11 +38,11 @@ yarn build-dev  # build a development version of both Core and Viewer.
 yarn dev        # start watching source files and open browser.
 ```
 
-With `yarn dev`, a web server starts ([Browsersync](https://browsersync.io/) with live-reload enabled), and Google Chrome should automatically open. If no browser opens, open <http://localhost:3000/core/test/files/>. On saving any source file, the browser automatically reloads.
+With `yarn dev`, a web server starts ([Browsersync](https://browsersync.io/) with live-reload enabled), and Google Chrome should automatically open. If no browser opens, open <http://localhost:3300/core/test/files/>. On saving any source file, the browser automatically reloads.
 
 ### Viewer and test files
 
-Viewer HTML file (in development mode) is located at `packages/viewer/lib/vivliostyle-viewer-dev.html`. You can open an (X)HTML file with a URL (relative to the viewer HTML file) specified to `#src=` hash parameter. For example, <http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/print_media/index.html> opens a test file for print media located at `packages/core/test/files/print_media/index.html`.
+Viewer HTML file (in development mode) is located at `packages/viewer/lib/vivliostyle-viewer-dev.html`. You can open an (X)HTML file with a URL (relative to the viewer HTML file) specified to `#src=` hash parameter. For example, <http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/print_media/index.html> opens a test file for print media located at `packages/core/test/files/print_media/index.html`.
 
 Test HTML files, intended to be used during development, are located at `packages/core/test/files/`. You are encouraged to add test files useful for implementing and verifying features.
 

@@ -30,7 +30,7 @@ yarn test           # Test
 
 ### Interactive Development Workflow
 
-- **Core+Viewer dev**: `yarn dev` at root → auto-opens http://localhost:3000/core/test/files/ (Test cases)
+- **Core+Viewer dev**: `yarn dev` at root → auto-opens http://localhost:3300/core/test/files/ (Test cases)
 - **Test files**: Add HTML to `packages/core/test/files/` + entry in `file-list.js` (appears in Test cases)
 
 ### Visual Testing with VS Code Integrated Browser
@@ -69,10 +69,10 @@ Use the VS Code integrated browser for routine rendering checks and bug reproduc
 
 **Test URLs**:
 
-- Test cases: http://localhost:3000/core/test/files/
+- Test cases: http://localhost:3300/core/test/files/
 - Local test:
-  - With test file: `http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/<test>.html`
-  - With any URL: `http://localhost:3000/viewer/lib/vivliostyle-viewer-dev.html#src=<URL>`
+  - With test file: `http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=../../core/test/files/<test>.html`
+  - With any URL: `http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=<URL>`
 - Note: Omit `&debug=true` for visual testing to avoid flickering during render process
 
 ## Naming Conventions

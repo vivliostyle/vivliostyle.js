@@ -34,8 +34,10 @@ const VIEWER_JS_FILES = {
   production: path.relative(DEST_DIR, pkg.main),
   development: "js/vivliostyle-viewer-dev.js",
 };
+const DEV_SERVER_PORT = 3300;
+const DEV_SERVER_ORIGIN = `http://localhost:${DEV_SERVER_PORT}`;
 const DEV_SERVER_LOCK_FILE = path.resolve(".cache", "dev-server.json");
-const DEV_SERVER_DEFAULT_URL = "http://localhost:3000/core/test/files/";
+const DEV_SERVER_DEFAULT_URL = `${DEV_SERVER_ORIGIN}/core/test/files/`;
 
 const VIVLIOSTYLE_VERSION = process.env["VIVLIOSTYLE_VERSION"];
 const VERSION =
@@ -141,7 +143,7 @@ function findRunningDevServer() {
 
 function getLocalServerOrigin(bs) {
   if (!bs || typeof bs.getOption !== "function") {
-    return "http://localhost:3000";
+    return DEV_SERVER_ORIGIN;
   }
   const urls = bs.getOption("urls");
   if (urls && typeof urls.get === "function") {
@@ -150,7 +152,7 @@ function getLocalServerOrigin(bs) {
       return local;
     }
   }
-  return "http://localhost:3000";
+  return DEV_SERVER_ORIGIN;
 }
 
 function getDevServerUrl(localUrl) {
@@ -326,7 +328,7 @@ function serve(isDevelopment) {
       startPath: "/core/test/files/",
       ghostMode: false, // do not mirror clicks, scrolls etc. between multiple browsers
       notify: false, // do not show any notifications in the browser
-      port: 3000,
+      port: DEV_SERVER_PORT,
       cors: true, // allow cross-origin requests so online viewers can load local test files
     },
     (_, bs) => {

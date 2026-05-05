@@ -2,6 +2,9 @@ import { existsSync, readFileSync, rmSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 
+const DEV_SERVER_PORT = 3300;
+const DEV_SERVER_DEFAULT_URL = `http://localhost:${DEV_SERVER_PORT}/core/test/files/`;
+
 const DEV_SERVER_LOCK_FILE = resolve(
   process.cwd(),
   "packages/viewer/.cache/dev-server.json",
@@ -27,7 +30,7 @@ function getExistingDevServerUrl() {
   try {
     const lock = JSON.parse(readFileSync(DEV_SERVER_LOCK_FILE, "utf8"));
     if (isProcessAlive(lock.pid)) {
-      return lock.url || "http://localhost:3000/core/test/files/";
+      return lock.url || DEV_SERVER_DEFAULT_URL;
     }
   } catch {
     // Ignore parse/read errors and remove broken lock file below.
