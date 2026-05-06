@@ -341,14 +341,22 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 
 3 つのモードすべてで `report.html` が `report.json` と `report.md` と一緒に出力されます。
 
-- テーブルの先頭列にはレポートのエントリ ID（`report.json` と同じもの）が表示されます。
+- ヘッダーに `report.json`、`report.md`、`triage.yaml` へのリンクがあり、
+  他の形式のレポートにすぐアクセスできます。
+- `#` 列にエントリ ID（`report.json` と同じもの）が表示されます。
+- Test 列にはカテゴリー、タイトル（元の test 文書へのリンク付き）、ファイルパス
+  （タイトルと異なる場合）、リファレンスファイルのリンクが表示されます。
 - 結果件数が多い場合でも、スクロール中にテーブルヘッダーが表示されたままになります。
 - 全モードで、差分ありの行だけでなく unchanged / 差分なしの行も HTML テーブルに表示されます。
-- Test 名から元の test 文書を開けます。
 - viewer badge からその side の実際の viewer URL を開けます。
 - `version-diff` は「差分がある」ことだけを示すモードなので、actual/baseline の badge は
-  `FAIL` ではなく `view` 表示になります。
+  side のラベル名（例: `canary`、`stable`）で表示されます。
 - `reftest` と `reftest-diff` では、意味のある場合に PASS / FAIL / ERROR badge を表示します。
+- `reftest-diff` モードでは、Baseline/Actual 列の PASS/FAIL badge の横に
+  リファレンスビューワーリンク（例: `v2.40.0 ref`、`canary ref`）が表示されます。
+- リンクは名前付き `target` 属性（`lr-source`、`lr-baseline`、`lr-actual`、
+  `lr-diff`）を使用するため、異なるエントリをクリックしても毎回新しいタブが
+  開くのではなく、同じタブが再利用されます。
 - サマリーカードは色分けされており、すべてのカードをクリックしてその条件で表を絞り込めます。
   `Compared` はフィルター解除として動作し、change type の各カードに加えて、
   `ERROR`、`Page count changed`、`Screenshot mismatches`、`Timeout entries`
@@ -415,7 +423,13 @@ PR 実行時は `--actual-viewer` が自動的に `git-<branch>` に設定され
 
 全モード共通で次のレポートファイルを出力します:
 
-- `report.json` — JSON 形式のフル結果（各項目の triage 情報と triage 集計を含む）
+- `report.json` — JSON 形式のフル結果（各項目の triage 情報と triage 集計を含む）。
+  ファイルパス（`diffImage`）はレポートディレクトリからのスラッシュ区切り相対パスで保存され、
+  `options.outDir` / `options.wptManifestPath` はワーキングディレクトリからの相対パスに
+  なるため、マシン間でレポートを持ち運べます。
+  `entries` 配列がある場合（entries なしのレガシー version-diff を除く全モード）、
+  差分やエラーの詳細は各エントリにマージされ、トップレベルの
+  `differences` / `errors` 配列は JSON から省略されます。
 - `report.md` — 人が読みやすいサマリー
 - `report.html` — source / viewer link、行フィルター、ページ単位 diff link を持つ HTML サマリー
 - `triage.yaml` — トリアージテンプレート（前回の決定を引き継ぎ済み）
