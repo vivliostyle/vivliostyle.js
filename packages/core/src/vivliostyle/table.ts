@@ -1793,6 +1793,23 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const initialNodeContext = nodeContext.copy();
     this.layoutEntireTable(nodeContext, column).then((nodeContextAfter) => {
       const tableElement = nodeContextAfter.viewNode as Element;
+
+      // CSS 2.1 §13.3.3: The first row's break-before propagates to the
+      // table.  If the first row has a forced break-before and the table is
+      // not at the leading edge of the page/column, trigger a page break
+      // before the table so it moves to the next page.
+      const firstRow = formattingContext.rows[0];
+      if (
+        firstRow &&
+        Break.isForcedBreakValue(firstRow.breakBefore) &&
+        this.hasInFlowContentBefore(tableElement, column)
+      ) {
+        tableElement.parentNode?.removeChild(tableElement);
+        column.pageBreakType = firstRow.breakBefore;
+        frame.finish(initialNodeContext);
+        return;
+      }
+
       const tableBBox = LayoutHelper.getElementClientRectAdjusted(
         column.clientLayout,
         tableElement,
@@ -1845,6 +1862,33 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       ) {
         return true;
       }
+    }
+    return false;
+  }
+
+  /**
+   * Check if there is any in-flow content before the given view node.
+   * Walks previous siblings at each ancestor level (up to the column root)
+   * to determine whether the table is at the leading edge of the
+   * page/column.
+   */
+  private hasInFlowContentBefore(
+    viewNode: Node,
+    column: Layout.Column,
+  ): boolean {
+    let node: Node | null = viewNode;
+    while (node && node !== column.element) {
+      let sibling = node.previousSibling;
+      while (sibling) {
+        if (sibling.nodeType === 1 && !LayoutHelper.isOutOfFlow(sibling)) {
+          return true;
+        }
+        if (sibling.nodeType === 3 && !VtreeImpl.canIgnore(sibling)) {
+          return true;
+        }
+        sibling = sibling.previousSibling;
+      }
+      node = node.parentNode;
     }
     return false;
   }
