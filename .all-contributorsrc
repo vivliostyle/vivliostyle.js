@@ -238,6 +238,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/203048277?v=4",
       "profile": "https://github.com/tomaioo",
       "contributions": ["code"]
+    },
+    {
+      "login": "bobbytung",
+      "name": "Bobby Tung",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1863378?v=4",
+      "profile": "http://wanderer.tw/",
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7
