@@ -360,15 +360,24 @@ or updating the PR comment.
 
 All three modes write `report.html` alongside `report.json` and `report.md`.
 
-- The first table column includes the report entry id (same as `report.json`).
+- The header includes links to `report.json`, `report.md`, and `triage.yaml` for
+  quick access to the other report formats.
+- The `#` column shows the entry id (same as `report.json`).
+- The Test column shows category, title (linked to source document), file path
+  (when different from the title), and reference file links.
 - The table header stays visible while scrolling long result tables.
 - All modes list every entry in the HTML table, including unchanged / no-difference rows.
-- Test names link to the original test document.
 - Viewer badges link to the exact viewer URL used for that side.
-- In `version-diff`, viewer badges are shown as `view` because the mode only
-  reports that a difference exists, not whether the new rendering is better or worse.
+- In `version-diff`, viewer badges are shown as the side label (e.g. `canary`,
+  `stable`) because the mode only reports that a difference exists, not whether
+  the new rendering is better or worse.
 - In `reftest` and `reftest-diff`, PASS / FAIL / ERROR style badges are shown when
   the mode has that semantic information.
+- In `reftest-diff` mode, reference viewer links (e.g. `v2.40.0 ref`, `canary ref`)
+  appear next to PASS/FAIL badges in the Baseline/Actual columns.
+- Links use named `target` attributes (`lr-source`, `lr-baseline`, `lr-actual`,
+  `lr-diff`) so that clicking different entries reuses the same browser tab
+  instead of opening a new tab each time.
 - The summary panel is color-coded, and every summary card can be clicked to filter the
   table in place. `Compared` clears the filter, and cards such as change types,
   `ERROR`, `Page count changed`, `Screenshot mismatches`, and `Timeout entries`
@@ -435,7 +444,13 @@ Default output directories depend on mode:
 
 All modes write these report files:
 
-- `report.json` — full results in JSON (includes triage info per item and triage summary counts)
+- `report.json` — full results in JSON (includes triage info per item and triage summary counts).
+  File paths (`diffImage`) are stored as forward-slash relative paths from the report
+  directory, and `options.outDir` / `options.wptManifestPath` are relative to the
+  working directory, so reports are portable across machines.
+  When an `entries` array exists (all modes except legacy version-diff without entries),
+  difference and error details are merged into each entry and the top-level
+  `differences` / `errors` arrays are omitted from the JSON.
 - `report.md` — human-readable summary
 - `report.html` — interactive HTML summary with source/viewer links, row filtering, and page-level diff links
 - `triage.yaml` — triage template (pre-filled with carried-over decisions)

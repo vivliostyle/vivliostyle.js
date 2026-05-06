@@ -2203,6 +2203,7 @@ function statusClass(value) {
   if (value === "FAIL") return "fail";
   if (value === "ERROR") return "error";
   if (value === "MANUAL") return "neutral";
+  if (value === "VIEW") return "neutral";
   return "neutral";
 }
 
@@ -2396,6 +2397,66 @@ function writeReports(outDir, result, triageStatusMap) {
     triageStatusMap,
   );
 
+  // Build a lookup from diff/error arrays keyed by entry id
+  const diffByIdMap = new Map(
+    differencesWithTriage.map((item) => [item.id, item]),
+  );
+  const errorByIdMap = new Map();
+  for (const item of errorsWithTriage) {
+    const items = errorByIdMap.get(item.id) || [];
+    items.push(item);
+    errorByIdMap.set(item.id, items);
+  }
+
+  // Merge difference and error info into each entry, stripping fields
+  // that are already present at the entry's top level to avoid duplication.
+  const entryDuplicateKeys = new Set([
+    "id",
+    "category",
+    "title",
+    "file",
+    "actualStatus",
+    "baselineStatus",
+    "sourceUrl",
+    "actualUrl",
+    "baselineUrl",
+  ]);
+  const stripDuplicateFields = (obj) => {
+    const stripped = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (entryDuplicateKeys.has(key)) {
+        continue;
+      }
+      // Strip redundant url from actual/baseline sub-objects
+      if (
+        (key === "actual" || key === "baseline") &&
+        value &&
+        typeof value === "object" &&
+        "url" in value
+      ) {
+        const { url, ...rest } = value;
+        stripped[key] = Object.keys(rest).length > 0 ? rest : undefined;
+        if (stripped[key] === undefined) delete stripped[key];
+      } else {
+        stripped[key] = value;
+      }
+    }
+    return stripped;
+  };
+  const entriesWithDetails = Array.isArray(result.entries)
+    ? result.entries.map((entry) => {
+        const diff = diffByIdMap.get(entry.id) || null;
+        const entryErrors = errorByIdMap.get(entry.id) || [];
+        return {
+          ...entry,
+          ...(diff ? { difference: stripDuplicateFields(diff) } : {}),
+          ...(entryErrors.length > 0
+            ? { errors: entryErrors.map(stripDuplicateFields) }
+            : {}),
+        };
+      })
+    : null;
+
   const resultWithTriage = {
     ...result,
     summary: {
@@ -2407,13 +2468,44 @@ function writeReports(outDir, result, triageStatusMap) {
         triagedEntries: differencesTriage.triaged + errorsTriage.triaged,
       },
     },
-    ...(Array.isArray(result.entries) ? { entries: result.entries } : {}),
+    ...(entriesWithDetails ? { entries: entriesWithDetails } : {}),
     differences: differencesWithTriage,
     errors: errorsWithTriage,
   };
 
   const jsonPath = path.join(outDir, "report.json");
-  fs.writeFileSync(jsonPath, JSON.stringify(resultWithTriage, null, 2), "utf8");
+  // Normalize file paths in JSON: convert absolute OS paths to
+  // forward-slash relative paths from the report directory.
+  const toRelPath = (p) =>
+    p ? path.relative(outDir, p).split(path.sep).join("/") : p;
+  const jsonReplacer = (key, value) => {
+    if (key === "diffImage" && typeof value === "string") {
+      return toRelPath(value);
+    }
+    if (key === "outDir" && typeof value === "string") {
+      return path.relative(process.cwd(), value).split(path.sep).join("/");
+    }
+    if (key === "wptManifestPath" && typeof value === "string") {
+      return path.relative(process.cwd(), value).split(path.sep).join("/");
+    }
+    return value;
+  };
+  // When entries array exists, difference/error info is merged into each entry,
+  // so omit the separate top-level differences/errors arrays from the JSON.
+  if (entriesWithDetails) {
+    const { differences: _d, errors: _e, ...jsonResult } = resultWithTriage;
+    fs.writeFileSync(
+      jsonPath,
+      JSON.stringify(jsonResult, jsonReplacer, 2),
+      "utf8",
+    );
+  } else {
+    fs.writeFileSync(
+      jsonPath,
+      JSON.stringify(resultWithTriage, jsonReplacer, 2),
+      "utf8",
+    );
+  }
 
   const lines = [];
   const formatTriageLabel = (triage) =>
@@ -2639,15 +2731,16 @@ function writeReports(outDir, result, triageStatusMap) {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\"/g, "&quot;");
-  const renderAnchor = (url, body, className = "") =>
+  const renderAnchor = (url, body, className = "", target = "_blank") =>
     url
-      ? `<a${className ? ` class="${className}"` : ""} href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${body}</a>`
+      ? `<a${className ? ` class="${className}"` : ""} href="${escapeHtml(url)}" target="${target}">${body}</a>`
       : body;
-  const renderBadge = (label, className, url) =>
+  const renderBadge = (label, className, url, target) =>
     renderAnchor(
       url,
       `<span class="badge ${className}">${escapeHtml(label)}</span>`,
       "badge-link",
+      target,
     );
   const toReportRelativePath = (filePath) =>
     escapeHtml(path.relative(outDir, filePath).split(path.sep).join("/"));
@@ -2721,21 +2814,26 @@ function writeReports(outDir, result, triageStatusMap) {
     const linksHtml = diffLinks
       .map(
         (item) =>
-          `<a class="diff-link" href="${item.href}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.label)}</a>`,
+          `<a class="diff-link" href="${item.href}" target="lr-diff">${escapeHtml(item.label)}</a>`,
       )
       .join("");
     return `<div class="change-cell">${badge}<span class="diff-links">${linksHtml}</span></div>`;
   };
-  const renderFallbackViewerBadge = (url) =>
+  const renderStatusBadge = (status, url, fallbackLabel, target) => {
+    const label = status === "VIEW" ? fallbackLabel : status;
+    return renderBadge(label, statusClass(status), url, target);
+  };
+  const renderFallbackViewerBadge = (url, target) =>
     renderBadge(
       result.options.mode === "version-diff" ? "view" : "-",
       "neutral",
       url,
+      target,
     );
-  const renderFallbackActualDifferenceBadge = (url) =>
+  const renderFallbackActualDifferenceBadge = (url, target) =>
     result.options.mode === "version-diff"
-      ? renderBadge("view", "neutral", url)
-      : renderBadge("FAIL", "fail", url);
+      ? renderBadge("view", "neutral", url, target)
+      : renderBadge("FAIL", "fail", url, target);
   const diffById = new Map(
     resultWithTriage.differences.map((item) => [item.id, item]),
   );
@@ -2909,7 +3007,75 @@ function writeReports(outDir, result, triageStatusMap) {
             entry.sourceUrl,
             escapeHtml(entry.title),
             "test-link",
+            "lr-source",
           );
+          const entryFiles = Array.isArray(entry.file)
+            ? entry.file
+            : entry.file
+              ? [entry.file]
+              : [];
+          const fileText = entryFiles.join(", ");
+          const titleMatchesFile =
+            fileText && normalizeCase(entry.title) === normalizeCase(fileText);
+          // Build file links for version-diff mode (derive base URL from sourceUrl and first file)
+          const fileLinksHtml = (() => {
+            if (titleMatchesFile || !fileText) return "";
+            if (!entry.sourceUrl || entryFiles.length === 0)
+              return `<div class="entry-file">${escapeHtml(fileText)}</div>`;
+            const firstFile = normalizeTestFilePath(entryFiles[0]);
+            const baseUrl =
+              firstFile && entry.sourceUrl.endsWith(firstFile)
+                ? entry.sourceUrl.slice(0, -firstFile.length)
+                : null;
+            if (!baseUrl)
+              return `<div class="entry-file">${escapeHtml(fileText)}</div>`;
+            const links = entryFiles.map((f) => {
+              const normalized = normalizeTestFilePath(f);
+              const url = normalized ? `${baseUrl}${normalized}` : null;
+              return url
+                ? renderAnchor(url, escapeHtml(f), "ref-link", "lr-source")
+                : escapeHtml(f);
+            });
+            return `<div class="entry-file">${links.join(", ")}</div>`;
+          })();
+          // Reference file links (raw file URL, not viewer URL)
+          const refsHtml = (entry.references || [])
+            .map((ref) => {
+              const rawRefUrl = result.options.wptBaseUrl
+                ? joinUrl(result.options.wptBaseUrl, ref.referenceFile)
+                : null;
+              return `<div class="entry-ref">${ref.relation || "=="} ${rawRefUrl ? renderAnchor(rawRefUrl, escapeHtml(ref.referenceFile), "ref-link", "lr-source") : escapeHtml(ref.referenceFile)}</div>`;
+            })
+            .join("");
+          // Reference viewer links for Baseline/Actual columns (reftest-diff mode only)
+          const refs = entry.references || [];
+          const hasRefDiffUrls = refs.some(
+            (ref) => ref.actualReferenceUrl && ref.baselineReferenceUrl,
+          );
+          const renderRefViewerLink = (label, url, target = "_blank") =>
+            `<a class="ref-viewer-link" href="${escapeHtml(url)}" target="${target}">${escapeHtml(label)}</a>`;
+          const baselineRefLinks = hasRefDiffUrls
+            ? refs
+                .filter((ref) => ref.baselineReferenceUrl)
+                .map((ref) =>
+                  renderRefViewerLink(
+                    `${result.labels.baseline} ref`,
+                    ref.baselineReferenceUrl,
+                    "lr-baseline",
+                  ),
+                )
+            : [];
+          const actualRefLinks = hasRefDiffUrls
+            ? refs
+                .filter((ref) => ref.actualReferenceUrl)
+                .map((ref) =>
+                  renderRefViewerLink(
+                    `${result.labels.actual} ref`,
+                    ref.actualReferenceUrl,
+                    "lr-actual",
+                  ),
+                )
+            : [];
           const notesText = notes.length > 0 ? notes.join(" | ") : "-";
           return `<tr ${renderRowFilterAttributes({
             changeType: entry.changeType,
@@ -2918,9 +3084,10 @@ function writeReports(outDir, result, triageStatusMap) {
             hasPageCountMismatch: entryMeta.hasPageCountMismatch,
             hasScreenshotMismatch: entryMeta.hasScreenshotMismatch,
           })}>
-          <td class="test-path"><span class="entry-id">${escapeHtml(entry.id)}</span>${titleHtml}</td>
-  <td>${renderBadge(entry.baselineStatus, statusClass(entry.baselineStatus), entry.baselineUrl)}</td>
-  <td>${renderBadge(entry.actualStatus, statusClass(entry.actualStatus), entry.actualUrl)}</td>
+          <td class="entry-id">${escapeHtml(entry.id)}</td>
+          <td class="test-path"><div class="entry-category">${escapeHtml(entry.category || "")}</div><div class="entry-title">${titleHtml}</div>${fileLinksHtml}${refsHtml}</td>
+  <td>${baselineRefLinks.length > 0 ? `<div class="status-cell">${renderStatusBadge(entry.baselineStatus, entry.baselineUrl, result.labels.baseline, "lr-baseline")}${baselineRefLinks.join("")}</div>` : renderStatusBadge(entry.baselineStatus, entry.baselineUrl, result.labels.baseline, "lr-baseline")}</td>
+  <td>${actualRefLinks.length > 0 ? `<div class="status-cell">${renderStatusBadge(entry.actualStatus, entry.actualUrl, result.labels.actual, "lr-actual")}${actualRefLinks.join("")}</div>` : renderStatusBadge(entry.actualStatus, entry.actualUrl, result.labels.actual, "lr-actual")}</td>
           <td>${renderChangeCell(entry.changeType, diff)}</td>
           <td>${escapeHtml(notesText)}</td>
 </tr>`;
@@ -2938,9 +3105,10 @@ function writeReports(outDir, result, triageStatusMap) {
               ),
             ),
           })}>
-          <td class="test-path"><span class="entry-id">${escapeHtml(diff.id)}</span>${renderAnchor(diff.sourceUrl, escapeHtml(diff.title), "test-link")}</td>
-  <td>${renderFallbackViewerBadge(diff.baseline?.url)}</td>
-  <td>${renderFallbackActualDifferenceBadge(diff.actual?.url)}</td>
+          <td class="entry-id">${escapeHtml(diff.id)}</td>
+          <td class="test-path"><div class="entry-category">${escapeHtml(diff.category || "")}</div><div class="entry-title">${renderAnchor(diff.sourceUrl, escapeHtml(diff.title), "test-link", "lr-source")}</div>${diff.file && normalizeCase(diff.title) !== normalizeCase(Array.isArray(diff.file) ? diff.file.join(", ") : diff.file) ? `<div class="entry-file">${escapeHtml(Array.isArray(diff.file) ? diff.file.join(", ") : diff.file)}</div>` : ""}</td>
+  <td>${renderFallbackViewerBadge(diff.baseline?.url, "lr-baseline")}</td>
+  <td>${renderFallbackActualDifferenceBadge(diff.actual?.url, "lr-actual")}</td>
           <td>${renderChangeCell("difference", diff)}</td>
   <td>${escapeHtml(diff.pageCountMismatch ? "page count changed" : `${diff.pages.length} page diff(s)`)}</td>
 </tr>`,
@@ -2980,9 +3148,10 @@ function writeReports(outDir, result, triageStatusMap) {
                 ? item.sideErrors.some((sideError) => sideError.error.timeout)
                 : item.error.timeout,
             })}>
-  <td class="test-path"><span class="entry-id">${escapeHtml(item.id)}</span>${renderAnchor(item.sourceUrl, escapeHtml(item.title), "test-link")}</td>
-  <td>${isBaselineError ? renderBadge("ERROR", "error", item.baselineUrl) : renderFallbackViewerBadge(item.baselineUrl)}</td>
-  <td>${isActualError ? renderBadge("ERROR", "error", item.actualUrl) : renderFallbackViewerBadge(item.actualUrl)}</td>
+  <td class="entry-id">${escapeHtml(item.id)}</td>
+  <td class="test-path"><div class="entry-category">${escapeHtml(item.category || "")}</div><div class="entry-title">${renderAnchor(item.sourceUrl, escapeHtml(item.title), "test-link", "lr-source")}</div>${item.file && normalizeCase(item.title) !== normalizeCase(Array.isArray(item.file) ? item.file.join(", ") : item.file) ? `<div class="entry-file">${escapeHtml(Array.isArray(item.file) ? item.file.join(", ") : item.file)}</div>` : ""}</td>
+  <td>${isBaselineError ? renderBadge("ERROR", "error", item.baselineUrl, "lr-baseline") : renderFallbackViewerBadge(item.baselineUrl, "lr-baseline")}</td>
+  <td>${isActualError ? renderBadge("ERROR", "error", item.actualUrl, "lr-actual") : renderFallbackViewerBadge(item.actualUrl, "lr-actual")}</td>
   <td>${renderChangeCell("error")}</td>
   <td>${escapeHtml(noteText)}</td>
 </tr>`;
@@ -2999,11 +3168,13 @@ function writeReports(outDir, result, triageStatusMap) {
     :root { color-scheme: light; --bg:#f6f4ef; --panel:#fffdf8; --ink:#222; --muted:#6b665c; --line:#ddd4c4; --pass:#1f7a4d; --fail:#b65f4f; --known-fail:#c07a6c; --regression:#8f1d14; --error:#8a2323; --improvement:#0b5d3b; --neutral:#7a6f5a; }
     html, body { height:100%; }
     body { margin:0; overflow:hidden; font:14px/1.4 ui-sans-serif, system-ui, sans-serif; color:var(--ink); background:linear-gradient(180deg,#f3efe6 0%,#f8f6f1 100%); }
-    main { box-sizing:border-box; max-width:1200px; height:100vh; margin:0 auto; padding:32px 24px 24px; display:flex; flex-direction:column; }
-    h1 { margin:0 0 8px; font-size:28px; }
-    p { margin:0; color:var(--muted); }
-    .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin:20px 0; }
-    .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:13px 14px; box-shadow:0 8px 24px rgba(0,0,0,.04); }
+    main { box-sizing:border-box; max-width:1200px; height:100vh; margin:0 auto; padding:20px 16px 24px; display:flex; flex-direction:column; }
+    h1 { margin:0 0 4px; font-size:20px; }
+    p { margin:0; color:var(--muted); font-size:13px; }
+    .header-link { color:var(--muted); text-decoration:none; }
+    .header-link:hover { text-decoration:underline; }
+    .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:6px; margin:10px 0; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px; box-shadow:0 4px 12px rgba(0,0,0,.03); }
     .summary-card { appearance:none; width:100%; text-align:left; font:inherit; color:inherit; }
     .summary-card.is-filterable { cursor:pointer; transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
     .summary-card.is-filterable:hover { transform:translateY(-1px); }
@@ -3015,8 +3186,8 @@ function writeReports(outDir, result, triageStatusMap) {
     .summary-card.regression { border-color:color-mix(in srgb, var(--regression) 46%, var(--line)); background:color-mix(in srgb, var(--regression) 18%, var(--panel)); }
     .summary-card.error { border-color:color-mix(in srgb, var(--error) 46%, var(--line)); background:color-mix(in srgb, var(--error) 18%, var(--panel)); }
     .summary-card.neutral { border-color:color-mix(in srgb, var(--neutral) 20%, var(--line)); background:var(--panel); }
-    .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.07em; }
-    .value { font-size:24px; font-weight:700; margin-top:4px; }
+    .label { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.07em; }
+    .value { font-size:18px; font-weight:700; margin-top:2px; }
     .table-wrap { flex:1; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.04); }
     table { width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); }
     th, td { padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; background:var(--panel); }
@@ -3034,25 +3205,28 @@ function writeReports(outDir, result, triageStatusMap) {
     .badge-link:hover .badge { filter:brightness(.94); }
     .test-link:hover { text-decoration:underline; }
     .change-cell { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .status-cell { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .diff-links { display:flex; gap:6px; flex-wrap:wrap; }
     .diff-link { color:var(--muted); text-decoration:none; font-size:12px; border:1px solid var(--line); border-radius:999px; padding:2px 8px; background:#f5f0e6; }
     .diff-link:hover { text-decoration:underline; }
-    .toolbar { display:flex; align-items:center; gap:10px; margin:0 0 14px; color:var(--muted); }
+    .ref-viewer-link { color:var(--muted); text-decoration:none; font-size:12px; border:1px solid var(--line); border-radius:999px; padding:2px 8px; background:#f5f0e6; }
+    .ref-viewer-link:hover { text-decoration:underline; }
+    .toolbar { display:flex; align-items:center; gap:10px; margin:0 0 10px; color:var(--muted); }
     .toolbar[hidden] { display:none; }
     .filter-reset { border:1px solid var(--line); background:var(--panel); border-radius:999px; padding:4px 10px; cursor:pointer; }
     .is-hidden { display:none; }
     .test-path { font-family:ui-monospace, SFMono-Regular, monospace; }
-    .entry-id { display:inline-flex; min-width:52px; margin-right:10px; color:var(--muted); font-weight:700; }
+    .entry-id { color:var(--muted); font-weight:700; font-family:ui-monospace, SFMono-Regular, monospace; text-align:right; white-space:nowrap; }
+    .entry-category { color:var(--muted); font-size:12px; margin-bottom:1px; }
+    .entry-title { }
+    .entry-file { color:var(--muted); font-size:11px; font-family:ui-monospace, SFMono-Regular, monospace; margin-top:2px; word-break:break-all; }
+    .entry-ref { color:var(--muted); font-size:11px; font-family:ui-monospace, SFMono-Regular, monospace; margin-top:1px; word-break:break-all; }
+    .ref-link { color:var(--muted); text-decoration:none; }
+    .ref-link:hover { text-decoration:underline; }
     .breakdown { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.6; }
     @media (max-height: 760px), (max-width: 760px) {
       body { overflow:auto; }
-      main { height:auto; min-height:100vh; padding:20px 16px 24px; }
-      h1 { font-size:24px; }
-      .summary { grid-template-columns:repeat(auto-fit,minmax(136px,1fr)); gap:8px; margin:16px 0; }
-      .card { border-radius:12px; padding:11px 12px; }
-      .label { font-size:10px; }
-      .value { font-size:20px; }
-      .toolbar { margin:0 0 12px; }
+      main { height:auto; min-height:100vh; }
       .table-wrap { flex:none; min-height:auto; overflow-x:auto; overflow-y:visible; }
     }
   </style>
@@ -3060,7 +3234,7 @@ function writeReports(outDir, result, triageStatusMap) {
 <body>
   <main>
     <h1>${escapeHtml(result.labels.actual)} vs ${escapeHtml(result.labels.baseline)}</h1>
-    <p>${escapeHtml(result.options.mode)} mode report generated at ${escapeHtml(result.generatedAt)}</p>
+    <p>${escapeHtml(result.options.mode)} mode report generated at ${escapeHtml(result.generatedAt)} · <a class="header-link" href="report.json">JSON</a> · <a class="header-link" href="report.md">Markdown</a> · <a class="header-link" href="triage.yaml">Triage</a></p>
     <section class="summary">
       ${summaryCards
         .map((card) => {
@@ -3083,6 +3257,7 @@ function writeReports(outDir, result, triageStatusMap) {
       <table>
         <thead>
           <tr>
+            <th>#</th>
             <th>Test</th>
             <th>${escapeHtml(result.labels.baseline)}</th>
             <th>${escapeHtml(result.labels.actual)}</th>
@@ -3248,6 +3423,25 @@ function writeTriageTemplate(outDir, result) {
       ];
       if (pageSelections.length > 0) {
         entry.pageSelections = pageSelections;
+      }
+      // Add reference viewer URLs for each side (useful for verifying FAIL results)
+      const referenceViewerUrls = [];
+      const seenRefUrls = new Set();
+      for (const comparison of diff.comparisons) {
+        if (
+          comparison.baselineUrl &&
+          !seenRefUrls.has(comparison.baselineUrl)
+        ) {
+          seenRefUrls.add(comparison.baselineUrl);
+          referenceViewerUrls.push({
+            side: comparison.side,
+            referenceFile: comparison.referenceFile,
+            url: comparison.baselineUrl,
+          });
+        }
+      }
+      if (referenceViewerUrls.length > 0) {
+        entry.referenceViewerUrls = referenceViewerUrls;
       }
     }
     if (diff.pageCountMismatch) {
@@ -3949,6 +4143,12 @@ async function main() {
         viewerChanged,
         actualUrl: target.actualUrl,
         baselineUrl: target.baselineUrl,
+        references: (target.references || []).map((ref) => ({
+          referenceFile: ref.referenceFile,
+          relation: ref.relation,
+          actualReferenceUrl: ref.actualReferenceUrl,
+          baselineReferenceUrl: ref.baselineReferenceUrl,
+        })),
       });
 
       if (viewerDiff.pageCountMismatch) {
@@ -4050,13 +4250,13 @@ async function main() {
           ? "ERROR"
           : opts.mode === "reftest"
             ? "PASS"
-            : "OK",
+            : "VIEW",
         baselineStatus:
           baselineSideErrs.length > 0
             ? "ERROR"
             : opts.mode === "reftest"
               ? "REFERENCE"
-              : "OK",
+              : "VIEW",
         changeType: "error",
         viewerChanged: false,
         actualUrl: target.actualUrl,
@@ -4222,6 +4422,11 @@ async function main() {
         viewerChanged: !overallPass,
         actualUrl: target.actualUrl,
         baselineUrl: baselines[0]?.reference?.baselineUrl || target.baselineUrl,
+        references: (target.references || []).map((ref) => ({
+          referenceFile: ref.referenceFile,
+          relation: ref.relation,
+          referenceUrl: ref.baselineUrl,
+        })),
       });
 
       if (!overallPass) {
@@ -4470,8 +4675,8 @@ async function main() {
       title: target.title,
       file: toArray(target.file),
       sourceUrl: target.sourceUrl,
-      actualStatus: "OK",
-      baselineStatus: "OK",
+      actualStatus: "VIEW",
+      baselineStatus: "VIEW",
       changeType: viewerChanged ? "changed" : "unchanged",
       viewerChanged,
       actualUrl: target.actualUrl,
