@@ -1,5 +1,4 @@
 /**
- * Copyright 2017 Daishinsha Inc.
  * Copyright 2026 Vivliostyle Foundation
  *
  * Vivliostyle.js is free software: you can redistribute it and/or modify
