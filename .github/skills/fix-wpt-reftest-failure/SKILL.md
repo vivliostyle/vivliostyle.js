@@ -39,7 +39,7 @@ This skill is specific to Vivliostyle.js and its WPT workflow. It assumes the re
 
 ### 2. Start or Reuse the Dev Server
 
-- Run `yarn dev` from the repo root.
+- Run `yarn dev` from the repo root using `run_in_terminal` in async mode so that the dev server output can be checked later with `get_terminal_output`.
 - If the output says the dev server is already running at `http://localhost:3300/core/test/files/`, reuse it.
 - Keep the dev server running throughout the edit and verification loop.
 
@@ -86,6 +86,9 @@ yarn test:reftest-diff --actual-viewer dev --baseline-viewer <viewer-spec> --out
 ### 6. Confirm the Intended Behavior
 
 - Read the WPT test HTML and reference HTML.
+  - WPT test source: `https://github.com/web-platform-tests/wpt` (deployed at `https://wpt.live/`)
+  - Raw source URL: `https://raw.githubusercontent.com/web-platform-tests/wpt/master/<path>`
+  - The WPT manifest at `artifacts/wpt-reftest/MANIFEST.json` (downloaded by `yarn download:wpt-manifest`) lists available test files and their reference relationships.
 - Look for explanatory comments, linked spec sections, and assertions encoded in the markup or CSS.
 - If the expected output is still unclear, inspect the WPT document without the Vivliostyle viewer and check the relevant CSS paged media or `@page` specification text.
 - When the issue groups many files, decide whether the current failing case is representative of the shared bug or should be split into a separate follow-up.
@@ -107,6 +110,7 @@ yarn test:reftest-diff --actual-viewer dev --baseline-viewer <viewer-spec> --out
 ### 9. Validate Immediately
 
 - Rerun the same narrow `yarn test:reftest` or `yarn test:reftest-diff` command right after the first substantive edit.
+- **Stale build check**: After editing core source, wait for the full rebuild chain before running reftest. Use `get_terminal_output` on the dev server terminal to confirm the output shows: (1) `[watch] build finished` (core esbuild), then (2) `created lib/js/vivliostyle-viewer-dev.js` (viewer rollup re-bundles core). The reftest loads the viewer bundle, so the rollup step must complete. If reftest results are identical to the pre-edit baseline, suspect a stale build before abandoning the hypothesis.
 - If it still fails but the output changed in a way that supports the current hypothesis, repair the same slice and rerun the same command.
 - If it fails in a way that falsifies the hypothesis, step one hop to the code that more directly controls the behavior and repeat.
 - Once the representative case passes, rerun any sibling WPT files that likely share the same root cause.
