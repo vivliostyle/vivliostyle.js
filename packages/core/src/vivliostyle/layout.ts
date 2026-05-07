@@ -516,7 +516,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   private almostEquals(
     a: number,
     b: number,
-    precision = 1.5 / (this.clientLayout.pixelRatio || 1),
+    precision = this.clientLayout.pixelRatio === 0
+      ? 0.5
+      : 1.5 / (this.clientLayout.pixelRatio || 1),
   ): boolean {
     return Math.abs(a - b) < precision;
   }
