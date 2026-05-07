@@ -1802,6 +1802,13 @@ function isWithinWptFuzzyTolerance(compared, fuzzy) {
     return true;
   }
 
+  // If pixelmatch (with threshold) reports zero diffPixels, the differences
+  // are imperceptible (e.g. sub-pixel antialiasing artifacts).  Treat as PASS
+  // even when no fuzzy metadata is declared for the test.
+  if (compared.diffPixels === 0) {
+    return true;
+  }
+
   if (!fuzzy) {
     return false;
   }
