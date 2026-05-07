@@ -385,6 +385,18 @@ export function fixAutoFillMultiColumnBox(
   // If it overflows, find a non-overflow block-size by binary search.
   element.style.columnFill = "auto";
   const blockSize2 = parseFloat(computedStyle.blockSize);
+  if (
+    blockSize2 <= 0 ||
+    (element.parentElement &&
+      findAncestorNonRootMultiColumn(element.parentElement))
+  ) {
+    // When the multicol has no in-flow content or is nested inside another
+    // multicol container, skip setting an explicit block-size. Setting one
+    // overrides the browser's natural height and prevents proper sizing in
+    // the parent multicol's fragmentation context. (Issue #1916)
+    element.removeAttribute("data-viv-saved-column-fill");
+    return;
+  }
   let blockSize = NaN;
   element.style.blockSize = `${blockSize2}px`;
   if (!checkRootColumnOverflow(column)) {
