@@ -71,28 +71,58 @@ describe("base", function () {
         "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/css/CSS2/fonts/font-family-008.xht",
       );
     });
+
+    it("does not convert wpt.live .sub.* URLs to raw.githack.com (server-side substitution required)", function () {
+      expect(
+        module.convertSpecialURL(
+          "https://wpt.live/fetch/corb/img-png-mislabeled-as-html.sub.html",
+        ),
+      ).toBe("https://wpt.live/fetch/corb/img-png-mislabeled-as-html.sub.html");
+      expect(
+        module.convertSpecialURL(
+          "https://wpt.live/density-size-correction/density-corrected-size-img-cross-origin.sub.html",
+        ),
+      ).toBe(
+        "https://wpt.live/density-size-correction/density-corrected-size-img-cross-origin.sub.html",
+      );
+      expect(
+        module.convertSpecialURL("https://wpt.live/some/test.sub.any.js"),
+      ).toBe("https://wpt.live/some/test.sub.any.js");
+      expect(
+        module.convertSpecialURL(
+          "https://wpt.live/some/test.sub.any.worker.js",
+        ),
+      ).toBe("https://wpt.live/some/test.sub.any.worker.js");
+    });
   });
 
   describe("resolveURL", function () {
-    it("keeps repo-root absolute paths within the WPT raw.githack.com mirror", function () {
+    it("resolves repo-root absolute paths to wpt.live when base is a WPT raw.githack.com URL", function () {
       expect(
         module.resolveURL(
           "/fonts/Lato-Medium.ttf",
           "https://raw.githack.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
         ),
-      ).toBe(
-        "https://raw.githack.com/web-platform-tests/wpt/master/fonts/Lato-Medium.ttf",
-      );
+      ).toBe("https://wpt.live/fonts/Lato-Medium.ttf");
     });
 
-    it("keeps repo-root absolute paths within the WPT mirror for non-master branches", function () {
+    it("resolves repo-root absolute paths to wpt.live for non-master branch WPT raw.githack.com URLs", function () {
       expect(
         module.resolveURL(
           "/fonts/ahem.css",
           "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/css/CSS2/fonts/font-family-008.xht",
         ),
+      ).toBe("https://wpt.live/fonts/ahem.css");
+    });
+
+    it("resolves relative sub-resources to wpt.live when base is a WPT raw.githack.com URL", function () {
+      expect(
+        module.resolveURL(
+          "resources/dpr.py?name=square.png&dpr=2",
+          "https://raw.githack.com/web-platform-tests/wpt/master/content-dpr/image.html",
+        ),
       ).toBe(
-        "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/fonts/ahem.css",
+        "https://wpt.live/content-dpr/resources/dpr.py?name=square.png&dpr=2",
       );
     });
   });

@@ -89,11 +89,12 @@ export function setResourceBaseURL(value: string): void {
   resourceBaseURL = value;
 }
 
-function getWptRawRepoRootURL(url: string): string | null {
-  const matched = stripFragmentAndQuery(url).match(
-    /^(https?:\/\/raw\.githack\.com\/web-platform-tests\/wpt\/[^/]+)(?:\/|$)/,
+function getWptLiveURL(url: string): string | null {
+  const result = url.replace(
+    /^(https?:)\/\/raw\.githack\.com\/web-platform-tests\/wpt\/[^/]+\//,
+    "$1//wpt.live/",
   );
-  return matched ? matched[1] : null;
+  return result !== url ? result : null;
 }
 
 /**
@@ -117,6 +118,9 @@ export function resolveURL(relURL: string, baseURL: string): string {
   if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/)) {
     baseURL = `${baseURL}/`;
   }
+  // If baseURL is a WPT raw.githack.com URL, resolve sub-resources against
+  // wpt.live instead so that dynamic resources (.py scripts) work correctly.
+  baseURL = getWptLiveURL(baseURL) ?? baseURL;
   let r: string[];
   if (relURL.match(/^\/\//)) {
     r = baseURL.match(/^(\w{2,}:)\/\//);
@@ -126,10 +130,6 @@ export function resolveURL(relURL: string, baseURL: string): string {
     return relURL;
   }
   if (relURL.match(/^\//)) {
-    const wptRawRepoRootURL = getWptRawRepoRootURL(baseURL);
-    if (wptRawRepoRootURL) {
-      return wptRawRepoRootURL + relURL;
-    }
     r = baseURL.match(/^(\w{2,}:\/\/[^\/]+)\//);
     if (r) {
       return r[1] + relURL;
@@ -214,7 +214,11 @@ export function convertSpecialURL(url: string): string {
     // Convert WPT live URL to raw.githack.com URL so it can be fetched without
     // CORS issues and with correct MIME types for embedded resources (e.g.,
     // <object data="..."> with type="text/html").
-    url = `${r[1]}//raw.githack.com/web-platform-tests/wpt/master/${r[2]}`;
+    // Exception: .sub.* files require WPT server-side template substitution
+    // (e.g. {{hosts[alt][]}}) and must remain on wpt.live to be served correctly.
+    if (!/\.sub\.[^/]+(?:[?#].*)?$/.test(r[2])) {
+      url = `${r[1]}//raw.githack.com/web-platform-tests/wpt/master/${r[2]}`;
+    }
   } else if (
     (r =
       /^(https?:)\/\/www\.aozora\.gr\.jp\/(cards\/[^/]+\/files\/[^/.]+\.html)$/.exec(
