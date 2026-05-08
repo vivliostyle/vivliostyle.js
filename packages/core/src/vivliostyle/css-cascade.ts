@@ -3921,12 +3921,19 @@ export class CascadeInstance {
     "font-style",
     "font-weight",
     "font-variant",
+    "hyphens",
+    "line-height",
+    "tab-size",
+    "text-combine-upright",
+    "text-emphasis-color",
+    "text-emphasis-position",
+    "text-emphasis-style",
+    "text-orientation",
+    "text-shadow",
+    "text-transform",
     "unicode-bidi",
     "direction",
     "white-space",
-    "text-transform",
-    "text-combine-upright",
-    "text-orientation",
   ];
 
   /**
