@@ -1648,6 +1648,27 @@ span[data-viv-leader] {
 [style*="--viv-marker-text-orientation"]::marker {
   text-orientation: var(--viv-marker-text-orientation);
 }
+[style*="--viv-marker-hyphens"]::marker {
+  hyphens: var(--viv-marker-hyphens);
+}
+[style*="--viv-marker-line-height"]::marker {
+  line-height: var(--viv-marker-line-height);
+}
+[style*="--viv-marker-tab-size"]::marker {
+  tab-size: var(--viv-marker-tab-size);
+}
+[style*="--viv-marker-text-emphasis-style"]::marker {
+  text-emphasis-style: var(--viv-marker-text-emphasis-style);
+}
+[style*="--viv-marker-text-emphasis-color"]::marker {
+  text-emphasis-color: var(--viv-marker-text-emphasis-color);
+}
+[style*="--viv-marker-text-emphasis-position"]::marker {
+  text-emphasis-position: var(--viv-marker-text-emphasis-position);
+}
+[style*="--viv-marker-text-shadow"]::marker {
+  text-shadow: var(--viv-marker-text-shadow);
+}
 
 /* initial-letter */
 [style*="--viv-initialLetter"]:has(>[data-adapt-pseudo="first-letter"])::first-letter {
