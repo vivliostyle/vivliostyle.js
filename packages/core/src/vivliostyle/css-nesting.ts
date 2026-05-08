@@ -72,11 +72,16 @@ function expandBlock(
     }
 
     if (input[index] === "@") {
-      flushDeclarations();
       const atRule = readAtRule(input, index, end);
       if (!atRule) {
         break;
       }
+      if (parentSelector && !SUPPORTED_GROUP_RULES.has(atRule.name)) {
+        declarations.push(compactWhitespace(input.slice(index, atRule.end)));
+        index = atRule.end;
+        continue;
+      }
+      flushDeclarations();
       if (atRule.hasBlock && SUPPORTED_GROUP_RULES.has(atRule.name)) {
         const inner = expandBlock(
           input,
@@ -110,6 +115,15 @@ function expandBlock(
     if (!rule) {
       const raw = readUntilSemicolonOrBrace(input, index, end);
       statements.push(compactWhitespace(raw.text));
+      index = raw.end;
+      continue;
+    }
+    if (
+      parentSelector &&
+      shouldKeepRuleLikeChunkInDeclarations(input, index, rule)
+    ) {
+      const raw = readRuleLikeDeclaration(input, index, rule.end, end);
+      declarations.push(compactWhitespace(raw.text));
       index = raw.end;
       continue;
     }
@@ -381,16 +395,40 @@ function isDeclarationStart(
   if (colonIndex >= end || input[colonIndex] !== ":") {
     return false;
   }
-  if (input[start] === "-" && input[start + 1] === "-") {
-    return true;
-  }
   const terminator = findTopLevelTerminator(
     input,
     colonIndex + 1,
     end,
     DECLARATION_START_TERMINATORS,
   );
-  return !terminator || terminator.char !== "{";
+  if (terminator?.char === "{") {
+    return !isLikelyNestedTypeOrUniversalSelector(
+      input,
+      start,
+      identEnd,
+      colonIndex,
+      terminator.index,
+    );
+  }
+  return true;
+}
+
+function isLikelyNestedTypeOrUniversalSelector(
+  input: string,
+  start: number,
+  identEnd: number,
+  colonIndex: number,
+  blockIndex: number,
+): boolean {
+  if (skipIgnorable(input, identEnd, blockIndex) !== colonIndex) {
+    return false;
+  }
+  const afterColon = skipIgnorable(input, colonIndex + 1, blockIndex);
+  if (afterColon !== colonIndex + 1 || afterColon >= blockIndex) {
+    return false;
+  }
+  const char = input[afterColon];
+  return char === ":" || char === "\\" || /[A-Za-z_-]/.test(char);
 }
 
 function readPropertyName(input: string, start: number, end: number): number {
@@ -476,6 +514,64 @@ function readStyleRule(
     blockStart: header.index + 1,
     blockEnd,
     end: blockEnd + 1,
+  };
+}
+
+function shouldKeepRuleLikeChunkInDeclarations(
+  input: string,
+  start: number,
+  rule: {
+    prelude: string;
+    blockStart: number;
+    blockEnd: number;
+    end: number;
+  },
+): boolean {
+  if (!isPlausibleNestedSelectorPrelude(input, start, rule.blockStart - 1)) {
+    return true;
+  }
+  const bodyStart = skipIgnorable(input, rule.blockStart, rule.blockEnd);
+  return bodyStart < rule.blockEnd && input[bodyStart] === ";";
+}
+
+function isPlausibleNestedSelectorPrelude(
+  input: string,
+  start: number,
+  end: number,
+): boolean {
+  const index = skipIgnorable(input, start, end);
+  if (index >= end) {
+    return false;
+  }
+  const char = input[index];
+  return (
+    char === "&" ||
+    char === "." ||
+    char === "#" ||
+    char === ":" ||
+    char === "[" ||
+    char === "|" ||
+    char === "*" ||
+    char === ">" ||
+    char === "+" ||
+    char === "~" ||
+    char === "\\" ||
+    /[A-Za-z_-]/.test(char)
+  );
+}
+
+function readRuleLikeDeclaration(
+  input: string,
+  start: number,
+  ruleEnd: number,
+  end: number,
+): { text: string; end: number } {
+  const suffixStart = skipIgnorable(input, ruleEnd, end);
+  const declarationEnd =
+    suffixStart < end && input[suffixStart] === ";" ? suffixStart + 1 : ruleEnd;
+  return {
+    text: input.slice(start, declarationEnd),
+    end: declarationEnd,
   };
 }
 
