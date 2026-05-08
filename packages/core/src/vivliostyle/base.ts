@@ -89,12 +89,23 @@ export function setResourceBaseURL(value: string): void {
   resourceBaseURL = value;
 }
 
-function getWptLiveURL(url: string): string | null {
-  const result = url.replace(
+function getWptRawRepoRootURL(url: string): string | null {
+  const matched = stripFragmentAndQuery(url).match(
+    /^(https?:\/\/raw\.githack\.com\/web-platform-tests\/wpt\/[^/]+)(?:\/|$)/,
+  );
+  return matched ? matched[1] : null;
+}
+
+/**
+ * Convert a WPT raw.githack.com URL to the equivalent wpt.live URL.
+ * Applied at DOM/CSS output points for resource URLs (images, fonts, etc.)
+ * so that dynamic WPT endpoints (e.g. `.py` scripts) work correctly.
+ */
+export function resolveWptResourceURL(url: string): string {
+  return url.replace(
     /^(https?:)\/\/raw\.githack\.com\/web-platform-tests\/wpt\/[^/]+\//,
     "$1//wpt.live/",
   );
-  return result !== url ? result : null;
 }
 
 /**
@@ -118,9 +129,6 @@ export function resolveURL(relURL: string, baseURL: string): string {
   if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/)) {
     baseURL = `${baseURL}/`;
   }
-  // If baseURL is a WPT raw.githack.com URL, resolve sub-resources against
-  // wpt.live instead so that dynamic resources (.py scripts) work correctly.
-  baseURL = getWptLiveURL(baseURL) ?? baseURL;
   let r: string[];
   if (relURL.match(/^\/\//)) {
     r = baseURL.match(/^(\w{2,}:)\/\//);
@@ -130,6 +138,10 @@ export function resolveURL(relURL: string, baseURL: string): string {
     return relURL;
   }
   if (relURL.match(/^\//)) {
+    const wptRawRepoRootURL = getWptRawRepoRootURL(baseURL);
+    if (wptRawRepoRootURL) {
+      return wptRawRepoRootURL + relURL;
+    }
     r = baseURL.match(/^(\w{2,}:\/\/[^\/]+)\//);
     if (r) {
       return r[1] + relURL;

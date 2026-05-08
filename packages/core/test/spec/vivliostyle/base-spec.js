@@ -97,33 +97,55 @@ describe("base", function () {
   });
 
   describe("resolveURL", function () {
-    it("resolves repo-root absolute paths to wpt.live when base is a WPT raw.githack.com URL", function () {
+    it("keeps repo-root absolute paths within the WPT raw.githack.com mirror", function () {
       expect(
         module.resolveURL(
           "/fonts/Lato-Medium.ttf",
           "https://raw.githack.com/web-platform-tests/wpt/master/css/css-fonts/font-face-src-list.html",
         ),
-      ).toBe("https://wpt.live/fonts/Lato-Medium.ttf");
+      ).toBe(
+        "https://raw.githack.com/web-platform-tests/wpt/master/fonts/Lato-Medium.ttf",
+      );
     });
 
-    it("resolves repo-root absolute paths to wpt.live for non-master branch WPT raw.githack.com URLs", function () {
+    it("keeps repo-root absolute paths within the WPT mirror for non-master branches", function () {
       expect(
         module.resolveURL(
           "/fonts/ahem.css",
           "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/css/CSS2/fonts/font-family-008.xht",
         ),
-      ).toBe("https://wpt.live/fonts/ahem.css");
+      ).toBe(
+        "https://raw.githack.com/web-platform-tests/wpt/merge_pr_123456/fonts/ahem.css",
+      );
     });
 
-    it("resolves relative sub-resources to wpt.live when base is a WPT raw.githack.com URL", function () {
+    it("resolves relative sub-resources within raw.githack.com (not converted to wpt.live)", function () {
       expect(
         module.resolveURL(
           "resources/dpr.py?name=square.png&dpr=2",
           "https://raw.githack.com/web-platform-tests/wpt/master/content-dpr/image.html",
         ),
       ).toBe(
+        "https://raw.githack.com/web-platform-tests/wpt/master/content-dpr/resources/dpr.py?name=square.png&dpr=2",
+      );
+    });
+  });
+
+  describe("resolveWptResourceURL", function () {
+    it("converts raw.githack.com WPT URLs to wpt.live for browser-loaded resources", function () {
+      expect(
+        module.resolveWptResourceURL(
+          "https://raw.githack.com/web-platform-tests/wpt/master/content-dpr/resources/dpr.py?name=square.png&dpr=2",
+        ),
+      ).toBe(
         "https://wpt.live/content-dpr/resources/dpr.py?name=square.png&dpr=2",
       );
+    });
+
+    it("passes through non-WPT URLs unchanged", function () {
+      expect(
+        module.resolveWptResourceURL("https://example.com/image.png"),
+      ).toBe("https://example.com/image.png");
     });
   });
 

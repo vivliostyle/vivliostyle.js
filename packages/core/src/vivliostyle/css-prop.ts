@@ -267,6 +267,10 @@ export class UrlTransformVisitor extends Css.FilterVisitor {
   }
 
   override visitURL(url: Css.URL): Css.Val {
-    return new Css.URL(this.transformer.transformURL(url.url, this.baseUrl));
+    return new Css.URL(
+      Base.resolveWptResourceURL(
+        this.transformer.transformURL(url.url, this.baseUrl),
+      ),
+    );
   }
 }

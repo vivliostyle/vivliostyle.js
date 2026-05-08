@@ -1766,11 +1766,17 @@ export class ViewFactory
                   attributeValue,
                   this.xmldoc.url,
                 );
+              } else {
+                // Convert WPT raw.githack.com URLs to wpt.live for resource
+                // attributes (src, poster) so dynamic endpoints work.
+                attributeValue = Base.resolveWptResourceURL(attributeValue);
               }
             } else if (attributeName == "srcset") {
               attributeValue = attributeValue
                 .split(",")
-                .map((value) => this.resolveURL(value.trim()))
+                .map((value) =>
+                  Base.resolveWptResourceURL(this.resolveURL(value.trim())),
+                )
                 .join(",");
             } else if (
               attributeName === "data" &&
