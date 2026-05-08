@@ -3064,9 +3064,9 @@ function writeReports(outDir, result, triageStatusMap) {
           const baselineRefLinks = hasRefDiffUrls
             ? refs
                 .filter((ref) => ref.baselineReferenceUrl)
-                .map((ref) =>
+                .map((ref, i, arr) =>
                   renderRefViewerLink(
-                    `${result.labels.baseline} ref`,
+                    `${result.labels.baseline} ref${arr.length > 1 ? i + 1 : ""}`,
                     ref.baselineReferenceUrl,
                     "lr-baseline",
                   ),
@@ -3075,9 +3075,9 @@ function writeReports(outDir, result, triageStatusMap) {
           const actualRefLinks = hasRefDiffUrls
             ? refs
                 .filter((ref) => ref.actualReferenceUrl)
-                .map((ref) =>
+                .map((ref, i, arr) =>
                   renderRefViewerLink(
-                    `${result.labels.actual} ref`,
+                    `${result.labels.actual} ref${arr.length > 1 ? i + 1 : ""}`,
                     ref.actualReferenceUrl,
                     "lr-actual",
                   ),
