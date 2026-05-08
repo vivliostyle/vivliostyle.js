@@ -208,6 +208,18 @@ describe("css-parser", function () {
         ).toBe(".foo { color: blue; }\n:is(.foo) .bar { background: green; }");
       });
 
+      it("still expands type selectors followed by pseudo-classes", function () {
+        expect(
+          adapt_cssnesting.expandNesting(".foo { a:hover { color: red; } }"),
+        ).toBe(":is(.foo) a:hover { color: red; }");
+      });
+
+      it("still expands namespace-prefixed type selectors", function () {
+        expect(
+          adapt_cssnesting.expandNesting(".foo { |a { color: red; } }"),
+        ).toBe(":is(.foo) |a { color: red; }");
+      });
+
       it("parses semicolonless declarations after preprocessing", function (done) {
         spyOn(handler, "property");
         parse(done, "ul { background: green }", function () {
