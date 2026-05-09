@@ -2928,6 +2928,10 @@ export class ViewFactory
     if (maskImage) {
       this.addImageFetchers(maskImage);
     }
+    const markerContent = computedStyle["--viv-marker-content"];
+    if (markerContent) {
+      this.addImageFetchers(markerContent);
+    }
     const isRelativePositioned =
       computedStyle["position"] === Css.ident.relative;
     const isRoot =
