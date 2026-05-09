@@ -1796,18 +1796,20 @@ export class ViewFactory
             if (
               attributeName === "poster" &&
               tag === "video" &&
-              ns === Base.NS.XHTML &&
-              hasAutoWidth &&
-              hasAutoHeight
+              ns === Base.NS.XHTML
             ) {
               const image = new Image();
               const fetcher = Net.loadElement(image, attributeValue);
-              fetchers.push(fetcher);
-              images.push({
-                image,
-                element: result as HTMLElement,
-                fetcher,
-              });
+              if (hasAutoWidth && hasAutoHeight) {
+                fetchers.push(fetcher);
+                images.push({
+                  image,
+                  element: result as HTMLElement,
+                  fetcher,
+                });
+              } else {
+                this.page.fetchers.push(fetcher);
+              }
             }
           } else if (attributeNS == "http://www.w3.org/2000/xmlns/") {
             continue; // namespace declaration (in Firefox)
@@ -2895,6 +2897,14 @@ export class ViewFactory
     } else if (bg instanceof Css.URL) {
       const url = Base.resolveWptResourceURL((bg as Css.URL).url);
       this.page.fetchers.push(Net.loadElement(new Image(), url));
+    } else if (bg instanceof Css.Func) {
+      for (const v of (bg as Css.Func).values) {
+        this.addImageFetchers(v);
+      }
+    } else if (bg instanceof Css.SpaceList) {
+      for (const v of (bg as Css.SpaceList).values) {
+        this.addImageFetchers(v);
+      }
     }
   }
 
@@ -2905,6 +2915,18 @@ export class ViewFactory
     const bg = computedStyle["background-image"];
     if (bg) {
       this.addImageFetchers(bg);
+    }
+    const borderImageSource = computedStyle["border-image-source"];
+    if (borderImageSource) {
+      this.addImageFetchers(borderImageSource);
+    }
+    const listStyleImage = computedStyle["list-style-image"];
+    if (listStyleImage) {
+      this.addImageFetchers(listStyleImage);
+    }
+    const maskImage = computedStyle["mask-image"];
+    if (maskImage) {
+      this.addImageFetchers(maskImage);
     }
     const isRelativePositioned =
       computedStyle["position"] === Css.ident.relative;
