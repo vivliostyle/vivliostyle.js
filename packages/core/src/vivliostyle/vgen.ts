@@ -1766,11 +1766,23 @@ export class ViewFactory
                   attributeValue,
                   this.xmldoc.url,
                 );
+              } else {
+                // Convert WPT raw.githack.com URLs to wpt.live for resource
+                // attributes (src, poster) so dynamic endpoints work.
+                attributeValue = Base.resolveWptResourceURL(attributeValue);
               }
             } else if (attributeName == "srcset") {
               attributeValue = attributeValue
                 .split(",")
-                .map((value) => this.resolveURL(value.trim()))
+                .map((entry) => {
+                  const parts = entry.trim().split(/\s+/);
+                  const url = Base.resolveWptResourceURL(
+                    this.resolveURL(parts[0]),
+                  );
+                  return parts.length > 1
+                    ? `${url} ${parts.slice(1).join(" ")}`
+                    : url;
+                })
                 .join(",");
             } else if (
               attributeName === "data" &&
@@ -2881,7 +2893,7 @@ export class ViewFactory
         this.addImageFetchers(values[i]);
       }
     } else if (bg instanceof Css.URL) {
-      const url = (bg as Css.URL).url;
+      const url = Base.resolveWptResourceURL((bg as Css.URL).url);
       this.page.fetchers.push(Net.loadElement(new Image(), url));
     }
   }
