@@ -400,6 +400,20 @@ export function loadElement(
             (elem as any).alt = alt;
           }
         }
+      } else if (
+        elem.localName === "img" ||
+        elem.localName === "embed" ||
+        elem.localName === "object" ||
+        elem.localName === "iframe"
+      ) {
+        // No src provided: element already has its source attributes set
+        // (e.g., <img srcset="...">, <embed src="...">, <object data="...">).
+        // Check if already loaded and set a timeout as a safety net.
+        if ((elem as HTMLImageElement).complete) {
+          setTimeout(() => handler(new Event("load")), 0);
+        } else {
+          timeoutId = setTimeout(handler, 30000);
+        }
       }
       return frame.result();
     },

@@ -1932,6 +1932,14 @@ export class ViewFactory
             }
             fetchers.push(imageFetcher);
           }
+        } else if (
+          !delayedSrc &&
+          tag === "img" &&
+          ns === Base.NS.XHTML &&
+          (result as HTMLImageElement).srcset
+        ) {
+          // <img srcset="..."> without src: wait for the image to load
+          this.page.fetchers.push(Net.loadElement(result));
         }
         delete computedStyle["content"];
 
@@ -1959,6 +1967,15 @@ export class ViewFactory
           result.localName === "object" &&
           result.namespaceURI === Base.NS.XHTML &&
           result.hasAttribute("data")
+        ) {
+          this.page.fetchers.push(Net.loadElement(result));
+        }
+
+        // Wait for embed element content to load (e.g., <embed src="image.png">).
+        if (
+          result.localName === "embed" &&
+          result.namespaceURI === Base.NS.XHTML &&
+          result.hasAttribute("src")
         ) {
           this.page.fetchers.push(Net.loadElement(result));
         }
