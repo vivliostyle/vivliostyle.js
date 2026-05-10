@@ -2945,6 +2945,10 @@ export class ViewFactory
     if (maskImage) {
       this.addImageFetchers(maskImage);
     }
+    const clipPath = computedStyle["clip-path"];
+    if (clipPath) {
+      this.addImageFetchers(clipPath);
+    }
     const markerContent = computedStyle["--viv-marker-content"];
     if (markerContent) {
       this.addImageFetchers(markerContent);
