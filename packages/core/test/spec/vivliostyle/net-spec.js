@@ -17,73 +17,34 @@
 
 import * as adapt_base from "../../../src/vivliostyle/base";
 import * as adapt_net from "../../../src/vivliostyle/net";
+import * as adapt_task from "../../../src/vivliostyle/task";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 
 describe("net", function () {
   describe("fetchFromURL", function () {
-    it("returns a synthetic empty HTML response for about:blank", function (done) {
-      adapt_net
-        .fetchFromURL("about:blank", adapt_net.FetchResponseType.DOCUMENT)
-        .then(function (response) {
-          expect(response.status).toBe(200);
-          expect(response.statusText).toBe("OK");
-          expect(response.url).toBe("about:blank");
-          expect(response.contentType).toBe("text/html");
-          expect(response.responseText).toBe("");
-          expect(response.responseXML).toBeNull();
-          expect(response.responseBlob).toBeNull();
-          done();
-        });
-    });
-
-    it("returns a synthetic empty HTML response for about:blank with query parameters", function (done) {
-      adapt_net
-        .fetchFromURL("about:blank?Q=1", adapt_net.FetchResponseType.DOCUMENT)
-        .then(function (response) {
-          expect(response.status).toBe(200);
-          expect(response.statusText).toBe("OK");
-          expect(response.url).toBe("about:blank?Q=1");
-          expect(response.contentType).toBe("text/html");
-          expect(response.responseText).toBe("");
-          expect(response.responseXML).toBeNull();
-          expect(response.responseBlob).toBeNull();
-          done();
-        });
-    });
-
-    it("returns a synthetic empty HTML response for mixed-case about:blank URLs", function (done) {
-      adapt_net
-        .fetchFromURL("ABOUT:blank?Q=1", adapt_net.FetchResponseType.DOCUMENT)
-        .then(function (response) {
-          expect(response.status).toBe(200);
-          expect(response.statusText).toBe("OK");
-          expect(response.url).toBe("ABOUT:blank?Q=1");
-          expect(response.contentType).toBe("text/html");
-          expect(response.responseText).toBe("");
-          expect(response.responseXML).toBeNull();
-          expect(response.responseBlob).toBeNull();
-          done();
-        });
-    });
-
-    it("lets about:blank parse as an empty HTML document", function (done) {
+    it("fetches a data:text/html, URL and parses as an empty HTML document", function (done) {
       var docStore = adapt_xmldoc.newXMLDocStore();
 
-      adapt_net
-        .fetchFromURL("about:blank", adapt_net.FetchResponseType.DOCUMENT)
-        .then(function (response) {
-          adapt_xmldoc
-            .parseXMLResource(response, docStore)
-            .then(function (docHolder) {
-              expect(docHolder).not.toBeNull();
-              expect(docHolder.url).toBe("about:blank");
-              expect(docHolder.document.documentElement.namespaceURI).toBe(
-                adapt_base.NS.XHTML,
-              );
-              expect(docHolder.document.body).not.toBeNull();
-              done();
-            });
-        });
+      adapt_task.start(function () {
+        adapt_net
+          .fetchFromURL("data:text/html,", adapt_net.FetchResponseType.DOCUMENT)
+          .then(function (response) {
+            expect(response.status).toBe(200);
+            expect(response.contentType).toContain("text/html");
+
+            adapt_xmldoc
+              .parseXMLResource(response, docStore)
+              .then(function (docHolder) {
+                expect(docHolder).not.toBeNull();
+                expect(docHolder.document.documentElement.namespaceURI).toBe(
+                  adapt_base.NS.XHTML,
+                );
+                expect(docHolder.document.body).not.toBeNull();
+                done();
+              });
+          });
+        return adapt_task.newResult(true);
+      });
     });
   });
 });

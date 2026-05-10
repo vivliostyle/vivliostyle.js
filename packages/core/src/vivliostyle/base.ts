@@ -194,6 +194,14 @@ export function resolveReferenceURL(relURL: string, baseURL: string): string {
 }
 
 /**
+ * Convert `about:blank` (with optional query/fragment, case-insensitive)
+ * to `data:text/html,` so the browser can load it natively.
+ */
+export function convertAboutBlankURL(url: string): string {
+  return /^about:blank($|[?#])/i.test(url) ? "data:text/html," : url;
+}
+
+/**
  * Convert special URLs (e.g. GitHub, Gist) to their raw equivalents.
  * This is useful for fetching content from these services in a format
  * that can be easily processed by Vivliostyle.js.
@@ -204,7 +212,9 @@ export function resolveReferenceURL(relURL: string, baseURL: string): string {
 export function convertSpecialURL(url: string): string {
   let r: RegExpMatchArray;
 
-  if (
+  if ((url = convertAboutBlankURL(url)) !== url) {
+    // already converted
+  } else if (
     (r =
       /^(https?:)\/\/github\.com\/web-platform-tests\/wpt\/(blob\/|tree\/|raw\/)?(.*)$/.exec(
         url,

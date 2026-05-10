@@ -94,6 +94,40 @@ describe("base", function () {
         ),
       ).toBe("https://wpt.live/some/test.sub.any.worker.js");
     });
+
+    it("converts about:blank to data:text/html,", function () {
+      expect(module.convertSpecialURL("about:blank")).toBe("data:text/html,");
+      expect(module.convertSpecialURL("ABOUT:blank")).toBe("data:text/html,");
+      expect(module.convertSpecialURL("about:blank?Q=1")).toBe(
+        "data:text/html,",
+      );
+      expect(module.convertSpecialURL("about:blank#frag")).toBe(
+        "data:text/html,",
+      );
+    });
+  });
+
+  describe("convertAboutBlankURL", function () {
+    it("converts about:blank to data:text/html,", function () {
+      expect(module.convertAboutBlankURL("about:blank")).toBe(
+        "data:text/html,",
+      );
+      expect(module.convertAboutBlankURL("ABOUT:blank")).toBe(
+        "data:text/html,",
+      );
+      expect(module.convertAboutBlankURL("about:blank?Q=1")).toBe(
+        "data:text/html,",
+      );
+    });
+
+    it("returns non-about:blank URLs unchanged", function () {
+      expect(module.convertAboutBlankURL("https://example.com")).toBe(
+        "https://example.com",
+      );
+      expect(module.convertAboutBlankURL("data:text/html,")).toBe(
+        "data:text/html,",
+      );
+    });
   });
 
   describe("resolveURL", function () {
