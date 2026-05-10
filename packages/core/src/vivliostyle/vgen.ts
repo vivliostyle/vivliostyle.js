@@ -1771,6 +1771,12 @@ export class ViewFactory
                 // attributes (src, poster) so dynamic endpoints work.
                 attributeValue = Base.resolveWptResourceURL(attributeValue);
               }
+              // Convert about:blank to data:text/html, so iframes and other
+              // embedded elements load natively without stalling on a missed
+              // load event.
+              if (attributeName === "src") {
+                attributeValue = Base.convertAboutBlankURL(attributeValue);
+              }
             } else if (attributeName == "srcset") {
               attributeValue = attributeValue
                 .split(",")

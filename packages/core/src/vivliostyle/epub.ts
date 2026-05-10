@@ -68,7 +68,7 @@ function clonePageGroupPageCounts(source: {
 function shouldSkipHeadForWebPub(url: string): boolean {
   return (
     /\.(x?html?|xht|svg)(?:[#?]|$)/i.test(url) ||
-    /^(?:about:|blob:)/i.test(Base.stripFragment(url))
+    /^(?:about:|data:|blob:)/i.test(Base.stripFragment(url))
   );
 }
 
@@ -152,7 +152,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     } else if (shouldSkipHeadForWebPub(url)) {
       // Web Publication primary entry (X)HTML
       // Skip HEAD request for known document URLs and special schemes.
-      // Browsers reject HEAD on blob: URLs, and about:blank is a synthetic blank document.
+      // Browsers reject non-GET methods for data: and blob: URLs.
       this.loadWebPub(url).then((opf) => {
         if (opf) {
           frame.finish(opf);

@@ -23,7 +23,7 @@ import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 describe("epub", function () {
   describe("EPUBDocStore", function () {
     describe("loadPubDoc", function () {
-      it("skips HEAD and treats about:blank as a Web Publication primary entry", function (done) {
+      it("skips HEAD and treats data: URLs as a Web Publication primary entry", function (done) {
         var store = new adapt_epub.EPUBDocStore();
         var opf = {};
         spyOn(store, "loadWebPub").and.callFake(function () {
@@ -31,8 +31,8 @@ describe("epub", function () {
         });
 
         adapt_task.start(function () {
-          store.loadPubDoc("about:blank").then(function (result) {
-            expect(store.loadWebPub).toHaveBeenCalledWith("about:blank");
+          store.loadPubDoc("data:text/html,").then(function (result) {
+            expect(store.loadWebPub).toHaveBeenCalledWith("data:text/html,");
             expect(result).toBe(opf);
             done();
           });
@@ -82,9 +82,9 @@ describe("epub", function () {
 
   describe("OPFDoc", function () {
     describe("initWithWebPubManifest", function () {
-      it("creates a primary entry for about:blank documents", function (done) {
+      it("creates a primary entry for data: URL documents", function (done) {
         var store = new adapt_epub.EPUBDocStore();
-        var opf = new adapt_epub.OPFDoc(store, "about:blank");
+        var opf = new adapt_epub.OPFDoc(store, "data:text/html,");
         var doc = new DOMParser().parseFromString(
           "<html xmlns='http://www.w3.org/1999/xhtml'><head><title>Blank</title></head><body></body></html>",
           "text/html",
@@ -94,7 +94,7 @@ describe("epub", function () {
           opf.initWithWebPubManifest({}, doc).then(function () {
             expect(opf.items.length).toBe(1);
             expect(opf.spine.length).toBe(1);
-            expect(opf.items[0].src).toBe("about:blank");
+            expect(opf.items[0].src).toBe("data:text/html,");
             done();
           });
           return adapt_task.newResult(true);
