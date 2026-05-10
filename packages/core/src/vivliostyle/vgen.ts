@@ -2949,6 +2949,14 @@ export class ViewFactory
     if (clipPath) {
       this.addImageFetchers(clipPath);
     }
+    const filter = computedStyle["filter"];
+    if (filter) {
+      this.addImageFetchers(filter);
+    }
+    const shapeOutside = computedStyle["shape-outside"];
+    if (shapeOutside) {
+      this.addImageFetchers(shapeOutside);
+    }
     const markerContent = computedStyle["--viv-marker-content"];
     if (markerContent) {
       this.addImageFetchers(markerContent);
