@@ -78,11 +78,13 @@ function extractPseudoElementText(
       return pseudoElem.textContent || "";
     }
     // Native ::marker: read from --viv-marker-content CSS custom property.
-    // Use getComputedStyle to capture inherited values (e.g., footnote-content
-    // inheriting from the footnote wrapper).
-    const markerContent = element.ownerDocument.defaultView
-      ?.getComputedStyle(element)
-      ?.getPropertyValue("--viv-marker-content");
+    // The property is always set as an inline style on the element itself
+    // (via computedStyle in vgen.ts), so element.style is sufficient.
+    // Avoid getComputedStyle here as it can cause unwanted style computation
+    // side effects on unrelated elements (e.g., canvas image-orientation).
+    const markerContent = (element as HTMLElement).style?.getPropertyValue(
+      "--viv-marker-content",
+    );
     if (markerContent) {
       // Extract only string components from the CSS content value.
       // e.g., url(icon.png) "1. " → "1. " (url() tokens are ignored)
