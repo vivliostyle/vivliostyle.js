@@ -963,6 +963,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               new TableCell(this.rowIndex, this.columnIndex, elem),
             );
             this.columnIndex++;
+            fixTableCellWrapperForBaseline(elem);
             // Propagate cell break values to the row for forced break detection
             const cellRow = formattingContext.rows[this.rowIndex];
             if (cellRow) {
@@ -1112,7 +1113,10 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     }
     return cellFragment.pseudoColumn
       .layout(startChunkPosition, true)
-      .thenReturn(true);
+      .thenAsync(() => {
+        fixTableCellWrapperForBaseline(cellViewNode);
+        return Task.newResult(true);
+      });
   }
 
   /**
@@ -2183,6 +2187,47 @@ function adjustCellHeight(
       padding.top;
     Base.setCSSProperty(cellContentElement, "max-height", `${height}px`);
   }
+}
+
+/**
+ * When a table cell has vertical-align: baseline and its content wrapper
+ * contains only out-of-flow children (position: absolute/fixed), the wrapper
+ * generates a spurious baseline from whitespace text nodes. This causes the
+ * browser's baseline alignment to incorrectly shift the absolutely positioned
+ * elements' static positions. Fix by setting the wrapper to display: contents
+ * so it becomes transparent to the box model and the browser can apply its
+ * table-cell baseline static-position fix correctly.
+ */
+function fixTableCellWrapperForBaseline(cellViewNode: Element): void {
+  // Find the table cell element (cellViewNode may be the wrapper div itself
+  // due to the shadow/template model, not the <td>)
+  const cellElement = cellViewNode.matches("td, th")
+    ? cellViewNode
+    : cellViewNode.closest("td, th");
+  if (!cellElement) {
+    return;
+  }
+  const cellStyle = (cellElement as HTMLElement).style;
+  if (cellStyle.verticalAlign !== "baseline") {
+    return;
+  }
+  const wrapper = cellElement.querySelector(
+    ".-vivliostyle-table-cell-container",
+  );
+  if (!wrapper) {
+    return;
+  }
+  const children = wrapper.children;
+  if (children.length === 0) {
+    return;
+  }
+  for (let i = 0; i < children.length; i++) {
+    const pos = (children[i] as HTMLElement).style.position;
+    if (pos !== "absolute" && pos !== "fixed") {
+      return;
+    }
+  }
+  Base.setCSSProperty(wrapper, "display", "contents");
 }
 
 /**
