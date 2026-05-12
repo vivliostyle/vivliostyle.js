@@ -1,3 +1,15 @@
+- category: General
+  title: "rem/rlh with font shorthand var() calc() (Issue #1955)"
+  file: root-font-var-calc.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1955  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/root-font-var-calc.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/root-font-var-calc.html&zoom=1&spread=false
 - category: Footnotes
   title: "Footnote marker with float:left overflow (Issue #1956)"
   file: footnotes/footnote-marker-with-float.html
