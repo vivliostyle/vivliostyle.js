@@ -3406,9 +3406,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // rendering differences with exclusion floats. Page/column float clear
     // edges from getPageFloatClearEdge() are accurate DOM measurements and
     // don't need the extra margin. (Issue #1803)
+    // Only apply rounding when actual inline floats have been laid out
+    // (leftFloatEdge or rightFloatEdge moved past beforeEdge). Without this
+    // guard, clearEdge equals beforeEdge (since leftFloatEdge/rightFloatEdge
+    // are initialized to beforeEdge in initGeom()), and Math.ceil rounding
+    // can push clearEdge past edge + tolerance, creating unnecessary
+    // clearance that causes infinite page generation. (Issue #1959)
     const floatUnit = this.getFloatLayoutUnit();
-    const inlineFloatEdgeDominates = clearEdge * dir > pageFloatClearEdge * dir;
-    if (floatUnit > 0) {
+    const hasInlineFloats =
+      this.leftFloatEdge * dir > this.beforeEdge * dir ||
+      this.rightFloatEdge * dir > this.beforeEdge * dir;
+    if (floatUnit > 0 && hasInlineFloats) {
+      const inlineFloatEdgeDominates =
+        clearEdge * dir > pageFloatClearEdge * dir;
       clearEdge =
         dir *
         (Math.ceil((clearEdge * dir) / floatUnit) +
