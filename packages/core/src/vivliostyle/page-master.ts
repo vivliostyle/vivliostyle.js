@@ -28,6 +28,7 @@ import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as LayoutHelper from "./layout-helper";
 import { StyleInstance } from "./ops";
+import { addImageFetchersToPage } from "./vgen";
 import * as Vtree from "./vtree";
 
 export let keyCount: number = 1;
@@ -1620,6 +1621,15 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         docFaces,
       );
     }
+    // Preload images referenced by background-image, border-image-source,
+    // and filter that were propagated from :root/body to the page container,
+    // so that page.fetchers waits for them before screenshot/render.
+    for (const name of imageProperties) {
+      const val = this.getProp(context, name);
+      if (val) {
+        addImageFetchersToPage(val, page);
+      }
+    }
     for (let i = 0; i < delayedProperties.length; i++) {
       this.propagateDelayedProperty(
         context,
@@ -1758,6 +1768,11 @@ export const passPostProperties = [
   "mix-blend-mode",
   "filter",
 ];
+
+/**
+ * Image-bearing properties in passPostProperties whose URLs need preloading.
+ */
+const imageProperties = ["background-image", "border-image-source", "filter"];
 
 /**
  * Only passed when there is content assigned by the content property.
