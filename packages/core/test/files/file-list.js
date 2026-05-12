@@ -25,6 +25,10 @@ module.exports = [
       },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
+        file: "root-font-var-calc.html",
+        title: "rem/rlh with font shorthand var() calc() (Issue #1955)",
+      },
+      {
         file: "web_font_in_page_margin.html",
         title: "Web font in page margin",
       },
