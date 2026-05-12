@@ -2912,23 +2912,7 @@ export class ViewFactory
   }
 
   addImageFetchers(bg: Css.Val) {
-    if (bg instanceof Css.CommaList) {
-      const values = (bg as Css.CommaList).values;
-      for (let i = 0; i < values.length; i++) {
-        this.addImageFetchers(values[i]);
-      }
-    } else if (bg instanceof Css.URL) {
-      const url = Base.resolveWptResourceURL((bg as Css.URL).url);
-      this.page.fetchers.push(Net.loadElement(new Image(), url));
-    } else if (bg instanceof Css.Func) {
-      for (const v of (bg as Css.Func).values) {
-        this.addImageFetchers(v);
-      }
-    } else if (bg instanceof Css.SpaceList) {
-      for (const v of (bg as Css.SpaceList).values) {
-        this.addImageFetchers(v);
-      }
-    }
+    addImageFetchersToPage(bg, this.page);
   }
 
   applyComputedStyles(
@@ -4086,6 +4070,30 @@ export class Viewport {
     const root = this.root;
     while (root.lastChild) {
       root.removeChild(root.lastChild);
+    }
+  }
+}
+
+/**
+ * Recursively walk a CSS value tree and push image-load fetchers for any
+ * URL values found. Used to preload images referenced by background-image,
+ * border-image-source, filter, etc.
+ */
+export function addImageFetchersToPage(val: Css.Val, page: Vtree.Page): void {
+  if (val instanceof Css.CommaList) {
+    for (const v of val.values) {
+      addImageFetchersToPage(v, page);
+    }
+  } else if (val instanceof Css.URL) {
+    const url = Base.resolveWptResourceURL(val.url);
+    page.fetchers.push(Net.loadElement(new Image(), url));
+  } else if (val instanceof Css.Func) {
+    for (const v of val.values) {
+      addImageFetchersToPage(v, page);
+    }
+  } else if (val instanceof Css.SpaceList) {
+    for (const v of val.values) {
+      addImageFetchersToPage(v, page);
     }
   }
 }
