@@ -1792,9 +1792,16 @@ export class StyleInstance
     layoutContext: Vtree.LayoutContext,
     forceNonFitting: boolean,
   ): Task.Result<LayoutType.Column> {
+    // Don't apply exclusions from sibling partitions when the partition's
+    // position or inline-size is unknown during layout:
+    // - auto block-size with before-edge dependency: position is unknown
+    // - auto inline-size: partition will shrink to fit content, so exclusions
+    //   from distant positions create incorrect float spacers (Issue #1171)
     const dontApplyExclusions = boxInstance.vertical
-      ? boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth
-      : boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight;
+      ? (boxInstance.isAutoWidth && boxInstance.isRightDependentOnAutoWidth) ||
+        boxInstance.isAutoHeight
+      : (boxInstance.isAutoHeight && boxInstance.isTopDependentOnAutoHeight) ||
+        boxInstance.isAutoWidth;
     const boxContainer = layoutContainer.element;
     const columnPageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
       regionPageFloatLayoutContext,

@@ -73,6 +73,11 @@ module.exports = [
         file: "incorrect_layout_with_empty_partition.html",
         title: "Incorrect layout with empty partition",
       },
+      {
+        file: "partition-overlap.html",
+        title:
+          "Partition overlap affects non-overlapping partition (Issue #1171)",
+      },
       { file: "nth_selectors.html", title: "nth selectors" },
       { file: "empty_selector.html", title: "empty selector" },
       {
