@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1955: rem and rlh units are incorrect when using font shorthand with var() and calc() -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>rem/rlh with font shorthand var() calc() (Issue #1955)</title>
+  <style>
+    @page { size: 200mm 150mm; }
+    :root {
+      --fs: calc(10 * 10px);
+      --lh: calc(200px / 2);
+      font: var(--fs) / var(--lh) sans-serif;
+    }
+    #test {
+      font-size: 1rem;
+      line-height: 1rlh;
+      border: solid;
+      margin: 10px;
+    }
+    #ref {
+      border: solid;
+      margin: 10px;
+    }
+    p {
+      font: 16px/1.5 sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <p>The two boxes below should be identical.</p>
+  <div id="test">TEST</div>
+  <div id="ref">TEST</div>
+</body>
+</html>

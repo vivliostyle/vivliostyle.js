@@ -1265,8 +1265,22 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     this.error = false;
     const validators = this.validatorSet.validators;
     if (!list[index].visit(validators["font-size"])) {
-      this.error = true;
-      return index;
+      // If font-size validation fails and a calc() was incorrectly consumed
+      // as font-weight by super.validateList (calc() is ambiguous between
+      // font-weight <number> and font-size <length>), backtrack to the
+      // calc() token's position and re-validate as font-size. (Issue #1955)
+      const fontWeight = this.values["font-weight"];
+      const calcIndex =
+        fontWeight instanceof Css.Func && fontWeight.name === "calc"
+          ? list.indexOf(fontWeight)
+          : -1;
+      if (calcIndex >= 0 && list[calcIndex].visit(validators["font-size"])) {
+        delete this.values["font-weight"];
+        index = calcIndex;
+      } else {
+        this.error = true;
+        return index;
+      }
     }
     this.values["font-size"] = list[index++];
     if (list[index] === Css.slash) {
