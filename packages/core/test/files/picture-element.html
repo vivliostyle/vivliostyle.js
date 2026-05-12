@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>picture element with source media (Issue #1089)</title>
+  <style>
+    body {
+      margin: 20px;
+    }
+    figure {
+      margin: 1em 0;
+    }
+    figcaption {
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>&lt;picture&gt; element with &lt;source media&gt;</h2>
+
+  <figure>
+    <figcaption>
+      <code>&lt;source media="print"&gt;</code> should be used
+      (200x200 image):
+    </figcaption>
+    <picture>
+      <source srcset="img/200x200.png" media="print">
+      <img src="img/50x50.png" alt="print media test">
+    </picture>
+  </figure>
+
+  <figure>
+    <figcaption>
+      <code>&lt;source media="screen"&gt;</code> should NOT be used
+      (50x50 fallback image):
+    </figcaption>
+    <picture>
+      <source srcset="img/200x200.png" media="screen">
+      <img src="img/50x50.png" alt="screen media test">
+    </picture>
+  </figure>
+
+  <figure>
+    <figcaption>
+      <code>&lt;source&gt;</code> without media should be used
+      (200x200 image):
+    </figcaption>
+    <picture>
+      <source srcset="img/200x200.png">
+      <img src="img/50x50.png" alt="no media test">
+    </picture>
+  </figure>
+
+  <figure>
+    <figcaption>
+      <code>&lt;source media="print"&gt;</code> with
+      <code>&lt;img&gt;</code> without src (aspect-ratio test):
+    </figcaption>
+    <picture>
+      <source srcset="img/200x200.png" media="print">
+      <img style="width: 100px; aspect-ratio: 1/1;" alt="aspect-ratio test">
+    </picture>
+  </figure>
+</body>
+</html>

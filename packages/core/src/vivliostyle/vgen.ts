@@ -24,6 +24,8 @@ import * as Break from "./break";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssPage from "./css-page";
+import * as CssParser from "./css-parser";
+import * as CssTokenizer from "./css-tokenizer";
 import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
 import * as Diff from "./diff";
@@ -1727,6 +1729,44 @@ export class ViewFactory
             if (attributeName == "style") {
               continue; // we do styling ourselves
             }
+            if (
+              attributeName === "media" &&
+              tag === "source" &&
+              ns === Base.NS.XHTML &&
+              element.parentElement?.localName === "picture"
+            ) {
+              // Evaluate the media query on <source> inside <picture>
+              // using Vivliostyle's media context (print mode by default).
+              // The browser evaluates media queries in screen mode,
+              // so we need to adjust the media attribute to match.
+              try {
+                const scope = this.context.rootScope;
+                const handler = new CssParser.ParserHandler(scope);
+                const tokenizer = new CssTokenizer.Tokenizer(
+                  attributeValue,
+                  handler,
+                );
+                const condExpr = CssParser.parseMediaQuery(
+                  tokenizer,
+                  handler,
+                  "",
+                );
+                if (condExpr) {
+                  const matches = condExpr.toExpr().evaluate(this.context);
+                  if (matches) {
+                    // Media matches: remove the media attribute so the
+                    // browser uses this source unconditionally.
+                    continue;
+                  } else {
+                    // Media doesn't match: prevent browser from using
+                    // this source.
+                    attributeValue = "not all";
+                  }
+                }
+              } catch (e) {
+                // If parsing fails, leave the attribute as-is.
+              }
+            }
             if (attributeName == "id" || attributeName == "name") {
               // Propagate transformed ids and collect them on the page
               // (only first time).
@@ -1869,8 +1909,13 @@ export class ViewFactory
             attributeName == "href" &&
             tag == "image" &&
             ns == Base.NS.SVG &&
-            attributeNS == Base.NS.XLINK
+            (attributeNS == Base.NS.XLINK || !attributeNS)
           ) {
+            // For SVG2 namespace-less href, also set the href attribute
+            // on the element since loadElement only sets xlink:href.
+            if (!attributeNS) {
+              result.setAttribute(attributeName, attributeValue);
+            }
             this.page.fetchers.push(Net.loadElement(result, attributeValue));
           } else {
             // When the document is not XML document (e.g. non-XML HTML)
@@ -1942,9 +1987,14 @@ export class ViewFactory
           !delayedSrc &&
           tag === "img" &&
           ns === Base.NS.XHTML &&
-          (result as HTMLImageElement).srcset
+          ((result as HTMLImageElement).srcset ||
+            element.parentElement?.localName === "picture")
         ) {
-          // <img srcset="..."> without src: wait for the image to load
+          // <img srcset="..."> without src, or <img> inside <picture>:
+          // wait for the image to load.
+          // Use page.fetchers (not layout-blocking fetchers) because the
+          // image source may only be resolved after DOM insertion (e.g.,
+          // <picture><source srcset="..."><img></picture>).
           this.page.fetchers.push(Net.loadElement(result));
         }
         delete computedStyle["content"];

@@ -192,6 +192,10 @@ module.exports = [
       { file: "compositing.html", title: "Compositing and Blending" },
       { file: "content-url-element.html", title: "Content URL" },
       {
+        file: "picture-element.html",
+        title: "picture element with source media (Issue #1089)",
+      },
+      {
         file: "content-in-page-margin-box.html",
         title: "Content in page margin box",
       },
