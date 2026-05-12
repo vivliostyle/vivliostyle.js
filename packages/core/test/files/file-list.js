@@ -1006,6 +1006,10 @@ module.exports = [
         file: "footnotes/footnote-area-max-height-vertical.html",
         title: "Footnote area max-block-size vertical (Issue #1878)",
       },
+      {
+        file: "footnotes/footnote-marker-with-float.html",
+        title: "Footnote marker with float:left overflow (Issue #1956)",
+      },
     ],
   },
   {
