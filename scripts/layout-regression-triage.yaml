@@ -1,4 +1,16 @@
 - category: General
+  title: "Partition overlap affects non-overlapping partition (Issue #1171)"
+  file: partition-overlap.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1171  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/partition-overlap.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/partition-overlap.html&zoom=1&spread=false
+- category: General
   title: "picture element with source media (Issue #1089)"
   file: picture-element.html
   decision: expected  # regression / expected / skip
