@@ -1,0 +1,74 @@
+<!-- Test case for Issue #1171: One partition affects another non-overlapping partition -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Partition overlap test (Issue #1171)</title>
+    <style>
+      @page {
+        size: 100mm;
+      }
+
+      @-epubx-page-master {
+        @-epubx-partition body {
+          -epubx-flow-from: body;
+          -epubx-required: true;
+          top: 10mm;
+          bottom: 10mm;
+          left: 10mm;
+          right: 10mm;
+        }
+        @-epubx-partition class(float) {
+          -epubx-flow-from: float-start-start;
+          inset-block-start: 10mm;
+          inset-inline-start: 10mm;
+        }
+        @-epubx-partition class(float) {
+          -epubx-flow-from: float-start-end;
+          inset-block-start: 10mm;
+          inset-inline-end: 10mm;
+        }
+        @-epubx-partition class(float) {
+          -epubx-flow-from: float-end-start;
+          inset-block-end: 10mm;
+          inset-inline-start: 10mm;
+        }
+        @-epubx-partition class(float) {
+          -epubx-flow-from: float-end-end;
+          inset-block-end: 10mm;
+          inset-inline-end: 10mm;
+        }
+      }
+
+      .eal-float-start-start {
+        -epubx-flow-into: float-start-start;
+      }
+      .eal-float-start-end {
+        -epubx-flow-into: float-start-end;
+      }
+      .eal-float-end-start {
+        -epubx-flow-into: float-end-start;
+      }
+      .eal-float-end-end {
+        -epubx-flow-into: float-end-end;
+      }
+
+      @-epubx-region .float {
+        div {
+          background-color: yellow;
+          border: 1px solid blue;
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Case 1: Two partitions at top (overlap vertically) -->
+    <div class="eal-float-start-start">start-start</div>
+    <div class="eal-float-start-end">start-end</div>
+    <p>
+      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ad fuga beatae, odit atque qui rerum molestiae vitae pariatur tempora corporis! Dolorem unde rerum labore laborum dolor ducimus esse doloremque obcaecati.
+      Odio itaque, ullam quos dolorum mollitia quae animi. Rem non nihil perferendis sunt nisi. Quos quisquam officiis magnam eius molestias, magni velit mollitia perferendis nihil vitae doloribus, deleniti, rerum voluptas!
+    </p>
+  </body>
+</html>
