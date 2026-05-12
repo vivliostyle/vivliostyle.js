@@ -1760,9 +1760,42 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const floatChunkPosition = new VtreeImpl.ChunkPosition(
             c.nodePosition,
           );
+          // Save the break position count before layout. Note: doLayout()
+          // resets breakPositions to [], so after layout() returns,
+          // breakPositions contains only items from this single call.
+          // prevBreakPositionCount captures the count from the PREVIOUS
+          // iteration's result (before this call's reset), which serves as
+          // a baseline: if the new count doesn't exceed it, the current
+          // continuation placed less content than the previous one,
+          // indicating a marker-only fragment. (Issue #1956)
+          const prevBreakPositionCount = floatArea.breakPositions
+            ? floatArea.breakPositions.length
+            : 0;
           floatArea.layout(floatChunkPosition, true).then((newPosition) => {
             result.newPosition = newPosition;
             if (!newPosition || allowFragmented) {
+              // For footnotes: if fragmented, check if meaningful content was
+              // placed for this continuation. If no new BoxBreakPosition was
+              // added beyond the previous iteration's count (which acts as a
+              // baseline since doLayout() resets the array each time), fail the
+              // layout so the footnote is deferred to the next page, preventing
+              // the marker from appearing alone at the page bottom.
+              if (
+                newPosition &&
+                floatArea.isFootnote &&
+                floatArea.breakPositions
+              ) {
+                const hasNewLineContent =
+                  floatArea.breakPositions.length > prevBreakPositionCount &&
+                  floatArea.breakPositions
+                    .slice(prevBreakPositionCount)
+                    .some((bp) => bp instanceof BoxBreakPosition);
+                if (!hasNewLineContent) {
+                  failed = true;
+                  loopFrame.breakLoop();
+                  return;
+                }
+              }
               i++;
               loopFrame.continueLoop();
             } else {

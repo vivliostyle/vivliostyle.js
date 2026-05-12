@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Footnote marker with float:left overflow (Issue #1956)</title>
+    <style>
+      @page {
+        size: 500px 300px;
+        margin: 20px;
+        outline: 1px solid cyan;
+
+        @bottom-center {
+          content: "Page " counter(page);
+          font-size: 11px;
+        }
+      }
+
+      :root {
+        font-size: 16px;
+        font-family: Arial, sans-serif;
+        line-height: 20px;
+        widows: 1;
+        orphans: 1;
+      }
+
+      body,
+      div,
+      p {
+        margin: 0;
+        padding: 0;
+      }
+
+      .spacer {
+        height: 185px;
+        background: #f0f0f0;
+      }
+
+      .footnote {
+        float: footnote;
+        font-size: 12px;
+        line-height: 16px;
+      }
+
+      /* The float:left marker combined with display:block on the footnote
+         body span triggers the bug: the marker is placed as a CSS float
+         inside the footnote area and its height is counted even when the
+         body text doesn't fit, causing the marker to overflow at the
+         page bottom while the body moves to the next page. */
+      .footnote::footnote-marker {
+        content: counter(footnote);
+        float: left;
+        margin-inline-end: 1em;
+        font-size: 16px;
+        color: blue;
+      }
+
+      .footnote > span {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spacer"></div>
+    <!-- Test: When page space is tight, the second footnote's marker
+         should NOT appear alone at the page bottom without its body text.
+         Expected: footnote 1 on page 1, footnote 2 (marker + body) on page 2. -->
+    <p>
+      Paragraph with footnote<span class="footnote"
+        ><span>First footnote body text.</span></span
+      >.
+    </p>
+    <p>
+      Another paragraph with footnote<span class="footnote"
+        ><span>Second footnote body text.</span></span
+      >.
+    </p>
+  </body>
+</html>
