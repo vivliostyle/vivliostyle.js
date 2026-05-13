@@ -1678,7 +1678,75 @@ function toComparableError(err) {
   };
 }
 
+/**
+ * A pool of reusable BrowserContexts.  Pages within the same context share
+ * the browser's HTTP cache, so reusing a context across multiple captures
+ * lets subsequent pages benefit from resources already fetched by earlier
+ * ones (e.g. WPT reference images hosted on wpt.live).  This reduces
+ * redundant network requests and lowers the chance of transient failures
+ * during large batch runs.
+ *
+ * Contexts are checked out exclusively via acquire() and must be returned
+ * via release() after use.
+ */
+class ContextPool {
+  constructor(browser, { viewportWidth, viewportHeight, poolSize }) {
+    this._browser = browser;
+    this._viewportWidth = viewportWidth;
+    this._viewportHeight = viewportHeight;
+    this._poolSize = poolSize;
+    /** @type {Array<import('playwright').BrowserContext>} */
+    this._all = [];
+    /** @type {Array<import('playwright').BrowserContext>} */
+    this._available = [];
+    /** @type {Array<(ctx: import('playwright').BrowserContext) => void>} */
+    this._waiters = [];
+  }
+
+  async acquire() {
+    // Return an idle context if one is available
+    if (this._available.length > 0) {
+      return this._available.pop();
+    }
+    // Create a new context if the pool has room
+    if (this._all.length < this._poolSize) {
+      const ctx = await this._browser.newContext({
+        viewport: {
+          width: this._viewportWidth,
+          height: this._viewportHeight,
+        },
+        deviceScaleFactor: 2,
+      });
+      this._all.push(ctx);
+      return ctx;
+    }
+    // All contexts are in use — wait for one to be released
+    return new Promise((resolve) => {
+      this._waiters.push(resolve);
+    });
+  }
+
+  release(ctx) {
+    if (this._waiters.length > 0) {
+      const resolve = this._waiters.shift();
+      resolve(ctx);
+    } else {
+      this._available.push(ctx);
+    }
+  }
+
+  async closeAll(timeoutMs) {
+    for (const ctx of this._all) {
+      await closeContextSafely(ctx, timeoutMs);
+    }
+    this._all = [];
+    this._available = [];
+    this._waiters = [];
+  }
+}
+
 async function captureOneSide({
+  contextPool,
   browser,
   url,
   key,
@@ -1689,6 +1757,59 @@ async function captureOneSide({
   viewportWidth,
   viewportHeight,
 }) {
+  // When a context pool is available, check out a context exclusively and
+  // use a dedicated page (closed after capture).  The context is returned
+  // to the pool in the finally block.  Otherwise fall back to creating an
+  // isolated context per capture (legacy behaviour).
+  if (contextPool) {
+    let context;
+    let page;
+    try {
+      context = await contextPool.acquire();
+      // Clear per-origin state so captures within the same context are
+      // independent (cookies, localStorage, sessionStorage).  HTTP cache
+      // is intentionally preserved to reduce redundant network fetches.
+      await context.clearCookies();
+      page = await context.newPage();
+      await page.addInitScript(() => {
+        try {
+          localStorage.clear();
+        } catch (_) {}
+        try {
+          sessionStorage.clear();
+        } catch (_) {}
+      });
+      const captured = await capturePages({
+        page,
+        url,
+        key,
+        dir,
+        timeoutMs,
+        skipScreenshots,
+        exportHtml,
+      });
+      return { ok: true, ...captured };
+    } catch (err) {
+      return { ok: false, error: toComparableError(err) };
+    } finally {
+      if (page) {
+        try {
+          await withWallClockTimeout(
+            () => page.close(),
+            Math.max(1000, Math.min(timeoutMs, 5000)),
+            "closing page",
+          );
+        } catch {
+          // ignore
+        }
+      }
+      if (context) {
+        contextPool.release(context);
+      }
+    }
+  }
+
+  // Legacy path: one context per capture
   let context;
   try {
     context = await browser.newContext({
@@ -3799,6 +3920,17 @@ async function main() {
     ...launchArgs,
   });
 
+  // Create a pool of reusable BrowserContexts.  Pages within the same
+  // context share the browser's HTTP cache, so reusing contexts lets later
+  // captures skip redundant fetches to wpt.live for common reference images.
+  // Pool size equals concurrency so every in-flight task gets its own
+  // exclusive context via checkout/release.
+  const contextPool = new ContextPool(browser, {
+    viewportWidth: opts.viewportWidth,
+    viewportHeight: opts.viewportHeight,
+    poolSize: opts.concurrency,
+  });
+
   const differences = [];
   const errors = [];
   const entries = [];
@@ -3821,6 +3953,7 @@ async function main() {
     const id = String(i + 1).padStart(4, "0");
     const slug = `${id}-${sanitizeName(target.category)}-${sanitizeName(target.title)}`;
     const captureOpts = {
+      contextPool,
       browser,
       timeoutMs: opts.timeoutMs,
       skipScreenshots: opts.skipScreenshots,
@@ -4715,6 +4848,7 @@ async function main() {
     }
   }
 
+  await contextPool.closeAll(opts.timeoutMs);
   await browser.close();
 
   const result = {
