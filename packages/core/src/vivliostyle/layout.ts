@@ -549,7 +549,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // (about 1.2/pixelRatio) beyond the parent multi-column box edge,
     // which may cause incorrect overflow detection and thus layout failure.
     // (Issue #1460)
-    if (this.almostEquals(edge, this.footnoteEdge)) {
+    // Use a wider tolerance (1.5px) even when pixelRatio=0, because
+    // multi-column measurement errors in exclusion shapes can make
+    // footnoteEdge ~1.2px too small while the default 0.5px precision
+    // (needed for float band snapping, Issue #1917) is too tight.
+    const precision = 1.5 / (this.clientLayout.pixelRatio || 1);
+    if (this.almostEquals(edge, this.footnoteEdge, precision)) {
       return false;
     }
 
@@ -948,25 +953,41 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // First pass: adjust band edges to column edges if they are almost equal
     // to avoid creating unnecessary floats that may cause layout issues.
     // (Issue #1460)
+    // In multi-column layout, getBoundingClientRect() of a child element
+    // spanning multiple columns can be offset by ~1.2px from the parent
+    // column box edges in all directions. Use wider tolerance for bands
+    // that approximately span the full column width (indicating a content
+    // area band affected by multi-column measurement offset), but keep
+    // default tolerance for partial-width bands (e.g. flexbox alignment
+    // exclusions) to avoid incorrectly snapping them. (Issue #1917)
+    const widerPrecision = 1.5 / (this.clientLayout.pixelRatio || 1);
     for (const band of bands) {
-      if (this.almostEquals(band.x1, x1)) {
+      // Check if this band approximately spans the full column width
+      // (both x edges are close to column edges within wider tolerance).
+      // Such bands are likely affected by multi-column measurement offset
+      // and need wider snapping precision.
+      const isFullWidthBand =
+        Math.abs(band.x1 - x1) < widerPrecision &&
+        Math.abs(band.x2 - x2) < widerPrecision;
+      const precision = isFullWidthBand ? widerPrecision : undefined;
+      if (this.almostEquals(band.x1, x1, precision)) {
         band.x1 = x1;
-      } else if (this.almostEquals(band.x1, x2)) {
+      } else if (this.almostEquals(band.x1, x2, precision)) {
         band.x1 = x2;
       }
-      if (this.almostEquals(band.x2, x2)) {
+      if (this.almostEquals(band.x2, x2, precision)) {
         band.x2 = x2;
-      } else if (this.almostEquals(band.x2, x1)) {
+      } else if (this.almostEquals(band.x2, x1, precision)) {
         band.x2 = x1;
       }
-      if (this.almostEquals(band.y1, y1)) {
+      if (this.almostEquals(band.y1, y1, precision)) {
         band.y1 = y1;
-      } else if (this.almostEquals(band.y1, y2)) {
+      } else if (this.almostEquals(band.y1, y2, precision)) {
         band.y1 = y2;
       }
-      if (this.almostEquals(band.y2, y2)) {
+      if (this.almostEquals(band.y2, y2, precision)) {
         band.y2 = y2;
-      } else if (this.almostEquals(band.y2, y1)) {
+      } else if (this.almostEquals(band.y2, y1, precision)) {
         band.y2 = y1;
       }
     }
@@ -1065,7 +1086,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (foundNonZeroWidthBand) {
       // Update footnoteEdge (Fix for issue #1298)
       const lastBand = bands[bands.length - 1];
-      if (foundNonZeroWidthBand !== lastBand && lastBand.y2 >= y2) {
+      // Use wider tolerance for the y2 comparison: in multi-column layout,
+      // getBoundingClientRect() can report band edges ~1.2px off from the
+      // actual column edge. The default 0.5px precision (pixelRatio=0) is
+      // too tight here. (Issue #1460)
+      const y2Precision = 1.5 / (this.clientLayout.pixelRatio || 1);
+      if (
+        foundNonZeroWidthBand !== lastBand &&
+        (lastBand.y2 >= y2 || this.almostEquals(lastBand.y2, y2, y2Precision))
+      ) {
         this.footnoteEdge = this.vertical
           ? -foundNonZeroWidthBand.y2
           : foundNonZeroWidthBand.y2;
@@ -1110,10 +1139,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     const initialBlockSize = this.vertical ? this.width : this.height;
     const blockSize = this.getBoxDir() * (this.footnoteEdge - this.beforeEdge);
+    // Use wider tolerance (1.5px) for the same reason as isOverflown():
+    // multi-column measurement errors can make footnoteEdge ~1.2px off,
+    // which should not trigger column height adjustment. (Issue #1460)
+    const precision = 1.5 / (this.clientLayout.pixelRatio || 1);
     if (
       blockSize > 0 &&
       blockSize < initialBlockSize &&
-      !this.almostEquals(blockSize, initialBlockSize)
+      !this.almostEquals(blockSize, initialBlockSize, precision)
     ) {
       const sizeProp = this.vertical ? "width" : "height";
       Base.setCSSProperty(this.element, sizeProp, `${blockSize}px`);
