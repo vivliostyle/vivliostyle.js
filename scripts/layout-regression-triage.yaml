@@ -1,3 +1,37 @@
+- id: "0045"
+  category: General
+  title: "Float with clear, vertical-rl (Issue #1803)"
+  file: float-clear-vertical.html
+  type: difference
+  decision: "expected"  # regression / expected / skip
+  notes: ""
+  approvedViewer: "git-fix-issue1959"  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-clear-vertical.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0066"
+  category: General
+  title: image-resolution
+  file: image-resolution.html
+  type: difference
+  decision: "expected"  # regression / expected / skip
+  notes: ""
+  approvedViewer: "git-fix-issue1959"  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/image-resolution.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/image-resolution.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+    - 3
 - category: General
   title: "Partition overlap affects non-overlapping partition (Issue #1171)"
   file: partition-overlap.html
