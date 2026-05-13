@@ -3,6 +3,49 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.42.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.42.0...v2.42.1) (2026-05-13)
+
+### Bug Fixes
+
+- Fix multi-column footnotes missing on first page with pixelRatio=0 ([03a05de](https://github.com/vivliostyle/vivliostyle.js/commit/03a05dede7ad3e3c3ae0d74e90bd85e5ce03bd8f))
+- Fix applyClearance() causing infinite page generation ([6b25dfb](https://github.com/vivliostyle/vivliostyle.js/commit/6b25dfb8d7e6d504dcea7b840701e7448b0703b8)), closes [#1959](https://github.com/vivliostyle/vivliostyle.js/issues/1959)
+- Fix non-overlapping EAL partitions affecting each other's layout ([243d170](https://github.com/vivliostyle/vivliostyle.js/commit/243d1707af45a3f9d7885c30169bcd0c47032510)), closes [#1171](https://github.com/vivliostyle/vivliostyle.js/issues/1171)
+- Add support for `<picture>` element and `<source media>` attribute ([56ed7c0](https://github.com/vivliostyle/vivliostyle.js/commit/56ed7c07f973d8c7ba3cf7ffb1b56ef9dc7049ef)), closes [#1089](https://github.com/vivliostyle/vivliostyle.js/issues/1089)
+- Fix background-image on page container not waiting for load ([da8566d](https://github.com/vivliostyle/vivliostyle.js/commit/da8566dbf29be98bd3b53d43436cb017cd726f13))
+- Fix rem and rlh units incorrect when using font shorthand with var() and calc() ([894b488](https://github.com/vivliostyle/vivliostyle.js/commit/894b4881ec187417d342e485ba659c9d38e5252a)), closes [#1955](https://github.com/vivliostyle/vivliostyle.js/issues/1955)
+- Fix footnote marker overflow when marker has float:left ([2a1d11a](https://github.com/vivliostyle/vivliostyle.js/commit/2a1d11aee136f0b04e2a47ffce4b1065d4aa473e)), closes [#1956](https://github.com/vivliostyle/vivliostyle.js/issues/1956)
+- Fix static position of absolutely positioned elements in baseline-aligned table cells ([b119b74](https://github.com/vivliostyle/vivliostyle.js/commit/b119b748918519644c26c7b540a4bed308e4ee52))
+- Avoid getComputedStyle side effect causing canvas image-orientation regression ([1656029](https://github.com/vivliostyle/vivliostyle.js/commit/165602995564955fb3d96cb5ff3d2d93b83f298d))
+- Replace `about:blank` handling with `data:text/html,` conversion ([030c501](https://github.com/vivliostyle/vivliostyle.js/commit/030c501eb50050bf3c957731be5fd1d6bd477631)), closes [#1911](https://github.com/vivliostyle/vivliostyle.js/issues/1911)
+- Fix CSS image preloading for `filter` and `shape-outside` ([31e000c](https://github.com/vivliostyle/vivliostyle.js/commit/31e000c2d44f109ecfef915cfb7c8dea3f70911b))
+- Fix `clip-path: url()` external SVG references not waited on before page capture ([de4cb0b](https://github.com/vivliostyle/vivliostyle.js/commit/de4cb0b32a4d68aa3b8ff1daca2c54004546bdf7))
+- Fix image preloading for `<embed>` elements and `<img srcset>` without `src` ([a428a54](https://github.com/vivliostyle/vivliostyle.js/commit/a428a54cd1938efdd9d9903acaf6f87c160f4dcc))
+- Fix list-style-image preloading for marker pseudo-element ([126223f](https://github.com/vivliostyle/vivliostyle.js/commit/126223f2820be1b7b443d7c14a0af1e956d49252))
+- Fix CSS image preloading for border-image, list-style-image, mask-image, and video poster ([d849ad1](https://github.com/vivliostyle/vivliostyle.js/commit/d849ad142b2938fca235cf6eb9bd2978c725407e))
+- fix srcset descriptor parsing and addImageFetchers prefetch URL ([2579d4a](https://github.com/vivliostyle/vivliostyle.js/commit/2579d4a4d7bc7a9216f0f25d99987f49d866f285))
+- Fix CORS errors and hangs when opening WPT files in Vivliostyle Viewer ([9649265](https://github.com/vivliostyle/vivliostyle.js/commit/9649265ce3b2c4595c9c4de97b6827765acf76aa))
+- Fix `::marker` pseudo-element property polyfill for missing CSS properties ([fb4304e](https://github.com/vivliostyle/vivliostyle.js/commit/fb4304e67d04a5d6f6ff021292b6e5dd68225ff7))
+- Fix CSS nesting recovery for malformed declarations ([09024cb](https://github.com/vivliostyle/vivliostyle.js/commit/09024cb3362b1d15c5e487c923407a32ba3484ac))
+- Fix CORS and cross-origin resource regressions in WPT tests ([7dd07f5](https://github.com/vivliostyle/vivliostyle.js/commit/7dd07f562a38e71341659b6b968ea6dd6bb1cf2d)), closes [#1919](https://github.com/vivliostyle/vivliostyle.js/issues/1919)
+- Fix WPT flexbox-min-height-auto reftest failures with pixelRatio=0 ([20539ec](https://github.com/vivliostyle/vivliostyle.js/commit/20539ec5a939cd391aef8f42af0cbc24438f50df)), closes [#1917](https://github.com/vivliostyle/vivliostyle.js/issues/1917)
+- Fix nested multi-column layout regressions on WPT ([150c054](https://github.com/vivliostyle/vivliostyle.js/commit/150c05439a3be8fcf35cbd2fde3e924df06d8b12))
+- Fix first table row's page-break-before not propagating to the table ([0885567](https://github.com/vivliostyle/vivliostyle.js/commit/08855676e49e5ff4e76484611b736f8b471b9af0))
+- Fix named-page breaks after out-of-flow siblings ([724d647](https://github.com/vivliostyle/vivliostyle.js/commit/724d6471871ca29ed9e859716e05ab9cadc44aee))
+- Improve Local dev server and WPT test URLs ([8c2bb0e](https://github.com/vivliostyle/vivliostyle.js/commit/8c2bb0ed22d1420e009ef32faa9d491a0e3c2ac0))
+- prevent WPT SVG test errors ([756889a](https://github.com/vivliostyle/vivliostyle.js/commit/756889abb9f596326f60f6809a7f80ca4fbdad60))
+- Fix WPT test failures for embedded HTML content ([6a09c8b](https://github.com/vivliostyle/vivliostyle.js/commit/6a09c8b2b2cf73268b86f6d817ae419890cd29b5)), closes [#1914](https://github.com/vivliostyle/vivliostyle.js/issues/1914)
+- Add text-orientation support to ::marker pseudo-element ([e4e4033](https://github.com/vivliostyle/vivliostyle.js/commit/e4e40339e1467c9959e31fcf6f7b0b82d440dda7))
+- Disable float precision compensation when high-precision rendering is off ([0dabf48](https://github.com/vivliostyle/vivliostyle.js/commit/0dabf4883d84ba826695afa9e746dedb0931bd3e)), closes [#1913](https://github.com/vivliostyle/vivliostyle.js/issues/1913)
+- support about:blank in publication loading ([bbbd527](https://github.com/vivliostyle/vivliostyle.js/commit/bbbd5270f776987c8871bad8f693b418b496235f)), closes [#1911](https://github.com/vivliostyle/vivliostyle.js/issues/1911)
+- Fix null pointer errors with MathML pseudo-elements and SVG ([9de6062](https://github.com/vivliostyle/vivliostyle.js/commit/9de606295563b9e59017f16d487751951109e84d)), closes [#1910](https://github.com/vivliostyle/vivliostyle.js/issues/1910)
+- resolve CSS WPT hang cases ([8f5b4b7](https://github.com/vivliostyle/vivliostyle.js/commit/8f5b4b78d2e2b95cf2290ba03fc3c803d5d0dbff)), closes [#1901](https://github.com/vivliostyle/vivliostyle.js/issues/1901)
+- Fix rowspan table layout in anchor-target sections ([b682b87](https://github.com/vivliostyle/vivliostyle.js/commit/b682b870c8602f98d888c0f40df86862f4a1bff8)), closes [#1905](https://github.com/vivliostyle/vivliostyle.js/issues/1905)
+- avoid table row overflow into margins after multipage tables ([c1e005c](https://github.com/vivliostyle/vivliostyle.js/commit/c1e005c8849838fc89aacba69a0d9a511ff7b748)), closes [#1902](https://github.com/vivliostyle/vivliostyle.js/issues/1902)
+- fragment default footnotes from inline anchors ([e267b87](https://github.com/vivliostyle/vivliostyle.js/commit/e267b87c0207d81f4f85af04e558901ae7fc3202))
+- keep footnote-policy: line anchors with fragmented footnotes ([ed17388](https://github.com/vivliostyle/vivliostyle.js/commit/ed173884cda078df12075a9f9706721dd129fb10)), closes [#1899](https://github.com/vivliostyle/vivliostyle.js/issues/1899)
+- **core:** address PR review on transformed URL serialization ([fed45df](https://github.com/vivliostyle/vivliostyle.js/commit/fed45df3702c83ccc61e2013132d0a3361d3a885))
+- **core:** unescaped transformed url can break out of css url ([5e9ef22](https://github.com/vivliostyle/vivliostyle.js/commit/5e9ef223dafdcc8ee054650fca05c91b3d440b62))
+
 # [2.42.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.41.0...v2.42.0) (2026-04-25)
 
 ### Features

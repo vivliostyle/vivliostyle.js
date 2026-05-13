@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.42.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.42.0...v2.42.1) (2026-05-13)
+
+### Bug Fixes
+
+- Improve Local dev server and WPT test URLs ([8c2bb0e](https://github.com/vivliostyle/vivliostyle.js/commit/8c2bb0ed22d1420e009ef32faa9d491a0e3c2ac0))
+
 # [2.42.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.41.0...v2.42.0) (2026-04-25)
 
 ### Bug Fixes
