@@ -1822,19 +1822,29 @@ export class OPFView implements Vgen.CustomRendererFactory {
       // This is necessary for named page with target-counter() to work.
       // (fix for issue #1136)
       const shouldKeepOldPageTypeInCounterResolveScope =
-        // In target-counter resolution rerender, preserve an existing boundary
+        // In target-counter resolution rerender, preserve the existing
         // pageType only when the old page is still layout-consistent.
         inCounterResolveScopeAtStart &&
         !isOldPageOffsetStale &&
-        pageIndexToRender > 0 &&
-        hasBoundaryBetweenPrevAndOld &&
-        nextPageContinuesOldPageType;
+        pageIndexToRender > 0;
       shouldKeepOldPageType =
         oldPage.pageType != null &&
         (shouldKeepOldPageTypeInCounterResolveScope ||
           pageIndexToRender === 0 ||
           oldPage.pageType === prevPage?.pageType);
       page.pageType = shouldKeepOldPageType ? oldPage.pageType : null;
+
+      if (inCounterResolveScopeAtStart) {
+        // Re-resolve the page-start type during target-counter rerender so a
+        // stale named page is not reused when the new start is actually default.
+        const pageStartPageType =
+          viewItem.instance.getPageStartPageTypeOverride(page.position);
+        if (pageStartPageType === "") {
+          page.pageType = "";
+        } else if (pageStartPageType) {
+          page.pageType = pageStartPageType;
+        }
+      }
 
       if (!inCounterResolveScopeAtStart && !shouldKeepOldPageType) {
         const shouldUsePrevPageTypeToFixEarlyBoundary =

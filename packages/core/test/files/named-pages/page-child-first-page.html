@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Named Page on Child Element at Page Start</title>
+    <style>
+      @page {
+        size: 300px;
+        margin: 36px;
+      }
+
+      @page A {
+        background: yellow;
+      }
+
+      .A {
+        page: A;
+      }
+
+      @page B {
+        background: pink;
+      }
+
+      .B {
+        page: B;
+      }
+
+      section + section {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="A">
+        <p>This page should have yellow background.</p>
+      </div>
+    </section>
+    <section>
+      <div class="B">
+        <p>This page should have pink background.</p>
+      </div>
+    </section>
+  </body>
+</html>

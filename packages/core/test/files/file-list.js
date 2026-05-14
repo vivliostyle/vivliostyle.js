@@ -227,6 +227,14 @@ module.exports = [
         title: "target-counter and margin bug",
       },
       {
+        file: "target-counter-default-page-type.html",
+        title: "target-counter() with default page type",
+      },
+      {
+        file: "target-counter-named-page-style.html",
+        title: "target-counter() named page style (Issue #1966)",
+      },
+      {
         file: "target-counter-named-pages-left-right.html",
         title: "target-counter() named pages with :left/:right (Issue #1497)",
       },
@@ -471,6 +479,10 @@ module.exports = [
       {
         file: "named-pages/page-child-element.html",
         title: "Named Page on Child Element with Running Element (Issue #1833)",
+      },
+      {
+        file: "named-pages/page-child-first-page.html",
+        title: "Named Page on Child Element at Page Start",
       },
     ],
   },
