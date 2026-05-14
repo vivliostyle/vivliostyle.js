@@ -1,1 +1,24 @@
-[]
+- category: Cross-references
+  title: target-counter() with default page type
+  file: target-counter-default-page-type.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1966  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-default-page-type.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-default-page-type.html&zoom=1&spread=false
+- category: Cross-references
+  title: "target-counter() named page style (Issue #1966)"
+  file: target-counter-named-page-style.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1966  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-named-page-style.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-named-page-style.html&zoom=1&spread=false
