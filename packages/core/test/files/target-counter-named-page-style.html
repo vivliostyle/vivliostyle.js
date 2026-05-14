@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1966: target-counter() must not drop named page styles -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>target-counter named page style</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 16mm;
+
+        @bottom-center {
+          content: counter(page);
+          font-size: 10pt;
+        }
+      }
+
+      @page toc {
+        background-color: #ccc;
+      }
+
+      body {
+        font-family: serif;
+        font-size: 14pt;
+        line-height: 1.4;
+      }
+
+      section {
+        min-height: 40mm;
+      }
+
+      .toc {
+        page: toc;
+      }
+
+      .toc a::after {
+        content: leader(" ") target-counter(attr(href), page);
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>Issue only exists with this page before the named TOC page.</p>
+    </section>
+
+    <section class="toc">
+      <h1>Contents</h1>
+      <ul>
+        <li><a href="#section1">Section 1</a></li>
+      </ul>
+      <p>The background of this TOC page should be gray.</p>
+    </section>
+
+    <section>
+      <h1 id="section1">Section 1</h1>
+      <p>This heading is referenced from the TOC by target-counter().</p>
+    </section>
+  </body>
+</html>

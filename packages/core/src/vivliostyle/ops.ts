@@ -810,7 +810,9 @@ export class StyleInstance
 
   private getExplicitPageType(style: CssCascade.ElementStyle): string | null {
     const pageValue = CssCascade.getProp(style, "page");
-    if (!pageValue) {
+    // `page` is non-inherited; defaulting values and `auto` do not establish a
+    // named page group and must not keep a stale named page alive.
+    if (!pageValue || Css.isDefaultingValue(pageValue.value)) {
       return null;
     }
     const pageType = pageValue.evaluate(this, "page").toString();
@@ -826,6 +828,61 @@ export class StyleInstance
       return null;
     }
     return this.getExplicitPageType(style);
+  }
+
+  getPageStartPageType(
+    layoutPosition: Vtree.LayoutPosition,
+  ): string | null | undefined {
+    const pageStartOffset = this.getPageStartOffset(layoutPosition, true);
+    const startElement = this.getPageStartElement(
+      layoutPosition,
+      pageStartOffset,
+    );
+    let currentElement = startElement;
+    while (currentElement) {
+      const style = this.styler.getStyle(currentElement, false);
+      const pageValue = style && CssCascade.getProp(style, "page");
+      // Resolve the page-start named page before page master selection, where
+      // `styler.cascade.currentPageType` may still describe the previous page.
+      if (pageValue && !Css.isDefaultingValue(pageValue.value)) {
+        const pageType = pageValue.evaluate(this, "page").toString();
+        if (pageType && pageType.toLowerCase() !== "auto") {
+          return pageType;
+        }
+      }
+      if (currentElement === this.xmldoc.root) {
+        break;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return "";
+  }
+
+  getPageStartPageTypeOverride(
+    layoutPosition: Vtree.LayoutPosition,
+  ): string | null | undefined {
+    const pageStartPageType = this.getPageStartPageType(layoutPosition);
+    if (pageStartPageType !== "") {
+      return undefined;
+    }
+    // A page can start at a wrapper element while the actual named page is on
+    // its first in-flow child, e.g. `section > div.B { page: B; }`.
+    const pageStartOffset = this.getPageStartOffset(layoutPosition, true);
+    let currentElement = this.getPageStartElement(
+      layoutPosition,
+      pageStartOffset,
+    );
+    while (currentElement) {
+      currentElement = this.getFirstInFlowChildElement(currentElement);
+      if (!currentElement) {
+        break;
+      }
+      const pageType = this.getPageGroupPageType(currentElement);
+      if (pageType) {
+        return pageType;
+      }
+    }
+    return "";
   }
 
   private getPreviousInFlowSibling(element: Element): Element | null {
@@ -2546,6 +2603,14 @@ export class StyleInstance
     page.isBlankPage = cp.isBlankPage;
     cp.page++;
 
+    // Choose the effective page type before selecting `@page` styles so page
+    // backgrounds and margin boxes use the same named-page context as content.
+    const pageStartPageType = this.getPageStartPageTypeOverride(cp);
+    if (pageStartPageType === "") {
+      page.pageType = "";
+    } else if (pageStartPageType) {
+      page.pageType = pageStartPageType;
+    }
     if (page.pageType == null) {
       page.pageType =
         (page.isBlankPage
