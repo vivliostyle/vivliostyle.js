@@ -17,7 +17,6 @@ module.exports = [
         title: "Running header emulation with Adaptive Layout",
       },
       { file: "case_sensitivity/html.html", title: "HTML case sensitivity" },
-      { file: "attr_selectors.html", title: "Attribute selectors" },
       { file: "ruby-broken-pagination.html", title: "Ruby broken pagination" },
       {
         file: "css-parse-error/gradient-background-image.html",
@@ -61,7 +60,6 @@ module.exports = [
         file: "unbreakable_box.html",
         title: "Unbreakable box at the end of a flow",
       },
-      { file: "selector_bug.html", title: "Selector bug" },
       { file: "outline.html", title: "Outline" },
       { file: "font-feature-settings.html", title: "Font feature settings" },
       {
@@ -78,8 +76,117 @@ module.exports = [
         title:
           "Partition overlap affects non-overlapping partition (Issue #1171)",
       },
+      { file: "math-sample.html", title: "MathJax" },
+      { file: "background-shorthand.html", title: "Background shorthand" },
+      { file: "prefixed_properties.html", title: "Prefixed properties" },
+      { file: "filter_property.html", title: "Filter property" },
+      { file: "content-attr.html", title: "Content attr()" },
+      {
+        file: "exclusion_with_printer_marks.html",
+        title: "Exclusion with printer marks",
+      },
+      { file: "box-decoration-break.html", title: "box-decoration-break" },
+      { file: "image-resolution.html", title: "image-resolution" },
+      { file: "target_blank_link.html", title: "target=_blank links" },
+      {
+        file: "rem_in_relpos.html",
+        title: "rem in position: relative element",
+      },
+      { file: "svg_properties.html", title: "SVG properties" },
+      { file: "font_property.html", title: "Font property" },
+      { file: "justification.html", title: "Justification" },
+      {
+        file: "justification_vertical.html",
+        title: "Justification (vertical writing-mode)",
+      },
+      { file: "compositing.html", title: "Compositing and Blending" },
+      { file: "content-url-element.html", title: "Content URL" },
+      {
+        file: "picture-element.html",
+        title: "picture element with source media (Issue #1089)",
+      },
+      {
+        file: "content-in-page-margin-box.html",
+        title: "Content in page margin box",
+      },
+      {
+        file: "page-margin-box-images.html",
+        title: "Page margin box images (Issue #1867)",
+      },
+      {
+        file: "counters-function-in-page-margin-box.html",
+        title: "counters() in page margin boxes",
+      },
+      { file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug" },
+      { file: "pages_counter.html", title: "pages counter" },
+      { file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug" },
+      { file: "viewport_unit.html", title: "viewport-percentage units" },
+      {
+        file: "viewport_unit_vertical.html",
+        title: "viewport-percentage units (vertical writing-mode)",
+      },
+      {
+        file: "page_viewport_unit.html",
+        title: "page viewport-percentage units with calc()",
+      },
+      { file: "link-to-viewer.html", title: "Link to Vivliostyle Viewer" },
+      {
+        file: "print_media/styles-in-body.html",
+        title: "Style elements in the body elements",
+      },
+      {
+        file: "lists-attributes.html",
+        title: "Attributes on list elements",
+        options: "&bookMode=true",
+      },
+      {
+        file: "z-index-at-page.html",
+        title: "z-index on @page and page-margin boxes",
+      },
+      {
+        file: "z-index-at-page-bare-text.html",
+        title:
+          "z-index on @page and page-margin boxes (bare text after float, Issue #1786)",
+      },
+      {
+        file: "inset-shorthand.html",
+        title: "inset shorthand property",
+      },
+      {
+        file: "lh-rlh-units.html",
+        title: "lh and rlh units",
+      },
+      {
+        file: "margin-break.html",
+        title: "margin-break property",
+      },
+      {
+        file: "border-width-test.html",
+        title: "border-width test",
+      },
+      {
+        file: "initial-letter.html",
+        title: "initial-letter property",
+      },
+      { file: "all-shorthand.html", title: "all shorthand property" },
+      { file: "env-doc-title.html", title: "env(doc-title) function" },
+    ],
+  },
+  {
+    category: "Selectors",
+    files: [
+      { file: "attr_selectors.html", title: "Attribute selectors" },
+      { file: "selector_bug.html", title: "Selector bug" },
       { file: "nth_selectors.html", title: "nth selectors" },
       { file: "empty_selector.html", title: "empty selector" },
+      { file: "ui_state_selectors.html", title: "UI state selectors" },
+      { file: "not-pseudo-selector.html", title: ":not pseudo selector" },
+      { file: "nth-child-of.html", title: ":nth-child(An+B of S) selector" },
+    ],
+  },
+  {
+    category: "CSS Nesting",
+    files: [
       {
         file: "css-nesting-basic.html",
         title: "CSS Nesting basic (Issue #1032)",
@@ -88,43 +195,28 @@ module.exports = [
         file: "css-nesting-conditionals.html",
         title: "CSS Nesting conditionals (Issue #1032)",
       },
-      { file: "ui_state_selectors.html", title: "UI state selectors" },
-      { file: "not-pseudo-selector.html", title: ":not pseudo selector" },
-      { file: "math-sample.html", title: "MathJax" },
-      { file: "background-shorthand.html", title: "Background shorthand" },
-      { file: "prefixed_properties.html", title: "Prefixed properties" },
-      { file: "filter_property.html", title: "Filter property" },
-      { file: "float-bug-test.html", title: "Float bug test" },
-      { file: "left-float-bug.html", title: "Float bug test: Left float" },
+    ],
+  },
+  {
+    category: "Spread inside/outside properties",
+    files: [
       {
-        file: "white-space_clear.html",
-        title: "Combination of white-space and clear",
-      },
-      { file: "clear-bug-test.html", title: "Float clear bug" },
-      { file: "float-text-offset-bug.html", title: "Float text offset bug" },
-      {
-        file: "float-clear.html",
-        title: "Float with clear (Issue #1803)",
+        file: "spread-inside-outside/spread-inside-outside.html",
+        title: "Spread inside/outside properties",
       },
       {
-        file: "float-clear-vertical.html",
-        title: "Float with clear, vertical-rl (Issue #1803)",
+        file: "spread-inside-outside/float-inside-outside.html",
+        title: "Float inside/outside values",
       },
       {
-        file: "float-lh-rlh.html",
-        title: "Float with lh/rlh height (Issue #1494, #1738)",
+        file: "spread-inside-outside/page-float-inside-outside.html",
+        title: "Page float inside/outside values",
       },
-      {
-        file: "float-in-position-relative.html",
-        title: "Float in position:relative across page break (Issue #1885)",
-      },
-      {
-        file: "float-in-position-relative-vertical.html",
-        title:
-          "Float in position:relative across page break, vertical writing mode (Issue #1885)",
-      },
-      { file: "content-attr.html", title: "Content attr()" },
-      { file: "relative_floats.html", title: "Floats with position: relative" },
+    ],
+  },
+  {
+    category: "Cross-references",
+    files: [
       { file: "target-counter.html", title: "target-counter" },
       {
         file: "cross-scope-counters.html",
@@ -176,117 +268,6 @@ module.exports = [
         file: "target-text-vs-named-strings-4.html",
         title: "target-text() vs Named Strings - with ::before and ::after",
       },
-      {
-        file: "exclusion_with_printer_marks.html",
-        title: "Exclusion with printer marks",
-      },
-      { file: "box-decoration-break.html", title: "box-decoration-break" },
-      { file: "image-resolution.html", title: "image-resolution" },
-      { file: "target_blank_link.html", title: "target=_blank links" },
-      {
-        file: "rem_in_relpos.html",
-        title: "rem in position: relative element",
-      },
-      { file: "svg_properties.html", title: "SVG properties" },
-      { file: "font_property.html", title: "Font property" },
-      { file: "justification.html", title: "Justification" },
-      {
-        file: "justification_vertical.html",
-        title: "Justification (vertical writing-mode)",
-      },
-      { file: "compositing.html", title: "Compositing and Blending" },
-      { file: "content-url-element.html", title: "Content URL" },
-      {
-        file: "picture-element.html",
-        title: "picture element with source media (Issue #1089)",
-      },
-      {
-        file: "content-in-page-margin-box.html",
-        title: "Content in page margin box",
-      },
-      {
-        file: "page-margin-box-images.html",
-        title: "Page margin box images (Issue #1867)",
-      },
-      {
-        file: "counters-function-in-page-margin-box.html",
-        title: "counters() in page margin boxes",
-      },
-      { file: "flowchunk_overflow_bug.html", title: "Flowchunk overflow bug" },
-      { file: "pages_counter.html", title: "pages counter" },
-      {
-        file: "float-in-relative-bug.html",
-        title: "Float in position:relative bug",
-      },
-      { file: "getRangeBoxes_bug.html", title: "getRangeBoxes bug" },
-      { file: "viewport_unit.html", title: "viewport-percentage units" },
-      {
-        file: "viewport_unit_vertical.html",
-        title: "viewport-percentage units (vertical writing-mode)",
-      },
-      {
-        file: "page_viewport_unit.html",
-        title: "page viewport-percentage units with calc()",
-      },
-      { file: "link-to-viewer.html", title: "Link to Vivliostyle Viewer" },
-      {
-        file: "print_media/styles-in-body.html",
-        title: "Style elements in the body elements",
-      },
-      {
-        file: "lists-attributes.html",
-        title: "Attributes on list elements",
-        options: "&bookMode=true",
-      },
-      {
-        file: "z-index-at-page.html",
-        title: "z-index on @page and page-margin boxes",
-      },
-      {
-        file: "z-index-at-page-bare-text.html",
-        title:
-          "z-index on @page and page-margin boxes (bare text after float, Issue #1786)",
-      },
-      {
-        file: "inset-shorthand.html",
-        title: "inset shorthand property",
-      },
-      {
-        file: "lh-rlh-units.html",
-        title: "lh and rlh units",
-      },
-      {
-        file: "margin-break.html",
-        title: "margin-break property",
-      },
-      {
-        file: "border-width-test.html",
-        title: "border-width test",
-      },
-      {
-        file: "initial-letter.html",
-        title: "initial-letter property",
-      },
-      { file: "nth-child-of.html", title: ":nth-child(An+B of S) selector" },
-      { file: "all-shorthand.html", title: "all shorthand property" },
-      { file: "env-doc-title.html", title: "env(doc-title) function" },
-    ],
-  },
-  {
-    category: "Spread inside/outside properties",
-    files: [
-      {
-        file: "spread-inside-outside/spread-inside-outside.html",
-        title: "Spread inside/outside properties",
-      },
-      {
-        file: "spread-inside-outside/float-inside-outside.html",
-        title: "Float inside/outside values",
-      },
-      {
-        file: "spread-inside-outside/page-float-inside-outside.html",
-        title: "Page float inside/outside values",
-      },
     ],
   },
   {
@@ -336,6 +317,52 @@ module.exports = [
       {
         file: "leader/multi-column-balance-on-body.html",
         title: "leader() in multi-column on body with column-fill: balance",
+      },
+    ],
+  },
+  {
+    category: "Counter style and list-style",
+    files: [
+      {
+        file: "counter-style/test.html",
+        title: "@counter-style rule",
+      },
+      {
+        file: "counter-style/list-style-type-counter-style.html",
+        title: "list-style-type with @counter-style",
+      },
+      {
+        file: "counter-style/marker.html",
+        title: "::marker pseudo-element",
+      },
+      {
+        file: "counter-style/marker-block-child.html",
+        title: "::marker with block child in list item (Issue #1831)",
+      },
+      {
+        file: "counter-style/marker-empty-li.html",
+        title: "::marker on empty list items",
+      },
+      {
+        file: "counter-style/list-style-position.html",
+        title: "list-style-position",
+      },
+      {
+        file: "counter-style/list-style-position-super.html",
+        title:
+          "Outside marker alignment with superscript content (Issue #1780)",
+      },
+      {
+        file: "counter-style/list-style-type-bullet.html",
+        title: "list-style-type bullet marker",
+      },
+      {
+        file: "counter-style/list-style-type-bullet-vertical.html",
+        title: "list-style-type bullet marker (vertical writing-mode)",
+      },
+      {
+        file: "counter-style/list-item-text-spacing.html",
+        title: "List-item with text-spacing (Issue #1763)",
       },
     ],
   },
@@ -653,6 +680,45 @@ module.exports = [
         file: "table/table-header-repeat.html",
         title:
           "Table header repeat with complex multipage tables (Issue #1873)",
+      },
+    ],
+  },
+  {
+    category: "Float and Clear",
+    files: [
+      { file: "float-bug-test.html", title: "Float bug test" },
+      { file: "left-float-bug.html", title: "Float bug test: Left float" },
+      {
+        file: "white-space_clear.html",
+        title: "Combination of white-space and clear",
+      },
+      { file: "clear-bug-test.html", title: "Float clear bug" },
+      { file: "float-text-offset-bug.html", title: "Float text offset bug" },
+      {
+        file: "float-clear.html",
+        title: "Float with clear (Issue #1803)",
+      },
+      {
+        file: "float-clear-vertical.html",
+        title: "Float with clear, vertical-rl (Issue #1803)",
+      },
+      {
+        file: "float-lh-rlh.html",
+        title: "Float with lh/rlh height (Issue #1494, #1738)",
+      },
+      {
+        file: "float-in-position-relative.html",
+        title: "Float in position:relative across page break (Issue #1885)",
+      },
+      {
+        file: "float-in-position-relative-vertical.html",
+        title:
+          "Float in position:relative across page break, vertical writing mode (Issue #1885)",
+      },
+      { file: "relative_floats.html", title: "Floats with position: relative" },
+      {
+        file: "float-in-relative-bug.html",
+        title: "Float in position:relative bug",
       },
     ],
   },
@@ -1123,52 +1189,6 @@ module.exports = [
       {
         file: "device-cmyk/test.html",
         title: "device-cmyk() function",
-      },
-    ],
-  },
-  {
-    category: "Counter style and list-style",
-    files: [
-      {
-        file: "counter-style/test.html",
-        title: "@counter-style rule",
-      },
-      {
-        file: "counter-style/list-style-type-counter-style.html",
-        title: "list-style-type with @counter-style",
-      },
-      {
-        file: "counter-style/marker.html",
-        title: "::marker pseudo-element",
-      },
-      {
-        file: "counter-style/marker-block-child.html",
-        title: "::marker with block child in list item (Issue #1831)",
-      },
-      {
-        file: "counter-style/marker-empty-li.html",
-        title: "::marker on empty list items",
-      },
-      {
-        file: "counter-style/list-style-position.html",
-        title: "list-style-position",
-      },
-      {
-        file: "counter-style/list-style-position-super.html",
-        title:
-          "Outside marker alignment with superscript content (Issue #1780)",
-      },
-      {
-        file: "counter-style/list-style-type-bullet.html",
-        title: "list-style-type bullet marker",
-      },
-      {
-        file: "counter-style/list-style-type-bullet-vertical.html",
-        title: "list-style-type bullet marker (vertical writing-mode)",
-      },
-      {
-        file: "counter-style/list-item-text-spacing.html",
-        title: "List-item with text-spacing (Issue #1763)",
       },
     ],
   },
