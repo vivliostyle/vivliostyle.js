@@ -74,6 +74,117 @@ describe("css-validator", function () {
     });
   });
 
+  describe("browser shorthand expansion", function () {
+    it("expands place-items into longhands", function (done) {
+      parseCascade(
+        "div { place-items: center start; }",
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["align-items"]).toBeDefined();
+          expect(cascade.tags.div.style["justify-items"]).toBeDefined();
+          expect(cascade.tags.div.style["align-items"].value.toString()).toBe(
+            "center",
+          );
+          expect(cascade.tags.div.style["justify-items"].value.toString()).toBe(
+            "start",
+          );
+        },
+      );
+    });
+
+    it("preserves cascade order when longhands override browser shorthand expansion", function (done) {
+      parseCascade(
+        "div { place-items: center start; justify-items: stretch; }",
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["align-items"]).toBeDefined();
+          expect(cascade.tags.div.style["justify-items"]).toBeDefined();
+          expect(cascade.tags.div.style["align-items"].value.toString()).toBe(
+            "center",
+          );
+          expect(cascade.tags.div.style["justify-items"].value.toString()).toBe(
+            "stretch",
+          );
+        },
+      );
+    });
+
+    it("propagates CSS-wide values from browser shorthands to their longhands", function (done) {
+      parseCascade("div { place-items: initial; }", done, function (cascade) {
+        expect(cascade.tags.div).toBeDefined();
+        expect(cascade.tags.div.style["align-items"]).toBeDefined();
+        expect(cascade.tags.div.style["justify-items"]).toBeDefined();
+        expect(cascade.tags.div.style["align-items"].value).toBe(
+          adapt_css.ident.initial,
+        );
+        expect(cascade.tags.div.style["justify-items"].value).toBe(
+          adapt_css.ident.initial,
+        );
+      });
+    });
+
+    it("caches non-shorthand properties after the first browser probe miss", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      spyOn(validatorSet, "expandBrowserShorthand").and.callThrough();
+
+      expect(validatorSet.getShorthand("color", "red")).toBeNull();
+      expect(validatorSet.getShorthand("color", "blue")).toBeNull();
+      expect(validatorSet.expandBrowserShorthand).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not cache a browser shorthand miss for unresolved var values", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      spyOn(validatorSet, "expandBrowserShorthand").and.callFake(
+        function (name, value) {
+          if (name !== "place-items") {
+            return null;
+          }
+          if (value === "var(--items)") {
+            return null;
+          }
+          if (value === "center start") {
+            return {
+              propList: ["align-items", "justify-items"],
+              values: {
+                "align-items": "center",
+                "justify-items": "start",
+              },
+            };
+          }
+          return null;
+        },
+      );
+
+      expect(
+        validatorSet.getShorthand("place-items", "var(--items)"),
+      ).toBeNull();
+      expect(
+        validatorSet.getShorthand("place-items", "center start"),
+      ).not.toBeNull();
+      expect(validatorSet.expandBrowserShorthand).toHaveBeenCalledTimes(2);
+    });
+
+    it("accepts browser shorthands with comma-list syntax", function (done) {
+      parseCascade(
+        "div { transition: opacity 1s ease, transform 2s linear; }",
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["transition-property"]).toBeDefined();
+          expect(cascade.tags.div.style["transition-duration"]).toBeDefined();
+          expect(
+            cascade.tags.div.style["transition-property"].value.toString(),
+          ).toBe("opacity,transform");
+          expect(
+            cascade.tags.div.style["transition-duration"].value.toString(),
+          ).toBe("1s,2s");
+        },
+      );
+    });
+  });
+
   describe("invalid selector list recovery", function () {
     it("drops an invalid selector list instead of salvaging later selectors", function (done) {
       parseCascade(

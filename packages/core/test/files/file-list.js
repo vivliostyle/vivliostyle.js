@@ -16,6 +16,10 @@ module.exports = [
         file: "running_header_adaptive.html",
         title: "Running header emulation with Adaptive Layout",
       },
+      {
+        file: "eal-generated-text-properties.html",
+        title: "EAL generated text properties (Issue #1968)",
+      },
       { file: "case_sensitivity/html.html", title: "HTML case sensitivity" },
       { file: "ruby-broken-pagination.html", title: "Ruby broken pagination" },
       {

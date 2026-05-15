@@ -642,12 +642,14 @@ export function mergeIn(
       const av = cascval.increaseSpecificity(specificity);
       setPropCascadeValue(target, prop, av, context);
 
-      // Expand shorthand property (its value contains variables).
-      const propListLH = (
+      // Reserve longhand slots for shorthand declarations, including
+      // browser-supported shorthands discovered lazily by ValidatorSet.
+      const validatorSet = (
         context as Exprs.Context & {
           style: { validatorSet: CssValidator.ValidatorSet };
         }
-      ).style?.validatorSet.shorthands[prop]?.propList;
+      ).style?.validatorSet;
+      const propListLH = validatorSet?.getShorthand(prop, av.value)?.propList;
       if (propListLH) {
         for (const propLH of propListLH) {
           const avLH = new CascadeValue(Css.empty, av.priority);
@@ -4224,7 +4226,7 @@ export class CascadeInstance {
           // all variables substituted
           const validatorSet = (styler as any)
             .validatorSet as CssValidator.ValidatorSet;
-          const shorthand = validatorSet?.shorthands[name]?.clone();
+          const shorthand = validatorSet?.getShorthand(name, value)?.clone();
           if (shorthand) {
             if (Css.isDefaultingValue(value)) {
               for (const nameLH of shorthand.propList) {
@@ -4240,7 +4242,8 @@ export class CascadeInstance {
             } else {
               // The var()-substituted value may have complex structure
               // (e.g. SpaceList in SpaceList) that ShorthandValidator
-              // cannot handle, so use toString and parseValue.
+              // cannot handle directly, so normalize it through parseValue
+              // before expanding the shorthand to longhands.
               const valueSH = CssParser.parseValue(
                 (styler as any).scope,
                 new CssTokenizer.Tokenizer(value.toString(), null),

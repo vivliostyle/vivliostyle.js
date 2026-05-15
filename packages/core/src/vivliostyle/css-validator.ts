@@ -21,8 +21,10 @@
  */
 import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
+import * as CssParser from "./css-parser";
 import * as CssTokenizer from "./css-tokenizer";
 import * as CmykStore from "./cmyk-store";
+import * as Exprs from "./exprs";
 import * as Base from "./base";
 import { ValidationTxt } from "./assets";
 import { TokenType } from "./css-tokenizer";
@@ -1362,6 +1364,74 @@ export class TextSpacingShorthandValidator extends SimpleShorthandValidator {
   }
 }
 
+export class BrowserShorthandValidator extends ShorthandValidator {
+  // Browser-supported shorthands that Vivliostyle does not model explicitly
+  // still need to participate in shorthand/longhand cascade resolution.
+  // This validator reuses the browser's own shorthand expansion instead of
+  // requiring one dedicated validator class per shorthand.
+  constructor(
+    public readonly name: string,
+    propList: string[] = [],
+  ) {
+    super();
+    this.propList = propList;
+  }
+
+  override clone(): this {
+    const other = new (this.constructor as any)(this.name, [...this.propList]);
+    other.validatorSet = this.validatorSet;
+    return other;
+  }
+
+  private validateValueText(valueText: string): boolean {
+    const expanded = this.validatorSet.expandBrowserShorthand(
+      this.name,
+      valueText,
+    );
+    if (!expanded) {
+      this.error = true;
+      return false;
+    }
+
+    this.propList = expanded.propList;
+    this.values = {};
+    for (const name of expanded.propList) {
+      const valueText = expanded.values[name];
+      if (!valueText) {
+        continue;
+      }
+      const parsed = CssParser.parseValue(
+        this.validatorSet.scope,
+        new CssTokenizer.Tokenizer(valueText, null),
+        "",
+      );
+      if (!parsed) {
+        this.error = true;
+        return false;
+      }
+      this.values[name] = parsed;
+    }
+    this.error = false;
+    return true;
+  }
+
+  override validateList(list: Css.Val[]): number {
+    const value =
+      list.length === 1
+        ? list[0].toString()
+        : new Css.SpaceList(list).toString();
+    if (!this.validateValueText(value)) {
+      return 0;
+    }
+    return list.length;
+  }
+
+  override visitCommaList(list: Css.CommaList): Css.Val {
+    this.validateValueText(list.toString());
+    return null;
+  }
+}
+
 const propsExcludedFromAll = [
   "unicode-bidi",
   "direction",
@@ -1486,6 +1556,85 @@ export class ValidatorSet {
   shorthands: { [key: string]: ShorthandValidator } = {};
   layoutProps: ValueMap = {};
   backgroundProps: ValueMap = {};
+  readonly scope = new Exprs.LexicalScope(null);
+  private browserShorthandStyle: CSSStyleDeclaration | null = null;
+  private browserShorthandMisses: { [key: string]: true } = {};
+
+  private getBrowserShorthandStyle(): CSSStyleDeclaration | null {
+    if (this.browserShorthandStyle !== null) {
+      return this.browserShorthandStyle;
+    }
+    if (typeof document === "undefined") {
+      return null;
+    }
+    this.browserShorthandStyle = document.createElement("div").style;
+    return this.browserShorthandStyle;
+  }
+
+  expandBrowserShorthand(
+    name: string,
+    valueText: string,
+  ): { propList: string[]; values: { [key: string]: string } } | null {
+    const style = this.getBrowserShorthandStyle();
+    if (!style) {
+      return null;
+    }
+    style.cssText = "";
+    style.setProperty(name, valueText);
+    const propList = Array.from({ length: style.length }, (_, i) =>
+      style.item(i),
+    ).filter((prop): prop is string => !!prop);
+    if (
+      !propList.length ||
+      (propList.length === 1 && propList[0] === name.toLowerCase())
+    ) {
+      return null;
+    }
+    // Use a detached CSSStyleDeclaration as a browser-native shorthand parser,
+    // then feed the resulting longhand values back into Vivliostyle's cascade.
+    const values: { [key: string]: string } = {};
+    for (const prop of propList) {
+      values[prop] = style.getPropertyValue(prop);
+    }
+    return { propList, values };
+  }
+
+  getShorthand(
+    name: string,
+    value?: Css.Val | string,
+  ): ShorthandValidator | null {
+    const shorthand = this.shorthands[name];
+    if (shorthand) {
+      return shorthand;
+    }
+    if (this.browserShorthandMisses[name]) {
+      return null;
+    }
+    if (value == null) {
+      return null;
+    }
+    const expanded = this.expandBrowserShorthand(
+      name,
+      typeof value === "string" ? value : value.toString(),
+    );
+    if (!expanded) {
+      if (
+        typeof value === "string"
+          ? !/\bvar\(/i.test(value)
+          : !containsVar(value)
+      ) {
+        this.browserShorthandMisses[name] = true;
+      }
+      return null;
+    }
+    const browserShorthand = new BrowserShorthandValidator(
+      name,
+      expanded.propList,
+    );
+    browserShorthand.setOwner(this);
+    this.shorthands[name] = browserShorthand;
+    return browserShorthand;
+  }
 
   private addReplacement(
     val: ValidatingGroup,
@@ -2087,9 +2236,7 @@ export class ValidatorSet {
     if (
       Css.isCustomPropName(name) ||
       // Check if it is a `@font-face` descriptor (Issue #1307)
-      ruleType === "font-face" ||
-      // Check if the property value containing `var(…)`
-      containsVar(value)
+      ruleType === "font-face"
     ) {
       receiver.simpleProperty(name, value, important);
       return;
@@ -2110,11 +2257,31 @@ export class ValidatorSet {
       prefix = r[1];
       name = r[2];
     }
+    const shorthandName = prefix ? origName : name;
+    if (containsVar(value)) {
+      // Register browser-supported shorthands before var() resolution so the
+      // later cascade pass can still expand mixed shorthand/longhand usage.
+      this.getShorthand(shorthandName, value);
+      receiver.simpleProperty(origName, value, important);
+      return;
+    }
     const px = this.prefixes[name];
     if (!px || !px[prefix]) {
       if (CSS.supports(origName, value.toString())) {
-        // Browser supports this property
-        receiver.simpleProperty(origName, value, important);
+        const shorthand = this.getShorthand(shorthandName, value)?.clone();
+        if (shorthand) {
+          if (Css.isDefaultingValue(value)) {
+            shorthand.propagateDefaultingValue(value, important, receiver);
+          } else {
+            value.visit(shorthand);
+            if (!shorthand.finish(important, receiver)) {
+              receiver.invalidPropertyValue(origName, value);
+            }
+          }
+        } else {
+          // Browser supports this property
+          receiver.simpleProperty(origName, value, important);
+        }
       } else if (prefix && !Base.knownPrefixes.includes(`-${prefix}-`)) {
         // Ignore properties with unknown prefix to avoid unnecessary warnings
       } else {
@@ -2147,7 +2314,11 @@ export class ValidatorSet {
         receiver.invalidPropertyValue(origName, value);
       }
     } else {
-      const shorthand = this.shorthands[name].clone();
+      const shorthand = this.getShorthand(name, value)?.clone();
+      if (!shorthand) {
+        receiver.unknownProperty(origName, value);
+        return;
+      }
       if (Css.isDefaultingValue(value)) {
         shorthand.propagateDefaultingValue(value, important, receiver);
       } else {
