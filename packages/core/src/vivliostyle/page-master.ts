@@ -1776,6 +1776,17 @@ const imageProperties = ["background-image", "border-image-source", "filter"];
 
 /**
  * Only passed when there is content assigned by the content property.
+ *
+ * This list is for properties that need to be propagated to the generated DOM
+ * element as browser CSS properties. Keep browser-expanded longhands here
+ * rather than their shorthand forms (for example, text-box-trim/text-box-edge
+ * instead of text-box).
+ *
+ * text-autospace and text-spacing-trim are intentionally omitted for now:
+ * generated content handles them via TextPolyfill.processGeneratedContent()
+ * with explicit values from boxInstance.getProp(), not by inheriting browser
+ * CSS properties. If generated content switches to browser-native handling for
+ * those properties in the future, add them back here.
  */
 export const passContentProperties = [
   "color",
@@ -1791,7 +1802,6 @@ export const passContentProperties = [
   "text-indent",
   "text-transform",
   "white-space",
-  "text-wrap",
   "text-wrap-mode",
   "text-wrap-style",
   "word-spacing",
@@ -1810,7 +1820,6 @@ export const passContentProperties = [
   "text-decoration-skip-ink",
   "text-decoration-style",
   "text-decoration-thickness",
-  "text-emphasis",
   "text-emphasis-color",
   "text-emphasis-position",
   "text-emphasis-style",
@@ -1822,6 +1831,9 @@ export const passContentProperties = [
   "text-underline-offset",
   "text-underline-position",
   "text-overflow",
+  "text-box-trim",
+  "text-box-edge",
+  "text-justify",
 ];
 
 export const passSingleUriContentProperties = [

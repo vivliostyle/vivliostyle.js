@@ -1,0 +1,203 @@
+<!-- Test case for Issue #1968: newer CSS text properties in EAL generated content -->
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>EAL generated text properties</title>
+    <style>
+      @page {
+        size: 200mm 140mm;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        font-family: Georgia, "Times New Roman", serif;
+      }
+
+      .body-anchor {
+        margin: 0;
+        font-size: 1px;
+        line-height: 1;
+        color: transparent;
+      }
+
+      @-epubx-page-template {
+        @-epubx-flow body {
+          -epubx-flow-consume: all;
+        }
+
+        .body-flow {
+          -epubx-flow-from: body;
+          top: 0;
+          left: 0;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+        }
+
+        .heading {
+          content: "Issue #1968: EAL generated content should preserve newer CSS text properties";
+          height: 6mm;
+          font: 700 13px/1.2 Arial, sans-serif;
+          color: #102a43;
+        }
+
+        .panel-label {
+          height: 6mm;
+          font: 700 11px/1.2 Arial, sans-serif;
+          color: #243b53;
+        }
+
+        .panel {
+          padding: 3mm;
+          border: 1px solid #52606d;
+          background: #fffdf7;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+
+        .textbox-panel {
+          content: "Ágj";
+          height: 26mm;
+          padding: 0 2mm;
+          border-top: 5px solid #d64545;
+          border-bottom: 5px solid #d64545;
+          background:
+            linear-gradient(
+              to bottom,
+              rgba(214, 69, 69, 0.14) 0 8mm,
+              transparent 8mm calc(100% - 8mm),
+              rgba(214, 69, 69, 0.14) calc(100% - 8mm) 100%
+            ),
+            #fffdf7;
+          font: 700 52px/1.45 Georgia, "Times New Roman", serif;
+          color: #7b1e1e;
+          text-align: center;
+        }
+
+        .spacing-panel {
+          content: "「漢A1漢B2漢C3漢D4漢E5漢F6漢G7漢H8」\A『漢A1漢B2漢C3漢D4漢E5漢F6漢G7漢H8』";
+          height: 42mm;
+          font: 400 18px/1.8 "Hiragino Mincho ProN", "Yu Mincho", serif;
+          color: #102a43;
+          white-space: pre-line;
+        }
+
+        .default-text-box-label {
+          content: "Default line box";
+        }
+
+        .longhand-text-box-label {
+          content: "trimmed with longhands";
+        }
+
+        .shorthand-text-box-label {
+          content: "trimmed with shorthand";
+        }
+
+        .default-spacing-label {
+          content: "Default spacing and wrapping";
+        }
+
+        .styled-spacing-label {
+          content: "justify + no-autospace + trim-both";
+        }
+
+        .longhand-text-box {
+          text-box-trim: trim-both;
+          text-box-edge: text;
+        }
+
+        .shorthand-text-box {
+          text-box: trim-both text;
+        }
+
+        .styled-spacing {
+          text-align: justify;
+          text-justify: inter-character;
+          text-autospace: no-autospace;
+          text-spacing-trim: trim-both;
+        }
+
+        @-epubx-page-master {
+          @-epubx-partition class(body-flow) {
+          }
+
+          @-epubx-partition class(heading) {
+            top: 4mm;
+            left: 10mm;
+            right: 10mm;
+          }
+
+          @-epubx-partition class(panel-label) class(default-text-box-label) {
+            top: 16mm;
+            left: 10mm;
+            width: 54mm;
+          }
+
+          @-epubx-partition class(panel) class(textbox-panel) {
+            top: 23mm;
+            left: 10mm;
+            width: 54mm;
+          }
+
+          @-epubx-partition class(panel-label) class(longhand-text-box-label) {
+            top: 16mm;
+            left: 73mm;
+            width: 54mm;
+          }
+
+          @-epubx-partition class(panel) class(textbox-panel) class(longhand-text-box) {
+            top: 23mm;
+            left: 73mm;
+            width: 54mm;
+          }
+
+          @-epubx-partition class(panel-label) class(shorthand-text-box-label) {
+            top: 16mm;
+            left: 136mm;
+            width: 54mm;
+          }
+
+          @-epubx-partition class(panel) class(textbox-panel) class(shorthand-text-box) {
+            top: 23mm;
+            left: 136mm;
+            width: 54mm;
+          }
+
+          @-epubx-partition class(panel-label) class(default-spacing-label) {
+            top: 58mm;
+            left: 10mm;
+            width: 78mm;
+          }
+
+          @-epubx-partition class(panel) class(spacing-panel) {
+            top: 65mm;
+            left: 10mm;
+            width: 78mm;
+          }
+
+          @-epubx-partition class(panel-label) class(styled-spacing-label) {
+            top: 58mm;
+            left: 112mm;
+            width: 78mm;
+          }
+
+          @-epubx-partition class(panel) class(spacing-panel) class(styled-spacing) {
+            top: 65mm;
+            left: 112mm;
+            width: 78mm;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p class="body-anchor">anchor</p>
+  </body>
+</html>
