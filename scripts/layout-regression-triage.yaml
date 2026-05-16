@@ -1,3 +1,15 @@
+- category: General
+  title: "EAL generated text properties (Issue #1968)"
+  file: eal-generated-text-properties.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1968  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-generated-text-properties.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-generated-text-properties.html&zoom=1&spread=false
 - category: Cross-references
   title: target-counter() with default page type
   file: target-counter-default-page-type.html
