@@ -590,6 +590,10 @@ export class StyleInstance
       return false;
     }
 
+    if (Css.isCustomPropName(name)) {
+      return typeof CSS !== "undefined" && CSS.supports(`(${name}:${value})`);
+    }
+
     let supported = true;
 
     class SupportsReceiver implements CssValidator.PropertyReceiver {

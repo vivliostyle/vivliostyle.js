@@ -889,6 +889,7 @@ export class Parser {
         if (token.type !== TokenType.EOF) {
           this.handler.error("E_CSS_MISMATCHED_C_PAR", token);
           this.actions = actionsErrorDecl;
+          return null;
         }
       }
       const func = new Css.Func(
@@ -900,7 +901,7 @@ export class Parser {
       // Check invalid var()
       if (func.name === "var") {
         const name = func.values[0] instanceof Css.Ident && func.values[0].name;
-        if (!Css.isCustomPropName(name) || name === this.propName) {
+        if (!Css.isCustomPropName(name)) {
           this.handler.error(`E_CSS_INVALID_VAR ${func.toString()}`, token);
           this.actions = actionsErrorDecl;
         }
@@ -1169,10 +1170,13 @@ export class Parser {
     }
     tokenizer.consume();
     const endPosition = tokenN.position;
+    const rawValue = tokenizer.input.substring(startPosition, endPosition);
     const value =
       isFunc && name === "selector" && commaCount > 0
         ? "" // selector() with multiple selectors doesn't work
-        : tokenizer.input.substring(startPosition, endPosition).trim();
+        : Css.isCustomPropName(name)
+          ? rawValue
+          : rawValue.trim();
     const supportsTest = new Exprs.SupportsTest(
       this.handler.getScope(),
       name,

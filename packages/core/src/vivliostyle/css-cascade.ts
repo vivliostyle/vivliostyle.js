@@ -4185,12 +4185,112 @@ export class CascadeInstance {
     element: Element | null,
   ): void {
     const elementStyle = elementStyles[0];
-    const visitor = new VarFilterVisitor(elementStyles, styler, element);
+    const sourceElementStyles = elementStyles.map((style) => ({ ...style }));
     const LIMIT_LOOP = 32; // prevent cyclic or too deep dependency
     const propsLH: ElementStyle = {}; // for shorthand -> longhand cascade
+    const pendingPseudoMap = getStyleMap(elementStyle, "_pseudos");
+    const propNames = Object.keys(elementStyle).filter(isPropName);
+
+    const applyVarFilterToProperty = (name: string): void => {
+      const cascVal = getProp(elementStyle, name);
+      let value = cascVal.value;
+      const lookupElementStyles = Css.isCustomPropName(name)
+        ? sourceElementStyles
+        : elementStyles;
+      const visitor = new VarFilterVisitor(
+        lookupElementStyles,
+        styler,
+        element,
+        Css.isCustomPropName(name) ? name : null,
+      );
+
+      if (
+        Css.isCustomPropName(name) &&
+        visitor.getFallbackCycleMembers(value, lookupElementStyles, element)
+      ) {
+        value = Css.ident.initial;
+      }
+
+      for (let i = 0; ; i++) {
+        if (i >= LIMIT_LOOP) {
+          value = Css.isCustomPropName(name) ? Css.ident.initial : Css.empty;
+          break;
+        }
+        const after = value.visit(visitor);
+        if (visitor.error) {
+          // invalid or unresolved variable found
+          value = Css.isCustomPropName(name) ? Css.ident.initial : Css.empty;
+          visitor.error = false;
+          break;
+        }
+        if (after === value) {
+          // no variable, or all variables substituted
+          break;
+        }
+        // variables substituted, but the substituted value may contain variables
+        value = after;
+      }
+      if (value !== cascVal.value) {
+        // all variables substituted
+        const validatorSet = (styler as any)
+          .validatorSet as CssValidator.ValidatorSet;
+        const shorthand = validatorSet?.getShorthand(name, value)?.clone();
+        if (shorthand) {
+          if (Css.isDefaultingValue(value)) {
+            for (const nameLH of shorthand.propList) {
+              const avLH = new CascadeValue(value, cascVal.priority);
+              const tvLH = getProp(elementStyle, nameLH);
+              setProp(propsLH, nameLH, cascadeValues(this.context, tvLH, avLH));
+            }
+            delete elementStyle[name];
+          } else {
+            // The var()-substituted value may have complex structure
+            // (e.g. SpaceList in SpaceList) that ShorthandValidator
+            // cannot handle directly, so normalize it through parseValue
+            // before expanding the shorthand to longhands.
+            const valueSH = CssParser.parseValue(
+              (styler as any).scope,
+              new CssTokenizer.Tokenizer(value.toString(), null),
+              "",
+            );
+            if (valueSH) {
+              valueSH.visit(shorthand);
+              if (!shorthand.error) {
+                for (const nameLH of shorthand.propList) {
+                  const avLH = new CascadeValue(
+                    shorthand.values[nameLH] ??
+                      validatorSet.defaultValues[nameLH] ??
+                      Css.ident.initial,
+                    cascVal.priority,
+                  );
+                  const tvLH = getProp(elementStyle, nameLH);
+                  setProp(
+                    propsLH,
+                    nameLH,
+                    cascadeValues(this.context, tvLH, avLH),
+                  );
+                }
+                delete elementStyle[name];
+              }
+            }
+          }
+        } else {
+          elementStyle[name] = new CascadeValue(value, cascVal.priority);
+        }
+      }
+      if (propsLH[name]) {
+        const av = getProp(elementStyle, name);
+        if (av && av.value !== Css.empty) {
+          setPropCascadeValue(propsLH, name, av, this.context);
+        }
+      }
+    };
 
     for (const name in elementStyle) {
       if (isMapName(name)) {
+        if (name === "_pseudos") {
+          continue;
+        }
         const pseudoMap = getStyleMap(elementStyle, name);
         for (const pseudoName in pseudoMap) {
           this.applyVarFilter(
@@ -4199,87 +4299,25 @@ export class CascadeInstance {
             element,
           );
         }
-      } else if (isPropName(name)) {
-        const cascVal = getProp(elementStyle, name);
-        let value = cascVal.value;
-
-        for (let i = 0; ; i++) {
-          if (i >= LIMIT_LOOP) {
-            value = Css.empty;
-            break;
-          }
-          const after = value.visit(visitor);
-          if (visitor.error) {
-            // invalid or unresolved variable found
-            value = Css.empty;
-            visitor.error = false;
-            break;
-          }
-          if (after === value) {
-            // no variable, or all variables substituted
-            break;
-          }
-          // variables substituted, but the substituted value may contain variables
-          value = after;
-        }
-        if (value !== cascVal.value) {
-          // all variables substituted
-          const validatorSet = (styler as any)
-            .validatorSet as CssValidator.ValidatorSet;
-          const shorthand = validatorSet?.getShorthand(name, value)?.clone();
-          if (shorthand) {
-            if (Css.isDefaultingValue(value)) {
-              for (const nameLH of shorthand.propList) {
-                const avLH = new CascadeValue(value, cascVal.priority);
-                const tvLH = getProp(elementStyle, nameLH);
-                setProp(
-                  propsLH,
-                  nameLH,
-                  cascadeValues(this.context, tvLH, avLH),
-                );
-              }
-              delete elementStyle[name];
-            } else {
-              // The var()-substituted value may have complex structure
-              // (e.g. SpaceList in SpaceList) that ShorthandValidator
-              // cannot handle directly, so normalize it through parseValue
-              // before expanding the shorthand to longhands.
-              const valueSH = CssParser.parseValue(
-                (styler as any).scope,
-                new CssTokenizer.Tokenizer(value.toString(), null),
-                "",
-              );
-              if (valueSH) {
-                valueSH.visit(shorthand);
-                if (!shorthand.error) {
-                  for (const nameLH of shorthand.propList) {
-                    const avLH = new CascadeValue(
-                      shorthand.values[nameLH] ??
-                        validatorSet.defaultValues[nameLH] ??
-                        Css.ident.initial,
-                      cascVal.priority,
-                    );
-                    const tvLH = getProp(elementStyle, nameLH);
-                    setProp(
-                      propsLH,
-                      nameLH,
-                      cascadeValues(this.context, tvLH, avLH),
-                    );
-                  }
-                  delete elementStyle[name];
-                }
-              }
-            }
-          } else {
-            elementStyle[name] = new CascadeValue(value, cascVal.priority);
-          }
-        }
-        if (propsLH[name]) {
-          const av = getProp(elementStyle, name);
-          if (av && av.value !== Css.empty) {
-            setPropCascadeValue(propsLH, name, av, this.context);
-          }
-        }
+      }
+    }
+    for (const name of propNames) {
+      if (Css.isCustomPropName(name)) {
+        applyVarFilterToProperty(name);
+      }
+    }
+    for (const name of propNames) {
+      if (!Css.isCustomPropName(name)) {
+        applyVarFilterToProperty(name);
+      }
+    }
+    if (pendingPseudoMap) {
+      for (const pseudoName in pendingPseudoMap) {
+        this.applyVarFilter(
+          [pendingPseudoMap[pseudoName], ...elementStyles],
+          styler,
+          element,
+        );
       }
     }
     // Update elementStyle with shorthand -> longhand cascade result
@@ -5690,21 +5728,298 @@ export const convertToPhysical = <T>(
  * Convert var() to its value
  */
 export class VarFilterVisitor extends Css.FilterVisitor {
+  private resolvingCustomProperties = [] as string[];
+  private varResolutionState = { cycleMembers: new Set<string>() };
+
   constructor(
     public elementStyles: ElementStyle[],
     public styler: CssStyler.AbstractStyler,
     public element: Element | null,
+    private readonly currentCustomPropertyName: string | null = null,
   ) {
     super();
+    if (currentCustomPropertyName) {
+      this.resolvingCustomProperties.push(currentCustomPropertyName);
+    }
+  }
+
+  private getRawCustomPropertyLookup(
+    name: string,
+    elementStyles: ElementStyle[],
+    element: Element | null,
+  ): {
+    found: boolean;
+    value: Css.Val | null;
+    elementStyles: ElementStyle[];
+    element: Element | null;
+  } {
+    let elem = element ?? ((this.styler as any).root as Element);
+    if (elementStyles?.length) {
+      for (let index = 0; index < elementStyles.length; index++) {
+        const style = elementStyles[index];
+        const val = (style[name] as CascadeValue)?.value;
+        if (!val) {
+          continue;
+        }
+        if (val === Css.ident.initial) {
+          return {
+            found: true,
+            value: null,
+            elementStyles: elementStyles.slice(index),
+            element,
+          };
+        }
+        if (
+          val === Css.ident.inherit ||
+          val === Css.ident.unset ||
+          val === Css.ident.revert
+        ) {
+          continue;
+        }
+        return {
+          found: true,
+          value: val,
+          elementStyles: elementStyles.slice(index),
+          element,
+        };
+      }
+      if (element) {
+        elem = element.parentElement;
+      }
+    }
+    for (; elem; elem = elem.parentElement) {
+      const style = this.styler.getStyle(elem, false);
+      const val = (style?.[name] as CascadeValue)?.value;
+      if (!val) {
+        continue;
+      }
+      if (val === Css.ident.initial) {
+        return {
+          found: true,
+          value: null,
+          elementStyles: style ? [style] : [],
+          element: elem,
+        };
+      }
+      if (
+        val === Css.ident.inherit ||
+        val === Css.ident.unset ||
+        val === Css.ident.revert
+      ) {
+        continue;
+      }
+      return {
+        found: true,
+        value: val,
+        elementStyles: style ? [style] : [],
+        element: elem,
+      };
+    }
+    return {
+      found: false,
+      value: null,
+      elementStyles: [],
+      element: null,
+    };
+  }
+
+  private collectReferencedCustomProperties(val: Css.Val): string[] {
+    const names = new Set<string>();
+    class ReferenceVisitor extends Css.Visitor {
+      override visitFunc(func: Css.Func): Css.Val {
+        const name = func.values[0] instanceof Css.Ident && func.values[0].name;
+        if (func.name === "var" && name && Css.isCustomPropName(name)) {
+          names.add(name);
+        }
+        return super.visitFunc(func);
+      }
+    }
+    val.visit(new ReferenceVisitor());
+    return Array.from(names);
+  }
+
+  private findReferencedCycleStart(
+    val: Css.Val,
+    elementStyles: ElementStyle[],
+    element: Element | null,
+    visited = new Set<string>(),
+  ): string | null {
+    for (const name of this.collectReferencedCustomProperties(val)) {
+      if (this.resolvingCustomProperties.includes(name)) {
+        return name;
+      }
+      if (visited.has(name)) {
+        continue;
+      }
+      visited.add(name);
+      const lookup = this.getRawCustomPropertyLookup(
+        name,
+        elementStyles,
+        element,
+      );
+      const cycleStartName =
+        lookup.value &&
+        this.findReferencedCycleStart(
+          lookup.value,
+          lookup.elementStyles,
+          lookup.element,
+          visited,
+        );
+      if (cycleStartName) {
+        return cycleStartName;
+      }
+    }
+    return null;
+  }
+
+  getFallbackCycleMembers(
+    val: Css.Val,
+    elementStyles: ElementStyle[],
+    element: Element | null,
+  ): Set<string> | null {
+    let cycleStartName: string | null = null;
+    const self = this;
+    class FallbackReferenceVisitor extends Css.Visitor {
+      override visitFunc(func: Css.Func): Css.Val {
+        if (func.name === "var") {
+          for (const fallbackVal of func.values.slice(1)) {
+            const referencedCycleStart = self.findReferencedCycleStart(
+              fallbackVal,
+              elementStyles,
+              element,
+            );
+            if (referencedCycleStart) {
+              cycleStartName = referencedCycleStart;
+              return null;
+            }
+          }
+        }
+        return super.visitFunc(func);
+      }
+    }
+    val.visit(new FallbackReferenceVisitor());
+    if (!cycleStartName) {
+      return null;
+    }
+    const cycleStartIndex =
+      this.resolvingCustomProperties.indexOf(cycleStartName);
+    return new Set(this.resolvingCustomProperties.slice(cycleStartIndex));
+  }
+
+  private resolveCustomProperty(
+    name: string,
+    val: Css.Val | null | undefined,
+    elementStyles: ElementStyle[],
+    element: Element | null,
+  ): { found: boolean; value: Css.Val | null; continueLookup: boolean } {
+    if (!val) {
+      return { found: false, value: null, continueLookup: false };
+    }
+    if (val === Css.ident.initial) {
+      return { found: true, value: null, continueLookup: false };
+    }
+    if (
+      val === Css.ident.inherit ||
+      val === Css.ident.unset ||
+      val === Css.ident.revert
+    ) {
+      return { found: true, value: null, continueLookup: true };
+    }
+    const fallbackCycleMembers = this.getFallbackCycleMembers(
+      val,
+      elementStyles,
+      element,
+    );
+    if (fallbackCycleMembers) {
+      fallbackCycleMembers.forEach((member) =>
+        this.varResolutionState.cycleMembers.add(member),
+      );
+      return { found: true, value: null, continueLookup: false };
+    }
+    return {
+      found: true,
+      value: this.resolveReferencedCustomProperty(
+        name,
+        val,
+        elementStyles,
+        element,
+      ),
+      continueLookup: false,
+    };
+  }
+
+  private resolveReferencedCustomProperty(
+    name: string,
+    value: Css.Val,
+    elementStyles: ElementStyle[],
+    element: Element | null,
+  ): Css.Val | null {
+    const cycleIndex = this.resolvingCustomProperties.indexOf(name);
+    if (cycleIndex >= 0) {
+      this.resolvingCustomProperties
+        .slice(cycleIndex)
+        .forEach((member) => this.varResolutionState.cycleMembers.add(member));
+      return null;
+    }
+
+    const previousCycleMembers = new Set(this.varResolutionState.cycleMembers);
+    this.varResolutionState.cycleMembers = new Set();
+    const nestedVisitor = new VarFilterVisitor(
+      elementStyles,
+      this.styler,
+      element,
+      name,
+    );
+    nestedVisitor.resolvingCustomProperties = this.resolvingCustomProperties;
+    nestedVisitor.resolvingCustomProperties.push(name);
+    nestedVisitor.varResolutionState = this.varResolutionState;
+
+    let resolvedValue = value;
+    const LIMIT_LOOP = 32;
+    for (let i = 0; ; i++) {
+      if (i >= LIMIT_LOOP) {
+        resolvedValue = null;
+        break;
+      }
+      const after = resolvedValue.visit(nestedVisitor);
+      if (nestedVisitor.error) {
+        resolvedValue = null;
+        break;
+      }
+      if (after === resolvedValue) {
+        break;
+      }
+      resolvedValue = after;
+    }
+
+    const hadCycleMembers = this.varResolutionState.cycleMembers;
+    this.varResolutionState.cycleMembers = new Set([
+      ...previousCycleMembers,
+      ...hadCycleMembers,
+    ]);
+    this.resolvingCustomProperties.pop();
+    return hadCycleMembers.has(name) ? null : resolvedValue;
   }
 
   private getVarValue(name: string): Css.Val {
     let elem = this.element ?? ((this.styler as any).root as Element);
     if (this.elementStyles?.length) {
-      for (const style of this.elementStyles) {
-        const val = (style[name] as CascadeValue)?.value;
-        if (val) {
-          return val;
+      for (let index = 0; index < this.elementStyles.length; index++) {
+        const style = this.elementStyles[index];
+        const resolved = this.resolveCustomProperty(
+          name,
+          (style[name] as CascadeValue)?.value,
+          this.elementStyles.slice(index),
+          this.element,
+        );
+        if (!resolved.found) {
+          continue;
+        }
+        if (resolved.value) {
+          return resolved.value;
+        }
+        if (!resolved.continueLookup) {
+          return null;
         }
       }
       if (this.element) {
@@ -5712,10 +6027,21 @@ export class VarFilterVisitor extends Css.FilterVisitor {
       }
     }
     for (; elem; elem = elem.parentElement) {
-      const val = (this.styler.getStyle(elem, false)?.[name] as CascadeValue)
-        ?.value;
-      if (val) {
-        return val;
+      const style = this.styler.getStyle(elem, false);
+      const resolved = this.resolveCustomProperty(
+        name,
+        (style?.[name] as CascadeValue)?.value,
+        style ? [style] : [],
+        elem,
+      );
+      if (!resolved.found) {
+        continue;
+      }
+      if (resolved.value) {
+        return resolved.value;
+      }
+      if (!resolved.continueLookup) {
+        return null;
       }
     }
     return null;
@@ -5733,6 +6059,13 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     const varVal = this.getVarValue(name);
     if (varVal) {
       return varVal;
+    }
+    if (
+      this.currentCustomPropertyName &&
+      this.varResolutionState.cycleMembers.has(this.currentCustomPropertyName)
+    ) {
+      this.error = true;
+      return Css.empty;
     }
     // fallback value
     if (func.values.length < 2) {

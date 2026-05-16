@@ -183,6 +183,16 @@ describe("css-validator", function () {
         },
       );
     });
+
+    it("keeps self-referential custom property declarations through the parser path", function (done) {
+      parseCascade("div { --a: var(--a, red); }", done, function (cascade) {
+        expect(cascade.tags.div).toBeDefined();
+        expect(cascade.tags.div.style["--a"]).toBeDefined();
+        expect(cascade.tags.div.style["--a"].value.toString()).toBe(
+          "var(--a,red)",
+        );
+      });
+    });
   });
 
   describe("invalid selector list recovery", function () {

@@ -1603,6 +1603,9 @@ export class ValidatorSet {
     name: string,
     value?: Css.Val | string,
   ): ShorthandValidator | null {
+    if (Css.isCustomPropName(name)) {
+      return null;
+    }
     const shorthand = this.shorthands[name];
     if (shorthand) {
       return shorthand;
