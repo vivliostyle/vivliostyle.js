@@ -50,6 +50,14 @@ describe("css-parser", function () {
       });
     }
 
+    function parseSupports(done, text, fn) {
+      spyOn(handler, "startWhenRule").and.callThrough();
+      parse(done, text, function () {
+        expect(handler.startWhenRule).toHaveBeenCalled();
+        fn(handler.startWhenRule.calls.mostRecent().args[0]);
+      });
+    }
+
     function tokenize(text) {
       var tokenizer = new adapt_csstok.Tokenizer(text, handler);
       var tokens = [];
@@ -1337,6 +1345,24 @@ describe("css-parser", function () {
             expect(handler.error).toHaveBeenCalled();
             expect(handler.pseudoelementSelector).not.toHaveBeenCalled();
           });
+        });
+      });
+    });
+
+    describe("supports parsing", function () {
+      it("preserves whitespace-only custom property values in @supports tests", function (done) {
+        parseSupports(done, "@supports (--a: ) {}", function (expr) {
+          expect(expr.expr.name).toBe("--a");
+          expect(expr.expr.value).toBe(" ");
+          expect(expr.expr.toString()).toBe("(--a: )");
+        });
+      });
+
+      it("preserves leading and trailing whitespace in custom property @supports values", function (done) {
+        parseSupports(done, "@supports (--a:  red ) {}", function (expr) {
+          expect(expr.expr.name).toBe("--a");
+          expect(expr.expr.value).toBe("  red ");
+          expect(expr.expr.toString()).toBe("(--a:  red )");
         });
       });
     });

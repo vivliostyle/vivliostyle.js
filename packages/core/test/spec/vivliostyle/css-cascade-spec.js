@@ -18,6 +18,8 @@
 
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
+import * as adapt_exprs from "../../../src/vivliostyle/exprs";
+import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
@@ -1138,6 +1140,222 @@ describe("css-cascade", function () {
           );
         });
       });
+    });
+  });
+
+  describe("VarFilterVisitor regression coverage", function () {
+    function parseValue(cssText) {
+      return adapt_cssparse.parseValue(
+        new adapt_exprs.LexicalScope(null),
+        new adapt_csstok.Tokenizer(cssText, null),
+        "",
+      );
+    }
+
+    function createCascadeValue(cssText) {
+      return new adapt_csscasc.CascadeValue(parseValue(cssText), 1);
+    }
+
+    function applyVarFilter(style, element, ancestorEntries) {
+      var styleMap = new Map();
+      styleMap.set(element, style);
+      (ancestorEntries || []).forEach(function (entry) {
+        styleMap.set(entry.element, entry.style);
+      });
+
+      var styler = {
+        root: element,
+        validatorSet: {
+          getShorthand: function () {
+            return null;
+          },
+          defaultValues: {},
+        },
+        getStyle: function (currentElement) {
+          return styleMap.get(currentElement) || null;
+        },
+      };
+      var cascadeInstance = {
+        context: {},
+      };
+      cascadeInstance.applyVarFilter =
+        adapt_csscasc.CascadeInstance.prototype.applyVarFilter;
+      cascadeInstance.applyVarFilter([style], styler, element);
+    }
+
+    it("keeps self-referential custom properties guaranteed-invalid instead of using their fallback", function () {
+      var element = document.createElement("div");
+      var style = {
+        "--a": createCascadeValue("var(--a, red)"),
+        color: createCascadeValue("var(--a, green)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--a"].value).toBe(adapt_css.ident.initial);
+      expect(style.color.value.toString()).toBe("green");
+    });
+
+    it("keeps cross-cyclic custom properties guaranteed-invalid regardless of declaration order", function () {
+      [
+        {
+          "--a": createCascadeValue("var(--b)"),
+          "--b": createCascadeValue("var(--a, green)"),
+          color: createCascadeValue("var(--b, blue)"),
+        },
+        {
+          "--b": createCascadeValue("var(--a, green)"),
+          "--a": createCascadeValue("var(--b)"),
+          color: createCascadeValue("var(--b, blue)"),
+        },
+      ].forEach(function (style) {
+        var element = document.createElement("div");
+
+        applyVarFilter(style, element);
+
+        expect(style["--a"].value).toBe(adapt_css.ident.initial);
+        expect(style["--b"].value).toBe(adapt_css.ident.initial);
+        expect(style.color.value.toString()).toBe("blue");
+      });
+    });
+
+    it("keeps fallback available for properties that only reference a cyclic custom property", function () {
+      var element = document.createElement("div");
+      var style = {
+        "--a": createCascadeValue("var(--b)"),
+        "--b": createCascadeValue("var(--a)"),
+        "--x": createCascadeValue("var(--a, green)"),
+        color: createCascadeValue("var(--x, blue)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--a"].value).toBe(adapt_css.ident.initial);
+      expect(style["--b"].value).toBe(adapt_css.ident.initial);
+      expect(style["--x"].value.toString()).toBe("green");
+      expect(style.color.value.toString()).toBe("green");
+    });
+
+    it("treats fallback references as part of the custom property dependency cycle", function () {
+      var element = document.createElement("div");
+      var style = {
+        "--a": createCascadeValue("var(--b, var(--c))"),
+        "--b": createCascadeValue("green"),
+        "--c": createCascadeValue("var(--a)"),
+        color: createCascadeValue("var(--a, blue)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--a"].value).toBe(adapt_css.ident.initial);
+      expect(style["--c"].value).toBe(adapt_css.ident.initial);
+      expect(style.color.value.toString()).toBe("blue");
+    });
+
+    it("resolves ordinary properties after marking cyclic custom properties invalid", function () {
+      var element = document.createElement("div");
+      var style = {
+        color: createCascadeValue("var(--a, blue)"),
+        "--a": createCascadeValue("var(--b, var(--c))"),
+        "--b": createCascadeValue("green"),
+        "--c": createCascadeValue("var(--a)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--a"].value).toBe(adapt_css.ident.initial);
+      expect(style["--c"].value).toBe(adapt_css.ident.initial);
+      expect(style.color.value.toString()).toBe("blue");
+    });
+
+    it("propagates fallback-cycle membership back to the calling custom property", function () {
+      var element = document.createElement("div");
+      var style = {
+        "--a": createCascadeValue("var(--b, red)"),
+        "--b": createCascadeValue("var(--c, var(--a))"),
+        "--c": createCascadeValue("green"),
+        color: createCascadeValue("var(--a, blue)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--a"].value).toBe(adapt_css.ident.initial);
+      expect(style["--b"].value).toBe(adapt_css.ident.initial);
+      expect(style.color.value.toString()).toBe("blue");
+    });
+
+    it("keeps fallback-only cycle dependencies invalid even when the substituted branch is otherwise valid", function () {
+      var element = document.createElement("div");
+      var style = {
+        "--a": createCascadeValue("var(--c, var(--b))"),
+        "--b": createCascadeValue("var(--a)"),
+        "--c": createCascadeValue("red"),
+        color: createCascadeValue("var(--a, blue)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--a"].value).toBe(adapt_css.ident.initial);
+      expect(style["--b"].value).toBe(adapt_css.ident.initial);
+      expect(style.color.value.toString()).toBe("blue");
+    });
+
+    it("preserves originating element custom property context for pseudo-elements", function () {
+      var element = document.createElement("div");
+      var beforeStyle = {
+        color: createCascadeValue("var(--x)"),
+        "--x": createCascadeValue("var(--y)"),
+      };
+      var style = {
+        "--y": createCascadeValue("green"),
+        _pseudos: {
+          before: beforeStyle,
+        },
+      };
+
+      applyVarFilter(style, element);
+
+      expect(beforeStyle["--x"].value.toString()).toBe("green");
+      expect(beforeStyle.color.value.toString()).toBe("green");
+    });
+
+    it("does not treat owner-element fallback references as pseudo-element cycles", function () {
+      var element = document.createElement("div");
+      var style = {
+        _pseudos: {
+          before: {
+            "--a": createCascadeValue("var(--c, var(--b))"),
+            color: createCascadeValue("var(--a, blue)"),
+          },
+        },
+        "--b": createCascadeValue("var(--a, green)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style["--b"].value.toString()).toBe("green");
+      expect(style._pseudos.before["--a"].value.toString()).toBe("green");
+      expect(style._pseudos.before.color.value.toString()).toBe("green");
+    });
+
+    it("uses fallback when a custom property references an invalid inherited variable", function () {
+      var body = document.createElement("body");
+      var element = document.createElement("p");
+      body.appendChild(element);
+      var bodyStyle = {
+        "--c": createCascadeValue("var(--a)"),
+      };
+      var style = {
+        "--a": createCascadeValue("var(--b)"),
+        "--b": createCascadeValue("var(--c, green)"),
+        color: createCascadeValue("var(--a)"),
+      };
+
+      applyVarFilter(style, element, [{ element: body, style: bodyStyle }]);
+
+      expect(style["--b"].value.toString()).toBe("green");
+      expect(style["--a"].value.toString()).toBe("green");
+      expect(style.color.value.toString()).toBe("green");
     });
   });
 });
