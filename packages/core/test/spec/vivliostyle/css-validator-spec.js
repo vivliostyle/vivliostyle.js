@@ -184,6 +184,78 @@ describe("css-validator", function () {
       );
     });
 
+    it("lets all reset browser shorthand longhands that are not in ValidationTxt", function (done) {
+      parseCascade(
+        "div { transition: opacity 1s ease; all: initial; }",
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["transition-property"]).toBeDefined();
+          expect(cascade.tags.div.style["transition-duration"]).toBeDefined();
+          expect(cascade.tags.div.style["transition-property"].value).toBe(
+            adapt_css.ident.initial,
+          );
+          expect(cascade.tags.div.style["transition-duration"].value).toBe(
+            adapt_css.ident.initial,
+          );
+        },
+      );
+    });
+
+    it("does not enumerate browser properties while creating the base validator set", function () {
+      spyOn(window, "getComputedStyle").and.callThrough();
+
+      adapt_cssvalid.baseValidatorSet();
+
+      expect(window.getComputedStyle).not.toHaveBeenCalled();
+    });
+
+    it("reuses cached browser property names for repeated all lookups", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      spyOn(validatorSet, "getBrowserPropertyNamesForAll").and.callThrough();
+
+      expect(validatorSet.getShorthand("all")).not.toBeNull();
+      expect(validatorSet.getShorthand("all")).not.toBeNull();
+      expect(validatorSet.getBrowserPropertyNamesForAll).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it("filters cached browser property names against later shorthand registrations", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+
+      validatorSet.allPropertyNames = null;
+      validatorSet.browserPropertyNamesForAll = [
+        "inset",
+        "transition-property",
+      ];
+
+      expect(validatorSet.getPropertiesForAll()).not.toContain("inset");
+      expect(validatorSet.getPropertiesForAll()).toContain(
+        "transition-property",
+      );
+    });
+
+    it("does not keep browser shorthand names in all after refresh", function (done) {
+      parseCascade(
+        "div { all: initial; position: absolute; top: 0; right: 0; }",
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["inset"]).toBeUndefined();
+          expect(cascade.tags.div.style["inset-block-start"]).toBeUndefined();
+          expect(cascade.tags.div.style["inset-block-end"]).toBeUndefined();
+          expect(cascade.tags.div.style["inset-inline-start"]).toBeUndefined();
+          expect(cascade.tags.div.style["inset-inline-end"]).toBeUndefined();
+          expect(cascade.tags.div.style["position"].value.toString()).toBe(
+            "absolute",
+          );
+          expect(cascade.tags.div.style["top"].value.toString()).toBe("0");
+          expect(cascade.tags.div.style["right"].value.toString()).toBe("0");
+        },
+      );
+    });
+
     it("keeps self-referential custom property declarations through the parser path", function (done) {
       parseCascade("div { --a: var(--a, red); }", done, function (cascade) {
         expect(cascade.tags.div).toBeDefined();

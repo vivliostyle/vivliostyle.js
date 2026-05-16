@@ -18,6 +18,7 @@
 
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
+import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
@@ -1156,21 +1157,24 @@ describe("css-cascade", function () {
       return new adapt_csscasc.CascadeValue(parseValue(cssText), 1);
     }
 
-    function applyVarFilter(style, element, ancestorEntries) {
+    function applyVarFilter(style, element, ancestorEntries, validatorSet) {
       var styleMap = new Map();
       styleMap.set(element, style);
       (ancestorEntries || []).forEach(function (entry) {
         styleMap.set(entry.element, entry.style);
       });
 
+      validatorSet = validatorSet || {
+        getShorthand: function () {
+          return null;
+        },
+        defaultValues: {},
+      };
+
       var styler = {
         root: element,
-        validatorSet: {
-          getShorthand: function () {
-            return null;
-          },
-          defaultValues: {},
-        },
+        validatorSet: validatorSet,
+        scope: validatorSet.scope,
         getStyle: function (currentElement) {
           return styleMap.get(currentElement) || null;
         },
@@ -1356,6 +1360,24 @@ describe("css-cascade", function () {
       expect(style["--b"].value.toString()).toBe("green");
       expect(style["--a"].value.toString()).toBe("green");
       expect(style.color.value.toString()).toBe("green");
+    });
+
+    it("expands all with var-substituted CSS-wide values into browser-backed longhands", function () {
+      var element = document.createElement("div");
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      var style = {
+        all: createCascadeValue("var(--reset, initial)"),
+        transition: createCascadeValue("opacity 1s ease"),
+      };
+
+      applyVarFilter(style, element, null, validatorSet);
+
+      expect(style.all).toBeUndefined();
+      expect(style.transition).toBeDefined();
+      expect(style["transition-property"]).toBeDefined();
+      expect(style["transition-duration"]).toBeDefined();
+      expect(style["transition-property"].value).toBe(adapt_css.ident.initial);
+      expect(style["transition-duration"].value).toBe(adapt_css.ident.initial);
     });
   });
 });
