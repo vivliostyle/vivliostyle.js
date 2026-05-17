@@ -1461,6 +1461,10 @@ const propsExcludedFromAll = [
   "block-end",
   "inline-start",
   "inline-end",
+  "inset-block-start",
+  "inset-block-end",
+  "inset-inline-start",
+  "inset-inline-end",
   "block-size",
   "inline-size",
   "max-block-size",
@@ -1511,13 +1515,12 @@ export class AllShorthandValidator extends SimpleShorthandValidator {
     super();
   }
 
+  refreshPropList(): void {
+    this.propList = this.validatorSet.getPropertiesForAll();
+  }
+
   override init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
     super.init(syntax, propList);
-    for (const name in this.validatorSet.validators) {
-      if (!propsExcludedFromAll.includes(name)) {
-        this.propList.push(name);
-      }
-    }
   }
 
   override validateList(list: Css.Val[]): number {
@@ -1559,6 +1562,69 @@ export class ValidatorSet {
   readonly scope = new Exprs.LexicalScope(null);
   private browserShorthandStyle: CSSStyleDeclaration | null = null;
   private browserShorthandMisses: { [key: string]: true } = {};
+  private browserPropertyNamesForAll: string[] | null = null;
+  private allPropertyNames: string[] | null = null;
+
+  private invalidateAllPropertyNames(): void {
+    this.allPropertyNames = null;
+  }
+
+  private getBrowserPropertyNamesForAll(): string[] | null {
+    if (this.browserPropertyNamesForAll) {
+      return this.browserPropertyNamesForAll;
+    }
+    if (
+      typeof document === "undefined" ||
+      typeof getComputedStyle !== "function"
+    ) {
+      return null;
+    }
+    const root = document.documentElement;
+    if (!root) {
+      return null;
+    }
+    const computedStyle = getComputedStyle(root);
+    const names: string[] = [];
+    for (let i = 0; i < computedStyle.length; i++) {
+      const name = computedStyle.item(i);
+      if (
+        !name ||
+        Css.isCustomPropName(name) ||
+        propsExcludedFromAll.includes(name)
+      ) {
+        continue;
+      }
+      names.push(name);
+    }
+    this.browserPropertyNamesForAll = names;
+    return this.browserPropertyNamesForAll;
+  }
+
+  getPropertiesForAll(): string[] {
+    if (this.allPropertyNames) {
+      return this.allPropertyNames;
+    }
+    const names = new Set<string>();
+    for (const name in this.validators) {
+      if (!propsExcludedFromAll.includes(name)) {
+        names.add(name);
+      }
+    }
+    const browserPropertyNames = this.getBrowserPropertyNamesForAll();
+    if (browserPropertyNames) {
+      for (const name of browserPropertyNames) {
+        if (this.shorthands[name]) {
+          continue;
+        }
+        names.add(name);
+      }
+    }
+    const propList = Array.from(names);
+    if (browserPropertyNames) {
+      this.allPropertyNames = propList;
+    }
+    return propList;
+  }
 
   private getBrowserShorthandStyle(): CSSStyleDeclaration | null {
     if (this.browserShorthandStyle !== null) {
@@ -1608,6 +1674,12 @@ export class ValidatorSet {
     }
     const shorthand = this.shorthands[name];
     if (shorthand) {
+      if (
+        shorthand instanceof AllShorthandValidator &&
+        !this.allPropertyNames
+      ) {
+        shorthand.refreshPropList();
+      }
       return shorthand;
     }
     if (this.browserShorthandMisses[name]) {
@@ -1636,6 +1708,7 @@ export class ValidatorSet {
     );
     browserShorthand.setOwner(this);
     this.shorthands[name] = browserShorthand;
+    this.invalidateAllPropertyNames();
     return browserShorthand;
   }
 
@@ -2195,6 +2268,7 @@ export class ValidatorSet {
       }
       shorthandValidator.init(syntax, propList);
       this.shorthands[ruleName] = shorthandValidator;
+      this.invalidateAllPropertyNames();
     }
   }
 
