@@ -1,4 +1,28 @@
 - category: General
+  title: "Attribute selector case sensitivity (Issue #1972)"
+  file: case_sensitivity/attribute-selectors.xhtml
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1972  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/case_sensitivity/attribute-selectors.xhtml&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/case_sensitivity/attribute-selectors.xhtml&zoom=1&spread=false
+- category: General
+  title: Attributes on list elements
+  file: lists-attributes.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1972  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/lists-attributes.html&bookMode=true&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/lists-attributes.html&bookMode=true&zoom=1&spread=false
+- category: General
   title: "EAL generated text properties (Issue #1968)"
   file: eal-generated-text-properties.html
   decision: expected  # regression / expected / skip
