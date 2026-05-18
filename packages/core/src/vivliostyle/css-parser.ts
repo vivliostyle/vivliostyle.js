@@ -72,6 +72,8 @@ export enum StylesheetFlavor {
   AUTHOR = "Author",
 }
 
+export type AttributeSelectorCaseSensitivity = "i" | "s" | null;
+
 export class ParserHandler implements CssTokenizer.TokenizerHandler {
   flavor: StylesheetFlavor;
 
@@ -104,10 +106,11 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
   idSelector(id: string): void {}
 
   attributeSelector(
-    ns: string,
+    ns: string | null,
     name: string,
     op: TokenType,
     value: string | null,
+    modifier?: AttributeSelectorCaseSensitivity,
   ): void {}
 
   descendantSelector(): void {}
@@ -289,12 +292,13 @@ export class DispatchParserHandler extends ParserHandler {
   }
 
   override attributeSelector(
-    ns: string,
+    ns: string | null,
     name: string,
     op: TokenType,
     value: string | null,
+    modifier?: AttributeSelectorCaseSensitivity,
   ): void {
-    this.slave.attributeSelector(ns, name, op, value);
+    this.slave.attributeSelector(ns, name, op, value, modifier);
   }
 
   override descendantSelector(): void {
@@ -1877,7 +1881,7 @@ export class Parser {
           }
 
         // fall through
-        case Action.SELECTOR_ATTR:
+        case Action.SELECTOR_ATTR: {
           tokenizer.consume();
           token = tokenizer.token();
           if (token.type == TokenType.IDENT) {
@@ -1931,9 +1935,10 @@ export class Parser {
               break;
             case TokenType.C_BRK:
               handler.attributeSelector(
-                ns as string,
+                ns as string | null,
                 text as string,
                 TokenType.EOF,
+                null,
                 null,
               );
               if (parsingFunctionParam) {
@@ -1948,18 +1953,31 @@ export class Parser {
               handler.error("E_CSS_ATTR_OP_EXPECTED", token);
               continue;
           }
+          const attributeName = text as string;
+          let valueModifier: AttributeSelectorCaseSensitivity = null;
           switch (token.type) {
             case TokenType.IDENT:
-            case TokenType.STR:
-              handler.attributeSelector(
-                ns as string,
-                text as string,
-                num,
-                token.text,
-              );
+            case TokenType.STR: {
+              const attributeValue = token.text;
               tokenizer.consume();
               token = tokenizer.token();
+              if (token.type == TokenType.IDENT) {
+                const modifier = token.text.toLowerCase();
+                if (modifier == "i" || modifier == "s") {
+                  valueModifier = modifier as AttributeSelectorCaseSensitivity;
+                  tokenizer.consume();
+                  token = tokenizer.token();
+                }
+              }
+              handler.attributeSelector(
+                ns as string | null,
+                attributeName,
+                num,
+                attributeValue,
+                valueModifier,
+              );
               break;
+            }
             default:
               this.actions = actionsErrorSelector;
               handler.error("E_CSS_ATTR_VAL_EXPECTED", token);
@@ -1977,6 +1995,7 @@ export class Parser {
           }
           tokenizer.consume();
           continue;
+        }
         case Action.SELECTOR_CHILD:
           handler.childSelector();
           this.actions = actionsSelectorCont;

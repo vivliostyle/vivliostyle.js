@@ -1035,34 +1035,77 @@ function checkAttribute(
   element: Element,
   ns: string | null,
   name: string,
-  pred: (element: Element, ns: string, name: string) => boolean,
+  pred: (attribute: Attr) => boolean,
 ): boolean {
   if (!element) {
     return false;
   }
+  const htmlAttributeNamesAreCaseInsensitive =
+    element.ownerDocument?.contentType === "text/html";
+  const selectorName = htmlAttributeNamesAreCaseInsensitive
+    ? asciiLowerCase(name)
+    : name;
   if (ns !== null) {
-    return pred(element, ns, name);
+    const attribute = element.getAttributeNodeNS(ns || null, selectorName);
+    return !!attribute && pred(attribute);
   }
-  // For wildcard namespace
-  for (const qname of element.getAttributeNames()) {
-    if (qname === name || qname.endsWith(`:${name}`)) {
-      if (
-        pred(
-          element,
-          qname === name ? "" : element.lookupNamespaceURI(qname.split(":")[0]),
-          name,
-        )
-      ) {
-        return true;
-      }
+  for (const attribute of Array.from(element.attributes)) {
+    const attributeName = htmlAttributeNamesAreCaseInsensitive
+      ? asciiLowerCase(attribute.localName)
+      : attribute.localName;
+    if (attributeName === selectorName && pred(attribute)) {
+      return true;
     }
   }
   return false;
 }
 
+function asciiLowerCase(value: string): string {
+  return value.replace(/[A-Z]/g, (char) => char.toLowerCase());
+}
+
+function isAttributeValueCaseInsensitive(
+  caseSensitivity: CssParser.AttributeSelectorCaseSensitivity,
+): boolean {
+  return caseSensitivity === "i";
+}
+
+function escapeRegExpForAttributeValue(
+  value: string,
+  caseSensitivity: CssParser.AttributeSelectorCaseSensitivity,
+): string {
+  return Array.from(value, (char) => {
+    const escapedChar = Base.escapeRegExp(char);
+    if (!isAttributeValueCaseInsensitive(caseSensitivity)) {
+      return escapedChar;
+    }
+    const lowerChar = asciiLowerCase(char);
+    const upperChar = lowerChar.toUpperCase();
+    if (lowerChar !== upperChar && /^[a-z]$/i.test(char)) {
+      return `[${lowerChar}${upperChar}]`;
+    }
+    return escapedChar;
+  }).join("");
+}
+
+function createAttributeValueRegExp(pattern: string): RegExp {
+  return new RegExp(pattern);
+}
+
+function attributeValueEquals(
+  actualValue: string,
+  expectedValue: string,
+  caseSensitivity: CssParser.AttributeSelectorCaseSensitivity,
+): boolean {
+  if (isAttributeValueCaseInsensitive(caseSensitivity)) {
+    return asciiLowerCase(actualValue) === asciiLowerCase(expectedValue);
+  }
+  return actualValue === expectedValue;
+}
+
 export class CheckAttributePresentAction extends ChainedAction {
   constructor(
-    public readonly ns: string,
+    public readonly ns: string | null,
     public readonly name: string,
   ) {
     super();
@@ -1074,7 +1117,7 @@ export class CheckAttributePresentAction extends ChainedAction {
         cascadeInstance.currentElement,
         this.ns,
         this.name,
-        (element, ns, name) => element.hasAttributeNS(ns, name),
+        () => true,
       )
     ) {
       this.chained.apply(cascadeInstance);
@@ -1084,9 +1127,10 @@ export class CheckAttributePresentAction extends ChainedAction {
 
 export class CheckAttributeEqAction extends ChainedAction {
   constructor(
-    public readonly ns: string,
+    public readonly ns: string | null,
     public readonly name: string,
     public readonly value: string,
+    public readonly caseSensitivity: CssParser.AttributeSelectorCaseSensitivity = null,
   ) {
     super();
   }
@@ -1097,7 +1141,12 @@ export class CheckAttributeEqAction extends ChainedAction {
         cascadeInstance.currentElement,
         this.ns,
         this.name,
-        (element, ns, name) => element.getAttributeNS(ns, name) == this.value,
+        (attribute) =>
+          attributeValueEquals(
+            attribute.value,
+            this.value,
+            this.caseSensitivity,
+          ),
       )
     ) {
       this.chained.apply(cascadeInstance);
@@ -1124,7 +1173,7 @@ export class CheckAttributeEqAction extends ChainedAction {
 
 export class CheckNamespaceSupportedAction extends ChainedAction {
   constructor(
-    public readonly ns: string,
+    public readonly ns: string | null,
     public readonly name: string,
   ) {
     super();
@@ -1136,8 +1185,7 @@ export class CheckNamespaceSupportedAction extends ChainedAction {
         cascadeInstance.currentElement,
         this.ns,
         this.name,
-        (element, ns, name) =>
-          !!supportedNamespaces[element.getAttributeNS(ns, name)],
+        (attribute) => !!supportedNamespaces[attribute.value],
       )
     ) {
       this.chained.apply(cascadeInstance);
@@ -1155,9 +1203,10 @@ export class CheckNamespaceSupportedAction extends ChainedAction {
 
 export class CheckAttributeRegExpAction extends ChainedAction {
   constructor(
-    public readonly ns: string,
+    public readonly ns: string | null,
     public readonly name: string,
     public readonly regexp: RegExp,
+    public readonly caseSensitivity: CssParser.AttributeSelectorCaseSensitivity = null,
   ) {
     super();
   }
@@ -1168,8 +1217,7 @@ export class CheckAttributeRegExpAction extends ChainedAction {
         cascadeInstance.currentElement,
         this.ns,
         this.name,
-        (element, ns, name) =>
-          !!element.getAttributeNS(ns, name)?.match(this.regexp),
+        (attribute) => !!attribute.value.match(this.regexp),
       )
     ) {
       this.chained.apply(cascadeInstance);
@@ -4806,16 +4854,16 @@ export class CascadeParserHandler
   }
 
   override attributeSelector(
-    ns: string,
+    ns: string | null,
     name: string,
     op: TokenType,
     value: string | null,
+    modifier?: CssParser.AttributeSelectorCaseSensitivity,
   ): void {
     if (this.invalidContinuationAfterPseudoelement(`[${name}]`)) {
       return;
     }
     this.specificity += 256;
-    name = name.toLowerCase();
     value = value || "";
     let action;
     switch (op) {
@@ -4823,7 +4871,7 @@ export class CascadeParserHandler
         action = new CheckAttributePresentAction(ns, name);
         break;
       case TokenType.EQ:
-        action = new CheckAttributeEqAction(ns, name, value);
+        action = new CheckAttributeEqAction(ns, name, value, modifier ?? null);
         break;
       case TokenType.TILDE_EQ:
         if (!value || value.match(/\s/)) {
@@ -4832,7 +4880,10 @@ export class CascadeParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`(^|\\s)${Base.escapeRegExp(value)}(\$|\\s)`),
+            createAttributeValueRegExp(
+              `(^|\\s)${escapeRegExpForAttributeValue(value, modifier ?? null)}(\$|\\s)`,
+            ),
+            modifier ?? null,
           );
         }
         break;
@@ -4840,7 +4891,10 @@ export class CascadeParserHandler
         action = new CheckAttributeRegExpAction(
           ns,
           name,
-          new RegExp(`^${Base.escapeRegExp(value)}(\$|-)`),
+          createAttributeValueRegExp(
+            `^${escapeRegExpForAttributeValue(value, modifier ?? null)}(\$|-)`,
+          ),
+          modifier ?? null,
         );
         break;
       case TokenType.HAT_EQ:
@@ -4850,7 +4904,10 @@ export class CascadeParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`^${Base.escapeRegExp(value)}`),
+            createAttributeValueRegExp(
+              `^${escapeRegExpForAttributeValue(value, modifier ?? null)}`,
+            ),
+            modifier ?? null,
           );
         }
         break;
@@ -4861,7 +4918,10 @@ export class CascadeParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(`${Base.escapeRegExp(value)}\$`),
+            createAttributeValueRegExp(
+              `${escapeRegExpForAttributeValue(value, modifier ?? null)}\$`,
+            ),
+            modifier ?? null,
           );
         }
         break;
@@ -4872,7 +4932,10 @@ export class CascadeParserHandler
           action = new CheckAttributeRegExpAction(
             ns,
             name,
-            new RegExp(Base.escapeRegExp(value)),
+            createAttributeValueRegExp(
+              escapeRegExpForAttributeValue(value, modifier ?? null),
+            ),
+            modifier ?? null,
           );
         }
         break;

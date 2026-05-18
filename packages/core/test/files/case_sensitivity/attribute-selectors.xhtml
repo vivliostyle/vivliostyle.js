@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test case for Issue #1972: attribute selectors case-sensitivity -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Attribute selector case sensitivity</title>
+    <style>
+      @page {
+        size: 200mm 150mm;
+        margin: 12mm;
+      }
+
+      body {
+        font: 16px/1.4 sans-serif;
+      }
+
+      .case {
+        margin: 0 0 8mm;
+        padding: 4mm;
+        border: 1px solid #b8b8b8;
+        color: #8f1d1d;
+        background: #ffe9e9;
+      }
+
+      #xml-name[data-Case] {
+        color: #0b5d2a;
+        background: #e7f6ea;
+      }
+
+      #xml-name[data-case] {
+        color: #8f1d1d;
+        background: #ffe9e9;
+      }
+
+      #flag-i[data-state="open" i] {
+        color: #0b5d2a;
+        background: #e7f6ea;
+      }
+
+      #flag-s[data-state="OPEN" s] {
+        color: #0b5d2a;
+        background: #e7f6ea;
+      }
+
+      #flag-s[data-state="open" s] {
+        color: #8f1d1d;
+        background: #ffe9e9;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="xml-name" class="case" data-Case="XML">
+      This block should be green. In XHTML, <code>[data-Case]</code> should
+      match exactly, but <code>[data-case]</code> should not match
+      <code>data-Case="XML"</code>.
+    </div>
+
+    <div id="flag-i" class="case" data-state="OPEN">
+      This block should be green. The i flag should make the value match ASCII
+      case-insensitively.
+    </div>
+
+    <div id="flag-s" class="case" data-state="OPEN">
+      This block should be green. The <code>s</code> flag should match
+      <code>[data-state="OPEN" s]</code>, but should not match
+      <code>[data-state="open" s]</code>.
+    </div>
+  </body>
+</html>
