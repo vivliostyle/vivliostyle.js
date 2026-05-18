@@ -27,6 +27,7 @@ describe("css-parser", function () {
 
     beforeEach(function () {
       spyOn(handler, "error");
+      spyOn(handler, "attributeSelector");
       spyOn(handler, "idSelector");
       spyOn(handler, "pseudoclassSelector");
       spyOn(handler, "startFuncWithSelector");
@@ -825,6 +826,19 @@ describe("css-parser", function () {
             expect(handler.error).not.toHaveBeenCalled();
             expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
             expect(handler.endFuncWithSelector).toHaveBeenCalled();
+          });
+        });
+
+        it("accepts ASCII-case-insensitive attribute selector flags", function (done) {
+          parse(done, ":not([attr='OPEN' I]) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.attributeSelector).toHaveBeenCalledWith(
+              "",
+              "attr",
+              adapt_csstok.TokenType.EQ,
+              "OPEN",
+              "i",
+            );
           });
         });
         it("can take class selector", function (done) {

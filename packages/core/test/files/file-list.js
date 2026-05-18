@@ -38,6 +38,10 @@ module.exports = [
       { file: "crop-marks.html", title: "Printer marks" },
       { file: "empty_page.html", title: "Empty page" },
       {
+        file: "case_sensitivity/attribute-selectors.xhtml",
+        title: "Attribute selector case sensitivity (Issue #1972)",
+      },
+      {
         file: ["multiple_html/first.html", "multiple_html/second.html"],
         title: "Multiple HTML files",
       },

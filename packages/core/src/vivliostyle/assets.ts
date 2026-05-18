@@ -1272,10 +1272,10 @@ ol[type=a], li[type=a] { list-style-type: lower-alpha; }
 ol[type=A], li[type=A] { list-style-type: upper-alpha; }
 ol[type=i], li[type=i] { list-style-type: lower-roman; }
 ol[type=I], li[type=I] { list-style-type: upper-roman; }
-ul[type=none], li[type=none] { list-style-type: none; }
-ul[type=disc], li[type=disc] { list-style-type: disc; }
-ul[type=circle], li[type=circle] { list-style-type: circle; }
-ul[type=square], li[type=square] { list-style-type: square; }
+ul[type=none i], li[type=none i] { list-style-type: none; }
+ul[type=disc i], li[type=disc i] { list-style-type: disc; }
+ul[type=circle i], li[type=circle i] { list-style-type: circle; }
+ul[type=square i], li[type=square i] { list-style-type: square; }
 u,
 ins {
   text-decoration: underline;

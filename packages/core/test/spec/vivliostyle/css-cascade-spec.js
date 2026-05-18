@@ -878,6 +878,24 @@ describe("css-cascade", function () {
           expect(action.ns).toBe("ns");
           expect(action.name).toBe("foo");
           expect(action.value).toBe("bar");
+          expect(action.caseSensitivity).toBeNull();
+        });
+
+        it("stores the attribute selector modifier when present", function () {
+          handler.attributeSelector(
+            "ns",
+            "foo",
+            adapt_csstok.TokenType.EQ,
+            "bar",
+            "i",
+          );
+
+          expect(handler.chain.length).toBe(1);
+          var action = handler.chain[0];
+          expect(action).toEqual(
+            jasmine.any(adapt_csscasc.CheckAttributeEqAction),
+          );
+          expect(action.caseSensitivity).toBe("i");
         });
       });
 
@@ -1004,6 +1022,42 @@ describe("css-cascade", function () {
           expect("a-bar-b".match(regexp)).toBeFalsy();
         });
 
+        it("creates an ASCII-case-insensitive regexp when the i modifier is passed", function () {
+          handler.attributeSelector(
+            "ns",
+            "foo",
+            adapt_csstok.TokenType.HAT_EQ,
+            "bar",
+            "i",
+          );
+
+          expect(handler.chain.length).toBe(1);
+          var action = handler.chain[0];
+          expect(action).toEqual(
+            jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
+          );
+          expect("BAR".match(action.regexp)).toBeTruthy();
+          expect("Bar-baz".match(action.regexp)).toBeTruthy();
+        });
+
+        it("does not use Unicode case folding for the i modifier", function () {
+          handler.attributeSelector(
+            "ns",
+            "foo",
+            adapt_csstok.TokenType.HAT_EQ,
+            "ä",
+            "i",
+          );
+
+          expect(handler.chain.length).toBe(1);
+          var action = handler.chain[0];
+          expect(action).toEqual(
+            jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
+          );
+          expect("äbc".match(action.regexp)).toBeTruthy();
+          expect("Äbc".match(action.regexp)).toBeFalsy();
+        });
+
         it("represents nothing when the value is an empty string", function () {
           handler.attributeSelector(
             "ns",
@@ -1113,6 +1167,92 @@ describe("css-cascade", function () {
   });
 
   describe("CascadeInstance", function () {
+    describe("attribute selectors", function () {
+      it("matches XML attribute names case-sensitively", function () {
+        var doc = new DOMParser().parseFromString(
+          "<root data-Case='value' />",
+          "text/xml",
+        );
+        var element = doc.documentElement;
+        var action = new adapt_csscasc.CheckAttributePresentAction(
+          "",
+          "data-Case",
+        );
+        var chained = (action.chained = jasmine.createSpyObj("chained", [
+          "apply",
+        ]));
+
+        action.apply({ currentElement: element });
+        expect(chained.apply).toHaveBeenCalled();
+
+        action = new adapt_csscasc.CheckAttributePresentAction("", "data-case");
+        chained = action.chained = jasmine.createSpyObj("chained", ["apply"]);
+
+        action.apply({ currentElement: element });
+        expect(chained.apply).not.toHaveBeenCalled();
+      });
+
+      it("matches attribute values ASCII-case-insensitively with the i flag", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><html><body><div data-state='OPEN'></div></body></html>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        var action = new adapt_csscasc.CheckAttributeEqAction(
+          "",
+          "data-state",
+          "open",
+          "i",
+        );
+        var chained = (action.chained = jasmine.createSpyObj("chained", [
+          "apply",
+        ]));
+
+        action.apply({ currentElement: element });
+        expect(chained.apply).toHaveBeenCalled();
+      });
+
+      it("does not use Unicode case folding for the i flag", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><html><body><div data-state='Ä'></div></body></html>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        var action = new adapt_csscasc.CheckAttributeEqAction(
+          "",
+          "data-state",
+          "ä",
+          "i",
+        );
+        var chained = (action.chained = jasmine.createSpyObj("chained", [
+          "apply",
+        ]));
+
+        action.apply({ currentElement: element });
+        expect(chained.apply).not.toHaveBeenCalled();
+      });
+
+      it("keeps exact attribute value matching with the s flag", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><html><body><div data-state='OPEN'></div></body></html>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        var action = new adapt_csscasc.CheckAttributeEqAction(
+          "",
+          "data-state",
+          "open",
+          "s",
+        );
+        var chained = (action.chained = jasmine.createSpyObj("chained", [
+          "apply",
+        ]));
+
+        action.apply({ currentElement: element });
+        expect(chained.apply).not.toHaveBeenCalled();
+      });
+    });
+
     describe("markerAllowedProps", function () {
       it("includes text-orientation for vertical writing mode support", function () {
         expect(adapt_csscasc.CascadeInstance.markerAllowedProps).toContain(
