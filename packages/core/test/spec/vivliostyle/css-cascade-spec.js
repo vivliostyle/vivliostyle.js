@@ -1520,4 +1520,96 @@ describe("css-cascade", function () {
       expect(style["transition-duration"].value).toBe(adapt_css.ident.initial);
     });
   });
+
+  describe("AttrValueFilterVisitor regression coverage", function () {
+    function parseValue(cssText) {
+      return adapt_cssparse.parseValue(
+        new adapt_exprs.LexicalScope(null),
+        new adapt_csstok.Tokenizer(cssText, null),
+        "",
+      );
+    }
+
+    function createCascadeValue(cssText) {
+      return new adapt_csscasc.CascadeValue(parseValue(cssText), 1);
+    }
+
+    function applyAttrFilter(style, element, validatorSet) {
+      validatorSet = validatorSet || adapt_cssvalid.baseValidatorSet();
+
+      var styler = {
+        root: element,
+        validatorSet: validatorSet,
+        scope: validatorSet.scope,
+        getStyle: function () {
+          return style;
+        },
+      };
+      var cascadeInstance = {
+        currentStyle: style,
+      };
+      cascadeInstance.applyAttrFilter =
+        adapt_csscasc.CascadeInstance.prototype.applyAttrFilter;
+      cascadeInstance.applyAttrFilterInner =
+        adapt_csscasc.CascadeInstance.prototype.applyAttrFilterInner;
+      cascadeInstance.applyAttrFilter(element, styler);
+    }
+
+    it("treats missing typed attr() without fallback as unset", function () {
+      var element = document.createElement("div");
+      var style = {
+        opacity: createCascadeValue("attr(data-opacity number)"),
+      };
+
+      applyAttrFilter(style, element);
+
+      expect(style.opacity.value).toBe(adapt_css.ident.unset);
+    });
+
+    it("invalidates attr() fallback when the property validator rejects it", function () {
+      var element = document.createElement("div");
+      element.setAttribute("data-opacity", "not-a-number");
+      var style = {
+        opacity: createCascadeValue("attr(data-opacity number, red)"),
+      };
+
+      applyAttrFilter(style, element);
+
+      expect(style.opacity.value).toBe(adapt_css.ident.unset);
+    });
+
+    it("invalidates the whole property when nested attr() makes the final value invalid", function () {
+      var element = document.createElement("div");
+      var style = {
+        transform: createCascadeValue("translateX(attr(data-x px, red))"),
+      };
+
+      applyAttrFilter(style, element);
+
+      expect(style.transform.value).toBe(adapt_css.ident.unset);
+    });
+
+    it("keeps the whole property when nested attr() fallback yields a valid value", function () {
+      var element = document.createElement("div");
+      var style = {
+        transform: createCascadeValue("translateX(attr(data-x px, 5px))"),
+      };
+
+      applyAttrFilter(style, element);
+
+      expect(style.transform.value.toString()).toBe("translatex(5px)");
+    });
+
+    it("trims attribute whitespace before appending unit keywords", function () {
+      var element = document.createElement("div");
+      element.setAttribute("data-size", "50 ");
+      var style = {
+        "font-size": createCascadeValue("attr(data-size px, 10px)"),
+      };
+
+      applyAttrFilter(style, element);
+
+      expect(style["font-size"].value.toString()).toBe("50px");
+    });
+  });
 });

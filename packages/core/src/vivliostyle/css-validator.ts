@@ -514,6 +514,15 @@ export class PrimitiveValidator extends PropertyValidator {
   }
 
   override visitFunc(func: Css.Func): Css.Val {
+    if (func.name.toLowerCase() === "attr") {
+      const attr = parseAttrFunction(func);
+      if (
+        attr &&
+        validatorSupportsAttrType(attr.type, this.allowed, this.units)
+      ) {
+        return func;
+      }
+    }
     if (this.allowed & ALLOW_COLOR) {
       if (func.name === "device-cmyk" || func.name === "cmyk") {
         if (
@@ -579,6 +588,344 @@ export class PrimitiveValidator extends PropertyValidator {
 }
 
 const NO_IDENTS: ValueMap = Object.create(null);
+
+const ATTR_ANY_NUMBER = ALLOW_POS_NUM | ALLOW_NEGATIVE | ALLOW_ZERO;
+
+const ATTR_ANY_INTEGER = ALLOW_POS_INT | ALLOW_NEGATIVE | ALLOW_ZERO;
+
+const ATTR_ANY_NUMERIC =
+  ALLOW_POS_NUMERIC | ALLOW_NEGATIVE | ALLOW_ZERO | ALLOW_ZERO_PERCENT;
+
+function makeUnitMap(unitNames: string[]): ValueMap {
+  const units: ValueMap = Object.create(null);
+  for (const unit of unitNames) {
+    units[unit] = Css.empty;
+  }
+  return units;
+}
+
+const PERCENTAGE_UNITS = makeUnitMap(["%"]);
+
+const LENGTH_UNITS = makeUnitMap([
+  "em",
+  "ex",
+  "ch",
+  "rem",
+  "lh",
+  "rlh",
+  "vw",
+  "vh",
+  "vi",
+  "vb",
+  "vmin",
+  "vmax",
+  "pvw",
+  "pvh",
+  "pvi",
+  "pvb",
+  "pvmin",
+  "pvmax",
+  "cm",
+  "mm",
+  "in",
+  "px",
+  "pt",
+  "pc",
+  "q",
+]);
+
+const LENGTH_PERCENTAGE_UNITS = {
+  ...LENGTH_UNITS,
+  ...PERCENTAGE_UNITS,
+};
+
+const ANGLE_UNITS = makeUnitMap(["deg", "grad", "rad", "turn"]);
+
+const TIME_UNITS = makeUnitMap(["s", "ms"]);
+
+const FREQUENCY_UNITS = makeUnitMap(["hz", "khz"]);
+
+export type AttrType =
+  | { kind: "string" }
+  | { kind: "url" }
+  | { kind: "syntax"; syntax: string }
+  | { kind: "unit"; unit: string };
+
+export type AttrFunction = {
+  attributeName: string;
+  type: AttrType;
+  fallback: Css.Val | null;
+};
+
+function normalizeAttrSyntax(syntax: string): string {
+  return syntax.replace(/\s+/g, "").toLowerCase();
+}
+
+function canonicalAttrUnit(unit: string): string {
+  return unit.toLowerCase();
+}
+
+function parseAttrTypeValue(value: Css.Val): AttrType | null {
+  if (value instanceof Css.Ident) {
+    switch (value.name.toLowerCase()) {
+      case "string":
+      case "raw-string":
+        return { kind: "string" };
+      case "url":
+        return { kind: "url" };
+      case "color":
+      case "integer":
+      case "number":
+      case "length":
+      case "angle":
+      case "time":
+      case "frequency":
+        return { kind: "syntax", syntax: `<${value.name.toLowerCase()}>` };
+      default:
+        return { kind: "unit", unit: canonicalAttrUnit(value.name) };
+    }
+  }
+  if (value instanceof Css.Func && value.name.toLowerCase() === "type") {
+    if (value.values.length !== 1) {
+      return null;
+    }
+    const syntax = normalizeAttrSyntax(value.values[0].stringValue());
+    return syntax ? { kind: "syntax", syntax } : null;
+  }
+  return null;
+}
+
+export function parseAttrFunction(func: Css.Func): AttrFunction | null {
+  if (func.name.toLowerCase() !== "attr") {
+    return null;
+  }
+  if (func.values.length < 1 || func.values.length > 2) {
+    return null;
+  }
+
+  let attributeName: string;
+  let type: AttrType = { kind: "string" };
+  const attributeArg = func.values[0];
+  if (attributeArg instanceof Css.Ident) {
+    attributeName = attributeArg.name;
+  } else if (attributeArg instanceof Css.SpaceList) {
+    const values = attributeArg.values;
+    if (
+      values.length < 1 ||
+      values.length > 2 ||
+      !(values[0] instanceof Css.Ident)
+    ) {
+      return null;
+    }
+    attributeName = values[0].name;
+    if (values.length === 2) {
+      type = parseAttrTypeValue(values[1]);
+      if (!type) {
+        return null;
+      }
+    }
+  } else {
+    return null;
+  }
+
+  return {
+    attributeName,
+    type,
+    fallback: func.values[1] ?? null,
+  };
+}
+
+function hasAttrUnit(units: ValueMap, unit: string): boolean {
+  return !!units[canonicalAttrUnit(unit)];
+}
+
+function hasAnyAttrUnit(units: ValueMap, candidates: ValueMap): boolean {
+  return Object.keys(candidates).some((unit) => hasAttrUnit(units, unit));
+}
+
+function validatorSupportsAttrType(
+  type: AttrType,
+  allowed: number,
+  units: ValueMap,
+): boolean {
+  switch (type.kind) {
+    case "string":
+      return !!(allowed & ALLOW_STR);
+    case "url":
+      return !!(allowed & (ALLOW_URL | ALLOW_IMAGE));
+    case "unit":
+      return hasAttrUnit(units, type.unit);
+    case "syntax":
+      switch (type.syntax) {
+        case "<string>":
+          return !!(allowed & ALLOW_STR);
+        case "<url>":
+          return !!(allowed & (ALLOW_URL | ALLOW_IMAGE));
+        case "<color>":
+          return !!(allowed & ALLOW_COLOR);
+        case "<integer>":
+          return !!(
+            allowed &
+            (ALLOW_POS_INT | ALLOW_POS_NUM | ALLOW_NEGATIVE | ALLOW_ZERO)
+          );
+        case "<number>":
+          return !!(
+            allowed &
+            (ALLOW_POS_NUM | ALLOW_POS_INT | ALLOW_NEGATIVE | ALLOW_ZERO)
+          );
+        case "<length>":
+          return hasAnyAttrUnit(units, LENGTH_UNITS);
+        case "<length-percentage>":
+          return hasAnyAttrUnit(units, LENGTH_PERCENTAGE_UNITS);
+        case "<percentage>":
+          return hasAnyAttrUnit(units, PERCENTAGE_UNITS);
+        case "<angle>":
+          return hasAnyAttrUnit(units, ANGLE_UNITS);
+        case "<time>":
+          return hasAnyAttrUnit(units, TIME_UNITS);
+        case "<frequency>":
+          return hasAnyAttrUnit(units, FREQUENCY_UNITS);
+        default:
+          return false;
+      }
+  }
+  return false;
+}
+
+function createAttrPrimitiveValidator(
+  type: AttrType,
+): PrimitiveValidator | null {
+  switch (type.kind) {
+    case "string":
+      return null;
+    case "url":
+      return null;
+    case "unit":
+      return new PrimitiveValidator(ATTR_ANY_NUMERIC, NO_IDENTS, {
+        [canonicalAttrUnit(type.unit)]: Css.empty,
+      });
+    case "syntax":
+      switch (type.syntax) {
+        case "<color>":
+          return new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS);
+        case "<integer>":
+          return new PrimitiveValidator(ATTR_ANY_INTEGER, NO_IDENTS, NO_IDENTS);
+        case "<number>":
+          return new PrimitiveValidator(ATTR_ANY_NUMBER, NO_IDENTS, NO_IDENTS);
+        case "<length>":
+          return new PrimitiveValidator(
+            ATTR_ANY_NUMERIC,
+            NO_IDENTS,
+            LENGTH_UNITS,
+          );
+        case "<length-percentage>":
+          return new PrimitiveValidator(
+            ATTR_ANY_NUMERIC,
+            NO_IDENTS,
+            LENGTH_PERCENTAGE_UNITS,
+          );
+        case "<percentage>":
+          return new PrimitiveValidator(
+            ATTR_ANY_NUMERIC,
+            NO_IDENTS,
+            PERCENTAGE_UNITS,
+          );
+        case "<angle>":
+          return new PrimitiveValidator(
+            ATTR_ANY_NUMERIC,
+            NO_IDENTS,
+            ANGLE_UNITS,
+          );
+        case "<time>":
+          return new PrimitiveValidator(
+            ATTR_ANY_NUMERIC,
+            NO_IDENTS,
+            TIME_UNITS,
+          );
+        case "<frequency>":
+          return new PrimitiveValidator(
+            ATTR_ANY_NUMERIC,
+            NO_IDENTS,
+            FREQUENCY_UNITS,
+          );
+        default:
+          return null;
+      }
+  }
+  return null;
+}
+
+function isSupportedAttrType(type: AttrType): boolean {
+  switch (type.kind) {
+    case "string":
+    case "url":
+    case "unit":
+      return true;
+    case "syntax":
+      return (
+        type.syntax === "<string>" ||
+        type.syntax === "<url>" ||
+        !!createAttrPrimitiveValidator(type)
+      );
+  }
+  return false;
+}
+
+export function getImplicitAttrFallback(type: AttrType): Css.Val {
+  switch (type.kind) {
+    case "url":
+      return new Css.URL("about:invalid");
+    case "string":
+      return new Css.Str("");
+    default:
+      return Css.ident.unset;
+  }
+}
+
+export function parseAttrValue(
+  scope: Exprs.LexicalScope,
+  value: string | null,
+  type: AttrType,
+): Css.Val | null {
+  if (value == null) {
+    return null;
+  }
+
+  switch (type.kind) {
+    case "string":
+      return new Css.Str(value);
+    case "url":
+      return value ? new Css.URL(value) : new Css.URL("about:invalid");
+    case "unit": {
+      const parsed = CssParser.parseValue(
+        scope,
+        new CssTokenizer.Tokenizer(
+          `${value.trim()}${canonicalAttrUnit(type.unit)}`,
+          null,
+        ),
+        "",
+      );
+      const validator = createAttrPrimitiveValidator(type);
+      return parsed && validator ? parsed.visit(validator) : null;
+    }
+    case "syntax": {
+      if (type.syntax === "<string>") {
+        return new Css.Str(value);
+      }
+      if (type.syntax === "<url>") {
+        return value ? new Css.URL(value) : new Css.URL("about:invalid");
+      }
+      const parsed = CssParser.parseValue(
+        scope,
+        new CssTokenizer.Tokenizer(value, null),
+        "",
+      );
+      const validator = createAttrPrimitiveValidator(type);
+      return parsed && validator ? parsed.visit(validator) : null;
+    }
+  }
+  return null;
+}
 
 export const ALWAYS_FAIL = new PrimitiveValidator(0, NO_IDENTS, NO_IDENTS);
 
@@ -855,6 +1202,17 @@ export class FuncValidator extends ListValidator {
       return null;
     }
     return new Css.Func(func.name, arr);
+  }
+}
+
+class AttrFuncValidator extends PropertyValidator {
+  validateSingle(_inval: Css.Val): Css.Val {
+    return null;
+  }
+
+  override visitFunc(func: Css.Func): Css.Val {
+    const attr = parseAttrFunction(func);
+    return attr && isSupportedAttrType(attr.type) ? func : null;
   }
 }
 
@@ -1806,6 +2164,9 @@ export class ValidatorSet {
       case "SPACE":
         validator = new SpaceListValidator(val);
         break;
+      case "attr":
+        validator = new AttrFuncValidator();
+        break;
       default:
         validator = new FuncValidator(fn.toLowerCase(), val);
         break;
@@ -1817,6 +2178,7 @@ export class ValidatorSet {
     this.namedValidators["COLOR"] = this.primitive(
       new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS),
     );
+    this.namedValidators["ATTR"] = this.primitive(new AttrFuncValidator());
     this.namedValidators["IMAGE_FUNCTION"] = this.primitive(
       new PrimitiveValidator(ALLOW_IMAGE, NO_IDENTS, NO_IDENTS),
     );
@@ -1827,7 +2189,7 @@ export class ValidatorSet {
       new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_PERCENTAGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, { "%": Css.empty }),
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, PERCENTAGE_UNITS),
     );
     this.namedValidators["NEGATIVE"] = this.primitive(
       new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS),
@@ -1839,53 +2201,16 @@ export class ValidatorSet {
       new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS),
     );
     this.namedValidators["POS_LENGTH"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        em: Css.empty,
-        ex: Css.empty,
-        ch: Css.empty,
-        rem: Css.empty,
-        lh: Css.empty,
-        rlh: Css.empty,
-        vw: Css.empty,
-        vh: Css.empty,
-        vi: Css.empty,
-        vb: Css.empty,
-        vmin: Css.empty,
-        vmax: Css.empty,
-        pvw: Css.empty,
-        pvh: Css.empty,
-        pvi: Css.empty,
-        pvb: Css.empty,
-        pvmin: Css.empty,
-        pvmax: Css.empty,
-        cm: Css.empty,
-        mm: Css.empty,
-        in: Css.empty,
-        px: Css.empty,
-        pt: Css.empty,
-        pc: Css.empty,
-        q: Css.empty,
-      }),
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, LENGTH_UNITS),
     );
     this.namedValidators["POS_ANGLE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        deg: Css.empty,
-        grad: Css.empty,
-        rad: Css.empty,
-        turn: Css.empty,
-      }),
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, ANGLE_UNITS),
     );
     this.namedValidators["POS_TIME"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        s: Css.empty,
-        ms: Css.empty,
-      }),
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, TIME_UNITS),
     );
     this.namedValidators["FREQUENCY"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        Hz: Css.empty,
-        kHz: Css.empty,
-      }),
+      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, FREQUENCY_UNITS),
     );
     this.namedValidators["RESOLUTION"] = this.primitive(
       new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {

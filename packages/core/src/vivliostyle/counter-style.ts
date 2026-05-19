@@ -648,100 +648,121 @@ abstract class CounterStyle {
     return new Symbolic(store, descriptors);
   }
 
-  static readonly #DECIMAL_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("numeric"), 0),
-    symbols: new CssCascade.CascadeValue(
-      new Css.SpaceList([
-        new Css.Str("0"),
-        new Css.Str("1"),
-        new Css.Str("2"),
-        new Css.Str("3"),
-        new Css.Str("4"),
-        new Css.Str("5"),
-        new Css.Str("6"),
-        new Css.Str("7"),
-        new Css.Str("8"),
-        new Css.Str("9"),
-      ]),
-      0,
-    ),
-  };
+  static #DECIMAL_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getDecimalDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#DECIMAL_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("numeric"), 0),
+      symbols: new CssCascade.CascadeValue(
+        new Css.SpaceList([
+          new Css.Str("0"),
+          new Css.Str("1"),
+          new Css.Str("2"),
+          new Css.Str("3"),
+          new Css.Str("4"),
+          new Css.Str("5"),
+          new Css.Str("6"),
+          new Css.Str("7"),
+          new Css.Str("8"),
+          new Css.Str("9"),
+        ]),
+        0,
+      ),
+    });
+  }
   static createDecimal(store: CounterStyleStoreMap): CounterStyle {
     return new Numeric(
       store,
-      CounterStyle.#DECIMAL_DESCRIPTORS as NumericDescriptors,
+      CounterStyle.#getDecimalDescriptors() as NumericDescriptors,
     );
   }
 
-  static readonly #DISC_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
-    symbols: new CssCascade.CascadeValue(new Css.Str("\u2022"), 0),
-    suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
-  };
+  static #DISC_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getDiscDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#DISC_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
+      symbols: new CssCascade.CascadeValue(new Css.Str("\u2022"), 0),
+      suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
+    });
+  }
   static createDisc(store: CounterStyleStoreMap): CounterStyle {
     return new Cyclic(
       store,
-      CounterStyle.#DISC_DESCRIPTORS as CyclicDescriptors,
+      CounterStyle.#getDiscDescriptors() as CyclicDescriptors,
     );
   }
 
-  static readonly #SQUARE_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
-    symbols: new CssCascade.CascadeValue(new Css.Str("\u25AA"), 0),
-    suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
-  };
+  static #SQUARE_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getSquareDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#SQUARE_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
+      symbols: new CssCascade.CascadeValue(new Css.Str("\u25AA"), 0),
+      suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
+    });
+  }
   static createSquare(store: CounterStyleStoreMap): CounterStyle {
     return new Cyclic(
       store,
-      CounterStyle.#SQUARE_DESCRIPTORS as CyclicDescriptors,
+      CounterStyle.#getSquareDescriptors() as CyclicDescriptors,
     );
   }
 
-  static readonly #CIRCLE_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
-    symbols: new CssCascade.CascadeValue(new Css.Str("\u25E6"), 0),
-    suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
-  };
+  static #CIRCLE_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getCircleDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#CIRCLE_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
+      symbols: new CssCascade.CascadeValue(new Css.Str("\u25E6"), 0),
+      suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
+    });
+  }
   static createCircle(store: CounterStyleStoreMap): CounterStyle {
     return new Cyclic(
       store,
-      CounterStyle.#CIRCLE_DESCRIPTORS as CyclicDescriptors,
+      CounterStyle.#getCircleDescriptors() as CyclicDescriptors,
     );
   }
 
-  static readonly #DISCLOSURE_OPEN_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
-    symbols: new CssCascade.CascadeValue(new Css.Str("\u25BE"), 0),
-    suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
-  };
+  static #DISCLOSURE_OPEN_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getDisclosureOpenDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#DISCLOSURE_OPEN_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
+      symbols: new CssCascade.CascadeValue(new Css.Str("\u25BE"), 0),
+      suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
+    });
+  }
   static createDisclosureOpen(store: CounterStyleStoreMap): CounterStyle {
     return new Cyclic(
       store,
-      CounterStyle.#DISCLOSURE_OPEN_DESCRIPTORS as CyclicDescriptors,
+      CounterStyle.#getDisclosureOpenDescriptors() as CyclicDescriptors,
     );
   }
 
-  static readonly #DISCLOSURE_CLOSED_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
-    symbols: new CssCascade.CascadeValue(new Css.Str("\u25B8"), 0),
-    suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
-  };
+  static #DISCLOSURE_CLOSED_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getDisclosureClosedDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#DISCLOSURE_CLOSED_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
+      symbols: new CssCascade.CascadeValue(new Css.Str("\u25B8"), 0),
+      suffix: new CssCascade.CascadeValue(new Css.Str(" "), 0),
+    });
+  }
   static createDisclosureClosed(store: CounterStyleStoreMap): CounterStyle {
     return new Cyclic(
       store,
-      this.#DISCLOSURE_CLOSED_DESCRIPTORS as CyclicDescriptors,
+      this.#getDisclosureClosedDescriptors() as CyclicDescriptors,
     );
   }
 
-  static readonly #NONE_DESCRIPTORS: CssCascade.ElementStyle = {
-    system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
-    symbols: new CssCascade.CascadeValue(new Css.Str(""), 0),
-    suffix: new CssCascade.CascadeValue(new Css.Str(""), 0),
-  };
+  static #NONE_DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getNoneDescriptors(): CssCascade.ElementStyle {
+    return (CounterStyle.#NONE_DESCRIPTORS ??= {
+      system: new CssCascade.CascadeValue(Css.getName("cyclic"), 0),
+      symbols: new CssCascade.CascadeValue(new Css.Str(""), 0),
+      suffix: new CssCascade.CascadeValue(new Css.Str(""), 0),
+    });
+  }
   static createNone(store: CounterStyleStoreMap): CounterStyle {
     return new Cyclic(
       store,
-      CounterStyle.#NONE_DESCRIPTORS as CyclicDescriptors,
+      CounterStyle.#getNoneDescriptors() as CyclicDescriptors,
     );
   }
 
@@ -1327,131 +1348,136 @@ const chineseLonghandNameList = [
   "cjk-ideographic",
 ] as const;
 
+function createChineseLonghandDescriptors(
+  negative: string,
+): CssCascade.ElementStyle {
+  return {
+    suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
+    fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
+    range: new CssCascade.CascadeValue(
+      new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
+      0,
+    ),
+    negative: new CssCascade.CascadeValue(new Css.Str(negative), 0),
+  };
+}
+
 /**
  * @see https://drafts.csswg.org/css-counter-styles-3/#limited-chinese
  */
 class ChineseLonghand extends CounterStyle {
-  static readonly #SIMP_CHINESE_INFORMAL: ChineseLonghandSetting = {
-    chars: {
-      digits: [
-        "\u96F6",
-        "\u4E00",
-        "\u4E8C",
-        "\u4E09",
-        "\u56DB",
-        "\u4E94",
-        "\u516D",
-        "\u4E03",
-        "\u516B",
-        "\u4E5D",
-      ],
-      markers: ["", "\u5341", "\u767E", "\u5343"],
-      informal: true,
-    },
-    descriptors: {
-      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-      range: new CssCascade.CascadeValue(
-        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-        0,
-      ),
-      negative: new CssCascade.CascadeValue(new Css.Str("\u8D1F"), 0),
-    },
-  };
-  static readonly #SIMP_CHINESE_FORMAL: ChineseLonghandSetting = {
-    chars: {
-      digits: [
-        "\u96F6",
-        "\u58F9",
-        "\u8D30",
-        "\u53C1",
-        "\u8086",
-        "\u4F0D",
-        "\u9646",
-        "\u67D2",
-        "\u634C",
-        "\u7396",
-      ],
-      markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
-      informal: false,
-    },
-    descriptors: {
-      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-      range: new CssCascade.CascadeValue(
-        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-        0,
-      ),
-      negative: new CssCascade.CascadeValue(new Css.Str("\u8D1F"), 0),
-    },
-  };
-  static readonly #TRAD_CHINESE_INFORMAL: ChineseLonghandSetting = {
-    chars: {
-      digits: [
-        "\u96F6",
-        "\u4E00",
-        "\u4E8C",
-        "\u4E09",
-        "\u56DB",
-        "\u4E94",
-        "\u516D",
-        "\u4E03",
-        "\u516B",
-        "\u4E5D",
-      ],
-      markers: ["", "\u5341", "\u767E", "\u5343"],
-      informal: true,
-    },
-    descriptors: {
-      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-      range: new CssCascade.CascadeValue(
-        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-        0,
-      ),
-      negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
-    },
-  };
-  static readonly #TRAD_CHINESE_FORMAL: ChineseLonghandSetting = {
-    chars: {
-      digits: [
-        "\u96F6",
-        "\u58F9",
-        "\u8CB3",
-        "\u53C3",
-        "\u8086",
-        "\u4F0D",
-        "\u9678",
-        "\u67D2",
-        "\u634C",
-        "\u7396",
-      ],
-      markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
-      informal: false,
-    },
-    descriptors: {
-      suffix: new CssCascade.CascadeValue(new Css.Str("\u3001"), 0),
-      fallback: new CssCascade.CascadeValue(Css.getName("cjk-decimal"), 0),
-      range: new CssCascade.CascadeValue(
-        new Css.SpaceList([new Css.Int(-9999), new Css.Int(9999)]),
-        0,
-      ),
-      negative: new CssCascade.CascadeValue(new Css.Str("\u8CA0"), 0),
-    },
-  };
+  static readonly #SIMP_CHINESE_INFORMAL_CHARS = {
+    digits: [
+      "\u96F6",
+      "\u4E00",
+      "\u4E8C",
+      "\u4E09",
+      "\u56DB",
+      "\u4E94",
+      "\u516D",
+      "\u4E03",
+      "\u516B",
+      "\u4E5D",
+    ],
+    markers: ["", "\u5341", "\u767E", "\u5343"],
+    informal: true,
+  } as const;
+  static readonly #SIMP_CHINESE_FORMAL_CHARS = {
+    digits: [
+      "\u96F6",
+      "\u58F9",
+      "\u8D30",
+      "\u53C1",
+      "\u8086",
+      "\u4F0D",
+      "\u9646",
+      "\u67D2",
+      "\u634C",
+      "\u7396",
+    ],
+    markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
+    informal: false,
+  } as const;
+  static readonly #TRAD_CHINESE_INFORMAL_CHARS = {
+    digits: [
+      "\u96F6",
+      "\u4E00",
+      "\u4E8C",
+      "\u4E09",
+      "\u56DB",
+      "\u4E94",
+      "\u516D",
+      "\u4E03",
+      "\u516B",
+      "\u4E5D",
+    ],
+    markers: ["", "\u5341", "\u767E", "\u5343"],
+    informal: true,
+  } as const;
+  static readonly #TRAD_CHINESE_FORMAL_CHARS = {
+    digits: [
+      "\u96F6",
+      "\u58F9",
+      "\u8CB3",
+      "\u53C3",
+      "\u8086",
+      "\u4F0D",
+      "\u9678",
+      "\u67D2",
+      "\u634C",
+      "\u7396",
+    ],
+    markers: ["", "\u62FE", "\u4F70", "\u4EDF"],
+    informal: false,
+  } as const;
   static readonly NAMES: ReadonlySet<(typeof chineseLonghandNameList)[number]> =
     new Set(chineseLonghandNameList);
-  static readonly #SETTINGS: ReadonlyMap<
+  static #SETTINGS: ReadonlyMap<
     SetElement<typeof ChineseLonghand.NAMES>,
     ChineseLonghandSetting
-  > = new Map([
-    ["simp-chinese-informal", ChineseLonghand.#SIMP_CHINESE_INFORMAL],
-    ["simp-chinese-formal", ChineseLonghand.#SIMP_CHINESE_FORMAL],
-    ["trad-chinese-informal", ChineseLonghand.#TRAD_CHINESE_INFORMAL],
-    ["trad-chinese-formal", ChineseLonghand.#TRAD_CHINESE_FORMAL],
-    // > This counter style is identical to trad-chinese-informal. (It exists for legacy reasons.)
-    ["cjk-ideographic", ChineseLonghand.#TRAD_CHINESE_INFORMAL],
-  ]);
+  > | null = null;
+  static #getSettings(): ReadonlyMap<
+    SetElement<typeof ChineseLonghand.NAMES>,
+    ChineseLonghandSetting
+  > {
+    return (ChineseLonghand.#SETTINGS ??= new Map([
+      [
+        "simp-chinese-informal",
+        {
+          chars: ChineseLonghand.#SIMP_CHINESE_INFORMAL_CHARS,
+          descriptors: createChineseLonghandDescriptors("\u8D1F"),
+        },
+      ],
+      [
+        "simp-chinese-formal",
+        {
+          chars: ChineseLonghand.#SIMP_CHINESE_FORMAL_CHARS,
+          descriptors: createChineseLonghandDescriptors("\u8D1F"),
+        },
+      ],
+      [
+        "trad-chinese-informal",
+        {
+          chars: ChineseLonghand.#TRAD_CHINESE_INFORMAL_CHARS,
+          descriptors: createChineseLonghandDescriptors("\u8CA0"),
+        },
+      ],
+      [
+        "trad-chinese-formal",
+        {
+          chars: ChineseLonghand.#TRAD_CHINESE_FORMAL_CHARS,
+          descriptors: createChineseLonghandDescriptors("\u8CA0"),
+        },
+      ],
+      [
+        "cjk-ideographic",
+        {
+          chars: ChineseLonghand.#TRAD_CHINESE_INFORMAL_CHARS,
+          descriptors: createChineseLonghandDescriptors("\u8CA0"),
+        },
+      ],
+    ]));
+  }
 
   #chars: ChineseLonghandSetting["chars"];
 
@@ -1459,7 +1485,7 @@ class ChineseLonghand extends CounterStyle {
     store: CounterStyleStoreMap,
     name: SetElement<typeof ChineseLonghand.NAMES>,
   ) {
-    const { chars, descriptors } = ChineseLonghand.#SETTINGS.get(name)!;
+    const { chars, descriptors } = ChineseLonghand.#getSettings().get(name)!;
     super(store, descriptors);
     this.#chars = chars;
   }
@@ -1539,13 +1565,16 @@ class ChineseLonghand extends CounterStyle {
  * @see https://drafts.csswg.org/css-counter-styles-3/#ethiopic-numeric-counter-style
  */
 class EthiopicNumeric extends CounterStyle {
-  static readonly #DESCRIPTORS = {
-    range: new CssCascade.CascadeValue(
-      new Css.SpaceList([new Css.Int(1), Css.getName("infinite")]),
-      0,
-    ),
-    suffix: new CssCascade.CascadeValue(new Css.Str("/ "), 0),
-  } as const;
+  static #DESCRIPTORS: CssCascade.ElementStyle | null = null;
+  static #getDescriptors(): CssCascade.ElementStyle {
+    return (EthiopicNumeric.#DESCRIPTORS ??= {
+      range: new CssCascade.CascadeValue(
+        new Css.SpaceList([new Css.Int(1), Css.getName("infinite")]),
+        0,
+      ),
+      suffix: new CssCascade.CascadeValue(new Css.Str("/ "), 0),
+    });
+  }
 
   static readonly #TENS = [
     "", // 0
@@ -1577,7 +1606,7 @@ class EthiopicNumeric extends CounterStyle {
   static readonly #TEN_THOUSAND = "\u137C"; // U+137C (even index separator / 10000)
 
   constructor(store: CounterStyleStoreMap) {
-    super(store, EthiopicNumeric.#DESCRIPTORS);
+    super(store, EthiopicNumeric.#getDescriptors());
   }
 
   protected override _getAutoRange(): Range {

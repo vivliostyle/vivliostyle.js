@@ -2127,57 +2127,58 @@ export interface CounterResolver {
 }
 
 export class AttrValueFilterVisitor extends Css.FilterVisitor {
-  constructor(public element: Element) {
+  hadAttrFunction = false;
+
+  constructor(
+    public element: Element,
+    private readonly scope: Exprs.LexicalScope,
+    private readonly propName: string,
+    private readonly validatorSet?: CssValidator.ValidatorSet,
+  ) {
     super();
   }
 
-  private createValueFromString(str: string | null, type: string): Css.Val {
-    switch (type) {
-      case "url":
-        if (str) {
-          return new Css.URL(str); // TODO should convert to absolute path
-        }
-        return new Css.URL("about:invalid");
-      case "string":
-      default:
-        if (str) {
-          return new Css.Str(str);
-        }
-        return new Css.Str("");
+  validatePropertyValue(value: Css.Val): Css.Val {
+    if (Css.isDefaultingValue(value)) {
+      return value;
     }
+    const validator = this.validatorSet?.validators[this.propName];
+    if (validator) {
+      return value.visit(validator) ?? Css.ident.unset;
+    }
+    if (!this.propName || CSS.supports(this.propName, value.toString())) {
+      return value;
+    }
+    return Css.ident.unset;
   }
 
   override visitFunc(func: Css.Func): Css.Val {
-    if (func.name !== "attr") {
+    if (func.name.toLowerCase() !== "attr") {
       return super.visitFunc(func);
     }
-    let type = "string";
-    let attributeName: string | null = null;
-    let defaultValue: Css.Val = null;
-    if (func.values[0] instanceof Css.SpaceList) {
-      const values = (func.values[0] as Css.SpaceList).values;
-      if (values.length >= 2) {
-        type = values[1].stringValue();
-      }
-      attributeName = values[0].stringValue();
-    } else {
-      attributeName = func.values[0].stringValue();
+    this.hadAttrFunction = true;
+    const attr = CssValidator.parseAttrFunction(func);
+    if (!attr) {
+      return super.visitFunc(func);
     }
-    if (func.values.length > 1) {
-      defaultValue = this.createValueFromString(
-        func.values[1].stringValue(),
-        type,
-      );
-    } else {
-      defaultValue = this.createValueFromString(null, type);
+
+    const fallback = (
+      attr.fallback ?? CssValidator.getImplicitAttrFallback(attr.type)
+    ).visit(this);
+
+    if (!this.element || !this.element.hasAttribute(attr.attributeName)) {
+      return fallback;
     }
-    if (this.element && this.element.hasAttribute(attributeName)) {
-      return this.createValueFromString(
-        this.element.getAttribute(attributeName),
-        type,
-      );
+
+    const value = CssValidator.parseAttrValue(
+      this.scope,
+      this.element.getAttribute(attr.attributeName),
+      attr.type,
+    );
+    if (!value) {
+      return fallback;
     }
-    return defaultValue;
+    return value;
   }
 }
 
@@ -3744,7 +3745,7 @@ export class CascadeInstance {
     // Convert device-cmyk() to color(srgb ...)
     this.applyCmykFilter(this.currentStyle, this.currentElement);
 
-    this.applyAttrFilter(element);
+    this.applyAttrFilter(element, styler);
     const quotesCasc = baseStyle["quotes"] as CascadeValue;
     let itemToPushLast: QuotesScopeItem | null = null;
     if (quotesCasc) {
@@ -4202,26 +4203,50 @@ export class CascadeInstance {
   }
 
   private applyAttrFilterInner(
-    visitor: Css.Visitor,
+    styler: CssStyler.AbstractStyler,
+    element: Element,
     elementStyle: ElementStyle,
   ): void {
+    const scope = (styler as AbstractStyler & { scope: Exprs.LexicalScope })
+      .scope;
+    const validatorSet = (
+      styler as AbstractStyler & {
+        validatorSet: CssValidator.ValidatorSet;
+      }
+    ).validatorSet;
     for (const propName in elementStyle) {
       if (isPropName(propName) && !Css.isCustomPropName(propName)) {
-        elementStyle[propName] = (
-          elementStyle[propName] as CascadeValue
-        ).filterValue(visitor);
+        const cascVal = elementStyle[propName] as CascadeValue;
+        const visitor = new AttrValueFilterVisitor(
+          element,
+          scope,
+          propName,
+          validatorSet,
+        );
+        const filtered = cascVal.filterValue(visitor);
+        if (!visitor.hadAttrFunction) {
+          elementStyle[propName] = filtered;
+          continue;
+        }
+        const validatedValue = visitor.validatePropertyValue(filtered.value);
+        elementStyle[propName] =
+          validatedValue === filtered.value
+            ? filtered
+            : new CascadeValue(validatedValue, filtered.priority);
       }
     }
   }
 
-  private applyAttrFilter(element: Element): void {
-    const visitor = new AttrValueFilterVisitor(element);
+  private applyAttrFilter(
+    element: Element,
+    styler: CssStyler.AbstractStyler,
+  ): void {
     const currentStyle = this.currentStyle;
     const pseudoMap = getStyleMap(currentStyle, "_pseudos");
     for (const pseudoName in pseudoMap) {
-      this.applyAttrFilterInner(visitor, pseudoMap[pseudoName]);
+      this.applyAttrFilterInner(styler, element, pseudoMap[pseudoName]);
     }
-    this.applyAttrFilterInner(visitor, currentStyle);
+    this.applyAttrFilterInner(styler, element, currentStyle);
   }
 
   /**
