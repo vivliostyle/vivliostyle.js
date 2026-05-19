@@ -1,0 +1,68 @@
+<!-- Test case for Issue #1485: support typed values in CSS attr() -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      @page {
+        size: 200mm 150mm;
+        margin: 12mm;
+      }
+
+      body {
+        font-family: sans-serif;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+
+      .sample {
+        border: 1px solid #999;
+        margin: 0 0 8px;
+        padding: 6px 8px;
+      }
+
+      .color-from-attr {
+        color: attr(data-color type(<color>), red);
+      }
+
+      .size-from-attr {
+        font-size: attr(data-size px, 18px);
+      }
+
+      .raw-string-from-attr::before {
+        content: attr(data-note raw-string, "raw fallback");
+        display: block;
+        font-weight: 700;
+      }
+
+      .opacity-from-attr {
+        background: #008000;
+        color: #fff;
+        opacity: attr(data-opacity number, 0.25);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sample color-from-attr" data-color="blue">
+      This text should be blue.
+    </div>
+    <div class="sample color-from-attr">This text should fall back to red.</div>
+    <div class="sample size-from-attr" data-size="32">
+      This text should render at 32px.
+    </div>
+    <div class="sample size-from-attr">
+      This text should fall back to 18px.
+    </div>
+    <div class="sample raw-string-from-attr" data-note="Raw string from attr()">
+      The line above should come from raw-string.
+    </div>
+    <div class="sample raw-string-from-attr">
+      The line above should fall back to "raw fallback".
+    </div>
+    <div class="sample opacity-from-attr" data-opacity="0.8">
+      This green box should render at 80% opacity.
+    </div>
+    <div class="sample opacity-from-attr">
+      This green box should fall back to 25% opacity.
+    </div>
+  </body>
+</html>

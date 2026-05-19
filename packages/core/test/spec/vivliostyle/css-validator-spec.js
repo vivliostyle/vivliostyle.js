@@ -18,6 +18,7 @@
 
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_css from "../../../src/vivliostyle/css";
+import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_task from "../../../src/vivliostyle/task";
@@ -316,6 +317,55 @@ describe("css-validator", function () {
           expect(handler.invalid).toBe(true);
         },
       );
+    });
+  });
+
+  describe("typed attr() nested grammar regression", function () {
+    it("accepts typed attr() inside string-set content lists", function (done) {
+      parseCascade(
+        'div { string-set: chapter attr(data-title type(<string>), "fallback"); }',
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["string-set"]).toBeDefined();
+        },
+      );
+    });
+
+    it("rejects unsupported attr() type() syntax inside string-set content lists", function (done) {
+      parseCascade(
+        'div { string-set: chapter attr(data-title type(<transform-list>), "fallback"); }',
+        done,
+        function (cascade, handler) {
+          expect(handler.invalid).toBe(true);
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["string-set"]).toBeUndefined();
+        },
+      );
+    });
+  });
+
+  describe("typed attr() helper regression", function () {
+    it("returns null for unsupported type() syntax", function () {
+      expect(
+        adapt_cssvalid.parseAttrValue(
+          new adapt_exprs.LexicalScope(null),
+          "rotate(30deg)",
+          { kind: "syntax", syntax: "<transform-list>" },
+        ),
+      ).toBeNull();
+    });
+
+    it("parses frequency syntax using lowercase normalized units", function () {
+      var value = adapt_cssvalid.parseAttrValue(
+        new adapt_exprs.LexicalScope(null),
+        "1kHz",
+        {
+          kind: "syntax",
+          syntax: "<frequency>",
+        },
+      );
+      expect(value && value.toString()).toBe("1khz");
     });
   });
 

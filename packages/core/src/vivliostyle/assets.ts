@@ -283,8 +283,6 @@ caption-side = top | bottom;
 clip = rect(ALENGTH{4}) | rect(SPACE(ALENGTH{4})) | auto;
 color = COLOR;
 LIST_STYLE_TYPE = IDENT;
-TYPE_OR_UNIT_IN_ATTR = string | color | url | integer | number | length | angle | time | frequency;
-ATTR = attr(SPACE(IDENT TYPE_OR_UNIT_IN_ATTR?) [ STRING | IDENT | COLOR | INT | NUM | PLENGTH | ANGLE | POS_TIME | FREQUENCY]?);
 CONTENT_LIST = [ STRING | URI | counter(IDENT LIST_STYLE_TYPE?) |
     counters(IDENT STRING LIST_STYLE_TYPE?) | ATTR |
     target-counter([ STRING | URI ] IDENT LIST_STYLE_TYPE?) |

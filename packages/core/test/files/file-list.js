@@ -88,6 +88,7 @@ module.exports = [
       { file: "background-shorthand.html", title: "Background shorthand" },
       { file: "prefixed_properties.html", title: "Prefixed properties" },
       { file: "filter_property.html", title: "Filter property" },
+      { file: "attr-type.html", title: "Typed attr() values (Issue #1485)" },
       { file: "content-attr.html", title: "Content attr()" },
       {
         file: "exclusion_with_printer_marks.html",
