@@ -736,10 +736,6 @@ module.exports = [
         title:
           "Float in position:relative across page break, vertical writing mode (Issue #1885)",
       },
-      {
-        file: "shape-outside-ellipse.html",
-        title: "Legacy ellipse shape-outside with spaces (Issue #1425)",
-      },
       { file: "relative_floats.html", title: "Floats with position: relative" },
       {
         file: "float-in-relative-bug.html",

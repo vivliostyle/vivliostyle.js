@@ -411,9 +411,7 @@ border-outside-width = BORDER_SIDE_WIDTH;
 inside = APLENGTH;
 outside = APLENGTH;
 
-SHAPE = auto | rectangle( PLENGTH{4} ) | rectangle( SPACE(PLENGTH{4}) ) |
-  ellipse( PLENGTH{4} ) | ellipse( SPACE(PLENGTH{4}) ) |
-  circle( PLENGTH{3} ) | circle( SPACE(PLENGTH{3}) ) |
+SHAPE = auto | rectangle( PLENGTH{4} ) |  ellipse( PLENGTH{4} ) |  circle( PLENGTH{3} ) |
     polygon( SPACE(PLENGTH+)+ );
 [epubx]shape-inside = SHAPE;
 [epubx,webkit]shape-outside = SHAPE;
