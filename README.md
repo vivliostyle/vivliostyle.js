@@ -157,6 +157,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jdtcn"><img src="https://avatars.githubusercontent.com/u/47177226?v=4?s=80" width="80px;" alt="Sergey"/><br /><sub><b>Sergey</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=jdtcn" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tomaioo"><img src="https://avatars.githubusercontent.com/u/203048277?v=4?s=80" width="80px;" alt="tomaioo"/><br /><sub><b>tomaioo</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=tomaioo" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://wanderer.tw/"><img src="https://avatars.githubusercontent.com/u/1863378?v=4?s=80" width="80px;" alt="Bobby Tung"/><br /><sub><b>Bobby Tung</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=bobbytung" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://sayportfolio.vercel.app/"><img src="https://avatars.githubusercontent.com/u/240962040?v=4?s=80" width="80px;" alt="Sai Asish Y"/><br /><sub><b>Sai Asish Y</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=SAY-5" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

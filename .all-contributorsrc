@@ -245,6 +245,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1863378?v=4",
       "profile": "http://wanderer.tw/",
       "contributions": ["code"]
+    },
+    {
+      "login": "SAY-5",
+      "name": "Sai Asish Y",
+      "avatar_url": "https://avatars.githubusercontent.com/u/240962040?v=4",
+      "profile": "https://sayportfolio.vercel.app/",
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7
