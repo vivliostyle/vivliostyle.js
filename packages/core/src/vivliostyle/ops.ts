@@ -2706,10 +2706,14 @@ export class StyleInstance
       if (!pageChangeSnapshot) {
         pageChangeSnapshot = pageStartSnapshot;
       }
+      const currentPageChangeSnapshot =
+        pageChangeSnapshot && pageChangeSnapshot.offset === pageChangeOffset
+          ? pageChangeSnapshot
+          : null;
       this.counterStore.setCurrentPageDocCounters(
         pageStartSnapshot?.counters ?? null,
-        pageChangeSnapshot?.changes ?? null,
-        pageChangeSnapshot?.changeTypes,
+        currentPageChangeSnapshot?.changes ?? null,
+        currentPageChangeSnapshot?.changeTypes,
       );
       this.counterStore.setCurrentPage(page);
       this.counterStore.updatePageCounters(cascadedPageStyle, this);
