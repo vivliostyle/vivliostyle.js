@@ -1,27 +1,63 @@
+- category: Table
+  title: "Table header repeat with nested rowspans (Issue #1980)"
+  file: table/table-header-repeat-nested-rowspan.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1980  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table-header-repeat-nested-rowspan.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table-header-repeat-nested-rowspan.html&zoom=1&spread=false
+- category: Cross-references
+  title: target-counter() with default page type
+  file: target-counter-default-page-type.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1966  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/target-counter-default-page-type.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1966-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/target-counter-default-page-type.html&zoom=1&spread=false
+- category: Cross-references
+  title: "target-counter() named page style (Issue #1966)"
+  file: target-counter-named-page-style.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1966  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/target-counter-named-page-style.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1966-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/target-counter-named-page-style.html&zoom=1&spread=false
 - category: Nth page selector
   title: "Page counter set/reset in page and element contexts (Issue #1978)"
   file: nth-page/page-counter-set-reset.html
   decision: expected  # regression / expected / skip
   notes: ""
   approvedViewer: git-fix-issue1978  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
+  actualLabel: dev
   actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/page-counter-set-reset.html&zoom=1&spread=false
-  baselineLabel: stable
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/nth-page/page-counter-set-reset.html&zoom=1&spread=false
+  baselineLabel: canary
   baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/page-counter-set-reset.html&zoom=1&spread=false
+    https://vivliostyle-git-fix-issue1978-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/nth-page/page-counter-set-reset.html&zoom=1&spread=false
 - category: Nth page selector
   title: "Custom page counter set/reset in page and element contexts (Issue #1978)"
   file: nth-page/custom-page-counter-set-reset.html
   decision: expected  # regression / expected / skip
   notes: ""
   approvedViewer: git-fix-issue1978  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
+  actualLabel: dev
   actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/custom-page-counter-set-reset.html&zoom=1&spread=false
-  baselineLabel: stable
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/nth-page/custom-page-counter-set-reset.html&zoom=1&spread=false
+  baselineLabel: canary
   baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/custom-page-counter-set-reset.html&zoom=1&spread=false
+    https://vivliostyle-git-fix-issue1978-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/nth-page/custom-page-counter-set-reset.html&zoom=1&spread=false
 - category: General
   title: "Typed attr() values (Issue #1485)"
   file: attr-type.html
@@ -70,27 +106,3 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-generated-text-properties.html&zoom=1&spread=false
-- category: Cross-references
-  title: target-counter() with default page type
-  file: target-counter-default-page-type.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1966  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-default-page-type.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-default-page-type.html&zoom=1&spread=false
-- category: Cross-references
-  title: "target-counter() named page style (Issue #1966)"
-  file: target-counter-named-page-style.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1966  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-named-page-style.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-named-page-style.html&zoom=1&spread=false
