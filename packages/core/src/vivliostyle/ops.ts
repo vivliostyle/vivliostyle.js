@@ -315,6 +315,9 @@ export class StyleInstance
   pageSheetSize: { [key: string]: { width: number; height: number } } = {};
   pageSheetHeight: number = 0;
   pageSheetWidth: number = 0;
+  private invalidPageAreaOnCurrentPage: boolean = false;
+  private repeatedInvalidPageAreaLayoutPosition: Vtree.LayoutPosition | null =
+    null;
   private semanticFootnoteFirstRefOffsets: Map<string, number | null> =
     new Map();
   private semanticFootnoteFirstRefOffsetsInitialized = { value: false };
@@ -2296,9 +2299,11 @@ export class StyleInstance
     );
 
     if (
-      boxInstance instanceof CssPage.PageRuleMasterInstance &&
-      (layoutContainer.width <= 0 || layoutContainer.height <= 0)
+      (layoutContainer.width <= 0 || layoutContainer.height <= 0) &&
+      (boxInstance instanceof CssPage.PageRuleMasterInstance ||
+        (flowName && flowName.isIdent()))
     ) {
+      this.invalidPageAreaOnCurrentPage = true;
       Logging.logger.warn("Negative or zero page area size");
     }
 
@@ -2575,6 +2580,63 @@ export class StyleInstance
     return true;
   }
 
+  private hasSameFlowPositions(
+    first: Vtree.LayoutPosition | null,
+    second: Vtree.LayoutPosition | null,
+  ): boolean {
+    if (first === second) {
+      return true;
+    }
+    if (!first || !second) {
+      return false;
+    }
+    const firstFlowNames = Object.keys(first.flowPositions);
+    const secondFlowNames = Object.keys(second.flowPositions);
+    if (firstFlowNames.length !== secondFlowNames.length) {
+      return false;
+    }
+    for (const flowName of firstFlowNames) {
+      if (
+        !first.flowPositions[flowName].isSamePosition(
+          second.flowPositions[flowName],
+        )
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private checkRepeatedInvalidPageArea(cp: Vtree.LayoutPosition): void {
+    const hasInvalidPageArea = this.invalidPageAreaOnCurrentPage;
+    this.invalidPageAreaOnCurrentPage = false;
+
+    if (!hasInvalidPageArea) {
+      this.repeatedInvalidPageAreaLayoutPosition = null;
+      return;
+    }
+    if (cp.isBlankPage || this.noMorePrimaryFlows(cp)) {
+      return;
+    }
+    if (!this.hasSameFlowPositions(this.layoutPositionAtPageStart, cp)) {
+      this.repeatedInvalidPageAreaLayoutPosition = null;
+      return;
+    }
+
+    const repeatedStall =
+      !!this.repeatedInvalidPageAreaLayoutPosition &&
+      this.hasSameFlowPositions(
+        this.repeatedInvalidPageAreaLayoutPosition,
+        this.layoutPositionAtPageStart,
+      );
+    this.repeatedInvalidPageAreaLayoutPosition =
+      this.layoutPositionAtPageStart.clone();
+
+    if (repeatedStall) {
+      throw new Error("Negative or zero page area size");
+    }
+  }
+
   layoutNextPage(
     page: Vtree.Page,
     cp?: Vtree.LayoutPosition,
@@ -2593,13 +2655,8 @@ export class StyleInstance
     if (this.lang) {
       page.bleedBox.setAttribute("lang", this.lang);
     }
+    this.invalidPageAreaOnCurrentPage = false;
     cp = this.currentLayoutPosition;
-
-    // Limit number of pages to prevent endless page generation
-    const LIMIT_PAGES = 10000;
-    if (cp.page > LIMIT_PAGES) {
-      throw new Error(`Too many pages generated (over ${LIMIT_PAGES} pages)`);
-    }
 
     const startSide = cp.startSideOfFlow("body");
     cp.isBlankPage =
@@ -2789,6 +2846,7 @@ export class StyleInstance
         if (!isTocBox) {
           this.processLinger();
           cp = this.currentLayoutPosition;
+          this.checkRepeatedInvalidPageArea(cp);
           Object.keys(cp.flowPositions).forEach((flowName) => {
             const flowPosition = cp.flowPositions[flowName];
             const breakAfter = flowPosition.breakAfter;

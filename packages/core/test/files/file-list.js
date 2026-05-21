@@ -20,6 +20,17 @@ module.exports = [
         file: "eal-generated-text-properties.html",
         title: "EAL generated text properties (Issue #1968)",
       },
+      {
+        file: "eal-zero-size-flow-partition.html",
+        title:
+          "EAL zero-size flow partition must not loop forever (Issue #941)",
+        skipLayoutRegression: true,
+      },
+      {
+        file: "invalid-page-area.html",
+        title: "Invalid page area must not loop forever (Issue #941)",
+        skipLayoutRegression: true,
+      },
       { file: "case_sensitivity/html.html", title: "HTML case sensitivity" },
       { file: "ruby-broken-pagination.html", title: "Ruby broken pagination" },
       {

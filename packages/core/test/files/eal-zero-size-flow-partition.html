@@ -1,0 +1,66 @@
+<!-- Test case for Issue #941: zero-size EAL flow partition must not loop forever -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>EAL zero-size flow partition</title>
+    <style>
+      @page {
+        size: 200mm 140mm;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        font-family: Georgia, "Times New Roman", serif;
+      }
+
+      .body-anchor {
+        margin: 0;
+        font-size: 1px;
+        line-height: 1;
+        color: transparent;
+      }
+
+      @-epubx-page-template {
+        @-epubx-flow body {
+          -epubx-flow-consume: all;
+        }
+
+        .body-flow {
+          -epubx-flow-from: body;
+          top: 0;
+          left: 0;
+          width: 0px;
+          height: 0px;
+          overflow: hidden;
+        }
+
+        .message {
+          content: "Zero-size EAL flow partition should stop instead of paginating forever.";
+          top: 10mm;
+          left: 10mm;
+          right: 10mm;
+          height: 10mm;
+          font: 700 13px/1.2 Arial, sans-serif;
+          color: #102a43;
+        }
+
+        @-epubx-page-master {
+          @-epubx-partition class(body-flow) {
+          }
+
+          @-epubx-partition class(message) {
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p class="body-anchor">anchor</p>
+  </body>
+</html>

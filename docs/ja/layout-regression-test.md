@@ -14,6 +14,11 @@
 テストソースリストは `packages/core/test/files/file-list.js` です。
 トリアージ決定の永続データは `scripts/layout-regression-triage.yaml` に保存されます。
 
+`file-list.js` の各エントリには `skipLayoutRegression: true` を指定でき、
+テストケースの start page には残したまま、デフォルトの
+`yarn test:layout-regression` 実行から除外できます。この指定をした
+エントリも、`--file` や `--title-includes` で明示指定すれば実行できます。
+
 ## セットアップ
 
 依存パッケージと Playwright ブラウザを一度だけインストール:
@@ -67,6 +72,9 @@ yarn test:layout-regression \
   --file footnotes/footnote-marker-outside-style.html \
   --file table/table_colspan.html
 ```
+
+`--file` と `--title-includes` では、`file-list.js` で
+`skipLayoutRegression: true` が指定されたエントリも実行対象に含まれます。
 
 同じオプションを複数指定した場合は OR 条件、
 異なる種類のフィルターを併用した場合は AND 条件で評価されます。
