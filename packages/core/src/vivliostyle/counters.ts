@@ -1005,18 +1005,6 @@ export class CounterStore {
         this.definePageCounter(resetCounterName, resetMap[resetCounterName]);
       }
     }
-    if (setMap) {
-      // Apply counter-set after reset to match counter update order
-      // (reset -> set -> increment).
-      for (const setCounterName in setMap) {
-        if (!this.currentPageCounters[setCounterName]) {
-          this.definePageCounter(setCounterName, setMap[setCounterName]);
-        } else {
-          const counterValues = this.currentPageCounters[setCounterName];
-          counterValues[counterValues.length - 1] = setMap[setCounterName];
-        }
-      }
-    }
     for (const incrementCounterName in incrementMap) {
       if (skipIncrement[incrementCounterName]) {
         continue;
@@ -1027,6 +1015,18 @@ export class CounterStore {
       const counterValues = this.currentPageCounters[incrementCounterName];
       counterValues[counterValues.length - 1] +=
         incrementMap[incrementCounterName];
+    }
+    if (setMap) {
+      // Match the standard counter update order:
+      // counter-reset -> counter-increment -> counter-set.
+      for (const setCounterName in setMap) {
+        if (!this.currentPageCounters[setCounterName]) {
+          this.definePageCounter(setCounterName, setMap[setCounterName]);
+        } else {
+          const counterValues = this.currentPageCounters[setCounterName];
+          counterValues[counterValues.length - 1] = setMap[setCounterName];
+        }
+      }
     }
   }
 

@@ -450,6 +450,16 @@ module.exports = [
         title: "nth() page selector & page counter reset",
       },
       {
+        file: "nth-page/page-counter-set-reset.html",
+        title:
+          "Page counter set/reset in page and element contexts (Issue #1978)",
+      },
+      {
+        file: "nth-page/custom-page-counter-set-reset.html",
+        title:
+          "Custom page counter set/reset in page and element contexts (Issue #1978)",
+      },
+      {
         file: [
           "nth-page/nth-page.html",
           "nth-page/nth-page-counter-reset.html",

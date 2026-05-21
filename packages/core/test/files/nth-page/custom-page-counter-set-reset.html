@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Custom page counter set/reset in page and element contexts</title>
+    <!-- Test case for Issue #1978: custom page counter set/reset in page and element contexts -->
+    <style>
+      @page :first {
+        counter-reset: my-page;
+      }
+
+      @page {
+        size: 320px 260px;
+        margin: 36px;
+        counter-increment: my-page;
+
+        @top-center {
+          font: 12px/1.2 Arial, sans-serif;
+        }
+
+        @bottom-center {
+          font: 12px/1.2 Arial, sans-serif;
+        }
+      }
+
+      @page control-frontmatter {
+        @top-center {
+          content: "A control";
+        }
+
+        @bottom-center {
+          content: "A " counter(my-page, lower-roman);
+        }
+      }
+
+      @page control-main {
+        @top-center {
+          content: "A control";
+        }
+
+        @bottom-center {
+          content: "A " counter(my-page);
+        }
+      }
+
+      @page :nth(1 of control-main) {
+        counter-reset: my-page;
+      }
+
+      @page set-at-page-frontmatter {
+        @top-center {
+          content: "B page counter-set";
+        }
+
+        @bottom-center {
+          content: "B " counter(my-page, lower-roman);
+        }
+      }
+
+      @page set-at-page-main {
+        @top-center {
+          content: "B page counter-set";
+        }
+
+        @bottom-center {
+          content: "B " counter(my-page);
+        }
+      }
+
+      @page :nth(1 of set-at-page-main) {
+        counter-set: my-page 1;
+      }
+
+      @page reset-at-element-frontmatter {
+        @top-center {
+          content: "C element counter-reset";
+        }
+
+        @bottom-center {
+          content: "C " counter(my-page, lower-roman);
+        }
+      }
+
+      @page reset-at-element-main {
+        @top-center {
+          content: "C element counter-reset";
+        }
+
+        @bottom-center {
+          content: "C " counter(my-page);
+        }
+      }
+
+      @page set-at-element-frontmatter {
+        @top-center {
+          content: "D element counter-set";
+        }
+
+        @bottom-center {
+          content: "D " counter(my-page, lower-roman);
+        }
+      }
+
+      @page set-at-element-main {
+        @top-center {
+          content: "D element counter-set";
+        }
+
+        @bottom-center {
+          content: "D " counter(my-page);
+        }
+      }
+
+      @page :nth(1 of control-frontmatter) {
+        counter-reset: my-page;
+      }
+
+      @page :nth(1 of set-at-page-frontmatter) {
+        counter-reset: my-page;
+      }
+
+      @page :nth(1 of reset-at-element-frontmatter) {
+        counter-reset: my-page;
+      }
+
+      @page :nth(1 of set-at-element-frontmatter) {
+        counter-reset: my-page;
+      }
+
+      html {
+        font: 14px/1.4 Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 0 0 10px;
+      }
+
+      .frontmatter > p,
+      .main > p {
+        border: 1px solid #bbb;
+        padding: 8px;
+      }
+
+      .main {
+        break-before: page;
+      }
+
+      .break-before {
+        break-before: page;
+      }
+
+      .scenario-start {
+        break-before: page;
+      }
+
+      .control-frontmatter {
+        page: control-frontmatter;
+      }
+
+      .control-main {
+        page: control-main;
+      }
+
+      .set-at-page-frontmatter {
+        page: set-at-page-frontmatter;
+      }
+
+      .set-at-page-main {
+        page: set-at-page-main;
+      }
+
+      .reset-at-element-frontmatter {
+        page: reset-at-element-frontmatter;
+      }
+
+      .reset-at-element-main {
+        page: reset-at-element-main;
+        counter-reset: my-page 1;
+      }
+
+      .set-at-element-frontmatter {
+        page: set-at-element-frontmatter;
+      }
+
+      .set-at-element-main {
+        page: set-at-element-main;
+        counter-set: my-page 1;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="frontmatter control-frontmatter">
+      <h1>A. Control with @page counter-reset</h1>
+      <p>Footer sequence should be A i.</p>
+      <p class="break-before">Footer sequence should be A ii.</p>
+    </section>
+    <section class="main control-main">
+      <p>Footer sequence should be A 1.</p>
+      <p class="break-before">Footer sequence should be A 2.</p>
+    </section>
+
+    <section class="frontmatter set-at-page-frontmatter scenario-start">
+      <h1>B. @page counter-set should also show 1 then 2</h1>
+      <p>Footer sequence should be B i.</p>
+      <p class="break-before">Footer sequence should be B ii.</p>
+    </section>
+    <section class="main set-at-page-main">
+      <p>Footer sequence should be B 1.</p>
+      <p class="break-before">Footer sequence should be B 2.</p>
+    </section>
+
+    <section class="frontmatter reset-at-element-frontmatter scenario-start">
+      <h1>C. Element counter-reset should show 1 then 2</h1>
+      <p>Footer sequence should be C i.</p>
+      <p class="break-before">Footer sequence should be C ii.</p>
+    </section>
+    <section class="main reset-at-element-main">
+      <p>Footer sequence should be C 1.</p>
+      <p class="break-before">Footer sequence should be C 2.</p>
+    </section>
+
+    <section class="frontmatter set-at-element-frontmatter scenario-start">
+      <h1>D. Element counter-set should show 1 then 2</h1>
+      <p>Footer sequence should be D i.</p>
+      <p class="break-before">Footer sequence should be D ii.</p>
+    </section>
+    <section class="main set-at-element-main">
+      <p>Footer sequence should be D 1.</p>
+      <p class="break-before">Footer sequence should be D 2.</p>
+    </section>
+  </body>
+</html>
