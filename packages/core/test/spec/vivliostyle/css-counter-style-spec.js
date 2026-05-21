@@ -629,16 +629,32 @@ describe("css-counter-style", function () {
     it("should count grapheme clusters in the initial representation", function (done) {
       parseStylesheet(
         done,
-        // Symbols are themselves multi-code-point emoji. They must contribute
-        // 1 to the length each, otherwise no padding will be added.
-        '@counter-style test { system: cyclic; symbols: "😀"; pad: 3 "0"; }',
+        // Symbols are themselves multi-code-point emoji graphemes. They must
+        // contribute 1 to the length each, otherwise padding will be too short.
+        '@counter-style test { system: cyclic; symbols: "👍🏽"; pad: 3 "0"; }',
         function (result, counterStyles) {
           expect(result).toBeTruthy();
           var style = counterStyles.getStyle("test");
           expect(style).not.toBeNull();
           if (!style) return;
-          // value 1 → "😀" (1 grapheme), pad to 3 → "00😀"
-          expect(style.format(1)).toBe("00😀");
+          // value 1 → "👍🏽" (1 grapheme, 2 code points), pad to 3 → "00👍🏽"
+          expect(style.format(1)).toBe("00👍🏽");
+        },
+      );
+    });
+
+    it("should count grapheme clusters in negative prefix and suffix", function (done) {
+      parseStylesheet(
+        done,
+        '@counter-style test { system: numeric; symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"; negative: "👍🏽" "👎🏽"; pad: 5 "0"; }',
+        function (result, counterStyles) {
+          expect(result).toBeTruthy();
+          var style = counterStyles.getStyle("test");
+          expect(style).not.toBeNull();
+          if (!style) return;
+          // value -5 → negative affixes contribute 2 graphemes total, so pad to 5
+          // yields two zeros between the prefix and the numeric representation.
+          expect(style.format(-5)).toBe("👍🏽005👎🏽");
         },
       );
     });
