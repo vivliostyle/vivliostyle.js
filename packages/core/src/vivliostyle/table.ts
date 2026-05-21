@@ -1990,6 +1990,21 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       return column.buildDeepElementView(nodeContext);
     } else {
       if (leadingEdge) {
+        const repetitiveElements = formattingContext.getRepetitiveElements();
+        // Issue #1980: a table can resume at a new page/column from the middle
+        // of its body, so it never passes through the table-root retry path
+        // below. Header-only tables would then drop their repeated thead on the
+        // first continuation page unless we preserve the header here. Keep
+        // footer-bearing tables on the normal skip logic, because existing
+        // fixtures intentionally drop header/footer when space is too tight.
+        if (
+          repetitiveElements &&
+          nodeContext.sourceNode !== formattingContext.tableSourceNode &&
+          !nodeContext.after &&
+          !repetitiveElements.isFooterRegistered()
+        ) {
+          repetitiveElements.preventSkippingHeader();
+        }
         RepetitiveElementImpl.appendHeaderToAncestors(
           nodeContext.parent,
           column,
@@ -2327,6 +2342,8 @@ export class LayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
     if (!repetitiveElements || !repetitiveElements.doneInitialLayout) {
       return new LayoutEntireTable(this.tableFormattingContext, this.processor);
     } else {
+      // The unconditional preserve-header path stays limited to table-root
+      // retries; mid-table continuations are handled at the leading edge above.
       if (
         nodeContext.sourceNode ===
           this.tableFormattingContext.tableSourceNode &&

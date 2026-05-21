@@ -723,6 +723,10 @@ module.exports = [
         title:
           "Table header repeat with complex multipage tables (Issue #1873)",
       },
+      {
+        file: "table/table-header-repeat-nested-rowspan.html",
+        title: "Table header repeat with nested rowspans (Issue #1980)",
+      },
     ],
   },
   {
