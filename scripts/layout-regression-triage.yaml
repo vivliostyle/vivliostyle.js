@@ -1,3 +1,27 @@
+- category: Nth page selector
+  title: "Page counter set/reset in page and element contexts (Issue #1978)"
+  file: nth-page/page-counter-set-reset.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1978  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/page-counter-set-reset.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/page-counter-set-reset.html&zoom=1&spread=false
+- category: Nth page selector
+  title: "Custom page counter set/reset in page and element contexts (Issue #1978)"
+  file: nth-page/custom-page-counter-set-reset.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1978  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/custom-page-counter-set-reset.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/custom-page-counter-set-reset.html&zoom=1&spread=false
 - category: General
   title: "Typed attr() values (Issue #1485)"
   file: attr-type.html
