@@ -26,10 +26,6 @@
  *   CounterStyle.format may require the writing mode as an argument.
  *   It may be necessary to extend it so that the caller can obtain the writing mode.
  *
- * - Use grapheme clusters for character counting in CounterStyle.#applyPadding.
- *     https://drafts.csswg.org/css-counter-styles/#counter-style-pad
- *   Intl.Segmenter may be useful. CounterStyle.format may require the lang as an argument.
- *
  * - Implement symbols() for defining anonymous counter styles
  *     https://drafts.csswg.org/css-counter-styles/#symbols-function
  *   Extending CounterStyle.defineAnonymous( ... ) should work.
@@ -39,6 +35,43 @@ import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 
 type SetElement<T> = T extends ReadonlySet<infer U> ? U : never;
+
+/**
+ * Count the grapheme clusters in a string. Per CSS Counter Styles Level 3,
+ * character counting for descriptors like `pad` is defined in terms of
+ * grapheme clusters, not Unicode code points. Falls back to code-point
+ * counting (`[...s].length`) on engines without `Intl.Segmenter`.
+ *
+ * @see https://drafts.csswg.org/css-counter-styles/#counter-style-pad
+ */
+interface GraphemeSegmenter {
+  segment(input: string): Iterable<unknown>;
+}
+let cachedGraphemeSegmenter: GraphemeSegmenter | null | undefined;
+function graphemeClusterCount(s: string): number {
+  if (s === "") return 0;
+  if (cachedGraphemeSegmenter === undefined) {
+    const SegmenterCtor = (
+      Intl as unknown as {
+        Segmenter?: new (
+          locale?: string | string[] | undefined,
+          options?: { granularity?: "grapheme" | "word" | "sentence" },
+        ) => GraphemeSegmenter;
+      }
+    ).Segmenter;
+    cachedGraphemeSegmenter =
+      typeof SegmenterCtor === "function"
+        ? new SegmenterCtor(undefined, { granularity: "grapheme" })
+        : null;
+  }
+  if (cachedGraphemeSegmenter === null) {
+    return [...s].length;
+  }
+  let count = 0;
+
+  for (const _ of cachedGraphemeSegmenter.segment(s)) count++;
+  return count;
+}
 
 /**
  * @see https://drafts.csswg.org/css-counter-styles-3/#non-overridable-counter-style-names
@@ -876,15 +909,16 @@ abstract class CounterStyle {
 
     const { prefix: negPrefix, suffix: negSuffix } = this.#getNegative();
     const negativeLength = usesNegative
-      ? [...negPrefix].length + (negSuffix ? [...negSuffix].length : 0)
+      ? graphemeClusterCount(negPrefix) +
+        (negSuffix ? graphemeClusterCount(negSuffix) : 0)
       : 0;
 
-    const diff = minLength - [...initialRep].length - negativeLength;
+    const diff = minLength - graphemeClusterCount(initialRep) - negativeLength;
     if (diff <= 0) {
       return initialRep;
     }
 
-    const padLength = [...padSymbol].length;
+    const padLength = graphemeClusterCount(padSymbol);
     const count = Math.ceil(diff / padLength);
     return padSymbol.repeat(count) + initialRep;
   }
