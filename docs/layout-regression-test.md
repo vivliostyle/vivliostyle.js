@@ -14,6 +14,11 @@ It checks:
 The test source list is `packages/core/test/files/file-list.js`.
 Persistent triage decisions are stored in `scripts/layout-regression-triage.yaml`.
 
+Entries in `file-list.js` can set `skipLayoutRegression: true` to stay on the
+test case start page while being excluded from default
+`yarn test:layout-regression` runs. Such entries can still be executed
+explicitly with `--file` or `--title-includes`.
+
 ## Setup
 
 Install dependencies and Playwright browsers once:
@@ -67,6 +72,9 @@ yarn test:layout-regression \
   --file footnotes/footnote-marker-outside-style.html \
   --file table/table_colspan.html
 ```
+
+`--file` and `--title-includes` also include entries marked with
+`skipLayoutRegression: true` in `file-list.js`.
 
 When multiple values are passed for the same option, they are OR conditions.
 When different filter options are combined, they are AND conditions.

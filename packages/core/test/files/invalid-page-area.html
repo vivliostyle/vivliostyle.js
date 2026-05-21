@@ -1,0 +1,33 @@
+<!-- Test case for Issue #941: invalid page area must not trigger endless pagination -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Invalid page area</title>
+    <style>
+      @page {
+        size: 500px 500px;
+        margin: 250px;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        font: 16px/1.4 serif;
+      }
+
+      p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      This paragraph should not cause endless pagination even though the page
+      area width and height are both zero.
+    </p>
+  </body>
+</html>

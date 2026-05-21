@@ -1304,6 +1304,8 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
   const fileFilters = opts.files
     .map((v) => normalizeCase(normalizeTestFilePath(v)))
     .filter(Boolean);
+  const hasExplicitEntryFilter =
+    titleFilters.length > 0 || fileFilters.length > 0;
 
   const rows = [];
 
@@ -1376,6 +1378,10 @@ function collectTargets(fileList, opts, approvedViewerMap = new Map()) {
 
     for (const entry of group.files) {
       if (!entry?.file) {
+        continue;
+      }
+
+      if (entry.skipLayoutRegression && !hasExplicitEntryFilter) {
         continue;
       }
 
