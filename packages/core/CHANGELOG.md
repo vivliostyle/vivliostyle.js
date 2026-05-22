@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.43.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.42.1...v2.43.0) (2026-05-22)
+
+### Features
+
+- Support typed CSS `attr()` values ([8d254d0](https://github.com/vivliostyle/vivliostyle.js/commit/8d254d0626d6faadeee20a55912adfb006bd62c9)), closes [#1485](https://github.com/vivliostyle/vivliostyle.js/issues/1485)
+
+### Bug Fixes
+
+- Repeat Table Headers on Nested Rowspan Continuations ([cd2a905](https://github.com/vivliostyle/vivliostyle.js/commit/cd2a905384d211c60de634ae54d155ff71276fab)), closes [#1980](https://github.com/vivliostyle/vivliostyle.js/issues/1980)
+- **counter-style:** count grapheme clusters for pad descriptor ([f57162d](https://github.com/vivliostyle/vivliostyle.js/commit/f57162da8cb72319c78148e9b4c64d88014a5f13)), closes [#1624](https://github.com/vivliostyle/vivliostyle.js/issues/1624)
+- Prevent endless pagination on invalid page layouts ([495b9c7](https://github.com/vivliostyle/vivliostyle.js/commit/495b9c78b575491e36141a83e6b0adff70f127fd)), closes [#941](https://github.com/vivliostyle/vivliostyle.js/issues/941)
+- Fix `@page` counter-set for page-based counters ([5ebd74e](https://github.com/vivliostyle/vivliostyle.js/commit/5ebd74eb8b916c4fcf7d941be8b9aada4c916b8d)), closes [#1978](https://github.com/vivliostyle/vivliostyle.js/issues/1978)
+- Fix attribute selector case sensitivity ([b520808](https://github.com/vivliostyle/vivliostyle.js/commit/b520808a5b70e23553afcff44705ac7dae2ae94a)), closes [#1972](https://github.com/vivliostyle/vivliostyle.js/issues/1972)
+- Fix `all` resetting browser-backed shorthand longhands ([901d747](https://github.com/vivliostyle/vivliostyle.js/commit/901d74727a38852ace1f5e403fb5ce780b4cd76e))
+- Fix WPT CSS variable resolution edge cases ([825cd26](https://github.com/vivliostyle/vivliostyle.js/commit/825cd2685023dbf06712a0398e473e725164b8e5))
+- Improve browser shorthand expansion and generated content `text-box` support ([eb380ab](https://github.com/vivliostyle/vivliostyle.js/commit/eb380ab55e4412032290608a7276a8ec224806cf)), closes [#1968](https://github.com/vivliostyle/vivliostyle.js/issues/1968)
+- Preserve named page styles during target-counter relayout ([81a8908](https://github.com/vivliostyle/vivliostyle.js/commit/81a89083bcba72323b97211889dc6df6749ebd56)), closes [#1966](https://github.com/vivliostyle/vivliostyle.js/issues/1966)
+
 ## [2.42.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.42.0...v2.42.1) (2026-05-13)
 
 ### Bug Fixes
