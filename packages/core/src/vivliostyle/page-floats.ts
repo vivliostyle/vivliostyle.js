@@ -1946,10 +1946,33 @@ export class PageFloatLayoutContext
   }
 
   getPageFloatClearEdge(clear: string, column: LayoutType.Column): number {
+    const shouldIgnoreFloatForClear = (floatSide: string) => {
+      const logicalFloatSides = this.toLogicalFloatSides(floatSide);
+      const primaryLogicalFloatSide = logicalFloatSides[0];
+      if (clear === "both") {
+        return primaryLogicalFloatSide === "block-end";
+      }
+      if (clear === "inline-start") {
+        return (
+          logicalFloatSides.includes("inline-end") ||
+          primaryLogicalFloatSide === "block-end"
+        );
+      }
+      if (clear === "inline-end") {
+        return (
+          logicalFloatSides.includes("inline-start") ||
+          primaryLogicalFloatSide === "block-start" ||
+          primaryLogicalFloatSide === "block-end"
+        );
+      }
+      return false;
+    };
+
     function isContinuationOfAlreadyAppearedFloat(
       context: PageFloatLayoutContext,
     ) {
       return (continuation: PageFloatContinuation) =>
+        !shouldIgnoreFloatForClear(continuation.float.floatSide) &&
         context.isAnchorAlreadyAppeared(continuation.float.getId());
     }
 
@@ -1957,16 +1980,10 @@ export class PageFloatLayoutContext
       fragment: PageFloatFragment,
       context: PageFloatLayoutContext,
     ) {
-      if (
-        (clear === "inline-start" &&
-          (fragment.floatSide.includes("inline-end") ||
-            fragment.floatSide === "block-end")) ||
-        (clear === "inline-end" &&
-          (fragment.floatSide.includes("inline-start") ||
-            fragment.floatSide === "block-start"))
-      ) {
-        // Clear page-floats by clear:inline-start/end on non-page-float elements.
-        // (Issue #1550)
+      if (shouldIgnoreFloatForClear(fragment.floatSide)) {
+        // Block-end page floats, including footnotes, are positioned after the
+        // current block and must not force inline-side clear on normal blocks.
+        // (Issue #1987, revisiting Issue #1550 behavior)
         return false;
       }
       return fragment.continuations.some(

@@ -1,0 +1,122 @@
+<!-- Test case for Issue #1987: clear after footnote should not move normal blocks below the footnote area -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clear after footnote (Issue #1987)</title>
+    <style>
+      @page {
+        size: 110mm 140mm;
+        margin: 10mm;
+
+        @bottom-center {
+          font-size: 0.85rem;
+          content: counter(page);
+        }
+      }
+
+      :root {
+        font: 12px/1.45 Georgia, serif;
+        counter-reset: footnote;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      section {
+        break-after: page;
+      }
+
+      h1 {
+        margin: 0 0 0.6rem;
+        font-size: 1.1rem;
+      }
+
+      p {
+        margin: 0 0 0.7em;
+      }
+
+      .expect {
+        color: #555;
+        font-style: italic;
+      }
+
+      .footnote {
+        float: footnote;
+        counter-increment: footnote;
+        font-size: 0.85em;
+      }
+
+      .footnote::footnote-call {
+        content: counter(footnote);
+        font-size: 0.7em;
+        line-height: 0;
+        vertical-align: super;
+      }
+
+      .footnote::footnote-marker {
+        content: counter(footnote) ". ";
+      }
+
+      .clear-both,
+      .clear-left {
+        padding: 0.15rem 0.25rem;
+      }
+
+      .clear-both {
+        clear: both;
+        background: #ebf7e8;
+      }
+
+      .clear-left {
+        clear: left;
+        background: #eef3ff;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>clear: both after footnote</h1>
+      <p class="expect">
+        The highlighted paragraphs should remain on the same page above the
+        footnote area.
+      </p>
+      <p>
+        A paragraph with a footnote should not force the next cleared block to
+        move below the footnote area<span class="footnote"
+          >Footnote text occupies the footnote area but must not act like an
+          inline float for clear: both.</span
+        >.
+      </p>
+      <p class="clear-both">
+        This paragraph has clear: both. It should stay in the main flow on this
+        page, not move after the footnote area or disappear.
+      </p>
+      <p class="clear-both">
+        This second clear: both paragraph should also remain visible on the same
+        page.
+      </p>
+      <p>Trailing body text should remain visible after the cleared paragraphs.</p>
+    </section>
+
+    <section>
+      <h1>clear: left after footnote</h1>
+      <p class="expect">
+        This page checks the physical clear value path that maps to inline-side
+        clearance.
+      </p>
+      <p>
+        A footnote should not push the next clear:left paragraph to the next
+        page<span class="footnote"
+          >This footnote confirms the same bug for a physical clear value.</span
+        >.
+      </p>
+      <p class="clear-left">
+        This paragraph has clear: left. It should remain on the same page above
+        the footnote area.
+      </p>
+      <p>Trailing text should remain visible on the same page.</p>
+    </section>
+  </body>
+</html>
