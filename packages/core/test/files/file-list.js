@@ -259,6 +259,10 @@ module.exports = [
         title: "target-counter() named pages with :left/:right (Issue #1497)",
       },
       {
+        file: "target-counter-page-group-nth.html",
+        title: "target-counter() with :nth(1 of Page) (Issue #1990)",
+      },
+      {
         file: "target-counter-missing-page.html",
         title: "target-counter() missing page (Issue #1498)",
       },

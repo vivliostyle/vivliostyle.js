@@ -1482,7 +1482,7 @@ export type OPFViewItem = {
   item: OPFItem;
   xmldoc: XmlDoc.XMLDocHolder;
   instance: OPS.StyleInstance;
-  layoutPositions: Vtree.LayoutPosition[];
+  layoutPositions: Array<Vtree.LayoutPosition | null>;
   pages: Vtree.Page[];
   complete: boolean;
   pageCounterStarts: CssCascade.CounterValues[];
@@ -2053,8 +2053,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
           // target-counter-and-page-floats.html)
           const hasRenderedFollowingPage =
             refs.pageIndex < targetViewItem.pages.length - 1;
+          const hasRenderedTargetPage = !!targetViewItem.pages[refs.pageIndex];
           const shouldIsolateRootPageFloatLayoutContext =
-            !!targetViewItem.pages[refs.pageIndex] && hasRenderedFollowingPage;
+            hasRenderedTargetPage && hasRenderedFollowingPage;
           const originalRootPageFloatLayoutContext =
             shouldIsolateRootPageFloatLayoutContext
               ? targetViewItem.instance.beginIsolatedRootPageFloatLayoutContext()
@@ -2063,6 +2064,14 @@ export class OPFView implements Vgen.CustomRendererFactory {
           this.counterStore.pushPageCounters(refs.pageCounters);
           this.counterStore.pushReferencesToSolve(refs.refs);
           const pos = targetViewItem.layoutPositions[refs.pageIndex];
+          if (hasRenderedTargetPage) {
+            // Same-page rerenders should recompute :nth(... of <page-type>)
+            // from the page-group state of earlier pages only.
+            targetViewItem.instance.preparePageGroupPageIndicesForRerender(
+              targetViewItem.layoutPositions,
+              refs.pageIndex,
+            );
+          }
 
           this.renderSinglePage(targetViewItem, pos).then((result) => {
             if (shouldIsolateRootPageFloatLayoutContext) {
