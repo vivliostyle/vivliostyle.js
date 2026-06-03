@@ -993,16 +993,17 @@ export class StyleInstance
   }
 
   private updatePageGroupPageIndices(
-    layoutPosition: Vtree.LayoutPosition,
+    layoutPosition: Vtree.LayoutPosition | null,
   ): void {
     const pageCascade = this.pageManager.pageCascadeInstance;
     pageCascade.pageTypePageIndices = Object.create(null);
-    const startSide = layoutPosition.startSideOfFlow("body");
-    const bodyFlowPosition = layoutPosition.flowPositions["body"];
+    const startSide = layoutPosition?.startSideOfFlow("body") || null;
+    const bodyFlowPosition = layoutPosition?.flowPositions["body"];
     const hasBodyFlowContent = !!(
       bodyFlowPosition && bodyFlowPosition.positions.length
     );
     const isSpreadDeferredBlankPage =
+      !!startSide &&
       Break.isSpreadBreakValue(startSide) &&
       !this.matchPageSide(startSide) &&
       !hasBodyFlowContent;
@@ -1010,10 +1011,10 @@ export class StyleInstance
     // documents for spread alignment (issue #666). It must not consume
     // :nth(An+B of <page-type>) page-group indices.
     const isBlankPageAtDocumentStart =
-      this.blankPageAtStart && layoutPosition.page === 1;
+      this.blankPageAtStart && (!layoutPosition || layoutPosition.page === 1);
     const canStartNewPageGroup =
       !isBlankPageAtDocumentStart &&
-      !layoutPosition.isBlankPage &&
+      !layoutPosition?.isBlankPage &&
       !isSpreadDeferredBlankPage;
 
     const pageStartOffset = this.getPageStartOffset(layoutPosition);
@@ -1070,6 +1071,23 @@ export class StyleInstance
         break;
       }
       currentElement = currentElement.parentElement;
+    }
+  }
+
+  preparePageGroupPageIndicesForRerender(
+    layoutPositions: Array<Vtree.LayoutPosition | null>,
+    pageIndexToRender: number,
+  ): void {
+    this.pageGroupPageCounts = Object.create(null);
+    this.currentPageGroupDocument = null;
+
+    for (
+      let previousPageIndex = 0;
+      previousPageIndex < pageIndexToRender;
+      previousPageIndex++
+    ) {
+      const previousLayoutPosition = layoutPositions[previousPageIndex] || null;
+      this.updatePageGroupPageIndices(previousLayoutPosition);
     }
   }
 

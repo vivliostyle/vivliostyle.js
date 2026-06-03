@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1990: target-counter() must not break :nth(1 of Page) -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>target-counter page group nth</title>
+    <style>
+      @page {
+        size: 140mm 120mm;
+        margin: 14mm;
+
+        @top-center {
+          content: "default";
+          font-size: 10pt;
+        }
+
+        @bottom-center {
+          content: counter(page);
+          font-size: 10pt;
+        }
+      }
+
+      @page Page {
+        background: #f2d46b;
+
+        @top-center {
+          content: "Page group Page";
+        }
+      }
+
+      @page :nth(1 of Page) {
+        background: #da5248;
+
+        @top-center {
+          content: "first of Page";
+          color: white;
+          font-weight: bold;
+        }
+      }
+
+      body {
+        font-family: serif;
+        font-size: 12pt;
+        line-height: 1.5;
+      }
+
+      main {
+        page: Page;
+      }
+
+      .toc a::after {
+        content: leader(".") target-counter(attr(href), page);
+      }
+
+      .target {
+        break-before: page;
+      }
+
+      .note {
+        font-weight: bold;
+      }
+
+      .filler {
+        margin: 0 0 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Issue #1990</h1>
+      <p class="note">
+        This first page should stay red because it is <code>:nth(1 of Page)</code>.
+      </p>
+      <p class="filler">
+        This prelude text keeps the same <code>&lt;main&gt;</code> flowing long
+        enough that the table of contents may start on the next page without an
+        explicit forced page break.
+      </p>
+      <p class="filler">
+        If page-group indices are rebuilt from the wrong baseline during a
+        target-counter() rerender, a later page in the same named-page element
+        can incorrectly start matching <code>:nth(1 of Page)</code>.
+      </p>
+      <div class="toc">
+        <p><a href="#target">Target section</a></p>
+      </div>
+      <p>
+        The link above uses <code>target-counter()</code> and forces a rerender
+        once the target page number becomes known.
+      </p>
+      <p>
+        If the bug is present, the first page becomes yellow after rerender
+        even though it remains the first page of the Page group.
+      </p>
+      <p class="filler">
+        This test expects the TOC above to start at the top of page 2 while
+        still remaining inside the same named-page element.
+      </p>
+      <p class="filler">
+        The TOC should not start a new Page page-group unless there is an
+        actual page-type boundary; reaching it by a natural page break must
+        still leave that page as page 2 of the same group.
+      </p>
+      <p class="filler">
+        This content keeps the same <code>&lt;main&gt;</code> flowing across
+        additional pages so the first page must keep
+        <code>:nth(1 of Page)</code> even when later pages of the same
+        named-page element already exist.
+      </p>
+      <p class="filler">
+        Later pages of this main element should remain part of the same Page
+        page-group, while only the first page stays red. If page-group indices
+        are rebuilt from the wrong baseline during target-counter() rerender, a
+        later page can incorrectly behave like page 1 in the group.
+      </p>
+      <p class="filler">
+        Vivliostyle needs to resolve the cross-reference after the target page
+        number is known, but that rerender must not inherit page-group counts
+        from pages that come after the page being rerendered.
+      </p>
+      <p class="filler">
+        Additional filler text keeps this named-page element flowing across
+        multiple pages with normal in-flow content. The regression appears when
+        the stored page-group count for the same <code>&lt;main&gt;</code>
+        already advanced past the first page before the rerender happens.
+      </p>
+      <p class="filler">
+        Rebuilding the page-group state from previous pages only should keep the
+        first page index at 1 and subsequent pages in increasing order, while
+        leaving the target section to start on a later page with a resolved
+        page number in the TOC.
+      </p>
+    </main>
+
+    <section class="target">
+      <h2 id="target">Target section</h2>
+      <p>This later page provides the resolved page number.</p>
+    </section>
+  </body>
+</html>
