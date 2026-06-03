@@ -1,3 +1,15 @@
+- category: Cross-references
+  title: "target-counter() with :nth(1 of Page) (Issue #1990)"
+  file: target-counter-page-group-nth.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1990  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-page-group-nth.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-page-group-nth.html&zoom=1&spread=false
 - category: Footnotes
   title: "Clear after footnote (Issue #1987)"
   file: footnotes/clear-after-footnote.html
