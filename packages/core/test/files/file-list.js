@@ -965,6 +965,10 @@ module.exports = [
         title: "Footnotes and page floats",
       },
       {
+        file: "footnotes/clear-after-footnote.html",
+        title: "Clear after footnote (Issue #1987)",
+      },
+      {
         file: "footnotes/footnote_with_pseudoelement.html",
         title: "Footnote with pseudoelement",
       },
