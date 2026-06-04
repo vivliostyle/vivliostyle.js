@@ -791,9 +791,36 @@ export class StyleInstance
     );
     const searchRootOffset = this.xmldoc.getElementOffset(searchRoot);
     const isDocumentStart = pageStartOffset <= searchRootOffset;
-    return startElement === searchRoot && isDocumentStart
-      ? this.getFirstInFlowChildElement(searchRoot)
-      : startElement;
+    if (startElement === searchRoot && isDocumentStart) {
+      return this.getFirstInFlowChildElement(searchRoot);
+    }
+
+    const startElementOffset = startElement
+      ? this.xmldoc.getElementOffset(startElement)
+      : Number.POSITIVE_INFINITY;
+    if (startElementOffset > pageStartOffset) {
+      // Issue #1991: a continuation page can start in deferred text before any
+      // new in-flow element begins, so recover the containing normal-flow
+      // element from the raw offset instead of jumping to the next element.
+      const nodeAtOffset = this.xmldoc.getNodeByOffset(pageStartOffset);
+      if (!Vtree.canIgnore(nodeAtOffset)) {
+        let currentElement =
+          nodeAtOffset.nodeType === Node.ELEMENT_NODE
+            ? (nodeAtOffset as Element)
+            : nodeAtOffset.parentElement;
+        while (currentElement) {
+          if (
+            this.xmldoc.getElementOffset(currentElement) <= pageStartOffset &&
+            this.isNormalFlowElement(currentElement)
+          ) {
+            return currentElement;
+          }
+          currentElement = currentElement.parentElement;
+        }
+      }
+    }
+
+    return startElement;
   }
 
   private isForcedPageBreakValue(value: string | null): boolean {
@@ -2682,8 +2709,6 @@ export class StyleInstance
     page.isBlankPage = cp.isBlankPage;
     cp.page++;
 
-    // Choose the effective page type before selecting `@page` styles so page
-    // backgrounds and margin boxes use the same named-page context as content.
     const pageStartPageType = this.getPageStartPageTypeOverride(cp);
     if (pageStartPageType === "") {
       page.pageType = "";
@@ -2691,12 +2716,23 @@ export class StyleInstance
       page.pageType = pageStartPageType;
     }
     if (page.pageType == null) {
-      page.pageType =
+      const fallbackPageType =
         (page.isBlankPage
           ? this.styler.cascade.previousPageType
           : this.styler.cascade.currentPageType) ??
-        (cp.page === 1 ? this.resolveFirstPageType() : null) ??
-        "";
+        (cp.page === 1 ? this.resolveFirstPageType() : null);
+      page.pageType = fallbackPageType;
+      if (!page.pageType) {
+        // Issue #1991: `currentPageType` can still be empty when a page starts
+        // mid-paragraph after deferred footnote text. Use the direct page-start
+        // resolver only as the last fallback so existing named-page/group flows
+        // keep their normal continuation behavior.
+        const directPageStartPageType = this.getPageStartPageType(cp);
+        if (directPageStartPageType) {
+          page.pageType = directPageStartPageType;
+        }
+      }
+      page.pageType = page.pageType ?? "";
       // Fix for issue #1309
       this.styler.cascade.previousPageType =
         this.styler.cascade.currentPageType;

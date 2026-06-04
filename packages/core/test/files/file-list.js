@@ -982,6 +982,10 @@ module.exports = [
         title: "footnote-policy: line fragmentation (Issue #1899)",
       },
       {
+        file: "footnotes/named-page-deferred-text.html",
+        title: "Named page with deferred text after footnote (Issue #1991)",
+      },
+      {
         file: "footnotes/footnote-area-at-footnote.html",
         title: "Footnote area with @footnote",
       },
