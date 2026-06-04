@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1991: named page should survive deferred text after footnote-policy:auto -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Named page with deferred text after footnote</title>
+    <style>
+      @page {
+        size: 360px 240px;
+        margin: 20px;
+
+        @top-center {
+          content: "default";
+          font: 10px sans-serif;
+          color: #a33;
+        }
+
+        @bottom-center {
+          content: "Page " counter(page);
+          font: 10px sans-serif;
+        }
+      }
+
+      @page chapter {
+        background: #f4dc5d;
+
+        @top-center {
+          content: "chapter";
+          font: 10px sans-serif;
+          color: #000;
+        }
+
+        @bottom-center {
+          content: "chapter " counter(page);
+          font: 10px sans-serif;
+        }
+
+        @footnote {
+          border-top: 1px solid #444;
+          margin-top: 4px;
+          padding-top: 4px;
+        }
+      }
+
+      :root {
+        font: 16px/20px "Courier New", monospace;
+        widows: 1;
+        orphans: 1;
+        counter-reset: footnote;
+      }
+
+      body,
+      section,
+      div,
+      p {
+        margin: 0;
+        padding: 0;
+      }
+
+      .chapter {
+        page: chapter;
+      }
+
+      .filler {
+        height: 76px;
+      }
+
+      .footnote {
+        float: footnote;
+        counter-increment: footnote;
+        font: 12px/16px Georgia, serif;
+      }
+
+      .footnote::footnote-call,
+      .footnote::footnote-marker {
+        content: "[" counter(footnote) "]";
+        color: blue;
+        font-size: 10px;
+        vertical-align: super;
+      }
+
+      .next {
+        break-before: page;
+        font: 14px/20px sans-serif;
+        padding-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="chapter">
+      <div class="filler">
+        Every page in this section should stay yellow. The following paragraph
+        contains a footnote with the default auto policy.
+      </div>
+      <p>
+        This single paragraph starts on the first chapter page and should
+        continue on the next chapter page after the footnote reduces the space
+        available near the bottom of the page.<span class="footnote"
+          >This footnote is tall enough to consume the remaining page space and
+          force the surrounding chapter paragraph to continue on the following
+          page. Even when that continuation happens, the named page set on the
+          chapter section should remain active for the continued page.</span
+        > The continuation text after the call is intentionally long and kept in
+        the same paragraph so the next page begins in the middle of this named
+        page section rather than at a new element boundary. That next page must
+        still use the chapter named page and therefore keep the yellow
+        background instead of falling back to the default white page. The same
+        chapter paragraph keeps flowing with plain inline text only, without any
+        later in-flow element that could re-establish the named page by chance.
+        This makes the test sensitive to whether the page-start resolver can
+        recover the enclosing named-page ancestor from a continuation offset in
+        the middle of a paragraph. If the bug is present, the continuation page
+        turns white even though the section has not ended. If the bug is fixed,
+        every page produced by this chapter paragraph remains yellow until the
+        next section starts on its own default page.
+      </p>
+    </section>
+
+    <section class="next">
+      <p>This page should be white because it starts after the chapter ends.</p>
+    </section>
+  </body>
+</html>
