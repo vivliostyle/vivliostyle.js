@@ -1,3 +1,15 @@
+- category: Footnotes
+  title: "Named page with deferred text after footnote (Issue #1991)"
+  file: footnotes/named-page-deferred-text.html
+  decision: expected  # regression / expected / skip
+  notes: Fixes deferred-text continuation losing the direct named page after footnote-policy:auto.
+  approvedViewer: git-fix-issue1991  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/named-page-deferred-text.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/named-page-deferred-text.html&zoom=1&spread=false
 - category: Cross-references
   title: "target-counter() with :nth(1 of Page) (Issue #1990)"
   file: target-counter-page-group-nth.html
