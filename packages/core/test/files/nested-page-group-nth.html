@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- Test case for nested named page + :nth(1 of <page-type>) without target-counter() -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>nested page group nth</title>
+    <style>
+      @page {
+        size: 140mm 120mm;
+        margin: 14mm;
+
+        @top-center {
+          content: "default";
+          font-size: 10pt;
+        }
+      }
+
+      @page typical {
+        background: #f2d46b;
+
+        @top-center {
+          content: "typical";
+        }
+      }
+
+      @page chapterhead {
+        background: #7dcf88;
+
+        @top-center {
+          content: "chapterhead";
+        }
+      }
+
+      @page :nth(1 of chapterhead) {
+        background: #da5248;
+
+        @top-center {
+          content: "first of chapterhead";
+          color: white;
+          font-weight: bold;
+        }
+      }
+
+      body {
+        font-family: serif;
+        font-size: 12pt;
+        line-height: 1.5;
+      }
+
+      main {
+        page: typical;
+      }
+
+      .chapter {
+        page: chapterhead;
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="chapter">
+        <h1>Nested page type only</h1>
+        <p>This first page should match <code>:nth(1 of chapterhead)</code>.</p>
+      </section>
+    </main>
+  </body>
+</html>

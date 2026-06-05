@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2002: a specific first-page named page must override a more general body named page -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>@page override on first page</title>
+    <style>
+      @page {
+        size: 160mm 110mm;
+        margin: 12mm;
+      }
+
+      @page body {
+        background: red;
+        @top-center {
+          content: "body page";
+        }
+      }
+
+      @page front-cover {
+        background: green;
+        @top-center {
+          content: "front-cover page";
+        }
+      }
+
+      body[data-page-name="body"] {
+        page: body;
+        margin: 0;
+        font: 18px/1.4 sans-serif;
+      }
+
+      #front-cover {
+        page: front-cover;
+        break-after: page;
+        min-height: 70mm;
+        padding: 6mm;
+      }
+
+      #content {
+        padding: 6mm;
+      }
+
+      p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body data-page-name="body">
+    <div id="front-cover">
+      <p>The first page should be green.</p>
+    </div>
+    <div id="content">
+      <p>The second page should be red.</p>
+    </div>
+  </body>
+</html>

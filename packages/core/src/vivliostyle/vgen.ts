@@ -187,6 +187,123 @@ export class ViewFactory
     );
   }
 
+  private getExplicitPageType(
+    style: CssCascade.ElementStyle | null | undefined,
+  ): string | null {
+    const pageValue = style?.["page"] as CssCascade.CascadeValue;
+    if (!pageValue || Css.isDefaultingValue(pageValue.value)) {
+      return null;
+    }
+    const pageType = pageValue.evaluate(this.context, "page").toString();
+    return !pageType || pageType.toLowerCase() === "auto" ? null : pageType;
+  }
+
+  private isNormalFlowElement(element: Element): boolean {
+    const style = this.styler.getStyle(element, false);
+    const displayValue = (
+      style?.["display"] as CssCascade.CascadeValue
+    )?.evaluate(this.styler.context, "display");
+    const display =
+      displayValue && !Css.isDefaultingValue(displayValue)
+        ? (displayValue as Css.Ident)
+        : Css.ident.inline;
+    if (display === Css.ident.none) {
+      return false;
+    }
+    const positionValue = (
+      style?.["position"] as CssCascade.CascadeValue
+    )?.evaluate(this.styler.context, "position");
+    const position =
+      positionValue && !Css.isDefaultingValue(positionValue)
+        ? positionValue
+        : Css.ident.static;
+    if (
+      Display.isRunning(position) ||
+      Display.isAbsolutelyPositioned(position)
+    ) {
+      return false;
+    }
+    const floatValue = (style?.["float"] as CssCascade.CascadeValue)?.evaluate(
+      this.styler.context,
+      "float",
+    );
+    const float =
+      floatValue && !Css.isDefaultingValue(floatValue)
+        ? floatValue
+        : Css.ident.none;
+    return float === Css.ident.none;
+  }
+
+  private getFirstInFlowChildElement(root: Element): Element | null {
+    let child = root.firstChild;
+    while (child) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (!Vtree.canIgnore(child)) {
+          return null;
+        }
+        child = child.nextSibling;
+        continue;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) {
+        child = child.nextSibling;
+        continue;
+      }
+      const element = child as Element;
+      if (this.isNormalFlowElement(element)) {
+        return element;
+      }
+      child = child.nextSibling;
+    }
+    return null;
+  }
+
+  private getEffectiveStartPageType(
+    element: Element,
+    pageType: string | null,
+  ): string | null {
+    let effectivePageType = pageType;
+    let currentElement: Element | null = element;
+    while (currentElement) {
+      const child = this.getFirstInFlowChildElement(currentElement);
+      if (!child) {
+        return effectivePageType;
+      }
+      const childPageType = this.getExplicitPageType(
+        this.styler.getStyle(child, false),
+      );
+      if (childPageType) {
+        effectivePageType = childPageType;
+      }
+      currentElement = child;
+    }
+    return effectivePageType;
+  }
+
+  private syncTextNodePageTypeBoundary(nodeContext: Vtree.NodeContext): void {
+    if (
+      nodeContext.sourceNode.nodeType !== Node.TEXT_NODE ||
+      Vtree.canIgnore(nodeContext.sourceNode) ||
+      nodeContext.fragmentIndex !== 1
+    ) {
+      return;
+    }
+    const pageType = nodeContext.pageType;
+    if (this.styler.cascade.currentPageType === pageType) {
+      return;
+    }
+    if (!Break.isSpreadBreakValue(nodeContext.breakBefore)) {
+      nodeContext.breakBefore = Break.resolveEffectiveBreakValue(
+        nodeContext.breakBefore,
+        "page",
+      );
+    }
+    if (pageType !== this.styler.cascade.previousPageType) {
+      this.styler.cascade.previousPageType =
+        this.styler.cascade.currentPageType;
+    }
+    this.styler.cascade.currentPageType = pageType;
+  }
+
   private syncSemanticFootnoteCounterToTarget(element: Element): void {
     if (
       element.localName !== "a" ||
@@ -1402,8 +1519,11 @@ export class ViewFactory
         }
         // Named page type
         const pageVal: Css.Val = computedStyle["page"];
-        let pageType =
-          pageVal && !Css.isDefaultingValue(pageVal) && pageVal.toString();
+        const specifiedPageType =
+          pageVal && !Css.isDefaultingValue(pageVal)
+            ? pageVal.toString()
+            : null;
+        let pageType = specifiedPageType;
         if (
           !pageType &&
           !this.nodeContext.parent &&
@@ -1419,11 +1539,22 @@ export class ViewFactory
         } else {
           this.nodeContext.pageType = pageType;
         }
+        const hasExplicitPageType =
+          specifiedPageType != null &&
+          specifiedPageType.toLowerCase() !== "auto";
+        const effectivePageType = hasExplicitPageType
+          ? this.nodeContext.fragmentIndex === 1
+            ? this.getEffectiveStartPageType(element, pageType)
+            : (this.styler.cascade.currentPageType ?? pageType)
+          : pageType;
         if (
-          this.styler.cascade.currentPageType !== pageType &&
+          this.styler.cascade.currentPageType !== effectivePageType &&
           // Fixed positioned or running elements should not affect page type
           // unless page type is explicitly set
-          !(!pageType && computedStyle["position"] === Css.ident.fixed)
+          !(
+            !hasExplicitPageType &&
+            computedStyle["position"] === Css.ident.fixed
+          )
         ) {
           if (
             this.nodeContext.fragmentIndex === 1 &&
@@ -1432,11 +1563,11 @@ export class ViewFactory
             this.nodeContext.breakBefore = "page";
           }
           // Fix for issue #1309
-          if (pageType !== this.styler.cascade.previousPageType) {
+          if (effectivePageType !== this.styler.cascade.previousPageType) {
             this.styler.cascade.previousPageType =
               this.styler.cascade.currentPageType;
           }
-          this.styler.cascade.currentPageType = pageType;
+          this.styler.cascade.currentPageType = effectivePageType;
         }
       }
       this.nodeContext.captionSide =
@@ -2906,6 +3037,7 @@ export class ViewFactory
     if (!nodeContext || nodeContext.after) {
       return Task.newResult(nodeContext);
     }
+    this.syncTextNodePageTypeBoundary(nodeContext);
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("nextInTree");
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(
       (processChildren) => {

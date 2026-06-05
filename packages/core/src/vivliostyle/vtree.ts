@@ -665,6 +665,7 @@ export class NodeContext implements Vtree.NodeContext {
     this.fragmentIndex = 1;
     this.afterIfContinues = null;
     this.footnotePolicy = null;
+    this.pageType = this.parent ? this.parent.pageType : null;
   }
 
   private cloneItem(): NodeContext {
@@ -706,6 +707,7 @@ export class NodeContext implements Vtree.NodeContext {
     np.fragmentIndex = this.fragmentIndex;
     np.afterIfContinues = this.afterIfContinues;
     np.footnotePolicy = this.footnotePolicy;
+    np.pageType = this.pageType;
     return np;
   }
 

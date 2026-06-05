@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!-- Test case for target-counter() + nested named page + :nth(1 of <page-type>) -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>target-counter nested page group nth</title>
+    <style>
+      @page {
+        size: 140mm 120mm;
+        margin: 14mm;
+
+        @top-center {
+          content: "default";
+          font-size: 10pt;
+        }
+
+        @bottom-center {
+          content: counter(page);
+          font-size: 10pt;
+        }
+      }
+
+      @page typical {
+        background: #f2d46b;
+
+        @top-center {
+          content: "typical";
+        }
+      }
+
+      @page chapterhead {
+        background: #7dcf88;
+
+        @top-center {
+          content: "chapterhead";
+        }
+      }
+
+      @page :nth(1 of chapterhead) {
+        background: #da5248;
+
+        @top-center {
+          content: "first of chapterhead";
+          color: white;
+          font-weight: bold;
+        }
+      }
+
+      body {
+        font-family: serif;
+        font-size: 12pt;
+        line-height: 1.5;
+      }
+
+      main {
+        page: typical;
+      }
+
+      .chapter {
+        page: chapterhead;
+        break-before: page;
+      }
+
+      .toc a::after {
+        content: leader(".") target-counter(attr(href), page);
+      }
+
+      .note {
+        font-weight: bold;
+      }
+
+      .filler {
+        margin: 0 0 1em;
+      }
+
+      .target {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="chapter">
+        <h1>Nested page type + target-counter()</h1>
+        <p class="note">
+          This first page should stay red because it is
+          <code>:nth(1 of chapterhead)</code>.
+        </p>
+        <div class="toc">
+          <p><a href="#target">Target section</a></p>
+        </div>
+        <p>
+          The link above uses <code>target-counter()</code> and rerenders this
+          page after the target page number becomes known.
+        </p>
+        <p class="filler">
+          The named page on this chapter section is nested under
+          <code>&lt;main style="page: typical"&gt;</code>, so the first page
+          type must come from the child section instead of the wrapper.
+        </p>
+        <p class="filler">
+          If rerender rebuilds page-group indices or page-start state from the
+          wrong baseline, this first page can stop matching
+          <code>:nth(1 of chapterhead)</code> after the cross-reference
+          resolves.
+        </p>
+        <p class="filler">
+          Additional filler keeps the same chapter section spanning multiple
+          pages so the rerendered page must remain page 1 of the chapterhead
+          page group while later pages become page 2, page 3, and so on.
+        </p>
+        <p class="filler">
+          This exercises the same target-counter() rerender path as issue
+          #1990, but with the page type coming from a nested child instead of
+          the outer wrapper.
+        </p>
+        <p class="filler">
+          The first page should therefore keep the red
+          <code>:nth(1 of chapterhead)</code> style even after the target page
+          number is resolved and the page is re-laid out.
+        </p>
+        <p class="filler">
+          Later pages in this same chapter section should still belong to the
+          same chapterhead page group without resetting the index to 1.
+        </p>
+        <p class="filler">
+          More filler text keeps the content flowing long enough that the link
+          target appears on a later chapterhead page.
+        </p>
+        <p class="filler">
+          Re-rendering the first page must not inherit page-group counts from
+          pages that come after it, and it must not fall back to the wrapper's
+          <code>typical</code> page type.
+        </p>
+        <h2 id="target" class="target">Target section</h2>
+        <p>This later page provides the resolved page number.</p>
+        <p class="filler">
+          The chapter section continues with the same explicit page type so the
+          resolved target remains within the chapterhead page group.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

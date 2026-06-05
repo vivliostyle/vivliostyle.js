@@ -263,6 +263,10 @@ module.exports = [
         title: "target-counter() with :nth(1 of Page) (Issue #1990)",
       },
       {
+        file: "target-counter-nested-page-group-nth.html",
+        title: "target-counter() with nested :nth(1 of page type)",
+      },
+      {
         file: "target-counter-missing-page.html",
         title: "target-counter() missing page (Issue #1498)",
       },
@@ -517,6 +521,18 @@ module.exports = [
       {
         file: "named-pages/page-child-first-page.html",
         title: "Named Page on Child Element at Page Start",
+      },
+      {
+        file: "named-pages/page-name-propagation.html",
+        title: "Named page propagation (Issue #1998)",
+      },
+      {
+        file: "named-pages/page-rule-override-first-page.html",
+        title: "@page override on first page (Issue #2002)",
+      },
+      {
+        file: "nested-page-group-nth.html",
+        title: "Nested named page with :nth(1 of page type)",
       },
     ],
   },
