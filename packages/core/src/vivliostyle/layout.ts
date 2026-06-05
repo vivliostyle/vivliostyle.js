@@ -3780,6 +3780,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 break;
               }
               if (!nodeContext.after) {
+                setBreakAtTheEdge(nodeContext.breakBefore);
+                suppressWeakerLeadingColumnBreaks(nodeContext);
+                consumeSatisfiedLeadingColumnBreak(nodeContext);
                 // Leading edge of non-empty block -> finished going through
                 // all starting edges of the box
                 if (needForcedBreak()) {

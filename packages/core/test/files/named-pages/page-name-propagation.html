@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1998: named page propagation should ignore wrapper-only page changes until content actually uses them -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Named page propagation</title>
+    <style>
+      @page {
+        size: 160mm 110mm;
+        margin: 16mm;
+        background: #f7f3ea;
+        @top-center {
+          content: "default";
+        }
+        @bottom-center {
+          content: "page " counter(page);
+        }
+      }
+
+      @page a {
+        background: #fff2a8;
+        @top-center {
+          content: "page a";
+        }
+      }
+
+      @page b {
+        background: #dbeafe;
+        @top-center {
+          content: "page b";
+        }
+      }
+
+      @page c {
+        background: #fecaca;
+        @top-center {
+          content: "page c";
+        }
+      }
+
+      @page d {
+        background: #dcfce7;
+        @top-center {
+          content: "page d";
+        }
+      }
+
+      @page e {
+        background: #e9d5ff;
+        @top-center {
+          content: "page e";
+        }
+      }
+
+      html,
+      body {
+        margin: 0;
+        font: 18px/1.45 sans-serif;
+      }
+
+      div {
+        border: 2px solid rgba(0, 0, 0, 0.5);
+        padding: 6px 10px;
+        margin: 0 0 6px;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .a {
+        page: a;
+      }
+
+      .b {
+        page: b;
+      }
+
+      .c {
+        page: c;
+      }
+
+      .d {
+        page: d;
+      }
+
+      .e {
+        page: e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="a">
+      <p>a should share page a with b.</p>
+    </div>
+    <div class="b">
+      <div class="e">
+        <div class="a">
+          <p>
+            b should stay on page a because the first content inside the b and
+            e wrappers overrides them back to page a.
+          </p>
+        </div>
+      </div>
+      <div class="c">
+        <p>c should start page c.</p>
+      </div>
+    </div>
+    <div class="d">
+      <p>d should start page d.</p>
+    </div>
+  </body>
+</html>

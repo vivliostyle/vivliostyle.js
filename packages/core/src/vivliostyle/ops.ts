@@ -945,6 +945,41 @@ export class StyleInstance
       : startElement;
   }
 
+  private getEffectiveFirstPageType(element: Element | null): string | null {
+    let currentElement = element;
+    let effectivePageType = currentElement
+      ? this.getPageGroupPageType(currentElement)
+      : null;
+    while (currentElement) {
+      const child = this.getFirstInFlowChildElement(currentElement);
+      if (!child) {
+        return effectivePageType;
+      }
+      const childPageType = this.getPageGroupPageType(child);
+      if (childPageType) {
+        effectivePageType = childPageType;
+      }
+      currentElement = child;
+    }
+    return effectivePageType;
+  }
+
+  private getEffectivePageGroupStartElement(startElement: Element): Element {
+    let effectiveStartElement = startElement;
+    let currentElement: Element | null = startElement;
+    while (currentElement) {
+      const child = this.getFirstInFlowChildElement(currentElement);
+      if (!child) {
+        return effectiveStartElement;
+      }
+      if (this.getPageGroupPageType(child)) {
+        effectiveStartElement = child;
+      }
+      currentElement = child;
+    }
+    return effectiveStartElement;
+  }
+
   /**
    * Resolve the page type for the first page by examining the first in-flow
    * element's CSS `page` property. This is needed because `currentPageType`
@@ -960,10 +995,7 @@ export class StyleInstance
    */
   private resolveFirstPageType(): string | null {
     const firstElement = this.getFirstDocumentFlowElement();
-    if (!firstElement) {
-      return null;
-    }
-    return this.getPageGroupPageType(firstElement);
+    return this.getEffectiveFirstPageType(firstElement);
   }
 
   private shouldStartPageGroup(
@@ -1045,14 +1077,21 @@ export class StyleInstance
       !isSpreadDeferredBlankPage;
 
     const pageStartOffset = this.getPageStartOffset(layoutPosition);
-    const startElement = this.getPageStartElement(
+    const rawStartElement = this.getPageStartElement(
       layoutPosition,
       pageStartOffset,
     );
 
-    if (!startElement) {
+    if (!rawStartElement) {
       return;
     }
+
+    const startElement =
+      this.getEffectivePageGroupStartElement(rawStartElement);
+    const effectivePageStartOffset =
+      startElement === rawStartElement
+        ? pageStartOffset
+        : this.xmldoc.getElementOffset(startElement);
 
     const startDocument = startElement.ownerDocument;
     const isNewPageGroupDocument =
@@ -1081,7 +1120,7 @@ export class StyleInstance
               this.shouldStartPageGroup(
                 currentElement,
                 pageType,
-                pageStartOffset,
+                effectivePageStartOffset,
               )))
         ) {
           pageIndex += 1;
@@ -2716,11 +2755,10 @@ export class StyleInstance
       page.pageType = pageStartPageType;
     }
     if (page.pageType == null) {
-      const fallbackPageType =
-        (page.isBlankPage
-          ? this.styler.cascade.previousPageType
-          : this.styler.cascade.currentPageType) ??
-        (cp.page === 1 ? this.resolveFirstPageType() : null);
+      const firstPageType = cp.page === 1 ? this.resolveFirstPageType() : null;
+      const fallbackPageType = page.isBlankPage
+        ? this.styler.cascade.previousPageType
+        : (firstPageType ?? this.styler.cascade.currentPageType);
       page.pageType = fallbackPageType;
       if (!page.pageType) {
         // Issue #1991: `currentPageType` can still be empty when a page starts

@@ -3656,7 +3656,9 @@ export class CascadeInstance {
       this.elementStack.push(element);
     }
 
-    // do not apply page rules
+    // Do not apply @page rules to element styles, but preserve the current
+    // page-type progression state for layout code that reuses this instance.
+    const savedCurrentPageType = this.currentPageType;
     this.currentPageType = null;
     this.currentElement = element;
     this.currentElementOffset = elementOffset;
@@ -3735,6 +3737,7 @@ export class CascadeInstance {
     }
     followingSiblingTypeCountsStack.push({});
     this.applyActions();
+    this.currentPageType = savedCurrentPageType;
 
     // Substitute var()
     this.applyVarFilter([this.currentStyle], styler, element);
