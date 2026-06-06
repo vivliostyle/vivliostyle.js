@@ -183,10 +183,21 @@ class CounterListener implements CssCascade.CounterListener {
 }
 
 /**
- * Map for named string name, element offset, and the string value
+ * Map for named string name, element offset, and the string value.
+ * The value is normally a plain string, but when the `string-set` value
+ * contains page-based counters it is kept as a `Css.Val` content list so the
+ * counters can be resolved per page (Issue #1997).
  */
 type NamedRunningValues = {
-  [name: string]: { [elementOffset: number]: string };
+  [name: string]: { [elementOffset: number]: string | Css.Val };
+};
+
+/**
+ * A `named-string-*` native expression that also exposes the stored content
+ * list so page-based counters can be rendered as patchable nodes (Issue #1997).
+ */
+type NamedStringNative = Exprs.Native & {
+  getContentList?: () => Css.Val | null;
 };
 
 class CounterResolver implements CssCascade.CounterResolver {
@@ -573,12 +584,18 @@ class CounterResolver implements CssCascade.CounterResolver {
    * https://drafts.csswg.org/css-gcpm-3/#using-named-strings
    */
   getNamedStringVal(name: string, retrievePosition: string): Exprs.Val {
-    return new Exprs.Native(
+    const native = new Exprs.Native(
       this.pageScope,
       () =>
         this.getRunningValue(this.namedStringValues, name, retrievePosition),
       `named-string-${retrievePosition}-${name}`,
     );
+    // Expose the stored content list (when the value contains page-based
+    // counters) so ContentPropertyHandler can render the counters as patchable
+    // nodes instead of a frozen string (Issue #1997).
+    (native as NamedStringNative).getContentList = () =>
+      this.getRunningContentList(name, retrievePosition);
+    return native;
   }
 
   /**
@@ -598,9 +615,133 @@ class CounterResolver implements CssCascade.CounterResolver {
     name: string,
     retrievePosition: string,
   ): string {
+    const raw = this.getRunningRawValue(
+      namedRunningValues,
+      name,
+      retrievePosition,
+    );
+    if (typeof raw.value === "string") {
+      return raw.value;
+    }
+    return this.contentListToString(
+      this.resolveDeferredContentList(raw.value, raw.offset),
+    );
+  }
+
+  /**
+   * Get the stored content list for a named string used in the current page,
+   * or null when the stored value is a plain string. Used to render page-based
+   * counters inside named strings as patchable nodes (Issue #1997).
+   */
+  getRunningContentList(
+    name: string,
+    retrievePosition: string,
+  ): Css.Val | null {
+    const raw = this.getRunningRawValue(
+      this.namedStringValues,
+      name,
+      retrievePosition,
+    );
+    if (typeof raw.value === "string") {
+      return null;
+    }
+    return this.resolveDeferredContentList(raw.value, raw.offset);
+  }
+
+  /**
+   * Resolve a stored named-string content list for rendering (Issue #1997).
+   *
+   * `counter(page)` (and any page-controlled counter other than `pages`) is
+   * resolved against the page that actually contains the assignment element
+   * (snapshot semantics, looked up by its element offset), but kept as a
+   * patchable expression node so cross-spine repagination
+   * (`adjustPageCountersOfLaterSpines` + `updatePageCounterNodesInPages`) can
+   * update the rendered page number. `counter(pages)` is likewise kept as a
+   * patchable expression filled with the final page count later.
+   */
+  private resolveDeferredContentList(val: Css.Val, offset: number): Css.Val {
+    return this.freezePageCounters(val, offset);
+  }
+
+  private freezePageCounters(val: Css.Val, offset: number): Css.Val {
+    if (val instanceof Css.Expr) {
+      const ex = val.expr;
+      if (ex instanceof Exprs.Native) {
+        const m = /^page-counters?-(.+)$/.exec(ex.str);
+        if (m) {
+          if (m[1] === "pages") {
+            // Total page count: keep as a patchable expression.
+            return val;
+          }
+          // counter(page) (and other page-controlled counters): bind to the
+          // assignment-page snapshot but keep it patchable so the rendered
+          // page number is updated when later pagination shifts page numbers.
+          const store = this.counterStore;
+          const counterName = m[1];
+          const format =
+            store.getPageCounterFormat(ex) ||
+            ((arr: number[]) =>
+              arr.length ? String(arr[arr.length - 1]) : "");
+          const patchExpr = store.getOrCreateNamedStringPageCounterExpr(
+            this.pageScope,
+            offset,
+            counterName,
+            format,
+          );
+          return new Css.Expr(patchExpr);
+        }
+      }
+      return val;
+    }
+    if (val instanceof Css.SpaceList) {
+      return new Css.SpaceList(
+        val.values.map((v) => this.freezePageCounters(v, offset)),
+      );
+    }
+    if (val instanceof Css.CommaList) {
+      return new Css.CommaList(
+        val.values.map((v) => this.freezePageCounters(v, offset)),
+      );
+    }
+    return val;
+  }
+
+  /**
+   * Best-effort conversion of a stored named-string content list to a string.
+   * Page-based counters are evaluated against the current page counters; the
+   * total page count (`counter(pages)`) is only finalized later by the DOM
+   * patching in finishLastPage, so this is used only as a fallback when the
+   * value is not rendered through ContentPropertyHandler.
+   */
+  private contentListToString(val: Css.Val): string {
+    if (val instanceof Css.Str) {
+      return val.stringValue();
+    }
+    if (val instanceof Css.Expr) {
+      const ex = val.expr;
+      if (ex instanceof Exprs.Native) {
+        const result = ex.fn.call(null);
+        return result == null ? "" : String(result);
+      }
+      return "";
+    }
+    if (val instanceof Css.SpaceList) {
+      return val.values.map((v) => this.contentListToString(v)).join("");
+    }
+    if (val instanceof Css.CommaList) {
+      return val.values.map((v) => this.contentListToString(v)).join("");
+    }
+    return "";
+  }
+
+  private getRunningRawValue(
+    namedRunningValues: NamedRunningValues,
+    name: string,
+    retrievePosition: string,
+  ): { value: string | Css.Val; offset: number } {
     const runningValues = namedRunningValues[name];
     if (!runningValues) {
-      return "";
+      return { value: "", offset: -1 };
     }
     const offsets = Object.keys(runningValues)
       .map((a) => parseInt(a, 10))
@@ -608,7 +749,7 @@ class CounterResolver implements CssCascade.CounterResolver {
 
     const currentPage = this.counterStore.currentPage;
     if (!currentPage) {
-      return "";
+      return { value: "", offset: -1 };
     }
     const pageStartOffset = currentPage.isBlankPage
       ? currentPage.offset - 1
@@ -701,7 +842,15 @@ class CounterResolver implements CssCascade.CounterResolver {
         }[retrievePosition]
       ] || "";
 
-    return runningValue;
+    return {
+      value: runningValue,
+      offset: {
+        first: firstOffset,
+        start: startOffset,
+        last: lastOffset,
+        "first-except": firstExceptOffset,
+      }[retrievePosition],
+    };
   }
 
   /**
@@ -710,13 +859,19 @@ class CounterResolver implements CssCascade.CounterResolver {
    */
   setNamedString(
     name: string,
-    stringValue: string,
+    stringValue: string | Css.Val,
     elementOffset: number,
   ): void {
     const values =
       this.namedStringValues[name] ||
       (this.namedStringValues[name] = Object.create(null));
     values[elementOffset] = stringValue;
+    if (typeof stringValue !== "string") {
+      // A deferred content list (contains page-based counters); enable
+      // per-page counter snapshotting so the value can be resolved against the
+      // page that actually contains the assignment element (Issue #1997).
+      this.counterStore.hasDeferredNamedStrings = true;
+    }
   }
 
   /**
@@ -752,6 +907,31 @@ export class CounterStore {
   // Issue #1999: remember the page-counter base from before a page-local
   // override so later pages can resume the inherited sequence.
   pageCountersBeforeOverride: CssCascade.CounterValues = Object.create(null);
+  // Issue #1997: per-page snapshot of the page counters, keyed by the page's
+  // start element offset, recorded when each page is finished. Used to resolve
+  // page-based counters in named strings (string-set) against the page that
+  // actually contains the assignment element, regardless of which page first
+  // uses the named string.
+  hasDeferredNamedStrings = false;
+  namedStringPageSnapshots: {
+    [startOffset: number]: {
+      lastOffset: number;
+      spineIndex: number;
+      counters: CssCascade.CounterValues;
+    };
+  } = Object.create(null);
+  // Issue #1997: patchable counter(page) expressions used inside named strings,
+  // keyed by the expression key. Each reads its value from the assignment-page
+  // snapshot (via getPageCountersForOffset) so the rendered running-header page
+  // number can be updated when cross-spine repagination shifts page numbers.
+  namedStringPageCounterExprMap: {
+    [exprKey: string]: {
+      expr: Exprs.Val;
+      offset: number;
+      counterName: string;
+      format: (p1: number[]) => string;
+    };
+  } = Object.create(null);
   currentPageCountersStack: CssCascade.CounterValues[] = [];
   pageIndicesById: {
     [key: string]: { spineIndex: number; pageIndex: number };
@@ -1207,7 +1387,76 @@ export class CounterStore {
         arr.push(ref);
       }
     }
+    if (this.hasDeferredNamedStrings && this.currentPage) {
+      this.recordNamedStringPageSnapshot(spineIndex);
+    }
     this.currentPage = null;
+  }
+
+  /**
+   * Record a snapshot of the current page counters keyed by the page's element
+   * offset range, so page-based counters in named strings (string-set) can be
+   * resolved against the page that contains the assignment element (Issue
+   * #1997). Re-finishing a page (relayout) overwrites the previous snapshot.
+   * The spine index is stored so the snapshot can be shifted together with
+   * pageCountersById when a preceding spine's page count changes (see
+   * adjustPageCountersOfLaterSpines).
+   */
+  private recordNamedStringPageSnapshot(spineIndex: number) {
+    const page = this.currentPage;
+    const startOffset = page.isBlankPage ? page.offset - 1 : page.offset;
+    const lastOffset = page.isBlankPage
+      ? startOffset
+      : Math.max(
+          startOffset,
+          ...Array.from(
+            page.container.querySelectorAll(`[${Base.ELEMENT_OFFSET_ATTR}]`),
+          ).map((e) => parseInt(e.getAttribute(Base.ELEMENT_OFFSET_ATTR), 10)),
+        );
+    // Repagination (e.g. after target-text/TOC expansion) can change page
+    // boundaries, so a previously recorded snapshot may now span a different
+    // offset range. Drop only stale entries that start at/after the new page's
+    // start offset (i.e. later pages) so getPageCountersForOffset never matches
+    // an outdated later-page snapshot. Earlier-starting snapshots are kept: the
+    // same element offset can legitimately appear on multiple consecutive pages
+    // (a fragmented element, or a blank page using offset-1), and in that case
+    // the earlier page's snapshot must remain the one returned so counter(page)
+    // freezes to the assignment page (Issue #1997).
+    for (const key of Object.keys(this.namedStringPageSnapshots)) {
+      const existingStart = parseInt(key, 10);
+      if (existingStart <= startOffset) continue;
+      const existing = this.namedStringPageSnapshots[existingStart];
+      if (existingStart <= lastOffset && startOffset <= existing.lastOffset) {
+        delete this.namedStringPageSnapshots[existingStart];
+      }
+    }
+    this.namedStringPageSnapshots[startOffset] = {
+      lastOffset,
+      spineIndex,
+      counters: cloneCounterValues(this.currentPageCounters),
+    };
+  }
+
+  /**
+   * Return the page counters captured for the finished page whose element
+   * offset range contains the given offset, or null when no such page has been
+   * finished yet (Issue #1997).
+   */
+  getPageCountersForOffset(offset: number): CssCascade.CounterValues | null {
+    // Snapshot keys are numeric page start offsets; Object.keys returns them in
+    // ascending order, so once a page starts after the target offset no later
+    // page can contain it.
+    for (const key of Object.keys(this.namedStringPageSnapshots)) {
+      const startOffset = parseInt(key, 10);
+      if (startOffset > offset) {
+        break;
+      }
+      const snap = this.namedStringPageSnapshots[startOffset];
+      if (offset <= snap.lastOffset) {
+        return snap.counters;
+      }
+    }
+    return null;
   }
 
   /**
@@ -1232,6 +1481,20 @@ export class CounterStore {
           adjusted.add(counters);
           counters["page"] = counters["page"].map((v) => v + pageDelta);
         }
+      }
+    }
+    // Issue #1997: keep named-string page snapshots (used to freeze
+    // counter(page) for deferred named strings) in sync with the shifted page
+    // numbers so running headers assigned in later spines stay correct.
+    for (const key of Object.keys(this.namedStringPageSnapshots)) {
+      const snap = this.namedStringPageSnapshots[parseInt(key, 10)];
+      if (
+        snap.spineIndex > expandedSpineIndex &&
+        snap.counters["page"] &&
+        !adjusted.has(snap.counters)
+      ) {
+        adjusted.add(snap.counters);
+        snap.counters["page"] = snap.counters["page"].map((v) => v + pageDelta);
       }
     }
   }
@@ -1306,6 +1569,23 @@ export class CounterStore {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
       if (!page?.container) continue;
+
+      // Issue #1997: patch counter(page) nodes inside named strings from the
+      // assignment-page snapshot (which adjustPageCountersOfLaterSpines has
+      // already shifted), independent of this page's own page counters.
+      const nsNodes = page.container.querySelectorAll(
+        `[${NAMED_STRING_PAGE_COUNTER_ATTR}]`,
+      );
+      for (const node of nsNodes) {
+        const key = node.getAttribute(NAMED_STRING_PAGE_COUNTER_ATTR);
+        const entry = this.namedStringPageCounterExprMap[key];
+        if (!entry) continue;
+        const counters = this.getPageCountersForOffset(entry.offset);
+        const values = counters?.[entry.counterName];
+        if (values) {
+          node.textContent = entry.format(values);
+        }
+      }
 
       const counters = this.getPageCountersForPage(
         page,
@@ -1409,6 +1689,55 @@ export class CounterStore {
       this.pageCounterExprs.push({ expr, format });
     }
   }
+
+  /**
+   * Return the format function registered for a page-counter expression, or
+   * null if it is not a registered page counter (Issue #1997).
+   */
+  getPageCounterFormat(expr: Exprs.Val): ((p1: number[]) => string) | null {
+    const found = this.pageCounterExprs.find((o) => o.expr === expr);
+    return found ? found.format : null;
+  }
+
+  /**
+   * Get (or lazily create) a patchable expression for a counter(page) used
+   * inside a named string assigned at the given element offset. The expression
+   * reads its value from the assignment-page snapshot so it stays correct after
+   * cross-spine repagination shifts page numbers (Issue #1997). The same
+   * (offset, counterName) pair always reuses the same expression to avoid
+   * unbounded growth across margin-box re-renders.
+   */
+  getOrCreateNamedStringPageCounterExpr(
+    pageScope: Exprs.LexicalScope,
+    offset: number,
+    counterName: string,
+    format: (p1: number[]) => string,
+  ): Exprs.Val {
+    for (const key in this.namedStringPageCounterExprMap) {
+      const entry = this.namedStringPageCounterExprMap[key];
+      if (entry.offset === offset && entry.counterName === counterName) {
+        return entry.expr;
+      }
+    }
+    const expr = new Exprs.Native(
+      pageScope,
+      () => {
+        const counters =
+          offset >= 0 ? this.getPageCountersForOffset(offset) : null;
+        const values =
+          (counters || this.currentPageCounters)[counterName] || [];
+        return format(values);
+      },
+      `named-string-page-counter-${counterName}`,
+    );
+    this.namedStringPageCounterExprMap[expr.key] = {
+      expr,
+      offset,
+      counterName,
+      format,
+    };
+    return expr;
+  }
   registerTargetCounterExpr(
     name: string,
     format: (p1: number) => string,
@@ -1464,6 +1793,13 @@ export class CounterStore {
         const node = document.createElementNS(Base.NS.XHTML, "span");
         node.textContent = val;
         node.setAttribute(TARGET_TEXT_ATTR, expr.key);
+        return node;
+      } else if (expr.str.startsWith("named-string-page-counter-")) {
+        // counter(page) inside a named string (Issue #1997): render as a
+        // patchable span so cross-spine repagination can update its value.
+        const node = document.createElementNS(Base.NS.XHTML, "span");
+        node.textContent = val;
+        node.setAttribute(NAMED_STRING_PAGE_COUNTER_ATTR, expr.key);
         return node;
       }
     }
@@ -1567,6 +1903,11 @@ export class CounterStore {
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
 export const PAGE_COUNTER_ATTR = "data-vivliostyle-page-counter";
+// Issue #1997: marks a counter(page) node rendered inside a named string, so
+// it is patched from the assignment-page snapshot (not the running header's
+// own page) when page numbers shift after cross-spine repagination.
+export const NAMED_STRING_PAGE_COUNTER_ATTR =
+  "data-vivliostyle-named-string-page-counter";
 export const TARGET_COUNTER_ATTR = "data-vivliostyle-target-counter";
 export const TARGET_TEXT_ATTR = "data-vivliostyle-target-text";
 

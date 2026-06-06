@@ -2109,7 +2109,7 @@ export interface CounterResolver {
    */
   setNamedString(
     name: string,
-    stringValue: string,
+    stringValue: string | Css.Val,
     elementOffset: number,
   ): void;
 
@@ -2215,6 +2215,54 @@ function getStringValueFromCssContentVal(
     }
   }
   return "";
+}
+
+/**
+ * Returns true if the value contains a page-based counter expression
+ * (`counter(page)` / `counter(pages)` or a counter that is page-controlled).
+ * Such values must be kept as a content list so the counters are resolved per
+ * page and patched with the final page count (Issue #1997).
+ */
+function containsPageCounter(val: Css.Val): boolean {
+  if (val instanceof Css.Expr) {
+    const ex = val.expr;
+    return ex instanceof Exprs.Native && /^page-counters?-/.test(ex.str);
+  }
+  if (val instanceof Css.SpaceList || val instanceof Css.CommaList) {
+    return val.values.some((v) => containsPageCounter(v));
+  }
+  return false;
+}
+
+/**
+ * Build the deferred content list stored for a `string-set` value that
+ * contains page-based counters (Issue #1997). Only the page-based counter
+ * expressions are kept deferred (so they can be resolved per page and patched
+ * with the final page count); every other part is stringified up front using
+ * the same rules as the non-deferred path (`getStringValueFromCssContentVal`),
+ * which ignores non-string content such as `url()`. This keeps `string()`
+ * behaving like plain string-set stringification instead of injecting images
+ * or other replaced content.
+ */
+function buildDeferredStringSetVal(
+  val: Css.Val,
+  context?: Exprs.Context,
+): Css.Val {
+  if (!containsPageCounter(val)) {
+    return new Css.Str(getStringValueFromCssContentVal(val, context));
+  }
+  if (val instanceof Css.SpaceList) {
+    return new Css.SpaceList(
+      val.values.map((v) => buildDeferredStringSetVal(v, context)),
+    );
+  }
+  if (val instanceof Css.CommaList) {
+    return new Css.CommaList(
+      val.values.map((v) => buildDeferredStringSetVal(v, context)),
+    );
+  }
+  // A page-based counter expression: keep it deferred.
+  return val;
 }
 
 export class ContentPropVisitor extends Css.FilterVisitor {
@@ -3686,15 +3734,32 @@ export class CascadeInstance {
     for (const set of sets) {
       if (set instanceof Css.SpaceList) {
         const name = set.values[0].stringValue();
-        const stringValue = set.values
-          .slice(1)
-          .map((v) => getStringValueFromCssContentVal(v, this.context))
-          .join("");
-        this.counterResolver.setNamedString(
-          name,
-          stringValue,
-          this.currentElementOffset,
-        );
+        const valueParts = set.values.slice(1);
+        if (valueParts.some((v) => containsPageCounter(v))) {
+          // When the value contains page-based counters (counter(page) /
+          // counter(pages)), keep the content list so the counters are
+          // resolved at the page where the named string is used and patched
+          // with the final page count (Issue #1997). Non-counter parts are
+          // stringified up front so `string()` ignores non-string content
+          // (e.g. url()) just like the plain stringification path.
+          this.counterResolver.setNamedString(
+            name,
+            buildDeferredStringSetVal(
+              new Css.SpaceList(valueParts),
+              this.context,
+            ),
+            this.currentElementOffset,
+          );
+        } else {
+          const stringValue = valueParts
+            .map((v) => getStringValueFromCssContentVal(v, this.context))
+            .join("");
+          this.counterResolver.setNamedString(
+            name,
+            stringValue,
+            this.currentElementOffset,
+          );
+        }
       }
     }
     delete props["string-set"];

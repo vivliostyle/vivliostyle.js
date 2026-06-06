@@ -551,6 +551,10 @@ module.exports = [
         file: "named-strings/string-set-attr.html",
         title: "string-set with attr() function",
       },
+      {
+        file: "named-strings/string-set-counter-page.html",
+        title: "string-set with counter(page) (Issue #1997)",
+      },
     ],
   },
   {

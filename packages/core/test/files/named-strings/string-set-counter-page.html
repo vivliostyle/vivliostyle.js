@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1997: string-set with counter(page) not working -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>string-set with counter(page)</title>
+    <style>
+      @page {
+        size: 200mm 150mm;
+        margin: 20mm;
+        @top-center {
+          content: string(title);
+          color: blue;
+        }
+        @bottom-center {
+          content: "page " counter(page) " of " counter(pages);
+        }
+      }
+      h1 {
+        string-set: title counter(page) " of " counter(pages);
+      }
+      .break {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Heading on page 1</h1>
+    <p>
+      Test passes if the running head at the top shows "1 of 2" (the page
+      number where the &lt;h1&gt; appears and the total page count).
+    </p>
+    <p class="break">Second page content. The running head should still show "1 of 2".</p>
+  </body>
+</html>
