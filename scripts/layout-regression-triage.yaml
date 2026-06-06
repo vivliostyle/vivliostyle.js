@@ -1,3 +1,15 @@
+- category: Named Strings
+  title: "string-set with counter(page) (Issue #1997)"
+  file: named-strings/string-set-counter-page.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1997  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named-strings/string-set-counter-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named-strings/string-set-counter-page.html&zoom=1&spread=false
 - category: Cross-references
   title: target-counter() with nested :nth(1 of page type)
   file: target-counter-nested-page-group-nth.html
