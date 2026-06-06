@@ -2258,6 +2258,35 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     )?.style?.pageScope;
   }
 
+  private hasLocalCounterResetOrSet(counterName: string): boolean {
+    return (
+      this.hasLocalCounter(counterName, "counter-reset", { reset: true }) ||
+      this.hasLocalCounter(counterName, "counter-set", { defaultValue: 0 })
+    );
+  }
+
+  private hasLocalCounterIncrement(counterName: string): boolean {
+    return this.hasLocalCounter(counterName, "counter-increment", {});
+  }
+
+  private hasLocalCounter(
+    counterName: string,
+    propName: "counter-reset" | "counter-set" | "counter-increment",
+    options: { reset?: boolean; defaultValue?: number },
+  ): boolean {
+    const currentStyle = this.cascade.currentStyle;
+    const cascVal = currentStyle?.[propName] as CascadeValue;
+    if (!cascVal) {
+      return false;
+    }
+    const value = cascVal.evaluate(this.cascade.context);
+    if (!value || Css.isDefaultingValue(value)) {
+      return false;
+    }
+    const counters = CssProp.toCounters(value, options);
+    return Object.prototype.hasOwnProperty.call(counters, counterName);
+  }
+
   /**
    * Helper method to evaluate CSS values containing counter() and other functions,
    * then convert to string.
@@ -2345,6 +2374,8 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     type: string,
     cascadeDocCounters: number[],
     separator?: string,
+    localCounterResetOrSet: boolean = false,
+    localCounterIncrement: boolean = false,
   ): string {
     const isList = typeof separator === "string";
     const formatCounterValues = (values: number[]): string => {
@@ -2356,6 +2387,11 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       if (this.pseudoName === "footnote-call" && this.element) {
         setFootnoteCounterValues(this.element, counterName, values);
       }
+    };
+    const counterValuesEqual = (a: number[], b: number[]): boolean => {
+      return (
+        a.length === b.length && a.every((value, index) => value === b[index])
+      );
     };
     if (this.pseudoName === "footnote-call" && this.element) {
       const storedDuplicateSemanticFootnoteCounter =
@@ -2377,17 +2413,52 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
 
     if (!this.element) {
-      const pageCounters = store.currentPageCounters?.[counterName] || [];
-      if (pageCounters.length) {
-        counterValues = pageCounters;
+      // Issue #1999: a page or margin-box local reset/set shadows the page
+      // counter state while resolving this generated content.
+      if (localCounterResetOrSet && cascadeDocCounters.length) {
+        counterValues = cascadeDocCounters;
         storeFootnoteCounterValuesIfNeeded(counterValues);
         return formatCounterValues(counterValues);
       }
+      if (
+        store.isPageControlledCounter?.(counterName) &&
+        localCounterIncrement &&
+        cascadeDocCounters.length
+      ) {
+        // Issue #1999: increment-only inside page/margin-box content is a
+        // delta from the page-start counter value, not a fresh local counter.
+        const pageCounters = store.currentPageCounters?.[counterName] || [];
+        const pageStartVal = pageCounters.length
+          ? pageCounters[pageCounters.length - 1]
+          : 0;
+        counterValues = [
+          pageStartVal + cascadeDocCounters[cascadeDocCounters.length - 1],
+        ];
+        storeFootnoteCounterValuesIfNeeded(counterValues);
+        return formatCounterValues(counterValues);
+      }
+      if (!store.isPageControlledCounter?.(counterName)) {
+        const pageCounters = store.currentPageCounters?.[counterName] || [];
+        if (pageCounters.length) {
+          counterValues = pageCounters;
+          storeFootnoteCounterValuesIfNeeded(counterValues);
+          return formatCounterValues(counterValues);
+        }
+      }
     }
 
+    const pageDocCounters = store.currentPageDocCounters?.[counterName] || [];
+    const useLocalPageCounters =
+      !this.element &&
+      cascadeDocCounters.length &&
+      !counterValuesEqual(cascadeDocCounters, pageDocCounters);
     const docCounters = this.element
       ? cascadeDocCounters
-      : store.currentPageDocCounters?.[counterName] || cascadeDocCounters;
+      : useLocalPageCounters
+        ? cascadeDocCounters
+        : pageDocCounters.length
+          ? pageDocCounters
+          : cascadeDocCounters;
 
     if (store.isPageControlledCounter?.(counterName)) {
       const docStartCounters =
@@ -2430,6 +2501,10 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     const cascadeDocCounters = (
       this.cascade.counters[counterName] || []
     ).slice();
+    const localCounterResetOrSet =
+      !this.element && this.hasLocalCounterResetOrSet(counterName);
+    const localCounterIncrement =
+      !this.element && this.hasLocalCounterIncrement(counterName);
     // When a counter store is available, return a native expression so
     // page/document counters resolve at layout time.
     const counterStore = this.getCounterStore();
@@ -2446,6 +2521,9 @@ export class ContentPropVisitor extends Css.FilterVisitor {
             counterName,
             type,
             cascadeDocCounters,
+            undefined,
+            localCounterResetOrSet,
+            localCounterIncrement,
           ),
         isPageCounter
           ? `page-counter-${counterName}`
@@ -2482,6 +2560,10 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     const cascadeDocCounters = (
       this.cascade.counters[counterName] || []
     ).slice();
+    const localCounterResetOrSet =
+      !this.element && this.hasLocalCounterResetOrSet(counterName);
+    const localCounterIncrement =
+      !this.element && this.hasLocalCounterIncrement(counterName);
     const counterStore = this.getCounterStore();
     if (counterStore) {
       const isPageCounter =
@@ -2497,6 +2579,8 @@ export class ContentPropVisitor extends Css.FilterVisitor {
             type,
             cascadeDocCounters,
             separator,
+            localCounterResetOrSet,
+            localCounterIncrement,
           ),
         isPageCounter
           ? `page-counters-${counterName}`
@@ -3404,12 +3488,12 @@ export class CascadeInstance {
     }
     // Ignore counter-* on 'display: none' elements and their descendants
     if (displayVal === Css.ident.none) {
-      this.currentElement.setAttribute("data-viv-display-none", "true");
+      this.currentElement?.setAttribute("data-viv-display-none", "true");
       this.lastCounterChanges = [];
       this.lastCounterChangeTypes = Object.create(null);
       this.counterScoping.push(null);
       return;
-    } else if (this.currentElement.closest("[data-viv-display-none]")) {
+    } else if (this.currentElement?.closest("[data-viv-display-none]")) {
       this.lastCounterChanges = [];
       this.lastCounterChangeTypes = Object.create(null);
       this.counterScoping.push(null);

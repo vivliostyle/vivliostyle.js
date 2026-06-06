@@ -1677,6 +1677,15 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     cascade.pushRule(this.pageBox.classes, null, style);
     const content = style["content"] as CssCascade.CascadeValue;
     if (content) {
+      const savedLastCounterChanges = Array.from(cascade.lastCounterChanges);
+      const savedLastCounterChangeTypes = {
+        ...cascade.lastCounterChangeTypes,
+      };
+      // Issue #1999: isolate temporary counter scoping while capturing
+      // page/margin-box content so sibling margin boxes do not inherit each
+      // other's local counter operations.
+      cascade.counterScoping.push(null);
+      cascade.pushCounters(style);
       style["content"] = content.filterValue(
         new CssCascade.ContentPropVisitor(
           cascade,
@@ -1684,6 +1693,10 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           cascade.counterResolver,
         ),
       );
+      cascade.popCounters();
+      cascade.popCounters();
+      cascade.lastCounterChanges = savedLastCounterChanges;
+      cascade.lastCounterChangeTypes = savedLastCounterChangeTypes;
     }
     this.init(cascade.context);
     for (const child of this.pageBox.children) {
