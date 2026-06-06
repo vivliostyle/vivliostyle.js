@@ -19,6 +19,7 @@
  */
 import * as Asserts from "./asserts";
 import * as Base from "./base";
+import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as CssProp from "./css-prop";
 import * as CssStyler from "./css-styler";
@@ -748,6 +749,9 @@ export class CounterStore {
   } = Object.create(null);
   currentPageCounters: CssCascade.CounterValues = Object.create(null);
   previousPageCounters: CssCascade.CounterValues = Object.create(null);
+  // Issue #1999: remember the page-counter base from before a page-local
+  // override so later pages can resume the inherited sequence.
+  pageCountersBeforeOverride: CssCascade.CounterValues = Object.create(null);
   currentPageCountersStack: CssCascade.CounterValues[] = [];
   pageIndicesById: {
     [key: string]: { spineIndex: number; pageIndex: number };
@@ -908,11 +912,15 @@ export class CounterStore {
     }
     const skipIncrement: { [key: string]: boolean } = Object.create(null);
     let resetMap: { [key: string]: number };
+    let resetIsNone = false;
     const reset = cascadedPageStyle["counter-reset"] as CssCascade.CascadeValue;
     if (reset) {
       const resetVal = reset.evaluate(context);
       if (resetVal) {
-        resetMap = CssProp.toCounters(resetVal, { reset: true });
+        resetIsNone = resetVal === Css.ident.none;
+        if (!resetIsNone) {
+          resetMap = CssProp.toCounters(resetVal, { reset: true });
+        }
       }
     }
     if (resetMap && "pages" in resetMap) {
@@ -976,6 +984,16 @@ export class CounterStore {
     // Start from previous page counters, then reconcile with document counters
     // so page-scoped and document-scoped counters stay consistent.
     const baseCounters = cloneCounterValues(this.previousPageCounters);
+    if (resetIsNone) {
+      // Issue #1999: clearing a page-local override must restore the
+      // pre-override page-counter base instead of leaking the previous page's
+      // overridden value into the next page.
+      for (const counterName in this.pageCountersBeforeOverride) {
+        baseCounters[counterName] = Array.from(
+          this.pageCountersBeforeOverride[counterName],
+        );
+      }
+    }
     if (this.currentPageDocCounters) {
       for (const counterName in this.currentPageDocCounters) {
         if (this.isPageControlledCounter(counterName)) {
@@ -991,6 +1009,13 @@ export class CounterStore {
               const counterValues = baseCounters[counterName];
               counterValues[counterValues.length - 1] += info.delta;
             }
+          } else if (!baseCounters[counterName]) {
+            // When a counter first becomes page-controlled, seed it from the
+            // inherited document state so the page's own increment starts from
+            // the current document value rather than from zero.
+            baseCounters[counterName] = Array.from(
+              this.currentPageDocCounters[counterName],
+            );
           }
           continue;
         }
@@ -1000,8 +1025,24 @@ export class CounterStore {
       }
     }
     this.currentPageCounters = baseCounters;
+    const countersBeforeOverride: CssCascade.CounterValues =
+      Object.create(null);
+    const rememberCounterBase = (counterName: string): void => {
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          countersBeforeOverride,
+          counterName,
+        )
+      ) {
+        const counterValues = baseCounters[counterName];
+        if (counterValues) {
+          countersBeforeOverride[counterName] = Array.from(counterValues);
+        }
+      }
+    };
     if (resetMap) {
       for (const resetCounterName in resetMap) {
+        rememberCounterBase(resetCounterName);
         this.definePageCounter(resetCounterName, resetMap[resetCounterName]);
       }
     }
@@ -1020,6 +1061,7 @@ export class CounterStore {
       // Match the standard counter update order:
       // counter-reset -> counter-increment -> counter-set.
       for (const setCounterName in setMap) {
+        rememberCounterBase(setCounterName);
         if (!this.currentPageCounters[setCounterName]) {
           this.definePageCounter(setCounterName, setMap[setCounterName]);
         } else {
@@ -1027,6 +1069,11 @@ export class CounterStore {
           counterValues[counterValues.length - 1] = setMap[setCounterName];
         }
       }
+    }
+    for (const counterName in countersBeforeOverride) {
+      this.pageCountersBeforeOverride[counterName] = Array.from(
+        countersBeforeOverride[counterName],
+      );
     }
   }
 

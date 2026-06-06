@@ -1258,7 +1258,17 @@ export class ViewFactory
       return frame.result();
     }
     const isRoot = this.nodeContext.parent == null;
-    this.nodeContext.flexContainer = display === Css.ident.flex;
+    const blockSize =
+      computedStyle[this.nodeContext.vertical ? "width" : "height"];
+    // Issue #1999: fixed-size grid boxes used as synthetic page references
+    // must stay whole. Once fragmented, continuation fragments lose the block
+    // size and later reference pages collapse.
+    const isFixedSizeGridContainer =
+      (display === Css.ident.grid || display === Css.ident.inline_grid) &&
+      !!blockSize &&
+      !(blockSize === Css.ident.auto || Css.isDefaultingValue(blockSize));
+    this.nodeContext.flexContainer =
+      display === Css.ident.flex || isFixedSizeGridContainer;
     this.createShadows(
       element,
       isRoot,

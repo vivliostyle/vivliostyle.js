@@ -747,13 +747,21 @@ export class StyleInstance
     const searchRootOffset = searchRoot
       ? this.xmldoc.getElementOffset(searchRoot)
       : pageStartOffset;
-    // Document start: page starts at or before the body/root element offset.
+    // Issue #1999: on the first page, @page counters must start from the
+    // body/root snapshot instead of treating document start as a synthetic
+    // page-boundary counter change.
     const isDocumentStart = pageStartOffset <= searchRootOffset;
     const resolvedStartElement =
       startElement === searchRoot && isDocumentStart
         ? this.getFirstInFlowChildElement(searchRoot)
         : startElement;
     if (!resolvedStartElement) {
+      if (isDocumentStart) {
+        return {
+          counterOffset: searchRootOffset,
+          changeOffset: searchRootOffset,
+        };
+      }
       return { counterOffset: pageStartOffset, changeOffset: pageStartOffset };
     }
     const changeOffset = this.xmldoc.getElementOffset(resolvedStartElement);
