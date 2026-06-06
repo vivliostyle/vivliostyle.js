@@ -1384,6 +1384,21 @@ export class ContentPropertyHandler extends Css.Visitor {
 
   override visitExpr(expr: Css.Expr): Css.Val {
     const ex = expr.toExpr();
+    // When a named string (string()) holds a content list with page-based
+    // counters, render that list so the counters become patchable nodes
+    // instead of a frozen string (Issue #1997).
+    if (ex instanceof Exprs.Native) {
+      const native = ex as Exprs.Native & {
+        getContentList?: () => Css.Val | null;
+      };
+      if (typeof native.getContentList === "function") {
+        const contentList = native.getContentList();
+        if (contentList) {
+          contentList.visit(this);
+          return null;
+        }
+      }
+    }
     let val = ex.evaluate(this.context);
     if (typeof val === "string") {
       assert(this.elem.ownerDocument);
