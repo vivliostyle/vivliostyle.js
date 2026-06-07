@@ -656,6 +656,7 @@ export const propertiesAppliedToPartition = (() => {
     "outline-width": true,
     "outline-style": true,
     "outline-color": true,
+    "outline-offset": true,
     "border-radius": true,
     "border-top-left-radius": true,
     "border-top-right-radius": true,

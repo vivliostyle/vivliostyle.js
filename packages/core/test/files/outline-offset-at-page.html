@@ -1,0 +1,34 @@
+<!-- Test case for Issue #2000: outline-offset at @page not working -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>outline-offset on @page</title>
+    <style>
+      @page {
+        size: 160mm 110mm;
+        margin: 18mm;
+        border: 4mm solid #d96b00;
+        outline: 6mm solid #1f9d43;
+        outline-offset: 12mm;
+      }
+
+      html,
+      body {
+        margin: 0;
+        font: 16px/1.5 serif;
+      }
+
+      body {
+        color: #222;
+      }
+
+      p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p>There should be a green outline aligned with the page edge.</p>
+  </body>
+</html>

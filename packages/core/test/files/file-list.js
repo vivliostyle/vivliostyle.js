@@ -80,6 +80,10 @@ module.exports = [
         title: "Unbreakable box at the end of a flow",
       },
       { file: "outline.html", title: "Outline" },
+      {
+        file: "outline-offset-at-page.html",
+        title: "outline-offset on @page (Issue #2000)",
+      },
       { file: "font-feature-settings.html", title: "Font feature settings" },
       {
         file: "font-variation-settings.html",
