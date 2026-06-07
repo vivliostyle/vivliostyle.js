@@ -1,3 +1,15 @@
+- category: General
+  title: "outline-offset on @page (Issue #2000)"
+  file: outline-offset-at-page.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2000  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/outline-offset-at-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/outline-offset-at-page.html&zoom=1&spread=false
 - category: Named Strings
   title: "string-set with counter(page) (Issue #1997)"
   file: named-strings/string-set-counter-page.html
