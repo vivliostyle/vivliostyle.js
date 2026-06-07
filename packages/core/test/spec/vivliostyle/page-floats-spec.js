@@ -1105,6 +1105,55 @@ describe("page-floats", function () {
       });
     });
 
+    describe("#hasCurrentAnchor", function () {
+      it("prefers the descendant anchor over an ancestor anchor for the same float", function () {
+        var container = {
+          element: {
+            contains: jasmine.createSpy("contains"),
+          },
+        };
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          container,
+          "foo",
+          null,
+          null,
+          null,
+        );
+        var columnContext = new PageFloatLayoutContext(
+          pageContext,
+          FloatReference.COLUMN,
+          null,
+          "foo",
+          null,
+          null,
+          null,
+        );
+        var float = new PageFloat(
+          dummyNodePosition(),
+          FloatReference.COLUMN,
+          "block-start",
+          null,
+          "foo",
+        );
+        var staleAnchorViewNode = {};
+        var currentAnchorViewNode = {};
+
+        columnContext.addPageFloat(float);
+        container.element.contains.and.callFake(function (node) {
+          return node === staleAnchorViewNode;
+        });
+        pageContext.registerPageFloatAnchor(float, staleAnchorViewNode);
+        columnContext.registerPageFloatAnchor(float, currentAnchorViewNode);
+
+        expect(pageContext.hasCurrentAnchor(float.getId())).toBe(false);
+        expect(container.element.contains).toHaveBeenCalledWith(
+          currentAnchorViewNode,
+        );
+      });
+    });
+
     describe("#deferPageFloat", function () {
       var pageContext, regionContext, columnContext, float;
       beforeEach(function () {
@@ -1498,7 +1547,38 @@ describe("page-floats", function () {
         expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
       });
 
-      it("forbids deferred line-policy footnotes on page contexts after the anchor appeared", function () {
+      it("forbids deferred line-policy footnotes on page contexts while the anchor is present", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        spyOn(pageContext, "invalidate").and.callThrough();
+        var float = new PageFloat(
+          dummyNodePosition(),
+          FloatReference.PAGE,
+          "block-end",
+          null,
+          "body",
+        );
+        float.footnotePolicy = adapt_css.ident.line;
+        pageContext.addPageFloat(float);
+        var continuation = new PageFloatContinuation(float, {});
+        pageContext.floatsDeferredToNext = [continuation];
+        spyOn(pageContext, "hasCurrentAnchor").and.returnValue(true);
+
+        pageContext.finish();
+
+        expect(pageContext.isForbidden(float)).toBe(true);
+        expect(pageContext.floatsDeferredToNext).toEqual([]);
+        expect(pageContext.invalidate).toHaveBeenCalled();
+      });
+
+      it("does not forbid deferred line-policy footnotes on page contexts when the anchor moved off the page on retry", function () {
         var pageContext = new PageFloatLayoutContext(
           rootContext,
           FloatReference.PAGE,
@@ -1521,12 +1601,13 @@ describe("page-floats", function () {
         var continuation = new PageFloatContinuation(float, {});
         pageContext.floatsDeferredToNext = [continuation];
         pageContext.footnoteAnchorsSeen.add(float.getId());
+        spyOn(pageContext, "hasCurrentAnchor").and.returnValue(false);
 
         pageContext.finish();
 
-        expect(pageContext.isForbidden(float)).toBe(true);
+        expect(pageContext.isForbidden(float)).toBe(false);
         expect(pageContext.floatsDeferredToNext).toEqual([]);
-        expect(pageContext.invalidate).toHaveBeenCalled();
+        expect(pageContext.invalidate).not.toHaveBeenCalled();
       });
 
       it("does not forbid deferred line-policy footnotes on region contexts", function () {

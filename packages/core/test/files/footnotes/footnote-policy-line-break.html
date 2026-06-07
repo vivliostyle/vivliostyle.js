@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2006: footnote-policy: line should break before the anchor line, not before the whole paragraph -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>footnote-policy: line break</title>
+    <style>
+      @page {
+        size: 320px 260px;
+        margin: 20px;
+
+        @bottom-center {
+          content: "Page " counter(page);
+          font-size: 11px;
+        }
+
+        @footnote {
+          border-top: 1px solid black;
+          margin-top: 4px;
+          padding-top: 2px;
+        }
+      }
+
+      :root {
+        font-family: Menlo, Monaco, "Courier New", monospace;
+        widows: 1;
+        orphans: 1;
+      }
+
+      body,
+      p {
+        margin: 0;
+      }
+
+      .spacer {
+        height: 120px;
+        background: #f3f3f3;
+      }
+
+      .story {
+        width: 220px;
+        font-size: 0;
+      }
+
+      .line {
+        display: inline-block;
+        width: 100%;
+        font-size: 18px;
+        line-height: 22px;
+        white-space: nowrap;
+      }
+
+      .footnote {
+        float: footnote;
+        font-size: 14px;
+        line-height: 18px;
+        white-space: normal;
+      }
+
+      .footnote::footnote-call,
+      .footnote::footnote-marker {
+        content: counter(footnote);
+        color: blue;
+        font-size: 10px;
+        vertical-align: super;
+      }
+
+      .policy-line {
+        footnote-policy: line;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spacer"></div>
+    <p class="story">
+      <span class="line">Line 1 remains.</span>
+      <span class="line">Line 2 remains.</span>
+      <span class="line">Line 3 remains.</span>
+      <span class="line"
+        >Line 4 has note<span class="footnote policy-line"
+          >This footnote wraps across three lines in the footnote area to force
+          a line-policy break.</span
+        > and moves.</span
+      >
+      <span class="line">Line 5 follows.</span>
+    </p>
+  </body>
+</html>
