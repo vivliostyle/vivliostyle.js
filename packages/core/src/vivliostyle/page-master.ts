@@ -1744,6 +1744,7 @@ export const passPreProperties = [
   "outline-style",
   "outline-color",
   "outline-width",
+  "outline-offset",
   "overflow",
   "visibility",
 ];
