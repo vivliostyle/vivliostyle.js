@@ -20,6 +20,7 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
+import * as LayoutHelper from "./layout-helper";
 import * as PageFloats from "./page-floats";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
@@ -27,6 +28,7 @@ import * as Vtree from "./vtree";
 import { Layout } from "./types";
 
 const PageFloatFragment = PageFloats.PageFloatFragment;
+const LINE_POLICY_EDGE_EPSILON = 0.1;
 
 export class Footnote extends PageFloats.PageFloat {
   constructor(
@@ -69,6 +71,163 @@ function getLinePolicyConstraintNode(anchorNode: Node): Node {
   return anchorNode;
 }
 
+// These helpers intentionally work from live DOM nodes only. The line-policy
+// constraint runs after layout has produced view nodes, but it does not have a
+// Layout.Column/clientLayout available, so LayoutHelper.calculateEdge() cannot
+// be reused directly here.
+
+function getBlockDir(vertical: boolean): number {
+  return vertical ? -1 : 1;
+}
+
+function getBlockStartEdge(rect: Vtree.ClientRect, vertical: boolean): number {
+  return vertical ? rect.right : rect.top;
+}
+
+function getBlockEndEdge(rect: Vtree.ClientRect, vertical: boolean): number {
+  return vertical ? rect.left : rect.bottom;
+}
+
+function toMutableClientRect(rect: {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}): Vtree.ClientRect {
+  return {
+    left: rect.left,
+    top: rect.top,
+    right: rect.right,
+    bottom: rect.bottom,
+    width: rect.width,
+    height: rect.height,
+  } as Vtree.ClientRect;
+}
+
+function getAdjustedElementRect(
+  element: Element,
+  vertical: boolean,
+): Vtree.ClientRect | null {
+  const rect = toMutableClientRect(element.getBoundingClientRect());
+  LayoutHelper.adjustRectForColumnBreaking(rect, vertical);
+  if (rect.right < rect.left || rect.bottom < rect.top) {
+    return null;
+  }
+  return rect;
+}
+
+function getAdjustedNonEmptyRects(
+  rects: ArrayLike<{
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  }>,
+  vertical: boolean,
+): Vtree.ClientRect[] {
+  const adjustedRects = Array.from(rects, toMutableClientRect);
+  LayoutHelper.adjustRectsForColumnBreaking(adjustedRects, vertical);
+  return adjustedRects.filter(
+    (rect) => rect.right > rect.left && rect.bottom > rect.top,
+  );
+}
+
+function getBlockEndEdgeFromRects(
+  rects: Vtree.ClientRect[],
+  vertical: boolean,
+): number {
+  if (!rects.length) {
+    return NaN;
+  }
+  return vertical
+    ? Math.min(...rects.map((rect) => rect.left))
+    : Math.max(...rects.map((rect) => rect.bottom));
+}
+
+function getFirstBlockEndEdgeFromRects(
+  rects: Vtree.ClientRect[],
+  vertical: boolean,
+): number {
+  if (!rects.length) {
+    return NaN;
+  }
+  const blockDir = getBlockDir(vertical);
+  const firstRect = rects.reduce((first, rect) =>
+    getBlockStartEdge(rect, vertical) * blockDir <
+    getBlockStartEdge(first, vertical) * blockDir
+      ? rect
+      : first,
+  );
+  return getBlockEndEdge(firstRect, vertical);
+}
+
+function getBlockEndEdgeFromViewNode(
+  viewNode: Node | null,
+  vertical: boolean,
+): number {
+  if (!viewNode) {
+    return NaN;
+  }
+  if (viewNode.nodeType === Node.ELEMENT_NODE) {
+    const rect = getAdjustedElementRect(viewNode as Element, vertical);
+    return rect ? getBlockEndEdge(rect, vertical) : NaN;
+  }
+  const text = viewNode.textContent || "";
+  if (!text.length) {
+    return NaN;
+  }
+  const range = viewNode.ownerDocument.createRange();
+  range.setStart(viewNode, 0);
+  range.setEnd(viewNode, text.length);
+  const rects = getAdjustedNonEmptyRects(range.getClientRects(), vertical);
+  return getBlockEndEdgeFromRects(rects, vertical);
+}
+
+function getNodeContextEdge(
+  nodeContext: Vtree.NodeContext,
+  vertical: boolean,
+): number {
+  const node = nodeContext.viewNode;
+  if (!node) {
+    return NaN;
+  }
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    const element = node as Element;
+    if (nodeContext.after || !nodeContext.inline) {
+      const rect = getAdjustedElementRect(element, vertical);
+      if (rect) {
+        if (nodeContext.after) {
+          return getBlockEndEdge(rect, vertical);
+        }
+        return getBlockStartEdge(rect, vertical);
+      }
+    }
+    const rects = getAdjustedNonEmptyRects(element.getClientRects(), vertical);
+    // Leading edges of inline elements need the current line's block-end edge,
+    // not the element's union rect, otherwise line-policy geometry never fires
+    // for inline content and falls back to node-position equality.
+    return getFirstBlockEndEdgeFromRects(rects, vertical);
+  }
+  const text = node.textContent || "";
+  if (!text.length) {
+    return NaN;
+  }
+  let offset = nodeContext.offsetInNode;
+  if (nodeContext.after) {
+    offset += text.length;
+  }
+  offset = Math.max(0, Math.min(offset, text.length - 1));
+  const range = node.ownerDocument.createRange();
+  range.setStart(node, offset);
+  range.setEnd(node, offset + 1);
+  const rects = getAdjustedNonEmptyRects(range.getClientRects(), vertical);
+  return getBlockEndEdgeFromRects(rects, vertical);
+}
+
 /**
  * @extends PageFloatFragment
  */
@@ -98,19 +257,34 @@ export class FootnoteFragment extends PageFloatFragment {
 export class LineFootnotePolicyLayoutConstraint
   implements Layout.LayoutConstraint
 {
-  constructor(public readonly footnote: Footnote) {}
+  private readonly anchorEdge: number;
+
+  constructor(
+    public readonly footnote: Footnote,
+    anchorViewNode: Node | null,
+    private readonly vertical: boolean,
+  ) {
+    // Capture the rendered anchor line when the footnote becomes constrained.
+    // Using live DOM geometry keeps footnote-policy: line tied to the line that
+    // owns the call instead of falling back to whole-paragraph ancestry.
+    this.anchorEdge = getBlockEndEdgeFromViewNode(anchorViewNode, vertical);
+  }
 
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
-    let sourceNode: Node | null = nodeContext.shadowContext
-      ? nodeContext.shadowContext.owner
-      : nodeContext.sourceNode;
-    while (sourceNode) {
-      if (sourceNode === this.footnote.policyAnchorNode) {
-        return false;
+    if (!isNaN(this.anchorEdge)) {
+      const edge = getNodeContextEdge(nodeContext, this.vertical);
+      if (!isNaN(edge)) {
+        // Normalize both values to block-progression order so vertical-rl uses
+        // the same "before the anchor line" comparison as horizontal-tb.
+        const blockDir = getBlockDir(this.vertical);
+        return (
+          edge * blockDir <
+          this.anchorEdge * blockDir - LINE_POLICY_EDGE_EPSILON
+        );
       }
-      sourceNode = sourceNode.parentNode;
     }
-    return true;
+    const nodePosition = nodeContext.toNodePosition();
+    return !Vtree.isSameNodePosition(nodePosition, this.footnote.nodePosition);
   }
 }
 
@@ -164,6 +338,9 @@ export class FootnoteLayoutStrategy
     ) {
       policyAnchorNode = shadowOwner;
     }
+    // Keep the broader source anchor for layoutPageFloat() edge recovery.
+    // The line-policy constraint itself is narrowed later by the rendered
+    // anchor view node captured in forbid().
     policyAnchorNode = getLinePolicyConstraintNode(policyAnchorNode);
     const float: PageFloats.PageFloat = new Footnote(
       nodePosition,
@@ -308,7 +485,15 @@ export class FootnoteLayoutStrategy
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
       case Css.ident.line: {
-        const constraint = new LineFootnotePolicyLayoutConstraint(footnote);
+        const anchors = pageFloatLayoutContext.collectPageFloatAnchors();
+        const anchorViewNode = anchors[footnote.getId()] || null;
+        // Reuse the rendered anchor view node collected during layout so the
+        // constraint can stop exactly at the current anchor line.
+        const constraint = new LineFootnotePolicyLayoutConstraint(
+          footnote,
+          anchorViewNode,
+          pageFloatLayoutContext.getContainer(footnote.floatReference).vertical,
+        );
         pageFloatLayoutContext.addLayoutConstraint(
           constraint,
           footnote.floatReference,

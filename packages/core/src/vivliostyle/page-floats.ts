@@ -678,13 +678,32 @@ export class PageFloatLayoutContext
     );
   }
 
+  private findPageFloatAnchor(floatId: PageFloatID): Node | null {
+    // Match collectPageFloatAnchors(): descendant registrations override
+    // anchors recorded on ancestor contexts.
+    for (let i = this.children.length - 1; i >= 0; i--) {
+      const anchorViewNode = this.children[i].findPageFloatAnchor(floatId);
+      if (anchorViewNode) {
+        return anchorViewNode;
+      }
+    }
+    return this.floatAnchors[floatId] ?? null;
+  }
+
+  hasCurrentAnchor(floatId: PageFloatID) {
+    const anchorViewNode = this.findPageFloatAnchor(floatId);
+    if (!anchorViewNode) {
+      return false;
+    }
+    return !!this.container?.element?.contains(anchorViewNode);
+  }
+
   isAnchorAlreadyAppeared(floatId: PageFloatID) {
     const deferredFloats = this.getDeferredPageFloatContinuations();
     if (deferredFloats.some((cont) => cont.float.getId() === floatId)) {
       return true;
     }
-    const floatAnchors = this.collectPageFloatAnchors();
-    const anchorViewNode = floatAnchors[floatId];
+    const anchorViewNode = this.findPageFloatAnchor(floatId);
     if (!anchorViewNode) {
       return false;
     }
@@ -975,7 +994,7 @@ export class PageFloatLayoutContext
         this.floatReference === FloatReference.PAGE &&
         "footnotePolicy" in float &&
         float.footnotePolicy === Css.ident.line &&
-        this.footnoteAnchorsSeen.has(float.getId()) &&
+        this.hasCurrentAnchor(float.getId()) &&
         !existingFragment
       ) {
         // Once the anchor line has already appeared on the page, a deferred
