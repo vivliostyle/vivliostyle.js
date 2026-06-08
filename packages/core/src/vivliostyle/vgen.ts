@@ -250,6 +250,17 @@ export class ViewFactory
       }
       const element = child as Element;
       if (this.isNormalFlowElement(element)) {
+        const style = this.styler.getStyle(element, false);
+        const displayValue = (
+          style?.["display"] as CssCascade.CascadeValue
+        )?.evaluate(this.styler.context, "display");
+        const display =
+          displayValue && !Css.isDefaultingValue(displayValue)
+            ? (displayValue as Css.Ident)
+            : Css.ident.inline;
+        if (Display.isInlineLevel(display)) {
+          return null;
+        }
         return element;
       }
       child = child.nextSibling;
