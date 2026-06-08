@@ -753,7 +753,7 @@ export class StyleInstance
     const isDocumentStart = pageStartOffset <= searchRootOffset;
     const resolvedStartElement =
       startElement === searchRoot && isDocumentStart
-        ? this.getFirstInFlowChildElement(searchRoot)
+        ? (this.getFirstInFlowChildElement(searchRoot) ?? startElement)
         : startElement;
     if (!resolvedStartElement) {
       if (isDocumentStart) {
@@ -800,7 +800,7 @@ export class StyleInstance
     const searchRootOffset = this.xmldoc.getElementOffset(searchRoot);
     const isDocumentStart = pageStartOffset <= searchRootOffset;
     if (startElement === searchRoot && isDocumentStart) {
-      return this.getFirstInFlowChildElement(searchRoot);
+      return this.getFirstInFlowChildElement(searchRoot) ?? startElement;
     }
 
     const startElementOffset = startElement
@@ -819,7 +819,7 @@ export class StyleInstance
         while (currentElement) {
           if (
             this.xmldoc.getElementOffset(currentElement) <= pageStartOffset &&
-            this.isNormalFlowElement(currentElement)
+            this.isPageBoundaryCandidateElement(currentElement)
           ) {
             return currentElement;
           }
@@ -865,6 +865,9 @@ export class StyleInstance
   }
 
   private getPageGroupPageType(element: Element): string | null {
+    if (this.isInlineLevelElement(element)) {
+      return null;
+    }
     const style = this.styler.getStyle(element, false);
     if (!style) {
       return null;
@@ -882,15 +885,11 @@ export class StyleInstance
     );
     let currentElement = startElement;
     while (currentElement) {
-      const style = this.styler.getStyle(currentElement, false);
-      const pageValue = style && CssCascade.getProp(style, "page");
       // Resolve the page-start named page before page master selection, where
       // `styler.cascade.currentPageType` may still describe the previous page.
-      if (pageValue && !Css.isDefaultingValue(pageValue.value)) {
-        const pageType = pageValue.evaluate(this, "page").toString();
-        if (pageType && pageType.toLowerCase() !== "auto") {
-          return pageType;
-        }
+      const pageType = this.getPageGroupPageType(currentElement);
+      if (pageType) {
+        return pageType;
       }
       if (currentElement === this.xmldoc.root) {
         break;
@@ -930,7 +929,7 @@ export class StyleInstance
   private getPreviousInFlowSibling(element: Element): Element | null {
     let sibling = element.previousElementSibling;
     while (sibling) {
-      if (this.isNormalFlowElement(sibling)) {
+      if (this.isPageBoundaryCandidateElement(sibling)) {
         return sibling;
       }
       sibling = sibling.previousElementSibling;
@@ -949,7 +948,7 @@ export class StyleInstance
       searchRootOffset,
     );
     return startElement === searchRoot
-      ? this.getFirstInFlowChildElement(searchRoot)
+      ? (this.getFirstInFlowChildElement(searchRoot) ?? startElement)
       : startElement;
   }
 
@@ -1170,7 +1169,7 @@ export class StyleInstance
     offset: number,
   ): Element | null {
     if (
-      this.isNormalFlowElement(root) &&
+      this.isPageBoundaryCandidateElement(root) &&
       this.xmldoc.getElementOffset(root) >= offset
     ) {
       return root;
@@ -1183,6 +1182,9 @@ export class StyleInstance
           const element = node as Element;
           if (!this.isNormalFlowElement(element)) {
             return NodeFilter.FILTER_REJECT;
+          }
+          if (this.isInlineLevelElement(element)) {
+            return NodeFilter.FILTER_SKIP;
           }
           const nodeOffset = this.xmldoc.getElementOffset(element);
           if (nodeOffset < offset) {
@@ -1223,11 +1225,20 @@ export class StyleInstance
       }
       const element = child as Element;
       if (this.isNormalFlowElement(element)) {
+        if (this.isInlineLevelElement(element)) {
+          return null;
+        }
         return element;
       }
       child = child.nextSibling;
     }
     return null;
+  }
+
+  private isPageBoundaryCandidateElement(element: Element): boolean {
+    return (
+      this.isNormalFlowElement(element) && !this.isInlineLevelElement(element)
+    );
   }
 
   private isNormalFlowElement(element: Element): boolean {
