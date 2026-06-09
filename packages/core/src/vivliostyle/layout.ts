@@ -3366,6 +3366,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return false;
     }
 
+    const clear =
+      nodeContext.clearSide === "same"
+        ? nodeContext.floatSide
+        : nodeContext.clearSide;
+    const useRawSpacerGeometry = /^(page|column|region)$/.test(clear);
     // measure where the edge of the element would be without clearance
     const margin = this.getComputedMargin(nodeContext.viewNode as Element);
     const spacer = nodeContext.viewNode.ownerDocument.createElement("div");
@@ -3378,18 +3383,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       spacer.style.height = "1px";
       spacer.style.marginTop = `${margin.top}px`;
     }
+    const getSpacerBox = () =>
+      useRawSpacerGeometry
+        ? this.clientLayout.getElementClientRect(spacer)
+        : LayoutHelper.getElementClientRectAdjusted(
+            this.clientLayout,
+            spacer,
+            this.vertical,
+          );
     nodeContext.viewNode.parentNode.insertBefore(spacer, nodeContext.viewNode);
-    let spacerBox = LayoutHelper.getElementClientRectAdjusted(
-      this.clientLayout,
-      spacer,
-      this.vertical,
-    );
+    // Use raw spacer geometry for page/column/region clears. Browser
+    // column-breaking adjustment can move the following cleared block outside
+    // the page area. (Issue #2010)
+    let spacerBox = getSpacerBox();
     const edge = this.getBeforeEdge(spacerBox);
     const dir = this.getBoxDir();
-    const clear =
-      nodeContext.clearSide === "same"
-        ? nodeContext.floatSide
-        : nodeContext.clearSide;
     const clearLR =
       /^(top|bottom|inside|outside|(block|inline)-(start|end))$/.test(clear)
         ? PageFloats.resolveInlineFloatDirection(
@@ -3476,11 +3484,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       } else {
         spacer.style.height = `${height}px`;
       }
-      spacerBox = LayoutHelper.getElementClientRectAdjusted(
-        this.clientLayout,
-        spacer,
-        this.vertical,
-      );
+      spacerBox = getSpacerBox();
       const afterEdge = this.getAfterEdge(spacerBox);
       if (!nodeContext.floatSide) {
         if (this.vertical) {
