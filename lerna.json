@@ -3,7 +3,7 @@
     "packages/*"
   ],
   "npmClient": "npm",
-  "version": "2.43.0",
+  "version": "2.43.1",
   "includeMergedTags": true,
   "changelogPreset": "./scripts/changelog-preset.js"
 }

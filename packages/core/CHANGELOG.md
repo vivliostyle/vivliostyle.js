@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.43.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.0...v2.43.1) (2026-06-09)
+
+### Bug Fixes
+
+- Keep clear page and column blocks visible after page floats ([bb8a73b](https://github.com/vivliostyle/vivliostyle.js/commit/bb8a73b71c5ce250b7688bee0b0a9f9b5f445760)), closes [#2010](https://github.com/vivliostyle/vivliostyle.js/issues/2010)
+- Fix named page boundaries for inline content ([cdc3894](https://github.com/vivliostyle/vivliostyle.js/commit/cdc3894d63acbe77bcac4bacd442f222f79bda1d))
+- Fix `footnote-policy: line` page breaks ([3678b4d](https://github.com/vivliostyle/vivliostyle.js/commit/3678b4d654d4b328cf5dfe2581cb625edfcada93)), closes [#2006](https://github.com/vivliostyle/vivliostyle.js/issues/2006)
+- Fix `outline-offset` handling in `@page` rules ([b88767e](https://github.com/vivliostyle/vivliostyle.js/commit/b88767e43f29f05276e66817c57db38e8a73eb55)), closes [#2000](https://github.com/vivliostyle/vivliostyle.js/issues/2000)
+- Resolve string-set with counter(page) and counter(pages) ([a5726e4](https://github.com/vivliostyle/vivliostyle.js/commit/a5726e4f3e4fad1975b92686ea165d951d5f76bd)), closes [#1997](https://github.com/vivliostyle/vivliostyle.js/issues/1997)
+- Fix `counter()` resolution in `@page` margin box content ([6723b15](https://github.com/vivliostyle/vivliostyle.js/commit/6723b157a926f07799b431f98078eb390fbc12c2)), closes [#1999](https://github.com/vivliostyle/vivliostyle.js/issues/1999)
+- Fix nested named page starts and `:nth()` page-group matching ([a8e600c](https://github.com/vivliostyle/vivliostyle.js/commit/a8e600cde8da197e696571c67dcb06e50afb78cb)), closes [#1998](https://github.com/vivliostyle/vivliostyle.js/issues/1998) [#2002](https://github.com/vivliostyle/vivliostyle.js/issues/2002)
+- Preserve named pages after deferred footnote text ([f42197f](https://github.com/vivliostyle/vivliostyle.js/commit/f42197f3abd97b08beb4f09abaf94a2e7d8b415e)), closes [#1991](https://github.com/vivliostyle/vivliostyle.js/issues/1991)
+- Fix `:nth(1 of Page)` after `target-counter()` rerender ([75e3ed6](https://github.com/vivliostyle/vivliostyle.js/commit/75e3ed65a7fcac3c75f673cd8abc9ab29d111680)), closes [#1990](https://github.com/vivliostyle/vivliostyle.js/issues/1990)
+- Fix text disappearing when `clear` follows a footnote ([5dd9cd6](https://github.com/vivliostyle/vivliostyle.js/commit/5dd9cd60e77ac5cc5b670fa827431208b3f9fc4f)), closes [#1987](https://github.com/vivliostyle/vivliostyle.js/issues/1987)
+
 # [2.43.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.42.1...v2.43.0) (2026-05-22)
 
 ### Features
