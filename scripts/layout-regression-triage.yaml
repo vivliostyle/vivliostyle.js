@@ -1,3 +1,39 @@
+- category: Page floats
+  title: "Page float with clear: page (Issue #2010)"
+  file: page_floats/page-float-clear-page.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2010  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page-float-clear-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/page-float-clear-page.html&zoom=1&spread=false
+- category: Page floats
+  title: "Column float with clear: column (Issue #2010)"
+  file: page_floats/column-float-clear-column.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2010  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column-float-clear-column.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column-float-clear-column.html&zoom=1&spread=false
+- category: Page floats
+  title: "Column float with clear: page (Issue #2010)"
+  file: page_floats/column-float-clear-page.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2010  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column-float-clear-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/column-float-clear-page.html&zoom=1&spread=false
 - category: Footnotes
   title: "footnote-policy: line break before anchor line (Issue #2006)"
   file: footnotes/footnote-policy-line-break.html
