@@ -4,18 +4,28 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
       - run: yarn install
       - run: yarn build
       - run: yarn lint
       - run: scripts/ci-after-success-hook.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
           DEPLOY_KEY_VIVLIOSTYLE_ORG: ${{ secrets.DEPLOY_KEY_VIVLIOSTYLE_ORG }}
           DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO: ${{ secrets.DEPLOY_KEY_VIVLIOSTYLE_GITHUB_IO }}
 

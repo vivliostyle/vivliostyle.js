@@ -38,6 +38,63 @@ function build-archive() {
     rm -rf ${archiveDir}
 }
 
+function package-exists-on-npm() {
+    local packageSpec=$1
+    local npmViewError
+
+    npmViewError=$(mktemp)
+    if npm view "${packageSpec}" version >/dev/null 2>"${npmViewError}"; then
+        rm -f "${npmViewError}"
+        return 0
+    fi
+    if grep -q "E404" "${npmViewError}"; then
+        rm -f "${npmViewError}"
+        return 1
+    fi
+    cat "${npmViewError}" >&2
+    rm -f "${npmViewError}"
+    return 2
+}
+
+function publish-package-to-npm() {
+    local packageDir=$1
+    local distTag=$2
+    local packageName
+    local packageVersion
+    local packageSpec
+    local publishArgs=()
+
+    packageName=$(node -p "require('./${packageDir}/package.json').name")
+    packageVersion=$(node -p "require('./${packageDir}/package.json').version")
+    packageSpec="${packageName}@${packageVersion}"
+
+    if package-exists-on-npm "${packageSpec}"; then
+        echo "===> ${packageSpec} is already published; skipping"
+        return
+    else
+        local viewStatus=$?
+        if [[ ${viewStatus} -ne 1 ]]; then
+            return ${viewStatus}
+        fi
+    fi
+
+    if [[ -n ${distTag} ]]; then
+        publishArgs=(--tag "${distTag}")
+    fi
+
+    echo "===> Publishing ${packageSpec} to npm"
+    (cd "${packageDir}" && npm publish "${publishArgs[@]}")
+}
+
+function publish-packages-to-npm() {
+    local distTag=$1
+
+    echo "===> npm version: $(npm --version)"
+    publish-package-to-npm packages/core "${distTag}"
+    publish-package-to-npm packages/viewer "${distTag}"
+    publish-package-to-npm packages/react "${distTag}"
+}
+
 function inject-env-var() {
     if [[ ${GITHUB_REF} =~ ^refs/pull/ ]]; then
         PULL_REQUEST=${GITHUB_REF/refs\/pull\//}
@@ -105,12 +162,11 @@ fi
 # if stable or pre-release tag push
 if [[ $IS_VALID_TAG = true ]]; then
     # publish to npm
-    echo "===> Publishing packages in npm"
-    [[ $DEBUG_HOOK = false ]] && echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+    echo "===> Publishing packages in npm with trusted publishing"
     if [[ $STABLE_RELEASE = true ]]; then
-        [[ $DEBUG_HOOK = false ]] && lerna publish from-package --yes
+        [[ $DEBUG_HOOK = false ]] && publish-packages-to-npm ""
     else
-        [[ $DEBUG_HOOK = false ]] && lerna publish from-package --dist-tag next --yes
+        [[ $DEBUG_HOOK = false ]] && publish-packages-to-npm "next"
     fi
     
     # GitHub releases
