@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Column float clear: column</title>
+    <style>
+      @page {
+        size: A5;
+        margin: 10mm;
+        border: 2px dotted gray;
+
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+      :root {
+        column-count: 2;
+        column-fill: auto;
+        font-family: Times, serif;
+        line-height: 1.2;
+      }
+      section {
+        break-before: column;
+      }
+      .column-float {
+        float-reference: column;
+        float: top;
+        box-sizing: border-box;
+        height: 150px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 5px inset cyan;
+        text-align: center;
+        align-content: center;
+      }
+      .clear-column {
+        clear: column;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Test case for Issue #2010: block with clear: column after column floats must not disappear. -->
+    <section>
+      <h2>Section 1</h2>
+      <div class="column-float">Column Float 1 (in Section 1)</div>
+      <p>
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
+        ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis
+        dis parturient montes, nascetur ridiculus mus. Donec quam felis,
+        ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa
+        quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget,
+        arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.
+        Nullam dictum felis eu pede mollis pretium. Integer tincidunt.
+      </p>
+      <div class="column-float clear-column">
+        Column Float 2 (with clear:column, in Section 1)
+      </div>
+      <p>
+        Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla
+        mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo
+        eget bibendum sodales, augue velit cursus nunc.
+      </p>
+      <div class="column-float">Column Float 3 (in Section 1)</div>
+    </section>
+    <section class="clear-column">
+      <h2>Section 2 (with clear:column)</h2>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur
+        adipisci, nulla illum distinctio officiis eaque animi dolorum soluta est
+        dicta. Non eius veritatis deleniti! Ipsam, nobis? Voluptate itaque
+        aliquam veritatis!
+      </p>
+      <div class="column-float">Column Float 4 (in Section 2)</div>
+    </section>
+  </body>
+</html>

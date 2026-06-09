@@ -937,6 +937,18 @@ module.exports = [
         title: "Clear page floats (vertical writing-mode)",
       },
       {
+        file: "page_floats/page-float-clear-page.html",
+        title: "Page float with clear: page (Issue #2010)",
+      },
+      {
+        file: "page_floats/column-float-clear-column.html",
+        title: "Column float with clear: column (Issue #2010)",
+      },
+      {
+        file: "page_floats/column-float-clear-page.html",
+        title: "Column float with clear: page (Issue #2010)",
+      },
+      {
         file: "page_floats/clear_on_page_floats.html",
         title: "clear on page floats",
       },
