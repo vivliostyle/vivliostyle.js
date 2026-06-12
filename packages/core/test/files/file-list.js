@@ -134,6 +134,10 @@ module.exports = [
         title: "Content in page margin box",
       },
       {
+        file: "target-counter-blank-page-typeerror.html",
+        title: "target-counter after spread blank page (Issue #2013)",
+      },
+      {
         file: "page-margin-box-images.html",
         title: "Page margin box images (Issue #1867)",
       },

@@ -2269,6 +2269,20 @@ export class OPFView implements Vgen.CustomRendererFactory {
       Task.newFrame("renderSinglePage");
 
     const pageIndexToRender = pos ? Math.max(pos.page, 0) : 0;
+    const pageNumberContextDepth =
+      viewItem.instance.getPageNumberContextDepth();
+    // Issue #2013: preserve the current render slot's page number so
+    // page-number remains available during target-counter() rerender cleanup.
+    viewItem.instance.pushPageNumberContext(pageIndexToRender + 1);
+    const restorePageNumberContext = (): void => {
+      viewItem.instance.restorePageNumberContextDepth(pageNumberContextDepth);
+    };
+    // Task errors bypass the success callback below, so unwind this fallback
+    // page-number context here before re-raising to the parent frame.
+    frame.handler = (handlerFrame, err) => {
+      restorePageNumberContext();
+      handlerFrame.task.raise(err, handlerFrame.parent);
+    };
     const inCounterResolveScopeAtStart = this.isInCounterResolveScope();
     const oldPage = this.preparePageCountersForRender(
       viewItem,
@@ -2309,6 +2323,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           ),
         )
         .then((resolvedPage) => {
+          restorePageNumberContext();
           frame.finish({
             pageAndPosition: makePageAndPosition(resolvedPage, pageIndex),
             nextLayoutPosition: pos,
