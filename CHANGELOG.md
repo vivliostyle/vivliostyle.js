@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.43.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.1...v2.43.2) (2026-06-12)
+
+### Bug Fixes
+
+- Prevent first-child named pages from reviving on later pages ([ba0f3fd](https://github.com/vivliostyle/vivliostyle.js/commit/ba0f3fd91a7a0db63472581a0b8eeb38b9b83819))
+- Fix `target-counter()` crash after spread blank pages ([b2be400](https://github.com/vivliostyle/vivliostyle.js/commit/b2be400e1ddbcb63179da6fb112ba477088f1b86)), closes [#2013](https://github.com/vivliostyle/vivliostyle.js/issues/2013)
+
 ## [2.43.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.0...v2.43.1) (2026-06-09)
 
 ### Bug Fixes
