@@ -938,6 +938,12 @@ export class StyleInstance
       layoutPosition,
       pageStartOffset,
     );
+    if (
+      currentElement &&
+      this.xmldoc.getElementOffset(currentElement) < pageStartOffset
+    ) {
+      return "";
+    }
     while (currentElement) {
       currentElement = this.getFirstInFlowChildElement(currentElement);
       if (!currentElement) {
