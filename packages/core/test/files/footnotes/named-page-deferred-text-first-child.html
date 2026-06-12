@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!-- Test case for the Issue #1991 regression: first-child named page must not revive on a later nested section page -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>First-child named page after deferred footnote text</title>
+    <style>
+      @page {
+        size: 360px 240px;
+        margin: 20px;
+
+        @top-center {
+          content: "default";
+          font: 10px sans-serif;
+          color: #933;
+        }
+
+        @bottom-center {
+          content: "default " counter(page);
+          font: 10px sans-serif;
+        }
+
+        @footnote {
+          border-top: 1px solid #666;
+          margin-top: 4px;
+          padding-top: 4px;
+        }
+      }
+
+      @page opener {
+        background: #d8ebff;
+
+        @top-center {
+          content: "opener";
+          font: 10px sans-serif;
+          color: #053b6b;
+        }
+
+        @bottom-center {
+          content: "opener " counter(page);
+          font: 10px sans-serif;
+        }
+
+        @footnote {
+          border-top: 1px solid #053b6b;
+          margin-top: 4px;
+          padding-top: 4px;
+        }
+      }
+
+      :root {
+        font: 16px/20px "Courier New", monospace;
+        widows: 1;
+        orphans: 1;
+        counter-reset: footnote;
+      }
+
+      body,
+      section,
+      div,
+      figure,
+      h1,
+      h2,
+      p {
+        margin: 0;
+        padding: 0;
+      }
+
+      .level1 {
+        font: inherit;
+      }
+
+      .opener {
+        page: opener;
+        box-sizing: border-box;
+        height: 200px;
+        padding: 28px 24px;
+        border: 2px solid #053b6b;
+      }
+
+      .opener h1 {
+        font: bold 28px/32px sans-serif;
+        margin-bottom: 16px;
+      }
+
+      .level2 {
+        break-inside: avoid;
+      }
+
+      .level2 + .level2 {
+        margin-top: 12px;
+      }
+
+      h2 {
+        font: bold 20px/24px sans-serif;
+        border-top: 4px solid #111;
+        padding-top: 8px;
+        margin-bottom: 12px;
+      }
+
+      pre {
+        margin: 0 0 12px;
+        padding: 10px;
+        border: 1px solid #777;
+        background: #f1f1f1;
+        font: 13px/16px monospace;
+        white-space: pre-wrap;
+      }
+
+      p {
+        margin-bottom: 12px;
+      }
+
+      figure.page-bottom {
+        float: bottom;
+        float-reference: page;
+        margin: 0;
+      }
+
+      figure.page-bottom div {
+        height: 60px;
+        border: 1px solid #888;
+        background: linear-gradient(180deg, #ddd, #f8f8f8);
+      }
+
+      .footnote {
+        float: footnote;
+        counter-increment: footnote;
+        font: 12px/16px Georgia, serif;
+      }
+
+      .footnote::footnote-call,
+      .footnote::footnote-marker {
+        content: "[" counter(footnote) "]";
+        color: #06c;
+        font-size: 10px;
+        vertical-align: super;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="level1">
+      <div class="opener">
+        <h1>Opener</h1>
+        <p>
+          Only this first page should use the blue named page. Every later page
+          in this section should stay on the default white page type.
+        </p>
+      </div>
+
+      <section class="level2">
+        <h2>First nested section</h2>
+        <p>
+          This nested section intentionally keeps the top-level wrapper alive
+          after the opener page has ended. Later pages in the same wrapper must
+          not recover the opener page type from the wrapper's first child.
+        </p>
+        <p>
+          The next nested section contains footnotes, a long code block, and a
+          bottom page float so that page four starts at another nested section
+          boundary while the top-level section is still open.
+        </p>
+      </section>
+
+      <section class="level2">
+        <h2>Long middle section</h2>
+        <p>
+          This paragraph includes a deferred footnote<span class="footnote"
+            >The footnote is tall enough to reduce the remaining space near the
+            bottom of the page and force surrounding content to continue later
+            in the same top-level section.</span
+          > before a longer code sample. The middle pages should remain on the
+          default page even though the top-level section still has the opener as
+          its first child.
+        </p>
+        <pre>
+const firstChange = {
+  description: "A long code block helps the preceding section span multiple pages.",
+  expectation: "Later nested sections must not revive the opener named page.",
+  reasoning: "The top-level wrapper remains open after page one, but only the first child has page: opener."
+};
+
+const secondChange = {
+  description: "Another long code block line keeps the content flowing.",
+  expectation: "A later section heading should start on a default page.",
+  reasoning: "If the bug is present, that later page will incorrectly turn blue."
+};
+
+const thirdChange = {
+  description: "The exact text is irrelevant; only the flow structure matters.",
+  expectation: "This block should occupy enough vertical space to push the next section further down.",
+  reasoning: "That makes the reproduction independent from private sample content."
+};
+
+const fourthChange = {
+  description: "Continue a few more lines to keep the page count stable.",
+  expectation: "The next nested section should land on page four.",
+  reasoning: "That is where the stale override showed up in the private sample."
+};
+        </pre>
+        <figure class="page-bottom">
+          <div></div>
+        </figure>
+        <p>
+          The middle section ends here after enough content to push the next
+          nested section onto a later page inside the same top-level wrapper.
+        </p>
+      </section>
+
+      <section class="level2">
+        <h2>Later nested section</h2>
+        <p>
+          This section should start on the default page type. If the bug is
+          present, the page that begins with this heading will incorrectly use
+          the opener named page and show the blue background and opener header.
+        </p>
+      </section>
+    </section>
+  </body>
+</html>

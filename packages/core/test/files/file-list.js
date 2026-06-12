@@ -1035,6 +1035,11 @@ module.exports = [
         title: "Named page with deferred text after footnote (Issue #1991)",
       },
       {
+        file: "footnotes/named-page-deferred-text-first-child.html",
+        title:
+          "First-child named page must not revive after deferred text (Issue #1991 regression)",
+      },
+      {
         file: "footnotes/footnote-area-at-footnote.html",
         title: "Footnote area with @footnote",
       },
