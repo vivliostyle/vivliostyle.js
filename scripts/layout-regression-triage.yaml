@@ -1,3 +1,15 @@
+- category: Footnotes
+  title: "First-child named page must not revive after deferred text (Issue #1991 regression)"
+  file: footnotes/named-page-deferred-text-first-child.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue1991b  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/named-page-deferred-text-first-child.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/named-page-deferred-text-first-child.html&zoom=1&spread=false
 - category: General
   title: "target-counter after spread blank page (Issue #2013)"
   file: target-counter-blank-page-typeerror.html
