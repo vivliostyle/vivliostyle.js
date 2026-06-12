@@ -162,7 +162,7 @@ export class Style {
           const styleInstance = this as StyleInstance;
           return (
             styleInstance.pageNumberOffset +
-            styleInstance.currentLayoutPosition.page
+            styleInstance.getCurrentPageNumberForPageScope()
           );
         },
         "page-number",
@@ -307,6 +307,7 @@ export class StyleInstance
   faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: PageMaster.PageBoxInstance } = {};
   pageManager: CssPage.PageManager = null;
+  private pageNumberContextStack: number[] = [];
   private rootPageFloatLayoutContext: PageFloats.PageFloatLayoutContext;
   pageBreaks: { [key: string]: boolean } = {};
   pageProgression: Constants.PageProgression | null = null;
@@ -626,6 +627,30 @@ export class StyleInstance
       supportsReceiver,
     );
     return supported;
+  }
+
+  getCurrentPageNumberForPageScope(): number {
+    if (this.currentLayoutPosition) {
+      return this.currentLayoutPosition.page;
+    }
+    // Issue #2013: target-counter() rerender can evaluate page-number after
+    // currentLayoutPosition has been cleared, so fall back to the active
+    // render-slot page number captured by OPFView.renderSinglePage().
+    return (
+      this.pageNumberContextStack[this.pageNumberContextStack.length - 1] ?? 0
+    );
+  }
+
+  getPageNumberContextDepth(): number {
+    return this.pageNumberContextStack.length;
+  }
+
+  pushPageNumberContext(pageNumber: number): void {
+    this.pageNumberContextStack.push(pageNumber);
+  }
+
+  restorePageNumberContextDepth(depth: number): void {
+    this.pageNumberContextStack.length = depth;
   }
 
   /**

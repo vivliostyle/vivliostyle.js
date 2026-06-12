@@ -1,0 +1,45 @@
+<!-- Test case for Issue #2013: target-counter on a page after a spread-induced blank page -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Issue #2013</title>
+    <style>
+      @page {
+        size: 140mm 180mm;
+        margin: 12mm;
+      }
+
+      body {
+        font-family: serif;
+        line-height: 1.4;
+      }
+
+      nav {
+        break-before: right;
+      }
+
+      nav li a::after {
+        content: leader(dotted) target-counter(attr(href url), page);
+      }
+
+      section {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Issue #2013</h1>
+    <p>This page forces the table of contents onto a right page.</p>
+    <nav>
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#target">Target</a></li>
+      </ol>
+    </nav>
+    <section>
+      <h2 id="target">Target</h2>
+      <p>Target page.</p>
+    </section>
+  </body>
+</html>
