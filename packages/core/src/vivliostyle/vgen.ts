@@ -62,6 +62,72 @@ const xhtmlElementsRenderedAsDiv = new Set([
   "title",
 ]);
 
+function getWebKitMarkerListStyleType(markerContent: Css.Val): Css.Str | null {
+  if (markerContent instanceof Css.Str) {
+    return markerContent;
+  }
+  if (markerContent instanceof Css.SpaceList) {
+    const parts: string[] = [];
+    for (const item of markerContent.values) {
+      if (item instanceof Css.Str) {
+        parts.push(item.str);
+      } else {
+        return null;
+      }
+    }
+    if (parts.length > 0) {
+      return new Css.Str(parts.join(""));
+    }
+  }
+  return null;
+}
+
+function getWebKitMarkerListStyleImage(markerContent: Css.Val): Css.URL | null {
+  if (markerContent instanceof Css.URL) {
+    return markerContent;
+  }
+  if (
+    markerContent instanceof Css.SpaceList &&
+    markerContent.values[0] instanceof Css.URL &&
+    markerContent.values
+      .slice(1)
+      .every((item) => item instanceof Css.Str && item.str.trim() === "")
+  ) {
+    return markerContent.values[0];
+  }
+  return null;
+}
+
+function applyWebKitMarkerFallback(computedStyle: {
+  [key: string]: Css.Val;
+}): boolean {
+  if (Base.browserType !== "webkit") {
+    return false;
+  }
+
+  const markerContent = computedStyle["--viv-marker-content"];
+  if (!markerContent) {
+    return false;
+  }
+
+  const listStyleImage = getWebKitMarkerListStyleImage(markerContent);
+  if (listStyleImage) {
+    computedStyle["list-style-type"] = Css.ident.none;
+    computedStyle["list-style-image"] = listStyleImage;
+    delete computedStyle["--viv-marker-content"];
+    return true;
+  }
+
+  const listStyleType = getWebKitMarkerListStyleType(markerContent);
+  if (listStyleType) {
+    computedStyle["list-style-type"] = listStyleType;
+    computedStyle["list-style-image"] = Css.ident.none;
+    return true;
+  }
+
+  return false;
+}
+
 export type CustomRenderer = (
   p1: Element,
   p2: Element,
@@ -1738,9 +1804,13 @@ export class ViewFactory
           tag = "li";
           if (computedStyle["--viv-marker-content"]) {
             // We control marker content via --viv-marker-content CSS custom
-            // property, so suppress the browser's default marker.
-            computedStyle["list-style-type"] = Css.ident.none;
-            computedStyle["list-style-image"] = Css.ident.none;
+            // property. WebKit cannot render content on ::marker, so fall
+            // back to list-style-* when the resolved marker can be expressed
+            // there. (Issue #2017)
+            if (!applyWebKitMarkerFallback(computedStyle)) {
+              computedStyle["list-style-type"] = Css.ident.none;
+              computedStyle["list-style-image"] = Css.ident.none;
+            }
           }
         } else {
           // Subsequent fragments: no marker
