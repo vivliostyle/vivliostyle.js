@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.43.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.2...v2.43.3) (2026-06-18)
+
+**Note:** Version bump only for package @vivliostyle/react
+
 ## [2.43.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.1...v2.43.2) (2026-06-12)
 
 **Note:** Version bump only for package @vivliostyle/react

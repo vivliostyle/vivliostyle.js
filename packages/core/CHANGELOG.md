@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.43.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.2...v2.43.3) (2026-06-18)
+
+### Bug Fixes
+
+- Fix missing list markers in WebKit ([8cbc78b](https://github.com/vivliostyle/vivliostyle.js/commit/8cbc78b0570c6289516ef1a566715ffc56952891)), closes [#2017](https://github.com/vivliostyle/vivliostyle.js/issues/2017)
+
 ## [2.43.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.1...v2.43.2) (2026-06-12)
 
 ### Bug Fixes
