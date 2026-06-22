@@ -64,8 +64,10 @@ export type CoreViewerSettings = {
  * - pageBorderWidth: Width of a border between two pages in a single
  *   spread (px). Effective only in spread view mode. default: 1
  * - renderAllPages: Render all pages at the document load time. default: true
- * - pageViewMode: Page view mode (singlePage / spread / autoSpread).
- *   default: singlePage
+ * - pageViewMode: Page view mode (singlePage / spread / autoSpread /
+ *   continuousScroll). In continuousScroll mode every page is rendered in its
+ *   own element, stacked vertically so the document can be scrolled through
+ *   like a PDF viewer. default: singlePage
  * - zoom: Zoom factor with which pages are displayed. default: 1
  * - fitToScreen: Auto adjust zoom factor to fit the screen. default: false
  * - defaultPaperSize: Default paper size in px. Effective when `@page` size
