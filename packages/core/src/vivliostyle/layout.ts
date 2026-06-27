@@ -2001,7 +2001,26 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             // float fragment is added. (Issue #1675)
             Asserts.assert(newFragment);
             const isInsidePageFloat = !!context.generatingNodePosition;
-            context.addPageFloatFragment(newFragment, isInsidePageFloat);
+            // Issue #2024: Placing a `footnote-policy: line` footnote shrinks
+            // the body area and invalidates the page so the body reflows. On
+            // each page-layout retry the same footnote is placed again; if it
+            // invalidated every time, the layout would never converge and the
+            // renderer would hang. Allow exactly one invalidation per such
+            // footnote per page; suppress the redundant invalidations after
+            // that so pagination can complete.
+            const isLineFootnote =
+              !isInsidePageFloat &&
+              float instanceof Footnote &&
+              float.footnotePolicy === Css.ident.line;
+            const alreadyInvalidatedForLineFootnote =
+              isLineFootnote && context.hasInvalidatedForLineFootnote(float);
+            context.addPageFloatFragment(
+              newFragment,
+              isInsidePageFloat || alreadyInvalidatedForLineFootnote,
+            );
+            if (isLineFootnote && !alreadyInvalidatedForLineFootnote) {
+              context.markInvalidatedForLineFootnote(float);
+            }
             context.discardStashedFragments(float.floatReference);
             if (newPosition) {
               const continuation = new PageFloats.PageFloatContinuation(
