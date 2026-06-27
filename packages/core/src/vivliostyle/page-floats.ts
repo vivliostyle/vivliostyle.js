@@ -391,6 +391,27 @@ export class PageFloatLayoutContext
   private footnoteAnchorsSeen: Set<PageFloatID> = new Set();
 
   /**
+   * Tracks `footnote-policy: line` footnote IDs that have already triggered
+   * one invalidation (body reflow) on the current page. Like
+   * footnoteAnchorsSeen, this set survives invalidate() calls. Placing such a
+   * footnote shrinks the body area and invalidates the page to reflow the
+   * body; without this guard the same footnote is re-placed and re-invalidated
+   * on every page-layout retry, which never converges and hangs the renderer.
+   * Allowing exactly one invalidation per footnote per page bounds the retries
+   * so pagination converges. (Issue #2024)
+   */
+  private lineFootnoteInvalidatedOnce: Set<PageFloatID> = new Set();
+
+  /**
+   * Tracks `footnote-policy: line` footnote IDs for which finish() has already
+   * forbidden the float and invalidated the page once. Without this guard,
+   * finish() forbids and invalidates on every page-layout retry (the float is
+   * re-deferred each pass), which never converges and hangs the renderer.
+   * Like footnoteAnchorsSeen, this set survives invalidate(). (Issue #2024)
+   */
+  private lineFootnoteFinishInvalidatedOnce: Set<PageFloatID> = new Set();
+
+  /**
    * Reference to the outer column's context for page float area contexts.
    * Used only for getParent() navigation to propagate nested page floats
    * and footnotes to region/page level. Unlike `parent`, this does NOT
@@ -698,6 +719,34 @@ export class PageFloatLayoutContext
     return !!this.container?.element?.contains(anchorViewNode);
   }
 
+  /**
+   * Whether a `footnote-policy: line` footnote has already triggered one
+   * invalidation (body reflow) on the current page. (Issue #2024)
+   */
+  hasInvalidatedForLineFootnote(float: PageFloat): boolean {
+    if (float.floatReference === this.floatReference) {
+      return this.lineFootnoteInvalidatedOnce.has(float.getId());
+    }
+    return this.getParent(float.floatReference).hasInvalidatedForLineFootnote(
+      float,
+    );
+  }
+
+  /**
+   * Mark that a `footnote-policy: line` footnote has triggered one
+   * invalidation on the current page, so subsequent placements on the same
+   * page suppress the redundant invalidation. (Issue #2024)
+   */
+  markInvalidatedForLineFootnote(float: PageFloat): void {
+    if (float.floatReference === this.floatReference) {
+      this.lineFootnoteInvalidatedOnce.add(float.getId());
+    } else {
+      this.getParent(float.floatReference).markInvalidatedForLineFootnote(
+        float,
+      );
+    }
+  }
+
   isAnchorAlreadyAppeared(floatId: PageFloatID) {
     const deferredFloats = this.getDeferredPageFloatContinuations();
     if (deferredFloats.some((cont) => cont.float.getId() === floatId)) {
@@ -995,16 +1044,22 @@ export class PageFloatLayoutContext
         "footnotePolicy" in float &&
         float.footnotePolicy === Css.ident.line &&
         this.hasCurrentAnchor(float.getId()) &&
-        !existingFragment
+        !existingFragment &&
+        !this.lineFootnoteFinishInvalidatedOnce.has(float.getId())
       ) {
         // Once the anchor line has already appeared on the page, a deferred
         // footnote-policy: line footnote can no longer move independently.
         // If a fragment already started on this page, the deferred part is
         // just the continuation and should remain allowed to split.
+        // Forbid and invalidate at most once per footnote per page: the float
+        // is re-deferred on every page-layout retry, so re-invalidating here
+        // each time would never converge and would hang the renderer.
+        // (Issue #2024)
         if (this.locked) {
           this.invalidate();
           return;
         }
+        this.lineFootnoteFinishInvalidatedOnce.add(float.getId());
         this.removeFloatDeferredToNext(float);
         this.forbid(float);
         this.invalidate();
