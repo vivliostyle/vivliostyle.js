@@ -387,11 +387,16 @@ export class FootnoteLayoutStrategy
     const context = pageFloatLayoutContext.getPageFloatLayoutContext(
       float.floatReference,
     );
+    const container = context.getContainer(float.floatReference);
+    const containerElement = container.element;
     const fragments = context.floatFragments.filter(
-      (fr) => fr instanceof FootnoteFragment,
+      (fr) =>
+        fr instanceof FootnoteFragment &&
+        (float.floatReference !== PageFloats.FloatReference.REGION ||
+          !(fr.area as Layout.PageFloatArea).parentElement ||
+          (fr.area as Layout.PageFloatArea).parentElement === containerElement),
     );
-    Asserts.assert(fragments.length <= 1);
-    return fragments[0] || null;
+    return fragments.find((fr) => fr.hasFloat(float)) || fragments[0] || null;
   }
 
   /** @override */

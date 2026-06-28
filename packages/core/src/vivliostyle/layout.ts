@@ -759,6 +759,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   bodyFrame.breakLoop();
                   return;
                 }
+                if (position.pluginProps["lineFootnoteOverflow"]) {
+                  bodyFrame.breakLoop();
+                  return;
+                }
                 bodyFrame.continueLoop();
               });
             } else if (!position.inline) {
@@ -1793,36 +1797,26 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const floatChunkPosition = new VtreeImpl.ChunkPosition(
             c.nodePosition,
           );
-          // Save the break position count before layout. Note: doLayout()
-          // resets breakPositions to [], so after layout() returns,
-          // breakPositions contains only items from this single call.
-          // prevBreakPositionCount captures the count from the PREVIOUS
-          // iteration's result (before this call's reset), which serves as
-          // a baseline: if the new count doesn't exceed it, the current
-          // continuation placed less content than the previous one,
-          // indicating a marker-only fragment. (Issue #1956)
-          const prevBreakPositionCount = floatArea.breakPositions
-            ? floatArea.breakPositions.length
-            : 0;
+          const prevRootViewNodeCount = floatArea.getRootViewNodeCount();
           floatArea.layout(floatChunkPosition, true).then((newPosition) => {
             result.newPosition = newPosition;
             if (!newPosition || allowFragmented) {
               // For footnotes: if fragmented, check if meaningful content was
-              // placed for this continuation. If no new BoxBreakPosition was
-              // added beyond the previous iteration's count (which acts as a
-              // baseline since doLayout() resets the array each time), fail the
-              // layout so the footnote is deferred to the next page, preventing
-              // the marker from appearing alone at the page bottom.
+              // placed for this continuation. doLayout() resets
+              // breakPositions for each layout call, so this check must be
+              // self-contained for the current continuation; comparing with a
+              // previous continuation rejects valid later footnotes in a shared
+              // footnote area. (Issue #1956, #2026)
               if (
                 newPosition &&
                 floatArea.isFootnote &&
                 floatArea.breakPositions
               ) {
                 const hasNewLineContent =
-                  floatArea.breakPositions.length > prevBreakPositionCount &&
-                  floatArea.breakPositions
-                    .slice(prevBreakPositionCount)
-                    .some((bp) => bp instanceof BoxBreakPosition);
+                  floatArea.breakPositions.some(
+                    (bp) => bp instanceof BoxBreakPosition,
+                  ) &&
+                  floatArea.hasNonPseudoTextContentAfter(prevRootViewNodeCount);
                 if (!hasNewLineContent) {
                   failed = true;
                   loopFrame.breakLoop();
@@ -1922,6 +1916,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ): Task.Result<boolean> {
     const context = this.pageFloatLayoutContext;
     const float = continuation.float;
+    const isFootnote = float instanceof Footnote;
+    const layoutLineFootnoteSeparately =
+      isFootnote &&
+      float.footnotePolicy === Css.ident.line &&
+      !!pageFloatFragment &&
+      !pageFloatFragment.hasFloat(float);
 
     // Snapshot insidePageFloatArea fragments before the layout attempt.
     // If this float's layout is cancelled, any NEW insidePageFloatArea
@@ -1940,7 +1940,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     }
 
-    context.stashEndFloatFragments(float);
+    if (!layoutLineFootnoteSeparately) {
+      context.stashEndFloatFragments(float);
+    }
 
     function cancelLayout(floatArea, pageFloatFragment) {
       if (pageFloatFragment) {
@@ -1975,7 +1977,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       context.restoreStashedFragments(float.floatReference);
       context.deferPageFloat(continuation);
     }
-    const isFootnote = float instanceof Footnote;
     const frame: Task.Frame<boolean> = Task.newFrame("layoutPageFloatInner");
     this.layoutSinglePageFloatFragment(
       [continuation],
@@ -1984,7 +1985,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       isFootnote || !context.hasFloatFragments(),
       strategy,
       anchorEdge,
-      pageFloatFragment,
+      layoutLineFootnoteSeparately ? null : pageFloatFragment,
     ).then((result) => {
       const floatArea = result.floatArea;
       const newFragment = result.pageFloatFragment;
@@ -2000,25 +2001,63 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             // layout. The region will be invalidated later when the outer page
             // float fragment is added. (Issue #1675)
             Asserts.assert(newFragment);
+            let fragmentForContext = newFragment;
+            if (layoutLineFootnoteSeparately && pageFloatFragment) {
+              // Existing shared footnote areas can receive a later
+              // line-policy footnote. Layout it in a scratch area first, then
+              // merge the rendered nodes and resize the existing area so the
+              // shared fragment keeps one physical footnote box.
+              const footnoteArea = pageFloatFragment.area as PageFloatArea;
+              const previousRootViewNodeCount =
+                footnoteArea.getRootViewNodeCount();
+              footnoteArea.appendContentFrom(newFragment.area as PageFloatArea);
+              context.removePageFloatFragment(newFragment, true);
+              const logicalFloatSide = context.setFloatAreaDimensions(
+                footnoteArea,
+                float.floatReference,
+                pageFloatFragment.floatSide,
+                anchorEdge,
+                false,
+                true,
+                context.getPageFloatPlacementCondition(
+                  float,
+                  float.floatSide,
+                  float.clearSide,
+                ),
+              );
+              if (!logicalFloatSide) {
+                footnoteArea.removeContentAfter(previousRootViewNodeCount);
+                cancelLayout(floatArea, newFragment);
+                frame.finish(false);
+                return;
+              }
+              pageFloatFragment.addContinuations(newFragment.continuations);
+              fragmentForContext = pageFloatFragment;
+            }
             const isInsidePageFloat = !!context.generatingNodePosition;
-            // Issue #2024: Placing a `footnote-policy: line` footnote shrinks
-            // the body area and invalidates the page so the body reflows. On
-            // each page-layout retry the same footnote is placed again; if it
-            // invalidated every time, the layout would never converge and the
-            // renderer would hang. Allow exactly one invalidation per such
-            // footnote per page; suppress the redundant invalidations after
-            // that so pagination can complete.
-            const isLineFootnote =
+            // Issue #2024, #2026: Placing a `footnote-policy: line` footnote
+            // shrinks the body area and invalidates the page so the body
+            // reflows. On each page-layout retry the same footnote is placed
+            // again; if it invalidated every time, layout may fail to converge
+            // or the final fragment area can be cleared by a later retry.
+            // Allow exactly one invalidation per line-policy footnote per
+            // retry size; suppress redundant invalidations after that so
+            // pagination can complete with the footnote area attached.
+            const isLineFootnoteForInvalidation =
               !isInsidePageFloat &&
               float instanceof Footnote &&
               float.footnotePolicy === Css.ident.line;
             const alreadyInvalidatedForLineFootnote =
-              isLineFootnote && context.hasInvalidatedForLineFootnote(float);
+              isLineFootnoteForInvalidation &&
+              context.hasInvalidatedForLineFootnote(float);
             context.addPageFloatFragment(
-              newFragment,
+              fragmentForContext,
               isInsidePageFloat || alreadyInvalidatedForLineFootnote,
             );
-            if (isLineFootnote && !alreadyInvalidatedForLineFootnote) {
+            if (
+              isLineFootnoteForInvalidation &&
+              !alreadyInvalidatedForLineFootnote
+            ) {
               context.markInvalidatedForLineFootnote(float);
             }
             context.discardStashedFragments(float.floatReference);
@@ -2248,7 +2287,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (pageFloatFragment && pageFloatFragment.hasFloat(float)) {
         context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
         return Task.newResult(nodeContextAfter as Vtree.NodeContext);
-      } else if (
+      }
+      if (
         context.isForbidden(float) ||
         context.hasPrecedingFloatsDeferredToNext(float)
       ) {
@@ -2306,9 +2346,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         if (isNaN(edge) && nodeContext.floatSide === "footnote") {
           edge = getFootnoteEdgeFromViewNode(nodeContextAfter.viewNode);
         }
-        if (this.isOverflown(edge)) {
+        const skipOverflowPrecheck =
+          nodeContext.floatSide === "footnote" &&
+          (float as Footnote).footnotePolicy === Css.ident.line;
+        if (!skipOverflowPrecheck && this.isOverflown(edge)) {
           return Task.newResult(nodeContextAfter);
         } else {
+          if (nodeContext.floatSide === "footnote") {
+            context.registerPageFloatAnchor(float, nodeContextAfter.viewNode);
+          }
           return this.layoutPageFloatInner(
             continuation,
             strategy,
@@ -2325,6 +2371,30 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             // This ensures footnote-call and following content are processed
             // in the same postLayoutBlock, allowing correct text-spacing.
             if (nodeContext.floatSide === "footnote") {
+              const footnote = float as Footnote;
+              if (
+                footnote.footnotePolicy === Css.ident.line &&
+                context.hasInvalidatedForLineFootnote(float)
+              ) {
+                if (context.isInvalidated()) {
+                  return Task.newResult(null as Vtree.NodeContext);
+                }
+                const continuingFragment = strategy.findPageFloatFragment(
+                  float,
+                  context,
+                );
+                if (
+                  continuingFragment?.hasFloat(float) &&
+                  continuingFragment.continues
+                ) {
+                  const overflowNodeContext = nodeContextAfter.modify();
+                  overflowNodeContext.overflow = true;
+                  overflowNodeContext.pluginProps["lineFootnoteOverflow"] = 1;
+                  this.breakPositions = [];
+                  this.saveEdgeBreakPosition(overflowNodeContext, null, true);
+                  return Task.newResult(overflowNodeContext);
+                }
+              }
               return Task.newResult(nodeContextAfter);
             }
             // When inside a page float area, return nodeContextAfter to continue
@@ -5291,7 +5361,10 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
       layoutConstraint,
       pageFloatLayoutContext,
     );
+    this.parentElement = parentContainer.element;
   }
+
+  readonly parentElement: Element | null;
 
   override openAllViews(
     position: Vtree.NodePosition,
@@ -5374,6 +5447,53 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         }
       }
     }
+  }
+
+  getRootViewNodeCount(): number {
+    return this.rootViewNodes.length;
+  }
+
+  hasNonPseudoTextContentAfter(rootViewNodeIndex: number): boolean {
+    const hasNonPseudoText = (node: Node): boolean => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return !!node.textContent?.trim();
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return false;
+      }
+      if (PseudoElement.getPseudoName(node as Element)) {
+        return false;
+      }
+      return Array.from(node.childNodes).some(hasNonPseudoText);
+    };
+    return this.rootViewNodes.slice(rootViewNodeIndex).some(hasNonPseudoText);
+  }
+
+  appendContentFrom(other: PageFloatArea): void {
+    other.rootViewNodes.forEach((node) => {
+      this.element.appendChild(node);
+    });
+    this.rootViewNodes.push(...other.rootViewNodes);
+    this.floatMargins.push(...other.floatMargins);
+    other.rootViewNodes.splice(0);
+    other.floatMargins.splice(0);
+    if (other.element.parentNode) {
+      other.element.parentNode.removeChild(other.element);
+    }
+    this.applyCompactFootnoteDisplay();
+    this.updateComputedBlockSizeForFootnoteArea(true);
+  }
+
+  removeContentAfter(rootViewNodeIndex: number): void {
+    const removedRootViewNodes = this.rootViewNodes.splice(rootViewNodeIndex);
+    this.floatMargins.splice(rootViewNodeIndex);
+    removedRootViewNodes.forEach((node) => {
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
+      }
+    });
+    this.applyCompactFootnoteDisplay();
+    this.updateComputedBlockSizeForFootnoteArea(true);
   }
 
   getContentInlineSize(): number {
@@ -5481,13 +5601,25 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     this.updateComputedBlockSizeForFootnoteArea();
   }
 
-  private updateComputedBlockSizeForFootnoteArea(): void {
+  private updateComputedBlockSizeForFootnoteArea(
+    useActualBlockStart: boolean = false,
+  ): void {
     if (this.rootViewNodes.length === 0) {
       this.computedBlockSize = 0;
       return;
     }
 
     const dir = this.getBoxDir();
+    let contentBeforeEdge = this.beforeEdge;
+    if (useActualBlockStart) {
+      const areaBox = LayoutHelper.getElementClientRectAdjusted(
+        this.clientLayout,
+        this.element,
+        this.vertical,
+      );
+      contentBeforeEdge =
+        this.getBeforeEdge(areaBox) + dir * this.getInsetBefore();
+    }
     this.computedBlockSize = Math.max(
       0,
       ...this.rootViewNodes.map((node) => {
@@ -5499,7 +5631,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         const margin = this.getComputedMargin(node);
         const marginAfter = this.vertical ? margin.left : margin.bottom;
         return (
-          dir * (this.getAfterEdge(box) - this.beforeEdge) +
+          dir * (this.getAfterEdge(box) - contentBeforeEdge) +
           Math.max(0, marginAfter)
         );
       }),

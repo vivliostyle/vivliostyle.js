@@ -567,9 +567,13 @@ export namespace Layout {
     adjustContentRelativeSize: boolean;
     readonly floatSide: string;
     readonly parentContainer: Vtree.Container;
+    readonly parentElement: Element | null;
 
     convertPercentageSizesToPx(target: Element): void;
     fixFloatSizeAndPosition(nodeContext: Vtree.NodeContext): void;
+    getRootViewNodeCount(): number;
+    hasNonPseudoTextContentAfter(rootViewNodeIndex: number): boolean;
+    appendContentFrom(other: PageFloatArea): void;
     getContentBlockMarginAfter(): number;
     getContentInlineSize(): number;
   }
@@ -699,6 +703,9 @@ export namespace PageFloats {
     getContainer(floatReference?: FloatReference): Vtree.Container;
     setContainer(container: Vtree.Container);
     setOuterContext(outerContext: PageFloatLayoutContext): void;
+    addPageFloatLayoutContextAsPreviousSibling(
+      context: PageFloatLayoutContext,
+    ): void;
     addPageFloat(float: PageFloat): void;
     getPageFloatLayoutContext(
       floatReference: FloatReference,

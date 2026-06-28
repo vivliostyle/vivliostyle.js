@@ -1031,6 +1031,11 @@ module.exports = [
           "footnote-policy: line break before anchor line (vertical writing-mode) (Issue #2006)",
       },
       {
+        file: "footnotes/footnote-fragmentation-target-counter.html",
+        title:
+          "Long footnote fragmentation with target-counter() (Issue #2026)",
+      },
+      {
         file: "footnotes/named-page-deferred-text.html",
         title: "Named page with deferred text after footnote (Issue #1991)",
       },

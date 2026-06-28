@@ -56,7 +56,7 @@ import * as TextPolyfill from "./text-polyfill";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
 import * as XmlDoc from "./xml-doc";
-import { Layout as LayoutType } from "./types";
+import { Layout as LayoutType, PageFloats as PageFloatsType } from "./types";
 import {
   UserAgentBaseCss,
   UserAgentCounterStylesCss,
@@ -1417,7 +1417,13 @@ export class StyleInstance
     // 1. Determine current position in the document: Find the minimal
     // consumed-offset for all elements not fully-consumed in each primary flow.
     // Current position is maximum of the results among all primary flows.
-    const currentPosition = this.getPosition(cp);
+    let currentPosition = this.getPosition(cp);
+    if (currentPosition == Number.POSITIVE_INFINITY) {
+      if (this.hasActiveRootPageFloatLayoutContext()) {
+        currentPosition =
+          cp.highestSeenOffset ?? this.styler.getReachedOffset();
+      }
+    }
     if (currentPosition == Number.POSITIVE_INFINITY) {
       // end of primary content is reached
       return null;
@@ -1548,7 +1554,9 @@ export class StyleInstance
     column.flowRootFormattingContext = flow.formattingContext;
   }
 
-  beginIsolatedRootPageFloatLayoutContext(): PageFloats.PageFloatLayoutContext {
+  beginIsolatedRootPageFloatLayoutContext(
+    previousPageFloatLayoutContext?: PageFloatsType.PageFloatLayoutContext | null,
+  ): PageFloats.PageFloatLayoutContext {
     const originalRootPageFloatLayoutContext = this.rootPageFloatLayoutContext;
     this.rootPageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
       null,
@@ -1559,6 +1567,11 @@ export class StyleInstance
       null,
       null,
     );
+    if (previousPageFloatLayoutContext) {
+      this.rootPageFloatLayoutContext.addPageFloatLayoutContextAsPreviousSibling(
+        previousPageFloatLayoutContext,
+      );
+    }
     return originalRootPageFloatLayoutContext;
   }
 
@@ -1576,6 +1589,12 @@ export class StyleInstance
         .length > 0 ||
       this.rootPageFloatLayoutContext.getFloatsDeferredToNextInChildContexts()
         .length > 0
+    );
+  }
+
+  private hasOnlyDeferredPageFloats(cp: Vtree.LayoutPosition): boolean {
+    return (
+      this.noMorePrimaryFlows(cp) && this.hasActiveRootPageFloatLayoutContext()
     );
   }
 
@@ -2798,7 +2817,11 @@ export class StyleInstance
     page.isBlankPage = cp.isBlankPage;
     cp.page++;
 
-    const pageStartPageType = this.getPageStartPageTypeOverride(cp);
+    const hasOnlyDeferredPageFloats = this.hasOnlyDeferredPageFloats(cp);
+
+    const pageStartPageType = hasOnlyDeferredPageFloats
+      ? undefined
+      : this.getPageStartPageTypeOverride(cp);
     if (pageStartPageType === "") {
       page.pageType = "";
     } else if (pageStartPageType) {
@@ -2806,9 +2829,14 @@ export class StyleInstance
     }
     if (page.pageType == null) {
       const firstPageType = cp.page === 1 ? this.resolveFirstPageType() : null;
+      const continuedPageType =
+        this.styler.cascade.currentPageType ??
+        this.styler.cascade.previousPageType;
       const fallbackPageType = page.isBlankPage
         ? this.styler.cascade.previousPageType
-        : (firstPageType ?? this.styler.cascade.currentPageType);
+        : hasOnlyDeferredPageFloats
+          ? continuedPageType
+          : (firstPageType ?? this.styler.cascade.currentPageType);
       page.pageType = fallbackPageType;
       if (!page.pageType) {
         // Issue #1991: `currentPageType` can still be empty when a page starts
@@ -2984,6 +3012,7 @@ export class StyleInstance
         });
       })
       .then(() => {
+        page.pageFloatLayoutContext = pageFloatLayoutContext;
         pageMaster.adjustPageLayout(this, page, this.clientLayout);
         if (!isTocBox) {
           this.processLinger();
@@ -3004,7 +3033,10 @@ export class StyleInstance
         cp.highestSeenOffset = this.styler.getReachedOffset();
         const triggers = this.style.store.getTriggersForDoc(this.xmldoc);
         page.finish(triggers, this.clientLayout);
-        if (this.noMorePrimaryFlows(cp)) {
+        if (
+          this.noMorePrimaryFlows(cp) &&
+          !this.hasActiveRootPageFloatLayoutContext()
+        ) {
           cp = null;
         }
         frame.finish(cp);
