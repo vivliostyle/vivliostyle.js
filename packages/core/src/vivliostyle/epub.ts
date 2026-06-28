@@ -1954,12 +1954,17 @@ export class OPFView implements Vgen.CustomRendererFactory {
     viewItem.layoutPositions[nextLayoutPosition.page] = nextLayoutPosition;
     const nextPage = viewItem.pages[nextLayoutPosition.page];
     const offsetChanged = !!oldPage && renderedPage.offset !== oldPage.offset;
+    const hasActivePageFloatState =
+      viewItem.instance.hasActiveRootPageFloatLayoutContext();
+    // Even if the source layout position is unchanged, active root page-float
+    // state can still change following pages through deferred continuations.
     const positionChanged =
       !previousLayoutPosition ||
       !nextLayoutPosition.isSamePosition(previousLayoutPosition) ||
       nextLayoutPosition.highestSeenOffset !==
         previousLayoutPosition.highestSeenOffset ||
-      offsetChanged;
+      offsetChanged ||
+      hasActivePageFloatState;
     const inCounterResolveScope = this.isInCounterResolveScope();
     const relayoutDecision = this.evaluateNextPageRelayout(
       oldPage,
@@ -2056,9 +2061,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
           const hasRenderedTargetPage = !!targetViewItem.pages[refs.pageIndex];
           const shouldIsolateRootPageFloatLayoutContext =
             hasRenderedTargetPage && hasRenderedFollowingPage;
+          const previousPageFloatLayoutContext =
+            shouldIsolateRootPageFloatLayoutContext && refs.pageIndex > 0
+              ? targetViewItem.pages[refs.pageIndex - 1]?.pageFloatLayoutContext
+              : null;
           const originalRootPageFloatLayoutContext =
             shouldIsolateRootPageFloatLayoutContext
-              ? targetViewItem.instance.beginIsolatedRootPageFloatLayoutContext()
+              ? targetViewItem.instance.beginIsolatedRootPageFloatLayoutContext(
+                  previousPageFloatLayoutContext,
+                )
               : null;
 
           this.counterStore.pushPageCounters(refs.pageCounters);

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2026: a long fragmented footnote with target-counter() must not be dropped during rerendering. Reduced from the original issue Gist. -->
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Long footnote fragmentation with target-counter()</title>
+    <style>
+      @page {
+        size: 140mm 215mm;
+        margin: 20mm 20mm 16mm;
+
+        @bottom-center {
+          font-size: 8pt;
+          content: counter(page);
+        }
+
+        @footnote {
+          border-top: 0.5pt solid black;
+          margin-top: 6.6666mm;
+          padding-top: 2mm;
+        }
+      }
+
+      :root {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 9.5pt;
+        line-height: 140%;
+        widows: 2;
+        orphans: 2;
+        hyphens: auto;
+      }
+
+      p {
+        margin: 0 0 3mm;
+        text-align: justify;
+      }
+
+      span[data-type="FOOTNOTE"] {
+        float: footnote;
+        font-size: 7.5pt;
+        line-height: 130%;
+        text-align: justify;
+      }
+
+      span[data-type="FOOTNOTE"]::footnote-call {
+        content: counter(footnote);
+        font-size: 70%;
+        line-height: 60%;
+        vertical-align: super;
+      }
+
+      span[data-type="FOOTNOTE"]::footnote-marker {
+        content: counter(footnote) ".";
+      }
+
+      a.signetpageref::before {
+        content: target-counter(attr(href url), page);
+      }
+    </style>
+  </head>
+  <body>
+    <p>Passons à présent à DesdémoneDesdémone (<i>Othello</i>)mort de. Sa dévotion désintéressée envers Othello et sa douceur font d’elle un sujet particulièrement indigne des souffrances tragiquesOthellomeurtre de Desdémone. Sa mort semble profondément choquante. Il faut se demander s’il y a quoi que ce soit dans sa nature qui puisse en quelque façon justifier son destin. Est-elle détruite gratuitement, comme une spectatrice sans défense entraînée dans l’effondrement de la vie d’Othello ?</p>
+
+    <p>La réponse dépend de la façon dont on comprend son amour. Quelle était la source de son engagement dans cette étrange romance ? Indiscutablement, il venait des discours d’Othello. Mais cela ne suffit pas : nous devons découvrir ce que ces discours suscitaient en elle. Nous apprenons de la bouche de son père qu’elle était d’ordinaire une jeune fille calme et timide, d’un caractère doux et gentil. Mais, dans le même temps, nous savons qu’elle était indépendante, qu’elle savait ce qu’elle voulait. Elle « repoussait les galants les plus somptueux et les mieux frisés » de Venise ; les meilleurs partis de la région ne lui suffisaient pas<span data-type="FOOTNOTE">
+I, 3, 113-115 [F.-V. Hugo, p. 252] ; I, 2, 83.
+</span>. Elle voulait aimer quelque chose qui surpasserait le caractère vénitien.</p>
+
+    <p>C’est ce qu’Othello lui a apporté. Ses histoires de pays étranges et de grandes aventures semblaient lui donner la preuve d’une expérience et d’une connaissance éloignées des conventions. Elle sentait que sa vie limitée ne lui suffisait pas ; nous voyons en elle une passion embryonnaire pour l’universel, un désir de ne pas être dupée par la vie. Mais elle est désorientée. Elle perçoit ce qui est simplement différent et étrange comme étant le plus significatif et le plus réel. Qu’Othello les croie ou non, ses histoires contiennent beaucoup d’éléments qui ne sauraient être vrais ; elles sont, comme le dit Iago, fantastiques<span data-type="FOOTNOTE">
+I, 3, 166-168 ; II, 1, 255-257.
+</span>. Elles séduisent l’imagination de Desdémone, qui a été noyée dans la solitude et la timidité. Elle est exactement comme la décrit son nom — superstitieuse<span data-type="FOOTNOTE">
+Pour cette étymologie, je suis l’analyse de ShaftesburyShaftesbury, Anthony Ashley Cooper, comte de en considérant que son nomDesdémone (<i>Othello</i>)signification du nom est dérivé du grec <i>δεισιδαίμων</i>, alors que des interprètes plus tardifs l’ont unanimement compris comme provenant de <i>δυσδαίμων</i>, qui signifie « malheureux », « infortuné ». Bien évidemment, on ne peut pas s’appuyer trop fortement sur l’étymologie supposée d’un nom pour interpréter une pièce, surtout quand cette interprétation elle-même est discutable. Mais il semble certain que Shakespeare choisissait souvent des noms qui connotaient les caractères de ses personnages (voir J. RuskinRuskin, John, <i>Munera Pulveris</i>, <i>in</i> <i>Works</i>, G. Allen, Londres, 1905, p. 257), et dans ce cas les deux étymologies correspondent extrêmement bien. Ma préférence pour le premier sens « superstitieuse » se fonde sur une observation générale de la nature de Desdémone et la pertinence qu’il y a à lui attribuer un tel terme. Autant que je sache, il n’y a pas de raisons philologiques qui permettent de trancher en faveur d’une interprétation plutôt qu’une autre, de sorte qu’il nous faut nous appuyer sur notre interprétation de la pièce pour justifier le sens qu’on donne à son nom. Si l’interprétation est convaincante, le nom lui donne un certain poids en plus. Les autres interprètes qui ont traité de ce problème ont fondé leur choix presque exclusivement sur l’idée que Desdémone était malchanceuse et que cela constituait son essence ; la signification de son nom ne ferait qu’exprimer cette malchancesuperstition. La tâche de cet essai a été de prouver ce n’est pas seulement la mauvaise fortune qui constitue le cœur de sa tragédie. Le lecteur doit juger pour lui-même de la plausibilité des deux étymologies, car l’érudition ne peut pas aller plus loin. Comme cela arrive fréquemment dans le domaine savant, une affirmation concernant la certitude d’une interprétation discutable semble fournir une preuve scientifique à des problématiques qui dépendent réellement de cette interprétation. C’est seulement si un Shaftesbury a tort avec certitude dans sa compréhension d’Othello qu’on peut décider ultimement si DesdémoneDesdémone (<i>Othello</i>)signification du nom signifiait « infortunée » aux yeux de Shakespeare. Quels que soient les arguments en faveur d’une hypothèse ou de l’autre, ils sont ambigus. La source que Shakespeare a utilisée pour <i>Othello</i>, la nouvelle de Cinthio, ne contenait qu’un seul nom, celui de Desdémone, que Shakespeare a repris dans sa pièce. Chez Cinthio, le nom signifie presque sans aucun doute « infortunée » ; mais cela ne prouve pas que Shakespeare n’a pas pu en modifier le sens, de la même façon qu’il réinterprète entièrement le personnage pour lui donner une nouvelle importance. L’élément pertinent est que Shakespeare modifie l’orthographe du nom de Cinthio : dans la <i>novella</i>, il s’agit de « <i>Dis</i>demona » Desdémone (<i>Othello</i>)signification du nom. Le <i>i </i>et le <i>y </i>sont les translitérations conventionnelles de la lettre grecque <i>υ</i>, ce qui indique clairement que l’étymologie du nom est <i>δυσδαίμων.</i> Le fait que Shakespeare substitue le <i>e</i> au <i>i</i>, à moins que ce ne soit pour des raisons non évidentes d’euphonie, rapprocherait le nom du grec <i>δεισιδαίμων</i>. Depuis Théophraste, si ce n’est avant, le <i>δεισιδαίμων</i>, ou l’homme superstitieux, est un des types humains conventionnels, un personnage qui est dépeint dans la littérature dans le but d’instruire le public sur les erreurs dangereuses et communes. PlutarquePlutarque a écrit un traité sur le sujet que Shakespeare aurait facilement pu lire. Dans l’œuvre de Plutarque, l’homme superstitieux est distingué de l’athée — qui est présenté comme ayant des opinions divergentes et fausses sur la nature des dieux. Les deux personnages décrits par Plutarque ont des similitudes frappantes avec Desdémone et Iago. Enfin, ces deux étymologies ne sont pas nécessairement mutuellement exclusives (voir p. <a class="signetpageref" href="#signet-Chap02_destinee"></a> du présent ouvrage). Voir John UptonUpton, John, <i>Critical Observations on Shakespeare</i>, Londres, 1746, p. 288 ; John Wesley HalesHales, John Wesley, <i>Notes and Essays on Shakespeare</i>, Londres, 1884, p. 111 ; Albert TeschTesch, Albert « Zum Namen Desdemona », <i>Germanisch-Romanische Monatsschrift</i>, XVII, 1929, 578-588.
+</span>. Sa dévotion envers Othello l’honore, et son choix de chercher un sens au-delà des opinions consacrées lui octroie une dignité que les citoyens ordinaires ne peuvent avoir. Mais c’était un choix qu’elle a conçu dans l’erreur : Othello était une création de son esprit. Elle croit les discours relatant ses hauts faits. Paradoxalement, son amour la poussait à rechercher chez Othello quelque chose d’indépendant et de libre, alors que ce même amour a rendu son mari dépendant et a relié son apparente universalité à quelque chose de particulier. Ils sont passés l’un à côté de l’autre, pour ainsi dire, sur le chemin de l’amour. Ce qu’il y a de plus paradoxal, c’est que pour se libérer de Venise, elle a aimé une création de Venise. Au lieu de gagner sa liberté, elle s’est retrouvée enchaînée encore plus solidement à ce qu’elle essayait de fuir ; Othello n’existait que dans l’esprit de Venise. DesdémoneDesdémone (<i>Othello</i>)mort de s’est donnée entièrement et avec passion à quelque chose qui dépassait la réalité physique, mais quelque chose qu’elle a conçu dans l’erreur. En abandonnant tout au nom du cosmopolitismecosmopolitismedans <i>Othello</i>, elle prenait le parti de l’expression la plus caractéristique de la communauté politique — les mythes qui entourent ses chefs. Desdémone, le seul personnage dans la pièce qui soit indifférent à l’opinion populaire, devient prisonnière de l’opinion qui s’est formée autour d’Othello.</p>
+
+    <p>La superstition de DesdémoneDesdémone (<i>Othello</i>)mort de n’est pas la seule cause de sa mortOthellomeurtre de Desdémone. Sa fidélitéfidélitéde Desdémone est également une condition nécessaire. Non seulement elle était attirée par les histoires d’Othello, mais elle croyait et voulait garder foi en lui quoi qu’il fît. L’apparence que revêtent ses actions n’a pas d’importance ; il faut le suivre et l’aimer en dépit de ses actes, car ses fins sont impénétrables. Elle croit en lui si entièrement qu’elle doit nier la validité du sens commun pour justifier son action. Ce qui apparaît comme une injustice d’un point de vue ordinaire doit apparaître à Desdémone comme la justice punissant quelque vice ou péché supposé de sa part ou de celle des autres. S’il faut le croire, quoiqu’il agisse de façon contraire aux normes humaines ordinaires, alors elle doit dire que ces normes sont dénuées de sens ou bien erronées dans ce contexte plus élevé. Elle accepte la nouvelle façon de juger les âmes qui a résulté de la jalousie d’Othello ; l’apparence manifeste des choses est rejetée, et une norme mystérieuse dépendant des caprices d’Othello devient la règle. Bien entendu, la véritable source de cette norme est le besoin que ressent Othello de se faire aimer de manière absolue et inconditionnelle. Mais cette source véritable est transformée et représentée comme un sens secret de la vie, un secret qui ne peut être révélé que par Othello. Chez Desdémone commence une sorte d’introspection : elle ne regarde plus le sens superficiel des mots et des actes, sa conscience lui ordonne de rechercher des fautes que sa raison ne voit pas. Cassio a fait peu ou prou la même chose lorsqu’il a été révoqué par Othello ; toutes les valeurs morales viennent d’Othello, et ce qu’il n’approuve pas est mauvais. Ce n’est pas Othello qui dépend de la nature, mais la nature qui dépend d’Othello. Ceci conduit à de nouvelles habitudes mentales, de nouvelles vertus.</p>
+
+    <p>Lors de sa conversation avec ÉmiliaÉmilia (<i>Othello</i>), Desdémone expose clairement son principe : la fidélité, et rien que la fidélité — tout y est subordonné. C’est un principe noble, sans aucun doute, mais qui n’est certainement pas aussi raisonnable que celui d’Émilia, qui fait dépendre la fidélité des actes de son mari. Son éthique est accommodante, elle n’attache pas tant d’importance à la chasteté. En elle-même, elle n’est pas une personne aussi raffinée que Desdémone, mais peut-être qu’on ne peut atteindre la noblesse véritable et non tragique par la sanctification de la fidélité maritale. Émilia, tout inférieure qu’elle soit, peut permettre de mettre ceci en valeur. Pour ÉmiliaÉmilia (<i>Othello</i>), le monde simple des significations du sens commun et la justice évidente des faits doivent dicter la fidélité : celle-ci ne saurait être inconditionnelle. Pour Desdémone, tout doit être interprété de façon à préserver sa foi<span data-type="FOOTNOTE">
+IV, 3, 66-116 ; IV, 3, 24-26 ; IV, 2, 81 ; IV, 2, 131-145 ; IV, 2, 177-193 ; III, 3, 89-96 ; III, 3, 103 ; III, 4, 162-176.
+</span>.</p>
+
+    <p>La foi de Desdémonesuperstition envers Othello la conduit à un certain mépris vis-à-vis de la véritévéritéet Désdémoneamourvérité et, ce qui n’a pas été assez souvent observé. Nous la voyons recourir à la tromperie à trois reprises dans la pièce, avec à chaque fois une incidence plus grande sur son destin. Tout d’abord, elle cache à son père sa relation avec Othello et le met devant le fait accompli. Quelle que soit l’indulgence avec laquelle nous puissions considérer son amour pour Othello, il n’y a aucun doute sur le fait qu’elle est coupable de désobéissance, et que son amour entre en conflit avec ses devoirs les plus sacrés. L’amour pour Othello conduit le meilleur enfant de la cité à mépriser ces devoirs, sans hésiter à enfreindre la loi pour lui. À chaque fois que sa loyauté se trouve tiraillée, Desdémone prend sans hésitation le parti d’Othello ; il semble que cette jeune fille timide a pris tant de force et d’assurance, ou que son amouramourfanatisme de l’ l’a rendue si fanatique qu’elle est devenue capable de commettre de sang-froid ce que d’autres seraient incapables de faire. Il faut rappeler que la conséquence de cette tromperie fut la mort de son père<span data-type="FOOTNOTE">
+V, 2, 255-261.
+</span>. Dans le deuxième cas, elle a menti à Othello à propos du mouchoirmouchoirdans <i>Othello</i>. C’est peut-être là que sa nature superstitieuse nous apparaît le plus clairement ; elle était si effrayée par l’importance qu’Othello attachait à ce mouchoir et par le conte qu’il lui a raconté à son propos qu’elle n’a pas osé lui faire savoir qu’elle l’avait perdu. Cette contre-vérité a conduit directement à sa propre mort<span data-type="FOOTNOTE">
+III, 4, 95-104.
+</span>. Enfin, elle semble proférer un mensonge même lorsqu’elle est à l’agonieDesdémone (<i>Othello</i>)déclarations d'agonie de. Elle dit qu’Othello ne l’a pas tuée. Elle essaie encore de préserver la réputation de son mari, car elle mourrait en vain s’il était mauvais. La réputation d’Othello vit en elle et non en lui. Jusqu’à la fin, elle doit voir les choses telles qu’elle veut les voir et non telles qu’elles sontDesdémone (<i>Othello</i>)déclarations d'agonie de. Croire c’est voir<span data-type="FOOTNOTE">
+V, 2, 147-156. Othello a étouffé Desdémone au vers 105 et il est persuadé qu’elle est morte jusqu’au vers 117. Que Shakespeare ait voulu dire qu’elle est revenue à la vie ou qu’Othello se soit trompé et qu’elle n’était pas encore tout à fait morte, les paroles de DesdémoneDesdémone (<i>Othello</i>)déclarations d'agonie de — des phrases cohérentes prononcées après un étranglement — constituent un événement remarquable, qui dépasse l’ordre naturel des choses. C’est une difficulté qui a souvent été soulignée. Je suggère que ce dernier effort suprême de la pauvre créature avait pour but de donner une impression de surnaturel au public, et qu’essayer de rationaliser cela, en changeant les circonstances de sa mort ou d’une autre façon, revient à manquer le sens du passage. C’est précisément en raison de l’invraisemblance de ce que fait Desdémone que nous prenons conscience de l’intensité de sa dévotion et de sa foi. Elle donne au passage une portée qui dépasse l’humain, dans une pièce qui se distingue par son contexte purement humain, une pièce dont les réverbérations cosmiques qui caractérisent les autres grandes tragédies de Shakespeare sont absentes. Au théâtre, particulièrement chez Shakespeare, les invraisemblances sont des outils permettant d’exprimer des réalités plus grandes mais indicibles.
+</span>.</p>
+
+    <p>La mort de Desdémone est dans une large mesure imputable à ses propres erreurs. C’étaient de nobles erreurs, des erreurs qui l’ont élevée au-dessus de l’humanité ordinaire, mais qui méritaient d’être punies. Du point de vue de la vie de tous les jours, Desdémone pèche en trahissant son père. Nous prenons son parti car elle le fait au nom de quelque chose de plus grand. Mais peut-être que dans une troisième perspective, la plus importante, nous devons prendre la défense de la société civile, et considérer son abandon comme le résultat d’une incompréhension monstrueuse. Peut-être qu’on ne peut atteindre le véritable cosmopolitisme qu’en renonçant aux vœux les plus chers de la vie pratique. Le mariage fait partie de la vie politique, de la société civile. On ne peut le purifier de sa dimension politique sans le vider de sa substance.</p>
+
+    <p>On a comparé Desdémone à CordéliaCordélia (<i>Le Roi Lear</i>) et à MirandaMiranda (<i>La Tempête</i>), à juste titre. Elle est indépendante, courageuse et gentille, comme la première ; elle a une douce candeur, comme la seconde (sur le même mode que le célèbre « <i>oh brave new world</i> »). Mais il manque à Desdémone cet amour de la vérité qui permet à Cordélia de si bien comprendre sa situation. Desdémone ne reconnaît jamais son erreur, et elle dit, en faisant référence à un autre sens possible de son nom : « Telle est ma misérable destinée<span data-type="FOOTNOTE">
+IV, 2, 150 [F.-V. Hugo, <i>ibid</i>. p. 358].
+</span> ! » <span id="signet-Chap02_destinee">Shakespeare</span>Shakespeare, en exploitant pleinement le sens de ce nom, nous présente sa « misérable destinée » comme le résultat de sa « superstitionsuperstition ». À la différence de Miranda, elle n’a pas de ProspéroProspéro (<i>La Tempête</i>) pour guider son imagination et la mettre sur le droit chemin. Sa compréhension naïve des choses engendre des monstres. Dans cette pièce sombre, Shakespeare ne nous montre aucune échappatoire au problème de Desdémone. Elle mène une vie noble, mais une vie qui va à l’encontre du droit et de la raison.</p>
+  </body>
+</html>

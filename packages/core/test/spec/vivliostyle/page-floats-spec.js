@@ -1154,6 +1154,89 @@ describe("page-floats", function () {
       });
     });
 
+    describe("#hasInvalidatedForLineFootnote", function () {
+      it("invalidates again when the line footnote retry size changes", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          "foo",
+          null,
+          null,
+          null,
+        );
+        var float = new PageFloat(
+          dummyNodePosition(),
+          FloatReference.PAGE,
+          "block-end",
+          null,
+          "foo",
+        );
+
+        pageContext.addPageFloat(float);
+        expect(pageContext.hasInvalidatedForLineFootnote(float)).toBe(false);
+
+        pageContext.markInvalidatedForLineFootnote(float);
+        expect(pageContext.hasInvalidatedForLineFootnote(float)).toBe(true);
+
+        pageContext.footnoteMaxBlockSize = 100;
+        expect(pageContext.hasInvalidatedForLineFootnote(float)).toBe(false);
+
+        pageContext.markInvalidatedForLineFootnote(float);
+        expect(pageContext.hasInvalidatedForLineFootnote(float)).toBe(true);
+      });
+    });
+
+    describe("#addPageFloatLayoutContextAsPreviousSibling", function () {
+      it("seeds isolated roots with continuations from the previous page", function () {
+        var previousPageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var isolatedRootContext = new PageFloatLayoutContext(
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var float = new PageFloat(
+          dummyNodePosition(),
+          FloatReference.PAGE,
+          "block-end",
+          null,
+          "body",
+        );
+        previousPageContext.addPageFloat(float);
+        var continuation = new PageFloatContinuation(float, {});
+        previousPageContext.deferPageFloat(continuation);
+
+        isolatedRootContext.addPageFloatLayoutContextAsPreviousSibling(
+          previousPageContext,
+        );
+        var isolatedPageContext = new PageFloatLayoutContext(
+          isolatedRootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        expect(isolatedPageContext.getDeferredPageFloatContinuations()).toEqual(
+          [continuation],
+        );
+      });
+    });
+
     describe("#deferPageFloat", function () {
       var pageContext, regionContext, columnContext, float;
       beforeEach(function () {
@@ -1545,6 +1628,61 @@ describe("page-floats", function () {
 
         expect(context.removePageFloatFragment).not.toHaveBeenCalled();
         expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
+      });
+
+      it("retries footnote sizing outside multi-column when the footnote pushes its anchor away", function () {
+        var pageContext = new PageFloatLayoutContext(
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+          null,
+        );
+        var float = new PageFloat(
+          dummyNodePosition(),
+          FloatReference.PAGE,
+          "block-end",
+          null,
+          "body",
+        );
+        float.footnotePolicy = adapt_css.ident.line;
+        pageContext.addPageFloat(float);
+        pageContext.footnoteAnchorsSeen.add(float.getId());
+        spyOn(pageContext, "hasMultiColumnFootnoteContext").and.returnValue(
+          false,
+        );
+        var area = {
+          isFootnote: true,
+          computedBlockSize: 100,
+          getInsetBefore: function () {
+            return 5;
+          },
+          getInsetAfter: function () {
+            return 5;
+          },
+          element: {
+            parentNode: {
+              removeChild: jasmine.createSpy("removeChild"),
+            },
+          },
+        };
+        var fragment = new PageFloatFragment(
+          float.floatReference,
+          float.floatSide,
+          null,
+          [new PageFloatContinuation(float, {})],
+          area,
+          true,
+        );
+        pageContext.addPageFloatFragment(fragment, true);
+
+        expect(pageContext.checkAndForbidNotAllowedFloat()).toBe(true);
+
+        expect(pageContext.footnoteMaxBlockSize).toBe(55);
+        expect(pageContext.isForbidden(float)).toBe(false);
+        expect(pageContext.findPageFloatFragment(float)).toBe(null);
       });
 
       it("forbids deferred line-policy footnotes on page contexts while the anchor is present", function () {
