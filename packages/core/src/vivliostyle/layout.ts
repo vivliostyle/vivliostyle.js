@@ -455,6 +455,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   blockDistanceToBlockEndFloats: number = NaN;
   lastLineStride: number = 0;
   breakAtTheEdgeBeforeFloat: string | null = null;
+  private lineFootnoteOverflowEdge: number | null = null;
 
   constructor(
     element: HTMLElement,
@@ -2387,12 +2388,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   continuingFragment?.hasFloat(float) &&
                   continuingFragment.continues
                 ) {
-                  const overflowNodeContext = nodeContextAfter.modify();
-                  overflowNodeContext.overflow = true;
-                  overflowNodeContext.pluginProps["lineFootnoteOverflow"] = 1;
-                  this.breakPositions = [];
-                  this.saveEdgeBreakPosition(overflowNodeContext, null, true);
-                  return Task.newResult(overflowNodeContext);
+                  // Issue #2029: keep building the rest of this inline line.
+                  // The forced overflow break is resolved later from the full
+                  // block checkpoints so text-spacing wrappers and normal line
+                  // breaking decide the natural end of the anchor line.
+                  this.registerLineFootnoteOverflowEdge(edge);
+                  return Task.newResult(nodeContextAfter);
                 }
               }
               return Task.newResult(nodeContextAfter);
@@ -2476,6 +2477,41 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return frame.result();
   }
 
+  private registerLineFootnoteOverflowEdge(edge: number): void {
+    if (!isFinite(edge)) {
+      return;
+    }
+    const dir = this.getBoxDir();
+    if (
+      this.lineFootnoteOverflowEdge == null ||
+      dir * edge < dir * this.lineFootnoteOverflowEdge
+    ) {
+      this.lineFootnoteOverflowEdge = edge;
+    }
+  }
+
+  private findLineFootnoteOverflowBreak(
+    checkPoints: Vtree.NodeContext[],
+  ): Vtree.NodeContext | null {
+    if (this.lineFootnoteOverflowEdge == null || checkPoints.length === 0) {
+      return null;
+    }
+    const linePositions = this.findLinePositions(checkPoints);
+    const dir = this.getBoxDir();
+    const tolerance = 1.5 / (this.clientLayout.pixelRatio || 1);
+    // Use the first rendered line whose block-end reaches the footnote call.
+    // This avoids forcing a break immediately after the call, which can leave
+    // an underfull justified line when the following text still fits.
+    const linePosition = linePositions.find(
+      (position) =>
+        dir * (position - this.lineFootnoteOverflowEdge) >= -tolerance,
+    );
+    if (linePosition == null) {
+      return null;
+    }
+    return this.findAcceptableBreakInside(checkPoints, linePosition, true);
+  }
+
   isLoneImage(checkPoints: Vtree.NodeContext[]): boolean {
     if (checkPoints.length != 2 && this.breakPositions.length > 0) {
       return false;
@@ -2526,6 +2562,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       "layoutBreakableBlock",
     );
     const checkPoints: Vtree.NodeContext[] = [];
+    this.lineFootnoteOverflowEdge = null;
     this.buildViewToNextBlockEdge(nodeContext, checkPoints).then(
       (resNodeContext) => {
         // at this point a single block was appended to the column
@@ -2595,6 +2632,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         lineCont.then((nodeContext) => {
           // Text-spacing etc. must be done before calculating edge. (Issue #898)
           // this.postLayoutBlock(nodeContext, checkPoints);
+
+          const lineFootnoteOverflowBreak =
+            this.findLineFootnoteOverflowBreak(checkPoints);
+          if (lineFootnoteOverflowBreak) {
+            const overflowNodeContext = lineFootnoteOverflowBreak.modify();
+            overflowNodeContext.overflow = true;
+            overflowNodeContext.pluginProps["lineFootnoteOverflow"] = 1;
+            this.breakPositions = [];
+            this.saveEdgeBreakPosition(overflowNodeContext, null, true);
+            this.lineFootnoteOverflowEdge = null;
+            frame.finish(overflowNodeContext);
+            return;
+          }
+          this.lineFootnoteOverflowEdge = null;
 
           if (checkPoints.length > 0) {
             this.saveBoxBreakPosition(checkPoints);
@@ -5563,7 +5614,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     }) as HTMLElement[];
     if (compactFootnotes.length === 0) {
       this.updateInlineFootnoteSeparators();
-      this.updateComputedBlockSizeForFootnoteArea();
+      this.updateComputedBlockSizeForFootnoteArea(true);
       return;
     }
 
@@ -5598,7 +5649,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     });
 
     this.updateInlineFootnoteSeparators();
-    this.updateComputedBlockSizeForFootnoteArea();
+    this.updateComputedBlockSizeForFootnoteArea(true);
   }
 
   private updateComputedBlockSizeForFootnoteArea(
@@ -5617,8 +5668,14 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         this.element,
         this.vertical,
       );
+      const contentInsetBefore = this.vertical
+        ? this.borderRight + this.paddingRight
+        : this.borderTop + this.paddingTop;
+      // getBoundingClientRect() gives the border box; adding margins here
+      // would shrink computedBlockSize and let footnotes protrude below the
+      // @page area. (Issue #2029)
       contentBeforeEdge =
-        this.getBeforeEdge(areaBox) + dir * this.getInsetBefore();
+        this.getBeforeEdge(areaBox) + dir * contentInsetBefore;
     }
     this.computedBlockSize = Math.max(
       0,
