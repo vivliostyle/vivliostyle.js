@@ -297,6 +297,28 @@ function normalizeLang(lang: string): string | null {
   return null;
 }
 
+const CHROMIUM_VO_TR_FALLBACK_PATTERN = /^[‘’“”〰﹙﹚﹛﹜﹝﹞〚〛；]\p{M}*$/u;
+const CHROMIUM_VO_TR_FALLBACK_OPEN_PATTERN = /^[‘“﹙﹛﹝〚]\p{M}*$/u;
+
+function isChromiumVoTrFallback(text: string, vertical: boolean): boolean {
+  return (
+    Base.browserType === "chromium" &&
+    vertical &&
+    CHROMIUM_VO_TR_FALLBACK_PATTERN.test(text)
+  );
+}
+
+function getChromiumVoTrFallbackTagName(
+  text: string,
+): "viv-ts-open" | "viv-ts-close" {
+  // Reuse the existing open/close wrapper tags only to isolate the character.
+  // Fallback-only nodes return before text-spacing/hanging classes are assigned,
+  // so this tag choice does not change spacing behavior.
+  return CHROMIUM_VO_TR_FALLBACK_OPEN_PATTERN.test(text)
+    ? "viv-ts-open"
+    : "viv-ts-close";
+}
+
 class TextSpacingPolyfill {
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-autospace", "text-spacing-trim"];
@@ -324,7 +346,7 @@ class TextSpacingPolyfill {
       }
       const textArr = node.textContent
         .replace(
-          /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
+          /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
           "$&\x00",
         )
         .split("\x00");
@@ -830,10 +852,12 @@ class TextSpacingPolyfill {
     }
 
     let punctProcessing = false;
+    let chromiumVoTrFallbackOnly = false;
     let hangingFirst = false;
     let hangingLast = false;
     let hangingEnd = false;
     let tagName: "viv-ts-open" | "viv-ts-close";
+    const needsChromiumVoTrFallback = isChromiumVoTrFallback(text, vertical);
 
     if (
       isFirstInBlock &&
@@ -881,6 +905,10 @@ class TextSpacingPolyfill {
       // fullwidth closing punctuation
       tagName = "viv-ts-close";
       punctProcessing = true;
+    } else if (needsChromiumVoTrFallback) {
+      tagName = getChromiumVoTrFallbackTagName(text);
+      punctProcessing = true;
+      chromiumVoTrFallbackOnly = true;
     }
 
     if (punctProcessing) {
@@ -894,6 +922,19 @@ class TextSpacingPolyfill {
       outerElem.appendChild(innerElem);
       textNode.parentNode.insertBefore(outerElem, textNode);
       innerElem.appendChild(textNode);
+
+      if (needsChromiumVoTrFallback) {
+        const textOrientation = document.defaultView.getComputedStyle(
+          innerElem.parentElement,
+        ).textOrientation;
+        if (textOrientation === "mixed") {
+          innerElem.style.textOrientation = "sideways";
+        }
+      }
+
+      if (chromiumVoTrFallbackOnly) {
+        return 0;
+      }
 
       // Check if the punctuation is almost full width
       function checkFullWidth(elem: HTMLElement): boolean {
