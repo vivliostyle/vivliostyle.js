@@ -1,4 +1,16 @@
 - category: Footnotes
+  title: "Long footnote with footnote-policy: line (Issue #2029)"
+  file: footnotes/footnote-policy-line-long.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2029  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-policy-line-long.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-policy-line-long.html&zoom=1&spread=false
+- category: Footnotes
   title: "Long footnote fragmentation with target-counter() (Issue #2026)"
   file: footnotes/footnote-fragmentation-target-counter.html
   decision: expected  # regression / expected / skip
