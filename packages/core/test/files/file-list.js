@@ -1031,6 +1031,10 @@ module.exports = [
           "footnote-policy: line break before anchor line (vertical writing-mode) (Issue #2006)",
       },
       {
+        file: "footnotes/footnote-policy-line-long.html",
+        title: "Long footnote with footnote-policy: line (Issue #2029)",
+      },
+      {
         file: "footnotes/footnote-fragmentation-target-counter.html",
         title:
           "Long footnote fragmentation with target-counter() (Issue #2026)",
