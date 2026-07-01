@@ -297,7 +297,7 @@ function normalizeLang(lang: string): string | null {
   return null;
 }
 
-const CHROMIUM_VO_TR_FALLBACK_PATTERN = /^[‘’“”〰﹙﹚﹛﹜﹝﹞〚〛；]\p{M}*$/u;
+const CHROMIUM_VO_TR_FALLBACK_PATTERN = /^[‘’“”〰﹙﹚﹛﹜﹝﹞〚〛]\p{M}*$/u;
 const CHROMIUM_VO_TR_FALLBACK_OPEN_PATTERN = /^[‘“﹙﹛﹝〚]\p{M}*$/u;
 
 function isChromiumVoTrFallback(text: string, vertical: boolean): boolean {
