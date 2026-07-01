@@ -1,3 +1,15 @@
+- category: Text Spacing
+  title: "Vertical vo=Tr characters fallback (Issue #2023)"
+  file: text-spacing/vo-tr-quotes-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2023a  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/vo-tr-quotes-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/vo-tr-quotes-vertical.html&zoom=1&spread=false
 - category: Footnotes
   title: "Long footnote with footnote-policy: line (Issue #2029)"
   file: footnotes/footnote-policy-line-long.html
