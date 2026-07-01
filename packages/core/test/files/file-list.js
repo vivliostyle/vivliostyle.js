@@ -434,6 +434,10 @@ module.exports = [
         title: "Text-spacing on generated content (vertical writing-mode)",
       },
       {
+        file: "text-spacing/vo-tr-quotes-vertical.html",
+        title: "Vertical vo=Tr characters fallback (Issue #2023)",
+      },
+      {
         file: "text-spacing/text-spacing-trim-start-code.html",
         title: "text-spacing-trim after code element (Issue #1863)",
       },

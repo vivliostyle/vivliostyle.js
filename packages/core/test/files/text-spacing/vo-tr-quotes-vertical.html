@@ -1,0 +1,67 @@
+<!-- Test case for Issue #2023: vertical vo=Tr characters should rotate on Chromium -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vertical vo=Tr characters fallback</title>
+    <style>
+      @page {
+        size: 180mm 120mm;
+        margin: 12mm;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+      }
+
+      .panel {
+        display: inline-block;
+        vertical-align: top;
+        margin-inline-end: 8mm;
+      }
+
+      .sample {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-size: 22px;
+        line-height: 1.2;
+        border: 1px solid #999;
+        padding: 4mm;
+        height: 62mm;
+      }
+
+      .rotate-quote {
+        text-orientation: sideways;
+      }
+
+      h1 {
+        margin: 0 0 4mm;
+        font-size: 14px;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .label {
+        margin-block-end: 2mm;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Vertical vo=Tr characters fallback</h1>
+    <div class="layout">
+      <div class="panel">
+        <p class="label">Mixed with fallback</p>
+        <p class="sample" id="mixed">“縦書き” ‘引用’ 〰 ﹙abc﹚ ﹛abc﹜ ﹝abc﹞ 〚abc〛 ；</p>
+      </div>
+      <div class="panel">
+        <p class="label">Expected character rotation</p>
+        <p class="sample" id="reference"><span class="rotate-quote">“</span>縦書き<span class="rotate-quote">”</span> <span class="rotate-quote">‘</span>引用<span class="rotate-quote">’</span> <span class="rotate-quote">〰</span> <span class="rotate-quote">﹙</span>abc<span class="rotate-quote">﹚</span> <span class="rotate-quote">﹛</span>abc<span class="rotate-quote">﹜</span> <span class="rotate-quote">﹝</span>abc<span class="rotate-quote">﹞</span> <span class="rotate-quote">〚</span>abc<span class="rotate-quote">〛</span> <span class="rotate-quote">；</span></p>
+      </div>
+    </div>
+  </body>
+</html>
