@@ -148,6 +148,32 @@ describe("epub", function () {
           restored = transformer.restoreURL("#" + transformed);
           expect(restored).toEqual([baseURL, fragment]);
         });
+
+        it("canonicalizes a redirected loaded document URL to the spine source URL", function () {
+          var store = {
+            get: function (url) {
+              return url === "http://example.com:8000/foo/bar1.html"
+                ? { url: "http://example.com:8000/foo/bar1" }
+                : null;
+            },
+          };
+          var redirectedOpfDoc = new adapt_epub.OPFDoc(store, null);
+          redirectedOpfDoc.spine = redirectedOpfDoc.items = [
+            { src: "http://example.com:8000/foo/bar1.html" },
+          ];
+          var redirectedTransformer =
+            redirectedOpfDoc.createDocumentURLTransformer();
+
+          var redirectedBaseURL = "http://example.com:8000/foo/bar1";
+          var redirectedTransformed = redirectedTransformer.transformFragment(
+            fragment,
+            redirectedBaseURL,
+          );
+
+          expect(
+            redirectedTransformer.restoreURL(redirectedTransformed),
+          ).toEqual(["http://example.com:8000/foo/bar1.html", fragment]);
+        });
       });
 
       describe("transformURL", function () {
@@ -176,6 +202,34 @@ describe("epub", function () {
 
           transformed = transformer.transformURL(baseURL + "#" + fragment);
           expect(transformed).toBe(baseURL + "#" + fragment);
+        });
+
+        it("transforms a redirected same-document URL using the canonical spine URL", function () {
+          var store = {
+            get: function (url) {
+              return url === "http://example.com:8000/foo/bar1.html"
+                ? { url: "http://example.com:8000/foo/bar1" }
+                : null;
+            },
+          };
+          var redirectedOpfDoc = new adapt_epub.OPFDoc(store, null);
+          redirectedOpfDoc.spine = redirectedOpfDoc.items = [
+            { src: "http://example.com:8000/foo/bar1.html" },
+          ];
+          var redirectedTransformer =
+            redirectedOpfDoc.createDocumentURLTransformer();
+          var redirectedBaseURL = "http://example.com:8000/foo/bar1";
+
+          var transformed = redirectedTransformer.transformURL(
+            "#" + fragment,
+            redirectedBaseURL,
+          );
+          expect(transformed.charAt(0)).toBe("#");
+
+          expect(redirectedTransformer.restoreURL(transformed)).toEqual([
+            "http://example.com:8000/foo/bar1.html",
+            fragment,
+          ]);
         });
       });
     });

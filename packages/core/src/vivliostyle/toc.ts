@@ -268,7 +268,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
 
     // The (X)HTML doc for the TOC box may be reused for the TOC page in the book,
     // but they need different styles. So, add "?viv-toc-box" to distinguish with TOC page URL.
-    const tocBoxUrl = Base.stripFragment(this.url) + "?viv-toc-box";
+    const tocBoxUrl = Base.toTocBoxURL(this.url);
 
     this.store.load(tocBoxUrl).then((xmldoc) => {
       for (const tocElem of findTocElements(xmldoc.document)) {

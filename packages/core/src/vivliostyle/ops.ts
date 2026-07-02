@@ -3384,7 +3384,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     const url = response.url;
 
     // Hack for TOCView.showTOC()
-    const isTocBox = url.endsWith("?viv-toc-box");
+    const isTocBox = Base.isTocBoxURL(url);
 
     XmlDoc.parseXMLResource(response, this).then(
       (xmldoc: XmlDoc.XMLDocHolder) => {

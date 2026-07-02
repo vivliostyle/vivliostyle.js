@@ -249,7 +249,13 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
    */
   getElement(url: string): Element | null {
     const m = url.match(/([^#]*)#(.+)$/);
-    if (!m || (m[1] && m[1] != this.url)) {
+    if (!m) {
+      return null;
+    }
+    // Issue #2036: a transformed TOC link can restore to the spine source URL
+    // while this document was loaded under a redirected alias. Accept either
+    // form as long as the store resolves both URLs to this same XMLDocHolder.
+    if (m[1] && m[1] != this.url && this.store?.get(m[1]) !== this) {
       return null;
     }
     const id = m[2];

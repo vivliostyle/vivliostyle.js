@@ -72,6 +72,20 @@ export function stripFragmentAndQuery(url: string): string {
   return url;
 }
 
+export const TOC_BOX_QUERY_SUFFIX = "?viv-toc-box";
+
+export function isTocBoxURL(url: string): boolean {
+  return url.endsWith(TOC_BOX_QUERY_SUFFIX);
+}
+
+export function stripTocBoxURL(url: string): string {
+  return isTocBoxURL(url) ? url.slice(0, -TOC_BOX_QUERY_SUFFIX.length) : url;
+}
+
+export function toTocBoxURL(url: string): string {
+  return isTocBoxURL(url) ? url : stripFragment(url) + TOC_BOX_QUERY_SUFFIX;
+}
+
 /**
  * Base URL relative to which URLs of resources are resolved.
  */

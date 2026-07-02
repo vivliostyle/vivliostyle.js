@@ -855,9 +855,41 @@ export class OPFDoc {
   createDocumentURLTransformer(): Base.DocumentURLTransformer {
     const self = this;
     class OPFDocumentURLTransformer implements Base.DocumentURLTransformer {
+      private canonicalDocumentURLCache = new Map<string, string>();
+
+      private getCanonicalDocumentURL(url: string): string {
+        // Issue #2036: a server may redirect a spine item URL (for example,
+        // stripping `.html`). Canonicalize redirected aliases back to the
+        // spine source URL so transformed ids and same-document references use
+        // one stable document identity.
+        const strippedURL = Base.stripFragment(Base.stripTocBoxURL(url));
+        const cachedURL = this.canonicalDocumentURLCache.get(strippedURL);
+        if (cachedURL) {
+          return cachedURL;
+        }
+        for (const item of self.spine) {
+          const itemURL = Base.stripFragment(Base.stripTocBoxURL(item.src));
+          if (itemURL === strippedURL) {
+            this.canonicalDocumentURLCache.set(strippedURL, itemURL);
+            return itemURL;
+          }
+          const loadedURL = self.store?.get(itemURL)?.url;
+          if (
+            loadedURL &&
+            Base.stripFragment(Base.stripTocBoxURL(loadedURL)) === strippedURL
+          ) {
+            this.canonicalDocumentURLCache.set(strippedURL, itemURL);
+            return itemURL;
+          }
+        }
+        this.canonicalDocumentURLCache.set(strippedURL, strippedURL);
+        return strippedURL;
+      }
+
       /** @override */
       transformFragment(fragment: string, baseURL: string): string {
-        const url = baseURL + (fragment ? `#${fragment}` : "");
+        const canonicalBaseURL = this.getCanonicalDocumentURL(baseURL);
+        const url = canonicalBaseURL + (fragment ? `#${fragment}` : "");
         return transformedIdPrefix + Base.escapeNameStrToHex(url, ":");
       }
 
@@ -865,10 +897,17 @@ export class OPFDoc {
       transformURL(url: string, baseURL: string): string {
         const r = url.match(/^([^#]*)#?(.*)$/);
         if (r) {
-          const path = r[1] || baseURL.replace(/\?viv-toc-box$/, "");
+          const path = this.getCanonicalDocumentURL(
+            r[1] || Base.stripTocBoxURL(baseURL),
+          );
           const fragment = decodeURIComponent(r[2]);
           if (path) {
-            if (self.spine.some((item) => item.src === path)) {
+            if (
+              self.spine.some(
+                (item) =>
+                  Base.stripFragment(Base.stripTocBoxURL(item.src)) === path,
+              )
+            ) {
               return `#${this.transformFragment(fragment, path)}`;
             }
           }
