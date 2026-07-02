@@ -23,7 +23,6 @@ Base64-encode the output (`base64 -w0 viv-ts-sp.woff2`) for the data URI in
 the @font-face `src` in assets.ts.
 """
 
-from fractions import Fraction
 from typing import BinaryIO
 
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
@@ -33,8 +32,7 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 
 def build_woff2(f: BinaryIO) -> None:
-    # The maximum unitsPerEm the OpenType spec allows.
-    UNITS_PER_EM = 16384
+    UNITS_PER_EM = 2048
 
     SPACE = "space"
     SPACE_THIN = "space.thin"
@@ -68,20 +66,13 @@ def build_woff2(f: BinaryIO) -> None:
             DUMMY: dummy,
         }
     )
-    # PostScript Courier defines a 0.6 em space, but it is actually
-    # 1229/2048 em, measured in the Courier.ttc shipped with macOS 26.4
-    # (sha256:449a068ddd88) and in LiberationMono-Regular.ttf
-    # from Liberation Fonts 2.1.5 (sha256:f2b83c763e8a).
-    COURIER_SPACE = Fraction(1229, 2048)
+    # glyph name -> (advance width, left side bearing)
     fb.setupHorizontalMetrics(
         {
             NOTDEF: (0, 0),
-            # Meant to be 0.5 em, the letter-spacing was initially -0.1 em
-            # but was corrected to -0.11 em (c2a249e37).
-            SPACE: (round((COURIER_SPACE - Fraction("0.11")) * UNITS_PER_EM), 0),
+            SPACE: (UNITS_PER_EM // 2, 0),
             SPACE_THIN: (UNITS_PER_EM // 8, 0),
-            # Likewise, meant to be 1 em.
-            SPACE_HANG: (round((COURIER_SPACE + Fraction("0.4")) * UNITS_PER_EM), 0),
+            SPACE_HANG: (UNITS_PER_EM, 0),
             DUMMY: (0, 0),
         }
     )
