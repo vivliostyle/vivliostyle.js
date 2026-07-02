@@ -1558,6 +1558,7 @@ viv-ts-close.viv-hang-end::after {
   font: 1em/0 "-viv-ts-sp";
   text-rendering: geometricPrecision;
   word-spacing: normal;
+  letter-spacing: normal;
   text-orientation: mixed;
   visibility: hidden;
 }
