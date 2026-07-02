@@ -207,9 +207,9 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     const frame: Task.Frame<Resource> = Task.newFrame("fetch");
 
     // Hack for TOCView.showTOC()
-    const isTocBox = url.endsWith("?viv-toc-box");
+    const isTocBox = Base.isTocBoxURL(url);
     if (isTocBox) {
-      url = url.replace("?viv-toc-box", "");
+      url = Base.stripTocBoxURL(url);
     }
     const userAgentXmlUrl = Base.resolveURL(
       "user-agent.xml",
@@ -234,8 +234,8 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
       }
       if (isTocBox) {
         // Hack for TOCView.showTOC()
-        url += "?viv-toc-box";
-        response.url += "?viv-toc-box";
+        url = Base.toTocBoxURL(url);
+        response.url = Base.toTocBoxURL(response.url);
       } else if (isUserAgentXml) {
         // Restore "user-agent.xml" URL
         response.url = url = userAgentXmlUrl;

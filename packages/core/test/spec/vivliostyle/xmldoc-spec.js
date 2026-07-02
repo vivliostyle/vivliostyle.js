@@ -56,6 +56,29 @@ describe("xml-doc", function () {
         var e = holder.getElement("foobar#baz");
         expect(e).toBeFalsy();
       });
+
+      it("returns an element for a stored alias URL of the same document", function () {
+        var doc = new DOMParser().parseFromString(
+          "<foo><bar id='baz'></bar></foo>",
+          "text/xml",
+        );
+        var holder;
+        var store = {
+          get: function (requestedUrl) {
+            return requestedUrl === "http://example.com/doc.html"
+              ? holder
+              : null;
+          },
+        };
+        holder = new adapt_xmldoc.XMLDocHolder(
+          store,
+          "http://example.com/doc",
+          doc,
+        );
+
+        var e = holder.getElement("http://example.com/doc.html#baz");
+        expect(e instanceof Element).toBe(true);
+      });
     });
   });
 
