@@ -1033,12 +1033,10 @@ export class AdaptiveViewer {
 
               // Update(2019-03): to avoid unexpected page move (first page to next),
               // keep pageIndex == 0 when offsetInItem == 0
-              if (
-                !(
-                  this.pagePosition.pageIndex == 0 &&
-                  this.pagePosition.offsetInItem == 0
-                )
-              ) {
+              if (!(
+                this.pagePosition.pageIndex == 0 &&
+                this.pagePosition.offsetInItem == 0
+              )) {
                 this.pagePosition.pageIndex = -1;
               }
             }

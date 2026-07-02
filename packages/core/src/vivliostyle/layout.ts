@@ -4898,12 +4898,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let last: Node = this.element.lastChild;
     while (last != this.last) {
       const prev = last.previousSibling;
-      if (
-        !(
-          this.element === last.parentNode &&
-          (this.layoutContext as Vgen.ViewFactory).isPseudoelement(last)
-        )
-      ) {
+      if (!(
+        this.element === last.parentNode &&
+        (this.layoutContext as Vgen.ViewFactory).isPseudoelement(last)
+      )) {
         this.element.removeChild(last);
       }
       last = prev;
@@ -5753,8 +5751,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
       const display =
         element.ownerDocument.defaultView?.getComputedStyle(element).display;
       const nextElement = this.rootViewNodes[index + 1] as
-        | HTMLElement
-        | undefined;
+        HTMLElement | undefined;
       const nextDisplay =
         nextElement?.ownerDocument.defaultView?.getComputedStyle(
           nextElement,

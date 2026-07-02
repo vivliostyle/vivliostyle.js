@@ -955,14 +955,12 @@ export class PageFloatLayoutContext
     // first attempt may produce an empty fragment before footnoteMaxBlockSize
     // has been initialized. Seed the usual size-reduction loop from the space
     // currently available on the page instead of deferring the whole footnote.
-    if (
-      !(
-        "footnotePolicy" in float &&
-        this.footnoteMaxBlockSize == null &&
-        this.footnoteAnchorsSeen.has(float.getId()) &&
-        this.hasMultiColumnFootnoteContext()
-      )
-    ) {
+    if (!(
+      "footnotePolicy" in float &&
+      this.footnoteMaxBlockSize == null &&
+      this.footnoteAnchorsSeen.has(float.getId()) &&
+      this.hasMultiColumnFootnoteContext()
+    )) {
       return false;
     }
     const availableOuterBlockSize =

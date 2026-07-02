@@ -94,8 +94,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
   }
 
   makeDeobfuscatorFactory():
-    | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
-    | null {
+    ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null) | null {
     return (url: string): ((p1: Blob) => Task.Result<Blob>) | null => {
       return this.deobfuscators[url];
     };

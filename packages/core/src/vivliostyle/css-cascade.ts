@@ -4103,8 +4103,7 @@ export class CascadeInstance {
     pseudoProps: ElementStyle,
   ): boolean {
     const viewConditionalStyles = pseudoProps["_viewConditionalStyles"] as
-      | { matcher: Matchers.Matcher; styles: ElementStyle }[]
-      | undefined;
+      { matcher: Matchers.Matcher; styles: ElementStyle }[] | undefined;
     if (!viewConditionalStyles || viewConditionalStyles.length <= 0) {
       return false;
     }

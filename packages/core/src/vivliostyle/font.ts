@@ -127,8 +127,7 @@ export class DocumentFaces {
 
   constructor(
     public readonly deobfuscator:
-      | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
-      | null,
+      ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null) | null,
   ) {}
 
   registerFamily(srcFace: Face, viewFace: Face): void {

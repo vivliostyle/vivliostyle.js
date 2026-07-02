@@ -25,15 +25,10 @@ import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 
 export type FormattingContextType =
-  | "Block"
-  | "RepetitiveElementsOwner"
-  | "Table";
+  "Block" | "RepetitiveElementsOwner" | "Table";
 
 export type FragmentLayoutConstraintType =
-  | "AfterIfContinue"
-  | "EntireTable"
-  | "RepetitiveElementsOwner"
-  | "TableRow";
+  "AfterIfContinue" | "EntireTable" | "RepetitiveElementsOwner" | "TableRow";
 
 export namespace CssCascade {
   export type ElementStyle = { [key: string]: any };

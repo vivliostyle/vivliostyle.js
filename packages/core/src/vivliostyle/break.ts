@@ -88,10 +88,7 @@ export function setBoxBreakFlag(
  * inline-end: the inline-end margin is discarded
  */
 type MarginDiscardFlag =
-  | "block-start"
-  | "block-end"
-  | "inline-start"
-  | "inline-end";
+  "block-start" | "block-end" | "inline-start" | "inline-end";
 
 export function getMarginDiscardFlags(element: Element): MarginDiscardFlag[] {
   const val = element.getAttribute("data-viv-margin-discard");

@@ -194,8 +194,7 @@ type SystemDescriptors<T extends SystemDescriptorValue> =
 type CyclicDescriptors = SystemDescriptors<CyclicSystemValue>;
 type FixedDescriptors = SystemDescriptors<FixedSystemValue>;
 type SymbolicDescriptors =
-  | CssCascade.ElementStyle
-  | SystemDescriptors<SymbolicSystemValue>;
+  CssCascade.ElementStyle | SystemDescriptors<SymbolicSystemValue>;
 type AlphabeticDescriptors = SystemDescriptors<AlphabeticSystemValue>;
 type NumericDescriptors = SystemDescriptors<NumericSystemValue>;
 type AdditiveDescriptors = SystemDescriptors<AdditiveSystemValue>;
@@ -294,8 +293,7 @@ function extractSymbol(symbol: SymbolType): string {
  * @see https://drafts.csswg.org/css-counter-styles/#descdef-counter-style-negative
  */
 type NegativeDescriptorValue =
-  | SymbolType
-  | (Css.SpaceList & { values: [SymbolType, SymbolType] });
+  SymbolType | (Css.SpaceList & { values: [SymbolType, SymbolType] });
 function validateNegative(value: Css.Val): value is NegativeDescriptorValue {
   if (validateSymbol(value)) {
     return true;
@@ -887,8 +885,7 @@ abstract class CounterStyle {
   }
 
   protected _getAdditiveSymbols():
-    | readonly [AdditiveSymbol, ...AdditiveSymbol[]]
-    | null {
+    readonly [AdditiveSymbol, ...AdditiveSymbol[]] | null {
     return this.#additiveSymbols;
   }
   protected static _getAdditiveSymbolsFrom(
@@ -1326,8 +1323,7 @@ class Extends extends CounterStyle {
   }
 
   protected override _getAdditiveSymbols():
-    | readonly [AdditiveSymbol, ...AdditiveSymbol[]]
-    | null {
+    readonly [AdditiveSymbol, ...AdditiveSymbol[]] | null {
     return (
       super._getAdditiveSymbols() ??
       CounterStyle._getAdditiveSymbolsFrom(this.#resolveBaseStyle())

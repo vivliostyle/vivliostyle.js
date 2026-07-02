@@ -123,8 +123,7 @@ class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
 
 export class Style {
   fontDeobfuscator:
-    | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
-    | null;
+    ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null) | null;
   validatorSet: CssValidator.ValidatorSet;
 
   constructor(
@@ -3299,8 +3298,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
 
   constructor(
     public fontDeobfuscator:
-      | ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null)
-      | null,
+      ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null) | null,
   ) {
     super(parseOPSResource, Net.FetchResponseType.DOCUMENT);
   }

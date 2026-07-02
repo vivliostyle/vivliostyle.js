@@ -1208,7 +1208,9 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       [key in MarginBoxPositionAlongVariableDimension]?: Vtree.Container;
     } = {};
     const boxInstances: {
-      [key in MarginBoxPositionAlongVariableDimension]?: PageMarginBoxPartitionInstance;
+      [
+        key in MarginBoxPositionAlongVariableDimension
+      ]?: PageMarginBoxPartitionInstance;
     } = {};
     const boxParams: {
       [key in MarginBoxPositionAlongVariableDimension]?: MarginBoxSizingParam;
@@ -1527,10 +1529,7 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
   private hasAutoSize_: boolean;
   private size: { [key in Sizing.Size]: number } | null = null;
   public readonly minMaxFitContent:
-    | "min-content"
-    | "max-content"
-    | "fit-content"
-    | null = null;
+    "min-content" | "max-content" | "fit-content" | null = null;
 
   constructor(
     protected readonly container: Vtree.Container,

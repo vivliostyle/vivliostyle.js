@@ -305,9 +305,7 @@ export class CoreViewer {
    */
   private loadDocumentOrPublication(
     singleDocumentOptions:
-      | SingleDocumentOptions
-      | SingleDocumentOptions[]
-      | null,
+      SingleDocumentOptions | SingleDocumentOptions[] | null,
     pubUrl: string | null,
     opt_documentOptions?: DocumentOptions,
     opt_viewerOptions?: CoreViewerOptions,

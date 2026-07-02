@@ -267,12 +267,10 @@ export function mergeSemanticFootnoteRootStyle(
   context: Exprs.Context,
   styleAccess: SemanticFootnoteStyleAccess,
 ): CssCascade.ElementStyle {
-  if (
-    !(
-      shadowContext?.type === Vtree.ShadowType.ROOTED &&
-      isSemanticFootnoteElement(element)
-    )
-  ) {
+  if (!(
+    shadowContext?.type === Vtree.ShadowType.ROOTED &&
+    isSemanticFootnoteElement(element)
+  )) {
     return elementStyle;
   }
 
