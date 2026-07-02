@@ -1556,8 +1556,11 @@ viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {
   content: " ";
   font-family: "-viv-ts-sp";
+  font-feature-settings: normal;
   text-rendering: geometricPrecision;
   word-spacing: normal;
+  letter-spacing: normal;
+  font-size-adjust: none;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
@@ -1583,6 +1586,8 @@ viv-ts-thin-sp::after {
   font-feature-settings: "ss01";
   text-rendering: geometricPrecision;
   word-spacing: normal;
+  letter-spacing: normal;
+  font-size-adjust: none;
   line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
