@@ -3409,6 +3409,24 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return this.spineItems.some((item) => item && item.pages.length > 0);
   }
 
+  /**
+   * Iterate over every rendered page in document (spine) order.
+   * Used by the continuous scroll view mode, where all pages are shown
+   * stacked vertically instead of one page (or spread) at a time.
+   */
+  forAllPages(fn: (page: Vtree.Page) => void): void {
+    for (const item of this.spineItems) {
+      if (!item) {
+        continue;
+      }
+      for (const page of item.pages) {
+        if (page) {
+          fn(page);
+        }
+      }
+    }
+  }
+
   showTOC(autohide: boolean): Task.Result<Vtree.Page> {
     const opf = this.opf;
     const toc = opf.toc;

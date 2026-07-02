@@ -53,6 +53,8 @@ export type ViewportSize = {
 export const VIEWPORT_STATUS_ATTRIBUTE = "data-vivliostyle-viewer-status";
 
 export const VIEWPORT_SPREAD_VIEW_ATTRIBUTE = "data-vivliostyle-spread-view";
+export const VIEWPORT_CONTINUOUS_SCROLL_ATTRIBUTE =
+  "data-vivliostyle-continuous-scroll";
 
 /**
  * @enum {string}
@@ -61,6 +63,11 @@ export enum PageViewMode {
   SINGLE_PAGE = "singlePage",
   SPREAD = "spread",
   AUTO_SPREAD = "autoSpread",
+  /**
+   * Render every page in its own element, stacked vertically so the whole
+   * document can be scrolled through like a PDF viewer (Issue #1235).
+   */
+  CONTINUOUS_SCROLL = "continuousScroll",
 }
 
 export type SingleDocumentParam = {
@@ -447,6 +454,11 @@ export class AdaptiveViewer {
       command["pageViewMode"] !== this.pageViewMode
     ) {
       this.pageViewMode = command["pageViewMode"] as PageViewMode;
+      // Continuous scroll mode needs every page rendered so they can all be
+      // stacked vertically (Issue #1235).
+      if (this.pageViewMode === PageViewMode.CONTINUOUS_SCROLL) {
+        this.renderAllPages = true;
+      }
       this.needResize = true;
     }
     if (
@@ -624,6 +636,75 @@ export class AdaptiveViewer {
     }
   }
 
+  /**
+   * Hide every rendered page (used when switching away from continuous
+   * scroll mode back to single page / spread view).
+   */
+  private hideAllPages() {
+    this.opfView.forAllPages((page) => {
+      Base.setCSSProperty(page.container, "display", "none");
+    });
+  }
+
+  /**
+   * Continuous scroll view mode (Issue #1235): reveal every rendered page so
+   * they are stacked vertically (each in its own element) like a PDF viewer,
+   * then scroll the current page into view.
+   */
+  private showAllPages(currentPage: Vtree.Page): Task.Result<null> {
+    this.viewportElement.setAttribute(
+      VIEWPORT_CONTINUOUS_SCROLL_ATTRIBUTE,
+      "true",
+    );
+    this.currentSpread = null;
+    this.opfView.forAllPages((page) => {
+      Base.setCSSProperty(page.container, "visibility", "visible");
+      Base.setCSSProperty(page.container, "display", "block");
+      page.container.style.marginLeft = "";
+      page.container.style.marginRight = "";
+    });
+    this.currentPage = currentPage;
+    // Attach interaction listeners to (and ensure visibility of) the current
+    // page; removePageListeners()/forCurrentPages() keep this in sync.
+    this.showSinglePage(currentPage);
+    this.setContinuousScrollZoom();
+    this.scrollToPage(currentPage);
+    return Task.newResult(null);
+  }
+
+  /**
+   * Scroll the viewport so the given page is brought into view, without
+   * replacing the content of a shared element (continuous scroll mode).
+   */
+  private scrollToPage(page: Vtree.Page) {
+    if (page.container && typeof page.container.scrollIntoView === "function") {
+      page.container.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }
+
+  /**
+   * Size the zoom box to fit the full stack of pages for continuous scroll
+   * mode. The widest page determines the width; the heights are summed so the
+   * viewport can scroll through every page.
+   */
+  private setContinuousScrollZoom() {
+    let maxWidth = 0;
+    let totalHeight = 0;
+    let count = 0;
+    this.opfView.forAllPages((page) => {
+      maxWidth = Math.max(maxWidth, page.dimensions.width);
+      totalHeight += page.dimensions.height;
+      count++;
+    });
+    if (count === 0 || !this.viewport) {
+      return;
+    }
+    // When fitting to screen, fit the page width (not the whole document
+    // height) so vertical scrolling stays comfortable.
+    const zoom = this.fitToScreen ? this.viewport.width / maxWidth : this.zoom;
+    this.viewport.zoom(maxWidth, totalHeight, zoom);
+  }
+
   private reportPosition(): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame("reportPosition");
     Asserts.assert(this.pagePosition);
@@ -668,12 +749,20 @@ export class AdaptiveViewer {
     }
   }
 
+  /**
+   * Whether the continuous scroll view mode is active (Issue #1235).
+   */
+  private isContinuousScroll(): boolean {
+    return this.pageViewMode === PageViewMode.CONTINUOUS_SCROLL;
+  }
+
   private resolveSpreadView(
     viewport: Vgen.Viewport,
     pageSize: { width: number; height: number } | null,
   ): boolean {
     switch (this.pageViewMode) {
       case PageViewMode.SINGLE_PAGE:
+      case PageViewMode.CONTINUOUS_SCROLL:
         return false;
       case PageViewMode.SPREAD:
         return true;
@@ -872,6 +961,24 @@ export class AdaptiveViewer {
   private showCurrent(page: Vtree.Page, sync?: boolean): Task.Result<null> {
     this.needRefresh = false;
     this.removePageListeners();
+
+    if (this.isContinuousScroll()) {
+      this.updateSpreadView(false);
+      return this.showAllPages(page);
+    }
+
+    // When leaving continuous scroll mode, hide the pages that were shown
+    // stacked so only the current page or spread remains visible.
+    if (
+      this.viewportElement.getAttribute(
+        VIEWPORT_CONTINUOUS_SCROLL_ATTRIBUTE,
+      ) === "true"
+    ) {
+      this.viewportElement.removeAttribute(
+        VIEWPORT_CONTINUOUS_SCROLL_ATTRIBUTE,
+      );
+      this.hideAllPages();
+    }
 
     const spreadView = this.resolveSpreadView(this.viewport, page.dimensions);
     if (spreadView !== this.pref.spreadView) {
