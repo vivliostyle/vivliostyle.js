@@ -441,6 +441,10 @@ module.exports = [
         file: "text-spacing/text-spacing-trim-start-code.html",
         title: "text-spacing-trim after code element (Issue #1863)",
       },
+      {
+        file: "text-spacing/inherited-spacing-properties.html",
+        title: "Text-spacing fillers with inherited spacing properties",
+      },
     ],
   },
   {
