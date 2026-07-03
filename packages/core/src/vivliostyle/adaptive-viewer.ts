@@ -108,7 +108,7 @@ export class AdaptiveViewer {
   opfView: Epub.OPFView;
   cmykReserveMap: CmykStore.CmykReserveMapEntry[] | undefined;
   cmykReserveMapUrl: string | undefined;
-  private paginationProgressHookRegistered = false;
+  private paginationProgressHook: Plugin.PaginationProgressHook | null = null;
 
   constructor(
     public readonly window: Window,
@@ -230,14 +230,24 @@ export class AdaptiveViewer {
    * calculation.
    */
   ensurePaginationProgressListener() {
-    if (this.paginationProgressHookRegistered) {
+    if (this.paginationProgressHook) {
       return;
     }
-    this.paginationProgressHookRegistered = true;
     const hook: Plugin.PaginationProgressHook = (payload) => {
       this.callback({ t: "paginationprogress", ...payload });
     };
+    this.paginationProgressHook = hook;
     Plugin.registerHook(Plugin.HOOKS.PAGINATION_PROGRESS, hook);
+  }
+
+  removePaginationProgressListener() {
+    if (this.paginationProgressHook) {
+      Plugin.removeHook(
+        Plugin.HOOKS.PAGINATION_PROGRESS,
+        this.paginationProgressHook,
+      );
+      this.paginationProgressHook = null;
+    }
   }
 
   private callback(message: Base.JSON): void {

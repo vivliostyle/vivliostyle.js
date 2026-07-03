@@ -249,6 +249,12 @@ export class CoreViewer {
       listener as Base.EventListener,
       false,
     );
+    if (
+      type === "paginationprogress" &&
+      !this.eventTarget.listeners[type]?.length
+    ) {
+      this.adaptViewer_.removePaginationProgressListener();
+    }
   }
 
   /**
