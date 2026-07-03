@@ -1,4 +1,52 @@
 - category: Text Spacing
+  title: Text Spacing (Chinese, Simplified)
+  file: text-spacing/text-spacing-zh-hans.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-text-spacing-fonts  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hans.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hans.html&zoom=1&spread=false
+- category: Text Spacing
+  title: Text-spacing on generated content (vertical writing-mode)
+  file: text-spacing/ts-generated-content-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-text-spacing-fonts  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-generated-content-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-generated-content-vertical.html&zoom=1&spread=false
+- category: Text Spacing
+  title: Text-spacing fillers with inherited spacing properties
+  file: text-spacing/inherited-spacing-properties.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-text-spacing-fonts  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/inherited-spacing-properties.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/inherited-spacing-properties.html&zoom=1&spread=false
+- category: Hanging Punctuation
+  title: hanging-punctuation:first with text-indent (Japanese)
+  file: text-spacing/hanging-punctuation-first-indent-ja.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-text-spacing-fonts  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-first-indent-ja.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-first-indent-ja.html&zoom=1&spread=false
+- category: Text Spacing
   title: "Vertical vo=Tr characters fallback (Issue #2023)"
   file: text-spacing/vo-tr-quotes-vertical.html
   decision: expected  # regression / expected / skip
