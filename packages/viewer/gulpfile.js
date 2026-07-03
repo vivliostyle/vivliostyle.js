@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-const process = require("process");
 // const KarmaServer = require("karma").Server;
 const browserSync = require("browser-sync").create();
 const gulp = require("gulp");

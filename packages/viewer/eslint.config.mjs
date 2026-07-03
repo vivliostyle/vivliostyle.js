@@ -30,6 +30,21 @@ export default [
     ),
   ),
   {
+    files: ["gulpfile.js", "stylelint.config.js"],
+
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+      sourceType: "commonjs",
+    },
+
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
     files: ["**/*.ts"],
 
     plugins: {

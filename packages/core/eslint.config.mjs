@@ -27,6 +27,23 @@ export default [
     ),
   ),
   {
+    files: ["test/conf/*.js", "test/files/file-list.js"],
+
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+      sourceType: "commonjs",
+    },
+
+    rules: {
+      "global-require": "off",
+      "no-process-env": "off",
+      "no-process-exit": "off",
+      "no-sync": "off",
+    },
+  },
+  {
     files: ["**/*.ts"],
 
     plugins: {
