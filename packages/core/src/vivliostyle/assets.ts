@@ -1534,6 +1534,11 @@ span.viv-anonymous-block {
   text-spacing-trim: space-all;
   text-autospace: no-autospace;
 }
+/* see #2034 */
+@font-face {
+  font-family: "-viv-ts-sp";
+  src: url("data:font/woff2;base64,d09GMgABAAAAAADcAAoAAAAAAhwAAACWAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAANAoUNgE2AiQDDAsIAAQgBQYHLhuDAfivCuyG888wVNS8F/ZFrDP4HM9/f7Fz/327szNpE39MLJMEEwhM4rqEpw5WA/yHf662vHz4yq43QNDB8YgOIBcKMTAeaQjBDrH14HBRR74Oowl4tbBt3gYLxV0Fd2NjjGDXnS4ACk4ExYDAJc3tIYAgPOf4u3qBDwf8K4JaIACDfyIAgMIABFUBC6LutJhuZR3vCA==") format("woff2");
+}
 viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {
   margin-inline-start: -0.5em;
@@ -1550,15 +1555,16 @@ viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {
   content: " ";
-  font-family: Courier, monospace;
+  font: 1em/0 "-viv-ts-sp";
+  text-rendering: geometricPrecision;
   word-spacing: normal;
-  letter-spacing: -0.11em;
-  line-height: 0;
+  letter-spacing: normal;
   text-orientation: mixed;
   visibility: hidden;
 }
 viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
-  letter-spacing: 0.4em;
+  /* 0.5em space + 0.5em = 1em */
+  letter-spacing: 0.5em;
 }
 viv-ts-close.viv-hang-hw > viv-ts-inner {
   letter-spacing: -0.5em;
@@ -1574,10 +1580,11 @@ viv-ts-open.viv-hang-first > viv-ts-inner {
 }
 viv-ts-thin-sp::after {
   content: " ";
-  font-family: Times, serif;
+  font: 1em/0 "-viv-ts-sp";
+  /* 0.5em space - 0.375em = 0.125em */
+  letter-spacing: -0.375em;
+  text-rendering: geometricPrecision;
   word-spacing: normal;
-  letter-spacing: -0.125em;
-  line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
 }
