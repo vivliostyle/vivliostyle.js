@@ -93,6 +93,7 @@ Note that even if the same function are registered multiple times, this method r
 
 - `fraction` (number) — 既にページ分割されたHTML内容の割合 (0-1)。
 - `pages` (number) — 作成済みページ数。
+- `href` (string) — 現在ページ分割中のドキュメントのURL。
 
 ## profile
 

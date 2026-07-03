@@ -93,6 +93,7 @@ The hook receives a payload object:
 
 - `fraction` (number) — Fraction of the HTML content already paginated (0-1).
 - `pages` (number) — Number of pages created so far.
+- `href` (string) — URL of the document currently being paginated.
 
 ## profile
 
