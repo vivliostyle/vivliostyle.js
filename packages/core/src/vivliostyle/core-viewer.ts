@@ -38,6 +38,8 @@ export interface Payload {
   epageCount: number;
   metadata: unknown;
   docTitle: string;
+  fraction: number;
+  pages: number;
 }
 
 const PageProgression = Constants.PageProgression;
@@ -226,6 +228,9 @@ export class CoreViewer {
    * @param listener Listener function.
    */
   addListener(type: string, listener: (payload: Payload) => void) {
+    if (type === "paginationprogress") {
+      this.adaptViewer_.ensurePaginationProgressListener();
+    }
     this.eventTarget.addEventListener(
       type,
       listener as Base.EventListener,
