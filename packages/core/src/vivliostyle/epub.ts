@@ -1744,7 +1744,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
    * their total offsets, so that the pagination progress fraction is
    * computed against the whole publication.
    */
-  collectTotalOffsets(): Task.Result<boolean> {
+  private collectTotalOffsets(): Task.Result<boolean> {
     if (this.paginationProgress.totalOffsetsReady) {
       return Task.newResult(true);
     }
