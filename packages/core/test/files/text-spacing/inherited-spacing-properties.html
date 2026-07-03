@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>text-spacingフィラーと継承プロパティのテスト</title>
+    <style>
+      p {
+        border: 1px solid silver;
+        text-align: justify;
+        text-spacing: auto;
+      }
+      b {
+        font-weight: bold;
+        color: maroon;
+      }
+      i {
+        font-style: normal;
+        font-size: 80%;
+        color: navy;
+      }
+      .ls {
+        letter-spacing: 0.2em;
+      }
+      .ffs1 {
+        font-feature-settings: "ss01";
+      }
+      .ffs2 {
+        font-feature-settings: "ss02";
+      }
+      .fsa {
+        font-size-adjust: 0.3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>text-spacingフィラーと継承プロパティ</h1>
+    <p>
+      text-spacingの詰め・和欧文間スペースの量は、周囲のletter-spacingや
+      font-feature-settingsの指定に影響されない。
+    </p>
+    <h2>基準(継承指定なし)</h2>
+    <p lang="zh-hans">
+      〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b
+        >「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b
+      >
+    </p>
+    <h2>letter-spacing: 0.2em</h2>
+    <p lang="zh-hans" class="ls">
+      〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b
+        >「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b
+      >
+    </p>
+    <h2>font-feature-settings: "ss01"</h2>
+    <p lang="zh-hans" class="ffs1">
+      〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b
+        >「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b
+      >
+    </p>
+    <h2>font-feature-settings: "ss02"</h2>
+    <p lang="zh-hans" class="ffs2">
+      〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b
+        >「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b
+      >
+    </p>
+    <h2>font-size-adjust: 0.3</h2>
+    <p lang="zh-hans" class="fsa">
+      〈标点符号〉是，〈句点〉・〈読点〉「括弧（類）」、他！　「《英（数）》字ABC-123等。」〈标点符号〉是，<b>〈句点〉</b>・<b>〈読点〉「括弧（類）」</b>、他！　<b
+        >「<i>《英（数）》</i>字<i>ABC-123</i>等。」</b
+      >
+    </p>
+  </body>
+</html>
