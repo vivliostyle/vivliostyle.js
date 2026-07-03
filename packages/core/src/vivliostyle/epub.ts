@@ -1140,6 +1140,10 @@ export class OPFDoc {
         const item = this.spine[i++];
         item.epage = epage;
         this.store.load(item.src).then((xmldoc) => {
+          if (!xmldoc) {
+            loopFrame.continueLoop();
+            return;
+          }
           // According to the old comment,
           // "Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size."
           // However, it should depend on the language.
@@ -1764,7 +1768,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
         }
         const item = this.opf.spine[spineIndex];
         this.opf.store.load(item.src).then((xmldoc) => {
-          totals[spineIndex] = xmldoc.getTotalOffset();
+          if (xmldoc) {
+            totals[spineIndex] = xmldoc.getTotalOffset();
+          }
           loopFrame.continueLoop();
         });
       })
