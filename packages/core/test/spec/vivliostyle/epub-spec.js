@@ -19,6 +19,7 @@
 import * as adapt_epub from "../../../src/vivliostyle/epub";
 import * as adapt_task from "../../../src/vivliostyle/task";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
+import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 
 describe("epub", function () {
   describe("EPUBDocStore", function () {
@@ -362,6 +363,114 @@ describe("epub", function () {
           },
         },
       ]);
+    });
+  });
+  describe("OPFView pagination progress", function () {
+    function createFakeView(totalOffsets) {
+      var view = Object.create(adapt_epub.OPFView.prototype);
+      view.spineItems = [];
+      view.paginationProgress = {
+        totalOffsetsBySpine: [],
+        renderedOffsetsBySpine: [],
+        totalOffsetsReady: false,
+        lastReportedPages: 0,
+        lastReportedFraction: 0,
+      };
+      view.opf = {
+        spine: totalOffsets.map(function (offset, i) {
+          return { src: "doc-" + i, spineIndex: i };
+        }),
+        store: {
+          load: function (src) {
+            var index = Number(src.replace("doc-", ""));
+            return adapt_task.newResult({
+              getTotalOffset: function () {
+                return totalOffsets[index];
+              },
+            });
+          },
+        },
+      };
+      return view;
+    }
+
+    function createFakeViewItem(view, spineIndex, totalOffset) {
+      return {
+        item: view.opf.spine[spineIndex],
+        xmldoc: {
+          getTotalOffset: function () {
+            return totalOffset;
+          },
+        },
+        instance: {
+          getPosition: function () {
+            return 0;
+          },
+        },
+        pages: [{ fetchers: [] }],
+      };
+    }
+
+    var payloads;
+    var hook = function (payload) {
+      payloads.push(payload);
+    };
+
+    beforeEach(function () {
+      payloads = [];
+      vivliostyle_plugin.registerHook(
+        vivliostyle_plugin.HOOKS.PAGINATION_PROGRESS,
+        hook,
+      );
+    });
+
+    afterEach(function () {
+      vivliostyle_plugin.removeHook(
+        vivliostyle_plugin.HOOKS.PAGINATION_PROGRESS,
+        hook,
+      );
+    });
+
+    it("reports the fraction of the paginated content in a single document", function () {
+      var view = createFakeView([100]);
+      var viewItem = createFakeViewItem(view, 0, 100);
+      view.spineItems[0] = viewItem;
+
+      // A page finished at the half of the document
+      viewItem.instance.getPosition = function () {
+        return 50;
+      };
+      view.reportPaginationProgress(viewItem, { page: 1 });
+      expect(payloads[0].fraction).toBeCloseTo(0.5, 5);
+      expect(payloads[0].pages).toBe(1);
+
+      // The last page finished (no next layout position)
+      view.reportPaginationProgress(viewItem, null);
+      expect(payloads[1].fraction).toBe(1);
+    });
+
+    it("does not report 100% until the last of multiple documents is paginated", function (done) {
+      var view = createFakeView([100, 100, 100]);
+
+      spyOn(view, "renderPagesUpto").and.callFake(function () {
+        // Each spine item is loaded and fully paginated in order
+        for (var i = 0; i < 3; i++) {
+          var viewItem = createFakeViewItem(view, i, 100);
+          view.spineItems[i] = viewItem;
+          view.reportPaginationProgress(viewItem, null);
+        }
+        return adapt_task.newResult(null);
+      });
+
+      adapt_task.start(function () {
+        view.renderAllPages().then(function () {
+          expect(payloads[0].fraction).toBeCloseTo(1 / 3, 5);
+          expect(payloads[1].fraction).toBeCloseTo(2 / 3, 5);
+          expect(payloads[2].fraction).toBe(1);
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
     });
   });
 });
