@@ -1537,7 +1537,7 @@ span.viv-anonymous-block {
 /* see #2034 */
 @font-face {
   font-family: "-viv-ts-sp";
-  src: url("data:font/woff2;base64,d09GMgABAAAAAAEkAAsAAAAAArQAAADcAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHGIGYAA0ChQ6ATYCJAMUCwwABCAFBgdIGwsCQC8K7DbiDEHKzANXs6TSYJZ4Pl2092faTbOX3JkNukZjMAiLUli0A2dQapOHDLIBAMfrfzqC1lGCJOoihfI9vLbnf1iJzY5PMEog1cBaC9QLE2o70kd4cJMNCI+SLU3PBKftXT7NA5YBN4Wo78PiiVUXwh7lcAliyS7EoZAHe3zhpqEa4MML28bboNC4tOAybAxDsG8h3f8CYIITQWMAlJnpPN4EEIS/35YvX73ATz8EnxdBKxCAhZsIAGDCQLAAgqkFFECdD4VxolPpjPMzZJy25DT9FnVnHg==") format("woff2");
+  src: url("data:font/woff2;base64,d09GMgABAAAAAADcAAoAAAAAAhwAAACWAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAANAoUNgE2AiQDDAsIAAQgBQYHLhuDAfivCuyG888wVNS8F/ZFrDP4HM9/f7Fz/327szNpE39MLJMEEwhM4rqEpw5WA/yHf662vHz4yq43QNDB8YgOIBcKMTAeaQjBDrH14HBRR74Oowl4tbBt3gYLxV0Fd2NjjGDXnS4ACk4ExYDAJc3tIYAgPOf4u3qBDwf8K4JaIACDfyIAgMIABFUBC6LutJhuZR3vCA==") format("woff2");
 }
 viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {
@@ -1555,15 +1555,15 @@ viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {
   content: " ";
-  font-family: "-viv-ts-sp";
+  font: 1em/0 "-viv-ts-sp";
   text-rendering: geometricPrecision;
   word-spacing: normal;
-  line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
 }
 viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
-  font-feature-settings: "ss02";
+  /* 0.5em space + 0.5em = 1em */
+  letter-spacing: 0.5em;
 }
 viv-ts-close.viv-hang-hw > viv-ts-inner {
   letter-spacing: -0.5em;
@@ -1579,11 +1579,11 @@ viv-ts-open.viv-hang-first > viv-ts-inner {
 }
 viv-ts-thin-sp::after {
   content: " ";
-  font-family: "-viv-ts-sp";
-  font-feature-settings: "ss01";
+  font: 1em/0 "-viv-ts-sp";
+  /* 0.5em space - 0.375em = 0.125em */
+  letter-spacing: -0.375em;
   text-rendering: geometricPrecision;
   word-spacing: normal;
-  line-height: 0;
   text-orientation: mixed;
   visibility: hidden;
 }

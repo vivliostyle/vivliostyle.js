@@ -7,12 +7,9 @@
 
 Vivliostyle's text-spacing implementation inserts hidden filler spaces whose
 advance width must be independent of the installed fonts. This script builds
-the woff2 font those fillers use. It carries U+0020 in three widths, selected
-per filler with stylistic sets:
-
-- default: 0.5 em, the punctuation trim/space fillers (viv-ts-open/viv-ts-close)
-- ss01:    0.125 em, the inter-script thin space (viv-ts-thin-sp)
-- ss02:    1 em, the hanging-punctuation filler (viv-ts-close.viv-hang-end)
+the woff2 font those fillers use: U+0020 with an advance of exactly 0.5 em.
+The fillers that need other widths derive them with `letter-spacing` in the
+UA stylesheet.
 
 In Blink, unless the filler elements have `text-rendering:
 geometricPrecision`, web fonts are laid out without subpixel positioning and
@@ -25,18 +22,13 @@ the @font-face `src` in assets.ts.
 
 from typing import BinaryIO
 
-from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 from fontTools.fontBuilder import FontBuilder
 from fontTools.misc.timeTools import timestampSinceEpoch
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 
-def build_woff2(f: BinaryIO) -> None:
-    UNITS_PER_EM = 2048
-
+def build_woff2(space_advance: int, units_per_em: int, f: BinaryIO) -> None:
     SPACE = "space"
-    SPACE_THIN = "space.thin"
-    SPACE_HANG = "space.hang"
     # The missing-glyph slot the TrueType spec requires at GID 0. The label
     # follows the glyph name that CFF mandates there (".notdef"); in TrueType
     # it does not particularly have to be ".notdef".
@@ -46,9 +38,9 @@ def build_woff2(f: BinaryIO) -> None:
     # unreachable.
     DUMMY = "dummy"
 
-    fb = FontBuilder(UNITS_PER_EM, isTTF=True)
+    fb = FontBuilder(units_per_em, isTTF=True)
     fb.font.flavor = "woff2"
-    fb.setupGlyphOrder([NOTDEF, SPACE, SPACE_THIN, SPACE_HANG, DUMMY])
+    fb.setupGlyphOrder([NOTDEF, SPACE, DUMMY])
     fb.setupCharacterMap({0x20: SPACE})
     empty = TTGlyphPen(None).glyph()
     dummy_pen = TTGlyphPen(None)
@@ -56,32 +48,10 @@ def build_woff2(f: BinaryIO) -> None:
     dummy_pen.lineTo((1, 0))
     dummy_pen.lineTo((0, 1))
     dummy_pen.closePath()
-    dummy = dummy_pen.glyph()
-    fb.setupGlyf(
-        {
-            NOTDEF: empty,
-            SPACE: empty,
-            SPACE_THIN: empty,
-            SPACE_HANG: empty,
-            DUMMY: dummy,
-        }
-    )
+    fb.setupGlyf({NOTDEF: empty, SPACE: empty, DUMMY: dummy_pen.glyph()})
     # glyph name -> (advance width, left side bearing)
     fb.setupHorizontalMetrics(
-        {
-            NOTDEF: (0, 0),
-            SPACE: (UNITS_PER_EM // 2, 0),
-            SPACE_THIN: (UNITS_PER_EM // 8, 0),
-            SPACE_HANG: (UNITS_PER_EM, 0),
-            DUMMY: (0, 0),
-        }
-    )
-    addOpenTypeFeaturesFromString(
-        fb.font,
-        f"""
-        feature ss01 {{ sub {SPACE} by {SPACE_THIN}; }} ss01;
-        feature ss02 {{ sub {SPACE} by {SPACE_HANG}; }} ss02;
-        """,
+        {NOTDEF: (0, 0), SPACE: (space_advance, 0), DUMMY: (0, 0)}
     )
 
     # Chromium's sanitizer rejects a font that lacks any of the tables below.
@@ -98,8 +68,9 @@ def build_woff2(f: BinaryIO) -> None:
 
 
 def main() -> None:
+    UNITS_PER_EM = 2048
     with open("viv-ts-sp.woff2", "wb") as f:
-        build_woff2(f)
+        build_woff2(UNITS_PER_EM // 2, UNITS_PER_EM, f)
 
 
 if __name__ == "__main__":
