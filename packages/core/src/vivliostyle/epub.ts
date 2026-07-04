@@ -1140,6 +1140,10 @@ export class OPFDoc {
         const item = this.spine[i++];
         item.epage = epage;
         this.store.load(item.src).then((xmldoc) => {
+          if (!xmldoc) {
+            loopFrame.continueLoop();
+            return;
+          }
           // According to the old comment,
           // "Estimate that offset=2700 roughly corresponds to 1024 bytes of compressed size."
           // However, it should depend on the language.
@@ -1539,6 +1543,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   private paginationProgress = {
     totalOffsetsBySpine: [] as number[],
     renderedOffsetsBySpine: [] as number[],
+    totalOffsetsReady: false,
     lastReportedPages: 0,
     lastReportedFraction: 0,
   };
@@ -1738,11 +1743,49 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return totalOffset;
   }
 
+  /**
+   * Load all spine items (fetch and parse only, without layout) and record
+   * their total offsets, so that the pagination progress fraction is
+   * computed against the whole publication.
+   */
+  private collectTotalOffsets(): Task.Result<boolean> {
+    if (this.paginationProgress.totalOffsetsReady) {
+      return Task.newResult(true);
+    }
+    const totals = this.paginationProgress.totalOffsetsBySpine;
+    let i = 0;
+    const frame: Task.Frame<boolean> = Task.newFrame("collectTotalOffsets");
+    frame
+      .loopWithFrame((loopFrame) => {
+        if (i === this.opf.spine.length) {
+          loopFrame.breakLoop();
+          return;
+        }
+        const spineIndex = i++;
+        if (totals[spineIndex] != null) {
+          loopFrame.continueLoop();
+          return;
+        }
+        const item = this.opf.spine[spineIndex];
+        this.opf.store.load(item.src).then((xmldoc) => {
+          if (xmldoc) {
+            totals[spineIndex] = xmldoc.getTotalOffset();
+          }
+          loopFrame.continueLoop();
+        });
+      })
+      .then(() => {
+        this.paginationProgress.totalOffsetsReady = true;
+        frame.finish(true);
+      });
+    return frame.result();
+  }
+
   private getTotalOffsetAll(): number {
     let total = 0;
-    for (const item of this.spineItems) {
-      if (item) {
-        total += this.getTotalOffsetForViewItem(item);
+    for (const totalOffset of this.paginationProgress.totalOffsetsBySpine) {
+      if (totalOffset) {
+        total += totalOffset;
       }
     }
     return total;
@@ -2583,35 +2626,44 @@ export class OPFView implements Vgen.CustomRendererFactory {
   renderAllPages(): Task.Result<PageAndPosition | null> {
     const frame: Task.Frame<PageAndPosition | null> =
       Task.newFrame("renderAllPages");
-    this.renderPagesUpto(
-      {
-        spineIndex: this.opf.spine.length - 1,
-        pageIndex: Number.POSITIVE_INFINITY,
-        offsetInItem: -1,
-      },
-      false,
-    ).then((result) => {
-      // Wait until all images are loaded (Issue #1321)
-      frame
-        .loopWithFrame((loopFrame) => {
-          if (
-            this.spineItems.some((viewItem) =>
-              viewItem?.pages.some((page) =>
-                page?.fetchers.some((fetcher) => !fetcher.arrived),
-              ),
-            )
-          ) {
-            frame.sleep(100).then(() => {
-              loopFrame.continueLoop();
-            });
-          } else {
-            loopFrame.breakLoop();
-          }
-        })
-        .then(() => {
-          frame.finish(result);
-        });
-    });
+    const collectResult = Plugin.getHooksForName(
+      Plugin.HOOKS.PAGINATION_PROGRESS,
+    ).length
+      ? this.collectTotalOffsets()
+      : Task.newResult(true);
+    collectResult
+      .thenAsync(() =>
+        this.renderPagesUpto(
+          {
+            spineIndex: this.opf.spine.length - 1,
+            pageIndex: Number.POSITIVE_INFINITY,
+            offsetInItem: -1,
+          },
+          false,
+        ),
+      )
+      .then((result) => {
+        // Wait until all images are loaded (Issue #1321)
+        frame
+          .loopWithFrame((loopFrame) => {
+            if (
+              this.spineItems.some((viewItem) =>
+                viewItem?.pages.some((page) =>
+                  page?.fetchers.some((fetcher) => !fetcher.arrived),
+                ),
+              )
+            ) {
+              frame.sleep(100).then(() => {
+                loopFrame.continueLoop();
+              });
+            } else {
+              loopFrame.breakLoop();
+            }
+          })
+          .then(() => {
+            frame.finish(result);
+          });
+      });
     return frame.result();
   }
 
