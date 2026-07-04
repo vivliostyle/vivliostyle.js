@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.44.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.3...v2.44.0) (2026-07-04)
+
+### Features
+
+- Add paginationprogress event to CoreViewer ([#2041](https://github.com/vivliostyle/vivliostyle.js/issues/2041)) ([442f605](https://github.com/vivliostyle/vivliostyle.js/commit/442f605519e990cfb29e0b244d89d5075290adac))
+- Add document href to pagination progress payload ([a9bd79d](https://github.com/vivliostyle/vivliostyle.js/commit/a9bd79d772bf4a1224b50e2c498a58abfce4aa5f))
+
+### Bug Fixes
+
+- Guard against null xmldoc from store.load ([e2086a6](https://github.com/vivliostyle/vivliostyle.js/commit/e2086a6a373b4b8e23a6dded4ec4b7f18c13ecfd))
+- Compute pagination progress fraction against all spine items ([91879d2](https://github.com/vivliostyle/vivliostyle.js/commit/91879d26a19d0c760b37f0f4372c1bde7c099748))
+- Make text-spacing filler widths independent of installed fonts ([#2035](https://github.com/vivliostyle/vivliostyle.js/issues/2035)) ([2bacf4b](https://github.com/vivliostyle/vivliostyle.js/commit/2bacf4bd455dcec41ef06c0f339a38422bf4e1b8))
+- Restore target-counter references for redirected chapter URLs ([2a0f1a4](https://github.com/vivliostyle/vivliostyle.js/commit/2a0f1a41529f7a6971ef0eb05abf73027b3e84b8)), closes [#2036](https://github.com/vivliostyle/vivliostyle.js/issues/2036)
+- Exclude Fullwidth Semicolon from Chromium vo=Tr fallback ([9febc7a](https://github.com/vivliostyle/vivliostyle.js/commit/9febc7ac55d9733d27b60abd4514e8c11e0d9200))
+- Fix Vertical vo=Tr character rotation on Chromium ([209180c](https://github.com/vivliostyle/vivliostyle.js/commit/209180cd82728fb93f10c53dbdaed5c8af3b6c6b)), closes [#2023](https://github.com/vivliostyle/vivliostyle.js/issues/2023)
+- Fix long line-policy footnote fragmentation ([478e8bb](https://github.com/vivliostyle/vivliostyle.js/commit/478e8bb9cd06decba15d2842fe192619c48cc496)), closes [#2029](https://github.com/vivliostyle/vivliostyle.js/issues/2029)
+- Prevent long footnotes from being dropped during target-counter() rerendering ([a931e94](https://github.com/vivliostyle/vivliostyle.js/commit/a931e94830328a16c2c99159fb1e15717e49c1ca)), closes [#2026](https://github.com/vivliostyle/vivliostyle.js/issues/2026)
+- prevent rendering hang with footnote-policy: line ([9679fb0](https://github.com/vivliostyle/vivliostyle.js/commit/9679fb0b159330c4b30018deb537bb19d2dea078)), closes [#2024](https://github.com/vivliostyle/vivliostyle.js/issues/2024)
+
 ## [2.43.3](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.2...v2.43.3) (2026-06-18)
 
 ### Bug Fixes
