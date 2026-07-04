@@ -144,6 +144,7 @@ export enum HOOKS {
    * The hook is called with an object with the following properties:
    *  {number} fraction: Fraction of the HTML content already paginated (0-1)
    *  {number} pages: Number of pages created so far
+   *  {string} href: URL of the document currently being paginated
    */
   PAGINATION_PROGRESS = "PAGINATION_PROGRESS",
 }
@@ -193,6 +194,7 @@ export type PostLayoutBlockHook = (
 export type PaginationProgressHook = (p1: {
   fraction: number;
   pages: number;
+  href: string;
 }) => void;
 
 const hooks = {};

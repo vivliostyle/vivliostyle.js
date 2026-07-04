@@ -1851,6 +1851,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const payload = {
       fraction,
       pages: this.paginationProgress.lastReportedPages,
+      href: viewItem.item.src,
     };
     for (const hook of hooks) {
       try {
