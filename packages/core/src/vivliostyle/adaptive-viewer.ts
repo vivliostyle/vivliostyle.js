@@ -108,6 +108,7 @@ export class AdaptiveViewer {
   opfView: Epub.OPFView;
   cmykReserveMap: CmykStore.CmykReserveMapEntry[] | undefined;
   cmykReserveMapUrl: string | undefined;
+  private paginationProgressHook: Plugin.PaginationProgressHook | null = null;
 
   constructor(
     public readonly window: Window,
@@ -221,6 +222,32 @@ export class AdaptiveViewer {
     Logging.logger.addListener(logLevel.ERROR, (info) => {
       this.callback({ t: "error", content: info });
     });
+  }
+
+  /**
+   * Register the PAGINATION_PROGRESS plugin hook lazily, so that viewers
+   * without a progress listener do not pay the cost of the progress
+   * calculation.
+   */
+  ensurePaginationProgressListener() {
+    if (this.paginationProgressHook) {
+      return;
+    }
+    const hook: Plugin.PaginationProgressHook = (payload) => {
+      this.callback({ t: "paginationprogress", ...payload });
+    };
+    this.paginationProgressHook = hook;
+    Plugin.registerHook(Plugin.HOOKS.PAGINATION_PROGRESS, hook);
+  }
+
+  removePaginationProgressListener() {
+    if (this.paginationProgressHook) {
+      Plugin.removeHook(
+        Plugin.HOOKS.PAGINATION_PROGRESS,
+        this.paginationProgressHook,
+      );
+      this.paginationProgressHook = null;
+    }
   }
 
   private callback(message: Base.JSON): void {
