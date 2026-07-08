@@ -1546,6 +1546,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
     totalOffsetsReady: false,
     lastReportedPages: 0,
     lastReportedFraction: 0,
+    lastReportedSpineIndex: -1,
+    lastReportedHref: "",
   };
 
   constructor(
@@ -1848,10 +1850,18 @@ export class OPFView implements Vgen.CustomRendererFactory {
       this.paginationProgress.lastReportedPages = pages;
     }
 
+    let href = viewItem.item.src;
+    if (spineIndex >= (this.paginationProgress.lastReportedSpineIndex ?? -1)) {
+      this.paginationProgress.lastReportedSpineIndex = spineIndex;
+      this.paginationProgress.lastReportedHref = href;
+    } else {
+      href = this.paginationProgress.lastReportedHref ?? href;
+    }
+
     const payload = {
       fraction,
       pages: this.paginationProgress.lastReportedPages,
-      href: viewItem.item.src,
+      href,
     };
     for (const hook of hooks) {
       try {
