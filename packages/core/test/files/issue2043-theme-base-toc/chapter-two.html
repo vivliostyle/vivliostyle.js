@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chapter Two</title>
+    <style>
+      @page {
+        size: 120mm 160mm;
+        margin: 12mm;
+
+        @bottom-center {
+          content: counter(page);
+          font-size: 9pt;
+        }
+      }
+
+      html {
+        font: 12pt/1.5 serif;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <section id="chapter-two">
+      <h1>Chapter Two</h1>
+      <p>This target should be referenced from the var()-content control.</p>
+      <p>Filler.</p>
+      <p>Filler.</p>
+      <p>Filler.</p>
+    </section>
+  </body>
+</html>
