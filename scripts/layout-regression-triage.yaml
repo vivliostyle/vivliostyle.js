@@ -1,1 +1,12 @@
-[]
+- category: Cross-references
+  title: "theme-base TOC vars with target-counter() (Issue #2043)"
+  file: issue2043-theme-base-toc/publication.json
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2043  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/issue2043-theme-base-toc/publication.json&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/issue2043-theme-base-toc/publication.json&zoom=1&spread=false
