@@ -259,6 +259,10 @@ module.exports = [
         title: "target-counter() with default page type",
       },
       {
+        file: "issue2043-theme-base-toc/publication.json",
+        title: "theme-base TOC vars with target-counter() (Issue #2043)",
+      },
+      {
         file: "target-counter-named-page-style.html",
         title: "target-counter() named page style (Issue #1966)",
       },

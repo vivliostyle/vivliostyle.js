@@ -4437,13 +4437,17 @@ export class CascadeInstance {
 
       for (let i = 0; ; i++) {
         if (i >= LIMIT_LOOP) {
-          value = Css.isCustomPropName(name) ? Css.ident.initial : Css.empty;
+          value = Css.isCustomPropName(name)
+            ? Css.ident.initial
+            : Css.ident.unset;
           break;
         }
         const after = value.visit(visitor);
         if (visitor.error) {
           // invalid or unresolved variable found
-          value = Css.isCustomPropName(name) ? Css.ident.initial : Css.empty;
+          value = Css.isCustomPropName(name)
+            ? Css.ident.initial
+            : Css.ident.unset;
           visitor.error = false;
           break;
         }
@@ -6316,6 +6320,44 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     } else {
       return new Css.CommaList(func.values.slice(1));
     }
+  }
+
+  override visitSpaceList(list: Css.SpaceList): Css.Val {
+    const values = this.visitValues(list.values);
+    if (this.error) {
+      return Css.empty;
+    }
+    if (values === list.values) {
+      return list;
+    }
+    const flattenedValues: Css.Val[] = [];
+    for (const value of values) {
+      if (value instanceof Css.SpaceList) {
+        flattenedValues.push(...value.values);
+      } else {
+        flattenedValues.push(value);
+      }
+    }
+    return new Css.SpaceList(flattenedValues);
+  }
+
+  override visitCommaList(list: Css.CommaList): Css.Val {
+    const values = this.visitValues(list.values);
+    if (this.error) {
+      return Css.empty;
+    }
+    if (values === list.values) {
+      return list;
+    }
+    const flattenedValues: Css.Val[] = [];
+    for (const value of values) {
+      if (value instanceof Css.CommaList) {
+        flattenedValues.push(...value.values);
+      } else {
+        flattenedValues.push(value);
+      }
+    }
+    return new Css.CommaList(flattenedValues);
   }
 }
 

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2043: theme-base TOC styles on cross-document links -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Issue 2043 Theme Base TOC</title>
+    <link rel="publication" type="application/ld+json" href="publication.json" />
+    <style>
+      :root {
+        --toc-anchor-color: inherit;
+        --toc-page-counter-display: inline;
+        --toc-page-counter-style: decimal;
+        --toc-page-leader-content: leader('.') ' ';
+      }
+
+      @page {
+        size: 136mm 190mm;
+        margin: 9mm;
+
+        @bottom-center {
+          content: counter(page);
+          font-size: 8pt;
+        }
+      }
+
+      html {
+        font: 10.5pt/1.35 serif;
+        widows: 1;
+        orphans: 1;
+      }
+
+      body {
+        margin: 0;
+        color: black;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0 0 0.55em;
+      }
+
+      nav[role='doc-toc'] ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      nav[role='doc-toc'] li {
+        margin: 0 0 0.3em;
+      }
+
+      nav[role='doc-toc'] li > a {
+        color: var(--toc-anchor-color);
+        text-decoration: none;
+      }
+
+      nav[role='doc-toc'] li > a::after {
+        content: var(--toc-page-leader-content)
+          target-counter(attr(href), page, var(--toc-page-counter-style));
+        display: var(--toc-page-counter-display);
+      }
+
+      nav[role='doc-toc'] ol.control-direct li > a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      nav[role='doc-toc'] ol.control-direct li > a::after {
+        content: leader('.') ' ' target-counter(attr(href), page);
+      }
+
+      nav[role='doc-toc'] ol.control-literal li > a {
+        color: black;
+        text-decoration: none;
+      }
+
+      nav[role='doc-toc'] ol.control-literal li > a::after {
+        content: var(--toc-page-leader-content)
+          target-counter(attr(href), page);
+      }
+
+      nav[role='doc-toc'] li > a.control-plain {
+        color: black;
+        text-decoration: none;
+      }
+
+      nav[role='doc-toc'] li > a.control-plain::after {
+        content: leader('.') ' '
+          target-counter(attr(href), page, var(--toc-page-counter-style));
+      }
+
+      nav[role='doc-toc'] li > a.control-string {
+        color: black;
+        text-decoration: none;
+      }
+
+      nav[role='doc-toc'] li > a.control-string::after {
+        content: ' ... 7';
+      }
+
+      nav[role='doc-toc'] ol.control-var-content li > a {
+        color: black;
+        text-decoration: none;
+      }
+
+      nav[role='doc-toc'] ol.control-var-content li > a::after {
+        content: var(--toc-page-leader-content)
+          target-counter(attr(href), page, var(--toc-page-counter-style));
+        display: var(--toc-page-counter-display);
+      }
+
+      .group-title {
+        margin: 0.8em 0 0.25em;
+        font-size: 0.9em;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <nav role="doc-toc" aria-label="Table of Contents">
+      <h1>Contents</h1>
+      <p>
+        Expected on page 1: direct CSS and var()-based content both work, and
+        the theme-base pattern also keeps the link text black.
+      </p>
+      <p class="group-title">Control: direct inherit + direct target-counter()</p>
+      <ol class="control-direct">
+        <li><a href="chapter-one.html#chapter-one">Chapter One</a></li>
+      </ol>
+      <p class="group-title">Control: leader var + direct target-counter()</p>
+      <ol class="control-literal">
+        <li><a href="chapter-one.html#chapter-one">Chapter One Literal</a></li>
+      </ol>
+      <p class="group-title">Control: direct leader + counter-style var</p>
+      <ol>
+        <li>
+          <a class="control-plain" href="chapter-two.html#chapter-two"
+            >Chapter Two Plain</a
+          >
+        </li>
+      </ol>
+      <p class="group-title">Control: plain anchor selector + fixed string after</p>
+      <ol>
+        <li><a class="control-string" href="#">Chapter Fixed String</a></li>
+      </ol>
+      <p class="group-title">Control: var()-based content with explicit black</p>
+      <ol class="control-var-content">
+        <li><a href="chapter-two.html#chapter-two">Chapter Two</a></li>
+      </ol>
+      <p class="group-title">Theme-base pattern: var(inherit) + var()-based content</p>
+      <ol>
+        <li><a href="chapter-three.html#chapter-three">Chapter Three</a></li>
+      </ol>
+    </nav>
+  </body>
+</html>

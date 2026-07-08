@@ -1502,6 +1502,33 @@ describe("css-cascade", function () {
       expect(style.color.value.toString()).toBe("green");
     });
 
+    it("treats unresolved var() in ordinary properties as unset", function () {
+      var element = document.createElement("div");
+      var style = {
+        color: createCascadeValue("var(--missing)"),
+      };
+
+      applyVarFilter(style, element);
+
+      expect(style.color.value).toBe(adapt_css.ident.unset);
+    });
+
+    it("treats inherited custom property keywords that resolve nowhere as unset in ordinary properties", function () {
+      var element = document.createElement("a");
+      var root = document.createElement("div");
+      root.appendChild(element);
+      var rootStyle = {
+        "--toc-anchor-color": createCascadeValue("inherit"),
+      };
+      var style = {
+        color: createCascadeValue("var(--toc-anchor-color)"),
+      };
+
+      applyVarFilter(style, element, [{ element: root, style: rootStyle }]);
+
+      expect(style.color.value).toBe(adapt_css.ident.unset);
+    });
+
     it("expands all with var-substituted CSS-wide values into browser-backed longhands", function () {
       var element = document.createElement("div");
       var validatorSet = adapt_cssvalid.baseValidatorSet();

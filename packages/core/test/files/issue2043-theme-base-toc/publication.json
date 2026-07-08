@@ -1,0 +1,18 @@
+{
+  "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+  "conformsTo": "https://www.w3.org/TR/pub-manifest/",
+  "type": "Book",
+  "name": "Issue 2043 Theme Base TOC",
+  "readingOrder": [
+    {
+      "url": "index.html",
+      "name": "Table of Contents",
+      "rel": "contents",
+      "type": "LinkedResource"
+    },
+    "chapter-one.html",
+    "chapter-two.html",
+    "chapter-three.html"
+  ],
+  "resources": []
+}
